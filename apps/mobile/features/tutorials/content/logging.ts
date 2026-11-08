@@ -129,7 +129,7 @@ export const LOGGING_TUTORIALS: Tutorial[] = [
       {
         image: 'scan-a-receipt-2',
         title: 'Frame the receipt',
-        body: 'Fit it inside the box and tap the shutter. The album button on the left picks a photo you already have.',
+        body: 'Fit it inside the box and tap the shutter. The album button on the left picks photos you already have: choose up to 10 and each becomes its own expense.',
       },
       {
         image: 'scan-a-receipt-3',

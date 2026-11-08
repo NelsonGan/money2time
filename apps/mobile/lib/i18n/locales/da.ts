@@ -102,6 +102,13 @@ const da = {
     camera_permission_body:
       'Tillad kameraadgang for at tage et billede af en kvittering, eller vælg en fra dit album.',
     camera_permission_grant: 'Tillad kameraadgang',
+    batch_scanning: 'Scanner kvitteringer',
+    batch_logged_one: '{{count}} udgift registreret',
+    batch_logged_other: '{{count}} udgifter registreret',
+    batch_none_logged: 'Ingen udgifter registreret',
+    batch_failed_one: '{{count}} kvittering kunne ikke læses',
+    batch_failed_other: '{{count}} kvitteringer kunne ikke læses',
+    batch_hint: 'Tryk for at se hver kvittering',
   },
   app: {
     name: 'Money2Time',

@@ -102,6 +102,13 @@ const es = {
     camera_permission_body:
       'Permite el acceso a la cámara para fotografiar un recibo, o elige uno de tu álbum.',
     camera_permission_grant: 'Permitir acceso a la cámara',
+    batch_scanning: 'Escaneando recibos',
+    batch_logged_one: '{{count}} gasto registrado',
+    batch_logged_other: '{{count}} gastos registrados',
+    batch_none_logged: 'No se registró ningún gasto',
+    batch_failed_one: 'No se pudo leer {{count}} recibo',
+    batch_failed_other: 'No se pudieron leer {{count}} recibos',
+    batch_hint: 'Toca para ver cada recibo',
   },
   app: {
     name: 'Money2Time',

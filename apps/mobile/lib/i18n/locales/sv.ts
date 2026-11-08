@@ -102,6 +102,13 @@ const sv = {
     camera_permission_body:
       'Tillåt kameraåtkomst för att fota ett kvitto, eller välj ett från ditt album.',
     camera_permission_grant: 'Tillåt kameraåtkomst',
+    batch_scanning: 'Skannar kvitton',
+    batch_logged_one: '{{count}} utgift registrerad',
+    batch_logged_other: '{{count}} utgifter registrerade',
+    batch_none_logged: 'Inga utgifter registrerade',
+    batch_failed_one: '{{count}} kvitto kunde inte läsas',
+    batch_failed_other: '{{count}} kvitton kunde inte läsas',
+    batch_hint: 'Tryck för att se varje kvitto',
   },
   app: {
     name: 'Money2Time',

@@ -18,6 +18,7 @@ import { useSheetColumnStyle } from '~/hooks/useSheetColumnStyle';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
+import type { PickedReceiptAsset } from '~/services/receiptPicker';
 import type { ScanIntent } from '~/services/scanCameraNavigation';
 import {
   claimInlineVoiceHost,
@@ -147,7 +148,7 @@ export function AddActionSheet({
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
   const sheetColumnStyle = useSheetColumnStyle();
-  const { canStartScan, scanReceiptImage } = useReceiptScans();
+  const { canStartScan, scanReceiptImage, scanReceiptBatch, receiptPickLimit } = useReceiptScans();
   const [accountPickerVisible, setAccountPickerVisible] = useState(false);
   const [tab, setTab] = useState<SheetTab>('add');
   // Non-null while the viewfinder has taken over the tile grid. The scan tiles
@@ -373,6 +374,16 @@ export function AddActionSheet({
       scanReceiptImage(path, source, intent);
     },
     [onClose, scanIntent, scanReceiptImage],
+  );
+
+  // Several album picks (Add-tab scans only): each becomes its own expense.
+  const handleScanBatch = useCallback(
+    (assets: PickedReceiptAsset[]) => {
+      setScanIntent(null);
+      onClose();
+      scanReceiptBatch(assets);
+    },
+    [onClose, scanReceiptBatch],
   );
 
   const handleNone = () => {
@@ -602,6 +613,8 @@ export function AddActionSheet({
                     <InlineReceiptCamera
                       viewfinderHeight={VIEWFINDER_HEIGHT}
                       onCaptured={handleScanCaptured}
+                      albumPickLimit={receiptPickLimit(scanIntent)}
+                      onPickedBatch={handleScanBatch}
                     />
                   </Suspense>
                 </AppErrorBoundary>

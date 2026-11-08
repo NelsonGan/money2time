@@ -102,6 +102,13 @@ const it = {
     camera_permission_body:
       'Consenti l’accesso alla fotocamera per fotografare uno scontrino, oppure scegline uno dal tuo album.',
     camera_permission_grant: 'Consenti l’accesso alla fotocamera',
+    batch_scanning: 'Scansione delle ricevute',
+    batch_logged_one: '{{count}} spesa registrata',
+    batch_logged_other: '{{count}} spese registrate',
+    batch_none_logged: 'Nessuna spesa registrata',
+    batch_failed_one: 'Impossibile leggere {{count}} ricevuta',
+    batch_failed_other: 'Impossibile leggere {{count}} ricevute',
+    batch_hint: 'Tocca per vedere ogni ricevuta',
   },
   app: {
     name: 'Money2Time',

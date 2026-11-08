@@ -102,6 +102,13 @@ const en = {
     camera_permission_body:
       'Allow camera access to snap a receipt, or pick one from your album instead.',
     camera_permission_grant: 'Allow camera access',
+    batch_scanning: 'Scanning receipts',
+    batch_logged_one: '{{count}} expense logged',
+    batch_logged_other: '{{count}} expenses logged',
+    batch_none_logged: 'No expenses logged',
+    batch_failed_one: "{{count}} receipt couldn't be read",
+    batch_failed_other: "{{count}} receipts couldn't be read",
+    batch_hint: 'Tap to see each receipt',
   },
   app: {
     name: 'Money2Time',

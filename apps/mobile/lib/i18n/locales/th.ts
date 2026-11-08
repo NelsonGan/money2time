@@ -101,6 +101,13 @@ const th = {
     camera_permission_title: 'ต้องเข้าถึงกล้อง',
     camera_permission_body: 'อนุญาตให้เข้าถึงกล้องเพื่อถ่ายใบเสร็จ หรือเลือกจากอัลบั้มของคุณ',
     camera_permission_grant: 'อนุญาตให้เข้าถึงกล้อง',
+    batch_scanning: 'กำลังสแกนใบเสร็จ',
+    batch_logged_one: 'บันทึกรายจ่าย {{count}} รายการแล้ว',
+    batch_logged_other: 'บันทึกรายจ่าย {{count}} รายการแล้ว',
+    batch_none_logged: 'ไม่มีรายจ่ายที่บันทึก',
+    batch_failed_one: 'อ่านใบเสร็จไม่ได้ {{count}} ใบ',
+    batch_failed_other: 'อ่านใบเสร็จไม่ได้ {{count}} ใบ',
+    batch_hint: 'แตะเพื่อดูใบเสร็จแต่ละใบ',
   },
   app: {
     name: 'Money2Time',

@@ -3,12 +3,18 @@ import { Alert } from 'react-native';
 
 import { PRO_LIMITS } from '~/constants/proLimits';
 import { useApp } from '~/context/AppContext';
+import {
+  RECEIPT_BATCH_CONCURRENCY,
+  receiptBatchPickLimit,
+  runReceiptQueue,
+} from '~/features/transactions/lib/receiptScanBatch';
 import { setReceiptSplitLaunch } from '~/features/transactions/lib/receiptSplitBridge';
 import { useProGate } from '~/hooks/useProGate';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import { requestOpenPaywall } from '~/services/paywallNavigation';
+import { type PickedReceiptAsset, saveReceiptAsset } from '~/services/receiptPicker';
 import {
   ReceiptScanError,
   type ResolvedReceiptDetail,
@@ -25,6 +31,7 @@ import {
 } from '~/services/transactionsNavigation';
 import { copyReceiptImage, deleteReceiptImage } from '~/services/userAssets';
 import { isAccountArchived } from '~/utils/accountArchive';
+import { formatAmount } from '~/utils/formatters';
 import { newId } from '~/utils/id';
 
 /**
@@ -54,8 +61,13 @@ export type ScanOutcome = 'created' | 'ready' | 'empty' | 'limit' | 'failed' | '
 export interface ScanJob {
   id: string;
   status: ScanJobStatus;
-  /** Relative receipt path (e.g. `receipts/9f3c.jpg`). */
-  receiptUri: string;
+  /**
+   * Relative receipt path (e.g. `receipts/9f3c.jpg`). Unset only while a batch
+   * receipt waits to be downscaled and stored.
+   */
+  receiptUri?: string;
+  /** Shared by the receipts of one multi-select album pick (one banner card). */
+  batchId?: string;
   /** Why the scan started — 'split' jobs open Split by Item when ready. */
   intent?: ScanIntent;
   error?: ScanJobError;
@@ -65,6 +77,18 @@ export interface ScanJob {
   splitPayload?: ResolvedReceiptDetail;
   /** Present on a 'created' job so its completion card can open the saved expense. */
   transactionId?: string;
+  /** Expenses a 'created' job logged (one image can hold several receipts). */
+  createdCount?: number;
+  /** A 'created' job's first expense, for its row on a batch card. */
+  createdNote?: string | null;
+  createdAmountLabel?: string;
+}
+
+/** Per-batch state the scans of one album pick share. */
+interface BatchRun {
+  size: number;
+  /** Set by the first scan that hits the quota, so the paywall opens once. */
+  limitHit: boolean;
 }
 
 interface ReceiptScanContextValue {
@@ -88,6 +112,18 @@ interface ReceiptScanContextValue {
    * `rel` is the stored receipt path (e.g. `receipts/9f3c.jpg`).
    */
   scanReceiptImage: (rel: string, source: ScanSource, intent?: ScanIntent) => void;
+  /**
+   * Scan several album picks as one batch (Add-tab scans only). Each picked
+   * image is downscaled, stored and scanned in the background, a few at a
+   * time, and logs its own expense; the banner shows the batch as one card.
+   */
+  scanReceiptBatch: (assets: PickedReceiptAsset[]) => void;
+  /**
+   * How many receipts the album may pick for a scan with this intent: 1 for
+   * split scans, otherwise up to the batch cap (less for a free user near the
+   * receipt-image limit).
+   */
+  receiptPickLimit: (intent?: ScanIntent) => number;
   /**
    * Like `scanReceiptImage` but awaitable — resolves with the scan's outcome
    * once the transaction is created (or the scan errors). Used by the auto-log
@@ -129,7 +165,7 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
     getReceiptCount,
     getUnpaidSplitBillCount,
   } = useApp();
-  const { checkLimit } = useProGate();
+  const { checkLimit, isPro } = useProGate();
   const [jobs, setJobs] = useState<ScanJob[]>([]);
   // Mirror the list in a ref so dismissJob can read the latest job synchronously
   // (it runs outside React's render-driven state).
@@ -149,6 +185,7 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
     getReceiptCount,
     getUnpaidSplitBillCount,
     checkLimit,
+    isPro,
   };
   const envRef = useRef(env);
   envRef.current = env;
@@ -166,8 +203,25 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
       const job = jobsRef.current.find((j) => j.id === id);
       // Once a scan has created an expense, that transaction owns its receipt
       // image. Dismissing the ephemeral completion card must never delete it.
-      if (job?.status !== 'created' && job?.receiptUri) deleteReceiptImage(job.receiptUri);
+      // A scanning job is still working on its file; it cleans up after itself.
+      if (job && job.status !== 'created' && job.status !== 'scanning' && job.receiptUri) {
+        deleteReceiptImage(job.receiptUri);
+      }
       setJobsBoth((prev) => prev.filter((j) => j.id !== id));
+    },
+    [setJobsBoth],
+  );
+
+  // Turn a finished scan into an error card. A job dismissed while it scanned
+  // left its receipt file to the scan, so when no card is left to carry the
+  // file, free it here instead.
+  const markJobError = useCallback(
+    (id: string, rel: string, error: ScanJobError) => {
+      if (!jobsRef.current.some((j) => j.id === id)) {
+        deleteReceiptImage(rel);
+        return;
+      }
+      setJobsBoth((prev) => prev.map((j) => (j.id === id ? { ...j, status: 'error', error } : j)));
     },
     [setJobsBoth],
   );
@@ -176,13 +230,17 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
   // alerts (Pro monthly cap) or opens the paywall (free); anything else leaves a
   // dismissible error card carrying the receipt.
   const applyScanFailure = useCallback(
-    (err: unknown, jobId: string, rel: string) => {
+    (err: unknown, jobId: string, rel: string, batch?: BatchRun) => {
       void trackEvent(AnalyticsEvents.RECEIPT_SCAN_FAILED, {
         code: err instanceof ReceiptScanError ? err.code : 'unknown',
       });
       if (err instanceof ReceiptScanError && err.code === 'limit_reached') {
         deleteReceiptImage(rel);
         setJobsBoth((prev) => prev.filter((j) => j.id !== jobId));
+        // Scans of one batch that were already in flight hit the same limit;
+        // the first one has said so.
+        if (batch?.limitHit) return;
+        if (batch) batch.limitHit = true;
         if (err.isPro) {
           // Pro users are already paying — no paywall. Show the limit and point
           // them at support (the Worker owns the real cap; prefer its number).
@@ -208,11 +266,9 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
         err instanceof ReceiptScanError && (err.code === 'capacity' || err.code === 'too_large')
           ? err.code
           : 'failed';
-      setJobsBoth((prev) =>
-        prev.map((j) => (j.id === jobId ? { ...j, status: 'error', error } : j)),
-      );
+      markJobError(jobId, rel, error);
     },
-    [setJobsBoth],
+    [markJobError, setJobsBoth],
   );
 
   const canStartScan = useCallback((intent: ScanIntent = 'quick') => {
@@ -254,7 +310,12 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
   );
 
   const runScan = useCallback(
-    async (id: string, rel: string, intent: ScanIntent = 'quick'): Promise<ScanOutcome> => {
+    async (
+      id: string,
+      rel: string,
+      intent: ScanIntent = 'quick',
+      batch?: BatchRun,
+    ): Promise<ScanOutcome> => {
       const appUserId = envRef.current.settings.appUserId?.trim();
       if (!appUserId) {
         deleteReceiptImage(rel);
@@ -319,6 +380,7 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
           count: drafts.length,
           mode,
           itemCount: response.receiptDetail?.items.length ?? 0,
+          batchSize: batch?.size ?? 1,
         });
 
         // Whether to keep the scanned image as the receipt. Off by default: the
@@ -339,9 +401,7 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
             setJobsBoth((prev) => prev.filter((j) => j.id !== id));
             return 'empty';
           }
-          setJobsBoth((prev) =>
-            prev.map((j) => (j.id === id ? { ...j, status: 'error', error: 'empty' } : j)),
-          );
+          markJobError(id, rel, 'empty');
           return 'empty';
         }
 
@@ -408,6 +468,7 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
         // exclusively — the editor deletes the file when its receipt is replaced
         // or removed.
         let firstId: string | null = null;
+        const first = drafts[0]!;
         drafts.forEach((d, index) => {
           // Keep the image only when opted in; otherwise no copies are made and
           // the original is freed once all drafts are created (below).
@@ -434,13 +495,28 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
         setJobsBoth((prev) =>
           prev.map((job) =>
             job.id === id
-              ? { ...job, status: 'created', transactionId: firstId ?? undefined }
+              ? {
+                  ...job,
+                  status: 'created',
+                  transactionId: firstId ?? undefined,
+                  createdCount: drafts.length,
+                  createdNote: first.note,
+                  createdAmountLabel:
+                    first.amount != null
+                      ? formatAmount(first.amount, envRef.current.settings, {
+                          currencyCode: first.currency,
+                        })
+                      : undefined,
+                }
               : job,
           ),
         );
         void trackEvent(AnalyticsEvents.RECEIPT_SCAN_SAVED, { count: drafts.length });
-        if (firstId) requestHighlightTransaction(firstId);
-        void triggerHaptic('success');
+        // A batch flashes a row and buzzes once, when the whole batch is done.
+        if (!batch) {
+          if (firstId) requestHighlightTransaction(firstId);
+          void triggerHaptic('success');
+        }
         return 'created';
       } catch (err) {
         const isLimit = err instanceof ReceiptScanError && err.code === 'limit_reached';
@@ -456,13 +532,13 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
           setJobsBoth((prev) => prev.filter((j) => j.id !== id));
           return 'failed';
         }
-        applyScanFailure(err, id, rel);
+        applyScanFailure(err, id, rel, batch);
         // 'limit' is distinct so a batch drain can stop instead of re-hitting
         // the quota (and re-opening the paywall) for every remaining shot.
         return isLimit ? 'limit' : 'failed';
       }
     },
-    [applyScanFailure, setJobsBoth],
+    [applyScanFailure, markJobError, setJobsBoth],
   );
 
   // Enqueue the scanning job, fire the start haptic, and kick off the parse,
@@ -474,7 +550,7 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
       const id = newId();
       setJobsBoth((prev) => [...prev, { id, status: 'scanning', receiptUri: rel, intent }]);
       void triggerHaptic('selection');
-      void trackEvent(AnalyticsEvents.RECEIPT_SCAN_STARTED, { source, intent });
+      void trackEvent(AnalyticsEvents.RECEIPT_SCAN_STARTED, { source, intent, batchSize: 1 });
       return runScan(id, rel, intent);
     },
     [runScan, setJobsBoth],
@@ -498,6 +574,81 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
       startScanJob(rel, source, intent),
     [startScanJob],
   );
+
+  const scanReceiptBatch = useCallback(
+    (assets: PickedReceiptAsset[]) => {
+      if (assets.length === 0) return;
+      if (!envRef.current.settings.appUserId?.trim()) {
+        Alert.alert(I18n.t('receiptScan.error_title'), I18n.t('receiptScan.error_body'));
+        return;
+      }
+      const batchId = newId();
+      const batch: BatchRun = { size: assets.length, limitHit: false };
+      const queue = assets.map((asset) => ({ asset, id: newId() }));
+      setJobsBoth((prev) => [
+        ...prev,
+        ...queue.map(({ id }): ScanJob => ({ id, status: 'scanning', intent: 'quick', batchId })),
+      ]);
+      void triggerHaptic('selection');
+
+      const scanOne = async ({
+        asset,
+        id,
+      }: (typeof queue)[number]): Promise<'continue' | 'stop'> => {
+        // Sent as each receipt starts, so one skipped after the quota ran out
+        // never opens a started→completed pair it cannot close.
+        void trackEvent(AnalyticsEvents.RECEIPT_SCAN_STARTED, {
+          source: 'library',
+          intent: 'quick',
+          batchSize: batch.size,
+        });
+        let rel: string;
+        try {
+          // The same storage treatment as a single pick, done here so the
+          // camera sheet never waits on ten resizes.
+          rel = await saveReceiptAsset(asset);
+        } catch {
+          void trackEvent(AnalyticsEvents.RECEIPT_SCAN_FAILED, { code: 'unreadable' });
+          setJobsBoth((prev) =>
+            prev.map((j) => (j.id === id ? { ...j, status: 'error', error: 'failed' } : j)),
+          );
+          return 'continue';
+        }
+        setJobsBoth((prev) => prev.map((j) => (j.id === id ? { ...j, receiptUri: rel } : j)));
+        const outcome = await runScan(id, rel, 'quick', batch);
+        return outcome === 'limit' || outcome === 'invalid' ? 'stop' : 'continue';
+      };
+
+      void runReceiptQueue(queue, RECEIPT_BATCH_CONCURRENCY, scanOne, ({ id }) => {
+        // Never started (the quota ran out): nothing was stored, so just drop it.
+        setJobsBoth((prev) => prev.filter((j) => j.id !== id));
+      }).then(() => {
+        const created = jobsRef.current.find(
+          (j) => j.batchId === batchId && j.status === 'created' && j.transactionId,
+        );
+        if (!created?.transactionId) return;
+        requestHighlightTransaction(created.transactionId);
+        void triggerHaptic('success');
+      });
+    },
+    [runScan, setJobsBoth],
+  );
+
+  const receiptPickLimit = useCallback((intent: ScanIntent = 'quick') => {
+    if (intent !== 'quick') return 1;
+    const scanEnv = envRef.current;
+    // Hand scans still in flight will attach their image too, so they count
+    // against the allowance before their expenses exist.
+    const pending = jobsRef.current.filter(
+      (j) => j.status === 'scanning' && j.intent !== 'screenshot',
+    ).length;
+    return receiptBatchPickLimit({
+      isPro: scanEnv.isPro,
+      keepImage: scanEnv.quickEntryPrefs.saveScannedReceipts,
+      receiptCount: scanEnv.getReceiptCount() + pending,
+      freeReceiptLimit: PRO_LIMITS.FREE_MAX_RECEIPTS,
+    });
+  }, []);
 
   const openReadyJob = useCallback(
     (id: string) => {
@@ -551,6 +702,8 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
       canStartScan,
       scanReceiptImage,
       scanReceiptImageAsync,
+      scanReceiptBatch,
+      receiptPickLimit,
       openReadyJob,
       openReadyJobAsSplit,
       openCreatedJob,
@@ -562,6 +715,8 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
       canStartScan,
       scanReceiptImage,
       scanReceiptImageAsync,
+      scanReceiptBatch,
+      receiptPickLimit,
       openReadyJob,
       openReadyJobAsSplit,
       openCreatedJob,
