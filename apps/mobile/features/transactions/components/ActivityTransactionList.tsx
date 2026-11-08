@@ -411,14 +411,13 @@ export const ActivityTransactionList = memo(function ActivityTransactionListImpl
   // Payback rows (`buildPaybackRows`) are not stored transactions, so they
   // cannot be selected, dragged or bulk-edited: they step aside while the list
   // is selecting, as folded paybacks unfold then.
+  // (Reordering only happens while selecting.)
   const listedTransactions = useMemo(
     () =>
-      selectionMode || reorderRequested
-        ? transactions.some(isPaybackRow)
-          ? transactions.filter((transaction) => !isPaybackRow(transaction))
-          : transactions
+      selectionMode && transactions.some(isPaybackRow)
+        ? transactions.filter((transaction) => !isPaybackRow(transaction))
         : transactions,
-    [reorderRequested, selectionMode, transactions],
+    [selectionMode, transactions],
   );
   // Reordering needs date order and day groups. A list that already has both
   // (the calendar's) keeps the same rows when selection starts, so the long

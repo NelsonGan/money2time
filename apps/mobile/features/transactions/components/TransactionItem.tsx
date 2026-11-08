@@ -998,6 +998,12 @@ export const TransactionItem = memo(
     // with it; these are here for the same reason as the split fields above,
     // where a refresh can hand back an object with the old timestamp.
     prev.transaction.reimbursable === next.transaction.reimbursable &&
+    // A payback row (`buildPaybackRows`) is rebuilt from its split and bill, so
+    // what it shows can change while neither timestamp moves (the account's
+    // currency, a rate arriving).
+    prev.transaction.amount === next.transaction.amount &&
+    prev.transaction.currency === next.transaction.currency &&
+    prev.transaction.note === next.transaction.note &&
     // A plan's payment count arrives by join, like the relation names below.
     prev.transaction.instalmentNumber === next.transaction.instalmentNumber &&
     prev.transaction.instalmentCount === next.transaction.instalmentCount &&

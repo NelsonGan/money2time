@@ -3364,20 +3364,26 @@ export function AccountsScreen({
       activeAccountId ? paybackRows.filter((row) => row.fromAccountId === activeAccountId) : [],
     [activeAccountId, paybackRows],
   );
+  // Only the periods holding a payback row get a new array; the rest keep the
+  // one above, so their pages do not redraw.
   const accountPeriodListMap = useMemo(() => {
     if (!selectedAccount || accountPaybackRows.length === 0) return accountPeriodTransactionsMap;
-    return bucketTransactionsByAccountPeriod(
-      mergeTransactionsByDateDesc(selectedAccountTransactions, accountPaybackRows),
+    const paybacksByPeriod = bucketTransactionsByAccountPeriod(
+      accountPaybackRows,
       selectedAccountStatementDay,
       monthCycle,
     );
+    const merged = new Map(accountPeriodTransactionsMap);
+    for (const [periodKey, rows] of paybacksByPeriod) {
+      merged.set(periodKey, mergeTransactionsByDateDesc(merged.get(periodKey) ?? [], rows));
+    }
+    return merged;
   }, [
     accountPaybackRows,
     accountPeriodTransactionsMap,
     monthCycle,
     selectedAccount,
     selectedAccountStatementDay,
-    selectedAccountTransactions,
   ]);
   const activePagerOffset = pagerActiveIndex - MONTH_PAGER_CENTER_INDEX;
   const activePagerPeriod = useMemo(() => {

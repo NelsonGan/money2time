@@ -60,6 +60,7 @@ import { invalidateLedgerPeople } from '~/features/sharedLedgers/lib/ledgerPeopl
 import { countAccountsTowardFreeLimit } from '~/features/transactions/lib/accountEntryGate';
 import { pickPaybackAccountId } from '~/features/transactions/lib/entryDefaults';
 import {
+  type AccountCurrencyLookup,
   buildPaybackRows,
   indexPaybacks,
   type PaybackLink,
@@ -920,7 +921,7 @@ function createPaybackTransferInDb(
 }
 
 /** An account's currency by id, read from the accounts already in memory. */
-type AccountCurrencyOf = (accountId: string) => string | undefined;
+type AccountCurrencyOf = AccountCurrencyLookup;
 
 /**
  * The payback transfer's amounts for a share of `share` paid into
@@ -6460,11 +6461,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const currencyById = new Map(accounts.map((account) => [account.id, account.currency]));
     const next = reusePaybackRows(
       paybackRowsRef.current,
-      buildPaybackRows(transactions, (accountId) => currencyById.get(accountId)),
+      buildPaybackRows(transactions, (accountId) => currencyById.get(accountId), rateTable),
     ) as TransactionWithRelations[];
     paybackRowsRef.current = next.length === 0 ? EMPTY_PAYBACK_ROWS : next;
     return paybackRowsRef.current;
-  }, [accounts, transactions]);
+  }, [accounts, rateTable, transactions]);
 
   if (!settings) {
     if (isLoading) {

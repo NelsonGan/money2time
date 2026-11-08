@@ -9,8 +9,8 @@
  */
 
 import { buildPaybackTransferNote } from '~/features/transactions/lib/settleUp';
-import type { TransactionSplit, TransactionWithRelations } from '~/types';
-import { normalizeMoneyAmount } from '~/utils/formatters';
+import { paybackTransferAmounts } from '~/features/transactions/lib/splitPayments';
+import type { RateTable, TransactionSplit, TransactionWithRelations } from '~/types';
 import { compareTransactionsByDateDesc } from '~/utils/transactionSorting';
 
 /** The bill a payback transfer paid back, and who paid it. */
@@ -80,29 +80,27 @@ export function indexPaybacks(
 export type AccountCurrencyLookup = (accountId: string) => string | undefined;
 
 /**
- * The amount a payback row shows, in the bill account's currency as its
- * balance counts the bill: the share itself when the bill has no account
- * snapshot, else at the bill's own frozen account rate. A bill paid back to 0
- * has no rate left to read, so it shows the share in the bill's currency.
+ * The amount a payback row shows: what a payback transfer out of the bill's
+ * account would carry (`paybackTransferAmounts`), in that account's currency
+ * as its balance counts the bill. A bill with no account shows the share.
  */
 function paybackRowAmount(
   bill: TransactionWithRelations,
   share: number,
   currencyOf: AccountCurrencyLookup,
+  rateTable: RateTable,
 ): { amount: number; currency: string } {
-  const accountCurrency = bill.accountId ? currencyOf(bill.accountId) : undefined;
-  if (
-    bill.accountAmount == null ||
-    !accountCurrency ||
-    accountCurrency === bill.currency ||
-    !(bill.amount > 0)
-  ) {
-    return { amount: normalizeMoneyAmount(share), currency: bill.currency };
-  }
-  return {
-    amount: normalizeMoneyAmount((share * bill.accountAmount) / bill.amount),
-    currency: accountCurrency,
-  };
+  const accountCurrency = (bill.accountId ? currencyOf(bill.accountId) : null) || bill.currency;
+  const { amount, currency } = paybackTransferAmounts({
+    share,
+    billCurrency: bill.currency,
+    billAmount: bill.amount,
+    billAccountAmount: bill.accountAmount ?? null,
+    fromCurrency: accountCurrency,
+    toCurrency: accountCurrency,
+    rateTable,
+  });
+  return { amount, currency };
 }
 
 /**
@@ -116,6 +114,7 @@ function paybackRowAmount(
 export function buildPaybackRows(
   transactions: readonly TransactionWithRelations[],
   currencyOf: AccountCurrencyLookup,
+  rateTable: RateTable,
 ): TransactionWithRelations[] {
   const rows: TransactionWithRelations[] = [];
   for (const bill of transactions) {
@@ -129,7 +128,7 @@ export function buildPaybackRows(
         instalmentNumber: null,
         dayOrder: null,
         type: 'transfer',
-        ...paybackRowAmount(bill, split.amount, currencyOf),
+        ...paybackRowAmount(bill, split.amount, currencyOf, rateTable),
         reportingCurrency: null,
         reportingAmount: null,
         fxRate: null,
@@ -142,7 +141,8 @@ export function buildPaybackRows(
         fromAccountName: bill.accountName ?? null,
         toAccountName: bill.accountName ?? null,
         categoryId: null,
-        // As a payback transfer's note, so a bill's paybacks read alike.
+        // Named as a payback transfer is ("Aisha: Dinner"). A transfer keeps
+        // the bill's note from when it was paid; this row follows the bill.
         note: buildPaybackTransferNote(split.personName, bill.note),
         details: null,
         receiptUri: null,
