@@ -1,6 +1,8 @@
+import { NavigationContext } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { FlashListRef } from '@shopify/flash-list';
 import { FlashList } from '@shopify/flash-list';
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type {
   LayoutChangeEvent,
   NativeScrollEvent,
@@ -30,7 +32,11 @@ import {
   TransactionReorderProvider,
   useTransactionReorder,
 } from '~/features/transactions/components/transactionReorder';
-import { foldPaybackRows, type PaybackDayEntry } from '~/features/transactions/lib/paybackGroups';
+import {
+  foldPaybackRows,
+  isPaybackRow,
+  type PaybackDayEntry,
+} from '~/features/transactions/lib/paybackGroups';
 import {
   applyReorderUpdates,
   type ReorderRow,
@@ -40,6 +46,7 @@ import {
 import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
+import type { RootStackParamList } from '~/navigation/rootStack';
 import { subscribeHighlightTransaction } from '~/services/transactionsNavigation';
 import type { TransactionWithRelations, UserSettings } from '~/types';
 import { cn } from '~/utils';
@@ -401,17 +408,29 @@ export const ActivityTransactionList = memo(function ActivityTransactionListImpl
   const pendingHighlightRef = useRef<{ id: string; requestedAt: number } | null>(null);
   const highlightClearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Payback rows (`buildPaybackRows`) are not stored transactions, so they
+  // cannot be selected, dragged or bulk-edited: they step aside while the list
+  // is selecting, as folded paybacks unfold then.
+  // (Reordering only happens while selecting.)
+  const listedTransactions = useMemo(
+    () =>
+      selectionMode && transactions.some(isPaybackRow)
+        ? transactions.filter((transaction) => !isPaybackRow(transaction))
+        : transactions,
+    [selectionMode, transactions],
+  );
   // Reordering needs date order and day groups. A list that already has both
   // (the calendar's) keeps the same rows when selection starts, so the long
   // press re-renders its cells without rebuilding them.
   const orderedTransactions = useMemo(
-    () => (reorderRequested ? sortTransactions(transactions, 'date_desc') : transactions),
-    [reorderRequested, transactions],
+    () =>
+      reorderRequested ? sortTransactions(listedTransactions, 'date_desc') : listedTransactions,
+    [listedTransactions, reorderRequested],
   );
   const groupRows = groupByDate || reorderRequested;
   const rows = useMemo<ActivityRow[]>(() => {
     if (!groupRows) {
-      return transactions.map((transaction) => ({
+      return listedTransactions.map((transaction) => ({
         kind: 'item',
         id: transaction.id,
         transaction,
@@ -475,12 +494,12 @@ export const ActivityTransactionList = memo(function ActivityTransactionListImpl
     getDisplayValueForTransaction,
     groupRows,
     isTimeMode,
+    listedTransactions,
     locale,
     orderedTransactions,
     reimbursementsCountAsExpense,
     subtotalAccountId,
     subtotalCurrencyCode,
-    transactions,
   ]);
 
   // Render-synced ref so long-lived imperative handlers (scroll-to-day, the
@@ -705,11 +724,46 @@ export const ActivityTransactionList = memo(function ActivityTransactionListImpl
   // Paybacks are tinted, and fold per bill and day (see PaybackGroupRow).
   const paybackIndex = usePaybackIndex();
 
+  // A payback row has no transaction of its own to open, so it opens its
+  // bill's page in Settle Up, which lists the payment and can undo it. Read
+  // from context, not useNavigation, so a list outside a navigator still renders.
+  const navigation = useContext(NavigationContext) as
+    | NativeStackNavigationProp<RootStackParamList>
+    | undefined;
+  const handleTransactionPress = useMemo(() => {
+    if (!onTransactionPress) return undefined;
+    return (transaction: TransactionWithRelations) => {
+      if (!isPaybackRow(transaction)) {
+        onTransactionPress(transaction);
+        return;
+      }
+      const billId = paybackIndex.get(transaction.id)?.billId;
+      if (billId) navigation?.navigate('SettleUpTransaction', { transactionId: billId });
+    };
+  }, [navigation, onTransactionPress, paybackIndex]);
+  const handleTransactionLongPress = useMemo(() => {
+    if (!onTransactionLongPress) return undefined;
+    return (transaction: TransactionWithRelations) => {
+      if (!isPaybackRow(transaction)) onTransactionLongPress(transaction);
+    };
+  }, [onTransactionLongPress]);
+
   const keyExtractor = useCallback((item: ActivityRow) => item.id, []);
   const getItemType = useCallback(
     (item: ActivityRow) =>
       item.kind === 'day' ? dayItemType(item.transactions.length) : item.kind,
     [],
+  );
+
+  const selectablePaybackGroupLongPress = useCallback(
+    (paybacks: TransactionWithRelations[]) => {
+      const selectable = paybacks.filter((tx) => !isPaybackRow(tx));
+      if (selectable.length === 0) return undefined;
+      if (onToggleDaySelection) return () => onToggleDaySelection(selectable.map((tx) => tx.id));
+      if (onTransactionLongPress) return () => onTransactionLongPress(selectable[0]!);
+      return undefined;
+    },
+    [onToggleDaySelection, onTransactionLongPress],
   );
 
   const renderRow = useCallback(
@@ -763,8 +817,8 @@ export const ActivityTransactionList = memo(function ActivityTransactionListImpl
                 <TransactionItem
                   key={`${key}:${remountKey(tx.id)}`}
                   transaction={tx}
-                  onPressTransaction={onTransactionPress}
-                  onLongPressTransaction={onTransactionLongPress}
+                  onPressTransaction={handleTransactionPress}
+                  onLongPressTransaction={handleTransactionLongPress}
                   onPressSplitBadge={onTransactionSplitBadgePress}
                   selected={selectedTransactionIdSet.has(tx.id)}
                   selectionMode={selectionMode}
@@ -798,13 +852,9 @@ export const ActivityTransactionList = memo(function ActivityTransactionListImpl
                     entry.transactions.some((tx) => tx.id === highlightedId)
                   }
                   // Long press selects the bill's paybacks, which unfolds them.
-                  onLongPress={
-                    onToggleDaySelection
-                      ? () => onToggleDaySelection(entry.transactions.map((tx) => tx.id))
-                      : onTransactionLongPress && entry.transactions[0]
-                        ? () => onTransactionLongPress(entry.transactions[0]!)
-                        : undefined
-                  }
+                  // Payback rows cannot be selected, so a group of only those
+                  // has no long press.
+                  onLongPress={selectablePaybackGroupLongPress(entry.transactions)}
                   compact={compactItems}
                   settings={displaySettings}
                 >
@@ -820,8 +870,8 @@ export const ActivityTransactionList = memo(function ActivityTransactionListImpl
           key={remountKey(item.transaction.id)}
           transaction={item.transaction}
           payback={paybackIndex.has(item.transaction.id)}
-          onPressTransaction={onTransactionPress}
-          onLongPressTransaction={onTransactionLongPress}
+          onPressTransaction={handleTransactionPress}
+          onLongPressTransaction={handleTransactionLongPress}
           onPressSplitBadge={onTransactionSplitBadgePress}
           selected={selectedTransactionIdSet.has(item.transaction.id)}
           selectionMode={selectionMode}
@@ -843,13 +893,14 @@ export const ActivityTransactionList = memo(function ActivityTransactionListImpl
       highlightedId,
       isTimeMode,
       measureDayCell,
+      handleTransactionLongPress,
+      handleTransactionPress,
       onToggleDaySelection,
       paybackIndex,
-      onTransactionLongPress,
-      onTransactionPress,
       onTransactionSplitBadgePress,
       remountKey,
       reorderRequested,
+      selectablePaybackGroupLongPress,
       selectedTransactionIdSet,
       selectionMode,
       spacerEnabled,

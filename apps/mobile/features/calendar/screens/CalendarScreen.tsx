@@ -27,7 +27,7 @@ import {
   TimeValueInline,
 } from '~/components/ui';
 import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
-import { useApp, useTransactions } from '~/context/AppContext';
+import { useApp, usePaybackRows, useTransactions } from '~/context/AppContext';
 import { NotificationReviewBanner } from '~/features/autoLog/components/NotificationReviewBanner';
 import {
   buildInsightsCategoryPickerData,
@@ -88,7 +88,10 @@ import {
 import { countsAsExpenseRow } from '~/utils/spending';
 import { whenSplashHidden } from '~/utils/splashState';
 import { reuseUnchangedGroups, transactionSearchText } from '~/utils/transactions';
-import { compareTransactionsByDateDesc } from '~/utils/transactionSorting';
+import {
+  compareTransactionsByDateDesc,
+  mergeTransactionsByDateDesc,
+} from '~/utils/transactionSorting';
 
 import { CalendarMonthGrid } from '../components/CalendarMonthGrid';
 import {
@@ -186,7 +189,15 @@ export function CalendarScreen({
   onSelectionModeChange,
   onShowTodayButtonChange,
 }: CalendarScreenProps) {
-  const { transactions } = useTransactions();
+  const { transactions: storedTransactions } = useTransactions();
+  // Paybacks that wrote no transfer show as rows of their own, as payback
+  // transfers do (`buildPaybackRows`). No total counts them: they are
+  // transfers that stay in one account.
+  const paybackRows = usePaybackRows();
+  const transactions = useMemo(
+    () => mergeTransactionsByDateDesc(storedTransactions, paybackRows),
+    [paybackRows, storedTransactions],
+  );
   const {
     settings,
     isLoading,

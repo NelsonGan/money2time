@@ -21,6 +21,7 @@ import {
   useReorderItemLayout,
   useReorderItemStyle,
 } from '~/features/transactions/components/transactionReorder';
+import { isPaybackRow } from '~/features/transactions/lib/paybackGroups';
 import { usePressScale } from '~/hooks/usePressScale';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -150,8 +151,15 @@ function describeTransaction(transaction: TransactionWithRelations): Transaction
       ? `${categoryPrimary} • ${categorySecondary}`
       : categoryPrimary;
   }
+  // A payback row (a friend's payback into the bill's own account, shown from
+  // its split) reads "Paid back" where a transfer reads "Moved".
   const title = isTransfer
-    ? transaction.note || I18n.t('transactions.filters.moved')
+    ? transaction.note ||
+      I18n.t(
+        isPaybackRow(transaction)
+          ? 'transactions.settleUp.section_paid'
+          : 'transactions.filters.moved',
+      )
     : isBalanceAdjustment
       ? transaction.note || I18n.t('transactions.filters.adjustment')
       : transaction.note || (categoryInline ?? I18n.t('common.uncategorized'));
@@ -282,7 +290,12 @@ const TransactionItemBody = memo(
     const isTimeMode = settings.displayMode === 'time';
 
     const dateLabel = showDateInSubtitle ? formatRelativeDate(transaction.date) : null;
-    const transferSubtitleLabel = I18n.t('transactions.filters.moved');
+    // A payback row stays in one account, so it names that one account, and
+    // says it was paid back rather than moved.
+    const paybackRow = isTransfer && isPaybackRow(transaction);
+    const transferSubtitleLabel = I18n.t(
+      paybackRow ? 'transactions.settleUp.section_paid' : 'transactions.filters.moved',
+    );
     // The account badge can be switched off in Display settings. A transfer
     // keeps its from → to pair either way: which accounts it moved between is
     // what the row is about, not a detail of it.
@@ -497,7 +510,14 @@ const TransactionItemBody = memo(
               {subtitlePrimary}
             </Text>
           ) : null}
-          {isTransfer ? (
+          {paybackRow ? (
+            <TransactionAccountBadge
+              account={fromAccount}
+              label={transaction.fromAccountId ? fromAccountLabel : I18n.t('common.no_account')}
+              compact={compact}
+              className={accountBadgeMarginClassName}
+            />
+          ) : isTransfer ? (
             <View
               collapsable={false}
               accessibilityLabel={`${fromAccountLabel} → ${toAccountLabel}`}
@@ -978,6 +998,12 @@ export const TransactionItem = memo(
     // with it; these are here for the same reason as the split fields above,
     // where a refresh can hand back an object with the old timestamp.
     prev.transaction.reimbursable === next.transaction.reimbursable &&
+    // A payback row (`buildPaybackRows`) is rebuilt from its split and bill, so
+    // what it shows can change while neither timestamp moves (the account's
+    // currency, a rate arriving).
+    prev.transaction.amount === next.transaction.amount &&
+    prev.transaction.currency === next.transaction.currency &&
+    prev.transaction.note === next.transaction.note &&
     // A plan's payment count arrives by join, like the relation names below.
     prev.transaction.instalmentNumber === next.transaction.instalmentNumber &&
     prev.transaction.instalmentCount === next.transaction.instalmentCount &&

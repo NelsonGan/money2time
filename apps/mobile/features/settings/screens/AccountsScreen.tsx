@@ -64,7 +64,7 @@ import {
 import { getAccountLogoMeta } from '~/constants/accountLogos';
 import { ACCOUNT_TYPE_OPTIONS, DEFAULT_CURRENCY } from '~/constants/appDefaults';
 import { spacing } from '~/constants/designSystem';
-import { useApp, useTransactions } from '~/context/AppContext';
+import { useApp, usePaybackRows, useTransactions } from '~/context/AppContext';
 import { LoanQuoteDisclosure } from '~/features/loans/components';
 import { resolveLoanContractFields } from '~/features/loans/lib/loanContractFields';
 import {
@@ -164,6 +164,7 @@ import {
   nextOccurrenceOfMonthDay,
   statementPeriodFromAnchor,
 } from '~/utils/statementPeriods';
+import { mergeTransactionsByDateDesc } from '~/utils/transactionSorting';
 
 interface AccountGroupSection {
   id: string;
@@ -3353,6 +3354,37 @@ export function AccountsScreen({
       monthCycle,
     );
   }, [selectedAccount, selectedAccountStatementDay, selectedAccountTransactions, monthCycle]);
+  // The list also shows the account's paybacks that wrote no transfer (a
+  // friend paying back into the bill's own account), as rows built from their
+  // split (`buildPaybackRows`). Only the list: the period's totals above are
+  // read from the stored transactions alone.
+  const paybackRows = usePaybackRows();
+  const accountPaybackRows = useMemo(
+    () =>
+      activeAccountId ? paybackRows.filter((row) => row.fromAccountId === activeAccountId) : [],
+    [activeAccountId, paybackRows],
+  );
+  // Only the periods holding a payback row get a new array; the rest keep the
+  // one above, so their pages do not redraw.
+  const accountPeriodListMap = useMemo(() => {
+    if (!selectedAccount || accountPaybackRows.length === 0) return accountPeriodTransactionsMap;
+    const paybacksByPeriod = bucketTransactionsByAccountPeriod(
+      accountPaybackRows,
+      selectedAccountStatementDay,
+      monthCycle,
+    );
+    const merged = new Map(accountPeriodTransactionsMap);
+    for (const [periodKey, rows] of paybacksByPeriod) {
+      merged.set(periodKey, mergeTransactionsByDateDesc(merged.get(periodKey) ?? [], rows));
+    }
+    return merged;
+  }, [
+    accountPaybackRows,
+    accountPeriodTransactionsMap,
+    monthCycle,
+    selectedAccount,
+    selectedAccountStatementDay,
+  ]);
   const activePagerOffset = pagerActiveIndex - MONTH_PAGER_CENTER_INDEX;
   const activePagerPeriod = useMemo(() => {
     if (usesStatementPeriods && selectedAccountStatementDay != null) {
@@ -4065,8 +4097,7 @@ export function AccountsScreen({
               addFinancialMonths(pagerAnchorDate, offset, monthCycle),
               monthCycle,
             );
-      const pageTransactions =
-        accountPeriodTransactionsMap.get(periodKey) ?? EMPTY_PERIOD_TRANSACTIONS;
+      const pageTransactions = accountPeriodListMap.get(periodKey) ?? EMPTY_PERIOD_TRANSACTIONS;
       return (
         <View style={pagerPageStyle} className="flex-1 bg-background">
           <ActivityTransactionList
@@ -4105,7 +4136,7 @@ export function AccountsScreen({
       );
     },
     [
-      accountPeriodTransactionsMap,
+      accountPeriodListMap,
       activeLocale,
       detailListBottomPadding,
       getDisplayValueForTransaction,
