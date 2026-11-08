@@ -175,6 +175,7 @@ class SettingsRepository {
         | 'reimbursementsCountAsExpense'
         | 'showTransactionAccount'
         | 'showAccountPickerBalances'
+        | 'hideAccountBalances'
         | 'navTabsJson'
       >
     >,
@@ -470,6 +471,7 @@ class SettingsRepository {
         reimbursementsCountAsExpense: true,
         showTransactionAccount: true,
         showAccountPickerBalances: true,
+        hideAccountBalances: false,
         navTabsJson: null,
         activeLedgerId: null,
         updatedAt: now,

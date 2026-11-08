@@ -3144,13 +3144,6 @@ interface AccountsScreenProps {
   onOpenCreateGroup?: () => void;
   useNativeBackGesture?: boolean;
   safeAreaEdges?: Edge[];
-  /**
-   * When the host (the assets tab) owns the balance-visibility toggle, it passes
-   * the state down and renders the eye button itself. Left undefined, the screen
-   * keeps its own internal toggle (e.g. when pushed standalone).
-   */
-  hideBalances?: boolean;
-  onToggleBalances?: () => void;
   /** Hides the overview title row + its inline settings/eye actions (the tab provides them). */
   hideOverviewHeader?: boolean;
 }
@@ -3172,8 +3165,6 @@ export function AccountsScreen({
   onOpenCreateGroup,
   useNativeBackGesture = false,
   safeAreaEdges = ['top'],
-  hideBalances,
-  onToggleBalances,
   hideOverviewHeader = false,
 }: AccountsScreenProps = {}) {
   const themeColors = useThemeColors();
@@ -3228,6 +3219,7 @@ export function AccountsScreen({
     reorderAccounts,
     reorderAccountGroups,
     renameAccountGroup,
+    updateSettings,
     updateTransactionsBulk,
   } = useApp();
   const monthCycle = monthCycleOf(settings);
@@ -3235,9 +3227,8 @@ export function AccountsScreen({
   const { checkLimit } = useProGate();
 
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(accountId);
-  const [internalHideBalances, setInternalHideBalances] = useState(false);
-  // Controlled when the host passes `hideBalances`; otherwise self-managed.
-  const hideAccountBalances = hideBalances ?? internalHideBalances;
+  // Saved, and shared with the eye on the assets page, so it survives a restart.
+  const hideAccountBalances = settings.hideAccountBalances;
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
   const [editingGroupName, setEditingGroupName] = useState('');
   // Track collapsed (not expanded) groups so cards stay expanded by default,
@@ -3466,12 +3457,8 @@ export function AccountsScreen({
     : I18n.t('accounts.hide_balances');
 
   const handleToggleAccountBalances = useCallback(() => {
-    if (onToggleBalances) {
-      onToggleBalances();
-      return;
-    }
-    setInternalHideBalances((previous) => !previous);
-  }, [onToggleBalances]);
+    updateSettings({ hideAccountBalances: !hideAccountBalances });
+  }, [hideAccountBalances, updateSettings]);
 
   const formatVisibleBalance = useCallback(
     (amount: number, currencyCode?: string) => {

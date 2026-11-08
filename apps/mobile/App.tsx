@@ -544,6 +544,7 @@ function MainShellScreen({
     accounts,
     accountGroups,
     updateQuickEntryPrefs,
+    updateSettings,
     settings,
   } = useApp();
   const { checkLimit } = useProGate();
@@ -1090,8 +1091,13 @@ function MainShellScreen({
     () => <ItemsScreen embedded safeAreaEdges={[]} onOpenItem={openItemEditor} />,
     [openItemEditor],
   );
+  // The Accounts and Goals eye. Saved as a setting so it survives a restart.
+  const hideAccountBalances = settings.hideAccountBalances;
+  const toggleAccountBalances = useCallback(() => {
+    updateSettings({ hideAccountBalances: !hideAccountBalances });
+  }, [hideAccountBalances, updateSettings]);
   const renderAssetsGoals = useCallback(
-    ({ hideBalances }: { hideBalances: boolean; onToggleBalances: () => void }) => (
+    ({ hideBalances }: { hideBalances: boolean }) => (
       <GoalsScreen
         hideBalances={hideBalances}
         onOpenGoal={openGoalDetail}
@@ -1130,18 +1136,10 @@ function MainShellScreen({
   // Declared here so its deps on openAccountEditor/openPayCreditCard/
   // openAccountGroupEditor are already initialized.
   const renderAssetsAccounts = useCallback(
-    ({
-      hideBalances,
-      onToggleBalances,
-    }: {
-      hideBalances: boolean;
-      onToggleBalances: () => void;
-    }) => (
+    () => (
       <MemoAccountsScreen
         safeAreaEdges={[]}
         hideOverviewHeader
-        hideBalances={hideBalances}
-        onToggleBalances={onToggleBalances}
         resetToRootToken={accountsResetToken}
         scrollToTopToken={accountsScrollTopToken}
         onOpenAccount={openAccountDetail}
@@ -1318,6 +1316,8 @@ function MainShellScreen({
             shouldPreload={preloadedTabs.has('accounts')}
           >
             <MemoAssetsTab
+              hideBalances={hideAccountBalances}
+              onToggleBalances={toggleAccountBalances}
               resetToAccountsToken={accountsResetToken}
               onAddItem={openItemEditorFromAssets}
               onOpenAccountSettings={openAccountSettings}

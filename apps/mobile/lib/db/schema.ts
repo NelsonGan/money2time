@@ -282,6 +282,11 @@ export const settingsTable = sqliteTable('settings', {
   showAccountPickerBalances: integer('show_account_picker_balances', { mode: 'boolean' })
     .notNull()
     .default(true),
+  // Whether the Accounts and Goals pages mask balances (their eye). Off by
+  // default.
+  hideAccountBalances: integer('hide_account_balances', { mode: 'boolean' })
+    .notNull()
+    .default(false),
   // The bottom bar's tabs, in order. Null means the default set; parse with
   // parseNavTabs.
   navTabsJson: text('nav_tabs_json'),
