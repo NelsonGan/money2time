@@ -23,7 +23,7 @@ import { I18n } from '~/lib/i18n';
 import { withColorAlpha } from '~/utils/color';
 import { formatDayHeaderParts } from '~/utils/dayHeader';
 import { monthCycleOf } from '~/utils/financialMonth';
-import { dayKeyFromDateLocal, formatAmount } from '~/utils/formatters';
+import { dayKeyFromDateLocal } from '~/utils/formatters';
 
 interface ShowcaseProps {
   width: number;
@@ -138,7 +138,7 @@ export function SplitPartPaymentsShowcase({ width }: ShowcaseProps) {
   const { settings } = useApp();
   const paid = SHARE_PAYMENTS.reduce((sum, amount) => sum + amount, 0);
   const owed = SHARE_TOTAL - paid;
-  const amount = (value: number) => formatAmount(value, { ...settings, displayMode: 'money' });
+  const amount = (value: number) => money(value, settings);
   // Payments on recent days, so the sample never shows a date to come.
   const day = (daysAgo: number) => {
     const date = new Date();
@@ -233,8 +233,9 @@ const BATCH_PICKS = SCANNED_RECEIPTS.length + 1;
 export function BatchScanShowcase({ width }: ShowcaseProps) {
   const colors = useThemeColors();
   const { settings } = useApp();
-  const amount = (value: number) => formatAmount(value, { ...settings, displayMode: 'money' });
-  const tile = Math.round((width - 3 * 8) / 4);
+  const amount = (value: number) => money(value, settings);
+  // One row of picks, 8pt apart.
+  const tile = Math.round((width - (BATCH_PICKS - 1) * 8) / BATCH_PICKS);
   return (
     <View className="gap-2.5" style={{ width }}>
       {/* The album picker's multi-select: numbered picks, in pick order. */}
@@ -368,11 +369,7 @@ export function ArchiveAccountsShowcase({ width }: ShowcaseProps) {
             CIMB Savings
           </Text>
           <Text variant="body" numberOfLines={1} className="text-foreground">
-            {formatAmount(
-              ARCHIVED_BALANCE,
-              { ...settings, displayMode: 'money' },
-              { showSign: false },
-            )}
+            {money(ARCHIVED_BALANCE, settings)}
           </Text>
         </View>
       </View>

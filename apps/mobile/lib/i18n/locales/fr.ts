@@ -183,7 +183,7 @@ const fr = {
       },
       batchScan: {
         title: 'Scannez plusieurs reçus à la fois',
-        body: "Touchez Scanner le reçu, ouvrez votre album et choisissez jusqu'à %{count} reçus. Chacun devient une dépense à part, avec son marchand, son montant, sa date et sa catégorie, pendant que vous continuez à utiliser l'app. Une carte sur Accueil indique où en est le traitement.",
+        body: "Touchez Scanner un reçu, ouvrez votre album et choisissez jusqu'à %{count} reçus. Chacun devient une dépense à part, avec son marchand, son montant, sa date et sa catégorie, pendant que vous continuez à utiliser l'app. Une carte sur Accueil indique où en est le traitement.",
       },
       archive: {
         title: 'Archivez des comptes',

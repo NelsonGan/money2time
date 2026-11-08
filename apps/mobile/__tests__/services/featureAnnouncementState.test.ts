@@ -87,6 +87,23 @@ describe('feature announcement state', () => {
     }
   });
 
+  it('names the real Scan receipt button in the batch scan page, in every language', () => {
+    for (const locale of SUPPORTED_LOCALE_FILES) {
+      const strings = loadLocale(locale);
+      const body: string = strings.news.budgets_splits_scans_archive.batchScan.body;
+      expect([locale, body]).toEqual([
+        locale,
+        expect.stringContaining(strings.add_action.scan_title),
+      ]);
+    }
+  });
+
+  it('says several budget periods need Pro only while the free plan allows one template', () => {
+    // The budgets page says "Running several periods at once is part of Pro" in
+    // every language. Raise the free limit and that sentence must change too.
+    expect(PRO_LIMITS.FREE_MAX_BUDGET_TEMPLATES).toBe(1);
+  });
+
   it('announces Cloud Sync, shared ledgers and Household insights on both platforms', () => {
     const latest = getFeatureAnnouncementById('cloud_sync_shared_ledgers_2026_11')!;
     expect(latest).toMatchObject({

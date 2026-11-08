@@ -6,7 +6,7 @@ import { clampSessionHours } from '~/features/widgets/lib/liveEarnings';
 import type { RootStackParamList } from '~/navigation/rootStack';
 import { requestRunAddAction } from '~/services/addActionNavigation';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
-import { requestFocusInsight } from '~/services/insightsNavigation';
+import { requestFocusInsight, requestOpenBudget } from '~/services/insightsNavigation';
 import {
   clearPendingLiveEarningsStart,
   requestStartLiveEarnings,
@@ -109,10 +109,7 @@ export function handleMoney2TimeDeepLink(url: string, navigationRef: RootNavigat
   if (parsed.action === 'budget') {
     // Budget is an Insights page now, so open the Insights tab focused on it
     // rather than a dedicated screen.
-    runDeepLinkNavigation(navigationRef, null, () => {
-      requestOpenTab('insights');
-      requestFocusInsight('budget');
-    });
+    runDeepLinkNavigation(navigationRef, null, requestOpenBudget);
     void trackEvent(AnalyticsEvents.WIDGET_OPENED, { widget: 'budget' });
     return true;
   }

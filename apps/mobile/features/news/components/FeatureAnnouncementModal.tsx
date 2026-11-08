@@ -21,7 +21,7 @@ import { I18n } from '~/lib/i18n';
 import { paymentAlertCapturesRepository } from '~/lib/repositories/paymentAlertCapturesRepository';
 import { requestRunAddAction } from '~/services/addActionNavigation';
 import { triggerHaptic } from '~/services/haptics';
-import { requestFocusInsight } from '~/services/insightsNavigation';
+import { requestFocusInsight, requestOpenBudget } from '~/services/insightsNavigation';
 import { isNotificationAiAvailable } from '~/services/notificationAi';
 import { requestOpenPaymentAlerts } from '~/services/paymentAlertsNavigation';
 import { requestOpenTab } from '~/services/tabNavigation';
@@ -307,11 +307,12 @@ export function FeatureAnnouncementModal({
     openSettleUp: onOpenSettleUp,
     // Budget is an Insights page, and Scan receipt one of the + button's flows:
     // both are reached through their bridges, the same from every caller.
-    openBudget: () => {
-      requestOpenTab('insights');
-      requestFocusInsight('budget');
+    openBudget: requestOpenBudget,
+    // Calendar first: its banner is the card that shows the batch's progress.
+    openScanReceipt: () => {
+      requestOpenTab('calendar');
+      requestRunAddAction('scan');
     },
-    openScanReceipt: () => requestRunAddAction('scan'),
     // The review page is a root route, reached through its bridge from every
     // caller; without notification logging the button opens its setup instead.
     openNotificationReview: () => {

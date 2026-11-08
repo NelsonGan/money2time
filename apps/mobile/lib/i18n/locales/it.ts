@@ -182,8 +182,8 @@ const it = {
         body: "Ora gli amici possono restituirti i soldi un po' alla volta. In Chi ti deve dei soldi, tocca Segna pagato e scrivi quanto hanno pagato. Il resto rimane da saldare, con una barra di avanzamento e l'elenco di ogni pagamento, e ogni pagamento conta nei tuoi conti appena arriva.",
       },
       batchScan: {
-        title: 'Scansiona tante ricevute insieme',
-        body: "Tocca Scansiona ricevuta, apri il tuo album e scegli fino a %{count} ricevute. Ognuna diventa una spesa a sé, con esercente, importo, data e categoria propri, mentre continui a usare l'app. Una scheda nella Home mostra a che punto è.",
+        title: 'Scansiona tanti scontrini insieme',
+        body: "Tocca Scansiona scontrino, apri il tuo album e scegli fino a %{count} scontrini. Ognuno diventa una spesa a sé, con esercente, importo, data e categoria propri, mentre continui a usare l'app. Una scheda nella Home mostra a che punto è.",
       },
       archive: {
         title: 'Archivia i conti',
