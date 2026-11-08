@@ -79,7 +79,9 @@ export function PaybackGroupRow({
     first?.fromAccountName || fromAccount?.name || I18n.t('common.no_account');
   const moved = transactions.filter((tx) => !isPaybackRow(tx));
   const firstMoved = moved[0];
-  const toIds = new Set(transactions.map((tx) => tx.toAccountId ?? ''));
+  // Only paybacks that moved money count as destinations: a payback row's
+  // "to" is the bill's own account, which is not one more place it went.
+  const toIds = new Set(moved.map((tx) => tx.toAccountId ?? ''));
   const toAccount = firstMoved?.toAccountId ? getAccountById(firstMoved.toAccountId) : undefined;
   const toName: string =
     firstMoved?.toAccountName || toAccount?.name || I18n.t('common.no_account');

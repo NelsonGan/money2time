@@ -199,6 +199,24 @@ describe('buildPaybackRows', () => {
     expect(
       buildPaybackRows([{ ...foreign, amount: 0, accountAmount: 0 }], currencyOf, RATES)[0],
     ).toMatchObject({ amount: 6, currency: 'EUR' });
+    // Unless the account is in the reporting currency: then the bill's frozen
+    // rate, so the rows do not move with today's rates.
+    expect(
+      buildPaybackRows(
+        [
+          {
+            ...foreign,
+            amount: 0,
+            accountAmount: 0,
+            reportingCurrency: 'EUR',
+            reportingAmount: 0,
+            fxRate: 0.25,
+          },
+        ],
+        currencyOf,
+        RATES,
+      )[0],
+    ).toMatchObject({ amount: 7.5, currency: 'EUR' });
     // No account snapshot: the balance counts the bill at face value, so the
     // payback is the share in the account's currency, as a payback transfer.
     expect(

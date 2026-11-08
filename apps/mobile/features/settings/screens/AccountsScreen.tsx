@@ -1261,6 +1261,9 @@ function AccountEditorSheet({
   const usesDueDaysAfter = editedType === 'credit' && creditDueRule === 'days_after';
   const parsedDueDaysAfter = Number(creditDueDaysAfter);
   const hasValidDueDaysAfter = !usesDueDaysAfter || isDueDaysAfterStatement(parsedDueDaysAfter);
+  // Days after a statement need a statement day to count from.
+  const dueDaysAfterNeedsStatement =
+    usesDueDaysAfter && hasValidDueDaysAfter && normalizedStatementDay == null;
   const nextDueDatePreview =
     usesDueDaysAfter && hasValidDueDaysAfter && normalizedStatementDay != null
       ? formatStatementDateLabel(
@@ -1272,7 +1275,8 @@ function AccountEditorSheet({
     normalizedName.length > 0 &&
     (isNewLoan || hasValidBalance) &&
     hasValidLoanFields &&
-    hasValidDueDaysAfter;
+    hasValidDueDaysAfter &&
+    !dueDaysAfterNeedsStatement;
 
   const handleSave = () => {
     if (!canSave) return;
@@ -1588,6 +1592,7 @@ function AccountEditorSheet({
                       value={creditStatementDay}
                       onChangeText={setCreditStatementDay}
                       placeholder="25"
+                      invalid={dueDaysAfterNeedsStatement}
                     />
                   </View>
                   <View className="flex-1">
@@ -1616,6 +1621,10 @@ function AccountEditorSheet({
                 {!hasValidDueDaysAfter ? (
                   <Text variant="caption" tone="error" className="px-1">
                     {I18n.t('accounts.due_days_after_error', { max: MAX_DUE_DAYS_AFTER_STATEMENT })}
+                  </Text>
+                ) : dueDaysAfterNeedsStatement ? (
+                  <Text variant="caption" tone="error" className="px-1">
+                    {I18n.t('accounts.due_days_after_needs_statement')}
                   </Text>
                 ) : nextDueDatePreview ? (
                   <Text variant="caption" tone="muted" className="px-1">

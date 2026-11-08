@@ -95,6 +95,7 @@ import {
   isTransferFee,
   planTransferFeeWrite,
   sameTransferFeeIndex,
+  transferFeeAccountAmount,
   transferFeeCreatedAt,
   transferFeeDayOrder,
   type TransferFeeDraft,
@@ -3362,7 +3363,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             ) {
               follow.accountId = nextAccountId;
               if (nextAccount && nextAccount.currency !== fee.currency) {
+                // The same charge in the new account's currency, not the same
+                // number in another currency.
+                const feeCurrency =
+                  (fee.accountId ? accountCurrencyOf(fee.accountId) : null) ?? fee.currency;
                 follow.currency = nextAccount.currency;
+                follow.amount = convert(
+                  transferFeeAccountAmount(fee),
+                  feeCurrency,
+                  nextAccount.currency,
+                  rateTableRef.current,
+                ).value;
               }
             }
           }
@@ -3565,6 +3576,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       });
     },
     [
+      accountCurrencyOf,
       accounts,
       buildSnapshot,
       scheduleRefreshTransactions,
@@ -4729,7 +4741,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         if (!parent || !split || !split.paidAt) return prev;
         const transferTxId = split.paidTransactionId;
         const splitAmount = split.amount;
-        const filtered = transferTxId ? prev.filter((tx) => tx.id !== transferTxId) : prev;
+        // The payback's transfer goes, and the fee charged on it with it.
+        const filtered = transferTxId
+          ? prev.filter((tx) => tx.id !== transferTxId && tx.feeOfId !== transferTxId)
+          : prev;
         return filtered.map((tx) => {
           if (tx.id !== parent.id) return tx;
           const restored = rescaleSplitAdjustedAmounts(tx, tx.amount + splitAmount, () =>
@@ -4826,7 +4841,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         if (!parent || !split) return prev;
         const transferTxId = split.paidAt ? split.paidTransactionId : null;
         const restoreAmount = split.paidAt ? split.amount : 0;
-        const filtered = transferTxId ? prev.filter((tx) => tx.id !== transferTxId) : prev;
+        // The payback's transfer goes, and the fee charged on it with it.
+        const filtered = transferTxId
+          ? prev.filter((tx) => tx.id !== transferTxId && tx.feeOfId !== transferTxId)
+          : prev;
         return filtered.map((tx) => {
           if (tx.id !== parent.id) return tx;
           const updatedSplits = removeSplitsKeepingShares(tx.splits ?? [], [splitId]);

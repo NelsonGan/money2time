@@ -13,7 +13,11 @@ import { TransactionEditorScreen } from '~/features/transactions/components';
 import { type SplitDraft, splitsHelpers } from '~/features/transactions/components/editor';
 import type { TransactionEditorSubmitExtras } from '~/features/transactions/components/TransactionEditorScreen';
 import { splitShareKey } from '~/features/transactions/lib/splitPayments';
-import { type TransferFeeDraft, transferFeeDraftOf } from '~/features/transactions/lib/transferFee';
+import {
+  transferFeeAccountAmount,
+  type TransferFeeDraft,
+  transferFeeDraftOf,
+} from '~/features/transactions/lib/transferFee';
 import { I18n } from '~/lib/i18n';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
 import type { RootStackParamList } from '~/navigation/rootStack';
@@ -153,7 +157,7 @@ function TransactionEditor({
           : I18n.t('transactions.editor.delete_payback_confirm_unnamed')
         : feeLink
           ? I18n.t('transactions.editor.transfer_fee.delete_confirm', {
-              fee: formatAmount(feeLink.amount, settings, {
+              fee: formatAmount(transferFeeAccountAmount(feeLink), settings, {
                 currencyCode:
                   (feeLink.accountId ? getAccountById(feeLink.accountId)?.currency : null) ??
                   feeLink.currency,
@@ -197,7 +201,11 @@ function TransactionEditor({
   );
 
   const handleSubmitWithSplits = useCallback(
-    (input: CreateTransactionInput, splits: SplitDraft[]) => {
+    (
+      input: CreateTransactionInput,
+      splits: SplitDraft[],
+      extras?: TransactionEditorSubmitExtras,
+    ) => {
       // Diff editor splits against the persisted state to find newly paid /
       // newly unpaid rows. These were staged locally — flush them to the DB now.
       // NOTE: a brand-new split (no prior in DB) with `s.paid` set is also
@@ -248,10 +256,12 @@ function TransactionEditor({
       // it in lockstep), so input.amount is the intended final value — this
       // overwrites the cumulative reductions from markSplitPaid above.
       updateTransaction(transaction.id, input);
+      saveFeeFor(input, extras?.transferFee ?? null);
     },
     [
       markSplitPaid,
       markSplitUnpaid,
+      saveFeeFor,
       transaction.id,
       transaction.splits,
       updateTransaction,

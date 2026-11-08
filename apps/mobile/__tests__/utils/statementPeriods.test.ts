@@ -253,6 +253,25 @@ describe('getCreditCycleDates with a due date some days after the statement', ()
     );
   });
 
+  it('shows the earlier unpaid statement when a long grace period leaves its bill still due', () => {
+    // Statement day 25, 45 days: on Nov 9 the Sep 25 bill is due today, before
+    // the Oct 25 one (Dec 9).
+    const { statementDate, dueDate } = getCreditCycleDates(
+      25,
+      null,
+      new Date(2026, 10, 9),
+      true,
+      45,
+    );
+    expect(statementDate).toEqual(new Date(2026, 8, 25));
+    expect(dueDate).toEqual(new Date(2026, 10, 9));
+    // A day later the Sep bill is past, so the Oct one is next.
+    expect(getCreditCycleDates(25, null, new Date(2026, 10, 10), true, 45)).toEqual({
+      statementDate: new Date(2026, 9, 25),
+      dueDate: new Date(2026, 11, 9),
+    });
+  });
+
   it('falls back to the fixed due day when there is no statement day', () => {
     const { statementDate, dueDate } = getCreditCycleDates(
       null,
@@ -306,6 +325,17 @@ describe('nextDueDateAfterStatement', () => {
   it('includes a bill due today', () => {
     expect(nextDueDateAfterStatement(25, 20, new Date(2026, 11, 15, 18, 30))).toEqual(
       new Date(2026, 11, 15),
+    );
+  });
+
+  it("is the earlier statement's due date when a long grace period leaves it ahead", () => {
+    // Statement day 25, 45 days, on Nov 9: Sep 25 + 45 = Nov 9 comes before
+    // Oct 25 + 45 = Dec 9.
+    expect(nextDueDateAfterStatement(25, 45, new Date(2026, 10, 9, 12))).toEqual(
+      new Date(2026, 10, 9),
+    );
+    expect(nextDueDateAfterStatement(25, 45, new Date(2026, 10, 10))).toEqual(
+      new Date(2026, 11, 9),
     );
   });
 

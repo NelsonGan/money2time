@@ -2171,6 +2171,7 @@ const ru = {
     due_rule_days_after: 'Дней после выписки',
     due_next_date: 'Следующий срок: {{date}}',
     due_days_after_error: 'Введите от 1 до {{max}} дней',
+    due_days_after_needs_statement: 'Укажите день выписки, от которого считать',
     current_balance: 'Текущий баланс',
     balance_adjustment_prompt_title: 'Как записать это изменение баланса?',
     balance_adjustment_prompt_message:

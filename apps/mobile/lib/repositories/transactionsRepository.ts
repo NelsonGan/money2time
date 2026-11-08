@@ -773,22 +773,24 @@ class TransactionsRepository {
     );
   }
 
+  /** Deletes a row, and the fee charged on it when it is a transfer. */
   softDelete(id: string) {
-    const db = getDb();
-    const now = nowIso();
-    db.update(transactionsTable)
-      .set({ deletedAt: now, updatedAt: now })
-      .where(and(eq(transactionsTable.id, id), isNull(transactionsTable.deletedAt)))
-      .run();
+    this.softDeleteMany([id]);
   }
 
+  /** Deletes the rows, and the fees charged on any of them that are transfers. */
   softDeleteMany(ids: string[]) {
     if (ids.length === 0) return;
     const db = getDb();
     const now = nowIso();
     db.update(transactionsTable)
       .set({ deletedAt: now, updatedAt: now })
-      .where(and(isNull(transactionsTable.deletedAt), inArray(transactionsTable.id, ids)))
+      .where(
+        and(
+          isNull(transactionsTable.deletedAt),
+          or(inArray(transactionsTable.id, ids), inArray(transactionsTable.feeOfId, ids)),
+        ),
+      )
       .run();
   }
 

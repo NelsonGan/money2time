@@ -2194,6 +2194,7 @@ const de = {
     due_rule_days_after: 'Tage nach Abrechnung',
     due_next_date: 'Nächste Fälligkeit: {{date}}',
     due_days_after_error: 'Gib 1 bis {{max}} Tage ein',
+    due_days_after_needs_statement: 'Gib einen Abrechnungstag zum Zählen an',
     current_balance: 'Aktueller Saldo',
     balance_adjustment_prompt_title: 'Wie soll diese Saldenänderung erfasst werden?',
     balance_adjustment_prompt_message:

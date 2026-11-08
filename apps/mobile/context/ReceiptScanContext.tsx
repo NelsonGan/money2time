@@ -89,6 +89,12 @@ interface BatchRun {
   size: number;
   /** Set by the first scan that hits the quota, so the paywall opens once. */
   limitHit: boolean;
+  /**
+   * Each created job's first expense, by job id. Kept here rather than read
+   * back from the job list, whose update may not have landed when the batch
+   * finishes.
+   */
+  createdIds: Map<string, string>;
 }
 
 interface ReceiptScanContextValue {
@@ -490,6 +496,7 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
           if (!firstId) firstId = txnId;
         });
         if (!keepImage) deleteReceiptImage(rel);
+        if (batch && firstId) batch.createdIds.set(id, firstId);
         // Keep a completion card in this provider's in-memory job list. It is
         // deliberately not persisted, so a native app restart clears it.
         setJobsBoth((prev) =>
@@ -583,7 +590,7 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
         return;
       }
       const batchId = newId();
-      const batch: BatchRun = { size: assets.length, limitHit: false };
+      const batch: BatchRun = { size: assets.length, limitHit: false, createdIds: new Map() };
       const queue = assets.map((asset) => ({ asset, id: newId() }));
       setJobsBoth((prev) => [
         ...prev,
@@ -623,11 +630,12 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
         // Never started (the quota ran out): nothing was stored, so just drop it.
         setJobsBoth((prev) => prev.filter((j) => j.id !== id));
       }).then(() => {
-        const created = jobsRef.current.find(
-          (j) => j.batchId === batchId && j.status === 'created' && j.transactionId,
-        );
-        if (!created?.transactionId) return;
-        requestHighlightTransaction(created.transactionId);
+        // The first receipt in pick order that made an expense.
+        const createdId = queue
+          .map(({ id }) => batch.createdIds.get(id))
+          .find((txnId) => txnId != null);
+        if (!createdId) return;
+        requestHighlightTransaction(createdId);
         void triggerHaptic('success');
       });
     },

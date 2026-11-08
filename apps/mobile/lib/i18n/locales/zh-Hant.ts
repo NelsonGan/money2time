@@ -2067,6 +2067,7 @@ const zhHant = {
     due_rule_days_after: '帳單日後天數',
     due_next_date: '下次還款日：{{date}}',
     due_days_after_error: '請輸入 1 至 {{max}} 天',
+    due_days_after_needs_statement: '請填寫結單日以便計算',
     current_balance: '當前餘額',
     currency_change_title: '更改帳戶貨幣？',
     currency_change_message:

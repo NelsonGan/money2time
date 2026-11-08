@@ -81,6 +81,10 @@ export function isDueDaysAfterStatement(value: unknown): value is number {
   );
 }
 
+function startOfDay(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
 /** `date` moved by whole calendar days, at local midnight (safe across DST). */
 export function addCalendarDays(date: Date, days: number): Date {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate() + days);
@@ -115,6 +119,15 @@ export function getCreditCycleDates(
     };
   }
   const lastStatement = getCurrentStatementCycleStart(statementDay, now);
+  if (hasUnpaidStatement && dueDaysAfterStatement != null) {
+    // A grace period longer than a cycle can leave the statement before the
+    // latest one still to pay, and its bill falls due first.
+    const previousStatement = statementPeriodFromAnchor(lastStatement, statementDay, -1).start;
+    const previousDue = addCalendarDays(previousStatement, dueDaysAfterStatement);
+    if (previousDue.getTime() >= startOfDay(now).getTime()) {
+      return { statementDate: previousStatement, dueDate: previousDue };
+    }
+  }
   const statementDate = hasUnpaidStatement
     ? lastStatement
     : statementPeriodFromAnchor(lastStatement, statementDay, 0).end;
@@ -126,19 +139,23 @@ export function getCreditCycleDates(
 }
 
 /**
- * The first bill due on or after today under a days-after rule: the latest
- * statement's, or the next statement's once that one's due date has passed.
- * The account editor previews it under the field.
+ * The first bill due on or after today under a days-after rule: the earliest
+ * of the statement before the latest one (a grace period longer than a cycle
+ * leaves it still to pay), the latest statement and the next one. The account
+ * editor previews it under the field.
  */
 export function nextDueDateAfterStatement(
   statementDay: number,
   dueDaysAfterStatement: number,
   now: Date,
 ): Date {
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const today = startOfDay(now);
   const lastStatement = getCurrentStatementCycleStart(statementDay, now);
-  const lastDue = addCalendarDays(lastStatement, dueDaysAfterStatement);
-  if (lastDue.getTime() >= today.getTime()) return lastDue;
+  for (const offset of [-1, 0]) {
+    const statement = statementPeriodFromAnchor(lastStatement, statementDay, offset).start;
+    const due = addCalendarDays(statement, dueDaysAfterStatement);
+    if (due.getTime() >= today.getTime()) return due;
+  }
   const nextStatement = statementPeriodFromAnchor(lastStatement, statementDay, 0).end;
   return addCalendarDays(nextStatement, dueDaysAfterStatement);
 }
