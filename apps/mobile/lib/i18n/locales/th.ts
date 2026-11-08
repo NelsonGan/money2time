@@ -2092,6 +2092,11 @@ const th = {
     type: 'ประเภท',
     statement_day: 'วันตัดรอบ',
     due_day: 'วันครบกำหนด',
+    due_rule: 'วันครบกำหนด',
+    due_rule_day_of_month: 'วันที่ของเดือน',
+    due_rule_days_after: 'จำนวนวันหลังสรุปยอด',
+    due_next_date: 'ครบกำหนดครั้งถัดไป: {{date}}',
+    due_days_after_error: 'ใส่ 1 ถึง {{max}} วัน',
     current_balance: 'ยอดคงเหลือปัจจุบัน',
     balance_adjustment_prompt_title: 'บันทึกการเปลี่ยนแปลงยอดคงเหลืออย่างไร?',
     balance_adjustment_prompt_message:

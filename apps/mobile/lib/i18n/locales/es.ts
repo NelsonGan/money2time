@@ -2136,6 +2136,11 @@ const es = {
     type: 'Tipo',
     statement_day: 'Día de corte',
     due_day: 'Fecha de pago',
+    due_rule: 'Vencimiento',
+    due_rule_day_of_month: 'Día del mes',
+    due_rule_days_after: 'Días tras el corte',
+    due_next_date: 'Próximo vencimiento: {{date}}',
+    due_days_after_error: 'Introduce de 1 a {{max}} días',
     current_balance: 'Saldo actual',
     balance_adjustment_prompt_title: '¿Cómo registrar este cambio de saldo?',
     balance_adjustment_prompt_message:

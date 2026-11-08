@@ -15,6 +15,9 @@ export const accountsTable = sqliteTable('accounts', {
   cardDesign: text('card_design'),
   creditStatementDay: integer('credit_statement_day'),
   creditDueDay: integer('credit_due_day'),
+  // Days after each statement the bill is due (migration 084). Null = due on
+  // the fixed day of the month in `creditDueDay`; see `getCreditCycleDates`.
+  creditDueDaysAfterStatement: integer('credit_due_days_after_statement'),
   currency: text('currency').notNull(),
   startingBalance: real('starting_balance').notNull().default(0),
   includeInTotals: integer('include_in_totals', { mode: 'boolean' }).notNull().default(true),

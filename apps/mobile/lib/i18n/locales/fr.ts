@@ -2147,6 +2147,11 @@ const fr = {
     type: 'Type',
     statement_day: 'Jour de relevé',
     due_day: "Jour d'échéance",
+    due_rule: 'Échéance',
+    due_rule_day_of_month: 'Jour du mois',
+    due_rule_days_after: 'Jours après le relevé',
+    due_next_date: 'Prochaine échéance : {{date}}',
+    due_days_after_error: 'Saisissez de 1 à {{max}} jours',
     current_balance: 'Solde actuel',
     balance_adjustment_prompt_title: 'Comment enregistrer ce changement de solde ?',
     balance_adjustment_prompt_message:

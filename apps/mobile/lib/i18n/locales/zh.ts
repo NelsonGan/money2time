@@ -2026,6 +2026,11 @@ const zh = {
     type: '类型',
     statement_day: '账单日',
     due_day: '还款日',
+    due_rule: '还款日期',
+    due_rule_day_of_month: '每月固定日',
+    due_rule_days_after: '账单日后天数',
+    due_next_date: '下次还款日：{{date}}',
+    due_days_after_error: '请输入 1 至 {{max}} 天',
     current_balance: '当前余额',
     currency_change_title: '更改账户货币？',
     currency_change_message:

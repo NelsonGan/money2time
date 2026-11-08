@@ -609,6 +609,7 @@ function StackCard({
       account.creditDueDay,
       new Date(),
       hasUnpaidStatement,
+      account.creditDueDaysAfterStatement ?? null,
     );
     const chips: string[] = [];
     if (statementDate) {
@@ -622,6 +623,7 @@ function StackCard({
     return chips.length > 0 ? chips : null;
   }, [
     account.creditDueDay,
+    account.creditDueDaysAfterStatement,
     account.creditStatementDay,
     hasUnpaidStatement,
     isCredit,

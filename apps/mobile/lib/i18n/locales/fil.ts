@@ -2153,6 +2153,11 @@ const fil = {
     type: 'Uri',
     statement_day: 'Araw ng statement',
     due_day: 'Due date',
+    due_rule: 'Petsa ng due',
+    due_rule_day_of_month: 'Araw ng buwan',
+    due_rule_days_after: 'Araw pagkatapos ng statement',
+    due_next_date: 'Susunod na due date: {{date}}',
+    due_days_after_error: 'Maglagay ng 1 hanggang {{max}} araw',
     current_balance: 'Kasalukuyang balance',
     balance_adjustment_prompt_title: 'Paano dapat itala ang pagbabago ng balance?',
     balance_adjustment_prompt_message:

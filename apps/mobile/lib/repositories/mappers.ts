@@ -242,6 +242,7 @@ export function toAccount(row: AccountRow): Account {
     cardDesign: row.cardDesign ?? null,
     creditStatementDay: row.creditStatementDay,
     creditDueDay: row.creditDueDay,
+    creditDueDaysAfterStatement: row.creditDueDaysAfterStatement ?? null,
     currency: row.currency,
     startingBalance: row.startingBalance,
     includeInTotals: row.includeInTotals,

@@ -2136,6 +2136,11 @@ const tr = {
     type: 'Tür',
     statement_day: 'Ekstre günü',
     due_day: 'Son ödeme günü',
+    due_rule: 'Son ödeme',
+    due_rule_day_of_month: 'Ayın günü',
+    due_rule_days_after: 'Ekstreden sonraki gün',
+    due_next_date: 'Sonraki son ödeme: {{date}}',
+    due_days_after_error: '1 ile {{max}} gün arası girin',
     current_balance: 'Mevcut bakiye',
     balance_adjustment_prompt_title: 'Bu bakiye değişikliği nasıl kaydedilsin?',
     balance_adjustment_prompt_message:

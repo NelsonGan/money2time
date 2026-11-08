@@ -2152,6 +2152,11 @@ const de = {
     type: 'Typ',
     statement_day: 'Abrechnungstag',
     due_day: 'Fälligkeitstag',
+    due_rule: 'Fälligkeit',
+    due_rule_day_of_month: 'Tag im Monat',
+    due_rule_days_after: 'Tage nach Abrechnung',
+    due_next_date: 'Nächste Fälligkeit: {{date}}',
+    due_days_after_error: 'Gib 1 bis {{max}} Tage ein',
     current_balance: 'Aktueller Saldo',
     balance_adjustment_prompt_title: 'Wie soll diese Saldenänderung erfasst werden?',
     balance_adjustment_prompt_message:

@@ -28,6 +28,7 @@ interface CreateAccountInput {
   cardDesign?: string | null;
   creditStatementDay?: number | null;
   creditDueDay?: number | null;
+  creditDueDaysAfterStatement?: number | null;
   currency: string;
   startingBalance: number;
   includeInTotals: boolean;
@@ -108,6 +109,7 @@ class AccountsRepository {
         cardDesign: input.cardDesign ?? null,
         creditStatementDay: input.creditStatementDay ?? null,
         creditDueDay: input.creditDueDay ?? null,
+        creditDueDaysAfterStatement: input.creditDueDaysAfterStatement ?? null,
         goalTargetAmount: input.goalTargetAmount ?? null,
         goalTargetDate: input.goalTargetDate ?? null,
         goalEmoji: input.goalEmoji ?? null,

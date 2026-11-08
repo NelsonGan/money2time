@@ -2136,6 +2136,11 @@ const pt = {
     type: 'Tipo',
     statement_day: 'Dia do fechamento',
     due_day: 'Dia do vencimento',
+    due_rule: 'Vencimento',
+    due_rule_day_of_month: 'Dia do mês',
+    due_rule_days_after: 'Dias após o fechamento',
+    due_next_date: 'Próximo vencimento: {{date}}',
+    due_days_after_error: 'Insira de 1 a {{max}} dias',
     current_balance: 'Saldo atual',
     balance_adjustment_prompt_title: 'Como registrar esta mudança de saldo?',
     balance_adjustment_prompt_message:
