@@ -1897,6 +1897,10 @@ const tr = {
     week_strip_label: 'Sonraki 7 gün',
     this_month: 'Bu ay',
     paused_section: 'Duraklatıldı',
+    settings_title: 'Tekrarlayan ayarları',
+    highlight_label: 'Tekrarlayan kayıtları renklendir',
+    highlight_hint:
+      'Tekrarlayan kurallarının eklediği kayıtlar işlem listelerinde yumuşak lavanta bir arka plan alır, böylece kendi girdiklerinden ayırt edebilirsin.',
     overdue: 'Gecikmiş',
     show_all_days: 'Tüm günler',
     day_due_count: '{{count}} vadesi geldi',

@@ -19,6 +19,7 @@ export { ProPaywallScreen } from './ProPaywallScreen';
 export { QuickEntrySettingsScreen } from './QuickEntrySettingsScreen';
 export { ReceiptsScreen } from './ReceiptsScreen';
 export { RecurringScreen } from './RecurringScreen';
+export { RecurringSettingsScreen } from './RecurringSettingsScreen';
 export { SettingsScreen } from './SettingsScreen';
 export { SettingsStack } from './SettingsStack';
 export { ShareAndEarnScreen } from './ShareAndEarnScreen';

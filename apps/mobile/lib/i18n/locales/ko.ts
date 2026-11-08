@@ -1861,6 +1861,10 @@ const ko = {
     week_strip_label: '다음 7일',
     this_month: '이번 달',
     paused_section: '일시정지',
+    settings_title: '반복 설정',
+    highlight_label: '반복 내역에 색 입히기',
+    highlight_hint:
+      '반복 규칙이 추가한 내역은 거래 목록에서 연한 라벤더색 배경으로 표시되어 직접 입력한 내역과 구분할 수 있어요.',
     overdue: '기한 초과',
     show_all_days: '모든 날짜',
     day_due_count: '{{count}}건 예정',

@@ -14,6 +14,7 @@ import Animated, {
 import { AccountLogo, CategoryEmoji, Text, TimeValueInline } from '~/components/ui';
 import { motionDurations } from '~/constants/motion';
 import { useApp } from '~/context/AppContext';
+import { useResolvedTheme } from '~/context/ThemeContext';
 import { PersonAvatar } from '~/features/sharedLedgers/components/PersonAvatar';
 import { shortName, useOpenLedgerPeople } from '~/features/sharedLedgers/lib/ledgerPeople';
 import {
@@ -22,6 +23,7 @@ import {
   useReorderItemStyle,
 } from '~/features/transactions/components/transactionReorder';
 import { isPaybackRow } from '~/features/transactions/lib/paybackGroups';
+import { recurringTintColors } from '~/features/transactions/lib/recurringTint';
 import { usePressScale } from '~/hooks/usePressScale';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -87,6 +89,11 @@ interface TransactionItemProps {
   highlighted?: boolean;
   /** A friend's payback (a split's transfer): tinted so it reads as money back. */
   payback?: boolean;
+  /**
+   * Made by a recurring rule while Recurring settings tints those
+   * (`isRecurringRunTransaction`, worked out by the list): a lavender card.
+   */
+  recurring?: boolean;
   settings: TransactionDisplaySettings;
   getTrueHourlyRateForDate: (dateIso: string) => number;
 }
@@ -106,6 +113,7 @@ interface TransactionItemViewProps {
   reorderHandle: boolean;
   highlighted: boolean;
   payback: boolean;
+  recurring: boolean;
   settings: TransactionDisplaySettings;
   getTrueHourlyRateForDate: (dateIso: string) => number;
 }
@@ -643,10 +651,12 @@ function TransactionItemView({
   reorderHandle,
   highlighted,
   payback,
+  recurring,
   settings,
   getTrueHourlyRateForDate,
 }: TransactionItemViewProps) {
   const themeColors = useThemeColors();
+  const resolvedTheme = useResolvedTheme();
 
   // Flash a brief tint over the row when asked (e.g. just after it was created),
   // then fade back to normal. Driven on the UI thread so it completes even if
@@ -675,6 +685,13 @@ function TransactionItemView({
     ? Math.max(0, splitsSummary.count - splitsSummary.paidCount)
     : 0;
   const hasUnpaidSplits = unpaidSplitsCount > 0;
+  // Made by a recurring rule: a soft lavender card, unless the row carries a
+  // stronger state (friends owe, a payback). Off while selecting, where it
+  // could pass for a selected row on a lavender-like theme colour.
+  const recurringColors =
+    recurring && !hasUnpaidSplits && !payback && !selectionMode
+      ? recurringTintColors(themeColors.lavender, resolvedTheme)
+      : null;
   const accentColor = payback
     ? themeColors.success
     : isTransfer
@@ -740,7 +757,17 @@ function TransactionItemView({
                 hideAccent ? 'pl-3.5' : 'pl-0',
               ),
         )}
+        // The lavender edge of a recurring-rule entry (its fill is drawn below).
+        style={recurringColors ? { borderColor: recurringColors.edge } : undefined}
       >
+        {/* Recurring-rule entry: lavender laid over the card, behind the content */}
+        {recurringColors ? (
+          <View
+            pointerEvents="none"
+            style={[StyleSheet.absoluteFill, { backgroundColor: recurringColors.fill }]}
+          />
+        ) : null}
+
         {/* Post-create highlight flash — tint behind the row content, fades out */}
         <Animated.View
           pointerEvents="none"
@@ -800,6 +827,7 @@ function AnimatedTransactionItem({
   reorderHandle,
   highlighted,
   payback,
+  recurring,
   settings,
   getTrueHourlyRateForDate,
 }: TransactionItemViewProps) {
@@ -830,6 +858,7 @@ function AnimatedTransactionItem({
         reorderHandle={reorderHandle}
         highlighted={highlighted}
         payback={payback}
+        recurring={recurring}
         settings={settings}
         getTrueHourlyRateForDate={getTrueHourlyRateForDate}
       />
@@ -850,6 +879,7 @@ function StaticTransactionItem({
   reorderHandle,
   highlighted,
   payback,
+  recurring,
   settings,
   getTrueHourlyRateForDate,
 }: TransactionItemViewProps) {
@@ -879,6 +909,7 @@ function StaticTransactionItem({
         reorderHandle={reorderHandle}
         highlighted={highlighted}
         payback={payback}
+        recurring={recurring}
         settings={settings}
         getTrueHourlyRateForDate={getTrueHourlyRateForDate}
       />
@@ -902,6 +933,7 @@ function TransactionItemComponent({
   reorderHandle = false,
   highlighted = false,
   payback = false,
+  recurring = false,
   settings,
   getTrueHourlyRateForDate,
 }: TransactionItemProps) {
@@ -949,6 +981,7 @@ function TransactionItemComponent({
         reorderHandle={reorderHandle}
         highlighted={highlighted}
         payback={payback}
+        recurring={recurring}
         settings={settings}
         getTrueHourlyRateForDate={getTrueHourlyRateForDate}
       />
@@ -969,6 +1002,7 @@ function TransactionItemComponent({
       reorderHandle={reorderHandle}
       highlighted={highlighted}
       payback={payback}
+      recurring={recurring}
       settings={settings}
       getTrueHourlyRateForDate={getTrueHourlyRateForDate}
     />
@@ -1028,6 +1062,7 @@ export const TransactionItem = memo(
     prev.reorderHandle === next.reorderHandle &&
     prev.highlighted === next.highlighted &&
     prev.payback === next.payback &&
+    prev.recurring === next.recurring &&
     prev.settings.currencySymbol === next.settings.currencySymbol &&
     prev.settings.displayMode === next.settings.displayMode &&
     prev.settings.workdayDisplayEnabled === next.settings.workdayDisplayEnabled &&

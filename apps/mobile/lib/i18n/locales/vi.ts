@@ -1873,6 +1873,10 @@ const vi = {
     week_strip_label: '7 ngày tới',
     this_month: 'Tháng này',
     paused_section: 'Tạm dừng',
+    settings_title: 'Cài đặt định kỳ',
+    highlight_label: 'Tô màu mục định kỳ',
+    highlight_hint:
+      'Các mục do quy tắc định kỳ thêm sẽ có nền oải hương nhạt trong danh sách giao dịch, để bạn phân biệt với các mục tự nhập.',
     overdue: 'Quá hạn',
     show_all_days: 'Tất cả các ngày',
     day_due_count: '{{count}} đến hạn',

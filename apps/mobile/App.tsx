@@ -153,6 +153,7 @@ import {
   QuickEntrySettingsScreen,
   ReceiptsScreen,
   RecurringScreen,
+  RecurringSettingsScreen,
   SettingsStack,
   ShareAndEarnScreen,
   WageCalculatorFlowScreen,
@@ -1202,6 +1203,11 @@ function MainShellScreen({
     requestOpenTab('settings');
     requestOpenSettingsScreen('ReimbursementSettings');
   }, []);
+  // Its own root route (not the Settings tab's stack), so Back returns to the tab.
+  const openRecurringSettings = useCallback(
+    () => navigation.navigate('SettingsRecurringSettings'),
+    [navigation],
+  );
   const openReceiptSettings = useCallback(() => {
     requestOpenTab('settings');
     requestOpenSettingsScreen('ReceiptSettings');
@@ -1228,7 +1234,12 @@ function MainShellScreen({
   );
   const addInstalmentPlan = useAddInstalmentPlan(navigation);
 
-  const showAddFab = showsTransactionFab(activeTab, navTabs);
+  // The Recurring page has its own + (a new rule) in the same corner, so the
+  // shell's steps aside while it is on screen: as a tab, or pushed in Settings.
+  const recurringOnScreen =
+    activeTab === 'recurring' ||
+    (activeTab === 'settings' && settingsCurrentScreen === 'Recurring');
+  const showAddFab = showsTransactionFab(activeTab, navTabs) && !recurringOnScreen;
 
   const shouldHideBottomNav =
     (activeTab === 'calendar' && isCalendarSelectionMode) ||
@@ -1420,7 +1431,10 @@ function MainShellScreen({
             active={activeTab === 'recurring'}
             shouldPreload={preloadedTabs.has('recurring')}
           >
-            <MemoRecurringScreen onOpenEditor={openRecurringEditor} />
+            <MemoRecurringScreen
+              onOpenEditor={openRecurringEditor}
+              onOpenSettings={openRecurringSettings}
+            />
           </MountedTab>
         ) : null}
         {hostsTab('instalments') ? (
@@ -2543,9 +2557,16 @@ function SettingsRecurringRouteScreen({ navigation }: RootStackRouteProps<'Setti
         }
         navigation.navigate('RecurringEditor');
       }}
+      onOpenSettings={() => navigation.navigate('SettingsRecurringSettings')}
       useNativeBackGesture
     />
   );
+}
+
+function SettingsRecurringSettingsRouteScreen({
+  navigation,
+}: RootStackRouteProps<'SettingsRecurringSettings'>) {
+  return <RecurringSettingsScreen onBack={() => navigation.goBack()} />;
 }
 
 function SettingsHourlyValueRouteScreen({
@@ -3230,6 +3251,10 @@ function AppContent() {
             <RootStack.Screen name="CategoryEditor" component={CategoryEditorRouteScreen} />
             <RootStack.Screen name="SettingsAccounts" component={SettingsAccountsRouteScreen} />
             <RootStack.Screen name="SettingsRecurring" component={SettingsRecurringRouteScreen} />
+            <RootStack.Screen
+              name="SettingsRecurringSettings"
+              component={SettingsRecurringSettingsRouteScreen}
+            />
             <RootStack.Screen
               name="SettingsInstalments"
               component={SettingsInstalmentsRouteScreen}

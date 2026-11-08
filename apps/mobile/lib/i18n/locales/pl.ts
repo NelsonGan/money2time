@@ -1893,6 +1893,10 @@ const pl = {
     week_strip_label: 'Następne 7 dni',
     this_month: 'W tym miesiącu',
     paused_section: 'Wstrzymane',
+    settings_title: 'Ustawienia cyklicznych',
+    highlight_label: 'Wyróżniaj wpisy cykliczne',
+    highlight_hint:
+      'Wpisy dodane przez reguły cykliczne mają w listach transakcji delikatne lawendowe tło, więc odróżnisz je od tych wpisanych ręcznie.',
     overdue: 'Zaległe',
     show_all_days: 'Wszystkie dni',
     day_due_count: '{{count}} do zapłaty',

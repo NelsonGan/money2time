@@ -1905,6 +1905,10 @@ const nl = {
     week_strip_label: 'Komende 7 dagen',
     this_month: 'Deze maand',
     paused_section: 'Gepauzeerd',
+    settings_title: 'Instellingen terugkerend',
+    highlight_label: 'Terugkerende items kleuren',
+    highlight_hint:
+      'Items die je terugkerende regels toevoegen krijgen een zachte lavendelkleurige achtergrond in je transactielijsten, zodat je ze onderscheidt van wat je zelf invoerde.',
     overdue: 'Verlopen',
     show_all_days: 'Alle dagen',
     day_due_count: '{{count}} vervallen',

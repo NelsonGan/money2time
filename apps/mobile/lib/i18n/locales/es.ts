@@ -1895,6 +1895,10 @@ const es = {
     week_strip_label: 'Próximos 7 días',
     this_month: 'Este mes',
     paused_section: 'Pausados',
+    settings_title: 'Ajustes de recurrentes',
+    highlight_label: 'Colorear entradas recurrentes',
+    highlight_hint:
+      'Las entradas que añaden tus reglas recurrentes tienen un suave fondo lavanda en tus listas de transacciones, para distinguirlas de las que escribiste tú.',
     overdue: 'Vencido',
     show_all_days: 'Todos los días',
     day_due_count: '{{count}} vencen',

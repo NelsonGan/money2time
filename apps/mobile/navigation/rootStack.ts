@@ -88,6 +88,7 @@ export type RootStackParamList = {
   InsightsDrilldown: InsightsDrilldownPayload;
   RecurringEditor: { ruleId?: string } | undefined;
   SettingsRecurring: undefined;
+  SettingsRecurringSettings: undefined;
   SettingsInstalments: undefined;
   InstalmentPlan: { planId: string };
   SettingsAccounts: undefined;

@@ -1905,6 +1905,10 @@ const fr = {
     week_strip_label: '7 prochains jours',
     this_month: 'Ce mois-ci',
     paused_section: 'En pause',
+    settings_title: 'Réglages des récurrences',
+    highlight_label: 'Teinter les entrées récurrentes',
+    highlight_hint:
+      'Les entrées ajoutées par tes règles récurrentes ont un léger fond lavande dans tes listes de transactions, pour les distinguer de celles que tu as saisies.',
     overdue: 'En retard',
     show_all_days: 'Tous les jours',
     day_due_count: '{{count}} à échéance',
