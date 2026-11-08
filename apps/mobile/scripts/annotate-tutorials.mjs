@@ -1,7 +1,7 @@
 // Turns raw simulator captures into the annotated tutorial art under
 // `assets/tutorials/`.
 //
-//   <raw capture>.png  +  marker spec  ->  assets/tutorials/<name>.png
+//   <raw capture>.png  +  marker spec  ->  assets/tutorials/<name>.webp
 //
 // The marker spec is `scripts/data/tutorial-shots.json`: one entry per image,
 // naming the raw capture and the red marks to draw on it. Marks are stored in
@@ -12,7 +12,7 @@
 //
 // Raw captures are deliberately NOT committed: at full device resolution they
 // are ~1MB each and there are well over a hundred. The committed artefact is
-// the annotated, downscaled PNG plus this spec, which is enough to redraw the
+// the annotated, downscaled WebP plus this spec, which is enough to redraw the
 // same marks over a fresh capture.
 //
 // A `source` of `RAW/<file>` resolves against `TUTORIAL_RAW_DIR` (default
@@ -37,7 +37,7 @@ import { fileURLToPath } from 'node:url';
 
 import Jimp from 'jimp-compact';
 
-import { encodeIndexedPng } from './lib/pngQuantize.mjs';
+import { encodeScreenshotWebp } from './lib/screenshotWebp.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SPEC_PATH = path.resolve(
@@ -48,14 +48,10 @@ const OUT_DIR = path.resolve(ROOT, process.env.TUTORIAL_OUT_DIR ?? 'assets/tutor
 /** Where `RAW/<file>` sources are looked up. Not committed, see the header. */
 const RAW_DIR = path.resolve(ROOT, process.env.TUTORIAL_RAW_DIR ?? '.tutorial-raw');
 
-/**
- * Palette size for the output. A screenshot of a flat UI quantizes almost
- * losslessly, and true-colour would be ~3.5x the bytes across 140-odd frames.
- * The whole set rides the native binary (it is deliberately kept out of
- * `expo.updates.assetPatternsToBeBundled` so it does not eat the 1000-asset OTA
- * cap), so those bytes are app download size.
- */
-const PALETTE_COLORS = 256;
+// The output is lossy WebP (scripts/lib/screenshotWebp.mjs). The whole set
+// rides the native binary (it is deliberately kept out of
+// `expo.updates.assetPatternsToBeBundled` so it does not eat the 1000-asset OTA
+// cap), so those bytes are app download size.
 
 /** Marker red. Bright enough to survive the downscale on a dark screenshot. */
 const RED = 0xff2f3aff;
@@ -199,8 +195,8 @@ async function annotate(id, entry) {
   }
 
   await fs.mkdir(OUT_DIR, { recursive: true });
-  const encoded = encodeIndexedPng(image, PALETTE_COLORS);
-  await fs.writeFile(path.join(OUT_DIR, `${id}.png`), encoded);
+  const encoded = await encodeScreenshotWebp(image.bitmap.data, { width, height, channels: 4 });
+  await fs.writeFile(path.join(OUT_DIR, `${id}.webp`), encoded);
   return { id, width, height, marks: (entry.marks ?? []).length, bytes: encoded.length };
 }
 

@@ -53,8 +53,6 @@ yarn-error.*
 *.db-wal
 *.sqlite
 *.sqlite-*
-# bundled read-only reference DB (built by apps/mobile/scripts/build-cities-db.mjs)
-!/apps/mobile/assets/db/cities.db
 *.mmbak
 skills-lock.json
 # Shared agent workflows are versioned; local agent state stays private.

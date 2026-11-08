@@ -57,7 +57,7 @@ describe('tutorial catalog', () => {
     for (const tutorial of TUTORIALS) {
       for (const step of tutorial.steps) {
         if (step.image === null) continue;
-        expect(fs.existsSync(path.join(ASSET_DIR, `${step.image}.png`))).toBe(true);
+        expect(fs.existsSync(path.join(ASSET_DIR, `${step.image}.webp`))).toBe(true);
       }
     }
   });
@@ -80,8 +80,8 @@ describe('tutorial catalog', () => {
     );
     const onDisk = fs
       .readdirSync(ASSET_DIR)
-      .filter((file) => file.endsWith('.png'))
-      .map((file) => file.replace(/\.png$/, ''));
+      .filter((file) => file.endsWith('.webp'))
+      .map((file) => file.replace(/\.webp$/, ''));
     // An orphan is dead weight in the binary, which the tutorial art is big
     // enough for to matter.
     expect(onDisk.filter((name) => !referenced.has(name))).toEqual([]);

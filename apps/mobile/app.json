@@ -84,6 +84,7 @@
       "./plugins/withMoney2TimeShareScan",
       "./plugins/withMoney2TimePaymentCapture",
       "./plugins/withXcode27Compat",
+      "./plugins/withStripFrameworkSymbols",
       [
         "./plugins/withAndroidAlternateIcons",
         [

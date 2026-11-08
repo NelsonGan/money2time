@@ -25,8 +25,8 @@ it('syncs tutorials with shared plan limits and their actual images to the websi
     const catalog = readFileSync(path.join(web, 'src/lib/tutorials.generated.ts'), 'utf8');
     expect(catalog).toContain(`The free plan includes ${PRO_LIMITS.FREE_MAX_ACCOUNTS} accounts.`);
     expect(catalog).toContain('Add the calendar');
-    expect(readFileSync(path.join(web, 'media/tutorials/widgets-4.png'))).toEqual(
-      readFileSync(path.join(root, 'assets/tutorials/widgets-4.png')),
+    expect(readFileSync(path.join(web, 'media/tutorials/widgets-4.webp'))).toEqual(
+      readFileSync(path.join(root, 'assets/tutorials/widgets-4.webp')),
     );
     expect(readFileSync(path.join(web, 'media/keep.txt'), 'utf8')).toBe(
       'outside the generated tutorial directory',

@@ -21,8 +21,9 @@
 // same complete tile (see cutOutFromBackdrop), so the identity transform lands
 // it back in exactly the same place.
 //
-// Re-run after the pose list or the framing changes:
-//   node scripts/generate-app-icons.mjs
+// Re-run after the pose list or the framing changes, then reduce the iOS
+// tiles to 256 colours (app size, see README "App size"):
+//   node scripts/generate-app-icons.mjs && npm run optimize:assets
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
