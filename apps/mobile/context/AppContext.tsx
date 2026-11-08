@@ -80,6 +80,7 @@ import {
   applyUnpaidMerge,
   consolidateOwedRows,
   cutPartPayment,
+  frozenAccountRate,
   type PaybackTransferAmounts,
   paybackTransferAmounts,
   planShareHandover,
@@ -1013,9 +1014,8 @@ function splitRestoreRates(
       accountRate = transfer.amount / undone.share;
     } else if (accountCurrency) {
       accountRate =
-        accountCurrency === tx.reportingCurrency && tx.fxRate != null
-          ? tx.fxRate
-          : convert(1, tx.currency, accountCurrency, rateTable).rateUsed;
+        frozenAccountRate(tx, accountCurrency) ??
+        convert(1, tx.currency, accountCurrency, rateTable).rateUsed;
     }
   }
   const reportingRate =
@@ -3362,11 +3362,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               canChargeTransferFee(nextAccount)
             ) {
               follow.accountId = nextAccountId;
-              if (nextAccount && nextAccount.currency !== fee.currency) {
+              // The fee's charge is in its current account's currency, which
+              // differs from the currency it was entered in once that account
+              // changed currency (`transferFeeAccountAmount`).
+              const feeCurrency =
+                (fee.accountId ? accountCurrencyOf(fee.accountId) : null) ?? fee.currency;
+              if (
+                nextAccount &&
+                (nextAccount.currency !== feeCurrency || nextAccount.currency !== fee.currency)
+              ) {
                 // The same charge in the new account's currency, not the same
                 // number in another currency.
-                const feeCurrency =
-                  (fee.accountId ? accountCurrencyOf(fee.accountId) : null) ?? fee.currency;
                 follow.currency = nextAccount.currency;
                 follow.amount = convert(
                   transferFeeAccountAmount(fee),

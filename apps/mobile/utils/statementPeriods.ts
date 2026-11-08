@@ -111,6 +111,7 @@ export function getCreditCycleDates(
   now: Date,
   hasUnpaidStatement: boolean,
   dueDaysAfterStatement: number | null = null,
+  hasUnpaidEarlierStatement = false,
 ): CreditCycleDates {
   if (statementDay == null) {
     return {
@@ -119,14 +120,9 @@ export function getCreditCycleDates(
     };
   }
   const lastStatement = getCurrentStatementCycleStart(statementDay, now);
-  if (hasUnpaidStatement && dueDaysAfterStatement != null) {
-    // A grace period longer than a cycle can leave the statement before the
-    // latest one still to pay, and its bill falls due first.
-    const previousStatement = statementPeriodFromAnchor(lastStatement, statementDay, -1).start;
-    const previousDue = addCalendarDays(previousStatement, dueDaysAfterStatement);
-    if (previousDue.getTime() >= startOfDay(now).getTime()) {
-      return { statementDate: previousStatement, dueDate: previousDue };
-    }
+  if (hasUnpaidEarlierStatement && dueDaysAfterStatement != null) {
+    const earlier = earlierStatementStillDue(statementDay, dueDaysAfterStatement, now);
+    if (earlier) return earlier;
   }
   const statementDate = hasUnpaidStatement
     ? lastStatement
@@ -139,23 +135,43 @@ export function getCreditCycleDates(
 }
 
 /**
- * The first bill due on or after today under a days-after rule: the earliest
- * of the statement before the latest one (a grace period longer than a cycle
- * leaves it still to pay), the latest statement and the next one. The account
- * editor previews it under the field.
+ * The statement before the latest one and its due date, when a days-after
+ * rule's grace period is longer than a cycle and that bill is still ahead of
+ * today. It falls due before the latest statement's, so a card that still owes
+ * on it shows it first. Null when its date has passed (always, for a grace
+ * period under four weeks).
+ */
+export function earlierStatementStillDue(
+  statementDay: number,
+  dueDaysAfterStatement: number,
+  now: Date,
+): { statementDate: Date; dueDate: Date } | null {
+  const lastStatement = getCurrentStatementCycleStart(statementDay, now);
+  const statementDate = statementPeriodFromAnchor(lastStatement, statementDay, -1).start;
+  const dueDate = addCalendarDays(statementDate, dueDaysAfterStatement);
+  return dueDate.getTime() >= startOfDay(now).getTime() ? { statementDate, dueDate } : null;
+}
+
+/**
+ * The first bill due on or after today under a days-after rule: the latest
+ * statement's, or the next statement's once that one's due date has passed.
+ * With `hasUnpaidEarlierStatement` (the card still owes on the statement
+ * before the latest), that earlier bill's date while it is still ahead, as
+ * the card's chips show it. The account editor previews it under the field.
  */
 export function nextDueDateAfterStatement(
   statementDay: number,
   dueDaysAfterStatement: number,
   now: Date,
+  hasUnpaidEarlierStatement = false,
 ): Date {
-  const today = startOfDay(now);
-  const lastStatement = getCurrentStatementCycleStart(statementDay, now);
-  for (const offset of [-1, 0]) {
-    const statement = statementPeriodFromAnchor(lastStatement, statementDay, offset).start;
-    const due = addCalendarDays(statement, dueDaysAfterStatement);
-    if (due.getTime() >= today.getTime()) return due;
+  if (hasUnpaidEarlierStatement) {
+    const earlier = earlierStatementStillDue(statementDay, dueDaysAfterStatement, now);
+    if (earlier) return earlier.dueDate;
   }
+  const lastStatement = getCurrentStatementCycleStart(statementDay, now);
+  const lastDue = addCalendarDays(lastStatement, dueDaysAfterStatement);
+  if (lastDue.getTime() >= startOfDay(now).getTime()) return lastDue;
   const nextStatement = statementPeriodFromAnchor(lastStatement, statementDay, 0).end;
   return addCalendarDays(nextStatement, dueDaysAfterStatement);
 }
@@ -237,6 +253,11 @@ export interface CreditSummary {
   payable: number;
   /** Spent since the last statement, not billed yet. */
   outstanding: number;
+  /**
+   * The part of `payable` billed before the latest statement: what is still
+   * owed on an earlier statement once payments have settled the oldest first.
+   */
+  earlierPayable: number;
 }
 
 interface CreditDeltaTransaction {
@@ -298,21 +319,31 @@ export function computeCreditCycleSummary(
   now: Date,
 ): CreditSummary {
   if (!account.creditStatementDay) {
-    return { outstanding: Math.max(0, balance), payable: 0 };
+    return { outstanding: Math.max(0, balance), payable: 0, earlierPayable: 0 };
   }
-  const currentCycleStartIso = getCurrentStatementCycleStart(
+  const currentCycleStart = getCurrentStatementCycleStart(account.creditStatementDay, now);
+  const currentCycleStartIso = currentCycleStart.toISOString();
+  const previousCycleStartIso = statementPeriodFromAnchor(
+    currentCycleStart,
     account.creditStatementDay,
-    now,
-  ).toISOString();
+    -1,
+  ).start.toISOString();
   let cycleDelta = 0;
+  let previousCycleDelta = 0;
   txns.forEach((tx) => {
-    if (tx.date < currentCycleStartIso) return;
+    if (tx.date < previousCycleStartIso) return;
     // Credit-card payments should settle statement payable first.
     if (isCreditPaymentTransaction(tx, account.id)) return;
-    cycleDelta += creditDeltaForAccountTransaction(tx, account.id);
+    const delta = creditDeltaForAccountTransaction(tx, account.id);
+    if (tx.date < currentCycleStartIso) previousCycleDelta += delta;
+    else cycleDelta += delta;
   });
   const outstandingFromCycle = Math.max(0, cycleDelta);
   const cappedBalance = Math.max(0, balance);
   const outstanding = Math.min(outstandingFromCycle, cappedBalance);
-  return { outstanding, payable: Math.max(0, cappedBalance - outstanding) };
+  const payable = Math.max(0, cappedBalance - outstanding);
+  // Payments settle the oldest bill first, so whatever is owed beyond the
+  // latest statement's own charges is left from an earlier one.
+  const earlierPayable = Math.max(0, payable - Math.max(0, previousCycleDelta));
+  return { outstanding, payable, earlierPayable };
 }

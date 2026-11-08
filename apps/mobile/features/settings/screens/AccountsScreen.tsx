@@ -718,7 +718,9 @@ function AccountEditorSheet({
     fxCurrencies,
     rateTable,
     recurringRules,
+    getTransactionsByAccount,
   } = useApp();
+  const { accountBalances } = useTransactions();
   // Account currency choices = the main currency + the user's subcurrencies
   // (added ones plus any already used by an account).
   const accountCurrencyCodes = useMemo(() => {
@@ -1264,10 +1266,29 @@ function AccountEditorSheet({
   // Days after a statement need a statement day to count from.
   const dueDaysAfterNeedsStatement =
     usesDueDaysAfter && hasValidDueDaysAfter && normalizedStatementDay == null;
+  // Whether this card still owes on the statement before the latest one, read
+  // with the statement day as typed, so the preview matches the card's chips.
+  const hasUnpaidEarlierStatement = useMemo(() => {
+    if (!account || account.type !== 'credit' || normalizedStatementDay == null) return false;
+    const balance =
+      accountBalances.find((b) => b.accountId === account.id)?.balance ?? account.startingBalance;
+    const summary = computeCreditCycleSummary(
+      { id: account.id, creditStatementDay: normalizedStatementDay },
+      getTransactionsByAccount(account.id),
+      balance,
+      new Date(),
+    );
+    return normalizeMoneyAmount(summary.earlierPayable) > 0;
+  }, [account, accountBalances, getTransactionsByAccount, normalizedStatementDay]);
   const nextDueDatePreview =
     usesDueDaysAfter && hasValidDueDaysAfter && normalizedStatementDay != null
       ? formatStatementDateLabel(
-          nextDueDateAfterStatement(normalizedStatementDay, parsedDueDaysAfter, new Date()),
+          nextDueDateAfterStatement(
+            normalizedStatementDay,
+            parsedDueDaysAfter,
+            new Date(),
+            hasUnpaidEarlierStatement,
+          ),
           appSettings.locale ?? I18n.locale ?? 'en',
         )
       : null;

@@ -9,7 +9,10 @@
  */
 
 import { buildPaybackTransferNote } from '~/features/transactions/lib/settleUp';
-import { paybackTransferAmounts } from '~/features/transactions/lib/splitPayments';
+import {
+  frozenAccountRate,
+  paybackTransferAmounts,
+} from '~/features/transactions/lib/splitPayments';
 import type { RateTable, TransactionSplit, TransactionWithRelations } from '~/types';
 import { normalizeMoneyAmount } from '~/utils/formatters';
 import { compareTransactionsByDateDesc } from '~/utils/transactionSorting';
@@ -92,18 +95,15 @@ function paybackRowAmount(
   rateTable: RateTable,
 ): { amount: number; currency: string } {
   const accountCurrency = (bill.accountId ? currencyOf(bill.accountId) : null) || bill.currency;
-  if (
-    bill.amount === 0 &&
-    bill.accountAmount != null &&
-    bill.currency !== accountCurrency &&
-    accountCurrency === bill.reportingCurrency &&
-    bill.fxRate != null
-  ) {
-    // Every share is paid back, so the bill has no amount left to read its
-    // account's rate from. Its frozen rate keeps the rows where they were
-    // instead of moving with today's rates (the same rate undoing a payback
-    // restores the bill at).
-    return { amount: normalizeMoneyAmount(share * bill.fxRate), currency: accountCurrency };
+  // Every share paid back leaves the bill at 0, with no amount to read its
+  // account's rate from. Its frozen rate keeps the rows where they were instead
+  // of moving with today's rates (the rate undoing a payback restores it at).
+  const frozenRate =
+    bill.amount === 0 && bill.accountAmount != null && bill.currency !== accountCurrency
+      ? frozenAccountRate(bill, accountCurrency)
+      : null;
+  if (frozenRate != null) {
+    return { amount: normalizeMoneyAmount(share * frozenRate), currency: accountCurrency };
   }
   const { amount, currency } = paybackTransferAmounts({
     share,

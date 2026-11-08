@@ -764,9 +764,6 @@ export const ActivityTransactionList = memo(function ActivityTransactionListImpl
       if (billId) navigation?.navigate('SettleUpTransaction', { transactionId: billId });
     };
   }, [navigation, onTransactionPress, paybackIndex]);
-  // A payback row is not stored, so it cannot be selected: its rows get no
-  // long press at all (not even the haptic), below.
-  const handleTransactionLongPress = onTransactionLongPress;
 
   const keyExtractor = useCallback((item: ActivityRow) => item.id, []);
   const getItemType = useCallback(
@@ -838,7 +835,11 @@ export const ActivityTransactionList = memo(function ActivityTransactionListImpl
                   key={`${key}:${remountKey(tx.id)}`}
                   transaction={tx}
                   onPressTransaction={handleTransactionPress}
-                  onLongPressTransaction={isPaybackRow(tx) ? undefined : handleTransactionLongPress}
+                  onLongPressTransaction={
+                    // A payback row is not stored, so it cannot be selected: no long
+                    // press at all (not even the haptic).
+                    isPaybackRow(tx) ? undefined : onTransactionLongPress
+                  }
                   onPressSplitBadge={onTransactionSplitBadgePress}
                   selected={selectedTransactionIdSet.has(tx.id)}
                   selectionMode={selectionMode}
@@ -894,7 +895,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionListImpl
           recurring={isRecurringRow(item.transaction)}
           onPressTransaction={handleTransactionPress}
           onLongPressTransaction={
-            isPaybackRow(item.transaction) ? undefined : handleTransactionLongPress
+            isPaybackRow(item.transaction) ? undefined : onTransactionLongPress
           }
           onPressSplitBadge={onTransactionSplitBadgePress}
           selected={selectedTransactionIdSet.has(item.transaction.id)}
@@ -917,7 +918,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionListImpl
       highlightedId,
       isTimeMode,
       measureDayCell,
-      handleTransactionLongPress,
+      onTransactionLongPress,
       handleTransactionPress,
       isRecurringRow,
       onToggleDaySelection,

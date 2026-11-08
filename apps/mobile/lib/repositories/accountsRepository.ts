@@ -200,14 +200,15 @@ class AccountsRepository {
       )
       .run();
 
-    // A transfer's fee goes with it, even when the fee was charged to another
-    // account than the one being deleted (`features/transactions/lib/transferFee.ts`).
+    // A transfer to or from this account takes its fee with it, even when the
+    // fee was charged to the transfer's other account
+    // (`features/transactions/lib/transferFee.ts`).
     db.update(transactionsTable)
       .set({ deletedAt: now, updatedAt: now })
       .where(
         and(
           isNull(transactionsTable.deletedAt),
-          sql`${transactionsTable.feeOfId} IN (SELECT ${transactionsTable.id} FROM ${transactionsTable} WHERE ${transactionsTable.deletedAt} = ${now} AND (${transactionsTable.fromAccountId} = ${id} OR ${transactionsTable.toAccountId} = ${id}))`,
+          sql`${transactionsTable.feeOfId} IN (SELECT ${transactionsTable.id} FROM ${transactionsTable} WHERE ${transactionsTable.fromAccountId} = ${id} OR ${transactionsTable.toAccountId} = ${id})`,
         ),
       )
       .run();
