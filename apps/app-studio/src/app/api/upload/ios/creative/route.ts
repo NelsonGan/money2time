@@ -2,11 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { readCreativeRequest } from '@/data/creativeRequest';
 import { iosReady } from '../../_lib';
 import { resumeIOSCreative, uploadIOSCreative, validateCreativeResume, validateCreativeUpload } from '@/data/storeCreativeUpload.mjs';
+import { localOnly } from '@/app/api/_guard';
 
 export const runtime = 'nodejs';
 export const maxDuration = 180;
 
 export async function POST(request: NextRequest) {
+  const refused = localOnly(request);
+  if (refused) return refused;
   const origin = request.headers.get('origin');
   if (origin && origin !== request.nextUrl.origin) {
     return NextResponse.json({ error: 'Upload from the Studio on this server.' }, { status: 403 });

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { androidSessions, androidEditCommit, androidEditDelete } from '../../_lib';
+import { localOnly } from '@/app/api/_guard';
 
 /**
  * Commits the edit, which is what makes everything uploaded during the session
@@ -7,6 +8,8 @@ import { androidSessions, androidEditCommit, androidEditDelete } from '../../_li
  * than leaving it open.
  */
 export async function POST(req: NextRequest) {
+  const refused = localOnly(req);
+  if (refused) return refused;
   const { sessionId } = await req.json() as { sessionId: string };
 
   const session = androidSessions.get(sessionId);

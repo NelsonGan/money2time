@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { iosReady, uploadIOSDescription } from '../../_lib';
 import { runWithConcurrency } from '@/utils/concurrency';
+import { localOnly } from '@/app/api/_guard';
 
 interface DescriptionPayload {
   name?: string;
@@ -22,6 +23,8 @@ interface DescriptionPayload {
 const CONCURRENCY = 4;
 
 export async function POST(req: NextRequest) {
+  const refused = localOnly(req);
+  if (refused) return refused;
   const ready = await iosReady();
   if (!ready.ok) return NextResponse.json({ error: ready.why }, { status: 503 });
 

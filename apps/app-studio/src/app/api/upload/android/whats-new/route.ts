@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { androidReady, androidTracks, uploadAndroidReleaseNotes } from '../../_lib';
+import { localOnly } from '@/app/api/_guard';
 
 /**
  * Which tracks the release note could go on.
@@ -7,7 +8,9 @@ import { androidReady, androidTracks, uploadAndroidReleaseNotes } from '../../_l
  * Only tracks that already have a release: a release note belongs to a
  * release, so an empty track has nowhere to put one.
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const refused = localOnly(request);
+  if (refused) return refused;
   const ready = await androidReady();
   if (!ready.ok) return NextResponse.json({ error: ready.why }, { status: 503 });
 
@@ -21,6 +24,8 @@ export async function GET() {
 
 /** Set the release note on every release in one track, in every locale. */
 export async function POST(req: NextRequest) {
+  const refused = localOnly(req);
+  if (refused) return refused;
   const ready = await androidReady();
   if (!ready.ok) return NextResponse.json({ error: ready.why }, { status: 503 });
 

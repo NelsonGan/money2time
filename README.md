@@ -3575,7 +3575,8 @@ per client IP per minute on `/scan` and `/notifications`, and answer
 receipts, 3 at a time, so a real user never gets near it. A scan body larger
 than the 8 MB image cap is refused with `413` before it is read, and the
 `categories` and `accounts` lists that go into the prompt are cut to 200
-names of 60 characters each, as the notification route already does. Keep a
+names of up to 200 characters (the app matches the answer to a name exactly,
+so the length is generous; the notification route keeps 60). Keep a
 spend limit on the OpenRouter key and the Anthropic key as the last line.
 
 #### Config
@@ -5231,10 +5232,13 @@ npm run build    # the production build
 
 The API writes files, runs `asc` and `gplay` with this Mac's credentials and
 edits the live listings, so it answers only the Studio page itself.
-`npm run dev` binds to 127.0.0.1, and `src/middleware.ts` refuses any API
-request whose Host is not this machine (another device on the network, or a
-DNS-rebinding page), whose Origin is another site, or, for writes, that is not
-JSON. `stageLocale` and `stagingDir` accept only plain locale codes, folder
+`npm run dev` binds to 127.0.0.1, and every route calls `localOnly`
+(`src/app/api/_guard.ts`) first, which refuses a request whose Host is not this
+machine (another device on the network, or a DNS-rebinding page), whose Origin
+is another site, or, for writes, that is not JSON. It is not a middleware on
+purpose: Next copies a request body for a middleware and cuts the copy at 10 MB,
+and one locale's screenshots are bigger. `tests/api-guard.test.mjs` fails if a
+route skips it. `stageLocale` and `stagingDir` accept only plain locale codes, folder
 names and image file names, so a request cannot name a path outside
 `.upload-staging/`. Keep both when adding a route.
 

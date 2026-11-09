@@ -136,8 +136,10 @@ const RETRY_TEMPERATURE = 0.2;
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 // Room for the rest of a scan request (currency, mode, the two lists) beside the image.
 const MAX_EXTRA_BODY_BYTES = 256 * 1024;
-// Category and account names sent with a scan: at most this many, 60 characters each.
+// Category and account names sent with a scan: at most this many, and this long.
+// The app matches the model's answer to a name exactly, so the length is generous.
 const MAX_PROMPT_LIST = 200;
+const MAX_PROMPT_NAME = 200;
 
 const CORS_HEADERS: Record<string, string> = {
   'Access-Control-Allow-Origin': '*',
@@ -582,8 +584,8 @@ function validate(body: ScanRequest): string | null {
     return 'invalid_mode';
   }
   // Both lists go into the prompt, so bound them like the notification route.
-  body.categories = stringList(body.categories, MAX_PROMPT_LIST);
-  body.accounts = stringList(body.accounts, MAX_PROMPT_LIST);
+  body.categories = stringList(body.categories, MAX_PROMPT_LIST, MAX_PROMPT_NAME);
+  body.accounts = stringList(body.accounts, MAX_PROMPT_LIST, MAX_PROMPT_NAME);
   return null;
 }
 
