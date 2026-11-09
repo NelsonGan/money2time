@@ -158,7 +158,8 @@ builds and serves it as one Cloudflare Worker, every `next/*` import is a
 vinext shim, and webpack or Turbopack settings do nothing. Before relying on a
 Next.js feature, check `node_modules/vinext/README.md` (API coverage, _Known
 gaps_) and the `migrate-to-vinext` skill's `references/compatibility.md`. The
-README's Website section is the rest.
+`work-on-website` skill is the procedure (setup, previewing, checks, how it
+ships), and the README's Website section is the reference.
 
 - **A page is a page times thirty-two.** Copy lives in `messages/<locale>.json`,
   never in components; `node scripts/validate-messages.mjs` is the parity check.
@@ -184,7 +185,8 @@ deployed. Store uploads write to live listings through the `asc` and `gplay`
 CLIs, so never run one without the user asking, and never commit store
 credentials (`.env.local`, `.p8` or service-account JSON). The
 `update-whats-new` skill writes each release's What's New in
-`src/data/appDescriptions.ts`.
+`src/data/appDescriptions.ts`, and the `work-on-app-studio` skill covers the
+rest (running it, recapturing screenshots, scenes, exports and uploads).
 
 ## Skills
 
@@ -193,5 +195,11 @@ Codex reads shared copies in `.agents/skills/` (with their supporting
 references) and `.agents/commands/`, the commands exposed to Codex as
 `$source-command-cleanup` and `$source-command-create-pr` skills. When you
 change a Claude workflow, refresh its shared copy in the same change. Local
-`.agents/memory/` stays ignored. `seo-loop` and `migrate-to-vinext` are the
-website's; their paths are relative to `apps/web`.
+`.agents/memory/` stays ignored.
+
+Every app in this repository has its skills here, at the root. Start from the
+one for the app you are changing: `work-on-website` (with `seo-loop`,
+`migrate-to-vinext` and `sync-web-dashboard`) for `apps/web`,
+`work-on-app-studio` (with `update-whats-new`) for `apps/app-studio`, and the
+rest for the app in `apps/mobile`. A skill's paths are relative to its app
+unless it says otherwise.

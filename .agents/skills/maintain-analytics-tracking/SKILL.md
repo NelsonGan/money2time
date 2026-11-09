@@ -7,6 +7,8 @@ description: Keep the canonical Money2Time PostHog and Google Analytics tracking
 
 The [Analytics](../../../README.md#analytics) section of `README.md` is the **single source of truth** for tracking. Read its relevant tables before changing analytics or a tracked product flow. The integration notes explain setup; they must not become a second event inventory.
 
+Three things in this repository send to the same GA4 property and PostHog project (658608): the app (`apps/mobile`, most of the section), the website and Web Dashboard (`apps/web`, its own typed contract in `apps/web/src/lib/analytics.ts`, documented in the **Website and Web Dashboard analytics** subsection at the end of the Analytics section), and the receipt-scanner Worker (`$ai_generation`). Update the table for the producer you changed. The phone's Web Dashboard events (`WEB_DASHBOARD_*`) and the browser's `m2t_dashboard_*` events describe the same link from two sides; when one changes, check the other. The website's PostHog volume is a line in the event budget, so a new or more frequent website event updates that line too.
+
 For every product/code change, assess its analytics impact. If it changes an event name, payload, trigger, frequency, destination, paywall source, visible screen, person/super property, feature-use rule, daily cap, transaction milestone, provider configuration or external producer, update the affected tracking tables **in the same change**. No analytics impact means no artificial table edit. A change with stale tracking documentation is unfinished.
 
 ## Keep implementation and tables aligned
@@ -25,7 +27,7 @@ For every product/code change, assess its analytics impact. If it changes an eve
 
 ## Verify before completing the change
 
-Run:
+For a website change, run `npm run lint` and `npm run build` in `apps/web` and follow that subsection's verification list; the Jest table check below covers only the app. For an app change, run:
 
 ```bash
 cd apps/mobile && npm test -- --runInBand __tests__/services/analyticsTrackingPlan.test.ts __tests__/services/analyticsEvents.test.ts __tests__/services/analyticsNative.test.ts __tests__/services/errorReporting.test.ts __tests__/services/revenueCatRestore.test.ts __tests__/utils/firstTransactionSignal.test.ts

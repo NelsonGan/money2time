@@ -1,6 +1,6 @@
 ---
 name: seo-loop
-description: Run the SEO engineering loop for money2time.com — decide whether a keyword deserves a new page (CREATE/IMPROVE/REJECT) using Search Console data, audit the implementation across all 32 locales, pass the pre-deploy gate, verify the production HTML, then measure in GSC and decide KEEP/ITERATE/REVERT. Use whenever asked to add, change, or investigate an SEO page, target a keyword, write titles/meta/canonicals/hreflang/sitemap entries, work on locale or translation coverage, diagnose a traffic or ranking drop, or check whether a page is indexed correctly.
+description: Run the SEO engineering loop for money2time.com (the website in apps/web) — decide whether a keyword deserves a new page (CREATE/IMPROVE/REJECT) using Search Console data, audit the implementation across all 32 locales, pass the pre-deploy gate, verify the production HTML, then measure in GSC and decide KEEP/ITERATE/REVERT. Use whenever asked to add, change, or investigate an SEO page, target a keyword, write titles/meta/canonicals/hreflang/sitemap entries, work on locale or translation coverage, diagnose a traffic or ranking drop, or check whether a page is indexed correctly.
 ---
 
 # The SEO loop

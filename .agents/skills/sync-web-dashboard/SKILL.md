@@ -11,8 +11,9 @@ Export Database JSON (patched row by row afterwards), and the website in
 feature the app gains and the web does not learn makes the dashboard wrong
 or out of date. **A change is not finished until this skill has run on it.**
 
-Read the README's "Web-dashboard Worker" and "Website" sections, and
-AGENTS.md's "Working on the website", before changing anything on either side.
+Read the README's "Web-dashboard Worker" and "Website" sections, and the
+[work-on-website](../work-on-website/SKILL.md) skill (setup, checks and rules
+for `apps/web`), before changing anything on either side.
 Web paths below are relative to `apps/web`, app paths to `apps/mobile`.
 
 ## 1. Decide the impact

@@ -1,6 +1,6 @@
 ---
 name: migrate-to-vinext
-description: Migrates Next.js projects to vinext (Vite-based Next.js reimplementation). Load when asked to migrate, convert, or switch from Next.js to vinext. Handles compatibility scanning, package replacement, Vite config generation, ESM conversion, and deployment setup (Cloudflare Workers natively, other platforms via Nitro).
+description: Migrates Next.js projects to vinext (Vite-based Next.js reimplementation); in this repository apps/web already runs on vinext, so load it for its compatibility references when a website change relies on a Next.js feature. Load when asked to migrate, convert, or switch from Next.js to vinext. Handles compatibility scanning, package replacement, Vite config generation, ESM conversion, and deployment setup (Cloudflare Workers natively, other platforms via Nitro).
 ---
 
 # Migrate Next.js to vinext

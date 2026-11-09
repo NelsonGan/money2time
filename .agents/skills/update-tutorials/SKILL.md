@@ -163,7 +163,7 @@ npm run check && npm test
 
 Then in `apps/web` (after `npm ci`): `node scripts/upload-media.mjs` to publish the screenshots
 to its R2 bucket, then `npm run lint && npm run build && npm run typecheck`. The website change
-goes in the same PR.
+goes in the same PR ([work-on-website](../work-on-website/SKILL.md) has the rest).
 
 Never hand-edit `src/lib/tutorials.generated.ts` or `media/tutorials/` — this script owns them.
 

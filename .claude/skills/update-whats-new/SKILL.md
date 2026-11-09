@@ -10,6 +10,8 @@ The store note lives in App Studio, `apps/app-studio/src/data/appDescriptions.ts
 repository root unless a step `cd`s into `apps/app-studio`.
 That file is the single source for both stores. Uploading is a separate act (the
 Descriptions view, or `npm run upload:*`); this skill only writes the copy and opens the PR.
+For anything else in App Studio (running it, scenes, uploads) see
+[work-on-app-studio](../work-on-app-studio/SKILL.md).
 
 Two things about the shape of the change, both easy to get wrong:
 
@@ -50,7 +52,9 @@ the candidate set.
 ## 2. Keep only what a user would notice
 
 Drop version bumps, CI and tooling, docs and `CLAUDE.md`, refactors, analytics volume
-changes, test-only work, and internal cleanups. Judgment calls are real here: "Redraw
+changes, test-only work, and internal cleanups. Drop commits confined to `apps/web` or
+`apps/app-studio` as well: the website and the store assets are not in the app release
+(`git log -- apps/mobile apps/cloudflare` lists only what can be). Judgment calls are real here: "Redraw
 alternate app icon artwork" is not news if the previous note already announced alternate
 icons, and a fix nobody could have hit is not worth a line.
 

@@ -5,9 +5,14 @@ description: Design and build polished, on-brand UI for the money2time React Nat
 
 # Frontend design (money2time)
 
-This app is a local-first React Native (Expo SDK 54, RN 0.81, New Architecture) expense tracker. Its hook is reframing money as **time** at the user's hourly rate. UI must feel calm, premium, and trustworthy — it handles people's money.
+This app is a local-first React Native (Expo SDK 58, RN 0.88, New Architecture) expense tracker in `apps/mobile`. Its hook is reframing money as **time** at the user's hourly rate. UI must feel calm, premium, and trustworthy — it handles people's money.
 
-Read `CLAUDE.md` first for the architecture map. This skill is the design layer on top of it.
+Read the README's Architecture section first for the map. This skill is the design layer on top of it.
+
+**This skill is the app's UI.** The other visual surfaces in this repository follow their own stack, though they share the brand (the `rosewood` theme, the chick mascot, DM Sans on the web, Work Sans in the app):
+
+- money2time.com and the Web Dashboard (`apps/web`): Next.js-style React with Tailwind v4, no NativeWind. Its tokens in `apps/web/src/app/globals.css` port the app's `rosewood` theme, and the dashboard's editors are built after the app's own. See [work-on-website](../work-on-website/SKILL.md). A UI change in the app that the dashboard also shows (a list badge, a tint, an editor) needs the matching dashboard change; [sync-web-dashboard](../sync-web-dashboard/SKILL.md) decides.
+- Store screenshots and creatives (`apps/app-studio`): React scenes rasterized in the browser around real app captures. A redesigned screen makes those captures stale. See [work-on-app-studio](../work-on-app-studio/SKILL.md).
 
 ## Analytics impact
 
