@@ -57,7 +57,12 @@ describe('per-IP limits', () => {
         new Request('https://scanner.test/scan', {
           method: 'POST',
           headers: { 'cf-connecting-ip': '203.0.113.7' },
-          body: JSON.stringify({ appUserId: 'm2t_a', image: 'eA==', mime: 'image/png', currency: 'MYR' }),
+          body: JSON.stringify({
+            appUserId: 'm2t_a',
+            image: 'eA==',
+            mime: 'image/png',
+            currency: 'MYR',
+          }),
         }),
         { SCAN_LIMITER: blocked } as never,
         ctx,
