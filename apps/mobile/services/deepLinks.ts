@@ -103,7 +103,7 @@ export function handleMoney2TimeDeepLink(url: string, navigationRef: RootNavigat
     // Any app or page can open this URL, and voice and scan start the
     // microphone or camera at once, so nothing runs behind the app lock.
     runDeepLinkNavigation(navigationRef, null, () => {
-      void whenAppUnlocked().then(() => requestRunAddAction(action));
+      runAddActionWhenUnlocked(action);
     });
     void trackEvent(AnalyticsEvents.BACK_TAP_TRIGGERED, { action });
     return true;
@@ -246,6 +246,24 @@ function runDeepLinkNavigation(
         : routes,
     } as Parameters<typeof navigationRef.reset>[0]);
     afterReset?.();
+  });
+}
+
+// A Back Tap made while locked runs once the person unlocks, but only the
+// latest one, and only soon after: an unlock much later, for some other reason,
+// must not start the microphone or camera out of nowhere.
+const LOCKED_ADD_ACTION_TTL_MS = 60_000;
+let lockedAddActionSeq = 0;
+
+function runAddActionWhenUnlocked(action: AddButtonAction) {
+  const seq = ++lockedAddActionSeq;
+  const requestedAt = Date.now();
+  void whenAppUnlocked().then(() => {
+    if (seq !== lockedAddActionSeq) return;
+    if (Date.now() - requestedAt > LOCKED_ADD_ACTION_TTL_MS) return;
+    // After the lock overlay's own modal has gone, so two native modals never
+    // overlap (that freezes touch input on iOS).
+    runAfterInteractions(() => requestRunAddAction(action));
   });
 }
 

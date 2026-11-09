@@ -110,6 +110,35 @@ describe('handleMoney2TimeDeepLink', () => {
       }
     });
 
+    it('runs only the latest Back Tap made while locked', async () => {
+      setAppLocked(true);
+      try {
+        handleMoney2TimeDeepLink('money2time://add?action=voice', makeNavigationRef());
+        handleMoney2TimeDeepLink('money2time://add?action=scan', makeNavigationRef());
+        setAppLocked(false);
+        await settle();
+        expect(requestRunAddAction).toHaveBeenCalledTimes(1);
+        expect(requestRunAddAction).toHaveBeenCalledWith('scan');
+      } finally {
+        setAppLocked(false);
+      }
+    });
+
+    it('drops a Back Tap when the unlock comes much later', async () => {
+      const now = jest.spyOn(Date, 'now').mockReturnValue(1_000_000);
+      setAppLocked(true);
+      try {
+        handleMoney2TimeDeepLink('money2time://add?action=voice', makeNavigationRef());
+        now.mockReturnValue(1_000_000 + 61_000);
+        setAppLocked(false);
+        await settle();
+        expect(requestRunAddAction).not.toHaveBeenCalled();
+      } finally {
+        setAppLocked(false);
+        now.mockRestore();
+      }
+    });
+
     it('resets to a clean root before running the action', () => {
       // Mirrors the widget behaviour: a modal left open from a previous tap
       // must not stack another entry sheet on top.
