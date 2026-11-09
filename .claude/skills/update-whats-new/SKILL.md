@@ -1,12 +1,13 @@
 ---
 name: update-whats-new
-description: Write the store "What's New" release note for money2time and open a PR on the money2time-screenshots-creator repo. Use when someone asks to update the What's New / release notes / store listing copy, after a batch of user-facing commits has landed, or before cutting a release to the App Store or Play.
+description: Write the store "What's New" release note for money2time in App Studio's listing copy (apps/app-studio) and open a PR. Use when someone asks to update the What's New / release notes / store listing copy, after a batch of user-facing commits has landed, or before cutting a release to the App Store or Play.
 ---
 
 # Writing the next What's New
 
-The store note lives in a **different repo**: `~/Projects/money2time-screenshots-creator`,
-in `src/data/appDescriptions.ts`, as a `whatsNew` field on each of **23 locale entries**.
+The store note lives in App Studio, `apps/app-studio/src/data/appDescriptions.ts`, as a
+`whatsNew` field on each of **23 locale entries**. Paths below are relative to the
+repository root unless a step `cd`s into `apps/app-studio`.
 That file is the single source for both stores. Uploading is a separate act (the
 Descriptions view, or `npm run upload:*`); this skill only writes the copy and opens the PR.
 
@@ -24,18 +25,23 @@ Two things about the shape of the change, both easy to get wrong:
 Everything already described is off the table. Two signals, and you need both:
 
 ```bash
-cd ~/Projects/money2time-screenshots-creator
 git status --porcelain          # must be empty; stop and ask if it is not
-git checkout main && git pull
-git log -1 --format=%ad --date=iso -- src/data/appDescriptions.ts   # when the last note landed
-sed -n '/^  en: {/,/^  },/p' src/data/appDescriptions.ts | sed -n '/whatsNew/,/`,$/p'  # what it said
+git fetch origin && git switch -c whats-new-<slug>-release origin/main   # or your worktree's branch
+F=apps/app-studio/src/data/appDescriptions.ts
+git log -1 --format='%h %ad %s' --date=iso origin/main -- $F   # when the last note landed
+sed -n '/^  en: {/,/^  },/p' $F | sed -n '/whatsNew/,/`,$/p'    # what it said
 ```
+
+App Studio moved into this repository on 2026-11-09 without its history. If the last
+commit touching the file is that move (its subject starts "Move the website and App Studio"), the
+note it holds is the batch-receipts release, written 2026-11-09 08:37 +0800 (the old repo's
+`adfe839`, PR #41): count from that date instead.
 
 Then list the app commits since that date, with a day of overlap because a note is usually
 written a day or two after the commits it covers:
 
 ```bash
-cd ~/Projects/money2time && git log --format="%h %ad %s" --date=short --since=<date minus 1 day>
+git log --format="%h %ad %s" --date=short --since=<date minus 1 day> origin/main
 ```
 
 Read the previous English note and strike anything it already announced. What is left is
@@ -59,7 +65,6 @@ release; against the previous store build the same imagery went from 2.8 MiB to 
 so the app in fact grew by 20 MiB. Compare the release tag or version-bump commit to `main`:
 
 ```bash
-cd ~/Projects/money2time
 # The app moved to apps/mobile; a commit from before the move keeps it at the root.
 for r in <last version-bump commit> main; do printf "%s  " $r
   d=apps/mobile/assets; git cat-file -e "$r:$d" 2>/dev/null || d=assets
@@ -77,7 +82,15 @@ generated registry to see which directory the app really loads.
 
 **Match the June and July notes, not the Aug 28 to Sep 3 ones.** Those three were written by
 Claude and read like it; the earlier ones are the user's own voice and are the register to
-copy (`git show 8c16221:src/data/appDescriptions.ts`, `git show 0f1a28b:...`):
+copy. They are in the archived `NelsonGan/money2time-screenshots-creator` repository, commits
+`8c16221` and `0f1a28b`:
+
+```bash
+gh api -H 'Accept: application/vnd.github.raw' \
+  'repos/NelsonGan/money2time-screenshots-creator/contents/src/data/appDescriptions.ts?ref=8c16221'
+```
+
+The English of one of them:
 
 ```
 - Fixed slowness on some devices
@@ -110,24 +123,57 @@ Do not save what is left after spending, but spend what is left after saving.
   the app's copywriting rule and the store note is app copy.
 - Blank line, then **one finance or time quote**, one sentence, **no attribution**.
 
-The quote rotates and **must not repeat**. Pull every past one first:
+The quote rotates and **must not repeat**. Every quote used up to the move into this
+repository (2026-11-09):
+
+```text
+A budget is telling your money where to go instead of wondering where it went.
+A little planning today saves time and money tomorrow.
+A penny saved is a penny earned.
+An investment in knowledge pays the best interest.
+Beware of little expenses; a small leak will sink a great ship.
+Do not save what is left after spending, but spend what is left after saving.
+Frugal living isn't about choosing poverty; it's about choosing to spend your life energy on what truly matters to you.
+Frugality can make a poor person rich.
+Frugality is enjoying the virtue of getting good value for every minute of your life energy and from everything you have the use of.
+He who has little is not poor, but he who wants more.
+I have learned to seek my happiness by limiting my desires, rather than in attempting to satisfy them.
+I'm not really frugal or thrifty. I just don't waste money on little things that don't matter, but spend on big things that do.
+Little by little, a little becomes a lot.
+Lost time is never found again.
+Money is a good servant but a bad master.
+Never spend your money before you have it.
+Rather go to bed without supper than rise in debt.
+Saving today gives you more choices tomorrow.
+Short reckonings make long friends.
+Take care of the pennies and the pounds will take care of themselves.
+The art is not in making money, but in keeping it.
+The greatest wealth is to live content with little.
+Time is money.
+Time is more valuable than money; you can get more money, but you cannot get more time.
+Time is the coin of your life. Only you can determine how it will be spent.
+Time is the most valuable thing a person can spend.
+Time spent together is time well spent.
+Too many people spend money they haven't earned, to buy things they don't want, to impress people they don't like.
+Wealth consists not in having great possessions, but in having few wants.
+What you call saving is just making a deal for the future.
+You may delay, but time will not.
+```
+
+Then add the ones used since, from this repository's history:
 
 ```bash
-cd ~/Projects/money2time-screenshots-creator
-for c in $(git log --format=%h -- src/data/appDescriptions.ts); do
-  git show "${c}:src/data/appDescriptions.ts" 2>/dev/null |
+F=apps/app-studio/src/data/appDescriptions.ts
+for c in $(git log --format=%h origin/main -- $F); do
+  git show "${c}:${F}" 2>/dev/null |
     python3 -c "import sys,re;m=re.search(r'whatsNew: \`(.*?)\`,',sys.stdin.read(),re.S);print(m.group(1).rsplit(chr(10),1)[-1] if m else '')"
 done | sort -u
 ```
 
-Note the **braces**: in zsh, `$c:src/...` is parsed as a substitution modifier and you get a
-diff instead of the file, silently comparing against the wrong text. Use `"${c}:path"`.
-
-Ones already spent include "Lost time is never found again", "Time is the coin of your
-life", "Beware of little expenses; a small leak will sink a great ship", "Frugality can make
-a poor person rich", "Do not save what is left after spending", "Money is a good servant but
-a bad master", and the *Your Money or Your Life* life-energy lines. Reach for something that fits the release rather than the most
-famous quote left.
+Note the **braces**: in zsh, `$c:path` is parsed as a substitution modifier and you get a
+diff instead of the file, silently comparing against the wrong text. Use `"${c}:${F}"`.
+When you write a note, add its quote to the list above in the same PR, so the list stays
+whole. Reach for something that fits the release rather than the most famous quote left.
 
 ## 4. Translate all 22 others
 
@@ -151,7 +197,7 @@ drops it.
 ## 5. Verify before the PR
 
 ```bash
-cd ~/Projects/money2time-screenshots-creator && npx tsc --noEmit
+cd apps/app-studio && npm ci && npx tsc --noEmit
 ```
 
 Then check three things that `tsc` cannot see:
@@ -181,18 +227,20 @@ PY
 Name the release after its headline feature (the slug the PR title uses too):
 
 ```bash
-cd ~/Projects/money2time-screenshots-creator
-git checkout -b whats-new-<slug>-release
-git commit -am "Update What's New for the <slug> release across all locales"
+cd "$(git rev-parse --show-toplevel)"
+git add apps/app-studio/src/data/appDescriptions.ts .claude/skills/update-whats-new/SKILL.md .agents/skills/update-whats-new/SKILL.md
+git commit -m "Update What's New for the <slug> release across all locales"
+git push -u origin HEAD
 gh pr create --title "Update What's New for the <slug> release across all locales" --body "..."
 ```
 
-Body, in the shape of PR #17: one opening line ("Two lines this release, in all 23
-locales:"), the **English note in a fenced block**, then a sentence per line saying which app
-PR it came from as `NelsonGan/money2time#NNN` (cross-repo links resolve), with the *why* for
-anything a reader would not guess from the bullet. Close with the rotating-quote note and
-that `npx tsc --noEmit` passes. Append this session's own attribution block, the one the
-system prompt gives you, rather than copying a previous PR's session URL.
+A change confined to `apps/app-studio` and the skills runs only the `App Studio` workflow and
+cuts no store build. Body: one opening line ("Two lines this release, in all 23 locales:"),
+the **English note in a fenced block**, then a sentence per line saying which app PR it came
+from as `#NNN`, with the *why* for anything a reader would not guess from the bullet. Close
+with the rotating-quote note and that `npx tsc --noEmit` passes. Append this session's own
+attribution block, the one the system prompt gives you, rather than copying a previous PR's
+session URL.
 
 Open the PR and stop. Do not merge, and do not upload to either store: an upload writes to a
 live listing and is the user's call.

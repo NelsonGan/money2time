@@ -1,0 +1,54 @@
+.preview { position: relative; margin: 0 auto; flex-shrink: 0; }
+.phone { width: 419px; height: 878px; padding: 13px; border-radius: 76px; background: #1c1c1e; transform-origin: top left; box-sizing: border-box; }
+.screen { position: relative; width: 393px; height: 852px; overflow: hidden; border-radius: 63px; background: white; color: #090909; font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif; font-size: 14px; line-height: 1.2; }
+.screen p { margin: 0; }
+.island { position: absolute; z-index: 5; top: 10px; left: 50%; transform: translateX(-50%); width: 126px; height: 37px; border-radius: 24px; background: #1c1c1e; }
+.headerArtwork { position: relative; height: 258px; overflow: hidden; display: flex; align-items: flex-end; justify-content: center; background: linear-gradient(#efdfc7, #fdf1db 90px); }
+.headerArtwork > div { mask-image: linear-gradient(transparent, black 24px); }
+.headerNavigation { position: absolute; z-index: 3; top: 58px; left: 15px; right: 15px; display: flex; justify-content: space-between; }
+.glassCircle { display: flex; justify-content: center; align-items: center; width: 49px; height: 49px; border-radius: 50%; background: rgba(255,255,255,.78); box-shadow: 0 1px 9px rgba(0,0,0,.09); }
+.productDetails { padding: 22px 20px 0; }
+.productIdentity { display: flex; gap: 18px; align-items: flex-start; }
+.largeIcon { width: 114px; height: 114px; border-radius: 26px; flex-shrink: 0; }
+.productCopy { flex: 1; min-width: 0; }
+.productTitle { font-size: 22px; line-height: 26px; font-weight: 600; letter-spacing: -.4px; }
+.subtitle { color: #8e8e93; }
+.productCopy .subtitle { margin-top: 3px; white-space: nowrap; font-size: 15px; }
+.getPill { display: flex; align-items: center; justify-content: center; width: 72px; height: 30px; border-radius: 20px; font-size: 14px; line-height: 1; font-weight: 600; color: #008aff; background: #f0f0f1; flex-shrink: 0; }
+.primaryPill { background: #2787fc; color: white; height: 32px; font-size: 16px; margin-top: 12px; }
+.facts { margin-top: 22px; border-top: 1px solid #dcdce1; padding: 13px 0 0; height: 89px; display: grid; grid-template-columns: 1fr 1fr 1.1fr; color: #98989f; }
+.facts > div { display: flex; flex-direction: column; align-items: center; gap: 7px; position: relative; font-size: 12px; white-space: nowrap; }
+.facts > div + div::before { content: ''; position: absolute; left: 0; top: 8px; height: 41px; width: 1px; background: #dcdce1; }
+.facts strong { font-size: 25px; line-height: 20px; font-weight: 600; }
+.factLabel { color: #b9b9c1; font-size: 10px; }
+.stars { color: #909096; letter-spacing: -1px; font-size: 13px; line-height: 15px; }
+.facts .stars { color: #bfbfc4; font-size: 17px; }
+.gallery { display: flex; gap: 10px; margin-top: 21px; padding-left: 20px; }
+.galleryItem { width: 228px; overflow: hidden; border-radius: 24px; flex-shrink: 0; }
+.searchNavigation { display: flex; align-items: center; gap: 14px; position: absolute; top: 58px; left: 15px; right: 15px; }
+.searchField { height: 46px; display: flex; align-items: center; gap: 7px; flex: 1; padding: 0 16px; background: linear-gradient(#fcfcfc, white); border-radius: 28px; box-shadow: 0 1px 9px rgba(0,0,0,.09), inset 0 0 0 1px rgba(0,0,0,.035); }
+.searchNavigation .glassCircle { width: 44px; height: 44px; }
+.searchContent { position: absolute; top: 134px; left: 20px; right: 20px; }
+.searchIdentity { position: relative; display: flex; gap: 14px; height: 58px; align-items: flex-start; }
+.appIcon { width: 58px; height: 58px; border-radius: 13px; flex-shrink: 0; }
+.searchCopy { min-width: 0; flex: 1; }
+.searchTitle { max-width: 190px; font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; letter-spacing: -.15px; margin-top: 2px !important; }
+.searchCopy .subtitle { font-size: 12px; margin-top: 5px; letter-spacing: .2px; white-space: nowrap; }
+.searchCopy .stars { display: block; margin-top: 4px; }
+.searchIdentity .getPill { position: absolute; right: 0; top: 29px; }
+.developer { display: flex; align-items: center; gap: 4px; color: #8e8e93; font-size: 11px; height: 15px; margin-top: 10px !important; }
+.searchArtwork { width: 353px; height: calc(353px * 2 / 3); border-radius: 12px; overflow: hidden; margin-top: 12px; background: #fbf2ea; }
+.searchPlaceholder { margin-top: 48px; }
+.placeholderListing { display: flex; gap: 12px; height: 60px; align-items: flex-start; position: relative; }
+.placeholderIcon { width: 60px; height: 60px; border-radius: 14px; background: #ececec; }
+.placeholderTitle { width: 84px; height: 15px; border-radius: 5px; background: #ececec; margin: 3px 0 8px; }
+.placeholderSubtitle { width: 156px; height: 13px; border-radius: 5px; background: #ececec; }
+.placeholderStars { display: block; margin-top: 3px; color: #ececec; letter-spacing: -1px; }
+.placeholderGet { position: absolute; right: 0; top: 17px; width: 72px; height: 30px; border-radius: 20px; background: #ececec; }
+.placeholderMeta { display: flex; gap: 17px; margin: 10px 0 12px; }
+.placeholderMeta span { width: 65px; height: 13px; border-radius: 4px; background: #ececec; }
+.placeholderGallery { display: flex; gap: 8px; }
+.placeholderGallery > div { width: 112px; height: 243px; border-radius: 13px; background: #ececec; border: 1px solid #d8d8dc; flex-shrink: 0; }
+.tabBar { position: absolute; z-index: 4; left: 13px; right: 13px; bottom: 15px; height: 61px; border-radius: 34px; display: flex; align-items: center; padding: 3px; background: rgba(249,249,249,.85); border: 1px solid rgba(0,0,0,.09); box-shadow: 0 2px 9px rgba(0,0,0,.1); backdrop-filter: blur(16px); }
+.tab { display: flex; flex: 1; flex-direction: column; align-items: center; justify-content: center; height: 53px; gap: 4px; font-size: 9px; border-radius: 28px; }
+.selectedTab { color: #008aff; background: rgba(225,225,228,.66); }

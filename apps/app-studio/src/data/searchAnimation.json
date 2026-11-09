@@ -1,0 +1,116 @@
+{
+  "duration": 8,
+  "cardLastFour": "4242",
+  "fps": 30,
+  "videoWidth": 1920,
+  "videoHeight": 1280,
+  "phone": {
+    "x": 0,
+    "y": -390,
+    "start": 0.45,
+    "arrive": 1.725,
+    "left": 2460,
+    "top": 942,
+    "width": 922,
+    "height": 1948,
+    "scale": 1.52
+  },
+  "layers": {
+    "paid": {
+      "in": 2.175,
+      "visible": 2.367,
+      "out": 3.042,
+      "hidden": 3.225
+    },
+    "approved": {
+      "in": 2.25,
+      "visible": 2.475
+    },
+    "logged": {
+      "in": 3.0,
+      "visible": 3.225
+    },
+    "existing": {
+      "in": 3.0,
+      "visible": 3.225
+    },
+    "transaction": {
+      "in": 3.417,
+      "visible": 3.55
+    },
+    "flash": {
+      "in": 3.417,
+      "visible": 3.55,
+      "out": 3.55,
+      "hidden": 4.3,
+      "peakOpacity": 0.28
+    }
+  },
+  "faceId": {
+    "left": 240.625,
+    "top": 37.125,
+    "width": 160,
+    "height": 144,
+    "unitScale": 2.75,
+    "start": 0.45,
+    "expanded": 0.75,
+    "scanStart": 0.792,
+    "scanEnd": 1.542,
+    "contract": 1.917,
+    "end": 2.217,
+    "color": "#32D74B"
+  },
+  "amounts": {
+    "en": "RM141.35",
+    "zh": "RM129.45",
+    "es": "€31.67",
+    "fr": "€37.63",
+    "de": "€51.72",
+    "pt": "R$96.02",
+    "it": "€32.53",
+    "ja": "¥2,953.00",
+    "ko": "₩27,309.00",
+    "ru": "₽1,058.00",
+    "hi": "₹1,287.84",
+    "th": "฿601.68",
+    "vi": "₫327,902.00",
+    "id": "Rp142,956.00",
+    "ms": "RM140.44",
+    "fil": "₱536.34",
+    "tr": "₺935.49",
+    "pl": "zł107.61",
+    "nl": "€38.94",
+    "uk": "₴450.89",
+    "sv": "kr477.50",
+    "nb": "kr525.30",
+    "da": "kr386.24"
+  },
+  "ledger": {
+    "sourceWidth": 1206,
+    "sourceHeight": 2622,
+    "screen": { "left": 20.625, "top": 20.625, "width": 880, "height": 1905.75 },
+    "entryTop": 740,
+    "entryHeight": 310,
+    "insertion": {
+      "start": 3.417,
+      "duration": 0.65,
+      "damping": 18,
+      "stiffness": 260,
+      "playbackRate": 1.2
+    },
+    "flash": {
+      "color": "#B1525F",
+      "left": 62,
+      "top": 820,
+      "width": 1082,
+      "height": 200,
+      "radius": 60
+    }
+  },
+  "terminal": {
+    "left": 2380,
+    "top": 222,
+    "width": 1080,
+    "height": 660
+  }
+}

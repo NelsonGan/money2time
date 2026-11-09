@@ -1,0 +1,395 @@
+@import "tailwindcss";
+
+/*
+ * Ported from the Money₂Time app's constants/designSystem.ts — the `rosewood`
+ * theme in light mode, which is what the app ships as its default. Keep these
+ * in sync with that file rather than tuning them here.
+ *
+ * The one deliberate divergence is the neutral ladder, marked below. The app's
+ * neutrals are a warm cream, which suits a phone screen held at arm's length;
+ * across a wide desktop page that much cream reads as a tint rather than as
+ * paper. The web lightens the page to an off-white and puts cards on plain
+ * white, so the ladder keeps its steps without the wash.
+ */
+:root {
+  --brand: #B1525F;
+  --primary: #B1525F;
+  --primary-soft: #F8E7EA;
+  --primary-muted: #EBC1C8;
+  --primary-dark: #8E4250;
+
+  /* Neutral ladder — lighter than the app's; see the note above. */
+  --background: #FCFAF5;
+  --background-subtle: #F5F2EA;
+  --card: #FFFFFF;
+  --surface: #FFFFFF;
+  --surface-muted: #F2EFE7;
+  --border: #E4DFD1;
+
+  --foreground: #1A2E2A;
+  --foreground-soft: #6B7A77;
+  --foreground-muted: #94A39F;
+
+  --accent: #F6B750;
+  --accent-soft: #FDF0D8;
+  --success: #1E9468;
+  --success-soft: #DFFBF0;
+  --error: #D45F57;
+  --error-soft: #FDE8E6;
+  --coral: #F37D57;
+  --lavender: #8E9FE8;
+  --sky: #8CC7FF;
+  --rosewood: #B1525F;
+
+  /* Wordmark, from getThemeWordmarkPalette('rosewood', 'light'). */
+  --wordmark-money: #F37D57;
+  --wordmark-two: #F6B750;
+  --wordmark-time: #B1525F;
+
+  /* The app's base corner radius. */
+  --radius: 1.4rem;
+}
+
+@theme inline {
+  --color-brand: var(--brand);
+  --color-primary: var(--primary);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-muted: var(--primary-muted);
+  --color-primary-dark: var(--primary-dark);
+  --color-background: var(--background);
+  --color-background-subtle: var(--background-subtle);
+  --color-card: var(--card);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-border: var(--border);
+  --color-foreground: var(--foreground);
+  --color-foreground-soft: var(--foreground-soft);
+  --color-foreground-muted: var(--foreground-muted);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-error: var(--error);
+  --color-error-soft: var(--error-soft);
+  --color-coral: var(--coral);
+  --color-lavender: var(--lavender);
+  --color-sky: var(--sky);
+  --color-rosewood: var(--rosewood);
+
+  --font-sans: var(--font-dm-sans);
+  --font-display: var(--font-dm-sans);
+  --font-mono: var(--font-dm-mono);
+
+  /* Shadow scale, from the app's tailwind.config.js. */
+  --shadow-soft: 0 1px 2px rgba(74, 56, 40, 0.04), 0 6px 18px rgba(74, 56, 40, 0.05);
+  --shadow-soft-lg: 0 2px 6px rgba(74, 56, 40, 0.05), 0 10px 30px rgba(74, 56, 40, 0.07);
+  --shadow-float: 0 4px 10px rgba(74, 56, 40, 0.05), 0 18px 46px rgba(74, 56, 40, 0.1);
+  --shadow-float-lg: 0 8px 20px rgba(74, 56, 40, 0.06), 0 30px 70px rgba(74, 56, 40, 0.13);
+  --shadow-glow: 0 10px 24px rgba(142, 66, 80, 0.22), 0 28px 60px rgba(142, 66, 80, 0.24);
+  --shadow-warm: 0 8px 32px rgba(246, 183, 80, 0.2);
+
+  --radius-card: var(--radius);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-dm-sans), system-ui, -apple-system, sans-serif;
+}
+
+/*
+ * The body is a column flex container, so a flex item sizes itself off its
+ * content and a wide child (a data table, a long unbreakable token) stretches
+ * the whole page past the viewport. Pinning items to the container width lets
+ * those subtrees scroll on their own instead.
+ */
+body > * {
+  width: 100%;
+  min-width: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 84px;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* ---------------------------------------------------------------- type ---- */
+
+.display {
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.04;
+  text-wrap: balance;
+}
+
+.headline {
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.14;
+  text-wrap: balance;
+}
+
+.eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* ------------------------------------------------------------ surfaces ---- */
+
+.card-surface {
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-soft);
+}
+
+.card-lift {
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.35s ease;
+}
+
+.card-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-soft-lg);
+}
+
+/* A full-bleed band, one flat step off the page background. */
+.band {
+  background: var(--background-subtle);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+/* The well inside a card: a step down from the card, never flat grey. */
+.well {
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+}
+
+/* ------------------------------------------------------------ keyframes --- */
+
+@keyframes ticker {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(3deg); }
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes indeterminate {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(250%); }
+}
+
+.animate-ticker {
+  animation: ticker 60s linear infinite;
+}
+
+.animate-indeterminate {
+  animation: indeterminate 1.4s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-wiggle {
+  animation: wiggle 2.5s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
+.animate-rise {
+  opacity: 0;
+  animation: rise 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* --------------------------------------------------------------- mascot --- */
+
+/*
+ * The mascot flipbook. It sits still on the pose it settles on and plays one
+ * pass when clicked: `.mascot-playing` goes on at the click and comes off at
+ * `animationend`, so the next click replays it.
+ *
+ * `steps(1, end)` makes each swap a hard cut, the way the app draws it —
+ * cross-fading two poses of the same chick reads as a double exposure rather
+ * than as motion. 0.84s is the two lead-in frames at the app's 420ms cadence;
+ * the pass lands on the resting frame, which is also the base state, so there
+ * is nothing for `forwards` to hold.
+ */
+.mascot-frame {
+  opacity: 0;
+}
+
+/* The pose it settles on, and the one a still flipbook shows. */
+.mascot-frame-3 {
+  opacity: 1;
+}
+
+@keyframes mascot-frame-1 {
+  0% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes mascot-frame-2 {
+  0% { opacity: 0; }
+  50% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes mascot-frame-3 {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+/*
+ * The shorthand is repeated per frame rather than shared with only the name
+ * overridden: an `animation` shorthand carrying no name minifies to
+ * `animation: none`, which silently drops the duration and leaves every frame
+ * sitting still.
+ */
+.mascot-playing .mascot-frame-1 {
+  animation: mascot-frame-1 0.84s steps(1, end);
+}
+
+.mascot-playing .mascot-frame-2 {
+  animation: mascot-frame-2 0.84s steps(1, end);
+}
+
+.mascot-playing .mascot-frame-3 {
+  animation: mascot-frame-3 0.84s steps(1, end);
+}
+
+/* --------------------------------------------------------- scroll reveal --- */
+
+/*
+ * Only hides content once components/scroll-reveal.tsx has mounted, so the
+ * server-rendered page and the no-JavaScript case stay fully visible.
+ */
+[data-reveal-ready] [data-reveal] {
+  opacity: 0;
+  transform: translateY(22px);
+}
+
+[data-reveal-ready] [data-reveal][data-revealed] {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0s),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0s);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  [data-reveal-ready] [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .animate-ticker,
+  .animate-float,
+  .animate-wiggle,
+  .mascot-playing .mascot-frame {
+    animation: none;
+  }
+
+  .animate-rise {
+    opacity: 1;
+    animation: none;
+  }
+
+  /* Still, mid-track: busy without the motion. */
+  .animate-indeterminate {
+    animation: none;
+    transform: translateX(75%);
+  }
+
+  .card-lift:hover {
+    transform: none;
+  }
+}
+
+/* ---------------------------------------------------------------- book ---- */
+
+.book-cover {
+  position: relative;
+  border-radius: 3px 10px 10px 3px;
+  overflow: hidden;
+  transform: perspective(800px) rotateY(-8deg);
+  box-shadow:
+    6px 6px 18px rgba(0, 0, 0, 0.18),
+    2px 2px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.book-cover:hover {
+  transform: perspective(800px) rotateY(-3deg);
+}
+
+.book-cover::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 14px;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.25),
+    rgba(0, 0, 0, 0.08) 30%,
+    rgba(255, 255, 255, 0.15) 50%,
+    rgba(0, 0, 0, 0.05) 70%,
+    transparent
+  );
+  z-index: 1;
+}
+
+.book-cover::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    transparent 40%,
+    transparent 60%,
+    rgba(0, 0, 0, 0.04) 100%
+  );
+  z-index: 1;
+}
+
+.highlight-underline {
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--primary) 45%, transparent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}

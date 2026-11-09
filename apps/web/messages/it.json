@@ -1,0 +1,2165 @@
+{
+  "metadata": {
+    "home": {
+      "title": "App gestione spese: ogni acquisto in ore - Money2Time",
+      "description": "L'app per gestire le spese che mostra ogni acquisto in ore della tua vita. Spese, conti e costi fissi, senza collegare la banca.",
+      "openGraphDescription": "Ogni acquisto, misurato in ore della tua vita. Un'app spese privata che non chiede mai le credenziali della banca."
+    },
+    "contact": {
+      "title": "Contatti - Money2Time",
+      "description": "Domande, feedback, idee per nuove funzioni o una richiesta sui tuoi dati: scrivi direttamente allo sviluppatore di Money2Time."
+    },
+    "privacy": {
+      "title": "Informativa sulla privacy - Money2Time",
+      "description": "Come Money2Time tratta i tuoi dati: archiviazione locale, analisi del prodotto con un ID casuale dell'App e nessuna vendita di dati personali o finanziari."
+    },
+    "terms": {
+      "title": "Termini di utilizzo - Money2Time",
+      "description": "I termini che accetti usando l'app per la gestione delle spese Money2Time per iOS e Android."
+    },
+    "statementsImport": {
+      "title": "Importare estratti conto con l'IA - Money2Time",
+      "description": "Una breve guida all'importazione degli estratti conto con l'IA in Money2Time, per recuperare lo storico senza digitare nulla."
+    },
+    "dataDeletion": {
+      "title": "Richiesta di eliminazione dei dati - Money2Time",
+      "description": "Come richiedere l'eliminazione dei tuoi dati Money2Time, cosa viene cancellato, cosa resta e per quanto tempo."
+    },
+    "keywords": [
+      "app gestione spese",
+      "app spese personali",
+      "bilancio familiare",
+      "budget mensile",
+      "finanze personali",
+      "spese ricorrenti",
+      "app per risparmiare",
+      "calcolo paga oraria",
+      "tracciamento spese",
+      "app budget"
+    ],
+    "costInHours": {
+      "title": "Salario mediano per Paese, in ore di lavoro - Money2Time",
+      "description": "Salari mediani e medi ufficiali di dieci Paesi, misurati su un prodotto identico ovunque: quanto bisogna lavorare per pagarlo.",
+      "openGraphDescription": "Fin dove arriva un'ora di lavoro in dieci Paesi, misurata su un prodotto identico ovunque."
+    },
+    "tutorials": {
+      "title": "Tutorial Money2Time - Come usare l'app",
+      "description": "Guide passo passo per ogni parte di Money2Time, con screenshot reali. Registrare spese, dividere il conto, impostare budget e leggere i prezzi in ore di lavoro.",
+      "detailTitle": "{title} - Tutorial Money2Time"
+    },
+    "dashboard": {
+      "title": "Dashboard web - Money2Time",
+      "description": "Scansiona il codice con il telefono per vedere i tuoi dati di Money2Time su uno schermo grande: spese, patrimonio netto, budget e le ore dietro ogni acquisto. Crittografia end-to-end, nulla salvato online."
+    }
+  },
+  "common": {
+    "language": {
+      "label": "Lingua"
+    },
+    "footer": {
+      "contact": "Contatti",
+      "privacy": "Informativa sulla privacy",
+      "dataDeletion": "Eliminazione dei dati",
+      "terms": "Termini di utilizzo",
+      "copyright": "© {year} Money2Time. Tutti i diritti riservati.",
+      "costInHours": "Prezzo in ore",
+      "tutorials": "Tutorial",
+      "dashboard": "Dashboard web"
+    }
+  },
+  "storeButtons": {
+    "appStorePrefix": "Scarica su",
+    "appStore": "App Store",
+    "playStorePrefix": "Disponibile su",
+    "playStore": "Google Play"
+  },
+  "screenshotGallery": {
+    "ariaLabel": "Screenshot dell'app",
+    "alts": {
+      "home": "Screenshot di Money2Time che mostra l'elenco mensile delle transazioni con i totali di entrate e uscite e le ore di lavoro dietro ogni acquisto",
+      "privacy": "Screenshot di Money2Time che evidenzia la privacy: i tuoi dati restano sul tuo dispositivo, senza pubblicità, funziona completamente offline",
+      "assets": "Screenshot di Money2Time che mostra il patrimonio netto e i saldi dei conti",
+      "addExpense": "Screenshot di Money2Time che mostra l'inserimento rapido di una spesa con tastiera su schermo e input vocale",
+      "splitBill": "Screenshot di Money2Time che mostra un conto diviso equamente tra più persone con la quota di ciascuno",
+      "insights": "Screenshot di Money2Time che mostra un grafico a torta con la suddivisione delle spese per categoria",
+      "budgeting": "Screenshot di Money2Time che mostra i budget mensili per categoria con barre di avanzamento e quanto resta in ciascuno",
+      "recurrings": "Screenshot di Money2Time che mostra impegni ricorrenti e cadenza",
+      "hourlyRates": "Screenshot di Money2Time che mostra lo storico del valore orario per mese"
+    }
+  },
+  "home": {
+    "nav": {
+      "howItWorks": "Come funziona",
+      "logging": "Registrazione",
+      "features": "Funzioni",
+      "privacy": "Privacy",
+      "download": "Scarica l'app",
+      "openMenu": "Apri il menu",
+      "closeMenu": "Chiudi il menu"
+    },
+    "hero": {
+      "title": "Ogni prezzo ha due numeri.",
+      "subtitle": "Money2Time registra le tue spese come qualsiasi altra app, poi mostra la stessa cifra in ore della tua vita.",
+      "badges": {
+        "onDevice": "Resta sul tuo telefono",
+        "noBank": "Nessun accesso bancario",
+        "quick": "Si registra in pochi secondi"
+      }
+    },
+    "units": {
+      "min": "{value} min",
+      "hours": "{value} h"
+    },
+    "ticker": {
+      "coffee": "Caffè",
+      "lunch": "Pranzo fuori",
+      "groceries": "Spesa",
+      "fuel": "Benzina",
+      "tshirt": "T-shirt",
+      "beers": "Giro di birre",
+      "electricity": "Elettricità",
+      "pizza": "Pizza del venerdì",
+      "dogFood": "Cibo per il cane",
+      "cinema": "Cinema",
+      "gym": "Palestra",
+      "rent": "Affitto",
+      "flight": "Volo per casa",
+      "iceCream": "Gelato"
+    },
+    "howItWorks": {
+      "eyebrow": "Come funziona",
+      "title": "Un tocco trasforma il denaro in tempo.",
+      "body": "Il tuo valore orario nasce da ciò che arriva davvero sul conto. Al netto delle tasse, sui giorni in cui lavori, tragitto non pagato compreso.",
+      "coffee": {
+        "title": "Il caffè",
+        "note": "Quanto si lavora in una breve passeggiata. Quel caffè lo volevi."
+      },
+      "impulse": {
+        "title": "L'acquisto d'impulso",
+        "note": "Quasi due giorni di lavoro. Meglio dormirci sopra."
+      },
+      "rate": {
+        "title": "Il tuo valore orario reale",
+        "perHour": "/h",
+        "takeHome": {
+          "label": "Stipendio netto",
+          "value": "{value} al mese"
+        },
+        "daysWorked": {
+          "label": "Giorni di lavoro",
+          "value": "{value} a settimana"
+        },
+        "commute": {
+          "label": "Tragitto, non pagato",
+          "value": "{value} min al giorno"
+        }
+      }
+    },
+    "logging": {
+      "eyebrow": "Registrazione",
+      "title": "Non digitare mai più una spesa.",
+      "body": "Quasi tutte le app di spese muoiono perché registrare è una fatica. Ecco tre modi per entrare.",
+      "videoPlaceholder": "Registrazione dello schermo in arrivo",
+      "receiptScan": {
+        "tab": "Scansiona uno scontrino",
+        "title": "Punta sullo scontrino.",
+        "body": "La fotocamera si apre dentro la scheda della spesa, non su un'altra schermata. Totale, negozio e data tornano già compilati e la foto resta allegata.",
+        "points": {
+          "one": "Legge totale, data e negozio",
+          "two": "Conserva la foto per dopo"
+        }
+      },
+      "backTap": {
+        "tab": "Tocco posteriore",
+        "title": "Tocca due volte il retro.",
+        "body": "Un comando rapido su Tocco posteriore di iOS apre il tastierino con l'ultimo conto e l'ultima categoria pronti. Fatto prima di lasciare la cassa.",
+        "points": {
+          "one": "Dalla tasca alla spesa registrata in pochi secondi",
+          "two": "Senza sbloccare, senza cercare l'app"
+        }
+      },
+      "applePay": {
+        "tab": "Apple Pay",
+        "title": "Oppure paga come sempre.",
+        "body": "Un'automazione riconosce un acquisto con Apple Pay e prepara la spesa. Una notifica, un'occhiata alla categoria, via.",
+        "points": {
+          "one": "Cattura quello che non annoteresti mai a mano",
+          "two": "Niente viene salvato finché non lo dici tu"
+        }
+      }
+    },
+    "review": {
+      "eyebrow": "Riepilogo",
+      "title": "Guarda dove è finito.",
+      "body": "Scegli una settimana, un mese o un anno. Una cifra, le ore che ci stanno dietro e le tue categorie in ordine. Toccane una per vedere cosa contiene.",
+      "points": {
+        "one": "Confrontato con la tua media, non con il budget di uno sconosciuto",
+        "two": "Escludi una categoria o un conto e i numeri si rifanno da soli",
+        "three": "Osservazioni, non prediche"
+      },
+      "chip": "{hours} ore",
+      "mock": {
+        "title": "Riepilogo spese",
+        "week": "Settimana",
+        "month": "Mese",
+        "year": "Anno",
+        "spent": "Speso questa settimana",
+        "calmer": "Più tranquilla del solito.",
+        "categories": {
+          "groceries": "Spesa",
+          "eatingOut": "Mangiare fuori",
+          "transport": "Trasporti"
+        }
+      }
+    },
+    "features": {
+      "eyebrow": "Funzioni",
+      "title": "Tutto il resto che ti aspetti, senza far rumore.",
+      "sentiment": {
+        "title": "Come ti è sembrata",
+        "body": "Segna un acquisto come contento, neutro o pentito. Lo schema dice più del totale.",
+        "legend": "Ne è valsa la pena"
+      },
+      "commitments": {
+        "title": "Spese fisse",
+        "body": "Affitto, assicurazione, la palestra che vuoi sempre disdire. Vedi il mese prima che arrivi.",
+        "lockedIn": "/mese già impegnati"
+      },
+      "reimbursements": {
+        "title": "Soldi che tornano",
+        "body": "Segna una spesa come rimborsabile e resta in una lista sua finché non rientra.",
+        "employer": "Datore di lavoro",
+        "insurer": "Assicurazione sanitaria"
+      },
+      "insights": {
+        "title": "Nove analisi",
+        "body": "Ripartizioni, andamenti, tasso di risparmio, sentimento, patrimonio. Tutto da un solo menu.",
+        "savingsRate": "Tasso di risparmio",
+        "incomeTrend": "Andamento delle entrate",
+        "assets": "Patrimonio"
+      },
+      "split": {
+        "title": "Dividere il conto",
+        "body": "Scansiona lo scontrino e assegna le voci intorno al tavolo. Conta solo la tua parte.",
+        "yourShare": "La tua parte"
+      },
+      "modes": {
+        "title": "Semplice o completo",
+        "body": "Parti con un portafoglio e un tastierino. Aggiungi conti, trasferimenti e valute quando servono.",
+        "simple": "Semplice",
+        "simpleNote": "Un portafoglio",
+        "full": "Completo",
+        "fullNote": "Tutto attivo"
+      },
+      "budgets": {
+        "title": "Budget che ti danno il ritmo",
+        "body": "Imposta un tetto mensile per categoria. La barra mostra a che punto dovresti essere oggi.",
+        "category": "Spesa",
+        "of": "su {total}",
+        "pace": "In linea, mancano {days} giorni"
+      },
+      "calendar": {
+        "title": "Un mese che si legge",
+        "body": "Allontanati fino a una griglia da calendario. Ogni giorno mostra cosa è entrato e cosa è uscito, con tonalità in base all'importo."
+      },
+      "currency": {
+        "title": "Qualsiasi valuta",
+        "body": "Registra nella valuta con cui hai pagato. I totali si convertono e l'importo originale resta sulla riga.",
+        "item": "Prestito auto",
+        "paidIn": "Pagato in {currency}"
+      },
+      "receipts": {
+        "title": "Ogni scontrino, archiviato",
+        "body": "Le foto si allegano alla spesa e si raccolgono in album. Una garanzia è a uno scorrimento di distanza."
+      },
+      "search": {
+        "title": "Trova qualsiasi cosa",
+        "body": "Cerca per nota o negozio, poi restringi per categoria, conto, importo o come ti è sembrata.",
+        "query": "caffè",
+        "filterCategory": "Cibo",
+        "filterAccount": "Contanti",
+        "filterSentiment": "Pentito"
+      },
+      "assets": {
+        "title": "Quello che possiedi",
+        "body": "Segui conti e beni accanto alle spese, così conta anche la visione lunga."
+      }
+    },
+    "testimonials": {
+      "eyebrow": "Recensioni",
+      "title": "Cosa dicono le persone dopo un mese.",
+      "usersChoice": "Scelta degli utenti"
+    },
+    "privacy": {
+      "eyebrow": "Privacy",
+      "title": "Le tue spese restano sul tuo telefono.",
+      "body": "Nessun account da creare, nessuna banca da collegare. Tutto vive sul tuo dispositivo e puoi esportare o cancellare ogni cosa quando vuoi.",
+      "onDevice": {
+        "title": "Solo sul dispositivo",
+        "body": "Niente cloud, niente sincronizzazione, niente pubblicità."
+      },
+      "import": {
+        "title": "Porta con te lo storico",
+        "body": "Importa un backup di Money Manager e riprendi da lì."
+      },
+      "link": "Leggi l'informativa sulla privacy"
+    },
+    "why": {
+      "eyebrow": "Dallo sviluppatore",
+      "title": "Perché ho creato questa app",
+      "bookAlt": "Your Money or Your Life di Vicki Robin",
+      "quote": "Stai scambiando la tua energia vitale per denaro",
+      "quoteAuthor": "- Vicki Robin",
+      "paragraph1": "Dopo aver letto <book>Your Money or Your Life</book>, qualcosa è scattato. Per la maggior parte di noi che vive di stipendio, il denaro non è solo denaro: è la nostra energia vitale. Ogni euro che spendiamo rappresenta ore del nostro tempo, del nostro impegno, della nostra vita cedute in cambio.",
+      "paragraph2": "Così ho creato questa app. Ti aiuta a vedere le spese in modo diverso: non solo in valuta, ma in ore della tua vita. Perché a volte <cost>\"$20\"</cost> non sembrano molti, ma <time>\"2 ore della mia vita\"</time> sì. L'obiettivo è semplice: aiutarti a diventare più consapevole di dove stanno andando i tuoi soldi (o, in realtà, il tuo tempo), così puoi riprenderne il controllo.",
+      "paragraph3": "Tutto resta sul tuo dispositivo: niente accessi e niente sincronizzazione cloud. I tuoi dati sono tuoi. Se serve, puoi anche esportarli come semplice file JSON. La versione gratuita ti offre tutto ciò che ti serve per iniziare. Pro sblocca alcune funzionalità extra, come conti/categorie/valori orari illimitati, ecc.",
+      "paragraph4": "Spero che tu possa sempre mantenere il controllo del tuo denaro e della tua vita."
+    },
+    "closing": {
+      "title": "Scopri quanto costa davvero il tuo denaro.",
+      "body": "Gratis e senza account. Inserisci il tuo valore orario in un minuto e ogni numero acquista un secondo significato."
+    },
+    "community": {
+      "body": "Connettiti con altri utenti, condividi feedback e ricevi consigli sul nostro server Discord.",
+      "cta": "Unisciti alla Community"
+    },
+    "dashboardEntry": {
+      "eyebrow": "Novità · Dashboard web",
+      "title": "I tuoi dati di Money2Time, su uno schermo grande",
+      "body": "Scansiona un codice su app.money2time.com con il telefono per vedere flusso di cassa, spese, patrimonio, budget, viaggi e le ore dietro ogni acquisto. Aggiungi e modifica transazioni dal computer finché il telefono è connesso. Crittografia end-to-end.",
+      "cta": "Apri la dashboard web",
+      "points": {
+        "private": "Crittografia end-to-end",
+        "charts": "17 dashboard",
+        "edits": "Modifica dal computer"
+      }
+    }
+  },
+  "contact": {
+    "page": {
+      "title": "Contattami",
+      "intro": "Per supporto, bug, feedback o domande sulla privacy.",
+      "formLabel": "Modulo di contatto",
+      "discordTitle": "Preferisci chattare?",
+      "discordBody": "Unisciti alla nostra community su Discord per entrare in contatto con altri utenti e ricevere risposte rapide.",
+      "discordCta": "Unisciti al nostro Discord"
+    },
+    "form": {
+      "honeypot": "Azienda",
+      "name": "Nome",
+      "namePlaceholder": "Il tuo nome",
+      "email": "Email",
+      "emailPlaceholder": "tu@example.com",
+      "message": "Messaggio",
+      "messagePlaceholder": "Raccontami cosa è successo, cosa vorresti migliorare o come posso aiutarti.",
+      "sending": "Invio...",
+      "send": "Invia messaggio"
+    },
+    "validation": {
+      "nameRequired": "Inserisci il tuo nome.",
+      "nameTooLong": "Mantieni il nome sotto {max} caratteri.",
+      "emailRequired": "Inserisci il tuo indirizzo email.",
+      "emailInvalid": "Usa un indirizzo email valido.",
+      "subjectTooLong": "Mantieni l'oggetto sotto {max} caratteri.",
+      "messageRequired": "Condividi un breve messaggio.",
+      "messageTooLong": "Mantieni il messaggio sotto {max} caratteri."
+    },
+    "status": {
+      "honeypot": "Grazie per averci contattato. Il tuo messaggio è in arrivo.",
+      "error": "Correggi i campi evidenziati e riprova.",
+      "mailto": "La tua app email predefinita si sta aprendo con il messaggio già compilato. Se non si apre nulla, scrivimi direttamente via email."
+    }
+  },
+  "statementsImport": {
+    "title": "Importazione estratti conto",
+    "intro": "Guarda la breve guida qui sotto per scoprire come importare i tuoi estratti conto bancari in Money2Time con l'aiuto dell'IA.",
+    "videoTitle": "Money2Time - guida all'importazione degli estratti conto"
+  },
+  "notFound": {
+    "title": "Pagina non trovata",
+    "body": "Questa pagina non esiste. Forse comunque costava troppo del tuo tempo.",
+    "home": "Vai alla home"
+  },
+  "privacy": {
+    "title": "Informativa sulla privacy",
+    "lastUpdated": "Ultimo aggiornamento: 22 ottobre 2026",
+    "websiteAnalytics": {
+      "title": "Analisi dell'utilizzo del sito web",
+      "paragraphs": [
+        "Su money2time.com utilizziamo PostHog e Google Analytics per misurare visualizzazioni di pagina pseudonime e un insieme limitato di interazioni, come i clic per scaricare l'app, la selezione dei tutorial e gli esiti del modulo di contatto. Questi servizi possono usare la memoria del browser o i cookie e trattare informazioni tecniche tra cui la regione approssimativa, il tipo di dispositivo e browser e il sito di provenienza. I dati utente e degli eventi di Google Analytics vengono conservati fino a 14 mesi.",
+        "Nella Dashboard web (app.money2time.com), gli stessi servizi misurano quali pagine della dashboard apri, quando un browser viene collegato o scollegato, se i trasferimenti dal tuo telefono e le modifiche che fai vanno a buon fine e quando viene proposta una funzionalità Pro. Una volta che il telefono ha inviato i suoi dati, questi eventi vengono collegati all'identificatore casuale dell'App di quel telefono, così il tuo uso della dashboard e dell'app conta come un unico utente pseudonimo finché non scolleghi il browser. La dashboard tiene tutto questo separato dal resto di money2time.com, quindi le tue visite alle altre pagine non vengono collegate a essa. Gli eventi della dashboard non includono mai i tuoi dati finanziari e le visite alla dashboard non vengono mai registrate come replay di sessione.",
+        "PostHog può anche registrare un piccolo campione di visite al sito come replay di sessione con ogni campo dei moduli oscurato, e riceve una segnalazione quando si verifica un errore in una pagina.",
+        "Non inviamo il contenuto del modulo di contatto, il testo cercato nei tutorial, dati finanziari, identificatori dell'account, stringhe di query URL complete o dati per pubblicità o personalizzazione. Il reindirizzamento /download non aggiunge l'indirizzo IP o la stringa user-agent al proprio evento di analisi. L'analisi del sito non viene caricata quando l'impostazione Do Not Track del browser è attiva."
+      ]
+    },
+    "sections": [
+      {
+        "title": "Panoramica",
+        "paragraphs": [
+          "Money2Time (l'App) è un'app di finanza personale che converte le tue spese in equivalenti di tempo in base alla tua paga oraria. La tua privacy è importante per noi. Questa informativa spiega quali dati raccoglie l'App, come vengono utilizzati e quali sono i tuoi diritti in relazione a tali dati."
+        ]
+      },
+      {
+        "title": "1. Archiviazione dei dati e progettazione local-first",
+        "paragraphs": [
+          "Tutti i tuoi dati finanziari, inclusi transazioni, conti, categorie, regole ricorrenti e impostazioni della retribuzione, sono archiviati localmente sul tuo dispositivo tramite un database sul dispositivo (SQLite). Non gestiamo server che archiviano le tue informazioni finanziarie personali e l'App non sincronizza mai i tuoi dati né ne esegue il backup su un nostro server. Se usi la Dashboard web facoltativa (sezione 6), il telefono invia una copia direttamente a un browser che hai collegato, con crittografia end-to-end; il nostro server la inoltra senza archiviarla e non può leggerla.",
+          "Se disinstalli l'App, tutti i dati archiviati localmente vengono eliminati in modo permanente."
+        ]
+      },
+      {
+        "title": "2. Informazioni che raccogliamo",
+        "subsections": [
+          {
+            "title": "Dati finanziari (archiviati solo localmente)",
+            "lists": [
+              [
+                "Importi, date, categorie, note e tag di sentiment delle transazioni",
+                "Nomi, tipi e saldi dei conti",
+                "Informazioni su retribuzione e paga oraria",
+                "Regole per transazioni ricorrenti",
+                "Nomi e organizzazione delle categorie"
+              ]
+            ],
+            "paragraphs": [
+              "Questi dati non lasciano mai il tuo dispositivo, a meno che tu non scelga esplicitamente di esportarli o di inviarli a un browser che hai collegato con la Dashboard web."
+            ]
+          },
+          {
+            "title": "Identificatore casuale dell'App",
+            "paragraphs": [
+              "Al primo avvio, l'App genera un identificatore univoco casuale che inizia con m2t_ e non è collegato al tuo nome, alla tua email, al tuo ID Apple o ad alcuna identità personale. Lo stesso identificatore viene condiviso con PostHog, Google Analytics for Firebase e RevenueCat per l'analisi del prodotto e la gestione degli abbonamenti, e con ogni browser che colleghi con la Dashboard web, le cui analisi di utilizzo (PostHog e Google Analytics) lo usano a loro volta."
+            ]
+          },
+          {
+            "title": "Analisi di utilizzo",
+            "paragraphs": [
+              "Usiamo PostHog e Google Analytics for Firebase per raccogliere dati di utilizzo pseudonimi collegati a questo identificatore casuale dell'App e migliorare l’App. Le analisi non includono importi, dettagli delle transazioni, saldi, note, ricevute, backup o informazioni identificative.",
+              "PostHog riceve anche segnalazioni di arresti anomali ed errori e registra un piccolo campione di sessioni dell’app come registrazioni dello schermo, così possiamo trovare e correggere i problemi. In queste registrazioni è oscurato tutto ciò che mostra le tue informazioni: testi, numeri, campi di inserimento, grafici e ogni foto che aggiungi. Resta visibile solo il design proprio dell’app, come icone, illustrazioni ed etichette dei pulsanti. Queste registrazioni non mostrano mai i tuoi dati finanziari."
+            ],
+            "lists": [
+              [
+                "Visualizzazioni delle schermate e utilizzo delle funzionalità",
+                "Eventi dell'App, come transazione creata o impostazioni modificate",
+                "Preferenze generali, come valuta, lingua, tema e modalità di visualizzazione",
+                "Piattaforma, come iOS o Android"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "title": "3. Acquisti in-app e abbonamenti",
+        "paragraphs": [
+          "L'App offre un abbonamento premium opzionale (Pro) gestito tramite RevenueCat. Il pagamento viene elaborato da Apple o Google. Non riceviamo né archiviamo mai le tue informazioni di pagamento, i dati della carta di credito o le credenziali dell'ID Apple/Account Google.",
+          "RevenueCat riceve lo stato del tuo abbonamento, l'identificatore del prodotto e la data di scadenza per gestire i tuoi diritti di accesso. Queste informazioni sono collegate all'identificatore casuale dell'App, non alla tua identità personale."
+        ]
+      },
+      {
+        "title": "4. Notifiche",
+        "paragraphs": [
+          "L'App può richiedere l'autorizzazione a inviare notifiche. Tutte le notifiche sono programmate localmente sul tuo dispositivo. Nessuna notifica push viene inviata da server esterni. Puoi negare l'autorizzazione alle notifiche o disattivarle in qualsiasi momento nelle Impostazioni del tuo dispositivo."
+        ],
+        "lists": [
+          [
+            "Promemoria giornalieri di controllo",
+            "Riepiloghi settimanali delle spese",
+            "Avvisi per transazioni ricorrenti"
+          ]
+        ]
+      },
+      {
+        "title": "5. Autorizzazioni del dispositivo",
+        "paragraphs": [
+          "L'App richiede solo l'autorizzazione alle notifiche per programmare promemoria e riepiloghi locali. L'App non accede a fotocamera, microfono, libreria fotografica, contatti, calendario, messaggi, posizione, dati sanitari, dati fitness, altre app o cronologia di navigazione."
+        ]
+      },
+      {
+        "title": "6. Esportazione e importazione dei dati e Dashboard web",
+        "paragraphs": [
+          "Puoi esportare tutti i tuoi dati finanziari come file JSON in qualsiasi momento tramite le Impostazioni dell'App. Il file esportato viene condiviso usando la funzionalità di condivisione nativa del tuo dispositivo. Non riceviamo né trattiamo i tuoi dati esportati.",
+          "Puoi anche importare dati da un backup precedente di Money2Time o migrare dall'app Money Manager. L'importazione sostituisce tutti i dati esistenti sul tuo dispositivo.",
+          "La Dashboard web è facoltativa. Per usarla, apri app.money2time.com su un computer e scansioni con l'App il codice che mostra. Il telefono e quel browser concordano quindi una chiave di crittografia che solo loro due possiedono. Finché la schermata Dashboard web dell'App e il browser sono entrambi aperti, l'App invia al browser una copia dei tuoi dati (gli stessi dati di un'esportazione, con i loghi, le icone e le foto di copertina che hai aggiunto, ma senza le foto delle ricevute e i codici QR di pagamento), cifrata end-to-end con AES-256-GCM. La copia transita attraverso un server che gestiamo su Cloudflare, il quale inoltra i dati cifrati man mano che arrivano e non li archivia. Noi non possiamo leggerli.",
+          "Il browser conserva l'ultima copia ricevuta, ancora cifrata, nel proprio spazio di archiviazione insieme alla chiave, finché non lo scolleghi dal browser o dall'App. Le modifiche che fai nella dashboard tornano al telefono, cifrate allo stesso modo, e l'App le salva solo mentre la sua schermata Dashboard web è aperta e solo da un browser a cui hai consentito di apportare modifiche. Il telefono comunica inoltre al browser se hai Money2Time Pro, in modo da sbloccare le dashboard Pro, e il suo identificatore casuale dell'App, per le analisi di utilizzo della dashboard. Non esiste alcun account: non conserviamo alcun indirizzo email e il server che inoltra i tuoi dati non conserva alcuna registrazione di quali telefoni e browser siano collegati."
+        ]
+      },
+      {
+        "title": "7. Eliminazione dei dati",
+        "paragraphs": [
+          "Hai sempre pieno controllo sui tuoi dati. Reimposta tutti i dati elimina in modo permanente dal tuo dispositivo tutte le transazioni, i conti, le categorie, le regole ricorrenti e le impostazioni della retribuzione. Reimposta solo transazioni cancella la cronologia delle transazioni mantenendo conti e categorie. La disinstallazione dell'App rimuove completamente il database locale e tutti i dati archiviati. Scollegare un browser dalla Dashboard web elimina la copia che conserva: subito se lo scolleghi dal browser, e alla connessione successiva se lo scolleghi dall'App. Anche cancellare i dati del sito di quel browser la elimina.",
+          "La reimpostazione dei dati all'interno dell'App non elimina lo stato dell'abbonamento detenuto da Apple/Google né i dati di analisi precedentemente inviati a PostHog / Google Analytics for Firebase. Per richiedere l'eliminazione dei dati di analisi, contattaci all'indirizzo email riportato sotto."
+        ]
+      },
+      {
+        "title": "8. Servizi di terze parti",
+        "paragraphs": [
+          "L'App non mostra pubblicità e non usa SDK pubblicitari."
+        ],
+        "table": {
+          "headers": [
+            "Servizio",
+            "Scopo",
+            "Dati condivisi"
+          ],
+          "rows": [
+            [
+              "PostHog / Google Analytics for Firebase",
+              "Analisi di utilizzo pseudonime",
+              "ID casuale dell'App, eventi di utilizzo delle funzionalità, preferenze"
+            ],
+            [
+              "RevenueCat",
+              "Gestione degli abbonamenti",
+              "ID casuale dell'App, stato dell'abbonamento"
+            ],
+            [
+              "Cloudflare (Workers, Durable Objects)",
+              "Connessione della Dashboard web, solo se la usi",
+              "I tuoi dati, cifrati end-to-end e solo in transito; dettagli di connessione come l'indirizzo IP, conservati per breve tempo nei log di Cloudflare"
+            ],
+            [
+              "Apple App Store / Google Play",
+              "Elaborazione dei pagamenti",
+              "Gestita direttamente da Apple/Google"
+            ]
+          ]
+        }
+      },
+      {
+        "title": "9. Sicurezza dei dati",
+        "paragraphs": [
+          "I tuoi dati finanziari sono archiviati in un database locale non cifrato, protetto dalla sicurezza integrata del tuo dispositivo. Quando usi la Dashboard web, i dati vengono cifrati sul telefono con AES-256-GCM, usando una chiave concordata dal telefono e dal browser tramite scambio di chiavi P-256, e inviati tramite HTTPS; il nostro server non ha mai la chiave. L'App usa solo algoritmi di crittografia standard e pubblicati."
+        ]
+      },
+      {
+        "title": "10. Privacy dei minori",
+        "paragraphs": [
+          "L'App non è destinata a minori di 13 anni. Non raccogliamo consapevolmente informazioni personali da minori di 13 anni. Se ritieni che un minore abbia fornito dati tramite l'App, contattaci e adotteremo misure per rimuovere tali informazioni."
+        ]
+      },
+      {
+        "title": "11. Modifiche a questa informativa",
+        "paragraphs": [
+          "Possiamo aggiornare periodicamente questa Informativa sulla privacy. Le modifiche saranno riportate in questa pagina con una data di Ultimo aggiornamento aggiornata. L'uso continuato dell'App dopo le modifiche costituisce accettazione dell'informativa aggiornata."
+        ]
+      }
+    ],
+    "contact": {
+      "title": "12. Contattaci",
+      "body": "Se hai domande su questa Informativa sulla privacy, hai bisogno di supporto o vuoi richiedere l'eliminazione dei dati di analisi, contattaci a:",
+      "formPrefix": "Puoi anche usare il",
+      "formLink": "modulo di contatto",
+      "formSuffix": "su questo sito."
+    }
+  },
+  "terms": {
+    "title": "Termini di utilizzo",
+    "lastUpdated": "Ultimo aggiornamento: 25 marzo 2026",
+    "privacyPolicyLabel": "Informativa sulla privacy",
+    "sections": [
+      {
+        "title": "Panoramica",
+        "paragraphs": [
+          "Questi Termini di utilizzo (Termini) regolano l'uso dell'applicazione mobile Money2Time (l'App), sviluppata e gestita da Nelson Gan. Scaricando o usando l'App, accetti di essere vincolato da questi Termini. Se non accetti, non usare l'App."
+        ]
+      },
+      {
+        "title": "1. Accettazione dei Termini",
+        "paragraphs": [
+          "Accedendo a Money2Time o usandola, confermi di avere almeno 13 anni e la capacità legale di stipulare questi Termini. Se usi l'App per conto di un'organizzazione, dichiari di avere l'autorità per vincolare tale organizzazione a questi Termini."
+        ]
+      },
+      {
+        "title": "2. Descrizione dell'App",
+        "paragraphs": [
+          "Money2Time è un'app di finanza personale che ti aiuta a comprendere il vero costo delle tue spese convertendole nelle ore equivalenti del tuo tempo, in base alla tua paga oraria. Le funzionalità principali includono:"
+        ],
+        "lists": [
+          [
+            "Monitoraggio di spese ed entrate su più conti",
+            "Conversione da denaro a tempo in base alle impostazioni della tua retribuzione",
+            "Regole per transazioni ricorrenti, come bollette e abbonamenti",
+            "Suddivisioni delle spese, approfondimenti e monitoraggio del sentiment",
+            "Esportazione e importazione dei dati locali",
+            "Notifiche personalizzabili per promemoria e riepiloghi"
+          ]
+        ]
+      },
+      {
+        "title": "3. Piani Free e Pro",
+        "paragraphs": [
+          "L'App è disponibile con modello freemium. Alcune funzionalità sono limitate nel piano gratuito e richiedono un abbonamento Pro attivo per essere sbloccate. Ci riserviamo il diritto di modificare in qualsiasi momento i limiti del piano gratuito o le funzionalità del piano Pro. Le modifiche sostanziali saranno comunicate tramite un aggiornamento dell'app o su questo sito web."
+        ],
+        "subsections": [
+          {
+            "title": "Piano Free",
+            "lists": [
+              [
+                "Fino a 5 conti",
+                "Fino a 9 categorie di spese/entrate",
+                "Fino a 5 regole per transazioni ricorrenti",
+                "Fino a 5 voci di paga oraria",
+                "Record di transazioni illimitati"
+              ]
+            ]
+          },
+          {
+            "title": "Piano Pro",
+            "lists": [
+              [
+                "Conti, categorie, regole ricorrenti e voci di paga oraria illimitati",
+                "Disponibile come abbonamento mensile, abbonamento annuale o acquisto a vita"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "title": "4. Acquisti in-app e abbonamenti",
+        "paragraphs": [
+          "Gli abbonamenti Pro e l'acquisto a vita vengono elaborati tramite Apple App Store o Google Play Store. Effettuando un acquisto, accetti i termini di pagamento del rispettivo store.",
+          "Gli abbonamenti sono fatturati in anticipo con ciclo mensile o annuale e si rinnovano automaticamente salvo annullamento almeno 24 ore prima della fine del periodo in corso. Le richieste di rimborso sono gestite da Apple o Google secondo le rispettive politiche di rimborso. Puoi ripristinare un acquisto precedente su un nuovo dispositivo usando Ripristina acquisti nelle impostazioni dell'App.",
+          "Un acquisto a vita concede l'accesso alle funzionalità Pro per l'intera durata dell'App. Non garantiamo che l'App continui a essere disponibile a tempo indeterminato."
+        ]
+      },
+      {
+        "title": "5. I tuoi dati",
+        "paragraphs": [
+          "Tutti i dati finanziari che inserisci, inclusi transazioni, conti, categorie, impostazioni della retribuzione e preferenze, sono archiviati localmente sul tuo dispositivo. Non abbiamo accesso ai tuoi dati finanziari e non li archiviamo su alcun server.",
+          "Sei l'unico responsabile della conservazione dei backup dei tuoi dati. Usa la funzione di esportazione integrata per creare un backup. Non siamo responsabili di eventuali perdite di dati causate da eliminazione dell'app, guasto del dispositivo o reimpostazione accidentale.",
+          "Per tutti i dettagli sul trattamento dei dati, consulta la nostra {privacyPolicy}."
+        ]
+      },
+      {
+        "title": "6. Uso consentito",
+        "paragraphs": [
+          "Accetti di non:"
+        ],
+        "lists": [
+          [
+            "Eseguire reverse engineering, decompilare o disassemblare l'App",
+            "Tentare di ottenere accesso non autorizzato a qualsiasi parte dell'App o dei relativi sistemi",
+            "Usare l'App per qualsiasi scopo illecito o in violazione di leggi applicabili",
+            "Ridistribuire, rivendere o concedere in sublicenza l'App o qualsiasi sua parte",
+            "Usare mezzi automatizzati per accedere all'App o interagire con essa"
+          ]
+        ]
+      },
+      {
+        "title": "7. Proprieta intellettuale",
+        "paragraphs": [
+          "L'App, inclusi design, codice, elementi grafici e contenuti, è di proprietà di Nelson Gan ed è protetta dal diritto d'autore e da altre leggi sulla proprietà intellettuale. Questi Termini non ti concedono alcun diritto di usare i nostri marchi, loghi o elementi del brand.",
+          "I tuoi dati finanziari appartengono a te. Usando l'App, non ci concedi alcun diritto sui tuoi dati personali."
+        ]
+      },
+      {
+        "title": "8. Esclusione di garanzie",
+        "paragraphs": [
+          "L'App è fornita così com'è e secondo disponibilità, senza garanzie di alcun tipo, espresse o implicite, incluse commerciabilità, idoneità a uno scopo particolare o non violazione.",
+          "Money2Time è uno strumento di produttività personale e non è un consulente finanziario, un contabile o un servizio finanziario regolamentato. Nulla nell'App costituisce consulenza finanziaria. Per decisioni finanziarie dovresti consultare un professionista qualificato.",
+          "Non garantiamo che l'App sia priva di errori, ininterrotta o priva di bug."
+        ]
+      },
+      {
+        "title": "9. Limitazione di responsabilità",
+        "paragraphs": [
+          "Nella massima misura consentita dalla legge applicabile, non saremo responsabili per danni indiretti, incidentali, speciali, consequenziali o punitivi derivanti dall'uso o dall'impossibilita di usare l'App, inclusi perdita di dati, decisioni finanziarie prese in base ai risultati forniti dall'App o problemi del dispositivo.",
+          "La nostra responsabilità complessiva nei tuoi confronti per qualsiasi reclamo derivante da questi Termini o dall'uso dell'App non supererà l'importo pagato per il periodo corrente del tuo abbonamento Pro, oppure $10 USD se usi il piano gratuito."
+        ]
+      },
+      {
+        "title": "10. Risoluzione",
+        "paragraphs": [
+          "Possiamo sospendere o interrompere il tuo accesso all'App in qualsiasi momento, con o senza motivo, e con o senza preavviso. In caso di risoluzione, il tuo diritto di usare l'App cessa immediatamente. Poiché i tuoi dati sono archiviati localmente, resteranno sul tuo dispositivo finché non disinstallerai l'App o non li reimposterai manualmente.",
+          "Puoi smettere di usare l'App in qualsiasi momento disinstallandola."
+        ]
+      },
+      {
+        "title": "11. Modifiche a questi Termini",
+        "paragraphs": [
+          "Possiamo aggiornare periodicamente questi Termini. Quando lo faremo, aggiorneremo la data di Ultimo aggiornamento nella parte superiore di questa pagina. L'uso continuato dell'App dopo le modifiche costituisce accettazione dei Termini rivisti. Per modifiche sostanziali, faremo sforzi ragionevoli per informarti tramite un aggiornamento dell'app o un avviso su questo sito web."
+        ]
+      },
+      {
+        "title": "12. Legge applicabile",
+        "paragraphs": [
+          "Questi Termini sono regolati e interpretati in conformità alle leggi di Singapore, senza riguardo alle disposizioni sui conflitti di legge. Qualsiasi controversia derivante da questi Termini sarà soggetta alla giurisdizione esclusiva dei tribunali di Singapore."
+        ]
+      }
+    ],
+    "contact": {
+      "title": "13. Contattaci",
+      "body": "Se hai domande su questi Termini, contattaci a:"
+    }
+  },
+  "dataDeletion": {
+    "title": "Richiesta di eliminazione dei dati",
+    "lastUpdated": "Ultimo aggiornamento: 20 ottobre 2026",
+    "intro": "Money2Time è un'app local-first: tutti i tuoi dati finanziari sono archiviati solo sul tuo dispositivo e non sono mai archiviati sui nostri server. Questa pagina spiega come richiedere l'eliminazione dei dati associati all'app Money2Time, inclusi i passaggi per richiedere l'eliminazione e quali tipi di dati vengono eliminati o conservati, insieme agli eventuali periodi di conservazione.",
+    "sections": [
+      {
+        "title": "Come richiedere l'eliminazione dei dati",
+        "subsections": [
+          {
+            "title": "Elimina i dati archiviati sul tuo dispositivo",
+            "paragraphs": [
+              "Quasi tutti i tuoi dati, inclusi tutti i tuoi dati finanziari, sono archiviati solo sul tuo dispositivo. Puoi eliminarli tu stesso in qualsiasi momento:"
+            ],
+            "lists": [
+              [
+                "Apri l'app Money2Time e vai su Impostazioni.",
+                "Tocca \"Reimposta tutti i dati\" per eliminare in modo permanente tutte le transazioni, i conti, le categorie, le regole ricorrenti e le impostazioni dello stipendio.",
+                "In alternativa, disinstalla l'app per rimuovere completamente il database locale e tutti i dati archiviati."
+              ]
+            ]
+          },
+          {
+            "title": "Elimina la copia in un browser collegato",
+            "paragraphs": [
+              "Se usi la Dashboard web, ogni browser che hai collegato conserva l'ultima copia inviata dal telefono, cifrata. Per eliminarla:"
+            ],
+            "lists": [
+              [
+                "Nel browser, apri app.money2time.com e scegli \"Scollega questo browser\". La copia e la sua chiave vengono eliminate subito.",
+                "Oppure, nell'app Money2Time, vai su Impostazioni > Dashboard web e tocca \"Scollega\" accanto al browser. Il browser elimina la sua copia alla connessione successiva.",
+                "Anche cancellare i dati del sito app.money2time.com nel browser la elimina."
+              ]
+            ]
+          },
+          {
+            "title": "Richiedi l'eliminazione dei dati di analisi e abbonamento",
+            "paragraphs": [
+              "Per richiedere l'eliminazione dei dati di analisi o abbonamento associati all'identificatore casuale della tua App, contattaci:"
+            ],
+            "lists": [
+              [
+                "Inviaci un'email all'indirizzo qui sotto con oggetto \"Data Deletion Request\", oppure usa il modulo di contatto su questo sito.",
+                "Usa il pulsante di copia accanto a ID utente in Settings > Display e includi l'ID completo, così possiamo individuare i dati associati alla tua App.",
+                "Elaboreremo la tua richiesta e ne confermeremo il completamento entro 30 giorni."
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Quali dati vengono eliminati o conservati",
+        "paragraphs": [
+          "La tabella seguente riassume cosa accade a ogni tipo di dato quando richiedi l'eliminazione e per quanto tempo i dati vengono conservati."
+        ],
+        "table": {
+          "headers": [
+            "Tipo di dato",
+            "Azione",
+            "Periodo di conservazione"
+          ],
+          "rows": [
+            [
+              "Dati finanziari sul dispositivo (transazioni, conti, categorie, regole ricorrenti, impostazioni dello stipendio)",
+              "Eliminati",
+              "Rimossi immediatamente quando reimposti i dati o disinstalli l'app. Non conserviamo nulla."
+            ],
+            [
+              "Copia della Dashboard web in un browser che hai collegato",
+              "Eliminati",
+              "Rimossa da quel browser quando lo scolleghi o cancelli i dati del sito. I nostri server non la archiviano mai, quindi non conserviamo nulla."
+            ],
+            [
+              "Dati di analisi pseudonimi (PostHog / Google Analytics for Firebase)",
+              "Eliminati su richiesta",
+              "Eliminati entro 30 giorni dalla tua richiesta."
+            ],
+            [
+              "Dati di abbonamento (RevenueCat, Apple, Google)",
+              "Conservati ove richiesto",
+              "Conservati da Apple o Google per obblighi di fatturazione, fiscali e legali, e gestiti tramite il tuo account Apple o Google."
+            ]
+          ]
+        }
+      },
+      {
+        "title": "Dati che non conserviamo",
+        "paragraphs": [
+          "Money2Time non richiede un account e non memorizza il tuo nome, email, Apple ID, account Google o dettagli di pagamento sui nostri server. Poiché i tuoi dati finanziari non sono mai archiviati sui nostri server, anche quando usi la Dashboard web, non possiamo accedervi né eliminarli per te.",
+          "I record di abbonamento e pagamento detenuti da Apple o Google sono al di fuori del nostro controllo e vengono gestiti direttamente tramite il tuo account Apple o Google."
+        ]
+      }
+    ],
+    "contact": {
+      "title": "Contattaci",
+      "body": "Per richiedere l'eliminazione dei dati di analisi o abbonamento, o per qualsiasi domanda, contattaci a:",
+      "formPrefix": "Puoi anche usare il",
+      "formLink": "modulo di contatto",
+      "formSuffix": "su questo sito."
+    }
+  },
+  "costInHours": {
+    "eyebrow": "Salari in ore",
+    "title": "Cosa compra un'ora di lavoro, Paese per Paese",
+    "intro": "Ogni prezzo ha un secondo numero: il tempo che hai lavorato per pagarlo. Questa pagina mette il salario ufficiale di ogni Paese accanto a un prodotto che è lo stesso ovunque, così si può confrontare cosa compra un'ora senza discutere prima di cosa c'era nel paniere.",
+    "compare": {
+      "base": "Riferimento",
+      "with": "Confronta con",
+      "measure": "Cosa misura",
+      "caption": "Salario pubblicato e il lavoro che costa un Big Mac, in due Paesi",
+      "priceSource": "Prezzi del Big Mac:"
+    },
+    "metrics": {
+      "workPerBigMac": "Lavoro per un Big Mac",
+      "bigMacPrice": "Prezzo del Big Mac",
+      "payPerHour": "Paga oraria",
+      "payPerHourUsd": "Paga oraria in dollari USA",
+      "bigMacsPerMonth": "Big Mac che compra un mese di stipendio",
+      "workPerLitre": "Lavoro per litro di benzina",
+      "workPer100kWh": "Lavoro per {kwh} kWh di elettricità"
+    },
+    "periods": {
+      "hour": "all'ora",
+      "week": "a settimana",
+      "month": "al mese",
+      "year": "all'anno"
+    },
+    "measures": {
+      "median": "Mediana",
+      "average": "Media"
+    },
+    "scopes": {
+      "allEmployees": "tutti i dipendenti",
+      "allWorkers": "tutti gli occupati",
+      "citizens": "cittadini",
+      "formalSector": "settore formale, 10+ addetti",
+      "fullTimeEmployees": "dipendenti a tempo pieno",
+      "fullTimeResidents": "residenti a tempo pieno",
+      "regularSalaried": "dipendenti stabili",
+      "wageAndSalary": "lavoratori dipendenti",
+      "employees": "dipendenti",
+      "employeesNet": "dipendenti, al netto delle imposte",
+      "employedPersons": "occupati",
+      "formalNonAgri": "settore formale non agricolo",
+      "fullTimeEquivalent": "dipendenti equivalenti a tempo pieno",
+      "urbanNonPrivate": "unità urbane non private"
+    },
+    "allMarkets": {
+      "title": "Tutti i Paesi, in classifica",
+      "intro": "Ordinati per quanto lo stipendio deve lavorare per un Big Mac. Conviene leggere prima la terza colonna: sei di queste cifre sono mediane e quattro sono medie, e le medie stanno più in alto perché la parte alta le tira su.",
+      "caption": "Cifre salariali pubblicate e il lavoro che costa un Big Mac, per Paese",
+      "country": "Paese",
+      "pay": "Salario pubblicato",
+      "basis": "Cosa misura",
+      "hourly": "All'ora",
+      "effort": "Lavoro per un Big Mac",
+      "youAreHere": "Tu"
+    },
+    "notes": {
+      "title": "Come leggere questi dati",
+      "method": {
+        "title": "Come sono calcolate le ore",
+        "body": "Dove un istituto pubblica un dato orario, quello viene usato così com'è. Dove pubblica un dato settimanale o mensile, si divide per una settimana di {hours} ore. Stats NZ pubblica entrambi, e i due coincidono a meno di cinquanta centesimi."
+      },
+      "basket": {
+        "title": "Perché un panino e non un paniere",
+        "body": "Un Big Mac, un litro di benzina 95 ottani e un chilowattora domestico sono le stesse cose in ognuno di questi Paesi, ciascuno rilevato da un solo editore in un'unica data. In India, dove McDonald's non vende il Big Mac di manzo, The Economist rileva il Maharaja Mac di pollo. Un paniere locale più ampio coprirebbe più cose, ma mangiare fuori non significa lo stesso a Manila e a Melbourne, e confrontarli direbbe più sul paniere che sul denaro."
+      },
+      "comparability": {
+        "title": "I salari non sono davvero confrontabili",
+        "body": "Nessuno pubblica un'unica tabella di salario mediano che copra questi Paesi, quindi ogni cifra viene dal suo istituto nazionale e conta un gruppo diverso. Sei sono mediane, quattro sono medie. Leggi le differenze come indicative, non esatte."
+      },
+      "grossPay": {
+        "title": "Sono cifre al lordo",
+        "body": "I salari pubblicati sono lordi. Quello che arriva davvero sul conto è meno, quindi le tue ore reali sono più di quelle di questa pagina."
+      }
+    },
+    "sources": {
+      "title": "Da dove vengono le cifre",
+      "bigMac": "Prezzi del Big Mac e tassi di cambio:",
+      "wages": "Salari, Paese per Paese:",
+      "energy": "Prezzi di benzina ed elettricità:"
+    },
+    "cta": {
+      "body": "L'app fa lo stesso con il tuo stipendio invece che con quello del Paese. Inserisci il netto e ogni acquisto guadagna un secondo numero.",
+      "link": "Guarda come funziona"
+    }
+  },
+  "tutorials": {
+    "eyebrow": "Guide",
+    "title": "Tutorial",
+    "intro": "Percorsi brevi, immagine per immagine, per tutto quello che fa Money2Time. Ogni screenshot è l'app vera, con il pulsante da toccare cerchiato in rosso.",
+    "searchPlaceholder": "Cerca tutorial",
+    "clear": "Cancella",
+    "emptyTitle": "Nessun risultato",
+    "emptyDescription": "Prova con una parola più corta o con il nome della schermata che cerchi.",
+    "stepCount": "{count} passaggi",
+    "stepCounter": "{current} di {total}",
+    "badgePro": "PRO",
+    "badgeIos": "iPhone",
+    "openInApp": "Apri nell'app",
+    "previous": "Precedente",
+    "next": "Successivo",
+    "category": {
+      "start": "Inizia",
+      "logging": "Registrare spese",
+      "organize": "Organizzare",
+      "plan": "Pianificare",
+      "share": "Dividere e saldare",
+      "insights": "Capire",
+      "data": "I tuoi dati"
+    }
+  },
+  "dashboard": {
+    "loading": "Apertura della dashboard…",
+    "units": {
+      "minutes": "{m} min",
+      "hours": "{h} h",
+      "hoursMinutes": "{h} h {m} min",
+      "days": "{d} g",
+      "daysHours": "{d} g {h} h"
+    },
+    "nav": {
+      "label": "Dashboard",
+      "menu": "Menu",
+      "openMenu": "Apri il menu",
+      "closeMenu": "Chiudi il menu",
+      "groups": {
+        "insights": "Analisi",
+        "wealth": "Patrimonio",
+        "planning": "Pianificazione",
+        "organize": "Organizza"
+      }
+    },
+    "period": {
+      "label": "Periodo",
+      "previous": "Periodo precedente",
+      "next": "Periodo successivo",
+      "asOf": "Al {date}",
+      "presets": {
+        "month": "Mese",
+        "3m": "3M",
+        "6m": "6M",
+        "12m": "12M",
+        "ytd": "Da inizio anno",
+        "year": "Anno",
+        "all": "Tutto"
+      }
+    },
+    "mode": {
+      "label": "Mostra gli importi in",
+      "hours": "Ore"
+    },
+    "common": {
+      "income": "Entrate",
+      "spending": "Spese",
+      "net": "Netto",
+      "saved": "Risparmiato",
+      "viewAll": "Vedi tutto",
+      "vsPrevious": "rispetto al precedente",
+      "uncategorized": "Senza categoria",
+      "other": "Altro",
+      "total": "Totale",
+      "average": "Media",
+      "transactions": "{count, plural, one {# transazione} many {# di transazioni} other {# transazioni}}",
+      "accountTypes": {
+        "debit": "Conto",
+        "credit": "Carta di credito",
+        "loan": "Prestito",
+        "goal": "Obiettivo",
+        "cash": "Contanti",
+        "savings": "Risparmi",
+        "investment": "Investimenti"
+      },
+      "viewFailed": "Non è stato possibile mostrare questa pagina con i tuoi dati. Le altre pagine funzionano ancora."
+    },
+    "views": {
+      "overview": {
+        "nav": "Panoramica",
+        "title": "Panoramica",
+        "subtitle": "Dove sono andati i tuoi soldi e le tue ore"
+      },
+      "cash-flow": {
+        "nav": "Flusso di cassa",
+        "title": "Flusso di cassa",
+        "subtitle": "Soldi in entrata, in uscita e quanto è rimasto"
+      },
+      "spending": {
+        "nav": "Spese",
+        "title": "Spese",
+        "subtitle": "Ogni categoria, fino alla singola transazione"
+      },
+      "income": {
+        "nav": "Entrate",
+        "title": "Entrate",
+        "subtitle": "Da dove sono arrivati i tuoi soldi"
+      },
+      "trends": {
+        "nav": "Tendenze",
+        "title": "Tendenze",
+        "subtitle": "Come cambia ogni categoria da un mese all'altro"
+      },
+      "calendar": {
+        "nav": "Calendario",
+        "title": "Calendario",
+        "subtitle": "Le spese giorno per giorno"
+      },
+      "transactions": {
+        "nav": "Transazioni",
+        "title": "Transazioni",
+        "subtitle": "Cerca e filtra tutto ciò che hai registrato"
+      },
+      "accounts": {
+        "nav": "Conti",
+        "title": "Conti",
+        "subtitle": "I saldi di tutti i conti"
+      },
+      "net-worth": {
+        "nav": "Patrimonio netto",
+        "title": "Patrimonio netto",
+        "subtitle": "Quello che possiedi, meno quello che devi"
+      },
+      "budgets": {
+        "nav": "Budget",
+        "title": "Budget",
+        "subtitle": "Il piano a confronto con quello che è successo davvero"
+      },
+      "recurring": {
+        "nav": "Ricorrenti",
+        "title": "Ricorrenti",
+        "subtitle": "Abbonamenti e bollette che si ripetono"
+      },
+      "goals": {
+        "nav": "Obiettivi e prestiti",
+        "title": "Obiettivi e prestiti",
+        "subtitle": "I progressi verso traguardi ed estinzioni"
+      },
+      "time": {
+        "nav": "Costo in tempo",
+        "title": "Costo in tempo",
+        "subtitle": "Le tue spese, in ore della tua vita"
+      },
+      "trips": {
+        "nav": "Viaggi",
+        "title": "Viaggi",
+        "subtitle": "Quanto è costato ogni viaggio, in soldi e giornate di lavoro"
+      },
+      "items": {
+        "nav": "Oggetti",
+        "title": "Oggetti",
+        "subtitle": "Quanto costano al giorno le cose che possiedi"
+      },
+      "splits": {
+        "nav": "Conti divisi",
+        "title": "Conti divisi",
+        "subtitle": "Chi ti deve ancora dei soldi"
+      },
+      "mood": {
+        "nav": "Umore e abitudini",
+        "title": "Umore e abitudini",
+        "subtitle": "Come ti sei sentito dopo gli acquisti e quando li fai"
+      },
+      "categories": {
+        "nav": "Categorie",
+        "title": "Categorie",
+        "subtitle": "Aggiungi, rinomina e organizza le categorie"
+      }
+    },
+    "overview": {
+      "spent": "Speso",
+      "earned": "Guadagnato",
+      "saved": "Risparmiato",
+      "overspent": "Speso più delle entrate",
+      "savingsRate": "Tasso di risparmio: {rate}",
+      "noIncome": "Nessuna entrata in questo periodo",
+      "netWorth": "Patrimonio netto",
+      "netWorthNote": "Su {count, plural, one {# conto} many {# di conti} other {# conti}} inclusi nei totali",
+      "cashFlowTitle": "Flusso di cassa",
+      "cashFlowSubtitle": "I 12 mesi fino a questo periodo",
+      "paceTitle": "Ritmo di spesa",
+      "thisMonth": "Questo mese",
+      "lastMonth": "Mese scorso",
+      "dayN": "Giorno {day}",
+      "paceBehind": "{amount} in meno rispetto allo stesso punto del mese scorso.",
+      "paceAhead": "{amount} in più rispetto allo stesso punto del mese scorso.",
+      "topCategories": "Categorie principali",
+      "biggestExpenses": "Spese più alte",
+      "upcoming": "Prossimi ricorrenti",
+      "nextOn": "Prossimo il {date}",
+      "noSpending": "Nessuna spesa in questo periodo",
+      "noRecurring": "Nessuna regola ricorrente attiva",
+      "timeTitle": "Il tuo tempo",
+      "timeBody": "Le spese di questo periodo hanno richiesto <strong>{hours}</strong> di lavoro per essere pagate.",
+      "workShare": "Quota delle ore lavorate",
+      "workShareNote": "Su circa {worked} retribuite in questo periodo",
+      "noWage": "Imposta un valore orario nell'app per vederlo in ore.",
+      "accountsTitle": "Conti più grandi"
+    },
+    "cashFlow": {
+      "savingsRate": "Tasso di risparmio: {rate}",
+      "noIncome": "Nessuna entrata in questo periodo",
+      "netPerDay": "Netto al giorno",
+      "avgNet": "Netto medio al mese",
+      "daysCount": "{count, plural, one {In # giorno} many {In # di giorni} other {In # giorni}}",
+      "monthsCount": "{count, plural, one {In # mese} many {In # di mesi} other {In # mesi}}",
+      "dailyTitle": "Giorno per giorno",
+      "monthlyTitle": "Mese per mese",
+      "sankeyTitle": "Dove sono andati i soldi",
+      "sankeySubtitle": "Le entrate a sinistra, le spese e i risparmi a destra",
+      "fromSavings": "Dai risparmi",
+      "empty": "Nessuna entrata o spesa in questo periodo",
+      "savingsRateTitle": "Tasso di risparmio",
+      "savingsRateSubtitle": "Quota delle entrate messa da parte ogni mese; il 20% è un obiettivo comune",
+      "tableTitle": "Riepilogo mensile",
+      "month": "Mese",
+      "rate": "Tasso"
+    },
+    "breakdown": {
+      "totalSpent": "Totale speso",
+      "totalEarned": "Totale guadagnato",
+      "perDay": "Al giorno",
+      "overDays": "{count, plural, one {In # giorno} many {In # di giorni} other {In # giorni}}",
+      "count": "Transazioni",
+      "avgEach": "{amount} in media",
+      "largestCategory": "Categoria più grande",
+      "byCategory": "Per categoria",
+      "subcategories": "Sottocategorie",
+      "clickToDrill": "Scegli una categoria per vederne le sottocategorie",
+      "allCategories": "Tutte le categorie",
+      "empty": "Niente qui in questo periodo",
+      "byDay": "Per giorno",
+      "byMonth": "Per mese",
+      "monthlyAverage": "{amount} al mese in media",
+      "topMerchants": "Posti principali",
+      "topMerchantsNote": "Raggruppati in base alla nota di ogni transazione",
+      "biggestPurchases": "Acquisti più grandi",
+      "biggestPayments": "Pagamenti più grandi",
+      "byWeekday": "Per giorno della settimana",
+      "byWeekdayNote": "Totale in questo periodo per ogni giorno della settimana",
+      "transactionsIn": "Transazioni in {name}",
+      "allTransactions": "Tutte le transazioni"
+    },
+    "transactions": {
+      "search": "Cerca note, categorie o importi",
+      "type": "Tipo",
+      "types": {
+        "all": "Tutti i tipi",
+        "expense": "Spese",
+        "income": "Entrate",
+        "transfer": "Trasferimenti"
+      },
+      "category": "Categoria",
+      "allCategories": "Tutte le categorie",
+      "account": "Conto",
+      "allAccounts": "Tutti i conti",
+      "feeling": "Sensazione",
+      "allFeelings": "Qualsiasi sensazione",
+      "feelings": {
+        "happy": "Bella sensazione",
+        "neutral": "Né bene né male",
+        "sad": "Meglio di no"
+      },
+      "empty": "Nessuna transazione corrisponde",
+      "newer": "Più recenti",
+      "older": "Meno recenti",
+      "page": "Pagina {page} di {pages}"
+    },
+    "trends": {
+      "gridTitle": "Categoria per mese",
+      "gridSubtitle": "Più scuro significa più speso in quel mese. Scegli una riga per vederla in grafico.",
+      "category": "Categoria",
+      "empty": "Nessuna spesa in questi mesi",
+      "lineSubtitle": "{amount} al mese in media",
+      "moversTitle": "Variazioni maggiori",
+      "moversSubtitle": "Rispetto al periodo precedente della stessa durata",
+      "noMovers": "Non è cambiato molto"
+    },
+    "calendar": {
+      "perDay": "Media al giorno",
+      "noSpendDays": "Giorni senza spese",
+      "noSpend": "Nessuna spesa",
+      "ofDays": "{count, plural, one {Su # giorno finora} many {Su # di giorni finora} other {Su # giorni finora}}",
+      "bestStreak": "Serie più lunga senza spese",
+      "daysValue": "{count, plural, one {# giorno} many {# di giorni} other {# giorni}}",
+      "bestStreakNote": "Negli ultimi 12 mesi",
+      "busiest": "Giorno più costoso",
+      "monthSubtitle": "Scegli un giorno per vedere cos'è successo",
+      "pickDay": "Ultimo di questo mese",
+      "pickDayNote": "Scegli un giorno sul calendario per vedere solo quello",
+      "yearTitle": "Gli ultimi 12 mesi",
+      "yearSubtitle": "Ogni quadratino è un giorno; più scuro significa più speso"
+    },
+    "accounts": {
+      "assets": "Patrimonio",
+      "debts": "Debiti",
+      "netWorth": "Patrimonio netto",
+      "inTotals": "{count, plural, one {# conto nei totali} many {# di conti nei totali} other {# conti nei totali}}",
+      "excluded": "{count, plural, =0 {Tutti i conti contano} one {# conto escluso dai totali} many {# di conti esclusi dai totali} other {# conti esclusi dai totali}}",
+      "ungrouped": "Altri conti",
+      "notInTotals": "Esclusi dai totali",
+      "owed": "da pagare",
+      "owedNow": "Da pagare oggi",
+      "balanceNow": "Saldo di oggi",
+      "lastActivity": "ultima attività {date}",
+      "statementDays": "Estratto conto il giorno {statement}, scadenza il giorno {due}",
+      "statementDaysAfter": "Estratto il giorno {statement}, scadenza {days} giorni dopo",
+      "activity": "Attività",
+      "empty": "Ancora nessun conto"
+    },
+    "netWorth": {
+      "now": "Patrimonio netto",
+      "inHours": "{hours} di lavoro alla tariffa di oggi",
+      "change": "Variazione",
+      "since": "Da {month}",
+      "bestMonth": "Mese migliore",
+      "debts": "Debiti",
+      "debtNote": "Carte di credito e prestiti nei totali",
+      "assets": "Patrimonio",
+      "chartTitle": "Attività, debiti e patrimonio netto",
+      "chartSubtitle": "Saldi di fine mese dei conti inclusi nei totali, ai cambi di oggi",
+      "mixTitle": "Dove sono le tue attività",
+      "mixSubtitle": "Per gruppo di conti",
+      "ungrouped": "Altro",
+      "empty": "Ancora nessuna attività",
+      "monthlyChange": "Variazione di ogni mese"
+    },
+    "budgets": {
+      "emptyTitle": "Ancora nessun budget",
+      "emptyBody": "Imposta un budget mensile nell'app e lo vedrai qui.",
+      "month": "Mese",
+      "budget": "Budget",
+      "spent": "Speso",
+      "ofBudget": "{pct} del budget",
+      "left": "Ancora da spendere",
+      "over": "Budget superato",
+      "perDayLeft": "{amount} al giorno per il resto del mese",
+      "pace": "Mese trascorso",
+      "paceNote": "Giorno {day} di {days}",
+      "linesTitle": "Categorie",
+      "linesSubtitle": "La linea su ogni barra indica a che punto sei del mese",
+      "overall": "Budget complessivo",
+      "overBy": "{amount} in più",
+      "leftOf": "{amount} rimasti",
+      "aheadOfPace": "oltre il ritmo previsto",
+      "unbudgetedCounted": "{amount} sono stati spesi fuori da queste categorie e contano nel budget.",
+      "unbudgetedNot": "{amount} sono stati spesi fuori da queste categorie e non vengono conteggiati.",
+      "rateNote": "Le spese in altre valute vengono convertite a 1 {currency} = {rate} {main}.",
+      "approxLeft": "Restano circa {amount}.",
+      "approxOver": "Sono circa {amount} in più.",
+      "unconverted": "{count, plural, one {# spesa non è ancora conteggiata} many {# di spese non sono ancora conteggiate} other {# spese non sono ancora conteggiate}}: manca il tasso di cambio per {currency}.",
+      "historyTitle": "Budget e spesa mese per mese",
+      "historyInMain": "In {currency}, per confrontare i mesi con budget in altre valute"
+    },
+    "recurring": {
+      "emptyTitle": "Nessuna regola ricorrente",
+      "emptyBody": "Gli abbonamenti e le bollette che imposti come ricorrenti nell'app compaiono qui.",
+      "perMonth": "Costi fissi al mese",
+      "perYear": "All'anno",
+      "clockTitle": "Bollette pagate entro",
+      "clockNote": "Partendo dalle 9:00, le prime {hours} di ogni giorno lavorativo le coprono ({day} giorni)",
+      "active": "Regole attive",
+      "pausedCount": "{count, plural, =0 {Nessuna in pausa} one {# in pausa} many {# in pausa} other {# in pausa}}",
+      "listTitle": "Attive",
+      "listSubtitle": "In ordine di costo mensile",
+      "cadence": {
+        "daily": "{count, plural, one {Ogni giorno} many {Ogni # di giorni} other {Ogni # giorni}}",
+        "weekly": "{count, plural, one {Ogni settimana} many {Ogni # di settimane} other {Ogni # settimane}}",
+        "monthly": "{count, plural, one {Ogni mese} many {Ogni # di mesi} other {Ogni # mesi}}",
+        "yearly": "{count, plural, one {Ogni anno} many {Ogni # di anni} other {Ogni # anni}}"
+      },
+      "next": "prossimo {date}",
+      "transfer": "Trasferimento",
+      "yearHours": "{hours} di lavoro all'anno",
+      "upcomingTitle": "In arrivo",
+      "pausedTitle": "In pausa"
+    },
+    "goals": {
+      "emptyTitle": "Nessun obiettivo o prestito",
+      "emptyBody": "Gli obiettivi di risparmio e i prestiti che segui nell'app compaiono qui.",
+      "goalsTitle": "Obiettivi",
+      "achieved": "Raggiunto",
+      "left": "Ancora da risparmiare",
+      "progress": "Progresso",
+      "byDate": "Per arrivarci entro il {date}",
+      "perMonthNeeded": "{amount} al mese",
+      "loansTitle": "Prestiti",
+      "model": {
+        "flat": "Tasso flat",
+        "reducing": "Tasso sul residuo"
+      },
+      "leftToPay": "Ancora da pagare",
+      "leftInHours": "{hours} di lavoro",
+      "paidOff": "Estinto",
+      "instalments": "{paid} rate su {total}",
+      "principal": "Importo preso in prestito",
+      "owedNow": "Capitale residuo",
+      "paidSoFar": "Pagato finora",
+      "monthly": "Rata mensile",
+      "rate": "Tasso",
+      "interestCharged": "Interessi addebitati",
+      "nextDue": "Prossimo pagamento",
+      "payoff": "Estinto entro",
+      "paymentsLeft": "Pagamenti rimasti",
+      "netNote": "I dati dei prestiti seguono l'app: gli interessi si aggiungono ogni mese a partire dal giorno in cui hai creato il prestito."
+    },
+    "time": {
+      "spentHours": "Ore di lavoro spese",
+      "share": "Quota delle ore lavorate",
+      "shareNote": "Su circa {hours} lavorate",
+      "workdays": "Giornate di lavoro",
+      "workdaysValue": "{count, plural, one {# giornata di lavoro} many {# di giornate di lavoro} other {# giornate di lavoro}}",
+      "workdayLength": "A {hours} per giornata di lavoro",
+      "hourlyValue": "Valore orario",
+      "perHour": "all'ora, in base al tuo ultimo stipendio",
+      "chartTitle": "Ore spese e ore lavorate",
+      "chartSubtitle": "Le spese di ogni mese, calcolate con lo stipendio di quel mese",
+      "hoursSpent": "Ore spese",
+      "hoursWorked": "Ore lavorate",
+      "categoriesTitle": "Categorie in giornate di lavoro",
+      "categoriesSubtitle": "Quante giornate di lavoro è costata ciascuna",
+      "empty": "Nessuna spesa in questo periodo",
+      "runwayTitle": "Autonomia di libertà",
+      "daysValue": "{count, plural, one {# giorno} many {# di giorni} other {# giorni}}",
+      "runwayBody": "Per quanto tempo basterebbero {liquid} nei conti di tutti i giorni, al tuo ritmo recente di {daily} al giorno, senza lavorare.",
+      "regretTitle": "Ore spese in rimpianti",
+      "regretBody": "{count, plural, =0 {Nessun acquisto segnato come \"Meglio di no\" in questo periodo.} one {Su # acquisto che avresti preferito non fare.} many {Su # di acquisti che avresti preferito non fare.} other {Su # acquisti che avresti preferito non fare.}}",
+      "biggestTitle": "Più alti in ore",
+      "biggestSubtitle": "Gli acquisti che hanno richiesto più tempo per essere guadagnati",
+      "wageTitle": "Il tuo valore orario nel tempo",
+      "wageSubtitle": "Dagli stipendi salvati nell'app",
+      "noWage": "Imposta un valore orario nell'app per vedere le tue spese in ore."
+    },
+    "trips": {
+      "emptyTitle": "Ancora nessun viaggio",
+      "emptyBody": "Gli album che crei nell'app per i viaggi compaiono qui con quanto è costato ciascuno.",
+      "count": "Viaggi",
+      "countries": "{count, plural, =0 {Nessun paese impostato} one {# paese} many {# di paesi} other {# paesi}}",
+      "total": "Speso in viaggi",
+      "workdays": "In giornate di lavoro",
+      "workdaysValue": "{count, plural, one {# giornata di lavoro} many {# di giornate di lavoro} other {# giornate di lavoro}}",
+      "workdaysNote": "In tutti i viaggi",
+      "current": "In corso",
+      "perDay": "{amount} al giorno",
+      "breakdown": "Per categoria",
+      "transactionsTitle": "Transazioni",
+      "pick": "Scegli un viaggio per vederne il dettaglio."
+    },
+    "items": {
+      "emptyTitle": "Nessun oggetto",
+      "emptyBody": "Gli oggetti che monitori nell'app compaiono qui con il loro costo al giorno.",
+      "value": "Valore posseduto",
+      "count": "{count, plural, one {# oggetto} many {# di oggetti} other {# oggetti}}",
+      "perDay": "Costo al giorno",
+      "perMonth": "{amount} al mese",
+      "workPerDay": "Lavoro al giorno",
+      "workPerDayNote": "Per pagare tutto ciò che possiedi",
+      "listTitle": "Tutto ciò che possiedi",
+      "listSubtitle": "Il prezzo d'acquisto ripartito sui giorni in cui lo hai avuto",
+      "bought": "Comprato il {date} per {price}",
+      "owned": "{count, plural, one {# giorno} many {# di giorni} other {# giorni}} di possesso",
+      "sold": "venduto per {price}",
+      "perDayValue": "{amount}/giorno",
+      "workValue": "{time} di lavoro al giorno"
+    },
+    "splits": {
+      "emptyTitle": "Nessun conto diviso",
+      "emptyBody": "I conti che dividi con gli amici nell'app compaiono qui.",
+      "owedToYou": "Ti devono",
+      "people": "{count, plural, =0 {Tutto saldato} one {Da # persona} many {Da # di persone} other {Da # persone}}",
+      "settled": "Quote saldate",
+      "ofShares": "{count, plural, one {Su # quota} many {Su # di quote} other {Su # quote}}",
+      "bills": "Conti divisi",
+      "billsNote": "Transazioni che hai condiviso",
+      "byPerson": "Chi ti deve dei soldi",
+      "allSettled": "Tutti ti hanno restituito i soldi",
+      "open": "{count, plural, one {# quota aperta} many {# di quote aperte} other {# quote aperte}}",
+      "billsTitle": "Transazioni condivise",
+      "unnamed": "Qualcuno"
+    },
+    "mood": {
+      "feelings": {
+        "happy": "Bella sensazione",
+        "neutral": "Né bene né male",
+        "sad": "Meglio di no"
+      },
+      "shareSub": "{amount} · {count, plural, one {# acquisto} many {# di acquisti} other {# acquisti}}",
+      "monthlyTitle": "Come ti sei sentito dopo gli acquisti",
+      "monthlySubtitle": "Numero di acquisti ogni mese, per sensazione",
+      "regretsTitle": "Meglio di no",
+      "regretsSubtitle": "Gli acquisti più grandi di cui ti sei pentito",
+      "noRegrets": "Nessun rimpianto in questo periodo",
+      "clockTitle": "Quando spendi",
+      "clockSubtitle": "Acquisti per giorno della settimana e ora; il picco è verso le {hour}",
+      "noTimes": "Gli acquisti registrati senza orario non compaiono qui."
+    },
+    "loadingTitle": "Dashboard web",
+    "edit": {
+      "statusReady": "Modifica attiva",
+      "statusReadyTitle": "Le modifiche sono salvate sul telefono",
+      "statusReadyBody": "Il telefono è connesso. Il telefono controlla e salva ogni modifica, poi sincronizza qui i dati aggiornati.",
+      "statusAway": "Sola lettura",
+      "statusAwayTitle": "Connetti il telefono per fare modifiche.",
+      "statusAwayBody": "Apri Money2Time sul telefono e vai su Impostazioni → Dashboard web. Finché è connesso, qui puoi aggiungere, modificare ed eliminare transazioni. Il telefono e questo browser restano sincronizzati.",
+      "statusUpdateTitle": "Aggiorna l'app per fare modifiche qui.",
+      "statusUpdateBody": "La versione di Money2Time sul telefono sincronizza i dati solo per la consultazione. Aggiornala per aggiungere, modificare ed eliminare voci da questo browser.",
+      "statusOffTitle": "Le modifiche sono disattivate per questo browser.",
+      "statusOffBody": "Sul telefono, apri Impostazioni → Dashboard web, tocca ⋯ accanto a questo browser e scegli Consenti modifiche.",
+      "statusSaving": "Salvataggio…",
+      "statusSyncing": "Sincronizzazione…",
+      "statusSyncingBody": "Sincronizzazione degli ultimi dati dal telefono. Potrai fare modifiche appena arrivano.",
+      "awayHint": "Per aggiungere, modificare o eliminare transazioni, apri Impostazioni → Dashboard web sul telefono.",
+      "close": "Chiudi",
+      "clear": "Cancella",
+      "cancel": "Annulla",
+      "reloadLatest": "Carica l'ultima versione",
+      "delete": "Elimina",
+      "apply": "Applica",
+      "choose": "Seleziona",
+      "add": "Aggiungi",
+      "update": "Aggiorna",
+      "addAnother": "Aggiungine un altro",
+      "type": "Tipo",
+      "expense": "Uscite",
+      "income": "Entrate",
+      "transfer": "Trasferimento",
+      "adjustment": "Rettifica",
+      "deleteTransaction": "Elimina transazione",
+      "deleteTransactionBody": "Non è possibile annullare. Continuare?",
+      "required": "Obbligatorio",
+      "from": "Da",
+      "to": "A",
+      "chooseAccount": "Scegli conto",
+      "swapAccounts": "Scambia conti mittente e destinatario",
+      "differentAccount": "Deve essere un conto diverso",
+      "accountLabel": "Conto",
+      "accounts": "Conti",
+      "categoryLabel": "Categoria",
+      "categories": "Categorie",
+      "options": "Opzioni della transazione",
+      "amount": "Importo",
+      "currencyLabel": "Valuta",
+      "optional": "Facoltativo",
+      "note": "Nota",
+      "received": "Importo ricevuto",
+      "date": "Data",
+      "details": "Dettagli",
+      "detailsPlaceholder": "Aggiungi una nota più lunga",
+      "reimbursable": "Rimborso in attesa",
+      "reimbursed": "Già rimborsata",
+      "reimbursableHint": "Una spesa che qualcuno ti restituirà. Richiedila nella pagina Rimborsi.",
+      "countAsExpense": "Conta come spesa",
+      "countAsExpenseHint": "Conta questo trasferimento come spesa nei totali, nei budget e nei grafici, nella categoria che scegli. Il denaro si sposta comunque tra i due conti come al solito.",
+      "feeling": "Come ti senti?",
+      "nudgeSmall": "Sono circa {hours} del tuo tempo",
+      "nudgePause": "Vale una pausa: ~{hours} di lavoro",
+      "nudgeLarge": "Sono {hours} del tuo tempo lavorativo",
+      "amountLocked": "Questo importo è collegato a una divisione o a un rimborso. Modificalo nell'app.",
+      "hideBalances": "Nascondi saldi",
+      "showBalances": "Mostra saldi",
+      "savingsGoals": "Obiettivi di risparmio",
+      "ungrouped": "Senza gruppo",
+      "noAccounts": "Ancora nessun conto.",
+      "noCategories": "Ancora nessuna categoria.",
+      "select": "Seleziona",
+      "selectAll": "Seleziona tutto",
+      "selected": "{count, plural, one {# selezionata} other {# selezionate}}",
+      "deleteConfirm": "{count, plural, one {Eliminare questa transazione? Viene eliminata anche sul telefono.} other {Eliminare # transazioni? Vengono eliminate anche sul telefono.}}",
+      "tooMany": "Seleziona al massimo {max} transazioni alla volta.",
+      "accountTransfers": "I trasferimenti mantengono i loro conti. Deselezionali per cambiare il conto.",
+      "accountLocked": "Alcune sono collegate a una divisione o a un rimborso. Cambia il loro conto nell'app.",
+      "accountCurrencies": "Sono in valute diverse. Seleziona movimenti in una sola valuta per spostarli su un altro conto.",
+      "editTitle": "Modifica transazione",
+      "errors": {
+        "stale": "Il telefono ha dati più recenti e li sta sincronizzando ora. Riprova tra un attimo.",
+        "conflict": "Questo dato è cambiato sul telefono. I dati più recenti stanno arrivando. Controllali e riprova.",
+        "amount_locked": "Questo importo è collegato a una divisione o a un rimborso. Modificalo nell'app.",
+        "pro_required": "Serve Money2Time Pro. Passa a Pro nell'app per fare di più.",
+        "off": "Le modifiche sono disattivate per questo browser. Consentile sul telefono in Impostazioni → Dashboard web.",
+        "invalid": "Il telefono non è riuscito a salvare. Controlla i dettagli e riprova.",
+        "failed": "Il telefono non è riuscito a salvare. Riprova.",
+        "busy": "L'ultima modifica è ancora in salvataggio. Riprova tra un attimo.",
+        "away": "Il telefono non è connesso. Apri Dashboard web sul telefono e riprova.",
+        "too_large": "Sono troppe modifiche in una volta. Seleziona meno voci.",
+        "unknown": "Il telefono si è disconnesso prima di confermare. Quando è di nuovo online, controlla se la modifica è stata salvata."
+      },
+      "account": {
+        "newAccount": "Nuovo conto",
+        "editAccount": "Modifica conto",
+        "deleteAccount": "Elimina conto",
+        "deleteAccountBody": "Questo conto e tutte le sue transazioni verranno eliminati definitivamente. Non è possibile annullare.",
+        "save": "Salva",
+        "type": "Tipo",
+        "typeDebit": "Debito",
+        "typeCredit": "Credito",
+        "specialNote": "Qui puoi cambiare nome, gruppo, logo e se conta nei totali. Modifica il resto nel suo editor.",
+        "name": "Nome conto",
+        "namePlaceholder": "Portafoglio quotidiano",
+        "logo": "Logo",
+        "logoAdd": "Aggiungi un logo",
+        "logoClear": "Rimuovi logo",
+        "logoChooseTitle": "Scegli logo",
+        "logoChooseSubtitle": "Cerca o sfoglia per paese",
+        "logoSearch": "Cerca banche e wallet",
+        "logoCountry": "Paese",
+        "logoNoResults": "Nessun risultato",
+        "group": "Gruppo conto",
+        "currency": "Valuta",
+        "statementDay": "Giorno estratto",
+        "dueDay": "Giorno scadenza",
+        "dueRule": "Scadenza",
+        "dueRuleDay": "Giorno del mese",
+        "dueRuleAfter": "Giorni dopo l’estratto",
+        "dayRange": "Scegli un giorno da 1 a 31.",
+        "daysAfterRange": "Scegli da 1 a {max} giorni.",
+        "startingBalance": "Saldo iniziale",
+        "currentBalance": "Saldo attuale",
+        "includeInTotals": "Includi nei totali",
+        "includeInTotalsHint": "I conti nascosti sono esclusi dal saldo totale.",
+        "currencyChangeTitle": "Cambiare la valuta del conto?",
+        "currencyChangeMessage": "Il saldo verrà convertito da {from} a {to} al tasso più recente. I movimenti esistenti mantengono la loro valuta originale.",
+        "currencyChangeAction": "Converti e cambia",
+        "balancePromptTitle": "Come registrare questa variazione di saldo?",
+        "balancePromptMessage": "Saldo variato di {amount}. Registra come entrata/uscita o mantieni come differenza conto (esclusa dai totali analisi).",
+        "recordDifference": "Registra come differenza conto",
+        "recordIncome": "Registra come entrata",
+        "recordExpense": "Registra come uscita",
+        "newGroup": "Nuovo gruppo",
+        "createGroup": "Crea gruppo",
+        "editGroup": "Modifica gruppo",
+        "groupName": "Nome gruppo",
+        "groupPlaceholder": "Spese",
+        "groupTaken": "Esiste già un gruppo con questo nome.",
+        "deleteGroup": "Eliminare il gruppo?",
+        "deleteGroupBody": "I conti in questo gruppo passeranno a Senza gruppo.",
+        "addToGroup": "Aggiungi conto",
+        "emptyGroup": "Ancora nessun conto in questo gruppo",
+        "cardDesign": "Design della carta",
+        "cardDesignTitle": "Design della carta",
+        "cardDesignPlain": "Tinta unita",
+        "cardDesignClear": "Rimuovi design della carta",
+        "cardDesignAll": "Tutti",
+        "cardDesignUploads": "I miei caricamenti",
+        "cardDesignTemplate": "Design della carta {genre} {number}",
+        "payTitle": "Paga carta di credito",
+        "loanPayTitle": "Effettua un pagamento",
+        "pay": "Paga",
+        "payFrom": "Da",
+        "none": "Nessuno",
+        "payable": "Saldo da pagare",
+        "loanDue": "Importo dovuto",
+        "paidNote": "Pagato: {name}",
+        "paymentNotePlaceholder": "Nota pagamento",
+        "genre_mascot": "Mascotte",
+        "genre_minimal": "Minimal",
+        "genre_gradient": "Sfumatura",
+        "genre_luxury": "Lusso",
+        "genre_texture": "Texture",
+        "genre_marble": "Marmo e pietra",
+        "genre_pattern": "Fantasia",
+        "genre_nature": "Natura",
+        "genre_space": "Spazio",
+        "genre_abstract": "Arte astratta",
+        "genre_anime": "Anime",
+        "genre_retro": "Retrò",
+        "genre_cute": "Carino"
+      },
+      "album": {
+        "createTitle": "Nuovo album",
+        "create": "Crea",
+        "editTitle": "Modifica viaggio",
+        "save": "Salva",
+        "done": "Fatto",
+        "clear": "Cancella",
+        "name": "Nome dell'album",
+        "namePlaceholder": "es. Viaggio a Tokyo",
+        "dates": "Date (facoltative)",
+        "startDate": "Data di inizio",
+        "endDate": "Data di fine",
+        "location": "Luogo",
+        "addTransactions": "Aggiungi transazioni",
+        "editTransactions": "Modifica transazioni",
+        "selectedCount": "{count} selezionate",
+        "transactionCount": "{count} transazioni",
+        "previous": "Precedente",
+        "next": "Avanti",
+        "deleteTitle": "Eliminare l'album?",
+        "deleteBody": "Questo rimuove l'album. Le tue transazioni non vengono eliminate.",
+        "noAlbums": "Ancora nessun album",
+        "appOnlyHint": "Aggiungi una foto di copertina o una posizione nell'app.",
+        "noExpenses": "Nessuna spesa questo mese.",
+        "bulkAction": "Album",
+        "addToAlbum": "Aggiungi all'album",
+        "expensesOnly": "Solo le spese possono andare in un album.",
+        "expensesCount": "{count, plural, one {Aggiungi questa spesa a:} other {Aggiungi queste # spese a:}}",
+        "expensesLeftOut": "{count, plural, one {Solo le spese possono andare in un album, quindi # voce resta fuori.} other {Solo le spese possono andare in un album, quindi # voci restano fuori.}}",
+        "reorderTitle": "Riordina album",
+        "activeLabel": "Aggiungi nuove transazioni a",
+        "activeTitle": "Viaggio attivo",
+        "activeNone": "Nessuno"
+      },
+      "budget": {
+        "allocatedSummary": "{allocated} di {total} assegnati",
+        "left": "{amount} rimanente",
+        "over": "{amount} in più",
+        "allocatedDone": "Completamente assegnato",
+        "cancel": "Annulla",
+        "save": "Salva",
+        "delete": "Elimina",
+        "amount": "Importo",
+        "fillRemainder": "Riempi",
+        "subcategories": "Sottocategorie",
+        "childrenHint": "Facoltativamente suddividi questo importo tra le sottocategorie.",
+        "duplicateSuffix": "copia",
+        "editTitle": "Modifica modello",
+        "addTitle": "Nuovo modello",
+        "chooseIcon": "Scegli icona",
+        "removeIcon": "Rimuovi icona",
+        "name": "Nome",
+        "namePlaceholder": "es. Quotidiano",
+        "total": "Budget totale",
+        "currency": "Valuta",
+        "currencyHintTemplate": "Ogni budget mantiene il tasso del giorno in cui viene creato e converte a quel tasso le spese in altre valute. Oggi: 1 {currency} = {rate} {main}.",
+        "currencyHintBudget": "Le spese in altre valute vengono convertite a 1 {currency} = {rate} {main}.",
+        "currencyNoRate": "Nessun tasso di cambio per {currency}. Aggiungine uno in Multivaluta nell'app, così le spese in altre valute vengono conteggiate.",
+        "countUnbudgetedTitle": "Conta la spesa fuori budget",
+        "countUnbudgetedCaption": "Includi nel totale del mese la spesa delle categorie senza voce di budget.",
+        "backPopulateTitle": "Compila i mesi passati",
+        "backPopulateCaption": "Crea budget per {first} - {last} ({count} mesi). I mesi che hanno già un budget vengono saltati.",
+        "templatesTitle": "Modelli di budget",
+        "templatesSubtitle": "Piani mensili riutilizzabili",
+        "newTemplate": "Nuovo modello",
+        "noTemplatesTitle": "Ancora nessun modello",
+        "noTemplatesMessage": "Crea un modello di budget per iniziare a pianificare i tuoi mesi.",
+        "createTemplate": "Crea modello",
+        "makeDefault": "Imposta come predefinito",
+        "defaultBadge": "Predefinito",
+        "duplicate": "Duplica",
+        "deleteTemplateTitle": "Eliminare il modello?",
+        "deleteTemplateMessage": "I budget mensili già creati vengono conservati. Se è il predefinito, il modello successivo lo diventa.",
+        "createBudget": "Crea budget",
+        "chooseTemplate": "Scegli un modello",
+        "customOption": "Personalizzato",
+        "customOptionCaption": "Crea un budget una tantum solo per questo mese.",
+        "editBudget": "Modifica budget",
+        "deleteBudget": "Elimina budget",
+        "deleteBudgetTitle": "Eliminare il budget di questo mese?",
+        "deleteBudgetMessage": "Non verrà ricreato automaticamente per questo mese.",
+        "month": "Mese",
+        "noCategories": "Aggiungi prima una categoria di spesa per darle un budget.",
+        "splitMismatch": "Le sottocategorie non sommano a questo importo",
+        "categoriesCount": "{count, plural, one {# categoria} other {# categorie}}"
+      },
+      "category": {
+        "newTitle": "Nuova categoria",
+        "editTitle": "Modifica categoria",
+        "name": "Nome",
+        "parentOptional": "Genitore (facoltativo)",
+        "select": "Seleziona",
+        "clear": "Cancella",
+        "cancel": "Annulla",
+        "save": "Salva",
+        "delete": "Elimina",
+        "deleteConfirm": "Questa categoria verrà eliminata definitivamente. Non è possibile annullare.",
+        "deleteTitle": "Eliminare la categoria?",
+        "deleteHasTransactions": "{count} transazioni usano questa categoria. Spostale in un’altra categoria, oppure eliminala e lasciale senza categoria.",
+        "moveToOther": "Sposta in un’altra categoria",
+        "deleteAnyway": "Elimina comunque",
+        "moveTitle": "Spostare le transazioni?",
+        "moveBody": "Tutte le transazioni verranno spostate in “{name}” e questa categoria verrà eliminata. Questa azione non può essere annullata.",
+        "moveAction": "Sposta ed elimina",
+        "addSubcategory": "Aggiungi sottocategoria",
+        "expense": "Uscite",
+        "income": "Entrate",
+        "type": "Tipo di categoria",
+        "required": "Inserisci un nome",
+        "noOptions": "Nessun'altra categoria",
+        "emptyTitle": "Ancora nessuna categoria",
+        "chooseIcon": "Scegli icona",
+        "removeIcon": "Rimuovi icona",
+        "tabIcons": "Icone",
+        "tabEmoji": "Emoji",
+        "searchIcons": "Cerca icone",
+        "noResults": "Nessun risultato",
+        "groups": {
+          "money": "Denaro",
+          "food_and_drink": "Cibo e bevande",
+          "transport": "Trasporti",
+          "travel": "Viaggi",
+          "home": "Casa",
+          "bills": "Bollette",
+          "shopping": "Acquisti",
+          "health": "Salute",
+          "leisure": "Tempo libero",
+          "work": "Lavoro",
+          "family": "Famiglia",
+          "other": "Altro",
+          "food": "Cibo e bevande",
+          "smileys": "Faccine",
+          "people": "Persone",
+          "animals": "Animali e natura",
+          "activities": "Attività",
+          "objects": "Oggetti",
+          "symbols": "Simboli",
+          "flags": "Bandiere"
+        },
+        "expand": "Espandi",
+        "collapse": "Comprimi",
+        "noSubcategories": "Nessuna sottocategoria",
+        "searchEmoji": "Cerca emoji"
+      },
+      "currency": {
+        "open": "Multivaluta",
+        "title": "Multivaluta",
+        "mainCurrency": "Valuta principale",
+        "mainInApp": "Per cambiare la valuta principale, usa l'app. I tuoi dati ripartono da zero.",
+        "asOf": "Aggiornato {date}",
+        "neverUpdated": "Non ancora aggiornato",
+        "subcurrencies": "Sotto-valute",
+        "add": "Aggiungi",
+        "addCurrency": "Aggiungi valuta",
+        "search": "Cerca valuta",
+        "noMatch": "Nessuna valuta corrispondente",
+        "empty": "Aggiungi una valuta per seguirne il tasso di cambio.",
+        "manual": "Manuale",
+        "editRate": "Modifica tasso",
+        "remove": "Rimuovi",
+        "save": "Salva",
+        "orderChanged": "Il nuovo ordine non è ancora salvato.",
+        "saveOrder": "Salva ordine"
+      },
+      "goal": {
+        "newGoal": "Nuovo obiettivo",
+        "editTitle": "Modifica obiettivo",
+        "edit": "Modifica",
+        "save": "Salva",
+        "deleteTitle": "Eliminare l'obiettivo?",
+        "deleteMessage": "Questo elimina l'obiettivo e le sue transazioni. Non può essere annullato.",
+        "coverInApp": "Cambia la foto di copertina nell'app.",
+        "chooseIcon": "Scegli icona",
+        "removeIcon": "Rimuovi icona",
+        "name": "Nome dell'obiettivo",
+        "namePlaceholder": "es. Viaggio in Giappone",
+        "target": "Importo obiettivo",
+        "currency": "Valuta",
+        "currentBalance": "Saldo attuale",
+        "targetDate": "Data obiettivo",
+        "targetDateHint": "Facoltativa. Ti mostra se sei in linea con il tuo obiettivo.",
+        "targetDatePast": "Scegli una data futura.",
+        "includeInTotals": "Includi nei totali",
+        "includeInTotalsHint": "I conti nascosti sono esclusi dal saldo totale.",
+        "startingAmount": "Già risparmiato (facoltativo)",
+        "autoSave": "Risparmio automatico",
+        "autoSaveHint": "Versa i soldi automaticamente con una cadenza fissa.",
+        "autoSaveAmount": "Importo",
+        "cadence": "Si ripete",
+        "cadenceMonthly": "Mensile",
+        "cadenceWeekly": "Settimanale",
+        "source": "Dal conto",
+        "sourcePlaceholder": "Scegli un conto",
+        "noSource": "Nessun conto in {currency} per ora. Il risparmio automatico richiede un conto nella stessa valuta.",
+        "autoSaveInRecurring": "Il risparmio automatico di questo obiettivo usa una pianificazione personalizzata. Cambiala in Ricorrenti.",
+        "currencyChangeTitle": "Cambiare la valuta del conto?",
+        "currencyChangeMessage": "Il saldo verrà convertito da {from} a {to} al tasso più recente. I movimenti esistenti mantengono la loro valuta originale.",
+        "currencyChangeAction": "Converti e cambia",
+        "balancePromptTitle": "Come registrare questa variazione di saldo?",
+        "balancePromptMessage": "Saldo variato di {amount}. Registra come entrata/uscita o mantieni come differenza conto (esclusa dai totali analisi).",
+        "recordDifference": "Registra come differenza conto",
+        "recordIncome": "Registra come entrata",
+        "recordExpense": "Registra come uscita",
+        "archive": "Archivia",
+        "unarchive": "Ripristina obiettivo",
+        "archiveTitle": "Archiviare l'obiettivo?",
+        "archiveMessage": "L'obiettivo esce dalla tua lista di obiettivi e ogni risparmio automatico verso di esso viene messo in pausa.",
+        "archiveBalanceHint": "Contiene ancora dei soldi. Puoi prelevarli prima, oppure lasciarli qui.",
+        "archiveConfirm": "Archivia",
+        "archived": "Archiviato",
+        "editInGoals": "Modifica obiettivo",
+        "deposit": "Versa",
+        "withdraw": "Preleva",
+        "depositFromAccount": "Da un conto",
+        "depositFromAccountHint": "Sposta denaro da uno dei tuoi conti.",
+        "depositOutside": "Denaro esterno",
+        "depositOutsideHint": "Un regalo o contanti esterni, registrato come entrata.",
+        "withdrawToAccount": "Su un conto",
+        "withdrawToAccountHint": "Sposta il denaro su uno dei tuoi conti.",
+        "withdrawSpend": "Spendili",
+        "withdrawSpendHint": "Paga direttamente da questo obiettivo, registrato come spesa."
+      },
+      "item": {
+        "add": "Aggiungi oggetto",
+        "addTitle": "Nuovo oggetto",
+        "editTitle": "Modifica oggetto",
+        "save": "Salva",
+        "deleteTitle": "Eliminare oggetto?",
+        "deleteMessage": "Questo rimuove l'oggetto dal tracker.",
+        "iconTitle": "Scegli icona",
+        "chooseIcon": "Scegli icona",
+        "iconSubtitle": "Scegli un'icona. Per caricarne una tua, usa l'app.",
+        "searchIcons": "Cerca icone…",
+        "customIcon": "Personalizzato",
+        "noResults": "Nessun risultato",
+        "name": "Nome",
+        "namePlaceholder": "es. Macchina per espresso",
+        "price": "Prezzo d'acquisto",
+        "currency": "Valuta",
+        "purchaseDate": "Data d'acquisto",
+        "markInactive": "Segna come inattivo",
+        "markInactiveHint": "Ferma il conteggio dei giorni per ciò che hai venduto, rotto o non usi più.",
+        "endDate": "Data di fine",
+        "sold": "L'ho venduto",
+        "salePrice": "Prezzo di vendita",
+        "note": "Nota",
+        "notePlaceholder": "Facoltativo",
+        "groups": {
+          "objects": "Oggetti",
+          "leisure": "Tempo libero",
+          "work": "Lavoro",
+          "home": "Casa",
+          "health": "Salute",
+          "travel": "Viaggi",
+          "transport": "Trasporti",
+          "shopping": "Acquisti",
+          "family": "Famiglia",
+          "other": "Altro"
+        },
+        "reorderTitle": "Riordina oggetti"
+      },
+      "loan": {
+        "newTitle": "Nuovo prestito",
+        "editTitle": "Modifica prestito",
+        "edit": "Modifica",
+        "save": "Salva",
+        "delete": "Elimina conto",
+        "deleteBody": "Questo conto e tutte le sue transazioni verranno eliminati definitivamente. Non è possibile annullare.",
+        "name": "Nome conto",
+        "namePlaceholder": "Prestito auto",
+        "logo": "Logo",
+        "logoAdd": "Aggiungi un logo",
+        "logoClear": "Rimuovi logo",
+        "group": "Gruppo conto",
+        "currency": "Valuta",
+        "interestModel": "Interessi",
+        "interestModelInfo": "Saldo decrescente: gli interessi si calcolano ogni mese su quanto devi ancora, quindi pagare di più o in anticipo riduce gli interessi. Funzionano così quasi tutti i mutui. Tasso fisso: gli interessi si calcolano una volta sull intero importo prestato e si aggiungono subito, quindi pagare in anticipo estingue prima il debito ma non fa risparmiare interessi. Funzionano così quasi tutti i prestiti auto e personali.",
+        "modelReducing": "Saldo decrescente",
+        "modelFlat": "Tasso fisso",
+        "principal": "Importo del prestito",
+        "term": "Durata del prestito",
+        "termInfo": "Per quante rate mensili dura il prestito, fino a {max}. Un prestito a 5 anni sono 60.",
+        "termError": "Inserisci un numero intero da 1 a {max}.",
+        "rate": "Tasso di interesse",
+        "rateInfoReducing": "Il tasso annuo che la banca applica al debito residuo. Inseriscilo e calcoliamo la rata e il totale, oppure inserisci il totale e calcoliamo il tasso.",
+        "rateInfoFlat": "Il tasso fisso annuo, applicato all intero importo prestato per tutta la durata. Inseriscilo e calcoliamo la rata e il totale, oppure inserisci il totale e calcoliamo il tasso.",
+        "effectiveRateHint": "Tasso effettivo {rate}%. È quanto costa questo tasso flat su saldo decrescente.",
+        "totalRepayable": "Totale da restituire",
+        "totalRepayableInfo": "Tutto quello che restituisci per l'intero prestito: la somma presa più tutti gli interessi.",
+        "instalment": "Rata mensile",
+        "instalmentInfo": "Quanto paghi ogni mese. Segue il totale qui sopra; attiva l'interruttore se la tua banca addebita un importo diverso e usiamo il tuo esattamente.",
+        "instalmentErrorLow": "Troppo bassa per estinguere il prestito entro la durata.",
+        "instalmentErrorHigh": "Troppo alta per questo importo e questa durata.",
+        "awaitingContract": "Compila i campi qui sopra",
+        "paidPeriods": "Rate già pagate",
+        "paidPeriodsInfo": "Lascia 0 per un prestito nuovo. Se è già iniziato, indica quante rate hai pagato e il saldo iniziale viene calcolato.",
+        "paidPeriodsError": "Deve essere inferiore alla durata.",
+        "collect": "Addebita su",
+        "collectInfo": "Il conto da cui esce la rata ogni mese. Scegline uno e viene registrata da sola; lascialo vuoto e registri tu ogni pagamento.",
+        "collectManual": "Registro io i pagamenti",
+        "collectExternal": "Questo pagamento è impostato in Ricorrenti. Modificalo lì.",
+        "countAsExpense": "Conta la rata come spesa",
+        "countAsExpenseInfo": "Un rimborso sposta sempre denaro sul prestito, quindi il debito residuo cala comunque. Con questa opzione attiva conta anche come spesa nei tuoi totali, budget e grafici, nella categoria che scegli. Disattivala e i rimborsi restano fuori dalle tue spese. Cambiarla in seguito vale solo per i rimborsi registrati da quel momento.",
+        "paymentCategory": "Categoria del rimborso",
+        "paymentCategoryPlaceholder": "Scegli una categoria",
+        "startDate": "Data di inizio",
+        "startDateInfo": "Quando è stato acceso il prestito. La prima rata cade un mese dopo e il suo giorno diventa il giorno di pagamento.",
+        "balanceOwed": "Debito residuo",
+        "balanceOwedInfo": "Quanto devi ancora oggi, senza gli interessi che non ti sono ancora stati addebitati. Di solito è più basso della cifra sul tuo estratto conto.",
+        "totalInterest": "Interessi totali",
+        "leftToPay": "Ancora da pagare",
+        "firstInstalment": "Prima rata",
+        "payoffBy": "Estinto entro",
+        "instalmentsLeft": "Rate rimanenti",
+        "includeInTotals": "Includi nei totali",
+        "includeInTotalsHint": "I conti nascosti sono esclusi dal saldo totale.",
+        "archive": "Archivia prestito",
+        "unarchive": "Ripristina prestito",
+        "archiveHint": "Lo nasconde dall'elenco dei conti. Cronologia e totali restano, e \"Mostra archiviati\" lo riporta.",
+        "rateChangeTitle": "Da quando si applica il nuovo tasso?",
+        "rateChangeMessage": "Il tasso passa da {from}% a {to}%. Applicalo da oggi per mantenere gli interessi già addebitati, o dall'inizio se stai correggendo un errore.",
+        "rateChangeFromStart": "Dall'inizio",
+        "rateChangeFromToday": "Da oggi",
+        "currencyChangeTitle": "Cambiare la valuta del conto?",
+        "currencyChangeMessage": "Il saldo verrà convertito da {from} a {to} al tasso più recente. I movimenti esistenti mantengono la loro valuta originale.",
+        "currencyChangeAction": "Converti e cambia",
+        "balancePromptTitle": "Come registrare questa variazione di saldo?",
+        "balancePromptMessage": "Saldo variato di {amount}. Registra come entrata/uscita o mantieni come differenza conto (esclusa dai totali analisi).",
+        "recordDifference": "Registra come differenza conto",
+        "recordIncome": "Registra come entrata",
+        "recordExpense": "Registra come uscita",
+        "archived": "Archiviato",
+        "editInLoans": "Modifica prestito",
+        "balanceOwedHint": "Il tuo estratto conto può mostrare {amount}, che aggiunge gli interessi ancora da venire."
+      },
+      "reimbursement": {
+        "pendingTitle": "In attesa di rientro",
+        "settledTitle": "Rimborsato",
+        "claim": "Richiedi",
+        "paidInto": "Su {account}",
+        "noAccount": "Nessun conto",
+        "undoTitle": "Annullare questo rimborso?",
+        "undoMessage": "La voce di entrata viene rimossa.",
+        "undoAction": "Annulla",
+        "cancel": "Annulla",
+        "saveFirst": "Salva prima le altre modifiche."
+      },
+      "reorder": {
+        "open": "Riordina",
+        "save": "Salva",
+        "accountsTitle": "Riordina conti",
+        "accountsHint": "Sposta i gruppi e i conti all'interno del loro gruppo. Gli obiettivi di risparmio mantengono il loro ordine.",
+        "categoriesTitle": "Riordina categorie",
+        "categoriesHint": "Sposta le categorie e le sottocategorie all'interno della loro categoria.",
+        "emptyGroup": "Ancora nessun conto in questo gruppo.",
+        "drag": "Trascina per riordinare",
+        "dragNamed": "Sposta {name}. Trascina o usa i tasti freccia.",
+        "moved": "{name} spostato in posizione {position} di {count}"
+      },
+      "rule": {
+        "newRule": "Nuova regola ricorrente",
+        "editRule": "Modifica regola ricorrente",
+        "sameFlow": "Stesso flusso dell'inserimento transazione",
+        "saveRule": "Salva regola",
+        "deleteRule": "Elimina regola",
+        "deleteConfirm": "Eliminare “{name}”? L’azione non può essere annullata.",
+        "amountRequired": "L'importo è obbligatorio",
+        "chooseCategory": "Scegli categoria",
+        "settings": "Impostazioni ricorrenza",
+        "ruleName": "Nome regola",
+        "ruleNamePlaceholder": "Abbonamento Netflix",
+        "enterRuleName": "Inserisci un nome per la regola ricorrente.",
+        "logo": "Logo",
+        "noLogo": "Nessun logo",
+        "customLogo": "Logo personalizzato",
+        "searchLogos": "Cerca abbonamenti",
+        "country": "Paese",
+        "noResults": "Nessun risultato",
+        "global": "Globale",
+        "repeat": "Ripeti",
+        "daily": "Giornaliero",
+        "weekly": "Settimanale",
+        "monthly": "Mensile",
+        "quarterly": "Trimestrale",
+        "semiannually": "Semestrale",
+        "yearly": "Annuale",
+        "every": "Ogni (intervallo)",
+        "ends": "Termina",
+        "never": "Mai",
+        "onDate": "In data",
+        "endDate": "Data fine",
+        "validEndDate": "Scegli una data di fine valida.",
+        "status": "Stato",
+        "active": "Attivo",
+        "paused": "In pausa",
+        "pause": "Pausa",
+        "resume": "Riprendi"
+      },
+      "split": {
+        "title": "Dividi conto",
+        "chip": "Dividi",
+        "evenly": "Dividi equamente",
+        "addPerson": "Aggiungi persona",
+        "me": "Io",
+        "personPlaceholder": "Nome amico",
+        "sumMatch": "{sum} di {total}",
+        "sumLeft": "{diff} rimanenti",
+        "sumOver": "Eccedenza di {diff}",
+        "sumMismatch": "{diff} non contabilizzati",
+        "negativeSelf": "Gli amici devono più del totale",
+        "markPaid": "Segna pagato",
+        "paidLabel": "Pagato il {date}",
+        "undo": "Annulla",
+        "done": "Fatto",
+        "remove": "Rimuovi",
+        "cancel": "Annulla",
+        "noAccount": "Nessun conto",
+        "paidTo": "Rimborsato su",
+        "sharesTitle": "Chi ti deve dei soldi",
+        "someone": "Qualcuno",
+        "untitledBill": "Conto diviso",
+        "paidTitle": "Rimborsato",
+        "undoTitle": "Segnare questa quota come non pagata?",
+        "undoBody": "Ti viene dovuta di nuovo e la spesa torna a salire di questo importo. Un trasferimento di rimborso verso un altro conto viene rimosso.",
+        "itemizedTotal": "Totale: {sum}",
+        "itemizedZeroHint": "Inserisci almeno un importo",
+        "removeTitle": "Rimuovere questa richiesta?",
+        "removeBody": "Questo cancella ciò che ti devono per questo conto. La transazione in sé resta invariata.",
+        "defaultPaidTo": "Rimborso predefinito su",
+        "defaultPaidToHint": "Le nuove divisioni vengono rimborsate su questo conto per impostazione predefinita."
+      },
+      "duplicate": "Duplica",
+      "duplicateTitle": "Duplica a una data",
+      "expenseCategory": "Categoria uscite",
+      "incomeCategory": "Categoria entrate",
+      "categoryNone": "I trasferimenti mantengono la loro categoria. Seleziona spese o entrate per cambiarla.",
+      "duplicateNone": "Le rettifiche di saldo e gli importi negativi non possono essere duplicati.",
+      "duplicateTooMany": "Duplica fino a {max} voci alla volta.",
+      "wage": {
+        "title": "Valore orario",
+        "subtitle": "Il tuo valore orario per ogni mese, come impostato nell'app.",
+        "add": "Aggiungi tariffa reddito",
+        "addTitle": "Aggiungi tariffa reddito",
+        "empty": "Nessuno storico valore orario.",
+        "now": "Questo mese",
+        "perHour": "/h",
+        "type": {
+          "hourly": "Orario",
+          "monthly": "Mensile",
+          "yearly": "Annuale"
+        },
+        "deleteTitle": "Eliminare il valore orario mensile?",
+        "deleteBody": "Eliminare la tariffa per {month}? I mesi che dipendono da essa torneranno al mese disponibile precedente.",
+        "year": "Anno",
+        "month": "Mese",
+        "existsTitle": "{month} esiste già",
+        "existsBody": "Questo mese ha già una tariffa reddito. Modificarla?",
+        "saveFor": "Salva per {month}",
+        "step1": "Quanto guadagni?",
+        "step2": "Settimana lavorativa",
+        "step3": "Tempo extra",
+        "amount": "Importo ({symbol})",
+        "afterTax": "Inserisci la retribuzione netta.",
+        "hoursPerWeek": "Ore lavoro / settimana",
+        "workdaysPerWeek": "Giorni lavorativi / settimana",
+        "commuteMinutes": "Tempo extra / giorno lavorativo (min)",
+        "commuteHint": "Includi preparazione, pendolarismo, parcheggio e lavoro non retribuito.",
+        "trueRate": "Tariffa oraria reale",
+        "weeklyIncome": "Reddito settimanale",
+        "baseRate": "Tariffa oraria base",
+        "commutePerWeek": "Tempo extra / settimana",
+        "totalPerWeek": "Tempo totale / settimana",
+        "showAs": "Mostra come",
+        "period": {
+          "hourly": "Orario",
+          "weekly": "Settimanale",
+          "monthly": "Mensile",
+          "yearly": "Annuale"
+        },
+        "suffix": {
+          "hourly": "/h",
+          "weekly": "/sett",
+          "monthly": "/mese",
+          "yearly": "/anno"
+        }
+      },
+      "notePlaceholder": "Nuova nota. Lascia vuoto per cancellarla."
+    },
+    "cloud": {
+      "strip": "Dati da {device}, sincronizzati {date}.",
+      "yourPhone": "il tuo telefono",
+      "dataFrom": "Dati del {date}",
+      "phoneHere": "Telefono connesso",
+      "phoneAway": "Telefono non connesso",
+      "connecting": "Connessione…",
+      "refresh": "Aggiorna dal telefono",
+      "receiving": "Sincronizzazione… {percent}%",
+      "preparing": "Preparazione…",
+      "preparingTitle": "Il telefono si sta preparando a sincronizzare",
+      "receivingTitle": "Sincronizzazione degli ultimi dati dal telefono",
+      "opening": "Apertura…",
+      "openingTitle": "Apertura dei dati sincronizzati",
+      "needsPhoneTitle": "Apri Money2Time sul telefono.",
+      "needsPhoneBody": "Vai su Impostazioni → Dashboard web. I dati più recenti arrivano da soli.",
+      "unlink": "Scollega questo browser",
+      "unlinkConfirm": "Scollegare? Questo browser elimina la sua copia dei tuoi dati. Scansiona di nuovo per ricollegarlo.",
+      "stay": "Resta collegato",
+      "elsewhereTitle": "Questa dashboard è aperta in un'altra scheda.",
+      "elsewhereBody": "Solo una scheda riceve gli aggiornamenti. Scegli Usa qui per cambiare.",
+      "useHere": "Usa qui",
+      "sourceOfTruth": "Le modifiche sono salvate sul telefono. Niente è salvato online.",
+      "errors": {
+        "incomplete": "La sincronizzazione con il telefono si è interrotta prima di finire. Aggiorna dal telefono per riprovare.",
+        "corrupt": "Non è stato possibile leggere i dati arrivati dal telefono. Aggiorna dal telefono per riprovare.",
+        "unsupported": "Questi dati provengono da una versione più recente dell'app. Ricarica la pagina per ottenere l'ultima dashboard.",
+        "storage": "Questo browser non ha salvato una copia, quindi la prossima volta avrà di nuovo bisogno del telefono. Succede spesso nelle finestre private."
+      }
+    },
+    "link": {
+      "eyebrow": "Dashboard web di Money2Time",
+      "title": "I tuoi dati Money2Time su grande schermo",
+      "subtitle": "Scansiona il codice con il telefono. Crittografia end-to-end, niente salvato online.",
+      "steps": {
+        "camera": {
+          "title": "Scansiona con la fotocamera",
+          "body": "Inquadra il codice con la fotocamera del telefono o scansionalo nell'app."
+        },
+        "link": {
+          "title": "Collega",
+          "body": "Controlla che entrambi gli schermi mostrino lo stesso codice, poi tocca Collega."
+        },
+        "dashboard": {
+          "title": "Apri la dashboard",
+          "body": "17 dashboard. Apri l'app quando vuoi per aggiornare e fai modifiche finché è connessa."
+        }
+      },
+      "promises": {
+        "edits": {
+          "title": "Modifica da connesso",
+          "body": "Le modifiche sono salvate sul telefono, solo finché è connesso."
+        },
+        "phone": {
+          "title": "Il telefono resta al comando",
+          "body": "I dati arrivano solo mentre l'app è aperta."
+        },
+        "private": {
+          "title": "Nulla salvato online",
+          "body": "Crittografia end-to-end. Nemmeno noi possiamo leggerli."
+        }
+      },
+      "cardTitle": "Collega questo browser",
+      "cardBody": "Scansiona con la fotocamera del telefono o l'app Money2Time.",
+      "qrLabel": "Codice QR per collegare questo browser all'app Money2Time",
+      "preparing": "Preparazione del codice…",
+      "noAccount": "Nessun account. Il codice cambia ogni 2 minuti.",
+      "confirmCode": "Controlla che il telefono mostri questo codice, poi tocca Collega.",
+      "candidateTitle": "Collegare {phone}?",
+      "candidateTitleUnnamed": "Collegare questo telefono?",
+      "candidateBody": "Controlla che il telefono mostri lo stesso codice. Collega solo se l'hai scansionato tu.",
+      "candidateAccept": "Collega",
+      "candidateReject": "Non è mio",
+      "offline": "Impossibile connettersi. Un nuovo codice compare quando torni online.",
+      "terms": "Collegando accetti i Termini di utilizzo e l'Informativa sulla privacy.",
+      "unlinkedNotice": "Scollegato. Questo browser ha eliminato la sua copia dei tuoi dati.",
+      "linkedTo": "Collegato a {phone}",
+      "waitingTitle": "In attesa del telefono",
+      "waitingBody": "Apri Money2Time → Impostazioni → Dashboard web.",
+      "preparingTitle": "Preparazione della sincronizzazione",
+      "preparingBody": "Il telefono sta preparando i tuoi dati. Tieni Money2Time aperto su di esso.",
+      "receivingTitle": "Sincronizzazione dei dati",
+      "receivingBody": "Crittografati end-to-end, direttamente dal telefono. Tieni Money2Time aperto su di esso.",
+      "openingTitle": "Apertura dei dati",
+      "openingBody": "Decrittazione in questo browser.",
+      "errors": {
+        "unsupported": "Questo browser non può aprire dati con crittografia end-to-end. Usa una versione recente di Chrome, Edge, Firefox o Safari."
+      }
+    },
+    "pro": {
+      "badge": "Pro",
+      "title": "Incluso in Money2Time Pro",
+      "body": "Fa parte di Money2Time Pro, insieme a periodi più lunghi e nessun limite per conti, categorie, movimenti ricorrenti e altro. Passa a Pro nell'app sul telefono e si sblocca anche qui.",
+      "stepApp": "Sul telefono, apri Money2Time e passa a Pro.",
+      "stepRefresh": "Torna qui e aggiorna dal telefono. Questo browser si sblocca appena il telefono ha sincronizzato i suoi dati.",
+      "checkAgain": "Ho fatto l'upgrade, aggiorna dal telefono",
+      "checking": "Sincronizzazione…",
+      "notNow": "Non ora",
+      "lockedPeriod": "{period}, solo Pro"
+    },
+    "filters": {
+      "title": "Filtri",
+      "accounts": "Conti",
+      "exclude": "Escludi",
+      "include": "Includi",
+      "done": "Fatto",
+      "reset": "Reimposta",
+      "note": "I saldi dei conti non vengono filtrati."
+    },
+    "hide": {
+      "hide": "Nascondi importi",
+      "show": "Mostra importi"
+    },
+    "dropdown": {
+      "search": "Cerca",
+      "noMatch": "Nessun risultato"
+    }
+  }
+}

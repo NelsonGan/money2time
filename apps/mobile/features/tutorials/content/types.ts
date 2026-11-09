@@ -1,9 +1,9 @@
 /**
  * Tutorial content model.
  *
- * The catalog in `tutorials.ts` is the **single source of truth for both
- * repositories**: `scripts/sync-tutorials-web.mjs` copies it (and the annotated
- * screenshots) into money2time-web, so a tutorial is written once and shows up
+ * The catalog in `tutorials.ts` is the **single source of truth for the app
+ * and the website**: `scripts/sync-tutorials-web.mjs` copies it (and the annotated
+ * screenshots) into apps/web, so a tutorial is written once and shows up
  * in the app and on money2time.com. Never hand-edit the generated copy on the
  * web side.
  *

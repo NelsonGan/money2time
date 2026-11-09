@@ -1,14 +1,12 @@
-// Generates bundled account-logo assets + registry from the screenshots-creator
-// manifest. Copies every PNG into assets/account-logos/<country>/<slug>.png and
+// Generates bundled account-logo assets + registry from the App Studio
+// (apps/app-studio) logo manifest. Copies every PNG into assets/account-logos/<country>/<slug>.png and
 // emits constants/accountLogos.generated.ts (require map + metadata + countries).
 //
 // Re-run after the source logo set changes:
 //   node scripts/generate-account-logos.mjs
 //
-// The source set is assumed to sit next to this repo (three levels up from this
-// app, which lives at apps/mobile). Set ACCOUNT_LOGOS_SOURCE_DIR
-// to point elsewhere — needed when running from a git worktree, whose parent is
-// the worktrees dir rather than ~/Projects.
+// The source set is apps/app-studio/public/logos in this repository. Set
+// ACCOUNT_LOGOS_SOURCE_DIR to read it from somewhere else.
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -17,7 +15,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..');
 const SOURCE_DIR = process.env.ACCOUNT_LOGOS_SOURCE_DIR
   ? path.resolve(process.env.ACCOUNT_LOGOS_SOURCE_DIR)
-  : path.resolve(REPO_ROOT, '../../../money2time-screenshots-creator/public/logos');
+  : path.resolve(REPO_ROOT, '../app-studio/public/logos');
 const ASSETS_DIR = path.join(REPO_ROOT, 'assets/account-logos');
 const GENERATED_FILE = path.join(REPO_ROOT, 'constants/accountLogos.generated.ts');
 

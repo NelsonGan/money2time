@@ -1,0 +1,2165 @@
+{
+  "metadata": {
+    "home": {
+      "title": "Harcama takip uygulaması: saat cinsinden - Money2Time",
+      "description": "Her satın alımı hayatınızdan saatlere çeviren harcama takip uygulaması. Giderleri, hesapları ve sabit ödemeleri banka girişi olmadan izleyin.",
+      "openGraphDescription": "Her satın alım, hayatınızdan saatler olarak. Banka girişi istemeyen özel bir harcama takip uygulaması."
+    },
+    "contact": {
+      "title": "İletişim - Money2Time",
+      "description": "Sorular, geri bildirim, özellik önerileri veya verilerinizle ilgili bir talep: doğrudan Money2Time geliştiricisine yazın."
+    },
+    "privacy": {
+      "title": "Gizlilik Politikası - Money2Time",
+      "description": "Money2Time verilerinizi nasıl işler: yerel depolama, rastgele bir Uygulama kimliği kullanan ürün analizi ve kişisel veya finansal verilerin satılmaması."
+    },
+    "terms": {
+      "title": "Kullanım Şartları - Money2Time",
+      "description": "Money2Time harcama takip uygulamasını iOS ve Android'de kullanırken kabul ettiğiniz şartlar."
+    },
+    "statementsImport": {
+      "title": "Banka ekstrelerini yapay zekâ ile içe aktarma - Money2Time",
+      "description": "Money2Time'daki yapay zekâ destekli ekstre aktarımının kısa anlatımı; banka geçmişinizi tek tek yazmadan aktarın."
+    },
+    "dataDeletion": {
+      "title": "Veri Silme Talebi - Money2Time",
+      "description": "Money2Time verilerinizin silinmesini nasıl talep edersiniz, neler silinir, neler saklanır ve ne kadar süreyle."
+    },
+    "keywords": [
+      "harcama takip uygulaması",
+      "bütçe uygulaması",
+      "gider takibi",
+      "kişisel finans uygulaması",
+      "aylık bütçe",
+      "düzenli ödemeler",
+      "para biriktirme uygulaması",
+      "saatlik ücret hesaplama",
+      "harcama analizi",
+      "bütçe planlama"
+    ],
+    "costInHours": {
+      "title": "Ülkelere göre medyan maaş, çalışma saatiyle - Money2Time",
+      "description": "On ülkenin resmi medyan ve ortalama maaşları, her yerde aynı olan tek bir ürüne karşı ölçüldü: bunun için ne kadar çalışmak gerekiyor.",
+      "openGraphDescription": "Bir saatlik çalışma on ülkede nereye yetiyor? Her yerde aynı olan tek bir ürünle ölçüldü."
+    },
+    "tutorials": {
+      "title": "Money2Time kılavuzları - Uygulama nasıl kullanılır",
+      "description": "Money2Time'ın her bölümü için gerçek ekran görüntüleriyle adım adım kılavuzlar. Harcama kaydı, hesap paylaşma, bütçe kurma ve fiyatları çalışma saati olarak görme.",
+      "detailTitle": "{title} - Money2Time kılavuzu"
+    },
+    "dashboard": {
+      "title": "Web Panosu - Money2Time",
+      "description": "Money2Time verilerinizi büyük ekranda görmek için telefonunuzla tarayın: harcamalar, net varlık, bütçeler ve her satın alımın ardındaki saatler. Uçtan uca şifreli, çevrimiçi saklanan hiçbir şey yok."
+    }
+  },
+  "common": {
+    "language": {
+      "label": "Dil"
+    },
+    "footer": {
+      "contact": "İletişim",
+      "privacy": "Gizlilik Politikası",
+      "dataDeletion": "Veri Silme",
+      "terms": "Kullanım Şartları",
+      "copyright": "© {year} Money2Time. Tüm hakları saklıdır.",
+      "costInHours": "Saat cinsinden fiyat",
+      "tutorials": "Kılavuzlar",
+      "dashboard": "Web panosu"
+    }
+  },
+  "storeButtons": {
+    "appStorePrefix": "Şuradan indirin:",
+    "appStore": "App Store",
+    "playStorePrefix": "Şuradan edinin:",
+    "playStore": "Google Play"
+  },
+  "screenshotGallery": {
+    "ariaLabel": "Uygulama ekran görüntüleri",
+    "alts": {
+      "home": "Aylık işlem listesini, gelir ve gider toplamlarını ve her satın almanın arkasındaki çalışma saatlerini gösteren Money2Time ekran görüntüsü",
+      "privacy": "Gizliliği vurgulayan Money2Time ekran görüntüsü: verileriniz cihazınızda kalır, reklam yok, tamamen çevrimdışı çalışır",
+      "assets": "Net varlıkları ve hesap bakiyelerini gösteren Money2Time ekran görüntüsü",
+      "addExpense": "Ekran klavyesi ve sesli giriş ile hızlı gider girişi gösteren Money2Time ekran görüntüsü",
+      "splitBill": "Bir hesabın birkaç kişi arasında eşit bölüşüldüğünü ve herkesin payını gösteren Money2Time ekran görüntüsü",
+      "insights": "Kategoriye göre gider dağılımı pasta grafiğini gösteren Money2Time ekran görüntüsü",
+      "budgeting": "Kategorilere göre aylık bütçeleri, ilerleme çubuklarını ve her birinde kalan tutarı gösteren Money2Time ekran görüntüsü",
+      "recurrings": "Düzenli yükümlülükleri ve sıklıklarını gösteren Money2Time ekran görüntüsü",
+      "hourlyRates": "Aylara göre saatlik değer geçmişini gösteren Money2Time ekran görüntüsü"
+    }
+  },
+  "home": {
+    "nav": {
+      "howItWorks": "Nasıl çalışır",
+      "logging": "Kayıt",
+      "features": "Özellikler",
+      "privacy": "Gizlilik",
+      "download": "Uygulamayı indir",
+      "openMenu": "Menüyü aç",
+      "closeMenu": "Menüyü kapat"
+    },
+    "hero": {
+      "title": "Her fiyatın iki sayısı vardır.",
+      "subtitle": "Money2Time harcamalarını her uygulama gibi kaydeder, sonra aynı tutarı hayatının saatleri olarak gösterir.",
+      "badges": {
+        "onDevice": "Telefonunda kalır",
+        "noBank": "Banka girişi yok",
+        "quick": "Saniyeler içinde kaydedilir"
+      }
+    },
+    "units": {
+      "min": "{value} dk",
+      "hours": "{value} sa"
+    },
+    "ticker": {
+      "coffee": "Kahve",
+      "lunch": "Dışarıda öğle yemeği",
+      "groceries": "Market",
+      "fuel": "Benzin",
+      "tshirt": "Tişört",
+      "beers": "Bir tur bira",
+      "electricity": "Elektrik",
+      "pizza": "Cuma pizzası",
+      "dogFood": "Köpek maması",
+      "cinema": "Sinema",
+      "gym": "Spor salonu",
+      "rent": "Kira",
+      "flight": "Eve uçuş",
+      "iceCream": "Dondurma"
+    },
+    "howItWorks": {
+      "eyebrow": "Nasıl çalışır",
+      "title": "Tek dokunuş parayı zamana çevirir.",
+      "body": "Saat ücretin, hesabına gerçekten geçen tutardan hesaplanır. Vergiden sonra, çalıştığın günlere bölünerek, hiç ödenmeyen yol süresi de dahil.",
+      "coffee": {
+        "title": "Kahve",
+        "note": "Kısa bir yürüyüş kadar çalışma. O kahveyi zaten istiyordun."
+      },
+      "impulse": {
+        "title": "Ani alışveriş",
+        "note": "Neredeyse iki iş günü. Bir gece düşünmeye değer."
+      },
+      "rate": {
+        "title": "Gerçek saat ücretin",
+        "perHour": "/sa",
+        "takeHome": {
+          "label": "Net maaş",
+          "value": "ayda {value}"
+        },
+        "daysWorked": {
+          "label": "Çalıştığın günler",
+          "value": "haftada {value}"
+        },
+        "commute": {
+          "label": "Yol, ödenmeyen",
+          "value": "günde {value} dk"
+        }
+      }
+    },
+    "logging": {
+      "eyebrow": "Kayıt",
+      "title": "Bir daha elle kayıt girme.",
+      "body": "Çoğu harcama uygulaması ölür, çünkü kayıt tutmak iştir. İşte üç kısa yol.",
+      "videoPlaceholder": "Ekran kaydı yakında",
+      "receiptScan": {
+        "tab": "Fiş tara",
+        "title": "Fişe doğrult.",
+        "body": "Kamera ayrı bir ekranda değil, kayıt formunun içinde açılır. Tutar, satıcı ve tarih dolu olarak döner, fotoğraf da ekli kalır.",
+        "points": {
+          "one": "Tutarı, tarihi ve satıcıyı okur",
+          "two": "Fotoğrafı sonrası için saklar"
+        }
+      },
+      "backTap": {
+        "tab": "Arkaya dokunma",
+        "title": "Telefonun arkasına iki kez dokun.",
+        "body": "iOS'un Arkaya Dokunma özelliğine bağlı bir kısayol, son hesabın ve kategorin hazır şekilde tuş takımını açar. Kasadan ayrılmadan biter.",
+        "points": {
+          "one": "Cepten kayda saniyeler içinde",
+          "two": "Kilit açmak yok, uygulama aramak yok"
+        }
+      },
+      "applePay": {
+        "tab": "Apple Pay",
+        "title": "Ya da her zamanki gibi öde.",
+        "body": "Bir otomasyon Apple Pay ödemesini fark eder ve kaydı hazırlar. Tek bildirim, kategoriye bir bakış, kaydır geç.",
+        "points": {
+          "one": "Elle asla girmeyeceğin şeyleri yakalar",
+          "two": "Sen onaylamadan hiçbir şey kaydedilmez"
+        }
+      }
+    },
+    "review": {
+      "eyebrow": "Değerlendirme",
+      "title": "Nereye gittiğini gör.",
+      "body": "Bir hafta, bir ay ya da bir yıl seç. Tek bir tutar, arkasındaki saatler ve kategorilerin sıralı halde. Birine dokun, içinde ne olduğunu gör.",
+      "points": {
+        "one": "Bir yabancının bütçesiyle değil, kendi ortalamanla karşılaştırılır",
+        "two": "Bir kategoriyi ya da hesabı çıkar, sayılar kendini yeniden hesaplar",
+        "three": "Gözlem var, azar yok"
+      },
+      "chip": "{hours} saat",
+      "mock": {
+        "title": "Harcamaları incele",
+        "week": "Hafta",
+        "month": "Ay",
+        "year": "Yıl",
+        "spent": "Bu hafta harcanan",
+        "calmer": "Her zamankinden sakin.",
+        "categories": {
+          "groceries": "Market",
+          "eatingOut": "Dışarıda yemek",
+          "transport": "Ulaşım"
+        }
+      }
+    },
+    "features": {
+      "eyebrow": "Özellikler",
+      "title": "Beklediğin diğer her şey, gürültü çıkarmadan.",
+      "sentiment": {
+        "title": "Nasıl hissettirdi",
+        "body": "Bir alışverişi mutlu, nötr ya da pişman diye işaretle. Örüntü toplamdan çok şey söyler.",
+        "legend": "Değdi"
+      },
+      "commitments": {
+        "title": "Sabit giderler",
+        "body": "Kira, sigorta, iptal etmeyi düşünüp durduğun spor salonu. Ayı, gelmeden gör.",
+        "lockedIn": "/ay bağlı"
+      },
+      "reimbursements": {
+        "title": "Geri gelen para",
+        "body": "Bir gideri geri ödenecek diye işaretle, gelene kadar kendi listesinde beklesin.",
+        "employer": "İşveren",
+        "insurer": "Sağlık sigortası"
+      },
+      "insights": {
+        "title": "Dokuz analiz",
+        "body": "Dağılımlar, eğilimler, tasarruf oranı, duygu, varlıklar. Hepsi tek bir menüden.",
+        "savingsRate": "Tasarruf oranı",
+        "incomeTrend": "Gelir eğilimi",
+        "assets": "Varlıklar"
+      },
+      "split": {
+        "title": "Hesabı bölüşmek",
+        "body": "Fişi tara, kalemleri masadakilere dağıt. Yalnızca senin payın sayılır.",
+        "yourShare": "Senin payın"
+      },
+      "modes": {
+        "title": "Basit ya da tam",
+        "body": "Tek bir cüzdan ve bir tuş takımıyla başla. Hesapları, transferleri ve para birimlerini gerektiğinde ekle.",
+        "simple": "Basit",
+        "simpleNote": "Tek cüzdan",
+        "full": "Tam",
+        "fullNote": "Her şey açık"
+      },
+      "budgets": {
+        "title": "Sana tempo tutan bütçeler",
+        "body": "Kategori başına aylık bir tavan belirle. Çubuk bugün nerede olman gerektiğini gösterir.",
+        "category": "Market",
+        "of": "/ {total}",
+        "pace": "Tempoda, {days} gün kaldı"
+      },
+      "calendar": {
+        "title": "Okunabilen bir ay",
+        "body": "Takvim ızgarasına uzaklaş. Her gün ne girdiğini ve ne çıktığını, tutar büyüdükçe koyulaşan renklerle gösterir."
+      },
+      "currency": {
+        "title": "Her para birimi",
+        "body": "Hangi para birimiyle ödediysen onunla kaydet. Toplamlar çevrilir, orijinal tutar satırda kalır.",
+        "item": "Taşıt kredisi",
+        "paidIn": "{currency} ile ödendi"
+      },
+      "receipts": {
+        "title": "Her fiş dosyalanmış",
+        "body": "Fotoğraflar kayda eklenir ve albümlerde toplanır. Bir garanti talebi tek kaydırma uzakta."
+      },
+      "search": {
+        "title": "Her şeyi bul",
+        "body": "Nota ya da satıcıya göre ara, sonra kategoriye, hesaba, tutara veya hissine göre daralt.",
+        "query": "kahve",
+        "filterCategory": "Yemek",
+        "filterAccount": "Nakit",
+        "filterSentiment": "Pişman"
+      },
+      "assets": {
+        "title": "Neyin var",
+        "body": "Hesapları ve varlıkları harcamaların yanında takip et, uzun vade de sayılsın."
+      }
+    },
+    "testimonials": {
+      "eyebrow": "Yorumlar",
+      "title": "İnsanlar bir ay sonra ne diyor.",
+      "usersChoice": "Kullanıcıların tercihi"
+    },
+    "privacy": {
+      "eyebrow": "Gizlilik",
+      "title": "Harcamaların telefonunda kalır.",
+      "body": "Açılacak hesap yok, bağlanacak banka yok. Her şey cihazında yaşar ve istediğin an tümünü dışa aktarabilir ya da silebilirsin.",
+      "onDevice": {
+        "title": "Yalnızca cihazda",
+        "body": "Bulut yok, senkronizasyon yok, reklam yok."
+      },
+      "import": {
+        "title": "Geçmişini yanında getir",
+        "body": "Money Manager yedeğini içe aktar ve kaldığın yerden devam et."
+      },
+      "link": "Gizlilik politikasını oku"
+    },
+    "why": {
+      "eyebrow": "Geliştiriciden",
+      "title": "Bunu Neden Yaptım",
+      "bookAlt": "Vicki Robin'in Your Money or Your Life kitabı",
+      "quote": "Yaşam enerjinizi para karşılığında takas ediyorsunuz",
+      "quoteAuthor": "- Vicki Robin",
+      "paragraph1": "<book>Your Money or Your Life</book> kitabını okuduktan sonra bende bir şey yerine oturdu. Maaşla çalışan çoğumuz için para sadece para değildir; yaşam enerjimizdir. Harcadığımız her lira, zamanımızdan saatleri, emeğimizi ve hayatımızdan verdiğimiz parçaları temsil eder.",
+      "paragraph2": "Bu yüzden bu uygulamayı yaptım. Harcamalarınızı farklı bir şekilde görmenize yardımcı olur: yalnızca para birimiyle değil, hayatınızdan saatlerle. Çünkü bazen <cost>\"20 $\"</cost> çok fazla gelmez, ama <time>\"hayatımın 2 saati\"</time> öyle gelir. Amaç basit: paranızın (ya da aslında zamanınızın) nereye gittiğinin daha çok farkına varmanıza ve kontrolü geri almanıza yardımcı olmak.",
+      "paragraph3": "Her şey cihazınızda kalır; giriş yapma veya bulut eşitleme yoktur. Verileriniz size aittir. Gerekirse verileri basit bir JSON dosyası olarak da dışa aktarabilirsiniz. Ücretsiz sürüm, başlamak için ihtiyacınız olan her şeyi sunar. Pro; sınırsız hesap/kategori/saatlik ücret gibi bazı ek özelliklerin kilidini açar.",
+      "paragraph4": "Umarım paranızın ve hayatınızın kontrolü her zaman sizde olur."
+    },
+    "closing": {
+      "title": "Paranın gerçekte neye mal olduğunu gör.",
+      "body": "Ücretsiz ve hesap gerekmiyor. Saatlik değerini bir dakikada gir, her sayı ikinci bir anlam kazansın."
+    },
+    "community": {
+      "body": "Diğer kullanıcılarla bağlantı kurun, geri bildirim paylaşın ve Discord sunucumuzda ipuçları alın.",
+      "cta": "Topluluğa Katıl"
+    },
+    "dashboardEntry": {
+      "eyebrow": "Yeni · Web Panosu",
+      "title": "Money2Time verileriniz büyük ekranda",
+      "body": "Telefonunuzla app.money2time.com'daki kodu tarayın; nakit akışını, harcamaları, net varlığı, bütçeleri, seyahatleri ve her alışverişin ardındaki saatleri görün. Telefonunuz bağlıyken bilgisayarınızdan işlem ekleyip düzenleyin. Uçtan uca şifreli.",
+      "cta": "Web panosunu aç",
+      "points": {
+        "private": "Uçtan uca şifreli",
+        "charts": "17 pano",
+        "edits": "Bilgisayarınızdan düzenleyin"
+      }
+    }
+  },
+  "contact": {
+    "page": {
+      "title": "Benimle İletişime Geçin",
+      "intro": "Destek, hatalar, geri bildirim veya gizlilik soruları için.",
+      "formLabel": "İletişim Formu",
+      "discordTitle": "Sohbet etmeyi mi tercih edersiniz?",
+      "discordBody": "Diğer kullanıcılarla bağlantı kurmak ve hızlı yanıtlar almak için Discord topluluğumuza katılın.",
+      "discordCta": "Discord'umuza Katılın"
+    },
+    "form": {
+      "honeypot": "Şirket",
+      "name": "Ad",
+      "namePlaceholder": "Adınız",
+      "email": "E-posta",
+      "emailPlaceholder": "siz@example.com",
+      "message": "Mesaj",
+      "messagePlaceholder": "Ne olduğunu, neyin iyileştirilmesini istediğinizi veya nasıl yardımcı olabileceğimi anlatın.",
+      "sending": "Gönderiliyor...",
+      "send": "Mesaj gönder"
+    },
+    "validation": {
+      "nameRequired": "Lütfen adınızı girin.",
+      "nameTooLong": "Lütfen adınızı {max} karakterin altında tutun.",
+      "emailRequired": "Lütfen e-posta adresinizi girin.",
+      "emailInvalid": "Lütfen geçerli bir e-posta adresi kullanın.",
+      "subjectTooLong": "Lütfen konuyu {max} karakterin altında tutun.",
+      "messageRequired": "Lütfen kısa bir mesaj paylaşın.",
+      "messageTooLong": "Lütfen mesajı {max} karakterin altında tutun."
+    },
+    "status": {
+      "honeypot": "Ulaştığınız için teşekkürler. Notunuz yolda.",
+      "error": "Lütfen vurgulanan alanları düzeltip tekrar deneyin.",
+      "mailto": "Varsayılan posta uygulamanız, mesaj önceden doldurulmuş şekilde açılıyor. Hiçbir şey açılmazsa doğrudan e-posta gönderin."
+    }
+  },
+  "statementsImport": {
+    "title": "Ekstre İçe Aktarma",
+    "intro": "Banka ekstrelerinizi yapay zeka yardımıyla Money2Time'a nasıl aktaracağınızı görmek için aşağıdaki kısa anlatımı izleyin.",
+    "videoTitle": "Money2Time - Ekstre İçe Aktarma anlatımı"
+  },
+  "notFound": {
+    "title": "Sayfa bulunamadı",
+    "body": "Bu sayfa yok. Belki de zamanınızdan gereğinden fazla götürüyordur.",
+    "home": "Ana sayfaya git"
+  },
+  "privacy": {
+    "title": "Gizlilik Politikası",
+    "lastUpdated": "Son güncelleme: 22 Ekim 2026",
+    "websiteAnalytics": {
+      "title": "Web Sitesi Kullanım Analizi",
+      "paragraphs": [
+        "money2time.com'da, takma adlı sayfa görüntülemelerini ve uygulama indirme tıklamaları, eğitim seçimi ve iletişim formu sonuçları gibi sınırlı sayıdaki etkileşimi ölçmek için PostHog ve Google Analytics kullanırız. Bu hizmetler tarayıcı depolamasını veya çerezleri kullanabilir ve yaklaşık bölge, cihaz ve tarayıcı türü ile yönlendiren site gibi teknik bilgileri işleyebilir. Google Analytics kullanıcı ve etkinlik verileri en fazla 14 ay saklanır.",
+        "Web Gösterge Paneli'nde (app.money2time.com) aynı hizmetler hangi pano sayfalarını açtığınızı, bir tarayıcının ne zaman bağlandığını veya bağlantısının kaldırıldığını, telefonunuzdan yapılan aktarımlar ile yaptığınız değişikliklerin başarılı olup olmadığını ve bir Pro özelliğinin ne zaman sunulduğunu ölçer. Telefonunuz verilerini gönderdikten sonra bu etkinlikler o telefonun rastgele uygulama tanımlayıcısıyla ilişkilendirilir; böylece pano ve uygulama kullanımınız, tarayıcının bağlantısını kaldırana kadar tek bir takma adlı kullanıcı olarak sayılır. Pano bunu money2time.com'un geri kalanından ayrı tutar; bu nedenle diğer sayfalara yaptığınız ziyaretler onunla ilişkilendirilmez. Pano etkinlikleri finansal verilerinizi asla içermez ve pano ziyaretleri asla oturum tekrarı olarak kaydedilmez.",
+        "PostHog ayrıca web sitesi ziyaretlerinin küçük bir örneğini her form alanı gizlenmiş oturum tekrarları olarak kaydedebilir ve bir sayfada hata oluştuğunda rapor alır.",
+        "İletişim formu içeriğini, eğitim arama metnini, finansal verileri, hesap tanımlayıcılarını, tam URL sorgu dizelerini veya reklam ya da kişiselleştirme amaçlı verileri göndermeyiz. /download yönlendirmesi IP adresinizi veya user-agent dizenizi analiz etkinliğine eklemez. Tarayıcınızın Do Not Track ayarı etkin olduğunda web sitesi analizi yüklenmez."
+      ]
+    },
+    "sections": [
+      {
+        "title": "Genel Bakış",
+        "paragraphs": [
+          "Money2Time (Uygulama), harcamalarınızı saatlik ücretinize göre zaman karşılıklarına dönüştüren bir kişisel finans uygulamasıdır. Gizliliğiniz bizim için önemlidir. Bu politika, Uygulamanın hangi verileri topladığını, bunların nasıl kullanıldığını ve bu verilerle ilgili haklarınızı açıklar."
+        ]
+      },
+      {
+        "title": "1. Veri Saklama ve Yerel Öncelikli Tasarım",
+        "paragraphs": [
+          "İşlemler, hesaplar, kategoriler, düzenli işlem kuralları ve ücret ayarları dahil tüm finansal verileriniz, cihaz üzerindeki bir veritabanı (SQLite) kullanılarak yerel olarak cihazınızda saklanır. Kişisel finansal bilgilerinizi saklayan sunucular işletmiyoruz ve Uygulama verilerinizi hiçbir zaman bizim bir sunucumuza eşitlemez veya yedeklemez. İsteğe bağlı Web Gösterge Paneli'ni (bölüm 6) kullanırsanız telefonunuz, bağladığınız bir tarayıcıya doğrudan, uçtan uca şifreli bir kopya gönderir; sunucumuz bunu saklamadan iletir ve okuyamaz.",
+          "Uygulamayı kaldırırsanız, yerel olarak saklanan tüm veriler kalıcı olarak silinir."
+        ]
+      },
+      {
+        "title": "2. Topladığımız Bilgiler",
+        "subsections": [
+          {
+            "title": "Finansal Veriler (Yalnızca Yerel Olarak Saklanır)",
+            "lists": [
+              [
+                "İşlem tutarları, tarihleri, kategorileri, notları ve duygu etiketleri",
+                "Hesap adları, türleri ve bakiyeleri",
+                "Ücret ve saatlik ücret bilgileri",
+                "Düzenli işlem kuralları",
+                "Kategori adları ve düzeni"
+              ]
+            ],
+            "paragraphs": [
+              "Bu veriler, açıkça dışa aktarmayı ya da Web Gösterge Paneli ile bağladığınız bir tarayıcıya göndermeyi seçmediğiniz sürece cihazınızdan ayrılmaz."
+            ]
+          },
+          {
+            "title": "Rastgele Uygulama Tanımlayıcısı",
+            "paragraphs": [
+              "İlk açılışta Uygulama; m2t_ ile başlayan ve adınız, e-posta adresiniz, Apple ID'niz veya herhangi bir kişisel kimliğinizle bağlantılı olmayan rastgele ve benzersiz bir tanımlayıcı oluşturur. Aynı tanımlayıcı ürün analizi ve abonelik yönetimi için PostHog, Google Analytics for Firebase ve RevenueCat ile paylaşılır; ayrıca Web Gösterge Paneli ile bağladığınız her tarayıcıyla da paylaşılır ve bu tarayıcının kullanım analizi (PostHog ve Google Analytics) de onu kullanır."
+            ]
+          },
+          {
+            "title": "Kullanım Analitiği",
+            "paragraphs": [
+              "Bu rastgele Uygulama tanımlayıcısına bağlı takma adlı kullanım verilerini toplamak ve Uygulamayı geliştirmek için PostHog ile Google Analytics for Firebase kullanırız. Analiz; tutarları, işlem ayrıntılarını, bakiyeleri, notları, makbuzları, yedekleri veya sizi tanımlayan bilgileri içermez.",
+              "PostHog ayrıca çökme ve hata raporlarını alır ve sorunları bulup düzeltebilmemiz için uygulama oturumlarının küçük bir örneğini ekran kaydı olarak kaydeder. Bu kayıtlarda bilgilerinizi gösteren her şey gizlenir: metinler, sayılar, giriş alanları, grafikler ve eklediğiniz her fotoğraf. Yalnızca uygulamanın kendi tasarımı, yani simgeleri, çizimleri ve düğme etiketleri görünür kalır. Bu kayıtlar finansal verilerinizi asla göstermez."
+            ],
+            "lists": [
+              [
+                "Ekran görüntülemeleri ve özellik kullanımı",
+                "İşlem oluşturulması veya ayarların değiştirilmesi gibi uygulama etkinlikleri",
+                "Para birimi, yerel ayar, tema ve görüntüleme modu gibi genel tercihler",
+                "iOS veya Android gibi platform"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "title": "3. Uygulama İçi Satın Almalar ve Abonelikler",
+        "paragraphs": [
+          "Uygulama, RevenueCat üzerinden yönetilen isteğe bağlı bir premium abonelik (Pro) sunar. Ödeme Apple veya Google tarafından işlenir. Ödeme bilgilerinizi, kredi kartı ayrıntılarınızı veya Apple ID/Google Hesabı kimlik bilgilerinizi hiçbir zaman almayız veya saklamayız.",
+          "RevenueCat, haklarınızı yönetmek için abonelik durumunuzu, ürün tanımlayıcınızı ve son kullanma tarihinizi alır. Bu bilgiler kişisel kimliğinize değil, rastgele Uygulama tanımlayıcısına bağlanır."
+        ]
+      },
+      {
+        "title": "4. Bildirimler",
+        "paragraphs": [
+          "Uygulama bildirim göndermek için izin isteyebilir. Tüm bildirimler cihazınızda yerel olarak zamanlanır. Harici sunuculardan anlık bildirim gönderilmez. Bildirim iznini reddedebilir veya cihazınızın Ayarlar bölümünden bildirimleri istediğiniz zaman devre dışı bırakabilirsiniz."
+        ],
+        "lists": [
+          [
+            "Günlük kontrol hatırlatmaları",
+            "Haftalık harcama özetleri",
+            "Düzenli işlem uyarıları"
+          ]
+        ]
+      },
+      {
+        "title": "5. Cihaz İzinleri",
+        "paragraphs": [
+          "Uygulama, yerel hatırlatmalar ve özetler zamanlamak için yalnızca bildirim izni ister. Uygulama kameranıza, mikrofonunuza, fotoğraf arşivinize, kişilerinize, takviminize, mesajlarınıza, konumunuza, sağlık verilerinize, fitness verilerinize, diğer uygulamalara veya tarama geçmişinize erişmez."
+        ]
+      },
+      {
+        "title": "6. Veri Dışa Aktarma, İçe Aktarma ve Web Gösterge Paneli",
+        "paragraphs": [
+          "Tüm finansal verilerinizi istediğiniz zaman Uygulamanın Ayarlar bölümünden JSON dosyası olarak dışa aktarabilirsiniz. Dışa aktarılan dosya, cihazınızın yerel paylaşım işlevi kullanılarak paylaşılır. Dışa aktardığınız verileri almayız veya işlemeyiz.",
+          "Önceki bir Money2Time yedeğinden veri içe aktarabilir veya Money Manager uygulamasından geçiş yapabilirsiniz. İçe aktarma, cihazınızdaki mevcut tüm verilerin yerini alır.",
+          "Web Gösterge Paneli isteğe bağlıdır. Kullanmak için bir bilgisayarda app.money2time.com adresini açar ve gösterdiği kodu Uygulama ile tararsınız. Ardından telefonunuz ve o tarayıcı, yalnızca ikisinin sahip olduğu bir şifreleme anahtarı üzerinde anlaşır. Uygulamanın Web Gösterge Paneli ekranı ve tarayıcı birlikte açıkken Uygulama, tarayıcıya verilerinizin bir kopyasını (dışa aktarımla aynı veriler; eklediğiniz logolar, simgeler ve kapak fotoğrafları dahil, ancak fiş fotoğrafları ve ödeme QR kodları hariç) AES-256-GCM ile uçtan uca şifrelenmiş olarak gönderir. Veriler, Cloudflare üzerinde işlettiğimiz bir sunucudan geçer; sunucu şifreli veriyi geldiği gibi iletir ve saklamaz. Verileri okuyamayız.",
+          "Tarayıcı, aldığı son kopyayı hâlâ şifreli olarak, anahtarla birlikte kendi depolama alanında; siz tarayıcıda veya Uygulamada bağlantısını kaldırana kadar tutar. Panoda yaptığınız değişiklikler aynı şekilde şifrelenerek telefonunuza geri gönderilir; Uygulama bunları yalnızca Web Gösterge Paneli ekranı açıkken ve yalnızca değişiklik yapmasına izin verdiğiniz bir tarayıcıdan geldiğinde kaydeder. Telefonunuz ayrıca tarayıcıya, Pro panoların kilidi açılabilsin diye Money2Time Pro'ya sahip olup olmadığınızı ve panonun kullanım analizi için rastgele uygulama tanımlayıcısını bildirir. Hesap yoktur: e-posta adresi tutmayız ve verilerinizi ileten sunucu, hangi telefonların ve tarayıcıların bağlı olduğuna dair hiçbir kayıt tutmaz."
+        ]
+      },
+      {
+        "title": "7. Veri Silme",
+        "paragraphs": [
+          "Verileriniz üzerinde her zaman tam kontrole sahipsiniz. Tüm Verileri Sıfırla, cihazınızdaki tüm işlemleri, hesapları, kategorileri, düzenli işlem kurallarını ve ücret ayarlarını kalıcı olarak siler. Yalnızca İşlemleri Sıfırla, hesapları ve kategorileri korurken işlem geçmişinizi temizler. Uygulamayı kaldırmak, yerel veritabanını ve saklanan tüm verileri tamamen siler. Bir tarayıcının Web Gösterge Paneli bağlantısını kaldırmak, onun tuttuğu kopyayı siler: bağlantıyı tarayıcıda kaldırırsanız hemen, Uygulamadan kaldırırsanız tarayıcı bir sonraki bağlandığında. O tarayıcının site verilerini temizlemek de kopyayı siler.",
+          "Uygulama içinde verileri sıfırlamak, Apple/Google tarafından tutulan abonelik durumunuzu veya daha önce PostHog / Google Analytics for Firebase'e gönderilmiş analitik verileri silmez. Analitik verilerin silinmesini talep etmek için aşağıdaki e-posta adresinden bizimle iletişime geçin."
+        ]
+      },
+      {
+        "title": "8. Üçüncü Taraf Hizmetleri",
+        "paragraphs": [
+          "Uygulama reklam göstermez veya reklam SDK'ları kullanmaz."
+        ],
+        "table": {
+          "headers": [
+            "Hizmet",
+            "Amaç",
+            "Paylaşılan Veriler"
+          ],
+          "rows": [
+            [
+              "PostHog / Google Analytics for Firebase",
+              "Takma adlı kullanım analitiği",
+              "Rastgele Uygulama kimliği, özellik kullanım etkinlikleri, tercihler"
+            ],
+            [
+              "RevenueCat",
+              "Abonelik yönetimi",
+              "Rastgele Uygulama kimliği, abonelik durumu"
+            ],
+            [
+              "Cloudflare (Workers, Durable Objects)",
+              "Web Gösterge Paneli bağlantısı, yalnızca kullanırsanız",
+              "Verileriniz, uçtan uca şifreli ve yalnızca aktarım sırasında; IP adresi gibi bağlantı ayrıntıları, Cloudflare'in günlüklerinde kısa süre tutulur"
+            ],
+            [
+              "Apple App Store / Google Play",
+              "Ödeme işleme",
+              "Doğrudan Apple/Google tarafından işlenir"
+            ]
+          ]
+        }
+      },
+      {
+        "title": "9. Veri Güvenliği",
+        "paragraphs": [
+          "Finansal verileriniz, cihazınızın yerleşik güvenliğiyle korunan şifrelenmemiş bir yerel veritabanında saklanır. Web Gösterge Paneli'ni kullandığınızda veriler telefonunuzda AES-256-GCM ile şifrelenir, telefonunuz ile tarayıcının P-256 anahtar değişimiyle üzerinde anlaştığı bir anahtar kullanılır ve HTTPS üzerinden gönderilir; sunucumuzda anahtar hiçbir zaman bulunmaz. Uygulama yalnızca standart, yayımlanmış şifreleme algoritmaları kullanır."
+        ]
+      },
+      {
+        "title": "10. Çocukların Gizliliği",
+        "paragraphs": [
+          "Uygulama 13 yaşın altındaki çocuklara yönelik değildir. 13 yaşın altındaki çocuklardan bilerek kişisel bilgi toplamıyoruz. Bir çocuğun Uygulama aracılığıyla veri sağladığını düşünüyorsanız lütfen bizimle iletişime geçin; bu bilgileri kaldırmak için gerekli adımları atacağız."
+        ]
+      },
+      {
+        "title": "11. Bu Politikadaki Değişiklikler",
+        "paragraphs": [
+          "Bu Gizlilik Politikasını zaman zaman güncelleyebiliriz. Değişiklikler, güncellenmiş Son güncelleme tarihiyle bu sayfaya yansıtılacaktır. Değişikliklerden sonra Uygulamayı kullanmaya devam etmeniz, güncellenmiş politikayı kabul ettiğiniz anlamına gelir."
+        ]
+      }
+    ],
+    "contact": {
+      "title": "12. Bize Ulaşın",
+      "body": "Bu Gizlilik Politikası hakkında sorularınız varsa, desteğe ihtiyacınız varsa veya analitik verilerin silinmesini talep etmek istiyorsanız lütfen bizimle şu adresten iletişime geçin:",
+      "formPrefix": "Bu sitedeki",
+      "formLink": "iletişim formunu",
+      "formSuffix": "da kullanabilirsiniz."
+    }
+  },
+  "terms": {
+    "title": "Kullanım Şartları",
+    "lastUpdated": "Son güncelleme: 25 Mart 2026",
+    "privacyPolicyLabel": "Gizlilik Politikası",
+    "sections": [
+      {
+        "title": "Genel Bakış",
+        "paragraphs": [
+          "Bu Kullanım Şartları (Şartlar), Nelson Gan tarafından geliştirilen ve işletilen Money2Time mobil uygulamasını (Uygulama) kullanımınızı düzenler. Uygulamayı indirerek veya kullanarak bu Şartlara bağlı kalmayı kabul edersiniz. Kabul etmiyorsanız Uygulamayı kullanmayın."
+        ]
+      },
+      {
+        "title": "1. Şartların Kabulü",
+        "paragraphs": [
+          "Money2Time'a erişerek veya onu kullanarak en az 13 yaşında olduğunuzu ve bu Şartlara taraf olmak için yasal ehliyete sahip olduğunuzu onaylarsınız. Uygulamayı bir kuruluş adına kullanıyorsanız, o kuruluşu bu Şartlara bağlama yetkiniz olduğunu beyan edersiniz."
+        ]
+      },
+      {
+        "title": "2. Uygulamanın Açıklaması",
+        "paragraphs": [
+          "Money2Time, giderlerinizi saatlik ücretinize göre zamanınızın eşdeğer saatlerine dönüştürerek harcamalarınızın gerçek maliyetini anlamanıza yardımcı olan bir kişisel finans uygulamasıdır. Temel özellikler şunlardır:"
+        ],
+        "lists": [
+          [
+            "Birden çok hesapta gider ve gelir takibi",
+            "Ücret ayarlarınıza göre para-zaman dönüşümü",
+            "Faturalar ve abonelikler için düzenli işlem kuralları",
+            "Harcama dağılımları, içgörüler ve duygu takibi",
+            "Yerel veri dışa aktarma ve içe aktarma",
+            "Hatırlatmalar ve özetler için özelleştirilebilir bildirimler"
+          ]
+        ]
+      },
+      {
+        "title": "3. Ücretsiz ve Pro Planlar",
+        "paragraphs": [
+          "Uygulama freemium esasına göre sunulur. Bazı özellikler ücretsiz planda sınırlıdır ve kilidinin açılması için aktif bir Pro aboneliği gerekir. Ücretsiz plan sınırlarını veya Pro plan özelliklerini istediğimiz zaman değiştirme hakkını saklı tutarız. Önemli değişiklikler bir uygulama güncellemesiyle veya bu web sitesinde duyurulacaktır."
+        ],
+        "subsections": [
+          {
+            "title": "Ücretsiz Plan",
+            "lists": [
+              [
+                "En fazla 5 hesap",
+                "En fazla 9 gider/gelir kategorisi",
+                "En fazla 5 düzenli işlem kuralı",
+                "En fazla 5 saatlik ücret girişi",
+                "Sınırsız işlem kaydı"
+              ]
+            ]
+          },
+          {
+            "title": "Pro Plan",
+            "lists": [
+              [
+                "Sınırsız hesap, kategori, düzenli kural ve saatlik ücret girişi",
+                "Aylık abonelik, yıllık abonelik veya ömür boyu satın alma olarak sunulur"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "title": "4. Uygulama İçi Satın Almalar ve Abonelikler",
+        "paragraphs": [
+          "Pro abonelikleri ve ömür boyu satın alma, Apple App Store veya Google Play Store üzerinden işlenir. Bir satın alma yaparak ilgili mağazanın ödeme şartlarını kabul edersiniz.",
+          "Abonelikler aylık veya yıllık döngüde peşin faturalandırılır ve mevcut dönemin bitiminden en az 24 saat önce iptal edilmediği sürece otomatik olarak yenilenir. İade talepleri Apple veya Google tarafından kendi iade politikaları kapsamında ele alınır. Önceki bir satın almayı yeni bir cihazda, Uygulama ayarlarındaki Satın Almaları Geri Yükle seçeneğini kullanarak geri yükleyebilirsiniz.",
+          "Ömür boyu satın alma, Uygulamanın ömrü boyunca Pro özelliklerine erişim sağlar. Uygulamanın süresiz olarak kullanılabilir kalacağına dair herhangi bir garanti vermeyiz."
+        ]
+      },
+      {
+        "title": "5. Verileriniz",
+        "paragraphs": [
+          "İşlemler, hesaplar, kategoriler, ücret ayarları ve tercihler dahil girdiğiniz tüm finansal veriler cihazınızda yerel olarak saklanır. Finansal verilerinize erişimimiz yoktur ve bunları herhangi bir sunucuda saklamayız.",
+          "Verilerinizin yedeklerini tutmaktan yalnızca siz sorumlusunuz. Yedek oluşturmak için yerleşik dışa aktarma özelliğini kullanın. Uygulamanın silinmesi, cihaz arızası veya yanlışlıkla sıfırlama sonucu oluşabilecek veri kayıplarından sorumlu değiliz.",
+          "Verilerin işlenmesine ilişkin tüm ayrıntılar için {privacyPolicy} bölümümüze bakın."
+        ]
+      },
+      {
+        "title": "6. Kabul Edilebilir Kullanım",
+        "paragraphs": [
+          "Şunları yapmamayı kabul edersiniz:"
+        ],
+        "lists": [
+          [
+            "Uygulama üzerinde tersine mühendislik yapmak, kaynak koda dönüştürmek veya parçalarına ayırmak",
+            "Uygulamanın herhangi bir bölümüne veya ilgili sistemlerine yetkisiz erişim sağlamaya çalışmak",
+            "Uygulamayı herhangi bir yasa dışı amaçla veya geçerli yasaları ihlal edecek şekilde kullanmak",
+            "Uygulamayı veya herhangi bir bölümünü yeniden dağıtmak, yeniden satmak veya alt lisanslamak",
+            "Uygulamaya erişmek veya Uygulama ile etkileşim kurmak için otomatik araçlar kullanmak"
+          ]
+        ]
+      },
+      {
+        "title": "7. Fikri Mülkiyet",
+        "paragraphs": [
+          "Tasarımı, kodu, grafikleri ve içeriği dahil olmak üzere Uygulama Nelson Gan'a aittir ve telif hakkı ile diğer fikri mülkiyet yasaları tarafından korunur. Bu Şartlar size ticari markalarımızı, logolarımızı veya marka unsurlarımızı kullanma hakkı vermez.",
+          "Finansal verileriniz size aittir. Uygulamayı kullanarak kişisel verileriniz üzerinde bize hiçbir hak tanımazsınız."
+        ]
+      },
+      {
+        "title": "8. Garantilerin Reddi",
+        "paragraphs": [
+          "Uygulama, satılabilirlik, belirli bir amaca uygunluk veya hak ihlali bulunmaması dahil olmak üzere açık veya zımni hiçbir garanti olmaksızın, olduğu gibi ve mevcut olduğu şekilde sunulur.",
+          "Money2Time kişisel bir verimlilik aracıdır; finansal danışman, muhasebeci veya düzenlemeye tabi bir finansal hizmet değildir. Uygulamadaki hiçbir şey finansal tavsiye niteliği taşımaz. Finansal kararlar için nitelikli bir uzmana danışmalısınız.",
+          "Uygulamanın hatasız, kesintisiz veya bugsız olacağını garanti etmeyiz."
+        ]
+      },
+      {
+        "title": "9. Sorumluluğun Sınırlandırılması",
+        "paragraphs": [
+          "Geçerli yasaların izin verdiği en geniş ölçüde, Uygulamayı kullanmanızdan veya kullanamamanızdan doğan hiçbir dolaylı, arızi, özel, sonuç olarak ortaya çıkan veya cezai zarardan sorumlu olmayacağız. Buna veri kaybı, Uygulama çıktısına dayanarak verilen finansal kararlar veya cihaz sorunları dahildir.",
+          "Bu Şartlardan veya Uygulamayı kullanımınızdan doğan herhangi bir talep için size karşı toplam sorumluluğumuz, mevcut Pro abonelik döneminiz için ödediğiniz tutarı veya ücretsiz plandaysanız 10 USD'yi aşmayacaktır."
+        ]
+      },
+      {
+        "title": "10. Fesih",
+        "paragraphs": [
+          "Uygulamaya erişiminizi herhangi bir zamanda, gerekçeli veya gerekçesiz ve bildirimli veya bildirimsiz olarak askıya alabilir veya sonlandırabiliriz. Fesih üzerine Uygulamayı kullanma hakkınız derhal sona erer. Verileriniz yerel olarak saklandığından, Uygulamayı kaldırana veya manuel olarak sıfırlayana kadar cihazınızda kalır.",
+          "Uygulamayı kaldırarak kullanmayı istediğiniz zaman bırakabilirsiniz."
+        ]
+      },
+      {
+        "title": "11. Bu Şartlardaki Değişiklikler",
+        "paragraphs": [
+          "Bu Şartları zaman zaman güncelleyebiliriz. Güncellediğimizde, bu sayfanın üst kısmındaki Son güncelleme tarihini de güncelleriz. Değişikliklerden sonra Uygulamayı kullanmaya devam etmeniz, revize edilmiş Şartları kabul ettiğiniz anlamına gelir. Önemli değişiklikler için sizi bir uygulama güncellemesiyle veya bu web sitesindeki bir bildirimle haberdar etmek için makul çabayı göstereceğiz."
+        ]
+      },
+      {
+        "title": "12. Geçerli Hukuk",
+        "paragraphs": [
+          "Bu Şartlar, kanunlar ihtilafı hükümleri dikkate alınmaksızın Singapur yasalarına tabidir ve bu yasalara göre yorumlanır. Bu Şartlardan doğan tüm uyuşmazlıklar, Singapur mahkemelerinin münhasır yargı yetkisine tabi olacaktır."
+        ]
+      }
+    ],
+    "contact": {
+      "title": "13. Bize Ulaşın",
+      "body": "Bu Şartlar hakkında sorularınız varsa lütfen bizimle şu adresten iletişime geçin:"
+    }
+  },
+  "dataDeletion": {
+    "title": "Veri Silme Talebi",
+    "lastUpdated": "Son güncelleme: 20 Ekim 2026",
+    "intro": "Money2Time yerel öncelikli (local-first) bir uygulamadır: tüm finansal verileriniz yalnızca cihazınızda saklanır ve sunucularımızda hiçbir zaman saklanmaz. Bu sayfa, Money2Time uygulamasıyla ilişkili verilerin silinmesini nasıl talep edeceğinizi; silme talebinde bulunma adımlarını, hangi tür verilerin silindiğini veya saklandığını ve saklama sürelerini açıklar.",
+    "sections": [
+      {
+        "title": "Veri Silme Nasıl Talep Edilir",
+        "subsections": [
+          {
+            "title": "Cihazınızda saklanan verileri silin",
+            "paragraphs": [
+              "Tüm finansal verileriniz dahil olmak üzere verilerinizin neredeyse tamamı yalnızca cihazınızda saklanır. İstediğiniz zaman kendiniz silebilirsiniz:"
+            ],
+            "lists": [
+              [
+                "Money2Time uygulamasını açın ve Ayarlar'a gidin.",
+                "Tüm işlemleri, hesapları, kategorileri, yinelenen kuralları ve ücret ayarlarını kalıcı olarak silmek için \"Tüm Verileri Sıfırla\"ya dokunun.",
+                "Alternatif olarak, yerel veritabanını ve saklanan tüm verileri tamamen kaldırmak için uygulamayı kaldırın."
+              ]
+            ]
+          },
+          {
+            "title": "Bağlı bir tarayıcıdaki kopyayı silin",
+            "paragraphs": [
+              "Web Gösterge Paneli'ni kullanıyorsanız, bağladığınız her tarayıcı telefonunuzun ona gönderdiği son kopyayı şifreli olarak tutar. Silmek için:"
+            ],
+            "lists": [
+              [
+                "Tarayıcıda app.money2time.com adresini açın ve \"Bu tarayıcının bağlantısını kaldır\" seçeneğini seçin. Kopya ve anahtarı hemen silinir.",
+                "Ya da Money2Time uygulamasında Ayarlar > Web Gösterge Paneli'ne gidin ve tarayıcının yanındaki \"Bağlantıyı kaldır\" düğmesine dokunun. Tarayıcı, bir sonraki bağlandığında kopyasını siler.",
+                "Tarayıcının app.money2time.com için site verilerini temizlemek de kopyayı siler."
+              ]
+            ]
+          },
+          {
+            "title": "Analiz ve abonelik verilerinin silinmesini talep edin",
+            "paragraphs": [
+              "Rastgele Uygulama tanımlayıcınızla ilişkili analiz veya abonelik verilerinin silinmesini talep etmek için bizimle iletişime geçin:"
+            ],
+            "lists": [
+              [
+                "Aşağıdaki adrese \"Data Deletion Request\" konusuyla e-posta gönderin veya bu sitedeki iletişim formunu kullanın.",
+                "Settings > Display bölümünde Kullanıcı Kimliği yanındaki kopyalama düğmesini kullanın ve Uygulamanızla ilişkili verileri bulabilmemiz için kimliğin tamamını ekleyin.",
+                "Talebinizi işleme alır ve tamamlandığını 30 gün içinde onaylarız."
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Hangi Veriler Silinir veya Saklanır",
+        "paragraphs": [
+          "Aşağıdaki tablo, silme talebinde bulunduğunuzda her veri türüne ne olduğunu ve verilerin ne kadar süreyle saklandığını özetler."
+        ],
+        "table": {
+          "headers": [
+            "Veri Türü",
+            "İşlem",
+            "Saklama Süresi"
+          ],
+          "rows": [
+            [
+              "Cihazdaki finansal veriler (işlemler, hesaplar, kategoriler, yinelenen kurallar, ücret ayarları)",
+              "Silindi",
+              "Verileri sıfırladığınızda veya uygulamayı kaldırdığınızda anında kaldırılır. Bizde hiçbir şey saklanmaz."
+            ],
+            [
+              "Bağladığınız bir tarayıcıdaki Web Gösterge Paneli kopyası",
+              "Silindi",
+              "Bağlantısını kaldırdığınızda veya site verilerini temizlediğinizde o tarayıcıdan kaldırılır. Sunucularımız bunu hiçbir zaman saklamaz, dolayısıyla bizde hiçbir şey tutulmaz."
+            ],
+            [
+              "Takma adlı analiz verileri (PostHog / Google Analytics for Firebase)",
+              "Talep üzerine silinir",
+              "Talebinizden itibaren 30 gün içinde silinir."
+            ],
+            [
+              "Abonelik verileri (RevenueCat, Apple, Google)",
+              "Gerektiğinde saklanır",
+              "Faturalandırma, vergi ve yasal yükümlülükler için Apple veya Google tarafından saklanır ve Apple veya Google hesabınız aracılığıyla yönetilir."
+            ]
+          ]
+        }
+      },
+      {
+        "title": "Saklamadığımız Veriler",
+        "paragraphs": [
+          "Money2Time hesap gerektirmez ve adınızı, e-postanızı, Apple Kimliğinizi, Google Hesabınızı veya ödeme bilgilerinizi sunucularımızda saklamaz. Finansal verileriniz, Web Gösterge Paneli'ni kullandığınızda da dahil olmak üzere sunucularımızda hiçbir zaman saklanmadığı için, sizin adınıza bunlara erişemez veya bunları silemeyiz.",
+          "Apple veya Google tarafından tutulan abonelik ve ödeme kayıtları bizim kontrolümüz dışındadır ve doğrudan Apple veya Google hesabınız aracılığıyla yönetilir."
+        ]
+      }
+    ],
+    "contact": {
+      "title": "Bize Ulaşın",
+      "body": "Analiz veya abonelik verilerinin silinmesini talep etmek için veya sorularınız varsa bizimle şu adresten iletişime geçin:",
+      "formPrefix": "Bu sitedeki",
+      "formLink": "iletişim formunu",
+      "formSuffix": "da kullanabilirsiniz."
+    }
+  },
+  "costInHours": {
+    "eyebrow": "Saat cinsinden maaşlar",
+    "title": "Bir saatlik çalışma neye yetiyor, ülke ülke",
+    "intro": "Her fiyatın ikinci bir sayısı vardır: onun için çalıştığınız süre. Bu sayfa her ülkenin resmi maaş verisini, her yerde aynı olan tek bir ürünle karşılaştırır; böylece bir saatin neye yettiği, sepete ne konduğu tartışılmadan kıyaslanabilir.",
+    "compare": {
+      "base": "Temel",
+      "with": "Şununla karşılaştır",
+      "measure": "Neyi ölçüyor",
+      "caption": "Yayımlanan maaş ve bir Big Mac için gereken çalışma, iki ülkede",
+      "priceSource": "Big Mac fiyatları:"
+    },
+    "metrics": {
+      "workPerBigMac": "Bir Big Mac için çalışma",
+      "bigMacPrice": "Big Mac fiyatı",
+      "payPerHour": "Saatlik ücret",
+      "payPerHourUsd": "Saatlik ücret, ABD doları",
+      "bigMacsPerMonth": "Bir aylık maaşın aldığı Big Mac",
+      "workPerLitre": "Bir litre benzin için çalışma",
+      "workPer100kWh": "{kwh} kWh elektrik için çalışma"
+    },
+    "periods": {
+      "hour": "saat başına",
+      "week": "haftada",
+      "month": "ayda",
+      "year": "yılda"
+    },
+    "measures": {
+      "median": "Medyan",
+      "average": "Ortalama"
+    },
+    "scopes": {
+      "allEmployees": "tüm ücretliler",
+      "allWorkers": "tüm çalışanlar",
+      "citizens": "vatandaşlar",
+      "formalSector": "kayıtlı sektör, 10+ çalışan",
+      "fullTimeEmployees": "tam zamanlı ücretliler",
+      "fullTimeResidents": "tam zamanlı yerleşikler",
+      "regularSalaried": "kadrolu ücretliler",
+      "wageAndSalary": "maaş ve ücret alanlar",
+      "employees": "ücretliler",
+      "employeesNet": "ücretliler, vergi sonrası",
+      "employedPersons": "çalışanlar",
+      "formalNonAgri": "tarım dışı kayıtlı sektör",
+      "fullTimeEquivalent": "tam zaman eşdeğeri ücretliler",
+      "urbanNonPrivate": "kentsel kamu ve büyük kuruluşlar"
+    },
+    "allMarkets": {
+      "title": "Tüm ülkeler, sıralamayla",
+      "intro": "Maaşın bir Big Mac için ne kadar çalışması gerektiğine göre sıralandı. Önce üçüncü sütunu okuyun: bu sayıların altısı medyan, dördü ortalama; ortalamalar üstte kalır çünkü tepe onları yukarı çeker.",
+      "caption": "Yayımlanan maaş verileri ve bir Big Mac için gereken çalışma, ülkelere göre",
+      "country": "Ülke",
+      "pay": "Yayımlanan maaş",
+      "basis": "Neyi ölçüyor",
+      "hourly": "Saat başına",
+      "effort": "Bir Big Mac için çalışma",
+      "youAreHere": "Siz"
+    },
+    "notes": {
+      "title": "Bunu nasıl okumalı",
+      "method": {
+        "title": "Saatler nasıl hesaplandı",
+        "body": "Bir istatistik kurumu saatlik bir rakam yayımlıyorsa o rakam olduğu gibi kullanılır. Haftalık ya da aylık yayımlıyorsa {hours} saatlik haftaya bölünür. Stats NZ ikisini de yayımlıyor ve aradaki fark elli sentin altında kalıyor."
+      },
+      "basket": {
+        "title": "Neden bir hamburger, neden bir sepet değil",
+        "body": "Big Mac, bir litre 95 oktan benzin ve bir konut kilovat-saati buradaki her ülkede aynı şeydir; her birini tek bir yayın tek bir tarihte derlemiştir. McDonald's'ın dana etli Big Mac satmadığı Hindistan'da The Economist bunun yerine tavuklu Maharaja Mac'i fiyatlar. Daha geniş bir yerel sepet hayatın daha çoğunu kapsardı ama dışarıda yemek Manila'da başka, Melbourne'de başka bir şeydir; ikisini kıyaslamak para hakkında değil sepet hakkında konuşmak olurdu."
+      },
+      "comparability": {
+        "title": "Maaşlar birebir karşılaştırılamaz",
+        "body": "Bu ülkeleri kapsayan tek bir medyan maaş tablosu kimse yayımlamıyor; her rakam kendi ulusal kurumundan geliyor ve farklı bir grubu sayıyor. Altısı medyan, dördü ortalama. Aradaki farkları kesin değil, yaklaşık okuyun."
+      },
+      "grossPay": {
+        "title": "Bunlar vergi öncesi",
+        "body": "Yayımlanan maaşlar brüt. Hesabınıza gerçekten geçen tutar daha az, dolayısıyla sizin saatleriniz bu sayfadakilerden fazla."
+      }
+    },
+    "sources": {
+      "title": "Rakamlar nereden geliyor",
+      "bigMac": "Big Mac fiyatları ve döviz kurları:",
+      "wages": "Maaşlar, ülke ülke:",
+      "energy": "Benzin ve elektrik fiyatları:"
+    },
+    "cta": {
+      "body": "Uygulama bunu ülkenizin değil sizin maaşınızla yapıyor. Elinize geçeni girin, her harcama ikinci bir sayı kazansın.",
+      "link": "Nasıl çalıştığını gör"
+    }
+  },
+  "tutorials": {
+    "eyebrow": "Kılavuzlar",
+    "title": "Kılavuzlar",
+    "intro": "Money2Time'ın yaptığı her şey için kısa, ekran ekran ilerleyen kılavuzlar. Her görüntü gerçek uygulamadan ve dokunulacak düğme kırmızıyla işaretli.",
+    "searchPlaceholder": "Kılavuzlarda ara",
+    "clear": "Temizle",
+    "emptyTitle": "Sonuç yok",
+    "emptyDescription": "Daha kısa bir kelime deneyin ya da aradığınız ekranın adını yazın.",
+    "stepCount": "{count} adım",
+    "stepCounter": "{total} adımdan {current}.",
+    "badgePro": "PRO",
+    "badgeIos": "iPhone",
+    "openInApp": "Uygulamada aç",
+    "previous": "Önceki",
+    "next": "Sonraki",
+    "category": {
+      "start": "Başlarken",
+      "logging": "Para kaydetme",
+      "organize": "Düzenleme",
+      "plan": "Planlama",
+      "share": "Paylaşma ve hesaplaşma",
+      "insights": "Anlama",
+      "data": "Verileriniz"
+    }
+  },
+  "dashboard": {
+    "loading": "Panonuz açılıyor…",
+    "units": {
+      "minutes": "{m} dk",
+      "hours": "{h} sa",
+      "hoursMinutes": "{h} sa {m} dk",
+      "days": "{d} g",
+      "daysHours": "{d} g {h} sa"
+    },
+    "nav": {
+      "label": "Panolar",
+      "menu": "Menü",
+      "openMenu": "Menüyü aç",
+      "closeMenu": "Menüyü kapat",
+      "groups": {
+        "insights": "Analizler",
+        "wealth": "Varlık",
+        "planning": "Planlama",
+        "organize": "Düzenleme"
+      }
+    },
+    "period": {
+      "label": "Dönem",
+      "previous": "Önceki dönem",
+      "next": "Sonraki dönem",
+      "asOf": "{date} itibarıyla",
+      "presets": {
+        "month": "Ay",
+        "3m": "3 ay",
+        "6m": "6 ay",
+        "12m": "12 ay",
+        "ytd": "Yıl başından",
+        "year": "Yıl",
+        "all": "Tümü"
+      }
+    },
+    "mode": {
+      "label": "Tutarları şöyle göster",
+      "hours": "Saat"
+    },
+    "common": {
+      "income": "Gelir",
+      "spending": "Harcama",
+      "net": "Net",
+      "saved": "Biriken",
+      "viewAll": "Tümünü gör",
+      "vsPrevious": "öncekine göre",
+      "uncategorized": "Kategorisiz",
+      "other": "Diğer",
+      "total": "Toplam",
+      "average": "Ortalama",
+      "transactions": "{count, plural, one {# işlem} other {# işlem}}",
+      "accountTypes": {
+        "debit": "Hesap",
+        "credit": "Kredi kartı",
+        "loan": "Kredi",
+        "goal": "Hedef",
+        "cash": "Nakit",
+        "savings": "Tasarruf",
+        "investment": "Yatırım"
+      },
+      "viewFailed": "Bu sayfa verileriniz için gösterilemedi. Diğer sayfalar çalışmaya devam ediyor."
+    },
+    "views": {
+      "overview": {
+        "nav": "Genel Bakış",
+        "title": "Genel Bakış",
+        "subtitle": "Paranız ve saatleriniz nereye gitti"
+      },
+      "cash-flow": {
+        "nav": "Nakit akışı",
+        "title": "Nakit akışı",
+        "subtitle": "Giren para, çıkan para ve geriye kalan"
+      },
+      "spending": {
+        "nav": "Harcama",
+        "title": "Harcama",
+        "subtitle": "Her kategori, işlem düzeyine kadar"
+      },
+      "income": {
+        "nav": "Gelir",
+        "title": "Gelir",
+        "subtitle": "Paranız nereden geldi"
+      },
+      "trends": {
+        "nav": "Eğilimler",
+        "title": "Eğilimler",
+        "subtitle": "Her kategori aydan aya nasıl değişiyor"
+      },
+      "calendar": {
+        "nav": "Takvim",
+        "title": "Takvim",
+        "subtitle": "Gün gün harcamalar"
+      },
+      "transactions": {
+        "nav": "İşlemler",
+        "title": "İşlemler",
+        "subtitle": "Kaydettiğiniz her şeyi arayın ve filtreleyin"
+      },
+      "accounts": {
+        "nav": "Hesaplar",
+        "title": "Hesaplar",
+        "subtitle": "Tüm hesaplardaki bakiyeler"
+      },
+      "net-worth": {
+        "nav": "Net değer",
+        "title": "Net değer",
+        "subtitle": "Sahip olduklarınız eksi borçlarınız"
+      },
+      "budgets": {
+        "nav": "Bütçeler",
+        "title": "Bütçeler",
+        "subtitle": "Plan ile gerçekte olanın karşılaştırması"
+      },
+      "recurring": {
+        "nav": "Tekrarlayan",
+        "title": "Tekrarlayan",
+        "subtitle": "Tekrar eden abonelikler ve faturalar"
+      },
+      "goals": {
+        "nav": "Hedefler ve krediler",
+        "title": "Hedefler ve krediler",
+        "subtitle": "Hedeflere ve borç kapatmaya doğru ilerleme"
+      },
+      "time": {
+        "nav": "Zaman maliyeti",
+        "title": "Zaman maliyeti",
+        "subtitle": "Harcamalarınız, hayatınızdan saat olarak"
+      },
+      "trips": {
+        "nav": "Geziler",
+        "title": "Geziler",
+        "subtitle": "Her gezinin maliyeti, para ve iş günü olarak"
+      },
+      "items": {
+        "nav": "Eşyalar",
+        "title": "Eşyalar",
+        "subtitle": "Sahip olduğunuz şeylerin günlük maliyeti"
+      },
+      "splits": {
+        "nav": "Bölüşülen hesaplar",
+        "title": "Bölüşülen hesaplar",
+        "subtitle": "Size hâlâ kimler borçlu"
+      },
+      "mood": {
+        "nav": "Ruh hali ve alışkanlıklar",
+        "title": "Ruh hali ve alışkanlıklar",
+        "subtitle": "Alışverişlerin nasıl hissettirdiği ve ne zaman yaptığınız"
+      },
+      "categories": {
+        "nav": "Kategoriler",
+        "title": "Kategoriler",
+        "subtitle": "Kategorilerinizi ekleyin, yeniden adlandırın ve düzenleyin"
+      }
+    },
+    "overview": {
+      "spent": "Harcanan",
+      "earned": "Kazanılan",
+      "saved": "Biriken",
+      "overspent": "Gelirden fazla harcandı",
+      "savingsRate": "Tasarruf oranı {rate}",
+      "noIncome": "Bu dönemde gelir yok",
+      "netWorth": "Net değer",
+      "netWorthNote": "Toplamlara dahil {count, plural, one {# hesap} other {# hesap}}",
+      "cashFlowTitle": "Nakit akışı",
+      "cashFlowSubtitle": "Bu döneme kadar olan 12 ay",
+      "paceTitle": "Harcama hızı",
+      "thisMonth": "Bu ay",
+      "lastMonth": "Geçen ay",
+      "dayN": "{day}. gün",
+      "paceBehind": "Geçen ayın bu noktasından {amount} daha az.",
+      "paceAhead": "Geçen ayın bu noktasından {amount} daha fazla.",
+      "topCategories": "En büyük kategoriler",
+      "biggestExpenses": "En büyük harcamalar",
+      "upcoming": "Yaklaşan tekrarlayanlar",
+      "nextOn": "Sıradaki: {date}",
+      "noSpending": "Bu dönemde harcama yok",
+      "noRecurring": "Etkin tekrarlayan kural yok",
+      "timeTitle": "Zamanınız",
+      "timeBody": "Bu dönemin harcamalarını ödemek <strong>{hours}</strong> çalışma gerektirdi.",
+      "workShare": "Çalıştığınız saatlerin payı",
+      "workShareNote": "Bu dönemde yaklaşık {worked} çalışmanın içinden",
+      "noWage": "Bunu saat olarak görmek için uygulamada saatlik değerinizi belirleyin.",
+      "accountsTitle": "En büyük hesaplar"
+    },
+    "cashFlow": {
+      "savingsRate": "Tasarruf oranı {rate}",
+      "noIncome": "Bu dönemde gelir yok",
+      "netPerDay": "Günlük net",
+      "avgNet": "Aylık ortalama net",
+      "daysCount": "{count, plural, one {# gün boyunca} other {# gün boyunca}}",
+      "monthsCount": "{count, plural, one {# ay boyunca} other {# ay boyunca}}",
+      "dailyTitle": "Gün gün",
+      "monthlyTitle": "Ay ay",
+      "sankeyTitle": "Para nereye gitti",
+      "sankeySubtitle": "Solda gelir, sağda harcama ve tasarruf",
+      "fromSavings": "Birikimden",
+      "empty": "Bu dönemde gelir veya harcama yok",
+      "savingsRateTitle": "Tasarruf oranı",
+      "savingsRateSubtitle": "Her ay gelirin ne kadarını biriktirdiğiniz; %20 yaygın bir hedef",
+      "tableTitle": "Aylık özet",
+      "month": "Ay",
+      "rate": "Oran"
+    },
+    "breakdown": {
+      "totalSpent": "Toplam harcanan",
+      "totalEarned": "Toplam kazanılan",
+      "perDay": "Günlük",
+      "overDays": "{count, plural, one {# gün boyunca} other {# gün boyunca}}",
+      "count": "İşlemler",
+      "avgEach": "Ortalama {amount}",
+      "largestCategory": "En büyük kategori",
+      "byCategory": "Kategoriye göre",
+      "subcategories": "Alt kategoriler",
+      "clickToDrill": "Alt kategorilerini görmek için bir kategori seçin",
+      "allCategories": "Tüm kategoriler",
+      "empty": "Bu dönemde burada bir şey yok",
+      "byDay": "Güne göre",
+      "byMonth": "Aya göre",
+      "monthlyAverage": "Ayda ortalama {amount}",
+      "topMerchants": "En çok gidilen yerler",
+      "topMerchantsNote": "Her işlemdeki nota göre gruplandı",
+      "biggestPurchases": "En büyük alışverişler",
+      "biggestPayments": "En büyük ödemeler",
+      "byWeekday": "Haftanın gününe göre",
+      "byWeekdayNote": "Bu dönemde her hafta gününün toplamı",
+      "transactionsIn": "{name} işlemleri",
+      "allTransactions": "Tüm işlemler"
+    },
+    "transactions": {
+      "search": "Notlarda, kategorilerde veya tutarlarda ara",
+      "type": "Tür",
+      "types": {
+        "all": "Tüm türler",
+        "expense": "Giderler",
+        "income": "Gelir",
+        "transfer": "Transferler"
+      },
+      "category": "Kategori",
+      "allCategories": "Tüm kategoriler",
+      "account": "Hesap",
+      "allAccounts": "Tüm hesaplar",
+      "feeling": "Duygu",
+      "allFeelings": "Herhangi bir duygu",
+      "feelings": {
+        "happy": "İyi hissettirdi",
+        "neutral": "Ne iyi ne kötü",
+        "sad": "Keşke yapmasaydım"
+      },
+      "empty": "Eşleşen işlem yok",
+      "newer": "Daha yeni",
+      "older": "Daha eski",
+      "page": "Sayfa {page} / {pages}"
+    },
+    "trends": {
+      "gridTitle": "Aya göre kategori",
+      "gridSubtitle": "Koyu renk, o ay daha çok harcandığı anlamına gelir. Grafiğini görmek için bir satır seçin.",
+      "category": "Kategori",
+      "empty": "Bu aylarda harcama yok",
+      "lineSubtitle": "Ayda ortalama {amount}",
+      "moversTitle": "En büyük değişimler",
+      "moversSubtitle": "Aynı uzunluktaki önceki dönemle karşılaştırıldığında",
+      "noMovers": "Pek bir şey değişmedi"
+    },
+    "calendar": {
+      "perDay": "Günlük ortalama",
+      "noSpendDays": "Harcamasız günler",
+      "noSpend": "Harcama yok",
+      "ofDays": "{count, plural, one {Şu ana kadarki # günün içinden} other {Şu ana kadarki # günün içinden}}",
+      "bestStreak": "En uzun harcamasız seri",
+      "daysValue": "{count, plural, one {# gün} other {# gün}}",
+      "bestStreakNote": "Son 12 ayda",
+      "busiest": "En yoğun gün",
+      "monthSubtitle": "Ne olduğunu görmek için bir gün seçin",
+      "pickDay": "Bu ayın en sonuncusu",
+      "pickDayNote": "Yalnızca o günü görmek için takvimden bir gün seçin",
+      "yearTitle": "Son 12 ay",
+      "yearSubtitle": "Her kare bir gün; koyu renk daha çok harcama demek"
+    },
+    "accounts": {
+      "assets": "Varlıklar",
+      "debts": "Borçlar",
+      "netWorth": "Net değer",
+      "inTotals": "{count, plural, one {# hesap toplamlarda} other {# hesap toplamlarda}}",
+      "excluded": "{count, plural, =0 {Tüm hesaplar sayılıyor} one {# hesap toplamların dışında} other {# hesap toplamların dışında}}",
+      "ungrouped": "Diğer hesaplar",
+      "notInTotals": "Toplamlara dahil değil",
+      "owed": "borç",
+      "owedNow": "Bugünkü borç",
+      "balanceNow": "Bugünkü bakiye",
+      "lastActivity": "son hareket: {date}",
+      "statementDays": "Ekstre ayın {statement}. günü, son ödeme {due}. gün",
+      "statementDaysAfter": "Ekstre ayın {statement}. günü, son ödeme {days} gün sonra",
+      "activity": "Hareketler",
+      "empty": "Henüz hesap yok"
+    },
+    "netWorth": {
+      "now": "Net değer",
+      "inHours": "Bugünkü kazanç oranıyla {hours} çalışma",
+      "change": "Değişim",
+      "since": "{month} tarihinden beri",
+      "bestMonth": "En iyi ay",
+      "debts": "Borçlar",
+      "debtNote": "Toplamlardaki kredi kartları ve krediler",
+      "assets": "Varlıklar",
+      "chartTitle": "Varlıklar, borçlar ve net değer",
+      "chartSubtitle": "Toplamlara dahil hesapların ay sonu bakiyeleri, bugünkü döviz kurlarıyla",
+      "mixTitle": "Varlıklarınız nerede",
+      "mixSubtitle": "Hesap grubuna göre",
+      "ungrouped": "Diğer",
+      "empty": "Henüz varlık yok",
+      "monthlyChange": "Aylık değişim"
+    },
+    "budgets": {
+      "emptyTitle": "Henüz bütçe yok",
+      "emptyBody": "Uygulamada aylık bir bütçe oluşturun, burada görünsün.",
+      "month": "Ay",
+      "budget": "Bütçe",
+      "spent": "Harcanan",
+      "ofBudget": "Bütçe kullanımı: {pct}",
+      "left": "Harcanabilecek kalan",
+      "over": "Bütçe aşımı",
+      "perDayLeft": "Ayın geri kalanı için günde {amount}",
+      "pace": "Geçen ay süresi",
+      "paceNote": "{days} günün {day}. günü",
+      "linesTitle": "Kategoriler",
+      "linesSubtitle": "Her çubuktaki çizgi, ayın ne kadarını geride bıraktığınızı gösterir",
+      "overall": "Tüm bütçe",
+      "overBy": "{amount} fazla",
+      "leftOf": "{amount} kaldı",
+      "aheadOfPace": "hızın önünde",
+      "unbudgetedCounted": "{amount}, bu kategoriler dışında harcandı ve bütçeye sayılıyor.",
+      "unbudgetedNot": "{amount}, bu kategoriler dışında harcandı ve sayılmıyor.",
+      "rateNote": "Diğer para birimlerindeki harcamalar 1 {currency} = {rate} {main} kuruyla dönüştürülür.",
+      "approxLeft": "Yani yaklaşık {amount} kaldı.",
+      "approxOver": "Yani yaklaşık {amount} fazla.",
+      "unconverted": "{count, plural, one {# harcama} other {# harcama}} henüz sayılmıyor: {currency} için kur yok.",
+      "historyTitle": "Aylara göre bütçe ve harcama",
+      "historyInMain": "{currency} cinsinden; böylece başka para biriminde bütçelenen aylar karşılaştırılabilir"
+    },
+    "recurring": {
+      "emptyTitle": "Tekrarlayan kural yok",
+      "emptyBody": "Uygulamada tekrar edecek şekilde ayarladığınız abonelikler ve faturalar burada görünür.",
+      "perMonth": "Aylık sabit giderler",
+      "perYear": "Yıllık",
+      "clockTitle": "Faturalar şu zamana kadar ödenir",
+      "clockNote": "Saat 9.00’da başlayarak her iş gününün ilk {hours} süresi bunları karşılar ({day} gün)",
+      "active": "Etkin kurallar",
+      "pausedCount": "{count, plural, =0 {Duraklatılan yok} one {# duraklatıldı} other {# duraklatıldı}}",
+      "listTitle": "Etkin",
+      "listSubtitle": "Aylık maliyete göre sıralı",
+      "cadence": {
+        "daily": "{count, plural, one {Her gün} other {Her # günde bir}}",
+        "weekly": "{count, plural, one {Her hafta} other {Her # haftada bir}}",
+        "monthly": "{count, plural, one {Her ay} other {Her # ayda bir}}",
+        "yearly": "{count, plural, one {Her yıl} other {Her # yılda bir}}"
+      },
+      "next": "sıradaki: {date}",
+      "transfer": "Transfer",
+      "yearHours": "Yılda {hours} çalışma",
+      "upcomingTitle": "Yaklaşanlar",
+      "pausedTitle": "Duraklatılanlar"
+    },
+    "goals": {
+      "emptyTitle": "Hedef veya kredi yok",
+      "emptyBody": "Uygulamada takip ettiğiniz tasarruf hedefleri ve krediler burada görünür.",
+      "goalsTitle": "Hedefler",
+      "achieved": "Ulaşıldı",
+      "left": "Biriktirilecek kalan",
+      "progress": "İlerleme",
+      "byDate": "{date} tarihine kadar ulaşmak için",
+      "perMonthNeeded": "Ayda {amount}",
+      "loansTitle": "Krediler",
+      "model": {
+        "flat": "Sabit oran",
+        "reducing": "Azalan bakiye"
+      },
+      "leftToPay": "Ödenecek kalan",
+      "leftInHours": "{hours} çalışma",
+      "paidOff": "Kapandı",
+      "instalments": "{paid} / {total} taksit",
+      "principal": "Çekilen tutar",
+      "owedNow": "Kalan anapara",
+      "paidSoFar": "Şimdiye kadar ödenen",
+      "monthly": "Aylık ödeme",
+      "rate": "Oran",
+      "interestCharged": "Uygulanan faiz",
+      "nextDue": "Sonraki ödeme",
+      "payoff": "Kapanış tarihi",
+      "paymentsLeft": "Kalan ödemeler",
+      "netNote": "Kredi rakamları uygulamayı izler: faiz, kredinin açıldığı günden itibaren her ay eklenir."
+    },
+    "time": {
+      "spentHours": "Harcanan çalışma saati",
+      "share": "Çalışılan saatlerin payı",
+      "shareNote": "Çalışılan yaklaşık {hours} içinden",
+      "workdays": "İş günleri",
+      "workdaysValue": "{count, plural, one {# iş günü} other {# iş günü}}",
+      "workdayLength": "İş günü başına {hours} ile",
+      "hourlyValue": "Saatlik değer",
+      "perHour": "saatte, son ücretinize göre",
+      "chartTitle": "Harcanan saat ve çalışılan saat",
+      "chartSubtitle": "Her ayın harcaması, o ayın ücretiyle fiyatlandırıldı",
+      "hoursSpent": "Harcanan saat",
+      "hoursWorked": "Çalışılan saat",
+      "categoriesTitle": "İş günü olarak kategoriler",
+      "categoriesSubtitle": "Her biri kaç iş günü tuttu",
+      "empty": "Bu dönemde harcama yok",
+      "runwayTitle": "Özgürlük payı",
+      "daysValue": "{count, plural, one {# gün} other {# gün}}",
+      "runwayBody": "Günlük {daily} olan son harcamalarınızla, çalışmadan günlük hesaplardaki {liquid} ne kadar yeter.",
+      "regretTitle": "Pişmanlıklara giden saatler",
+      "regretBody": "{count, plural, =0 {Bu dönemde “Keşke yapmasaydım” olarak işaretlenen bir şey yok.} one {Keşke yapmasaydım dediğiniz # alışverişte.} other {Keşke yapmasaydım dediğiniz # alışverişte.}}",
+      "biggestTitle": "Saat olarak en büyükler",
+      "biggestSubtitle": "Kazanması en uzun süren alışverişler",
+      "wageTitle": "Zaman içinde saatlik değeriniz",
+      "wageSubtitle": "Uygulamada kayıtlı ücretlerden",
+      "noWage": "Harcamalarınızı saat olarak görmek için uygulamada saatlik değerinizi belirleyin."
+    },
+    "trips": {
+      "emptyTitle": "Henüz gezi yok",
+      "emptyBody": "Uygulamada gezi için oluşturduğunuz albümler, her birinin maliyetiyle burada görünür.",
+      "count": "Geziler",
+      "countries": "{count, plural, =0 {Ülke belirlenmedi} one {# ülke} other {# ülke}}",
+      "total": "Gezilere harcanan",
+      "workdays": "İş günü olarak",
+      "workdaysValue": "{count, plural, one {# iş günü} other {# iş günü}}",
+      "workdaysNote": "Tüm geziler toplamı",
+      "current": "Güncel",
+      "perDay": "Günde {amount}",
+      "breakdown": "Kategoriye göre",
+      "transactionsTitle": "İşlemler",
+      "pick": "Dökümünü görmek için bir gezi seçin."
+    },
+    "items": {
+      "emptyTitle": "Henüz eşya yok",
+      "emptyBody": "Uygulamada takip ettiğiniz eşyalar, günlük maliyetleriyle burada görünür.",
+      "value": "Sahip olunan değer",
+      "count": "{count, plural, one {# eşya} other {# eşya}}",
+      "perDay": "Günlük maliyet",
+      "perMonth": "Ayda {amount}",
+      "workPerDay": "Günlük çalışma",
+      "workPerDayNote": "Sahip olduğunuz her şeyi ödemek için",
+      "listTitle": "Sahip olduğunuz her şey",
+      "listSubtitle": "Satın alma fiyatı, elinizde tuttuğunuz günlere yayılır",
+      "bought": "{date} tarihinde {price} karşılığında alındı",
+      "owned": "{count, plural, one {# gündür} other {# gündür}} sizde",
+      "sold": "{price} karşılığında satıldı",
+      "perDayValue": "{amount}/gün",
+      "workValue": "günde {time} çalışma"
+    },
+    "splits": {
+      "emptyTitle": "Bölüşülen hesap yok",
+      "emptyBody": "Uygulamada arkadaşlarınızla böldüğünüz hesaplar burada görünür.",
+      "owedToYou": "Size borçlu",
+      "people": "{count, plural, =0 {Hepsi ödendi} one {# kişiden} other {# kişiden}}",
+      "settled": "Ödenen paylar",
+      "ofShares": "{count, plural, one {# paydan} other {# paydan}}",
+      "bills": "Bölüşülen hesaplar",
+      "billsNote": "Paylaştığınız işlemler",
+      "byPerson": "Size kimler borçlu",
+      "allSettled": "Herkes size borcunu ödedi",
+      "open": "{count, plural, one {# açık pay} other {# açık pay}}",
+      "billsTitle": "Paylaşılan işlemler",
+      "unnamed": "Biri"
+    },
+    "mood": {
+      "feelings": {
+        "happy": "İyi hissettirdi",
+        "neutral": "Ne iyi ne kötü",
+        "sad": "Keşke yapmasaydım"
+      },
+      "shareSub": "{amount} · {count, plural, one {# alışveriş} other {# alışveriş}}",
+      "monthlyTitle": "Alışverişler nasıl hissettirdi",
+      "monthlySubtitle": "Her ay alışveriş sayısı, duyguya göre",
+      "regretsTitle": "Keşke yapmasaydım",
+      "regretsSubtitle": "En çok pişman olduğunuz büyük alışverişler",
+      "noRegrets": "Bu dönemde pişmanlık yok",
+      "clockTitle": "Ne zaman harcıyorsunuz",
+      "clockSubtitle": "Haftanın gününe ve saate göre alışverişler; en yoğun {hour} civarı",
+      "noTimes": "Saati kaydedilmeden girilen alışverişler burada görünmez."
+    },
+    "loadingTitle": "Web Gösterge Paneli",
+    "edit": {
+      "statusReady": "Düzenleme açık",
+      "statusReadyTitle": "Değişiklikler telefonunuza kaydedilir",
+      "statusReadyBody": "Telefonunuz bağlı. Telefonunuz her değişikliği kontrol edip kaydeder, ardından güncel verileri buraya eşitler.",
+      "statusAway": "Salt okunur",
+      "statusAwayTitle": "Değişiklik yapmak için telefonunuzu bağlayın.",
+      "statusAwayBody": "Telefonunuzda Money2Time'ı açıp Ayarlar → Web Gösterge Paneli'ne gidin. Bağlıyken burada işlem ekleyebilir, düzenleyebilir ve silebilirsiniz. Telefonunuz ve bu tarayıcı eşitlenmiş kalır.",
+      "statusUpdateTitle": "Burada değişiklik yapmak için uygulamayı güncelleyin.",
+      "statusUpdateBody": "Telefonunuzdaki Money2Time sürümü verileri yalnızca görüntüleme için eşitler. Bu tarayıcıdan kayıt eklemek, düzenlemek ve silmek için uygulamayı güncelleyin.",
+      "statusOffTitle": "Bu tarayıcı için değişiklikler kapalı.",
+      "statusOffBody": "Telefonunuzda Ayarlar → Web Gösterge Paneli'ni açın, bu tarayıcının yanındaki ⋯ simgesine dokunun ve Değişikliklere izin ver'i seçin.",
+      "statusSaving": "Kaydediliyor…",
+      "statusSyncing": "Eşitleniyor…",
+      "statusSyncingBody": "Telefonunuzdaki en son veriler eşitleniyor. Veriler gelir gelmez değişiklik yapabilirsiniz.",
+      "awayHint": "İşlem eklemek, düzenlemek veya silmek için telefonunuzda Ayarlar → Web Gösterge Paneli'ni açın.",
+      "close": "Kapat",
+      "clear": "Temizle",
+      "cancel": "İptal",
+      "reloadLatest": "En yenisini yükle",
+      "delete": "Sil",
+      "apply": "Uygula",
+      "choose": "Seçin",
+      "add": "Ekle",
+      "update": "Güncelle",
+      "addAnother": "Bir tane daha ekle",
+      "type": "Tür",
+      "expense": "Gider",
+      "income": "Gelir",
+      "transfer": "Transfer",
+      "adjustment": "Düzeltme",
+      "deleteTransaction": "İşlemi sil",
+      "deleteTransactionBody": "Bu geri alınamaz. Devam edilsin mi?",
+      "required": "Zorunlu",
+      "from": "Kaynak",
+      "to": "Hedef",
+      "chooseAccount": "Hesap seçin",
+      "swapAccounts": "Kaynak ve hedef hesapları değiştir",
+      "differentAccount": "Farklı bir hesap olmalı",
+      "accountLabel": "Hesap",
+      "accounts": "Hesaplar",
+      "categoryLabel": "Kategori",
+      "categories": "Kategoriler",
+      "options": "İşlem seçenekleri",
+      "amount": "Tutar",
+      "currencyLabel": "Para birimi",
+      "optional": "İsteğe bağlı",
+      "note": "Not",
+      "received": "Alınan tutar",
+      "date": "Tarih",
+      "details": "Ayrıntılar",
+      "detailsPlaceholder": "Daha uzun bir not ekleyin",
+      "reimbursable": "Geri ödeme bekliyor",
+      "reimbursed": "Zaten geri ödendi",
+      "reimbursableHint": "Başkasının geri ödeyeceği bir harcama. Geri ödemeler sayfasından isteyin.",
+      "countAsExpense": "Gider olarak say",
+      "countAsExpenseHint": "Bu transferi seçtiğin kategori altında toplamlarında, bütçelerinde ve grafiklerinde gider olarak sayar. Para iki hesap arasında her zamanki gibi hareket eder.",
+      "feeling": "Nasıl hissediyorsunuz?",
+      "nudgeSmall": "Bu yaklaşık {hours} zamanınıza mal oluyor",
+      "nudgePause": "Düşünmeye değer: ~{hours} çalışma",
+      "nudgeLarge": "Bu {hours} çalışma sürenize denk geliyor",
+      "amountLocked": "Bu tutar bir bölüşüme veya iadeye bağlı. Uygulamada değiştirin.",
+      "hideBalances": "Bakiyeleri gizle",
+      "showBalances": "Bakiyeleri göster",
+      "savingsGoals": "Birikim Hedefleri",
+      "ungrouped": "Grupsuz",
+      "noAccounts": "Henüz hesap yok.",
+      "noCategories": "Henüz kategori yok.",
+      "select": "Seç",
+      "selectAll": "Tümünü seç",
+      "selected": "{count, plural, one {# seçildi} other {# seçildi}}",
+      "deleteConfirm": "{count, plural, one {Bu işlem silinsin mi? Telefonunuzdan da silinir.} other {# işlem silinsin mi? Telefonunuzdan da silinir.}}",
+      "tooMany": "Bir seferde en fazla {max} işlem seçebilirsiniz.",
+      "accountTransfers": "Transferler hesaplarını korur. Hesabı değiştirmek için transferlerin seçimini kaldırın.",
+      "accountLocked": "Bunlardan bazıları bir bölüşüme veya iadeye bağlı. Hesaplarını uygulamada değiştirin.",
+      "accountCurrencies": "Bunlar farklı para birimlerinde. Başka bir hesaba taşımak için tek bir para biriminde kayıtlar seçin.",
+      "editTitle": "İşlemi düzenle",
+      "errors": {
+        "stale": "Telefonunuzda daha yeni veriler var ve şimdi eşitliyor. Biraz sonra tekrar deneyin.",
+        "conflict": "Bu, telefonunuzda değişti. En son veriler yolda. Kontrol edip tekrar deneyin.",
+        "amount_locked": "Bu tutar bir bölüşüme veya iadeye bağlı. Uygulamada değiştirin.",
+        "pro_required": "Bunun için Money2Time Pro gerekiyor. Daha fazlası için uygulamada yükseltin.",
+        "off": "Bu tarayıcı için değişiklikler kapalı. Telefonunuzda Ayarlar → Web Gösterge Paneli'nden izin verin.",
+        "invalid": "Telefonunuz bunu kaydedemedi. Bilgileri kontrol edip tekrar deneyin.",
+        "failed": "Telefonunuz bunu kaydedemedi. Tekrar deneyin.",
+        "busy": "Son değişikliğiniz hâlâ kaydediliyor. Biraz sonra tekrar deneyin.",
+        "away": "Telefonunuz bağlı değil. Üzerinde Web Gösterge Paneli'ni açıp tekrar deneyin.",
+        "too_large": "Aynı anda çok fazla değişiklik var. Daha az kayıt seçin.",
+        "unknown": "Telefonunuzun bağlantısı onaylamadan önce koptu. Tekrar bağlandığında değişikliğin kaydedilip kaydedilmediğini kontrol edin."
+      },
+      "account": {
+        "newAccount": "Yeni Hesap",
+        "editAccount": "Hesap Düzenle",
+        "deleteAccount": "Hesabı sil",
+        "deleteAccountBody": "Bu işlem bu hesabı ve tüm işlemlerini kalıcı olarak siler. Bu geri alınamaz.",
+        "save": "Kaydet",
+        "type": "Tür",
+        "typeDebit": "Banka",
+        "typeCredit": "Kredi",
+        "specialNote": "Burada adı, grubu, logoyu ve toplamlara dahil edilip edilmeyeceğini değiştirebilirsiniz. Gerisini kendi düzenleyicisinde değiştirin.",
+        "name": "Hesap adı",
+        "namePlaceholder": "Günlük Cüzdan",
+        "logo": "Logo",
+        "logoAdd": "Logo ekle",
+        "logoClear": "Logoyu kaldır",
+        "logoChooseTitle": "Logo seç",
+        "logoChooseSubtitle": "Ülkeye göre ara veya göz at",
+        "logoSearch": "Banka ve cüzdan ara",
+        "logoCountry": "Ülke",
+        "logoNoResults": "Eşleşme bulunamadı",
+        "group": "Hesap grubu",
+        "currency": "Para birimi",
+        "statementDay": "Ekstre günü",
+        "dueDay": "Son ödeme günü",
+        "dueRule": "Son ödeme",
+        "dueRuleDay": "Ayın günü",
+        "dueRuleAfter": "Ekstreden sonraki gün",
+        "dayRange": "1 ile 31 arasında bir gün seçin.",
+        "daysAfterRange": "1 ile {max} gün arası seçin.",
+        "startingBalance": "Başlangıç bakiyesi",
+        "currentBalance": "Mevcut bakiye",
+        "includeInTotals": "Toplama dahil et",
+        "includeInTotalsHint": "Gizlenen hesaplar toplam bakiyeden hariç tutulur.",
+        "currencyChangeTitle": "Hesap para birimi değiştirilsin mi?",
+        "currencyChangeMessage": "Bakiye en güncel kurla {from} biriminden {to} birimine dönüştürülecek. Mevcut kayıtlar kendi para birimini korur.",
+        "currencyChangeAction": "Dönüştür ve değiştir",
+        "balancePromptTitle": "Bu bakiye değişikliği nasıl kaydedilsin?",
+        "balancePromptMessage": "Bakiye {amount} değişti. Gelir/gider olarak kaydet veya hesap farkı olarak tut (analiz toplamlarından hariç).",
+        "recordDifference": "Hesap farkı olarak kaydet",
+        "recordIncome": "Gelir olarak kaydet",
+        "recordExpense": "Gider olarak kaydet",
+        "newGroup": "Yeni grup",
+        "createGroup": "Grup oluştur",
+        "editGroup": "Grubu düzenle",
+        "groupName": "Grup adı",
+        "groupPlaceholder": "Harcamalar",
+        "groupTaken": "Bu adda bir grup zaten var.",
+        "deleteGroup": "Grup silinsin mi?",
+        "deleteGroupBody": "Bu gruptaki hesaplar Grupsuz'a taşınacak.",
+        "addToGroup": "Hesap ekle",
+        "emptyGroup": "Bu grupta henüz hesap yok",
+        "cardDesign": "Kart tasarımı",
+        "cardDesignTitle": "Kart tasarımı",
+        "cardDesignPlain": "Düz renk",
+        "cardDesignClear": "Kart tasarımını kaldır",
+        "cardDesignAll": "Tümü",
+        "cardDesignUploads": "Yüklediklerim",
+        "cardDesignTemplate": "{genre} kart tasarımı {number}",
+        "payTitle": "Kredi kartı öde",
+        "loanPayTitle": "Ödeme yap",
+        "pay": "Öde",
+        "payFrom": "Kaynaktan",
+        "none": "Yok",
+        "payable": "Ödenecek Bakiye",
+        "loanDue": "Ödenecek tutar",
+        "paidNote": "Ödendi: {name}",
+        "paymentNotePlaceholder": "Ödeme notu",
+        "genre_mascot": "Maskot",
+        "genre_minimal": "Minimal",
+        "genre_gradient": "Gradyan",
+        "genre_luxury": "Lüks",
+        "genre_texture": "Doku",
+        "genre_marble": "Mermer ve taş",
+        "genre_pattern": "Desen",
+        "genre_nature": "Doğa",
+        "genre_space": "Uzay",
+        "genre_abstract": "Soyut sanat",
+        "genre_anime": "Anime",
+        "genre_retro": "Retro",
+        "genre_cute": "Sevimli"
+      },
+      "album": {
+        "createTitle": "Yeni Albüm",
+        "create": "Oluştur",
+        "editTitle": "Geziyi düzenle",
+        "save": "Kaydet",
+        "done": "Tamam",
+        "clear": "Temizle",
+        "name": "Albüm adı",
+        "namePlaceholder": "örn. Tokyo Gezisi",
+        "dates": "Tarihler (isteğe bağlı)",
+        "startDate": "Başlangıç tarihi",
+        "endDate": "Bitiş tarihi",
+        "location": "Konum",
+        "addTransactions": "İşlem ekle",
+        "editTransactions": "İşlemleri düzenle",
+        "selectedCount": "{count} seçildi",
+        "transactionCount": "{count} işlem",
+        "previous": "Önceki",
+        "next": "İleri",
+        "deleteTitle": "Albüm silinsin mi?",
+        "deleteBody": "Bu, albümü kaldırır. İşlemleriniz silinmez.",
+        "noAlbums": "Henüz albüm yok",
+        "appOnlyHint": "Uygulamada kapak fotoğrafı veya konum ekleyin.",
+        "noExpenses": "Bu ay gider yok.",
+        "bulkAction": "Albüm",
+        "addToAlbum": "Albüme ekle",
+        "expensesOnly": "Albüme yalnızca giderler eklenebilir.",
+        "expensesCount": "{count, plural, one {Bu gideri şuraya ekle:} other {Bu # gideri şuraya ekle:}}",
+        "expensesLeftOut": "{count, plural, one {Albüme yalnızca giderler eklenebilir, bu yüzden # işlem dışarıda kalıyor.} other {Albüme yalnızca giderler eklenebilir, bu yüzden # işlem dışarıda kalıyor.}}",
+        "reorderTitle": "Albümleri yeniden sırala",
+        "activeLabel": "Yeni işlemleri şuna ekle",
+        "activeTitle": "Etkin gezi",
+        "activeNone": "Yok"
+      },
+      "budget": {
+        "allocatedSummary": "{total} içinden {allocated} dağıtıldı",
+        "left": "{amount} kaldı",
+        "over": "{amount} aşım",
+        "allocatedDone": "Tamamı dağıtıldı",
+        "cancel": "İptal",
+        "save": "Kaydet",
+        "delete": "Sil",
+        "amount": "Tutar",
+        "fillRemainder": "Doldur",
+        "subcategories": "Alt kategoriler",
+        "childrenHint": "İstersen bu tutarı alt kategorilere dağıt.",
+        "duplicateSuffix": "kopya",
+        "editTitle": "Şablonu düzenle",
+        "addTitle": "Yeni şablon",
+        "chooseIcon": "Simge seç",
+        "removeIcon": "Simgeyi kaldır",
+        "name": "Ad",
+        "namePlaceholder": "örn. Günlük",
+        "total": "Toplam bütçe",
+        "currency": "Para birimi",
+        "currencyHintTemplate": "Her bütçe oluşturulduğu günün kurunu korur ve diğer para birimlerindeki harcamaları bu kurla dönüştürür. Bugün: 1 {currency} = {rate} {main}.",
+        "currencyHintBudget": "Diğer para birimlerindeki harcamalar 1 {currency} = {rate} {main} kuruyla dönüştürülür.",
+        "currencyNoRate": "Henüz {currency} kuru yok. Diğer para birimlerindeki harcamaların sayılması için uygulamadaki Çoklu para birimi bölümünden bir kur ekleyin.",
+        "countUnbudgetedTitle": "Bütçelenmemiş harcamayı say",
+        "countUnbudgetedCaption": "Bütçe kalemi olmayan kategorilerin harcamasını ay toplamına dahil et.",
+        "backPopulateTitle": "Geçmiş ayları doldur",
+        "backPopulateCaption": "{first} - {last} için bütçeler oluşturur ({count} ay). Zaten bütçesi olan aylar atlanır.",
+        "templatesTitle": "Bütçe şablonları",
+        "templatesSubtitle": "Yeniden kullanılabilir aylık planlar",
+        "newTemplate": "Yeni şablon",
+        "noTemplatesTitle": "Henüz şablon yok",
+        "noTemplatesMessage": "Aylarını planlamaya başlamak için bir bütçe şablonu oluştur.",
+        "createTemplate": "Şablon oluştur",
+        "makeDefault": "Varsayılan yap",
+        "defaultBadge": "Varsayılan",
+        "duplicate": "Çoğalt",
+        "deleteTemplateTitle": "Şablon silinsin mi?",
+        "deleteTemplateMessage": "Bu şablondan oluşturulmuş aylık bütçeler korunur. Varsayılansa, sıradaki şablon varsayılan olur.",
+        "createBudget": "Bütçe oluştur",
+        "chooseTemplate": "Bir şablon seç",
+        "customOption": "Özel",
+        "customOptionCaption": "Yalnızca bu aya özel tek seferlik bir bütçe oluşturun.",
+        "editBudget": "Bütçeyi düzenle",
+        "deleteBudget": "Bütçeyi sil",
+        "deleteBudgetTitle": "Bu ayın bütçesi silinsin mi?",
+        "deleteBudgetMessage": "Bu ay için otomatik olarak yeniden oluşturulmaz.",
+        "month": "Ay",
+        "noCategories": "Bütçe vermek için önce bir gider kategorisi ekleyin.",
+        "splitMismatch": "Alt kategoriler bu tutarla uyuşmuyor",
+        "categoriesCount": "{count, plural, one {# kategori} other {# kategori}}"
+      },
+      "category": {
+        "newTitle": "Yeni Kategori",
+        "editTitle": "Kategori Düzenle",
+        "name": "Ad",
+        "parentOptional": "Üst kategori (isteğe bağlı)",
+        "select": "Seçin",
+        "clear": "Temizle",
+        "cancel": "İptal",
+        "save": "Kaydet",
+        "delete": "Sil",
+        "deleteConfirm": "Bu işlem bu kategoriyi kalıcı olarak siler. Bu geri alınamaz.",
+        "deleteTitle": "Kategori silinsin mi?",
+        "deleteHasTransactions": "{count} işlem bu kategoriyi kullanıyor. Bunları başka bir kategoriye taşıyın ya da kategoriyi silip işlemleri kategorisiz bırakın.",
+        "moveToOther": "Başka bir kategoriye taşı",
+        "deleteAnyway": "Yine de sil",
+        "moveTitle": "İşlemler taşınsın mı?",
+        "moveBody": "Tüm işlemler “{name}” kategorisine taşınacak ve bu kategori silinecek. Bu işlem geri alınamaz.",
+        "moveAction": "Taşı ve sil",
+        "addSubcategory": "Alt kategori ekle",
+        "expense": "Gider",
+        "income": "Gelir",
+        "type": "Kategori türü",
+        "required": "Bir ad girin",
+        "noOptions": "Henüz başka kategori yok",
+        "emptyTitle": "Henüz kategori yok",
+        "chooseIcon": "Simge seç",
+        "removeIcon": "Simgeyi kaldır",
+        "tabIcons": "Simgeler",
+        "tabEmoji": "Emoji",
+        "searchIcons": "Simge ara",
+        "noResults": "Sonuç bulunamadı",
+        "groups": {
+          "money": "Para",
+          "food_and_drink": "Yiyecek ve içecek",
+          "transport": "Ulaşım",
+          "travel": "Seyahat",
+          "home": "Ev",
+          "bills": "Faturalar",
+          "shopping": "Alışveriş",
+          "health": "Sağlık",
+          "leisure": "Eğlence",
+          "work": "İş",
+          "family": "Aile",
+          "other": "Diğer",
+          "food": "Yiyecek ve içecek",
+          "smileys": "İfadeler",
+          "people": "İnsanlar",
+          "animals": "Hayvanlar ve doğa",
+          "activities": "Etkinlikler",
+          "objects": "Nesneler",
+          "symbols": "Semboller",
+          "flags": "Bayraklar"
+        },
+        "expand": "Genişlet",
+        "collapse": "Daralt",
+        "noSubcategories": "Henüz alt kategori yok",
+        "searchEmoji": "Emoji ara"
+      },
+      "currency": {
+        "open": "Çoklu para birimi",
+        "title": "Çoklu para birimi",
+        "mainCurrency": "Ana para birimi",
+        "mainInApp": "Ana para biriminizi değiştirmek için uygulamayı kullanın. Verileriniz sıfırdan başlar.",
+        "asOf": "{date} tarihinde güncellendi",
+        "neverUpdated": "Henüz güncellenmedi",
+        "subcurrencies": "Alt para birimleri",
+        "add": "Ekle",
+        "addCurrency": "Para birimi ekle",
+        "search": "Para birimi ara",
+        "noMatch": "Eşleşen para birimi yok",
+        "empty": "Döviz kurunu takip etmek için bir para birimi ekleyin.",
+        "manual": "Manuel",
+        "editRate": "Kuru düzenle",
+        "remove": "Kaldır",
+        "save": "Kaydet",
+        "orderChanged": "Yeni sıra henüz kaydedilmedi.",
+        "saveOrder": "Sırayı kaydet"
+      },
+      "goal": {
+        "newGoal": "Yeni hedef",
+        "editTitle": "Hedefi düzenle",
+        "edit": "Düzenle",
+        "save": "Kaydet",
+        "deleteTitle": "Hedef silinsin mi?",
+        "deleteMessage": "Bu, hedefi ve işlemlerini siler. Bu işlem geri alınamaz.",
+        "coverInApp": "Kapak fotoğrafını uygulamada değiştirin.",
+        "chooseIcon": "Simge seç",
+        "removeIcon": "Simgeyi kaldır",
+        "name": "Hedef adı",
+        "namePlaceholder": "örn. Japonya gezisi",
+        "target": "Hedef tutar",
+        "currency": "Para birimi",
+        "currentBalance": "Mevcut bakiye",
+        "targetDate": "Hedef tarihi",
+        "targetDateHint": "İsteğe bağlı. Hedefine yolunda olup olmadığını gösteren bir tempo ekler.",
+        "targetDatePast": "Gelecekte bir tarih seç.",
+        "includeInTotals": "Toplama dahil et",
+        "includeInTotalsHint": "Gizlenen hesaplar toplam bakiyeden hariç tutulur.",
+        "startingAmount": "Şimdiden birikmiş tutar (isteğe bağlı)",
+        "autoSave": "Otomatik birikim",
+        "autoSaveHint": "Belirli aralıklarla parayı otomatik olarak aktarır.",
+        "autoSaveAmount": "Tutar",
+        "cadence": "Tekrar",
+        "cadenceMonthly": "Aylık",
+        "cadenceWeekly": "Haftalık",
+        "source": "Kaynak hesap",
+        "sourcePlaceholder": "Bir hesap seç",
+        "noSource": "Henüz {currency} hesabın yok. Otomatik birikim için aynı para biriminde bir hesap gerekir.",
+        "autoSaveInRecurring": "Bu hedefin otomatik birikimi özel bir program kullanıyor. Tekrarlayanlar bölümünden değiştirin.",
+        "currencyChangeTitle": "Hesap para birimi değiştirilsin mi?",
+        "currencyChangeMessage": "Bakiye en güncel kurla {from} biriminden {to} birimine dönüştürülecek. Mevcut kayıtlar kendi para birimini korur.",
+        "currencyChangeAction": "Dönüştür ve değiştir",
+        "balancePromptTitle": "Bu bakiye değişikliği nasıl kaydedilsin?",
+        "balancePromptMessage": "Bakiye {amount} değişti. Gelir/gider olarak kaydet veya hesap farkı olarak tut (analiz toplamlarından hariç).",
+        "recordDifference": "Hesap farkı olarak kaydet",
+        "recordIncome": "Gelir olarak kaydet",
+        "recordExpense": "Gider olarak kaydet",
+        "archive": "Arşivle",
+        "unarchive": "Hedefi geri getir",
+        "archiveTitle": "Hedef arşivlensin mi?",
+        "archiveMessage": "Hedef, hedef listenden çıkar ve ona giden otomatik birikim duraklatılır.",
+        "archiveBalanceHint": "İçinde hâlâ para var. Önce çekebilir ya da burada saklamaya devam edebilirsin.",
+        "archiveConfirm": "Arşivle",
+        "archived": "Arşivlendi",
+        "editInGoals": "Hedefi düzenle",
+        "deposit": "Para yatır",
+        "withdraw": "Para çek",
+        "depositFromAccount": "Bir hesaptan",
+        "depositFromAccountHint": "Hesaplarından birinden para aktar.",
+        "depositOutside": "Dışarıdan para",
+        "depositOutsideHint": "Hediye veya dışarıdan nakit, gelir olarak kaydedilir.",
+        "withdrawToAccount": "Bir hesaba",
+        "withdrawToAccountHint": "Parayı hesaplarından birine geri aktar.",
+        "withdrawSpend": "Harca",
+        "withdrawSpendHint": "Bu hedeften doğrudan öde, gider olarak kaydedilir."
+      },
+      "item": {
+        "add": "Eşya ekle",
+        "addTitle": "Yeni eşya",
+        "editTitle": "Eşyayı düzenle",
+        "save": "Kaydet",
+        "deleteTitle": "Eşya silinsin mi?",
+        "deleteMessage": "Bu, eşyayı takipçinden kaldırır.",
+        "iconTitle": "Simge seç",
+        "chooseIcon": "Simge seç",
+        "iconSubtitle": "Bir simge seçin. Kendi simgenizi yüklemek için uygulamayı kullanın.",
+        "searchIcons": "Simge ara…",
+        "customIcon": "Özel",
+        "noResults": "Eşleşme bulunamadı",
+        "name": "Ad",
+        "namePlaceholder": "örn. Espresso makinesi",
+        "price": "Satın alma fiyatı",
+        "currency": "Para birimi",
+        "purchaseDate": "Satın alma tarihi",
+        "markInactive": "Pasif olarak işaretle",
+        "markInactiveHint": "Sattığın, kırılan ya da artık kullanmadığın şeyler için gün saymayı durdurur.",
+        "endDate": "Bitiş tarihi",
+        "sold": "Sattım",
+        "salePrice": "Satış fiyatı",
+        "note": "Not",
+        "notePlaceholder": "İsteğe bağlı",
+        "groups": {
+          "objects": "Nesneler",
+          "leisure": "Eğlence",
+          "work": "İş",
+          "home": "Ev",
+          "health": "Sağlık",
+          "travel": "Seyahat",
+          "transport": "Ulaşım",
+          "shopping": "Alışveriş",
+          "family": "Aile",
+          "other": "Diğer"
+        },
+        "reorderTitle": "Öğeleri yeniden sırala"
+      },
+      "loan": {
+        "newTitle": "Yeni kredi",
+        "editTitle": "Krediyi düzenle",
+        "edit": "Düzenle",
+        "save": "Kaydet",
+        "delete": "Hesabı sil",
+        "deleteBody": "Bu işlem bu hesabı ve tüm işlemlerini kalıcı olarak siler. Bu geri alınamaz.",
+        "name": "Hesap adı",
+        "namePlaceholder": "Taşıt kredisi",
+        "logo": "Logo",
+        "logoAdd": "Logo ekle",
+        "logoClear": "Logoyu kaldır",
+        "group": "Hesap grubu",
+        "currency": "Para birimi",
+        "interestModel": "Faiz",
+        "interestModelInfo": "Azalan bakiye: faiz her ay kalan borcunuz üzerinden işler, bu yüzden fazladan veya erken ödeme faizi düşürür. Konut kredilerinin çoğu böyle çalışır. Sabit oran: faiz, çekilen tutarın tamamı üzerinden bir kez hesaplanır ve baştan eklenir, bu yüzden erken ödeme borcu daha çabuk bitirir ama faiz kazandırmaz. Taşıt ve ihtiyaç kredilerinin çoğu böyle çalışır.",
+        "modelReducing": "Azalan bakiye",
+        "modelFlat": "Sabit oran",
+        "principal": "Kredi tutarı",
+        "term": "Kredi vadesi",
+        "termInfo": "Kredinin kaç aylık taksite yayıldığı, en fazla {max}. 5 yıllık bir kredi 60 eder.",
+        "termError": "1 ile {max} arasında tam sayı girin.",
+        "rate": "Faiz oranı",
+        "rateInfoReducing": "Bankanızın kalan borcunuz üzerinden uyguladığı yıllık oran. Yazın, aylık taksit ve toplam hesaplansın; ya da toplamı yazın, oran hesaplansın.",
+        "rateInfoFlat": "Yıllık sabit oran, çekilen tutarın tamamı üzerinden tüm vade boyunca uygulanır. Yazın, aylık taksit ve toplam hesaplansın; ya da toplamı yazın, oran hesaplansın.",
+        "effectiveRateHint": "Efektif faiz {rate}%. Bu sabit faizin azalan bakiyede gerçek maliyeti budur.",
+        "totalRepayable": "Toplam geri ödeme",
+        "totalRepayableInfo": "Kredi boyunca geri ödediğiniz her şey: aldığınız tutar artı tüm faiz.",
+        "instalment": "Aylık taksit",
+        "instalmentInfo": "Her ay ödediğiniz tutar. Yukarıdaki toplamı izler; bankanız farklı bir tutar tahsil ediyorsa anahtarı açın, sizinkini aynen kullanırız.",
+        "instalmentErrorLow": "Krediyi vade içinde kapatmak için fazla düşük.",
+        "instalmentErrorHigh": "Bu kredi tutarı ve vade için fazla yüksek.",
+        "awaitingContract": "Yukarıdaki alanları doldurun",
+        "paidPeriods": "Ödenmiş taksit sayısı",
+        "paidPeriodsInfo": "Yeni kredide 0 bırakın. Devam eden bir krediyse kaç taksit ödediğinizi girin, açılış bakiyesi hesaplanır.",
+        "paidPeriodsError": "Kredi vadesinden az olmalı.",
+        "collect": "Şu hesaptan çek",
+        "collectInfo": "Taksidin her ay çekileceği hesap. Birini seçerseniz otomatik kaydedilir; boş bırakırsanız her ödemeyi kendiniz kaydedersiniz.",
+        "collectManual": "Ödemeleri kendim kaydederim",
+        "collectExternal": "Bu ödeme Yinelenen bölümünde ayarlı. Oradan düzenleyin.",
+        "countAsExpense": "Taksiti gider olarak say",
+        "countAsExpenseInfo": "Bir ödeme her zaman krediye para aktarır, bu yüzden kalan borcunuz her durumda azalır. Bu açıkken ödeme, seçtiğiniz kategori altında toplamlarınızda, bütçelerinizde ve grafiklerinizde gider olarak da sayılır. Kapatırsanız ödemeler giderlerinizin dışında kalır. Sonradan değiştirmek yalnızca o andan sonra kaydedilen ödemeleri etkiler.",
+        "paymentCategory": "Ödeme kategorisi",
+        "paymentCategoryPlaceholder": "Bir kategori seçin",
+        "startDate": "Başlangıç tarihi",
+        "startDateInfo": "Kredinin çekildiği tarih. İlk taksit bir ay sonra düşer ve o günü ödeme gününüz olur.",
+        "balanceOwed": "Kalan borç",
+        "balanceOwedInfo": "Bugün hâlâ borçlu olduğunuz tutar, size henüz yansıtılmamış faiz hariç. Genelde ekstrenizdeki rakamdan düşüktür.",
+        "totalInterest": "Toplam faiz",
+        "leftToPay": "Kalan ödeme",
+        "firstInstalment": "İlk taksit",
+        "payoffBy": "Bitiş",
+        "instalmentsLeft": "Kalan taksit",
+        "includeInTotals": "Toplama dahil et",
+        "includeInTotalsHint": "Gizlenen hesaplar toplam bakiyeden hariç tutulur.",
+        "archive": "Krediyi arşivle",
+        "unarchive": "Arşivden çıkar",
+        "archiveHint": "Hesap listenizden gizler. Geçmiş ve toplamlar korunur, \"Arşivi göster\" ile geri gelir.",
+        "rateChangeTitle": "Yeni oran ne zamandan itibaren geçerli?",
+        "rateChangeMessage": "Oran {from}% seviyesinden {to}% seviyesine değişiyor. Şimdiye kadar işlenen faizi korumak için bugünden, bir hatayı düzeltiyorsan baştan itibaren uygula.",
+        "rateChangeFromStart": "Baştan",
+        "rateChangeFromToday": "Bugünden",
+        "currencyChangeTitle": "Hesap para birimi değiştirilsin mi?",
+        "currencyChangeMessage": "Bakiye en güncel kurla {from} biriminden {to} birimine dönüştürülecek. Mevcut kayıtlar kendi para birimini korur.",
+        "currencyChangeAction": "Dönüştür ve değiştir",
+        "balancePromptTitle": "Bu bakiye değişikliği nasıl kaydedilsin?",
+        "balancePromptMessage": "Bakiye {amount} değişti. Gelir/gider olarak kaydet veya hesap farkı olarak tut (analiz toplamlarından hariç).",
+        "recordDifference": "Hesap farkı olarak kaydet",
+        "recordIncome": "Gelir olarak kaydet",
+        "recordExpense": "Gider olarak kaydet",
+        "archived": "Arşivlendi",
+        "editInLoans": "Krediyi düzenle",
+        "balanceOwedHint": "Ekstreniz {amount} gösteriyor olabilir, o tutara ileride işleyecek faiz de eklenmiştir."
+      },
+      "reimbursement": {
+        "pendingTitle": "Geri gelmesi bekleniyor",
+        "settledTitle": "Geri ödendi",
+        "claim": "İste",
+        "paidInto": "{account} hesabına",
+        "noAccount": "Hesap yok",
+        "undoTitle": "Bu geri ödeme geri alınsın mı?",
+        "undoMessage": "Para girişi kaydı silinir.",
+        "undoAction": "Geri al",
+        "cancel": "İptal",
+        "saveFirst": "Önce diğer değişikliklerinizi kaydedin."
+      },
+      "reorder": {
+        "open": "Yeniden Sırala",
+        "save": "Kaydet",
+        "accountsTitle": "Hesapları yeniden sırala",
+        "accountsHint": "Grupları ve grup içindeki hesapları taşıyın. Birikim hedefleri kendi sırasını korur.",
+        "categoriesTitle": "Kategorileri yeniden sırala",
+        "categoriesHint": "Kategorileri ve ana kategorisi içindeki alt kategorileri taşıyın.",
+        "emptyGroup": "Bu grupta henüz hesap yok.",
+        "drag": "Sıralamak için sürükleyin",
+        "dragNamed": "{name} öğesini taşı. Sürükleyin veya ok tuşlarını kullanın.",
+        "moved": "{name}, {count} içinde {position}. sıraya taşındı"
+      },
+      "rule": {
+        "newRule": "Yeni tekrarlayan kural",
+        "editRule": "Tekrarlayan kuralı düzenle",
+        "sameFlow": "İşlem girişiyle aynı akış",
+        "saveRule": "Kuralı kaydet",
+        "deleteRule": "Kuralı sil",
+        "deleteConfirm": "“{name}” silinsin mi? Bu işlem geri alınamaz.",
+        "amountRequired": "Tutar gerekli",
+        "chooseCategory": "Kategori seçin",
+        "settings": "Tekrarlama ayarları",
+        "ruleName": "Kural adı",
+        "ruleNamePlaceholder": "Netflix aboneliği",
+        "enterRuleName": "Lütfen bir tekrarlama kuralı adı girin.",
+        "logo": "Logo",
+        "noLogo": "Logo yok",
+        "customLogo": "Özel logo",
+        "searchLogos": "Abonelik ara",
+        "country": "Ülke",
+        "noResults": "Eşleşme bulunamadı",
+        "global": "Genel",
+        "repeat": "Tekrarla",
+        "daily": "Günlük",
+        "weekly": "Haftalık",
+        "monthly": "Aylık",
+        "quarterly": "Üç aylık",
+        "semiannually": "Altı aylık",
+        "yearly": "Yıllık",
+        "every": "Her (aralık)",
+        "ends": "Biter",
+        "never": "Hiçbir Zaman",
+        "onDate": "Belirli tarihte",
+        "endDate": "Bitiş tarihi",
+        "validEndDate": "Lütfen geçerli bir bitiş tarihi seçin.",
+        "status": "Durum",
+        "active": "Aktif",
+        "paused": "Duraklatıldı",
+        "pause": "Duraklat",
+        "resume": "Sürdür"
+      },
+      "split": {
+        "title": "Hesabı Böl",
+        "chip": "Böl",
+        "evenly": "Eşit böl",
+        "addPerson": "Kişi ekle",
+        "me": "Ben",
+        "personPlaceholder": "Arkadaşın adı",
+        "sumMatch": "{sum} / {total}",
+        "sumLeft": "{diff} kaldı",
+        "sumOver": "{diff} fazla",
+        "sumMismatch": "{diff} eksik",
+        "negativeSelf": "Arkadaşların payı toplamı aşıyor",
+        "markPaid": "Ödendi olarak işaretle",
+        "paidLabel": "{date} ödendi",
+        "undo": "Geri al",
+        "done": "Tamam",
+        "remove": "Kaldır",
+        "cancel": "İptal",
+        "noAccount": "Hesap yok",
+        "paidTo": "Geri ödenen hesap",
+        "sharesTitle": "Size kim borçlu",
+        "someone": "Birisi",
+        "untitledBill": "Bölünen hesap",
+        "paidTitle": "Geri ödendi",
+        "undoTitle": "Bu pay ödenmedi olarak işaretlensin mi?",
+        "undoBody": "Tutar yeniden size borçlu olur ve gider bu tutar kadar artar. Başka bir hesaba yapılan geri ödeme transferi kaldırılır.",
+        "itemizedTotal": "Toplam: {sum}",
+        "itemizedZeroHint": "En az bir tutar girin",
+        "removeTitle": "Bu talep kaldırılsın mı?",
+        "removeBody": "Bu, kişinin bu hesap için size olan borcunu siler. İşlemin kendisi değişmez.",
+        "defaultPaidTo": "Varsayılan ödeme hesabı",
+        "defaultPaidToHint": "Yeni paylar varsayılan olarak bu hesaba ödenir."
+      },
+      "duplicate": "Çoğalt",
+      "duplicateTitle": "Tarihe çoğalt",
+      "expenseCategory": "Gider kategorisi",
+      "incomeCategory": "Gelir kategorisi",
+      "categoryNone": "Transferler kategorisini korur. Kategoriyi değiştirmek için gider veya gelir seçin.",
+      "duplicateNone": "Bakiye düzeltmeleri ve eksi tutarlar çoğaltılamaz.",
+      "duplicateTooMany": "Bir seferde en fazla {max} işlem çoğaltabilirsiniz.",
+      "wage": {
+        "title": "Saatlik değer",
+        "subtitle": "Aylık gelir oranınız, uygulamada ayarladığınız gibi.",
+        "add": "Gelir oranı ekle",
+        "addTitle": "Gelir oranı ekle",
+        "empty": "Henüz saatlik değer geçmişi yok.",
+        "now": "Bu ay",
+        "perHour": "/sa",
+        "type": {
+          "hourly": "Saatlik",
+          "monthly": "Aylık",
+          "yearly": "Yıllık"
+        },
+        "deleteTitle": "Aylık saatlik değer silinsin mi?",
+        "deleteBody": "{month} oranı silinsin mi? Buna bağlı aylar önceki mevcut aya geri döner.",
+        "year": "Yıl",
+        "month": "Ay",
+        "existsTitle": "{month} zaten mevcut",
+        "existsBody": "Bu ayın zaten bir gelir oranı var. Bunun yerine düzenlensin mi?",
+        "saveFor": "{month} için kaydet",
+        "step1": "Ne kadar kazanıyorsunuz?",
+        "step2": "Çalışma haftası",
+        "step3": "Ekstra çalışma süresi",
+        "amount": "Tutar ({symbol})",
+        "afterTax": "Vergiden sonraki gelirinizi girin.",
+        "hoursPerWeek": "Haftalık çalışma saati",
+        "workdaysPerWeek": "Haftada çalışma günü",
+        "commuteMinutes": "Günlük ekstra süre (dk)",
+        "commuteHint": "Hazırlanma, yolculuk, park ve ücretsiz çalışma süresi dahil.",
+        "trueRate": "Gerçek saatlik oran",
+        "weeklyIncome": "Haftalık gelir",
+        "baseRate": "Temel saatlik oran",
+        "commutePerWeek": "Haftalık ekstra süre",
+        "totalPerWeek": "Toplam haftalık süre",
+        "showAs": "Şöyle göster",
+        "period": {
+          "hourly": "Saatlik",
+          "weekly": "Haftalık",
+          "monthly": "Aylık",
+          "yearly": "Yıllık"
+        },
+        "suffix": {
+          "hourly": "/sa",
+          "weekly": "/hf",
+          "monthly": "/ay",
+          "yearly": "/yıl"
+        }
+      },
+      "notePlaceholder": "Yeni not. Silmek için boş bırakın."
+    },
+    "cloud": {
+      "strip": "{device} cihazından veriler, {date} tarihinde eşitlendi.",
+      "yourPhone": "telefonunuz",
+      "dataFrom": "Veri tarihi: {date}",
+      "phoneHere": "Telefon bağlı",
+      "phoneAway": "Telefon bağlı değil",
+      "connecting": "Bağlanıyor…",
+      "refresh": "Telefondan yenile",
+      "receiving": "Eşitleniyor… %{percent}",
+      "preparing": "Hazırlanıyor…",
+      "preparingTitle": "Telefonunuz eşitlemeye hazırlanıyor",
+      "receivingTitle": "Telefonunuzdaki en son veriler eşitleniyor",
+      "opening": "Açılıyor…",
+      "openingTitle": "Eşitlenen veriler açılıyor",
+      "needsPhoneTitle": "Telefonunuzda Money2Time'ı açın.",
+      "needsPhoneBody": "Ayarlar → Web Gösterge Paneli'ne gidin. En yeni verileriniz kendiliğinden gelir.",
+      "unlink": "Bu tarayıcının bağlantısını kaldır",
+      "unlinkConfirm": "Bağlantı kaldırılsın mı? Bu tarayıcı verilerinizin kopyasını siler. Yeniden bağlamak için tekrar tarayın.",
+      "stay": "Bağlı kalsın",
+      "elsewhereTitle": "Bu pano başka bir sekmede açık.",
+      "elsewhereBody": "Güncellemeleri yalnızca bir sekme alır. Değiştirmek için Burada kullan'ı seçin.",
+      "useHere": "Burada kullan",
+      "sourceOfTruth": "Değişiklikler telefonunuza kaydedilir. Çevrimiçi hiçbir şey saklanmaz.",
+      "errors": {
+        "incomplete": "Telefonunuzla eşitleme tamamlanmadan durdu. Tekrar denemek için telefonunuzdan yenileyin.",
+        "corrupt": "Telefonunuzdan gelen veri okunamadı. Tekrar denemek için telefonunuzdan yenileyin.",
+        "unsupported": "Bu veri uygulamanın daha yeni bir sürümünden geliyor. En son panoyu almak için sayfayı yeniden yükleyin.",
+        "storage": "Bu tarayıcı bir kopyayı kaydetmedi, bu yüzden bir dahaki sefere yine telefonunuza ihtiyaç duyacak. Gizli pencereler çoğu zaman buna yol açar."
+      }
+    },
+    "link": {
+      "eyebrow": "Money2Time Web Panosu",
+      "title": "Money2Time verileriniz büyük ekranda",
+      "subtitle": "Kodu telefonunuzla tarayın. Uçtan uca şifreli, çevrimiçi hiçbir şey saklanmaz.",
+      "steps": {
+        "camera": {
+          "title": "Kamerayla tarayın",
+          "body": "Telefonunuzun kamerasını koda tutun ya da uygulamada tarayın."
+        },
+        "link": {
+          "title": "Bağlayın",
+          "body": "İki ekranın da aynı kodu gösterdiğini kontrol edin ve Bağla'ya dokunun."
+        },
+        "dashboard": {
+          "title": "Panonuzu açın",
+          "body": "17 pano. Yenilemek için uygulamayı istediğiniz zaman açın, bağlıyken de değişiklik yapın."
+        }
+      },
+      "promises": {
+        "edits": {
+          "title": "Bağlıyken düzenleyin",
+          "body": "Değişiklikler telefonunuza kaydedilir, yalnızca telefonunuz bağlıyken."
+        },
+        "phone": {
+          "title": "Telefonunuz yönetimde kalır",
+          "body": "Veriler yalnızca uygulama açıkken gelir."
+        },
+        "private": {
+          "title": "Çevrimiçi saklanan hiçbir şey yok",
+          "body": "Uçtan uca şifreli. Biz bile okuyamayız."
+        }
+      },
+      "cardTitle": "Bu tarayıcıyı bağlayın",
+      "cardBody": "Telefon kamerasıyla ya da Money2Time uygulamasıyla tarayın.",
+      "qrLabel": "Bu tarayıcıyı Money2Time uygulamasına bağlamak için QR kodu",
+      "preparing": "Kod hazırlanıyor…",
+      "noAccount": "Hesap gerekmez. Kod her 2 dakikada bir değişir.",
+      "confirmCode": "Telefonunuzun bu kodu gösterdiğini kontrol edin ve orada Bağla'ya dokunun.",
+      "candidateTitle": "{phone} bağlansın mı?",
+      "candidateTitleUnnamed": "Bu telefon bağlansın mı?",
+      "candidateBody": "Telefonunuzun aynı kodu gösterdiğini kontrol edin. Yalnızca kendiniz taradıysanız bağlayın.",
+      "candidateAccept": "Bağla",
+      "candidateReject": "Benim değil",
+      "offline": "Bağlanılamıyor. Tekrar çevrimiçi olduğunuzda yeni bir kod görünür.",
+      "terms": "Bağlayarak Kullanım Koşulları'nı ve Gizlilik Politikası'nı kabul edersiniz.",
+      "unlinkedNotice": "Bağlantı kaldırıldı. Bu tarayıcı verilerinizin kopyasını sildi.",
+      "linkedTo": "{phone} ile bağlı",
+      "waitingTitle": "Telefonunuz bekleniyor",
+      "waitingBody": "Money2Time → Ayarlar → Web Gösterge Paneli'ni açın.",
+      "preparingTitle": "Eşitlemeye hazırlanılıyor",
+      "preparingBody": "Telefonunuz verilerinizi paketliyor. Üzerinde Money2Time'ı açık tutun.",
+      "receivingTitle": "Verileriniz eşitleniyor",
+      "receivingBody": "Uçtan uca şifreli, doğrudan telefonunuzdan. Üzerinde Money2Time'ı açık tutun.",
+      "openingTitle": "Verileriniz açılıyor",
+      "openingBody": "Bu tarayıcıda şifresi çözülüyor.",
+      "errors": {
+        "unsupported": "Bu tarayıcı uçtan uca şifreli verileri açamıyor. Chrome, Edge, Firefox veya Safari'nin güncel bir sürümünü kullanın."
+      }
+    },
+    "pro": {
+      "badge": "Pro",
+      "title": "Money2Time Pro’nun bir parçası",
+      "body": "Bu, Money2Time Pro'nun bir parçası; daha uzun dönemler ve hesap, kategori, tekrarlayan işlem gibi şeylerde sınırsız kullanım da buna dahil. Telefonunuzdaki uygulamadan Pro'ya geçin, burada da açılsın.",
+      "stepApp": "Telefonunuzda Money2Time'ı açın ve Pro'ya geçin.",
+      "stepRefresh": "Buraya dönüp telefonunuzdan yenileyin. Telefonunuz verilerini eşitler eşitlemez bu tarayıcıda da açılır.",
+      "checkAgain": "Yükselttim, telefondan yenile",
+      "checking": "Eşitleniyor…",
+      "notNow": "Şimdi değil",
+      "lockedPeriod": "{period}, yalnızca Pro"
+    },
+    "filters": {
+      "title": "Filtreler",
+      "accounts": "Hesaplar",
+      "exclude": "Hariç tut",
+      "include": "Dahil et",
+      "done": "Tamam",
+      "reset": "Sıfırla",
+      "note": "Hesap bakiyeleri filtrelenmez."
+    },
+    "hide": {
+      "hide": "Tutarları gizle",
+      "show": "Tutarları göster"
+    },
+    "dropdown": {
+      "search": "Ara",
+      "noMatch": "Eşleşme yok"
+    }
+  }
+}

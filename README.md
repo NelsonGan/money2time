@@ -2,12 +2,19 @@
 
 A React Native expense tracker that lets you view spending as **money or as time** — every dollar reframed as hours of your life at your hourly rate. Local-first, offline, on-device.
 
+This repository holds everything Money2Time ships: the app, the Cloudflare
+Workers behind it, the website and Web Dashboard
+([money2time.com](https://www.money2time.com),
+[app.money2time.com](https://app.money2time.com)), and App Studio, which makes
+the store screenshots and listing copy.
+
 This file is the only documentation in the repo. Everything about how the
 project works is here; agent-specific instructions are in
 [AGENTS.md](AGENTS.md).
 
 Paths in `code` are relative to the app, `apps/mobile`, unless they start with
-`apps/` or `.github/`, or a section says otherwise.
+`apps/` or `.github/`, or a section says otherwise ([Website](#website) is
+relative to `apps/web`, [App Studio](#app-studio) to `apps/app-studio`).
 
 ---
 
@@ -24,6 +31,8 @@ Paths in `code` are relative to the app, `apps/mobile`, unless they start with
 - [App icons](#app-icons)
 - [App size and native-only assets](#app-size-and-native-only-assets)
 - [Cloudflare](#cloudflare)
+- [Website](#website)
+- [App Studio](#app-studio)
 - [CI and deploy](#ci-and-deploy)
 - [Testing](#testing)
 - [Conventions](#conventions)
@@ -37,15 +46,26 @@ apps/mobile      Expo / React Native app: its own npm project (package.json,
                  package-lock.json, patches/, eas.json)
 apps/cloudflare  workers/ and d1/: one npm project per Worker, one schema
                  directory per D1 database, and the R2 tutorial-media notes
-.github          CI workflows, and the screenshots and evidence PRs embed
-                 (.github/pr-assets/)
+apps/web         money2time.com and the Web Dashboard: Next.js App Router
+                 code built by vinext as one Cloudflare Worker (see Website)
+apps/app-studio  App Studio: the store screenshots, creatives and listing
+                 copy, and their uploads (see App Studio)
+.github          CI workflows; a pull request's screenshots and evidence go
+                 in .github/pr-assets/ on its branch, never on main
 ```
 
 The root holds only what is shared: CI, agent config (`.claude/`, `.agents/`,
 `.codex/`), `.easignore` (EAS reads it from the repository root, not from the
 app, because it archives the whole repository), `.prettierrc`, `.editorconfig`
-and this file. There is no root `package.json`: each app installs and runs on
-its own, and app commands run from `apps/mobile`.
+and this file. There is no root `package.json` and no workspace: each app is
+its own npm project with its own lockfile, installs and runs on its own, and
+its commands run from its directory (`apps/mobile`, `apps/web`,
+`apps/app-studio`, or the Worker's under `apps/cloudflare/workers/`).
+
+The website and App Studio were separate repositories (`money2time-web` and
+`money2time-screenshots-creator`) until 2026-11-09. They moved in as a
+snapshot of their `main` branches, without their history, which stays in
+those archived repositories.
 
 Inside the mobile app:
 
@@ -122,7 +142,7 @@ apps/mobile/
 
 ### Prerequisites
 
-- Node.js 22+ and npm 10+ (CI runs Node 22; Wrangler 4 needs it)
+- Node.js 22+ and npm 10+ (CI runs Node 22; Wrangler 4 needs it). The website needs Node 22.18 or newer and CI builds it on Node 24
 - Xcode (iOS) / Android Studio or the Android command-line tools (Android) for simulator and emulator builds
 - `ANDROID_HOME` (the Android SDK, e.g. `$HOME/Library/Android/sdk`) and `JAVA_HOME` (JDK 17) exported in the shell that runs `npx expo start`, `expo run:android` or a local EAS build.
 
@@ -130,9 +150,11 @@ apps/mobile/
 
 ### Setup
 
-The app lives in `apps/mobile` and the Cloudflare Workers in `apps/cloudflare`
-(see [Repo layout](#repo-layout)). Each is its own npm project; app commands
-run from `apps/mobile`.
+The app lives in `apps/mobile`, the Cloudflare Workers in `apps/cloudflare`,
+the website in `apps/web` and App Studio in `apps/app-studio` (see
+[Repo layout](#repo-layout)). Each is its own npm project; app commands run
+from `apps/mobile`. The website and App Studio are set up in their own
+sections ([Website](#website), [App Studio](#app-studio)).
 
 ```bash
 cd apps/mobile
@@ -210,7 +232,7 @@ The tutorial pipeline, in order:
 ```bash
 node scripts/annotate-tutorials.mjs        # captures -> committed frames
 node scripts/generate-tutorial-images.mjs  # frames -> registry
-node scripts/sync-tutorials-web.mjs        # catalog -> ../money2time-web
+node scripts/sync-tutorials-web.mjs        # catalog -> apps/web
 ```
 
 ## Architecture
@@ -512,7 +534,7 @@ Traditional Chinese is `zh-Hant`. Device tags for Taiwan, Hong Kong, and Macau s
 - **App Lock**: Biometric gate via `services/biometricAuth.ts`, configured in `AppLockScreen`; settings `biometricLockEnabled` / `biometricLockDelaySeconds`.
 - **Receipt scan**: Background OCR of a snapped/uploaded receipt, orchestrated by `context/ReceiptScanContext.tsx` (`useReceiptScans()` → `startScan`, `scanReceiptImage`, banner `jobs`). `startScan` gates the free-tier receipts limit, then opens the **inline camera** via the `requestOpenScanCamera` bridge. There is no pushed camera route: `ReceiptCameraSheet` is mounted once by the app shell (above the navigator) and raises the viewfinder as a bottom sheet over whatever screen asked for it, so dismissing lands the user exactly where they were. The viewfinder itself is `components/InlineReceiptCamera` — a fixed-height framing box plus a shutter, an album button and a close button — and the transaction editor renders the _same_ component in its numpad slot when the receipt chip is tapped, so framing a shot never covers the amount and note being filled in. A snap is held for Retake / Use photo; an album pick skips that (the picker was the review step); either path downscales the photo (`downscaleReceiptForStorage` in the platform-split `services/receiptImage` — caps the long edge at 1600px and re-encodes JPEG via `expo-image-manipulator` so the one stored copy is small enough for both the attachment view and the base64 upload; `.ts` is a web/test passthrough) then saves it (`saveReceiptImage`) and calls `scanReceiptImage`, which enqueues a background job and hits the Worker (`services/receiptScan`). **Several receipts at once (Add only)**: on a plain scan (`intent: 'quick'`: the + sheet's Add-tab Scan receipt, or the + button mapped to scan) the album opens in multi-select for up to 10 receipts (`MAX_RECEIPT_BATCH`, numbered in pick order via `pickReceiptAssets`); a free user with "Save scanned receipts" on can pick no more than the receipt images they have left (`receiptBatchPickLimit`). Split scans, Settle Up and the transaction editor's receipt chip stay one photo, and a single pick takes the one-receipt path unchanged. The sheet closes at once and `scanReceiptBatch` queues one job per receipt under a shared `batchId`: each is downscaled, stored and scanned in the background, three at a time (`RECEIPT_BATCH_CONCURRENCY`, `runReceiptQueue`), and logs its own expense. The first scan to hit the quota opens the paywall (or the Pro limit alert) once; scans already in flight drop quietly and the rest never start. The banner shows a batch as one card (`ScanBatchCard`: "Scanning receipts 3/10", then "N expenses logged" and how many could not be read) that expands into a row per receipt, each opening its expense or dismissing its error; one row flashes and one haptic plays when the whole batch is done. The pure parts live in `features/transactions/lib/receiptScanBatch.ts`. A single parsed draft becomes a tappable "ready to review" banner (opens a pre-filled editor; a secondary "Split by item" chip appears when the itemized breakdown parsed ≥2 line items); multiple drafts are added directly. `startScan('split')` carries a split intent through the camera so the ready card opens the Split-by-Item editor directly (Worker `mode: 'itemized'`). **`expo-camera` is a native module** (config plugin in `app.json`), so `InlineReceiptCamera` is `React.lazy`-loaded behind an error boundary by both hosts — never import it eagerly — adding/upgrading it needs a **dev-client/prebuild rebuild** (like MapLibre). `patches/expo-camera+58.0.12.patch` makes iOS `takePictureAsync` reject instead of crashing when the preview connection stops mid-capture, and `patches/expo-image-picker+58.0.10.patch` stops a failed read of an Android Photo Picker `content://` uri being masked by a `Uri.toFile()` crash (Sentry MONEY2TIME-26). `__tests__/patches/expoCameraStoppedConnection.test.ts` and `expoImagePickerContentUri.test.ts` fail if an upgrade drops either.
 - **Android share-to-log**: Android's Automation page has one entry, sharing a screenshot or receipt photo to the app from the system share sheet, the counterpart of iOS's Back Tap "Log Screenshot". `plugins/withMoney2TimeShareScan.js` generates `ShareScanActivity`, a no-UI share target for `image/*` (SEND and SEND*MULTIPLE) that copies the shared images into `<filesDir>/shared-scans/` and opens the app. It is a **separate activity on purpose**: picking an alternate icon disables `MainActivity` (see the App icon switcher note), and a share filter on a disabled component disappears from the share sheet. The copy happens in the activity because a shared `content://` grant does not outlive it. Each file is written as `<name>.part` and renamed when complete, and the folder listing *is* the queue: `services/autoLog.ts` reads it on Android (`parseSharedScanFileNames` in `features/transactions/lib/autoLog.ts`) in place of the iOS App Group queue, so `ScreenshotScanSync` in `App.tsx` drains both platforms through the same `screenshot` scan intent (silent auto-create, the `autoLogSaveScreenshot` opt-in). Adding the activity needs a **prebuild/native rebuild**. The walkthrough is the `shareScreenshot` topic of `AutoLogTutorialScreen`, with frames in `assets/autolog/ss*\*.webp`drawn from`scripts/data/autolog-shots.json` (`TUTORIAL_SPEC=scripts/data/autolog-shots.json TUTORIAL_OUT_DIR=assets/autolog node scripts/annotate-tutorials.mjs`).
-- **Tutorials**: `features/tutorials/` is a searchable set of step-by-step guides, reached from Settings > HELP & ABOUT > Tutorials (root routes `Tutorials` and `TutorialDetail`, so `money2time://tutorial?id=<slug>` can open one directly). Three things about it are load-bearing. **The catalog is English prose in `features/tutorials/content/*.ts`, not in `lib/i18n/locales/*`** — it is long-form content, and putting it in the locale files would add hundreds of keys to all 24 of them (and 32 more on the website) and make the parity test police prose; the screen _chrome_ does go through I18n, under `tutorials.*`. **The catalog is also the single source of truth for money2time.com**: `node scripts/sync-tutorials-web.mjs` copies it plus the screenshots into the web repo (`src/lib/tutorials.generated.ts`, `media/tutorials/`, which the site publishes to its R2 bucket with `node scripts/upload-media.mjs`), so a tutorial is written once. Re-run it after any content or artwork change, or the two drift. **`assets/tutorials` is deliberately absent from `expo.updates.assetPatternsToBeBundled`** so its ~145 frames ride the native binary instead of eating the 1000-asset OTA cap (see the icon-pack note above).
+- **Tutorials**: `features/tutorials/` is a searchable set of step-by-step guides, reached from Settings > HELP & ABOUT > Tutorials (root routes `Tutorials` and `TutorialDetail`, so `money2time://tutorial?id=<slug>` can open one directly). Three things about it are load-bearing. **The catalog is English prose in `features/tutorials/content/*.ts`, not in `lib/i18n/locales/*`** — it is long-form content, and putting it in the locale files would add hundreds of keys to all 24 of them (and 32 more on the website) and make the parity test police prose; the screen _chrome_ does go through I18n, under `tutorials.*`. **The catalog is also the single source of truth for money2time.com**: `node scripts/sync-tutorials-web.mjs` copies it plus the screenshots into the website (`apps/web/src/lib/tutorials.generated.ts`, `apps/web/media/tutorials/`, which the site publishes to its R2 bucket with `node scripts/upload-media.mjs`), so a tutorial is written once. Re-run it after any content or artwork change, or the two drift. **`assets/tutorials` is deliberately absent from `expo.updates.assetPatternsToBeBundled`** so its ~145 frames ride the native binary instead of eating the 1000-asset OTA cap (see the icon-pack note above).
   **Artwork pipeline.** A raw simulator capture plus a red-marker spec becomes the committed frame: `scripts/data/tutorial-shots.json` names the source and the marks in **normalised [0,1] coordinates**, taken from an element's frame in the accessibility tree (`agent-device snapshot -i --json`, divided by the screen size) rather than eyeballed off a screenshot, so a mark survives a recapture on a different device. `node scripts/annotate-tutorials.mjs [id-prefix...]` draws them, downscales to 820px wide and writes a **quality-85 lossy WebP** (`scripts/lib/screenshotWebp.mjs`; about 40% of the 256-colour PNG the frames used to be, with small UI text as sharp, and the bytes are app download size). The Automation frames under `assets/autolog/` use the same encoder. Raw captures are not committed (~1MB each, well over a hundred); they live in the gitignored `.tutorial-raw/`, which the spec's `RAW/` prefix resolves against. `node scripts/generate-tutorial-images.mjs` then emits the `require()` registry Metro needs. `__tests__/features/tutorials.test.ts` fails on a step pointing at a missing image, an orphan image nothing references, or an em/en dash in the copy.
 - **Live earnings (Live Activity)**: Settings > Widgets > Live earnings. `WidgetsScreen` (route `Widgets`) is a **hub**, not the feature: it lists one row per widget so a second one can be added without taking the page apart, and reads `getCurrentLiveActivity()` on focus purely to show an "On" badge (read-only on purpose, so it never mounts a second controller pushing its own updates). `LiveEarningsScreen` (route `LiveEarnings`) is the feature, offering a Lock Screen / Dynamic Island activity whose money figure counts up at the user's true hourly rate for a chosen 1 to 8 hour session. It needs **no Apple approval and no entitlement**: the app declares `NSSupportsLiveActivities` (added by `plugins/withMoney2TimeWidgets.js`) and that is the whole permission story, though the user can still switch Live Activities off per app in iOS Settings, which `ActivityAuthorizationInfo` reports and the screen surfaces. **The one thing ActivityKit cannot do is repaint on its own.** Only time-derived SwiftUI views (`Text(timerInterval:)`, `ProgressView(timerInterval:)`) redraw without an update, so the card's elapsed clock and progress bar are genuinely live while the **amount** is only as fresh as the last `activity.update()`. **`useLiveEarningsSync`** therefore pushes one on every AppState transition out of `active` (the moment right before the user looks at their Lock Screen) and one on the way back in (to reap a session that expired while the app was away); and a **push Worker** carries it the rest of the way. That is the only thing that moves the figure while the phone is locked, because it is the only one that does not need the app to be running: `apps/cloudflare/workers/live-earnings` holds the session and pushes the current amount once a minute for its whole life. Worth being clear on what an ActivityKit push is, because the name misleads: no banner, no sound, nothing in Notification Center, and **no notification permission** - Live Activity delivery is independent of an app's notification settings, so it works for users who have denied notifications outright. It is a silent data channel to one card. The app requests the activity with `pushType: .token` and registers the token via `services/liveEarningsPush.ts`. **The token is not available when `request()` returns** - it is minted per activity and asynchronously, so it is nil even on an install that has run sessions before; an early version waited for it and only bought a Start button that stalled. Registration is therefore an **upsert keyed by the push token**, done on the first transition out of the foreground, which is the moment before the Lock Screen is looked at anyway. That one path also repairs a registration that failed while offline and picks up a token ActivityKit rotated mid-session. Three more things that cost real debugging time: a Live Activity push token is **not** the 64-hex-character APNs _device_ token every example uses - iOS 26 issues **256** hex characters, and a length bound written for the smaller one silently rejects every real token (registration is best-effort, so the only symptom is a card that never ticks). `ContentState.asOfMillis` is a **Double, not a Date**, because a pushed `content-state` is decoded by a JSONDecoder with _default_ strategies and the default for `Date` is `deferredToDate` - seconds since the 2001 reference date, so a Unix timestamp decodes without complaint and lands 31 years out. And the app must declare **`NSSupportsLiveActivitiesFrequentUpdates`**, or Apple's delivery budget runs out part-way through a shift and the figure freezes again with nothing to say why. That hook is mounted **once in `AppContent`, not on the screen**, and the distinction is load-bearing: a listener owned by `LiveEarningsScreen` dies when the screen is popped, which is precisely what happens right after someone taps "Start the clock" and navigates back, leaving the card frozen at the amount it started with. `useLiveEarningsActivity` owns only the screen's own state (start, stop, and re-reading ActivityKit on focus). The **in-app preview** has no such limit and re-renders four times a second, which is what sells the feature. All math is the pure `features/widgets/lib/liveEarnings.ts`; the 8-hour cap is iOS's own, not a product choice. A hand-started shift is set up **in the act of starting it**: the action bar reads "Start manually" and opens `StartSessionSheet`, which asks the two questions a session needs (how long, and when it began) and then starts it. They used to be rows in a "Session" section on the screen itself, which put the settings for one shift next to the settings for every future one (the schedule) with only a header between them, and left the screen holding draft state for a session that might never begin. The length is still persisted on the schedule blob as `hours` (so the sheet opens on the last shift worked, and still apart from the schedule's own `shiftHours`); the start time deliberately is not, since "I clocked in at nine" is true of one shift only. A session can be **backdated**, and the picker for it is two wheels of **wall-clock time**, not a list of "2h ago" presets: someone who clocked in at half nine knows the time, and making them work out the difference is arithmetic the app can do. The hour column is labelled with `Intl.DateTimeFormat(locale, { hour: 'numeric' })` so the locale picks 12- vs 24-hour, and it carries **instants, not 0-23 numbers**, since a DST fall-back repeats an hour. Both columns only ever offer the window the session allows (the earliest hour starts part-way through, the current one stops at the present minute), so every combination the wheels can land on is a legal start rather than one clamped after the fact, and shortening the duration re-clamps a start the longer window had allowed. The sheet hands back the picked **time** and the screen converts it to an offset at the moment Start is pressed, so minutes spent deciding do not shift the session. Amounts deliberately go through `formatCurrency`, **not** `formatAmount`: in time display mode the latter would divide the earned amount by the very rate that produced it and render the elapsed clock twice. The Swift lives in the config plugin like the rest of the widget code (`ios/` is gitignored) and `Money2TimeEarningsAttributes` is emitted from **one** template string into both the app target and the widget extension, because ActivityKit pairs them by type name and two hand-maintained copies would drift. Two layout rules the card depends on, both learned the hard way on device: a **`Text(timerInterval:)` that is not given the width it reserved renders `1:--` instead of the time**, so the elapsed clock lives on its own footnote-sized row rather than sharing a line with the amount; and the **amount owns its row outright**, because giving the timer `layoutPriority` next to it let the timer claim the whole row and the amount rendered as nothing at all. A `Text(timerInterval:)` also reserves a box for the widest value it could ever show, so **anything placed after it on a row gets shoved to the far side** — which is why the clock sits at the start of the footer row with only a `Spacer` and the end time after it. That reserved box is also why the clock is given a **fixed 72pt frame**: the Lock Screen renders the card narrower than Notification Center does, and without a reservation the timer was handed less than it asked for and drew `3:--` on the Lock Screen while reading correctly everywhere else. The reservation has to be a **finite** one, and this is the sharpest trap in the whole card. `fixedSize(horizontal: true)` is the obvious way to say "take the width you need", and it shipped that way, but it proposes an _unspecified_ width instead of a number; the system's own ideal width for a timer text is not finite under that proposal, and the resulting nan came back out through the sibling progress bar as `view origin is invalid: (nan, 3.0)`, a hard trap in SwiftUI's layout. It does not fail gracefully or locally: it kills `WidgetRenderer_Activities`, the out-of-process renderer that draws **every** presentation of the activity, so the Lock Screen card, Notification Center, and all four Dynamic Island states render as blank black at once while ActivityKit still reports the activity as perfectly alive. That is the signature to recognise: a Live Activity that is running and updating (`liveactivitiesd` logs it, the app's own preview animates, the home-screen widget keeps ticking) but draws nothing anywhere. When it happens, the answer is in `~/Library/Logs/DiagnosticReports/WidgetRenderer_Activities-*.ips` and in `log show --predicate 'process == "WidgetRenderer_Activities"'`, not in anything the app can see. The rule this leaves behind: inside a Live Activity, never hand a time-derived view an unspecified size proposal - give it a number. The card is deliberately spare: four rows (badge + rate, the amount with the session total and the refresh button beside it, the bar, clock + end time), **no wordmark and no captions**, because a Lock Screen card is read at a glance and every label it does not need is one more thing between the user and the number. It carries no artwork for a second reason too — a Live Activity's view is archived and rendered out of process, so an image loaded at runtime with `UIImage(contentsOfFile:)` comes back as a grey placeholder box (the same `loadBundleImage` helper works fine in the home-screen widgets, which render in process, which is what makes that trap easy to walk into). Colour: the app hands the activity **both** the light and dark variants of the user's theme primary as `0xRRGGBB` ints, since the extension cannot read `ThemeContext`, and spends that accent on exactly one element (the amount) with everything else on `.primary`/`.secondary` — the only colours legible both over the Lock Screen and in light contexts. Per the HIG the card is deliberately **uncontained**: no background tint (the system material is what the rest of the iOS 26 Lock Screen is made of) and no filled pill around the "Earning" badge, because everything on the card except the refresh control is read-only and anything else that looks like a button misleads. That **refresh button** is the card's one interactive element, and it exists precisely because the amount cannot repaint itself: `Money2TimeRefreshEarningsIntent` is a `LiveActivityIntent`, which the system runs **in the app's process** (a plain `AppIntent` would run in the extension, where `Activity.update` reaches nothing), so one tap pushes the current figure without unlocking the phone or foregrounding the app. Two things it depends on: the intent must **not** set `isDiscoverable = false` (that keeps the app's copy out of the AppIntents metadata index and the system then routes to the extension's copy, where `Activity.activities` is always empty and the button silently does nothing, which is exactly how it first shipped in testing), and it reads its figure from the widget feed below rather than recomputing one, so the card and the widget can never disagree. The amount animates with `.contentTransition(.numericText(value:))`, which is why `ContentState` carries the raw `earned` double next to the formatted string: the digit roll needs a number to interpolate and cannot get one from a localized currency string.
 - **Scheduled auto-start (push-to-start)**: The schedule on `LiveEarningsScreen` raises the card by itself at the start of a shift, and is **Pro-only** (`requirePro('live_earnings_auto_start')`) while starting the clock by hand stays free: what Pro buys is not having to. The gate is checked in `syncLiveEarningsAutoStart` on every pass, not just at the toggle, because a subscription can lapse long after the switch was flipped and the stored schedule would otherwise go on raising cards; the app disarms it the first time a lapsed subscriber opens the app, which is the only moment it gets (the Worker has no idea who is Pro, and a schedule nobody comes back to is dropped by its own staleness sweep). The switch reads off for a free account even when the flag is set, so it never promises a card that is not coming. `Activity.request()` is **foreground-only**, so for its first release the schedule could only be a local notification the user tapped; what removed the tap is a **push-to-start token** (iOS 17.2+), which addresses the activity _type_ on a device rather than any card, outlives every card raised from it, and lets a push start one with the app not running at all. The app reads it with `getLiveActivityPushToStartToken()` and registers the shift (weekdays, local time, length, rate, and the device's IANA zone) with `POST /live-earnings/schedule`; `apps/cloudflare/workers/live-earnings/src/starts.ts` sends the start push at the right local minute. **Both mechanisms still exist and exactly one may be armed**, which is why `features/widgets/lib/syncLiveEarningsAutoStart.ts` owns the decision rather than the two services it drives: with a token it registers the schedule and cancels the reminders, without one (iOS below 17.2) it schedules the reminders and registers nothing, and it disarms both when the schedule is off, has no days, has no wage behind it, or Live Activities are switched off for the app. `syncScheduledNotifications` deliberately no longer touches this one. It runs from `useLiveEarningsSync`, so it re-arms on every foreground: that is what repairs a registration made while offline, follows a user into a new time zone, refreshes the prerendered copy after a change of wage, currency, language or theme, and picks up a rotated token. **Everything the card will show is registered prerendered**, like the widget's timeline, because the Worker has no i18n catalogue and no view of the user's currency - and it can be, because a scheduled shift is fixed in advance. A shift is a start time **and a length**, and the length is its own field: `shiftHours` on the schedule blob, kept apart from the `hours` a hand-started session runs for. The two were one value at first and that was a bug rather than a simplification - clocking in for two hours of overtime on a Saturday silently rewrote every weekday the schedule covered, so Monday's card ended at eleven. `normalizeLiveEarningsSchedule` reads `shiftHours` from `hours` when the stored blob names only the latter, so an install upgrading across the split keeps scheduling exactly what it already was; only a blob naming neither gets the 8-hour default. `scheduleEndClock`, `scheduledSessionTotal`, the registered `durationMinutes` and the reminder's deep link all read `shiftHours`, and `useLiveEarningsSync`'s `scheduleKey` covers it so a change re-registers. A schedule is a **wall clock, not an offset**: `src/schedule.ts` walks local calendar days so 09:00 stays 09:00 across a daylight-saving change, and `next_start_at` is precomputed per row (a range scan, not a sweep of everyone's calendar) and recomputed **strictly forward** from now, so a foreground at 09:00:30 cannot re-arm the 09:00 start that just fired. Three states the pass refuses to start in, because each would put a lie on the Lock Screen: **a card is already up for that account** (started by hand, or a shift still running - it would count the same hours twice), **the start is more than `START_GRACE_MS` late** (the phone that was off all morning gets the push the moment it comes back; `apns-expiration` matches), and **APNs is unconfigured** (rows are left armed rather than rolled past a start that never went out). Two more things the payload depends on. The **attributes travel as millis** - `startedAtMillis`/`endsAtMillis`, with `startedAt`/`endsAt` as computed `Date`s - for exactly the reason `ContentState.asOfMillis` does: a pushed `attributes` dictionary is decoded by a JSONDecoder with default strategies, and the default for a Swift `Date` is seconds since the 2001 reference date, so a Unix timestamp lands 31 years out without throwing. `__tests__/services/liveEarningsStartContract.test.ts` reads the struct out of the config plugin and fails if the Worker's payload stops matching it, because nothing else would notice: APNs returns 200 for a payload the device then discards. And a start push **must carry an `alert`** (Apple's rule, so a card cannot appear entirely unannounced); on iPhone the card is the notice and the alert is what a paired Apple Watch shows, and delivery still needs no notification permission. Once the card is up **iOS wakes the app in the background** so it can read the new activity's _update_ token and register it through the ordinary session path - which is what starts the amount ticking; `refreshLiveEarningsActivity` therefore re-reads a tokenless activity a few times a second apart, since a single empty read would leave the figure frozen until the user next opened the app themselves. If two cards ever do end up running (a start that slipped past the busy check), the module's `activityUpdates` observer ends all but the one that has been **accruing longest**, since a shift already in progress is the one with something to lose; the manual start path, which deliberately ends the old card before requesting a new one, holds the reaper off with a flag while both briefly exist.
@@ -1974,7 +1996,7 @@ how the household is spending, and who is covering what.
 
 **This section is the single source of truth for Money2Time analytics.** The tables define the approved event names, destinations, triggers, frequency, properties and adoption milestones. Update this document in the same change as any affected tracking code or product flow. Implementation details belong in [the integration notes](#how-tracking-is-wired); do not maintain a second event inventory there.
 
-Baseline audited against this checkout on **2026-10-12**, when PostHog replaced Mixpanel (product analytics) and Sentry (error tracking). This date records an audit, not a release date. The catalog covers native iOS/Android app tracking; [the web fallback](apps/mobile/services/analytics.ts) sends nothing. Routing means an event is eligible to be sent when the provider is configured; delivery is best-effort. The website's contract lives in the `money2time-web` repository (`docs/analytics.md`) and reports to the same GA4 property and PostHog project.
+Baseline audited against this checkout on **2026-10-12**, when PostHog replaced Mixpanel (product analytics) and Sentry (error tracking). This date records an audit, not a release date. The catalog covers native iOS/Android app tracking; [the web fallback](apps/mobile/services/analytics.ts) sends nothing. Routing means an event is eligible to be sent when the provider is configured; delivery is best-effort. The website's contract is [Website and Web Dashboard analytics](#website-and-web-dashboard-analytics), at the end of this section, and reports to the same GA4 property and PostHog project.
 
 Two providers, two jobs:
 
@@ -2784,6 +2806,263 @@ through RevenueCat's integration for every customer, updated or not; GA4
 revenue measurement is unchanged. The canonical [revenue tables](#revenue-measurement) own the exact
 server names, external settings and duplicate-control rules.
 
+### Website and Web Dashboard analytics
+
+The website's own tracking (`apps/web/src/lib/analytics.ts`; paths in this
+subsection are relative to `apps/web`).
+
+Money2Time's app and website share one Google Analytics 4 property and one
+PostHog project, so web acquisition and app engagement can be compared in one
+reporting surface. Marketing-site visitors stay anonymous, so neither provider
+stitches a website visitor to a later app user. The web dashboard is the
+exception: a linked phone sends its pseudonymous app user ID (`m2t_<uuid>`)
+with its data, and the dashboard identifies as that user in both providers
+(see [Dashboard identity](#website-dashboard-identity)). PostHog replaced Mixpanel on
+2026-10-12; the app's analytics contract (events, budget, dashboards) is the
+rest of this [Analytics](#analytics) section, and the website's PostHog volume
+is a line in its [event budget](#posthog-event-budget).
+
+#### Website PostHog resources
+
+| Resource       | Value                                                                                 |
+| -------------- | ------------------------------------------------------------------------------------- |
+| Organization   | `Money2Time` (free plan)                                                              |
+| Project        | `Money2Time` (`658608`), US Cloud, shared with the app and the receipt-scanner Worker |
+| Project token  | `phc_zDp6…` in `src/lib/analytics-config.ts` (public, write-only)                     |
+| Ingestion host | `https://us.i.posthog.com`                                                            |
+
+The project token, like the GA4 measurement ID, is public ingestion metadata
+and is checked in. `NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN` overrides it for a
+deployment that should report elsewhere. No PostHog secret exists on the Worker.
+
+#### Website Google resources
+
+| Resource                        | Value                              |
+| ------------------------------- | ---------------------------------- |
+| Google Cloud / Firebase project | `money2time-expo` (`229377044166`) |
+| Analytics account               | `Nelson's Projects` (`350740029`)  |
+| GA4 property                    | `Money2Time` (`553783025`)         |
+| Web stream                      | `Money2Time Web` (`15786577260`)   |
+| Measurement ID                  | `G-CV6GQ43B16`                     |
+| Stream URL                      | `https://www.money2time.com`       |
+
+The measurement ID is public routing metadata and is deliberately checked into
+`src/lib/analytics.ts`. It is not a credential. The Google tag and PostHog start
+only on `money2time.com`, `www.money2time.com` or `app.money2time.com`, and do
+not start when the browser advertises Do Not Track.
+
+#### Website GA4 property configuration
+
+- Property timezone is Malaysia and currency is MYR.
+- Enhanced measurement is off. The app router emits exactly one sanitized
+  `page_view` after each navigation, so automatic history events would duplicate
+  page views and could capture query strings.
+- Google Signals and user-provided data collection are off.
+- Ads storage, ads user data, personalized-ad signals, and property-wide ads
+  personalization are disabled.
+- Event and user data retention is 14 months. Reset on new activity is off, so
+  this is a real upper bound rather than a rolling window.
+- No Measurement Protocol secret exists. A direct request to `/download` has no
+  browser analytics session and remains a privacy-reduced PostHog server event;
+  rendered-site links emit one client event instead, avoiding a second server
+  event with a disconnected anonymous identity. Requests carrying `DNT: 1`
+  skip that server event. Every rendered download CTA records its GA4 event
+  before leaving.
+- The existing Developer Traffic filter is active, while the default Internal
+  Traffic filter remains in testing. Production-host gating independently keeps
+  website preview and localhost traffic out of both providers.
+
+#### Website PostHog configuration
+
+The client in `src/lib/analytics.ts` captures only the typed contract below:
+
+- autocapture, automatic page views and page leaves, rage clicks, dead clicks,
+  heatmaps and web-vitals capture are off. Page views are sent manually as
+  `$pageview` with the sanitized URL and `page_type`;
+- marketing-site visitors are never identified
+  (`person_profiles: "identified_only"`), so their events are anonymous,
+  PostHog's cheapest kind, and create no person profiles; a linked web
+  dashboard identifies as its phone's app user (below), so its events are
+  person events;
+- feature flag evaluation, surveys, product tours, conversations and web
+  experiments are off, so a page load never makes a billable flag request;
+- uncaught errors and unhandled promise rejections are captured for error
+  tracking (`capture_exceptions`), except on the web dashboard, where a stack
+  trace could carry the visitor's own figures;
+- session replay follows the project's settings: a 10% sample, a 5-second
+  minimum, every input masked (the contact form) and no network headers or
+  bodies. The web dashboard (`app.money2time.com`) is never recorded: a visit
+  there initialises PostHog with `disable_session_recording` (no PostHog remote
+  config or site apps load there either), and its root carries `ph-no-capture`.
+  GA4 loads there like on the marketing site and receives the same typed
+  events as PostHog; the host's CSP admits Google's tag and collection
+  endpoints, and the property's enhanced measurement is off, so the tag
+  collects nothing on its own.
+  The marketing host's `/dashboard` only redirects to the app host, so a
+  recording never follows a visitor onto the dashboard. The
+  website uses the free tier's 5,000 monthly web recordings; the
+  app's mobile recordings are a separate 2,500 allowance, sampled in its code;
+- a `before_send` hook reduces `$current_url`, `$initial_current_url` and
+  `$session_entry_url` to origin + path, cuts external referrers to their
+  origin (Money2Time referrers keep their path, as in GA4), and drops ad click
+  identifiers (`gclid`, `fbclid`, …). UTM values are kept;
+- the retired Mixpanel client's `mp_*` browser storage is removed on load;
+- the project anonymizes IPs after GeoIP lookup, and its test-account filter
+  excludes `localhost`.
+
+#### Website dashboard identity
+
+Each transfer from a linked phone carries `meta.analyticsId`, the app's
+`settings.appUserId` (`m2t_<uuid>`), inside the end-to-end encrypted `begin`
+message. When that data opens, and when a kept copy is shown on a later visit,
+`identifyDashboardUser` in `src/lib/analytics.ts`:
+
+- calls PostHog `identify` with it once per browser (the SDK skips a repeat),
+  so the anonymous browser ID merges into the app's person and every later
+  dashboard event is that person's; and
+- sets GA4's `user_id` to it, the same User-ID the app's Firebase SDK sets, so
+  GA4 counts the browser and the phone as one user.
+
+The ID is also kept in the app host's `localStorage` (`m2t_dashboard_user`),
+so a later visit's first GA4 page view carries it before the cached copy has
+opened. Unlinking, from either side, calls `resetDashboardUser`: the stored ID
+goes, PostHog starts a new anonymous ID (and registers `site_locale` again,
+which `reset` clears), and GA4's `user_id` is cleared, so the next phone
+linked in that browser is a different person. Only an `m2t_<uuid>` value is
+used, and a phone whose app predates the field sends none, which leaves the
+browser anonymous.
+
+The identity stays on the dashboard host. There PostHog keeps its state in
+that host's own `localStorage` (`persistence: "localStorage"`) rather than the
+cookie the marketing site shares across `money2time.com`, and GA4 sets its
+client-ID cookie for that host only (`cookie_domain: "none"`). Marketing pages
+visited in the same browser therefore stay anonymous, before and after a link,
+and are never merged into the app user.
+
+#### Website event contract
+
+Code uses typed product events and maps them to GA4 names and parameters in one
+place. Event call sites supply bounded enums, IDs from the checked-in tutorial
+catalog, or country/locale codes; none passes arbitrary visitor text.
+
+| GA4 event                         | PostHog event                           | When                                                                                                                                                          | Reportable parameters                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| --------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `page_view`                       | `$pageview`                             | Initial render and App Router navigation                                                                                                                      | GA4 `content_group`; PostHog `page_type`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `m2t_app_download_clicked`        | `App Download Clicked`                  | Store-bound button or mobile `/download` CTA                                                                                                                  | `placement`, `target`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `m2t_download_cta_clicked`        | `App Download Clicked` (`target: none`) | Desktop `/download` CTA (no store target)                                                                                                                     | `placement`, `target`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `m2t_carousel_slide_changed`      | `Carousel Slide Changed`                | Manual screenshot carousel change                                                                                                                             | GA4 `mode`, `position`, `screenshot`; PostHog `method`, `position`, `screenshot`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `m2t_contact_form_result`         | `Contact Form Submitted`                | Contact action finishes                                                                                                                                       | GA4 `form_status`; PostHog `status`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `generate_lead`                   | None                                    | Contact form succeeds                                                                                                                                         | `lead_source`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `m2t_cost_comparison_changed`     | `Cost Comparison Changed`               | Comparison country changes                                                                                                                                    | `base_country`, `compare_from`, `compare_to`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `m2t_dashboard_entry_clicked`     | `Dashboard Entry Clicked`               | Home page button to app.money2time.com (the footer link is not tracked)                                                                                       | `placement`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `m2t_dashboard_linked`            | `Dashboard Linked`                      | The link is confirmed on the phone and then on this browser                                                                                                   | none                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `m2t_dashboard_data_received`     | `Dashboard Data Received`               | A transfer from the phone finishes and opens, or fails; a patch that does not fit the data here and is asked for again counts as `patch_unusable`             | `result` (`success`, `incomplete`, `corrupt`, `unsupported` or `patch_unusable`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `m2t_dashboard_edited`            | `Dashboard Edited`                      | A change made here is answered by the phone, or cannot reach it                                                                                               | `action` (`<entity>_<op>`: transaction, account, group, category and recurring with create, update or delete; `transaction_bulk_update`, `transaction_bulk_delete`, `transaction_bulk_duplicate`; and the module editors' own, such as `goal_archive`, `loan_update`, `budget_template_default`, `item_create`, `album_transactions`, `split_settle`, `reimbursement_mark`, `wage_create`, `currency_rate`, `reorder_categories`), `result` (`saved` or the error code), `count` (rows the batch names, counted as the phone counts them toward its 500-row limit: a budget template counts its lines, an album change the entries added and removed; the phone's own `Web Dashboard Edited` counts entries saved instead) |
+| `m2t_dashboard_pro_prompt_viewed` | `Dashboard Pro Prompt Viewed`           | The Pro paywall opens: a free account picks a period only Pro shows (12M, YTD, Year or All), reaches a free-plan limit, or the phone refuses a change for one | `feature` (`period`, or the limit: `accounts`, `categories`, `recurring`, `reimbursements`, `goals`, `loans`, `items`, `albums`, `budget_templates`, `split_bills`, `subcurrencies`, `wage_entries`; `other` when the phone names none)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `m2t_dashboard_view_opened`       | `Dashboard View Opened`                 | A dashboard page is shown, including the one a refresh lands on                                                                                               | `view`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `m2t_dashboard_unlinked`          | `Dashboard Unlinked`                    | The browser is unlinked and forgets its key and copy                                                                                                          | `by` (`browser`/`phone`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `m2t_discord_link_clicked`        | `Discord Link Clicked`                  | Discord link click                                                                                                                                            | `placement`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `m2t_language_changed`            | `Language Changed`                      | Site locale changes                                                                                                                                           | `locale_from`, `locale_to`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `select_content`                  | `Tutorial Selected`                     | Tutorial selected                                                                                                                                             | GA4 `content_id`, `content_type`, `source`, `results`; PostHog `tutorial`, `source`, `results`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `m2t_tutorial_open_in_app`        | `Tutorial Open In App`                  | Tutorial deep link attempted                                                                                                                                  | `tutorial`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `m2t_tutorial_app_fallback`       | `Tutorial App Fallback`                 | Deep link falls back to the download route                                                                                                                    | `tutorial`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| None                              | `Download Link Visited` (server)        | Direct or external request to `/download`                                                                                                                     | `destination`, `platform`, `path`, `$referrer`, `utm_*`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+
+PostHog also registers `site_locale` on every event. `Download Link Visited`
+is sent from the server with a fresh random ID and
+`$process_person_profile: false`, so each direct visit is its own anonymous
+event; it never carries the visitor's IP address, user agent or full URL.
+
+The GA4 key events are `m2t_app_download_clicked`,
+`m2t_tutorial_open_in_app`, and `generate_lead`, counted once per event with no
+default monetary value.
+
+Existing property definitions are reused for `locale` (user scope), `mode`,
+`source`, `target`, and `tutorial`. Website-specific event dimensions are
+`placement`, `screenshot`, `form_status`, `base_country`, `compare_from`,
+`compare_to`, `locale_from`, `locale_to`. Custom metrics are `results` and
+`position`. The dashboard's `view`, `result`, `action`, `feature` and `by`
+reach GA4 as event parameters but are not registered as custom dimensions
+yet, so GA4 reports them only after they are; `count` is not a custom metric
+either.
+
+#### Website GA4 dashboard
+
+The published `Money2Time Growth & Product` dashboard (`15788169937`) lives in
+the `Custom dashboards` collection (`15788213190`). It defaults to the last 28
+days and contains ten cards:
+
+- executive scorecards for active users, new users, engagement rate, and key
+  events;
+- active users over time split by platform;
+- new users split by first-user default channel group;
+- key events split by event name;
+- an app onboarding funnel from `m2t_onboarding_started` to
+  `m2t_onboarding_completed`;
+- a Pro funnel from `m2t_pro_paywall_viewed` through
+  `m2t_pro_purchase_started` to `m2t_pro_purchase_completed`; and
+- website download key events split by the `placement` dimension.
+
+The website placement card deliberately uses `Key events`, rather than all
+events carrying `placement`, so it measures the key-event
+`m2t_app_download_clicked` without mixing in Discord or non-store download CTA
+clicks. It will remain empty until the website integration is deployed and GA4
+has processed production traffic.
+
+Do not extend either app funnel backwards to a marketing-site event. Only the
+web dashboard sets the app's user ID; a website-to-app user funnel would imply
+an identity relationship the data cannot support. Use the website placement
+card and app funnels as adjacent stages instead. Dashboard events, which carry
+the app's User-ID once a phone has sent data, can sit in a user funnel with
+app events.
+
+#### Website data boundaries
+
+The implementation does not send contact-form contents, tutorial-search text,
+financial values, account identifiers, full query strings, or arbitrary
+component properties. The web dashboard receives the visitor's own data
+straight from their phone, end-to-end encrypted, decrypts it in the browser and
+keeps the encrypted copy in IndexedDB; nothing is stored online, and the only
+data that goes back is the changes made here, sealed for the phone. Its events
+carry only which page, whether a link was made or ended, whether a transfer
+opened, what kind of change was made and how the phone answered, and which Pro
+feature was asked for, never an amount, a name, a note, a category or an account. Only `utm_source`, `utm_medium`, `utm_campaign`,
+`utm_content`, `utm_term`, and `utm_id` are read from the landing URL, and each
+value is capped at 100 Unicode code points. GA4 referrers retain the path only
+for Money2Time hosts and the origin only for external sites.
+
+PostHog autocapture, automatic page views, heatmaps and click-ID campaign
+properties are disabled or stripped, and URL and referrer properties are
+reduced as described above. Session replays mask every input. The `/download`
+route likewise omits IP addresses, user-agent strings, and full URLs from its
+server event. Historical website data stays in the retired Mixpanel project and
+is not migrated.
+
+#### Website analytics verification
+
+Before merging an analytics change, from `apps/web`:
+
+```bash
+node scripts/validate-messages.mjs
+npm run lint
+npm run build
+```
+
+After deployment, use GA4 Realtime or DebugView and PostHog's Activity view
+on the production host and verify:
+
+1. one `page_view` arrives per route navigation with no query string, including
+   across locale-layout remounts;
+2. locale is set as a user property;
+3. each CTA emits the event and bounded parameters in the table above;
+4. successful contact delivery emits both the outcome and `generate_lead`;
+5. Do Not Track prevents the Google tag and PostHog client from loading;
+6. `DNT: 1` also prevents a direct `/download` request from creating its
+   privacy-reduced PostHog server event;
+7. PostHog `$pageview` and event URLs carry no query string, and external
+   referrers only their origin; and
+8. preview and localhost traffic do not enter either production project.
+
 ## App icons
 
 One folder per icon variant, composed by `node scripts/generate-app-icons.mjs`
@@ -3011,7 +3290,7 @@ the sparkle are both still there.
 
 ## App size and native-only assets
 
-An October 2026 pass cut the Android release APK by about 10% (316.67 MB to 283.34 MB) and the Hermes bundle by about 9%. The measurements are in [.github/pr-assets/app-size/](.github/pr-assets/app-size/measurements.json). A November 2026 pass cut the Hermes bundle by another 9% (16.65 MB to 15.11 MB on iOS, 16.66 MB to 15.09 MB on Android) and the bundled images by 4.45 MB, measured in [.github/pr-assets/bundle-size/](.github/pr-assets/bundle-size/measurements.json). A second November 2026 pass, measured on real unsigned Release archives of 1.7.4, cut the iOS app from 227.8 MB to 181.1 MB (about 206 MB to 167 MB once the App Store thins it for an iPhone, and 151.6 MB to 124.5 MB compressed) and the arm64 Android release APK from 172.3 MB to 164.2 MB, in [.github/pr-assets/ios-app-size/](.github/pr-assets/ios-app-size/measurements.json). What follows is what still applies.
+An October 2026 pass cut the Android release APK by about 10% (316.67 MB to 283.34 MB) and the Hermes bundle by about 9%. The measurements are in [the app-size PR's evidence](https://github.com/NelsonGan/money2time/blob/95af63b58fa45cd1d99ff33ab4c84b774d09ce57/.github/pr-assets/app-size/measurements.json). A November 2026 pass cut the Hermes bundle by another 9% (16.65 MB to 15.11 MB on iOS, 16.66 MB to 15.09 MB on Android) and the bundled images by 4.45 MB, measured in [.github/pr-assets/bundle-size/](.github/pr-assets/bundle-size/measurements.json). A second November 2026 pass, measured on real unsigned Release archives of 1.7.4, cut the iOS app from 227.8 MB to 181.1 MB (about 206 MB to 167 MB once the App Store thins it for an iPhone, and 151.6 MB to 124.5 MB compressed) and the arm64 Android release APK from 172.3 MB to 164.2 MB, in [.github/pr-assets/ios-app-size/](.github/pr-assets/ios-app-size/measurements.json). What follows is what still applies.
 
 ### What contributes to size
 
@@ -3145,9 +3424,9 @@ artwork are generator inputs and were retained.
   `CATEGORY_ICON_SOURCES` and `GENERATED_CATEGORY_ICONS` when it loads, which
   took it from 298 KB to 22 KB of minified JS. Icon filenames must therefore be
   kebab-case; the generator stops on any other name.
-- **Some artwork and source files are read by the Web Dashboard repo, so their
-  formats are not free to change.** money2time-web's
-  `scripts/sync-dashboard-assets.mjs` converts the PNGs in
+- **Some artwork and source files are read by the website, so their
+  formats are not free to change.** `apps/web/scripts/sync-dashboard-assets.mjs`
+  converts the PNGs in
   `assets/account-logos`, `assets/subscription-logos`, `assets/items` and
   `assets/icon-packs/default`, copies `assets/mascots` and
   `assets/card-designs`, and parses `constants/accountLogos.generated.ts`,
@@ -4115,8 +4394,8 @@ email codes, expired invite links and rate-limit rows older than a day.
 #### Pages and email
 
 The invite page, its broken-link page and the sign-in code email look like
-money2time.com: `brand.ts` copies the site's tokens (`globals.css` in
-money2time-web, itself the app's `rosewood` theme) and, since the site has no
+money2time.com: `brand.ts` copies the site's tokens (`apps/web/src/app/globals.css`,
+itself the app's `rosewood` theme) and, since the site has no
 dark mode, the app's rosewood dark palette for `prefers-color-scheme: dark`.
 DM Sans, the off-white page with white cards, the rosewood button, the eyebrow
 label, the icon with the three-colour Money₂Time wordmark, the waving chick
@@ -4352,13 +4631,909 @@ byte-range request returns `206 Partial Content`, and that the tutorial's Video
 link opens and plays it on iOS. Record the new object's size and hash in the
 table above. No Worker deployment or app native rebuild is required.
 
+## Website
+
+`apps/web` is [money2time.com](https://www.money2time.com) (the marketing site
+and the legal pages the stores link to) and the Web Dashboard on
+[app.money2time.com](https://app.money2time.com). It is its own npm project, and
+paths in this section are relative to it.
+
+**This is Next.js code that does not run on Next.js.** The site is written
+against the Next.js 16 App Router API, but it is built and served by
+[vinext](https://github.com/cloudflare/vinext), Cloudflare's reimplementation
+of that API on Vite, as one Cloudflare Worker. Every `next/*` import resolves to
+a vinext shim. npm still installs the `next` package, because next-intl and
+vinext's image shim list it as a peer, but nothing is built from it. Most of the
+Next.js docs still apply; where they and vinext disagree, vinext wins. Before
+relying on a Next.js feature, check `node_modules/vinext/README.md` (its API
+coverage tables and _Known gaps_) and the `migrate-to-vinext` skill's
+`references/compatibility.md`. Webpack and Turbopack configuration do nothing
+here; Vite plugins replace them.
+
+### Website tech stack
+
+- Next.js 16 App Router code, built and served by vinext as the Cloudflare
+  Worker `money2time-workers-web`
+- TypeScript, Tailwind CSS v4, `next-intl` for routing and translations
+- DM Sans / DM Mono fonts
+- ESLint 9 (`eslint.config.mjs`) and `node --test`; no Prettier. The code uses
+  double quotes, unlike the app
+
+### Website services and resources
+
+Everything the site depends on, by the name it has in that service. Cloudflare
+resources are in the Money2Time account (`accountId` in `cloudflare.config.ts`).
+The site has no database, KV namespace, Worker secret or environment variable
+in production.
+
+| Service                          | Name / ID                                                                                               | What it does for the site                                                                                                                        |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Cloudflare Worker                | `money2time-workers-web`                                                                                | Serves the marketing site, the legal pages and the Web Dashboard. Configured by `cloudflare.config.ts`                                           |
+| Cloudflare Workers Static Assets | part of `money2time-workers-web`                                                                        | Build output, the ~1,460 prerendered pages under `/_vinext/static-cache/`, the favicon and the dashboard's art in `public/dashboard-assets/`     |
+| Cloudflare custom domains        | `www.money2time.com`, `app.money2time.com` → `money2time-workers-web`                                   | `www` is the site, `app` the Web Dashboard. Cloudflare manages their DNS records                                                                 |
+| Cloudflare Worker route          | `money2time.com/*` → `money2time-workers-web`                                                           | The apex, which only `308`s to `www`. Needs the DNS record below                                                                                 |
+| Cloudflare DNS record            | `AAAA money2time.com 100::`, proxied                                                                    | Originless record the apex route runs on. Keep it: a route works only on a proxied record                                                        |
+| Cloudflare zone                  | `money2time.com` (Free plan)                                                                            | DNS, the domains above, Image Transformations (switched on, same-zone sources only), Email Routing                                               |
+| Cloudflare R2 bucket             | `money2time-assets`, custom domain `media.money2time.com`                                               | The marketing site's pictures and videos, under `web/`. The app's tutorial videos live under `tutorials/` ([Tutorial media](#tutorial-media-r2)) |
+| Cloudflare account API token     | `money2time-web-github-actions`                                                                         | What GitHub Actions deploys with. See [Website deployment](#website-deployment)                                                                  |
+| Cloudflare Worker                | `money2time-workers-web-dashboard`, on `workers-web-dashboard.money2time.com`                           | The Web Dashboard's relay, `apps/cloudflare/workers/web-dashboard` ([Web-dashboard Worker](#web-dashboard-worker))                               |
+| Cloudflare Email Routing         | `support@money2time.com` on zone `money2time.com`                                                       | The address the contact form and legal pages name                                                                                                |
+| GitHub                           | `NelsonGan/money2time`, workflow `Web` (`.github/workflows/web.yml`), secret `CLOUDFLARE_WEB_API_TOKEN` | Checks and deploys. `main` is production                                                                                                         |
+| PostHog and GA4                  | see [Website and Web Dashboard analytics](#website-and-web-dashboard-analytics)                         | Analytics, shared with the app                                                                                                                   |
+| Google Search Console            | `sc-domain:money2time.com`                                                                              | Indexing and search data, read by the `seo-loop` skill                                                                                           |
+
+### Website development
+
+```bash
+cd apps/web
+npm install
+npm run dev                          # http://localhost:3000, the server in workerd
+```
+
+Open [http://localhost:3000](http://localhost:3000) for the site and
+[http://app.localhost:3000](http://app.localhost:3000) for the Web Dashboard.
+The server runs in workerd, Cloudflare's runtime, in development as in
+production. In a git worktree, run `npm ci` there: a symlinked `node_modules`
+breaks the build.
+
+```bash
+npm run build && npm start           # production build, served locally as the real Worker
+npm run lint                         # eslint
+npm run typecheck                    # Worker binding types, then tsc
+npm test                             # node --test on src/**/*.test.ts
+node scripts/validate-messages.mjs   # every locale checked against en.json
+node scripts/upload-media.mjs        # publish media/ to the R2 bucket (see Website media)
+npm run deploy                       # build and deploy from a laptop (see Website deployment)
+```
+
+`npm run typecheck` generates the Worker binding types first; plain `tsc`
+fails in a fresh checkout. After a dev server, `npm run build` can fail with
+`next/font/google queries have exactly one entry`; `rm -rf .next` fixes it.
+`npm start` answers to the production hostnames too, so the host rules can be
+checked locally: `curl -H "Host: app.money2time.com" localhost:3000`.
+
+To run the Web Dashboard against a local relay, start the relay in
+`apps/cloudflare/workers/web-dashboard` (`npm run dev`, with
+`http://app.localhost:3000` in its `.dev.vars` `ALLOWED_ORIGINS`) and point
+`NEXT_PUBLIC_WEB_DASHBOARD_RELAY_URL` at it in `.env.development.local`. The
+`sync-web-dashboard` skill has the whole procedure, simulator included.
+
+### Website pages
+
+- `/` — Landing page: hero, price ticker, feature grid, store reviews, and download links
+- `/tutorials` — Searchable how-to guides, mirrored from the app (see [Generated website files](#generated-website-files))
+- `/tutorials/<slug>` — One guide, step by step, with an "Open in the app" deep link
+- `/cost-in-hours` — Published wages from every country the site covers, priced in work time
+- `/statements-import` — How to import a bank statement
+- `/contact` — Contact form that checks the message, then opens the visitor's mail app with it addressed to support
+- `/privacy`, `/terms`, `/data-deletion` — Legal pages for store compliance
+- `/download` — Redirects to the App Store or Play Store by user agent
+
+`app.money2time.com` is the Web Dashboard, served by the same Worker:
+`src/proxy.ts` rewrites every path on an `app.` host to `/[locale]/dashboard`,
+and `/dashboard` on the marketing host `308`s there. It is `noindex` and out of
+the sitemap.
+
+### Web Dashboard in the browser
+
+There is no account and nothing is stored online: the browser shows a QR code,
+the phone scans it, both confirm a six-digit code, and while both are open the
+phone sends its backup end-to-end encrypted through the stateless relay
+([Web-dashboard Worker](#web-dashboard-worker), the protocol reference). The
+browser keeps the encrypted copy and a non-extractable key in IndexedDB until
+unlinked; unlinking on either side reaches the other the next time both are
+open.
+
+`src/lib/cloud/relay.ts`, `crypto.ts`, `patch.ts` and `edits.ts` must match the
+app's `services/webDashboardLink.ts`, `webDashboardCrypto.ts`,
+`webDashboardPatch.ts` and `webDashboardEdits.ts` byte for byte.
+
+- **Transfers.** Later transfers carry only what changed: each request names
+  the copy the browser holds (`have`), the phone answers with a patch against it
+  (`meta.base`), and `src/lib/cloud/patch.ts` applies it with the same rules as
+  the app's `services/webDashboardPatch.ts`. The page shows the result, then
+  gzips and seals it itself (`sealForCache`) so its cache matches what the phone
+  thinks it holds. A patch that does not fit asks again with `repair` (once per
+  patch) and gets the whole export. A request the phone skips or cannot prepare
+  is answered with `unchanged`, which ends the "getting ready" state; with
+  `current` it also says this browser's edit token is still good.
+- **Edits.** Changes are made only through the phone, only while it is
+  connected, and only from a browser the phone allowed. The editors
+  (`src/components/dashboard/edit/`, built on `kit.tsx` after the app's own
+  editors) send a sealed `edit` with ops (`src/lib/cloud/edits.ts`) for
+  transactions, accounts, account groups, categories and recurring rules, and
+  module ops for goals, loans, budgets, items, albums, split bills,
+  reimbursements, wage months, currencies and reorders (`module:goal`,
+  `module:loan`, `module:budget`, `module:item`, `module:album`,
+  `module:split`, `module:reimbursement`, `module:wage`, `module:currency`,
+  `module:reorder`), carrying the single-use `editToken` from the data on
+  screen and each row's `updated_at` as it was when the editor opened. The
+  phone checks the whole batch, saves it or refuses it, answers `edited` with
+  its new data version, and sends the changed data; the dashboard waits for
+  that version before the next change, and a `conflict` offers to reload the
+  editor from the fresh row. Nothing is changed in the browser itself. A phone
+  whose app predates editing sends no token (read only), and one that has not
+  allowed this browser sends a null token (`off`).
+- **Split bills paid back in parts** (app migration 082): each payment is its
+  own paid split row pointing back with `part_of_split_id`, and the rest stays
+  owed on the share's first row, so a share is every row with the same
+  `part_of_split_id ?? id` (`splitShareKey` in
+  `src/components/dashboard/edit/split-ops.ts`). The web cannot record a part
+  payment, and shows each payment as its own paid row, but its split evenly and
+  Me edits count what a share already paid (`spreadOverShares`), as the app's
+  do, and Who owes you counts settled shares, not rows. Rows from a phone that
+  predates part payments carry no `part_of_split_id` and behave as before.
+- **Budgets are monthly only.** The app also keeps weekly and yearly budgets in
+  `budget_templates` and `monthly_budgets` (`period` "week" / "year", with
+  `month` holding `YYYY-MM-DD` / `YYYY`), and every reader here keeps just the
+  monthly rows (`src/lib/backup/budget-period.ts`), since a backup uploaded
+  straight to the site carries them all.
+- **Budgets in another currency.** A monthly budget may be in another currency
+  than the main one (`currency`, null for the main one, and the rate frozen
+  when it was made, `fx_rate`): `src/lib/backup/budget-currency.ts` values its
+  spending as the app's `budgetCurrency.ts` does, the budget page shows its
+  figures in that currency, and its editors pick it beside the total and name
+  it in every save. Each `want` says the page can show them
+  (`features: ["budget-currencies"]` in `relay.ts`, the app's `WANT_FEATURES`);
+  a phone sends budgets in other currencies only to a page that says so, and
+  says in each transfer's `meta.features` that it saves one; only then do the
+  editors offer the currency picker and name a currency (only when it
+  changed), since the store app refuses a field it does not know.
+- **Credit cards due days after the statement** (app migration 084,
+  `credit_due_days_after_statement`, `creditLimitDays.dueDaysAfter`): Accounts
+  shows "due N days later", and the account editor offers the Due date pills
+  (Day of month / Days after statement, 1 to 45) only when the phone's
+  `meta.features` names `credit-due-days-after`
+  (`phoneTakesCreditDueDaysAfter`), and, as in the app, will not save that rule
+  without a statement day to count from. The page does not ask for it in
+  `want`, since it changes nothing in what is sent. Such a card keeps
+  `credit_due_day` near its real due day, so pages and phones from before read
+  a close day; a fixed day saved from an older page switches the card back to
+  it.
+- **Recurring frequencies.** The Recurring editor offers Daily, Weekly,
+  Monthly, Quarterly, Semi-annually and Yearly, matching the app. Quarterly and
+  semi-annual choices send the phone `monthly` with an interval multiplied by
+  3 or 6; the stored interval stays within the edit protocol's 999 limit.
+  Existing monthly rules every 3 or 6 months read back with the new labels,
+  while other intervals keep their monthly label. Opening and saving a rule
+  without changes preserves its stored schedule. `src/lib/backup/recurrence.ts`
+  owns the conversion and its tests.
+- **Controls and Pro.** Editor labels come from the app's own translations
+  where the app has the same label. The controls are the web's own: dropdowns
+  with icons and search (`dropdown.tsx`), a selection toolbar in the
+  transaction list's header whose menus apply a pick at once (`editing.tsx`),
+  and drag and drop with keyboard moves for every reorder (`edit/sortable.tsx`).
+  Free-plan limits mirror the app's `PRO_LIMITS` in one module, and everything
+  that needs Pro (the 12M, YTD, Year and All periods, each free-plan limit, and
+  a `pro_required` refusal) opens the one paywall in `paywall.tsx`
+  (`usePaywall()`); Pro is bought in the app, and the phone says it has Pro
+  with each transfer.
+- **The app host's headers.** It gets its own strict headers in
+  `next.config.ts`: a CSP allowing only this site, pictures from the media
+  bucket, the relay, PostHog and Google's tag and GA4 endpoints; no framing; no
+  referrer. PostHog there loads no remote config, records no session and
+  captures no exceptions. GA4 and PostHog both get the dashboard's typed
+  events, and each transfer's `meta.analyticsId` (the phone's `m2t_<uuid>` app
+  user ID) identifies the browser as that user in both
+  (`identifyDashboardUser`, reset on unlink); see
+  [Website and Web Dashboard analytics](#website-and-web-dashboard-analytics).
+- The IndexedDB database is named `money2time-web-dashboard`
+  (`src/lib/cloud/cache.ts`). Renaming it would drop every browser's link.
+
+### Website localization
+
+The site ships 32 locales (`messages/*.json`), including regional English
+variants that differ only in currency and spelling. `src/proxy.ts` picks one
+from the visitor's `Accept-Language` header and IP country; the default locale
+(`en`) has no URL prefix, every other locale does. Regional catalogs such as
+`en-my.json` carry only the strings that differ from `en.json`;
+`src/i18n/request.ts` merges the rest in at runtime, so a missing key renders
+English rather than a raw message key.
+
+- **Copy lives in `messages/`, never in components.** A page whose strings
+  exist only in `en.json` ships thirty-one broken locales.
+  `node scripts/validate-messages.mjs` is the parity check.
+- **`localePrefix` is `"as-needed"`**, so `en` is unprefixed: `/cost-in-hours`
+  and `/en/cost-in-hours` are the same page, and only the unprefixed one may be
+  indexable.
+- **`sitemap.ts` carries hand-maintained `lastModified` dates.** They are real
+  dates, which is what makes the field worth having. Bump the date for the
+  route you changed, and only that route.
+
+### Generated website files
+
+These are written by a script, not by hand. Anything changed in them directly
+is overwritten on the next run. Pictures a script writes into `media/` reach
+the site only once `node scripts/upload-media.mjs` has published them.
+
+| File                                                                                                                                                                                                          | Regenerate with                                                                          |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `src/lib/tutorials.generated.ts`, `media/tutorials/*.webp`                                                                                                                                                    | `node scripts/sync-tutorials-web.mjs` **in `apps/mobile`**                               |
+| `src/lib/icons.generated.ts`                                                                                                                                                                                  | `node scripts/generate-icon-catalog.mjs`                                                 |
+| `src/lib/bigmac.generated.ts`                                                                                                                                                                                 | `node scripts/generate-bigmac-data.mjs`                                                  |
+| `src/lib/energy.generated.ts`                                                                                                                                                                                 | `node scripts/generate-energy-data.mjs`                                                  |
+| `src/lib/backup/{assets,category-icon-groups,emoji-catalog,logo-names,card-designs}.generated.ts`, `src/components/dashboard/edit/item-icons.generated.ts`, the dashboard's art in `public/dashboard-assets/` | `node scripts/sync-dashboard-assets.mjs` (reads `apps/mobile`, or the path passed to it) |
+
+Tutorial content is owned by the app (`features/tutorials/content/`), which
+pushes both the copy and the annotated screenshots across. Edit a tutorial
+there and re-run the sync. The chrome around it (page title, search box,
+category headings) is ordinary `messages/*.json` and is translated here as
+usual; only the guide copy itself is English on both platforms.
+
+The landing gallery in `media/screenshots/<language>/` uses the nine iPhone
+marketing scenes from [App Studio](#app-studio). The current set was exported
+on October 1, 2026 (studio revision `f47aabb`, in its archived repository),
+with local app data in all 23 languages; regional English pages share the
+English set. To refresh it, export **iPhone → Export All Locales** in App
+Studio, convert the PNGs to WebP at quality 90 while keeping their
+1284 × 2778 dimensions, and use the scene IDs as filenames. Keep the order and
+translation keys in `src/app/home-screenshots.ts` aligned with the scenes,
+publish them with `node scripts/upload-media.mjs` (which purges the old ones
+from Cloudflare's cache, resized copies included), and update the homepage
+date in `src/app/sitemap.ts`.
+
+### Website environment
+
+Production needs no environment variables and the Worker has no secrets.
+`.env.example` lists the optional ones.
+
+| Variable                              | Used for                                                                                                                                                                   |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN`   | Optional. Overrides the checked-in public PostHog project token (`src/lib/analytics-config.ts`); GA4's public measurement ID is likewise checked into the analytics module |
+| `NEXT_PUBLIC_WEB_DASHBOARD_RELAY_URL` | Optional. The Web Dashboard relay; defaults to `https://workers-web-dashboard.money2time.com`. Point it at a local relay for development                                   |
+
+Put local values in `.env.development.local`, not `.env.local`. Vite reads
+`.env.local` for production builds as well, so a local relay URL there would be
+built into a deploy made from your machine. `NEXT_PUBLIC_*` values are fixed at
+build time.
+
+### Website hosting
+
+`cloudflare.config.ts` is the Worker's whole configuration; there is no
+`wrangler.jsonc`. `vite.config.ts` sets up vinext and the Cloudflare Vite
+plugin, which runs the server in workerd during `npm run dev` too, so a local
+run and a deployed one fail in the same places.
+
+- **Prerendered pages.** `prerender: { routes: "*" }` renders every page
+  `generateStaticParams` names at build time: the marketing, legal and
+  tutorial pages in every prefixed locale, about 1,460 in all.
+  `staticAssetsAdapter()` ships them in the Worker version's Static Assets
+  under `/_vinext/static-cache/` and serves them read-only
+  (`x-vinext-cache: HIT`), so a deploy replaces every page at once and a
+  rollback restores the pages with the chunks they name.
+- **What renders per request.** The English pages (`/`, `/contact`, …): the
+  proxy reaches them by rewriting to `/en/…`, and vinext keeps a rewritten
+  request out of the prerender cache, so they render on each request in a few
+  milliseconds, with `no-store`. So does `/` in Malaysia and Singapore (the
+  same rewrite, to `en-my` and `en-sg`), the Web Dashboard on `app.`, the 404
+  page, `/download`, and the metadata routes (sitemap, robots, manifest, the OG
+  and Twitter cards), which vinext does not prerender.
+- **What each response tells caches.** Prerendered pages carry vinext's
+  `s-maxage=31536000, stale-while-revalidate`, which only a shared cache reads,
+  and none sits in front of the Worker: Cloudflare does not cache a Worker's
+  responses unless the Worker asks it to. Putting a cache rule or CDN in front
+  would freeze pages across deploys. Pages rendered per request send
+  `no-store`, and so do the OG and Twitter cards: vinext marks any response
+  that sets a cookie uncacheable, and the locale proxy sets one on a first
+  visit. Each card costs a second or two of CPU, which crawlers' occasional
+  fetches make negligible.
+- **Metadata is in the `<head>`.** `htmlLimitedBots: /.*/` in `next.config.ts`
+  makes every response resolve its metadata before streaming, as a prerendered
+  page does. Without it, a page rendered per request streams its title,
+  canonical and hreflang after `</head>`, where Google ignores a canonical.
+- **Every request reaches the Worker first** except `/_next/static/*` and
+  `/dashboard-assets/*` (`runWorkerFirst`), so the `next.config.ts` redirects
+  and headers apply to cached pages too. The hashed build output and the
+  dashboard's art come straight from Static Assets, with the caching in
+  `public/_headers`.
+- **Host rules.** `src/proxy.ts` `308`s every apex path to `www` with its query
+  string (a `next.config.ts` redirect would do, but vinext drops the query when
+  a redirect leaves the host, and campaign links carry UTM tags); its matcher
+  has a host-conditioned entry so files and `/download` on the apex are
+  covered too. It also sends every path on `app.` to the dashboard, picks a
+  locale from `cf-ipcountry` (Cloudflare's IP geolocation) and the browser's
+  languages, and `308`s `/dashboard` on `www` to the app host. In
+  `next.config.ts`, every host but `www` and `app` gets
+  `X-Robots-Tag: noindex`, and the `app.` host gets the dashboard's CSP.
+- **No `workers.dev` copy and no preview URLs.** Either would publish a second,
+  complete copy of the site under a name no canonical names.
+- **OG cards** are drawn per request by `next/og` in the Worker. Their fonts
+  are inlined into the bundle at build time (vinext rewrites
+  `fetch(new URL("…", import.meta.url)).then((res) => res.arrayBuffer())`), and
+  their pictures are fetched from the media bucket (`src/lib/og.tsx`).
+- **Logs.** `observability` is on: Workers & Pages → `money2time-workers-web`
+  → Observability.
+- **Pinned on purpose.** `@cloudflare/vite-plugin` 2.0 and `cf` 1.0 are betas,
+  the toolchain `vinext init` sets up, pinned exactly; upgrade them on purpose.
+  `eslint-plugin-react-hooks` is pinned at 7.0.1: 7.1 adds a `refs` check the
+  dashboard does not pass yet. `eslint.config.mjs` assembles the
+  `eslint-config-next` rules (core web vitals and TypeScript) from the same
+  plugins, since that package needs Next's own Babel parser.
+
+### Website media
+
+Every picture and video on the marketing site is served from the
+`money2time-assets` R2 bucket, at `https://media.money2time.com/web/<path>`.
+Two exceptions ship with the site from `public/` instead: the favicon, and the
+Web Dashboard's logos, item art, category icons and card designs in
+`public/dashboard-assets/` (about 3,600 files written by
+`scripts/sync-dashboard-assets.mjs`), which are kept in git so that updating
+them is a commit and a deploy. The dashboard's mascots and clay icons are the
+marketing site's, so they come from the bucket. `media/` is the source, laid
+out exactly as the bucket's `web/` prefix, and `src/lib/media.ts` builds the
+URLs:
+
+- `media("/videos/back-tap.mp4")` is the file as uploaded. Icons and mascots
+  are exported at about twice the size they are drawn, so they are used as
+  they are.
+- `jpegMedia(path)` is the file converted to JPEG at the edge. Open Graph
+  cards need it for the tutorial captures, which are WebP (the app ships them
+  that way to save app size), because satori cannot read WebP and Image
+  Transformations cannot write PNG. One conversion per tutorial cover. The
+  deployed Worker gets a 404 for its own `/cdn-cgi/image/` requests, so in
+  production `tutorialShotAsset` asks with `cf: { image }` on the plain URL
+  and uses `jpegMedia` only where `cf` is ignored (a local build).
+- `responsiveMedia(path, width)` and `resizedMedia(path, width)` resize at
+  Cloudflare's edge with Image Transformations, which is switched on for the
+  `money2time.com` zone, and send AVIF or WebP. They are for the large captures
+  drawn at a fraction of their size: the home carousel, the tutorial steps, the
+  book cover and the app icon. The free plan includes 5,000 distinct
+  transformations a month; the site can use at most about 2,300 (every capture
+  at three widths, in AVIF and WebP), and each new width or quality is another
+  set, so add them sparingly.
+
+`node scripts/upload-media.mjs` mirrors `media/` into the bucket: it uploads
+only what differs (an R2 ETag is the file's MD5), sets
+`Cache-Control: public, max-age=86400, s-maxage=31536000`, and purges anything
+it replaced from Cloudflare's cache. `--dry-run` says what it would do,
+`--check` exits 1 when the bucket is behind, and `--prune` deletes objects
+under `web/` that `media/` no longer has. It uses `CLOUDFLARE_API_TOKEN` or
+else your `cf` login (`npx cf auth login`).
+
+A deploy does not upload media, so publish new pictures before merging the
+change that shows them; `--check` tells you whether you have, and the `Web`
+workflow runs it. On the site itself, `/screenshots/…`,
+`/tutorials/<image>.webp` (and the older `/tutorials/<image>.png`, whose files
+stay in the bucket), `/icon.png` and the other media paths `308` to the same
+file in the bucket (`MOVED_MEDIA` in `next.config.ts`).
+
+The app's tutorial videos share the bucket under `tutorials/`, and
+[Tutorial media](#tutorial-media-r2) owns them. Leave that prefix alone.
+
+### Website deployment
+
+The `Web` workflow (`.github/workflows/web.yml`) checks, builds and deploys.
+It runs only when `apps/web/**` or the workflow changes, and checks out only
+the latest commit and only `apps/web`.
+
+| Event                              | What runs                                                                                                 |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| pull request touching `apps/web`   | lint, tests, locale parity, `upload-media.mjs --check`, `npm run build`, typecheck, then `npm run upload` |
+| push to `main` touching `apps/web` | the same checks and build, then `npm run deploy:prebuilt`                                                 |
+
+- `deploy:prebuilt` is `vinext-cloudflare deploy --skip-build`: it deploys the
+  build the workflow just made, with `cf deploy`, and applies the custom
+  domains and the apex route. They are read into the build, so a change to
+  either needs a fresh build. A custom domain cannot be attached to a hostname
+  that already has DNS records of its own; remove them first.
+- `upload` is `cf workers versions create --prebuilt`: it uploads a branch's
+  build as a Worker version without promoting it, which proves the branch
+  builds and binds without touching the live site. Those versions sit in the
+  Worker's history; deploy only a version built from `main`.
+- The media check fails a run whose `media/` has files the bucket does not, so
+  a page cannot ship before its pictures. Publish them with
+  `node scripts/upload-media.mjs` from your machine.
+
+The workflow authenticates with the repository secret
+`CLOUDFLARE_WEB_API_TOKEN`, the account API token
+`money2time-web-github-actions`: Workers Scripts edit and Account Settings read
+on the account, read-only R2, and Zone read, Workers Routes, DNS and SSL edit
+on `money2time.com` (the last two for the custom domains). It is a different
+token from the Workers' `CLOUDFLARE_API_TOKEN`. Rotate it in the dashboard
+under Manage Account → Account API Tokens, then
+`gh secret set CLOUDFLARE_WEB_API_TOKEN`. A pull request without the secret
+(one from a fork) still gets every check and the build, and skips the media
+check and the upload; a push to `main` without it fails.
+
+Every change lands through a pull request, and merging to `main` is the
+deploy. `npm run deploy` does the same from a laptop (with your `cf` login or
+`CLOUDFLARE_API_TOKEN`), for when GitHub Actions is unavailable.
+
+### SEO
+
+The `seo-loop` skill holds the procedure: `SKILL.md` plus one reference per
+stage in `references/`. Read them before any SEO task; this is orientation.
+
+```
+GSC → intent & ownership check → audit → pre-deploy gate → deploy
+    → production verification → GSC measurement → keep/iterate/revert
+```
+
+Two rules override enthusiasm:
+
+1. **No page is created before the ownership check**
+   (`references/intent-check.md`). Publishing a second page for an intent an
+   existing URL already ranks for is the cheapest way to lose traffic. The
+   verdict is `CREATE`, `IMPROVE EXISTING`, or `REJECT`, with the query and the
+   numbers behind it. Google Search Console is the source of truth; never
+   invent its numbers.
+2. **No page ships on what the source says it does.** The gate is what the
+   server actually returned.
+
+The gate, before any deploy (`references/pre-deploy-gate.md`), from `apps/web`:
+
+```bash
+npm run dev                                                                # shell one
+node ../../.claude/skills/seo-loop/scripts/seo-check.mjs http://localhost:3000 /route
+node scripts/validate-messages.mjs
+npm run lint && npm run build
+```
+
+Exit code 1 means the gate is closed, and a failed gate is not deployed. After
+the deploy is live, run the same checker against `https://www.money2time.com`
+and follow `references/post-deploy-verify.md`.
+
+**The two hosts.** `SITE_URL` is `https://money2time.com`, which does not serve
+the site: it `308`s to `https://www.money2time.com` (`src/proxy.ts`). Google
+has resolved this correctly: the apex is indexed and `www` is a recognised
+alternate. Performance data still shows both hosts as separate rows, so sum
+them before reading a total. This is not an emergency and not a reason to hold
+up page work.
+
+**Checked, and deliberately left alone.** Re-deciding these needs new
+evidence, not a re-reading: the `/` locale rewrite for MY and SG in
+`src/proxy.ts`; the apex/`www` split; the thin `/statements-import` page; and
+the `costInHours` description naming a country count that is wrong in all 32
+locales. The skill explains why each one stands.
+
+On a traffic drop, investigate site → page → query → indexing/canonical →
+recent code changes before writing a word, and check whether it is one locale
+or all of them. One locale is a translation or hreflang problem; all of them is
+not.
+
+### Where things live on the website
+
+| Concern                                                                | File                                                                            |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `SITE_URL`, brand names, locale helpers                                | `src/lib/seo.ts`                                                                |
+| canonical + hreflang for a page                                        | `pageAlternates()`, `localeAlternates()`                                        |
+| absolute/relative localised URLs                                       | `localizedUrl()`, `localizedPath()`                                             |
+| `og:locale`, `<html lang>`                                             | `ogLocale()`, `htmlLang()`                                                      |
+| Open Graph / Twitter blocks                                            | `pageOpenGraph()`, `pageTwitter()`                                              |
+| structured data                                                        | `breadcrumbLd()`, `jsonLd()`                                                    |
+| announced URLs and their real dates                                    | `src/app/sitemap.ts`                                                            |
+| crawl rules and declared host                                          | `src/app/robots.ts`                                                             |
+| every word on every page, per locale                                   | `messages/<locale>.json` (32 files)                                             |
+| routing locales, default, prefix strategy                              | `src/i18n/routing.ts`                                                           |
+| country wage data                                                      | `src/lib/wages.ts`                                                              |
+| locale redirect/rewrite middleware                                     | `src/proxy.ts`                                                                  |
+| typed GA4/PostHog event contract                                       | `src/lib/analytics.ts`                                                          |
+| backup parsing and app-equivalent maths                                | `src/lib/backup/`                                                               |
+| Web Dashboard link protocol, crypto, patches, edit ops, browser cache  | `src/lib/cloud/`                                                                |
+| dashboard UI (shell, charts, 18 pages in `nav.ts`, editors in `edit/`) | `src/components/dashboard/`                                                     |
+| logos, item art and category icons for the dashboard                   | `public/dashboard-assets/`, written by `node scripts/sync-dashboard-assets.mjs` |
+| every picture and video, and their URLs                                | `media/`, `src/lib/media.ts`, `node scripts/upload-media.mjs`                   |
+| the Worker: domains, bindings, runtime flags                           | `cloudflare.config.ts`                                                          |
+| old media URLs, noindex for other hosts, the dashboard's CSP           | `next.config.ts`                                                                |
+| analytics property setup and verification                              | [Website and Web Dashboard analytics](#website-and-web-dashboard-analytics)     |
+
+## App Studio
+
+`apps/app-studio` is a local Next.js tool that makes the localized App Store and
+Google Play marketing assets for Money2Time, and uploads them straight to App
+Store Connect and Google Play. It was the `money2time-screenshots-creator`
+repository. It is its own npm project, and paths in this section are relative
+to it. It is never deployed: it runs on the development Mac, which holds the
+store CLIs' credentials.
+
+Scenes are composed as React components and rasterized in the browser, so every
+asset is regenerated from source rather than hand-edited in a design tool.
+
+### Assets App Studio produces
+
+| Device           | Dimensions      | Locales             |
+| ---------------- | --------------- | ------------------- |
+| iPhone           | 1284 × 2778     | all                 |
+| iPad             | 2732 × 2048     | all                 |
+| iPhone Duo       | 2853 × 2007     | all, App Store only |
+| App Store Header | 3840 × 1646     | all                 |
+| App Store Search | 1920 × 1280 MP4 | all                 |
+| Feature Graphic  | 1024 × 500      | all                 |
+| Landing Card     | 1200 × 1200     | all                 |
+| App Icon         | 512 × 512       | Play only           |
+| Descriptions     | —               | all                 |
+
+The App Icon is the one asset it does not draw: it is
+`public/assets/icons/play_store_512.png`, copied from `apps/mobile`, and the
+view exists to upload it. See [Play keeps the icon per listing](#play-keeps-the-icon-per-listing).
+
+Localized copy lives in `src/scenes/locales/` (23 locales); store listing text,
+including each release's What's New, lives in `src/data/appDescriptions.ts`
+(the `update-whats-new` skill writes it). `public/logos/` (with its
+`manifest.json`) is also the source of the app's bundled account logos:
+`apps/mobile/scripts/generate-account-logos.mjs` reads it.
+
+### App Studio screenshots
+
+The screens in `public/assets/screenshots-iphone/` and
+`public/assets/screenshots-duo/` are real captures, one folder per locale, each
+taken on a simulator after seeding the app's matching preview profile (the
+mock-data branch's `services/previewData`, `generatePreviewData(profile)`,
+which also sets the app language).
+
+The iPhone Duo set shows the app on the open iPhone Duo's inner display, which
+is landscape: tabs in a side rail, Home as month grid and ledger side by side.
+Each of the eight scenes puts one screen in an unfolded Duo under the matching
+iPhone headline, on one line, so no new copy needs translating. It exports at
+2853 × 2007, Apple's `APP_IPHONE_DUO` landscape size, and uploads as
+`IPHONE_DUO`. Play has no Duo gallery, so **Upload to Store** offers the App
+Store only. To capture it, lease an iPhone Duo (`simlock:ios:iPhone Duo`),
+unfold it (`agent-device help foldable`), go Home, rotate to landscape, then
+launch the app: rotating with the app in front leaves its window portrait. An
+upright landscape capture is 2853 × 2007.
+
+### Running App Studio
+
+```bash
+cd apps/app-studio
+npm install
+npm run dev      # http://localhost:3000
+npm test         # upload and export regression checks (needs ffmpeg)
+npx tsc --noEmit
+npm run build    # the production build
+```
+
+Pick a device and locale, preview the scenes, then export a single asset, the
+whole set, or every locale at once. Generated deliverables can be kept in the
+ignored `exports/` folder. Install **ffmpeg and ffprobe** (`brew install
+ffmpeg`) to encode and validate the Search video; downloads and Store uploads
+use the same encoder.
+
+The `App Studio` workflow (`.github/workflows/app-studio.yml`) runs the tests,
+the typecheck and the build on every pull request and push to `main` that
+touches `apps/app-studio`. It uploads nothing.
+
+### App Store header and search creatives
+
+Apple treats the header and search creatives as optional creative assets,
+separate from the screenshot gallery. The header introduces the brand; search
+should quickly communicate the app's purpose and firsthand experience;
+screenshots show the app in use. Keep messaging brief and key artwork centered
+([Apple asset best practices](https://developer.apple.com/app-store/asset-best-practices/)).
+
+| Asset               | Export size | Format                              | Purpose                                                |
+| ------------------- | ----------- | ----------------------------------- | ------------------------------------------------------ |
+| Product page header | 3840 × 1646 | RGB JPEG                            | App name on the left, fresh waving mascot on the right |
+| Search results      | 1920 × 1280 | Silent H.264 MP4, 30 fps, 8 seconds | Apple Pay tap → confirmation → automatic expense       |
+| iPhone gallery      | 1284 × 2778 | PNG                                 | Explain eight actual app experiences                   |
+
+Apple accepts JPEG for both dedicated creative placements and prohibits alpha
+channels. Header JPEG exports use a quality of 0.98 and an opaque cream
+background. Search video uses a 3:2 composition within Apple's 5–30-second
+video range. Apple also accepts a 5244 × 2950 universal PNG; the dedicated
+formats are preferable here because the header and search image need different
+information hierarchies
+([Apple creative asset specifications](https://developer.apple.com/help/app-store-connect/reference/app-information/creative-assets-specifications)).
+
+**Safe areas**, measured from the green art-safe rectangles in Apple's static
+Photoshop templates ([Header](https://developer.apple.com/go/?id=photoshop-product-page-header-template),
+[Search Results](https://developer.apple.com/go/?id=photoshop-search-results-template))
+and inset slightly to avoid their borders, in full-canvas coordinates from the
+top-left corner:
+
+| Placement | Left | Top | Safe width | Safe height |
+| --------- | ---- | --- | ---------- | ----------- |
+| Header    | 1098 | 494 | 1644       | 660         |
+| Search    | 838  | 766 | 2164       | 1028        |
+
+Both compositions extend beyond the template's central rectangle so the artwork
+stays readable in the phone previews; confining Search to that rectangle made
+the text and phone too small in Apple's full-image card. Header offers a guide
+overlay and a safe-area crop view as a template stress check; Search offers a
+full-image view and a 353 × 235 **Search card** preview matching the artwork's
+displayed size in the App Store. Every preview mode exports the complete
+composition, and Header's guides stay outside the exported canvas.
+
+**The Studio App Store preview.** Header and Search open in an App Store phone
+preview based on App Store Connect screenshots: a 393 × 852 screen, a 13-pixel
+bezel, a Dynamic Island and the floating store tab bar. Search places the
+creative in a 353 × 235.33 card with 20-pixel side insets, below the app
+listing and above a placeholder result. Header places the full-width creative
+at the bottom of a 258-pixel header with an extended cream sky, back/share
+controls, app details, and the first two gallery scenes. The app icon is the
+real one; store labels and metadata are illustrative English. The phone shrinks
+below a 419-pixel content area. Its frame and store chrome are outside the
+creative element, so exports and uploads capture only the artwork. It is a
+local approximation, not Apple's renderer: App Store Connect's Preview remains
+the final placement check for other devices and orientations.
+
+**Header.** The 1800-pixel-wide wordmark starts at `(640, 704)` on the left; a
+freshly generated version of the mascot sits in a 760-pixel square at
+`(2500, 476)` on the right, with a subtle shadow, over a simple city (lower
+left) and farmland (lower right) around an open cream center
+(`public/assets/app-store/header-city-farmland-open-center.png`). At the
+393-pixel phone preview the wordmark is about 184 pixels wide and the mascot 78. No other copy or props; the same Header serves every language. The mascot
+(`public/assets/app-store/header-mascot-wave.png`, transparent, kept as its own
+layer) keeps the chick's golden-yellow rounded body, two-lobed tuft, large
+white eyes, orange beak and short feet, with soft matte shading and one gently
+raised wing. It was generated with `public/assets/mascots/waving.png` and
+`receipt.png` as character references and `transparent_background: true`, from
+this brief:
+
+> Use case: ads-marketing. Asset type: isolated transparent mascot
+> illustration for the Money2Time App Store Header. Input images: Image 1 is
+> the original waving Money2Time mascot, a character identity reference; Image
+> 2 is the original receipt pose, another identity reference. Primary request:
+> create a fresh, cleaner version of this same recognizable golden-yellow chick
+> mascot in a gentle welcoming wave. Preserve the rounded squat body, two-lobed
+> upright head tuft, large white oval eyes with black pupils and small
+> catchlights, little orange beak, short wings, and orange feet. Change the
+> pose and rendering: relaxed three-quarter stance, one small wing raised in an
+> understated wave, friendly calm smile, looking slightly toward the left where
+> the existing wordmark will be placed. Remove the belt, money pouch, coins,
+> receipt, exclamation marks, and all props. Style: refined soft 3D editorial
+> illustration with broad matte golden-yellow surfaces, restrained depth,
+> smooth simple geometry, soft daylight, minimal shading, no plastic glare and
+> no fuzzy texture. Composition: full character visible, centered in a square
+> canvas, compact silhouette filling roughly 78 percent of the canvas, clean
+> alpha edges and genuinely transparent background. Keep the mascot
+> recognizable rather than inventing a new species. No clock, wallet, phone,
+> typography, logo, badge, speech bubble, scene, ground plane, extra
+> characters, clothing, decorative symbols, or watermark. It must remain
+> clearly readable at approximately 70 pixels tall beside the brand name.
+
+**Search.** The same landscape, with the localized "Track expenses
+effortlessly" headline on the left (320-pixel inset, a 1700-pixel fitted block,
+centered at y = 1220) and, on the right, a wide card terminal above an upright
+Apple Pay phone. Both stay straight. The phone is at 1.52 scale and runs
+through the artwork's bottom edge; the terminal starts at `(2380, 222)` and the
+phone at `(2460, 942)`, 60 pixels apart at rest, and the phone rises 390 pixels
+to overlap the terminal by 330. Official Visa and Apple Pay artwork sits as
+small acceptance decals on the casing, stored unmodified in
+`public/assets/app-store/payment/` (Apple's
+[marketing resources](https://developer.apple.com/apple-pay/marketing/) and
+Visa's [digital brand mark](https://usa.visa.com/content/dam/VCOM/Brand/visa-brand-mark-digital-2025.zip?elqTrack=true)).
+Metallic edges, raised keys and soft shadows give the devices depth. The
+Search artwork contains no app name.
+
+The eight-second sequence:
+
+1. 0.45–1.725 s: the phone rises. From 0.45–0.75 s the Dynamic Island expands
+   downward into a black Face ID panel; a green stroke scans its rounded
+   corners from 0.792–1.542 s, resolves into the green recognition face, and
+   the panel contracts back from 1.917–2.217 s (an original vector animation
+   after Apple's own Dynamic Island / Face ID demonstration).
+2. 2.175 s: payment confirms with a blue checkmark and localized Done.
+3. 3 s: Wallet turns into the locale's own `01-home.png` ledger capture.
+4. 3.417 s: a new first-day section inserts with the new expense, pushing older
+   rows down with the app's layout spring (damping 18, stiffness 260, from
+   `apps/mobile/features/transactions/components/TransactionItem.tsx`, played
+   at 1.2× so it settles in about 542 ms, with a 133 ms entry fade), and the
+   row flashes the rosewood theme colour (`#B1525F`, opacity up to 0.28, then
+   a 750 ms fade).
+5. To 8 s: the phone stays raised and the terminal and ledger stay visible
+   through the last frame. No end fade, no pose reset.
+
+The payment amount matches each locale's first captured ledger row (English
+`RM141.35`); the hardware and the card ending `4242` are shared.
+`src/data/searchAnimation.json` holds the amounts, screenshot crops, card
+digits, dimensions, frame rate, motion, phase timings, the insertion spring and
+the flash; when the ledger captures are refreshed, check the first-row amounts
+and crop geometry against the new images. `paymentAnimation.mjs` derives the
+preview keyframes and encoder motion from it, and `faceIdAnimation.mjs` draws
+the same vector frames for the browser and the encoder. The browser captures a
+static composition and seven transparent DOM layers (moving phone layers in
+the raised pose, older ledger rows before they move), and the encoder animates
+and clips them. Preview, download and upload share the composition, layer
+order, crop and timeline. The preview plays once and holds its last frame
+(pause or Replay to inspect it); reduced motion and the preview toggle pause
+it, and exports always carry the full sequence.
+
+**Screenshot gallery.** Eight scenes, each a complete message over a real
+screen, the first three sharing a continuous warm background:
+
+1. Ledger: money and working time beside transactions.
+2. Accounts: where money is held.
+3. Budgets: how much to spend.
+4. Expense breakdown: spending categories.
+5. Add an expense: enter a transaction quickly.
+6. Recurring payments: regular commitments.
+7. Hourly value: the rate behind time conversions.
+8. Split bill: shared spending.
+
+Every slot shows the app; privacy belongs in the listing copy, not in the
+opening sequence. Long localized headlines fit to their authored lines after
+fonts load.
+
+**Localization and export.** The Header is one composition for all 23 locales.
+Search has one shared payment scene with its headline, reader instruction and
+confirmation localized in all 23, over the locale's own ledger capture; longer
+languages get fitted type on two lines. Choose **App Store Header** or **App
+Store Search** and a language; **Export JPEG** saves Header, **Export MP4** saves
+Search, and **Export All Locales** saves a ZIP with a folder per language.
+Navigation, language and preview framing controls lock during an export.
+
+**Upload.** **Upload to Store** in either creative view saves to the **Header**
+or **Search Results** field in App Store Connect, for the current language or
+all 22 App Store languages (29 regional variants: English, Chinese, Spanish,
+French and Portuguese also reach their regional ones, sharing one library
+asset). Filipino exports but has no App Store localization. Header JPEGs are
+converted to opaque RGB PNGs, because the Asset Library rejected JPEG uploads.
+Before any Store write, ffprobe checks the Search MP4 is exactly 1920 × 1280,
+H.264, yuv420p, 30 fps, 8 seconds, one video stream and no audio. Video uploads
+reserve `appAssetLibraryVideos`, transfer Apple's upload ranges and commit
+`uploaded: true`; Studio then waits for a playable `videoAsset` URL and
+`specId` (a ready state and poster are not enough) and assigns the **video**
+relationship to `APP_STORE_SEARCH_RESULTS_ASSET`. Processing beyond a
+request's 90 seconds returns a reference that Studio continues for up to 15
+minutes with the same asset and version, and identical retries reuse the asset
+for an hour since the last attempt. References live in memory: after a server
+restart or expiry, check the Asset Library before uploading again. Replacing
+one field keeps the other creative and the gallery. If a delete or assignment
+response is lost, Studio reads the field back before reporting success or
+restoring the previous asset, and says so when it cannot tell. Partial language
+failures count as failures. Uploads save assets and placements without
+submitting for review: check App Store Connect's Preview on iPhone and iPad,
+both orientations, then submit the version
+([Apple asset management](https://developer.apple.com/help/app-store-connect/manage-app-information/manage-your-app-store-assets)).
+This uses the `appAssetLibraryImages`, `appAssetLibraryVideos` and
+`appAssetLibraryPlacements` resources, through
+`src/data/storeCreativeUpload.mjs`.
+
+**Release checks.** Header: JPEG dimensions and RGB colour mode. Search: MP4
+resolution, H.264/yuv420p, 30 fps, eight seconds, no audio; all 23 locales for
+clipped text (CJK, Thai, Devanagari and longer European phrases above all),
+payment and expense timing, and consistent shared artwork. The gallery at
+thumbnail size as well as full size. After release, use product page
+optimization to test one header change at a time over a consistent audience and
+period: these designs are reasoned, not measured.
+
+### Store uploads
+
+Screenshots, descriptions and icons upload through the store CLIs. Header and
+Search Results use the Asset Library API with a short-lived token issued by the
+configured `asc` CLI. Credentials and tokens stay on the server, so **no
+credential lives in the repository**: no `.p8`, no service-account JSON, no
+issuer id (`.gitignore` refuses `scripts/*.p8`, `scripts/*.json` and
+`.env.local`).
+
+|         | Holds                                        | Set up with        | Check with     |
+| ------- | -------------------------------------------- | ------------------ | -------------- |
+| `asc`   | App Store Connect key, in the macOS keychain | `asc auth login`   | `asc doctor`   |
+| `gplay` | Play service account                         | `gplay auth login` | `gplay doctor` |
+
+Copy the template and fill in which app to write to:
+
+```bash
+cp .env.local.example .env.local
+```
+
+| Variable                                     | What                                                           |
+| -------------------------------------------- | -------------------------------------------------------------- |
+| `ASC_APP_ID`                                 | numeric App ID from App Store Connect, not the bundle id       |
+| `ANDROID_PACKAGE_NAME`                       | e.g. `com.nelsongan.money2time`                                |
+| `GPLAY_PROFILE`                              | only if this app's Play account is not gplay's default profile |
+| `ANTHROPIC_API_KEY`                          | optional, for `/api/translate` (description translation)       |
+| `BRANDFETCH_API_KEY`, `BRANDFETCH_CLIENT_ID` | optional, for `scripts/fetch-brand-logos.mjs`                  |
+
+One machine often holds more than one Play account. Register this app's and
+name it, leaving the default alone:
+
+```bash
+gplay auth login --service-account ./scripts/<key>.json --profile money2time --set-default=false
+```
+
+`GET /api/status` reports whether each CLI is authenticated and names the
+profile it would use; the sidebar's status dot reads it.
+
+**App Store Connect** needs an API key with the **App Manager** role (Admin
+also works). Developer can upload builds but cannot edit App Store metadata,
+which is what screenshots and descriptions are. **Google Play** needs the
+Google Play Android Developer API enabled in the service account's Cloud
+project, and app access in Play Console with **View app information** and
+**Manage store presence**, plus a release permission for What's New, which on
+Play is a note on a release rather than on the listing.
+
+### Running an upload
+
+Use **Upload to Store** in the sidebar. Screenshot uploads can also use the
+CLI; both share `src/data/storeUpload.mjs`, so the button and the command line
+cannot drift. The screenshot commands do not handle the Header and Search
+Results placements.
+
+```bash
+npm run upload:ios -- --dir ./money2time-screenshots-all --device phone --dry-run
+npm run upload:ios -- --dir ./money2time-duo-all --device duo --dry-run
+npm run upload:android -- --dir ./money2time-screenshots-all --device phone --dry-run
+npm run upload:android -- --device icon --dry-run      # no --dir: nothing per locale
+```
+
+Drop `--dry-run` to write for real. `--dir` holds one folder per locale, which
+is what **Export All Locales** unzips to. One tablet set goes to two Play
+galleries: Play keeps 7-inch and 10-inch screenshots separately and wants
+both, so `--device tablet` writes the same images to `sevenInchScreenshots` and
+`tenInchScreenshots`.
+
+A dry run is read-only on both sides. On iOS it reports what would upload
+without creating anything, including the localizations a real run would add.
+On Play, where `gplay images` has no dry run of its own, it uploads into an
+edit and then discards it; an uncommitted edit never reaches the store.
+
+An iOS upload needs a version in an editable state (`PREPARE_FOR_SUBMISSION`,
+or one of the rejected states); a shipped version is `READY_FOR_SALE` and
+cannot be edited, so create the next version in App Store Connect first. A Play
+upload puts every locale into one edit and commits once, so a failure part-way
+through discards the whole edit rather than leaving half a listing behind.
+
+**What's New** goes to both, in different places. On the App Store it is a
+field on the version. On Play it is a release note on a release inside a
+track, so the Descriptions view asks which track first and lists only the
+tracks that have a release. Play caps it at 500 characters, and
+`uploadAndroidReleaseNotes` truncates rather than failing.
+
+### Play keeps the icon per listing
+
+Play's store icon is a listing asset, like a screenshot. Nothing derives it
+from the app: the launcher icon inside the AAB never becomes the store icon,
+and Play holds a separate copy of it against every locale. So changing it in
+Play Console changes the default listing and nothing else. This app had drifted
+exactly that way: `en-US` on the current chick, all thirty other listings still
+serving the wallet icon from two designs ago.
+
+```
+$ gplay images list --package com.nelsongan.money2time --edit $EDIT --locale en-US --type icon
+  sha1 7b48b3f9…      # the chick
+$ ... --locale de-DE   # and ja-JP, zh-TW, fr-FR, en-GB, en-AU, en-CA, …
+  sha1 89723cec…      # the old wallet
+```
+
+So **App Icon → Upload to Store** writes the file to every listing Play holds,
+read from Play rather than from `ANDROID_LOCALE_MAP`: a locale opened once in
+Play Console is a listing the map has never written to, and those are
+precisely the ones stuck on old art. Here that is 31 listings against the map's
+29 (`en-AU` and `en-CA` are Play's, not ours). There is no App Store half to
+this: Apple reads an app's icon out of the binary, so the view is Android only.
+
+### App Studio scripts and stack
+
+| Script                          | Purpose                                      |
+| ------------------------------- | -------------------------------------------- |
+| `scripts/upload-ios.mjs`        | Upload screenshots via the `asc` CLI         |
+| `scripts/upload-android.mjs`    | Upload screenshots, or the icon, via `gplay` |
+| `scripts/fetch-brand-logos.mjs` | Fetch bank/brand logos                       |
+| `scripts/normalize-logos.mjs`   | Normalize fetched logos                      |
+| `scripts/triage-logos.mjs`      | Review and triage logo candidates            |
+
+Next.js 15 · React 19 · TypeScript · Tailwind v4 · `html-to-image` for
+rasterization · the `asc` and `gplay` CLIs for the stores.
+
 ## CI and deploy
 
 App CI/CD is [.github/workflows/deploy.yml](.github/workflows/deploy.yml), gated `changes → test → plan → deploy`:
 
-- **Changes** — runs first on every event and classifies the diff (`git diff` of the PR merge commit's base parent, or the push's `before..after`) into two flags every other job keys off: `app` (anything that can reach the mobile binary, i.e. everything except `apps/cloudflare/**`, `.github/**`, `.claude/**`, `.agents/**`, `.codex/**`, `.vscode/**`, any `*.md`, `LICENSE`) and `checks` (anything outside `apps/cloudflare/**`). **Fail open:** an unresolvable diff or an unrecognized path sets every flag true, so a new directory builds the app rather than silently skipping the release.
-- **Test** — `npm ci`, `npm run check` (typecheck + lint + format), `npm test`. Runs in `apps/mobile`. Skipped when `checks` is false, because eslint and tsconfig only see the app, prettier sees the app plus the root `*.md` and `.github/`, and jest only reads `__tests__/` — there is literally nothing for it to check on a Worker-only change. A failure blocks everything downstream.
-- **Plan** — manual dispatch, or push-to-main **when `app` is set**. A Worker-only or docs-only merge to `main` therefore never cuts a store build. Resolves the build matrix (push = both iOS+Android production; dispatch = the chosen single platform/profile).
+- **Changes** — runs first on every event and classifies the diff (`git diff` of the PR merge commit's base parent, or the push's `before..after`) into two flags every other job keys off: `app` (anything that can reach the mobile binary, i.e. everything except `apps/cloudflare/**`, `apps/web/**`, `apps/app-studio/**`, `.github/**`, `.claude/**`, `.agents/**`, `.codex/**`, `.vscode/**`, any `*.md`, `LICENSE`) and `checks` (anything outside `apps/cloudflare/**`, `apps/web/**` and `apps/app-studio/**`). **Fail open:** an unresolvable diff or an unrecognized path sets every flag true, so a new directory builds the app rather than silently skipping the release.
+- **Test** — `npm ci`, `npm run check` (typecheck + lint + format), `npm test`. Runs in `apps/mobile`. Skipped when `checks` is false, because eslint and tsconfig only see the app, prettier sees the app plus the root `*.md` and `.github/`, and jest only reads `__tests__/` — there is literally nothing for it to check on a change confined to the Workers, the website or App Studio. A failure blocks everything downstream.
+- **Plan** — manual dispatch, or push-to-main **when `app` is set**. A merge to `main` that only touches the Workers, the website, App Studio or docs therefore never cuts a store build. Resolves the build matrix (push = both iOS+Android production; dispatch = the chosen single platform/profile).
 - **Deploy** — from `apps/mobile`, `eas build --local` on the matched runner (`xcode-27` for iOS, ubuntu-latest for Android), then `eas submit`. `fail-fast: false` so a single-platform failure doesn't kill the other build. **iOS is built with Xcode 27.1, pinned.** iOS decides what an app supports from the SDK it was linked against, so a binary built with an older Xcode runs in compatibility mode on newer hardware: on the open iPhone Duo, builds 484–486 (linked against the iOS 26 SDK by Xcode 26.3 on `macos-15`) showed as a phone-sized window in the middle of the screen, without the Duo layout. GitHub's `macos-*` images stop at Xcode 26; Xcode 27 is only on the `xcode-27` image. Keep the pinned Xcode at least as new as the newest hardware the app adapts to (27.1 for the Duo), never `latest-stable`. **The Android job grows the runner's swap to 16 GB before building.** R8 runs in the 4 GB Gradle daemon (`plugins/withGradleMemory.js`) while CMake compiles the app's native code for four ABIs, and when those overlap the 16 GB runner runs out of RAM: GitHub kills the VM mid-Gradle with "The runner has received a shutdown signal", about a minute after `:app:minifyReleaseWithR8` starts. From 2026-10-26 to 2026-11-02, most Android release jobs died this way. The job prints peak RAM and swap use after the build; if a job still dies at that step, read those numbers before you blame the code. **It also frees disk space first.** The Gradle cache (~5 GB), the NDK (downloaded on every build), `node_modules` and EAS's working copy fill the runner's disk, and on 2026-11-03 and 2026-11-04 two Android release jobs died of it: one with "No space left on device" while restoring the Gradle cache (only shown in the job's annotations; its log was empty), one with a truncated NDK download ("Error reading Zip content", then `InstallFailedException`). The first step deletes preinstalled toolchains the build never uses (.NET, Swift, Haskell, Boost, PowerShell, Julia, Azure CLI, CodeQL, Docker images); the job prints free space then and again after the build.
 
 Cloudflare has its own workflow, [.github/workflows/cloudflare.yml](.github/workflows/cloudflare.yml) (typecheck, available Worker tests and a `wrangler deploy --dry-run` bundle on PRs; on push to `main`, for each Worker whose own files or schema changed since the last successful production deploy, the D1 schema apply where it has a database, then `wrangler deploy`), path-filtered to non-markdown `apps/cloudflare/**` so an app-only change never redeploys the Worker and vice versa. Both directions of that split are deliberate: **gate jobs with `if:`, not workflow-level `paths:`** — a job skipped by `if:` reports success to branch protection, while a whole workflow skipped by a path filter leaves its required checks pending forever.
@@ -4367,9 +5542,11 @@ Cloudflare has its own workflow, [.github/workflows/cloudflare.yml](.github/work
 
 Concurrency group `${{ github.workflow }}-${{ github.ref }}` with `cancel-in-progress: true` — a new push to `main` cancels the in-flight run; new commits to a PR cancel previous test runs. Requires repo secret `EXPO_TOKEN`. Push to `main` auto-submits to TestFlight (iOS) + Play **production** (`production` track, Android); promote to App Store manually.
 
+The website has its own workflow, [.github/workflows/web.yml](.github/workflows/web.yml) (lint, tests, locale parity, the media check, build and typecheck; a pull request uploads the build as a Worker version, a push to `main` deploys it; see [Website deployment](#website-deployment)), and so does App Studio, [.github/workflows/app-studio.yml](.github/workflows/app-studio.yml) (tests, typecheck and build, deploying nothing). Both are path-filtered to their app's directory and check out only that directory.
+
 ### At a glance
 
-Two workflows, split so an app-only change never redeploys the Workers and vice versa.
+Four workflows, split so a change to one app never rebuilds or redeploys another.
 
 [.github/workflows/deploy.yml](.github/workflows/deploy.yml) — the app:
 
@@ -4381,6 +5558,10 @@ Two workflows, split so an app-only change never redeploys the Workers and vice 
 | `deploy`  | after `plan`                                  | `eas build --local` on xcode-27, Xcode 27.1 (iOS) / ubuntu-latest (Android), then `eas submit` |
 
 [.github/workflows/cloudflare.yml](.github/workflows/cloudflare.yml) — the Workers: typecheck, available tests and dry-run bundle on PRs; on push to `main`, only the Workers changed since the last successful deploy get their D1 schema applied (where they have one) and `wrangler deploy`, so a run cancelled while queued or failed is caught up by the next. A deploy that has started is never cancelled by a newer push.
+
+[.github/workflows/web.yml](.github/workflows/web.yml) — the website, on changes under `apps/web/`: checks and build, then a Worker version upload on PRs and the production deploy on `main` (queued, never cancelled). Needs the secret `CLOUDFLARE_WEB_API_TOKEN`.
+
+[.github/workflows/app-studio.yml](.github/workflows/app-studio.yml) — App Studio, on changes under `apps/app-studio/`: tests (with ffmpeg), typecheck and build. No deploy and no secrets.
 
 A failing test blocks everything downstream. Concurrency cancels in-flight runs when a newer commit lands on the same ref. Requires repo secret `EXPO_TOKEN`. Pushes to `main` auto-submit to TestFlight (iOS) and the Play **production** track (Android); the App Store release is promoted by hand.
 
@@ -4394,6 +5575,8 @@ npm test
 ```
 
 Jest with `ts-jest` over `__tests__/` (184 suites, node env). Modules with native deps are mocked via `__tests__/__mocks__/` (i18n, haptics, DB client, drizzle, expo-localization, image assets). Coverage skews to pure utilities, feature math, repository mappers, and navigation helpers — no React Native render tests.
+
+The website (`npm test` in `apps/web`, `node --test` over `src/**/*.test.ts`) and App Studio (`npm test` in `apps/app-studio`, `node --test` over `tests/`) have their own tests; see [Website development](#website-development) and [Running App Studio](#running-app-studio).
 
 ### Receipt-scanner regression images
 
@@ -4421,7 +5604,7 @@ Amounts, item quantities/currencies and account detection were checked; merchant
 wording was allowed to vary. Once the printed date is more than 30 days old,
 responses should use today's date, following the Worker's existing date clamp.
 Recorded responses and limits are in
-[receipt regression evidence](.github/pr-assets/notification-text-scanning/receipt-regression-results.json).
+[receipt regression evidence](https://github.com/NelsonGan/money2time/blob/95af63b58fa45cd1d99ff33ab4c84b774d09ce57/.github/pr-assets/notification-text-scanning/receipt-regression-results.json).
 
 ### Performance measurement
 
@@ -4457,6 +5640,10 @@ demotes the emulator's threads to background priority while its window is
 hidden, which slows it down several times over mid-run.
 
 ## Conventions
+
+These are the app's. The website follows its own ESLint config and double
+quotes, with no Prettier (see [Website tech stack](#website-tech-stack)), and
+App Studio its Next.js defaults; match the file you are in.
 
 - ESLint via `expo lint`; import sorting enforced (`simple-import-sort`).
 - Prettier for formatting; run `npm run lint:fix && npm run format` before opening a PR.
