@@ -1,0 +1,2165 @@
+{
+  "metadata": {
+    "home": {
+      "title": "Ứng dụng quản lý chi tiêu theo giờ - Money2Time",
+      "description": "Ứng dụng quản lý chi tiêu quy đổi mỗi khoản mua thành số giờ cuộc đời bạn. Theo dõi chi tiêu, tài khoản và hóa đơn định kỳ, không cần liên kết ngân hàng.",
+      "openGraphDescription": "Mỗi khoản chi, quy ra giờ cuộc đời bạn. Ứng dụng chi tiêu riêng tư, không bao giờ hỏi tài khoản ngân hàng."
+    },
+    "contact": {
+      "title": "Liên hệ - Money2Time",
+      "description": "Câu hỏi, góp ý, ý tưởng tính năng hoặc yêu cầu về dữ liệu của bạn: nhắn thẳng cho người phát triển Money2Time."
+    },
+    "privacy": {
+      "title": "Chính sách quyền riêng tư - Money2Time",
+      "description": "Cách Money2Time xử lý dữ liệu: lưu trữ cục bộ, phân tích sản phẩm bằng ID ứng dụng ngẫu nhiên và không bán dữ liệu cá nhân hoặc tài chính."
+    },
+    "terms": {
+      "title": "Điều khoản sử dụng - Money2Time",
+      "description": "Các điều khoản bạn chấp nhận khi dùng ứng dụng quản lý chi tiêu Money2Time trên iOS và Android."
+    },
+    "statementsImport": {
+      "title": "Nhập sao kê ngân hàng bằng AI - Money2Time",
+      "description": "Hướng dẫn ngắn về nhập sao kê bằng AI trong Money2Time, để đưa lịch sử ngân hàng vào mà không phải gõ từng dòng."
+    },
+    "dataDeletion": {
+      "title": "Yêu cầu xóa dữ liệu - Money2Time",
+      "description": "Cách yêu cầu xóa dữ liệu Money2Time của bạn, những gì bị xóa, những gì được giữ lại và giữ trong bao lâu."
+    },
+    "keywords": [
+      "ứng dụng quản lý chi tiêu",
+      "app quản lý chi tiêu",
+      "ghi chép chi tiêu",
+      "quản lý tài chính cá nhân",
+      "chi tiêu hàng tháng",
+      "ứng dụng tiết kiệm tiền",
+      "ngân sách cá nhân",
+      "lương theo giờ",
+      "sổ thu chi",
+      "theo dõi chi tiêu"
+    ],
+    "costInHours": {
+      "title": "Lương trung vị theo nước, tính bằng giờ làm - Money2Time",
+      "description": "Lương trung vị và trung bình chính thức của mười nước, đo bằng một món hàng giống nhau ở mọi nơi: phải làm bao lâu mới mua được.",
+      "openGraphDescription": "Một giờ làm việc đi được bao xa? Đo bằng một món hàng giống hệt nhau ở mười nước."
+    },
+    "tutorials": {
+      "title": "Hướng dẫn Money2Time - Cách dùng ứng dụng",
+      "description": "Hướng dẫn từng bước cho mọi phần của Money2Time, kèm ảnh chụp màn hình thật. Ghi chi tiêu, chia hóa đơn, lập ngân sách và xem giá theo số giờ làm việc.",
+      "detailTitle": "{title} - Hướng dẫn Money2Time"
+    },
+    "dashboard": {
+      "title": "Bảng điều khiển web - Money2Time",
+      "description": "Quét bằng điện thoại để xem dữ liệu Money2Time trên màn hình lớn: chi tiêu, tài sản ròng, ngân sách và số giờ đằng sau mỗi lần mua. Mã hóa đầu cuối, không lưu gì trực tuyến."
+    }
+  },
+  "common": {
+    "language": {
+      "label": "Ngôn ngữ"
+    },
+    "footer": {
+      "contact": "Liên hệ",
+      "privacy": "Chính sách quyền riêng tư",
+      "dataDeletion": "Xóa dữ liệu",
+      "terms": "Điều khoản sử dụng",
+      "copyright": "© {year} Money2Time. Bảo lưu mọi quyền.",
+      "costInHours": "Giá tính bằng giờ",
+      "tutorials": "Hướng dẫn",
+      "dashboard": "Bảng điều khiển web"
+    }
+  },
+  "storeButtons": {
+    "appStorePrefix": "Tải về trên",
+    "appStore": "App Store",
+    "playStorePrefix": "Tải trên",
+    "playStore": "Google Play"
+  },
+  "screenshotGallery": {
+    "ariaLabel": "Ảnh chụp màn hình ứng dụng",
+    "alts": {
+      "home": "Ảnh chụp màn hình Money2Time hiển thị danh sách giao dịch hàng tháng với tổng thu nhập và chi tiêu cùng số giờ làm việc đằng sau mỗi lần mua",
+      "privacy": "Ảnh chụp màn hình Money2Time về quyền riêng tư: dữ liệu của bạn luôn ở trên thiết bị, không quảng cáo, hoạt động hoàn toàn ngoại tuyến",
+      "assets": "Ảnh chụp màn hình Money2Time hiển thị tài sản ròng và số dư tài khoản",
+      "addExpense": "Ảnh chụp màn hình Money2Time hiển thị thao tác nhập nhanh khoản chi với bàn phím trên màn hình và nhập bằng giọng nói",
+      "splitBill": "Ảnh chụp màn hình Money2Time hiển thị hóa đơn được chia đều cho nhiều người kèm phần của mỗi người",
+      "insights": "Ảnh chụp màn hình Money2Time hiển thị biểu đồ tròn phân tích chi tiêu theo danh mục",
+      "budgeting": "Ảnh chụp màn hình Money2Time hiển thị ngân sách hằng tháng theo danh mục với thanh tiến độ và số tiền còn lại của mỗi mục",
+      "recurrings": "Ảnh chụp màn hình Money2Time hiển thị các cam kết định kỳ và chu kỳ lặp",
+      "hourlyRates": "Ảnh chụp màn hình Money2Time hiển thị lịch sử giá trị theo giờ theo từng tháng"
+    }
+  },
+  "home": {
+    "nav": {
+      "howItWorks": "Cách hoạt động",
+      "logging": "Ghi chép",
+      "features": "Tính năng",
+      "privacy": "Riêng tư",
+      "download": "Tải ứng dụng",
+      "openMenu": "Mở menu",
+      "closeMenu": "Đóng menu"
+    },
+    "hero": {
+      "title": "Mỗi mức giá đều có hai con số.",
+      "subtitle": "Money2Time ghi chi tiêu như mọi ứng dụng khác, rồi hiện chính con số đó dưới dạng số giờ đời bạn.",
+      "badges": {
+        "onDevice": "Chỉ nằm trong máy bạn",
+        "noBank": "Không cần đăng nhập ngân hàng",
+        "quick": "Ghi xong trong vài giây"
+      }
+    },
+    "units": {
+      "min": "{value} phút",
+      "hours": "{value} giờ"
+    },
+    "ticker": {
+      "coffee": "Cà phê",
+      "lunch": "Ăn trưa ngoài",
+      "groceries": "Đi chợ",
+      "fuel": "Xăng",
+      "tshirt": "Áo thun",
+      "beers": "Một chầu bia",
+      "electricity": "Tiền điện",
+      "pizza": "Pizza tối thứ Sáu",
+      "dogFood": "Thức ăn cho chó",
+      "cinema": "Xem phim",
+      "gym": "Phòng gym",
+      "rent": "Tiền thuê nhà",
+      "flight": "Vé máy bay về nhà",
+      "iceCream": "Kem"
+    },
+    "howItWorks": {
+      "eyebrow": "Cách hoạt động",
+      "title": "Một chạm biến tiền thành thời gian.",
+      "body": "Mức lương giờ được tính từ số tiền thực sự về tài khoản bạn. Sau thuế, chia cho những ngày bạn đi làm, tính cả quãng đường đi lại không ai trả công.",
+      "coffee": {
+        "title": "Ly cà phê",
+        "note": "Bằng một quãng đi bộ ngắn. Ly cà phê đó bạn vẫn muốn mà."
+      },
+      "impulse": {
+        "title": "Món mua bốc đồng",
+        "note": "Gần hai ngày công. Đáng để ngủ một đêm rồi tính."
+      },
+      "rate": {
+        "title": "Mức lương giờ thật của bạn",
+        "perHour": "/giờ",
+        "takeHome": {
+          "label": "Lương thực nhận",
+          "value": "{value} mỗi tháng"
+        },
+        "daysWorked": {
+          "label": "Số ngày đi làm",
+          "value": "{value} ngày mỗi tuần"
+        },
+        "commute": {
+          "label": "Đi lại, không lương",
+          "value": "{value} phút mỗi ngày"
+        }
+      }
+    },
+    "logging": {
+      "eyebrow": "Ghi chép",
+      "title": "Không bao giờ phải gõ tay nữa.",
+      "body": "Hầu hết ứng dụng chi tiêu chết vì việc ghi chép quá mệt. Đây là ba lối đi tắt.",
+      "videoPlaceholder": "Video quay màn hình sắp có",
+      "receiptScan": {
+        "tab": "Quét hoá đơn",
+        "title": "Chỉ cần chĩa vào hoá đơn.",
+        "body": "Camera mở ngay trong phiếu nhập, không phải màn hình riêng. Tổng tiền, cửa hàng và ngày quay lại đã điền sẵn, ảnh vẫn đính kèm.",
+        "points": {
+          "one": "Đọc tổng tiền, ngày và cửa hàng",
+          "two": "Giữ lại ảnh để dùng sau"
+        }
+      },
+      "backTap": {
+        "tab": "Chạm mặt lưng",
+        "title": "Chạm hai lần vào mặt lưng.",
+        "body": "Một phím tắt gắn với Chạm Mặt Lưng của iOS sẽ mở bàn phím số cùng tài khoản và hạng mục gần nhất. Xong trước khi bạn rời quầy.",
+        "points": {
+          "one": "Từ trong túi đến ghi xong chỉ vài giây",
+          "two": "Không mở khoá, không phải tìm ứng dụng"
+        }
+      },
+      "applePay": {
+        "tab": "Apple Pay",
+        "title": "Hoặc cứ thanh toán như thường.",
+        "body": "Một tự động hoá nhận ra giao dịch Apple Pay và soạn sẵn khoản chi. Một thông báo, liếc qua hạng mục, vuốt đi là xong.",
+        "points": {
+          "one": "Bắt được những khoản bạn chẳng bao giờ tự ghi",
+          "two": "Chưa lưu gì cho tới khi bạn đồng ý"
+        }
+      }
+    },
+    "review": {
+      "eyebrow": "Nhìn lại",
+      "title": "Xem tiền đã đi đâu.",
+      "body": "Chọn một tuần, một tháng hay một năm. Một con số, số giờ đằng sau nó, và các hạng mục xếp theo thứ tự. Chạm vào bất kỳ mục nào để xem bên trong.",
+      "points": {
+        "one": "So với mức trung bình của chính bạn, không phải ngân sách của người lạ",
+        "two": "Bỏ một hạng mục hay một tài khoản, các con số tự tính lại",
+        "three": "Chỉ ghi nhận, không trách móc"
+      },
+      "chip": "{hours} giờ",
+      "mock": {
+        "title": "Xem lại chi tiêu",
+        "week": "Tuần",
+        "month": "Tháng",
+        "year": "Năm",
+        "spent": "Đã chi tuần này",
+        "calmer": "Yên ắng hơn mọi khi.",
+        "categories": {
+          "groceries": "Đi chợ",
+          "eatingOut": "Ăn ngoài",
+          "transport": "Đi lại"
+        }
+      }
+    },
+    "features": {
+      "eyebrow": "Tính năng",
+      "title": "Tất cả những gì còn lại bạn mong đợi, không ồn ào.",
+      "sentiment": {
+        "title": "Lúc đó thấy thế nào",
+        "body": "Gắn nhãn hài lòng, bình thường hay tiếc cho mỗi khoản chi. Quy luật nói nhiều hơn con số tổng.",
+        "legend": "Thấy đáng"
+      },
+      "commitments": {
+        "title": "Khoản cố định",
+        "body": "Tiền nhà, bảo hiểm, phòng gym mà bạn cứ định huỷ. Nhìn thấy cả tháng trước khi nó xảy ra.",
+        "lockedIn": "/tháng đã bị khoá"
+      },
+      "reimbursements": {
+        "title": "Tiền sẽ quay lại",
+        "body": "Đánh dấu một khoản là được hoàn, nó sẽ chờ trong danh sách riêng cho tới khi tiền về.",
+        "employer": "Công ty",
+        "insurer": "Bảo hiểm y tế"
+      },
+      "insights": {
+        "title": "Chín góc phân tích",
+        "body": "Cơ cấu, xu hướng, tỷ lệ tiết kiệm, cảm xúc, tài sản. Tất cả từ một menu.",
+        "savingsRate": "Tỷ lệ tiết kiệm",
+        "incomeTrend": "Xu hướng thu nhập",
+        "assets": "Tài sản"
+      },
+      "split": {
+        "title": "Chia hoá đơn",
+        "body": "Quét hoá đơn rồi chia từng món cho cả bàn. Chỉ phần của bạn được tính.",
+        "yourShare": "Phần của bạn"
+      },
+      "modes": {
+        "title": "Đơn giản hay đầy đủ",
+        "body": "Bắt đầu với một ví và một bàn phím số. Thêm tài khoản, chuyển khoản và ngoại tệ khi bạn cần.",
+        "simple": "Đơn giản",
+        "simpleNote": "Một ví",
+        "full": "Đầy đủ",
+        "fullNote": "Bật tất cả"
+      },
+      "budgets": {
+        "title": "Ngân sách giữ nhịp cho bạn",
+        "body": "Đặt trần chi tiêu hằng tháng cho từng hạng mục. Thanh tiến độ cho biết hôm nay bạn nên ở đâu.",
+        "category": "Đi chợ",
+        "of": "trên {total}",
+        "pace": "Đúng nhịp, còn {days} ngày"
+      },
+      "calendar": {
+        "title": "Một tháng đọc được",
+        "body": "Thu nhỏ về dạng lịch. Mỗi ngày cho thấy tiền vào và tiền ra, càng đậm khi số tiền càng lớn."
+      },
+      "currency": {
+        "title": "Mọi loại tiền tệ",
+        "body": "Ghi bằng đúng đồng tiền bạn đã trả. Tổng số được quy đổi, còn số gốc vẫn nằm trên dòng đó.",
+        "item": "Trả góp xe",
+        "paidIn": "Trả bằng {currency}"
+      },
+      "receipts": {
+        "title": "Mọi hoá đơn đều được lưu",
+        "body": "Ảnh đính kèm khoản chi và gom lại thành album. Cần bảo hành thì chỉ cách một cú vuốt."
+      },
+      "search": {
+        "title": "Tìm được mọi thứ",
+        "body": "Tìm theo ghi chú hoặc cửa hàng, rồi lọc theo hạng mục, tài khoản, số tiền hay cảm giác lúc đó.",
+        "query": "cà phê",
+        "filterCategory": "Ăn uống",
+        "filterAccount": "Tiền mặt",
+        "filterSentiment": "Tiếc"
+      },
+      "assets": {
+        "title": "Những gì bạn có",
+        "body": "Theo dõi tài khoản và tài sản song song với chi tiêu, để bức tranh dài hạn cũng được tính đến."
+      }
+    },
+    "testimonials": {
+      "eyebrow": "Đánh giá",
+      "title": "Mọi người nói gì sau một tháng.",
+      "usersChoice": "Lựa chọn của người dùng"
+    },
+    "privacy": {
+      "eyebrow": "Riêng tư",
+      "title": "Chi tiêu của bạn nằm lại trong máy bạn.",
+      "body": "Không cần tạo tài khoản, không cần kết nối ngân hàng. Mọi thứ nằm trên thiết bị của bạn, và bạn có thể xuất hoặc xoá toàn bộ bất cứ lúc nào.",
+      "onDevice": {
+        "title": "Chỉ trên thiết bị",
+        "body": "Không đám mây, không đồng bộ, không quảng cáo."
+      },
+      "import": {
+        "title": "Mang lịch sử của bạn theo",
+        "body": "Nhập bản sao lưu từ Money Manager rồi tiếp tục."
+      },
+      "link": "Đọc chính sách quyền riêng tư"
+    },
+    "why": {
+      "eyebrow": "Từ nhà phát triển",
+      "title": "Vì sao tôi xây dựng ứng dụng này",
+      "bookAlt": "Your Money or Your Life của Vicki Robin",
+      "quote": "Bạn đang đánh đổi năng lượng sống của mình để lấy tiền",
+      "quoteAuthor": "- Vicki Robin",
+      "paragraph1": "Sau khi đọc <book>Your Money or Your Life</book>, tôi như hiểu ra một điều. Với hầu hết chúng ta, những người sống bằng tiền lương, tiền không chỉ là tiền, mà là năng lượng sống của chúng ta. Mỗi đồng chúng ta tiêu đại diện cho nhiều giờ thời gian, công sức và một phần cuộc đời đã đánh đổi.",
+      "paragraph2": "Vì vậy tôi đã xây dựng ứng dụng này. Nó giúp bạn nhìn chi tiêu theo một cách khác: không chỉ bằng tiền tệ, mà bằng số giờ trong cuộc đời bạn. Vì đôi khi <cost>\"$20\"</cost> nghe không nhiều, nhưng <time>\"2 giờ trong đời tôi\"</time> thì có. Mục tiêu rất đơn giản: giúp bạn nhận thức rõ hơn tiền của mình, hay đúng hơn là thời gian của mình, đang đi đâu, để bạn có thể giành lại quyền kiểm soát.",
+      "paragraph3": "Mọi thứ đều ở lại trên thiết bị của bạn, không cần đăng nhập hay đồng bộ đám mây. Dữ liệu là của bạn. Bạn cũng có thể xuất dữ liệu thành một tệp JSON đơn giản nếu cần. Phiên bản miễn phí cung cấp mọi thứ bạn cần để bắt đầu. Pro mở khóa thêm một số tính năng như không giới hạn tài khoản/danh mục/mức giá theo giờ, v.v.",
+      "paragraph4": "Hy vọng bạn sẽ luôn kiểm soát được tiền bạc và cuộc sống của mình."
+    },
+    "closing": {
+      "title": "Xem tiền của bạn thực sự đáng giá bao nhiêu.",
+      "body": "Miễn phí và không cần tài khoản. Nhập giá trị mỗi giờ của bạn trong một phút, mọi con số sẽ có thêm một tầng nghĩa."
+    },
+    "community": {
+      "body": "Kết nối với người dùng khác, chia sẻ phản hồi và nhận mẹo trên máy chủ Discord của chúng tôi.",
+      "cta": "Tham gia Cộng đồng"
+    },
+    "dashboardEntry": {
+      "eyebrow": "Mới · Bảng điều khiển web",
+      "title": "Dữ liệu Money2Time của bạn trên màn hình lớn",
+      "body": "Quét mã trên app.money2time.com bằng điện thoại để xem dòng tiền, chi tiêu, tài sản ròng, ngân sách, chuyến đi và số giờ đằng sau mỗi lần mua. Thêm và sửa giao dịch từ máy tính khi điện thoại đang kết nối. Mã hóa đầu cuối.",
+      "cta": "Mở bảng điều khiển web",
+      "points": {
+        "private": "Mã hóa đầu cuối",
+        "charts": "17 bảng điều khiển",
+        "edits": "Sửa từ máy tính"
+      }
+    }
+  },
+  "contact": {
+    "page": {
+      "title": "Liên hệ với tôi",
+      "intro": "Dành cho hỗ trợ, lỗi, góp ý hoặc câu hỏi về quyền riêng tư.",
+      "formLabel": "Biểu mẫu liên hệ",
+      "discordTitle": "Bạn muốn trò chuyện?",
+      "discordBody": "Tham gia cộng đồng Discord của chúng tôi để kết nối với người dùng khác và nhận câu trả lời nhanh chóng.",
+      "discordCta": "Tham gia Discord của Chúng tôi"
+    },
+    "form": {
+      "honeypot": "Công ty",
+      "name": "Tên",
+      "namePlaceholder": "Tên của bạn",
+      "email": "Email",
+      "emailPlaceholder": "ban@example.com",
+      "message": "Tin nhắn",
+      "messagePlaceholder": "Hãy cho tôi biết chuyện gì đã xảy ra, bạn muốn cải thiện điều gì hoặc tôi có thể giúp thế nào.",
+      "sending": "Đang gửi...",
+      "send": "Gửi tin nhắn"
+    },
+    "validation": {
+      "nameRequired": "Vui lòng nhập tên của bạn.",
+      "nameTooLong": "Vui lòng giữ tên dưới {max} ký tự.",
+      "emailRequired": "Vui lòng nhập địa chỉ email của bạn.",
+      "emailInvalid": "Vui lòng dùng một địa chỉ email hợp lệ.",
+      "subjectTooLong": "Vui lòng giữ tiêu đề dưới {max} ký tự.",
+      "messageRequired": "Vui lòng chia sẻ một tin nhắn ngắn.",
+      "messageTooLong": "Vui lòng giữ tin nhắn dưới {max} ký tự."
+    },
+    "status": {
+      "honeypot": "Cảm ơn bạn đã liên hệ. Tin nhắn của bạn đang được gửi.",
+      "error": "Vui lòng sửa các trường được đánh dấu rồi thử lại.",
+      "mailto": "Ứng dụng email mặc định của bạn đang mở với tin nhắn đã được điền sẵn. Nếu không có gì mở ra, hãy gửi email trực tiếp cho tôi."
+    }
+  },
+  "statementsImport": {
+    "title": "Nhập sao kê",
+    "intro": "Xem hướng dẫn ngắn bên dưới để biết cách nhập sao kê ngân hàng vào Money2Time với sự hỗ trợ của AI.",
+    "videoTitle": "Money2Time - Hướng dẫn nhập sao kê"
+  },
+  "notFound": {
+    "title": "Không tìm thấy trang",
+    "body": "Trang này không tồn tại. Có lẽ dù sao nó cũng tốn quá nhiều thời gian của bạn.",
+    "home": "Về trang chủ"
+  },
+  "privacy": {
+    "title": "Chính sách quyền riêng tư",
+    "lastUpdated": "Cập nhật lần cuối: ngày 22 tháng 10 năm 2026",
+    "websiteAnalytics": {
+      "title": "Phân tích việc sử dụng trang web",
+      "paragraphs": [
+        "Trên money2time.com, chúng tôi dùng PostHog và Google Analytics để đo lượt xem trang dưới dạng bút danh và một số tương tác giới hạn, chẳng hạn lượt nhấp tải ứng dụng, chọn bài hướng dẫn và kết quả của biểu mẫu liên hệ. Các dịch vụ này có thể dùng bộ nhớ trình duyệt hoặc cookie và xử lý thông tin kỹ thuật gồm khu vực gần đúng, loại thiết bị và trình duyệt, cùng trang giới thiệu. Dữ liệu người dùng và sự kiện trong Google Analytics được lưu giữ tối đa 14 tháng.",
+        "Trên Bảng điều khiển web (app.money2time.com), chính các dịch vụ này đo những trang bảng điều khiển bạn mở, thời điểm một trình duyệt được liên kết hoặc hủy liên kết, việc truyền dữ liệu từ điện thoại cũng như các thay đổi bạn thực hiện có thành công hay không, và thời điểm một tính năng Pro được giới thiệu. Sau khi điện thoại của bạn đã gửi dữ liệu, các sự kiện này được liên kết với mã định danh ứng dụng ngẫu nhiên của điện thoại đó, nên việc bạn dùng bảng điều khiển và ứng dụng được tính là một người dùng dưới dạng bút danh cho đến khi bạn hủy liên kết trình duyệt. Bảng điều khiển tách riêng dữ liệu này khỏi phần còn lại của money2time.com, nên các lượt truy cập của bạn vào những trang khác không được liên kết với nó. Sự kiện của bảng điều khiển không bao giờ chứa dữ liệu tài chính của bạn, và các lượt truy cập bảng điều khiển không bao giờ được ghi lại dưới dạng bản phát lại phiên.",
+        "PostHog cũng có thể ghi lại một mẫu nhỏ các lượt truy cập trang web dưới dạng bản phát lại phiên với mọi ô biểu mẫu đều bị che, và nhận báo cáo khi một trang gặp lỗi.",
+        "Chúng tôi không gửi nội dung biểu mẫu liên hệ, văn bản tìm kiếm bài hướng dẫn, dữ liệu tài chính, mã định danh tài khoản, toàn bộ chuỗi truy vấn URL hoặc dữ liệu dùng cho quảng cáo hay cá nhân hóa. Chuyển hướng /download không thêm địa chỉ IP hoặc chuỗi user-agent của bạn vào sự kiện phân tích. Phân tích trang web không tải khi cài đặt Do Not Track của trình duyệt được bật."
+      ]
+    },
+    "sections": [
+      {
+        "title": "Tổng quan",
+        "paragraphs": [
+          "Money2Time (Ứng dụng) là ứng dụng tài chính cá nhân chuyển chi tiêu của bạn thành giá trị thời gian tương đương dựa trên lương theo giờ của bạn. Quyền riêng tư của bạn rất quan trọng với chúng tôi. Chính sách này giải thích Ứng dụng thu thập dữ liệu nào, dữ liệu đó được sử dụng như thế nào và các quyền của bạn đối với dữ liệu đó."
+        ]
+      },
+      {
+        "title": "1. Lưu trữ dữ liệu và thiết kế ưu tiên cục bộ",
+        "paragraphs": [
+          "Tất cả dữ liệu tài chính của bạn, bao gồm giao dịch, tài khoản, danh mục, quy tắc định kỳ và cài đặt lương, được lưu trữ cục bộ trên thiết bị của bạn bằng cơ sở dữ liệu trên thiết bị (SQLite). Chúng tôi không vận hành máy chủ lưu trữ thông tin tài chính cá nhân của bạn, và Ứng dụng không bao giờ đồng bộ hoặc sao lưu dữ liệu của bạn lên máy chủ của chúng tôi. Nếu bạn dùng Bảng điều khiển web tùy chọn (mục 6), điện thoại của bạn sẽ gửi một bản sao thẳng đến trình duyệt bạn đã liên kết, được mã hóa đầu cuối; máy chủ của chúng tôi chỉ chuyển tiếp mà không lưu trữ và không thể đọc được.",
+          "Nếu bạn gỡ cài đặt Ứng dụng, toàn bộ dữ liệu được lưu trữ cục bộ sẽ bị xóa vĩnh viễn."
+        ]
+      },
+      {
+        "title": "2. Thông tin chúng tôi thu thập",
+        "subsections": [
+          {
+            "title": "Dữ liệu tài chính (chỉ lưu trữ cục bộ)",
+            "lists": [
+              [
+                "Số tiền, ngày, danh mục, ghi chú và thẻ cảm xúc của giao dịch",
+                "Tên, loại và số dư tài khoản",
+                "Thông tin lương và mức lương theo giờ",
+                "Quy tắc giao dịch định kỳ",
+                "Tên danh mục và cách tổ chức"
+              ]
+            ],
+            "paragraphs": [
+              "Dữ liệu này không bao giờ rời khỏi thiết bị của bạn, trừ khi bạn chủ động chọn xuất dữ liệu, hoặc gửi đến trình duyệt đã liên kết qua Bảng điều khiển web."
+            ]
+          },
+          {
+            "title": "Mã định danh ứng dụng ngẫu nhiên",
+            "paragraphs": [
+              "Trong lần khởi chạy đầu tiên, Ứng dụng tạo một mã định danh duy nhất ngẫu nhiên bắt đầu bằng m2t_, không liên kết với tên, email, Apple ID hoặc bất kỳ danh tính cá nhân nào của bạn. Cùng một mã định danh được chia sẻ với PostHog, Google Analytics for Firebase và RevenueCat để phân tích sản phẩm và quản lý gói đăng ký, và với bất kỳ trình duyệt nào bạn liên kết qua Bảng điều khiển web, nơi tính năng phân tích sử dụng (PostHog và Google Analytics) cũng dùng mã này."
+            ]
+          },
+          {
+            "title": "Phân tích sử dụng",
+            "paragraphs": [
+              "Chúng tôi dùng PostHog và Google Analytics for Firebase để thu thập dữ liệu sử dụng được gắn mã giả, liên kết với mã định danh ứng dụng ngẫu nhiên này, và cải thiện Ứng dụng. Dữ liệu phân tích không gồm số tiền, chi tiết giao dịch, số dư, ghi chú, biên lai, bản sao lưu hoặc thông tin nhận dạng bạn.",
+              "PostHog cũng nhận báo cáo sự cố và lỗi, đồng thời ghi lại một mẫu nhỏ các phiên dùng ứng dụng dưới dạng bản ghi màn hình để chúng tôi tìm và khắc phục sự cố. Trong các bản ghi đó, mọi thứ hiển thị thông tin của bạn đều bị che: văn bản, con số, ô nhập liệu, biểu đồ và mọi ảnh bạn thêm vào. Chỉ thiết kế của chính ứng dụng, như biểu tượng, hình minh họa và nhãn nút, là hiển thị. Các bản ghi này không bao giờ hiển thị dữ liệu tài chính của bạn."
+            ],
+            "lists": [
+              [
+                "Lượt xem màn hình và mức sử dụng tính năng",
+                "Sự kiện trong ứng dụng như tạo giao dịch hoặc thay đổi cài đặt",
+                "Tùy chọn chung như tiền tệ, ngôn ngữ/khu vực, giao diện và chế độ hiển thị",
+                "Nền tảng như iOS hoặc Android"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "title": "3. Mua hàng trong ứng dụng và gói đăng ký",
+        "paragraphs": [
+          "Ứng dụng cung cấp một gói đăng ký cao cấp tùy chọn (Pro) được quản lý thông qua RevenueCat. Thanh toán được Apple hoặc Google xử lý. Chúng tôi không bao giờ nhận hoặc lưu trữ thông tin thanh toán, thông tin thẻ tín dụng hoặc thông tin đăng nhập Apple ID/Google Account của bạn.",
+          "RevenueCat nhận trạng thái đăng ký, mã định danh sản phẩm và ngày hết hạn của bạn để quản lý quyền lợi. Thông tin này được liên kết với mã định danh ứng dụng ngẫu nhiên, không phải danh tính cá nhân của bạn."
+        ]
+      },
+      {
+        "title": "4. Thông báo",
+        "paragraphs": [
+          "Ứng dụng có thể yêu cầu quyền gửi thông báo. Tất cả thông báo được lên lịch cục bộ trên thiết bị của bạn. Không có thông báo đẩy nào được gửi từ máy chủ bên ngoài. Bạn có thể từ chối quyền thông báo hoặc tắt thông báo bất cứ lúc nào trong Cài đặt của thiết bị."
+        ],
+        "lists": [
+          [
+            "Nhắc kiểm tra hằng ngày",
+            "Tóm tắt chi tiêu hằng tuần",
+            "Cảnh báo giao dịch định kỳ"
+          ]
+        ]
+      },
+      {
+        "title": "5. Quyền trên thiết bị",
+        "paragraphs": [
+          "Ứng dụng chỉ yêu cầu quyền thông báo để lên lịch nhắc nhở và tóm tắt cục bộ. Ứng dụng không truy cập camera, micrô, thư viện ảnh, danh bạ, lịch, tin nhắn, vị trí, dữ liệu sức khỏe, dữ liệu thể chất, ứng dụng khác hoặc lịch sử duyệt web của bạn."
+        ]
+      },
+      {
+        "title": "6. Xuất, nhập dữ liệu và Bảng điều khiển web",
+        "paragraphs": [
+          "Bạn có thể xuất toàn bộ dữ liệu tài chính của mình dưới dạng tệp JSON bất cứ lúc nào thông qua Cài đặt của Ứng dụng. Tệp đã xuất được chia sẻ bằng chức năng chia sẻ gốc trên thiết bị của bạn. Chúng tôi không nhận hoặc xử lý dữ liệu đã xuất của bạn.",
+          "Bạn cũng có thể nhập dữ liệu từ bản sao lưu Money2Time trước đó hoặc chuyển dữ liệu từ ứng dụng Money Manager. Việc nhập sẽ thay thế toàn bộ dữ liệu hiện có trên thiết bị của bạn.",
+          "Bảng điều khiển web là tùy chọn. Để dùng, bạn mở app.money2time.com trên máy tính và quét mã hiển thị ở đó bằng Ứng dụng. Điện thoại của bạn và trình duyệt đó sau đó thống nhất một khóa mã hóa mà chỉ hai bên nắm giữ. Khi màn hình Bảng điều khiển web trong Ứng dụng và trình duyệt cùng đang mở, Ứng dụng gửi cho trình duyệt một bản sao dữ liệu của bạn (cùng dữ liệu như khi xuất, kèm logo, biểu tượng và ảnh bìa bạn đã thêm, nhưng không gồm ảnh hóa đơn hay mã QR thanh toán), được mã hóa đầu cuối bằng AES-256-GCM. Dữ liệu đi qua một máy chủ do chúng tôi vận hành trên Cloudflare; máy chủ này chuyển tiếp dữ liệu đã mã hóa ngay khi nhận được và không lưu trữ. Chúng tôi không thể đọc được dữ liệu đó.",
+          "Trình duyệt giữ bản sao cuối cùng nhận được, vẫn ở dạng mã hóa, trong bộ nhớ riêng của nó cùng với khóa, cho đến khi bạn hủy liên kết trong trình duyệt hoặc trong Ứng dụng. Các thay đổi bạn thực hiện trên bảng điều khiển được gửi ngược lại điện thoại, được mã hóa theo cùng cách đó, và Ứng dụng chỉ lưu chúng khi màn hình Bảng điều khiển web của Ứng dụng đang mở và chỉ từ trình duyệt bạn đã cho phép thay đổi. Điện thoại của bạn cũng cho trình duyệt biết bạn có Money2Time Pro hay không, để mở khóa các bảng điều khiển Pro, cùng mã định danh ứng dụng ngẫu nhiên của điện thoại, để phục vụ phân tích sử dụng bảng điều khiển. Không có tài khoản: chúng tôi không giữ địa chỉ email, và máy chủ chuyển tiếp dữ liệu của bạn không lưu bất kỳ hồ sơ nào về những điện thoại và trình duyệt đã được liên kết."
+        ]
+      },
+      {
+        "title": "7. Xóa dữ liệu",
+        "paragraphs": [
+          "Bạn luôn có toàn quyền kiểm soát dữ liệu của mình. Reset All Data xóa vĩnh viễn toàn bộ giao dịch, tài khoản, danh mục, quy tắc định kỳ và cài đặt lương khỏi thiết bị của bạn. Reset Transactions Only xóa lịch sử giao dịch nhưng giữ lại tài khoản và danh mục. Việc gỡ cài đặt Ứng dụng sẽ xóa hoàn toàn cơ sở dữ liệu cục bộ và toàn bộ dữ liệu đã lưu. Hủy liên kết một trình duyệt khỏi Bảng điều khiển web sẽ xóa bản sao mà trình duyệt đó giữ: ngay lập tức nếu bạn hủy liên kết trong trình duyệt, và vào lần kết nối tiếp theo của trình duyệt nếu bạn hủy liên kết từ Ứng dụng. Xóa dữ liệu trang web của trình duyệt đó cũng sẽ xóa bản sao.",
+          "Việc đặt lại dữ liệu trong Ứng dụng không xóa trạng thái đăng ký do Apple/Google nắm giữ hoặc dữ liệu phân tích đã gửi trước đó tới PostHog / Google Analytics for Firebase. Để yêu cầu xóa dữ liệu phân tích, hãy liên hệ với chúng tôi qua email bên dưới."
+        ]
+      },
+      {
+        "title": "8. Dịch vụ bên thứ ba",
+        "paragraphs": [
+          "Ứng dụng không hiển thị quảng cáo hoặc sử dụng SDK quảng cáo."
+        ],
+        "table": {
+          "headers": [
+            "Dịch vụ",
+            "Mục đích",
+            "Dữ liệu được chia sẻ"
+          ],
+          "rows": [
+            [
+              "PostHog / Google Analytics for Firebase",
+              "Phân tích sử dụng bằng mã giả",
+              "ID ứng dụng ngẫu nhiên, sự kiện sử dụng tính năng, tùy chọn"
+            ],
+            [
+              "RevenueCat",
+              "Quản lý gói đăng ký",
+              "ID ứng dụng ngẫu nhiên, trạng thái đăng ký"
+            ],
+            [
+              "Cloudflare (Workers, Durable Objects)",
+              "Kết nối Bảng điều khiển web, chỉ khi bạn sử dụng",
+              "Dữ liệu của bạn, được mã hóa đầu cuối và chỉ trong quá trình truyền; thông tin kết nối như địa chỉ IP, được lưu ngắn hạn trong nhật ký của Cloudflare"
+            ],
+            [
+              "Apple App Store / Google Play",
+              "Xử lý thanh toán",
+              "Do Apple/Google trực tiếp xử lý"
+            ]
+          ]
+        }
+      },
+      {
+        "title": "9. Bảo mật dữ liệu",
+        "paragraphs": [
+          "Dữ liệu tài chính của bạn được lưu trong một cơ sở dữ liệu cục bộ không mã hóa, được bảo vệ bởi cơ chế bảo mật tích hợp của thiết bị. Khi bạn dùng Bảng điều khiển web, dữ liệu được mã hóa trên điện thoại bằng AES-256-GCM, với khóa mà điện thoại và trình duyệt thống nhất thông qua trao đổi khóa P-256, và được gửi qua HTTPS; máy chủ của chúng tôi không bao giờ có khóa này. Ứng dụng chỉ sử dụng các thuật toán mã hóa tiêu chuẩn, đã được công bố."
+        ]
+      },
+      {
+        "title": "10. Quyền riêng tư của trẻ em",
+        "paragraphs": [
+          "Ứng dụng không hướng đến trẻ em dưới 13 tuổi. Chúng tôi không cố ý thu thập thông tin cá nhân từ trẻ em dưới 13 tuổi. Nếu bạn tin rằng một trẻ em đã cung cấp dữ liệu thông qua Ứng dụng, vui lòng liên hệ với chúng tôi và chúng tôi sẽ thực hiện các bước để xóa thông tin đó."
+        ]
+      },
+      {
+        "title": "11. Thay đổi đối với chính sách này",
+        "paragraphs": [
+          "Chúng tôi có thể cập nhật Chính sách quyền riêng tư này theo thời gian. Các thay đổi sẽ được phản ánh trên trang này cùng ngày Cập nhật lần cuối mới. Việc tiếp tục sử dụng Ứng dụng sau khi có thay đổi đồng nghĩa với việc chấp nhận chính sách đã cập nhật."
+        ]
+      }
+    ],
+    "contact": {
+      "title": "12. Liên hệ với chúng tôi",
+      "body": "Nếu bạn có bất kỳ câu hỏi nào về Chính sách quyền riêng tư này, cần hỗ trợ hoặc muốn yêu cầu xóa dữ liệu phân tích, vui lòng liên hệ với chúng tôi tại:",
+      "formPrefix": "Bạn cũng có thể dùng",
+      "formLink": "biểu mẫu liên hệ",
+      "formSuffix": "trên trang web này."
+    }
+  },
+  "terms": {
+    "title": "Điều khoản sử dụng",
+    "lastUpdated": "Cập nhật lần cuối: ngày 25 tháng 3 năm 2026",
+    "privacyPolicyLabel": "Chính sách quyền riêng tư",
+    "sections": [
+      {
+        "title": "Tổng quan",
+        "paragraphs": [
+          "Các Điều khoản sử dụng này (Điều khoản) điều chỉnh việc bạn sử dụng ứng dụng di động Money2Time (Ứng dụng), do Nelson Gan phát triển và vận hành. Bằng cách tải xuống hoặc sử dụng Ứng dụng, bạn đồng ý bị ràng buộc bởi các Điều khoản này. Nếu bạn không đồng ý, không sử dụng Ứng dụng."
+        ]
+      },
+      {
+        "title": "1. Chấp nhận Điều khoản",
+        "paragraphs": [
+          "Bằng cách truy cập hoặc sử dụng Money2Time, bạn xác nhận rằng bạn từ 13 tuổi trở lên và có năng lực pháp lý để tham gia các Điều khoản này. Nếu bạn sử dụng Ứng dụng thay mặt cho một tổ chức, bạn tuyên bố rằng bạn có thẩm quyền ràng buộc tổ chức đó với các Điều khoản này."
+        ]
+      },
+      {
+        "title": "2. Mô tả Ứng dụng",
+        "paragraphs": [
+          "Money2Time là ứng dụng tài chính cá nhân giúp bạn hiểu chi phí thật sự của việc chi tiêu bằng cách chuyển các khoản chi thành số giờ thời gian tương đương của bạn dựa trên lương theo giờ. Các tính năng cốt lõi bao gồm:"
+        ],
+        "lists": [
+          [
+            "Theo dõi chi tiêu và thu nhập trên nhiều tài khoản",
+            "Chuyển đổi tiền thành thời gian dựa trên cài đặt lương của bạn",
+            "Quy tắc giao dịch định kỳ cho hóa đơn và gói đăng ký",
+            "Phân tích chi tiêu, thông tin chi tiết và theo dõi cảm xúc",
+            "Xuất và nhập dữ liệu cục bộ",
+            "Thông báo có thể tùy chỉnh cho nhắc nhở và tóm tắt"
+          ]
+        ]
+      },
+      {
+        "title": "3. Gói miễn phí và Pro",
+        "paragraphs": [
+          "Ứng dụng được cung cấp theo mô hình freemium. Một số tính năng bị giới hạn trong gói miễn phí và cần gói đăng ký Pro đang hoạt động để mở khóa. Chúng tôi bảo lưu quyền thay đổi giới hạn của gói miễn phí hoặc tính năng của gói Pro bất cứ lúc nào. Những thay đổi quan trọng sẽ được thông báo thông qua bản cập nhật ứng dụng hoặc trên trang web này."
+        ],
+        "subsections": [
+          {
+            "title": "Gói miễn phí",
+            "lists": [
+              [
+                "Tối đa 5 tài khoản",
+                "Tối đa 9 danh mục chi tiêu/thu nhập",
+                "Tối đa 5 quy tắc giao dịch định kỳ",
+                "Tối đa 5 mục mức lương theo giờ",
+                "Không giới hạn bản ghi giao dịch"
+              ]
+            ]
+          },
+          {
+            "title": "Gói Pro",
+            "lists": [
+              [
+                "Không giới hạn tài khoản, danh mục, quy tắc định kỳ và mục mức lương theo giờ",
+                "Có sẵn dưới dạng gói đăng ký hằng tháng, gói đăng ký hằng năm hoặc mua trọn đời"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "title": "4. Mua hàng trong ứng dụng và gói đăng ký",
+        "paragraphs": [
+          "Gói đăng ký Pro và gói mua trọn đời được xử lý thông qua Apple App Store hoặc Google Play Store. Khi thực hiện mua hàng, bạn đồng ý với điều khoản thanh toán của cửa hàng tương ứng.",
+          "Gói đăng ký được tính phí trước theo chu kỳ hằng tháng hoặc hằng năm và tự động gia hạn trừ khi bị hủy ít nhất 24 giờ trước khi kết thúc kỳ hiện tại. Yêu cầu hoàn tiền do Apple hoặc Google xử lý theo chính sách hoàn tiền tương ứng của họ. Bạn có thể khôi phục giao dịch mua trước đó trên thiết bị mới bằng Restore Purchases trong cài đặt Ứng dụng.",
+          "Gói mua trọn đời cấp quyền truy cập các tính năng Pro trong suốt vòng đời của Ứng dụng. Chúng tôi không đảm bảo rằng Ứng dụng sẽ tiếp tục khả dụng vô thời hạn."
+        ]
+      },
+      {
+        "title": "5. Dữ liệu của bạn",
+        "paragraphs": [
+          "Tất cả dữ liệu tài chính bạn nhập, bao gồm giao dịch, tài khoản, danh mục, cài đặt lương và tùy chọn, được lưu trữ cục bộ trên thiết bị của bạn. Chúng tôi không có quyền truy cập vào dữ liệu tài chính của bạn và không lưu trữ dữ liệu đó trên bất kỳ máy chủ nào.",
+          "Bạn hoàn toàn chịu trách nhiệm duy trì bản sao lưu dữ liệu của mình. Hãy dùng tính năng xuất tích hợp để tạo bản sao lưu. Chúng tôi không chịu trách nhiệm đối với bất kỳ mất mát dữ liệu nào do xóa ứng dụng, thiết bị hỏng hoặc đặt lại ngoài ý muốn.",
+          "Để biết đầy đủ chi tiết về cách xử lý dữ liệu, hãy xem {privacyPolicy} của chúng tôi."
+        ]
+      },
+      {
+        "title": "6. Sử dụng được chấp nhận",
+        "paragraphs": [
+          "Bạn đồng ý không:"
+        ],
+        "lists": [
+          [
+            "Dịch ngược, giải biên dịch hoặc tháo rời Ứng dụng",
+            "Cố gắng truy cập trái phép vào bất kỳ phần nào của Ứng dụng hoặc các hệ thống liên quan",
+            "Sử dụng Ứng dụng cho bất kỳ mục đích trái pháp luật nào hoặc vi phạm bất kỳ luật hiện hành nào",
+            "Phân phối lại, bán lại hoặc cấp phép lại Ứng dụng hoặc bất kỳ phần nào của Ứng dụng",
+            "Sử dụng phương tiện tự động để truy cập hoặc tương tác với Ứng dụng"
+          ]
+        ]
+      },
+      {
+        "title": "7. Sở hữu trí tuệ",
+        "paragraphs": [
+          "Ứng dụng, bao gồm thiết kế, mã nguồn, đồ họa và nội dung, thuộc sở hữu của Nelson Gan và được bảo vệ bởi luật bản quyền cũng như các luật sở hữu trí tuệ khác. Các Điều khoản này không cấp cho bạn bất kỳ quyền nào để sử dụng nhãn hiệu, logo hoặc thành phần thương hiệu của chúng tôi.",
+          "Dữ liệu tài chính của bạn thuộc về bạn. Bằng việc sử dụng Ứng dụng, bạn không cấp cho chúng tôi bất kỳ quyền nào đối với dữ liệu cá nhân của bạn."
+        ]
+      },
+      {
+        "title": "8. Tuyên bố miễn trừ bảo đảm",
+        "paragraphs": [
+          "Ứng dụng được cung cấp nguyên trạng và theo tình trạng sẵn có, không có bất kỳ bảo đảm nào, dù rõ ràng hay ngụ ý, bao gồm khả năng bán được, sự phù hợp cho một mục đích cụ thể hoặc không vi phạm quyền.",
+          "Money2Time là công cụ năng suất cá nhân và không phải là cố vấn tài chính, kế toán hoặc dịch vụ tài chính được quản lý. Không có nội dung nào trong Ứng dụng cấu thành lời khuyên tài chính. Bạn nên tham khảo chuyên gia đủ điều kiện cho các quyết định tài chính.",
+          "Chúng tôi không bảo đảm rằng Ứng dụng sẽ không có lỗi, không bị gián đoạn hoặc không có bug."
+        ]
+      },
+      {
+        "title": "9. Giới hạn trách nhiệm",
+        "paragraphs": [
+          "Trong phạm vi tối đa được pháp luật hiện hành cho phép, chúng tôi sẽ không chịu trách nhiệm đối với bất kỳ thiệt hại gián tiếp, ngẫu nhiên, đặc biệt, hệ quả hoặc mang tính trừng phạt nào phát sinh từ việc bạn sử dụng hoặc không thể sử dụng Ứng dụng, bao gồm mất dữ liệu, quyết định tài chính được đưa ra dựa trên kết quả của Ứng dụng hoặc sự cố thiết bị.",
+          "Tổng trách nhiệm của chúng tôi đối với bạn cho bất kỳ khiếu nại nào phát sinh từ các Điều khoản này hoặc việc bạn sử dụng Ứng dụng sẽ không vượt quá số tiền bạn đã trả cho kỳ đăng ký Pro hiện tại của mình, hoặc $10 USD nếu bạn đang dùng gói miễn phí."
+        ]
+      },
+      {
+        "title": "10. Chấm dứt",
+        "paragraphs": [
+          "Chúng tôi có thể đình chỉ hoặc chấm dứt quyền truy cập của bạn vào Ứng dụng bất cứ lúc nào, có hoặc không có lý do, và có hoặc không có thông báo. Khi chấm dứt, quyền sử dụng Ứng dụng của bạn sẽ dừng ngay lập tức. Vì dữ liệu của bạn được lưu trữ cục bộ, dữ liệu sẽ vẫn ở trên thiết bị của bạn cho đến khi bạn gỡ cài đặt Ứng dụng hoặc tự đặt lại dữ liệu.",
+          "Bạn có thể ngừng sử dụng Ứng dụng bất cứ lúc nào bằng cách gỡ cài đặt."
+        ]
+      },
+      {
+        "title": "11. Thay đổi đối với các Điều khoản này",
+        "paragraphs": [
+          "Chúng tôi có thể cập nhật các Điều khoản này theo thời gian. Khi làm vậy, chúng tôi sẽ cập nhật ngày Cập nhật lần cuối ở đầu trang này. Việc tiếp tục sử dụng Ứng dụng sau khi có thay đổi đồng nghĩa với việc bạn chấp nhận các Điều khoản đã sửa đổi. Đối với thay đổi quan trọng, chúng tôi sẽ nỗ lực hợp lý để thông báo cho bạn thông qua bản cập nhật ứng dụng hoặc thông báo trên trang web này."
+        ]
+      },
+      {
+        "title": "12. Luật điều chỉnh",
+        "paragraphs": [
+          "Các Điều khoản này được điều chỉnh và diễn giải theo luật pháp Singapore, không xét đến các quy định về xung đột pháp luật. Bất kỳ tranh chấp nào phát sinh từ các Điều khoản này sẽ thuộc thẩm quyền xét xử độc quyền của tòa án Singapore."
+        ]
+      }
+    ],
+    "contact": {
+      "title": "13. Liên hệ với chúng tôi",
+      "body": "Nếu bạn có bất kỳ câu hỏi nào về các Điều khoản này, vui lòng liên hệ với chúng tôi tại:"
+    }
+  },
+  "dataDeletion": {
+    "title": "Yêu cầu xóa dữ liệu",
+    "lastUpdated": "Cập nhật lần cuối: ngày 20 tháng 10 năm 2026",
+    "intro": "Money2Time là ứng dụng local-first: toàn bộ dữ liệu tài chính của bạn chỉ được lưu trên thiết bị của bạn và không bao giờ được lưu trên máy chủ của chúng tôi. Trang này giải thích cách yêu cầu xóa dữ liệu liên quan đến ứng dụng Money2Time, bao gồm các bước để yêu cầu xóa và những loại dữ liệu nào bị xóa hoặc được giữ lại, cùng với mọi thời gian lưu giữ.",
+    "sections": [
+      {
+        "title": "Cách yêu cầu xóa dữ liệu",
+        "subsections": [
+          {
+            "title": "Xóa dữ liệu được lưu trên thiết bị của bạn",
+            "paragraphs": [
+              "Hầu hết dữ liệu của bạn, bao gồm toàn bộ dữ liệu tài chính, chỉ được lưu trên thiết bị của bạn. Bạn có thể tự xóa bất cứ lúc nào:"
+            ],
+            "lists": [
+              [
+                "Mở ứng dụng Money2Time và vào Cài đặt.",
+                "Nhấn \"Đặt lại tất cả dữ liệu\" để xóa vĩnh viễn tất cả giao dịch, tài khoản, danh mục, quy tắc định kỳ và cài đặt lương.",
+                "Ngoài ra, hãy gỡ cài đặt ứng dụng để xóa hoàn toàn cơ sở dữ liệu cục bộ và tất cả dữ liệu đã lưu."
+              ]
+            ]
+          },
+          {
+            "title": "Xóa bản sao trong trình duyệt đã liên kết",
+            "paragraphs": [
+              "Nếu bạn dùng Bảng điều khiển web, mỗi trình duyệt bạn đã liên kết sẽ giữ bản sao gần nhất mà điện thoại gửi cho nó, ở dạng mã hóa. Để xóa:"
+            ],
+            "lists": [
+              [
+                "Trong trình duyệt, mở app.money2time.com và chọn \"Hủy liên kết trình duyệt này\". Bản sao và khóa của nó bị xóa ngay lập tức.",
+                "Hoặc, trong ứng dụng Money2Time, vào Cài đặt > Bảng điều khiển web và nhấn \"Hủy liên kết\" bên cạnh trình duyệt. Trình duyệt sẽ xóa bản sao của mình vào lần kết nối tiếp theo.",
+                "Xóa dữ liệu trang web của trình duyệt đối với app.money2time.com cũng sẽ xóa bản sao."
+              ]
+            ]
+          },
+          {
+            "title": "Yêu cầu xóa dữ liệu phân tích và đăng ký",
+            "paragraphs": [
+              "Để yêu cầu xóa dữ liệu phân tích hoặc dữ liệu đăng ký liên quan đến mã định danh ứng dụng ngẫu nhiên của bạn, hãy liên hệ với chúng tôi:"
+            ],
+            "lists": [
+              [
+                "Gửi email cho chúng tôi theo địa chỉ bên dưới với tiêu đề \"Data Deletion Request\", hoặc dùng biểu mẫu liên hệ trên trang web này.",
+                "Hãy dùng nút sao chép bên cạnh ID người dùng trong Settings > Display và cung cấp ID đầy đủ để chúng tôi có thể tìm dữ liệu liên quan đến Ứng dụng của bạn.",
+                "Chúng tôi sẽ xử lý yêu cầu của bạn và xác nhận hoàn tất trong vòng 30 ngày."
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Dữ liệu nào bị xóa hoặc được giữ lại",
+        "paragraphs": [
+          "Bảng dưới đây tóm tắt điều gì xảy ra với từng loại dữ liệu khi bạn yêu cầu xóa và dữ liệu được lưu giữ trong bao lâu."
+        ],
+        "table": {
+          "headers": [
+            "Loại dữ liệu",
+            "Hành động",
+            "Thời gian lưu giữ"
+          ],
+          "rows": [
+            [
+              "Dữ liệu tài chính trên thiết bị (giao dịch, tài khoản, danh mục, quy tắc định kỳ, cài đặt lương)",
+              "Đã xóa",
+              "Bị xóa ngay khi bạn đặt lại dữ liệu hoặc gỡ cài đặt ứng dụng. Chúng tôi không giữ lại bất cứ điều gì."
+            ],
+            [
+              "Bản sao Bảng điều khiển web trong trình duyệt bạn đã liên kết",
+              "Đã xóa",
+              "Bị xóa khỏi trình duyệt đó khi bạn hủy liên kết hoặc xóa dữ liệu trang web. Máy chủ của chúng tôi không bao giờ lưu bản sao này, nên chúng tôi không giữ lại gì."
+            ],
+            [
+              "Dữ liệu phân tích bằng mã giả (PostHog / Google Analytics for Firebase)",
+              "Xóa theo yêu cầu",
+              "Bị xóa trong vòng 30 ngày kể từ yêu cầu của bạn."
+            ],
+            [
+              "Dữ liệu đăng ký (RevenueCat, Apple, Google)",
+              "Giữ lại khi cần thiết",
+              "Được Apple hoặc Google giữ lại cho các nghĩa vụ thanh toán, thuế và pháp lý, và được quản lý thông qua tài khoản Apple hoặc Google của bạn."
+            ]
+          ]
+        }
+      },
+      {
+        "title": "Dữ liệu chúng tôi không lưu trữ",
+        "paragraphs": [
+          "Money2Time không yêu cầu tài khoản và không lưu tên, email, Apple ID, Tài khoản Google hoặc chi tiết thanh toán của bạn trên máy chủ của chúng tôi. Vì dữ liệu tài chính của bạn không bao giờ được lưu trên máy chủ của chúng tôi, kể cả khi bạn dùng Bảng điều khiển web, chúng tôi không thể truy cập hoặc xóa dữ liệu đó thay bạn.",
+          "Hồ sơ đăng ký và thanh toán do Apple hoặc Google lưu giữ nằm ngoài tầm kiểm soát của chúng tôi và được quản lý trực tiếp qua tài khoản Apple hoặc Google của bạn."
+        ]
+      }
+    ],
+    "contact": {
+      "title": "Liên hệ với chúng tôi",
+      "body": "Để yêu cầu xóa dữ liệu phân tích hoặc đăng ký, hoặc nếu bạn có bất kỳ câu hỏi nào, hãy liên hệ với chúng tôi tại:",
+      "formPrefix": "Bạn cũng có thể dùng",
+      "formLink": "biểu mẫu liên hệ",
+      "formSuffix": "trên trang web này."
+    }
+  },
+  "costInHours": {
+    "eyebrow": "Lương tính bằng giờ",
+    "title": "Một giờ làm việc mua được gì, theo từng nước",
+    "intro": "Mọi mức giá đều có con số thứ hai: thời gian bạn đã làm để có nó. Trang này đặt mức lương chính thức của từng nước cạnh một món hàng giống nhau ở mọi nơi, nên có thể so xem một giờ mua được gì mà không phải tranh cãi trước về việc bỏ gì vào giỏ.",
+    "compare": {
+      "base": "Mốc",
+      "with": "So với",
+      "measure": "Đo cái gì",
+      "caption": "Lương công bố và công sức cho một chiếc Big Mac, ở hai nước",
+      "priceSource": "Giá Big Mac:"
+    },
+    "metrics": {
+      "workPerBigMac": "Làm bao lâu cho một Big Mac",
+      "bigMacPrice": "Giá Big Mac",
+      "payPerHour": "Lương mỗi giờ",
+      "payPerHourUsd": "Lương mỗi giờ tính bằng đô la Mỹ",
+      "bigMacsPerMonth": "Số Big Mac một tháng lương mua được",
+      "workPerLitre": "Làm bao lâu cho một lít xăng",
+      "workPer100kWh": "Làm bao lâu cho {kwh} kWh điện"
+    },
+    "periods": {
+      "hour": "mỗi giờ",
+      "week": "mỗi tuần",
+      "month": "mỗi tháng",
+      "year": "mỗi năm"
+    },
+    "measures": {
+      "median": "Trung vị",
+      "average": "Trung bình"
+    },
+    "scopes": {
+      "allEmployees": "toàn bộ người làm công",
+      "allWorkers": "toàn bộ người có việc làm",
+      "citizens": "công dân",
+      "formalSector": "khu vực chính thức, từ 10 người",
+      "fullTimeEmployees": "người làm toàn thời gian",
+      "fullTimeResidents": "cư dân làm toàn thời gian",
+      "regularSalaried": "người làm công ăn lương ổn định",
+      "wageAndSalary": "người hưởng lương",
+      "employees": "người làm công",
+      "employeesNet": "người làm công, sau thuế",
+      "employedPersons": "người có việc làm",
+      "formalNonAgri": "khu vực chính thức phi nông nghiệp",
+      "fullTimeEquivalent": "người làm công quy đổi toàn thời gian",
+      "urbanNonPrivate": "đơn vị đô thị ngoài tư nhân"
+    },
+    "allMarkets": {
+      "title": "Xếp hạng mười nước",
+      "intro": "Sắp theo việc mức lương phải làm bao lâu mới đủ một chiếc Big Mac. Nên đọc cột thứ ba trước: sáu con số là trung vị và bốn là trung bình, mà trung bình luôn cao hơn vì nhóm thu nhập cao kéo lên.",
+      "caption": "Số liệu lương công bố và công sức cho một chiếc Big Mac, theo nước",
+      "country": "Nước",
+      "pay": "Lương công bố",
+      "basis": "Đo cái gì",
+      "hourly": "Mỗi giờ",
+      "effort": "Làm bao lâu cho một Big Mac",
+      "youAreHere": "Bạn"
+    },
+    "notes": {
+      "title": "Cách đọc trang này",
+      "method": {
+        "title": "Số giờ được tính thế nào",
+        "body": "Nơi nào cơ quan thống kê công bố mức theo giờ thì lấy nguyên mức đó. Nơi nào công bố theo tuần hoặc theo tháng thì chia cho tuần làm việc {hours} giờ. Stats NZ công bố cả hai, và chênh lệch giữa chúng chưa tới năm mươi xu."
+      },
+      "basket": {
+        "title": "Vì sao là một chiếc bánh chứ không phải cả giỏ hàng",
+        "body": "Big Mac, một lít xăng octan 95 và một kilowatt-giờ điện sinh hoạt là cùng những thứ ở mọi nước trong trang này, mỗi thứ đều do một tờ báo thu thập trong cùng một ngày. Ở Ấn Độ, nơi McDonald's không bán Big Mac bò, The Economist lấy giá Maharaja Mac làm bằng thịt gà. Một giỏ hàng địa phương rộng hơn sẽ bao được nhiều mặt của đời sống hơn, nhưng «ăn ngoài» ở Manila và ở Melbourne không phải một thứ, và đem so thì nói về cái giỏ nhiều hơn nói về đồng tiền."
+      },
+      "comparability": {
+        "title": "Các mức lương không so trực tiếp được",
+        "body": "Không ai công bố một bảng lương trung vị duy nhất bao trùm các nước này, nên mỗi con số đến từ cơ quan thống kê riêng và đếm một nhóm khác nhau. Sáu là trung vị, bốn là trung bình. Hãy đọc khoảng cách giữa các nước như một ước lượng."
+      },
+      "grossPay": {
+        "title": "Đây là trước thuế",
+        "body": "Lương công bố là lương gộp. Số thực về tài khoản thì nhỏ hơn, nên số giờ của chính bạn dài hơn số trên trang này."
+      }
+    },
+    "sources": {
+      "title": "Số liệu lấy từ đâu",
+      "bigMac": "Giá Big Mac và tỷ giá:",
+      "wages": "Lương, theo từng nước:",
+      "energy": "Giá xăng và điện:"
+    },
+    "cta": {
+      "body": "Ứng dụng làm điều này với lương của bạn chứ không phải của cả nước. Nhập số bạn thực nhận, mỗi khoản chi sẽ có con số thứ hai.",
+      "link": "Xem cách hoạt động"
+    }
+  },
+  "tutorials": {
+    "eyebrow": "Hướng dẫn",
+    "title": "Hướng dẫn",
+    "intro": "Các hướng dẫn ngắn, đi từng màn hình, cho mọi thứ Money2Time làm được. Mỗi ảnh đều là ứng dụng thật, nút cần chạm được khoanh đỏ.",
+    "searchPlaceholder": "Tìm hướng dẫn",
+    "clear": "Xóa",
+    "emptyTitle": "Không có kết quả",
+    "emptyDescription": "Thử từ ngắn hơn, hoặc tên màn hình bạn đang tìm.",
+    "stepCount": "{count} bước",
+    "stepCounter": "{current} / {total}",
+    "badgePro": "PRO",
+    "badgeIos": "iPhone",
+    "openInApp": "Mở trong ứng dụng",
+    "previous": "Trước",
+    "next": "Tiếp",
+    "category": {
+      "start": "Bắt đầu",
+      "logging": "Ghi lại chi tiêu",
+      "organize": "Sắp xếp",
+      "plan": "Lên kế hoạch",
+      "share": "Chia và thanh toán",
+      "insights": "Hiểu rõ hơn",
+      "data": "Dữ liệu của bạn"
+    }
+  },
+  "dashboard": {
+    "loading": "Đang mở bảng điều khiển của bạn…",
+    "units": {
+      "minutes": "{m} ph",
+      "hours": "{h} giờ",
+      "hoursMinutes": "{h} giờ {m} ph",
+      "days": "{d} ngày",
+      "daysHours": "{d} ngày {h} giờ"
+    },
+    "nav": {
+      "label": "Bảng điều khiển",
+      "menu": "Menu",
+      "openMenu": "Mở menu",
+      "closeMenu": "Đóng menu",
+      "groups": {
+        "insights": "Thống kê",
+        "wealth": "Tài sản",
+        "planning": "Kế hoạch",
+        "organize": "Sắp xếp"
+      }
+    },
+    "period": {
+      "label": "Kỳ",
+      "previous": "Kỳ trước",
+      "next": "Kỳ sau",
+      "asOf": "Tính đến {date}",
+      "presets": {
+        "month": "Tháng",
+        "3m": "3 tháng",
+        "6m": "6 tháng",
+        "12m": "12 tháng",
+        "ytd": "Từ đầu năm",
+        "year": "Năm",
+        "all": "Tất cả"
+      }
+    },
+    "mode": {
+      "label": "Hiển thị số tiền theo",
+      "hours": "Giờ"
+    },
+    "common": {
+      "income": "Thu nhập",
+      "spending": "Chi tiêu",
+      "net": "Ròng",
+      "saved": "Tiết kiệm được",
+      "viewAll": "Xem tất cả",
+      "vsPrevious": "so với kỳ trước",
+      "uncategorized": "Chưa phân loại",
+      "other": "Khác",
+      "total": "Tổng",
+      "average": "Trung bình",
+      "transactions": "{count, plural, other {# giao dịch}}",
+      "accountTypes": {
+        "debit": "Tài khoản",
+        "credit": "Thẻ tín dụng",
+        "loan": "Khoản vay",
+        "goal": "Mục tiêu",
+        "cash": "Tiền mặt",
+        "savings": "Tiết kiệm",
+        "investment": "Đầu tư"
+      },
+      "viewFailed": "Không thể hiển thị trang này với dữ liệu của bạn. Các trang khác vẫn hoạt động."
+    },
+    "views": {
+      "overview": {
+        "nav": "Tổng quan",
+        "title": "Tổng quan",
+        "subtitle": "Tiền và thời gian của bạn đã đi đâu"
+      },
+      "cash-flow": {
+        "nav": "Dòng tiền",
+        "title": "Dòng tiền",
+        "subtitle": "Tiền vào, tiền ra và phần còn lại"
+      },
+      "spending": {
+        "nav": "Chi tiêu",
+        "title": "Chi tiêu",
+        "subtitle": "Từng danh mục, đến tận từng giao dịch"
+      },
+      "income": {
+        "nav": "Thu nhập",
+        "title": "Thu nhập",
+        "subtitle": "Tiền của bạn đến từ đâu"
+      },
+      "trends": {
+        "nav": "Xu hướng",
+        "title": "Xu hướng",
+        "subtitle": "Từng danh mục thay đổi thế nào qua các tháng"
+      },
+      "calendar": {
+        "nav": "Lịch",
+        "title": "Lịch",
+        "subtitle": "Chi tiêu từng ngày"
+      },
+      "transactions": {
+        "nav": "Giao dịch",
+        "title": "Giao dịch",
+        "subtitle": "Tìm kiếm và lọc mọi thứ bạn đã ghi"
+      },
+      "accounts": {
+        "nav": "Tài khoản",
+        "title": "Tài khoản",
+        "subtitle": "Số dư của mọi tài khoản"
+      },
+      "net-worth": {
+        "nav": "Tài sản ròng",
+        "title": "Tài sản ròng",
+        "subtitle": "Những gì bạn có, trừ những gì bạn nợ"
+      },
+      "budgets": {
+        "nav": "Ngân sách",
+        "title": "Ngân sách",
+        "subtitle": "Kế hoạch so với thực tế"
+      },
+      "recurring": {
+        "nav": "Định kỳ",
+        "title": "Định kỳ",
+        "subtitle": "Đăng ký và hóa đơn lặp lại"
+      },
+      "goals": {
+        "nav": "Mục tiêu & khoản vay",
+        "title": "Mục tiêu & khoản vay",
+        "subtitle": "Tiến độ đạt mục tiêu và trả nợ"
+      },
+      "time": {
+        "nav": "Chi phí thời gian",
+        "title": "Chi phí thời gian",
+        "subtitle": "Chi tiêu của bạn, quy ra giờ cuộc đời"
+      },
+      "trips": {
+        "nav": "Chuyến đi",
+        "title": "Chuyến đi",
+        "subtitle": "Mỗi chuyến đi tốn bao nhiêu, tính bằng tiền và ngày công"
+      },
+      "items": {
+        "nav": "Vật dụng",
+        "title": "Vật dụng",
+        "subtitle": "Chi phí mỗi ngày của những thứ bạn sở hữu"
+      },
+      "splits": {
+        "nav": "Hóa đơn chia",
+        "title": "Hóa đơn chia",
+        "subtitle": "Ai còn nợ bạn"
+      },
+      "mood": {
+        "nav": "Cảm xúc & thói quen",
+        "title": "Cảm xúc & thói quen",
+        "subtitle": "Cảm giác sau mỗi lần mua và bạn mua vào lúc nào"
+      },
+      "categories": {
+        "nav": "Danh mục",
+        "title": "Danh mục",
+        "subtitle": "Thêm, đổi tên và sắp xếp các danh mục của bạn"
+      }
+    },
+    "overview": {
+      "spent": "Đã chi",
+      "earned": "Đã kiếm",
+      "saved": "Tiết kiệm được",
+      "overspent": "Chi vượt thu nhập",
+      "savingsRate": "Tỷ lệ tiết kiệm {rate}",
+      "noIncome": "Kỳ này không có thu nhập",
+      "netWorth": "Tài sản ròng",
+      "netWorthNote": "Tính trên {count, plural, other {# tài khoản}} trong tổng",
+      "cashFlowTitle": "Dòng tiền",
+      "cashFlowSubtitle": "12 tháng tính đến kỳ này",
+      "paceTitle": "Nhịp chi tiêu",
+      "thisMonth": "Tháng này",
+      "lastMonth": "Tháng trước",
+      "dayN": "Ngày {day}",
+      "paceBehind": "Ít hơn {amount} so với cùng thời điểm tháng trước.",
+      "paceAhead": "Nhiều hơn {amount} so với cùng thời điểm tháng trước.",
+      "topCategories": "Danh mục lớn nhất",
+      "biggestExpenses": "Khoản chi lớn nhất",
+      "upcoming": "Khoản định kỳ sắp tới",
+      "nextOn": "Tiếp theo vào {date}",
+      "noSpending": "Kỳ này không có chi tiêu",
+      "noRecurring": "Không có quy tắc định kỳ đang bật",
+      "timeTitle": "Thời gian của bạn",
+      "timeBody": "Chi tiêu kỳ này tương đương <strong>{hours}</strong> làm việc.",
+      "workShare": "Tỷ lệ số giờ bạn đã làm",
+      "workShareNote": "Trong khoảng {worked} làm việc ở kỳ này",
+      "noWage": "Hãy đặt giá trị theo giờ trong ứng dụng để xem theo giờ.",
+      "accountsTitle": "Tài khoản lớn nhất"
+    },
+    "cashFlow": {
+      "savingsRate": "Tỷ lệ tiết kiệm {rate}",
+      "noIncome": "Kỳ này không có thu nhập",
+      "netPerDay": "Ròng mỗi ngày",
+      "avgNet": "Ròng trung bình mỗi tháng",
+      "daysCount": "{count, plural, other {Trong # ngày}}",
+      "monthsCount": "{count, plural, other {Trong # tháng}}",
+      "dailyTitle": "Từng ngày",
+      "monthlyTitle": "Từng tháng",
+      "sankeyTitle": "Tiền đã đi đâu",
+      "sankeySubtitle": "Thu nhập bên trái, chi tiêu và tiết kiệm bên phải",
+      "fromSavings": "Từ tiền tiết kiệm",
+      "empty": "Kỳ này không có thu nhập hay chi tiêu",
+      "savingsRateTitle": "Tỷ lệ tiết kiệm",
+      "savingsRateSubtitle": "Phần thu nhập bạn giữ lại mỗi tháng; 20% là mục tiêu phổ biến",
+      "tableTitle": "Tóm tắt theo tháng",
+      "month": "Tháng",
+      "rate": "Tỷ lệ"
+    },
+    "breakdown": {
+      "totalSpent": "Tổng đã chi",
+      "totalEarned": "Tổng đã kiếm",
+      "perDay": "Mỗi ngày",
+      "overDays": "{count, plural, other {Trong # ngày}}",
+      "count": "Giao dịch",
+      "avgEach": "Trung bình {amount}",
+      "largestCategory": "Danh mục lớn nhất",
+      "byCategory": "Theo danh mục",
+      "subcategories": "Danh mục con",
+      "clickToDrill": "Chọn một danh mục để xem danh mục con",
+      "allCategories": "Tất cả danh mục",
+      "empty": "Kỳ này chưa có gì ở đây",
+      "byDay": "Theo ngày",
+      "byMonth": "Theo tháng",
+      "monthlyAverage": "Trung bình {amount} mỗi tháng",
+      "topMerchants": "Nơi chi nhiều nhất",
+      "topMerchantsNote": "Nhóm theo ghi chú của từng giao dịch",
+      "biggestPurchases": "Khoản mua lớn nhất",
+      "biggestPayments": "Khoản thanh toán lớn nhất",
+      "byWeekday": "Theo thứ trong tuần",
+      "byWeekdayNote": "Tổng của kỳ này cho từng thứ trong tuần",
+      "transactionsIn": "Giao dịch trong {name}",
+      "allTransactions": "Tất cả giao dịch"
+    },
+    "transactions": {
+      "search": "Tìm theo ghi chú, danh mục hoặc số tiền",
+      "type": "Loại",
+      "types": {
+        "all": "Tất cả loại",
+        "expense": "Chi tiêu",
+        "income": "Thu nhập",
+        "transfer": "Chuyển khoản"
+      },
+      "category": "Danh mục",
+      "allCategories": "Tất cả danh mục",
+      "account": "Tài khoản",
+      "allAccounts": "Tất cả tài khoản",
+      "feeling": "Cảm giác",
+      "allFeelings": "Mọi cảm giác",
+      "feelings": {
+        "happy": "Thấy đáng",
+        "neutral": "Bình thường",
+        "sad": "Giá như đừng chi"
+      },
+      "empty": "Không có giao dịch phù hợp",
+      "newer": "Mới hơn",
+      "older": "Cũ hơn",
+      "page": "Trang {page}/{pages}"
+    },
+    "trends": {
+      "gridTitle": "Danh mục theo tháng",
+      "gridSubtitle": "Màu càng đậm là tháng đó chi càng nhiều. Chọn một hàng để xem biểu đồ.",
+      "category": "Danh mục",
+      "empty": "Những tháng này không có chi tiêu",
+      "lineSubtitle": "Trung bình {amount} mỗi tháng",
+      "moversTitle": "Thay đổi lớn nhất",
+      "moversSubtitle": "So với kỳ trước có cùng độ dài",
+      "noMovers": "Không có gì thay đổi nhiều"
+    },
+    "calendar": {
+      "perDay": "Trung bình mỗi ngày",
+      "noSpendDays": "Ngày không chi tiêu",
+      "noSpend": "Không chi tiêu",
+      "ofDays": "{count, plural, other {Trên # ngày tính đến nay}}",
+      "bestStreak": "Chuỗi không chi tiêu dài nhất",
+      "daysValue": "{count, plural, other {# ngày}}",
+      "bestStreakNote": "Trong 12 tháng qua",
+      "busiest": "Ngày chi nhiều nhất",
+      "monthSubtitle": "Chọn một ngày để xem đã xảy ra chuyện gì",
+      "pickDay": "Mới nhất trong tháng",
+      "pickDayNote": "Chọn một ngày trên lịch để chỉ xem ngày đó",
+      "yearTitle": "12 tháng qua",
+      "yearSubtitle": "Mỗi ô vuông là một ngày; màu càng đậm là chi càng nhiều"
+    },
+    "accounts": {
+      "assets": "Tài sản",
+      "debts": "Nợ",
+      "netWorth": "Tài sản ròng",
+      "inTotals": "{count, plural, other {# tài khoản được tính vào tổng}}",
+      "excluded": "{count, plural, =0 {Mọi tài khoản đều được tính} other {# tài khoản không tính vào tổng}}",
+      "ungrouped": "Tài khoản khác",
+      "notInTotals": "Không tính vào tổng",
+      "owed": "đang nợ",
+      "owedNow": "Nợ hôm nay",
+      "balanceNow": "Số dư hôm nay",
+      "lastActivity": "hoạt động gần nhất {date}",
+      "statementDays": "Sao kê ngày {statement}, đến hạn ngày {due}",
+      "statementDaysAfter": "Sao kê ngày {statement}, đến hạn sau {days} ngày",
+      "activity": "Hoạt động",
+      "empty": "Chưa có tài khoản nào"
+    },
+    "netWorth": {
+      "now": "Tài sản ròng",
+      "inHours": "{hours} làm việc theo mức hôm nay",
+      "change": "Thay đổi",
+      "since": "Từ {month}",
+      "bestMonth": "Tháng tốt nhất",
+      "debts": "Nợ",
+      "debtNote": "Thẻ tín dụng và khoản vay trong tổng",
+      "assets": "Tài sản",
+      "chartTitle": "Tài sản, nợ và tài sản ròng",
+      "chartSubtitle": "Số dư cuối tháng của các tài khoản được tính vào tổng, theo tỷ giá hôm nay",
+      "mixTitle": "Tài sản của bạn nằm ở đâu",
+      "mixSubtitle": "Theo nhóm tài khoản",
+      "ungrouped": "Khác",
+      "empty": "Chưa có tài sản",
+      "monthlyChange": "Thay đổi mỗi tháng"
+    },
+    "budgets": {
+      "emptyTitle": "Chưa có ngân sách nào",
+      "emptyBody": "Hãy lập ngân sách hằng tháng trong ứng dụng và nó sẽ hiện ở đây.",
+      "month": "Tháng",
+      "budget": "Ngân sách",
+      "spent": "Đã chi",
+      "ofBudget": "{pct} ngân sách",
+      "left": "Còn được chi",
+      "over": "Vượt ngân sách",
+      "perDayLeft": "{amount} mỗi ngày cho phần còn lại của tháng",
+      "pace": "Tháng đã trôi qua",
+      "paceNote": "Ngày {day}/{days}",
+      "linesTitle": "Danh mục",
+      "linesSubtitle": "Vạch trên mỗi thanh cho biết bạn đã đi được bao xa trong tháng",
+      "overall": "Toàn bộ ngân sách",
+      "overBy": "Vượt {amount}",
+      "leftOf": "Còn {amount}",
+      "aheadOfPace": "nhanh hơn nhịp",
+      "unbudgetedCounted": "{amount} được chi ngoài các danh mục này và được tính vào ngân sách.",
+      "unbudgetedNot": "{amount} được chi ngoài các danh mục này và không được tính.",
+      "rateNote": "Chi tiêu bằng tiền tệ khác được quy đổi theo 1 {currency} = {rate} {main}.",
+      "approxLeft": "Tức là còn khoảng {amount}.",
+      "approxOver": "Tức là vượt khoảng {amount}.",
+      "unconverted": "{count, plural, other {# khoản chi}} chưa được tính: chưa có tỷ giá {currency}.",
+      "historyTitle": "Ngân sách và chi tiêu theo tháng",
+      "historyInMain": "Theo {currency}, để so sánh được các tháng có ngân sách bằng tiền tệ khác"
+    },
+    "recurring": {
+      "emptyTitle": "Chưa có quy tắc định kỳ",
+      "emptyBody": "Các khoản đăng ký và hóa đơn bạn đặt lặp lại trong ứng dụng sẽ hiện ở đây.",
+      "perMonth": "Chi phí cố định mỗi tháng",
+      "perYear": "Mỗi năm",
+      "clockTitle": "Hóa đơn được trả xong lúc",
+      "clockNote": "Bắt đầu từ 9:00, {hours} đầu tiên của mỗi ngày làm việc sẽ trả hết chúng ({day} ngày)",
+      "active": "Quy tắc đang bật",
+      "pausedCount": "{count, plural, =0 {Không có khoản nào tạm dừng} other {# tạm dừng}}",
+      "listTitle": "Đang bật",
+      "listSubtitle": "Xếp theo chi phí mỗi tháng",
+      "cadence": {
+        "daily": "{count, plural, =1 {Mỗi ngày} other {Cứ # ngày một lần}}",
+        "weekly": "{count, plural, =1 {Mỗi tuần} other {Cứ # tuần một lần}}",
+        "monthly": "{count, plural, =1 {Mỗi tháng} other {Cứ # tháng một lần}}",
+        "yearly": "{count, plural, =1 {Mỗi năm} other {Cứ # năm một lần}}"
+      },
+      "next": "tiếp theo {date}",
+      "transfer": "Chuyển khoản",
+      "yearHours": "{hours} làm việc mỗi năm",
+      "upcomingTitle": "Sắp tới",
+      "pausedTitle": "Tạm dừng"
+    },
+    "goals": {
+      "emptyTitle": "Chưa có mục tiêu hay khoản vay",
+      "emptyBody": "Mục tiêu tiết kiệm và khoản vay bạn theo dõi trong ứng dụng sẽ hiện ở đây.",
+      "goalsTitle": "Mục tiêu",
+      "achieved": "Đã đạt",
+      "left": "Còn cần tiết kiệm",
+      "progress": "Tiến độ",
+      "byDate": "Để đạt vào {date}",
+      "perMonthNeeded": "{amount} mỗi tháng",
+      "loansTitle": "Khoản vay",
+      "model": {
+        "flat": "Lãi suất cố định",
+        "reducing": "Dư nợ giảm dần"
+      },
+      "leftToPay": "Còn phải trả",
+      "leftInHours": "{hours} làm việc",
+      "paidOff": "Đã trả xong",
+      "instalments": "{paid}/{total} kỳ trả góp",
+      "principal": "Số tiền vay",
+      "owedNow": "Gốc còn nợ",
+      "paidSoFar": "Đã trả đến nay",
+      "monthly": "Khoản trả hằng tháng",
+      "rate": "Tỷ lệ",
+      "interestCharged": "Lãi đã tính",
+      "nextDue": "Kỳ trả tiếp theo",
+      "payoff": "Trả xong vào",
+      "paymentsLeft": "Số kỳ còn lại",
+      "netNote": "Số liệu khoản vay theo cách ứng dụng tính: lãi được cộng mỗi tháng kể từ ngày tạo khoản vay."
+    },
+    "time": {
+      "spentHours": "Số giờ làm việc đã chi",
+      "share": "Tỷ lệ số giờ đã làm",
+      "shareNote": "Trong khoảng {hours} đã làm",
+      "workdays": "Ngày công",
+      "workdaysValue": "{count, plural, other {# ngày công}}",
+      "workdayLength": "Với {hours} mỗi ngày công",
+      "hourlyValue": "Giá trị giờ",
+      "perHour": "mỗi giờ, theo mức lương gần nhất",
+      "chartTitle": "Giờ đã chi so với giờ đã làm",
+      "chartSubtitle": "Chi tiêu mỗi tháng, quy theo mức lương của tháng đó",
+      "hoursSpent": "Giờ đã chi",
+      "hoursWorked": "Giờ đã làm",
+      "categoriesTitle": "Danh mục tính theo ngày công",
+      "categoriesSubtitle": "Mỗi danh mục tốn bao nhiêu ngày công",
+      "empty": "Kỳ này không có chi tiêu",
+      "runwayTitle": "Quãng đường tự do",
+      "daysValue": "{count, plural, other {# ngày}}",
+      "runwayBody": "{liquid} trong các tài khoản dùng hằng ngày sẽ đủ cho bao lâu, với mức chi gần đây {daily} mỗi ngày, mà không cần đi làm.",
+      "regretTitle": "Giờ dành cho những lần hối tiếc",
+      "regretBody": "{count, plural, =0 {Kỳ này không có khoản nào đánh dấu “Giá như đừng chi”.} other {Trong # lần mua bạn ước mình đã không mua.}}",
+      "biggestTitle": "Lớn nhất theo giờ",
+      "biggestSubtitle": "Những khoản mua tốn nhiều thời gian kiếm nhất",
+      "wageTitle": "Giá trị giờ của bạn theo thời gian",
+      "wageSubtitle": "Từ các mức lương đã lưu trong ứng dụng",
+      "noWage": "Hãy đặt giá trị theo giờ trong ứng dụng để xem chi tiêu theo giờ."
+    },
+    "trips": {
+      "emptyTitle": "Chưa có chuyến đi",
+      "emptyBody": "Các album bạn tạo trong ứng dụng cho chuyến đi sẽ hiện ở đây cùng chi phí của từng chuyến.",
+      "count": "Chuyến đi",
+      "countries": "{count, plural, =0 {Chưa chọn quốc gia} other {# quốc gia}}",
+      "total": "Chi cho chuyến đi",
+      "workdays": "Tính theo ngày công",
+      "workdaysValue": "{count, plural, other {# ngày công}}",
+      "workdaysNote": "Trên mọi chuyến đi",
+      "current": "Hiện tại",
+      "perDay": "{amount} mỗi ngày",
+      "breakdown": "Theo danh mục",
+      "transactionsTitle": "Giao dịch",
+      "pick": "Chọn một chuyến đi để xem chi tiết."
+    },
+    "items": {
+      "emptyTitle": "Chưa có vật dụng",
+      "emptyBody": "Các món đồ bạn theo dõi trong ứng dụng sẽ hiện ở đây cùng chi phí mỗi ngày.",
+      "value": "Giá trị sở hữu",
+      "count": "{count, plural, other {# món}}",
+      "perDay": "Chi phí mỗi ngày",
+      "perMonth": "{amount} mỗi tháng",
+      "workPerDay": "Công việc mỗi ngày",
+      "workPerDayNote": "Để trả cho mọi thứ bạn sở hữu",
+      "listTitle": "Mọi thứ bạn sở hữu",
+      "listSubtitle": "Giá mua chia đều cho số ngày bạn đã dùng",
+      "bought": "Mua ngày {date} với giá {price}",
+      "owned": "{count, plural, other {# ngày}} sở hữu",
+      "sold": "đã bán với giá {price}",
+      "perDayValue": "{amount}/ngày",
+      "workValue": "{time} làm việc mỗi ngày"
+    },
+    "splits": {
+      "emptyTitle": "Chưa có hóa đơn chia",
+      "emptyBody": "Các hóa đơn bạn chia với bạn bè trong ứng dụng sẽ hiện ở đây.",
+      "owedToYou": "Nợ bạn",
+      "people": "{count, plural, =0 {Đã thanh toán hết} other {Từ # người}}",
+      "settled": "Phần đã thanh toán",
+      "ofShares": "{count, plural, other {Trên # phần}}",
+      "bills": "Hóa đơn chia",
+      "billsNote": "Giao dịch bạn đã chia sẻ",
+      "byPerson": "Ai nợ bạn",
+      "allSettled": "Mọi người đã trả lại bạn",
+      "open": "{count, plural, other {# phần chưa trả}}",
+      "billsTitle": "Giao dịch chia sẻ",
+      "unnamed": "Một người"
+    },
+    "mood": {
+      "feelings": {
+        "happy": "Thấy đáng",
+        "neutral": "Bình thường",
+        "sad": "Giá như đừng chi"
+      },
+      "shareSub": "{amount} · {count, plural, other {# lần mua}}",
+      "monthlyTitle": "Cảm giác sau mỗi lần mua",
+      "monthlySubtitle": "Số lần mua mỗi tháng, theo cảm giác",
+      "regretsTitle": "Giá như đừng chi",
+      "regretsSubtitle": "Những khoản mua lớn nhất bạn hối tiếc",
+      "noRegrets": "Kỳ này không có điều hối tiếc",
+      "clockTitle": "Khi nào bạn chi tiêu",
+      "clockSubtitle": "Số lần mua theo thứ và giờ; đông nhất quanh {hour}",
+      "noTimes": "Các lần mua được ghi không kèm giờ sẽ không hiện ở đây."
+    },
+    "loadingTitle": "Bảng điều khiển web",
+    "edit": {
+      "statusReady": "Đang bật chỉnh sửa",
+      "statusReadyTitle": "Thay đổi được lưu trên điện thoại",
+      "statusReadyBody": "Điện thoại của bạn đang kết nối. Điện thoại kiểm tra và lưu từng thay đổi, rồi đồng bộ dữ liệu mới về đây.",
+      "statusAway": "Chỉ xem",
+      "statusAwayTitle": "Hãy kết nối điện thoại để thay đổi.",
+      "statusAwayBody": "Mở Money2Time trên điện thoại và vào Cài đặt → Bảng điều khiển web. Khi đang kết nối, bạn có thể thêm, sửa và xóa giao dịch ngay tại đây. Điện thoại và trình duyệt này luôn đồng bộ.",
+      "statusUpdateTitle": "Hãy cập nhật ứng dụng để thay đổi tại đây.",
+      "statusUpdateBody": "Phiên bản Money2Time trên điện thoại của bạn chỉ đồng bộ dữ liệu để xem. Hãy cập nhật để thêm, sửa và xóa mục từ trình duyệt này.",
+      "statusOffTitle": "Đã tắt thay đổi cho trình duyệt này.",
+      "statusOffBody": "Trên điện thoại, mở Cài đặt → Bảng điều khiển web, chạm vào ⋯ cạnh trình duyệt này và chọn Cho phép thay đổi.",
+      "statusSaving": "Đang lưu…",
+      "statusSyncing": "Đang đồng bộ…",
+      "statusSyncingBody": "Đang đồng bộ dữ liệu mới nhất từ điện thoại. Bạn có thể thay đổi ngay khi dữ liệu về tới.",
+      "awayHint": "Để thêm, sửa hoặc xóa giao dịch, hãy mở Cài đặt → Bảng điều khiển web trên điện thoại.",
+      "close": "Đóng",
+      "clear": "Xóa",
+      "cancel": "Hủy",
+      "reloadLatest": "Tải bản mới nhất",
+      "delete": "Xóa",
+      "apply": "Áp dụng",
+      "choose": "Chọn",
+      "add": "Thêm",
+      "update": "Cập nhật",
+      "addAnother": "Thêm tiếp",
+      "type": "Loại",
+      "expense": "Chi tiêu",
+      "income": "Thu nhập",
+      "transfer": "Chuyển khoản",
+      "adjustment": "Điều chỉnh",
+      "deleteTransaction": "Xóa giao dịch",
+      "deleteTransactionBody": "Không thể hoàn tác. Tiếp tục?",
+      "required": "Bắt buộc",
+      "from": "Từ",
+      "to": "Đến",
+      "chooseAccount": "Chọn tài khoản",
+      "swapAccounts": "Hoán đổi tài khoản nguồn và đích",
+      "differentAccount": "Phải là tài khoản khác",
+      "accountLabel": "Tài khoản",
+      "accounts": "Tài khoản",
+      "categoryLabel": "Danh mục",
+      "categories": "Danh mục",
+      "options": "Tuỳ chọn giao dịch",
+      "amount": "Số tiền",
+      "currencyLabel": "Tiền tệ",
+      "optional": "Tùy chọn",
+      "note": "Ghi chú",
+      "received": "Số tiền nhận",
+      "date": "Ngày",
+      "details": "Chi tiết",
+      "detailsPlaceholder": "Thêm ghi chú dài hơn",
+      "reimbursable": "Chờ hoàn tiền",
+      "reimbursed": "Đã hoàn",
+      "reimbursableHint": "Khoản chi người khác sẽ trả lại. Đòi lại ở trang Hoàn tiền.",
+      "countAsExpense": "Tính là chi tiêu",
+      "countAsExpenseHint": "Tính khoản chuyển này là chi tiêu trong tổng, ngân sách và biểu đồ của bạn, theo danh mục bạn chọn. Tiền vẫn chuyển giữa hai tài khoản như thường.",
+      "feeling": "Bạn cảm thấy thế nào?",
+      "nudgeSmall": "Khoảng {hours} thời gian của bạn",
+      "nudgePause": "Đáng suy nghĩ: ~{hours} làm việc",
+      "nudgeLarge": "Đây là {hours} thời gian làm việc của bạn",
+      "amountLocked": "Số tiền này gắn với một khoản chia hoặc hoàn tiền. Hãy đổi trong ứng dụng.",
+      "hideBalances": "Ẩn số dư",
+      "showBalances": "Hiện số dư",
+      "savingsGoals": "Mục tiêu tiết kiệm",
+      "ungrouped": "Chưa nhóm",
+      "noAccounts": "Chưa có tài khoản.",
+      "noCategories": "Chưa có danh mục.",
+      "select": "Chọn",
+      "selectAll": "Chọn tất cả",
+      "selected": "{count, plural, other {Đã chọn #}}",
+      "deleteConfirm": "{count, plural, other {Xóa # giao dịch này? Giao dịch cũng sẽ bị xóa trên điện thoại của bạn.}}",
+      "tooMany": "Mỗi lần chỉ chọn tối đa {max} giao dịch.",
+      "accountTransfers": "Chuyển khoản giữ nguyên tài khoản. Hãy bỏ chọn chúng để đổi tài khoản.",
+      "accountLocked": "Một số mục này gắn với khoản chia hoặc hoàn tiền. Hãy đổi tài khoản của chúng trong ứng dụng.",
+      "accountCurrencies": "Các mục này dùng các loại tiền khác nhau. Hãy chọn các mục cùng một loại tiền để chuyển sang tài khoản khác.",
+      "editTitle": "Sửa giao dịch",
+      "errors": {
+        "stale": "Điện thoại của bạn có dữ liệu mới hơn và đang đồng bộ. Hãy thử lại sau giây lát.",
+        "conflict": "Mục này đã thay đổi trên điện thoại của bạn. Dữ liệu mới nhất đang được gửi tới. Hãy kiểm tra rồi thử lại.",
+        "amount_locked": "Số tiền này gắn với một khoản chia hoặc hoàn tiền. Hãy đổi trong ứng dụng.",
+        "pro_required": "Tính năng này cần Money2Time Pro. Nâng cấp trong ứng dụng để dùng thêm.",
+        "off": "Đã tắt thay đổi cho trình duyệt này. Hãy cho phép trên điện thoại tại Cài đặt → Bảng điều khiển web.",
+        "invalid": "Điện thoại của bạn không lưu được. Hãy kiểm tra thông tin rồi thử lại.",
+        "failed": "Điện thoại của bạn không lưu được. Hãy thử lại.",
+        "busy": "Thay đổi trước của bạn vẫn đang được lưu. Hãy thử lại sau giây lát.",
+        "away": "Điện thoại của bạn chưa kết nối. Hãy mở Bảng điều khiển web trên điện thoại rồi thử lại.",
+        "too_large": "Quá nhiều thay đổi cùng lúc. Hãy chọn ít mục hơn.",
+        "unknown": "Điện thoại ngắt kết nối trước khi xác nhận. Khi kết nối lại, hãy kiểm tra xem thay đổi đã được lưu chưa."
+      },
+      "account": {
+        "newAccount": "Tài khoản mới",
+        "editAccount": "Sửa tài khoản",
+        "deleteAccount": "Xóa tài khoản",
+        "deleteAccountBody": "Sẽ xóa vĩnh viễn tài khoản này và toàn bộ giao dịch của nó. Không thể hoàn tác.",
+        "save": "Lưu",
+        "type": "Loại",
+        "typeDebit": "Ghi nợ",
+        "typeCredit": "Tín dụng",
+        "specialNote": "Tại đây bạn có thể đổi tên, nhóm, logo và việc có tính vào tổng hay không. Phần còn lại hãy sửa trong trình chỉnh sửa riêng của nó.",
+        "name": "Tên tài khoản",
+        "namePlaceholder": "Ví hàng ngày",
+        "logo": "Logo",
+        "logoAdd": "Thêm logo",
+        "logoClear": "Xóa logo",
+        "logoChooseTitle": "Chọn logo",
+        "logoChooseSubtitle": "Tìm kiếm hoặc duyệt theo quốc gia",
+        "logoSearch": "Tìm ngân hàng & ví",
+        "logoCountry": "Quốc gia",
+        "logoNoResults": "Không tìm thấy kết quả",
+        "group": "Nhóm tài khoản",
+        "currency": "Tiền tệ",
+        "statementDay": "Ngày sao kê",
+        "dueDay": "Ngày đáo hạn",
+        "dueRule": "Hạn thanh toán",
+        "dueRuleDay": "Ngày trong tháng",
+        "dueRuleAfter": "Số ngày sau sao kê",
+        "dayRange": "Chọn một ngày từ 1 đến 31.",
+        "daysAfterRange": "Chọn từ 1 đến {max} ngày.",
+        "startingBalance": "Số dư ban đầu",
+        "currentBalance": "Số dư hiện tại",
+        "includeInTotals": "Tính vào tổng",
+        "includeInTotalsHint": "Tài khoản ẩn không tính vào tổng số dư.",
+        "currencyChangeTitle": "Đổi tiền tệ của tài khoản?",
+        "currencyChangeMessage": "Số dư sẽ được quy đổi từ {from} sang {to} theo tỷ giá mới nhất. Các giao dịch hiện có vẫn giữ nguyên tiền tệ gốc.",
+        "currencyChangeAction": "Quy đổi và thay đổi",
+        "balancePromptTitle": "Ghi thay đổi số dư này như thế nào?",
+        "balancePromptMessage": "Số dư thay đổi {amount}. Ghi là thu nhập/chi tiêu hay chỉ là chênh lệch tài khoản (không tính vào tổng phân tích)?",
+        "recordDifference": "Ghi là chênh lệch tài khoản",
+        "recordIncome": "Ghi là thu nhập",
+        "recordExpense": "Ghi là chi tiêu",
+        "newGroup": "Nhóm mới",
+        "createGroup": "Tạo nhóm",
+        "editGroup": "Sửa nhóm",
+        "groupName": "Tên nhóm",
+        "groupPlaceholder": "Chi tiêu",
+        "groupTaken": "Đã có nhóm với tên này.",
+        "deleteGroup": "Xóa nhóm?",
+        "deleteGroupBody": "Các tài khoản trong nhóm này sẽ chuyển sang Chưa nhóm.",
+        "addToGroup": "Thêm tài khoản",
+        "emptyGroup": "Chưa có tài khoản trong nhóm này",
+        "cardDesign": "Thiết kế thẻ",
+        "cardDesignTitle": "Thiết kế thẻ",
+        "cardDesignPlain": "Màu trơn",
+        "cardDesignClear": "Bỏ thiết kế thẻ",
+        "cardDesignAll": "Tất cả",
+        "cardDesignUploads": "Ảnh đã tải lên",
+        "cardDesignTemplate": "Thiết kế thẻ {genre} {number}",
+        "payTitle": "Thanh toán thẻ tín dụng",
+        "loanPayTitle": "Thanh toán",
+        "pay": "Thanh toán",
+        "payFrom": "Từ",
+        "none": "Không có",
+        "payable": "Số dư phải trả",
+        "loanDue": "Số tiền phải trả",
+        "paidNote": "Đã trả: {name}",
+        "paymentNotePlaceholder": "Ghi chú thanh toán",
+        "genre_mascot": "Linh vật",
+        "genre_minimal": "Tối giản",
+        "genre_gradient": "Chuyển màu",
+        "genre_luxury": "Sang trọng",
+        "genre_texture": "Chất liệu",
+        "genre_marble": "Đá cẩm thạch & đá",
+        "genre_pattern": "Hoa văn",
+        "genre_nature": "Thiên nhiên",
+        "genre_space": "Vũ trụ",
+        "genre_abstract": "Nghệ thuật trừu tượng",
+        "genre_anime": "Anime",
+        "genre_retro": "Cổ điển",
+        "genre_cute": "Dễ thương"
+      },
+      "album": {
+        "createTitle": "Album mới",
+        "create": "Tạo",
+        "editTitle": "Sửa chuyến đi",
+        "save": "Lưu",
+        "done": "Xong",
+        "clear": "Xóa",
+        "name": "Tên album",
+        "namePlaceholder": "vd. Chuyến đi Tokyo",
+        "dates": "Ngày (tùy chọn)",
+        "startDate": "Ngày bắt đầu",
+        "endDate": "Ngày kết thúc",
+        "location": "Vị trí",
+        "addTransactions": "Thêm giao dịch",
+        "editTransactions": "Sửa giao dịch",
+        "selectedCount": "Đã chọn {count}",
+        "transactionCount": "{count} giao dịch",
+        "previous": "Trước",
+        "next": "Tiếp",
+        "deleteTitle": "Xóa album?",
+        "deleteBody": "Thao tác này xóa album. Giao dịch của bạn không bị xóa.",
+        "noAlbums": "Chưa có album",
+        "appOnlyHint": "Thêm ảnh bìa hoặc vị trí trong ứng dụng.",
+        "noExpenses": "Tháng này chưa có chi tiêu.",
+        "bulkAction": "Album",
+        "addToAlbum": "Thêm vào album",
+        "expensesOnly": "Chỉ chi tiêu mới thêm được vào album.",
+        "expensesCount": "{count, plural, other {Thêm # khoản chi tiêu này vào:}}",
+        "expensesLeftOut": "{count, plural, other {Chỉ chi tiêu mới thêm được vào album, nên # mục sẽ bị bỏ ra ngoài.}}",
+        "reorderTitle": "Sắp xếp album",
+        "activeLabel": "Tự thêm giao dịch mới vào",
+        "activeTitle": "Chuyến đi hiện tại",
+        "activeNone": "Không"
+      },
+      "budget": {
+        "allocatedSummary": "Đã phân bổ {allocated} / {total}",
+        "left": "Còn lại {amount}",
+        "over": "Vượt {amount}",
+        "allocatedDone": "Đã phân bổ đủ",
+        "cancel": "Hủy",
+        "save": "Lưu",
+        "delete": "Xóa",
+        "amount": "Số tiền",
+        "fillRemainder": "Điền",
+        "subcategories": "Danh mục con",
+        "childrenHint": "Tùy chọn: chia số tiền này cho các danh mục con.",
+        "duplicateSuffix": "bản sao",
+        "editTitle": "Sửa mẫu",
+        "addTitle": "Mẫu mới",
+        "chooseIcon": "Chọn biểu tượng",
+        "removeIcon": "Xóa biểu tượng",
+        "name": "Tên",
+        "namePlaceholder": "VD: Hằng ngày",
+        "total": "Tổng ngân sách",
+        "currency": "Tiền tệ",
+        "currencyHintTemplate": "Mỗi ngân sách giữ tỷ giá của ngày được tạo và quy đổi chi tiêu bằng tiền tệ khác theo tỷ giá đó. Hôm nay: 1 {currency} = {rate} {main}.",
+        "currencyHintBudget": "Chi tiêu bằng tiền tệ khác được quy đổi theo 1 {currency} = {rate} {main}.",
+        "currencyNoRate": "Chưa có tỷ giá {currency}. Hãy thêm trong mục Đa tiền tệ của ứng dụng để chi tiêu bằng tiền tệ khác được tính.",
+        "countUnbudgetedTitle": "Tính chi tiêu ngoài ngân sách",
+        "countUnbudgetedCaption": "Gộp chi tiêu từ các danh mục không có dòng ngân sách vào tổng của tháng.",
+        "backPopulateTitle": "Điền các tháng trước",
+        "backPopulateCaption": "Tạo ngân sách cho {first} - {last} ({count} tháng). Bỏ qua các tháng đã có ngân sách.",
+        "templatesTitle": "Mẫu ngân sách",
+        "templatesSubtitle": "Kế hoạch tháng dùng lại được",
+        "newTemplate": "Mẫu mới",
+        "noTemplatesTitle": "Chưa có mẫu nào",
+        "noTemplatesMessage": "Tạo một mẫu ngân sách để bắt đầu lập kế hoạch cho các tháng.",
+        "createTemplate": "Tạo mẫu",
+        "makeDefault": "Đặt làm mặc định",
+        "defaultBadge": "Mặc định",
+        "duplicate": "Nhân bản",
+        "deleteTemplateTitle": "Xóa mẫu?",
+        "deleteTemplateMessage": "Các ngân sách tháng đã tạo vẫn được giữ. Nếu đây là mẫu mặc định, mẫu tiếp theo sẽ thành mặc định.",
+        "createBudget": "Tạo ngân sách",
+        "chooseTemplate": "Chọn một mẫu",
+        "customOption": "Tùy chỉnh",
+        "customOptionCaption": "Tạo ngân sách một lần chỉ cho tháng này.",
+        "editBudget": "Sửa ngân sách",
+        "deleteBudget": "Xóa ngân sách",
+        "deleteBudgetTitle": "Xóa ngân sách tháng này?",
+        "deleteBudgetMessage": "Nó sẽ không được tự động tạo lại cho tháng này.",
+        "month": "Tháng",
+        "noCategories": "Hãy thêm danh mục chi tiêu trước để đặt ngân sách cho nó.",
+        "splitMismatch": "Các danh mục con cộng lại không bằng số tiền này",
+        "categoriesCount": "{count, plural, other {# danh mục}}"
+      },
+      "category": {
+        "newTitle": "Danh mục mới",
+        "editTitle": "Sửa danh mục",
+        "name": "Tên",
+        "parentOptional": "Cha (tùy chọn)",
+        "select": "Chọn",
+        "clear": "Xóa",
+        "cancel": "Hủy",
+        "save": "Lưu",
+        "delete": "Xóa",
+        "deleteConfirm": "Sẽ xóa vĩnh viễn danh mục này. Không thể hoàn tác.",
+        "deleteTitle": "Xóa danh mục?",
+        "deleteHasTransactions": "{count} giao dịch đang dùng danh mục này. Chuyển chúng sang danh mục khác, hoặc xóa danh mục và để chúng không có danh mục.",
+        "moveToOther": "Chuyển sang danh mục khác",
+        "deleteAnyway": "Vẫn xóa",
+        "moveTitle": "Chuyển giao dịch?",
+        "moveBody": "Tất cả giao dịch sẽ được chuyển sang “{name}” và danh mục này sẽ bị xóa. Không thể hoàn tác thao tác này.",
+        "moveAction": "Chuyển và xóa",
+        "addSubcategory": "Thêm danh mục con",
+        "expense": "Chi tiêu",
+        "income": "Thu nhập",
+        "type": "Loại danh mục",
+        "required": "Nhập tên",
+        "noOptions": "Chưa có danh mục khác",
+        "emptyTitle": "Chưa có danh mục",
+        "chooseIcon": "Chọn biểu tượng",
+        "removeIcon": "Xóa biểu tượng",
+        "tabIcons": "Biểu tượng",
+        "tabEmoji": "Emoji",
+        "searchIcons": "Tìm biểu tượng",
+        "noResults": "Không có kết quả",
+        "groups": {
+          "money": "Tiền",
+          "food_and_drink": "Ăn uống",
+          "transport": "Di chuyển",
+          "travel": "Du lịch",
+          "home": "Nhà cửa",
+          "bills": "Hóa đơn",
+          "shopping": "Mua sắm",
+          "health": "Sức khỏe",
+          "leisure": "Giải trí",
+          "work": "Công việc",
+          "family": "Gia đình",
+          "other": "Khác",
+          "food": "Ăn uống",
+          "smileys": "Mặt cười",
+          "people": "Con người",
+          "animals": "Động vật và thiên nhiên",
+          "activities": "Hoạt động",
+          "objects": "Đồ vật",
+          "symbols": "Ký hiệu",
+          "flags": "Cờ"
+        },
+        "expand": "Mở rộng",
+        "collapse": "Thu gọn",
+        "noSubcategories": "Chưa có danh mục con",
+        "searchEmoji": "Tìm emoji"
+      },
+      "currency": {
+        "open": "Đa tiền tệ",
+        "title": "Đa tiền tệ",
+        "mainCurrency": "Tiền tệ chính",
+        "mainInApp": "Để đổi tiền tệ chính, hãy dùng ứng dụng. Dữ liệu của bạn sẽ bắt đầu lại từ đầu.",
+        "asOf": "Cập nhật {date}",
+        "neverUpdated": "Chưa cập nhật",
+        "subcurrencies": "Tiền tệ phụ",
+        "add": "Thêm",
+        "addCurrency": "Thêm tiền tệ",
+        "search": "Tìm tiền tệ",
+        "noMatch": "Không có tiền tệ phù hợp",
+        "empty": "Thêm một loại tiền để theo dõi tỷ giá của nó.",
+        "manual": "Thủ công",
+        "editRate": "Sửa tỷ giá",
+        "remove": "Xóa",
+        "save": "Lưu",
+        "orderChanged": "Thứ tự mới chưa được lưu.",
+        "saveOrder": "Lưu thứ tự"
+      },
+      "goal": {
+        "newGoal": "Mục tiêu mới",
+        "editTitle": "Sửa mục tiêu",
+        "edit": "Sửa",
+        "save": "Lưu",
+        "deleteTitle": "Xóa mục tiêu?",
+        "deleteMessage": "Thao tác này xóa mục tiêu và các giao dịch của nó. Không thể hoàn tác.",
+        "coverInApp": "Đổi ảnh bìa trong ứng dụng.",
+        "chooseIcon": "Chọn biểu tượng",
+        "removeIcon": "Xóa biểu tượng",
+        "name": "Tên mục tiêu",
+        "namePlaceholder": "VD: Chuyến đi Nhật Bản",
+        "target": "Số tiền mục tiêu",
+        "currency": "Tiền tệ",
+        "currentBalance": "Số dư hiện tại",
+        "targetDate": "Ngày mục tiêu",
+        "targetDateHint": "Tùy chọn. Thêm nhịp tiến độ cho mục tiêu của bạn.",
+        "targetDatePast": "Hãy chọn một ngày trong tương lai.",
+        "includeInTotals": "Tính vào tổng",
+        "includeInTotalsHint": "Tài khoản ẩn không tính vào tổng số dư.",
+        "startingAmount": "Đã tiết kiệm sẵn (tùy chọn)",
+        "autoSave": "Tự động tiết kiệm",
+        "autoSaveHint": "Tự động chuyển tiền vào theo lịch.",
+        "autoSaveAmount": "Số tiền",
+        "cadence": "Lặp lại",
+        "cadenceMonthly": "Hàng tháng",
+        "cadenceWeekly": "Hàng tuần",
+        "source": "Từ tài khoản",
+        "sourcePlaceholder": "Chọn tài khoản",
+        "noSource": "Chưa có tài khoản {currency}. Tự động tiết kiệm cần tài khoản cùng loại tiền tệ.",
+        "autoSaveInRecurring": "Tự động tiết kiệm của mục tiêu này dùng lịch tùy chỉnh. Hãy đổi trong mục Định kỳ.",
+        "currencyChangeTitle": "Đổi tiền tệ của tài khoản?",
+        "currencyChangeMessage": "Số dư sẽ được quy đổi từ {from} sang {to} theo tỷ giá mới nhất. Các giao dịch hiện có vẫn giữ nguyên tiền tệ gốc.",
+        "currencyChangeAction": "Quy đổi và thay đổi",
+        "balancePromptTitle": "Ghi thay đổi số dư này như thế nào?",
+        "balancePromptMessage": "Số dư thay đổi {amount}. Ghi là thu nhập/chi tiêu hay chỉ là chênh lệch tài khoản (không tính vào tổng phân tích)?",
+        "recordDifference": "Ghi là chênh lệch tài khoản",
+        "recordIncome": "Ghi là thu nhập",
+        "recordExpense": "Ghi là chi tiêu",
+        "archive": "Lưu trữ",
+        "unarchive": "Khôi phục mục tiêu",
+        "archiveTitle": "Lưu trữ mục tiêu?",
+        "archiveMessage": "Mục tiêu sẽ rời khỏi danh sách và mọi khoản tự động tiết kiệm vào nó sẽ tạm dừng.",
+        "archiveBalanceHint": "Mục tiêu vẫn còn tiền. Bạn có thể rút ra trước, hoặc để nguyên ở đây.",
+        "archiveConfirm": "Lưu trữ",
+        "archived": "Đã lưu trữ",
+        "editInGoals": "Sửa mục tiêu",
+        "deposit": "Nạp tiền",
+        "withdraw": "Rút tiền",
+        "depositFromAccount": "Từ tài khoản",
+        "depositFromAccountHint": "Chuyển tiền từ một tài khoản của bạn.",
+        "depositOutside": "Tiền từ bên ngoài",
+        "depositOutsideHint": "Quà tặng hoặc tiền mặt từ bên ngoài, ghi nhận là thu nhập.",
+        "withdrawToAccount": "Về tài khoản",
+        "withdrawToAccountHint": "Chuyển tiền về một tài khoản của bạn.",
+        "withdrawSpend": "Chi tiêu luôn",
+        "withdrawSpendHint": "Chi trả trực tiếp từ mục tiêu này, ghi nhận là chi tiêu."
+      },
+      "item": {
+        "add": "Thêm vật dụng",
+        "addTitle": "Vật dụng mới",
+        "editTitle": "Sửa vật dụng",
+        "save": "Lưu",
+        "deleteTitle": "Xóa vật dụng?",
+        "deleteMessage": "Thao tác này xóa vật dụng khỏi danh sách theo dõi.",
+        "iconTitle": "Chọn biểu tượng",
+        "chooseIcon": "Chọn biểu tượng",
+        "iconSubtitle": "Chọn một biểu tượng. Để tải biểu tượng của riêng bạn lên, hãy dùng ứng dụng.",
+        "searchIcons": "Tìm biểu tượng…",
+        "customIcon": "Tùy chỉnh",
+        "noResults": "Không tìm thấy kết quả",
+        "name": "Tên",
+        "namePlaceholder": "vd. Máy pha espresso",
+        "price": "Giá mua",
+        "currency": "Tiền tệ",
+        "purchaseDate": "Ngày mua",
+        "markInactive": "Đánh dấu ngừng",
+        "markInactiveHint": "Dừng đếm ngày cho những món bạn đã bán, hỏng hoặc không còn dùng.",
+        "endDate": "Ngày kết thúc",
+        "sold": "Tôi đã bán",
+        "salePrice": "Giá bán",
+        "note": "Ghi chú",
+        "notePlaceholder": "Tùy chọn",
+        "groups": {
+          "objects": "Đồ vật",
+          "leisure": "Giải trí",
+          "work": "Công việc",
+          "home": "Nhà cửa",
+          "health": "Sức khỏe",
+          "travel": "Du lịch",
+          "transport": "Di chuyển",
+          "shopping": "Mua sắm",
+          "family": "Gia đình",
+          "other": "Khác"
+        },
+        "reorderTitle": "Sắp xếp các mục"
+      },
+      "loan": {
+        "newTitle": "Khoản vay mới",
+        "editTitle": "Sửa khoản vay",
+        "edit": "Sửa",
+        "save": "Lưu",
+        "delete": "Xóa tài khoản",
+        "deleteBody": "Sẽ xóa vĩnh viễn tài khoản này và toàn bộ giao dịch của nó. Không thể hoàn tác.",
+        "name": "Tên tài khoản",
+        "namePlaceholder": "Vay mua xe",
+        "logo": "Logo",
+        "logoAdd": "Thêm logo",
+        "logoClear": "Xóa logo",
+        "group": "Nhóm tài khoản",
+        "currency": "Tiền tệ",
+        "interestModel": "Lãi suất",
+        "interestModelInfo": "Dư nợ giảm dần: lãi tính hằng tháng trên số bạn còn nợ, nên trả thêm hoặc trả sớm sẽ giảm lãi. Hầu hết vay mua nhà hoạt động như vậy. Lãi suất phẳng: lãi được tính một lần trên toàn bộ số tiền vay và cộng ngay từ đầu, nên trả sớm giúp hết nợ nhanh hơn nhưng không tiết kiệm lãi. Hầu hết vay mua xe và vay tiêu dùng hoạt động như vậy.",
+        "modelReducing": "Dư nợ giảm dần",
+        "modelFlat": "Lãi suất phẳng",
+        "principal": "Số tiền vay",
+        "term": "Kỳ hạn vay",
+        "termInfo": "Khoản vay trả góp trong bao nhiêu kỳ hằng tháng, tối đa {max}. Vay 5 năm là 60 kỳ.",
+        "termError": "Nhập số nguyên từ 1 đến {max}.",
+        "rate": "Lãi suất",
+        "rateInfoReducing": "Lãi suất năm ngân hàng tính trên số bạn còn nợ. Nhập lãi suất để tính khoản trả hằng tháng và tổng, hoặc nhập tổng để tính lãi suất.",
+        "rateInfoFlat": "Lãi suất phẳng theo năm, tính trên toàn bộ số tiền vay trong suốt kỳ hạn. Nhập lãi suất để tính khoản trả hằng tháng và tổng, hoặc nhập tổng để tính lãi suất.",
+        "effectiveRateHint": "Lãi suất thực {rate}%. Đó là chi phí thật của lãi suất phẳng này tính trên dư nợ giảm dần.",
+        "totalRepayable": "Tổng phải trả",
+        "totalRepayableInfo": "Tất cả những gì bạn trả lại trong suốt khoản vay: số tiền đã vay cộng toàn bộ lãi.",
+        "instalment": "Trả góp hằng tháng",
+        "instalmentInfo": "Số tiền bạn trả mỗi tháng. Nó theo tổng phía trên; bật công tắc nếu ngân hàng thu số khác, chúng tôi sẽ dùng đúng số của bạn.",
+        "instalmentErrorLow": "Quá nhỏ để trả hết khoản vay trong kỳ hạn.",
+        "instalmentErrorHigh": "Quá lớn so với số tiền vay và kỳ hạn này.",
+        "awaitingContract": "Điền các ô phía trên",
+        "paidPeriods": "Số kỳ đã trả",
+        "paidPeriodsInfo": "Để 0 nếu là khoản vay mới. Nếu đang trả dở, nhập số kỳ đã trả và dư nợ ban đầu sẽ được tính giúp bạn.",
+        "paidPeriodsError": "Phải nhỏ hơn kỳ hạn vay.",
+        "collect": "Trừ từ tài khoản",
+        "collectInfo": "Tài khoản bị trừ tiền góp mỗi tháng. Chọn một tài khoản thì được ghi tự động; để trống thì bạn tự ghi mỗi lần trả.",
+        "collectManual": "Tôi sẽ tự ghi",
+        "collectExternal": "Khoản trả này được thiết lập trong Định kỳ. Hãy sửa ở đó.",
+        "countAsExpense": "Tính kỳ trả góp là chi tiêu",
+        "countAsExpenseInfo": "Một khoản trả nợ luôn chuyển tiền vào khoản vay, nên dư nợ của bạn vẫn giảm dù thế nào. Khi bật, khoản này cũng được tính là chi tiêu trong tổng số, ngân sách và biểu đồ của bạn, theo danh mục bạn chọn. Tắt đi thì các khoản trả nợ nằm ngoài chi tiêu. Thay đổi sau này chỉ áp dụng cho các khoản trả nợ ghi từ lúc đó.",
+        "paymentCategory": "Danh mục trả nợ",
+        "paymentCategoryPlaceholder": "Chọn danh mục",
+        "startDate": "Ngày bắt đầu",
+        "startDateInfo": "Ngày giải ngân khoản vay. Kỳ đầu tiên rơi vào một tháng sau, và ngày đó thành ngày thanh toán của bạn.",
+        "balanceOwed": "Dư nợ",
+        "balanceOwedInfo": "Số bạn còn nợ hôm nay, chưa tính lãi chưa bị thu. Thường nhỏ hơn con số trên sao kê của bạn.",
+        "totalInterest": "Tổng lãi",
+        "leftToPay": "Còn phải trả",
+        "firstInstalment": "Kỳ đầu tiên",
+        "payoffBy": "Tất toán vào",
+        "instalmentsLeft": "Kỳ còn lại",
+        "includeInTotals": "Tính vào tổng",
+        "includeInTotalsHint": "Tài khoản ẩn không tính vào tổng số dư.",
+        "archive": "Lưu trữ khoản vay",
+        "unarchive": "Bỏ lưu trữ",
+        "archiveHint": "Ẩn khỏi danh sách tài khoản. Lịch sử và tổng số vẫn được giữ, và \"Xem mục đã lưu trữ\" sẽ đưa nó trở lại.",
+        "rateChangeTitle": "Áp dụng lãi suất mới từ khi nào?",
+        "rateChangeMessage": "Lãi suất đổi từ {from}% sang {to}%. Áp dụng từ hôm nay để giữ nguyên lãi đã tính, hoặc từ đầu nếu bạn đang sửa một sai sót.",
+        "rateChangeFromStart": "Từ đầu",
+        "rateChangeFromToday": "Từ hôm nay",
+        "currencyChangeTitle": "Đổi tiền tệ của tài khoản?",
+        "currencyChangeMessage": "Số dư sẽ được quy đổi từ {from} sang {to} theo tỷ giá mới nhất. Các giao dịch hiện có vẫn giữ nguyên tiền tệ gốc.",
+        "currencyChangeAction": "Quy đổi và thay đổi",
+        "balancePromptTitle": "Ghi thay đổi số dư này như thế nào?",
+        "balancePromptMessage": "Số dư thay đổi {amount}. Ghi là thu nhập/chi tiêu hay chỉ là chênh lệch tài khoản (không tính vào tổng phân tích)?",
+        "recordDifference": "Ghi là chênh lệch tài khoản",
+        "recordIncome": "Ghi là thu nhập",
+        "recordExpense": "Ghi là chi tiêu",
+        "archived": "Đã lưu trữ",
+        "editInLoans": "Sửa khoản vay",
+        "balanceOwedHint": "Sao kê của bạn có thể hiện {amount}, đã cộng cả phần lãi sắp tới."
+      },
+      "reimbursement": {
+        "pendingTitle": "Đang chờ hoàn",
+        "settledTitle": "Đã hoàn",
+        "claim": "Đòi lại",
+        "paidInto": "Vào {account}",
+        "noAccount": "Không có tài khoản",
+        "undoTitle": "Hoàn tác khoản hoàn tiền này?",
+        "undoMessage": "Bút toán tiền vào sẽ bị xoá.",
+        "undoAction": "Hoàn tác",
+        "cancel": "Hủy",
+        "saveFirst": "Hãy lưu các thay đổi khác của bạn trước."
+      },
+      "reorder": {
+        "open": "Sắp xếp",
+        "save": "Lưu",
+        "accountsTitle": "Sắp xếp tài khoản",
+        "accountsHint": "Di chuyển các nhóm và tài khoản trong nhóm. Mục tiêu tiết kiệm giữ thứ tự riêng.",
+        "categoriesTitle": "Sắp xếp danh mục",
+        "categoriesHint": "Di chuyển các danh mục và danh mục con trong danh mục cha.",
+        "emptyGroup": "Chưa có tài khoản trong nhóm này.",
+        "drag": "Kéo để sắp xếp lại",
+        "dragNamed": "Di chuyển {name}. Kéo, hoặc dùng các phím mũi tên.",
+        "moved": "Đã chuyển {name} đến vị trí {position} trên {count}"
+      },
+      "rule": {
+        "newRule": "Quy tắc định kỳ mới",
+        "editRule": "Sửa quy tắc định kỳ",
+        "sameFlow": "Luồng giống như nhập giao dịch",
+        "saveRule": "Lưu quy tắc",
+        "deleteRule": "Xóa quy tắc",
+        "deleteConfirm": "Xóa “{name}”? Hành động này không thể hoàn tác.",
+        "amountRequired": "Vui lòng nhập số tiền",
+        "chooseCategory": "Chọn danh mục",
+        "settings": "Cài đặt định kỳ",
+        "ruleName": "Tên quy tắc",
+        "ruleNamePlaceholder": "Đăng ký Netflix",
+        "enterRuleName": "Vui lòng nhập tên quy tắc định kỳ.",
+        "logo": "Logo",
+        "noLogo": "Không có logo",
+        "customLogo": "Logo tùy chỉnh",
+        "searchLogos": "Tìm dịch vụ đăng ký",
+        "country": "Quốc gia",
+        "noResults": "Không tìm thấy kết quả",
+        "global": "Chung",
+        "repeat": "Lặp lại",
+        "daily": "Hàng ngày",
+        "weekly": "Hàng tuần",
+        "monthly": "Hàng tháng",
+        "quarterly": "Hàng quý",
+        "semiannually": "Nửa năm một lần",
+        "yearly": "Hàng năm",
+        "every": "Mỗi (chu kỳ)",
+        "ends": "Kết thúc",
+        "never": "Không bao giờ",
+        "onDate": "Vào ngày",
+        "endDate": "Ngày kết thúc",
+        "validEndDate": "Vui lòng chọn ngày kết thúc hợp lệ.",
+        "status": "Trạng thái",
+        "active": "Đang hoạt động",
+        "paused": "Tạm dừng",
+        "pause": "Tạm dừng",
+        "resume": "Tiếp tục"
+      },
+      "split": {
+        "title": "Chia hóa đơn",
+        "chip": "Chia",
+        "evenly": "Chia đều",
+        "addPerson": "Thêm người",
+        "me": "Tôi",
+        "personPlaceholder": "Tên bạn bè",
+        "sumMatch": "{sum} / {total}",
+        "sumLeft": "Còn {diff}",
+        "sumOver": "Vượt {diff}",
+        "sumMismatch": "Thiếu {diff}",
+        "negativeSelf": "Bạn bè nợ nhiều hơn tổng tiền",
+        "markPaid": "Đánh dấu đã trả",
+        "paidLabel": "Đã trả {date}",
+        "undo": "Hoàn tác",
+        "done": "Xong",
+        "remove": "Gỡ",
+        "cancel": "Hủy",
+        "noAccount": "Không có tài khoản",
+        "paidTo": "Đã trả vào",
+        "sharesTitle": "Ai nợ bạn",
+        "someone": "Ai đó",
+        "untitledBill": "Chia hóa đơn",
+        "paidTitle": "Đã trả",
+        "undoTitle": "Đánh dấu phần này là chưa trả?",
+        "undoBody": "Người đó lại nợ bạn khoản này và khoản chi tiêu sẽ tăng lên đúng số tiền đó. Giao dịch chuyển tiền trả lại vào tài khoản khác sẽ bị xóa.",
+        "itemizedTotal": "Tổng: {sum}",
+        "itemizedZeroHint": "Nhập ít nhất một số tiền",
+        "removeTitle": "Xóa yêu cầu này?",
+        "removeBody": "Thao tác này xóa khoản họ nợ bạn cho hóa đơn này. Giao dịch gốc vẫn được giữ nguyên.",
+        "defaultPaidTo": "Mặc định trả vào",
+        "defaultPaidToHint": "Các khoản chia mới sẽ được trả vào tài khoản này theo mặc định."
+      },
+      "duplicate": "Nhân bản",
+      "duplicateTitle": "Nhân bản sang ngày",
+      "expenseCategory": "Danh mục chi tiêu",
+      "incomeCategory": "Danh mục thu nhập",
+      "categoryNone": "Giao dịch chuyển khoản giữ nguyên danh mục. Hãy chọn chi tiêu hoặc thu nhập để đổi danh mục.",
+      "duplicateNone": "Không thể nhân bản điều chỉnh số dư và số tiền âm.",
+      "duplicateTooMany": "Mỗi lần nhân bản tối đa {max} mục.",
+      "wage": {
+        "title": "Giá trị giờ",
+        "subtitle": "Mức thu nhập của bạn cho từng tháng, như đã đặt trong ứng dụng.",
+        "add": "Thêm mức lương",
+        "addTitle": "Thêm mức lương",
+        "empty": "Chưa có lịch sử giá trị giờ.",
+        "now": "Tháng này",
+        "perHour": "/giờ",
+        "type": {
+          "hourly": "Theo giờ",
+          "monthly": "Theo tháng",
+          "yearly": "Theo năm"
+        },
+        "deleteTitle": "Xóa giá trị giờ tháng?",
+        "deleteBody": "Xóa mức lương cho {month}? Các tháng phụ thuộc vào nó sẽ dùng tháng trước đó.",
+        "year": "Năm",
+        "month": "Tháng",
+        "existsTitle": "{month} đã tồn tại",
+        "existsBody": "Tháng này đã có mức lương. Sửa thay vì thêm mới?",
+        "saveFor": "Lưu cho {month}",
+        "step1": "Bạn kiếm được bao nhiêu?",
+        "step2": "Tuần làm việc",
+        "step3": "Thời gian làm việc thêm",
+        "amount": "Số tiền ({symbol})",
+        "afterTax": "Nhập thu nhập sau thuế.",
+        "hoursPerWeek": "Giờ làm / tuần",
+        "workdaysPerWeek": "Ngày làm / tuần",
+        "commuteMinutes": "Thời gian thêm / ngày (phút)",
+        "commuteHint": "Bao gồm chuẩn bị, di chuyển, đỗ xe và thời gian làm không lương.",
+        "trueRate": "Lương thực tế theo giờ",
+        "weeklyIncome": "Thu nhập tuần",
+        "baseRate": "Lương giờ cơ bản",
+        "commutePerWeek": "Thời gian thêm / tuần",
+        "totalPerWeek": "Tổng thời gian / tuần",
+        "showAs": "Hiển thị theo",
+        "period": {
+          "hourly": "Theo giờ",
+          "weekly": "Theo tuần",
+          "monthly": "Theo tháng",
+          "yearly": "Theo năm"
+        },
+        "suffix": {
+          "hourly": "/giờ",
+          "weekly": "/tuần",
+          "monthly": "/tháng",
+          "yearly": "/năm"
+        }
+      },
+      "notePlaceholder": "Ghi chú mới. Để trống để xóa ghi chú."
+    },
+    "cloud": {
+      "strip": "Dữ liệu từ {device}, đồng bộ {date}.",
+      "yourPhone": "điện thoại của bạn",
+      "dataFrom": "Dữ liệu từ {date}",
+      "phoneHere": "Điện thoại đã kết nối",
+      "phoneAway": "Điện thoại chưa kết nối",
+      "connecting": "Đang kết nối…",
+      "refresh": "Làm mới từ điện thoại",
+      "receiving": "Đang đồng bộ… {percent}%",
+      "preparing": "Đang chuẩn bị…",
+      "preparingTitle": "Điện thoại của bạn đang chuẩn bị đồng bộ",
+      "receivingTitle": "Đang đồng bộ dữ liệu mới nhất từ điện thoại",
+      "opening": "Đang mở…",
+      "openingTitle": "Đang mở dữ liệu đã đồng bộ",
+      "needsPhoneTitle": "Hãy mở Money2Time trên điện thoại.",
+      "needsPhoneBody": "Vào Cài đặt → Bảng điều khiển web. Dữ liệu mới nhất sẽ tự đến.",
+      "unlink": "Hủy liên kết trình duyệt này",
+      "unlinkConfirm": "Hủy liên kết? Trình duyệt này sẽ xóa bản sao dữ liệu của bạn. Quét lại để liên kết.",
+      "stay": "Giữ liên kết",
+      "elsewhereTitle": "Bảng điều khiển này đang mở ở một thẻ khác.",
+      "elsewhereBody": "Chỉ một thẻ nhận cập nhật. Chọn Dùng ở đây để chuyển.",
+      "useHere": "Dùng ở đây",
+      "sourceOfTruth": "Thay đổi được lưu trên điện thoại. Không lưu gì trực tuyến.",
+      "errors": {
+        "incomplete": "Quá trình đồng bộ với điện thoại đã dừng trước khi hoàn tất. Hãy làm mới từ điện thoại để thử lại.",
+        "corrupt": "Không thể đọc dữ liệu từ điện thoại của bạn. Hãy làm mới từ điện thoại để thử lại.",
+        "unsupported": "Dữ liệu này đến từ phiên bản ứng dụng mới hơn. Hãy tải lại trang để có bảng điều khiển mới nhất.",
+        "storage": "Trình duyệt này không lưu bản sao, nên lần sau sẽ cần đến điện thoại của bạn một lần nữa. Cửa sổ riêng tư thường gây ra điều này."
+      }
+    },
+    "link": {
+      "eyebrow": "Bảng điều khiển web Money2Time",
+      "title": "Dữ liệu Money2Time của bạn trên màn hình lớn",
+      "subtitle": "Quét mã bằng điện thoại. Mã hóa đầu cuối, không lưu gì trực tuyến.",
+      "steps": {
+        "camera": {
+          "title": "Quét bằng camera",
+          "body": "Hướng camera điện thoại vào mã, hoặc quét trong ứng dụng."
+        },
+        "link": {
+          "title": "Liên kết",
+          "body": "Kiểm tra cả hai màn hình hiện cùng một mã, rồi nhấn Liên kết."
+        },
+        "dashboard": {
+          "title": "Mở bảng điều khiển",
+          "body": "17 bảng điều khiển. Mở ứng dụng bất cứ lúc nào để làm mới, và thay đổi khi đang kết nối."
+        }
+      },
+      "promises": {
+        "edits": {
+          "title": "Sửa khi đang kết nối",
+          "body": "Thay đổi được lưu trên điện thoại, chỉ khi điện thoại đang kết nối."
+        },
+        "phone": {
+          "title": "Điện thoại vẫn là người quyết định",
+          "body": "Dữ liệu chỉ được gửi khi ứng dụng đang mở."
+        },
+        "private": {
+          "title": "Không có gì được lưu trực tuyến",
+          "body": "Mã hóa đầu cuối. Ngay cả chúng tôi cũng không thể đọc."
+        }
+      },
+      "cardTitle": "Liên kết trình duyệt này",
+      "cardBody": "Quét bằng camera điện thoại hoặc ứng dụng Money2Time.",
+      "qrLabel": "Mã QR để liên kết trình duyệt này với ứng dụng Money2Time",
+      "preparing": "Đang chuẩn bị mã…",
+      "noAccount": "Không cần tài khoản. Mã đổi sau mỗi 2 phút.",
+      "confirmCode": "Kiểm tra điện thoại hiện mã này, rồi nhấn Liên kết trên đó.",
+      "candidateTitle": "Liên kết {phone}?",
+      "candidateTitleUnnamed": "Liên kết điện thoại này?",
+      "candidateBody": "Kiểm tra điện thoại hiện cùng mã. Chỉ liên kết nếu chính bạn đã quét.",
+      "candidateAccept": "Liên kết",
+      "candidateReject": "Không phải của tôi",
+      "offline": "Không thể kết nối. Mã mới sẽ hiện khi bạn trực tuyến trở lại.",
+      "terms": "Khi liên kết, bạn đồng ý với Điều khoản sử dụng và Chính sách quyền riêng tư.",
+      "unlinkedNotice": "Đã hủy liên kết. Trình duyệt này đã xóa bản sao dữ liệu của bạn.",
+      "linkedTo": "Đã liên kết với {phone}",
+      "waitingTitle": "Đang chờ điện thoại của bạn",
+      "waitingBody": "Mở Money2Time → Cài đặt → Bảng điều khiển web.",
+      "preparingTitle": "Đang chuẩn bị đồng bộ",
+      "preparingBody": "Điện thoại đang gói dữ liệu của bạn. Hãy để Money2Time mở trên điện thoại.",
+      "receivingTitle": "Đang đồng bộ dữ liệu của bạn",
+      "receivingBody": "Mã hóa đầu cuối, trực tiếp từ điện thoại. Hãy để Money2Time mở trên điện thoại.",
+      "openingTitle": "Đang mở dữ liệu của bạn",
+      "openingBody": "Đang giải mã trong trình duyệt này.",
+      "errors": {
+        "unsupported": "Trình duyệt này không thể mở dữ liệu mã hóa đầu cuối. Hãy dùng phiên bản Chrome, Edge, Firefox hoặc Safari mới."
+      }
+    },
+    "pro": {
+      "badge": "Pro",
+      "title": "Thuộc Money2Time Pro",
+      "body": "Tính năng này thuộc Money2Time Pro, cùng với khoảng thời gian dài hơn và không giới hạn tài khoản, danh mục, giao dịch định kỳ và nhiều thứ khác. Nâng cấp trong ứng dụng trên điện thoại, và tính năng sẽ mở khóa ở đây.",
+      "stepApp": "Trên điện thoại, mở Money2Time và nâng cấp lên Pro.",
+      "stepRefresh": "Quay lại đây và làm mới từ điện thoại. Trình duyệt này sẽ mở khóa ngay khi điện thoại đồng bộ dữ liệu.",
+      "checkAgain": "Tôi đã nâng cấp, làm mới từ điện thoại",
+      "checking": "Đang đồng bộ…",
+      "notNow": "Để sau",
+      "lockedPeriod": "{period}, chỉ có trong Pro"
+    },
+    "filters": {
+      "title": "Bộ lọc",
+      "accounts": "Tài khoản",
+      "exclude": "Loại trừ",
+      "include": "Bao gồm",
+      "done": "Xong",
+      "reset": "Đặt lại",
+      "note": "Số dư tài khoản không bị lọc."
+    },
+    "hide": {
+      "hide": "Ẩn số tiền",
+      "show": "Hiện số tiền"
+    },
+    "dropdown": {
+      "search": "Tìm kiếm",
+      "noMatch": "Không có kết quả"
+    }
+  }
+}

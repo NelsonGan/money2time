@@ -73,8 +73,14 @@ skills-lock.json
 # README.md) and are never part of the iOS/Android app bundle.
 /apps/cloudflare/
 
-# Repository-level material no build reads: CI workflows and the PR screenshots
-# and evidence under .github/pr-assets (100+ MB), and the agent config.
+# The website and App Studio are separate projects too (see "Website" and "App
+# Studio" in README.md), and App Studio's store screenshots alone are ~170 MB.
+/apps/web/
+/apps/app-studio/
+
+# Repository-level material no build reads: CI workflows, the PR screenshots
+# and evidence a pull request adds under .github/pr-assets, and the agent
+# config.
 /.github/
 /.claude/
 /.codex/

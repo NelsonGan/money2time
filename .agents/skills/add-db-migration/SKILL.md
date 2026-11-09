@@ -5,7 +5,9 @@ description: "Add a database schema change to the money2time app (new table, col
 
 # Add a DB migration (money2time)
 
-SQLite via `expo-sqlite` + Drizzle. Migrations are **append-only**, numbered `NNN_*.ts` in `lib/db/migrations/`, and **auto-discovered** by `lib/db/migrations/index.ts` via `require.context` matching `^\d{3}_[a-z0-9_-]+\.(ts|js)$`, then run in ascending `version` order. The latest is `028`; your new file is the next number.
+SQLite via `expo-sqlite` + Drizzle, in the app (`apps/mobile`; paths below are relative to it). Migrations are **append-only**, numbered `NNN_*.ts` in `lib/db/migrations/`, and **auto-discovered** by `lib/db/migrations/index.ts` via `require.context` matching `^\d{3}_[a-z0-9_-]+\.(ts|js)$`, then run in ascending `version` order. Your new file takes the next number after the highest one in that folder.
+
+**The Web Dashboard reads these tables too.** The phone sends its Export Database JSON to the website in `apps/web`, which parses it (`apps/web/src/lib/backup/`) and, for some tables, edits rows through the phone. After the migration works in the app, run [sync-web-dashboard](../sync-web-dashboard/SKILL.md): a new table or column usually needs a reader there, in the same PR, that still accepts backups from older apps without it.
 
 **Never edit a shipped migration.** Users have already run it; changing it diverges their DB from new installs. Always add a new file.
 
@@ -53,7 +55,8 @@ SQLite via `expo-sqlite` + Drizzle. Migrations are **append-only**, numbered `NN
 - [ ] Backfill added if legacy rows need it (normalizeCurrencies pattern).
 - [ ] Repository/context wiring + test added.
 - [ ] `npm run check` and `npm test` pass.
-- [ ] If this adds a table/notable column, update the schema table in `CLAUDE.md` and `README.md`.
+- [ ] If this adds a table/notable column, update the README section that describes it.
+- [ ] [sync-web-dashboard](../sync-web-dashboard/SKILL.md) run: the website reads the new field, or the PR says "Web Dashboard: no impact" and why.
 
 ## Anti-patterns
 

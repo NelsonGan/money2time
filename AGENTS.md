@@ -13,12 +13,15 @@ anything reading `AGENTS.md` by convention gets the same thing.
 ```
 apps/mobile      Expo / React Native app, its own npm project
 apps/cloudflare  workers/ and d1/, one directory per Worker and per database
+apps/web         money2time.com and the Web Dashboard (vinext on a Worker)
+apps/app-studio  App Studio: store screenshots, creatives and listing copy
 .github          CI workflows, and pr-assets/ for PR screenshots and evidence
 ```
 
-There is no root `package.json`. App commands run from `apps/mobile`, and app
-paths in the README and in these instructions (`features/…`, `lib/…`,
-`__tests__/…`, `scripts/…`) are relative to it.
+There is no root `package.json` and no workspace: each app is its own npm
+project. App commands run from `apps/mobile`, and app paths in the README and
+in these instructions (`features/…`, `lib/…`, `__tests__/…`, `scripts/…`) are
+relative to it unless they name another app.
 
 ```bash
 cd apps/mobile
@@ -29,7 +32,12 @@ npm test
 
 Run `npm run check` and `npm test` before you say you are done. A Worker
 change also needs `npm run typecheck` in its own directory under
-`apps/cloudflare/workers/`.
+`apps/cloudflare/workers/`. A website change needs, from `apps/web`,
+`npm run lint`, `npm test`, `node scripts/validate-messages.mjs`,
+`npm run build` and `npm run typecheck` (after the build). An App Studio change
+needs, from `apps/app-studio`, `npm test` and `npx tsc --noEmit`. Run `npm ci`
+in an app before its first command in a worktree: a symlinked `node_modules`
+breaks the website's build.
 
 **Simulator and emulator control goes through the T3 Code device tools**, so
 the user can watch the device in T3 Code's Device panel. Devices come from the
@@ -67,15 +75,15 @@ review those against the diff yourself, and add the expected PostHog event
 volume to the README's event budget when adding an event or increasing its
 frequency.
 
-**The Web Dashboard is part of the change.** app.money2time.com (the
-`money2time-web` repo, at `~/Projects/money2time-web`) rebuilds the app's
-pages, totals and editors from the data the phone sends, so it falls behind
-every time the app changes and it does not. After every product or code change
-works in the app, and before the PR, run the `sync-web-dashboard` skill: it
-decides whether the dashboard shows, edits or reads what changed, and if so
-has you change money2time-web, keep older apps and pages working, verify it
-end to end against the simulator and open a linked web PR. A change without
-web impact says "Web Dashboard: no impact" and why in its PR.
+**The Web Dashboard is part of the change.** app.money2time.com (`apps/web`)
+rebuilds the app's pages, totals and editors from the data the phone sends, so
+it falls behind every time the app changes and it does not. After every
+product or code change works in the app, and before the PR, run the
+`sync-web-dashboard` skill: it decides whether the dashboard shows, edits or
+reads what changed, and if so has you change `apps/web` in the same PR, keep
+older apps and pages working, and verify it end to end against the simulator.
+A change without web impact says "Web Dashboard: no impact" and why in its PR.
+Merging deploys the website at once, while the app reaches the stores later.
 
 **Show the device in T3 Code's Device panel while testing.** Open it with
 `device_open` and leave it on the tested screen while the user should still look
@@ -133,12 +141,52 @@ final UI and save it, with any recording or other evidence, in
 PR branch. That is the only place PR assets go. Embed them with URLs pinned to
 the commit that added them
 (`https://raw.githubusercontent.com/NelsonGan/money2time/<commit-sha>/.github/pr-assets/<topic>/<file>`),
-so they keep loading after a merge or a later move. Local file paths and a
+so they keep loading after a merge or a later move. Then delete the folder in
+the next commit and push both together: the images stay reachable through the
+PR's history and never land on `main`, which would otherwise carry hundreds of
+MB of old screenshots (they were cleared out on 2026-11-09). Local file paths and a
 text-only report are not enough. Keep private account details out of the
 images. Include before/after screenshots only when both were actually captured.
 For instructions-only changes without UI testing, state that no app behavior
 changed and report the documentation checks instead. The `create-pr` skill
 covers the rest of the description.
+
+## Working on the website
+
+`apps/web` is Next.js App Router code that does not run on Next.js: vinext
+builds and serves it as one Cloudflare Worker, every `next/*` import is a
+vinext shim, and webpack or Turbopack settings do nothing. Before relying on a
+Next.js feature, check `node_modules/vinext/README.md` (API coverage, _Known
+gaps_) and the `migrate-to-vinext` skill's `references/compatibility.md`. The
+`work-on-website` skill is the procedure (setup, previewing, checks, how it
+ships), and the README's Website section is the reference.
+
+- **A page is a page times thirty-two.** Copy lives in `messages/<locale>.json`,
+  never in components; `node scripts/validate-messages.mjs` is the parity check.
+  Bump `src/app/sitemap.ts`'s real `lastModified` date for the route you
+  changed, and only that one.
+- **SEO work goes through the `seo-loop` skill.** No page is created before its
+  ownership check against Google Search Console (`CREATE`, `IMPROVE EXISTING`
+  or `REJECT`, with the numbers), and no page ships on what the source says it
+  does: the gate is what the server returned. Never invent Search Console
+  numbers.
+- **Pictures are published, not deployed.** A deploy does not upload `media/`;
+  run `node scripts/upload-media.mjs` before merging a change that shows new
+  pictures, or the workflow's media check fails.
+- Put a local relay URL in `.env.development.local`, never `.env.local`: Vite
+  reads `.env.local` for production builds too.
+- The website uses double quotes and its own ESLint config, not the app's
+  Prettier settings. Match the file you are in.
+
+## Working on App Studio
+
+`apps/app-studio` runs only on this Mac (`npm run dev`, port 3000); it is never
+deployed. Store uploads write to live listings through the `asc` and `gplay`
+CLIs, so never run one without the user asking, and never commit store
+credentials (`.env.local`, `.p8` or service-account JSON). The
+`update-whats-new` skill writes each release's What's New in
+`src/data/appDescriptions.ts`, and the `work-on-app-studio` skill covers the
+rest (running it, recapturing screenshots, scenes, exports and uploads).
 
 ## Skills
 
@@ -148,3 +196,10 @@ references) and `.agents/commands/`, the commands exposed to Codex as
 `$source-command-cleanup` and `$source-command-create-pr` skills. When you
 change a Claude workflow, refresh its shared copy in the same change. Local
 `.agents/memory/` stays ignored.
+
+Every app in this repository has its skills here, at the root. Start from the
+one for the app you are changing: `work-on-website` (with `seo-loop`,
+`migrate-to-vinext` and `sync-web-dashboard`) for `apps/web`,
+`work-on-app-studio` (with `update-whats-new`) for `apps/app-studio`, and the
+rest for the app in `apps/mobile`. A skill's paths are relative to its app
+unless it says otherwise.

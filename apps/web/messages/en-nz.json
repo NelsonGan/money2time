@@ -1,0 +1,38 @@
+{
+  "home": {
+    "ticker": {
+      "fuel": "Petrol",
+      "cinema": "Cinema"
+    },
+    "howItWorks": {
+      "body": "Your rate comes from what actually lands in your account. After tax, ACC and KiwiSaver, across the days you work, including the commute you never get paid for."
+    },
+    "why": {
+      "paragraph2": "So I built this app. It helps you see your spending in a different way: not just in currency, but in hours of your life. Because sometimes <cost>\"$21\"</cost> doesn't feel like much, but <time>\"2 hours of my life\"</time> does. The goal is simple, to help you become more aware of where your money (or really, time) is going, so you can take back control of it."
+    }
+  },
+  "metadata": {
+    "home": {
+      "title": "Expense Tracker App for New Zealand - Money2Time",
+      "description": "See every dollar as hours of your life. A private expense tracker that works out your hourly rate after tax, ACC and KiwiSaver, with no bank login.",
+      "openGraphDescription": "Every dollar you spend, priced in hours of your life. Track recurring bills too — no bank login, nothing leaves your phone."
+    },
+    "keywords": [
+      "expense tracker nz",
+      "budget app new zealand",
+      "spending tracker app",
+      "expense tracker after kiwisaver",
+      "hourly rate calculator nz",
+      "recurring expense tracker",
+      "offline expense tracker",
+      "personal finance app nz",
+      "money to time",
+      "true cost of spending"
+    ],
+    "costInHours": {
+      "title": "Median Wage in NZ, in Hours of Work - Money2Time",
+      "description": "How far New Zealand's median wage goes, measured against one product that costs the same everywhere — and how that compares with nine other countries.",
+      "openGraphDescription": "How far New Zealand's median wage goes against a product that is the same everywhere, next to nine other countries."
+    }
+  }
+}

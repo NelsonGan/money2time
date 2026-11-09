@@ -1,0 +1,47 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Next.js
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+
+# Build/debug artifacts
+.playwright-mcp/
+modal-*.png
+.thumbnails/
+
+# Credentials — never commit these
+.env.local
+scripts/.env
+scripts/*.p8
+scripts/*.json
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Screenshots staged on disk for the upload CLIs
+.upload-staging/
+
+# Generated store deliverables; the scenes remain the source of truth.
+exports/

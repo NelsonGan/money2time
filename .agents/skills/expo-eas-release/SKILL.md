@@ -5,7 +5,7 @@ description: "Release the money2time app via the GitHub Actions pipeline (EAS Bu
 
 # Expo EAS release (money2time)
 
-Expo SDK 54 / RN 0.81, New Architecture. **Releases happen only through GitHub Actions** (`.github/workflows/deploy.yml`), which runs EAS Build then EAS Submit. There is no manual local-build path and no OTA/`eas update` flow — do not run `eas build` / `eas submit` / `eas update` by hand for a release.
+Expo SDK 58 / React Native 0.88, New Architecture. The app is `apps/mobile`; paths below are relative to it. **Releases happen only through GitHub Actions** (`.github/workflows/deploy.yml`), which runs EAS Build then EAS Submit. There is no manual local-build path and no OTA/`eas update` flow — do not run `eas build` / `eas submit` / `eas update` by hand for a release.
 
 Config sources of truth: `eas.json` (profiles/submit), `app.json` (version), `.github/workflows/deploy.yml` (the pipeline).
 
@@ -19,7 +19,7 @@ Config sources of truth: `eas.json` (profiles/submit), `app.json` (version), `.g
 
 ## The pipeline (`deploy.yml`)
 
-Three jobs, gated `test → plan → deploy`:
+Four jobs, gated `changes → test → plan → deploy`. **`changes` decides whether a push to `main` is an app release at all:** a diff confined to `apps/cloudflare/`, `apps/web/`, `apps/app-studio/`, `.github/`, the agent folders and `*.md` cuts no store build; anything else (any file under `apps/mobile`, even a script or a test) does. The website deploys through its own `Web` workflow and App Studio has a check-only workflow, so a change there never needs this one.
 
 - **test** — runs on every push, PR, and dispatch: `npm ci`, `npm run check` (typecheck + lint + format), then `npm test`. A red check here blocks `plan` and `deploy`.
 - **plan** — push-to-`main` and manual-dispatch only. Resolves the build matrix (push = iOS + Android production; dispatch = the chosen single platform/profile).
@@ -38,7 +38,7 @@ Concurrency cancels in-flight runs on a new push to the same ref.
 
 ## Versioning
 
-- Marketing version lives in `app.json` `expo.version` (currently `1.3.1`); bump it for a user-facing release.
+- Marketing version lives in `app.json` `expo.version`; bump it for a user-facing release.
 - Build numbers are remote/auto-incremented by the `production` profile — never hand-set them.
 
 ## Debugging
@@ -53,7 +53,7 @@ Concurrency cancels in-flight runs on a new push to the same ref.
 - `npm run check` + `npm test` green.
 - `app.json` version bumped iff a user-facing release.
 - The `deploy` job finished green and the build reached the correct store track.
-- Release notes describe the change.
+- Release notes describe the change. The store "What's New" note is written in App Studio (`apps/app-studio/src/data/appDescriptions.ts`) with the [update-whats-new](../update-whats-new/SKILL.md) skill, and store screenshots and creatives come from App Studio too ([work-on-app-studio](../work-on-app-studio/SKILL.md)). Uploading them to the stores is a separate, manual step the user asks for.
 
 ## Anti-patterns
 

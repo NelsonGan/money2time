@@ -1,0 +1,2165 @@
+{
+  "metadata": {
+    "home": {
+      "title": "记账App：把消费换算成生命时间 - Money2Time",
+      "description": "把每笔消费换算成生命时间的记账App。记录支出、账户和固定开销，无需绑定银行卡，数据只留在手机里。",
+      "openGraphDescription": "每一笔消费，都换算成你的生命时间。无需绑定银行卡的私密记账App。"
+    },
+    "contact": {
+      "title": "联系我 - Money2Time",
+      "description": "问题、反馈、功能建议或与你的数据有关的请求，都可以直接写给 Money2Time 的开发者。"
+    },
+    "privacy": {
+      "title": "隐私政策 - Money2Time",
+      "description": "Money2Time 如何处理您的数据：以本地存储为主、使用随机应用 ID 进行产品分析，并且不会出售个人或财务数据。"
+    },
+    "terms": {
+      "title": "使用条款 - Money2Time",
+      "description": "在 iOS 和 Android 上使用记账App Money2Time 时你所同意的条款。"
+    },
+    "statementsImport": {
+      "title": "用AI导入银行账单 - Money2Time",
+      "description": "Money2Time 的AI账单导入简短教程，让你不用逐条输入就能导入银行流水。"
+    },
+    "dataDeletion": {
+      "title": "数据删除请求 - Money2Time",
+      "description": "如何申请删除你的 Money2Time 数据，哪些会被删除、哪些会保留，以及保留多久。"
+    },
+    "keywords": [
+      "记账App",
+      "记账软件",
+      "记账本",
+      "个人记账",
+      "消费记录",
+      "预算管理",
+      "时薪计算",
+      "理财App",
+      "免费记账",
+      "离线记账"
+    ],
+    "costInHours": {
+      "title": "各国工资中位数，用工作时间衡量 - Money2Time",
+      "description": "十个国家的官方工资中位数与平均数，用一件在哪里都一样的商品来衡量：买它需要工作多久。",
+      "openGraphDescription": "一小时的工作能走多远？用一件全球一致的商品，比较十个国家。"
+    },
+    "tutorials": {
+      "title": "Money2Time 使用教程 - 手把手教你用",
+      "description": "Money2Time 每个功能的分步教程，配真实截图。学会记录支出、分摊账单、设置预算，以及把价格换算成工作时长。",
+      "detailTitle": "{title} - Money2Time 教程"
+    },
+    "dashboard": {
+      "title": "网页看板 - Money2Time",
+      "description": "用手机扫码，在大屏幕上查看你的 Money2Time 数据：支出、净资产、预算，以及每笔购买背后的小时数。端到端加密，线上不存储任何内容。"
+    }
+  },
+  "common": {
+    "language": {
+      "label": "语言"
+    },
+    "footer": {
+      "contact": "联系",
+      "privacy": "隐私政策",
+      "dataDeletion": "删除数据",
+      "terms": "使用条款",
+      "copyright": "© {year} Money2Time。保留所有权利。",
+      "costInHours": "用小时看价格",
+      "tutorials": "使用教程",
+      "dashboard": "网页看板"
+    }
+  },
+  "storeButtons": {
+    "appStorePrefix": "下载于",
+    "appStore": "App Store",
+    "playStorePrefix": "获取于",
+    "playStore": "Google Play"
+  },
+  "screenshotGallery": {
+    "ariaLabel": "应用截图",
+    "alts": {
+      "home": "Money2Time 截图，显示每月交易列表，包含收入和支出总额以及每笔消费背后的工作时长",
+      "privacy": "Money2Time 隐私亮点截图：数据只保存在你的设备上，无广告，完全离线可用",
+      "assets": "Money2Time 截图，显示净资产和账户余额",
+      "addExpense": "Money2Time 截图，显示带屏幕键盘和语音输入的快速记账界面",
+      "splitBill": "Money2Time 截图，显示账单在多人之间平均分摊以及每人应付的金额",
+      "insights": "Money2Time 截图，显示按分类划分的支出饼图",
+      "budgeting": "Money2Time 截图，显示按分类划分的月度预算、进度条和各项剩余额度",
+      "recurrings": "Money2Time 截图，显示周期性支出和频率",
+      "hourlyRates": "Money2Time 截图，显示按月记录的时薪价值历史"
+    }
+  },
+  "home": {
+    "nav": {
+      "howItWorks": "运作方式",
+      "logging": "记账",
+      "features": "功能",
+      "privacy": "隐私",
+      "download": "获取应用",
+      "openMenu": "打开菜单",
+      "closeMenu": "关闭菜单"
+    },
+    "hero": {
+      "title": "每个价格都有两个数字。",
+      "subtitle": "Money2Time 像其他应用一样记录你的支出，然后把同一笔金额换算成你生命中的小时数。",
+      "badges": {
+        "onDevice": "只留在你的手机里",
+        "noBank": "无需银行登录",
+        "quick": "几秒钟记完一笔"
+      }
+    },
+    "units": {
+      "min": "{value} 分钟",
+      "hours": "{value} 小时"
+    },
+    "ticker": {
+      "coffee": "咖啡",
+      "lunch": "在外吃午饭",
+      "groceries": "生鲜杂货",
+      "fuel": "加油",
+      "tshirt": "T恤",
+      "beers": "一轮啤酒",
+      "electricity": "电费",
+      "pizza": "周五披萨",
+      "dogFood": "狗粮",
+      "cinema": "看电影",
+      "gym": "健身房",
+      "rent": "房租",
+      "flight": "回家的机票",
+      "iceCream": "冰淇淋"
+    },
+    "howItWorks": {
+      "eyebrow": "运作方式",
+      "title": "一次点按，把钱变成时间。",
+      "body": "你的时薪来自真正进到账户里的钱。税后金额，除以你上班的天数，还算上从来没人给你付钱的通勤。",
+      "coffee": {
+        "title": "那杯咖啡",
+        "note": "散个短步的工作量。那杯咖啡你本来就想喝。"
+      },
+      "impulse": {
+        "title": "冲动消费",
+        "note": "几乎两个工作日，值得先睡一觉再决定。"
+      },
+      "rate": {
+        "title": "你真正的时薪",
+        "perHour": "/小时",
+        "takeHome": {
+          "label": "到手收入",
+          "value": "每月 {value}"
+        },
+        "daysWorked": {
+          "label": "上班天数",
+          "value": "每周 {value} 天"
+        },
+        "commute": {
+          "label": "通勤，无薪",
+          "value": "每天 {value} 分钟"
+        }
+      }
+    },
+    "logging": {
+      "eyebrow": "记账",
+      "title": "再也不用手动输入一笔账。",
+      "body": "大多数记账应用坚持不下去，是因为记账本身就是件麻烦事。这里有三条捷径。",
+      "videoPlaceholder": "屏幕录制即将上线",
+      "receiptScan": {
+        "tab": "扫描小票",
+        "title": "对准小票就好。",
+        "body": "相机直接在记账面板里打开，不用跳到另一个页面。金额、商家和日期会自动填好，照片也一并留在这笔账上。",
+        "points": {
+          "one": "读取金额、日期和商家",
+          "two": "照片保存下来备用"
+        }
+      },
+      "backTap": {
+        "tab": "轻点背面",
+        "title": "轻点两下手机背面。",
+        "body": "把快捷指令绑到 iOS 的「轻点背面」上，数字键盘会带着你上一次的账户和分类直接打开。还没离开收银台就记完了。",
+        "points": {
+          "one": "从口袋掏出到记完只要几秒",
+          "two": "不用解锁，也不用翻找应用"
+        }
+      },
+      "applePay": {
+        "tab": "Apple Pay",
+        "title": "或者，照常付款就行。",
+        "body": "自动化会发现 Apple Pay 的付款并先把这笔账拟好。一条通知，扫一眼分类，划走即可。",
+        "points": {
+          "one": "把你绝不会手动记的那些消费也接住",
+          "two": "在你确认之前什么都不会保存"
+        }
+      }
+    },
+    "review": {
+      "eyebrow": "回顾",
+      "title": "看看钱都去哪了。",
+      "body": "选一周、一个月或一年。一个金额、背后的小时数，以及排好序的分类。点开任意一项就能看到里面有什么。",
+      "points": {
+        "one": "和你自己的平均值比较，而不是别人的预算",
+        "two": "排除某个分类或账户，数字会自动重算",
+        "three": "只做观察，不讲道理"
+      },
+      "chip": "{hours} 小时",
+      "mock": {
+        "title": "回顾支出",
+        "week": "周",
+        "month": "月",
+        "year": "年",
+        "spent": "本周支出",
+        "calmer": "比平常安静一些。",
+        "categories": {
+          "groceries": "生鲜杂货",
+          "eatingOut": "在外就餐",
+          "transport": "交通"
+        }
+      }
+    },
+    "features": {
+      "eyebrow": "功能",
+      "title": "其他你会期待的功能，都在，且不吵。",
+      "sentiment": {
+        "title": "当时的感受",
+        "body": "把一笔消费标为满意、一般或后悔。规律比总额更能说明问题。",
+        "legend": "觉得值"
+      },
+      "commitments": {
+        "title": "固定支出",
+        "body": "房租、保险、那个你一直想退的健身卡。这个月还没开始，你就看得见。",
+        "lockedIn": "/月已经锁定"
+      },
+      "reimbursements": {
+        "title": "会回来的钱",
+        "body": "把一笔支出标成可报销，它就在自己的列表里等着，直到钱真的到账。",
+        "employer": "公司",
+        "insurer": "医疗保险"
+      },
+      "insights": {
+        "title": "九种分析",
+        "body": "构成、趋势、储蓄率、情绪、资产，全都在一个下拉菜单里。",
+        "savingsRate": "储蓄率",
+        "incomeTrend": "收入趋势",
+        "assets": "资产"
+      },
+      "split": {
+        "title": "分摊账单",
+        "body": "扫描小票，把每一项分给桌上的人。只有你的那份会被计入。",
+        "yourShare": "你的那份"
+      },
+      "modes": {
+        "title": "简单版或完整版",
+        "body": "先从一个钱包和一个数字键盘开始。账户、转账和多币种，等你需要时再加。",
+        "simple": "简单",
+        "simpleNote": "一个钱包",
+        "full": "完整",
+        "fullNote": "全部开启"
+      },
+      "budgets": {
+        "title": "会帮你控速的预算",
+        "body": "给每个分类设一个月度上限。进度条会告诉你，今天本该走到哪。",
+        "category": "生鲜杂货",
+        "of": "/ {total}",
+        "pace": "节奏正常，还剩 {days} 天"
+      },
+      "calendar": {
+        "title": "读得懂的一个月",
+        "body": "缩放到日历视图。每一天进了多少、出了多少，都按金额深浅显示。"
+      },
+      "currency": {
+        "title": "任意币种",
+        "body": "用你实际支付的币种记账。总额会自动换算，原始金额仍留在那一行。",
+        "item": "车贷",
+        "paidIn": "以 {currency} 支付"
+      },
+      "receipts": {
+        "title": "每张小票都归档",
+        "body": "照片会附在这笔账上，并汇集成相册。要走保修，滑一下就找到了。"
+      },
+      "search": {
+        "title": "什么都找得到",
+        "body": "按备注或商家搜索，再按分类、账户、金额或当时的感受收窄范围。",
+        "query": "咖啡",
+        "filterCategory": "餐饮",
+        "filterAccount": "现金",
+        "filterSentiment": "后悔"
+      },
+      "assets": {
+        "title": "你拥有什么",
+        "body": "把账户和资产和支出放在一起看，长期的那笔账也算得进来。"
+      }
+    },
+    "testimonials": {
+      "eyebrow": "评价",
+      "title": "用了一个月之后，大家怎么说。",
+      "usersChoice": "用户之选"
+    },
+    "privacy": {
+      "eyebrow": "隐私",
+      "title": "你的支出只留在你的手机上。",
+      "body": "不用注册账号，也不用连接银行。一切都在你的设备上，随时可以全部导出或删除。",
+      "onDevice": {
+        "title": "仅存于设备",
+        "body": "没有云端、没有同步、没有广告。"
+      },
+      "import": {
+        "title": "把过往记录带过来",
+        "body": "导入 Money Manager 的备份，接着记就好。"
+      },
+      "link": "阅读隐私政策"
+    },
+    "why": {
+      "eyebrow": "来自开发者",
+      "title": "为什么做这个应用",
+      "bookAlt": "Vicki Robin 所著 Your Money or Your Life",
+      "quote": "你是在用生命能量换取金钱",
+      "quoteAuthor": "- Vicki Robin",
+      "paragraph1": "读完 <book>Your Money or Your Life</book> 后，我突然想通了一件事。对大多数靠工资生活的人来说，钱不只是钱，它也是我们的生命能量。我们花出去的每一块钱，都代表投入过的时间、努力，以及被交换出去的一部分人生。",
+      "paragraph2": "所以我做了这个应用。它帮你用另一种方式看待消费：不只看金额，也看它对应了多少生命时间。有时候 <cost>\"$20\"</cost> 听起来不多，但 <time>\"我生命中的 2 小时\"</time> 就很具体。目标很简单：让你更清楚钱，或者说时间，流向哪里，然后重新拿回控制权。",
+      "paragraph3": "所有数据都留在你的设备上，没有登录，也没有云端同步。你的数据属于你。需要时也可以导出为简单的 JSON 文件。免费版已经足够开始使用；Pro 会解锁无限账户、分类、时薪等额外功能。",
+      "paragraph4": "希望你始终能掌控自己的金钱，也掌控自己的人生。"
+    },
+    "closing": {
+      "title": "看清你的钱究竟值多少。",
+      "body": "免费，也不用注册。花一分钟填上你的时薪，每个数字都会多出一层含义。"
+    },
+    "community": {
+      "body": "与其他用户交流，分享反馈，并在我们的 Discord 服务器上获取小贴士。",
+      "cta": "加入社区"
+    },
+    "dashboardEntry": {
+      "eyebrow": "新功能 · 网页看板",
+      "title": "在大屏幕上查看你的 Money2Time 数据",
+      "body": "用手机扫描 app.money2time.com 上的代码，查看现金流、支出、净资产、预算、旅行，以及每笔消费背后的工作时长。手机连接期间，可在电脑上添加和编辑交易。端到端加密。",
+      "cta": "打开网页看板",
+      "points": {
+        "private": "端到端加密",
+        "charts": "17 个看板",
+        "edits": "在电脑上编辑"
+      }
+    }
+  },
+  "contact": {
+    "page": {
+      "title": "联系我",
+      "intro": "用于支持、问题反馈、改进建议或隐私相关问题。",
+      "formLabel": "联系表单",
+      "discordTitle": "更喜欢聊天?",
+      "discordBody": "加入我们的 Discord 社区，与其他用户交流并快速获得解答。",
+      "discordCta": "加入我们的 Discord"
+    },
+    "form": {
+      "honeypot": "公司",
+      "name": "姓名",
+      "namePlaceholder": "你的姓名",
+      "email": "邮箱",
+      "emailPlaceholder": "you@example.com",
+      "message": "留言",
+      "messagePlaceholder": "告诉我发生了什么、你希望改进什么，或我可以怎样帮你。",
+      "sending": "发送中...",
+      "send": "发送留言"
+    },
+    "validation": {
+      "nameRequired": "请输入你的姓名。",
+      "nameTooLong": "姓名请保持在 {max} 个字符以内。",
+      "emailRequired": "请输入你的邮箱地址。",
+      "emailInvalid": "请输入有效的邮箱地址。",
+      "subjectTooLong": "主题请保持在 {max} 个字符以内。",
+      "messageRequired": "请填写一段简短留言。",
+      "messageTooLong": "留言请保持在 {max} 个字符以内。"
+    },
+    "status": {
+      "honeypot": "感谢联系。你的留言正在发送。",
+      "error": "请修正标出的字段后再试一次。",
+      "mailto": "正在打开你的默认邮件应用，并预填好留言。如果没有打开，请直接发送邮件给我。"
+    }
+  },
+  "statementsImport": {
+    "title": "账单导入",
+    "intro": "观看下面的简短演示，了解如何借助 AI 将银行账单导入 Money2Time。",
+    "videoTitle": "Money2Time - 账单导入演示"
+  },
+  "notFound": {
+    "title": "找不到页面",
+    "body": "这个页面不存在。也许它本来就不值得花费你的时间。",
+    "home": "返回首页"
+  },
+  "privacy": {
+    "title": "隐私政策",
+    "lastUpdated": "最后更新：2026 年 10 月 22 日",
+    "websiteAnalytics": {
+      "title": "网站使用情况分析",
+      "paragraphs": [
+        "在 money2time.com 上，我们使用 PostHog 和 Google Analytics 衡量经过假名处理的页面浏览量及有限的互动，例如应用下载点击、教程选择和联系表单结果。这些服务可能会使用浏览器存储空间或 Cookie，并处理技术信息，包括大致地区、设备和浏览器类型以及引荐网站。Google Analytics 的用户和事件数据最长保留 14 个月。",
+        "在网页仪表盘（app.money2time.com）上，同样的服务会统计你打开了哪些仪表盘页面、浏览器何时被关联或解除关联、从手机传输的数据和你所做的更改是否成功，以及何时向你展示 Pro 功能。在你的手机发送数据后，这些事件会关联到该手机的随机应用标识符，因此在你解除浏览器的关联之前，你在仪表盘和应用中的使用会计为同一个假名用户。仪表盘会将这些数据与 money2time.com 的其他部分分开，因此你对其他页面的访问不会与之关联。仪表盘事件绝不包含你的财务数据，仪表盘访问也绝不会被录制为会话回放。",
+        "PostHog 还可能将一小部分网站访问录制为会话回放，其中每个表单字段都会被遮盖，并会在页面出错时接收报告。",
+        "我们不会发送联系表单内容、教程搜索文本、财务数据、账户标识符、完整的网址查询字符串，也不会发送用于广告或个性化的数据。/download 重定向不会将你的 IP 地址或 user-agent 字符串添加到其分析事件中。启用浏览器的“请勿跟踪”设置后，网站分析不会加载。"
+      ]
+    },
+    "sections": [
+      {
+        "title": "概览",
+        "paragraphs": [
+          "Money2Time（以下简称“本应用”）是一款个人理财应用，会根据你的时薪把消费换算成时间。我们重视你的隐私。本政策说明本应用会收集哪些数据、如何使用这些数据，以及你对这些数据拥有的权利。"
+        ]
+      },
+      {
+        "title": "1. 数据存储与本地优先设计",
+        "paragraphs": [
+          "你的所有财务数据，包括交易、账户、分类、周期性规则和工资设置，都会通过设备内数据库（SQLite）存储在你的设备本地。我们不运营用于存储个人财务信息的服务器，本应用也绝不会把你的数据同步或备份到我们的服务器。如果你使用可选的网页仪表盘（第 6 节），你的手机会把一份副本以端到端加密的方式直接发送到你已关联的浏览器；我们的服务器只负责转发，不会存储，也无法读取。",
+          "如果你卸载本应用，所有本地存储的数据都会被永久删除。"
+        ]
+      },
+      {
+        "title": "2. 我们收集的信息",
+        "subsections": [
+          {
+            "title": "财务数据（仅本地存储）",
+            "lists": [
+              [
+                "交易金额、日期、分类、备注和情绪标签",
+                "账户名称、类型和余额",
+                "工资和时薪信息",
+                "周期性交易规则",
+                "分类名称和组织方式"
+              ]
+            ],
+            "paragraphs": [
+              "除非你明确选择导出，或将数据发送到通过网页仪表盘关联的浏览器，否则这些数据不会离开你的设备。"
+            ]
+          },
+          {
+            "title": "随机应用标识符",
+            "paragraphs": [
+              "首次启动时，本应用会生成一个以 m2t_ 开头的随机唯一标识符。它不会与你的姓名、邮箱、Apple ID 或任何个人身份绑定。同一个标识符会与 PostHog、Google Analytics for Firebase 和 RevenueCat 共享，用于产品分析和订阅管理；也会与你通过网页仪表盘关联的任何浏览器共享，其使用情况分析（PostHog 和 Google Analytics）同样会使用它。"
+            ]
+          },
+          {
+            "title": "使用分析",
+            "paragraphs": [
+              "我们使用 PostHog 和 Google Analytics for Firebase 收集与此随机应用标识符关联的假名化使用数据，以改进本应用。分析数据不包含金额、交易详情、账户余额、备注、收据、备份或可识别您身份的信息。",
+              "PostHog 还会接收崩溃和错误报告，并将一小部分应用会话录制为屏幕录像，以便我们发现并修复问题。录像中凡是显示你个人信息的内容都会被遮盖，包括文字、数字、输入框、图表以及你添加的任何照片。只有应用自身的设计，例如图标、插图和按钮文字，才可见。这些录像绝不会显示你的财务数据。"
+            ],
+            "lists": [
+              [
+                "页面浏览和功能使用情况",
+                "应用事件，例如创建交易或修改设置",
+                "一般偏好，例如货币、语言地区、主题和显示模式",
+                "平台，例如 iOS 或 Android"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "title": "3. 应用内购买与订阅",
+        "paragraphs": [
+          "本应用提供可选的高级订阅（Pro），并通过 RevenueCat 管理。付款由 Apple 或 Google 处理。我们不会接收或存储你的付款信息、信用卡信息或 Apple ID/Google 账号凭据。",
+          "RevenueCat 会接收你的订阅状态、产品标识符和到期日期，以管理你的权益。这些信息关联到随机应用标识符，而不是你的个人身份。"
+        ]
+      },
+      {
+        "title": "4. 通知",
+        "paragraphs": [
+          "本应用可能会请求发送通知的权限。所有通知都在你的设备本地安排。不会从外部服务器发送推送通知。你可以随时拒绝通知权限，或在设备设置中关闭通知。"
+        ],
+        "lists": [
+          [
+            "每日签到提醒",
+            "每周消费总结",
+            "周期性交易提醒"
+          ]
+        ]
+      },
+      {
+        "title": "5. 设备权限",
+        "paragraphs": [
+          "本应用只会请求通知权限，用于安排本地提醒和总结。本应用不会访问你的相机、麦克风、照片图库、联系人、日历、信息、位置、健康数据、健身数据、其他应用或浏览历史。"
+        ]
+      },
+      {
+        "title": "6. 数据导出、导入与网页仪表盘",
+        "paragraphs": [
+          "你可以随时在本应用的设置中，将所有财务数据导出为 JSON 文件。导出的文件会通过设备原生分享功能处理。我们不会接收或处理你导出的数据。",
+          "你也可以从之前的 Money2Time 备份导入数据，或从 Money Manager 应用迁移数据。导入会替换设备上现有的所有数据。",
+          "网页仪表盘是可选的。要使用它，你需要在电脑上打开 app.money2time.com，并用本应用扫描页面上显示的二维码。随后，你的手机和该浏览器会协商出一把只有双方持有的加密密钥。当本应用的网页仪表盘页面和浏览器同时处于打开状态时，本应用会向浏览器发送一份你的数据副本（与导出数据相同，包含你添加的标志、图标和封面照片，但不包括收据照片和付款二维码），并使用 AES-256-GCM 进行端到端加密。数据会经过我们在 Cloudflare 上运行的服务器，该服务器在加密数据到达时直接转发，不会存储。我们无法读取这些数据。",
+          "浏览器会把最后收到的一份副本仍以加密形式连同密钥保存在它自己的存储中，直到你在浏览器或本应用中解除关联。你在仪表盘中所做的更改会以同样的方式加密后传回你的手机，并且只有在本应用的网页仪表盘页面处于打开状态、且更改来自你允许修改的浏览器时，本应用才会保存这些更改。你的手机还会告知浏览器你是否拥有 Money2Time Pro，以便解锁 Pro 仪表盘，并告知手机的随机应用标识符，用于仪表盘的使用情况分析。这里没有账号：我们不保存电子邮件地址，负责转发你数据的服务器也不记录哪些手机和浏览器已被关联。"
+        ]
+      },
+      {
+        "title": "7. 数据删除",
+        "paragraphs": [
+          "你始终完全控制自己的数据。“重置所有数据”会从设备中永久删除所有交易、账户、分类、周期性规则和工资设置。“仅重置交易”会清除交易历史，同时保留账户和分类。卸载本应用会移除本地数据库和所有存储数据。解除浏览器与网页仪表盘的关联会删除它保存的副本：在浏览器中解除时会立即删除，在本应用中解除时则会在它下次连接时删除。清除该浏览器的网站数据同样会将其删除。",
+          "在本应用内重置数据，不会删除 Apple/Google 持有的订阅状态，也不会删除之前发送到 PostHog / Google Analytics for Firebase 的分析数据。如需请求删除分析数据，请通过下方邮箱联系我们。"
+        ]
+      },
+      {
+        "title": "8. 第三方服务",
+        "paragraphs": [
+          "本应用不展示广告，也不使用广告 SDK。"
+        ],
+        "table": {
+          "headers": [
+            "服务",
+            "用途",
+            "共享数据"
+          ],
+          "rows": [
+            [
+              "PostHog / Google Analytics for Firebase",
+              "假名化使用分析",
+              "随机应用 ID、功能使用事件、偏好"
+            ],
+            [
+              "RevenueCat",
+              "订阅管理",
+              "随机应用 ID、订阅状态"
+            ],
+            [
+              "Cloudflare (Workers, Durable Objects)",
+              "网页仪表盘连接，仅在你使用时",
+              "你的数据，端到端加密且仅在传输过程中；IP 地址等连接信息，会在 Cloudflare 的日志中短暂保留"
+            ],
+            [
+              "Apple App Store / Google Play",
+              "付款处理",
+              "由 Apple/Google 直接处理"
+            ]
+          ]
+        }
+      },
+      {
+        "title": "9. 数据安全",
+        "paragraphs": [
+          "你的财务数据存储在未加密的本地数据库中，并受到设备内置安全机制保护。当你使用网页仪表盘时，数据会在你的手机上使用 AES-256-GCM 加密，密钥由你的手机和浏览器通过 P-256 密钥交换协商得出，并通过 HTTPS 发送；我们的服务器从不持有该密钥。本应用只使用标准的、已公开发布的加密算法。"
+        ]
+      },
+      {
+        "title": "10. 儿童隐私",
+        "paragraphs": [
+          "本应用并非面向 13 岁以下儿童。我们不会故意收集 13 岁以下儿童的个人信息。如果你认为儿童通过本应用提供了数据，请联系我们，我们会采取措施移除此类信息。"
+        ]
+      },
+      {
+        "title": "11. 政策变更",
+        "paragraphs": [
+          "我们可能会不时更新本隐私政策。变更会在本页面体现，并更新“最后更新”日期。变更后继续使用本应用，即表示你接受更新后的政策。"
+        ]
+      }
+    ],
+    "contact": {
+      "title": "12. 联系我们",
+      "body": "如果你对本隐私政策有任何疑问、需要支持，或想请求删除分析数据，请通过以下方式联系我们：",
+      "formPrefix": "你也可以使用本站的",
+      "formLink": "联系表单",
+      "formSuffix": "。"
+    }
+  },
+  "terms": {
+    "title": "使用条款",
+    "lastUpdated": "最后更新：2026 年 3 月 25 日",
+    "privacyPolicyLabel": "隐私政策",
+    "sections": [
+      {
+        "title": "概览",
+        "paragraphs": [
+          "本使用条款（以下简称“条款”）适用于你对 Money2Time 移动应用（以下简称“本应用”）的使用。本应用由 Nelson Gan 开发和运营。下载或使用本应用，即表示你同意受本条款约束。如果你不同意，请不要使用本应用。"
+        ]
+      },
+      {
+        "title": "1. 接受条款",
+        "paragraphs": [
+          "访问或使用 Money2Time，即表示你确认自己年满 13 岁，并具备订立本条款的法律能力。如果你代表某个组织使用本应用，则表示你有权使该组织受本条款约束。"
+        ]
+      },
+      {
+        "title": "2. 应用说明",
+        "paragraphs": [
+          "Money2Time 是一款个人理财应用，会根据你的时薪把支出换算成等价的时间，帮助你理解消费的真正成本。核心功能包括："
+        ],
+        "lists": [
+          [
+            "跨多个账户追踪支出和收入",
+            "根据工资设置进行金钱到时间的换算",
+            "账单和订阅的周期性交易规则",
+            "消费拆解、洞察和情绪追踪",
+            "本地数据导出与导入",
+            "用于提醒和总结的自定义通知"
+          ]
+        ]
+      },
+      {
+        "title": "3. 免费与 Pro 计划",
+        "paragraphs": [
+          "本应用以免费增值模式提供。免费计划中的部分功能有限制，需要有效的 Pro 订阅才能解锁。我们保留随时修改免费计划限制或 Pro 功能的权利。重大变更会通过应用更新或本网站告知。"
+        ],
+        "subsections": [
+          {
+            "title": "免费计划",
+            "lists": [
+              [
+                "最多 5 个账户",
+                "最多 9 个支出/收入分类",
+                "最多 5 条周期性交易规则",
+                "最多 5 条时薪记录",
+                "不限交易记录数量"
+              ]
+            ]
+          },
+          {
+            "title": "Pro 计划",
+            "lists": [
+              [
+                "不限账户、分类、周期性规则和时薪记录数量",
+                "可选择月度订阅、年度订阅或一次性终身购买"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "title": "4. 应用内购买与订阅",
+        "paragraphs": [
+          "Pro 订阅和终身购买通过 Apple App Store 或 Google Play Store 处理。购买即表示你同意相应商店的付款条款。",
+          "订阅会按月或按年提前计费，并会自动续订，除非你在当前周期结束前至少 24 小时取消。退款请求由 Apple 或 Google 根据各自退款政策处理。你可以在本应用设置中使用“恢复购买”，在新设备上恢复以前的购买。",
+          "终身购买会在本应用生命周期内授予 Pro 功能访问权。我们不保证本应用会无限期持续提供。"
+        ]
+      },
+      {
+        "title": "5. 你的数据",
+        "paragraphs": [
+          "你输入的所有财务数据，包括交易、账户、分类、工资设置和偏好，都会存储在你的设备本地。我们无法访问你的财务数据，也不会把这些数据存储在任何服务器上。",
+          "你需自行负责维护数据备份。请使用内置导出功能创建备份。对于应用删除、设备故障或误重置造成的数据丢失，我们不承担责任。",
+          "有关数据处理的完整详情，请参阅我们的 {privacyPolicy}。"
+        ]
+      },
+      {
+        "title": "6. 可接受使用",
+        "paragraphs": [
+          "你同意不会："
+        ],
+        "lists": [
+          [
+            "对本应用进行逆向工程、反编译或反汇编",
+            "试图未经授权访问本应用或相关系统的任何部分",
+            "将本应用用于任何违法目的，或违反任何适用法律",
+            "重新分发、转售或再许可本应用或其任何部分",
+            "使用自动化方式访问本应用或与本应用交互"
+          ]
+        ]
+      },
+      {
+        "title": "7. 知识产权",
+        "paragraphs": [
+          "本应用，包括其设计、代码、图形和内容，归 Nelson Gan 所有，并受版权和其他知识产权法律保护。本条款不会授予你使用我们的商标、标志或品牌元素的权利。",
+          "你的财务数据属于你。使用本应用不会授予我们对你个人数据的任何权利。"
+        ]
+      },
+      {
+        "title": "8. 保证免责声明",
+        "paragraphs": [
+          "本应用按现状和可用状态提供，不作任何明示或默示保证，包括但不限于适销性、特定用途适用性或不侵权。",
+          "Money2Time 是个人效率工具，不是财务顾问、会计师或受监管金融服务。本应用中的任何内容均不构成财务建议。财务决策应咨询合格专业人士。",
+          "我们不保证本应用无错误、不中断或没有缺陷。"
+        ]
+      },
+      {
+        "title": "9. 责任限制",
+        "paragraphs": [
+          "在适用法律允许的最大范围内，对于因使用或无法使用本应用而产生的任何间接、附带、特殊、后果性或惩罚性损害，我们不承担责任，包括数据丢失、基于本应用输出作出的财务决策或设备问题。",
+          "对于因本条款或你使用本应用而产生的任何索赔，我们对你的总责任不超过你当前 Pro 订阅周期已支付的金额；如果你使用免费计划，则不超过 10 美元。"
+        ]
+      },
+      {
+        "title": "10. 终止",
+        "paragraphs": [
+          "我们可以随时暂停或终止你对本应用的访问，无论是否有原因，也无论是否通知。终止后，你使用本应用的权利立即停止。由于你的数据存储在本地，它会继续保留在你的设备上，直到你卸载本应用或手动重置。",
+          "你可以随时卸载本应用以停止使用。"
+        ]
+      },
+      {
+        "title": "11. 条款变更",
+        "paragraphs": [
+          "我们可能会不时更新本条款。更新时，我们会修改本页面顶部的“最后更新”日期。变更后继续使用本应用，即表示你接受修订后的条款。对于重大变更，我们会合理努力通过应用更新或本网站通知你。"
+        ]
+      },
+      {
+        "title": "12. 适用法律",
+        "paragraphs": [
+          "本条款受新加坡法律管辖并按其解释，不考虑其法律冲突规则。因本条款产生的任何争议，均应受新加坡法院的专属管辖。"
+        ]
+      }
+    ],
+    "contact": {
+      "title": "13. 联系我们",
+      "body": "如果你对本条款有任何疑问，请通过以下方式联系我们："
+    }
+  },
+  "dataDeletion": {
+    "title": "数据删除请求",
+    "lastUpdated": "最后更新：2026 年 10 月 20 日",
+    "intro": "Money2Time 是一款本地优先（local-first）应用：你的所有财务数据仅存储在你的设备上，绝不会存储在我们的服务器上。本页面说明如何请求删除与 Money2Time 应用相关的数据，包括请求删除的步骤、哪些类型的数据会被删除或保留，以及相应的保留期限。",
+    "sections": [
+      {
+        "title": "如何请求删除数据",
+        "subsections": [
+          {
+            "title": "删除存储在你设备上的数据",
+            "paragraphs": [
+              "你的几乎所有数据，包括所有财务数据，都仅存储在你的设备上。你可以随时自行删除:"
+            ],
+            "lists": [
+              [
+                "打开 Money2Time 应用并进入“设置”。",
+                "点按“重置所有数据”以永久删除所有交易、账户、类别、周期性规则和薪资设置。",
+                "或者，卸载应用以彻底删除本地数据库和所有存储的数据。"
+              ]
+            ]
+          },
+          {
+            "title": "删除已关联浏览器中的副本",
+            "paragraphs": [
+              "如果你使用网页仪表盘，你关联的每个浏览器都会以加密形式保存你的手机发给它的最后一份副本。要删除它："
+            ],
+            "lists": [
+              [
+                "在浏览器中打开 app.money2time.com，选择“解除此浏览器的关联”。副本及其密钥会立即删除。",
+                "或者在 Money2Time 应用中进入“设置 > 网页仪表盘”，点按浏览器旁边的“解除关联”。该浏览器会在下次连接时删除其副本。",
+                "清除浏览器中 app.money2time.com 的网站数据同样会将其删除。"
+              ]
+            ]
+          },
+          {
+            "title": "请求删除分析数据和订阅数据",
+            "paragraphs": [
+              "如需请求删除与你的随机应用标识符相关的分析数据或订阅数据，请联系我们:"
+            ],
+            "lists": [
+              [
+                "以主题“Data Deletion Request”发送电子邮件至以下地址，或使用本站的联系表单。",
+                "请使用 Settings > Display 中用户 ID 旁的复制按钮并提供完整 ID，以便我们找到与你的应用关联的数据。",
+                "我们将处理你的请求，并在 30 天内确认完成。"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "title": "哪些数据会被删除或保留",
+        "paragraphs": [
+          "下表总结了当你请求删除时每种类型的数据会发生什么，以及数据的保留时长。"
+        ],
+        "table": {
+          "headers": [
+            "数据类型",
+            "操作",
+            "保留期限"
+          ],
+          "rows": [
+            [
+              "设备上的财务数据(交易、账户、类别、周期性规则、薪资设置)",
+              "已删除",
+              "在你重置数据或卸载应用时立即移除。我们不会保留任何内容。"
+            ],
+            [
+              "你已关联的浏览器中的网页仪表盘副本",
+              "已删除",
+              "你解除关联或清除其网站数据时，会从该浏览器中移除。我们的服务器从不存储它，因此我们不保留任何内容。"
+            ],
+            [
+              "假名化分析数据(PostHog / Google Analytics for Firebase)",
+              "应请求删除",
+              "在你请求后的 30 天内删除。"
+            ],
+            [
+              "订阅数据(RevenueCat、Apple、Google)",
+              "在必要时保留",
+              "由 Apple 或 Google 出于账单、税务和法律义务而保留，并通过你的 Apple 或 Google 账户进行管理。"
+            ]
+          ]
+        }
+      },
+      {
+        "title": "我们不存储的数据",
+        "paragraphs": [
+          "Money2Time 不需要账户，也不会在我们的服务器上存储你的姓名、电子邮件、Apple ID、Google 账户或付款信息。由于你的财务数据从不存储在我们的服务器上，包括你使用网页仪表盘时，我们无法为你访问或删除这些数据。",
+          "由 Apple 或 Google 保存的订阅和付款记录不在我们的控制范围内，直接通过你的 Apple 或 Google 账户进行管理。"
+        ]
+      }
+    ],
+    "contact": {
+      "title": "联系我们",
+      "body": "如需请求删除分析数据或订阅数据，或如有任何疑问，请通过以下方式联系我们:",
+      "formPrefix": "你也可以使用本站的",
+      "formLink": "联系表单",
+      "formSuffix": "。"
+    }
+  },
+  "costInHours": {
+    "eyebrow": "用小时看工资",
+    "title": "一小时的工作能买什么，逐国来看",
+    "intro": "每个价格都有第二个数字：你为它工作的时间。这一页把各国官方公布的工资，放在一件在哪里都一样的商品旁边，于是不必先争论购物篮里该装什么，就能比较一小时能买到什么。",
+    "compare": {
+      "base": "基准",
+      "with": "对比国家",
+      "measure": "衡量的是什么",
+      "caption": "两国的公布工资，以及买一个巨无霸所需的工作",
+      "priceSource": "巨无霸价格："
+    },
+    "metrics": {
+      "workPerBigMac": "一个巨无霸的工作量",
+      "bigMacPrice": "巨无霸价格",
+      "payPerHour": "每小时工资",
+      "payPerHourUsd": "每小时工资（美元）",
+      "bigMacsPerMonth": "一个月工资能买的巨无霸",
+      "workPerLitre": "一升汽油的工作量",
+      "workPer100kWh": "{kwh} 度电的工作量"
+    },
+    "periods": {
+      "hour": "每小时",
+      "week": "每周",
+      "month": "每月",
+      "year": "每年"
+    },
+    "measures": {
+      "median": "中位数",
+      "average": "平均数"
+    },
+    "scopes": {
+      "allEmployees": "全部雇员",
+      "allWorkers": "全部就业者",
+      "citizens": "本国公民",
+      "formalSector": "正规部门，10人以上",
+      "fullTimeEmployees": "全职雇员",
+      "fullTimeResidents": "全职常住居民",
+      "regularSalaried": "固定受薪雇员",
+      "wageAndSalary": "工资薪金获得者",
+      "employees": "雇员",
+      "employeesNet": "雇员，税后",
+      "employedPersons": "就业人员",
+      "formalNonAgri": "非农正规部门",
+      "fullTimeEquivalent": "全时当量雇员",
+      "urbanNonPrivate": "城镇非私营单位"
+    },
+    "allMarkets": {
+      "title": "十个国家排名",
+      "intro": "按工资要为一个巨无霸工作多久排序。第三列值得先看：其中六个是中位数，四个是平均数，而平均数会被高收入拉高。",
+      "caption": "各国公布的工资数据，以及买一个巨无霸所需的工作",
+      "country": "国家",
+      "pay": "公布工资",
+      "basis": "衡量的是什么",
+      "hourly": "每小时",
+      "effort": "一个巨无霸的工作量",
+      "youAreHere": "你"
+    },
+    "notes": {
+      "title": "怎么读这张表",
+      "method": {
+        "title": "小时是怎么算出来的",
+        "body": "统计机构公布小时数据的，直接采用。公布周薪或月薪的，按每周{hours}小时折算。Stats NZ 两者都公布，二者相差不到五十分。"
+      },
+      "basket": {
+        "title": "为什么是一个汉堡，而不是一篮商品",
+        "body": "巨无霸、一升 95 号汽油和一度居民用电，在这里的每个国家都是同一样东西，而且都由同一家出版机构在同一天收集。在麦当劳不卖牛肉巨无霸的印度，《经济学人》改用鸡肉的马哈拉惹麦当劳。更完整的本地购物篮能覆盖生活的更多方面，但「在外面吃一顿」在马尼拉和墨尔本并不是一回事，比较它们说的更多是篮子，而不是钱。"
+      },
+      "comparability": {
+        "title": "工资之间并不能严格对比",
+        "body": "没有任何机构公布一份涵盖这些国家的统一工资中位数表，因此每个数字都来自各自的国家统计机构，统计的人群也不同。六个是中位数，四个是平均数。国家之间的差距请当作参考。"
+      },
+      "grossPay": {
+        "title": "这些都是税前",
+        "body": "公布的工资是税前数字。真正到账的更少，所以你自己的小时数会比这一页更长。"
+      }
+    },
+    "sources": {
+      "title": "数字出处",
+      "bigMac": "巨无霸价格与汇率：",
+      "wages": "各国工资：",
+      "energy": "汽油与电价："
+    },
+    "cta": {
+      "body": "这款应用用的是你自己的工资，而不是国家的。填入你的到手收入，每一笔消费都会多出第二个数字。",
+      "link": "看看它怎么用"
+    }
+  },
+  "tutorials": {
+    "eyebrow": "教程",
+    "title": "使用教程",
+    "intro": "一屏一步的简短教程，覆盖 Money2Time 能做的所有事。每张截图都来自真实的应用，要点的按钮用红色标出。",
+    "searchPlaceholder": "搜索教程",
+    "clear": "清除",
+    "emptyTitle": "没有找到结果",
+    "emptyDescription": "换个更短的词，或者输入你要找的页面名称。",
+    "stepCount": "{count} 步",
+    "stepCounter": "第 {current} 步，共 {total} 步",
+    "badgePro": "PRO",
+    "badgeIos": "iPhone",
+    "openInApp": "在应用中打开",
+    "previous": "上一篇",
+    "next": "下一篇",
+    "category": {
+      "start": "快速上手",
+      "logging": "记一笔",
+      "organize": "整理",
+      "plan": "提前规划",
+      "share": "分摊与结算",
+      "insights": "看懂数据",
+      "data": "你的数据"
+    }
+  },
+  "dashboard": {
+    "loading": "正在打开你的看板…",
+    "units": {
+      "minutes": "{m}分",
+      "hours": "{h}小时",
+      "hoursMinutes": "{h}小时{m}分",
+      "days": "{d}天",
+      "daysHours": "{d}天{h}小时"
+    },
+    "nav": {
+      "label": "看板",
+      "menu": "菜单",
+      "openMenu": "打开菜单",
+      "closeMenu": "关闭菜单",
+      "groups": {
+        "insights": "洞察",
+        "wealth": "财富",
+        "planning": "规划",
+        "organize": "整理"
+      }
+    },
+    "period": {
+      "label": "周期",
+      "previous": "上一周期",
+      "next": "下一周期",
+      "asOf": "截至 {date}",
+      "presets": {
+        "month": "月",
+        "3m": "3个月",
+        "6m": "6个月",
+        "12m": "12个月",
+        "ytd": "年初至今",
+        "year": "年",
+        "all": "全部"
+      }
+    },
+    "mode": {
+      "label": "金额显示为",
+      "hours": "小时"
+    },
+    "common": {
+      "income": "收入",
+      "spending": "支出",
+      "net": "净额",
+      "saved": "已存下",
+      "viewAll": "查看全部",
+      "vsPrevious": "较上期",
+      "uncategorized": "未分类",
+      "other": "其他",
+      "total": "合计",
+      "average": "平均数",
+      "transactions": "{count, plural, other {# 笔交易}}",
+      "accountTypes": {
+        "debit": "账户",
+        "credit": "信用卡",
+        "loan": "贷款",
+        "goal": "目标",
+        "cash": "现金",
+        "savings": "储蓄",
+        "investment": "投资"
+      },
+      "viewFailed": "无法用你的数据显示此页面。其他页面仍可正常使用。"
+    },
+    "views": {
+      "overview": {
+        "nav": "概览",
+        "title": "概览",
+        "subtitle": "你的钱和时间都去了哪里"
+      },
+      "cash-flow": {
+        "nav": "现金流",
+        "title": "现金流",
+        "subtitle": "收入、支出和剩余"
+      },
+      "spending": {
+        "nav": "支出",
+        "title": "支出",
+        "subtitle": "每个分类，细到每笔交易"
+      },
+      "income": {
+        "nav": "收入",
+        "title": "收入",
+        "subtitle": "你的钱从哪里来"
+      },
+      "trends": {
+        "nav": "趋势",
+        "title": "趋势",
+        "subtitle": "各分类逐月的变化"
+      },
+      "calendar": {
+        "nav": "日历",
+        "title": "日历",
+        "subtitle": "每天的支出"
+      },
+      "transactions": {
+        "nav": "交易",
+        "title": "交易",
+        "subtitle": "搜索并筛选你记录的所有内容"
+      },
+      "accounts": {
+        "nav": "账户",
+        "title": "账户",
+        "subtitle": "所有账户的余额"
+      },
+      "net-worth": {
+        "nav": "净资产",
+        "title": "净资产",
+        "subtitle": "你拥有的，减去你欠下的"
+      },
+      "budgets": {
+        "nav": "预算",
+        "title": "预算",
+        "subtitle": "计划与实际对照"
+      },
+      "recurring": {
+        "nav": "定期",
+        "title": "定期",
+        "subtitle": "重复扣款的订阅和账单"
+      },
+      "goals": {
+        "nav": "目标与贷款",
+        "title": "目标与贷款",
+        "subtitle": "目标和还款的进度"
+      },
+      "time": {
+        "nav": "时间成本",
+        "title": "时间成本",
+        "subtitle": "把你的支出换算成生命时间"
+      },
+      "trips": {
+        "nav": "旅行",
+        "title": "旅行",
+        "subtitle": "每次旅行花了多少钱、多少个工作日"
+      },
+      "items": {
+        "nav": "物品",
+        "title": "物品",
+        "subtitle": "你拥有的物品每天的成本"
+      },
+      "splits": {
+        "nav": "分摊账单",
+        "title": "分摊账单",
+        "subtitle": "谁还欠你钱"
+      },
+      "mood": {
+        "nav": "心情与习惯",
+        "title": "心情与习惯",
+        "subtitle": "消费后的感受，以及你在什么时候消费"
+      },
+      "categories": {
+        "nav": "分类",
+        "title": "分类",
+        "subtitle": "添加、重命名和整理你的分类"
+      }
+    },
+    "overview": {
+      "spent": "已花费",
+      "earned": "已赚取",
+      "saved": "已存下",
+      "overspent": "支出超过收入",
+      "savingsRate": "储蓄率 {rate}",
+      "noIncome": "本周期没有收入",
+      "netWorth": "净资产",
+      "netWorthNote": "合计包含 {count, plural, other {# 个账户}}",
+      "cashFlowTitle": "现金流",
+      "cashFlowSubtitle": "截至本周期的 12 个月",
+      "paceTitle": "支出节奏",
+      "thisMonth": "本月",
+      "lastMonth": "上月",
+      "dayN": "第 {day} 天",
+      "paceBehind": "比上月同一天少 {amount}。",
+      "paceAhead": "比上月同一天多 {amount}。",
+      "topCategories": "主要分类",
+      "biggestExpenses": "最大支出",
+      "upcoming": "即将到期的定期项目",
+      "nextOn": "下次：{date}",
+      "noSpending": "本周期没有支出",
+      "noRecurring": "没有启用中的定期规则",
+      "timeTitle": "你的时间",
+      "timeBody": "本周期的支出相当于 <strong>{hours}</strong> 的工作。",
+      "workShare": "占你工作小时的比例",
+      "workShareNote": "本周期大约工作了 {worked}",
+      "noWage": "请在应用中设置时薪，以小时查看。",
+      "accountsTitle": "最大账户"
+    },
+    "cashFlow": {
+      "savingsRate": "储蓄率 {rate}",
+      "noIncome": "本周期没有收入",
+      "netPerDay": "每日净额",
+      "avgNet": "每月平均净额",
+      "daysCount": "{count, plural, other {共 # 天}}",
+      "monthsCount": "{count, plural, other {共 # 个月}}",
+      "dailyTitle": "按天",
+      "monthlyTitle": "按月",
+      "sankeyTitle": "钱去了哪里",
+      "sankeySubtitle": "左边是收入，右边是支出和储蓄",
+      "fromSavings": "来自储蓄",
+      "empty": "本周期没有收入或支出",
+      "savingsRateTitle": "储蓄率",
+      "savingsRateSubtitle": "每月留下的收入占比；20% 是常见目标",
+      "tableTitle": "月度汇总",
+      "month": "月",
+      "rate": "比率"
+    },
+    "breakdown": {
+      "totalSpent": "总支出",
+      "totalEarned": "总收入",
+      "perDay": "每天",
+      "overDays": "{count, plural, other {共 # 天}}",
+      "count": "交易",
+      "avgEach": "平均 {amount}",
+      "largestCategory": "最大分类",
+      "byCategory": "按分类",
+      "subcategories": "子分类",
+      "clickToDrill": "选择一个分类查看其子分类",
+      "allCategories": "全部分类",
+      "empty": "本周期这里没有内容",
+      "byDay": "按天",
+      "byMonth": "按月",
+      "monthlyAverage": "平均每月 {amount}",
+      "topMerchants": "常去的地方",
+      "topMerchantsNote": "按每笔交易的备注分组",
+      "biggestPurchases": "最大的消费",
+      "biggestPayments": "最大的付款",
+      "byWeekday": "按星期",
+      "byWeekdayNote": "本周期内每个星期几的合计",
+      "transactionsIn": "{name}的交易",
+      "allTransactions": "全部交易"
+    },
+    "transactions": {
+      "search": "搜索备注、分类或金额",
+      "type": "类型",
+      "types": {
+        "all": "全部类型",
+        "expense": "支出",
+        "income": "收入",
+        "transfer": "转账"
+      },
+      "category": "分类",
+      "allCategories": "全部分类",
+      "account": "账户",
+      "allAccounts": "全部账户",
+      "feeling": "感受",
+      "allFeelings": "任何感受",
+      "feelings": {
+        "happy": "花得值",
+        "neutral": "说不上",
+        "sad": "有点后悔"
+      },
+      "empty": "没有匹配的交易",
+      "newer": "较新",
+      "older": "较早",
+      "page": "第 {page} 页，共 {pages} 页"
+    },
+    "trends": {
+      "gridTitle": "按月查看分类",
+      "gridSubtitle": "颜色越深，当月花得越多。选择一行查看图表。",
+      "category": "分类",
+      "empty": "这几个月没有支出",
+      "lineSubtitle": "平均每月 {amount}",
+      "moversTitle": "变化最大",
+      "moversSubtitle": "与上一个相同长度的周期对比",
+      "noMovers": "没有明显变化"
+    },
+    "calendar": {
+      "perDay": "日均",
+      "noSpendDays": "无支出日",
+      "noSpend": "无支出",
+      "ofDays": "{count, plural, other {截至目前共 # 天}}",
+      "bestStreak": "最长无支出连续天数",
+      "daysValue": "{count, plural, other {# 天}}",
+      "bestStreakNote": "近 12 个月",
+      "busiest": "花得最多的一天",
+      "monthSubtitle": "选择一天，查看当天发生了什么",
+      "pickDay": "本月最近一天",
+      "pickDayNote": "在日历上选择一天，只查看当天",
+      "yearTitle": "近 12 个月",
+      "yearSubtitle": "每个方块代表一天；颜色越深，花得越多"
+    },
+    "accounts": {
+      "assets": "资产",
+      "debts": "负债",
+      "netWorth": "净资产",
+      "inTotals": "{count, plural, other {# 个账户计入合计}}",
+      "excluded": "{count, plural, =0 {所有账户都已计入} other {# 个账户未计入合计}}",
+      "ungrouped": "其他账户",
+      "notInTotals": "未计入合计",
+      "owed": "欠款",
+      "owedNow": "今日欠款",
+      "balanceNow": "今日余额",
+      "lastActivity": "最近动态：{date}",
+      "statementDays": "账单日为 {statement} 日，还款日为 {due} 日",
+      "statementDaysAfter": "每月 {statement} 日出账单，{days} 天后到期",
+      "activity": "动态",
+      "empty": "还没有账户"
+    },
+    "netWorth": {
+      "now": "净资产",
+      "inHours": "按今天的时薪折合 {hours} 的工作",
+      "change": "变化",
+      "since": "自 {month} 起",
+      "bestMonth": "最佳月份",
+      "debts": "负债",
+      "debtNote": "合计中的信用卡和贷款",
+      "assets": "资产",
+      "chartTitle": "资产、负债与净资产",
+      "chartSubtitle": "计入合计的账户月末余额，按今天的汇率计算",
+      "mixTitle": "你的资产分布",
+      "mixSubtitle": "按账户分组",
+      "ungrouped": "其他",
+      "empty": "还没有资产",
+      "monthlyChange": "每月变化"
+    },
+    "budgets": {
+      "emptyTitle": "还没有预算",
+      "emptyBody": "在应用中设置月度预算后，就会显示在这里。",
+      "month": "月",
+      "budget": "预算",
+      "spent": "已花费",
+      "ofBudget": "占预算 {pct}",
+      "left": "剩余可花",
+      "over": "超出预算",
+      "perDayLeft": "本月剩余时间每天可花 {amount}",
+      "pace": "本月进度",
+      "paceNote": "第 {day} 天，共 {days} 天",
+      "linesTitle": "分类",
+      "linesSubtitle": "每个条上的线表示本月已过去多少",
+      "overall": "总预算",
+      "overBy": "超出 {amount}",
+      "leftOf": "剩余 {amount}",
+      "aheadOfPace": "超前于进度",
+      "unbudgetedCounted": "有 {amount} 花在这些分类之外，并计入预算。",
+      "unbudgetedNot": "有 {amount} 花在这些分类之外，未计入。",
+      "rateNote": "其他货币的支出按 1 {currency} = {rate} {main} 换算。",
+      "approxLeft": "约剩余 {amount}。",
+      "approxOver": "约超出 {amount}。",
+      "unconverted": "{count, plural, other {# 笔支出}}尚未计入：没有 {currency} 的汇率。",
+      "historyTitle": "按月对比预算与支出",
+      "historyInMain": "以 {currency} 计，便于对比用其他货币做预算的月份"
+    },
+    "recurring": {
+      "emptyTitle": "没有定期规则",
+      "emptyBody": "你在应用中设置为重复的订阅和账单会显示在这里。",
+      "perMonth": "每月固定支出",
+      "perYear": "每年",
+      "clockTitle": "账单还清的时间",
+      "clockNote": "从 9:00 开始，每个工作日的前 {hours} 用来支付这些账单（{day} 天）",
+      "active": "启用中的规则",
+      "pausedCount": "{count, plural, =0 {没有已暂停的} other {# 个已暂停}}",
+      "listTitle": "启用中",
+      "listSubtitle": "按每月成本排序",
+      "cadence": {
+        "daily": "{count, plural, =1 {每天} other {每 # 天}}",
+        "weekly": "{count, plural, =1 {每周} other {每 # 周}}",
+        "monthly": "{count, plural, =1 {每月} other {每 # 个月}}",
+        "yearly": "{count, plural, =1 {每年} other {每 # 年}}"
+      },
+      "next": "下次：{date}",
+      "transfer": "转账",
+      "yearHours": "每年 {hours} 的工作",
+      "upcomingTitle": "即将到来",
+      "pausedTitle": "已暂停"
+    },
+    "goals": {
+      "emptyTitle": "没有目标或贷款",
+      "emptyBody": "你在应用中跟踪的储蓄目标和贷款会显示在这里。",
+      "goalsTitle": "目标",
+      "achieved": "已达成",
+      "left": "还需存下",
+      "progress": "进度",
+      "byDate": "要在 {date} 前达成",
+      "perMonthNeeded": "每月 {amount}",
+      "loansTitle": "贷款",
+      "model": {
+        "flat": "固定利率",
+        "reducing": "递减余额"
+      },
+      "leftToPay": "待还",
+      "leftInHours": "{hours} 的工作",
+      "paidOff": "已还清",
+      "instalments": "已还 {paid} 期，共 {total} 期",
+      "principal": "借款金额",
+      "owedNow": "尚欠本金",
+      "paidSoFar": "已还",
+      "monthly": "每月还款",
+      "rate": "比率",
+      "interestCharged": "已产生利息",
+      "nextDue": "下次还款",
+      "payoff": "还清时间",
+      "paymentsLeft": "剩余期数",
+      "netNote": "贷款数据与应用保持一致：利息自贷款创建当天起按月累加。"
+    },
+    "time": {
+      "spentHours": "花掉的工作小时",
+      "share": "占工作小时的比例",
+      "shareNote": "大约工作了 {hours}",
+      "workdays": "工作日",
+      "workdaysValue": "{count, plural, other {# 个工作日}}",
+      "workdayLength": "按每个工作日 {hours} 计",
+      "hourlyValue": "时薪",
+      "perHour": "每小时，按你最近的工资",
+      "chartTitle": "花掉的小时与工作的小时",
+      "chartSubtitle": "每月的支出，按当月的工资折算",
+      "hoursSpent": "花掉的小时",
+      "hoursWorked": "工作的小时",
+      "categoriesTitle": "按工作日计的分类",
+      "categoriesSubtitle": "每个分类花了多少个工作日",
+      "empty": "本周期没有支出",
+      "runwayTitle": "自由跑道",
+      "daysValue": "{count, plural, other {# 天}}",
+      "runwayBody": "按你近期每天 {daily} 的花销，{liquid} 的日常账户资金不工作还能撑多久。",
+      "regretTitle": "后悔花掉的时间",
+      "regretBody": "{count, plural, =0 {本周期没有标记为“有点后悔”的消费。} other {涉及 # 笔你希望没买的消费。}}",
+      "biggestTitle": "耗时最多",
+      "biggestSubtitle": "赚回来最久的几笔消费",
+      "wageTitle": "你的时薪变化",
+      "wageSubtitle": "来自应用中保存的工资",
+      "noWage": "请在应用中设置时薪，以小时查看你的支出。"
+    },
+    "trips": {
+      "emptyTitle": "还没有旅行",
+      "emptyBody": "你在应用中为旅行创建的相册会显示在这里，并附上每次的花费。",
+      "count": "旅行",
+      "countries": "{count, plural, =0 {未设置国家} other {# 个国家}}",
+      "total": "旅行支出",
+      "workdays": "折合工作日",
+      "workdaysValue": "{count, plural, other {# 个工作日}}",
+      "workdaysNote": "所有旅行合计",
+      "current": "当前",
+      "perDay": "每天 {amount}",
+      "breakdown": "按分类",
+      "transactionsTitle": "交易",
+      "pick": "选择一次旅行，查看明细。"
+    },
+    "items": {
+      "emptyTitle": "还没有物品",
+      "emptyBody": "你在应用中跟踪的物品会显示在这里，并附上每天的成本。",
+      "value": "持有价值",
+      "count": "{count, plural, other {# 件物品}}",
+      "perDay": "每天成本",
+      "perMonth": "每月 {amount}",
+      "workPerDay": "每天的工作量",
+      "workPerDayNote": "用来负担你拥有的一切",
+      "listTitle": "你拥有的一切",
+      "listSubtitle": "购买价格按你持有的天数摊开",
+      "bought": "{date} 以 {price} 购入",
+      "owned": "已拥有 {count, plural, other {# 天}}",
+      "sold": "以 {price} 卖出",
+      "perDayValue": "{amount}/天",
+      "workValue": "每天 {time} 的工作"
+    },
+    "splits": {
+      "emptyTitle": "没有分摊账单",
+      "emptyBody": "你在应用中与朋友分摊的账单会显示在这里。",
+      "owedToYou": "欠你的钱",
+      "people": "{count, plural, =0 {全部结清} other {来自 # 人}}",
+      "settled": "已结清份额",
+      "ofShares": "{count, plural, other {共 # 份}}",
+      "bills": "分摊账单",
+      "billsNote": "你分摊过的交易",
+      "byPerson": "谁欠你钱",
+      "allSettled": "所有人都已还钱",
+      "open": "{count, plural, other {# 份未结清}}",
+      "billsTitle": "分摊的交易",
+      "unnamed": "某人"
+    },
+    "mood": {
+      "feelings": {
+        "happy": "花得值",
+        "neutral": "说不上",
+        "sad": "有点后悔"
+      },
+      "shareSub": "{amount} · {count, plural, other {# 笔消费}}",
+      "monthlyTitle": "消费后的感受",
+      "monthlySubtitle": "每月消费笔数，按感受划分",
+      "regretsTitle": "有点后悔",
+      "regretsSubtitle": "你最后悔的几笔大额消费",
+      "noRegrets": "本周期没有后悔的消费",
+      "clockTitle": "你什么时候消费",
+      "clockSubtitle": "按星期和小时统计的消费；高峰在 {hour} 前后",
+      "noTimes": "没有记录时间的消费不会显示在这里。"
+    },
+    "loadingTitle": "网页仪表盘",
+    "edit": {
+      "statusReady": "编辑已开启",
+      "statusReadyTitle": "更改会保存在手机上",
+      "statusReadyBody": "你的手机已连接。手机会检查并保存每项更改，然后把更新后的数据同步回这里。",
+      "statusAway": "只读",
+      "statusAwayTitle": "连接手机后才能进行更改。",
+      "statusAwayBody": "在手机上打开 Money2Time，进入“设置 → 网页仪表盘”。连接期间，你可以在这里添加、编辑和删除交易。手机和此浏览器会保持同步。",
+      "statusUpdateTitle": "请更新应用，才能在这里更改。",
+      "statusUpdateBody": "你手机上的 Money2Time 版本只能同步数据供查看。请更新应用，才能在此浏览器中添加、编辑和删除条目。",
+      "statusOffTitle": "此浏览器的更改已关闭。",
+      "statusOffBody": "在手机上打开“设置 → 网页仪表盘”，点按此浏览器旁的 ⋯，然后选择“允许更改”。",
+      "statusSaving": "正在保存…",
+      "statusSyncing": "正在同步…",
+      "statusSyncingBody": "正在从手机同步最新数据。数据一到，你就可以进行更改。",
+      "awayHint": "如需添加、编辑或删除交易，请在手机上打开“设置 → 网页仪表盘”。",
+      "close": "关闭",
+      "clear": "清除",
+      "cancel": "取消",
+      "reloadLatest": "加载最新",
+      "delete": "删除",
+      "apply": "应用",
+      "choose": "选择",
+      "add": "添加",
+      "update": "更新",
+      "addAnother": "再添加一个",
+      "type": "类型",
+      "expense": "支出",
+      "income": "收入",
+      "transfer": "转账",
+      "adjustment": "调整",
+      "deleteTransaction": "删除交易",
+      "deleteTransactionBody": "此操作不可撤销，确定继续？",
+      "required": "必填",
+      "from": "从",
+      "to": "到",
+      "chooseAccount": "选择账户",
+      "swapAccounts": "交换转出和转入账户",
+      "differentAccount": "不能是同一个账户",
+      "accountLabel": "账户",
+      "accounts": "账户",
+      "categoryLabel": "分类",
+      "categories": "分类",
+      "options": "交易选项",
+      "amount": "金额",
+      "currencyLabel": "货币",
+      "optional": "选填",
+      "note": "备注",
+      "received": "到账金额",
+      "date": "日期",
+      "details": "详细信息",
+      "detailsPlaceholder": "添加更长的备注",
+      "reimbursable": "待报销",
+      "reimbursed": "已返还",
+      "reimbursableHint": "别人会还给你的支出。可在报销页面申请。",
+      "countAsExpense": "计为支出",
+      "countAsExpenseHint": "将此转账计为支出，按你选择的分类计入总额、预算和图表。资金仍照常在两个账户之间转移。",
+      "feeling": "你感觉如何？",
+      "nudgeSmall": "这大约花费你 {hours} 的时间",
+      "nudgePause": "值得三思：约 {hours} 的工作量",
+      "nudgeLarge": "这相当于 {hours} 的工作时间",
+      "amountLocked": "此金额与分摊或退款关联。请在应用中更改。",
+      "hideBalances": "隐藏余额",
+      "showBalances": "显示余额",
+      "savingsGoals": "储蓄目标",
+      "ungrouped": "未分组",
+      "noAccounts": "还没有账户。",
+      "noCategories": "还没有分类。",
+      "select": "选择",
+      "selectAll": "全选",
+      "selected": "{count, plural, other {已选 #}}",
+      "deleteConfirm": "{count, plural, other {删除 # 笔交易？手机上的也会一并删除。}}",
+      "tooMany": "一次最多选择 {max} 笔交易。",
+      "accountTransfers": "转账会保留原账户。取消选择转账后才能更改账户。",
+      "accountLocked": "其中一些与分摊或退款关联。请在应用中更改它们的账户。",
+      "accountCurrencies": "这些记录的币种不同。请只选择同一币种的记录，再移到其他账户。",
+      "editTitle": "编辑交易",
+      "errors": {
+        "stale": "你的手机有更新的数据，正在同步。请稍后再试。",
+        "conflict": "这在你的手机上已更改，最新数据正在发送。请查看后再试。",
+        "amount_locked": "此金额与分摊或退款关联。请在应用中更改。",
+        "pro_required": "此功能需要 Money2Time Pro。请在应用中升级以使用更多功能。",
+        "off": "此浏览器的更改已关闭。请在手机上的“设置 → 网页仪表盘”中允许更改。",
+        "invalid": "你的手机无法保存。请检查详情后再试。",
+        "failed": "你的手机无法保存。请再试一次。",
+        "busy": "上一项更改仍在保存。请稍后再试。",
+        "away": "你的手机未连接。请在手机上打开网页仪表盘后再试。",
+        "too_large": "一次更改太多了。请少选一些条目。",
+        "unknown": "手机在确认前断开了连接。重新连接后，请检查更改是否已保存。"
+      },
+      "account": {
+        "newAccount": "新建账户",
+        "editAccount": "编辑账户",
+        "deleteAccount": "删除账户",
+        "deleteAccountBody": "将永久删除此账户及其所有交易，此操作不可撤销。",
+        "save": "保存",
+        "type": "类型",
+        "typeDebit": "借记",
+        "typeCredit": "信用",
+        "specialNote": "在这里可以更改名称、分组、徽标，以及是否计入总额。其余内容请在其专属编辑页中修改。",
+        "name": "账户名称",
+        "namePlaceholder": "日常钱包",
+        "logo": "标志",
+        "logoAdd": "添加标志",
+        "logoClear": "移除标志",
+        "logoChooseTitle": "选择标志",
+        "logoChooseSubtitle": "搜索或按国家/地区浏览",
+        "logoSearch": "搜索银行和钱包",
+        "logoCountry": "国家/地区",
+        "logoNoResults": "未找到匹配项",
+        "group": "账户分组",
+        "currency": "货币",
+        "statementDay": "账单日",
+        "dueDay": "还款日",
+        "dueRule": "还款日期",
+        "dueRuleDay": "每月固定日",
+        "dueRuleAfter": "账单日后天数",
+        "dayRange": "请选择 1 到 31 之间的日期。",
+        "daysAfterRange": "请选择 1 至 {max} 天。",
+        "startingBalance": "初始余额",
+        "currentBalance": "当前余额",
+        "includeInTotals": "计入总额",
+        "includeInTotalsHint": "隐藏的账户不计入总余额。",
+        "currencyChangeTitle": "更改账户货币？",
+        "currencyChangeMessage": "余额将按最新汇率从 {from} 换算为 {to}。现有记录仍保留其原始货币。",
+        "currencyChangeAction": "换算并更改",
+        "balancePromptTitle": "如何记录此余额变动？",
+        "balancePromptMessage": "余额变动 {amount}。记录为收入/支出，还是仅作为账户差额（不计入洞察总额）？",
+        "recordDifference": "记录为账户差额",
+        "recordIncome": "记录为收入",
+        "recordExpense": "记录为支出",
+        "newGroup": "新建分组",
+        "createGroup": "创建分组",
+        "editGroup": "编辑分组",
+        "groupName": "分组名称",
+        "groupPlaceholder": "日常消费",
+        "groupTaken": "已有同名分组。",
+        "deleteGroup": "删除分组？",
+        "deleteGroupBody": "该分组中的账户将移至\"未分组\"。",
+        "addToGroup": "添加账户",
+        "emptyGroup": "此分组暂无账户",
+        "cardDesign": "卡面设计",
+        "cardDesignTitle": "卡面设计",
+        "cardDesignPlain": "纯色",
+        "cardDesignClear": "移除卡面设计",
+        "cardDesignAll": "全部",
+        "cardDesignUploads": "我的上传",
+        "cardDesignTemplate": "{genre}卡面设计 {number}",
+        "payTitle": "信用卡还款",
+        "loanPayTitle": "还款",
+        "pay": "还款",
+        "payFrom": "从",
+        "none": "无",
+        "payable": "应付余额",
+        "loanDue": "应还金额",
+        "paidNote": "已付：{name}",
+        "paymentNotePlaceholder": "还款备注",
+        "genre_mascot": "吉祥物",
+        "genre_minimal": "极简",
+        "genre_gradient": "渐变",
+        "genre_luxury": "奢华",
+        "genre_texture": "质感",
+        "genre_marble": "大理石与石材",
+        "genre_pattern": "图案",
+        "genre_nature": "自然",
+        "genre_space": "太空",
+        "genre_abstract": "抽象艺术",
+        "genre_anime": "动漫",
+        "genre_retro": "复古",
+        "genre_cute": "可爱"
+      },
+      "album": {
+        "createTitle": "新建相册",
+        "create": "创建",
+        "editTitle": "编辑行程",
+        "save": "保存",
+        "done": "完成",
+        "clear": "清除",
+        "name": "相册名称",
+        "namePlaceholder": "例如：东京之旅",
+        "dates": "日期（可选）",
+        "startDate": "开始日期",
+        "endDate": "结束日期",
+        "location": "地点",
+        "addTransactions": "添加交易",
+        "editTransactions": "编辑交易",
+        "selectedCount": "已选 {count} 项",
+        "transactionCount": "{count} 笔交易",
+        "previous": "上一个",
+        "next": "下一个",
+        "deleteTitle": "删除相册？",
+        "deleteBody": "这将删除相册，但不会删除你的交易。",
+        "noAlbums": "还没有相册",
+        "appOnlyHint": "请在应用中添加封面照片或位置。",
+        "noExpenses": "本月没有支出。",
+        "bulkAction": "相册",
+        "addToAlbum": "添加到相册",
+        "expensesOnly": "只有支出可以放入相册。",
+        "expensesCount": "{count, plural, other {将这 # 笔支出添加到：}}",
+        "expensesLeftOut": "{count, plural, other {只有支出可以放入相册，所以有 # 笔记录不会加入。}}",
+        "reorderTitle": "相册排序",
+        "activeLabel": "新交易自动加入",
+        "activeTitle": "当前行程",
+        "activeNone": "无"
+      },
+      "budget": {
+        "allocatedSummary": "已分配 {allocated} / {total}",
+        "left": "剩余 {amount}",
+        "over": "超出 {amount}",
+        "allocatedDone": "已全部分配",
+        "cancel": "取消",
+        "save": "保存",
+        "delete": "删除",
+        "amount": "金额",
+        "fillRemainder": "补齐",
+        "subcategories": "子分类",
+        "childrenHint": "可选：将此金额分配到子分类。",
+        "duplicateSuffix": "副本",
+        "editTitle": "编辑模板",
+        "addTitle": "新建模板",
+        "chooseIcon": "选择图标",
+        "removeIcon": "移除图标",
+        "name": "名称",
+        "namePlaceholder": "例如：日常",
+        "total": "预算总额",
+        "currency": "货币",
+        "currencyHintTemplate": "每个预算保留创建当天的汇率，并按该汇率换算其他货币的支出。今天：1 {currency} = {rate} {main}。",
+        "currencyHintBudget": "其他货币的支出按 1 {currency} = {rate} {main} 换算。",
+        "currencyNoRate": "还没有 {currency} 的汇率。请在应用的多币种中添加，以便计入其他货币的支出。",
+        "countUnbudgetedTitle": "计入预算外支出",
+        "countUnbudgetedCaption": "将没有预算项的分类支出计入当月总额。",
+        "backPopulateTitle": "回填过去的月份",
+        "backPopulateCaption": "将为 {first} - {last}（{count} 个月）创建预算。已有预算的月份会跳过。",
+        "templatesTitle": "预算模板",
+        "templatesSubtitle": "可复用的月度计划",
+        "newTemplate": "新建模板",
+        "noTemplatesTitle": "还没有模板",
+        "noTemplatesMessage": "创建一个预算模板，开始规划你的每个月。",
+        "createTemplate": "创建模板",
+        "makeDefault": "设为默认",
+        "defaultBadge": "默认",
+        "duplicate": "复制",
+        "deleteTemplateTitle": "删除模板？",
+        "deleteTemplateMessage": "已创建的月度预算会保留。如果这是默认模板，下一个模板将成为默认。",
+        "createBudget": "创建预算",
+        "chooseTemplate": "选择模板",
+        "customOption": "自定义",
+        "customOptionCaption": "仅为本月创建一次性预算。",
+        "editBudget": "编辑预算",
+        "deleteBudget": "删除预算",
+        "deleteBudgetTitle": "删除本月预算？",
+        "deleteBudgetMessage": "本月不会自动重新创建。",
+        "month": "月份",
+        "noCategories": "请先添加一个支出分类，再为它设置预算。",
+        "splitMismatch": "子分类的合计与此金额不符",
+        "categoriesCount": "{count, plural, other {# 个分类}}"
+      },
+      "category": {
+        "newTitle": "新建分类",
+        "editTitle": "编辑分类",
+        "name": "名称",
+        "parentOptional": "父分类（选填）",
+        "select": "选择",
+        "clear": "清除",
+        "cancel": "取消",
+        "save": "保存",
+        "delete": "删除",
+        "deleteConfirm": "将永久删除此分类，此操作不可撤销。",
+        "deleteTitle": "删除分类？",
+        "deleteHasTransactions": "有 {count} 笔交易使用此分类。可将它们移至其他分类，或删除此分类并让它们变为未分类。",
+        "moveToOther": "移至其他分类",
+        "deleteAnyway": "仍然删除",
+        "moveTitle": "移动交易？",
+        "moveBody": "所有交易将被移至“{name}”，且此分类将被删除。此操作无法撤销。",
+        "moveAction": "移动并删除",
+        "addSubcategory": "添加子类别",
+        "expense": "支出",
+        "income": "收入",
+        "type": "分类类型",
+        "required": "请输入名称",
+        "noOptions": "还没有其他分类",
+        "emptyTitle": "还没有分类",
+        "chooseIcon": "选择图标",
+        "removeIcon": "移除图标",
+        "tabIcons": "图标",
+        "tabEmoji": "表情",
+        "searchIcons": "搜索图标",
+        "noResults": "没有匹配结果",
+        "groups": {
+          "money": "金钱",
+          "food_and_drink": "餐饮",
+          "transport": "交通",
+          "travel": "旅行",
+          "home": "家居",
+          "bills": "账单",
+          "shopping": "购物",
+          "health": "健康",
+          "leisure": "休闲",
+          "work": "工作",
+          "family": "家庭",
+          "other": "其他",
+          "food": "餐饮",
+          "smileys": "笑脸",
+          "people": "人物",
+          "animals": "动物与自然",
+          "activities": "活动",
+          "objects": "物品",
+          "symbols": "符号",
+          "flags": "旗帜"
+        },
+        "expand": "展开",
+        "collapse": "收起",
+        "noSubcategories": "暂无子分类",
+        "searchEmoji": "搜索表情"
+      },
+      "currency": {
+        "open": "多币种",
+        "title": "多币种",
+        "mainCurrency": "主货币",
+        "mainInApp": "如需更改主货币，请使用应用。你的数据会重新开始。",
+        "asOf": "更新于 {date}",
+        "neverUpdated": "尚未更新",
+        "subcurrencies": "子货币",
+        "add": "添加",
+        "addCurrency": "添加货币",
+        "search": "搜索货币",
+        "noMatch": "没有匹配的货币",
+        "empty": "添加货币以追踪其汇率。",
+        "manual": "手动",
+        "editRate": "编辑汇率",
+        "remove": "移除",
+        "save": "保存",
+        "orderChanged": "新顺序尚未保存。",
+        "saveOrder": "保存顺序"
+      },
+      "goal": {
+        "newGoal": "新目标",
+        "editTitle": "编辑目标",
+        "edit": "编辑",
+        "save": "保存",
+        "deleteTitle": "删除目标？",
+        "deleteMessage": "这会删除该目标及其交易。此操作无法撤销。",
+        "coverInApp": "请在应用中更换封面照片。",
+        "chooseIcon": "选择图标",
+        "removeIcon": "移除图标",
+        "name": "目标名称",
+        "namePlaceholder": "例如：日本之旅",
+        "target": "目标金额",
+        "currency": "货币",
+        "currentBalance": "当前余额",
+        "targetDate": "目标日期",
+        "targetDateHint": "可选。设置后会为目标显示进度节奏。",
+        "targetDatePast": "请选择一个未来的日期。",
+        "includeInTotals": "计入总额",
+        "includeInTotalsHint": "隐藏的账户不计入总余额。",
+        "startingAmount": "已存金额（可选）",
+        "autoSave": "自动储蓄",
+        "autoSaveHint": "按计划自动把钱转入目标。",
+        "autoSaveAmount": "金额",
+        "cadence": "重复",
+        "cadenceMonthly": "每月",
+        "cadenceWeekly": "每周",
+        "source": "转出账户",
+        "sourcePlaceholder": "选择账户",
+        "noSource": "还没有 {currency} 账户。自动储蓄需要一个相同币种的账户。",
+        "autoSaveInRecurring": "此目标的自动储蓄使用自定义计划。请在“固定”中更改。",
+        "currencyChangeTitle": "更改账户货币？",
+        "currencyChangeMessage": "余额将按最新汇率从 {from} 换算为 {to}。现有记录仍保留其原始货币。",
+        "currencyChangeAction": "换算并更改",
+        "balancePromptTitle": "如何记录此余额变动？",
+        "balancePromptMessage": "余额变动 {amount}。记录为收入/支出，还是仅作为账户差额（不计入洞察总额）？",
+        "recordDifference": "记录为账户差额",
+        "recordIncome": "记录为收入",
+        "recordExpense": "记录为支出",
+        "archive": "归档",
+        "unarchive": "恢复目标",
+        "archiveTitle": "归档目标？",
+        "archiveMessage": "目标将移出目标列表，转入它的自动储蓄也会暂停。",
+        "archiveBalanceHint": "里面还有钱。你可以先取出来，也可以继续放在这里。",
+        "archiveConfirm": "归档",
+        "archived": "已归档",
+        "editInGoals": "编辑目标",
+        "deposit": "存入",
+        "withdraw": "取出",
+        "depositFromAccount": "从账户转入",
+        "depositFromAccountHint": "从你的账户中转入资金。",
+        "depositOutside": "外部资金",
+        "depositOutsideHint": "来自外部的礼金或现金，将记为收入。",
+        "withdrawToAccount": "转回账户",
+        "withdrawToAccountHint": "把钱转回你的账户。",
+        "withdrawSpend": "直接消费",
+        "withdrawSpendHint": "直接从该目标付款，将记为支出。"
+      },
+      "item": {
+        "add": "添加物品",
+        "addTitle": "新物品",
+        "editTitle": "编辑物品",
+        "save": "保存",
+        "deleteTitle": "删除物品？",
+        "deleteMessage": "这会将物品从你的追踪器中移除。",
+        "iconTitle": "选择图标",
+        "chooseIcon": "选择图标",
+        "iconSubtitle": "选择一个图标。如需上传自己的图标，请使用应用。",
+        "searchIcons": "搜索图标…",
+        "customIcon": "自定义",
+        "noResults": "未找到匹配项",
+        "name": "名称",
+        "namePlaceholder": "例如：浓缩咖啡机",
+        "price": "购买价格",
+        "currency": "货币",
+        "purchaseDate": "购买日期",
+        "markInactive": "标记为停用",
+        "markInactiveHint": "停止计算已售出、损坏或不再使用的物品的天数。",
+        "endDate": "结束日期",
+        "sold": "我卖掉了",
+        "salePrice": "售出价格",
+        "note": "备注",
+        "notePlaceholder": "可选",
+        "groups": {
+          "objects": "物品",
+          "leisure": "休闲",
+          "work": "工作",
+          "home": "家居",
+          "health": "健康",
+          "travel": "旅行",
+          "transport": "交通",
+          "shopping": "购物",
+          "family": "家庭",
+          "other": "其他"
+        },
+        "reorderTitle": "项目排序"
+      },
+      "loan": {
+        "newTitle": "新建贷款",
+        "editTitle": "编辑贷款",
+        "edit": "编辑",
+        "save": "保存",
+        "delete": "删除账户",
+        "deleteBody": "将永久删除此账户及其所有交易，此操作不可撤销。",
+        "name": "账户名称",
+        "namePlaceholder": "车贷",
+        "logo": "标志",
+        "logoAdd": "添加标志",
+        "logoClear": "移除标志",
+        "group": "账户分组",
+        "currency": "货币",
+        "interestModel": "利息",
+        "interestModelInfo": "余额递减：利息每月按你尚未还清的余额计算，因此多还或提前还款可以减少利息。大多数房贷是这种方式。固定利率：利息按借款全额一次算清并在一开始就加上，提前还款能更快清偿债务，但省不下利息。大多数车贷和个人贷款是这种方式。",
+        "modelReducing": "余额递减",
+        "modelFlat": "固定利率",
+        "principal": "贷款金额",
+        "term": "贷款期数",
+        "termInfo": "贷款分多少期按月偿还，最多 {max} 期。5 年期即 60 期。",
+        "termError": "请输入 1 到 {max} 之间的整数。",
+        "rate": "利率",
+        "rateInfoReducing": "银行按你尚未还清的余额收取的年利率。填入后会算出每月还款额和总额，或直接填总额，利率会自动算出。",
+        "rateInfoFlat": "年固定利率，按借款全额在整个贷款期内计收。填入后会算出每月还款额和总额，或直接填总额，利率会自动算出。",
+        "effectiveRateHint": "实际利率 {rate}%。这就是此平息利率按余额递减计算的真实成本。",
+        "totalRepayable": "还款总额",
+        "totalRepayableInfo": "整笔贷款你总共要还的钱：借款金额加上全部利息。",
+        "instalment": "每月还款",
+        "instalmentInfo": "你每月还的金额。它跟着上面的总额走；如果银行实际扣的金额不同，请打开开关，我们会照你填的用。",
+        "instalmentErrorLow": "这个金额在贷款期内还不完。",
+        "instalmentErrorHigh": "对这笔贷款金额和期限来说太大了。",
+        "awaitingContract": "请填写上面的栏位",
+        "paidPeriods": "已还期数",
+        "paidPeriodsInfo": "新贷款保持 0。如果已经还了一段时间，填入已还期数，起始余额会自动算出。",
+        "paidPeriodsError": "必须少于贷款期数。",
+        "collect": "扣款账户",
+        "collectInfo": "每月扣除还款的账户。选定后会自动记账；留空则由你手动记录每次还款。",
+        "collectManual": "我自己记录还款",
+        "collectExternal": "这笔还款在「周期记账」中设置，请在那里修改。",
+        "countAsExpense": "将分期计入支出",
+        "countAsExpenseInfo": "还款始终会把钱转入贷款，所以无论如何欠款都会减少。开启后，它还会按你选择的分类计入总计、预算和图表中的支出。关闭后，还款不计入支出。之后再更改，只影响从那时起记录的还款。",
+        "paymentCategory": "还款分类",
+        "paymentCategoryPlaceholder": "选择分类",
+        "startDate": "起始日期",
+        "startDateInfo": "贷款发放的日期。首期在一个月后到期，该日即为你的还款日。",
+        "balanceOwed": "剩余欠款",
+        "balanceOwedInfo": "你今天还欠的金额，不含尚未收取的利息。通常比对账单上的数字小。",
+        "totalInterest": "利息总额",
+        "leftToPay": "待还",
+        "firstInstalment": "首期",
+        "payoffBy": "还清时间",
+        "instalmentsLeft": "剩余期数",
+        "includeInTotals": "计入总额",
+        "includeInTotalsHint": "隐藏的账户不计入总余额。",
+        "archive": "归档贷款",
+        "unarchive": "取消归档",
+        "archiveHint": "将它从账户列表中隐藏。历史记录和总额都会保留，点“显示已归档”即可找回。",
+        "rateChangeTitle": "新利率从何时生效？",
+        "rateChangeMessage": "利率将从 {from}% 变为 {to}%。从今天起生效可保留已计的利息；如果是修正错误，请选择从一开始。",
+        "rateChangeFromStart": "从一开始",
+        "rateChangeFromToday": "从今天起",
+        "currencyChangeTitle": "更改账户货币？",
+        "currencyChangeMessage": "余额将按最新汇率从 {from} 换算为 {to}。现有记录仍保留其原始货币。",
+        "currencyChangeAction": "换算并更改",
+        "balancePromptTitle": "如何记录此余额变动？",
+        "balancePromptMessage": "余额变动 {amount}。记录为收入/支出，还是仅作为账户差额（不计入洞察总额）？",
+        "recordDifference": "记录为账户差额",
+        "recordIncome": "记录为收入",
+        "recordExpense": "记录为支出",
+        "archived": "已归档",
+        "editInLoans": "编辑贷款",
+        "balanceOwedHint": "你的对账单可能显示 {amount}，那个数字加上了以后才收的利息。"
+      },
+      "reimbursement": {
+        "pendingTitle": "等待返还",
+        "settledTitle": "已返还",
+        "claim": "已收到",
+        "paidInto": "存入{account}",
+        "noAccount": "无账户",
+        "undoTitle": "撤销这笔报销？",
+        "undoMessage": "收入记录会被删除。",
+        "undoAction": "撤销",
+        "cancel": "取消",
+        "saveFirst": "请先保存你的其他更改。"
+      },
+      "reorder": {
+        "open": "排序",
+        "save": "保存",
+        "accountsTitle": "账户排序",
+        "accountsHint": "移动分组，以及分组内的账户。储蓄目标保持各自的顺序。",
+        "categoriesTitle": "分类排序",
+        "categoriesHint": "移动分类，以及父分类内的子分类。",
+        "emptyGroup": "此分组暂无账户。",
+        "drag": "拖动以排序",
+        "dragNamed": "移动{name}。拖动，或使用方向键。",
+        "moved": "已将{name}移到第 {position} 位，共 {count} 项"
+      },
+      "rule": {
+        "newRule": "新建循环规则",
+        "editRule": "编辑循环规则",
+        "sameFlow": "与添加交易流程相同",
+        "saveRule": "保存规则",
+        "deleteRule": "删除规则",
+        "deleteConfirm": "删除“{name}”？此操作无法撤销。",
+        "amountRequired": "请输入金额",
+        "chooseCategory": "选择分类",
+        "settings": "循环设置",
+        "ruleName": "规则名称",
+        "ruleNamePlaceholder": "Netflix 订阅",
+        "enterRuleName": "请输入循环规则名称。",
+        "logo": "图标",
+        "noLogo": "无图标",
+        "customLogo": "自定义图标",
+        "searchLogos": "搜索订阅服务",
+        "country": "国家/地区",
+        "noResults": "未找到匹配项",
+        "global": "全局",
+        "repeat": "重复",
+        "daily": "每天",
+        "weekly": "每周",
+        "monthly": "每月",
+        "quarterly": "每季度",
+        "semiannually": "每半年",
+        "yearly": "每年",
+        "every": "间隔",
+        "ends": "结束",
+        "never": "永不",
+        "onDate": "指定日期",
+        "endDate": "结束日期",
+        "validEndDate": "请选择有效的结束日期。",
+        "status": "状态",
+        "active": "进行中",
+        "paused": "已暂停",
+        "pause": "暂停",
+        "resume": "恢复"
+      },
+      "split": {
+        "title": "分摊账单",
+        "chip": "分摊",
+        "evenly": "平均分摊",
+        "addPerson": "添加人员",
+        "me": "我",
+        "personPlaceholder": "好友姓名",
+        "sumMatch": "{sum} / {total}",
+        "sumLeft": "还需 {diff}",
+        "sumOver": "超出 {diff}",
+        "sumMismatch": "差额 {diff}",
+        "negativeSelf": "朋友们的总和超过了总金额",
+        "markPaid": "标记已还",
+        "paidLabel": "{date} 已还",
+        "undo": "撤销",
+        "done": "完成",
+        "remove": "移除",
+        "cancel": "取消",
+        "noAccount": "无账户",
+        "paidTo": "还款至",
+        "sharesTitle": "谁欠你钱",
+        "someone": "某人",
+        "untitledBill": "分摊账单",
+        "paidTitle": "已还款",
+        "undoTitle": "将这份标记为未还吗？",
+        "undoBody": "对方会重新欠你这笔钱，支出也会增加相应金额。转入其他账户的还款转账会被移除。",
+        "itemizedTotal": "合计：{sum}",
+        "itemizedZeroHint": "请至少输入一个金额",
+        "removeTitle": "移除这条请求？",
+        "removeBody": "这将清除对方在这张账单中欠你的金额，交易本身不受影响。",
+        "defaultPaidTo": "默认收款账户",
+        "defaultPaidToHint": "新的分摊默认收款到此账户。"
+      },
+      "duplicate": "复制",
+      "duplicateTitle": "复制到日期",
+      "expenseCategory": "支出分类",
+      "incomeCategory": "收入分类",
+      "categoryNone": "转账会保留其分类。请选择支出或收入来更改分类。",
+      "duplicateNone": "余额调整和负数金额无法复制。",
+      "duplicateTooMany": "一次最多复制 {max} 条记录。",
+      "wage": {
+        "title": "时薪",
+        "subtitle": "你每个月的收入费率，与应用中的设置一致。",
+        "add": "添加时薪记录",
+        "addTitle": "添加时薪记录",
+        "empty": "暂无时薪历史记录。",
+        "now": "本月",
+        "perHour": "/时",
+        "type": {
+          "hourly": "时薪",
+          "monthly": "月薪",
+          "yearly": "年薪"
+        },
+        "deleteTitle": "删除月度时薪？",
+        "deleteBody": "删除 {month} 的时薪？依赖此时薪的月份将回退到前一个可用月份。",
+        "year": "年",
+        "month": "月",
+        "existsTitle": "{month} 已存在",
+        "existsBody": "该月已有时薪记录，是否改为编辑？",
+        "saveFor": "保存至 {month}",
+        "step1": "你的收入是多少？",
+        "step2": "每周工作",
+        "step3": "额外工作时间",
+        "amount": "金额（{symbol}）",
+        "afterTax": "请输入税后收入。",
+        "hoursPerWeek": "每周工时",
+        "workdaysPerWeek": "每周工作天数",
+        "commuteMinutes": "每天额外时间（分钟）",
+        "commuteHint": "包括准备出门、通勤、停车，以及任何无薪工作时间。",
+        "trueRate": "真实时薪",
+        "weeklyIncome": "每周收入",
+        "baseRate": "基础时薪",
+        "commutePerWeek": "每周额外时间",
+        "totalPerWeek": "每周总时间",
+        "showAs": "显示为",
+        "period": {
+          "hourly": "每小时",
+          "weekly": "每周",
+          "monthly": "每月",
+          "yearly": "每年"
+        },
+        "suffix": {
+          "hourly": "/时",
+          "weekly": "/周",
+          "monthly": "/月",
+          "yearly": "/年"
+        }
+      },
+      "notePlaceholder": "新备注。留空即可清除。"
+    },
+    "cloud": {
+      "strip": "来自 {device} 的数据，同步于 {date}。",
+      "yourPhone": "你的手机",
+      "dataFrom": "数据时间：{date}",
+      "phoneHere": "手机已连接",
+      "phoneAway": "手机未连接",
+      "connecting": "正在连接…",
+      "refresh": "从手机刷新",
+      "receiving": "正在同步… {percent}%",
+      "preparing": "准备中…",
+      "preparingTitle": "你的手机正在准备同步",
+      "receivingTitle": "正在从手机同步最新数据",
+      "opening": "正在打开…",
+      "openingTitle": "正在打开已同步的数据",
+      "needsPhoneTitle": "请在手机上打开 Money2Time。",
+      "needsPhoneBody": "前往“设置 → 网页仪表盘”。最新数据会自动传过来。",
+      "unlink": "解除此浏览器的关联",
+      "unlinkConfirm": "解除关联？此浏览器会删除你数据的副本。再次扫描即可重新关联。",
+      "stay": "保持关联",
+      "elsewhereTitle": "此看板已在另一个标签页中打开。",
+      "elsewhereBody": "只有一个标签页能接收更新。选择“在此使用”即可切换。",
+      "useHere": "在此使用",
+      "sourceOfTruth": "更改会保存在手机上。不在线存储任何内容。",
+      "errors": {
+        "incomplete": "与手机的同步在完成前中断了。请从手机刷新后重试。",
+        "corrupt": "无法读取来自手机的数据。请从手机刷新后重试。",
+        "unsupported": "这些数据来自更新版本的应用。请重新加载页面以获取最新的看板。",
+        "storage": "此浏览器没有保存副本，所以下次仍需要用到你的手机。隐私窗口通常会这样。"
+      }
+    },
+    "link": {
+      "eyebrow": "Money2Time 网页看板",
+      "title": "在大屏幕上查看你的 Money2Time 数据",
+      "subtitle": "用手机扫描代码即可。端到端加密，不在线存储任何内容。",
+      "steps": {
+        "camera": {
+          "title": "用相机扫描",
+          "body": "将手机相机对准代码，或在应用中扫描。"
+        },
+        "link": {
+          "title": "关联",
+          "body": "确认两个屏幕显示相同的代码，然后点按“关联”。"
+        },
+        "dashboard": {
+          "title": "打开看板",
+          "body": "17 个看板。随时打开应用即可刷新，连接期间还能进行更改。"
+        }
+      },
+      "promises": {
+        "edits": {
+          "title": "连接时可编辑",
+          "body": "更改只会在手机连接期间保存到手机上。"
+        },
+        "phone": {
+          "title": "手机说了算",
+          "body": "只有应用打开时才会传输数据。"
+        },
+        "private": {
+          "title": "线上不存储任何内容",
+          "body": "端到端加密。连我们也无法读取。"
+        }
+      },
+      "cardTitle": "关联此浏览器",
+      "cardBody": "用手机相机或 Money2Time 应用扫描。",
+      "qrLabel": "用于将此浏览器关联到 Money2Time 应用的二维码",
+      "preparing": "正在准备二维码…",
+      "noAccount": "无需账户。代码每 2 分钟更换一次。",
+      "confirmCode": "确认手机显示的是这个代码，然后在手机上点按“关联”。",
+      "candidateTitle": "要关联{phone}吗？",
+      "candidateTitleUnnamed": "要关联这部手机吗？",
+      "candidateBody": "确认手机显示的是同一个代码。只有你亲自扫描时才关联。",
+      "candidateAccept": "关联",
+      "candidateReject": "不是我的",
+      "offline": "无法连接。重新联网后会显示新代码。",
+      "terms": "关联即表示你同意《使用条款》和《隐私政策》。",
+      "unlinkedNotice": "已解除关联。此浏览器已删除你数据的副本。",
+      "linkedTo": "已关联到 {phone}",
+      "waitingTitle": "正在等待你的手机",
+      "waitingBody": "打开 Money2Time →“设置 → 网页仪表盘”。",
+      "preparingTitle": "正在准备同步",
+      "preparingBody": "手机正在打包你的数据。请保持手机上的 Money2Time 处于打开状态。",
+      "receivingTitle": "正在同步你的数据",
+      "receivingBody": "端到端加密，直接来自你的手机。请保持手机上的 Money2Time 处于打开状态。",
+      "openingTitle": "正在打开你的数据",
+      "openingBody": "正在此浏览器中解密。",
+      "errors": {
+        "unsupported": "此浏览器无法打开端到端加密的数据。请使用较新版本的 Chrome、Edge、Firefox 或 Safari。"
+      }
+    },
+    "pro": {
+      "badge": "Pro",
+      "title": "属于 Money2Time Pro",
+      "body": "这是 Money2Time Pro 的功能。Pro 还提供更长的时间范围，并取消账户、分类、定期交易等数量限制。在手机上的应用中升级后，这里也会解锁。",
+      "stepApp": "在手机上打开 Money2Time 并升级到 Pro。",
+      "stepRefresh": "回到这里，从手机刷新。手机同步数据后，这个浏览器就会解锁。",
+      "checkAgain": "我已升级，从手机刷新",
+      "checking": "正在同步…",
+      "notNow": "以后再说",
+      "lockedPeriod": "{period}，仅限 Pro"
+    },
+    "filters": {
+      "title": "筛选",
+      "accounts": "账户",
+      "exclude": "排除",
+      "include": "包含",
+      "done": "完成",
+      "reset": "重置",
+      "note": "账户余额不受筛选影响。"
+    },
+    "hide": {
+      "hide": "隐藏金额",
+      "show": "显示金额"
+    },
+    "dropdown": {
+      "search": "搜索",
+      "noMatch": "没有匹配项"
+    }
+  }
+}

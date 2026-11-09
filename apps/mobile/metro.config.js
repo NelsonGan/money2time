@@ -14,16 +14,16 @@ config.transformer = {
   babelTransformerPath: require.resolve('react-native-svg-transformer/expo'),
 };
 
-// Belt-and-suspenders: the Cloudflare resources in apps/cloudflare (Workers, D1
-// schemas) must never be bundled into the app. Nothing imports them today, and
-// they sit outside this project so Metro does not watch them, but this makes it
-// structurally impossible even via a future accidental import. Anchored to the
-// absolute path so it never matches an unrelated `cloudflare/` dir in
-// node_modules.
-const workerDirEscaped = path
-  .resolve(__dirname, '../cloudflare')
-  .replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-const blockWorker = new RegExp(`^${workerDirEscaped}[\\\\/]`);
+// Belt-and-suspenders: the other apps in apps/ (the Cloudflare Workers and D1
+// schemas, the website, App Studio) must never be bundled into the app. Nothing
+// imports them today, and they sit outside this project so Metro does not watch
+// them, but this makes it structurally impossible even via a future accidental
+// import. Anchored to the absolute paths so it never matches an unrelated
+// `cloudflare/` or `web/` dir in node_modules.
+const blockOtherApps = ['../cloudflare', '../web', '../app-studio'].map((dir) => {
+  const escaped = path.resolve(__dirname, dir).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(`^${escaped}[\\\\/]`);
+});
 const existingBlockList = config.resolver.blockList;
 const existingResolveRequest = config.resolver.resolveRequest;
 
@@ -40,7 +40,7 @@ config.resolver = {
   // read-only cities database (assets/db/cities.db.gz) ships as an asset.
   assetExts: [...config.resolver.assetExts.filter((ext) => ext !== 'svg'), 'gz'],
   sourceExts: [...config.resolver.sourceExts, 'svg'],
-  blockList: existingBlockList ? [].concat(existingBlockList, blockWorker) : blockWorker,
+  blockList: existingBlockList ? [].concat(existingBlockList, blockOtherApps) : blockOtherApps,
 };
 
 module.exports = withNativeWind(config, { input: './global.css' });

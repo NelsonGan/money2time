@@ -1,0 +1,2165 @@
+{
+  "metadata": {
+    "home": {
+      "title": "Aplikasi Catatan Keuangan dalam Jam - Money2Time",
+      "description": "Aplikasi catatan keuangan yang menampilkan tiap pembelian sebagai jam hidupmu. Catat pengeluaran, rekening, dan tagihan rutin tanpa login bank.",
+      "openGraphDescription": "Setiap pembelian, dihitung dalam jam hidupmu. Aplikasi keuangan privat yang tak pernah meminta login bank."
+    },
+    "contact": {
+      "title": "Hubungi Saya - Money2Time",
+      "description": "Pertanyaan, masukan, ide fitur, atau permintaan soal datamu: tulis langsung ke pengembang Money2Time."
+    },
+    "privacy": {
+      "title": "Kebijakan Privasi - Money2Time",
+      "description": "Cara Money2Time menangani data Anda: penyimpanan lokal, analitik produk dengan ID Aplikasi acak, dan tidak menjual data pribadi atau keuangan."
+    },
+    "terms": {
+      "title": "Ketentuan Penggunaan - Money2Time",
+      "description": "Ketentuan yang kamu setujui saat memakai aplikasi catatan keuangan Money2Time untuk iOS dan Android."
+    },
+    "statementsImport": {
+      "title": "Impor rekening koran dengan AI - Money2Time",
+      "description": "Panduan singkat impor rekening koran berbantuan AI di Money2Time, agar riwayat bank masuk tanpa diketik satu per satu."
+    },
+    "dataDeletion": {
+      "title": "Permintaan Penghapusan Data - Money2Time",
+      "description": "Cara meminta penghapusan data Money2Time, apa yang dihapus, apa yang disimpan, dan berapa lama disimpan."
+    },
+    "keywords": [
+      "aplikasi catatan keuangan",
+      "aplikasi keuangan pribadi",
+      "pencatat pengeluaran",
+      "aplikasi budgeting",
+      "catat pengeluaran harian",
+      "pengeluaran bulanan",
+      "aplikasi hemat",
+      "gaji per jam",
+      "keuangan pribadi",
+      "aplikasi anggaran"
+    ],
+    "costInHours": {
+      "title": "Gaji median per negara dalam jam kerja - Money2Time",
+      "description": "Gaji median dan rata-rata resmi dari sepuluh negara, diukur dengan satu produk yang sama di mana pun: berapa lama harus bekerja untuk membelinya.",
+      "openGraphDescription": "Sejauh mana satu jam kerja di sepuluh negara, diukur dengan produk yang sama di mana pun."
+    },
+    "tutorials": {
+      "title": "Tutorial Money2Time - Cara memakai aplikasinya",
+      "description": "Panduan langkah demi langkah untuk setiap bagian Money2Time, dengan tangkapan layar asli. Belajar mencatat pengeluaran, membagi tagihan, menyusun anggaran, dan membaca harga sebagai jam kerja.",
+      "detailTitle": "{title} - Tutorial Money2Time"
+    },
+    "dashboard": {
+      "title": "Dasbor Web - Money2Time",
+      "description": "Pindai dengan ponselmu untuk melihat data Money2Time di layar besar: pengeluaran, kekayaan bersih, anggaran, dan jam di balik setiap pembelian. Terenkripsi end-to-end, tidak ada yang disimpan secara online."
+    }
+  },
+  "common": {
+    "language": {
+      "label": "Bahasa"
+    },
+    "footer": {
+      "contact": "Kontak",
+      "privacy": "Kebijakan Privasi",
+      "dataDeletion": "Penghapusan Data",
+      "terms": "Ketentuan Penggunaan",
+      "copyright": "© {year} Money2Time. Semua hak dilindungi.",
+      "costInHours": "Harga dalam jam",
+      "tutorials": "Tutorial",
+      "dashboard": "Dasbor web"
+    }
+  },
+  "storeButtons": {
+    "appStorePrefix": "Unduh di",
+    "appStore": "App Store",
+    "playStorePrefix": "Dapatkan di",
+    "playStore": "Google Play"
+  },
+  "screenshotGallery": {
+    "ariaLabel": "Tangkapan layar aplikasi",
+    "alts": {
+      "home": "Tangkapan layar Money2Time yang menampilkan daftar transaksi bulanan dengan total pemasukan dan pengeluaran serta jam kerja di balik setiap pembelian",
+      "privacy": "Tangkapan layar Money2Time yang menonjolkan privasi: data Anda tetap di perangkat Anda, tanpa iklan, berfungsi sepenuhnya offline",
+      "assets": "Tangkapan layar Money2Time yang menampilkan aset bersih dan saldo akun",
+      "addExpense": "Tangkapan layar Money2Time yang menampilkan input pengeluaran cepat dengan papan ketik di layar dan input suara",
+      "splitBill": "Tangkapan layar Money2Time yang menampilkan tagihan yang dibagi rata di antara beberapa orang beserta bagian masing-masing",
+      "insights": "Tangkapan layar Money2Time yang menampilkan diagram pai rincian pengeluaran berdasarkan kategori",
+      "budgeting": "Tangkapan layar Money2Time yang menampilkan anggaran bulanan per kategori dengan bilah kemajuan dan sisa anggaran masing-masing",
+      "recurrings": "Tangkapan layar Money2Time yang menampilkan komitmen berulang dan periodenya",
+      "hourlyRates": "Tangkapan layar Money2Time yang menampilkan riwayat nilai per jam berdasarkan bulan"
+    }
+  },
+  "home": {
+    "nav": {
+      "howItWorks": "Cara kerjanya",
+      "logging": "Pencatatan",
+      "features": "Fitur",
+      "privacy": "Privasi",
+      "download": "Ambil aplikasinya",
+      "openMenu": "Buka menu",
+      "closeMenu": "Tutup menu"
+    },
+    "hero": {
+      "title": "Setiap harga punya dua angka.",
+      "subtitle": "Money2Time mencatat pengeluaranmu seperti aplikasi lain, lalu menampilkan angka yang sama dalam jam hidupmu.",
+      "badges": {
+        "onDevice": "Tetap di ponselmu",
+        "noBank": "Tanpa login bank",
+        "quick": "Tercatat dalam hitungan detik"
+      }
+    },
+    "units": {
+      "min": "{value} mnt",
+      "hours": "{value} jam"
+    },
+    "ticker": {
+      "coffee": "Kopi",
+      "lunch": "Makan siang di luar",
+      "groceries": "Belanja dapur",
+      "fuel": "Bensin",
+      "tshirt": "Kaus",
+      "beers": "Satu ronde bir",
+      "electricity": "Listrik",
+      "pizza": "Pizza Jumat malam",
+      "dogFood": "Makanan anjing",
+      "cinema": "Bioskop",
+      "gym": "Gym",
+      "rent": "Sewa",
+      "flight": "Tiket pulang",
+      "iceCream": "Es krim"
+    },
+    "howItWorks": {
+      "eyebrow": "Cara kerjanya",
+      "title": "Satu ketukan mengubah uang jadi waktu.",
+      "body": "Tarif per jammu dihitung dari uang yang benar-benar masuk ke rekeningmu. Setelah pajak, dibagi hari-hari kamu bekerja, termasuk perjalanan yang tak pernah dibayar.",
+      "coffee": {
+        "title": "Secangkir kopi",
+        "note": "Setara jalan kaki sebentar. Kopi itu memang kamu mau."
+      },
+      "impulse": {
+        "title": "Belanja impulsif",
+        "note": "Hampir dua hari kerja. Layak dipikirkan semalam dulu."
+      },
+      "rate": {
+        "title": "Tarif aslimu",
+        "perHour": "/jam",
+        "takeHome": {
+          "label": "Gaji bersih",
+          "value": "{value} per bulan"
+        },
+        "daysWorked": {
+          "label": "Hari kerja",
+          "value": "{value} per minggu"
+        },
+        "commute": {
+          "label": "Perjalanan, tak dibayar",
+          "value": "{value} mnt per hari"
+        }
+      }
+    },
+    "logging": {
+      "eyebrow": "Pencatatan",
+      "title": "Tak perlu mengetik catatan lagi.",
+      "body": "Kebanyakan aplikasi pengeluaran mati karena mencatat itu melelahkan. Ini tiga jalan pintasnya.",
+      "videoPlaceholder": "Rekaman layar segera hadir",
+      "receiptScan": {
+        "tab": "Pindai struk",
+        "title": "Arahkan saja ke struknya.",
+        "body": "Kamera terbuka di dalam lembar pencatatan, bukan di layar terpisah. Total, nama toko dan tanggal kembali sudah terisi, dan fotonya tetap terlampir.",
+        "points": {
+          "one": "Membaca total, tanggal dan nama toko",
+          "two": "Menyimpan fotonya untuk nanti"
+        }
+      },
+      "backTap": {
+        "tab": "Ketuk Belakang",
+        "title": "Ketuk dua kali bagian belakang.",
+        "body": "Pintasan lewat Ketuk Belakang di iOS membuka papan angka dengan akun dan kategori terakhirmu siap pakai. Selesai sebelum kamu meninggalkan kasir.",
+        "points": {
+          "one": "Dari saku sampai tercatat dalam hitungan detik",
+          "two": "Tanpa membuka kunci, tanpa mencari aplikasinya"
+        }
+      },
+      "applePay": {
+        "tab": "Apple Pay",
+        "title": "Atau bayar seperti biasa saja.",
+        "body": "Sebuah otomatisasi menangkap pembayaran Apple Pay dan menyiapkan catatannya. Satu notifikasi, sekilas lihat kategorinya, geser, selesai.",
+        "points": {
+          "one": "Menangkap yang tak akan pernah kamu catat manual",
+          "two": "Tidak ada yang tersimpan sebelum kamu setuju"
+        }
+      }
+    },
+    "review": {
+      "eyebrow": "Tinjauan",
+      "title": "Lihat ke mana perginya.",
+      "body": "Pilih satu minggu, satu bulan atau satu tahun. Satu angka, jam yang ada di baliknya, dan kategorimu berurutan. Ketuk salah satunya untuk melihat isinya.",
+      "points": {
+        "one": "Dibandingkan dengan rata-ratamu sendiri, bukan anggaran orang lain",
+        "two": "Keluarkan satu kategori atau akun, angkanya menghitung ulang sendiri",
+        "three": "Pengamatan, bukan ceramah"
+      },
+      "chip": "{hours} jam",
+      "mock": {
+        "title": "Tinjau pengeluaran",
+        "week": "Minggu",
+        "month": "Bulan",
+        "year": "Tahun",
+        "spent": "Dibelanjakan minggu ini",
+        "calmer": "Lebih tenang dari biasanya.",
+        "categories": {
+          "groceries": "Belanja dapur",
+          "eatingOut": "Makan di luar",
+          "transport": "Transportasi"
+        }
+      }
+    },
+    "features": {
+      "eyebrow": "Fitur",
+      "title": "Semua hal lain yang kamu harapkan, tanpa ribut.",
+      "sentiment": {
+        "title": "Rasanya bagaimana",
+        "body": "Tandai sebuah pembelian sebagai senang, biasa saja atau menyesal. Polanya bicara lebih banyak daripada totalnya.",
+        "legend": "Terasa sepadan"
+      },
+      "commitments": {
+        "title": "Kewajiban rutin",
+        "body": "Sewa, asuransi, gym yang terus ingin kamu batalkan. Lihat bulanmu sebelum bulannya tiba.",
+        "lockedIn": "/bln sudah terkunci"
+      },
+      "reimbursements": {
+        "title": "Uang yang akan kembali",
+        "body": "Tandai satu pengeluaran sebagai bisa diganti, dan ia menunggu di daftarnya sendiri sampai uangnya masuk.",
+        "employer": "Kantor",
+        "insurer": "Asuransi kesehatan"
+      },
+      "insights": {
+        "title": "Sembilan analisis",
+        "body": "Rincian, tren, rasio menabung, perasaan, aset. Semuanya dari satu menu.",
+        "savingsRate": "Rasio menabung",
+        "incomeTrend": "Tren pemasukan",
+        "assets": "Aset"
+      },
+      "split": {
+        "title": "Membagi tagihan",
+        "body": "Pindai struknya, bagikan tiap item ke orang di meja. Hanya bagianmu yang dihitung.",
+        "yourShare": "Bagianmu"
+      },
+      "modes": {
+        "title": "Sederhana atau lengkap",
+        "body": "Mulailah dengan satu dompet dan papan angka. Tambahkan akun, transfer dan mata uang saat kamu membutuhkannya.",
+        "simple": "Sederhana",
+        "simpleNote": "Satu dompet",
+        "full": "Lengkap",
+        "fullNote": "Semua menyala"
+      },
+      "budgets": {
+        "title": "Anggaran yang mengatur tempo",
+        "body": "Tetapkan batas bulanan per kategori. Batangnya menunjukkan di mana kamu seharusnya berada hari ini.",
+        "category": "Belanja dapur",
+        "of": "dari {total}",
+        "pace": "Sesuai tempo, tersisa {days} hari"
+      },
+      "calendar": {
+        "title": "Satu bulan yang bisa dibaca",
+        "body": "Perkecil sampai jadi kisi kalender. Tiap hari menampilkan yang masuk dan keluar, makin pekat makin besar jumlahnya."
+      },
+      "currency": {
+        "title": "Mata uang apa pun",
+        "body": "Catat dalam mata uang yang kamu pakai membayar. Totalnya dikonversi, angka aslinya tetap ada di barisnya.",
+        "item": "Cicilan mobil",
+        "paidIn": "Dibayar dalam {currency}"
+      },
+      "receipts": {
+        "title": "Setiap struk tersimpan rapi",
+        "body": "Foto menempel pada catatan dan berkumpul dalam album. Klaim garansi cuma sejauh satu gulir."
+      },
+      "search": {
+        "title": "Temukan apa saja",
+        "body": "Cari lewat catatan atau nama toko, lalu persempit dengan kategori, akun, jumlah atau perasaanmu waktu itu.",
+        "query": "kopi",
+        "filterCategory": "Makanan",
+        "filterAccount": "Tunai",
+        "filterSentiment": "Menyesal"
+      },
+      "assets": {
+        "title": "Apa yang kamu miliki",
+        "body": "Pantau akun dan aset berdampingan dengan pengeluaran, supaya gambaran panjangnya ikut terhitung."
+      }
+    },
+    "testimonials": {
+      "eyebrow": "Ulasan",
+      "title": "Kata orang setelah sebulan memakai.",
+      "usersChoice": "Pilihan pengguna"
+    },
+    "privacy": {
+      "eyebrow": "Privasi",
+      "title": "Pengeluaranmu tetap di ponselmu.",
+      "body": "Tak ada akun yang perlu dibuat, tak ada bank yang perlu disambungkan. Semuanya hidup di perangkatmu, dan kamu bisa mengekspor atau menghapus semuanya kapan saja.",
+      "onDevice": {
+        "title": "Hanya di perangkat",
+        "body": "Tanpa awan, tanpa sinkronisasi, tanpa iklan."
+      },
+      "import": {
+        "title": "Bawa riwayatmu",
+        "body": "Impor cadangan Money Manager lalu lanjutkan."
+      },
+      "link": "Baca kebijakan privasi"
+    },
+    "why": {
+      "eyebrow": "Dari Pengembang",
+      "title": "Mengapa Saya Membuat Ini",
+      "bookAlt": "Your Money or Your Life oleh Vicki Robin",
+      "quote": "Anda menukar energi hidup Anda dengan uang",
+      "quoteAuthor": "- Vicki Robin",
+      "paragraph1": "Setelah membaca <book>Your Money or Your Life</book>, saya merasa ada yang akhirnya masuk akal. Bagi kebanyakan dari kita yang bekerja untuk upah, uang bukan sekadar uang, melainkan energi hidup kita. Setiap rupiah yang kita belanjakan mewakili jam-jam waktu, usaha, dan hidup kita yang ditukar.",
+      "paragraph2": "Jadi saya membuat aplikasi ini. Aplikasi ini membantu Anda melihat pengeluaran dengan cara berbeda: bukan hanya dalam mata uang, tetapi dalam jam hidup Anda. Karena terkadang <cost>\"$20\"</cost> terasa tidak banyak, tetapi <time>\"2 jam hidup saya\"</time> terasa berbeda. Tujuannya sederhana, membantu Anda lebih sadar ke mana uang Anda (atau sebenarnya, waktu Anda) pergi, agar Anda bisa mengambil kembali kendalinya.",
+      "paragraph3": "Semuanya tetap berada di perangkat Anda, tanpa login atau sinkronisasi cloud. Data Anda adalah milik Anda. Jika perlu, Anda juga bisa mengekspor data sebagai file JSON sederhana. Versi gratis memberi Anda semua yang dibutuhkan untuk memulai. Pro membuka beberapa fitur tambahan seperti akun/kategori/tarif per jam tanpa batas, dan lainnya.",
+      "paragraph4": "Semoga Anda selalu memegang kendali atas uang dan hidup Anda."
+    },
+    "closing": {
+      "title": "Lihat berapa harga uangmu sebenarnya.",
+      "body": "Gratis dan tanpa akun. Isi nilai per jammu dalam satu menit, dan tiap angka mendapat makna kedua."
+    },
+    "community": {
+      "body": "Terhubung dengan pengguna lain, bagikan masukan, dan dapatkan tips di server Discord kami.",
+      "cta": "Gabung Komunitas"
+    },
+    "dashboardEntry": {
+      "eyebrow": "Baru · Dasbor Web",
+      "title": "Data Money2Time-mu, di layar besar",
+      "body": "Pindai kode di app.money2time.com dengan ponselmu untuk melihat arus kas, pengeluaran, kekayaan bersih, anggaran, perjalanan, dan jam di balik setiap pembelian. Tambah dan ubah transaksi dari komputermu selama ponselmu tersambung. Terenkripsi end-to-end.",
+      "cta": "Buka dasbor web",
+      "points": {
+        "private": "Terenkripsi end-to-end",
+        "charts": "17 dasbor",
+        "edits": "Ubah dari komputermu"
+      }
+    }
+  },
+  "contact": {
+    "page": {
+      "title": "Hubungi Saya",
+      "intro": "Untuk dukungan, bug, masukan, atau pertanyaan privasi.",
+      "formLabel": "Formulir Kontak",
+      "discordTitle": "Lebih suka mengobrol?",
+      "discordBody": "Bergabunglah dengan komunitas Discord kami untuk terhubung dengan pengguna lain dan mendapatkan jawaban cepat.",
+      "discordCta": "Gabung Discord Kami"
+    },
+    "form": {
+      "honeypot": "Perusahaan",
+      "name": "Nama",
+      "namePlaceholder": "Nama Anda",
+      "email": "Email",
+      "emailPlaceholder": "anda@example.com",
+      "message": "Pesan",
+      "messagePlaceholder": "Ceritakan apa yang terjadi, apa yang ingin Anda tingkatkan, atau bagaimana saya bisa membantu.",
+      "sending": "Mengirim...",
+      "send": "Kirim pesan"
+    },
+    "validation": {
+      "nameRequired": "Masukkan nama Anda.",
+      "nameTooLong": "Harap batasi nama Anda di bawah {max} karakter.",
+      "emailRequired": "Masukkan alamat email Anda.",
+      "emailInvalid": "Gunakan alamat email yang valid.",
+      "subjectTooLong": "Harap batasi subjek di bawah {max} karakter.",
+      "messageRequired": "Bagikan pesan singkat.",
+      "messageTooLong": "Harap batasi pesan di bawah {max} karakter."
+    },
+    "status": {
+      "honeypot": "Terima kasih sudah menghubungi. Catatan Anda sedang dikirim.",
+      "error": "Perbaiki kolom yang ditandai lalu coba lagi.",
+      "mailto": "Aplikasi email default Anda sedang dibuka dengan pesan yang sudah terisi. Jika tidak ada yang terbuka, email saya langsung."
+    }
+  },
+  "statementsImport": {
+    "title": "Impor Rekening Koran",
+    "intro": "Tonton panduan singkat di bawah ini untuk melihat cara mengimpor rekening koran bank Anda ke Money2Time dengan bantuan AI.",
+    "videoTitle": "Money2Time - Panduan impor rekening koran"
+  },
+  "notFound": {
+    "title": "Halaman tidak ditemukan",
+    "body": "Halaman ini tidak ada. Mungkin memang terlalu mahal untuk waktu Anda.",
+    "home": "Ke beranda"
+  },
+  "privacy": {
+    "title": "Kebijakan Privasi",
+    "lastUpdated": "Terakhir diperbarui: 22 Oktober 2026",
+    "websiteAnalytics": {
+      "title": "Analitik Penggunaan Situs Web",
+      "paragraphs": [
+        "Di money2time.com, kami menggunakan PostHog dan Google Analytics untuk mengukur tayangan halaman pseudonim serta sejumlah interaksi terbatas, seperti klik unduhan aplikasi, pemilihan tutorial, dan hasil formulir kontak. Layanan ini dapat menggunakan penyimpanan browser atau cookie dan memproses informasi teknis termasuk perkiraan wilayah, jenis perangkat dan browser, serta situs perujuk. Data pengguna dan peristiwa Google Analytics disimpan hingga 14 bulan.",
+        "Di Dasbor Web (app.money2time.com), layanan yang sama mengukur halaman dasbor mana yang Anda buka, kapan browser ditautkan atau diputuskan tautannya, apakah transfer dari ponsel Anda dan perubahan yang Anda buat berhasil, serta kapan fitur Pro ditawarkan. Setelah ponsel Anda mengirimkan datanya, peristiwa ini ditautkan ke pengidentifikasi aplikasi acak milik ponsel tersebut, sehingga penggunaan dasbor dan aplikasi Anda dihitung sebagai satu pengguna pseudonim hingga Anda memutuskan tautan browser. Dasbor memisahkan hal ini dari bagian lain money2time.com, sehingga kunjungan Anda ke halaman lain tidak ditautkan dengannya. Peristiwa dasbor tidak pernah menyertakan data keuangan Anda, dan kunjungan ke dasbor tidak pernah direkam sebagai rekaman ulang sesi.",
+        "PostHog juga dapat merekam sebagian kecil kunjungan situs web sebagai rekaman ulang sesi dengan setiap kolom formulir disamarkan, dan menerima laporan saat terjadi error di sebuah halaman.",
+        "Kami tidak mengirim isi formulir kontak, teks pencarian tutorial, data keuangan, pengenal akun, string kueri URL lengkap, atau data untuk iklan maupun personalisasi. Pengalihan /download tidak menambahkan alamat IP atau string user-agent Anda ke peristiwa analitiknya. Analitik situs web tidak dimuat saat pengaturan Do Not Track di browser Anda diaktifkan."
+      ]
+    },
+    "sections": [
+      {
+        "title": "Ikhtisar",
+        "paragraphs": [
+          "Money2Time (Aplikasi) adalah aplikasi keuangan pribadi yang mengonversi pengeluaran Anda menjadi padanan waktu berdasarkan upah per jam Anda. Privasi Anda penting bagi kami. Kebijakan ini menjelaskan data apa yang dikumpulkan Aplikasi, bagaimana data tersebut digunakan, dan hak Anda terkait data tersebut."
+        ]
+      },
+      {
+        "title": "1. Penyimpanan Data & Desain Lokal-Dahulu",
+        "paragraphs": [
+          "Semua data keuangan Anda, termasuk transaksi, akun, kategori, aturan berulang, dan pengaturan upah, disimpan secara lokal di perangkat Anda menggunakan basis data di perangkat (SQLite). Kami tidak mengoperasikan server yang menyimpan informasi keuangan pribadi Anda, dan Aplikasi tidak pernah menyinkronkan data Anda atau mencadangkannya ke server kami. Jika Anda menggunakan Dasbor Web yang bersifat opsional (bagian 6), ponsel Anda mengirim salinan langsung ke browser yang Anda tautkan, dengan enkripsi end-to-end; server kami meneruskannya tanpa menyimpannya dan tidak dapat membacanya.",
+          "Jika Anda menghapus instalasi Aplikasi, semua data yang tersimpan secara lokal akan dihapus secara permanen."
+        ]
+      },
+      {
+        "title": "2. Informasi yang Kami Kumpulkan",
+        "subsections": [
+          {
+            "title": "Data Keuangan (Hanya Disimpan Secara Lokal)",
+            "lists": [
+              [
+                "Jumlah transaksi, tanggal, kategori, catatan, dan tag sentimen",
+                "Nama akun, jenis, dan saldo",
+                "Informasi upah dan tarif per jam",
+                "Aturan transaksi berulang",
+                "Nama dan pengaturan kategori"
+              ]
+            ],
+            "paragraphs": [
+              "Data ini tidak pernah meninggalkan perangkat Anda kecuali Anda secara eksplisit memilih untuk mengekspornya, atau mengirimkannya ke browser yang Anda tautkan dengan Dasbor Web."
+            ]
+          },
+          {
+            "title": "Pengidentifikasi Aplikasi Acak",
+            "paragraphs": [
+              "Saat pertama kali diluncurkan, Aplikasi membuat pengidentifikasi unik acak yang diawali dengan m2t_ dan tidak ditautkan ke nama, email, Apple ID, atau identitas pribadi apa pun. Pengidentifikasi yang sama dibagikan kepada PostHog, Google Analytics for Firebase, dan RevenueCat untuk analitik produk dan pengelolaan langganan, serta kepada setiap browser yang Anda tautkan dengan Dasbor Web, yang analitik penggunaannya (PostHog dan Google Analytics) juga menggunakannya."
+            ]
+          },
+          {
+            "title": "Analitik Penggunaan",
+            "paragraphs": [
+              "Kami menggunakan PostHog dan Google Analytics for Firebase untuk mengumpulkan data penggunaan berpseudonim yang ditautkan ke pengidentifikasi Aplikasi acak ini dan meningkatkan Aplikasi. Data ini tidak mencakup jumlah, detail transaksi, saldo, catatan, struk, cadangan, atau informasi yang dapat mengidentifikasi Anda.",
+              "PostHog juga menerima laporan crash dan error, serta merekam sebagian kecil sesi aplikasi sebagai rekaman layar agar kami dapat menemukan dan memperbaiki masalah. Dalam rekaman itu, semua hal yang menampilkan informasi Anda disamarkan: teks, angka, kolom input, grafik, dan foto apa pun yang Anda tambahkan. Hanya desain milik aplikasi, seperti ikon, ilustrasi, dan label tombolnya, yang tetap terlihat. Rekaman ini tidak pernah menampilkan data keuangan Anda."
+            ],
+            "lists": [
+              [
+                "Tampilan layar dan penggunaan fitur",
+                "Peristiwa aplikasi seperti transaksi dibuat atau pengaturan diubah",
+                "Preferensi umum seperti mata uang, lokal, tema, dan mode tampilan",
+                "Platform seperti iOS atau Android"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "title": "3. Pembelian Dalam Aplikasi & Langganan",
+        "paragraphs": [
+          "Aplikasi menawarkan langganan premium opsional (Pro) yang dikelola melalui RevenueCat. Pembayaran diproses oleh Apple atau Google. Kami tidak pernah menerima atau menyimpan informasi pembayaran, detail kartu kredit, atau kredensial Apple ID/Google Account Anda.",
+          "RevenueCat menerima status langganan, pengidentifikasi produk, dan tanggal kedaluwarsa Anda untuk mengelola hak akses Anda. Informasi ini ditautkan ke pengidentifikasi Aplikasi acak, bukan identitas pribadi Anda."
+        ]
+      },
+      {
+        "title": "4. Notifikasi",
+        "paragraphs": [
+          "Aplikasi dapat meminta izin untuk mengirim notifikasi. Semua notifikasi dijadwalkan secara lokal di perangkat Anda. Tidak ada notifikasi push yang dikirim dari server eksternal. Anda dapat menolak izin notifikasi atau menonaktifkan notifikasi kapan saja di Pengaturan perangkat Anda."
+        ],
+        "lists": [
+          [
+            "Pengingat check-in harian",
+            "Ringkasan pengeluaran mingguan",
+            "Peringatan transaksi berulang"
+          ]
+        ]
+      },
+      {
+        "title": "5. Izin Perangkat",
+        "paragraphs": [
+          "Aplikasi hanya meminta izin notifikasi untuk menjadwalkan pengingat dan ringkasan lokal. Aplikasi tidak mengakses kamera, mikrofon, perpustakaan foto, kontak, kalender, pesan, lokasi, data kesehatan, data kebugaran, aplikasi lain, atau riwayat penelusuran Anda."
+        ]
+      },
+      {
+        "title": "6. Ekspor, Impor Data & Dasbor Web",
+        "paragraphs": [
+          "Anda dapat mengekspor semua data keuangan Anda sebagai file JSON kapan saja melalui Pengaturan Aplikasi. File yang diekspor dibagikan menggunakan fungsi berbagi bawaan perangkat Anda. Kami tidak menerima atau memproses data yang Anda ekspor.",
+          "Anda juga dapat mengimpor data dari cadangan Money2Time sebelumnya atau bermigrasi dari aplikasi Money Manager. Mengimpor akan menggantikan semua data yang ada di perangkat Anda.",
+          "Dasbor Web bersifat opsional. Untuk menggunakannya, Anda membuka app.money2time.com di komputer dan memindai kode yang ditampilkannya dengan Aplikasi. Ponsel Anda dan browser tersebut kemudian menyepakati kunci enkripsi yang hanya dipegang oleh keduanya. Selama layar Dasbor Web di Aplikasi dan browser sama-sama terbuka, Aplikasi mengirimkan salinan data Anda ke browser (data yang sama dengan ekspor, dengan logo, ikon, dan foto sampul yang kamu tambahkan, tetapi tanpa foto struk atau kode QR pembayaran), dienkripsi end-to-end dengan AES-256-GCM. Data ini melewati server yang kami jalankan di Cloudflare, yang meneruskan data terenkripsi tersebut saat diterima dan tidak menyimpannya. Kami tidak dapat membacanya.",
+          "Browser menyimpan salinan terakhir yang diterimanya, tetap dalam keadaan terenkripsi, di penyimpanannya sendiri bersama kuncinya, sampai Anda memutuskan tautannya di browser atau di Aplikasi. Perubahan yang Anda buat di dasbor dikirim kembali ke ponsel Anda, dienkripsi dengan cara yang sama, dan Aplikasi hanya menyimpannya selama layar Dasbor Web-nya terbuka dan hanya dari browser yang Anda izinkan untuk membuat perubahan. Ponsel Anda juga memberi tahu browser apakah Anda memiliki Money2Time Pro, agar dasbor Pro dapat dibuka, serta pengidentifikasi aplikasi acaknya, untuk analitik penggunaan dasbor. Tidak ada akun: kami tidak menyimpan alamat email, dan server yang meneruskan data Anda tidak mencatat ponsel maupun browser mana yang tertaut."
+        ]
+      },
+      {
+        "title": "7. Penghapusan Data",
+        "paragraphs": [
+          "Anda memiliki kendali penuh atas data Anda setiap saat. Reset All Data menghapus secara permanen semua transaksi, akun, kategori, aturan berulang, dan pengaturan upah dari perangkat Anda. Reset Transactions Only menghapus riwayat transaksi Anda sambil mempertahankan akun dan kategori. Menghapus instalasi Aplikasi akan menghapus basis data lokal dan seluruh data yang tersimpan sepenuhnya. Memutuskan tautan browser dari Dasbor Web menghapus salinan yang disimpannya: langsung saat Anda memutuskan tautan di browser, dan saat berikutnya browser terhubung bila Anda memutuskan tautan dari Aplikasi. Menghapus data situs browser tersebut juga menghapusnya.",
+          "Mereset data di dalam Aplikasi tidak menghapus status langganan Anda yang disimpan oleh Apple/Google atau data analitik yang sebelumnya dikirim ke PostHog / Google Analytics for Firebase. Untuk meminta penghapusan data analitik, hubungi kami melalui email di bawah."
+        ]
+      },
+      {
+        "title": "8. Layanan Pihak Ketiga",
+        "paragraphs": [
+          "Aplikasi tidak menampilkan iklan atau menggunakan SDK periklanan."
+        ],
+        "table": {
+          "headers": [
+            "Layanan",
+            "Tujuan",
+            "Data yang Dibagikan"
+          ],
+          "rows": [
+            [
+              "PostHog / Google Analytics for Firebase",
+              "Analitik penggunaan berpseudonim",
+              "ID Aplikasi acak, peristiwa penggunaan fitur, preferensi"
+            ],
+            [
+              "RevenueCat",
+              "Pengelolaan langganan",
+              "ID Aplikasi acak, status langganan"
+            ],
+            [
+              "Cloudflare (Workers, Durable Objects)",
+              "Koneksi Dasbor Web, hanya jika Anda menggunakannya",
+              "Data Anda, terenkripsi end-to-end dan hanya saat dalam perjalanan; detail koneksi seperti alamat IP, disimpan sebentar di log Cloudflare"
+            ],
+            [
+              "Apple App Store / Google Play",
+              "Pemrosesan pembayaran",
+              "Ditangani langsung oleh Apple/Google"
+            ]
+          ]
+        }
+      },
+      {
+        "title": "9. Keamanan Data",
+        "paragraphs": [
+          "Data keuangan Anda disimpan dalam basis data lokal yang tidak terenkripsi dan dilindungi oleh keamanan bawaan perangkat Anda. Saat Anda menggunakan Dasbor Web, data tersebut dienkripsi di ponsel Anda dengan AES-256-GCM, menggunakan kunci yang disepakati ponsel dan browser Anda melalui pertukaran kunci P-256, dan dikirim melalui HTTPS; server kami tidak pernah memiliki kuncinya. Aplikasi hanya menggunakan algoritma enkripsi standar yang dipublikasikan."
+        ]
+      },
+      {
+        "title": "10. Privasi Anak",
+        "paragraphs": [
+          "Aplikasi tidak ditujukan untuk anak-anak di bawah usia 13 tahun. Kami tidak dengan sengaja mengumpulkan informasi pribadi dari anak-anak di bawah 13 tahun. Jika Anda meyakini seorang anak telah memberikan data melalui Aplikasi, harap hubungi kami dan kami akan mengambil langkah untuk menghapus informasi tersebut."
+        ]
+      },
+      {
+        "title": "11. Perubahan pada Kebijakan Ini",
+        "paragraphs": [
+          "Kami dapat memperbarui Kebijakan Privasi ini dari waktu ke waktu. Perubahan akan ditampilkan di halaman ini dengan tanggal Terakhir diperbarui yang baru. Penggunaan Aplikasi secara berkelanjutan setelah perubahan berarti Anda menerima kebijakan yang diperbarui."
+        ]
+      }
+    ],
+    "contact": {
+      "title": "12. Hubungi Kami",
+      "body": "Jika Anda memiliki pertanyaan tentang Kebijakan Privasi ini, membutuhkan dukungan, atau ingin meminta penghapusan data analitik, silakan hubungi kami di:",
+      "formPrefix": "Anda juga dapat menggunakan",
+      "formLink": "formulir kontak",
+      "formSuffix": "di situs ini."
+    }
+  },
+  "terms": {
+    "title": "Ketentuan Penggunaan",
+    "lastUpdated": "Terakhir diperbarui: 25 Maret 2026",
+    "privacyPolicyLabel": "Kebijakan Privasi",
+    "sections": [
+      {
+        "title": "Ikhtisar",
+        "paragraphs": [
+          "Ketentuan Penggunaan ini (Ketentuan) mengatur penggunaan Anda atas aplikasi seluler Money2Time (Aplikasi), yang dikembangkan dan dioperasikan oleh Nelson Gan. Dengan mengunduh atau menggunakan Aplikasi, Anda setuju untuk terikat oleh Ketentuan ini. Jika Anda tidak setuju, jangan gunakan Aplikasi."
+        ]
+      },
+      {
+        "title": "1. Penerimaan Ketentuan",
+        "paragraphs": [
+          "Dengan mengakses atau menggunakan Money2Time, Anda mengonfirmasi bahwa Anda berusia setidaknya 13 tahun dan memiliki kapasitas hukum untuk menyetujui Ketentuan ini. Jika Anda menggunakan Aplikasi atas nama suatu organisasi, Anda menyatakan bahwa Anda memiliki wewenang untuk mengikat organisasi tersebut pada Ketentuan ini."
+        ]
+      },
+      {
+        "title": "2. Deskripsi Aplikasi",
+        "paragraphs": [
+          "Money2Time adalah aplikasi keuangan pribadi yang membantu Anda memahami biaya sebenarnya dari pengeluaran Anda dengan mengonversi pengeluaran menjadi padanan jam waktu Anda berdasarkan upah per jam Anda. Fitur inti meliputi:"
+        ],
+        "lists": [
+          [
+            "Pelacakan pengeluaran dan pemasukan di beberapa akun",
+            "Konversi uang ke waktu berdasarkan pengaturan upah Anda",
+            "Aturan transaksi berulang untuk tagihan dan langganan",
+            "Rincian pengeluaran, insight, dan pelacakan sentimen",
+            "Ekspor dan impor data lokal",
+            "Notifikasi yang dapat disesuaikan untuk pengingat dan ringkasan"
+          ]
+        ]
+      },
+      {
+        "title": "3. Paket Gratis dan Pro",
+        "paragraphs": [
+          "Aplikasi tersedia dengan model freemium. Fitur tertentu dibatasi pada paket gratis dan memerlukan langganan Pro aktif untuk membukanya. Kami berhak mengubah batas paket gratis atau fitur paket Pro kapan saja. Perubahan material akan dikomunikasikan melalui pembaruan aplikasi atau di situs web ini."
+        ],
+        "subsections": [
+          {
+            "title": "Paket Gratis",
+            "lists": [
+              [
+                "Hingga 5 akun",
+                "Hingga 9 kategori pengeluaran/pemasukan",
+                "Hingga 5 aturan transaksi berulang",
+                "Hingga 5 entri tarif per jam",
+                "Catatan transaksi tanpa batas"
+              ]
+            ]
+          },
+          {
+            "title": "Paket Pro",
+            "lists": [
+              [
+                "Akun, kategori, aturan berulang, dan entri tarif per jam tanpa batas",
+                "Tersedia sebagai langganan bulanan, langganan tahunan, atau pembelian seumur hidup"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "title": "4. Pembelian Dalam Aplikasi & Langganan",
+        "paragraphs": [
+          "Langganan Pro dan pembelian seumur hidup diproses melalui Apple App Store atau Google Play Store. Dengan melakukan pembelian, Anda menyetujui ketentuan pembayaran dari masing-masing toko.",
+          "Langganan ditagih di muka pada siklus bulanan atau tahunan dan diperpanjang otomatis kecuali dibatalkan setidaknya 24 jam sebelum akhir periode berjalan. Permintaan pengembalian dana ditangani oleh Apple atau Google sesuai kebijakan pengembalian dana masing-masing. Anda dapat memulihkan pembelian sebelumnya di perangkat baru menggunakan Restore Purchases di pengaturan Aplikasi.",
+          "Pembelian seumur hidup memberi akses ke fitur Pro selama masa hidup Aplikasi. Kami tidak menjamin bahwa Aplikasi akan terus tersedia tanpa batas waktu."
+        ]
+      },
+      {
+        "title": "5. Data Anda",
+        "paragraphs": [
+          "Semua data keuangan yang Anda masukkan, termasuk transaksi, akun, kategori, pengaturan upah, dan preferensi, disimpan secara lokal di perangkat Anda. Kami tidak memiliki akses ke data keuangan Anda dan tidak menyimpannya di server mana pun.",
+          "Anda sepenuhnya bertanggung jawab untuk menjaga cadangan data Anda. Gunakan fitur ekspor bawaan untuk membuat cadangan. Kami tidak bertanggung jawab atas kehilangan data apa pun akibat penghapusan aplikasi, kegagalan perangkat, atau reset yang tidak disengaja.",
+          "Untuk detail lengkap tentang penanganan data, lihat {privacyPolicy} kami."
+        ]
+      },
+      {
+        "title": "6. Penggunaan yang Diperbolehkan",
+        "paragraphs": [
+          "Anda setuju untuk tidak:"
+        ],
+        "lists": [
+          [
+            "Melakukan rekayasa balik, dekompilasi, atau pembongkaran Aplikasi",
+            "Mencoba mendapatkan akses tanpa izin ke bagian mana pun dari Aplikasi atau sistem terkaitnya",
+            "Menggunakan Aplikasi untuk tujuan yang melanggar hukum atau melanggar hukum yang berlaku",
+            "Mendistribusikan ulang, menjual kembali, atau mensublisensikan Aplikasi atau bagian mana pun darinya",
+            "Menggunakan cara otomatis untuk mengakses atau berinteraksi dengan Aplikasi"
+          ]
+        ]
+      },
+      {
+        "title": "7. Kekayaan Intelektual",
+        "paragraphs": [
+          "Aplikasi, termasuk desain, kode, grafis, dan kontennya, dimiliki oleh Nelson Gan dan dilindungi oleh hak cipta serta undang-undang kekayaan intelektual lainnya. Ketentuan ini tidak memberikan hak apa pun kepada Anda untuk menggunakan merek dagang, logo, atau elemen merek kami.",
+          "Data keuangan Anda adalah milik Anda. Dengan menggunakan Aplikasi, Anda tidak memberikan hak apa pun kepada kami atas data pribadi Anda."
+        ]
+      },
+      {
+        "title": "8. Penafian Jaminan",
+        "paragraphs": [
+          "Aplikasi disediakan sebagaimana adanya dan sebagaimana tersedia tanpa jaminan dalam bentuk apa pun, baik tersurat maupun tersirat, termasuk jaminan kelayakan jual, kesesuaian untuk tujuan tertentu, atau tidak melanggar hak pihak lain.",
+          "Money2Time adalah alat produktivitas pribadi dan bukan penasihat keuangan, akuntan, atau layanan keuangan yang teregulasi. Tidak ada bagian dari Aplikasi yang merupakan nasihat keuangan. Anda sebaiknya berkonsultasi dengan profesional yang berkualifikasi untuk keputusan keuangan.",
+          "Kami tidak menjamin bahwa Aplikasi akan bebas dari kesalahan, tidak terputus, atau bebas dari bug."
+        ]
+      },
+      {
+        "title": "9. Batasan Tanggung Jawab",
+        "paragraphs": [
+          "Sejauh diizinkan oleh hukum yang berlaku, kami tidak bertanggung jawab atas kerugian tidak langsung, insidental, khusus, konsekuensial, atau punitif yang timbul dari penggunaan Anda atas, atau ketidakmampuan Anda menggunakan, Aplikasi, termasuk kehilangan data, keputusan keuangan yang dibuat berdasarkan keluaran Aplikasi, atau masalah perangkat.",
+          "Total tanggung jawab kami kepada Anda atas klaim apa pun yang timbul dari Ketentuan ini atau penggunaan Anda atas Aplikasi tidak akan melebihi jumlah yang Anda bayarkan untuk periode langganan Pro Anda saat ini, atau $10 USD jika Anda menggunakan paket gratis."
+        ]
+      },
+      {
+        "title": "10. Pengakhiran",
+        "paragraphs": [
+          "Kami dapat menangguhkan atau mengakhiri akses Anda ke Aplikasi kapan saja, dengan atau tanpa alasan, dan dengan atau tanpa pemberitahuan. Setelah pengakhiran, hak Anda untuk menggunakan Aplikasi berhenti segera. Karena data Anda disimpan secara lokal, data tersebut akan tetap berada di perangkat Anda sampai Anda menghapus instalasi Aplikasi atau meresetnya secara manual.",
+          "Anda dapat berhenti menggunakan Aplikasi kapan saja dengan menghapus instalasinya."
+        ]
+      },
+      {
+        "title": "11. Perubahan pada Ketentuan Ini",
+        "paragraphs": [
+          "Kami dapat memperbarui Ketentuan ini dari waktu ke waktu. Ketika kami melakukannya, kami akan memperbarui tanggal Terakhir diperbarui di bagian atas halaman ini. Penggunaan Aplikasi secara berkelanjutan setelah perubahan berarti Anda menerima Ketentuan yang telah direvisi. Untuk perubahan material, kami akan melakukan upaya yang wajar untuk memberi tahu Anda melalui pembaruan aplikasi atau pemberitahuan di situs web ini."
+        ]
+      },
+      {
+        "title": "12. Hukum yang Berlaku",
+        "paragraphs": [
+          "Ketentuan ini diatur oleh dan ditafsirkan sesuai dengan hukum Singapura, tanpa memperhatikan ketentuan pertentangan hukumnya. Setiap sengketa yang timbul dari Ketentuan ini akan tunduk pada yurisdiksi eksklusif pengadilan Singapura."
+        ]
+      }
+    ],
+    "contact": {
+      "title": "13. Hubungi Kami",
+      "body": "Jika Anda memiliki pertanyaan tentang Ketentuan ini, silakan hubungi kami di:"
+    }
+  },
+  "dataDeletion": {
+    "title": "Permintaan Penghapusan Data",
+    "lastUpdated": "Terakhir diperbarui: 20 Oktober 2026",
+    "intro": "Money2Time adalah aplikasi local-first: semua data keuangan Anda hanya disimpan di perangkat Anda dan tidak pernah disimpan di server kami. Halaman ini menjelaskan cara meminta penghapusan data yang terkait dengan aplikasi Money2Time, termasuk langkah-langkah untuk meminta penghapusan dan jenis data mana yang dihapus atau disimpan, beserta periode penyimpanannya.",
+    "sections": [
+      {
+        "title": "Cara Meminta Penghapusan Data",
+        "subsections": [
+          {
+            "title": "Hapus data yang tersimpan di perangkat Anda",
+            "paragraphs": [
+              "Hampir semua data Anda, termasuk semua data keuangan Anda, hanya tersimpan di perangkat Anda. Anda dapat menghapusnya sendiri kapan saja:"
+            ],
+            "lists": [
+              [
+                "Buka aplikasi Money2Time dan buka Setelan.",
+                "Ketuk \"Reset All Data\" untuk menghapus secara permanen semua transaksi, akun, kategori, aturan berulang, dan setelan upah.",
+                "Sebagai alternatif, hapus instalan aplikasi untuk menghapus sepenuhnya basis data lokal dan semua data yang tersimpan."
+              ]
+            ]
+          },
+          {
+            "title": "Hapus salinan di browser yang tertaut",
+            "paragraphs": [
+              "Jika Anda menggunakan Dasbor Web, setiap browser yang Anda tautkan menyimpan salinan terakhir yang dikirim ponsel Anda, dalam keadaan terenkripsi. Untuk menghapusnya:"
+            ],
+            "lists": [
+              [
+                "Di browser, buka app.money2time.com dan pilih \"Putuskan tautan browser ini\". Salinan dan kuncinya langsung dihapus.",
+                "Atau, di aplikasi Money2Time, buka Pengaturan > Dasbor Web dan ketuk \"Putuskan tautan\" di samping browser tersebut. Browser menghapus salinannya saat berikutnya terhubung.",
+                "Menghapus data situs browser untuk app.money2time.com juga menghapusnya."
+              ]
+            ]
+          },
+          {
+            "title": "Minta penghapusan data analitik dan langganan",
+            "paragraphs": [
+              "Untuk meminta penghapusan data analitik atau langganan yang terkait dengan pengidentifikasi Aplikasi acak Anda, hubungi kami:"
+            ],
+            "lists": [
+              [
+                "Kirim email kepada kami ke alamat di bawah dengan subjek \"Data Deletion Request\", atau gunakan formulir kontak di situs ini.",
+                "Gunakan tombol salin di samping ID Pengguna di Settings > Display dan sertakan ID lengkap agar kami dapat menemukan data yang terkait dengan Aplikasi Anda.",
+                "Kami akan memproses permintaan Anda dan mengonfirmasi penyelesaiannya dalam waktu 30 hari."
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Data Mana yang Dihapus atau Disimpan",
+        "paragraphs": [
+          "Tabel di bawah ini merangkum apa yang terjadi pada setiap jenis data saat Anda meminta penghapusan, dan berapa lama data disimpan."
+        ],
+        "table": {
+          "headers": [
+            "Jenis Data",
+            "Tindakan",
+            "Periode Penyimpanan"
+          ],
+          "rows": [
+            [
+              "Data keuangan di perangkat (transaksi, akun, kategori, aturan berulang, setelan upah)",
+              "Dihapus",
+              "Dihapus segera saat Anda mereset data atau menghapus instalan aplikasi. Kami tidak menyimpan apa pun."
+            ],
+            [
+              "Salinan Dasbor Web di browser yang Anda tautkan",
+              "Dihapus",
+              "Dihapus dari browser tersebut saat Anda memutuskan tautannya atau menghapus data situsnya. Server kami tidak pernah menyimpannya, jadi tidak ada yang kami simpan."
+            ],
+            [
+              "Data analitik berpseudonim (PostHog / Google Analytics for Firebase)",
+              "Dihapus atas permintaan",
+              "Dihapus dalam waktu 30 hari sejak permintaan Anda."
+            ],
+            [
+              "Data langganan (RevenueCat, Apple, Google)",
+              "Disimpan bila diperlukan",
+              "Disimpan oleh Apple atau Google untuk kewajiban penagihan, pajak, dan hukum, serta dikelola melalui akun Apple atau Google Anda."
+            ]
+          ]
+        }
+      },
+      {
+        "title": "Data yang Tidak Kami Simpan",
+        "paragraphs": [
+          "Money2Time tidak memerlukan akun dan tidak menyimpan nama, email, Apple ID, Akun Google, atau detail pembayaran Anda di server kami. Karena data keuangan Anda tidak pernah disimpan di server kami, termasuk saat Anda menggunakan Dasbor Web, kami tidak dapat mengaksesnya atau menghapusnya untuk Anda.",
+          "Catatan langganan dan pembayaran yang disimpan oleh Apple atau Google berada di luar kendali kami dan dikelola langsung melalui akun Apple atau Google Anda."
+        ]
+      }
+    ],
+    "contact": {
+      "title": "Hubungi Kami",
+      "body": "Untuk meminta penghapusan data analitik atau langganan, atau jika Anda memiliki pertanyaan, hubungi kami di:",
+      "formPrefix": "Anda juga dapat menggunakan",
+      "formLink": "formulir kontak",
+      "formSuffix": "di situs ini."
+    }
+  },
+  "costInHours": {
+    "eyebrow": "Gaji dalam jam",
+    "title": "Apa yang dibeli satu jam kerja, negara demi negara",
+    "intro": "Setiap harga punya angka kedua: waktu yang kamu kerjakan untuk membayarnya. Halaman ini menaruh gaji resmi tiap negara di samping satu produk yang sama di mana pun, sehingga kita bisa membandingkan apa yang dibeli satu jam tanpa lebih dulu berdebat soal isi keranjang belanja.",
+    "compare": {
+      "base": "Dasar",
+      "with": "Bandingkan dengan",
+      "measure": "Yang diukur",
+      "caption": "Gaji resmi dan kerja untuk satu Big Mac, di dua negara",
+      "priceSource": "Harga Big Mac:"
+    },
+    "metrics": {
+      "workPerBigMac": "Kerja untuk satu Big Mac",
+      "bigMacPrice": "Harga Big Mac",
+      "payPerHour": "Gaji per jam",
+      "payPerHourUsd": "Gaji per jam dalam dolar AS",
+      "bigMacsPerMonth": "Big Mac yang dibeli gaji sebulan",
+      "workPerLitre": "Kerja per liter bensin",
+      "workPer100kWh": "Kerja per {kwh} kWh listrik"
+    },
+    "periods": {
+      "hour": "per jam",
+      "week": "per minggu",
+      "month": "per bulan",
+      "year": "per tahun"
+    },
+    "measures": {
+      "median": "Median",
+      "average": "Rata-rata"
+    },
+    "scopes": {
+      "allEmployees": "semua karyawan",
+      "allWorkers": "semua pekerja",
+      "citizens": "warga negara",
+      "formalSector": "sektor formal, 10+ pekerja",
+      "fullTimeEmployees": "karyawan penuh waktu",
+      "fullTimeResidents": "penduduk penuh waktu",
+      "regularSalaried": "karyawan tetap",
+      "wageAndSalary": "penerima upah dan gaji",
+      "employees": "karyawan",
+      "employeesNet": "karyawan, setelah pajak",
+      "employedPersons": "penduduk bekerja",
+      "formalNonAgri": "sektor formal nonpertanian",
+      "fullTimeEquivalent": "karyawan setara penuh waktu",
+      "urbanNonPrivate": "unit perkotaan nonswasta"
+    },
+    "allMarkets": {
+      "title": "Semua negara, diurutkan",
+      "intro": "Diurutkan menurut berapa lama gaji harus bekerja untuk satu Big Mac. Baca kolom ketiga lebih dulu: enam angka adalah median dan empat adalah rata-rata, dan rata-rata selalu lebih tinggi karena ditarik oleh yang berpenghasilan besar.",
+      "caption": "Angka gaji resmi dan kerja untuk satu Big Mac, per negara",
+      "country": "Negara",
+      "pay": "Gaji resmi",
+      "basis": "Yang diukur",
+      "hourly": "Per jam",
+      "effort": "Kerja untuk satu Big Mac",
+      "youAreHere": "Kamu"
+    },
+    "notes": {
+      "title": "Cara membacanya",
+      "method": {
+        "title": "Cara jam dihitung",
+        "body": "Jika badan statistik menerbitkan angka per jam, angka itu dipakai apa adanya. Jika yang terbit mingguan atau bulanan, angkanya dibagi minggu {hours} jam. Stats NZ menerbitkan keduanya, dan selisihnya di bawah lima puluh sen."
+      },
+      "basket": {
+        "title": "Kenapa satu burger, bukan sekeranjang belanja",
+        "body": "Big Mac, satu liter bensin oktan 95, dan satu kilowatt-jam listrik rumah tangga adalah hal yang sama di setiap negara di sini, masing-masing dihargai satu penerbit pada satu tanggal. Di India, tempat McDonald's tidak menjual Big Mac daging sapi, The Economist memakai Maharaja Mac berisi ayam. Keranjang lokal yang lebih lengkap akan mencakup lebih banyak sisi hidup, tetapi makan di luar berarti hal berbeda di Manila dan di Melbourne, dan membandingkannya lebih banyak bercerita tentang keranjangnya daripada tentang uangnya."
+      },
+      "comparability": {
+        "title": "Gajinya tidak bisa dibandingkan mentah-mentah",
+        "body": "Tidak ada satu tabel gaji median yang mencakup negara-negara ini, jadi tiap angka datang dari badan statistik masing-masing dan menghitung kelompok yang berbeda. Enam median, empat rata-rata. Baca selisihnya sebagai gambaran, bukan angka pasti."
+      },
+      "grossPay": {
+        "title": "Ini sebelum pajak",
+        "body": "Gaji yang diterbitkan bersifat kotor. Yang benar-benar masuk rekening lebih kecil, jadi jam milikmu sendiri lebih panjang daripada di halaman ini."
+      }
+    },
+    "sources": {
+      "title": "Dari mana angkanya",
+      "bigMac": "Harga Big Mac dan kurs:",
+      "wages": "Gaji, negara demi negara:",
+      "energy": "Harga bensin dan listrik:"
+    },
+    "cta": {
+      "body": "Aplikasi ini melakukannya dengan gajimu, bukan gaji negaramu. Masukkan yang kamu terima bersih dan tiap pembelian dapat angka kedua.",
+      "link": "Lihat cara kerjanya"
+    }
+  },
+  "tutorials": {
+    "eyebrow": "Panduan",
+    "title": "Tutorial",
+    "intro": "Panduan singkat, gambar demi gambar, untuk semua yang bisa dilakukan Money2Time. Setiap tangkapan layar adalah aplikasi asli, dengan tombol yang harus ditekan ditandai merah.",
+    "searchPlaceholder": "Cari tutorial",
+    "clear": "Hapus",
+    "emptyTitle": "Tidak ada yang cocok",
+    "emptyDescription": "Coba kata yang lebih pendek, atau nama layar yang Anda cari.",
+    "stepCount": "{count} langkah",
+    "stepCounter": "{current} dari {total}",
+    "badgePro": "PRO",
+    "badgeIos": "iPhone",
+    "openInApp": "Buka di aplikasi",
+    "previous": "Sebelumnya",
+    "next": "Berikutnya",
+    "category": {
+      "start": "Mulai",
+      "logging": "Mencatat uang",
+      "organize": "Merapikan",
+      "plan": "Merencanakan",
+      "share": "Berbagi dan melunasi",
+      "insights": "Memahami",
+      "data": "Data Anda"
+    }
+  },
+  "dashboard": {
+    "loading": "Membuka dasbormu…",
+    "units": {
+      "minutes": "{m} mnt",
+      "hours": "{h} jam",
+      "hoursMinutes": "{h} jam {m} mnt",
+      "days": "{d} hr",
+      "daysHours": "{d} hr {h} jam"
+    },
+    "nav": {
+      "label": "Dasbor",
+      "menu": "Menu",
+      "openMenu": "Buka menu",
+      "closeMenu": "Tutup menu",
+      "groups": {
+        "insights": "Wawasan",
+        "wealth": "Kekayaan",
+        "planning": "Perencanaan",
+        "organize": "Pengaturan"
+      }
+    },
+    "period": {
+      "label": "Periode",
+      "previous": "Periode sebelumnya",
+      "next": "Periode berikutnya",
+      "asOf": "Per {date}",
+      "presets": {
+        "month": "Bulan",
+        "3m": "3 bln",
+        "6m": "6 bln",
+        "12m": "12 bln",
+        "ytd": "Tahun ini",
+        "year": "Tahun",
+        "all": "Semua"
+      }
+    },
+    "mode": {
+      "label": "Tampilkan jumlah sebagai",
+      "hours": "Jam"
+    },
+    "common": {
+      "income": "Pemasukan",
+      "spending": "Pengeluaran",
+      "net": "Bersih",
+      "saved": "Ditabung",
+      "viewAll": "Lihat semua",
+      "vsPrevious": "dibanding sebelumnya",
+      "uncategorized": "Tanpa kategori",
+      "other": "Lainnya",
+      "total": "Total",
+      "average": "Rata-rata",
+      "transactions": "{count, plural, other {# transaksi}}",
+      "accountTypes": {
+        "debit": "Rekening",
+        "credit": "Kartu kredit",
+        "loan": "Pinjaman",
+        "goal": "Target",
+        "cash": "Tunai",
+        "savings": "Tabungan",
+        "investment": "Investasi"
+      },
+      "viewFailed": "Halaman ini tidak bisa ditampilkan untuk datamu. Halaman lainnya tetap berfungsi."
+    },
+    "views": {
+      "overview": {
+        "nav": "Ikhtisar",
+        "title": "Ikhtisar",
+        "subtitle": "Ke mana uang dan jam kerjamu pergi"
+      },
+      "cash-flow": {
+        "nav": "Arus kas",
+        "title": "Arus kas",
+        "subtitle": "Uang masuk, uang keluar, dan sisanya"
+      },
+      "spending": {
+        "nav": "Pengeluaran",
+        "title": "Pengeluaran",
+        "subtitle": "Setiap kategori, sampai ke tiap transaksi"
+      },
+      "income": {
+        "nav": "Pemasukan",
+        "title": "Pemasukan",
+        "subtitle": "Dari mana uangmu berasal"
+      },
+      "trends": {
+        "nav": "Tren",
+        "title": "Tren",
+        "subtitle": "Bagaimana tiap kategori bergerak dari bulan ke bulan"
+      },
+      "calendar": {
+        "nav": "Kalender",
+        "title": "Kalender",
+        "subtitle": "Pengeluaran hari demi hari"
+      },
+      "transactions": {
+        "nav": "Transaksi",
+        "title": "Transaksi",
+        "subtitle": "Cari dan filter semua yang kamu catat"
+      },
+      "accounts": {
+        "nav": "Rekening",
+        "title": "Rekening",
+        "subtitle": "Saldo di semua rekening"
+      },
+      "net-worth": {
+        "nav": "Kekayaan bersih",
+        "title": "Kekayaan bersih",
+        "subtitle": "Apa yang kamu miliki, dikurangi apa yang kamu utang"
+      },
+      "budgets": {
+        "nav": "Anggaran",
+        "title": "Anggaran",
+        "subtitle": "Rencana dibanding yang benar-benar terjadi"
+      },
+      "recurring": {
+        "nav": "Berulang",
+        "title": "Berulang",
+        "subtitle": "Langganan dan tagihan yang berulang"
+      },
+      "goals": {
+        "nav": "Target & pinjaman",
+        "title": "Target & pinjaman",
+        "subtitle": "Kemajuan menuju target dan pelunasan"
+      },
+      "time": {
+        "nav": "Biaya waktu",
+        "title": "Biaya waktu",
+        "subtitle": "Pengeluaranmu, dalam jam hidupmu"
+      },
+      "trips": {
+        "nav": "Perjalanan",
+        "title": "Perjalanan",
+        "subtitle": "Biaya tiap perjalanan, dalam uang dan hari kerja"
+      },
+      "items": {
+        "nav": "Barang",
+        "title": "Barang",
+        "subtitle": "Biaya per hari barang-barang yang kamu miliki"
+      },
+      "splits": {
+        "nav": "Tagihan patungan",
+        "title": "Tagihan patungan",
+        "subtitle": "Siapa yang masih berutang padamu"
+      },
+      "mood": {
+        "nav": "Suasana hati & kebiasaan",
+        "title": "Suasana hati & kebiasaan",
+        "subtitle": "Bagaimana rasanya setelah membeli, dan kapan kamu membeli"
+      },
+      "categories": {
+        "nav": "Kategori",
+        "title": "Kategori",
+        "subtitle": "Tambah, ganti nama, dan atur kategorimu"
+      }
+    },
+    "overview": {
+      "spent": "Dikeluarkan",
+      "earned": "Diperoleh",
+      "saved": "Ditabung",
+      "overspent": "Pengeluaran melebihi pemasukan",
+      "savingsRate": "Rasio tabungan {rate}",
+      "noIncome": "Tidak ada pemasukan di periode ini",
+      "netWorth": "Kekayaan bersih",
+      "netWorthNote": "Dari {count, plural, other {# rekening}} yang masuk total",
+      "cashFlowTitle": "Arus kas",
+      "cashFlowSubtitle": "12 bulan hingga periode ini",
+      "paceTitle": "Laju pengeluaran",
+      "thisMonth": "Bulan ini",
+      "lastMonth": "Bulan lalu",
+      "dayN": "Hari ke-{day}",
+      "paceBehind": "{amount} lebih sedikit dari titik yang sama bulan lalu.",
+      "paceAhead": "{amount} lebih banyak dari titik yang sama bulan lalu.",
+      "topCategories": "Kategori teratas",
+      "biggestExpenses": "Pengeluaran terbesar",
+      "upcoming": "Pengeluaran berulang mendatang",
+      "nextOn": "Berikutnya {date}",
+      "noSpending": "Tidak ada pengeluaran di periode ini",
+      "noRecurring": "Tidak ada aturan berulang yang aktif",
+      "timeTitle": "Waktumu",
+      "timeBody": "Pengeluaran periode ini setara dengan <strong>{hours}</strong> kerja untuk membayarnya.",
+      "workShare": "Porsi dari jam yang kamu kerjakan",
+      "workShareNote": "Dari sekitar {worked} di periode ini",
+      "noWage": "Atur nilai per jam di aplikasi untuk melihatnya dalam jam.",
+      "accountsTitle": "Rekening terbesar"
+    },
+    "cashFlow": {
+      "savingsRate": "Rasio tabungan {rate}",
+      "noIncome": "Tidak ada pemasukan di periode ini",
+      "netPerDay": "Bersih per hari",
+      "avgNet": "Rata-rata bersih per bulan",
+      "daysCount": "{count, plural, other {Selama # hari}}",
+      "monthsCount": "{count, plural, other {Selama # bulan}}",
+      "dailyTitle": "Hari demi hari",
+      "monthlyTitle": "Bulan demi bulan",
+      "sankeyTitle": "Ke mana uang pergi",
+      "sankeySubtitle": "Pemasukan di kiri, pengeluaran dan tabungan di kanan",
+      "fromSavings": "Dari tabungan",
+      "empty": "Tidak ada pemasukan atau pengeluaran di periode ini",
+      "savingsRateTitle": "Rasio menabung",
+      "savingsRateSubtitle": "Porsi pemasukan yang disimpan tiap bulan; 20% adalah target umum",
+      "tableTitle": "Ringkasan bulanan",
+      "month": "Bulan",
+      "rate": "Rasio"
+    },
+    "breakdown": {
+      "totalSpent": "Total pengeluaran",
+      "totalEarned": "Total pemasukan",
+      "perDay": "Per hari",
+      "overDays": "{count, plural, other {Selama # hari}}",
+      "count": "Transaksi",
+      "avgEach": "Rata-rata {amount}",
+      "largestCategory": "Kategori terbesar",
+      "byCategory": "Menurut kategori",
+      "subcategories": "Subkategori",
+      "clickToDrill": "Pilih kategori untuk melihat subkategorinya",
+      "allCategories": "Semua kategori",
+      "empty": "Tidak ada apa-apa di periode ini",
+      "byDay": "Menurut hari",
+      "byMonth": "Menurut bulan",
+      "monthlyAverage": "Rata-rata {amount} sebulan",
+      "topMerchants": "Tempat teratas",
+      "topMerchantsNote": "Dikelompokkan menurut catatan di tiap transaksi",
+      "biggestPurchases": "Pembelian terbesar",
+      "biggestPayments": "Pembayaran terbesar",
+      "byWeekday": "Menurut hari dalam seminggu",
+      "byWeekdayNote": "Total di periode ini untuk tiap hari dalam seminggu",
+      "transactionsIn": "Transaksi di {name}",
+      "allTransactions": "Semua transaksi"
+    },
+    "transactions": {
+      "search": "Cari catatan, kategori, atau jumlah",
+      "type": "Jenis",
+      "types": {
+        "all": "Semua jenis",
+        "expense": "Pengeluaran",
+        "income": "Pemasukan",
+        "transfer": "Transfer"
+      },
+      "category": "Kategori",
+      "allCategories": "Semua kategori",
+      "account": "Rekening",
+      "allAccounts": "Semua rekening",
+      "feeling": "Perasaan",
+      "allFeelings": "Semua perasaan",
+      "feelings": {
+        "happy": "Terasa menyenangkan",
+        "neutral": "Biasa saja",
+        "sad": "Menyesal"
+      },
+      "empty": "Tidak ada transaksi yang cocok",
+      "newer": "Lebih baru",
+      "older": "Lebih lama",
+      "page": "Halaman {page} dari {pages}"
+    },
+    "trends": {
+      "gridTitle": "Kategori per bulan",
+      "gridSubtitle": "Makin gelap berarti makin banyak pengeluaran di bulan itu. Pilih satu baris untuk membuat grafiknya.",
+      "category": "Kategori",
+      "empty": "Tidak ada pengeluaran di bulan-bulan ini",
+      "lineSubtitle": "Rata-rata {amount} sebulan",
+      "moversTitle": "Perubahan terbesar",
+      "moversSubtitle": "Dibanding periode sebelumnya dengan panjang yang sama",
+      "noMovers": "Tidak banyak yang berubah"
+    },
+    "calendar": {
+      "perDay": "Rata-rata per hari",
+      "noSpendDays": "Hari tanpa pengeluaran",
+      "noSpend": "Tanpa pengeluaran",
+      "ofDays": "{count, plural, other {Dari # hari sejauh ini}}",
+      "bestStreak": "Rentetan terpanjang tanpa pengeluaran",
+      "daysValue": "{count, plural, other {# hari}}",
+      "bestStreakNote": "Dalam 12 bulan terakhir",
+      "busiest": "Hari terboros",
+      "monthSubtitle": "Pilih satu hari untuk melihat apa yang terjadi",
+      "pickDay": "Terbaru bulan ini",
+      "pickDayNote": "Pilih satu hari di kalender untuk melihat hari itu saja",
+      "yearTitle": "12 bulan terakhir",
+      "yearSubtitle": "Tiap kotak adalah satu hari; makin gelap berarti makin banyak pengeluaran"
+    },
+    "accounts": {
+      "assets": "Aset",
+      "debts": "Utang",
+      "netWorth": "Kekayaan bersih",
+      "inTotals": "{count, plural, other {# rekening masuk total}}",
+      "excluded": "{count, plural, =0 {Semua rekening dihitung} other {# rekening tidak masuk total}}",
+      "ungrouped": "Rekening lain",
+      "notInTotals": "Tidak masuk total",
+      "owed": "terutang",
+      "owedNow": "Terutang hari ini",
+      "balanceNow": "Saldo hari ini",
+      "lastActivity": "aktivitas terakhir {date}",
+      "statementDays": "Tagihan tanggal {statement}, jatuh tempo tanggal {due}",
+      "statementDaysAfter": "Tagihan tanggal {statement}, jatuh tempo {days} hari kemudian",
+      "activity": "Aktivitas",
+      "empty": "Belum ada rekening"
+    },
+    "netWorth": {
+      "now": "Kekayaan bersih",
+      "inHours": "{hours} kerja dengan tarif hari ini",
+      "change": "Perubahan",
+      "since": "Sejak {month}",
+      "bestMonth": "Bulan terbaik",
+      "debts": "Utang",
+      "debtNote": "Kartu kredit dan pinjaman yang masuk total",
+      "assets": "Aset",
+      "chartTitle": "Aset, utang, dan kekayaan bersih",
+      "chartSubtitle": "Saldo akhir bulan dari rekening yang masuk total, dengan kurs hari ini",
+      "mixTitle": "Di mana asetmu berada",
+      "mixSubtitle": "Menurut grup rekening",
+      "ungrouped": "Lainnya",
+      "empty": "Belum ada aset",
+      "monthlyChange": "Perubahan tiap bulan"
+    },
+    "budgets": {
+      "emptyTitle": "Belum ada anggaran",
+      "emptyBody": "Buat anggaran bulanan di aplikasi dan anggarannya akan muncul di sini.",
+      "month": "Bulan",
+      "budget": "Anggaran",
+      "spent": "Dikeluarkan",
+      "ofBudget": "{pct} dari anggaran",
+      "left": "Sisa yang bisa dipakai",
+      "over": "Melebihi anggaran",
+      "perDayLeft": "{amount} sehari untuk sisa bulan ini",
+      "pace": "Bulan berjalan",
+      "paceNote": "Hari ke-{day} dari {days}",
+      "linesTitle": "Kategori",
+      "linesSubtitle": "Garis di tiap batang menandai seberapa jauh bulan ini sudah berjalan",
+      "overall": "Seluruh anggaran",
+      "overBy": "Lebih {amount}",
+      "leftOf": "Sisa {amount}",
+      "aheadOfPace": "lebih cepat dari laju",
+      "unbudgetedCounted": "{amount} dipakai di luar kategori ini dan dihitung ke dalam anggaran.",
+      "unbudgetedNot": "{amount} dipakai di luar kategori ini dan tidak dihitung.",
+      "rateNote": "Pengeluaran dalam mata uang lain dikonversi dengan 1 {currency} = {rate} {main}.",
+      "approxLeft": "Sisanya sekitar {amount}.",
+      "approxOver": "Lebihnya sekitar {amount}.",
+      "unconverted": "{count, plural, other {# pengeluaran}} belum dihitung: belum ada kurs {currency}.",
+      "historyTitle": "Anggaran vs pengeluaran per bulan",
+      "historyInMain": "Dalam {currency}, agar bulan dengan anggaran mata uang lain bisa dibandingkan"
+    },
+    "recurring": {
+      "emptyTitle": "Tidak ada aturan berulang",
+      "emptyBody": "Langganan dan tagihan yang kamu atur berulang di aplikasi muncul di sini.",
+      "perMonth": "Biaya tetap sebulan",
+      "perYear": "Setahun",
+      "clockTitle": "Tagihan lunas pada",
+      "clockNote": "Mulai pukul 9.00, {hours} pertama tiap hari kerja menutupinya ({day} hari)",
+      "active": "Aturan aktif",
+      "pausedCount": "{count, plural, =0 {Tidak ada yang dijeda} other {# dijeda}}",
+      "listTitle": "Aktif",
+      "listSubtitle": "Diurutkan berdasarkan biaya per bulan",
+      "cadence": {
+        "daily": "{count, plural, other {Setiap # hari}}",
+        "weekly": "{count, plural, other {Setiap # minggu}}",
+        "monthly": "{count, plural, other {Setiap # bulan}}",
+        "yearly": "{count, plural, other {Setiap # tahun}}"
+      },
+      "next": "berikutnya {date}",
+      "transfer": "Transfer",
+      "yearHours": "{hours} kerja setahun",
+      "upcomingTitle": "Segera datang",
+      "pausedTitle": "Dijeda"
+    },
+    "goals": {
+      "emptyTitle": "Tidak ada target atau pinjaman",
+      "emptyBody": "Target tabungan dan pinjaman yang kamu pantau di aplikasi muncul di sini.",
+      "goalsTitle": "Target",
+      "achieved": "Tercapai",
+      "left": "Masih harus ditabung",
+      "progress": "Kemajuan",
+      "byDate": "Untuk mencapainya pada {date}",
+      "perMonthNeeded": "{amount} sebulan",
+      "loansTitle": "Pinjaman",
+      "model": {
+        "flat": "Bunga flat",
+        "reducing": "Bunga menurun"
+      },
+      "leftToPay": "Sisa yang harus dibayar",
+      "leftInHours": "{hours} kerja",
+      "paidOff": "Lunas",
+      "instalments": "{paid} dari {total} cicilan",
+      "principal": "Dipinjam",
+      "owedNow": "Pokok terutang",
+      "paidSoFar": "Sudah dibayar",
+      "monthly": "Pembayaran bulanan",
+      "rate": "Rasio",
+      "interestCharged": "Bunga yang dikenakan",
+      "nextDue": "Pembayaran berikutnya",
+      "payoff": "Lunas pada",
+      "paymentsLeft": "Sisa pembayaran",
+      "netNote": "Angka pinjaman mengikuti aplikasi: bunga ditambahkan tiap bulan sejak hari pinjaman dibuat."
+    },
+    "time": {
+      "spentHours": "Jam kerja terpakai",
+      "share": "Porsi dari jam kerja",
+      "shareNote": "Dari sekitar {hours} kerja",
+      "workdays": "Hari kerja",
+      "workdaysValue": "{count, plural, other {# hari kerja}}",
+      "workdayLength": "Dengan {hours} per hari kerja",
+      "hourlyValue": "Nilai per jam",
+      "perHour": "per jam, dari gaji terbarumu",
+      "chartTitle": "Jam terpakai vs jam kerja",
+      "chartSubtitle": "Pengeluaran tiap bulan, dihargai dengan gaji bulan itu",
+      "hoursSpent": "Jam terpakai",
+      "hoursWorked": "Jam kerja",
+      "categoriesTitle": "Kategori dalam hari kerja",
+      "categoriesSubtitle": "Berapa hari kerja yang dihabiskan tiap kategori",
+      "empty": "Tidak ada pengeluaran di periode ini",
+      "runwayTitle": "Napas kebebasan",
+      "daysValue": "{count, plural, other {# hari}}",
+      "runwayBody": "Berapa lama {liquid} di rekening harian akan bertahan dengan pengeluaran terbaru {daily} sehari, tanpa bekerja.",
+      "regretTitle": "Jam untuk yang disesali",
+      "regretBody": "{count, plural, =0 {Tidak ada yang ditandai \"Menyesal\" di periode ini.} other {Dari # pembelian yang kamu sesali.}}",
+      "biggestTitle": "Terbesar dalam jam",
+      "biggestSubtitle": "Pembelian yang paling lama dicari uangnya",
+      "wageTitle": "Nilai per jammu dari waktu ke waktu",
+      "wageSubtitle": "Dari gaji yang tersimpan di aplikasi",
+      "noWage": "Atur nilai per jam di aplikasi untuk melihat pengeluaranmu dalam jam."
+    },
+    "trips": {
+      "emptyTitle": "Belum ada perjalanan",
+      "emptyBody": "Album yang kamu buat di aplikasi untuk perjalanan muncul di sini beserta biayanya.",
+      "count": "Perjalanan",
+      "countries": "{count, plural, =0 {Negara belum diatur} other {# negara}}",
+      "total": "Dihabiskan untuk perjalanan",
+      "workdays": "Dalam hari kerja",
+      "workdaysValue": "{count, plural, other {# hari kerja}}",
+      "workdaysNote": "Dari semua perjalanan",
+      "current": "Saat ini",
+      "perDay": "{amount} sehari",
+      "breakdown": "Menurut kategori",
+      "transactionsTitle": "Transaksi",
+      "pick": "Pilih perjalanan untuk melihat rinciannya."
+    },
+    "items": {
+      "emptyTitle": "Belum ada barang",
+      "emptyBody": "Barang yang kamu pantau di aplikasi muncul di sini beserta biayanya per hari.",
+      "value": "Nilai barang yang dimiliki",
+      "count": "{count, plural, other {# barang}}",
+      "perDay": "Biaya per hari",
+      "perMonth": "{amount} sebulan",
+      "workPerDay": "Kerja per hari",
+      "workPerDayNote": "Untuk membayar semua yang kamu miliki",
+      "listTitle": "Semua yang kamu miliki",
+      "listSubtitle": "Harga beli dibagi ke hari-hari sejak kamu memilikinya",
+      "bought": "Dibeli {date} seharga {price}",
+      "owned": "Dimiliki {count, plural, other {# hari}}",
+      "sold": "dijual seharga {price}",
+      "perDayValue": "{amount}/hari",
+      "workValue": "{time} kerja sehari"
+    },
+    "splits": {
+      "emptyTitle": "Tidak ada tagihan patungan",
+      "emptyBody": "Tagihan yang kamu patungkan dengan teman di aplikasi muncul di sini.",
+      "owedToYou": "Utang kepadamu",
+      "people": "{count, plural, =0 {Semua sudah lunas} other {Dari # orang}}",
+      "settled": "Bagian yang lunas",
+      "ofShares": "{count, plural, other {Dari # bagian}}",
+      "bills": "Tagihan patungan",
+      "billsNote": "Transaksi yang kamu bagi",
+      "byPerson": "Siapa yang berutang padamu",
+      "allSettled": "Semua orang sudah membayar kembali",
+      "open": "{count, plural, other {# bagian belum lunas}}",
+      "billsTitle": "Transaksi patungan",
+      "unnamed": "Seseorang"
+    },
+    "mood": {
+      "feelings": {
+        "happy": "Terasa menyenangkan",
+        "neutral": "Biasa saja",
+        "sad": "Menyesal"
+      },
+      "shareSub": "{amount} · {count, plural, other {# pembelian}}",
+      "monthlyTitle": "Bagaimana rasanya setelah membeli",
+      "monthlySubtitle": "Jumlah pembelian tiap bulan, menurut perasaan",
+      "regretsTitle": "Menyesal",
+      "regretsSubtitle": "Pembelian terbesar yang kamu sesali",
+      "noRegrets": "Tidak ada penyesalan di periode ini",
+      "clockTitle": "Kapan kamu berbelanja",
+      "clockSubtitle": "Pembelian menurut hari dan jam; paling ramai sekitar {hour}",
+      "noTimes": "Pembelian yang dicatat tanpa waktu tidak muncul di sini."
+    },
+    "loadingTitle": "Dasbor Web",
+    "edit": {
+      "statusReady": "Pengeditan aktif",
+      "statusReadyTitle": "Perubahan disimpan di ponselmu",
+      "statusReadyBody": "Ponselmu tersambung. Ponselmu memeriksa dan menyimpan setiap perubahan, lalu menyinkronkan data terbaru kembali ke sini.",
+      "statusAway": "Hanya baca",
+      "statusAwayTitle": "Sambungkan ponselmu untuk membuat perubahan.",
+      "statusAwayBody": "Buka Money2Time di ponselmu lalu masuk ke Pengaturan → Dasbor Web. Selama tersambung, kamu bisa menambah, mengubah, dan menghapus transaksi di sini. Ponselmu dan browser ini tetap sinkron.",
+      "statusUpdateTitle": "Perbarui aplikasi untuk membuat perubahan di sini.",
+      "statusUpdateBody": "Versi Money2Time di ponselmu menyinkronkan data hanya untuk dilihat. Perbarui untuk menambah, mengubah, dan menghapus transaksi dari browser ini.",
+      "statusOffTitle": "Perubahan nonaktif untuk browser ini.",
+      "statusOffBody": "Di ponselmu, buka Pengaturan → Dasbor Web, ketuk ⋯ di samping browser ini lalu pilih Izinkan perubahan.",
+      "statusSaving": "Menyimpan…",
+      "statusSyncing": "Menyinkronkan…",
+      "statusSyncingBody": "Menyinkronkan data terbaru dari ponselmu. Kamu bisa membuat perubahan begitu data tiba.",
+      "awayHint": "Untuk menambah, mengubah, atau menghapus transaksi, buka Pengaturan → Dasbor Web di ponselmu.",
+      "close": "Tutup",
+      "clear": "Hapus",
+      "cancel": "Batal",
+      "reloadLatest": "Muat yang terbaru",
+      "delete": "Hapus",
+      "apply": "Terapkan",
+      "choose": "Pilih",
+      "add": "Tambah",
+      "update": "Perbarui",
+      "addAnother": "Tambah lagi",
+      "type": "Jenis",
+      "expense": "Pengeluaran",
+      "income": "Pemasukan",
+      "transfer": "Transfer",
+      "adjustment": "Penyesuaian",
+      "deleteTransaction": "Hapus transaksi",
+      "deleteTransactionBody": "Tindakan ini tidak bisa dibatalkan. Lanjutkan?",
+      "required": "Wajib diisi",
+      "from": "Dari",
+      "to": "Ke",
+      "chooseAccount": "Pilih akun",
+      "swapAccounts": "Tukar akun asal dan tujuan",
+      "differentAccount": "Harus akun yang berbeda",
+      "accountLabel": "Akun",
+      "accounts": "Akun",
+      "categoryLabel": "Kategori",
+      "categories": "Kategori",
+      "options": "Opsi transaksi",
+      "amount": "Jumlah",
+      "currencyLabel": "Mata uang",
+      "optional": "Opsional",
+      "note": "Catatan",
+      "received": "Jumlah diterima",
+      "date": "Tanggal",
+      "details": "Detail",
+      "detailsPlaceholder": "Tambahkan catatan yang lebih panjang",
+      "reimbursable": "Menunggu penggantian",
+      "reimbursed": "Sudah diganti",
+      "reimbursableHint": "Pengeluaran yang akan diganti orang lain. Tagih di halaman Penggantian.",
+      "countAsExpense": "Hitung sebagai pengeluaran",
+      "countAsExpenseHint": "Menghitung transfer ini sebagai pengeluaran di total, anggaran, dan grafik kamu, di bawah kategori yang kamu pilih. Uang tetap berpindah antara kedua akun seperti biasa.",
+      "feeling": "Bagaimana perasaanmu?",
+      "nudgeSmall": "Ini sekitar {hours} waktumu",
+      "nudgePause": "Patut dipikir: ~{hours} waktu kerja",
+      "nudgeLarge": "Ini setara {hours} waktu kerjamu",
+      "amountLocked": "Jumlah ini terkait dengan pembagian tagihan atau pengembalian dana. Ubah di aplikasi.",
+      "hideBalances": "Sembunyikan saldo",
+      "showBalances": "Tampilkan saldo",
+      "savingsGoals": "Target Tabungan",
+      "ungrouped": "Tanpa Grup",
+      "noAccounts": "Belum ada akun.",
+      "noCategories": "Belum ada kategori.",
+      "select": "Pilih",
+      "selectAll": "Pilih semua",
+      "selected": "{count, plural, one {# dipilih} other {# dipilih}}",
+      "deleteConfirm": "{count, plural, one {Hapus transaksi ini? Transaksi ini juga dihapus di ponselmu.} other {Hapus # transaksi? Transaksi ini juga dihapus di ponselmu.}}",
+      "tooMany": "Pilih hingga {max} transaksi sekaligus.",
+      "accountTransfers": "Transfer tetap memakai rekeningnya. Batalkan pilihannya untuk mengubah rekening.",
+      "accountLocked": "Sebagian terkait dengan pembagian tagihan atau pengembalian dana. Ubah akunnya di aplikasi.",
+      "accountCurrencies": "Transaksi ini memakai mata uang berbeda. Pilih transaksi dengan satu mata uang untuk memindahkannya ke akun lain.",
+      "editTitle": "Ubah transaksi",
+      "errors": {
+        "stale": "Ponselmu punya data yang lebih baru dan sedang menyinkronkannya. Coba lagi sebentar lagi.",
+        "conflict": "Data ini berubah di ponselmu. Data terbaru sedang dikirim. Periksa dulu lalu coba lagi.",
+        "amount_locked": "Jumlah ini terkait dengan pembagian tagihan atau pengembalian dana. Ubah di aplikasi.",
+        "pro_required": "Ini membutuhkan Money2Time Pro. Upgrade di aplikasi untuk melakukan lebih banyak.",
+        "off": "Perubahan nonaktif untuk browser ini. Izinkan di ponselmu melalui Pengaturan → Dasbor Web.",
+        "invalid": "Ponselmu tidak bisa menyimpannya. Periksa detailnya lalu coba lagi.",
+        "failed": "Ponselmu tidak bisa menyimpannya. Coba lagi.",
+        "busy": "Perubahan terakhirmu masih disimpan. Coba lagi sebentar lagi.",
+        "away": "Ponselmu tidak tersambung. Buka Dasbor Web di ponselmu lalu coba lagi.",
+        "too_large": "Terlalu banyak perubahan sekaligus. Pilih lebih sedikit transaksi.",
+        "unknown": "Ponselmu terputus sebelum sempat mengonfirmasi. Setelah tersambung lagi, periksa apakah perubahan tersimpan."
+      },
+      "account": {
+        "newAccount": "Akun Baru",
+        "editAccount": "Edit Akun",
+        "deleteAccount": "Hapus akun",
+        "deleteAccountBody": "Ini akan menghapus akun ini dan semua transaksinya secara permanen. Tindakan ini tidak bisa dibatalkan.",
+        "save": "Simpan",
+        "type": "Jenis",
+        "typeDebit": "Debit",
+        "typeCredit": "Kredit",
+        "specialNote": "Di sini kamu bisa mengubah nama, grup, logo, dan apakah akun dihitung dalam total. Ubah sisanya di editornya sendiri.",
+        "name": "Nama akun",
+        "namePlaceholder": "Dompet Harian",
+        "logo": "Logo",
+        "logoAdd": "Tambahkan logo",
+        "logoClear": "Hapus logo",
+        "logoChooseTitle": "Pilih logo",
+        "logoChooseSubtitle": "Cari atau jelajahi per negara",
+        "logoSearch": "Cari bank & dompet",
+        "logoCountry": "Negara",
+        "logoNoResults": "Tidak ada hasil",
+        "group": "Grup akun",
+        "currency": "Mata uang",
+        "statementDay": "Tanggal rekening koran",
+        "dueDay": "Tanggal jatuh tempo",
+        "dueRule": "Jatuh tempo",
+        "dueRuleDay": "Tanggal tiap bulan",
+        "dueRuleAfter": "Hari setelah tagihan",
+        "dayRange": "Pilih tanggal dari 1 sampai 31.",
+        "daysAfterRange": "Pilih 1 sampai {max} hari.",
+        "startingBalance": "Saldo awal",
+        "currentBalance": "Saldo saat ini",
+        "includeInTotals": "Sertakan dalam total",
+        "includeInTotalsHint": "Akun yang disembunyikan dikecualikan dari total saldo.",
+        "currencyChangeTitle": "Ubah mata uang akun?",
+        "currencyChangeMessage": "Saldo akan dikonversi dari {from} ke {to} dengan kurs terbaru. Entri yang ada tetap menggunakan mata uang aslinya.",
+        "currencyChangeAction": "Konversi & ubah",
+        "balancePromptTitle": "Bagaimana perubahan saldo ini dicatat?",
+        "balancePromptMessage": "Saldo berubah sebesar {amount}. Catat sebagai pemasukan/pengeluaran atau simpan sebagai selisih akun (dikecualikan dari total wawasan).",
+        "recordDifference": "Catat sebagai selisih akun",
+        "recordIncome": "Catat sebagai pemasukan",
+        "recordExpense": "Catat sebagai pengeluaran",
+        "newGroup": "Grup baru",
+        "createGroup": "Buat grup",
+        "editGroup": "Edit grup",
+        "groupName": "Nama grup",
+        "groupPlaceholder": "Pengeluaran",
+        "groupTaken": "Grup dengan nama ini sudah ada.",
+        "deleteGroup": "Hapus grup?",
+        "deleteGroupBody": "Akun dalam grup ini akan dipindahkan ke Tanpa Grup.",
+        "addToGroup": "Tambah akun",
+        "emptyGroup": "Belum ada akun di grup ini",
+        "cardDesign": "Desain kartu",
+        "cardDesignTitle": "Desain kartu",
+        "cardDesignPlain": "Warna polos",
+        "cardDesignClear": "Hapus desain kartu",
+        "cardDesignAll": "Semua",
+        "cardDesignUploads": "Unggahanku",
+        "cardDesignTemplate": "Desain kartu {genre} {number}",
+        "payTitle": "Bayar kartu kredit",
+        "loanPayTitle": "Bayar angsuran",
+        "pay": "Bayar",
+        "payFrom": "Bayar dari",
+        "none": "Tidak Ada",
+        "payable": "Saldo Terutang",
+        "loanDue": "Jumlah tagihan",
+        "paidNote": "Dibayar: {name}",
+        "paymentNotePlaceholder": "Catatan pembayaran",
+        "genre_mascot": "Maskot",
+        "genre_minimal": "Minimalis",
+        "genre_gradient": "Gradasi",
+        "genre_luxury": "Mewah",
+        "genre_texture": "Tekstur",
+        "genre_marble": "Marmer & batu",
+        "genre_pattern": "Motif",
+        "genre_nature": "Alam",
+        "genre_space": "Luar angkasa",
+        "genre_abstract": "Seni abstrak",
+        "genre_anime": "Anime",
+        "genre_retro": "Retro",
+        "genre_cute": "Imut"
+      },
+      "album": {
+        "createTitle": "Album Baru",
+        "create": "Buat",
+        "editTitle": "Edit perjalanan",
+        "save": "Simpan",
+        "done": "Selesai",
+        "clear": "Hapus",
+        "name": "Nama album",
+        "namePlaceholder": "mis. Perjalanan ke Tokyo",
+        "dates": "Tanggal (opsional)",
+        "startDate": "Tanggal mulai",
+        "endDate": "Tanggal selesai",
+        "location": "Lokasi",
+        "addTransactions": "Tambah transaksi",
+        "editTransactions": "Edit transaksi",
+        "selectedCount": "{count} dipilih",
+        "transactionCount": "{count} transaksi",
+        "previous": "Sebelumnya",
+        "next": "Berikutnya",
+        "deleteTitle": "Hapus album?",
+        "deleteBody": "Ini menghapus album. Transaksi Anda tidak dihapus.",
+        "noAlbums": "Belum ada album",
+        "appOnlyHint": "Tambahkan foto sampul atau lokasi di aplikasi.",
+        "noExpenses": "Belum ada pengeluaran bulan ini.",
+        "bulkAction": "Album",
+        "addToAlbum": "Tambahkan ke album",
+        "expensesOnly": "Hanya pengeluaran yang bisa masuk album.",
+        "expensesCount": "{count, plural, one {Tambahkan pengeluaran ini ke:} other {Tambahkan # pengeluaran ini ke:}}",
+        "expensesLeftOut": "{count, plural, one {Hanya pengeluaran yang bisa masuk album, jadi # transaksi tidak disertakan.} other {Hanya pengeluaran yang bisa masuk album, jadi # transaksi tidak disertakan.}}",
+        "reorderTitle": "Urutkan album",
+        "activeLabel": "Tambah transaksi baru ke",
+        "activeTitle": "Perjalanan aktif",
+        "activeNone": "Tidak ada"
+      },
+      "budget": {
+        "allocatedSummary": "{allocated} dari {total} teralokasi",
+        "left": "Sisa {amount}",
+        "over": "Lebih {amount}",
+        "allocatedDone": "Teralokasi penuh",
+        "cancel": "Batal",
+        "save": "Simpan",
+        "delete": "Hapus",
+        "amount": "Jumlah",
+        "fillRemainder": "Isi",
+        "subcategories": "Subkategori",
+        "childrenHint": "Jika mau, bagikan jumlah ini ke subkategori.",
+        "duplicateSuffix": "salinan",
+        "editTitle": "Edit templat",
+        "addTitle": "Templat baru",
+        "chooseIcon": "Pilih ikon",
+        "removeIcon": "Hapus ikon",
+        "name": "Nama",
+        "namePlaceholder": "mis. Sehari-hari",
+        "total": "Total anggaran",
+        "currency": "Mata uang",
+        "currencyHintTemplate": "Setiap anggaran memakai kurs pada hari anggaran dibuat, dan mengonversi pengeluaran dalam mata uang lain dengan kurs itu. Hari ini: 1 {currency} = {rate} {main}.",
+        "currencyHintBudget": "Pengeluaran dalam mata uang lain dikonversi dengan 1 {currency} = {rate} {main}.",
+        "currencyNoRate": "Belum ada kurs {currency}. Tambahkan di Multi-mata uang pada aplikasi agar pengeluaran dalam mata uang lain ikut dihitung.",
+        "countUnbudgetedTitle": "Hitung pengeluaran di luar anggaran",
+        "countUnbudgetedCaption": "Sertakan pengeluaran dari kategori tanpa pos anggaran ke total bulan.",
+        "backPopulateTitle": "Isi bulan-bulan sebelumnya",
+        "backPopulateCaption": "Membuat anggaran untuk {first} - {last} ({count} bulan). Bulan yang sudah punya anggaran dilewati.",
+        "templatesTitle": "Templat anggaran",
+        "templatesSubtitle": "Rencana bulanan yang dapat dipakai ulang",
+        "newTemplate": "Templat baru",
+        "noTemplatesTitle": "Belum ada templat",
+        "noTemplatesMessage": "Buat templat anggaran untuk mulai merencanakan bulan-bulanmu.",
+        "createTemplate": "Buat templat",
+        "makeDefault": "Jadikan default",
+        "defaultBadge": "Default",
+        "duplicate": "Duplikat",
+        "deleteTemplateTitle": "Hapus templat?",
+        "deleteTemplateMessage": "Anggaran bulanan yang sudah dibuat tetap disimpan. Jika ini default, templat berikutnya menjadi default.",
+        "createBudget": "Buat anggaran",
+        "chooseTemplate": "Pilih templat",
+        "customOption": "Kustom",
+        "customOptionCaption": "Buat anggaran sekali pakai khusus bulan ini.",
+        "editBudget": "Edit anggaran",
+        "deleteBudget": "Hapus anggaran",
+        "deleteBudgetTitle": "Hapus anggaran bulan ini?",
+        "deleteBudgetMessage": "Tidak akan dibuat ulang secara otomatis untuk bulan ini.",
+        "month": "Bulan",
+        "noCategories": "Tambahkan kategori pengeluaran dulu untuk memberinya anggaran.",
+        "splitMismatch": "Subkategori tidak sama dengan jumlah ini",
+        "categoriesCount": "{count, plural, one {# kategori} other {# kategori}}"
+      },
+      "category": {
+        "newTitle": "Kategori Baru",
+        "editTitle": "Edit Kategori",
+        "name": "Nama",
+        "parentOptional": "Induk (opsional)",
+        "select": "Pilih",
+        "clear": "Hapus",
+        "cancel": "Batal",
+        "save": "Simpan",
+        "delete": "Hapus",
+        "deleteConfirm": "Ini akan menghapus kategori ini secara permanen. Tindakan ini tidak bisa dibatalkan.",
+        "deleteTitle": "Hapus kategori?",
+        "deleteHasTransactions": "{count} transaksi menggunakan kategori ini. Pindahkan ke kategori lain, atau hapus dan biarkan tanpa kategori.",
+        "moveToOther": "Pindahkan ke kategori lain",
+        "deleteAnyway": "Tetap hapus",
+        "moveTitle": "Pindahkan transaksi?",
+        "moveBody": "Semua transaksi akan dipindahkan ke “{name}” dan kategori ini akan dihapus. Tindakan ini tidak dapat dibatalkan.",
+        "moveAction": "Pindahkan & hapus",
+        "addSubcategory": "Tambah subkategori",
+        "expense": "Pengeluaran",
+        "income": "Pemasukan",
+        "type": "Jenis kategori",
+        "required": "Masukkan nama",
+        "noOptions": "Belum ada kategori lain",
+        "emptyTitle": "Belum ada kategori",
+        "chooseIcon": "Pilih ikon",
+        "removeIcon": "Hapus ikon",
+        "tabIcons": "Ikon",
+        "tabEmoji": "Emoji",
+        "searchIcons": "Cari ikon",
+        "noResults": "Tidak ada hasil",
+        "groups": {
+          "money": "Uang",
+          "food_and_drink": "Makanan dan minuman",
+          "transport": "Transportasi",
+          "travel": "Perjalanan",
+          "home": "Rumah",
+          "bills": "Tagihan",
+          "shopping": "Belanja",
+          "health": "Kesehatan",
+          "leisure": "Hiburan",
+          "work": "Kerja",
+          "family": "Keluarga",
+          "other": "Lainnya",
+          "food": "Makanan dan minuman",
+          "smileys": "Smiley",
+          "people": "Orang",
+          "animals": "Hewan dan alam",
+          "activities": "Aktivitas",
+          "objects": "Objek",
+          "symbols": "Simbol",
+          "flags": "Bendera"
+        },
+        "expand": "Perluas",
+        "collapse": "Ciutkan",
+        "noSubcategories": "Belum ada subkategori",
+        "searchEmoji": "Cari emoji"
+      },
+      "currency": {
+        "open": "Multi-mata uang",
+        "title": "Multi-mata uang",
+        "mainCurrency": "Mata uang utama",
+        "mainInApp": "Untuk mengubah mata uang utama, gunakan aplikasi. Data kamu akan dimulai dari awal.",
+        "asOf": "Diperbarui {date}",
+        "neverUpdated": "Belum diperbarui",
+        "subcurrencies": "Sub-mata uang",
+        "add": "Tambah",
+        "addCurrency": "Tambah mata uang",
+        "search": "Cari mata uang",
+        "noMatch": "Tidak ada mata uang yang cocok",
+        "empty": "Tambahkan mata uang untuk melacak kursnya.",
+        "manual": "Manual",
+        "editRate": "Edit kurs",
+        "remove": "Hapus",
+        "save": "Simpan",
+        "orderChanged": "Urutan baru belum disimpan.",
+        "saveOrder": "Simpan urutan"
+      },
+      "goal": {
+        "newGoal": "Target baru",
+        "editTitle": "Edit target",
+        "edit": "Edit",
+        "save": "Simpan",
+        "deleteTitle": "Hapus target?",
+        "deleteMessage": "Ini menghapus target beserta transaksinya. Tidak bisa dibatalkan.",
+        "coverInApp": "Ubah foto sampul di aplikasi.",
+        "chooseIcon": "Pilih ikon",
+        "removeIcon": "Hapus ikon",
+        "name": "Nama target",
+        "namePlaceholder": "mis. Liburan ke Jepang",
+        "target": "Jumlah target",
+        "currency": "Mata uang",
+        "currentBalance": "Saldo saat ini",
+        "targetDate": "Tanggal target",
+        "targetDateHint": "Opsional. Menambahkan patokan laju agar targetmu tetap sesuai jalur.",
+        "targetDatePast": "Pilih tanggal di masa depan.",
+        "includeInTotals": "Sertakan dalam total",
+        "includeInTotalsHint": "Akun yang disembunyikan dikecualikan dari total saldo.",
+        "startingAmount": "Sudah terkumpul (opsional)",
+        "autoSave": "Tabung otomatis",
+        "autoSaveHint": "Masukkan uang secara otomatis sesuai jadwal.",
+        "autoSaveAmount": "Jumlah",
+        "cadence": "Berulang",
+        "cadenceMonthly": "Bulanan",
+        "cadenceWeekly": "Mingguan",
+        "source": "Dari akun",
+        "sourcePlaceholder": "Pilih akun",
+        "noSource": "Belum ada akun {currency}. Tabung otomatis butuh akun dengan mata uang yang sama.",
+        "autoSaveInRecurring": "Tabung otomatis target ini memakai jadwal khusus. Ubah di Berulang.",
+        "currencyChangeTitle": "Ubah mata uang akun?",
+        "currencyChangeMessage": "Saldo akan dikonversi dari {from} ke {to} dengan kurs terbaru. Entri yang ada tetap menggunakan mata uang aslinya.",
+        "currencyChangeAction": "Konversi & ubah",
+        "balancePromptTitle": "Bagaimana perubahan saldo ini dicatat?",
+        "balancePromptMessage": "Saldo berubah sebesar {amount}. Catat sebagai pemasukan/pengeluaran atau simpan sebagai selisih akun (dikecualikan dari total wawasan).",
+        "recordDifference": "Catat sebagai selisih akun",
+        "recordIncome": "Catat sebagai pemasukan",
+        "recordExpense": "Catat sebagai pengeluaran",
+        "archive": "Arsipkan",
+        "unarchive": "Pulihkan target",
+        "archiveTitle": "Arsipkan target?",
+        "archiveMessage": "Target keluar dari daftar targetmu dan tabung otomatis ke dalamnya dijeda.",
+        "archiveBalanceHint": "Masih ada uang di dalamnya. Kamu bisa menariknya dulu, atau biarkan tersimpan di sini.",
+        "archiveConfirm": "Arsipkan",
+        "archived": "Diarsipkan",
+        "editInGoals": "Edit target",
+        "deposit": "Setor",
+        "withdraw": "Tarik",
+        "depositFromAccount": "Dari akun",
+        "depositFromAccountHint": "Pindahkan uang dari salah satu akunmu.",
+        "depositOutside": "Uang dari luar",
+        "depositOutsideHint": "Hadiah atau uang tunai dari luar, dicatat sebagai pemasukan.",
+        "withdrawToAccount": "Ke akun",
+        "withdrawToAccountHint": "Pindahkan uang kembali ke salah satu akunmu.",
+        "withdrawSpend": "Belanjakan",
+        "withdrawSpendHint": "Bayar langsung dari target ini, dicatat sebagai pengeluaran."
+      },
+      "item": {
+        "add": "Tambah barang",
+        "addTitle": "Barang baru",
+        "editTitle": "Edit barang",
+        "save": "Simpan",
+        "deleteTitle": "Hapus barang?",
+        "deleteMessage": "Ini menghapus barang dari pelacakmu.",
+        "iconTitle": "Pilih ikon",
+        "chooseIcon": "Pilih ikon",
+        "iconSubtitle": "Pilih ikon. Untuk mengunggah ikon sendiri, gunakan aplikasi.",
+        "searchIcons": "Cari ikon…",
+        "customIcon": "Khusus",
+        "noResults": "Tidak ada hasil",
+        "name": "Nama",
+        "namePlaceholder": "mis. Mesin espresso",
+        "price": "Harga beli",
+        "currency": "Mata uang",
+        "purchaseDate": "Tanggal beli",
+        "markInactive": "Tandai tidak aktif",
+        "markInactiveHint": "Menghentikan penghitungan hari untuk barang yang dijual, rusak, atau tidak lagi dipakai.",
+        "endDate": "Tanggal berakhir",
+        "sold": "Saya menjualnya",
+        "salePrice": "Harga jual",
+        "note": "Catatan",
+        "notePlaceholder": "Opsional",
+        "groups": {
+          "objects": "Objek",
+          "leisure": "Hiburan",
+          "work": "Kerja",
+          "home": "Rumah",
+          "health": "Kesehatan",
+          "travel": "Perjalanan",
+          "transport": "Transportasi",
+          "shopping": "Belanja",
+          "family": "Keluarga",
+          "other": "Lainnya"
+        },
+        "reorderTitle": "Urutkan barang"
+      },
+      "loan": {
+        "newTitle": "Pinjaman baru",
+        "editTitle": "Edit pinjaman",
+        "edit": "Edit",
+        "save": "Simpan",
+        "delete": "Hapus akun",
+        "deleteBody": "Ini akan menghapus akun ini dan semua transaksinya secara permanen. Tindakan ini tidak bisa dibatalkan.",
+        "name": "Nama akun",
+        "namePlaceholder": "Pinjaman mobil",
+        "logo": "Logo",
+        "logoAdd": "Tambahkan logo",
+        "logoClear": "Hapus logo",
+        "group": "Grup akun",
+        "currency": "Mata uang",
+        "interestModel": "Bunga",
+        "interestModelInfo": "Saldo menurun: bunga dihitung tiap bulan atas sisa utang, jadi membayar lebih atau lebih awal memangkas bunga. Begitulah cara kerja sebagian besar KPR. Bunga flat: bunga dihitung sekali atas seluruh pokok pinjaman dan ditambahkan di muka, jadi membayar lebih awal melunasi utang lebih cepat tetapi tidak menghemat bunga. Begitulah cara kerja sebagian besar kredit mobil dan pinjaman pribadi.",
+        "modelReducing": "Saldo menurun",
+        "modelFlat": "Bunga flat",
+        "principal": "Jumlah pinjaman",
+        "term": "Tenor pinjaman",
+        "termInfo": "Berapa angsuran bulanan yang dijalani, maksimal {max}. Pinjaman 5 tahun berarti 60.",
+        "termError": "Masukkan bilangan bulat dari 1 sampai {max}.",
+        "rate": "Suku bunga",
+        "rateInfoReducing": "Suku bunga tahunan yang dikenakan bank atas sisa utang Anda. Ketik dan angsuran bulanan serta totalnya dihitung, atau ketik totalnya dan bunganya yang dihitung.",
+        "rateInfoFlat": "Suku bunga flat tahunan, dikenakan atas seluruh pokok pinjaman selama masa pinjaman. Ketik dan angsuran bulanan serta totalnya dihitung, atau ketik totalnya dan bunganya yang dihitung.",
+        "effectiveRateHint": "Suku bunga efektif {rate}%. Itulah biaya bunga flat ini pada saldo menurun.",
+        "totalRepayable": "Total yang dibayar",
+        "totalRepayableInfo": "Semua yang Anda bayar kembali selama pinjaman: jumlah yang dipinjam ditambah seluruh bunga.",
+        "instalment": "Angsuran bulanan",
+        "instalmentInfo": "Yang Anda bayar setiap bulan. Mengikuti total di atas; aktifkan sakelar jika bank Anda menagih jumlah berbeda dan kami pakai persis milik Anda.",
+        "instalmentErrorLow": "Terlalu kecil untuk melunasi pinjaman dalam tenor ini.",
+        "instalmentErrorHigh": "Terlalu besar untuk jumlah pinjaman dan tenor ini.",
+        "awaitingContract": "Isi kolom di atas",
+        "paidPeriods": "Angsuran yang sudah dibayar",
+        "paidPeriodsInfo": "Biarkan 0 untuk pinjaman baru. Kalau sudah berjalan, isi jumlah angsuran yang dibayar dan saldo awal dihitung otomatis.",
+        "paidPeriodsError": "Harus lebih sedikit dari tenor.",
+        "collect": "Debit dari",
+        "collectInfo": "Akun yang didebit tiap bulan. Pilih satu dan angsuran tercatat otomatis; kosongkan dan kamu mencatat sendiri tiap pembayaran.",
+        "collectManual": "Saya catat sendiri",
+        "collectExternal": "Pembayaran ini diatur di Berulang. Ubah di sana.",
+        "countAsExpense": "Hitung cicilan sebagai pengeluaran",
+        "countAsExpenseInfo": "Pembayaran selalu memindahkan uang ke pinjaman, jadi sisa utang Anda tetap berkurang. Dengan ini aktif, pembayaran juga dihitung sebagai pengeluaran di total, anggaran, dan grafik Anda, di bawah kategori yang Anda pilih. Matikan dan pembayaran tidak masuk pengeluaran Anda. Mengubahnya nanti hanya berlaku untuk pembayaran yang dicatat setelah itu.",
+        "paymentCategory": "Kategori pembayaran",
+        "paymentCategoryPlaceholder": "Pilih kategori",
+        "startDate": "Tanggal mulai",
+        "startDateInfo": "Kapan pinjaman diambil. Angsuran pertama jatuh sebulan kemudian, dan tanggalnya menjadi tanggal bayarmu.",
+        "balanceOwed": "Sisa utang",
+        "balanceOwedInfo": "Yang masih Anda utang hari ini, tanpa bunga yang belum dibebankan. Biasanya lebih kecil dari angka di rekening koran Anda.",
+        "totalInterest": "Total bunga",
+        "leftToPay": "Sisa bayaran",
+        "firstInstalment": "Angsuran pertama",
+        "payoffBy": "Lunas pada",
+        "instalmentsLeft": "Sisa angsuran",
+        "includeInTotals": "Sertakan dalam total",
+        "includeInTotalsHint": "Akun yang disembunyikan dikecualikan dari total saldo.",
+        "archive": "Arsipkan pinjaman",
+        "unarchive": "Keluarkan dari arsip",
+        "archiveHint": "Menyembunyikannya dari daftar akun. Riwayat dan total tetap tersimpan, dan \"Tampilkan arsip\" mengembalikannya.",
+        "rateChangeTitle": "Mulai kapan bunga baru berlaku?",
+        "rateChangeMessage": "Bunga berubah dari {from}% menjadi {to}%. Terapkan mulai hari ini agar bunga yang sudah dikenakan tetap, atau dari awal jika kamu memperbaiki kesalahan.",
+        "rateChangeFromStart": "Dari awal",
+        "rateChangeFromToday": "Mulai hari ini",
+        "currencyChangeTitle": "Ubah mata uang akun?",
+        "currencyChangeMessage": "Saldo akan dikonversi dari {from} ke {to} dengan kurs terbaru. Entri yang ada tetap menggunakan mata uang aslinya.",
+        "currencyChangeAction": "Konversi & ubah",
+        "balancePromptTitle": "Bagaimana perubahan saldo ini dicatat?",
+        "balancePromptMessage": "Saldo berubah sebesar {amount}. Catat sebagai pemasukan/pengeluaran atau simpan sebagai selisih akun (dikecualikan dari total wawasan).",
+        "recordDifference": "Catat sebagai selisih akun",
+        "recordIncome": "Catat sebagai pemasukan",
+        "recordExpense": "Catat sebagai pengeluaran",
+        "archived": "Diarsipkan",
+        "editInLoans": "Edit pinjaman",
+        "balanceOwedHint": "Rekening koran Anda mungkin menampilkan {amount}, yang sudah menambahkan bunga yang belum jatuh tempo."
+      },
+      "reimbursement": {
+        "pendingTitle": "Menunggu kembali",
+        "settledTitle": "Sudah diganti",
+        "claim": "Tagih",
+        "paidInto": "Ke {account}",
+        "noAccount": "Tanpa Akun",
+        "undoTitle": "Batalkan penggantian ini?",
+        "undoMessage": "Catatan uang masuk dihapus.",
+        "undoAction": "Batalkan",
+        "cancel": "Batal",
+        "saveFirst": "Simpan perubahan lainnya dulu."
+      },
+      "reorder": {
+        "open": "Urutkan",
+        "save": "Simpan",
+        "accountsTitle": "Urutkan akun",
+        "accountsHint": "Pindahkan grup, dan akun di dalam grupnya. Target tabungan memakai urutannya sendiri.",
+        "categoriesTitle": "Urutkan kategori",
+        "categoriesHint": "Pindahkan kategori, dan subkategori di dalam induknya.",
+        "emptyGroup": "Belum ada akun di grup ini.",
+        "drag": "Seret untuk mengubah urutan",
+        "dragNamed": "Pindahkan {name}. Seret, atau gunakan tombol panah.",
+        "moved": "{name} dipindah ke posisi {position} dari {count}"
+      },
+      "rule": {
+        "newRule": "Aturan berulang baru",
+        "editRule": "Edit aturan berulang",
+        "sameFlow": "Alur yang sama dengan entri transaksi",
+        "saveRule": "Simpan aturan",
+        "deleteRule": "Hapus aturan",
+        "deleteConfirm": "Hapus “{name}”? Tindakan ini tidak dapat dibatalkan.",
+        "amountRequired": "Jumlah wajib diisi",
+        "chooseCategory": "Pilih kategori",
+        "settings": "Pengaturan berulang",
+        "ruleName": "Nama aturan",
+        "ruleNamePlaceholder": "Langganan Netflix",
+        "enterRuleName": "Masukkan nama aturan berulang.",
+        "logo": "Logo",
+        "noLogo": "Tanpa logo",
+        "customLogo": "Logo kustom",
+        "searchLogos": "Cari langganan",
+        "country": "Negara",
+        "noResults": "Tidak ada hasil",
+        "global": "Global",
+        "repeat": "Ulangi",
+        "daily": "Harian",
+        "weekly": "Mingguan",
+        "monthly": "Bulanan",
+        "quarterly": "Triwulanan",
+        "semiannually": "Semesteran",
+        "yearly": "Tahunan",
+        "every": "Setiap (interval)",
+        "ends": "Berakhir",
+        "never": "Tidak Pernah",
+        "onDate": "Pada tanggal",
+        "endDate": "Tanggal akhir",
+        "validEndDate": "Pilih tanggal akhir yang valid.",
+        "status": "Status",
+        "active": "Aktif",
+        "paused": "Dijeda",
+        "pause": "Jeda",
+        "resume": "Lanjutkan"
+      },
+      "split": {
+        "title": "Bagi Tagihan",
+        "chip": "Bagi",
+        "evenly": "Bagi rata",
+        "addPerson": "Tambah orang",
+        "me": "Saya",
+        "personPlaceholder": "Nama teman",
+        "sumMatch": "{sum} dari {total}",
+        "sumLeft": "{diff} tersisa",
+        "sumOver": "Lebih {diff}",
+        "sumMismatch": "{diff} belum tercakup",
+        "negativeSelf": "Teman-teman berhutang lebih dari total",
+        "markPaid": "Tandai sudah bayar",
+        "paidLabel": "Dibayar {date}",
+        "undo": "Batalkan",
+        "done": "Selesai",
+        "remove": "Keluarkan",
+        "cancel": "Batal",
+        "noAccount": "Tanpa Akun",
+        "paidTo": "Dibayar kembali ke",
+        "sharesTitle": "Siapa yang berutang padamu",
+        "someone": "Seseorang",
+        "untitledBill": "Bagi tagihan",
+        "paidTitle": "Dibayar kembali",
+        "undoTitle": "Tandai bagian ini belum dibayar?",
+        "undoBody": "Bagian ini kembali menjadi utang untukmu, dan pengeluaran naik lagi sebesar jumlah ini. Transfer pembayaran kembali ke akun lain akan dihapus.",
+        "itemizedTotal": "Total: {sum}",
+        "itemizedZeroHint": "Masukkan minimal satu jumlah",
+        "removeTitle": "Hapus permintaan ini?",
+        "removeBody": "Ini menghapus utang mereka padamu untuk tagihan ini. Transaksinya sendiri tidak berubah.",
+        "defaultPaidTo": "Default dibayar ke",
+        "defaultPaidToHint": "Patungan baru dibayar ke akun ini secara default."
+      },
+      "duplicate": "Duplikat",
+      "duplicateTitle": "Duplikat ke tanggal",
+      "expenseCategory": "Kategori pengeluaran",
+      "incomeCategory": "Kategori pemasukan",
+      "categoryNone": "Transfer tetap memakai kategorinya. Pilih pengeluaran atau pemasukan untuk mengubahnya.",
+      "duplicateNone": "Penyesuaian saldo dan jumlah negatif tidak bisa diduplikasi.",
+      "duplicateTooMany": "Duplikat hingga {max} transaksi sekaligus.",
+      "wage": {
+        "title": "Nilai per jam",
+        "subtitle": "Nilai per jam untuk tiap bulan, sesuai pengaturan di aplikasi.",
+        "add": "Tambah tarif pemasukan",
+        "addTitle": "Tambah tarif pemasukan",
+        "empty": "Belum ada riwayat nilai per jam.",
+        "now": "Bulan ini",
+        "perHour": "/jam",
+        "type": {
+          "hourly": "Per Jam",
+          "monthly": "Bulanan",
+          "yearly": "Tahunan"
+        },
+        "deleteTitle": "Hapus nilai per jam bulanan?",
+        "deleteBody": "Hapus tarif untuk {month}? Bulan yang bergantung padanya akan kembali ke bulan sebelumnya yang tersedia.",
+        "year": "Tahun",
+        "month": "Bulan",
+        "existsTitle": "{month} sudah ada",
+        "existsBody": "Bulan ini sudah memiliki tarif pemasukan. Edit saja?",
+        "saveFor": "Simpan untuk {month}",
+        "step1": "Berapa penghasilanmu?",
+        "step2": "Minggu kerja",
+        "step3": "Waktu kerja tambahan",
+        "amount": "Jumlah ({symbol})",
+        "afterTax": "Masukkan gaji bersih setelah pajak.",
+        "hoursPerWeek": "Jam kerja / minggu",
+        "workdaysPerWeek": "Hari kerja / minggu",
+        "commuteMinutes": "Waktu tambahan / hari kerja (menit)",
+        "commuteHint": "Termasuk persiapan, perjalanan, parkir, dan waktu kerja tidak berbayar.",
+        "trueRate": "Tarif per jam nyata",
+        "weeklyIncome": "Pemasukan mingguan",
+        "baseRate": "Tarif per jam dasar",
+        "commutePerWeek": "Waktu tambahan / minggu",
+        "totalPerWeek": "Total waktu / minggu",
+        "showAs": "Tampilkan sebagai",
+        "period": {
+          "hourly": "Per jam",
+          "weekly": "Mingguan",
+          "monthly": "Bulanan",
+          "yearly": "Tahunan"
+        },
+        "suffix": {
+          "hourly": "/jam",
+          "weekly": "/mgg",
+          "monthly": "/bln",
+          "yearly": "/thn"
+        }
+      },
+      "notePlaceholder": "Catatan baru. Kosongkan untuk menghapusnya."
+    },
+    "cloud": {
+      "strip": "Data dari {device}, disinkronkan {date}.",
+      "yourPhone": "ponselmu",
+      "dataFrom": "Data dari {date}",
+      "phoneHere": "Ponsel tersambung",
+      "phoneAway": "Ponsel tidak tersambung",
+      "connecting": "Menghubungkan…",
+      "refresh": "Segarkan dari ponsel",
+      "receiving": "Menyinkronkan… {percent}%",
+      "preparing": "Bersiap…",
+      "preparingTitle": "Ponselmu sedang bersiap untuk menyinkronkan",
+      "receivingTitle": "Menyinkronkan data terbaru dari ponselmu",
+      "opening": "Membuka…",
+      "openingTitle": "Membuka data yang disinkronkan",
+      "needsPhoneTitle": "Buka Money2Time di ponselmu.",
+      "needsPhoneBody": "Buka Pengaturan → Dasbor Web. Data terbarumu masuk dengan sendirinya.",
+      "unlink": "Putuskan tautan browser ini",
+      "unlinkConfirm": "Putuskan tautan? Browser ini menghapus salinan datamu. Pindai lagi untuk menautkan ulang.",
+      "stay": "Tetap tertaut",
+      "elsewhereTitle": "Dasbor ini terbuka di tab lain.",
+      "elsewhereBody": "Hanya satu tab yang menerima pembaruan. Pilih Gunakan di sini untuk beralih.",
+      "useHere": "Gunakan di sini",
+      "sourceOfTruth": "Perubahan disimpan di ponselmu. Tidak ada yang disimpan online.",
+      "errors": {
+        "incomplete": "Sinkronisasi dengan ponselmu berhenti sebelum selesai. Segarkan dari ponselmu untuk mencoba lagi.",
+        "corrupt": "Data dari ponselmu tidak dapat dibaca. Segarkan dari ponselmu untuk mencoba lagi.",
+        "unsupported": "Data ini berasal dari versi aplikasi yang lebih baru. Muat ulang halaman untuk mendapatkan dasbor terbaru.",
+        "storage": "Browser ini tidak mau menyimpan salinan, jadi akan membutuhkan ponselmu lagi lain kali. Jendela pribadi sering menyebabkan hal ini."
+      }
+    },
+    "link": {
+      "eyebrow": "Dasbor Web Money2Time",
+      "title": "Data Money2Time-mu, di layar besar",
+      "subtitle": "Pindai kodenya dengan ponselmu. Terenkripsi end-to-end, tidak ada yang disimpan online.",
+      "steps": {
+        "camera": {
+          "title": "Pindai dengan kamera",
+          "body": "Arahkan kamera ponsel ke kode, atau pindai di aplikasi."
+        },
+        "link": {
+          "title": "Tautkan",
+          "body": "Pastikan kedua layar menampilkan kode yang sama, lalu ketuk Tautkan."
+        },
+        "dashboard": {
+          "title": "Buka dasbormu",
+          "body": "17 dasbor. Buka aplikasi kapan saja untuk menyegarkan, dan buat perubahan selama tersambung."
+        }
+      },
+      "promises": {
+        "edits": {
+          "title": "Ubah saat tersambung",
+          "body": "Perubahan disimpan di ponselmu, hanya saat ponselmu tersambung."
+        },
+        "phone": {
+          "title": "Ponselmu yang memegang kendali",
+          "body": "Data hanya masuk saat aplikasi terbuka."
+        },
+        "private": {
+          "title": "Tidak ada yang disimpan secara online",
+          "body": "Terenkripsi end-to-end. Bahkan kami tidak bisa membacanya."
+        }
+      },
+      "cardTitle": "Tautkan browser ini",
+      "cardBody": "Pindai dengan kamera ponsel atau aplikasi Money2Time.",
+      "qrLabel": "Kode QR untuk menautkan browser ini ke aplikasi Money2Time",
+      "preparing": "Menyiapkan kode…",
+      "noAccount": "Tanpa akun. Kode berganti setiap 2 menit.",
+      "confirmCode": "Pastikan ponselmu menampilkan kode ini, lalu ketuk Tautkan di sana.",
+      "candidateTitle": "Tautkan {phone}?",
+      "candidateTitleUnnamed": "Tautkan ponsel ini?",
+      "candidateBody": "Pastikan ponselmu menampilkan kode yang sama. Tautkan hanya jika kamu sendiri yang memindainya.",
+      "candidateAccept": "Tautkan",
+      "candidateReject": "Bukan milikku",
+      "offline": "Tidak bisa terhubung. Kode baru muncul saat kamu online lagi.",
+      "terms": "Dengan menautkan, kamu menyetujui Ketentuan Penggunaan dan Kebijakan Privasi.",
+      "unlinkedNotice": "Tautan diputus. Browser ini menghapus salinan datamu.",
+      "linkedTo": "Tertaut ke {phone}",
+      "waitingTitle": "Menunggu ponselmu",
+      "waitingBody": "Buka Money2Time → Pengaturan → Dasbor Web.",
+      "preparingTitle": "Bersiap untuk sinkronisasi",
+      "preparingBody": "Ponselmu sedang mengemas datamu. Biarkan Money2Time tetap terbuka di sana.",
+      "receivingTitle": "Menyinkronkan datamu",
+      "receivingBody": "Terenkripsi end-to-end, langsung dari ponselmu. Biarkan Money2Time tetap terbuka di sana.",
+      "openingTitle": "Membuka datamu",
+      "openingBody": "Sedang didekripsi di browser ini.",
+      "errors": {
+        "unsupported": "Browser ini tidak dapat membuka data yang dienkripsi end-to-end. Gunakan Chrome, Edge, Firefox, atau Safari versi terbaru."
+      }
+    },
+    "pro": {
+      "badge": "Pro",
+      "title": "Bagian dari Money2Time Pro",
+      "body": "Ini bagian dari Money2Time Pro, bersama periode yang lebih panjang dan tanpa batas untuk akun, kategori, transaksi berulang, dan lainnya. Tingkatkan di aplikasi pada ponselmu, dan fitur ini juga terbuka di sini.",
+      "stepApp": "Di ponselmu, buka Money2Time dan tingkatkan ke Pro.",
+      "stepRefresh": "Kembali ke sini dan muat ulang dari ponselmu. Browser ini terbuka begitu ponselmu selesai menyinkronkan datanya.",
+      "checkAgain": "Sudah upgrade, segarkan dari ponsel",
+      "checking": "Menyinkronkan…",
+      "notNow": "Nanti saja",
+      "lockedPeriod": "{period}, khusus Pro"
+    },
+    "filters": {
+      "title": "Filter",
+      "accounts": "Akun",
+      "exclude": "Kecualikan",
+      "include": "Sertakan",
+      "done": "Selesai",
+      "reset": "Atur Ulang",
+      "note": "Saldo akun tidak difilter."
+    },
+    "hide": {
+      "hide": "Sembunyikan jumlah",
+      "show": "Tampilkan jumlah"
+    },
+    "dropdown": {
+      "search": "Cari",
+      "noMatch": "Tidak ada yang cocok"
+    }
+  }
+}

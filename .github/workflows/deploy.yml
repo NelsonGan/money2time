@@ -2,12 +2,13 @@ name: CI / CD
 
 # Path-aware pipeline. The `changes` job classifies the diff once and every
 # downstream job keys off it, so a change only pays for the pipeline it can
-# actually affect: a Worker-only or docs-only merge to main no longer kicks off
-# an iOS + Android store build, and a Worker-only PR skips the app test job.
-# Production Cloudflare deploys are path-filtered the same way in
-# cloudflare.yml. Skipped jobs still report as successful to branch protection,
-# which is why this gates jobs with `if:` instead of workflow-level `paths:`
-# (a workflow skipped by a path filter leaves required checks pending forever).
+# actually affect: a Worker-, website-, App Studio- or docs-only merge to main
+# never kicks off an iOS + Android store build, and such a PR skips the app test
+# job. The Workers, the website and App Studio have their own path-filtered
+# workflows (cloudflare.yml, web.yml, app-studio.yml). Skipped jobs still
+# report as successful to branch protection, which is why this gates jobs with
+# `if:` instead of workflow-level `paths:` (a workflow skipped by a path filter
+# leaves required checks pending forever).
 
 # Give each run a clear title in the Actions list so production, PR, manual,
 # and branch runs are easy to tell apart at a glance.
@@ -49,10 +50,12 @@ jobs:
   #   app     — anything that can reach the mobile binary (gates the
   #             production store build)
   #   checks  — anything the app's `npm run check` / `npm test` can even see,
-  #             i.e. everything outside apps/cloudflare/ (eslint and tsconfig
-  #             only see apps/mobile, prettier sees it plus the root docs and
-  #             .github/, and jest only reads its __tests__/), so a Worker-only
-  #             change skips the app test job.
+  #             i.e. everything outside apps/cloudflare/, apps/web/ and
+  #             apps/app-studio/ (eslint and tsconfig only see apps/mobile,
+  #             prettier sees it plus the root docs and .github/, and jest only
+  #             reads its __tests__/), so a Worker-, website- or App Studio-only
+  #             change skips the app test job. Those have their own workflows
+  #             (cloudflare.yml, web.yml, app-studio.yml).
   # Fail open: when the diff can't be resolved, every flag is true.
   changes:
     name: Detect changes
@@ -120,10 +123,10 @@ jobs:
           # `if`, so a genuine app change classifies as `app=false` and the push
           # never cuts a store build. It is size-dependent, so it passed on every
           # normal diff and first bit on a 2,265-file one. Keep these unpiped.
-          grep -qvE '^apps/cloudflare/' changed.txt && checks=true
+          grep -qvE '^apps/(cloudflare|web|app-studio)/' changed.txt && checks=true
           # Paths that cannot change the shipped binary. Anything else counts as
           # an app change, so an unrecognised path always builds the app.
-          grep -vE '^(apps/cloudflare/|\.github/|\.claude/|\.agents/|\.codex/|\.vscode/)|(^|/)[^/]*\.md$|^LICENSE$' changed.txt > app_paths.txt || true
+          grep -vE '^(apps/cloudflare/|apps/web/|apps/app-studio/|\.github/|\.claude/|\.agents/|\.codex/|\.vscode/)|(^|/)[^/]*\.md$|^LICENSE$' changed.txt > app_paths.txt || true
           [ -s app_paths.txt ] && app=true
 
           echo "app=$app | checks=$checks"
@@ -133,9 +136,9 @@ jobs:
     name: Test
     needs: changes
     # `npm run check` / `npm test` run inside apps/mobile and are blind to
-    # apps/cloudflare/ (eslint and tsconfig only see the app, prettier the app plus
-    # the root docs and .github/, jest only __tests__/), so a Worker-only change
-    # has nothing to run here.
+    # apps/cloudflare/, apps/web/ and apps/app-studio/ (eslint and tsconfig only
+    # see the app, prettier the app plus the root docs and .github/, jest only
+    # __tests__/), so a change confined to those has nothing to run here.
     if: needs.changes.outputs.checks == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15

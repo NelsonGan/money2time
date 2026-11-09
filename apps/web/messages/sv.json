@@ -1,0 +1,2165 @@
+{
+  "metadata": {
+    "home": {
+      "title": "Budgetapp som visar utgifter i timmar - Money2Time",
+      "description": "Budget- och utgiftsappen som visar varje köp i timmar av ditt liv. Håll koll på utgifter, konton och fasta kostnader — utan bankinloggning.",
+      "openGraphDescription": "Varje köp mätt i timmar av ditt liv. En privat utgiftsapp som aldrig ber om din bankinloggning."
+    },
+    "contact": {
+      "title": "Kontakt - Money2Time",
+      "description": "Frågor, feedback, funktionsönskemål eller en begäran om dina uppgifter — skriv direkt till utvecklaren av Money2Time."
+    },
+    "privacy": {
+      "title": "Integritetspolicy - Money2Time",
+      "description": "Så hanterar Money2Time dina uppgifter: lokal lagring, produktanalys med ett slumpmässigt app-ID och ingen försäljning av personliga eller ekonomiska data."
+    },
+    "terms": {
+      "title": "Användarvillkor - Money2Time",
+      "description": "Villkoren du godkänner när du använder utgiftsappen Money2Time för iOS och Android."
+    },
+    "statementsImport": {
+      "title": "Importera kontoutdrag med AI - Money2Time",
+      "description": "En kort genomgång av AI-importen av kontoutdrag i Money2Time, så att du får in bankhistoriken utan att knappa in allt."
+    },
+    "dataDeletion": {
+      "title": "Begäran om radering av data - Money2Time",
+      "description": "Så begär du radering av dina Money2Time-uppgifter, vad som raderas, vad som sparas och hur länge."
+    },
+    "keywords": [
+      "budgetapp",
+      "utgiftsapp",
+      "hushållsbudget",
+      "ekonomiapp",
+      "privatekonomi app",
+      "fasta kostnader",
+      "spara pengar app",
+      "timlön kalkylator",
+      "budgetera app",
+      "utgiftskoll"
+    ],
+    "costInHours": {
+      "title": "Medianlön per land, i arbetstimmar - Money2Time",
+      "description": "Officiella median- och genomsnittslöner från tio länder, mätta mot en produkt som är likadan överallt: hur länge man måste arbeta för den.",
+      "openGraphDescription": "Hur långt en arbetstimme räcker i tio länder, mätt på en produkt som är likadan överallt."
+    },
+    "tutorials": {
+      "title": "Money2Time guider - Så använder du appen",
+      "description": "Steg för steg guider till varje del av Money2Time, med riktiga skärmbilder. Lär dig registrera utgifter, dela notan, sätta budget och läsa priser i arbetstimmar.",
+      "detailTitle": "{title} - Money2Time guide"
+    },
+    "dashboard": {
+      "title": "Webbpanel - Money2Time",
+      "description": "Skanna med telefonen för att se din Money2Time-data på en stor skärm: utgifter, nettoförmögenhet, budgetar och timmarna bakom varje köp. End-to-end-krypterat, inget lagras online."
+    }
+  },
+  "common": {
+    "language": {
+      "label": "Språk"
+    },
+    "footer": {
+      "contact": "Kontakt",
+      "privacy": "Integritetspolicy",
+      "dataDeletion": "Radering av data",
+      "terms": "Användarvillkor",
+      "copyright": "© {year} Money2Time. Alla rättigheter förbehållna.",
+      "costInHours": "Pris i timmar",
+      "tutorials": "Guider",
+      "dashboard": "Webbpanel"
+    }
+  },
+  "storeButtons": {
+    "appStorePrefix": "Hämta i",
+    "appStore": "App Store",
+    "playStorePrefix": "Finns på",
+    "playStore": "Google Play"
+  },
+  "screenshotGallery": {
+    "ariaLabel": "App-skärmbilder",
+    "alts": {
+      "home": "Money2Time-skärmbild som visar den månatliga transaktionslistan med intäkts- och utgiftssummor och arbetstimmarna bakom varje köp",
+      "privacy": "Money2Time-skärmbild som lyfter fram integritet: din data stannar på din enhet, inga annonser, fungerar helt offline",
+      "assets": "Skärmbild från Money2Time som visar nettotillgångar och kontosaldon",
+      "addExpense": "Skärmbild från Money2Time som visar snabb registrering av utgift med skärmtangentbord och röstinmatning",
+      "splitBill": "Skärmbild från Money2Time som visar en nota delad lika mellan flera personer med varje persons andel",
+      "insights": "Skärmbild från Money2Time som visar ett cirkeldiagram över utgifter per kategori",
+      "budgeting": "Skärmbild från Money2Time som visar månadsbudgetar per kategori med förloppsindikatorer och hur mycket som är kvar i varje",
+      "recurrings": "Skärmbild från Money2Time som visar återkommande åtaganden och intervall",
+      "hourlyRates": "Skärmbild från Money2Time som visar historik över timvärde per månad"
+    }
+  },
+  "home": {
+    "nav": {
+      "howItWorks": "Så funkar det",
+      "logging": "Registrering",
+      "features": "Funktioner",
+      "privacy": "Integritet",
+      "download": "Hämta appen",
+      "openMenu": "Öppna menyn",
+      "closeMenu": "Stäng menyn"
+    },
+    "hero": {
+      "title": "Varje pris har två siffror.",
+      "subtitle": "Money2Time följer dina utgifter som vilken app som helst och visar sedan samma summa i timmar av ditt liv.",
+      "badges": {
+        "onDevice": "Stannar i din telefon",
+        "noBank": "Ingen bankinloggning",
+        "quick": "Registreras på sekunder"
+      }
+    },
+    "units": {
+      "min": "{value} min",
+      "hours": "{value} tim"
+    },
+    "ticker": {
+      "coffee": "Kaffe",
+      "lunch": "Lunch ute",
+      "groceries": "Matvaror",
+      "fuel": "Bensin",
+      "tshirt": "T-shirt",
+      "beers": "Runda öl",
+      "electricity": "El",
+      "pizza": "Fredagspizza",
+      "dogFood": "Hundmat",
+      "cinema": "Bio",
+      "gym": "Gym",
+      "rent": "Hyra",
+      "flight": "Flyg hem",
+      "iceCream": "Glass"
+    },
+    "howItWorks": {
+      "eyebrow": "Så funkar det",
+      "title": "Ett tryck gör pengar till tid.",
+      "body": "Din timpeng bygger på det som faktiskt landar på kontot. Efter skatt, fördelat på de dagar du jobbar, inklusive pendlingen du aldrig får betalt för.",
+      "coffee": {
+        "title": "Kaffet",
+        "note": "En kort promenad i arbete. Du ville ha det kaffet."
+      },
+      "impulse": {
+        "title": "Impulsköpet",
+        "note": "Nästan två arbetsdagar. Värt att sova på saken."
+      },
+      "rate": {
+        "title": "Din riktiga timpeng",
+        "perHour": "/tim",
+        "takeHome": {
+          "label": "Lön efter skatt",
+          "value": "{value} i månaden"
+        },
+        "daysWorked": {
+          "label": "Dagar du jobbar",
+          "value": "{value} i veckan"
+        },
+        "commute": {
+          "label": "Pendling, obetald",
+          "value": "{value} min om dagen"
+        }
+      }
+    },
+    "logging": {
+      "eyebrow": "Registrering",
+      "title": "Skriv aldrig in en utgift igen.",
+      "body": "De flesta utgiftsappar dör för att registreringen är jobbig. Här är tre vägar in.",
+      "videoPlaceholder": "Skärminspelning kommer snart",
+      "receiptScan": {
+        "tab": "Skanna ett kvitto",
+        "title": "Rikta mot kvittot.",
+        "body": "Kameran öppnas inuti inmatningsvyn, inte på en egen skärm. Summa, butik och datum kommer tillbaka ifyllda, och bilden följer med.",
+        "points": {
+          "one": "Läser summa, datum och butik",
+          "two": "Sparar bilden till senare"
+        }
+      },
+      "backTap": {
+        "tab": "Tryck på baksidan",
+        "title": "Tryck två gånger på baksidan.",
+        "body": "Ett genvägskommando via Tryck på baksidan i iOS öppnar knappsatsen med ditt senaste konto och din senaste kategori redo. Klart innan du lämnar kassan.",
+        "points": {
+          "one": "Från fickan till registrerat på sekunder",
+          "two": "Ingen upplåsning, inget letande efter appen"
+        }
+      },
+      "applePay": {
+        "tab": "Apple Pay",
+        "title": "Eller betala som vanligt.",
+        "body": "En automation känner igen ett Apple Pay-köp och förbereder posten. En notis, en blick på kategorin, svep bort.",
+        "points": {
+          "one": "Fångar det du aldrig skulle skriva in för hand",
+          "two": "Inget sparas förrän du säger till"
+        }
+      }
+    },
+    "review": {
+      "eyebrow": "Översikt",
+      "title": "Se vart det tog vägen.",
+      "body": "Välj en vecka, en månad eller ett år. En summa, timmarna bakom den och dina kategorier i ordning. Tryck på en för att se vad som ligger i den.",
+      "points": {
+        "one": "Jämfört med ditt eget snitt, inte med någon annans budget",
+        "two": "Uteslut en kategori eller ett konto så räknas siffrorna om",
+        "three": "Observationer, inga pekpinnar"
+      },
+      "chip": "{hours} timmar",
+      "mock": {
+        "title": "Granska utgifter",
+        "week": "Vecka",
+        "month": "Månad",
+        "year": "År",
+        "spent": "Spenderat denna vecka",
+        "calmer": "Lugnare än vanligt.",
+        "categories": {
+          "groceries": "Matvaror",
+          "eatingOut": "Äta ute",
+          "transport": "Transport"
+        }
+      }
+    },
+    "features": {
+      "eyebrow": "Funktioner",
+      "title": "Allt annat du väntar dig, utan väsen.",
+      "sentiment": {
+        "title": "Hur det kändes",
+        "body": "Märk ett köp som nöjt, neutralt eller ångrat. Mönstret säger mer än summan.",
+        "legend": "Kändes värt det"
+      },
+      "commitments": {
+        "title": "Fasta utgifter",
+        "body": "Hyra, försäkring, gymmet du tänker säga upp. Se månaden innan den händer.",
+        "lockedIn": "/mån redan bundet"
+      },
+      "reimbursements": {
+        "title": "Pengar på väg tillbaka",
+        "body": "Märk en utgift som ersättningsgill så väntar den i en egen lista tills den kommer in.",
+        "employer": "Arbetsgivare",
+        "insurer": "Sjukförsäkring"
+      },
+      "insights": {
+        "title": "Nio insikter",
+        "body": "Fördelningar, trender, sparkvot, känsla, tillgångar. Allt från en meny.",
+        "savingsRate": "Sparkvot",
+        "incomeTrend": "Inkomsttrend",
+        "assets": "Tillgångar"
+      },
+      "split": {
+        "title": "Dela notan",
+        "body": "Skanna kvittot och fördela raderna runt bordet. Bara din del räknas.",
+        "yourShare": "Din del"
+      },
+      "modes": {
+        "title": "Enkelt eller fullt",
+        "body": "Börja med en plånbok och en knappsats. Lägg till konton, överföringar och valutor när du behöver dem.",
+        "simple": "Enkelt",
+        "simpleNote": "En plånbok",
+        "full": "Fullt",
+        "fullNote": "Allt påslaget"
+      },
+      "budgets": {
+        "title": "Budgetar som håller takten",
+        "body": "Sätt ett månadstak per kategori. Stapeln visar var du borde ligga i dag.",
+        "category": "Matvaror",
+        "of": "av {total}",
+        "pace": "I fas, {days} dagar kvar"
+      },
+      "calendar": {
+        "title": "En månad du kan läsa",
+        "body": "Zooma ut till ett kalenderrutnät. Varje dag visar vad som kom in och gick ut, mörkare ju större belopp."
+      },
+      "currency": {
+        "title": "Vilken valuta som helst",
+        "body": "Registrera i valutan du betalade i. Summorna räknas om och originalbeloppet står kvar på raden.",
+        "item": "Billån",
+        "paidIn": "Betalat i {currency}"
+      },
+      "receipts": {
+        "title": "Varje kvitto, arkiverat",
+        "body": "Bilderna hänger med posten och samlas i album. Ett garantiärende är en scroll bort."
+      },
+      "search": {
+        "title": "Hitta vad som helst",
+        "body": "Sök på anteckning eller butik och begränsa sedan på kategori, konto, belopp eller känsla.",
+        "query": "kaffe",
+        "filterCategory": "Mat",
+        "filterAccount": "Kontant",
+        "filterSentiment": "Ångrat"
+      },
+      "assets": {
+        "title": "Vad du äger",
+        "body": "Följ konton och tillgångar vid sidan av utgifterna, så att den långa bilden också räknas."
+      }
+    },
+    "testimonials": {
+      "eyebrow": "Omdömen",
+      "title": "Vad folk säger efter en månad.",
+      "usersChoice": "Användarnas val"
+    },
+    "privacy": {
+      "eyebrow": "Integritet",
+      "title": "Dina utgifter stannar i telefonen.",
+      "body": "Inget konto att skapa, ingen bank att koppla. Allt bor på din enhet och du kan exportera eller radera allt när du vill.",
+      "onDevice": {
+        "title": "Bara på enheten",
+        "body": "Inget moln, ingen synk, inga annonser."
+      },
+      "import": {
+        "title": "Ta med din historik",
+        "body": "Importera en säkerhetskopia från Money Manager och fortsätt."
+      },
+      "link": "Läs integritetspolicyn"
+    },
+    "why": {
+      "eyebrow": "Från utvecklaren",
+      "title": "Varför jag byggde det här",
+      "bookAlt": "Your Money or Your Life av Vicki Robin",
+      "quote": "Du byter din livsenergi mot pengar",
+      "quoteAuthor": "- Vicki Robin",
+      "paragraph1": "Efter att ha läst <book>Your Money or Your Life</book> klickade något för mig. För de flesta av oss som tjänar lön är pengar inte bara pengar, de är vår livsenergi. Varje krona vi spenderar motsvarar timmar av vår tid, vår ansträngning, vårt liv som byts bort.",
+      "paragraph2": "Därför byggde jag den här appen. Den hjälper dig att se dina utgifter på ett annat sätt: inte bara i valuta, utan i timmar av ditt liv. För ibland känns <cost>\"$20\"</cost> inte som särskilt mycket, men <time>\"2 timmar av mitt liv\"</time> gör det. Målet är enkelt, att hjälpa dig bli mer medveten om vart dina pengar (eller egentligen din tid) tar vägen, så att du kan ta tillbaka kontrollen.",
+      "paragraph3": "Allt stannar på din enhet, utan inloggningar eller molnsynkronisering. Dina data är dina. Du kan också exportera datan som en enkel JSON-fil vid behov. Gratisversionen ger dig allt du behöver för att komma igång. Pro låser upp några extra funktioner som obegränsat antal konton/kategorier/timlöner med mera.",
+      "paragraph4": "Förhoppningsvis har du alltid kontroll över dina pengar och ditt liv."
+    },
+    "closing": {
+      "title": "Se vad dina pengar egentligen kostar.",
+      "body": "Gratis och utan konto. Fyll i din timpeng på en minut så får varje siffra en andra innebörd."
+    },
+    "community": {
+      "body": "Få kontakt med andra användare, dela feedback och få tips på vår Discord-server.",
+      "cta": "Gå med i Communityn"
+    },
+    "dashboardEntry": {
+      "eyebrow": "Nytt · Webbpanel",
+      "title": "Din Money2Time-data på en stor skärm",
+      "body": "Skanna en kod på app.money2time.com med telefonen och se kassaflöde, utgifter, förmögenhet, budgetar, resor och timmarna bakom varje köp. Lägg till och redigera transaktioner från datorn medan telefonen är ansluten. End-to-end-krypterat.",
+      "cta": "Öppna webbpanelen",
+      "points": {
+        "private": "End-to-end-krypterat",
+        "charts": "17 paneler",
+        "edits": "Redigera från datorn"
+      }
+    }
+  },
+  "contact": {
+    "page": {
+      "title": "Kontakta mig",
+      "intro": "För support, buggar, feedback eller integritetsfrågor.",
+      "formLabel": "Kontaktformulär",
+      "discordTitle": "Föredrar du att chatta?",
+      "discordBody": "Gå med i vår Discord-community för att komma i kontakt med andra användare och få snabba svar.",
+      "discordCta": "Gå med i vår Discord"
+    },
+    "form": {
+      "honeypot": "Företag",
+      "name": "Namn",
+      "namePlaceholder": "Ditt namn",
+      "email": "E-post",
+      "emailPlaceholder": "du@example.com",
+      "message": "Meddelande",
+      "messagePlaceholder": "Berätta vad som hände, vad du vill få förbättrat eller hur jag kan hjälpa.",
+      "sending": "Skickar...",
+      "send": "Skicka meddelande"
+    },
+    "validation": {
+      "nameRequired": "Ange ditt namn.",
+      "nameTooLong": "Håll namnet under {max} tecken.",
+      "emailRequired": "Ange din e-postadress.",
+      "emailInvalid": "Ange en giltig e-postadress.",
+      "subjectTooLong": "Håll ämnet under {max} tecken.",
+      "messageRequired": "Skriv ett kort meddelande.",
+      "messageTooLong": "Håll meddelandet under {max} tecken."
+    },
+    "status": {
+      "honeypot": "Tack för att du hörde av dig. Ditt meddelande är på väg.",
+      "error": "Rätta de markerade fälten och försök igen.",
+      "mailto": "Din förvalda e-postapp öppnas med meddelandet ifyllt. Om inget öppnas kan du mejla mig direkt."
+    }
+  },
+  "statementsImport": {
+    "title": "Import av kontoutdrag",
+    "intro": "Se den korta genomgången nedan för att lära dig hur du importerar dina kontoutdrag till Money2Time med hjälp av AI.",
+    "videoTitle": "Money2Time - genomgång av import av kontoutdrag"
+  },
+  "notFound": {
+    "title": "Sidan hittades inte",
+    "body": "Den här sidan finns inte. Den kanske ändå kostar för mycket av din tid.",
+    "home": "Gå hem"
+  },
+  "privacy": {
+    "title": "Integritetspolicy",
+    "lastUpdated": "Senast uppdaterad: 22 oktober 2026",
+    "websiteAnalytics": {
+      "title": "Analys av webbplatsanvändning",
+      "paragraphs": [
+        "På money2time.com använder vi PostHog och Google Analytics för att mäta pseudonyma sidvisningar och en begränsad uppsättning interaktioner, till exempel klick på appnedladdning, val av guide och resultat från kontaktformuläret. Tjänsterna kan använda webbläsarlagring eller cookies och behandla teknisk information, inklusive ungefärlig region, enhets- och webbläsartyp samt hänvisande webbplats. Användar- och händelsedata i Google Analytics lagras i upp till 14 månader.",
+        "I Webbpanelen (app.money2time.com) mäter samma tjänster vilka sidor i panelen du öppnar, när en webbläsare kopplas eller kopplas bort, om överföringar från din telefon och ändringar du gör lyckas, och när en Pro-funktion erbjuds. När din telefon har skickat sina data kopplas dessa händelser till telefonens slumpmässiga app-ID, så att din användning av panelen och appen räknas som en pseudonym användare tills du kopplar bort webbläsaren. Panelen håller detta åtskilt från resten av money2time.com, så att dina besök på andra sidor inte kopplas till den. Händelser från panelen innehåller aldrig dina ekonomiska uppgifter, och besök på panelen spelas aldrig in som sessionsuppspelningar.",
+        "PostHog kan också spela in ett litet urval av besök på webbplatsen som sessionsuppspelningar där alla formulärfält är dolda, och tar emot en rapport när ett fel uppstår på en sida.",
+        "Vi skickar inte innehåll från kontaktformuläret, söktext i guider, ekonomiska data, kontoidentifierare, fullständiga URL-frågesträngar eller data för annonsering eller personalisering. Omdirigeringen /download lägger inte till din IP-adress eller user-agent-sträng i analyshändelsen. Webbplatsanalys laddas inte när Do Not Track är aktiverat i webbläsaren."
+      ]
+    },
+    "sections": [
+      {
+        "title": "Översikt",
+        "paragraphs": [
+          "Money2Time (appen) är en app för privatekonomi som omvandlar dina utgifter till motsvarande tid baserat på din timlön. Din integritet är viktig för oss. Den här policyn förklarar vilka data appen samlar in, hur de används och vilka rättigheter du har i fråga om dessa data."
+        ]
+      },
+      {
+        "title": "1. Datalagring och lokal först-design",
+        "paragraphs": [
+          "Alla dina ekonomiska data, inklusive transaktioner, konton, kategorier, återkommande regler och löneinställningar, lagras lokalt på din enhet med en databas på enheten (SQLite). Vi driver inga servrar som lagrar din personliga ekonomiska information, och appen synkroniserar aldrig dina data eller säkerhetskopierar dem till en server hos oss. Om du använder den valfria Webbpanelen (avsnitt 6) skickar din telefon en kopia direkt till en webbläsare som du har kopplat, end-to-end-krypterad; vår server för den vidare utan att lagra den och kan inte läsa den.",
+          "Om du avinstallerar appen raderas alla lokalt lagrade data permanent."
+        ]
+      },
+      {
+        "title": "2. Information vi samlar in",
+        "subsections": [
+          {
+            "title": "Ekonomiska data (lagras endast lokalt)",
+            "lists": [
+              [
+                "Transaktionsbelopp, datum, kategorier, anteckningar och känslotaggar",
+                "Kontonamn, typer och saldon",
+                "Information om lön och timlön",
+                "Regler för återkommande transaktioner",
+                "Kategorinamn och organisering"
+              ]
+            ],
+            "paragraphs": [
+              "Dessa data lämnar aldrig din enhet om du inte uttryckligen väljer att exportera dem eller skicka dem till en webbläsare som du har kopplat med Webbpanelen."
+            ]
+          },
+          {
+            "title": "Slumpmässigt app-ID",
+            "paragraphs": [
+              "Vid första start skapar appen en slumpmässig unik identifierare som börjar med m2t_ och inte är kopplad till ditt namn, din e-postadress, ditt Apple-ID eller någon personlig identitet. Samma identifierare delas med PostHog, Google Analytics for Firebase och RevenueCat för produktanalys och prenumerationshantering, och med varje webbläsare som du kopplar med Webbpanelen, vars användningsanalys (PostHog och Google Analytics) också använder den."
+            ]
+          },
+          {
+            "title": "Användningsanalys",
+            "paragraphs": [
+              "Vi använder PostHog och Google Analytics for Firebase för att samla in pseudonym användningsdata som är kopplad till detta slumpmässiga app-ID och förbättra appen. Analysen innehåller inte belopp, transaktionsuppgifter, kontosaldon, anteckningar, kvitton, säkerhetskopior eller identifierande information.",
+              "PostHog tar också emot krasch- och felrapporter och spelar in ett litet urval av appsessioner som skärminspelningar så att vi kan hitta och åtgärda problem. I inspelningarna är allt som visar din information dolt: text, siffror, inmatningsfält, diagram och alla foton du lägger till. Bara appens egen design, som ikoner, illustrationer och knapptexter, syns. Inspelningarna visar aldrig dina ekonomiska uppgifter."
+            ],
+            "lists": [
+              [
+                "Skärmvisningar och funktionsanvändning",
+                "Apphändelser, till exempel att en transaktion skapas eller inställningar ändras",
+                "Allmänna inställningar som valuta, språk/region, tema och visningsläge",
+                "Plattform, till exempel iOS eller Android"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "title": "3. Köp i appen och prenumerationer",
+        "paragraphs": [
+          "Appen erbjuder en valfri premiumprenumeration (Pro) som hanteras via RevenueCat. Betalning behandlas av Apple eller Google. Vi tar aldrig emot eller lagrar din betalningsinformation, dina kortuppgifter eller inloggningsuppgifter för Apple-ID/Google-konto.",
+          "RevenueCat tar emot din prenumerationsstatus, produktidentifierare och utgångsdatum för att hantera dina rättigheter. Detta kopplas till det slumpmässiga app-ID:t, inte till din personliga identitet."
+        ]
+      },
+      {
+        "title": "4. Notiser",
+        "paragraphs": [
+          "Appen kan be om tillstånd att skicka notiser. Alla notiser schemaläggs lokalt på din enhet. Inga pushnotiser skickas från externa servrar. Du kan neka tillstånd för notiser eller stänga av notiser när som helst i enhetens inställningar."
+        ],
+        "lists": [
+          [
+            "Dagliga påminnelser om avstämning",
+            "Veckovisa sammanfattningar av utgifter",
+            "Aviseringar för återkommande transaktioner"
+          ]
+        ]
+      },
+      {
+        "title": "5. Enhetsbehörigheter",
+        "paragraphs": [
+          "Appen begär endast behörighet för notiser för att schemalägga lokala påminnelser och sammanfattningar. Appen kommer inte åt din kamera, mikrofon, bildbibliotek, kontakter, kalender, meddelanden, plats, hälsodata, träningsdata, andra appar eller webbhistorik."
+        ]
+      },
+      {
+        "title": "6. Dataexport, import och Webbpanel",
+        "paragraphs": [
+          "Du kan när som helst exportera alla dina ekonomiska data som en JSON-fil via appens inställningar. Den exporterade filen delas med enhetens inbyggda delningsfunktion. Vi tar inte emot eller behandlar dina exporterade data.",
+          "Du kan också importera data från en tidigare Money2Time-säkerhetskopia eller migrera från appen Money Manager. Import ersätter alla befintliga data på din enhet.",
+          "Webbpanelen är valfri. För att använda den öppnar du app.money2time.com på en dator och skannar koden som visas där med appen. Din telefon och den webbläsaren kommer sedan överens om en krypteringsnyckel som bara de två har. Medan appens skärm för Webbpanel och webbläsaren båda är öppna skickar appen en kopia av dina data till webbläsaren (samma data som i en export, med logotyper, ikoner och omslagsfoton som du har lagt till, men inte kvittofoton eller QR-koder för betalning), end-to-end-krypterad med AES-256-GCM. Den går via en server som vi driver på Cloudflare, som för det krypterade datat vidare allteftersom det kommer och inte lagrar det. Vi kan inte läsa det.",
+          "Webbläsaren behåller den senaste kopian den fick, fortfarande krypterad, i sitt eget lagringsutrymme tillsammans med nyckeln, tills du kopplar bort den i webbläsaren eller i appen. Ändringar som du gör i panelen skickas tillbaka till din telefon, krypterade på samma sätt, och appen sparar dem bara medan dess skärm för Webbpanel är öppen och bara från en webbläsare som du har tillåtit att göra ändringar. Din telefon berättar också för webbläsaren om du har Money2Time Pro, så att den kan låsa upp Pro-paneler, och sitt slumpmässiga app-ID, för panelens användningsanalys. Det finns inget konto: vi sparar ingen e-postadress, och servern som för dina data vidare sparar ingen uppgift om vilka telefoner och webbläsare som är kopplade."
+        ]
+      },
+      {
+        "title": "7. Radering av data",
+        "paragraphs": [
+          "Du har alltid full kontroll över dina data. Återställ all data raderar permanent alla transaktioner, konton, kategorier, återkommande regler och löneinställningar från din enhet. Återställ endast transaktioner rensar din transaktionshistorik men behåller konton och kategorier. Om du avinstallerar appen tas den lokala databasen och alla lagrade data bort helt. Att koppla bort en webbläsare från Webbpanelen raderar den kopia den behåller: direkt när du kopplar bort i webbläsaren och nästa gång den ansluter när du kopplar bort från appen. Att rensa den webbläsarens webbplatsdata raderar den också.",
+          "Att återställa data i appen raderar inte din prenumerationsstatus hos Apple/Google eller analysdata som tidigare skickats till PostHog / Google Analytics for Firebase. För att begära radering av analysdata, kontakta oss på e-postadressen nedan."
+        ]
+      },
+      {
+        "title": "8. Tredjepartstjänster",
+        "paragraphs": [
+          "Appen visar inte annonser och använder inga SDK:er för annonsering."
+        ],
+        "table": {
+          "headers": [
+            "Tjänst",
+            "Syfte",
+            "Delade data"
+          ],
+          "rows": [
+            [
+              "PostHog / Google Analytics for Firebase",
+              "Pseudonym användningsanalys",
+              "Slumpmässigt app-ID, händelser för funktionsanvändning, inställningar"
+            ],
+            [
+              "RevenueCat",
+              "Prenumerationshantering",
+              "Slumpmässigt app-ID, prenumerationsstatus"
+            ],
+            [
+              "Cloudflare (Workers, Durable Objects)",
+              "Anslutning för Webbpanelen, endast om du använder den",
+              "Dina data, end-to-end-krypterade och endast under överföring; anslutningsuppgifter som IP-adress, som sparas kortvarigt i Cloudflares loggar"
+            ],
+            [
+              "Apple App Store / Google Play",
+              "Betalningshantering",
+              "Hanteras direkt av Apple/Google"
+            ]
+          ]
+        }
+      },
+      {
+        "title": "9. Datasäkerhet",
+        "paragraphs": [
+          "Dina ekonomiska data lagras i en okrypterad lokal databas som skyddas av enhetens inbyggda säkerhet. När du använder Webbpanelen krypteras de på din telefon med AES-256-GCM, med en nyckel som din telefon och webbläsaren kommer överens om genom P-256-nyckelutbyte, och skickas över HTTPS; vår server har aldrig nyckeln. Appen använder endast standardiserade, publicerade krypteringsalgoritmer."
+        ]
+      },
+      {
+        "title": "10. Barns integritet",
+        "paragraphs": [
+          "Appen riktar sig inte till barn under 13 år. Vi samlar inte medvetet in personuppgifter från barn under 13 år. Om du tror att ett barn har lämnat data via appen, kontakta oss så vidtar vi åtgärder för att ta bort sådan information."
+        ]
+      },
+      {
+        "title": "11. Ändringar av denna policy",
+        "paragraphs": [
+          "Vi kan uppdatera denna integritetspolicy från tid till annan. Ändringar visas på den här sidan med ett uppdaterat datum för Senast uppdaterad. Fortsatt användning av appen efter ändringar innebär att du accepterar den uppdaterade policyn."
+        ]
+      }
+    ],
+    "contact": {
+      "title": "12. Kontakta oss",
+      "body": "Om du har frågor om denna integritetspolicy, behöver support eller vill begära radering av analysdata, kontakta oss på:",
+      "formPrefix": "Du kan också använda",
+      "formLink": "kontaktformuläret",
+      "formSuffix": "på den här webbplatsen."
+    }
+  },
+  "terms": {
+    "title": "Användarvillkor",
+    "lastUpdated": "Senast uppdaterad: 25 mars 2026",
+    "privacyPolicyLabel": "Integritetspolicy",
+    "sections": [
+      {
+        "title": "Översikt",
+        "paragraphs": [
+          "Dessa användarvillkor (villkoren) reglerar din användning av mobilappen Money2Time (appen), som utvecklas och drivs av Nelson Gan. Genom att ladda ner eller använda appen samtycker du till att vara bunden av dessa villkor. Om du inte samtycker ska du inte använda appen."
+        ]
+      },
+      {
+        "title": "1. Godkännande av villkoren",
+        "paragraphs": [
+          "Genom att få åtkomst till eller använda Money2Time bekräftar du att du är minst 13 år gammal och har rättslig kapacitet att ingå dessa villkor. Om du använder appen för en organisations räkning intygar du att du har behörighet att binda organisationen till dessa villkor."
+        ]
+      },
+      {
+        "title": "2. Beskrivning av appen",
+        "paragraphs": [
+          "Money2Time är en app för privatekonomi som hjälper dig förstå den verkliga kostnaden för dina utgifter genom att omvandla dem till motsvarande timmar av din tid baserat på din timlön. Kärnfunktioner inkluderar:"
+        ],
+        "lists": [
+          [
+            "Spårning av utgifter och inkomster över flera konton",
+            "Omvandling från pengar till tid baserat på dina löneinställningar",
+            "Regler för återkommande transaktioner för räkningar och prenumerationer",
+            "Utgiftsfördelningar, insikter och känslospårning",
+            "Lokal export och import av data",
+            "Anpassningsbara notiser för påminnelser och sammanfattningar"
+          ]
+        ]
+      },
+      {
+        "title": "3. Gratis- och Pro-planer",
+        "paragraphs": [
+          "Appen erbjuds enligt en freemium-modell. Vissa funktioner är begränsade i gratisplanen och kräver en aktiv Pro-prenumeration för att låsas upp. Vi förbehåller oss rätten att när som helst ändra gränserna för gratisplanen eller funktionerna i Pro-planen. Väsentliga ändringar meddelas via en appuppdatering eller på denna webbplats."
+        ],
+        "subsections": [
+          {
+            "title": "Gratisplan",
+            "lists": [
+              [
+                "Upp till 5 konton",
+                "Upp till 9 utgifts-/inkomstkategorier",
+                "Upp till 5 regler för återkommande transaktioner",
+                "Upp till 5 poster för timlön",
+                "Obegränsat antal transaktionsposter"
+              ]
+            ]
+          },
+          {
+            "title": "Pro-plan",
+            "lists": [
+              [
+                "Obegränsat antal konton, kategorier, återkommande regler och poster för timlön",
+                "Tillgänglig som månadsprenumeration, årsprenumeration eller livstidsköp"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "title": "4. Köp i appen och prenumerationer",
+        "paragraphs": [
+          "Pro-prenumerationer och livstidsköpet behandlas via Apple App Store eller Google Play Store. Genom att göra ett köp godkänner du betalningsvillkoren för respektive butik.",
+          "Prenumerationer faktureras i förskott månadsvis eller årsvis och förnyas automatiskt om de inte sägs upp minst 24 timmar före slutet av den aktuella perioden. Begäran om återbetalning hanteras av Apple eller Google enligt deras respektive återbetalningspolicyer. Du kan återställa ett tidigare köp på en ny enhet med Återställ köp i appens inställningar.",
+          "Ett livstidsköp ger åtkomst till Pro-funktioner under appens livstid. Vi garanterar inte att appen kommer att fortsätta vara tillgänglig på obestämd tid."
+        ]
+      },
+      {
+        "title": "5. Dina data",
+        "paragraphs": [
+          "Alla ekonomiska data du anger, inklusive transaktioner, konton, kategorier, löneinställningar och preferenser, lagras lokalt på din enhet. Vi har inte åtkomst till dina ekonomiska data och lagrar dem inte på någon server.",
+          "Du är ensam ansvarig för att underhålla säkerhetskopior av dina data. Använd den inbyggda exportfunktionen för att skapa en säkerhetskopia. Vi ansvarar inte för dataförlust som beror på borttagning av appen, enhetsfel eller oavsiktlig återställning.",
+          "Fullständig information om datahantering finns i vår {privacyPolicy}."
+        ]
+      },
+      {
+        "title": "6. Tillåten användning",
+        "paragraphs": [
+          "Du samtycker till att inte:"
+        ],
+        "lists": [
+          [
+            "Bakåtkompilera, dekompilera eller disassemblera appen",
+            "Försöka få obehörig åtkomst till någon del av appen eller dess relaterade system",
+            "Använda appen för något olagligt syfte eller i strid med tillämpliga lagar",
+            "Vidaredistribuera, sälja vidare eller underlicensiera appen eller någon del av den",
+            "Använda automatiserade metoder för att komma åt eller interagera med appen"
+          ]
+        ]
+      },
+      {
+        "title": "7. Immateriella rättigheter",
+        "paragraphs": [
+          "Appen, inklusive dess design, kod, grafik och innehåll, ägs av Nelson Gan och skyddas av upphovsrätt och andra lagar om immateriella rättigheter. Dessa villkor ger dig inga rättigheter att använda våra varumärken, logotyper eller varumärkeselement.",
+          "Dina ekonomiska data tillhör dig. Genom att använda appen ger du oss inga rättigheter till dina personuppgifter."
+        ]
+      },
+      {
+        "title": "8. Ansvarsfriskrivning",
+        "paragraphs": [
+          "Appen tillhandahålls i befintligt skick och i mån av tillgänglighet utan några garantier, uttryckliga eller underförstådda, inklusive garantier om säljbarhet, lämplighet för ett särskilt ändamål eller icke-intrång.",
+          "Money2Time är ett personligt produktivitetsverktyg och är inte en finansiell rådgivare, revisor eller reglerad finansiell tjänst. Ingenting i appen utgör finansiell rådgivning. Du bör rådfråga en kvalificerad expert vid ekonomiska beslut.",
+          "Vi garanterar inte att appen är felfri, oavbruten eller fri från buggar."
+        ]
+      },
+      {
+        "title": "9. Ansvarsbegränsning",
+        "paragraphs": [
+          "I den största utsträckning som tillåts enligt tillämplig lag ansvarar vi inte för indirekta, oförutsedda, särskilda, följdrelaterade eller straffrättsliga skador som uppstår till följd av din användning av, eller oförmåga att använda, appen, inklusive dataförlust, ekonomiska beslut som fattas baserat på appens resultat eller problem med enheten.",
+          "Vårt totala ansvar gentemot dig för anspråk som uppstår ur dessa villkor eller din användning av appen ska inte överstiga det belopp du betalade för din aktuella Pro-prenumerationsperiod, eller $10 USD om du använder gratisplanen."
+        ]
+      },
+      {
+        "title": "10. Uppsägning",
+        "paragraphs": [
+          "Vi kan stänga av eller avsluta din åtkomst till appen när som helst, med eller utan anledning och med eller utan föregående meddelande. Vid uppsägning upphör din rätt att använda appen omedelbart. Eftersom dina data lagras lokalt finns de kvar på din enhet tills du avinstallerar appen eller återställer den manuellt.",
+          "Du kan sluta använda appen när som helst genom att avinstallera den."
+        ]
+      },
+      {
+        "title": "11. Ändringar av dessa villkor",
+        "paragraphs": [
+          "Vi kan uppdatera dessa villkor från tid till annan. När vi gör det uppdaterar vi datumet Senast uppdaterad högst upp på denna sida. Fortsatt användning av appen efter ändringar innebär att du accepterar de reviderade villkoren. Vid väsentliga ändringar gör vi rimliga ansträngningar för att meddela dig via en appuppdatering eller ett meddelande på denna webbplats."
+        ]
+      },
+      {
+        "title": "12. Tillämplig lag",
+        "paragraphs": [
+          "Dessa villkor regleras av och tolkas i enlighet med Singapores lagar, utan hänsyn till dess lagvalsregler. Eventuella tvister som uppstår ur dessa villkor ska omfattas av exklusiv jurisdiktion för domstolarna i Singapore."
+        ]
+      }
+    ],
+    "contact": {
+      "title": "13. Kontakta oss",
+      "body": "Om du har frågor om dessa villkor, kontakta oss på:"
+    }
+  },
+  "dataDeletion": {
+    "title": "Begäran om radering av data",
+    "lastUpdated": "Senast uppdaterad: 20 oktober 2026",
+    "intro": "Money2Time är en local-first-app: alla dina ekonomiska data lagras endast på din enhet och lagras aldrig på våra servrar. Den här sidan förklarar hur du begär radering av de data som är kopplade till Money2Time-appen, inklusive stegen för att begära radering och vilka typer av data som raderas eller behålls, tillsammans med eventuella lagringsperioder.",
+    "sections": [
+      {
+        "title": "Så begär du radering av data",
+        "subsections": [
+          {
+            "title": "Radera data som lagras på din enhet",
+            "paragraphs": [
+              "Nästan alla dina data, inklusive alla dina ekonomiska data, lagras endast på din enhet. Du kan radera dem själv när som helst:"
+            ],
+            "lists": [
+              [
+                "Öppna Money2Time-appen och gå till Inställningar.",
+                "Tryck på \"Återställ all data\" för att permanent radera alla transaktioner, konton, kategorier, återkommande regler och löneinställningar.",
+                "Alternativt kan du avinstallera appen för att helt ta bort den lokala databasen och alla lagrade data."
+              ]
+            ]
+          },
+          {
+            "title": "Radera kopian i en kopplad webbläsare",
+            "paragraphs": [
+              "Om du använder Webbpanelen behåller varje webbläsare som du har kopplat den senaste kopian som din telefon skickade till den, krypterad. Så här raderar du den:"
+            ],
+            "lists": [
+              [
+                "Öppna app.money2time.com i webbläsaren och välj \"Koppla bort den här webbläsaren\". Kopian och dess nyckel raderas direkt.",
+                "Eller gå till Inställningar > Webbpanel i Money2Time-appen och tryck på \"Koppla bort\" bredvid webbläsaren. Den raderar sin kopia nästa gång den ansluter.",
+                "Att rensa webbläsarens webbplatsdata för app.money2time.com raderar den också."
+              ]
+            ]
+          },
+          {
+            "title": "Begär radering av analys- och prenumerationsdata",
+            "paragraphs": [
+              "För att begära radering av analys- eller prenumerationsdata som är kopplade till ditt slumpmässiga app-ID, kontakta oss:"
+            ],
+            "lists": [
+              [
+                "Mejla oss på adressen nedan med ämnet \"Data Deletion Request\", eller använd kontaktformuläret på den här webbplatsen.",
+                "Använd kopieringsknappen bredvid Användar-ID under Settings > Display och ange hela ID:t så att vi kan hitta data som är kopplade till din app.",
+                "Vi behandlar din begäran och bekräftar att den är slutförd inom 30 dagar."
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Vilka data raderas eller behålls",
+        "paragraphs": [
+          "Tabellen nedan sammanfattar vad som händer med varje typ av data när du begär radering, och hur länge eventuella data lagras."
+        ],
+        "table": {
+          "headers": [
+            "Datatyp",
+            "Åtgärd",
+            "Lagringsperiod"
+          ],
+          "rows": [
+            [
+              "Ekonomiska data på enheten (transaktioner, konton, kategorier, återkommande regler, löneinställningar)",
+              "Raderas",
+              "Tas bort omedelbart när du återställer data eller avinstallerar appen. Vi behåller ingenting."
+            ],
+            [
+              "Kopia av Webbpanelen i en webbläsare som du har kopplat",
+              "Raderas",
+              "Tas bort från den webbläsaren när du kopplar bort den eller rensar dess webbplatsdata. Våra servrar lagrar den aldrig, så vi behåller ingenting."
+            ],
+            [
+              "Pseudonyma analysdata (PostHog / Google Analytics for Firebase)",
+              "Raderas på begäran",
+              "Raderas inom 30 dagar från din begäran."
+            ],
+            [
+              "Prenumerationsdata (RevenueCat, Apple, Google)",
+              "Behålls där det krävs",
+              "Lagras av Apple eller Google för fakturerings-, skatte- och juridiska skyldigheter, och hanteras via ditt Apple- eller Google-konto."
+            ]
+          ]
+        }
+      },
+      {
+        "title": "Data vi inte lagrar",
+        "paragraphs": [
+          "Money2Time kräver inget konto och lagrar inte ditt namn, din e-post, ditt Apple-ID, ditt Google-konto eller dina betalningsuppgifter på våra servrar. Eftersom dina ekonomiska data aldrig lagras på våra servrar, inte heller när du använder Webbpanelen, kan vi inte komma åt eller radera dem åt dig.",
+          "Prenumerations- och betalningsuppgifter som Apple eller Google har är utanför vår kontroll och hanteras direkt via ditt Apple- eller Google-konto."
+        ]
+      }
+    ],
+    "contact": {
+      "title": "Kontakta oss",
+      "body": "För att begära radering av analys- eller prenumerationsdata, eller om du har frågor, kontakta oss på:",
+      "formPrefix": "Du kan också använda",
+      "formLink": "kontaktformuläret",
+      "formSuffix": "på den här webbplatsen."
+    }
+  },
+  "costInHours": {
+    "eyebrow": "Löner i timmar",
+    "title": "Vad en arbetstimme räcker till, land för land",
+    "intro": "Varje pris har en siffra till: tiden du arbetade för den. Den här sidan ställer varje lands publicerade lön mot en produkt som är likadan överallt, så att man kan jämföra vad en timme räcker till utan att först behöva enas om varukorgen.",
+    "compare": {
+      "base": "Utgångspunkt",
+      "with": "Jämför med",
+      "measure": "Vad den mäter",
+      "caption": "Publicerad lön och arbetet bakom en Big Mac, i två länder",
+      "priceSource": "Big Mac-priser:"
+    },
+    "metrics": {
+      "workPerBigMac": "Arbete för en Big Mac",
+      "bigMacPrice": "Big Mac-pris",
+      "payPerHour": "Lön per timme",
+      "payPerHourUsd": "Lön per timme i amerikanska dollar",
+      "bigMacsPerMonth": "Big Macar för en månadslön",
+      "workPerLitre": "Arbete per liter bensin",
+      "workPer100kWh": "Arbete per {kwh} kWh el"
+    },
+    "periods": {
+      "hour": "i timmen",
+      "week": "i veckan",
+      "month": "i månaden",
+      "year": "per år"
+    },
+    "measures": {
+      "median": "Median",
+      "average": "Genomsnitt"
+    },
+    "scopes": {
+      "allEmployees": "alla anställda",
+      "allWorkers": "alla sysselsatta",
+      "citizens": "medborgare",
+      "formalSector": "formell sektor, 10+ anställda",
+      "fullTimeEmployees": "heltidsanställda",
+      "fullTimeResidents": "bosatta på heltid",
+      "regularSalaried": "fast anställda",
+      "wageAndSalary": "löntagare",
+      "employees": "anställda",
+      "employeesNet": "anställda, efter skatt",
+      "employedPersons": "sysselsatta",
+      "formalNonAgri": "formell icke-jordbrukssektor",
+      "fullTimeEquivalent": "heltidsekvivalenta anställda",
+      "urbanNonPrivate": "urbana icke-privata enheter"
+    },
+    "allMarkets": {
+      "title": "Alla länder, rankade",
+      "intro": "Sorterade efter hur länge lönen måste arbeta för en Big Mac. Läs tredje kolumnen först: sex av siffrorna är medianer och fyra är genomsnitt, och genomsnitten ligger högre eftersom toppen drar upp dem.",
+      "caption": "Publicerade lönesiffror och arbetet bakom en Big Mac, per land",
+      "country": "Land",
+      "pay": "Publicerad lön",
+      "basis": "Vad den mäter",
+      "hourly": "Per timme",
+      "effort": "Arbete för en Big Mac",
+      "youAreHere": "Du"
+    },
+    "notes": {
+      "title": "Så läser du detta",
+      "method": {
+        "title": "Så räknas timmarna fram",
+        "body": "Där en statistikmyndighet publicerar en timsiffra används den som den är. Där den publicerar en vecko- eller månadssiffra delas den med en {hours}-timmarsvecka. Stats NZ publicerar båda, och de två stämmer inom femtio öre."
+      },
+      "basket": {
+        "title": "Varför en burgare och inte en varukorg",
+        "body": "En Big Mac, en liter 95-oktanig bensin och en kilowattimme för hushåll är samma saker i vart och ett av länderna här, var och en insamlad av en utgivare vid ett tillfälle. I Indien, där McDonald's inte säljer någon Big Mac med nötkött, prissätter The Economist i stället kycklingburgaren Maharaja Mac. En bredare lokal varukorg skulle täcka mer av livet, men att äta ute betyder inte samma sak i Manila och i Melbourne, och en jämförelse skulle säga mer om korgen än om pengarna."
+      },
+      "comparability": {
+        "title": "Lönerna går inte att jämföra rakt av",
+        "body": "Ingen publicerar en enda medianlönetabell som täcker de här länderna, så varje siffra kommer från landets egen statistikmyndighet och räknar en annan grupp. Sex är medianer, fyra är genomsnitt. Läs skillnaderna som vägledande, inte exakta."
+      },
+      "grossPay": {
+        "title": "Det här är före skatt",
+        "body": "Publicerade löner är brutto. Det som faktiskt landar på kontot är mindre, så dina egna timmar är fler än de på den här sidan."
+      }
+    },
+    "sources": {
+      "title": "Varifrån siffrorna kommer",
+      "bigMac": "Big Mac-priser och växelkurser:",
+      "wages": "Löner, land för land:",
+      "energy": "Bensin- och elpriser:"
+    },
+    "cta": {
+      "body": "Appen gör det här med din lön i stället för landets. Fyll i vad du får ut och varje köp får en siffra till.",
+      "link": "Se hur det fungerar"
+    }
+  },
+  "tutorials": {
+    "eyebrow": "Guider",
+    "title": "Guider",
+    "intro": "Korta genomgångar, bild för bild, av allt Money2Time kan. Varje skärmbild är den riktiga appen, med knappen du ska trycka på markerad i rött.",
+    "searchPlaceholder": "Sök bland guider",
+    "clear": "Rensa",
+    "emptyTitle": "Inga träffar",
+    "emptyDescription": "Prova ett kortare ord, eller namnet på skärmen du letar efter.",
+    "stepCount": "{count} steg",
+    "stepCounter": "{current} av {total}",
+    "badgePro": "PRO",
+    "badgeIos": "iPhone",
+    "openInApp": "Öppna i appen",
+    "previous": "Föregående",
+    "next": "Nästa",
+    "category": {
+      "start": "Kom igång",
+      "logging": "Registrera pengar",
+      "organize": "Organisera",
+      "plan": "Planera",
+      "share": "Dela och göra upp",
+      "insights": "Förstå det",
+      "data": "Dina data"
+    }
+  },
+  "dashboard": {
+    "loading": "Öppnar din panel…",
+    "units": {
+      "minutes": "{m} min",
+      "hours": "{h} h",
+      "hoursMinutes": "{h} h {m} min",
+      "days": "{d} d",
+      "daysHours": "{d} d {h} h"
+    },
+    "nav": {
+      "label": "Paneler",
+      "menu": "Meny",
+      "openMenu": "Öppna menyn",
+      "closeMenu": "Stäng menyn",
+      "groups": {
+        "insights": "Insikter",
+        "wealth": "Förmögenhet",
+        "planning": "Planering",
+        "organize": "Organisera"
+      }
+    },
+    "period": {
+      "label": "Period",
+      "previous": "Föregående period",
+      "next": "Nästa period",
+      "asOf": "Per {date}",
+      "presets": {
+        "month": "Månad",
+        "3m": "3 mån",
+        "6m": "6 mån",
+        "12m": "12 mån",
+        "ytd": "I år",
+        "year": "År",
+        "all": "Allt"
+      }
+    },
+    "mode": {
+      "label": "Visa belopp som",
+      "hours": "Timmar"
+    },
+    "common": {
+      "income": "Inkomst",
+      "spending": "Utgifter",
+      "net": "Netto",
+      "saved": "Sparat",
+      "viewAll": "Visa alla",
+      "vsPrevious": "mot föregående",
+      "uncategorized": "Utan kategori",
+      "other": "Övrigt",
+      "total": "Totalt",
+      "average": "Genomsnitt",
+      "transactions": "{count, plural, one {# transaktion} other {# transaktioner}}",
+      "accountTypes": {
+        "debit": "Konto",
+        "credit": "Kreditkort",
+        "loan": "Lån",
+        "goal": "Mål",
+        "cash": "Kontant",
+        "savings": "Sparande",
+        "investment": "Investering"
+      },
+      "viewFailed": "Den här sidan kunde inte visas för dina data. De andra sidorna fungerar fortfarande."
+    },
+    "views": {
+      "overview": {
+        "nav": "Översikt",
+        "title": "Översikt",
+        "subtitle": "Vart dina pengar och dina timmar tog vägen"
+      },
+      "cash-flow": {
+        "nav": "Kassaflöde",
+        "title": "Kassaflöde",
+        "subtitle": "Pengar in, pengar ut och vad som blev kvar"
+      },
+      "spending": {
+        "nav": "Utgifter",
+        "title": "Utgifter",
+        "subtitle": "Varje kategori, ända ner till transaktionen"
+      },
+      "income": {
+        "nav": "Inkomst",
+        "title": "Inkomst",
+        "subtitle": "Varifrån dina pengar kom"
+      },
+      "trends": {
+        "nav": "Trender",
+        "title": "Trender",
+        "subtitle": "Hur varje kategori rör sig från månad till månad"
+      },
+      "calendar": {
+        "nav": "Kalender",
+        "title": "Kalender",
+        "subtitle": "Utgifter dag för dag"
+      },
+      "transactions": {
+        "nav": "Transaktioner",
+        "title": "Transaktioner",
+        "subtitle": "Sök och filtrera allt du har loggat"
+      },
+      "accounts": {
+        "nav": "Konton",
+        "title": "Konton",
+        "subtitle": "Saldon på alla konton"
+      },
+      "net-worth": {
+        "nav": "Nettoförmögenhet",
+        "title": "Nettoförmögenhet",
+        "subtitle": "Det du äger, minus det du är skyldig"
+      },
+      "budgets": {
+        "nav": "Budgetar",
+        "title": "Budgetar",
+        "subtitle": "Planen mot vad som faktiskt hände"
+      },
+      "recurring": {
+        "nav": "Återkommande",
+        "title": "Återkommande",
+        "subtitle": "Prenumerationer och räkningar som upprepas"
+      },
+      "goals": {
+        "nav": "Mål och lån",
+        "title": "Mål och lån",
+        "subtitle": "Framsteg mot målen och mot att bli skuldfri"
+      },
+      "time": {
+        "nav": "Tidskostnad",
+        "title": "Tidskostnad",
+        "subtitle": "Dina utgifter, i timmar av ditt liv"
+      },
+      "trips": {
+        "nav": "Resor",
+        "title": "Resor",
+        "subtitle": "Vad varje resa kostade, i pengar och arbetsdagar"
+      },
+      "items": {
+        "nav": "Föremål",
+        "title": "Föremål",
+        "subtitle": "Vad dina saker kostar per dag"
+      },
+      "splits": {
+        "nav": "Delade notor",
+        "title": "Delade notor",
+        "subtitle": "Vem som fortfarande är skyldig dig"
+      },
+      "mood": {
+        "nav": "Humör och vanor",
+        "title": "Humör och vanor",
+        "subtitle": "Hur köpen kändes, och när du gör dem"
+      },
+      "categories": {
+        "nav": "Kategorier",
+        "title": "Kategorier",
+        "subtitle": "Lägg till, byt namn på och organisera dina kategorier"
+      }
+    },
+    "overview": {
+      "spent": "Spenderat",
+      "earned": "Intjänat",
+      "saved": "Sparat",
+      "overspent": "Spenderat mer än inkomsten",
+      "savingsRate": "Sparandegrad: {rate}",
+      "noIncome": "Ingen inkomst under perioden",
+      "netWorth": "Nettoförmögenhet",
+      "netWorthNote": "Över {count, plural, one {# konto} other {# konton}} i summorna",
+      "cashFlowTitle": "Kassaflöde",
+      "cashFlowSubtitle": "De 12 månaderna fram till perioden",
+      "paceTitle": "Utgiftstakt",
+      "thisMonth": "Den här månaden",
+      "lastMonth": "Förra månaden",
+      "dayN": "Dag {day}",
+      "paceBehind": "{amount} mindre än vid samma punkt förra månaden.",
+      "paceAhead": "{amount} mer än vid samma punkt förra månaden.",
+      "topCategories": "Största kategorier",
+      "biggestExpenses": "Största utgifter",
+      "upcoming": "Kommande återkommande",
+      "nextOn": "Nästa {date}",
+      "noSpending": "Inga utgifter under perioden",
+      "noRecurring": "Inga aktiva återkommande regler",
+      "timeTitle": "Din tid",
+      "timeBody": "Periodens utgifter krävde <strong>{hours}</strong> arbete att betala.",
+      "workShare": "Andel av de timmar du arbetade",
+      "workShareNote": "Av ungefär {worked} under perioden",
+      "noWage": "Ange ett timvärde i appen för att se detta i timmar.",
+      "accountsTitle": "Största konton"
+    },
+    "cashFlow": {
+      "savingsRate": "Sparandegrad: {rate}",
+      "noIncome": "Ingen inkomst under perioden",
+      "netPerDay": "Netto per dag",
+      "avgNet": "Genomsnittligt netto per månad",
+      "daysCount": "{count, plural, one {Över # dag} other {Över # dagar}}",
+      "monthsCount": "{count, plural, one {Över # månad} other {Över # månader}}",
+      "dailyTitle": "Dag för dag",
+      "monthlyTitle": "Månad för månad",
+      "sankeyTitle": "Vart pengarna tog vägen",
+      "sankeySubtitle": "Inkomst till vänster, utgifter och sparande till höger",
+      "fromSavings": "Från sparande",
+      "empty": "Ingen inkomst eller inga utgifter under perioden",
+      "savingsRateTitle": "Sparkvot",
+      "savingsRateSubtitle": "Andel av inkomsten du sparar varje månad; 20 % är ett vanligt mål",
+      "tableTitle": "Månadssammanfattning",
+      "month": "Månad",
+      "rate": "Grad"
+    },
+    "breakdown": {
+      "totalSpent": "Totalt spenderat",
+      "totalEarned": "Totalt intjänat",
+      "perDay": "Per dag",
+      "overDays": "{count, plural, one {Över # dag} other {Över # dagar}}",
+      "count": "Transaktioner",
+      "avgEach": "{amount} i snitt",
+      "largestCategory": "Största kategorin",
+      "byCategory": "Per kategori",
+      "subcategories": "Underkategorier",
+      "clickToDrill": "Välj en kategori för att se dess underkategorier",
+      "allCategories": "Alla kategorier",
+      "empty": "Inget här under perioden",
+      "byDay": "Per dag",
+      "byMonth": "Per månad",
+      "monthlyAverage": "{amount} i månaden i snitt",
+      "topMerchants": "Vanligaste ställen",
+      "topMerchantsNote": "Grupperat efter anteckningen på varje transaktion",
+      "biggestPurchases": "Största köp",
+      "biggestPayments": "Största betalningar",
+      "byWeekday": "Per veckodag",
+      "byWeekdayNote": "Summa under perioden för varje veckodag",
+      "transactionsIn": "Transaktioner i {name}",
+      "allTransactions": "Alla transaktioner"
+    },
+    "transactions": {
+      "search": "Sök i anteckningar, kategorier eller belopp",
+      "type": "Typ",
+      "types": {
+        "all": "Alla typer",
+        "expense": "Utgifter",
+        "income": "Inkomst",
+        "transfer": "Överföringar"
+      },
+      "category": "Kategori",
+      "allCategories": "Alla kategorier",
+      "account": "Konto",
+      "allAccounts": "Alla konton",
+      "feeling": "Känsla",
+      "allFeelings": "Valfri känsla",
+      "feelings": {
+        "happy": "Kändes bra",
+        "neutral": "Varken eller",
+        "sad": "Önskar du låtit bli"
+      },
+      "empty": "Inga transaktioner matchar",
+      "newer": "Nyare",
+      "older": "Äldre",
+      "page": "Sida {page} av {pages}"
+    },
+    "trends": {
+      "gridTitle": "Kategori per månad",
+      "gridSubtitle": "Mörkare betyder mer spenderat den månaden. Välj en rad för att se den som diagram.",
+      "category": "Kategori",
+      "empty": "Inga utgifter dessa månader",
+      "lineSubtitle": "{amount} i månaden i snitt",
+      "moversTitle": "Största förändringar",
+      "moversSubtitle": "Mot föregående period av samma längd",
+      "noMovers": "Inget förändrades mycket"
+    },
+    "calendar": {
+      "perDay": "Snitt per dag",
+      "noSpendDays": "Dagar utan utgifter",
+      "noSpend": "Inget spenderat",
+      "ofDays": "{count, plural, one {Av # dag hittills} other {Av # dagar hittills}}",
+      "bestStreak": "Längsta svit utan utgifter",
+      "daysValue": "{count, plural, one {# dag} other {# dagar}}",
+      "bestStreakNote": "Under de senaste 12 månaderna",
+      "busiest": "Dyraste dagen",
+      "monthSubtitle": "Välj en dag för att se vad som hände",
+      "pickDay": "Senaste den här månaden",
+      "pickDayNote": "Välj en dag i kalendern för att bara se den dagen",
+      "yearTitle": "De senaste 12 månaderna",
+      "yearSubtitle": "Varje ruta är en dag; mörkare betyder mer spenderat"
+    },
+    "accounts": {
+      "assets": "Tillgångar",
+      "debts": "Skulder",
+      "netWorth": "Nettoförmögenhet",
+      "inTotals": "{count, plural, one {# konto i summorna} other {# konton i summorna}}",
+      "excluded": "{count, plural, =0 {Alla konton räknas} one {# konto utanför summorna} other {# konton utanför summorna}}",
+      "ungrouped": "Övriga konton",
+      "notInTotals": "Ingår inte i summorna",
+      "owed": "skuld",
+      "owedNow": "Skuld i dag",
+      "balanceNow": "Saldo i dag",
+      "lastActivity": "senaste aktivitet {date}",
+      "statementDays": "Kontoutdrag dag {statement}, förfaller dag {due}",
+      "statementDaysAfter": "Faktura dag {statement}, förfaller {days} dagar senare",
+      "activity": "Aktivitet",
+      "empty": "Inga konton ännu"
+    },
+    "netWorth": {
+      "now": "Nettoförmögenhet",
+      "inHours": "{hours} arbete till dagens timvärde",
+      "change": "Förändring",
+      "since": "Sedan {month}",
+      "bestMonth": "Bästa månaden",
+      "debts": "Skulder",
+      "debtNote": "Kreditkort och lån i summorna",
+      "assets": "Tillgångar",
+      "chartTitle": "Tillgångar, skulder och nettoförmögenhet",
+      "chartSubtitle": "Saldon vid månadens slut för konton som ingår i summorna, till dagens växelkurser",
+      "mixTitle": "Var dina tillgångar finns",
+      "mixSubtitle": "Per kontogrupp",
+      "ungrouped": "Övrigt",
+      "empty": "Inga tillgångar än",
+      "monthlyChange": "Förändring varje månad"
+    },
+    "budgets": {
+      "emptyTitle": "Inga budgetar ännu",
+      "emptyBody": "Skapa en månadsbudget i appen så visas den här.",
+      "month": "Månad",
+      "budget": "Budget",
+      "spent": "Spenderat",
+      "ofBudget": "{pct} av budgeten",
+      "left": "Kvar att spendera",
+      "over": "Över budget",
+      "perDayLeft": "{amount} per dag resten av månaden",
+      "pace": "Månaden hittills",
+      "paceNote": "Dag {day} av {days}",
+      "linesTitle": "Kategorier",
+      "linesSubtitle": "Linjen på varje stapel visar hur långt in i månaden du är",
+      "overall": "Hela budgeten",
+      "overBy": "{amount} över",
+      "leftOf": "{amount} kvar",
+      "aheadOfPace": "före takten",
+      "unbudgetedCounted": "{amount} spenderades utanför dessa kategorier och räknas mot budgeten.",
+      "unbudgetedNot": "{amount} spenderades utanför dessa kategorier och räknas inte.",
+      "rateNote": "Utgifter i andra valutor räknas om till 1 {currency} = {rate} {main}.",
+      "approxLeft": "Det är ungefär {amount} kvar.",
+      "approxOver": "Det är ungefär {amount} över.",
+      "unconverted": "{count, plural, one {# utgift räknas} other {# utgifter räknas}} inte än: det finns ingen kurs för {currency}.",
+      "historyTitle": "Budget mot spenderat per månad",
+      "historyInMain": "I {currency}, så att månader med budget i andra valutor kan jämföras"
+    },
+    "recurring": {
+      "emptyTitle": "Inga återkommande regler",
+      "emptyBody": "Prenumerationer och räkningar som du låter upprepas i appen visas här.",
+      "perMonth": "Fasta kostnader i månaden",
+      "perYear": "Per år",
+      "clockTitle": "Räkningarna betalda till",
+      "clockNote": "Från klockan 9.00 täcker varje arbetsdags första {hours} dem ({day} dagar)",
+      "active": "Aktiva regler",
+      "pausedCount": "{count, plural, =0 {Inga pausade} one {# pausad} other {# pausade}}",
+      "listTitle": "Aktiva",
+      "listSubtitle": "Sorterade efter kostnad per månad",
+      "cadence": {
+        "daily": "{count, plural, one {Varje dag} other {Med # dagars mellanrum}}",
+        "weekly": "{count, plural, one {Varje vecka} other {Med # veckors mellanrum}}",
+        "monthly": "{count, plural, one {Varje månad} other {Med # månaders mellanrum}}",
+        "yearly": "{count, plural, one {Varje år} other {Med # års mellanrum}}"
+      },
+      "next": "nästa {date}",
+      "transfer": "Överföring",
+      "yearHours": "{hours} arbete om året",
+      "upcomingTitle": "Kommande",
+      "pausedTitle": "Pausade"
+    },
+    "goals": {
+      "emptyTitle": "Inga mål eller lån",
+      "emptyBody": "Sparmål och lån som du följer i appen visas här.",
+      "goalsTitle": "Mål",
+      "achieved": "Uppnått",
+      "left": "Kvar att spara",
+      "progress": "Framsteg",
+      "byDate": "För att nå det till {date}",
+      "perMonthNeeded": "{amount} i månaden",
+      "loansTitle": "Lån",
+      "model": {
+        "flat": "Fast ränta",
+        "reducing": "Ränta på kvarvarande skuld"
+      },
+      "leftToPay": "Kvar att betala",
+      "leftInHours": "{hours} arbete",
+      "paidOff": "Återbetalt",
+      "instalments": "{paid} av {total} avbetalningar",
+      "principal": "Lånat belopp",
+      "owedNow": "Kvarvarande kapital",
+      "paidSoFar": "Betalt hittills",
+      "monthly": "Månadsbetalning",
+      "rate": "Grad",
+      "interestCharged": "Debiterad ränta",
+      "nextDue": "Nästa betalning",
+      "payoff": "Skuldfri",
+      "paymentsLeft": "Betalningar kvar",
+      "netNote": "Lånesiffrorna följer appen: räntan läggs på varje månad från dagen lånet skapades."
+    },
+    "time": {
+      "spentHours": "Arbetstimmar som gått åt",
+      "share": "Andel av arbetade timmar",
+      "shareNote": "Av ungefär {hours} arbetade",
+      "workdays": "Arbetsdagar",
+      "workdaysValue": "{count, plural, one {# arbetsdag} other {# arbetsdagar}}",
+      "workdayLength": "Med {hours} per arbetsdag",
+      "hourlyValue": "Timvärde",
+      "perHour": "i timmen, från din senaste lön",
+      "chartTitle": "Timmar spenderade mot timmar arbetade",
+      "chartSubtitle": "Varje månads utgifter, prissatta med den månadens lön",
+      "hoursSpent": "Timmar spenderade",
+      "hoursWorked": "Timmar arbetade",
+      "categoriesTitle": "Kategorier i arbetsdagar",
+      "categoriesSubtitle": "Hur många arbetsdagar var och en kostade",
+      "empty": "Inga utgifter under perioden",
+      "runwayTitle": "Frihetsmarginal",
+      "daysValue": "{count, plural, one {# dag} other {# dagar}}",
+      "runwayBody": "Hur länge {liquid} på vardagskonton skulle räcka med dina senaste utgifter på {daily} per dag, utan att arbeta.",
+      "regretTitle": "Timmar på ånger",
+      "regretBody": "{count, plural, =0 {Inget markerat som ”Önskar du låtit bli” under perioden.} one {Över # köp som du önskar att du låtit bli.} other {Över # köp som du önskar att du låtit bli.}}",
+      "biggestTitle": "Störst i timmar",
+      "biggestSubtitle": "Köpen som tog längst tid att tjäna ihop",
+      "wageTitle": "Ditt timvärde över tid",
+      "wageSubtitle": "Från lönerna som sparats i appen",
+      "noWage": "Ange ett timvärde i appen för att se dina utgifter i timmar."
+    },
+    "trips": {
+      "emptyTitle": "Inga resor än",
+      "emptyBody": "Album som du skapar i appen för resor visas här med vad varje resa kostade.",
+      "count": "Resor",
+      "countries": "{count, plural, =0 {Inget land angivet} one {# land} other {# länder}}",
+      "total": "Spenderat på resor",
+      "workdays": "I arbetsdagar",
+      "workdaysValue": "{count, plural, one {# arbetsdag} other {# arbetsdagar}}",
+      "workdaysNote": "För alla resor",
+      "current": "Pågående",
+      "perDay": "{amount} per dag",
+      "breakdown": "Per kategori",
+      "transactionsTitle": "Transaktioner",
+      "pick": "Välj en resa för att se fördelningen."
+    },
+    "items": {
+      "emptyTitle": "Inga föremål än",
+      "emptyBody": "Saker som du följer i appen visas här med vad de kostar per dag.",
+      "value": "Värde av ägodelar",
+      "count": "{count, plural, one {# sak} other {# saker}}",
+      "perDay": "Kostnad per dag",
+      "perMonth": "{amount} i månaden",
+      "workPerDay": "Arbete per dag",
+      "workPerDayNote": "För att betala för allt du äger",
+      "listTitle": "Allt du äger",
+      "listSubtitle": "Inköpspriset fördelat på de dagar du har haft det",
+      "bought": "Köpt {date} för {price}",
+      "owned": "{count, plural, one {# dag} other {# dagar}} i din ägo",
+      "sold": "såld för {price}",
+      "perDayValue": "{amount}/dag",
+      "workValue": "{time} arbete per dag"
+    },
+    "splits": {
+      "emptyTitle": "Inga delade notor",
+      "emptyBody": "Notor som du delar med vänner i appen visas här.",
+      "owedToYou": "Skyldigt till dig",
+      "people": "{count, plural, =0 {Allt är gjort upp} one {Av # person} other {Av # personer}}",
+      "settled": "Uppgjorda andelar",
+      "ofShares": "{count, plural, one {Av # andel} other {Av # andelar}}",
+      "bills": "Delade notor",
+      "billsNote": "Transaktioner som du delat",
+      "byPerson": "Vem som är skyldig dig",
+      "allSettled": "Alla har betalat tillbaka",
+      "open": "{count, plural, one {# öppen andel} other {# öppna andelar}}",
+      "billsTitle": "Delade transaktioner",
+      "unnamed": "Någon"
+    },
+    "mood": {
+      "feelings": {
+        "happy": "Kändes bra",
+        "neutral": "Varken eller",
+        "sad": "Önskar du låtit bli"
+      },
+      "shareSub": "{amount} · {count, plural, one {# köp} other {# köp}}",
+      "monthlyTitle": "Hur köpen kändes",
+      "monthlySubtitle": "Antal köp varje månad, efter känsla",
+      "regretsTitle": "Önskar du låtit bli",
+      "regretsSubtitle": "De största köpen du ångrade",
+      "noRegrets": "Ingen ånger under perioden",
+      "clockTitle": "När du handlar",
+      "clockSubtitle": "Köp per veckodag och timme; mest runt {hour}",
+      "noTimes": "Köp som loggats utan tid visas inte här."
+    },
+    "loadingTitle": "Webbpanel",
+    "edit": {
+      "statusReady": "Redigering på",
+      "statusReadyTitle": "Ändringar sparas på din telefon",
+      "statusReadyBody": "Din telefon är ansluten. Telefonen kontrollerar och sparar varje ändring och synkar sedan de uppdaterade data hit.",
+      "statusAway": "Skrivskyddat",
+      "statusAwayTitle": "Anslut telefonen för att göra ändringar.",
+      "statusAwayBody": "Öppna Money2Time på telefonen och gå till Inställningar → Webbpanel. Medan den är ansluten kan du lägga till, ändra och ta bort transaktioner här. Telefonen och den här webbläsaren hålls synkade.",
+      "statusUpdateTitle": "Uppdatera appen för att göra ändringar här.",
+      "statusUpdateBody": "Money2Time-versionen på din telefon synkar bara data för visning. Uppdatera den för att lägga till, ändra och ta bort poster från den här webbläsaren.",
+      "statusOffTitle": "Ändringar är avstängda för den här webbläsaren.",
+      "statusOffBody": "Öppna Inställningar → Webbpanel på telefonen, tryck på ⋯ bredvid den här webbläsaren och välj Tillåt ändringar.",
+      "statusSaving": "Sparar…",
+      "statusSyncing": "Synkar…",
+      "statusSyncingBody": "Synkar de senaste data från telefonen. Du kan göra ändringar så snart de har kommit.",
+      "awayHint": "Öppna Inställningar → Webbpanel på telefonen för att lägga till, ändra eller ta bort transaktioner.",
+      "close": "Stäng",
+      "clear": "Rensa",
+      "cancel": "Avbryt",
+      "reloadLatest": "Hämta senaste",
+      "delete": "Ta bort",
+      "apply": "Tillämpa",
+      "choose": "Välj",
+      "add": "Lägg till",
+      "update": "Uppdatera",
+      "addAnother": "Lägg till en till",
+      "type": "Typ",
+      "expense": "Utgift",
+      "income": "Inkomst",
+      "transfer": "Överföring",
+      "adjustment": "Justering",
+      "deleteTransaction": "Ta bort transaktion",
+      "deleteTransactionBody": "Det här kan inte ångras. Fortsätta?",
+      "required": "Obligatorisk",
+      "from": "Från",
+      "to": "Till",
+      "chooseAccount": "Välj konto",
+      "swapAccounts": "Byt från- och till-konton",
+      "differentAccount": "Måste vara ett annat konto",
+      "accountLabel": "Konto",
+      "accounts": "Konton",
+      "categoryLabel": "Kategori",
+      "categories": "Kategorier",
+      "options": "Alternativ för transaktionen",
+      "amount": "Belopp",
+      "currencyLabel": "Valuta",
+      "optional": "Valfritt",
+      "note": "Anteckning",
+      "received": "Mottaget belopp",
+      "date": "Datum",
+      "details": "Detaljer",
+      "detailsPlaceholder": "Lägg till en längre anteckning",
+      "reimbursable": "Väntar på ersättning",
+      "reimbursed": "Redan återbetalad",
+      "reimbursableHint": "En utgift som någon betalar tillbaka. Kräv den på sidan Ersättningar.",
+      "countAsExpense": "Räkna som utgift",
+      "countAsExpenseHint": "Räknar den här överföringen som utgift i dina summor, budgetar och diagram, under kategorin du väljer. Pengarna flyttas fortfarande mellan de två kontona som vanligt.",
+      "feeling": "Hur känner du dig?",
+      "nudgeSmall": "Det är ungefär {hours} av din tid",
+      "nudgePause": "Värt att tänka på: ~{hours} arbetstid",
+      "nudgeLarge": "Det är {hours} av din arbetstid",
+      "amountLocked": "Det här beloppet är kopplat till en delning eller en återbetalning. Ändra det i appen.",
+      "hideBalances": "Dölj saldon",
+      "showBalances": "Visa saldon",
+      "savingsGoals": "Sparmål",
+      "ungrouped": "Ej grupperade",
+      "noAccounts": "Inga konton ännu.",
+      "noCategories": "Inga kategorier ännu.",
+      "select": "Markera",
+      "selectAll": "Markera alla",
+      "selected": "{count, plural, one {# markerad} other {# markerade}}",
+      "deleteConfirm": "{count, plural, one {Ta bort den här transaktionen? Den tas bort från telefonen också.} other {Ta bort # transaktioner? De tas bort från telefonen också.}}",
+      "tooMany": "Du kan markera högst {max} transaktioner åt gången.",
+      "accountTransfers": "Överföringar behåller sina konton. Avmarkera dem för att ändra konto.",
+      "accountLocked": "Några av dessa är kopplade till en delning eller en återbetalning. Ändra deras konto i appen.",
+      "accountCurrencies": "De är i olika valutor. Välj poster i en valuta för att flytta dem till ett annat konto.",
+      "editTitle": "Redigera transaktion",
+      "errors": {
+        "stale": "Din telefon har nyare data och synkar dem nu. Försök igen om en stund.",
+        "conflict": "Det här ändrades på din telefon. De senaste uppgifterna är på väg. Kontrollera dem och försök igen.",
+        "amount_locked": "Det här beloppet är kopplat till en delning eller en återbetalning. Ändra det i appen.",
+        "pro_required": "Det här kräver Money2Time Pro. Uppgradera i appen för att göra mer.",
+        "off": "Ändringar är avstängda för den här webbläsaren. Tillåt dem på telefonen under Inställningar → Webbpanel.",
+        "invalid": "Telefonen kunde inte spara det här. Kontrollera uppgifterna och försök igen.",
+        "failed": "Telefonen kunde inte spara det här. Försök igen.",
+        "busy": "Din senaste ändring sparas fortfarande. Försök igen om en stund.",
+        "away": "Telefonen är inte ansluten. Öppna Webbpanel på den och försök igen.",
+        "too_large": "Det är för många ändringar på en gång. Markera färre poster.",
+        "unknown": "Telefonen kopplades från innan den bekräftade. När den är tillbaka, kontrollera om ändringen sparades."
+      },
+      "account": {
+        "newAccount": "Nytt konto",
+        "editAccount": "Redigera konto",
+        "deleteAccount": "Ta bort konto",
+        "deleteAccountBody": "Det här tar permanent bort det här kontot och alla dess transaktioner. Det kan inte ångras.",
+        "save": "Spara",
+        "type": "Typ",
+        "typeDebit": "Debit",
+        "typeCredit": "Kredit",
+        "specialNote": "Här kan du ändra namn, grupp, logotyp och om kontot räknas med i summorna. Resten redigerar du i dess egen redigerare.",
+        "name": "Kontonamn",
+        "namePlaceholder": "Daglig plånbok",
+        "logo": "Logga",
+        "logoAdd": "Lägg till en logga",
+        "logoClear": "Ta bort logotyp",
+        "logoChooseTitle": "Välj logga",
+        "logoChooseSubtitle": "Sök eller bläddra efter land",
+        "logoSearch": "Sök banker och plånböcker",
+        "logoCountry": "Land",
+        "logoNoResults": "Inga träffar",
+        "group": "Kontogrupp",
+        "currency": "Valuta",
+        "statementDay": "Utdragsdag",
+        "dueDay": "Förfallodag",
+        "dueRule": "Förfallodag",
+        "dueRuleDay": "Dag i månaden",
+        "dueRuleAfter": "Dagar efter faktura",
+        "dayRange": "Välj en dag från 1 till 31.",
+        "daysAfterRange": "Välj 1 till {max} dagar.",
+        "startingBalance": "Ingångssaldo",
+        "currentBalance": "Aktuellt saldo",
+        "includeInTotals": "Inkludera i totaler",
+        "includeInTotalsHint": "Dolda konton exkluderas från totalsaldot.",
+        "currencyChangeTitle": "Ändra kontots valuta?",
+        "currencyChangeMessage": "Saldot räknas om från {from} till {to} med den senaste kursen. Befintliga poster behåller sin ursprungliga valuta.",
+        "currencyChangeAction": "Räkna om och ändra",
+        "balancePromptTitle": "Hur ska den här saldoändringen registreras?",
+        "balancePromptMessage": "Saldo ändrades med {amount}. Registrera som inkomst/utgift eller behåll som kontoskillnad (exkluderas från insiktstotaler).",
+        "recordDifference": "Registrera som kontoskillnad",
+        "recordIncome": "Registrera som inkomst",
+        "recordExpense": "Registrera som utgift",
+        "newGroup": "Ny grupp",
+        "createGroup": "Skapa grupp",
+        "editGroup": "Redigera grupp",
+        "groupName": "Gruppnamn",
+        "groupPlaceholder": "Utgifter",
+        "groupTaken": "Det finns redan en grupp med det här namnet.",
+        "deleteGroup": "Ta bort grupp?",
+        "deleteGroupBody": "Konton i den här gruppen flyttas till Ej grupperade.",
+        "addToGroup": "Lägg till konto",
+        "emptyGroup": "Inga konton i den här gruppen ännu",
+        "cardDesign": "Kortdesign",
+        "cardDesignTitle": "Kortdesign",
+        "cardDesignPlain": "Enfärgat",
+        "cardDesignClear": "Ta bort kortdesign",
+        "cardDesignAll": "Alla",
+        "cardDesignUploads": "Mina uppladdningar",
+        "cardDesignTemplate": "Kortdesign: {genre} {number}",
+        "payTitle": "Betala kreditkort",
+        "loanPayTitle": "Gör en betalning",
+        "pay": "Betala",
+        "payFrom": "Betala från",
+        "none": "Ingen",
+        "payable": "Betalningsbart saldo",
+        "loanDue": "Belopp att betala",
+        "paidNote": "Betalt: {name}",
+        "paymentNotePlaceholder": "Betalningsanteckning",
+        "genre_mascot": "Maskot",
+        "genre_minimal": "Minimalistiskt",
+        "genre_gradient": "Gradient",
+        "genre_luxury": "Lyx",
+        "genre_texture": "Textur",
+        "genre_marble": "Marmor och sten",
+        "genre_pattern": "Mönster",
+        "genre_nature": "Natur",
+        "genre_space": "Rymden",
+        "genre_abstract": "Abstrakt konst",
+        "genre_anime": "Anime",
+        "genre_retro": "Retro",
+        "genre_cute": "Gulligt"
+      },
+      "album": {
+        "createTitle": "Nytt album",
+        "create": "Skapa",
+        "editTitle": "Redigera resa",
+        "save": "Spara",
+        "done": "Klar",
+        "clear": "Rensa",
+        "name": "Albumnamn",
+        "namePlaceholder": "t.ex. Tokyoresa",
+        "dates": "Datum (valfritt)",
+        "startDate": "Startdatum",
+        "endDate": "Slutdatum",
+        "location": "Plats",
+        "addTransactions": "Lägg till transaktioner",
+        "editTransactions": "Redigera transaktioner",
+        "selectedCount": "{count} valda",
+        "transactionCount": "{count} transaktioner",
+        "previous": "Föregående",
+        "next": "Nästa",
+        "deleteTitle": "Radera album?",
+        "deleteBody": "Detta tar bort albumet. Dina transaktioner raderas inte.",
+        "noAlbums": "Inga album än",
+        "appOnlyHint": "Lägg till ett omslagsfoto eller en plats i appen.",
+        "noExpenses": "Inga utgifter den här månaden.",
+        "bulkAction": "Album",
+        "addToAlbum": "Lägg till i album",
+        "expensesOnly": "Bara utgifter kan läggas i ett album.",
+        "expensesCount": "{count, plural, one {Lägg till den här utgiften i:} other {Lägg till de här # utgifterna i:}}",
+        "expensesLeftOut": "{count, plural, one {Bara utgifter kan läggas i ett album, så # post lämnas utanför.} other {Bara utgifter kan läggas i ett album, så # poster lämnas utanför.}}",
+        "reorderTitle": "Ordna om album",
+        "activeLabel": "Lägg nya transaktioner till",
+        "activeTitle": "Aktiv resa",
+        "activeNone": "Ingen"
+      },
+      "budget": {
+        "allocatedSummary": "{allocated} av {total} fördelat",
+        "left": "{amount} kvar",
+        "over": "{amount} över",
+        "allocatedDone": "Helt fördelad",
+        "cancel": "Avbryt",
+        "save": "Spara",
+        "delete": "Ta bort",
+        "amount": "Belopp",
+        "fillRemainder": "Fyll",
+        "subcategories": "Underkategorier",
+        "childrenHint": "Fördela eventuellt beloppet på underkategorier.",
+        "duplicateSuffix": "kopia",
+        "editTitle": "Redigera mall",
+        "addTitle": "Ny mall",
+        "chooseIcon": "Välj ikon",
+        "removeIcon": "Ta bort ikon",
+        "name": "Namn",
+        "namePlaceholder": "t.ex. Vardag",
+        "total": "Total budget",
+        "currency": "Valuta",
+        "currencyHintTemplate": "Varje budget behåller kursen från dagen den skapas och räknar om utgifter i andra valutor med den. I dag: 1 {currency} = {rate} {main}.",
+        "currencyHintBudget": "Utgifter i andra valutor räknas om till 1 {currency} = {rate} {main}.",
+        "currencyNoRate": "Ingen kurs för {currency} än. Lägg till en under Flera valutor i appen så att utgifter i andra valutor räknas.",
+        "countUnbudgetedTitle": "Räkna obudgeterade utgifter",
+        "countUnbudgetedCaption": "Räkna med utgifter från kategorier utan budgetpost i månadens total.",
+        "backPopulateTitle": "Fyll i tidigare månader",
+        "backPopulateCaption": "Skapar budgetar för {first} - {last} ({count} månader). Månader som redan har en budget hoppas över.",
+        "templatesTitle": "Budgetmallar",
+        "templatesSubtitle": "Återanvändbara månadsplaner",
+        "newTemplate": "Ny mall",
+        "noTemplatesTitle": "Inga mallar ännu",
+        "noTemplatesMessage": "Skapa en budgetmall för att börja planera dina månader.",
+        "createTemplate": "Skapa mall",
+        "makeDefault": "Gör till standard",
+        "defaultBadge": "Standard",
+        "duplicate": "Duplicera",
+        "deleteTemplateTitle": "Ta bort mall?",
+        "deleteTemplateMessage": "Redan skapade månadsbudgetar behålls. Om detta är standarden blir nästa mall standard.",
+        "createBudget": "Skapa budget",
+        "chooseTemplate": "Välj en mall",
+        "customOption": "Anpassad",
+        "customOptionCaption": "Skapa en engångsbudget bara för den här månaden.",
+        "editBudget": "Redigera budget",
+        "deleteBudget": "Ta bort budget",
+        "deleteBudgetTitle": "Ta bort denna månads budget?",
+        "deleteBudgetMessage": "Den återskapas inte automatiskt för den här månaden.",
+        "month": "Månad",
+        "noCategories": "Lägg först till en utgiftskategori för att ge den en budget.",
+        "splitMismatch": "Underkategorierna summerar inte till det här beloppet",
+        "categoriesCount": "{count, plural, one {# kategori} other {# kategorier}}"
+      },
+      "category": {
+        "newTitle": "Ny kategori",
+        "editTitle": "Redigera kategori",
+        "name": "Namn",
+        "parentOptional": "Förälder (valfritt)",
+        "select": "Välj",
+        "clear": "Rensa",
+        "cancel": "Avbryt",
+        "save": "Spara",
+        "delete": "Ta bort",
+        "deleteConfirm": "Det här tar permanent bort den här kategorin. Det kan inte ångras.",
+        "deleteTitle": "Ta bort kategori?",
+        "deleteHasTransactions": "{count} transaktioner använder den här kategorin. Flytta dem till en annan kategori, eller ta bort den och lämna dem okategoriserade.",
+        "moveToOther": "Flytta till en annan kategori",
+        "deleteAnyway": "Ta bort ändå",
+        "moveTitle": "Flytta transaktioner?",
+        "moveBody": "Alla transaktioner flyttas till ”{name}” och den här kategorin tas bort. Detta kan inte ångras.",
+        "moveAction": "Flytta och ta bort",
+        "addSubcategory": "Lägg till underkategori",
+        "expense": "Utgift",
+        "income": "Inkomst",
+        "type": "Kategorityp",
+        "required": "Ange ett namn",
+        "noOptions": "Inga andra kategorier ännu",
+        "emptyTitle": "Inga kategorier ännu",
+        "chooseIcon": "Välj ikon",
+        "removeIcon": "Ta bort ikon",
+        "tabIcons": "Ikoner",
+        "tabEmoji": "Emoji",
+        "searchIcons": "Sök ikoner",
+        "noResults": "Inga träffar",
+        "groups": {
+          "money": "Pengar",
+          "food_and_drink": "Mat och dryck",
+          "transport": "Transport",
+          "travel": "Resor",
+          "home": "Hem",
+          "bills": "Räkningar",
+          "shopping": "Shopping",
+          "health": "Hälsa",
+          "leisure": "Fritid",
+          "work": "Arbete",
+          "family": "Familj",
+          "other": "Övrigt",
+          "food": "Mat och dryck",
+          "smileys": "Smileys",
+          "people": "Människor",
+          "animals": "Djur och natur",
+          "activities": "Aktiviteter",
+          "objects": "Objekt",
+          "symbols": "Symboler",
+          "flags": "Flaggor"
+        },
+        "expand": "Expandera",
+        "collapse": "Komprimera",
+        "noSubcategories": "Inga underkategorier ännu",
+        "searchEmoji": "Sök emoji"
+      },
+      "currency": {
+        "open": "Flera valutor",
+        "title": "Flera valutor",
+        "mainCurrency": "Huvudvaluta",
+        "mainInApp": "Använd appen för att ändra din huvudvaluta. Dina data börjar då om från noll.",
+        "asOf": "Uppdaterad {date}",
+        "neverUpdated": "Inte uppdaterad än",
+        "subcurrencies": "Undervalutor",
+        "add": "Lägg till",
+        "addCurrency": "Lägg till valuta",
+        "search": "Sök valuta",
+        "noMatch": "Ingen matchande valuta",
+        "empty": "Lägg till en valuta för att följa dess växelkurs.",
+        "manual": "Manuell",
+        "editRate": "Redigera kurs",
+        "remove": "Ta bort",
+        "save": "Spara",
+        "orderChanged": "Den nya ordningen är inte sparad ännu.",
+        "saveOrder": "Spara ordning"
+      },
+      "goal": {
+        "newGoal": "Nytt mål",
+        "editTitle": "Redigera mål",
+        "edit": "Redigera",
+        "save": "Spara",
+        "deleteTitle": "Radera mål?",
+        "deleteMessage": "Detta raderar målet och dess transaktioner. Det kan inte ångras.",
+        "coverInApp": "Ändra omslagsfotot i appen.",
+        "chooseIcon": "Välj ikon",
+        "removeIcon": "Ta bort ikon",
+        "name": "Målets namn",
+        "namePlaceholder": "t.ex. Japanresa",
+        "target": "Målbelopp",
+        "currency": "Valuta",
+        "currentBalance": "Aktuellt saldo",
+        "targetDate": "Måldatum",
+        "targetDateHint": "Valfritt. Ger ditt mål ett tempo att hålla.",
+        "targetDatePast": "Välj ett datum i framtiden.",
+        "includeInTotals": "Inkludera i totaler",
+        "includeInTotalsHint": "Dolda konton exkluderas från totalsaldot.",
+        "startingAmount": "Redan sparat (valfritt)",
+        "autoSave": "Autospar",
+        "autoSaveHint": "Flytta in pengar automatiskt enligt ett schema.",
+        "autoSaveAmount": "Belopp",
+        "cadence": "Upprepas",
+        "cadenceMonthly": "Varje månad",
+        "cadenceWeekly": "Varje vecka",
+        "source": "Från konto",
+        "sourcePlaceholder": "Välj ett konto",
+        "noSource": "Inga {currency}-konton ännu. Autospar behöver ett konto i samma valuta.",
+        "autoSaveInRecurring": "Det här målets automatiska sparande använder ett eget schema. Ändra det under Återkommande.",
+        "currencyChangeTitle": "Ändra kontots valuta?",
+        "currencyChangeMessage": "Saldot räknas om från {from} till {to} med den senaste kursen. Befintliga poster behåller sin ursprungliga valuta.",
+        "currencyChangeAction": "Räkna om och ändra",
+        "balancePromptTitle": "Hur ska den här saldoändringen registreras?",
+        "balancePromptMessage": "Saldo ändrades med {amount}. Registrera som inkomst/utgift eller behåll som kontoskillnad (exkluderas från insiktstotaler).",
+        "recordDifference": "Registrera som kontoskillnad",
+        "recordIncome": "Registrera som inkomst",
+        "recordExpense": "Registrera som utgift",
+        "archive": "Arkivera",
+        "unarchive": "Återställ mål",
+        "archiveTitle": "Arkivera mål?",
+        "archiveMessage": "Målet flyttas ut ur din mållista och eventuellt autospar till det pausas.",
+        "archiveBalanceHint": "Det innehåller fortfarande pengar. Du kan ta ut dem först eller låta dem ligga kvar här.",
+        "archiveConfirm": "Arkivera",
+        "archived": "Arkiverat",
+        "editInGoals": "Redigera mål",
+        "deposit": "Sätt in",
+        "withdraw": "Ta ut",
+        "depositFromAccount": "Från ett konto",
+        "depositFromAccountHint": "Flytta pengar från ett av dina konton.",
+        "depositOutside": "Pengar utifrån",
+        "depositOutsideHint": "En gåva eller kontanter utifrån, bokförs som inkomst.",
+        "withdrawToAccount": "Till ett konto",
+        "withdrawToAccountHint": "Flytta tillbaka pengar till ett av dina konton.",
+        "withdrawSpend": "Använd pengarna",
+        "withdrawSpendHint": "Betala något direkt från detta mål, bokförs som utgift."
+      },
+      "item": {
+        "add": "Lägg till föremål",
+        "addTitle": "Nytt föremål",
+        "editTitle": "Redigera föremål",
+        "save": "Spara",
+        "deleteTitle": "Ta bort föremål?",
+        "deleteMessage": "Detta tar bort föremålet från din spårare.",
+        "iconTitle": "Välj ikon",
+        "chooseIcon": "Välj ikon",
+        "iconSubtitle": "Välj en ikon. Använd appen för att ladda upp din egen.",
+        "searchIcons": "Sök ikoner…",
+        "customIcon": "Anpassad",
+        "noResults": "Inga träffar",
+        "name": "Namn",
+        "namePlaceholder": "t.ex. Espressomaskin",
+        "price": "Inköpspris",
+        "currency": "Valuta",
+        "purchaseDate": "Inköpsdatum",
+        "markInactive": "Markera som inaktiv",
+        "markInactiveHint": "Slutar räkna dagar för saker du sålt, som gått sönder eller inte längre använder.",
+        "endDate": "Slutdatum",
+        "sold": "Jag sålde det",
+        "salePrice": "Försäljningspris",
+        "note": "Anteckning",
+        "notePlaceholder": "Valfritt",
+        "groups": {
+          "objects": "Objekt",
+          "leisure": "Fritid",
+          "work": "Arbete",
+          "home": "Hem",
+          "health": "Hälsa",
+          "travel": "Resor",
+          "transport": "Transport",
+          "shopping": "Shopping",
+          "family": "Familj",
+          "other": "Övrigt"
+        },
+        "reorderTitle": "Ordna om föremål"
+      },
+      "loan": {
+        "newTitle": "Nytt lån",
+        "editTitle": "Redigera lån",
+        "edit": "Redigera",
+        "save": "Spara",
+        "delete": "Ta bort konto",
+        "deleteBody": "Det här tar permanent bort det här kontot och alla dess transaktioner. Det kan inte ångras.",
+        "name": "Kontonamn",
+        "namePlaceholder": "Billån",
+        "logo": "Logga",
+        "logoAdd": "Lägg till en logga",
+        "logoClear": "Ta bort logotyp",
+        "group": "Kontogrupp",
+        "currency": "Valuta",
+        "interestModel": "Ränta",
+        "interestModelInfo": "Sjunkande saldo: ränta tas ut varje månad på det du fortfarande är skyldig, så extra eller tidiga betalningar sänker räntan. Så fungerar de flesta bolån. Fast ränta: räntan räknas ut en gång på hela lånebeloppet och läggs på direkt, så tidig betalning blir skuldfri snabbare men sparar ingen ränta. Så fungerar de flesta bil- och privatlån.",
+        "modelReducing": "Sjunkande saldo",
+        "modelFlat": "Fast ränta",
+        "principal": "Lånebelopp",
+        "term": "Löptid",
+        "termInfo": "Hur många månadsbetalningar lånet löper på, upp till {max}. Ett lån på 5 år är 60.",
+        "termError": "Skriv ett heltal från 1 till {max}.",
+        "rate": "Ränta",
+        "rateInfoReducing": "Den årliga räntan banken tar på din kvarvarande skuld. Skriv in den så räknas månadsbelopp och totalsumma ut, eller skriv in totalsumman så räknas räntan ut.",
+        "rateInfoFlat": "Den årliga fasta räntan, uttagen på hela lånebeloppet under hela löptiden. Skriv in den så räknas månadsbelopp och totalsumma ut, eller skriv in totalsumman så räknas räntan ut.",
+        "effectiveRateHint": "Effektiv ränta {rate}%. Det är vad den här platta räntan kostar på sjunkande saldo.",
+        "totalRepayable": "Totalt att betala tillbaka",
+        "totalRepayableInfo": "Allt du betalar tillbaka under hela lånet: det du lånade plus all ränta.",
+        "instalment": "Månadsbetalning",
+        "instalmentInfo": "Vad du betalar varje månad. Följer summan ovan; slå på reglaget om din bank drar ett annat belopp, så använder vi ditt precis så.",
+        "instalmentErrorLow": "För lågt för att betala av lånet inom löptiden.",
+        "instalmentErrorHigh": "För högt för det här lånebeloppet och den här löptiden.",
+        "awaitingContract": "Fyll i fälten ovan",
+        "paidPeriods": "Redan betalda månader",
+        "paidPeriodsInfo": "Lämna på 0 för ett nytt lån. Är du i gång, ange hur många betalningar du gjort så räknas ingående saldo ut.",
+        "paidPeriodsError": "Måste vara mindre än löptiden.",
+        "collect": "Dra från",
+        "collectInfo": "Kontot betalningen dras från varje månad. Välj ett så bokförs den automatiskt; lämna tomt så bokför du varje betalning själv.",
+        "collectManual": "Jag bokför själv",
+        "collectExternal": "Den här betalningen är inställd under Återkommande. Redigera den där.",
+        "countAsExpense": "Räkna delbetalningen som utgift",
+        "countAsExpenseInfo": "En inbetalning flyttar alltid pengar till lånet, så din restskuld minskar oavsett. Med det här på räknas den även som utgift i dina summor, budgetar och diagram, under kategorin du väljer. Stäng av och inbetalningar hålls utanför dina utgifter. Ändrar du senare gäller det bara inbetalningar som bokförs därefter.",
+        "paymentCategory": "Kategori för inbetalning",
+        "paymentCategoryPlaceholder": "Välj en kategori",
+        "startDate": "Startdatum",
+        "startDateInfo": "När lånet togs. Första betalningen sker en månad senare, och dess datum blir din betalningsdag.",
+        "balanceOwed": "Kvarvarande skuld",
+        "balanceOwedInfo": "Vad du är skyldig i dag, utan den ränta du ännu inte debiterats. Brukar vara lägre än siffran på ditt kontoutdrag.",
+        "totalInterest": "Total ränta",
+        "leftToPay": "Kvar att betala",
+        "firstInstalment": "Första betalning",
+        "payoffBy": "Slutbetalt",
+        "instalmentsLeft": "Betalningar kvar",
+        "includeInTotals": "Inkludera i totaler",
+        "includeInTotalsHint": "Dolda konton exkluderas från totalsaldot.",
+        "archive": "Arkivera lån",
+        "unarchive": "Ta fram ur arkivet",
+        "archiveHint": "Döljer det från din kontolista. Historik och summor behålls, och \"Visa arkiverade\" tar fram det igen.",
+        "rateChangeTitle": "Från när gäller den nya räntan?",
+        "rateChangeMessage": "Räntan ändras från {from}% till {to}%. Tillämpa den från idag för att behålla redan debiterad ränta, eller från början om du rättar ett fel.",
+        "rateChangeFromStart": "Från början",
+        "rateChangeFromToday": "Från idag",
+        "currencyChangeTitle": "Ändra kontots valuta?",
+        "currencyChangeMessage": "Saldot räknas om från {from} till {to} med den senaste kursen. Befintliga poster behåller sin ursprungliga valuta.",
+        "currencyChangeAction": "Räkna om och ändra",
+        "balancePromptTitle": "Hur ska den här saldoändringen registreras?",
+        "balancePromptMessage": "Saldo ändrades med {amount}. Registrera som inkomst/utgift eller behåll som kontoskillnad (exkluderas från insiktstotaler).",
+        "recordDifference": "Registrera som kontoskillnad",
+        "recordIncome": "Registrera som inkomst",
+        "recordExpense": "Registrera som utgift",
+        "archived": "Arkiverat",
+        "editInLoans": "Redigera lån",
+        "balanceOwedHint": "På ditt kontoutdrag kan det stå {amount}, där är räntan som återstår inräknad."
+      },
+      "reimbursement": {
+        "pendingTitle": "Väntar på att komma tillbaka",
+        "settledTitle": "Återbetalad",
+        "claim": "Kräv",
+        "paidInto": "Till {account}",
+        "noAccount": "Inget konto",
+        "undoTitle": "Ångra den här ersättningen?",
+        "undoMessage": "Inbetalningen tas bort.",
+        "undoAction": "Ångra",
+        "cancel": "Avbryt",
+        "saveFirst": "Spara dina andra ändringar först."
+      },
+      "reorder": {
+        "open": "Sortera om",
+        "save": "Spara",
+        "accountsTitle": "Ordna om konton",
+        "accountsHint": "Flytta grupper och konton inom sin grupp. Sparmål behåller sin egen ordning.",
+        "categoriesTitle": "Ordna om kategorier",
+        "categoriesHint": "Flytta kategorier och underkategorier inom sin överordnade kategori.",
+        "emptyGroup": "Inga konton i den här gruppen ännu.",
+        "drag": "Dra för att ändra ordning",
+        "dragNamed": "Flytta {name}. Dra, eller använd piltangenterna.",
+        "moved": "{name} flyttad till plats {position} av {count}"
+      },
+      "rule": {
+        "newRule": "Ny återkommande regel",
+        "editRule": "Redigera återkommande regel",
+        "sameFlow": "Samma flöde som transaktionsinmatning",
+        "saveRule": "Spara regel",
+        "deleteRule": "Ta bort regel",
+        "deleteConfirm": "Ta bort ”{name}”? Detta kan inte ångras.",
+        "amountRequired": "Belopp krävs",
+        "chooseCategory": "Välj kategori",
+        "settings": "Återkommande inställningar",
+        "ruleName": "Regelnamn",
+        "ruleNamePlaceholder": "Netflix-prenumeration",
+        "enterRuleName": "Ange ett namn för återkommande regeln.",
+        "logo": "Logotyp",
+        "noLogo": "Ingen logotyp",
+        "customLogo": "Egen logotyp",
+        "searchLogos": "Sök prenumerationer",
+        "country": "Land",
+        "noResults": "Inga träffar",
+        "global": "Globalt",
+        "repeat": "Upprepa",
+        "daily": "Dagligen",
+        "weekly": "Veckovis",
+        "monthly": "Månadsvis",
+        "quarterly": "Kvartalsvis",
+        "semiannually": "Halvårsvis",
+        "yearly": "Årsvis",
+        "every": "Varje (intervall)",
+        "ends": "Slutar",
+        "never": "Aldrig",
+        "onDate": "På datum",
+        "endDate": "Slutdatum",
+        "validEndDate": "Välj ett giltigt slutdatum.",
+        "status": "Status",
+        "active": "Aktiv",
+        "paused": "Pausad",
+        "pause": "Pausa",
+        "resume": "Återuppta"
+      },
+      "split": {
+        "title": "Dela notan",
+        "chip": "Dela",
+        "evenly": "Dela lika",
+        "addPerson": "Lägg till person",
+        "me": "Jag",
+        "personPlaceholder": "Väns namn",
+        "sumMatch": "{sum} av {total}",
+        "sumLeft": "{diff} kvar",
+        "sumOver": "Överskrider med {diff}",
+        "sumMismatch": "{diff} ofördelat",
+        "negativeSelf": "Vännerna är skyldiga mer än totalen",
+        "markPaid": "Markera som betald",
+        "paidLabel": "Betald {date}",
+        "undo": "Ångra",
+        "done": "Klar",
+        "remove": "Ta bort",
+        "cancel": "Avbryt",
+        "noAccount": "Inget konto",
+        "paidTo": "Återbetalt till",
+        "sharesTitle": "Vem är skyldig dig",
+        "someone": "Någon",
+        "untitledBill": "Delad nota",
+        "paidTitle": "Återbetalt",
+        "undoTitle": "Markera den här andelen som obetald?",
+        "undoBody": "Du är skyldig den igen, och utgiften ökar med det här beloppet. En återbetalningsöverföring till ett annat konto tas bort.",
+        "itemizedTotal": "Totalt: {sum}",
+        "itemizedZeroHint": "Ange minst ett belopp",
+        "removeTitle": "Ta bort denna begäran?",
+        "removeBody": "Detta nollställer vad de är skyldiga dig för denna nota. Själva transaktionen påverkas inte.",
+        "defaultPaidTo": "Betalas till som standard",
+        "defaultPaidToHint": "Nya delningar betalas till detta konto som standard."
+      },
+      "duplicate": "Duplicera",
+      "duplicateTitle": "Duplicera till datum",
+      "expenseCategory": "Utgiftskategori",
+      "incomeCategory": "Inkomstkategori",
+      "categoryNone": "Överföringar behåller sin kategori. Markera utgifter eller inkomster för att ändra den.",
+      "duplicateNone": "Saldojusteringar och negativa belopp kan inte dupliceras.",
+      "duplicateTooMany": "Duplicera högst {max} poster åt gången.",
+      "wage": {
+        "title": "Timvärde",
+        "subtitle": "Din inkomstnivå för varje månad, som den är inställd i appen.",
+        "add": "Lägg till inkomstgrad",
+        "addTitle": "Lägg till inkomstgrad",
+        "empty": "Ingen timlönehistorik ännu.",
+        "now": "Den här månaden",
+        "perHour": "/tim",
+        "type": {
+          "hourly": "Timvis",
+          "monthly": "Månadsvis",
+          "yearly": "Årsvis"
+        },
+        "deleteTitle": "Ta bort månadstimlön?",
+        "deleteBody": "Ta bort timlönen för {month}? Månader som är beroende av den faller tillbaka till föregående tillgängliga månad.",
+        "year": "År",
+        "month": "Månad",
+        "existsTitle": "{month} finns redan",
+        "existsBody": "Den här månaden har redan en inkomstgrad. Redigera den istället?",
+        "saveFor": "Spara för {month}",
+        "step1": "Vad tjänar du?",
+        "step2": "Arbetsvecka",
+        "step3": "Extra arbetstid",
+        "amount": "Belopp ({symbol})",
+        "afterTax": "Ange din lön efter skatt.",
+        "hoursPerWeek": "Arbetstimmar / vecka",
+        "workdaysPerWeek": "Arbetsdagar / vecka",
+        "commuteMinutes": "Extra tid / arbetsdag (min)",
+        "commuteHint": "Inkludera förberedelse, pendling, parkering och obetald arbetstid.",
+        "trueRate": "Verklig timlön",
+        "weeklyIncome": "Veckoinkomst",
+        "baseRate": "Bas-timlön",
+        "commutePerWeek": "Extra tid / vecka",
+        "totalPerWeek": "Total tid / vecka",
+        "showAs": "Visa som",
+        "period": {
+          "hourly": "Per timme",
+          "weekly": "Veckovis",
+          "monthly": "Månadsvis",
+          "yearly": "Årligen"
+        },
+        "suffix": {
+          "hourly": "/tim",
+          "weekly": "/v",
+          "monthly": "/mån",
+          "yearly": "/år"
+        }
+      },
+      "notePlaceholder": "Ny anteckning. Lämna tomt för att rensa den."
+    },
+    "cloud": {
+      "strip": "Data från {device}, synkad {date}.",
+      "yourPhone": "din telefon",
+      "dataFrom": "Data från {date}",
+      "phoneHere": "Telefonen är ansluten",
+      "phoneAway": "Telefonen är inte ansluten",
+      "connecting": "Ansluter…",
+      "refresh": "Uppdatera från telefonen",
+      "receiving": "Synkar… {percent}%",
+      "preparing": "Förbereder…",
+      "preparingTitle": "Din telefon gör sig redo att synka",
+      "receivingTitle": "Synkar de senaste data från din telefon",
+      "opening": "Öppnar…",
+      "openingTitle": "Öppnar de synkade data",
+      "needsPhoneTitle": "Öppna Money2Time på din telefon.",
+      "needsPhoneBody": "Gå till Inställningar → Webbpanel. Dina senaste data kommer av sig själv.",
+      "unlink": "Koppla bort den här webbläsaren",
+      "unlinkConfirm": "Koppla bort? Den här webbläsaren raderar sin kopia av dina data. Skanna igen för att koppla.",
+      "stay": "Behåll kopplingen",
+      "elsewhereTitle": "Den här panelen är öppen i en annan flik.",
+      "elsewhereBody": "Bara en flik får uppdateringar. Välj Använd här för att byta.",
+      "useHere": "Använd här",
+      "sourceOfTruth": "Ändringar sparas på din telefon. Inget sparas online.",
+      "errors": {
+        "incomplete": "Synkningen med din telefon avbröts innan den var klar. Uppdatera från telefonen för att försöka igen.",
+        "corrupt": "Det gick inte att läsa datan från din telefon. Uppdatera från telefonen för att försöka igen.",
+        "unsupported": "Datan kommer från en nyare version av appen. Ladda om sidan för att få den senaste panelen.",
+        "storage": "Den här webbläsaren sparade ingen kopia, så den behöver din telefon igen nästa gång. Privata fönster gör ofta så."
+      }
+    },
+    "link": {
+      "eyebrow": "Money2Time Webbpanel",
+      "title": "Din Money2Time-data på stor skärm",
+      "subtitle": "Skanna koden med telefonen. End-to-end-krypterat, inget sparas online.",
+      "steps": {
+        "camera": {
+          "title": "Skanna med kameran",
+          "body": "Rikta telefonens kamera mot koden, eller skanna den i appen."
+        },
+        "link": {
+          "title": "Koppla",
+          "body": "Kontrollera att båda skärmarna visar samma kod och tryck på Koppla."
+        },
+        "dashboard": {
+          "title": "Öppna din panel",
+          "body": "17 paneler. Öppna appen när du vill för att uppdatera, och gör ändringar medan den är ansluten."
+        }
+      },
+      "promises": {
+        "edits": {
+          "title": "Redigera när den är ansluten",
+          "body": "Ändringar sparas på telefonen, bara medan den är ansluten."
+        },
+        "phone": {
+          "title": "Din telefon bestämmer",
+          "body": "Data kommer bara medan appen är öppen."
+        },
+        "private": {
+          "title": "Inget lagras online",
+          "body": "End-to-end-krypterat. Inte ens vi kan läsa det."
+        }
+      },
+      "cardTitle": "Koppla den här webbläsaren",
+      "cardBody": "Skanna med telefonens kamera eller Money2Time-appen.",
+      "qrLabel": "QR-kod för att koppla den här webbläsaren till Money2Time-appen",
+      "preparing": "Förbereder en kod…",
+      "noAccount": "Inget konto behövs. Koden byts varannan minut.",
+      "confirmCode": "Kontrollera att telefonen visar den här koden och tryck på Koppla där.",
+      "candidateTitle": "Koppla {phone}?",
+      "candidateTitleUnnamed": "Koppla den här telefonen?",
+      "candidateBody": "Kontrollera att telefonen visar samma kod. Koppla bara om du skannade den själv.",
+      "candidateAccept": "Koppla",
+      "candidateReject": "Inte min",
+      "offline": "Ingen anslutning. En ny kod visas när du är online igen.",
+      "terms": "Genom att koppla godkänner du användarvillkoren och integritetspolicyn.",
+      "unlinkedNotice": "Bortkopplad. Den här webbläsaren raderade sin kopia av dina data.",
+      "linkedTo": "Kopplad till {phone}",
+      "waitingTitle": "Väntar på din telefon",
+      "waitingBody": "Öppna Money2Time → Inställningar → Webbpanel.",
+      "preparingTitle": "Gör klart för synkning",
+      "preparingBody": "Telefonen packar ihop dina data. Låt Money2Time vara öppet på den.",
+      "receivingTitle": "Synkar dina data",
+      "receivingBody": "End-to-end-krypterat, direkt från din telefon. Låt Money2Time vara öppet på den.",
+      "openingTitle": "Öppnar dina data",
+      "openingBody": "Dekrypterar dem i den här webbläsaren.",
+      "errors": {
+        "unsupported": "Den här webbläsaren kan inte öppna end-to-end-krypterade data. Använd en ny version av Chrome, Edge, Firefox eller Safari."
+      }
+    },
+    "pro": {
+      "badge": "Pro",
+      "title": "Ingår i Money2Time Pro",
+      "body": "Det här ingår i Money2Time Pro, tillsammans med längre perioder och inga gränser för konton, kategorier, återkommande transaktioner med mera. Uppgradera i appen på telefonen, så låses det upp här också.",
+      "stepApp": "Öppna Money2Time på telefonen och uppgradera till Pro.",
+      "stepRefresh": "Kom tillbaka hit och uppdatera från telefonen. Webbläsaren låses upp så snart telefonen har synkat sina data.",
+      "checkAgain": "Jag har uppgraderat, uppdatera från telefonen",
+      "checking": "Synkar…",
+      "notNow": "Inte nu",
+      "lockedPeriod": "{period}, endast Pro"
+    },
+    "filters": {
+      "title": "Filter",
+      "accounts": "Konton",
+      "exclude": "Exkludera",
+      "include": "Inkludera",
+      "done": "Klar",
+      "reset": "Återställ",
+      "note": "Kontosaldon filtreras inte."
+    },
+    "hide": {
+      "hide": "Dölj belopp",
+      "show": "Visa belopp"
+    },
+    "dropdown": {
+      "search": "Sök",
+      "noMatch": "Inga träffar"
+    }
+  }
+}

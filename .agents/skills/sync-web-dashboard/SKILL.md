@@ -1,24 +1,25 @@
 ---
 name: sync-web-dashboard
-description: Keep the Web Dashboard (app.money2time.com, the money2time-web repo) in step with the app. Run it on every product or code change, after the app change works, before the PR, to decide whether the dashboard shows, edits or parses what changed and, if it does, change and verify money2time-web in the same piece of work. Use whenever a change adds or alters a feature, a screen's rules, a list or total, a database table or column, the Export Database JSON, an editor flow, a free-plan limit, or anything under services/webDashboard*.
+description: Keep the Web Dashboard (app.money2time.com, the website in apps/web) in step with the app. Run it on every product or code change, after the app change works, before the PR, to decide whether the dashboard shows, edits or parses what changed and, if it does, change and verify apps/web in the same branch and PR. Use whenever a change adds or alters a feature, a screen's rules, a list or total, a database table or column, the Export Database JSON, an editor flow, a free-plan limit, or anything under services/webDashboard*.
 ---
 
 # Sync the Web Dashboard
 
 The Web Dashboard is a second front end for the same data. The phone sends its
-Export Database JSON (patched row by row afterwards), and the separate repo
-`money2time-web` (checked out at `~/Projects/money2time-web`) rebuilds the
-app's pages, totals and editors from it. Nothing there updates by itself: a
+Export Database JSON (patched row by row afterwards), and the website in
+`apps/web` rebuilds the app's pages, totals and editors from it. Nothing there updates by itself: a
 feature the app gains and the web does not learn makes the dashboard wrong
 or out of date. **A change is not finished until this skill has run on it.**
 
-Read the app README's "Web-dashboard Worker" section and the web repo's
-`AGENTS.md` before changing anything on either side.
+Read the README's "Web-dashboard Worker" and "Website" sections, and the
+[work-on-website](../work-on-website/SKILL.md) skill (setup, checks and rules
+for `apps/web`), before changing anything on either side.
+Web paths below are relative to `apps/web`, app paths to `apps/mobile`.
 
 ## 1. Decide the impact
 
-Walk the app diff and answer each question. Any "yes" means the web changes in
-the same piece of work.
+Walk the app diff and answer each question. Any "yes" means `apps/web` changes
+in the same branch and PR.
 
 | The app change…                                                                                                                                                        | Web places to check                                                                                                                                                                                                                                         |
 | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -30,7 +31,7 @@ the same piece of work.
 | changes what the phone sends (budgets, assets, `meta`)                                                                                                                 | the app's `services/webDashboard*.ts` (monthly budgets only: `webDashboardBudgets.ts`) and the web reader of it                                                                                                                                             |
 | changes a free-plan limit or what needs Pro                                                                                                                            | `src/components/dashboard/pro-limits.ts`, `paywall.tsx`                                                                                                                                                                                                     |
 | adds user-facing words the web also shows                                                                                                                              | `messages/<locale>.json` (32 locales; reuse an existing key when the words match)                                                                                                                                                                           |
-| adds logos, icons, item art or card designs                                                                                                                            | `node scripts/sync-dashboard-assets.mjs <app worktree>/apps/mobile` in the web worktree (with no argument it reads the app checkout beside the web repo, not your branch); if it changed `media/mascots`, publish them with `node scripts/upload-media.mjs` |
+| adds logos, icons, item art or card designs                                                                                                                            | `node scripts/sync-dashboard-assets.mjs` in `apps/web` (it reads `../mobile`, so your branch's app); if it changed `media/mascots`, publish them with `node scripts/upload-media.mjs`                                                                          |
 | is app-only by design (image uploads, Pro icon packs, main-currency change, online rates, weekly and yearly budgets, device features such as widgets or notifications) | nothing; say so                                                                                                                                                                                                                                             |
 
 When nothing applies, write "Web Dashboard: no impact (reason)" in the PR's
@@ -38,8 +39,8 @@ description and stop. Do not make an empty web change.
 
 ## 2. Keep both versions working
 
-The web deploys the moment its PR merges; the app reaches people through the
-stores days later, and some never update. So:
+The web deploys the moment the PR merges (the `Web` workflow); the app reaches
+people through the stores days later, and some never update. So:
 
 - The web must read data from **older apps** (a missing column, an older
   shape) and from **the new app** at once. Default every new field.
@@ -55,21 +56,20 @@ stores days later, and some never update. So:
 
 ## 3. Make the web change
 
-- Work in a worktree of `money2time-web`, never on its `main`:
-  `git -C ~/Projects/money2time-web worktree add -b <branch> ~/.t3/worktrees/money2time-web/<branch> origin/main`,
-  then `npm ci` in it (a symlinked `node_modules` breaks the build).
+- Work in `apps/web` of the same worktree and branch as the app change, and
+  run `npm ci` there first (a symlinked `node_modules` breaks the build).
 - Mirror the app's rule, not its code: name the app function it follows in a
   comment (as `model.ts` does), keep the same rounding, rates and edge cases.
 - Put pure logic in a module whose value imports all end in `.ts` and use no
   `@/` alias (type-only imports are fine), so `node --test` can load it, and
   test it (`src/**/*.test.ts`).
-- Run the web repo's checks: `npm run lint`, `npm run typecheck` (it generates
+- Run the website's checks in `apps/web`: `npm run lint`, `npm run typecheck` (it generates
   the Worker binding types first; plain `tsc` fails in a fresh worktree),
   `npm test`, `node scripts/validate-messages.mjs`, and `npm run build` for
   anything beyond a small view change.
-- Update the web repo's `AGENTS.md`/`README.md` where they describe what
-  changed, and the app README's "Web-dashboard Worker" section for any
-  protocol, page-feature or edit-op change.
+- Update the README's "Website" section where it describes what changed, and
+  its "Web-dashboard Worker" section for any protocol, page-feature or edit-op
+  change.
 
 ## 4. Verify end to end
 
@@ -112,17 +112,13 @@ branch:
    for an editor change, edit from the browser and check the phone. Capture
    screenshots of the dashboard (the preview tools or a browser screenshot).
 
-## 5. Ship both
+## 5. Ship them together
 
-- Commit in the web repo as `NelsonGan <65579637+NelsonGan@users.noreply.github.com>`
-  (`--author` and `GIT_COMMITTER_NAME`/`GIT_COMMITTER_EMAIL`), staging files
-  by name. Open the PR in `NelsonGan/money2time-web` following its AGENTS.md:
-  a one-sentence `## Summary` and a `## Changes` list, no other sections, so
-  the link to the app PR, the release order and the checks go in those. Its
-  screenshots go in that repo's `.github/pr-assets/<topic>/`, pinned to the
-  commit. Link the two PRs to each other.
-- Say the release order in both descriptions. Usually either can merge first
-  (step 2). When the web needs the new app to be useful, say it degrades
-  safely until then.
-- In the app PR, under Verification, say what was checked on the dashboard,
-  or "Web Dashboard: no impact (reason)".
+- The web change goes in the same PR as the app change, with the dashboard
+  screenshots beside the app's in `.github/pr-assets/<topic>/` (see
+  [create-pr](../create-pr/SKILL.md)).
+- Merging deploys the web at once and ships the app through the stores later.
+  When the web needs the new app to be useful, say in the description that it
+  degrades safely until then (step 2).
+- Under Verification, say what was checked on the dashboard, or "Web
+  Dashboard: no impact (reason)".

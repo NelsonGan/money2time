@@ -7,7 +7,11 @@ description: Test-driven development for the money2time codebase using Jest + ts
 
 This project runs **Jest with `ts-jest` in a `node` test environment** (`jest.config.js`). Tests live in `__tests__/`, named `*.test.ts`. There are **no React Native render tests** — the test env has no native runtime. So TDD here targets the *logic* layers, which is where bugs actually hide.
 
-Read `CLAUDE.md` for the architecture; this skill is how you build it test-first.
+Read the README's Architecture section for the map; this skill is how you build it test-first. Everything below is the app (`apps/mobile`). The other apps test differently:
+
+- **Website** (`apps/web`): `node --test` over `src/**/*.test.ts`, run with `npm test` there. A module under test must import values by paths ending in `.ts` and without the `@/` alias (type-only imports are fine), and pure logic belongs in such a module so it can be tested. The Web Dashboard's maths mirrors the app's: when you change a rule test-first here, test its mirror there too. See [work-on-website](../work-on-website/SKILL.md).
+- **App Studio** (`apps/app-studio`): `node --test tests/*.test.mjs` via `npm test`, covering uploads, exports and video encoding (needs ffmpeg). See [work-on-app-studio](../work-on-app-studio/SKILL.md).
+- **Workers** (`apps/cloudflare/workers/<name>`): their own `npm test` where they have one.
 
 ## The Red → Green → Refactor loop
 
@@ -45,7 +49,7 @@ Never write the implementation before its test exists. If you're tempted to, wri
 | `expo-localization` | `__mocks__/expo-localization.ts` |
 | `drizzle-orm` + `drizzle-orm/sqlite-core` | `__mocks__/drizzle.ts` |
 
-The `~/*` alias resolves to repo root. If you introduce a new native dependency in code under test, add a mapping/mock here **as part of the same change** or the suite won't load.
+The `~/*` alias resolves to the app root (`apps/mobile`). If you introduce a new native dependency in code under test, add a mapping/mock here **as part of the same change** or the suite won't load.
 
 ## Conventions to match
 

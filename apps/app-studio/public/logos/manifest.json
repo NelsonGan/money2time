@@ -1,0 +1,3891 @@
+{
+  "generatedAt": "2026-07-25T02:19:29.539Z",
+  "size": 256,
+  "countries": {
+    "united-states": {
+      "name": "United States",
+      "locale": "en",
+      "brands": [
+        {
+          "name": "Acorns",
+          "slug": "acorns",
+          "domain": "acorns.com",
+          "file": "acorns.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Affirm",
+          "slug": "affirm",
+          "domain": "affirm.com",
+          "file": "affirm.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Bank of America",
+          "slug": "bank-of-america",
+          "domain": "bankofamerica.com",
+          "file": "bank-of-america.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Betterment",
+          "slug": "betterment",
+          "domain": "betterment.com",
+          "file": "betterment.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Capital One",
+          "slug": "capital-one",
+          "domain": "capitalone.com",
+          "file": "capital-one.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Cash App",
+          "slug": "cash-app",
+          "domain": "cash.app",
+          "file": "cash-app.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Charles Schwab",
+          "slug": "charles-schwab",
+          "domain": "schwab.com",
+          "file": "charles-schwab.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Chase",
+          "slug": "chase",
+          "domain": "chase.com",
+          "file": "chase.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Chime",
+          "slug": "chime",
+          "domain": "chime.com",
+          "file": "chime.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Citizens Bank",
+          "slug": "citizens-bank",
+          "domain": "citizensbank.com",
+          "file": "citizens-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Current",
+          "slug": "current",
+          "domain": "current.com",
+          "file": "current.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Discover",
+          "slug": "discover",
+          "domain": "discover.com",
+          "file": "discover.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "E*TRADE",
+          "slug": "e-trade",
+          "domain": "etrade.com",
+          "file": "e-trade.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Fidelity",
+          "slug": "fidelity",
+          "domain": "fidelity.com",
+          "file": "fidelity.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Fifth Third Bank",
+          "slug": "fifth-third-bank",
+          "domain": "53.com",
+          "file": "fifth-third-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Goldman Sachs",
+          "slug": "goldman-sachs",
+          "domain": "goldmansachs.com",
+          "file": "goldman-sachs.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "HSBC",
+          "slug": "hsbc",
+          "domain": "hsbc.com",
+          "file": "hsbc.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "KeyBank",
+          "slug": "keybank",
+          "domain": "key.com",
+          "file": "keybank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Marcus by Goldman Sachs",
+          "slug": "marcus-by-goldman-sachs",
+          "domain": "marcus.com",
+          "file": "marcus-by-goldman-sachs.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Merrill",
+          "slug": "merrill",
+          "domain": "ml.com",
+          "file": "merrill.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Morgan Stanley",
+          "slug": "morgan-stanley",
+          "domain": "morganstanley.com",
+          "file": "morgan-stanley.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Navy Federal Credit Union",
+          "slug": "navy-federal-credit-union",
+          "domain": "navyfederal.org",
+          "file": "navy-federal-credit-union.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "PNC Bank",
+          "slug": "pnc-bank",
+          "domain": "pncbank.com",
+          "file": "pnc-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Public",
+          "slug": "public",
+          "domain": "public.com",
+          "file": "public.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Robinhood",
+          "slug": "robinhood",
+          "domain": "robinhood.com",
+          "file": "robinhood.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "SoFi",
+          "slug": "sofi",
+          "domain": "sofi.com",
+          "file": "sofi.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Synchrony",
+          "slug": "synchrony",
+          "domain": "synchrony.com",
+          "file": "synchrony.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "TD Ameritrade",
+          "slug": "td-ameritrade",
+          "domain": "tdameritrade.com",
+          "file": "td-ameritrade.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "TD Bank",
+          "slug": "td-bank",
+          "domain": "td.com",
+          "file": "td-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Truist",
+          "slug": "truist",
+          "domain": "truist.com",
+          "file": "truist.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Vanguard",
+          "slug": "vanguard",
+          "domain": "vanguard.com",
+          "file": "vanguard.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Venmo",
+          "slug": "venmo",
+          "domain": "venmo.com",
+          "file": "venmo.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Wealthfront",
+          "slug": "wealthfront",
+          "domain": "wealthfront.com",
+          "file": "wealthfront.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Wells Fargo",
+          "slug": "wells-fargo",
+          "domain": "wellsfargo.com",
+          "file": "wells-fargo.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Zelle",
+          "slug": "zelle",
+          "domain": "zellepay.com",
+          "file": "zelle.png",
+          "logoType": "icon"
+        }
+      ]
+    },
+    "china": {
+      "name": "China",
+      "locale": "zh",
+      "brands": [
+        {
+          "name": "Agricultural Bank of China",
+          "slug": "agricultural-bank-of-china",
+          "domain": "abchina.com",
+          "file": "agricultural-bank-of-china.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Alipay",
+          "slug": "alipay",
+          "domain": "alipay.com",
+          "file": "alipay.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Bank of Beijing",
+          "slug": "bank-of-beijing",
+          "domain": "bankofbeijing.com.cn",
+          "file": "bank-of-beijing.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Bank of China",
+          "slug": "bank-of-china",
+          "domain": "boc.cn",
+          "file": "bank-of-china.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Bank of Communications",
+          "slug": "bank-of-communications",
+          "domain": "bankcomm.com",
+          "file": "bank-of-communications.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Bank of Nanjing",
+          "slug": "bank-of-nanjing",
+          "domain": "njcb.com.cn",
+          "file": "bank-of-nanjing.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "China CITIC Bank",
+          "slug": "china-citic-bank",
+          "domain": "citicbank.com",
+          "file": "china-citic-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "China Construction Bank",
+          "slug": "china-construction-bank",
+          "domain": "ccb.com",
+          "file": "china-construction-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "China Everbright Bank",
+          "slug": "china-everbright-bank",
+          "domain": "cebbank.com",
+          "file": "china-everbright-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "China Guangfa Bank",
+          "slug": "china-guangfa-bank",
+          "domain": "gdb.com.cn",
+          "file": "china-guangfa-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "China Merchants Bank",
+          "slug": "china-merchants-bank",
+          "domain": "cmbchina.com",
+          "file": "china-merchants-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "China Minsheng Bank",
+          "slug": "china-minsheng-bank",
+          "domain": "cmbc.com.cn",
+          "file": "china-minsheng-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "China Zheshang Bank",
+          "slug": "china-zheshang-bank",
+          "domain": "czbank.com",
+          "file": "china-zheshang-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Hua Xia Bank",
+          "slug": "hua-xia-bank",
+          "domain": "hxb.com.cn",
+          "file": "hua-xia-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "ICBC",
+          "slug": "icbc",
+          "domain": "icbc.com",
+          "file": "icbc.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Industrial Bank",
+          "slug": "industrial-bank",
+          "domain": "cib.com.cn",
+          "file": "industrial-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "JD.com",
+          "slug": "jdcom",
+          "domain": "jd.com",
+          "file": "jdcom.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Meituan",
+          "slug": "meituan",
+          "domain": "meituan.com",
+          "file": "meituan.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Ping An Bank",
+          "slug": "ping-an-bank",
+          "domain": "pingan.com",
+          "file": "ping-an-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Postal Savings Bank of China",
+          "slug": "postal-savings-bank-of-china",
+          "domain": "psbc.com",
+          "file": "postal-savings-bank-of-china.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Tencent",
+          "slug": "tencent",
+          "domain": "tencent.com",
+          "file": "tencent.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "UnionPay",
+          "slug": "unionpay",
+          "domain": "unionpayintl.com",
+          "file": "unionpay.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "WeBank",
+          "slug": "webank",
+          "domain": "webank.com",
+          "file": "webank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "WeChat Pay",
+          "slug": "wechat-pay",
+          "domain": "wechat.com",
+          "file": "wechat-pay.png",
+          "logoType": "icon"
+        }
+      ]
+    },
+    "malaysia": {
+      "name": "Malaysia",
+      "locale": "ms",
+      "brands": [
+        {
+          "name": "AEON Bank",
+          "slug": "aeon-bank",
+          "domain": "aeonbank.com.my",
+          "file": "aeon-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Affin Bank",
+          "slug": "affin-bank",
+          "domain": "affinbank.com.my",
+          "file": "affin-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Al Rajhi Bank",
+          "slug": "al-rajhi-bank",
+          "domain": "alrajhibank.com.sa",
+          "file": "al-rajhi-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Alliance Bank",
+          "slug": "alliance-bank",
+          "domain": "alliancebank.com.my",
+          "file": "alliance-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "AmBank",
+          "slug": "ambank",
+          "domain": "ambankgroup.com",
+          "file": "ambank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Atome",
+          "slug": "atome",
+          "domain": "atome.sg",
+          "file": "atome.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Bank Islam",
+          "slug": "bank-islam",
+          "domain": "bankislam.com",
+          "file": "bank-islam.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Bank Muamalat",
+          "slug": "bank-muamalat",
+          "domain": "muamalat.com.my",
+          "file": "bank-muamalat.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Bank Rakyat",
+          "slug": "bank-rakyat",
+          "domain": "bankrakyat.com.my",
+          "file": "bank-rakyat.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "BigPay",
+          "slug": "bigpay",
+          "domain": "bigpayme.com",
+          "file": "bigpay.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Boost Bank",
+          "slug": "boost-bank",
+          "domain": "myboostbank.co",
+          "file": "boost-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "CIMB",
+          "slug": "cimb",
+          "domain": "cimb.com",
+          "file": "cimb.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "EPF (KWSP)",
+          "slug": "epf-kwsp",
+          "domain": "kwsp.gov.my",
+          "file": "epf-kwsp.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "GrabPay",
+          "slug": "grabpay",
+          "domain": "grab.com",
+          "file": "grabpay.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "GXBank",
+          "slug": "gxbank",
+          "domain": "gxbank.my",
+          "file": "gxbank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Hong Leong Bank",
+          "slug": "hong-leong-bank",
+          "domain": "hongleongbank.com.my",
+          "file": "hong-leong-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "HSBC Malaysia",
+          "slug": "hsbc-malaysia",
+          "domain": "hsbc.com",
+          "file": "hsbc-malaysia.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Kenanga",
+          "slug": "kenanga",
+          "domain": "kenanga.com.my",
+          "file": "kenanga.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Kuwait Finance House",
+          "slug": "kuwait-finance-house",
+          "domain": "kfh.com.my",
+          "file": "kuwait-finance-house.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Maybank",
+          "slug": "maybank",
+          "domain": "maybank.com",
+          "file": "maybank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "OCBC Malaysia",
+          "slug": "ocbc-malaysia",
+          "domain": "ocbc.com",
+          "file": "ocbc-malaysia.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Public Bank",
+          "slug": "public-bank",
+          "domain": "pbebank.com",
+          "file": "public-bank.png",
+          "logoType": "manual"
+        },
+        {
+          "name": "Rakuten Trade",
+          "slug": "rakuten-trade",
+          "domain": "rakutentrade.my",
+          "file": "rakuten-trade.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "RHB Bank",
+          "slug": "rhb-bank",
+          "domain": "rhbgroup.com",
+          "file": "rhb-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Ryt Bank",
+          "slug": "ryt-bank",
+          "domain": "rytbank.my",
+          "file": "ryt-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "ShopeePay",
+          "slug": "shopeepay",
+          "domain": "shopee.com.br",
+          "file": "shopeepay.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Standard Chartered Malaysia",
+          "slug": "standard-chartered-malaysia",
+          "domain": "sc.com",
+          "file": "standard-chartered-malaysia.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "StashAway",
+          "slug": "stashaway",
+          "domain": "stashaway.com",
+          "file": "stashaway.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Touch 'n Go eWallet",
+          "slug": "touch-n-go-ewallet",
+          "domain": "touchngo.com.my",
+          "file": "touch-n-go-ewallet.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "UOB Malaysia",
+          "slug": "uob-malaysia",
+          "domain": "uobgroup.com",
+          "file": "uob-malaysia.png",
+          "logoType": "icon"
+        }
+      ]
+    },
+    "mexico": {
+      "name": "Mexico",
+      "locale": "es",
+      "brands": [
+        {
+          "name": "Afirme",
+          "slug": "afirme",
+          "domain": "afirme.com",
+          "file": "afirme.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Albo",
+          "slug": "albo",
+          "domain": "albo.com",
+          "file": "albo.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "BanBajío",
+          "slug": "banbajio",
+          "domain": "banbajio.com",
+          "file": "banbajio.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Banco Azteca",
+          "slug": "banco-azteca",
+          "domain": "bancoazteca.com",
+          "file": "banco-azteca.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "BanCoppel",
+          "slug": "bancoppel",
+          "domain": "bancoppel.com",
+          "file": "bancoppel.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Banorte",
+          "slug": "banorte",
+          "domain": "banorte.com",
+          "file": "banorte.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Banregio",
+          "slug": "banregio",
+          "domain": "banregio.com",
+          "file": "banregio.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "HSBC México",
+          "slug": "hsbc-mexico",
+          "domain": "hsbc.com.mx",
+          "file": "hsbc-mexico.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Inbursa",
+          "slug": "inbursa",
+          "domain": "inbursa.com",
+          "file": "inbursa.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Klar",
+          "slug": "klar",
+          "domain": "klar.mx",
+          "file": "klar.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Mercado Pago",
+          "slug": "mercado-pago",
+          "domain": "mercadopago.com.br",
+          "file": "mercado-pago.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Mifel",
+          "slug": "mifel",
+          "domain": "mifel.com.mx",
+          "file": "mifel.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Nu México",
+          "slug": "nu-mexico",
+          "domain": "nubank.com.mx",
+          "file": "nu-mexico.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "RappiCard",
+          "slug": "rappicard",
+          "domain": "rappicard.mx",
+          "file": "rappicard.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Santander México",
+          "slug": "santander-mexico",
+          "domain": "santander.com",
+          "file": "santander-mexico.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Scotiabank México",
+          "slug": "scotiabank-mexico",
+          "domain": "scotiabank.com",
+          "file": "scotiabank-mexico.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Stori",
+          "slug": "stori",
+          "domain": "storicard.com",
+          "file": "stori.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Ualá",
+          "slug": "uala",
+          "domain": "uala.com.ar",
+          "file": "uala.png",
+          "logoType": "icon"
+        }
+      ]
+    },
+    "spain": {
+      "name": "Spain",
+      "locale": "es",
+      "brands": [
+        {
+          "name": "Abanca",
+          "slug": "abanca",
+          "domain": "abanca.com",
+          "file": "abanca.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Banco Pichincha España",
+          "slug": "banco-pichincha-espana",
+          "domain": "bancopichincha.es",
+          "file": "banco-pichincha-espana.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Banco Sabadell",
+          "slug": "banco-sabadell",
+          "domain": "bancsabadell.com",
+          "file": "banco-sabadell.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Bankinter",
+          "slug": "bankinter",
+          "domain": "bankinter.com",
+          "file": "bankinter.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "BBVA",
+          "slug": "bbva",
+          "domain": "bbva.es",
+          "file": "bbva.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Bizum",
+          "slug": "bizum",
+          "domain": "bizum.es",
+          "file": "bizum.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "CaixaBank",
+          "slug": "caixabank",
+          "domain": "caixabank.com",
+          "file": "caixabank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Cajamar",
+          "slug": "cajamar",
+          "domain": "cajamar.es",
+          "file": "cajamar.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "EVO Banco",
+          "slug": "evo-banco",
+          "domain": "evobanco.es",
+          "file": "evo-banco.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Ibercaja",
+          "slug": "ibercaja",
+          "domain": "ibercaja.es",
+          "file": "ibercaja.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Imagin",
+          "slug": "imagin",
+          "domain": "imagin.com",
+          "file": "imagin.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "ING España",
+          "slug": "ing-espana",
+          "domain": "ing.com",
+          "file": "ing-espana.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Kutxabank",
+          "slug": "kutxabank",
+          "domain": "kutxabank.es",
+          "file": "kutxabank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "MyInvestor",
+          "slug": "myinvestor",
+          "domain": "myinvestor.es",
+          "file": "myinvestor.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Openbank",
+          "slug": "openbank",
+          "domain": "openbank.com",
+          "file": "openbank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Santander",
+          "slug": "santander",
+          "domain": "santander.com",
+          "file": "santander.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Unicaja Banco",
+          "slug": "unicaja-banco",
+          "domain": "unicajabanco.bank",
+          "file": "unicaja-banco.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Wizink",
+          "slug": "wizink",
+          "domain": "wizink.es",
+          "file": "wizink.png",
+          "logoType": "icon"
+        }
+      ]
+    },
+    "brazil": {
+      "name": "Brazil",
+      "locale": "pt",
+      "brands": [
+        {
+          "name": "Banco BMG",
+          "slug": "banco-bmg",
+          "domain": "bancobmg.com.br",
+          "file": "banco-bmg.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Banco BS2",
+          "slug": "banco-bs2",
+          "domain": "bs2.com",
+          "file": "banco-bs2.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Banco Daycoval",
+          "slug": "banco-daycoval",
+          "domain": "bancodaycoval.com.br",
+          "file": "banco-daycoval.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Banco do Brasil",
+          "slug": "banco-do-brasil",
+          "domain": "bb.com.br",
+          "file": "banco-do-brasil.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Banco Original",
+          "slug": "banco-original",
+          "domain": "original.com.br",
+          "file": "banco-original.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Banco Pan",
+          "slug": "banco-pan",
+          "domain": "bancopan.com.br",
+          "file": "banco-pan.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Banco Safra",
+          "slug": "banco-safra",
+          "domain": "safra.com.br",
+          "file": "banco-safra.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Banrisul",
+          "slug": "banrisul",
+          "domain": "banrisul.com.br",
+          "file": "banrisul.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Bradesco",
+          "slug": "bradesco",
+          "domain": "bradesco.com.br",
+          "file": "bradesco.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "BTG Pactual",
+          "slug": "btg-pactual",
+          "domain": "btgpactual.com",
+          "file": "btg-pactual.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "C6 Bank",
+          "slug": "c6-bank",
+          "domain": "c6bank.com.br",
+          "file": "c6-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Caixa Econômica Federal",
+          "slug": "caixa-economica-federal",
+          "domain": "caixa.gov.br",
+          "file": "caixa-economica-federal.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Foxbit",
+          "slug": "foxbit",
+          "domain": "foxbit.com.br",
+          "file": "foxbit.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Mercado Bitcoin",
+          "slug": "mercado-bitcoin",
+          "domain": "mercadobitcoin.com.br",
+          "file": "mercado-bitcoin.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Mercado Pago",
+          "slug": "mercado-pago",
+          "domain": "mercadopago.com.br",
+          "file": "mercado-pago.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Neon",
+          "slug": "neon",
+          "domain": "neon.com",
+          "file": "neon.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Nubank",
+          "slug": "nubank",
+          "domain": "nubank.com.br",
+          "file": "nubank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "PagBank",
+          "slug": "pagbank",
+          "domain": "pagbank.com",
+          "file": "pagbank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "PicPay",
+          "slug": "picpay",
+          "domain": "picpay.com",
+          "file": "picpay.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Santander Brasil",
+          "slug": "santander-brasil",
+          "domain": "santander.com.br",
+          "file": "santander-brasil.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Sicoob",
+          "slug": "sicoob",
+          "domain": "sicoob.com.br",
+          "file": "sicoob.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Sicredi",
+          "slug": "sicredi",
+          "domain": "sicredi.com.br",
+          "file": "sicredi.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Will Bank",
+          "slug": "will-bank",
+          "domain": "willbank.com.br",
+          "file": "will-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "XP Investimentos",
+          "slug": "xp-investimentos",
+          "domain": "xpi.com.br",
+          "file": "xp-investimentos.png",
+          "logoType": "icon"
+        }
+      ]
+    },
+    "portugal": {
+      "name": "Portugal",
+      "locale": "pt",
+      "brands": [
+        {
+          "name": "ActivoBank",
+          "slug": "activobank",
+          "domain": "activobank.pt",
+          "file": "activobank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Banco CTT",
+          "slug": "banco-ctt",
+          "domain": "bancoctt.pt",
+          "file": "banco-ctt.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Banco Montepio",
+          "slug": "banco-montepio",
+          "domain": "bancomontepio.pt",
+          "file": "banco-montepio.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Bankinter Portugal",
+          "slug": "bankinter-portugal",
+          "domain": "bankinter.pt",
+          "file": "bankinter-portugal.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Caixa Geral de Depósitos",
+          "slug": "caixa-geral-de-depositos",
+          "domain": "cgd.pt",
+          "file": "caixa-geral-de-depositos.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Cofidis",
+          "slug": "cofidis",
+          "domain": "cofidis.fr",
+          "file": "cofidis.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Crédito Agrícola",
+          "slug": "credito-agricola",
+          "domain": "creditoagricola.pt",
+          "file": "credito-agricola.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "EuroBic",
+          "slug": "eurobic",
+          "domain": "eurobic.pt",
+          "file": "eurobic.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "MB WAY",
+          "slug": "mb-way",
+          "domain": "mbway.pt",
+          "file": "mb-way.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Millennium BCP",
+          "slug": "millennium-bcp",
+          "domain": "millenniumbcp.net",
+          "file": "millennium-bcp.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Moey!",
+          "slug": "moey",
+          "domain": "moey.pt",
+          "file": "moey.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Novobanco",
+          "slug": "novobanco",
+          "domain": "novobanco.com",
+          "file": "novobanco.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Santander Portugal",
+          "slug": "santander-portugal",
+          "domain": "santander.pt",
+          "file": "santander-portugal.png",
+          "logoType": "icon"
+        }
+      ]
+    },
+    "germany": {
+      "name": "Germany",
+      "locale": "de",
+      "brands": [
+        {
+          "name": "1822direkt",
+          "slug": "1822direkt",
+          "domain": "1822direkt.de",
+          "file": "1822direkt.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Bitpanda",
+          "slug": "bitpanda",
+          "domain": "bitpanda.com",
+          "file": "bitpanda.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "comdirect",
+          "slug": "comdirect",
+          "domain": "comdirect.de",
+          "file": "comdirect.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Commerzbank",
+          "slug": "commerzbank",
+          "domain": "commerzbank.com",
+          "file": "commerzbank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Consorsbank",
+          "slug": "consorsbank",
+          "domain": "consorsbank.de",
+          "file": "consorsbank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Deutsche Bank",
+          "slug": "deutsche-bank",
+          "domain": "db.com",
+          "file": "deutsche-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "DKB",
+          "slug": "dkb",
+          "domain": "dkb.de",
+          "file": "dkb.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "DZ Bank",
+          "slug": "dz-bank",
+          "domain": "dzbank.com",
+          "file": "dz-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "HypoVereinsbank",
+          "slug": "hypovereinsbank",
+          "domain": "hypovereinsbank.de",
+          "file": "hypovereinsbank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "ING Deutschland",
+          "slug": "ing-deutschland",
+          "domain": "ing.com",
+          "file": "ing-deutschland.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Norisbank",
+          "slug": "norisbank",
+          "domain": "norisbank.de",
+          "file": "norisbank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Postbank",
+          "slug": "postbank",
+          "domain": "postbank.de",
+          "file": "postbank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Scalable Capital",
+          "slug": "scalable-capital",
+          "domain": "scalable.capital",
+          "file": "scalable-capital.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Sparda-Bank",
+          "slug": "sparda-bank",
+          "domain": "sparda.at",
+          "file": "sparda-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Sparkasse",
+          "slug": "sparkasse",
+          "domain": "sparkasse.de",
+          "file": "sparkasse.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Targobank",
+          "slug": "targobank",
+          "domain": "targobank.de",
+          "file": "targobank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Trade Republic",
+          "slug": "trade-republic",
+          "domain": "traderepublic.com",
+          "file": "trade-republic.png",
+          "logoType": "icon"
+        }
+      ]
+    },
+    "france": {
+      "name": "France",
+      "locale": "fr",
+      "brands": [
+        {
+          "name": "AXA Banque",
+          "slug": "axa-banque",
+          "domain": "axa-banque.fr",
+          "file": "axa-banque.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Banque Populaire",
+          "slug": "banque-populaire",
+          "domain": "banquepopulaire.fr",
+          "file": "banque-populaire.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "BforBank",
+          "slug": "bforbank",
+          "domain": "bforbank.com",
+          "file": "bforbank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "BNP Paribas",
+          "slug": "bnp-paribas",
+          "domain": "bnpparibas.de",
+          "file": "bnp-paribas.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Boursorama",
+          "slug": "boursorama",
+          "domain": "boursorama.com",
+          "file": "boursorama.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Crédit Agricole",
+          "slug": "credit-agricole",
+          "domain": "credit-agricole.com",
+          "file": "credit-agricole.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Crédit du Nord",
+          "slug": "credit-du-nord",
+          "domain": "creditdunord.fr",
+          "file": "credit-du-nord.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Crédit Mutuel",
+          "slug": "credit-mutuel",
+          "domain": "creditmutuel.com",
+          "file": "credit-mutuel.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Fortuneo",
+          "slug": "fortuneo",
+          "domain": "fortuneo.com",
+          "file": "fortuneo.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Hello bank!",
+          "slug": "hello-bank",
+          "domain": "hellobank.com",
+          "file": "hello-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "La Banque Postale",
+          "slug": "la-banque-postale",
+          "domain": "labanquepostale.com",
+          "file": "la-banque-postale.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "LCL",
+          "slug": "lcl",
+          "domain": "lcl.fr",
+          "file": "lcl.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Lydia",
+          "slug": "lydia",
+          "domain": "lydia-app.com",
+          "file": "lydia.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Monabanq",
+          "slug": "monabanq",
+          "domain": "monabanq.com",
+          "file": "monabanq.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Nickel",
+          "slug": "nickel",
+          "domain": "nickel.eu",
+          "file": "nickel.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Qonto",
+          "slug": "qonto",
+          "domain": "qonto.com",
+          "file": "qonto.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Société Générale",
+          "slug": "societe-generale",
+          "domain": "societegenerale.ci",
+          "file": "societe-generale.png",
+          "logoType": "icon"
+        }
+      ]
+    },
+    "italy": {
+      "name": "Italy",
+      "locale": "it",
+      "brands": [
+        {
+          "name": "Banca Mediolanum",
+          "slug": "banca-mediolanum",
+          "domain": "bancamediolanum.it",
+          "file": "banca-mediolanum.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Banca Popolare di Sondrio",
+          "slug": "banca-popolare-di-sondrio",
+          "domain": "popso.it",
+          "file": "banca-popolare-di-sondrio.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Banca Sella",
+          "slug": "banca-sella",
+          "domain": "bancasella.com",
+          "file": "banca-sella.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "BNL",
+          "slug": "bnl",
+          "domain": "bnl.it",
+          "file": "bnl.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "BPER Banca",
+          "slug": "bper-banca",
+          "domain": "bper.it",
+          "file": "bper-banca.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Buddybank",
+          "slug": "buddybank",
+          "domain": "buddybank.com",
+          "file": "buddybank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Credem",
+          "slug": "credem",
+          "domain": "credem.it",
+          "file": "credem.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "FinecoBank",
+          "slug": "finecobank",
+          "domain": "finecobank.com",
+          "file": "finecobank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Hype",
+          "slug": "hype",
+          "domain": "hype.it",
+          "file": "hype.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Illimity",
+          "slug": "illimity",
+          "domain": "illimity.com",
+          "file": "illimity.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Intesa Sanpaolo",
+          "slug": "intesa-sanpaolo",
+          "domain": "intesasanpaolo.com",
+          "file": "intesa-sanpaolo.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Mediobanca",
+          "slug": "mediobanca",
+          "domain": "mediobanca.com",
+          "file": "mediobanca.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Nexi",
+          "slug": "nexi",
+          "domain": "nexi.it",
+          "file": "nexi.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Poste Italiane",
+          "slug": "poste-italiane",
+          "domain": "posteitaliane.it",
+          "file": "poste-italiane.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "PostePay",
+          "slug": "postepay",
+          "domain": "postepay.it",
+          "file": "postepay.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Satispay",
+          "slug": "satispay",
+          "domain": "satispay.com",
+          "file": "satispay.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "UniCredit",
+          "slug": "unicredit",
+          "domain": "unicredit.it",
+          "file": "unicredit.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Widiba",
+          "slug": "widiba",
+          "domain": "widiba.it",
+          "file": "widiba.png",
+          "logoType": "icon"
+        }
+      ]
+    },
+    "india": {
+      "name": "India",
+      "locale": "hi",
+      "brands": [
+        {
+          "name": "Angel One",
+          "slug": "angel-one",
+          "domain": "angelone.in",
+          "file": "angel-one.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "AU Small Finance Bank",
+          "slug": "au-small-finance-bank",
+          "domain": "aubank.in",
+          "file": "au-small-finance-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Axis Bank",
+          "slug": "axis-bank",
+          "domain": "axisbank.com",
+          "file": "axis-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Bajaj Finserv",
+          "slug": "bajaj-finserv",
+          "domain": "bajajfinserv.in",
+          "file": "bajaj-finserv.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Bandhan Bank",
+          "slug": "bandhan-bank",
+          "domain": "bandhanbank.com",
+          "file": "bandhan-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Bank of Baroda",
+          "slug": "bank-of-baroda",
+          "domain": "bankofbaroda.in",
+          "file": "bank-of-baroda.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Bank of India",
+          "slug": "bank-of-india",
+          "domain": "bankofindia.co.in",
+          "file": "bank-of-india.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "BHIM",
+          "slug": "bhim",
+          "domain": "bhimupi.org.in",
+          "file": "bhim.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Canara Bank",
+          "slug": "canara-bank",
+          "domain": "canarabank.com",
+          "file": "canara-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "CoinDCX",
+          "slug": "coindcx",
+          "domain": "coindcx.com",
+          "file": "coindcx.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Cred",
+          "slug": "cred",
+          "domain": "cred.club",
+          "file": "cred.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Federal Bank",
+          "slug": "federal-bank",
+          "domain": "federalbank.co.in",
+          "file": "federal-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Groww",
+          "slug": "groww",
+          "domain": "groww.in",
+          "file": "groww.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "HDFC Bank",
+          "slug": "hdfc-bank",
+          "domain": "hdfcbank.com",
+          "file": "hdfc-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "ICICI Bank",
+          "slug": "icici-bank",
+          "domain": "icicibank.com",
+          "file": "icici-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "IDBI Bank",
+          "slug": "idbi-bank",
+          "domain": "idbibank.in",
+          "file": "idbi-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "IDFC First Bank",
+          "slug": "idfc-first-bank",
+          "domain": "idfcfirstbank.com",
+          "file": "idfc-first-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "IndusInd Bank",
+          "slug": "indusind-bank",
+          "domain": "indusind.com",
+          "file": "indusind-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Kotak Mahindra Bank",
+          "slug": "kotak-mahindra-bank",
+          "domain": "kotak.com",
+          "file": "kotak-mahindra-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Mobikwik",
+          "slug": "mobikwik",
+          "domain": "mobikwik.com",
+          "file": "mobikwik.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Paytm",
+          "slug": "paytm",
+          "domain": "paytm.com",
+          "file": "paytm.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "PhonePe",
+          "slug": "phonepe",
+          "domain": "phonepe.com",
+          "file": "phonepe.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Punjab National Bank",
+          "slug": "punjab-national-bank",
+          "domain": "pnbindia.in",
+          "file": "punjab-national-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "State Bank of India",
+          "slug": "state-bank-of-india",
+          "domain": "sbi.co.in",
+          "file": "state-bank-of-india.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Union Bank of India",
+          "slug": "union-bank-of-india",
+          "domain": "unionbankofindia.co.in",
+          "file": "union-bank-of-india.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Upstox",
+          "slug": "upstox",
+          "domain": "upstox.com",
+          "file": "upstox.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "WazirX",
+          "slug": "wazirx",
+          "domain": "wazirx.com",
+          "file": "wazirx.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Yes Bank",
+          "slug": "yes-bank",
+          "domain": "yesbank.in",
+          "file": "yes-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Zerodha",
+          "slug": "zerodha",
+          "domain": "zerodha.com",
+          "file": "zerodha.png",
+          "logoType": "icon"
+        }
+      ]
+    },
+    "indonesia": {
+      "name": "Indonesia",
+      "locale": "id",
+      "brands": [
+        {
+          "name": "Ajaib",
+          "slug": "ajaib",
+          "domain": "ajaib.co.id",
+          "file": "ajaib.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Bank BTN",
+          "slug": "bank-btn",
+          "domain": "btn.co.id",
+          "file": "bank-btn.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Bank Central Asia",
+          "slug": "bank-central-asia",
+          "domain": "bca.co.id",
+          "file": "bank-central-asia.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Bank Danamon",
+          "slug": "bank-danamon",
+          "domain": "danamon.co.id",
+          "file": "bank-danamon.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Bank Jago",
+          "slug": "bank-jago",
+          "domain": "jago.com",
+          "file": "bank-jago.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Bank Mandiri",
+          "slug": "bank-mandiri",
+          "domain": "bankmandiri.co.id",
+          "file": "bank-mandiri.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Bank Mega",
+          "slug": "bank-mega",
+          "domain": "bankmega.com",
+          "file": "bank-mega.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Bank Negara Indonesia",
+          "slug": "bank-negara-indonesia",
+          "domain": "bni.co.id",
+          "file": "bank-negara-indonesia.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Bank Neo Commerce",
+          "slug": "bank-neo-commerce",
+          "domain": "bankneocommerce.co.id",
+          "file": "bank-neo-commerce.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Bank Syariah Indonesia",
+          "slug": "bank-syariah-indonesia",
+          "domain": "bankbsi.co.id",
+          "file": "bank-syariah-indonesia.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Bibit",
+          "slug": "bibit",
+          "domain": "bibit.id",
+          "file": "bibit.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "CIMB Niaga",
+          "slug": "cimb-niaga",
+          "domain": "cimbniaga.co.id",
+          "file": "cimb-niaga.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Indodax",
+          "slug": "indodax",
+          "domain": "indodax.com",
+          "file": "indodax.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Jenius",
+          "slug": "jenius",
+          "domain": "jenius.com",
+          "file": "jenius.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "OCBC Indonesia",
+          "slug": "ocbc-indonesia",
+          "domain": "ocbc.id",
+          "file": "ocbc-indonesia.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Pluang",
+          "slug": "pluang",
+          "domain": "pluang.com",
+          "file": "pluang.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Stockbit",
+          "slug": "stockbit",
+          "domain": "stockbit.com",
+          "file": "stockbit.png",
+          "logoType": "icon"
+        }
+      ]
+    },
+    "japan": {
+      "name": "Japan",
+      "locale": "ja",
+      "brands": [
+        {
+          "name": "Aeon Bank",
+          "slug": "aeon-bank",
+          "domain": "aeonbank.com.my",
+          "file": "aeon-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "bitFlyer",
+          "slug": "bitflyer",
+          "domain": "bitflyer.com",
+          "file": "bitflyer.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Coincheck",
+          "slug": "coincheck",
+          "domain": "coincheck.com",
+          "file": "coincheck.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Japan Post Bank",
+          "slug": "japan-post-bank",
+          "domain": "jp-bank.japanpost.jp",
+          "file": "japan-post-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "JCB",
+          "slug": "jcb",
+          "domain": "jcb.com",
+          "file": "jcb.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Merpay",
+          "slug": "merpay",
+          "domain": "merpay.com",
+          "file": "merpay.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Mizuho Bank",
+          "slug": "mizuho-bank",
+          "domain": "mizuhobank.com",
+          "file": "mizuho-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Nomura",
+          "slug": "nomura",
+          "domain": "nomura.com",
+          "file": "nomura.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "PayPay",
+          "slug": "paypay",
+          "domain": "paypay.ne.jp",
+          "file": "paypay.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "PayPay Bank",
+          "slug": "paypay-bank",
+          "domain": "paypay-bank.co.jp",
+          "file": "paypay-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Rakuten Bank",
+          "slug": "rakuten-bank",
+          "domain": "rakuten-bank.com.tw",
+          "file": "rakuten-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Resona Bank",
+          "slug": "resona-bank",
+          "domain": "resonabank.co.jp",
+          "file": "resona-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "SBI Sumishin Net Bank",
+          "slug": "sbi-sumishin-net-bank",
+          "domain": "netbk.co.jp",
+          "file": "sbi-sumishin-net-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "WAON",
+          "slug": "waon",
+          "domain": "waon.net",
+          "file": "waon.png",
+          "logoType": "icon"
+        }
+      ]
+    },
+    "south-korea": {
+      "name": "South Korea",
+      "locale": "ko",
+      "brands": [
+        {
+          "name": "Bithumb",
+          "slug": "bithumb",
+          "domain": "bithumb.com",
+          "file": "bithumb.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Busan Bank",
+          "slug": "busan-bank",
+          "domain": "busanbank.co.kr",
+          "file": "busan-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Hana Bank",
+          "slug": "hana-bank",
+          "domain": "kebhana.us",
+          "file": "hana-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "IBK",
+          "slug": "ibk",
+          "domain": "ibk.co.kr",
+          "file": "ibk.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "KakaoBank",
+          "slug": "kakaobank",
+          "domain": "kakaobank.com",
+          "file": "kakaobank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "KB Kookmin Bank",
+          "slug": "kb-kookmin-bank",
+          "domain": "kbkookminbank.com",
+          "file": "kb-kookmin-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Mirae Asset",
+          "slug": "mirae-asset",
+          "domain": "miraeasset.com",
+          "file": "mirae-asset.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "NongHyup Bank",
+          "slug": "nonghyup-bank",
+          "domain": "nonghyup.com",
+          "file": "nonghyup-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Shinhan Bank",
+          "slug": "shinhan-bank",
+          "domain": "shinhan.com.kh",
+          "file": "shinhan-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "SSGPAY",
+          "slug": "ssgpay",
+          "domain": "ssgpay.com",
+          "file": "ssgpay.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Suhyup Bank",
+          "slug": "suhyup-bank",
+          "domain": "suhyup-bank.com",
+          "file": "suhyup-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Toss",
+          "slug": "toss",
+          "domain": "toss.im",
+          "file": "toss.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Toss Bank",
+          "slug": "toss-bank",
+          "domain": "tossbank.com",
+          "file": "toss-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Upbit",
+          "slug": "upbit",
+          "domain": "upbit.com",
+          "file": "upbit.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Woori Bank",
+          "slug": "woori-bank",
+          "domain": "wooribank.com.kh",
+          "file": "woori-bank.png",
+          "logoType": "icon"
+        }
+      ]
+    },
+    "denmark": {
+      "name": "Denmark",
+      "locale": "da",
+      "brands": [
+        {
+          "name": "Arbejdernes Landsbank",
+          "slug": "arbejdernes-landsbank",
+          "domain": "al-bank.dk",
+          "file": "arbejdernes-landsbank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Basisbank",
+          "slug": "basisbank",
+          "domain": "basisbank.dk",
+          "file": "basisbank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Coop Bank",
+          "slug": "coop-bank",
+          "domain": "coopbank.dk",
+          "file": "coop-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Danske Bank",
+          "slug": "danske-bank",
+          "domain": "danskebank.com",
+          "file": "danske-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Jyske Bank",
+          "slug": "jyske-bank",
+          "domain": "jyskebank.dk",
+          "file": "jyske-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Lunar",
+          "slug": "lunar",
+          "domain": "lunar.app",
+          "file": "lunar.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "MobilePay",
+          "slug": "mobilepay",
+          "domain": "mobilepay.dk",
+          "file": "mobilepay.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Nordea",
+          "slug": "nordea",
+          "domain": "nordea.com",
+          "file": "nordea.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Nykredit",
+          "slug": "nykredit",
+          "domain": "nykredit.dk",
+          "file": "nykredit.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Ringkjøbing Landbobank",
+          "slug": "ringkj-bing-landbobank",
+          "domain": "landbobanken.dk",
+          "file": "ringkj-bing-landbobank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Spar Nord",
+          "slug": "spar-nord",
+          "domain": "sparnord.dk",
+          "file": "spar-nord.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Sydbank",
+          "slug": "sydbank",
+          "domain": "sydbank.dk",
+          "file": "sydbank.png",
+          "logoType": "icon"
+        }
+      ]
+    },
+    "norway": {
+      "name": "Norway",
+      "locale": "nb",
+      "brands": [
+        {
+          "name": "Bank Norwegian",
+          "slug": "bank-norwegian",
+          "domain": "banknorwegian.no",
+          "file": "bank-norwegian.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "BN Bank",
+          "slug": "bn-bank",
+          "domain": "bnbank.no",
+          "file": "bn-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Danske Bank",
+          "slug": "danske-bank",
+          "domain": "danskebank.com",
+          "file": "danske-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "DNB",
+          "slug": "dnb",
+          "domain": "dnb.no",
+          "file": "dnb.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Gjensidige",
+          "slug": "gjensidige",
+          "domain": "gjensidige.no",
+          "file": "gjensidige.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Handelsbanken",
+          "slug": "handelsbanken",
+          "domain": "handelsbanken.no",
+          "file": "handelsbanken.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Instabank",
+          "slug": "instabank",
+          "domain": "instabank.no",
+          "file": "instabank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Nordea Norge",
+          "slug": "nordea-norge",
+          "domain": "nordea.no",
+          "file": "nordea-norge.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Sbanken",
+          "slug": "sbanken",
+          "domain": "sbanken.no",
+          "file": "sbanken.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Skandiabanken",
+          "slug": "skandiabanken",
+          "domain": "skandiabanken.se",
+          "file": "skandiabanken.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "SpareBank 1",
+          "slug": "sparebank-1",
+          "domain": "sparebank1.no",
+          "file": "sparebank-1.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Sparebanken Vest",
+          "slug": "sparebanken-vest",
+          "domain": "spv.no",
+          "file": "sparebanken-vest.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Storebrand",
+          "slug": "storebrand",
+          "domain": "storebrand.no",
+          "file": "storebrand.png",
+          "logoType": "icon"
+        }
+      ]
+    },
+    "netherlands": {
+      "name": "Netherlands",
+      "locale": "nl",
+      "brands": [
+        {
+          "name": "ABN AMRO",
+          "slug": "abn-amro",
+          "domain": "abnamro.com",
+          "file": "abn-amro.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "ASN Bank",
+          "slug": "asn-bank",
+          "domain": "asnbank.nl",
+          "file": "asn-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "bunq",
+          "slug": "bunq",
+          "domain": "bunq.com",
+          "file": "bunq.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "de Volksbank",
+          "slug": "de-volksbank",
+          "domain": "devolksbank.nl",
+          "file": "de-volksbank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "iDEAL",
+          "slug": "ideal",
+          "domain": "ideal.es",
+          "file": "ideal.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "ING",
+          "slug": "ing",
+          "domain": "ing.com",
+          "file": "ing.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Knab",
+          "slug": "knab",
+          "domain": "knab.nl",
+          "file": "knab.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Rabobank",
+          "slug": "rabobank",
+          "domain": "rabobank.nl",
+          "file": "rabobank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "RegioBank",
+          "slug": "regiobank",
+          "domain": "regiobank.nl",
+          "file": "regiobank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "SNS",
+          "slug": "sns",
+          "domain": "snsbank.nl",
+          "file": "sns.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Tikkie",
+          "slug": "tikkie",
+          "domain": "tikkie.me",
+          "file": "tikkie.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Triodos Bank",
+          "slug": "triodos-bank",
+          "domain": "triodos.com",
+          "file": "triodos-bank.png",
+          "logoType": "icon"
+        }
+      ]
+    },
+    "poland": {
+      "name": "Poland",
+      "locale": "pl",
+      "brands": [
+        {
+          "name": "Alior Bank",
+          "slug": "alior-bank",
+          "domain": "aliorbank.pl",
+          "file": "alior-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Bank Millennium",
+          "slug": "bank-millennium",
+          "domain": "bankmillennium.pl",
+          "file": "bank-millennium.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "BLIK",
+          "slug": "blik",
+          "domain": "blik.com",
+          "file": "blik.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Citi Handlowy",
+          "slug": "citi-handlowy",
+          "domain": "citibank.pl",
+          "file": "citi-handlowy.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Getin Bank",
+          "slug": "getin-bank",
+          "domain": "getinbank.pl",
+          "file": "getin-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "mBank",
+          "slug": "mbank",
+          "domain": "mbank.pl",
+          "file": "mbank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Nest Bank",
+          "slug": "nest-bank",
+          "domain": "nestbank.pl",
+          "file": "nest-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "PayU",
+          "slug": "payu",
+          "domain": "payu.com",
+          "file": "payu.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Plus Bank",
+          "slug": "plus-bank",
+          "domain": "plusbank.pl",
+          "file": "plus-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Przelewy24",
+          "slug": "przelewy24",
+          "domain": "przelewy24.pl",
+          "file": "przelewy24.png",
+          "logoType": "icon"
+        }
+      ]
+    },
+    "russia": {
+      "name": "Russia",
+      "locale": "ru",
+      "brands": [
+        {
+          "name": "Alfa-Bank",
+          "slug": "alfa-bank",
+          "domain": "alfabank.com",
+          "file": "alfa-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Gazprombank",
+          "slug": "gazprombank",
+          "domain": "gazprombank.tech",
+          "file": "gazprombank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Home Credit Bank",
+          "slug": "home-credit-bank",
+          "domain": "homecredit.kz",
+          "file": "home-credit-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "MTS Bank",
+          "slug": "mts-bank",
+          "domain": "mtsbank.ru",
+          "file": "mts-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Otkritie",
+          "slug": "otkritie",
+          "domain": "open.ru",
+          "file": "otkritie.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Rosbank",
+          "slug": "rosbank",
+          "domain": "rosbank.ru",
+          "file": "rosbank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Sberbank",
+          "slug": "sberbank",
+          "domain": "sberbank.ru",
+          "file": "sberbank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Sovcombank",
+          "slug": "sovcombank",
+          "domain": "sovcombank.credit",
+          "file": "sovcombank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Uralsib",
+          "slug": "uralsib",
+          "domain": "uralsib.com",
+          "file": "uralsib.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "VTB",
+          "slug": "vtb",
+          "domain": "vtb.com",
+          "file": "vtb.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "YooMoney",
+          "slug": "yoomoney",
+          "domain": "yoomoney.com",
+          "file": "yoomoney.png",
+          "logoType": "icon"
+        }
+      ]
+    },
+    "sweden": {
+      "name": "Sweden",
+      "locale": "sv",
+      "brands": [
+        {
+          "name": "Avanza",
+          "slug": "avanza",
+          "domain": "avanza.se",
+          "file": "avanza.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Handelsbanken",
+          "slug": "handelsbanken",
+          "domain": "handelsbanken.co.uk",
+          "file": "handelsbanken.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "ICA Banken",
+          "slug": "ica-banken",
+          "domain": "icabanken.se",
+          "file": "ica-banken.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Länsförsäkringar",
+          "slug": "lansforsakringar",
+          "domain": "lansforsakringar.se",
+          "file": "lansforsakringar.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Nordea",
+          "slug": "nordea",
+          "domain": "nordea.com",
+          "file": "nordea.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Nordnet",
+          "slug": "nordnet",
+          "domain": "nordnet.fi",
+          "file": "nordnet.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Resurs Bank",
+          "slug": "resurs-bank",
+          "domain": "resursbank.fi",
+          "file": "resurs-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "SBAB",
+          "slug": "sbab",
+          "domain": "sbab.se",
+          "file": "sbab.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Skandia",
+          "slug": "skandia",
+          "domain": "skandia.se",
+          "file": "skandia.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Sparbanken Syd",
+          "slug": "sparbanken-syd",
+          "domain": "sparbankensyd.se",
+          "file": "sparbanken-syd.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Swedbank",
+          "slug": "swedbank",
+          "domain": "swedbank.lv",
+          "file": "swedbank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Trustly",
+          "slug": "trustly",
+          "domain": "trustly.com",
+          "file": "trustly.png",
+          "logoType": "icon"
+        }
+      ]
+    },
+    "thailand": {
+      "name": "Thailand",
+      "locale": "th",
+      "brands": [
+        {
+          "name": "BAAC",
+          "slug": "baac",
+          "domain": "baac.or.th",
+          "file": "baac.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Bangkok Bank",
+          "slug": "bangkok-bank",
+          "domain": "bangkokbank.com",
+          "file": "bangkok-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Bitkub",
+          "slug": "bitkub",
+          "domain": "bitkub.com",
+          "file": "bitkub.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "GHB",
+          "slug": "ghb",
+          "domain": "ghbank.co.th",
+          "file": "ghb.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Government Savings Bank",
+          "slug": "government-savings-bank",
+          "domain": "gsb.or.th",
+          "file": "government-savings-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Kasikornbank",
+          "slug": "kasikornbank",
+          "domain": "kasikornbank.com",
+          "file": "kasikornbank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Kiatnakin Phatra",
+          "slug": "kiatnakin-phatra",
+          "domain": "kiatnakin.co.th",
+          "file": "kiatnakin-phatra.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Krungsri",
+          "slug": "krungsri",
+          "domain": "krungsri.com",
+          "file": "krungsri.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "LH Bank",
+          "slug": "lh-bank",
+          "domain": "lhbank.co.th",
+          "file": "lh-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "ShopeePay Thailand",
+          "slug": "shopeepay-thailand",
+          "domain": "shopeepay.co.th",
+          "file": "shopeepay-thailand.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "TrueMoney",
+          "slug": "truemoney",
+          "domain": "truemoney.com",
+          "file": "truemoney.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "TTB Bank",
+          "slug": "ttb-bank",
+          "domain": "ttbbank.com",
+          "file": "ttb-bank.png",
+          "logoType": "icon"
+        }
+      ]
+    },
+    "turkey": {
+      "name": "Turkey",
+      "locale": "tr",
+      "brands": [
+        {
+          "name": "Akbank",
+          "slug": "akbank",
+          "domain": "akbank.com",
+          "file": "akbank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Albaraka Türk",
+          "slug": "albaraka-turk",
+          "domain": "albaraka.com.tr",
+          "file": "albaraka-turk.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "DenizBank",
+          "slug": "denizbank",
+          "domain": "denizbank.com",
+          "file": "denizbank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Enpara",
+          "slug": "enpara",
+          "domain": "enpara.com",
+          "file": "enpara.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Fibabanka",
+          "slug": "fibabanka",
+          "domain": "fibabanka.com.tr",
+          "file": "fibabanka.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Garanti BBVA",
+          "slug": "garanti-bbva",
+          "domain": "garantibbva.com",
+          "file": "garanti-bbva.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Halkbank",
+          "slug": "halkbank",
+          "domain": "halkbank.com.tr",
+          "file": "halkbank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "ING Türkiye",
+          "slug": "ing-turkiye",
+          "domain": "ing.com.tr",
+          "file": "ing-turkiye.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "ininal",
+          "slug": "ininal",
+          "domain": "ininal.com",
+          "file": "ininal.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "İşbank",
+          "slug": "isbank",
+          "domain": "isbank.com.tr",
+          "file": "isbank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Kuveyt Türk",
+          "slug": "kuveyt-turk",
+          "domain": "kuveytturk.com.tr",
+          "file": "kuveyt-turk.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Midas",
+          "slug": "midas",
+          "domain": "getmidas.com",
+          "file": "midas.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Odeabank",
+          "slug": "odeabank",
+          "domain": "odeabank.com.tr",
+          "file": "odeabank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Papara",
+          "slug": "papara",
+          "domain": "papara.com",
+          "file": "papara.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Paribu",
+          "slug": "paribu",
+          "domain": "paribu.com",
+          "file": "paribu.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "QNB Finansbank",
+          "slug": "qnb-finansbank",
+          "domain": "finansbank.com.tr",
+          "file": "qnb-finansbank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Şekerbank",
+          "slug": "sekerbank",
+          "domain": "sekerbank.com.tr",
+          "file": "sekerbank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "TEB",
+          "slug": "teb",
+          "domain": "teb.com.tr",
+          "file": "teb.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Türkiye Finans",
+          "slug": "turkiye-finans",
+          "domain": "turkiyefinans.com.tr",
+          "file": "turkiye-finans.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "VakıfBank",
+          "slug": "vak-fbank",
+          "domain": "vakifbank.com.tr",
+          "file": "vak-fbank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Yapı Kredi",
+          "slug": "yap-kredi",
+          "domain": "yapikredi.com.tr",
+          "file": "yap-kredi.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Ziraat Bankası",
+          "slug": "ziraat-bankas",
+          "domain": "ziraatbank.com.tr",
+          "file": "ziraat-bankas.png",
+          "logoType": "icon"
+        }
+      ]
+    },
+    "ukraine": {
+      "name": "Ukraine",
+      "locale": "uk",
+      "brands": [
+        {
+          "name": "A-Bank",
+          "slug": "a-bank",
+          "domain": "a-bank.com.ua",
+          "file": "a-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Bank Vostok",
+          "slug": "bank-vostok",
+          "domain": "bankvostok.com.ua",
+          "file": "bank-vostok.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Credit Agricole Ukraine",
+          "slug": "credit-agricole-ukraine",
+          "domain": "credit-agricole.ua",
+          "file": "credit-agricole-ukraine.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Kredobank",
+          "slug": "kredobank",
+          "domain": "kredobank.com.ua",
+          "file": "kredobank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "monobank",
+          "slug": "monobank",
+          "domain": "monobank.ua",
+          "file": "monobank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Privat24",
+          "slug": "privat24",
+          "domain": "privat24.ua",
+          "file": "privat24.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "PUMB",
+          "slug": "pumb",
+          "domain": "pumb.ua",
+          "file": "pumb.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Raiffeisen Bank Ukraine",
+          "slug": "raiffeisen-bank-ukraine",
+          "domain": "raiffeisen.ua",
+          "file": "raiffeisen-bank-ukraine.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Sense Bank",
+          "slug": "sense-bank",
+          "domain": "sensebank.com.ua",
+          "file": "sense-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "TAScombank",
+          "slug": "tascombank",
+          "domain": "tascombank.com.ua",
+          "file": "tascombank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Ukreximbank",
+          "slug": "ukreximbank",
+          "domain": "eximb.com",
+          "file": "ukreximbank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Ukrgasbank",
+          "slug": "ukrgasbank",
+          "domain": "ukrgasbank.com",
+          "file": "ukrgasbank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "UkrSibbank",
+          "slug": "ukrsibbank",
+          "domain": "ukrsibbank.com",
+          "file": "ukrsibbank.png",
+          "logoType": "icon"
+        }
+      ]
+    },
+    "vietnam": {
+      "name": "Vietnam",
+      "locale": "vi",
+      "brands": [
+        {
+          "name": "ACB",
+          "slug": "acb",
+          "domain": "acb.com.vn",
+          "file": "acb.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "BIDV",
+          "slug": "bidv",
+          "domain": "bidv.com.vn",
+          "file": "bidv.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Finhay",
+          "slug": "finhay",
+          "domain": "finhay.com.vn",
+          "file": "finhay.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "HDBank",
+          "slug": "hdbank",
+          "domain": "hdbank.com.vn",
+          "file": "hdbank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "MoMo",
+          "slug": "momo",
+          "domain": "momo.vn",
+          "file": "momo.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Nam A Bank",
+          "slug": "nam-a-bank",
+          "domain": "namabank.com.vn",
+          "file": "nam-a-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Sacombank",
+          "slug": "sacombank",
+          "domain": "sacombank.com.vn",
+          "file": "sacombank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "SeABank",
+          "slug": "seabank",
+          "domain": "seabank.com.vn",
+          "file": "seabank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "ShopeePay Vietnam",
+          "slug": "shopeepay-vietnam",
+          "domain": "shopee.com.br",
+          "file": "shopeepay-vietnam.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Techcombank",
+          "slug": "techcombank",
+          "domain": "techcombank.com.vn",
+          "file": "techcombank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "TPBank",
+          "slug": "tpbank",
+          "domain": "tpb.vn",
+          "file": "tpbank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Vietcombank",
+          "slug": "vietcombank",
+          "domain": "vietcombank.com.vn",
+          "file": "vietcombank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "VietinBank",
+          "slug": "vietinbank",
+          "domain": "vietinbank.vn",
+          "file": "vietinbank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Viettel Money",
+          "slug": "viettel-money",
+          "domain": "viettelmoney.vn",
+          "file": "viettel-money.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "VNPay",
+          "slug": "vnpay",
+          "domain": "vnpay.vn",
+          "file": "vnpay.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "VPBank",
+          "slug": "vpbank",
+          "domain": "vpbank.com",
+          "file": "vpbank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "ZaloPay",
+          "slug": "zalopay",
+          "domain": "zalopay.com.vn",
+          "file": "zalopay.png",
+          "logoType": "icon"
+        }
+      ]
+    },
+    "philippines": {
+      "name": "Philippines",
+      "locale": "fil",
+      "brands": [
+        {
+          "name": "BDO Unibank",
+          "slug": "bdo-unibank",
+          "domain": "bdo.com.ph",
+          "file": "bdo-unibank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "BPI",
+          "slug": "bpi",
+          "domain": "bpi.com.ph",
+          "file": "bpi.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "China Bank",
+          "slug": "china-bank",
+          "domain": "chinabank.ph",
+          "file": "china-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "COL Financial",
+          "slug": "col-financial",
+          "domain": "colfinancial.com",
+          "file": "col-financial.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "GCash",
+          "slug": "gcash",
+          "domain": "gcash.com",
+          "file": "gcash.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "GoTyme Bank",
+          "slug": "gotyme-bank",
+          "domain": "gotyme.com.ph",
+          "file": "gotyme-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "GrabPay PH",
+          "slug": "grabpay-ph",
+          "domain": "grab.com",
+          "file": "grabpay-ph.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Maya",
+          "slug": "maya",
+          "domain": "maya.ph",
+          "file": "maya.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Metrobank",
+          "slug": "metrobank",
+          "domain": "metrobank.com.ph",
+          "file": "metrobank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "PNB",
+          "slug": "pnb",
+          "domain": "pnb.com.ph",
+          "file": "pnb.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "PSBank",
+          "slug": "psbank",
+          "domain": "psbank.com.ph",
+          "file": "psbank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "RCBC",
+          "slug": "rcbc",
+          "domain": "rcbc.com",
+          "file": "rcbc.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Robinsons Bank",
+          "slug": "robinsons-bank",
+          "domain": "robinsonsbank.com.ph",
+          "file": "robinsons-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Security Bank",
+          "slug": "security-bank",
+          "domain": "securitybank.com",
+          "file": "security-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "ShopeePay Philippines",
+          "slug": "shopeepay-philippines",
+          "domain": "shopee.com.br",
+          "file": "shopeepay-philippines.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Tonik",
+          "slug": "tonik",
+          "domain": "tonikbank.com",
+          "file": "tonik.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "UnionBank",
+          "slug": "unionbank",
+          "domain": "unionbankph.com",
+          "file": "unionbank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "UnionDigital Bank",
+          "slug": "uniondigital-bank",
+          "domain": "uniondigitalbank.io",
+          "file": "uniondigital-bank.png",
+          "logoType": "icon"
+        }
+      ]
+    },
+    "global": {
+      "name": "Global",
+      "locale": "*",
+      "brands": [
+        {
+          "name": "American Express",
+          "slug": "american-express",
+          "domain": "americanexpress.com",
+          "file": "american-express.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Apple Pay",
+          "slug": "apple-pay",
+          "domain": "apple.com",
+          "file": "apple-pay.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Binance",
+          "slug": "binance",
+          "domain": "binance.com",
+          "file": "binance.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Bitget",
+          "slug": "bitget",
+          "domain": "bitget.com",
+          "file": "bitget.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Bitstamp",
+          "slug": "bitstamp",
+          "domain": "bitstamp.net",
+          "file": "bitstamp.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Bybit",
+          "slug": "bybit",
+          "domain": "bybit.com",
+          "file": "bybit.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Coinbase",
+          "slug": "coinbase",
+          "domain": "coinbase.com",
+          "file": "coinbase.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Crypto.com",
+          "slug": "cryptocom",
+          "domain": "crypto.com",
+          "file": "cryptocom.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "eToro",
+          "slug": "etoro",
+          "domain": "etoro.com",
+          "file": "etoro.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Gate.io",
+          "slug": "gateio",
+          "domain": "gate.io",
+          "file": "gateio.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Gemini",
+          "slug": "gemini",
+          "domain": "gemini.com",
+          "file": "gemini.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "IG",
+          "slug": "ig",
+          "domain": "ig.com",
+          "file": "ig.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Interactive Brokers",
+          "slug": "interactive-brokers",
+          "domain": "interactivebrokers.com",
+          "file": "interactive-brokers.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Klarna",
+          "slug": "klarna",
+          "domain": "klarna.com",
+          "file": "klarna.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Kraken",
+          "slug": "kraken",
+          "domain": "kraken.com",
+          "file": "kraken.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "KuCoin",
+          "slug": "kucoin",
+          "domain": "kucoin.com",
+          "file": "kucoin.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Mastercard",
+          "slug": "mastercard",
+          "domain": "mastercard.com",
+          "file": "mastercard.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "MEXC",
+          "slug": "mexc",
+          "domain": "mexc.com",
+          "file": "mexc.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "moomoo",
+          "slug": "moomoo",
+          "domain": "moomoo.com",
+          "file": "moomoo.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "N26",
+          "slug": "n26",
+          "domain": "n26.com",
+          "file": "n26.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Neteller",
+          "slug": "neteller",
+          "domain": "neteller.com",
+          "file": "neteller.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "OKX",
+          "slug": "okx",
+          "domain": "okx.com",
+          "file": "okx.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Payoneer",
+          "slug": "payoneer",
+          "domain": "payoneer.com",
+          "file": "payoneer.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "PayPal",
+          "slug": "paypal",
+          "domain": "paypal.com",
+          "file": "paypal.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Plus500",
+          "slug": "plus500",
+          "domain": "plus500.com",
+          "file": "plus500.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Revolut",
+          "slug": "revolut",
+          "domain": "revolut.com",
+          "file": "revolut.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Samsung Wallet",
+          "slug": "samsung-wallet",
+          "domain": "samsung.com",
+          "file": "samsung-wallet.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Saxo",
+          "slug": "saxo",
+          "domain": "home.saxo",
+          "file": "saxo.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Skrill",
+          "slug": "skrill",
+          "domain": "skrill.com",
+          "file": "skrill.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Stripe",
+          "slug": "stripe",
+          "domain": "stripe.com",
+          "file": "stripe.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Tiger Brokers",
+          "slug": "tiger-brokers",
+          "domain": "tigerbrokers.com.sg",
+          "file": "tiger-brokers.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Trading 212",
+          "slug": "trading-212",
+          "domain": "trading212.com",
+          "file": "trading-212.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Visa",
+          "slug": "visa",
+          "domain": "visa.com",
+          "file": "visa.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Webull",
+          "slug": "webull",
+          "domain": "webull.com",
+          "file": "webull.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Western Union",
+          "slug": "western-union",
+          "domain": "westernunion.com",
+          "file": "western-union.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Wise",
+          "slug": "wise",
+          "domain": "wise.com",
+          "file": "wise.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "XTB",
+          "slug": "xtb",
+          "domain": "xtb.com",
+          "file": "xtb.png",
+          "logoType": "icon"
+        }
+      ]
+    },
+    "singapore": {
+      "name": "Singapore",
+      "locale": "en",
+      "brands": [
+        {
+          "name": "ANEXT Bank",
+          "slug": "anext-bank",
+          "domain": "anext.com.sg",
+          "file": "anext-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Aspire",
+          "slug": "aspire",
+          "domain": "aspireapp.com",
+          "file": "aspire.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "CIMB Singapore",
+          "slug": "cimb-singapore",
+          "domain": "cimb.com",
+          "file": "cimb-singapore.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Citibank Singapore",
+          "slug": "citibank-singapore",
+          "domain": "citibank.pl",
+          "file": "citibank-singapore.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Coinhako",
+          "slug": "coinhako",
+          "domain": "coinhako.com",
+          "file": "coinhako.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "DBS Bank",
+          "slug": "dbs-bank",
+          "domain": "dbs.com",
+          "file": "dbs-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Endowus",
+          "slug": "endowus",
+          "domain": "endowus.com",
+          "file": "endowus.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "GrabPay",
+          "slug": "grabpay",
+          "domain": "grab.com",
+          "file": "grabpay.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "GXS Bank",
+          "slug": "gxs-bank",
+          "domain": "gxs.com.sg",
+          "file": "gxs-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "HSBC Singapore",
+          "slug": "hsbc-singapore",
+          "domain": "hsbc.com",
+          "file": "hsbc-singapore.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Independent Reserve",
+          "slug": "independent-reserve",
+          "domain": "independentreserve.com",
+          "file": "independent-reserve.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Instarem",
+          "slug": "instarem",
+          "domain": "instarem.com",
+          "file": "instarem.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "MariBank",
+          "slug": "maribank",
+          "domain": "maribank.com.sg",
+          "file": "maribank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Maybank Singapore",
+          "slug": "maybank-singapore",
+          "domain": "maybank.com",
+          "file": "maybank-singapore.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "OCBC",
+          "slug": "ocbc",
+          "domain": "ocbc.com",
+          "file": "ocbc.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "POSB",
+          "slug": "posb",
+          "domain": "posb.com.sg",
+          "file": "posb.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "ShopeePay",
+          "slug": "shopeepay",
+          "domain": "shopee.com.br",
+          "file": "shopeepay.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Singlife",
+          "slug": "singlife",
+          "domain": "singlife.com",
+          "file": "singlife.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Standard Chartered Singapore",
+          "slug": "standard-chartered-singapore",
+          "domain": "sc.com",
+          "file": "standard-chartered-singapore.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "StashAway",
+          "slug": "stashaway",
+          "domain": "stashaway.com",
+          "file": "stashaway.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Syfe",
+          "slug": "syfe",
+          "domain": "syfe.com",
+          "file": "syfe.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "UOB",
+          "slug": "uob",
+          "domain": "uobgroup.com",
+          "file": "uob.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "YouTrip",
+          "slug": "youtrip",
+          "domain": "you.co",
+          "file": "youtrip.png",
+          "logoType": "icon"
+        }
+      ]
+    },
+    "taiwan": {
+      "name": "Taiwan",
+      "locale": "zh",
+      "brands": [
+        {
+          "name": "ACE Exchange",
+          "slug": "ace-exchange",
+          "domain": "aceex.io",
+          "file": "ace-exchange.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Bank of Taiwan",
+          "slug": "bank-of-taiwan",
+          "domain": "bot.com.tw",
+          "file": "bank-of-taiwan.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Bank SinoPac",
+          "slug": "bank-sinopac",
+          "domain": "sinopac.com",
+          "file": "bank-sinopac.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "BitoPro",
+          "slug": "bitopro",
+          "domain": "bitopro.com",
+          "file": "bitopro.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Cathay United Bank",
+          "slug": "cathay-united-bank",
+          "domain": "cathaybk.com.tw",
+          "file": "cathay-united-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Chang Hwa Bank",
+          "slug": "chang-hwa-bank",
+          "domain": "bankchb.com",
+          "file": "chang-hwa-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "CTBC Bank",
+          "slug": "ctbc-bank",
+          "domain": "ctbcbank.com",
+          "file": "ctbc-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "DBS Taiwan",
+          "slug": "dbs-taiwan",
+          "domain": "dbs.com",
+          "file": "dbs-taiwan.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "E.SUN Bank",
+          "slug": "esun-bank",
+          "domain": "esunbank.com.tw",
+          "file": "esun-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "EasyCard",
+          "slug": "easycard",
+          "domain": "easycard.com.tw",
+          "file": "easycard.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "First Bank",
+          "slug": "first-bank",
+          "domain": "firstbank.com.tw",
+          "file": "first-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Fubon Bank",
+          "slug": "fubon-bank",
+          "domain": "fubon.com",
+          "file": "fubon-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "HSBC Taiwan",
+          "slug": "hsbc-taiwan",
+          "domain": "hsbc.com",
+          "file": "hsbc-taiwan.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Hua Nan Bank",
+          "slug": "hua-nan-bank",
+          "domain": "hncb.com.tw",
+          "file": "hua-nan-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "icash Pay",
+          "slug": "icash-pay",
+          "domain": "icashpay.com.tw",
+          "file": "icash-pay.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "JKOPay",
+          "slug": "jkopay",
+          "domain": "jkos.com",
+          "file": "jkopay.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "KGI Securities",
+          "slug": "kgi-securities",
+          "domain": "kgi.com",
+          "file": "kgi-securities.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Land Bank of Taiwan",
+          "slug": "land-bank-of-taiwan",
+          "domain": "landbank.com.tw",
+          "file": "land-bank-of-taiwan.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "LINE Pay",
+          "slug": "line-pay",
+          "domain": "line.me",
+          "file": "line-pay.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Mega Bank",
+          "slug": "mega-bank",
+          "domain": "megabank.com.tw",
+          "file": "mega-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "PXPay Plus",
+          "slug": "pxpay-plus",
+          "domain": "pxpayplus.com",
+          "file": "pxpay-plus.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Rakuten Bank Taiwan",
+          "slug": "rakuten-bank-taiwan",
+          "domain": "rakuten-bank.co.jp",
+          "file": "rakuten-bank-taiwan.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Richart",
+          "slug": "richart",
+          "domain": "richart.tw",
+          "file": "richart.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Shanghai Commercial & Savings Bank",
+          "slug": "shanghai-commercial-savings-bank",
+          "domain": "scsb.com.tw",
+          "file": "shanghai-commercial-savings-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Standard Chartered Taiwan",
+          "slug": "standard-chartered-taiwan",
+          "domain": "sc.com",
+          "file": "standard-chartered-taiwan.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Taishin Bank",
+          "slug": "taishin-bank",
+          "domain": "taishinbank.com.tw",
+          "file": "taishin-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Taiwan Business Bank",
+          "slug": "taiwan-business-bank",
+          "domain": "tbb.com.tw",
+          "file": "taiwan-business-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Taiwan Cooperative Bank",
+          "slug": "taiwan-cooperative-bank",
+          "domain": "tcb-bank.com.tw",
+          "file": "taiwan-cooperative-bank.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Union Bank of Taiwan",
+          "slug": "union-bank-of-taiwan",
+          "domain": "ubot.com.tw",
+          "file": "union-bank-of-taiwan.png",
+          "logoType": "icon"
+        },
+        {
+          "name": "Yuanta Bank",
+          "slug": "yuanta-bank",
+          "domain": "yuantabank.com.tw",
+          "file": "yuanta-bank.png",
+          "logoType": "icon"
+        }
+      ]
+    }
+  }
+}

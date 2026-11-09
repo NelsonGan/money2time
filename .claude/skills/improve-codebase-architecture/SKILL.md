@@ -5,7 +5,24 @@ description: Evaluate and improve the structural health of the money2time codeba
 
 # Improve codebase architecture (money2time)
 
-Read `CLAUDE.md` first — it is the canonical architecture map. This skill is about *keeping the codebase true to that map* and improving it incrementally, not redesigning it.
+Read the README's Repo layout and Architecture sections first — they are the canonical map. This skill is about *keeping the codebase true to that map* and improving it incrementally, not redesigning it.
+
+## The apps in this repository
+
+The repository holds several independent projects, each its own npm project with its own lockfile, conventions and CI. There is no workspace and no shared package:
+
+| App               | What                                              | Skill                                                            |
+| ----------------- | ------------------------------------------------- | ---------------------------------------------------------------- |
+| `apps/mobile`     | the Expo app; the rest of this skill is about it  | this one                                                         |
+| `apps/cloudflare` | one Worker per directory, plus D1 schemas         | README "Cloudflare"                                              |
+| `apps/web`        | money2time.com and the Web Dashboard (vinext)     | [work-on-website](../work-on-website/SKILL.md)                   |
+| `apps/app-studio` | store screenshots, creatives and listing copy     | [work-on-app-studio](../work-on-app-studio/SKILL.md)             |
+
+Boundaries between them:
+
+- **No imports across apps.** Code two apps need is mirrored, with a comment naming the twin (the Web Dashboard's `src/lib/cloud/*` match the app's `services/webDashboard*.ts` byte for byte; `src/lib/backup/model.ts` mirrors the app's maths). Changing one side means changing the other in the same PR.
+- **Assets cross by script, not by path.** `apps/mobile/scripts/sync-tutorials-web.mjs` and `apps/web/scripts/sync-dashboard-assets.mjs` copy app art and the tutorial catalog into the website; `apps/mobile/scripts/generate-account-logos.mjs` reads App Studio's `public/logos/`. Their outputs are committed and never hand-edited, and the README lists which app files they parse, so those formats are not free to change.
+- **The Metro config blocks the other apps**, and `.easignore` keeps them out of the EAS archive. Keep it that way: nothing outside `apps/mobile` may end up in the binary.
 
 ## Analytics impact
 
@@ -73,7 +90,7 @@ Cross-cutting:
 - Dead code removed, not left "just in case".
 - Public contracts (`types/`, repo/context signatures) updated consistently across all callers.
 - `npm run check` and `npm test` both pass.
-- The change is documented in `CLAUDE.md` if it alters the architecture map (new table, new feature folder, new service category, new top-level pattern).
+- The change is documented in `README.md` if it alters the architecture map (new table, new feature folder, new service category, new top-level pattern, a new app or cross-app sync).
 
 ## Anti-patterns (do not introduce)
 

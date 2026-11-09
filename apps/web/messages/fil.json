@@ -1,0 +1,2165 @@
+{
+  "metadata": {
+    "home": {
+      "title": "Expense Tracker: Gastos Mo, Oras Mo - Money2Time",
+      "description": "Ang expense tracker na ipinapakita ang bawat bilihin bilang oras ng buhay mo. Subaybayan ang gastos, account at buwanang bayarin — walang bank login.",
+      "openGraphDescription": "Bawat piso, katumbas ng oras ng buhay mo. Isang pribadong expense tracker na hindi humihingi ng bank login."
+    },
+    "contact": {
+      "title": "Makipag-ugnayan - Money2Time",
+      "description": "Mga tanong, feedback, ideya para sa bagong feature, o hiling tungkol sa data mo: magsulat nang diretso sa gumawa ng Money2Time."
+    },
+    "privacy": {
+      "title": "Patakaran sa Privacy - Money2Time",
+      "description": "Paano pinangangasiwaan ng Money2Time ang data mo: local-first storage, product analytics gamit ang random app ID, at walang pagbebenta ng personal o financial data."
+    },
+    "terms": {
+      "title": "Mga Tuntunin ng Paggamit - Money2Time",
+      "description": "Ang mga tuntuning tinatanggap mo kapag ginamit ang Money2Time expense tracker sa iOS at Android."
+    },
+    "statementsImport": {
+      "title": "Mag-import ng bank statement gamit ang AI - Money2Time",
+      "description": "Maikling gabay sa AI statement import ng Money2Time, para mailipat ang bank history mo nang hindi isa-isang tinitipa."
+    },
+    "dataDeletion": {
+      "title": "Kahilingan sa Pagtanggal ng Data - Money2Time",
+      "description": "Paano humiling na tanggalin ang data mo sa Money2Time, ano ang binubura, ano ang itinatago, at gaano katagal."
+    },
+    "keywords": [
+      "expense tracker app",
+      "budget app philippines",
+      "gastos tracker",
+      "pera at oras",
+      "personal finance app",
+      "buwanang gastos",
+      "ipon app",
+      "sahod kada oras",
+      "expense tracker tagalog",
+      "budgeting app"
+    ],
+    "costInHours": {
+      "title": "Median na sahod bawat bansa, sa oras ng trabaho - Money2Time",
+      "description": "Opisyal na median at average na sahod ng sampung bansa, sinukat sa isang produktong pareho saanman: gaano katagal kang magtatrabaho para dito.",
+      "openGraphDescription": "Gaano kalayo ang isang oras ng trabaho sa sampung bansa, sinukat sa produktong pareho saanman."
+    },
+    "tutorials": {
+      "title": "Mga tutorial ng Money2Time - Paano gamitin ang app",
+      "description": "Sunod-sunod na gabay para sa bawat bahagi ng Money2Time, may totoong screenshot. Matutunan ang pag-log ng gastos, paghati ng bill, pagbabadyet, at pagtingin sa presyo bilang oras ng trabaho.",
+      "detailTitle": "{title} - Tutorial ng Money2Time"
+    },
+    "dashboard": {
+      "title": "Web Dashboard - Money2Time",
+      "description": "I-scan gamit ang iyong telepono para makita ang Money2Time data mo sa malaking screen: paggastos, net worth, budget at ang mga oras sa likod ng bawat pagbili. May end-to-end encryption, walang iniimbak online."
+    }
+  },
+  "common": {
+    "language": {
+      "label": "Wika"
+    },
+    "footer": {
+      "contact": "Makipag-ugnayan",
+      "privacy": "Patakaran sa Privacy",
+      "dataDeletion": "Pagtanggal ng Data",
+      "terms": "Mga Tuntunin ng Paggamit",
+      "copyright": "© {year} Money2Time. Nakalaan ang lahat ng karapatan.",
+      "costInHours": "Presyo sa oras",
+      "tutorials": "Mga tutorial",
+      "dashboard": "Web dashboard"
+    }
+  },
+  "storeButtons": {
+    "appStorePrefix": "I-download sa",
+    "appStore": "App Store",
+    "playStorePrefix": "Kunin ito sa",
+    "playStore": "Google Play"
+  },
+  "screenshotGallery": {
+    "ariaLabel": "Mga screenshot ng app",
+    "alts": {
+      "home": "Screenshot ng Money2Time na nagpapakita ng buwanang listahan ng mga transaksyon na may kabuuang kita at gastos at ang mga oras ng trabaho sa likod ng bawat pagbili",
+      "privacy": "Screenshot ng Money2Time tungkol sa privacy: nananatili sa iyong device ang data mo, walang ads, gumagana nang ganap na offline",
+      "assets": "Screenshot ng Money2Time na nagpapakita ng net assets at mga balanse ng account",
+      "addExpense": "Screenshot ng Money2Time na nagpapakita ng mabilis na paglagay ng gastos gamit ang on-screen keyboard at voice input",
+      "splitBill": "Screenshot ng Money2Time na nagpapakita ng bill na hinati nang pantay sa ilang tao kasama ang parte ng bawat isa",
+      "insights": "Screenshot ng Money2Time na nagpapakita ng pie chart ng breakdown ng gastos ayon sa kategorya",
+      "budgeting": "Screenshot ng Money2Time na nagpapakita ng buwanang budget bawat kategorya na may progress bar at kung magkano ang natitira sa bawat isa",
+      "recurrings": "Screenshot ng Money2Time na nagpapakita ng mga paulit-ulit na commitment at iskedyul",
+      "hourlyRates": "Screenshot ng Money2Time na nagpapakita ng kasaysayan ng halaga kada oras ayon sa buwan"
+    }
+  },
+  "home": {
+    "nav": {
+      "howItWorks": "Paano ito gumagana",
+      "logging": "Pagtatala",
+      "features": "Mga feature",
+      "privacy": "Privacy",
+      "download": "Kunin ang app",
+      "openMenu": "Buksan ang menu",
+      "closeMenu": "Isara ang menu"
+    },
+    "hero": {
+      "title": "May dalawang numero ang bawat presyo.",
+      "subtitle": "Itinatala ng Money2Time ang gastos mo gaya ng ibang app, tapos ipinapakita ang parehong halaga bilang oras ng buhay mo.",
+      "badges": {
+        "onDevice": "Nananatili sa telepono mo",
+        "noBank": "Walang bank login",
+        "quick": "Ilang segundo lang ang pagtatala"
+      }
+    },
+    "units": {
+      "min": "{value} min",
+      "hours": "{value} oras"
+    },
+    "ticker": {
+      "coffee": "Kape",
+      "lunch": "Tanghalian sa labas",
+      "groceries": "Grocery",
+      "fuel": "Gasolina",
+      "tshirt": "T-shirt",
+      "beers": "Isang round ng beer",
+      "electricity": "Kuryente",
+      "pizza": "Pizza tuwing Biyernes",
+      "dogFood": "Pagkain ng aso",
+      "cinema": "Sine",
+      "gym": "Gym",
+      "rent": "Upa",
+      "flight": "Pamasahe pauwi",
+      "iceCream": "Ice cream"
+    },
+    "howItWorks": {
+      "eyebrow": "Paano ito gumagana",
+      "title": "Isang tap, nagiging oras ang pera.",
+      "body": "Ang rate mo kada oras ay galing sa perang talagang pumapasok sa account mo. Pagkatapos ng buwis, hinati sa mga araw na nagtatrabaho ka, kasama ang biyahe na hindi naman binabayaran.",
+      "coffee": {
+        "title": "Ang kape",
+        "note": "Maliit lang kaya madaling palampasin. Gusto mo naman talaga ang kapeng iyon."
+      },
+      "impulse": {
+        "title": "Ang biglaang bili",
+        "note": "Halos dalawang araw ng trabaho. Sulit tulugan muna."
+      },
+      "rate": {
+        "title": "Ang totoo mong rate",
+        "perHour": "/oras",
+        "takeHome": {
+          "label": "Take-home pay",
+          "value": "{value} kada buwan"
+        },
+        "daysWorked": {
+          "label": "Araw na nagtatrabaho ka",
+          "value": "{value} kada linggo"
+        },
+        "commute": {
+          "label": "Biyahe, walang bayad",
+          "value": "{value} min kada araw"
+        }
+      }
+    },
+    "logging": {
+      "eyebrow": "Pagtatala",
+      "title": "Hindi ka na magta-type ng entry.",
+      "body": "Namamatay ang karamihan ng expense app dahil trabaho ang pagtatala. Narito ang tatlong shortcut.",
+      "videoPlaceholder": "Malapit nang mailagay ang screen recording",
+      "receiptScan": {
+        "tab": "Mag-scan ng resibo",
+        "title": "Itutok lang sa resibo.",
+        "body": "Bumubukas ang camera sa loob mismo ng entry sheet, hindi sa ibang screen. Balik na punong-puno ang total, tindahan at petsa, at nakakabit pa rin ang litrato.",
+        "points": {
+          "one": "Binabasa ang total, petsa at tindahan",
+          "two": "Itinatago ang litrato para sa susunod"
+        }
+      },
+      "backTap": {
+        "tab": "Back Tap",
+        "title": "I-tap nang dalawang beses ang likod.",
+        "body": "Isang shortcut sa Back Tap ng iOS ang nagbubukas ng keypad kasama ang huli mong account at kategorya. Tapos bago ka pa umalis sa counter.",
+        "points": {
+          "one": "Mula bulsa hanggang naitala, ilang segundo lang",
+          "two": "Walang pag-unlock, walang paghahanap ng app"
+        }
+      },
+      "applePay": {
+        "tab": "Apple Pay",
+        "title": "O magbayad na lang gaya ng dati.",
+        "body": "May automation na nakakahalata ng bayad sa Apple Pay at inihahanda na ang entry. Isang notification, sulyap sa kategorya, i-swipe at tapos.",
+        "points": {
+          "one": "Nahuhuli ang mga hindi mo talaga itatala nang manual",
+          "two": "Walang nase-save hangga't hindi mo sinasabi"
+        }
+      }
+    },
+    "review": {
+      "eyebrow": "Balikan",
+      "title": "Tingnan kung saan napunta.",
+      "body": "Pumili ng isang linggo, buwan o taon. Isang halaga, ang mga oras sa likod nito, at nakaayos na mga kategorya. I-tap ang alinman para makita ang laman.",
+      "points": {
+        "one": "Ikinukumpara sa sarili mong average, hindi sa badyet ng iba",
+        "two": "Alisin ang isang kategorya o account at kusang magre-recompute ang mga numero",
+        "three": "Obserbasyon, hindi sermon"
+      },
+      "chip": "{hours} oras",
+      "mock": {
+        "title": "Balikan ang gastos",
+        "week": "Linggo",
+        "month": "Buwan",
+        "year": "Taon",
+        "spent": "Nagastos ngayong linggo",
+        "calmer": "Mas kalmado kaysa dati.",
+        "categories": {
+          "groceries": "Grocery",
+          "eatingOut": "Kain sa labas",
+          "transport": "Transportasyon"
+        }
+      }
+    },
+    "features": {
+      "eyebrow": "Mga feature",
+      "title": "Lahat ng iba pang inaasahan mo, tahimik lang.",
+      "sentiment": {
+        "title": "Kung ano ang pakiramdam",
+        "body": "Tagan ang isang bili bilang masaya, neutral o pinagsisihan. Mas marami pang sinasabi ang pattern kaysa sa total.",
+        "legend": "Sulit naman"
+      },
+      "commitments": {
+        "title": "Mga fixed na gastos",
+        "body": "Upa, insurance, ang gym na balak mo nang i-cancel. Makikita mo ang buwan bago pa ito dumating.",
+        "lockedIn": "/buwan nakalaan na"
+      },
+      "reimbursements": {
+        "title": "Perang babalik",
+        "body": "Markahan ang gastos bilang mare-reimburse at maghihintay ito sa sarili nitong listahan hanggang dumating.",
+        "employer": "Kompanya",
+        "insurer": "Health insurance"
+      },
+      "insights": {
+        "title": "Siyam na pagsusuri",
+        "body": "Hatian, trend, savings rate, damdamin, ari-arian. Lahat mula sa isang menu.",
+        "savingsRate": "Savings rate",
+        "incomeTrend": "Trend ng kita",
+        "assets": "Ari-arian"
+      },
+      "split": {
+        "title": "Hatian ang bill",
+        "body": "I-scan ang resibo, hatiin ang bawat item sa mesa. Ang parte mo lang ang binibilang.",
+        "yourShare": "Parte mo"
+      },
+      "modes": {
+        "title": "Simple o buo",
+        "body": "Magsimula sa isang wallet at keypad. Magdagdag ng account, transfer at currency kapag kailangan mo na.",
+        "simple": "Simple",
+        "simpleNote": "Isang wallet",
+        "full": "Buo",
+        "fullNote": "Lahat naka-on"
+      },
+      "budgets": {
+        "title": "Badyet na nagtatakda ng bilis",
+        "body": "Maglagay ng buwanang limit kada kategorya. Ipinapakita ng bar kung nasaan ka dapat ngayong araw.",
+        "category": "Grocery",
+        "of": "sa {total}",
+        "pace": "Nasa tamang bilis, {days} araw pa"
+      },
+      "calendar": {
+        "title": "Isang buwan na kayang basahin",
+        "body": "Mag-zoom out sa calendar grid. Ipinapakita ng bawat araw kung ano ang pumasok at lumabas, mas madilim kapag mas malaki."
+      },
+      "currency": {
+        "title": "Kahit anong currency",
+        "body": "Itala sa currency na ibinayad mo. Kino-convert ang kabuuan, at nananatili sa linya ang orihinal na halaga.",
+        "item": "Hulog sa sasakyan",
+        "paidIn": "Binayaran sa {currency}"
+      },
+      "receipts": {
+        "title": "Bawat resibo, nakaimbak",
+        "body": "Nakakabit ang litrato sa entry at naiipon sa mga album. Isang scroll lang ang warranty claim."
+      },
+      "search": {
+        "title": "Hanapin ang kahit ano",
+        "body": "Maghanap gamit ang note o tindahan, tapos paliitin ayon sa kategorya, account, halaga o pakiramdam.",
+        "query": "kape",
+        "filterCategory": "Pagkain",
+        "filterAccount": "Cash",
+        "filterSentiment": "Pinagsisihan"
+      },
+      "assets": {
+        "title": "Kung ano ang meron ka",
+        "body": "Subaybayan ang mga account at ari-arian katabi ng gastos, para mabilang din ang mas malayong tanaw."
+      }
+    },
+    "testimonials": {
+      "eyebrow": "Mga review",
+      "title": "Ang sabi ng mga tao pagkatapos ng isang buwan.",
+      "usersChoice": "Pinili ng mga user"
+    },
+    "privacy": {
+      "eyebrow": "Privacy",
+      "title": "Nananatili sa telepono mo ang gastos mo.",
+      "body": "Walang account na gagawin, walang bangkong ikokonekta. Nasa device mo ang lahat, at kaya mong i-export o burahin ang lahat kahit kailan.",
+      "onDevice": {
+        "title": "Nasa device lang",
+        "body": "Walang cloud, walang sync, walang ads."
+      },
+      "import": {
+        "title": "Dalhin ang dati mong record",
+        "body": "Mag-import ng backup mula sa Money Manager at magpatuloy."
+      },
+      "link": "Basahin ang privacy policy"
+    },
+    "why": {
+      "eyebrow": "Mula sa Developer",
+      "title": "Bakit Ko Ito Ginawa",
+      "bookAlt": "Your Money or Your Life ni Vicki Robin",
+      "quote": "Ipinagpapalit mo ang enerhiya ng iyong buhay para sa pera",
+      "quoteAuthor": "- Vicki Robin",
+      "paragraph1": "Pagkatapos kong basahin ang <book>Your Money or Your Life</book>, may biglang nag-click sa akin. Para sa karamihan sa atin na kumikita ng sahod, ang pera ay hindi lang pera, ito ang enerhiya ng ating buhay. Ang bawat dolyar na ginagastos natin ay kumakatawan sa mga oras ng ating panahon, pagsisikap, at buhay na ipinagpalit natin.",
+      "paragraph2": "Kaya ginawa ko ang app na ito. Tinutulungan ka nitong makita ang paggastos sa ibang paraan: hindi lang sa currency, kundi sa oras ng iyong buhay. Dahil minsan ang <cost>\"$20\"</cost> ay parang hindi malaki, pero ang <time>\"2 oras ng buhay ko\"</time> ay ramdam. Simple ang layunin: tulungan kang maging mas mulat kung saan napupunta ang pera mo (o sa totoo lang, oras mo), para mabawi mo ang kontrol dito.",
+      "paragraph3": "Nananatili ang lahat sa iyong device, walang login o cloud sync. Sa iyo ang data mo. Maaari mo ring i-export ang data bilang simpleng JSON file kung kailangan. Ibinibigay ng libreng bersyon ang lahat ng kailangan mo para makapagsimula. Ina-unlock ng Pro ang ilang karagdagang feature tulad ng unlimited accounts/categories/hourly rates, atbp.",
+      "paragraph4": "Sana palagi mong hawak ang kontrol sa iyong pera at sa iyong buhay."
+    },
+    "closing": {
+      "title": "Tingnan kung magkano talaga ang pera mo.",
+      "body": "Libre, at walang kailangang account. Ilagay ang halaga mo kada oras sa loob ng isang minuto at magkakaroon ng pangalawang kahulugan ang bawat numero."
+    },
+    "community": {
+      "body": "Kumonekta sa ibang users, magbahagi ng feedback, at kumuha ng mga tip sa aming Discord server.",
+      "cta": "Sumali sa Komunidad"
+    },
+    "dashboardEntry": {
+      "eyebrow": "Bago · Web Dashboard",
+      "title": "Ang Money2Time data mo, sa malaking screen",
+      "body": "Mag-scan ng code sa app.money2time.com gamit ang telepono mo para makita ang cash flow, gastos, net worth, budget, biyahe at ang mga oras sa likod ng bawat binili. Magdagdag at mag-edit ng mga transaksyon mula sa computer mo habang nakakonekta ang telepono mo. End-to-end encrypted.",
+      "cta": "Buksan ang web dashboard",
+      "points": {
+        "private": "May end-to-end encryption",
+        "charts": "17 dashboard",
+        "edits": "Mag-edit mula sa computer mo"
+      }
+    }
+  },
+  "contact": {
+    "page": {
+      "title": "Makipag-ugnayan sa Akin",
+      "intro": "Para sa suporta, bug, feedback, o mga tanong tungkol sa privacy.",
+      "formLabel": "Form sa Pakikipag-ugnayan",
+      "discordTitle": "Mas gusto mo bang mag-chat?",
+      "discordBody": "Sumali sa aming Discord community para makonekta sa ibang users at makakuha ng mabilisang sagot.",
+      "discordCta": "Sumali sa Discord Namin"
+    },
+    "form": {
+      "honeypot": "Kompanya",
+      "name": "Pangalan",
+      "namePlaceholder": "Iyong pangalan",
+      "email": "Email",
+      "emailPlaceholder": "you@example.com",
+      "message": "Mensahe",
+      "messagePlaceholder": "Sabihin sa akin kung ano ang nangyari, ano ang gusto mong mapabuti, o paano ako makakatulong.",
+      "sending": "Ipinapadala...",
+      "send": "Ipadala ang mensahe"
+    },
+    "validation": {
+      "nameRequired": "Pakilagay ang iyong pangalan.",
+      "nameTooLong": "Panatilihing mas mababa sa {max} character ang iyong pangalan.",
+      "emailRequired": "Pakilagay ang iyong email address.",
+      "emailInvalid": "Gumamit ng wastong email address.",
+      "subjectTooLong": "Panatilihing mas mababa sa {max} character ang subject.",
+      "messageRequired": "Magbahagi ng maikling mensahe.",
+      "messageTooLong": "Panatilihing mas mababa sa {max} character ang mensahe."
+    },
+    "status": {
+      "honeypot": "Salamat sa pakikipag-ugnayan. Papunta na ang iyong mensahe.",
+      "error": "Ayusin ang mga naka-highlight na field at subukan ulit.",
+      "mailto": "Binubuksan ang default mail app mo na may nakahandang mensahe. Kung walang bumukas, direkta akong i-email."
+    }
+  },
+  "statementsImport": {
+    "title": "Pag-import ng Statement",
+    "intro": "Panoorin ang maikling walkthrough sa ibaba para makita kung paano i-import ang iyong mga bank statement sa Money2Time sa tulong ng AI.",
+    "videoTitle": "Money2Time - Walkthrough ng Pag-import ng Statement"
+  },
+  "notFound": {
+    "title": "Hindi nahanap ang page",
+    "body": "Hindi umiiral ang page na ito. Baka masyado rin nitong kinakain ang oras mo.",
+    "home": "Pumunta sa home"
+  },
+  "privacy": {
+    "title": "Patakaran sa Privacy",
+    "lastUpdated": "Huling na-update: Oktubre 22, 2026",
+    "websiteAnalytics": {
+      "title": "Analytics ng Paggamit ng Website",
+      "paragraphs": [
+        "Sa money2time.com, ginagamit namin ang PostHog at Google Analytics upang sukatin ang mga pseudonymous na page view at limitadong hanay ng mga interaction, gaya ng pag-click sa pag-download ng app, pagpili ng tutorial, at resulta ng contact form. Maaaring gumamit ang mga serbisyong ito ng browser storage o cookies at magproseso ng teknikal na impormasyon kabilang ang tinatayang rehiyon, uri ng device at browser, at referring site. Pinapanatili nang hanggang 14 na buwan ang user at event data sa Google Analytics.",
+        "Sa Web Dashboard (app.money2time.com), sinusukat ng parehong mga serbisyo kung aling mga pahina ng dashboard ang binubuksan mo, kung kailan na-link o na-unlink ang isang browser, kung nagtatagumpay ang mga paglipat mula sa iyong telepono at ang mga pagbabagong ginagawa mo, at kung kailan inaalok ang isang Pro feature. Kapag naipadala na ng iyong telepono ang data nito, naka-link ang mga event na ito sa random na app identifier ng teleponong iyon, kaya ang paggamit mo ng dashboard at ng app ay binibilang bilang iisang pseudonymous na user hanggang i-unlink mo ang browser. Pinananatiling hiwalay ito ng dashboard sa iba pang bahagi ng money2time.com, kaya hindi naka-link dito ang mga pagbisita mo sa ibang mga pahina. Hindi kailanman kasama sa mga event ng dashboard ang iyong financial data, at ang mga pagbisita sa dashboard ay hindi kailanman nire-record bilang session replay.",
+        "Maaari ding i-record ng PostHog ang maliit na sample ng mga pagbisita sa website bilang session replay na nakatago ang bawat form field, at tumatanggap ito ng ulat kapag may error sa isang page.",
+        "Hindi namin ipinapadala ang nilalaman ng contact form, tekstong hinanap sa tutorial, financial data, account identifier, buong URL query string, o data para sa advertising o personalization. Hindi idinaragdag ng /download redirect ang iyong IP address o user-agent string sa analytics event nito. Hindi nilo-load ang website analytics kapag naka-enable ang Do Not Track ng iyong browser."
+      ]
+    },
+    "sections": [
+      {
+        "title": "Pangkalahatang-ideya",
+        "paragraphs": [
+          "Ang Money2Time (ang App) ay isang personal finance app na ginagawang katumbas na oras ang iyong paggastos batay sa iyong hourly wage. Mahalaga sa amin ang iyong privacy. Ipinapaliwanag ng patakarang ito kung anong data ang kinokolekta ng App, paano ito ginagamit, at ang iyong mga karapatan kaugnay ng data na iyon."
+        ]
+      },
+      {
+        "title": "1. Pag-iimbak ng Data at Local-First na Disenyo",
+        "paragraphs": [
+          "Lahat ng iyong financial data, kabilang ang mga transaksyon, account, kategorya, recurring rules, at wage settings, ay nakaimbak nang lokal sa iyong device gamit ang on-device database (SQLite). Hindi kami nagpapatakbo ng mga server na nag-iimbak ng iyong personal na impormasyong pinansyal, at hindi kailanman sina-sync o bina-back up ng App ang iyong data sa isang server namin. Kung gagamitin mo ang opsyonal na Web Dashboard (seksyon 6), direktang nagpapadala ang iyong telepono ng kopya sa browser na na-link mo, may end-to-end encryption; ipinapasa ito ng aming server nang hindi iniimbak at hindi nito ito mababasa.",
+          "Kung i-uninstall mo ang App, permanenteng mabubura ang lahat ng lokal na nakaimbak na data."
+        ]
+      },
+      {
+        "title": "2. Impormasyong Kinokolekta Namin",
+        "subsections": [
+          {
+            "title": "Financial Data (Lokal Lang Iniimbak)",
+            "lists": [
+              [
+                "Mga halaga ng transaksyon, petsa, kategorya, tala, at sentiment tags",
+                "Mga pangalan, uri, at balanse ng account",
+                "Impormasyon sa sahod at hourly rate",
+                "Mga recurring transaction rule",
+                "Mga pangalan at organisasyon ng kategorya"
+              ]
+            ],
+            "paragraphs": [
+              "Hindi umaalis ang data na ito sa iyong device maliban kung malinaw mong piniling i-export ito, o ipadala ito sa browser na na-link mo gamit ang Web Dashboard."
+            ]
+          },
+          {
+            "title": "Random App Identifier",
+            "paragraphs": [
+              "Sa unang pagbukas, gumagawa ang App ng random na unique identifier na nagsisimula sa m2t_ at hindi naka-link sa iyong pangalan, email, Apple ID, o anumang personal na pagkakakilanlan. Ibinabahagi ang parehong identifier sa PostHog, Google Analytics for Firebase, at RevenueCat para sa product analytics at pamamahala ng subscription, at sa anumang browser na ili-link mo gamit ang Web Dashboard, na ginagamit din ito para sa usage analytics nito (PostHog at Google Analytics)."
+            ]
+          },
+          {
+            "title": "Usage Analytics",
+            "paragraphs": [
+              "Ginagamit namin ang PostHog at Google Analytics for Firebase upang mangolekta ng pseudonymous usage data na naka-link sa random app identifier na ito at mapaganda ang App. Hindi kasama rito ang halaga, detalye ng transaksyon, balanse, notes, resibo, backups, o impormasyon na makakakilala sa iyo.",
+              "Tumatanggap din ang PostHog ng mga ulat ng crash at error, at nire-record nito ang maliit na sample ng mga session ng app bilang screen recording para mahanap at maayos namin ang mga problema. Sa mga recording na iyon, nakatago ang lahat ng nagpapakita ng iyong impormasyon: teksto, numero, input field, chart at anumang larawang idinagdag mo. Ang sariling disenyo lang ng app, gaya ng mga icon, ilustrasyon at label ng button, ang nakikita. Hindi kailanman ipinapakita ng mga recording na ito ang iyong financial data."
+            ],
+            "lists": [
+              [
+                "Mga screen view at paggamit ng feature",
+                "Mga event sa app tulad ng paggawa ng transaksyon o pagbabago ng settings",
+                "Mga pangkalahatang preference tulad ng currency, locale, theme, at display mode",
+                "Platform tulad ng iOS o Android"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "title": "3. In-App Purchases at Subscriptions",
+        "paragraphs": [
+          "Nag-aalok ang App ng opsyonal na premium subscription (Pro) na pinamamahalaan sa pamamagitan ng RevenueCat. Pinoproseso ng Apple o Google ang bayad. Hindi namin kailanman natatanggap o iniimbak ang iyong payment information, detalye ng credit card, o Apple ID/Google Account credentials.",
+          "Natatanggap ng RevenueCat ang iyong subscription status, product identifier, at expiration date para pamahalaan ang iyong entitlements. Naka-link ito sa random app identifier, hindi sa iyong personal na pagkakakilanlan."
+        ]
+      },
+      {
+        "title": "4. Mga Notification",
+        "paragraphs": [
+          "Maaaring humingi ng pahintulot ang App na magpadala ng mga notification. Lahat ng notification ay lokal na iniiskedyul sa iyong device. Walang push notification na ipinapadala mula sa external servers. Maaari mong tanggihan ang notification permission o i-disable ang notifications anumang oras sa Settings ng iyong device."
+        ],
+        "lists": [
+          [
+            "Araw-araw na check-in reminders",
+            "Lingguhang buod ng paggastos",
+            "Mga alerto para sa recurring transaction"
+          ]
+        ]
+      },
+      {
+        "title": "5. Mga Pahintulot ng Device",
+        "paragraphs": [
+          "Notification permission lang ang hinihingi ng App upang mag-iskedyul ng lokal na reminders at summaries. Hindi ina-access ng App ang iyong camera, microphone, photo library, contacts, calendar, messages, location, health data, fitness data, ibang apps, o browsing history."
+        ]
+      },
+      {
+        "title": "6. Data Export, Import at Web Dashboard",
+        "paragraphs": [
+          "Maaari mong i-export ang lahat ng iyong financial data bilang JSON file anumang oras sa pamamagitan ng Settings ng App. Ibinabahagi ang exported file gamit ang native sharing functionality ng iyong device. Hindi namin natatanggap o pinoproseso ang iyong exported data.",
+          "Maaari ka ring mag-import ng data mula sa dating Money2Time backup o mag-migrate mula sa Money Manager app. Pinapalitan ng pag-import ang lahat ng umiiral na data sa iyong device.",
+          "Opsyonal ang Web Dashboard. Para magamit ito, bubuksan mo ang app.money2time.com sa isang computer at i-scan ang code na ipinapakita nito gamit ang App. Pagkatapos, magkakasundo ang iyong telepono at ang browser na iyon sa isang encryption key na silang dalawa lang ang may hawak. Habang parehong bukas ang Web Dashboard screen ng App at ang browser, nagpapadala ang App sa browser ng kopya ng iyong data (ang parehong data ng isang export, kasama ang mga logo, icon at cover photo na idinagdag mo, pero hindi ang mga larawan ng resibo o mga QR code sa pagbabayad), naka-encrypt nang end-to-end gamit ang AES-256-GCM. Dumadaan ito sa isang server na pinapatakbo namin sa Cloudflare, na ipinapasa ang naka-encrypt na data habang dumarating ito at hindi ito iniimbak. Hindi namin ito mababasa.",
+          "Itinatago ng browser ang huling kopyang natanggap nito, naka-encrypt pa rin, sa sarili nitong storage kasama ang key, hanggang i-unlink mo ito sa browser o sa App. Bumabalik sa iyong telepono ang mga pagbabagong ginagawa mo sa dashboard, naka-encrypt sa parehong paraan, at sine-save lang ito ng App habang bukas ang Web Dashboard screen nito at mula lang sa browser na pinayagan mong gumawa ng mga pagbabago. Sinasabi rin ng iyong telepono sa browser kung mayroon kang Money2Time Pro, para mabuksan nito ang mga Pro dashboard, at ang random na app identifier nito, para sa usage analytics ng dashboard. Walang account: hindi kami nag-iimbak ng email address, at ang server na nagpapasa ng iyong data ay walang talaan kung aling mga telepono at browser ang naka-link."
+        ]
+      },
+      {
+        "title": "7. Pagbura ng Data",
+        "paragraphs": [
+          "May ganap kang kontrol sa iyong data sa lahat ng oras. Permanenteng binubura ng Reset All Data ang lahat ng transaksyon, account, kategorya, recurring rules, at wage settings mula sa iyong device. Nililinis ng Reset Transactions Only ang iyong transaction history habang pinananatili ang accounts at categories. Kapag in-uninstall ang App, ganap na inaalis ang lokal na database at lahat ng nakaimbak na data. Kapag in-unlink ang isang browser mula sa Web Dashboard, binubura ang kopyang itinatago nito: agad kapag nag-unlink ka sa browser, at sa susunod na pagkonekta nito kapag nag-unlink ka mula sa App. Binubura rin ito kapag nilinis ang site data ng browser na iyon.",
+          "Ang pag-reset ng data sa loob ng App ay hindi nagbubura ng iyong subscription status na hawak ng Apple/Google o ng analytics data na dati nang naipadala sa PostHog / Google Analytics for Firebase. Para humiling ng pagbura ng analytics data, makipag-ugnayan sa amin sa email sa ibaba."
+        ]
+      },
+      {
+        "title": "8. Mga Third-Party Service",
+        "paragraphs": [
+          "Hindi nagpapakita ng advertisement ang App at hindi gumagamit ng advertising SDKs."
+        ],
+        "table": {
+          "headers": [
+            "Serbisyo",
+            "Layunin",
+            "Data na Ibinabahagi"
+          ],
+          "rows": [
+            [
+              "PostHog / Google Analytics for Firebase",
+              "Pseudonymous na usage analytics",
+              "Random app ID, mga event sa paggamit ng feature, preferences"
+            ],
+            [
+              "RevenueCat",
+              "Pamamahala ng subscription",
+              "Random na app ID, status ng subscription"
+            ],
+            [
+              "Cloudflare (Workers, Durable Objects)",
+              "Koneksyon ng Web Dashboard, kung gagamitin mo lang ito",
+              "Ang iyong data, may end-to-end encryption at habang nasa biyahe lang; mga detalye ng koneksyon tulad ng IP address, saglit na itinatago sa mga log ng Cloudflare"
+            ],
+            [
+              "Apple App Store / Google Play",
+              "Pagproseso ng bayad",
+              "Direktang pinangangasiwaan ng Apple/Google"
+            ]
+          ]
+        }
+      },
+      {
+        "title": "9. Seguridad ng Data",
+        "paragraphs": [
+          "Ang iyong financial data ay nakaimbak sa isang hindi naka-encrypt na lokal na database na protektado ng built-in security ng iyong device. Kapag ginamit mo ang Web Dashboard, ine-encrypt ito sa iyong telepono gamit ang AES-256-GCM, na may key na pinagkasunduan ng iyong telepono at browser sa pamamagitan ng P-256 key exchange, at ipinapadala sa HTTPS; hindi kailanman hawak ng aming server ang key. Standard at nailathalang encryption algorithm lang ang ginagamit ng App."
+        ]
+      },
+      {
+        "title": "10. Privacy ng mga Bata",
+        "paragraphs": [
+          "Hindi nakatuon ang App sa mga batang wala pang 13 taong gulang. Hindi kami sadyang nangongolekta ng personal information mula sa mga batang wala pang 13. Kung naniniwala kang may batang nagbigay ng data sa pamamagitan ng App, makipag-ugnayan sa amin at gagawa kami ng hakbang para alisin ang naturang impormasyon."
+        ]
+      },
+      {
+        "title": "11. Mga Pagbabago sa Patakarang Ito",
+        "paragraphs": [
+          "Maaari naming i-update ang Privacy Policy na ito paminsan-minsan. Makikita ang mga pagbabago sa page na ito kasama ang na-update na Huling na-update na petsa. Ang patuloy na paggamit ng App pagkatapos ng mga pagbabago ay nangangahulugan ng pagtanggap sa na-update na patakaran."
+        ]
+      }
+    ],
+    "contact": {
+      "title": "12. Makipag-ugnayan sa Amin",
+      "body": "Kung mayroon kang anumang tanong tungkol sa Privacy Policy na ito, kailangan ng suporta, o gustong humiling ng pagbura ng analytics data, makipag-ugnayan sa amin sa:",
+      "formPrefix": "Maaari mo ring gamitin ang",
+      "formLink": "contact form",
+      "formSuffix": "sa site na ito."
+    }
+  },
+  "terms": {
+    "title": "Mga Tuntunin ng Paggamit",
+    "lastUpdated": "Huling na-update: Marso 25, 2026",
+    "privacyPolicyLabel": "Patakaran sa Privacy",
+    "sections": [
+      {
+        "title": "Pangkalahatang-ideya",
+        "paragraphs": [
+          "Pinamamahalaan ng Mga Tuntunin ng Paggamit na ito (Mga Tuntunin) ang iyong paggamit ng Money2Time mobile application (ang App), na binuo at pinapatakbo ni Nelson Gan. Sa pag-download o paggamit ng App, sumasang-ayon kang masaklaw ng Mga Tuntuning ito. Kung hindi ka sumasang-ayon, huwag gamitin ang App."
+        ]
+      },
+      {
+        "title": "1. Pagtanggap sa Mga Tuntunin",
+        "paragraphs": [
+          "Sa pag-access o paggamit ng Money2Time, kinukumpirma mong ikaw ay hindi bababa sa 13 taong gulang at may legal na kapasidad na pumasok sa Mga Tuntuning ito. Kung ginagamit mo ang App sa ngalan ng isang organisasyon, ipinapahayag mong may awtoridad kang itali ang organisasyong iyon sa Mga Tuntuning ito."
+        ]
+      },
+      {
+        "title": "2. Paglalarawan ng App",
+        "paragraphs": [
+          "Ang Money2Time ay isang personal finance app na tumutulong sa iyong maunawaan ang tunay na gastos ng iyong paggastos sa pamamagitan ng paggawa ng mga expense bilang katumbas na oras ng iyong panahon batay sa iyong hourly wage. Kabilang sa mga pangunahing feature ang:"
+        ],
+        "lists": [
+          [
+            "Pagsubaybay ng gastos at kita sa maraming account",
+            "Money-to-time conversion batay sa iyong wage settings",
+            "Recurring transaction rules para sa bills at subscriptions",
+            "Mga breakdown ng paggastos, insights, at sentiment tracking",
+            "Lokal na data export at import",
+            "Nako-customize na notifications para sa reminders at summaries"
+          ]
+        ]
+      },
+      {
+        "title": "3. Free at Pro na Plano",
+        "paragraphs": [
+          "Available ang App sa freemium basis. Limitado ang ilang feature sa free plan at nangangailangan ng active Pro subscription para ma-unlock. Inilalaan namin ang karapatang baguhin ang free-plan limits o Pro plan features anumang oras. Ipapaalam ang mahahalagang pagbabago sa pamamagitan ng app update o sa website na ito."
+        ],
+        "subsections": [
+          {
+            "title": "Free na Plano",
+            "lists": [
+              [
+                "Hanggang 5 account",
+                "Hanggang 9 na expense/income categories",
+                "Hanggang 5 recurring transaction rules",
+                "Hanggang 5 hourly rate entries",
+                "Unlimited transaction records"
+              ]
+            ]
+          },
+          {
+            "title": "Pro na Plano",
+            "lists": [
+              [
+                "Unlimited accounts, categories, recurring rules, at hourly rate entries",
+                "Available bilang monthly subscription, annual subscription, o lifetime purchase"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "title": "4. In-App Purchases at Subscriptions",
+        "paragraphs": [
+          "Pinoproseso ang Pro subscriptions at lifetime purchase sa pamamagitan ng Apple App Store o Google Play Store. Sa pagbili, sumasang-ayon ka sa payment terms ng kaukulang store.",
+          "Sinisingil nang pauna ang subscriptions sa buwanan o taunang cycle at awtomatikong nagre-renew maliban kung kinansela nang hindi bababa sa 24 na oras bago matapos ang kasalukuyang period. Ang refund requests ay pinangangasiwaan ng Apple o Google sa ilalim ng kani-kanilang refund policies. Maaari mong ibalik ang dating purchase sa bagong device gamit ang Restore Purchases sa App settings.",
+          "Ang lifetime purchase ay nagbibigay ng access sa Pro features habang-buhay ng App. Hindi kami nagbibigay ng garantiya na patuloy na magiging available ang App nang walang hanggan."
+        ]
+      },
+      {
+        "title": "5. Iyong Data",
+        "paragraphs": [
+          "Lahat ng financial data na inilalagay mo, kabilang ang mga transaksyon, account, kategorya, wage settings, at preferences, ay nakaimbak nang lokal sa iyong device. Wala kaming access sa iyong financial data at hindi namin ito iniimbak sa anumang server.",
+          "Ikaw lamang ang responsable sa pagpapanatili ng backups ng iyong data. Gamitin ang built-in export feature para gumawa ng backup. Hindi kami mananagot sa anumang pagkawala ng data na dulot ng pagbura ng app, pagkasira ng device, o aksidenteng reset.",
+          "Para sa kumpletong detalye tungkol sa paghawak ng data, tingnan ang aming {privacyPolicy}."
+        ]
+      },
+      {
+        "title": "6. Katanggap-tanggap na Paggamit",
+        "paragraphs": [
+          "Sumasang-ayon kang hindi:"
+        ],
+        "lists": [
+          [
+            "I-reverse-engineer, i-decompile, o i-disassemble ang App",
+            "Subukang makakuha ng hindi awtorisadong access sa anumang bahagi ng App o sa mga kaugnay nitong system",
+            "Gamitin ang App para sa anumang labag sa batas na layunin o sa paglabag sa anumang naaangkop na batas",
+            "Muling ipamahagi, muling ibenta, o i-sublicense ang App o anumang bahagi nito",
+            "Gumamit ng automated means para mag-access o makipag-interact sa App"
+          ]
+        ]
+      },
+      {
+        "title": "7. Ari-ariang Intelektwal",
+        "paragraphs": [
+          "Ang App, kabilang ang disenyo, code, graphics, at content nito, ay pagmamay-ari ni Nelson Gan at protektado ng copyright at iba pang intellectual property laws. Hindi nagbibigay sa iyo ang Mga Tuntuning ito ng anumang karapatang gamitin ang aming trademarks, logos, o brand elements.",
+          "Sa iyo ang iyong financial data. Sa paggamit ng App, wala kang ibinibigay sa amin na karapatan sa iyong personal data."
+        ]
+      },
+      {
+        "title": "8. Pagtanggi sa mga Warranty",
+        "paragraphs": [
+          "Ibinibigay ang App as is at as available, nang walang anumang warranty, hayag man o ipinahiwatig, kabilang ang merchantability, fitness for a particular purpose, o non-infringement.",
+          "Ang Money2Time ay isang personal productivity tool at hindi financial adviser, accountant, o regulated financial service. Walang anumang nasa App ang bumubuo ng financial advice. Dapat kang kumonsulta sa kwalipikadong propesyonal para sa mga desisyong pinansyal.",
+          "Hindi namin ginagarantiyang magiging error-free, walang pagkaantala, o walang bug ang App."
+        ]
+      },
+      {
+        "title": "9. Limitasyon ng Pananagutan",
+        "paragraphs": [
+          "Sa pinakamalawak na saklaw na pinahihintulutan ng naaangkop na batas, hindi kami mananagot para sa anumang indirect, incidental, special, consequential, o punitive damages na nagmumula sa iyong paggamit, o kawalan ng kakayahang gamitin, ang App, kabilang ang pagkawala ng data, mga desisyong pinansyal na ginawa batay sa output ng App, o mga isyu sa device.",
+          "Ang kabuuang pananagutan namin sa iyo para sa anumang claim na nagmumula sa Mga Tuntuning ito o sa iyong paggamit ng App ay hindi lalampas sa halagang binayaran mo para sa kasalukuyan mong Pro subscription period, o $10 USD kung nasa free plan ka."
+        ]
+      },
+      {
+        "title": "10. Pagwawakas",
+        "paragraphs": [
+          "Maaari naming suspindihin o wakasan ang iyong access sa App anumang oras, may dahilan man o wala, at may abiso man o wala. Sa pagwawakas, agad na matatapos ang iyong karapatang gamitin ang App. Dahil lokal na nakaimbak ang iyong data, mananatili ito sa iyong device hanggang i-uninstall mo ang App o manu-mano mo itong i-reset.",
+          "Maaari mong ihinto ang paggamit ng App anumang oras sa pamamagitan ng pag-uninstall nito."
+        ]
+      },
+      {
+        "title": "11. Mga Pagbabago sa Mga Tuntuning Ito",
+        "paragraphs": [
+          "Maaari naming i-update ang Mga Tuntuning ito paminsan-minsan. Kapag ginawa namin ito, ia-update namin ang Huling na-update na petsa sa itaas ng page na ito. Ang patuloy na paggamit ng App pagkatapos ng mga pagbabago ay nangangahulugan ng pagtanggap mo sa binagong Mga Tuntunin. Para sa mahahalagang pagbabago, magsisikap kami nang makatwiran na abisuhan ka sa pamamagitan ng app update o notice sa website na ito."
+        ]
+      },
+      {
+        "title": "12. Namamahalang Batas",
+        "paragraphs": [
+          "Ang Mga Tuntuning ito ay pinamamahalaan at binibigyang-kahulugan alinsunod sa mga batas ng Singapore, nang hindi isinasaalang-alang ang conflict of law provisions nito. Anumang dispute na magmumula sa Mga Tuntuning ito ay sasailalim sa exclusive jurisdiction ng mga hukuman ng Singapore."
+        ]
+      }
+    ],
+    "contact": {
+      "title": "13. Makipag-ugnayan sa Amin",
+      "body": "Kung mayroon kang anumang tanong tungkol sa Mga Tuntuning ito, makipag-ugnayan sa amin sa:"
+    }
+  },
+  "dataDeletion": {
+    "title": "Kahilingan sa Pagtanggal ng Data",
+    "lastUpdated": "Huling na-update: Oktubre 20, 2026",
+    "intro": "Ang Money2Time ay isang local-first na app: lahat ng iyong financial data ay nakaimbak lamang sa iyong device at hindi kailanman iniimbak sa aming mga server. Ipinapaliwanag ng page na ito kung paano humiling na tanggalin ang data na nauugnay sa Money2Time app, kasama ang mga hakbang para humiling ng pagtanggal at kung aling mga uri ng data ang tinatanggal o itinatago, kasama ang anumang panahon ng pag-iimbak.",
+    "sections": [
+      {
+        "title": "Paano Humiling ng Pagtanggal ng Data",
+        "subsections": [
+          {
+            "title": "Tanggalin ang data na nakaimbak sa iyong device",
+            "paragraphs": [
+              "Halos lahat ng iyong data, kasama ang lahat ng iyong financial data, ay nakaimbak lamang sa iyong device. Maaari mo itong tanggalin anumang oras:"
+            ],
+            "lists": [
+              [
+                "Buksan ang Money2Time app at pumunta sa Settings.",
+                "I-tap ang \"Reset All Data\" para permanenteng tanggalin ang lahat ng transaksyon, account, kategorya, recurring rule, at setting ng sahod.",
+                "Bilang alternatibo, i-uninstall ang app para tuluyang alisin ang lokal na database at lahat ng nakaimbak na data."
+              ]
+            ]
+          },
+          {
+            "title": "Burahin ang kopya sa naka-link na browser",
+            "paragraphs": [
+              "Kung gagamitin mo ang Web Dashboard, itinatago ng bawat browser na na-link mo ang huling kopyang ipinadala ng iyong telepono rito, naka-encrypt. Para burahin ito:"
+            ],
+            "lists": [
+              [
+                "Sa browser, buksan ang app.money2time.com at piliin ang \"I-unlink ang browser na ito\". Agad na binubura ang kopya at ang key nito.",
+                "O, sa Money2Time app, pumunta sa Mga setting > Web Dashboard at i-tap ang \"I-unlink\" sa tabi ng browser. Buburahin nito ang kopya nito sa susunod na pagkonekta nito.",
+                "Binubura rin ito kapag nilinis ang site data ng browser para sa app.money2time.com."
+              ]
+            ]
+          },
+          {
+            "title": "Humiling ng pagtanggal ng analytics at subscription data",
+            "paragraphs": [
+              "Para humiling na tanggalin ang analytics o subscription data na nauugnay sa iyong random app identifier, makipag-ugnayan sa amin:"
+            ],
+            "lists": [
+              [
+                "Mag-email sa amin sa address sa ibaba na may paksang \"Data Deletion Request\", o gamitin ang contact form sa site na ito.",
+                "Gamitin ang copy button sa tabi ng User ID sa Settings > Display at isama ang buong ID para mahanap namin ang data na nauugnay sa iyong App.",
+                "Ipoproseso namin ang iyong kahilingan at kukumpirmahin ang pagkumpleto sa loob ng 30 araw."
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Aling Data ang Tinatanggal o Itinatago",
+        "paragraphs": [
+          "Ang talahanayan sa ibaba ay nagbubuod kung ano ang mangyayari sa bawat uri ng data kapag humiling ka ng pagtanggal, at kung gaano katagal itinatago ang anumang data."
+        ],
+        "table": {
+          "headers": [
+            "Uri ng Data",
+            "Aksyon",
+            "Panahon ng Pag-iimbak"
+          ],
+          "rows": [
+            [
+              "Financial data sa device (mga transaksyon, account, kategorya, recurring rule, setting ng sahod)",
+              "Tinanggal",
+              "Agad na inaalis kapag ni-reset mo ang data o na-uninstall ang app. Wala kaming itinatago."
+            ],
+            [
+              "Kopya ng Web Dashboard sa browser na na-link mo",
+              "Tinanggal",
+              "Inaalis sa browser na iyon kapag in-unlink mo ito o nilinis ang site data nito. Hindi ito kailanman iniimbak ng aming server, kaya wala kaming itinatago."
+            ],
+            [
+              "Pseudonymous na analytics data (PostHog / Google Analytics for Firebase)",
+              "Tinatanggal kapag hiniling",
+              "Tinatanggal sa loob ng 30 araw mula sa iyong kahilingan."
+            ],
+            [
+              "Data ng subscription (RevenueCat, Apple, Google)",
+              "Itinatago kung kinakailangan",
+              "Itinatago ng Apple o Google para sa mga obligasyon sa billing, buwis, at legal, at pinamamahalaan sa pamamagitan ng iyong Apple o Google account."
+            ]
+          ]
+        }
+      },
+      {
+        "title": "Data na Hindi Namin Iniimbak",
+        "paragraphs": [
+          "Ang Money2Time ay hindi nangangailangan ng account at hindi nag-iimbak ng iyong pangalan, email, Apple ID, Google Account, o mga detalye ng pagbabayad sa aming mga server. Dahil ang iyong financial data ay hindi kailanman iniimbak sa aming mga server, kahit kapag ginamit mo ang Web Dashboard, hindi namin ito maa-access o matatanggal para sa iyo.",
+          "Ang mga rekord ng subscription at pagbabayad na hawak ng Apple o Google ay wala sa aming kontrol at direktang pinamamahalaan sa pamamagitan ng iyong Apple o Google account."
+        ]
+      }
+    ],
+    "contact": {
+      "title": "Makipag-ugnayan sa Amin",
+      "body": "Para humiling ng pagtanggal ng analytics o subscription data, o kung may mga tanong ka, makipag-ugnayan sa amin sa:",
+      "formPrefix": "Maaari mo ring gamitin ang",
+      "formLink": "contact form",
+      "formSuffix": "sa site na ito."
+    }
+  },
+  "costInHours": {
+    "eyebrow": "Sahod sa oras",
+    "title": "Ano ang kayang bilhin ng isang oras ng trabaho, bawat bansa",
+    "intro": "May pangalawang numero ang bawat presyo: ang oras na pinagtrabahuhan mo para dito. Inilalagay ng pahinang ito ang opisyal na sahod ng bawat bansa katabi ng isang produktong pareho saanman, kaya maihahambing kung ano ang kayang bilhin ng isang oras nang hindi muna nagtatalo kung ano ang ilalagay sa basket.",
+    "compare": {
+      "base": "Batayan",
+      "with": "Ihambing sa",
+      "measure": "Ano ang sinusukat",
+      "caption": "Inilathalang sahod at ang trabaho para sa isang Big Mac, sa dalawang bansa",
+      "priceSource": "Presyo ng Big Mac:"
+    },
+    "metrics": {
+      "workPerBigMac": "Trabaho para sa isang Big Mac",
+      "bigMacPrice": "Presyo ng Big Mac",
+      "payPerHour": "Sahod kada oras",
+      "payPerHourUsd": "Sahod kada oras sa dolyar",
+      "bigMacsPerMonth": "Big Mac na kayang bilhin ng isang buwang sahod",
+      "workPerLitre": "Trabaho kada litro ng gasolina",
+      "workPer100kWh": "Trabaho kada {kwh} kWh ng kuryente"
+    },
+    "periods": {
+      "hour": "kada oras",
+      "week": "kada linggo",
+      "month": "kada buwan",
+      "year": "kada taon"
+    },
+    "measures": {
+      "median": "Median",
+      "average": "Average"
+    },
+    "scopes": {
+      "allEmployees": "lahat ng empleyado",
+      "allWorkers": "lahat ng may trabaho",
+      "citizens": "mamamayan",
+      "formalSector": "pormal na sektor, 10+ tauhan",
+      "fullTimeEmployees": "full-time na empleyado",
+      "fullTimeResidents": "full-time na residente",
+      "regularSalaried": "regular na sahurang empleyado",
+      "wageAndSalary": "sumasahod na manggagawa",
+      "employees": "mga empleyado",
+      "employeesNet": "mga empleyado, matapos ang buwis",
+      "employedPersons": "mga may trabaho",
+      "formalNonAgri": "pormal na sektor na di-agrikultural",
+      "fullTimeEquivalent": "full-time equivalent na empleyado",
+      "urbanNonPrivate": "urbanong di-pribadong yunit"
+    },
+    "allMarkets": {
+      "title": "Ranking ng sampung bansa",
+      "intro": "Nakaayos ayon sa gaano katagal kailangang magtrabaho ng sahod para sa isang Big Mac. Basahin muna ang pangatlong hanay: anim ang median at apat ang average, at mas mataas ang average dahil hinihila ito ng mga malalaki ang kita.",
+      "caption": "Inilathalang datos ng sahod at ang trabaho para sa isang Big Mac, bawat bansa",
+      "country": "Bansa",
+      "pay": "Inilathalang sahod",
+      "basis": "Ano ang sinusukat",
+      "hourly": "Kada oras",
+      "effort": "Trabaho para sa isang Big Mac",
+      "youAreHere": "Ikaw"
+    },
+    "notes": {
+      "title": "Paano ito basahin",
+      "method": {
+        "title": "Paano kinuwenta ang oras",
+        "body": "Kung may inilalathalang kada-oras na datos ang isang ahensya, iyon ang ginagamit. Kung lingguhan o buwanan, hinahati ito sa {hours}-oras na linggo. Parehong inilalathala ng Stats NZ, at wala pang limampung sentimo ang pagkakaiba."
+      },
+      "basket": {
+        "title": "Bakit isang burger at hindi isang basket ng pamilihan",
+        "body": "Ang Big Mac, isang litrong octane-95 na gasolina, at isang kilowatt-hour sa bahay ay pareho sa lahat ng bansa rito, bawat isa'y pinepresyuhan ng iisang publikasyon sa iisang petsa. Sa India, kung saan walang Big Mac na baka ang McDonald's, ang Maharaja Mac na manok ang pinepresyuhan ng The Economist. Mas malawak ang saklaw ng mas malaking lokal na basket, pero magkaiba ang ibig sabihin ng kumain sa labas sa Maynila at sa Melbourne, at ang paghahambing niyon ay mas maraming sasabihin tungkol sa basket kaysa sa pera."
+      },
+      "comparability": {
+        "title": "Hindi tuwirang maihahambing ang mga sahod",
+        "body": "Walang naglalathala ng iisang talaan ng median na sahod na sumasaklaw sa mga bansang ito, kaya bawat numero ay galing sa sariling ahensya at ibang grupo ang binibilang. Anim ang median, apat ang average. Basahin ang agwat bilang gabay."
+      },
+      "grossPay": {
+        "title": "Bago pa ang buwis ito",
+        "body": "Gross ang inilathalang sahod. Mas maliit ang talagang napupunta sa iyo, kaya mas mahaba ang sarili mong oras kaysa sa nasa pahinang ito."
+      }
+    },
+    "sources": {
+      "title": "Saan galing ang mga numero",
+      "bigMac": "Presyo ng Big Mac at palitan:",
+      "wages": "Sahod, bawat bansa:",
+      "energy": "Presyo ng gasolina at kuryente:"
+    },
+    "cta": {
+      "body": "Ginagawa ito ng app gamit ang sahod mo, hindi ng bansa mo. Ilagay ang natatanggap mong net at bawat bilihin ay magkakaroon ng pangalawang numero.",
+      "link": "Tingnan kung paano ito gumagana"
+    }
+  },
+  "tutorials": {
+    "eyebrow": "Mga gabay",
+    "title": "Mga tutorial",
+    "intro": "Maiikling gabay, larawan sa larawan, para sa lahat ng kayang gawin ng Money2Time. Totoong app ang bawat screenshot, may pulang marka sa button na dapat pindutin.",
+    "searchPlaceholder": "Maghanap ng tutorial",
+    "clear": "I-clear",
+    "emptyTitle": "Walang tumugma",
+    "emptyDescription": "Subukan ang mas maikling salita, o ang pangalan ng screen na hinahanap mo.",
+    "stepCount": "{count} hakbang",
+    "stepCounter": "{current} ng {total}",
+    "badgePro": "PRO",
+    "badgeIos": "iPhone",
+    "openInApp": "Buksan sa app",
+    "previous": "Nakaraan",
+    "next": "Susunod",
+    "category": {
+      "start": "Magsimula",
+      "logging": "Pag-log ng pera",
+      "organize": "Ayusin",
+      "plan": "Magplano",
+      "share": "Ibahagi at bayaran",
+      "insights": "Unawain",
+      "data": "Ang iyong data"
+    }
+  },
+  "dashboard": {
+    "loading": "Binubuksan ang iyong dashboard…",
+    "units": {
+      "minutes": "{m} min",
+      "hours": "{h} oras",
+      "hoursMinutes": "{h} oras {m} min",
+      "days": "{d} araw",
+      "daysHours": "{d} araw {h} oras"
+    },
+    "nav": {
+      "label": "Mga dashboard",
+      "menu": "Menu",
+      "openMenu": "Buksan ang menu",
+      "closeMenu": "Isara ang menu",
+      "groups": {
+        "insights": "Insights",
+        "wealth": "Yaman",
+        "planning": "Pagpaplano",
+        "organize": "Ayusin"
+      }
+    },
+    "period": {
+      "label": "Panahon",
+      "previous": "Nakaraang panahon",
+      "next": "Susunod na panahon",
+      "asOf": "Hanggang {date}",
+      "presets": {
+        "month": "Buwan",
+        "3m": "3B",
+        "6m": "6B",
+        "12m": "12B",
+        "ytd": "YTD",
+        "year": "Taon",
+        "all": "Lahat"
+      }
+    },
+    "mode": {
+      "label": "Ipakita ang halaga bilang",
+      "hours": "Oras"
+    },
+    "common": {
+      "income": "Kita",
+      "spending": "Gastos",
+      "net": "Net",
+      "saved": "Naipon",
+      "viewAll": "Tingnan lahat",
+      "vsPrevious": "kumpara sa nakaraan",
+      "uncategorized": "Walang kategorya",
+      "other": "Iba pa",
+      "total": "Kabuuan",
+      "average": "Average",
+      "transactions": "{count, plural, other {# transaksyon}}",
+      "accountTypes": {
+        "debit": "Account",
+        "credit": "Credit card",
+        "loan": "Utang",
+        "goal": "Goal",
+        "cash": "Cash",
+        "savings": "Ipon",
+        "investment": "Investment"
+      },
+      "viewFailed": "Hindi maipakita ang pahinang ito para sa data mo. Gumagana pa rin ang ibang pahina."
+    },
+    "views": {
+      "overview": {
+        "nav": "Pangkalahatang-ideya",
+        "title": "Pangkalahatang-ideya",
+        "subtitle": "Saan napunta ang pera at oras mo"
+      },
+      "cash-flow": {
+        "nav": "Cash flow",
+        "title": "Cash flow",
+        "subtitle": "Pumasok, lumabas, at kung ano ang natira"
+      },
+      "spending": {
+        "nav": "Gastos",
+        "title": "Gastos",
+        "subtitle": "Bawat kategorya, hanggang sa bawat transaksyon"
+      },
+      "income": {
+        "nav": "Kita",
+        "title": "Kita",
+        "subtitle": "Saan galing ang pera mo"
+      },
+      "trends": {
+        "nav": "Mga trend",
+        "title": "Mga trend",
+        "subtitle": "Paano gumagalaw ang bawat kategorya kada buwan"
+      },
+      "calendar": {
+        "nav": "Kalendaryo",
+        "title": "Kalendaryo",
+        "subtitle": "Gastos araw-araw"
+      },
+      "transactions": {
+        "nav": "Mga transaksyon",
+        "title": "Mga transaksyon",
+        "subtitle": "Maghanap at mag-filter ng lahat ng naitala mo"
+      },
+      "accounts": {
+        "nav": "Mga account",
+        "title": "Mga account",
+        "subtitle": "Balanse sa lahat ng account"
+      },
+      "net-worth": {
+        "nav": "Net worth",
+        "title": "Net worth",
+        "subtitle": "Ang pag-aari mo, bawas ang utang mo"
+      },
+      "budgets": {
+        "nav": "Mga budget",
+        "title": "Mga budget",
+        "subtitle": "Ang plano kumpara sa totoong nangyari"
+      },
+      "recurring": {
+        "nav": "Paulit-ulit",
+        "title": "Paulit-ulit",
+        "subtitle": "Mga subscription at bayarin na umuulit"
+      },
+      "goals": {
+        "nav": "Mga goal at utang",
+        "title": "Mga goal at utang",
+        "subtitle": "Progreso papunta sa mga target at bayad-utang"
+      },
+      "time": {
+        "nav": "Gastos sa oras",
+        "title": "Gastos sa oras",
+        "subtitle": "Ang gastos mo, sa oras ng buhay mo"
+      },
+      "trips": {
+        "nav": "Mga biyahe",
+        "title": "Mga biyahe",
+        "subtitle": "Magkano ang bawat biyahe, sa pera at araw ng trabaho"
+      },
+      "items": {
+        "nav": "Mga item",
+        "title": "Mga item",
+        "subtitle": "Magkano kada araw ang mga pag-aari mo"
+      },
+      "splits": {
+        "nav": "Hating bayarin",
+        "title": "Hating bayarin",
+        "subtitle": "Sino pa ang may utang sa iyo"
+      },
+      "mood": {
+        "nav": "Mood at gawi",
+        "title": "Mood at gawi",
+        "subtitle": "Ano ang pakiramdam sa mga binili, at kailan mo ito binibili"
+      },
+      "categories": {
+        "nav": "Mga Kategorya",
+        "title": "Mga Kategorya",
+        "subtitle": "Magdagdag, palitan ang pangalan at ayusin ang mga kategorya mo"
+      }
+    },
+    "overview": {
+      "spent": "Nagastos",
+      "earned": "Kinita",
+      "saved": "Naipon",
+      "overspent": "Gastos na lampas sa kita",
+      "savingsRate": "{rate} savings rate",
+      "noIncome": "Walang kita sa panahong ito",
+      "netWorth": "Net worth",
+      "netWorthNote": "Sa {count, plural, other {# account}} na kasama sa kabuuan",
+      "cashFlowTitle": "Cash flow",
+      "cashFlowSubtitle": "Ang 12 buwan hanggang sa panahong ito",
+      "paceTitle": "Bilis ng paggastos",
+      "thisMonth": "Ngayong buwan",
+      "lastMonth": "Nakaraang buwan",
+      "dayN": "Araw {day}",
+      "paceBehind": "{amount} na mas mababa kaysa sa parehong puntos noong nakaraang buwan.",
+      "paceAhead": "{amount} na mas mataas kaysa sa parehong puntos noong nakaraang buwan.",
+      "topCategories": "Mga nangungunang kategorya",
+      "biggestExpenses": "Pinakamalalaking gastos",
+      "upcoming": "Paparating na paulit-ulit",
+      "nextOn": "Susunod sa {date}",
+      "noSpending": "Walang gastos sa panahong ito",
+      "noRecurring": "Walang aktibong paulit-ulit na rule",
+      "timeTitle": "Ang oras mo",
+      "timeBody": "Ang gastos sa panahong ito ay katumbas ng <strong>{hours}</strong> na trabaho.",
+      "workShare": "Bahagi ng oras na nagtrabaho ka",
+      "workShareNote": "Mula sa humigit-kumulang {worked} sa panahong ito",
+      "noWage": "Magtakda ng halaga kada oras sa app para makita ito sa oras.",
+      "accountsTitle": "Pinakamalalaking account"
+    },
+    "cashFlow": {
+      "savingsRate": "{rate} savings rate",
+      "noIncome": "Walang kita sa panahong ito",
+      "netPerDay": "Net kada araw",
+      "avgNet": "Karaniwang net kada buwan",
+      "daysCount": "{count, plural, other {Sa loob ng # araw}}",
+      "monthsCount": "{count, plural, other {Sa loob ng # buwan}}",
+      "dailyTitle": "Araw-araw",
+      "monthlyTitle": "Buwan-buwan",
+      "sankeyTitle": "Saan napunta ang pera",
+      "sankeySubtitle": "Kita sa kaliwa, gastos at ipon sa kanan",
+      "fromSavings": "Mula sa ipon",
+      "empty": "Walang kita o gastos sa panahong ito",
+      "savingsRateTitle": "Savings rate",
+      "savingsRateSubtitle": "Bahagi ng kita na naitatabi kada buwan; 20% ang karaniwang goal",
+      "tableTitle": "Buwanang buod",
+      "month": "Buwan",
+      "rate": "Rate"
+    },
+    "breakdown": {
+      "totalSpent": "Kabuuang nagastos",
+      "totalEarned": "Kabuuang kinita",
+      "perDay": "Kada araw",
+      "overDays": "{count, plural, other {Sa loob ng # araw}}",
+      "count": "Mga transaksyon",
+      "avgEach": "{amount} sa karaniwan",
+      "largestCategory": "Pinakamalaking kategorya",
+      "byCategory": "Ayon sa kategorya",
+      "subcategories": "Mga subkategorya",
+      "clickToDrill": "Pumili ng kategorya para makita ang mga subkategorya nito",
+      "allCategories": "Lahat ng kategorya",
+      "empty": "Walang laman dito sa panahong ito",
+      "byDay": "Ayon sa araw",
+      "byMonth": "Ayon sa buwan",
+      "monthlyAverage": "{amount} kada buwan sa karaniwan",
+      "topMerchants": "Mga nangungunang lugar",
+      "topMerchantsNote": "Pinagsama ayon sa note ng bawat transaksyon",
+      "biggestPurchases": "Pinakamalalaking binili",
+      "biggestPayments": "Pinakamalalaking bayad",
+      "byWeekday": "Ayon sa araw ng linggo",
+      "byWeekdayNote": "Kabuuan sa panahong ito para sa bawat araw ng linggo",
+      "transactionsIn": "Mga transaksyon sa {name}",
+      "allTransactions": "Lahat ng transaksyon"
+    },
+    "transactions": {
+      "search": "Maghanap ng note, kategorya, o halaga",
+      "type": "Uri",
+      "types": {
+        "all": "Lahat ng uri",
+        "expense": "Mga gastos",
+        "income": "Kita",
+        "transfer": "Mga transfer"
+      },
+      "category": "Kategorya",
+      "allCategories": "Lahat ng kategorya",
+      "account": "Account",
+      "allAccounts": "Lahat ng account",
+      "feeling": "Pakiramdam",
+      "allFeelings": "Anumang pakiramdam",
+      "feelings": {
+        "happy": "Maganda ang pakiramdam",
+        "neutral": "Wala lang",
+        "sad": "Sana hindi na lang"
+      },
+      "empty": "Walang tumutugmang transaksyon",
+      "newer": "Mas bago",
+      "older": "Mas luma",
+      "page": "Pahina {page} ng {pages}"
+    },
+    "trends": {
+      "gridTitle": "Kategorya kada buwan",
+      "gridSubtitle": "Mas madilim, mas malaki ang nagastos sa buwang iyon. Pumili ng hilera para makita ang chart nito.",
+      "category": "Kategorya",
+      "empty": "Walang gastos sa mga buwang ito",
+      "lineSubtitle": "{amount} kada buwan sa karaniwan",
+      "moversTitle": "Pinakamalalaking pagbabago",
+      "moversSubtitle": "Kumpara sa nakaraang panahon na kasinghaba nito",
+      "noMovers": "Halos walang nagbago"
+    },
+    "calendar": {
+      "perDay": "Karaniwan kada araw",
+      "noSpendDays": "Mga araw na walang gastos",
+      "noSpend": "Walang nagastos",
+      "ofDays": "{count, plural, other {Sa # araw hanggang ngayon}}",
+      "bestStreak": "Pinakamahabang tuloy-tuloy na walang gastos",
+      "daysValue": "{count, plural, other {# araw}}",
+      "bestStreakNote": "Sa nakaraang 12 buwan",
+      "busiest": "Pinakamalaking araw",
+      "monthSubtitle": "Pumili ng araw para makita ang nangyari",
+      "pickDay": "Pinakabago ngayong buwan",
+      "pickDayNote": "Pumili ng araw sa kalendaryo para makita lang ang araw na iyon",
+      "yearTitle": "Ang nakaraang 12 buwan",
+      "yearSubtitle": "Bawat parisukat ay isang araw; mas madilim, mas malaki ang nagastos"
+    },
+    "accounts": {
+      "assets": "Ari-arian",
+      "debts": "Mga utang",
+      "netWorth": "Net worth",
+      "inTotals": "{count, plural, other {# account sa kabuuan}}",
+      "excluded": "{count, plural, =0 {Kasama ang lahat ng account} other {# account na hindi kasama sa kabuuan}}",
+      "ungrouped": "Iba pang account",
+      "notInTotals": "Hindi kasama sa kabuuan",
+      "owed": "utang",
+      "owedNow": "Utang ngayon",
+      "balanceNow": "Balanse ngayon",
+      "lastActivity": "huling aktibidad {date}",
+      "statementDays": "Statement sa araw {statement}, due sa araw {due}",
+      "statementDaysAfter": "Statement sa araw {statement}, due pagkalipas ng {days} araw",
+      "activity": "Aktibidad",
+      "empty": "Wala pang account"
+    },
+    "netWorth": {
+      "now": "Net worth",
+      "inHours": "{hours} na trabaho sa rate ngayon",
+      "change": "Pagbabago",
+      "since": "Mula {month}",
+      "bestMonth": "Pinakamagandang buwan",
+      "debts": "Mga utang",
+      "debtNote": "Mga credit card at utang na kasama sa kabuuan",
+      "assets": "Ari-arian",
+      "chartTitle": "Mga asset, utang, at net worth",
+      "chartSubtitle": "Balanse sa katapusan ng buwan ng mga account na kasama sa kabuuan, sa exchange rate ngayon",
+      "mixTitle": "Nasaan ang mga asset mo",
+      "mixSubtitle": "Ayon sa grupo ng account",
+      "ungrouped": "Iba pa",
+      "empty": "Wala pang asset",
+      "monthlyChange": "Pagbabago kada buwan"
+    },
+    "budgets": {
+      "emptyTitle": "Wala pang budget",
+      "emptyBody": "Gumawa ng buwanang budget sa app at lalabas ito rito.",
+      "month": "Buwan",
+      "budget": "Budget",
+      "spent": "Nagastos",
+      "ofBudget": "{pct} ng budget",
+      "left": "Natitirang magagastos",
+      "over": "Lampas sa budget",
+      "perDayLeft": "{amount} kada araw para sa natitirang buwan",
+      "pace": "Lumipas na bahagi ng buwan",
+      "paceNote": "Araw {day} ng {days}",
+      "linesTitle": "Mga kategorya",
+      "linesSubtitle": "Ang linya sa bawat bar ay nagpapakita kung gaano na katagal ang buwan",
+      "overall": "Buong budget",
+      "overBy": "{amount} ang lampas",
+      "leftOf": "{amount} ang natira",
+      "aheadOfPace": "mas mabilis sa takbo",
+      "unbudgetedCounted": "{amount} ang nagastos sa labas ng mga kategoryang ito at kasama sa budget.",
+      "unbudgetedNot": "{amount} ang nagastos sa labas ng mga kategoryang ito at hindi isinama.",
+      "rateNote": "Iko-convert ang gastos sa ibang pera sa 1 {currency} = {rate} {main}.",
+      "approxLeft": "Mga {amount} pa ang natitira.",
+      "approxOver": "Mga {amount} ang lampas.",
+      "unconverted": "{count, plural, other {# gastos}} ang hindi pa naisasama: walang exchange rate para sa {currency}.",
+      "historyTitle": "Budget kumpara sa nagastos kada buwan",
+      "historyInMain": "Sa {currency}, para maihambing ang mga buwang may badyet sa ibang pera"
+    },
+    "recurring": {
+      "emptyTitle": "Walang paulit-ulit na rule",
+      "emptyBody": "Lalabas dito ang mga subscription at bayarin na itinakda mong umulit sa app.",
+      "perMonth": "Mga nakapirming gastos kada buwan",
+      "perYear": "Kada taon",
+      "clockTitle": "Bayad na ang mga bayarin pagsapit ng",
+      "clockNote": "Simula 9:00, sakop ito ng unang {hours} ng bawat araw ng trabaho ({day} araw)",
+      "active": "Mga aktibong rule",
+      "pausedCount": "{count, plural, =0 {Walang naka-pause} other {# naka-pause}}",
+      "listTitle": "Aktibo",
+      "listSubtitle": "Nakaayos ayon sa halaga kada buwan",
+      "cadence": {
+        "daily": "{count, plural, other {Kada # araw}}",
+        "weekly": "{count, plural, other {Kada # linggo}}",
+        "monthly": "{count, plural, other {Kada # buwan}}",
+        "yearly": "{count, plural, other {Kada # taon}}"
+      },
+      "next": "susunod sa {date}",
+      "transfer": "Transfer",
+      "yearHours": "{hours} na trabaho kada taon",
+      "upcomingTitle": "Paparating",
+      "pausedTitle": "Naka-pause"
+    },
+    "goals": {
+      "emptyTitle": "Walang goal o utang",
+      "emptyBody": "Lalabas dito ang mga savings goal at utang na sinusubaybayan mo sa app.",
+      "goalsTitle": "Mga goal",
+      "achieved": "Naabot na",
+      "left": "Kailangan pang ipunin",
+      "progress": "Progreso",
+      "byDate": "Para maabot ito bago ang {date}",
+      "perMonthNeeded": "{amount} kada buwan",
+      "loansTitle": "Mga utang",
+      "model": {
+        "flat": "Flat rate",
+        "reducing": "Reducing balance"
+      },
+      "leftToPay": "Natitirang babayaran",
+      "leftInHours": "{hours} na trabaho",
+      "paidOff": "Bayad na",
+      "instalments": "{paid} ng {total} hulog",
+      "principal": "Hiniram",
+      "owedNow": "Natitirang principal",
+      "paidSoFar": "Nabayaran na",
+      "monthly": "Buwanang bayad",
+      "rate": "Rate",
+      "interestCharged": "Interes na siningil",
+      "nextDue": "Susunod na bayad",
+      "payoff": "Bayad na pagsapit ng",
+      "paymentsLeft": "Natitirang bayad",
+      "netNote": "Ayon sa app ang mga numero ng utang: idinadagdag buwan-buwan ang interes mula sa araw na ginawa ang utang."
+    },
+    "time": {
+      "spentHours": "Oras ng trabahong nagastos",
+      "share": "Bahagi ng oras na nagtrabaho",
+      "shareNote": "Mula sa humigit-kumulang {hours} na trabaho",
+      "workdays": "Araw ng trabaho",
+      "workdaysValue": "{count, plural, other {# araw ng trabaho}}",
+      "workdayLength": "Sa {hours} kada araw ng trabaho",
+      "hourlyValue": "Halaga kada oras",
+      "perHour": "kada oras, mula sa pinakabago mong sahod",
+      "chartTitle": "Oras na nagastos vs oras na nagtrabaho",
+      "chartSubtitle": "Gastos ng bawat buwan, may presyo ayon sa sahod ng buwang iyon",
+      "hoursSpent": "Oras na nagastos",
+      "hoursWorked": "Oras na nagtrabaho",
+      "categoriesTitle": "Mga kategorya sa araw ng trabaho",
+      "categoriesSubtitle": "Ilang araw ng trabaho ang katumbas ng bawat isa",
+      "empty": "Walang gastos sa panahong ito",
+      "runwayTitle": "Freedom runway",
+      "daysValue": "{count, plural, other {# araw}}",
+      "runwayBody": "Gaano katagal tatagal ang {liquid} sa mga pang-araw-araw na account sa kamakailan mong {daily} kada araw, nang hindi nagtatrabaho.",
+      "regretTitle": "Oras na napunta sa pagsisisi",
+      "regretBody": "{count, plural, =0 {Walang minarkahang \"Sana hindi na lang\" sa panahong ito.} other {Sa # binili na sana hindi mo na lang binili.}}",
+      "biggestTitle": "Pinakamalaki sa oras",
+      "biggestSubtitle": "Ang mga binili na pinakamatagal pinagtrabahuhan",
+      "wageTitle": "Ang halaga mo kada oras sa paglipas ng panahon",
+      "wageSubtitle": "Mula sa mga sahod na naka-save sa app",
+      "noWage": "Magtakda ng halaga kada oras sa app para makita ang gastos mo sa oras."
+    },
+    "trips": {
+      "emptyTitle": "Wala pang biyahe",
+      "emptyBody": "Lalabas dito ang mga album na ginawa mo sa app para sa mga biyahe, kasama ang magkano ang bawat isa.",
+      "count": "Mga biyahe",
+      "countries": "{count, plural, =0 {Walang itinakdang bansa} other {# bansa}}",
+      "total": "Nagastos sa mga biyahe",
+      "workdays": "Sa araw ng trabaho",
+      "workdaysValue": "{count, plural, other {# araw ng trabaho}}",
+      "workdaysNote": "Sa lahat ng biyahe",
+      "current": "Kasalukuyan",
+      "perDay": "{amount} kada araw",
+      "breakdown": "Ayon sa kategorya",
+      "transactionsTitle": "Mga transaksyon",
+      "pick": "Pumili ng biyahe para makita ang breakdown nito."
+    },
+    "items": {
+      "emptyTitle": "Wala pang item",
+      "emptyBody": "Lalabas dito ang mga gamit na sinusubaybayan mo sa app, kasama ang gastos kada araw.",
+      "value": "Halaga ng pag-aari",
+      "count": "{count, plural, other {# gamit}}",
+      "perDay": "Gastos kada araw",
+      "perMonth": "{amount} kada buwan",
+      "workPerDay": "Trabaho kada araw",
+      "workPerDayNote": "Para mabayaran ang lahat ng pag-aari mo",
+      "listTitle": "Lahat ng pag-aari mo",
+      "listSubtitle": "Presyo ng pagkabili na hinati sa mga araw na hawak mo ito",
+      "bought": "Binili noong {date} sa halagang {price}",
+      "owned": "{count, plural, other {# araw}} nang pag-aari",
+      "sold": "naibenta sa halagang {price}",
+      "perDayValue": "{amount}/araw",
+      "workValue": "{time} na trabaho kada araw"
+    },
+    "splits": {
+      "emptyTitle": "Walang hating bayarin",
+      "emptyBody": "Lalabas dito ang mga bayaring hinati mo sa mga kaibigan sa app.",
+      "owedToYou": "Utang sa iyo",
+      "people": "{count, plural, =0 {Bayad na lahat} other {Mula sa # tao}}",
+      "settled": "Bayad nang bahagi",
+      "ofShares": "{count, plural, other {Sa # bahagi}}",
+      "bills": "Hating bayarin",
+      "billsNote": "Mga transaksyong pinaghatian",
+      "byPerson": "Sino ang may utang sa iyo",
+      "allSettled": "Nabayaran ka na ng lahat",
+      "open": "{count, plural, other {# bahaging hindi pa bayad}}",
+      "billsTitle": "Mga pinaghatiang transaksyon",
+      "unnamed": "Isang tao"
+    },
+    "mood": {
+      "feelings": {
+        "happy": "Maganda ang pakiramdam",
+        "neutral": "Wala lang",
+        "sad": "Sana hindi na lang"
+      },
+      "shareSub": "{amount} · {count, plural, other {# binili}}",
+      "monthlyTitle": "Ano ang pakiramdam sa mga binili",
+      "monthlySubtitle": "Bilang ng binili kada buwan, ayon sa pakiramdam",
+      "regretsTitle": "Sana hindi na lang",
+      "regretsSubtitle": "Ang pinakamalalaking binili na pinagsisihan mo",
+      "noRegrets": "Walang pinagsisihan sa panahong ito",
+      "clockTitle": "Kailan ka gumagastos",
+      "clockSubtitle": "Mga binili ayon sa araw ng linggo at oras; pinakamarami sa bandang {hour}",
+      "noTimes": "Hindi lalabas dito ang mga binili na naitala nang walang oras."
+    },
+    "loadingTitle": "Web Dashboard",
+    "edit": {
+      "statusReady": "Naka-on ang pag-edit",
+      "statusReadyTitle": "Sa telepono mo sine-save ang mga pagbabago",
+      "statusReadyBody": "Nakakonekta ang telepono mo. Sinusuri at sine-save ng telepono mo ang bawat pagbabago, saka sini-sync pabalik dito ang na-update na data.",
+      "statusAway": "Read only",
+      "statusAwayTitle": "Ikonekta ang telepono mo para makapagbago.",
+      "statusAwayBody": "Buksan ang Money2Time sa telepono mo at pumunta sa Mga setting → Web Dashboard. Habang nakakonekta ito, puwede kang magdagdag, mag-edit at magbura ng mga transaksyon dito. Magkasabay ang telepono mo at ang browser na ito.",
+      "statusUpdateTitle": "I-update ang app para makapagbago rito.",
+      "statusUpdateBody": "Pang-view lang ang data na sini-sync ng bersyon ng Money2Time sa telepono mo. I-update ito para makapagdagdag, makapag-edit at makapagbura ng mga transaksyon mula sa browser na ito.",
+      "statusOffTitle": "Naka-off ang mga pagbabago para sa browser na ito.",
+      "statusOffBody": "Sa telepono mo, buksan ang Mga setting → Web Dashboard, i-tap ang ⋯ sa tabi ng browser na ito at piliin ang Payagan ang mga pagbabago.",
+      "statusSaving": "Sine-save…",
+      "statusSyncing": "Sini-sync…",
+      "statusSyncingBody": "Sini-sync ang pinakabagong data mula sa telepono mo. Makakapagbago ka na pagdating nito.",
+      "awayHint": "Para magdagdag, mag-edit o magbura ng mga transaksyon, buksan ang Mga setting → Web Dashboard sa telepono mo.",
+      "close": "Isara",
+      "clear": "I-clear",
+      "cancel": "Kanselahin",
+      "reloadLatest": "I-load ang pinakabago",
+      "delete": "Burahin",
+      "apply": "Ilapat",
+      "choose": "Pumili",
+      "add": "Magdagdag",
+      "update": "I-update",
+      "addAnother": "Magdagdag pa",
+      "type": "Uri",
+      "expense": "Gastos",
+      "income": "Kita",
+      "transfer": "Transfer",
+      "adjustment": "Adjustment",
+      "deleteTransaction": "Burahin ang transaksyon",
+      "deleteTransactionBody": "Hindi ito maaaring ibalik. Ituloy?",
+      "required": "Kailangan",
+      "from": "Mula",
+      "to": "Patungo",
+      "chooseAccount": "Pumili ng account",
+      "swapAccounts": "Palitan ang from at to na account",
+      "differentAccount": "Dapat ibang account",
+      "accountLabel": "Account",
+      "accounts": "Mga Account",
+      "categoryLabel": "Kategorya",
+      "categories": "Mga Kategorya",
+      "options": "Mga opsyon sa transaksyon",
+      "amount": "Halaga",
+      "currencyLabel": "Pera",
+      "optional": "Opsyonal",
+      "note": "Note",
+      "received": "Halagang natanggap",
+      "date": "Petsa",
+      "details": "Mga detalye",
+      "detailsPlaceholder": "Magdagdag ng mas mahabang tala",
+      "reimbursable": "Nakabinbing reimbursement",
+      "reimbursed": "Nabayaran na",
+      "reimbursableHint": "Gastos na babayaran ka pabalik. Singilin ito sa pahinang Mga reimbursement.",
+      "countAsExpense": "Ibilang bilang gastos",
+      "countAsExpenseHint": "Ibinibilang ang transfer na ito bilang gastos sa iyong mga kabuuan, budget at chart, sa ilalim ng kategoryang pipiliin mo. Gumagalaw pa rin ang pera sa pagitan ng dalawang account gaya ng dati.",
+      "feeling": "Paano ka nakaramdam?",
+      "nudgeSmall": "Mga {hours} ng iyong oras iyon",
+      "nudgePause": "Pag-isipan: ~{hours} ng trabaho",
+      "nudgeLarge": "Iyon ay {hours} ng iyong oras sa trabaho",
+      "amountLocked": "Naka-link ang halagang ito sa isang hatian o refund. Palitan ito sa app.",
+      "hideBalances": "Itago ang mga balance",
+      "showBalances": "Ipakita ang mga balance",
+      "savingsGoals": "Mga Savings Goal",
+      "ungrouped": "Walang grupo",
+      "noAccounts": "Wala pang account.",
+      "noCategories": "Wala pang kategorya.",
+      "select": "Pumili",
+      "selectAll": "Piliin lahat",
+      "selected": "{count, plural, one {# ang napili} other {# ang napili}}",
+      "deleteConfirm": "{count, plural, one {Buburahin ang transaksyong ito? Buburahin din ito sa telepono mo.} other {Buburahin ang # transaksyon? Buburahin din ang mga ito sa telepono mo.}}",
+      "tooMany": "Hanggang {max} transaksyon lang ang puwedeng piliin nang sabay.",
+      "accountTransfers": "Nananatili ang mga account ng mga transfer. Alisin sila sa pagpili para mapalitan ang account.",
+      "accountLocked": "May ilan dito na naka-link sa split o refund. Palitan ang account nila sa app.",
+      "accountCurrencies": "Magkakaiba ang currency ng mga ito. Pumili ng mga entry sa iisang currency para ilipat sila sa ibang account.",
+      "editTitle": "I-edit ang transaksyon",
+      "errors": {
+        "stale": "Mas bago ang data ng telepono mo at sini-sync na ito ngayon. Subukan ulit sa ilang sandali.",
+        "conflict": "Nabago ito sa telepono mo. Padating na ang pinakabagong data. Tingnan ito at subukan ulit.",
+        "amount_locked": "Naka-link ang halagang ito sa isang hatian o refund. Palitan ito sa app.",
+        "pro_required": "Kailangan nito ng Money2Time Pro. Mag-upgrade sa app para makagawa ng higit pa.",
+        "off": "Naka-off ang mga pagbabago para sa browser na ito. Payagan ang mga ito sa telepono mo sa Mga setting → Web Dashboard.",
+        "invalid": "Hindi ito na-save ng telepono mo. Suriin ang mga detalye at subukan ulit.",
+        "failed": "Hindi ito na-save ng telepono mo. Subukan ulit.",
+        "busy": "Sine-save pa ang huli mong pagbabago. Subukan ulit sa ilang sandali.",
+        "away": "Hindi nakakonekta ang telepono mo. Buksan ang Web Dashboard dito at subukan ulit.",
+        "too_large": "Masyadong marami ang pagbabago nang sabay-sabay. Pumili ng mas kaunting transaksyon.",
+        "unknown": "Nadiskonekta ang telepono mo bago ito nakapagkumpirma. Pagbalik nito, tingnan kung na-save ang pagbabago."
+      },
+      "account": {
+        "newAccount": "Bagong Account",
+        "editAccount": "I-edit ang Account",
+        "deleteAccount": "Burahin ang account",
+        "deleteAccountBody": "Permanenteng mabubura ang account na ito at lahat ng transaksyon nito. Hindi ito maaaring ibalik.",
+        "save": "I-save",
+        "type": "Uri",
+        "typeDebit": "Debit",
+        "typeCredit": "Credit",
+        "specialNote": "Dito mo mapapalitan ang pangalan, grupo, logo at kung kasama ito sa mga total. I-edit ang iba pa sa sarili nitong editor.",
+        "name": "Pangalan ng account",
+        "namePlaceholder": "Pang-araw-araw na Wallet",
+        "logo": "Logo",
+        "logoAdd": "Magdagdag ng logo",
+        "logoClear": "Alisin ang logo",
+        "logoChooseTitle": "Pumili ng logo",
+        "logoChooseSubtitle": "Maghanap o mag-browse ayon sa bansa",
+        "logoSearch": "Maghanap ng bangko at wallet",
+        "logoCountry": "Bansa",
+        "logoNoResults": "Walang nahanap",
+        "group": "Account group",
+        "currency": "Pera",
+        "statementDay": "Araw ng statement",
+        "dueDay": "Due date",
+        "dueRule": "Petsa ng due",
+        "dueRuleDay": "Araw ng buwan",
+        "dueRuleAfter": "Araw pagkatapos ng statement",
+        "dayRange": "Pumili ng araw mula 1 hanggang 31.",
+        "daysAfterRange": "Pumili ng 1 hanggang {max} araw.",
+        "startingBalance": "Panimulang balance",
+        "currentBalance": "Kasalukuyang balance",
+        "includeInTotals": "Isama sa kabuuan",
+        "includeInTotalsHint": "Ang mga nakatagong account ay hindi kasama sa kabuuang balance.",
+        "currencyChangeTitle": "Palitan ang pera ng account?",
+        "currencyChangeMessage": "Iko-convert ang balanse mula {from} papuntang {to} sa pinakabagong palitan. Pinapanatili ng mga umiiral na entry ang orihinal nilang pera.",
+        "currencyChangeAction": "I-convert at palitan",
+        "balancePromptTitle": "Paano dapat itala ang pagbabago ng balance?",
+        "balancePromptMessage": "Nagbago ang balance ng {amount}. Itala bilang kita/gastos o panatilihin bilang pagkakaiba ng account (hindi kasama sa kabuuan ng insights).",
+        "recordDifference": "Itala bilang pagkakaiba ng account",
+        "recordIncome": "Itala bilang kita",
+        "recordExpense": "Itala bilang gastos",
+        "newGroup": "Bagong grupo",
+        "createGroup": "Gumawa ng grupo",
+        "editGroup": "I-edit ang grupo",
+        "groupName": "Pangalan ng grupo",
+        "groupPlaceholder": "Mga Gastos",
+        "groupTaken": "May grupo nang may ganitong pangalan.",
+        "deleteGroup": "Burahin ang grupo?",
+        "deleteGroupBody": "Ang mga account sa grupong ito ay ilililipat sa Walang grupo.",
+        "addToGroup": "Magdagdag ng account",
+        "emptyGroup": "Wala pang account sa grupong ito",
+        "cardDesign": "Disenyo ng card",
+        "cardDesignTitle": "Disenyo ng card",
+        "cardDesignPlain": "Payak na kulay",
+        "cardDesignClear": "Alisin ang disenyo ng card",
+        "cardDesignAll": "Lahat",
+        "cardDesignUploads": "Mga in-upload ko",
+        "cardDesignTemplate": "{genre} na disenyo ng card {number}",
+        "payTitle": "Bayaran ang credit card",
+        "loanPayTitle": "Magbayad",
+        "pay": "Bayaran",
+        "payFrom": "Bayaran mula sa",
+        "none": "Wala",
+        "payable": "Balance Payable",
+        "loanDue": "Halagang babayaran",
+        "paidNote": "Bayad: {name}",
+        "paymentNotePlaceholder": "Note ng bayad",
+        "genre_mascot": "Mascot",
+        "genre_minimal": "Minimal",
+        "genre_gradient": "Gradient",
+        "genre_luxury": "Luho",
+        "genre_texture": "Texture",
+        "genre_marble": "Marmol at bato",
+        "genre_pattern": "Pattern",
+        "genre_nature": "Kalikasan",
+        "genre_space": "Kalawakan",
+        "genre_abstract": "Abstract na sining",
+        "genre_anime": "Anime",
+        "genre_retro": "Retro",
+        "genre_cute": "Cute"
+      },
+      "album": {
+        "createTitle": "Bagong Album",
+        "create": "Gumawa",
+        "editTitle": "I-edit ang biyahe",
+        "save": "I-save",
+        "done": "Tapos",
+        "clear": "I-clear",
+        "name": "Pangalan ng album",
+        "namePlaceholder": "hal. Biyahe sa Tokyo",
+        "dates": "Mga petsa (opsyonal)",
+        "startDate": "Petsa ng simula",
+        "endDate": "Petsa ng tapos",
+        "location": "Lokasyon",
+        "addTransactions": "Magdagdag ng mga transaksyon",
+        "editTransactions": "I-edit ang mga transaksyon",
+        "selectedCount": "{count} ang napili",
+        "transactionCount": "{count} na transaksyon",
+        "previous": "Nakaraan",
+        "next": "Susunod",
+        "deleteTitle": "Tanggalin ang album?",
+        "deleteBody": "Tatanggalin nito ang album. Hindi binubura ang iyong mga transaksyon.",
+        "noAlbums": "Wala pang album",
+        "appOnlyHint": "Magdagdag ng cover photo o lokasyon sa app.",
+        "noExpenses": "Walang gastos ngayong buwan.",
+        "bulkAction": "Album",
+        "addToAlbum": "Idagdag sa album",
+        "expensesOnly": "Gastos lang ang puwedeng ilagay sa album.",
+        "expensesCount": "{count, plural, one {Idagdag ang gastos na ito sa:} other {Idagdag ang # gastos na ito sa:}}",
+        "expensesLeftOut": "{count, plural, one {Gastos lang ang puwedeng ilagay sa album, kaya hindi kasama ang # transaksyon.} other {Gastos lang ang puwedeng ilagay sa album, kaya hindi kasama ang # transaksyon.}}",
+        "reorderTitle": "Ayusin ang mga album",
+        "activeLabel": "Idagdag ang bagong transaksyon sa",
+        "activeTitle": "Aktibong biyahe",
+        "activeNone": "Wala"
+      },
+      "budget": {
+        "allocatedSummary": "{allocated} sa {total} ang nailaan",
+        "left": "{amount} na natitira",
+        "over": "Lampas ng {amount}",
+        "allocatedDone": "Ganap nang nailaan",
+        "cancel": "Kanselahin",
+        "save": "I-save",
+        "delete": "Burahin",
+        "amount": "Halaga",
+        "fillRemainder": "Punan",
+        "subcategories": "Mga subkategorya",
+        "childrenHint": "Maaaring hatiin ang halagang ito sa mga subkategorya.",
+        "duplicateSuffix": "kopya",
+        "editTitle": "I-edit ang template",
+        "addTitle": "Bagong template",
+        "chooseIcon": "Pumili ng icon",
+        "removeIcon": "Alisin ang icon",
+        "name": "Pangalan",
+        "namePlaceholder": "hal. Pang-araw-araw",
+        "total": "Kabuuang badyet",
+        "currency": "Pera",
+        "currencyHintTemplate": "Pinapanatili ng bawat badyet ang rate sa araw na ginawa ito, at doon kino-convert ang gastos sa ibang pera. Ngayon: 1 {currency} = {rate} {main}.",
+        "currencyHintBudget": "Iko-convert ang gastos sa ibang pera sa 1 {currency} = {rate} {main}.",
+        "currencyNoRate": "Wala pang exchange rate para sa {currency}. Magdagdag nito sa Multi-currency ng app para maisama ang gastos sa ibang pera.",
+        "countUnbudgetedTitle": "Bilangin ang gastos na walang badyet",
+        "countUnbudgetedCaption": "Isama sa kabuuan ng buwan ang gastos mula sa mga kategoryang walang linya ng badyet.",
+        "backPopulateTitle": "Punan ang mga nakaraang buwan",
+        "backPopulateCaption": "Gagawa ng badyet para sa {first} - {last} ({count} buwan). Lalaktawan ang mga buwang may badyet na.",
+        "templatesTitle": "Mga template ng badyet",
+        "templatesSubtitle": "Mga buwanang planong magagamit muli",
+        "newTemplate": "Bagong template",
+        "noTemplatesTitle": "Wala pang template",
+        "noTemplatesMessage": "Gumawa ng template ng badyet para simulan ang pagpaplano ng iyong mga buwan.",
+        "createTemplate": "Gumawa ng template",
+        "makeDefault": "Gawing default",
+        "defaultBadge": "Default",
+        "duplicate": "I-duplicate",
+        "deleteTemplateTitle": "Burahin ang template?",
+        "deleteTemplateMessage": "Mananatili ang mga buwanang badyet na nagawa na. Kung ito ang default, ang susunod na template ang magiging default.",
+        "createBudget": "Gumawa ng badyet",
+        "chooseTemplate": "Pumili ng template",
+        "customOption": "Custom",
+        "customOptionCaption": "Gumawa ng one-time na budget para sa buwang ito lang.",
+        "editBudget": "I-edit ang badyet",
+        "deleteBudget": "Burahin ang badyet",
+        "deleteBudgetTitle": "Burahin ang badyet ng buwang ito?",
+        "deleteBudgetMessage": "Hindi ito awtomatikong gagawin muli para sa buwang ito.",
+        "month": "Buwan",
+        "noCategories": "Magdagdag muna ng kategorya ng gastos para mabigyan ito ng badyet.",
+        "splitMismatch": "Hindi tumutugma sa halagang ito ang kabuuan ng mga subcategory",
+        "categoriesCount": "{count, plural, one {# kategorya} other {# kategorya}}"
+      },
+      "category": {
+        "newTitle": "Bagong Kategorya",
+        "editTitle": "I-edit ang Kategorya",
+        "name": "Pangalan",
+        "parentOptional": "Parent (opsyonal)",
+        "select": "Pumili",
+        "clear": "I-clear",
+        "cancel": "Kanselahin",
+        "save": "I-save",
+        "delete": "Burahin",
+        "deleteConfirm": "Permanenteng mabubura ang kategoryang ito. Hindi ito maaaring ibalik.",
+        "deleteTitle": "Burahin ang kategorya?",
+        "deleteHasTransactions": "{count} na transaksyon ang gumagamit ng kategoryang ito. Ilipat ang mga ito sa ibang kategorya, o burahin ito at iwang walang kategorya.",
+        "moveToOther": "Ilipat sa ibang kategorya",
+        "deleteAnyway": "Burahin pa rin",
+        "moveTitle": "Ilipat ang mga transaksyon?",
+        "moveBody": "Ililipat ang lahat ng transaksyon sa “{name}” at buburahin ang kategoryang ito. Hindi ito maibabalik.",
+        "moveAction": "Ilipat at burahin",
+        "addSubcategory": "Magdagdag ng subcategory",
+        "expense": "Gastos",
+        "income": "Kita",
+        "type": "Uri ng kategorya",
+        "required": "Maglagay ng pangalan",
+        "noOptions": "Wala pang ibang kategorya",
+        "emptyTitle": "Wala pang kategorya",
+        "chooseIcon": "Pumili ng icon",
+        "removeIcon": "Alisin ang icon",
+        "tabIcons": "Mga icon",
+        "tabEmoji": "Emoji",
+        "searchIcons": "Maghanap ng icon",
+        "noResults": "Walang tugma",
+        "groups": {
+          "money": "Pera",
+          "food_and_drink": "Pagkain at inumin",
+          "transport": "Transportasyon",
+          "travel": "Paglalakbay",
+          "home": "Bahay",
+          "bills": "Mga bayarin",
+          "shopping": "Pamimili",
+          "health": "Kalusugan",
+          "leisure": "Libangan",
+          "work": "Trabaho",
+          "family": "Pamilya",
+          "other": "Iba pa",
+          "food": "Pagkain at inumin",
+          "smileys": "Mga smiley",
+          "people": "Mga tao",
+          "animals": "Hayop at kalikasan",
+          "activities": "Mga aktibidad",
+          "objects": "Mga bagay",
+          "symbols": "Mga simbolo",
+          "flags": "Mga watawat"
+        },
+        "expand": "Palawakin",
+        "collapse": "I-collapse",
+        "noSubcategories": "Wala pang subcategory",
+        "searchEmoji": "Maghanap ng emoji"
+      },
+      "currency": {
+        "open": "Multi-currency",
+        "title": "Multi-currency",
+        "mainCurrency": "Pangunahing pera",
+        "mainInApp": "Para palitan ang pangunahing pera mo, gamitin ang app. Magsisimula ito ng bagong data.",
+        "asOf": "Na-update {date}",
+        "neverUpdated": "Hindi pa na-update",
+        "subcurrencies": "Mga sub-currency",
+        "add": "Idagdag",
+        "addCurrency": "Magdagdag ng pera",
+        "search": "Maghanap ng pera",
+        "noMatch": "Walang tugmang pera",
+        "empty": "Magdagdag ng pera para subaybayan ang palitan nito.",
+        "manual": "Manual",
+        "editRate": "I-edit ang rate",
+        "remove": "Alisin",
+        "save": "I-save",
+        "orderChanged": "Hindi pa na-save ang bagong ayos.",
+        "saveOrder": "I-save ang ayos"
+      },
+      "goal": {
+        "newGoal": "Bagong goal",
+        "editTitle": "I-edit ang goal",
+        "edit": "I-edit",
+        "save": "I-save",
+        "deleteTitle": "Burahin ang goal?",
+        "deleteMessage": "Mabubura ang goal at ang mga transaksyon nito. Hindi na ito maibabalik.",
+        "coverInApp": "Palitan ang cover photo sa app.",
+        "chooseIcon": "Pumili ng icon",
+        "removeIcon": "Alisin ang icon",
+        "name": "Pangalan ng goal",
+        "namePlaceholder": "hal. Biyahe sa Japan",
+        "target": "Target na halaga",
+        "currency": "Pera",
+        "currentBalance": "Kasalukuyang balance",
+        "targetDate": "Target na petsa",
+        "targetDateHint": "Opsyonal. Nagdadagdag ng gabay sa takbo ng iyong goal.",
+        "targetDatePast": "Pumili ng petsa sa hinaharap.",
+        "includeInTotals": "Isama sa kabuuan",
+        "includeInTotalsHint": "Ang mga nakatagong account ay hindi kasama sa kabuuang balance.",
+        "startingAmount": "Naipon na (opsyonal)",
+        "autoSave": "Auto-save",
+        "autoSaveHint": "Awtomatikong maglipat ng pera ayon sa iskedyul.",
+        "autoSaveAmount": "Halaga",
+        "cadence": "Umuulit",
+        "cadenceMonthly": "Buwanan",
+        "cadenceWeekly": "Lingguhan",
+        "source": "Mula sa account",
+        "sourcePlaceholder": "Pumili ng account",
+        "noSource": "Wala pang {currency} account. Kailangan ng auto-save ng account na parehong currency.",
+        "autoSaveInRecurring": "May custom na iskedyul ang auto-save ng goal na ito. Palitan ito sa Paulit-ulit.",
+        "currencyChangeTitle": "Palitan ang pera ng account?",
+        "currencyChangeMessage": "Iko-convert ang balanse mula {from} papuntang {to} sa pinakabagong palitan. Pinapanatili ng mga umiiral na entry ang orihinal nilang pera.",
+        "currencyChangeAction": "I-convert at palitan",
+        "balancePromptTitle": "Paano dapat itala ang pagbabago ng balance?",
+        "balancePromptMessage": "Nagbago ang balance ng {amount}. Itala bilang kita/gastos o panatilihin bilang pagkakaiba ng account (hindi kasama sa kabuuan ng insights).",
+        "recordDifference": "Itala bilang pagkakaiba ng account",
+        "recordIncome": "Itala bilang kita",
+        "recordExpense": "Itala bilang gastos",
+        "archive": "I-archive",
+        "unarchive": "Ibalik ang goal",
+        "archiveTitle": "I-archive ang goal?",
+        "archiveMessage": "Aalis ang goal sa listahan ng iyong mga goal at mapa-pause ang anumang auto-save dito.",
+        "archiveBalanceHint": "May laman pa itong pera. Puwede mo muna itong i-withdraw, o hayaang nakatabi rito.",
+        "archiveConfirm": "I-archive",
+        "archived": "Naka-archive",
+        "editInGoals": "I-edit ang goal",
+        "deposit": "Magdeposito",
+        "withdraw": "Mag-withdraw",
+        "depositFromAccount": "Mula sa account",
+        "depositFromAccountHint": "Maglipat ng pera mula sa isa sa iyong mga account.",
+        "depositOutside": "Pera mula sa labas",
+        "depositOutsideHint": "Regalo o cash mula sa labas, itatala bilang kita.",
+        "withdrawToAccount": "Sa account",
+        "withdrawToAccountHint": "Ibalik ang pera sa isa sa iyong mga account.",
+        "withdrawSpend": "Gastusin ito",
+        "withdrawSpendHint": "Magbayad nang direkta mula sa goal na ito, itatala bilang gastos."
+      },
+      "item": {
+        "add": "Magdagdag ng item",
+        "addTitle": "Bagong item",
+        "editTitle": "I-edit ang item",
+        "save": "I-save",
+        "deleteTitle": "Tanggalin ang item?",
+        "deleteMessage": "Aalisin nito ang item sa iyong tracker.",
+        "iconTitle": "Pumili ng icon",
+        "chooseIcon": "Pumili ng icon",
+        "iconSubtitle": "Pumili ng icon. Para mag-upload ng sarili mo, gamitin ang app.",
+        "searchIcons": "Maghanap ng icon…",
+        "customIcon": "Custom",
+        "noResults": "Walang nahanap",
+        "name": "Pangalan",
+        "namePlaceholder": "hal. Espresso machine",
+        "price": "Presyo ng pagbili",
+        "currency": "Pera",
+        "purchaseDate": "Petsa ng pagbili",
+        "markInactive": "Markahan bilang inactive",
+        "markInactiveHint": "Hinihinto ang pagbilang ng araw para sa mga bagay na naibenta, nasira, o hindi na ginagamit.",
+        "endDate": "Petsa ng pagtatapos",
+        "sold": "Naibenta ko",
+        "salePrice": "Presyo ng benta",
+        "note": "Tala",
+        "notePlaceholder": "Opsyonal",
+        "groups": {
+          "objects": "Mga bagay",
+          "leisure": "Libangan",
+          "work": "Trabaho",
+          "home": "Bahay",
+          "health": "Kalusugan",
+          "travel": "Paglalakbay",
+          "transport": "Transportasyon",
+          "shopping": "Pamimili",
+          "family": "Pamilya",
+          "other": "Iba pa"
+        },
+        "reorderTitle": "Ayusin ang mga item"
+      },
+      "loan": {
+        "newTitle": "Bagong utang",
+        "editTitle": "I-edit ang utang",
+        "edit": "I-edit",
+        "save": "I-save",
+        "delete": "Burahin ang account",
+        "deleteBody": "Permanenteng mabubura ang account na ito at lahat ng transaksyon nito. Hindi ito maaaring ibalik.",
+        "name": "Pangalan ng account",
+        "namePlaceholder": "Utang sa kotse",
+        "logo": "Logo",
+        "logoAdd": "Magdagdag ng logo",
+        "logoClear": "Alisin ang logo",
+        "group": "Account group",
+        "currency": "Pera",
+        "interestModel": "Interes",
+        "interestModelInfo": "Bumababang balanse: sinisingil ang interes buwan buwan sa natitira mong utang, kaya ang dagdag o maagang bayad ay nagpapababa ng interes. Ganito ang karamihan ng home loan. Flat rate: minsan lang kinukuwenta ang interes sa buong halagang hiniram at idinadagdag agad, kaya mas mabilis mabayaran ang utang pero walang natitipid na interes. Ganito ang karamihan ng car at personal loan.",
+        "modelReducing": "Bumababang balanse",
+        "modelFlat": "Flat rate",
+        "principal": "Halaga ng utang",
+        "term": "Tagal ng utang",
+        "termInfo": "Ilang buwanang hulog ang utang, hanggang {max}. Ang 5 taong utang ay 60.",
+        "termError": "Maglagay ng buong numero mula 1 hanggang {max}.",
+        "rate": "Interes",
+        "rateInfoReducing": "Ang taunang rate na sinisingil ng bangko sa natitira mong utang. I-type ito at kukuwentahin namin ang buwanang hulog at kabuuan, o i-type ang kabuuan at kukuwentahin namin ang rate.",
+        "rateInfoFlat": "Ang taunang flat rate, sinisingil sa buong halagang hiniram sa buong panahon ng utang. I-type ito at kukuwentahin namin ang buwanang hulog at kabuuan, o i-type ang kabuuan at kukuwentahin namin ang rate.",
+        "effectiveRateHint": "Effective rate {rate}%. Iyan ang halaga ng flat rate na ito sa bumababang balanse.",
+        "totalRepayable": "Kabuuang babayaran",
+        "totalRepayableInfo": "Lahat ng babayaran mo sa buong utang: ang hiniram mo kasama ang lahat ng interes.",
+        "instalment": "Buwanang hulog",
+        "instalmentInfo": "Ang binabayaran mo kada buwan. Sumusunod ito sa kabuuan sa itaas; i-on ang switch kung ibang halaga ang siningil ng bangko mo at gagamitin namin ang sa iyo.",
+        "instalmentErrorLow": "Masyadong maliit para mabayaran ang utang sa loob ng tagal nito.",
+        "instalmentErrorHigh": "Masyadong malaki para sa halaga at tagal na ito.",
+        "awaitingContract": "Punan ang mga kahon sa itaas",
+        "paidPeriods": "Nabayarang hulog",
+        "paidPeriodsInfo": "Iwan sa 0 kung bagong utang. Kung tumatakbo na, ilagay kung ilang hulog na ang nabayaran at kukwentahin ang panimulang balanse.",
+        "paidPeriodsError": "Dapat mas kaunti sa tagal ng utang.",
+        "collect": "Kaltasin sa",
+        "collectInfo": "Ang account na kinakaltasan buwan-buwan. Pumili at awtomatiko itong naitatala; iwang blangko at ikaw ang magtatala ng bawat bayad.",
+        "collectManual": "Ako na ang magtatala",
+        "collectExternal": "Naka-set up ang bayad na ito sa Paulit-ulit. Doon ito i-edit.",
+        "countAsExpense": "Bilangin ang hulog bilang gastos",
+        "countAsExpenseInfo": "Ang bayad ay laging naglilipat ng pera sa utang, kaya bumababa ang natitirang utang mo alinman ang piliin. Kapag naka-on ito, binibilang din ito bilang gastos sa iyong mga kabuuan, badyet at tsart, sa ilalim ng kategoryang pipiliin mo. I-off ito at hindi kasama ang mga bayad sa iyong gastos. Ang pagbabago mamaya ay para lang sa mga bayad na itatala mula noon.",
+        "paymentCategory": "Kategorya ng bayad",
+        "paymentCategoryPlaceholder": "Pumili ng kategorya",
+        "startDate": "Petsa ng simula",
+        "startDateInfo": "Kung kailan kinuha ang utang. Ang unang hulog ay isang buwan pagkatapos, at ang petsang iyon ang magiging araw ng bayad mo.",
+        "balanceOwed": "Natitirang utang",
+        "balanceOwedInfo": "Ang utang mo ngayon, hindi kasama ang interes na hindi pa sinisingil. Kadalasan mas maliit ito kaysa sa nasa statement mo.",
+        "totalInterest": "Kabuuang interes",
+        "leftToPay": "Natitirang bayad",
+        "firstInstalment": "Unang hulog",
+        "payoffBy": "Bayad sa",
+        "instalmentsLeft": "Natitirang hulog",
+        "includeInTotals": "Isama sa kabuuan",
+        "includeInTotalsHint": "Ang mga nakatagong account ay hindi kasama sa kabuuang balance.",
+        "archive": "I-archive ang utang",
+        "unarchive": "Alisin sa archive",
+        "archiveHint": "Itinatago ito sa listahan ng account. Nananatili ang kasaysayan at kabuuan, at ibinabalik ito ng \"Ipakita ang archived\".",
+        "rateChangeTitle": "Kailan magsisimula ang bagong rate?",
+        "rateChangeMessage": "Magbabago ang rate mula {from}% sa {to}%. Ilapat mula ngayon para manatili ang interes na nasingil na, o mula sa simula kung inaayos mo ang isang pagkakamali.",
+        "rateChangeFromStart": "Mula sa simula",
+        "rateChangeFromToday": "Mula ngayon",
+        "currencyChangeTitle": "Palitan ang pera ng account?",
+        "currencyChangeMessage": "Iko-convert ang balanse mula {from} papuntang {to} sa pinakabagong palitan. Pinapanatili ng mga umiiral na entry ang orihinal nilang pera.",
+        "currencyChangeAction": "I-convert at palitan",
+        "balancePromptTitle": "Paano dapat itala ang pagbabago ng balance?",
+        "balancePromptMessage": "Nagbago ang balance ng {amount}. Itala bilang kita/gastos o panatilihin bilang pagkakaiba ng account (hindi kasama sa kabuuan ng insights).",
+        "recordDifference": "Itala bilang pagkakaiba ng account",
+        "recordIncome": "Itala bilang kita",
+        "recordExpense": "Itala bilang gastos",
+        "archived": "Naka-archive",
+        "editInLoans": "I-edit ang utang",
+        "balanceOwedHint": "Maaaring {amount} ang nasa statement mo, kasama na ang interes na darating pa."
+      },
+      "reimbursement": {
+        "pendingTitle": "Hinihintay pang bumalik",
+        "settledTitle": "Nabayaran na",
+        "claim": "Singilin",
+        "paidInto": "Sa {account}",
+        "noAccount": "Walang account",
+        "undoTitle": "I-undo ang reimbursement na ito?",
+        "undoMessage": "Aalisin ang pumasok na pera.",
+        "undoAction": "I-undo",
+        "cancel": "Kanselahin",
+        "saveFirst": "I-save muna ang iba mo pang pagbabago."
+      },
+      "reorder": {
+        "open": "Ayusin",
+        "save": "I-save",
+        "accountsTitle": "Ayusin ang mga account",
+        "accountsHint": "Ilipat ang mga grupo, at ang mga account sa loob ng grupo nila. May sarili nilang ayos ang mga savings goal.",
+        "categoriesTitle": "Ayusin ang mga kategorya",
+        "categoriesHint": "Ilipat ang mga kategorya, at ang mga subcategory sa loob ng parent nila.",
+        "emptyGroup": "Wala pang account sa grupong ito.",
+        "drag": "I-drag para ayusin ang pagkakasunod",
+        "dragNamed": "Ilipat ang {name}. I-drag, o gamitin ang arrow keys.",
+        "moved": "Nailipat ang {name} sa puwesto {position} ng {count}"
+      },
+      "rule": {
+        "newRule": "Bagong recurring rule",
+        "editRule": "I-edit ang recurring rule",
+        "sameFlow": "Parehong proseso ng pagdadagdag ng transaksyon",
+        "saveRule": "I-save ang rule",
+        "deleteRule": "Burahin ang rule",
+        "deleteConfirm": "Tanggalin ang “{name}”? Hindi na ito maibabalik.",
+        "amountRequired": "Kailangan ang halaga",
+        "chooseCategory": "Pumili ng kategorya",
+        "settings": "Recurring settings",
+        "ruleName": "Pangalan ng rule",
+        "ruleNamePlaceholder": "Netflix subscription",
+        "enterRuleName": "Mangyaring magpasok ng pangalan ng recurring rule.",
+        "logo": "Logo",
+        "noLogo": "Walang logo",
+        "customLogo": "Custom na logo",
+        "searchLogos": "Maghanap ng subscription",
+        "country": "Bansa",
+        "noResults": "Walang nahanap",
+        "global": "Global",
+        "repeat": "Ulitin",
+        "daily": "Araw-araw",
+        "weekly": "Linggo-linggo",
+        "monthly": "Buwan-buwan",
+        "quarterly": "Kada tatlong buwan",
+        "semiannually": "Kada anim na buwan",
+        "yearly": "Taon-taon",
+        "every": "Bawat (interval)",
+        "ends": "Magtatapos",
+        "never": "Hindi kailanman",
+        "onDate": "Sa petsa",
+        "endDate": "Petsa ng pagtatapos",
+        "validEndDate": "Mangyaring pumili ng valid na end date.",
+        "status": "Status",
+        "active": "Aktibo",
+        "paused": "Naka-pause",
+        "pause": "I-pause",
+        "resume": "Ituloy"
+      },
+      "split": {
+        "title": "Split Bill",
+        "chip": "Hatiin",
+        "evenly": "Hatiin nang pantay",
+        "addPerson": "Magdagdag ng tao",
+        "me": "Ako",
+        "personPlaceholder": "Pangalan ng kaibigan",
+        "sumMatch": "{sum} ng {total}",
+        "sumLeft": "{diff} na natitira",
+        "sumOver": "Lagpas ng {diff}",
+        "sumMismatch": "{diff} na hindi naka-account",
+        "negativeSelf": "Ang utang ng mga kaibigan ay higit sa kabuuan",
+        "markPaid": "Markahang bayad",
+        "paidLabel": "Binayaran {date}",
+        "undo": "I-undo",
+        "done": "Tapos",
+        "remove": "Alisin",
+        "cancel": "Kanselahin",
+        "noAccount": "Walang account",
+        "paidTo": "Binayaran pabalik sa",
+        "sharesTitle": "Sino ang may utang sa iyo",
+        "someone": "Isang tao",
+        "untitledBill": "Split bill",
+        "paidTitle": "Nabayaran na",
+        "undoTitle": "Markahang hindi pa bayad ang bahaging ito?",
+        "undoBody": "Utang ito sa iyo ulit, at tataas muli ang gastos ng halagang ito. Aalisin ang payback transfer sa ibang account.",
+        "itemizedTotal": "Kabuuan: {sum}",
+        "itemizedZeroHint": "Maglagay ng kahit isang halaga",
+        "removeTitle": "Alisin ang request na ito?",
+        "removeBody": "Ic-clear nito ang utang nila sa iyo para sa bill na ito. Hindi mababago ang transaksyon mismo.",
+        "defaultPaidTo": "Default na babayaran sa",
+        "defaultPaidToHint": "Sa account na ito babayaran ang mga bagong split bilang default."
+      },
+      "duplicate": "I-duplicate",
+      "duplicateTitle": "I-duplicate sa petsa",
+      "expenseCategory": "Expense category",
+      "incomeCategory": "Income category",
+      "categoryNone": "Nananatili sa mga transfer ang kategorya nila. Pumili ng mga gastos o kita para palitan ito.",
+      "duplicateNone": "Hindi madodoble ang mga balance adjustment at negatibong halaga.",
+      "duplicateTooMany": "Hanggang {max} transaksyon lang ang puwedeng i-duplicate nang sabay.",
+      "wage": {
+        "title": "Hourly value",
+        "subtitle": "Ang income rate mo para sa bawat buwan, ayon sa itinakda sa app.",
+        "add": "Magdagdag ng income rate",
+        "addTitle": "Magdagdag ng income rate",
+        "empty": "Wala pang kasaysayan ng hourly value.",
+        "now": "Ngayong buwan",
+        "perHour": "/oras",
+        "type": {
+          "hourly": "Hourly",
+          "monthly": "Monthly",
+          "yearly": "Yearly"
+        },
+        "deleteTitle": "Burahin ang buwanang hourly value?",
+        "deleteBody": "Burahin ang rate para sa {month}? Ang mga buwang nakasalalay dito ay babalik sa nakaraang available na buwan.",
+        "year": "Taon",
+        "month": "Buwan",
+        "existsTitle": "Mayroon nang {month}",
+        "existsBody": "Mayroon nang income rate ang buwang ito. I-edit na lang?",
+        "saveFor": "I-save para sa {month}",
+        "step1": "Magkano ang iyong kinikita?",
+        "step2": "Work week",
+        "step3": "Dagdag na oras sa trabaho",
+        "amount": "Halaga ({symbol})",
+        "afterTax": "Ilagay ang iyong after-tax na sahod.",
+        "hoursPerWeek": "Oras ng trabaho / linggo",
+        "workdaysPerWeek": "Araw ng trabaho / linggo",
+        "commuteMinutes": "Dagdag na oras / araw ng trabaho (min)",
+        "commuteHint": "Isama ang paghahanda, biyahe, parking, at hindi bayad na oras ng trabaho.",
+        "trueRate": "True hourly rate",
+        "weeklyIncome": "Lingguhang kita",
+        "baseRate": "Base hourly rate",
+        "commutePerWeek": "Dagdag na oras / linggo",
+        "totalPerWeek": "Kabuuang oras / linggo",
+        "showAs": "Ipakita bilang",
+        "period": {
+          "hourly": "Oras-oras",
+          "weekly": "Lingguhan",
+          "monthly": "Buwanan",
+          "yearly": "Taunan"
+        },
+        "suffix": {
+          "hourly": "/oras",
+          "weekly": "/lggo",
+          "monthly": "/buwan",
+          "yearly": "/taon"
+        }
+      },
+      "notePlaceholder": "Bagong note. Iwanang blangko para burahin ito."
+    },
+    "cloud": {
+      "strip": "Data mula sa {device}, na-sync {date}.",
+      "yourPhone": "telepono mo",
+      "dataFrom": "Data mula {date}",
+      "phoneHere": "Nakakonekta ang telepono",
+      "phoneAway": "Hindi nakakonekta ang telepono",
+      "connecting": "Kumokonekta…",
+      "refresh": "I-refresh mula sa telepono",
+      "receiving": "Sini-sync… {percent}%",
+      "preparing": "Naghahanda…",
+      "preparingTitle": "Naghahanda ang iyong telepono para mag-sync",
+      "receivingTitle": "Sini-sync ang pinakabagong data mula sa iyong telepono",
+      "opening": "Binubuksan…",
+      "openingTitle": "Binubuksan ang na-sync na data",
+      "needsPhoneTitle": "Buksan ang Money2Time sa iyong telepono.",
+      "needsPhoneBody": "Pumunta sa Mga setting → Web Dashboard. Kusang darating ang pinakabago mong data.",
+      "unlink": "I-unlink ang browser na ito",
+      "unlinkConfirm": "I-unlink? Buburahin ng browser na ito ang kopya nito ng data mo. Mag-scan ulit para i-link muli.",
+      "stay": "Panatilihing naka-link",
+      "elsewhereTitle": "Nakabukas ang dashboard na ito sa ibang tab.",
+      "elsewhereBody": "Isang tab lang ang nakakatanggap ng update. Piliin ang Gamitin dito para lumipat.",
+      "useHere": "Gamitin dito",
+      "sourceOfTruth": "Sa telepono mo sine-save ang mga pagbabago. Walang naka-save online.",
+      "errors": {
+        "incomplete": "Huminto ang pag-sync sa iyong telepono bago ito natapos. I-refresh mula sa iyong telepono para subukan ulit.",
+        "corrupt": "Hindi mabasa ang data mula sa iyong telepono. I-refresh mula sa iyong telepono para subukan ulit.",
+        "unsupported": "Galing ang data na ito sa mas bagong bersyon ng app. I-reload ang page para makuha ang pinakabagong dashboard.",
+        "storage": "Hindi nag-save ng kopya ang browser na ito, kaya kakailanganin nito ulit ang iyong telepono sa susunod. Madalas itong mangyari sa mga private window."
+      }
+    },
+    "link": {
+      "eyebrow": "Money2Time Web Dashboard",
+      "title": "Ang Money2Time data mo, sa malaking screen",
+      "subtitle": "I-scan ang code gamit ang telepono mo. End-to-end encrypted, walang naka-save online.",
+      "steps": {
+        "camera": {
+          "title": "I-scan gamit ang camera",
+          "body": "Itutok ang camera ng telepono sa code, o i-scan ito sa app."
+        },
+        "link": {
+          "title": "I-link",
+          "body": "Tiyaking pareho ang code sa dalawang screen, saka i-tap ang I-link."
+        },
+        "dashboard": {
+          "title": "Buksan ang dashboard",
+          "body": "17 dashboard. Buksan ang app anumang oras para mag-refresh, at magbago habang nakakonekta ito."
+        }
+      },
+      "promises": {
+        "edits": {
+          "title": "Mag-edit habang nakakonekta",
+          "body": "Sine-save sa telepono mo ang mga pagbabago, habang nakakonekta lang ito."
+        },
+        "phone": {
+          "title": "Ang telepono mo ang masusunod",
+          "body": "Dumarating lang ang data habang bukas ang app."
+        },
+        "private": {
+          "title": "Walang iniimbak online",
+          "body": "End-to-end encrypted. Kahit kami ay hindi ito mababasa."
+        }
+      },
+      "cardTitle": "I-link ang browser na ito",
+      "cardBody": "I-scan gamit ang camera ng telepono o ang Money2Time app.",
+      "qrLabel": "QR code para i-link ang browser na ito sa Money2Time app",
+      "preparing": "Inihahanda ang code…",
+      "noAccount": "Walang account na kailangan. Nagbabago ang code tuwing 2 minuto.",
+      "confirmCode": "Tiyaking ipinapakita ng telepono mo ang code na ito, saka i-tap ang I-link doon.",
+      "candidateTitle": "I-link ang {phone}?",
+      "candidateTitleUnnamed": "I-link ang teleponong ito?",
+      "candidateBody": "Tiyaking pareho ang code sa telepono mo. Mag-link lang kung ikaw mismo ang nag-scan.",
+      "candidateAccept": "I-link",
+      "candidateReject": "Hindi akin",
+      "offline": "Hindi makakonekta. Lalabas ang bagong code kapag online ka na ulit.",
+      "terms": "Sa pag-link, sumasang-ayon ka sa Terms of Use at Privacy Policy.",
+      "unlinkedNotice": "Na-unlink na. Binura ng browser na ito ang kopya nito ng data mo.",
+      "linkedTo": "Naka-link sa {phone}",
+      "waitingTitle": "Naghihintay sa iyong telepono",
+      "waitingBody": "Buksan ang Money2Time → Mga setting → Web Dashboard.",
+      "preparingTitle": "Naghahanda para mag-sync",
+      "preparingBody": "Pinapaketehin ng telepono mo ang iyong data. Panatilihing bukas ang Money2Time dito.",
+      "receivingTitle": "Sini-sync ang iyong data",
+      "receivingBody": "End-to-end encrypted, diretso mula sa iyong telepono. Panatilihing bukas ang Money2Time dito.",
+      "openingTitle": "Binubuksan ang iyong data",
+      "openingBody": "Dine-decrypt ito sa browser na ito.",
+      "errors": {
+        "unsupported": "Hindi mabubuksan ng browser na ito ang data na may end-to-end encryption. Gumamit ng kamakailang bersyon ng Chrome, Edge, Firefox o Safari."
+      }
+    },
+    "pro": {
+      "badge": "Pro",
+      "title": "Bahagi ng Money2Time Pro",
+      "body": "Bahagi ito ng Money2Time Pro, kasama ang mas mahahabang panahon at walang limit sa accounts, categories, paulit-ulit na transaksyon at iba pa. Mag-upgrade sa app sa iyong phone, at mabubuksan din ito rito.",
+      "stepApp": "Sa iyong phone, buksan ang Money2Time at mag-upgrade sa Pro.",
+      "stepRefresh": "Bumalik dito at mag-refresh mula sa iyong phone. Mabubuksan ang browser na ito kapag na-sync na ng phone ang data nito.",
+      "checkAgain": "Nag-upgrade na ako, i-refresh mula sa telepono",
+      "checking": "Sini-sync…",
+      "notNow": "Hindi muna",
+      "lockedPeriod": "{period}, Pro lang"
+    },
+    "filters": {
+      "title": "Mga Filter",
+      "accounts": "Mga Account",
+      "exclude": "Huwag isama",
+      "include": "Isama lang",
+      "done": "Tapos",
+      "reset": "I-reset",
+      "note": "Hindi sinasala ang balanse ng mga account."
+    },
+    "hide": {
+      "hide": "Itago ang halaga",
+      "show": "Ipakita ang halaga"
+    },
+    "dropdown": {
+      "search": "Maghanap",
+      "noMatch": "Walang tugma"
+    }
+  }
+}

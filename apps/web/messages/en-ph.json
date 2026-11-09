@@ -1,0 +1,34 @@
+{
+  "home": {
+    "howItWorks": {
+      "body": "Your rate comes from what actually lands in your account. After tax, SSS and PhilHealth, across the days you work, including the commute you never get paid for."
+    },
+    "why": {
+      "paragraph2": "So I built this app. It helps you see your spending in a different way: not just in currency, but in hours of your life. Because sometimes <cost>\"₱150\"</cost> doesn't feel like much, but <time>\"2 hours of my life\"</time> does. The goal is simple, to help you become more aware of where your money (or really, time) is going, so you can take back control of it."
+    }
+  },
+  "metadata": {
+    "home": {
+      "title": "Expense Tracker App for the Philippines - Money2Time",
+      "description": "See every peso as hours of your life. A private expense tracker that works out your hourly rate after tax, SSS and PhilHealth, with no bank login.",
+      "openGraphDescription": "Every peso you spend, priced in hours of your life. Track monthly bills too — no bank login, nothing leaves your phone."
+    },
+    "keywords": [
+      "expense tracker philippines",
+      "budget app philippines",
+      "spending tracker app",
+      "gastos tracker app",
+      "hourly wage calculator philippines",
+      "recurring expense tracker",
+      "offline expense tracker",
+      "personal finance app philippines",
+      "money to time",
+      "true cost of spending"
+    ],
+    "costInHours": {
+      "title": "Average Wage in the Philippines, in Hours - Money2Time",
+      "description": "How far the average Philippine wage goes, measured against one product that costs the same everywhere — and how that compares with nine other countries.",
+      "openGraphDescription": "How far the average Philippine wage goes against a product that is the same everywhere, next to nine other countries."
+    }
+  }
+}
