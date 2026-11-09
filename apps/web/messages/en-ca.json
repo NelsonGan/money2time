@@ -1,0 +1,34 @@
+{
+  "home": {
+    "howItWorks": {
+      "body": "Your rate comes from what actually lands in your account. After tax, CPP and EI, across the days you work, including the commute you never get paid for."
+    },
+    "why": {
+      "paragraph2": "So I built this app. It helps you see your spending in a different way: not just in currency, but in hours of your life. Because sometimes <cost>\"$19\"</cost> doesn't feel like much, but <time>\"2 hours of my life\"</time> does. The goal is simple, to help you become more aware of where your money (or really, time) is going, so you can take back control of it."
+    }
+  },
+  "metadata": {
+    "home": {
+      "title": "Expense Tracker App for Canada - Money2Time",
+      "description": "See every dollar as hours of your life. A private expense tracker that works out your hourly rate after tax, CPP and EI, with no bank login.",
+      "openGraphDescription": "Every dollar you spend, priced in hours of your life. Track recurring bills too — no bank login, nothing leaves your phone."
+    },
+    "keywords": [
+      "expense tracker canada",
+      "budget app canada",
+      "spending tracker app",
+      "expense tracker after cpp and ei",
+      "hourly wage calculator canada",
+      "recurring expense tracker",
+      "offline expense tracker",
+      "personal finance app canada",
+      "money to time",
+      "true cost of spending"
+    ],
+    "costInHours": {
+      "title": "Average Wage in Canada, in Work Hours - Money2Time",
+      "description": "How far the average Canadian wage goes, measured against one product that costs the same everywhere — and how that compares with nine other countries.",
+      "openGraphDescription": "How far the average Canadian wage goes against a product that is the same everywhere, next to nine other countries."
+    }
+  }
+}

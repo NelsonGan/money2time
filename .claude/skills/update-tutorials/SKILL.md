@@ -21,7 +21,7 @@ This skill is the loop that fixes that. Work through it in order.
 | Annotated frames                     | `assets/tutorials/<image>.webp`                                       | yes                |
 | Metro `require()` registry           | `features/tutorials/content/images.generated.ts`                      | yes, generated     |
 | Raw simulator captures               | `.tutorial-raw/<name>.png`                                            | **no**, gitignored |
-| Website copy of both                 | `money2time-web` `src/lib/tutorials.generated.ts`, `media/tutorials/` | yes, generated     |
+| Website copy of both                 | `apps/web/src/lib/tutorials.generated.ts`, `apps/web/media/tutorials/` | yes, generated     |
 
 `image` names and tutorial `id`s are independent. Renumbering a tutorial's steps renames the
 **output**, not the raw capture: the spec entry keeps pointing at whatever the file on disk is
@@ -157,12 +157,13 @@ House style, enforced partly by `__tests__/features/tutorials.test.ts`:
 ## 7. Sync the website and run the checks
 
 ```bash
-node scripts/sync-tutorials-web.mjs      # ../money2time-web, or --web <path>
+node scripts/sync-tutorials-web.mjs      # into ../web (apps/web), or --web <path>
 npm run check && npm test
 ```
 
-Then in `money2time-web`: `node scripts/upload-media.mjs` to publish the screenshots to its
-R2 bucket, then `npm run lint && npm run build && npm run typecheck`.
+Then in `apps/web` (after `npm ci`): `node scripts/upload-media.mjs` to publish the screenshots
+to its R2 bucket, then `npm run lint && npm run build && npm run typecheck`. The website change
+goes in the same PR ([work-on-website](../work-on-website/SKILL.md) has the rest).
 
 Never hand-edit `src/lib/tutorials.generated.ts` or `media/tutorials/` — this script owns them.
 

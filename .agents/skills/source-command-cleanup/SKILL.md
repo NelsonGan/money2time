@@ -9,6 +9,8 @@ You are doing a pre-merge code cleanup pass. Your job is to find and fix real pr
 
 Run `git diff main...HEAD --name-only` to get the list of files changed in this branch. If on main with no branch, use `git diff HEAD~5...HEAD --name-only` to get recently touched files. Focus your review on these files only.
 
+Group them by app: `apps/mobile` (the app), `apps/cloudflare/workers/<name>`, `apps/web` (the website and Web Dashboard) and `apps/app-studio`. Each app has its own conventions, so judge a file by its own app's, and skip generated files (`*.generated.ts`, `public/dashboard-assets/`, `media/`).
+
 ## Step 2: Read and audit each file
 
 For each changed file, read it fully and flag issues in these categories:
@@ -27,7 +29,7 @@ For each changed file, read it fully and flag issues in these categories:
 - Null/undefined dereferences that are not guarded
 - Incorrect logic that contradicts the surrounding code's intent
 
-**Convention violations** (based on this codebase's patterns)
+**Convention violations** (the app's patterns; for `apps/web` and `apps/app-studio` use the rules in the `work-on-website` and `work-on-app-studio` skills: copy in all 32 `messages/*.json`, typed analytics events, `.ts` value imports in tested modules, no imports across apps)
 
 - `console.log` instead of `console.warn` / `console.error`
 - Raw date logic instead of `dayKeyFromDateLocal()` / `monthKeyFromIsoLocal()` etc.
@@ -56,7 +58,7 @@ Fix every issue you found. Edits must be surgical — change only the lines need
 
 ## Step 4: Run checks
 
-Run `npm run check` (typecheck + lint). Fix any errors it surfaces that are related to your changes. If analytics is affected, also run `npm test -- --runInBand __tests__/services/analyticsTrackingPlan.test.ts __tests__/services/analyticsEvents.test.ts __tests__/services/analyticsNative.test.ts` and reconcile the table with the implementation before completing the cleanup.
+Run each changed app's checks from its directory: `npm run check` in `apps/mobile` (typecheck + lint + format), `npm run typecheck` in a changed Worker, `npm run lint`, `npm test` and `node scripts/validate-messages.mjs` in `apps/web`, and `npx tsc --noEmit` and `npm test` in `apps/app-studio`. Fix any errors they surface that are related to your changes. If analytics is affected, also run `npm test -- --runInBand __tests__/services/analyticsTrackingPlan.test.ts __tests__/services/analyticsEvents.test.ts __tests__/services/analyticsNative.test.ts` and reconcile the table with the implementation before completing the cleanup.
 
 ## Step 5: Report
 

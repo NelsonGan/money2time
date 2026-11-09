@@ -5,6 +5,19 @@ description: Add, rename, or remove user-facing strings across the money2time i1
 
 # Add / change an i18n string (money2time)
 
+This skill is the **app's** strings (`apps/mobile`; paths below are relative to
+it). The repository holds two more sets of translations, each with its own
+rules:
+
+- **Website and Web Dashboard** (`apps/web/messages/*.json`, 32 locales,
+  regional English files hold only differences; check with
+  `node scripts/validate-messages.mjs` in `apps/web`). See
+  [work-on-website](../work-on-website/SKILL.md). When the same words appear in
+  the app and on the dashboard, change both, and reuse the app's wording.
+- **Store screenshots** (`apps/app-studio/src/scenes/locales/*.ts`, 23 locales)
+  and store listing text (`apps/app-studio/src/data/appDescriptions.ts`). See
+  [work-on-app-studio](../work-on-app-studio/SKILL.md).
+
 All user-facing text goes through `I18n.t('key')` (i18n-js, setup in `lib/i18n/index.ts`). There are **24 locale files** in `lib/i18n/locales/`: `da, de, en, es, fil, fr, hi, id, it, ja, ko, ms, nb, nl, pl, pt, ru, sv, th, tr, uk, vi, zh, zh-Hant`. `en.ts` is the **source of truth**.
 
 `__tests__/i18n/localeParity.test.ts` fails the build (CI gate) unless **every** locale:

@@ -1,0 +1,39 @@
+{
+  "home": {
+    "ticker": {
+      "fuel": "Petrol",
+      "cinema": "Cinema",
+      "lunch": "Hawker lunch"
+    },
+    "howItWorks": {
+      "body": "Your rate comes from what actually lands in your account. After tax and CPF, across the days you work, including the commute you never get paid for."
+    },
+    "why": {
+      "paragraph2": "So I built this app. It helps you see your spending in a different way: not just in currency, but in hours of your life. Because sometimes <cost>\"$22\"</cost> doesn't feel like much, but <time>\"2 hours of my life\"</time> does. The goal is simple, to help you become more aware of where your money (or really, time) is going, so you can take back control of it."
+    }
+  },
+  "metadata": {
+    "home": {
+      "title": "Expense Tracker App for Singapore - Money2Time",
+      "description": "See every dollar as hours of your life. A private expense tracker that works out your hourly rate after tax and CPF, with no bank login.",
+      "openGraphDescription": "Every dollar you spend, priced in hours of your life. Track GIRO payments too — no bank login, nothing leaves your phone."
+    },
+    "keywords": [
+      "expense tracker singapore",
+      "budget app singapore",
+      "spending tracker app",
+      "expense tracker after cpf",
+      "hourly rate calculator singapore",
+      "recurring expense tracker",
+      "offline expense tracker",
+      "personal finance app singapore",
+      "money to time",
+      "true cost of spending"
+    ],
+    "costInHours": {
+      "title": "Median Salary in Singapore, in Work Hours - Money2Time",
+      "description": "How far Singapore's median income goes, measured against one product that costs the same everywhere — and how that compares with nine other countries.",
+      "openGraphDescription": "How far Singapore's median income goes against a product that is the same everywhere, next to nine other countries."
+    }
+  }
+}

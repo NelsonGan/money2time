@@ -1,0 +1,38 @@
+{
+  "home": {
+    "ticker": {
+      "fuel": "Petrol",
+      "cinema": "Cinema"
+    },
+    "howItWorks": {
+      "body": "Your rate comes from what actually lands in your account. After tax and UIF, across the days you work, including the commute you never get paid for."
+    },
+    "why": {
+      "paragraph2": "So I built this app. It helps you see your spending in a different way: not just in currency, but in hours of your life. Because sometimes <cost>\"R120\"</cost> doesn't feel like much, but <time>\"2 hours of my life\"</time> does. The goal is simple, to help you become more aware of where your money (or really, time) is going, so you can take back control of it."
+    }
+  },
+  "metadata": {
+    "home": {
+      "title": "Expense Tracker App for South Africa - Money2Time",
+      "description": "See every rand as hours of your life. A private expense tracker that works out your hourly rate after tax and UIF, with no bank login.",
+      "openGraphDescription": "Every rand you spend, priced in hours of your life. Track debit orders too — no bank login, nothing leaves your phone."
+    },
+    "costInHours": {
+      "title": "Average Wage in South Africa, in Work Hours - Money2Time",
+      "description": "How far South Africa's average formal-sector wage goes, measured against one product that costs the same everywhere — and how that compares with other countries.",
+      "openGraphDescription": "How far South Africa's average wage goes against a product that is the same everywhere, next to the other countries on the page."
+    },
+    "keywords": [
+      "expense tracker south africa",
+      "budget app south africa",
+      "spending tracker app",
+      "expense tracker after uif",
+      "hourly rate calculator south africa",
+      "debit order tracker",
+      "offline expense tracker",
+      "personal finance app south africa",
+      "money to time",
+      "true cost of spending"
+    ]
+  }
+}

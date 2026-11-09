@@ -1,0 +1,2165 @@
+{
+  "metadata": {
+    "home": {
+      "title": "Huishoudboekje-app: uitgaven in uren - Money2Time",
+      "description": "Het huishoudboekje dat elke aankoop in uren van je leven laat zien. Houd uitgaven, rekeningen en vaste lasten bij, zonder bankkoppeling.",
+      "openGraphDescription": "Elke aankoop, gemeten in uren van je leven. Een privé-uitgavenapp die nooit om je bankgegevens vraagt."
+    },
+    "contact": {
+      "title": "Contact - Money2Time",
+      "description": "Vragen, feedback, ideeën voor functies of een verzoek over je gegevens: mail rechtstreeks met de maker van Money2Time."
+    },
+    "privacy": {
+      "title": "Privacybeleid - Money2Time",
+      "description": "Hoe Money2Time met je gegevens omgaat: lokale opslag, productanalyse met een willekeurige app-ID en geen verkoop van persoonlijke of financiële gegevens."
+    },
+    "terms": {
+      "title": "Gebruiksvoorwaarden - Money2Time",
+      "description": "De voorwaarden die je accepteert bij gebruik van de uitgaven-app Money2Time voor iOS en Android."
+    },
+    "statementsImport": {
+      "title": "Bankafschriften importeren met AI - Money2Time",
+      "description": "Een korte uitleg van de AI-import van bankafschriften in Money2Time, zodat je je historie overzet zonder alles te typen."
+    },
+    "dataDeletion": {
+      "title": "Verzoek om gegevensverwijdering - Money2Time",
+      "description": "Hoe je verwijdering van je Money2Time-gegevens aanvraagt, wat er wordt gewist, wat bewaard blijft en hoe lang."
+    },
+    "keywords": [
+      "huishoudboekje app",
+      "uitgaven app",
+      "budget app",
+      "vaste lasten",
+      "persoonlijke financiën",
+      "uitgaven bijhouden",
+      "app om te besparen",
+      "uurloon berekenen",
+      "budgetteren app",
+      "financieel overzicht"
+    ],
+    "costInHours": {
+      "title": "Mediaan loon per land, in werkuren - Money2Time",
+      "description": "Officiële mediane en gemiddelde lonen uit tien landen, afgezet tegen één overal identiek product: hoe lang je ervoor moet werken.",
+      "openGraphDescription": "Hoe ver een werkuur reikt in tien landen, gemeten aan een product dat overal hetzelfde is."
+    },
+    "tutorials": {
+      "title": "Money2Time handleidingen - Zo gebruik je de app",
+      "description": "Stap voor stap uitleg voor elk onderdeel van Money2Time, met echte schermafbeeldingen. Uitgaven vastleggen, rekeningen delen, budgetten instellen en prijzen in werkuren lezen.",
+      "detailTitle": "{title} - Money2Time handleiding"
+    },
+    "dashboard": {
+      "title": "Webdashboard - Money2Time",
+      "description": "Scan met je telefoon om je Money2Time-gegevens op een groot scherm te zien: uitgaven, vermogen, budgetten en de uren achter elke aankoop. End-to-end versleuteld, niets online opgeslagen."
+    }
+  },
+  "common": {
+    "language": {
+      "label": "Taal"
+    },
+    "footer": {
+      "contact": "Contact",
+      "privacy": "Privacybeleid",
+      "dataDeletion": "Gegevens verwijderen",
+      "terms": "Gebruiksvoorwaarden",
+      "copyright": "© {year} Money2Time. Alle rechten voorbehouden.",
+      "costInHours": "Prijs in uren",
+      "tutorials": "Handleidingen",
+      "dashboard": "Webdashboard"
+    }
+  },
+  "storeButtons": {
+    "appStorePrefix": "Download in de",
+    "appStore": "App Store",
+    "playStorePrefix": "Download via",
+    "playStore": "Google Play"
+  },
+  "screenshotGallery": {
+    "ariaLabel": "App-screenshots",
+    "alts": {
+      "home": "Money2Time-screenshot met de maandelijkse transactielijst met inkomsten- en uitgaventotalen en de werkuren achter elke aankoop",
+      "privacy": "Money2Time-screenshot over privacy: je gegevens blijven op je apparaat, geen advertenties, werkt volledig offline",
+      "assets": "Money2Time-schermafbeelding met nettovermogen en rekeningsaldi",
+      "addExpense": "Money2Time-schermafbeelding met snelle invoer van uitgaven, het schermtoetsenbord en spraakinvoer",
+      "splitBill": "Money2Time-schermafbeelding met een rekening die gelijk is verdeeld over meerdere personen en ieders aandeel",
+      "insights": "Money2Time-schermafbeelding met een cirkeldiagram van uitgaven per categorie",
+      "budgeting": "Money2Time-schermafbeelding met maandbudgetten per categorie, voortgangsbalken en het resterende bedrag per budget",
+      "recurrings": "Money2Time-schermafbeelding met terugkerende verplichtingen en frequentie",
+      "hourlyRates": "Money2Time-schermafbeelding met de geschiedenis van je uurwaarde per maand"
+    }
+  },
+  "home": {
+    "nav": {
+      "howItWorks": "Hoe het werkt",
+      "logging": "Vastleggen",
+      "features": "Functies",
+      "privacy": "Privacy",
+      "download": "App downloaden",
+      "openMenu": "Menu openen",
+      "closeMenu": "Menu sluiten"
+    },
+    "hero": {
+      "title": "Elke prijs heeft twee getallen.",
+      "subtitle": "Money2Time houdt je uitgaven bij zoals elke andere app en laat hetzelfde bedrag daarna zien in uren van je leven.",
+      "badges": {
+        "onDevice": "Blijft op je telefoon",
+        "noBank": "Geen bankkoppeling",
+        "quick": "In seconden vastgelegd"
+      }
+    },
+    "units": {
+      "min": "{value} min",
+      "hours": "{value} u"
+    },
+    "ticker": {
+      "coffee": "Koffie",
+      "lunch": "Lunch buiten de deur",
+      "groceries": "Boodschappen",
+      "fuel": "Benzine",
+      "tshirt": "T-shirt",
+      "beers": "Rondje bier",
+      "electricity": "Stroom",
+      "pizza": "Vrijdagpizza",
+      "dogFood": "Hondenvoer",
+      "cinema": "Bioscoop",
+      "gym": "Sportschool",
+      "rent": "Huur",
+      "flight": "Vlucht naar huis",
+      "iceCream": "IJsje"
+    },
+    "howItWorks": {
+      "eyebrow": "Hoe het werkt",
+      "title": "Eén tik maakt van geld tijd.",
+      "body": "Je uurwaarde komt uit wat er echt op je rekening belandt. Na belasting, verdeeld over de dagen dat je werkt, inclusief de reistijd waar je nooit voor betaald wordt.",
+      "coffee": {
+        "title": "De koffie",
+        "note": "Een korte wandeling aan werk. Je wilde die koffie."
+      },
+      "impulse": {
+        "title": "De impulsaankoop",
+        "note": "Bijna twee werkdagen. Daar slaap je beter een nachtje over."
+      },
+      "rate": {
+        "title": "Je echte uurwaarde",
+        "perHour": "/uur",
+        "takeHome": {
+          "label": "Nettoloon",
+          "value": "{value} per maand"
+        },
+        "daysWorked": {
+          "label": "Werkdagen",
+          "value": "{value} per week"
+        },
+        "commute": {
+          "label": "Reistijd, onbetaald",
+          "value": "{value} min per dag"
+        }
+      }
+    },
+    "logging": {
+      "eyebrow": "Vastleggen",
+      "title": "Nooit meer een boeking typen.",
+      "body": "De meeste uitgaven-apps sneuvelen omdat vastleggen werk is. Hier zijn drie manieren om binnen te komen.",
+      "videoPlaceholder": "Schermopname volgt binnenkort",
+      "receiptScan": {
+        "tab": "Bon scannen",
+        "title": "Richt op de bon.",
+        "body": "De camera opent in het invoerscherm zelf, niet op een apart scherm. Totaal, winkel en datum komen ingevuld terug, en de foto blijft eraan hangen.",
+        "points": {
+          "one": "Leest het totaal, de datum en de winkel",
+          "two": "Bewaart de foto voor later"
+        }
+      },
+      "backTap": {
+        "tab": "Tik op achterkant",
+        "title": "Tik twee keer op de achterkant.",
+        "body": "Een opdracht via Tik op achterkant in iOS opent het toetsenblok met je laatste rekening en categorie klaar. Klaar voordat je bij de kassa wegloopt.",
+        "points": {
+          "one": "Van broekzak naar boeking in seconden",
+          "two": "Geen ontgrendelen, geen zoeken naar de app"
+        }
+      },
+      "applePay": {
+        "tab": "Apple Pay",
+        "title": "Of betaal gewoon zoals altijd.",
+        "body": "Een automatisering ziet een Apple Pay-betaling en zet de boeking klaar. Eén melding, een blik op de categorie, wegvegen.",
+        "points": {
+          "one": "Vangt op wat je met de hand nooit zou noteren",
+          "two": "Er wordt niets bewaard tot jij het zegt"
+        }
+      }
+    },
+    "review": {
+      "eyebrow": "Terugkijken",
+      "title": "Zie waar het heen ging.",
+      "body": "Kies een week, een maand of een jaar. Eén bedrag, de uren erachter en je categorieën op volgorde. Tik er een aan om te zien wat erin zit.",
+      "points": {
+        "one": "Vergeleken met je eigen gemiddelde, niet met het budget van een vreemde",
+        "two": "Sluit een categorie of rekening uit en de cijfers rekenen zichzelf opnieuw uit",
+        "three": "Observaties, geen preek"
+      },
+      "chip": "{hours} uur",
+      "mock": {
+        "title": "Uitgaven bekijken",
+        "week": "Week",
+        "month": "Maand",
+        "year": "Jaar",
+        "spent": "Deze week uitgegeven",
+        "calmer": "Rustiger dan normaal.",
+        "categories": {
+          "groceries": "Boodschappen",
+          "eatingOut": "Uit eten",
+          "transport": "Vervoer"
+        }
+      }
+    },
+    "features": {
+      "eyebrow": "Functies",
+      "title": "Al het andere dat je verwacht, zonder ophef.",
+      "sentiment": {
+        "title": "Hoe het voelde",
+        "body": "Markeer een aankoop als blij, neutraal of spijt. Het patroon zegt meer dan het totaal.",
+        "legend": "Was het waard"
+      },
+      "commitments": {
+        "title": "Vaste lasten",
+        "body": "Huur, verzekering, de sportschool die je steeds wilt opzeggen. Zie de maand voordat hij gebeurt.",
+        "lockedIn": "/mnd vastgelegd"
+      },
+      "reimbursements": {
+        "title": "Geld dat terugkomt",
+        "body": "Markeer een uitgave als declarabel en die wacht in een eigen lijst tot hij binnenkomt.",
+        "employer": "Werkgever",
+        "insurer": "Zorgverzekeraar"
+      },
+      "insights": {
+        "title": "Negen inzichten",
+        "body": "Verdelingen, trends, spaarquote, gevoel, bezittingen. Allemaal uit één menu.",
+        "savingsRate": "Spaarquote",
+        "incomeTrend": "Inkomenstrend",
+        "assets": "Bezittingen"
+      },
+      "split": {
+        "title": "Rekening delen",
+        "body": "Scan de bon en verdeel de posten rond de tafel. Alleen jouw deel telt.",
+        "yourShare": "Jouw deel"
+      },
+      "modes": {
+        "title": "Eenvoudig of volledig",
+        "body": "Begin met één portemonnee en een toetsenblok. Voeg rekeningen, overboekingen en valuta toe wanneer je ze nodig hebt.",
+        "simple": "Eenvoudig",
+        "simpleNote": "Eén portemonnee",
+        "full": "Volledig",
+        "fullNote": "Alles aan"
+      },
+      "budgets": {
+        "title": "Budgetten die je tempo aangeven",
+        "body": "Stel per categorie een maandplafond in. De balk laat zien waar je vandaag zou moeten staan.",
+        "category": "Boodschappen",
+        "of": "van {total}",
+        "pace": "Op schema, nog {days} dagen"
+      },
+      "calendar": {
+        "title": "Een maand die je kunt lezen",
+        "body": "Zoom uit naar een kalenderraster. Elke dag laat zien wat er binnenkwam en wegging, donkerder naarmate het bedrag groter is."
+      },
+      "currency": {
+        "title": "Elke valuta",
+        "body": "Leg vast in de valuta waarin je betaalde. Totalen worden omgerekend en het origineel blijft op de regel staan.",
+        "item": "Autolening",
+        "paidIn": "Betaald in {currency}"
+      },
+      "receipts": {
+        "title": "Elke bon, opgeborgen",
+        "body": "Foto's hangen aan de boeking en verzamelen zich in albums. Een garantieclaim is één scroll ver."
+      },
+      "search": {
+        "title": "Vind alles terug",
+        "body": "Zoek op notitie of winkel en filter daarna op categorie, rekening, bedrag of gevoel.",
+        "query": "koffie",
+        "filterCategory": "Eten",
+        "filterAccount": "Contant",
+        "filterSentiment": "Spijt"
+      },
+      "assets": {
+        "title": "Wat je bezit",
+        "body": "Volg rekeningen en bezittingen naast je uitgaven, zodat het lange verhaal ook meetelt."
+      }
+    },
+    "testimonials": {
+      "eyebrow": "Beoordelingen",
+      "title": "Wat mensen na een maand zeggen.",
+      "usersChoice": "Keuze van gebruikers"
+    },
+    "privacy": {
+      "eyebrow": "Privacy",
+      "title": "Je uitgaven blijven op je telefoon.",
+      "body": "Geen account aanmaken, geen bank koppelen. Alles staat op je toestel en je kunt alles exporteren of wissen wanneer je wilt.",
+      "onDevice": {
+        "title": "Alleen op het toestel",
+        "body": "Geen cloud, geen synchronisatie, geen advertenties."
+      },
+      "import": {
+        "title": "Neem je geschiedenis mee",
+        "body": "Importeer een back-up van Money Manager en ga verder."
+      },
+      "link": "Lees het privacybeleid"
+    },
+    "why": {
+      "eyebrow": "Van de ontwikkelaar",
+      "title": "Waarom ik dit heb gebouwd",
+      "bookAlt": "Your Money or Your Life van Vicki Robin",
+      "quote": "Je ruilt je levensenergie voor geld",
+      "quoteAuthor": "- Vicki Robin",
+      "paragraph1": "Na het lezen van <book>Your Money or Your Life</book> viel bij mij het kwartje. Voor de meesten van ons die loon verdienen, is geld niet zomaar geld; het is onze levensenergie. Elke euro die we uitgeven staat voor uren van onze tijd, onze inspanning, ons leven dat we inruilen.",
+      "paragraph2": "Daarom heb ik deze app gebouwd. Hij helpt je op een andere manier naar je uitgaven te kijken: niet alleen in valuta, maar in uren van je leven. Want soms voelt <cost>\"$20\"</cost> niet als veel, maar <time>\"2 uur van mijn leven\"</time> wel. Het doel is eenvoudig: je bewuster maken van waar je geld (of eigenlijk je tijd) naartoe gaat, zodat je de controle erover terugkrijgt.",
+      "paragraph3": "Alles blijft op je apparaat, zonder logins of cloudsynchronisatie. Je gegevens zijn van jou. Je kunt de gegevens indien nodig ook exporteren als een eenvoudig JSON-bestand. De gratis versie geeft je alles wat je nodig hebt om te beginnen. Pro ontgrendelt extra functies, zoals onbeperkte rekeningen/categorieën/uurtarieven, enzovoort.",
+      "paragraph4": "Hopelijk houd je altijd controle over je geld en je leven."
+    },
+    "closing": {
+      "title": "Zie wat je geld echt kost.",
+      "body": "Gratis en zonder account. Vul in een minuut je uurwaarde in en elk getal krijgt een tweede betekenis."
+    },
+    "community": {
+      "body": "Maak contact met andere gebruikers, deel feedback en krijg tips op onze Discord-server.",
+      "cta": "Word Lid van de Community"
+    },
+    "dashboardEntry": {
+      "eyebrow": "Nieuw · Webdashboard",
+      "title": "Je Money2Time-gegevens, op een groot scherm",
+      "body": "Scan een code op app.money2time.com met je telefoon en zie cashflow, uitgaven, vermogen, budgetten, reizen en de uren achter elke aankoop. Voeg transacties toe en bewerk ze vanaf je computer zolang je telefoon verbonden is. End-to-end versleuteld.",
+      "cta": "Open het webdashboard",
+      "points": {
+        "private": "End-to-end versleuteld",
+        "charts": "17 dashboards",
+        "edits": "Bewerk vanaf je computer"
+      }
+    }
+  },
+  "contact": {
+    "page": {
+      "title": "Neem contact op",
+      "intro": "Voor support, bugs, feedback of privacyvragen.",
+      "formLabel": "Contactformulier",
+      "discordTitle": "Liever chatten?",
+      "discordBody": "Word lid van onze Discord-community om in contact te komen met andere gebruikers en snel antwoord te krijgen.",
+      "discordCta": "Word lid van onze Discord"
+    },
+    "form": {
+      "honeypot": "Bedrijf",
+      "name": "Naam",
+      "namePlaceholder": "Je naam",
+      "email": "E-mail",
+      "emailPlaceholder": "jij@example.com",
+      "message": "Bericht",
+      "messagePlaceholder": "Vertel wat er is gebeurd, wat je verbeterd wilt zien of hoe ik kan helpen.",
+      "sending": "Verzenden...",
+      "send": "Bericht verzenden"
+    },
+    "validation": {
+      "nameRequired": "Voer je naam in.",
+      "nameTooLong": "Houd je naam onder {max} tekens.",
+      "emailRequired": "Voer je e-mailadres in.",
+      "emailInvalid": "Gebruik een geldig e-mailadres.",
+      "subjectTooLong": "Houd het onderwerp onder {max} tekens.",
+      "messageRequired": "Deel een kort bericht.",
+      "messageTooLong": "Houd het bericht onder {max} tekens."
+    },
+    "status": {
+      "honeypot": "Bedankt voor je bericht. Je bericht is onderweg.",
+      "error": "Corrigeer de gemarkeerde velden en probeer het opnieuw.",
+      "mailto": "Je standaard mailapp wordt geopend met het bericht al ingevuld. Als er niets opent, mail me dan rechtstreeks."
+    }
+  },
+  "statementsImport": {
+    "title": "Afschriften importeren",
+    "intro": "Bekijk de korte uitleg hieronder om te zien hoe je je bankafschriften met hulp van AI in Money2Time importeert.",
+    "videoTitle": "Money2Time - uitleg over afschriften importeren"
+  },
+  "notFound": {
+    "title": "Pagina niet gevonden",
+    "body": "Deze pagina bestaat niet. Misschien kost hij sowieso te veel van je tijd.",
+    "home": "Naar startpagina"
+  },
+  "privacy": {
+    "title": "Privacybeleid",
+    "lastUpdated": "Laatst bijgewerkt: 22 oktober 2026",
+    "websiteAnalytics": {
+      "title": "Gebruiksanalyse van de website",
+      "paragraphs": [
+        "Op money2time.com gebruiken we PostHog en Google Analytics om pseudonieme paginaweergaven en een beperkte reeks interacties te meten, zoals klikken op appdownloads, tutorialselecties en resultaten van het contactformulier. Deze diensten kunnen browseropslag of cookies gebruiken en technische informatie verwerken, waaronder de globale regio, het type apparaat en browser en de verwijzende site. Gebruikers- en gebeurtenisgegevens in Google Analytics worden maximaal 14 maanden bewaard.",
+        "Op het Webdashboard (app.money2time.com) meten dezelfde diensten welke dashboardpagina's je opent, wanneer een browser wordt gekoppeld of ontkoppeld, of overdrachten vanaf je telefoon en wijzigingen die je maakt slagen, en wanneer een Pro-functie wordt aangeboden. Zodra je telefoon zijn gegevens heeft verstuurd, worden deze gebeurtenissen gekoppeld aan de willekeurige app-ID van die telefoon, zodat je gebruik van het dashboard en de app telt als één pseudonieme gebruiker totdat je de browser ontkoppelt. Het dashboard houdt dit gescheiden van de rest van money2time.com, zodat je bezoeken aan andere pagina's er niet aan worden gekoppeld. Dashboardgebeurtenissen bevatten nooit je financiële gegevens, en bezoeken aan het dashboard worden nooit vastgelegd als sessieherhalingen.",
+        "PostHog kan ook een kleine steekproef van websitebezoeken vastleggen als sessieherhalingen waarin elk formulierveld is afgeschermd, en ontvangt een rapport wanneer er op een pagina een fout optreedt.",
+        "We versturen geen inhoud van het contactformulier, zoektekst uit tutorials, financiële gegevens, account-ID's, volledige URL-querystrings of gegevens voor advertenties of personalisatie. De omleiding /download voegt je IP-adres of user-agent-string niet toe aan de analysegebeurtenis. Websiteanalyse wordt niet geladen als Do Not Track in je browser is ingeschakeld."
+      ]
+    },
+    "sections": [
+      {
+        "title": "Overzicht",
+        "paragraphs": [
+          "Money2Time (de App) is een app voor persoonlijke financiën die je uitgaven omzet in tijdsequivalenten op basis van je uurloon. Je privacy is belangrijk voor ons. Dit beleid legt uit welke gegevens de App verzamelt, hoe die worden gebruikt en welke rechten je hebt met betrekking tot die gegevens."
+        ]
+      },
+      {
+        "title": "1. Gegevensopslag en local-first ontwerp",
+        "paragraphs": [
+          "Al je financiële gegevens, inclusief transacties, rekeningen, categorieën, terugkerende regels en looninstellingen, worden lokaal op je apparaat opgeslagen met een database op het apparaat (SQLite). Wij beheren geen servers die je persoonlijke financiële informatie opslaan en de App synchroniseert je gegevens nooit en maakt er nooit een back-up van op een server van ons. Als je het optionele Webdashboard gebruikt (sectie 6), stuurt je telefoon een kopie rechtstreeks naar een browser die je hebt gekoppeld, end-to-end versleuteld; onze server geeft die door zonder haar op te slaan en kan haar niet lezen.",
+          "Als je de App verwijdert, worden alle lokaal opgeslagen gegevens permanent verwijderd."
+        ]
+      },
+      {
+        "title": "2. Informatie die we verzamelen",
+        "subsections": [
+          {
+            "title": "Financiele gegevens (alleen lokaal opgeslagen)",
+            "lists": [
+              [
+                "Transactiebedragen, datums, categorieën, notities en sentimenttags",
+                "Rekeningnamen, typen en saldi",
+                "Loon- en uurtariefinformatie",
+                "Regels voor terugkerende transacties",
+                "Categorienamen en ordening"
+              ]
+            ],
+            "paragraphs": [
+              "Deze gegevens verlaten je apparaat nooit, tenzij je er uitdrukkelijk voor kiest ze te exporteren of ze te sturen naar een browser die je met het Webdashboard hebt gekoppeld."
+            ]
+          },
+          {
+            "title": "Willekeurige app-ID",
+            "paragraphs": [
+              "Bij de eerste start genereert de App een willekeurige unieke ID die begint met m2t_ en niet is gekoppeld aan je naam, e-mailadres, Apple ID of enige persoonlijke identiteit. Dezelfde ID wordt gedeeld met PostHog, Google Analytics for Firebase en RevenueCat voor productanalyse en abonnementsbeheer, en met elke browser die je met het Webdashboard koppelt, waarvan de gebruiksanalyse (PostHog en Google Analytics) hem ook gebruikt."
+            ]
+          },
+          {
+            "title": "Gebruiksanalyse",
+            "paragraphs": [
+              "We gebruiken PostHog en Google Analytics for Firebase om gepseudonimiseerde gebruiksgegevens te verzamelen die aan deze willekeurige app-ID zijn gekoppeld en de App te verbeteren. De analyse bevat geen bedragen, transactiedetails, rekeningsaldi, notities, bonnetjes, back-ups of informatie die jou identificeert.",
+              "PostHog ontvangt ook crash- en foutrapporten en legt een kleine steekproef van app-sessies vast als schermopnames, zodat we problemen kunnen vinden en oplossen. In die opnames is alles afgeschermd wat jouw gegevens laat zien: tekst, getallen, invoervelden, grafieken en elke foto die je toevoegt. Alleen het eigen ontwerp van de app, zoals pictogrammen, illustraties en knopteksten, blijft zichtbaar. Deze opnames tonen nooit je financiële gegevens."
+            ],
+            "lists": [
+              [
+                "Schermweergaven en functiegebruik",
+                "Appgebeurtenissen, zoals een aangemaakte transactie of gewijzigde instellingen",
+                "Algemene voorkeuren, zoals valuta, locale, thema en weergavemodus",
+                "Platform, zoals iOS of Android"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "title": "3. In-app aankopen en abonnementen",
+        "paragraphs": [
+          "De App biedt een optioneel premiumabonnement (Pro) dat via RevenueCat wordt beheerd. Betaling wordt verwerkt door Apple of Google. Wij ontvangen of bewaren nooit je betalingsinformatie, creditcardgegevens of inloggegevens voor Apple ID/Google Account.",
+          "RevenueCat ontvangt je abonnementsstatus, product-ID en vervaldatum om je rechten te beheren. Dit is gekoppeld aan de willekeurige app-ID, niet aan je persoonlijke identiteit."
+        ]
+      },
+      {
+        "title": "4. Meldingen",
+        "paragraphs": [
+          "De App kan toestemming vragen om meldingen te sturen. Alle meldingen worden lokaal op je apparaat gepland. Er worden geen pushmeldingen vanaf externe servers verzonden. Je kunt toestemming voor meldingen weigeren of meldingen op elk moment uitschakelen in de instellingen van je apparaat."
+        ],
+        "lists": [
+          [
+            "Dagelijkse check-inherinneringen",
+            "Wekelijkse uitgavenoverzichten",
+            "Waarschuwingen voor terugkerende transacties"
+          ]
+        ]
+      },
+      {
+        "title": "5. Apparaatrechten",
+        "paragraphs": [
+          "De App vraagt alleen toestemming voor meldingen om lokale herinneringen en overzichten te plannen. De App heeft geen toegang tot je camera, microfoon, fotobibliotheek, contacten, agenda, berichten, locatie, gezondheidsgegevens, fitnessgegevens, andere apps of browsegeschiedenis."
+        ]
+      },
+      {
+        "title": "6. Gegevens exporteren, importeren en Webdashboard",
+        "paragraphs": [
+          "Je kunt al je financiële gegevens op elk moment als JSON-bestand exporteren via de instellingen van de App. Het geëxporteerde bestand wordt gedeeld met de native deelfunctie van je apparaat. Wij ontvangen of verwerken je geëxporteerde gegevens niet.",
+          "Je kunt ook gegevens importeren uit een eerdere Money2Time-back-up of migreren vanuit de Money Manager-app. Importeren vervangt alle bestaande gegevens op je apparaat.",
+          "Het Webdashboard is optioneel. Om het te gebruiken open je app.money2time.com op een computer en scan je de code die daar verschijnt met de App. Je telefoon en die browser spreken dan een versleutelingssleutel af die alleen die twee hebben. Zolang het Webdashboard-scherm van de App en de browser allebei open zijn, stuurt de App de browser een kopie van je gegevens (dezelfde gegevens als bij een export, met de logo's, pictogrammen en omslagfoto's die je hebt toegevoegd, maar zonder bonfoto's en betaal-QR-codes), end-to-end versleuteld met AES-256-GCM. Die kopie loopt via een server die wij op Cloudflare beheren; die geeft de versleutelde gegevens door zodra ze binnenkomen en slaat ze niet op. Wij kunnen ze niet lezen.",
+          "De browser bewaart de laatste kopie die hij heeft ontvangen, nog steeds versleuteld, samen met de sleutel in zijn eigen opslag, totdat je hem ontkoppelt in de browser of in de App. Wijzigingen die je in het dashboard maakt, gaan op dezelfde manier versleuteld terug naar je telefoon, en de App slaat ze alleen op zolang het Webdashboard-scherm open is en alleen vanuit een browser die je hebt toegestaan wijzigingen te maken. Je telefoon laat de browser ook weten of je Money2Time Pro hebt, zodat hij Pro-dashboards kan ontgrendelen, en geeft hem zijn willekeurige app-ID door voor de gebruiksanalyse van het dashboard. Er is geen account: wij bewaren geen e-mailadres, en de server die je gegevens doorgeeft, bewaart geen gegevens over welke telefoons en browsers zijn gekoppeld."
+        ]
+      },
+      {
+        "title": "7. Gegevens verwijderen",
+        "paragraphs": [
+          "Je hebt altijd volledige controle over je gegevens. Alle gegevens resetten verwijdert alle transacties, rekeningen, categorieën, terugkerende regels en looninstellingen permanent van je apparaat. Alleen transacties resetten wist je transactiegeschiedenis, maar behoudt rekeningen en categorieën. Als je de App verwijdert, worden de lokale database en alle opgeslagen gegevens volledig verwijderd. Een browser ontkoppelen van het Webdashboard verwijdert de kopie die hij bewaart: meteen als je in de browser ontkoppelt en de eerstvolgende keer dat hij verbinding maakt als je vanuit de App ontkoppelt. Ook het wissen van de sitegegevens van die browser verwijdert de kopie.",
+          "Gegevens resetten binnen de App verwijdert niet je abonnementsstatus die door Apple/Google wordt bewaard, en ook niet analysegegevens die eerder naar PostHog / Google Analytics for Firebase zijn verzonden. Neem contact met ons op via het onderstaande e-mailadres om verwijdering van analysegegevens aan te vragen."
+        ]
+      },
+      {
+        "title": "8. Diensten van derden",
+        "paragraphs": [
+          "De App toont geen advertenties en gebruikt geen advertentie-SDK's."
+        ],
+        "table": {
+          "headers": [
+            "Dienst",
+            "Doel",
+            "Gedeelde gegevens"
+          ],
+          "rows": [
+            [
+              "PostHog / Google Analytics for Firebase",
+              "Gepseudonimiseerde gebruiksanalyse",
+              "Willekeurige app-ID, gebeurtenissen voor functiegebruik, voorkeuren"
+            ],
+            [
+              "RevenueCat",
+              "Abonnementsbeheer",
+              "Willekeurige app-ID, abonnementsstatus"
+            ],
+            [
+              "Cloudflare (Workers, Durable Objects)",
+              "Webdashboard-verbinding, alleen als je het gebruikt",
+              "Je gegevens, end-to-end versleuteld en alleen onderweg; verbindingsgegevens zoals het IP-adres, kort bewaard in de logs van Cloudflare"
+            ],
+            [
+              "Apple App Store / Google Play",
+              "Betalingsverwerking",
+              "Rechtstreeks afgehandeld door Apple/Google"
+            ]
+          ]
+        }
+      },
+      {
+        "title": "9. Gegevensbeveiliging",
+        "paragraphs": [
+          "Je financiële gegevens worden opgeslagen in een onversleutelde lokale database die wordt beschermd door de ingebouwde beveiliging van je apparaat. Wanneer je het Webdashboard gebruikt, worden ze op je telefoon versleuteld met AES-256-GCM, met een sleutel die je telefoon en browser afspreken via P-256-sleuteluitwisseling, en verzonden via HTTPS; onze server heeft de sleutel nooit. De App gebruikt alleen standaard, openbaar gepubliceerde versleutelingsalgoritmen."
+        ]
+      },
+      {
+        "title": "10. Privacy van kinderen",
+        "paragraphs": [
+          "De App is niet gericht op kinderen jonger dan 13 jaar. Wij verzamelen niet bewust persoonlijke informatie van kinderen jonger dan 13 jaar. Als je denkt dat een kind via de App gegevens heeft verstrekt, neem dan contact met ons op; dan nemen we stappen om die informatie te verwijderen."
+        ]
+      },
+      {
+        "title": "11. Wijzigingen in dit beleid",
+        "paragraphs": [
+          "We kunnen dit privacybeleid van tijd tot tijd bijwerken. Wijzigingen worden op deze pagina weergegeven met een bijgewerkte datum bij Laatst bijgewerkt. Voortgezet gebruik van de App na wijzigingen geldt als acceptatie van het bijgewerkte beleid."
+        ]
+      }
+    ],
+    "contact": {
+      "title": "12. Contact opnemen",
+      "body": "Als je vragen hebt over dit privacybeleid, support nodig hebt of verwijdering van analysegegevens wilt aanvragen, neem dan contact met ons op via:",
+      "formPrefix": "Je kunt ook het",
+      "formLink": "contactformulier",
+      "formSuffix": "op deze site gebruiken."
+    }
+  },
+  "terms": {
+    "title": "Gebruiksvoorwaarden",
+    "lastUpdated": "Laatst bijgewerkt: 25 maart 2026",
+    "privacyPolicyLabel": "Privacybeleid",
+    "sections": [
+      {
+        "title": "Overzicht",
+        "paragraphs": [
+          "Deze Gebruiksvoorwaarden (Voorwaarden) regelen je gebruik van de mobiele Money2Time-applicatie (de App), ontwikkeld en beheerd door Nelson Gan. Door de App te downloaden of te gebruiken, ga je ermee akkoord aan deze Voorwaarden gebonden te zijn. Als je niet akkoord gaat, gebruik de App dan niet."
+        ]
+      },
+      {
+        "title": "1. Acceptatie van de voorwaarden",
+        "paragraphs": [
+          "Door Money2Time te openen of te gebruiken, bevestig je dat je minstens 13 jaar oud bent en juridisch bevoegd bent om deze Voorwaarden aan te gaan. Als je de App namens een organisatie gebruikt, verklaar je dat je bevoegd bent die organisatie aan deze Voorwaarden te binden."
+        ]
+      },
+      {
+        "title": "2. Beschrijving van de App",
+        "paragraphs": [
+          "Money2Time is een app voor persoonlijke financiën die je helpt de echte kosten van je uitgaven te begrijpen door uitgaven om te zetten in het equivalente aantal uren van je tijd, op basis van je uurloon. Kernfuncties zijn onder meer:"
+        ],
+        "lists": [
+          [
+            "Uitgaven en inkomsten bijhouden over meerdere rekeningen",
+            "Omrekening van geld naar tijd op basis van je looninstellingen",
+            "Regels voor terugkerende transacties voor rekeningen en abonnementen",
+            "Uitsplitsingen van uitgaven, inzichten en sentimenttracking",
+            "Lokale gegevens exporteren en importeren",
+            "Aanpasbare meldingen voor herinneringen en overzichten"
+          ]
+        ]
+      },
+      {
+        "title": "3. Gratis en Pro-abonnementen",
+        "paragraphs": [
+          "De App is beschikbaar op freemiumbasis. Bepaalde functies zijn beperkt in het gratis abonnement en vereisen een actief Pro-abonnement om ze te ontgrendelen. Wij behouden ons het recht voor om limieten van het gratis abonnement of functies van het Pro-abonnement op elk moment te wijzigen. Materiele wijzigingen worden gecommuniceerd via een app-update of op deze website."
+        ],
+        "subsections": [
+          {
+            "title": "Gratis abonnement",
+            "lists": [
+              [
+                "Maximaal 5 rekeningen",
+                "Maximaal 9 uitgaven-/inkomstencategorieën",
+                "Maximaal 5 regels voor terugkerende transacties",
+                "Maximaal 5 uurtariefvermeldingen",
+                "Onbeperkte transactierecords"
+              ]
+            ]
+          },
+          {
+            "title": "Pro-abonnement",
+            "lists": [
+              [
+                "Onbeperkte rekeningen, categorieën, terugkerende regels en uurtariefvermeldingen",
+                "Beschikbaar als maandabonnement, jaarabonnement of levenslange aankoop"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "title": "4. In-app aankopen en abonnementen",
+        "paragraphs": [
+          "Pro-abonnementen en de levenslange aankoop worden verwerkt via de Apple App Store of Google Play Store. Door een aankoop te doen, ga je akkoord met de betalingsvoorwaarden van de betreffende store.",
+          "Abonnementen worden vooraf gefactureerd op maand- of jaarbasis en worden automatisch verlengd, tenzij ze minstens 24 uur voor het einde van de huidige periode worden opgezegd. Terugbetalingsverzoeken worden door Apple of Google behandeld volgens hun respectieve terugbetalingsbeleid. Je kunt een eerdere aankoop op een nieuw apparaat herstellen via Aankopen herstellen in de instellingen van de App.",
+          "Een levenslange aankoop geeft toegang tot Pro-functies gedurende de levensduur van de App. Wij garanderen niet dat de App voor onbepaalde tijd beschikbaar blijft."
+        ]
+      },
+      {
+        "title": "5. Je gegevens",
+        "paragraphs": [
+          "Alle financiële gegevens die je invoert, waaronder transacties, rekeningen, categorieën, looninstellingen en voorkeuren, worden lokaal op je apparaat opgeslagen. Wij hebben geen toegang tot je financiële gegevens en slaan ze niet op een server op.",
+          "Je bent zelf verantwoordelijk voor het maken en bewaren van back-ups van je gegevens. Gebruik de ingebouwde exportfunctie om een back-up te maken. Wij zijn niet aansprakelijk voor gegevensverlies als gevolg van verwijdering van de app, apparaatstoringen of per ongeluk resetten.",
+          "Zie ons {privacyPolicy} voor volledige details over gegevensverwerking."
+        ]
+      },
+      {
+        "title": "6. Aanvaardbaar gebruik",
+        "paragraphs": [
+          "Je stemt ermee in om het volgende niet te doen:"
+        ],
+        "lists": [
+          [
+            "De App reverse-engineeren, decompileren of disassembleren",
+            "Proberen onbevoegde toegang te krijgen tot enig deel van de App of de daaraan gerelateerde systemen",
+            "De App gebruiken voor enig onwettig doel of in strijd met toepasselijke wetten",
+            "De App of enig deel ervan herdistribueren, doorverkopen of in sublicentie geven",
+            "Geautomatiseerde middelen gebruiken om toegang te krijgen tot of interactie te hebben met de App"
+          ]
+        ]
+      },
+      {
+        "title": "7. Intellectueel eigendom",
+        "paragraphs": [
+          "De App, inclusief ontwerp, code, graphics en content, is eigendom van Nelson Gan en wordt beschermd door auteursrecht en andere wetten op intellectueel eigendom. Deze Voorwaarden geven je geen rechten om onze handelsmerken, logo's of merkelementen te gebruiken.",
+          "Je financiële gegevens zijn van jou. Door de App te gebruiken, geef je ons geen rechten op je persoonlijke gegevens."
+        ]
+      },
+      {
+        "title": "8. Afwijzing van garanties",
+        "paragraphs": [
+          "De App wordt geleverd zoals hij is en zoals hij beschikbaar is, zonder enige vorm van garantie, expliciet of impliciet, waaronder verkoopbaarheid, geschiktheid voor een bepaald doel of niet-inbreuk.",
+          "Money2Time is een hulpmiddel voor persoonlijke productiviteit en is geen financieel adviseur, accountant of gereguleerde financiële dienst. Niets in de App vormt financieel advies. Voor financiële beslissingen moet je een gekwalificeerde professional raadplegen.",
+          "Wij garanderen niet dat de App foutloos, ononderbroken of vrij van bugs zal zijn."
+        ]
+      },
+      {
+        "title": "9. Beperking van aansprakelijkheid",
+        "paragraphs": [
+          "Voor zover maximaal toegestaan door toepasselijk recht, zijn wij niet aansprakelijk voor indirecte, incidentele, bijzondere, gevolg- of punitieve schade die voortvloeit uit je gebruik van, of onvermogen om gebruik te maken van, de App, waaronder gegevensverlies, financiële beslissingen op basis van uitvoer van de App of apparaatproblemen.",
+          "Onze totale aansprakelijkheid tegenover jou voor enige claim die voortvloeit uit deze Voorwaarden of je gebruik van de App, zal niet hoger zijn dan het bedrag dat je hebt betaald voor je huidige Pro-abonnementsperiode, of $10 USD als je het gratis abonnement gebruikt."
+        ]
+      },
+      {
+        "title": "10. Beeindiging",
+        "paragraphs": [
+          "Wij kunnen je toegang tot de App op elk moment opschorten of beëindigen, met of zonder reden en met of zonder kennisgeving. Bij beëindiging eindigt je recht om de App te gebruiken onmiddellijk. Omdat je gegevens lokaal worden opgeslagen, blijven ze op je apparaat staan totdat je de App verwijdert of handmatig reset.",
+          "Je kunt op elk moment stoppen met het gebruik van de App door hem te verwijderen."
+        ]
+      },
+      {
+        "title": "11. Wijzigingen in deze voorwaarden",
+        "paragraphs": [
+          "We kunnen deze Voorwaarden van tijd tot tijd bijwerken. Wanneer we dat doen, werken we de datum Laatst bijgewerkt bovenaan deze pagina bij. Voortgezet gebruik van de App na wijzigingen geldt als je acceptatie van de herziene Voorwaarden. Bij materiële wijzigingen zullen we redelijke inspanningen leveren om je te informeren via een app-update of een bericht op deze website."
+        ]
+      },
+      {
+        "title": "12. Toepasselijk recht",
+        "paragraphs": [
+          "Deze Voorwaarden worden beheerst door en uitgelegd in overeenstemming met de wetten van Singapore, zonder rekening te houden met bepalingen inzake conflicterend recht. Alle geschillen die voortvloeien uit deze Voorwaarden vallen onder de exclusieve bevoegdheid van de rechtbanken van Singapore."
+        ]
+      }
+    ],
+    "contact": {
+      "title": "13. Contact opnemen",
+      "body": "Als je vragen hebt over deze Voorwaarden, neem dan contact met ons op via:"
+    }
+  },
+  "dataDeletion": {
+    "title": "Verzoek om gegevensverwijdering",
+    "lastUpdated": "Laatst bijgewerkt: 20 oktober 2026",
+    "intro": "Money2Time is een local-first app: al je financiële gegevens worden alleen op je apparaat opgeslagen en worden nooit op onze servers opgeslagen. Deze pagina legt uit hoe je verwijdering aanvraagt van de gegevens die aan de Money2Time-app zijn gekoppeld, inclusief de stappen om verwijdering aan te vragen en welke soorten gegevens worden verwijderd of bewaard, samen met eventuele bewaartermijnen.",
+    "sections": [
+      {
+        "title": "Hoe je gegevensverwijdering aanvraagt",
+        "subsections": [
+          {
+            "title": "Verwijder gegevens die op je apparaat zijn opgeslagen",
+            "paragraphs": [
+              "Bijna al je gegevens, inclusief al je financiële gegevens, worden alleen op je apparaat opgeslagen. Je kunt ze op elk moment zelf verwijderen:"
+            ],
+            "lists": [
+              [
+                "Open de Money2Time-app en ga naar Instellingen.",
+                "Tik op \"Alle gegevens resetten\" om alle transacties, accounts, categorieën, terugkerende regels en looninstellingen permanent te verwijderen.",
+                "Je kunt de app ook verwijderen om de lokale database en alle opgeslagen gegevens volledig te wissen."
+              ]
+            ]
+          },
+          {
+            "title": "De kopie in een gekoppelde browser verwijderen",
+            "paragraphs": [
+              "Als je het Webdashboard gebruikt, bewaart elke browser die je hebt gekoppeld de laatste kopie die je telefoon hem heeft gestuurd, versleuteld. Zo verwijder je die:"
+            ],
+            "lists": [
+              [
+                "Open in de browser app.money2time.com en kies \"Deze browser ontkoppelen\". De kopie en de bijbehorende sleutel worden meteen verwijderd.",
+                "Of ga in de Money2Time-app naar Instellingen > Webdashboard en tik naast de browser op \"Ontkoppelen\". De browser verwijdert zijn kopie de eerstvolgende keer dat hij verbinding maakt.",
+                "Ook het wissen van de sitegegevens van de browser voor app.money2time.com verwijdert de kopie."
+              ]
+            ]
+          },
+          {
+            "title": "Vraag verwijdering van analyse- en abonnementsgegevens aan",
+            "paragraphs": [
+              "Om verwijdering aan te vragen van de analyse- of abonnementsgegevens die aan je willekeurige app-ID zijn gekoppeld, neem contact met ons op:"
+            ],
+            "lists": [
+              [
+                "Mail ons naar het onderstaande adres met als onderwerp \"Data Deletion Request\", of gebruik het contactformulier op deze site.",
+                "Gebruik de kopieerknop naast Gebruikers-ID onder Settings > Display en vermeld de volledige ID, zodat we de gegevens kunnen vinden die aan je App zijn gekoppeld.",
+                "We verwerken je verzoek en bevestigen de voltooiing binnen 30 dagen."
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Welke gegevens worden verwijderd of bewaard",
+        "paragraphs": [
+          "De onderstaande tabel vat samen wat er met elk type gegevens gebeurt wanneer je verwijdering aanvraagt, en hoe lang gegevens worden bewaard."
+        ],
+        "table": {
+          "headers": [
+            "Gegevenstype",
+            "Actie",
+            "Bewaartermijn"
+          ],
+          "rows": [
+            [
+              "Financiële gegevens op het apparaat (transacties, accounts, categorieën, terugkerende regels, looninstellingen)",
+              "Verwijderd",
+              "Onmiddellijk verwijderd wanneer je gegevens reset of de app verwijdert. Wij bewaren niets."
+            ],
+            [
+              "Webdashboard-kopie in een browser die je hebt gekoppeld",
+              "Verwijderd",
+              "Verwijderd uit die browser wanneer je hem ontkoppelt of de sitegegevens wist. Onze servers slaan de kopie nooit op, dus wij bewaren niets."
+            ],
+            [
+              "Gepseudonimiseerde analysegegevens (PostHog / Google Analytics for Firebase)",
+              "Verwijderd op verzoek",
+              "Verwijderd binnen 30 dagen na je verzoek."
+            ],
+            [
+              "Abonnementsgegevens (RevenueCat, Apple, Google)",
+              "Bewaard waar vereist",
+              "Bewaard door Apple of Google voor facturerings-, belasting- en wettelijke verplichtingen, en beheerd via je Apple- of Google-account."
+            ]
+          ]
+        }
+      },
+      {
+        "title": "Gegevens die we niet opslaan",
+        "paragraphs": [
+          "Money2Time vereist geen account en slaat je naam, e-mail, Apple ID, Google-account of betaalgegevens niet op op onze servers. Omdat je financiële gegevens nooit op onze servers worden opgeslagen, ook niet wanneer je het Webdashboard gebruikt, kunnen wij ze niet voor je inzien of verwijderen.",
+          "Abonnements- en betaalgegevens die door Apple of Google worden bewaard, vallen buiten onze controle en worden rechtstreeks via je Apple- of Google-account beheerd."
+        ]
+      }
+    ],
+    "contact": {
+      "title": "Contact opnemen",
+      "body": "Voor het aanvragen van verwijdering van analyse- of abonnementsgegevens, of als je vragen hebt, neem contact met ons op via:",
+      "formPrefix": "Je kunt ook het",
+      "formLink": "contactformulier",
+      "formSuffix": "op deze site gebruiken."
+    }
+  },
+  "costInHours": {
+    "eyebrow": "Lonen in uren",
+    "title": "Wat een werkuur koopt, land voor land",
+    "intro": "Elke prijs heeft een tweede getal: de tijd die je ervoor gewerkt hebt. Deze pagina zet het officieel gepubliceerde loon van elk land naast één product dat overal hetzelfde is, zodat je kunt vergelijken wat een uur koopt zonder eerst over de boodschappenmand te hoeven praten.",
+    "compare": {
+      "base": "Uitgangspunt",
+      "with": "Vergelijk met",
+      "measure": "Wat het meet",
+      "caption": "Gepubliceerd loon en het werk voor één Big Mac, in twee landen",
+      "priceSource": "Big Mac-prijzen:"
+    },
+    "metrics": {
+      "workPerBigMac": "Werk voor één Big Mac",
+      "bigMacPrice": "Big Mac-prijs",
+      "payPerHour": "Loon per uur",
+      "payPerHourUsd": "Loon per uur in Amerikaanse dollars",
+      "bigMacsPerMonth": "Big Macs voor een maandloon",
+      "workPerLitre": "Werk per liter benzine",
+      "workPer100kWh": "Werk per {kwh} kWh stroom"
+    },
+    "periods": {
+      "hour": "per uur",
+      "week": "per week",
+      "month": "per maand",
+      "year": "per jaar"
+    },
+    "measures": {
+      "median": "Mediaan",
+      "average": "Gemiddelde"
+    },
+    "scopes": {
+      "allEmployees": "alle werknemers",
+      "allWorkers": "alle werkenden",
+      "citizens": "staatsburgers",
+      "formalSector": "formele sector, 10+ medewerkers",
+      "fullTimeEmployees": "voltijdwerknemers",
+      "fullTimeResidents": "voltijds ingezetenen",
+      "regularSalaried": "vaste loontrekkers",
+      "wageAndSalary": "loon- en salarisontvangers",
+      "employees": "werknemers",
+      "employeesNet": "werknemers, na belasting",
+      "employedPersons": "werkenden",
+      "formalNonAgri": "formele niet-agrarische sector",
+      "fullTimeEquivalent": "voltijdequivalente werknemers",
+      "urbanNonPrivate": "stedelijke niet-particuliere eenheden"
+    },
+    "allMarkets": {
+      "title": "Alle landen, gerangschikt",
+      "intro": "Gerangschikt naar hoe lang het loon moet werken voor één Big Mac. Lees de derde kolom eerst: zes van deze cijfers zijn medianen en vier zijn gemiddelden, en gemiddelden liggen hoger omdat de top ze omhoog trekt.",
+      "caption": "Gepubliceerde looncijfers en het werk voor één Big Mac, per land",
+      "country": "Land",
+      "pay": "Gepubliceerd loon",
+      "basis": "Wat het meet",
+      "hourly": "Per uur",
+      "effort": "Werk voor één Big Mac",
+      "youAreHere": "Jij"
+    },
+    "notes": {
+      "title": "Hoe je dit leest",
+      "method": {
+        "title": "Hoe de uren zijn berekend",
+        "body": "Waar een statistiekbureau een uurbedrag publiceert, wordt dat ongewijzigd overgenomen. Waar het een week- of maandbedrag publiceert, wordt gedeeld door een week van {hours} uur. Stats NZ publiceert allebei, en de twee schelen minder dan vijftig cent."
+      },
+      "basket": {
+        "title": "Waarom één burger en geen boodschappenmand",
+        "body": "Een Big Mac, een liter benzine (octaan 95) en een kilowattuur voor huishoudens zijn in al deze landen hetzelfde, elk op één datum door één uitgever verzameld. In India, waar McDonald's geen Big Mac met rundvlees verkoopt, neemt The Economist de Maharaja Mac met kip. Een ruimere lokale mand zou meer van het leven dekken, maar buiten de deur eten betekent iets anders in Manila dan in Melbourne, en dat vergelijken zegt meer over de mand dan over het geld."
+      },
+      "comparability": {
+        "title": "De lonen zijn niet strikt vergelijkbaar",
+        "body": "Niemand publiceert één tabel met mediane lonen voor deze landen, dus elk cijfer komt van het eigen statistiekbureau en telt een andere groep. Zes zijn medianen, vier zijn gemiddelden. Lees de verschillen als indicatief, niet als exact."
+      },
+      "grossPay": {
+        "title": "Dit is vóór belasting",
+        "body": "Gepubliceerde lonen zijn bruto. Wat er echt op je rekening komt is minder, dus jouw eigen uren zijn langer dan die op deze pagina."
+      }
+    },
+    "sources": {
+      "title": "Waar de cijfers vandaan komen",
+      "bigMac": "Big Mac-prijzen en wisselkoersen:",
+      "wages": "Lonen, land voor land:",
+      "energy": "Benzine- en stroomprijzen:"
+    },
+    "cta": {
+      "body": "De app doet dit met jouw loon in plaats van dat van je land. Vul in wat je netto overhoudt en elke aankoop krijgt een tweede getal.",
+      "link": "Bekijk hoe het werkt"
+    }
+  },
+  "tutorials": {
+    "eyebrow": "Handleidingen",
+    "title": "Handleidingen",
+    "intro": "Korte uitleg, beeld voor beeld, voor alles wat Money2Time kan. Elke schermafbeelding is de echte app, met de knop die je moet tikken in het rood.",
+    "searchPlaceholder": "Zoek in handleidingen",
+    "clear": "Wissen",
+    "emptyTitle": "Geen resultaten",
+    "emptyDescription": "Probeer een korter woord, of de naam van het scherm dat je zoekt.",
+    "stepCount": "{count} stappen",
+    "stepCounter": "{current} van {total}",
+    "badgePro": "PRO",
+    "badgeIos": "iPhone",
+    "openInApp": "Openen in de app",
+    "previous": "Vorige",
+    "next": "Volgende",
+    "category": {
+      "start": "Aan de slag",
+      "logging": "Geld vastleggen",
+      "organize": "Ordenen",
+      "plan": "Vooruit plannen",
+      "share": "Delen en afrekenen",
+      "insights": "Begrijpen",
+      "data": "Jouw gegevens"
+    }
+  },
+  "dashboard": {
+    "loading": "Je dashboard wordt geopend…",
+    "units": {
+      "minutes": "{m} min",
+      "hours": "{h} u",
+      "hoursMinutes": "{h} u {m} min",
+      "days": "{d} d",
+      "daysHours": "{d} d {h} u"
+    },
+    "nav": {
+      "label": "Dashboards",
+      "menu": "Menu",
+      "openMenu": "Menu openen",
+      "closeMenu": "Menu sluiten",
+      "groups": {
+        "insights": "Inzichten",
+        "wealth": "Vermogen",
+        "planning": "Planning",
+        "organize": "Ordenen"
+      }
+    },
+    "period": {
+      "label": "Periode",
+      "previous": "Vorige periode",
+      "next": "Volgende periode",
+      "asOf": "Per {date}",
+      "presets": {
+        "month": "Maand",
+        "3m": "3 mnd",
+        "6m": "6 mnd",
+        "12m": "12 mnd",
+        "ytd": "Dit jaar",
+        "year": "Jaar",
+        "all": "Alles"
+      }
+    },
+    "mode": {
+      "label": "Bedragen tonen als",
+      "hours": "Uren"
+    },
+    "common": {
+      "income": "Inkomsten",
+      "spending": "Uitgaven",
+      "net": "Netto",
+      "saved": "Gespaard",
+      "viewAll": "Alles bekijken",
+      "vsPrevious": "t.o.v. vorige",
+      "uncategorized": "Zonder categorie",
+      "other": "Overig",
+      "total": "Totaal",
+      "average": "Gemiddelde",
+      "transactions": "{count, plural, one {# transactie} other {# transacties}}",
+      "accountTypes": {
+        "debit": "Rekening",
+        "credit": "Creditcard",
+        "loan": "Lening",
+        "goal": "Doel",
+        "cash": "Contant",
+        "savings": "Spaargeld",
+        "investment": "Beleggingen"
+      },
+      "viewFailed": "Deze pagina kon voor jouw gegevens niet worden getoond. De andere pagina's werken nog."
+    },
+    "views": {
+      "overview": {
+        "nav": "Overzicht",
+        "title": "Overzicht",
+        "subtitle": "Waar je geld en je uren naartoe gingen"
+      },
+      "cash-flow": {
+        "nav": "Kasstroom",
+        "title": "Kasstroom",
+        "subtitle": "Geld erin, geld eruit en wat er overbleef"
+      },
+      "spending": {
+        "nav": "Uitgaven",
+        "title": "Uitgaven",
+        "subtitle": "Elke categorie, tot op de transactie"
+      },
+      "income": {
+        "nav": "Inkomsten",
+        "title": "Inkomsten",
+        "subtitle": "Waar je geld vandaan kwam"
+      },
+      "trends": {
+        "nav": "Trends",
+        "title": "Trends",
+        "subtitle": "Hoe elke categorie van maand tot maand verloopt"
+      },
+      "calendar": {
+        "nav": "Kalender",
+        "title": "Kalender",
+        "subtitle": "Uitgaven dag voor dag"
+      },
+      "transactions": {
+        "nav": "Transacties",
+        "title": "Transacties",
+        "subtitle": "Zoek en filter alles wat je hebt vastgelegd"
+      },
+      "accounts": {
+        "nav": "Rekeningen",
+        "title": "Rekeningen",
+        "subtitle": "Saldo's van al je rekeningen"
+      },
+      "net-worth": {
+        "nav": "Nettovermogen",
+        "title": "Nettovermogen",
+        "subtitle": "Wat je bezit, min wat je schuldig bent"
+      },
+      "budgets": {
+        "nav": "Budgetten",
+        "title": "Budgetten",
+        "subtitle": "Je plan naast wat er echt gebeurde"
+      },
+      "recurring": {
+        "nav": "Terugkerend",
+        "title": "Terugkerend",
+        "subtitle": "Abonnementen en rekeningen die zich herhalen"
+      },
+      "goals": {
+        "nav": "Doelen en leningen",
+        "title": "Doelen en leningen",
+        "subtitle": "Voortgang richting doelen en aflossingen"
+      },
+      "time": {
+        "nav": "Tijdkosten",
+        "title": "Tijdkosten",
+        "subtitle": "Je uitgaven, in uren van je leven"
+      },
+      "trips": {
+        "nav": "Reizen",
+        "title": "Reizen",
+        "subtitle": "Wat elke reis kostte, in geld en werkdagen"
+      },
+      "items": {
+        "nav": "Items",
+        "title": "Items",
+        "subtitle": "Wat je spullen per dag kosten"
+      },
+      "splits": {
+        "nav": "Gedeelde rekeningen",
+        "title": "Gedeelde rekeningen",
+        "subtitle": "Wie je nog geld schuldig is"
+      },
+      "mood": {
+        "nav": "Stemming en gewoonten",
+        "title": "Stemming en gewoonten",
+        "subtitle": "Hoe aankopen voelden, en wanneer je ze doet"
+      },
+      "categories": {
+        "nav": "Categorieën",
+        "title": "Categorieën",
+        "subtitle": "Voeg je categorieën toe, hernoem en organiseer ze"
+      }
+    },
+    "overview": {
+      "spent": "Uitgegeven",
+      "earned": "Verdiend",
+      "saved": "Gespaard",
+      "overspent": "Meer uitgegeven dan verdiend",
+      "savingsRate": "Spaarquote {rate}",
+      "noIncome": "Geen inkomsten in deze periode",
+      "netWorth": "Nettovermogen",
+      "netWorthNote": "Over {count, plural, one {# rekening} other {# rekeningen}} in de totalen",
+      "cashFlowTitle": "Kasstroom",
+      "cashFlowSubtitle": "De 12 maanden tot en met deze periode",
+      "paceTitle": "Uitgaventempo",
+      "thisMonth": "Deze maand",
+      "lastMonth": "Vorige maand",
+      "dayN": "Dag {day}",
+      "paceBehind": "{amount} minder dan op dit punt vorige maand.",
+      "paceAhead": "{amount} meer dan op dit punt vorige maand.",
+      "topCategories": "Grootste categorieën",
+      "biggestExpenses": "Grootste uitgaven",
+      "upcoming": "Aankomend terugkerend",
+      "nextOn": "Volgende op {date}",
+      "noSpending": "Geen uitgaven in deze periode",
+      "noRecurring": "Geen actieve terugkerende regels",
+      "timeTitle": "Je tijd",
+      "timeBody": "De uitgaven van deze periode kostten <strong>{hours}</strong> werk om te betalen.",
+      "workShare": "Aandeel van de uren die je werkte",
+      "workShareNote": "Van ongeveer {worked} betaald in deze periode",
+      "noWage": "Stel in de app een uurtarief in om dit in uren te zien.",
+      "accountsTitle": "Grootste rekeningen"
+    },
+    "cashFlow": {
+      "savingsRate": "Spaarquote {rate}",
+      "noIncome": "Geen inkomsten in deze periode",
+      "netPerDay": "Netto per dag",
+      "avgNet": "Gemiddeld netto per maand",
+      "daysCount": "{count, plural, one {Over # dag} other {Over # dagen}}",
+      "monthsCount": "{count, plural, one {Over # maand} other {Over # maanden}}",
+      "dailyTitle": "Dag voor dag",
+      "monthlyTitle": "Maand voor maand",
+      "sankeyTitle": "Waar het geld naartoe ging",
+      "sankeySubtitle": "Inkomsten links, uitgaven en sparen rechts",
+      "fromSavings": "Uit spaargeld",
+      "empty": "Geen inkomsten of uitgaven in deze periode",
+      "savingsRateTitle": "Spaarquote",
+      "savingsRateSubtitle": "Aandeel van je inkomsten dat je elke maand overhoudt; 20% is een veelgebruikt doel",
+      "tableTitle": "Maandoverzicht",
+      "month": "Maand",
+      "rate": "Quote"
+    },
+    "breakdown": {
+      "totalSpent": "Totaal uitgegeven",
+      "totalEarned": "Totaal verdiend",
+      "perDay": "Per dag",
+      "overDays": "{count, plural, one {Over # dag} other {Over # dagen}}",
+      "count": "Transacties",
+      "avgEach": "{amount} gemiddeld",
+      "largestCategory": "Grootste categorie",
+      "byCategory": "Per categorie",
+      "subcategories": "Subcategorieën",
+      "clickToDrill": "Kies een categorie om de subcategorieën te zien",
+      "allCategories": "Alle categorieën",
+      "empty": "Niets hier in deze periode",
+      "byDay": "Per dag",
+      "byMonth": "Per maand",
+      "monthlyAverage": "{amount} per maand gemiddeld",
+      "topMerchants": "Meest bezochte plekken",
+      "topMerchantsNote": "Gegroepeerd op de notitie van elke transactie",
+      "biggestPurchases": "Grootste aankopen",
+      "biggestPayments": "Grootste betalingen",
+      "byWeekday": "Per dag van de week",
+      "byWeekdayNote": "Totaal in deze periode voor elke weekdag",
+      "transactionsIn": "Transacties in {name}",
+      "allTransactions": "Alle transacties"
+    },
+    "transactions": {
+      "search": "Zoek in notities, categorieën of bedragen",
+      "type": "Type",
+      "types": {
+        "all": "Alle typen",
+        "expense": "Uitgaven",
+        "income": "Inkomsten",
+        "transfer": "Overboekingen"
+      },
+      "category": "Categorie",
+      "allCategories": "Alle categorieën",
+      "account": "Rekening",
+      "allAccounts": "Alle rekeningen",
+      "feeling": "Gevoel",
+      "allFeelings": "Elk gevoel",
+      "feelings": {
+        "happy": "Voelde goed",
+        "neutral": "Neutraal",
+        "sad": "Liever niet gedaan"
+      },
+      "empty": "Geen transacties gevonden",
+      "newer": "Nieuwer",
+      "older": "Ouder",
+      "page": "Pagina {page} van {pages}"
+    },
+    "trends": {
+      "gridTitle": "Categorie per maand",
+      "gridSubtitle": "Donkerder betekent meer uitgegeven die maand. Kies een rij om die in een grafiek te zien.",
+      "category": "Categorie",
+      "empty": "Geen uitgaven in deze maanden",
+      "lineSubtitle": "{amount} per maand gemiddeld",
+      "moversTitle": "Grootste veranderingen",
+      "moversSubtitle": "Ten opzichte van de vorige periode van dezelfde lengte",
+      "noMovers": "Er is weinig veranderd"
+    },
+    "calendar": {
+      "perDay": "Gemiddeld per dag",
+      "noSpendDays": "Dagen zonder uitgaven",
+      "noSpend": "Niets uitgegeven",
+      "ofDays": "{count, plural, one {Van # dag tot nu toe} other {Van # dagen tot nu toe}}",
+      "bestStreak": "Langste reeks zonder uitgaven",
+      "daysValue": "{count, plural, one {# dag} other {# dagen}}",
+      "bestStreakNote": "In de afgelopen 12 maanden",
+      "busiest": "Duurste dag",
+      "monthSubtitle": "Kies een dag om te zien wat er gebeurde",
+      "pickDay": "Laatste van deze maand",
+      "pickDayNote": "Kies een dag in de kalender om alleen die dag te zien",
+      "yearTitle": "De afgelopen 12 maanden",
+      "yearSubtitle": "Elk vierkantje is een dag; donkerder betekent meer uitgegeven"
+    },
+    "accounts": {
+      "assets": "Bezittingen",
+      "debts": "Schulden",
+      "netWorth": "Nettovermogen",
+      "inTotals": "{count, plural, one {# rekening in de totalen} other {# rekeningen in de totalen}}",
+      "excluded": "{count, plural, =0 {Elke rekening telt mee} one {# rekening buiten de totalen} other {# rekeningen buiten de totalen}}",
+      "ungrouped": "Overige rekeningen",
+      "notInTotals": "Niet in de totalen",
+      "owed": "verschuldigd",
+      "owedNow": "Vandaag verschuldigd",
+      "balanceNow": "Saldo vandaag",
+      "lastActivity": "laatste activiteit {date}",
+      "statementDays": "Afschrift op dag {statement}, betaling op dag {due}",
+      "statementDaysAfter": "Afschrift op dag {statement}, te betalen {days} dagen later",
+      "activity": "Activiteit",
+      "empty": "Nog geen rekeningen"
+    },
+    "netWorth": {
+      "now": "Nettovermogen",
+      "inHours": "{hours} werk tegen het uurtarief van vandaag",
+      "change": "Verandering",
+      "since": "Sinds {month}",
+      "bestMonth": "Beste maand",
+      "debts": "Schulden",
+      "debtNote": "Creditcards en leningen in de totalen",
+      "assets": "Bezittingen",
+      "chartTitle": "Bezittingen, schulden en nettovermogen",
+      "chartSubtitle": "Saldo's aan het einde van de maand van rekeningen die meetellen in de totalen, tegen de wisselkoersen van vandaag",
+      "mixTitle": "Waar je bezittingen staan",
+      "mixSubtitle": "Per rekeninggroep",
+      "ungrouped": "Overig",
+      "empty": "Nog geen bezittingen",
+      "monthlyChange": "Verandering per maand"
+    },
+    "budgets": {
+      "emptyTitle": "Nog geen budgetten",
+      "emptyBody": "Stel in de app een maandbudget in en het verschijnt hier.",
+      "month": "Maand",
+      "budget": "Budget",
+      "spent": "Uitgegeven",
+      "ofBudget": "{pct} van het budget",
+      "left": "Nog te besteden",
+      "over": "Over budget",
+      "perDayLeft": "{amount} per dag voor de rest van de maand",
+      "pace": "Maand verstreken",
+      "paceNote": "Dag {day} van {days}",
+      "linesTitle": "Categorieën",
+      "linesSubtitle": "De lijn op elke balk laat zien hoever je in de maand bent",
+      "overall": "Totaalbudget",
+      "overBy": "{amount} over",
+      "leftOf": "{amount} over",
+      "aheadOfPace": "voor op het tempo",
+      "unbudgetedCounted": "{amount} is buiten deze categorieën uitgegeven en telt mee voor het budget.",
+      "unbudgetedNot": "{amount} is buiten deze categorieën uitgegeven en telt niet mee.",
+      "rateNote": "Uitgaven in andere valuta worden omgerekend tegen 1 {currency} = {rate} {main}.",
+      "approxLeft": "Dat is ongeveer {amount} over.",
+      "approxOver": "Dat is ongeveer {amount} te veel.",
+      "unconverted": "{count, plural, one {# uitgave telt} other {# uitgaven tellen}} nog niet mee: er is geen koers voor {currency}.",
+      "historyTitle": "Budget versus uitgegeven per maand",
+      "historyInMain": "In {currency}, zodat maanden met een budget in andere valuta vergelijkbaar zijn"
+    },
+    "recurring": {
+      "emptyTitle": "Geen terugkerende regels",
+      "emptyBody": "Abonnementen en rekeningen die je in de app laat terugkeren, verschijnen hier.",
+      "perMonth": "Vaste lasten per maand",
+      "perYear": "Per jaar",
+      "clockTitle": "Rekeningen betaald om",
+      "clockNote": "Vanaf 9:00 dekken de eerste {hours} van elke werkdag ze ({day} dagen)",
+      "active": "Actieve regels",
+      "pausedCount": "{count, plural, =0 {Geen gepauzeerd} one {# gepauzeerd} other {# gepauzeerd}}",
+      "listTitle": "Actief",
+      "listSubtitle": "Gesorteerd op kosten per maand",
+      "cadence": {
+        "daily": "{count, plural, one {Elke dag} other {Elke # dagen}}",
+        "weekly": "{count, plural, one {Elke week} other {Elke # weken}}",
+        "monthly": "{count, plural, one {Elke maand} other {Elke # maanden}}",
+        "yearly": "{count, plural, one {Elk jaar} other {Elke # jaar}}"
+      },
+      "next": "volgende {date}",
+      "transfer": "Overboeking",
+      "yearHours": "{hours} werk per jaar",
+      "upcomingTitle": "Binnenkort",
+      "pausedTitle": "Gepauzeerd"
+    },
+    "goals": {
+      "emptyTitle": "Geen doelen of leningen",
+      "emptyBody": "Spaardoelen en leningen die je in de app bijhoudt, verschijnen hier.",
+      "goalsTitle": "Doelen",
+      "achieved": "Bereikt",
+      "left": "Nog te sparen",
+      "progress": "Voortgang",
+      "byDate": "Om het te halen vóór {date}",
+      "perMonthNeeded": "{amount} per maand",
+      "loansTitle": "Leningen",
+      "model": {
+        "flat": "Vaste rente",
+        "reducing": "Dalend saldo"
+      },
+      "leftToPay": "Nog te betalen",
+      "leftInHours": "{hours} werk",
+      "paidOff": "Afgelost",
+      "instalments": "{paid} van {total} termijnen",
+      "principal": "Geleend",
+      "owedNow": "Openstaande hoofdsom",
+      "paidSoFar": "Tot nu toe betaald",
+      "monthly": "Maandelijkse betaling",
+      "rate": "Quote",
+      "interestCharged": "Berekende rente",
+      "nextDue": "Volgende betaling",
+      "payoff": "Afgelost op",
+      "paymentsLeft": "Resterende betalingen",
+      "netNote": "De leningcijfers volgen de app: rente wordt elke maand opgeteld vanaf de dag dat de lening is aangemaakt."
+    },
+    "time": {
+      "spentHours": "Gewerkte uren uitgegeven",
+      "share": "Aandeel van gewerkte uren",
+      "shareNote": "Van ongeveer {hours} gewerkt",
+      "workdays": "Werkdagen",
+      "workdaysValue": "{count, plural, one {# werkdag} other {# werkdagen}}",
+      "workdayLength": "Bij {hours} per werkdag",
+      "hourlyValue": "Uurtarief",
+      "perHour": "per uur, volgens je laatste loon",
+      "chartTitle": "Uren uitgegeven versus uren gewerkt",
+      "chartSubtitle": "De uitgaven van elke maand, geprijsd tegen het loon van die maand",
+      "hoursSpent": "Uren uitgegeven",
+      "hoursWorked": "Uren gewerkt",
+      "categoriesTitle": "Categorieën in werkdagen",
+      "categoriesSubtitle": "Hoeveel werkdagen elke categorie kostte",
+      "empty": "Geen uitgaven in deze periode",
+      "runwayTitle": "Vrijheidsmarge",
+      "daysValue": "{count, plural, one {# dag} other {# dagen}}",
+      "runwayBody": "Hoe lang {liquid} op je betaalrekeningen mee zou gaan bij je recente {daily} per dag, zonder te werken.",
+      "regretTitle": "Uren aan spijt",
+      "regretBody": "{count, plural, =0 {Niets gemarkeerd als \"Liever niet gedaan\" in deze periode.} one {Verdeeld over # aankoop waar je liever van had afgezien.} other {Verdeeld over # aankopen waar je liever van had afgezien.}}",
+      "biggestTitle": "Grootste in uren",
+      "biggestSubtitle": "De aankopen waar het langst voor gewerkt moest worden",
+      "wageTitle": "Je uurtarief in de loop van de tijd",
+      "wageSubtitle": "Uit de lonen die in de app zijn opgeslagen",
+      "noWage": "Stel in de app een uurtarief in om je uitgaven in uren te zien."
+    },
+    "trips": {
+      "emptyTitle": "Nog geen reizen",
+      "emptyBody": "Albums die je in de app voor reizen maakt, verschijnen hier met wat elke reis kostte.",
+      "count": "Reizen",
+      "countries": "{count, plural, =0 {Geen land ingesteld} one {# land} other {# landen}}",
+      "total": "Uitgegeven aan reizen",
+      "workdays": "In werkdagen",
+      "workdaysValue": "{count, plural, one {# werkdag} other {# werkdagen}}",
+      "workdaysNote": "Over alle reizen",
+      "current": "Huidig",
+      "perDay": "{amount} per dag",
+      "breakdown": "Per categorie",
+      "transactionsTitle": "Transacties",
+      "pick": "Kies een reis om de uitsplitsing te zien."
+    },
+    "items": {
+      "emptyTitle": "Nog geen items",
+      "emptyBody": "Items die je in de app bijhoudt, verschijnen hier met wat ze per dag kosten.",
+      "value": "Waarde van je bezit",
+      "count": "{count, plural, one {# item} other {# items}}",
+      "perDay": "Kosten per dag",
+      "perMonth": "{amount} per maand",
+      "workPerDay": "Werk per dag",
+      "workPerDayNote": "Om alles wat je bezit te betalen",
+      "listTitle": "Alles wat je bezit",
+      "listSubtitle": "Aankoopprijs verdeeld over de dagen dat je het hebt gehad",
+      "bought": "Gekocht op {date} voor {price}",
+      "owned": "{count, plural, one {# dag} other {# dagen}} in bezit",
+      "sold": "verkocht voor {price}",
+      "perDayValue": "{amount}/dag",
+      "workValue": "{time} werk per dag"
+    },
+    "splits": {
+      "emptyTitle": "Geen gedeelde rekeningen",
+      "emptyBody": "Rekeningen die je in de app met vrienden deelt, verschijnen hier.",
+      "owedToYou": "Aan jou verschuldigd",
+      "people": "{count, plural, =0 {Alles vereffend} one {Door # persoon} other {Door # personen}}",
+      "settled": "Vereffende delen",
+      "ofShares": "{count, plural, one {Van # deel} other {Van # delen}}",
+      "bills": "Gedeelde rekeningen",
+      "billsNote": "Transacties die je hebt gedeeld",
+      "byPerson": "Wie je nog geld schuldig is",
+      "allSettled": "Iedereen heeft je terugbetaald",
+      "open": "{count, plural, one {# openstaand deel} other {# openstaande delen}}",
+      "billsTitle": "Gedeelde transacties",
+      "unnamed": "Iemand"
+    },
+    "mood": {
+      "feelings": {
+        "happy": "Voelde goed",
+        "neutral": "Neutraal",
+        "sad": "Liever niet gedaan"
+      },
+      "shareSub": "{amount} · {count, plural, one {# aankoop} other {# aankopen}}",
+      "monthlyTitle": "Hoe aankopen voelden",
+      "monthlySubtitle": "Aantal aankopen per maand, per gevoel",
+      "regretsTitle": "Liever niet gedaan",
+      "regretsSubtitle": "De grootste aankopen waar je spijt van had",
+      "noRegrets": "Geen spijt in deze periode",
+      "clockTitle": "Wanneer je uitgeeft",
+      "clockSubtitle": "Aankopen per weekdag en uur; het drukst rond {hour}",
+      "noTimes": "Aankopen die zonder tijdstip zijn vastgelegd, worden hier niet getoond."
+    },
+    "loadingTitle": "Webdashboard",
+    "edit": {
+      "statusReady": "Bewerken aan",
+      "statusReadyTitle": "Wijzigingen worden op je telefoon opgeslagen",
+      "statusReadyBody": "Je telefoon is verbonden. Je telefoon controleert en bewaart elke wijziging en synchroniseert de bijgewerkte gegevens daarna hierheen.",
+      "statusAway": "Alleen-lezen",
+      "statusAwayTitle": "Verbind je telefoon om wijzigingen te maken.",
+      "statusAwayBody": "Open Money2Time op je telefoon en ga naar Instellingen → Webdashboard. Zolang hij verbonden is, kun je hier transacties toevoegen, bewerken en verwijderen. Je telefoon en deze browser blijven gelijk.",
+      "statusUpdateTitle": "Werk de app bij om hier wijzigingen te maken.",
+      "statusUpdateBody": "De Money2Time-versie op je telefoon synchroniseert gegevens alleen om te bekijken. Werk hem bij om vanuit deze browser items toe te voegen, te bewerken en te verwijderen.",
+      "statusOffTitle": "Wijzigingen staan uit voor deze browser.",
+      "statusOffBody": "Open op je telefoon Instellingen → Webdashboard, tik op ⋯ naast deze browser en kies Wijzigingen toestaan.",
+      "statusSaving": "Opslaan…",
+      "statusSyncing": "Synchroniseren…",
+      "statusSyncingBody": "De nieuwste gegevens van je telefoon worden gesynchroniseerd. Zodra ze er zijn, kun je wijzigingen maken.",
+      "awayHint": "Open Instellingen → Webdashboard op je telefoon om transacties toe te voegen, te bewerken of te verwijderen.",
+      "close": "Sluiten",
+      "clear": "Wissen",
+      "cancel": "Annuleren",
+      "reloadLatest": "Nieuwste laden",
+      "delete": "Verwijderen",
+      "apply": "Toepassen",
+      "choose": "Selecteer",
+      "add": "Toevoegen",
+      "update": "Bijwerken",
+      "addAnother": "Nog een toevoegen",
+      "type": "Type",
+      "expense": "Uitgaven",
+      "income": "Inkomsten",
+      "transfer": "Overboeking",
+      "adjustment": "Aanpassing",
+      "deleteTransaction": "Transactie verwijderen",
+      "deleteTransactionBody": "Dit kan niet ongedaan worden gemaakt. Doorgaan?",
+      "required": "Verplicht",
+      "from": "Van",
+      "to": "Naar",
+      "chooseAccount": "Rekening kiezen",
+      "swapAccounts": "Van- en naar-rekening wisselen",
+      "differentAccount": "Moet een andere rekening zijn",
+      "accountLabel": "Rekening",
+      "accounts": "Rekeningen",
+      "categoryLabel": "Categorie",
+      "categories": "Categorieën",
+      "options": "Opties voor de transactie",
+      "amount": "Bedrag",
+      "currencyLabel": "Valuta",
+      "optional": "Optioneel",
+      "note": "Notitie",
+      "received": "Ontvangen bedrag",
+      "date": "Datum",
+      "details": "Details",
+      "detailsPlaceholder": "Langere notitie toevoegen",
+      "reimbursable": "Vergoeding in afwachting",
+      "reimbursed": "Al terugbetaald",
+      "reimbursableHint": "Een uitgave die iemand terugbetaalt. Vorder hem op de pagina Vergoedingen.",
+      "countAsExpense": "Tellen als uitgave",
+      "countAsExpenseHint": "Telt deze overboeking als uitgave in je totalen, budgetten en grafieken, onder de gekozen categorie. Het geld gaat nog steeds gewoon van de ene rekening naar de andere.",
+      "feeling": "Hoe voel je je?",
+      "nudgeSmall": "Dat is ongeveer {hours} van je tijd",
+      "nudgePause": "Even nadenken: ~{hours} werktijd",
+      "nudgeLarge": "Dat is {hours} van je werktijd",
+      "amountLocked": "Dit bedrag hoort bij een splitsing of terugbetaling. Wijzig het in de app.",
+      "hideBalances": "Saldi verbergen",
+      "showBalances": "Saldi tonen",
+      "savingsGoals": "Spaardoelen",
+      "ungrouped": "Niet gegroepeerd",
+      "noAccounts": "Nog geen rekeningen.",
+      "noCategories": "Nog geen categorieën.",
+      "select": "Selecteren",
+      "selectAll": "Alles selecteren",
+      "selected": "{count, plural, one {# geselecteerd} other {# geselecteerd}}",
+      "deleteConfirm": "{count, plural, one {Deze transactie verwijderen? Hij wordt ook van je telefoon verwijderd.} other {# transacties verwijderen? Ze worden ook van je telefoon verwijderd.}}",
+      "tooMany": "Selecteer maximaal {max} transacties tegelijk.",
+      "accountTransfers": "Overboekingen behouden hun rekeningen. Deselecteer ze om de rekening te wijzigen.",
+      "accountLocked": "Sommige hiervan horen bij een splitsing of terugbetaling. Wijzig hun rekening in de app.",
+      "accountCurrencies": "Deze staan in verschillende valuta. Selecteer transacties in één valuta om ze naar een andere rekening te verplaatsen.",
+      "editTitle": "Transactie bewerken",
+      "errors": {
+        "stale": "Je telefoon heeft nieuwere gegevens en synchroniseert ze nu. Probeer het zo opnieuw.",
+        "conflict": "Dit is gewijzigd op je telefoon. De nieuwste gegevens komen eraan. Controleer ze en probeer het opnieuw.",
+        "amount_locked": "Dit bedrag hoort bij een splitsing of terugbetaling. Wijzig het in de app.",
+        "pro_required": "Hiervoor heb je Money2Time Pro nodig. Upgrade in de app om meer te doen.",
+        "off": "Wijzigingen staan uit voor deze browser. Sta ze toe op je telefoon via Instellingen → Webdashboard.",
+        "invalid": "Je telefoon kon dit niet opslaan. Controleer de gegevens en probeer het opnieuw.",
+        "failed": "Je telefoon kon dit niet opslaan. Probeer het opnieuw.",
+        "busy": "Je vorige wijziging wordt nog opgeslagen. Probeer het zo opnieuw.",
+        "away": "Je telefoon is niet verbonden. Open Webdashboard erop en probeer het opnieuw.",
+        "too_large": "Dat zijn te veel wijzigingen tegelijk. Selecteer minder items.",
+        "unknown": "Je telefoon is losgekoppeld voordat hij het bevestigde. Controleer als hij weer verbonden is of de wijziging is opgeslagen."
+      },
+      "account": {
+        "newAccount": "Nieuwe rekening",
+        "editAccount": "Rekening bewerken",
+        "deleteAccount": "Rekening verwijderen",
+        "deleteAccountBody": "Dit verwijdert permanent deze rekening en alle bijbehorende transacties. Dit kan niet ongedaan worden gemaakt.",
+        "save": "Opslaan",
+        "type": "Type",
+        "typeDebit": "Debet",
+        "typeCredit": "Krediet",
+        "specialNote": "Hier kun je de naam, groep, het logo en de optie om mee te tellen in totalen wijzigen. De rest bewerk je in de eigen editor.",
+        "name": "Rekeningnaam",
+        "namePlaceholder": "Dagelijkse portemonnee",
+        "logo": "Logo",
+        "logoAdd": "Logo toevoegen",
+        "logoClear": "Logo verwijderen",
+        "logoChooseTitle": "Logo kiezen",
+        "logoChooseSubtitle": "Zoek of blader per land",
+        "logoSearch": "Zoek banken en wallets",
+        "logoCountry": "Land",
+        "logoNoResults": "Geen resultaten",
+        "group": "Rekeninggroep",
+        "currency": "Valuta",
+        "statementDay": "Afschriftdag",
+        "dueDay": "Vervaldatum",
+        "dueRule": "Vervaldatum",
+        "dueRuleDay": "Dag van de maand",
+        "dueRuleAfter": "Dagen na afschrift",
+        "dayRange": "Kies een dag van 1 tot 31.",
+        "daysAfterRange": "Kies 1 tot {max} dagen.",
+        "startingBalance": "Beginsaldo",
+        "currentBalance": "Huidig saldo",
+        "includeInTotals": "Opnemen in totalen",
+        "includeInTotalsHint": "Verborgen rekeningen worden uitgesloten van het totaalsaldo.",
+        "currencyChangeTitle": "Rekeningvaluta wijzigen?",
+        "currencyChangeMessage": "Het saldo wordt tegen de nieuwste koers omgerekend van {from} naar {to}. Bestaande boekingen behouden hun oorspronkelijke valuta.",
+        "currencyChangeAction": "Omrekenen en wijzigen",
+        "balancePromptTitle": "Hoe moet deze saldowijziging worden geregistreerd?",
+        "balancePromptMessage": "Saldo gewijzigd met {amount}. Registreren als inkomsten/uitgaven of bewaren als rekeningverschil (niet meegeteld in inzichttotalen).",
+        "recordDifference": "Registreren als rekeningverschil",
+        "recordIncome": "Registreren als inkomsten",
+        "recordExpense": "Registreren als uitgaven",
+        "newGroup": "Nieuwe groep",
+        "createGroup": "Groep aanmaken",
+        "editGroup": "Groep bewerken",
+        "groupName": "Groepsnaam",
+        "groupPlaceholder": "Uitgaven",
+        "groupTaken": "Er bestaat al een groep met deze naam.",
+        "deleteGroup": "Groep verwijderen?",
+        "deleteGroupBody": "Rekeningen in deze groep worden verplaatst naar Niet gegroepeerd.",
+        "addToGroup": "Account toevoegen",
+        "emptyGroup": "Nog geen accounts in deze groep",
+        "cardDesign": "Kaartontwerp",
+        "cardDesignTitle": "Kaartontwerp",
+        "cardDesignPlain": "Effen kleur",
+        "cardDesignClear": "Kaartontwerp verwijderen",
+        "cardDesignAll": "Alle",
+        "cardDesignUploads": "Mijn uploads",
+        "cardDesignTemplate": "Kaartontwerp {genre} {number}",
+        "payTitle": "Creditcard betalen",
+        "loanPayTitle": "Betaling doen",
+        "pay": "Betalen",
+        "payFrom": "Betalen van",
+        "none": "Geen",
+        "payable": "Te betalen saldo",
+        "loanDue": "Te betalen bedrag",
+        "paidNote": "Betaald: {name}",
+        "paymentNotePlaceholder": "Betalingsnotitie",
+        "genre_mascot": "Mascotte",
+        "genre_minimal": "Minimalistisch",
+        "genre_gradient": "Kleurverloop",
+        "genre_luxury": "Luxe",
+        "genre_texture": "Textuur",
+        "genre_marble": "Marmer & steen",
+        "genre_pattern": "Patroon",
+        "genre_nature": "Natuur",
+        "genre_space": "Ruimte",
+        "genre_abstract": "Abstracte kunst",
+        "genre_anime": "Anime",
+        "genre_retro": "Retro",
+        "genre_cute": "Schattig"
+      },
+      "album": {
+        "createTitle": "Nieuw album",
+        "create": "Maken",
+        "editTitle": "Reis bewerken",
+        "save": "Opslaan",
+        "done": "Klaar",
+        "clear": "Wissen",
+        "name": "Albumnaam",
+        "namePlaceholder": "bijv. Reis naar Tokio",
+        "dates": "Datums (optioneel)",
+        "startDate": "Startdatum",
+        "endDate": "Einddatum",
+        "location": "Locatie",
+        "addTransactions": "Transacties toevoegen",
+        "editTransactions": "Transacties bewerken",
+        "selectedCount": "{count} geselecteerd",
+        "transactionCount": "{count} transacties",
+        "previous": "Vorige",
+        "next": "Volgende",
+        "deleteTitle": "Album verwijderen?",
+        "deleteBody": "Hiermee wordt het album verwijderd. Je transacties worden niet verwijderd.",
+        "noAlbums": "Nog geen albums",
+        "appOnlyHint": "Voeg een omslagfoto of locatie toe in de app.",
+        "noExpenses": "Geen uitgaven deze maand.",
+        "bulkAction": "Album",
+        "addToAlbum": "Aan album toevoegen",
+        "expensesOnly": "Alleen uitgaven kunnen in een album.",
+        "expensesCount": "{count, plural, one {Deze uitgave toevoegen aan:} other {Deze # uitgaven toevoegen aan:}}",
+        "expensesLeftOut": "{count, plural, one {Alleen uitgaven kunnen in een album, dus # transactie blijft erbuiten.} other {Alleen uitgaven kunnen in een album, dus # transacties blijven erbuiten.}}",
+        "reorderTitle": "Albums herschikken",
+        "activeLabel": "Nieuwe transacties toevoegen aan",
+        "activeTitle": "Actieve reis",
+        "activeNone": "Geen"
+      },
+      "budget": {
+        "allocatedSummary": "{allocated} van {total} verdeeld",
+        "left": "{amount} over",
+        "over": "{amount} erover",
+        "allocatedDone": "Volledig verdeeld",
+        "cancel": "Annuleren",
+        "save": "Opslaan",
+        "delete": "Verwijderen",
+        "amount": "Bedrag",
+        "fillRemainder": "Aanvullen",
+        "subcategories": "Subcategorieën",
+        "childrenHint": "Verdeel dit bedrag eventueel over subcategorieën.",
+        "duplicateSuffix": "kopie",
+        "editTitle": "Sjabloon bewerken",
+        "addTitle": "Nieuw sjabloon",
+        "chooseIcon": "Kies pictogram",
+        "removeIcon": "Pictogram verwijderen",
+        "name": "Naam",
+        "namePlaceholder": "bijv. Dagelijks",
+        "total": "Totaalbudget",
+        "currency": "Valuta",
+        "currencyHintTemplate": "Elk budget houdt de koers van de dag waarop het is gemaakt en rekent uitgaven in andere valuta daartegen om. Vandaag: 1 {currency} = {rate} {main}.",
+        "currencyHintBudget": "Uitgaven in andere valuta worden omgerekend tegen 1 {currency} = {rate} {main}.",
+        "currencyNoRate": "Nog geen koers voor {currency}. Voeg er een toe bij Meerdere valuta's in de app, zodat uitgaven in andere valuta meetellen.",
+        "countUnbudgetedTitle": "Niet-gebudgetteerde uitgaven meetellen",
+        "countUnbudgetedCaption": "Tel uitgaven uit categorieën zonder budgetregel mee in het maandtotaal.",
+        "backPopulateTitle": "Vorige maanden invullen",
+        "backPopulateCaption": "Maakt budgetten voor {first} - {last} ({count} maanden). Maanden met een budget worden overgeslagen.",
+        "templatesTitle": "Budgetsjablonen",
+        "templatesSubtitle": "Herbruikbare maandplannen",
+        "newTemplate": "Nieuw sjabloon",
+        "noTemplatesTitle": "Nog geen sjablonen",
+        "noTemplatesMessage": "Maak een budgetsjabloon om je maanden te plannen.",
+        "createTemplate": "Sjabloon maken",
+        "makeDefault": "Als standaard instellen",
+        "defaultBadge": "Standaard",
+        "duplicate": "Dupliceren",
+        "deleteTemplateTitle": "Sjabloon verwijderen?",
+        "deleteTemplateMessage": "Al gemaakte maandbudgetten blijven bewaard. Is dit de standaard, dan wordt het volgende sjabloon standaard.",
+        "createBudget": "Budget maken",
+        "chooseTemplate": "Kies een sjabloon",
+        "customOption": "Aangepast",
+        "customOptionCaption": "Maak een eenmalig budget alleen voor deze maand.",
+        "editBudget": "Budget bewerken",
+        "deleteBudget": "Budget verwijderen",
+        "deleteBudgetTitle": "Budget van deze maand verwijderen?",
+        "deleteBudgetMessage": "Het wordt voor deze maand niet automatisch opnieuw aangemaakt.",
+        "month": "Maand",
+        "noCategories": "Voeg eerst een uitgavencategorie toe om er een budget aan te geven.",
+        "splitMismatch": "De subcategorieën tellen niet op tot dit bedrag",
+        "categoriesCount": "{count, plural, one {# categorie} other {# categorieën}}"
+      },
+      "category": {
+        "newTitle": "Nieuwe categorie",
+        "editTitle": "Categorie bewerken",
+        "name": "Naam",
+        "parentOptional": "Bovenliggende categorie (optioneel)",
+        "select": "Selecteer",
+        "clear": "Wissen",
+        "cancel": "Annuleren",
+        "save": "Opslaan",
+        "delete": "Verwijderen",
+        "deleteConfirm": "Dit verwijdert deze categorie permanent. Dit kan niet ongedaan worden gemaakt.",
+        "deleteTitle": "Categorie verwijderen?",
+        "deleteHasTransactions": "{count} transacties gebruiken deze categorie. Verplaats ze naar een andere categorie, of verwijder de categorie en laat ze zonder categorie.",
+        "moveToOther": "Naar een andere categorie verplaatsen",
+        "deleteAnyway": "Toch verwijderen",
+        "moveTitle": "Transacties verplaatsen?",
+        "moveBody": "Alle transacties worden verplaatst naar “{name}” en deze categorie wordt verwijderd. Dit kan niet ongedaan worden gemaakt.",
+        "moveAction": "Verplaatsen en verwijderen",
+        "addSubcategory": "Subcategorie toevoegen",
+        "expense": "Uitgaven",
+        "income": "Inkomsten",
+        "type": "Categorietype",
+        "required": "Voer een naam in",
+        "noOptions": "Nog geen andere categorieën",
+        "emptyTitle": "Nog geen categorieën",
+        "chooseIcon": "Kies pictogram",
+        "removeIcon": "Pictogram verwijderen",
+        "tabIcons": "Pictogrammen",
+        "tabEmoji": "Emoji",
+        "searchIcons": "Pictogrammen zoeken",
+        "noResults": "Geen resultaten",
+        "groups": {
+          "money": "Geld",
+          "food_and_drink": "Eten en drinken",
+          "transport": "Vervoer",
+          "travel": "Reizen",
+          "home": "Huis",
+          "bills": "Rekeningen",
+          "shopping": "Winkelen",
+          "health": "Gezondheid",
+          "leisure": "Vrije tijd",
+          "work": "Werk",
+          "family": "Gezin",
+          "other": "Overig",
+          "food": "Eten en drinken",
+          "smileys": "Smileys",
+          "people": "Mensen",
+          "animals": "Dieren en natuur",
+          "activities": "Activiteiten",
+          "objects": "Objecten",
+          "symbols": "Symbolen",
+          "flags": "Vlaggen"
+        },
+        "expand": "Uitvouwen",
+        "collapse": "Samenvouwen",
+        "noSubcategories": "Nog geen subcategorieën",
+        "searchEmoji": "Emoji zoeken"
+      },
+      "currency": {
+        "open": "Meerdere valuta's",
+        "title": "Meerdere valuta's",
+        "mainCurrency": "Hoofdvaluta",
+        "mainInApp": "Gebruik de app om je hoofdvaluta te wijzigen. Je begint dan met schone gegevens.",
+        "asOf": "Bijgewerkt {date}",
+        "neverUpdated": "Nog niet bijgewerkt",
+        "subcurrencies": "Subvaluta's",
+        "add": "Toevoegen",
+        "addCurrency": "Valuta toevoegen",
+        "search": "Valuta zoeken",
+        "noMatch": "Geen overeenkomende valuta",
+        "empty": "Voeg een valuta toe om de koers te volgen.",
+        "manual": "Handmatig",
+        "editRate": "Koers bewerken",
+        "remove": "Verwijderen",
+        "save": "Opslaan",
+        "orderChanged": "Nieuwe volgorde nog niet opgeslagen.",
+        "saveOrder": "Volgorde opslaan"
+      },
+      "goal": {
+        "newGoal": "Nieuw doel",
+        "editTitle": "Doel bewerken",
+        "edit": "Bewerken",
+        "save": "Opslaan",
+        "deleteTitle": "Doel verwijderen?",
+        "deleteMessage": "Dit verwijdert het doel en de bijbehorende transacties. Dit kan niet ongedaan worden gemaakt.",
+        "coverInApp": "Wijzig de omslagfoto in de app.",
+        "chooseIcon": "Kies pictogram",
+        "removeIcon": "Pictogram verwijderen",
+        "name": "Naam van het doel",
+        "namePlaceholder": "bijv. Reis naar Japan",
+        "target": "Doelbedrag",
+        "currency": "Valuta",
+        "currentBalance": "Huidig saldo",
+        "targetDate": "Streefdatum",
+        "targetDateHint": "Optioneel. Laat zien of je op schema ligt voor je doel.",
+        "targetDatePast": "Kies een datum in de toekomst.",
+        "includeInTotals": "Opnemen in totalen",
+        "includeInTotalsHint": "Verborgen rekeningen worden uitgesloten van het totaalsaldo.",
+        "startingAmount": "Al gespaard (optioneel)",
+        "autoSave": "Automatisch sparen",
+        "autoSaveHint": "Zet automatisch geld opzij volgens een vast schema.",
+        "autoSaveAmount": "Bedrag",
+        "cadence": "Herhaalt",
+        "cadenceMonthly": "Maandelijks",
+        "cadenceWeekly": "Wekelijks",
+        "source": "Van rekening",
+        "sourcePlaceholder": "Kies een rekening",
+        "noSource": "Nog geen rekeningen in {currency}. Automatisch sparen vereist een rekening in dezelfde valuta.",
+        "autoSaveInRecurring": "Het automatisch sparen van dit doel gebruikt een eigen schema. Wijzig het bij Terugkerend.",
+        "currencyChangeTitle": "Rekeningvaluta wijzigen?",
+        "currencyChangeMessage": "Het saldo wordt tegen de nieuwste koers omgerekend van {from} naar {to}. Bestaande boekingen behouden hun oorspronkelijke valuta.",
+        "currencyChangeAction": "Omrekenen en wijzigen",
+        "balancePromptTitle": "Hoe moet deze saldowijziging worden geregistreerd?",
+        "balancePromptMessage": "Saldo gewijzigd met {amount}. Registreren als inkomsten/uitgaven of bewaren als rekeningverschil (niet meegeteld in inzichttotalen).",
+        "recordDifference": "Registreren als rekeningverschil",
+        "recordIncome": "Registreren als inkomsten",
+        "recordExpense": "Registreren als uitgaven",
+        "archive": "Archiveren",
+        "unarchive": "Doel herstellen",
+        "archiveTitle": "Doel archiveren?",
+        "archiveMessage": "Het doel verdwijnt uit je doelenlijst en automatisch sparen ernaartoe wordt gepauzeerd.",
+        "archiveBalanceHint": "Er staat nog geld op. Je kunt het eerst opnemen, of het hier bewaard laten.",
+        "archiveConfirm": "Archiveren",
+        "archived": "Gearchiveerd",
+        "editInGoals": "Doel bewerken",
+        "deposit": "Storten",
+        "withdraw": "Opnemen",
+        "depositFromAccount": "Vanaf een rekening",
+        "depositFromAccountHint": "Verplaats geld vanaf een van je rekeningen.",
+        "depositOutside": "Geld van buitenaf",
+        "depositOutsideHint": "Een cadeau of contant geld van buitenaf, geregistreerd als inkomen.",
+        "withdrawToAccount": "Naar een rekening",
+        "withdrawToAccountHint": "Zet geld terug op een van je rekeningen.",
+        "withdrawSpend": "Uitgeven",
+        "withdrawSpendHint": "Betaal iets rechtstreeks vanuit dit doel, geregistreerd als uitgave."
+      },
+      "item": {
+        "add": "Item toevoegen",
+        "addTitle": "Nieuw item",
+        "editTitle": "Item bewerken",
+        "save": "Opslaan",
+        "deleteTitle": "Item verwijderen?",
+        "deleteMessage": "Dit verwijdert het item uit je tracker.",
+        "iconTitle": "Pictogram kiezen",
+        "chooseIcon": "Pictogram kiezen",
+        "iconSubtitle": "Kies een pictogram. Gebruik de app om je eigen te uploaden.",
+        "searchIcons": "Pictogrammen zoeken…",
+        "customIcon": "Aangepast",
+        "noResults": "Geen resultaten",
+        "name": "Naam",
+        "namePlaceholder": "bijv. Espressomachine",
+        "price": "Aankoopprijs",
+        "currency": "Valuta",
+        "purchaseDate": "Aankoopdatum",
+        "markInactive": "Markeren als inactief",
+        "markInactiveHint": "Stopt het tellen van dagen voor dingen die je verkocht, kapot of niet meer gebruikt.",
+        "endDate": "Einddatum",
+        "sold": "Ik heb het verkocht",
+        "salePrice": "Verkoopprijs",
+        "note": "Notitie",
+        "notePlaceholder": "Optioneel",
+        "groups": {
+          "objects": "Objecten",
+          "leisure": "Vrije tijd",
+          "work": "Werk",
+          "home": "Huis",
+          "health": "Gezondheid",
+          "travel": "Reizen",
+          "transport": "Vervoer",
+          "shopping": "Winkelen",
+          "family": "Gezin",
+          "other": "Overig"
+        },
+        "reorderTitle": "Items herschikken"
+      },
+      "loan": {
+        "newTitle": "Nieuwe lening",
+        "editTitle": "Lening bewerken",
+        "edit": "Bewerken",
+        "save": "Opslaan",
+        "delete": "Rekening verwijderen",
+        "deleteBody": "Dit verwijdert permanent deze rekening en alle bijbehorende transacties. Dit kan niet ongedaan worden gemaakt.",
+        "name": "Rekeningnaam",
+        "namePlaceholder": "Autolening",
+        "logo": "Logo",
+        "logoAdd": "Logo toevoegen",
+        "logoClear": "Logo verwijderen",
+        "group": "Rekeninggroep",
+        "currency": "Valuta",
+        "interestModel": "Rente",
+        "interestModelInfo": "Dalend saldo: rente wordt elke maand berekend over wat je nog schuldig bent, dus extra of vroeg aflossen scheelt rente. Zo werken de meeste hypotheken. Vast tarief: de rente wordt eenmalig over het hele geleende bedrag berekend en vooraf opgeteld, dus vroeg aflossen maakt je sneller schuldenvrij maar bespaart geen rente. Zo werken de meeste auto- en persoonlijke leningen.",
+        "modelReducing": "Dalend saldo",
+        "modelFlat": "Vast tarief",
+        "principal": "Leenbedrag",
+        "term": "Looptijd",
+        "termInfo": "Hoeveel maandtermijnen de lening loopt, tot {max}. Een lening van 5 jaar is 60.",
+        "termError": "Vul een heel getal van 1 tot {max} in.",
+        "rate": "Rente",
+        "rateInfoReducing": "Het jaarrentepercentage dat je bank rekent over wat je nog schuldig bent. Vul het in en we berekenen de maandtermijn en het totaal, of vul het totaal in en we berekenen de rente.",
+        "rateInfoFlat": "Het jaarlijkse vaste tarief, berekend over het hele geleende bedrag voor de hele looptijd. Vul het in en we berekenen de maandtermijn en het totaal, of vul het totaal in en we berekenen de rente.",
+        "effectiveRateHint": "Effectieve rente {rate}%. Dat kost deze vlakke rente op een dalend saldo.",
+        "totalRepayable": "Totaal terug te betalen",
+        "totalRepayableInfo": "Alles wat je over de hele lening terugbetaalt: het geleende bedrag plus alle rente.",
+        "instalment": "Maandtermijn",
+        "instalmentInfo": "Wat je elke maand betaalt. Volgt het totaal hierboven; zet de schakelaar aan als je bank een ander bedrag afschrijft, dan nemen wij dat van jou precies over.",
+        "instalmentErrorLow": "Te laag om de lening binnen de looptijd af te betalen.",
+        "instalmentErrorHigh": "Te hoog voor dit leenbedrag en deze looptijd.",
+        "awaitingContract": "Vul de velden hierboven in",
+        "paidPeriods": "Al betaalde termijnen",
+        "paidPeriodsInfo": "Laat op 0 bij een nieuwe lening. Loopt hij al, vul dan in hoeveel termijnen je betaald hebt; het beginsaldo wordt berekend.",
+        "paidPeriodsError": "Moet lager zijn dan de looptijd.",
+        "collect": "Afschrijven van",
+        "collectInfo": "De rekening waar de termijn maandelijks vanaf gaat. Kies er een en het wordt vanzelf geboekt; laat leeg en je boekt elke aflossing zelf.",
+        "collectManual": "Ik boek aflossingen zelf",
+        "collectExternal": "Deze aflossing staat ingesteld bij Terugkerend. Pas hem daar aan.",
+        "countAsExpense": "Termijn meetellen als uitgave",
+        "countAsExpenseInfo": "Een aflossing verplaatst altijd geld naar de lening, dus je restschuld daalt sowieso. Met deze optie aan telt hij ook mee als uitgave in je totalen, budgetten en grafieken, onder de categorie die je kiest. Zet hem uit en aflossingen blijven buiten je uitgaven. Later wijzigen geldt alleen voor aflossingen die daarna worden geboekt.",
+        "paymentCategory": "Categorie van aflossing",
+        "paymentCategoryPlaceholder": "Kies een categorie",
+        "startDate": "Startdatum",
+        "startDateInfo": "Wanneer de lening is afgesloten. De eerste termijn valt een maand later en die dag wordt je betaaldag.",
+        "balanceOwed": "Openstaand saldo",
+        "balanceOwedInfo": "Wat je vandaag nog schuldig bent, zonder de rente die je nog niet in rekening is gebracht. Meestal lager dan het bedrag op je afschrift.",
+        "totalInterest": "Totale rente",
+        "leftToPay": "Nog te betalen",
+        "firstInstalment": "Eerste termijn",
+        "payoffBy": "Afgelost in",
+        "instalmentsLeft": "Termijnen over",
+        "includeInTotals": "Opnemen in totalen",
+        "includeInTotalsHint": "Verborgen rekeningen worden uitgesloten van het totaalsaldo.",
+        "archive": "Lening archiveren",
+        "unarchive": "Lening terughalen",
+        "archiveHint": "Verbergt hem uit je rekeningenlijst. Geschiedenis en totalen blijven, en \"Gearchiveerde tonen\" haalt hem terug.",
+        "rateChangeTitle": "Vanaf wanneer geldt de nieuwe rente?",
+        "rateChangeMessage": "De rente verandert van {from}% naar {to}%. Pas hem toe vanaf vandaag om de al berekende rente te behouden, of vanaf het begin als je een fout corrigeert.",
+        "rateChangeFromStart": "Vanaf het begin",
+        "rateChangeFromToday": "Vanaf vandaag",
+        "currencyChangeTitle": "Rekeningvaluta wijzigen?",
+        "currencyChangeMessage": "Het saldo wordt tegen de nieuwste koers omgerekend van {from} naar {to}. Bestaande boekingen behouden hun oorspronkelijke valuta.",
+        "currencyChangeAction": "Omrekenen en wijzigen",
+        "balancePromptTitle": "Hoe moet deze saldowijziging worden geregistreerd?",
+        "balancePromptMessage": "Saldo gewijzigd met {amount}. Registreren als inkomsten/uitgaven of bewaren als rekeningverschil (niet meegeteld in inzichttotalen).",
+        "recordDifference": "Registreren als rekeningverschil",
+        "recordIncome": "Registreren als inkomsten",
+        "recordExpense": "Registreren als uitgaven",
+        "archived": "Gearchiveerd",
+        "editInLoans": "Lening bewerken",
+        "balanceOwedHint": "Op je afschrift staat misschien {amount}, daar zit de rente die nog komt bij inbegrepen."
+      },
+      "reimbursement": {
+        "pendingTitle": "Wacht op terugbetaling",
+        "settledTitle": "Terugbetaald",
+        "claim": "Vorderen",
+        "paidInto": "Naar {account}",
+        "noAccount": "Geen rekening",
+        "undoTitle": "Deze vergoeding ongedaan maken?",
+        "undoMessage": "De inkomende boeking wordt verwijderd.",
+        "undoAction": "Ongedaan maken",
+        "cancel": "Annuleren",
+        "saveFirst": "Sla eerst je andere wijzigingen op."
+      },
+      "reorder": {
+        "open": "Sorteren",
+        "save": "Opslaan",
+        "accountsTitle": "Rekeningen herschikken",
+        "accountsHint": "Verplaats groepen en rekeningen binnen hun groep. Spaardoelen houden hun eigen volgorde.",
+        "categoriesTitle": "Categorieën herschikken",
+        "categoriesHint": "Verplaats categorieën en subcategorieën binnen hun hoofdcategorie.",
+        "emptyGroup": "Nog geen rekeningen in deze groep.",
+        "drag": "Sleep om de volgorde te wijzigen",
+        "dragNamed": "{name} verplaatsen. Sleep, of gebruik de pijltjestoetsen.",
+        "moved": "{name} verplaatst naar positie {position} van {count}"
+      },
+      "rule": {
+        "newRule": "Nieuwe terugkerende regel",
+        "editRule": "Terugkerende regel bewerken",
+        "sameFlow": "Zelfde stroom als transactie-invoer",
+        "saveRule": "Regel opslaan",
+        "deleteRule": "Regel verwijderen",
+        "deleteConfirm": "“{name}” verwijderen? Dit kan niet ongedaan worden gemaakt.",
+        "amountRequired": "Bedrag is verplicht",
+        "chooseCategory": "Categorie kiezen",
+        "settings": "Herhalingsinstellingen",
+        "ruleName": "Regelnaam",
+        "ruleNamePlaceholder": "Netflix-abonnement",
+        "enterRuleName": "Voer een naam in voor de herhalingssregel.",
+        "logo": "Logo",
+        "noLogo": "Geen logo",
+        "customLogo": "Eigen logo",
+        "searchLogos": "Abonnementen zoeken",
+        "country": "Land",
+        "noResults": "Geen resultaten",
+        "global": "Globaal",
+        "repeat": "Herhalen",
+        "daily": "Dagelijks",
+        "weekly": "Wekelijks",
+        "monthly": "Maandelijks",
+        "quarterly": "Per kwartaal",
+        "semiannually": "Halfjaarlijks",
+        "yearly": "Jaarlijks",
+        "every": "Elke (interval)",
+        "ends": "Eindigt",
+        "never": "Nooit",
+        "onDate": "Op datum",
+        "endDate": "Einddatum",
+        "validEndDate": "Kies een geldige einddatum.",
+        "status": "Status",
+        "active": "Actief",
+        "paused": "Gepauzeerd",
+        "pause": "Pauzeren",
+        "resume": "Hervatten"
+      },
+      "split": {
+        "title": "Rekening splitsen",
+        "chip": "Splitsen",
+        "evenly": "Gelijk verdelen",
+        "addPerson": "Persoon toevoegen",
+        "me": "Ik",
+        "personPlaceholder": "Naam van vriend",
+        "sumMatch": "{sum} van {total}",
+        "sumLeft": "{diff} over",
+        "sumOver": "{diff} te veel",
+        "sumMismatch": "{diff} niet meegerekend",
+        "negativeSelf": "Vrienden betalen meer dan het totaal",
+        "markPaid": "Markeer als betaald",
+        "paidLabel": "Betaald op {date}",
+        "undo": "Ongedaan maken",
+        "done": "Klaar",
+        "remove": "Verwijderen",
+        "cancel": "Annuleren",
+        "noAccount": "Geen rekening",
+        "paidTo": "Terugbetaald aan",
+        "sharesTitle": "Wie jou nog moet betalen",
+        "someone": "Iemand",
+        "untitledBill": "Gesplitste rekening",
+        "paidTitle": "Terugbetaald",
+        "undoTitle": "Dit aandeel als onbetaald markeren?",
+        "undoBody": "Het wordt je weer verschuldigd en de uitgave gaat met dit bedrag omhoog. Een terugbetaling naar een andere rekening wordt verwijderd.",
+        "itemizedTotal": "Totaal: {sum}",
+        "itemizedZeroHint": "Voer minstens één bedrag in",
+        "removeTitle": "Dit verzoek verwijderen?",
+        "removeBody": "Dit wist wat diegene je voor deze rekening verschuldigd is. De transactie zelf blijft ongewijzigd.",
+        "defaultPaidTo": "Standaard betaald aan",
+        "defaultPaidToHint": "Nieuwe splits worden standaard op deze rekening betaald."
+      },
+      "duplicate": "Dupliceren",
+      "duplicateTitle": "Dupliceren naar datum",
+      "expenseCategory": "Uitgavecategorie",
+      "incomeCategory": "Inkomstencategorie",
+      "categoryNone": "Overboekingen behouden hun categorie. Selecteer uitgaven of inkomsten om die te wijzigen.",
+      "duplicateNone": "Aanpassingen en negatieve bedragen kunnen niet worden gedupliceerd.",
+      "duplicateTooMany": "Dupliceer maximaal {max} transacties tegelijk.",
+      "wage": {
+        "title": "Uurtarief",
+        "subtitle": "Je inkomstentarief per maand, zoals ingesteld in de app.",
+        "add": "Inkomstenpercentage toevoegen",
+        "addTitle": "Inkomstenpercentage toevoegen",
+        "empty": "Nog geen uurtarief-geschiedenis.",
+        "now": "Deze maand",
+        "perHour": "/u",
+        "type": {
+          "hourly": "Per uur",
+          "monthly": "Per maand",
+          "yearly": "Per jaar"
+        },
+        "deleteTitle": "Maandelijks uurtarief verwijderen?",
+        "deleteBody": "Tarief voor {month} verwijderen? Maanden die hiervan afhankelijk zijn, vallen terug op de vorige beschikbare maand.",
+        "year": "Jaar",
+        "month": "Maand",
+        "existsTitle": "{month} bestaat al",
+        "existsBody": "Deze maand heeft al een inkomstenpercentage. In plaats daarvan bewerken?",
+        "saveFor": "Opslaan voor {month}",
+        "step1": "Wat verdien je?",
+        "step2": "Werkweek",
+        "step3": "Extra werktijd",
+        "amount": "Bedrag ({symbol})",
+        "afterTax": "Voer je nettoloon in.",
+        "hoursPerWeek": "Werkuren / week",
+        "workdaysPerWeek": "Werkdagen / week",
+        "commuteMinutes": "Extra tijd / werkdag (min)",
+        "commuteHint": "Inclusief klaarmaken, reistijd, parkeren en onbetaalde werktijd.",
+        "trueRate": "Echt uurtarief",
+        "weeklyIncome": "Wekelijkse inkomsten",
+        "baseRate": "Basis-uurtarief",
+        "commutePerWeek": "Extra tijd / week",
+        "totalPerWeek": "Totale tijd / week",
+        "showAs": "Weergeven als",
+        "period": {
+          "hourly": "Per uur",
+          "weekly": "Wekelijks",
+          "monthly": "Maandelijks",
+          "yearly": "Jaarlijks"
+        },
+        "suffix": {
+          "hourly": "/u",
+          "weekly": "/wk",
+          "monthly": "/mnd",
+          "yearly": "/jr"
+        }
+      },
+      "notePlaceholder": "Nieuwe notitie. Laat leeg om hem te wissen."
+    },
+    "cloud": {
+      "strip": "Gegevens van {device}, gesynchroniseerd {date}.",
+      "yourPhone": "je telefoon",
+      "dataFrom": "Gegevens van {date}",
+      "phoneHere": "Telefoon verbonden",
+      "phoneAway": "Telefoon niet verbonden",
+      "connecting": "Verbinden…",
+      "refresh": "Vernieuwen vanaf telefoon",
+      "receiving": "Synchroniseren… {percent}%",
+      "preparing": "Even klaarmaken…",
+      "preparingTitle": "Je telefoon maakt zich klaar om te synchroniseren",
+      "receivingTitle": "De nieuwste gegevens van je telefoon worden gesynchroniseerd",
+      "opening": "Openen…",
+      "openingTitle": "De gesynchroniseerde gegevens openen",
+      "needsPhoneTitle": "Open Money2Time op je telefoon.",
+      "needsPhoneBody": "Ga naar Instellingen → Webdashboard. Je nieuwste gegevens komen vanzelf binnen.",
+      "unlink": "Deze browser ontkoppelen",
+      "unlinkConfirm": "Ontkoppelen? Deze browser verwijdert zijn kopie van je gegevens. Scan opnieuw om weer te koppelen.",
+      "stay": "Gekoppeld houden",
+      "elsewhereTitle": "Dit dashboard is geopend in een ander tabblad.",
+      "elsewhereBody": "Maar één tabblad krijgt updates. Kies Hier gebruiken om te wisselen.",
+      "useHere": "Hier gebruiken",
+      "sourceOfTruth": "Wijzigingen worden op je telefoon opgeslagen. Niets wordt online opgeslagen.",
+      "errors": {
+        "incomplete": "Het synchroniseren met je telefoon is gestopt voordat het klaar was. Vernieuw vanaf je telefoon om het opnieuw te proberen.",
+        "corrupt": "De gegevens van je telefoon konden niet worden gelezen. Vernieuw vanaf je telefoon om het opnieuw te proberen.",
+        "unsupported": "Deze gegevens komen van een nieuwere versie van de app. Laad de pagina opnieuw om het nieuwste dashboard te krijgen.",
+        "storage": "Deze browser wilde geen kopie opslaan, dus hij heeft je telefoon de volgende keer opnieuw nodig. Privévensters doen dit vaak."
+      }
+    },
+    "link": {
+      "eyebrow": "Money2Time Webdashboard",
+      "title": "Je Money2Time-gegevens op een groot scherm",
+      "subtitle": "Scan de code met je telefoon. End-to-end versleuteld, niets online opgeslagen.",
+      "steps": {
+        "camera": {
+          "title": "Scan met je camera",
+          "body": "Richt de camera van je telefoon op de code, of scan hem in de app."
+        },
+        "link": {
+          "title": "Koppel",
+          "body": "Controleer of beide schermen dezelfde code tonen en tik op Koppelen."
+        },
+        "dashboard": {
+          "title": "Open je dashboard",
+          "body": "17 dashboards. Open de app wanneer je wilt om te vernieuwen, en maak wijzigingen zolang hij verbonden is."
+        }
+      },
+      "promises": {
+        "edits": {
+          "title": "Bewerk terwijl verbonden",
+          "body": "Wijzigingen worden op je telefoon opgeslagen, alleen terwijl hij verbonden is."
+        },
+        "phone": {
+          "title": "Je telefoon blijft de baas",
+          "body": "Gegevens komen alleen binnen als de app open is."
+        },
+        "private": {
+          "title": "Niets online opgeslagen",
+          "body": "End-to-end versleuteld. Zelfs wij kunnen het niet lezen."
+        }
+      },
+      "cardTitle": "Deze browser koppelen",
+      "cardBody": "Scan met de camera van je telefoon of de Money2Time-app.",
+      "qrLabel": "QR-code om deze browser te koppelen aan de Money2Time-app",
+      "preparing": "Code voorbereiden…",
+      "noAccount": "Geen account nodig. De code wisselt elke 2 minuten.",
+      "confirmCode": "Controleer of je telefoon deze code toont en tik daar op Koppelen.",
+      "candidateTitle": "{phone} koppelen?",
+      "candidateTitleUnnamed": "Deze telefoon koppelen?",
+      "candidateBody": "Controleer of je telefoon dezelfde code toont. Koppel alleen als je hem zelf hebt gescand.",
+      "candidateAccept": "Koppelen",
+      "candidateReject": "Niet van mij",
+      "offline": "Geen verbinding. Er verschijnt een nieuwe code zodra je weer online bent.",
+      "terms": "Door te koppelen ga je akkoord met de Gebruiksvoorwaarden en het Privacybeleid.",
+      "unlinkedNotice": "Ontkoppeld. Deze browser heeft zijn kopie van je gegevens verwijderd.",
+      "linkedTo": "Gekoppeld aan {phone}",
+      "waitingTitle": "Wachten op je telefoon",
+      "waitingBody": "Open Money2Time → Instellingen → Webdashboard.",
+      "preparingTitle": "Klaarmaken om te synchroniseren",
+      "preparingBody": "Je telefoon pakt je gegevens in. Houd Money2Time open op je telefoon.",
+      "receivingTitle": "Je gegevens synchroniseren",
+      "receivingBody": "End-to-end versleuteld, rechtstreeks vanaf je telefoon. Houd Money2Time open op je telefoon.",
+      "openingTitle": "Je gegevens openen",
+      "openingBody": "Wordt ontsleuteld in deze browser.",
+      "errors": {
+        "unsupported": "Deze browser kan geen end-to-end versleutelde gegevens openen. Gebruik een recente versie van Chrome, Edge, Firefox of Safari."
+      }
+    },
+    "pro": {
+      "badge": "Pro",
+      "title": "Onderdeel van Money2Time Pro",
+      "body": "Dit hoort bij Money2Time Pro, samen met langere periodes en geen limieten voor rekeningen, categorieën, terugkerende transacties en meer. Upgrade in de app op je telefoon, dan gaat het hier ook open.",
+      "stepApp": "Open Money2Time op je telefoon en upgrade naar Pro.",
+      "stepRefresh": "Kom hier terug en vernieuw vanaf je telefoon. Deze browser gaat open zodra je telefoon zijn gegevens heeft gesynchroniseerd.",
+      "checkAgain": "Ik heb geüpgraded, vernieuw vanaf telefoon",
+      "checking": "Synchroniseren…",
+      "notNow": "Niet nu",
+      "lockedPeriod": "{period}, alleen Pro"
+    },
+    "filters": {
+      "title": "Filters",
+      "accounts": "Rekeningen",
+      "exclude": "Uitsluiten",
+      "include": "Opnemen",
+      "done": "Klaar",
+      "reset": "Herstellen",
+      "note": "Rekeningsaldi worden niet gefilterd."
+    },
+    "hide": {
+      "hide": "Bedragen verbergen",
+      "show": "Bedragen tonen"
+    },
+    "dropdown": {
+      "search": "Zoeken",
+      "noMatch": "Geen resultaten"
+    }
+  }
+}

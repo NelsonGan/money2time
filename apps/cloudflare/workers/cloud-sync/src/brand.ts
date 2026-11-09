@@ -1,7 +1,7 @@
 // The Money2Time look for the little this Worker shows people: the invite
 // page (pages.ts) and the sign-in code email (email.ts).
 //
-// Every value is money2time-web's (src/app/globals.css, which ports the app's
+// Every value is the website's (apps/web/src/app/globals.css, which ports the app's
 // `rosewood` theme from apps/mobile/constants/designSystem.ts), and the dark
 // values are that theme's dark palette in the app, since the site has none.
 // Change them there first and copy them here, never the other way round.
@@ -48,7 +48,7 @@ export const FONT_SANS =
 export const GOOGLE_FONTS_URL =
   'https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap';
 
-/** The site's media bucket (money2time-web src/lib/media.ts), resized at the edge. */
+/** The site's media bucket (apps/web/src/lib/media.ts), resized at the edge. */
 export const MEDIA_ORIGIN = 'https://media.money2time.com';
 function resized(path: string, width: number): string {
   return `${MEDIA_ORIGIN}/cdn-cgi/image/width=${width},quality=85,format=auto,fit=scale-down,onerror=redirect/web${path}`;
