@@ -36,8 +36,8 @@ sed -n '/^  en: {/,/^  },/p' $F | sed -n '/whatsNew/,/`,$/p'    # what it said
 
 App Studio moved into this repository on 2026-11-09 without its history. If the last
 commit touching the file is that move (its subject starts "Move the website and App Studio"), the
-note it holds is the batch-receipts release, written 2026-11-09 08:37 +0800 (the old repo's
-`adfe839`, PR #41): count from that date instead.
+note it holds is the batch-receipts release, written 2026-11-09 08:37 +0800: count from that
+date instead.
 
 Then list the app commits since that date, with a day of overlap because a note is usually
 written a day or two after the commits it covers:
@@ -86,14 +86,7 @@ generated registry to see which directory the app really loads.
 
 **Match the June and July notes, not the Aug 28 to Sep 3 ones.** Those three were written by
 Claude and read like it; the earlier ones are the user's own voice and are the register to
-copy. They are in the archived `NelsonGan/money2time-screenshots-creator` repository, commits
-`8c16221` and `0f1a28b`:
-
-```bash
-gh api -H 'Accept: application/vnd.github.raw' \
-  'repos/NelsonGan/money2time-screenshots-creator/contents/src/data/appDescriptions.ts?ref=8c16221'
-```
-
+copy. Both are in [references/past-notes.md](references/past-notes.md), in all 23 locales.
 The English of one of them:
 
 ```
@@ -188,7 +181,7 @@ The locales, in file order: `en zh de fr es pt it nl ru ja ko hi id tr vi th pl 
 da ms fil`. Match with `^  [a-z]{2,3}: {` — **`fil` is three letters** and a `{2}` regex
 drops it.
 
-- Read that locale's line in the **same June/July commit** for its register (verb form and
+- Read that locale's June/July note in [references/past-notes.md](references/past-notes.md) for its register (verb form and
   formality differ per language: `Lade till` in sv, `Nagdagdag ng` in fil, `...しました` in ja).
 - **Stay as terse as the English.** A translation is not the place to add back the qualifier
   the English bullet dropped; the target-language bullet is one clause too.

@@ -64,8 +64,10 @@ its commands run from its directory (`apps/mobile`, `apps/web`,
 
 The website and App Studio were separate repositories (`money2time-web` and
 `money2time-screenshots-creator`) until 2026-11-09. They moved in as a
-snapshot of their `main` branches, without their history, which stays in
-those archived repositories.
+snapshot of their `main` branches, without their git history. Nothing here
+depends on those repositories: what their history held that is still needed
+(the past What's New notes and quotes) lives in the `update-whats-new`
+skill.
 
 Inside the mobile app:
 
@@ -4882,8 +4884,7 @@ usual; only the guide copy itself is English on both platforms.
 
 The landing gallery in `media/screenshots/<language>/` uses the nine iPhone
 marketing scenes from [App Studio](#app-studio). The current set was exported
-on October 1, 2026 (studio revision `f47aabb`, in its archived repository),
-with local app data in all 23 languages; regional English pages share the
+on October 1, 2026, with local app data in all 23 languages; regional English pages share the
 English set. To refresh it, export **iPhone → Export All Locales** in App
 Studio, convert the PNGs to WebP at quality 90 while keeping their
 1284 × 2778 dimensions, and use the scene IDs as filenames. Keep the order and
