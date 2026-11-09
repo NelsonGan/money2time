@@ -15,7 +15,7 @@ apps/mobile      Expo / React Native app, its own npm project
 apps/cloudflare  workers/ and d1/, one directory per Worker and per database
 apps/web         money2time.com and the Web Dashboard (vinext on a Worker)
 apps/app-studio  App Studio: store screenshots, creatives and listing copy
-.github          CI workflows, and pr-assets/ for PR screenshots and evidence
+.github          CI workflows (pr-assets/ is an ignored scratch folder for PR captures)
 ```
 
 There is no root `package.json` and no workspace: each app is its own npm
@@ -136,16 +136,16 @@ lease, for what `agent-device` cannot do. Gradle needs `ANDROID_HOME` and
 `JAVA_HOME` set (see Getting set up in the README).
 
 **Always include screenshots in PR descriptions after UI testing.** Capture the
-final UI and save it, with any recording or other evidence, in
-`.github/pr-assets/<topic>/` (one kebab-case folder per PR), committed on the
-PR branch. That is the only place PR assets go. Embed them with URLs pinned to
-the commit that added them
-(`https://raw.githubusercontent.com/NelsonGan/money2time/<commit-sha>/.github/pr-assets/<topic>/<file>`),
-so they keep loading after a merge or a later move. Then delete the folder in
-the next commit and push both together: the images stay reachable through the
-PR's history and never land on `main`, which would otherwise carry hundreds of
-MB of old screenshots (they were cleared out on 2026-11-09). Local file paths and a
-text-only report are not enough. Keep private account details out of the
+final UI and save it, with any recording, in `.github/pr-assets/<topic>/` (one
+kebab-case folder per PR, ignored by git) and upload it as a GitHub attachment:
+reference it in the description by that path (`![alt](.github/pr-assets/<topic>/after.png)`)
+and pass the same path to `--attach` on `gh pr create`, `gh pr edit` or
+`gh pr comment`, which uploads it and rewrites the reference. **Never commit
+screenshots, recordings or other evidence**: committed evidence once made every
+clone hundreds of MB bigger. Non-image evidence goes in the description
+as text. Then read the description back and check every image is a
+`github.com/user-attachments` URL. Local file paths and a text-only report are
+not enough. Keep private account details out of the
 images. Include before/after screenshots only when both were actually captured.
 For instructions-only changes without UI testing, state that no app behavior
 changed and report the documentation checks instead. The `create-pr` skill

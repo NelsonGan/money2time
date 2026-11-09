@@ -50,8 +50,8 @@ apps/web         money2time.com and the Web Dashboard: Next.js App Router
                  code built by vinext as one Cloudflare Worker (see Website)
 apps/app-studio  App Studio: the store screenshots, creatives and listing
                  copy, and their uploads (see App Studio)
-.github          CI workflows; a pull request's screenshots and evidence go
-                 in .github/pr-assets/ on its branch, never on main
+.github          CI workflows; PR screenshots are GitHub attachments
+                 (gh --attach), never committed
 ```
 
 The root holds only what is shared: CI, agent config (`.claude/`, `.agents/`,
@@ -3292,7 +3292,7 @@ the sparkle are both still there.
 
 ## App size and native-only assets
 
-An October 2026 pass cut the Android release APK by about 10% (316.67 MB to 283.34 MB) and the Hermes bundle by about 9%. The measurements are in [the app-size PR's evidence](https://github.com/NelsonGan/money2time/blob/95af63b58fa45cd1d99ff33ab4c84b774d09ce57/.github/pr-assets/app-size/measurements.json). A November 2026 pass cut the Hermes bundle by another 9% (16.65 MB to 15.11 MB on iOS, 16.66 MB to 15.09 MB on Android) and the bundled images by 4.45 MB, measured in [the bundle-size PR's evidence](https://github.com/NelsonGan/money2time/blob/95af63b58fa45cd1d99ff33ab4c84b774d09ce57/.github/pr-assets/bundle-size/measurements.json). A second November 2026 pass, measured on real unsigned Release archives of 1.7.4, cut the iOS app from 227.8 MB to 181.1 MB (about 206 MB to 167 MB once the App Store thins it for an iPhone, and 151.6 MB to 124.5 MB compressed) and the arm64 Android release APK from 172.3 MB to 164.2 MB, in [the iOS app-size PR's evidence](https://github.com/NelsonGan/money2time/blob/95af63b58fa45cd1d99ff33ab4c84b774d09ce57/.github/pr-assets/ios-app-size/measurements.json). What follows is what still applies.
+An October 2026 pass cut the Android release APK by about 10% (316.67 MB to 283.34 MB) and the Hermes bundle by about 9%. The measurements are in [the app-size PR's evidence](https://github.com/NelsonGan/money2time/blob/64b5458d21c3cf4568f554eb7cef6c71b6affe34/.github/pr-assets/app-size/measurements.json). A November 2026 pass cut the Hermes bundle by another 9% (16.65 MB to 15.11 MB on iOS, 16.66 MB to 15.09 MB on Android) and the bundled images by 4.45 MB, measured in [the bundle-size PR's evidence](https://github.com/NelsonGan/money2time/blob/c9c8cbfbfb1f86d549ba52ae356f1f12100ea144/.github/pr-assets/bundle-size/measurements.json). A second November 2026 pass, measured on real unsigned Release archives of 1.7.4, cut the iOS app from 227.8 MB to 181.1 MB (about 206 MB to 167 MB once the App Store thins it for an iPhone, and 151.6 MB to 124.5 MB compressed) and the arm64 Android release APK from 172.3 MB to 164.2 MB, in [the iOS app-size PR's evidence](https://github.com/NelsonGan/money2time/blob/193c5cd3b060041a9bce7cf35e32b3ea5fa19909/.github/pr-assets/ios-app-size/measurements.json). What follows is what still applies.
 
 ### What contributes to size
 
@@ -5605,7 +5605,7 @@ Amounts, item quantities/currencies and account detection were checked; merchant
 wording was allowed to vary. Once the printed date is more than 30 days old,
 responses should use today's date, following the Worker's existing date clamp.
 Recorded responses and limits are in
-[receipt regression evidence](https://github.com/NelsonGan/money2time/blob/95af63b58fa45cd1d99ff33ab4c84b774d09ce57/.github/pr-assets/notification-text-scanning/receipt-regression-results.json).
+[receipt regression evidence](https://github.com/NelsonGan/money2time/blob/64b5458d21c3cf4568f554eb7cef6c71b6affe34/.github/pr-assets/notification-text-scanning/receipt-regression-results.json).
 
 ### Performance measurement
 

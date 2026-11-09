@@ -110,5 +110,5 @@ npm run build     # when you changed more than copy
 The `App Studio` workflow (`.github/workflows/app-studio.yml`) runs the same on
 every PR and push to `main` that touches `apps/app-studio`. A Studio-only
 change cuts no store build and deploys nothing. Put screenshots of changed
-scenes in the PR (`.github/pr-assets/<topic>/`, removed again in the next
-commit, see [create-pr](../create-pr/SKILL.md)).
+scenes in the PR as attachments (`gh pr create --attach`, never committed, see
+[create-pr](../create-pr/SKILL.md)).
