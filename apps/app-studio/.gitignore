@@ -45,3 +45,8 @@ scripts/*.json
 
 # Generated store deliverables; the scenes remain the source of truth.
 exports/
+
+# Store credentials: a Play service-account key or App Store Connect key, wherever it is saved
+*.p8
+key.json
+*service-account*.json

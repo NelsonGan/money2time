@@ -77,6 +77,25 @@ const nextConfig: NextConfig = {
     if (process.env.NODE_ENV !== "production") return headers;
     return [
       ...headers,
+      /*
+       * Every host is HTTPS only (Cloudflare's Always Use HTTPS redirects plain
+       * HTTP), and HSTS keeps a browser from trying HTTP again, where a hostile
+       * network could swap in its own pairing page.
+       */
+      {
+        source: "/:path*",
+        headers: [{ key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" }],
+      },
+      // The marketing site: no framing by other sites, no MIME sniffing.
+      {
+        source: "/:path*",
+        missing: [{ type: "host" as const, value: "app\\..*" }],
+        headers: [
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+        ],
+      },
       {
         source: "/:path*",
         has: [{ type: "host" as const, value: "app\\..*" }],

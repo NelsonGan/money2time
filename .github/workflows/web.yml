@@ -41,12 +41,12 @@ jobs:
     defaults:
       run:
         working-directory: apps/web
-    env:
-      # The account API token money2time-web-github-actions: Workers Scripts,
-      # the zone's routes, DNS and certificates (for the custom domains), and
-      # read-only R2 for the media check. Pull requests from forks get no
-      # secrets, so they skip the steps that need it.
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_WEB_API_TOKEN }}
+    # CLOUDFLARE_WEB_API_TOKEN is the account API token
+    # money2time-web-github-actions: Workers Scripts, the zone's routes, DNS and
+    # certificates (for the custom domains), and read-only R2 for the media
+    # check. Only the steps that call Cloudflare get it, so `npm ci`'s install
+    # scripts, lint, tests and the build never see it. Pull requests from forks
+    # get no secrets, so they skip those steps.
     steps:
       - name: Check out repository
         uses: actions/checkout@v5
@@ -77,6 +77,8 @@ jobs:
       # or before the secret is set) still gets every check and the build.
       - name: Check the Cloudflare token
         id: token
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_WEB_API_TOKEN }}
         run: |
           if [ -n "$CLOUDFLARE_API_TOKEN" ]; then
             echo "present=true" >> "$GITHUB_OUTPUT"
@@ -92,6 +94,8 @@ jobs:
       # pictures it shows are in the bucket.
       - name: Check media/ is published to R2
         if: steps.token.outputs.present == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_WEB_API_TOKEN }}
         run: node scripts/upload-media.mjs --check
 
       - name: Build
@@ -106,8 +110,12 @@ jobs:
       # sending it any traffic. This proves the Worker uploads and binds.
       - name: Upload Worker version
         if: github.ref != 'refs/heads/main' && steps.token.outputs.present == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_WEB_API_TOKEN }}
         run: npm run upload
 
       - name: Deploy to production
         if: github.ref == 'refs/heads/main'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_WEB_API_TOKEN }}
         run: npm run deploy:prebuilt

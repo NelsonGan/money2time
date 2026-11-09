@@ -17,6 +17,19 @@ routes = [
 workers_dev = false
 preview_urls = true
 
+# Requests per client IP per minute. The quotas are per appUserId, which any
+# caller can invent, and an unreadable image uses no scan; these bound what one
+# address can spend on AI. Batch scanning sends at most 10 receipts, 3 at a time.
+[[ratelimits]]
+name = "SCAN_LIMITER"
+namespace_id = "2405"
+simple = { limit = 30, period = 60 }
+
+[[ratelimits]]
+name = "NOTIFICATION_LIMITER"
+namespace_id = "2406"
+simple = { limit = 30, period = 60 }
+
 # D1 database for the entitlement cache + rate-limit counters
 # (schema: apps/cloudflare/d1/receipt-scanner/schema.sql).
 [[d1_databases]]

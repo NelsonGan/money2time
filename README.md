@@ -3567,6 +3567,17 @@ Quota is consumed **only when the parse yields at least one transaction**, so
 failed scans and unreadable receipts (`transactions: []`) don't burn a user's
 allowance.
 
+Because of that, and because the quota is keyed on an `appUserId` any caller
+can invent, the quota alone does not bound AI spend. Two Workers rate limits do:
+`SCAN_LIMITER` and `NOTIFICATION_LIMITER` (`wrangler.toml`) allow 30 requests
+per client IP per minute on `/scan` and `/notifications`, and answer
+`429 { "error": "rate_limited" }` past that. Batch scanning sends at most 10
+receipts, 3 at a time, so a real user never gets near it. A scan body larger
+than the 8 MB image cap is refused with `413` before it is read, and the
+`categories` and `accounts` lists that go into the prompt are cut to 200
+names of 60 characters each, as the notification route already does. Keep a
+spend limit on the OpenRouter key and the Anthropic key as the last line.
+
 #### Config
 
 `wrangler.toml` `[vars]`: `MODEL`, `ENTITLEMENT_ID`, and the per-tier quota:
@@ -4172,7 +4183,9 @@ Four things bound the blast radius, all of them tested:
 Be clear about what the request signature is: a shared secret shipped inside
 the app bundle (`EXPO_PUBLIC_REQUEST_SIGNING_KEY`), so it is extractable by
 anyone who unpacks the IPA. It raises the cost of casual abuse. It is not
-authentication, and nothing here should be designed as though it were.
+authentication, and nothing here should be designed as though it were. The
+receipt scanner's per-IP rate limits exist for the same reason (see its quota
+notes).
 
 What that leaves, and why it is acceptable:
 
@@ -4953,9 +4966,19 @@ run and a deployed one fail in the same places.
   has a host-conditioned entry so files and `/download` on the apex are
   covered too. It also sends every path on `app.` to the dashboard, picks a
   locale from `cf-ipcountry` (Cloudflare's IP geolocation) and the browser's
-  languages, and `308`s `/dashboard` on `www` to the app host. In
+  languages, and `308`s `/dashboard` on `www` to the app host. It matches that
+  path decoded (`decodedPath`), as the router does, so `/%64ashboard` cannot
+  render the dashboard on `www` without the app host's headers. In
   `next.config.ts`, every host but `www` and `app` gets
   `X-Robots-Tag: noindex`, and the `app.` host gets the dashboard's CSP.
+- **HTTPS only.** The zone's **Always Use HTTPS** setting is on, so Cloudflare
+  `301`s plain HTTP on every hostname (the site, the dashboard and the
+  Workers' custom domains), and every host sends
+  `Strict-Transport-Security: max-age=31536000; includeSubDomains`. Before
+  this, `http://app.money2time.com` served the whole dashboard, so a hostile
+  network could hand out its own pairing page. Every hostname on the zone must
+  keep a valid certificate. `www` also sends `nosniff`,
+  `X-Frame-Options: SAMEORIGIN` and `strict-origin-when-cross-origin`.
 - **No `workers.dev` copy and no preview URLs.** Either would publish a second,
   complete copy of the site under a name no canonical names.
 - **OG cards** are drawn per request by `next/og` in the Worker. Their fonts
@@ -5054,7 +5077,9 @@ token from the Workers' `CLOUDFLARE_API_TOKEN`. Rotate it in the dashboard
 under Manage Account → Account API Tokens, then
 `gh secret set CLOUDFLARE_WEB_API_TOKEN`. A pull request without the secret
 (one from a fork) still gets every check and the build, and skips the media
-check and the upload; a push to `main` without it fails.
+check and the upload; a push to `main` without it fails. Only the steps that
+call Cloudflare (the token check, the media check, the upload and the deploy)
+get the token, so dependency install scripts and the build never see it.
 
 Every change lands through a pull request, and merging to `main` is the
 deploy. `npm run deploy` does the same from a laptop (with your `cf` login or
@@ -5198,11 +5223,20 @@ upright landscape capture is 2853 × 2007.
 ```bash
 cd apps/app-studio
 npm install
-npm run dev      # http://localhost:3000
+npm run dev      # http://localhost:3000, on this Mac only (127.0.0.1)
 npm test         # upload and export regression checks (needs ffmpeg)
 npx tsc --noEmit
 npm run build    # the production build
 ```
+
+The API writes files, runs `asc` and `gplay` with this Mac's credentials and
+edits the live listings, so it answers only the Studio page itself.
+`npm run dev` binds to 127.0.0.1, and `src/middleware.ts` refuses any API
+request whose Host is not this machine (another device on the network, or a
+DNS-rebinding page), whose Origin is another site, or, for writes, that is not
+JSON. `stageLocale` and `stagingDir` accept only plain locale codes, folder
+names and image file names, so a request cannot name a path outside
+`.upload-staging/`. Keep both when adding a route.
 
 Pick a device and locale, preview the scenes, then export a single asset, the
 whole set, or every locale at once. Generated deliverables can be kept in the

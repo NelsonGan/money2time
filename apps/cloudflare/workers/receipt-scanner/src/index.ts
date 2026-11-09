@@ -15,6 +15,7 @@ import {
   normalizeNotificationResults,
   notificationMaxTokens,
   parseNotificationRequest,
+  stringList,
   type NotificationReviewRequest,
 } from './notifications';
 import { checkQuota, consumeQuota } from './ratelimit';
@@ -54,6 +55,10 @@ export interface Env extends PostHogEnv, PromptEnv {
   NOTIFICATION_FREE_INTERVAL?: string;
   NOTIFICATION_PRO_LIMIT?: string;
   NOTIFICATION_PRO_INTERVAL?: string;
+  // Requests per client IP per minute on /scan and /notifications (wrangler.toml).
+  // Optional so tests and local runs without the binding still work.
+  SCAN_LIMITER?: RateLimit;
+  NOTIFICATION_LIMITER?: RateLimit;
   // Optional OpenAI-style image_url.detail hint ("low" | "high" | "auto").
   // "low" downsamples to cut input tokens at some OCR-accuracy risk; unset omits it.
   IMAGE_DETAIL?: string;
@@ -129,6 +134,10 @@ const MIN_RETRY_BUDGET_MS = 15000;
 const RETRY_TEMPERATURE = 0.2;
 // Cap on the base64 payload; the app enforces the same limit before uploading.
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
+// Room for the rest of a scan request (currency, mode, the two lists) beside the image.
+const MAX_EXTRA_BODY_BYTES = 256 * 1024;
+// Category and account names sent with a scan: at most this many, 60 characters each.
+const MAX_PROMPT_LIST = 200;
 
 const CORS_HEADERS: Record<string, string> = {
   'Access-Control-Allow-Origin': '*',
@@ -180,6 +189,7 @@ export default {
     }
     const url = new URL(request.url);
     if (request.method === 'POST' && url.pathname === '/notifications') {
+      if (await overLimit(env.NOTIFICATION_LIMITER, request)) return json({ error: 'rate_limited' }, 429);
       return handleNotifications(request, env, ctx, false);
     }
     if (request.method === 'POST' && url.pathname === '/notifications/quota') {
@@ -187,6 +197,12 @@ export default {
     }
     if (request.method !== 'POST' || url.pathname !== '/scan') {
       return json({ error: 'not_found' }, 404);
+    }
+
+    if (await overLimit(env.SCAN_LIMITER, request)) return json({ error: 'rate_limited' }, 429);
+    // The image is capped below; refuse a larger body before reading it at all.
+    if (Number(request.headers.get('content-length') ?? 0) > MAX_IMAGE_BYTES + MAX_EXTRA_BODY_BYTES) {
+      return json({ error: 'image_too_large' }, 413);
     }
 
     const reqId = crypto.randomUUID();
@@ -565,7 +581,17 @@ function validate(body: ScanRequest): string | null {
   ) {
     return 'invalid_mode';
   }
+  // Both lists go into the prompt, so bound them like the notification route.
+  body.categories = stringList(body.categories, MAX_PROMPT_LIST);
+  body.accounts = stringList(body.accounts, MAX_PROMPT_LIST);
   return null;
+}
+
+/** True when this client IP is over its per-minute limit. No binding, no limit. */
+async function overLimit(limiter: RateLimit | undefined, request: Request): Promise<boolean> {
+  if (!limiter) return false;
+  const key = request.headers.get('cf-connecting-ip') ?? 'unknown';
+  return !(await limiter.limit({ key })).success;
 }
 
 // Verify HMAC-SHA256(`<timestamp>.<appUserId>`) in X-Signature, with X-Timestamp

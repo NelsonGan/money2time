@@ -34,6 +34,12 @@ export {
 export const STAGING_ROOT = path.join(process.cwd(), '.upload-staging');
 
 export function stagingDir(...parts: string[]): string {
+  // `device` comes from a request body: one plain name per part, nothing else.
+  for (const part of parts) {
+    if (typeof part !== 'string' || !/^[A-Za-z0-9_-]{1,40}$/.test(part)) {
+      throw new Error(`Not a staging folder name: ${String(part).slice(0, 40)}`);
+    }
+  }
   return path.join(STAGING_ROOT, ...parts);
 }
 
