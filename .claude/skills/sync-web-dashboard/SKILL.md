@@ -115,7 +115,7 @@ branch:
 ## 5. Ship them together
 
 - The web change goes in the same PR as the app change, with the dashboard
-  screenshots beside the app's in `.github/pr-assets/<topic>/` (see
+  screenshots attached beside the app's (`--attach`, see
   [create-pr](../create-pr/SKILL.md)).
 - Merging deploys the web at once and ships the app through the stores later.
   When the web needs the new app to be useful, say in the description that it

@@ -130,5 +130,5 @@ are done, `node_modules` in a throwaway worktree: the disk on this Mac fills up.
   skips the media check and the upload, and `main` fails to deploy.
 - Never `npm run deploy` from your machine unless the user asks: it deploys to
   production.
-- PR screenshots of the site go in `.github/pr-assets/<topic>/` like the app's,
-  removed again in the next commit (see [create-pr](../create-pr/SKILL.md)).
+- PR screenshots of the site are attachments like the app's (`--attach`, never
+  committed, see [create-pr](../create-pr/SKILL.md)).
