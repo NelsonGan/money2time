@@ -18,7 +18,8 @@ import { authenticateWithBiometrics, getBiometricLabel } from '~/services/biomet
  * Rendered through a Modal so it sits above every other native layer (including
  * any open RN Modal/sheet) and captures the Android hardware back button while
  * locked. Never locks when the setting is off; if the user is no longer Pro the
- * setting is turned off automatically so a lapsed subscriber is never locked out.
+ * setting is turned off after their next unlock, so a lapsed subscriber loses
+ * the feature but whoever holds the phone never gets past the lock by it.
  */
 export function BiometricLockGate({
   onLockStateChange,
@@ -54,12 +55,15 @@ export function BiometricLockGate({
     delayMsRef.current = delaySeconds * 1000;
   }, [delaySeconds]);
 
-  // Turn the feature off if the subscription has lapsed (confirmed, not loading).
+  // Turn the feature off if the subscription has lapsed (confirmed, not
+  // loading), but only once the app is unlocked. `isPro` also turns false when
+  // a cached expiry passes offline, so a stolen phone kept in airplane mode
+  // would otherwise switch its own lock off.
   useEffect(() => {
-    if (!isLoading && !isPro && enabled) {
+    if (!isLoading && !isPro && enabled && !locked) {
       updateSettings({ biometricLockEnabled: false });
     }
-  }, [enabled, isLoading, isPro, updateSettings]);
+  }, [enabled, isLoading, isPro, locked, updateSettings]);
 
   useEffect(() => {
     let cancelled = false;

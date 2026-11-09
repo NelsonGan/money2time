@@ -1,3 +1,4 @@
+import { setAppLocked } from '~/features/settings/lib/appLockState';
 import { LIVE_EARNINGS_MIN_HOURS } from '~/features/widgets/lib/liveEarnings';
 import { requestRunAddAction } from '~/services/addActionNavigation';
 import { handleMoney2TimeDeepLink } from '~/services/deepLinks';
@@ -68,7 +69,10 @@ describe('handleMoney2TimeDeepLink', () => {
   beforeEach(() => jest.clearAllMocks());
 
   describe('Back Tap (money2time://add)', () => {
-    it('runs the configured entry action', () => {
+    // The action waits for `whenAppUnlocked()`, which resolves on a later tick.
+    const settle = () => new Promise((resolve) => setImmediate(resolve));
+
+    it('runs the configured entry action', async () => {
       for (const action of ['quick', 'full', 'scan', 'voice', 'split', 'splitScan']) {
         jest.clearAllMocks();
         const handled = handleMoney2TimeDeepLink(
@@ -76,16 +80,33 @@ describe('handleMoney2TimeDeepLink', () => {
           makeNavigationRef(),
         );
         expect(handled).toBe(true);
+        await settle();
         expect(requestRunAddAction).toHaveBeenCalledWith(action);
       }
     });
 
-    it('falls back to quick entry rather than no-opping on a missing or unknown action', () => {
+    it('falls back to quick entry rather than no-opping on a missing or unknown action', async () => {
       // A Back Tap that silently does nothing reads as a broken feature.
       for (const url of ['money2time://add', 'money2time://add?action=bogus']) {
         jest.clearAllMocks();
         expect(handleMoney2TimeDeepLink(url, makeNavigationRef())).toBe(true);
+        await settle();
         expect(requestRunAddAction).toHaveBeenCalledWith('quick');
+      }
+    });
+
+    it('starts nothing behind the app lock until the person unlocks', async () => {
+      // Any app can open this URL, and voice starts the microphone at once.
+      setAppLocked(true);
+      try {
+        handleMoney2TimeDeepLink('money2time://add?action=voice', makeNavigationRef());
+        await settle();
+        expect(requestRunAddAction).not.toHaveBeenCalled();
+        setAppLocked(false);
+        await settle();
+        expect(requestRunAddAction).toHaveBeenCalledWith('voice');
+      } finally {
+        setAppLocked(false);
       }
     });
 

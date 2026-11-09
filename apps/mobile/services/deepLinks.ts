@@ -1,6 +1,7 @@
 import type { NavigationContainerRefWithCurrent } from '@react-navigation/native';
 import { Keyboard, Linking } from 'react-native';
 
+import { whenAppUnlocked } from '~/features/settings/lib/appLockState';
 import { getTutorial } from '~/features/tutorials/content/tutorials';
 import { clampSessionHours } from '~/features/widgets/lib/liveEarnings';
 import type { RootStackParamList } from '~/navigation/rootStack';
@@ -99,8 +100,10 @@ export function handleMoney2TimeDeepLink(url: string, navigationRef: RootNavigat
   // as broken.
   if (parsed.action === 'add') {
     const action = normalizeBackTapAction(parsed.params.action) ?? 'quick';
+    // Any app or page can open this URL, and voice and scan start the
+    // microphone or camera at once, so nothing runs behind the app lock.
     runDeepLinkNavigation(navigationRef, null, () => {
-      requestRunAddAction(action);
+      void whenAppUnlocked().then(() => requestRunAddAction(action));
     });
     void trackEvent(AnalyticsEvents.BACK_TAP_TRIGGERED, { action });
     return true;
