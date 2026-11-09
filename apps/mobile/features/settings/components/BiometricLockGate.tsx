@@ -18,7 +18,8 @@ import { authenticateWithBiometrics, getBiometricLabel } from '~/services/biomet
  * Rendered through a Modal so it sits above every other native layer (including
  * any open RN Modal/sheet) and captures the Android hardware back button while
  * locked. Never locks when the setting is off; if the user is no longer Pro the
- * setting is turned off automatically so a lapsed subscriber is never locked out.
+ * setting is turned off after their next unlock, so a lapsed subscriber loses
+ * the feature but whoever holds the phone never gets past the lock by it.
  */
 export function BiometricLockGate({
   onLockStateChange,
@@ -41,6 +42,10 @@ export function BiometricLockGate({
   // Bumped each time the overlay should (re)prompt — covers returning to the
   // foreground while already locked, where `locked` doesn't change.
   const [promptToken, setPromptToken] = useState(0);
+  // Whether the app is in the foreground. `locked` only turns true when the app
+  // comes back, so while it is away the lock reads as off even though it will
+  // re-lock on return; nothing may switch the setting off in that window.
+  const [appActive, setAppActive] = useState(AppState.currentState === 'active');
   // Tracks a genuine background trip. The OS biometric sheet only sends the app
   // to `inactive` (iOS) and never to `background`, so gating re-lock on this flag
   // avoids re-locking the instant a successful unlock returns to `active`.
@@ -54,12 +59,16 @@ export function BiometricLockGate({
     delayMsRef.current = delaySeconds * 1000;
   }, [delaySeconds]);
 
-  // Turn the feature off if the subscription has lapsed (confirmed, not loading).
+  // Turn the feature off if the subscription has lapsed (confirmed, not
+  // loading), but only while the app is in the foreground and unlocked.
+  // `isPro` also turns false when a cached expiry passes offline, so a stolen
+  // phone kept in airplane mode would otherwise switch its own lock off,
+  // including while backgrounded, before the return re-locks it.
   useEffect(() => {
-    if (!isLoading && !isPro && enabled) {
+    if (!isLoading && !isPro && enabled && !locked && appActive) {
       updateSettings({ biometricLockEnabled: false });
     }
-  }, [enabled, isLoading, isPro, updateSettings]);
+  }, [appActive, enabled, isLoading, isPro, locked, updateSettings]);
 
   useEffect(() => {
     let cancelled = false;
@@ -76,6 +85,9 @@ export function BiometricLockGate({
   // configured grace period has elapsed.
   useEffect(() => {
     const sub = AppState.addEventListener('change', (next) => {
+      // Set in the same handler as `setLocked(true)` below, so React batches
+      // them and the lapse effect never sees active-and-unlocked in between.
+      setAppActive(next === 'active');
       if (next === 'background') {
         wentToBackgroundRef.current = true;
         backgroundedAtRef.current = Date.now();

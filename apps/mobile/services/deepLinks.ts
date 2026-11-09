@@ -1,6 +1,7 @@
 import type { NavigationContainerRefWithCurrent } from '@react-navigation/native';
 import { Keyboard, Linking } from 'react-native';
 
+import { whenAppUnlocked } from '~/features/settings/lib/appLockState';
 import { getTutorial } from '~/features/tutorials/content/tutorials';
 import { clampSessionHours } from '~/features/widgets/lib/liveEarnings';
 import type { RootStackParamList } from '~/navigation/rootStack';
@@ -99,8 +100,10 @@ export function handleMoney2TimeDeepLink(url: string, navigationRef: RootNavigat
   // as broken.
   if (parsed.action === 'add') {
     const action = normalizeBackTapAction(parsed.params.action) ?? 'quick';
+    // Any app or page can open this URL, and voice and scan start the
+    // microphone or camera at once, so nothing runs behind the app lock.
     runDeepLinkNavigation(navigationRef, null, () => {
-      requestRunAddAction(action);
+      runAddActionWhenUnlocked(action);
     });
     void trackEvent(AnalyticsEvents.BACK_TAP_TRIGGERED, { action });
     return true;
@@ -243,6 +246,24 @@ function runDeepLinkNavigation(
         : routes,
     } as Parameters<typeof navigationRef.reset>[0]);
     afterReset?.();
+  });
+}
+
+// A Back Tap made while locked runs once the person unlocks, but only the
+// latest one, and only soon after: an unlock much later, for some other reason,
+// must not start the microphone or camera out of nowhere.
+const LOCKED_ADD_ACTION_TTL_MS = 60_000;
+let lockedAddActionSeq = 0;
+
+function runAddActionWhenUnlocked(action: AddButtonAction) {
+  const seq = ++lockedAddActionSeq;
+  const requestedAt = Date.now();
+  void whenAppUnlocked().then(() => {
+    if (seq !== lockedAddActionSeq) return;
+    if (Date.now() - requestedAt > LOCKED_ADD_ACTION_TTL_MS) return;
+    // After the lock overlay's own modal has gone, so two native modals never
+    // overlap (that freezes touch input on iOS).
+    runAfterInteractions(() => requestRunAddAction(action));
   });
 }
 
