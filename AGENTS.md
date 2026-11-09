@@ -141,8 +141,8 @@ kebab-case folder per PR, ignored by git) and upload it as a GitHub attachment:
 reference it in the description by that path (`![alt](.github/pr-assets/<topic>/after.png)`)
 and pass the same path to `--attach` on `gh pr create`, `gh pr edit` or
 `gh pr comment`, which uploads it and rewrites the reference. **Never commit
-screenshots, recordings or other evidence**: the history was rewritten on
-2026-11-09 to remove 600 MB of them. Non-image evidence goes in the description
+screenshots, recordings or other evidence**: committed evidence once made every
+clone hundreds of MB bigger. Non-image evidence goes in the description
 as text. Then read the description back and check every image is a
 `github.com/user-attachments` URL. Local file paths and a text-only report are
 not enough. Keep private account details out of the
