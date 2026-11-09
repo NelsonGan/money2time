@@ -797,7 +797,7 @@ export const TUTORIALS: Tutorial[] = [
         {
           "image": "recurring-3",
           "title": "Add a rule",
-          "body": "The plus in the top right. It is the same form as a normal entry, with a date and an amount. The free plan includes five rules."
+          "body": "The plus in the bottom right. It is the same form as a normal entry, with a date and an amount. The free plan includes five rules."
         },
         {
           "image": "recurring-4",
