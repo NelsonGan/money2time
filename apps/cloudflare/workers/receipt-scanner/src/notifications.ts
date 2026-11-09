@@ -69,13 +69,13 @@ function isCurrency(value: unknown): value is string {
   return typeof value === 'string' && /^[A-Za-z]{3}$/.test(value.trim());
 }
 
-function stringList(value: unknown, max: number): string[] {
+export function stringList(value: unknown, max: number, maxLength = 60): string[] {
   if (!Array.isArray(value)) return [];
   return Array.from(
     new Set(
       value
         .filter((item): item is string => typeof item === 'string')
-        .map((item) => item.trim().slice(0, 60))
+        .map((item) => item.trim().slice(0, maxLength))
         .filter(Boolean),
     ),
   ).slice(0, max);

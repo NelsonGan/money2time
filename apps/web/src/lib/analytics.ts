@@ -889,7 +889,14 @@ function isPrivatePage(): boolean {
 export function pageTypeOf(pathname: string, hostname?: string): PageType {
   // Every path on the app host is the dashboard (see src/proxy.ts).
   if (hostname && isAppHost(hostname)) return "dashboard";
-  const segments = pathname.split("/").filter(Boolean);
+  // Decoded, as the router does, so an escaped `/%64ashboard` still counts.
+  let decoded = pathname;
+  try {
+    decoded = decodeURIComponent(pathname);
+  } catch {
+    // A malformed escape cannot route to a page either.
+  }
+  const segments = decoded.split("/").filter(Boolean);
   if (segments[0] && isLocale(segments[0])) segments.shift();
 
   const [first, second] = segments;

@@ -267,12 +267,6 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Set up EAS CLI
-        uses: expo/expo-github-action@v8
-        with:
-          eas-version: latest
-          token: ${{ secrets.EXPO_TOKEN }}
-
       - name: Cache eas-build-local
         uses: actions/cache@v4
         with:
@@ -301,6 +295,16 @@ jobs:
       - name: Install dependencies
         working-directory: apps/mobile
         run: npm ci
+
+      # After `npm ci`: the action exports EXPO_TOKEN (build and submit to both
+      # stores) to every later step, so dependency install scripts run without
+      # it. Pinned rather than `latest`, so a new eas-cli release cannot reach
+      # the token unreviewed; bump it on purpose.
+      - name: Set up EAS CLI
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: 27.5.0
+          token: ${{ secrets.EXPO_TOKEN }}
 
       # The release build runs R8 in the 4 GB Gradle daemon (plus a Kotlin
       # daemon) while CMake compiles the app's native code for four ABIs. On
@@ -390,7 +394,7 @@ jobs:
       - name: Set up EAS CLI
         uses: expo/expo-github-action@v8
         with:
-          eas-version: latest
+          eas-version: 27.5.0
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Start cloud dev-client build

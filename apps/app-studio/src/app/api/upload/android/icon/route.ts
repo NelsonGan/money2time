@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import { androidSessions, androidIconPath, uploadAndroidIcon } from '../../_lib';
+import { localOnly } from '@/app/api/_guard';
 
 /**
  * Put the app icon on one Play listing, inside the open edit.
@@ -15,6 +16,8 @@ import { androidSessions, androidIconPath, uploadAndroidIcon } from '../../_lib'
  * other requests reading the copy.
  */
 export async function POST(req: NextRequest) {
+  const refused = localOnly(req);
+  if (refused) return refused;
   const { sessionId, playLocale } = await req.json() as {
     sessionId: string;
     playLocale: string;

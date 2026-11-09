@@ -157,6 +157,19 @@ function internalLocalizedPathname(pathname: string, locale: Locale) {
 const DASHBOARD_PATH = /^\/(?:([a-z]{2,3}(?:-[a-z]{2})?)\/)?dashboard\/?$/;
 
 /**
+ * The path as the router will see it. Routing decodes percent escapes, so
+ * `/%64ashboard` renders the dashboard: matching the raw path would let it
+ * through on www, without the app host's CSP and with analytics recording on.
+ */
+export function decodedPath(pathname: string): string {
+  try {
+    return decodeURIComponent(pathname);
+  } catch {
+    return pathname;
+  }
+}
+
+/**
  * app.money2time.com serves only the dashboard, at whatever path, in the
  * visitor's language: a locale in the path, then their saved choice, then
  * the same browser-and-country guess the marketing site makes.
@@ -207,7 +220,7 @@ export default function proxy(request: NextRequest) {
   if (pathname === "/robots.txt" || pathname === "/sitemap.xml") return NextResponse.next();
 
   // The dashboard is served only on its own host; send it there.
-  const dashboard = pathname.match(DASHBOARD_PATH);
+  const dashboard = decodedPath(pathname).match(DASHBOARD_PATH);
   if (dashboard && isProductionHost(host)) {
     const locale = dashboard[1] && isLocale(dashboard[1]) ? dashboard[1] : undefined;
     const target = new URL(locale && locale !== routing.defaultLocale ? `/${locale}` : "/", APP_ORIGIN);

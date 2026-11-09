@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { localOnly } from '@/app/api/_guard';
 
 export interface AppCopy {
   name?: string;
@@ -37,6 +38,8 @@ const LANGUAGE_NAMES: Record<string, string> = {
 };
 
 export async function POST(req: NextRequest) {
+  const refused = localOnly(req);
+  if (refused) return refused;
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     return NextResponse.json({ error: 'ANTHROPIC_API_KEY not set in .env.local' }, { status: 503 });

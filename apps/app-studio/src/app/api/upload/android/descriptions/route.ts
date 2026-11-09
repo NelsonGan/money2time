@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { androidReady, stagingDir, uploadAndroidDescriptions } from '../../_lib';
+import { localOnly } from '@/app/api/_guard';
 
 interface DescriptionPayload {
   name?: string;
@@ -17,6 +18,8 @@ interface DescriptionPayload {
  * a version code this tool has no business guessing.
  */
 export async function POST(req: NextRequest) {
+  const refused = localOnly(req);
+  if (refused) return refused;
   const ready = await androidReady();
   if (!ready.ok) return NextResponse.json({ error: ready.why }, { status: 503 });
 

@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { iosReady, stageLocale, stagingDir, uploadIOSLocale } from '../_lib';
+import { localOnly } from '@/app/api/_guard';
 
 /** Stage one locale's screenshots on disk, then hand them to `asc`. */
 export async function POST(req: NextRequest) {
+  const refused = localOnly(req);
+  if (refused) return refused;
   const ready = await iosReady();
   if (!ready.ok) return NextResponse.json({ error: ready.why }, { status: 503 });
 

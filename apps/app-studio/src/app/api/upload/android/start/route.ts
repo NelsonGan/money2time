@@ -3,6 +3,7 @@ import {
   androidReady, androidEditCreate, androidEditDelete, androidListingLocales,
   androidSessions, ANDROID_IMAGE_TYPES,
 } from '../../_lib';
+import { localOnly } from '@/app/api/_guard';
 
 /**
  * Opens a Play edit and hands back a session id. Every locale in the run goes
@@ -14,6 +15,8 @@ import {
  * alongside.
  */
 export async function POST(req: NextRequest) {
+  const refused = localOnly(req);
+  if (refused) return refused;
   const ready = await androidReady();
   if (!ready.ok) return NextResponse.json({ error: ready.why }, { status: 503 });
 

@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { androidSessions, stageLocale, stagingDir, uploadAndroidLocale } from '../../_lib';
+import { localOnly } from '@/app/api/_guard';
 
 /** Stage one locale's images, then push them into the open edit via `gplay`. */
 export async function POST(req: NextRequest) {
+  const refused = localOnly(req);
+  if (refused) return refused;
   const { sessionId, locale, screenshots } = await req.json() as {
     sessionId: string;
     locale: string;

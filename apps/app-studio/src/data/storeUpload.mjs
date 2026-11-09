@@ -106,7 +106,21 @@ export async function androidReady() {
  * @returns {string} the directory written
  */
 export function stageLocale(root, locale, screenshots) {
+  // Both values arrive in a request body: keep them from naming any path
+  // outside the staging folder (`../`, an absolute path, a dotfile).
+  if (typeof locale !== 'string' || !/^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8})*$/.test(locale)) {
+    throw new Error(`Not a locale: ${String(locale).slice(0, 40)}`);
+  }
+  if (!Array.isArray(screenshots)) throw new Error('No screenshots to stage.');
+  for (const shot of screenshots) {
+    const name = shot?.filename;
+    if (typeof name !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9_.-]{0,120}\.(png|jpe?g)$/i.test(name) || name.includes('..')) {
+      throw new Error(`Not a screenshot file name: ${String(name).slice(0, 60)}`);
+    }
+    if (typeof shot.data !== 'string') throw new Error(`No image data for ${name}.`);
+  }
   const dir = path.join(root, locale);
+  if (path.dirname(path.resolve(dir)) !== path.resolve(root)) throw new Error('Staging path escaped its folder.');
   fs.rmSync(dir, { recursive: true, force: true });
   fs.mkdirSync(dir, { recursive: true });
   for (const shot of screenshots) {
