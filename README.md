@@ -910,6 +910,15 @@ different on a fresh second installation. A Cloud Sync sign-in does not change i
 but it carries Pro across the user's phones: see
 [Pro on every signed-in phone](#pro-on-every-signed-in-phone). Google Sign-In in the app authorizes
 Google Drive backups; it does not sign the user into Google Play or RevenueCat.
+Google's consent screen lets people untick Drive access, and the sign-in still
+succeeds. `services/autoBackupProviders/googleDriveAuth.ts` checks the granted
+`drive.file` scope: without it the account counts as not connected (backups fall
+back to the phone and the Backup screen offers Reconnect), and a sign-in that
+left it out asks for it once more with `addScopes`. Before this check every
+backup of such an account failed with 403 `insufficientPermissions` and nothing
+was saved anywhere (19 users in 1.7.4's first days, all of its Drive failures).
+Such an account's `Auto Backup Failed` now reports `error_kind` `unavailable`
+with `fell_back_to_local` true instead of a Drive 403 `client` failure.
 Importing a Money2Time data backup deliberately preserves the destination's App
 User ID. Do not change that to trust purchase identity from an editable backup.
 

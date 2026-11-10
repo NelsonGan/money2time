@@ -1,6 +1,7 @@
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 
-const SCOPES = ['https://www.googleapis.com/auth/drive.file'];
+const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
+const SCOPES = [DRIVE_SCOPE];
 
 // IMPORTANT: configure in eas.json / .env and inject as EXPO_PUBLIC_*.
 // Without a webClientId, GoogleSignin.signIn() will fail at runtime.
@@ -47,9 +48,26 @@ export function isGoogleDriveConfigured(): boolean {
 // back to a local backup.
 let restorePromise: Promise<boolean> | null = null;
 
+/**
+ * Whether the account let this app reach Drive. Google's consent screen lets
+ * people untick the Drive box; the sign-in still succeeds, but every Drive
+ * call then fails with 403 `insufficientPermissions`, so the backup was
+ * neither on Drive nor anywhere else. Such a session counts as not connected:
+ * the backup falls back to the phone and the screen offers to reconnect,
+ * which asks for Drive again. A user the SDK reports no scopes for is trusted
+ * as before.
+ */
+function hasDriveAccess(user: { scopes?: string[] } | null): boolean {
+  if (!user) return false;
+  const scopes = user.scopes;
+  if (!Array.isArray(scopes) || scopes.length === 0) return true;
+  return scopes.includes(DRIVE_SCOPE);
+}
+
 export async function ensureGoogleSession(opts?: { force?: boolean }): Promise<boolean> {
   configureOnce();
-  if (!opts?.force && GoogleSignin.getCurrentUser()) return true;
+  const current = GoogleSignin.getCurrentUser();
+  if (!opts?.force && current) return hasDriveAccess(current);
   if (!GoogleSignin.hasPreviousSignIn()) return false;
 
   // Dedupe concurrent restores — the settings screen, `listAllBackups` and a
@@ -59,7 +77,7 @@ export async function ensureGoogleSession(opts?: { force?: boolean }): Promise<b
     const promise = (async () => {
       try {
         const result = await GoogleSignin.signInSilently();
-        return result.type === 'success';
+        return result.type === 'success' && hasDriveAccess(result.data);
       } catch {
         // Revoked access, expired refresh token, offline. The caller falls
         // back; an interactive sign-in is needed to recover.
@@ -87,8 +105,13 @@ export async function signInWithGoogle(): Promise<
   try {
     await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
     const result = await GoogleSignin.signIn();
-    if (result.type === 'success') {
-      return { ok: true, email: result.data.user.email ?? null };
+    if (result.type !== 'success') return { ok: false, reason: 'cancelled' };
+    if (hasDriveAccess(result.data)) return { ok: true, email: result.data.user.email ?? null };
+    // Drive was unticked on the consent screen: ask for just that once more.
+    // Refusing again is a choice, so it ends like a cancel.
+    const added = await GoogleSignin.addScopes({ scopes: SCOPES });
+    if (added?.type === 'success' && hasDriveAccess(added.data)) {
+      return { ok: true, email: added.data.user.email ?? null };
     }
     return { ok: false, reason: 'cancelled' };
   } catch (e) {

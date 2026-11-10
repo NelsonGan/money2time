@@ -10,6 +10,7 @@
 
 interface MockUser {
   user: { email: string };
+  scopes?: string[];
 }
 
 interface GoogleSigninMock {
@@ -18,6 +19,7 @@ interface GoogleSigninMock {
   getCurrentUser: jest.Mock<MockUser | null, []>;
   signInSilently: jest.Mock;
   signIn: jest.Mock;
+  addScopes: jest.Mock;
   signOut: jest.Mock;
   getTokens: jest.Mock;
   hasPlayServices: jest.Mock;
@@ -29,6 +31,7 @@ const googleSignin: GoogleSigninMock = {
   getCurrentUser: jest.fn(() => null),
   signInSilently: jest.fn(),
   signIn: jest.fn(),
+  addScopes: jest.fn(),
   signOut: jest.fn(),
   getTokens: jest.fn(),
   hasPlayServices: jest.fn(),
@@ -214,5 +217,100 @@ describe('signOutFromGoogle', () => {
     googleSignin.hasPreviousSignIn.mockReturnValue(false);
     googleSignin.getCurrentUser.mockReturnValue(null);
     await expect(auth.ensureGoogleSession()).resolves.toBe(false);
+  });
+});
+
+/**
+ * Google's consent screen lets people untick "See, edit, create and delete
+ * the Google Drive files you use with this app". Sign-in still succeeds, but
+ * the token cannot reach Drive: every backup then failed with 403
+ * `insufficientPermissions` (21 users in the first days of 1.7.4, all of that
+ * build's Drive failures) and nothing was written anywhere.
+ */
+describe('Drive access left out at sign-in', () => {
+  const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
+  const BASIC = ['openid', 'https://www.googleapis.com/auth/userinfo.email'];
+  const WITHOUT_DRIVE: MockUser = { user: { email: 'someone@example.com' }, scopes: BASIC };
+  const WITH_DRIVE: MockUser = {
+    user: { email: 'someone@example.com' },
+    scopes: [...BASIC, DRIVE_SCOPE],
+  };
+
+  it('does not count a session without Drive access as connected', async () => {
+    googleSignin.hasPreviousSignIn.mockReturnValue(true);
+    googleSignin.getCurrentUser.mockReturnValue(WITHOUT_DRIVE);
+    const auth = loadAuth();
+
+    await expect(auth.ensureGoogleSession()).resolves.toBe(false);
+    await expect(auth.getGoogleAccountEmail()).resolves.toBeNull();
+  });
+
+  it('does not count a restored session without Drive access as connected', async () => {
+    googleSignin.hasPreviousSignIn.mockReturnValue(true);
+    googleSignin.signInSilently.mockImplementation(async () => {
+      googleSignin.getCurrentUser.mockReturnValue(WITHOUT_DRIVE);
+      return { type: 'success', data: WITHOUT_DRIVE };
+    });
+    const auth = loadAuth();
+
+    await expect(auth.ensureGoogleSession()).resolves.toBe(false);
+  });
+
+  it('hands out no token Drive would refuse', async () => {
+    googleSignin.hasPreviousSignIn.mockReturnValue(true);
+    googleSignin.getCurrentUser.mockReturnValue(WITHOUT_DRIVE);
+    googleSignin.signInSilently.mockResolvedValue({ type: 'success', data: WITHOUT_DRIVE });
+    googleSignin.getTokens.mockResolvedValue({ idToken: 'id', accessToken: 'no-drive-token' });
+    const auth = loadAuth();
+
+    await expect(auth.getGoogleAccessToken()).resolves.toBeNull();
+  });
+
+  it('counts a session with Drive access as connected', async () => {
+    googleSignin.hasPreviousSignIn.mockReturnValue(true);
+    googleSignin.getCurrentUser.mockReturnValue(WITH_DRIVE);
+    const auth = loadAuth();
+
+    await expect(auth.ensureGoogleSession()).resolves.toBe(true);
+  });
+
+  it('asks for Drive access again when the consent screen left it out', async () => {
+    googleSignin.signIn.mockImplementation(async () => {
+      googleSignin.getCurrentUser.mockReturnValue(WITHOUT_DRIVE);
+      return { type: 'success', data: WITHOUT_DRIVE };
+    });
+    googleSignin.addScopes.mockImplementation(async () => {
+      googleSignin.getCurrentUser.mockReturnValue(WITH_DRIVE);
+      return { type: 'success', data: WITH_DRIVE };
+    });
+    const auth = loadAuth();
+
+    await expect(auth.signInWithGoogle()).resolves.toEqual({
+      ok: true,
+      email: 'someone@example.com',
+    });
+    expect(googleSignin.addScopes).toHaveBeenCalledWith({ scopes: [DRIVE_SCOPE] });
+  });
+
+  it('does not connect when Drive access is refused again', async () => {
+    googleSignin.signIn.mockImplementation(async () => {
+      googleSignin.getCurrentUser.mockReturnValue(WITHOUT_DRIVE);
+      return { type: 'success', data: WITHOUT_DRIVE };
+    });
+    googleSignin.addScopes.mockResolvedValue({ type: 'cancelled', data: null });
+    const auth = loadAuth();
+
+    await expect(auth.signInWithGoogle()).resolves.toEqual({ ok: false, reason: 'cancelled' });
+  });
+
+  it('does not ask again when Drive access was granted the first time', async () => {
+    googleSignin.signIn.mockResolvedValue({ type: 'success', data: WITH_DRIVE });
+    const auth = loadAuth();
+
+    await expect(auth.signInWithGoogle()).resolves.toEqual({
+      ok: true,
+      email: 'someone@example.com',
+    });
+    expect(googleSignin.addScopes).not.toHaveBeenCalled();
   });
 });
