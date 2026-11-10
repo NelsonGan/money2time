@@ -158,7 +158,7 @@ jobs:
           printf 'app=%s\nchecks=%s\nbundle=%s\n' "$app" "$checks" "$bundle" >> "$GITHUB_OUTPUT"
 
   # `npm run check` (typecheck, lint, format) and `npm test`, split over two
-  # runners because lint alone takes as long as the other three together.
+  # runners because lint takes almost as long as the other three together.
   # Running the three checks side by side on one runner was tried first and
   # saved almost nothing: they compete for the same cores, and finished in
   # 102 seconds where one after another they take about 115.
@@ -265,7 +265,7 @@ jobs:
   # Typecheck and jest never run Metro, so without this a PR that breaks the
   # bundle (an import or asset only Metro resolves) would first fail in the
   # store build after merge. It runs beside `checks` and `lint`, one runner
-  # per platform: bundling both on one runner took almost twice as long.
+  # per platform: bundling both on one runner took about twice as long.
   #
   # On a push to main it only keeps the Metro cache warm for the pull requests
   # that branch from main (a pull request can read a cache saved by its own
