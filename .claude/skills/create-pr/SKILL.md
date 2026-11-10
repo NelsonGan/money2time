@@ -73,7 +73,7 @@ Pick the medium that shows the change, and record motion only when a still canno
     -loop 0 .github/pr-assets/<topic>/after-swipe.gif
   ```
 
-- **Video (MP4)** only for a flow too long for a GIF (more than about 15 seconds) or one that needs full frame rate. Keep it under 10 MB. GitHub plays a video only when it is alone on its own line, and shows a bare link inside a table, so put it under the group's table after a bold caption line.
+- **Video (MP4)** only for a flow too long for a GIF (more than about 15 seconds) or one that needs full frame rate. Keep it under 10 MB. GitHub plays a video only when it is alone on its own line, and shows a bare link inside a table, so put it under the group's table after a bold caption line, as `![Caption](.github/pr-assets/<topic>/flow.mp4)` alone on its line: `--attach` rewrites it to the bare URL that GitHub plays.
 
 **Upload images and videos as GitHub attachments with `gh`'s `--attach`; never commit them.**
 
