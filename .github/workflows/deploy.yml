@@ -3,12 +3,16 @@ name: CI / CD
 # Path-aware pipeline. The `changes` job classifies the diff once and every
 # downstream job keys off it, so a change only pays for the pipeline it can
 # actually affect: a Worker-, website-, App Studio- or docs-only merge to main
-# never kicks off an iOS + Android store build, and such a PR skips the app test
-# job. The Workers, the website and App Studio have their own path-filtered
-# workflows (cloudflare.yml, web.yml, app-studio.yml). Skipped jobs still
-# report as successful to branch protection, which is why this gates jobs with
-# `if:` instead of workflow-level `paths:` (a workflow skipped by a path filter
+# never kicks off an iOS + Android store build, a website- or App Studio-only
+# PR skips the app's jobs, and a docs- or Worker-only one skips the bundle. The
+# Workers, the website and App Studio have their own path-filtered workflows
+# (cloudflare.yml, web.yml, app-studio.yml). Skipped jobs still report as
+# successful to branch protection, which is why this gates jobs with `if:`
+# instead of workflow-level `paths:` (a workflow skipped by a path filter
 # leaves required checks pending forever).
+#
+# `test` and `bundle` run side by side on their own runners, both from the
+# node_modules cache in .github/actions/mobile-deps. README: *CI and deploy*.
 
 # Give each run a clear title in the Actions list so production, PR, manual,
 # and branch runs are easy to tell apart at a glance.
@@ -46,16 +50,20 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Classifies the diff into the two flags the jobs below gate on:
+  # Classifies the diff into the three flags the jobs below gate on:
   #   app     — anything that can reach the mobile binary (gates the
   #             production store build)
-  #   checks  — anything the app's `npm run check` / `npm test` can even see,
-  #             i.e. everything outside apps/cloudflare/, apps/web/ and
-  #             apps/app-studio/ (eslint and tsconfig only see apps/mobile,
-  #             prettier sees it plus the root docs and .github/, and jest only
-  #             reads its __tests__/), so a Worker-, website- or App Studio-only
-  #             change skips the app test job. Those have their own workflows
-  #             (cloudflare.yml, web.yml, app-studio.yml).
+  #   checks  — anything the app's `npm run check` / `npm test` can see, i.e.
+  #             everything outside apps/web/ and apps/app-studio/. eslint only
+  #             sees apps/mobile and prettier sees it plus the root docs and
+  #             .github/, but jest and the typecheck also read the Workers:
+  #             __tests__/cloudflare/ and the live-earnings contract tests
+  #             import apps/cloudflare/workers/*/src, so a Worker change runs
+  #             the test job too. The website and App Studio have their own
+  #             workflows (web.yml, app-studio.yml).
+  #   bundle  — anything Metro can bundle differently: `app`, plus .github/
+  #             (a change to this workflow should run the job it changed). A
+  #             docs- or Worker-only change skips the bundle job.
   # Fail open: when the diff can't be resolved, every flag is true.
   changes:
     name: Detect changes
@@ -66,12 +74,19 @@ jobs:
     outputs:
       app: ${{ steps.classify.outputs.app }}
       checks: ${{ steps.classify.outputs.checks }}
+      bundle: ${{ steps.classify.outputs.bundle }}
     steps:
+      # Every other job waits for this one, so it fetches as little as it can:
+      # the diff below compares two trees and never reads a file, so the
+      # commits come without their blobs (the app's artwork and the store
+      # screenshots are hundreds of MB) and only .github/ is written to disk.
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           # Depth 2 so the diff below has a parent commit to compare against.
           fetch-depth: 2
+          filter: blob:none
+          sparse-checkout: .github
 
       - name: Classify changed paths
         id: classify
@@ -81,12 +96,17 @@ jobs:
         run: |
           set -uo pipefail
 
+          # --no-renames in every diff below: a file moved out of the app shows
+          # up as a deletion there and an addition elsewhere, so the move still
+          # counts as an app change. With rename detection it would be listed
+          # under its new path only, and detecting renames reads file contents,
+          # which this blobless checkout would have to download.
           files=""
           resolved=false
           if [ "$EVENT" = "pull_request" ]; then
             # PR runs check out the merge commit; parent 1 is the base branch,
             # so this diff is exactly the PR's changes.
-            if files=$(git diff --name-only HEAD^1 HEAD 2>/dev/null); then
+            if files=$(git diff --name-only --no-renames HEAD^1 HEAD 2>/dev/null); then
               resolved=true
             fi
           elif [ "$EVENT" = "push" ]; then
@@ -95,9 +115,9 @@ jobs:
             # squash-merge to main looks like anyway.
             if [ -n "$BEFORE" ] && [ "$BEFORE" != "0000000000000000000000000000000000000000" ] \
               && git fetch --depth=1 origin "$BEFORE" 2>/dev/null \
-              && files=$(git diff --name-only "$BEFORE" HEAD 2>/dev/null); then
+              && files=$(git diff --name-only --no-renames "$BEFORE" HEAD 2>/dev/null); then
               resolved=true
-            elif files=$(git diff --name-only HEAD^1 HEAD 2>/dev/null); then
+            elif files=$(git diff --name-only --no-renames HEAD^1 HEAD 2>/dev/null); then
               resolved=true
             fi
           fi
@@ -105,7 +125,7 @@ jobs:
           if [ "$resolved" != true ]; then
             # workflow_dispatch, or a diff we couldn't resolve: build everything.
             echo "Changed paths not resolvable for '$EVENT' — treating all as changed."
-            printf 'app=true\nchecks=true\n' >> "$GITHUB_OUTPUT"
+            printf 'app=true\nchecks=true\nbundle=true\n' >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -115,6 +135,7 @@ jobs:
 
           app=false
           checks=false
+          bundle=false
           # These classifications write each grep's matches to a file and test
           # that file, rather than piping one grep into a `grep -q` that exits on
           # the first match. Under `pipefail` that pipe is a silent landmine: the
@@ -123,22 +144,24 @@ jobs:
           # `if`, so a genuine app change classifies as `app=false` and the push
           # never cuts a store build. It is size-dependent, so it passed on every
           # normal diff and first bit on a 2,265-file one. Keep these unpiped.
-          grep -qvE '^apps/(cloudflare|web|app-studio)/' changed.txt && checks=true
+          grep -qvE '^apps/(web|app-studio)/' changed.txt && checks=true
           # Paths that cannot change the shipped binary. Anything else counts as
           # an app change, so an unrecognised path always builds the app.
           grep -vE '^(apps/cloudflare/|apps/web/|apps/app-studio/|\.github/|\.claude/|\.agents/|\.codex/|\.vscode/)|(^|/)[^/]*\.md$|^LICENSE$' changed.txt > app_paths.txt || true
           [ -s app_paths.txt ] && app=true
+          # The bundle job also runs for a change to the workflows themselves.
+          if [ "$app" = true ] || grep -qE '^\.github/' changed.txt; then bundle=true; fi
 
-          echo "app=$app | checks=$checks"
-          printf 'app=%s\nchecks=%s\n' "$app" "$checks" >> "$GITHUB_OUTPUT"
+          echo "app=$app | checks=$checks | bundle=$bundle"
+          printf 'app=%s\nchecks=%s\nbundle=%s\n' "$app" "$checks" "$bundle" >> "$GITHUB_OUTPUT"
 
   test:
     name: Test
     needs: changes
-    # `npm run check` / `npm test` run inside apps/mobile and are blind to
-    # apps/cloudflare/, apps/web/ and apps/app-studio/ (eslint and tsconfig only
-    # see the app, prettier the app plus the root docs and .github/, jest only
-    # __tests__/), so a change confined to those has nothing to run here.
+    # `npm run check` / `npm test` run inside apps/mobile. They also read the
+    # Workers (jest and the typecheck follow the tests' imports into
+    # apps/cloudflare/workers/*/src), but never apps/web/ or apps/app-studio/,
+    # so a change confined to those two has nothing to run here.
     if: needs.changes.outputs.checks == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -148,31 +171,113 @@ jobs:
       run:
         working-directory: apps/mobile
     steps:
+      # Only what the checks read: the app, the Workers its tests import, and
+      # .github/ plus the root files (README.md and the other docs prettier
+      # and the analytics test read, which a sparse checkout always includes).
+      # A test that starts reading another app fails here with a missing file:
+      # add that directory to the list.
       - name: Check out repository
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/checkout@v5
         with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: apps/mobile/package-lock.json
+          sparse-checkout: |
+            .github
+            apps/cloudflare
+            apps/mobile
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Set up dependencies
+        uses: ./.github/actions/mobile-deps
 
+      # The three checks are independent, so they run at once instead of one
+      # after another (`npm run check` chains them): the step takes as long as
+      # the slowest, lint, which gets two threads of the runner's four cores.
+      # Each writes to its own log, printed when all three have finished, so
+      # the output of one never interleaves with another's. A failed check is
+      # printed outside a collapsed group and named in an annotation.
       - name: Run checks
-        run: npm run check
+        run: |
+          names=(typecheck lint format)
+          npm run --silent typecheck > "$RUNNER_TEMP/typecheck.log" 2>&1 &
+          pids=($!)
+          # `expo lint` forwards what follows its own `--` to ESLint.
+          npm run --silent lint -- -- --concurrency 2 > "$RUNNER_TEMP/lint.log" 2>&1 &
+          pids+=($!)
+          npm run --silent format:check > "$RUNNER_TEMP/format.log" 2>&1 &
+          pids+=($!)
+
+          failed=()
+          for i in "${!names[@]}"; do
+            name=${names[$i]}
+            if wait "${pids[$i]}"; then
+              echo "::group::$name passed"
+              cat "$RUNNER_TEMP/$name.log"
+              echo "::endgroup::"
+            else
+              failed+=("$name")
+              echo "──── $name FAILED ────"
+              cat "$RUNNER_TEMP/$name.log"
+            fi
+          done
+          if [ "${#failed[@]}" -gt 0 ]; then
+            echo "::error::Failed: ${failed[*]}. Run \`npm run check\` in apps/mobile to reproduce."
+            exit 1
+          fi
 
       - name: Run tests
         run: npm test
 
-      # Typecheck and jest never run Metro, so without this a PR that breaks
-      # the bundle (an import or asset only Metro resolves) would first fail in
-      # the store build after merge. PRs only: on main the store build bundles
-      # right after this anyway.
+  # Typecheck and jest never run Metro, so without this a PR that breaks the
+  # bundle (an import or asset only Metro resolves) would first fail in the
+  # store build after merge. It runs beside `test` on its own runner, not after
+  # it, and nothing waits for it: on main it does not hold up the store build
+  # (which bundles again anyway), it only keeps the Metro cache below warm for
+  # the pull requests that branch from it. A pull request can read a cache
+  # saved by its own earlier runs or by main, never by another pull request.
+  bundle:
+    name: Bundle
+    needs: changes
+    if: github.event_name != 'workflow_dispatch' && needs.changes.outputs.bundle == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: apps/mobile
+    steps:
+      # Metro only bundles the app (metro.config.js blocks the other apps).
+      - name: Check out repository
+        uses: actions/checkout@v5
+        with:
+          sparse-checkout: |
+            .github
+            apps/mobile
+
+      - name: Set up dependencies
+        uses: ./.github/actions/mobile-deps
+
+      # Metro keeps each file's transformed output in $TMPDIR/metro-cache,
+      # keyed by the file's contents, so a restored cache only skips files that
+      # have not changed and can never bring back a stale one. Resolving
+      # imports and assets, the thing this job is here to check, is never
+      # cached. With it the bundle takes about a third of the time.
+      #
+      # The key is everything that changes how a file is transformed without
+      # changing the file: dependencies, patches, and the Babel, Metro,
+      # Tailwind and app config. A change to any of them starts a new cache;
+      # otherwise the cache is saved once and reused as it is, so it is not
+      # re-uploaded on every run. The files changed since it was saved are
+      # transformed again each run, which is seconds.
+      - name: Restore Metro cache
+        uses: actions/cache@v5
+        with:
+          path: ${{ runner.temp }}/metro-cache
+          key: metro-${{ runner.os }}-${{ hashFiles('apps/mobile/package.json', 'apps/mobile/package-lock.json', 'apps/mobile/patches/**', 'apps/mobile/babel.config.js', 'apps/mobile/metro.config.js', 'apps/mobile/tailwind.config.js', 'apps/mobile/global.css', 'apps/mobile/app.json', 'apps/mobile/app.config.ts', 'apps/mobile/scripts/babel/**', 'apps/mobile/scripts/metro/**') }}
+
       - name: Bundle app
-        if: github.event_name == 'pull_request'
+        env:
+          # Where Metro puts metro-cache/ (os.tmpdir()), so the step above
+          # caches a path this workflow chose.
+          TMPDIR: ${{ runner.temp }}
         run: npx expo export --platform ios --platform android --output-dir "$RUNNER_TEMP/expo-export"
 
   # Production Worker deploys live in the dedicated cloudflare.yml workflow (runs on
@@ -267,21 +372,11 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Cache eas-build-local
-        uses: actions/cache@v4
-        with:
-          path: ~/.eas-build-local
-          key: ${{ runner.os }}-eas-build-local-${{ hashFiles('apps/mobile/package-lock.json', 'apps/mobile/patches/**') }}
-          restore-keys: ${{ runner.os }}-eas-build-local-
-
-      - name: Cache CocoaPods
-        if: matrix.platform == 'ios'
-        uses: actions/cache@v4
-        with:
-          path: apps/mobile/ios/Pods
-          key: ${{ runner.os }}-pods-${{ hashFiles('apps/mobile/ios/Podfile.lock', 'apps/mobile/patches/**') }}
-          restore-keys: ${{ runner.os }}-pods-
-
+      # The Gradle cache is the only build cache here. `eas build --local`
+      # builds in a temporary copy of the repository, so nothing it produces
+      # lands in the checkout: the caches this job once had for
+      # ~/.eas-build-local and apps/mobile/ios/Pods pointed at folders that
+      # never existed, missed on every run and saved nothing.
       - name: Cache Gradle
         if: matrix.platform == 'android'
         uses: actions/cache@v4
@@ -381,15 +476,8 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: apps/mobile/package-lock.json
-
-      - name: Install dependencies
-        run: npm ci
+      - name: Set up dependencies
+        uses: ./.github/actions/mobile-deps
 
       - name: Set up EAS CLI
         uses: expo/expo-github-action@v8

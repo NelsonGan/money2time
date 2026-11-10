@@ -5321,7 +5321,13 @@ use the same encoder.
 
 The `App Studio` workflow (`.github/workflows/app-studio.yml`) runs the tests,
 the typecheck and the build on every pull request and push to `main` that
-touches `apps/app-studio`. It uploads nothing.
+touches `apps/app-studio`. It uploads nothing. Its `ffmpeg` and `ffprobe` are a
+pinned static build (a BtbN/FFmpeg-Builds release, checked against its SHA-256
+and cached), not the apt package: installing that takes 20 to 40 seconds on a
+good day and took 3 to 15 minutes in all three runs on 2026-11-10. The pinned
+build is kept upstream until October 2028; the workflow's comment says how to
+move to a newer one, and the job falls back to apt with a warning if the
+download ever fails.
 
 ### App Store header and search creatives
 
@@ -5639,10 +5645,11 @@ rasterization · the `asc` and `gplay` CLIs for the stores.
 
 ## CI and deploy
 
-App CI/CD is [.github/workflows/deploy.yml](.github/workflows/deploy.yml), gated `changes → test → plan → deploy`:
+App CI/CD is [.github/workflows/deploy.yml](.github/workflows/deploy.yml), gated `changes → test → plan → deploy`, with `bundle` running beside `test`:
 
-- **Changes** — runs first on every event and classifies the diff (`git diff` of the PR merge commit's base parent, or the push's `before..after`) into two flags every other job keys off: `app` (anything that can reach the mobile binary, i.e. everything except `apps/cloudflare/**`, `apps/web/**`, `apps/app-studio/**`, `.github/**`, `.claude/**`, `.agents/**`, `.codex/**`, `.vscode/**`, any `*.md`, `LICENSE`) and `checks` (anything outside `apps/cloudflare/**`, `apps/web/**` and `apps/app-studio/**`). **Fail open:** an unresolvable diff or an unrecognized path sets every flag true, so a new directory builds the app rather than silently skipping the release.
-- **Test** — `npm ci`, `npm run check` (typecheck + lint + format), `npm test`. Runs in `apps/mobile`. Skipped when `checks` is false, because eslint and tsconfig only see the app, prettier sees the app plus the root `*.md` and `.github/`, and jest only reads `__tests__/` — there is literally nothing for it to check on a change confined to the Workers, the website or App Studio. A failure blocks everything downstream.
+- **Changes** — runs first on every event and classifies the diff (`git diff --no-renames` of the PR merge commit's base parent, or the push's `before..after`) into three flags every other job keys off: `app` (anything that can reach the mobile binary, i.e. everything except `apps/cloudflare/**`, `apps/web/**`, `apps/app-studio/**`, `.github/**`, `.claude/**`, `.agents/**`, `.codex/**`, `.vscode/**`, any `*.md`, `LICENSE`), `checks` (anything outside `apps/web/**` and `apps/app-studio/**`) and `bundle` (`app`, plus `.github/**`). **Fail open:** an unresolvable diff or an unrecognized path sets every flag true, so a new directory builds the app rather than silently skipping the release. Every other job waits for this one, so it checks out as little as it can: the two commits without their file contents (`filter: blob:none`; a diff of two trees never reads a file) and only `.github/` on disk, about 3 MB instead of several hundred. `--no-renames` keeps it that way (detecting renames reads file contents) and lists a file moved out of the app under its old path too, so the move still counts as an app change.
+- **Test** — the three parts of `npm run check` (typecheck, lint, format) at the same time, then `npm test`. Runs in `apps/mobile`, from the `node_modules` cache (see [CI caches](#ci-caches)). The checks are independent, so the step takes as long as the slowest (lint, which gets two ESLint threads); each writes to its own log, printed when all three have finished, and a failed one is printed outside a collapsed group and named in an annotation. `expo lint` keeps its own ESLint cache locally, which is why lint takes seconds on a laptop and a minute in CI: CI does not restore that cache, because ESLint reuses a file's result without looking at the files it imports. Skipped when `checks` is false: eslint only sees the app and prettier the app plus the root `*.md` and `.github/`, but jest and the typecheck also read the Workers (`__tests__/cloudflare/` and the live-earnings contract tests import `apps/cloudflare/workers/*/src`), so a Worker change runs this job and only a change confined to the website or App Studio skips it. The checkout holds only what these read (`apps/mobile`, `apps/cloudflare`, `.github/` and the root files); a test that starts reading another app fails in CI with a missing file until that directory is added to the job's `sparse-checkout`. A failure blocks everything downstream.
+- **Bundle** — `npx expo export` for iOS and Android, on its own runner beside `test`. Typecheck and jest never run Metro, so without it a PR that breaks the bundle (an import or asset only Metro resolves) would first fail in the store build after merge. Runs when `bundle` is set, so a docs- or Worker-only change skips it. Nothing waits for it: on `main` it does not hold up the store build, which bundles again anyway; it runs there to keep the Metro cache warm for the pull requests that branch from `main`.
 - **Plan** — manual dispatch, or push-to-main **when `app` is set**. A merge to `main` that only touches the Workers, the website, App Studio or docs therefore never cuts a store build. Resolves the build matrix (push = both iOS+Android production; dispatch = the chosen single platform/profile).
 - **Deploy** — from `apps/mobile`, `eas build --local` on the matched runner (`xcode-27` for iOS, ubuntu-latest for Android), then `eas submit`. `fail-fast: false` so a single-platform failure doesn't kill the other build. **iOS is built with Xcode 27.1, pinned.** iOS decides what an app supports from the SDK it was linked against, so a binary built with an older Xcode runs in compatibility mode on newer hardware: on the open iPhone Duo, builds 484–486 (linked against the iOS 26 SDK by Xcode 26.3 on `macos-15`) showed as a phone-sized window in the middle of the screen, without the Duo layout. GitHub's `macos-*` images stop at Xcode 26; Xcode 27 is only on the `xcode-27` image. Keep the pinned Xcode at least as new as the newest hardware the app adapts to (27.1 for the Duo), never `latest-stable`. **The Android job grows the runner's swap to 16 GB before building.** R8 runs in the 4 GB Gradle daemon (`plugins/withGradleMemory.js`) while CMake compiles the app's native code for four ABIs, and when those overlap the 16 GB runner runs out of RAM: GitHub kills the VM mid-Gradle with "The runner has received a shutdown signal", about a minute after `:app:minifyReleaseWithR8` starts. From 2026-10-26 to 2026-11-02, most Android release jobs died this way. The job prints peak RAM and swap use after the build; if a job still dies at that step, read those numbers before you blame the code. **It also frees disk space first.** The Gradle cache (~5 GB), the NDK (downloaded on every build), `node_modules` and EAS's working copy fill the runner's disk, and on 2026-11-03 and 2026-11-04 two Android release jobs died of it: one with "No space left on device" while restoring the Gradle cache (only shown in the job's annotations; its log was empty), one with a truncated NDK download ("Error reading Zip content", then `InstallFailedException`). The first step deletes preinstalled toolchains the build never uses (.NET, Swift, Haskell, Boost, PowerShell, Julia, Azure CLI, CodeQL, Docker images); the job prints free space then and again after the build.
 
@@ -5656,26 +5663,47 @@ The website has its own workflow, [.github/workflows/web.yml](.github/workflows/
 
 ### At a glance
 
-Four workflows, split so a change to one app never rebuilds or redeploys another.
+Four workflows, split so a change to one app never rebuilds or redeploys another. (A fifth, `appstore-release-notifier.yml`, posts new App Store versions to Discord every hour.)
 
 [.github/workflows/deploy.yml](.github/workflows/deploy.yml) — the app:
 
-| Job       | Runs on                                       | What it does                                                                                   |
-| --------- | --------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `changes` | every event                                   | Classifies the diff into `app` / `checks` flags. Fails open: an unresolvable diff sets both    |
-| `test`    | when `checks` is set                          | `npm ci` → `npm run check` (typecheck + lint + format) → `npm test`                            |
-| `plan`    | push to `main` when `app` is set, or dispatch | Resolves the build matrix (push = both platforms production; dispatch = the chosen one)        |
-| `deploy`  | after `plan`                                  | `eas build --local` on xcode-27, Xcode 27.1 (iOS) / ubuntu-latest (Android), then `eas submit` |
+| Job       | Runs on                                       | What it does                                                                                                |
+| --------- | --------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `changes` | every event                                   | Classifies the diff into `app` / `checks` / `bundle` flags. Fails open: an unresolvable diff sets all three |
+| `test`    | when `checks` is set                          | typecheck, lint and format at once → `npm test`                                                             |
+| `bundle`  | PR or push when `bundle` is set               | `npx expo export` for both platforms, from the Metro cache. Nothing waits for it                            |
+| `plan`    | push to `main` when `app` is set, or dispatch | Resolves the build matrix (push = both platforms production; dispatch = the chosen one)                     |
+| `deploy`  | after `plan`                                  | `eas build --local` on xcode-27, Xcode 27.1 (iOS) / ubuntu-latest (Android), then `eas submit`              |
 
 [.github/workflows/cloudflare.yml](.github/workflows/cloudflare.yml) — the Workers: typecheck, available tests and dry-run bundle on PRs; on push to `main`, only the Workers changed since the last successful deploy get their D1 schema applied (where they have one) and `wrangler deploy`, so a run cancelled while queued or failed is caught up by the next. A deploy that has started is never cancelled by a newer push.
 
-[.github/workflows/web.yml](.github/workflows/web.yml) — the website, on changes under `apps/web/`: checks and build, then a Worker version upload on PRs and the production deploy on `main` (queued, never cancelled). Needs the secret `CLOUDFLARE_WEB_API_TOKEN`.
+[.github/workflows/web.yml](.github/workflows/web.yml) — the website, on changes under `apps/web/`: checks and build (lint runs while the build does), then a Worker version upload on PRs and the production deploy on `main` (queued, never cancelled). Needs the secret `CLOUDFLARE_WEB_API_TOKEN`.
 
-[.github/workflows/app-studio.yml](.github/workflows/app-studio.yml) — App Studio, on changes under `apps/app-studio/`: tests (with ffmpeg), typecheck and build. No deploy and no secrets.
+[.github/workflows/app-studio.yml](.github/workflows/app-studio.yml) — App Studio, on changes under `apps/app-studio/`: tests (with a pinned static ffmpeg), typecheck and build. No deploy and no secrets.
 
 A failing test blocks everything downstream. Concurrency cancels in-flight runs when a newer commit lands on the same ref. Requires repo secret `EXPO_TOKEN`. Pushes to `main` auto-submit to TestFlight (iOS) and the Play **production** track (Android); the App Store release is promoted by hand.
 
 Over-the-air updates are **internal-only** — `updates.enabled` is on for the development and preview profiles and off for store builds, which launch straight from their embedded bundle.
+
+### CI caches
+
+A repository gets 10 GB of Actions cache, and GitHub deletes the least recently used entries beyond that. A pull request can read a cache saved by its own earlier runs or by `main`, never by another pull request, so a cache only helps new pull requests once a run on `main` has saved it.
+
+| Cache key               | What it holds                                   | Used by                                     | New entry when                                                                 |
+| ----------------------- | ----------------------------------------------- | ------------------------------------------- | ------------------------------------------------------------------------------ |
+| `mobile-node-modules-…` | `apps/mobile/node_modules`, patches applied     | `test`, `bundle`, `dev-build`               | `package.json`, `package-lock.json` or `patches/` change                       |
+| `metro-…`               | Metro's transform cache (`metro-cache/`)        | `bundle`                                    | dependencies, patches, or the Babel, Metro, Tailwind or app config change      |
+| `web-node-modules-…`    | `apps/web/node_modules`                         | the `Web` workflow                          | the website's `package.json` or `package-lock.json` change                     |
+| `ffmpeg-…`              | the static `ffmpeg` and `ffprobe`               | the `App Studio` workflow                   | the pinned build changes                                                       |
+| `Linux-gradle-…`        | `~/.gradle` (about 4.9 GB)                      | the Android store build                     | `patches/` change (no Gradle file is committed, so nothing else is in the key) |
+| `node-cache-…-npm-…`    | npm's download cache (`~/.npm`)                 | the store builds, the `App Studio` workflow | that app's `package-lock.json` changes                                         |
+| `appstore-version-…`    | the last App Store version announced on Discord | `appstore-release-notifier.yml`             | a new version is announced                                                     |
+
+- **`node_modules` is cached whole, not npm's download cache.** With `~/.npm` restored, `npm ci` still unpacks 1,300 packages and runs patch-package, which was most of the minute it took. The key covers everything `npm ci` reads (lockfile, `package.json` for its install hooks, `patches/`, OS, CPU, Node major), so a hit is the tree `npm ci` would build. The app's jobs share the steps in `.github/actions/mobile-deps`. The cache is saved straight after the install, not at the end of the job, so a run whose checks fail still leaves it for the next one.
+- **The Metro cache cannot hide a broken bundle.** Metro keys each file's transformed output by the file's contents, so a restored cache only skips files that have not changed, and resolving imports and assets (what the `bundle` job is there to check) is never cached. The cache's own key adds everything that changes a transform without changing the file. It is saved once per key and then reused as it is, so it is not uploaded again on every run; the files changed since are transformed again each time, which takes seconds.
+- **Not cached, on purpose.** ESLint's cache (see **Test** above). Anything inside a store build other than Gradle's downloads: `eas build --local` builds in a temporary copy of the repository, so nothing it produces lands in the checkout. The job once had caches for `~/.eas-build-local` and `apps/mobile/ios/Pods`; both folders never existed, so the caches missed on every run and saved nothing, and they were removed.
+
+**Where a store build's time goes** (run 42800279120, 2026-11-10: iOS 32 minutes, Android 54). iOS: 19 minutes of `xcodebuild`, 3 of `pod install`, and two `npm ci` (the job's own, then EAS's in its temporary copy). Android: 43 minutes of Gradle with every one of 1,019 tasks executed, most of it CMake compiling the native code of the app, Skia, Reanimated, Worklets and expo-modules-core once per ABI, for four ABIs (`arm64-v8a`, `armeabi-v7a`, `x86`, `x86_64`). The levers that would move these are a compiler cache (ccache) for both platforms and building fewer Android ABIs. Both change the store build itself, so they need a release to verify; neither is set up.
 
 ## Testing
 

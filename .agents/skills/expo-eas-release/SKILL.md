@@ -19,9 +19,10 @@ Config sources of truth: `eas.json` (profiles/submit), `app.json` (version), `.g
 
 ## The pipeline (`deploy.yml`)
 
-Four jobs, gated `changes → test → plan → deploy`. **`changes` decides whether a push to `main` is an app release at all:** a diff confined to `apps/cloudflare/`, `apps/web/`, `apps/app-studio/`, `.github/`, the agent folders and `*.md` cuts no store build; anything else (any file under `apps/mobile`, even a script or a test) does. The website deploys through its own `Web` workflow and App Studio has a check-only workflow, so a change there never needs this one.
+Five jobs: `changes → test → plan → deploy`, with `bundle` beside `test`. **`changes` decides whether a push to `main` is an app release at all:** a diff confined to `apps/cloudflare/`, `apps/web/`, `apps/app-studio/`, `.github/`, the agent folders and `*.md` cuts no store build; anything else (any file under `apps/mobile`, even a script or a test) does. The website deploys through its own `Web` workflow and App Studio has a check-only workflow, so a change there never needs this one.
 
-- **test** — runs on every push, PR, and dispatch: `npm ci`, `npm run check` (typecheck + lint + format), then `npm test`. A red check here blocks `plan` and `deploy`.
+- **test** — runs on every push, PR, and dispatch: typecheck, lint and format at the same time, then `npm test`. A red check here blocks `plan` and `deploy`.
+- **bundle** — PRs and pushes: `npx expo export` for both platforms. Nothing waits for it; a PR that breaks the Metro bundle fails here instead of in the store build.
 - **plan** — push-to-`main` and manual-dispatch only. Resolves the build matrix (push = iOS + Android production; dispatch = the chosen single platform/profile).
 - **deploy** — push-to-`main` and manual-dispatch only. `eas build --local` on the matched runner (`xcode-27` with Xcode 27.1 pinned for iOS, ubuntu-latest for Android; see the README for why the pin matters), then `eas submit`. `fail-fast: false`, so one platform failing doesn't kill the other.
 

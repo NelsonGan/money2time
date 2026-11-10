@@ -1,0 +1,45 @@
+name: Set up the app's dependencies
+description: >-
+  Sets up Node.js and apps/mobile/node_modules. The folder is restored from the
+  cache while the lockfile, package.json and patches are unchanged, and
+  installed with `npm ci` (then saved) when they are not.
+
+# Caches node_modules itself, not npm's download cache: restoring ~/.npm still
+# leaves `npm ci` to unpack 1,300 packages and run patch-package, which was
+# most of the minute it took. The key covers everything `npm ci` reads, so a
+# hit is the same tree `npm ci` would build:
+#   - package-lock.json, the versions
+#   - package.json, the lifecycle scripts (postinstall runs patch-package)
+#   - patches/, what patch-package writes into node_modules
+#   - the OS, CPU and Node major, for packages with native binaries
+# The cache is saved right after the install rather than at the end of the job,
+# so a job whose checks fail still leaves it for the next run.
+runs:
+  using: composite
+  steps:
+    - name: Set up Node.js
+      uses: actions/setup-node@v5
+      with:
+        node-version: 22
+        # node_modules is cached below; npm's download cache is not needed too.
+        package-manager-cache: false
+
+    - name: Restore node_modules
+      id: cache
+      uses: actions/cache/restore@v5
+      with:
+        path: apps/mobile/node_modules
+        key: mobile-node-modules-${{ runner.os }}-${{ runner.arch }}-node22-${{ hashFiles('apps/mobile/package.json', 'apps/mobile/package-lock.json', 'apps/mobile/patches/**') }}
+
+    - name: Install dependencies
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      working-directory: apps/mobile
+      run: npm ci
+
+    - name: Save node_modules
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v5
+      with:
+        path: apps/mobile/node_modules
+        key: ${{ steps.cache.outputs.cache-primary-key }}

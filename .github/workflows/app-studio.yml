@@ -32,6 +32,10 @@ jobs:
     name: App Studio · Test and build
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      FFMPEG_RELEASE: autobuild-2026-10-31-12-59
+      FFMPEG_BUILD: ffmpeg-n9.0.2-39-g7adfbe40dc-linux64-gpl-9.0
+      FFMPEG_SHA256: 73e29a56974ae5a651133a04584c7483b21afe941e17dc91d79814a758b608d3
     defaults:
       run:
         working-directory: apps/app-studio
@@ -49,9 +53,61 @@ jobs:
           cache: npm
           cache-dependency-path: apps/app-studio/package-lock.json
 
-      # The Search creative tests encode and decode real video.
+      # The Search creative tests encode and decode real video with `ffmpeg`
+      # and `ffprobe`. They come from a pinned static build, checked against
+      # its SHA-256 and cached, not from apt: `apt-get install ffmpeg` pulls
+      # in over a hundred packages, which takes 20 to 40 seconds on a good day
+      # and took 3 to 15 minutes in all three runs on 2026-11-10 (the last one
+      # was still installing when the job was cancelled).
+      #
+      # The build is a BtbN/FFmpeg-Builds release (GPL, so it has libx264). The
+      # project keeps the last build of each month for two years, so this one
+      # is there until October 2028. To move to a newer one, take the tag, file
+      # name and SHA-256 from its release page and change the three values
+      # below together. If the download or the checksum ever fails, the job
+      # falls back to apt and warns, instead of failing.
+      - name: Restore ffmpeg
+        id: ffmpeg
+        uses: actions/cache/restore@v5
+        with:
+          path: ~/.local/ffmpeg
+          key: ffmpeg-${{ runner.os }}-${{ runner.arch }}-${{ env.FFMPEG_BUILD }}
+
       - name: Install ffmpeg
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg > /dev/null
+        id: ffmpeg-install
+        if: steps.ffmpeg.outputs.cache-hit != 'true'
+        working-directory: ${{ runner.temp }}
+        run: |
+          url="https://github.com/BtbN/FFmpeg-Builds/releases/download/$FFMPEG_RELEASE/$FFMPEG_BUILD.tar.xz"
+          if curl -fsSL --retry 3 --retry-delay 2 -o ffmpeg.tar.xz "$url" \
+            && echo "$FFMPEG_SHA256  ffmpeg.tar.xz" | sha256sum --check --status; then
+            mkdir -p ~/.local/ffmpeg
+            tar -xJf ffmpeg.tar.xz -C ~/.local/ffmpeg --strip-components=2 \
+              "$FFMPEG_BUILD/bin/ffmpeg" "$FFMPEG_BUILD/bin/ffprobe"
+            echo "static=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::Could not download $FFMPEG_BUILD or its checksum did not match; installing ffmpeg with apt instead. Update the pinned build in app-studio.yml."
+            sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg > /dev/null
+          fi
+          rm -f ffmpeg.tar.xz
+
+      # Only a verified static build is cached, never the apt fallback.
+      - name: Save ffmpeg
+        if: steps.ffmpeg-install.outputs.static == 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: ~/.local/ffmpeg
+          key: ${{ steps.ffmpeg.outputs.cache-primary-key }}
+
+      # `shell: bash` adds pipefail, so a missing binary fails the step.
+      - name: Check ffmpeg
+        shell: bash
+        working-directory: ${{ runner.temp }}
+        run: |
+          if [ -x ~/.local/ffmpeg/ffmpeg ]; then echo "$HOME/.local/ffmpeg" >> "$GITHUB_PATH"; export PATH="$HOME/.local/ffmpeg:$PATH"; fi
+          ffmpeg -hide_banner -version | sed -n 1p
+          ffprobe -hide_banner -version | sed -n 1p
+          ffmpeg -hide_banner -encoders | grep -c libx264
 
       - name: Install dependencies
         run: npm ci

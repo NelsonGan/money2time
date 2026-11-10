@@ -58,14 +58,31 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: 24
-          cache: npm
-          cache-dependency-path: apps/web/package-lock.json
+          # node_modules is cached below; npm's download cache is not needed too.
+          package-manager-cache: false
+
+      # Caches node_modules itself, not npm's download cache, which still
+      # leaves `npm ci` to unpack every package. The key is everything
+      # `npm ci` reads (there are no patches or install hooks here), so a hit
+      # is the tree it would build. It is saved straight after the install, so
+      # a run whose checks fail still leaves it for the next one.
+      - name: Restore node_modules
+        id: deps
+        uses: actions/cache/restore@v5
+        with:
+          path: apps/web/node_modules
+          key: web-node-modules-${{ runner.os }}-${{ runner.arch }}-node24-${{ hashFiles('apps/web/package.json', 'apps/web/package-lock.json') }}
 
       - name: Install dependencies
+        if: steps.deps.outputs.cache-hit != 'true'
         run: npm ci
 
-      - name: Lint
-        run: npm run lint
+      - name: Save node_modules
+        if: steps.deps.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: apps/web/node_modules
+          key: ${{ steps.deps.outputs.cache-primary-key }}
 
       - name: Test
         run: npm test
@@ -98,8 +115,28 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_WEB_API_TOKEN }}
         run: node scripts/upload-media.mjs --check
 
-      - name: Build
-        run: npm run build
+      # Lint runs while the build does, not before it: neither reads what the
+      # other writes (eslint.config.mjs ignores every build output), and the
+      # build is the longer of the two. Lint's output is printed once the build
+      # has finished, so the two never interleave. The typecheck stays a step
+      # of its own because it does read what the build writes.
+      - name: Lint and build
+        run: |
+          npm run --silent lint > "$RUNNER_TEMP/lint.log" 2>&1 &
+          lint=$!
+          build=0
+          npm run build || build=$?
+          if wait "$lint"; then
+            echo "::group::Lint passed"
+            cat "$RUNNER_TEMP/lint.log"
+            echo "::endgroup::"
+          else
+            echo "──── Lint FAILED ────"
+            cat "$RUNNER_TEMP/lint.log"
+            echo "::error::Lint failed. Run \`npm run lint\` in apps/web to reproduce."
+            exit 1
+          fi
+          exit "$build"
 
       # After the build: vinext writes the route types (`PageProps`) to
       # `.next/types` and `next-env.d.ts` as it builds, and neither is committed.
