@@ -19,10 +19,10 @@ Config sources of truth: `eas.json` (profiles/submit), `app.json` (version), `.g
 
 ## The pipeline (`deploy.yml`)
 
-Seven jobs: `changes → checks + lint → plan → deploy`, with `bundle` beside them and `test` reporting on all three. **`changes` decides whether a push to `main` is an app release at all:** a diff confined to `apps/cloudflare/`, `apps/web/`, `apps/app-studio/`, `.github/`, the agent folders and `*.md` cuts no store build; anything else (any file under `apps/mobile`, even a script or a test) does. The website deploys through its own `Web` workflow and App Studio has a check-only workflow, so a change there never needs this one.
+Seven jobs (`bundle` once per platform): `changes → checks + lint → plan → deploy`, with `bundle` beside them and `test` reporting on all three. **`changes` decides whether a push to `main` is an app release at all:** a diff confined to `apps/cloudflare/`, `apps/web/`, `apps/app-studio/`, `.github/`, the agent folders and `*.md` cuts no store build; anything else (any file under `apps/mobile`, even a script or a test) does. The website deploys through its own `Web` workflow and App Studio has a check-only workflow, so a change there never needs this one.
 
 - **checks** and **lint** — run on every push, PR, and dispatch, side by side: typecheck, format and `npm test` in one, ESLint in the other. Together they are `npm run check` plus `npm test`. A red check in either blocks `plan` and `deploy`.
-- **bundle** — PRs: `npx expo export` for both platforms, so a PR that breaks the Metro bundle fails here instead of in the store build. On `main` it only refreshes the Metro cache; the store build does not wait for it.
+- **bundle** — PRs: `npx expo export`, one job per platform, so a PR that breaks the Metro bundle fails here instead of in the store build. On `main` it only refreshes the Metro cache; the store build does not wait for it.
 - **test** — runs nothing itself: green when `checks`, `lint` and `bundle` all passed. It is the one check to read on a PR.
 - **plan** — push-to-`main` and manual-dispatch only. Resolves the build matrix (push = iOS + Android production; dispatch = the chosen single platform/profile).
 - **deploy** — push-to-`main` and manual-dispatch only. `eas build --local` on the matched runner (`xcode-27` with Xcode 27.1 pinned for iOS, ubuntu-latest for Android; see the README for why the pin matters), then `eas submit`. `fail-fast: false`, so one platform failing doesn't kill the other.

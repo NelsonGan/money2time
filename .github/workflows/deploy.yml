@@ -264,8 +264,8 @@ jobs:
 
   # Typecheck and jest never run Metro, so without this a PR that breaks the
   # bundle (an import or asset only Metro resolves) would first fail in the
-  # store build after merge. It runs beside `checks` and `lint`, on its own
-  # runner.
+  # store build after merge. It runs beside `checks` and `lint`, one runner
+  # per platform: bundling both on one runner took almost twice as long.
   #
   # On a push to main it only keeps the Metro cache warm for the pull requests
   # that branch from main (a pull request can read a cache saved by its own
@@ -274,9 +274,14 @@ jobs:
   # does not, the job bundles and saves it. The store build does not wait for
   # it either way; it bundles again itself.
   bundle:
-    name: Bundle
+    name: Bundle (${{ matrix.platform }})
     needs: changes
     if: github.event_name != 'workflow_dispatch' && needs.changes.outputs.bundle == 'true'
+    strategy:
+      # Each platform reports on its own: one failing does not cancel the other.
+      fail-fast: false
+      matrix:
+        platform: [ios, android]
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -298,7 +303,8 @@ jobs:
       # config and every transform option), so a restored cache only skips
       # files whose result would be the same. Resolving imports and assets, the
       # thing this job is here to check, is never cached. With the cache the
-      # bundle takes about a third of the time.
+      # bundle takes about half the time. Each platform has its own cache: a
+      # file is transformed once per platform.
       #
       # The key adds what changes a transform without Metro noticing: the
       # dependencies and their patches, the Babel plugin and Metro stubs in
@@ -312,7 +318,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: ${{ runner.temp }}/metro-cache
-          key: metro-${{ runner.os }}-${{ hashFiles('apps/mobile/package-lock.json', 'apps/mobile/patches/**', 'apps/mobile/babel.config.js', 'apps/mobile/metro.config.js', 'apps/mobile/tailwind.config.js', 'apps/mobile/global.css', 'apps/mobile/scripts/babel/**', 'apps/mobile/scripts/metro/**') }}
+          key: metro-${{ runner.os }}-${{ matrix.platform }}-${{ hashFiles('apps/mobile/package-lock.json', 'apps/mobile/patches/**', 'apps/mobile/babel.config.js', 'apps/mobile/metro.config.js', 'apps/mobile/tailwind.config.js', 'apps/mobile/global.css', 'apps/mobile/scripts/babel/**', 'apps/mobile/scripts/metro/**') }}
           lookup-only: ${{ github.event_name == 'push' }}
 
       # `checks` saves the node_modules cache; this job only reads it.
@@ -330,10 +336,10 @@ jobs:
           # Where Metro puts metro-cache/ (os.tmpdir()), so the step above
           # caches a path this workflow chose.
           TMPDIR: ${{ runner.temp }}
-        run: npx expo export --platform ios --platform android --output-dir "$RUNNER_TEMP/expo-export"
+        run: npx expo export --platform ${{ matrix.platform }} --output-dir "$RUNNER_TEMP/expo-export"
 
   # The one check to read on a pull request: green means `checks`, `lint` and
-  # `bundle` all passed (or `bundle` had nothing to do). They are separate jobs
+  # both `bundle` jobs passed (or `bundle` had nothing to do). They are separate jobs
   # so they can run at the same time, and without this a pull request with one
   # of them red would look green on the others. Nothing waits for this job: the
   # store build is gated on `checks` and `lint`, as it was when the bundle was
