@@ -263,8 +263,9 @@ export function NotificationHistoryScreen({ onBack }: { onBack: () => void }) {
         { count: ids.length },
       ),
       // iOS stacks the buttons and moves Cancel last, so Review later goes
-      // first. Android shows them as neutral (left), negative and positive
-      // (right): Ignore sits apart on the left, away from Review later.
+      // first. Android takes them as neutral, negative, positive: stacked, that
+      // is Review later on top and Ignore at the bottom; on one line, Ignore
+      // sits alone on the left. Either way Cancel keeps it from Review later.
       Platform.OS === 'android' ? [ignore, cancel, later] : [cancel, later, ignore],
     );
   });
