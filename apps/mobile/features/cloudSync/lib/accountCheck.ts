@@ -13,8 +13,12 @@ export const ACCOUNT_CHECK_EVERY_MS = 30 * 60_000;
 export const OWN_PURCHASE_CHECK_EVERY_MS = 24 * 60 * 60_000;
 /** A paused phone asks whether Pro is back this often while open, and on return to the app. */
 export const PAUSED_CHECK_EVERY_MS = 15 * 60_000;
-/** A paused phone never asks twice within this, whatever wakes it (a return, a live nudge). */
-export const PAUSED_CHECK_MIN_GAP_MS = 60_000;
+/**
+ * A paused phone never asks twice within this, whatever wakes it (a return,
+ * a live nudge). A little over the Worker's one-minute cache of a "not Pro"
+ * answer, so the next check reads RevenueCat again (a purchase just made).
+ */
+export const PAUSED_CHECK_MIN_GAP_MS = 65_000;
 
 /**
  * Whether a routine check is due, the last answer having come at `checkedAt`

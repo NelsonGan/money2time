@@ -38,7 +38,8 @@ describe('accountCheckDue', () => {
 describe('pausedCheckDue', () => {
   const now = 1_800_000_000_000;
 
-  it('asks again only a minute after the last answer', () => {
+  it('asks again only after the Worker no longer keeps its last "not Pro" (a minute)', () => {
+    expect(PAUSED_CHECK_MIN_GAP_MS).toBeGreaterThan(60_000);
     expect(pausedCheckDue(now, 0)).toBe(true);
     expect(pausedCheckDue(now, now - 10_000)).toBe(false);
     expect(pausedCheckDue(now, now - PAUSED_CHECK_MIN_GAP_MS)).toBe(true);

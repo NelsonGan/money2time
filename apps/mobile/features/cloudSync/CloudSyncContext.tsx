@@ -52,8 +52,9 @@ import {
 import { PERSONAL_CHANNEL } from './lib/ledgerRows';
 import { decideLink } from './lib/linking';
 import { isOfflineMessage } from './lib/offlineError';
-import { shouldAskForCredentials } from './lib/pausedCheck';
+import { credentialsWouldBeRefused, type KnownProAnswer } from './lib/pausedCheck';
 import {
+  type AccountStatus,
   CloudSyncApiError,
   type CloudUser,
   deleteAccount as apiDeleteAccount,
@@ -99,9 +100,11 @@ import {
 } from './services/syncEngine';
 
 const TOKEN_REFRESH_MARGIN_MS = 24 * 60 * 60 * 1000;
-
-/** The Worker's answer about this phone's Pro. */
-type ProAnswer = { isPro: boolean; limited: boolean };
+/**
+ * A paused phone's check made this soon before a live reconnect covers what
+ * the socket missed: the return to the app that reconnected it ran one.
+ */
+const RECONNECT_COVERED_MS = 15_000;
 
 export type CloudSyncStatus =
   /** A build without the native sync module. */
@@ -268,12 +271,30 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
   const syncAgainRef = useRef(false);
   const accountCheckedAtRef = useRef(0);
   const accountAskRef = useRef(0);
+  /**
+   * The Worker's last answer about this phone's Pro in this session (an
+   * account status, or a credentials request), which holds back credentials
+   * requests it says would be refused (`credentialsWouldBeRefused`).
+   */
+  const proAnswerRef = useRef<(KnownProAnswer & { userId: string }) | null>(null);
+  /** A paused check waiting for its turn (`checkWhilePaused`). */
+  const pausedCheckRef = useRef<{
+    timer: ReturnType<typeof setTimeout>;
+    since: number;
+    userId: string;
+  } | null>(null);
   const appUserIdRef = useRef(appUserId);
   appUserIdRef.current = appUserId;
   const isStoreProRef = useRef(isStorePro);
   isStoreProRef.current = isStorePro;
   const isStatusKnownRef = useRef(isStatusKnown);
   isStatusKnownRef.current = isStatusKnown;
+  /**
+   * This install may hold a purchase of its own: RevenueCat says so, or has
+   * not answered yet. Before linking, the status call cannot count one (it
+   * sends no install id), so only a credentials request can.
+   */
+  const mayHoldPurchase = useCallback(() => isStoreProRef.current || !isStatusKnownRef.current, []);
   const refreshAllRef = useRef(refreshAll);
   refreshAllRef.current = refreshAll;
   const switchLedgerRef = useRef(switchLedger);
@@ -316,14 +337,31 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
     return token;
   }, []);
 
-  /** Tells the other phones that `channel` changed. Best effort. */
-  const announce = useCallback((channel: string) => {
+  /**
+   * Tells the other phones that `channel` changed. Best effort. `pro`: this
+   * phone's own Pro began, so the user's paused phones ask again.
+   */
+  const announce = useCallback((channel: string, reason?: 'pro') => {
     const token = sessionRef.current?.token;
     if (!token) return;
-    void notifyChanged(token, channel, LIVE_DEVICE_ID).catch(() => undefined);
+    void notifyChanged(token, channel, LIVE_DEVICE_ID, reason).catch(() => undefined);
   }, []);
   const announceRef = useRef(announce);
   announceRef.current = announce;
+
+  /**
+   * Keeps the Worker's answer about this phone's Pro. When this phone's own
+   * purchase turned a "not Pro" into Pro (bought or restored here, or linked
+   * with a purchase), the account's paused phones hear it at once over the
+   * live socket rather than at their next check.
+   */
+  const rememberProAnswer = useCallback((userId: string, answer: AccountStatus) => {
+    const previous = proAnswerRef.current?.userId === userId ? proAnswerRef.current : null;
+    proAnswerRef.current = { ...answer, at: Date.now(), userId };
+    if (previous && !previous.isPro && answer.isPro && isStoreProRef.current) {
+      announceRef.current(PERSONAL_CHANNEL, 'pro');
+    }
+  }, []);
 
   /**
    * Asks the Worker whether the account is Pro (any of its phones), and links
@@ -337,34 +375,38 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
    * own purchase, which is Pro whatever the account says
    * (`accountCheckDue`). Returns the Worker's answer when this call got one.
    */
-  const refreshAccountPro = useCallback(async (force = false): Promise<ProAnswer | null> => {
-    const session = sessionRef.current;
-    if (!session) return null;
-    const ownPurchase = session.linked && isStoreProRef.current;
-    if (!force && !accountCheckDue(Date.now(), accountCheckedAtRef.current, ownPurchase)) {
-      return null;
-    }
-    accountCheckedAtRef.current = Date.now();
-    const asked = ++accountAskRef.current;
-    try {
-      // The install is linked to the account only once its data is: a Pro
-      // phone signing in to someone else's account and backing out lends it
-      // nothing.
-      const answer = await getAccountStatus(
-        session.token,
-        session.linked ? appUserIdRef.current : null,
-      );
-      const current = sessionRef.current;
-      // Signed out meanwhile, or a newer answer is on its way.
-      if (current?.user.id !== session.user.id || asked !== accountAskRef.current) return null;
-      setAccountPro(session.user.id, answer.isPro && current.linked);
-      setPhoneLimited(answer.limited);
-      return answer;
-    } catch {
-      // Offline, or a Worker without the route: the last answer stands.
-      return null;
-    }
-  }, []);
+  const refreshAccountPro = useCallback(
+    async (force = false): Promise<AccountStatus | null> => {
+      const session = sessionRef.current;
+      if (!session) return null;
+      const ownPurchase = session.linked && isStoreProRef.current;
+      if (!force && !accountCheckDue(Date.now(), accountCheckedAtRef.current, ownPurchase)) {
+        return null;
+      }
+      accountCheckedAtRef.current = Date.now();
+      const asked = ++accountAskRef.current;
+      try {
+        // The install is linked to the account only once its data is: a Pro
+        // phone signing in to someone else's account and backing out lends it
+        // nothing.
+        const answer = await getAccountStatus(
+          session.token,
+          session.linked ? appUserIdRef.current : null,
+        );
+        const current = sessionRef.current;
+        // Signed out meanwhile, or a newer answer is on its way.
+        if (current?.user.id !== session.user.id || asked !== accountAskRef.current) return null;
+        rememberProAnswer(session.user.id, answer);
+        setAccountPro(session.user.id, answer.isPro && current.linked);
+        setPhoneLimited(answer.limited);
+        return answer;
+      } catch {
+        // Offline, or a Worker without the route: the last answer stands.
+        return null;
+      }
+    },
+    [rememberProAnswer],
+  );
 
   const refreshAccountProRef = useRef(refreshAccountPro);
   refreshAccountProRef.current = refreshAccountPro;
@@ -394,22 +436,34 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
     const id = appUserIdRef.current;
     if (!id) throw new Error('no_app_user_id');
     const session = sessionRef.current;
+    if (!session) throw new CloudSyncApiError('unauthorized', 401);
+    // Every path that asks (a sync, linking, a live nudge, a launch) stops
+    // here while the last answer says the Worker would refuse: its refusal
+    // costs a request and tells nothing new. The paused checks ask the status.
+    const known = proAnswerRef.current?.userId === session.user.id ? proAnswerRef.current : null;
+    if (credentialsWouldBeRefused(known, Date.now(), session.linked, mayHoldPurchase())) {
+      throw new CloudSyncApiError(known?.limited ? 'phone_limit' : 'not_pro', 403);
+    }
     try {
-      const next = await getSyncCredentials(await sessionToken(), id);
+      const next = await getSyncCredentials(session.token, id);
+      if (sessionRef.current?.user.id === session.user.id) {
+        rememberProAnswer(session.user.id, { isPro: true, limited: false });
+      }
       credentialsRef.current = next;
       return next;
     } catch (error) {
       // The Worker refuses credentials with the same check as the account
       // status (`checkInPhone`), so the refusal is a fresh answer: kept like
-      // one, the next launch asks the status first instead of being refused
-      // again, and no routine check repeats it straight away.
-      if (isNotPro(error) && session && sessionRef.current?.user.id === session.user.id) {
+      // one, so nothing asks again before a check says Pro, and the next
+      // launch asks the status first instead of being refused again.
+      if (isNotPro(error) && sessionRef.current?.user.id === session.user.id) {
         accountCheckedAtRef.current = Date.now();
+        rememberProAnswer(session.user.id, { isPro: false, limited: isPhoneLimit(error) });
         setAccountPro(session.user.id, false);
       }
       throw error;
     }
-  }, [sessionToken]);
+  }, [mayHoldPurchase, rememberProAnswer]);
 
   const closeEngine = useCallback(() => {
     engineRef.current?.close();
@@ -442,6 +496,9 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       retryRef.current = false;
       reportedRef.current = false;
       accountCheckedAtRef.current = 0;
+      proAnswerRef.current = null;
+      if (pausedCheckRef.current) clearTimeout(pausedCheckRef.current.timer);
+      pausedCheckRef.current = null;
       if (opts.deleteReplica) {
         // The account's Pro was this account's; the phone keeps its own.
         clearAccountPro();
@@ -673,11 +730,12 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
   );
 
   /**
-   * Brings this phone and the cloud copy together after a sign-in. `known`:
-   * an account-status answer the caller has just had, so it is not asked twice.
+   * Brings this phone and the cloud copy together after a sign-in. `asked`:
+   * the caller has just asked the account status (even if it got no answer),
+   * so it is not asked twice.
    */
   const link = useCallback(
-    async (known?: ProAnswer) => {
+    async (asked?: { answer: AccountStatus | null }) => {
       if (linkingRef.current) return;
       linkingRef.current = true;
       const generation = generationRef.current;
@@ -685,17 +743,9 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       // A retry after going offline is setting up again, not offline.
       setLastError(null);
       try {
-        const answer = known ?? (await refreshAccountPro(true));
-        if (generation !== generationRef.current) return;
-        // A free account's credentials would only be refused. Until this
-        // phone's own Pro is known it may hold a purchase the status call could
-        // not count (it sends no install id before linking), so it asks.
-        const ownPurchase = isStoreProRef.current || !isStatusKnownRef.current;
-        if (!shouldAskForCredentials(answer, false, ownPurchase)) {
-          closeEngine();
-          setStatus('notPro');
-          return;
-        }
+        // A free account stops at notPro without a credentials request:
+        // `fetchCredentials` holds back the one this answer says is refused.
+        if (!asked) await refreshAccountPro(true);
         const engine = await openEngine();
         await engine.pullLatest();
         const cloud = await engine.summarizeCloud();
@@ -780,6 +830,7 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       // Another account's Pro does not carry over.
       if (getAccountProAnswer()?.userId !== signedIn.id) clearAccountPro();
       accountCheckedAtRef.current = 0;
+      proAnswerRef.current = null;
       const session: StoredSession = { token, user: signedIn, linked: resume };
       sessionRef.current = session;
       bindShared(session);
@@ -843,44 +894,84 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
   const syncNow = useCallback(async () => {
     const session = sessionRef.current;
     if (!session) return;
-    let answer: ProAnswer | null = null;
     // Pro may have been restored since the last answer, here or on another phone.
     if (status === 'notPro') {
       credentialsRef.current = null;
-      answer = await refreshAccountPro(true);
-      // Stay paused until the next check when the answer already says the
+      const kept = proAnswerRef.current?.userId === session.user.id ? proAnswerRef.current : null;
+      // A Pro answer from the check that has just resumed it (whose Pro
+      // turning on calls this again) is not asked twice.
+      const answer =
+        kept?.isPro && !pausedCheckDue(Date.now(), accountCheckedAtRef.current)
+          ? kept
+          : await refreshAccountPro(true);
+      // Stay paused until the next check when the answer says the
       // credentials would be refused.
-      if (!shouldAskForCredentials(answer, session.linked, isStoreProRef.current)) return;
+      const known = proAnswerRef.current?.userId === session.user.id ? proAnswerRef.current : null;
+      if (credentialsWouldBeRefused(known, Date.now(), session.linked, mayHoldPurchase())) return;
+      if (session.linked) await runSync();
+      else await link({ answer });
+      return;
     }
     if (session.linked) await runSync();
-    else await link(answer ?? undefined);
-  }, [link, refreshAccountPro, runSync, status]);
+    else await link();
+  }, [link, mayHoldPurchase, refreshAccountPro, runSync, status]);
   const syncNowRef = useRef(syncNow);
   syncNowRef.current = syncNow;
 
-  /** A live nudge that came too soon after the last paused check, waiting for its turn. */
-  const pausedCheckTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   /**
    * A paused phone asks whether Pro is back (`syncNow` asks the account
-   * status first), at most once a minute unless `always`: a return to the
-   * app, the 15-minute check and a live nudge can all come at once. `later`:
-   * one asked too soon runs when the minute is up instead of being dropped,
-   * as a live nudge may say another phone has just bought Pro.
+   * status first), at most once per `PAUSED_CHECK_MIN_GAP_MS` unless
+   * `always`: a return to the app, the 15-minute check and a live nudge can
+   * all come at once. `later`: one asked too soon runs when the gap is up
+   * instead of being dropped (a `pro` nudge, a missed nudge, a purchase the
+   * Worker has not seen yet), unless a check made after `since` (when it was
+   * asked for; default now) has covered it meanwhile.
    */
-  const checkWhilePaused = useCallback((opts: { always?: boolean; later?: boolean } = {}) => {
-    const now = Date.now();
-    if (!opts.always && !pausedCheckDue(now, accountCheckedAtRef.current)) {
-      if (opts.later && !pausedCheckTimerRef.current) {
-        const wait = Math.max(0, accountCheckedAtRef.current + PAUSED_CHECK_MIN_GAP_MS - now);
-        pausedCheckTimerRef.current = setTimeout(() => {
-          pausedCheckTimerRef.current = null;
-          if (statusRef.current === 'notPro') checkWhilePaused({ later: true });
-        }, wait);
+  const checkWhilePaused = useCallback(
+    (opts: { always?: boolean; later?: boolean; since?: number } = {}) => {
+      const session = sessionRef.current;
+      if (!session) return;
+      const now = Date.now();
+      const checkedAt = accountCheckedAtRef.current;
+      if (opts.always || pausedCheckDue(now, checkedAt)) {
+        void syncNowRef.current();
+        return;
       }
-      return;
-    }
-    void syncNowRef.current();
-  }, []);
+      const since = opts.since ?? now;
+      if (!opts.later || checkedAt >= since) return;
+      const pending = pausedCheckRef.current;
+      if (pending?.userId === session.user.id) {
+        pending.since = Math.max(pending.since, since);
+        return;
+      }
+      if (pending) clearTimeout(pending.timer);
+      const entry = {
+        since,
+        userId: session.user.id,
+        timer: setTimeout(
+          () => {
+            if (pausedCheckRef.current !== entry) return;
+            pausedCheckRef.current = null;
+            if (statusRef.current !== 'notPro' || sessionRef.current?.user.id !== entry.userId) {
+              return;
+            }
+            // A return to the app or the 15-minute check ran meanwhile.
+            if (accountCheckedAtRef.current >= entry.since) return;
+            checkWhilePaused({ always: true });
+          },
+          Math.max(0, checkedAt + PAUSED_CHECK_MIN_GAP_MS - now),
+        ),
+      };
+      pausedCheckRef.current = entry;
+    },
+    [],
+  );
+  useEffect(
+    () => () => {
+      if (pausedCheckRef.current) clearTimeout(pausedCheckRef.current.timer);
+    },
+    [],
+  );
 
   const signOut = useCallback(
     async (opts: { force?: boolean } = {}) => {
@@ -989,18 +1080,13 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       if (kept?.userId === session.user.id) {
         // The launch's credentials request checks Pro anyway, so the
         // routine check waits its usual time from the last answer.
-        accountCheckedAtRef.current = kept.checkedAt;
+        accountCheckedAtRef.current = Math.min(kept.checkedAt, Date.now());
         if (!kept.isPro) {
           // Paused when the app last ran: ask the status first, so a launch
-          // that is still paused sends no credentials request to be refused.
-          const answer = await refreshAccountPro(true);
+          // still paused stops at notPro without a credentials request
+          // (`fetchCredentials` holds back the one it would refuse).
+          await refreshAccountPro(true);
           if (cancelled) return;
-          if (!shouldAskForCredentials(answer, true, isStoreProRef.current)) {
-            setStatus('notPro');
-            // Its shared ledgers sync without the account's Pro, as a sync would run them.
-            void runSharedSync();
-            return;
-          }
         }
       }
       await runSync();
@@ -1025,7 +1111,9 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
     if (status !== 'ready' && status !== 'notPro') return;
     // Between replica operations: a sync may be running on the engine.
     if (!isPro) void runExclusive(closeEngine);
-    void syncNow();
+    // Pro ended on a phone already paused: the answer that ended it has just
+    // come (a status, or a refused credentials request), so nothing is asked.
+    if (isPro || status !== 'notPro') void syncNow();
     // A shared ledger of this user's resumes (or pauses) with it.
     void runSharedSync({ forceList: true });
     // Only a change of Pro matters here, not every new callback.
@@ -1052,9 +1140,12 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
     wasStoreProRef.current = isStorePro;
     if (was === null || was === isStorePro || !sessionRef.current) return;
     void refreshAccountPro(true).then((answer) => {
-      // A purchase here may make the account Pro again: the account's paused
-      // phones hear it now (their live socket) rather than at their next check.
-      if (isStorePro && answer?.isPro) announceRef.current(PERSONAL_CHANNEL);
+      // Bought here while paused, but the Worker still keeps the "not Pro" it
+      // read a moment ago (for a minute): ask again once it no longer does.
+      // Once the answer is Pro, `rememberProAnswer` tells the other phones.
+      if (isStorePro && answer && !answer.isPro && statusRef.current === 'notPro') {
+        checkWhilePaused({ later: true });
+      }
     });
     // Only a change of the store's answer matters here.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1125,11 +1216,15 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
         if (closingRef.current) return;
         if (reason === 'access' && actor === userId) sharedLedgerSync.noteLeftByUser(channel);
         if (channel === PERSONAL_CHANNEL && statusRef.current === 'notPro') {
-          // Paused: the account may be Pro again (a purchase on another
-          // phone). Asked through the status, never a credentials request
-          // that would be refused. An `access` change (the account deleted on
-          // another phone) is asked at once, and signs this phone out.
-          checkWhilePaused({ always: reason === 'access', later: true });
+          // Paused: its own data does not sync. Another phone's Pro (`pro`)
+          // may resume it: asked, and never lost. An `access` change (the
+          // account deleted on another phone) is asked at once, and signs
+          // this phone out. A `data` change only says a Pro phone of the
+          // account pushed (this one is past the phone limit, or the other
+          // runs on its issued token): it waits for the next check, or a
+          // phone past the limit would ask on every edit made elsewhere.
+          if (reason === 'access') checkWhilePaused({ always: true });
+          else if (reason === 'pro') checkWhilePaused({ later: true });
         } else if (channel === PERSONAL_CHANNEL) {
           // Also how a deletion of the account on another phone is learned:
           // the sync finds the session gone and signs this phone out.
@@ -1140,10 +1235,15 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       },
       onReconnect: () => {
         if (closingRef.current) return;
-        // A paused phone's own data has nothing to sync, and its return to
-        // the app is checked already; its shared ledgers still catch up.
-        if (statusRef.current === 'notPro') void runSharedSyncRef.current();
-        else void runSyncRef.current();
+        // A paused phone's own data has nothing to sync; its shared ledgers
+        // catch up, and a nudge the socket missed is checked for, unless the
+        // return to the app that reconnected it checked just now.
+        if (statusRef.current === 'notPro') {
+          void runSharedSyncRef.current();
+          checkWhilePaused({ later: true, since: Date.now() - RECONNECT_COVERED_MS });
+        } else {
+          void runSyncRef.current();
+        }
       },
     });
   }, [checkWhilePaused, enabled, sessionToken, userId]);

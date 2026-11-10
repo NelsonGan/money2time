@@ -12,6 +12,14 @@ describe('parseLiveMessage', () => {
     ).toEqual({ channel: 'abc123', reason: 'access', actor: 'u1' });
   });
 
+  it('reads a pro change: another phone of the user just got Pro', () => {
+    expect(parseLiveMessage('{"type":"changed","channel":"personal","reason":"pro"}')).toEqual({
+      channel: 'personal',
+      reason: 'pro',
+      actor: null,
+    });
+  });
+
   it('treats an unknown reason as data', () => {
     expect(parseLiveMessage('{"type":"changed","channel":"personal"}')?.reason).toBe('data');
   });
