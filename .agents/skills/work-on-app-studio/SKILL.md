@@ -16,16 +16,16 @@ are relative to `apps/app-studio`.
 
 ## What lives where
 
-| You are changing…                                         | Look in                                                                      |
-| --------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| a scene's headline or layout (iPhone, iPad, iPhone Duo)   | `src/scenes/sceneData.tsx`, `ipadSceneData.tsx`, `duoSceneData.tsx`          |
-| the scene copy, per language                              | `src/scenes/locales/<locale>.ts` (23 locales, `en.ts` is the source)         |
-| the real app screens inside the scenes                    | `public/assets/screenshots-iphone/<locale>/`, `public/assets/screenshots-duo/<locale>/` (8 PNGs each) |
-| the App Store header and search creatives                 | `src/components/AppStoreCreative.tsx`, `src/data/searchAnimation.json`, `src/scenes/appStoreCreativeCopy.ts` |
-| store listing text and each release's What's New           | `src/data/appDescriptions.ts` (the [update-whats-new](../update-whats-new/SKILL.md) skill writes What's New) |
-| uploads                                                   | `src/data/storeUpload.mjs`, `src/data/storeCreativeUpload.mjs`, `scripts/upload-*.mjs`, `src/app/api/upload/` |
-| bank and wallet logos                                     | `public/logos/` and its `manifest.json` (`scripts/fetch-brand-logos.mjs`, `normalize-logos.mjs`, `triage-logos.mjs`) |
-| the Play store icon                                       | `public/assets/icons/play_store_512.png`, copied from `apps/mobile`          |
+| You are changing…                                       | Look in                                                                                                              |
+| ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| a scene's headline or layout (iPhone, iPad, iPhone Duo) | `src/scenes/sceneData.tsx`, `ipadSceneData.tsx`, `duoSceneData.tsx`                                                  |
+| the scene copy, per language                            | `src/scenes/locales/<locale>.ts` (23 locales, `en.ts` is the source)                                                 |
+| the real app screens inside the scenes                  | `public/assets/screenshots-iphone/`, `screenshots-ipad/`, `screenshots-duo/` (`<locale>/`, 8 PNGs each)              |
+| the App Store header and search creatives               | `src/components/AppStoreCreative.tsx`, `src/data/searchAnimation.json`, `src/scenes/appStoreCreativeCopy.ts`         |
+| store listing text and each release's What's New        | `src/data/appDescriptions.ts` (the [update-whats-new](../update-whats-new/SKILL.md) skill writes What's New)         |
+| uploads                                                 | `src/data/storeUpload.mjs`, `src/data/storeCreativeUpload.mjs`, `scripts/upload-*.mjs`, `src/app/api/upload/`        |
+| bank and wallet logos                                   | `public/logos/` and its `manifest.json` (`scripts/fetch-brand-logos.mjs`, `normalize-logos.mjs`, `triage-logos.mjs`) |
+| the Play store icon                                     | `public/assets/icons/play_store_512.png`, copied from `apps/mobile`                                                  |
 
 What other parts of the repo take from Studio:
 
@@ -51,30 +51,12 @@ Search video needs `ffmpeg` and `ffprobe` (`brew install ffmpeg`).
 
 ## Refreshing the app screenshots
 
-The PNGs in `public/assets/screenshots-*` are real captures of the app with
-synthetic data, one folder per locale, so a redesigned screen means
-recapturing it in all 23 languages.
-
-1. The data comes from the app's mock-data branch
-   (`origin/claude/mock-data-locales-robust-3kk6pv`, `services/previewData`;
-   `generatePreviewData(profile)` also sets the app language). It predates the
-   app's move to `apps/mobile`: in your worktree, merge `origin/main` into a
-   local branch, `git mv services/previewData` and `assets/preview` into
-   `apps/mobile/`, and keep both imports in `AppContext.tsx`. Never push that
-   branch.
-2. Lease a device with the T3 Code device tools (`simlock:ios:iPhone 18 Pro`, or
-   `simlock:ios:iPhone Duo` for the Duo set) and run the branch on it with
-   `simlock-metro`. Drive the app only with the `agent-device` command
-   `device_open` returns; evaluate JavaScript in the app with `agent-device cdp`
-   (Metro rejects a raw inspector WebSocket).
-3. For each locale: seed its preview profile, turn on Pro
-   (`setDevProOverride(true)`), visit the eight screens and save each capture
-   under the scene's file name (`01-home.png` … `08-budgeting.png`).
-4. iPhone Duo: unfold it (`agent-device help foldable`), go Home, rotate to
-   landscape, then launch the app; rotating with the app in front leaves its
-   window portrait. An upright capture is 2853 × 2007.
-5. Look at the scenes in Studio for every locale, then close the device with
-   `device_close` (`shutdown: true`).
+The PNGs in `public/assets/screenshots-*` (iPhone, iPad, iPhone Duo) are real
+captures of the app with seeded demo data, one folder per locale, so a
+redesigned screen means recapturing it in all 23 languages. The
+[update-app-studio-screenshots](../update-app-studio-screenshots/SKILL.md)
+skill is the whole procedure: the `app-studio-seed-data` branch, the devices,
+the capture script and the review.
 
 The Search creative takes its payment amount and crop from each locale's
 `01-home.png`; when those change, check `src/data/searchAnimation.json`

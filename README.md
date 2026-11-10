@@ -5259,22 +5259,36 @@ including each release's What's New, lives in `src/data/appDescriptions.ts`
 
 ### App Studio screenshots
 
-The screens in `public/assets/screenshots-iphone/` and
-`public/assets/screenshots-duo/` are real captures, one folder per locale, each
-taken on a simulator after seeding the app's matching preview profile (the
-mock-data branch's `services/previewData`, `generatePreviewData(profile)`,
-which also sets the app language).
+The screens in `public/assets/screenshots-iphone/`, `screenshots-ipad/` and
+`screenshots-duo/` are real captures, one folder per locale with the same eight
+file names (`01-home.png` … `08-budgeting.png`), each taken on a simulator after
+seeding the app's matching preview profile. The seed data lives on the
+`app-studio-seed-data` branch, which is never merged: it is `main` plus
+`services/previewData` (one profile per app language, chosen by
+`PREVIEW_PROFILE_FOR_LOCALE`) and a dev-only `globalThis.__appStudio` hook that
+seeds a locale, sets the app language and silences the new-install pop-ups. The
+`update-app-studio-screenshots` skill rebases it on `main`, runs it on the
+leased devices and captures every locale with its `scripts/capture.mjs`.
 
-The iPhone Duo set shows the app on the open iPhone Duo's inner display, which
-is landscape: tabs in a side rail, Home as month grid and ledger side by side.
-Each of the eight scenes puts one screen in an unfolded Duo under the matching
-iPhone headline, on one line, so no new copy needs translating. It exports at
-2853 × 2007, Apple's `APP_IPHONE_DUO` landscape size, and uploads as
-`IPHONE_DUO`. Play has no Duo gallery, so **Upload to Store** offers the App
-Store only. To capture it, lease an iPhone Duo (`simlock:ios:iPhone Duo`),
-unfold it (`agent-device help foldable`), go Home, rotate to landscape, then
-launch the app: rotating with the app in front leaves its window portrait. An
-upright landscape capture is 2853 × 2007.
+| Set        | Device (Simlock model)  | Capture                | Scene layout                            |
+| ---------- | ----------------------- | ---------------------- | --------------------------------------- |
+| iPhone     | `iPhone 18 Pro`         | 1206 × 2622, portrait  | scene-specific (`sceneData.tsx`)        |
+| iPad       | `iPad Pro 13-inch (M5)` | 2752 × 2064, landscape | one-line headline over a landscape iPad |
+| iPhone Duo | `iPhone Duo`, open      | 2853 × 2007, landscape | one-line headline over an open Duo      |
+
+The iPad and iPhone Duo sets show the app's own layouts for those screens: tabs
+in a side rail, Home and Insights as two panes, Accounts and Budgeting in two
+columns. Each of their eight scenes puts one screen in the device under the
+matching iPhone headline, on one line, so no new copy needs translating. The
+iPad set exports at 2732 × 2048 and goes to the App Store's 13-inch iPad gallery
+and to both of Play's tablet galleries. The Duo set exports at 2853 × 2007,
+Apple's `APP_IPHONE_DUO` landscape size, and uploads as `IPHONE_DUO`; Play has
+no Duo gallery, so **Upload to Store** offers the App Store only.
+
+To capture the iPad set, turn the iPad to landscape before opening the app. For
+the Duo, unfold it (`agent-device help foldable`), go Home, rotate to
+landscape, then launch the app: rotating with the app in front leaves its
+window portrait.
 
 ### Running App Studio
 

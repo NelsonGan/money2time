@@ -186,8 +186,10 @@ deployed. Store uploads write to live listings through the `asc` and `gplay`
 CLIs, so never run one without the user asking, and never commit store
 credentials (`.env.local`, `.p8` or service-account JSON). The
 `update-whats-new` skill writes each release's What's New in
-`src/data/appDescriptions.ts`, and the `work-on-app-studio` skill covers the
-rest (running it, recapturing screenshots, scenes, exports and uploads).
+`src/data/appDescriptions.ts`, the `update-app-studio-screenshots` skill
+recaptures the app screens in every language (from the `app-studio-seed-data`
+branch), and the `work-on-app-studio` skill covers the rest (running it,
+scenes, exports and uploads).
 
 ## Skills
 
@@ -201,6 +203,7 @@ change a Claude workflow, refresh its shared copy in the same change. Local
 Every app in this repository has its skills here, at the root. Start from the
 one for the app you are changing: `work-on-website` (with `seo-loop`,
 `migrate-to-vinext` and `sync-web-dashboard`) for `apps/web`,
-`work-on-app-studio` (with `update-whats-new`) for `apps/app-studio`, and the
+`work-on-app-studio` (with `update-whats-new` and
+`update-app-studio-screenshots`) for `apps/app-studio`, and the
 rest for the app in `apps/mobile`. A skill's paths are relative to its app
 unless it says otherwise.

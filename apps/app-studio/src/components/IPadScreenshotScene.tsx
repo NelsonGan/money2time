@@ -1,8 +1,7 @@
 import { forwardRef } from 'react';
-import { DeviceFrame } from './DeviceFrame';
 import { Blob, Branch } from './flora';
-import { SceneCanvas, SceneGlows, renderHeadline, DISPLAY_FONT } from './sceneParts';
-import { useFitText, useFitLines } from './useFitText';
+import { DeviceScreen, SceneCanvas, SceneGlows, renderHeadline, oneLine, DISPLAY_FONT } from './sceneParts';
+import { useFitText } from './useFitText';
 import type { IPadSceneConfig } from '../scenes/ipadSceneData';
 import { IPAD_EXPORT_WIDTH, IPAD_EXPORT_HEIGHT } from '../utils/export';
 
@@ -13,16 +12,58 @@ interface IPadScreenshotSceneProps {
 
 const W = IPAD_EXPORT_WIDTH;
 const H = IPAD_EXPORT_HEIGHT;
+const INK = '#2F2521';
+
+/** The display at the captures' own aspect ratio (iPad Pro 13-inch, 4:3). */
+const SCREEN_W = 2260;
+const SCREEN_H = Math.round(SCREEN_W * (2064 / 2752));
+const BEZEL = 38;
+const RIM = 9;
+const RADIUS = 52;
 
 /**
- * Headline and proof points on the left, two phones on the right with the
- * front one overlapping. Copy is fitted rather than trusted to be short, since
- * the same layout carries twenty-three languages.
+ * A landscape tablet: thin aluminium rim, even black bezel and the front
+ * camera centred on the top edge, as on an iPad Pro held sideways.
+ */
+function IPadFrame({ screenshot }: { screenshot: string }) {
+  return (
+    <div style={{
+      width: SCREEN_W + (BEZEL + RIM) * 2,
+      height: SCREEN_H + (BEZEL + RIM) * 2,
+      borderRadius: RADIUS + BEZEL + RIM,
+      background: 'linear-gradient(150deg, #d9d9de 0%, #a1a1a6 30%, #c7c7cc 55%, #8e8e93 80%, #d1d1d6 100%)',
+      padding: RIM,
+      boxSizing: 'border-box',
+      boxShadow: '0 90px 180px rgba(10,25,20,0.28), 0 28px 60px rgba(10,25,20,0.15)',
+    }}>
+      <div style={{
+        width: '100%', height: '100%',
+        borderRadius: RADIUS + BEZEL,
+        background: '#0a0a0c',
+        padding: BEZEL,
+        boxSizing: 'border-box',
+        position: 'relative',
+      }}>
+        <div style={{
+          position: 'absolute', top: BEZEL / 2 - 6, left: '50%', width: 12, height: 12,
+          transform: 'translateX(-50%)', borderRadius: '50%',
+          background: 'radial-gradient(circle at 35% 35%, #3a3f4a, #111318 70%)',
+        }} />
+        <DeviceScreen screenshot={screenshot} width={SCREEN_W} height={SCREEN_H} borderRadius={RADIUS} />
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Headline across the top, the iPad below it bleeding off the bottom edge,
+ * the same composition as the iPhone Duo scenes.
  */
 export const IPadScreenshotScene = forwardRef<HTMLDivElement, IPadScreenshotSceneProps>(
   ({ scene, previewScale = 0.17 }, ref) => {
-    const headlineRef = useFitText<HTMLHeadingElement>(132, 0.55);
-    const subRef = useFitLines<HTMLParagraphElement>(52, 2);
+    const headlineRef = useFitText<HTMLHeadingElement>(150, 0.55);
+    const headline = oneLine(scene.headline);
+    const highlight = scene.highlight ? oneLine(scene.highlight) : undefined;
 
     return (
       <SceneCanvas
@@ -30,72 +71,31 @@ export const IPadScreenshotScene = forwardRef<HTMLDivElement, IPadScreenshotScen
         width={W}
         height={H}
         previewScale={previewScale}
-        background={`linear-gradient(122deg, ${scene.gradientFrom}, ${scene.gradientTo})`}
+        background={`linear-gradient(170deg, #FBF2EA, ${scene.gradientTo})`}
       >
         <SceneGlows
           accent={scene.accentColor}
           top={{ inset: 420, size: 1500 }}
           bottom={{ bottomInset: 380, leftInset: 420, size: 1300 }}
         />
-        <Branch x={-120} y={1480} size={520} color={scene.accentColor} opacity={0.16} rotate={-20} />
-        <Blob x={2320} y={-180} size={620} color={scene.accentColor} opacity={0.09} rotate={18} />
+        <Branch x={-110} y={60} size={460} color={scene.accentColor} opacity={0.16} rotate={200} flip />
+        <Blob x={2300} y={-140} size={560} color={scene.accentColor} opacity={0.10} rotate={18} />
 
-        {/* Left column: headline, supporting line, three proof points */}
-        <div style={{
-          position: 'absolute', left: 132, top: 0, bottom: 0, width: 1130,
-          display: 'flex', flexDirection: 'column', justifyContent: 'center',
-          zIndex: 6,
+        <h1 ref={headlineRef} style={{
+          position: 'absolute', top: 118, left: 160, right: 160, zIndex: 6,
+          fontFamily: DISPLAY_FONT,
+          fontSize: 150, fontWeight: 800, color: INK,
+          lineHeight: 1.08, margin: 0, textAlign: 'center',
+          whiteSpace: 'pre-line', letterSpacing: '-3px',
         }}>
-          <h1 ref={headlineRef} style={{
-            fontFamily: DISPLAY_FONT,
-            fontSize: 132, fontWeight: 800, color: scene.textColor,
-            lineHeight: 1.08, margin: 0, whiteSpace: 'pre-line',
-            letterSpacing: '-2px',
-          }}>
-            {renderHeadline(scene.headline, scene.highlight, scene.accentColor)}
-          </h1>
-          <p ref={subRef} style={{
-            fontSize: 52, fontWeight: 600, color: scene.subColor,
-            lineHeight: 1.35, margin: '44px 0 0', maxWidth: 1030,
-          }}>{scene.subheadline}</p>
+          {renderHeadline(headline, highlight, scene.accentColor, { offset: -16, height: 18 })}
+        </h1>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 22, marginTop: 64 }}>
-            {scene.bullets.map((bullet) => (
-              <div key={bullet.text} style={{
-                display: 'flex', alignItems: 'center', gap: 26,
-                alignSelf: 'flex-start',
-                background: '#FFFFFF', borderRadius: 999,
-                padding: '18px 44px 18px 18px',
-                boxShadow: '0 14px 34px rgba(47,37,33,0.10)',
-                maxWidth: 1060,
-              }}>
-                <span style={{
-                  width: 84, height: 84, borderRadius: '50%', flexShrink: 0,
-                  background: `${scene.accentColor}1F`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 46,
-                }}>{bullet.icon}</span>
-                <span style={{
-                  fontSize: 42, fontWeight: 700,
-                  color: scene.textColor, lineHeight: 1.2,
-                }}>{bullet.text}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Right: two phones, the front one overlapping */}
         <div style={{
-          position: 'absolute', right: -60, top: 96, zIndex: 4,
-          transform: 'rotate(-7deg)',
+          position: 'absolute', top: 410, left: '50%',
+          transform: 'translateX(-50%)', zIndex: 4,
         }}>
-          <DeviceFrame screenshot={scene.shots[0]} scale={2.5} />
-        </div>
-        <div style={{
-          position: 'absolute', right: 630, top: 210, zIndex: 5,
-          transform: 'rotate(4deg)',
-        }}>
-          <DeviceFrame screenshot={scene.shots[1]} scale={2.5} />
+          <IPadFrame screenshot={scene.screenshot} />
         </div>
       </SceneCanvas>
     );
