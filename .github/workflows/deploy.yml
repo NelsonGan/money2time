@@ -56,10 +56,10 @@ jobs:
   #             production store build)
   #   checks  — anything the app's `npm run check` / `npm test` can see (the
   #             `checks` and `lint` jobs), i.e. everything outside apps/web/
-  #             and apps/app-studio/. eslint only sees apps/mobile and prettier
-  #             sees it plus the root docs and .github/, but jest and the
-  #             typecheck also read the Workers: __tests__/cloudflare/ and the
-  #             live-earnings contract tests import
+  #             and apps/app-studio/. prettier only sees apps/mobile, the
+  #             root docs and .github/, but jest, the typecheck and eslint's
+  #             import rules also read the Workers: __tests__/cloudflare/ and
+  #             the live-earnings contract tests import
   #             apps/cloudflare/workers/*/src, so a Worker change runs these
   #             jobs too. The website and App Studio have their own workflows
   #             (web.yml, app-studio.yml).
@@ -163,10 +163,10 @@ jobs:
   # saved almost nothing: they compete for the same cores, and finished in
   # 102 seconds where one after another they take about 115.
   #
-  # Both jobs run inside apps/mobile. They also read the Workers (jest and the
-  # typecheck follow the tests' imports into apps/cloudflare/workers/*/src),
-  # but never apps/web/ or apps/app-studio/, so a change confined to those two
-  # has nothing to run here.
+  # Both jobs run inside apps/mobile. They also read the Workers (jest, the
+  # typecheck and ESLint's import rules follow the tests' imports into
+  # apps/cloudflare/workers/*/src), but never apps/web/ or apps/app-studio/,
+  # so a change confined to those two has nothing to run here.
   checks:
     name: Checks
     needs: changes
@@ -219,12 +219,15 @@ jobs:
       run:
         working-directory: apps/mobile
     steps:
-      # ESLint only reads the app.
+      # The same files as `checks`: ESLint lints only the app, but its
+      # import/no-unresolved rule follows the tests' imports into the Workers
+      # and reports each one it cannot find.
       - name: Check out repository
         uses: actions/checkout@v5
         with:
           sparse-checkout: |
             .github
+            apps/cloudflare
             apps/mobile
 
       # `checks` saves the node_modules cache; this job only reads it.
