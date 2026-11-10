@@ -5,8 +5,9 @@ name: Web
 # deploying it, and deploys `main` to the money2time-workers-web Worker.
 # README: *Website*.
 #
-# The checkout is shallow and holds only apps/web: the repository's history is
-# mostly old screenshots, and the mobile app's artwork is hundreds of MB.
+# The checkout is shallow and holds only apps/web (and .github/, for the
+# action that sets up dependencies): the repository's history is mostly old
+# screenshots, and the mobile app's artwork is hundreds of MB.
 run-name: >-
   ${{ github.event_name == 'pull_request' && format('Web · PR #{0}', github.event.number)
    || github.ref == 'refs/heads/main' && 'Web · Production deploy'
@@ -52,37 +53,15 @@ jobs:
         uses: actions/checkout@v5
         with:
           fetch-depth: 1
-          sparse-checkout: apps/web
+          sparse-checkout: |
+            .github
+            apps/web
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v5
+      - name: Set up dependencies
+        uses: ./.github/actions/node-deps
         with:
+          directory: apps/web
           node-version: 24
-          # node_modules is cached below; npm's download cache is not needed too.
-          package-manager-cache: false
-
-      # Caches node_modules itself, not npm's download cache, which still
-      # leaves `npm ci` to unpack every package. The key is everything
-      # `npm ci` reads (there are no patches or install hooks here), so a hit
-      # is the tree it would build. It is saved straight after the install, so
-      # a run whose checks fail still leaves it for the next one.
-      - name: Restore node_modules
-        id: deps
-        uses: actions/cache/restore@v5
-        with:
-          path: apps/web/node_modules
-          key: web-node-modules-${{ runner.os }}-${{ runner.arch }}-node24-${{ hashFiles('apps/web/package.json', 'apps/web/package-lock.json') }}
-
-      - name: Install dependencies
-        if: steps.deps.outputs.cache-hit != 'true'
-        run: npm ci
-
-      - name: Save node_modules
-        if: steps.deps.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v5
-        with:
-          path: apps/web/node_modules
-          key: ${{ steps.deps.outputs.cache-primary-key }}
 
       - name: Test
         run: npm test

@@ -44,14 +44,15 @@ jobs:
         uses: actions/checkout@v5
         with:
           fetch-depth: 1
-          sparse-checkout: apps/app-studio
+          sparse-checkout: |
+            .github
+            apps/app-studio
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v5
+      - name: Set up dependencies
+        uses: ./.github/actions/node-deps
         with:
+          directory: apps/app-studio
           node-version: 22
-          cache: npm
-          cache-dependency-path: apps/app-studio/package-lock.json
 
       # The Search creative tests encode and decode real video with `ffmpeg`
       # and `ffprobe`. They come from a pinned static build, checked against
@@ -108,9 +109,6 @@ jobs:
           ffmpeg -hide_banner -version | sed -n 1p
           ffprobe -hide_banner -version | sed -n 1p
           ffmpeg -hide_banner -encoders | grep -c libx264
-
-      - name: Install dependencies
-        run: npm ci
 
       - name: Test
         run: npm test

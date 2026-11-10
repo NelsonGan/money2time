@@ -11,8 +11,9 @@ name: CI / CD
 # instead of workflow-level `paths:` (a workflow skipped by a path filter
 # leaves required checks pending forever).
 #
-# `test` and `bundle` run side by side on their own runners, both from the
-# node_modules cache in .github/actions/mobile-deps. README: *CI and deploy*.
+# `checks` and `bundle` run side by side on their own runners, both from the
+# node_modules cache in .github/actions/node-deps, and `test` is the one check
+# that says both passed. README: *CI and deploy*.
 
 # Give each run a clear title in the Actions list so production, PR, manual,
 # and branch runs are easy to tell apart at a glance.
@@ -61,9 +62,9 @@ jobs:
   #             import apps/cloudflare/workers/*/src, so a Worker change runs
   #             the test job too. The website and App Studio have their own
   #             workflows (web.yml, app-studio.yml).
-  #   bundle  — anything Metro can bundle differently: `app`, plus .github/
-  #             (a change to this workflow should run the job it changed). A
-  #             docs- or Worker-only change skips the bundle job.
+  #   bundle  — anything Metro can bundle differently: `app`, plus this
+  #             workflow and the actions it uses (a change to the bundle job
+  #             should run it). A docs- or Worker-only change skips the job.
   # Fail open: when the diff can't be resolved, every flag is true.
   changes:
     name: Detect changes
@@ -149,14 +150,14 @@ jobs:
           # an app change, so an unrecognised path always builds the app.
           grep -vE '^(apps/cloudflare/|apps/web/|apps/app-studio/|\.github/|\.claude/|\.agents/|\.codex/|\.vscode/)|(^|/)[^/]*\.md$|^LICENSE$' changed.txt > app_paths.txt || true
           [ -s app_paths.txt ] && app=true
-          # The bundle job also runs for a change to the workflows themselves.
-          if [ "$app" = true ] || grep -qE '^\.github/' changed.txt; then bundle=true; fi
+          # The bundle job also runs for a change to the job itself.
+          if [ "$app" = true ] || grep -qE '^\.github/(workflows/deploy\.yml|actions/)' changed.txt; then bundle=true; fi
 
           echo "app=$app | checks=$checks | bundle=$bundle"
           printf 'app=%s\nchecks=%s\nbundle=%s\n' "$app" "$checks" "$bundle" >> "$GITHUB_OUTPUT"
 
-  test:
-    name: Test
+  checks:
+    name: Checks
     needs: changes
     # `npm run check` / `npm test` run inside apps/mobile. They also read the
     # Workers (jest and the typecheck follow the tests' imports into
@@ -185,35 +186,70 @@ jobs:
             apps/mobile
 
       - name: Set up dependencies
-        uses: ./.github/actions/mobile-deps
+        uses: ./.github/actions/node-deps
+        with:
+          directory: apps/mobile
+          node-version: 22
 
-      # The three checks are independent, so they run at once instead of one
-      # after another (`npm run check` chains them): the step takes as long as
-      # the slowest, lint, which gets two threads of the runner's four cores.
-      # Each writes to its own log, printed when all three have finished, so
+      # The three parts of `npm run check` are independent, so they run at once
+      # instead of one after another: the step takes as long as the slowest,
+      # lint, which gets two threads of the runner's four cores. Each writes to
+      # its own log, printed with its duration when all three have finished, so
       # the output of one never interleaves with another's. A failed check is
       # printed outside a collapsed group and named in an annotation.
+      #
+      # Lint calls ESLint directly, not `npm run lint`: `expo lint` passes on
+      # ESLint's exit status, which is empty when ESLint is killed (out of
+      # memory, say), so a lint that died would be reported as passed. It also
+      # skips the ESLint cache `expo lint` writes, which a CI run never reuses.
+      #
+      # The step starts by checking that package.json still defines `check` and
+      # `lint` the way this step copies them, so changing one without the other
+      # fails here instead of quietly checking less than `npm run check` does.
       - name: Run checks
         run: |
-          names=(typecheck lint format)
-          npm run --silent typecheck > "$RUNNER_TEMP/typecheck.log" 2>&1 &
-          pids=($!)
-          # `expo lint` forwards what follows its own `--` to ESLint.
-          npm run --silent lint -- -- --concurrency 2 > "$RUNNER_TEMP/lint.log" 2>&1 &
-          pids+=($!)
-          npm run --silent format:check > "$RUNNER_TEMP/format.log" 2>&1 &
-          pids+=($!)
+          expect() {
+            actual=$(node -p "require('./package.json').scripts['$1']")
+            if [ "$actual" != "$2" ]; then
+              echo "::error::package.json's \"$1\" script is now '$actual'. Update the Run checks step in .github/workflows/deploy.yml to match, then this guard."
+              exit 1
+            fi
+          }
+          expect check 'npm run typecheck && npm run lint && npm run format:check'
+          expect lint 'expo lint .'
+
+          names=()
+          pids=()
+          start() {
+            name=$1
+            shift
+            (
+              SECONDS=0
+              status=0
+              "$@" > "$RUNNER_TEMP/$name.log" 2>&1 || status=$?
+              echo "$SECONDS" > "$RUNNER_TEMP/$name.seconds"
+              exit "$status"
+            ) &
+            names+=("$name")
+            pids+=($!)
+          }
+          start typecheck npm run --silent typecheck
+          start lint npx eslint . --concurrency 2
+          start format npm run --silent format:check
 
           failed=()
           for i in "${!names[@]}"; do
             name=${names[$i]}
-            if wait "${pids[$i]}"; then
-              echo "::group::$name passed"
+            status=0
+            wait "${pids[$i]}" || status=$?
+            took="$(cat "$RUNNER_TEMP/$name.seconds" 2> /dev/null || echo '?')s"
+            if [ "$status" -eq 0 ]; then
+              echo "::group::$name passed in $took"
               cat "$RUNNER_TEMP/$name.log"
               echo "::endgroup::"
             else
               failed+=("$name")
-              echo "──── $name FAILED ────"
+              echo "──── $name FAILED in $took (exit $status) ────"
               cat "$RUNNER_TEMP/$name.log"
             fi
           done
@@ -227,11 +263,14 @@ jobs:
 
   # Typecheck and jest never run Metro, so without this a PR that breaks the
   # bundle (an import or asset only Metro resolves) would first fail in the
-  # store build after merge. It runs beside `test` on its own runner, not after
-  # it, and nothing waits for it: on main it does not hold up the store build
-  # (which bundles again anyway), it only keeps the Metro cache below warm for
-  # the pull requests that branch from it. A pull request can read a cache
-  # saved by its own earlier runs or by main, never by another pull request.
+  # store build after merge. It runs beside `checks` on its own runner.
+  #
+  # On a push to main it only keeps the Metro cache warm for the pull requests
+  # that branch from main (a pull request can read a cache saved by its own
+  # earlier runs or by main, never by another pull request): when the cache
+  # for this key already exists the job stops after looking it up, and when it
+  # does not, the job bundles and saves it. The store build does not wait for
+  # it either way; it bundles again itself.
   bundle:
     name: Bundle
     needs: changes
@@ -252,33 +291,75 @@ jobs:
             .github
             apps/mobile
 
-      - name: Set up dependencies
-        uses: ./.github/actions/mobile-deps
-
       # Metro keeps each file's transformed output in $TMPDIR/metro-cache,
-      # keyed by the file's contents, so a restored cache only skips files that
-      # have not changed and can never bring back a stale one. Resolving
-      # imports and assets, the thing this job is here to check, is never
-      # cached. With it the bundle takes about a third of the time.
+      # keyed by the file's contents and by its own configuration (the Babel
+      # config and every transform option), so a restored cache only skips
+      # files whose result would be the same. Resolving imports and assets, the
+      # thing this job is here to check, is never cached. With the cache the
+      # bundle takes about a third of the time.
       #
-      # The key is everything that changes how a file is transformed without
-      # changing the file: dependencies, patches, and the Babel, Metro,
-      # Tailwind and app config. A change to any of them starts a new cache;
-      # otherwise the cache is saved once and reused as it is, so it is not
-      # re-uploaded on every run. The files changed since it was saved are
-      # transformed again each run, which is seconds.
+      # The key adds what changes a transform without Metro noticing: the
+      # dependencies and their patches, the Babel plugin and Metro stubs in
+      # scripts/, and the Babel, Metro and Tailwind config. A change to any of
+      # them starts a new cache; otherwise it is saved once and reused as it
+      # is, so it is not uploaded again on every run. The files changed since
+      # it was saved are transformed again each run, which takes seconds. A
+      # push only looks the cache up (see above), it does not download it.
       - name: Restore Metro cache
+        id: metro
         uses: actions/cache@v5
         with:
           path: ${{ runner.temp }}/metro-cache
-          key: metro-${{ runner.os }}-${{ hashFiles('apps/mobile/package.json', 'apps/mobile/package-lock.json', 'apps/mobile/patches/**', 'apps/mobile/babel.config.js', 'apps/mobile/metro.config.js', 'apps/mobile/tailwind.config.js', 'apps/mobile/global.css', 'apps/mobile/app.json', 'apps/mobile/app.config.ts', 'apps/mobile/scripts/babel/**', 'apps/mobile/scripts/metro/**') }}
+          key: metro-${{ runner.os }}-${{ hashFiles('apps/mobile/package-lock.json', 'apps/mobile/patches/**', 'apps/mobile/babel.config.js', 'apps/mobile/metro.config.js', 'apps/mobile/tailwind.config.js', 'apps/mobile/global.css', 'apps/mobile/scripts/babel/**', 'apps/mobile/scripts/metro/**') }}
+          lookup-only: ${{ github.event_name == 'push' }}
+
+      # `checks` saves the node_modules cache; this job only reads it.
+      - name: Set up dependencies
+        if: github.event_name == 'pull_request' || steps.metro.outputs.cache-hit != 'true'
+        uses: ./.github/actions/node-deps
+        with:
+          directory: apps/mobile
+          node-version: 22
+          save: false
 
       - name: Bundle app
+        if: github.event_name == 'pull_request' || steps.metro.outputs.cache-hit != 'true'
         env:
           # Where Metro puts metro-cache/ (os.tmpdir()), so the step above
           # caches a path this workflow chose.
           TMPDIR: ${{ runner.temp }}
         run: npx expo export --platform ios --platform android --output-dir "$RUNNER_TEMP/expo-export"
+
+  # The one check to read on a pull request: green means `checks` and `bundle`
+  # both passed (or `bundle` had nothing to do). They are separate jobs so they
+  # can run at the same time, and without this a pull request with a broken
+  # bundle would look green on its checks alone. Nothing waits for this job:
+  # the store build is gated on `checks`, as it was when the bundle was a
+  # pull-request-only step.
+  test:
+    name: Test
+    needs: [changes, checks, bundle]
+    # Runs when the jobs it reports on failed, too; that is its purpose.
+    if: ${{ !cancelled() && needs.changes.outputs.checks == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: Check that the checks and the bundle passed
+        env:
+          CHECKS: ${{ needs.checks.result }}
+          BUNDLE: ${{ needs.bundle.result }}
+        run: |
+          echo "checks: $CHECKS"
+          echo "bundle: $BUNDLE"
+          if [ "$CHECKS" != success ]; then
+            echo "::error::The Checks job did not pass ($CHECKS)."
+            exit 1
+          fi
+          if [ "$BUNDLE" != success ] && [ "$BUNDLE" != skipped ]; then
+            echo "::error::The Bundle job did not pass ($BUNDLE)."
+            exit 1
+          fi
 
   # Production Worker deploys live in the dedicated cloudflare.yml workflow (runs on
   # push to main when apps/cloudflare/** changes), so there is no worker-deploy job here —
@@ -286,7 +367,10 @@ jobs:
 
   plan:
     name: Production · Plan
-    needs: [changes, test]
+    # Waits for `checks`, not for the `test` job that sums up `checks` and
+    # `bundle`: a job whose own `if:` has no status check is skipped when any
+    # job upstream of it was skipped, and `bundle` is skipped on a manual run.
+    needs: [changes, checks]
     # A push to main only cuts a store build when something in the push can
     # reach the binary — a Worker-only or docs-only merge stops here. Manual
     # dispatch always builds (that is what it is for).
@@ -463,7 +547,7 @@ jobs:
 
   dev-build:
     name: Dev · Build (${{ github.event.inputs.platform }})
-    needs: test
+    needs: checks
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.profile == 'development'
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -477,7 +561,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up dependencies
-        uses: ./.github/actions/mobile-deps
+        uses: ./.github/actions/node-deps
+        with:
+          directory: apps/mobile
+          node-version: 22
 
       - name: Set up EAS CLI
         uses: expo/expo-github-action@v8
