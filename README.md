@@ -5723,15 +5723,22 @@ over six years; medians, launch of 12 runs and saves of 8):
 
 | Measure                                              | Before   | After  |
 | ---------------------------------------------------- | -------- | ------ |
-| JavaScript start to first screen                     | 1,233 ms | 685 ms |
-| Module evaluation                                    | 246 ms   | 194 ms |
-| Loading the transactions (`txList`)                  | 472 ms   | 191 ms |
-| First render to laid out                             | 395 ms   | 206 ms |
-| Dropped-frame time in the 5 s after the first screen | 912 ms   | 422 ms |
-| Longest freeze in those 5 s                          | 383 ms   | 192 ms |
-| Quick-entry save: dropped-frame time                 | 1,059 ms | 105 ms |
-| Edit an entry: dropped-frame time                    | 1,587 ms | 95 ms  |
-| Edit an entry: longest freeze                        | 1,275 ms | 96 ms  |
+| JavaScript start to first screen                     | 1,290 ms | 732 ms |
+| Module evaluation                                    | 270 ms   | 204 ms |
+| Loading the transactions (`txList`)                  | 476 ms   | 203 ms |
+| First render to laid out                             | 390 ms   | 222 ms |
+| Dropped-frame time in the 5 s after the first screen | 850 ms   | 456 ms |
+| Longest freeze in those 5 s                          | 330 ms   | 197 ms |
+| Quick-entry save: dropped-frame time                 | 606 ms   | 115 ms |
+| Edit an entry: dropped-frame time                    | 1,601 ms | 93 ms  |
+| Edit an entry: longest freeze                        | 1,217 ms | 84 ms  |
+
+On a Pixel 10 emulator (Release, compiled ahead of time, the same data;
+launch of 10 runs, the rest of 8) launch to first screen went from 886 ms to
+750 ms, the transaction load from 293 ms to 182 ms, the longest freeze after
+an edit from 541 ms to 71 ms and after a quick-entry save from 155 ms to
+105 ms. The emulator does not hold 60 frames a second, so its dropped-frame
+totals are large on any build; compare the longest freeze there.
 
 What moved them: the local-day cache (`utils/localDate.ts`, the launch sort
 from about 225 ms to 20 ms, the calendar's month groups from 256 ms to 12 ms),
