@@ -52,7 +52,6 @@ import { computeItemStats } from '~/features/items/utils';
 import {
   buildRefundNote,
   countsTowardSpending,
-  filterSpendingTransactions,
   NO_REIMBURSEMENT,
 } from '~/features/reimbursements/lib/reimbursementMath';
 import { withEntryStamp } from '~/features/sharedLedgers/lib/entryStamp';
@@ -212,12 +211,9 @@ import {
   type AlbumLocation,
   type AlbumStats,
   type AppState,
-  type BreakdownItem,
   type BudgetPeriod,
   type BudgetTemplate,
-  type CashflowSummary,
   type Category,
-  type DateRange,
   DEFAULT_QUICK_ENTRY_PREFS,
   type ExchangeRate,
   isLocatedAlbum,
@@ -244,7 +240,6 @@ import {
   type WeekStartsOn,
 } from '~/types';
 import { isAccountArchived } from '~/utils/accountArchive';
-import { aggregateBreakdown } from '~/utils/breakdown';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import {
   buildRateTable,
@@ -283,6 +278,7 @@ import { recurrenceFrequencyOf } from '~/utils/recurringRules';
 import { countsAsExpenseRow } from '~/utils/spending';
 import {
   reconcileTransactionRow,
+  reconcileTransactionRows,
   reuseUnchangedTransactions,
   transactionSearchText,
 } from '~/utils/transactions';
@@ -697,17 +693,6 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
    *  transaction churn. */
   getUnpaidSplitBillCount: () => number;
   getTransactionsByAccount: (accountId: string) => TransactionWithRelations[];
-  queryTransactions: (filters?: Partial<TransactionFilters>) => TransactionWithRelations[];
-  getCashflowSummary: (range: DateRange) => CashflowSummary;
-  getExpenseBreakdownByCategory: (range: DateRange) => BreakdownItem[];
-  getExpenseBreakdownBySubcategory: (range: DateRange) => BreakdownItem[];
-  getIncomeBreakdown: (range: DateRange) => BreakdownItem[];
-  getTransfersBetweenAccounts: (
-    fromAccountId: string,
-    toAccountId: string,
-    start?: string,
-    end?: string,
-  ) => TransactionWithRelations[];
   getTrueHourlyRateForDate: (dateIso: string) => number;
   getDisplayValueForTransaction: (transaction: TransactionWithRelations) => number;
 
@@ -866,6 +851,8 @@ function computeAlbumStats(
 // seconds — the "transaction took ~10s to appear / redirect" symptom. The cap
 // guarantees the write always lands promptly.
 const DEFERRED_WRITE_MAX_DELAY_MS = 300;
+// Above this many written rows a reload costs no more than re-reading them by id.
+const RECONCILE_ROW_LIMIT = 500;
 function runDeferredWrite(task: () => void) {
   runAfterInteractionsCapped(task, DEFERRED_WRITE_MAX_DELAY_MS);
 }
@@ -1915,6 +1902,31 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [],
   );
 
+  // What the reminders were last scheduled from. Three places schedule them
+  // (a load, a prefs change, and the effect that follows the week and month
+  // start), and the effect runs right after either of the others with the very
+  // same values; it skips those, so a launch schedules once rather than twice.
+  const scheduledRemindersRef = useRef<{
+    prefs: NotificationPreferences;
+    weekStartsOn: WeekStartsOn;
+    firstDayOfMonth: number;
+  } | null>(null);
+  const scheduleReminders = useCallback(
+    (
+      prefs: NotificationPreferences,
+      options: { weekStartsOn: WeekStartsOn; firstDayOfMonth: number },
+    ) => {
+      scheduledRemindersRef.current = { prefs, ...options };
+      // expo-notifications' scheduling call can reject with a transient OS
+      // error (iOS's notification daemon connection dropping), which surfaced
+      // as an unhandled rejection on every cold start (Sentry MONEY2TIME-R).
+      syncScheduledNotifications(prefs, options).catch((error) => {
+        reportError(error, { scope: 'notifications' });
+      });
+    },
+    [],
+  );
+
   const refreshAll = useCallback(() => {
     try {
       const databaseInit = initializeDatabase();
@@ -2072,7 +2084,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
       const nextPeriodBudgets = periodBudgetsRepository.list();
 
-      const nextRawAccountBalances = accountsRepository.getBalances();
+      const nextRawAccountBalances = accountsRepository.getBalances(nextAccounts);
       perfMark('balances');
 
       // The review reminders deliberately carry no spend figure. A repeating
@@ -2081,11 +2093,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // not the one the notification recaps. On the firing day that is always a
       // full period stale, and "you spent X last week" pointing at the week
       // before last is worse than an invitation with no number in it.
-      syncScheduledNotifications(nextNotificationPrefs, {
+      scheduleReminders(nextNotificationPrefs, {
         weekStartsOn: nextSettings.weekStartsOn,
         firstDayOfMonth: nextSettings.firstDayOfMonth,
-      }).catch((error) => {
-        reportError(error, { scope: 'notifications' });
       });
 
       setCurrentMonthWage(effectiveCurrentWage);
@@ -2123,7 +2133,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       reportError(error, { scope: 'app_load' });
       setLoadError(getErrorMessage(error, I18n.t('errors.data_load_failed')));
     }
-  }, []);
+  }, [scheduleReminders]);
 
   const refreshTransactions = useCallback(() => {
     try {
@@ -2215,6 +2225,27 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       refreshTransactions();
     }, 0);
   }, [refreshTransactions]);
+
+  // After a write that knows exactly which rows it changed: re-read those rows
+  // and the balances, instead of every transaction in the ledger. On a long
+  // history the full reload was most of what froze the screen after an edit.
+  // Anything this cannot follow row by row still reloads.
+  const reconcileStoredTransactions = useCallback(
+    (ids: string[]) => {
+      if (ids.length > RECONCILE_ROW_LIMIT) {
+        scheduleRefreshTransactions();
+        return;
+      }
+      try {
+        const stored = transactionsRepository.listByIds(ids);
+        setTransactions((prev) => reconcileTransactionRows(prev, ids, stored));
+        setRawAccountBalances(accountsRepository.getBalances());
+      } catch {
+        scheduleRefreshTransactions();
+      }
+    },
+    [scheduleRefreshTransactions],
+  );
 
   useEffect(() => {
     perfMark('data_load_start');
@@ -3539,13 +3570,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         ),
       );
       runDeferredWrite(() => {
+        // The rows this write changed. `reload` is set when it changed rows
+        // this list cannot name, and the whole ledger is read again instead.
+        const writtenIds = normalizedUpdates.map(({ id }) => id);
+        let reload = false;
         try {
-          transactionsRepository.updateMany(normalizedUpdates);
+          transactionsRepository.updateMany(normalizedUpdates, nextUpdatedAt);
           // Shared ledgers: an entry given to someone else takes its refund
           // and its split paybacks with it (those were stamped from it).
           normalizedUpdates.forEach(({ id, input }) => {
             if (input.memberId !== undefined) {
               transactionsRepository.reassignLinked(id, input.memberId);
+              reload = true;
             }
           });
           // An expense and the income row written for its refund are a pair, so
@@ -3555,6 +3591,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           // moves the refund with it, or the two stop cancelling and the period
           // shows income that never arrived.
           normalizedUpdates.forEach(({ id, input }) => {
+            // Few rows have a refund, so the loaded row answers for the rest
+            // without three queries each (a bulk edit made hundreds).
+            if (
+              !transactionById.get(id)?.reimbursementTransactionId &&
+              input.reimbursementTransactionId == null
+            ) {
+              return;
+            }
             const current = transactionsRepository.getById(id);
             const refundId = current?.reimbursementTransactionId;
             if (!refundId) return;
@@ -3565,6 +3609,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 reimbursementAccountId: null,
                 reimbursementTransactionId: null,
               });
+              reload = true;
               return;
             }
             if (input.amount === undefined && input.currency === undefined) return;
@@ -3575,17 +3620,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               reportingAmount: current.reportingAmount,
               fxRate: current.fxRate,
             });
+            writtenIds.push(refundId);
           });
         } catch {
           // rollback on failure
+          reload = true;
         }
-        scheduleRefreshTransactions();
+        if (reload) scheduleRefreshTransactions();
+        else reconcileStoredTransactions(writtenIds);
       });
     },
     [
       accountCurrencyOf,
       accounts,
       buildSnapshot,
+      reconcileStoredTransactions,
       scheduleRefreshTransactions,
       resolveCategoryDefaultNote,
       resolveRelationNames,
@@ -3727,7 +3776,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const deletedHadReceipt = transactionsRef.current.some(
         (tx) => idSet.has(tx.id) && !!tx.receiptUri,
       );
+      // With no split or refund to put back, the rows taken out above are the
+      // whole change, so only the balances need reading again.
+      const removedRowsOnly =
+        parentTxIdsWithSplits.size === 0 &&
+        restoreByParentId.size === 0 &&
+        reopenExpenseIds.length === 0;
       runDeferredWrite(() => {
+        let reload = !removedRowsOnly;
         try {
           transactionsRepository.softDeleteMany(uniqueIds);
           if (parentTxIdsWithSplits.size > 0) {
@@ -3788,11 +3844,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           }
         } catch {
           // rollback on failure
+          reload = true;
         }
-        scheduleRefreshTransactions();
+        if (reload) scheduleRefreshTransactions();
+        else refreshAccountBalances();
       });
     },
-    [accountCurrencyOf, scheduleRefreshTransactions],
+    [accountCurrencyOf, refreshAccountBalances, scheduleRefreshTransactions],
   );
 
   const updateTransaction = useCallback(
@@ -5396,15 +5454,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
       // No fresh bodies here — a prefs toggle only moves the schedule, and the
       // next load recomputes the figures anyway.
-      syncScheduledNotifications(merged, {
+      scheduleReminders(merged, {
         weekStartsOn: weekStartsOnRef.current,
         firstDayOfMonth: monthCycleDefaultDay(monthCycleRef.current),
-      }).catch((error) => {
-        reportError(error, { scope: 'notifications' });
       });
       return merged;
     });
-  }, []);
+  }, [scheduleReminders]);
 
   const updateQuickEntryPrefs = useCallback((updates: Partial<QuickEntryPrefs>) => {
     const previous = quickEntryPrefsRef.current;
@@ -5488,25 +5544,34 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // The review reminders fire on the first day of the user's week and financial
   // month, so changing either in Display settings has to move the schedule.
   // `refreshAll` only reschedules on load, and these settings change in between.
+  // It also runs when a load finishes and after a prefs change, both of which
+  // have just scheduled from these same values: nothing to do then.
   const reviewWeekStartsOn = settings?.weekStartsOn;
   const reviewFirstDayOfMonth = settings?.firstDayOfMonth;
   useEffect(() => {
     if (isLoading || reviewWeekStartsOn === undefined || reviewFirstDayOfMonth === undefined) {
       return;
     }
-    syncScheduledNotifications(notificationPrefs, {
+    const scheduled = scheduledRemindersRef.current;
+    if (
+      scheduled &&
+      scheduled.prefs === notificationPrefs &&
+      scheduled.weekStartsOn === reviewWeekStartsOn &&
+      scheduled.firstDayOfMonth === reviewFirstDayOfMonth
+    ) {
+      return;
+    }
+    scheduleReminders(notificationPrefs, {
       weekStartsOn: reviewWeekStartsOn,
       firstDayOfMonth: reviewFirstDayOfMonth,
-    }).catch((error) => {
-      // This effect reruns on every app load (whenever `isLoading` flips),
-      // and expo-notifications' scheduling call can reject with a transient
-      // OS error (e.g. iOS's notification daemon connection dropping), which
-      // otherwise surfaced as an unhandled rejection on every cold start
-      // (Sentry MONEY2TIME-R). Every other call site in this file already
-      // catches and reports instead of letting it escape.
-      reportError(error, { scope: 'notifications' });
     });
-  }, [isLoading, notificationPrefs, reviewFirstDayOfMonth, reviewWeekStartsOn]);
+  }, [
+    isLoading,
+    notificationPrefs,
+    reviewFirstDayOfMonth,
+    reviewWeekStartsOn,
+    scheduleReminders,
+  ]);
 
   useEffect(() => {
     if (settings?.displayMode !== 'time') return;
@@ -5551,13 +5616,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       transactionsByAccountIdRef.current.get(accountId) ?? EMPTY_ACCOUNT_TRANSACTIONS,
     [],
   );
-
-  // Reads the repository fresh on every call, so it never returns stale data;
-  // like getTransactionsByAccount, its identity does not track transaction
-  // churn — memoizing callers must key on `useTransactions().transactions`.
-  const queryTransactions = useCallback((filters: Partial<TransactionFilters> = {}) => {
-    return transactionsRepository.list(filters);
-  }, []);
 
   const orderedRateHistory = useMemo(
     () => buildNormalizedRateHistory(monthlyWages),
@@ -5667,77 +5725,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // counts as spending. Only the analytics below read it; account balances and
   // statement periods always count every row.
   const reimbursementsCountAsExpense = settings?.reimbursementsCountAsExpense ?? true;
-
-  const getCashflowSummary = useCallback(
-    (range: DateRange): CashflowSummary => {
-      const txns = filterSpendingTransactions(
-        transactionsRepository.listForSummary({
-          dateRange: range,
-        }),
-        reimbursementsCountAsExpense,
-      );
-
-      let income = 0;
-      let expense = 0;
-      txns.forEach((transaction) => {
-        const value = valueForDisplay(
-          transaction.reportingAmount ?? transaction.amount,
-          transaction.date,
-        );
-        if (transaction.type === 'income') {
-          income += value;
-        } else if (countsAsExpenseRow(transaction)) {
-          // Transfers are already in this result set (the query is untyped);
-          // only the counted ones cross into the expense total.
-          expense += value;
-        }
-      });
-
-      return { income, expense };
-    },
-    [valueForDisplay, reimbursementsCountAsExpense],
-  );
-
-  const buildBreakdown = useCallback(
-    (range: DateRange, type: 'income' | 'expense', groupByRoot: boolean): BreakdownItem[] => {
-      const txns = filterSpendingTransactions(
-        transactionsRepository.listForSummary(
-          {
-            type,
-            dateRange: range,
-          },
-          // A counted loan repayment carries the category the borrower picked,
-          // so it groups like any other expense once the query returns it.
-          { includeCountedTransfers: type === 'expense' },
-        ),
-        reimbursementsCountAsExpense,
-      );
-
-      return aggregateBreakdown(txns, {
-        resolveCategory: (id) => categoryByIdMap.get(id),
-        valueOf: valueForDisplay,
-        groupByRoot,
-      });
-    },
-    // Transactions are read fresh from the DB inside, so results are never
-    // stale; the identity deliberately does NOT track transaction churn (that
-    // dep rebuilt the whole useApp() value on every write). Memoizing callers
-    // must key on `useTransactions().transactions`.
-    [categoryByIdMap, valueForDisplay, reimbursementsCountAsExpense],
-  );
-
-  const getExpenseBreakdownByCategory = useCallback(
-    (range: DateRange) => buildBreakdown(range, 'expense', true),
-    [buildBreakdown],
-  );
-  const getExpenseBreakdownBySubcategory = useCallback(
-    (range: DateRange) => buildBreakdown(range, 'expense', false),
-    [buildBreakdown],
-  );
-  const getIncomeBreakdown = useCallback(
-    (range: DateRange) => buildBreakdown(range, 'income', false),
-    [buildBreakdown],
-  );
 
   // Stats for every album: each album's member ids (one query, re-read only
   // when `albums` reloads, which every membership change does) summed against
@@ -6089,18 +6076,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       );
     },
     [refreshBudgets, runMutation],
-  );
-
-  const getTransfersBetweenAccounts = useCallback(
-    (fromAccountId: string, toAccountId: string, start?: string, end?: string) => {
-      return transactionsRepository.getTransfersBetweenAccounts(
-        fromAccountId,
-        toAccountId,
-        start,
-        end,
-      );
-    },
-    [],
   );
 
   // Ledgers
@@ -6575,12 +6550,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             getReceiptCount,
             getUnpaidSplitBillCount,
             getTransactionsByAccount,
-            queryTransactions,
-            getCashflowSummary,
-            getExpenseBreakdownByCategory,
-            getExpenseBreakdownBySubcategory,
-            getIncomeBreakdown,
-            getTransfersBetweenAccounts,
             getTrueHourlyRateForDate,
             getDisplayValueForTransaction,
             resetTransactionsOnly,
@@ -6718,12 +6687,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       getReceiptCount,
       getUnpaidSplitBillCount,
       getTransactionsByAccount,
-      queryTransactions,
-      getCashflowSummary,
-      getExpenseBreakdownByCategory,
-      getExpenseBreakdownBySubcategory,
-      getIncomeBreakdown,
-      getTransfersBetweenAccounts,
       getTrueHourlyRateForDate,
       getDisplayValueForTransaction,
       resetTransactionsOnly,

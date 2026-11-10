@@ -5,7 +5,6 @@ import { getDb, getSQLite } from '~/lib/db/client';
 import { getActiveLedgerId, inActiveLedger } from '~/lib/db/ledgerScope';
 import { transactionsTable } from '~/lib/db/schema';
 import type {
-  CashflowSummary,
   Transaction,
   TransactionFilters,
   TransactionSentiment,
@@ -322,21 +321,7 @@ function matchesIncludedCategory(transaction: TransactionWithRelations, category
   return transaction.categoryId === categoryId || transaction.categoryParentId === categoryId;
 }
 
-/**
- * Options that only the spending aggregations pass. Kept off
- * {@link TransactionFilters} on purpose: that type is the user's own filter
- * state, persisted and shown in the filter sheet, and picking "Expense" there
- * must keep meaning expense rows.
- */
-export interface TransactionQueryOptions {
-  /**
-   * Widen a `type: 'expense'` query to also return the transfers the user
-   * asked to be counted as spending (loan repayments). See `utils/spending.ts`.
-   */
-  includeCountedTransfers?: boolean;
-}
-
-function buildSqlPredicates(normalized: TransactionFilters, options?: TransactionQueryOptions) {
+function buildSqlPredicates(normalized: TransactionFilters) {
   const predicates = [
     isNull(transactionsTable.deletedAt),
     inActiveLedger(transactionsTable),
@@ -344,17 +329,9 @@ function buildSqlPredicates(normalized: TransactionFilters, options?: Transactio
       ? or(eq(transactionsTable.type, 'balance_adjustment'), eq(transactionsTable.type, 'transfer'))
       : normalized.type === 'transfer'
         ? eq(transactionsTable.type, 'transfer')
-        : normalized.type === 'expense' && options?.includeCountedTransfers
-          ? or(
-              eq(transactionsTable.type, 'expense'),
-              and(
-                eq(transactionsTable.type, 'transfer'),
-                eq(transactionsTable.countsAsExpense, true),
-              ),
-            )
-          : normalized.type !== 'all'
-            ? eq(transactionsTable.type, normalized.type)
-            : undefined,
+        : normalized.type !== 'all'
+          ? eq(transactionsTable.type, normalized.type)
+          : undefined,
     normalized.dateRange ? gte(transactionsTable.date, normalized.dateRange.start) : undefined,
     normalized.dateRange ? lte(transactionsTable.date, normalized.dateRange.end) : undefined,
     normalized.accountId
@@ -385,20 +362,16 @@ function buildSqlPredicates(normalized: TransactionFilters, options?: Transactio
 const ALWAYS_ON_PREDICATES = 2;
 
 class TransactionsRepository {
-  // Plain rows matching the SQL-level filters only — no relation JOINs and no
-  // splits lookup. Used by aggregations (cashflow, category breakdowns) which
-  // read amount/type/date/categoryId and never touch account/category names or
-  // splits, so the two extra queries in `list()` are pure waste there.
-  listForSummary(
-    filters: Partial<TransactionFilters> = {},
-    options?: TransactionQueryOptions,
-  ): Transaction[] {
+  // Plain rows matching the SQL-level filters only: no relation names and no
+  // splits. For aggregations that read amount, type, date and category and
+  // never touch those, so the lookups in `list()` would be pure waste.
+  listForSummary(filters: Partial<TransactionFilters> = {}): Transaction[] {
     const db = getDb();
     const normalized = normalizeTransactionFilters(filters);
     return db
       .select()
       .from(transactionsTable)
-      .where(and(...buildSqlPredicates(normalized, options)))
+      .where(and(...buildSqlPredicates(normalized)))
       .all()
       .map(toTransaction);
   }
@@ -499,10 +472,6 @@ class TransactionsRepository {
     });
 
     return perfSpan('tx_sort', () => sortTransactions(filtered, normalized.sortBy));
-  }
-
-  listByAccount(accountId: string) {
-    return this.list({ accountId, sortBy: 'date_desc' });
   }
 
   /**
@@ -688,11 +657,18 @@ class TransactionsRepository {
       .run();
   }
 
-  updateMany(updates: { id: string; input: Partial<CreateTransactionInput> }[]) {
+  /**
+   * `now` stamps updatedAt. A caller that already rendered the edit
+   * optimistically passes the stamp it used, so the stored rows match what is
+   * on screen and the reconcile after the write has nothing to change.
+   */
+  updateMany(
+    updates: { id: string; input: Partial<CreateTransactionInput> }[],
+    now: string = nowIso(),
+  ) {
     if (updates.length === 0) return;
     const sqlite = getSQLite();
     const db = getDb();
-    const now = nowIso();
 
     sqlite.execSync('BEGIN');
     try {
@@ -792,66 +768,6 @@ class TransactionsRepository {
         ),
       )
       .run();
-  }
-
-  getCashflowSummary(range: { start: string; end: string }): CashflowSummary {
-    const db = getDb();
-    const rows = db
-      .select()
-      .from(transactionsTable)
-      .where(
-        and(
-          isNull(transactionsTable.deletedAt),
-          inActiveLedger(transactionsTable),
-          gte(transactionsTable.date, range.start),
-          lte(transactionsTable.date, range.end),
-          inArray(transactionsTable.type, ['income', 'expense']),
-        ),
-      )
-      .all();
-
-    let income = 0;
-    let expense = 0;
-    rows.forEach((row) => {
-      // Reporting currency, like every other total: `amount` is whatever
-      // currency the row was entered in.
-      const value = row.reportingAmount ?? row.amount;
-      if (row.type === 'income') {
-        income += value;
-      } else if (row.type === 'expense') {
-        expense += value;
-      }
-    });
-
-    return { income, expense };
-  }
-
-  getTransfersBetweenAccounts(
-    fromAccountId: string,
-    toAccountId: string,
-    start?: string,
-    end?: string,
-  ): TransactionWithRelations[] {
-    const db = getDb();
-
-    const rows = db
-      .select()
-      .from(transactionsTable)
-      .where(
-        and(
-          isNull(transactionsTable.deletedAt),
-          inActiveLedger(transactionsTable),
-          eq(transactionsTable.type, 'transfer'),
-          eq(transactionsTable.fromAccountId, fromAccountId),
-          eq(transactionsTable.toAccountId, toAccountId),
-          start ? gte(transactionsTable.date, start) : undefined,
-          end ? lte(transactionsTable.date, end) : undefined,
-        ),
-      )
-      .all()
-      .map(toTransaction);
-    const orderedRows = sortTransactions(rows, 'date_desc');
-    return attachRelations(orderedRows);
   }
 }
 

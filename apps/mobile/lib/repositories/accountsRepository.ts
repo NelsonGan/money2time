@@ -230,8 +230,8 @@ class AccountsRepository {
       .run();
   }
 
-  getBalances(): AccountBalance[] {
-    const accounts = this.list();
+  /** `accounts` is the open ledger's accounts when the caller has just read them. */
+  getBalances(accounts: Account[] = this.list()): AccountBalance[] {
     if (accounts.length === 0) return [];
 
     // Totals for the open ledger's accounts only, so a small ledger stays fast

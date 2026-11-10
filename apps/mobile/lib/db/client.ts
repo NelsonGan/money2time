@@ -173,8 +173,21 @@ export function getSQLite(): SQLiteDatabase {
   return sqlite;
 }
 
+let drizzleDb: ReturnType<typeof drizzle> | null = null;
+let drizzleConnection: SQLiteDatabase | null = null;
+
+/**
+ * The Drizzle wrapper for the open connection. One per connection: every
+ * repository call asks for it, and building a new dialect and session each
+ * time was pure overhead.
+ */
 export function getDb() {
-  return drizzle(getSQLite(), devSqlLogger ? { logger: devSqlLogger } : undefined);
+  const connection = getSQLite();
+  if (!drizzleDb || drizzleConnection !== connection) {
+    drizzleDb = drizzle(connection, devSqlLogger ? { logger: devSqlLogger } : undefined);
+    drizzleConnection = connection;
+  }
+  return drizzleDb;
 }
 
 export interface DatabaseInitResult extends MigrationRunResult {
