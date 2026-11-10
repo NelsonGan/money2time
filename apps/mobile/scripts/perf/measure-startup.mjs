@@ -25,7 +25,6 @@
  * includes process creation and native init. Android also reports the OS's
  * own `am start -W` TotalTime, which runs until the first frame is drawn.
  */
-import { spawn } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
 
 import {
@@ -36,9 +35,12 @@ import {
   option,
   parsePerfLines,
   restoreAndroidGolden,
+  restoreIosGolden,
   run,
   simctlArgs,
   sleep,
+  spanTimes,
+  startIosPerfLog,
   tryRun,
   waitFor,
 } from './lib.mjs';
@@ -58,35 +60,12 @@ if (!['ios', 'android'].includes(platform) || !device) {
   process.exit(1);
 }
 
-// iOS: one `log stream` for the whole session, buffered into a string.
-let iosLog = '';
-let iosStream = null;
-async function startIosStream() {
-  iosStream = spawn(
-    'xcrun',
-    simctlArgs(
-      'spawn',
-      device,
-      'log',
-      'stream',
-      '--level',
-      'debug',
-      '--style',
-      'compact',
-      '--predicate',
-      'eventMessage CONTAINS "[m2t-perf]"',
-    ),
-  );
-  iosStream.stdout.on('data', (chunk) => {
-    iosLog += chunk.toString();
-  });
-  await sleep(1500);
-}
+// iOS: one `log stream` for the whole session.
+let iosLog = null;
 
 // The frame report, then a moment for the marks line that follows it and the
 // spans line after that (a build from before either existed never sends it).
-async function waitForPostLaunch(readText) {
-  const read = () => parsePerfLines(readText());
+async function waitForPostLaunch(read) {
   await waitFor(read, (list) => list.some((e) => e.kind === 'post_launch'));
   await waitFor(read, (list) => list.some((e) => e.kind === 'post_launch_marks'), 1000);
   return waitFor(
@@ -96,20 +75,8 @@ async function waitForPostLaunch(readText) {
   );
 }
 
-/** `span:<name>` -> ms for each span the app timed in `phase` (see `perfSpan`). */
-function spanTimes(events, phase) {
-  const line = events.find((e) => e.kind === 'spans' && e.phase === phase);
-  return Object.fromEntries(
-    Object.entries(line?.spans ?? {}).map(([name, [ms]]) => [`span:${name}`, ms]),
-  );
-}
-
 function restoreIos() {
-  const container = run('xcrun', simctlArgs('get_app_container', device, bundle, 'data')).trim();
-  for (const dir of ['SQLite', 'user-assets']) {
-    run('rm', ['-rf', `${container}/Documents/${dir}`]);
-    run('cp', ['-R', `${golden}/${dir}`, `${container}/Documents/${dir}`]);
-  }
+  const container = restoreIosGolden(device, golden, bundle);
   if (backupDue) {
     run('sqlite3', [
       `${container}/Documents/SQLite/money2time.db`,
@@ -133,10 +100,10 @@ async function runOnce(index) {
     tryRun('xcrun', simctlArgs('terminate', device, bundle));
     if (golden) restoreIos();
     await sleep(settleMs);
-    iosLog = '';
+    iosLog.clear();
     t0 = Date.now();
     run('xcrun', simctlArgs('launch', device, bundle));
-    events = await waitForPostLaunch(() => iosLog);
+    events = await waitForPostLaunch(iosLog.events);
   } else {
     tryRun(adb, ['-s', device, 'shell', 'am', 'force-stop', bundle]);
     if (golden) restoreAndroid();
@@ -152,7 +119,9 @@ async function runOnce(index) {
     const total = output.match(/TotalTime:\s*(\d+)/);
     osTotalTime = total ? Number(total[1]) : null;
     events = await waitForPostLaunch(() =>
-      tryRun(adb, ['-s', device, 'logcat', '-d', '-v', 'raw', '-s', 'ReactNativeJS:*']),
+      parsePerfLines(
+        tryRun(adb, ['-s', device, 'logcat', '-d', '-v', 'raw', '-s', 'ReactNativeJS:*']),
+      ),
     );
   }
   const startup = events.find((e) => e.kind === 'startup');
@@ -204,13 +173,13 @@ async function runOnce(index) {
 }
 
 const activity = platform === 'android' ? androidLauncherActivity(device, bundle) : null;
-if (platform === 'ios') await startIosStream();
+if (platform === 'ios') iosLog = await startIosPerfLog(device);
 const results = [];
 for (let index = 0; index < runs; index += 1) {
   const result = await runOnce(index);
   if (result) results.push(result);
 }
-iosStream?.kill();
+iosLog?.stop();
 
 const keys = [...new Set(results.flatMap((result) => Object.keys(result)))].filter(
   (key) => key !== 'run' && key !== 'detail',

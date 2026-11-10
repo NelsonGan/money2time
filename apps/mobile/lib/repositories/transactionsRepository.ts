@@ -61,7 +61,6 @@ export function assertInOpenLedger(input: CreateTransactionInput): void {
   }
 }
 
-
 export interface CreateTransactionInput {
   type: TransactionType;
   amount: number;

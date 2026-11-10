@@ -99,7 +99,11 @@ describe.each(ZONES)('localDayOfTime in %s', (zone) => {
   });
 
   it('answers as Date does outside the cached range', () => {
-    for (const time of [Date.UTC(1969, 11, 31, 23, 59), Date.UTC(1900, 5, 15), Date.UTC(2150, 0, 1)]) {
+    for (const time of [
+      Date.UTC(1969, 11, 31, 23, 59),
+      Date.UTC(1900, 5, 15),
+      Date.UTC(2150, 0, 1),
+    ]) {
       expect(localDayOfTime(time)).toEqual(expected(time));
     }
   });

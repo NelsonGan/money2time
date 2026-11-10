@@ -1,5 +1,6 @@
 import {
   addFinancialMonths,
+  buildMonthCycle,
   clampFirstDayOfMonth,
   financialMonthAnchorForToday,
   financialMonthDayKeys,
@@ -238,5 +239,31 @@ describe('financialYearEndForDate', () => {
         );
       }
     }
+  });
+});
+
+describe('financialMonthKeyForIso with a cycle asked about many times', () => {
+  it('answers for whichever cycle is passed, back and forth', () => {
+    const payday = buildMonthCycle(25, null);
+    const calendar = buildMonthCycle(1, null);
+    const pinned = buildMonthCycle(25, JSON.stringify({ '2026-03': 10 }));
+    for (let round = 0; round < 3; round += 1) {
+      expect(financialMonthKeyForIso('2026-03-12', payday)).toBe('2026-02');
+      expect(financialMonthKeyForIso('2026-03-12', calendar)).toBe('2026-03');
+      expect(financialMonthKeyForIso('2026-03-12', pinned)).toBe('2026-03');
+      expect(financialMonthKeyForIso('2026-03-12T04:00:00.000Z', payday)).toBe('2026-02');
+    }
+  });
+
+  it('follows a cycle object that is changed in place', () => {
+    // Only a frozen cycle is remembered between calls; this one is not.
+    const cycle = { defaultDay: 1, overrides: {} as Record<string, number> };
+    expect(financialMonthKeyForIso('2026-03-12', cycle)).toBe('2026-03');
+    cycle.overrides['2026-03'] = 20;
+    expect(financialMonthKeyForIso('2026-03-12', cycle)).toBe('2026-02');
+    cycle.defaultDay = 25;
+    delete cycle.overrides['2026-03'];
+    expect(financialMonthKeyForIso('2026-03-12', cycle)).toBe('2026-02');
+    expect(financialMonthKeyForIso('2026-03-26', cycle)).toBe('2026-03');
   });
 });

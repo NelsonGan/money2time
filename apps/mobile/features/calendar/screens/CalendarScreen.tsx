@@ -88,10 +88,7 @@ import {
 import { countsAsExpenseRow } from '~/utils/spending';
 import { whenSplashHidden } from '~/utils/splashState';
 import { reuseUnchangedGroups, transactionSearchText } from '~/utils/transactions';
-import {
-  compareTransactionsByDateDesc,
-  mergeTransactionsByDateDesc,
-} from '~/utils/transactionSorting';
+import { mergeTransactionsByDateDesc, sortTransactions } from '~/utils/transactionSorting';
 
 import { CalendarMonthGrid } from '../components/CalendarMonthGrid';
 import {
@@ -681,9 +678,9 @@ export function CalendarScreen({
                 entry.amountKeys.some((key) => amountKeyMatches(key, amountQuery))),
           )
           .map((entry) => entry.tx)
-      : [...filteredTransactions];
-    matched.sort(compareTransactionsByDateDesc);
-    return matched;
+      : filteredTransactions;
+    // Already newest first, so this is a check rather than a sort.
+    return sortTransactions(matched, 'date_desc');
   }, [isSearchOpen, debouncedSearchQuery, searchIndex, filteredTransactions]);
 
   useEffect(() => {

@@ -51,6 +51,7 @@ import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import { withColorAlpha } from '~/utils/color';
 import { FONT } from '~/utils/fonts';
 import { formatAmount, formatHours } from '~/utils/formatters';
+import { compareText } from '~/utils/transactionSorting';
 
 type DrilldownSortOption = 'default' | 'largest_value';
 type DrilldownTransactionFilter = 'income' | 'expense';
@@ -294,9 +295,9 @@ export function InsightsDrilldownScreen({
         const bValue = valueById.get(b.id) ?? 0;
         const amountDelta = Math.abs(bValue) - Math.abs(aValue);
         if (amountDelta !== 0) return amountDelta;
-        const dateDelta = b.date.localeCompare(a.date);
+        const dateDelta = compareText(b.date, a.date);
         if (dateDelta !== 0) return dateDelta;
-        return b.createdAt.localeCompare(a.createdAt);
+        return compareText(b.createdAt, a.createdAt);
       });
       return sorted;
     },

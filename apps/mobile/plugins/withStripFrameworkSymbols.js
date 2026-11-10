@@ -21,7 +21,11 @@
  * build with signing off (an unsigned archive) is left unsigned, as CocoaPods
  * leaves it, and is signed when it is exported. A framework strip cannot
  * handle is skipped with a warning rather than failing the release.
- * Release only: Debug keeps its symbols for the debugger.
+ * Release only: Debug keeps its symbols for the debugger. Device builds only:
+ * a simulator build is never shipped, and an arm64 simulator refuses to load
+ * a framework whose signature the strip invalidated, which a build with
+ * signing off (how the Simlock pool and the perf builds are made) never puts
+ * back. Such a Release build died in dyld before running a line of the app.
  */
 const { withPodfile } = require('@expo/config-plugins');
 
@@ -30,6 +34,7 @@ const PHASE_NAME = '[Money2Time] Strip framework symbols';
 
 const STRIP_SCRIPT = `set -e
 [ "$CONFIGURATION" = "Release" ] || exit 0
+[ "\${PLATFORM_NAME:-}" = "iphonesimulator" ] && exit 0
 frameworks="$TARGET_BUILD_DIR/$FRAMEWORKS_FOLDER_PATH"
 [ -d "$frameworks" ] || exit 0
 for framework in "$frameworks"/*.framework; do
