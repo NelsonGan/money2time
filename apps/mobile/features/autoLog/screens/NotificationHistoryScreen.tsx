@@ -56,6 +56,11 @@ import { minorUnitDigits } from '~/utils/moneyText';
 
 import { NotificationAiCard } from '../components/NotificationAiCard';
 import { isPayableAccount } from '../lib/binding';
+import {
+  leavePromptButtons,
+  rememberedReviewSelections,
+  rememberReviewSelections,
+} from '../lib/reviewLeave';
 
 export function NotificationHistoryScreen({ onBack }: { onBack: () => void }) {
   const app = useApp();
@@ -85,7 +90,8 @@ export function NotificationHistoryScreen({ onBack }: { onBack: () => void }) {
     };
     setLoading(true);
     setHistory([]);
-    setSelections({});
+    // Picks made before a Review later come back with the cards.
+    setSelections(rememberedReviewSelections(identity.current.user, identity.current.generation));
     setFailed(false);
     const load = () => {
       void readNotificationScanHistory(settings.appUserId)
@@ -111,6 +117,16 @@ export function NotificationHistoryScreen({ onBack }: { onBack: () => void }) {
     };
   }, [settings.appUserId, retry]);
   const pending = history.filter((entry) => entry.result === 'pending');
+  const pendingKey = pending.map((entry) => entry.id).join('|');
+  useEffect(() => {
+    if (loading) return;
+    rememberReviewSelections(
+      identity.current.user,
+      identity.current.generation,
+      selections,
+      pendingKey ? pendingKey.split('|') : [],
+    );
+  }, [loading, pendingKey, selections]);
   const run = async (ids: string[], action: 'income' | 'expense' | 'none'): Promise<boolean> => {
     if (busyRef.current) return false;
     busyRef.current = true;
@@ -234,11 +250,13 @@ export function NotificationHistoryScreen({ onBack }: { onBack: () => void }) {
     }
   };
   // Root-stack route: covers back button, hardware back and iOS swipe-back.
-  // No bottom tabs remain visible, so switching tabs cannot bypass the warning.
+  // No bottom tabs remain visible, so switching tabs cannot skip the prompt.
+  // Leaving with items pending asks first; Review later is the default.
   usePreventRemove(loading || pending.length > 0 || busy, ({ data }) => {
     if (busyRef.current || loading) return;
     const ids = pending.map((entry) => entry.id);
-    // Review later leaves everything in To review; the home banner brings it back.
+    // Review later leaves everything in To review, picks included; the home
+    // banner counts them (one dismissed earlier returns on the next app open).
     const later: AlertButton = {
       text: I18n.t('payment_alerts.review_leave_later'),
       isPreferred: true,
@@ -262,11 +280,7 @@ export function NotificationHistoryScreen({ onBack }: { onBack: () => void }) {
           : 'payment_alerts.review_leave_body',
         { count: ids.length },
       ),
-      // iOS stacks the buttons and moves Cancel last, so Review later goes
-      // first. Android takes them as neutral, negative, positive: stacked, that
-      // is Review later on top and Ignore at the bottom; on one line, Ignore
-      // sits alone on the left. Either way Cancel keeps it from Review later.
-      Platform.OS === 'android' ? [ignore, cancel, later] : [cancel, later, ignore],
+      leavePromptButtons(Platform.OS, { cancel, later, ignore }),
     );
   });
   const money = (amount: number, currency: string) =>
