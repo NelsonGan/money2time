@@ -43,6 +43,10 @@ const I18n = new I18nJs({ en });
 const loadedLocales = new Set(['en']);
 
 I18n.enableFallback = true;
+// Placeholders are `{{name}}` or `%{name}` with a plain name. The i18n-js
+// default also takes `%{{name}}`, Turkish's "%20" style, as a placeholder
+// named `{name` and renders `[missing "%{{name}}" value]`.
+I18n.placeholder = /(?:\{\{|%\{)([\w.]+)\}\}?/gm;
 I18n.defaultLocale = 'en';
 
 const SUPPORTED_LOCALES = Object.keys(LOCALE_LOADERS);
