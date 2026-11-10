@@ -11,7 +11,7 @@ import React, {
 } from 'react';
 import type { LayoutChangeEvent, StyleProp, View as ViewType, ViewStyle } from 'react-native';
 import { View } from 'react-native';
-import type { GestureType } from 'react-native-gesture-handler';
+import type { GestureType, LegacyGestureStateManager } from 'react-native-gesture-handler';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import type { AnimatedRef, SharedValue } from 'react-native-reanimated';
 import Animated, {
@@ -187,6 +187,24 @@ export function ReorderShiftView({ id, children }: { id: string; children: React
 }
 
 /**
+ * Activates a grip's gesture from `onTouchesDown`, so the list cannot scroll
+ * instead.
+ *
+ * `activate()` alone is not enough on iOS with react-native-gesture-handler
+ * 3.3.0: it ignores activating a gesture that has not begun, and a grip
+ * touched for the first time begins only after `onTouchesDown` returns. The
+ * list then took the touch, scrolled, and cancelled the drag; the next try on
+ * the same grip worked, because a used grip keeps its last state. `begin()`
+ * marks it begun first. Gesture handler 3.5.0 does this inside `activate()`,
+ * so this can go back to a plain `activate()` after upgrading.
+ */
+function claimTouch(manager: LegacyGestureStateManager) {
+  'worklet';
+  manager.begin();
+  manager.activate();
+}
+
+/**
  * The grip a row is dragged by. It takes the touch the moment it lands, as the
  * Sortable handle did, so it never starts a scroll instead.
  *
@@ -215,7 +233,7 @@ export function ReorderGrip({
         // and do nothing. Let go, it would scroll the list out from under the
         // row that is landing.
         if (settling.value) {
-          manager.activate();
+          claimTouch(manager);
           return;
         }
         const touch = event.allTouches[0];
@@ -223,7 +241,7 @@ export function ReorderGrip({
           manager.fail();
           return;
         }
-        manager.activate();
+        claimTouch(manager);
       })
       .onTouchesMove((event) => {
         const touch = event.allTouches[0];
