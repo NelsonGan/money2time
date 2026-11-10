@@ -25,16 +25,6 @@ const it: LocaleModule = {
     s13: { h: 'Importa\ncon un Tap', hl: 'con un Tap', sh: 'L\'IA legge l\'estratto. Tu confermi', she: '🤖', aiPowered: 'Con IA', oneTap: 'Copia Testo', pasteJSON: 'Incolla JSON' },
     s14: { h: 'Scrivi.\nTocca. Fatto.', hl: 'Fatto.', sh: 'La tastiera è la via più veloce', she: '⌨️', type: 'Caffè 6.50', tap: '↵', done: '0m per segnare', category: 'Auto · Cibo / Caffè' },
     s16: { h: 'Fissa il Budget.\nResta in Rotta.', hl: 'Resta in Rotta.', sh: 'Ogni categoria, sempre in vista', she: '🎯', ring: '80%', left: '$730.85 rimasti', budgeted: 'Spesa a budget', unbudgeted: 'Spesa fuori budget' },
-    s15: {
-      privacy: 'Privacy prima di tutto', privacySub: 'I tuoi dati non lasciano mai il telefono',
-      heroSub: 'I tuoi dati restano sul tuo dispositivo. Da sempre, per sempre.',
-      noAds: 'Niente pubblicità', noAdsSub: 'Zero distrazioni. Solo le tue finanze.',
-      local: 'Completamente locale', localSub: 'Funziona offline. Nessun account richiesto',
-      inspiredPre: 'Ispirata a',
-      bookSub: 'Il denaro è l’energia vitale che scambi per averlo',
-      bookDesc: 'Il classico intramontabile della finanza personale. Saggezza pratica su denaro, tempo e vita.',
-      downloads: '50.000+ utenti',
-    },
   },
 
   feature: {

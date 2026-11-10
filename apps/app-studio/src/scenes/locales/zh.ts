@@ -19,16 +19,6 @@ const zh: LocaleModule = {
     s13: { h: '一键\n导入账单', hl: '导入账单', sh: 'AI 读账单，你只需确认', she: '🤖', aiPowered: 'AI 智能', oneTap: '复制提示', pasteJSON: '粘贴 JSON' },
     s14: { h: '输入\n即记账', hl: '即记账', sh: '键盘是最快的入口', she: '⌨️', type: '咖啡 25', tap: '↵', done: '0分钟搞定', category: '自动 · 餐饮 / 咖啡' },
     s16: { h: '设好预算\n不再超支', hl: '不再超支', sh: '每个分类，一目了然', she: '🎯', ring: '80%', left: '还剩 $730.85', budgeted: '预算内支出', unbudgeted: '预算外支出' },
-    s15: {
-      privacy: '隐私优先', privacySub: '数据只保存在你的手机上',
-      heroSub: '数据始终留在你的设备上，过去如此，将来也是。',
-      noAds: '没有广告', noAdsSub: '没有干扰，只有你的账本',
-      local: '完全本地', localSub: '完全离线可用，无需注册账号',
-      inspiredPre: '灵感来自',
-      bookSub: '金钱，是你用生命能量换来的',
-      bookDesc: '经久不衰的个人理财经典，关于金钱、时间与人生的实用智慧。',
-      downloads: '50,000+ 用户',
-    },
   },
 
   feature: {

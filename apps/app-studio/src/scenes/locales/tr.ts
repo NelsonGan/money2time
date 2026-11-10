@@ -25,16 +25,6 @@ const tr: LocaleModule = {
     s13: { h: 'Tek Dokunuşla\nİçe Aktar', hl: 'İçe Aktar', sh: 'Yapay zekâ ekstrenı okur. Sen onaylarsın', she: '🤖', aiPowered: 'Yapay zekâ', oneTap: 'Metni Kopyala', pasteJSON: 'JSON Yapıştır' },
     s14: { h: 'Yaz.\nDokun. Bitti.', hl: 'Bitti.', sh: 'Klavyen en hızlı yoldur', she: '⌨️', type: 'Kahve 6.50', tap: '↵', done: '0m kayıt', category: 'Oto · Yemek / Kahve' },
     s16: { h: 'Bütçeni Kur.\nYolunda Kal.', hl: 'Yolunda Kal.', sh: 'Her kategori, her zaman görünür', she: '🎯', ring: '80%', left: '$730.85 kaldı', budgeted: 'Bütçeli harcama', unbudgeted: 'Bütçe dışı harcama' },
-    s15: {
-      privacy: 'Önce gizlilik', privacySub: 'Verilerin telefonundan asla çıkmaz',
-      heroSub: 'Verilerin cihazında kalır. Her zaman öyleydi, hep öyle kalacak.',
-      noAds: 'Reklam yok', noAdsSub: 'Dikkat dağıtan hiçbir şey yok. Sadece finansların.',
-      local: 'Tamamen yerel', localSub: 'Çevrimdışı çalışır. Hesap gerekmez',
-      inspiredPre: 'İlham kaynağı',
-      bookSub: 'Para, karşılığında verdiğin yaşam enerjisidir',
-      bookDesc: 'Kişisel finansın zamansız klasiği. Para, zaman ve hayata dair pratik bilgelik.',
-      downloads: '50.000+ kullanıcı',
-    },
   },
 
   feature: {

@@ -19,16 +19,6 @@ const ja: LocaleModule = {
     s13: { h: '一瞬で\n取込み', hl: '取込み', sh: 'AIが明細を読み取り確認のみ', she: '🤖', aiPowered: 'AI 搭載', oneTap: 'プロンプト複製', pasteJSON: 'JSON 貼付' },
     s14: { h: '打って\n即完了', hl: '即完了', sh: 'キーボードが最速の入口', she: '⌨️', type: 'コーヒー 6.50', tap: '↵', done: '0mで記録', category: '自動 · 飲食 / コーヒー' },
     s16: { h: '予算を決めて\n守り抜く', hl: '守り抜く', sh: 'すべてのカテゴリを一目で', she: '🎯', ring: '80%', left: '残り $730.85', budgeted: '予算内の支出', unbudgeted: '予算外の支出' },
-    s15: {
-      privacy: 'プライバシー最優先', privacySub: 'データは端末の外に出ません',
-      heroSub: 'データはあなたの端末の中だけに。これまでも、これからも。',
-      noAds: '広告なし', noAdsSub: '余計なものはなし。家計に集中できます',
-      local: '完全ローカル', localSub: 'オフラインで動作。アカウント不要',
-      inspiredPre: 'インスピレーション',
-      bookSub: 'お金とは、あなたが引き換えにした生命エネルギーである',
-      bookDesc: '時代を超えて読み継がれる家計の名著。お金と時間、人生の実践的な知恵。',
-      downloads: '50,000+ ユーザー',
-    },
   },
 
   feature: {

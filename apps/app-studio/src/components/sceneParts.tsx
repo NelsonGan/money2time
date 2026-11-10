@@ -2,15 +2,26 @@ import { forwardRef } from 'react';
 import type { ReactNode, CSSProperties } from 'react';
 
 /**
- * Pieces shared by the iPhone and iPad screenshot scenes. The two scenes lay
- * out their device and headline differently, so only the genuinely common
- * chrome lives here.
+ * Pieces shared by the iPhone, iPad and iPhone Duo screenshot scenes. Each
+ * scene lays out its device and headline differently, so only the genuinely
+ * common chrome lives here.
  */
 
 const DISPLAY_FONT = "'Bricolage Grotesque', 'Work Sans', system-ui, sans-serif";
 const BODY_FONT = "'Work Sans', system-ui, sans-serif";
 
 export { DISPLAY_FONT, BODY_FONT };
+
+/** Scripts written without spaces between words: Chinese, Japanese, Thai. */
+const UNSPACED = /[\u0E00-\u0E7F\u3000-\u30FF\u3400-\u9FFF\uF900-\uFAFF\uFF00-\uFFEF]/;
+
+/**
+ * Puts a two-line headline on one line, which reads better across a landscape
+ * canvas (iPad, iPhone Duo). The break becomes a space, except between two
+ * characters of a script that puts no space between words.
+ */
+export const oneLine = (text: string) => text.replace(/\s*\n\s*/g, (gap, at: number) =>
+  UNSPACED.test(text[at - 1] ?? '') && UNSPACED.test(text[at + gap.length] ?? '') ? '' : ' ');
 
 /**
  * Renders `headline`, wrapping the first occurrence of `highlight` in accent

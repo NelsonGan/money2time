@@ -25,16 +25,6 @@ const vi: LocaleModule = {
     s13: { h: 'Nhập Liệu\nMột Chạm', hl: 'Một Chạm', sh: 'AI đọc sao kê. Bạn xác nhận', she: '🤖', aiPowered: 'Dùng AI', oneTap: 'Sao Chép', pasteJSON: 'Dán JSON' },
     s14: { h: 'Gõ.\nChạm. Xong.', hl: 'Xong.', sh: 'Bàn phím là cách nhanh nhất', she: '⌨️', type: 'Cà phê 6.50', tap: '↵', done: '0m để ghi', category: 'Tự động · Ăn uống / Cà phê' },
     s16: { h: 'Đặt Ngân Sách.\nGiữ Đúng Hướng.', hl: 'Giữ Đúng Hướng.', sh: 'Mọi danh mục, luôn trong tầm mắt', she: '🎯', ring: '80%', left: 'còn $730.85', budgeted: 'Chi trong ngân sách', unbudgeted: 'Chi ngoài ngân sách' },
-    s15: {
-      privacy: 'Quyền riêng tư trên hết', privacySub: 'Dữ liệu không bao giờ rời khỏi điện thoại',
-      heroSub: 'Dữ liệu của bạn luôn ở trên thiết bị của bạn. Trước giờ vẫn vậy, và mãi mãi về sau.',
-      noAds: 'Không quảng cáo', noAdsSub: 'Không phiền nhiễu. Chỉ có tài chính của bạn.',
-      local: 'Hoàn toàn trên máy bạn', localSub: 'Hoạt động ngoại tuyến. Không cần tài khoản',
-      inspiredPre: 'Lấy cảm hứng từ',
-      bookSub: 'Tiền là năng lượng sống mà bạn đánh đổi',
-      bookDesc: 'Cuốn cẩm nang tài chính cá nhân kinh điển. Trí tuệ thiết thực về tiền bạc, thời gian và cuộc sống.',
-      downloads: '50.000+ người dùng',
-    },
   },
 
   feature: {

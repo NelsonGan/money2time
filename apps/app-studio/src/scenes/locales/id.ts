@@ -25,16 +25,6 @@ const id: LocaleModule = {
     s13: { h: 'Impor\nSekali Ketuk', hl: 'Sekali Ketuk', sh: 'AI baca laporanmu. Kamu konfirmasi', she: '🤖', aiPowered: 'Pakai AI', oneTap: 'Salin Teks', pasteJSON: 'Tempel JSON' },
     s14: { h: 'Ketik.\nKetuk. Beres.', hl: 'Beres.', sh: 'Keyboard adalah cara tercepat', she: '⌨️', type: 'Kopi 6.50', tap: '↵', done: '0m mencatat', category: 'Otomatis · Makanan / Kopi' },
     s16: { h: 'Atur Anggaran.\nTetap di Jalur.', hl: 'Tetap di Jalur.', sh: 'Setiap kategori, selalu terlihat', she: '🎯', ring: '80%', left: 'sisa $730.85', budgeted: 'Belanja teranggarkan', unbudgeted: 'Belanja di luar anggaran' },
-    s15: {
-      privacy: 'Privasi yang utama', privacySub: 'Data tidak pernah keluar dari ponselmu',
-      heroSub: 'Data kamu tetap di perangkatmu. Dulu, kini, dan selamanya.',
-      noAds: 'Tanpa iklan', noAdsSub: 'Tanpa gangguan. Hanya keuanganmu.',
-      local: 'Sepenuhnya lokal', localSub: 'Berfungsi offline. Tanpa perlu akun',
-      inspiredPre: 'Terinspirasi dari',
-      bookSub: 'Uang adalah energi hidup yang kamu tukarkan',
-      bookDesc: 'Panduan keuangan pribadi klasik yang abadi. Kebijaksanaan praktis tentang uang, waktu, dan hidup.',
-      downloads: '50.000+ pengguna',
-    },
   },
 
   feature: {

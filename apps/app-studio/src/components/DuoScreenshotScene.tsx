@@ -1,6 +1,6 @@
 import { forwardRef } from 'react';
 import { Blob, Branch } from './flora';
-import { DeviceScreen, SceneCanvas, SceneGlows, renderHeadline, DISPLAY_FONT } from './sceneParts';
+import { DeviceScreen, SceneCanvas, SceneGlows, renderHeadline, oneLine, DISPLAY_FONT } from './sceneParts';
 import { useFitText } from './useFitText';
 import type { DuoSceneConfig } from '../scenes/duoSceneData';
 import { DUO_EXPORT_WIDTH, DUO_EXPORT_HEIGHT } from '../utils/export';
@@ -20,17 +20,6 @@ const SCREEN_H = Math.round(SCREEN_W * (2007 / 2853));
 const BEZEL = 24;
 const RIM = 9;
 const RADIUS = 84;
-
-/** Scripts written without spaces between words: Chinese, Japanese, Thai. */
-const UNSPACED = /[\u0E00-\u0E7F\u3000-\u30FF\u3400-\u9FFF\uF900-\uFAFF\uFF00-\uFFEF]/;
-
-/**
- * One line reads better across a landscape canvas than the iPhone's two. The
- * break becomes a space, except between two characters of a script that puts
- * no space between words.
- */
-const oneLine = (text: string) => text.replace(/\s*\n\s*/g, (gap, at: number) =>
-  UNSPACED.test(text[at - 1] ?? '') && UNSPACED.test(text[at + gap.length] ?? '') ? '' : ' ');
 
 /**
  * The open iPhone Duo: titanium rim, thin black bezel, no camera cutout (the

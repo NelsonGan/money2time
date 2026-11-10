@@ -46,30 +46,3 @@ export function useFitText<T extends HTMLElement>(base: number, minScale = 0.62)
 
   return ref;
 }
-
-/**
- * The same idea for a wrapping paragraph, where the constraint is a line count
- * rather than a width. The supporting line under a headline is allowed two
- * lines; a third one reaches the device.
- */
-export function useFitLines<T extends HTMLElement>(base: number, maxLines: number, minScale = 0.66) {
-  const ref = useRef<T>(null);
-
-  useLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    let size = base;
-    el.style.fontSize = `${size}px`;
-
-    const floor = Math.round(base * minScale);
-    const lineHeight = () => parseFloat(getComputedStyle(el).lineHeight) || size * 1.32;
-
-    while (size > floor && el.scrollHeight > lineHeight() * maxLines + 1) {
-      size -= 2;
-      el.style.fontSize = `${size}px`;
-    }
-  });
-
-  return ref;
-}

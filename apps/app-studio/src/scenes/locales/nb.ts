@@ -25,16 +25,6 @@ const nb: LocaleModule = {
     s13: { h: 'Importer\nmed Ett Trykk', hl: 'med Ett Trykk', sh: 'KI leser kontoutskriften. Du bekrefter', she: '🤖', aiPowered: 'Med KI', oneTap: 'Kopier Tekst', pasteJSON: 'Lim inn JSON' },
     s14: { h: 'Skriv.\nTrykk. Ferdig.', hl: 'Ferdig.', sh: 'Tastaturet er den raskeste veien', she: '⌨️', type: 'Kaffe 6.50', tap: '↵', done: '0m å føre', category: 'Auto · Mat / Kaffe' },
     s16: { h: 'Sett et Budsjett.\nHold Kursen.', hl: 'Hold Kursen.', sh: 'Hver kategori, alltid synlig', she: '🎯', ring: '80%', left: '$730.85 igjen', budgeted: 'Budsjetterte utgifter', unbudgeted: 'Ikke budsjettert' },
-    s15: {
-      privacy: 'Personvern først', privacySub: 'Dataene dine forlater aldri telefonen',
-      heroSub: 'Dataene dine blir på enheten din – nå og alltid.',
-      noAds: 'Ingen annonser', noAdsSub: 'Ingen distraksjoner. Bare økonomien din.',
-      local: 'Helt lokal', localSub: 'Fungerer offline. Ingen konto nødvendig',
-      inspiredPre: 'Inspirert av',
-      bookSub: 'Penger er livsenergien du bytter bort for dem',
-      bookDesc: 'Den tidløse klassikeren om personlig økonomi. Praktisk visdom om penger, tid og liv.',
-      downloads: '50 000+ brukere',
-    },
   },
 
   feature: {

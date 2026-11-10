@@ -24,16 +24,6 @@ const de: LocaleModule = {
     s13: { h: 'Import\nper Tipp', hl: 'per Tipp', sh: 'KI liest deinen Beleg. Du bestätigst', she: '🤖', aiPowered: 'KI-gestützt', oneTap: 'Prompt kopieren', pasteJSON: 'JSON einfügen' },
     s14: { h: 'Tippen.\nFertig.', hl: 'Fertig.', sh: 'Deine Tastatur ist der schnellste Weg', she: '⌨️', type: 'Kaffee 6.50', tap: '↵', done: '0m erfasst', category: 'Auto · Essen / Kaffee' },
     s16: { h: 'Budget setzen.\nKurs halten.', hl: 'Kurs halten.', sh: 'Jede Kategorie, immer im Blick', she: '🎯', ring: '80%', left: '$730.85 übrig', budgeted: 'Budgetierte Ausgaben', unbudgeted: 'Nicht budgetiert' },
-    s15: {
-      privacy: 'Privatsphäre zuerst', privacySub: 'Deine Daten verlassen nie dein Handy',
-      heroSub: 'Deine Daten bleiben auf deinem Gerät. Heute und für immer.',
-      noAds: 'Keine Werbung', noAdsSub: 'Keine Ablenkung. Nur deine Finanzen.',
-      local: 'Komplett lokal', localSub: 'Funktioniert offline. Kein Konto nötig',
-      inspiredPre: 'Inspiriert von',
-      bookSub: 'Geld ist die Lebensenergie, die du dafür eintauschst',
-      bookDesc: 'Der zeitlose Klassiker der privaten Finanzen. Praktische Weisheit zu Geld, Zeit und Leben.',
-      downloads: '50.000+ Nutzer',
-    },
   },
 
   feature: {
