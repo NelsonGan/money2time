@@ -696,17 +696,20 @@ describe('native daily engagement', () => {
 
   it('samples first-day launches for session replay far more often than later ones', async () => {
     const analytics = await import('~/services/analytics.native');
-    expect(analytics.startSessionReplayForLaunch(true, () => 0.03)).toBe(true);
+    expect(analytics.startSessionReplayForLaunch(true, () => 0.049)).toBe(true);
     expect(mockStartSessionRecording).toHaveBeenCalledTimes(1);
     // Decided once per launch.
     expect(analytics.startSessionReplayForLaunch(true, () => 0)).toBe(false);
 
     jest.resetModules();
+    const firstDayUnsampled = await import('~/services/analytics.native');
+    expect(firstDayUnsampled.startSessionReplayForLaunch(true, () => 0.05)).toBe(false);
+    jest.resetModules();
     const later = await import('~/services/analytics.native');
-    expect(later.startSessionReplayForLaunch(false, () => 0.03)).toBe(false);
+    expect(later.startSessionReplayForLaunch(false, () => 0.0025)).toBe(false);
     jest.resetModules();
     const sampled = await import('~/services/analytics.native');
-    expect(sampled.startSessionReplayForLaunch(false, () => 0.001)).toBe(true);
+    expect(sampled.startSessionReplayForLaunch(false, () => 0.0024)).toBe(true);
   });
 
   it('pauses a recording while a number pad is on screen and resumes the same session', async () => {
