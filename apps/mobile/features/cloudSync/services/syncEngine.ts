@@ -115,6 +115,13 @@ const CHECKPOINT_WAL_BYTES = 4 * 1024 * 1024;
 /** Images that failed to download are tried again at most this often. */
 const MISSING_MEDIA_RETRY_MS = 10 * 60_000;
 const UPLOAD_CONCURRENCY = 4;
+/**
+ * Waits before each further try of an image upload that failed. One failed
+ * upload stops the round, and while Cloud Sync is being turned on that sends
+ * the user back to the sign-in screen, so a blip (the upload breaking on the
+ * phone, a server error) gets two more tries first.
+ */
+const UPLOAD_RETRY_DELAYS_MS = [500, 2_000];
 /** The `sync_info` key that names one phone (`origin` in `sync_rows`). */
 const deviceNameKey = (origin: string) => `device_name:${origin}`;
 
@@ -1579,7 +1586,9 @@ export class SyncEngine {
       const slice = onDisk.slice(i, i + MEDIA_BATCH);
       const existing = await existingMedia(token, mediaPath, slice);
       await inParallel(slice, UPLOAD_CONCURRENCY, async (path) => {
-        if (!existing.has(path)) await uploadMedia(token, mediaPath, path, assetFile(path));
+        if (!existing.has(path)) {
+          await uploadWithRetry(() => uploadMedia(token, mediaPath, path, assetFile(path)));
+        }
         done(path);
       });
     }
@@ -1681,6 +1690,27 @@ async function inParallel<T>(
   };
   await Promise.all(Array.from({ length: Math.min(concurrency, items.length) }, worker));
   if (failure) throw (failure as { error: unknown }).error;
+}
+
+/**
+ * Runs one image upload, again after a short wait while the failure looks
+ * passing: the upload broke on the phone (`network`), or the server failed
+ * (`server` without a 4xx status). A refused session, Pro or image is final.
+ */
+async function uploadWithRetry(upload: () => Promise<void>): Promise<void> {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      await upload();
+      return;
+    } catch (error) {
+      const { code, status } = (error ?? {}) as { code?: unknown; status?: unknown };
+      const passing =
+        code === 'network' ||
+        (code === 'server' && !(typeof status === 'number' && status >= 400 && status < 500));
+      if (!passing || attempt >= UPLOAD_RETRY_DELAYS_MS.length) throw error;
+      await new Promise((resolve) => setTimeout(resolve, UPLOAD_RETRY_DELAYS_MS[attempt]));
+    }
+  }
 }
 
 function assetFile(relativePath: string): File {

@@ -581,11 +581,14 @@ describe('with one pull per sync', () => {
 });
 
 describe('images', () => {
-  it('stop the push when one fails to upload, and the retry sends only the rest', async () => {
-    let uploads = 0;
-    (apiUploadMedia as jest.Mock).mockImplementation(async () => {
-      uploads += 1;
-      if (uploads === 3) throw new Error('upload failed');
+  it('stop the push when one keeps failing to upload, and the retry sends only the rest', async () => {
+    let failing = true;
+    const sent: string[] = [];
+    (apiUploadMedia as jest.Mock).mockImplementation(async (_token, _media, path: string) => {
+      sent.push(path);
+      if (failing && path === 'receipts/r2.jpg') {
+        throw Object.assign(new Error('upload failed'), { code: 'server', status: 502 });
+      }
     });
     for (let i = 0; i < 6; i++) {
       files.add(`user-assets/receipts/r${i}.jpg`);
@@ -594,12 +597,59 @@ describe('images', () => {
     await expect(engine.syncNow()).rejects.toThrow('upload failed');
     // No row may reach another phone before its image can.
     expect(calls).not.toContain('push');
+    // Tried three times in the round before giving up.
+    expect(sent.filter((path) => path === 'receipts/r2.jpg')).toHaveLength(3);
+    failing = false;
+    sent.length = 0;
     await engine.syncNow();
     expect(calls).toContain('push');
-    // Six images, each sent once, plus the one that failed sent again: the
-    // ones done before the failure are not uploaded twice.
-    expect(uploads).toBe(7);
+    // The next round sends only what had not gone up: the others are not
+    // uploaded twice.
+    expect(sent).toEqual(['receipts/r2.jpg']);
     expect(app.prepare('SELECT COUNT(*) AS n FROM sync_media_pending').get()?.n).toBe(0);
+  }, 15_000);
+
+  // 2026-11-10: four people turning Cloud Sync on were sent back to the
+  // sign-in screen because one image upload failed once (CloudSyncApiError
+  // "server" from uploadMedia). Cloudflare saw the same uploads end with the
+  // phone closing the connection, and the same images went up a minute later.
+  // A failure in a link drops the session, so one blip cost the whole setup.
+  it('try a failed upload again in the same round before giving up', async () => {
+    const tries = new Map<string, number>();
+    (apiUploadMedia as jest.Mock).mockImplementation(async (_token, _media, path: string) => {
+      const n = (tries.get(path) ?? 0) + 1;
+      tries.set(path, n);
+      if (path === 'receipts/r1.jpg' && n === 1) {
+        throw Object.assign(new Error('server: http_500'), { code: 'server', status: 500 });
+      }
+      // How uploadMedia reports an upload that broke on the phone.
+      if (path === 'receipts/r3.jpg' && n === 1) {
+        throw Object.assign(new Error('network'), { code: 'network', status: 0 });
+      }
+    });
+    for (let i = 0; i < 5; i++) {
+      files.add(`user-assets/receipts/r${i}.jpg`);
+      addTransaction(`t${i}`, i, { receipt_uri: `receipts/r${i}.jpg` });
+    }
+    await expect(engine.syncNow()).resolves.toMatchObject({ pushed: true });
+    expect(tries.get('receipts/r1.jpg')).toBe(2);
+    expect(tries.get('receipts/r3.jpg')).toBe(2);
+    expect(app.prepare('SELECT COUNT(*) AS n FROM sync_media_pending').get()?.n).toBe(0);
+  }, 15_000);
+
+  it.each([
+    ['the session was refused', 'unauthorized', 401],
+    ['Pro was refused', 'not_pro', 403],
+    ['the image was refused', 'server', 413],
+  ] as const)('do not try again when %s', async (_case, code, status) => {
+    const { CloudSyncApiError } = jest.requireActual<
+      typeof import('~/features/cloudSync/services/cloudSyncApi')
+    >('~/features/cloudSync/services/cloudSyncApi');
+    (apiUploadMedia as jest.Mock).mockRejectedValue(new CloudSyncApiError(code, status));
+    files.add('user-assets/receipts/r0.jpg');
+    addTransaction('t0', 1, { receipt_uri: 'receipts/r0.jpg' });
+    await expect(engine.syncNow()).rejects.toThrow(code);
+    expect(apiUploadMedia).toHaveBeenCalledTimes(1);
   });
 
   it('download one a pulled row names at once, while failed ones wait', async () => {

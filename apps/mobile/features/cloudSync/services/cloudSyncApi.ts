@@ -290,13 +290,30 @@ export async function uploadMedia(
   path: string,
   file: File,
 ): Promise<void> {
-  const result = await file.upload(mediaUrl(await baseUrl(), mediaPath, path), {
-    httpMethod: 'PUT',
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (result.status < 200 || result.status >= 300) {
-    throw new CloudSyncApiError(result.status === 401 ? 'unauthorized' : 'server', result.status);
+  const url = mediaUrl(await baseUrl(), mediaPath, path);
+  let result: { status: number; body: string };
+  try {
+    result = await file.upload(url, {
+      httpMethod: 'PUT',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  } catch {
+    // The upload broke on the phone (connection lost, cancelled), as a failed
+    // fetch does in `request`.
+    throw new CloudSyncApiError('network', 0);
   }
+  if (result.status >= 200 && result.status < 300) return;
+  let json: unknown = null;
+  try {
+    json = result.body ? JSON.parse(result.body) : null;
+  } catch {
+    json = null;
+  }
+  const error = toError(result.status, json);
+  // The status in the message: without it every failed upload reported the
+  // same bare "server", whatever answered.
+  if (error.code !== 'server') throw error;
+  throw new CloudSyncApiError('server', result.status, `http_${result.status}`);
 }
 
 export async function downloadMedia(
