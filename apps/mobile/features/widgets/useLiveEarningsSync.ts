@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import { AppState, type AppStateStatus } from 'react-native';
 
 import { useApp } from '~/context/AppContext';
-import { useIsPro } from '~/context/ProContext';
+import { useIsPro, useIsProStatusKnown } from '~/context/ProContext';
 import { useThemeColor } from '~/context/ThemeContext';
 import { reportError } from '~/services/errorReporting';
 import { isLiveActivityAvailable } from '~/services/liveActivity';
@@ -26,6 +26,12 @@ import { syncLiveEarningsAutoStart } from './lib/syncLiveEarningsAutoStart';
 export function useLiveEarningsSync() {
   const { settings, notificationPrefs, getTrueHourlyRateForDate } = useApp();
   const isPro = useIsPro();
+  // `isPro` reads "not Pro" until the subscription status has been read, at
+  // launch and after a change of identity. Syncing on that placeholder cleared
+  // a Pro user's armed schedule on the server on every cold start and
+  // registered it again a moment later: two requests, and a window with no
+  // schedule. So the schedule is left alone until the answer is real.
+  const isProKnown = useIsProStatusKnown();
   const themeColor = useThemeColor();
 
   // Read inside a listener that is registered once, so it must not close over
@@ -59,6 +65,10 @@ export function useLiveEarningsSync() {
   useEffect(() => {
     isProRef.current = isPro;
   }, [isPro]);
+  const isProKnownRef = useRef(isProKnown);
+  useEffect(() => {
+    isProKnownRef.current = isProKnown;
+  }, [isProKnown]);
 
   // The widget needs a feed to render, and the first foreground transition can
   // be a long way off. Writing one as soon as the app knows the currency (and
@@ -92,7 +102,7 @@ export function useLiveEarningsSync() {
   );
   useEffect(() => {
     rateRef.current = scheduleHourlyRate;
-    if (!currencySymbol) return;
+    if (!currencySymbol || !isProKnown) return;
     syncLiveEarningsAutoStart({
       // The ref, so the effect can key on the values above without the linter
       // demanding the object it would then re-run on. It is written by the
@@ -110,7 +120,7 @@ export function useLiveEarningsSync() {
       // unhandled rejection on every foreground (Sentry MONEY2TIME-R).
       reportError(error, { scope: 'notifications' });
     });
-  }, [appUserId, currencySymbol, isPro, scheduleKey, scheduleHourlyRate, themeColor]);
+  }, [appUserId, currencySymbol, isPro, isProKnown, scheduleKey, scheduleHourlyRate, themeColor]);
 
   useEffect(() => {
     if (!isLiveActivityAvailable) return;
@@ -129,7 +139,7 @@ export function useLiveEarningsSync() {
       // Coming back is also when the schedule is re-armed: it is what repairs a
       // registration that failed while offline, picks up a push-to-start token
       // iOS has rotated, and follows the user into a new time zone.
-      if (next === 'active') {
+      if (next === 'active' && isProKnownRef.current) {
         syncLiveEarningsAutoStart({
           schedule: scheduleRef.current,
           isPro: isProRef.current,

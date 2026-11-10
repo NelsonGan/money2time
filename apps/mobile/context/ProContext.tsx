@@ -73,6 +73,9 @@ const ProContext = createContext<ProContextValue | null>(null);
 // only ask whether the user is Pro, and re-rendering them for the rest was
 // wasted work at exactly the moments the app is busiest.
 const ProStatusContext = createContext<boolean | null>(null);
+// And whether that flag is the real answer yet (`isStatusKnown`), for the few
+// places that act on "not Pro" and so must not act on the placeholder.
+const ProStatusKnownContext = createContext<boolean | null>(null);
 
 export function ProProvider({ children }: { children: React.ReactNode }) {
   const { settings } = useApp();
@@ -359,7 +362,11 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <ProContext.Provider value={value}>
-      <ProStatusContext.Provider value={effectiveIsPro}>{children}</ProStatusContext.Provider>
+      <ProStatusContext.Provider value={effectiveIsPro}>
+        <ProStatusKnownContext.Provider value={isStatusKnown}>
+          {children}
+        </ProStatusKnownContext.Provider>
+      </ProStatusContext.Provider>
     </ProContext.Provider>
   );
 }
@@ -371,6 +378,19 @@ export function useIsPro() {
     throw new Error('useIsPro must be used within ProProvider');
   }
   return isPro;
+}
+
+/**
+ * Whether `useIsPro()` is a settled answer for this install, without
+ * re-rendering for anything else about Pro. Until then it is a `false`
+ * placeholder: wait for this before doing anything a Pro user would lose.
+ */
+export function useIsProStatusKnown() {
+  const isKnown = useContext(ProStatusKnownContext);
+  if (isKnown === null) {
+    throw new Error('useIsProStatusKnown must be used within ProProvider');
+  }
+  return isKnown;
 }
 
 export function usePro() {

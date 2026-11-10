@@ -61,7 +61,7 @@ export function phonesWithAccountPro(
  * no writes. A phone back after SLOT_IDLE_MS rejoins at the back of the queue.
  * An App User ID claimed by another account is not recorded.
  */
-export async function markPhoneSeen(env: Env, userId: string, appUserId: string): Promise<void> {
+async function markPhoneSeen(env: Env, userId: string, appUserId: string): Promise<void> {
   const now = Date.now();
   await env.AUTH_DB.prepare(
     `INSERT INTO account_phones (user_id, app_user_id, first_seen_at, last_seen_at)
@@ -92,7 +92,7 @@ export function isValidAppUserId(value: unknown): value is string {
  * accounts. The ID is random but not proof of ownership: README > Cloud-sync
  * Worker > Pro has the limits.
  */
-export async function linkAppUserId(env: Env, userId: string, appUserId: string): Promise<void> {
+async function linkAppUserId(env: Env, userId: string, appUserId: string): Promise<void> {
   const owner = await env.AUTH_DB.prepare('SELECT user_id FROM pro_links WHERE app_user_id = ?1')
     .bind(appUserId)
     .first<{ user_id: string }>();
@@ -172,32 +172,58 @@ export async function isAccountPro(env: Env, userId: string): Promise<boolean> {
  * `limited`: the account is Pro, but every place is taken. Without an App
  * User ID (an older app) the account decides.
  */
-export async function phoneProStatus(
+async function phoneProStatus(
   env: Env,
   userId: string,
   appUserId: string | null,
 ): Promise<{ isPro: boolean; limited: boolean }> {
   if (!(await isAccountPro(env, userId))) return { isPro: false, limited: false };
   if (!appUserId) return { isPro: true, limited: false };
-  const own = await env.AUTH_DB.prepare(
-    'SELECT is_pro FROM pro_links WHERE user_id = ?1 AND app_user_id = ?2',
-  )
-    .bind(userId, appUserId)
-    .first<{ is_pro: number }>();
-  if (own?.is_pro === 1) return { isPro: true, limited: false };
-  const { results: phones } = await env.AUTH_DB.prepare(
-    `SELECT a.app_user_id, a.first_seen_at, a.last_seen_at, COALESCE(p.is_pro, 0) AS own_pro
-     FROM account_phones a LEFT JOIN pro_links p
-       ON p.user_id = a.user_id AND p.app_user_id = a.app_user_id
-     WHERE a.user_id = ?1 LIMIT 500`,
-  )
-    .bind(userId)
-    .all<AccountPhone & { own_pro: number }>();
+  // One round trip for both reads; the second only matters when the phone has
+  // no purchase of its own.
+  const [own, phoneRows] = await env.AUTH_DB.batch<
+    { is_pro: number } | (AccountPhone & { own_pro: number })
+  >([
+    env.AUTH_DB.prepare(
+      'SELECT is_pro FROM pro_links WHERE user_id = ?1 AND app_user_id = ?2',
+    ).bind(userId, appUserId),
+    env.AUTH_DB.prepare(
+      `SELECT a.app_user_id, a.first_seen_at, a.last_seen_at, COALESCE(p.is_pro, 0) AS own_pro
+       FROM account_phones a LEFT JOIN pro_links p
+         ON p.user_id = a.user_id AND p.app_user_id = a.app_user_id
+       WHERE a.user_id = ?1 LIMIT 500`,
+    ).bind(userId),
+  ]);
+  if ((own.results[0] as { is_pro: number } | undefined)?.is_pro === 1) {
+    return { isPro: true, limited: false };
+  }
+  const phones = phoneRows.results as (AccountPhone & { own_pro: number })[];
   const places = phonesWithAccountPro(
     phones.filter((phone) => phone.own_pro !== 1),
     Date.now(),
   );
   return places.has(appUserId) ? { isPro: true, limited: false } : { isPro: false, limited: true };
+}
+
+/**
+ * A phone checking in (a status or credentials call): link it if it is Pro,
+ * record that it is in use, and say whether it gets Pro.
+ */
+export async function checkInPhone(
+  env: Env,
+  userId: string,
+  appUserId: string | null,
+): Promise<{ isPro: boolean; limited: boolean }> {
+  if (appUserId) {
+    // Asked together: neither reads what the other writes (the phone record
+    // only looks at other accounts' links), so the request waits once for
+    // both instead of once for each.
+    await Promise.all([
+      linkAppUserId(env, userId, appUserId),
+      markPhoneSeen(env, userId, appUserId),
+    ]);
+  }
+  return phoneProStatus(env, userId, appUserId);
 }
 
 /** true / false from RevenueCat, or null when it could not be asked. */

@@ -5432,35 +5432,38 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  const updateNotificationPrefs = useCallback((updates: Partial<NotificationPreferences>) => {
-    setNotificationPrefs((previous) => {
-      const merged: NotificationPreferences = {
-        dailyCheckin: { ...previous.dailyCheckin, ...updates.dailyCheckin },
-        recurringAlert: { ...previous.recurringAlert, ...updates.recurringAlert },
-        weeklyReview: { ...previous.weeklyReview, ...updates.weeklyReview },
-        monthlyReview: { ...previous.monthlyReview, ...updates.monthlyReview },
-        // Normalized on write as well as on read, so a caller cannot store a
-        // day list that is out of order, duplicated, or not a weekday at all.
-        liveEarningsStart: normalizeLiveEarningsSchedule({
-          ...previous.liveEarningsStart,
-          ...updates.liveEarningsStart,
-        }),
-      };
-      try {
-        settingsRepository.updateNotificationPreferencesJson(JSON.stringify(merged));
-      } catch (error) {
-        reportError(error, { scope: 'notifications' });
-        return previous;
-      }
-      // No fresh bodies here — a prefs toggle only moves the schedule, and the
-      // next load recomputes the figures anyway.
-      scheduleReminders(merged, {
-        weekStartsOn: weekStartsOnRef.current,
-        firstDayOfMonth: monthCycleDefaultDay(monthCycleRef.current),
+  const updateNotificationPrefs = useCallback(
+    (updates: Partial<NotificationPreferences>) => {
+      setNotificationPrefs((previous) => {
+        const merged: NotificationPreferences = {
+          dailyCheckin: { ...previous.dailyCheckin, ...updates.dailyCheckin },
+          recurringAlert: { ...previous.recurringAlert, ...updates.recurringAlert },
+          weeklyReview: { ...previous.weeklyReview, ...updates.weeklyReview },
+          monthlyReview: { ...previous.monthlyReview, ...updates.monthlyReview },
+          // Normalized on write as well as on read, so a caller cannot store a
+          // day list that is out of order, duplicated, or not a weekday at all.
+          liveEarningsStart: normalizeLiveEarningsSchedule({
+            ...previous.liveEarningsStart,
+            ...updates.liveEarningsStart,
+          }),
+        };
+        try {
+          settingsRepository.updateNotificationPreferencesJson(JSON.stringify(merged));
+        } catch (error) {
+          reportError(error, { scope: 'notifications' });
+          return previous;
+        }
+        // No fresh bodies here — a prefs toggle only moves the schedule, and the
+        // next load recomputes the figures anyway.
+        scheduleReminders(merged, {
+          weekStartsOn: weekStartsOnRef.current,
+          firstDayOfMonth: monthCycleDefaultDay(monthCycleRef.current),
+        });
+        return merged;
       });
-      return merged;
-    });
-  }, [scheduleReminders]);
+    },
+    [scheduleReminders],
+  );
 
   const updateQuickEntryPrefs = useCallback((updates: Partial<QuickEntryPrefs>) => {
     const previous = quickEntryPrefsRef.current;
@@ -5565,13 +5568,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       weekStartsOn: reviewWeekStartsOn,
       firstDayOfMonth: reviewFirstDayOfMonth,
     });
-  }, [
-    isLoading,
-    notificationPrefs,
-    reviewFirstDayOfMonth,
-    reviewWeekStartsOn,
-    scheduleReminders,
-  ]);
+  }, [isLoading, notificationPrefs, reviewFirstDayOfMonth, reviewWeekStartsOn, scheduleReminders]);
 
   useEffect(() => {
     if (settings?.displayMode !== 'time') return;
