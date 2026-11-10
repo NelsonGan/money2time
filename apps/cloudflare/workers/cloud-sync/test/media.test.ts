@@ -85,15 +85,14 @@ function fixture(t: TestContext, fail: Partial<Record<Op, number>>, error?: stri
     };
   };
   const r2 = fakeBucket(fail, error);
-  const old = fakeBucket({});
-  const env = { AUTH_DB: { prepare }, MEDIA: r2.bucket, OLD_MEDIA: old.bucket } as unknown as Env;
+  const env = { AUTH_DB: { prepare }, MEDIA: r2.bucket } as unknown as Env;
   const count = () =>
     (
       db.prepare('SELECT objects FROM media_usage WHERE user_id = ?').get('u1') as
         | { objects: number }
         | undefined
     )?.objects ?? 0;
-  return { env, r2, old, count };
+  return { env, r2, count };
 }
 
 const space = userSpace('u1');
@@ -219,38 +218,4 @@ test('deleting every image survives R2 failing the list and the delete once', as
   assert.equal(r2.objects.size, 0);
   assert.equal(r2.calls.list, 2);
   assert.equal(r2.calls.delete, 2);
-});
-
-test('an image still only in the old bucket is read, found and deleted there', async (t) => {
-  const { env, r2, old } = fixture(t, {});
-  old.objects.set('u/u1/receipts/old.jpg', image);
-  const read = await getMedia(env, space, 'receipts/old.jpg');
-  assert.equal(read.status, 200);
-  assert.deepEqual(new Uint8Array(await read.arrayBuffer()), image);
-  const exists = await existingMedia(env, space, ['receipts/old.jpg', 'receipts/none.jpg']);
-  assert.deepEqual(await exists.json(), { existing: ['receipts/old.jpg'] });
-  await putMedia(env, space, 'receipts/a.jpg', upload());
-  await deleteAllMedia(env, space);
-  assert.equal(old.objects.size, 0);
-  assert.equal(r2.objects.size, 0);
-});
-
-test('a new image goes to the new bucket only, and replacing an old one adds nothing', async (t) => {
-  const { env, r2, old, count } = fixture(t, {});
-  old.objects.set('u/u1/receipts/a.jpg', image);
-  const res = await putMedia(env, space, 'receipts/a.jpg', upload());
-  assert.equal(res.status, 200);
-  assert.equal(count(), 0);
-  await putMedia(env, space, 'receipts/b.jpg', upload());
-  assert.equal(count(), 1);
-  assert.deepEqual([...r2.objects.keys()].sort(), ['u/u1/receipts/a.jpg', 'u/u1/receipts/b.jpg']);
-  assert.equal(old.calls.put, 0);
-});
-
-test('without the old bucket bound, only the new one is used', async (t) => {
-  const { env, old } = fixture(t, {});
-  delete (env as { OLD_MEDIA?: unknown }).OLD_MEDIA;
-  old.objects.set('u/u1/receipts/old.jpg', image);
-  assert.equal((await getMedia(env, space, 'receipts/old.jpg')).status, 404);
-  assert.equal(old.calls.get, 0);
 });

@@ -30,12 +30,6 @@ database_id = "2154e310-6fce-49eb-aa4b-565e343c9eb7"
 binding = "MEDIA"
 bucket_name = "money2time-cloud-sync-media-apac"
 
-# Where the images were until 2026-11-10 (eastern North America). Read and
-# deleted from until every image is confirmed copied, then removed.
-[[r2_buckets]]
-binding = "OLD_MEDIA"
-bucket_name = "money2time-cloud-sync-media"
-
 # Live updates (src/live.ts): one hub per user holds their open apps' sockets
 # and tells them when a channel changed. SQLite-backed, so it runs on any plan.
 [[durable_objects.bindings]]
