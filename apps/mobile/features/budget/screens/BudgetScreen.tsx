@@ -654,7 +654,7 @@ export const BudgetPagerView = forwardRef<MonthPagerHandle, BudgetPagerViewProps
         // Nothing touches this month: the familiar empty state.
         if (!focusModel && !showWeekCreate && !showYearCreate) {
           return (
-            <View style={{ width: pageWidth }} className="flex-1">
+            <View style={{ width: pageWidth }} className="h-full shrink-0">
               <EmptyState
                 title={I18n.t('budget.no_budget_title', {
                   month: monthKeyLabel(month, settings.locale),
@@ -952,7 +952,7 @@ export const BudgetPagerView = forwardRef<MonthPagerHandle, BudgetPagerViewProps
         );
 
         return (
-          <View style={{ width: pageWidth }} className="flex-1">
+          <View style={{ width: pageWidth }} className="h-full shrink-0">
             <ScrollView
               contentContainerStyle={[
                 { paddingHorizontal: spacing.lg, paddingTop: spacing.sm },
@@ -1022,6 +1022,12 @@ export const BudgetPagerView = forwardRef<MonthPagerHandle, BudgetPagerViewProps
           pagingEnabled
           showsHorizontalScrollIndicator={false}
           bounces={false}
+          // FlatList clips by default on Android, and a clipped page that
+          // nests a ScrollView can stay detached after a swipe: the header
+          // shows the month, the page stays blank. windowSize caps the pages.
+          // Pages are h-full shrink-0, not flex-1: a zero flex basis can
+          // collapse a newly mounted Android cell (as on Insights, #567).
+          removeClippedSubviews={false}
           initialNumToRender={3}
           maxToRenderPerBatch={3}
           windowSize={3}
