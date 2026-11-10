@@ -594,6 +594,7 @@ const zh = {
       disabled_body: '请在 iOS「设置」中重新开启 Money2Time 的实时活动，然后回到这里。',
       unavailable: '实时活动需要 iOS 16.2 或更高版本的 iPhone。',
       start_failed: '没能开始，请再试一次。',
+      stop_failed: '没能停止，请再试一次。',
       schedule_section: '定时',
       schedule_tooltip:
         '在 iOS 17.2 及更高版本上，即使应用已关闭，Money2Time 也会在这个时间替你开始计时。更早的版本会改为发送一条通知，点按即可开始计时。',

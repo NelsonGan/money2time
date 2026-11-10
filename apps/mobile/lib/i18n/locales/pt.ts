@@ -621,6 +621,7 @@ const pt = {
       disabled_body: 'Reative-as para o Money2Time nos Ajustes do iOS e volte aqui.',
       unavailable: 'As atividades ao vivo exigem um iPhone com iOS 16.2 ou posterior.',
       start_failed: 'Não começou. Tente de novo.',
+      stop_failed: 'Não parou. Tente de novo.',
       schedule_section: 'Programação',
       schedule_tooltip:
         'No iOS 17.2 ou posterior, o Money2Time inicia o relógio para você nesse horário, mesmo com o app fechado. Em versões anteriores, ele envia uma notificação e tocar nela inicia o relógio.',

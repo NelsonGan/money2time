@@ -622,6 +622,7 @@ const nl = {
       disabled_body: 'Zet ze weer aan voor Money2Time in de iOS-instellingen en kom dan terug.',
       unavailable: 'Live-activiteiten vereisen een iPhone met iOS 16.2 of nieuwer.',
       start_failed: 'Dat startte niet. Probeer het nog eens.',
+      stop_failed: 'Dat stopte niet. Probeer het nog eens.',
       schedule_section: 'Schema',
       schedule_tooltip:
         'Op iOS 17.2 en nieuwer start Money2Time de klok op dit tijdstip voor je, ook als de app gesloten is. Op oudere versies stuurt de app een melding, en met een tik daarop start de klok.',

@@ -620,6 +620,7 @@ const ko = {
       disabled_body: 'iOS 설정에서 Money2Time의 라이브 액티비티를 켠 다음 다시 오세요.',
       unavailable: '라이브 액티비티에는 iOS 16.2 이상의 iPhone이 필요합니다.',
       start_failed: '시작하지 못했어요. 다시 시도해 주세요.',
+      stop_failed: '멈추지 못했어요. 다시 시도해 주세요.',
       schedule_section: '일정',
       schedule_tooltip:
         'iOS 17.2 이상에서는 앱이 닫혀 있어도 이 시각에 Money2Time이 시계를 대신 시작합니다. 이전 버전에서는 알림을 보내고, 알림을 누르면 시계가 시작됩니다.',

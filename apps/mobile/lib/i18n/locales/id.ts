@@ -622,6 +622,7 @@ const id = {
       disabled_body: 'Aktifkan lagi untuk Money2Time di Pengaturan iOS, lalu kembali ke sini.',
       unavailable: 'Live Activity memerlukan iPhone dengan iOS 16.2 atau lebih baru.',
       start_failed: 'Gagal dimulai. Coba lagi ya.',
+      stop_failed: 'Gagal dihentikan. Coba lagi ya.',
       schedule_section: 'Jadwal',
       schedule_tooltip:
         'Di iOS 17.2 ke atas, Money2Time memulai jam untuk Anda pada waktu ini, bahkan saat aplikasi tertutup. Pada versi lama, aplikasi mengirim notifikasi, dan mengetuknya akan memulai jam.',

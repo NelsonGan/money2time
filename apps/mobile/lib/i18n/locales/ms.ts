@@ -623,6 +623,7 @@ const ms = {
         'Hidupkan semula untuk Money2Time dalam Tetapan iOS, kemudian kembali ke sini.',
       unavailable: 'Live Activity memerlukan iPhone dengan iOS 16.2 atau lebih baharu.',
       start_failed: 'Gagal bermula. Cuba sekali lagi.',
+      stop_failed: 'Gagal berhenti. Cuba sekali lagi.',
       schedule_section: 'Jadual',
       schedule_tooltip:
         'Pada iOS 17.2 dan lebih baharu, Money2Time memulakan jam untuk anda pada waktu ini, walaupun apl ditutup. Pada versi lama, apl menghantar pemberitahuan, dan mengetiknya akan memulakan jam.',
