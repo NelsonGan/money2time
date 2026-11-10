@@ -12,14 +12,17 @@ const REPO_ROOT = path.resolve(__dirname, '../..');
  * re-render rebuilt it. It also hangs the main thread walking that subtree on
  * every scroll (MONEY2TIME-G, MONEY2TIME-1R, MONEY2TIME-1K).
  *
- * Both pagers cap themselves with `windowSize`, so clipping was never buying
- * anything worth that risk. These live in two places (the shared config and
- * the insights screen's inline props). FlatList defaults clipping to true on
- * Android, so omitting the prop does not disable it. Require an explicit false.
+ * Every pager caps itself with `windowSize`, so clipping was never buying
+ * anything worth that risk. These live in the shared config and in the inline
+ * props of the Insights, Budget and Household pagers. FlatList defaults
+ * clipping to true on Android, so omitting the prop does not disable it (the
+ * Budget page went blank on Android that way). Require an explicit false.
  */
 const PAGER_SOURCES = [
   'features/transactions/constants/monthPagerList.ts',
   'features/insights/screens/InsightsScreen.tsx',
+  'features/budget/screens/BudgetScreen.tsx',
+  'features/sharedLedgers/screens/HouseholdPagerView.tsx',
 ] as const;
 
 /** Comments explain the rule, so only real code counts as a violation. */
@@ -54,5 +57,17 @@ describe('month pager virtualization', () => {
     // to hit in the first place.
     expect(windowSizes.length).toBeGreaterThan(0);
     windowSizes.forEach((windowSize) => expect(windowSize).toBeGreaterThanOrEqual(3));
+  });
+
+  it.each(PAGER_SOURCES)('%s sizes its pages without flex-1', (relativePath) => {
+    // A `flex-1` page has a zero flex basis inside FlatList's row cell, so a
+    // newly mounted Android cell can collapse and shift every later page away
+    // from `getItemLayout` (a blank or wrong month after a swipe). Pages take
+    // an explicit width with `h-full shrink-0` instead.
+    const flexPages =
+      readPagerSource(relativePath).match(
+        /style=\{\{\s*width:\s*pageWidth\s*\}\}\s*className="[^"]*\bflex-1\b/g,
+      ) ?? [];
+    expect(flexPages).toEqual([]);
   });
 });
