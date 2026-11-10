@@ -44,9 +44,13 @@ export function useLiveEarningsSync() {
   const isProStatusKnown = useIsProStatusKnown();
   const [proStatusWaitOver, setProStatusWaitOver] = useState(false);
   useEffect(() => {
+    // Armed only while the answer is still out. This hook lives in the app's
+    // root component, where a state change re-renders everything under it, so
+    // the usual launch (status known within a second) must not set any.
+    if (isProStatusKnown) return undefined;
     const timer = setTimeout(() => setProStatusWaitOver(true), PRO_STATUS_WAIT_MS);
     return () => clearTimeout(timer);
-  }, []);
+  }, [isProStatusKnown]);
   const isProKnown = isProStatusKnown || proStatusWaitOver;
   const isProForSync = isPro || !isProStatusKnown;
   const themeColor = useThemeColor();
