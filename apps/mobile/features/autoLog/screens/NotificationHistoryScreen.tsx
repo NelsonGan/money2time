@@ -244,6 +244,7 @@ export function NotificationHistoryScreen({ onBack }: { onBack: () => void }) {
       isPreferred: true,
       onPress: () => navigation.dispatch(data.action),
     };
+    const cancel: AlertButton = { text: I18n.t('common.cancel'), style: 'cancel' };
     const ignore: AlertButton = {
       text: I18n.t('payment_alerts.review_leave_confirm'),
       style: 'destructive',
@@ -262,11 +263,9 @@ export function NotificationHistoryScreen({ onBack }: { onBack: () => void }) {
         { count: ids.length },
       ),
       // iOS stacks the buttons and moves Cancel last, so Review later goes
-      // first; Android's last button is its primary one, on the right.
-      [
-        { text: I18n.t('common.cancel'), style: 'cancel' },
-        ...(Platform.OS === 'android' ? [ignore, later] : [later, ignore]),
-      ],
+      // first. Android shows them as neutral (left), negative and positive
+      // (right): Ignore sits apart on the left, away from Review later.
+      Platform.OS === 'android' ? [ignore, cancel, later] : [cancel, later, ignore],
     );
   });
   const money = (amount: number, currency: string) =>
