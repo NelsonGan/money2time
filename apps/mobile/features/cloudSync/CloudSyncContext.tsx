@@ -26,7 +26,12 @@ import { usePro } from '~/context/ProContext';
 import { writeOwnLedgerProfiles } from '~/features/sharedLedgers/lib/ledgerPeople';
 import { DEFAULT_LEDGER_ID, getActiveLedgerId } from '~/lib/db/ledgerScope';
 import { ledgersRepository } from '~/lib/repositories/ledgersRepository';
-import { clearAccountPro, getAccountProAnswer, setAccountPro } from '~/services/accountPro';
+import {
+  clearAccountPro,
+  getAccountProAnswer,
+  setAccountPro,
+  waitForAccountPro,
+} from '~/services/accountPro';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { runAutoBackupIfDue, saveRestoreSafetyBackup } from '~/services/autoBackup';
 import type {
@@ -38,6 +43,12 @@ import { reportError } from '~/services/errorReporting';
 import { runUserAssetGc } from '~/services/userAssetGc';
 
 import { useSyncScheduler } from './hooks/useSyncScheduler';
+import {
+  accountCheckDue,
+  PAUSED_CHECK_EVERY_MS,
+  PAUSED_CHECK_MIN_GAP_MS,
+  pausedCheckDue,
+} from './lib/accountCheck';
 import { PERSONAL_CHANNEL } from './lib/ledgerRows';
 import { decideLink } from './lib/linking';
 import { isOfflineMessage } from './lib/offlineError';
@@ -88,8 +99,9 @@ import {
 } from './services/syncEngine';
 
 const TOKEN_REFRESH_MARGIN_MS = 24 * 60 * 60 * 1000;
-/** The account's Pro is asked again at most this often, unless something calls for it. */
-const ACCOUNT_PRO_EVERY_MS = 5 * 60_000;
+
+/** The Worker's answer about this phone's Pro. */
+type ProAnswer = { isPro: boolean; limited: boolean };
 
 export type CloudSyncStatus =
   /** A build without the native sync module. */
@@ -260,6 +272,8 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
   appUserIdRef.current = appUserId;
   const isStoreProRef = useRef(isStorePro);
   isStoreProRef.current = isStorePro;
+  const isStatusKnownRef = useRef(isStatusKnown);
+  isStatusKnownRef.current = isStatusKnown;
   const refreshAllRef = useRef(refreshAll);
   refreshAllRef.current = refreshAll;
   const switchLedgerRef = useRef(switchLedger);
@@ -318,37 +332,39 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
    * in, or is waiting on the keep-which-data choice, is not Pro through it.
    * Sharing a sign-in to share Pro would mean sharing one's money data.
    * A failed read keeps the last answer (offline keeps Pro for a while), and
-   * is asked again at the next sync after 5 minutes or on the next event.
-   * Returns the Worker's answer when this call got one.
+   * is asked again on the next event or the next routine check: with a sync,
+   * 30 minutes after the last answer, or a day for a linked phone with its
+   * own purchase, which is Pro whatever the account says
+   * (`accountCheckDue`). Returns the Worker's answer when this call got one.
    */
-  const refreshAccountPro = useCallback(
-    async (force = false): Promise<{ isPro: boolean; limited: boolean } | null> => {
-      const session = sessionRef.current;
-      if (!session) return null;
-      if (!force && Date.now() - accountCheckedAtRef.current < ACCOUNT_PRO_EVERY_MS) return null;
-      accountCheckedAtRef.current = Date.now();
-      const asked = ++accountAskRef.current;
-      try {
-        // The install is linked to the account only once its data is: a Pro
-        // phone signing in to someone else's account and backing out lends it
-        // nothing.
-        const answer = await getAccountStatus(
-          session.token,
-          session.linked ? appUserIdRef.current : null,
-        );
-        const current = sessionRef.current;
-        // Signed out meanwhile, or a newer answer is on its way.
-        if (current?.user.id !== session.user.id || asked !== accountAskRef.current) return null;
-        setAccountPro(session.user.id, answer.isPro && current.linked);
-        setPhoneLimited(answer.limited);
-        return answer;
-      } catch {
-        // Offline, or a Worker without the route: the last answer stands.
-        return null;
-      }
-    },
-    [],
-  );
+  const refreshAccountPro = useCallback(async (force = false): Promise<ProAnswer | null> => {
+    const session = sessionRef.current;
+    if (!session) return null;
+    const ownPurchase = session.linked && isStoreProRef.current;
+    if (!force && !accountCheckDue(Date.now(), accountCheckedAtRef.current, ownPurchase)) {
+      return null;
+    }
+    accountCheckedAtRef.current = Date.now();
+    const asked = ++accountAskRef.current;
+    try {
+      // The install is linked to the account only once its data is: a Pro
+      // phone signing in to someone else's account and backing out lends it
+      // nothing.
+      const answer = await getAccountStatus(
+        session.token,
+        session.linked ? appUserIdRef.current : null,
+      );
+      const current = sessionRef.current;
+      // Signed out meanwhile, or a newer answer is on its way.
+      if (current?.user.id !== session.user.id || asked !== accountAskRef.current) return null;
+      setAccountPro(session.user.id, answer.isPro && current.linked);
+      setPhoneLimited(answer.limited);
+      return answer;
+    } catch {
+      // Offline, or a Worker without the route: the last answer stands.
+      return null;
+    }
+  }, []);
 
   const refreshAccountProRef = useRef(refreshAccountPro);
   refreshAccountProRef.current = refreshAccountPro;
@@ -377,9 +393,22 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
     if (current && current.expiresAt - Date.now() > TOKEN_REFRESH_MARGIN_MS) return current;
     const id = appUserIdRef.current;
     if (!id) throw new Error('no_app_user_id');
-    const next = await getSyncCredentials(await sessionToken(), id);
-    credentialsRef.current = next;
-    return next;
+    const session = sessionRef.current;
+    try {
+      const next = await getSyncCredentials(await sessionToken(), id);
+      credentialsRef.current = next;
+      return next;
+    } catch (error) {
+      // The Worker refuses credentials with the same check as the account
+      // status (`checkInPhone`), so the refusal is a fresh answer: kept like
+      // one, the next launch asks the status first instead of being refused
+      // again, and no routine check repeats it straight away.
+      if (isNotPro(error) && session && sessionRef.current?.user.id === session.user.id) {
+        accountCheckedAtRef.current = Date.now();
+        setAccountPro(session.user.id, false);
+      }
+      throw error;
+    }
   }, [sessionToken]);
 
   const closeEngine = useCallback(() => {
@@ -643,62 +672,70 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
     [markLinked, reloadAfterApply, runSync],
   );
 
-  /** Brings this phone and the cloud copy together after a sign-in. */
-  const link = useCallback(async () => {
-    if (linkingRef.current) return;
-    linkingRef.current = true;
-    const generation = generationRef.current;
-    setStatus('linking');
-    // A retry after going offline is setting up again, not offline.
-    setLastError(null);
-    try {
-      await refreshAccountPro(true);
-      const engine = await openEngine();
-      await engine.pullLatest();
-      const cloud = await engine.summarizeCloud();
-      const local = summarizeLocal();
-      if (generation !== generationRef.current) return;
-      const decision = decideLink(cloud, local);
-      if (decision === 'upload') {
-        await engine.uploadAllReplacingCloud();
-        await markLinked('uploaded');
-      } else if (decision === 'download') {
-        await adoptCloudCopy(engine, 'downloaded');
-      } else {
-        setChoice({ local, cloud });
-        setStatus('needsChoice');
-      }
-    } catch (error) {
-      if (generation !== generationRef.current) return;
-      if (isNotPro(error)) {
-        closeEngine();
-        setPhoneLimited(isPhoneLimit(error));
-        setStatus('notPro');
-        return;
-      }
-      const kind = errorKind(error);
-      if (kind === 'offline') {
-        // Keep the sign-in: linking starts again once the phone is online.
-        closeEngine();
+  /**
+   * Brings this phone and the cloud copy together after a sign-in. `known`:
+   * an account-status answer the caller has just had, so it is not asked twice.
+   */
+  const link = useCallback(
+    async (known?: ProAnswer) => {
+      if (linkingRef.current) return;
+      linkingRef.current = true;
+      const generation = generationRef.current;
+      setStatus('linking');
+      // A retry after going offline is setting up again, not offline.
+      setLastError(null);
+      try {
+        const answer = known ?? (await refreshAccountPro(true));
+        if (generation !== generationRef.current) return;
+        // A free account's credentials would only be refused. Until this
+        // phone's own Pro is known it may hold a purchase the status call could
+        // not count (it sends no install id before linking), so it asks.
+        const ownPurchase = isStoreProRef.current || !isStatusKnownRef.current;
+        if (!shouldAskForCredentials(answer, false, ownPurchase)) {
+          closeEngine();
+          setStatus('notPro');
+          return;
+        }
+        const engine = await openEngine();
+        await engine.pullLatest();
+        const cloud = await engine.summarizeCloud();
+        const local = summarizeLocal();
+        if (generation !== generationRef.current) return;
+        const decision = decideLink(cloud, local);
+        if (decision === 'upload') {
+          await engine.uploadAllReplacingCloud();
+          await markLinked('uploaded');
+        } else if (decision === 'download') {
+          await adoptCloudCopy(engine, 'downloaded');
+        } else {
+          setChoice({ local, cloud });
+          setStatus('needsChoice');
+        }
+      } catch (error) {
+        if (generation !== generationRef.current) return;
+        if (isNotPro(error)) {
+          closeEngine();
+          setPhoneLimited(isPhoneLimit(error));
+          setStatus('notPro');
+          return;
+        }
+        const kind = errorKind(error);
+        if (kind === 'offline') {
+          // Keep the sign-in: linking starts again once the phone is online.
+          closeEngine();
+          setLastError(kind);
+          return;
+        }
+        // Start over from the sign-in screen, with the reason shown there.
+        report(error, 'link', kind);
+        await forgetSession({ deleteReplica: true });
         setLastError(kind);
-        return;
+      } finally {
+        linkingRef.current = false;
       }
-      // Start over from the sign-in screen, with the reason shown there.
-      report(error, 'link', kind);
-      await forgetSession({ deleteReplica: true });
-      setLastError(kind);
-    } finally {
-      linkingRef.current = false;
-    }
-  }, [
-    adoptCloudCopy,
-    closeEngine,
-    forgetSession,
-    markLinked,
-    openEngine,
-    refreshAccountPro,
-    report,
-  ]);
+    },
+    [adoptCloudCopy, closeEngine, forgetSession, markLinked, openEngine, refreshAccountPro, report],
+  );
 
   const resolveChoice = useCallback(
     async (keep: 'cloud' | 'phone') => {
@@ -806,17 +843,44 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
   const syncNow = useCallback(async () => {
     const session = sessionRef.current;
     if (!session) return;
+    let answer: ProAnswer | null = null;
     // Pro may have been restored since the last answer, here or on another phone.
     if (status === 'notPro') {
       credentialsRef.current = null;
-      const answer = await refreshAccountPro(true);
+      answer = await refreshAccountPro(true);
       // Stay paused until the next check when the answer already says the
       // credentials would be refused.
       if (!shouldAskForCredentials(answer, session.linked, isStoreProRef.current)) return;
     }
     if (session.linked) await runSync();
-    else await link();
+    else await link(answer ?? undefined);
   }, [link, refreshAccountPro, runSync, status]);
+  const syncNowRef = useRef(syncNow);
+  syncNowRef.current = syncNow;
+
+  /** A live nudge that came too soon after the last paused check, waiting for its turn. */
+  const pausedCheckTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /**
+   * A paused phone asks whether Pro is back (`syncNow` asks the account
+   * status first), at most once a minute unless `always`: a return to the
+   * app, the 15-minute check and a live nudge can all come at once. `later`:
+   * one asked too soon runs when the minute is up instead of being dropped,
+   * as a live nudge may say another phone has just bought Pro.
+   */
+  const checkWhilePaused = useCallback((opts: { always?: boolean; later?: boolean } = {}) => {
+    const now = Date.now();
+    if (!opts.always && !pausedCheckDue(now, accountCheckedAtRef.current)) {
+      if (opts.later && !pausedCheckTimerRef.current) {
+        const wait = Math.max(0, accountCheckedAtRef.current + PAUSED_CHECK_MIN_GAP_MS - now);
+        pausedCheckTimerRef.current = setTimeout(() => {
+          pausedCheckTimerRef.current = null;
+          if (statusRef.current === 'notPro') checkWhilePaused({ later: true });
+        }, wait);
+      }
+      return;
+    }
+    void syncNowRef.current();
+  }, []);
 
   const signOut = useCallback(
     async (opts: { force?: boolean } = {}) => {
@@ -890,6 +954,8 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
     void (async () => {
       void finishPendingSignOut();
       const session = await loadSession();
+      // The answer kept from the last run decides what this launch asks.
+      await waitForAccountPro();
       if (cancelled) return;
       sessionRef.current = session;
       bindShared(session);
@@ -907,9 +973,9 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       if (session.linked) void setLastLinkedUser(session.user.id);
       setUser(session.user);
       setLinked(session.linked);
-      void refreshAccountPro(true);
       // Not linked: the app closed during linking, or the account is not Pro
-      // yet. Start linking again (it stops at notPro if so).
+      // yet. Start linking again (it asks the account status, and stops at
+      // notPro if so).
       if (!session.linked) {
         await sharedLedgerSync.refreshList(true).catch(() => 0);
         await link();
@@ -919,6 +985,24 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       // Record edits even if this launch cannot sync (offline, Pro ended):
       // they go up with the next sync that can.
       enableCapture();
+      const kept = getAccountProAnswer();
+      if (kept?.userId === session.user.id) {
+        // The launch's credentials request checks Pro anyway, so the
+        // routine check waits its usual time from the last answer.
+        accountCheckedAtRef.current = kept.checkedAt;
+        if (!kept.isPro) {
+          // Paused when the app last ran: ask the status first, so a launch
+          // that is still paused sends no credentials request to be refused.
+          const answer = await refreshAccountPro(true);
+          if (cancelled) return;
+          if (!shouldAskForCredentials(answer, true, isStoreProRef.current)) {
+            setStatus('notPro');
+            // Its shared ledgers sync without the account's Pro, as a sync would run them.
+            void runSharedSync();
+            return;
+          }
+        }
+      }
       await runSync();
     })();
     return () => {
@@ -967,7 +1051,11 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
     const was = wasStoreProRef.current;
     wasStoreProRef.current = isStorePro;
     if (was === null || was === isStorePro || !sessionRef.current) return;
-    void refreshAccountPro(true);
+    void refreshAccountPro(true).then((answer) => {
+      // A purchase here may make the account Pro again: the account's paused
+      // phones hear it now (their live socket) rather than at their next check.
+      if (isStorePro && answer?.isPro) announceRef.current(PERSONAL_CHANNEL);
+    });
     // Only a change of the store's answer matters here.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isStorePro, isStatusKnown]);
@@ -988,11 +1076,15 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
   );
   useSyncScheduler(status === 'ready', scheduledSync, syncWanted, { pushSoon });
 
-  // Paused: check again on return to the app and every few minutes, so a
-  // renewal on another phone resumes this one without a tap.
-  const scheduledResume = useCallback(() => void syncNow(), [syncNow]);
+  // Paused: check again on return to the app and every 15 minutes, so a
+  // renewal on another phone resumes this one without a tap. A purchase on
+  // another phone signed in says so at once over the live socket.
+  const scheduledResume = useCallback(() => checkWhilePaused(), [checkWhilePaused]);
   const never = useCallback(() => false, []);
-  useSyncScheduler(status === 'notPro', scheduledResume, never);
+  useSyncScheduler(status === 'notPro', scheduledResume, never, {
+    everyMs: PAUSED_CHECK_EVERY_MS,
+    onBackground: false,
+  });
 
   const scheduledLink = useCallback(() => void link(), [link]);
   const always = useCallback(() => true, []);
@@ -1032,7 +1124,13 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       onChange: ({ channel, reason, actor }) => {
         if (closingRef.current) return;
         if (reason === 'access' && actor === userId) sharedLedgerSync.noteLeftByUser(channel);
-        if (channel === PERSONAL_CHANNEL) {
+        if (channel === PERSONAL_CHANNEL && statusRef.current === 'notPro') {
+          // Paused: the account may be Pro again (a purchase on another
+          // phone). Asked through the status, never a credentials request
+          // that would be refused. An `access` change (the account deleted on
+          // another phone) is asked at once, and signs this phone out.
+          checkWhilePaused({ always: reason === 'access', later: true });
+        } else if (channel === PERSONAL_CHANNEL) {
           // Also how a deletion of the account on another phone is learned:
           // the sync finds the session gone and signs this phone out.
           void runSyncRef.current();
@@ -1042,10 +1140,13 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       },
       onReconnect: () => {
         if (closingRef.current) return;
-        void runSyncRef.current();
+        // A paused phone's own data has nothing to sync, and its return to
+        // the app is checked already; its shared ledgers still catch up.
+        if (statusRef.current === 'notPro') void runSharedSyncRef.current();
+        else void runSyncRef.current();
       },
     });
-  }, [enabled, sessionToken, userId]);
+  }, [checkWhilePaused, enabled, sessionToken, userId]);
 
   const shareLedger = useCallback(
     async (ledger: { id: string; name: string; emoji: string | null }) => {
