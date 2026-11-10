@@ -4392,6 +4392,23 @@ email codes, expired invite links and rate-limit rows older than a day.
   at 20,000 images; when the counter says full, the real count is read from R2
   first, so drift never refuses an upload. Images the app stops using stay in
   R2 until the account is deleted (there is no per-image delete yet).
+- **Image bucket location.** `MEDIA` is `money2time-cloud-sync-media-apac`
+  (Asia-Pacific), next to the users (about 95% in Malaysia and Singapore) and
+  the Turso group in Singapore. Until 2026-11-10 the images were in
+  `money2time-cloud-sync-media`, which R2 had placed in eastern North America:
+  every image request from Southeast Asia crossed the Pacific and back, roughly
+  200–250 ms each. An R2 bucket cannot be moved,
+  so the images were copied to a new one through the REST API (every key
+  checked by ETag, size and content type). While the old bucket is still
+  bound as `OLD_MEDIA`, an image missing from `MEDIA` is read from it,
+  existence checks and the quota recount include it (each key counted once),
+  and deleting an account or ledger empties both; new images go to `MEDIA`
+  only. Once every key is confirmed copied, the `OLD_MEDIA` binding and the
+  fallback are removed and the old bucket is emptied and deleted. The Workers
+  use Cloudflare's default placement (each request runs at the data centre
+  nearest the user), which is already beside the data for these users; Smart
+  Placement would help only the few far away, and would also move image
+  uploads and the live connection.
 - **Turso.** A database `m2t-sync-<24 hex of sha256(userId)>` in
   `TURSO_GROUP` of `TURSO_ORG`, made through the Platform API with
   `TURSO_API_TOKEN`, with the `sync_rows` / `sync_info` schema applied over
@@ -4487,8 +4504,9 @@ limited per address and attempt, so neither can be used to spam an inbox.
 
 #### Config
 
-`wrangler.toml` holds the bindings (`AUTH_DB` D1, `MEDIA` R2, `EMAIL` Email
-Service, `SYNC_HUB` Durable Object with its `v1` SQLite migration,
+`wrangler.toml` holds the bindings (`AUTH_DB` D1, `MEDIA` R2 and, during the
+move, `OLD_MEDIA` R2, `EMAIL` Email Service, `SYNC_HUB` Durable Object with its
+`v1` SQLite migration,
 `AUTH_LIMITER` and `OTP_LIMITER`), the cron and the public vars (among them
 `TURNSTILE_ENFORCE` and `TURNSTILE_HOSTNAMES`).
 Secrets: `BETTER_AUTH_SECRET`, `TURSO_API_TOKEN`, `APPLE_PRIVATE_KEY` and
@@ -4516,7 +4534,8 @@ Made for this feature on 2026-10-28, all new (nothing existing is shared):
 | ------------------------ | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
 | Worker + custom domains  | `money2time-workers-cloud-sync`, `workers-cloud-sync` + `shared-ledgers` .money2time.com, cron `17 3 * * *`             | `npx wrangler delete` in `workers/cloud-sync` (removes the domain route and cron too)       |
 | D1 database              | `money2time-cloud-sync-auth`, `2154e310-6fce-49eb-aa4b-565e343c9eb7`                                                    | `npx wrangler d1 delete money2time-cloud-sync-auth`                                         |
-| R2 bucket (private)      | `money2time-cloud-sync-media`                                                                                           | empty it, then `npx wrangler r2 bucket delete money2time-cloud-sync-media`                  |
+| R2 bucket (private)      | `money2time-cloud-sync-media-apac` (APAC, added 2026-11-10)                                                             | empty it, then `npx wrangler r2 bucket delete money2time-cloud-sync-media-apac`             |
+| R2 bucket (old, private) | `money2time-cloud-sync-media` (ENAM, until 2026-11-10)                                                                  | empty it, then `npx wrangler r2 bucket delete money2time-cloud-sync-media`                  |
 | Rate limit namespaces    | `2402` (`AUTH_LIMITER`), `2403` (`OTP_LIMITER`)                                                                         | go with the Worker                                                                          |
 | Worker secrets           | `BETTER_AUTH_SECRET`, `TURSO_API_TOKEN`, `APPLE_PRIVATE_KEY`                                                            | go with the Worker                                                                          |
 | Apple App ID capability  | Sign in with Apple (`APPLE_ID_AUTH`, primary) on `com.nelsongan.money2time`                                             | `asc bundle-ids capabilities remove --id 2ASN39AS8V_APPLE_ID_AUTH --confirm` (then rebuild) |

@@ -3,6 +3,11 @@ export interface Env {
   AUTH_DB: D1Database;
   /** The user's images, under `u/<userId>/<asset path>`. Private: only this Worker reads it. */
   MEDIA: R2Bucket;
+  /**
+   * The bucket the images were in before they moved to `MEDIA` (2026-11-10).
+   * While bound, reads fall back to it and deletes reach it (src/media.ts).
+   */
+  OLD_MEDIA?: R2Bucket;
   /** Cloudflare Email Service, for the sign-in codes. */
   EMAIL?: SendEmail;
   /** Live updates: one SyncHub (src/live.ts) per user, holding their apps' sockets. */
