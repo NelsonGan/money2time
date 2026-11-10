@@ -4,12 +4,6 @@
 // asset path after the prefix is the same relative path the app stores in its
 // rows (`receipts/<uuid>.jpg`), so a synced row finds its image under the
 // same name on every phone.
-//
-// The images moved from a bucket in eastern North America to one in
-// Asia-Pacific, next to the users and the Turso databases, on 2026-11-10.
-// While `OLD_MEDIA` is bound, an image missing from `MEDIA` is looked for in
-// it, counting reads both, and deleting a space empties both. New images go to
-// `MEDIA` only.
 
 import type { Env } from './env';
 import { json } from './http';
@@ -110,28 +104,6 @@ export function mediaKey(space: MediaSpace, path: string): string {
   return `${space.prefix}${path}`;
 }
 
-/** `MEDIA`, then `OLD_MEDIA` while the move is not finished. */
-function buckets(env: Env): R2Bucket[] {
-  return env.OLD_MEDIA ? [env.MEDIA, env.OLD_MEDIA] : [env.MEDIA];
-}
-
-/** Whether `key` is stored, in the current bucket or still only in the old one. */
-async function headImage(env: Env, key: string): Promise<R2Object | null> {
-  for (const bucket of buckets(env)) {
-    const head = await withR2Retry(() => bucket.head(key));
-    if (head) return head;
-  }
-  return null;
-}
-
-async function getImage(env: Env, key: string): Promise<R2ObjectBody | null> {
-  for (const bucket of buckets(env)) {
-    const object = await withR2Retry(() => bucket.get(key));
-    if (object) return object;
-  }
-  return null;
-}
-
 /** The asset path of a `/v1/…/media/<path>` URL, or null when it does not decode. */
 export function decodeMediaPath(encoded: string): string | null {
   try {
@@ -194,7 +166,7 @@ async function countNewImage(
   space: MediaSpace,
   key: string,
 ): Promise<'replaced' | 'counted' | 'full'> {
-  if (await headImage(env, key)) return 'replaced';
+  if (await withR2Retry(() => env.MEDIA.head(key))) return 'replaced';
   if (await incrementBelowCap(env, space)) return 'counted';
   const actual = await countObjects(env, space);
   await env.AUTH_DB.prepare(
@@ -225,36 +197,33 @@ async function adjustCount(env: Env, space: MediaSpace, delta: number): Promise<
     .run();
 }
 
-/** Visits every key of the space stored in `bucket`, a page at a time. */
+/** Visits every stored key of the space, a page at a time. */
 async function forEachPage(
-  bucket: R2Bucket,
+  env: Env,
   space: MediaSpace,
   visit: (keys: string[]) => Promise<void>,
 ): Promise<void> {
   let cursor: string | undefined;
   do {
     const listed = await withR2Retry(() =>
-      bucket.list({ prefix: space.prefix, cursor, limit: 1000 }),
+      env.MEDIA.list({ prefix: space.prefix, cursor, limit: 1000 }),
     );
     if (listed.objects.length) await visit(listed.objects.map((o) => o.key));
     cursor = listed.truncated ? listed.cursor : undefined;
   } while (cursor);
 }
 
-/** The space's images, each counted once though it may be in both buckets. */
 async function countObjects(env: Env, space: MediaSpace): Promise<number> {
-  const keys = new Set<string>();
-  for (const bucket of buckets(env)) {
-    await forEachPage(bucket, space, async (page) => {
-      for (const key of page) keys.add(key);
-    });
-  }
-  return keys.size;
+  let total = 0;
+  await forEachPage(env, space, async (keys) => {
+    total += keys.length;
+  });
+  return total;
 }
 
 export async function getMedia(env: Env, space: MediaSpace, path: string): Promise<Response> {
   if (!isValidAssetPath(path)) return json({ error: 'bad_path' }, 400);
-  const object = await getImage(env, mediaKey(space, path));
+  const object = await withR2Retry(() => env.MEDIA.get(mediaKey(space, path)));
   if (!object) return json({ error: 'not_found' }, 404);
   return new Response(object.body, {
     headers: {
@@ -274,13 +243,13 @@ export async function existingMedia(
     return json({ error: 'bad_paths' }, 400);
   }
   const valid = paths.filter((p): p is string => typeof p === 'string' && isValidAssetPath(p));
-  const heads = await Promise.all(valid.map((p) => headImage(env, mediaKey(space, p))));
+  const heads = await Promise.all(
+    valid.map((p) => withR2Retry(() => env.MEDIA.head(mediaKey(space, p)))),
+  );
   return json({ existing: valid.filter((_, index) => heads[index] !== null) });
 }
 
 /** Deletes every image of the space (account deletion, a ledger no longer shared). */
 export async function deleteAllMedia(env: Env, space: MediaSpace): Promise<void> {
-  for (const bucket of buckets(env)) {
-    await forEachPage(bucket, space, (keys) => withR2Retry(() => bucket.delete(keys)));
-  }
+  await forEachPage(env, space, (keys) => withR2Retry(() => env.MEDIA.delete(keys)));
 }
