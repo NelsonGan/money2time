@@ -4408,11 +4408,11 @@ email codes, expired invite links and rate-limit rows older than a day.
   size and content type. For the move the old bucket was bound as `OLD_MEDIA`,
   read from when an image was missing and emptied with the new one on deletes
   (#701); once every key was confirmed copied and the old bucket had no writes
-  after the deploy, that fallback was removed. The Workers use Cloudflare's
-  default placement (each request runs at the data centre nearest the user),
-  which is already beside the data for these users; Smart Placement would help
-  only the few far away, and would also move image uploads and the live
-  connection.
+  after the deploy, that fallback was removed and the old bucket was emptied
+  and deleted. The Workers use Cloudflare's default placement (each request
+  runs at the data centre nearest the user), which is already beside the data
+  for these users; Smart Placement would help only the few far away, and would
+  also move image uploads and the live connection.
 - **Turso.** A database `m2t-sync-<24 hex of sha256(userId)>` in
   `TURSO_GROUP` of `TURSO_ORG`, made through the Platform API with
   `TURSO_API_TOKEN`, with the `sync_rows` / `sync_info` schema applied over
@@ -4538,7 +4538,6 @@ Made for this feature on 2026-10-28, all new (nothing existing is shared):
 | Worker + custom domains  | `money2time-workers-cloud-sync`, `workers-cloud-sync` + `shared-ledgers` .money2time.com, cron `17 3 * * *`             | `npx wrangler delete` in `workers/cloud-sync` (removes the domain route and cron too)       |
 | D1 database              | `money2time-cloud-sync-auth`, `2154e310-6fce-49eb-aa4b-565e343c9eb7`                                                    | `npx wrangler d1 delete money2time-cloud-sync-auth`                                         |
 | R2 bucket (private)      | `money2time-cloud-sync-media-apac` (APAC, added 2026-11-10)                                                             | empty it, then `npx wrangler r2 bucket delete money2time-cloud-sync-media-apac`             |
-| R2 bucket (old, private) | `money2time-cloud-sync-media` (ENAM, unused since 2026-11-10; empty and delete it)                                      | empty it, then `npx wrangler r2 bucket delete money2time-cloud-sync-media`                  |
 | Rate limit namespaces    | `2402` (`AUTH_LIMITER`), `2403` (`OTP_LIMITER`)                                                                         | go with the Worker                                                                          |
 | Worker secrets           | `BETTER_AUTH_SECRET`, `TURSO_API_TOKEN`, `APPLE_PRIVATE_KEY`                                                            | go with the Worker                                                                          |
 | Apple App ID capability  | Sign in with Apple (`APPLE_ID_AUTH`, primary) on `com.nelsongan.money2time`                                             | `asc bundle-ids capabilities remove --id 2ASN39AS8V_APPLE_ID_AUTH --confirm` (then rebuild) |
