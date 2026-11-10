@@ -51,9 +51,7 @@ export function DisplaySettingsScreen({
   const bottomNavInset = useSettingsBottomNavInset();
   const resolvedTheme = useResolvedTheme();
   const themeColors = useThemeColors();
-  const currentLocaleSelection = SUPPORTED_LOCALES.includes(
-    settings.locale as (typeof SUPPORTED_LOCALES)[number],
-  )
+  const currentLocaleSelection = SUPPORTED_LOCALES.includes(settings.locale)
     ? settings.locale
     : 'en';
 

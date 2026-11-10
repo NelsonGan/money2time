@@ -3,10 +3,17 @@
  */
 import type { RecurrencePattern } from '~/types';
 import { dayKeyFromIsoLocal } from '~/utils/formatters';
+import { resetLocalDays } from '~/utils/localDate';
 import { legacyNextRunAfter, repairRecurringSchedule } from '~/utils/recurringScheduleRepair';
 
 /** Set by the time zone environment named at the top of this file. */
 declare const setTimeZone: (zone: string | undefined) => void;
+
+/** Changes the zone and drops the local days the app cached in the old one. */
+function changeTimeZone(zone: string | undefined) {
+  setTimeZone(zone);
+  resetLocalDays();
+}
 
 const ZONES = ['Asia/Kuala_Lumpur', 'America/New_York', 'UTC'] as const;
 
@@ -31,10 +38,10 @@ function legacyHistory(start: string, pattern: RecurrencePattern, interval: numb
 }
 
 describe('the arithmetic older versions used', () => {
-  afterAll(() => setTimeZone(undefined));
+  afterAll(() => changeTimeZone(undefined));
 
   it('moved a rule on the 1st to the 29th east of UTC', () => {
-    setTimeZone('Asia/Kuala_Lumpur');
+    changeTimeZone('Asia/Kuala_Lumpur');
     const { runDates, nextRunDate } = legacyHistory(midnight('2026-02-01'), 'monthly', 1, 4);
     expect([...runDates, nextRunDate].map(dayKeyFromIsoLocal)).toEqual([
       '2026-02-01',
@@ -46,7 +53,7 @@ describe('the arithmetic older versions used', () => {
   });
 
   it('kept a rule on the 31st on the 28th after February', () => {
-    setTimeZone('UTC');
+    changeTimeZone('UTC');
     const { runDates, nextRunDate } = legacyHistory(midnight('2026-01-31'), 'monthly', 1, 3);
     expect([...runDates, nextRunDate].map(dayKeyFromIsoLocal)).toEqual([
       '2026-01-31',
@@ -58,8 +65,8 @@ describe('the arithmetic older versions used', () => {
 });
 
 describe.each(ZONES)('repairing a rule saved before anchor days, in %s', (zone) => {
-  beforeAll(() => setTimeZone(zone));
-  afterAll(() => setTimeZone(undefined));
+  beforeAll(() => changeTimeZone(zone));
+  afterAll(() => changeTimeZone(undefined));
 
   const repair = (
     start: string,

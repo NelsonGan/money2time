@@ -27,6 +27,8 @@ const POST_LAUNCH_WINDOW_MS = 5000;
 const INTERACTION_WINDOW_MS = 2500;
 
 const marks: Record<string, number> = {};
+// Total ms and call count per span name since the last report.
+let spans: Record<string, [number, number]> = {};
 let startupReported = false;
 
 declare const __BUNDLE_START_TIME__: number | undefined;
@@ -39,6 +41,35 @@ function log(payload: Record<string, unknown>) {
 export function perfMark(name: string) {
   if (!PERF_TRACE_ENABLED || name in marks) return;
   marks[name] = Date.now();
+}
+
+/**
+ * Time a synchronous piece of work under `name`. The totals since the last
+ * report go out as a `spans` line: one with the `startup` line (everything up
+ * to the splash lifting), one with the `post_launch` report, and one with each
+ * `interaction` report, so a slow launch or a janky save says where its time
+ * went. A normal build just runs `work`.
+ */
+export function perfSpan<T>(name: string, work: () => T): T {
+  if (!PERF_TRACE_ENABLED) return work();
+  const startedAt = performance.now();
+  try {
+    return work();
+  } finally {
+    const span = (spans[name] ??= [0, 0]);
+    span[0] += performance.now() - startedAt;
+    span[1] += 1;
+  }
+}
+
+// A line of its own: iOS truncates a long log message.
+function logSpans(phase: string) {
+  const entries = Object.entries(spans);
+  spans = {};
+  if (entries.length === 0) return;
+  const rounded: Record<string, [number, number]> = {};
+  for (const [name, [ms, count]] of entries) rounded[name] = [Math.round(ms * 10) / 10, count];
+  log({ kind: 'spans', phase, spans: rounded });
 }
 
 interface FrameReport {
@@ -113,6 +144,7 @@ export function perfStartupDone(extra: Record<string, unknown> = {}) {
     marks: { ...marks },
     ...extra,
   });
+  logSpans('startup');
   const splashHiddenAt = marks.splash_hide ?? Date.now();
   monitorFrames(POST_LAUNCH_WINDOW_MS, (report) => {
     log({ kind: 'post_launch', windowMs: POST_LAUNCH_WINDOW_MS, ...report });
@@ -125,6 +157,7 @@ export function perfStartupDone(extra: Record<string, unknown> = {}) {
       if (at > splashHiddenAt) later[name] = at - splashHiddenAt;
     }
     log({ kind: 'post_launch_marks', marks: later });
+    logSpans('post_launch');
   });
 }
 
@@ -141,5 +174,6 @@ export function perfInteraction(label: string, extra: Record<string, unknown> = 
       ...report,
       ...extra,
     });
+    logSpans(label);
   });
 }

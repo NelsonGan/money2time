@@ -1,4 +1,5 @@
 import {
+  createTransactionAssembler,
   toAccount,
   toAccountGroup,
   toBudgetTemplate,
@@ -14,7 +15,12 @@ import {
   toTransaction,
   toTransactionSplit,
   toTransactionWithRelationsFromRaw,
+  TRANSACTION_COMMON_COLUMNS_SQL,
   TRANSACTION_RAW_COLUMNS_SQL,
+  TRANSACTION_SPARSE_COLUMNS_SQL,
+  TRANSACTION_SPARSE_FILTER_SQL,
+  type TransactionRelationLookups,
+  transactionRelations,
 } from '~/lib/repositories/mappers';
 
 const STAMPS = {
@@ -1030,6 +1036,220 @@ describe('toTransactionWithRelationsFromRaw', () => {
       accountName: null,
       fromAccountName: null,
       toAccountName: null,
+      categoryName: null,
+      categoryIcon: null,
+      categoryParentId: null,
+      categoryParentName: null,
+      instalmentCount: null,
+    });
+  });
+});
+
+describe('createTransactionAssembler', () => {
+  type RawValue = string | number | null;
+  const names = (sql: string) => sql.split(',').map((column) => column.trim().replace(/^t\./, ''));
+  const rawColumns = names(TRANSACTION_RAW_COLUMNS_SQL);
+  const commonColumns = names(TRANSACTION_COMMON_COLUMNS_SQL);
+  // `t.id` leads the sparse query so its rows can be matched to the common ones.
+  const sparseColumns = names(TRANSACTION_SPARSE_COLUMNS_SQL).slice(1);
+  // What the filter calls "not set": `t.column IS NOT <the default>`.
+  const sparseDefaults = new Map<string, RawValue>(
+    TRANSACTION_SPARSE_FILTER_SQL.split(' OR ').map((term) => {
+      const match = /^t\.(\w+) IS NOT (.+)$/.exec(term);
+      if (!match) throw new Error(`Unreadable filter term: ${term}`);
+      const [, column, literal] = match as unknown as [string, string, string];
+      if (literal === 'NULL') return [column, null];
+      return [column, literal.startsWith("'") ? literal.slice(1, -1) : Number(literal)];
+    }),
+  );
+
+  const lookups: TransactionRelationLookups = {
+    accountNames: new Map([
+      ['a1', 'Wallet'],
+      ['a2', 'Card'],
+    ]),
+    categories: new Map([
+      ['c-lunch', { name: 'Lunch', icon: 'meal', parentId: 'c-food', parentName: 'Food' }],
+      ['c-food', { name: 'Food', icon: 'meal', parentId: null, parentName: null }],
+    ]),
+    instalmentCounts: new Map([['plan1', 12]]),
+  };
+
+  /** The full raw row a common row and its sparse values stand for. */
+  function fullRow(values: Record<string, RawValue>) {
+    const relations = transactionRelations(
+      {
+        accountId: values.account_id as string | null,
+        fromAccountId: values.from_account_id as string | null,
+        toAccountId: values.to_account_id as string | null,
+        categoryId: values.category_id as string | null,
+        instalmentRuleId: values.instalment_rule_id as string | null,
+      },
+      lookups,
+    );
+    return [
+      ...rawColumns.map((column) => values[column] ?? null),
+      relations.accountName,
+      relations.fromAccountName,
+      relations.toAccountName,
+      relations.categoryName,
+      relations.categoryIcon,
+      relations.categoryParentId,
+      relations.categoryParentName,
+      relations.instalmentCount,
+    ];
+  }
+
+  const common: Record<string, RawValue> = {
+    id: 't1',
+    type: 'expense',
+    amount: 12.5,
+    currency: 'MYR',
+    reporting_currency: 'MYR',
+    reporting_amount: 12.5,
+    fx_rate: 1,
+    date: '2026-05-13T04:00:00.000Z',
+    account_id: 'a1',
+    from_account_id: null,
+    to_account_id: null,
+    category_id: 'c-lunch',
+    note: 'noodles',
+    created_at: '2026-05-13T04:00:00.000Z',
+    updated_at: '2026-05-14T04:00:00.000Z',
+  };
+  const commonRow = (values: Record<string, RawValue>) =>
+    commonColumns.map((column) => values[column] ?? null);
+
+  it('reads every raw column in exactly one of the two parts', () => {
+    expect([...commonColumns, ...sparseColumns].sort()).toEqual([...rawColumns].sort());
+    expect(commonColumns[0]).toBe('id');
+    expect([...sparseDefaults.keys()]).toEqual(sparseColumns);
+    expect(Object.keys(common)).toEqual(commonColumns);
+  });
+
+  it('builds a row with no sparse values as the raw mapper would, key for key', () => {
+    const defaults = Object.fromEntries(sparseDefaults);
+    const built = createTransactionAssembler(lookups, new Map())(commonRow(common));
+    const expected = toTransactionWithRelationsFromRaw(fullRow({ ...defaults, ...common }));
+    expect(built).toEqual(expected);
+    expect(Object.keys(built)).toEqual(Object.keys(expected));
+    expect(built.accountName).toBe('Wallet');
+    expect(built.categoryParentName).toBe('Food');
+  });
+
+  it('builds a transfer with no sparse values the same way', () => {
+    const transfer = {
+      ...common,
+      id: 't2',
+      type: 'transfer',
+      reporting_currency: null,
+      reporting_amount: null,
+      fx_rate: null,
+      account_id: null,
+      from_account_id: 'a1',
+      to_account_id: 'a2',
+      category_id: null,
+      note: null,
+    };
+    const built = createTransactionAssembler(lookups, new Map())(commonRow(transfer));
+    expect(built).toEqual(
+      toTransactionWithRelationsFromRaw(
+        fullRow({ ...Object.fromEntries(sparseDefaults), ...transfer }),
+      ),
+    );
+    expect(built.fromAccountName).toBe('Wallet');
+    expect(built.toAccountName).toBe('Card');
+  });
+
+  it('gives a row its sparse values and the names they point at', () => {
+    const sparse: Record<string, RawValue> = {
+      to_amount: 55,
+      account_amount: 50,
+      receipt_uri: 'receipts/1.jpg',
+      recurrence_pattern: 'monthly',
+      recurrence_interval: 2,
+      recurrence_end_date: '2027-01-01',
+      recurrence_parent_id: 'r1',
+      sentiment: 'happy',
+      reimbursable: 1,
+      reimbursed_at: '2026-05-20T00:00:00.000Z',
+      reimbursement_account_id: 'a2',
+      reimbursement_transaction_id: 't9',
+      reimbursement_of_id: 't8',
+      counts_as_expense: 1,
+      day_order: 1234.5,
+      deleted_at: null,
+      details: 'Team lunch',
+      instalment_rule_id: 'plan1',
+      instalment_number: 4,
+      created_by: 'user-mei',
+      member_id: 'user-nelson',
+      fee_of_id: 't7',
+    };
+    expect(Object.keys(sparse)).toEqual(sparseColumns);
+    const sparseById = new Map([['t1', ['t1', ...sparseColumns.map((column) => sparse[column])]]]);
+    const assemble = createTransactionAssembler(lookups, sparseById as Map<string, RawValue[]>);
+    const built = assemble(commonRow(common));
+    expect(built).toEqual(toTransactionWithRelationsFromRaw(fullRow({ ...sparse, ...common })));
+    expect(built.instalmentCount).toBe(12);
+    expect(built.sentiment).toBe('happy');
+    // The row after a sparse one starts clean.
+    const plain = assemble(commonRow({ ...common, id: 't3' }));
+    expect(plain.sentiment).toBe('neutral');
+    expect(plain.receiptUri).toBeNull();
+    expect(plain.instalmentCount).toBeNull();
+  });
+});
+
+describe('transactionRelations', () => {
+  const lookups: TransactionRelationLookups = {
+    accountNames: new Map([['a1', 'Wallet']]),
+    categories: new Map([
+      ['c1', { name: 'Coffee', icon: 'cup', parentId: 'c0', parentName: 'Food' }],
+    ]),
+    instalmentCounts: new Map([['plan1', 6]]),
+  };
+  const none = {
+    accountId: null,
+    fromAccountId: null,
+    toAccountId: null,
+    categoryId: null,
+    instalmentRuleId: null,
+  };
+
+  it('names what a transaction points at', () => {
+    expect(
+      transactionRelations(
+        { ...none, accountId: 'a1', categoryId: 'c1', instalmentRuleId: 'plan1' },
+        lookups,
+      ),
+    ).toEqual({
+      accountName: 'Wallet',
+      fromAccountName: null,
+      toAccountName: null,
+      categoryName: 'Coffee',
+      categoryIcon: 'cup',
+      categoryParentId: 'c0',
+      categoryParentName: 'Food',
+      instalmentCount: 6,
+    });
+  });
+
+  it('gives null for a row that is gone, and for an empty id', () => {
+    const relations = transactionRelations(
+      {
+        accountId: '',
+        fromAccountId: 'deleted-account',
+        toAccountId: 'a1',
+        categoryId: 'no-such-category',
+        instalmentRuleId: 'deleted-plan',
+      },
+      lookups,
+    );
+    expect(relations).toEqual({
+      accountName: null,
+      fromAccountName: null,
+      toAccountName: 'Wallet',
       categoryName: null,
       categoryIcon: null,
       categoryParentId: null,

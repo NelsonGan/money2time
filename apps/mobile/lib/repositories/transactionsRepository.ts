@@ -17,12 +17,17 @@ import type {
 import { normalizeMoneyAmount } from '~/utils/formatters';
 import { newId, nowIso } from '~/utils/id';
 import { escapeLike, rankNoteSuggestions } from '~/utils/noteSuggestions';
+import { perfSpan } from '~/utils/perfTrace';
 import { sortTransactions } from '~/utils/transactionSorting';
 
 import {
+  createTransactionAssembler,
   toTransaction,
-  toTransactionWithRelationsFromRaw,
-  TRANSACTION_RAW_COLUMNS_SQL,
+  TRANSACTION_COMMON_COLUMNS_SQL,
+  TRANSACTION_SPARSE_COLUMNS_SQL,
+  TRANSACTION_SPARSE_FILTER_SQL,
+  type TransactionRelationLookups,
+  transactionRelations,
 } from './mappers';
 import { transactionSplitsRepository } from './transactionSplitsRepository';
 
@@ -57,21 +62,6 @@ export function assertInOpenLedger(input: CreateTransactionInput): void {
   }
 }
 
-type RelationRow = {
-  txId: string;
-  accountId: string | null;
-  accountName: string | null;
-  fromAccountId: string | null;
-  fromAccountName: string | null;
-  toAccountId: string | null;
-  toAccountName: string | null;
-  categoryId: string | null;
-  categoryName: string | null;
-  categoryIcon: string | null;
-  categoryParentId: string | null;
-  parentCategoryName: string | null;
-  instalmentCount: number | null;
-};
 
 export interface CreateTransactionInput {
   type: TransactionType;
@@ -143,15 +133,6 @@ const DEFAULT_TRANSACTION_QUERY: TransactionFilters = {
   maxAmount: null,
   sortBy: 'date_desc',
 };
-const inClausePlaceholdersByCount = new Map<number, string>();
-
-function getInClausePlaceholders(count: number): string {
-  const cached = inClausePlaceholdersByCount.get(count);
-  if (cached) return cached;
-  const placeholders = Array.from({ length: count }, () => '?').join(',');
-  inClausePlaceholdersByCount.set(count, placeholders);
-  return placeholders;
-}
 
 function normalizeTransactionFilters(
   filters: Partial<TransactionFilters> = {},
@@ -201,9 +182,9 @@ export function summarizeSplits(splits: TransactionSplit[]): TransactionSplitsSu
 }
 
 // Above this count, a `WHERE id IN (…)` clause carries so many bound parameters
-// that preparing the statement costs more than scanning the relevant table once
-// and grouping in JS. The full-table paths return supersets that are filtered by
-// the per-transaction map lookups below, so the result is identical either way.
+// that preparing the statement costs more than scanning the splits table once
+// and grouping in JS. The full scan returns a superset that the per-transaction
+// map lookups below filter, so the result is identical either way.
 const IN_CLAUSE_SCAN_THRESHOLD = 900;
 
 function attachSplits(transactions: TransactionWithRelations[]): void {
@@ -222,128 +203,105 @@ function attachSplits(transactions: TransactionWithRelations[]): void {
   }
 }
 
-// The relation names every loaded transaction carries, joined in by both the
-// full load and attachRelations' lookup so the two can never disagree.
-const RELATION_JOINS_SQL = `
-    LEFT JOIN accounts a ON a.id = t.account_id AND a.deleted_at IS NULL
-    LEFT JOIN accounts fa ON fa.id = t.from_account_id AND fa.deleted_at IS NULL
-    LEFT JOIN accounts ta ON ta.id = t.to_account_id AND ta.deleted_at IS NULL
-    LEFT JOIN categories c ON c.id = t.category_id
-    LEFT JOIN categories p ON p.id = c.parent_id
-    LEFT JOIN recurring_rules ir ON ir.id = t.instalment_rule_id AND ir.deleted_at IS NULL`;
+type RawValue = string | number | null;
 
-const CATEGORY_ICON_SQL = `COALESCE(NULLIF(TRIM(c.icon), ''), NULLIF(TRIM(p.icon), ''))`;
-
-/**
- * Every live transaction with its relation names, read in one query as raw
- * value arrays and turned into objects in a single pass. This is the launch
- * load, so it is kept lean: the Drizzle select, `toTransaction` and the second
- * relations query it replaces built three objects per row and read the table
- * twice, which on a five-year history took the best part of a second on
- * Android. Ordered newest first, which leaves `sortTransactions` little or
- * nothing to do.
- */
-function loadAllWithRelations(): TransactionWithRelations[] {
-  const statement = getSQLite().prepareSync(`
-    SELECT ${TRANSACTION_RAW_COLUMNS_SQL},
-      a.name, fa.name, ta.name, c.name, ${CATEGORY_ICON_SQL}, c.parent_id, p.name,
-      ir.instalment_count
-    FROM transactions t ${RELATION_JOINS_SQL}
-    WHERE t.deleted_at IS NULL AND t.ledger_id = ?
-    ORDER BY t.date DESC, t.created_at DESC, t.id DESC
-  `);
+/** Every row of `query`, as arrays of values in column order. */
+function rawRows(query: string, params: (string | number)[] = []): RawValue[][] {
+  const statement = getSQLite().prepareSync(query);
   try {
-    const rows = statement
-      .executeForRawResultSync<Record<string, string | number | null>>([getActiveLedgerId()])
-      .getAllSync();
-    const transactions = new Array<TransactionWithRelations>(rows.length);
-    for (let index = 0; index < rows.length; index += 1) {
-      transactions[index] = toTransactionWithRelationsFromRaw(rows[index] ?? []);
-    }
-    return transactions;
+    return statement.executeForRawResultSync(params).getAllSync() as RawValue[][];
   } finally {
     statement.finalizeSync();
   }
 }
 
-function attachRelations(transactions: Transaction[]): TransactionWithRelations[] {
-  if (transactions.length === 0) return [];
-
-  const txIds: string[] = [];
-  transactions.forEach((transaction) => {
-    txIds.push(transaction.id);
-  });
-  const sqlite = getSQLite();
-  // For large sets, a WHERE t.id IN (…thousands…) clause is slow to prepare;
-  // scan all non-deleted transactions instead. The relation map is keyed by
-  // id, so the per-transaction lookup below still yields the exact same result
-  // whether the query returned a superset or an exact match.
-  const scanAllNonDeleted = txIds.length > IN_CLAUSE_SCAN_THRESHOLD;
-  const relationFilterSql = scanAllNonDeleted
-    ? 't.deleted_at IS NULL AND t.ledger_id = ?'
-    : `t.id IN (${getInClausePlaceholders(txIds.length)})`;
-
-  const rows = sqlite.getAllSync<{
-    txId: string;
-    accountId: string | null;
-    accountName: string | null;
-    fromAccountId: string | null;
-    fromAccountName: string | null;
-    toAccountId: string | null;
-    toAccountName: string | null;
-    categoryId: string | null;
-    categoryName: string | null;
-    categoryIcon: string | null;
-    categoryParentId: string | null;
-    parentCategoryName: string | null;
-    instalmentCount: number | null;
-  }>(
-    `
-    SELECT
-      t.id as txId,
-      t.account_id as accountId,
-      a.name as accountName,
-      t.from_account_id as fromAccountId,
-      fa.name as fromAccountName,
-      t.to_account_id as toAccountId,
-      ta.name as toAccountName,
-      t.category_id as categoryId,
-      c.name as categoryName,
-      ${CATEGORY_ICON_SQL} as categoryIcon,
-      c.parent_id as categoryParentId,
-      p.name as parentCategoryName,
-      ir.instalment_count as instalmentCount
-    FROM transactions t ${RELATION_JOINS_SQL}
-    WHERE ${relationFilterSql}
-  `,
-    scanAllNonDeleted ? [getActiveLedgerId()] : txIds,
-  );
-
-  const relationMap = new Map<string, RelationRow>();
-  for (let index = 0; index < rows.length; index += 1) {
-    const row = rows[index];
-    if (!row) continue;
-    relationMap.set(row.txId, row);
+/**
+ * The names a transaction shows for its accounts, category and instalment
+ * plan. These tables are tiny next to the transactions, so each is read once
+ * per load and looked up per row, which is what every load path does
+ * ({@link transactionRelations}): an account that was deleted gives no name,
+ * a deleted category still gives its own, and a category with no icon of its
+ * own shows its parent's.
+ */
+function loadRelationLookups(): TransactionRelationLookups {
+  const accountNames = new Map<string, string>();
+  for (const [id, name] of rawRows('SELECT id, name FROM accounts WHERE deleted_at IS NULL')) {
+    accountNames.set(id as string, name as string);
   }
-
-  const withRelations: TransactionWithRelations[] = [];
-  for (let index = 0; index < transactions.length; index += 1) {
-    const transaction = transactions[index];
-    if (!transaction) continue;
-    const rel = relationMap.get(transaction.id);
-    withRelations.push({
-      ...transaction,
-      accountName: rel?.accountName ?? null,
-      fromAccountName: rel?.fromAccountName ?? null,
-      toAccountName: rel?.toAccountName ?? null,
-      categoryName: rel?.categoryName ?? null,
-      categoryParentId: rel?.categoryParentId ?? null,
-      categoryParentName: rel?.parentCategoryName ?? null,
-      categoryIcon: rel?.categoryIcon ?? null,
-      instalmentCount: rel?.instalmentCount ?? null,
+  const categories = new Map<
+    string,
+    { name: string | null; icon: string | null; parentId: string | null; parentName: string | null }
+  >();
+  for (const [id, name, icon, parentId, parentName] of rawRows(
+    `SELECT c.id, c.name, COALESCE(NULLIF(TRIM(c.icon), ''), NULLIF(TRIM(p.icon), '')),
+        c.parent_id, p.name
+      FROM categories c LEFT JOIN categories p ON p.id = c.parent_id`,
+  )) {
+    categories.set(id as string, {
+      name: name as string | null,
+      icon: icon as string | null,
+      parentId: parentId as string | null,
+      parentName: parentName as string | null,
     });
   }
-  return withRelations;
+  const instalmentCounts = new Map<string, number>();
+  for (const [id, count] of rawRows(
+    `SELECT id, instalment_count FROM recurring_rules
+      WHERE deleted_at IS NULL AND instalment_count IS NOT NULL`,
+  )) {
+    instalmentCounts.set(id as string, count as number);
+  }
+  return { accountNames, categories, instalmentCounts };
+}
+
+/**
+ * Every live transaction of the open ledger with its relation names, newest
+ * first, which leaves `sortTransactions` little or nothing to do. This is the
+ * launch load (and the reload after an edit), so it is kept lean. Rows are
+ * read as plain value arrays and built into objects in one pass: a Drizzle
+ * select, `toTransaction` and a relations query built three objects per row
+ * and read the table twice, the best part of a second on a five-year history
+ * on Android. And what crosses into JavaScript is kept small, since each value
+ * costs about the same there whatever it holds: the fifteen columns every row
+ * uses, the sparse columns only for the rows that set one, and no joined names
+ * (see `TRANSACTION_SPARSE_DEFAULTS` in the mappers).
+ */
+function loadAllWithRelations(): TransactionWithRelations[] {
+  const ledgerId = getActiveLedgerId();
+  const sparseById = new Map<string, RawValue[]>();
+  for (const row of rawRows(
+    `SELECT ${TRANSACTION_SPARSE_COLUMNS_SQL} FROM transactions t
+      WHERE t.deleted_at IS NULL AND t.ledger_id = ? AND (${TRANSACTION_SPARSE_FILTER_SQL})`,
+    [ledgerId],
+  )) {
+    sparseById.set(row[0] as string, row);
+  }
+  const rows = perfSpan('tx_rows', () =>
+    rawRows(
+      `SELECT ${TRANSACTION_COMMON_COLUMNS_SQL} FROM transactions t
+        WHERE t.deleted_at IS NULL AND t.ledger_id = ?
+        ORDER BY t.date DESC, t.created_at DESC, t.id DESC`,
+      [ledgerId],
+    ),
+  );
+  return perfSpan('tx_build', () => {
+    const assemble = createTransactionAssembler(loadRelationLookups(), sparseById);
+    const transactions = new Array<TransactionWithRelations>(rows.length);
+    for (let index = 0; index < rows.length; index += 1) {
+      transactions[index] = assemble(rows[index] ?? []);
+    }
+    return transactions;
+  });
+}
+
+/** Adds the relation names to transactions read without them. */
+function attachRelations(transactions: Transaction[]): TransactionWithRelations[] {
+  if (transactions.length === 0) return [];
+  const lookups = loadRelationLookups();
+  return transactions.map((transaction) => ({
+    ...transaction,
+    ...transactionRelations(transaction, lookups),
+  }));
 }
 
 function matchesExcludedCategory(
@@ -540,7 +498,7 @@ class TransactionsRepository {
       return true;
     });
 
-    return sortTransactions(filtered, normalized.sortBy);
+    return perfSpan('tx_sort', () => sortTransactions(filtered, normalized.sortBy));
   }
 
   listByAccount(accountId: string) {

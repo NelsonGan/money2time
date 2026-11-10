@@ -277,6 +277,7 @@ import {
 } from '~/utils/formatters';
 import { newId, nowIso } from '~/utils/id';
 import { runAfterInteractions, runAfterInteractionsCapped } from '~/utils/interactions';
+import { syncLocalDaysWithTimeZone } from '~/utils/localDate';
 import { perfMark } from '~/utils/perfTrace';
 import { recurrenceFrequencyOf } from '~/utils/recurringRules';
 import { countsAsExpenseRow } from '~/utils/spending';
@@ -5243,6 +5244,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const sub = RNAppState.addEventListener('change', (state: AppStateStatus) => {
       if (state !== 'active') return;
+      // The phone may have changed time zone while the app was away.
+      syncLocalDaysWithTimeZone();
       const today = dayKeyFromDateLocal(new Date());
       if (today === lastFullRefreshDayRef.current) return;
       lastFullRefreshDayRef.current = today;

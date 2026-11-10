@@ -29,6 +29,16 @@ export function tryRun(cmd, cmdArgs) {
 
 export const adbShell = (device, command) => run(adb, ['-s', device, 'shell', command]);
 
+/**
+ * `xcrun simctl` arguments for a simulator, which may live outside the default
+ * device set: `--device-set <dir>` names the set (a Simlock pool simulator is
+ * in `~/.simlock/devices/ios`, where plain `simctl` answers "Invalid device").
+ */
+export function simctlArgs(...args) {
+  const deviceSet = option('device-set');
+  return deviceSet ? ['simctl', '--set', deviceSet, ...args] : ['simctl', ...args];
+}
+
 /** Every `[m2t-perf]` payload in a log dump (see utils/perfTrace.ts). */
 export function parsePerfLines(text) {
   const events = [];

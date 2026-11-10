@@ -19,6 +19,7 @@ import { filterSpendingTransactions } from '~/features/reimbursements/lib/reimbu
 import { I18n } from '~/lib/i18n';
 import type {
   Category,
+  MonthCycleInput,
   PeriodBudget,
   RateTable,
   TransactionWithRelations,
@@ -715,6 +716,52 @@ const BUDGET_BREAKDOWN_MAX_LINES = 4;
 /** Which running budget the widgets show: this month's, else this week's, else this year's. */
 const BUDGET_WIDGET_PERIOD_ORDER = ['month', 'week', 'year'] as const;
 
+function runningWidgetBudget(
+  periodBudgets: PeriodBudget[],
+  todayKey: string,
+  monthCycle: MonthCycleInput,
+): PeriodBudget | null {
+  const live = periodBudgets.filter((entry) => !entry.deletedAt);
+  for (const period of BUDGET_WIDGET_PERIOD_ORDER) {
+    const budget = budgetCoveringDay(live, period, todayKey, monthCycle);
+    if (budget) return budget;
+  }
+  return null;
+}
+
+/**
+ * The transactions a widget can show. Every builder reads a window that ends
+ * today: the last seven days, the current month, the savings history's six
+ * months, or the running budget's period. So the rows before the earliest of
+ * those starts are dropped here, once, instead of each builder walking years
+ * of history to skip them. A row whose date cannot be read is kept, for the
+ * builders to judge as they always have.
+ */
+function rowsInWidgetWindow(
+  transactions: TransactionWithRelations[],
+  periodBudgets: PeriodBudget[],
+  monthCycle: MonthCycleInput,
+  now: Date,
+): TransactionWithRelations[] {
+  const today = startOfDayLocal(now);
+  const starts = [dayKeyFromDateLocal(addDays(today, -6))];
+  for (const months of [0, SAVINGS_HISTORY_MONTHS - 1]) {
+    const month = addFinancialMonths(financialMonthAnchorForToday(monthCycle), -months, monthCycle);
+    starts.push(
+      dayKeyFromDateLocal(
+        financialMonthStartDate(financialMonthKeyForDate(month, monthCycle), monthCycle),
+      ),
+    );
+  }
+  const budget = runningWidgetBudget(periodBudgets, dayKeyFromDateLocal(now), monthCycle);
+  if (budget) starts.push(budgetPeriodRange(budget.period, budget.periodKey, monthCycle).start);
+  const firstDayKey = starts.reduce((earliest, key) => (key < earliest ? key : earliest));
+  return transactions.filter((transaction) => {
+    const dayKey = dayKeyFromIsoLocal(transaction.date);
+    return dayKey.length < firstDayKey.length || dayKey >= firstDayKey;
+  });
+}
+
 function buildBudgetWidgetSnapshots(
   transactions: TransactionWithRelations[],
   settings: UserSettings,
@@ -724,13 +771,7 @@ function buildBudgetWidgetSnapshots(
   rateTable: RateTable | null,
 ): { budgetRing: BudgetRingSnapshot; budgetBreakdown: BudgetBreakdownSnapshot } {
   const monthCycle = monthCycleOf(settings);
-  let budget: PeriodBudget | null = null;
-  const live = periodBudgets.filter((entry) => !entry.deletedAt);
-  const todayKey = dayKeyFromDateLocal(now);
-  for (const period of BUDGET_WIDGET_PERIOD_ORDER) {
-    budget = budgetCoveringDay(live, period, todayKey, monthCycle);
-    if (budget) break;
-  }
+  const budget = runningWidgetBudget(periodBudgets, dayKeyFromDateLocal(now), monthCycle);
   // Without any running budget the set-up state names the current month.
   const monthKey = budget?.periodKey ?? financialMonthKeyForDate(now, monthCycle);
   const period = budget?.period ?? 'month';
@@ -877,10 +918,15 @@ export function buildMoney2TimeWidgetSnapshot({
   /** The latest rates, for a budget in another currency made with no rate. */
   rateTable?: RateTable | null;
 }): Money2TimeWidgetSnapshot {
+  const now = new Date();
+  const monthCycle = monthCycleOf(settings);
   // Every widget below is a spending readout, so the reimbursement rows come
   // out here once rather than in each builder.
   const spendingTransactions = toSpendingRows(
-    filterSpendingTransactions(transactions, settings.reimbursementsCountAsExpense),
+    filterSpendingTransactions(
+      rowsInWidgetWindow(transactions, periodBudgets, monthCycle, now),
+      settings.reimbursementsCountAsExpense,
+    ),
   );
   const includeInSavings = buildSavingsIncludePredicate(
     categories,
@@ -889,8 +935,6 @@ export function buildMoney2TimeWidgetSnapshot({
     savingsIncomeMode,
     savingsExpenseMode,
   );
-  const now = new Date();
-  const monthCycle = monthCycleOf(settings);
   const monthKey = financialMonthKeyForDate(now, monthCycle);
   const expenseAmount = normalizeMoneyAmount(
     spendingTransactions.reduce((total, transaction) => {
