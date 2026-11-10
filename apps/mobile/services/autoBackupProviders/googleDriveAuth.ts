@@ -54,20 +54,28 @@ let restorePromise: Promise<boolean> | null = null;
  * call then fails with 403 `insufficientPermissions`, so the backup was
  * neither on Drive nor anywhere else. Such a session counts as not connected:
  * the backup falls back to the phone and the screen offers to reconnect,
- * which asks for Drive again. A user the SDK reports no scopes for is trusted
- * as before.
+ * which asks for Drive again. A session the SDK reports no scopes for is
+ * trusted as before.
  */
 function hasDriveAccess(user: { scopes?: string[] } | null): boolean {
-  if (!user) return false;
-  const scopes = user.scopes;
+  const scopes = user?.scopes;
   if (!Array.isArray(scopes) || scopes.length === 0) return true;
   return scopes.includes(DRIVE_SCOPE);
 }
 
+/** A usable Google session for Drive: restored, and allowed to reach Drive. */
 export async function ensureGoogleSession(opts?: { force?: boolean }): Promise<boolean> {
+  if (!(await restoreGoogleSession(opts))) return false;
+  return hasDriveAccess(GoogleSignin.getCurrentUser());
+}
+
+/**
+ * Rebuilds the remembered Google session, whatever it may reach. Cloud Sync's
+ * sign-in only needs its ID token, so it must not depend on Drive access.
+ */
+async function restoreGoogleSession(opts?: { force?: boolean }): Promise<boolean> {
   configureOnce();
-  const current = GoogleSignin.getCurrentUser();
-  if (!opts?.force && current) return hasDriveAccess(current);
+  if (!opts?.force && GoogleSignin.getCurrentUser()) return true;
   if (!GoogleSignin.hasPreviousSignIn()) return false;
 
   // Dedupe concurrent restores — the settings screen, `listAllBackups` and a
@@ -77,7 +85,7 @@ export async function ensureGoogleSession(opts?: { force?: boolean }): Promise<b
     const promise = (async () => {
       try {
         const result = await GoogleSignin.signInSilently();
-        return result.type === 'success' && hasDriveAccess(result.data);
+        return result.type === 'success';
       } catch {
         // Revoked access, expired refresh token, offline. The caller falls
         // back; an interactive sign-in is needed to recover.
@@ -109,7 +117,9 @@ export async function signInWithGoogle(): Promise<
     if (hasDriveAccess(result.data)) return { ok: true, email: result.data.user.email ?? null };
     // Drive was unticked on the consent screen: ask for just that once more.
     // Refusing again is a choice, so it ends like a cancel.
-    const added = await GoogleSignin.addScopes({ scopes: SCOPES });
+    // Android rejects a refusal ("Failed to add scopes.") where iOS resolves
+    // `cancelled`; both are the person saying no.
+    const added = await GoogleSignin.addScopes({ scopes: SCOPES }).catch(() => null);
     if (added?.type === 'success' && hasDriveAccess(added.data)) {
       return { ok: true, email: added.data.user.email ?? null };
     }
@@ -188,7 +198,7 @@ export async function getGoogleIdToken(): Promise<GoogleIdTokenResult> {
   if (!WEB_CLIENT_ID) return { ok: false, reason: 'unavailable', message: 'not configured' };
   configureOnce();
   const hadDriveAccount = GoogleSignin.hasPreviousSignIn();
-  if (await ensureGoogleSession({ force: true })) {
+  if (await restoreGoogleSession({ force: true })) {
     try {
       const tokens = await GoogleSignin.getTokens();
       if (tokens.idToken) return { ok: true, idToken: tokens.idToken };

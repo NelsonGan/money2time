@@ -224,7 +224,7 @@ describe('signOutFromGoogle', () => {
  * Google's consent screen lets people untick "See, edit, create and delete
  * the Google Drive files you use with this app". Sign-in still succeeds, but
  * the token cannot reach Drive: every backup then failed with 403
- * `insufficientPermissions` (21 users in the first days of 1.7.4, all of that
+ * `insufficientPermissions` (19 users in the first days of 1.7.4, all of that
  * build's Drive failures) and nothing was written anywhere.
  */
 describe('Drive access left out at sign-in', () => {
@@ -301,6 +301,31 @@ describe('Drive access left out at sign-in', () => {
     const auth = loadAuth();
 
     await expect(auth.signInWithGoogle()).resolves.toEqual({ ok: false, reason: 'cancelled' });
+  });
+
+  it('treats a refusal Android reports as an error like a cancel', async () => {
+    googleSignin.signIn.mockImplementation(async () => {
+      googleSignin.getCurrentUser.mockReturnValue(WITHOUT_DRIVE);
+      return { type: 'success', data: WITHOUT_DRIVE };
+    });
+    googleSignin.addScopes.mockRejectedValue(
+      Object.assign(new Error('Failed to add scopes.'), { code: 'addScopes' }),
+    );
+    const auth = loadAuth();
+
+    await expect(auth.signInWithGoogle()).resolves.toEqual({ ok: false, reason: 'cancelled' });
+  });
+
+  it("still gives Cloud Sync's Google sign-in the ID token", async () => {
+    googleSignin.hasPreviousSignIn.mockReturnValue(true);
+    googleSignin.getCurrentUser.mockReturnValue(WITHOUT_DRIVE);
+    googleSignin.signInSilently.mockResolvedValue({ type: 'success', data: WITHOUT_DRIVE });
+    googleSignin.getTokens.mockResolvedValue({ idToken: 'id-token', accessToken: 'no-drive' });
+    process.env.EXPO_PUBLIC_GOOGLE_OAUTH_WEB_CLIENT_ID = 'web-client';
+    const auth = loadAuth();
+    delete process.env.EXPO_PUBLIC_GOOGLE_OAUTH_WEB_CLIENT_ID;
+
+    await expect(auth.getGoogleIdToken()).resolves.toEqual({ ok: true, idToken: 'id-token' });
   });
 
   it('does not ask again when Drive access was granted the first time', async () => {
