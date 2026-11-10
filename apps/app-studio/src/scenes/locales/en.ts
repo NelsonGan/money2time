@@ -24,16 +24,6 @@ const en: LocaleModule = {
     s13: { h: 'Import\nin a Tap', hl: 'in a Tap', sh: 'AI reads your statement. You confirm', she: '🤖', aiPowered: 'AI-powered', oneTap: 'Copy Prompt', pasteJSON: 'Paste JSON' },
     s14: { h: 'Type.\nTap. Done.', hl: 'Done.', sh: 'Your keyboard is the fastest way in', she: '⌨️', type: 'Coffee 6.50', tap: '↵', done: '0m to log', category: 'Auto · Food / Coffee' },
     s16: { h: 'Set Budgets.\nStay on Track.', hl: 'Stay on Track.', sh: 'Every category, always in view', she: '🎯', ring: '80%', left: '$730.85 left', budgeted: 'Budgeted spend', unbudgeted: 'Unbudgeted spend' },
-    s15: {
-      privacy: 'Privacy first', privacySub: 'Your data never leaves your phone',
-      heroSub: 'Your data stays on your device. Always has, always will.',
-      noAds: 'No ads', noAdsSub: 'Zero distractions. Just your finances.',
-      local: 'Completely local', localSub: 'Works fully offline. No account needed',
-      inspiredPre: 'Inspired by',
-      bookSub: 'Money is the life energy you trade for it',
-      bookDesc: 'The timeless personal finance guide. Practical wisdom for money, time, and life.',
-      downloads: '50K+ Users',
-    },
   },
 
   feature: {

@@ -25,16 +25,6 @@ const fil: LocaleModule = {
     s13: { h: 'Import\nsa Isang Tap', hl: 'sa Isang Tap', sh: 'Binabasa ng AI ang statement. Ikaw ang kumpirma', she: '🤖', aiPowered: 'May AI', oneTap: 'Copy Prompt', pasteJSON: 'Paste JSON' },
     s14: { h: 'I-type.\nI-tap. Tapos.', hl: 'Tapos.', sh: 'Ang keyboard ang pinakamabilis na paraan', she: '⌨️', type: 'Kape 6.50', tap: '↵', done: '0m i-log', category: 'Auto · Pagkain / Kape' },
     s16: { h: 'Magbudget.\nSundin Mo Ito.', hl: 'Sundin Mo Ito.', sh: 'Bawat kategorya, laging nakikita', she: '🎯', ring: '80%', left: '$730.85 ang natitira', budgeted: 'Nakabudget na gastos', unbudgeted: 'Hindi nakabudget' },
-    s15: {
-      privacy: 'Privacy muna', privacySub: 'Hindi umaalis sa phone mo ang data',
-      heroSub: 'Nananatili ang iyong data sa iyong device. Noon pa man, at magpakailanman.',
-      noAds: 'Walang ads', noAdsSub: 'Walang abala. Puro pananalapi mo lang.',
-      local: 'Ganap na lokal', localSub: 'Gumagana offline. Hindi kailangan ng account',
-      inspiredPre: 'Hango sa',
-      bookSub: 'Ang pera ay ang lakas ng buhay na ipinagpalit mo',
-      bookDesc: 'Ang walang-kupas na gabay sa personal na pananalapi. Praktikal na karunungan sa pera, oras, at buhay.',
-      downloads: '50,000+ na user',
-    },
   },
 
   feature: {

@@ -25,16 +25,6 @@ const ms: LocaleModule = {
     s13: { h: 'Import\nSekali Ketik', hl: 'Sekali Ketik', sh: 'AI baca penyatamu. Kau sahkan', she: '🤖', aiPowered: 'Guna AI', oneTap: 'Salin Teks', pasteJSON: 'Tampal JSON' },
     s14: { h: 'Taip.\nKetik. Siap.', hl: 'Siap.', sh: 'Papan kekunci jalan terpantas', she: '⌨️', type: 'Kopi 6.50', tap: '↵', done: '0m catat', category: 'Auto · Makanan / Kopi' },
     s16: { h: 'Tetapkan Bajet.\nKekal Terkawal.', hl: 'Kekal Terkawal.', sh: 'Setiap kategori, sentiasa kelihatan', she: '🎯', ring: '80%', left: 'baki $730.85', budgeted: 'Perbelanjaan berbajet', unbudgeted: 'Perbelanjaan luar bajet' },
-    s15: {
-      privacy: 'Privasi diutamakan', privacySub: 'Data anda tidak pernah keluar dari telefon',
-      heroSub: 'Data anda kekal dalam peranti anda. Dahulu, kini dan selamanya.',
-      noAds: 'Tiada iklan', noAdsSub: 'Tiada gangguan. Hanya kewangan anda.',
-      local: 'Sepenuhnya setempat', localSub: 'Berfungsi luar talian. Tiada akaun diperlukan',
-      inspiredPre: 'Diilhamkan daripada',
-      bookSub: 'Wang ialah tenaga hidup yang anda tukarkan',
-      bookDesc: 'Panduan kewangan peribadi klasik yang abadi. Kebijaksanaan praktikal tentang wang, masa dan kehidupan.',
-      downloads: '50,000+ pengguna',
-    },
   },
 
   feature: {

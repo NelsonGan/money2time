@@ -24,20 +24,8 @@ export interface PhoneStrings {
   s12: { h: string; hl: string; sh: string; she: string; language: string; currency: string; theme: string };
   s13: { h: string; hl: string; sh: string; she: string; aiPowered: string; oneTap: string; pasteJSON: string };
   s14: { h: string; hl: string; sh: string; she: string; type: string; tap: string; done: string; category: string };
-  /** Budgeting. Sits with the other headline groups; s15 below is the odd one out, not a scene headline. */
+  /** Budgeting. */
   s16: { h: string; hl: string; sh: string; she: string; ring: string; left: string; budgeted: string; unbudgeted: string };
-  /** Privacy / brand triptych panel (scene 02, headline-less). Optional until all locales are translated; falls back to English. */
-  s15?: {
-    privacy: string; privacySub: string;
-    /** Longer subtitle under the panel headline; falls back to privacySub. */
-    heroSub?: string;
-    noAds: string; noAdsSub: string;
-    local: string; localSub: string;
-    inspiredPre: string; bookSub: string;
-    /** Short description beside the book cover; falls back to bookSub. */
-    bookDesc?: string;
-    downloads: string;
-  };
 }
 
 /**

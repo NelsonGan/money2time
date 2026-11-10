@@ -25,16 +25,6 @@ const nl: LocaleModule = {
     s13: { h: 'Importeer\nin Eén Tik', hl: 'in Eén Tik', sh: 'AI leest je afschrift. Jij bevestigt', she: '🤖', aiPowered: 'Met AI', oneTap: 'Kopieer Tekst', pasteJSON: 'Plak JSON' },
     s14: { h: 'Typ.\nTik. Klaar.', hl: 'Klaar.', sh: 'Je toetsenbord is de snelste weg', she: '⌨️', type: 'Koffie 6.50', tap: '↵', done: '0m om te boeken', category: 'Auto · Eten / Koffie' },
     s16: { h: 'Stel een Budget.\nHou Koers.', hl: 'Hou Koers.', sh: 'Elke categorie, altijd in beeld', she: '🎯', ring: '80%', left: '$730.85 over', budgeted: 'Begrote uitgaven', unbudgeted: 'Niet begroot' },
-    s15: {
-      privacy: 'Privacy voorop', privacySub: 'Je gegevens verlaten nooit je telefoon',
-      heroSub: 'Je gegevens blijven op je apparaat. Altijd al, en voor altijd.',
-      noAds: 'Geen advertenties', noAdsSub: 'Geen afleiding. Alleen je financiën.',
-      local: 'Volledig lokaal', localSub: 'Werkt offline. Geen account nodig',
-      inspiredPre: 'Geïnspireerd door',
-      bookSub: 'Geld is de levensenergie die je ervoor inruilt',
-      bookDesc: 'De tijdloze klassieker over persoonlijke financiën. Praktische wijsheid over geld, tijd en leven.',
-      downloads: '50.000+ gebruikers',
-    },
   },
 
   feature: {

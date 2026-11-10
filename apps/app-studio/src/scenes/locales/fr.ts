@@ -25,16 +25,6 @@ const fr: LocaleModule = {
     s13: { h: 'Importez\nen un Clic', hl: 'en un Clic', sh: 'L\'IA lit votre relevé. Vous confirmez', she: '🤖', aiPowered: 'Via IA', oneTap: 'Copier Texte', pasteJSON: 'Coller JSON' },
     s14: { h: 'Tapez.\nClic. Fini.', hl: 'Fini.', sh: 'Votre clavier est la voie la plus rapide', she: '⌨️', type: 'Café 6.50', tap: '↵', done: '0m à noter', category: 'Auto · Repas / Café' },
     s16: { h: 'Fixe ton Budget.\nGarde le Cap.', hl: 'Garde le Cap.', sh: 'Chaque catégorie, toujours en vue', she: '🎯', ring: '80%', left: '$730.85 restant', budgeted: 'Dépenses budgétées', unbudgeted: 'Dépenses hors budget' },
-    s15: {
-      privacy: 'Vie privée d’abord', privacySub: 'Vos données ne quittent jamais votre téléphone',
-      heroSub: 'Vos données restent sur votre appareil. Depuis toujours, pour toujours.',
-      noAds: 'Zéro publicité', noAdsSub: 'Zéro distraction. Seulement vos finances.',
-      local: 'Entièrement local', localSub: 'Fonctionne hors ligne. Aucun compte requis',
-      inspiredPre: 'Inspiré de',
-      bookSub: 'L’argent est l’énergie vitale que vous échangez contre lui',
-      bookDesc: 'Le classique intemporel des finances personnelles. Une sagesse pratique sur l’argent, le temps et la vie.',
-      downloads: '+50 000 utilisateurs',
-    },
   },
 
   feature: {

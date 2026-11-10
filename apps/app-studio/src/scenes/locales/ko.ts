@@ -25,16 +25,6 @@ const ko: LocaleModule = {
     s13: { h: '한 번에\n불러오기', hl: '불러오기', sh: 'AI가 내역을 읽고 확인만 하면 끝', she: '🤖', aiPowered: 'AI 기반', oneTap: '프롬프트 복사', pasteJSON: 'JSON 붙여넣기' },
     s14: { h: '입력하면\n바로 끝.', hl: '바로 끝.', sh: '키보드가 가장 빠른 입구예요', she: '⌨️', type: '커피 6.50', tap: '↵', done: '0m 만에 기록', category: '자동 · 식비 / 커피' },
     s16: { h: '예산을 정하고\n지켜내기', hl: '지켜내기', sh: '모든 카테고리를 한눈에', she: '🎯', ring: '80%', left: '$730.85 남음', budgeted: '예산 내 지출', unbudgeted: '예산 외 지출' },
-    s15: {
-      privacy: '프라이버시 우선', privacySub: '데이터는 휴대폰 밖으로 나가지 않아요',
-      heroSub: '당신의 데이터는 기기 안에만 머뭅니다. 지금까지도, 앞으로도.',
-      noAds: '광고 없음', noAdsSub: '방해 요소 없이 가계부에만 집중',
-      local: '완전한 로컬', localSub: '오프라인으로 작동. 계정 필요 없음',
-      inspiredPre: '영감의 원천',
-      bookSub: '돈은 당신이 맞바꾼 생명 에너지입니다',
-      bookDesc: '시대를 초월한 개인 재무의 고전. 돈과 시간, 삶에 대한 실용적인 지혜.',
-      downloads: '50,000+ 사용자',
-    },
   },
 
   feature: {
