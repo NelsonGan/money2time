@@ -1,6 +1,6 @@
 import { ChevronRight, X } from 'lucide-react-native';
 import React, { useEffect, useRef, useState, useSyncExternalStore } from 'react';
-import { AppState, Pressable, View } from 'react-native';
+import { Alert, AppState, Pressable, View } from 'react-native';
 
 import { ClayIcon, Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
@@ -18,7 +18,7 @@ import {
 } from '~/services/notificationScanHistory';
 import { requestOpenPaymentAlerts } from '~/services/paymentAlertsNavigation';
 
-import { countKey } from '../lib/presentation';
+import { countKey, isReviewBannerVisible } from '../lib/presentation';
 import { getNotificationAiStatus, subscribeNotificationAiStatus } from '../notificationAiReview';
 
 /**
@@ -38,6 +38,10 @@ export function NotificationReviewBanner() {
   const [aiIds, setAiIds] = useState<string[]>([]);
   // What X cleared; anything new (or a new review run) brings the banner back.
   const [dismissed, setDismissed] = useState<ReadonlySet<string> | null>(null);
+  // History generation the ids were read under, so X never pairs them with a
+  // history reset since; and whether X's ignore is still running.
+  const generation = useRef(getNotificationScanHistoryGeneration(settings.appUserId));
+  const ignoring = useRef(false);
   const aiStatus = useSyncExternalStore(subscribeNotificationAiStatus, getNotificationAiStatus);
   useEffect(() => {
     let active = true;
@@ -45,9 +49,11 @@ export function NotificationReviewBanner() {
     setAiIds([]);
     setDismissed(null);
     const load = () => {
+      const readGeneration = getNotificationScanHistoryGeneration(settings.appUserId);
       void readNotificationScanHistory(settings.appUserId)
         .then((rows) => {
           if (!active) return;
+          generation.current = readGeneration;
           setIds(rows.filter((row) => row.result === 'pending').map((row) => row.id));
           setAiIds(rows.filter((row) => isUnseenAiResult(row)).map((row) => row.id));
         })
@@ -56,7 +62,8 @@ export function NotificationReviewBanner() {
     const stop = subscribeNotificationScanHistory(settings.appUserId, load);
     const state = AppState.addEventListener('change', (next) => {
       if (next === 'active') {
-        setDismissed(null);
+        // An ignore still running would show its items again for a moment.
+        if (!ignoring.current) setDismissed(null);
         load();
       }
     });
@@ -68,11 +75,7 @@ export function NotificationReviewBanner() {
     };
   }, [settings.appUserId]);
   const reviewing = aiStatus?.reviewing ?? 0;
-  const visible =
-    reviewing > 0 ||
-    ids.some((id) => !dismissed?.has(id)) ||
-    aiIds.some((id) => !dismissed?.has(id));
-  if (!visible) return null;
+  if (!isReviewBannerVisible(reviewing, ids, aiIds, dismissed)) return null;
   const done = reviewing === 0 && aiIds.length > 0;
   const title = done
     ? I18n.t(countKey('payment_alerts.ai_banner_done', aiIds.length), { count: aiIds.length })
@@ -87,16 +90,23 @@ export function NotificationReviewBanner() {
     // Seen, AI's results move to History (where Undo stays).
     void markNotificationAiResultsSeen(appUserId, aiIds).catch(() => undefined);
     if (ids.length === 0) return;
-    void resolveNotificationReviews(ids, 'none', {
+    ignoring.current = true;
+    resolveNotificationReviews(ids, 'none', {
       appUserId,
-      generation: getNotificationScanHistoryGeneration(appUserId),
+      generation: generation.current,
       getCurrent: () => ({ ...live.current, appUserId: live.current.settings.appUserId }),
     })
-      .then((outcome) => {
-        // Anything left (a capture still being written) shows the banner again.
-        if (outcome.unfinished.length > 0) setDismissed(null);
+      .catch(() => {
+        // Ignore stops at a capture it cannot find: show what is left and say so.
+        setDismissed(null);
+        Alert.alert(
+          I18n.t('payment_alerts.history_title'),
+          I18n.t('payment_alerts.review_save_error'),
+        );
       })
-      .catch(() => setDismissed(null));
+      .finally(() => {
+        ignoring.current = false;
+      });
   };
   const open = () => {
     void triggerHaptic('selection');
