@@ -3382,10 +3382,13 @@ const nl = {
     review_no_account_android:
       'Geen rekening voor deze app. Kies er een in %{path}, dan worden ze automatisch vastgelegd.',
     review_save_error: 'Opslaan mislukt. Je onafgemaakte items staan er nog.',
-    review_leave_title: 'Onafgemaakte meldingen negeren?',
-    review_leave_body: 'Als je weggaat, worden alle %{count} onafgemaakte meldingen genegeerd.',
-    review_leave_body_single: 'Als je weggaat, wordt de onafgemaakte melding genegeerd.',
+    review_leave_title: 'De rest later bekijken?',
+    review_leave_body:
+      '%{count} meldingen staan nog bij Te bekijken. Bewaar ze voor later of negeer ze nu allemaal.',
+    review_leave_body_single:
+      '1 melding staat nog bij Te bekijken. Bewaar hem voor later of negeer hem nu.',
     review_leave_confirm: 'Negeren en weggaan',
+    review_leave_later: 'Later bekijken',
     review_show_more: 'Volledige melding tonen',
     review_show_less: 'Minder tonen',
     ai_title: 'Autocontrole',

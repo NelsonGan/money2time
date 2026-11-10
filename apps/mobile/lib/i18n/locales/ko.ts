@@ -3303,10 +3303,13 @@ const ko = {
       '계좌가 없어요. Log Notification 단축어에서 계좌를 선택하면 자동으로 기록돼요.',
     review_no_account_android: '이 앱의 계좌가 없어요. %{path}에서 선택하면 자동으로 기록돼요.',
     review_save_error: '저장할 수 없습니다. 완료하지 않은 항목은 그대로 남아 있습니다.',
-    review_leave_title: '완료하지 않은 알림을 무시할까요?',
-    review_leave_body: '나가면 완료하지 않은 알림 %{count}개가 모두 무시됩니다.',
-    review_leave_body_single: '나가면 완료하지 않은 알림이 무시됩니다.',
+    review_leave_title: '나머지는 나중에 검토할까요?',
+    review_leave_body:
+      '검토 대기 중인 알림이 %{count}개 있습니다. 나중에 검토하도록 남겨 두거나 지금 모두 무시하세요.',
+    review_leave_body_single:
+      '검토 대기 중인 알림이 1개 있습니다. 나중에 검토하도록 남겨 두거나 지금 무시하세요.',
     review_leave_confirm: '무시하고 나가기',
+    review_leave_later: '나중에 검토',
     review_show_more: '알림 전체 보기',
     review_show_less: '간단히 보기',
     ai_title: '자동 검토',

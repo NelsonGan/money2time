@@ -3391,10 +3391,13 @@ const fr = {
     review_no_account_android:
       'Aucun compte pour cette app. Choisissez-en un dans %{path} pour les enregistrer automatiquement.',
     review_save_error: 'Enregistrement impossible. Vos éléments non terminés sont toujours là.',
-    review_leave_title: 'Ignorer les notifications non terminées ?',
-    review_leave_body: 'Si vous quittez, les %{count} notifications non terminées seront ignorées.',
-    review_leave_body_single: 'Si vous quittez, la notification non terminée sera ignorée.',
+    review_leave_title: 'Vérifier le reste plus tard ?',
+    review_leave_body:
+      '%{count} notifications sont encore dans À vérifier. Gardez-les pour plus tard ou ignorez-les toutes maintenant.',
+    review_leave_body_single:
+      '1 notification est encore dans À vérifier. Gardez-la pour plus tard ou ignorez-la maintenant.',
     review_leave_confirm: 'Ignorer et quitter',
+    review_leave_later: 'Vérifier plus tard',
     review_show_more: 'Afficher toute la notification',
     review_show_less: 'Afficher moins',
     ai_title: 'Vérification auto',

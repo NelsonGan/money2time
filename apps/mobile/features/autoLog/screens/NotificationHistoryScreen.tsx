@@ -10,7 +10,7 @@ import {
   Undo2,
 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, Pressable, View } from 'react-native';
+import { Alert, type AlertButton, Platform, Pressable, View } from 'react-native';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { LoadingDots } from '~/components/feedback/LoadingDots';
@@ -238,6 +238,21 @@ export function NotificationHistoryScreen({ onBack }: { onBack: () => void }) {
   usePreventRemove(loading || pending.length > 0 || busy, ({ data }) => {
     if (busyRef.current || loading) return;
     const ids = pending.map((entry) => entry.id);
+    // Review later leaves everything in To review; the home banner brings it back.
+    const later: AlertButton = {
+      text: I18n.t('payment_alerts.review_leave_later'),
+      isPreferred: true,
+      onPress: () => navigation.dispatch(data.action),
+    };
+    const ignore: AlertButton = {
+      text: I18n.t('payment_alerts.review_leave_confirm'),
+      style: 'destructive',
+      onPress: () => {
+        void run(ids, 'none').then((ok) => {
+          if (ok) navigation.dispatch(data.action);
+        });
+      },
+    };
     Alert.alert(
       I18n.t('payment_alerts.review_leave_title'),
       I18n.t(
@@ -246,17 +261,11 @@ export function NotificationHistoryScreen({ onBack }: { onBack: () => void }) {
           : 'payment_alerts.review_leave_body',
         { count: ids.length },
       ),
+      // iOS stacks the buttons and moves Cancel last, so Review later goes
+      // first; Android's last button is its primary one, on the right.
       [
         { text: I18n.t('common.cancel'), style: 'cancel' },
-        {
-          text: I18n.t('payment_alerts.review_leave_confirm'),
-          style: 'destructive',
-          onPress: () => {
-            void run(ids, 'none').then((ok) => {
-              if (ok) navigation.dispatch(data.action);
-            });
-          },
-        },
+        ...(Platform.OS === 'android' ? [ignore, later] : [later, ignore]),
       ],
     );
   });

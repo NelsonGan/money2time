@@ -3348,10 +3348,13 @@ const sv = {
     review_no_account_android:
       'Inget konto för appen. Välj ett under %{path} så bokförs de automatiskt.',
     review_save_error: 'Det gick inte att spara. Dina ofärdiga poster finns kvar här.',
-    review_leave_title: 'Ignorera ofärdiga aviseringar?',
-    review_leave_body: 'Om du lämnar ignoreras alla %{count} ofärdiga aviseringar.',
-    review_leave_body_single: 'Om du lämnar ignoreras den ofärdiga aviseringen.',
+    review_leave_title: 'Granska resten senare?',
+    review_leave_body:
+      '%{count} aviseringar finns kvar under Att granska. Spara dem till senare eller ignorera alla nu.',
+    review_leave_body_single:
+      '1 avisering finns kvar under Att granska. Spara den till senare eller ignorera den nu.',
     review_leave_confirm: 'Ignorera och lämna',
+    review_leave_later: 'Granska senare',
     review_show_more: 'Visa hela aviseringen',
     review_show_less: 'Visa mindre',
     ai_title: 'Autogranskning',

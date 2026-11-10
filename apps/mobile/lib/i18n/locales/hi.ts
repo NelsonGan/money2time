@@ -3330,10 +3330,13 @@ const hi = {
     review_no_account_android:
       'इस ऐप के लिए कोई खाता नहीं है। %{path} में खाता चुनें, ताकि ये अपने-आप दर्ज हों।',
     review_save_error: 'सेव नहीं हो सका। आपके अधूरे आइटम अभी भी यहीं हैं।',
-    review_leave_title: 'अधूरी सूचनाओं को अनदेखा करें?',
-    review_leave_body: 'बाहर जाने पर सभी %{count} अधूरी सूचनाएं अनदेखी कर दी जाएंगी।',
-    review_leave_body_single: 'बाहर जाने पर अधूरी सूचना अनदेखी कर दी जाएगी।',
+    review_leave_title: 'बाकी बाद में जांचें?',
+    review_leave_body:
+      'अभी %{count} सूचनाएं जांचनी बाकी हैं। उन्हें बाद के लिए रखें, या अभी सभी को अनदेखा करें।',
+    review_leave_body_single:
+      'अभी 1 सूचना जांचनी बाकी है। उसे बाद के लिए रखें, या अभी अनदेखा करें।',
     review_leave_confirm: 'अनदेखा करें और बाहर जाएं',
+    review_leave_later: 'बाद में जांचें',
     review_show_more: 'पूरी सूचना दिखाएं',
     review_show_less: 'कम दिखाएं',
     ai_title: 'ऑटो-जांच',

@@ -3368,10 +3368,13 @@ const pt = {
     review_no_account_android:
       'Este app não tem conta. Escolha uma em %{path} para registrá-las automaticamente.',
     review_save_error: 'Não foi possível salvar. Seus itens pendentes continuam aqui.',
-    review_leave_title: 'Ignorar notificações pendentes?',
-    review_leave_body: 'Ao sair, as %{count} notificações pendentes serão ignoradas.',
-    review_leave_body_single: 'Ao sair, a notificação pendente será ignorada.',
+    review_leave_title: 'Revisar o resto depois?',
+    review_leave_body:
+      '%{count} notificações ainda estão em Para revisar. Guarde-as para depois ou ignore todas agora.',
+    review_leave_body_single:
+      '1 notificação ainda está em Para revisar. Guarde-a para depois ou ignore-a agora.',
     review_leave_confirm: 'Ignorar e sair',
+    review_leave_later: 'Revisar depois',
     review_show_more: 'Ver notificação completa',
     review_show_less: 'Ver menos',
     ai_title: 'Revisão automática',

@@ -3344,10 +3344,13 @@ const da = {
     review_no_account_android:
       'Ingen konto for denne app. Vælg en under %{path}, så de registreres automatisk.',
     review_save_error: 'Kunne ikke gemme. Dine ufærdige elementer er her stadig.',
-    review_leave_title: 'Ignorer ufærdige notifikationer?',
-    review_leave_body: 'Hvis du går, ignoreres alle %{count} ufærdige notifikationer.',
-    review_leave_body_single: 'Hvis du går, ignoreres den ufærdige notifikation.',
+    review_leave_title: 'Gennemgå resten senere?',
+    review_leave_body:
+      '%{count} notifikationer er stadig under Til gennemgang. Behold dem til senere, eller ignorer dem alle nu.',
+    review_leave_body_single:
+      '1 notifikation er stadig under Til gennemgang. Behold den til senere, eller ignorer den nu.',
     review_leave_confirm: 'Ignorer og gå',
+    review_leave_later: 'Gennemgå senere',
     review_show_more: 'Vis hele notifikationen',
     review_show_less: 'Vis mindre',
     ai_title: 'Autogennemgang',

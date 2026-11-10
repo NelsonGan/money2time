@@ -3374,10 +3374,13 @@ const es = {
     review_no_account_android:
       'Esta app no tiene cuenta. Elige una en %{path} para que se registren automáticamente.',
     review_save_error: 'No se pudo guardar. Tus elementos sin terminar siguen aquí.',
-    review_leave_title: '¿Ignorar las notificaciones sin terminar?',
-    review_leave_body: 'Si sales, se ignorarán las %{count} notificaciones sin terminar.',
-    review_leave_body_single: 'Si sales, se ignorará la notificación sin terminar.',
+    review_leave_title: '¿Revisar el resto más tarde?',
+    review_leave_body:
+      '%{count} notificaciones siguen en Por revisar. Guárdalas para más tarde o ignóralas todas ahora.',
+    review_leave_body_single:
+      '1 notificación sigue en Por revisar. Guárdala para más tarde o ignórala ahora.',
     review_leave_confirm: 'Ignorar y salir',
+    review_leave_later: 'Revisar más tarde',
     review_show_more: 'Ver notificación completa',
     review_show_less: 'Ver menos',
     ai_title: 'Revisión automática',

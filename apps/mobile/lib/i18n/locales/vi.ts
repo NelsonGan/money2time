@@ -3323,10 +3323,13 @@ const vi = {
     review_no_account_android:
       'Ứng dụng này chưa có tài khoản. Chọn trong %{path} để tự động ghi lại.',
     review_save_error: 'Không thể lưu. Các mục chưa xong vẫn còn ở đây.',
-    review_leave_title: 'Bỏ qua các thông báo chưa xong?',
-    review_leave_body: 'Nếu rời đi, cả %{count} thông báo chưa xong sẽ bị bỏ qua.',
-    review_leave_body_single: 'Nếu rời đi, thông báo chưa xong sẽ bị bỏ qua.',
+    review_leave_title: 'Xem lại phần còn lại sau?',
+    review_leave_body:
+      'Còn %{count} thông báo trong Cần xem lại. Giữ lại để xem sau, hoặc bỏ qua tất cả ngay.',
+    review_leave_body_single:
+      'Còn 1 thông báo trong Cần xem lại. Giữ lại để xem sau, hoặc bỏ qua ngay.',
     review_leave_confirm: 'Bỏ qua và rời đi',
+    review_leave_later: 'Xem lại sau',
     review_show_more: 'Hiện toàn bộ thông báo',
     review_show_less: 'Thu gọn',
     ai_title: 'Tự động xem lại',

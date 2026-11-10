@@ -3362,10 +3362,13 @@ const id = {
     review_no_account_android:
       'Aplikasi ini belum punya akun. Pilih di %{path} agar dicatat otomatis.',
     review_save_error: 'Tidak dapat menyimpan. Item yang belum selesai masih ada di sini.',
-    review_leave_title: 'Abaikan notifikasi yang belum selesai?',
-    review_leave_body: 'Jika keluar, semua %{count} notifikasi yang belum selesai akan diabaikan.',
-    review_leave_body_single: 'Jika keluar, notifikasi yang belum selesai akan diabaikan.',
+    review_leave_title: 'Tinjau sisanya nanti?',
+    review_leave_body:
+      '%{count} notifikasi masih ada di Perlu ditinjau. Simpan untuk nanti, atau abaikan semuanya sekarang.',
+    review_leave_body_single:
+      '1 notifikasi masih ada di Perlu ditinjau. Simpan untuk nanti, atau abaikan sekarang.',
     review_leave_confirm: 'Abaikan dan keluar',
+    review_leave_later: 'Tinjau nanti',
     review_show_more: 'Tampilkan notifikasi lengkap',
     review_show_less: 'Tampilkan lebih sedikit',
     ai_title: 'Tinjauan otomatis',

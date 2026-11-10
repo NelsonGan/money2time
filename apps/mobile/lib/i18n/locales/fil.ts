@@ -3395,12 +3395,13 @@ const fil = {
     review_no_account_android:
       'Walang account ang app na ito. Pumili sa %{path} para awtomatikong maitala ang mga ito.',
     review_save_error: 'Hindi ma-save. Nandito pa rin ang mga hindi pa tapos na item.',
-    review_leave_title: 'Huwag pansinin ang mga hindi pa tapos na notification?',
+    review_leave_title: 'I-review ang natitira mamaya?',
     review_leave_body:
-      'Kapag umalis ka, hindi papansinin ang lahat ng %{count} na hindi pa tapos na notification.',
+      'May %{count} notification pa sa Ire-review. Itabi muna para mamaya, o huwag pansinin lahat ngayon.',
     review_leave_body_single:
-      'Kapag umalis ka, hindi papansinin ang hindi pa tapos na notification.',
+      'May 1 notification pa sa Ire-review. Itabi muna para mamaya, o huwag pansinin ngayon.',
     review_leave_confirm: 'Huwag pansinin at umalis',
+    review_leave_later: 'I-review mamaya',
     review_show_more: 'Ipakita ang buong notification',
     review_show_less: 'Ipakita nang mas kaunti',
     ai_title: 'Auto-review',

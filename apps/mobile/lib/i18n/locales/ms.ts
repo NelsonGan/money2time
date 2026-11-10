@@ -3371,11 +3371,13 @@ const ms = {
     review_no_account_android:
       'Tiada akaun untuk apl ini. Pilih dalam %{path} supaya ia direkod secara automatik.',
     review_save_error: 'Tidak dapat menyimpan. Item yang belum selesai masih ada di sini.',
-    review_leave_title: 'Abaikan pemberitahuan yang belum selesai?',
+    review_leave_title: 'Semak selebihnya kemudian?',
     review_leave_body:
-      'Jika anda keluar, kesemua %{count} pemberitahuan yang belum selesai akan diabaikan.',
-    review_leave_body_single: 'Jika anda keluar, pemberitahuan yang belum selesai akan diabaikan.',
+      '%{count} pemberitahuan masih dalam Untuk disemak. Simpan untuk kemudian, atau abaikan semuanya sekarang.',
+    review_leave_body_single:
+      '1 pemberitahuan masih dalam Untuk disemak. Simpan untuk kemudian, atau abaikan sekarang.',
     review_leave_confirm: 'Abaikan dan keluar',
+    review_leave_later: 'Semak kemudian',
     review_show_more: 'Tunjukkan pemberitahuan penuh',
     review_show_less: 'Tunjukkan kurang',
     ai_title: 'Semakan automatik',
