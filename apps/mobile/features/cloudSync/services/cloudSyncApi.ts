@@ -295,7 +295,13 @@ export async function uploadMedia(
     headers: { Authorization: `Bearer ${token}` },
   });
   if (result.status < 200 || result.status >= 300) {
-    throw new CloudSyncApiError(result.status === 401 ? 'unauthorized' : 'server', result.status);
+    // The status in the message: without it every failed upload reports
+    // the same bare "server", whatever answered.
+    throw new CloudSyncApiError(
+      result.status === 401 ? 'unauthorized' : 'server',
+      result.status,
+      `http_${result.status}`,
+    );
   }
 }
 
