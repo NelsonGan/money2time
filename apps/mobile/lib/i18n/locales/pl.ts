@@ -3354,11 +3354,13 @@ const pl = {
     review_no_account_android:
       'Brak konta dla tej aplikacji. Wybierz je w %{path}, aby zapisywały się automatycznie.',
     review_save_error: 'Nie udało się zapisać. Niedokończone pozycje nadal tu są.',
-    review_leave_title: 'Pominąć niedokończone powiadomienia?',
+    review_leave_title: 'Sprawdzić resztę później?',
     review_leave_body:
-      'Wyjście spowoduje pominięcie wszystkich niedokończonych powiadomień (%{count}).',
-    review_leave_body_single: 'Wyjście spowoduje pominięcie niedokończonego powiadomienia.',
+      'Powiadomienia do sprawdzenia: %{count}. Zostaw je na później albo pomiń wszystkie teraz.',
+    review_leave_body_single:
+      '1 powiadomienie czeka na sprawdzenie. Zostaw je na później albo pomiń je teraz.',
     review_leave_confirm: 'Pomiń i wyjdź',
+    review_leave_later: 'Sprawdź później',
     review_show_more: 'Pokaż całe powiadomienie',
     review_show_less: 'Pokaż mniej',
     ai_title: 'Autosprawdzanie',

@@ -3348,10 +3348,13 @@ const nb = {
     review_no_account_android:
       'Ingen konto for denne appen. Velg en under %{path}, så føres de automatisk.',
     review_save_error: 'Kunne ikke lagre. De uferdige elementene dine er fortsatt her.',
-    review_leave_title: 'Ignorere uferdige varsler?',
-    review_leave_body: 'Hvis du går ut, ignoreres alle %{count} uferdige varsler.',
-    review_leave_body_single: 'Hvis du går ut, ignoreres det uferdige varselet.',
+    review_leave_title: 'Gå gjennom resten senere?',
+    review_leave_body:
+      '%{count} varsler ligger fortsatt i Til gjennomgang. Behold dem til senere, eller ignorer alle nå.',
+    review_leave_body_single:
+      '1 varsel ligger fortsatt i Til gjennomgang. Behold det til senere, eller ignorer det nå.',
     review_leave_confirm: 'Ignorer og gå ut',
+    review_leave_later: 'Gå gjennom senere',
     review_show_more: 'Vis hele varselet',
     review_show_less: 'Vis mindre',
     ai_title: 'Autogjennomgang',

@@ -3356,10 +3356,13 @@ const tr = {
     review_no_account_android:
       'Bu uygulamanın hesabı yok. Otomatik kaydedilmeleri için %{path} bölümünden bir hesap seçin.',
     review_save_error: 'Kaydedilemedi. Tamamlanmamış öğeleriniz hâlâ burada.',
-    review_leave_title: 'Tamamlanmamış bildirimler yok sayılsın mı?',
-    review_leave_body: 'Çıkarsanız tamamlanmamış %{count} bildirimin tümü yok sayılır.',
-    review_leave_body_single: 'Çıkarsanız tamamlanmamış bildirim yok sayılır.',
+    review_leave_title: 'Kalanlar sonra incelensin mi?',
+    review_leave_body:
+      '%{count} bildirim hâlâ İncelenecek bölümünde. Sonraya bırakın ya da şimdi hepsini yok sayın.',
+    review_leave_body_single:
+      '1 bildirim hâlâ İncelenecek bölümünde. Sonraya bırakın ya da şimdi yok sayın.',
     review_leave_confirm: 'Yok say ve çık',
+    review_leave_later: 'Sonra incele',
     review_show_more: 'Bildirimin tamamını göster',
     review_show_less: 'Daha az göster',
     ai_title: 'Otomatik inceleme',

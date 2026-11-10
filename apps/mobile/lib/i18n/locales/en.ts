@@ -3337,10 +3337,13 @@ const en = {
     review_no_account_android:
       'No account for this app. Choose one in %{path} so these are logged automatically.',
     review_save_error: 'Could not save. Your unfinished items are still here.',
-    review_leave_title: 'Ignore unfinished notifications?',
-    review_leave_body: 'Leaving will ignore all %{count} unfinished notifications.',
-    review_leave_body_single: 'Leaving will ignore the unfinished notification.',
+    review_leave_title: 'Review the rest later?',
+    review_leave_body:
+      '%{count} notifications are still in To review. Keep them there for later, or ignore them all now.',
+    review_leave_body_single:
+      '1 notification is still in To review. Keep it there for later, or ignore it now.',
     review_leave_confirm: 'Ignore and leave',
+    review_leave_later: 'Review later',
     review_show_more: 'Show full notification',
     review_show_less: 'Show less',
     ai_title: 'Auto-review',

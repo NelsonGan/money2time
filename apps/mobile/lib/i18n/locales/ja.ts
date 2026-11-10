@@ -3320,10 +3320,13 @@ const ja = {
       '口座が未設定です。Log Notification ショートカットで口座を選ぶと自動で記録されます。',
     review_no_account_android: 'このアプリの口座がありません。%{path} で選ぶと自動で記録されます。',
     review_save_error: '保存できませんでした。未完了の項目はそのまま残っています。',
-    review_leave_title: '未完了の通知を無視しますか？',
-    review_leave_body: 'この画面を離れると、未完了の通知 %{count} 件がすべて無視されます。',
-    review_leave_body_single: 'この画面を離れると、未完了の通知は無視されます。',
+    review_leave_title: '残りはあとで確認しますか？',
+    review_leave_body:
+      '確認待ちの通知が %{count} 件あります。あとで確認するために残すか、今すべて無視できます。',
+    review_leave_body_single:
+      '確認待ちの通知が 1 件あります。あとで確認するために残すか、今無視できます。',
     review_leave_confirm: '無視して戻る',
+    review_leave_later: 'あとで確認',
     review_show_more: '通知をすべて表示',
     review_show_less: '折りたたむ',
     ai_title: '自動確認',

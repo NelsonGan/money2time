@@ -3369,10 +3369,13 @@ const it = {
     review_no_account_android:
       'Nessun conto per questa app. Sceglilo in %{path} per registrarle automaticamente.',
     review_save_error: 'Impossibile salvare. Gli elementi non completati sono ancora qui.',
-    review_leave_title: 'Ignorare le notifiche non completate?',
-    review_leave_body: 'Uscendo, tutte le %{count} notifiche non completate verranno ignorate.',
-    review_leave_body_single: 'Uscendo, la notifica non completata verrà ignorata.',
+    review_leave_title: 'Controllare il resto più tardi?',
+    review_leave_body:
+      '%{count} notifiche sono ancora in Da controllare. Tienile per dopo o ignorale tutte ora.',
+    review_leave_body_single:
+      '1 notifica è ancora in Da controllare. Tienila per dopo o ignorala ora.',
     review_leave_confirm: 'Ignora ed esci',
+    review_leave_later: 'Controlla più tardi',
     review_show_more: 'Mostra tutta la notifica',
     review_show_less: 'Mostra meno',
     ai_title: 'Revisione automatica',

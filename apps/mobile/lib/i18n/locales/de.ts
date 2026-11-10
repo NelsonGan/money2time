@@ -3390,12 +3390,13 @@ const de = {
     review_no_account_android:
       'Kein Konto für diese App. Wähle eins unter %{path}, damit sie automatisch erfasst werden.',
     review_save_error: 'Speichern fehlgeschlagen. Deine offenen Einträge sind noch da.',
-    review_leave_title: 'Offene Benachrichtigungen ignorieren?',
+    review_leave_title: 'Den Rest später prüfen?',
     review_leave_body:
-      'Wenn du die Seite verlässt, werden alle %{count} offenen Benachrichtigungen ignoriert.',
+      '%{count} Benachrichtigungen sind noch unter „Zu prüfen“. Behalte sie für später oder ignoriere jetzt alle.',
     review_leave_body_single:
-      'Wenn du die Seite verlässt, wird die offene Benachrichtigung ignoriert.',
+      '1 Benachrichtigung ist noch unter „Zu prüfen“. Behalte sie für später oder ignoriere sie jetzt.',
     review_leave_confirm: 'Ignorieren und verlassen',
+    review_leave_later: 'Später prüfen',
     review_show_more: 'Ganze Benachrichtigung anzeigen',
     review_show_less: 'Weniger anzeigen',
     ai_title: 'Autoprüfung',
