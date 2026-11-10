@@ -54,11 +54,13 @@ export async function connectLive(
 }
 
 /**
- * Why a channel changed: `data` (rows were pushed) or `access` (someone
+ * Why a channel changed: `data` (rows were pushed), `access` (someone
  * joined, left or was removed, or the ledger or account is gone), which
- * makes the app re-read its list of shared ledgers too.
+ * makes the app re-read its list of shared ledgers too, or `pro` (personal
+ * channel only: the sender's own Pro began, so the account's paused phones
+ * ask again whether it is Pro). Apps from before `pro` read it as `data`.
  */
-export type ChangeReason = 'data' | 'access';
+export type ChangeReason = 'data' | 'access' | 'pro';
 
 /** Tells each user's other phones that `channel` changed. Best effort. */
 export async function notifyUsers(

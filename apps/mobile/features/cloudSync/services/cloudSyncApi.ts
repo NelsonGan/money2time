@@ -211,6 +211,13 @@ export function deleteAccount(token: string): Promise<{ ok: boolean }> {
   return request('/v1/account', { method: 'DELETE', token });
 }
 
+/** The Worker's answer about this phone's Pro (`POST /v1/account/status`). */
+export interface AccountStatus {
+  isPro: boolean;
+  /** The account is Pro, but this phone is past the 5 phones its Pro reaches. */
+  limited: boolean;
+}
+
 /**
  * Whether this phone gets Pro from the account (any install of it is Pro, and
  * this phone is among the 5 its Pro reaches; `limited` when it is not). Sent
@@ -219,7 +226,7 @@ export function deleteAccount(token: string): Promise<{ ok: boolean }> {
 export async function getAccountStatus(
   token: string,
   appUserId: string | null,
-): Promise<{ isPro: boolean; limited: boolean }> {
+): Promise<AccountStatus> {
   const body = await request<{ isPro?: unknown; limited?: unknown }>('/v1/account/status', {
     body: { appUserId },
     token,
@@ -244,8 +251,10 @@ export async function notifyChanged(
   token: string,
   channel: string,
   deviceId: string,
+  /** `pro`: this phone's own Pro began, so the user's paused phones ask again. */
+  reason?: 'pro',
 ): Promise<void> {
-  await request('/v1/sync/notify', { body: { channel, device: deviceId }, token });
+  await request('/v1/sync/notify', { body: { channel, device: deviceId, reason }, token });
 }
 
 export function getSyncCredentials(token: string, appUserId: string): Promise<SyncCredentials> {

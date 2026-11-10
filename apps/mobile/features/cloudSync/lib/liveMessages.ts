@@ -7,8 +7,11 @@ const RETRY_MAX_MS = 60_000;
 export interface LiveChange {
   /** `personal`, or a shared ledger's share id. */
   channel: string;
-  /** `access`: membership or the ledger itself changed, so re-read the list. */
-  reason: 'data' | 'access';
+  /**
+   * `access`: membership or the ledger itself changed, so re-read the list.
+   * `pro`: another phone of the user just got its own Pro (personal channel).
+   */
+  reason: 'data' | 'access' | 'pro';
   /** Who caused an `access` change, when the Worker says. */
   actor: string | null;
 }
@@ -26,7 +29,7 @@ export function parseLiveMessage(data: unknown): LiveChange | null {
     if (message.type !== 'changed' || typeof message.channel !== 'string') return null;
     return {
       channel: message.channel,
-      reason: message.reason === 'access' ? 'access' : 'data',
+      reason: message.reason === 'access' || message.reason === 'pro' ? message.reason : 'data',
       actor: typeof message.actor === 'string' ? message.actor : null,
     };
   } catch {

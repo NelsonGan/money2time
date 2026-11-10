@@ -1272,11 +1272,21 @@ longer reads it; the flag can be archived in PostHog. A phone may still hold the
     (RevenueCat's transfer), which leaves phone A free in RevenueCat. With
     both signed in, A stays Pro through the account: B's install is linked as
     soon as its Restore makes it Pro (`POST /v1/account/status`), and A asks
-    again on its next sync. Signed out, A loses Pro, as before Cloud Sync.
-  - The answer is asked at sign-in, at launch, on every sync (at most every 5
-    minutes), whenever this phone's own Pro changes, and while paused. It is
-    kept in AsyncStorage, so an offline launch stays Pro for up to 7 days
-    without a fresh answer. A session the Worker rejects keeps it for that
+    again when its own Pro ends. If A asked before B's link landed, B's new
+    Pro nudges A over the live socket and A resumes. Signed out, A loses Pro,
+    as before Cloud Sync.
+  - The answer is asked at sign-in, when linking, whenever this phone's own
+    Pro changes, and while paused (below); otherwise with a sync, at most
+    every 30 minutes, or once a day for a linked phone with its own purchase,
+    which is Pro whatever the account says (`lib/accountCheck.ts`). The
+    Worker keeps RevenueCat's answer for an hour, so asking more often
+    learned nothing sooner: at every 5 minutes, status checks were 31% of
+    the Worker's requests (2026-11-09), up to about 100 a day from one
+    phone. A launch asks only when the last answer is that old: the launch's
+    credentials request checks Pro anyway (the Worker answers both with
+    `checkInPhone`), and a refused one counts as a "not Pro" answer. The
+    answer is kept in AsyncStorage, so an offline launch stays Pro for up to
+    7 days without a fresh answer. A session the Worker rejects keeps it for that
     grace too: to the phone an expired session and an account deleted on
     another phone look the same. Signing out (or signing in to another
     account) drops it; the phone keeps only its own Pro.
@@ -1326,14 +1336,35 @@ longer reads it; the flag can be archived in PostHog. A phone may still hold the
   - The screen shows Sync paused with Renew Pro (paywall), Sign out and
     Delete account.
   - Sync resumes by itself when this phone's Pro comes back (purchase or
-    restore), and the app checks again on return to the app and every 3
-    minutes, which covers a renewal on another phone. Each check asks the
-    account status first and asks for sync credentials only when it says Pro
-    (the Worker answers both from `phoneProStatus`): before, a paused phone's
-    credentials request was refused every 3 minutes, 68% of all credentials
-    requests in the first week after launch. A phone not linked yet whose own
-    purchase is active still asks, since the status call does not send its
-    install's id.
+    restore). For a renewal on another phone, the app checks again on return
+    to the app and every 15 minutes while open (never twice within 65
+    seconds, just over the Worker's one-minute cache of a "not Pro", and not
+    on going to the background). It also checks at once when another phone
+    signed in to the account gets Pro of its own (bought, restored, or
+    linked with a purchase). That phone sends a `pro` nudge on the live
+    socket (`POST /v1/sync/notify {channel: 'personal', reason: 'pro'}`). A
+    `pro` nudge, or one the socket may have missed while it was down, that
+    comes too soon after a check runs when the gap is up, so it is never
+    lost. A purchase on the paused phone itself that the Worker still
+    answers "not Pro" (its cache) is asked again the same way. An ordinary
+    `data` nudge on the user's own channel is ignored while paused: it only
+    means a Pro phone of the account pushed. This phone is then past the
+    phone limit, or the other runs on its issued token, and asking on every
+    edit made elsewhere would cost a request a minute.
+  - A paused phone never asks for sync credentials the Worker would refuse.
+    `fetchCredentials` checks the last answer (an account status, or a
+    refused credentials request, both from the Worker's `phoneProStatus`)
+    before every credentials request, whichever path makes it: a sync, a
+    launch, linking or a live nudge. A "not Pro" holds for 15 minutes
+    (`credentialsWouldBeRefused` in `lib/pausedCheck.ts`). The paused checks
+    ask the account status first. A launch after a "not Pro" answer asks
+    the status first too. Before, a paused phone's credentials request was
+    refused every 3 minutes, 68% of all credentials requests in the first
+    week after launch. Even after the paused checks stopped that, launches,
+    live reconnects and other phones' nudges still asked: 57% of credentials
+    requests were refused on 2026-11-09. A phone not linked yet whose own
+    purchase is active (or not known yet) still asks, since the status call
+    does not send its install's id.
   - When the account's Pro ends, phones that were Pro only through it are
     free again (Pro features lock as for any lapse); a phone with its own
     purchase stays Pro.
@@ -1558,11 +1589,14 @@ updated_at)`, with each row as JSON, plus `sync_info` (the choice screen's
   `POST /v1/sync/notify {channel}`; the Worker tells every phone of the user
   (personal channel) or of everyone in the shared ledger, except the sender,
   and they sync that channel at once. A typical edit shows on another phone
-  in 2 to 4 seconds. Messages carry only the channel name. The socket closes
-  in the background, reconnects with backoff (2 s to 1 minute) and syncs on
-  every reconnect; the 3-minute pull stays as the fallback. `access` changes
+  in 2 to 4 seconds. Messages carry only the channel name and a reason. The
+  socket closes in the background, reconnects with backoff (2 s to 1 minute)
+  and syncs on every reconnect; the 3-minute pull stays as the fallback. A
+  paused phone handles its own channel differently (see When Pro ends). `access` changes
   (someone joined, left or was removed, a ledger or an account was deleted)
-  also make the app re-read its shared-ledger list.
+  also make the app re-read its shared-ledger list. `pro` changes (personal
+  channel only) say another of the user's phones got Pro of its own. Apps
+  from before `pro` read it as `data`.
 - **Failures.** Offline is shown, never reported. Any other failure sends
   `Cloud Sync Failed` and an error report once per failure streak, not on
   every retry. The shared ledgers' syncs have a streak of their own: a
@@ -4299,7 +4333,7 @@ API stay on `BETTER_AUTH_URL`.
 | `DELETE /v1/account/install`            | `{appUserId}` → sign-out: this install no longer counts toward the account's Pro                                                                                                                                                                                    |
 | `POST /v1/account/status`               | `{appUserId}` → `{isPro, limited}` for this phone; links the App User ID if it is Pro and records the phone. The account's Pro reaches the first 5 phones to join (a place frees on sign-out or after 30 days unused)                                               |
 | `GET /v1/live?device=…`                 | WebSocket upgrade; the user's `SyncHub` keeps it and sends `{type: 'changed', channel, reason}`. The app pings every 25 s (answered without waking the hub)                                                                                                         |
-| `POST /v1/sync/notify`                  | `{channel, device}` → tells the user's other phones (`personal`) or everyone in a shared ledger the user is in; 404 for a ledger that is not theirs                                                                                                                 |
+| `POST /v1/sync/notify`                  | `{channel, device, reason?}` → tells the user's other phones (`personal`) or everyone in a shared ledger the user is in; 404 for a ledger that is not theirs. `reason: 'pro'` (personal only) is passed on; anything else is a `data` change                        |
 | `POST /v1/sync/credentials`             | `{appUserId}` → the user's Turso URL and a 7-day token; links the App User ID if it is Pro; makes the database on first use; 403 `not_pro`                                                                                                                          |
 | `POST /v1/media/exists`                 | Which of up to 100 image paths are stored                                                                                                                                                                                                                           |
 | `PUT` / `GET /v1/media/<folder>/<file>` | Store / read one image (15 MB cap, image types only, one folder level)                                                                                                                                                                                              |

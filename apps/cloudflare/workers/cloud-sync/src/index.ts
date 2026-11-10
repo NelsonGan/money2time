@@ -211,14 +211,17 @@ async function route(request: Request, url: URL, env: Env, user: SessionUser): P
     if (env.NOTIFY_LIMITER && !(await env.NOTIFY_LIMITER.limit({ key: user.id })).success) {
       return json({ error: 'rate_limited' }, 429);
     }
-    const body = await readJson<{ channel: unknown; device: unknown }>(request);
+    const body = await readJson<{ channel: unknown; device: unknown; reason: unknown }>(request);
     const channel = body?.channel;
     if (!isValidChannel(channel)) return json({ error: 'bad_request' }, 400);
     const device = isValidDeviceId(body?.device) ? body.device : null;
+    // `pro`: the sender's own Pro began, which only the user's own phones
+    // (paused ones) act on. Anything else is a data change.
+    const reason = channel === 'personal' && body?.reason === 'pro' ? 'pro' : 'data';
     const audience =
       channel === 'personal' ? [user.id] : await audienceIfAllowed(env, channel, user.id);
     if (!audience) return json({ error: 'not_found' }, 404);
-    await notifyUsers(env, audience, channel, device);
+    await notifyUsers(env, audience, channel, device, reason);
     return json({ ok: true });
   }
 
