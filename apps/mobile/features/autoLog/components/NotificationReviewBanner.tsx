@@ -1,5 +1,5 @@
 import { ChevronRight, X } from 'lucide-react-native';
-import React, { useEffect, useState, useSyncExternalStore } from 'react';
+import React, { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { AppState, Pressable, View } from 'react-native';
 
 import { ClayIcon, Text } from '~/components/ui';
@@ -8,7 +8,9 @@ import { ScanProgress } from '~/features/transactions/components/ScanStatusBanne
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
+import { resolveNotificationReviews } from '~/services/notificationReview';
 import {
+  getNotificationScanHistoryGeneration,
   isUnseenAiResult,
   markNotificationAiResultsSeen,
   readNotificationScanHistory,
@@ -20,17 +22,22 @@ import { countKey } from '../lib/presentation';
 import { getNotificationAiStatus, subscribeNotificationAiStatus } from '../notificationAiReview';
 
 /**
- * Inline home review action, styled like the receipt-scan banner beside it;
- * dismissal never ignores unfinished items. With AI auto-review on it shows the
+ * Inline home review action, styled like the receipt-scan banner beside it.
+ * Its X ignores the notifications still waiting, like Ignore All on the review
+ * page, and marks auto-review's results seen. With AI auto-review on it shows the
  * batch in progress with the scan banner's own progress row, then one line on
  * what AI did, so the results are in front of the user right after launch.
  */
 export function NotificationReviewBanner() {
-  const { settings } = useApp();
+  const app = useApp();
+  const { settings } = app;
+  const live = useRef(app);
+  live.current = app;
   const colors = useThemeColors();
   const [ids, setIds] = useState<string[]>([]);
   const [aiIds, setAiIds] = useState<string[]>([]);
-  const [dismissed, setDismissed] = useState<string | null>(null);
+  // What X cleared; anything new (or a new review run) brings the banner back.
+  const [dismissed, setDismissed] = useState<ReadonlySet<string> | null>(null);
   const aiStatus = useSyncExternalStore(subscribeNotificationAiStatus, getNotificationAiStatus);
   useEffect(() => {
     let active = true;
@@ -61,8 +68,10 @@ export function NotificationReviewBanner() {
     };
   }, [settings.appUserId]);
   const reviewing = aiStatus?.reviewing ?? 0;
-  const signature = `${reviewing > 0}|${ids.join('|')}|${aiIds.join('|')}`;
-  const visible = (reviewing > 0 || ids.length > 0 || aiIds.length > 0) && signature !== dismissed;
+  const visible =
+    reviewing > 0 ||
+    ids.some((id) => !dismissed?.has(id)) ||
+    aiIds.some((id) => !dismissed?.has(id));
   if (!visible) return null;
   const done = reviewing === 0 && aiIds.length > 0;
   const title = done
@@ -71,6 +80,24 @@ export function NotificationReviewBanner() {
         ids.length === 1 ? 'payment_alerts.review_banner_single' : 'payment_alerts.review_banner',
         { count: ids.length },
       );
+  const dismiss = () => {
+    void triggerHaptic('selection');
+    const appUserId = settings.appUserId;
+    setDismissed(new Set([...ids, ...aiIds]));
+    // Seen, AI's results move to History (where Undo stays).
+    void markNotificationAiResultsSeen(appUserId, aiIds).catch(() => undefined);
+    if (ids.length === 0) return;
+    void resolveNotificationReviews(ids, 'none', {
+      appUserId,
+      generation: getNotificationScanHistoryGeneration(appUserId),
+      getCurrent: () => ({ ...live.current, appUserId: live.current.settings.appUserId }),
+    })
+      .then((outcome) => {
+        // Anything left (a capture still being written) shows the banner again.
+        if (outcome.unfinished.length > 0) setDismissed(null);
+      })
+      .catch(() => setDismissed(null));
+  };
   const open = () => {
     void triggerHaptic('selection');
     requestOpenPaymentAlerts({ screen: 'NotificationHistory' });
@@ -111,17 +138,15 @@ export function NotificationReviewBanner() {
               </Text>
             ) : null}
           </View>
-          {/* A nested Pressable so dismissing does not open the page. */}
+          {/* A nested Pressable so X does not open the page. */}
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={I18n.t('common.close')}
+            accessibilityLabel={I18n.t(
+              ids.length > 0 ? 'payment_alerts.review_ignore_all' : 'common.close',
+            )}
+            testID="notification-review-banner-dismiss"
             hitSlop={8}
-            onPress={() => {
-              void triggerHaptic('selection');
-              setDismissed(signature);
-              // Dismissed, AI's results move to Recent (where Undo stays).
-              void markNotificationAiResultsSeen(settings.appUserId, aiIds).catch(() => undefined);
-            }}
+            onPress={dismiss}
             className="h-7 w-7 items-center justify-center rounded-full bg-secondary/60"
           >
             <X size={15} color={colors.textMuted} />

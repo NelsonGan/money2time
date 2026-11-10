@@ -256,7 +256,7 @@ export function NotificationHistoryScreen({ onBack }: { onBack: () => void }) {
     if (busyRef.current || loading) return;
     const ids = pending.map((entry) => entry.id);
     // Review later leaves everything in To review, picks included; the home
-    // banner counts them (one dismissed earlier returns on the next app open).
+    // banner counts them until they are decided (its X ignores them).
     const later: AlertButton = {
       text: I18n.t('payment_alerts.review_leave_later'),
       isPreferred: true,
