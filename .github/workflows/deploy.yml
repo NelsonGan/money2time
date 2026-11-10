@@ -11,9 +11,9 @@ name: CI / CD
 # instead of workflow-level `paths:` (a workflow skipped by a path filter
 # leaves required checks pending forever).
 #
-# `checks` and `bundle` run side by side on their own runners, both from the
-# node_modules cache in .github/actions/node-deps, and `test` is the one check
-# that says both passed. README: *CI and deploy*.
+# `checks`, `lint` and `bundle` run side by side on their own runners, all
+# from the node_modules cache in .github/actions/node-deps, and `test` is the
+# one check that says all three passed. README: *CI and deploy*.
 
 # Give each run a clear title in the Actions list so production, PR, manual,
 # and branch runs are easy to tell apart at a glance.
@@ -54,14 +54,15 @@ jobs:
   # Classifies the diff into the three flags the jobs below gate on:
   #   app     — anything that can reach the mobile binary (gates the
   #             production store build)
-  #   checks  — anything the app's `npm run check` / `npm test` can see, i.e.
-  #             everything outside apps/web/ and apps/app-studio/. eslint only
-  #             sees apps/mobile and prettier sees it plus the root docs and
-  #             .github/, but jest and the typecheck also read the Workers:
-  #             __tests__/cloudflare/ and the live-earnings contract tests
-  #             import apps/cloudflare/workers/*/src, so a Worker change runs
-  #             the test job too. The website and App Studio have their own
-  #             workflows (web.yml, app-studio.yml).
+  #   checks  — anything the app's `npm run check` / `npm test` can see (the
+  #             `checks` and `lint` jobs), i.e. everything outside apps/web/
+  #             and apps/app-studio/. eslint only sees apps/mobile and prettier
+  #             sees it plus the root docs and .github/, but jest and the
+  #             typecheck also read the Workers: __tests__/cloudflare/ and the
+  #             live-earnings contract tests import
+  #             apps/cloudflare/workers/*/src, so a Worker change runs these
+  #             jobs too. The website and App Studio have their own workflows
+  #             (web.yml, app-studio.yml).
   #   bundle  — anything Metro can bundle differently: `app`, plus this
   #             workflow and the actions it uses (a change to the bundle job
   #             should run it). A docs- or Worker-only change skips the job.
@@ -156,13 +157,19 @@ jobs:
           echo "app=$app | checks=$checks | bundle=$bundle"
           printf 'app=%s\nchecks=%s\nbundle=%s\n' "$app" "$checks" "$bundle" >> "$GITHUB_OUTPUT"
 
+  # `npm run check` (typecheck, lint, format) and `npm test`, split over two
+  # runners because lint alone takes as long as the other three together.
+  # Running the three checks side by side on one runner was tried first and
+  # saved almost nothing: they compete for the same cores, and finished in
+  # 102 seconds where one after another they take about 115.
+  #
+  # Both jobs run inside apps/mobile. They also read the Workers (jest and the
+  # typecheck follow the tests' imports into apps/cloudflare/workers/*/src),
+  # but never apps/web/ or apps/app-studio/, so a change confined to those two
+  # has nothing to run here.
   checks:
     name: Checks
     needs: changes
-    # `npm run check` / `npm test` run inside apps/mobile. They also read the
-    # Workers (jest and the typecheck follow the tests' imports into
-    # apps/cloudflare/workers/*/src), but never apps/web/ or apps/app-studio/,
-    # so a change confined to those two has nothing to run here.
     if: needs.changes.outputs.checks == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -191,79 +198,71 @@ jobs:
           directory: apps/mobile
           node-version: 22
 
-      # The three parts of `npm run check` are independent, so they run at once
-      # instead of one after another: the step takes as long as the slowest,
-      # lint, which gets two threads of the runner's four cores. Each writes to
-      # its own log, printed with its duration when all three have finished, so
-      # the output of one never interleaves with another's. A failed check is
-      # printed outside a collapsed group and named in an annotation.
-      #
-      # Lint calls ESLint directly, not `npm run lint`: `expo lint` passes on
-      # ESLint's exit status, which is empty when ESLint is killed (out of
-      # memory, say), so a lint that died would be reported as passed. It also
-      # skips the ESLint cache `expo lint` writes, which a CI run never reuses.
-      #
-      # The step starts by checking that package.json still defines `check` and
-      # `lint` the way this step copies them, so changing one without the other
-      # fails here instead of quietly checking less than `npm run check` does.
-      - name: Run checks
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Check formatting
+        run: npm run format:check
+
+      - name: Run tests
+        run: npm test
+
+  lint:
+    name: Lint
+    needs: changes
+    if: needs.changes.outputs.checks == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: apps/mobile
+    steps:
+      # ESLint only reads the app.
+      - name: Check out repository
+        uses: actions/checkout@v5
+        with:
+          sparse-checkout: |
+            .github
+            apps/mobile
+
+      # `checks` saves the node_modules cache; this job only reads it.
+      - name: Set up dependencies
+        uses: ./.github/actions/node-deps
+        with:
+          directory: apps/mobile
+          node-version: 22
+          save: false
+
+      # `checks` and this job together are `npm run check`, taken apart. If
+      # package.json's `check` or `lint` script changes, this fails until the
+      # two jobs are brought in line, instead of CI quietly checking less than
+      # `npm run check` does.
+      - name: Check that these jobs still match `npm run check`
         run: |
           expect() {
             actual=$(node -p "require('./package.json').scripts['$1']")
             if [ "$actual" != "$2" ]; then
-              echo "::error::package.json's \"$1\" script is now '$actual'. Update the Run checks step in .github/workflows/deploy.yml to match, then this guard."
+              echo "::error::package.json's \"$1\" script is now '$actual'. Bring the checks and lint jobs in .github/workflows/deploy.yml in line with it, then update this guard."
               exit 1
             fi
           }
           expect check 'npm run typecheck && npm run lint && npm run format:check'
           expect lint 'expo lint .'
 
-          names=()
-          pids=()
-          start() {
-            name=$1
-            shift
-            (
-              SECONDS=0
-              status=0
-              "$@" > "$RUNNER_TEMP/$name.log" 2>&1 || status=$?
-              echo "$SECONDS" > "$RUNNER_TEMP/$name.seconds"
-              exit "$status"
-            ) &
-            names+=("$name")
-            pids+=($!)
-          }
-          start typecheck npm run --silent typecheck
-          start lint npx eslint . --concurrency 2
-          start format npm run --silent format:check
-
-          failed=()
-          for i in "${!names[@]}"; do
-            name=${names[$i]}
-            status=0
-            wait "${pids[$i]}" || status=$?
-            took="$(cat "$RUNNER_TEMP/$name.seconds" 2> /dev/null || echo '?')s"
-            if [ "$status" -eq 0 ]; then
-              echo "::group::$name passed in $took"
-              cat "$RUNNER_TEMP/$name.log"
-              echo "::endgroup::"
-            else
-              failed+=("$name")
-              echo "──── $name FAILED in $took (exit $status) ────"
-              cat "$RUNNER_TEMP/$name.log"
-            fi
-          done
-          if [ "${#failed[@]}" -gt 0 ]; then
-            echo "::error::Failed: ${failed[*]}. Run \`npm run check\` in apps/mobile to reproduce."
-            exit 1
-          fi
-
-      - name: Run tests
-        run: npm test
+      # ESLint directly, not `npm run lint`: `expo lint` passes on ESLint's
+      # exit status, which is empty when ESLint is killed (out of memory,
+      # say), so a lint that died would be reported as passed. It also writes
+      # an ESLint cache, which a CI run never reuses. Two threads, because
+      # this job has the runner to itself.
+      - name: Lint
+        run: npx eslint . --concurrency 2
 
   # Typecheck and jest never run Metro, so without this a PR that breaks the
   # bundle (an import or asset only Metro resolves) would first fail in the
-  # store build after merge. It runs beside `checks` on its own runner.
+  # store build after merge. It runs beside `checks` and `lint`, on its own
+  # runner.
   #
   # On a push to main it only keeps the Metro cache warm for the pull requests
   # that branch from main (a pull request can read a cache saved by its own
@@ -330,30 +329,36 @@ jobs:
           TMPDIR: ${{ runner.temp }}
         run: npx expo export --platform ios --platform android --output-dir "$RUNNER_TEMP/expo-export"
 
-  # The one check to read on a pull request: green means `checks` and `bundle`
-  # both passed (or `bundle` had nothing to do). They are separate jobs so they
-  # can run at the same time, and without this a pull request with a broken
-  # bundle would look green on its checks alone. Nothing waits for this job:
-  # the store build is gated on `checks`, as it was when the bundle was a
-  # pull-request-only step.
+  # The one check to read on a pull request: green means `checks`, `lint` and
+  # `bundle` all passed (or `bundle` had nothing to do). They are separate jobs
+  # so they can run at the same time, and without this a pull request with one
+  # of them red would look green on the others. Nothing waits for this job: the
+  # store build is gated on `checks` and `lint`, as it was when the bundle was
+  # a pull-request-only step.
   test:
     name: Test
-    needs: [changes, checks, bundle]
+    needs: [changes, checks, lint, bundle]
     # Runs when the jobs it reports on failed, too; that is its purpose.
     if: ${{ !cancelled() && needs.changes.outputs.checks == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions: {}
     steps:
-      - name: Check that the checks and the bundle passed
+      - name: Check that the checks, lint and the bundle passed
         env:
           CHECKS: ${{ needs.checks.result }}
+          LINT: ${{ needs.lint.result }}
           BUNDLE: ${{ needs.bundle.result }}
         run: |
           echo "checks: $CHECKS"
+          echo "lint: $LINT"
           echo "bundle: $BUNDLE"
           if [ "$CHECKS" != success ]; then
             echo "::error::The Checks job did not pass ($CHECKS)."
+            exit 1
+          fi
+          if [ "$LINT" != success ]; then
+            echo "::error::The Lint job did not pass ($LINT)."
             exit 1
           fi
           if [ "$BUNDLE" != success ] && [ "$BUNDLE" != skipped ]; then
@@ -367,10 +372,11 @@ jobs:
 
   plan:
     name: Production · Plan
-    # Waits for `checks`, not for the `test` job that sums up `checks` and
-    # `bundle`: a job whose own `if:` has no status check is skipped when any
-    # job upstream of it was skipped, and `bundle` is skipped on a manual run.
-    needs: [changes, checks]
+    # Waits for `checks` and `lint`, not for the `test` job that sums them up
+    # with `bundle`: a job whose own `if:` has no status check is skipped when
+    # any job upstream of it was skipped, and `bundle` is skipped on a manual
+    # run.
+    needs: [changes, checks, lint]
     # A push to main only cuts a store build when something in the push can
     # reach the binary — a Worker-only or docs-only merge stops here. Manual
     # dispatch always builds (that is what it is for).
@@ -547,7 +553,7 @@ jobs:
 
   dev-build:
     name: Dev · Build (${{ github.event.inputs.platform }})
-    needs: checks
+    needs: [checks, lint]
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.profile == 'development'
     runs-on: ubuntu-latest
     timeout-minutes: 30
