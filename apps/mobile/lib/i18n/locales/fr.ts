@@ -623,6 +623,7 @@ const fr = {
       unavailable:
         'Les activités en direct nécessitent un iPhone sous iOS 16.2 ou version ultérieure.',
       start_failed: 'Ça n’a pas démarré. Réessayez.',
+      stop_failed: 'Ça ne s’est pas arrêté. Réessayez.',
       schedule_section: 'Programmation',
       schedule_tooltip:
         "Sur iOS 17.2 et versions ultérieures, Money2Time démarre l'horloge pour vous à cette heure, même si l'app est fermée. Sur les versions plus anciennes, elle envoie une notification et un appui dessus démarre l'horloge.",

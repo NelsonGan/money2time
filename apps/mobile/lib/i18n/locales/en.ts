@@ -599,6 +599,7 @@ const en = {
       disabled_body: 'Turn them back on for Money2Time in iOS Settings, then come back here.',
       unavailable: 'Live Activities need an iPhone on iOS 16.2 or later.',
       start_failed: 'That did not start. Give it another go.',
+      stop_failed: 'That did not stop. Give it another go.',
       schedule_section: 'Schedule',
       schedule_tooltip:
         'On iOS 17.2 and later Money2Time starts the clock for you at this time, even with the app closed. On older versions it sends a notification instead, and tapping it starts the clock.',

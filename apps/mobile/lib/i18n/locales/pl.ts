@@ -622,6 +622,7 @@ const pl = {
       disabled_body: 'Włącz je ponownie dla Money2Time w Ustawieniach iOS i wróć tutaj.',
       unavailable: 'Aktywności na żywo wymagają iPhone’a z iOS 16.2 lub nowszym.',
       start_failed: 'Nie wystartowała. Spróbuj jeszcze raz.',
+      stop_failed: 'Nie zatrzymała się. Spróbuj jeszcze raz.',
       schedule_section: 'Harmonogram',
       schedule_tooltip:
         'W systemie iOS 17.2 i nowszym Money2Time uruchamia zegar za Ciebie o tej godzinie, nawet gdy aplikacja jest zamknięta. W starszych wersjach wysyła powiadomienie, a jego dotknięcie uruchamia zegar.',

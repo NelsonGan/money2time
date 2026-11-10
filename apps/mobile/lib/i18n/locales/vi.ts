@@ -621,6 +621,7 @@ const vi = {
       disabled_body: 'Bật lại cho Money2Time trong Cài đặt iOS rồi quay lại đây.',
       unavailable: 'Live Activity cần iPhone chạy iOS 16.2 trở lên.',
       start_failed: 'Chưa bắt đầu được. Thử lại nhé.',
+      stop_failed: 'Chưa dừng được. Thử lại nhé.',
       schedule_section: 'Lịch',
       schedule_tooltip:
         'Trên iOS 17.2 trở lên, Money2Time bắt đầu tính giờ giúp bạn vào lúc này, ngay cả khi ứng dụng đã đóng. Trên phiên bản cũ hơn, ứng dụng gửi một thông báo và chạm vào đó để bắt đầu tính giờ.',

@@ -622,6 +622,7 @@ const fil = {
       disabled_body: 'I-on ulit para sa Money2Time sa iOS Settings, tapos balik ka dito.',
       unavailable: 'Kailangan ng Live Activities ang iPhone na may iOS 16.2 o mas bago.',
       start_failed: 'Hindi nagsimula. Subukan ulit.',
+      stop_failed: 'Hindi huminto. Subukan ulit.',
       schedule_section: 'Iskedyul',
       schedule_tooltip:
         'Sa iOS 17.2 pataas, sinisimulan ng Money2Time ang orasan para sa iyo sa oras na ito, kahit nakasara ang app. Sa mas lumang bersyon, nagpapadala ito ng notification, at ang pag-tap dito ang magsisimula ng orasan.',

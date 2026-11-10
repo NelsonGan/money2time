@@ -594,6 +594,7 @@ const zhHant = {
       disabled_body: '請在 iOS「設定」中重新開啟 Money2Time 的即時動態，然後回到這裡。',
       unavailable: '即時動態需要 iOS 16.2 或更高版本的 iPhone。',
       start_failed: '沒能開始，請再試一次。',
+      stop_failed: '沒能停止，請再試一次。',
       schedule_section: '定時',
       schedule_tooltip:
         '在 iOS 17.2 及更高版本上，即使應用已關閉，Money2Time 也會在這個時間替你開始計時。更早的版本會改為傳送一則通知，點按即可開始計時。',

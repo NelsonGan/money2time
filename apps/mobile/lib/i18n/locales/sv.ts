@@ -621,6 +621,7 @@ const sv = {
       disabled_body: 'Slå på dem för Money2Time i iOS-inställningarna och kom tillbaka hit.',
       unavailable: 'Liveaktiviteter kräver en iPhone med iOS 16.2 eller senare.',
       start_failed: 'Det startade inte. Försök igen.',
+      stop_failed: 'Det stoppade inte. Försök igen.',
       schedule_section: 'Schema',
       schedule_tooltip:
         'På iOS 17.2 och senare startar Money2Time klockan åt dig vid den här tiden, även när appen är stängd. På äldre versioner skickas i stället en avisering, och ett tryck på den startar klockan.',

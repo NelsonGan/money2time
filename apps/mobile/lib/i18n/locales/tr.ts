@@ -621,6 +621,7 @@ const tr = {
       disabled_body: 'iOS Ayarlar’dan Money2Time için yeniden açın, sonra buraya dönün.',
       unavailable: 'Canlı etkinlikler iOS 16.2 veya sonrasını çalıştıran bir iPhone gerektirir.',
       start_failed: 'Başlamadı. Bir daha deneyin.',
+      stop_failed: 'Durmadı. Bir daha deneyin.',
       schedule_section: 'Program',
       schedule_tooltip:
         'iOS 17.2 ve sonrasında Money2Time bu saatte sayacı sizin için başlatır, uygulama kapalı olsa bile. Daha eski sürümlerde bunun yerine bir bildirim gönderir ve bildirime dokunmak sayacı başlatır.',

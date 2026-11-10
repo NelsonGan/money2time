@@ -623,6 +623,7 @@ const de = {
         'Schalte sie für Money2Time in den iOS-Einstellungen wieder ein und komm dann zurück.',
       unavailable: 'Live-Aktivitäten benötigen ein iPhone mit iOS 16.2 oder neuer.',
       start_failed: 'Das hat nicht geklappt. Versuch es noch einmal.',
+      stop_failed: 'Das Stoppen hat nicht geklappt. Versuch es noch einmal.',
       schedule_section: 'Zeitplan',
       schedule_tooltip:
         'Ab iOS 17.2 startet Money2Time die Uhr zu dieser Zeit für Sie, auch bei geschlossener App. Auf älteren Versionen sendet die App stattdessen eine Mitteilung, und ein Tippen darauf startet die Uhr.',

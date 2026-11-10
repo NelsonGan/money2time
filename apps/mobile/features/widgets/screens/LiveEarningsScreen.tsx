@@ -37,6 +37,7 @@ import {
   startedMinutesAgoFor,
 } from '../lib/liveEarnings';
 import { scheduleEndClock, toggleScheduleDay, weekdaysFrom } from '../lib/liveEarningsSchedule';
+import { liveEarningsScreenState } from '../lib/liveEarningsScreenState';
 import { useLiveEarningsActivity } from '../useLiveEarningsActivity';
 
 interface LiveEarningsScreenProps {
@@ -89,7 +90,8 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
   const hours = schedule.hours;
   const [startSheetVisible, setStartSheetVisible] = useState(false);
   const [now, setNow] = useState(() => Date.now());
-  const [failed, setFailed] = useState(false);
+  // Which button last failed, so the message under it names the right action.
+  const [failed, setFailed] = useState<'start' | 'stop' | null>(null);
   const [permissionStatus, setPermissionStatus] = useState<
     'granted' | 'denied' | 'undetermined' | null
   >(null);
@@ -154,7 +156,7 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
           ? 0
           : startedMinutesAgoFor(clampStartAt(startedAt, startingAt, pickedHours), startingAt);
       const started = await start(pickedHours, offsetMinutes);
-      setFailed(!started);
+      setFailed(started ? null : 'start');
       if (!started) return;
       void triggerHaptic('success');
       // Remembered so the next shift opens on the same length, and only once
@@ -168,20 +170,23 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
   );
 
   const handleStop = useCallback(async () => {
-    setFailed(false);
-    await stop();
+    setFailed(null);
+    const stopped = await stop();
+    setFailed(stopped ? null : 'stop');
   }, [stop]);
 
-  const canRun = available && hasWage && enabled;
-  // Hydration is not a blocker, it is a "not known yet": showing the
-  // Live-Activities-are-off card while ActivityKit is still being asked would
-  // flash a wrong explanation on every open.
-  const blocker = !available || !hasWage || (hydrated && !enabled);
   const running = session !== null;
+  const { canStart, showActionBar, blocker, showSchedule } = liveEarningsScreenState({
+    available,
+    hydrated,
+    enabled,
+    hasWage,
+    running,
+  });
   // Read inside the auto-start effect without making it re-run as the flags
   // settle, which would re-check a request it has already claimed.
-  const canRunRef = useRef(canRun);
-  canRunRef.current = canRun;
+  const canStartRef = useRef(canStart);
+  canStartRef.current = canStart;
 
   // The reminder's deep link left a pending start here. It is claimed once the
   // activity layer has hydrated (so an already-running session is visible and
@@ -194,10 +199,10 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
     const pending = consumePendingLiveEarningsStart();
     if (!pending) return;
     autoStartAttempted.current = true;
-    if (session || !canRunRef.current) return;
+    if (session || !canStartRef.current) return;
     void (async () => {
       const started = await start(pending.hours);
-      setFailed(!started);
+      setFailed(started ? null : 'start');
       if (started) void triggerHaptic('success');
     })();
   }, [hydrated, session, start]);
@@ -287,11 +292,16 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
   return (
     <SettingsPageLayout
       actionBar={
-        canRun && hydrated ? (
+        showActionBar ? (
           <View style={[styles.actionBar, bottomNavInset]}>
-            {failed ? (
+            {/* Only while it still describes the button below it: a session
+                can appear after a failed start (a scheduled push), and a
+                failed stop can turn out to have ended the card anyway. */}
+            {(failed === 'start' && !running) || (failed === 'stop' && running) ? (
               <Text variant="caption" tone="error" className="pb-2">
-                {I18n.t('widgets.live.start_failed')}
+                {I18n.t(
+                  failed === 'start' ? 'widgets.live.start_failed' : 'widgets.live.stop_failed',
+                )}
               </Text>
             ) : null}
             <FatButton
@@ -305,7 +315,7 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
                   void handleStop();
                   return;
                 }
-                setFailed(false);
+                setFailed(null);
                 setStartSheetVisible(true);
               }}
             />
@@ -335,13 +345,13 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
 
         {blocker ? (
           <View className="pt-4">
-            {!available ? (
+            {blocker === 'unavailable' ? (
               <Card variant="outline" className="p-5">
                 <Text variant="caption" tone="muted">
                   {I18n.t('widgets.live.unavailable')}
                 </Text>
               </Card>
-            ) : !hasWage ? (
+            ) : blocker === 'wage' ? (
               <Card variant="accent" className="gap-3 p-5">
                 <Text variant="bodyStrong">{I18n.t('widgets.live.wage_title')}</Text>
                 <Text variant="caption" tone="muted">
@@ -367,7 +377,7 @@ export function LiveEarningsScreen({ onBack, onOpenHourlyValue }: LiveEarningsSc
           </View>
         ) : null}
 
-        {canRun && hydrated ? (
+        {showSchedule ? (
           <View className="mt-7 gap-3">
             {/* Hand-rolled rather than SettingsSection: its `title` takes a
                 string, and this header needs the info button beside it. The

@@ -49,7 +49,8 @@ export interface LiveEarningsActivityController {
    * the session length.
    */
   start: (hours: number, startedMinutesAgo?: number) => Promise<boolean>;
-  stop: () => Promise<void>;
+  /** Resolves false when the session could not be ended. */
+  stop: () => Promise<boolean>;
 }
 
 export function useLiveEarningsActivity(hourlyRate: number): LiveEarningsActivityController {
@@ -215,10 +216,16 @@ export function useLiveEarningsActivity(hourlyRate: number): LiveEarningsActivit
       // the other is a shift that finished and is worth reading.
       void syncLiveEarningsWidget(null, currencySymbol, accent);
       void trackEvent(AnalyticsEvents.LIVE_EARNINGS_STOPPED);
+      return true;
+    } catch {
+      // Re-read so the screen shows what is actually on the Lock Screen: the
+      // card may have ended anyway, and if it has not, Stop stays to try again.
+      await syncFromSystem();
+      return false;
     } finally {
       setBusy(false);
     }
-  }, [accent, appUserId, currencySymbol]);
+  }, [accent, appUserId, currencySymbol, syncFromSystem]);
 
   return useMemo(
     () => ({ available: isLiveActivityAvailable, hydrated, enabled, session, busy, start, stop }),

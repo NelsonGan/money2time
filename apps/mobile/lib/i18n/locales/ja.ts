@@ -622,6 +622,7 @@ const ja = {
         'iOS の「設定」で Money2Time のライブアクティビティをオンにして、ここに戻ってください。',
       unavailable: 'ライブアクティビティには iOS 16.2 以降の iPhone が必要です。',
       start_failed: 'はじめられませんでした。もう一度お試しください。',
+      stop_failed: '止められませんでした。もう一度お試しください。',
       schedule_section: 'スケジュール',
       schedule_tooltip:
         'iOS 17.2以降では、アプリを閉じていてもこの時刻にMoney2Timeが計測を開始します。それより前のバージョンでは通知が届き、タップすると計測が始まります。',
