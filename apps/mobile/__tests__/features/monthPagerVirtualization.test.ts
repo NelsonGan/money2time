@@ -58,4 +58,16 @@ describe('month pager virtualization', () => {
     expect(windowSizes.length).toBeGreaterThan(0);
     windowSizes.forEach((windowSize) => expect(windowSize).toBeGreaterThanOrEqual(3));
   });
+
+  it.each(PAGER_SOURCES)('%s sizes its pages without flex-1', (relativePath) => {
+    // A `flex-1` page has a zero flex basis inside FlatList's row cell, so a
+    // newly mounted Android cell can collapse and shift every later page away
+    // from `getItemLayout` (a blank or wrong month after a swipe). Pages take
+    // an explicit width with `h-full shrink-0` instead.
+    const flexPages =
+      readPagerSource(relativePath).match(
+        /style=\{\{\s*width:\s*pageWidth\s*\}\}\s*className="[^"]*\bflex-1\b/g,
+      ) ?? [];
+    expect(flexPages).toEqual([]);
+  });
 });
