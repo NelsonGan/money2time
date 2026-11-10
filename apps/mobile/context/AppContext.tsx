@@ -851,6 +851,8 @@ function computeAlbumStats(
 // seconds — the "transaction took ~10s to appear / redirect" symptom. The cap
 // guarantees the write always lands promptly.
 const DEFERRED_WRITE_MAX_DELAY_MS = 300;
+// How long after a failed reminder scheduling the one retry runs.
+const REMINDER_RETRY_DELAY_MS = 3000;
 // Above this many written rows a reload costs no more than re-reading them by id.
 const RECONCILE_ROW_LIMIT = 500;
 function runDeferredWrite(task: () => void) {
@@ -1916,13 +1918,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       prefs: NotificationPreferences,
       options: { weekStartsOn: WeekStartsOn; firstDayOfMonth: number },
     ) => {
-      scheduledRemindersRef.current = { prefs, ...options };
-      // expo-notifications' scheduling call can reject with a transient OS
-      // error (iOS's notification daemon connection dropping), which surfaced
-      // as an unhandled rejection on every cold start (Sentry MONEY2TIME-R).
-      syncScheduledNotifications(prefs, options).catch((error) => {
-        reportError(error, { scope: 'notifications' });
-      });
+      const scheduled = { prefs, ...options };
+      scheduledRemindersRef.current = scheduled;
+      const attempt = (retriesLeft: number) => {
+        // expo-notifications' scheduling call can reject with a transient OS
+        // error (iOS's notification daemon connection dropping), which surfaced
+        // as an unhandled rejection on every cold start (Sentry MONEY2TIME-R).
+        syncScheduledNotifications(prefs, options).catch((error) => {
+          reportError(error, { scope: 'notifications' });
+          // It can fail between cancelling a reminder and scheduling it again,
+          // so try once more, unless something newer has been scheduled since.
+          // (The second scheduling a launch used to do covered this by chance.)
+          if (retriesLeft <= 0 || scheduledRemindersRef.current !== scheduled) return;
+          setTimeout(() => {
+            if (scheduledRemindersRef.current === scheduled) attempt(retriesLeft - 1);
+          }, REMINDER_RETRY_DELAY_MS);
+        });
+      };
+      attempt(1);
     },
     [],
   );
@@ -2230,19 +2243,42 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // and the balances, instead of every transaction in the ledger. On a long
   // history the full reload was most of what froze the screen after an edit.
   // Anything this cannot follow row by row still reloads.
+  //
+  // Trailing and one per burst, like the reload above. Writes queued in the
+  // same JS turn run one after another before any timer, so by the time this
+  // reads, each of them has landed. Reading straight after its own write
+  // instead saw rows a later write was still about to change or remove:
+  // saving a transfer with its fee taken off (an edit that moves the fee, then
+  // the fee's delete) put the deleted fee back in the list, and nothing
+  // reloads after a plain delete to take it out again.
+  const reconcileIdsRef = useRef<Set<string> | null>(null);
   const reconcileStoredTransactions = useCallback(
     (ids: string[]) => {
-      if (ids.length > RECONCILE_ROW_LIMIT) {
-        scheduleRefreshTransactions();
+      // A reload on its way reads these rows too.
+      if (refreshTransactionsScheduled.current) return;
+      const queued = reconcileIdsRef.current;
+      if (queued) {
+        ids.forEach((id) => queued.add(id));
         return;
       }
-      try {
-        const stored = transactionsRepository.listByIds(ids);
-        setTransactions((prev) => reconcileTransactionRows(prev, ids, stored));
-        setRawAccountBalances(accountsRepository.getBalances());
-      } catch {
-        scheduleRefreshTransactions();
-      }
+      const pending = new Set(ids);
+      reconcileIdsRef.current = pending;
+      setTimeout(() => {
+        reconcileIdsRef.current = null;
+        if (refreshTransactionsScheduled.current) return;
+        if (pending.size > RECONCILE_ROW_LIMIT) {
+          scheduleRefreshTransactions();
+          return;
+        }
+        try {
+          const touched = [...pending];
+          const stored = transactionsRepository.listByIds(touched);
+          setTransactions((prev) => reconcileTransactionRows(prev, touched, stored));
+          setRawAccountBalances(accountsRepository.getBalances());
+        } catch {
+          scheduleRefreshTransactions();
+        }
+      }, 0);
     },
     [scheduleRefreshTransactions],
   );
@@ -3590,15 +3626,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           // removes the refund and reopens the expense; changing the amount
           // moves the refund with it, or the two stop cancelling and the period
           // shows income that never arrived.
+          // Few rows have a refund, so one query finds the ones that do
+          // rather than three per row (a bulk edit made hundreds). Asked of
+          // the database, after the write: a refund linked earlier in the
+          // same turn is stored by now and not yet in the loaded list.
+          const refunded = new Set(
+            transactionsRepository.idsWithRefund(normalizedUpdates.map(({ id }) => id)),
+          );
           normalizedUpdates.forEach(({ id, input }) => {
-            // Few rows have a refund, so the loaded row answers for the rest
-            // without three queries each (a bulk edit made hundreds).
-            if (
-              !transactionById.get(id)?.reimbursementTransactionId &&
-              input.reimbursementTransactionId == null
-            ) {
-              return;
-            }
+            if (!refunded.has(id)) return;
             const current = transactionsRepository.getById(id);
             const refundId = current?.reimbursementTransactionId;
             if (!refundId) return;

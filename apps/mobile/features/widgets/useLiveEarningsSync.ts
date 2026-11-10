@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { AppState, type AppStateStatus } from 'react-native';
 
 import { useApp } from '~/context/AppContext';
@@ -10,6 +10,9 @@ import { isLiveActivityAvailable } from '~/services/liveActivity';
 import { liveEarningsAccent } from './lib/liveEarningsAccent';
 import { refreshLiveEarningsActivity } from './lib/refreshLiveEarnings';
 import { syncLiveEarningsAutoStart } from './lib/syncLiveEarningsAutoStart';
+
+/** Longest the schedule sync waits for the launch Pro status read. */
+const PRO_STATUS_WAIT_MS = 10_000;
 
 /**
  * Keeps the live-earnings activity's money figure current, mounted once for
@@ -31,7 +34,21 @@ export function useLiveEarningsSync() {
   // a Pro user's armed schedule on the server on every cold start and
   // registered it again a moment later: two requests, and a window with no
   // schedule. So the schedule is left alone until the answer is real.
-  const isProKnown = useIsProStatusKnown();
+  //
+  // A status read that never settles must not leave the schedule unsynced for
+  // the whole session (an edited schedule never registered, a rotated push
+  // token never picked up), so the wait is capped, as the auto-log drain's is.
+  // Past the cap the sync runs as for a Pro user: it can then only arm or
+  // re-arm what the person set up while Pro, never clear it, and it runs again
+  // with the real answer if that arrives.
+  const isProStatusKnown = useIsProStatusKnown();
+  const [proStatusWaitOver, setProStatusWaitOver] = useState(false);
+  useEffect(() => {
+    const timer = setTimeout(() => setProStatusWaitOver(true), PRO_STATUS_WAIT_MS);
+    return () => clearTimeout(timer);
+  }, []);
+  const isProKnown = isProStatusKnown || proStatusWaitOver;
+  const isProForSync = isPro || !isProStatusKnown;
   const themeColor = useThemeColor();
 
   // Read inside a listener that is registered once, so it must not close over
@@ -61,10 +78,10 @@ export function useLiveEarningsSync() {
   const rateRef = useRef(0);
   // Auto-start is Pro-only, and a subscription can lapse while a schedule is
   // armed - so this is read on every pass, not once at the toggle.
-  const isProRef = useRef(isPro);
+  const isProRef = useRef(isProForSync);
   useEffect(() => {
-    isProRef.current = isPro;
-  }, [isPro]);
+    isProRef.current = isProForSync;
+  }, [isProForSync]);
   const isProKnownRef = useRef(isProKnown);
   useEffect(() => {
     isProKnownRef.current = isProKnown;
@@ -108,7 +125,7 @@ export function useLiveEarningsSync() {
       // demanding the object it would then re-run on. It is written by the
       // effect declared before this one, so it is never behind.
       schedule: scheduleRef.current,
-      isPro,
+      isPro: isProForSync,
       hourlyRate: scheduleHourlyRate,
       currencySymbol,
       accent: liveEarningsAccent(themeColor),
@@ -120,7 +137,15 @@ export function useLiveEarningsSync() {
       // unhandled rejection on every foreground (Sentry MONEY2TIME-R).
       reportError(error, { scope: 'notifications' });
     });
-  }, [appUserId, currencySymbol, isPro, isProKnown, scheduleKey, scheduleHourlyRate, themeColor]);
+  }, [
+    appUserId,
+    currencySymbol,
+    isProForSync,
+    isProKnown,
+    scheduleKey,
+    scheduleHourlyRate,
+    themeColor,
+  ]);
 
   useEffect(() => {
     if (!isLiveActivityAvailable) return;

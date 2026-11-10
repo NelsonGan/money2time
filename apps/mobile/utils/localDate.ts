@@ -47,6 +47,8 @@ export interface LocalDay {
 let offsetByUtcDay = new Map<number, number>();
 /** Local days by their day number (days since 1970-01-01 on the local calendar). */
 let localDayByNumber = new Map<number, LocalDay>();
+/** The first UTC day of every block learned so far. */
+let learnedBlocks: number[] = [];
 let cachedZoneFingerprint: string | null = null;
 
 function pad2(value: number): string {
@@ -64,9 +66,11 @@ function offsetAt(timeMs: number): number {
  */
 function learnBlock(utcDay: number): number {
   // A new block is rare, so it is also where a zone change gets noticed
-  // between foregrounds.
-  syncLocalDaysWithTimeZone();
+  // between foregrounds (by the quick check only: re-reading every block for
+  // each new one would make learning a long history quadratic).
+  dropLearnedDaysIfZoneChanged();
   const first = Math.floor(utcDay / BLOCK_DAYS) * BLOCK_DAYS;
+  learnedBlocks.push(first);
   let atStart = offsetAt(first * DAY_MS);
   for (let day = first; day < first + BLOCK_DAYS; day += 1) {
     const atEnd = offsetAt((day + 1) * DAY_MS);
@@ -146,15 +150,12 @@ function zoneFingerprint(): string {
 export function resetLocalDays(): void {
   offsetByUtcDay = new Map();
   localDayByNumber = new Map();
+  learnedBlocks = [];
   cachedZoneFingerprint = null;
 }
 
-/**
- * Drop the learned offsets when the device's time zone is no longer the one
- * they were read in (travel, or a changed setting). Cheap; the app calls it
- * on every return to the foreground. Returns whether anything was dropped.
- */
-export function syncLocalDaysWithTimeZone(): boolean {
+/** The quick check: this year's offsets. Returns whether anything was dropped. */
+function dropLearnedDaysIfZoneChanged(): boolean {
   const fingerprint = zoneFingerprint();
   if (cachedZoneFingerprint === null) {
     cachedZoneFingerprint = fingerprint;
@@ -163,5 +164,41 @@ export function syncLocalDaysWithTimeZone(): boolean {
   if (cachedZoneFingerprint === fingerprint) return false;
   resetLocalDays();
   cachedZoneFingerprint = fingerprint;
+  return true;
+}
+
+/** Days between the offsets re-read in each learned block by the full check. */
+const RECHECK_STRIDE_DAYS = 16;
+
+/**
+ * Whether the zone still gives the offsets that were learned, by re-reading
+ * one day in sixteen of every block, oldest first. Two zones can agree all
+ * this year and differ in the years the entries are from (Amman and Riyadh
+ * since 2022, Asuncion and Buenos Aires since 2024), which this year's
+ * offsets alone cannot tell apart.
+ */
+function learnedOffsetsStillHold(): boolean {
+  const blocks = [...learnedBlocks].sort((a, b) => a - b);
+  for (const first of blocks) {
+    for (let day = first; day < first + BLOCK_DAYS; day += RECHECK_STRIDE_DAYS) {
+      const learned = offsetByUtcDay.get(day);
+      if (learned === undefined || Number.isNaN(learned)) continue;
+      if (offsetAt(day * DAY_MS) !== learned) return false;
+    }
+  }
+  return true;
+}
+
+/**
+ * Drop the learned offsets when the device's time zone is no longer the one
+ * they were read in (travel, or a changed setting). The app calls it on every
+ * return to the foreground; it costs a few offset reads per learned block.
+ * Returns whether anything was dropped.
+ */
+export function syncLocalDaysWithTimeZone(): boolean {
+  if (dropLearnedDaysIfZoneChanged()) return true;
+  if (learnedOffsetsStillHold()) return false;
+  resetLocalDays();
+  cachedZoneFingerprint = zoneFingerprint();
   return true;
 }

@@ -113,6 +113,8 @@ export interface CreateTransactionInput {
   memberId?: string | null;
 }
 
+/** Ids per `IN (…)` lookup, under SQLite's bound-parameter limit. */
+const ID_LOOKUP_CHUNK = 900;
 /** Ids per soft-delete statement (each bound twice, well under SQLite's limit). */
 const SOFT_DELETE_CHUNK = 5000;
 
@@ -223,31 +225,35 @@ function rawRows(query: string, params: (string | number)[] = []): RawValue[][] 
  */
 function loadRelationLookups(): TransactionRelationLookups {
   const accountNames = new Map<string, string>();
-  for (const [id, name] of rawRows('SELECT id, name FROM accounts WHERE deleted_at IS NULL')) {
-    accountNames.set(id as string, name as string);
-  }
   const categories = new Map<
     string,
     { name: string | null; icon: string | null; parentId: string | null; parentName: string | null }
   >();
-  for (const [id, name, icon, parentId, parentName] of rawRows(
-    `SELECT c.id, c.name, COALESCE(NULLIF(TRIM(c.icon), ''), NULLIF(TRIM(p.icon), '')),
-        c.parent_id, p.name
-      FROM categories c LEFT JOIN categories p ON p.id = c.parent_id`,
-  )) {
-    categories.set(id as string, {
-      name: name as string | null,
-      icon: icon as string | null,
-      parentId: parentId as string | null,
-      parentName: parentName as string | null,
-    });
-  }
   const instalmentCounts = new Map<string, number>();
-  for (const [id, count] of rawRows(
-    `SELECT id, instalment_count FROM recurring_rules
-      WHERE deleted_at IS NULL AND instalment_count IS NOT NULL`,
+  // One query for the three, tagged by table: each call into SQLite costs
+  // more than these few rows do, and `getById` runs this for a single row.
+  for (const [table, id, name, icon, parentId, parentName] of rawRows(
+    `SELECT 'account', id, name, NULL, NULL, NULL FROM accounts WHERE deleted_at IS NULL
+     UNION ALL
+     SELECT 'category', c.id, c.name,
+         COALESCE(NULLIF(TRIM(c.icon), ''), NULLIF(TRIM(p.icon), '')), c.parent_id, p.name
+       FROM categories c LEFT JOIN categories p ON p.id = c.parent_id
+     UNION ALL
+     SELECT 'plan', id, instalment_count, NULL, NULL, NULL FROM recurring_rules
+       WHERE deleted_at IS NULL AND instalment_count IS NOT NULL`,
   )) {
-    instalmentCounts.set(id as string, count as number);
+    if (table === 'account') {
+      accountNames.set(id as string, name as string);
+    } else if (table === 'category') {
+      categories.set(id as string, {
+        name: name as string | null,
+        icon: icon as string | null,
+        parentId: parentId as string | null,
+        parentName: parentName as string | null,
+      });
+    } else {
+      instalmentCounts.set(id as string, name as number);
+    }
   }
   return { accountNames, categories, instalmentCounts };
 }
@@ -575,6 +581,27 @@ class TransactionsRepository {
     const withRelations = attachRelations(rows.map(toTransaction));
     attachSplits(withRelations);
     return withRelations;
+  }
+
+  /**
+   * Which of `ids` are expenses with a refund row written for them. One query
+   * for a whole edit, so the edit only has to look closer at those.
+   */
+  idsWithRefund(ids: string[]): string[] {
+    const found: string[] = [];
+    for (let start = 0; start < ids.length; start += ID_LOOKUP_CHUNK) {
+      const chunk = ids.slice(start, start + ID_LOOKUP_CHUNK);
+      const placeholders = chunk.map(() => '?').join(',');
+      for (const [id] of rawRows(
+        `SELECT id FROM transactions
+          WHERE id IN (${placeholders}) AND deleted_at IS NULL
+            AND reimbursement_transaction_id IS NOT NULL`,
+        chunk,
+      )) {
+        found.push(id as string);
+      }
+    }
+    return found;
   }
 
   create(input: CreateTransactionInput): string {

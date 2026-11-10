@@ -145,6 +145,32 @@ describe('localDayOfTime', () => {
   });
 });
 
+describe('a move between zones that agree this year', () => {
+  beforeEach(() => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-11-10T04:00:00.000Z'));
+  });
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  // Amman has kept UTC+3 all year since October 2022, as Riyadh always has;
+  // before that its winters were UTC+2.
+  const winterEvening = Date.UTC(2020, 0, 15, 21, 30);
+
+  it('is noticed from the days already learned', () => {
+    setTimeZone('Asia/Amman');
+    resetLocalDays();
+    expect(localDayOfTime(winterEvening).dayKey).toBe('2020-01-15');
+    expect(localDayOfTime(Date.UTC(2026, 10, 9, 12)).dayKey).toBe('2026-11-09');
+    expect(syncLocalDaysWithTimeZone()).toBe(false);
+    setTimeZone('Asia/Riyadh');
+    expect(new Date(Date.UTC(2026, 0, 1)).getTimezoneOffset()).toBe(-180);
+    expect(syncLocalDaysWithTimeZone()).toBe(true);
+    expect(localDayOfTime(winterEvening).dayKey).toBe('2020-01-16');
+    expect(syncLocalDaysWithTimeZone()).toBe(false);
+  });
+});
+
 describe('daysInCalendarMonth', () => {
   it('matches Date for every month of 1900 to 2100', () => {
     for (let year = 1900; year <= 2100; year += 1) {
