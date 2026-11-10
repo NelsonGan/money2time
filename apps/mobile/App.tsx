@@ -271,7 +271,7 @@ import { foldSpan, readableColumn } from '~/utils/adaptiveLayout';
 import { financialMonthKeyForDate, monthCycleOf } from '~/utils/financialMonth';
 import { dayKeyFromIsoLocal } from '~/utils/formatters';
 import { runAfterInteractions } from '~/utils/interactions';
-import { perfInteraction, perfMark, perfStartupDone } from '~/utils/perfTrace';
+import { perfInteraction, perfMark, perfSpan, perfStartupDone } from '~/utils/perfTrace';
 import { markSplashHidden, whenSplashHidden } from '~/utils/splashState';
 // PostHog starts before anything renders so error autocapture (uncaught
 // JavaScript errors, unhandled rejections and native crashes) covers startup.
@@ -1649,19 +1649,21 @@ function WidgetSnapshotSync() {
       if (cancelled) return;
       perfMark('widget_snapshot_start');
       const savingsExclusions = parseSavingsExclusions(insightsPreferencesJson);
-      const snapshot = buildMoney2TimeWidgetSnapshot({
-        transactions,
-        settings,
-        isPro,
-        getTrueHourlyRateForDate,
-        categories,
-        periodBudgets,
-        rateTable,
-        excludedSavingsIncomeCategoryIds: savingsExclusions.income,
-        excludedSavingsExpenseCategoryIds: savingsExclusions.expense,
-        savingsIncomeMode: savingsExclusions.incomeMode,
-        savingsExpenseMode: savingsExclusions.expenseMode,
-      });
+      const snapshot = perfSpan('widget_snapshot', () =>
+        buildMoney2TimeWidgetSnapshot({
+          transactions,
+          settings,
+          isPro,
+          getTrueHourlyRateForDate,
+          categories,
+          periodBudgets,
+          rateTable,
+          excludedSavingsIncomeCategoryIds: savingsExclusions.income,
+          excludedSavingsExpenseCategoryIds: savingsExclusions.expense,
+          savingsIncomeMode: savingsExclusions.incomeMode,
+          savingsExpenseMode: savingsExclusions.expenseMode,
+        }),
+      );
       perfMark('widget_snapshot_built');
       void writeMoney2TimeWidgetSnapshot(snapshot).then(() => reloadMoney2TimeWidgets());
     };

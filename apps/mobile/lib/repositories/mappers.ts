@@ -459,7 +459,9 @@ export function toTransaction(row: TransactionRow): Transaction {
  * transaction that way and building each object once is several times faster
  * than a Drizzle select followed by `toTransaction` and a second pass to add
  * the relation names, which is what loading a long history used to cost.
- * Aliased to `t`, followed by the relation columns the caller joins in.
+ * Aliased to `t`, followed by the eight relation values. The launch load
+ * reads them in two parts and puts each row back in this order
+ * ({@link createTransactionAssembler}).
  */
 export const TRANSACTION_RAW_COLUMNS_SQL = `
   t.id, t.type, t.amount, t.currency, t.reporting_currency, t.reporting_amount,
@@ -529,6 +531,241 @@ export function toTransactionWithRelationsFromRaw(
     categoryParentName: (values[43] as string | null) ?? null,
     categoryIcon: (values[41] as string | null) ?? null,
     instalmentCount: (values[44] as number | null) ?? null,
+  };
+}
+
+const TRANSACTION_RAW_COLUMNS = TRANSACTION_RAW_COLUMNS_SQL.split(',').map((column) =>
+  column.trim().replace(/^t\./, ''),
+);
+
+/**
+ * The columns that hold their default on nearly every row, and that default as
+ * SQLite stores it: each belongs to a feature most entries never use (a
+ * receipt photo, a mood, a reimbursement, an instalment plan, a shared
+ * ledger). Reading a value into JavaScript costs about the same whether it is
+ * a string or NULL, so the launch load reads the other fifteen columns for
+ * every row and these only for the rows where one of them is set
+ * ({@link TRANSACTION_SPARSE_FILTER_SQL}); on 20,000 rows that halved the
+ * query. A column added to the table belongs here when most rows leave it at
+ * its default; the mapper test fails until it is in one list or the other.
+ */
+const TRANSACTION_SPARSE_DEFAULTS: Readonly<Record<string, RawValue>> = {
+  to_amount: null,
+  account_amount: null,
+  receipt_uri: null,
+  recurrence_pattern: 'none',
+  recurrence_interval: 1,
+  recurrence_end_date: null,
+  recurrence_parent_id: null,
+  sentiment: 'neutral',
+  reimbursable: 0,
+  reimbursed_at: null,
+  reimbursement_account_id: null,
+  reimbursement_transaction_id: null,
+  reimbursement_of_id: null,
+  counts_as_expense: 0,
+  day_order: null,
+  // The loads that use this only read live rows.
+  deleted_at: null,
+  details: null,
+  instalment_rule_id: null,
+  instalment_number: null,
+  created_by: null,
+  member_id: null,
+  fee_of_id: null,
+};
+
+const SPARSE_COLUMNS = TRANSACTION_RAW_COLUMNS.filter(
+  (column) => column in TRANSACTION_SPARSE_DEFAULTS,
+);
+const COMMON_COLUMNS = TRANSACTION_RAW_COLUMNS.filter(
+  (column) => !(column in TRANSACTION_SPARSE_DEFAULTS),
+);
+const rawPosition = (column: string) => {
+  const position = TRANSACTION_RAW_COLUMNS.indexOf(column);
+  if (position < 0) throw new Error(`Unknown transaction column ${column}`);
+  return position;
+};
+const COMMON_POSITIONS = COMMON_COLUMNS.map(rawPosition);
+const SPARSE_POSITIONS = SPARSE_COLUMNS.map(rawPosition);
+const sqlLiteral = (value: RawValue) =>
+  value === null ? 'NULL' : typeof value === 'number' ? String(value) : `'${value}'`;
+
+/** The columns every row is read with, aliased to `t`; `t.id` comes first. */
+export const TRANSACTION_COMMON_COLUMNS_SQL = COMMON_COLUMNS.map((column) => `t.${column}`).join(
+  ', ',
+);
+/** `t.id`, then the sparse columns, for the rows {@link TRANSACTION_SPARSE_FILTER_SQL} keeps. */
+export const TRANSACTION_SPARSE_COLUMNS_SQL = ['id', ...SPARSE_COLUMNS]
+  .map((column) => `t.${column}`)
+  .join(', ');
+/** True for a row with any sparse column off its default. `IS NOT` so NULL counts as a value. */
+export const TRANSACTION_SPARSE_FILTER_SQL = SPARSE_COLUMNS.map(
+  (column) => `t.${column} IS NOT ${sqlLiteral(TRANSACTION_SPARSE_DEFAULTS[column] as RawValue)}`,
+).join(' OR ');
+
+/**
+ * The few small tables a transaction's relation names come from, read once
+ * per load rather than joined onto every row.
+ */
+export interface TransactionRelationLookups {
+  /** Live accounts' names by id. */
+  accountNames: ReadonlyMap<string, string>;
+  /** Every category by id (deleted ones too, as a row keeps its category's name). */
+  categories: ReadonlyMap<
+    string,
+    { name: string | null; icon: string | null; parentId: string | null; parentName: string | null }
+  >;
+  /** Live instalment plans' number of payments by rule id. */
+  instalmentCounts: ReadonlyMap<string, number>;
+}
+
+type TransactionRelations = Required<
+  Pick<
+    TransactionWithRelations,
+    | 'accountName'
+    | 'fromAccountName'
+    | 'toAccountName'
+    | 'categoryName'
+    | 'categoryIcon'
+    | 'categoryParentId'
+    | 'categoryParentName'
+    | 'instalmentCount'
+  >
+>;
+
+/** The relation names of one transaction, null where the other row is gone. */
+export function transactionRelations(
+  transaction: Pick<
+    Transaction,
+    'accountId' | 'fromAccountId' | 'toAccountId' | 'categoryId' | 'instalmentRuleId'
+  >,
+  lookups: TransactionRelationLookups,
+): TransactionRelations {
+  const { accountNames, categories, instalmentCounts } = lookups;
+  const nameOf = (accountId: string | null | undefined) =>
+    accountId ? (accountNames.get(accountId) ?? null) : null;
+  const category = transaction.categoryId ? categories.get(transaction.categoryId) : undefined;
+  return {
+    accountName: nameOf(transaction.accountId),
+    fromAccountName: nameOf(transaction.fromAccountId),
+    toAccountName: nameOf(transaction.toAccountId),
+    categoryName: category?.name ?? null,
+    categoryIcon: category?.icon ?? null,
+    categoryParentId: category?.parentId ?? null,
+    categoryParentName: category?.parentName ?? null,
+    instalmentCount: transaction.instalmentRuleId
+      ? (instalmentCounts.get(transaction.instalmentRuleId) ?? null)
+      : null,
+  };
+}
+
+const ACCOUNT_ID_POSITION = rawPosition('account_id');
+const FROM_ACCOUNT_ID_POSITION = rawPosition('from_account_id');
+const TO_ACCOUNT_ID_POSITION = rawPosition('to_account_id');
+const CATEGORY_ID_POSITION = rawPosition('category_id');
+const INSTALMENT_RULE_ID_POSITION = rawPosition('instalment_rule_id');
+const RELATIONS_POSITION = TRANSACTION_RAW_COLUMNS.length;
+
+/**
+ * Builds transactions from rows read in two parts: the common columns of every
+ * row ({@link TRANSACTION_COMMON_COLUMNS_SQL}) and, for the rows that have
+ * them, the sparse ones (`sparseById`, {@link TRANSACTION_SPARSE_COLUMNS_SQL}).
+ *
+ * A row with sparse values is laid out as the full raw row it stands for and
+ * handed to {@link toTransactionWithRelationsFromRaw}. A row without them,
+ * which is most rows, is built directly with the defaults written in: filling
+ * that 45-value row first cost four times the mapping itself. The mapper test
+ * holds the two paths to the same result, field for field.
+ */
+export function createTransactionAssembler(
+  lookups: TransactionRelationLookups,
+  sparseById: ReadonlyMap<string, readonly RawValue[]>,
+): (common: readonly RawValue[]) => TransactionWithRelations {
+  // Reused for every sparse row: the mapper copies what it needs out of it.
+  const raw: RawValue[] = new Array<RawValue>(RELATIONS_POSITION + 8).fill(null);
+  const { accountNames, categories, instalmentCounts } = lookups;
+  const nameOf = (accountId: RawValue | undefined) =>
+    typeof accountId === 'string' && accountId ? (accountNames.get(accountId) ?? null) : null;
+  const categoryOf = (categoryId: RawValue | undefined) =>
+    typeof categoryId === 'string' && categoryId ? categories.get(categoryId) : undefined;
+
+  const fromSparse = (common: readonly RawValue[], sparse: readonly RawValue[]) => {
+    for (let index = 0; index < COMMON_POSITIONS.length; index += 1) {
+      raw[COMMON_POSITIONS[index] as number] = common[index] ?? null;
+    }
+    for (let index = 0; index < SPARSE_POSITIONS.length; index += 1) {
+      raw[SPARSE_POSITIONS[index] as number] = sparse[index + 1] ?? null;
+    }
+    const category = categoryOf(raw[CATEGORY_ID_POSITION]);
+    const ruleId = raw[INSTALMENT_RULE_ID_POSITION];
+    raw[RELATIONS_POSITION] = nameOf(raw[ACCOUNT_ID_POSITION]);
+    raw[RELATIONS_POSITION + 1] = nameOf(raw[FROM_ACCOUNT_ID_POSITION]);
+    raw[RELATIONS_POSITION + 2] = nameOf(raw[TO_ACCOUNT_ID_POSITION]);
+    raw[RELATIONS_POSITION + 3] = category?.name ?? null;
+    raw[RELATIONS_POSITION + 4] = category?.icon ?? null;
+    raw[RELATIONS_POSITION + 5] = category?.parentId ?? null;
+    raw[RELATIONS_POSITION + 6] = category?.parentName ?? null;
+    raw[RELATIONS_POSITION + 7] =
+      typeof ruleId === 'string' && ruleId ? (instalmentCounts.get(ruleId) ?? null) : null;
+    return toTransactionWithRelationsFromRaw(raw);
+  };
+
+  return (common) => {
+    const sparse = sparseById.get(common[0] as string);
+    if (sparse) return fromSparse(common, sparse);
+    // In the order of TRANSACTION_COMMON_COLUMNS_SQL: id, type, amount,
+    // currency, reporting_currency, reporting_amount, fx_rate, date,
+    // account_id, from_account_id, to_account_id, category_id, note,
+    // created_at, updated_at.
+    const category = categoryOf(common[11]);
+    return {
+      id: common[0] as string,
+      type: asTransactionType(common[1] as string),
+      amount: common[2] as number,
+      currency: common[3] as string,
+      reportingCurrency: (common[4] as string | null) ?? null,
+      reportingAmount: (common[5] as number | null) ?? null,
+      fxRate: (common[6] as number | null) ?? null,
+      toAmount: null,
+      accountAmount: null,
+      date: common[7] as string,
+      accountId: common[8] as string | null,
+      fromAccountId: common[9] as string | null,
+      toAccountId: common[10] as string | null,
+      categoryId: common[11] as string | null,
+      note: common[12] as string | null,
+      receiptUri: null,
+      recurrencePattern: 'none',
+      recurrenceInterval: 1,
+      recurrenceEndDate: null,
+      recurrenceParentId: null,
+      sentiment: 'neutral',
+      reimbursable: false,
+      reimbursedAt: null,
+      reimbursementAccountId: null,
+      reimbursementTransactionId: null,
+      reimbursementOfId: null,
+      countsAsExpense: false,
+      dayOrder: null,
+      createdAt: common[13] as string,
+      updatedAt: common[14] as string,
+      deletedAt: null,
+      details: null,
+      instalmentRuleId: null,
+      instalmentNumber: null,
+      createdBy: null,
+      memberId: null,
+      feeOfId: null,
+      accountName: nameOf(common[8]),
+      fromAccountName: nameOf(common[9]),
+      toAccountName: nameOf(common[10]),
+      categoryName: category?.name ?? null,
+      categoryParentId: category?.parentId ?? null,
+      categoryParentName: category?.parentName ?? null,
+      categoryIcon: category?.icon ?? null,
+      instalmentCount: null,
+    };
   };
 }
 

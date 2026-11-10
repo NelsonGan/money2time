@@ -1,5 +1,6 @@
 import type { MonthCycleInput, TransactionSplit, TransactionWithRelations } from '~/types';
 import { financialMonthKeyForIso } from '~/utils/financialMonth';
+import { insertTransactionsByDateDesc, sortTransactions } from '~/utils/transactionSorting';
 
 export interface MonthSummary {
   count: number;
@@ -152,6 +153,63 @@ export function reconcileTransactionRow(
   const next = prev.slice();
   next[index] = persisted;
   return next;
+}
+
+/**
+ * Puts the stored copies of the rows a write touched (`ids`) in place of what
+ * the list holds for them, and leaves every other row alone: the many-row form
+ * of {@link reconcileTransactionRow}, for an edit that knows exactly which
+ * rows it wrote. `stored` is what the database now has for those ids; a
+ * touched row missing from it is gone and leaves the list, and a stored row
+ * the list did not have joins it. The order is only looked at again when a
+ * replaced row's own place could have moved. `prev` itself comes back when
+ * nothing differs, which is the norm after an optimistic update, so React
+ * skips the render.
+ */
+export function reconcileTransactionRows(
+  prev: TransactionWithRelations[],
+  ids: readonly string[],
+  stored: readonly TransactionWithRelations[],
+): TransactionWithRelations[] {
+  if (ids.length === 0) return prev;
+  const touched = new Set(ids);
+  const storedById = new Map<string, TransactionWithRelations>();
+  for (const tx of stored) {
+    if (touched.has(tx.id)) storedById.set(tx.id, tx);
+  }
+  const next: TransactionWithRelations[] = [];
+  let changed = false;
+  let reorder = false;
+  for (const current of prev) {
+    if (!touched.has(current.id)) {
+      next.push(current);
+      continue;
+    }
+    const persisted = storedById.get(current.id);
+    storedById.delete(current.id);
+    if (!persisted) {
+      changed = true;
+      continue;
+    }
+    if (sameTransactionFields(current, persisted)) {
+      next.push(current);
+      continue;
+    }
+    changed = true;
+    if (
+      current.date !== persisted.date ||
+      current.createdAt !== persisted.createdAt ||
+      (current.dayOrder ?? null) !== (persisted.dayOrder ?? null)
+    ) {
+      reorder = true;
+    }
+    next.push(persisted);
+  }
+  if (!changed && storedById.size === 0) return prev;
+  const ordered = reorder ? sortTransactions(next, 'date_desc') : next;
+  return storedById.size > 0
+    ? insertTransactionsByDateDesc(ordered, [...storedById.values()])
+    : ordered;
 }
 
 /**

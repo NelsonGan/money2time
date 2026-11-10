@@ -8,6 +8,7 @@ import {
 } from '~/constants/appDefaults';
 import { I18n } from '~/lib/i18n';
 import type { DateRange, UserSettings, WageConfig } from '~/types';
+import { localDayOfTime } from '~/utils/localDate';
 
 type WorkdayFormatSettings = Pick<UserSettings, 'workdayDisplayEnabled' | 'workingHoursPerDay'>;
 type AmountFormatSettings = Pick<UserSettings, 'currencySymbol' | 'displayMode'> &
@@ -141,11 +142,17 @@ export function dateFromDayKeyLocal(dayKey: string): Date {
   return new Date(year, (month ?? 1) - 1, day ?? 1);
 }
 
+/**
+ * The local `YYYY-MM-DD` day of a stored date. Runs once per transaction in
+ * every pass over them, so it reads the day from `localDayOfTime` rather than
+ * from a `Date`'s local getters (see `utils/localDate` for why those are slow
+ * on a newest-first list).
+ */
 export function dayKeyFromIsoLocal(dateIso: string): string {
   if (isSimpleDayKey(dateIso)) return dateIso;
-  const parsed = new Date(dateIso);
-  if (Number.isNaN(parsed.getTime())) return dateIso.slice(0, 10);
-  return dayKeyFromDateLocal(parsed);
+  const time = Date.parse(dateIso);
+  if (Number.isNaN(time)) return dateIso.slice(0, 10);
+  return localDayOfTime(time).dayKey;
 }
 
 /**
@@ -218,9 +225,9 @@ export function monthKeyFromDateLocal(date: Date): string {
 
 export function monthKeyFromIsoLocal(dateIso: string): string {
   if (isSimpleDayKey(dateIso)) return dateIso.slice(0, 7);
-  const parsed = new Date(dateIso);
-  if (Number.isNaN(parsed.getTime())) return dateIso.slice(0, 7);
-  return monthKeyFromDateLocal(parsed);
+  const time = Date.parse(dateIso);
+  if (Number.isNaN(time)) return dateIso.slice(0, 7);
+  return localDayOfTime(time).monthKey;
 }
 
 export function monthKeyFromDateIso(dateIso: string): string {

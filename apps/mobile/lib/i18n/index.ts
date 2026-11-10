@@ -1,63 +1,61 @@
 import { getLocales } from 'expo-localization';
 import { I18n as I18nJs } from 'i18n-js';
 
-import da from './locales/da';
-import de from './locales/de';
 import en from './locales/en';
-import es from './locales/es';
-import fil from './locales/fil';
-import fr from './locales/fr';
-import hi from './locales/hi';
-import id from './locales/id';
-import it from './locales/it';
-import ja from './locales/ja';
-import ko from './locales/ko';
-import ms from './locales/ms';
-import nb from './locales/nb';
-import nl from './locales/nl';
-import pl from './locales/pl';
-import pt from './locales/pt';
-import ru from './locales/ru';
-import sv from './locales/sv';
-import th from './locales/th';
-import tr from './locales/tr';
-import uk from './locales/uk';
-import vi from './locales/vi';
-import zh from './locales/zh';
-import zhHant from './locales/zh-Hant';
 
-const TRANSLATIONS = {
-  da,
-  de,
-  en,
-  es,
-  fil,
-  fr,
-  hi,
-  id,
-  it,
-  ja,
-  ko,
-  ms,
-  nb,
-  nl,
-  pl,
-  pt,
-  ru,
-  sv,
-  th,
-  tr,
-  uk,
-  vi,
-  zh,
-  'zh-Hant': zhHant,
-} as const;
-const I18n = new I18nJs(TRANSLATIONS);
+type Translations = typeof en;
+
+// Every locale but English is read from its module the first time it is
+// asked for. Each one is about 3,000 strings, and building all 24 on launch
+// (then merging them into i18n-js) took a visible share of module evaluation
+// for 23 languages the person is not reading. `require` inside the function is
+// what defers it: Metro evaluates a module on its first `require`.
+/* eslint-disable @typescript-eslint/no-require-imports -- deferred on purpose */
+const LOCALE_LOADERS: Record<string, () => Translations> = {
+  da: () => (require('./locales/da') as { default: Translations }).default,
+  de: () => (require('./locales/de') as { default: Translations }).default,
+  en: () => en,
+  es: () => (require('./locales/es') as { default: Translations }).default,
+  fil: () => (require('./locales/fil') as { default: Translations }).default,
+  fr: () => (require('./locales/fr') as { default: Translations }).default,
+  hi: () => (require('./locales/hi') as { default: Translations }).default,
+  id: () => (require('./locales/id') as { default: Translations }).default,
+  it: () => (require('./locales/it') as { default: Translations }).default,
+  ja: () => (require('./locales/ja') as { default: Translations }).default,
+  ko: () => (require('./locales/ko') as { default: Translations }).default,
+  ms: () => (require('./locales/ms') as { default: Translations }).default,
+  nb: () => (require('./locales/nb') as { default: Translations }).default,
+  nl: () => (require('./locales/nl') as { default: Translations }).default,
+  pl: () => (require('./locales/pl') as { default: Translations }).default,
+  pt: () => (require('./locales/pt') as { default: Translations }).default,
+  ru: () => (require('./locales/ru') as { default: Translations }).default,
+  sv: () => (require('./locales/sv') as { default: Translations }).default,
+  th: () => (require('./locales/th') as { default: Translations }).default,
+  tr: () => (require('./locales/tr') as { default: Translations }).default,
+  uk: () => (require('./locales/uk') as { default: Translations }).default,
+  vi: () => (require('./locales/vi') as { default: Translations }).default,
+  zh: () => (require('./locales/zh') as { default: Translations }).default,
+  'zh-Hant': () => (require('./locales/zh-Hant') as { default: Translations }).default,
+};
+/* eslint-enable @typescript-eslint/no-require-imports */
+// English is always there: it is the fallback for a key a locale lacks.
+const I18n = new I18nJs({ en });
+const loadedLocales = new Set(['en']);
 
 I18n.enableFallback = true;
 I18n.defaultLocale = 'en';
 
-const SUPPORTED_LOCALES = Object.keys(TRANSLATIONS) as (keyof typeof TRANSLATIONS)[];
+const SUPPORTED_LOCALES = Object.keys(LOCALE_LOADERS);
+
+/** Hand i18n-js a supported locale's strings, once. */
+function loadLocale(locale: string) {
+  if (loadedLocales.has(locale)) return;
+  const load = LOCALE_LOADERS[locale];
+  if (!load) return;
+  loadedLocales.add(locale);
+  I18n.store({ [locale]: load() });
+}
+
 const LOCALE_LABELS: Record<string, string> = {
   da: 'Dansk',
   de: 'Deutsch',
@@ -108,9 +106,7 @@ function normalizeLocale(input: string | null | undefined, regionCode?: string |
     return hasTraditionalScript || (!hasSimplifiedScript && traditionalRegion) ? 'zh-Hant' : 'zh';
   }
   const resolved = LOCALE_ALIASES[base] ?? base;
-  return SUPPORTED_LOCALES.includes(resolved as (typeof SUPPORTED_LOCALES)[number])
-    ? resolved
-    : 'en';
+  return SUPPORTED_LOCALES.includes(resolved) ? resolved : 'en';
 }
 
 function getLocaleLabel(locale: string) {
@@ -128,7 +124,13 @@ function getDeviceRegionCode(): string | null {
 }
 
 function setAppLocale(locale: string) {
-  I18n.locale = normalizeLocale(locale);
+  const next = normalizeLocale(locale);
+  // i18n-js falls back from `zh-Hant` to `zh` before English, so the base
+  // language has to be there too.
+  const base = next.split('-')[0];
+  if (base && base !== next) loadLocale(base);
+  loadLocale(next);
+  I18n.locale = next;
 }
 
 /**
@@ -139,13 +141,13 @@ function setAppLocale(locale: string) {
  */
 function orderedLocales(currentLocale: string): string[] {
   const pinned: string[] = [];
-  if (SUPPORTED_LOCALES.includes(currentLocale as (typeof SUPPORTED_LOCALES)[number])) {
+  if (SUPPORTED_LOCALES.includes(currentLocale)) {
     pinned.push(currentLocale);
   }
   if (currentLocale !== 'en') {
     pinned.push('en');
   }
-  const rest = (SUPPORTED_LOCALES as readonly string[]).filter((l) => !pinned.includes(l));
+  const rest = SUPPORTED_LOCALES.filter((l) => !pinned.includes(l));
   return [...pinned, ...rest];
 }
 

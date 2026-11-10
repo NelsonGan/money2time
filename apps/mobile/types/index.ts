@@ -1300,18 +1300,6 @@ export interface TransactionFilters {
   sortBy: 'date_desc' | 'date_asc' | 'amount_desc' | 'amount_asc';
 }
 
-export interface BreakdownItem {
-  id: string;
-  label: string;
-  parentLabel?: string;
-  amount: number;
-}
-
-export interface CashflowSummary {
-  income: number;
-  expense: number;
-}
-
 export interface AccountBalance {
   accountId: string;
   balance: number;

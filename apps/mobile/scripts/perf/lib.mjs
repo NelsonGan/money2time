@@ -1,7 +1,7 @@
 /**
  * Helpers shared by the measurement scripts in this folder (see README.md).
  */
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawn } from 'node:child_process';
 
 export const APP_BUNDLE = 'com.nelsongan.money2time';
 
@@ -28,6 +28,73 @@ export function tryRun(cmd, cmdArgs) {
 }
 
 export const adbShell = (device, command) => run(adb, ['-s', device, 'shell', command]);
+
+/**
+ * `xcrun simctl` arguments for a simulator, which may live outside the default
+ * device set: `--device-set <dir>` names the set (a Simlock pool simulator is
+ * in `~/.simlock/devices/ios`, where plain `simctl` answers "Invalid device").
+ */
+export function simctlArgs(...args) {
+  const deviceSet = option('device-set');
+  return deviceSet ? ['simctl', '--set', deviceSet, ...args] : ['simctl', ...args];
+}
+
+/**
+ * What the app logs on an iOS simulator from now on: one `log stream` for the
+ * session, kept as text. `clear()` forgets what came before (call it right
+ * before a launch), `stop()` ends the stream.
+ */
+export async function startIosPerfLog(device) {
+  let text = '';
+  const stream = spawn(
+    'xcrun',
+    simctlArgs(
+      'spawn',
+      device,
+      'log',
+      'stream',
+      '--level',
+      'debug',
+      '--style',
+      'compact',
+      '--predicate',
+      'eventMessage CONTAINS "[m2t-perf]"',
+    ),
+  );
+  stream.stdout.on('data', (chunk) => {
+    text += chunk.toString();
+  });
+  await sleep(1500);
+  return {
+    events: () => parsePerfLines(text),
+    clear: () => {
+      text = '';
+    },
+    stop: () => stream.kill(),
+  };
+}
+
+/**
+ * Puts a snapshot (a copy of the app's `Documents/SQLite` and
+ * `Documents/user-assets`) back as the app's data on an iOS simulator. The app
+ * must not be running. Returns the app's data container.
+ */
+export function restoreIosGolden(device, golden, bundle = APP_BUNDLE) {
+  const container = run('xcrun', simctlArgs('get_app_container', device, bundle, 'data')).trim();
+  for (const dir of ['SQLite', 'user-assets']) {
+    run('rm', ['-rf', `${container}/Documents/${dir}`]);
+    run('cp', ['-R', `${golden}/${dir}`, `${container}/Documents/${dir}`]);
+  }
+  return container;
+}
+
+/** `span:<name>` -> ms for each span the app timed in `phase` (see `perfSpan`). */
+export function spanTimes(events, phase) {
+  const line = events.find((e) => e.kind === 'spans' && e.phase === phase);
+  return Object.fromEntries(
+    Object.entries(line?.spans ?? {}).map(([name, [ms]]) => [`span:${name}`, ms]),
+  );
+}
 
 /** Every `[m2t-perf]` payload in a log dump (see utils/perfTrace.ts). */
 export function parsePerfLines(text) {

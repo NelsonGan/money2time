@@ -4,6 +4,7 @@
 import { recurringRunTransactionId } from '~/lib/repositories/recurringRulesRepository';
 import type { RecurringTransactionRule } from '~/types';
 import { dayKeyFromIsoLocal } from '~/utils/formatters';
+import { resetLocalDays } from '~/utils/localDate';
 import {
   effectiveAnchorDay,
   isSameRunDay,
@@ -21,9 +22,15 @@ const ZONES = ['Asia/Kuala_Lumpur', 'America/New_York', 'UTC'] as const;
 /** Set by the time zone environment named at the top of this file. */
 declare const setTimeZone: (zone: string | undefined) => void;
 
+/** Changes the zone and drops the local days the app cached in the old one. */
+function changeTimeZone(zone: string | undefined) {
+  setTimeZone(zone);
+  resetLocalDays();
+}
+
 function useTimeZone(zone: string) {
-  beforeAll(() => setTimeZone(zone));
-  afterAll(() => setTimeZone(undefined));
+  beforeAll(() => changeTimeZone(zone));
+  afterAll(() => changeTimeZone(undefined));
 }
 
 /** Local midnight of a day key, as the editor stores a picked day. */

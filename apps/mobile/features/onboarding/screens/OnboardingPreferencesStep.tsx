@@ -92,9 +92,7 @@ export function OnboardingPreferencesStep({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- the labels come from I18n, which follows `locale`
     [locale, resolvedTheme],
   );
-  const selectedLocale = SUPPORTED_LOCALES.includes(locale as (typeof SUPPORTED_LOCALES)[number])
-    ? locale
-    : 'en';
+  const selectedLocale = SUPPORTED_LOCALES.includes(locale) ? locale : 'en';
   const currentCurrencyCode = currencyByCode.has(currencyCode)
     ? currencyCode
     : (currencyBySymbol.get(currencySymbol)?.code ?? 'USD');

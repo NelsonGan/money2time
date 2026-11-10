@@ -257,9 +257,11 @@ Stack options live in `navigation/stackOptions.ts` (headerShown: false, slide an
 
 Global state lives in `context/AppContext.tsx` via the `useApp()` hook. This is the single source of truth for all DB data — wallets, transactions, categories, settings, recurring rules, monthly wages, account balances, albums, and the multi-currency exchange-rate table. All CRUD operations are methods on this context. There is no Redux, Zustand, or other state library.
 
-**Two contexts, by update frequency.** The volatile transaction-derived state — `transactions`, `filteredTransactions`, `accountBalances`, `transactionFilters`, `activeAccountFilter` — lives in a separate `TransactionsContext`, read via **`useTransactions()`**. Everything else (settings, accounts, categories, albums, FX, wages, prefs) plus all action functions stay on `useApp()`. This matters because transaction CRUD updates `transactions` optimistically/granularly (not via the full `refreshAll()` reload), so isolating it keeps the app's most frequent mutation from re-rendering every settings/account/album consumer. **Rule of thumb:** if a component needs live transaction data use `useTransactions()`; otherwise use `useApp()` and it won't re-render on transaction churn. Functions on `useApp()` that touch transactions (`getTransactionsByAccount`, `queryTransactions`, the breakdown queries, the bulk mutations, `getDisplayValueForTransaction`) are **identity-stable across transaction churn** (they read render-synced refs) — a memo that caches their results must also key on `useTransactions().transactions`.
+**Two contexts, by update frequency.** The volatile transaction-derived state — `transactions`, `filteredTransactions`, `accountBalances`, `transactionFilters`, `activeAccountFilter` — lives in a separate `TransactionsContext`, read via **`useTransactions()`**. Everything else (settings, accounts, categories, albums, FX, wages, prefs) plus all action functions stay on `useApp()`. This matters because transaction CRUD updates `transactions` optimistically/granularly (not via the full `refreshAll()` reload), so isolating it keeps the app's most frequent mutation from re-rendering every settings/account/album consumer. **Rule of thumb:** if a component needs live transaction data use `useTransactions()`; otherwise use `useApp()` and it won't re-render on transaction churn. Functions on `useApp()` that touch transactions (`getTransactionsByAccount`, the bulk mutations, `getDisplayValueForTransaction`) are **identity-stable across transaction churn** (they read render-synced refs) — a memo that caches their results must also key on `useTransactions().transactions`.
 
 **Scoped mutation refreshes.** Non-transaction mutations refresh only the state slice they touch (`refreshAccountsAndGroups`, `refreshCategories`, `refreshAlbums`, `refreshWages`, `refreshSettings` — passed to `runMutation` via `options.refresh`). The full `refreshAll()` is reserved for load/retry, restores/imports/resets, and recurring-rule edits (which rely on its `runDueTransactions` pass). When adding a mutation, pick the narrowest refresh; include `refreshTransactions()` only if the write changes transaction rows or their denormalized relation names (account/category renames, reassignment, redenomination).
+
+**A transaction write re-reads only what it wrote.** `refreshTransactions()` reloads every transaction of the ledger, which on a long history is the slowest thing the app does after launch, so the common writes avoid it. A create reconciles its one row (`reconcileTransactionRow`). An edit (`updateTransactionsBulk`) stamps the stored rows with the same `updatedAt` it showed optimistically, re-reads the rows it wrote by id and swaps in any that differ (`reconcileStoredTransactions`, `reconcileTransactionRows` in `utils/transactions.ts`), which is normally none, so nothing re-renders. That re-read is trailing and one per burst, as the reload is (`scheduleRefreshTransactions`): it runs after every write queued in the same JS turn has landed, so it never reads a row a later write is about to change or remove (saving a transfer with its fee taken off edits the fee and then deletes it), and it is skipped when a reload is already on its way. A delete with no split or refund to put back only re-reads the balances. Each falls back to the full reload when the write touched rows it cannot name (an entry handed to another member of a shared ledger, a refund removed with its expense, a restored split, a failed write, or more than 500 rows). Keep that shape when adding a transaction write: track the ids, and reload only when you cannot.
 
 **Tab visibility.** The five main tabs stay mounted for the app's lifetime (`MountedTab` in `App.tsx`), so hidden tabs would otherwise re-render and recompute on every write. `MountedTab` wraps each tab in `TransactionsWhileVisible` (`context/AppContext.tsx`): inside a hidden tab, `useTransactions()` keeps returning the snapshot from when the tab was last visible, so a write re-renders only the tab on screen and a hidden tab catches up in a single render when shown. Screens therefore read `useTransactions()` directly, with no hold of their own; the flip side is that code running in a hidden tab sees that snapshot, so anything that must act on live transactions belongs outside the tabs (`AppContext`, the shell around them, or a root-stack screen). Root-stack screens (editors, drilldowns) sit outside the tabs and always see live data.
 
@@ -273,7 +275,7 @@ Key properties from `useApp()`:
 - **Recurring ops**: `createRecurringRule`, `updateRecurringRule`, `deleteRecurringRule`
 - **Instalment plans**: `instalmentPlans` (progress, active first), `createInstalmentPlan`, `updateInstalmentPlan`, `deleteInstalmentPlan`, `payNextInstalment`, `payOffInstalmentPlan` (plans are kept out of `recurringRules`; see the instalment plans entry under Key patterns)
 - **Settings ops**: `updateSettings`, `updateWageConfig`, `updateWageConfigForMonth`, `deleteWageConfigForMonth`, `toggleDisplayMode`, `canUseTimeDisplayMode`
-- **Queries**: `getAccountById`, `getCategoryById`, `getTransactionsByAccount`, `queryTransactions`, `getCashflowSummary`, `getExpenseBreakdownByCategory`, `getExpenseBreakdownBySubcategory`, `getIncomeBreakdown`, `getTransfersBetweenAccounts`, `getTrueHourlyRateForDate`, `getDisplayValueForTransaction`
+- **Queries**: `getAccountById`, `getCategoryById`, `getTransactionsByAccount`, `getTrueHourlyRateForDate`, `getDisplayValueForTransaction`
 - **Data management**: `resetTransactionsOnly`, `resetAllData`, `importMoneyManagerBackup`
 - **Onboarding**: `completeOnboarding({ seedDefaultAccounts })` completes setup and optionally seeds accounts.
 - **Ledgers**: `ledgers`, `activeLedger`, `switchLedger`, `createLedger`, `updateLedger`, `deleteLedger`, `getLedgerEntryCounts` (separate books; see [Ledgers](#ledgers))
@@ -291,6 +293,8 @@ Other contexts:
 ### Database
 
 SQLite via `expo-sqlite` + Drizzle ORM. Schema is in `lib/db/schema.ts`. The DB client is initialized in `lib/db/client.ts` (database file: `money2time.db`, migrations in `lib/db/migrations/` numbered `001`–`085`, with no `072`–`074`: ledgers, Cloud Sync and shared ledgers are all in `075_ledgers_and_cloud_sync`, see [Ledgers](#ledgers)). `lib/db/normalizeCurrencies.ts` collapses legacy single-currency rows on restore/upgrade.
+
+**The transaction load (`loadAllWithRelations` in `transactionsRepository.ts`)** runs at launch and on every full reload, and what it costs is mostly the number of values that cross from SQLite into JavaScript (about the same for a string, a number or NULL), not the SQL. So it reads each row as a plain value array, and in two parts: the fifteen columns every row uses, and the 22 sparse ones (a receipt, a mood, a reimbursement, an instalment plan, a shared ledger's member, and so on) only for the rows where one is off its default. The two lists, the defaults and the SQL built from them are in `lib/repositories/mappers.ts` (`TRANSACTION_SPARSE_DEFAULTS`, `createTransactionAssembler`); **a new `transactions` column goes in one of them**, and the mapper test fails until it does. Relation names (account, category, parent category, the category's icon, the instalment plan's length) are not joined in: `loadRelationLookups` reads those three small tables once and `transactionRelations` looks each row up, which is also what `getById`, `listByIds` and the filtered `list` use, so there is one definition of what a row's names are. On 20,000 rows this took the load from 476 ms to about 190 ms on an iPhone simulator (the rest of that is the first read of the table from disk).
 
 **Migration runner contract** (`lib/db/migrations/runner.ts`, wired up by `index.ts`'s `require.context` loader):
 
@@ -432,7 +436,7 @@ All shared types are in `types/index.ts`:
 - **Domain**: `Account`, `AccountGroup`, `Category`, `Transaction`, `TransactionWithRelations`, `TransactionSplit`, `TransactionSplitsSummary`, `RecurringTransactionRule`, `ProcessedRecurringRule`, `MonthlyWageSettings`, `WageConfig`, `UserSettings`, `QuickEntryPrefs`, `Album`, `AlbumStats`, `AlbumWithStats`
 - **Multi-currency**: `ExchangeRateSource` ('api' | 'manual'), `ExchangeRate`, `RateTable`, `RateRefreshResult`
 - **Enums**: `TransactionSentiment` ('happy' | 'neutral' | 'sad'), `AccountType` ('debit' | 'credit' | 'goal' | 'loan'), `TransactionType` ('expense' | 'income' | 'transfer' | 'balance_adjustment'), `RecurringTransactionType` (TransactionType minus balance_adjustment), `CategoryType` ('expense' | 'income'), `RecurrencePattern` ('none' | 'daily' | 'weekly' | 'monthly' | 'yearly'; quarterly and semi-annually are stored as monthly every 3 / 6, see Recurring frequencies)
-- **Queries / state**: `TransactionFilters`, `AccountBalance`, `CashflowSummary`, `BreakdownItem`, `DateRange`, `NotificationPreferences`, `AppState`
+- **Queries / state**: `TransactionFilters`, `AccountBalance`, `DateRange`, `NotificationPreferences`, `AppState`
 
 ### Constants
 
@@ -448,7 +452,7 @@ All shared types are in `types/index.ts`:
 
 ### i18n
 
-`I18n.t('key')` via i18n-js. Setup in `lib/i18n/index.ts` with device locale detection. **24 locales** are fully implemented in `lib/i18n/locales/` (da, de, en, es, fil, fr, hi, id, it, ja, ko, ms, nb, nl, pl, pt, ru, sv, th, tr, uk, vi, zh, zh-Hant). English (`en.ts`) is the source of truth; falls back to English for unsupported locales. `__tests__/i18n/localeParity.test.ts` enforces that every locale has the same key set as `en.ts` — when you add a string to `en.ts`, add it to all locales or the parity test fails.
+`I18n.t('key')` via i18n-js. Setup in `lib/i18n/index.ts` with device locale detection. **24 locales** are fully implemented in `lib/i18n/locales/` (da, de, en, es, fil, fr, hi, id, it, ja, ko, ms, nb, nl, pl, pt, ru, sv, th, tr, uk, vi, zh, zh-Hant). English (`en.ts`) is the source of truth; falls back to English for unsupported locales. Only English is imported when the app starts: every other locale is `require`d inside `LOCALE_LOADERS` the first time `setAppLocale` asks for it (with its base language, since i18n-js falls back from `zh-Hant` to `zh`), because building all 24 catalogs of about 3,000 strings each cost about 40 ms of every launch. A new locale needs its line in `LOCALE_LOADERS` and its label in `LOCALE_LABELS`. `__tests__/i18n/localeParity.test.ts` enforces that every locale has the same key set as `en.ts` — when you add a string to `en.ts`, add it to all locales or the parity test fails.
 
 Traditional Chinese is `zh-Hant`. Device tags for Taiwan, Hong Kong, and Macau select it automatically; generic `zh` and Simplified Chinese tags keep the existing `zh` catalog.
 
@@ -459,6 +463,7 @@ Traditional Chinese is `zh-Hant`. Device tags for Taiwan, Hong Kong, and Macau s
 - **Backup provider marks**: Backup destinations and saved-backup rows use bundled iCloud and Google Drive brand images through `constants/brandLogos.ts`, with original colors in both themes. The Drive mark comes from [Google's branding download](https://developers.google.com/workspace/drive/api/guides/branding); iCloud reuses the existing subscription artwork. The copies in `assets/brands/` are included in OTA updates.
 - **Retired simple mode**: All users have accounts, transfers, and the full app. Migration `063_retire_simple_mode` converts legacy settings to power while preserving every financial row and the former wallet's ID. It keeps that wallet as the Quick Entry default. `retireSimpleMode` also runs inside backup-restore transactions because old JSON backups can restore settings after migration 063 already ran. The `user_mode` SQLite column remains for backup compatibility; it is absent from the domain model and cannot be selected in the UI.
 - **Date keys**: Use `dayKeyFromDateLocal()`, `monthKeyFromDateLocal()`, `monthKeyFromDateIso()` etc. from `~/utils/formatters` — do not roll custom date logic.
+- **Local days of stored dates (`utils/localDate.ts`)**: never read a transaction's local date with `new Date(tx.date).getFullYear()` (or `getMonth`, `getDate`, `getDay`, `getHours`) in code that runs once per transaction. Hermes caches the time zone's UTC offsets only when instants are looked up oldest first, and the app holds its transactions newest first, so each such call misses that cache: about 11 µs a row on an iPhone simulator against 0.06 µs oldest first, which made every pass over 20,000 transactions cost over 200 ms (the launch sort, the calendar's month groups and the widget snapshot each paid it). Warming Hermes's cache does not last, as it holds only a few years of daylight-saving changes and one range evicts another. `dayKeyFromIsoLocal`, `monthKeyFromIsoLocal` and `financialMonthKeyForIso` therefore go through `localDayOfTime`, which keeps the offset per UTC day itself (learned a block of days at a time, oldest first), leaves the days the offset changes on to `Date`, and returns one shared `LocalDay` per day. `__tests__/utils/localDate.test.ts` holds it to `Date` across 16 time zones. The cache is dropped when the device changes time zone (`syncLocalDaysWithTimeZone`, called on every return to the foreground); a test that switches zones calls `resetLocalDays()`.
 - **Financial month (the month cycle)**: a "month" can start on a day other than the 1st (payday cycles), and **not necessarily the same day every month**. The shape is a `MonthCycle` (`types/index.ts`): a `defaultDay` (1..31) every month follows, plus `overrides` keyed `YYYY-MM` for the months the user pinned somewhere else. It is stored as two columns, `settings.first_day_of_month` (the default) and `settings.first_day_overrides_json` (migration `060`), for the default ledger; every other ledger keeps its own in `ledgers.prefs_json` (see [Ledgers](#ledgers)). `settingsRepository` hands out the open ledger's, and it is read as one object with **`monthCycleOf(settings)`** — never off the raw columns.
 
   For any **user-facing monthly** grouping/range/anchor, use the helpers in `~/utils/financialMonth` (`financialMonthKeyForIso`, `financialMonthRange`, `financialMonthAnchorForToday`, `addFinancialMonths`, `financialMonthDayKeys`, `financialMonthOffsetForDayKey`) passing that cycle — never re-derive month boundaries inline. Every helper also takes a bare `number` (that is the "same day every month" cycle, and what their defaults and the tests use), and reduces **exactly** to the calendar-month `~/utils/formatters` behaviour at a plain `1`, so default users are unaffected. Because a number is assignable to `MonthCycleInput`, the compiler will **not** catch a call site still passing `settings.firstDayOfMonth` — it silently ignores the per-month exceptions, so grep for that field rather than trusting `tsc`. The two places that legitimately still read the scalar are the monthly-review notification trigger and its copy: an OS monthly trigger repeats on a fixed day and cannot follow an overridden month.
@@ -5613,7 +5618,7 @@ cd apps/mobile
 npm test
 ```
 
-Jest with `ts-jest` over `__tests__/` (184 suites, node env). Modules with native deps are mocked via `__tests__/__mocks__/` (i18n, haptics, DB client, drizzle, expo-localization, image assets). Coverage skews to pure utilities, feature math, repository mappers, and navigation helpers — no React Native render tests.
+Jest with `ts-jest` over `__tests__/` (283 suites, node env). Modules with native deps are mocked via `__tests__/__mocks__/` (i18n, haptics, DB client, drizzle, expo-localization, image assets). Coverage skews to pure utilities, feature math, repository mappers, and navigation helpers — no React Native render tests.
 
 The website (`npm test` in `apps/web`, `node --test` over `src/**/*.test.ts`) and App Studio (`npm test` in `apps/app-studio`, `node --test` over `tests/`) have their own tests; see [Website development](#website-development) and [Running App Studio](#running-app-studio).
 
@@ -5656,10 +5661,13 @@ emulator with a large data set. They read the `[m2t-perf]` lines that
 
 1. Build a release app with the probes on, e.g.
    `EXPO_PUBLIC_PERF_TRACE=1 ./gradlew assembleRelease` in `android/`, or
-   `EXPO_PUBLIC_PERF_TRACE=1 xcodebuild -configuration Release -sdk iphonesimulator ...`
-   in `ios/`. Measure the build you compare against the same way.
-2. Load the data set once (restore a backup in the app), then save a snapshot
-   so every run starts from the same state:
+   `EXPO_PUBLIC_PERF_TRACE=1 SENTRY_DISABLE_AUTO_UPLOAD=true xcodebuild -workspace ios/Money2Time.xcworkspace -scheme Money2Time -configuration Release -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath <dir outside the repo> ARCHS=arm64 ONLY_ACTIVE_ARCH=NO CODE_SIGNING_ALLOWED=NO build`
+   for iOS. Measure the build you compare against the same way, and keep a
+   copy of each `.app` so the two can be swapped on one simulator. A change
+   to JavaScript only rebuilds in about a minute.
+2. Load the data set once, then save a snapshot so every run starts from the
+   same state. Restore a backup in the app, or finish onboarding, stop the app
+   and insert rows into `money2time.db` with `sqlite3`.
    - iOS: copy `Documents/SQLite` and `Documents/user-assets` out of the app's
      data container and pass that folder as `--golden`.
    - Android: tar `files/SQLite` and `files/user-assets` to
@@ -5669,14 +5677,78 @@ emulator with a large data set. They read the `[m2t-perf]` lines that
      times launch to first screen, the data load, and the frame gaps in the
      five seconds after the splash lifts. `--backup-due` marks the daily
      auto-backup as due, as on the first launch of a day.
+   - `measure-save-ios.mjs --device <udid> --golden <dir> --agent-device <command>`
+     times a quick-entry save and an edit of an existing entry, tapping
+     through the `agent-device` command `device_open` returns.
    - `measure-save-android.mjs` times a quick-add save.
    - `measure-launch-tap-android.mjs` times a tap on + shortly after launch.
+
+A leased Simlock simulator is not in the default device set: pass
+`--device-set ~/.simlock/devices/ios` and the UDID from `simlock-udid <device id>`.
+
+**Where the time went.** `perfSpan(name, work)` times a piece of synchronous
+work in a trace build and is a plain call otherwise. The totals come out as a
+`spans` line with the startup report, the post-launch report and each
+interaction report, and `measure-startup.mjs` prints them as `span:<name>`.
+The transaction load (`tx_rows`, `tx_build`, `tx_sort`) and the widget snapshot
+(`widget_snapshot`) are wrapped; wrap a suspect while investigating rather
+than guessing.
+
+**Reading the numbers.**
+
+- On an iOS simulator about two seconds pass between the launch command and
+  the first line of JavaScript (process creation and dyld; the app's first log
+  line appears 1.7 s in). It is the same for every build, so compare
+  `launchToSplashHide - launchToModulesStart`.
+- Nothing else should be running: a typecheck or a build beside a measurement
+  moves the frame gaps.
+- The first query after the snapshot is restored reads the table from disk.
+  That cost lands on whichever query runs first, so judge a query change by
+  the whole `txList`, not by one span.
+- For a JavaScript CPU profile, start Metro with `--no-dev` and attach to the
+  dev client (`agent-device cdp profile cpu start`). A profile of a
+  development bundle mostly shows React's development checks. The sampler
+  takes a sample about every 14 ms, so it finds a hot function over a
+  second-long pause and misses one that is merely called 20,000 times; time
+  those with `perfSpan`, or with a `runtime eval` loop.
 
 On Android, compile the app ahead of time before measuring (`adb shell cmd
 package compile -m speed -f <package>`) so both builds run the same way. On a
 Mac, keep the emulator's window in front or run it with `-no-window`: macOS
 demotes the emulator's threads to background priority while its window is
 hidden, which slows it down several times over mid-run.
+
+**November 2026 pass** (iPhone 18 Pro simulator, Release, 20,000 transactions
+over six years; medians, launch of 12 runs and saves of 8):
+
+| Measure                                              | Before   | After  |
+| ---------------------------------------------------- | -------- | ------ |
+| JavaScript start to first screen                     | 1,290 ms | 732 ms |
+| Module evaluation                                    | 270 ms   | 204 ms |
+| Loading the transactions (`txList`)                  | 476 ms   | 203 ms |
+| First render to laid out                             | 390 ms   | 222 ms |
+| Dropped-frame time in the 5 s after the first screen | 850 ms   | 456 ms |
+| Longest freeze in those 5 s                          | 330 ms   | 197 ms |
+| Quick-entry save: dropped-frame time                 | 606 ms   | 115 ms |
+| Edit an entry: dropped-frame time                    | 1,601 ms | 93 ms  |
+| Edit an entry: longest freeze                        | 1,217 ms | 84 ms  |
+
+On a Pixel 10 emulator (Release, compiled ahead of time, the same data;
+launch of 10 runs, the rest of 8) launch to first screen went from 886 ms to
+750 ms, the transaction load from 293 ms to 182 ms, the longest freeze after
+an edit from 541 ms to 71 ms and after a quick-entry save from 155 ms to
+105 ms. The emulator does not hold 60 frames a second, so its dropped-frame
+totals are large on any build; compare the longest freeze there.
+
+What moved them: the local-day cache (`utils/localDate.ts`, the launch sort
+from about 225 ms to 20 ms, the calendar's month groups from 256 ms to 12 ms),
+the two-part transaction load, the widget snapshot reading six months of rows
+instead of all of them (174 ms to 20 ms), loading one locale instead of 24,
+and an edit re-reading the rows it wrote instead of the ledger. The Hermes
+bundle did not change in size (15.36 MB on iOS and 15.37 MB on Android from
+`expo export`). Loading modules on first use (Metro's `inlineRequires`) was
+tried and left out: it took module evaluation from 200 ms to 92 ms and put the
+same time back into the data load and the first render.
 
 ## Conventions
 

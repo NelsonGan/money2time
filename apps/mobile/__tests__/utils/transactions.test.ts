@@ -3,6 +3,7 @@ import type { TransactionWithRelations } from '~/types';
 import {
   bucketTransactionsByMonth,
   reconcileTransactionRow,
+  reconcileTransactionRows,
   reuseUnchangedGroups,
   reuseUnchangedTransactions,
   transactionSearchText,
@@ -199,6 +200,55 @@ describe('reconcileTransactionRow', () => {
   it('ignores an id that is no longer in the list', () => {
     const prev = [other];
     expect(reconcileTransactionRow(prev, 'new', optimistic)).toBe(prev);
+  });
+});
+
+describe('reconcileTransactionRows', () => {
+  const newest = makeTx({ id: 'c', date: '2026-05-13', amount: 3 });
+  const middle = makeTx({ id: 'b', date: '2026-05-12', amount: 2 });
+  const oldest = makeTx({ id: 'a', date: '2026-05-11', amount: 1 });
+  const prev = [newest, middle, oldest];
+
+  it('returns the same list when the stored rows match what it holds', () => {
+    expect(reconcileTransactionRows(prev, ['b'], [{ ...middle }])).toBe(prev);
+    expect(reconcileTransactionRows(prev, [], [])).toBe(prev);
+  });
+
+  it('swaps in a stored row that differs and keeps every other object', () => {
+    const stored = { ...middle, amount: 20, updatedAt: '2026-05-14T00:00:00.000Z' };
+    const result = reconcileTransactionRows(prev, ['b'], [stored]);
+    expect(result).not.toBe(prev);
+    expect(result.map((tx) => tx.id)).toEqual(['c', 'b', 'a']);
+    expect(result[0]).toBe(newest);
+    expect(result[1]).toBe(stored);
+    expect(result[2]).toBe(oldest);
+  });
+
+  it('drops a touched row the database no longer has', () => {
+    const result = reconcileTransactionRows(prev, ['b', 'a'], [{ ...oldest }]);
+    expect(result).toEqual([newest, oldest]);
+    expect(result[1]).toBe(oldest);
+  });
+
+  it('moves a row whose stored date differs to its place', () => {
+    const stored = { ...oldest, date: '2026-05-14' };
+    const result = reconcileTransactionRows(prev, ['a'], [stored]);
+    expect(result.map((tx) => tx.id)).toEqual(['a', 'c', 'b']);
+  });
+
+  it('adds a stored row the list did not have, in date order', () => {
+    const extra = makeTx({ id: 'x', date: '2026-05-12', amount: 9 });
+    const result = reconcileTransactionRows(prev, ['x'], [extra]);
+    expect(result.map((tx) => tx.id).sort()).toEqual(['a', 'b', 'c', 'x']);
+    expect(result.indexOf(extra)).toBeGreaterThan(result.indexOf(newest));
+    expect(result.indexOf(extra)).toBeLessThan(result.indexOf(oldest));
+  });
+
+  it('leaves rows it was not told about alone, even if a stored copy is passed', () => {
+    const stray = { ...newest, amount: 99 };
+    expect(reconcileTransactionRows(prev, ['b'], [{ ...middle }, stray])).toBe(prev);
+    const result = reconcileTransactionRows(prev, ['b'], [{ ...middle, amount: 20 }, stray]);
+    expect(result.filter((tx) => tx.id === 'c')).toEqual([newest]);
   });
 });
 

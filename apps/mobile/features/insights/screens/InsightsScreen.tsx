@@ -218,6 +218,7 @@ import {
   type SelectionFilterMode,
 } from '~/utils/selectionFilter';
 import { asSpendingRow, countsAsExpenseRow } from '~/utils/spending';
+import { compareText } from '~/utils/transactionSorting';
 
 import type { InsightsDrilldownPayload } from './InsightsDrilldownScreen';
 
@@ -1336,10 +1337,12 @@ function monthShortYearLabel(monthKey: string, locale: string): string {
 function sortTransactionsNewestFirst(
   transactions: TransactionWithRelations[],
 ): TransactionWithRelations[] {
+  // `compareText`, not `localeCompare`: the same order for these fixed-format
+  // dates, without building a collator per comparison (see its comment).
   return transactions.sort((a, b) => {
-    const dateDelta = b.date.localeCompare(a.date);
+    const dateDelta = compareText(b.date, a.date);
     if (dateDelta !== 0) return dateDelta;
-    return b.createdAt.localeCompare(a.createdAt);
+    return compareText(b.createdAt, a.createdAt);
   });
 }
 

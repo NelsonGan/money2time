@@ -56,14 +56,7 @@ import {
   userSpace,
 } from './media';
 import { connectLive, isValidChannel, isValidDeviceId, notifyUsers } from './live';
-import {
-  isAccountPro,
-  isValidAppUserId,
-  linkAppUserId,
-  markPhoneSeen,
-  phoneProStatus,
-  unlinkAppUserId,
-} from './revenuecat';
+import { checkInPhone, isAccountPro, isValidAppUserId, unlinkAppUserId } from './revenuecat';
 import { databaseNameFor, deleteDatabase, deleteSyncDatabase, getSyncDatabase } from './turso';
 import { checkTurnstile, TURNSTILE_HEADER } from './turnstile';
 
@@ -198,11 +191,7 @@ async function route(request: Request, url: URL, env: Env, user: SessionUser): P
     // most 5, the most recently active; `limited` says this one is past it).
     const body = await readJson<{ appUserId: unknown }>(request);
     const appUserId = isValidAppUserId(body?.appUserId) ? body.appUserId : null;
-    if (appUserId) {
-      await linkAppUserId(env, user.id, appUserId);
-      await markPhoneSeen(env, user.id, appUserId);
-    }
-    return json(await phoneProStatus(env, user.id, appUserId));
+    return json(await checkInPhone(env, user.id, appUserId));
   }
 
   if (pathname === '/v1/account/install' && method === 'DELETE') {
@@ -273,11 +262,7 @@ async function route(request: Request, url: URL, env: Env, user: SessionUser): P
   if (pathname === '/v1/sync/credentials' && method === 'POST') {
     const body = await readJson<{ appUserId: unknown }>(request);
     const appUserId = isValidAppUserId(body?.appUserId) ? body.appUserId : null;
-    if (appUserId) {
-      await linkAppUserId(env, user.id, appUserId);
-      await markPhoneSeen(env, user.id, appUserId);
-    }
-    const pro = await phoneProStatus(env, user.id, appUserId);
+    const pro = await checkInPhone(env, user.id, appUserId);
     if (!pro.isPro) return json({ error: pro.limited ? 'phone_limit' : 'not_pro' }, 403);
     // A concurrent DELETE /v1/account makes the database insert fail on the
     // user's foreign key, and getSyncDatabase removes what it made.

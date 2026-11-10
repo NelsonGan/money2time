@@ -148,15 +148,20 @@ async function access(
   id: string,
   userId: string,
 ): Promise<{ ledger: SharedLedgerRow; role: Role } | null> {
-  const ledger = await getLedger(env, id);
-  if (!ledger) return null;
-  if (ledger.owner_user_id === userId) return { ledger, role: 'owner' };
-  const member = await env.AUTH_DB.prepare(
-    'SELECT 1 FROM ledger_members WHERE ledger_id = ?1 AND user_id = ?2',
+  // One read for the ledger and whether the user is in it: every ledger
+  // route, image and notify starts here, and a member used to wait for two.
+  const row = await env.AUTH_DB.prepare(
+    `SELECT l.*, EXISTS (
+       SELECT 1 FROM ledger_members m WHERE m.ledger_id = l.id AND m.user_id = ?2
+     ) AS is_member
+     FROM shared_ledgers l WHERE l.id = ?1`,
   )
     .bind(id, userId)
-    .first();
-  return member ? { ledger, role: 'member' } : null;
+    .first<SharedLedgerRow & { is_member: number }>();
+  if (!row) return null;
+  const { is_member: isMember, ...ledger } = row;
+  if (ledger.owner_user_id === userId) return { ledger, role: 'owner' };
+  return isMember === 1 ? { ledger, role: 'member' } : null;
 }
 
 /**
@@ -266,8 +271,11 @@ export async function ledgerAudience(env: Env, ledger: SharedLedgerRow): Promise
  */
 export async function isLedgerActive(env: Env, ledger: SharedLedgerRow): Promise<boolean> {
   if (await isAccountPro(env, ledger.owner_user_id)) return true;
-  const members = await memberIds(env, ledger.id);
-  const answers = await Promise.all(members.map((id) => isAccountPro(env, id)));
+  return anyAccountPro(env, await memberIds(env, ledger.id));
+}
+
+async function anyAccountPro(env: Env, userIds: string[]): Promise<boolean> {
+  const answers = await Promise.all(userIds.map((id) => isAccountPro(env, id)));
   return answers.includes(true);
 }
 
@@ -282,11 +290,14 @@ async function ownerOf(
 }
 
 async function view(env: Env, ledger: SharedLedgerRow, role: Role): Promise<LedgerView> {
-  const [owner, count, active] = await Promise.all([
+  // The members are read once, for the count and (when the owner is not Pro)
+  // for whether one of them keeps the ledger syncing.
+  const [owner, members, ownerPro] = await Promise.all([
     ownerOf(env, ledger),
-    memberCount(env, ledger.id),
-    isLedgerActive(env, ledger),
+    memberIds(env, ledger.id),
+    isAccountPro(env, ledger.owner_user_id),
   ]);
+  const active = ownerPro || (await anyAccountPro(env, members));
   return {
     id: ledger.id,
     ledgerId: ledger.ledger_id,
@@ -295,7 +306,7 @@ async function view(env: Env, ledger: SharedLedgerRow, role: Role): Promise<Ledg
     role,
     ownerId: ledger.owner_user_id,
     ownerName: displayName(owner.name, owner.email),
-    memberCount: count,
+    memberCount: members.length,
     active,
   };
 }
@@ -413,15 +424,18 @@ export async function ledgerForMedia(
 }
 
 async function listLedgers(env: Env, user: SessionUser): Promise<Response> {
-  const owned = await env.AUTH_DB.prepare('SELECT * FROM shared_ledgers WHERE owner_user_id = ?1')
-    .bind(user.id)
-    .all<SharedLedgerRow>();
-  const joined = await env.AUTH_DB.prepare(
-    `SELECT l.* FROM shared_ledgers l JOIN ledger_members m ON m.ledger_id = l.id
-     WHERE m.user_id = ?1`,
-  )
-    .bind(user.id)
-    .all<SharedLedgerRow>();
+  // Asked together: the app lists its ledgers before almost every sync.
+  const [owned, joined] = await Promise.all([
+    env.AUTH_DB.prepare('SELECT * FROM shared_ledgers WHERE owner_user_id = ?1')
+      .bind(user.id)
+      .all<SharedLedgerRow>(),
+    env.AUTH_DB.prepare(
+      `SELECT l.* FROM shared_ledgers l JOIN ledger_members m ON m.ledger_id = l.id
+       WHERE m.user_id = ?1`,
+    )
+      .bind(user.id)
+      .all<SharedLedgerRow>(),
+  ]);
   const ledgers = await Promise.all([
     ...owned.results.map((row) => view(env, row, 'owner')),
     ...joined.results.map((row) => view(env, row, 'member')),

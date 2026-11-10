@@ -11,6 +11,8 @@
  *   node scripts/perf/measure-startup.mjs android --device emulator-5554 --runs 10
  *
  * Options: --bundle <id> (default com.nelsongan.money2time), --out <file.json>,
+ * --device-set <dir> for a simulator outside the default set (a Simlock pool
+ * simulator: ~/.simlock/devices/ios),
  * --settle <ms> pause between runs (default 2000), --golden <dir> restore the
  * app's database from a snapshot before every run so each launch starts from
  * the same state (iOS: a copy of Documents/SQLite and Documents/user-assets;
@@ -23,7 +25,6 @@
  * includes process creation and native init. Android also reports the OS's
  * own `am start -W` TotalTime, which runs until the first frame is drawn.
  */
-import { spawn } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
 
 import {
@@ -34,8 +35,12 @@ import {
   option,
   parsePerfLines,
   restoreAndroidGolden,
+  restoreIosGolden,
   run,
+  simctlArgs,
   sleep,
+  spanTimes,
+  startIosPerfLog,
   tryRun,
   waitFor,
 } from './lib.mjs';
@@ -55,43 +60,23 @@ if (!['ios', 'android'].includes(platform) || !device) {
   process.exit(1);
 }
 
-// iOS: one `log stream` for the whole session, buffered into a string.
-let iosLog = '';
-let iosStream = null;
-async function startIosStream() {
-  iosStream = spawn('xcrun', [
-    'simctl',
-    'spawn',
-    device,
-    'log',
-    'stream',
-    '--level',
-    'debug',
-    '--style',
-    'compact',
-    '--predicate',
-    'eventMessage CONTAINS "[m2t-perf]"',
-  ]);
-  iosStream.stdout.on('data', (chunk) => {
-    iosLog += chunk.toString();
-  });
-  await sleep(1500);
-}
+// iOS: one `log stream` for the whole session.
+let iosLog = null;
 
-// The frame report, then a moment for the marks line that follows it (builds
-// from before that line existed never send it).
-async function waitForPostLaunch(readText) {
-  const read = () => parsePerfLines(readText());
+// The frame report, then a moment for the marks line that follows it and the
+// spans line after that (a build from before either existed never sends it).
+async function waitForPostLaunch(read) {
   await waitFor(read, (list) => list.some((e) => e.kind === 'post_launch'));
-  return waitFor(read, (list) => list.some((e) => e.kind === 'post_launch_marks'), 1000);
+  await waitFor(read, (list) => list.some((e) => e.kind === 'post_launch_marks'), 1000);
+  return waitFor(
+    read,
+    (list) => list.some((e) => e.kind === 'spans' && e.phase === 'post_launch'),
+    500,
+  );
 }
 
 function restoreIos() {
-  const container = run('xcrun', ['simctl', 'get_app_container', device, bundle, 'data']).trim();
-  for (const dir of ['SQLite', 'user-assets']) {
-    run('rm', ['-rf', `${container}/Documents/${dir}`]);
-    run('cp', ['-R', `${golden}/${dir}`, `${container}/Documents/${dir}`]);
-  }
+  const container = restoreIosGolden(device, golden, bundle);
   if (backupDue) {
     run('sqlite3', [
       `${container}/Documents/SQLite/money2time.db`,
@@ -112,13 +97,13 @@ async function runOnce(index) {
   let osTotalTime = null;
   let events;
   if (platform === 'ios') {
-    tryRun('xcrun', ['simctl', 'terminate', device, bundle]);
+    tryRun('xcrun', simctlArgs('terminate', device, bundle));
     if (golden) restoreIos();
     await sleep(settleMs);
-    iosLog = '';
+    iosLog.clear();
     t0 = Date.now();
-    run('xcrun', ['simctl', 'launch', device, bundle]);
-    events = await waitForPostLaunch(() => iosLog);
+    run('xcrun', simctlArgs('launch', device, bundle));
+    events = await waitForPostLaunch(iosLog.events);
   } else {
     tryRun(adb, ['-s', device, 'shell', 'am', 'force-stop', bundle]);
     if (golden) restoreAndroid();
@@ -134,7 +119,9 @@ async function runOnce(index) {
     const total = output.match(/TotalTime:\s*(\d+)/);
     osTotalTime = total ? Number(total[1]) : null;
     events = await waitForPostLaunch(() =>
-      tryRun(adb, ['-s', device, 'logcat', '-d', '-v', 'raw', '-s', 'ReactNativeJS:*']),
+      parsePerfLines(
+        tryRun(adb, ['-s', device, 'logcat', '-d', '-v', 'raw', '-s', 'ReactNativeJS:*']),
+      ),
     );
   }
   const startup = events.find((e) => e.kind === 'startup');
@@ -170,6 +157,8 @@ async function runOnce(index) {
     postLaunchJank: post?.jankMs ?? null,
     postLaunchLongFrames: post?.longFrames ?? null,
     postLaunchSettledAt: post?.settledAtMs ?? null,
+    ...spanTimes(events, 'startup'),
+    ...spanTimes(events, 'post_launch'),
   };
   // Kept per run rather than in the medians: what ran after the splash lifted
   // (ms after it) and the longest frame gaps ([ms into the window, gap ms]).
@@ -184,15 +173,17 @@ async function runOnce(index) {
 }
 
 const activity = platform === 'android' ? androidLauncherActivity(device, bundle) : null;
-if (platform === 'ios') await startIosStream();
+if (platform === 'ios') iosLog = await startIosPerfLog(device);
 const results = [];
 for (let index = 0; index < runs; index += 1) {
   const result = await runOnce(index);
   if (result) results.push(result);
 }
-iosStream?.kill();
+iosLog?.stop();
 
-const keys = Object.keys(results[0] ?? {}).filter((key) => key !== 'run' && key !== 'detail');
+const keys = [...new Set(results.flatMap((result) => Object.keys(result)))].filter(
+  (key) => key !== 'run' && key !== 'detail',
+);
 const medians = Object.fromEntries(keys.map((key) => [key, median(results.map((r) => r[key]))]));
 console.log('\nmedian of', results.length, 'runs:');
 console.table(medians);

@@ -4,6 +4,7 @@ import {
   monthKeyFromDateLocal,
   monthKeyFromIsoLocal,
 } from '~/utils/formatters';
+import { daysInCalendarMonth, localDayOfTime } from '~/utils/localDate';
 
 /**
  * Configurable month cycle ("first day of month") support.
@@ -57,8 +58,15 @@ function monthKeyFromParts(year: number, month1: number): string {
   return `${year}-${pad2(month1)}`;
 }
 
-/** Days in a calendar month. Day 0 of the next month is the last of this one. */
+/**
+ * Days in a calendar month. Arithmetic for a real month, as this runs once per
+ * transaction when bucketing by a month cycle; anything else takes day 0 of
+ * the next month, which is the last of this one.
+ */
 export function daysInMonth(year: number, month1: number): number {
+  if (Number.isInteger(year) && year >= 1970 && month1 >= 1 && month1 <= 12) {
+    return daysInCalendarMonth(year, month1);
+  }
   return new Date(year, month1, 0).getDate();
 }
 
@@ -121,11 +129,39 @@ function firstDayForParts(cycle: MonthCycleInput, year: number, month1: number):
   const overrides = cycle?.overrides;
   // Building the key string is the only allocation on this path, so skip it
   // entirely for the overwhelmingly common cycle that pins nothing.
-  const override = hasAnyOverride(overrides)
+  const override = cycleShape(cycle).hasOverrides
     ? overrides![monthKeyFromParts(year, month1)]
     : undefined;
   const day = clampFirstDayOfMonth(override ?? cycle?.defaultDay);
   return resolveDayInMonth(day, year, month1);
+}
+
+interface CycleShape {
+  hasOverrides: boolean;
+  /** Exactly the calendar month: day 1 and nothing pinned. */
+  isCalendar: boolean;
+}
+
+// What the last cycle asked about looks like. A pass over every transaction
+// asks about one cycle thousands of times, and working it out again each time
+// (the walk over `overrides`, mostly) cost more than reading the row's date.
+// Only a frozen cycle is remembered, since only that one cannot change under
+// us; `monthCycleOf` freezes and interns the cycles the app passes around.
+let rememberedCycle: object | null = null;
+let rememberedShape: CycleShape = { hasOverrides: false, isCalendar: true };
+
+function cycleShape(cycle: Exclude<MonthCycleInput, number>): CycleShape {
+  if (cycle != null && cycle === rememberedCycle) return rememberedShape;
+  const hasOverrides = hasAnyOverride(cycle?.overrides);
+  const shape = {
+    hasOverrides,
+    isCalendar: clampFirstDayOfMonth(cycle?.defaultDay) === 1 && !hasOverrides,
+  };
+  if (cycle != null && Object.isFrozen(cycle) && Object.isFrozen(cycle.overrides)) {
+    rememberedCycle = cycle;
+    rememberedShape = shape;
+  }
+  return shape;
 }
 
 /**
@@ -135,8 +171,7 @@ function firstDayForParts(cycle: MonthCycleInput, year: number, month1: number):
  */
 function isCalendarCycle(cycle: MonthCycleInput): boolean {
   if (typeof cycle === 'number') return clampFirstDayOfMonth(cycle) === 1;
-  if (clampFirstDayOfMonth(cycle?.defaultDay) !== 1) return false;
-  return !hasAnyOverride(cycle?.overrides);
+  return cycleShape(cycle).isCalendar;
 }
 
 /**
@@ -224,9 +259,14 @@ export function financialMonthKeyForIso(dateIso: string, cycle: MonthCycleInput 
     const firstDay = firstDayForParts(cycle, simple.year, simple.month1);
     return financialMonthKeyFromParts(simple.year, simple.month1, simple.day, firstDay);
   }
-  const parsed = new Date(dateIso);
-  if (Number.isNaN(parsed.getTime())) return monthKeyFromIsoLocal(dateIso);
-  return financialMonthKeyForDate(parsed, cycle);
+  const time = Date.parse(dateIso);
+  if (Number.isNaN(time)) return monthKeyFromIsoLocal(dateIso);
+  // The same answer as `financialMonthKeyForDate(new Date(dateIso), cycle)`,
+  // from the cached local day instead of a `Date`'s local getters.
+  const local = localDayOfTime(time);
+  const firstDay = firstDayForParts(cycle, local.year, local.month1);
+  if (firstDay === 1) return local.monthKey;
+  return financialMonthKeyFromParts(local.year, local.month1, local.day, firstDay);
 }
 
 /** Local start `Date` of a financial month key (its own configured start day). */

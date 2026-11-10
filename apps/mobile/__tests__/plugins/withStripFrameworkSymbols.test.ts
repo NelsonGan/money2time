@@ -44,7 +44,10 @@ describe('withStripFrameworkSymbols', () => {
 
   const darwin = process.platform === 'darwin' ? it : it.skip;
 
-  function runScript(configuration: string, { readOnly = false } = {}) {
+  function runScript(
+    configuration: string,
+    { readOnly = false, platform = 'iphoneos' }: { readOnly?: boolean; platform?: string } = {},
+  ) {
     const root = mkdtempSync(path.join(tmpdir(), 'money2time-strip-'));
     const framework = path.join(root, 'Frameworks/Example.framework');
     mkdirSync(framework, { recursive: true });
@@ -74,6 +77,7 @@ describe('withStripFrameworkSymbols', () => {
       env: {
         ...process.env,
         CONFIGURATION: configuration,
+        PLATFORM_NAME: platform,
         TARGET_BUILD_DIR: root,
         FRAMEWORKS_FOLDER_PATH: 'Frameworks',
         CODE_SIGNING_ALLOWED: 'NO',
@@ -100,6 +104,15 @@ describe('withStripFrameworkSymbols', () => {
     const { status, stdout, symbols, sizes } = runScript('Release', { readOnly: true });
     expect(status).toBe(0);
     expect(stdout).toContain('warning: could not strip');
+    expect(symbols).toContain('_helper');
+    expect(sizes[1]).toBe(sizes[0]);
+  });
+
+  // Stripping invalidates the signature, and an unsigned simulator build
+  // never gets a new one: the app would not launch.
+  darwin('leaves simulator builds alone', () => {
+    const { status, symbols, sizes } = runScript('Release', { platform: 'iphonesimulator' });
+    expect(status).toBe(0);
     expect(symbols).toContain('_helper');
     expect(sizes[1]).toBe(sizes[0]);
   });

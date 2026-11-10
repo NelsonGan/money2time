@@ -570,6 +570,72 @@ describe('budget widgets', () => {
   });
 });
 
+// The widgets only read recent rows, so the builder drops the rest up front.
+// What it keeps has to cover every widget's own window.
+describe('the rows the widgets read', () => {
+  beforeEach(() => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-10-28T12:00:00'));
+  });
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  const recent = [
+    transaction({ id: 'today', amount: 30, date: '2026-10-28T09:00:00' }),
+    transaction({ id: 'last-week', amount: 50, date: '2026-10-21T12:00:00' }),
+    transaction({ id: 'pay', type: 'income', amount: 4000, date: '2026-10-01T12:00:00' }),
+    transaction({ id: 'august', amount: 200, date: '2026-08-15' }),
+  ];
+  const build = (transactions: TransactionWithRelations[], periodBudgets: PeriodBudget[] = []) =>
+    buildMoney2TimeWidgetSnapshot({
+      transactions,
+      settings: baseSettings,
+      isPro: true,
+      getTrueHourlyRateForDate: () => 0,
+      periodBudgets,
+    });
+  const withoutStamp = (snapshot: ReturnType<typeof build>) => ({ ...snapshot, generatedAt: '' });
+
+  it('gives the same snapshot with years of older history added', () => {
+    const history = Array.from({ length: 400 }, (_, index) =>
+      transaction({
+        id: `old-${index}`,
+        type: index % 5 === 0 ? 'income' : 'expense',
+        amount: 10 + index,
+        date: new Date(Date.UTC(2021, 0, 1 + index * 4, 12)).toISOString(),
+      }),
+    );
+    const budgets = [periodBudget({ totalAmount: 1000 })];
+    expect(withoutStamp(build([...recent, ...history], budgets))).toEqual(
+      withoutStamp(build(recent, budgets)),
+    );
+  });
+
+  it('counts the whole of the oldest month in the savings history, and nothing before it', () => {
+    // Six months to October: May is the first.
+    const months = build([
+      ...recent,
+      transaction({ id: 'may-first', amount: 70, date: '2026-05-01' }),
+      transaction({ id: 'april-last', amount: 900, date: '2026-04-30T23:00:00' }),
+    ]).savingsHistory.months;
+    expect(months.find((month) => month.monthKey === '2026-05')?.expense).toBe(70);
+    expect(months.some((month) => month.monthKey === '2026-04')).toBe(false);
+  });
+
+  it('counts spending from the start of a running year budget', () => {
+    const { budgetRing } = build(
+      [...recent, transaction({ id: 'january', amount: 420, date: '2026-01-02T12:00:00' })],
+      [periodBudget({ period: 'year', periodKey: '2026', totalAmount: 1000 })],
+    );
+    // 30 + 50 + 200 + 420 of 1000.
+    expect(budgetRing.usageRatio).toBeCloseTo(0.7);
+  });
+
+  it('keeps a row whose date cannot be read, as before', () => {
+    expect(() => build([...recent, transaction({ id: 'odd', date: 'soon' })])).not.toThrow();
+  });
+});
+
 describe('savings widget filter modes', () => {
   const categories = [
     { id: 'salary', parentId: null },
