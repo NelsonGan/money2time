@@ -198,6 +198,13 @@ import {
   normalizeNotificationPrefs,
   syncScheduledNotifications,
 } from '~/services/notifications';
+import {
+  preparePreviewReceipt,
+  type PreviewSeedProfile,
+  type PreviewSeedSummary,
+  seedPreviewData,
+} from '~/services/previewData';
+import { installAppStudioHook } from '~/services/previewData/appStudio';
 import { resetAutomationCaptureData } from '~/services/resetAutomationCaptureData';
 import { initReviewPrompt, recordTransactionLogged } from '~/services/reviewPrompt';
 import { runUserAssetGc, runUserAssetGcBackfillOnce } from '~/services/userAssetGc';
@@ -698,6 +705,7 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
 
   resetTransactionsOnly: () => void;
   resetAllData: () => void;
+  generatePreviewData: (profile: PreviewSeedProfile) => Promise<PreviewSeedSummary>;
   importMoneyManagerBackup: (uri: string, fileName?: string) => Promise<MMImportSummary>;
   insightsPreferencesJson: string | null;
   updateInsightsPreferencesJson: (value: string | null) => void;
@@ -6263,6 +6271,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     void trackEvent(AnalyticsEvents.DATA_RESET, { scope: 'transactions_only' });
   }, [resetTransactionFilters, runMutation, settings?.appUserId]);
 
+  // Store-screenshot seed data (app-studio-seed-data branch only, never merged).
+  const generatePreviewData = useCallback(
+    async (profile: PreviewSeedProfile) => {
+      // Copy the bundled sample receipt into the asset store first (async), then
+      // run the synchronous seed with the resulting relative path.
+      const receiptPath = await preparePreviewReceipt();
+      const summary = runMutation(() => seedPreviewData(profile, receiptPath));
+      setAppLocale(summary.locale);
+      setActiveAccountFilter(null);
+      resetTransactionFilters();
+      return summary;
+    },
+    [resetTransactionFilters, runMutation],
+  );
+  useEffect(
+    () => installAppStudioHook(generatePreviewData, settings?.appUserId),
+    [generatePreviewData, settings?.appUserId],
+  );
+
   const importMoneyManagerBackup = useCallback(
     async (uri: string, fileName?: string) => {
       const normalizedName = fileName?.trim().toLowerCase();
@@ -6587,6 +6614,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             getDisplayValueForTransaction,
             resetTransactionsOnly,
             resetAllData,
+            generatePreviewData,
             importMoneyManagerBackup,
             insightsPreferencesJson,
             updateInsightsPreferencesJson,
@@ -6724,6 +6752,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       getDisplayValueForTransaction,
       resetTransactionsOnly,
       resetAllData,
+      generatePreviewData,
       importMoneyManagerBackup,
       insightsPreferencesJson,
       updateInsightsPreferencesJson,
