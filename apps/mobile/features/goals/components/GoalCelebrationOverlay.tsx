@@ -8,17 +8,17 @@ import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { Account } from '~/types';
 
+interface GoalCelebrationOverlayProps {
+  /** False while the root stack is changing screens; the celebration waits. */
+  allowed: boolean;
+}
+
 /**
  * One-shot celebration shown when a savings goal first reaches its target.
  * Driven entirely by AppContext's pendingGoalCelebration (the persisted
  * goalAchievedAt stamp guarantees it never repeats), so it can fire on
  * whatever screen the user happens to be on, review-prompt style.
  */
-interface GoalCelebrationOverlayProps {
-  /** False while the root stack is changing screens; the celebration waits. */
-  allowed: boolean;
-}
-
 export function GoalCelebrationOverlay({ allowed }: GoalCelebrationOverlayProps) {
   const { pendingGoalCelebration, clearGoalCelebration } = useApp();
   // A goal is usually reached by the save that is closing the add sheet, and a

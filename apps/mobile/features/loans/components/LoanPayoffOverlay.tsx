@@ -9,17 +9,17 @@ import { triggerHaptic } from '~/services/haptics';
 import type { Account } from '~/types';
 import { formatAmount } from '~/utils/formatters';
 
+interface LoanPayoffOverlayProps {
+  /** False while the root stack is changing screens; the celebration waits. */
+  allowed: boolean;
+}
+
 /**
  * One-shot celebration shown when a loan's balance first reaches zero. Driven
  * entirely by AppContext's pendingLoanCelebration (the persisted loanPaidOffAt
  * stamp guarantees it never repeats), so it can fire on whatever screen the
  * user happens to be on, exactly like the goal celebration.
  */
-interface LoanPayoffOverlayProps {
-  /** False while the root stack is changing screens; the celebration waits. */
-  allowed: boolean;
-}
-
 export function LoanPayoffOverlay({ allowed }: LoanPayoffOverlayProps) {
   const {
     pendingLoanCelebration,
