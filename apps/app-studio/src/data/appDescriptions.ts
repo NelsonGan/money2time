@@ -26,17 +26,13 @@ Hopefully you'll always have control of your money and your life.
 Terms of Use: https://money2time.com/terms
 Privacy Policy: https://money2time.com/privacy
 Contact: https://www.money2time.com/contact`,
-    whatsNew: `- Added the ability to archive accounts
-- Added partial paybacks for split bills
-- Added budgets in other currencies
-- Added the ability to pay loans with a credit card
-- Added the ability to scan multiple receipts at once
-- Added transfer fees
-- Added credit card due dates counted from the statement
-- Added the option to tint recurring entries
-- Reduced app size
+    whatsNew: `- Added the ability to turn a saved expense into instalments
+- Added fees for recurring transfers
+- Added the option to review notifications later
+- Fixed slowness with a long history
+- Fixed the app freezing after saving from the widget
 
-Rather go to bed without supper than rise in debt.`,
+Slow and steady wins the race.`,
   },
 
   zh: {
@@ -53,17 +49,13 @@ Rather go to bed without supper than rise in debt.`,
 使用条款：https://money2time.com/terms
 隐私政策：https://money2time.com/privacy
 联系我们：https://www.money2time.com/contact`,
-    whatsNew: `- 新增了归档账户的功能
-- 新增了分账的部分还款
-- 新增了其他货币的预算
-- 新增了用信用卡还贷款的功能
-- 新增了一次扫描多张收据的功能
-- 新增了转账手续费
-- 新增了按账单日计算的信用卡还款日
-- 新增了为固定交易着色的选项
-- 减小了应用体积
+    whatsNew: `- 新增了将已保存的支出转为分期的功能
+- 新增了定期转账的手续费
+- 新增了稍后审核通知的选项
+- 修复了记录较多时的卡顿问题
+- 修复了从小组件保存后应用卡住的问题
 
-宁可空腹上床，不可负债起床。`,
+欲速则不达。`,
   },
 
   de: {
@@ -80,17 +72,13 @@ Ich hoffe, du hast immer die Kontrolle über dein Geld – und dein Leben.
 Nutzungsbedingungen: https://money2time.com/terms
 Datenschutzrichtlinie: https://money2time.com/privacy
 Kontakt: https://www.money2time.com/contact`,
-    whatsNew: `- Möglichkeit hinzugefügt, Konten zu archivieren
-- Teilrückzahlungen für geteilte Rechnungen hinzugefügt
-- Budgets in anderen Währungen hinzugefügt
-- Möglichkeit hinzugefügt, Kredite per Kreditkarte zu bezahlen
-- Scannen mehrerer Belege auf einmal hinzugefügt
-- Überweisungsgebühren hinzugefügt
-- Kreditkarten-Fälligkeit nach Abrechnung hinzugefügt
-- Einfärben wiederkehrender Einträge hinzugefügt
-- App-Größe reduziert
+    whatsNew: `- Umwandeln gespeicherter Ausgaben in Raten hinzugefügt
+- Gebühren für wiederkehrende Überweisungen hinzugefügt
+- Option hinzugefügt, Benachrichtigungen später zu prüfen
+- Langsamkeit bei langem Verlauf behoben
+- Hängen der App nach dem Speichern im Widget behoben
 
-Lieber hungrig zu Bett gehen als mit Schulden aufstehen.`,
+Gut Ding will Weile haben.`,
   },
 
   fr: {
@@ -107,17 +95,13 @@ J'espère que vous aurez toujours le contrôle de votre argent et de votre vie.
 Conditions d'utilisation : https://money2time.com/terms
 Politique de confidentialité : https://money2time.com/privacy
 Contact : https://www.money2time.com/contact`,
-    whatsNew: `- Ajout de la possibilité d'archiver des comptes
-- Ajout des remboursements partiels des additions partagées
-- Ajout des budgets dans d'autres devises
-- Ajout de la possibilité de rembourser un prêt par carte de crédit
-- Ajout du scan de plusieurs reçus à la fois
-- Ajout des frais de virement
-- Ajout des échéances de carte selon le relevé
-- Ajout de la teinte des entrées récurrentes
-- Réduction de la taille de l'application
+    whatsNew: `- Ajout de la conversion d'une dépense enregistrée en paiements échelonnés
+- Ajout des frais sur les virements récurrents
+- Ajout de l'option de vérifier les notifications plus tard
+- Correction de la lenteur avec un long historique
+- Correction du blocage de l'application après un ajout depuis le widget
 
-Mieux vaut se coucher sans souper que se lever avec des dettes.`,
+Rien ne sert de courir, il faut partir à point.`,
   },
 
   es: {
@@ -134,17 +118,13 @@ Ojalá siempre tengas el control de tu dinero y de tu vida.
 Condiciones de uso: https://money2time.com/terms
 Política de privacidad: https://money2time.com/privacy
 Contacto: https://www.money2time.com/contact`,
-    whatsNew: `- Se añadió la posibilidad de archivar cuentas
-- Se añadieron pagos parciales de gastos compartidos
-- Se añadieron presupuestos en otras monedas
-- Se añadió la posibilidad de pagar préstamos con tarjeta de crédito
-- Se añadió el escaneo de varios recibos
-- Se añadieron comisiones de transferencia
-- Se añadió el vencimiento de tarjeta tras el corte
-- Se añadió el color para entradas recurrentes
-- Se redujo el tamaño de la app
+    whatsNew: `- Se añadió la posibilidad de convertir un gasto guardado en cuotas
+- Se añadieron comisiones en transferencias recurrentes
+- Se añadió la opción de revisar las notificaciones más tarde
+- Se corrigió la lentitud con un historial largo
+- Se corrigió el bloqueo de la app al guardar desde el widget
 
-Más vale acostarse sin cenar que amanecer con deudas.`,
+Despacio se llega lejos.`,
   },
 
   pt: {
@@ -161,17 +141,13 @@ Que você sempre tenha controle do seu dinheiro e da sua vida.
 Termos de Uso: https://money2time.com/terms
 Política de Privacidade: https://money2time.com/privacy
 Contato: https://www.money2time.com/contact`,
-    whatsNew: `- Adicionada a possibilidade de arquivar contas
-- Adicionados pagamentos parciais de despesas divididas
-- Adicionados orçamentos em outras moedas
-- Adicionada a possibilidade de pagar empréstimos com cartão de crédito
-- Adicionado o escaneamento de vários recibos
-- Adicionadas taxas de transferência
-- Adicionado vencimento do cartão a partir da fatura
-- Adicionado destaque para lançamentos recorrentes
-- Reduzido o tamanho do app
+    whatsNew: `- Adicionada a possibilidade de transformar uma despesa salva em parcelas
+- Adicionadas taxas em transferências recorrentes
+- Adicionada a opção de revisar notificações depois
+- Corrigida a lentidão com um histórico longo
+- Corrigido o travamento do app ao salvar pelo widget
 
-Mais vale deitar sem jantar do que acordar com dívidas.`,
+Devagar se vai ao longe.`,
   },
 
   it: {
@@ -188,17 +164,13 @@ Speriamo che tu possa sempre avere il controllo del tuo denaro e della tua vita.
 Termini di utilizzo: https://money2time.com/terms
 Informativa sulla privacy: https://money2time.com/privacy
 Contatto: https://www.money2time.com/contact`,
-    whatsNew: `- Aggiunta la possibilità di archiviare i conti
-- Aggiunti i rimborsi parziali delle spese divise
-- Aggiunti i budget in altre valute
-- Aggiunta la possibilità di pagare i prestiti con carta di credito
-- Aggiunta la scansione di più scontrini insieme
-- Aggiunte le commissioni sui trasferimenti
-- Aggiunta la scadenza della carta dall'estratto conto
-- Aggiunto il colore per le voci ricorrenti
-- Ridotte le dimensioni dell'app
+    whatsNew: `- Aggiunta la possibilità di trasformare una spesa salvata in rate
+- Aggiunte le commissioni sui trasferimenti ricorrenti
+- Aggiunta l'opzione di rivedere le notifiche più tardi
+- Risolta la lentezza con una cronologia lunga
+- Risolto il blocco dell'app dopo il salvataggio dal widget
 
-Meglio andare a letto senza cena che svegliarsi con i debiti.`,
+Chi va piano va sano e va lontano.`,
   },
 
   nl: {
@@ -215,17 +187,13 @@ Hopelijk heb je altijd de controle over je geld en je leven.
 Gebruiksvoorwaarden: https://money2time.com/terms
 Privacybeleid: https://money2time.com/privacy
 Contact: https://www.money2time.com/contact`,
-    whatsNew: `- Mogelijkheid toegevoegd om rekeningen te archiveren
-- Gedeeltelijke terugbetalingen van gedeelde uitgaven toegevoegd
-- Budgetten in andere valuta toegevoegd
-- Mogelijkheid toegevoegd om leningen met een creditcard te betalen
-- Meerdere bonnetjes tegelijk scannen toegevoegd
-- Overboekingskosten toegevoegd
-- Vervaldatum creditcard na afschrift toegevoegd
-- Kleur voor terugkerende items toegevoegd
-- App-grootte verkleind
+    whatsNew: `- Mogelijkheid toegevoegd om een opgeslagen uitgave in termijnen te splitsen
+- Kosten voor terugkerende overboekingen toegevoegd
+- Optie toegevoegd om meldingen later te bekijken
+- Traagheid bij een lange geschiedenis opgelost
+- Vastlopen van de app na opslaan via de widget opgelost
 
-Liever zonder avondeten naar bed dan met schulden opstaan.`,
+Haastige spoed is zelden goed.`,
   },
 
   ru: {
@@ -242,17 +210,13 @@ Liever zonder avondeten naar bed dan met schulden opstaan.`,
 Условия использования: https://money2time.com/terms
 Политика конфиденциальности: https://money2time.com/privacy
 Контакты: https://www.money2time.com/contact`,
-    whatsNew: `- Добавлена возможность архивировать счета
-- Добавлены частичные возвраты по общим расходам
-- Добавлены бюджеты в других валютах
-- Добавлена возможность оплачивать кредиты кредитной картой
-- Добавлено сканирование нескольких чеков сразу
-- Добавлены комиссии за переводы
-- Добавлен срок оплаты карты от даты выписки
-- Добавлено выделение регулярных записей
-- Уменьшен размер приложения
+    whatsNew: `- Добавлена возможность превратить сохранённый расход в рассрочку
+- Добавлены комиссии для регулярных переводов
+- Добавлена возможность просмотреть уведомления позже
+- Исправлены замедления при длинной истории
+- Исправлено зависание приложения после сохранения из виджета
 
-Лучше лечь спать без ужина, чем проснуться с долгами.`,
+Тише едешь, дальше будешь.`,
   },
 
   ja: {
@@ -269,17 +233,13 @@ Liever zonder avondeten naar bed dan met schulden opstaan.`,
 利用規約: https://money2time.com/terms
 プライバシーポリシー: https://money2time.com/privacy
 お問い合わせ: https://www.money2time.com/contact`,
-    whatsNew: `- 口座をアーカイブできる機能を追加しました
-- 割り勘の一部返済を追加しました
-- 他の通貨での予算を追加しました
-- ローンをクレジットカードで支払える機能を追加しました
-- 複数のレシートを一度にスキャンできる機能を追加しました
-- 振替手数料を追加しました
-- 締め日から数えるクレジットカードの支払日を追加しました
-- 定期の記録に色をつけるオプションを追加しました
-- アプリのサイズを削減しました
+    whatsNew: `- 保存済みの支出を分割払いにできる機能を追加しました
+- 定期振替の手数料を追加しました
+- 通知を後で確認できるオプションを追加しました
+- 記録が多いときの動作の遅さを修正しました
+- ウィジェットから保存した後にアプリが固まる問題を修正しました
 
-借金を抱えて起きるより、夕食を抜いて寝るほうがよい。`,
+急がば回れ。`,
   },
 
   ko: {
@@ -296,17 +256,13 @@ Liever zonder avondeten naar bed dan met schulden opstaan.`,
 이용 약관: https://money2time.com/terms
 개인정보 처리방침: https://money2time.com/privacy
 문의: https://www.money2time.com/contact`,
-    whatsNew: `- 계좌를 보관할 수 있는 기능을 추가했습니다
-- 더치페이 부분 정산을 추가했습니다
-- 다른 통화 예산을 추가했습니다
-- 신용카드로 대출을 갚는 기능을 추가했습니다
-- 영수증 여러 장을 한 번에 스캔하는 기능을 추가했습니다
-- 이체 수수료를 추가했습니다
-- 명세서 기준 신용카드 결제일을 추가했습니다
-- 반복 내역에 색을 입히는 옵션을 추가했습니다
-- 앱 용량을 줄였습니다
+    whatsNew: `- 저장한 지출을 할부로 바꾸는 기능을 추가했습니다
+- 반복 이체 수수료를 추가했습니다
+- 알림을 나중에 검토하는 옵션을 추가했습니다
+- 내역이 많을 때 느려지는 현상을 수정했습니다
+- 위젯에서 저장한 뒤 앱이 멈추는 문제를 수정했습니다
 
-빚을 지고 일어나느니 저녁을 굶고 자는 편이 낫습니다.`,
+급할수록 돌아가라.`,
   },
 
   hi: {
@@ -323,17 +279,13 @@ Liever zonder avondeten naar bed dan met schulden opstaan.`,
 उपयोग की शर्तें: https://money2time.com/terms
 गोपनीयता नीति: https://money2time.com/privacy
 संपर्क: https://www.money2time.com/contact`,
-    whatsNew: `- खातों को आर्काइव करने की सुविधा जोड़ी गई
-- बँटे हुए बिलों का आंशिक भुगतान जोड़ा गया
-- दूसरी मुद्राओं में बजट जोड़े गए
-- क्रेडिट कार्ड से लोन चुकाने की सुविधा जोड़ी गई
-- एक साथ कई रसीदें स्कैन करने की सुविधा जोड़ी गई
-- ट्रांसफ़र शुल्क जोड़ा गया
-- स्टेटमेंट से गिनी जाने वाली क्रेडिट कार्ड नियत तारीख जोड़ी गई
-- आवर्ती एंट्री को रंगने का विकल्प जोड़ा गया
-- ऐप का आकार कम किया गया
+    whatsNew: `- सहेजे गए खर्च को किस्तों में बदलने की सुविधा जोड़ी गई
+- आवर्ती ट्रांसफ़र पर शुल्क जोड़ा गया
+- सूचनाओं की बाद में समीक्षा करने का विकल्प जोड़ा गया
+- लंबे इतिहास में धीमेपन की समस्या ठीक की
+- विजेट से सहेजने के बाद ऐप अटकने की समस्या ठीक की
 
-कर्ज़ में उठने से अच्छा है भूखे पेट सो जाना।`,
+धीरे-धीरे रे मना, धीरे सब कुछ होय।`,
   },
 
   id: {
@@ -350,17 +302,13 @@ Semoga Anda selalu punya kendali atas uang dan hidup Anda.
 Syarat Penggunaan: https://money2time.com/terms
 Kebijakan Privasi: https://money2time.com/privacy
 Kontak: https://www.money2time.com/contact`,
-    whatsNew: `- Menambahkan kemampuan untuk mengarsipkan rekening
-- Menambahkan pembayaran sebagian untuk tagihan patungan
-- Menambahkan anggaran dalam mata uang lain
-- Menambahkan kemampuan membayar pinjaman dengan kartu kredit
-- Menambahkan pemindaian beberapa struk sekaligus
-- Menambahkan biaya transfer
-- Menambahkan jatuh tempo kartu dari tanggal tagihan
-- Menambahkan opsi mewarnai entri berulang
-- Mengurangi ukuran aplikasi
+    whatsNew: `- Menambahkan kemampuan mengubah pengeluaran tersimpan menjadi cicilan
+- Menambahkan biaya untuk transfer berulang
+- Menambahkan opsi meninjau notifikasi nanti
+- Memperbaiki kelambatan pada riwayat yang panjang
+- Memperbaiki aplikasi macet setelah menyimpan dari widget
 
-Lebih baik tidur tanpa makan malam daripada bangun dengan utang.`,
+Biar lambat asal selamat.`,
   },
 
   tr: {
@@ -377,17 +325,13 @@ Umarım paranızın ve hayatınızın kontrolü her zaman sizde olur.
 Kullanım Koşulları: https://money2time.com/terms
 Gizlilik Politikası: https://money2time.com/privacy
 İletişim: https://www.money2time.com/contact`,
-    whatsNew: `- Hesapları arşivleme özelliği eklendi
-- Paylaşılan harcamalar için kısmi geri ödeme eklendi
-- Başka para birimlerinde bütçe eklendi
-- Kredileri kredi kartıyla ödeme özelliği eklendi
-- Birden fazla fişi aynı anda tarama eklendi
-- Transfer ücretleri eklendi
-- Hesap kesiminden sayılan kart son ödeme tarihi eklendi
-- Tekrarlayan kayıtları renklendirme seçeneği eklendi
-- Uygulama boyutu küçültüldü
+    whatsNew: `- Kayıtlı bir harcamayı taksite çevirme özelliği eklendi
+- Tekrarlayan transferlere ücret eklendi
+- Bildirimleri daha sonra inceleme seçeneği eklendi
+- Uzun geçmişteki yavaşlık giderildi
+- Widget'tan kaydettikten sonra uygulamanın donması giderildi
 
-Aç yat, borçlu yatma.`,
+Acele işe şeytan karışır.`,
   },
 
   vi: {
@@ -404,17 +348,13 @@ Hy vọng bạn luôn làm chủ được tiền bạc và cuộc sống của m
 Điều khoản sử dụng: https://money2time.com/terms
 Chính sách bảo mật: https://money2time.com/privacy
 Liên hệ: https://www.money2time.com/contact`,
-    whatsNew: `- Thêm khả năng lưu trữ tài khoản
-- Thêm hoàn trả từng phần cho hóa đơn chia sẻ
-- Thêm ngân sách bằng tiền tệ khác
-- Thêm khả năng trả khoản vay bằng thẻ tín dụng
-- Thêm khả năng quét nhiều hóa đơn cùng lúc
-- Thêm phí chuyển khoản
-- Thêm hạn thanh toán thẻ tính từ ngày sao kê
-- Thêm tùy chọn tô màu mục định kỳ
-- Giảm dung lượng ứng dụng
+    whatsNew: `- Thêm khả năng đổi khoản chi đã lưu thành trả góp
+- Thêm phí cho chuyển khoản định kỳ
+- Thêm tùy chọn xem lại thông báo sau
+- Khắc phục tình trạng chậm khi lịch sử dài
+- Khắc phục lỗi ứng dụng bị treo sau khi lưu từ tiện ích
 
-Thà đi ngủ không ăn tối còn hơn thức dậy mang nợ.`,
+Chậm mà chắc.`,
   },
 
   th: {
@@ -431,17 +371,13 @@ Thà đi ngủ không ăn tối còn hơn thức dậy mang nợ.`,
 เงื่อนไขการใช้งาน: https://money2time.com/terms
 นโยบายความเป็นส่วนตัว: https://money2time.com/privacy
 ติดต่อ: https://www.money2time.com/contact`,
-    whatsNew: `- เพิ่มความสามารถในการเก็บถาวรบัญชี
-- เพิ่มการจ่ายคืนบางส่วนสำหรับบิลที่หารกัน
-- เพิ่มงบประมาณในสกุลเงินอื่น
-- เพิ่มความสามารถในการจ่ายสินเชื่อด้วยบัตรเครดิต
-- เพิ่มการสแกนใบเสร็จหลายใบพร้อมกัน
-- เพิ่มค่าธรรมเนียมการโอน
-- เพิ่มวันครบกำหนดบัตรเครดิตที่นับจากวันสรุปยอด
-- เพิ่มตัวเลือกแต้มสีรายการประจำ
-- ลดขนาดแอป
+    whatsNew: `- เพิ่มความสามารถในการเปลี่ยนรายจ่ายที่บันทึกแล้วเป็นการผ่อนชำระ
+- เพิ่มค่าธรรมเนียมสำหรับการโอนประจำ
+- เพิ่มตัวเลือกตรวจสอบการแจ้งเตือนภายหลัง
+- แก้ไขปัญหาความช้าเมื่อมีประวัติยาว
+- แก้ไขปัญหาแอปค้างหลังบันทึกจากวิดเจ็ต
 
-ยอมเข้านอนโดยไม่กินข้าวเย็น ดีกว่าตื่นมาพร้อมหนี้สิน`,
+ช้าๆ ได้พร้าเล่มงาม`,
   },
 
   pl: {
@@ -458,17 +394,13 @@ Mam nadzieję, że zawsze będziesz mieć kontrolę nad swoimi pieniędzmi i swo
 Warunki korzystania: https://money2time.com/terms
 Polityka prywatności: https://money2time.com/privacy
 Kontakt: https://www.money2time.com/contact`,
-    whatsNew: `- Dodano możliwość archiwizowania kont
-- Dodano częściowe spłaty wspólnych rachunków
-- Dodano budżety w innych walutach
-- Dodano możliwość spłaty pożyczek kartą kredytową
-- Dodano skanowanie wielu paragonów naraz
-- Dodano opłaty za przelewy
-- Dodano termin spłaty karty liczony od wyciągu
-- Dodano wyróżnianie wpisów cyklicznych
-- Zmniejszono rozmiar aplikacji
+    whatsNew: `- Dodano możliwość zamiany zapisanego wydatku na raty
+- Dodano opłaty za przelewy cykliczne
+- Dodano opcję przejrzenia powiadomień później
+- Naprawiono spowolnienia przy długiej historii
+- Naprawiono zawieszanie się aplikacji po zapisie z widżetu
 
-Lepiej iść spać bez kolacji, niż obudzić się z długami.`,
+Spiesz się powoli.`,
   },
 
   uk: {
@@ -485,17 +417,13 @@ Lepiej iść spać bez kolacji, niż obudzić się z długami.`,
 Умови використання: https://money2time.com/terms
 Політика конфіденційності: https://money2time.com/privacy
 Контакт: https://www.money2time.com/contact`,
-    whatsNew: `- Додано можливість архівувати рахунки
-- Додано часткові повернення за спільними витратами
-- Додано бюджети в інших валютах
-- Додано можливість сплачувати кредити кредитною карткою
-- Додано сканування кількох чеків одночасно
-- Додано комісії за перекази
-- Додано термін оплати картки від дати виписки
-- Додано виділення регулярних записів
-- Зменшено розмір застосунку
+    whatsNew: `- Додано можливість перетворити збережену витрату на розстрочку
+- Додано комісії для регулярних переказів
+- Додано можливість переглянути сповіщення пізніше
+- Виправлено сповільнення при довгій історії
+- Виправлено зависання застосунку після збереження з віджета
 
-Краще лягти спати без вечері, ніж прокинутися з боргами.`,
+Тихіше їдеш, далі будеш.`,
   },
 
   sv: {
@@ -512,17 +440,13 @@ Förhoppningsvis har du alltid kontroll över dina pengar och ditt liv.
 Användarvillkor: https://money2time.com/terms
 Integritetspolicy: https://money2time.com/privacy
 Kontakt: https://www.money2time.com/contact`,
-    whatsNew: `- Lade till möjligheten att arkivera konton
-- Lade till delbetalningar för delade notor
-- Lade till budgetar i andra valutor
-- Lade till möjligheten att betala lån med kreditkort
-- Lade till skanning av flera kvitton samtidigt
-- Lade till överföringsavgifter
-- Lade till förfallodag räknad från kortutdraget
-- Lade till färgning av återkommande poster
-- Minskade appens storlek
+    whatsNew: `- Lade till möjligheten att göra om en sparad utgift till delbetalningar
+- Lade till avgifter för återkommande överföringar
+- Lade till möjligheten att granska aviseringar senare
+- Åtgärdade långsamhet med lång historik
+- Åtgärdade att appen hängde sig efter sparande från widgeten
 
-Hellre gå hungrig till sängs än vakna med skulder.`,
+Skynda långsamt.`,
   },
 
   nb: {
@@ -539,17 +463,13 @@ Forhåpentligvis vil du alltid ha kontroll over pengene dine – og livet ditt.
 Vilkår for bruk: https://money2time.com/terms
 Personvernerklæring: https://money2time.com/privacy
 Kontakt: https://www.money2time.com/contact`,
-    whatsNew: `- La til mulighet for å arkivere kontoer
-- La til delvis tilbakebetaling av delte regninger
-- La til budsjetter i andre valutaer
-- La til mulighet for å betale lån med kredittkort
-- La til skanning av flere kvitteringer samtidig
-- La til overføringsgebyrer
-- La til forfallsdato regnet fra kortutskriften
-- La til fargelegging av faste poster
-- Reduserte appens størrelse
+    whatsNew: `- La til mulighet for å gjøre en lagret utgift om til avdrag
+- La til gebyrer for faste overføringer
+- La til mulighet for å se gjennom varsler senere
+- Rettet treghet med lang historikk
+- Rettet at appen hang seg etter lagring fra widgeten
 
-Heller legge seg sulten enn å våkne med gjeld.`,
+Hastverk er lastverk.`,
   },
 
   da: {
@@ -566,17 +486,13 @@ Forhåbentlig har du altid kontrol over dine penge og dit liv.
 Brugsbetingelser: https://money2time.com/terms
 Privatlivspolitik: https://money2time.com/privacy
 Kontakt: https://www.money2time.com/contact`,
-    whatsNew: `- Tilføjede mulighed for at arkivere konti
-- Tilføjede delvis tilbagebetaling af delte regninger
-- Tilføjede budgetter i andre valutaer
-- Tilføjede mulighed for at betale lån med kreditkort
-- Tilføjede scanning af flere kvitteringer på én gang
-- Tilføjede overførselsgebyrer
-- Tilføjede forfaldsdato regnet fra kortudskriften
-- Tilføjede farvning af tilbagevendende poster
-- Reducerede appens størrelse
+    whatsNew: `- Tilføjede mulighed for at gøre en gemt udgift til afdrag
+- Tilføjede gebyrer for tilbagevendende overførsler
+- Tilføjede mulighed for at gennemgå notifikationer senere
+- Rettede langsommelighed med lang historik
+- Rettede at appen frøs efter gemning fra widgetten
 
-Hellere gå sulten i seng end vågne op med gæld.`,
+Hastværk er lastværk.`,
   },
 
   ms: {
@@ -593,17 +509,13 @@ Semoga anda sentiasa memiliki kawalan ke atas wang dan kehidupan anda.
 Terma Penggunaan: https://money2time.com/terms
 Dasar Privasi: https://money2time.com/privacy
 Hubungi Kami: https://www.money2time.com/contact`,
-    whatsNew: `- Menambah keupayaan untuk mengarkibkan akaun
-- Menambah bayaran balik separa untuk bil yang dikongsi
-- Menambah bajet dalam mata wang lain
-- Menambah keupayaan membayar pinjaman dengan kad kredit
-- Menambah imbasan beberapa resit sekaligus
-- Menambah caj pindahan
-- Menambah tarikh akhir kad dari tarikh penyata
-- Menambah pilihan mewarnakan entri berulang
-- Mengurangkan saiz aplikasi
+    whatsNew: `- Menambah keupayaan menukar perbelanjaan tersimpan kepada ansuran
+- Menambah caj untuk pindahan berulang
+- Menambah pilihan menyemak pemberitahuan kemudian
+- Membaiki kelambatan pada sejarah yang panjang
+- Membaiki aplikasi tergantung selepas menyimpan dari widget
 
-Lebih baik tidur tanpa makan malam daripada bangun berhutang.`,
+Biar lambat asalkan selamat.`,
   },
 
   fil: {
@@ -618,17 +530,13 @@ Sana lagi kang may kontrol sa iyong pera at sa iyong buhay.
 Mga Tuntunin ng Paggamit: https://money2time.com/terms
 Patakaran sa Privacy: https://money2time.com/privacy
 Makipag-ugnayan: https://www.money2time.com/contact`,
-    whatsNew: `- Nagdagdag ng kakayahang i-archive ang mga account
-- Nagdagdag ng bahagyang pagbabayad sa hinating bill
-- Nagdagdag ng budget sa ibang pera
-- Nagdagdag ng kakayahang magbayad ng loan gamit ang credit card
-- Nagdagdag ng sabay-sabay na pag-scan ng resibo
-- Nagdagdag ng bayad sa transfer
-- Nagdagdag ng due date ng card mula sa statement
-- Nagdagdag ng kulay sa paulit-ulit na entry
-- Binawasan ang laki ng app
+    whatsNew: `- Nagdagdag ng kakayahang gawing hulugan ang naka-save na gastos
+- Nagdagdag ng bayad sa paulit-ulit na transfer
+- Nagdagdag ng opsyong suriin ang mga notification mamaya
+- Inayos ang pagbagal kapag mahaba ang history
+- Inayos ang pag-freeze ng app pagkatapos mag-save mula sa widget
 
-Mas mabuting matulog nang walang hapunan kaysa gumising nang may utang.`,
+Kapag may tiyaga, may nilaga.`,
   },
 
 };
