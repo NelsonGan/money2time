@@ -143,6 +143,7 @@ Never spend your money before you have it.
 Rather go to bed without supper than rise in debt.
 Saving today gives you more choices tomorrow.
 Short reckonings make long friends.
+Slow and steady wins the race.
 Take care of the pennies and the pounds will take care of themselves.
 The art is not in making money, but in keeping it.
 The greatest wealth is to live content with little.
