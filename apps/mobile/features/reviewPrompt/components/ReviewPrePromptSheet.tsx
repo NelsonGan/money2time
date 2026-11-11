@@ -37,7 +37,17 @@ const styles = StyleSheet.create({
   },
 });
 
-export function ReviewPrePromptSheet() {
+interface ReviewPrePromptSheetProps {
+  /**
+   * False over a modal route or while the root stack is changing screens. A
+   * request that arrives then waits: the milestone trigger fires from the save
+   * that is closing the add sheet, and a Modal presented during that dismiss
+   * freezes the app.
+   */
+  allowed: boolean;
+}
+
+export function ReviewPrePromptSheet({ allowed }: ReviewPrePromptSheetProps) {
   const [visible, setVisible] = useState(false);
   const [trigger, setTrigger] = useState<ReviewPrePromptTrigger>('manual');
   const [step, setStep] = useState<Step>('initial');
@@ -97,7 +107,7 @@ export function ReviewPrePromptSheet() {
 
   return (
     <ThemeModal
-      visible={visible}
+      visible={visible && allowed}
       transparent
       animationType="fade"
       onRequestClose={onBackdropPress}

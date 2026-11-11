@@ -195,6 +195,7 @@ import { LiveEarningsScreen } from '~/features/widgets/screens/LiveEarningsScree
 import { useLiveEarningsSync } from '~/features/widgets/useLiveEarningsSync';
 import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useProGate } from '~/hooks/useProGate';
+import { useRootScreenSettled } from '~/hooks/useRootScreenSettled';
 import { useThemeVars } from '~/hooks/useThemeVars';
 import { I18n } from '~/lib/i18n';
 import {
@@ -2969,7 +2970,13 @@ function AppContent() {
   // and freezes the whole page. Gate every app-level prompt so it only appears
   // over the base Main shell; the gate is reactive, so a suppressed prompt
   // re-appears once the user closes the modal route.
-  const rootPromptsAllowed = rootActiveScreen === 'Main';
+  // Main alone is not enough: the state returns to Main as the modal route
+  // starts its native dismiss, and a prompt presented during that dismiss
+  // leaves an invisible modal that takes every touch (saving from the widget
+  // with an announcement queued froze the app). So the screen must also have
+  // settled, which the celebrations below wait for too.
+  const rootScreenSettled = useRootScreenSettled(rootActiveScreen);
+  const rootPromptsAllowed = rootActiveScreen === 'Main' && rootScreenSettled;
 
   useEffect(() => {
     if (isLoading) return;
@@ -3418,7 +3425,7 @@ function AppContent() {
         allowed={!biometricLocked && rootPromptsAllowed}
         onTurnOn={handleTurnOnCloudSync}
       />
-      <ReviewPrePromptSheet />
+      <ReviewPrePromptSheet allowed={!biometricLocked && rootPromptsAllowed} />
       <LedgerProGuard
         canSwitch={rootPromptsAllowed}
         suppressed={
@@ -3429,8 +3436,8 @@ function AppContent() {
         }
         onRenewPro={() => navigationRef.navigate('ProPaywall', { source: 'ledgers_pro_ended' })}
       />
-      <GoalCelebrationOverlay />
-      <LoanPayoffOverlay />
+      <GoalCelebrationOverlay allowed={rootScreenSettled} />
+      <LoanPayoffOverlay allowed={rootScreenSettled} />
       <BiometricLockGate onLockStateChange={setBiometricLocked} />
     </View>
   );

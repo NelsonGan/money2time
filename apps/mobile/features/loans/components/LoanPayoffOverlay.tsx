@@ -9,13 +9,18 @@ import { triggerHaptic } from '~/services/haptics';
 import type { Account } from '~/types';
 import { formatAmount } from '~/utils/formatters';
 
+interface LoanPayoffOverlayProps {
+  /** False while the root stack is changing screens; the celebration waits. */
+  allowed: boolean;
+}
+
 /**
  * One-shot celebration shown when a loan's balance first reaches zero. Driven
  * entirely by AppContext's pendingLoanCelebration (the persisted loanPaidOffAt
  * stamp guarantees it never repeats), so it can fire on whatever screen the
  * user happens to be on, exactly like the goal celebration.
  */
-export function LoanPayoffOverlay() {
+export function LoanPayoffOverlay({ allowed }: LoanPayoffOverlayProps) {
   const {
     pendingLoanCelebration,
     clearLoanCelebration,
@@ -23,7 +28,10 @@ export function LoanPayoffOverlay() {
     settings,
     currentMonthWage,
   } = useApp();
-  const visible = pendingLoanCelebration != null;
+  // The payoff usually comes from the save that is closing the add sheet, and
+  // a Modal presented during that dismiss freezes the app, so it waits for the
+  // root screen to settle.
+  const visible = pendingLoanCelebration != null && allowed;
 
   // Holds the last celebration's data across the dismiss so `<Modal>` stays
   // mounted with `visible` going straight to false, rather than being
@@ -35,11 +43,12 @@ export function LoanPayoffOverlay() {
   const [content, setContent] = useState<Account | null>(null);
 
   useEffect(() => {
-    if (pendingLoanCelebration) {
-      setContent(pendingLoanCelebration);
-      void triggerHaptic('success');
-    }
+    if (pendingLoanCelebration) setContent(pendingLoanCelebration);
   }, [pendingLoanCelebration]);
+
+  useEffect(() => {
+    if (visible) void triggerHaptic('success');
+  }, [visible]);
 
   if (!content) return null;
 
