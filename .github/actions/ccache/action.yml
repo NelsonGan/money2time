@@ -116,7 +116,7 @@ runs:
 
           # Last check: the binary runs here and reads its config.
           CCACHE_CONFIGPATH="$bin/ccache.conf" "$bin/ccache" --version | sed -n 1p || return 1
-          CCACHE_CONFIGPATH="$bin/ccache.conf" "$bin/ccache" --zero-stats > /dev/null || return 1
+          CCACHE_CONFIGPATH="$bin/ccache.conf" "$bin/ccache" --show-config > /dev/null || return 1
         }
 
         if ! install; then
@@ -151,3 +151,11 @@ runs:
         restore-keys: |
           ccache-${{ runner.os }}-${{ hashFiles('apps/mobile/package-lock.json', 'apps/mobile/patches/**') }}-
           ccache-${{ runner.os }}-
+
+    # After the restore, not before: the counters live inside the cache, so a
+    # restored cache brings along the numbers of the build that saved it, and
+    # ./save has to see this build's alone.
+    - name: Reset the compiler cache statistics
+      if: steps.install.outputs.available == 'true'
+      shell: bash
+      run: ccache --zero-stats > /dev/null || true
