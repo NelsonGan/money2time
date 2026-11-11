@@ -14,9 +14,17 @@ import type { Account } from '~/types';
  * goalAchievedAt stamp guarantees it never repeats), so it can fire on
  * whatever screen the user happens to be on, review-prompt style.
  */
-export function GoalCelebrationOverlay() {
+interface GoalCelebrationOverlayProps {
+  /** False while the root stack is changing screens; the celebration waits. */
+  allowed: boolean;
+}
+
+export function GoalCelebrationOverlay({ allowed }: GoalCelebrationOverlayProps) {
   const { pendingGoalCelebration, clearGoalCelebration } = useApp();
-  const visible = pendingGoalCelebration != null;
+  // A goal is usually reached by the save that is closing the add sheet, and a
+  // Modal presented during that dismiss freezes the app, so it waits for the
+  // root screen to settle.
+  const visible = pendingGoalCelebration != null && allowed;
 
   // Holds the last celebration's data across the dismiss. `<Modal>` must stay
   // mounted with `visible` going straight to false, not be unmounted while
@@ -29,11 +37,12 @@ export function GoalCelebrationOverlay() {
   const [content, setContent] = useState<Account | null>(null);
 
   useEffect(() => {
-    if (pendingGoalCelebration) {
-      setContent(pendingGoalCelebration);
-      void triggerHaptic('success');
-    }
+    if (pendingGoalCelebration) setContent(pendingGoalCelebration);
   }, [pendingGoalCelebration]);
+
+  useEffect(() => {
+    if (visible) void triggerHaptic('success');
+  }, [visible]);
 
   if (!content) return null;
 
