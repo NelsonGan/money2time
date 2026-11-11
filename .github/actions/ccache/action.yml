@@ -1,0 +1,161 @@
+name: Set up the compiler cache
+description: >-
+  Installs ccache, restores its cache and turns it on for the store build that
+  follows, so C, C++ and Objective-C files that did not change are not compiled
+  again. Pair it with ./.github/actions/ccache/save after the build.
+
+# A store build compiles the same native code every time: React Native's
+# libraries, and on Android each of them once per CPU type. ccache keeps the
+# compiler's output keyed by the preprocessed source and the compiler flags,
+# so an unchanged file costs a lookup instead of a compile.
+#
+# How it is switched on:
+#   - Android: CMake reads CMAKE_C_COMPILER_LAUNCHER / CMAKE_CXX_COMPILER_LAUNCHER
+#     from the environment and puts ccache in front of the NDK's clang.
+#   - iOS: xcodebuild reads XCODE_XCCONFIG_FILE from the environment; the file
+#     points every target's CC and CXX at two small wrapper scripts that call
+#     ccache. React Native has its own switch for this (USE_CCACHE=1), but its
+#     wrapper script gets ccache's path from a build setting that Xcode 27 no
+#     longer passes to the compiler, so it quietly runs plain clang instead.
+# Both only work when the build runs in the same directory every time, because
+# the paths are part of what ccache hashes: the job sets
+# EAS_LOCAL_BUILD_WORKINGDIR for that.
+#
+# ccache is a pinned release binary checked against its SHA-256, not a package
+# manager install. To move to a newer release, change the version and both
+# checksums together (they are on the release page,
+# github.com/ccache/ccache/releases).
+#
+# A cache must never be the reason a release fails. If anything here goes wrong
+# (the download, the checksum, unpacking, running the binary), the step warns,
+# switches nothing on, and the build runs without ccache: the variables that
+# turn it on are written last, only when everything before them worked.
+inputs:
+  max-size:
+    description: The most disk space ccache may use, such as 2G.
+    default: 2G
+outputs:
+  available:
+    description: "'true' when ccache was installed and switched on."
+    value: ${{ steps.install.outputs.available }}
+runs:
+  using: composite
+  steps:
+    - name: Install ccache
+      id: install
+      shell: bash
+      env:
+        CCACHE_VERSION: 4.14.2
+        CCACHE_SHA256_LINUX: d540ba01f160addbd3dd5e18eda9bd34005591b095c09ac8ae9d0a1b655e7ef5
+        CCACHE_SHA256_MACOS: cf240009630b605b775c7c5c7b7105a3b196c79f31af322c1557969aa28003fc
+        MAX_SIZE: ${{ inputs.max-size }}
+      run: |
+        bin="$HOME/.local/ccache-bin"
+
+        # Every command is checked by hand (`|| return 1`): inside a function
+        # called from an `if`, bash does not stop at a failing command.
+        install() {
+          local name sha compiler
+          case "$RUNNER_OS-$RUNNER_ARCH" in
+            Linux-X64)
+              name="ccache-$CCACHE_VERSION-linux-x86_64-musl-static"
+              sha=$CCACHE_SHA256_LINUX
+              ;;
+            macOS-*)
+              name="ccache-$CCACHE_VERSION-darwin"
+              sha=$CCACHE_SHA256_MACOS
+              ;;
+            *)
+              echo "No pinned ccache build for $RUNNER_OS $RUNNER_ARCH."
+              return 1
+              ;;
+          esac
+
+          curl -fsSL --retry 3 --retry-delay 2 -o "$RUNNER_TEMP/ccache.tar.gz" \
+            "https://github.com/ccache/ccache/releases/download/v$CCACHE_VERSION/$name.tar.gz" || return 1
+          echo "$sha  $RUNNER_TEMP/ccache.tar.gz" | shasum -a 256 --check --status || return 1
+          mkdir -p "$bin" || return 1
+          tar -xzf "$RUNNER_TEMP/ccache.tar.gz" -C "$bin" --strip-components=1 "$name/ccache" || return 1
+          rm -f "$RUNNER_TEMP/ccache.tar.gz"
+
+          # One config file for every way ccache gets called. The settings that
+          # differ on macOS are React Native's own for Xcode (its
+          # scripts/xcode/ccache.conf), which an Xcode build needs to get hits.
+          {
+            echo "cache_dir = $HOME/.ccache"
+            echo "max_size = $MAX_SIZE"
+            # The compiler is identified by its contents, not its timestamp:
+            # the NDK is downloaded again on every build and Xcode is
+            # reinstalled with every runner image, so the timestamp is new
+            # every time.
+            echo "compiler_check = content"
+            if [ "$RUNNER_OS" = Linux ]; then
+              # Headers come out of a fresh `npm ci` and code generation with
+              # new timestamps on every build; without this ccache distrusts
+              # them.
+              echo "sloppiness = include_file_mtime,include_file_ctime,time_macros"
+            else
+              echo "sloppiness = clang_index_store,file_stat_matches,include_file_ctime,include_file_mtime,ivfsoverlay,pch_defines,modules,system_headers,time_macros"
+              echo "file_clone = true"
+              echo "depend_mode = true"
+              echo "inode_cache = true"
+            fi
+          } > "$bin/ccache.conf" || return 1
+
+          if [ "$RUNNER_OS" = macOS ]; then
+            # Xcode runs the compiler with an environment of its own, so
+            # nothing from this job reaches it: the wrapper scripts carry the
+            # paths themselves.
+            for compiler in clang clang++; do
+              printf '#!/bin/sh\nexport CCACHE_CONFIGPATH="%s"\nexec "%s" %s "$@"\n' \
+                "$bin/ccache.conf" "$bin/ccache" "$compiler" > "$bin/ccache-$compiler" || return 1
+              chmod +x "$bin/ccache-$compiler" || return 1
+            done
+            printf 'CC = %s\nCXX = %s\n' "$bin/ccache-clang" "$bin/ccache-clang++" > "$bin/ccache.xcconfig" || return 1
+          fi
+
+          # Last check: the binary runs here and reads its config.
+          CCACHE_CONFIGPATH="$bin/ccache.conf" "$bin/ccache" --version | sed -n 1p || return 1
+          CCACHE_CONFIGPATH="$bin/ccache.conf" "$bin/ccache" --show-config > /dev/null || return 1
+        }
+
+        if ! install; then
+          echo "::warning::Could not set up ccache; building without a compiler cache."
+          exit 0
+        fi
+
+        echo "$bin" >> "$GITHUB_PATH"
+        {
+          echo "CCACHE_CONFIGPATH=$bin/ccache.conf"
+          if [ "$RUNNER_OS" = Linux ]; then
+            echo "CMAKE_C_COMPILER_LAUNCHER=ccache"
+            echo "CMAKE_CXX_COMPILER_LAUNCHER=ccache"
+          else
+            # xcodebuild does read this one from the job's environment; the
+            # file points every target's CC and CXX at the wrapper scripts.
+            echo "XCODE_XCCONFIG_FILE=$bin/ccache.xcconfig"
+          fi
+        } >> "$GITHUB_ENV"
+        echo "available=true" >> "$GITHUB_OUTPUT"
+
+    # The key ends in this run's id, so it never matches exactly and the
+    # newest cache whose key starts the same is restored: first one for these
+    # dependencies, then any. ./save decides after the build whether what was
+    # restored is still good enough or a new one should be saved.
+    - name: Restore the compiler cache
+      if: steps.install.outputs.available == 'true'
+      uses: actions/cache/restore@v5
+      with:
+        path: ~/.ccache
+        key: ccache-${{ runner.os }}-${{ hashFiles('apps/mobile/package-lock.json', 'apps/mobile/patches/**') }}-${{ github.run_id }}-${{ github.run_attempt }}
+        restore-keys: |
+          ccache-${{ runner.os }}-${{ hashFiles('apps/mobile/package-lock.json', 'apps/mobile/patches/**') }}-
+          ccache-${{ runner.os }}-
+
+    # After the restore, not before: the counters live inside the cache, so a
+    # restored cache brings along the numbers of the build that saved it, and
+    # ./save has to see this build's alone.
+    - name: Reset the compiler cache statistics
+      if: steps.install.outputs.available == 'true'
+      shell: bash
+      run: ccache --zero-stats > /dev/null || true

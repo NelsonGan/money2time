@@ -5,8 +5,9 @@ name: Web
 # deploying it, and deploys `main` to the money2time-workers-web Worker.
 # README: *Website*.
 #
-# The checkout is shallow and holds only apps/web: the repository's history is
-# mostly old screenshots, and the mobile app's artwork is hundreds of MB.
+# The checkout is shallow and holds only apps/web (and .github/, for the
+# action that sets up dependencies): the repository's history is mostly old
+# screenshots, and the mobile app's artwork is hundreds of MB.
 run-name: >-
   ${{ github.event_name == 'pull_request' && format('Web · PR #{0}', github.event.number)
    || github.ref == 'refs/heads/main' && 'Web · Production deploy'
@@ -18,10 +19,12 @@ on:
     paths:
       - 'apps/web/**'
       - '.github/workflows/web.yml'
+      - '.github/actions/node-deps/**'
   pull_request:
     paths:
       - 'apps/web/**'
       - '.github/workflows/web.yml'
+      - '.github/actions/node-deps/**'
   workflow_dispatch:
 
 # A newer push to a pull request replaces its older run. Production deploys
@@ -52,20 +55,15 @@ jobs:
         uses: actions/checkout@v5
         with:
           fetch-depth: 1
-          sparse-checkout: apps/web
+          sparse-checkout: |
+            .github
+            apps/web
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v5
+      - name: Set up dependencies
+        uses: ./.github/actions/node-deps
         with:
+          directory: apps/web
           node-version: 24
-          cache: npm
-          cache-dependency-path: apps/web/package-lock.json
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Lint
-        run: npm run lint
 
       - name: Test
         run: npm test
@@ -98,8 +96,28 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_WEB_API_TOKEN }}
         run: node scripts/upload-media.mjs --check
 
-      - name: Build
-        run: npm run build
+      # Lint runs while the build does, not before it: neither reads what the
+      # other writes (eslint.config.mjs ignores every build output), and the
+      # build is the longer of the two. Lint's output is printed once the build
+      # has finished, so the two never interleave. The typecheck stays a step
+      # of its own because it does read what the build writes.
+      - name: Lint and build
+        run: |
+          npm run --silent lint > "$RUNNER_TEMP/lint.log" 2>&1 &
+          lint=$!
+          build=0
+          npm run build || build=$?
+          if wait "$lint"; then
+            echo "::group::Lint passed"
+            cat "$RUNNER_TEMP/lint.log"
+            echo "::endgroup::"
+          else
+            echo "──── Lint FAILED ────"
+            cat "$RUNNER_TEMP/lint.log"
+            echo "::error::Lint failed. Run \`npm run lint\` in apps/web to reproduce."
+            exit 1
+          fi
+          exit "$build"
 
       # After the build: vinext writes the route types (`PageProps`) to
       # `.next/types` and `next-env.d.ts` as it builds, and neither is committed.

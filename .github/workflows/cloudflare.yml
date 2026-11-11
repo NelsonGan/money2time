@@ -54,12 +54,17 @@ jobs:
           - worker: cloud-sync
             database: money2time-cloud-sync-auth
     steps:
+      # Only apps/cloudflare (and the root files): nothing a Worker builds or
+      # tests reads the rest of the repository, and the app's artwork and the
+      # store screenshots are hundreds of MB.
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+        with:
+          sparse-checkout: apps/cloudflare
 
       # wrangler v4 requires Node >= 22.
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 22
 
@@ -100,8 +105,13 @@ jobs:
             database: money2time-cloud-sync-auth
             schema: cloud-sync
     steps:
+      # The comparison below only reads the two commits' file lists, which a
+      # sparse checkout has in full, so it still sees a change to this workflow
+      # file even though the file itself is not checked out.
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+        with:
+          sparse-checkout: apps/cloudflare
 
       # Deploy only the Workers changed since the last production deploy that
       # succeeded. A new version restarts the Worker's Durable Objects, which
@@ -131,7 +141,7 @@ jobs:
 
       - name: Set up Node.js
         if: steps.changes.outputs.deploy == 'true'
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 22
 

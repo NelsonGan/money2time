@@ -1,0 +1,62 @@
+name: Set up Node.js and an app's dependencies
+description: >-
+  Sets up Node.js and one app's node_modules. The folder is restored from the
+  cache while the app's lockfile, package.json and patches are unchanged, and
+  installed with `npm ci` (then saved) when they are not.
+
+# Caches node_modules itself, not npm's download cache: with ~/.npm restored,
+# `npm ci` still has to unpack every package and run the install hooks, which
+# was most of the minute it took the app. The key covers everything `npm ci`
+# reads, so a hit is the same tree `npm ci` would build:
+#   - package-lock.json, the versions
+#   - package.json, the lifecycle scripts (the app's postinstall runs
+#     patch-package)
+#   - patches/, what patch-package writes into node_modules (only the app has
+#     any)
+#   - the OS, CPU and Node major, for packages with native binaries
+# The cache is saved right after the install rather than at the end of the job,
+# so a job whose checks fail still leaves it for the next run.
+#
+# The calling job must check out .github/ (for this file) and the app.
+inputs:
+  directory:
+    description: The app's directory, such as apps/mobile.
+    required: true
+  node-version:
+    description: The Node.js major version. It is part of the cache key.
+    required: true
+  save:
+    description: >-
+      Whether this job saves the cache after installing. Set it to false in all
+      but one of the jobs that install the same app side by side, so they do
+      not all upload the same folder.
+    default: 'true'
+runs:
+  using: composite
+  steps:
+    - name: Set up Node.js
+      uses: actions/setup-node@v5
+      with:
+        node-version: ${{ inputs.node-version }}
+        # node_modules is cached below; npm's download cache is not needed too.
+        package-manager-cache: false
+
+    - name: Restore node_modules
+      id: cache
+      uses: actions/cache/restore@v5
+      with:
+        path: ${{ inputs.directory }}/node_modules
+        key: node-modules-${{ inputs.directory }}-${{ runner.os }}-${{ runner.arch }}-node${{ inputs.node-version }}-${{ hashFiles(format('{0}/package.json', inputs.directory), format('{0}/package-lock.json', inputs.directory), format('{0}/patches/**', inputs.directory)) }}
+
+    - name: Install dependencies
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      working-directory: ${{ inputs.directory }}
+      run: npm ci
+
+    - name: Save node_modules
+      if: steps.cache.outputs.cache-hit != 'true' && inputs.save == 'true'
+      uses: actions/cache/save@v5
+      with:
+        path: ${{ inputs.directory }}/node_modules
+        key: ${{ steps.cache.outputs.cache-primary-key }}
