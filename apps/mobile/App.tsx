@@ -179,6 +179,11 @@ import { buildAutoLogCatalog } from '~/features/transactions/lib/autoLogCatalog'
 import { pickDefaultAccountId } from '~/features/transactions/lib/entryDefaults';
 import { setReceiptSplitLaunch } from '~/features/transactions/lib/receiptSplitBridge';
 import {
+  NO_RECURRING_RULE_FEE,
+  recurringRuleFeeDraft,
+  recurringRuleFeeFieldsOnSave,
+} from '~/features/transactions/lib/transferFee';
+import {
   AddTransactionScreen,
   EditTransactionScreen,
   QuickAddScreen,
@@ -270,6 +275,7 @@ import type {
   WageConfig,
 } from '~/types';
 import { foldSpan, readableColumn } from '~/utils/adaptiveLayout';
+import { convert } from '~/utils/currency';
 import { financialMonthKeyForDate, monthCycleOf } from '~/utils/financialMonth';
 import { dayKeyFromIsoLocal } from '~/utils/formatters';
 import { runAfterInteractions } from '~/utils/interactions';
@@ -2794,11 +2800,26 @@ function InsightsDrilldownRouteScreen({
 }
 
 function RecurringEditorRouteScreen({ route, navigation }: RootStackRouteProps<'RecurringEditor'>) {
-  const { accounts, recurringRules, createRecurringRule, updateRecurringRule } = useApp();
+  const { accounts, recurringRules, createRecurringRule, updateRecurringRule, rateTable } =
+    useApp();
   const ruleId = route.params?.ruleId ?? null;
   const editingRule = useMemo(
     () => (ruleId ? (recurringRules.find((rule) => rule.id === ruleId) ?? null) : null),
     [recurringRules, ruleId],
+  );
+  // The rule's fee as the editor opens it, in the paying account's currency,
+  // which the fee sheet edits.
+  const openedFee = useMemo(
+    () =>
+      editingRule
+        ? recurringRuleFeeDraft(editingRule, (amount, feeCurrency, accountId) => {
+            const accountCurrency = accounts.find((account) => account.id === accountId)?.currency;
+            return accountCurrency && accountCurrency !== feeCurrency
+              ? convert(amount, feeCurrency, accountCurrency, rateTable).value
+              : amount;
+          })
+        : null,
+    [accounts, editingRule, rateTable],
   );
 
   useEffect(() => {
@@ -2823,6 +2844,7 @@ function RecurringEditorRouteScreen({ route, navigation }: RootStackRouteProps<'
       subtitleOverride={I18n.t('recurring.same_flow')}
       submitLabelOverride={I18n.t('recurring.save_rule')}
       restrictTypeOptions={['expense', 'income', 'transfer']}
+      initialTransferFee={openedFee}
       recurringOptions={{
         initialName: editingRule?.name,
         initialPattern: editingRule?.recurrencePattern,
@@ -2834,7 +2856,7 @@ function RecurringEditorRouteScreen({ route, navigation }: RootStackRouteProps<'
           setPendingSubscriptionLogoPicker(session);
           navigation.navigate('SubscriptionLogoPicker');
         },
-        onSubmitRecurring: ({ transaction, recurring }) => {
+        onSubmitRecurring: ({ transaction, recurring, transferFee }) => {
           const recurringTxType =
             transaction.type === 'transfer'
               ? 'transfer'
@@ -2884,6 +2906,19 @@ function RecurringEditorRouteScreen({ route, navigation }: RootStackRouteProps<'
                   accountId: null,
                   categoryId: repaymentReporting.categoryId,
                   countsAsExpense: repaymentReporting.countsAsExpense,
+                  // Written beside every run, in the paying account's currency;
+                  // a fee left as it opened keeps what the rule stores.
+                  ...recurringRuleFeeFieldsOnSave({
+                    draft: transferFee,
+                    opened: openedFee,
+                    rule: editingRule,
+                    transfer: {
+                      fromAccountId: transaction.fromAccountId ?? null,
+                      toAccountId: transaction.toAccountId ?? null,
+                    },
+                    currencyOf: (accountId) =>
+                      accounts.find((account) => account.id === accountId)?.currency,
+                  }),
                 }
               : {
                   ...basePayload,
@@ -2893,6 +2928,7 @@ function RecurringEditorRouteScreen({ route, navigation }: RootStackRouteProps<'
                   toAccountId: null,
                   // No longer a transfer, so there is nothing to stamp.
                   countsAsExpense: false,
+                  ...NO_RECURRING_RULE_FEE,
                 };
 
           if (editingRule) {

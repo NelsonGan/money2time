@@ -1262,6 +1262,7 @@
       },
       "next": "अगला {date}",
       "transfer": "ट्रांसफ़र",
+      "fee": "शुल्क {amount}",
       "yearHours": "साल में {hours} का काम",
       "upcomingTitle": "आने वाले",
       "pausedTitle": "रुके हुए"

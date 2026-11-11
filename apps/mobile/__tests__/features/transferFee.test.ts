@@ -6,7 +6,12 @@ import {
   EMPTY_TRANSFER_FEE_INDEX,
   indexTransferFees,
   isTransferFee,
+  NO_RECURRING_RULE_FEE,
   planTransferFeeWrite,
+  recurringRuleChargesFee,
+  recurringRuleFeeDraft,
+  recurringRuleFeeFields,
+  recurringRuleFeeFieldsOnSave,
   sameTransferFeeIndex,
   transferFeeAccountAmount,
   transferFeeAccountId,
@@ -321,5 +326,158 @@ describe('which account can pay a fee', () => {
     expect(defaultTransferFeeSide({ type: 'debit' }, { type: 'loan' })).toBe('from');
     expect(defaultTransferFeeSide({ type: 'loan' }, { type: 'debit' })).toBe('to');
     expect(defaultTransferFeeSide(null, null)).toBe('from');
+  });
+});
+
+describe('recurring transfer rules', () => {
+  const accounts = { fromAccountId: 'card', toAccountId: 'wallet' };
+  const ruleCurrencyOf = (id: string) => ({ card: 'MYR', wallet: 'SGD' })[id];
+
+  it("saves a fee in the paying account's currency", () => {
+    expect(
+      recurringRuleFeeFields(
+        { amount: 2.005, side: 'to', categoryId: 'fees' },
+        accounts,
+        ruleCurrencyOf,
+      ),
+    ).toEqual({ feeAmount: 2.01, feeCurrency: 'SGD', feeSide: 'to', feeCategoryId: 'fees' });
+    expect(
+      recurringRuleFeeFields(
+        { amount: 2, side: 'from', categoryId: null },
+        accounts,
+        ruleCurrencyOf,
+      ),
+    ).toEqual({ feeAmount: 2, feeCurrency: 'MYR', feeSide: 'from', feeCategoryId: null });
+  });
+
+  it('saves no fee for no draft, a zero amount or a side without an account', () => {
+    expect(recurringRuleFeeFields(null, accounts, ruleCurrencyOf)).toEqual(NO_RECURRING_RULE_FEE);
+    expect(
+      recurringRuleFeeFields(
+        { amount: 0, side: 'from', categoryId: 'fees' },
+        accounts,
+        ruleCurrencyOf,
+      ),
+    ).toEqual(NO_RECURRING_RULE_FEE);
+    expect(
+      recurringRuleFeeFields(
+        { amount: 2, side: 'to', categoryId: 'fees' },
+        { fromAccountId: 'card', toAccountId: null },
+        ruleCurrencyOf,
+      ),
+    ).toEqual(NO_RECURRING_RULE_FEE);
+  });
+
+  it("opens a rule's fee in the editor, and none on a rule without one", () => {
+    expect(
+      recurringRuleFeeDraft({
+        type: 'transfer',
+        feeAmount: 2,
+        feeSide: 'to',
+        feeCategoryId: 'fees',
+      }),
+    ).toEqual({ amount: 2, side: 'to', categoryId: 'fees' });
+    expect(recurringRuleFeeDraft({ type: 'transfer', feeAmount: null })).toBeNull();
+    expect(recurringRuleFeeDraft({ type: 'expense', feeAmount: 2 })).toBeNull();
+  });
+
+  it("opens a fee saved in another currency in its paying account's", () => {
+    // Saved in MYR; the card was pointed at an SGD account since.
+    const rule = {
+      type: 'transfer' as const,
+      ...accounts,
+      feeAmount: 3,
+      feeCurrency: 'MYR',
+      feeSide: 'to' as const,
+      feeCategoryId: 'fees',
+    };
+    const toSgd = (amount: number, currency: string, accountId: string) => {
+      expect(accountId).toBe('wallet');
+      return currency === 'MYR' ? amount * 0.3153 : amount;
+    };
+    expect(recurringRuleFeeDraft(rule, toSgd)).toEqual({
+      amount: 0.95,
+      side: 'to',
+      categoryId: 'fees',
+    });
+  });
+
+  it('charges a fee only on an account that is there and is not a loan', () => {
+    const types: Record<string, 'credit' | 'debit' | 'loan'> = { card: 'credit', wallet: 'debit' };
+    const accountOf = (id: string) => (types[id] ? { type: types[id] } : undefined);
+    const rule = {
+      type: 'transfer' as const,
+      ...accounts,
+      feeAmount: 2,
+      feeCurrency: 'MYR',
+      feeSide: 'from' as const,
+    };
+    expect(recurringRuleChargesFee(rule, accountOf)).toBe(true);
+    expect(recurringRuleChargesFee({ ...rule, toAccountId: 'car', feeSide: 'to' }, accountOf)).toBe(
+      false,
+    );
+    types.car = 'loan';
+    expect(recurringRuleChargesFee({ ...rule, toAccountId: 'car', feeSide: 'to' }, accountOf)).toBe(
+      false,
+    );
+    expect(recurringRuleChargesFee({ ...rule, feeAmount: null }, accountOf)).toBe(false);
+    expect(recurringRuleChargesFee({ ...rule, type: 'expense' }, accountOf)).toBe(false);
+  });
+});
+
+describe('saving a recurring rule its fee left as it opened', () => {
+  const rule = {
+    fromAccountId: 'card',
+    toAccountId: 'wallet',
+    feeAmount: 2,
+    feeCurrency: 'MYR',
+    feeSide: 'to' as const,
+    feeCategoryId: 'fees',
+  };
+  const ruleTransfer = { fromAccountId: 'card', toAccountId: 'wallet' };
+  // The wallet is now SGD and no MYR rate is known: the sheet showed 2 as is.
+  const opened = { amount: 2, side: 'to' as const, categoryId: 'fees' };
+  const walletIsSgd = (id: string) => (id === 'wallet' ? 'SGD' : 'MYR');
+
+  it('keeps the stored fee, so a rename never re-denominates it', () => {
+    expect(
+      recurringRuleFeeFieldsOnSave({
+        draft: { ...opened },
+        opened,
+        rule,
+        transfer: ruleTransfer,
+        currencyOf: walletIsSgd,
+      }),
+    ).toEqual({ feeAmount: 2, feeCurrency: 'MYR', feeSide: 'to', feeCategoryId: 'fees' });
+  });
+
+  it('saves a changed fee, or one now paid by another account, in that account’s currency', () => {
+    expect(
+      recurringRuleFeeFieldsOnSave({
+        draft: { ...opened, amount: 3 },
+        opened,
+        rule,
+        transfer: ruleTransfer,
+        currencyOf: walletIsSgd,
+      }),
+    ).toEqual({ feeAmount: 3, feeCurrency: 'SGD', feeSide: 'to', feeCategoryId: 'fees' });
+    expect(
+      recurringRuleFeeFieldsOnSave({
+        draft: { ...opened },
+        opened,
+        rule,
+        transfer: { fromAccountId: 'card', toAccountId: 'savings' },
+        currencyOf: walletIsSgd,
+      }),
+    ).toEqual({ feeAmount: 2, feeCurrency: 'MYR', feeSide: 'to', feeCategoryId: 'fees' });
+    expect(
+      recurringRuleFeeFieldsOnSave({
+        draft: null,
+        opened,
+        rule,
+        transfer: ruleTransfer,
+        currencyOf: walletIsSgd,
+      }),
+    ).toEqual(NO_RECURRING_RULE_FEE);
   });
 });

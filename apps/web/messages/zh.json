@@ -1262,6 +1262,7 @@
       },
       "next": "下次：{date}",
       "transfer": "转账",
+      "fee": "手续费 {amount}",
       "yearHours": "每年 {hours} 的工作",
       "upcomingTitle": "即将到来",
       "pausedTitle": "已暂停"

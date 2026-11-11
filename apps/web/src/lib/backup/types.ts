@@ -140,6 +140,14 @@ export type RecurringRuleRow = Row & {
   counts_as_expense?: number | null;
   /** Set on an instalment plan only (the app's migration 078). */
   instalment_count?: number | null;
+  /**
+   * A transfer rule's fee, written beside each run as an expense (the app's
+   * migration 088). Absent from older apps: no fee.
+   */
+  fee_amount?: number | null;
+  fee_currency?: string | null;
+  fee_side?: string | null;
+  fee_category_id?: string | null;
 };
 
 export type SettingsRow = Row & {

@@ -1,5 +1,5 @@
 import { Settings2 } from 'lucide-react-native';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Alert, FlatList, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -27,6 +27,10 @@ import {
   RecurringWeekStrip,
   type WeekStripDay,
 } from '~/features/settings/components/RecurringWeekStrip';
+import {
+  NO_RECURRING_RULE_FEE,
+  recurringRuleChargesFee,
+} from '~/features/transactions/lib/transferFee';
 import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -50,8 +54,8 @@ import {
   recurringAmountPerMonth,
   recurringExpenseDueBetween,
   recurringMonthlyExpenseTotal,
+  recurringRunSpend,
 } from '~/utils/recurringRules';
-import { countsAsExpenseRow } from '~/utils/spending';
 
 const MS_PER_DAY = 86_400_000;
 /** Space between the + and what it sits above (the bar, or the home indicator). */
@@ -132,12 +136,33 @@ export function RecurringScreen({
   const listBottomPadding = fabBottom + ADD_FAB_SIZE + SETTINGS_LIST_BOTTOM_PADDING;
   const {
     settings,
-    recurringRules,
+    accounts,
+    recurringRules: storedRules,
     deleteRecurringRule,
     getCategoryById,
     getTrueHourlyRateForDate,
     rateTable,
   } = useApp();
+  // A fee the runner will not write (its paying account became a loan or is
+  // gone) is neither shown nor counted. Keyed on the accounts' types, not the
+  // accounts, whose list changes with every balance refresh.
+  const accountTypesKey = useMemo(
+    () => accounts.map((account) => `${account.id}:${account.type}`).join(','),
+    [accounts],
+  );
+  const accountsRef = useRef(accounts);
+  accountsRef.current = accounts;
+  const recurringRules = useMemo(() => {
+    if (!storedRules.some((rule) => rule.feeAmount != null)) return storedRules;
+    const accountById = new Map(accountsRef.current.map((account) => [account.id, account]));
+    return storedRules.map((rule) =>
+      rule.feeAmount != null && !recurringRuleChargesFee(rule, (id) => accountById.get(id))
+        ? { ...rule, ...NO_RECURRING_RULE_FEE }
+        : rule,
+    );
+    // accountTypesKey stands in for the accounts: only their types matter here.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accountTypesKey, storedRules]);
   const monthCycle = monthCycleOf(settings);
   const { checkLimit } = useProGate();
 
@@ -330,6 +355,12 @@ export function RecurringScreen({
             ? `≈ ${formatValue(reportingAmount)}`
             : undefined,
         metaLabel: formatCadence(rule.recurrencePattern, rule.recurrenceInterval),
+        feeLabel:
+          rule.type === 'transfer' && rule.feeAmount && rule.feeCurrency
+            ? I18n.t('transactions.editor.transfer_fee.chip_active', {
+                amount: formatValue(rule.feeAmount, rule.feeCurrency),
+              })
+            : undefined,
         badge,
         categoryIcon: category?.icon ?? null,
         categoryParentIcon: parent?.icon ?? null,
@@ -357,8 +388,7 @@ export function RecurringScreen({
 
     days.forEach(([dayKey, dayRules], dayIndex) => {
       const dayTotal = dayRules.reduce(
-        (sum, rule) =>
-          countsAsExpenseRow(rule) ? sum + toReporting(rule.amount, rule.currency) : sum,
+        (sum, rule) => sum + recurringRunSpend(rule, toReporting),
         0,
       );
       result.push({

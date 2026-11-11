@@ -1262,6 +1262,7 @@
       },
       "next": "susunod sa {date}",
       "transfer": "Transfer",
+      "fee": "Bayad {amount}",
       "yearHours": "{hours} na trabaho kada taon",
       "upcomingTitle": "Paparating",
       "pausedTitle": "Naka-pause"

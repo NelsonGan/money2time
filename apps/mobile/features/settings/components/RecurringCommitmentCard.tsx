@@ -27,6 +27,8 @@ export interface RecurringCommitmentCardProps {
   metaLabel: string;
   /** Trailing line under the amount (a monthly or reporting-currency equivalent). */
   amountNoteLabel?: string;
+  /** A transfer rule's fee on each run ("Fee RM2.00"), under the amount. */
+  feeLabel?: string;
   badge?: RecurringCardBadge;
   categoryIcon: string | null;
   categoryParentIcon: string | null;
@@ -92,6 +94,7 @@ export const RecurringCommitmentCard = React.memo(function RecurringCommitmentCa
   amountLabel,
   metaLabel,
   amountNoteLabel,
+  feeLabel,
   badge = null,
   categoryIcon,
   categoryParentIcon,
@@ -175,6 +178,11 @@ export const RecurringCommitmentCard = React.memo(function RecurringCommitmentCa
           <Text variant="bodyStrong" className={cn('text-[15px]', amountTone)}>
             {amountLabel}
           </Text>
+          {feeLabel ? (
+            <Text variant="label" className="text-[10px] normal-case tracking-normal" tone="muted">
+              {feeLabel}
+            </Text>
+          ) : null}
           {amountNoteLabel ? (
             <Text variant="label" className="text-[10px] normal-case tracking-normal" tone="muted">
               {amountNoteLabel}

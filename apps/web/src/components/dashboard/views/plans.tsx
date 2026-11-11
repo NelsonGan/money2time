@@ -274,8 +274,9 @@ export function RecurringView() {
 
   const active = model.recurring.filter((r) => r.active).sort((a, b) => b.monthlyBase - a.monthlyBase);
   const paused = model.recurring.filter((r) => !r.active);
-  const spending = active.filter((r) => r.counts);
-  const monthly = spending.reduce((s, r) => s + r.monthlyBase, 0);
+  // As the app's `recurringMonthlyExpenseTotal`: what counts as spending, plus
+  // the fee a transfer rule writes as an expense on every run.
+  const monthly = active.reduce((s, r) => s + (r.counts ? r.monthlyBase : 0) + r.feeMonthlyBase, 0);
   const upcoming = upcomingRules(model, 10);
 
   // "Each workday you work until…": the fixed bills, spread over workdays.
@@ -400,6 +401,7 @@ export function RecurringView() {
                       {rule.nextRun ? <span>· {t("next", { date: f.date(rule.nextRun) })}</span> : null}
                       {account ? <span className="inline-flex items-center gap-1">· <AccountLogo logoId={account.logoId} name={account.name} size={14} />{account.name}</span> : null}
                       {!rule.counts ? <Pill>{t("transfer")}</Pill> : null}
+                      {rule.fee ? <Pill>{t("fee", { amount: rule.fee.currency !== model.currency ? f.foreign(rule.fee.amount, rule.fee.currency) : f.money(rule.fee.amount) })}</Pill> : null}
                     </p>
                   </div>
                   <div className="shrink-0 text-right">

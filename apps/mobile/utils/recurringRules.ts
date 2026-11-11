@@ -52,22 +52,45 @@ export function recurringAmountPerMonth(
  * (`countsAsExpense`) — the same test every other spending readout applies to
  * the rows such a rule generates. Without it the one screen that names the
  * commitment would be the only place it is missing from the monthly total.
+ * A transfer rule's fee is an expense on every run, so it counts too.
  */
 export function recurringMonthlyExpenseTotal(
   rules: readonly RecurringTransactionRule[],
   convertToReporting: (amount: number, currency: string) => number,
 ): number {
   return rules.reduce((total, rule) => {
-    if (!rule.isActive || !countsAsExpenseRow(rule)) return total;
-    return (
-      total +
-      recurringAmountPerMonth(
-        convertToReporting(rule.amount, rule.currency),
-        rule.recurrencePattern,
-        rule.recurrenceInterval,
-      )
-    );
+    if (!rule.isActive) return total;
+    const spend = recurringRunSpend(rule, convertToReporting);
+    if (spend === 0) return total;
+    return total + recurringAmountPerMonth(spend, rule.recurrencePattern, rule.recurrenceInterval);
   }, 0);
+}
+
+/**
+ * What one run of a rule adds to spending, in the reporting currency: its
+ * amount when it counts as spending (an expense, or a loan repayment counted
+ * as one), plus a transfer rule's fee, which each run writes as an expense.
+ */
+export function recurringRunSpend(
+  rule: Pick<
+    RecurringTransactionRule,
+    'type' | 'amount' | 'currency' | 'countsAsExpense' | 'feeAmount' | 'feeCurrency'
+  >,
+  convertToReporting: (amount: number, currency: string) => number,
+): number {
+  const amount = countsAsExpenseRow(rule) ? convertToReporting(rule.amount, rule.currency) : 0;
+  return amount + recurringRunFeeSpend(rule, convertToReporting);
+}
+
+/** A transfer rule's fee on one run, in the reporting currency (0 for none). */
+export function recurringRunFeeSpend(
+  rule: Pick<RecurringTransactionRule, 'type' | 'feeAmount' | 'feeCurrency'>,
+  convertToReporting: (amount: number, currency: string) => number,
+): number {
+  if (rule.type !== 'transfer' || !rule.feeCurrency || !rule.feeAmount || rule.feeAmount <= 0) {
+    return 0;
+  }
+  return convertToReporting(rule.feeAmount, rule.feeCurrency);
 }
 
 /* ------------------------------------------------------------------ *
@@ -399,8 +422,7 @@ export function recurringExpenseDueBetween(
         MS_PER_DAY,
     ) + 1;
   return projectRecurringOccurrences(rules, { fromDayKey, days }).reduce(
-    (total, { rule }) =>
-      countsAsExpenseRow(rule) ? total + convertToReporting(rule.amount, rule.currency) : total,
+    (total, { rule }) => total + recurringRunSpend(rule, convertToReporting),
     0,
   );
 }

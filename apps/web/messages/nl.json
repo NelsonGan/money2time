@@ -1262,6 +1262,7 @@
       },
       "next": "volgende {date}",
       "transfer": "Overboeking",
+      "fee": "Kosten {amount}",
       "yearHours": "{hours} werk per jaar",
       "upcomingTitle": "Binnenkort",
       "pausedTitle": "Gepauzeerd"

@@ -1262,6 +1262,7 @@
       },
       "next": "sıradaki: {date}",
       "transfer": "Transfer",
+      "fee": "Ücret {amount}",
       "yearHours": "Yılda {hours} çalışma",
       "upcomingTitle": "Yaklaşanlar",
       "pausedTitle": "Duraklatılanlar"

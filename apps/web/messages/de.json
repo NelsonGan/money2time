@@ -1262,6 +1262,7 @@
       },
       "next": "nächste am {date}",
       "transfer": "Überweisung",
+      "fee": "Gebühr {amount}",
       "yearHours": "{hours} Arbeit im Jahr",
       "upcomingTitle": "Demnächst",
       "pausedTitle": "Pausiert"

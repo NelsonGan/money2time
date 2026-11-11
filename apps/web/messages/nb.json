@@ -1262,6 +1262,7 @@
       },
       "next": "neste {date}",
       "transfer": "Overføring",
+      "fee": "Gebyr {amount}",
       "yearHours": "{hours} arbeid i året",
       "upcomingTitle": "Kommer snart",
       "pausedTitle": "På pause"

@@ -9,6 +9,7 @@ import {
   recurringExpenseDueBetween,
   recurringMonthlyExpenseTotal,
   recurringRunRuleId,
+  recurringRunSpend,
   storedRecurrenceOf,
 } from '~/utils/recurringRules';
 
@@ -39,6 +40,10 @@ function makeRule(overrides: Partial<RecurringTransactionRule>): RecurringTransa
     instalmentTotal: null,
     instalmentStartDate: null,
     memberId: null,
+    feeAmount: null,
+    feeCurrency: null,
+    feeSide: null,
+    feeCategoryId: null,
     createdAt: '2026-05-13T00:00:00.000Z',
     updatedAt: '2026-05-13T00:00:00.000Z',
     deletedAt: null,
@@ -80,6 +85,59 @@ describe('recurringMonthlyExpenseTotal', () => {
   // 1 MYR = 0.3153 SGD, everything else already reporting-currency.
   const toSgd = (amount: number, currency: string) =>
     currency === 'MYR' ? amount * 0.3153 : amount;
+
+  // The transfer itself is not spending, but the fee each run writes is.
+  it("counts a transfer rule's fee, converted from the paying account's currency", () => {
+    const topUp = makeRule({
+      id: 'topup',
+      type: 'transfer',
+      amount: 200,
+      currency: 'MYR',
+      accountId: null,
+      fromAccountId: 'card',
+      toAccountId: 'wallet',
+      feeAmount: 2,
+      feeCurrency: 'MYR',
+      feeSide: 'from',
+      recurrencePattern: 'weekly',
+    });
+    expect(recurringRunSpend(topUp, toSgd)).toBeCloseTo(2 * 0.3153, 5);
+    expect(recurringMonthlyExpenseTotal([topUp], toSgd)).toBeCloseTo(
+      ((2 * 0.3153) / 7) * AVERAGE_DAYS_PER_MONTH,
+      5,
+    );
+    expect(recurringRunSpend({ ...topUp, feeAmount: null }, toSgd)).toBe(0);
+    expect(recurringMonthlyExpenseTotal([{ ...topUp, isActive: false }], toSgd)).toBe(0);
+  });
+
+  it('counts the fee beside a loan repayment counted as spending', () => {
+    const repayment = makeRule({
+      type: 'transfer',
+      amount: 100,
+      currency: 'SGD',
+      countsAsExpense: true,
+      feeAmount: 1,
+      feeCurrency: 'SGD',
+    });
+    expect(recurringRunSpend(repayment, toSgd)).toBe(101);
+  });
+
+  it('counts a fee on every run due in a window', () => {
+    const topUp = makeRule({
+      type: 'transfer',
+      amount: 50,
+      currency: 'SGD',
+      feeAmount: 0.5,
+      feeCurrency: 'SGD',
+      recurrencePattern: 'weekly',
+      nextRunDate: new Date(2026, 5, 1).toISOString(),
+    });
+    // June 1, 8, 15, 22 and 29.
+    expect(recurringExpenseDueBetween([topUp], '2026-06-01', '2026-06-30', toSgd)).toBeCloseTo(
+      2.5,
+      5,
+    );
+  });
 
   it('converts foreign-currency rules instead of counting them at face value', () => {
     const rules = [makeRule({ id: 'car', amount: 966.9, currency: 'MYR' })];

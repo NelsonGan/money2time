@@ -628,6 +628,52 @@ describe('toReceiptSplit', () => {
 });
 
 describe('toRecurringRule', () => {
+  it("reads a transfer rule's fee, and no fee on any other rule", () => {
+    const row: any = {
+      id: 'r',
+      name: 'Top up',
+      type: 'transfer',
+      amount: 200,
+      currency: 'MYR',
+      accountId: null,
+      fromAccountId: 'card',
+      toAccountId: 'wallet',
+      categoryId: null,
+      note: null,
+      recurrencePattern: 'monthly',
+      recurrenceInterval: 1,
+      nextRunDate: '2026-06-01',
+      endDate: null,
+      isActive: true,
+      feeAmount: 2,
+      feeCurrency: 'MYR',
+      feeSide: 'to',
+      feeCategoryId: 'fees',
+      ...STAMPS,
+    };
+    expect(toRecurringRule(row)).toMatchObject({
+      feeAmount: 2,
+      feeCurrency: 'MYR',
+      feeSide: 'to',
+      feeCategoryId: 'fees',
+    });
+    const none = { feeAmount: null, feeCurrency: null, feeSide: null, feeCategoryId: null };
+    expect(toRecurringRule({ ...row, type: 'expense' })).toMatchObject(none);
+    expect(toRecurringRule({ ...row, feeAmount: 0 })).toMatchObject(none);
+    // Saved before migration 088: no fee columns at all.
+    expect(
+      toRecurringRule({
+        ...row,
+        feeAmount: undefined,
+        feeCurrency: undefined,
+        feeSide: undefined,
+        feeCategoryId: undefined,
+      }),
+    ).toMatchObject(none);
+    // An unknown side reads as the from account, as a saved fee's does.
+    expect(toRecurringRule({ ...row, feeSide: 'sideways' }).feeSide).toBe('from');
+  });
+
   it('keeps daily / weekly / monthly / yearly patterns', () => {
     const baseRow: any = {
       id: 'r',

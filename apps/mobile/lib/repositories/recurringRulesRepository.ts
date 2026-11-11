@@ -13,10 +13,16 @@ import {
   scheduleOfPlan,
 } from '~/features/instalments/lib/instalmentPlan';
 import { selfMemberIdFor } from '~/features/sharedLedgers/lib/entryStamp';
+import {
+  recurringRuleChargesFee,
+  transferFeeAccountId,
+  transferFeeCreatedAt,
+} from '~/features/transactions/lib/transferFee';
 import { getDb, getSQLite } from '~/lib/db/client';
 import { getActiveLedgerId, inActiveLedger } from '~/lib/db/ledgerScope';
 import { accountsTable, recurringRulesTable, transactionsTable } from '~/lib/db/schema';
 import type {
+  AccountType,
   ProcessedRecurringRule,
   RecurrencePattern,
   RecurringTransactionRule,
@@ -80,6 +86,14 @@ export interface CreateRecurringRuleInput {
   instalmentCount?: number | null;
   instalmentTotal?: number | null;
   instalmentStartDate?: string | null;
+  /**
+   * A transfer rule's fee, written beside each run as its own expense row
+   * (see `RecurringTransactionRule.feeAmount`). Null amount means none.
+   */
+  feeAmount?: number | null;
+  feeCurrency?: string | null;
+  feeSide?: 'from' | 'to' | null;
+  feeCategoryId?: string | null;
 }
 
 export interface CreateInstalmentPlanInput {
@@ -137,20 +151,91 @@ interface RunContext {
   reporting: string;
   rateTable: ReturnType<typeof buildRateTable>;
   accountCurrencyById: Map<string, string>;
+  /** Live accounts only. */
+  accountTypeById: Map<string, AccountType>;
 }
 
 function buildRunContext(): RunContext {
   // The open ledger's currency, which is the settings row's on the default one.
   const reporting = ledgersRepository.activeReportingCurrency().code;
   const rateTable = buildRateTable(reporting, exchangeRatesRepository.listByBase(reporting));
-  const accountCurrencyById = new Map(
-    getDb()
-      .select({ id: accountsTable.id, currency: accountsTable.currency })
-      .from(accountsTable)
-      .all()
-      .map((row) => [row.id, row.currency]),
+  const accounts = getDb()
+    .select({
+      id: accountsTable.id,
+      currency: accountsTable.currency,
+      type: accountsTable.type,
+      deletedAt: accountsTable.deletedAt,
+    })
+    .from(accountsTable)
+    .all();
+  const accountCurrencyById = new Map(accounts.map((row) => [row.id, row.currency]));
+  // Live accounts only: a fee is never charged to one that is gone.
+  const accountTypeById = new Map(
+    accounts.filter((row) => !row.deletedAt).map((row) => [row.id, row.type as AccountType]),
   );
-  return { reporting, rateTable, accountCurrencyById };
+  return { reporting, rateTable, accountCurrencyById, accountTypeById };
+}
+
+/**
+ * The fee expense a transfer rule writes beside its run on `date`, or null
+ * when it has none or its paying account cannot carry one (gone, or a loan,
+ * whose balance is walked from its repayments). Written in the fee's own
+ * currency with the account-currency value frozen when the account's differs,
+ * the same as a foreign-currency expense rule.
+ */
+function transferFeeRunInput(
+  rule: RecurringTransactionRule,
+  context: RunContext,
+  date: string,
+  transferId: string,
+  note: string,
+): CreateTransactionInput | null {
+  const amount = normalizeMoneyAmount(rule.feeAmount ?? 0);
+  const accountId = transferFeeAccountId(rule.feeSide === 'to' ? 'to' : 'from', rule);
+  const chargeable = recurringRuleChargesFee(rule, (id) => {
+    const type = context.accountTypeById.get(id);
+    return type ? { type } : undefined;
+  });
+  if (!chargeable || !accountId || !rule.feeCurrency || !(amount > 0)) return null;
+  const { reporting, rateTable } = context;
+  const accountCurrency = context.accountCurrencyById.get(accountId) ?? rule.feeCurrency;
+  const { value: reportingAmount, rateUsed } = convert(
+    amount,
+    rule.feeCurrency,
+    reporting,
+    rateTable,
+  );
+  return {
+    type: 'expense',
+    amount,
+    currency: rule.feeCurrency,
+    reportingCurrency: reporting,
+    reportingAmount,
+    fxRate: rateUsed ?? (rule.feeCurrency === reporting ? 1 : null),
+    accountAmount:
+      rule.feeCurrency !== accountCurrency
+        ? convert(amount, rule.feeCurrency, accountCurrency, rateTable).value
+        : null,
+    date,
+    accountId,
+    fromAccountId: null,
+    toAccountId: null,
+    categoryId: rule.feeCategoryId,
+    note,
+    sentiment: 'neutral',
+    reimbursable: false,
+    feeOfId: transferId,
+    createdBy: rule.memberId,
+    memberId: rule.memberId,
+  };
+}
+
+/**
+ * A run's fee row is named after its transfer, so every phone that runs the
+ * rule writes the same one. `recurringRunRuleId` still reads the rule from it.
+ */
+export function recurringRunFeeTransactionId(transferRunId: string): string {
+  return `${transferRunId}:fee`;
 }
 
 /**
@@ -190,15 +275,33 @@ function categorizedRunInput(
 }
 
 /** Writes a run once: an id that exists (even deleted) is never written again. */
-function writeRunOnce(id: string, input: CreateTransactionInput): boolean {
+function writeRunOnce(id: string, input: CreateTransactionInput, now?: string): boolean {
   const exists = getDb()
     .select({ id: transactionsTable.id })
     .from(transactionsTable)
     .where(eq(transactionsTable.id, id))
     .get();
   if (exists) return false;
-  transactionsRepository.createWithId(id, input);
+  // `now` when the caller needs the stamp (a fee is placed under its transfer).
+  if (now) transactionsRepository.createWithId(id, input, now);
+  else transactionsRepository.createWithId(id, input);
   return true;
+}
+
+/**
+ * Writes a transfer run's fee once (`now` is when its transfer was written), a
+ * millisecond under the transfer in the day (`transferFeeCreatedAt`), as the
+ * editor places a one-off fee.
+ */
+function writeRunFee(transferId: string, input: CreateTransactionInput, now: string) {
+  const feeId = recurringRunFeeTransactionId(transferId);
+  const exists = getDb()
+    .select({ id: transactionsTable.id })
+    .from(transactionsTable)
+    .where(eq(transactionsTable.id, feeId))
+    .get();
+  if (exists) return;
+  transactionsRepository.createWithId(feeId, input, now, transferFeeCreatedAt(now));
 }
 
 /**
@@ -346,6 +449,10 @@ class RecurringRulesRepository {
         instalmentTotal: input.instalmentTotal ?? null,
         instalmentStartDate: input.instalmentStartDate ?? null,
         memberId: input.memberId !== undefined ? input.memberId : selfMemberIdFor(ledgerId),
+        feeAmount: input.type === 'transfer' ? (input.feeAmount ?? null) : null,
+        feeCurrency: input.type === 'transfer' ? (input.feeCurrency ?? null) : null,
+        feeSide: input.type === 'transfer' ? (input.feeSide ?? null) : null,
+        feeCategoryId: input.type === 'transfer' ? (input.feeCategoryId ?? null) : null,
         createdAt: now,
         updatedAt: now,
         deletedAt: null,
@@ -787,7 +894,15 @@ class RecurringRulesRepository {
     );
   }
 
-  runDueTransactions(todayIso: string = nowIso(), maxRules: number = 10): ProcessedRecurringRule[] {
+  /**
+   * `options.feeNote` titles a transfer fee's expense row ("Transfer fee", in the
+   * app's language), as the editor titles a one-off fee.
+   */
+  runDueTransactions(
+    todayIso: string = nowIso(),
+    maxRules: number = 10,
+    { feeNote = 'Transfer fee' }: { feeNote?: string } = {},
+  ): ProcessedRecurringRule[] {
     const db = getDb();
     const dueRules = db
       .select()
@@ -838,14 +953,13 @@ class RecurringRulesRepository {
       // One id per rule and run date: two phones that both run a due rule
       // (Cloud Sync) make the same row instead of two, and a run that already
       // happened (even if since deleted) is never made again.
-      const createRun = (input: CreateTransactionInput) => {
+      const createRun = (input: CreateTransactionInput, now?: string): boolean =>
         // The rule's person, the same on every phone that runs it.
-        writeRunOnce(recurringRunTransactionId(rule.id, input.date), {
-          ...input,
-          createdBy: rule.memberId,
-          memberId: rule.memberId,
-        });
-      };
+        writeRunOnce(
+          recurringRunTransactionId(rule.id, input.date),
+          { ...input, createdBy: rule.memberId, memberId: rule.memberId },
+          now,
+        );
       let cursor = rule.nextRunDate;
       // The day of the month this run keeps; a stored anchor the run date has
       // moved off (an older phone moved it) gives way to the run date's day.
@@ -867,7 +981,7 @@ class RecurringRulesRepository {
               const snapshot = counted
                 ? convert(rule.amount, rule.currency, reporting, rateTable)
                 : null;
-              createRun({
+              const input: CreateTransactionInput = {
                 type: 'transfer',
                 amount: rule.amount,
                 currency: rule.currency,
@@ -886,7 +1000,21 @@ class RecurringRulesRepository {
                 categoryId: counted ? rule.categoryId : null,
                 note: rule.note,
                 countsAsExpense: counted,
-              });
+              };
+              const transferId = recurringRunTransactionId(rule.id, cursor);
+              const fee = transferFeeRunInput(rule, context, cursor, transferId, feeNote);
+              if (!fee) {
+                createRun(input);
+              } else {
+                // The transfer and its fee land together: a fee is only
+                // written beside a transfer this pass wrote (a run made
+                // before, maybe deleted since, already had its fee or none),
+                // so a transfer saved without it would never get one.
+                getSQLite().withTransactionSync(() => {
+                  const now = nowIso();
+                  if (createRun(input, now)) writeRunFee(transferId, fee, now);
+                });
+              }
             }
           } else if (rule.accountId && rule.categoryId) {
             createRun(categorizedRunInput(rule, context, cursor, rule.amount));

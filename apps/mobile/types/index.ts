@@ -1275,6 +1275,17 @@ export interface RecurringTransactionRule {
   instalmentStartDate: string | null;
   /** Shared ledgers: the account the rule's entries belong to; null = the owner. */
   memberId: string | null;
+  /**
+   * A transfer rule's fee (null on every other rule and on a transfer without
+   * one): each run writes it beside the transfer as its own expense row, the
+   * way the editor saves a one-off transfer's fee. `feeAmount` is in
+   * `feeCurrency`, the paying account's currency when it was set; `feeSide`
+   * is the account that pays it. See `features/transactions/lib/transferFee.ts`.
+   */
+  feeAmount: number | null;
+  feeCurrency: string | null;
+  feeSide: 'from' | 'to' | null;
+  feeCategoryId: string | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;

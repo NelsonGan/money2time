@@ -1,7 +1,10 @@
 jest.mock('~/lib/db/client', () => ({
   getDb: jest.fn(),
   // The payment rows a plan already has: none unless a test says so.
-  getSQLite: jest.fn(() => ({ getAllSync: () => [] })),
+  getSQLite: jest.fn(() => ({
+    getAllSync: () => [],
+    withTransactionSync: (write: () => void) => write(),
+  })),
 }));
 jest.mock('~/lib/repositories/transactionsRepository', () => ({
   transactionsRepository: { create: jest.fn(), createWithId: jest.fn() },
@@ -14,6 +17,7 @@ import { getDb, getSQLite } from '~/lib/db/client';
 import { accountsTable, recurringRulesTable, transactionsTable } from '~/lib/db/schema';
 import {
   recurringRulesRepository,
+  recurringRunFeeTransactionId,
   recurringRunTransactionId,
 } from '~/lib/repositories/recurringRulesRepository';
 import { transactionsRepository } from '~/lib/repositories/transactionsRepository';
@@ -52,6 +56,10 @@ function makeLoanRule(overrides: Partial<RecurringTransactionRule> = {}): Recurr
     instalmentTotal: null,
     instalmentStartDate: null,
     memberId: null,
+    feeAmount: null,
+    feeCurrency: null,
+    feeSide: null,
+    feeCategoryId: null,
     createdAt: '2026-07-01T00:00:00.000Z',
     updatedAt: '2026-07-01T00:00:00.000Z',
     deletedAt: null,
@@ -496,5 +504,150 @@ describe('repairLegacySchedules', () => {
     });
     recurringRulesRepository.repairLegacySchedules();
     expect(writes).toEqual([{ anchorDay: 31, nextRunDate: '2026-02-28' }]);
+  });
+});
+
+describe('recurring transfer fees', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  const ACCOUNTS: { id: string; currency: string; type: string; deletedAt?: string }[] = [
+    { id: 'card', currency: 'MYR', type: 'credit' },
+    { id: 'wallet', currency: 'SGD', type: 'debit' },
+    { id: 'loan', currency: 'MYR', type: 'loan' },
+  ];
+
+  /**
+   * The runner against a transfer rule. `lookups` answers the id lookups in
+   * order (the transfer's, then the fee's); each is missing unless given.
+   */
+  function useFeeRule(
+    overrides: Partial<RecurringTransactionRule>,
+    lookups: ({ id: string } | undefined)[] = [],
+  ) {
+    const rule = makeLoanRule({
+      id: 'topup',
+      fromAccountId: 'card',
+      toAccountId: 'wallet',
+      nextRunDate: '2026-07-30',
+      endDate: null,
+      feeAmount: 2,
+      feeCurrency: 'MYR',
+      feeSide: 'from',
+      feeCategoryId: 'fees',
+      ...overrides,
+    });
+    const query = {
+      where: () => query,
+      orderBy: () => query,
+      limit: () => query,
+      all: () => [rule],
+    };
+    const db = {
+      select: () => ({
+        from: (table: unknown) => {
+          if (table === recurringRulesTable) return query;
+          if (table === transactionsTable) return { where: () => ({ get: () => lookups.shift() }) };
+          if (table === accountsTable) return { all: () => ACCOUNTS };
+          return { get: () => undefined };
+        },
+      }),
+      update: () => ({
+        set: (values: Partial<RecurringTransactionRule>) => ({
+          where: () => ({ run: () => Object.assign(rule, values) }),
+        }),
+      }),
+    };
+    (getDb as jest.Mock).mockReturnValue(db);
+    return rule;
+  }
+
+  const writes = () => jest.mocked(transactionsRepository.createWithId).mock.calls;
+
+  it('writes the fee beside each run, on the paying account and linked to its transfer', () => {
+    useFeeRule({});
+    recurringRulesRepository.runDueTransactions('2026-07-31T00:00:00.000Z', 10, {
+      feeNote: 'Transfer fee',
+    });
+
+    expect(writes().map(([id]) => id)).toEqual([
+      'rr:topup:2026-07-30',
+      recurringRunFeeTransactionId('rr:topup:2026-07-30'),
+    ]);
+    const [, , transferNow] = writes()[0];
+    const [, fee, feeNow, createdAt] = writes()[1];
+    expect(fee).toEqual(
+      expect.objectContaining({
+        type: 'expense',
+        amount: 2,
+        currency: 'MYR',
+        accountId: 'card',
+        categoryId: 'fees',
+        note: 'Transfer fee',
+        feeOfId: 'rr:topup:2026-07-30',
+        accountAmount: null,
+        memberId: null,
+      }),
+    );
+    // Written with its transfer, a millisecond under it in the day.
+    expect(feeNow).toBe(transferNow);
+    expect(createdAt).toBe(new Date(Date.parse(transferNow as string) - 1).toISOString());
+    // Still read as the rule's run, so the lists tint it like its transfer.
+    expect(isRecurringRunTransaction({ id: writes()[1][0] })).toBe(true);
+  });
+
+  it('charges a to-side fee to the to account, freezing what it costs there', () => {
+    useFeeRule({ feeSide: 'to', feeCurrency: 'MYR' });
+    recurringRulesRepository.runDueTransactions('2026-07-31T00:00:00.000Z');
+    const [, fee] = writes()[1];
+    expect(fee).toEqual(expect.objectContaining({ accountId: 'wallet', currency: 'MYR' }));
+    // The wallet is in SGD: the fee keeps its amount and records the account's.
+    expect(fee.accountAmount).not.toBeNull();
+  });
+
+  it('writes no fee beside a run that was made before', () => {
+    useFeeRule({}, [{ id: 'rr:topup:2026-07-30' }]);
+    recurringRulesRepository.runDueTransactions('2026-07-31T00:00:00.000Z');
+    expect(writes()).toHaveLength(0);
+  });
+
+  it('never writes the same fee twice', () => {
+    useFeeRule({}, [undefined, { id: 'rr:topup:2026-07-30:fee' }]);
+    recurringRulesRepository.runDueTransactions('2026-07-31T00:00:00.000Z');
+    expect(writes().map(([id]) => id)).toEqual(['rr:topup:2026-07-30']);
+  });
+
+  it('writes no fee when it is zero or would land on a loan', () => {
+    useFeeRule({ feeAmount: 0 });
+    recurringRulesRepository.runDueTransactions('2026-07-31T00:00:00.000Z');
+    expect(writes()).toHaveLength(1);
+
+    jest.clearAllMocks();
+    useFeeRule({ toAccountId: 'loan', feeSide: 'to' });
+    recurringRulesRepository.runDueTransactions('2026-07-31T00:00:00.000Z');
+    expect(writes().map(([id]) => id)).toEqual(['rr:topup:2026-07-30']);
+  });
+
+  it('writes no fee on a paying account that was deleted', () => {
+    ACCOUNTS[0] = { ...ACCOUNTS[0], deletedAt: '2026-07-01T00:00:00.000Z' };
+    try {
+      useFeeRule({});
+      recurringRulesRepository.runDueTransactions('2026-07-31T00:00:00.000Z');
+      expect(writes().map(([id]) => id)).toEqual(['rr:topup:2026-07-30']);
+    } finally {
+      ACCOUNTS[0] = { id: 'card', currency: 'MYR', type: 'credit' };
+    }
+  });
+
+  it('writes a fee for every run it catches up on', () => {
+    useFeeRule({});
+    recurringRulesRepository.runDueTransactions('2026-09-30T23:59:59.999Z');
+    expect(writes().map(([id]) => id)).toEqual([
+      'rr:topup:2026-07-30',
+      'rr:topup:2026-07-30:fee',
+      'rr:topup:2026-08-30',
+      'rr:topup:2026-08-30:fee',
+      'rr:topup:2026-09-30',
+      'rr:topup:2026-09-30:fee',
+    ]);
   });
 });
