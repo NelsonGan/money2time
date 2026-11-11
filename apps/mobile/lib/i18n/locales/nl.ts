@@ -1858,6 +1858,12 @@ const nl = {
       'Om een bon, details of vergoeding te houden, moet de eerste termijn vandaag of eerder zijn.',
     remove: 'Termijnen verwijderen',
     add_payments: '{{count}} termijnen toevoegen',
+    convert_payments: 'Omzetten in {{count}} betalingen',
+    convert_note: 'Deze uitgave wordt betaling 1 van {{count}}. De rest volgt volgens schema.',
+    already_due_one:
+      'Er is al {{count}} betaling extra verschuldigd. Die wordt toegevoegd als je opslaat.',
+    already_due_other:
+      'Er zijn al {{count}} betalingen extra verschuldigd. Die worden toegevoegd als je opslaat.',
     pill_a11y: 'Termijn {{label}}',
     new_plan: 'Nieuwe termijnbetaling',
     due_this_month: 'Deze maand te betalen',

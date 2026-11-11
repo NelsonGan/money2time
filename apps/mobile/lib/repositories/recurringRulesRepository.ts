@@ -2,6 +2,7 @@ import { and, eq, gte, isNull, lt, lte, or, type SQL } from 'drizzle-orm';
 
 import {
   buildInstalmentProgress,
+  canConvertToInstalmentPlan,
   canSplitInstalments,
   INSTALMENT_PAYOFF_NUMBER,
   instalmentAmounts,
@@ -22,6 +23,7 @@ import type {
   TransactionSentiment,
 } from '~/types';
 import { buildRateTable, convert } from '~/utils/currency';
+import { normalizeMoneyAmount } from '~/utils/formatters';
 import { newId, nowIso } from '~/utils/id';
 // Shared with the screen's forecast so the dates it projects are the dates this
 // runner will actually write.
@@ -112,6 +114,16 @@ export interface CreateInstalmentPlanInput {
    * plan is this phone's account when it is a member of the open ledger.
    */
   memberId?: string | null;
+}
+
+/** Turning an expense already saved into a plan: the expense is payment 1. */
+export interface ConvertToInstalmentPlanInput {
+  transactionId: string;
+  count: number;
+  recurrencePattern: 'monthly' | 'weekly';
+  recurrenceInterval: number;
+  /** The bank's payment amount, when it differs from the even split. */
+  regularAmount?: number | null;
 }
 
 export interface CreatedInstalmentPlan {
@@ -380,6 +392,82 @@ class RecurringRulesRepository {
       created = { ruleId, firstPaymentId };
     });
     return created;
+  }
+
+  /**
+   * Turns an expense already saved into an instalment plan of its amount. The
+   * row itself becomes payment 1, on its own date, so it keeps its id, receipt,
+   * note, mood, albums and Cloud Sync history; only its amount drops to the
+   * first payment's. The plan's schedule counts from that date, and the
+   * runner makes any later payment already due on the next load, the same as
+   * a plan added with a date in the past. Returns the plan's id, or null when
+   * the row cannot be converted (see `canConvertToInstalmentPlan`).
+   */
+  convertTransactionToInstalmentPlan(input: ConvertToInstalmentPlanInput): string | null {
+    const transaction = transactionsRepository.getById(input.transactionId);
+    if (!transaction || !canConvertToInstalmentPlan(transaction)) return null;
+    const { accountId, categoryId } = transaction;
+    const total = transaction.amount;
+    const count = Math.trunc(input.count);
+    if (!accountId || !categoryId || count < 2) return null;
+    if (!canSplitInstalments(total, count)) return null;
+    if (input.regularAmount != null && !isRegularAmountValid(total, count, input.regularAmount)) {
+      return null;
+    }
+    const amounts = instalmentAmounts(total, count, input.regularAmount);
+    const recurrenceInterval = normalizeInterval(input.recurrenceInterval);
+    const dates = scheduleOfPlan({
+      instalmentCount: count,
+      instalmentStartDate: transaction.date,
+      nextRunDate: transaction.date,
+      recurrencePattern: input.recurrencePattern,
+      recurrenceInterval,
+    });
+    const firstDate = dates[0];
+    const secondDate = dates[1];
+    const lastDate = dates[dates.length - 1];
+    const firstAmount = amounts[0];
+    if (!firstDate || !secondDate || !lastDate || dates.length !== count || !firstAmount) {
+      return null;
+    }
+    // The frozen reporting and account-currency values shrink with the
+    // amount, at the rate the expense was saved with.
+    const share = firstAmount / total;
+    const scaled = (value: number | null) =>
+      value == null ? null : normalizeMoneyAmount(value * share);
+
+    let ruleId: string | null = null;
+    getSQLite().withTransactionSync(() => {
+      const id = this.create({
+        memberId: transaction.memberId,
+        name: transaction.note?.trim() || '',
+        type: 'expense',
+        amount: firstAmount,
+        currency: transaction.currency,
+        accountId,
+        categoryId,
+        note: transaction.note ?? null,
+        recurrencePattern: input.recurrencePattern,
+        recurrenceInterval,
+        // Payment 1 is made (it is this row), so the plan waits on payment 2.
+        nextRunDate: secondDate,
+        anchorDay: localDayOfMonth(firstDate),
+        endDate: lastDate,
+        instalmentCount: count,
+        instalmentTotal: total,
+        instalmentStartDate: firstDate,
+      });
+      if (!id) return;
+      transactionsRepository.update(transaction.id, {
+        amount: firstAmount,
+        reportingAmount: scaled(transaction.reportingAmount),
+        accountAmount: scaled(transaction.accountAmount),
+        instalmentRuleId: id,
+        instalmentNumber: 1,
+      });
+      ruleId = id;
+    });
+    return ruleId;
   }
 
   /**

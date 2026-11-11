@@ -1841,6 +1841,11 @@ const sv = {
       'För att behålla ett kvitto, detaljer eller en ersättning måste första betalningen vara i dag eller tidigare.',
     remove: 'Ta bort delbetalning',
     add_payments: 'Lägg till {{count}} betalningar',
+    convert_payments: 'Gör om till {{count}} betalningar',
+    convert_note: 'Den här utgiften blir betalning 1 av {{count}}. Resten följer schemat.',
+    already_due_one: '{{count}} betalning till har redan förfallit. Den läggs till när du sparar.',
+    already_due_other:
+      '{{count}} betalningar till har redan förfallit. De läggs till när du sparar.',
     pill_a11y: 'Delbetalning {{label}}',
     new_plan: 'Ny delbetalning',
     due_this_month: 'Förfaller denna månad',

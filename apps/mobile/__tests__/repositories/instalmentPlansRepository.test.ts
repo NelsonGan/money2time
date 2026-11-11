@@ -1,6 +1,11 @@
 jest.mock('~/lib/db/client', () => ({ getDb: jest.fn(), getSQLite: jest.fn() }));
 jest.mock('~/lib/repositories/transactionsRepository', () => ({
-  transactionsRepository: { createWithId: jest.fn(), softDelete: jest.fn() },
+  transactionsRepository: {
+    createWithId: jest.fn(),
+    softDelete: jest.fn(),
+    getById: jest.fn(),
+    update: jest.fn(),
+  },
 }));
 jest.mock('~/lib/repositories/exchangeRatesRepository', () => ({
   exchangeRatesRepository: { listByBase: () => [] },
@@ -251,6 +256,133 @@ describe('createInstalmentPlan', () => {
     ).toBeNull();
     expect(
       recurringRulesRepository.createInstalmentPlan({ ...PLAN_INPUT, count: 1, startDate: today }),
+    ).toBeNull();
+    expect(state.inserted).toBe(0);
+  });
+});
+
+/** An expense saved already, as the editor or a receipt scan left it. */
+function savedExpense(overrides: Row = {}): Row {
+  return {
+    id: 'tx-sofa',
+    type: 'expense',
+    amount: 1000,
+    currency: 'MYR',
+    reportingAmount: 1000,
+    accountAmount: null,
+    date: noon('2026-11-02'),
+    accountId: 'card',
+    categoryId: 'home',
+    note: 'Sofa',
+    memberId: null,
+    instalmentRuleId: null,
+    feeOfId: null,
+    reimbursedAt: null,
+    reimbursementTransactionId: null,
+    splits: [],
+    ...overrides,
+  };
+}
+
+describe('convertTransactionToInstalmentPlan', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  const CONVERT_INPUT = {
+    transactionId: 'tx-sofa',
+    count: 3,
+    recurrencePattern: 'monthly' as const,
+    recurrenceInterval: 1,
+  };
+
+  it('makes the expense payment 1, keeping its row, and waits on payment 2', () => {
+    const state = useFakeDb();
+    (transactionsRepository.getById as jest.Mock).mockReturnValue(savedExpense());
+
+    expect(recurringRulesRepository.convertTransactionToInstalmentPlan(CONVERT_INPUT)).toBe('plan');
+
+    expect(transactionsRepository.update).toHaveBeenCalledWith('tx-sofa', {
+      amount: 333.33,
+      reportingAmount: 333.33,
+      accountAmount: null,
+      instalmentRuleId: 'plan',
+      instalmentNumber: 1,
+    });
+    // Nothing new is written for payment 1: the expense is it.
+    expect(transactionsRepository.createWithId).not.toHaveBeenCalled();
+    expect(state.rule).toMatchObject({
+      name: 'Sofa',
+      amount: 333.33,
+      accountId: 'card',
+      categoryId: 'home',
+      instalmentCount: 3,
+      instalmentTotal: 1000,
+      instalmentStartDate: noon('2026-11-02'),
+      nextRunDate: noon('2026-12-02'),
+      endDate: noon('2027-01-02'),
+      isActive: true,
+    });
+  });
+
+  it('shrinks the frozen reporting and account values with the amount', () => {
+    useFakeDb();
+    (transactionsRepository.getById as jest.Mock).mockReturnValue(
+      savedExpense({ currency: 'USD', amount: 300, reportingAmount: 1410, accountAmount: 1410 }),
+    );
+
+    recurringRulesRepository.convertTransactionToInstalmentPlan(CONVERT_INPUT);
+
+    expect(transactionsRepository.update).toHaveBeenCalledWith(
+      'tx-sofa',
+      expect.objectContaining({ amount: 100, reportingAmount: 470, accountAmount: 470 }),
+    );
+  });
+
+  it('keeps whose expense it is on the plan, and uses the bank’s amount', () => {
+    const state = useFakeDb();
+    (transactionsRepository.getById as jest.Mock).mockReturnValue(
+      savedExpense({ memberId: 'user-ana' }),
+    );
+
+    recurringRulesRepository.convertTransactionToInstalmentPlan({
+      ...CONVERT_INPUT,
+      regularAmount: 333.4,
+    });
+
+    expect(state.rule).toMatchObject({ memberId: 'user-ana', amount: 333.4 });
+    expect(transactionsRepository.update).toHaveBeenCalledWith(
+      'tx-sofa',
+      expect.objectContaining({ amount: 333.4 }),
+    );
+  });
+
+  it.each([
+    ['a payment of a plan already', { instalmentRuleId: 'other-plan' }],
+    ['income', { type: 'income' }],
+    ['a transfer fee', { feeOfId: 'transfer' }],
+    ['a reimbursed expense', { reimbursedAt: noon('2026-11-03') }],
+    ['a split bill', { splits: [{ id: 'split' }] }],
+    ['an expense with no category', { categoryId: null }],
+    ['an amount too small to split', { amount: 0.02 }],
+  ])('refuses %s', (_label, overrides) => {
+    const state = useFakeDb();
+    (transactionsRepository.getById as jest.Mock).mockReturnValue(savedExpense(overrides));
+
+    expect(recurringRulesRepository.convertTransactionToInstalmentPlan(CONVERT_INPUT)).toBeNull();
+    expect(state.inserted).toBe(0);
+    expect(transactionsRepository.update).not.toHaveBeenCalled();
+  });
+
+  it('refuses a deleted expense and a payment amount that does not fit', () => {
+    const state = useFakeDb();
+    (transactionsRepository.getById as jest.Mock).mockReturnValue(null);
+    expect(recurringRulesRepository.convertTransactionToInstalmentPlan(CONVERT_INPUT)).toBeNull();
+
+    (transactionsRepository.getById as jest.Mock).mockReturnValue(savedExpense());
+    expect(
+      recurringRulesRepository.convertTransactionToInstalmentPlan({
+        ...CONVERT_INPUT,
+        regularAmount: 500,
+      }),
     ).toBeNull();
     expect(state.inserted).toBe(0);
   });

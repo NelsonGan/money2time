@@ -1859,6 +1859,12 @@ const fr = {
       "Pour garder un reçu, des détails ou un remboursement, la première échéance doit être aujourd'hui ou avant.",
     remove: 'Retirer les échéances',
     add_payments: 'Ajouter {{count}} échéances',
+    convert_payments: 'Transformer en {{count}} échéances',
+    convert_note:
+      "Cette dépense devient l'échéance 1 sur {{count}}. Les autres suivent le calendrier.",
+    already_due_one: "{{count}} autre échéance est déjà due. Elle est ajoutée à l'enregistrement.",
+    already_due_other:
+      "{{count}} autres échéances sont déjà dues. Elles sont ajoutées à l'enregistrement.",
     pill_a11y: 'Échéance {{label}}',
     new_plan: 'Nouveau paiement en plusieurs fois',
     due_this_month: 'À payer ce mois-ci',

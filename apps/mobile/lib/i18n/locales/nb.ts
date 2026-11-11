@@ -1842,6 +1842,11 @@ const nb = {
       'For å beholde en kvittering, detaljer eller refusjon må første avdrag være i dag eller tidligere.',
     remove: 'Fjern delbetaling',
     add_payments: 'Legg til {{count}} avdrag',
+    convert_payments: 'Gjør om til {{count}} betalinger',
+    convert_note: 'Denne utgiften blir betaling 1 av {{count}}. Resten følger planen.',
+    already_due_one: '{{count}} betaling til har allerede forfalt. Den legges til når du lagrer.',
+    already_due_other:
+      '{{count}} betalinger til har allerede forfalt. De legges til når du lagrer.',
     pill_a11y: 'Avdrag {{label}}',
     new_plan: 'Ny delbetaling',
     due_this_month: 'Forfaller denne måneden',

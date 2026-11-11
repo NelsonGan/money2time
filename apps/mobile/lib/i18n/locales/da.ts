@@ -1843,6 +1843,11 @@ const da = {
       'For at beholde en kvittering, detaljer eller refusion skal første afdrag være i dag eller tidligere.',
     remove: 'Fjern afdrag',
     add_payments: 'Tilføj {{count}} afdrag',
+    convert_payments: 'Gør til {{count}} betalinger',
+    convert_note: 'Denne udgift bliver betaling 1 af {{count}}. Resten følger planen.',
+    already_due_one: '{{count}} betaling mere er allerede forfalden. Den tilføjes, når du gemmer.',
+    already_due_other:
+      '{{count}} betalinger mere er allerede forfaldne. De tilføjes, når du gemmer.',
     pill_a11y: 'Afdrag {{label}}',
     new_plan: 'Ny afbetaling',
     due_this_month: 'Forfalder denne måned',

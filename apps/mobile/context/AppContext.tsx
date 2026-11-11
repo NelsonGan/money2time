@@ -154,6 +154,7 @@ import {
   receiptSplitsRepository,
 } from '~/lib/repositories/receiptSplitsRepository';
 import {
+  type ConvertToInstalmentPlanInput,
   type CreatedInstalmentPlan,
   type CreateInstalmentPlanInput,
   type CreateRecurringRuleInput,
@@ -480,6 +481,15 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   instalmentPlans: InstalmentProgress[];
   /** Saves a plan and makes its first payment when that is already due. */
   createInstalmentPlan: (input: CreateInstalmentPlanInput) => CreatedInstalmentPlan | null;
+  /**
+   * Turns an expense already saved into a plan of its amount, after saving
+   * the editor's `edits` to it: the expense becomes payment 1.
+   */
+  convertTransactionToInstalmentPlan: (
+    id: string,
+    edits: Partial<CreateTransactionInput>,
+    plan: Omit<ConvertToInstalmentPlanInput, 'transactionId'>,
+  ) => void;
   /** Renames a plan or moves its upcoming payments to another account or category. */
   updateInstalmentPlan: (id: string, updates: InstalmentPlanUpdate) => void;
   /** Ends a plan; the payments already made stay unless `removePayments`. */
@@ -3952,11 +3962,53 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           frequency: frequencyOfSchedule(input.recurrencePattern, input.recurrenceInterval),
           first_payment_due: created.firstPaymentId !== null,
           custom_amount: input.regularAmount != null,
+          source: 'add_form',
         });
       }
       return created;
     },
     [runMutation],
+  );
+
+  const convertTransactionToInstalmentPlan = useCallback(
+    (
+      id: string,
+      edits: Partial<CreateTransactionInput>,
+      plan: Omit<ConvertToInstalmentPlanInput, 'transactionId'>,
+    ) => {
+      // The editor's other changes (note, category, date, receipt) save first,
+      // like any edit. Its write is deferred, and this one is queued behind it
+      // (deferred writes run in order), so the plan is made from the row as
+      // the user left it and reloads everything once both have landed.
+      updateTransactionsBulk([{ id, input: edits }]);
+      runDeferredWrite(() => {
+        try {
+          const ruleId = runMutation(() =>
+            recurringRulesRepository.convertTransactionToInstalmentPlan({
+              ...plan,
+              transactionId: id,
+            }),
+          );
+          if (!ruleId) {
+            reportError(new Error('Expense could not be turned into an instalment plan'), {
+              scope: 'instalment_convert',
+            });
+            return;
+          }
+          void trackEvent(AnalyticsEvents.INSTALMENT_PLAN_CREATED, {
+            payments: Math.trunc(plan.count),
+            frequency: frequencyOfSchedule(plan.recurrencePattern, plan.recurrenceInterval),
+            // The expense itself is payment 1, made already.
+            first_payment_due: true,
+            custom_amount: plan.regularAmount != null,
+            source: 'saved_expense',
+          });
+        } catch (error) {
+          reportError(error, { scope: 'instalment_convert' });
+        }
+      });
+    },
+    [runMutation, updateTransactionsBulk],
   );
 
   const updateInstalmentPlan = useCallback(
@@ -6515,6 +6567,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             deleteRecurringRule,
             instalmentPlans,
             createInstalmentPlan,
+            convertTransactionToInstalmentPlan,
             updateInstalmentPlan,
             deleteInstalmentPlan,
             payNextInstalment,
@@ -6653,6 +6706,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       deleteRecurringRule,
       instalmentPlans,
       createInstalmentPlan,
+      convertTransactionToInstalmentPlan,
       updateInstalmentPlan,
       deleteInstalmentPlan,
       payNextInstalment,

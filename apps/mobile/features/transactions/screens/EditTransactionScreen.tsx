@@ -9,6 +9,11 @@ import {
   useTransactions,
   useTransferFeeIndex,
 } from '~/context/AppContext';
+import type { InstalmentChoice } from '~/features/instalments/components/InstalmentSheet';
+import {
+  canConvertToInstalmentPlan,
+  scheduleOfFrequency,
+} from '~/features/instalments/lib/instalmentPlan';
 import { TransactionEditorScreen } from '~/features/transactions/components';
 import { type SplitDraft, splitsHelpers } from '~/features/transactions/components/editor';
 import type { TransactionEditorSubmitExtras } from '~/features/transactions/components/TransactionEditorScreen';
@@ -18,9 +23,11 @@ import {
   type TransferFeeDraft,
   transferFeeDraftOf,
 } from '~/features/transactions/lib/transferFee';
+import { useProGate } from '~/hooks/useProGate';
 import { I18n } from '~/lib/i18n';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
 import type { RootStackParamList } from '~/navigation/rootStack';
+import { requestHighlightTransaction } from '~/services/transactionsNavigation';
 import type { TransactionType, TransactionWithRelations } from '~/types';
 import { getErrorMessage } from '~/utils/errorHandling';
 import { dateKeepingTimeOfDay, dayKeyFromIsoLocal, formatAmount } from '~/utils/formatters';
@@ -68,10 +75,12 @@ function TransactionEditor({
     markSplitPaid,
     markSplitUnpaid,
     instalmentPlans,
+    convertTransactionToInstalmentPlan,
     saveTransferFee,
     settings,
     getAccountById,
   } = useApp();
+  const { checkLimit } = useProGate();
   // The fee this transfer was charged, edited with it.
   const feeLink = useTransferFeeIndex().byTransferId.get(transaction.id) ?? null;
   const initialTransferFee = useMemo<TransferFeeDraft | null>(
@@ -142,6 +151,48 @@ function TransactionEditor({
     () =>
       isBalanceAdjustment ? ['balance_adjustment'] : isInstalmentPayment ? ['expense'] : undefined,
     [isBalanceAdjustment, isInstalmentPayment],
+  );
+
+  // An expense saved already (often by a receipt scan or a notification) can
+  // still be paid in instalments: the editor offers the same Instalments chip
+  // as the add form, and saving turns the expense into the plan's payment 1.
+  const canConvertToPlan = !isBalanceAdjustment && canConvertToInstalmentPlan(transaction);
+  const activePlanCount = useMemo(
+    () => instalmentPlans.filter((plan) => !plan.complete).length,
+    [instalmentPlans],
+  );
+  const instalmentOptions = useMemo(
+    () =>
+      canConvertToPlan
+        ? {
+            initialChoice: null,
+            canStart: () => checkLimit('instalments', activePlanCount),
+            onSubmitPlan: ({
+              transaction: input,
+              choice,
+            }: {
+              transaction: CreateTransactionInput;
+              choice: InstalmentChoice;
+            }) => {
+              const { pattern, interval } = scheduleOfFrequency(choice.frequency);
+              convertTransactionToInstalmentPlan(transaction.id, input, {
+                count: choice.count,
+                recurrencePattern: pattern,
+                recurrenceInterval: interval,
+                regularAmount: choice.amount ?? null,
+              });
+              // Flash the row, now payment 1 with its "1/12" pill.
+              requestHighlightTransaction(transaction.id);
+            },
+          }
+        : undefined,
+    [
+      activePlanCount,
+      canConvertToPlan,
+      checkLimit,
+      convertTransactionToInstalmentPlan,
+      transaction.id,
+    ],
   );
 
   // A friend's payback transfer: deleting it undoes the payment, which goes
@@ -296,6 +347,7 @@ function TransactionEditor({
       initialTransferFee={initialTransferFee}
       openSplitBillOnMount={openSplitBillOnMount}
       headerNotice={headerNotice}
+      instalmentOptions={instalmentOptions}
       subtitleOverride={
         isBalanceAdjustment
           ? I18n.t('transactions.editor.subtitle_edit_balance_adjustment')

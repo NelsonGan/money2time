@@ -1850,6 +1850,12 @@ const id = {
       'Agar struk, detail, atau penggantian tetap tersimpan, pembayaran pertama harus hari ini atau sebelumnya.',
     remove: 'Hapus cicilan',
     add_payments: 'Tambahkan {{count}} pembayaran',
+    convert_payments: 'Jadikan {{count}} pembayaran',
+    convert_note: 'Pengeluaran ini menjadi pembayaran 1 dari {{count}}. Sisanya mengikuti jadwal.',
+    already_due_one:
+      '{{count}} pembayaran lagi sudah jatuh tempo. Ditambahkan saat Anda menyimpan.',
+    already_due_other:
+      '{{count}} pembayaran lagi sudah jatuh tempo. Ditambahkan saat Anda menyimpan.',
     pill_a11y: 'Cicilan {{label}}',
     new_plan: 'Cicilan baru',
     due_this_month: 'Jatuh tempo bulan ini',

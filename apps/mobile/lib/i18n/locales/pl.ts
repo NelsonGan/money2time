@@ -1848,6 +1848,11 @@ const pl = {
       'Aby zachować paragon, szczegóły lub zwrot kosztów, pierwsza rata musi przypadać na dziś lub wcześniej.',
     remove: 'Usuń raty',
     add_payments: 'Dodaj raty ({{count}})',
+    convert_payments: 'Zamień na {{count}} płatności',
+    convert_note: 'Ten wydatek staje się płatnością 1 z {{count}}. Reszta według harmonogramu.',
+    already_due_one: 'Jeszcze {{count}} płatność jest już wymagalna. Zostanie dodana po zapisaniu.',
+    already_due_other:
+      'Jeszcze {{count}} płatności jest już wymagalnych. Zostaną dodane po zapisaniu.',
     pill_a11y: 'Rata {{label}}',
     new_plan: 'Nowy plan ratalny',
     due_this_month: 'Do zapłaty w tym miesiącu',

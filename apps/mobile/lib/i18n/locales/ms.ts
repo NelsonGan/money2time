@@ -1854,6 +1854,11 @@ const ms = {
       'Untuk menyimpan resit, butiran atau bayaran balik, bayaran pertama mesti hari ini atau lebih awal.',
     remove: 'Buang ansuran',
     add_payments: 'Tambah {{count}} bayaran',
+    convert_payments: 'Jadikan {{count}} bayaran',
+    convert_note:
+      'Perbelanjaan ini menjadi bayaran 1 daripada {{count}}. Selebihnya mengikut jadual.',
+    already_due_one: '{{count}} lagi bayaran sudah tiba tempoh. Ia ditambah apabila anda simpan.',
+    already_due_other: '{{count}} lagi bayaran sudah tiba tempoh. Ia ditambah apabila anda simpan.',
     pill_a11y: 'Ansuran {{label}}',
     new_plan: 'Pelan ansuran baharu',
     due_this_month: 'Perlu dibayar bulan ini',
