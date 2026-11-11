@@ -207,6 +207,13 @@ export const recurringRulesTable = sqliteTable('recurring_rules', {
   // The person the rule's entries belong to in a shared ledger (migration 079);
   // NULL means the ledger's owner. Copied onto each run.
   memberId: text('member_id'),
+  // A transfer rule's fee (migration 088), written beside each run as its own
+  // expense row. Null amount (or 0) means no fee. See
+  // features/transactions/lib/transferFee.ts.
+  feeAmount: real('fee_amount'),
+  feeCurrency: text('fee_currency'),
+  feeSide: text('fee_side'),
+  feeCategoryId: text('fee_category_id'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
   deletedAt: text('deleted_at'),

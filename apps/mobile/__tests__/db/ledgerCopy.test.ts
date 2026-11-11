@@ -182,6 +182,9 @@ function partsSource(): Record<string, Row[]> {
         ledger_id: 'src',
         from_account_id: 'cash',
         to_account_id: 'trip',
+        // Its fee's category was deleted, so it does not come along.
+        fee_amount: 1,
+        fee_category_id: 'gone',
         recurrence_pattern: 'weekly',
         recurrence_interval: 1,
         next_run_date: '2026-11-09T00:00:00.000Z',
@@ -314,6 +317,12 @@ describe('ledgerPartsCopySpecs', () => {
       december,
       '2026-11-09T00:00:00.000Z',
     ]);
+  });
+
+  it('keeps a transfer rule whose fee category stays behind, its fee unfiled', () => {
+    const rules = planParts(['recurring', 'accounts', 'categories', 'goals']).recurring_rules;
+    const save = rules.find((rule) => rule.to_account_id != null);
+    expect(save).toMatchObject({ fee_amount: 1, fee_category_id: null });
   });
 
   it('copies budget templates with their lines, and albums empty and inactive', () => {

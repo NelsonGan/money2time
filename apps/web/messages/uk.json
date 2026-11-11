@@ -1262,6 +1262,7 @@
       },
       "next": "наступний: {date}",
       "transfer": "Переказ",
+      "fee": "Комісія {amount}",
       "yearHours": "{hours} роботи на рік",
       "upcomingTitle": "Незабаром",
       "pausedTitle": "Призупинені"

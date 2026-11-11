@@ -1262,6 +1262,7 @@
       },
       "next": "następna {date}",
       "transfer": "Przelew",
+      "fee": "Opłata {amount}",
       "yearHours": "{hours} pracy rocznie",
       "upcomingTitle": "Nadchodzące",
       "pausedTitle": "Wstrzymane"

@@ -771,6 +771,35 @@ describe('recurring rules', () => {
     expect(step).toMatchObject({ input: { countsAsExpense: true, categoryId: 'food' } });
   });
 
+  // The web's rule editor has no fee: a transfer rule's fee survives its
+  // edits, and goes when the rule stops being a transfer, as in the app.
+  it("keeps a transfer rule's fee, and drops it when the rule becomes an expense", () => {
+    const topUp = rule('r1', {
+      type: 'transfer',
+      accountId: null,
+      categoryId: null,
+      fromAccountId: 'myr',
+      toAccountId: 'card',
+      feeAmount: 2,
+      feeCurrency: 'MYR',
+      feeSide: 'from',
+      feeCategoryId: 'food',
+    });
+    const edit = (set: Record<string, unknown>) => [
+      { entity: 'recurring', op: 'update', id: 'r1', at: AT, set },
+    ];
+    const [renamed] = steps(edit({ name: 'Top-up' }), { recurringRules: [topUp] });
+    expect(renamed.kind === 'recurring.update' && Object.keys(renamed.input)).not.toContain(
+      'feeAmount',
+    );
+    const [expense] = steps(edit({ type: 'expense', accountId: 'myr', categoryId: 'food' }), {
+      recurringRules: [topUp],
+    });
+    expect(expense).toMatchObject({
+      input: { feeAmount: null, feeCurrency: null, feeSide: null, feeCategoryId: null },
+    });
+  });
+
   it('pauses a rule, refuses an end before the start, and holds a free plan to five', () => {
     const rules = [rule('r1')];
     const edit = (set: Record<string, unknown>) => [

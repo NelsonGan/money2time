@@ -308,3 +308,90 @@ export function sameTransferFeeIndex(a: TransferFeeIndex, b: TransferFeeIndex): 
   }
   return true;
 }
+
+/** The fee columns a recurring transfer rule stores (all null for none). */
+export interface RecurringRuleFeeFields {
+  feeAmount: number | null;
+  feeCurrency: string | null;
+  feeSide: TransferFeeSide | null;
+  feeCategoryId: string | null;
+}
+
+export const NO_RECURRING_RULE_FEE: RecurringRuleFeeFields = {
+  feeAmount: null,
+  feeCurrency: null,
+  feeSide: null,
+  feeCategoryId: null,
+};
+
+/**
+ * What a recurring transfer rule saves for the editor's fee draft: the amount
+ * in the paying account's currency, which every run then writes beside its
+ * transfer (`recurringRulesRepository.runDueTransactions`). No draft, 0, or a
+ * side without an account saves no fee.
+ */
+export function recurringRuleFeeFields(
+  draft: TransferFeeDraft | null,
+  transfer: TransferAccounts,
+  currencyOf: (accountId: string) => string | null | undefined,
+): RecurringRuleFeeFields {
+  const amount = draft ? normalizeMoneyAmount(draft.amount) : 0;
+  const accountId = draft ? transferFeeAccountId(draft.side, transfer) : null;
+  const currency = accountId ? currencyOf(accountId) : null;
+  if (!draft || !(amount > 0) || !accountId || !currency) return NO_RECURRING_RULE_FEE;
+  return {
+    feeAmount: amount,
+    feeCurrency: currency,
+    feeSide: draft.side,
+    feeCategoryId: draft.categoryId,
+  };
+}
+
+type RuleWithFee = Pick<Transaction, 'type'> &
+  Partial<TransferAccounts> &
+  Partial<RecurringRuleFeeFields>;
+
+/**
+ * The editor's draft for a recurring rule's fee, or null when it has none.
+ * The sheet edits the fee in the paying account's currency, so a fee saved in
+ * another one (the account was re-denominated, or the rule pointed at another
+ * account from the loan, goal or Web Dashboard editor) is converted into it by
+ * `inAccountCurrency`, the way a one-off fee reads its `accountAmount`.
+ */
+export function recurringRuleFeeDraft(
+  rule: RuleWithFee,
+  inAccountCurrency?: (amount: number, feeCurrency: string, accountId: string) => number,
+): TransferFeeDraft | null {
+  if (rule.type !== 'transfer' || rule.feeAmount == null || !(rule.feeAmount > 0)) return null;
+  const side: TransferFeeSide = rule.feeSide === 'to' ? 'to' : 'from';
+  const accountId = transferFeeAccountId(side, {
+    fromAccountId: rule.fromAccountId ?? null,
+    toAccountId: rule.toAccountId ?? null,
+  });
+  const amount =
+    inAccountCurrency && accountId && rule.feeCurrency
+      ? normalizeMoneyAmount(inAccountCurrency(rule.feeAmount, rule.feeCurrency, accountId))
+      : rule.feeAmount;
+  return { amount, side, categoryId: rule.feeCategoryId ?? null };
+}
+
+/**
+ * Whether a recurring rule's runs will write its fee: a transfer with a fee
+ * whose paying account is still there and can carry one (not a loan), the
+ * same test the runner makes (`transferFeeRunInput`). A rule pointed at a
+ * loan from another editor keeps its stored fee, but neither writes nor
+ * counts it.
+ */
+export function recurringRuleChargesFee(
+  rule: RuleWithFee,
+  accountOf: (accountId: string) => Pick<Account, 'type'> | null | undefined,
+): boolean {
+  if (rule.type !== 'transfer' || !rule.feeCurrency || !rule.feeAmount || rule.feeAmount <= 0) {
+    return false;
+  }
+  const accountId = transferFeeAccountId(rule.feeSide === 'to' ? 'to' : 'from', {
+    fromAccountId: rule.fromAccountId ?? null,
+    toAccountId: rule.toAccountId ?? null,
+  });
+  return !!accountId && canChargeTransferFee(accountOf(accountId));
+}

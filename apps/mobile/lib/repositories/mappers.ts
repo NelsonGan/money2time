@@ -827,6 +827,21 @@ export function toReceiptSplit(row: ReceiptSplitRow, items: ReceiptSplitItem[]):
   };
 }
 
+function recurringFeeOf(
+  row: RecurringRuleRow,
+): Pick<RecurringTransactionRule, 'feeAmount' | 'feeCurrency' | 'feeSide' | 'feeCategoryId'> {
+  const amount = row.feeAmount;
+  if (row.type !== 'transfer' || amount == null || !(amount > 0) || !row.feeCurrency) {
+    return { feeAmount: null, feeCurrency: null, feeSide: null, feeCategoryId: null };
+  }
+  return {
+    feeAmount: amount,
+    feeCurrency: row.feeCurrency,
+    feeSide: row.feeSide === 'to' ? 'to' : 'from',
+    feeCategoryId: row.feeCategoryId ?? null,
+  };
+}
+
 export function toRecurringRule(row: RecurringRuleRow): RecurringTransactionRule {
   return {
     id: row.id,
@@ -863,6 +878,8 @@ export function toRecurringRule(row: RecurringRuleRow): RecurringTransactionRule
     instalmentTotal: row.instalmentTotal ?? null,
     instalmentStartDate: row.instalmentStartDate ?? null,
     memberId: row.memberId ?? null,
+    // Only a transfer rule carries a fee; a fee of 0 or less is none.
+    ...recurringFeeOf(row),
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     deletedAt: row.deletedAt,

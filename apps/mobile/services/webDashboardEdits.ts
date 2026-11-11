@@ -1097,6 +1097,11 @@ function rulePayload(
     fromAccountId: null,
     toAccountId: null,
     countsAsExpense: false,
+    // Only a transfer rule carries a fee, as the app's editor saves it.
+    feeAmount: null,
+    feeCurrency: null,
+    feeSide: null,
+    feeCategoryId: null,
   });
 }
 

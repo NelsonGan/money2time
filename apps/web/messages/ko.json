@@ -1262,6 +1262,7 @@
       },
       "next": "다음 {date}",
       "transfer": "이체",
+      "fee": "수수료 {amount}",
       "yearHours": "연간 {hours} 근무",
       "upcomingTitle": "예정",
       "pausedTitle": "일시중지"

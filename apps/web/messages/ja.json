@@ -1262,6 +1262,7 @@
       },
       "next": "次回 {date}",
       "transfer": "振替",
+      "fee": "手数料 {amount}",
       "yearHours": "年間{hours}の労働",
       "upcomingTitle": "今後の予定",
       "pausedTitle": "一時停止中"

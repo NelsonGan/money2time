@@ -27,6 +27,10 @@ import {
   RecurringWeekStrip,
   type WeekStripDay,
 } from '~/features/settings/components/RecurringWeekStrip';
+import {
+  NO_RECURRING_RULE_FEE,
+  recurringRuleChargesFee,
+} from '~/features/transactions/lib/transferFee';
 import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -50,8 +54,8 @@ import {
   recurringAmountPerMonth,
   recurringExpenseDueBetween,
   recurringMonthlyExpenseTotal,
+  recurringRunSpend,
 } from '~/utils/recurringRules';
-import { countsAsExpenseRow } from '~/utils/spending';
 
 const MS_PER_DAY = 86_400_000;
 /** Space between the + and what it sits above (the bar, or the home indicator). */
@@ -132,12 +136,23 @@ export function RecurringScreen({
   const listBottomPadding = fabBottom + ADD_FAB_SIZE + SETTINGS_LIST_BOTTOM_PADDING;
   const {
     settings,
-    recurringRules,
+    accounts,
+    recurringRules: storedRules,
     deleteRecurringRule,
     getCategoryById,
     getTrueHourlyRateForDate,
     rateTable,
   } = useApp();
+  // A fee the runner will not write (its paying account became a loan or is
+  // gone) is neither shown nor counted.
+  const recurringRules = useMemo(() => {
+    const accountById = new Map(accounts.map((account) => [account.id, account]));
+    return storedRules.map((rule) =>
+      rule.feeAmount != null && !recurringRuleChargesFee(rule, (id) => accountById.get(id))
+        ? { ...rule, ...NO_RECURRING_RULE_FEE }
+        : rule,
+    );
+  }, [accounts, storedRules]);
   const monthCycle = monthCycleOf(settings);
   const { checkLimit } = useProGate();
 
@@ -330,6 +345,12 @@ export function RecurringScreen({
             ? `≈ ${formatValue(reportingAmount)}`
             : undefined,
         metaLabel: formatCadence(rule.recurrencePattern, rule.recurrenceInterval),
+        feeLabel:
+          rule.type === 'transfer' && rule.feeAmount && rule.feeCurrency
+            ? I18n.t('transactions.editor.transfer_fee.chip_active', {
+                amount: formatValue(rule.feeAmount, rule.feeCurrency),
+              })
+            : undefined,
         badge,
         categoryIcon: category?.icon ?? null,
         categoryParentIcon: parent?.icon ?? null,
@@ -357,8 +378,7 @@ export function RecurringScreen({
 
     days.forEach(([dayKey, dayRules], dayIndex) => {
       const dayTotal = dayRules.reduce(
-        (sum, rule) =>
-          countsAsExpenseRow(rule) ? sum + toReporting(rule.amount, rule.currency) : sum,
+        (sum, rule) => sum + recurringRunSpend(rule, toReporting),
         0,
       );
       result.push({

@@ -60,6 +60,8 @@ interface TableSpec {
    * out: a recurring rule whose account stays behind would run into nothing.
    */
   allRefs?: boolean;
+  /** References `allRefs` lets go of: one that does not land becomes null. */
+  optionalRefs?: readonly string[];
   /** Last changes to a planned copy (`source` is the row it copies), after its references are mapped. */
   adjust?: (copy: Row, source: Row) => void;
   /** Last changes across all of a table's copies (`sources[i]` is what `copies[i]` copies). */
@@ -137,6 +139,8 @@ export const LEDGER_COPY_TABLES: readonly TableSpec[] = [
       from_account_id: 'accounts',
       to_account_id: 'accounts',
       category_id: 'categories',
+      // A transfer rule's fee is filed under the copy's category.
+      fee_category_id: 'categories',
     },
     cleared: ['member_id'],
   },
@@ -251,7 +255,12 @@ export function planLedgerCopy(
         ('ledger' in owner || mapOf(owner.via).has(String(row[owner.parent]))) &&
         (spec.required ?? []).every((column) => lands(row, column)) &&
         (!spec.allRefs ||
-          Object.keys(spec.refs).every((column) => row[column] == null || lands(row, column))) &&
+          Object.keys(spec.refs).every(
+            (column) =>
+              row[column] == null ||
+              lands(row, column) ||
+              (spec.optionalRefs?.includes(column) ?? false),
+          )) &&
         (spec.keep?.(row) ?? true),
     );
     const space = ID_SPACE[spec.table];
@@ -528,6 +537,8 @@ export function ledgerPartsCopySpecs(copy: LedgerPartsCopy): TableSpec[] {
     specs.push({
       ...base('recurring_rules'),
       allRefs: true,
+      // A fee filed under a category left behind is still charged, unfiled.
+      optionalRefs: ['fee_category_id'],
       // An instalment plan is one purchase being paid off, and its payments
       // stay behind with the rest of the history: it is not copied.
       keep: (row) =>

@@ -1262,6 +1262,7 @@
       },
       "next": "tiếp theo {date}",
       "transfer": "Chuyển khoản",
+      "fee": "Phí {amount}",
       "yearHours": "{hours} làm việc mỗi năm",
       "upcomingTitle": "Sắp tới",
       "pausedTitle": "Tạm dừng"

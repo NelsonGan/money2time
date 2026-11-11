@@ -1262,6 +1262,7 @@
       },
       "next": "ครั้งถัดไป {date}",
       "transfer": "การโอน",
+      "fee": "ค่าธรรมเนียม {amount}",
       "yearHours": "ทำงาน {hours} ต่อปี",
       "upcomingTitle": "ที่กำลังจะถึง",
       "pausedTitle": "ที่หยุดไว้"

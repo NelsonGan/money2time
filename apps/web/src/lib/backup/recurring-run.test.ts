@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { highlightsRecurringRuns, isRecurringRun, planRuleIdsOf, recurringRunRuleId } from "./recurring-run.ts";
+import { highlightsRecurringRuns, isRecurringRun, planRuleIdsOf, recurringRuleFee, recurringRunRuleId } from "./recurring-run.ts";
 
 test("a rule's run is read from its id; typed-in entries and plan payments are not", () => {
   assert.equal(isRecurringRun({ id: "rr:rule-1:2026-11-01" }), true);
@@ -30,4 +30,19 @@ test("the rule is read from a run id", () => {
   assert.equal(recurringRunRuleId("rr:plan-1:payoff"), "plan-1");
   assert.equal(recurringRunRuleId("rr::x"), null);
   assert.equal(recurringRunRuleId("abc"), null);
+});
+
+test("a transfer rule's fee is read as the app reads it; any other rule, or none, has no fee", () => {
+  const types: Record<string, string> = { card: "credit", wallet: "debit", car: "loan" };
+  const typeOf = (id: string) => types[id];
+  const topUp = { type: "transfer", from_account_id: "card", to_account_id: "wallet", fee_amount: 2, fee_currency: "MYR" };
+  assert.deepEqual(recurringRuleFee(topUp, typeOf), { amount: 2, currency: "MYR" });
+  assert.deepEqual(recurringRuleFee({ ...topUp, fee_side: "to" }, typeOf), { amount: 2, currency: "MYR" });
+  assert.equal(recurringRuleFee({ type: "transfer" }, typeOf), null);
+  assert.equal(recurringRuleFee({ ...topUp, fee_amount: 0 }, typeOf), null);
+  assert.equal(recurringRuleFee({ ...topUp, fee_currency: null }, typeOf), null);
+  assert.equal(recurringRuleFee({ ...topUp, type: "expense" }, typeOf), null);
+  // The phone's runner writes no fee on a loan or on an account that is gone.
+  assert.equal(recurringRuleFee({ ...topUp, to_account_id: "car", fee_side: "to" }, typeOf), null);
+  assert.equal(recurringRuleFee({ ...topUp, from_account_id: "closed" }, typeOf), null);
 });

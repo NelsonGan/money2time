@@ -451,6 +451,8 @@ interface TransactionEditorScreenProps {
         isActive: boolean;
         logoId: string | null;
       };
+      /** A transfer rule's fee, written beside each run; null on every other rule. */
+      transferFee: TransferFeeDraft | null;
     }) => void;
   };
   /** A line under the header that links somewhere (a payment's instalment plan). */
@@ -2376,6 +2378,7 @@ export function TransactionEditorScreen({
               isActive: recurrenceIsActive,
               logoId: effectiveRecurrenceLogoId,
             },
+            transferFee: capturedPayload.type === 'transfer' ? transferFee : null,
           });
         };
         submitPayload = null; // handled by recurringSubmit
@@ -2773,7 +2776,7 @@ export function TransactionEditorScreen({
     (type === 'transfer' ? transferCountsAsExpense : type === 'expense' && reimbursable);
   // Receipt attach rides at the right end of the action row (money-in/out).
   const showReceiptButton = useStickyNumpad && (type === 'expense' || type === 'income');
-  // A transfer's fee (a recurring rule has its own editor and no fee).
+  // A transfer's fee. A recurring rule sets it from the Fee row under To instead.
   const showTransferFeeButton = useStickyNumpad && isTransferType;
   // Currency now lives on the amount card, not the action row.
   const showActionRow =
@@ -3732,6 +3735,43 @@ export function TransactionEditorScreen({
                         </View>
                       </SummaryRow>
                     </View>
+                    {/* A rule's fee, written beside each run. The one-off
+                        editor has the Fee chip in its action row instead. */}
+                    {recurringOptions ? (
+                      <>
+                        <View className="h-[1px] bg-border/15 mx-4" />
+                        <SummaryRow
+                          label={I18n.t('transactions.editor.transfer_fee.chip_label')}
+                          isActive={transferFeeSheetVisible}
+                          onPress={() => {
+                            clearActiveField();
+                            openTransferFeeSheet();
+                          }}
+                          rightElement={null}
+                        >
+                          <View className="flex-row items-center justify-between">
+                            <View className="flex-row items-center gap-2 flex-1 min-w-0">
+                              <View className="w-7 h-7 rounded-full bg-secondary/60 items-center justify-center">
+                                <Receipt size={13} color={themeColors.textMuted} />
+                              </View>
+                              <Text variant="caption" tone="muted">
+                                {I18n.t('transactions.editor.transfer_fee.chip_label')}
+                              </Text>
+                            </View>
+                            <Text
+                              variant="body"
+                              numberOfLines={1}
+                              className={cn(
+                                'text-right shrink max-w-[58%]',
+                                transferFeeLabel ? '' : 'text-muted-foreground/60',
+                              )}
+                            >
+                              {transferFeeLabel ?? I18n.t('transactions.editor.optional')}
+                            </Text>
+                          </View>
+                        </SummaryRow>
+                      </>
+                    ) : null}
                   </>
                 ) : (
                   <View onLayout={pageRegisterLayout('account')}>

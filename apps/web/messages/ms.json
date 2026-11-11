@@ -1262,6 +1262,7 @@
       },
       "next": "seterusnya {date}",
       "transfer": "Pindahan",
+      "fee": "Caj {amount}",
       "yearHours": "{hours} bekerja setahun",
       "upcomingTitle": "Akan datang",
       "pausedTitle": "Dijeda"

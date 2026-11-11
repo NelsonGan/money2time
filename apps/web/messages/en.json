@@ -1262,6 +1262,7 @@
       },
       "next": "next {date}",
       "transfer": "Transfer",
+      "fee": "Fee {amount}",
       "yearHours": "{hours} of work a year",
       "upcomingTitle": "Coming up",
       "pausedTitle": "Paused"

@@ -36,3 +36,30 @@ export function planRuleIdsOf(rules: readonly { id: string; instalment_count?: n
 export function highlightsRecurringRuns(settings: { highlight_recurring_transactions?: number | null }): boolean {
   return settings.highlight_recurring_transactions === 1;
 }
+
+/**
+ * A transfer rule's fee on each run, in its own currency, or null for none.
+ * As the app's `toRecurringRule` reads it (lib/repositories/mappers.ts): only
+ * a transfer carries one, and 0 or less is none. Like the app's
+ * `recurringRuleChargesFee`, a fee whose paying account is gone or a loan is
+ * none: the phone's runner does not write it. `accountTypeOf` gives a live
+ * account's type, undefined for one that is not.
+ */
+export function recurringRuleFee(
+  rule: {
+    type: string;
+    from_account_id?: string | null;
+    to_account_id?: string | null;
+    fee_amount?: number | null;
+    fee_currency?: string | null;
+    fee_side?: string | null;
+  },
+  accountTypeOf: (accountId: string) => string | undefined,
+): { amount: number; currency: string } | null {
+  const amount = rule.fee_amount;
+  if (rule.type !== "transfer" || amount == null || !(amount > 0) || !rule.fee_currency) return null;
+  const payingId = rule.fee_side === "to" ? rule.to_account_id : rule.from_account_id;
+  const payingType = payingId ? accountTypeOf(payingId) : undefined;
+  if (!payingType || payingType === "loan") return null;
+  return { amount, currency: rule.fee_currency };
+}

@@ -24,7 +24,7 @@ import {
 import { storedBudgetCurrency, storedBudgetRate } from "./budget-currency";
 import { monthlyBudgetRows } from "./budget-period";
 import { paidWithoutTransfer, paybackNote } from "./paybacks";
-import { highlightsRecurringRuns, isRecurringRun, planRuleIdsOf } from "./recurring-run";
+import { highlightsRecurringRuns, isRecurringRun, planRuleIdsOf, recurringRuleFee } from "./recurring-run";
 import {
   accrueReducingBalance,
   loanAccrualRatePercent,
@@ -177,6 +177,10 @@ export type RecurringRule = {
   amountBase: number;
   /** Main-currency cost per month. */
   monthlyBase: number;
+  /** A transfer rule's fee on each run (an expense the run writes beside it), or null. */
+  fee: { amount: number; currency: string; base: number } | null;
+  /** The fee's main-currency cost per month, 0 without one. */
+  feeMonthlyBase: number;
   pattern: string;
   interval: number;
   nextRun: Date | null;
@@ -752,6 +756,8 @@ export function buildModel(backup: BackupFile, opts: { timeZone?: string | null 
             ? 1 / (12 * interval)
             : 1 / interval;
     const amountBase = toBase(row.amount, row.currency || currency) ?? row.amount;
+    const fee = recurringRuleFee(row, (id) => accountById.get(id)?.type);
+    const feeBase = fee ? (toBase(fee.amount, fee.currency) ?? fee.amount) : 0;
     return {
       id: row.id,
       name: row.name || row.note || "",
@@ -760,6 +766,8 @@ export function buildModel(backup: BackupFile, opts: { timeZone?: string | null 
       currency: row.currency || currency,
       amountBase,
       monthlyBase: amountBase * perMonth,
+      fee: fee ? { ...fee, base: feeBase } : null,
+      feeMonthlyBase: feeBase * perMonth,
       pattern,
       interval,
       nextRun: parseLocalDate(row.next_run_date ?? null),
