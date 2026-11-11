@@ -5616,8 +5616,11 @@ npm run upload:android -- --device icon --dry-run      # no --dir: nothing per l
 ```
 
 Drop `--dry-run` to write for real. `--dir` holds one folder per locale, which
-is what **Export All Locales** unzips to. One tablet set goes to two Play
-galleries: Play keeps 7-inch and 10-inch screenshots separately and wants
+is what **Export All Locales** unzips to. Both scripts upload six locales at
+once, as **Upload to Store** does (`--concurrency <n>` changes it), and print
+each locale's lines together when it finishes: most of an upload is the store
+processing images, so one locale at a time took about six times as long. One
+tablet set goes to two Play galleries: Play keeps 7-inch and 10-inch screenshots separately and wants
 both, so `--device tablet` writes the same images to `sevenInchScreenshots` and
 `tenInchScreenshots`.
 

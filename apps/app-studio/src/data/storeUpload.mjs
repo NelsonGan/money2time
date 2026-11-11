@@ -95,6 +95,28 @@ export async function androidReady() {
   return { ok: true, detail: `gplay profile "${wanted ?? res.json?.profile ?? profiles[0].name}"` };
 }
 
+// ── Concurrency ──────────────────────────────────────────────────────────────
+
+/**
+ * How many locales the upload scripts send at once, the same as the Studio's
+ * Upload to Store (`MAX_UPLOAD_CONCURRENCY` in `UploadModal.tsx`). Most of an
+ * upload is waiting for the store to process each image, so one locale at a
+ * time took about six times as long.
+ */
+export const UPLOAD_CONCURRENCY = 6;
+
+/** Run `fn` on every item, at most `limit` at once. Items finish in any order. */
+export async function forEachLimit(items, limit, fn) {
+  let next = 0;
+  const worker = async () => {
+    while (next < items.length) {
+      const i = next++;
+      await fn(items[i], i);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.max(1, Math.min(limit, items.length)) }, worker));
+}
+
 // ── Staging ──────────────────────────────────────────────────────────────────
 
 /**
