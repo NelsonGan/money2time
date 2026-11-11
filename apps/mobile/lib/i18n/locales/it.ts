@@ -1850,6 +1850,7 @@ const it = {
     add_payments: 'Aggiungi {{count}} rate',
     convert_payments: 'Trasforma in {{count}} rate',
     convert_note: 'Questa spesa diventa la rata 1 di {{count}}. Le altre seguono il piano.',
+    convert_failed: 'Non è stato possibile trasformare questa spesa in rate. Riprova.',
     already_due_one: 'È già scaduta {{count}} altra rata. Viene aggiunta al salvataggio.',
     already_due_other: 'Sono già scadute altre {{count}} rate. Vengono aggiunte al salvataggio.',
     pill_a11y: 'Rata {{label}}',

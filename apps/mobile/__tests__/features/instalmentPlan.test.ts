@@ -165,6 +165,7 @@ describe('isInstalmentPlan', () => {
 
 describe('canConvertToInstalmentPlan', () => {
   const expense = {
+    id: 'tx-sofa',
     type: 'expense' as const,
     instalmentRuleId: null,
     feeOfId: null,
@@ -175,8 +176,17 @@ describe('canConvertToInstalmentPlan', () => {
 
   it('allows a plain expense of the user’s own', () => {
     expect(canConvertToInstalmentPlan(expense)).toBe(true);
-    // A pending reimbursement stays on payment 1, as on a new plan.
     expect(canConvertToInstalmentPlan({ ...expense, splits: undefined })).toBe(true);
+  });
+
+  it('allows a pending reimbursement, which stays on payment 1', () => {
+    const pending = { ...expense, reimbursable: true, reimbursedAt: null };
+    expect(canConvertToInstalmentPlan(pending)).toBe(true);
+  });
+
+  it('refuses a run of a rule, such as a plan payment an older app wrote without its plan', () => {
+    expect(canConvertToInstalmentPlan({ ...expense, id: 'rr:plan-a:2026-10-02' })).toBe(false);
+    expect(canConvertToInstalmentPlan({ ...expense, id: 'rr:netflix:2026-10-02' })).toBe(false);
   });
 
   it('refuses rows that would still count towards something else', () => {

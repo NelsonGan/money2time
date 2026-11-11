@@ -63,18 +63,23 @@ export function isInstalmentPlan(
 /**
  * Whether a transaction already saved can be turned into an instalment plan,
  * becoming its first payment. Only a plain expense of the user's own: not a
- * payment of a plan already, not split with friends, not a transfer's fee,
- * and not one whose reimbursement came back (its refund is for the whole
- * amount, which the first payment no longer is).
+ * payment of a plan already, not a run of a recurring rule (`rr:` ids, which
+ * include a plan's payments written by app versions that did not name the
+ * plan on them, so moving one to a new plan would leave its own plan charging
+ * it again), not split with friends, not a transfer's fee, and not one whose
+ * reimbursement came back (its refund is for the whole amount, which the
+ * first payment no longer is). A pending reimbursement is fine: the tick
+ * stays on payment 1, as on a plan from the add form.
  */
 export function canConvertToInstalmentPlan(
   transaction: Pick<
     Transaction,
-    'type' | 'instalmentRuleId' | 'feeOfId' | 'reimbursedAt' | 'reimbursementTransactionId'
+    'id' | 'type' | 'instalmentRuleId' | 'feeOfId' | 'reimbursedAt' | 'reimbursementTransactionId'
   > & { splits?: readonly unknown[] | null },
 ): boolean {
   return (
     transaction.type === 'expense' &&
+    !transaction.id.startsWith('rr:') &&
     !transaction.instalmentRuleId &&
     !transaction.feeOfId &&
     !transaction.reimbursedAt &&

@@ -1845,6 +1845,7 @@ const da = {
     add_payments: 'Tilføj {{count}} afdrag',
     convert_payments: 'Gør til {{count}} betalinger',
     convert_note: 'Denne udgift bliver betaling 1 af {{count}}. Resten følger planen.',
+    convert_failed: 'Udgiften kunne ikke deles op i rater. Prøv igen.',
     already_due_one: '{{count}} betaling mere er allerede forfalden. Den tilføjes, når du gemmer.',
     already_due_other:
       '{{count}} betalinger mere er allerede forfaldne. De tilføjes, når du gemmer.',

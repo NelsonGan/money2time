@@ -1860,6 +1860,7 @@ const nl = {
     add_payments: '{{count}} termijnen toevoegen',
     convert_payments: 'Omzetten in {{count}} betalingen',
     convert_note: 'Deze uitgave wordt betaling 1 van {{count}}. De rest volgt volgens schema.',
+    convert_failed: 'Deze uitgave kon niet in termijnen worden omgezet. Probeer het opnieuw.',
     already_due_one:
       'Er is al {{count}} betaling extra verschuldigd. Die wordt toegevoegd als je opslaat.',
     already_due_other:

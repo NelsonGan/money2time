@@ -1867,6 +1867,7 @@ const fil = {
     convert_payments: 'Gawing {{count}} bayad',
     convert_note:
       'Ang gastos na ito ang magiging bayad 1 sa {{count}}. Susunod ang iba ayon sa iskedyul.',
+    convert_failed: 'Hindi magawang hulugan ang gastos na ito. Pakisubukang muli.',
     already_due_one: 'May {{count}} pang bayad na dapat nang bayaran. Idaragdag ito pag-save mo.',
     already_due_other:
       'May {{count}} pang bayad na dapat nang bayaran. Idaragdag ang mga ito pag-save mo.',

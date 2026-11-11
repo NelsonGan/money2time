@@ -10,6 +10,7 @@ import {
   useTransferFeeIndex,
 } from '~/context/AppContext';
 import type { InstalmentChoice } from '~/features/instalments/components/InstalmentSheet';
+import { useCanStartInstalmentPlan } from '~/features/instalments/hooks/useCanStartInstalmentPlan';
 import {
   canConvertToInstalmentPlan,
   scheduleOfFrequency,
@@ -23,7 +24,6 @@ import {
   type TransferFeeDraft,
   transferFeeDraftOf,
 } from '~/features/transactions/lib/transferFee';
-import { useProGate } from '~/hooks/useProGate';
 import { I18n } from '~/lib/i18n';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
 import type { RootStackParamList } from '~/navigation/rootStack';
@@ -80,7 +80,7 @@ function TransactionEditor({
     settings,
     getAccountById,
   } = useApp();
-  const { checkLimit } = useProGate();
+  const canStartPlan = useCanStartInstalmentPlan();
   // The fee this transfer was charged, edited with it.
   const feeLink = useTransferFeeIndex().byTransferId.get(transaction.id) ?? null;
   const initialTransferFee = useMemo<TransferFeeDraft | null>(
@@ -156,17 +156,13 @@ function TransactionEditor({
   // An expense saved already (often by a receipt scan or a notification) can
   // still be paid in instalments: the editor offers the same Instalments chip
   // as the add form, and saving turns the expense into the plan's payment 1.
-  const canConvertToPlan = !isBalanceAdjustment && canConvertToInstalmentPlan(transaction);
-  const activePlanCount = useMemo(
-    () => instalmentPlans.filter((plan) => !plan.complete).length,
-    [instalmentPlans],
-  );
+  const canConvertToPlan = canConvertToInstalmentPlan(transaction);
   const instalmentOptions = useMemo(
     () =>
       canConvertToPlan
         ? {
             initialChoice: null,
-            canStart: () => checkLimit('instalments', activePlanCount),
+            canStart: canStartPlan,
             onSubmitPlan: ({
               transaction: input,
               choice,
@@ -175,24 +171,22 @@ function TransactionEditor({
               choice: InstalmentChoice;
             }) => {
               const { pattern, interval } = scheduleOfFrequency(choice.frequency);
-              convertTransactionToInstalmentPlan(transaction.id, input, {
-                count: choice.count,
-                recurrencePattern: pattern,
-                recurrenceInterval: interval,
-                regularAmount: choice.amount ?? null,
-              });
-              // Flash the row, now payment 1 with its "1/12" pill.
-              requestHighlightTransaction(transaction.id);
+              convertTransactionToInstalmentPlan(
+                transaction.id,
+                input,
+                {
+                  count: choice.count,
+                  recurrencePattern: pattern,
+                  recurrenceInterval: interval,
+                  regularAmount: choice.amount ?? null,
+                },
+                // Flash the row once it is payment 1, with its "1/12" pill.
+                () => requestHighlightTransaction(transaction.id),
+              );
             },
           }
         : undefined,
-    [
-      activePlanCount,
-      canConvertToPlan,
-      checkLimit,
-      convertTransactionToInstalmentPlan,
-      transaction.id,
-    ],
+    [canConvertToPlan, canStartPlan, convertTransactionToInstalmentPlan, transaction.id],
   );
 
   // A friend's payback transfer: deleting it undoes the payment, which goes

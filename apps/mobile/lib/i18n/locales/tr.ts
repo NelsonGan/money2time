@@ -1854,6 +1854,7 @@ const tr = {
     add_payments: '{{count}} taksit ekle',
     convert_payments: '{{count}} ödemeye dönüştür',
     convert_note: 'Bu harcama {{count}} ödemenin 1. ödemesi olur. Kalanlar plana göre gelir.',
+    convert_failed: 'Bu harcama taksitlere dönüştürülemedi. Lütfen tekrar dene.',
     already_due_one: '{{count}} ödemenin daha vadesi geldi. Kaydettiğinde eklenir.',
     already_due_other: '{{count}} ödemenin daha vadesi geldi. Kaydettiğinde eklenir.',
     pill_a11y: 'Taksit {{label}}',

@@ -1850,6 +1850,7 @@ const pl = {
     add_payments: 'Dodaj raty ({{count}})',
     convert_payments: 'Zamień na {{count}} płatności',
     convert_note: 'Ten wydatek staje się płatnością 1 z {{count}}. Reszta według harmonogramu.',
+    convert_failed: 'Nie udało się rozłożyć tego wydatku na raty. Spróbuj ponownie.',
     already_due_one: 'Jeszcze {{count}} płatność jest już wymagalna. Zostanie dodana po zapisaniu.',
     already_due_other:
       'Jeszcze {{count}} płatności jest już wymagalnych. Zostaną dodane po zapisaniu.',

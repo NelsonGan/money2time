@@ -1853,6 +1853,7 @@ const pt = {
     add_payments: 'Adicionar {{count}} parcelas',
     convert_payments: 'Transformar em {{count}} parcelas',
     convert_note: 'Esta despesa vira a parcela 1 de {{count}}. As demais seguem o calendário.',
+    convert_failed: 'Não foi possível parcelar esta despesa. Tente novamente.',
     already_due_one: 'Mais {{count}} parcela já venceu. Ela é lançada ao salvar.',
     already_due_other: 'Mais {{count}} parcelas já venceram. Elas são lançadas ao salvar.',
     pill_a11y: 'Parcela {{label}}',

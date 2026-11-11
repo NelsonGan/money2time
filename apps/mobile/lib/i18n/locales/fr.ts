@@ -1862,6 +1862,7 @@ const fr = {
     convert_payments: 'Transformer en {{count}} échéances',
     convert_note:
       "Cette dépense devient l'échéance 1 sur {{count}}. Les autres suivent le calendrier.",
+    convert_failed: 'Impossible de transformer cette dépense en échéances. Veuillez réessayer.',
     already_due_one: "{{count}} autre échéance est déjà due. Elle est ajoutée à l'enregistrement.",
     already_due_other:
       "{{count}} autres échéances sont déjà dues. Elles sont ajoutées à l'enregistrement.",

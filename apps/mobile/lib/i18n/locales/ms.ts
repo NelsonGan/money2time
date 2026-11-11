@@ -1857,6 +1857,7 @@ const ms = {
     convert_payments: 'Jadikan {{count}} bayaran',
     convert_note:
       'Perbelanjaan ini menjadi bayaran 1 daripada {{count}}. Selebihnya mengikut jadual.',
+    convert_failed: 'Perbelanjaan ini tidak dapat dijadikan ansuran. Sila cuba lagi.',
     already_due_one: '{{count}} lagi bayaran sudah tiba tempoh. Ia ditambah apabila anda simpan.',
     already_due_other: '{{count}} lagi bayaran sudah tiba tempoh. Ia ditambah apabila anda simpan.',
     pill_a11y: 'Ansuran {{label}}',

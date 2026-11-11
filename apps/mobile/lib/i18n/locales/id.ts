@@ -1852,6 +1852,7 @@ const id = {
     add_payments: 'Tambahkan {{count}} pembayaran',
     convert_payments: 'Jadikan {{count}} pembayaran',
     convert_note: 'Pengeluaran ini menjadi pembayaran 1 dari {{count}}. Sisanya mengikuti jadwal.',
+    convert_failed: 'Pengeluaran ini tidak dapat dijadikan cicilan. Silakan coba lagi.',
     already_due_one:
       '{{count}} pembayaran lagi sudah jatuh tempo. Ditambahkan saat Anda menyimpan.',
     already_due_other:

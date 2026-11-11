@@ -1843,6 +1843,7 @@ const sv = {
     add_payments: 'Lägg till {{count}} betalningar',
     convert_payments: 'Gör om till {{count}} betalningar',
     convert_note: 'Den här utgiften blir betalning 1 av {{count}}. Resten följer schemat.',
+    convert_failed: 'Utgiften kunde inte delas upp i avbetalningar. Försök igen.',
     already_due_one: '{{count}} betalning till har redan förfallit. Den läggs till när du sparar.',
     already_due_other:
       '{{count}} betalningar till har redan förfallit. De läggs till när du sparar.',

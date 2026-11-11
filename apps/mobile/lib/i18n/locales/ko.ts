@@ -1820,6 +1820,7 @@ const ko = {
     add_payments: '{{count}}회 추가',
     convert_payments: '{{count}}회 납부로 바꾸기',
     convert_note: '이 지출이 {{count}}회 중 1회차 납부가 됩니다. 나머지는 일정대로 이어집니다.',
+    convert_failed: '이 지출을 할부로 바꾸지 못했습니다. 다시 시도해 주세요.',
     already_due_one: '이미 기한이 지난 납부가 {{count}}회 더 있습니다. 저장하면 추가됩니다.',
     already_due_other: '이미 기한이 지난 납부가 {{count}}회 더 있습니다. 저장하면 추가됩니다.',
     pill_a11y: '할부 {{label}}',

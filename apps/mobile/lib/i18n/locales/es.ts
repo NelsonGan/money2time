@@ -1852,6 +1852,7 @@ const es = {
     add_payments: 'Añadir {{count}} cuotas',
     convert_payments: 'Convertir en {{count}} pagos',
     convert_note: 'Este gasto pasa a ser el pago 1 de {{count}}. El resto sigue el calendario.',
+    convert_failed: 'No se pudo convertir este gasto en pagos a plazos. Inténtalo de nuevo.',
     already_due_one: 'Ya vence {{count}} pago más. Se añade al guardar.',
     already_due_other: 'Ya vencen {{count}} pagos más. Se añaden al guardar.',
     pill_a11y: 'Cuota {{label}}',

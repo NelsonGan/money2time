@@ -1814,6 +1814,7 @@ const en = {
     add_payments: 'Add {{count}} payments',
     convert_payments: 'Turn into {{count}} payments',
     convert_note: 'This expense becomes payment 1 of {{count}}. The rest follow on schedule.',
+    convert_failed: 'This expense could not be turned into instalments. Please try again.',
     already_due_one: '{{count}} more payment is already due. It is added when you save.',
     already_due_other: '{{count}} more payments are already due. They are added when you save.',
     pill_a11y: 'Instalment {{label}}',

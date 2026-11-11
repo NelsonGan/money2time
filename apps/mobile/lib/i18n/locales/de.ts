@@ -1864,6 +1864,8 @@ const de = {
     add_payments: '{{count}} Raten hinzufügen',
     convert_payments: 'In {{count}} Raten aufteilen',
     convert_note: 'Diese Ausgabe wird Rate 1 von {{count}}. Der Rest folgt nach Plan.',
+    convert_failed:
+      'Diese Ausgabe konnte nicht in Raten aufgeteilt werden. Bitte versuche es erneut.',
     already_due_one:
       '{{count}} weitere Rate ist schon fällig. Sie wird beim Speichern hinzugefügt.',
     already_due_other:

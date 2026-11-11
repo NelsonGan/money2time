@@ -1758,6 +1758,7 @@ const zhHant = {
     add_payments: '新增 {{count}} 期',
     convert_payments: '分成 {{count}} 期',
     convert_note: '這筆支出會成為 {{count}} 期中的第 1 期，其餘按計畫進行。',
+    convert_failed: '無法將這筆支出分期，請再試一次。',
     already_due_one: '已有 {{count}} 期到期，儲存時會一併加入。',
     already_due_other: '已有 {{count}} 期到期，儲存時會一併加入。',
     pill_a11y: '分期 {{label}}',

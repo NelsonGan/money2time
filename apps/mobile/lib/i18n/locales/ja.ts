@@ -1833,6 +1833,7 @@ const ja = {
     convert_payments: '{{count}}回払いにする',
     convert_note:
       'この支出が{{count}}回のうち1回目の支払いになります。残りは予定どおりに続きます。',
+    convert_failed: 'この支出を分割払いにできませんでした。もう一度お試しください。',
     already_due_one: '期日を過ぎた支払いがあと{{count}}回あります。保存すると追加されます。',
     already_due_other: '期日を過ぎた支払いがあと{{count}}回あります。保存すると追加されます。',
     pill_a11y: '分割払い {{label}}',
