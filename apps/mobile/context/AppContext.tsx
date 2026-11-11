@@ -2053,11 +2053,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         // The rules still run, on the day their next run date shows.
         reportError(error, { scope: 'recurring_repair' });
       }
-      const processedRules = recurringRulesRepository.runDueTransactions(
-        undefined,
-        undefined,
-        I18n.t('transactions.editor.transfer_fee.row_note'),
-      );
+      const processedRules = recurringRulesRepository.runDueTransactions(nowIso(), 10, {
+        feeNote: I18n.t('transactions.editor.transfer_fee.row_note'),
+      });
       perfMark('recurring_run');
       const trueHourlyRate = effectiveCurrentWage?.trueHourlyRate ?? 0;
 
@@ -2732,7 +2730,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       runMutation(() => {
         recurringRulesRepository.update(id, updates);
       });
-      void trackEvent(AnalyticsEvents.RECURRING_RULE_UPDATED);
+      // Only the recurring editor saves the fee; other edits (a goal's
+      // auto-save, a loan's repayment, the Web Dashboard) leave it alone.
+      void trackEvent(
+        AnalyticsEvents.RECURRING_RULE_UPDATED,
+        'feeAmount' in updates
+          ? { has_fee: updates.type === 'transfer' && (updates.feeAmount ?? 0) > 0 }
+          : undefined,
+      );
     },
     [runMutation],
   );

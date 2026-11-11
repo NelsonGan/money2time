@@ -181,7 +181,7 @@ import { setReceiptSplitLaunch } from '~/features/transactions/lib/receiptSplitB
 import {
   NO_RECURRING_RULE_FEE,
   recurringRuleFeeDraft,
-  recurringRuleFeeFields,
+  recurringRuleFeeFieldsOnSave,
 } from '~/features/transactions/lib/transferFee';
 import {
   AddTransactionScreen,
@@ -2806,6 +2806,20 @@ function RecurringEditorRouteScreen({ route, navigation }: RootStackRouteProps<'
     () => (ruleId ? (recurringRules.find((rule) => rule.id === ruleId) ?? null) : null),
     [recurringRules, ruleId],
   );
+  // The rule's fee as the editor opens it, in the paying account's currency,
+  // which the fee sheet edits.
+  const openedFee = useMemo(
+    () =>
+      editingRule
+        ? recurringRuleFeeDraft(editingRule, (amount, feeCurrency, accountId) => {
+            const accountCurrency = accounts.find((account) => account.id === accountId)?.currency;
+            return accountCurrency && accountCurrency !== feeCurrency
+              ? convert(amount, feeCurrency, accountCurrency, rateTable).value
+              : amount;
+          })
+        : null,
+    [accounts, editingRule, rateTable],
+  );
 
   useEffect(() => {
     if (!ruleId || editingRule) return;
@@ -2829,19 +2843,7 @@ function RecurringEditorRouteScreen({ route, navigation }: RootStackRouteProps<'
       subtitleOverride={I18n.t('recurring.same_flow')}
       submitLabelOverride={I18n.t('recurring.save_rule')}
       restrictTypeOptions={['expense', 'income', 'transfer']}
-      initialTransferFee={
-        editingRule
-          ? recurringRuleFeeDraft(editingRule, (amount, feeCurrency, accountId) => {
-              // In the paying account's currency, which the fee sheet edits.
-              const accountCurrency = accounts.find(
-                (account) => account.id === accountId,
-              )?.currency;
-              return accountCurrency && accountCurrency !== feeCurrency
-                ? convert(amount, feeCurrency, accountCurrency, rateTable).value
-                : amount;
-            })
-          : null
-      }
+      initialTransferFee={openedFee}
       recurringOptions={{
         initialName: editingRule?.name,
         initialPattern: editingRule?.recurrencePattern,
@@ -2903,15 +2905,19 @@ function RecurringEditorRouteScreen({ route, navigation }: RootStackRouteProps<'
                   accountId: null,
                   categoryId: repaymentReporting.categoryId,
                   countsAsExpense: repaymentReporting.countsAsExpense,
-                  // Written beside every run, in the paying account's currency.
-                  ...recurringRuleFeeFields(
-                    transferFee,
-                    {
+                  // Written beside every run, in the paying account's currency;
+                  // a fee left as it opened keeps what the rule stores.
+                  ...recurringRuleFeeFieldsOnSave({
+                    draft: transferFee,
+                    opened: openedFee,
+                    rule: editingRule,
+                    transfer: {
                       fromAccountId: transaction.fromAccountId ?? null,
                       toAccountId: transaction.toAccountId ?? null,
                     },
-                    (accountId) => accounts.find((account) => account.id === accountId)?.currency,
-                  ),
+                    currencyOf: (accountId) =>
+                      accounts.find((account) => account.id === accountId)?.currency,
+                  }),
                 }
               : {
                   ...basePayload,

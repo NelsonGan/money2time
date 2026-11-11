@@ -1,5 +1,5 @@
 import { Settings2 } from 'lucide-react-native';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Alert, FlatList, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -144,15 +144,25 @@ export function RecurringScreen({
     rateTable,
   } = useApp();
   // A fee the runner will not write (its paying account became a loan or is
-  // gone) is neither shown nor counted.
+  // gone) is neither shown nor counted. Keyed on the accounts' types, not the
+  // accounts, whose list changes with every balance refresh.
+  const accountTypesKey = useMemo(
+    () => accounts.map((account) => `${account.id}:${account.type}`).join(','),
+    [accounts],
+  );
+  const accountsRef = useRef(accounts);
+  accountsRef.current = accounts;
   const recurringRules = useMemo(() => {
-    const accountById = new Map(accounts.map((account) => [account.id, account]));
+    if (!storedRules.some((rule) => rule.feeAmount != null)) return storedRules;
+    const accountById = new Map(accountsRef.current.map((account) => [account.id, account]));
     return storedRules.map((rule) =>
       rule.feeAmount != null && !recurringRuleChargesFee(rule, (id) => accountById.get(id))
         ? { ...rule, ...NO_RECURRING_RULE_FEE }
         : rule,
     );
-  }, [accounts, storedRules]);
+    // accountTypesKey stands in for the accounts: only their types matter here.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accountTypesKey, storedRules]);
   const monthCycle = monthCycleOf(settings);
   const { checkLimit } = useProGate();
 

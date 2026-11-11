@@ -11,6 +11,7 @@ import {
   recurringRuleChargesFee,
   recurringRuleFeeDraft,
   recurringRuleFeeFields,
+  recurringRuleFeeFieldsOnSave,
   sameTransferFeeIndex,
   transferFeeAccountAmount,
   transferFeeAccountId,
@@ -421,5 +422,62 @@ describe('recurring transfer rules', () => {
     );
     expect(recurringRuleChargesFee({ ...rule, feeAmount: null }, accountOf)).toBe(false);
     expect(recurringRuleChargesFee({ ...rule, type: 'expense' }, accountOf)).toBe(false);
+  });
+});
+
+describe('saving a recurring rule its fee left as it opened', () => {
+  const rule = {
+    fromAccountId: 'card',
+    toAccountId: 'wallet',
+    feeAmount: 2,
+    feeCurrency: 'MYR',
+    feeSide: 'to' as const,
+    feeCategoryId: 'fees',
+  };
+  const ruleTransfer = { fromAccountId: 'card', toAccountId: 'wallet' };
+  // The wallet is now SGD and no MYR rate is known: the sheet showed 2 as is.
+  const opened = { amount: 2, side: 'to' as const, categoryId: 'fees' };
+  const walletIsSgd = (id: string) => (id === 'wallet' ? 'SGD' : 'MYR');
+
+  it('keeps the stored fee, so a rename never re-denominates it', () => {
+    expect(
+      recurringRuleFeeFieldsOnSave({
+        draft: { ...opened },
+        opened,
+        rule,
+        transfer: ruleTransfer,
+        currencyOf: walletIsSgd,
+      }),
+    ).toEqual({ feeAmount: 2, feeCurrency: 'MYR', feeSide: 'to', feeCategoryId: 'fees' });
+  });
+
+  it('saves a changed fee, or one now paid by another account, in that account’s currency', () => {
+    expect(
+      recurringRuleFeeFieldsOnSave({
+        draft: { ...opened, amount: 3 },
+        opened,
+        rule,
+        transfer: ruleTransfer,
+        currencyOf: walletIsSgd,
+      }),
+    ).toEqual({ feeAmount: 3, feeCurrency: 'SGD', feeSide: 'to', feeCategoryId: 'fees' });
+    expect(
+      recurringRuleFeeFieldsOnSave({
+        draft: { ...opened },
+        opened,
+        rule,
+        transfer: { fromAccountId: 'card', toAccountId: 'savings' },
+        currencyOf: walletIsSgd,
+      }),
+    ).toEqual({ feeAmount: 2, feeCurrency: 'MYR', feeSide: 'to', feeCategoryId: 'fees' });
+    expect(
+      recurringRuleFeeFieldsOnSave({
+        draft: null,
+        opened,
+        rule,
+        transfer: ruleTransfer,
+        currencyOf: walletIsSgd,
+      }),
+    ).toEqual(NO_RECURRING_RULE_FEE);
   });
 });

@@ -395,3 +395,39 @@ export function recurringRuleChargesFee(
   });
   return !!accountId && canChargeTransferFee(accountOf(accountId));
 }
+
+/**
+ * What saving the recurring editor stores for the fee. A fee left as it opened
+ * (same amount, side and category, on the same paying account) keeps exactly
+ * what the rule has, so opening and saving a rule never re-denominates its
+ * fee: the draft may have been converted for the sheet
+ * (`recurringRuleFeeDraft`), or shown at face value when no rate was known.
+ */
+export function recurringRuleFeeFieldsOnSave(input: {
+  draft: TransferFeeDraft | null;
+  /** The draft the editor opened with, null for a new rule or one without a fee. */
+  opened: TransferFeeDraft | null;
+  rule: (TransferAccounts & RecurringRuleFeeFields) | null;
+  transfer: TransferAccounts;
+  currencyOf: (accountId: string) => string | null | undefined;
+}): RecurringRuleFeeFields {
+  const { draft, opened, rule, transfer } = input;
+  const unchanged =
+    !!draft &&
+    !!opened &&
+    !!rule &&
+    rule.feeAmount != null &&
+    draft.amount === opened.amount &&
+    draft.side === opened.side &&
+    draft.categoryId === opened.categoryId &&
+    transferFeeAccountId(draft.side, transfer) === transferFeeAccountId(opened.side, rule);
+  if (unchanged && rule) {
+    return {
+      feeAmount: rule.feeAmount,
+      feeCurrency: rule.feeCurrency,
+      feeSide: rule.feeSide,
+      feeCategoryId: rule.feeCategoryId,
+    };
+  }
+  return recurringRuleFeeFields(draft, transfer, input.currencyOf);
+}
