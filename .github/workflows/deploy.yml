@@ -239,28 +239,21 @@ jobs:
           save: false
 
       # `checks` and this job together are `npm run check`, taken apart. If
-      # package.json's `check` or `lint` script changes, this fails until the
-      # two jobs are brought in line, instead of CI quietly checking less than
+      # package.json's `check` script changes, this fails until the two jobs
+      # are brought in line, instead of CI quietly checking less than
       # `npm run check` does.
       - name: Check that these jobs still match `npm run check`
         run: |
-          expect() {
-            actual=$(node -p "require('./package.json').scripts['$1']")
-            if [ "$actual" != "$2" ]; then
-              echo "::error::package.json's \"$1\" script is now '$actual'. Bring the checks and lint jobs in .github/workflows/deploy.yml in line with it, then update this guard."
-              exit 1
-            fi
-          }
-          expect check 'npm run typecheck && npm run lint && npm run format:check'
-          expect lint 'expo lint .'
+          expected='npm run typecheck && npm run lint && npm run format:check'
+          actual=$(node -p "require('./package.json').scripts.check")
+          if [ "$actual" != "$expected" ]; then
+            echo "::error::package.json's \"check\" script is now '$actual'. Bring the checks and lint jobs in .github/workflows/deploy.yml in line with it, then update this guard."
+            exit 1
+          fi
 
-      # ESLint directly, not `npm run lint`: `expo lint` passes on ESLint's
-      # exit status, which is empty when ESLint is killed (out of memory,
-      # say), so a lint that died would be reported as passed. It also writes
-      # an ESLint cache, which a CI run never reuses. Two threads, because
-      # this job has the runner to itself.
+      # Two threads, because this job has the runner to itself.
       - name: Lint
-        run: npx eslint . --concurrency 2
+        run: npm run lint -- --concurrency 2
 
   # Typecheck and jest never run Metro, so without this a PR that breaks the
   # bundle (an import or asset only Metro resolves) would first fail in the
@@ -298,7 +291,8 @@ jobs:
             .github
             apps/mobile
 
-      # Metro keeps each file's transformed output in $TMPDIR/metro-cache,
+      # Metro keeps each file's transformed output in a cache directory
+      # (EXPO_METRO_CACHE_OUTPUT_DIR below; a temporary folder otherwise),
       # keyed by the file's contents and by its own configuration (the Babel
       # config and every transform option), so a restored cache only skips
       # files whose result would be the same. Resolving imports and assets, the
@@ -333,9 +327,7 @@ jobs:
       - name: Bundle app
         if: github.event_name == 'pull_request' || steps.metro.outputs.cache-hit != 'true'
         env:
-          # Where Metro puts metro-cache/ (os.tmpdir()), so the step above
-          # caches a path this workflow chose.
-          TMPDIR: ${{ runner.temp }}
+          EXPO_METRO_CACHE_OUTPUT_DIR: ${{ runner.temp }}/metro-cache
         run: npx expo export --platform ${{ matrix.platform }} --output-dir "$RUNNER_TEMP/expo-export"
 
   # The one check to read on a pull request: green means `checks`, `lint` and
@@ -347,21 +339,29 @@ jobs:
   test:
     name: Test
     needs: [changes, checks, lint, bundle]
-    # Runs when the jobs it reports on failed, too; that is its purpose.
-    if: ${{ !cancelled() && needs.changes.outputs.checks == 'true' }}
+    # Runs when the jobs it reports on failed, too; that is its purpose. That
+    # includes `changes`: if it fails, every job after it is skipped, and a
+    # skipped check looks like a passed one.
+    if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.checks == 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions: {}
     steps:
       - name: Check that the checks, lint and the bundle passed
         env:
+          CHANGES: ${{ needs.changes.result }}
           CHECKS: ${{ needs.checks.result }}
           LINT: ${{ needs.lint.result }}
           BUNDLE: ${{ needs.bundle.result }}
         run: |
+          echo "changes: $CHANGES"
           echo "checks: $CHECKS"
           echo "lint: $LINT"
           echo "bundle: $BUNDLE"
+          if [ "$CHANGES" != success ]; then
+            echo "::error::The Detect changes job did not pass ($CHANGES), so nothing was checked."
+            exit 1
+          fi
           if [ "$CHECKS" != success ]; then
             echo "::error::The Checks job did not pass ($CHECKS)."
             exit 1
@@ -479,6 +479,11 @@ jobs:
       # ~/.eas-build-local and apps/mobile/ios/Pods: neither folder ever
       # existed, so they missed on every run and saved nothing.)
       #
+      # All three caches below are restored here and saved right after
+      # "Build app", not at the end of the job: a build whose upload to the
+      # store fails, or that a newer push cancels afterwards, still leaves
+      # them for the next one.
+      #
       # Gradle's downloads and unpacked libraries. The key is the app's
       # dependencies and patches, which decide the Gradle version and every
       # library, and there is no fallback to an older cache on purpose: the
@@ -486,9 +491,10 @@ jobs:
       # and grew to 14 GB, half of it from a Gradle version no build used any
       # more. A change to the dependencies now downloads from scratch once
       # (about three minutes) and saves a clean cache.
-      - name: Cache Gradle
+      - name: Restore the Gradle cache
+        id: gradle
         if: matrix.platform == 'android'
-        uses: actions/cache@v5
+        uses: actions/cache/restore@v5
         with:
           path: |
             ~/.gradle/caches
@@ -496,14 +502,15 @@ jobs:
           key: gradle-${{ runner.os }}-${{ hashFiles('apps/mobile/package-lock.json', 'apps/mobile/patches/**') }}
 
       # What `pod install` downloads (Firebase, Google Sign-In and the other
-      # pods that are not in node_modules).
-      - name: Cache CocoaPods downloads
+      # pods that are not in node_modules). No fallback either, for the same
+      # reason.
+      - name: Restore the CocoaPods downloads
+        id: cocoapods
         if: matrix.platform == 'ios'
-        uses: actions/cache@v5
+        uses: actions/cache/restore@v5
         with:
           path: ~/Library/Caches/CocoaPods
           key: cocoapods-${{ runner.os }}-${{ hashFiles('apps/mobile/package-lock.json', 'apps/mobile/patches/**') }}
-          restore-keys: cocoapods-${{ runner.os }}-
 
       # Most of a store build is compiling native code that did not change
       # since the last one. See the action for how the cache is switched on.
@@ -579,6 +586,27 @@ jobs:
             --non-interactive \
             --output=${{ steps.output.outputs.file }}
 
+      - name: Save the Gradle cache
+        if: matrix.platform == 'android' && steps.gradle.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ steps.gradle.outputs.cache-primary-key }}
+
+      - name: Save the CocoaPods downloads
+        if: matrix.platform == 'ios' && steps.cocoapods.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: ~/Library/Caches/CocoaPods
+          key: ${{ steps.cocoapods.outputs.cache-primary-key }}
+
+      # Saves a new cache only when this build had to compile a noticeable
+      # share of the files itself (see the action).
+      - name: Save the compiler cache
+        uses: ./.github/actions/ccache/save
+
       - name: Report peak memory and disk
         if: always() && matrix.platform == 'android'
         run: |
@@ -593,7 +621,7 @@ jobs:
         if: always()
         run: |
           command -v ccache > /dev/null || exit 0
-          ccache --show-stats
+          ccache --show-stats || true
 
       - name: Submit build
         working-directory: apps/mobile

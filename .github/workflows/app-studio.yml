@@ -14,10 +14,12 @@ on:
     paths:
       - 'apps/app-studio/**'
       - '.github/workflows/app-studio.yml'
+      - '.github/actions/node-deps/**'
   pull_request:
     paths:
       - 'apps/app-studio/**'
       - '.github/workflows/app-studio.yml'
+      - '.github/actions/node-deps/**'
   workflow_dispatch:
 
 concurrency:

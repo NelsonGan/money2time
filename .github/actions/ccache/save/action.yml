@@ -1,0 +1,47 @@
+name: Save the compiler cache
+description: >-
+  Run after a build that used ./.github/actions/ccache. Saves ccache's cache
+  when the build had to compile a noticeable share of the files itself, and
+  does nothing when the restored cache already covered it.
+
+# The cache refreshes itself whenever it stops being useful, whatever the
+# reason: new dependencies, a new Xcode or NDK (the compiler is part of what
+# ccache hashes), a change to the compile flags, or no cache to restore at all.
+# A build where nearly everything hit saves nothing, so a 0.5 GB upload is not
+# repeated on every release.
+#
+# It runs right after the build, not at the end of the job, so a build whose
+# upload to the store fails, or that a newer push cancels afterwards, still
+# leaves its cache for the next one. It never fails the job.
+runs:
+  using: composite
+  steps:
+    - name: Decide whether to save the compiler cache
+      id: decide
+      shell: bash
+      run: |
+        # Nothing in this step may fail the job.
+        set +e
+        command -v ccache > /dev/null || exit 0
+        stats=$(ccache --print-stats 2> /dev/null) || exit 0
+        count() {
+          local value
+          value=$(printf '%s\n' "$stats" | awk -v key="$1" '$1 == key { print $2 }')
+          case "$value" in '' | *[!0-9]*) value=0 ;; esac
+          echo "$value"
+        }
+        misses=$(count cache_miss)
+        hits=$(($(count direct_cache_hit) + $(count preprocessed_cache_hit)))
+        total=$((misses + hits))
+        echo "ccache: $hits of $total compiles came from the cache."
+        # More than 1 in 20 compiled from scratch: worth a new cache.
+        if [ "$total" -gt 0 ] && [ $((misses * 20)) -gt "$total" ]; then
+          echo "save=true" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Save the compiler cache
+      if: steps.decide.outputs.save == 'true'
+      uses: actions/cache/save@v5
+      with:
+        path: ~/.ccache
+        key: ccache-${{ runner.os }}-${{ hashFiles('apps/mobile/package-lock.json', 'apps/mobile/patches/**') }}-${{ github.run_id }}-${{ github.run_attempt }}

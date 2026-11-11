@@ -19,10 +19,12 @@ on:
     paths:
       - 'apps/web/**'
       - '.github/workflows/web.yml'
+      - '.github/actions/node-deps/**'
   pull_request:
     paths:
       - 'apps/web/**'
       - '.github/workflows/web.yml'
+      - '.github/actions/node-deps/**'
   workflow_dispatch:
 
 # A newer push to a pull request replaces its older run. Production deploys
