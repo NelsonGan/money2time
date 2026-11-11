@@ -1,4 +1,14 @@
-import { Check, ChevronRight, Info, Minus, Pencil, Plus, RotateCcw, X } from 'lucide-react-native';
+import {
+  Check,
+  ChevronRight,
+  Info,
+  Minus,
+  Pencil,
+  Plus,
+  ReceiptText,
+  RotateCcw,
+  X,
+} from 'lucide-react-native';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Keyboard, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { useReanimatedKeyboardAnimation } from 'react-native-keyboard-controller';
@@ -29,6 +39,7 @@ import {
   isRegularAmountValid,
   MAX_INSTALMENT_COUNT,
   MIN_INSTALMENT_COUNT,
+  paymentsAlreadyDue,
   regularAmountImpliesOtherTotal,
   scheduleOfFrequency,
   splitInstalmentAmounts,
@@ -67,6 +78,11 @@ interface InstalmentSheetProps {
   onPickFirstPayment: (choice: InstalmentChoice) => void;
   /** Sets the form's amount: the plan's total, when the payments imply another. */
   onSetTotal: (total: number) => void;
+  /**
+   * The form is an expense saved already, which becomes the plan's first
+   * payment rather than a new one being made.
+   */
+  fromSavedExpense?: boolean;
 }
 
 /** The amounts and dates a choice gives, shared by the sheet and the form. */
@@ -111,6 +127,7 @@ export function InstalmentSheet({
   onClose,
   onPickFirstPayment,
   onSetTotal,
+  fromSavedExpense = false,
 }: InstalmentSheetProps) {
   const { settings } = useApp();
   const themeColors = useThemeColors();
@@ -144,6 +161,7 @@ export function InstalmentSheet({
   const canApply = canSplit && plan.valid;
   const startsToday =
     dayKeyFromIsoLocal(firstPaymentIso) === dayKeyFromIsoLocal(new Date().toISOString());
+  const alreadyDue = canApply ? paymentsAlreadyDue(plan.dates) : 0;
 
   const setCount = (count: number) => {
     void triggerHaptic('selection');
@@ -182,6 +200,16 @@ export function InstalmentSheet({
                 <X size={18} color={themeColors.textMuted} />
               </Pressable>
             </View>
+
+            {/* A saved expense is not copied: it becomes payment 1. */}
+            {fromSavedExpense ? (
+              <View className="mx-5 mt-2 flex-row items-center gap-3 rounded-2xl bg-secondary/50 px-4 py-3">
+                <ReceiptText size={18} color={themeColors.textMuted} />
+                <Text variant="caption" tone="muted" className="min-w-0 flex-1">
+                  {I18n.t('instalments.convert_note', { count: choice.count })}
+                </Text>
+              </View>
+            ) : null}
 
             <ScrollView
               contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, 16) + 8 }}
@@ -225,6 +253,20 @@ export function InstalmentSheet({
                         to={formatPlanDay(plan.lastDate)}
                         lastAmount={plan.custom && plan.valid ? money(plan.last) : null}
                       />
+                      {/* A purchase from a while back: say what saving adds. */}
+                      {alreadyDue > 0 ? (
+                        <View className="flex-row items-center gap-2 self-stretch rounded-xl bg-secondary/50 px-3 py-2.5">
+                          <Info size={16} color={themeColors.textMuted} />
+                          <Text variant="caption" tone="muted" className="min-w-0 flex-1">
+                            {I18n.t(
+                              alreadyDue === 1
+                                ? 'instalments.already_due_one'
+                                : 'instalments.already_due_other',
+                              { count: alreadyDue },
+                            )}
+                          </Text>
+                        </View>
+                      ) : null}
                       {plan.custom &&
                       (!plan.valid ||
                         regularAmountImpliesOtherTotal(total, choice.count, plan.regular)) ? (

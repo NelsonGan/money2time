@@ -458,9 +458,11 @@ interface TransactionEditorScreenProps {
   /** The fee a transfer being edited already has. */
   initialTransferFee?: TransferFeeDraft | null;
   /**
-   * Offers "pay in instalments" on a new expense: the amount becomes the
-   * total, and saving hands the form and the chosen plan here instead of
-   * creating one transaction.
+   * Offers "pay in instalments" on an expense: the amount becomes the total,
+   * and saving hands the form and the chosen plan here instead of saving one
+   * transaction. In edit mode the caller passes it only for an expense that
+   * can become a plan (`canConvertToInstalmentPlan`); that expense is then
+   * the plan's first payment.
    */
   instalmentOptions?: {
     /** Start with this plan chosen (Settings › Instalments' add button). */
@@ -1741,14 +1743,11 @@ export function TransactionEditorScreen({
   // itemized mode and the amount is derived from the rows on Done. The
   // account/category can be filled in afterwards, and each split row carries
   // its own payback account.
-  // "Pay in instalments" is offered on a new expense only, and never alongside
-  // a split bill: a plan's payments are the user's own.
+  // "Pay in instalments" is offered on an expense (a new one, or a saved one
+  // the caller allows), and never alongside a split bill: a plan's payments
+  // are the user's own.
   const instalmentsOffered =
-    !!instalmentOptions &&
-    mode === 'create' &&
-    type === 'expense' &&
-    !recurringOptions &&
-    !onSubmitConfirmed;
+    !!instalmentOptions && type === 'expense' && !recurringOptions && !onSubmitConfirmed;
   const instalmentActive = instalmentsOffered && instalmentChoice !== null;
   const hasFriendSplits = splitMode && splits.some((s) => !s.isSelf);
   const canOpenSplitBill =
@@ -2416,10 +2415,12 @@ export function TransactionEditorScreen({
           return;
         }
         // A receipt, the longer note and the reimbursement tick belong to one
-        // real payment: the first, made at once. A plan that starts later has
-        // nowhere to keep them. The mood is not kept either, but it starts as
-        // neutral and is not worth stopping the save for.
-        const firstPaymentLater = new Date(capturedPayload.date).getTime() > Date.now();
+        // real payment: the first, made at once. A new plan that starts later
+        // has nowhere to keep them. The mood is not kept either, but it starts
+        // as neutral and is not worth stopping the save for. A saved expense
+        // keeps them all, since it is the first payment itself.
+        const firstPaymentLater =
+          mode === 'create' && new Date(capturedPayload.date).getTime() > Date.now();
         if (
           firstPaymentLater &&
           (capturedPayload.receiptUri ||
@@ -2601,7 +2602,9 @@ export function TransactionEditorScreen({
   const saveLabel =
     submitLabelOverride ??
     (instalmentActive && instalmentChoice
-      ? I18n.t('instalments.add_payments', { count: instalmentChoice.count })
+      ? I18n.t(mode === 'edit' ? 'instalments.convert_payments' : 'instalments.add_payments', {
+          count: instalmentChoice.count,
+        })
       : mode === 'create'
         ? I18n.t('transactions.editor.title_create')
         : I18n.t('transactions.editor.title_edit'));
@@ -5159,6 +5162,7 @@ export function TransactionEditorScreen({
           currency={entryCurrency}
           firstPaymentIso={instalmentFirstIso}
           draft={instalmentDraft}
+          fromSavedExpense={mode === 'edit'}
           onApply={(choice) => {
             setInstalmentChoice(choice);
             setInstalmentDraft(null);

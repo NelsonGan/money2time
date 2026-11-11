@@ -1830,6 +1830,12 @@ const ja = {
     extras_need_today: 'レシート、詳細、立て替えを残すには、初回の支払いを今日以前にしてください。',
     remove: '分割払いを解除',
     add_payments: '{{count}} 回分を追加',
+    convert_payments: '{{count}}回払いにする',
+    convert_note:
+      'この支出が{{count}}回のうち1回目の支払いになります。残りは予定どおりに続きます。',
+    convert_failed: 'この支出を分割払いにできませんでした。もう一度お試しください。',
+    already_due_one: '期日を過ぎた支払いがあと{{count}}回あります。保存すると追加されます。',
+    already_due_other: '期日を過ぎた支払いがあと{{count}}回あります。保存すると追加されます。',
     pill_a11y: '分割払い {{label}}',
     new_plan: '新しい分割払い',
     due_this_month: '今月の支払い',

@@ -102,6 +102,7 @@ import {
   GoalsTabScreen,
 } from '~/features/goals/screens';
 import { InsightsDrilldownScreen, InsightsScreen } from '~/features/insights/screens';
+import { useCanStartInstalmentPlan } from '~/features/instalments/hooks/useCanStartInstalmentPlan';
 import { InstalmentPlanScreen } from '~/features/instalments/screens/InstalmentPlanScreen';
 import { InstalmentPlansScreen } from '~/features/instalments/screens/InstalmentPlansScreen';
 import { AssetsTab } from '~/features/items/components';
@@ -2508,16 +2509,14 @@ function SettingsAccountsRouteScreen({ navigation }: RootStackRouteProps<'Settin
  * another plan still being paid.
  */
 function useAddInstalmentPlan(navigation: Pick<RootMainNavigationProp, 'navigate'>) {
-  const { instalmentPlans } = useApp();
-  const { checkLimit } = useProGate();
+  const canStartPlan = useCanStartInstalmentPlan();
   return useCallback(() => {
-    const active = instalmentPlans.filter((plan) => !plan.complete).length;
-    if (!checkLimit('instalments', active)) return;
+    if (!canStartPlan()) return;
     navigation.navigate('AddTransactionDetailed', {
       startInstalmentPlan: true,
       keepCurrentTab: true,
     });
-  }, [checkLimit, instalmentPlans, navigation]);
+  }, [canStartPlan, navigation]);
 }
 
 function SettingsInstalmentsRouteScreen({

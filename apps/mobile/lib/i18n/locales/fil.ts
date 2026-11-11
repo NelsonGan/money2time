@@ -1864,6 +1864,13 @@ const fil = {
       'Para mapanatili ang resibo, detalye o reimbursement, dapat ngayong araw o mas maaga ang unang hulog.',
     remove: 'Alisin ang hulugan',
     add_payments: 'Idagdag ang {{count}} hulog',
+    convert_payments: 'Gawing {{count}} bayad',
+    convert_note:
+      'Ang gastos na ito ang magiging bayad 1 sa {{count}}. Susunod ang iba ayon sa iskedyul.',
+    convert_failed: 'Hindi magawang hulugan ang gastos na ito. Pakisubukang muli.',
+    already_due_one: 'May {{count}} pang bayad na dapat nang bayaran. Idaragdag ito pag-save mo.',
+    already_due_other:
+      'May {{count}} pang bayad na dapat nang bayaran. Idaragdag ang mga ito pag-save mo.',
     pill_a11y: 'Hulugan {{label}}',
     new_plan: 'Bagong hulugan',
     due_this_month: 'Dapat bayaran ngayong buwan',

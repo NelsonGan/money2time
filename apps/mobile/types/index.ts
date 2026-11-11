@@ -988,8 +988,9 @@ export interface Transaction {
   dayOrder: number | null;
   /**
    * The instalment plan (a recurring rule with `instalmentCount`) this row is
-   * a payment of, or null. Set by the plan's runner and its early-payment and
-   * payoff actions only; the editor never writes it.
+   * a payment of, or null. Set by the plan's runner, its early-payment and
+   * payoff actions, and turning a saved expense into a plan (which makes it
+   * payment 1); the editor never writes it.
    */
   instalmentRuleId: string | null;
   /**

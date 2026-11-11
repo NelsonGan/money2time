@@ -154,6 +154,7 @@ import {
   receiptSplitsRepository,
 } from '~/lib/repositories/receiptSplitsRepository';
 import {
+  type ConvertToInstalmentPlanInput,
   type CreatedInstalmentPlan,
   type CreateInstalmentPlanInput,
   type CreateRecurringRuleInput,
@@ -480,6 +481,16 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   instalmentPlans: InstalmentProgress[];
   /** Saves a plan and makes its first payment when that is already due. */
   createInstalmentPlan: (input: CreateInstalmentPlanInput) => CreatedInstalmentPlan | null;
+  /**
+   * Turns an expense already saved into a plan of its amount, after saving
+   * the editor's `edits` to it: the expense becomes payment 1.
+   */
+  convertTransactionToInstalmentPlan: (
+    id: string,
+    edits: Partial<CreateTransactionInput>,
+    plan: Omit<ConvertToInstalmentPlanInput, 'transactionId'>,
+    onConverted?: () => void,
+  ) => void;
   /** Renames a plan or moves its upcoming payments to another account or category. */
   updateInstalmentPlan: (id: string, updates: InstalmentPlanUpdate) => void;
   /** Ends a plan; the payments already made stay unless `removePayments`. */
@@ -3389,8 +3400,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   );
 
   const updateTransactionsBulk = useCallback(
-    (requested: { id: string; input: Partial<CreateTransactionInput> }[]) => {
-      if (requested.length === 0) return;
+    (
+      requested: { id: string; input: Partial<CreateTransactionInput> }[],
+      options?: {
+        /**
+         * Runs once the deferred write has landed (or found nothing to write),
+         * told whether it was stored: work that must build on the saved rows.
+         */
+        afterWrite?: (stored: boolean) => void;
+      },
+    ) => {
+      const afterWrite = options?.afterWrite;
+      if (requested.length === 0) {
+        if (afterWrite) runDeferredWrite(() => afterWrite(true));
+        return;
+      }
       const transactionById = new Map(
         transactionsRef.current.map((transaction) => [transaction.id, transaction]),
       );
@@ -3578,7 +3602,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
         inputById.set(id, normalizedInput);
       });
-      if (normalizedUpdates.length === 0) return;
+      if (normalizedUpdates.length === 0) {
+        if (afterWrite) runDeferredWrite(() => afterWrite(true));
+        return;
+      }
 
       const nextUpdatedAt = nowIso();
       setTransactions((prev) =>
@@ -3610,8 +3637,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         // this list cannot name, and the whole ledger is read again instead.
         const writtenIds = normalizedUpdates.map(({ id }) => id);
         let reload = false;
+        let stored = false;
         try {
           transactionsRepository.updateMany(normalizedUpdates, nextUpdatedAt);
+          stored = true;
           // Shared ledgers: an entry given to someone else takes its refund
           // and its split paybacks with it (those were stamped from it).
           normalizedUpdates.forEach(({ id, input }) => {
@@ -3664,6 +3693,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
         if (reload) scheduleRefreshTransactions();
         else reconcileStoredTransactions(writtenIds);
+        afterWrite?.(stored);
       });
     },
     [
@@ -3952,11 +3982,55 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           frequency: frequencyOfSchedule(input.recurrencePattern, input.recurrenceInterval),
           first_payment_due: created.firstPaymentId !== null,
           custom_amount: input.regularAmount != null,
+          source: 'add_form',
         });
       }
       return created;
     },
     [runMutation],
+  );
+
+  const convertTransactionToInstalmentPlan = useCallback(
+    (
+      id: string,
+      edits: Partial<CreateTransactionInput>,
+      plan: Omit<ConvertToInstalmentPlanInput, 'transactionId'>,
+      onConverted?: () => void,
+    ) => {
+      // The editor's other changes (note, category, date, receipt) save first,
+      // like any edit, and the plan is made from the row once they are stored:
+      // its total and first date are what the user left in the form.
+      updateTransactionsBulk([{ id, input: edits }], {
+        afterWrite: (stored) => {
+          try {
+            const ruleId = stored
+              ? runMutation(() =>
+                  recurringRulesRepository.convertTransactionToInstalmentPlan({
+                    ...plan,
+                    transactionId: id,
+                  }),
+                )
+              : null;
+            // A failed save, or a row that changed under the editor (another
+            // phone's sync): no plan was made.
+            if (!ruleId) throw new Error('Expense could not be turned into an instalment plan');
+            void trackEvent(AnalyticsEvents.INSTALMENT_PLAN_CREATED, {
+              payments: Math.trunc(plan.count),
+              frequency: frequencyOfSchedule(plan.recurrencePattern, plan.recurrenceInterval),
+              // The expense itself is payment 1, made already.
+              first_payment_due: true,
+              custom_amount: plan.regularAmount != null,
+              source: 'saved_expense',
+            });
+            onConverted?.();
+          } catch (error) {
+            Alert.alert(I18n.t('instalments.convert_failed'));
+            reportError(error, { scope: 'instalment_convert' });
+          }
+        },
+      });
+    },
+    [runMutation, updateTransactionsBulk],
   );
 
   const updateInstalmentPlan = useCallback(
@@ -6515,6 +6589,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             deleteRecurringRule,
             instalmentPlans,
             createInstalmentPlan,
+            convertTransactionToInstalmentPlan,
             updateInstalmentPlan,
             deleteInstalmentPlan,
             payNextInstalment,
@@ -6653,6 +6728,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       deleteRecurringRule,
       instalmentPlans,
       createInstalmentPlan,
+      convertTransactionToInstalmentPlan,
       updateInstalmentPlan,
       deleteInstalmentPlan,
       payNextInstalment,

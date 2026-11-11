@@ -1,6 +1,11 @@
 jest.mock('~/lib/db/client', () => ({ getDb: jest.fn(), getSQLite: jest.fn() }));
 jest.mock('~/lib/repositories/transactionsRepository', () => ({
-  transactionsRepository: { createWithId: jest.fn(), softDelete: jest.fn() },
+  transactionsRepository: {
+    createWithId: jest.fn(),
+    softDelete: jest.fn(),
+    getById: jest.fn(),
+    update: jest.fn(),
+  },
 }));
 jest.mock('~/lib/repositories/exchangeRatesRepository', () => ({
   exchangeRatesRepository: { listByBase: () => [] },
@@ -20,6 +25,12 @@ import {
   recurringRunTransactionId,
 } from '~/lib/repositories/recurringRulesRepository';
 import { transactionsRepository } from '~/lib/repositories/transactionsRepository';
+
+/** Local midnight on a day: where every plan's schedule starts. */
+function midnight(dayKey: string): string {
+  const [year, month, day] = dayKey.split('-').map(Number);
+  return new Date(year ?? 0, (month ?? 1) - 1, day ?? 1).toISOString();
+}
 
 /** Local noon on a day: the same calendar day in UTC in most time zones. */
 function noon(dayKey: string): string {
@@ -256,6 +267,168 @@ describe('createInstalmentPlan', () => {
   });
 });
 
+/** An expense saved already, as the editor or a receipt scan left it. */
+function savedExpense(overrides: Row = {}): Row {
+  return {
+    id: 'tx-sofa',
+    type: 'expense',
+    amount: 1000,
+    currency: 'MYR',
+    reportingAmount: 1000,
+    accountAmount: null,
+    date: noon('2026-11-02'),
+    accountId: 'card',
+    categoryId: 'home',
+    note: 'Sofa',
+    memberId: null,
+    instalmentRuleId: null,
+    feeOfId: null,
+    reimbursedAt: null,
+    reimbursementTransactionId: null,
+    splits: [],
+    ...overrides,
+  };
+}
+
+describe('convertTransactionToInstalmentPlan', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  const CONVERT_INPUT = {
+    transactionId: 'tx-sofa',
+    count: 3,
+    recurrencePattern: 'monthly' as const,
+    recurrenceInterval: 1,
+  };
+
+  it('makes the expense payment 1, keeping its row, and waits on payment 2', () => {
+    const state = useFakeDb();
+    (transactionsRepository.getById as jest.Mock).mockReturnValue(savedExpense());
+
+    expect(recurringRulesRepository.convertTransactionToInstalmentPlan(CONVERT_INPUT)).toBe('plan');
+
+    expect(transactionsRepository.update).toHaveBeenCalledWith('tx-sofa', {
+      amount: 333.33,
+      reportingAmount: 333.33,
+      accountAmount: null,
+      instalmentRuleId: 'plan',
+      instalmentNumber: 1,
+    });
+    // Nothing new is written for payment 1: the expense is it.
+    expect(transactionsRepository.createWithId).not.toHaveBeenCalled();
+    expect(state.rule).toMatchObject({
+      name: 'Sofa',
+      amount: 333.33,
+      accountId: 'card',
+      categoryId: 'home',
+      instalmentCount: 3,
+      instalmentTotal: 1000,
+      instalmentStartDate: midnight('2026-11-02'),
+      nextRunDate: midnight('2026-12-02'),
+      endDate: midnight('2027-01-02'),
+      anchorDay: 2,
+      isActive: true,
+    });
+  });
+
+  it('starts the schedule at midnight of the expense’s day, which keeps its own time', () => {
+    const state = useFakeDb();
+    const evening = new Date(2026, 7, 31, 18, 30).toISOString();
+    (transactionsRepository.getById as jest.Mock).mockReturnValue(savedExpense({ date: evening }));
+
+    recurringRulesRepository.convertTransactionToInstalmentPlan(CONVERT_INPUT);
+
+    // Due from the start of each day, as a plan from the add form is; the
+    // 31st carries on to the last day of a short month.
+    expect(state.rule).toMatchObject({
+      instalmentStartDate: midnight('2026-08-31'),
+      nextRunDate: midnight('2026-09-30'),
+      endDate: midnight('2026-10-31'),
+      anchorDay: 31,
+    });
+    // The row is not moved: the update carries no date.
+    expect(transactionsRepository.update).toHaveBeenCalledWith(
+      'tx-sofa',
+      expect.not.objectContaining({ date: expect.anything() }),
+    );
+  });
+
+  it('reads a date saved as a bare day (Quick Add) as that local day', () => {
+    const state = useFakeDb();
+    (transactionsRepository.getById as jest.Mock).mockReturnValue(
+      savedExpense({ date: '2026-11-02' }),
+    );
+
+    recurringRulesRepository.convertTransactionToInstalmentPlan(CONVERT_INPUT);
+
+    expect(state.rule).toMatchObject({ instalmentStartDate: midnight('2026-11-02') });
+  });
+
+  it('shrinks the frozen reporting and account values with the amount', () => {
+    useFakeDb();
+    (transactionsRepository.getById as jest.Mock).mockReturnValue(
+      savedExpense({ currency: 'USD', amount: 300, reportingAmount: 1410, accountAmount: 1410 }),
+    );
+
+    recurringRulesRepository.convertTransactionToInstalmentPlan(CONVERT_INPUT);
+
+    expect(transactionsRepository.update).toHaveBeenCalledWith(
+      'tx-sofa',
+      expect.objectContaining({ amount: 100, reportingAmount: 470, accountAmount: 470 }),
+    );
+  });
+
+  it('keeps whose expense it is on the plan, and uses the bank’s amount', () => {
+    const state = useFakeDb();
+    (transactionsRepository.getById as jest.Mock).mockReturnValue(
+      savedExpense({ memberId: 'user-ana' }),
+    );
+
+    recurringRulesRepository.convertTransactionToInstalmentPlan({
+      ...CONVERT_INPUT,
+      regularAmount: 333.4,
+    });
+
+    expect(state.rule).toMatchObject({ memberId: 'user-ana', amount: 333.4 });
+    expect(transactionsRepository.update).toHaveBeenCalledWith(
+      'tx-sofa',
+      expect.objectContaining({ amount: 333.4 }),
+    );
+  });
+
+  it.each([
+    ['a payment of a plan already', { instalmentRuleId: 'other-plan' }],
+    ['a plan payment an older app wrote', { id: 'rr:other-plan:2026-10-02' }],
+    ['income', { type: 'income' }],
+    ['a transfer fee', { feeOfId: 'transfer' }],
+    ['a reimbursed expense', { reimbursedAt: noon('2026-11-03') }],
+    ['a split bill', { splits: [{ id: 'split' }] }],
+    ['an expense with no category', { categoryId: null }],
+    ['an amount too small to split', { amount: 0.02 }],
+  ])('refuses %s', (_label, overrides) => {
+    const state = useFakeDb();
+    (transactionsRepository.getById as jest.Mock).mockReturnValue(savedExpense(overrides));
+
+    expect(recurringRulesRepository.convertTransactionToInstalmentPlan(CONVERT_INPUT)).toBeNull();
+    expect(state.inserted).toBe(0);
+    expect(transactionsRepository.update).not.toHaveBeenCalled();
+  });
+
+  it('refuses a deleted expense and a payment amount that does not fit', () => {
+    const state = useFakeDb();
+    (transactionsRepository.getById as jest.Mock).mockReturnValue(null);
+    expect(recurringRulesRepository.convertTransactionToInstalmentPlan(CONVERT_INPUT)).toBeNull();
+
+    (transactionsRepository.getById as jest.Mock).mockReturnValue(savedExpense());
+    expect(
+      recurringRulesRepository.convertTransactionToInstalmentPlan({
+        ...CONVERT_INPUT,
+        regularAmount: 500,
+      }),
+    ).toBeNull();
+    expect(state.inserted).toBe(0);
+  });
+});
+
 describe('payNextInstalment', () => {
   beforeEach(() => jest.clearAllMocks());
 
@@ -351,5 +524,26 @@ describe('deleteInstalmentPlan', () => {
     expect(recurringRulesRepository.deleteInstalmentPlan('plan')).toEqual(['p1']);
     expect(state.rule?.deletedAt).toBeTruthy();
     expect(transactionsRepository.softDelete).not.toHaveBeenCalled();
+  });
+
+  it('makes a kept expense that was turned into the plan an ordinary expense again', () => {
+    useFakeDb({
+      rule: planRow(),
+      payments: [
+        payment(1, noon('2026-11-02'), { id: 'tx-sofa' }),
+        payment(2, noon('2026-12-02'), { id: 'rr:plan:2026-12-02' }),
+      ],
+    });
+
+    expect(recurringRulesRepository.deleteInstalmentPlan('plan')).toEqual([
+      'tx-sofa',
+      'rr:plan:2026-12-02',
+    ]);
+    // The plan's own run keeps the link, so it never reads as a repeat.
+    expect(transactionsRepository.update).toHaveBeenCalledTimes(1);
+    expect(transactionsRepository.update).toHaveBeenCalledWith('tx-sofa', {
+      instalmentRuleId: null,
+      instalmentNumber: null,
+    });
   });
 });

@@ -5,12 +5,12 @@ import {
   DEFAULT_INSTALMENT_CHOICE,
   type InstalmentChoice,
 } from '~/features/instalments/components/InstalmentSheet';
+import { useCanStartInstalmentPlan } from '~/features/instalments/hooks/useCanStartInstalmentPlan';
 import { scheduleOfFrequency } from '~/features/instalments/lib/instalmentPlan';
 import { TransactionEditorScreen } from '~/features/transactions/components';
 import { type SplitDraft, splitsHelpers } from '~/features/transactions/components/editor';
 import type { TransactionEditorSubmitExtras } from '~/features/transactions/components/TransactionEditorScreen';
 import { useNewTransactionGate } from '~/features/transactions/hooks/useNewTransactionGate';
-import { useProGate } from '~/hooks/useProGate';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
 import type { AddTransactionInitialValues } from '~/navigation/rootStack';
 import { requestHighlightTransaction } from '~/services/transactionsNavigation';
@@ -36,19 +36,10 @@ export function AddTransactionScreen({
   openSplitBillOnMount,
   startInstalmentPlan = false,
 }: AddTransactionScreenProps) {
-  const {
-    createTransaction,
-    createTransactionWithSplits,
-    markSplitPaid,
-    instalmentPlans,
-    createInstalmentPlan,
-  } = useApp();
+  const { createTransaction, createTransactionWithSplits, markSplitPaid, createInstalmentPlan } =
+    useApp();
   const { blocked, activeAccountCount } = useNewTransactionGate();
-  const { checkLimit } = useProGate();
-  const activePlanCount = useMemo(
-    () => instalmentPlans.filter((plan) => !plan.complete).length,
-    [instalmentPlans],
-  );
+  const canStartPlan = useCanStartInstalmentPlan();
 
   // "Pay in instalments": the form's amount is the total and its date the
   // first payment. The plan keeps the note as its name and hands the receipt,
@@ -57,7 +48,7 @@ export function AddTransactionScreen({
   const instalmentOptions = useMemo(
     () => ({
       initialChoice: startInstalmentPlan ? DEFAULT_INSTALMENT_CHOICE : null,
-      canStart: () => checkLimit('instalments', activePlanCount),
+      canStart: canStartPlan,
       onSubmitPlan: ({
         transaction,
         choice,
@@ -90,7 +81,7 @@ export function AddTransactionScreen({
         if (created?.firstPaymentId) requestHighlightTransaction(created.firstPaymentId);
       },
     }),
-    [activePlanCount, checkLimit, createInstalmentPlan, startInstalmentPlan],
+    [canStartPlan, createInstalmentPlan, startInstalmentPlan],
   );
 
   // Create the transaction and briefly flash its row so the user can spot the

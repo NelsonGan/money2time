@@ -60,6 +60,34 @@ export function isInstalmentPlan(
   return typeof rule.instalmentCount === 'number' && rule.instalmentCount > 0;
 }
 
+/**
+ * Whether a transaction already saved can be turned into an instalment plan,
+ * becoming its first payment. Only a plain expense of the user's own: not a
+ * payment of a plan already, not a run of a recurring rule (`rr:` ids, which
+ * include a plan's payments written by app versions that did not name the
+ * plan on them, so moving one to a new plan would leave its own plan charging
+ * it again), not split with friends, not a transfer's fee, and not one whose
+ * reimbursement came back (its refund is for the whole amount, which the
+ * first payment no longer is). A pending reimbursement is fine: the tick
+ * stays on payment 1, as on a plan from the add form.
+ */
+export function canConvertToInstalmentPlan(
+  transaction: Pick<
+    Transaction,
+    'id' | 'type' | 'instalmentRuleId' | 'feeOfId' | 'reimbursedAt' | 'reimbursementTransactionId'
+  > & { splits?: readonly unknown[] | null },
+): boolean {
+  return (
+    transaction.type === 'expense' &&
+    !transaction.id.startsWith('rr:') &&
+    !transaction.instalmentRuleId &&
+    !transaction.feeOfId &&
+    !transaction.reimbursedAt &&
+    !transaction.reimbursementTransactionId &&
+    (transaction.splits?.length ?? 0) === 0
+  );
+}
+
 /** Whether a total splits into `count` payments of at least one cent each. */
 export function canSplitInstalments(total: number, count: number): boolean {
   return Number.isFinite(total) && total > 0 && Math.round(total * 100) >= Math.trunc(count);
@@ -194,6 +222,15 @@ export function instalmentScheduleDates(
     dates.push(next);
   }
   return dates;
+}
+
+/**
+ * How many payments after the first fall on or before `now`'s day, which the
+ * plan makes as soon as it is saved (a purchase from a while back).
+ */
+export function paymentsAlreadyDue(dates: readonly string[], now: Date = new Date()): number {
+  const today = dayKeyFromIsoLocal(now.toISOString());
+  return dates.slice(1).filter((date) => dayKeyFromIsoLocal(date) <= today).length;
 }
 
 /** The schedule of a saved plan. */

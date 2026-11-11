@@ -1862,6 +1862,14 @@ const de = {
       'Um einen Beleg, Details oder eine Erstattung zu behalten, muss die erste Rate heute oder früher sein.',
     remove: 'Raten entfernen',
     add_payments: '{{count}} Raten hinzufügen',
+    convert_payments: 'In {{count}} Raten aufteilen',
+    convert_note: 'Diese Ausgabe wird Rate 1 von {{count}}. Der Rest folgt nach Plan.',
+    convert_failed:
+      'Diese Ausgabe konnte nicht in Raten aufgeteilt werden. Bitte versuche es erneut.',
+    already_due_one:
+      '{{count}} weitere Rate ist schon fällig. Sie wird beim Speichern hinzugefügt.',
+    already_due_other:
+      '{{count}} weitere Raten sind schon fällig. Sie werden beim Speichern hinzugefügt.',
     pill_a11y: 'Rate {{label}}',
     new_plan: 'Neue Ratenzahlung',
     due_this_month: 'Diesen Monat fällig',

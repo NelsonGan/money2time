@@ -2,6 +2,7 @@ import { and, eq, gte, isNull, lt, lte, or, type SQL } from 'drizzle-orm';
 
 import {
   buildInstalmentProgress,
+  canConvertToInstalmentPlan,
   canSplitInstalments,
   INSTALMENT_PAYOFF_NUMBER,
   instalmentAmounts,
@@ -22,6 +23,7 @@ import type {
   TransactionSentiment,
 } from '~/types';
 import { buildRateTable, convert } from '~/utils/currency';
+import { dateFromDayKeyLocal, dayKeyFromIsoLocal, normalizeMoneyAmount } from '~/utils/formatters';
 import { newId, nowIso } from '~/utils/id';
 // Shared with the screen's forecast so the dates it projects are the dates this
 // runner will actually write.
@@ -112,6 +114,16 @@ export interface CreateInstalmentPlanInput {
    * plan is this phone's account when it is a member of the open ledger.
    */
   memberId?: string | null;
+}
+
+/** Turning an expense already saved into a plan: the expense is payment 1. */
+export interface ConvertToInstalmentPlanInput {
+  transactionId: string;
+  count: number;
+  recurrencePattern: 'monthly' | 'weekly';
+  recurrenceInterval: number;
+  /** The bank's payment amount, when it differs from the even split. */
+  regularAmount?: number | null;
 }
 
 export interface CreatedInstalmentPlan {
@@ -243,6 +255,54 @@ function deactivateLiveRules(condition: SQL | undefined) {
     .run();
 }
 
+interface InstalmentPlanSchedule {
+  count: number;
+  /** Each payment, the last one balancing the total. */
+  amounts: number[];
+  /** Each payment's date, the first being the plan's start. */
+  dates: string[];
+  recurrenceInterval: number;
+}
+
+/**
+ * The payments and dates of a new plan, shared by a plan from the add form and
+ * one made from a saved expense; null when the plan cannot be made (fewer than
+ * two payments, a total under a cent a payment, or a payment amount that
+ * leaves nothing for the last).
+ */
+function instalmentPlanSchedule(input: {
+  total: number;
+  count: number;
+  regularAmount?: number | null;
+  startDate: string;
+  recurrencePattern: 'monthly' | 'weekly';
+  recurrenceInterval: number;
+}): InstalmentPlanSchedule | null {
+  const count = Math.trunc(input.count);
+  if (count < 2 || !canSplitInstalments(input.total, count)) return null;
+  if (
+    input.regularAmount != null &&
+    !isRegularAmountValid(input.total, count, input.regularAmount)
+  ) {
+    return null;
+  }
+  const recurrenceInterval = normalizeInterval(input.recurrenceInterval);
+  const dates = scheduleOfPlan({
+    instalmentCount: count,
+    instalmentStartDate: input.startDate,
+    nextRunDate: input.startDate,
+    recurrencePattern: input.recurrencePattern,
+    recurrenceInterval,
+  });
+  if (dates.length !== count) return null;
+  return {
+    count,
+    amounts: instalmentAmounts(input.total, count, input.regularAmount),
+    dates,
+    recurrenceInterval,
+  };
+}
+
 class RecurringRulesRepository {
   list(): RecurringTransactionRule[] {
     const db = getDb();
@@ -313,50 +373,18 @@ class RecurringRulesRepository {
     input: CreateInstalmentPlanInput,
     todayIso: string = nowIso(),
   ): CreatedInstalmentPlan | null {
-    const count = Math.trunc(input.count);
-    if (!input.accountId || !input.categoryId || count < 2) return null;
-    if (!canSplitInstalments(input.total, count)) return null;
-    if (
-      input.regularAmount != null &&
-      !isRegularAmountValid(input.total, count, input.regularAmount)
-    ) {
-      return null;
-    }
-    const amounts = instalmentAmounts(input.total, count, input.regularAmount);
-    const schedule = {
-      instalmentCount: count,
-      instalmentStartDate: input.startDate,
-      nextRunDate: input.startDate,
-      recurrencePattern: input.recurrencePattern,
-      recurrenceInterval: normalizeInterval(input.recurrenceInterval),
-    };
-    const dates = scheduleOfPlan(schedule);
-    const firstDate = dates[0];
-    const lastDate = dates[dates.length - 1];
-    if (!firstDate || !lastDate || dates.length !== count) return null;
+    if (!input.accountId || !input.categoryId) return null;
+    const schedule = instalmentPlanSchedule(input);
+    if (!schedule) return null;
+    const { amounts, dates } = schedule;
+    const firstDate = dates[0] ?? input.startDate;
 
     // The rule, its first payment and the move to the next one land
     // together: a plan whose first payment failed would have the runner make
     // it later without the receipt, which the asset sweep would then delete.
     let created: CreatedInstalmentPlan | null = null;
     getSQLite().withTransactionSync(() => {
-      const ruleId = this.create({
-        memberId: input.memberId,
-        name: input.name,
-        type: 'expense',
-        amount: amounts[0] ?? 0,
-        currency: input.currency,
-        accountId: input.accountId,
-        categoryId: input.categoryId,
-        note: input.note ?? null,
-        recurrencePattern: input.recurrencePattern,
-        recurrenceInterval: schedule.recurrenceInterval,
-        nextRunDate: firstDate,
-        endDate: lastDate,
-        instalmentCount: count,
-        instalmentTotal: input.total,
-        instalmentStartDate: firstDate,
-      });
+      const ruleId = this.insertInstalmentPlanRule(input, schedule, firstDate);
       if (!ruleId) return;
 
       let firstPaymentId: string | null = null;
@@ -380,6 +408,107 @@ class RecurringRulesRepository {
       created = { ruleId, firstPaymentId };
     });
     return created;
+  }
+
+  /**
+   * Turns an expense already saved into an instalment plan of its amount. The
+   * row itself becomes payment 1, on its own date, so it keeps its id, receipt,
+   * note, mood, albums and Cloud Sync history; only its amount drops to the
+   * first payment's. The plan's schedule counts from that day, and the runner
+   * makes any later payment already due on the next load, the same as a plan
+   * added with a date in the past. Returns the plan's id, or null when the row
+   * cannot be converted (see `canConvertToInstalmentPlan`).
+   */
+  convertTransactionToInstalmentPlan(input: ConvertToInstalmentPlanInput): string | null {
+    const transaction = transactionsRepository.getById(input.transactionId);
+    if (!transaction || !canConvertToInstalmentPlan(transaction)) return null;
+    const { accountId, categoryId } = transaction;
+    if (!accountId || !categoryId) return null;
+    const total = transaction.amount;
+    // The schedule starts at local midnight of the expense's day, as a plan
+    // from the add form does, so each later payment is due from the start of
+    // its day (the row keeps its own time). Counted from the expense's time
+    // instead, a payment due later today would wait until that hour, after
+    // the sheet had said it was added on saving.
+    const startDate = dateFromDayKeyLocal(dayKeyFromIsoLocal(transaction.date)).toISOString();
+    const schedule = instalmentPlanSchedule({ ...input, total, startDate });
+    const secondDate = schedule?.dates[1];
+    const firstAmount = schedule?.amounts[0];
+    if (!schedule || !secondDate || !firstAmount) return null;
+    // The frozen reporting and account-currency values shrink with the
+    // amount, at the rates the row holds.
+    const share = firstAmount / total;
+    const scaled = (value: number | null) =>
+      value == null ? null : normalizeMoneyAmount(value * share);
+
+    let ruleId: string | null = null;
+    getSQLite().withTransactionSync(() => {
+      const id = this.insertInstalmentPlanRule(
+        {
+          name: transaction.note?.trim() || '',
+          total,
+          currency: transaction.currency,
+          accountId,
+          categoryId,
+          note: transaction.note ?? null,
+          recurrencePattern: input.recurrencePattern,
+          memberId: transaction.memberId,
+        },
+        schedule,
+        // Payment 1 is made (it is this row), so the plan waits on payment 2.
+        secondDate,
+      );
+      if (!id) return;
+      transactionsRepository.update(transaction.id, {
+        amount: firstAmount,
+        reportingAmount: scaled(transaction.reportingAmount),
+        accountAmount: scaled(transaction.accountAmount),
+        instalmentRuleId: id,
+        instalmentNumber: 1,
+      });
+      ruleId = id;
+    });
+    return ruleId;
+  }
+
+  /** Inserts a new plan's rule, waiting on `nextRunDate`. */
+  private insertInstalmentPlanRule(
+    plan: Pick<
+      CreateInstalmentPlanInput,
+      | 'name'
+      | 'total'
+      | 'currency'
+      | 'accountId'
+      | 'categoryId'
+      | 'note'
+      | 'recurrencePattern'
+      | 'memberId'
+    >,
+    schedule: InstalmentPlanSchedule,
+    nextRunDate: string,
+  ): string | null {
+    const firstDate = schedule.dates[0];
+    const lastDate = schedule.dates[schedule.dates.length - 1];
+    if (!firstDate || !lastDate) return null;
+    return this.create({
+      memberId: plan.memberId,
+      name: plan.name,
+      type: 'expense',
+      amount: schedule.amounts[0] ?? 0,
+      currency: plan.currency,
+      accountId: plan.accountId,
+      categoryId: plan.categoryId,
+      note: plan.note ?? null,
+      recurrencePattern: plan.recurrencePattern,
+      recurrenceInterval: schedule.recurrenceInterval,
+      nextRunDate,
+      // The day of the month the plan is for: its first payment's.
+      anchorDay: runDayOf(firstDate)?.day ?? null,
+      endDate: lastDate,
+      instalmentCount: schedule.count,
+      instalmentTotal: plan.total,
+      instalmentStartDate: firstDate,
+    });
   }
 
   /**
@@ -429,6 +558,12 @@ class RecurringRulesRepository {
    * rule). Returns the ids of the payments already made, so a caller that
    * removes those too can do it through the normal transaction delete, which
    * also cleans up what hangs off a row (album joins, receipts, splits).
+   *
+   * A kept payment that is an expense the user turned into the plan (any id
+   * but a run id `rr:<plan>:…`) stops naming it, so it is an ordinary expense
+   * again: it can be split, re-typed or turned into a new plan. The plan's own
+   * runs keep the link, which is what keeps them from reading as an ordinary
+   * rule's runs (`isRecurringRunTransaction`) once the plan is gone.
    */
   deleteInstalmentPlan(ruleId: string): string[] {
     const rule = this.get(ruleId);
@@ -438,7 +573,14 @@ class RecurringRulesRepository {
           .filter((payment) => !payment.deletedAt)
           .map((payment) => payment.id)
       : [];
-    this.softDelete(ruleId);
+    getSQLite().withTransactionSync(() => {
+      this.softDelete(ruleId);
+      paymentIds
+        .filter((id) => !id.startsWith('rr:'))
+        .forEach((id) =>
+          transactionsRepository.update(id, { instalmentRuleId: null, instalmentNumber: null }),
+        );
+    });
     return paymentIds;
   }
 

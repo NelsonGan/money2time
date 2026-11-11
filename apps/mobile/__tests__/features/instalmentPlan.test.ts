@@ -1,6 +1,7 @@
 import {
   buildInstalmentPlans,
   buildInstalmentProgress,
+  canConvertToInstalmentPlan,
   clampInstalmentCount,
   frequencyOfSchedule,
   INSTALMENT_PAYOFF_NUMBER,
@@ -13,6 +14,7 @@ import {
   isInstalmentPlan,
   isRegularAmountValid,
   paymentRowsForPlan,
+  paymentsAlreadyDue,
   regularAmountImpliesOtherTotal,
   scheduleOfFrequency,
   splitInstalmentAmounts,
@@ -158,6 +160,60 @@ describe('isInstalmentPlan', () => {
   it('tells a plan from an ordinary rule', () => {
     expect(isInstalmentPlan(makePlan())).toBe(true);
     expect(isInstalmentPlan({ instalmentCount: null })).toBe(false);
+  });
+});
+
+describe('canConvertToInstalmentPlan', () => {
+  const expense = {
+    id: 'tx-sofa',
+    type: 'expense' as const,
+    instalmentRuleId: null,
+    feeOfId: null,
+    reimbursedAt: null,
+    reimbursementTransactionId: null,
+    splits: [],
+  };
+
+  it('allows a plain expense of the user’s own', () => {
+    expect(canConvertToInstalmentPlan(expense)).toBe(true);
+    expect(canConvertToInstalmentPlan({ ...expense, splits: undefined })).toBe(true);
+  });
+
+  it('allows a pending reimbursement, which stays on payment 1', () => {
+    const pending = { ...expense, reimbursable: true, reimbursedAt: null };
+    expect(canConvertToInstalmentPlan(pending)).toBe(true);
+  });
+
+  it('refuses a run of a rule, such as a plan payment an older app wrote without its plan', () => {
+    expect(canConvertToInstalmentPlan({ ...expense, id: 'rr:plan-a:2026-10-02' })).toBe(false);
+    expect(canConvertToInstalmentPlan({ ...expense, id: 'rr:netflix:2026-10-02' })).toBe(false);
+  });
+
+  it('refuses rows that would still count towards something else', () => {
+    expect(canConvertToInstalmentPlan({ ...expense, type: 'income' })).toBe(false);
+    expect(canConvertToInstalmentPlan({ ...expense, type: 'transfer' })).toBe(false);
+    expect(canConvertToInstalmentPlan({ ...expense, instalmentRuleId: 'plan' })).toBe(false);
+    expect(canConvertToInstalmentPlan({ ...expense, feeOfId: 'transfer' })).toBe(false);
+    expect(canConvertToInstalmentPlan({ ...expense, reimbursedAt: '2026-11-02' })).toBe(false);
+    expect(canConvertToInstalmentPlan({ ...expense, reimbursementTransactionId: 'refund' })).toBe(
+      false,
+    );
+    expect(canConvertToInstalmentPlan({ ...expense, splits: [{}] })).toBe(false);
+  });
+});
+
+describe('paymentsAlreadyDue', () => {
+  const at = (day: string) => new Date(`${day}T12:00:00`).toISOString();
+  const dates = instalmentScheduleDates(at('2026-08-11'), 'monthly', 1, 6);
+
+  it('counts the payments after the first that fall on or before today', () => {
+    expect(paymentsAlreadyDue(dates, new Date(at('2026-11-11')))).toBe(3);
+    expect(paymentsAlreadyDue(dates, new Date(at('2026-11-10')))).toBe(2);
+  });
+
+  it('is zero for a plan that starts today or later', () => {
+    expect(paymentsAlreadyDue(dates, new Date(at('2026-08-11')))).toBe(0);
+    expect(paymentsAlreadyDue(dates, new Date(at('2026-01-01')))).toBe(0);
   });
 });
 

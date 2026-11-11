@@ -1828,6 +1828,12 @@ const vi = {
       'Để giữ biên lai, chi tiết hoặc hoàn tiền, kỳ đầu tiên phải là hôm nay hoặc trước đó.',
     remove: 'Bỏ trả góp',
     add_payments: 'Thêm {{count}} kỳ',
+    convert_payments: 'Chuyển thành {{count}} kỳ thanh toán',
+    convert_note:
+      'Khoản chi này trở thành kỳ thanh toán 1 trong {{count}} kỳ. Các kỳ còn lại theo lịch.',
+    convert_failed: 'Không thể chuyển khoản chi này thành trả góp. Vui lòng thử lại.',
+    already_due_one: 'Còn {{count}} kỳ nữa đã đến hạn. Kỳ này sẽ được thêm khi bạn lưu.',
+    already_due_other: 'Còn {{count}} kỳ nữa đã đến hạn. Các kỳ này sẽ được thêm khi bạn lưu.',
     pill_a11y: 'Trả góp {{label}}',
     new_plan: 'Khoản trả góp mới',
     due_this_month: 'Đến hạn tháng này',
