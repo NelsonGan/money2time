@@ -46,18 +46,6 @@ it('names the status of a server failure', async () => {
   expect(error.message).toBe('server: http_500');
 });
 
-// 2026-11-12: a sync on 1.7.5 failed with "server: http_408". Cloudflare
-// logged no 408 for the Worker's host that week, so something between the
-// phone and Cloudflare timed the upload out. It is the upload not getting
-// through, like a dropped connection, so it is tried again, not refused.
-it('reports a request timeout (408) as network', async () => {
-  const error = await failure(
-    jest.fn().mockResolvedValue({ status: 408, body: '<html>Request Timeout</html>', headers: {} }),
-  );
-  expect(error.code).toBe('network');
-  expect(error.status).toBe(408);
-});
-
 it("keeps the Worker's refusals apart", async () => {
   const refused = (status: number, body: string) =>
     failure(jest.fn().mockResolvedValue({ status, body, headers: {} }));

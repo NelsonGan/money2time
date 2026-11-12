@@ -123,9 +123,6 @@ function toError(status: number, body: unknown): CloudSyncApiError {
     message?: unknown;
   };
   const code = String(record.code ?? record.error ?? '');
-  // The request timed out on its way (the Worker never answers 408): it did
-  // not get through, as when the connection drops, so it is worth another try.
-  if (status === 408) return new CloudSyncApiError('network', status, 'http_408');
   if (status === 401) return new CloudSyncApiError('unauthorized', status, code);
   if (status === 403 && code === 'not_pro') return new CloudSyncApiError('not_pro', status);
   if (status === 403 && code === 'captcha_failed') {
