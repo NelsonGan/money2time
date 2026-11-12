@@ -4,14 +4,13 @@ import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AccountLogo, AccountPickerSheet, Button, Text } from '~/components/ui';
-import { ThemeModal } from '~/components/ui/theme-modal';
+import { BottomSheetModal } from '~/components/ui/bottom-sheet-modal';
 import { useApp } from '~/context/AppContext';
 import {
   type SettleUpFlow,
   SettleUpFlowAvatars,
 } from '~/features/transactions/components/SettleUpFlowAvatars';
 import { pickPaybackAccountId } from '~/features/transactions/lib/entryDefaults';
-import { useSheetColumnStyle } from '~/hooks/useSheetColumnStyle';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -49,17 +48,10 @@ interface SettleUpConfirmSheetProps {
 export function SettleUpConfirmSheet({ content, onClose, onConfirm }: SettleUpConfirmSheetProps) {
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
-  const sheetColumnStyle = useSheetColumnStyle();
   const { accounts, accountGroups, getAccountById, settings } = useApp();
 
   const [accountId, setAccountId] = useState<string | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
-
-  // The sheet keeps what it showed while it slides away, instead of emptying
-  // the moment the caller clears its content.
-  const lastContent = useRef<SettleUpConfirmContent | null>(null);
-  if (content) lastContent.current = content;
-  const shown = content ?? lastContent.current;
 
   // Seeded when the sheet opens, not on every account change while it is open:
   // the account money is paid to by default, which is never an archived one.
@@ -76,106 +68,11 @@ export function SettleUpConfirmSheet({ content, onClose, onConfirm }: SettleUpCo
   const hasAccounts = accounts.length > 0;
 
   return (
-    <ThemeModal
+    <BottomSheetModal
       visible={open}
-      transparent
-      animationType="slide"
-      presentationStyle="overFullScreen"
-      onRequestClose={onClose}
-    >
-      <View className="flex-1 justify-end">
-        <Pressable accessible={false} className="absolute inset-0 bg-black/40" onPress={onClose} />
-        <View
-          className="overflow-hidden rounded-t-[28px] bg-background"
-          style={[sheetColumnStyle, { paddingBottom: Math.max(insets.bottom, 16) + 8 }]}
-        >
-          {shown ? (
-            <>
-              <View className="items-center pt-2.5">
-                <View className="h-1 w-10 rounded-full bg-border/60" />
-              </View>
-              <View className="items-center px-6 pt-6">
-                <SettleUpFlowAvatars
-                  personKey={shown.personKey}
-                  personName={shown.personName}
-                  flow={shown.flow}
-                />
-                <Text variant="caption" tone="muted" numberOfLines={1} className="mt-3">
-                  {shown.caption}
-                </Text>
-                <Text
-                  variant="display"
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
-                  className={cn(
-                    'mt-0.5 text-center',
-                    shown.flow === 'receive'
-                      ? 'text-success'
-                      : shown.flow === 'pay'
-                        ? 'text-destructive'
-                        : '',
-                  )}
-                >
-                  {shown.amountText}
-                </Text>
-                {shown.detail ? (
-                  <Text
-                    variant="caption"
-                    tone="muted"
-                    numberOfLines={2}
-                    className="mt-1 text-center"
-                  >
-                    {shown.detail}
-                  </Text>
-                ) : null}
-              </View>
-
-              {hasAccounts ? (
-                <Pressable
-                  onPress={() => {
-                    void triggerHaptic('selection');
-                    setPickerOpen(true);
-                  }}
-                  accessibilityRole="button"
-                  className="mx-4 mt-5 flex-row items-center gap-2 rounded-2xl border border-border/25 bg-card/60 px-4 py-3 active:opacity-70"
-                >
-                  <Text variant="body" tone="muted" className="flex-1">
-                    {I18n.t(
-                      shown.flow === 'pay'
-                        ? 'transactions.settleUp.paid_from'
-                        : 'transactions.settleUp.payment_paid_to',
-                    )}
-                  </Text>
-                  {account ? (
-                    <AccountLogo
-                      logoId={account.logoId}
-                      type={account.type}
-                      goalEmoji={account.goalEmoji}
-                      size={18}
-                    />
-                  ) : null}
-                  <Text variant="bodyStrong" numberOfLines={1} className="max-w-[55%]">
-                    {account?.name ?? I18n.t('common.no_account')}
-                  </Text>
-                  <ChevronRight size={16} color={themeColors.textMuted} />
-                </Pressable>
-              ) : null}
-
-              <View className="px-4 pt-4">
-                <Button
-                  onPress={() => {
-                    void triggerHaptic('success');
-                    onConfirm(hasAccounts ? accountId : null);
-                  }}
-                  className="w-full"
-                >
-                  <Text>{shown.confirmLabel}</Text>
-                </Button>
-              </View>
-            </>
-          ) : null}
-        </View>
-
+      onClose={onClose}
+      style={{ paddingBottom: Math.max(insets.bottom, 16) + 8 }}
+      overlay={
         <AccountPickerSheet
           overlay
           visible={pickerOpen}
@@ -188,7 +85,88 @@ export function SettleUpConfirmSheet({ content, onClose, onConfirm }: SettleUpCo
             setPickerOpen(false);
           }}
         />
-      </View>
-    </ThemeModal>
+      }
+    >
+      {content ? (
+        <>
+          <View className="items-center pt-2.5">
+            <View className="h-1 w-10 rounded-full bg-border/60" />
+          </View>
+          <View className="items-center px-6 pt-6">
+            <SettleUpFlowAvatars
+              personKey={content.personKey}
+              personName={content.personName}
+              flow={content.flow}
+            />
+            <Text variant="caption" tone="muted" numberOfLines={1} className="mt-3">
+              {content.caption}
+            </Text>
+            <Text
+              variant="display"
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              className={cn(
+                'mt-0.5 text-center',
+                content.flow === 'receive'
+                  ? 'text-success'
+                  : content.flow === 'pay'
+                    ? 'text-destructive'
+                    : '',
+              )}
+            >
+              {content.amountText}
+            </Text>
+            {content.detail ? (
+              <Text variant="caption" tone="muted" numberOfLines={2} className="mt-1 text-center">
+                {content.detail}
+              </Text>
+            ) : null}
+          </View>
+
+          {hasAccounts ? (
+            <Pressable
+              onPress={() => {
+                void triggerHaptic('selection');
+                setPickerOpen(true);
+              }}
+              accessibilityRole="button"
+              className="mx-4 mt-5 flex-row items-center gap-2 rounded-2xl border border-border/25 bg-card/60 px-4 py-3 active:opacity-70"
+            >
+              <Text variant="body" tone="muted" className="flex-1">
+                {I18n.t(
+                  content.flow === 'pay'
+                    ? 'transactions.settleUp.paid_from'
+                    : 'transactions.settleUp.payment_paid_to',
+                )}
+              </Text>
+              {account ? (
+                <AccountLogo
+                  logoId={account.logoId}
+                  type={account.type}
+                  goalEmoji={account.goalEmoji}
+                  size={18}
+                />
+              ) : null}
+              <Text variant="bodyStrong" numberOfLines={1} className="max-w-[55%]">
+                {account?.name ?? I18n.t('common.no_account')}
+              </Text>
+              <ChevronRight size={16} color={themeColors.textMuted} />
+            </Pressable>
+          ) : null}
+
+          <View className="px-4 pt-4">
+            <Button
+              onPress={() => {
+                void triggerHaptic('success');
+                onConfirm(hasAccounts ? accountId : null);
+              }}
+              className="w-full"
+            >
+              <Text>{content.confirmLabel}</Text>
+            </Button>
+          </View>
+        </>
+      ) : null}
+    </BottomSheetModal>
   );
 }

@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Pressable, View } from 'react-native';
 
 import { AccountLogo, AccountPickerSheet, Text } from '~/components/ui';
-import { ThemeModal } from '~/components/ui/theme-modal';
+import { BottomSheetModal } from '~/components/ui/bottom-sheet-modal';
 import { useApp } from '~/context/AppContext';
 import {
   evaluateExpression,
@@ -12,7 +12,6 @@ import {
 import { MiniNumpad } from '~/features/transactions/components/editor/MiniNumpad';
 import { pickPaybackAccountId } from '~/features/transactions/lib/entryDefaults';
 import { planSplitPayment } from '~/features/transactions/lib/splitPayments';
-import { useSheetColumnStyle } from '~/hooks/useSheetColumnStyle';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -55,7 +54,6 @@ interface SplitPaymentSheetProps {
  */
 export function SplitPaymentSheet({ target, onClose, onRecord }: SplitPaymentSheetProps) {
   const themeColors = useThemeColors();
-  const sheetColumnStyle = useSheetColumnStyle();
   const { accounts, accountGroups, getAccountById, settings } = useApp();
 
   const [expression, setExpression] = useState('');
@@ -108,100 +106,10 @@ export function SplitPaymentSheet({ target, onClose, onRecord }: SplitPaymentShe
   const account = paybackAccountId ? getAccountById(paybackAccountId) : null;
 
   return (
-    <ThemeModal
+    <BottomSheetModal
       visible={target !== null}
-      transparent
-      animationType="slide"
-      presentationStyle="overFullScreen"
-      onRequestClose={onClose}
-    >
-      <View className="flex-1 justify-end">
-        <Pressable accessible={false} className="absolute inset-0 bg-black/40" onPress={onClose} />
-        <View className="overflow-hidden rounded-t-[28px] bg-background" style={sheetColumnStyle}>
-          {target ? (
-            <>
-              <View className="items-center pt-2.5">
-                <View className="h-1 w-10 rounded-full bg-border/60" />
-              </View>
-              <View className="items-center px-6 pt-4">
-                <Text variant="subheading">{I18n.t('transactions.editor.split.mark_paid')}</Text>
-                <Text variant="caption" tone="muted" numberOfLines={1} className="mt-0.5">
-                  {target.label}
-                </Text>
-                <View className="mt-4 flex-row items-baseline gap-1">
-                  <Text variant="subheading" tone="muted">
-                    {currencySymbolForCode(target.currency)}
-                  </Text>
-                  <Text
-                    variant="display"
-                    tone={tooMuch ? 'error' : 'default'}
-                    numberOfLines={1}
-                    adjustsFontSizeToFit
-                    accessibilityLabel={I18n.t('transactions.settleUp.payment_amount')}
-                  >
-                    {expression || '0'}
-                  </Text>
-                </View>
-                <Text variant="caption" tone={tooMuch ? 'error' : 'muted'} className="mt-1">
-                  {tooMuch
-                    ? I18n.t('transactions.settleUp.payment_too_much', {
-                        owed: format(target.owed),
-                      })
-                    : I18n.t('transactions.settleUp.payment_left_of', {
-                        left: format(Math.max(0, normalizeMoneyAmount(target.owed - amount))),
-                        total: format(target.shareTotal),
-                      })}
-                </Text>
-              </View>
-
-              {target.billHasAccount === false ? (
-                <View className="mb-3" />
-              ) : (
-                <Pressable
-                  onPress={() => {
-                    void triggerHaptic('selection');
-                    setPickerOpen(true);
-                  }}
-                  accessibilityRole="button"
-                  className="mx-4 mt-4 mb-3 flex-row items-center gap-2 rounded-2xl border border-border/25 bg-card/60 px-4 py-3 active:opacity-70"
-                >
-                  <Text variant="body" tone="muted" className="flex-1">
-                    {I18n.t(
-                      target.direction === 'pay'
-                        ? 'transactions.settleUp.paid_from'
-                        : 'transactions.settleUp.payment_paid_to',
-                    )}
-                  </Text>
-                  {account ? (
-                    <AccountLogo
-                      logoId={account.logoId}
-                      type={account.type}
-                      goalEmoji={account.goalEmoji}
-                      size={18}
-                    />
-                  ) : null}
-                  <Text variant="bodyStrong" numberOfLines={1} className="max-w-[55%]">
-                    {account?.name ?? I18n.t('common.no_account')}
-                  </Text>
-                  <ChevronRight size={16} color={themeColors.textMuted} />
-                </Pressable>
-              )}
-
-              <MiniNumpad
-                key={padKey}
-                initialExpression={expression}
-                onValueChange={setExpression}
-                onConfirm={handleRecord}
-                confirmLabel={
-                  plan?.kind === 'partial'
-                    ? I18n.t('transactions.settleUp.part_paid')
-                    : I18n.t('transactions.editor.split.mark_paid')
-                }
-              />
-            </>
-          ) : null}
-        </View>
-
+      onClose={onClose}
+      overlay={
         <AccountPickerSheet
           overlay
           visible={pickerOpen}
@@ -214,7 +122,90 @@ export function SplitPaymentSheet({ target, onClose, onRecord }: SplitPaymentShe
             setPickerOpen(false);
           }}
         />
-      </View>
-    </ThemeModal>
+      }
+    >
+      {target ? (
+        <>
+          <View className="items-center pt-2.5">
+            <View className="h-1 w-10 rounded-full bg-border/60" />
+          </View>
+          <View className="items-center px-6 pt-4">
+            <Text variant="subheading">{I18n.t('transactions.editor.split.mark_paid')}</Text>
+            <Text variant="caption" tone="muted" numberOfLines={1} className="mt-0.5">
+              {target.label}
+            </Text>
+            <View className="mt-4 flex-row items-baseline gap-1">
+              <Text variant="subheading" tone="muted">
+                {currencySymbolForCode(target.currency)}
+              </Text>
+              <Text
+                variant="display"
+                tone={tooMuch ? 'error' : 'default'}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                accessibilityLabel={I18n.t('transactions.settleUp.payment_amount')}
+              >
+                {expression || '0'}
+              </Text>
+            </View>
+            <Text variant="caption" tone={tooMuch ? 'error' : 'muted'} className="mt-1">
+              {tooMuch
+                ? I18n.t('transactions.settleUp.payment_too_much', {
+                    owed: format(target.owed),
+                  })
+                : I18n.t('transactions.settleUp.payment_left_of', {
+                    left: format(Math.max(0, normalizeMoneyAmount(target.owed - amount))),
+                    total: format(target.shareTotal),
+                  })}
+            </Text>
+          </View>
+
+          {target.billHasAccount === false ? (
+            <View className="mb-3" />
+          ) : (
+            <Pressable
+              onPress={() => {
+                void triggerHaptic('selection');
+                setPickerOpen(true);
+              }}
+              accessibilityRole="button"
+              className="mx-4 mt-4 mb-3 flex-row items-center gap-2 rounded-2xl border border-border/25 bg-card/60 px-4 py-3 active:opacity-70"
+            >
+              <Text variant="body" tone="muted" className="flex-1">
+                {I18n.t(
+                  target.direction === 'pay'
+                    ? 'transactions.settleUp.paid_from'
+                    : 'transactions.settleUp.payment_paid_to',
+                )}
+              </Text>
+              {account ? (
+                <AccountLogo
+                  logoId={account.logoId}
+                  type={account.type}
+                  goalEmoji={account.goalEmoji}
+                  size={18}
+                />
+              ) : null}
+              <Text variant="bodyStrong" numberOfLines={1} className="max-w-[55%]">
+                {account?.name ?? I18n.t('common.no_account')}
+              </Text>
+              <ChevronRight size={16} color={themeColors.textMuted} />
+            </Pressable>
+          )}
+
+          <MiniNumpad
+            key={padKey}
+            initialExpression={expression}
+            onValueChange={setExpression}
+            onConfirm={handleRecord}
+            confirmLabel={
+              plan?.kind === 'partial'
+                ? I18n.t('transactions.settleUp.part_paid')
+                : I18n.t('transactions.editor.split.mark_paid')
+            }
+          />
+        </>
+      ) : null}
+    </BottomSheetModal>
   );
 }

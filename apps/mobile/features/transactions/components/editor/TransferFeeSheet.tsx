@@ -3,18 +3,17 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
 
 import { AccountLogo, CategoryEmoji, Text } from '~/components/ui';
+import { BottomSheetModal } from '~/components/ui/bottom-sheet-modal';
 import {
   type CategoryPickerOption,
   CategoryPickerSheet,
 } from '~/components/ui/CategoryPickerSheet';
-import { ThemeModal } from '~/components/ui/theme-modal';
 import {
   canChargeTransferFee,
   defaultTransferFeeSide,
   type TransferFeeDraft,
   type TransferFeeSide,
 } from '~/features/transactions/lib/transferFee';
-import { useSheetColumnStyle } from '~/hooks/useSheetColumnStyle';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -61,7 +60,6 @@ export function TransferFeeSheet({
   onApply,
 }: TransferFeeSheetProps) {
   const themeColors = useThemeColors();
-  const sheetColumnStyle = useSheetColumnStyle();
 
   const [expression, setExpression] = useState('');
   // Remounts the pad each time the sheet opens, so it starts on the fee shown.
@@ -152,102 +150,10 @@ export function TransferFeeSheet({
   };
 
   return (
-    <ThemeModal
+    <BottomSheetModal
       visible={visible}
-      transparent
-      animationType="slide"
-      presentationStyle="overFullScreen"
-      onRequestClose={onClose}
-    >
-      <View className="flex-1 justify-end">
-        <Pressable accessible={false} className="absolute inset-0 bg-black/40" onPress={onClose} />
-        <View className="overflow-hidden rounded-t-[28px] bg-background" style={sheetColumnStyle}>
-          <View className="items-center pt-2.5">
-            <View className="h-1 w-10 rounded-full bg-border/60" />
-          </View>
-          <View className="items-center px-6 pt-4">
-            <Text variant="subheading">{I18n.t('transactions.editor.transfer_fee.title')}</Text>
-            <View className="mt-2 flex-row items-baseline gap-1">
-              <Text variant="subheading" tone="muted">
-                {currencySymbolForCode(feeCurrency)}
-              </Text>
-              <Text
-                variant="display"
-                numberOfLines={1}
-                adjustsFontSizeToFit
-                accessibilityLabel={I18n.t('transactions.editor.transfer_fee.amount_label')}
-              >
-                {expression || '0'}
-              </Text>
-            </View>
-          </View>
-
-          <View className="mx-4 mt-4 overflow-hidden rounded-2xl border border-border/30 bg-secondary/30">
-            <View className="gap-2 px-3 pb-2.5 pt-3">
-              <Text variant="caption" tone="muted">
-                {I18n.t('transactions.editor.transfer_fee.charged_to')}
-              </Text>
-              <View
-                accessibilityRole="radiogroup"
-                className="flex-row gap-1 rounded-full bg-secondary/80 p-1"
-              >
-                {renderSide('from', fromAccount)}
-                {renderSide('to', toAccount)}
-              </View>
-            </View>
-            <View className="ml-14 h-[1px] bg-border/30" />
-            <Pressable
-              onPress={() => {
-                void triggerHaptic('selection');
-                setCategoryPickerOpen(true);
-              }}
-              accessibilityRole="button"
-              accessibilityLabel={I18n.t('transactions.editor.category')}
-              accessibilityValue={category ? { text: category.name } : undefined}
-              className="min-h-[48px] flex-row items-center gap-3 px-3 py-2 active:bg-secondary/60"
-            >
-              <View className="h-8 w-8 items-center justify-center rounded-xl bg-primary/10">
-                <Tag size={16} color={themeColors.primary} />
-              </View>
-              <Text variant="body" numberOfLines={1} className="shrink">
-                {I18n.t('transactions.editor.category')}
-              </Text>
-              <View className="flex-1" />
-              {category ? (
-                <View className="max-w-[55%] shrink flex-row items-center gap-1.5">
-                  <CategoryEmoji icon={category.icon} size={18} />
-                  <Text variant="body" tone="muted" numberOfLines={1} className="shrink">
-                    {category.name}
-                  </Text>
-                </View>
-              ) : null}
-              <ChevronRight size={16} color={themeColors.textMuted} />
-            </Pressable>
-          </View>
-
-          {fee ? (
-            <Pressable
-              onPress={handleRemove}
-              accessibilityRole="button"
-              hitSlop={6}
-              className="mt-2 self-center px-3 py-1.5 active:opacity-70"
-            >
-              <Text variant="caption" tone="error" className="font-semibold">
-                {I18n.t('transactions.editor.transfer_fee.remove')}
-              </Text>
-            </Pressable>
-          ) : (
-            <View className="h-3" />
-          )}
-
-          <MiniNumpad
-            key={padKey}
-            initialExpression={expression}
-            onValueChange={setExpression}
-            onConfirm={handleDone}
-          />
-        </View>
-
+      onClose={onClose}
+      overlay={
         <CategoryPickerSheet
           overlay
           visible={categoryPickerOpen}
@@ -261,7 +167,92 @@ export function TransferFeeSheet({
             setCategoryPickerOpen(false);
           }}
         />
+      }
+    >
+      <View className="items-center pt-2.5">
+        <View className="h-1 w-10 rounded-full bg-border/60" />
       </View>
-    </ThemeModal>
+      <View className="items-center px-6 pt-4">
+        <Text variant="subheading">{I18n.t('transactions.editor.transfer_fee.title')}</Text>
+        <View className="mt-2 flex-row items-baseline gap-1">
+          <Text variant="subheading" tone="muted">
+            {currencySymbolForCode(feeCurrency)}
+          </Text>
+          <Text
+            variant="display"
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            accessibilityLabel={I18n.t('transactions.editor.transfer_fee.amount_label')}
+          >
+            {expression || '0'}
+          </Text>
+        </View>
+      </View>
+
+      <View className="mx-4 mt-4 overflow-hidden rounded-2xl border border-border/30 bg-secondary/30">
+        <View className="gap-2 px-3 pb-2.5 pt-3">
+          <Text variant="caption" tone="muted">
+            {I18n.t('transactions.editor.transfer_fee.charged_to')}
+          </Text>
+          <View
+            accessibilityRole="radiogroup"
+            className="flex-row gap-1 rounded-full bg-secondary/80 p-1"
+          >
+            {renderSide('from', fromAccount)}
+            {renderSide('to', toAccount)}
+          </View>
+        </View>
+        <View className="ml-14 h-[1px] bg-border/30" />
+        <Pressable
+          onPress={() => {
+            void triggerHaptic('selection');
+            setCategoryPickerOpen(true);
+          }}
+          accessibilityRole="button"
+          accessibilityLabel={I18n.t('transactions.editor.category')}
+          accessibilityValue={category ? { text: category.name } : undefined}
+          className="min-h-[48px] flex-row items-center gap-3 px-3 py-2 active:bg-secondary/60"
+        >
+          <View className="h-8 w-8 items-center justify-center rounded-xl bg-primary/10">
+            <Tag size={16} color={themeColors.primary} />
+          </View>
+          <Text variant="body" numberOfLines={1} className="shrink">
+            {I18n.t('transactions.editor.category')}
+          </Text>
+          <View className="flex-1" />
+          {category ? (
+            <View className="max-w-[55%] shrink flex-row items-center gap-1.5">
+              <CategoryEmoji icon={category.icon} size={18} />
+              <Text variant="body" tone="muted" numberOfLines={1} className="shrink">
+                {category.name}
+              </Text>
+            </View>
+          ) : null}
+          <ChevronRight size={16} color={themeColors.textMuted} />
+        </Pressable>
+      </View>
+
+      {fee ? (
+        <Pressable
+          onPress={handleRemove}
+          accessibilityRole="button"
+          hitSlop={6}
+          className="mt-2 self-center px-3 py-1.5 active:opacity-70"
+        >
+          <Text variant="caption" tone="error" className="font-semibold">
+            {I18n.t('transactions.editor.transfer_fee.remove')}
+          </Text>
+        </Pressable>
+      ) : (
+        <View className="h-3" />
+      )}
+
+      <MiniNumpad
+        key={padKey}
+        initialExpression={expression}
+        onValueChange={setExpression}
+        onConfirm={handleDone}
+      />
+    </BottomSheetModal>
   );
 }
