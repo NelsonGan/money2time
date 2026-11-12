@@ -5,8 +5,10 @@ import {
   friendPaidExpense,
   friendShare,
   isFriendPaidBill,
+  isPayBackPart,
   owedToPayer,
   owesPayer,
+  paidBackInParts,
   selfShare,
   storedFriendPaidRow,
 } from '~/features/transactions/lib/splitPayer';
@@ -25,6 +27,7 @@ function makeSplit(overrides: Partial<TransactionSplit>): TransactionSplit {
     partOfSplitId: null,
     isPayer: false,
     shareAmount: null,
+    memberId: null,
     sortOrder: 0,
     createdAt: '2026-11-05T00:00:00.000Z',
     updatedAt: '2026-11-05T00:00:00.000Z',
@@ -102,9 +105,14 @@ describe('owedToPayer', () => {
     expect(owedToPayer(friendPaid, 30)).toEqual({
       splitId: 'aisha',
       personName: 'Aisha',
+      memberId: null,
       amount: 30,
+      owed: 30,
+      total: 30,
+      paid: 0,
       paidAt: null,
       paidFromAccountId: null,
+      payments: [],
     });
     expect(owesPayer(friendPaid, 30)).toBe(true);
   });
@@ -116,6 +124,10 @@ describe('owedToPayer', () => {
         : split,
     );
     expect(owedToPayer(paid, 30)).toMatchObject({
+      amount: 30,
+      owed: 0,
+      total: 30,
+      paid: 30,
       paidAt: '2026-11-12T08:00:00.000Z',
       paidFromAccountId: 'maybank',
     });
@@ -131,6 +143,82 @@ describe('owedToPayer', () => {
     expect(
       owedToPayer([makeSplit({ personName: '  ', isPayer: true })], 12)?.personName,
     ).toBeNull();
+  });
+});
+
+describe('paying the payer back in parts', () => {
+  // Of the RM30 share, RM10 then RM5 are paid: the bill and the Me row are
+  // down to the RM15 still owed, and each part is a paid row under the payer's.
+  const partPaid = [
+    makeSplit({ id: 'me', isSelf: true, personName: null, amount: 15 }),
+    makeSplit({ id: 'aisha', personName: 'Aisha', isPayer: true, shareAmount: 30 }),
+    makeSplit({
+      id: 'p2',
+      personName: 'Aisha',
+      partOfSplitId: 'aisha',
+      shareAmount: 5,
+      paidAt: '2026-11-10T08:00:00.000Z',
+      paidTransactionId: 'tx-p2',
+      paybackAccountId: 'cash',
+    }),
+    makeSplit({
+      id: 'p1',
+      personName: 'Aisha',
+      partOfSplitId: 'aisha',
+      shareAmount: 10,
+      paidAt: '2026-11-08T08:00:00.000Z',
+      paidTransactionId: 'tx-p1',
+      paybackAccountId: 'maybank',
+    }),
+    makeSplit({ id: 'ben', personName: 'Ben', shareAmount: 30 }),
+  ];
+
+  it('knows a part by its paid row under the payer', () => {
+    expect(partPaid.map((split) => isPayBackPart(split))).toEqual([
+      false,
+      false,
+      true,
+      true,
+      false,
+    ]);
+    // A friend's part payment on a bill the user paid holds its amount in `amount`.
+    expect(
+      isPayBackPart(makeSplit({ partOfSplitId: 'root', amount: 10, paidAt: '2026-11-08' })),
+    ).toBe(false);
+  });
+
+  it('owes what is left, with the parts listed oldest first', () => {
+    expect(owedToPayer(partPaid, 15)).toMatchObject({
+      amount: 15,
+      owed: 15,
+      total: 30,
+      paid: 15,
+      paidAt: null,
+      payments: [
+        { splitId: 'p1', amount: 10, paidFromAccountId: 'maybank', transactionId: 'tx-p1' },
+        { splitId: 'p2', amount: 5, paidFromAccountId: 'cash', transactionId: 'tx-p2' },
+      ],
+    });
+    expect(paidBackInParts(partPaid)).toBe(15);
+    expect(owesPayer(partPaid, 15)).toBe(true);
+  });
+
+  it('is fully paid once the rest is paid too', () => {
+    const settled = partPaid.map((split) =>
+      split.id === 'aisha' ? { ...split, paidAt: '2026-11-12T08:00:00.000Z' } : split,
+    );
+    expect(owedToPayer(settled, 15)).toMatchObject({ amount: 15, owed: 0, total: 30, paid: 30 });
+    expect(owesPayer(settled, 15)).toBe(false);
+  });
+
+  it('keeps the whole bill the same however much is paid', () => {
+    // 15 still owed + 15 paid in parts + Aisha 30 + Ben 30.
+    expect(friendPaidBillTotal(partPaid, 15)).toBe(90);
+  });
+
+  it('has paid nothing in parts on a bill the user paid', () => {
+    expect(paidBackInParts(selfPaid)).toBe(0);
+    expect(paidBackInParts(undefined)).toBe(0);
   });
 });
 

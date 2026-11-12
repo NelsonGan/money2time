@@ -191,17 +191,15 @@ export function SettleUpPersonScreen({
       ? I18n.t(youOwe ? 'transactions.settleUp.you_paid_on' : 'transactions.settleUp.paid_on', {
           date: share.paidAt ? formatShortDate(share.paidAt) : '',
         })
-      : [
-          formatShortDate(share.date),
-          whoPaid,
-          share.sharePaid > 0
-            ? I18n.t('transactions.settleUp.share_paid', {
-                paid: formatNative(share.sharePaid, share.currency),
-              })
-            : null,
-        ]
-          .filter(Boolean)
-          .join(' · ');
+      : `${formatShortDate(share.date)} · ${whoPaid}`;
+    // A share partly paid shows how far along it is as a slim bar under the
+    // line, read out in words: the line itself has no room for the figures.
+    const partPaid = !paid && share.sharePaid > 0 && share.shareTotal > 0;
+    const partPaidLabel = partPaid
+      ? I18n.t('transactions.settleUp.share_paid', {
+          paid: formatNative(share.sharePaid, share.currency),
+        })
+      : null;
     return (
       <Pressable
         key={share.splitId}
@@ -232,6 +230,20 @@ export function SettleUpPersonScreen({
           <Text variant="caption" tone="muted" numberOfLines={1}>
             {caption}
           </Text>
+          {partPaid ? (
+            <View
+              accessible
+              accessibilityLabel={partPaidLabel ?? undefined}
+              className="mt-1.5 h-1 w-24 overflow-hidden rounded-full bg-border/40"
+            >
+              <View
+                className="h-full rounded-full bg-success"
+                style={{
+                  width: `${Math.min(100, Math.round((share.sharePaid / share.shareTotal) * 100))}%`,
+                }}
+              />
+            </View>
+          ) : null}
         </View>
         <Text
           variant="bodyStrong"

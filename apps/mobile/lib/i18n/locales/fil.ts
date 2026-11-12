@@ -1088,6 +1088,7 @@ const fil = {
         you_owe_summary: 'May utang kang {{amount}} kay {{name}}',
         you_owe_nothing: 'Wala kang utang sa bill na ito',
         get_back_hint: 'Maibabalik sa iyo ang {{amount}}',
+        paid_floor: 'Nabayaran mo na ang {{amount}}',
         your_share: 'Hati mo {{amount}}',
         swipe_hint_actions: 'I-swipe pakaliwa ang row para markahang bayad o burahin',
         swipe_hint_delete: 'I-swipe pakaliwa ang row para burahin',

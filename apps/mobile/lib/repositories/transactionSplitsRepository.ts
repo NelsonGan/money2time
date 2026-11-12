@@ -24,6 +24,8 @@ export interface CreateTransactionSplitInput {
   isPayer?: boolean;
   /** A friend's share of a bill another friend paid. */
   shareAmount?: number | null;
+  /** The Cloud Sync account this person is (see `TransactionSplit.memberId`). */
+  memberId?: string | null;
 }
 
 export interface UpdateTransactionSplitInput {
@@ -36,6 +38,7 @@ export interface UpdateTransactionSplitInput {
   partOfSplitId?: string | null;
   isPayer?: boolean;
   shareAmount?: number | null;
+  memberId?: string | null;
 }
 
 class TransactionSplitsRepository {
@@ -169,6 +172,7 @@ class TransactionSplitsRepository {
       // an app version from before these columns writes.
       isPayer: input.isPayer ? true : null,
       shareAmount: input.shareAmount == null ? null : normalizeMoneyAmount(input.shareAmount),
+      memberId: input.memberId ?? null,
       sortOrder: input.sortOrder ?? 0,
       createdAt: now,
       updatedAt: now,
@@ -203,6 +207,7 @@ class TransactionSplitsRepository {
     if (updates.paidTransactionId !== undefined) set.paidTransactionId = updates.paidTransactionId;
     if (updates.partOfSplitId !== undefined) set.partOfSplitId = updates.partOfSplitId;
     if (updates.isPayer !== undefined) set.isPayer = updates.isPayer ? true : null;
+    if (updates.memberId !== undefined) set.memberId = updates.memberId;
     if (updates.shareAmount !== undefined) {
       set.shareAmount =
         updates.shareAmount === null ? null : normalizeMoneyAmount(updates.shareAmount);

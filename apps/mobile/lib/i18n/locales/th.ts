@@ -1078,6 +1078,7 @@ const th = {
         you_owe_summary: 'คุณติดเงิน {{name}} {{amount}}',
         you_owe_nothing: 'คุณไม่ได้ติดเงินในบิลนี้',
         get_back_hint: 'คุณจะได้คืน {{amount}}',
+        paid_floor: 'คุณคืนไปแล้ว {{amount}}',
         your_share: 'ส่วนของคุณ {{amount}}',
         swipe_hint_actions: 'ปัดแถวไปทางซ้ายเพื่อทำเครื่องหมายว่าจ่ายแล้วหรือลบ',
         swipe_hint_delete: 'ปัดแถวไปทางซ้ายเพื่อลบ',

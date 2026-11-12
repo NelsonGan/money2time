@@ -1094,6 +1094,7 @@ const de = {
         you_owe_summary: 'Du schuldest {{name}} {{amount}}',
         you_owe_nothing: 'Du schuldest bei dieser Rechnung nichts',
         get_back_hint: 'Du bekommst {{amount}} zurück',
+        paid_floor: 'Du hast bereits {{amount}} zurückgezahlt',
         your_share: 'Dein Anteil {{amount}}',
         swipe_hint_actions: 'Zeile nach links wischen zum Bezahltmarkieren oder Löschen',
         swipe_hint_delete: 'Zeile nach links wischen zum Löschen',

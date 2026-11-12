@@ -344,6 +344,10 @@ export const transactionSplitsTable = sqliteTable('transaction_splits', {
   // `amount` (what a person owes the user) stays 0. Null on every other row.
   isPayer: integer('is_payer', { mode: 'boolean' }),
   shareAmount: real('share_amount'),
+  // The Cloud Sync account this person is, once they are a real user (a member
+  // of a shared group). Null for a name typed on the bill, which is every row
+  // today; balances group by it when set. See features/transactions/lib/debtParty.ts.
+  memberId: text('member_id'),
   sortOrder: integer('sort_order').notNull().default(0),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),

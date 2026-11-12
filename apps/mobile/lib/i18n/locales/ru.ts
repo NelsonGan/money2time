@@ -1083,6 +1083,7 @@ const ru = {
         you_owe_summary: 'Вы должны {{name}} {{amount}}',
         you_owe_nothing: 'По этому счёту вы ничего не должны',
         get_back_hint: 'Вам вернётся {{amount}}',
+        paid_floor: 'Вы уже вернули {{amount}}',
         your_share: 'Ваша доля {{amount}}',
         swipe_hint_actions: 'Проведите по строке влево, чтобы отметить оплату или удалить',
         swipe_hint_delete: 'Проведите по строке влево, чтобы удалить',

@@ -24,7 +24,7 @@ import {
 import { storedBudgetCurrency, storedBudgetRate } from "./budget-currency";
 import { monthlyBudgetRows } from "./budget-period";
 import { paidWithoutTransfer, paybackNote } from "./paybacks";
-import { owedToPayers } from "./split-payer";
+import { isPayBackPart, owedToPayers, partyKey } from "./split-payer";
 import { highlightsRecurringRuns, isRecurringRun, planRuleIdsOf, recurringRuleFee } from "./recurring-run";
 import {
   accrueReducingBalance,
@@ -254,6 +254,8 @@ export type Item = {
 
 export type SplitDebt = {
   person: string;
+  /** What the person's shares are grouped under: a real user's account, else the folded name. */
+  key: string;
   /** The share in the main currency, rounded to the cent as the app's Settle Up does. */
   amountBase: number;
   txId: string;
@@ -907,6 +909,7 @@ export function buildModel(backup: BackupFile, opts: { timeZone?: string | null 
     splitDebts.push({
       // Unnamed shares group together; the page names the group.
       person: (split.person_name ?? "").trim(),
+      key: partyKey(split.person_name, split.member_id),
       amountBase: shareInBase(split.amount, tx),
       txId: tx.id,
       date: tx.date,
@@ -923,6 +926,7 @@ export function buildModel(backup: BackupFile, opts: { timeZone?: string | null 
     if (owed.paidAt || !(owed.amount > 0)) continue;
     splitOwed.push({
       person: owed.person,
+      key: owed.key,
       amountBase: shareInBase(owed.amount, tx),
       txId: tx.id,
       date: tx.date,
@@ -936,6 +940,8 @@ export function buildModel(backup: BackupFile, opts: { timeZone?: string | null 
   const paybackRows: Tx[] = [];
   for (const split of splits) {
     const bill = txById.get(split.transaction_id)!;
+    // A part the user paid a friend back is an expense of its own, not a payback to them.
+    if (isPayBackPart(split)) continue;
     if (!split.is_self && split.paid_at && split.paid_transaction_id) {
       const transfer = txById.get(split.paid_transaction_id);
       if (transfer) transfer.payback = "transfer";

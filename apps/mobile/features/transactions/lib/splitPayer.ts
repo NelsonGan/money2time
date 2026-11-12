@@ -17,6 +17,14 @@
  *
  * The other friends on such a bill owe the payer, not the user. Their shares
  * are kept so the bill reads whole, and so a group's balances can use them.
+ *
+ * The user can pay the payer back in parts. A part paid from an account is its
+ * own expense on that account (the money has left it), cut out of the bill:
+ * the bill and the Me row drop by the part, so the bill is always what is
+ * still owed, and a paid row under the payer's (`partOfSplitId`) records the
+ * part in `shareAmount` and points at that expense with `paidTransactionId`.
+ * Spending is unchanged: the bill and its parts add up to the user's share.
+ * Paying everything that is left is the full payback above.
  */
 
 import type { TransactionSplit } from '~/types';
@@ -52,7 +60,10 @@ export function selfShare(
   return self ? self.amount : fallback;
 }
 
-/** The whole bill a friend paid: the user's share and every friend's. */
+/**
+ * The whole bill a friend paid: what the user still owes, what they have paid
+ * in parts (kept in `shareAmount` on the parts' rows), and every friend's share.
+ */
 export function friendPaidBillTotal(
   splits: readonly Pick<TransactionSplit, 'isSelf' | 'amount' | 'shareAmount'>[],
   expenseAmount: number,
@@ -64,17 +75,50 @@ export function friendPaidBillTotal(
   return normalizeMoneyAmount(total);
 }
 
+/**
+ * A part of their own share the user has already paid the payer: a paid row
+ * under the payer's that holds the part in `shareAmount`.
+ */
+export function isPayBackPart(
+  split: Pick<TransactionSplit, 'isSelf' | 'partOfSplitId' | 'shareAmount' | 'paidAt'>,
+): boolean {
+  return !split.isSelf && !!split.partOfSplitId && split.shareAmount != null && !!split.paidAt;
+}
+
+/** One part payment the user made to the payer. */
+export interface PayBackPayment {
+  splitId: string;
+  amount: number;
+  paidAt: string;
+  paidFromAccountId: string | null;
+  /** The expense the part was paid as, on that account. */
+  transactionId: string | null;
+}
+
 /** What the user owes on a bill a friend paid. */
 export interface OwedToPayer {
   /** The payer's row: the one Mark paid and Undo act on. */
   splitId: string;
   personName: string | null;
-  /** The user's share of the bill, in the bill's currency. */
+  /** The payer's Cloud Sync account, once people can be real users. */
+  memberId: string | null;
+  /**
+   * What is left of the user's share after the parts, in the bill's currency:
+   * what is still owed, or once `paidAt` is set, what the last payment was.
+   */
   amount: number;
-  /** When the user paid it back; null while it is still owed. */
+  /** What the user still owes: `amount` until it is paid, then 0. */
+  owed: number;
+  /** The user's whole share of the bill: what is owed and what is paid. */
+  total: number;
+  /** What the user has paid back so far. */
+  paid: number;
+  /** When the user paid the last of it; null while something is still owed. */
   paidAt: string | null;
-  /** The account it was paid from. */
+  /** The account the last of it was paid from. */
   paidFromAccountId: string | null;
+  /** The parts paid before that, oldest first. */
+  payments: PayBackPayment[];
 }
 
 /**
@@ -89,13 +133,43 @@ export function owedToPayer(
   const payer = billPayer(splits);
   if (!payer || !splits) return null;
   const trimmed = payer.personName?.trim() ?? '';
+  const payments = splits
+    .filter((split) => isPayBackPart(split) && split.partOfSplitId === payer.id)
+    .map((split) => ({
+      splitId: split.id,
+      amount: split.shareAmount ?? 0,
+      paidAt: split.paidAt ?? '',
+      paidFromAccountId: split.paybackAccountId,
+      transactionId: split.paidTransactionId,
+    }))
+    .sort((a, b) => (a.paidAt < b.paidAt ? -1 : a.paidAt > b.paidAt ? 1 : 0));
+  // The bill itself is what is left: every part paid was cut out of it.
+  const left = normalizeMoneyAmount(selfShare(splits, expenseAmount));
+  const paidParts = normalizeMoneyAmount(payments.reduce((sum, part) => sum + part.amount, 0));
+  const total = normalizeMoneyAmount(left + paidParts);
   return {
     splitId: payer.id,
     personName: trimmed.length > 0 ? trimmed : null,
-    amount: normalizeMoneyAmount(selfShare(splits, expenseAmount)),
+    memberId: payer.memberId ?? null,
+    amount: left,
+    owed: payer.paidAt ? 0 : left,
+    total,
+    paid: payer.paidAt ? total : paidParts,
     paidAt: payer.paidAt,
     paidFromAccountId: payer.paidAt ? payer.paybackAccountId : null,
+    payments,
   };
+}
+
+/** What the user has paid the payer in parts so far (0 on any other bill). */
+export function paidBackInParts(splits: readonly TransactionSplit[] | null | undefined): number {
+  const payer = billPayer(splits);
+  if (!payer || !splits) return 0;
+  return normalizeMoneyAmount(
+    splits
+      .filter((split) => isPayBackPart(split) && split.partOfSplitId === payer.id)
+      .reduce((sum, split) => sum + (split.shareAmount ?? 0), 0),
+  );
 }
 
 /** Whether the user still owes the payer something on this bill. */
@@ -104,7 +178,7 @@ export function owesPayer(
   expenseAmount: number,
 ): boolean {
   const owed = owedToPayer(splits, expenseAmount);
-  return !!owed && !owed.paidAt && owed.amount > 0;
+  return !!owed && owed.owed > 0;
 }
 
 /** A row of the split editor, as far as who paid goes. */

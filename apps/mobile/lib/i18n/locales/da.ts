@@ -1081,6 +1081,7 @@ const da = {
         you_owe_summary: 'Du skylder {{name}} {{amount}}',
         you_owe_nothing: 'Du skylder intet på denne regning',
         get_back_hint: 'Du får {{amount}} tilbage',
+        paid_floor: 'Du har allerede betalt {{amount}} tilbage',
         your_share: 'Din andel {{amount}}',
         swipe_hint_actions: 'Stryg en række til venstre for at markere betalt eller slette',
         swipe_hint_delete: 'Stryg en række til venstre for at slette',

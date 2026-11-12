@@ -27,6 +27,7 @@ function makeSplit(overrides: Partial<TransactionSplit>): TransactionSplit {
     partOfSplitId: null,
     isPayer: false,
     shareAmount: null,
+    memberId: null,
     sortOrder: 0,
     createdAt: '2026-05-13T00:00:00.000Z',
     updatedAt: '2026-05-13T00:00:00.000Z',
@@ -106,7 +107,7 @@ describe('aggregateSettleUpByPerson', () => {
       totalReporting: 30,
       paidReporting: 20,
       unpaidBillCount: 1,
-      billCount: 2,
+      billCount: 1,
     });
     expect(summary.people[0].bills.map((bill) => [bill.splitId, bill.paidAt])).toEqual([
       ['open', null],
@@ -210,7 +211,8 @@ describe('aggregateSettleUpByPerson', () => {
     expect(summary.people[0].name).toBe('Marcus');
     expect(summary.people[0].totalReporting).toBe(30);
     expect(summary.people[0].unpaidBillCount).toBe(1);
-    expect(summary.people[0].billCount).toBe(2);
+    // Two rows of one bill: a share paid in part is still one bill.
+    expect(summary.people[0].billCount).toBe(1);
   });
 
   it('collapses unnamed splits into one bucket that sorts last on ties', () => {
@@ -1106,5 +1108,124 @@ describe('balances in both directions', () => {
     expect(personBalanceState({ netReporting: -30, unpaidBillCount: 1 })).toBe('you_owe');
     expect(personBalanceState({ netReporting: 0, unpaidBillCount: 2 })).toBe('even');
     expect(personBalanceState({ netReporting: 0, unpaidBillCount: 0 })).toBe('settled');
+  });
+});
+
+describe('a debt the user pays back in parts', () => {
+  // Aisha paid dinner; of the user's RM30 share RM10 is paid, RM20 still owed.
+  const dinner = (rootPaidAt: string | null = null) =>
+    makeTx({
+      id: 'dinner',
+      amount: 20,
+      reportingAmount: 20,
+      accountId: null,
+      date: '2026-11-06',
+      splits: [
+        makeSplit({ id: 'me', transactionId: 'dinner', isSelf: true, amount: 20 }),
+        makeSplit({
+          id: 'payer',
+          transactionId: 'dinner',
+          personName: 'Aisha',
+          amount: 0,
+          isPayer: true,
+          shareAmount: 30,
+          paidAt: rootPaidAt,
+          paybackAccountId: rootPaidAt ? 'maybank' : null,
+        }),
+        makeSplit({
+          id: 'part',
+          transactionId: 'dinner',
+          personName: 'Aisha',
+          amount: 0,
+          shareAmount: 10,
+          partOfSplitId: 'payer',
+          paidAt: '2026-11-08T09:00:00.000Z',
+          paidTransactionId: 'tx-part',
+          paybackAccountId: 'cash',
+        }),
+      ],
+    });
+
+  it('owes what is left and keeps the part as paid history of the same share', () => {
+    const summary = aggregateSettleUpByPerson([dinner()], { reportingCurrency: 'USD' });
+    const [aisha] = summary.people;
+    expect(aisha).toMatchObject({
+      owedReporting: 20,
+      owedPaidReporting: 10,
+      netReporting: -20,
+      unpaidBillCount: 1,
+      youOweCount: 1,
+    });
+    expect(aisha!.bills).toEqual([
+      expect.objectContaining({
+        splitId: 'payer',
+        amount: 20,
+        paidAt: null,
+        shareTotal: 30,
+        sharePaid: 10,
+        shareKey: 'payer',
+      }),
+      expect.objectContaining({
+        splitId: 'part',
+        amount: 10,
+        paidAt: '2026-11-08T09:00:00.000Z',
+        paybackAccountId: 'cash',
+        shareTotal: 30,
+        sharePaid: 10,
+        shareKey: 'payer',
+      }),
+    ]);
+  });
+
+  it('shows the bill as one share with its payment', () => {
+    const summary = aggregateSettleUpByTransaction([dinner()], { reportingCurrency: 'USD' });
+    expect(summary.transactions[0]).toMatchObject({
+      paidBy: { name: 'Aisha', key: 'aisha' },
+      billTotalNative: 60,
+      totalNative: 20,
+      paidNative: 10,
+      unpaidSplitCount: 1,
+      splitCount: 2,
+    });
+    expect(summary.owedReporting).toBe(20);
+  });
+
+  it('is settled once the rest is paid, and Settle up has nothing left to pay', () => {
+    const paid = [dinner('2026-11-12T09:00:00.000Z')];
+    const summary = aggregateSettleUpByPerson(paid, { reportingCurrency: 'USD' });
+    expect(summary.people[0]).toMatchObject({
+      owedReporting: 0,
+      owedPaidReporting: 30,
+      unpaidBillCount: 0,
+    });
+    expect(personSettlementRows(paid, 'aisha')).toEqual({ receive: [], pay: [] });
+    expect(personSettlementRows([dinner()], 'aisha')).toEqual({ receive: [], pay: ['payer'] });
+    expect(countUnpaidSplitBills(paid)).toBe(0);
+    expect(countUnpaidSplitBills([dinner()])).toBe(1);
+  });
+});
+
+describe('people who are real users', () => {
+  it('groups shares by member before name, apart from a name alone', () => {
+    const bill = makeTx({
+      id: 'a',
+      splits: [
+        makeSplit({ id: 's1', transactionId: 'a', personName: 'Aisha', memberId: 'u1' }),
+        makeSplit({ id: 's2', transactionId: 'a', personName: 'Aisha B.', memberId: 'u1' }),
+        makeSplit({ id: 's3', transactionId: 'a', personName: 'Aisha' }),
+      ],
+    });
+    const summary = aggregateSettleUpByPerson([bill], { reportingCurrency: 'USD' });
+    expect(summary.people.map((person) => [person.key, person.memberId, person.billCount])).toEqual(
+      [
+        ['member:u1', 'u1', 1],
+        ['aisha', null, 1],
+      ],
+    );
+    expect(personSettlementRows([bill], 'member:u1')).toEqual({
+      receive: ['s1', 's2'],
+      pay: [],
+    });
+    expect(countUnpaidDebtors([bill])).toBe(2);
   });
 });

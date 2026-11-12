@@ -23,6 +23,7 @@ function split(overrides: Partial<TransactionSplit>): TransactionSplit {
     partOfSplitId: null,
     isPayer: false,
     shareAmount: null,
+    memberId: null,
     sortOrder: 0,
     createdAt: '2026-10-12T00:00:00.000Z',
     updatedAt: '2026-10-12T00:00:00.000Z',
@@ -196,6 +197,29 @@ describe('buildPaybackRows', () => {
     ];
     expect(buildPaybackRows(friendPaid, currencyOf, RATES)).toEqual([]);
     expect(indexPaybacks(friendPaid).size).toBe(0);
+  });
+
+  it('leaves a part the user paid a friend back as the plain expense it is', () => {
+    const partPaid = [
+      bill({
+        amount: 20,
+        splits: [
+          split({ id: 'me', isSelf: true, amount: 20 }),
+          split({ id: 'payer', amount: 0, isPayer: true, shareAmount: 30 }),
+          split({
+            id: 'part',
+            amount: 0,
+            shareAmount: 10,
+            partOfSplitId: 'payer',
+            paidAt: PAID,
+            paidTransactionId: 'tx-part',
+            paybackAccountId: 'maybank',
+          }),
+        ],
+      }),
+    ];
+    expect(indexPaybacks(partPaid).size).toBe(0);
+    expect(buildPaybackRows(partPaid, currencyOf, RATES)).toEqual([]);
   });
 
   it("shows a bill with no account's paybacks, named as a payback transfer would be", () => {

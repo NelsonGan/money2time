@@ -1056,6 +1056,13 @@ export interface TransactionSplit {
    * the share lives here. Null on a bill the user paid.
    */
   shareAmount: number | null;
+  /**
+   * The Cloud Sync account this person is, once they are a real user (a
+   * member of a shared group). Null for a name typed on the bill, which is
+   * every row today. Balances group a person by this when it is set, else by
+   * their name (`debtPartyOf`).
+   */
+  memberId: string | null;
   sortOrder: number;
   createdAt: string;
   updatedAt: string;
@@ -1168,6 +1175,8 @@ export interface PersonDebt {
   key: string;
   /** Display name (from the most recent bill), or null when the split was unnamed. */
   name: string | null;
+  /** Their Cloud Sync account once people can be real users; null for a name. */
+  memberId: string | null;
   /** What they still owe the user, in the reporting currency. */
   totalReporting: number;
   /** What they have paid the user back, in the reporting currency. */
@@ -1260,6 +1269,8 @@ export interface TransactionDebtSplit {
 export interface TransactionDebtParticipant {
   splitId: string;
   personName: string | null;
+  /** The key their balance is grouped under (`debtPartyOf`). */
+  partyKey: string;
   /** Their share, in the bill's currency. */
   amount: number;
   /** The friend who paid the bill. */
@@ -1269,8 +1280,11 @@ export interface TransactionDebtParticipant {
 /** A split bill: shares owed to the user, or the user's own share of a bill a friend paid. */
 export interface TransactionDebt {
   transactionId: string;
-  /** Who paid: null when the user did, else the friend (`name` null when unnamed). */
-  paidBy: { name: string | null } | null;
+  /**
+   * Who paid: null when the user did, else the friend (`name` null when
+   * unnamed) and the key their balance is grouped under.
+   */
+  paidBy: { name: string | null; key: string } | null;
   /** On a bill a friend paid: the whole bill and everyone else's share of it. */
   billTotalNative: number | null;
   participants: TransactionDebtParticipant[];

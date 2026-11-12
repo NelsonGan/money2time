@@ -1080,6 +1080,7 @@ const hi = {
         you_owe_summary: 'आपको {{name}} को {{amount}} देने हैं',
         you_owe_nothing: 'इस बिल पर आपको कुछ नहीं देना',
         get_back_hint: 'आपको {{amount}} वापस मिलेंगे',
+        paid_floor: 'आप पहले ही {{amount}} चुका चुके हैं',
         your_share: 'आपका हिस्सा {{amount}}',
         swipe_hint_actions: 'भुगतान चिह्नित करने या हटाने के लिए पंक्ति को बाएँ स्वाइप करें',
         swipe_hint_delete: 'हटाने के लिए पंक्ति को बाएँ स्वाइप करें',

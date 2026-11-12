@@ -1087,6 +1087,7 @@ const pt = {
         you_owe_summary: 'Você deve {{amount}} a {{name}}',
         you_owe_nothing: 'Você não deve nada nesta conta',
         get_back_hint: 'Você recebe {{amount}} de volta',
+        paid_floor: 'Você já devolveu {{amount}}',
         your_share: 'Sua parte {{amount}}',
         swipe_hint_actions: 'Deslize uma linha para a esquerda para marcar como pago ou excluir',
         swipe_hint_delete: 'Deslize uma linha para a esquerda para excluir',

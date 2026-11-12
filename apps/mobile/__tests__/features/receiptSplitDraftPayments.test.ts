@@ -35,6 +35,7 @@ function split(overrides: Partial<TransactionSplit>): TransactionSplit {
     partOfSplitId: null,
     isPayer: false,
     shareAmount: null,
+    memberId: null,
     sortOrder: 0,
     createdAt: PAID,
     updatedAt: PAID,

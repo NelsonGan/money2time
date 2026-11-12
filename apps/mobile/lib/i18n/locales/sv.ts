@@ -1082,6 +1082,7 @@ const sv = {
         you_owe_summary: 'Du är skyldig {{name}} {{amount}}',
         you_owe_nothing: 'Du är inte skyldig något på den här notan',
         get_back_hint: 'Du får tillbaka {{amount}}',
+        paid_floor: 'Du har redan betalat tillbaka {{amount}}',
         your_share: 'Din andel {{amount}}',
         swipe_hint_actions: 'Svep en rad åt vänster för att markera betald eller ta bort',
         swipe_hint_delete: 'Svep en rad åt vänster för att ta bort',

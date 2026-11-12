@@ -1084,6 +1084,7 @@ const es = {
         you_owe_summary: 'Le debes {{amount}} a {{name}}',
         you_owe_nothing: 'No debes nada en esta cuenta',
         get_back_hint: 'Recuperas {{amount}}',
+        paid_floor: 'Ya devolviste {{amount}}',
         your_share: 'Tu parte {{amount}}',
         swipe_hint_actions: 'Desliza una fila a la izquierda para marcar pagado o eliminar',
         swipe_hint_delete: 'Desliza una fila a la izquierda para eliminar',

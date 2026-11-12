@@ -1082,6 +1082,7 @@ const nb = {
         you_owe_summary: 'Du skylder {{name}} {{amount}}',
         you_owe_nothing: 'Du skylder ingenting på denne regningen',
         get_back_hint: 'Du får tilbake {{amount}}',
+        paid_floor: 'Du har allerede betalt tilbake {{amount}}',
         your_share: 'Din andel {{amount}}',
         swipe_hint_actions: 'Sveip en rad til venstre for å merke betalt eller slette',
         swipe_hint_delete: 'Sveip en rad til venstre for å slette',

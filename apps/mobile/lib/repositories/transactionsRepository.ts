@@ -165,12 +165,12 @@ export function summarizeSplits(splits: TransactionSplit[]): TransactionSplitsSu
   // payer. The other friends on it owe the payer, not the user.
   const owed = owedToPayer(splits, 0);
   if (owed) {
-    const unpaid = !owed.paidAt && owed.amount > 0;
+    const unpaid = owed.owed > 0;
     return {
       count: 1,
       paidCount: unpaid ? 0 : 1,
-      unpaidAmount: unpaid ? owed.amount : 0,
-      totalOwed: owed.amount,
+      unpaidAmount: owed.owed,
+      totalOwed: owed.total,
       youOwe: true,
     };
   }

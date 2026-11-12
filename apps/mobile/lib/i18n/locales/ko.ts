@@ -1075,6 +1075,7 @@ const ko = {
         you_owe_summary: '{{name}} 님에게 {{amount}} 줄 돈',
         you_owe_nothing: '이 청구에서 줄 돈이 없어요',
         get_back_hint: '{{amount}} 돌려받아요',
+        paid_floor: '이미 {{amount}} 갚았어요',
         your_share: '내 부담액 {{amount}}',
         swipe_hint_actions: '행을 왼쪽으로 스와이프하여 지불 완료 표시 또는 삭제',
         swipe_hint_delete: '행을 왼쪽으로 스와이프하여 삭제',

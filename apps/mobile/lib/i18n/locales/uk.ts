@@ -1083,6 +1083,7 @@ const uk = {
         you_owe_summary: 'Ви винні {{name}} {{amount}}',
         you_owe_nothing: 'За цим рахунком ви нічого не винні',
         get_back_hint: 'Вам повернеться {{amount}}',
+        paid_floor: 'Ви вже повернули {{amount}}',
         your_share: 'Ваша частка {{amount}}',
         swipe_hint_actions: 'Проведіть рядком ліворуч, щоб позначити оплату або видалити',
         swipe_hint_delete: 'Проведіть рядком ліворуч, щоб видалити',

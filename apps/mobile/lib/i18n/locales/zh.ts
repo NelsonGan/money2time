@@ -1043,6 +1043,7 @@ const zh = {
         you_owe_summary: '你欠 {{name}} {{amount}}',
         you_owe_nothing: '这张账单你不欠钱',
         get_back_hint: '你可收回 {{amount}}',
+        paid_floor: '你已还 {{amount}}',
         your_share: '你的份额 {{amount}}',
         swipe_hint_actions: '向左滑动一行以标记已付或删除',
         swipe_hint_delete: '向左滑动一行以删除',

@@ -1084,6 +1084,7 @@ const id = {
         you_owe_summary: 'Kamu berutang {{amount}} ke {{name}}',
         you_owe_nothing: 'Kamu tidak berutang apa pun di tagihan ini',
         get_back_hint: 'Kamu menerima kembali {{amount}}',
+        paid_floor: 'Kamu sudah membayar {{amount}}',
         your_share: 'Bagianmu {{amount}}',
         swipe_hint_actions: 'Geser baris ke kiri untuk menandai lunas atau menghapus',
         swipe_hint_delete: 'Geser baris ke kiri untuk menghapus',

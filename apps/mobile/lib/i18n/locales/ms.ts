@@ -1086,6 +1086,7 @@ const ms = {
         you_owe_summary: 'Anda berhutang {{amount}} kepada {{name}}',
         you_owe_nothing: 'Anda tidak berhutang apa-apa pada bil ini',
         get_back_hint: 'Anda dapat balik {{amount}}',
+        paid_floor: 'Anda sudah bayar balik {{amount}}',
         your_share: 'Bahagian anda {{amount}}',
         swipe_hint_actions: 'Leret baris ke kiri untuk tanda dibayar atau padam',
         swipe_hint_delete: 'Leret baris ke kiri untuk padam',

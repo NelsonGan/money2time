@@ -1088,6 +1088,7 @@ const nl = {
         you_owe_summary: 'Je bent {{name}} {{amount}} schuldig',
         you_owe_nothing: 'Je bent niets schuldig op deze rekening',
         get_back_hint: 'Je krijgt {{amount}} terug',
+        paid_floor: 'Je hebt al {{amount}} terugbetaald',
         your_share: 'Jouw deel {{amount}}',
         swipe_hint_actions: 'Veeg een rij naar links om betaald te markeren of te verwijderen',
         swipe_hint_delete: 'Veeg een rij naar links om te verwijderen',

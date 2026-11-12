@@ -5,8 +5,11 @@
  * the expense is the user's own share (the Me row), owed to that friend, whose
  * row carries `is_payer`; every friend's row keeps `amount` at 0 and holds its
  * share of the bill in `share_amount`. The payer row's `paid_at` is when the
- * user paid them back. Rows from an app before this carry neither column and
- * read as a bill the user paid. No imports, so the tests can load it.
+ * user paid the last of it back. A part paid before that is a paid row under
+ * the payer's (`part_of_split_id`) holding the part in `share_amount`, and the
+ * bill and its Me row are what is still owed. Rows from an app before this
+ * carry neither column and read as a bill the user paid. No imports, so the
+ * tests can load it.
  */
 
 export type PayerSplit = {
@@ -19,7 +22,23 @@ export type PayerSplit = {
   part_of_split_id?: string | null;
   is_payer?: number | boolean | null;
   share_amount?: number | null;
+  member_id?: string | null;
 };
+
+/**
+ * The key a person's shares are grouped under (the app's `debtPartyKey`): the
+ * Cloud Sync account when the person is a real user, else the case-folded
+ * name, so linking a name to an account later only changes this.
+ */
+export function partyKey(personName: string | null | undefined, memberId?: string | null): string {
+  if (memberId) return `member:${memberId}`;
+  return (personName ?? "").trim().toLocaleLowerCase();
+}
+
+/** A part of their own share the user has already paid the payer (the app's `isPayBackPart`). */
+export function isPayBackPart(split: PayerSplit): boolean {
+  return !split.is_self && !!split.part_of_split_id && split.share_amount != null && !!split.paid_at;
+}
 
 /** The friend who paid the bill among its rows, or null when the user did (the app's `billPayer`). */
 export function billPayer<T extends PayerSplit>(rows: readonly T[]): T | null {
@@ -33,7 +52,9 @@ export type OwedToPayer = {
   splitId: string;
   /** The payer's name, trimmed; empty when never named. */
   person: string;
-  /** The user's share, in the bill's currency. */
+  /** The key the payer's balance is grouped under (`partyKey`). */
+  key: string;
+  /** What is left of the user's share after the parts already paid, in the bill's currency. */
   amount: number;
   /** When the user paid it back; null while it is owed. */
   paidAt: string | null;
@@ -60,6 +81,7 @@ export function owedToPayers<T extends PayerSplit>(splits: readonly T[], expense
       txId,
       splitId: payer.id,
       person: (payer.person_name ?? "").trim(),
+      key: partyKey(payer.person_name, payer.member_id),
       amount: Math.round((self ? self.amount : expenseAmount(txId)) * 100) / 100,
       paidAt: payer.paid_at ?? null,
     });
@@ -75,16 +97,19 @@ export type PersonBalance = { person: string; net: number; count: number };
  * the app's Balances lists people (`aggregateSettleUpByPerson`). People are
  * grouped by case-folded name; amounts are kept to the cent at each step.
  */
-export function netByPerson(owesYou: readonly { person: string; amountBase: number }[], youOwe: readonly { person: string; amountBase: number }[]): PersonBalance[] {
+export function netByPerson(
+  owesYou: readonly { person: string; key?: string; amountBase: number }[],
+  youOwe: readonly { person: string; key?: string; amountBase: number }[],
+): PersonBalance[] {
   const map = new Map<string, PersonBalance>();
-  const add = (person: string, amount: number) => {
-    const key = person.toLocaleLowerCase();
+  const add = (person: string, amount: number, partyKeyOf?: string) => {
+    const key = partyKeyOf ?? person.toLocaleLowerCase();
     const entry = map.get(key) ?? { person, net: 0, count: 0 };
     entry.net = Math.round((entry.net + amount) * 100) / 100;
     entry.count += 1;
     map.set(key, entry);
   };
-  for (const debt of owesYou) add(debt.person, debt.amountBase);
-  for (const debt of youOwe) add(debt.person, -debt.amountBase);
+  for (const debt of owesYou) add(debt.person, debt.amountBase, debt.key);
+  for (const debt of youOwe) add(debt.person, -debt.amountBase, debt.key);
   return [...map.values()].sort((a, b) => Math.abs(b.net) - Math.abs(a.net));
 }

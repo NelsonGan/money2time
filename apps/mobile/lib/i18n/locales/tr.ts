@@ -1082,6 +1082,7 @@ const tr = {
         you_owe_summary: '{{name}} kişisine {{amount}} borcunuz var',
         you_owe_nothing: 'Bu hesapta borcunuz yok',
         get_back_hint: '{{amount}} geri alırsınız',
+        paid_floor: 'Zaten {{amount}} geri ödediniz',
         your_share: 'Sizin payınız {{amount}}',
         swipe_hint_actions: 'Ödendi olarak işaretlemek veya silmek için satırı sola kaydırın',
         swipe_hint_delete: 'Silmek için satırı sola kaydırın',

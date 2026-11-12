@@ -188,7 +188,7 @@ export function SettleUpScreen({
   // zero) is noise.
   const bothWays = summary.owedToYouReporting > 0 && summary.youOweReporting > 0;
   const renderHero = () => (
-    <View className="items-center px-4 pt-4 pb-4">
+    <View className="items-center px-5 pt-4 pb-4">
       <Text variant="caption" tone="muted">
         {I18n.t(
           !hasOpenBalances
@@ -214,22 +214,36 @@ export function SettleUpScreen({
         {formatReporting(Math.abs(summary.netReporting))}
       </Text>
       {bothWays ? (
-        <View className="mt-3 flex-row gap-2.5 self-stretch">
-          <View className="flex-1 items-center rounded-2xl bg-success/10 px-3 py-2.5">
-            <Text variant="caption" tone="muted" numberOfLines={1}>
-              {I18n.t('transactions.settleUp.owed_to_you')}
-            </Text>
-            <Text variant="bodyStrong" className="text-success" numberOfLines={1}>
-              {formatReporting(summary.owedToYouReporting)}
-            </Text>
+        // The two sides of the net, to scale: one slim bar split by how much
+        // is owed each way, with each figure under its own end.
+        <View className="mt-4 self-stretch">
+          <View className="h-1.5 flex-row gap-1 overflow-hidden rounded-full">
+            <View
+              className="rounded-full bg-success/60"
+              style={{ flex: summary.owedToYouReporting }}
+            />
+            <View
+              className="rounded-full bg-destructive/50"
+              style={{ flex: summary.youOweReporting }}
+            />
           </View>
-          <View className="flex-1 items-center rounded-2xl bg-destructive/10 px-3 py-2.5">
-            <Text variant="caption" tone="muted" numberOfLines={1}>
-              {I18n.t('transactions.settleUp.you_owe_tag')}
-            </Text>
-            <Text variant="bodyStrong" className="text-destructive" numberOfLines={1}>
-              {formatReporting(summary.youOweReporting)}
-            </Text>
+          <View className="mt-2 flex-row justify-between">
+            <View>
+              <Text variant="caption" tone="muted">
+                {I18n.t('transactions.settleUp.owed_to_you')}
+              </Text>
+              <Text variant="bodyStrong" className="text-success">
+                {formatReporting(summary.owedToYouReporting)}
+              </Text>
+            </View>
+            <View className="items-end">
+              <Text variant="caption" tone="muted">
+                {I18n.t('transactions.settleUp.you_owe_tag')}
+              </Text>
+              <Text variant="bodyStrong" className="text-destructive">
+                {formatReporting(summary.youOweReporting)}
+              </Text>
+            </View>
           </View>
         </View>
       ) : (

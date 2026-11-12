@@ -14,6 +14,7 @@ function makeSplit(overrides: Partial<TransactionSplit>): TransactionSplit {
     partOfSplitId: null,
     isPayer: false,
     shareAmount: null,
+    memberId: null,
     sortOrder: 0,
     createdAt: '2026-05-13T00:00:00.000Z',
     updatedAt: '2026-05-13T00:00:00.000Z',
@@ -112,6 +113,27 @@ describe('summarizeSplits', () => {
         count: 1,
         paidCount: 1,
         unpaidAmount: 0,
+        totalOwed: 30,
+        youOwe: true,
+      });
+    });
+
+    it('counts what is left once part of it is paid back', () => {
+      const partPaid = [
+        makeSplit({ id: 'me', isSelf: true, amount: 20 }),
+        makeSplit({ id: 'aisha', amount: 0, isPayer: true, shareAmount: 30 }),
+        makeSplit({
+          id: 'part',
+          amount: 0,
+          shareAmount: 10,
+          partOfSplitId: 'aisha',
+          paidAt: '2026-11-08T00:00:00.000Z',
+        }),
+      ];
+      expect(summarizeSplits(partPaid)).toEqual({
+        count: 1,
+        paidCount: 0,
+        unpaidAmount: 20,
         totalOwed: 30,
         youOwe: true,
       });

@@ -858,7 +858,7 @@ const en = {
       you_paid_on: 'You paid {{date}}',
       undo_payment_title: 'Undo this payment?',
       undo_payment_message:
-        'You will owe {{amount}} again, and it comes off the account it was paid from.',
+        'You will owe {{amount}} again. The payment is removed from the account it was paid from.',
     },
     title: 'Transactions',
     empty_month_title: 'No transactions this month',
@@ -1057,6 +1057,7 @@ const en = {
         you_owe_summary: 'You owe {{name}} {{amount}}',
         you_owe_nothing: 'You owe nothing on this bill',
         get_back_hint: 'You get back {{amount}}',
+        paid_floor: 'You already paid back {{amount}}',
         your_share: 'Your share {{amount}}',
         swipe_hint_actions: 'Swipe a row left to mark paid or delete',
         swipe_hint_delete: 'Swipe a row left to delete',

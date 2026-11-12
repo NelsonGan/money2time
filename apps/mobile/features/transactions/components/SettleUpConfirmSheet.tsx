@@ -40,10 +40,11 @@ interface SettleUpConfirmSheetProps {
 }
 
 /**
- * The one confirmation both Balances settlements share: Settle up with a
- * person (everything open, both ways) and paying a friend back for one bill.
- * It shows who pays whom as two avatars and an arrow, then the amount, which
- * is fixed, so all it asks is which account the money moved through.
+ * The confirmation for Settle up with a person: everything open between the
+ * two, both ways, in one payment. It shows who pays whom as two avatars and an
+ * arrow, then the amount, which is fixed, so all it asks is which account the
+ * money moved through. (Paying one bill back, which can be in parts, uses
+ * SplitPaymentSheet.)
  */
 export function SettleUpConfirmSheet({ content, onClose, onConfirm }: SettleUpConfirmSheetProps) {
   const themeColors = useThemeColors();

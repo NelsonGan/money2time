@@ -782,6 +782,7 @@ export function toTransactionSplit(row: TransactionSplitRow): TransactionSplit {
     partOfSplitId: row.partOfSplitId ?? null,
     isPayer: !!row.isPayer,
     shareAmount: row.shareAmount ?? null,
+    memberId: row.memberId ?? null,
     sortOrder: row.sortOrder ?? 0,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,

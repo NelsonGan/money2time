@@ -1704,6 +1704,7 @@ export function TransactionEditorScreen({
           ...existing,
           paid: incoming.paid,
           settled: incoming.settled,
+          paidBack: incoming.paidBack,
           paybackAccountId: incoming.paid ? incoming.paybackAccountId : existing.paybackAccountId,
         };
       });
@@ -2481,6 +2482,19 @@ export function TransactionEditorScreen({
           (acc, s) => (s.paid ? acc : acc + (Number(s.amount) || 0)),
           0,
         );
+        // The user's own share of a bill a friend paid cannot go below what
+        // they have already paid that friend back.
+        const paidBack = friendPayer?.paidBack ?? 0;
+        if (
+          paidBack > 0 &&
+          (Number(splits.find((s) => s.isSelf)?.amount) || 0) + 0.005 < paidBack
+        ) {
+          pendingSplitToastRef.current = I18n.t('transactions.editor.split.paid_floor', {
+            amount: `${entryCurrencySymbol}${paidBack.toFixed(2)}`,
+          });
+          handleOpenSplitBill();
+          return;
+        }
         if (Math.abs(sumOfUnpaidSplits - submitPayload.amount) > 0.005) {
           // Don't fail silently: reducing the amount below the friends' total
           // floors the user's own share at 0, so the split no longer balances.

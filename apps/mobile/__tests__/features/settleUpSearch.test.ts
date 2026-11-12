@@ -13,6 +13,7 @@ function person(
   return {
     key: name.toLowerCase(),
     name,
+    memberId: null,
     totalReporting: paidAt ? 0 : 10,
     paidReporting: paidAt ? 10 : 0,
     owedReporting: 0,

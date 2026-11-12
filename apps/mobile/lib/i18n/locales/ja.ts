@@ -1077,6 +1077,7 @@ const ja = {
         you_owe_summary: '{{name}}に{{amount}}を返す',
         you_owe_nothing: 'この会計で返す分はありません',
         get_back_hint: '{{amount}}が戻ってきます',
+        paid_floor: 'すでに{{amount}}を返済済みです',
         your_share: '自分の負担 {{amount}}',
         swipe_hint_actions: '行を左にスワイプして支払い済みにするか削除',
         swipe_hint_delete: '行を左にスワイプして削除',

@@ -1086,6 +1086,7 @@ const fr = {
         you_owe_summary: 'Vous devez {{amount}} à {{name}}',
         you_owe_nothing: 'Vous ne devez rien sur cette facture',
         get_back_hint: 'Vous récupérez {{amount}}',
+        paid_floor: 'Vous avez déjà remboursé {{amount}}',
         your_share: 'Votre part {{amount}}',
         swipe_hint_actions: 'Balayez une ligne vers la gauche pour marquer payé ou supprimer',
         swipe_hint_delete: 'Balayez une ligne vers la gauche pour supprimer',

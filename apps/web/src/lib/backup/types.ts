@@ -121,6 +121,11 @@ export type TransactionSplitRow = Row & {
    */
   is_payer?: number | boolean | null;
   share_amount?: number | null;
+  /**
+   * The Cloud Sync account this person is, once people can be real users.
+   * Null or absent today; balances group by it when it is set (`partyKey`).
+   */
+  member_id?: string | null;
 };
 
 export type ExchangeRateRow = Row & {

@@ -15,6 +15,7 @@ function person(
   return {
     key,
     name: key,
+    memberId: null,
     totalReporting: unpaidBillCount * 10,
     paidReporting: 0,
     owedReporting: 0,

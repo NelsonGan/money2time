@@ -44,6 +44,7 @@ const split = (id: string, patch: Partial<TransactionSplit> = {}): TransactionSp
   partOfSplitId: null,
   isPayer: false,
   shareAmount: null,
+  memberId: null,
   sortOrder: 0,
   createdAt: AT,
   updatedAt: SPLIT_AT,

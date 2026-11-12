@@ -33,6 +33,12 @@ export interface SplitPaymentTarget {
   paybackAccountId: string | null;
   /** False for a bill paid from no account: the payback lands nowhere, so no Paid to. */
   billHasAccount?: boolean;
+  /**
+   * `pay` when it is the user paying a friend back for a bill that friend
+   * paid, so the account is where the money left from. A friend paying the
+   * user back by default.
+   */
+  direction?: 'receive' | 'pay';
 }
 
 interface SplitPaymentSheetProps {
@@ -42,9 +48,10 @@ interface SplitPaymentSheetProps {
 }
 
 /**
- * Settle Up's Mark paid: how much a friend paid back and where it landed. It
+ * Balances' Mark paid: how much was paid back and through which account. It
  * opens on everything still owed, which settles the share; lowering the
- * amount records a part payment instead.
+ * amount records a part payment instead. The same sheet serves a friend
+ * paying the user back and the user paying a friend back (`direction`).
  */
 export function SplitPaymentSheet({ target, onClose, onRecord }: SplitPaymentSheetProps) {
   const themeColors = useThemeColors();
@@ -159,7 +166,11 @@ export function SplitPaymentSheet({ target, onClose, onRecord }: SplitPaymentShe
                   className="mx-4 mt-4 mb-3 flex-row items-center gap-2 rounded-2xl border border-border/25 bg-card/60 px-4 py-3 active:opacity-70"
                 >
                   <Text variant="body" tone="muted" className="flex-1">
-                    {I18n.t('transactions.settleUp.payment_paid_to')}
+                    {I18n.t(
+                      target.direction === 'pay'
+                        ? 'transactions.settleUp.paid_from'
+                        : 'transactions.settleUp.payment_paid_to',
+                    )}
                   </Text>
                   {account ? (
                     <AccountLogo

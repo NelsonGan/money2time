@@ -1086,6 +1086,7 @@ const pl = {
         you_owe_summary: 'Jesteś winien {{name}} {{amount}}',
         you_owe_nothing: 'Na tym rachunku nic nie jesteś winien',
         get_back_hint: 'Wraca do ciebie {{amount}}',
+        paid_floor: 'Oddano już {{amount}}',
         your_share: 'Twoja część {{amount}}',
         swipe_hint_actions: 'Przesuń wiersz w lewo, aby oznaczyć jako zapłacone lub usunąć',
         swipe_hint_delete: 'Przesuń wiersz w lewo, aby usunąć',

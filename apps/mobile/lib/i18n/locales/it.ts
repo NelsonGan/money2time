@@ -1087,6 +1087,7 @@ const it = {
         you_owe_summary: 'Devi {{amount}} a {{name}}',
         you_owe_nothing: 'Non devi nulla per questo conto',
         get_back_hint: 'Ti tornano {{amount}}',
+        paid_floor: 'Hai già restituito {{amount}}',
         your_share: 'La tua quota {{amount}}',
         swipe_hint_actions: 'Scorri una riga verso sinistra per segnare come pagato o eliminare',
         swipe_hint_delete: 'Scorri una riga verso sinistra per eliminare',

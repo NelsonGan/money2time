@@ -1081,6 +1081,7 @@ const vi = {
         you_owe_summary: 'Bạn nợ {{name}} {{amount}}',
         you_owe_nothing: 'Bạn không nợ gì ở hóa đơn này',
         get_back_hint: 'Bạn nhận lại {{amount}}',
+        paid_floor: 'Bạn đã trả lại {{amount}}',
         your_share: 'Phần của bạn {{amount}}',
         swipe_hint_actions: 'Vuốt hàng sang trái để đánh dấu đã trả hoặc xóa',
         swipe_hint_delete: 'Vuốt hàng sang trái để xóa',

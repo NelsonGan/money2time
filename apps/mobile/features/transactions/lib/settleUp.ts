@@ -8,6 +8,7 @@ import type {
   TransactionWithRelations,
 } from '~/types';
 
+import { type DebtParty, debtPartyKey, debtPartyOf, UNNAMED_PERSON_KEY } from './debtParty';
 import {
   billPayer,
   friendPaidBillTotal,
@@ -17,8 +18,7 @@ import {
 } from './splitPayer';
 import { splitShareKey, summarizeSplitShares } from './splitPayments';
 
-/** Grouping key for splits that were never given a person name. */
-export const UNNAMED_PERSON_KEY = '__unnamed__';
+export { UNNAMED_PERSON_KEY };
 
 export interface AggregateSettleUpOptions {
   /** The user's reporting currency; the roll-up total is expressed in it. */
@@ -56,20 +56,130 @@ function splitReportingAmount(
   return amount;
 }
 
-/** The key a person's shares are grouped under: their trimmed, case-folded name. */
+/**
+ * The key a name typed on a bill is grouped under. A split row's own key comes
+ * from `debtPartyOf`, which prefers its member once people can be real users.
+ */
 export function personKeyOf(personName: string | null | undefined): string {
-  const trimmed = personName?.trim() ?? '';
-  return trimmed.length > 0 ? trimmed.toLowerCase() : UNNAMED_PERSON_KEY;
+  return debtPartyKey(personName);
 }
 
-function displayNameOf(personName: string | null | undefined): string | null {
-  const trimmed = personName?.trim() ?? '';
-  return trimmed.length > 0 ? trimmed : null;
+/**
+ * One share between the user and a person, whichever way it is owed, with who
+ * it is with. Balances are rolled up from these, so a later source of debts
+ * (a shared group's expenses) only has to produce entries.
+ */
+export interface DebtEntry extends PersonDebtBill {
+  party: DebtParty;
+}
+
+/** The bill fields every entry of one transaction carries. */
+function billFieldsOf(tx: TransactionWithRelations) {
+  return {
+    transactionId: tx.id,
+    date: tx.date,
+    currency: tx.currency,
+    note: tx.note ?? null,
+    categoryName: tx.categoryName ?? null,
+    categoryIcon: tx.categoryIcon ?? null,
+  };
+}
+
+/**
+ * The entries of one bill: what the user owes the friend who paid it (the
+ * part still owed, then each part already paid), or each friend's positive
+ * share of a bill the user paid. Nobody on a bill a friend paid owes the user.
+ */
+function debtEntriesOf(
+  tx: TransactionWithRelations,
+  options: AggregateSettleUpOptions,
+): DebtEntry[] {
+  const splits = tx.splits;
+  if (!splits || splits.length === 0) return [];
+  const { reportingCurrency, rateToReporting } = options;
+  const reporting = (amount: number) =>
+    roundCents(splitReportingAmount(amount, tx, reportingCurrency, rateToReporting));
+  const bill = billFieldsOf(tx);
+
+  const owed = owedToPayer(splits, tx.amount);
+  if (owed) {
+    if (!(owed.total > 0)) return [];
+    const payer = billPayer(splits)!;
+    const party = debtPartyOf(payer);
+    const share = { shareTotal: owed.total, sharePaid: owed.paid, shareKey: owed.splitId };
+    const entries: DebtEntry[] = [];
+    // What is left on the bill: owed, or the last payment once it is paid.
+    if (owed.amount > 0) {
+      entries.push({
+        ...bill,
+        ...share,
+        party,
+        splitId: owed.splitId,
+        direction: 'you_owe',
+        amount: owed.amount,
+        reportingAmount: reporting(owed.amount),
+        paybackAccountId: owed.paidFromAccountId,
+        billHasAccount: true,
+        paidAt: owed.paidAt,
+      });
+    }
+    for (const part of owed.payments) {
+      entries.push({
+        ...bill,
+        ...share,
+        party,
+        splitId: part.splitId,
+        direction: 'you_owe',
+        amount: part.amount,
+        reportingAmount: reporting(part.amount),
+        paybackAccountId: part.paidFromAccountId,
+        billHasAccount: true,
+        paidAt: part.paidAt,
+      });
+    }
+    return entries;
+  }
+
+  const shares = summarizeSplitShares(splits);
+  const entries: DebtEntry[] = [];
+  for (const split of splits) {
+    if (split.isSelf) continue;
+    if (!(split.amount > 0)) continue;
+    const share = shares.get(splitShareKey(split));
+    entries.push({
+      ...bill,
+      party: debtPartyOf(split),
+      splitId: split.id,
+      direction: 'owes_you',
+      amount: split.amount,
+      reportingAmount: reporting(split.amount),
+      paybackAccountId: split.paybackAccountId ?? tx.accountId ?? null,
+      billHasAccount: !!tx.accountId,
+      paidAt: split.paidAt,
+      shareTotal: share?.total ?? split.amount,
+      sharePaid: share?.paid ?? 0,
+      shareKey: splitShareKey(split),
+    });
+  }
+  return entries;
+}
+
+/**
+ * Every share between the user and someone else across `transactions`, in
+ * both directions. It takes any list, so the debts of one album (or later a
+ * shared group) are the entries of that album's transactions.
+ */
+export function collectDebtEntries(
+  transactions: readonly TransactionWithRelations[],
+  options: AggregateSettleUpOptions,
+): DebtEntry[] {
+  return transactions.flatMap((tx) => debtEntriesOf(tx, options));
 }
 
 interface MutablePerson {
   key: string;
   name: string | null;
+  memberId: string | null;
   /** Date of the bill the display name came from; most recent wins on casing drift. */
   nameDate: string;
   totalReporting: number;
@@ -107,37 +217,26 @@ function netCurrencyTotals(
 }
 
 /**
- * Rolls every share across all transactions up by person, in both directions:
- * the positive, non-self splits of the bills the user paid (the person owes
- * the user), and the user's own share of the bills that person paid (the user
- * owes them, see `splitPayer.ts`). People are grouped by trimmed, case-folded
- * name; splits with no name collapse into a single {@link UNNAMED_PERSON_KEY}
+ * Rolls debt entries up by person. People are grouped by their party key (a
+ * member once people can be real users, else the trimmed, case-folded name);
+ * entries with no name collapse into a single {@link UNNAMED_PERSON_KEY}
  * bucket. Totals are in the reporting currency and only include unpaid shares;
  * the `byCurrency` lists preserve the unpaid native subtotals.
- *
- * It takes any list of transactions, so the balances of one album (or later a
- * shared group) are this roll-up over that album's transactions.
  */
-export function aggregateSettleUpByPerson(
-  transactions: TransactionWithRelations[],
-  options: AggregateSettleUpOptions,
+export function rollUpDebtsByPerson(
+  entries: readonly DebtEntry[],
+  reportingCurrency: string,
 ): SettleUpSummary {
-  const { reportingCurrency, rateToReporting } = options;
   const people = new Map<string, MutablePerson>();
 
-  const addBill = (
-    tx: TransactionWithRelations,
-    personName: string | null | undefined,
-    bill: PersonDebtBill,
-  ) => {
-    const key = personKeyOf(personName);
-    const name = displayNameOf(personName);
-    let person = people.get(key);
+  for (const { party, ...bill } of entries) {
+    let person = people.get(party.key);
     if (!person) {
       person = {
-        key,
-        name,
-        nameDate: tx.date,
+        key: party.key,
+        name: party.name,
+        memberId: party.memberId,
+        nameDate: bill.date,
         totalReporting: 0,
         paidReporting: 0,
         owedReporting: 0,
@@ -147,10 +246,10 @@ export function aggregateSettleUpByPerson(
         byCurrency: new Map(),
         owedByCurrency: new Map(),
         bills: [],
-        oldestDate: tx.date,
+        oldestDate: bill.date,
         oldestUnpaidDate: null,
       };
-      people.set(key, person);
+      people.set(party.key, person);
     }
     person.bills.push(bill);
     const youOwe = bill.direction === 'you_owe';
@@ -162,7 +261,7 @@ export function aggregateSettleUpByPerson(
       }
     } else {
       const byCurrency = youOwe ? person.owedByCurrency : person.byCurrency;
-      byCurrency.set(tx.currency, roundCents((byCurrency.get(tx.currency) ?? 0) + bill.amount));
+      byCurrency.set(bill.currency, roundCents((byCurrency.get(bill.currency) ?? 0) + bill.amount));
       if (youOwe) {
         person.owedReporting = roundCents(person.owedReporting + bill.reportingAmount);
         person.youOweCount += 1;
@@ -170,75 +269,14 @@ export function aggregateSettleUpByPerson(
         person.totalReporting = roundCents(person.totalReporting + bill.reportingAmount);
       }
       person.unpaidBillCount += 1;
-      if (person.oldestUnpaidDate === null || tx.date < person.oldestUnpaidDate) {
-        person.oldestUnpaidDate = tx.date;
+      if (person.oldestUnpaidDate === null || bill.date < person.oldestUnpaidDate) {
+        person.oldestUnpaidDate = bill.date;
       }
     }
-    if (tx.date < person.oldestDate) person.oldestDate = tx.date;
-    if (name && tx.date >= person.nameDate) {
-      person.name = name;
-      person.nameDate = tx.date;
-    }
-  };
-
-  for (const tx of transactions) {
-    const splits = tx.splits;
-    if (!splits || splits.length === 0) continue;
-
-    // A bill a friend paid: the user owes that friend their own share, and
-    // nobody on it owes the user.
-    const owed = owedToPayer(splits, tx.amount);
-    if (owed) {
-      if (!(owed.amount > 0)) continue;
-      addBill(tx, owed.personName, {
-        splitId: owed.splitId,
-        direction: 'you_owe',
-        transactionId: tx.id,
-        date: tx.date,
-        amount: owed.amount,
-        currency: tx.currency,
-        reportingAmount: roundCents(
-          splitReportingAmount(owed.amount, tx, reportingCurrency, rateToReporting),
-        ),
-        note: tx.note ?? null,
-        categoryName: tx.categoryName ?? null,
-        categoryIcon: tx.categoryIcon ?? null,
-        paybackAccountId: owed.paidFromAccountId,
-        billHasAccount: true,
-        paidAt: owed.paidAt,
-        shareTotal: owed.amount,
-        sharePaid: owed.paidAt ? owed.amount : 0,
-        shareKey: owed.splitId,
-      });
-      continue;
-    }
-
-    const shares = summarizeSplitShares(splits);
-    for (const split of splits) {
-      if (split.isSelf) continue;
-      if (!(split.amount > 0)) continue;
-
-      const share = shares.get(splitShareKey(split));
-      addBill(tx, split.personName, {
-        splitId: split.id,
-        direction: 'owes_you',
-        transactionId: tx.id,
-        date: tx.date,
-        amount: split.amount,
-        currency: tx.currency,
-        reportingAmount: roundCents(
-          splitReportingAmount(split.amount, tx, reportingCurrency, rateToReporting),
-        ),
-        note: tx.note ?? null,
-        categoryName: tx.categoryName ?? null,
-        categoryIcon: tx.categoryIcon ?? null,
-        paybackAccountId: split.paybackAccountId ?? tx.accountId ?? null,
-        billHasAccount: !!tx.accountId,
-        paidAt: split.paidAt,
-        shareTotal: share?.total ?? split.amount,
-        sharePaid: share?.paid ?? 0,
-        shareKey: splitShareKey(split),
-      });
+    if (bill.date < person.oldestDate) person.oldestDate = bill.date;
+    if (party.name && bill.date >= person.nameDate) {
+      person.name = party.name;
+      person.nameDate = bill.date;
     }
   }
 
@@ -261,6 +299,7 @@ export function aggregateSettleUpByPerson(
     result.push({
       key: person.key,
       name: person.name,
+      memberId: person.memberId,
       totalReporting: person.totalReporting,
       paidReporting: person.paidReporting,
       owedReporting: person.owedReporting,
@@ -271,7 +310,8 @@ export function aggregateSettleUpByPerson(
       netByCurrency: netCurrencyTotals(person.byCurrency, person.owedByCurrency),
       bills: person.bills,
       oldestDate: person.oldestUnpaidDate ?? person.oldestDate,
-      billCount: person.bills.length,
+      // Bills, not rows: a share paid in parts is several rows of one bill.
+      billCount: new Set(person.bills.map((bill) => bill.transactionId)).size,
       unpaidBillCount: person.unpaidBillCount,
       youOweCount: person.youOweCount,
     });
@@ -315,6 +355,17 @@ export function aggregateSettleUpByPerson(
 }
 
 /**
+ * The Balances roll-up over `transactions`: every share in both directions
+ * ({@link collectDebtEntries}), grouped by person ({@link rollUpDebtsByPerson}).
+ */
+export function aggregateSettleUpByPerson(
+  transactions: TransactionWithRelations[],
+  options: AggregateSettleUpOptions,
+): SettleUpSummary {
+  return rollUpDebtsByPerson(collectDebtEntries(transactions, options), options.reportingCurrency);
+}
+
+/**
  * Cheap count of distinct people with an open balance: someone who still owes
  * on an unpaid, non-self split, or a friend the user still owes for a bill
  * they paid. Uses the same person-key derivation as
@@ -330,14 +381,14 @@ export function countUnpaidDebtors(transactions: TransactionWithRelations[]): nu
     if (!splits || splits.length === 0) continue;
     const payer = billPayer(splits);
     if (payer) {
-      if (owesPayer(splits, tx.amount)) keys.add(personKeyOf(payer.personName));
+      if (owesPayer(splits, tx.amount)) keys.add(debtPartyOf(payer).key);
       continue;
     }
     for (const split of splits) {
       if (split.isSelf) continue;
       if (split.paidAt) continue;
       if (!(split.amount > 0)) continue;
-      keys.add(personKeyOf(split.personName));
+      keys.add(debtPartyOf(split).key);
     }
   }
   return keys.size;
@@ -401,14 +452,14 @@ export function personSettlementRows(
     if (!splits || splits.length === 0) continue;
     const payer = billPayer(splits);
     if (payer) {
-      if (personKeyOf(payer.personName) === personKey && owesPayer(splits, tx.amount)) {
+      if (debtPartyOf(payer).key === personKey && owesPayer(splits, tx.amount)) {
         rows.pay.push(payer.id);
       }
       continue;
     }
     for (const split of splits) {
       if (split.isSelf || split.paidAt || !(split.amount > 0)) continue;
-      if (personKeyOf(split.personName) === personKey) rows.receive.push(split.id);
+      if (debtPartyOf(split).key === personKey) rows.receive.push(split.id);
     }
   }
   return rows;
@@ -426,7 +477,7 @@ export function aggregateSettleUpByTransaction(
   transactions: TransactionWithRelations[],
   options: AggregateSettleUpOptions,
 ): SettleUpByTransactionSummary {
-  const { reportingCurrency, rateToReporting } = options;
+  const { reportingCurrency } = options;
   const result: TransactionDebt[] = [];
   let grandTotal = 0;
   let grandOwed = 0;
@@ -454,50 +505,22 @@ export function aggregateSettleUpByTransaction(
       }
     };
 
-    const mine = owedToPayer(splits, tx.amount);
-    if (mine) {
-      if (mine.amount > 0) {
-        count({
-          splitId: mine.splitId,
-          direction: 'you_owe',
-          personName: mine.personName,
-          amount: mine.amount,
-          currency: tx.currency,
-          reportingAmount: roundCents(
-            splitReportingAmount(mine.amount, tx, reportingCurrency, rateToReporting),
-          ),
-          paybackAccountId: mine.paidFromAccountId,
-          billHasAccount: true,
-          paidAt: mine.paidAt,
-          shareTotal: mine.amount,
-          sharePaid: mine.paidAt ? mine.amount : 0,
-          shareKey: mine.splitId,
-        });
-      }
-    } else {
-      const shares = summarizeSplitShares(splits);
-      for (const split of splits) {
-        if (split.isSelf) continue;
-        if (!(split.amount > 0)) continue;
-
-        const share = shares.get(splitShareKey(split));
-        count({
-          splitId: split.id,
-          direction: 'owes_you',
-          personName: displayNameOf(split.personName),
-          amount: split.amount,
-          currency: tx.currency,
-          reportingAmount: roundCents(
-            splitReportingAmount(split.amount, tx, reportingCurrency, rateToReporting),
-          ),
-          paybackAccountId: split.paybackAccountId ?? tx.accountId ?? null,
-          billHasAccount: !!tx.accountId,
-          paidAt: split.paidAt,
-          shareTotal: share?.total ?? split.amount,
-          sharePaid: share?.paid ?? 0,
-          shareKey: splitShareKey(split),
-        });
-      }
+    const payer = billPayer(splits);
+    for (const { party, ...entry } of debtEntriesOf(tx, options)) {
+      count({
+        splitId: entry.splitId,
+        direction: entry.direction,
+        personName: party.name,
+        amount: entry.amount,
+        currency: entry.currency,
+        reportingAmount: entry.reportingAmount,
+        paybackAccountId: entry.paybackAccountId,
+        billHasAccount: entry.billHasAccount,
+        paidAt: entry.paidAt,
+        shareTotal: entry.shareTotal,
+        sharePaid: entry.sharePaid,
+        shareKey: entry.shareKey,
+      });
     }
     if (owed.length === 0) continue;
 
@@ -515,16 +538,17 @@ export function aggregateSettleUpByTransaction(
     });
     result.push({
       transactionId: tx.id,
-      paidBy: mine ? { name: mine.personName } : null,
-      billTotalNative: mine ? friendPaidBillTotal(splits, tx.amount) : null,
-      participants: mine
+      paidBy: payer ? { name: debtPartyOf(payer).name, key: debtPartyOf(payer).key } : null,
+      billTotalNative: payer ? friendPaidBillTotal(splits, tx.amount) : null,
+      participants: payer
         ? splits
             .filter((split) => !split.isSelf && !split.partOfSplitId)
             .map((split) => ({
               splitId: split.id,
-              personName: displayNameOf(split.personName),
+              personName: debtPartyOf(split).name,
+              partyKey: debtPartyOf(split).key,
               amount: split.shareAmount ?? 0,
-              isPayer: split.id === mine.splitId,
+              isPayer: split.id === payer.id,
             }))
         : [],
       date: tx.date,
@@ -540,7 +564,7 @@ export function aggregateSettleUpByTransaction(
       splitCount: owed.length,
       unpaidSplitCount,
     });
-    if (mine) grandOwed = roundCents(grandOwed + totalReporting);
+    if (payer) grandOwed = roundCents(grandOwed + totalReporting);
     else grandTotal = roundCents(grandTotal + totalReporting);
     splitCount += unpaidSplitCount;
   }
