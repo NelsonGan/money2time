@@ -439,6 +439,17 @@ export const albumSettlementsTable = sqliteTable('album_settlements', {
   deletedAt: text('deleted_at'),
 });
 
+// What a group has agreed on (migration 091): one row per group, `id` and
+// `ledgerId` both the group's id.
+export const albumGroupsTable = sqliteTable('album_groups', {
+  id: text('id').primaryKey(),
+  ledgerId: text('ledger_id').notNull(),
+  simplifyDebts: integer('simplify_debts', { mode: 'boolean' }).notNull().default(false),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+  deletedAt: text('deleted_at'),
+});
+
 export const albumTransactionsTable = sqliteTable('album_transactions', {
   id: text('id').primaryKey(),
   albumId: text('album_id').notNull(),

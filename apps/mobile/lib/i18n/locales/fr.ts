@@ -1088,8 +1088,6 @@ const fr = {
         get_back_hint: 'Vous récupérez {{amount}}',
         paid_floor: 'Vous avez déjà remboursé {{amount}}',
         your_share: 'Votre part {{amount}}',
-        swipe_hint_actions: 'Balayez une ligne vers la gauche pour marquer payé ou supprimer',
-        swipe_hint_delete: 'Balayez une ligne vers la gauche pour supprimer',
         section_subtitle_unpaid: '{{count}} vous doit encore',
         section_subtitle_unpaid_plural: '{{count}} vous doivent encore',
         subtotal_label: 'Sous-total',
@@ -3017,7 +3015,6 @@ const fr = {
       remove_joined_title: "Retirer {{name}} de l'album ?",
       remove_joined_message:
         'Cette personne ne recevra plus les notes de cet album. Les notes où elle figure restent.',
-      hint: 'Tant que cet album est actif, une nouvelle dépense commence partagée avec ces personnes.',
       who_title: 'Lequel êtes-vous ?',
       who_message:
         'Choisissez votre nom pour que votre part de chaque note arrive dans votre livre.',
@@ -3042,11 +3039,18 @@ const fr = {
     balances: {
       tab: 'Soldes',
       empty_message: 'Partagez une note dans cet album et elle apparaîtra ici.',
-      total_line: 'Total dépensé {{total}} · Votre part {{share}}',
+      who_owes_whom: 'Qui doit à qui',
+      owes_you: '{{name}} vous doit',
+      owes: '{{from}} doit à {{to}}',
+      group_spending: 'Dépenses du groupe',
+      your_share: 'Votre part',
+    },
+    simplify: {
+      row: 'Simplifier les dettes du groupe',
+      info: 'Regroupe les dettes du groupe pour qu’il y ait moins de paiements à faire. Personne ne paie ni ne reçoit plus au total.',
     },
     join: {
       title: 'Album partagé',
-      note: 'Il est ajouté comme album dans votre propre livre, avec votre part de chaque note.',
       own: "C'est l'un de vos propres albums.",
       already: 'Vous êtes déjà dans cet album.',
     },

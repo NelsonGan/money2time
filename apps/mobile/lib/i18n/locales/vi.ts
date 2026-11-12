@@ -1083,8 +1083,6 @@ const vi = {
         get_back_hint: 'Bạn nhận lại {{amount}}',
         paid_floor: 'Bạn đã trả lại {{amount}}',
         your_share: 'Phần của bạn {{amount}}',
-        swipe_hint_actions: 'Vuốt hàng sang trái để đánh dấu đã trả hoặc xóa',
-        swipe_hint_delete: 'Vuốt hàng sang trái để xóa',
         section_subtitle_unpaid: '{{count}} người chưa trả',
         section_subtitle_unpaid_plural: '{{count}} người chưa trả',
         subtotal_label: 'Tạm tính',
@@ -2960,7 +2958,6 @@ const vi = {
       remove_joined_title: 'Xóa {{name}} khỏi album?',
       remove_joined_message:
         'Họ sẽ không còn nhận hóa đơn của album này. Các hóa đơn có họ vẫn được giữ.',
-      hint: 'Khi album này đang hoạt động, khoản chi mới bắt đầu được chia với những người này.',
       who_title: 'Bạn là ai trong số này?',
       who_message: 'Chọn tên của bạn để phần của bạn trong mỗi hóa đơn vào sổ của bạn.',
       who_new: 'Tôi không có trong danh sách',
@@ -2983,11 +2980,18 @@ const vi = {
     balances: {
       tab: 'Số dư',
       empty_message: 'Chia một hóa đơn trong album này và nó sẽ hiện ở đây.',
-      total_line: 'Tổng chi {{total}} · Phần của bạn {{share}}',
+      who_owes_whom: 'Ai nợ ai',
+      owes_you: '{{name}} nợ bạn',
+      owes: '{{from}} nợ {{to}}',
+      group_spending: 'Chi tiêu của nhóm',
+      your_share: 'Phần của bạn',
+    },
+    simplify: {
+      row: 'Đơn giản hóa nợ nhóm',
+      info: 'Gộp các khoản nợ trong nhóm để phải trả ít lần hơn. Tổng số mỗi người trả hoặc nhận vẫn như cũ.',
     },
     join: {
       title: 'Album chung',
-      note: 'Nó được thêm thành một album trong sổ của riêng bạn, kèm phần của bạn trong mỗi hóa đơn.',
       own: 'Đây là một trong các album của bạn.',
       already: 'Bạn đã ở trong album này.',
     },

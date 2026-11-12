@@ -1090,8 +1090,6 @@ const fil = {
         get_back_hint: 'Maibabalik sa iyo ang {{amount}}',
         paid_floor: 'Nabayaran mo na ang {{amount}}',
         your_share: 'Hati mo {{amount}}',
-        swipe_hint_actions: 'I-swipe pakaliwa ang row para markahang bayad o burahin',
-        swipe_hint_delete: 'I-swipe pakaliwa ang row para burahin',
         section_subtitle_unpaid: '{{count}} ay may utang pa sa iyo',
         section_subtitle_unpaid_plural: '{{count}} ay may utang pa sa iyo',
         subtotal_label: 'Subtotal',
@@ -3020,7 +3018,6 @@ const fil = {
       remove_joined_title: 'Alisin si {{name}} sa album?',
       remove_joined_message:
         'Hindi na nila matatanggap ang mga bill ng album na ito. Mananatili ang mga bill na kasama sila.',
-      hint: 'Habang aktibo ang album na ito, nagsisimulang hati sa mga taong ito ang bagong gastos.',
       who_title: 'Alin ka rito?',
       who_message: 'Piliin ang pangalan mo para mapunta sa ledger mo ang bahagi mo sa bawat bill.',
       who_new: 'Wala ako sa listahan',
@@ -3044,11 +3041,18 @@ const fil = {
     balances: {
       tab: 'Mga balanse',
       empty_message: 'Maghati ng bill sa album na ito at lalabas ito rito.',
-      total_line: 'Kabuuang gastos {{total}} · Bahagi mo {{share}}',
+      who_owes_whom: 'Sino ang may utang kanino',
+      owes_you: 'May utang sa iyo si {{name}}',
+      owes: 'May utang si {{from}} kay {{to}}',
+      group_spending: 'Gastos ng grupo',
+      your_share: 'Ang parte mo',
+    },
+    simplify: {
+      row: 'Pasimplehin ang utang ng grupo',
+      info: 'Pinagsasama ang mga utang sa grupo para mas kaunti ang babayaran. Walang magbabayad o makakatanggap ng mas malaki sa kabuuan.',
     },
     join: {
       title: 'Shared na album',
-      note: 'Idadagdag ito bilang album sa sarili mong ledger, kasama ang bahagi mo sa bawat bill.',
       own: 'Isa ito sa sarili mong mga album.',
       already: 'Kasali ka na sa album na ito.',
     },

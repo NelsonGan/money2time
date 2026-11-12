@@ -1079,8 +1079,6 @@ const ja = {
         get_back_hint: '{{amount}}が戻ってきます',
         paid_floor: 'すでに{{amount}}を返済済みです',
         your_share: '自分の負担 {{amount}}',
-        swipe_hint_actions: '行を左にスワイプして支払い済みにするか削除',
-        swipe_hint_delete: '行を左にスワイプして削除',
         section_subtitle_unpaid: '{{count}} 人がまだ支払っていません',
         section_subtitle_unpaid_plural: '{{count}} 人がまだ支払っていません',
         subtotal_label: '小計',
@@ -2959,7 +2957,6 @@ const ja = {
       remove_joined_title: '{{name}}をアルバムから外しますか？',
       remove_joined_message:
         'この人にはこのアルバムの会計が届かなくなります。この人が含まれる会計は残ります。',
-      hint: 'このアルバムが有効な間、新しい支出はこの人たちとの割り勘で始まります。',
       who_title: 'あなたはどれですか？',
       who_message: '自分の名前を選ぶと、各会計のあなたの分が自分の帳簿に入ります。',
       who_new: 'リストにいません',
@@ -2982,11 +2979,18 @@ const ja = {
     balances: {
       tab: '残高',
       empty_message: 'このアルバムで会計を割り勘すると、ここに表示されます。',
-      total_line: '合計支出 {{total}} · あなたの分 {{share}}',
+      who_owes_whom: '誰が誰にいくら',
+      owes_you: '{{name}}さんからもらう',
+      owes: '{{from}}さん → {{to}}さん',
+      group_spending: 'グループの支出',
+      your_share: 'あなたの負担',
+    },
+    simplify: {
+      row: 'グループの貸し借りをまとめる',
+      info: 'グループ内の貸し借りをまとめて、支払いの回数を減らします。合計で払う額やもらう額は変わりません。',
     },
     join: {
       title: '共有アルバム',
-      note: 'あなたの帳簿にアルバムとして追加され、各会計のあなたの分が入ります。',
       own: 'これはあなた自身のアルバムです。',
       already: 'このアルバムにはすでに参加しています。',
     },

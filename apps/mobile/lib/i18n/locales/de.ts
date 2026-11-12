@@ -1096,8 +1096,6 @@ const de = {
         get_back_hint: 'Du bekommst {{amount}} zurück',
         paid_floor: 'Du hast bereits {{amount}} zurückgezahlt',
         your_share: 'Dein Anteil {{amount}}',
-        swipe_hint_actions: 'Zeile nach links wischen zum Bezahltmarkieren oder Löschen',
-        swipe_hint_delete: 'Zeile nach links wischen zum Löschen',
         section_subtitle_unpaid: '{{count}} schuldet noch',
         section_subtitle_unpaid_plural: '{{count}} schulden noch',
         subtotal_label: 'Zwischensumme',
@@ -3023,7 +3021,6 @@ const de = {
       remove_joined_title: '{{name}} aus dem Album entfernen?',
       remove_joined_message:
         'Die Person erhält keine Rechnungen dieses Albums mehr. Rechnungen, auf denen sie steht, bleiben.',
-      hint: 'Solange dieses Album aktiv ist, wird eine neue Ausgabe zunächst mit diesen Personen geteilt.',
       who_title: 'Wer davon bist du?',
       who_message:
         'Wähle deinen Namen, damit dein Anteil jeder Rechnung in deinem Kassenbuch landet.',
@@ -3048,11 +3045,18 @@ const de = {
     balances: {
       tab: 'Salden',
       empty_message: 'Teile eine Rechnung in diesem Album, dann erscheint sie hier.',
-      total_line: 'Insgesamt ausgegeben {{total}} · Dein Anteil {{share}}',
+      who_owes_whom: 'Wer schuldet wem',
+      owes_you: '{{name}} schuldet dir',
+      owes: '{{from}} schuldet {{to}}',
+      group_spending: 'Ausgaben der Gruppe',
+      your_share: 'Dein Anteil',
+    },
+    simplify: {
+      row: 'Gruppenschulden vereinfachen',
+      info: 'Fasst Schulden in der Gruppe zusammen, damit weniger Zahlungen nötig sind. Insgesamt zahlt oder bekommt niemand mehr.',
     },
     join: {
       title: 'Geteiltes Album',
-      note: 'Es wird als Album in deinem eigenen Kassenbuch hinzugefügt, mit deinem Anteil jeder Rechnung.',
       own: 'Das ist eines deiner eigenen Alben.',
       already: 'Du bist bereits in diesem Album.',
     },

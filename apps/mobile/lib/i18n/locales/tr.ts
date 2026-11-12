@@ -1084,8 +1084,6 @@ const tr = {
         get_back_hint: '{{amount}} geri alırsınız',
         paid_floor: 'Zaten {{amount}} geri ödediniz',
         your_share: 'Sizin payınız {{amount}}',
-        swipe_hint_actions: 'Ödendi olarak işaretlemek veya silmek için satırı sola kaydırın',
-        swipe_hint_delete: 'Silmek için satırı sola kaydırın',
         section_subtitle_unpaid: '{{count}} kişi hâlâ borçlu',
         section_subtitle_unpaid_plural: '{{count}} kişi hâlâ borçlu',
         subtotal_label: 'Ara toplam',
@@ -2986,7 +2984,6 @@ const tr = {
       remove_joined_title: '{{name}} albümden çıkarılsın mı?',
       remove_joined_message:
         'Bu kişi artık bu albümün hesaplarını almaz. Yer aldığı hesaplar kalır.',
-      hint: 'Bu albüm etkinken yeni bir gider bu kişilerle bölüşülmüş olarak başlar.',
       who_title: 'Hangisi sizsiniz?',
       who_message: 'Adınızı seçin; her hesaptaki payınız kendi defterinize düşsün.',
       who_new: 'Listede yokum',
@@ -3008,11 +3005,18 @@ const tr = {
     balances: {
       tab: 'Bakiyeler',
       empty_message: 'Bu albümde bir hesap bölüşün, burada görünsün.',
-      total_line: 'Toplam harcama {{total}} · Payınız {{share}}',
+      who_owes_whom: 'Kim kime borçlu',
+      owes_you: '{{name}} size borçlu',
+      owes: '{{from}}, {{to}} kişisine borçlu',
+      group_spending: 'Grup harcaması',
+      your_share: 'Sizin payınız',
+    },
+    simplify: {
+      row: 'Grup borçlarını sadeleştir',
+      info: 'Gruptaki borçları birleştirir, böylece daha az ödeme yapılır. Kimse toplamda daha fazla ödemez veya almaz.',
     },
     join: {
       title: 'Paylaşılan albüm',
-      note: 'Kendi defterinize bir albüm olarak, her hesaptaki payınızla eklenir.',
       own: 'Bu, kendi albümlerinizden biri.',
       already: 'Zaten bu albümdesiniz.',
     },

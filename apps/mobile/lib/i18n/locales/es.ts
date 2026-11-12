@@ -1086,8 +1086,6 @@ const es = {
         get_back_hint: 'Recuperas {{amount}}',
         paid_floor: 'Ya devolviste {{amount}}',
         your_share: 'Tu parte {{amount}}',
-        swipe_hint_actions: 'Desliza una fila a la izquierda para marcar pagado o eliminar',
-        swipe_hint_delete: 'Desliza una fila a la izquierda para eliminar',
         section_subtitle_unpaid: '{{count}} aún te debe',
         section_subtitle_unpaid_plural: '{{count}} aún te deben',
         subtotal_label: 'Subtotal',
@@ -2995,7 +2993,6 @@ const es = {
       remove_joined_title: '¿Quitar a {{name}} del álbum?',
       remove_joined_message:
         'Dejará de recibir las cuentas de este álbum. Las cuentas en las que aparece se quedan.',
-      hint: 'Mientras este álbum esté activo, un gasto nuevo empieza dividido con estas personas.',
       who_title: '¿Cuál eres tú?',
       who_message: 'Elige tu nombre para que tu parte de cada cuenta llegue a tu libro.',
       who_new: 'No estoy en la lista',
@@ -3018,11 +3015,18 @@ const es = {
     balances: {
       tab: 'Saldos',
       empty_message: 'Divide una cuenta en este álbum y aparecerá aquí.',
-      total_line: 'Total gastado {{total}} · Tu parte {{share}}',
+      who_owes_whom: 'Quién debe a quién',
+      owes_you: '{{name}} te debe',
+      owes: '{{from}} debe a {{to}}',
+      group_spending: 'Gasto del grupo',
+      your_share: 'Tu parte',
+    },
+    simplify: {
+      row: 'Simplificar deudas del grupo',
+      info: 'Combina las deudas del grupo para que haya menos pagos que hacer. Nadie paga ni recibe más en total.',
     },
     join: {
       title: 'Álbum compartido',
-      note: 'Se añade como un álbum en tu propio libro, con tu parte de cada cuenta.',
       own: 'Este es uno de tus propios álbumes.',
       already: 'Ya estás en este álbum.',
     },

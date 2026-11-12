@@ -1077,8 +1077,6 @@ const ko = {
         get_back_hint: '{{amount}} 돌려받아요',
         paid_floor: '이미 {{amount}} 갚았어요',
         your_share: '내 부담액 {{amount}}',
-        swipe_hint_actions: '행을 왼쪽으로 스와이프하여 지불 완료 표시 또는 삭제',
-        swipe_hint_delete: '행을 왼쪽으로 스와이프하여 삭제',
         section_subtitle_unpaid: '{{count}}명이 아직 정산 안 함',
         section_subtitle_unpaid_plural: '{{count}}명이 아직 정산 안 함',
         subtotal_label: '소계',
@@ -2940,7 +2938,6 @@ const ko = {
       remove_joined_title: '{{name}} 님을 앨범에서 내보낼까요?',
       remove_joined_message:
         '이 사람은 이 앨범의 청구를 더 이상 받지 않아요. 포함된 청구는 그대로 남아요.',
-      hint: '이 앨범이 활성 상태인 동안 새 지출은 이 사람들과 나눈 상태로 시작해요.',
       who_title: '누가 본인인가요?',
       who_message: '이름을 선택하면 각 청구의 내 몫이 내 장부에 들어와요.',
       who_new: '목록에 없어요',
@@ -2962,11 +2959,18 @@ const ko = {
     balances: {
       tab: '정산 현황',
       empty_message: '이 앨범에서 청구를 나누면 여기에 표시돼요.',
-      total_line: '총 지출 {{total}} · 내 몫 {{share}}',
+      who_owes_whom: '누가 누구에게',
+      owes_you: '{{name}} 님이 나에게 줄 돈',
+      owes: '{{from}} 님 → {{to}} 님',
+      group_spending: '그룹 지출',
+      your_share: '내 몫',
+    },
+    simplify: {
+      row: '그룹 정산 간단히',
+      info: '그룹 안의 빚을 합쳐 송금 횟수를 줄여요. 각자 내거나 받는 총액은 그대로예요.',
     },
     join: {
       title: '공유 앨범',
-      note: '내 장부에 앨범으로 추가되고, 각 청구의 내 몫이 들어와요.',
       own: '내 앨범 중 하나예요.',
       already: '이미 이 앨범에 참여 중이에요.',
     },

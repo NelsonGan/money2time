@@ -1086,8 +1086,6 @@ const id = {
         get_back_hint: 'Kamu menerima kembali {{amount}}',
         paid_floor: 'Kamu sudah membayar {{amount}}',
         your_share: 'Bagianmu {{amount}}',
-        swipe_hint_actions: 'Geser baris ke kiri untuk menandai lunas atau menghapus',
-        swipe_hint_delete: 'Geser baris ke kiri untuk menghapus',
         section_subtitle_unpaid: '{{count}} masih berutang padamu',
         section_subtitle_unpaid_plural: '{{count}} masih berutang padamu',
         subtotal_label: 'Subtotal',
@@ -2991,7 +2989,6 @@ const id = {
       remove_joined_title: 'Keluarkan {{name}} dari album?',
       remove_joined_message:
         'Dia tidak lagi menerima tagihan album ini. Tagihan yang memuatnya tetap ada.',
-      hint: 'Selama album ini aktif, pengeluaran baru langsung dibagi dengan orang-orang ini.',
       who_title: 'Yang mana kamu?',
       who_message: 'Pilih namamu agar bagianmu dari tiap tagihan masuk ke buku kasmu.',
       who_new: 'Saya tidak ada di daftar',
@@ -3015,11 +3012,18 @@ const id = {
     balances: {
       tab: 'Saldo',
       empty_message: 'Bagi sebuah tagihan di album ini dan akan muncul di sini.',
-      total_line: 'Total pengeluaran {{total}} · Bagianmu {{share}}',
+      who_owes_whom: 'Siapa berutang kepada siapa',
+      owes_you: '{{name}} berutang kepada Anda',
+      owes: '{{from}} berutang kepada {{to}}',
+      group_spending: 'Pengeluaran grup',
+      your_share: 'Bagian Anda',
+    },
+    simplify: {
+      row: 'Sederhanakan utang grup',
+      info: 'Menggabungkan utang di grup agar pembayarannya lebih sedikit. Total yang dibayar atau diterima tiap orang tetap sama.',
     },
     join: {
       title: 'Album bersama',
-      note: 'Ditambahkan sebagai album di buku kasmu sendiri, dengan bagianmu dari tiap tagihan.',
       own: 'Ini salah satu albummu sendiri.',
       already: 'Kamu sudah ada di album ini.',
     },

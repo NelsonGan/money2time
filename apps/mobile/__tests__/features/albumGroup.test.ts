@@ -284,8 +284,8 @@ describe('the whole group', () => {
       }),
     ];
     expect(Object.fromEntries(groupTotals(expenses, 'me'))).toEqual({
-      MYR: { total: 130, selfShare: 50 },
-      JPY: { total: 3000, selfShare: 1500 },
+      MYR: { total: 130, selfPaid: 90, selfShare: 50 },
+      JPY: { total: 3000, selfPaid: 0, selfShare: 1500 },
     });
   });
 });

@@ -1,23 +1,27 @@
-import { Check, ChevronRight } from 'lucide-react-native';
-import React, { useMemo, useSyncExternalStore } from 'react';
+import { ArrowRight, ChevronRight } from 'lucide-react-native';
+import React, { useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
 
 import { Button, Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import { PersonAvatar } from '~/features/transactions/components/PersonAvatar';
+import {
+  type SettleUpConfirmContent,
+  SettleUpConfirmSheet,
+} from '~/features/transactions/components/SettleUpConfirmSheet';
+import { debtPartyKey } from '~/features/transactions/lib/debtParty';
 import { personBalanceState } from '~/features/transactions/lib/settleUp';
 import { useSettleUpSummary } from '~/features/transactions/lib/useSettleUpSummary';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import type { AlbumExpense, PersonDebt } from '~/types';
 import { cn } from '~/utils';
 import { currencySymbolForCode } from '~/utils/currency';
 import { formatCurrency } from '~/utils/formatters';
 
 import type { AlbumGroup } from '../hooks/useAlbumGroup';
-import { groupTotals } from '../lib/albumGroup';
-import { listGroupExpenses, subscribeAlbumGroups } from '../services/albumGroupStore';
+import { useGroupDebts } from '../hooks/useGroupDebts';
+import type { GroupDebt } from '../lib/groupDebts';
 
 interface AlbumBalancesProps {
   albumId: string;
@@ -30,13 +34,23 @@ interface AlbumBalancesProps {
   onAddExpense: () => void;
 }
 
-const NO_EXPENSES: AlbumExpense[] = [];
+/** A line of "Who owes whom". */
+interface DebtRow {
+  key: string;
+  /** How the debt is the user's: owed to them, owed by them, or between two others. */
+  mine: 'owed' | 'owe' | null;
+  /** The two people's names; the user's side is not read. */
+  fromName: string | null;
+  toName: string | null;
+  amountText: string;
+  onPress?: () => void;
+}
 
 /**
  * An album's Balances: what the user is owed or owes across the album's
- * bills, then one row per person with their net. The same roll-up as the
- * Balances page, over this album's entries alone. A shared album adds what
- * the whole group spent and the user's share of it.
+ * bills, then who owes whom. An album that is not shared lists the user's own
+ * balance with each person; a shared one lists the whole group's debts
+ * (simplified when the group has that on) and what the group spent.
  */
 export function AlbumBalances({
   albumId,
@@ -45,23 +59,87 @@ export function AlbumBalances({
   onOpenPeople,
   onAddExpense,
 }: AlbumBalancesProps) {
-  const { settings } = useApp();
+  const { settings, settleGroupDebt } = useApp();
   const colors = useThemeColors();
   const summary = useSettleUpSummary(albumId);
   const groupId = group.share?.ledgerId ?? null;
-  const expenses = useSyncExternalStore(subscribeAlbumGroups, () =>
-    groupId ? listGroupExpenses(groupId) : NO_EXPENSES,
-  );
-  const totals = useMemo(
-    () => (groupId ? groupTotals(expenses, group.self?.id ?? null) : null),
-    [expenses, group.self?.id, groupId],
-  );
+  const selfId = group.self?.id ?? null;
+  const shared = useGroupDebts(groupId, selfId);
+  /** The simplified debt being settled, while its sheet is open. */
+  const [settling, setSettling] = useState<GroupDebt | null>(null);
 
   // Money, whatever the display mode: a balance is what changes hands.
   const format = (amount: number) => formatCurrency(amount, settings.currencySymbol);
+  const formatIn = (amount: number, currency: string) =>
+    formatCurrency(amount, currencySymbolForCode(currency));
   const net = summary.netReporting;
   const open = summary.billCount > 0;
   const netState = net >= 0.005 ? 'owed' : net <= -0.005 ? 'owe' : 'even';
+
+  const nameOf = (memberId: string) =>
+    group.members.find((member) => member.id === memberId)?.name ?? null;
+
+  // The user's own first (what they are owed, then what they owe), the
+  // larger first within each.
+  const mineOf = (debt: GroupDebt) =>
+    debt.to === selfId ? 'owed' : debt.from === selfId ? 'owe' : null;
+  const rankOf = (debt: GroupDebt) => ['owed', 'owe', null].indexOf(mineOf(debt));
+  const rows: DebtRow[] = shared
+    ? [...shared.debts]
+        .sort((a, b) => rankOf(a) - rankOf(b) || b.amount - a.amount)
+        .map((debt): DebtRow => {
+          const mine = mineOf(debt);
+          const fromName = nameOf(debt.from);
+          const toName = nameOf(debt.to);
+          return {
+            key: `${debt.currency}:${debt.from}:${debt.to}`,
+            mine,
+            fromName,
+            toName,
+            amountText: formatIn(debt.amount, debt.currency),
+            // A simplified debt is settled as it stands; a pair's own on the
+            // person's page, beside its bills.
+            onPress: !mine
+              ? undefined
+              : shared.simplified
+                ? () => setSettling(debt)
+                : () => onOpenPerson(debtPartyKey(mine === 'owed' ? fromName : toName)),
+          };
+        })
+    : summary.people.flatMap((person): DebtRow[] => {
+        const state = personBalanceState(person);
+        if (state !== 'owes_you' && state !== 'you_owe') return [];
+        return [
+          {
+            key: person.key,
+            mine: state === 'owes_you' ? 'owed' : 'owe',
+            fromName: person.name,
+            toName: person.name,
+            amountText: format(Math.abs(person.netReporting)),
+            onPress: () => onOpenPerson(person.key),
+          },
+        ];
+      });
+
+  const settleContent = useMemo<SettleUpConfirmContent | null>(() => {
+    if (!settling) return null;
+    const receive = settling.to === selfId;
+    const name =
+      group.members.find((member) => member.id === (receive ? settling.from : settling.to))?.name ??
+      null;
+    const shown = name ?? I18n.t('transactions.settleUp.someone');
+    return {
+      personKey: debtPartyKey(name),
+      personName: name,
+      flow: receive ? 'receive' : 'pay',
+      caption: I18n.t(
+        receive ? 'transactions.settleUp.person_pays_you' : 'transactions.settleUp.you_pay_person',
+        { name: shown },
+      ),
+      amountText: formatCurrency(settling.amount, currencySymbolForCode(settling.currency)),
+      confirmLabel: I18n.t('transactions.settleUp.settle_up'),
+    };
+  }, [group.members, selfId, settling]);
 
   // Joined, and not yet said who they are: none of the album's bills are
   // theirs until they do, so that is all there is to show.
@@ -89,66 +167,87 @@ export function AlbumBalances({
     );
   }
 
-  const row = (person: PersonDebt, index: number) => {
-    const state = personBalanceState(person);
-    const settled = state === 'settled';
+  const avatar = (name: string | null, isSelf: boolean) => (
+    <PersonAvatar
+      name={isSelf ? I18n.t('transactions.editor.split.me_label') : name}
+      partyKey={isSelf ? null : debtPartyKey(name)}
+      size={30}
+    />
+  );
+  const shown = (name: string | null) => name ?? I18n.t('transactions.settleUp.someone');
+
+  const debtRow = (row: DebtRow, index: number) => {
+    const sentence =
+      row.mine === 'owed'
+        ? I18n.t('albums.balances.owes_you', { name: shown(row.fromName) })
+        : row.mine === 'owe'
+          ? I18n.t('transactions.settleUp.section_you_owe', { name: shown(row.toName) })
+          : I18n.t('albums.balances.owes', {
+              from: shown(row.fromName),
+              to: shown(row.toName),
+            });
     return (
       <Pressable
-        key={person.key}
+        key={row.key}
+        disabled={!row.onPress}
         onPress={() => {
           void triggerHaptic('selection');
-          onOpenPerson(person.key);
+          row.onPress?.();
         }}
-        accessibilityRole="button"
+        accessibilityRole={row.onPress ? 'button' : 'text'}
+        accessibilityLabel={`${sentence}, ${row.amountText}`}
         className={cn(
           'flex-row items-center gap-3 px-4 py-3 active:opacity-70',
           index > 0 ? 'border-t border-border/15' : '',
         )}
       >
-        <View style={{ opacity: settled ? 0.55 : 1 }}>
-          <PersonAvatar name={person.name} partyKey={person.key} size={40} />
+        <View className="flex-row items-center gap-1.5">
+          {avatar(row.fromName, row.mine === 'owe')}
+          <ArrowRight size={14} color={colors.textMuted} />
+          {avatar(row.toName, row.mine === 'owed')}
         </View>
         <Text
-          variant="bodyStrong"
-          tone={settled ? 'muted' : undefined}
+          variant={row.mine ? 'bodyStrong' : 'body'}
+          tone={row.mine ? undefined : 'muted'}
           numberOfLines={1}
           className="flex-1"
         >
-          {person.name ?? I18n.t('transactions.settleUp.someone')}
+          {sentence}
         </Text>
-        {settled ? (
-          <Check size={18} color={colors.success} />
-        ) : (
-          <View className="items-end">
-            <Text variant="caption" tone="muted">
-              {state === 'owes_you'
-                ? I18n.t('transactions.settleUp.person_owes_label')
-                : state === 'you_owe'
-                  ? I18n.t('transactions.settleUp.you_owe_tag')
-                  : I18n.t('transactions.settleUp.even_tag')}
-            </Text>
-            <Text
-              variant="bodyStrong"
-              className={
-                state === 'owes_you'
-                  ? 'text-success'
-                  : state === 'you_owe'
-                    ? 'text-destructive'
-                    : 'text-muted-foreground'
-              }
-            >
-              {format(Math.abs(person.netReporting))}
-            </Text>
-          </View>
-        )}
-        <ChevronRight size={18} color={colors.textMuted} />
+        <Text
+          variant="bodyStrong"
+          className={
+            row.mine === 'owed'
+              ? 'text-success'
+              : row.mine === 'owe'
+                ? 'text-destructive'
+                : 'text-muted-foreground'
+          }
+        >
+          {row.amountText}
+        </Text>
+        {/* Kept as a gap on rows that open nothing, so the amounts line up. */}
+        <View className="w-[18px]">
+          {row.onPress ? <ChevronRight size={18} color={colors.textMuted} /> : null}
+        </View>
       </Pressable>
     );
   };
 
+  const tile = (label: string, value: string) => (
+    <View className="flex-1 gap-0.5 rounded-xl bg-secondary/40 px-3 py-2.5">
+      <Text variant="caption" tone="muted" numberOfLines={1}>
+        {label}
+      </Text>
+      <Text variant="bodyStrong" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
+        {value}
+      </Text>
+    </View>
+  );
+
   return (
-    <View className="px-5 pt-5">
-      <View className="items-center pb-4">
+    <View className="gap-4 px-5 pt-5">
+      <View className="items-center">
         <Text variant="caption" tone="muted">
           {I18n.t(
             !open
@@ -175,32 +274,47 @@ export function AlbumBalances({
         </Text>
       </View>
 
-      {summary.people.length > 0 ? (
+      {rows.length > 0 ? (
         <View className="overflow-hidden rounded-2xl border border-border/30 bg-card">
-          {summary.people.map(row)}
+          <Text variant="bodyStrong" className="px-4 pb-1 pt-3.5">
+            {I18n.t('albums.balances.who_owes_whom')}
+          </Text>
+          {rows.map(debtRow)}
         </View>
-      ) : (
+      ) : !open && !shared?.spending.size ? (
         <Text variant="body" tone="muted" className="px-4 text-center">
           {I18n.t('albums.balances.empty_message')}
         </Text>
-      )}
+      ) : null}
 
-      {totals && totals.size > 0 ? (
-        <View className="mt-4 items-center gap-0.5">
-          {[...totals].map(([currency, entry]) => (
-            <Text key={currency} variant="caption" tone="muted" className="text-center">
-              {I18n.t('albums.balances.total_line', {
-                total: formatCurrency(entry.total, currencySymbolForCode(currency)),
-                share: formatCurrency(entry.selfShare, currencySymbolForCode(currency)),
-              })}
-            </Text>
+      {shared && shared.spending.size > 0 ? (
+        <View className="gap-2.5 rounded-2xl border border-border/30 bg-card px-4 py-3.5">
+          <Text variant="bodyStrong">{I18n.t('albums.balances.group_spending')}</Text>
+          {[...shared.spending].map(([currency, spent]) => (
+            <View key={currency} className="flex-row gap-2">
+              {tile(
+                I18n.t('transactions.settleUp.receipt_total_label'),
+                formatIn(spent.total, currency),
+              )}
+              {tile(I18n.t('transactions.settleUp.you_paid'), formatIn(spent.selfPaid, currency))}
+              {tile(I18n.t('albums.balances.your_share'), formatIn(spent.selfShare, currency))}
+            </View>
           ))}
         </View>
       ) : null}
 
-      <Button onPress={onAddExpense} className="mt-5" testID="album-add-expense">
+      <Button onPress={onAddExpense} testID="album-add-expense">
         <Text>{I18n.t('onboarding.bootstrap.add_transaction')}</Text>
       </Button>
+
+      <SettleUpConfirmSheet
+        content={settleContent}
+        onClose={() => setSettling(null)}
+        onConfirm={(accountId) => {
+          if (groupId && settling) settleGroupDebt(groupId, settling, accountId);
+          setSettling(null);
+        }}
+      />
     </View>
   );
 }

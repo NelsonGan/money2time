@@ -9,21 +9,26 @@ import { getSQLite } from '~/lib/db/client';
 import { DEFAULT_LEDGER_ID, getActiveLedgerId } from '~/lib/db/ledgerScope';
 import { albumGroupsRepository } from '~/lib/repositories/albumGroupsRepository';
 import { parseAlbumPeople } from '~/lib/repositories/mappers';
-import type { AlbumExpense, AlbumMember } from '~/types';
+import type { AlbumExpense, AlbumMember, AlbumSettlement } from '~/types';
 import { nowIso } from '~/utils/id';
 
 import { cleanPersonName, personNameKey } from '../lib/albumPeople';
 
 const cache = new Map<string, AlbumMember[]>();
 const expenseCache = new Map<string, AlbumExpense[]>();
+const settlementCache = new Map<string, AlbumSettlement[]>();
+const simplifyCache = new Map<string, boolean>();
 const listeners = new Set<() => void>();
 const NO_MEMBERS: AlbumMember[] = [];
 const NO_EXPENSES: AlbumExpense[] = [];
+const NO_SETTLEMENTS: AlbumSettlement[] = [];
 
 /** A group's rows changed (a sync, an edit, a share or its end): readers look again. */
 export function notifyAlbumGroups(): void {
   cache.clear();
   expenseCache.clear();
+  settlementCache.clear();
+  simplifyCache.clear();
   for (const listener of listeners) listener();
 }
 
@@ -59,6 +64,35 @@ export function listGroupExpenses(groupId: string): AlbumExpense[] {
   }
   expenseCache.set(groupId, expenses);
   return expenses;
+}
+
+/** A group's payments that still stand. The same array until something changes. */
+export function listGroupSettlements(groupId: string): AlbumSettlement[] {
+  const known = settlementCache.get(groupId);
+  if (known) return known;
+  let settlements: AlbumSettlement[];
+  try {
+    settlements = albumGroupsRepository.listSettlements(groupId).filter((item) => !item.deletedAt);
+  } catch {
+    settlements = NO_SETTLEMENTS;
+  }
+  settlementCache.set(groupId, settlements);
+  return settlements;
+}
+
+/** Whether the group has "Simplify group debts" on. */
+export function groupSimplifiesDebts(groupId: string): boolean {
+  const known = simplifyCache.get(groupId);
+  if (known !== undefined) return known;
+  let simplifies: boolean;
+  try {
+    simplifies = albumGroupsRepository.simplifiesDebts(groupId);
+  } catch {
+    // Before migration 091 has run.
+    simplifies = false;
+  }
+  simplifyCache.set(groupId, simplifies);
+  return simplifies;
 }
 
 interface AlbumRow {

@@ -37,6 +37,13 @@ import {
   selfMember,
   uniquePersonName,
 } from '~/features/albums/lib/albumPeople';
+import {
+  type GroupDebt,
+  openShares,
+  pairwiseDebts,
+  settleDebt,
+  simplifyDebts,
+} from '~/features/albums/lib/groupDebts';
 import { notifyAlbumGroups } from '~/features/albums/services/albumGroupStore';
 import {
   type GroupEnv,
@@ -599,6 +606,14 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
    * (`memberId`), or someone new (`null`, named `name`).
    */
   claimAlbumMember: (groupId: string, memberId: string | null, name: string) => void;
+  /** Turns "Simplify group debts" on or off for everyone in a shared album. */
+  setAlbumSimplifyDebts: (groupId: string, simplify: boolean) => void;
+  /**
+   * Records a debt the album's Balances shows between the user and another
+   * member as paid, through `accountId` here. The payment is written onto the
+   * bills between the two (see `settleDebt`), so every phone's entries follow.
+   */
+  settleGroupDebt: (groupId: string, debt: GroupDebt, accountId: string | null) => void;
   /**
    * Saves a split bill of a shared album: the group's bill is written, and
    * the user's own entry follows from it. `rows` are the split editor's, for
@@ -4008,6 +4023,71 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [afterGroupWrite, groupEnvFor],
   );
 
+  const setAlbumSimplifyDebts = useCallback((groupId: string, simplify: boolean) => {
+    if (!sharedAlbumFor(groupId)) return;
+    albumGroupsRepository.setSimplifyDebts(groupId, simplify);
+    notifyAlbumGroups();
+    void trackEvent(AnalyticsEvents.ALBUM_SIMPLIFY_DEBTS_SET, { on: simplify });
+  }, []);
+
+  const settleGroupDebt = useCallback(
+    (groupId: string, debt: GroupDebt, accountId: string | null) => {
+      const env = groupEnvFor(groupId);
+      if (!env) return;
+      runDeferredWrite(() => {
+        try {
+          const self = selfMember(albumGroupsRepository.listMembers(groupId), env.userId);
+          if (!self || (debt.from !== self.id && debt.to !== self.id)) return;
+          const open = openShares(
+            albumGroupsRepository.listExpenses(groupId),
+            albumGroupsRepository.listSettlements(groupId),
+          );
+          // The debt as the group holds it now: a second tap, or a payment
+          // that landed meanwhile, never pays it twice.
+          const current = (
+            albumGroupsRepository.simplifiesDebts(groupId)
+              ? simplifyDebts(open)
+              : pairwiseDebts(open)
+          ).find(
+            (item) =>
+              item.from === debt.from && item.to === debt.to && item.currency === debt.currency,
+          );
+          if (!current) return;
+          const payments = settleDebt(open, {
+            ...debt,
+            amount: Math.min(debt.amount, current.amount),
+          });
+          const date = dayKeyFromDateLocal(new Date());
+          // Every payment of the user's own goes through the one account, so
+          // those that only pass a debt along leave it as it was.
+          const paidThrough = new Map<string, string | null>();
+          for (const payment of payments) {
+            const id = albumGroupsRepository.createSettlement({
+              groupId,
+              expenseId: payment.expenseId,
+              fromMember: payment.from,
+              toMember: payment.to,
+              amount: payment.amount,
+              currency: debt.currency,
+              date,
+              createdBy: env.userId,
+            });
+            if (payment.from === self.id || payment.to === self.id) paidThrough.set(id, accountId);
+          }
+          projectGroup(groupId, env, { hints: { accounts: paidThrough } });
+          void trackEvent(AnalyticsEvents.ALBUM_PAYMENT_RECORDED, {
+            direction: debt.from === self.id ? 'paid' : 'received',
+            via: 'group_debt',
+          });
+        } catch (error) {
+          reportError(error, { scope: 'album_group_payment' });
+        }
+        afterGroupWrite();
+      });
+    },
+    [afterGroupWrite, groupEnvFor],
+  );
+
   const saveAlbumBill = useCallback(
     (
       groupId: string,
@@ -4181,6 +4261,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           });
           void trackEvent(AnalyticsEvents.ALBUM_PAYMENT_RECORDED, {
             direction: payer ? 'paid' : 'received',
+            via: 'bill',
           });
         } catch (error) {
           reportError(error, { scope: 'album_group_payment' });
@@ -7631,6 +7712,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             renameAlbumMember,
             removeAlbumMember,
             claimAlbumMember,
+            setAlbumSimplifyDebts,
+            settleGroupDebt,
             saveAlbumBill,
             detachAlbumBill,
             addTransactionsToAlbum,
@@ -7783,6 +7866,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       renameAlbumMember,
       removeAlbumMember,
       claimAlbumMember,
+      setAlbumSimplifyDebts,
+      settleGroupDebt,
       saveAlbumBill,
       detachAlbumBill,
       addTransactionsToAlbum,

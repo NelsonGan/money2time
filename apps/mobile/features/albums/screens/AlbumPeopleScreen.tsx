@@ -1,14 +1,12 @@
 import * as Clipboard from 'expo-clipboard';
-import { Check, Copy, LogOut, Plus, RefreshCw, X } from 'lucide-react-native';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, Pressable, Switch, View } from 'react-native';
+import { LogOut } from 'lucide-react-native';
+import React, { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { Alert, Pressable, View } from 'react-native';
 
-import { LoadingDots } from '~/components/feedback/LoadingDots';
 import {
   Button,
   Card,
   FormScrollView,
-  Input,
   SETTINGS_HORIZONTAL_PADDING,
   SettingsHeader,
   SettingsPageLayout,
@@ -18,7 +16,6 @@ import {
 import { useApp } from '~/context/AppContext';
 import { useIsPro } from '~/context/ProContext';
 import { useCloudSync } from '~/features/cloudSync/CloudSyncContext';
-import { CloudSyncApiError } from '~/features/cloudSync/services/cloudSyncApi';
 import {
   getInviteLink,
   getLedgerMembers,
@@ -27,7 +24,6 @@ import {
 } from '~/features/cloudSync/services/sharedLedgersApi';
 import { leaveAskingFirst } from '~/features/sharedLedgers/lib/confirmLeave';
 import { ownDisplayName } from '~/features/sharedLedgers/lib/ledgerPeople';
-import { sharingErrorMessage } from '~/features/sharedLedgers/lib/sharing';
 import { PersonAvatar } from '~/features/transactions/components/PersonAvatar';
 import { debtPartyKey } from '~/features/transactions/lib/debtParty';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -36,44 +32,30 @@ import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import { newId } from '~/utils/id';
 
+import { AlbumSharingCard } from '../components/AlbumSharingCard';
+import { SplitWithCard, type SplitWithRow } from '../components/SplitWithCard';
 import { useAlbumGroup } from '../hooks/useAlbumGroup';
 import { memberIsOnBill } from '../lib/albumGroup';
+import { albumSharingMessage, peopleEditMessage } from '../lib/albumMessages';
 import {
   type AlbumGroupPerson,
-  cleanPersonName,
   MAX_ALBUM_PEOPLE,
   type PeopleEditError,
   withPersonAdded,
   withPersonRemoved,
   withPersonRenamed,
 } from '../lib/albumPeople';
-import { listGroupExpenses } from '../services/albumGroupStore';
-
-/** Albums one Pro user can share at a time, and people who can join one (the Worker's limits). */
-const MAX_SHARED_ALBUMS = 3;
-const MAX_ALBUM_JOINERS = 9;
+import {
+  groupSimplifiesDebts,
+  listGroupExpenses,
+  subscribeAlbumGroups,
+} from '../services/albumGroupStore';
 
 interface AlbumPeopleScreenProps {
   albumId: string;
   onBack: () => void;
   onOpenCloudSync: () => void;
   onOpenProPaywall: (source: string) => void;
-}
-
-function editError(error: PeopleEditError): string | null {
-  if (error === 'taken') return I18n.t('albums.people.name_taken');
-  if (error === 'full') return I18n.t('albums.people.full', { max: MAX_ALBUM_PEOPLE });
-  return null;
-}
-
-function albumSharingError(error: unknown): string {
-  if (error instanceof CloudSyncApiError) {
-    if (error.code === 'limit_reached') {
-      return I18n.t('albums.share.limit', { max: MAX_SHARED_ALBUMS });
-    }
-    if (error.code === 'full') return I18n.t('albums.share.full', { max: MAX_ALBUM_JOINERS });
-  }
-  return sharingErrorMessage(error);
 }
 
 /**
@@ -96,6 +78,7 @@ export function AlbumPeopleScreen({
     renameAlbumMember,
     removeAlbumMember,
     claimAlbumMember,
+    setAlbumSimplifyDebts,
   } = useApp();
   const sync = useCloudSync();
   const isPro = useIsPro();
@@ -107,9 +90,10 @@ export function AlbumPeopleScreen({
   const shareId = share?.shareId ?? null;
   const isOwner = share?.role === 'owner';
   const signedOut = sync.status === 'signedOut' || sync.status === 'unavailable';
+  const simplifies = useSyncExternalStore(subscribeAlbumGroups, () =>
+    share ? groupSimplifiesDebts(share.ledgerId) : false,
+  );
 
-  const [newName, setNewName] = useState('');
-  const [renaming, setRenaming] = useState<{ id: string; name: string } | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [link, setLink] = useState<InviteLink | null>(null);
   const [copied, setCopied] = useState(false);
@@ -174,7 +158,7 @@ export function AlbumPeopleScreen({
     try {
       await work();
     } catch (error) {
-      Alert.alert(albumSharingError(error));
+      Alert.alert(albumSharingMessage(error));
     } finally {
       setBusy(null);
     }
@@ -183,42 +167,25 @@ export function AlbumPeopleScreen({
   if (!album) return <SettingsPageLayout>{null}</SettingsPageLayout>;
 
   const showEditError = (error: PeopleEditError | null) => {
-    const message = error ? editError(error) : null;
+    const message = error ? peopleEditMessage(error) : null;
     if (message) Alert.alert(message);
     return error === null;
   };
 
-  const addPerson = () => {
-    const name = newName;
-    if (!name.trim()) return;
-    void triggerHaptic('selection');
-    if (share) {
-      if (showEditError(addAlbumMember(album.id, name))) setNewName('');
-      return;
-    }
+  const addPerson = (name: string): boolean => {
+    if (share) return showEditError(addAlbumMember(album.id, name));
     const next = withPersonAdded(album.splitWith, name, newId());
-    if (typeof next === 'string') {
-      showEditError(next);
-      return;
-    }
+    if (typeof next === 'string') return showEditError(next);
     setAlbumPeople(album.id, next);
-    setNewName('');
+    return true;
   };
 
-  /** Ends a rename in the list: kept when the name changed and is free, else dropped. */
-  const endRename = () => {
-    if (!renaming) return;
-    setRenaming(null);
-    const name = cleanPersonName(renaming.name);
-    const current = share
-      ? group.members.find((member) => member.id === renaming.id)?.name
-      : album.splitWith.find((person) => person.id === renaming.id)?.name;
-    if (!name || name === current) return;
+  const renamePerson = (id: string, name: string) => {
     if (share) {
-      showEditError(renameAlbumMember(album.id, renaming.id, name));
+      showEditError(renameAlbumMember(album.id, id, name));
       return;
     }
-    const next = withPersonRenamed(album.splitWith, renaming.id, name);
+    const next = withPersonRenamed(album.splitWith, id, name);
     if (typeof next === 'string') showEditError(next);
     else setAlbumPeople(album.id, next);
   };
@@ -232,7 +199,6 @@ export function AlbumPeopleScreen({
   const confirmRemove = (person: AlbumGroupPerson) => {
     if (!person.id) return;
     const id = person.id;
-    void triggerHaptic('warning');
     const member = group.members.find((item) => item.id === id);
     if (share && member?.userId && isJoined(person)) {
       // Someone who joined: the owner takes them out of the share.
@@ -370,7 +336,26 @@ export function AlbumPeopleScreen({
     claimAlbumMember(album.id, memberId, ownDisplayName() ?? '');
   };
 
-  const canAdd = group.others.length < MAX_ALBUM_PEOPLE && !mustClaim;
+  const rows = group.people.map((person): SplitWithRow => {
+    const joined = isJoined(person);
+    return {
+      id: person.id,
+      // In a shared album the user reads as the others see them, and can
+      // change that name like anyone's.
+      name: person.isSelf && group.self ? group.self.name : person.name,
+      isSelf: person.isSelf,
+      caption: !share
+        ? undefined
+        : person.isSelf
+          ? I18n.t('albums.people.me_tag')
+          : joined
+            ? I18n.t('albums.people.joined')
+            : I18n.t('albums.people.not_joined'),
+      renamable: !mustClaim,
+      // Someone who joined is the owner's to remove; a name is anyone's.
+      removable: !person.isSelf && !mustClaim && (!share || !joined || (isOwner && !!person.id)),
+    };
+  });
 
   return (
     <SettingsPageLayout>
@@ -423,183 +408,55 @@ export function AlbumPeopleScreen({
           <Text variant="label" tone="muted" className="mb-2.5 px-1">
             {I18n.t('albums.people.split_with')}
           </Text>
-          <Card className="overflow-hidden p-0">
-            {group.people.map((person, index) => {
-              const joined = isJoined(person);
-              // Someone who joined is the owner's to remove; a name is anyone's.
-              const removable =
-                !person.isSelf && !mustClaim && (!share || !joined || (isOwner && !!person.id));
-              // In a shared album the user reads as the others see them, and
-              // can change that name like anyone's.
-              const name = person.isSelf && group.self ? group.self.name : person.name;
-              return (
-                <View
-                  key={person.id ?? 'me'}
-                  className={`flex-row items-center gap-3 px-4 py-3 ${index > 0 ? 'border-t border-border/15' : ''}`}
-                >
-                  <PersonAvatar
-                    name={name}
-                    partyKey={person.isSelf ? null : debtPartyKey(name)}
-                    size={38}
-                  />
-                  {renaming && renaming.id === person.id ? (
-                    // Renamed in place: Return or a tap elsewhere keeps it.
-                    <View className="flex-1">
-                      <Input
-                        testID="album-person-rename"
-                        value={renaming.name}
-                        onChangeText={(text) => setRenaming({ id: renaming.id, name: text })}
-                        autoFocus
-                        selectTextOnFocus
-                        autoCapitalize="words"
-                        autoCorrect={false}
-                        returnKeyType="done"
-                        onBlur={endRename}
-                      />
-                    </View>
-                  ) : (
-                    <Pressable
-                      className="flex-1"
-                      disabled={!person.id || mustClaim}
-                      onPress={() => person.id && setRenaming({ id: person.id, name })}
-                      accessibilityRole="button"
-                    >
-                      <Text variant="bodyStrong" numberOfLines={1}>
-                        {name}
-                      </Text>
-                      {share ? (
-                        <Text variant="caption" tone="muted">
-                          {person.isSelf
-                            ? I18n.t('albums.people.me_tag')
-                            : joined
-                              ? I18n.t('albums.people.joined')
-                              : I18n.t('albums.people.not_joined')}
-                        </Text>
-                      ) : null}
-                    </Pressable>
-                  )}
-                  {removable && renaming?.id !== person.id ? (
-                    <Pressable
-                      onPress={() => confirmRemove(person)}
-                      accessibilityRole="button"
-                      accessibilityLabel={`${I18n.t('common.remove')} ${name}`}
-                      hitSlop={8}
-                      className="h-8 w-8 items-center justify-center rounded-full bg-secondary/50 active:opacity-70"
-                    >
-                      <X size={15} color={colors.textMuted} />
-                    </Pressable>
-                  ) : null}
-                </View>
-              );
-            })}
-            {canAdd ? (
-              <View className="flex-row items-center gap-3 border-t border-border/15 px-4 py-2.5">
-                <View className="h-[38px] w-[38px] items-center justify-center rounded-full bg-primary/15">
-                  <Plus size={18} color={colors.primary} />
-                </View>
-                <View className="flex-1">
-                  <Input
-                    testID="album-person-name"
-                    value={newName}
-                    onChangeText={setNewName}
-                    placeholder={I18n.t('albums.people.add_person')}
-                    returnKeyType="done"
-                    autoCapitalize="words"
-                    autoCorrect={false}
-                    onSubmitEditing={addPerson}
-                    blurOnSubmit={false}
-                  />
-                </View>
-                {newName.trim() ? (
-                  <Pressable
-                    onPress={addPerson}
-                    accessibilityRole="button"
-                    accessibilityLabel={I18n.t('albums.people.add_person')}
-                    className="h-9 items-center justify-center rounded-full bg-primary px-4 active:opacity-80"
-                  >
-                    <Text variant="label" className="text-primary-foreground">
-                      {I18n.t('albums.people.add')}
-                    </Text>
-                  </Pressable>
-                ) : null}
-              </View>
-            ) : null}
-          </Card>
-          {!share ? (
-            <Text variant="caption" tone="muted" className="mt-2 px-1">
-              {I18n.t('albums.people.hint')}
-            </Text>
-          ) : null}
+          <SplitWithCard
+            rows={rows}
+            canAdd={group.others.length < MAX_ALBUM_PEOPLE && !mustClaim}
+            onAdd={addPerson}
+            onRename={renamePerson}
+            onRemove={(row) => {
+              const person = group.people.find((item) => item.id === row.id);
+              if (person) confirmRemove(person);
+            }}
+          />
         </View>
 
-        {!share || isOwner ? (
-          <Card className="px-4 py-3.5">
-            <View className="flex-row items-center gap-3">
-              <View className="flex-1 gap-0.5">
-                <Text variant="bodyStrong">{I18n.t('albums.share.row')}</Text>
-                <Text variant="caption" tone="muted">
-                  {I18n.t(
+        <AlbumSharingCard
+          share={
+            !share || isOwner
+              ? {
+                  value: !!share,
+                  onChange: toggleShare,
+                  busy: busy === 'share' || busy === 'stop',
+                  note:
                     !share && isPro && sync.status !== 'ready'
-                      ? 'albums.share.needs_cloud_sync'
-                      : 'albums.share.caption',
-                  )}
-                </Text>
-              </View>
-              {busy === 'share' || busy === 'stop' ? (
-                <LoadingDots size="small" />
-              ) : (
-                <Switch
-                  testID="album-share-switch"
-                  value={!!share}
-                  onValueChange={toggleShare}
-                  trackColor={{ false: undefined, true: colors.primary }}
-                />
-              )}
-            </View>
-          </Card>
-        ) : null}
-
-        {canInvite ? (
-          <Card className="gap-2.5 px-4 py-3.5">
-            <Text variant="bodyStrong">{I18n.t('shared_ledgers.invite_link')}</Text>
-            <View className="flex-row items-center gap-2">
-              <View className="flex-1 rounded-xl bg-secondary/40 px-3 py-2.5">
-                {link ? (
-                  <Text variant="caption" numberOfLines={1} selectable testID="album-invite-link">
-                    {link.url.replace(/^https?:\/\//, '')}
-                  </Text>
-                ) : (
-                  <LoadingDots size="small" />
-                )}
-              </View>
-              <Pressable
-                onPress={() => void copyLink()}
-                disabled={!link}
-                accessibilityRole="button"
-                accessibilityLabel={I18n.t('common.copy')}
-                className="h-10 w-10 items-center justify-center rounded-xl bg-secondary/50 active:opacity-70"
-              >
-                {copied ? (
-                  <Check size={17} color={colors.success} />
-                ) : (
-                  <Copy size={17} color={colors.textMuted} />
-                )}
-              </Pressable>
-              <Pressable
-                onPress={confirmNewLink}
-                disabled={!link || busy !== null}
-                accessibilityRole="button"
-                accessibilityLabel={I18n.t('shared_ledgers.new_link')}
-                className="h-10 w-10 items-center justify-center rounded-xl bg-secondary/50 active:opacity-70"
-              >
-                <RefreshCw size={16} color={colors.textMuted} />
-              </Pressable>
-            </View>
-            <Text variant="caption" tone="muted">
-              {I18n.t('albums.share.link_note')}
-            </Text>
-          </Card>
-        ) : null}
+                      ? I18n.t('albums.share.needs_cloud_sync')
+                      : null,
+                }
+              : null
+          }
+          simplify={
+            share && !mustClaim
+              ? {
+                  value: simplifies,
+                  onChange: (next) => {
+                    void triggerHaptic('selection');
+                    setAlbumSimplifyDebts(album.id, next);
+                  },
+                }
+              : null
+          }
+          link={
+            canInvite
+              ? {
+                  url: link?.url ?? null,
+                  copied,
+                  disabled: busy !== null,
+                  onCopy: () => void copyLink(),
+                  onNewLink: confirmNewLink,
+                }
+              : null
+          }
+        />
 
         {share && !isOwner ? (
           <Button variant="secondary" onPress={confirmLeave} disabled={busy !== null}>

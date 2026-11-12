@@ -1088,8 +1088,6 @@ const pl = {
         get_back_hint: 'Wraca do ciebie {{amount}}',
         paid_floor: 'Oddano już {{amount}}',
         your_share: 'Twoja część {{amount}}',
-        swipe_hint_actions: 'Przesuń wiersz w lewo, aby oznaczyć jako zapłacone lub usunąć',
-        swipe_hint_delete: 'Przesuń wiersz w lewo, aby usunąć',
         section_subtitle_unpaid: '{{count}} nadal zalega',
         section_subtitle_unpaid_plural: '{{count}} nadal zalega',
         subtotal_label: 'Suma częściowa',
@@ -2989,7 +2987,6 @@ const pl = {
       remove_joined_title: 'Usunąć {{name}} z albumu?',
       remove_joined_message:
         'Ta osoba przestanie dostawać rachunki z tego albumu. Rachunki, na których jest, zostają.',
-      hint: 'Gdy ten album jest aktywny, nowy wydatek zaczyna się podzielony z tymi osobami.',
       who_title: 'Którą osobą jesteś?',
       who_message:
         'Wybierz swoje imię, aby Twoja część każdego rachunku trafiała do Twojej księgi.',
@@ -3013,11 +3010,18 @@ const pl = {
     balances: {
       tab: 'Salda',
       empty_message: 'Podziel rachunek w tym albumie, a pojawi się tutaj.',
-      total_line: 'Wydano łącznie {{total}} · Twoja część {{share}}',
+      who_owes_whom: 'Kto komu jest winien',
+      owes_you: '{{name}} jest Ci winien(-na)',
+      owes: '{{from}} → {{to}}',
+      group_spending: 'Wydatki grupy',
+      your_share: 'Twój udział',
+    },
+    simplify: {
+      row: 'Uprość długi grupy',
+      info: 'Łączy długi w grupie, żeby było mniej płatności. Nikt nie płaci ani nie dostaje łącznie więcej.',
     },
     join: {
       title: 'Udostępniony album',
-      note: 'Zostanie dodany jako album w Twojej księdze, z Twoją częścią każdego rachunku.',
       own: 'To jeden z Twoich albumów.',
       already: 'Jesteś już w tym albumie.',
     },

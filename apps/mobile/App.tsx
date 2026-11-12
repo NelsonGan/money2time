@@ -2440,6 +2440,7 @@ function CreateAlbumRouteScreen({ route, navigation }: RootStackRouteProps<'Crea
       initialTransactionIds={route.params?.initialTransactionIds}
       onClose={() => navigation.goBack()}
       onCreated={(albumId) => navigation.replace('AlbumDetail', { albumId })}
+      onOpenProPaywall={(source) => navigation.navigate('ProPaywall', { source })}
     />
   );
 }

@@ -1,3 +1,4 @@
+import { openShares, settleDebt, simplifyDebts } from '~/features/albums/lib/groupDebts';
 import {
   albumLedgerId,
   albumState,
@@ -322,6 +323,61 @@ describe('changes to a bill', () => {
     addBill('dinner', 'aisha');
     expect(projectGroup(GROUP, { ...env, userId: 'u-someone-new' })).toBe(false);
     expect(liveTransactions()).toEqual([]);
+  });
+});
+
+describe('simplify group debts', () => {
+  it('is off until someone turns it on, for the whole group', () => {
+    expect(albumGroupsRepository.simplifiesDebts(GROUP)).toBe(false);
+    albumGroupsRepository.setSimplifyDebts(GROUP, true);
+    expect(albumGroupsRepository.simplifiesDebts(GROUP)).toBe(true);
+    // One row per group, routed with the group's other rows.
+    expect(app.all('SELECT id, ledger_id, simplify_debts FROM album_groups')).toEqual([
+      { id: GROUP, ledger_id: GROUP, simplify_debts: 1 },
+    ]);
+    albumGroupsRepository.setSimplifyDebts(GROUP, false);
+    expect(albumGroupsRepository.simplifiesDebts(GROUP)).toBe(false);
+  });
+
+  it('a debt paid past the user closes both their bills and leaves them even', () => {
+    // Aisha owes the user 30; the user owes Ben 30: Aisha pays Ben.
+    const shares = (owes: Record<string, number>) =>
+      Object.entries(owes).map(([memberId, amount]) => ({ memberId, amount }));
+    const add = (id: string, paidBy: string, owes: Record<string, number>) =>
+      albumGroupsRepository.upsertExpense({
+        id,
+        groupId: GROUP,
+        date: '2026-11-12',
+        note: id,
+        amount: Object.values(owes).reduce((sum, value) => sum + value, 0),
+        currency: 'MYR',
+        categoryName: null,
+        categoryIcon: null,
+        paidBy,
+        shares: shares(owes),
+        createdBy: 'u-me',
+      });
+    add('dinner', 'me', { me: 30, aisha: 30 });
+    add('boat', 'ben', { ben: 30, me: 30 });
+    projectGroup(GROUP, env);
+    expect(balances()).toEqual({ Aisha: 30, Ben: -30 });
+
+    const open = openShares(
+      albumGroupsRepository.listExpenses(GROUP),
+      albumGroupsRepository.listSettlements(GROUP),
+    );
+    const simple = simplifyDebts(open);
+    expect(simple).toEqual([{ from: 'aisha', to: 'ben', currency: 'MYR', amount: 30 }]);
+    // Recorded on Aisha's phone: the user's phone only sees the settlements.
+    settleDebt(open, simple[0]).forEach((item, index) =>
+      pay(`s${index}`, item.expenseId, item.from, item.to, item.amount, '2026-11-13T08:00:00.000Z'),
+    );
+    projectGroup(GROUP, env);
+    expect(balances()).toEqual({ Aisha: 0, Ben: 0 });
+    // Paid back for the dinner, and paid for the boat: 30 in, 30 out.
+    expect(tx('dinner')).toMatchObject({ amount: 30 });
+    expect(tx('boat')).toMatchObject({ amount: 30, account_id: 'cash' });
+    expect(projectGroup(GROUP, env)).toBe(false);
   });
 });
 

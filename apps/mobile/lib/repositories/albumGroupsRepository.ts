@@ -5,7 +5,12 @@
 import { and, eq, isNull } from 'drizzle-orm';
 
 import { getDb } from '~/lib/db/client';
-import { albumExpensesTable, albumMembersTable, albumSettlementsTable } from '~/lib/db/schema';
+import {
+  albumExpensesTable,
+  albumGroupsTable,
+  albumMembersTable,
+  albumSettlementsTable,
+} from '~/lib/db/schema';
 import type { AlbumExpense, AlbumMember, AlbumSettlement, AlbumShare } from '~/types';
 import { normalizeMoneyAmount } from '~/utils/formatters';
 import { newId, nowIso } from '~/utils/id';
@@ -207,6 +212,38 @@ class AlbumGroupsRepository {
       .update(albumSettlementsTable)
       .set({ deletedAt: now, updatedAt: now })
       .where(and(eq(albumSettlementsTable.id, id), isNull(albumSettlementsTable.deletedAt)))
+      .run();
+  }
+
+  // -------------------------------------------------------------------------
+  // Settings
+
+  /** Whether the group shows its debts simplified; off until someone turns it on. */
+  simplifiesDebts(groupId: string): boolean {
+    const row = getDb()
+      .select({ simplifyDebts: albumGroupsTable.simplifyDebts })
+      .from(albumGroupsTable)
+      .where(and(eq(albumGroupsTable.id, groupId), isNull(albumGroupsTable.deletedAt)))
+      .get();
+    return row?.simplifyDebts ?? false;
+  }
+
+  setSimplifyDebts(groupId: string, simplifyDebts: boolean): void {
+    const now = nowIso();
+    getDb()
+      .insert(albumGroupsTable)
+      .values({
+        id: groupId,
+        ledgerId: groupId,
+        simplifyDebts,
+        createdAt: now,
+        updatedAt: now,
+        deletedAt: null,
+      })
+      .onConflictDoUpdate({
+        target: albumGroupsTable.id,
+        set: { simplifyDebts, updatedAt: now, deletedAt: null },
+      })
       .run();
   }
 }

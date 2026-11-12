@@ -165,6 +165,17 @@ function countedPayments(
   return { payments, left: left / 100 };
 }
 
+/** What `fromMember` still owes `toMember` of a `share` of `bill`, after the payments on it. */
+export function shareLeft(
+  bill: Bill,
+  settlements: readonly Payment[],
+  fromMember: string,
+  toMember: string,
+  share: number,
+): number {
+  return countedPayments(bill, settlements, fromMember, toMember, share).left;
+}
+
 /** A split row of the user's own side of a bill, before the phone's own choices (accounts). */
 interface LocalSplitRow {
   /** What the row is, for finding the row a phone already has. */
@@ -341,16 +352,26 @@ type LiveBill = Pick<
   AlbumExpense,
   'id' | 'amount' | 'currency' | 'paidBy' | 'shares' | 'deletedAt'
 >;
-/** What the group spent and what one member's share of it is, per currency. */
+/** A group's spending in one currency, and one member's part in it. */
+export interface GroupSpending {
+  total: number;
+  /** What the member paid for the group's bills. */
+  selfPaid: number;
+  /** What the bills cost the member: their own shares. */
+  selfShare: number;
+}
+
+/** What the group spent, and what one member paid and their share of it, per currency. */
 export function groupTotals(
   expenses: readonly LiveBill[],
   selfId: string | null,
-): Map<string, { total: number; selfShare: number }> {
-  const totals = new Map<string, { total: number; selfShare: number }>();
+): Map<string, GroupSpending> {
+  const totals = new Map<string, GroupSpending>();
   for (const bill of expenses) {
     if (bill.deletedAt) continue;
-    const entry = totals.get(bill.currency) ?? { total: 0, selfShare: 0 };
+    const entry = totals.get(bill.currency) ?? { total: 0, selfPaid: 0, selfShare: 0 };
     entry.total = normalizeMoneyAmount(entry.total + bill.amount);
+    if (bill.paidBy === selfId) entry.selfPaid = normalizeMoneyAmount(entry.selfPaid + bill.amount);
     for (const share of bill.shares) {
       if (share.memberId === selfId) {
         entry.selfShare = normalizeMoneyAmount(entry.selfShare + share.amount);

@@ -2,7 +2,6 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
-  ChevronsLeft,
   Minus,
   Plus,
   RotateCcw,
@@ -1113,21 +1112,6 @@ export function SplitBillModal({
               </Text>
             </Pressable>
           </View>
-
-          {/* Swipe coach: teaches the left-swipe row actions. Shown only while
-              there is an unpaid friend row to act on. */}
-          {splits.some((s) => !s.isSelf && !s.paid) ? (
-            <View className="mx-5 mt-2.5 flex-row items-center justify-center gap-1.5">
-              <ChevronsLeft size={13} color={themeColors.textMuted} />
-              <Text variant="caption" tone="muted" className="text-center">
-                {I18n.t(
-                  onMarkPaid && !friendPaid
-                    ? 'transactions.editor.split.swipe_hint_actions'
-                    : 'transactions.editor.split.swipe_hint_delete',
-                )}
-              </Text>
-            </View>
-          ) : null}
 
           {/* Tax & service: a percentage stepper applied
               proportionally on top of the entered amounts. */}

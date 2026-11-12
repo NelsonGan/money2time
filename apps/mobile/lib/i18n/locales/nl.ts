@@ -1090,8 +1090,6 @@ const nl = {
         get_back_hint: 'Je krijgt {{amount}} terug',
         paid_floor: 'Je hebt al {{amount}} terugbetaald',
         your_share: 'Jouw deel {{amount}}',
-        swipe_hint_actions: 'Veeg een rij naar links om betaald te markeren of te verwijderen',
-        swipe_hint_delete: 'Veeg een rij naar links om te verwijderen',
         section_subtitle_unpaid: '{{count}} is je nog schuldig',
         section_subtitle_unpaid_plural: '{{count}} zijn je nog schuldig',
         subtotal_label: 'Subtotaal',
@@ -3014,7 +3012,6 @@ const nl = {
       remove_joined_title: '{{name}} uit het album verwijderen?',
       remove_joined_message:
         'Diegene krijgt de rekeningen van dit album niet meer. Rekeningen waar diegene op staat, blijven.',
-      hint: 'Zolang dit album actief is, begint een nieuwe uitgave gedeeld met deze personen.',
       who_title: 'Welke ben jij?',
       who_message: 'Kies je naam, zodat jouw deel van elke rekening in je kasboek komt.',
       who_new: 'Ik sta niet in de lijst',
@@ -3037,11 +3034,18 @@ const nl = {
     balances: {
       tab: "Saldo's",
       empty_message: 'Deel een rekening in dit album en die verschijnt hier.',
-      total_line: 'Totaal uitgegeven {{total}} · Jouw deel {{share}}',
+      who_owes_whom: 'Wie is wie wat schuldig',
+      owes_you: '{{name}} is jou schuldig',
+      owes: '{{from}} is {{to}} schuldig',
+      group_spending: 'Uitgaven van de groep',
+      your_share: 'Jouw deel',
+    },
+    simplify: {
+      row: 'Groepsschulden vereenvoudigen',
+      info: 'Voegt schulden in de groep samen, zodat er minder betalingen nodig zijn. Niemand betaalt of krijgt in totaal meer.',
     },
     join: {
       title: 'Gedeeld album',
-      note: 'Het wordt als album aan je eigen kasboek toegevoegd, met jouw deel van elke rekening.',
       own: 'Dit is een van je eigen albums.',
       already: 'Je doet al mee aan dit album.',
     },

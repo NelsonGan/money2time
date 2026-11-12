@@ -205,10 +205,9 @@ export function JoinLedgerScreen({
           onPress={() => void join()}
         />
         {sync.user?.email ? <IdentityRow email={sync.user.email} /> : null}
-        <NoticeBanner
-          icon={ShieldCheck}
-          text={I18n.t(isAlbum ? 'albums.join.note' : 'shared_ledgers.join_note')}
-        />
+        {isAlbum ? null : (
+          <NoticeBanner icon={ShieldCheck} text={I18n.t('shared_ledgers.join_note')} />
+        )}
       </View>
     );
   }

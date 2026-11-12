@@ -1084,8 +1084,6 @@ const nb = {
         get_back_hint: 'Du får tilbake {{amount}}',
         paid_floor: 'Du har allerede betalt tilbake {{amount}}',
         your_share: 'Din andel {{amount}}',
-        swipe_hint_actions: 'Sveip en rad til venstre for å merke betalt eller slette',
-        swipe_hint_delete: 'Sveip en rad til venstre for å slette',
         section_subtitle_unpaid: '{{count}} skylder deg fortsatt',
         section_subtitle_unpaid_plural: '{{count}} skylder deg fortsatt',
         subtotal_label: 'Delsum',
@@ -2980,7 +2978,6 @@ const nb = {
       remove_joined_title: 'Fjerne {{name}} fra albumet?',
       remove_joined_message:
         'De får ikke lenger albumets regninger. Regningene de står på, blir værende.',
-      hint: 'Mens albumet er aktivt, starter en ny utgift delt med disse personene.',
       who_title: 'Hvem av dem er du?',
       who_message: 'Velg navnet ditt, så havner din andel av hver regning i din regnskapsbok.',
       who_new: 'Jeg står ikke på listen',
@@ -3003,11 +3000,18 @@ const nb = {
     balances: {
       tab: 'Saldoer',
       empty_message: 'Del en regning i dette albumet, så vises den her.',
-      total_line: 'Brukt totalt {{total}} · Din andel {{share}}',
+      who_owes_whom: 'Hvem skylder hvem',
+      owes_you: '{{name}} skylder deg',
+      owes: '{{from}} skylder {{to}}',
+      group_spending: 'Gruppens forbruk',
+      your_share: 'Din andel',
+    },
+    simplify: {
+      row: 'Forenkle gruppens gjeld',
+      info: 'Slår sammen gjelden i gruppen, så det blir færre betalinger. Ingen betaler eller får mer totalt.',
     },
     join: {
       title: 'Delt album',
-      note: 'Det legges til som et album i din egen regnskapsbok, med din andel av hver regning.',
       own: 'Dette er et av dine egne album.',
       already: 'Du er allerede med i dette albumet.',
     },

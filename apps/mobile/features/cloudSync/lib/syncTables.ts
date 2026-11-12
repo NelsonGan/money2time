@@ -34,13 +34,14 @@ export const SYNC_TABLES = [
   'album_members',
   'album_expenses',
   'album_settlements',
+  'album_groups',
 ] as const;
 
 export type SyncTable = (typeof SYNC_TABLES)[number];
 
 /**
- * A shared album's group (migration 090): its members, bills and settlements.
- * They sync, with the group's own cloud database, but are not the user's data:
+ * A shared album's group (migrations 090 and 091): its members, bills,
+ * settlements and settings. They sync, with the group's own cloud database, but are not the user's data:
  * a backup leaves them out, and what the user keeps of a group is their own
  * side of its bills, in their own ledger.
  */
@@ -48,6 +49,7 @@ export const GROUP_SYNC_TABLES: readonly SyncTable[] = [
   'album_members',
   'album_expenses',
   'album_settlements',
+  'album_groups',
 ];
 
 export function isSyncTable(name: string): name is SyncTable {

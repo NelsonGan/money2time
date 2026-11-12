@@ -261,6 +261,7 @@ export const GA4_ONLY_EVENTS = {
   ALBUM_BILL_SAVED: 'Album Bill Saved',
   ALBUM_PAYMENT_RECORDED: 'Album Payment Recorded',
   ALBUM_PAYMENT_UNDONE: 'Album Payment Undone',
+  ALBUM_SIMPLIFY_DEBTS_SET: 'Album Simplify Debts Set',
 
   // Budgets
   BUDGET_TEMPLATE_CREATED: 'Budget Template Created',
