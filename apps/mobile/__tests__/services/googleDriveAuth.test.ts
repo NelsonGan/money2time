@@ -328,6 +328,68 @@ describe('Drive access left out at sign-in', () => {
     await expect(auth.getGoogleIdToken()).resolves.toEqual({ ok: true, idToken: 'id-token' });
   });
 
+  it('reports any other addScopes failure as an error, not a cancel', async () => {
+    googleSignin.signIn.mockResolvedValue({ type: 'success', data: WITHOUT_DRIVE });
+    googleSignin.addScopes.mockRejectedValue(
+      Object.assign(new Error('Current activity is null.'), { code: 'NULL_PRESENTER' }),
+    );
+    const auth = loadAuth();
+
+    await expect(auth.signInWithGoogle()).resolves.toEqual({
+      ok: false,
+      reason: 'error',
+      message: 'Current activity is null.',
+    });
+  });
+
+  it('connects when the grant succeeded but Android read the account back empty', async () => {
+    googleSignin.signIn.mockImplementation(async () => {
+      googleSignin.getCurrentUser.mockReturnValue(WITHOUT_DRIVE);
+      return { type: 'success', data: WITHOUT_DRIVE };
+    });
+    googleSignin.addScopes.mockImplementation(async () => {
+      googleSignin.getCurrentUser.mockReturnValue(WITH_DRIVE);
+      return { type: 'noSavedCredentialFound', data: null };
+    });
+    const auth = loadAuth();
+
+    await expect(auth.signInWithGoogle()).resolves.toEqual({
+      ok: true,
+      email: 'someone@example.com',
+    });
+  });
+
+  it('counts full Drive access as covering backups', async () => {
+    googleSignin.hasPreviousSignIn.mockReturnValue(true);
+    googleSignin.getCurrentUser.mockReturnValue({
+      user: { email: 'someone@example.com' },
+      scopes: [...BASIC, 'https://www.googleapis.com/auth/drive'],
+    });
+    const auth = loadAuth();
+
+    await expect(auth.ensureGoogleSession()).resolves.toBe(true);
+  });
+
+  it("restores Cloud Sync's sign-in without asking for Drive on Android", async () => {
+    // Android: the remembered account is readable before the restore, and a
+    // silent sign-in that asks for a scope it never granted fails.
+    googleSignin.hasPreviousSignIn.mockReturnValue(true);
+    googleSignin.getCurrentUser.mockReturnValue(WITHOUT_DRIVE);
+    googleSignin.signInSilently.mockImplementation(async () => {
+      const config = googleSignin.configure.mock.lastCall?.[0] as { scopes?: string[] };
+      if (config.scopes?.includes(DRIVE_SCOPE)) return { type: 'noSavedCredentialFound' };
+      return { type: 'success', data: WITHOUT_DRIVE };
+    });
+    googleSignin.getTokens.mockResolvedValue({ idToken: 'id-token', accessToken: 'no-drive' });
+    process.env.EXPO_PUBLIC_GOOGLE_OAUTH_WEB_CLIENT_ID = 'web-client';
+    const auth = loadAuth();
+    delete process.env.EXPO_PUBLIC_GOOGLE_OAUTH_WEB_CLIENT_ID;
+
+    await expect(auth.getGoogleIdToken()).resolves.toEqual({ ok: true, idToken: 'id-token' });
+    expect(googleSignin.signIn).not.toHaveBeenCalled();
+    expect(googleSignin.signOut).not.toHaveBeenCalled();
+  });
+
   it('does not ask again when Drive access was granted the first time', async () => {
     googleSignin.signIn.mockResolvedValue({ type: 'success', data: WITH_DRIVE });
     const auth = loadAuth();
