@@ -648,6 +648,7 @@ describe('images', () => {
     ['the session was refused', 'unauthorized', 401],
     ['Pro was refused', 'not_pro', 403],
     ['the image was refused', 'server', 413],
+    ['the request was malformed', 'server', 400],
   ] as const)('do not try again when %s', async (_case, code, status) => {
     const { CloudSyncApiError } = jest.requireActual<
       typeof import('~/features/cloudSync/services/cloudSyncApi')
