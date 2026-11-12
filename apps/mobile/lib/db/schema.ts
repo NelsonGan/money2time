@@ -165,6 +165,9 @@ export const transactionsTable = sqliteTable('transactions', {
   // README.md > Shared ledgers > Who added it.
   createdBy: text('created_by'),
   memberId: text('member_id'),
+  // Shared albums (migration 090): the group whose bill this entry is the
+  // user's side of; the bill is the album_expenses row with this entry's id.
+  albumGroupId: text('album_group_id'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
   deletedAt: text('deleted_at'),
@@ -348,6 +351,10 @@ export const transactionSplitsTable = sqliteTable('transaction_splits', {
   // of a shared group). Null for a name typed on the bill, which is every row
   // today; balances group by it when set. See features/transactions/lib/debtParty.ts.
   memberId: text('member_id'),
+  // Shared albums (migration 090): the group member this share is with, and
+  // the group settlement a paid row came from or was sent as.
+  albumMemberId: text('album_member_id'),
+  settlementId: text('settlement_id'),
   sortOrder: integer('sort_order').notNull().default(0),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
@@ -373,7 +380,60 @@ export const albumsTable = sqliteTable('albums', {
   placeName: text('place_name'),
   placeAdmin: text('place_admin'),
   countryCode: text('country_code'),
+  // Migration 090. `[{ id, name }]`: the people an album that is not shared
+  // is split with.
+  splitWithJson: text('split_with_json'),
   sortOrder: integer('sort_order').notNull().default(0),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+  deletedAt: text('deleted_at'),
+});
+
+// A shared album's group (migration 090). `ledgerId` is the group's id, which
+// is the album's id: the column Cloud Sync routes a row by, so these rows go
+// to the group's own cloud database. No ledger has that id.
+export const albumMembersTable = sqliteTable('album_members', {
+  id: text('id').primaryKey(),
+  ledgerId: text('ledger_id').notNull(),
+  name: text('name').notNull(),
+  // The Cloud Sync account of someone who joined; null is a placeholder.
+  userId: text('user_id'),
+  sortOrder: integer('sort_order').notNull().default(0),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+  deletedAt: text('deleted_at'),
+});
+
+export const albumExpensesTable = sqliteTable('album_expenses', {
+  id: text('id').primaryKey(),
+  ledgerId: text('ledger_id').notNull(),
+  date: text('date').notNull(),
+  note: text('note'),
+  amount: real('amount').notNull(),
+  currency: text('currency').notNull(),
+  // The payer's own category, as a hint for the other phones.
+  categoryName: text('category_name'),
+  categoryIcon: text('category_icon'),
+  // The member who paid, and `[{ memberId, amount }]` for each share.
+  paidBy: text('paid_by').notNull(),
+  sharesJson: text('shares_json').notNull(),
+  createdBy: text('created_by'),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+  deletedAt: text('deleted_at'),
+});
+
+export const albumSettlementsTable = sqliteTable('album_settlements', {
+  id: text('id').primaryKey(),
+  ledgerId: text('ledger_id').notNull(),
+  // The bill the payment is for.
+  expenseId: text('expense_id'),
+  fromMember: text('from_member').notNull(),
+  toMember: text('to_member').notNull(),
+  amount: real('amount').notNull(),
+  currency: text('currency').notNull(),
+  date: text('date').notNull(),
+  createdBy: text('created_by'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
   deletedAt: text('deleted_at'),
@@ -580,6 +640,9 @@ export type MonthlyWageSettingsRow = typeof monthlyWageSettingsTable.$inferSelec
 export type ExchangeRateRow = typeof exchangeRatesTable.$inferSelect;
 export type AlbumRow = typeof albumsTable.$inferSelect;
 export type AlbumTransactionRow = typeof albumTransactionsTable.$inferSelect;
+export type AlbumMemberRow = typeof albumMembersTable.$inferSelect;
+export type AlbumExpenseRow = typeof albumExpensesTable.$inferSelect;
+export type AlbumSettlementRow = typeof albumSettlementsTable.$inferSelect;
 export type ItemRow = typeof itemsTable.$inferSelect;
 export type BudgetTemplateRow = typeof budgetTemplatesTable.$inferSelect;
 export type BudgetTemplateCategoryRow = typeof budgetTemplateCategoriesTable.$inferSelect;

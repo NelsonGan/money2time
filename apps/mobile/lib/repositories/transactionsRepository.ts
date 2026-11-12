@@ -112,6 +112,8 @@ export interface CreateTransactionInput {
    */
   createdBy?: string | null;
   memberId?: string | null;
+  /** Shared albums: the group whose bill this entry is the user's side of. */
+  albumGroupId?: string | null;
 }
 
 /** Ids per `IN (…)` lookup, under SQLite's bound-parameter limit. */
@@ -674,6 +676,7 @@ class TransactionsRepository {
         instalmentNumber: normalizedInput.instalmentNumber ?? null,
         createdBy: normalizedInput.createdBy,
         memberId: normalizedInput.memberId,
+        albumGroupId: normalizedInput.albumGroupId ?? null,
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,

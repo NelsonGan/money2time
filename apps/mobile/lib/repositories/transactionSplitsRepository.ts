@@ -26,6 +26,10 @@ export interface CreateTransactionSplitInput {
   shareAmount?: number | null;
   /** The Cloud Sync account this person is (see `TransactionSplit.memberId`). */
   memberId?: string | null;
+  /** The member of a shared album's group this share is with. */
+  albumMemberId?: string | null;
+  /** The group settlement this paid row came from or was sent as. */
+  settlementId?: string | null;
 }
 
 export interface UpdateTransactionSplitInput {
@@ -39,6 +43,8 @@ export interface UpdateTransactionSplitInput {
   isPayer?: boolean;
   shareAmount?: number | null;
   memberId?: string | null;
+  albumMemberId?: string | null;
+  settlementId?: string | null;
 }
 
 class TransactionSplitsRepository {
@@ -173,6 +179,8 @@ class TransactionSplitsRepository {
       isPayer: input.isPayer ? true : null,
       shareAmount: input.shareAmount == null ? null : normalizeMoneyAmount(input.shareAmount),
       memberId: input.memberId ?? null,
+      albumMemberId: input.albumMemberId ?? null,
+      settlementId: input.settlementId ?? null,
       sortOrder: input.sortOrder ?? 0,
       createdAt: now,
       updatedAt: now,
@@ -208,6 +216,8 @@ class TransactionSplitsRepository {
     if (updates.partOfSplitId !== undefined) set.partOfSplitId = updates.partOfSplitId;
     if (updates.isPayer !== undefined) set.isPayer = updates.isPayer ? true : null;
     if (updates.memberId !== undefined) set.memberId = updates.memberId;
+    if (updates.albumMemberId !== undefined) set.albumMemberId = updates.albumMemberId;
+    if (updates.settlementId !== undefined) set.settlementId = updates.settlementId;
     if (updates.shareAmount !== undefined) {
       set.shareAmount =
         updates.shareAmount === null ? null : normalizeMoneyAmount(updates.shareAmount);

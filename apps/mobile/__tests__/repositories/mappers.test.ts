@@ -1029,6 +1029,7 @@ describe('toTransactionWithRelationsFromRaw', () => {
       instalmentNumber: 4,
       createdBy: 'user-mei',
       memberId: 'user-nelson',
+      albumGroupId: null,
       feeOfId: 't7',
       ...STAMPS,
     };
@@ -1073,6 +1074,7 @@ describe('toTransactionWithRelationsFromRaw', () => {
       instalmentNumber: null,
       createdBy: null,
       memberId: null,
+      albumGroupId: null,
       feeOfId: null,
       ...STAMPS,
     };
@@ -1231,6 +1233,7 @@ describe('createTransactionAssembler', () => {
       created_by: 'user-mei',
       member_id: 'user-nelson',
       fee_of_id: 't7',
+      album_group_id: 'album-1',
     };
     expect(Object.keys(sparse)).toEqual(sparseColumns);
     const sparseById = new Map([['t1', ['t1', ...sparseColumns.map((column) => sparse[column])]]]);

@@ -306,6 +306,10 @@ export interface SplitDraftInput {
   shareAmount?: number | null;
   /** The Cloud Sync account this person is, once people can be real users. */
   memberId?: string | null;
+  /** The member of a shared album's group this share is with. */
+  albumMemberId?: string | null;
+  /** The group settlement a paid row came from or was sent as. */
+  settlementId?: string | null;
 }
 
 /** How a transaction was entered. Drives which analytics event fires on
@@ -954,6 +958,7 @@ function optimisticPaybackTransfer(input: {
     feeOfId: null,
     // The repayment belongs to whoever the split expense does.
     ...withEntryStamp({ memberId: parent.memberId }, getActiveLedgerId()),
+    albumGroupId: null,
     recurrencePattern: 'none',
     recurrenceInterval: 1,
     recurrenceEndDate: null,
@@ -3194,6 +3199,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         dayOrder,
         createdBy: normalizedInput.createdBy,
         memberId: normalizedInput.memberId,
+        albumGroupId: null,
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,
@@ -3310,6 +3316,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         dayOrder: null,
         createdBy: normalizedInput.createdBy,
         memberId: normalizedInput.memberId,
+        albumGroupId: null,
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,
@@ -4274,6 +4281,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         feeOfId: null,
         createdBy: refundInput.createdBy,
         memberId: refundInput.memberId,
+        albumGroupId: null,
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,
@@ -4434,6 +4442,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           isPayer: !!draft.isPayer,
           shareAmount: draft.shareAmount == null ? null : normalizeMoneyAmount(draft.shareAmount),
           memberId: draft.memberId ?? null,
+          albumMemberId: draft.albumMemberId ?? null,
+          settlementId: draft.settlementId ?? null,
           sortOrder: draft.sortOrder ?? index,
           createdAt: now,
           updatedAt: now,
@@ -4469,6 +4479,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         feeOfId: null,
         createdBy: normalizedInput.createdBy,
         memberId: normalizedInput.memberId,
+        albumGroupId: null,
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,
@@ -4602,6 +4613,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           isPayer: !!draft.isPayer,
           shareAmount: draft.shareAmount == null ? null : normalizeMoneyAmount(draft.shareAmount),
           memberId: draft.memberId ?? null,
+          albumMemberId: draft.albumMemberId ?? null,
+          settlementId: draft.settlementId ?? null,
           sortOrder: draft.sortOrder ?? index,
           createdAt: now,
           updatedAt: now,

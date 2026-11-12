@@ -13,6 +13,12 @@ import {
   type BackupRestoreOptions,
   type ImportResult,
 } from '~/services/dataManagementService';
+import {
+  albumState,
+  beginAlbumGroup,
+  ensureLocalAlbum,
+  releaseAlbumGroup,
+} from '~/features/albums/services/albumGroupStore';
 import { restoreLedgerChoices } from '~/utils/backupLedgerPolicy';
 
 import { CloudSyncApiError, ledgerMediaPath, type SyncCredentials } from './cloudSyncApi';
@@ -104,6 +110,7 @@ function fromRemote(remote: RemoteSharedLedger, userId: string): SharedLedger {
     userId,
     // An owner is its own owner even before the Worker says so.
     ownerUserId: remote.ownerId ?? (remote.role === 'owner' ? userId : null),
+    kind: remote.kind === 'album' ? 'album' : 'ledger',
   };
 }
 
@@ -235,6 +242,20 @@ class SharedLedgerSync {
         continue;
       }
       const known = sharedLedgerFor(item.ledgerId);
+      if (item.kind === 'album') {
+        if (known && known.shareId !== item.id) continue;
+        if (item.role === 'owner' && !known && albumState(item.ledgerId) === 'deleted') {
+          // The album was deleted on this phone while signed out: sharing
+          // ends with it.
+          await this.finishPending(token, item.id, 'stop');
+          continue;
+        }
+        seen.add(item.ledgerId);
+        saveSharedLedger(fromRemote(item, session.userId));
+        // A group joined on another phone: the album it shows as.
+        ensureLocalAlbum({ ledgerId: item.ledgerId, name: item.name });
+        continue;
+      }
       // A member's ledger id that is already one of this phone's own ledgers
       // is never taken over, nor is one already synced under another share.
       // A copy that never synced as the user's own is not theirs: a backup
@@ -268,7 +289,9 @@ class SharedLedgerSync {
     }
     if (opts.letGo === false || this.session !== session) return 0;
     const gone = listSharedLedgers().filter((local) => !seen.has(local.ledgerId));
-    const removed = gone.filter((local) => local.role === 'member');
+    // A shared album stays on the phone as the user's own album, so there is
+    // nothing to tell them was removed.
+    const removed = gone.filter((local) => local.role === 'member' && local.kind !== 'album');
     // Names first: letting go deletes a member's copy.
     const names = removed.map(localLedgerName);
     for (const local of gone) await this.letGo(local, { requeue: false });
@@ -313,7 +336,11 @@ class SharedLedgerSync {
       this.closeEngine(ledger.shareId);
       removeSharedLedger(ledger.ledgerId);
       forgetChannel(ledger.shareId);
-      if (ledger.role !== 'owner') {
+      if (ledger.kind === 'album') {
+        // Owner and member alike keep the album and their own entries; the
+        // group's rows go.
+        releaseAlbumGroup(ledger.ledgerId, ledger.userId ?? null);
+      } else if (ledger.role !== 'owner') {
         // The open ledger waits for the user to be back on the main screens
         // (LedgerProGuard), so no editor loses its ledger under it.
         if (ledger.ledgerId === getActiveLedgerId()) deferLedgerDelete(ledger.ledgerId);
@@ -567,6 +594,35 @@ class SharedLedgerSync {
   }
 
   /**
+   * Shares one of the user's albums: its group gets a database of its own,
+   * starting with the user (`selfName`) and the people the album was split
+   * with. `publish` then writes the album's bills into the group (the caller
+   * knows the entries); the first sync uploads it all.
+   */
+  async shareAlbum(
+    album: { id: string; name: string },
+    selfName: string,
+    publish: () => void,
+  ): Promise<SharedLedger> {
+    const session = this.requireSession();
+    const remote = await shareLedger(await this.token(), {
+      ledgerId: album.id,
+      name: album.name,
+      emoji: null,
+      kind: 'album',
+    });
+    const shared = fromRemote(remote, session.userId);
+    // Between syncs: the group's rows are written once the channel routes them.
+    await runExclusive(() => {
+      saveSharedLedger(shared);
+      beginAlbumGroup(album.id, { userId: session.userId, name: selfName });
+      publish();
+    });
+    await this.syncAll().catch(() => undefined);
+    return shared;
+  }
+
+  /**
    * Owner: everyone else loses the ledger, and its cloud database is deleted.
    * With `whenUnreachable: 'local'` (deleting the ledger) it also works
    * signed out, after the account was deleted elsewhere, or offline: the
@@ -697,8 +753,12 @@ class SharedLedgerSync {
     // Before taking a seat: a ledger whose id is already one of this phone's
     // own ledgers (or another share's) is never written into.
     const preview = await previewInvite(code);
-    if (preview.ledgerId) this.assertJoinable(preview.ledgerId, null);
+    // An album's group never writes into a ledger: the album it shows as is
+    // the user's own, so one already here is simply joined again.
+    const album = preview.kind === 'album';
+    if (preview.ledgerId && !album) this.assertJoinable(preview.ledgerId, null);
     const remote = await acceptInvite(await this.token(), code);
+    if (remote.kind === 'album') return this.joinAlbum(remote);
     this.assertJoinable(remote.ledgerId, remote.id);
     // Joined again after leaving offline: the queued leave no longer applies.
     await removePendingLedgerAction(remote.id);
@@ -709,6 +769,25 @@ class SharedLedgerSync {
     } catch (error) {
       // Joined, but nothing has come down yet. The screen says so and Join
       // again retries (the Worker answers a member with the same share).
+      this.retry = true;
+      throw error;
+    }
+    return shared.ledgerId;
+  }
+
+  /** The album half of `join`: the group syncs down, and the album it shows as is made. */
+  private async joinAlbum(remote: RemoteSharedLedger): Promise<string> {
+    const known = sharedLedgerFor(remote.ledgerId);
+    if (known && known.shareId !== remote.id) throw new CloudSyncApiError('own_ledger', 409);
+    await removePendingLedgerAction(remote.id);
+    const shared = fromRemote(remote, this.requireSession().userId);
+    await runExclusive(() => {
+      saveSharedLedger(shared);
+      ensureLocalAlbum({ ledgerId: shared.ledgerId, name: shared.name });
+    });
+    try {
+      await (await this.engineFor(shared)).syncNow();
+    } catch (error) {
       this.retry = true;
       throw error;
     }
@@ -749,7 +828,8 @@ class SharedLedgerSync {
     for (const ledger of listSharedLedgers()) {
       removeSharedLedger(ledger.ledgerId);
       forgetChannel(ledger.shareId);
-      if (ledger.role === 'member') deleteLedgerLocally(ledger.ledgerId);
+      if (ledger.kind === 'album') releaseAlbumGroup(ledger.ledgerId, ledger.userId ?? null);
+      else if (ledger.role === 'member') deleteLedgerLocally(ledger.ledgerId);
       if (userId) deleteReplicaFiles(userId, ledger.shareId);
     }
     this.session = null;

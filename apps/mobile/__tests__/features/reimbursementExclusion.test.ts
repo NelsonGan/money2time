@@ -68,6 +68,7 @@ function transaction(overrides: Partial<TransactionWithRelations>): TransactionW
     instalmentNumber: null,
     createdBy: null,
     memberId: null,
+    albumGroupId: null,
     reportingCurrency: 'USD',
     reportingAmount: overrides.reportingAmount ?? overrides.amount ?? 0,
     fxRate: 1,

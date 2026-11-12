@@ -36,6 +36,8 @@ function split(overrides: Partial<TransactionSplit>): TransactionSplit {
     isPayer: false,
     shareAmount: null,
     memberId: null,
+    albumMemberId: null,
+    settlementId: null,
     sortOrder: 0,
     createdAt: PAID,
     updatedAt: PAID,

@@ -80,7 +80,7 @@ import { LIVE_DEVICE_ID, startLiveSync } from './services/liveSync';
 import { NATIVE_PROVIDERS, type NativeProvider } from './services/nativeSignIn';
 import { finishPendingSignOut, unlinkAndEndSession } from './services/pendingSignOut';
 import {
-  listSharedLedgers,
+  listLedgerShares,
   type SharedLedger,
   subscribeSharedLedgers,
 } from './services/sharedLedgerStore';
@@ -318,7 +318,8 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
   // others see who added an entry (README: Shared ledgers > Who added it).
   // Written again when the list or the Settings profile changes; unchanged
   // rows are left alone, so nothing syncs for nothing.
-  const sharedLedgerList = React.useSyncExternalStore(subscribeSharedLedgers, listSharedLedgers);
+  // Ledgers only: a shared album's people are its group's members, by name.
+  const sharedLedgerList = React.useSyncExternalStore(subscribeSharedLedgers, listLedgerShares);
   const profileName = settings?.profileName ?? null;
   const profileAvatarUri = settings?.profileAvatarUri ?? null;
   const signedInUserId = user?.id ?? null;

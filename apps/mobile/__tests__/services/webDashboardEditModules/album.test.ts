@@ -23,6 +23,7 @@ const album = (id: string, patch: Partial<Album> = {}): Album => ({
   placeName: null,
   placeAdmin: null,
   countryCode: null,
+  splitWith: [],
   createdAt: AT,
   updatedAt: AT,
   deletedAt: null,

@@ -28,6 +28,7 @@ function makeTx(id: string, date: string): TransactionWithRelations {
     instalmentNumber: null,
     createdBy: null,
     memberId: null,
+    albumGroupId: null,
     reportingCurrency: 'USD',
     reportingAmount: 0,
     fxRate: 1,

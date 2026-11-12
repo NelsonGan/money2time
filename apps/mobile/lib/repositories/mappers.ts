@@ -3,7 +3,10 @@ import { DEFAULT_LEDGER_ID } from '~/lib/db/ledgerScope';
 import type {
   AccountGroupRow,
   AccountRow,
+  AlbumExpenseRow,
+  AlbumMemberRow,
   AlbumRow,
+  AlbumSettlementRow,
   AutoLogCaptureRow,
   BudgetTemplateCategoryRow,
   BudgetTemplateRow,
@@ -26,6 +29,11 @@ import type {
   Account,
   AccountGroup,
   Album,
+  AlbumExpense,
+  AlbumMember,
+  AlbumPerson,
+  AlbumSettlement,
+  AlbumShare,
   AppIconId,
   BackupTarget,
   BudgetPeriod,
@@ -290,7 +298,95 @@ export function toAlbum(row: AlbumRow): Album {
     placeName: row.placeName ?? null,
     placeAdmin: row.placeAdmin ?? null,
     countryCode: row.countryCode ?? null,
+    splitWith: parseAlbumPeople(row.splitWithJson),
     sortOrder: row.sortOrder ?? 0,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    deletedAt: row.deletedAt,
+  };
+}
+
+/** `albums.split_with_json`: the people of an album that is not shared. */
+export function parseAlbumPeople(json: string | null | undefined): AlbumPerson[] {
+  if (!json) return [];
+  try {
+    const parsed: unknown = JSON.parse(json);
+    if (!Array.isArray(parsed)) return [];
+    const people: AlbumPerson[] = [];
+    for (const item of parsed) {
+      const entry = item as { id?: unknown; name?: unknown } | null;
+      const name = typeof entry?.name === 'string' ? entry.name.trim() : '';
+      if (typeof entry?.id === 'string' && entry.id && name) people.push({ id: entry.id, name });
+    }
+    return people;
+  } catch {
+    return [];
+  }
+}
+
+export function toAlbumMember(row: AlbumMemberRow): AlbumMember {
+  return {
+    id: row.id,
+    groupId: row.ledgerId,
+    name: row.name,
+    userId: row.userId ?? null,
+    sortOrder: row.sortOrder ?? 0,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    deletedAt: row.deletedAt,
+  };
+}
+
+/** `album_expenses.shares_json`: each member's share of the bill. */
+export function parseAlbumShares(json: string | null | undefined): AlbumShare[] {
+  if (!json) return [];
+  try {
+    const parsed: unknown = JSON.parse(json);
+    if (!Array.isArray(parsed)) return [];
+    const shares: AlbumShare[] = [];
+    for (const item of parsed) {
+      const entry = item as { memberId?: unknown; amount?: unknown } | null;
+      const amount = Number(entry?.amount);
+      if (typeof entry?.memberId === 'string' && entry.memberId && Number.isFinite(amount)) {
+        shares.push({ memberId: entry.memberId, amount: Math.max(0, amount) });
+      }
+    }
+    return shares;
+  } catch {
+    return [];
+  }
+}
+
+export function toAlbumExpense(row: AlbumExpenseRow): AlbumExpense {
+  return {
+    id: row.id,
+    groupId: row.ledgerId,
+    date: row.date,
+    note: row.note ?? null,
+    amount: row.amount,
+    currency: row.currency,
+    categoryName: row.categoryName ?? null,
+    categoryIcon: row.categoryIcon ?? null,
+    paidBy: row.paidBy,
+    shares: parseAlbumShares(row.sharesJson),
+    createdBy: row.createdBy ?? null,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    deletedAt: row.deletedAt,
+  };
+}
+
+export function toAlbumSettlement(row: AlbumSettlementRow): AlbumSettlement {
+  return {
+    id: row.id,
+    groupId: row.ledgerId,
+    expenseId: row.expenseId ?? null,
+    fromMember: row.fromMember,
+    toMember: row.toMember,
+    amount: row.amount,
+    currency: row.currency,
+    date: row.date,
+    createdBy: row.createdBy ?? null,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     deletedAt: row.deletedAt,
@@ -446,6 +542,7 @@ export function toTransaction(row: TransactionRow): Transaction {
     instalmentNumber: row.instalmentNumber ?? null,
     createdBy: row.createdBy ?? null,
     memberId: row.memberId ?? null,
+    albumGroupId: row.albumGroupId ?? null,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     deletedAt: row.deletedAt,
@@ -471,7 +568,8 @@ export const TRANSACTION_RAW_COLUMNS_SQL = `
   t.recurrence_parent_id, t.sentiment, t.reimbursable, t.reimbursed_at,
   t.reimbursement_account_id, t.reimbursement_transaction_id, t.reimbursement_of_id,
   t.counts_as_expense, t.day_order, t.created_at, t.updated_at, t.deleted_at, t.details,
-  t.instalment_rule_id, t.instalment_number, t.created_by, t.member_id, t.fee_of_id`;
+  t.instalment_rule_id, t.instalment_number, t.created_by, t.member_id, t.fee_of_id,
+  t.album_group_id`;
 
 type RawValue = string | number | null;
 
@@ -523,14 +621,15 @@ export function toTransactionWithRelationsFromRaw(
     createdBy: (values[34] as string | null) ?? null,
     memberId: (values[35] as string | null) ?? null,
     feeOfId: (values[36] as string | null) ?? null,
-    accountName: (values[37] as string | null) ?? null,
-    fromAccountName: (values[38] as string | null) ?? null,
-    toAccountName: (values[39] as string | null) ?? null,
-    categoryName: (values[40] as string | null) ?? null,
-    categoryParentId: (values[42] as string | null) ?? null,
-    categoryParentName: (values[43] as string | null) ?? null,
-    categoryIcon: (values[41] as string | null) ?? null,
-    instalmentCount: (values[44] as number | null) ?? null,
+    albumGroupId: (values[37] as string | null) ?? null,
+    accountName: (values[38] as string | null) ?? null,
+    fromAccountName: (values[39] as string | null) ?? null,
+    toAccountName: (values[40] as string | null) ?? null,
+    categoryName: (values[41] as string | null) ?? null,
+    categoryParentId: (values[43] as string | null) ?? null,
+    categoryParentName: (values[44] as string | null) ?? null,
+    categoryIcon: (values[42] as string | null) ?? null,
+    instalmentCount: (values[45] as number | null) ?? null,
   };
 }
 
@@ -573,6 +672,7 @@ const TRANSACTION_SPARSE_DEFAULTS: Readonly<Record<string, RawValue>> = {
   created_by: null,
   member_id: null,
   fee_of_id: null,
+  album_group_id: null,
 };
 
 const SPARSE_COLUMNS = TRANSACTION_RAW_COLUMNS.filter(
@@ -757,6 +857,7 @@ export function createTransactionAssembler(
       createdBy: null,
       memberId: null,
       feeOfId: null,
+      albumGroupId: null,
       accountName: nameOf(common[8]),
       fromAccountName: nameOf(common[9]),
       toAccountName: nameOf(common[10]),
@@ -783,6 +884,8 @@ export function toTransactionSplit(row: TransactionSplitRow): TransactionSplit {
     isPayer: !!row.isPayer,
     shareAmount: row.shareAmount ?? null,
     memberId: row.memberId ?? null,
+    albumMemberId: row.albumMemberId ?? null,
+    settlementId: row.settlementId ?? null,
     sortOrder: row.sortOrder ?? 0,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
