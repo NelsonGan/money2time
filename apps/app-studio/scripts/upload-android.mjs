@@ -26,7 +26,7 @@ import path from 'path';
 import {
   androidReady, androidEditCreate, androidEditCommit, androidEditDelete,
   uploadAndroidLocale, uploadAndroidIcon, androidListingLocales, androidIconPath,
-  forEachLimit, ANDROID_LOCALE_MAP, UPLOAD_CONCURRENCY,
+  forEachLimit, parseConcurrency, ANDROID_LOCALE_MAP,
 } from '../src/data/storeUpload.mjs';
 
 // Next reads .env.local on its own; a plain node script has to be told. The
@@ -45,7 +45,13 @@ const device = getArg('--device', 'phone');
  * uncommitted edit never reaches the store.
  */
 const dryRun = args.includes('--dry-run');
-const concurrency = Number(getArg('--concurrency', UPLOAD_CONCURRENCY)) || UPLOAD_CONCURRENCY;
+let concurrency;
+try {
+  concurrency = parseConcurrency(getArg('--concurrency', undefined));
+} catch (err) {
+  console.error(`\n❌ ${err.message}\n`);
+  process.exit(1);
+}
 
 const ready = await androidReady();
 if (!ready.ok) {
@@ -86,14 +92,14 @@ try {
   } else {
   await forEachLimit(Object.keys(ANDROID_LOCALE_MAP), concurrency, async (ourLocale) => {
     const dir = path.join(screenshotsDir, ourLocale);
-    if (!fs.existsSync(dir)) { console.log(`⚠  No folder for "${ourLocale}", skipping`); return; }
-
-    const pngs = fs.readdirSync(dir).filter(f => f.toLowerCase().endsWith('.png'));
-    if (!pngs.length) { console.log(`⚠  Empty folder for "${ourLocale}", skipping`); return; }
-
     // Buffered so parallel locales do not interleave their lines.
-    const lines = [`📂 ${ourLocale}  (${pngs.length} screenshots)`];
+    const lines = [];
     try {
+      if (!fs.existsSync(dir)) { console.log(`⚠  No folder for "${ourLocale}", skipping`); return; }
+      const pngs = fs.readdirSync(dir).filter(f => f.toLowerCase().endsWith('.png'));
+      if (!pngs.length) { console.log(`⚠  Empty folder for "${ourLocale}", skipping`); return; }
+      lines.push(`📂 ${ourLocale}  (${pngs.length} screenshots)`);
+
       const result = await uploadAndroidLocale({
         device, locale: ourLocale, dir, editId, log: (line) => lines.push(line),
       });
@@ -107,6 +113,7 @@ try {
       // One locale throwing must not abandon the others mid-upload; the edit
       // is discarded below once every locale has finished.
       failures++;
+      if (!lines.length) lines.push(`📂 ${ourLocale}`);
       lines.push(`   ✗ ${err.message}`);
     }
     console.log(lines.join('\n'));

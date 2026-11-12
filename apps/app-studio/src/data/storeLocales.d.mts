@@ -1,3 +1,4 @@
+export declare const UPLOAD_CONCURRENCY: number;
 export declare const IOS_LOCALE_MAP: Record<string, string[]>;
 export declare const ANDROID_LOCALE_MAP: Record<string, string[]>;
 export declare const IOS_DEVICE_TYPE: Record<string, string | undefined>;

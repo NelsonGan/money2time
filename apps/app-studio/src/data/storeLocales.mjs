@@ -10,6 +10,14 @@
  * of its own is worse than a duplicate.
  */
 
+/**
+ * How many locales go to a store at once, from the Studio's Upload to Store
+ * and from the upload scripts alike. Most of an upload is waiting for the
+ * store to process each image, so one locale at a time took about six times
+ * as long.
+ */
+export const UPLOAD_CONCURRENCY = 6;
+
 /** @type {Record<string, string[]>} */
 export const IOS_LOCALE_MAP = {
   en: ['en-US', 'en-GB', 'en-AU', 'en-CA'],

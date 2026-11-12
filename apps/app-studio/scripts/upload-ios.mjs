@@ -23,7 +23,7 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 import {
-  iosReady, uploadIOSLocale, iosVersion, forEachLimit, IOS_LOCALE_MAP, UPLOAD_CONCURRENCY,
+  iosReady, uploadIOSLocale, iosVersion, forEachLimit, parseConcurrency, IOS_LOCALE_MAP,
 } from '../src/data/storeUpload.mjs';
 
 // Next reads .env.local on its own; a plain node script has to be told. The
@@ -37,7 +37,13 @@ const getArg = (flag, fallback) => { const i = args.indexOf(flag); return i !== 
 const screenshotsDir = getArg('--dir', './money2time-screenshots-all');
 const device = getArg('--device', 'phone');
 const dryRun = args.includes('--dry-run');
-const concurrency = Number(getArg('--concurrency', UPLOAD_CONCURRENCY)) || UPLOAD_CONCURRENCY;
+let concurrency;
+try {
+  concurrency = parseConcurrency(getArg('--concurrency', undefined));
+} catch (err) {
+  console.error(`\n❌ ${err.message}\n`);
+  process.exit(1);
+}
 
 const ready = await iosReady();
 if (!ready.ok) {
@@ -53,18 +59,24 @@ let failures = 0;
 
 // Every locale needs the same version: look it up once rather than in each of
 // the parallel uploads.
-await iosVersion();
+try {
+  await iosVersion();
+} catch (err) {
+  console.error(`   ✗ ${err.message}`);
+  console.log('\n⚠️  Finished with 1 failure(s)\n');
+  process.exit(1);
+}
 
 await forEachLimit(Object.keys(IOS_LOCALE_MAP), concurrency, async (ourLocale) => {
   const dir = path.join(screenshotsDir, ourLocale);
-  if (!fs.existsSync(dir)) { console.log(`⚠  No folder for "${ourLocale}", skipping`); return; }
-
-  const pngs = fs.readdirSync(dir).filter(f => f.toLowerCase().endsWith('.png'));
-  if (!pngs.length) { console.log(`⚠  Empty folder for "${ourLocale}", skipping`); return; }
-
   // Buffered so parallel locales do not interleave their lines.
-  const lines = [`📂 ${ourLocale}  (${pngs.length} screenshots)`];
+  const lines = [];
   try {
+    if (!fs.existsSync(dir)) { console.log(`⚠  No folder for "${ourLocale}", skipping`); return; }
+    const pngs = fs.readdirSync(dir).filter(f => f.toLowerCase().endsWith('.png'));
+    if (!pngs.length) { console.log(`⚠  Empty folder for "${ourLocale}", skipping`); return; }
+    lines.push(`📂 ${ourLocale}  (${pngs.length} screenshots)`);
+
     const result = await uploadIOSLocale({
       device, locale: ourLocale, dir, dryRun, log: (line) => lines.push(line),
     });
@@ -75,6 +87,7 @@ await forEachLimit(Object.keys(IOS_LOCALE_MAP), concurrency, async (ourLocale) =
     }
   } catch (err) {
     failures++;
+    if (!lines.length) lines.push(`📂 ${ourLocale}`);
     lines.push(`   ✗ ${err.message}`);
   }
   console.log(lines.join('\n'));
