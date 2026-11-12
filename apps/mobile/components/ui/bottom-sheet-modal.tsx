@@ -1,6 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
   type DimensionValue,
+  type LayoutChangeEvent,
   Pressable,
   type StyleProp,
   StyleSheet,
@@ -10,6 +11,7 @@ import {
 } from 'react-native';
 import Animated, {
   Easing,
+  ReduceMotion,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
@@ -26,6 +28,11 @@ import { ThemeModal } from './theme-modal';
 const EASE_SHEET = Easing.bezier(0.32, 0.72, 0, 1);
 const OPEN_MS = 320;
 const CLOSE_MS = 240;
+// The timings always run: with Reduce Motion on, the panel fades instead of
+// sliding (see panelStyle), and a timing that honoured the setting would jump
+// straight to its end, so nothing would fade at all.
+const FADE = ReduceMotion.Never;
+const ignore = () => {};
 
 interface BottomSheetModalProps {
   visible: boolean;
@@ -69,30 +76,68 @@ export function BottomSheetModal({
   const [mounted, setMounted] = useState(visible);
   // 0 hidden, 1 shown: the dim's opacity and how far the panel has risen.
   const progress = useSharedValue(0);
-  // The panel's height, so it starts just below the screen edge; until it is
-  // measured, a whole screen.
+  // The panel's height, so it starts just below the screen edge.
   const panelHeight = useSharedValue(windowHeight);
+  // Whether the panel has been laid out since the Modal last mounted. An open
+  // waits for it, so the panel slides its own height from its first frame
+  // instead of starting a screen away and jumping when it is measured.
+  const measured = useRef(false);
+  const openPending = useRef(false);
+  const visibleRef = useRef(visible);
 
-  // Keeps what the sheet last showed while it slides away.
+  // What the sheet last showed, kept while it slides away. Recorded once a
+  // visible render has committed.
   const shownChildren = useRef(children);
   const shownOverlay = useRef(overlay);
-  if (visible) {
+  useLayoutEffect(() => {
+    if (!visible) return;
     shownChildren.current = children;
     shownOverlay.current = overlay;
-  }
+  });
+
+  const slideIn = useCallback(() => {
+    progress.set(withTiming(1, { duration: OPEN_MS, easing: EASE_SHEET, reduceMotion: FADE }));
+  }, [progress]);
+
+  const finishClose = useCallback(() => {
+    // Opened again while it was sliding away: stay up.
+    if (visibleRef.current) return;
+    measured.current = false;
+    setMounted(false);
+  }, []);
 
   useEffect(() => {
+    visibleRef.current = visible;
     if (visible) {
-      setMounted(true);
-      progress.set(withTiming(1, { duration: OPEN_MS, easing: EASE_SHEET }));
+      if (measured.current) {
+        slideIn();
+      } else {
+        openPending.current = true;
+        setMounted(true);
+      }
+      return;
+    }
+    openPending.current = false;
+    // Never shown (first mount hidden, or closed before it was laid out).
+    if (progress.get() === 0) {
+      finishClose();
       return;
     }
     progress.set(
-      withTiming(0, { duration: CLOSE_MS, easing: EASE_SHEET }, (finished) => {
-        if (finished) scheduleOnRN(setMounted, false);
+      withTiming(0, { duration: CLOSE_MS, easing: EASE_SHEET, reduceMotion: FADE }, (finished) => {
+        if (finished) scheduleOnRN(finishClose);
       }),
     );
-  }, [progress, visible]);
+  }, [finishClose, progress, slideIn, visible]);
+
+  const handleLayout = (event: LayoutChangeEvent) => {
+    panelHeight.set(event.nativeEvent.layout.height);
+    measured.current = true;
+    if (openPending.current) {
+      openPending.current = false;
+      slideIn();
+    }
+  };
 
   const dimStyle = useAnimatedStyle(() => ({ opacity: progress.get() }));
   const panelStyle = useAnimatedStyle(() =>
@@ -107,7 +152,8 @@ export function BottomSheetModal({
       transparent
       animationType="none"
       presentationStyle="overFullScreen"
-      onRequestClose={onClose}
+      // A sheet already sliding away is closed; Back must not close it twice.
+      onRequestClose={visible ? onClose : ignore}
     >
       <View className="flex-1 justify-end" pointerEvents={visible ? 'auto' : 'none'}>
         <Animated.View style={[StyleSheet.absoluteFill, dimStyle]}>
@@ -115,16 +161,16 @@ export function BottomSheetModal({
         </Animated.View>
         <Animated.View
           style={[sheetColumnStyle, maxHeight != null ? { maxHeight } : null, panelStyle]}
-          onLayout={(event) => panelHeight.set(event.nativeEvent.layout.height)}
+          onLayout={handleLayout}
         >
           <View
             className={cn('shrink overflow-hidden rounded-t-[28px] bg-background', className)}
             style={style}
           >
-            {shownChildren.current}
+            {visible ? children : shownChildren.current}
           </View>
         </Animated.View>
-        {shownOverlay.current}
+        {visible ? overlay : shownOverlay.current}
       </View>
     </ThemeModal>
   );
