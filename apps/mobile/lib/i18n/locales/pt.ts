@@ -3031,6 +3031,8 @@ const pt = {
       title: 'Álbum compartilhado',
       own: 'Este é um dos seus próprios álbuns.',
       already: 'Você já está neste álbum.',
+      main_shared:
+        'Seu livro principal está compartilhado, então não pode conter um álbum compartilhado.',
     },
     bill: {
       delete_shared: 'Esta conta está em um álbum compartilhado. Excluí-la a remove para todos.',
@@ -3340,6 +3342,7 @@ const pt = {
     share_toggle: 'Compartilhar este livro',
     share_toggle_caption: 'Convide até {{max}} pessoas. Elas não precisam do Pro.',
     needs_cloud_sync: 'Entre no Cloud Sync para compartilhar um livro.',
+    has_shared_albums: 'Este livro tem álbuns compartilhados. Pare de compartilhá-los primeiro.',
     limit_reached: 'Por enquanto, você pode compartilhar até {{max}} livros.',
     share_failed:
       'O livro foi criado, mas o compartilhamento não começou. Tente de novo na página Compartilhamento do livro.',

@@ -6,7 +6,7 @@
 import { deleteLedgerLocally } from '~/features/cloudSync/services/ledgerChannels';
 import { sharedLedgerFor } from '~/features/cloudSync/services/sharedLedgerStore';
 import { getSQLite } from '~/lib/db/client';
-import { DEFAULT_LEDGER_ID, getActiveLedgerId } from '~/lib/db/ledgerScope';
+import { DEFAULT_LEDGER_ID } from '~/lib/db/ledgerScope';
 import { albumGroupsRepository } from '~/lib/repositories/albumGroupsRepository';
 import { parseAlbumPeople } from '~/lib/repositories/mappers';
 import type { AlbumExpense, AlbumMember, AlbumSettlement } from '~/types';
@@ -122,11 +122,20 @@ export function albumLedgerId(albumId: string): string | null {
 }
 
 /**
+ * Whether this phone can hold a shared album. Shared albums live in one
+ * place, the user's main ledger, and only while that ledger is not itself
+ * shared: a group's bills then never land among entries that belong to other
+ * people, and nothing has to follow an album between ledgers.
+ */
+export function mainLedgerTakesSharedAlbums(): boolean {
+  return sharedLedgerFor(DEFAULT_LEDGER_ID) === null;
+}
+
+/**
  * The album a group this phone joined shows as: made here, with the group's
- * id, in a ledger of the user's own (the open one, unless that is a shared
- * ledger, where an album is never split). Left alone when it is already here,
- * so two phones of one person agree on it once their own data syncs; one
- * deleted here and then joined again comes back.
+ * id, in the user's main ledger (`mainLedgerTakesSharedAlbums`). Left alone
+ * when it is already here, so two phones of one person agree on it once their
+ * own data syncs; one deleted here and then joined again comes back.
  */
 export function ensureLocalAlbum(share: { ledgerId: string; name: string | null }): void {
   const now = nowIso();
@@ -141,18 +150,16 @@ export function ensureLocalAlbum(share: { ledgerId: string; name: string | null 
     }
     return;
   }
-  const open = getActiveLedgerId();
-  const ledgerId = sharedLedgerFor(open) ? DEFAULT_LEDGER_ID : open;
   const top = db.getFirstSync<{ top: number | null }>(
     'SELECT MIN(sort_order) AS top FROM albums WHERE ledger_id = ? AND deleted_at IS NULL',
-    [ledgerId],
+    [DEFAULT_LEDGER_ID],
   );
   db.runSync(
     `INSERT INTO albums (id, ledger_id, name, is_active, sort_order, created_at, updated_at)
      VALUES (?, ?, ?, 0, ?, ?, ?)`,
     [
       share.ledgerId,
-      ledgerId,
+      DEFAULT_LEDGER_ID,
       cleanPersonName(share.name ?? '') || 'Album',
       (top?.top ?? 0) - 1,
       now,

@@ -3004,6 +3004,7 @@ const en = {
       title: 'Shared album',
       own: 'This is one of your own albums.',
       already: "You're already in this album.",
+      main_shared: "Your main ledger is shared, so it can't hold a shared album.",
     },
     bill: {
       delete_shared: 'This bill is in a shared album. Deleting it removes it for everyone.',
@@ -3309,6 +3310,7 @@ const en = {
     share_toggle: 'Share this ledger',
     share_toggle_caption: "Invite up to {{max}} people. They don't need Pro.",
     needs_cloud_sync: 'Sign in to Cloud Sync to share a ledger.',
+    has_shared_albums: 'This ledger has shared albums. Stop sharing them first.',
     limit_reached: 'You can share up to {{max}} ledgers for now.',
     share_failed:
       "The ledger was created, but sharing didn't start. Try again from the ledger's Sharing page.",

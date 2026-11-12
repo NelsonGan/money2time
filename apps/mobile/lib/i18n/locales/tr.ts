@@ -3019,6 +3019,7 @@ const tr = {
       title: 'Paylaşılan albüm',
       own: 'Bu, kendi albümlerinizden biri.',
       already: 'Zaten bu albümdesiniz.',
+      main_shared: 'Ana defteriniz paylaşıldığı için paylaşılan bir albüm barındıramaz.',
     },
     bill: {
       delete_shared: 'Bu hesap paylaşılan bir albümde. Silerseniz herkes için kaldırılır.',
@@ -3325,6 +3326,7 @@ const tr = {
     share_toggle: 'Bu defteri paylaş',
     share_toggle_caption: "En fazla {{max}} kişiyi davet et. Pro'ya ihtiyaçları yok.",
     needs_cloud_sync: "Defter paylaşmak için Cloud Sync'e giriş yap.",
+    has_shared_albums: 'Bu defterde paylaşılan albümler var. Önce onları paylaşmayı bırakın.',
     limit_reached: 'Şimdilik en fazla {{max}} defter paylaşabilirsin.',
     share_failed:
       'Defter oluşturuldu ama paylaşım başlamadı. Defterin Paylaşım sayfasından tekrar dene.',

@@ -3,6 +3,7 @@ import {
   albumLedgerId,
   albumState,
   ensureLocalAlbum,
+  mainLedgerTakesSharedAlbums,
   releaseAlbumGroup,
 } from '~/features/albums/services/albumGroupStore';
 import {
@@ -18,6 +19,7 @@ import {
 import { aggregateSettleUpByPerson } from '~/features/transactions/lib/settleUp';
 import { owedToPayer } from '~/features/transactions/lib/splitPayer';
 import { getDb, getSQLite } from '~/lib/db/client';
+import { DEFAULT_LEDGER_ID, setActiveLedgerId } from '~/lib/db/ledgerScope';
 import { albumGroupsRepository } from '~/lib/repositories/albumGroupsRepository';
 import { transactionSplitsRepository } from '~/lib/repositories/transactionSplitsRepository';
 import { transactionsRepository } from '~/lib/repositories/transactionsRepository';
@@ -509,6 +511,32 @@ describe('sharing an album that already has split bills', () => {
     expect(albumState(GROUP)).toBe('live');
     expect(albumLedgerId(GROUP)).toBe('default');
     expect(app.all('SELECT COUNT(*) AS n FROM albums')[0].n).toBe(1);
+  });
+
+  it('puts a joined album in the main ledger, whichever ledger is open', () => {
+    setActiveLedgerId('work');
+    try {
+      ensureLocalAlbum({ ledgerId: 'tokyo', name: 'Tokyo' });
+    } finally {
+      setActiveLedgerId(DEFAULT_LEDGER_ID);
+    }
+    expect(albumLedgerId('tokyo')).toBe(DEFAULT_LEDGER_ID);
+    // A shared album needs the main ledger to be the user's alone.
+    expect(mainLedgerTakesSharedAlbums()).toBe(true);
+    saveSharedLedger({
+      ledgerId: DEFAULT_LEDGER_ID,
+      shareId: 'share-main',
+      role: 'owner',
+      name: 'Main',
+      ownerName: 'Nelson',
+      memberCount: 2,
+      active: true,
+      userId: 'u-me',
+      ownerUserId: 'u-me',
+      kind: 'ledger',
+    });
+    expect(mainLedgerTakesSharedAlbums()).toBe(false);
+    removeSharedLedger(DEFAULT_LEDGER_ID);
   });
 
   it('gives the album back as the user’s own when sharing ends', () => {

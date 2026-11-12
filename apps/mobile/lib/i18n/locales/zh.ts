@@ -2891,6 +2891,7 @@ const zh = {
       title: '共享相册',
       own: '这是你自己的相册。',
       already: '你已在此相册中。',
+      main_shared: '你的主账本已共享，因此无法放入共享相册。',
     },
     bill: {
       delete_shared: '此账单在共享相册中。删除后所有人那里都会移除。',
@@ -3186,6 +3187,7 @@ const zh = {
     share_toggle: '共享这个账本',
     share_toggle_caption: '最多可邀请 {{max}} 人。他们不需要 Pro。',
     needs_cloud_sync: '登录 Cloud Sync 即可共享账本。',
+    has_shared_albums: '此账本有共享相册，请先停止共享这些相册。',
     limit_reached: '目前最多可共享 {{max}} 个账本。',
     share_failed: '账本已创建，但共享没有开始。请到账本的“共享”页面再试一次。',
     status_not_shared: '未共享',

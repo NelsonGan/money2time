@@ -12,6 +12,7 @@ import { useIsPro } from '~/context/ProContext';
 import { useCloudSync } from '~/features/cloudSync/CloudSyncContext';
 import { useSharedLedger } from '~/features/sharedLedgers/hooks/useSharedLedgers';
 import { useThemeColors } from '~/hooks/useThemeColors';
+import { DEFAULT_LEDGER_ID } from '~/lib/db/ledgerScope';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { pickLibraryImage } from '~/services/libraryImagePicker';
@@ -51,8 +52,9 @@ export function CreateAlbumScreen({
   const sync = useCloudSync();
   const isPro = useIsPro();
   // An album in a shared ledger is not split with people: its entries already
-  // belong to the ledger's own.
+  // belong to the ledger's own. And only an album of the main ledger is shared.
   const canSplit = useSharedLedger(activeLedger.id) === null;
+  const canShare = canSplit && activeLedger.id === DEFAULT_LEDGER_ID;
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
 
@@ -301,7 +303,7 @@ export function CreateAlbumScreen({
                     onRemove={(row) => row.id && setPeople(withPersonRemoved(people, row.id))}
                   />
                   <AlbumSharingCard
-                    share={{ value: share, onChange: toggleShare }}
+                    share={canShare ? { value: share, onChange: toggleShare } : null}
                     simplify={
                       share
                         ? {

@@ -2891,6 +2891,7 @@ const zhHant = {
       title: '共享相簿',
       own: '這是你自己的相簿。',
       already: '你已在此相簿中。',
+      main_shared: '你的主帳本已共享，因此無法放入共享相簿。',
     },
     bill: {
       delete_shared: '此帳單在共享相簿中。刪除後所有人那裡都會移除。',
@@ -3185,6 +3186,7 @@ const zhHant = {
     share_toggle: '共享這個帳本',
     share_toggle_caption: '最多可邀請 {{max}} 人。他們不需要 Pro。',
     needs_cloud_sync: '登入 Cloud Sync 即可共享帳本。',
+    has_shared_albums: '此帳本有共享相簿，請先停止共享這些相簿。',
     limit_reached: '目前最多可共享 {{max}} 個帳本。',
     share_failed: '帳本已建立，但共享沒有開始。請到帳本的「共享」頁面再試一次。',
     status_not_shared: '未共享',

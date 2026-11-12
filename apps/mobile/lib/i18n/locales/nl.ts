@@ -3048,6 +3048,7 @@ const nl = {
       title: 'Gedeeld album',
       own: 'Dit is een van je eigen albums.',
       already: 'Je doet al mee aan dit album.',
+      main_shared: 'Je hoofdboek is gedeeld en kan daarom geen gedeeld album bevatten.',
     },
     bill: {
       delete_shared:
@@ -3357,6 +3358,7 @@ const nl = {
     share_toggle: 'Dit boek delen',
     share_toggle_caption: 'Nodig tot {{max}} mensen uit. Ze hebben geen Pro nodig.',
     needs_cloud_sync: 'Meld je aan bij Cloud Sync om een boek te delen.',
+    has_shared_albums: 'Dit boek heeft gedeelde albums. Stop eerst met het delen daarvan.',
     limit_reached: 'Je kunt voorlopig tot {{max}} boeken delen.',
     share_failed:
       'Het boek is aangemaakt, maar het delen is niet gestart. Probeer het opnieuw via de pagina Delen van het boek.',

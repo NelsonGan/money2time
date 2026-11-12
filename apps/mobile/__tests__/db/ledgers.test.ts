@@ -306,12 +306,25 @@ describe('ledgersRepository on SQLite', () => {
       INSERT INTO monthly_budgets (id, ledger_id, period, month, total_amount, deleted_at, created_at, updated_at)
         VALUES ('work-sep', 'work', 'month', '2026-09', 100, '${NOW}', '${NOW}', '${NOW}');
     `);
+    // The taxi is a shared album's bill, with a payment of the group's on it.
+    harness.connection.exec(`
+      UPDATE transactions SET album_group_id = 'trip' WHERE id = 'taxi';
+      UPDATE transaction_splits SET settlement_id = 'pay-1' WHERE transaction_id = 'taxi';
+    `);
     let n = 0;
     const copied = copyLedgerRows(harness.db, 'work', 'copy', () => `c${++n}`, NOW);
 
     // Cash, taxi, hotel, taxi's split, the album, its taxi join and the
     // budget tombstone; not the deleted entry, its album join, nor lunch's split.
     expect(copied).toBe(7);
+    // The copy is the user's own split bill, not the group's.
+    expect(
+      harness.all(
+        `SELECT t.album_group_id, s.settlement_id FROM transactions t
+         JOIN transaction_splits s ON s.transaction_id = t.id
+         WHERE t.ledger_id = 'copy'`,
+      ),
+    ).toEqual([{ album_group_id: null, settlement_id: null }]);
     expect(
       harness.all(
         `SELECT a.transaction_id FROM album_transactions a JOIN albums b ON b.id = a.album_id WHERE b.ledger_id = 'copy'`,

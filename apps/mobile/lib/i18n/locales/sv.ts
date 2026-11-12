@@ -3012,6 +3012,7 @@ const sv = {
       title: 'Delat album',
       own: 'Det här är ett av dina egna album.',
       already: 'Du är redan med i det här albumet.',
+      main_shared: 'Din huvudkassabok är delad, så den kan inte innehålla ett delat album.',
     },
     bill: {
       delete_shared: 'Notan finns i ett delat album. Om du raderar den försvinner den för alla.',
@@ -3319,6 +3320,7 @@ const sv = {
     share_toggle: 'Dela den här kassaboken',
     share_toggle_caption: 'Bjud in upp till {{max}} personer. De behöver inte Pro.',
     needs_cloud_sync: 'Logga in på Cloud Sync för att dela en kassabok.',
+    has_shared_albums: 'Den här kassaboken har delade album. Sluta dela dem först.',
     limit_reached: 'Du kan dela upp till {{max}} kassaböcker tills vidare.',
     share_failed:
       'Kassaboken skapades, men delningen startade inte. Försök igen från kassabokens sida Delning.',

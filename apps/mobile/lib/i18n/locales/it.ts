@@ -3027,6 +3027,8 @@ const it = {
       title: 'Album condiviso',
       own: 'Questo è uno dei tuoi album.',
       already: 'Sei già in questo album.',
+      main_shared:
+        'Il tuo registro principale è condiviso, quindi non può contenere un album condiviso.',
     },
     bill: {
       delete_shared: 'Questo conto è in un album condiviso. Eliminandolo viene rimosso per tutti.',
@@ -3336,6 +3338,8 @@ const it = {
     share_toggle: 'Condividi questo registro',
     share_toggle_caption: 'Invita fino a {{max}} persone. Non serve Pro.',
     needs_cloud_sync: 'Accedi a Cloud Sync per condividere un registro.',
+    has_shared_albums:
+      'Questo registro contiene album condivisi. Interrompi prima la loro condivisione.',
     limit_reached: 'Per ora puoi condividere fino a {{max}} registri.',
     share_failed:
       'Il registro è stato creato, ma la condivisione non è partita. Riprova dalla pagina Condivisione del registro.',

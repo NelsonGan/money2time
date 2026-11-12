@@ -6,13 +6,15 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {
+  albumLedgerId,
   albumState,
   beginAlbumGroup,
   ensureLocalAlbum,
+  mainLedgerTakesSharedAlbums,
   releaseAlbumGroup,
 } from '~/features/albums/services/albumGroupStore';
 import { getSQLite } from '~/lib/db/client';
-import { getActiveLedgerId } from '~/lib/db/ledgerScope';
+import { DEFAULT_LEDGER_ID, getActiveLedgerId } from '~/lib/db/ledgerScope';
 import {
   applyBackupData,
   type BackupData,
@@ -43,6 +45,7 @@ import {
   clearDeferredLedgerDeletes,
   deferLedgerDelete,
   getDeferredLedgerDeletes,
+  listAlbumShares,
   listPendingLedgerActions,
   listSharedLedgers,
   noteRemovedLedgers,
@@ -581,6 +584,10 @@ class SharedLedgerSync {
 
   /** Shares one of the user's ledgers. Its rows move to the new database on the next sync. */
   async share(ledger: { id: string; name: string; emoji: string | null }): Promise<SharedLedger> {
+    // The main ledger holds the shared albums, and holds none once it is shared.
+    if (ledger.id === DEFAULT_LEDGER_ID && listAlbumShares().length > 0) {
+      throw new Error('main ledger has shared albums');
+    }
     const remote = await shareLedger(await this.token(), {
       ledgerId: ledger.id,
       name: ledger.name,
@@ -605,6 +612,10 @@ class SharedLedgerSync {
     publish: () => void,
   ): Promise<SharedLedger> {
     const session = this.requireSession();
+    // Only an album of the main ledger, while that ledger is not shared.
+    if (albumLedgerId(album.id) !== DEFAULT_LEDGER_ID || !mainLedgerTakesSharedAlbums()) {
+      throw new Error('album is not in the main ledger');
+    }
     const remote = await shareLedger(await this.token(), {
       ledgerId: album.id,
       name: album.name,

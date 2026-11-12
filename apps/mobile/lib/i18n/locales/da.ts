@@ -3011,6 +3011,7 @@ const da = {
       title: 'Delt album',
       own: 'Dette er et af dine egne album.',
       already: 'Du er allerede med i dette album.',
+      main_shared: 'Dit hovedregnskab er delt, så det kan ikke rumme et delt album.',
     },
     bill: {
       delete_shared: 'Regningen er i et delt album. Sletter du den, fjernes den for alle.',
@@ -3315,6 +3316,7 @@ const da = {
     share_toggle: 'Del dette regnskab',
     share_toggle_caption: 'Inviter op til {{max}} personer. De behøver ikke Pro.',
     needs_cloud_sync: 'Log ind på Cloud Sync for at dele et regnskab.',
+    has_shared_albums: 'Dette regnskab har delte album. Stop med at dele dem først.',
     limit_reached: 'Du kan dele op til {{max}} regnskaber indtil videre.',
     share_failed:
       'Regnskabet blev oprettet, men delingen startede ikke. Prøv igen fra regnskabets Deling-side.',

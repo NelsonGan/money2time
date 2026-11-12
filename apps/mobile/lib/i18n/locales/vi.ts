@@ -2994,6 +2994,7 @@ const vi = {
       title: 'Album chung',
       own: 'Đây là một trong các album của bạn.',
       already: 'Bạn đã ở trong album này.',
+      main_shared: 'Sổ chính của bạn đang được chia sẻ nên không thể chứa album chung.',
     },
     bill: {
       delete_shared: 'Hóa đơn này nằm trong album chung. Xóa nó sẽ gỡ khỏi mọi người.',
@@ -3297,6 +3298,7 @@ const vi = {
     share_toggle: 'Chia sẻ sổ này',
     share_toggle_caption: 'Mời tối đa {{max}} người. Họ không cần Pro.',
     needs_cloud_sync: 'Đăng nhập Cloud Sync để chia sẻ sổ.',
+    has_shared_albums: 'Sổ này có album chung. Hãy ngừng chia sẻ các album đó trước.',
     limit_reached: 'Hiện bạn có thể chia sẻ tối đa {{max}} sổ.',
     share_failed: 'Sổ đã được tạo nhưng chưa bắt đầu chia sẻ. Hãy thử lại từ trang Chia sẻ của sổ.',
     status_not_shared: 'Chưa chia sẻ',

@@ -3026,6 +3026,7 @@ const id = {
       title: 'Album bersama',
       own: 'Ini salah satu albummu sendiri.',
       already: 'Kamu sudah ada di album ini.',
+      main_shared: 'Buku utama Anda dibagikan, jadi tidak bisa memuat album bersama.',
     },
     bill: {
       delete_shared:
@@ -3335,6 +3336,8 @@ const id = {
     share_toggle: 'Bagikan buku ini',
     share_toggle_caption: 'Undang hingga {{max}} orang. Mereka tidak perlu Pro.',
     needs_cloud_sync: 'Masuk ke Cloud Sync untuk membagikan buku.',
+    has_shared_albums:
+      'Buku ini memiliki album bersama. Hentikan berbagi album itu terlebih dahulu.',
     limit_reached: 'Untuk saat ini Anda bisa membagikan hingga {{max}} buku.',
     share_failed:
       'Buku sudah dibuat, tetapi berbagi belum dimulai. Coba lagi dari halaman Berbagi buku itu.',

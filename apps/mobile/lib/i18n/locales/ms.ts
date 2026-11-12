@@ -3031,6 +3031,7 @@ const ms = {
       title: 'Album kongsi',
       own: 'Ini salah satu album anda sendiri.',
       already: 'Anda sudah berada dalam album ini.',
+      main_shared: 'Buku utama anda dikongsi, jadi ia tidak boleh mengandungi album kongsi.',
     },
     bill: {
       delete_shared:
@@ -3339,6 +3340,7 @@ const ms = {
     share_toggle: 'Kongsi buku ini',
     share_toggle_caption: 'Jemput sehingga {{max}} orang. Mereka tidak perlukan Pro.',
     needs_cloud_sync: 'Log masuk ke Cloud Sync untuk berkongsi buku.',
+    has_shared_albums: 'Buku ini mempunyai album kongsi. Hentikan perkongsian album itu dahulu.',
     limit_reached: 'Buat masa ini anda boleh berkongsi sehingga {{max}} buku.',
     share_failed:
       'Buku telah dicipta, tetapi perkongsian tidak bermula. Cuba lagi dari halaman Perkongsian buku itu.',

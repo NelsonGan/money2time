@@ -3024,6 +3024,8 @@ const pl = {
       title: 'Udostępniony album',
       own: 'To jeden z Twoich albumów.',
       already: 'Jesteś już w tym albumie.',
+      main_shared:
+        'Twoja główna księga jest udostępniona, więc nie może zawierać udostępnionego albumu.',
     },
     bill: {
       delete_shared: 'Ten rachunek jest w udostępnionym albumie. Usunięcie usunie go u wszystkich.',
@@ -3327,6 +3329,7 @@ const pl = {
     share_toggle: 'Udostępnij tę księgę',
     share_toggle_caption: 'Zaproś do {{max}} osób. Nie potrzebują Pro.',
     needs_cloud_sync: 'Zaloguj się do Cloud Sync, aby udostępnić księgę.',
+    has_shared_albums: 'Ta księga zawiera udostępnione albumy. Najpierw przestań je udostępniać.',
     limit_reached: 'Na razie możesz udostępnić maksymalnie {{max}} księgi.',
     share_failed:
       'Księga została utworzona, ale udostępnianie się nie rozpoczęło. Spróbuj ponownie na stronie Udostępnianie tej księgi.',

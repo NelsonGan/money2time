@@ -2117,7 +2117,13 @@ migrations `090` and `091`.
   its people, whether or not the album is the active one (the `albumId` param
   of `AddTransactionDetailed`), and comes back to the album when saved.
 - **Share this album.** A switch on the People page, for the album's owner:
-  Pro and a Cloud Sync sign-in, at most **3** shared albums at a time. One
+  Pro and a Cloud Sync sign-in, at most **3** shared albums at a time. **Only
+  an album of the main ledger can be shared, and only while that ledger is
+  not itself shared** (`mainLedgerTakesSharedAlbums`, `useAlbumGroup.canShare`):
+  in any other ledger the switch is not offered, a main ledger that holds a
+  shared album cannot be shared until its albums are not, and a copy of a
+  ledger carries a shared album's bills as ordinary split bills
+  (`album_group_id` and `settlement_id` are cleared). One
   card holds it, the Simplify group debts switch and, once shared, the
   album's invite link (Copy, New link; the same 24-hour link a shared ledger
   has); what each does is behind its info button. Each person then reads as
@@ -2131,8 +2137,9 @@ migrations `090` and `091`.
   where a smaller amount can be typed to pay part of it.
 - **Joining.** The link opens the Join screen (the one shared ledgers use,
   titled Shared album). Anyone signed in can join, Pro or not, up to **9**
-  people. The album is added to a ledger of the user's own (the open one, or
-  the main one when the open ledger is shared), and its People page asks
+  people. The album is added to the user's main ledger, which opens with it
+  (someone whose main ledger is shared is told it cannot hold one), and its
+  People page asks
   **Which one is you?**: one of the names the owner added, or "I'm not on the
   list" (then they are added under their own name). Until they answer,
   nothing of the group reaches their ledger, and the album's Balances tab
@@ -2231,8 +2238,8 @@ migrations `090` and `091`.
   the middle sees one payment in and one out for the same amount; on the
   phone that records it both go through the one account picked.
 - **When it runs.** After every shared sync that applied rows
-  (`reloadAfterApply`), at launch and when a ledger opens. A group whose
-  album is in another ledger than the open one waits for that ledger: the
+  (`reloadAfterApply`), at launch and when a ledger opens. A group's
+  album is in the main ledger, so while another ledger is open it waits: the
   entries land on its accounts and categories.
 - **Trust.** As a shared ledger: a member's token can write anything in the
   group's database. A phone only ever writes its own member's side from it,

@@ -423,7 +423,7 @@ export function AlbumPeopleScreen({
 
         <AlbumSharingCard
           share={
-            !share || isOwner
+            (share ? isOwner : group.canShare)
               ? {
                   value: !!share,
                   onChange: toggleShare,

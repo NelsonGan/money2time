@@ -3059,6 +3059,7 @@ const de = {
       title: 'Geteiltes Album',
       own: 'Das ist eines deiner eigenen Alben.',
       already: 'Du bist bereits in diesem Album.',
+      main_shared: 'Dein Hauptbuch ist geteilt und kann deshalb kein geteiltes Album enthalten.',
     },
     bill: {
       delete_shared:
@@ -3371,6 +3372,7 @@ const de = {
     share_toggle: 'Dieses Buch teilen',
     share_toggle_caption: 'Lade bis zu {{max}} Personen ein. Sie brauchen kein Pro.',
     needs_cloud_sync: 'Melde dich bei Cloud Sync an, um ein Buch zu teilen.',
+    has_shared_albums: 'Dieses Buch enthält geteilte Alben. Beende zuerst deren Freigabe.',
     limit_reached: 'Du kannst vorerst bis zu {{max}} Bücher teilen.',
     share_failed:
       'Das Buch wurde erstellt, aber das Teilen hat nicht begonnen. Versuch es auf der Teilen-Seite des Buchs noch einmal.',

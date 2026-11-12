@@ -35,6 +35,7 @@ import {
 } from '~/features/cloudSync/services/sharedLedgerStore';
 import { ledgerDisplayName } from '~/features/ledgers/lib/ledgerDisplay';
 import { useThemeColors } from '~/hooks/useThemeColors';
+import { DEFAULT_LEDGER_ID } from '~/lib/db/ledgerScope';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 
@@ -131,6 +132,7 @@ export function JoinLedgerScreen({
   const hereRole = here ? (sharedHere?.role ?? 'owner') : null;
 
   const isAlbum = preview?.kind === 'album';
+  const mainLedgerIsShared = sharedLedgers.some((l) => l.ledgerId === DEFAULT_LEDGER_ID);
   const albumHere = isAlbum && id ? (sharedAlbums.find((a) => a.ledgerId === id) ?? null) : null;
 
   let action: React.ReactNode;
@@ -153,6 +155,9 @@ export function JoinLedgerScreen({
         />
       </View>
     );
+  } else if (isAlbum && mainLedgerIsShared) {
+    // A shared album goes in the main ledger, which takes none while it is shared.
+    action = <NoticeBanner icon={Info} text={I18n.t('albums.join.main_shared')} />;
   } else if (here && hereRole && !isAlbum) {
     action = (
       <View className="gap-3">

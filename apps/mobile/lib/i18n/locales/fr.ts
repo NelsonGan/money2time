@@ -3053,6 +3053,8 @@ const fr = {
       title: 'Album partagé',
       own: "C'est l'un de vos propres albums.",
       already: 'Vous êtes déjà dans cet album.',
+      main_shared:
+        'Votre carnet principal est partagé, il ne peut donc pas contenir d’album partagé.',
     },
     bill: {
       delete_shared:
@@ -3366,6 +3368,7 @@ const fr = {
     share_toggle: 'Partager ce carnet',
     share_toggle_caption: "Invitez jusqu'à {{max}} personnes. Elles n'ont pas besoin de Pro.",
     needs_cloud_sync: 'Connectez-vous à Cloud Sync pour partager un carnet.',
+    has_shared_albums: 'Ce carnet contient des albums partagés. Arrêtez d’abord de les partager.',
     limit_reached: "Vous pouvez partager jusqu'à {{max}} carnets pour l'instant.",
     share_failed:
       "Le carnet a été créé, mais le partage n'a pas démarré. Réessayez depuis la page Partage du carnet.",

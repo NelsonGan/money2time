@@ -2973,6 +2973,7 @@ const ko = {
       title: '공유 앨범',
       own: '내 앨범 중 하나예요.',
       already: '이미 이 앨범에 참여 중이에요.',
+      main_shared: '기본 가계부가 공유 중이라 공유 앨범을 담을 수 없어요.',
     },
     bill: {
       delete_shared: '이 청구는 공유 앨범에 있어요. 삭제하면 모두에게서 사라져요.',
@@ -3275,6 +3276,7 @@ const ko = {
     share_toggle_caption:
       '최대 {{max}}명까지 초대할 수 있어요. 초대받은 사람은 Pro가 없어도 됩니다.',
     needs_cloud_sync: '가계부를 공유하려면 Cloud Sync에 로그인하세요.',
+    has_shared_albums: '이 가계부에 공유 앨범이 있어요. 먼저 앨범 공유를 중지하세요.',
     limit_reached: '지금은 가계부를 최대 {{max}}개까지 공유할 수 있습니다.',
     share_failed:
       '가계부는 만들어졌지만 공유가 시작되지 않았습니다. 가계부의 공유 페이지에서 다시 시도하세요.',

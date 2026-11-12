@@ -3055,6 +3055,8 @@ const fil = {
       title: 'Shared na album',
       own: 'Isa ito sa sarili mong mga album.',
       already: 'Kasali ka na sa album na ito.',
+      main_shared:
+        'Naka-share ang main ledger mo, kaya hindi ito puwedeng maglaman ng shared na album.',
     },
     bill: {
       delete_shared:
@@ -3369,6 +3371,8 @@ const fil = {
     share_toggle: 'I-share ang ledger na ito',
     share_toggle_caption: 'Mag-imbita ng hanggang {{max}} tao. Hindi nila kailangan ng Pro.',
     needs_cloud_sync: 'Mag-sign in sa Cloud Sync para mag-share ng ledger.',
+    has_shared_albums:
+      'May mga shared na album ang ledger na ito. Itigil muna ang pag-share sa mga iyon.',
     limit_reached: 'Hanggang {{max}} ledger lang ang puwede mong i-share sa ngayon.',
     share_failed:
       'Nagawa ang ledger, pero hindi nagsimula ang pag-share. Subukan ulit mula sa Pag-share na page ng ledger.',
