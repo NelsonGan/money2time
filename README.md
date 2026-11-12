@@ -1574,8 +1574,9 @@ updated_at)`, with each row as JSON, plus `sync_info` (the choice screen's
   in `sync_media_pending` with the outbox flush and uploaded before the push,
   four at a time, so a row never reaches another phone before its image can.
   An upload that breaks on the phone (`network`: a dropped connection, as
-  `uploadMedia` reports any rejection of the upload) or fails on the server
-  (`server` without a 4xx status) is tried twice more, after 0.5 s and 2 s,
+  `uploadMedia` reports any rejection of the upload; also an HTTP 408 to any
+  Worker request, which the Worker never sends, so something on the way
+  timed the request out) or fails on the server (`server` without a 4xx status) is tried twice more, after 0.5 s and 2 s,
   before the round gives up: a failed round while Cloud Sync is being turned
   on sends the user back to the sign-in screen, and on 2026-11-10 one such
   blip did that to 4 of about 30 people setting it up. A refused session, Pro
