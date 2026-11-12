@@ -42,6 +42,8 @@ const split = (id: string, patch: Partial<TransactionSplit> = {}): TransactionSp
   paidAt: null,
   paidTransactionId: null,
   partOfSplitId: null,
+  isPayer: false,
+  shareAmount: null,
   sortOrder: 0,
   createdAt: AT,
   updatedAt: SPLIT_AT,
@@ -501,5 +503,51 @@ describe('module:split share and settings ops', () => {
         { op: 'create', tx: { ...NEW_TX, date: '2026-02-30' }, splits: [me(15), friend('A', 15)] },
       ]),
     ).toMatchObject({ error: 'unread' });
+  });
+});
+
+describe('module:split on a bill a friend paid', () => {
+  // Dinner RM30 that Ann paid: the expense is the user's RM10, owed to Ann.
+  const data = lookup([
+    bill([
+      split('self', { isSelf: true, personName: 'Me', amount: 10, paybackAccountId: null }),
+      split('ann', { amount: 0, isPayer: true, shareAmount: 10, paybackAccountId: null }),
+      split('bo', { amount: 0, shareAmount: 10, paybackAccountId: null }),
+    ]),
+  ]);
+
+  it('refuses an update from a page that would write the rows as a bill the user paid', () => {
+    expect(
+      plan(
+        [
+          {
+            op: 'update',
+            id: 'bill',
+            at: AT,
+            set: { note: 'Supper' },
+            splits: [
+              me(10, { id: 'self', paid: false }),
+              friend('ann', 0, { id: 'ann', paid: false, paybackAccountId: null }),
+              friend('bo', 0, { id: 'bo', paid: false, paybackAccountId: null }),
+            ],
+          },
+        ],
+        data,
+      ),
+    ).toMatchObject({ error: 'invalid' });
+  });
+
+  it('refuses settling, undoing, removing or re-pointing its rows', () => {
+    for (const op of ['settle', 'unsettle', 'remove'] as const) {
+      expect(plan([{ op, id: 'ann', txId: 'bill', at: SPLIT_AT }], data)).toMatchObject({
+        error: 'invalid',
+      });
+    }
+    expect(
+      plan(
+        [{ op: 'payback', id: 'bo', txId: 'bill', at: SPLIT_AT, paybackAccountId: 'card' }],
+        data,
+      ),
+    ).toMatchObject({ error: 'invalid' });
   });
 });

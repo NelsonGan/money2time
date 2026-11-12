@@ -24,6 +24,7 @@ import {
 import { storedBudgetCurrency, storedBudgetRate } from "./budget-currency";
 import { monthlyBudgetRows } from "./budget-period";
 import { paidWithoutTransfer, paybackNote } from "./paybacks";
+import { owedToPayers } from "./split-payer";
 import { highlightsRecurringRuns, isRecurringRun, planRuleIdsOf, recurringRuleFee } from "./recurring-run";
 import {
   accrueReducingBalance,
@@ -100,6 +101,11 @@ export type Tx = {
    * or edited.
    */
   payback?: "transfer" | "row";
+  /**
+   * A split bill a friend paid: the friend's name ("" when never named). The
+   * expense is then the user's own share, owed to that friend.
+   */
+  paidBy?: string;
   /** Made by an ordinary recurring rule (`isRecurringRun`), tinted in the lists while `Model.highlightRecurring`. */
   recurring?: boolean;
 };
@@ -289,6 +295,8 @@ export type Model = {
   trips: Trip[];
   items: Item[];
   splitDebts: SplitDebt[];
+  /** What the user still owes friends for the bills they paid, one entry per bill. */
+  splitOwed: SplitDebt[];
   splits: TransactionSplitRow[];
   /**
    * The paybacks that wrote no transfer, as transfer-shaped rows that stay in
@@ -906,6 +914,22 @@ export function buildModel(backup: BackupFile, opts: { timeZone?: string | null 
     });
   }
 
+  // The other direction: a bill a friend paid, where the user owes that friend
+  // their own share (the app's `owedToPayer`).
+  const splitOwed: SplitDebt[] = [];
+  for (const owed of owedToPayers(splits, (txId) => txById.get(txId)?.originalAmount ?? 0)) {
+    const tx = txById.get(owed.txId)!;
+    tx.paidBy = owed.person;
+    if (owed.paidAt || !(owed.amount > 0)) continue;
+    splitOwed.push({
+      person: owed.person,
+      amountBase: shareInBase(owed.amount, tx),
+      txId: tx.id,
+      date: tx.date,
+      note: tx.note,
+    });
+  }
+
   // A friend's paybacks. One into another account wrote a transfer, which is
   // tinted as a payback; one into the bill's own account wrote nothing but the
   // paid share, so it gets a row of its own, as in the app.
@@ -980,6 +1004,7 @@ export function buildModel(backup: BackupFile, opts: { timeZone?: string | null 
     trips,
     items,
     splitDebts,
+    splitOwed,
     splits,
     paybackRows,
     highlightRecurring: highlightsRecurringRuns(settings),

@@ -12,6 +12,7 @@ import {
 } from '~/features/transactions/components/SettleUpShareList';
 import type { ReceiptContent } from '~/features/transactions/components/SplitReceiptCard';
 import { SplitReceiptShareModal } from '~/features/transactions/components/SplitReceiptShareModal';
+import { personInitial } from '~/features/transactions/lib/personAvatar';
 import { personItemNames } from '~/features/transactions/lib/receiptSplitShare';
 import { buildSettleUpShareCards } from '~/features/transactions/lib/settleUpDateGroups';
 import { useSettleUpByTransaction } from '~/features/transactions/lib/useSettleUpSummary';
@@ -19,6 +20,7 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { TransactionDebtSplit } from '~/types';
+import { cn } from '~/utils';
 import { currencySymbolForCode } from '~/utils/currency';
 import { formatCurrency, formatShortDate } from '~/utils/formatters';
 
@@ -30,11 +32,6 @@ interface SettleUpTransactionScreenProps {
   onEdit: () => void;
   /** Open the itemized receipt-split editor for this bill. */
   onOpenReceiptSplit: () => void;
-}
-
-function personInitial(name: string | null): string {
-  const trimmed = name?.trim();
-  return trimmed ? trimmed[0]!.toUpperCase() : '?';
 }
 
 export function SettleUpTransactionScreen({
@@ -177,17 +174,41 @@ export function SettleUpTransactionScreen({
                   {formatShortDate(bill.date)}
                 </Text>
               </View>
-              {bill.unpaidSplitCount > 0 ? (
+              {/* A bill a friend paid is owed the other way: the user's own share, to them. */}
+              {bill.paidBy ? (
+                <Text variant="caption" tone="muted" className="mt-2 text-center">
+                  {I18n.t(
+                    bill.unpaidSplitCount > 0
+                      ? 'transactions.settleUp.section_you_owe'
+                      : 'transactions.settleUp.you_paid_back',
+                    { name: bill.paidBy.name ?? I18n.t('transactions.settleUp.someone') },
+                  )}
+                </Text>
+              ) : bill.unpaidSplitCount > 0 ? (
                 <Text variant="caption" tone="muted" className="mt-2">
                   {I18n.t('transactions.settleUp.section_owed')}
                 </Text>
               ) : null}
-              <Text variant="title" className="text-center">
+              <Text
+                variant="title"
+                className={cn(
+                  'text-center',
+                  bill.paidBy && bill.unpaidSplitCount > 0 ? 'text-destructive' : '',
+                )}
+              >
                 {formatNative(
                   bill.unpaidSplitCount === 0 ? bill.paidNative : bill.totalNative,
                   bill.currency,
                 )}
               </Text>
+              {bill.paidBy && bill.billTotalNative !== null ? (
+                <Text variant="caption" tone="muted" className="mt-1 text-center">
+                  {I18n.t('transactions.settleUp.person_paid_total', {
+                    name: bill.paidBy.name ?? I18n.t('transactions.settleUp.someone'),
+                    amount: formatNative(bill.billTotalNative, bill.currency),
+                  })}
+                </Text>
+              ) : null}
               {bill.unpaidSplitCount > 0 && bill.paidNative > 0 ? (
                 <View className="mt-3 w-full items-center px-6">
                   <View className="h-1.5 w-full max-w-[240px] overflow-hidden rounded-full bg-secondary/60">
@@ -240,9 +261,61 @@ export function SettleUpTransactionScreen({
               )}
               label={(split) => split.personName ?? I18n.t('transactions.settleUp.someone')}
             />
+
+            {/* How a bill a friend paid was shared out. Only the user's own
+                share is theirs to settle; the rest is between the others. */}
+            {bill.paidBy && bill.participants.length > 0 ? (
+              <View className="mt-4">
+                <SettleUpSectionHeader title={I18n.t('transactions.settleUp.everyone_share')} />
+                <View className="mt-1 overflow-hidden rounded-2xl border border-border/25 bg-card/60">
+                  {[
+                    {
+                      key: 'me',
+                      name: I18n.t('transactions.editor.split.me_label'),
+                      amount: bill.splits[0]?.shareTotal ?? 0,
+                      isPayer: false,
+                    },
+                    ...bill.participants.map((participant) => ({
+                      key: participant.splitId,
+                      name: participant.personName ?? I18n.t('transactions.settleUp.someone'),
+                      amount: participant.amount,
+                      isPayer: participant.isPayer,
+                    })),
+                  ].map((row, index) => (
+                    <View
+                      key={row.key}
+                      className={cn(
+                        'flex-row items-center gap-2.5 px-4 py-3',
+                        index > 0 ? 'border-t border-border/15' : '',
+                      )}
+                    >
+                      <View className="h-8 w-8 items-center justify-center rounded-full bg-secondary/50">
+                        <Text variant="caption" className="font-semibold">
+                          {personInitial(row.name)}
+                        </Text>
+                      </View>
+                      <Text variant="body" numberOfLines={1} className="shrink">
+                        {row.name}
+                      </Text>
+                      {row.isPayer ? (
+                        <View className="rounded-full bg-success/15 px-2 py-0.5">
+                          <Text variant="caption" className="font-medium text-success">
+                            {I18n.t('transactions.editor.split.payer_tag')}
+                          </Text>
+                        </View>
+                      ) : null}
+                      <View className="flex-1" />
+                      <Text variant="body" tone="muted">
+                        {formatNative(row.amount, bill.currency)}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            ) : null}
           </ScrollView>
 
-          {bill.unpaidSplitCount > 0 ? (
+          {bill.unpaidSplitCount > 0 && !bill.paidBy ? (
             <View className="px-5 pb-8 pt-2">
               <Button onPress={handleShare} className="w-full gap-2">
                 <Send size={18} color="#fff" />

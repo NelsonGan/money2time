@@ -24,6 +24,8 @@ function split(overrides: Partial<TransactionSplit>): TransactionSplit {
     paidAt: null,
     paidTransactionId: null,
     partOfSplitId: null,
+    isPayer: false,
+    shareAmount: null,
     sortOrder: 0,
     createdAt: '2026-10-12T00:00:00.000Z',
     updatedAt: '2026-10-12T00:00:00.000Z',

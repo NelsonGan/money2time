@@ -22,6 +22,7 @@ import {
   Timer,
   Trash2,
   Type,
+  UserRound,
 } from 'lucide-react-native';
 import React, { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -107,6 +108,7 @@ import {
   pickPaybackAccountId,
 } from '~/features/transactions/lib/entryDefaults';
 import { resolveNoteChange } from '~/features/transactions/lib/noteSuggestionPick';
+import { draftPayer } from '~/features/transactions/lib/splitPayer';
 import { resolveSplitSaveRoute } from '~/features/transactions/lib/splitSaveRoute';
 import {
   canChargeTransferFee,
@@ -1041,8 +1043,10 @@ export function TransactionEditorScreen({
   // re-opening the split editor to manage it must never be gated. A transaction
   // whose splits are all settled does NOT count, so adding a new split to it is
   // treated like starting a fresh bill and gated normally.
-  const startsAsUnsettledSplitBill =
-    !!initialSplits && initialSplits.some((s) => !s.isSelf && !s.paid && Number(s.amount) > 0);
+  const initialPayer = initialSplits ? draftPayer(initialSplits) : null;
+  const startsAsUnsettledSplitBill = initialPayer
+    ? !initialPayer.settled
+    : !!initialSplits && initialSplits.some((s) => !s.isSelf && !s.paid && Number(s.amount) > 0);
   const [splitMode, setSplitMode] = useState(hasInitialSplits);
   // The instalment plan chosen for this new expense, or null for an ordinary
   // one. Kept while the type changes so switching back restores it.
@@ -1699,6 +1703,7 @@ export function TransactionEditorScreen({
         return {
           ...existing,
           paid: incoming.paid,
+          settled: incoming.settled,
           paybackAccountId: incoming.paid ? incoming.paybackAccountId : existing.paybackAccountId,
         };
       });
@@ -1752,6 +1757,11 @@ export function TransactionEditorScreen({
     !!instalmentOptions && type === 'expense' && !recurringOptions && !onSubmitConfirmed;
   const instalmentActive = instalmentsOffered && instalmentChoice !== null;
   const hasFriendSplits = splitMode && splits.some((s) => !s.isSelf);
+  // A friend paid this bill (the Split Bill page's Paid by). The amount here is
+  // still the whole bill; the expense saved is the user's own share, on no
+  // account until they pay that friend back (lib/splitPayer.ts).
+  const friendPayer = splitMode && type === 'expense' ? draftPayer(splits) : null;
+  const owesFriendPayer = !!friendPayer && !friendPayer.settled;
   const canOpenSplitBill =
     !hideSplitMode && type === 'expense' && !recurringOptions && !instalmentActive;
 
@@ -1899,7 +1909,13 @@ export function TransactionEditorScreen({
   // transition) so the just-created draft row doesn't flash a "(1)" on the button
   // behind the screen before it's actually committed.
   const splitBillsUnpaidCount =
-    splitMode && !splitRouteOpen ? splits.filter((s) => !s.isSelf && !s.paid).length : 0;
+    !splitMode || splitRouteOpen
+      ? 0
+      : friendPayer
+        ? owesFriendPayer
+          ? 1
+          : 0
+        : splits.filter((s) => !s.isSelf && !s.paid).length;
 
   // Mark Paid / Undo only stage the change locally. They adjust the editor's
   // amount field and flip the row's paid badge. Nothing is persisted until the
@@ -2287,7 +2303,10 @@ export function TransactionEditorScreen({
         preparedSubmitPayload = submitPayload;
       } else {
         const baseErrors: typeof fieldErrors = {};
-        if (!accountId) baseErrors.account = I18n.t('transactions.editor.error.required');
+        // A bill a friend paid has not left any of the user's accounts yet.
+        if (!accountId && !owesFriendPayer) {
+          baseErrors.account = I18n.t('transactions.editor.error.required');
+        }
         if (!categoryId) baseErrors.category = I18n.t('transactions.editor.error.required');
         if (Object.keys(baseErrors).length > 0) {
           setError(I18n.t('transactions.editor.error.complete_required'));
@@ -4509,7 +4528,24 @@ export function TransactionEditorScreen({
               style={styles.actionRow}
               contentContainerStyle={styles.actionRowContent}
             >
-              {showAccountChip ? (
+              {showAccountChip && owesFriendPayer ? (
+                // A friend paid: no account to pick until the user pays them
+                // back, so the chip says who paid and opens the split instead.
+                <Pressable
+                  onPress={() => handleOpenSplitBill()}
+                  accessibilityRole="button"
+                  style={styles.accountChip}
+                  className="h-9 flex-row items-center gap-1.5 rounded-full border border-primary/40 bg-primary/15 px-3 active:opacity-70"
+                >
+                  <UserRound size={14} color={themeColors.primary} />
+                  <Text variant="caption" numberOfLines={1} className="shrink text-primary">
+                    {I18n.t('transactions.editor.split.paid_by_chip', {
+                      name:
+                        friendPayer?.personName.trim() || I18n.t('transactions.settleUp.someone'),
+                    })}
+                  </Text>
+                </Pressable>
+              ) : showAccountChip ? (
                 <Pressable
                   onPress={() => {
                     void triggerHaptic('selection');
@@ -4739,6 +4775,17 @@ export function TransactionEditorScreen({
                   >
                     {amountDisplay}
                   </Text>
+                  {/* A friend paid: the amount is the whole bill, the expense saved
+                      is only the user's share of it. */}
+                  {friendPayer ? (
+                    <Text variant="caption" tone="primary" numberOfLines={1}>
+                      {I18n.t('transactions.editor.split.your_share', {
+                        amount: `${entryCurrencySymbol}${(
+                          Number(splits.find((s) => s.isSelf)?.amount) || 0
+                        ).toFixed(2)}`,
+                      })}
+                    </Text>
+                  ) : null}
                   {workTimeNudgeParts ? (
                     <Text variant="caption" tone="muted" style={styles.nudgeLabel}>
                       {workTimeNudgeParts.before}

@@ -1045,7 +1045,7 @@
       "splits": {
         "nav": "分摊账单",
         "title": "分摊账单",
-        "subtitle": "谁还欠你钱"
+        "subtitle": "你和朋友之间互相欠多少"
       },
       "mood": {
         "nav": "心情与习惯",
@@ -1359,13 +1359,16 @@
       "emptyTitle": "没有分摊账单",
       "emptyBody": "你在应用中与朋友分摊的账单会显示在这里。",
       "owedToYou": "欠你的钱",
+      "youOwe": "你欠",
+      "youOweNote": "朋友付款的账单",
+      "owesYou": "欠你",
       "people": "{count, plural, =0 {全部结清} other {来自 # 人}}",
       "settled": "已结清份额",
       "ofShares": "{count, plural, other {共 # 份}}",
       "bills": "分摊账单",
       "billsNote": "你分摊过的交易",
-      "byPerson": "谁欠你钱",
-      "allSettled": "所有人都已还钱",
+      "byPerson": "欠款往来",
+      "allSettled": "全部结清",
       "open": "{count, plural, other {# 份未结清}}",
       "billsTitle": "分摊的交易",
       "unnamed": "某人"
@@ -1448,6 +1451,7 @@
       "nudgePause": "值得三思：约 {hours} 的工作量",
       "nudgeLarge": "这相当于 {hours} 的工作时间",
       "amountLocked": "此金额与分摊或退款关联。请在应用中更改。",
+      "friendPaid": "这张账单由 {name} 付款，请在 App 中修改。",
       "hideBalances": "隐藏余额",
       "showBalances": "显示余额",
       "savingsGoals": "储蓄目标",
@@ -1979,6 +1983,7 @@
         "someone": "某人",
         "untitledBill": "分摊账单",
         "paidTitle": "已还款",
+        "personPaid": "{name} 付款",
         "undoTitle": "将这份标记为未还吗？",
         "undoBody": "对方会重新欠你这笔钱，支出也会增加相应金额。转入其他账户的还款转账会被移除。",
         "itemizedTotal": "合计：{sum}",

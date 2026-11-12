@@ -20,6 +20,10 @@ export interface CreateTransactionSplitInput {
   paidTransactionId?: string | null;
   /** A part payment: the share's first row it was paid out of. */
   partOfSplitId?: string | null;
+  /** This friend paid the bill (see `TransactionSplit.isPayer`). */
+  isPayer?: boolean;
+  /** A friend's share of a bill another friend paid. */
+  shareAmount?: number | null;
 }
 
 export interface UpdateTransactionSplitInput {
@@ -30,6 +34,8 @@ export interface UpdateTransactionSplitInput {
   paidAt?: string | null;
   paidTransactionId?: string | null;
   partOfSplitId?: string | null;
+  isPayer?: boolean;
+  shareAmount?: number | null;
 }
 
 class TransactionSplitsRepository {
@@ -159,6 +165,10 @@ class TransactionSplitsRepository {
       paidAt: input.paidAt ?? null,
       paidTransactionId: input.paidTransactionId ?? null,
       partOfSplitId: input.partOfSplitId ?? null,
+      // Null, not false, on a bill the user paid: the row is then exactly what
+      // an app version from before these columns writes.
+      isPayer: input.isPayer ? true : null,
+      shareAmount: input.shareAmount == null ? null : normalizeMoneyAmount(input.shareAmount),
       sortOrder: input.sortOrder ?? 0,
       createdAt: now,
       updatedAt: now,
@@ -192,6 +202,11 @@ class TransactionSplitsRepository {
     if (updates.paidAt !== undefined) set.paidAt = updates.paidAt;
     if (updates.paidTransactionId !== undefined) set.paidTransactionId = updates.paidTransactionId;
     if (updates.partOfSplitId !== undefined) set.partOfSplitId = updates.partOfSplitId;
+    if (updates.isPayer !== undefined) set.isPayer = updates.isPayer ? true : null;
+    if (updates.shareAmount !== undefined) {
+      set.shareAmount =
+        updates.shareAmount === null ? null : normalizeMoneyAmount(updates.shareAmount);
+    }
     db.update(transactionSplitsTable)
       .set(set)
       .where(and(eq(transactionSplitsTable.id, id), isNull(transactionSplitsTable.deletedAt)))

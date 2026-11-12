@@ -17,9 +17,15 @@ function person(
     name: key,
     totalReporting: unpaidBillCount * 10,
     paidReporting: 0,
+    owedReporting: 0,
+    owedPaidReporting: 0,
+    netReporting: 0,
     byCurrency: [],
+    owedByCurrency: [],
+    netByCurrency: [],
     bills: bills.map((bill, index) => ({
       splitId: `${key}-${index}`,
+      direction: 'owes_you' as const,
       transactionId: `${key}-tx-${index}`,
       date: bill.date,
       amount: 10,
@@ -37,6 +43,7 @@ function person(
     oldestDate: bills[bills.length - 1]?.date ?? '',
     billCount: bills.length,
     unpaidBillCount,
+    youOweCount: 0,
   };
 }
 
@@ -48,6 +55,9 @@ function transaction(
 ): TransactionDebt {
   return {
     transactionId,
+    paidBy: null,
+    billTotalNative: null,
+    participants: [],
     date,
     note: null,
     categoryName: null,

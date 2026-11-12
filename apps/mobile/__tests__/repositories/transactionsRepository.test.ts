@@ -12,6 +12,8 @@ function makeSplit(overrides: Partial<TransactionSplit>): TransactionSplit {
     paidAt: null,
     paidTransactionId: null,
     partOfSplitId: null,
+    isPayer: false,
+    shareAmount: null,
     sortOrder: 0,
     createdAt: '2026-05-13T00:00:00.000Z',
     updatedAt: '2026-05-13T00:00:00.000Z',
@@ -38,6 +40,7 @@ describe('summarizeSplits', () => {
       paidCount: 2,
       unpaidAmount: 0,
       totalOwed: 40,
+      youOwe: false,
     });
   });
 
@@ -47,6 +50,7 @@ describe('summarizeSplits', () => {
       paidCount: 0,
       unpaidAmount: 0,
       totalOwed: 0,
+      youOwe: false,
     });
   });
 
@@ -71,6 +75,7 @@ describe('summarizeSplits', () => {
       paidCount: 1,
       unpaidAmount: 25,
       totalOwed: 45,
+      youOwe: false,
     });
   });
 
@@ -81,6 +86,40 @@ describe('summarizeSplits', () => {
       paidCount: 1,
       unpaidAmount: 0,
       totalOwed: 30,
+      youOwe: false,
+    });
+  });
+
+  describe('a bill a friend paid', () => {
+    const rows = (paidAt: string | null = null) => [
+      makeSplit({ id: 'me', isSelf: true, amount: 30 }),
+      makeSplit({ id: 'aisha', amount: 0, isPayer: true, shareAmount: 30, paidAt }),
+      makeSplit({ id: 'ben', amount: 0, shareAmount: 30 }),
+    ];
+
+    it('has one share to settle: what the user owes the payer', () => {
+      expect(summarizeSplits(rows())).toEqual({
+        count: 1,
+        paidCount: 0,
+        unpaidAmount: 30,
+        totalOwed: 30,
+        youOwe: true,
+      });
+    });
+
+    it('is settled once the user has paid the payer back', () => {
+      expect(summarizeSplits(rows('2026-11-12T00:00:00.000Z'))).toEqual({
+        count: 1,
+        paidCount: 1,
+        unpaidAmount: 0,
+        totalOwed: 30,
+        youOwe: true,
+      });
+    });
+
+    it('is settled when the user had no share of it', () => {
+      const none = rows().map((split) => (split.isSelf ? { ...split, amount: 0 } : split));
+      expect(summarizeSplits(none)).toMatchObject({ count: 1, paidCount: 1, unpaidAmount: 0 });
     });
   });
 });

@@ -205,6 +205,12 @@ export const GA4_ONLY_EVENTS = {
   /** Part of a share was paid back; the rest is still owed. */
   SPLIT_PART_PAID: 'Split Part Paid',
   SPLIT_MARKED_UNPAID: 'Split Marked Unpaid',
+  /** The user paid a friend back for a bill that friend paid. */
+  SPLIT_DEBT_PAID: 'Split Debt Paid',
+  /** That payment was undone, so the user owes it again. */
+  SPLIT_DEBT_REOPENED: 'Split Debt Reopened',
+  /** Settle up on a person's page cleared everything open with them, both ways. */
+  SETTLE_UP_COMPLETED: 'Settle Up Completed',
   SETTLE_UP_QR_SET: 'Settle Up Payment QR Set',
 
   // Reimbursements

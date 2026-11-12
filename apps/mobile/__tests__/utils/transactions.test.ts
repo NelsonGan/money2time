@@ -158,6 +158,8 @@ describe('reuseUnchangedTransactions', () => {
       paidAt: null,
       paidTransactionId: null,
       partOfSplitId: null,
+      isPayer: false,
+      shareAmount: null,
       sortOrder: 0,
       createdAt: '2026-05-13T00:00:00.000Z',
       updatedAt: '2026-05-13T00:00:00.000Z',

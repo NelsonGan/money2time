@@ -21,6 +21,8 @@ function split(overrides: Partial<TransactionSplit>): TransactionSplit {
     paidAt: null,
     paidTransactionId: null,
     partOfSplitId: null,
+    isPayer: false,
+    shareAmount: null,
     sortOrder: 0,
     createdAt: '2026-10-12T00:00:00.000Z',
     updatedAt: '2026-10-12T00:00:00.000Z',
@@ -172,6 +174,28 @@ describe('buildPaybackRows', () => {
     });
     expect(isPaybackRow(row!)).toBe(true);
     expect(isPaybackRow({ id: 'tr' })).toBe(false);
+  });
+
+  it('shows nothing for a bill a friend paid once the user has paid them back', () => {
+    // The payer's row is paid, but it is the user paying, not a payback to them.
+    const friendPaid = [
+      bill({
+        amount: 30,
+        splits: [
+          split({ id: 'me', isSelf: true, amount: 30 }),
+          split({
+            id: 'payer',
+            amount: 0,
+            isPayer: true,
+            shareAmount: 30,
+            paidAt: PAID,
+            paybackAccountId: 'maybank',
+          }),
+        ],
+      }),
+    ];
+    expect(buildPaybackRows(friendPaid, currencyOf, RATES)).toEqual([]);
+    expect(indexPaybacks(friendPaid).size).toBe(0);
   });
 
   it("shows a bill with no account's paybacks, named as a payback transfer would be", () => {

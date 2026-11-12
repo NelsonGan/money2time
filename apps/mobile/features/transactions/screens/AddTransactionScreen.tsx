@@ -11,6 +11,7 @@ import { TransactionEditorScreen } from '~/features/transactions/components';
 import { type SplitDraft, splitsHelpers } from '~/features/transactions/components/editor';
 import type { TransactionEditorSubmitExtras } from '~/features/transactions/components/TransactionEditorScreen';
 import { useNewTransactionGate } from '~/features/transactions/hooks/useNewTransactionGate';
+import { draftPayer, friendPaidExpense } from '~/features/transactions/lib/splitPayer';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
 import type { AddTransactionInitialValues } from '~/navigation/rootStack';
 import { requestHighlightTransaction } from '~/services/transactionsNavigation';
@@ -99,6 +100,17 @@ export function AddTransactionScreen({
 
   const handleSubmitWithSplits = useCallback(
     (input: CreateTransactionInput, splits: SplitDraft[]) => {
+      // A friend paid: the expense is the user's own share, on no account
+      // until they pay that friend back, and nobody owes the user anything.
+      if (draftPayer(splits)) {
+        const share = Number(splits.find((s) => s.isSelf)?.amount) || 0;
+        createTransactionWithSplits(
+          friendPaidExpense(input, share, false),
+          splitsHelpers.toSplitDraftInputs(splits, null),
+        );
+        return;
+      }
+
       // Stage the locally-marked-paid friends so we can flush them via
       // markSplitPaid AFTER the parent + splits are created. This mirrors
       // EditTransactionScreen — the markSplitPaid path is the one that

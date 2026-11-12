@@ -1045,7 +1045,7 @@
       "splits": {
         "nav": "Conti divisi",
         "title": "Conti divisi",
-        "subtitle": "Chi ti deve ancora dei soldi"
+        "subtitle": "Quello che tu e i tuoi amici vi dovete"
       },
       "mood": {
         "nav": "Umore e abitudini",
@@ -1359,13 +1359,16 @@
       "emptyTitle": "Nessun conto diviso",
       "emptyBody": "I conti che dividi con gli amici nell'app compaiono qui.",
       "owedToYou": "Ti devono",
+      "youOwe": "Devi",
+      "youOweNote": "Per i conti pagati dagli amici",
+      "owesYou": "Ti deve",
       "people": "{count, plural, =0 {Tutto saldato} one {Da # persona} many {Da # di persone} other {Da # persone}}",
       "settled": "Quote saldate",
       "ofShares": "{count, plural, one {Su # quota} many {Su # di quote} other {Su # quote}}",
       "bills": "Conti divisi",
       "billsNote": "Transazioni che hai condiviso",
-      "byPerson": "Chi ti deve dei soldi",
-      "allSettled": "Tutti ti hanno restituito i soldi",
+      "byPerson": "Saldi",
+      "allSettled": "Tutto saldato",
       "open": "{count, plural, one {# quota aperta} many {# di quote aperte} other {# quote aperte}}",
       "billsTitle": "Transazioni condivise",
       "unnamed": "Qualcuno"
@@ -1448,6 +1451,7 @@
       "nudgePause": "Vale una pausa: ~{hours} di lavoro",
       "nudgeLarge": "Sono {hours} del tuo tempo lavorativo",
       "amountLocked": "Questo importo è collegato a una divisione o a un rimborso. Modificalo nell'app.",
+      "friendPaid": "{name} ha pagato questo conto. Modificalo nell'app.",
       "hideBalances": "Nascondi saldi",
       "showBalances": "Mostra saldi",
       "savingsGoals": "Obiettivi di risparmio",
@@ -1979,6 +1983,7 @@
         "someone": "Qualcuno",
         "untitledBill": "Conto diviso",
         "paidTitle": "Rimborsato",
+        "personPaid": "{name} ha pagato",
         "undoTitle": "Segnare questa quota come non pagata?",
         "undoBody": "Ti viene dovuta di nuovo e la spesa torna a salire di questo importo. Un trasferimento di rimborso verso un altro conto viene rimosso.",
         "itemizedTotal": "Totale: {sum}",

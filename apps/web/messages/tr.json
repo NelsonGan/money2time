@@ -1045,7 +1045,7 @@
       "splits": {
         "nav": "Bölüşülen hesaplar",
         "title": "Bölüşülen hesaplar",
-        "subtitle": "Size hâlâ kimler borçlu"
+        "subtitle": "Sizin ve arkadaşlarınızın birbirine borcu"
       },
       "mood": {
         "nav": "Ruh hali ve alışkanlıklar",
@@ -1359,13 +1359,16 @@
       "emptyTitle": "Bölüşülen hesap yok",
       "emptyBody": "Uygulamada arkadaşlarınızla böldüğünüz hesaplar burada görünür.",
       "owedToYou": "Size borçlu",
+      "youOwe": "Borcunuz",
+      "youOweNote": "Arkadaşların ödediği hesaplar için",
+      "owesYou": "Size borcu",
       "people": "{count, plural, =0 {Hepsi ödendi} one {# kişiden} other {# kişiden}}",
       "settled": "Ödenen paylar",
       "ofShares": "{count, plural, one {# paydan} other {# paydan}}",
       "bills": "Bölüşülen hesaplar",
       "billsNote": "Paylaştığınız işlemler",
-      "byPerson": "Size kimler borçlu",
-      "allSettled": "Herkes size borcunu ödedi",
+      "byPerson": "Bakiyeler",
+      "allSettled": "Her şey ödeşildi",
       "open": "{count, plural, one {# açık pay} other {# açık pay}}",
       "billsTitle": "Paylaşılan işlemler",
       "unnamed": "Biri"
@@ -1448,6 +1451,7 @@
       "nudgePause": "Düşünmeye değer: ~{hours} çalışma",
       "nudgeLarge": "Bu {hours} çalışma sürenize denk geliyor",
       "amountLocked": "Bu tutar bir bölüşüme veya iadeye bağlı. Uygulamada değiştirin.",
+      "friendPaid": "Bu hesabı {name} ödedi. Uygulamada değiştirin.",
       "hideBalances": "Bakiyeleri gizle",
       "showBalances": "Bakiyeleri göster",
       "savingsGoals": "Birikim Hedefleri",
@@ -1979,6 +1983,7 @@
         "someone": "Birisi",
         "untitledBill": "Bölünen hesap",
         "paidTitle": "Geri ödendi",
+        "personPaid": "{name} ödedi",
         "undoTitle": "Bu pay ödenmedi olarak işaretlensin mi?",
         "undoBody": "Tutar yeniden size borçlu olur ve gider bu tutar kadar artar. Başka bir hesaba yapılan geri ödeme transferi kaldırılır.",
         "itemizedTotal": "Toplam: {sum}",

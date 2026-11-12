@@ -1045,7 +1045,7 @@
       "splits": {
         "nav": "Tagihan patungan",
         "title": "Tagihan patungan",
-        "subtitle": "Siapa yang masih berutang padamu"
+        "subtitle": "Utang antara kamu dan teman-temanmu"
       },
       "mood": {
         "nav": "Suasana hati & kebiasaan",
@@ -1359,13 +1359,16 @@
       "emptyTitle": "Tidak ada tagihan patungan",
       "emptyBody": "Tagihan yang kamu patungkan dengan teman di aplikasi muncul di sini.",
       "owedToYou": "Utang kepadamu",
+      "youOwe": "Kamu berutang",
+      "youOweNote": "Untuk tagihan yang dibayar teman",
+      "owesYou": "Berutang padamu",
       "people": "{count, plural, =0 {Semua sudah lunas} other {Dari # orang}}",
       "settled": "Bagian yang lunas",
       "ofShares": "{count, plural, other {Dari # bagian}}",
       "bills": "Tagihan patungan",
       "billsNote": "Transaksi yang kamu bagi",
-      "byPerson": "Siapa yang berutang padamu",
-      "allSettled": "Semua orang sudah membayar kembali",
+      "byPerson": "Utang piutang",
+      "allSettled": "Semua sudah lunas",
       "open": "{count, plural, other {# bagian belum lunas}}",
       "billsTitle": "Transaksi patungan",
       "unnamed": "Seseorang"
@@ -1448,6 +1451,7 @@
       "nudgePause": "Patut dipikir: ~{hours} waktu kerja",
       "nudgeLarge": "Ini setara {hours} waktu kerjamu",
       "amountLocked": "Jumlah ini terkait dengan pembagian tagihan atau pengembalian dana. Ubah di aplikasi.",
+      "friendPaid": "{name} membayar tagihan ini. Ubah di aplikasi.",
       "hideBalances": "Sembunyikan saldo",
       "showBalances": "Tampilkan saldo",
       "savingsGoals": "Target Tabungan",
@@ -1979,6 +1983,7 @@
         "someone": "Seseorang",
         "untitledBill": "Bagi tagihan",
         "paidTitle": "Dibayar kembali",
+        "personPaid": "{name} membayar",
         "undoTitle": "Tandai bagian ini belum dibayar?",
         "undoBody": "Bagian ini kembali menjadi utang untukmu, dan pengeluaran naik lagi sebesar jumlah ini. Transfer pembayaran kembali ke akun lain akan dihapus.",
         "itemizedTotal": "Total: {sum}",

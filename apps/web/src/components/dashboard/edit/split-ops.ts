@@ -5,6 +5,7 @@
  */
 
 import type { Model } from "@/lib/backup/model";
+import { billPayer } from "../../../lib/backup/split-payer.ts";
 import type { TransactionSplitRow } from "@/lib/backup/types";
 import type { TxFields } from "@/lib/cloud/edits";
 
@@ -50,7 +51,11 @@ export function splitsOf(model: Model, txId: string): SplitRecord[] {
     .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
 }
 
-/** Expenses with a friend's share still owed: what the free plan counts. */
+/**
+ * Expenses with a friend's share still owed, or that a friend paid and the
+ * user has not paid back: what the free plan counts (the app's
+ * `countUnpaidSplitBills`).
+ */
 export function unpaidSplitBills(model: Model): number {
   const live = new Set(model.txs.map((tx) => tx.id));
   const bills = new Set<string>();
@@ -58,7 +63,17 @@ export function unpaidSplitBills(model: Model): number {
     if (row.deleted_at || row.is_self || row.paid_at || !(row.amount > 0) || !live.has(row.transaction_id)) continue;
     bills.add(row.transaction_id);
   }
+  for (const debt of model.splitOwed) bills.add(debt.txId);
   return bills.size;
+}
+
+/**
+ * The friend who paid a saved bill, or null when the user did. Such a bill is
+ * changed in the app: its rows mean something else there (see
+ * lib/backup/split-payer.ts), and the phone refuses a split edit of one.
+ */
+export function payerOf(model: Model, txId: string): SplitRecord | null {
+  return billPayer(splitsOf(model, txId));
 }
 
 // -------------------------------------------- the Split Bill page's arithmetic --

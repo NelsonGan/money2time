@@ -1045,7 +1045,7 @@
       "splits": {
         "nav": "Notes partagées",
         "title": "Notes partagées",
-        "subtitle": "Qui vous doit encore de l'argent"
+        "subtitle": "Ce que vous et vos amis vous devez"
       },
       "mood": {
         "nav": "Humeur et habitudes",
@@ -1359,13 +1359,16 @@
       "emptyTitle": "Aucune note partagée",
       "emptyBody": "Les notes que vous partagez avec des amis dans l'app apparaissent ici.",
       "owedToYou": "Vous est dû",
+      "youOwe": "Vous devez",
+      "youOweNote": "Pour les factures payées par vos amis",
+      "owesYou": "Vous doit",
       "people": "{count, plural, =0 {Tout est réglé} one {Par # personne} other {Par # personnes}}",
       "settled": "Parts réglées",
       "ofShares": "{count, plural, one {Sur # part} other {Sur # parts}}",
       "bills": "Notes partagées",
       "billsNote": "Transactions que vous avez partagées",
-      "byPerson": "Qui vous doit de l'argent",
-      "allSettled": "Tout le monde vous a remboursé",
+      "byPerson": "Soldes",
+      "allSettled": "Tout est réglé",
       "open": "{count, plural, one {# part ouverte} other {# parts ouvertes}}",
       "billsTitle": "Transactions partagées",
       "unnamed": "Quelqu'un"
@@ -1448,6 +1451,7 @@
       "nudgePause": "À réfléchir : ~{hours} de travail",
       "nudgeLarge": "C'est {hours} de votre temps de travail",
       "amountLocked": "Ce montant est lié à un partage ou à un remboursement. Modifiez-le dans l'app.",
+      "friendPaid": "{name} a payé cette facture. Modifiez-la dans l'app.",
       "hideBalances": "Masquer les soldes",
       "showBalances": "Afficher les soldes",
       "savingsGoals": "Objectifs d'épargne",
@@ -1979,6 +1983,7 @@
         "someone": "Quelqu'un",
         "untitledBill": "Facture partagée",
         "paidTitle": "Remboursé",
+        "personPaid": "{name} a payé",
         "undoTitle": "Marquer cette part comme impayée ?",
         "undoBody": "Elle vous est de nouveau due, et la dépense remonte de ce montant. Un virement de remboursement vers un autre compte est supprimé.",
         "itemizedTotal": "Total : {sum}",

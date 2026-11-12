@@ -69,11 +69,13 @@ import {
 import {
   buildPaybackTransferNote,
   countUnpaidSplitBills,
+  personSettlementRows,
 } from '~/features/transactions/lib/settleUp';
 import {
   rescaleSplitAdjustedAmounts,
   type SplitSnapshotRates,
 } from '~/features/transactions/lib/splitAmountSnapshot';
+import { billPayer } from '~/features/transactions/lib/splitPayer';
 import {
   applyShareHandover,
   applyUnpaidMerge,
@@ -298,6 +300,10 @@ export interface SplitDraftInput {
   paid?: { paidAt: string; paidTransactionId: string | null };
   /** A part payment: the share's first row it was paid out of. */
   partOfSplitId?: string | null;
+  /** This friend paid the bill, so the user owes them (see splitPayer.ts). */
+  isPayer?: boolean;
+  /** A friend's share of a bill another friend paid; `amount` is then 0. */
+  shareAmount?: number | null;
 }
 
 /** How a transaction was entered. Drives which analytics event fires on
@@ -635,6 +641,23 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   markSplitUnpaid: (splitId: string) => void;
   updateSplitPaybackAccount: (splitId: string, paybackAccountId: string | null) => void;
   deleteSplit: (splitId: string) => void;
+  /**
+   * The user paid a friend back for a bill that friend paid (`payerSplitId` is
+   * the payer's row). The expense moves onto `accountId`, the account it was
+   * paid from; null records the payment without one.
+   */
+  payBackPayer: (
+    payerSplitId: string,
+    options?: { accountId?: string | null; via?: 'bill' | 'settle_up' },
+  ) => void;
+  /** Undoes {@link payBackPayer}: the user owes the share again. */
+  undoPayBackPayer: (payerSplitId: string) => void;
+  /**
+   * Settles everything open with one person, both ways, through `accountId`:
+   * their unpaid shares are marked paid into it and the bills they paid are
+   * paid back from it, so the account moves by the net.
+   */
+  settleUpWithPerson: (personKey: string, accountId: string | null) => void;
 
   /** Reimbursements: an expense someone else pays back. */
   markTransactionReimbursed: (
@@ -1461,9 +1484,13 @@ function isLoggedEntryType(type: TransactionWithRelations['type']): boolean {
 }
 
 /** Report a bill split with other people; a split kept only for oneself is not one. */
-function trackSplitBillCreated(splits: readonly { isSelf: boolean }[]): void {
+function trackSplitBillCreated(splits: readonly { isSelf: boolean; isPayer?: boolean }[]): void {
   const people = splits.filter((split) => !split.isSelf).length;
-  if (people > 0) void trackEvent(AnalyticsEvents.SPLIT_BILL_CREATED, { people });
+  if (people === 0) return;
+  void trackEvent(AnalyticsEvents.SPLIT_BILL_CREATED, {
+    people,
+    paid_by: splits.some((split) => split.isPayer && !split.isSelf) ? 'friend' : 'me',
+  });
 }
 
 /** Erases the user's own data. Shared ledgers stay (see `deletePersonalLedgerRows`). */
@@ -4346,6 +4373,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           paidAt: draft.paid?.paidAt ?? null,
           paidTransactionId,
           partOfSplitId: draft.partOfSplitId ?? null,
+          isPayer: !!draft.isPayer,
+          shareAmount: draft.shareAmount == null ? null : normalizeMoneyAmount(draft.shareAmount),
           sortOrder: draft.sortOrder ?? index,
           createdAt: now,
           updatedAt: now,
@@ -4452,6 +4481,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               paidAt: s.paidAt,
               paidTransactionId: s.paidTransactionId,
               partOfSplitId: s.partOfSplitId,
+              isPayer: s.isPayer,
+              shareAmount: s.shareAmount,
             });
           });
           if (receiptSplit) {
@@ -4508,6 +4539,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           paidAt: null,
           paidTransactionId: null,
           partOfSplitId: draft.partOfSplitId ?? null,
+          isPayer: !!draft.isPayer,
+          shareAmount: draft.shareAmount == null ? null : normalizeMoneyAmount(draft.shareAmount),
           sortOrder: draft.sortOrder ?? index,
           createdAt: now,
           updatedAt: now,
@@ -4575,6 +4608,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 amount: next.amount,
                 paybackAccountId: next.paybackAccountId,
                 sortOrder: next.sortOrder,
+                isPayer: next.isPayer,
+                shareAmount: next.shareAmount,
               });
             } else {
               transactionSplitsRepository.createWithId(next.id, {
@@ -4585,6 +4620,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 paybackAccountId: next.paybackAccountId,
                 sortOrder: next.sortOrder,
                 partOfSplitId: next.partOfSplitId,
+                isPayer: next.isPayer,
+                shareAmount: next.shareAmount,
               });
             }
           });
@@ -5073,6 +5110,130 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       });
     },
     [accountCurrencyOf, scheduleRefreshTransactions, undonePaybackOf],
+  );
+
+  // The user pays a friend back for a bill that friend paid. Until now the
+  // expense (the user's share) sat on no account, because the money had not
+  // left the user; paying puts it on the account it was paid from, at the
+  // bill's own date and amount, so spending does not move. The payer's row
+  // records when, and from which account (features/transactions/lib/splitPayer.ts).
+  const payBackPayer = useCallback(
+    (payerSplitId: string, options?: { accountId?: string | null; via?: 'bill' | 'settle_up' }) => {
+      const paidAtIso = nowIso();
+      const accountId = options?.accountId ?? null;
+      const via = options?.via ?? 'bill';
+      const accountAmountFor = (bill: { amount: number; currency: string }): number | null => {
+        const accountCurrency = accountId ? accountCurrencyOf(accountId) : undefined;
+        return accountCurrency && accountCurrency !== bill.currency
+          ? convert(bill.amount, bill.currency, accountCurrency, rateTableRef.current).value
+          : null;
+      };
+      setTransactions((prev) =>
+        prev.map((tx) => {
+          const payer = billPayer(tx.splits);
+          if (!payer || payer.id !== payerSplitId || payer.paidAt) return tx;
+          const updatedSplits = (tx.splits ?? []).map((s) =>
+            s.id === payerSplitId
+              ? { ...s, paidAt: paidAtIso, paybackAccountId: accountId, updatedAt: paidAtIso }
+              : s,
+          );
+          return {
+            ...tx,
+            accountId,
+            accountName: resolveRelationNames({ accountId }).accountName,
+            accountAmount: accountAmountFor(tx),
+            updatedAt: paidAtIso,
+            splits: updatedSplits,
+            splitsSummary: summarizeSplits(updatedSplits),
+          };
+        }),
+      );
+      runDeferredWrite(() => {
+        try {
+          const split = transactionSplitsRepository.findById(payerSplitId);
+          if (!split || !split.isPayer || split.isSelf || split.paidAt) return;
+          const parent = transactionsRepository.getById(split.transactionId);
+          if (!parent) return;
+          getSQLite().withTransactionSync(() => {
+            transactionsRepository.update(parent.id, {
+              accountId,
+              accountAmount: accountAmountFor(parent),
+            });
+            transactionSplitsRepository.update(payerSplitId, {
+              paidAt: paidAtIso,
+              paybackAccountId: accountId,
+            });
+          });
+          void trackEvent(AnalyticsEvents.SPLIT_DEBT_PAID, { with_account: !!accountId, via });
+        } catch {
+          // ignore; refresh below restores truth
+        }
+        scheduleRefreshTransactions();
+      });
+    },
+    [accountCurrencyOf, resolveRelationNames, scheduleRefreshTransactions],
+  );
+
+  // Undo: the user owes the share again, and the expense leaves the account.
+  const undoPayBackPayer = useCallback(
+    (payerSplitId: string) => {
+      const now = nowIso();
+      setTransactions((prev) =>
+        prev.map((tx) => {
+          const payer = billPayer(tx.splits);
+          if (!payer || payer.id !== payerSplitId || !payer.paidAt) return tx;
+          const updatedSplits = (tx.splits ?? []).map((s) =>
+            s.id === payerSplitId
+              ? { ...s, paidAt: null, paybackAccountId: null, updatedAt: now }
+              : s,
+          );
+          return {
+            ...tx,
+            accountId: null,
+            accountName: null,
+            accountAmount: null,
+            updatedAt: now,
+            splits: updatedSplits,
+            splitsSummary: summarizeSplits(updatedSplits),
+          };
+        }),
+      );
+      runDeferredWrite(() => {
+        try {
+          const split = transactionSplitsRepository.findById(payerSplitId);
+          if (!split || !split.isPayer || !split.paidAt) return;
+          getSQLite().withTransactionSync(() => {
+            transactionsRepository.update(split.transactionId, {
+              accountId: null,
+              accountAmount: null,
+            });
+            transactionSplitsRepository.update(payerSplitId, {
+              paidAt: null,
+              paybackAccountId: null,
+            });
+          });
+          void trackEvent(AnalyticsEvents.SPLIT_DEBT_REOPENED, {});
+        } catch {
+          // ignore
+        }
+        scheduleRefreshTransactions();
+      });
+    },
+    [scheduleRefreshTransactions],
+  );
+
+  const settleUpWithPerson = useCallback(
+    (personKey: string, accountId: string | null) => {
+      const rows = personSettlementRows(transactionsRef.current, personKey);
+      if (rows.receive.length === 0 && rows.pay.length === 0) return;
+      rows.receive.forEach((splitId) => markSplitPaid(splitId, { paybackAccountId: accountId }));
+      rows.pay.forEach((splitId) => payBackPayer(splitId, { accountId, via: 'settle_up' }));
+      void trackEvent(AnalyticsEvents.SETTLE_UP_COMPLETED, {
+        received: rows.receive.length,
+        paid: rows.pay.length,
+      });
+    },
+    [markSplitPaid, payBackPayer],
   );
 
   const canUseTimeDisplayMode = useMemo(
@@ -6654,6 +6815,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             markSplitUnpaid,
             updateSplitPaybackAccount,
             deleteSplit,
+            payBackPayer,
+            undoPayBackPayer,
+            settleUpWithPerson,
             markTransactionReimbursed,
             unmarkTransactionReimbursed,
             updateSettings,
@@ -6792,6 +6956,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       markSplitUnpaid,
       updateSplitPaybackAccount,
       deleteSplit,
+      payBackPayer,
+      undoPayBackPayer,
+      settleUpWithPerson,
       markTransactionReimbursed,
       unmarkTransactionReimbursed,
       updateSettings,

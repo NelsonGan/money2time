@@ -944,6 +944,12 @@ function MainShellScreen({
   );
   const openTransactionSplitBill = useCallback(
     (transaction: TransactionWithRelations) => {
+      // A bill a friend paid has nothing to mark paid in the split editor:
+      // its badge opens the bill in Balances, where the user pays them back.
+      if (transaction.splitsSummary?.youOwe) {
+        navigation.navigate('SettleUpTransaction', { transactionId: transaction.id });
+        return;
+      }
       navigation.navigate('EditTransaction', {
         transactionId: transaction.id,
         openSplitBill: true,
@@ -2179,10 +2185,12 @@ function AccountDetailRouteScreen({ route, navigation }: RootStackRouteProps<'Ac
         })
       }
       onOpenTransactionSplitBadge={(transaction) =>
-        navigation.navigate('EditTransaction', {
-          transactionId: transaction.id,
-          openSplitBill: true,
-        })
+        transaction.splitsSummary?.youOwe
+          ? navigation.navigate('SettleUpTransaction', { transactionId: transaction.id })
+          : navigation.navigate('EditTransaction', {
+              transactionId: transaction.id,
+              openSplitBill: true,
+            })
       }
     />
   );
@@ -2788,10 +2796,12 @@ function InsightsDrilldownRouteScreen({
         })
       }
       onOpenTransactionSplitBadge={(transaction) =>
-        navigation.navigate('EditTransaction', {
-          transactionId: transaction.id,
-          openSplitBill: true,
-        })
+        transaction.splitsSummary?.youOwe
+          ? navigation.navigate('SettleUpTransaction', { transactionId: transaction.id })
+          : navigation.navigate('EditTransaction', {
+              transactionId: transaction.id,
+              openSplitBill: true,
+            })
       }
       onOpenSubcategoryDrilldown={(payload) => navigation.push('InsightsDrilldown', payload)}
       onRemoveFromAlbum={albumId ? (ids) => removeTransactionsFromAlbum(albumId, ids) : undefined}

@@ -1045,7 +1045,7 @@
       "splits": {
         "nav": "Delte regninger",
         "title": "Delte regninger",
-        "subtitle": "Hvem som fortsatt skylder deg"
+        "subtitle": "Hva du og vennene dine skylder hverandre"
       },
       "mood": {
         "nav": "Humør og vaner",
@@ -1359,13 +1359,16 @@
       "emptyTitle": "Ingen delte regninger",
       "emptyBody": "Regninger du deler med venner i appen, vises her.",
       "owedToYou": "Skyldig til deg",
+      "youOwe": "Du skylder",
+      "youOweNote": "For regninger venner har betalt",
+      "owesYou": "Skylder deg",
       "people": "{count, plural, =0 {Alt er gjort opp} one {Fra # person} other {Fra # personer}}",
       "settled": "Andeler gjort opp",
       "ofShares": "{count, plural, one {Av # andel} other {Av # andeler}}",
       "bills": "Delte regninger",
       "billsNote": "Transaksjoner du delte",
-      "byPerson": "Hvem som skylder deg",
-      "allSettled": "Alle har betalt deg tilbake",
+      "byPerson": "Mellomværender",
+      "allSettled": "Alt er gjort opp",
       "open": "{count, plural, one {# åpen andel} other {# åpne andeler}}",
       "billsTitle": "Delte transaksjoner",
       "unnamed": "Noen"
@@ -1448,6 +1451,7 @@
       "nudgePause": "Verdt å tenke over: ~{hours} arbeid",
       "nudgeLarge": "Det er {hours} av arbeidstiden din",
       "amountLocked": "Dette beløpet er knyttet til en deling eller en refusjon. Endre det i appen.",
+      "friendPaid": "{name} betalte denne regningen. Endre den i appen.",
       "hideBalances": "Skjul saldoer",
       "showBalances": "Vis saldoer",
       "savingsGoals": "Sparemål",
@@ -1979,6 +1983,7 @@
         "someone": "Noen",
         "untitledBill": "Delt regning",
         "paidTitle": "Betalt tilbake",
+        "personPaid": "{name} betalte",
         "undoTitle": "Merke denne andelen som ubetalt?",
         "undoBody": "Du har krav på den igjen, og utgiften går opp med dette beløpet. En tilbakebetalingsoverføring til en annen konto fjernes.",
         "itemizedTotal": "Totalt: {sum}",

@@ -1045,7 +1045,7 @@
       "splits": {
         "nav": "Bil dikongsi",
         "title": "Bil dikongsi",
-        "subtitle": "Siapa yang masih berhutang dengan anda"
+        "subtitle": "Hutang antara anda dan rakan-rakan"
       },
       "mood": {
         "nav": "Perasaan & tabiat",
@@ -1359,13 +1359,16 @@
       "emptyTitle": "Tiada bil dikongsi",
       "emptyBody": "Bil yang anda kongsi dengan rakan dalam apl dipaparkan di sini.",
       "owedToYou": "Terhutang kepada anda",
+      "youOwe": "Anda berhutang",
+      "youOweNote": "Untuk bil yang dibayar rakan",
+      "owesYou": "Berhutang dengan anda",
       "people": "{count, plural, =0 {Semua telah diselesaikan} other {Oleh # orang}}",
       "settled": "Bahagian diselesaikan",
       "ofShares": "{count, plural, other {Daripada # bahagian}}",
       "bills": "Bil dikongsi",
       "billsNote": "Transaksi yang anda kongsi",
-      "byPerson": "Siapa yang berhutang dengan anda",
-      "allSettled": "Semua orang telah membayar balik",
+      "byPerson": "Hutang piutang",
+      "allSettled": "Semua sudah selesai",
       "open": "{count, plural, other {# bahagian belum selesai}}",
       "billsTitle": "Transaksi dikongsi",
       "unnamed": "Seseorang"
@@ -1448,6 +1451,7 @@
       "nudgePause": "Fikirkan dua kali: ~{hours} waktu kerja",
       "nudgeLarge": "Ini bersamaan {hours} waktu kerja anda",
       "amountLocked": "Jumlah ini dipautkan kepada pembahagian bil atau bayaran balik. Ubah dalam apl.",
+      "friendPaid": "{name} membayar bil ini. Ubah dalam aplikasi.",
       "hideBalances": "Sembunyikan baki",
       "showBalances": "Tunjukkan baki",
       "savingsGoals": "Matlamat Simpanan",
@@ -1979,6 +1983,7 @@
         "someone": "Seseorang",
         "untitledBill": "Bahagi Bil",
         "paidTitle": "Dibayar balik",
+        "personPaid": "{name} membayar",
         "undoTitle": "Tandakan bahagian ini belum dibayar?",
         "undoBody": "Ia terhutang kepada anda semula, dan perbelanjaan naik semula sebanyak jumlah ini. Pindahan bayaran balik ke akaun lain akan dibuang.",
         "itemizedTotal": "Jumlah: {sum}",

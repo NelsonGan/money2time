@@ -24,6 +24,7 @@ import {
 } from '~/features/transactions/components/transactionReorder';
 import { isPaybackRow } from '~/features/transactions/lib/paybackGroups';
 import { recurringTintColors } from '~/features/transactions/lib/recurringTint';
+import { billPayer } from '~/features/transactions/lib/splitPayer';
 import { usePressScale } from '~/hooks/usePressScale';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -307,9 +308,20 @@ const TransactionItemBody = memo(
     // The account badge can be switched off in Display settings. A transfer
     // keeps its from → to pair either way: which accounts it moved between is
     // what the row is about, not a detail of it.
+    // A bill a friend paid sits on no account until the user pays them back:
+    // it says who paid instead of "No account".
+    const friendPayer =
+      transaction.splitsSummary?.youOwe && !transaction.accountId
+        ? billPayer(transaction.splits)
+        : null;
     const accountSubtitleLabel =
       !isTransfer && appSettings.showTransactionAccount
-        ? (transaction.accountName ?? I18n.t('common.no_account'))
+        ? (transaction.accountName ??
+          (friendPayer
+            ? I18n.t('transactions.settleUp.person_paid', {
+                name: friendPayer.personName?.trim() || I18n.t('transactions.settleUp.someone'),
+              })
+            : I18n.t('common.no_account')))
         : null;
     const account = transaction.accountId ? getAccountById(transaction.accountId) : undefined;
     const fromAccount = transaction.fromAccountId
@@ -1022,6 +1034,7 @@ export const TransactionItem = memo(
     prev.transaction.splitsSummary?.count === next.transaction.splitsSummary?.count &&
     prev.transaction.splitsSummary?.paidCount === next.transaction.splitsSummary?.paidCount &&
     prev.transaction.splitsSummary?.unpaidAmount === next.transaction.splitsSummary?.unpaidAmount &&
+    prev.transaction.splitsSummary?.youOwe === next.transaction.splitsSummary?.youOwe &&
     // Same story for the denormalized relation fields: renaming a category or
     // changing its icon rewrites the category row, not the transaction, so the
     // refreshed row arrives with its old updatedAt. Without these the list keeps
