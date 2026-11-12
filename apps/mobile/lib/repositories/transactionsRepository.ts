@@ -1,6 +1,7 @@
 import { and, eq, gte, inArray, isNull, lte, or, sql } from 'drizzle-orm';
 
 import { withEntryStamp } from '~/features/sharedLedgers/lib/entryStamp';
+import { owedToPayer } from '~/features/transactions/lib/splitPayer';
 import { getDb, getSQLite } from '~/lib/db/client';
 import { getActiveLedgerId, inActiveLedger } from '~/lib/db/ledgerScope';
 import { transactionsTable } from '~/lib/db/schema';
@@ -160,6 +161,19 @@ function withoutCreator<T extends Partial<CreateTransactionInput>>(input: T): T 
 }
 
 export function summarizeSplits(splits: TransactionSplit[]): TransactionSplitsSummary {
+  // A bill a friend paid has one share to settle: the user's own, owed to the
+  // payer. The other friends on it owe the payer, not the user.
+  const owed = owedToPayer(splits, 0);
+  if (owed) {
+    const unpaid = owed.owed > 0;
+    return {
+      count: 1,
+      paidCount: unpaid ? 0 : 1,
+      unpaidAmount: owed.owed,
+      totalOwed: owed.total,
+      youOwe: true,
+    };
+  }
   let count = 0;
   let paidCount = 0;
   let unpaidAmount = 0;
@@ -178,7 +192,7 @@ export function summarizeSplits(splits: TransactionSplit[]): TransactionSplitsSu
       unpaidAmount += split.amount;
     }
   }
-  return { count, paidCount, unpaidAmount, totalOwed };
+  return { count, paidCount, unpaidAmount, totalOwed, youOwe: false };
 }
 
 // Above this count, a `WHERE id IN (…)` clause carries so many bound parameters

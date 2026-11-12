@@ -1045,7 +1045,7 @@
       "splits": {
         "nav": "Delade notor",
         "title": "Delade notor",
-        "subtitle": "Vem som fortfarande är skyldig dig"
+        "subtitle": "Vad du och dina vänner är skyldiga varandra"
       },
       "mood": {
         "nav": "Humör och vanor",
@@ -1359,13 +1359,16 @@
       "emptyTitle": "Inga delade notor",
       "emptyBody": "Notor som du delar med vänner i appen visas här.",
       "owedToYou": "Skyldigt till dig",
+      "youOwe": "Du är skyldig",
+      "youOweNote": "För notor som vänner har betalat",
+      "owesYou": "Skyldig dig",
       "people": "{count, plural, =0 {Allt är gjort upp} one {Av # person} other {Av # personer}}",
       "settled": "Uppgjorda andelar",
       "ofShares": "{count, plural, one {Av # andel} other {Av # andelar}}",
       "bills": "Delade notor",
       "billsNote": "Transaktioner som du delat",
-      "byPerson": "Vem som är skyldig dig",
-      "allSettled": "Alla har betalat tillbaka",
+      "byPerson": "Mellanhavanden",
+      "allSettled": "Allt är reglerat",
       "open": "{count, plural, one {# öppen andel} other {# öppna andelar}}",
       "billsTitle": "Delade transaktioner",
       "unnamed": "Någon"
@@ -1448,6 +1451,7 @@
       "nudgePause": "Värt att tänka på: ~{hours} arbetstid",
       "nudgeLarge": "Det är {hours} av din arbetstid",
       "amountLocked": "Det här beloppet är kopplat till en delning eller en återbetalning. Ändra det i appen.",
+      "friendPaid": "{name} betalade den här notan. Ändra den i appen.",
       "hideBalances": "Dölj saldon",
       "showBalances": "Visa saldon",
       "savingsGoals": "Sparmål",
@@ -1979,6 +1983,7 @@
         "someone": "Någon",
         "untitledBill": "Delad nota",
         "paidTitle": "Återbetalt",
+        "personPaid": "{name} betalade",
         "undoTitle": "Markera den här andelen som obetald?",
         "undoBody": "Du är skyldig den igen, och utgiften ökar med det här beloppet. En återbetalningsöverföring till ett annat konto tas bort.",
         "itemizedTotal": "Totalt: {sum}",

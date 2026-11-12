@@ -1,4 +1,4 @@
-import { ArrowRight, CalendarRange, GripVertical, Undo2 } from 'lucide-react-native';
+import { ArrowRight, CalendarRange, GripVertical, Undo2, UserRound } from 'lucide-react-native';
 import React, { memo, useEffect } from 'react';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
@@ -24,6 +24,7 @@ import {
 } from '~/features/transactions/components/transactionReorder';
 import { isPaybackRow } from '~/features/transactions/lib/paybackGroups';
 import { recurringTintColors } from '~/features/transactions/lib/recurringTint';
+import { billPayer } from '~/features/transactions/lib/splitPayer';
 import { usePressScale } from '~/hooks/usePressScale';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -222,12 +223,16 @@ export function TransactionAccountBadge({
   label,
   compact,
   className,
+  person = false,
 }: {
   account?: Account;
   label: string;
   compact: boolean;
   className?: string;
+  /** The pill names a person (the friend who paid the bill), not an account. */
+  person?: boolean;
 }) {
+  const themeColors = useThemeColors();
   const labelSizeClass = compact ? 'text-[10px] leading-[12px]' : 'text-[11px] leading-[14px]';
   return (
     <View
@@ -236,12 +241,18 @@ export function TransactionAccountBadge({
         className,
       )}
     >
-      <AccountLogo
-        logoId={account?.logoId}
-        type={account?.type}
-        goalEmoji={account?.goalEmoji}
-        size={compact ? 12 : 14}
-      />
+      {person ? (
+        <View className="pl-0.5">
+          <UserRound size={compact ? 10 : 12} color={themeColors.primary} />
+        </View>
+      ) : (
+        <AccountLogo
+          logoId={account?.logoId}
+          type={account?.type}
+          goalEmoji={account?.goalEmoji}
+          size={compact ? 12 : 14}
+        />
+      )}
       {/* Sized from a hidden copy, drawn over it a little wider: inside the
           long-range month pagers a box that hugs its text can come out a
           sliver narrower than the text, which ellipsized names that fit
@@ -307,9 +318,20 @@ const TransactionItemBody = memo(
     // The account badge can be switched off in Display settings. A transfer
     // keeps its from → to pair either way: which accounts it moved between is
     // what the row is about, not a detail of it.
+    // A bill a friend paid sits on no account until the user pays them back:
+    // it says who paid instead of "No account".
+    const friendPayer =
+      transaction.splitsSummary?.youOwe && !transaction.accountId
+        ? billPayer(transaction.splits)
+        : null;
     const accountSubtitleLabel =
       !isTransfer && appSettings.showTransactionAccount
-        ? (transaction.accountName ?? I18n.t('common.no_account'))
+        ? (transaction.accountName ??
+          (friendPayer
+            ? I18n.t('transactions.settleUp.person_paid', {
+                name: friendPayer.personName?.trim() || I18n.t('transactions.settleUp.someone'),
+              })
+            : I18n.t('common.no_account')))
         : null;
     const account = transaction.accountId ? getAccountById(transaction.accountId) : undefined;
     const fromAccount = transaction.fromAccountId
@@ -556,6 +578,7 @@ const TransactionItemBody = memo(
                 account={account}
                 label={accountSubtitleLabel}
                 compact={compact}
+                person={!!friendPayer}
                 className={compact ? 'min-w-[40px] shrink' : 'min-w-[44px] shrink'}
               />
               <InstalmentPill label={instalmentLabel} compact={compact} />
@@ -565,6 +588,7 @@ const TransactionItemBody = memo(
               account={account}
               label={accountSubtitleLabel}
               compact={compact}
+              person={!!friendPayer}
               className={accountBadgeMarginClassName}
             />
           ) : instalmentLabel ? (
@@ -1022,6 +1046,7 @@ export const TransactionItem = memo(
     prev.transaction.splitsSummary?.count === next.transaction.splitsSummary?.count &&
     prev.transaction.splitsSummary?.paidCount === next.transaction.splitsSummary?.paidCount &&
     prev.transaction.splitsSummary?.unpaidAmount === next.transaction.splitsSummary?.unpaidAmount &&
+    prev.transaction.splitsSummary?.youOwe === next.transaction.splitsSummary?.youOwe &&
     // Same story for the denormalized relation fields: renaming a category or
     // changing its icon rewrites the category row, not the transaction, so the
     // refreshed row arrives with its old updatedAt. Without these the list keeps

@@ -1045,7 +1045,7 @@
       "splits": {
         "nav": "Geteilte Rechnungen",
         "title": "Geteilte Rechnungen",
-        "subtitle": "Wer dir noch Geld schuldet"
+        "subtitle": "Was du und deine Freunde einander schulden"
       },
       "mood": {
         "nav": "Stimmung & Gewohnheiten",
@@ -1359,13 +1359,16 @@
       "emptyTitle": "Keine geteilten Rechnungen",
       "emptyBody": "Rechnungen, die du in der App mit Freunden teilst, erscheinen hier.",
       "owedToYou": "Dir geschuldet",
+      "youOwe": "Du schuldest",
+      "youOweNote": "Für Rechnungen, die Freunde bezahlt haben",
+      "owesYou": "Schuldet dir",
       "people": "{count, plural, =0 {Alles beglichen} one {Von # Person} other {Von # Personen}}",
       "settled": "Beglichene Anteile",
       "ofShares": "{count, plural, one {Von # Anteil} other {Von # Anteilen}}",
       "bills": "Geteilte Rechnungen",
       "billsNote": "Transaktionen, die du geteilt hast",
-      "byPerson": "Wer dir Geld schuldet",
-      "allSettled": "Alle haben dir das Geld zurückgegeben",
+      "byPerson": "Salden",
+      "allSettled": "Alles beglichen",
       "open": "{count, plural, one {# offener Anteil} other {# offene Anteile}}",
       "billsTitle": "Geteilte Transaktionen",
       "unnamed": "Jemand"
@@ -1448,6 +1451,7 @@
       "nudgePause": "Kurz innehalten: ~{hours} Arbeitszeit",
       "nudgeLarge": "Das entspricht {hours} deiner Arbeitszeit",
       "amountLocked": "Dieser Betrag ist mit einer Aufteilung oder Erstattung verknüpft. Ändere ihn in der App.",
+      "friendPaid": "{name} hat diese Rechnung bezahlt. Ändere sie in der App.",
       "hideBalances": "Salden ausblenden",
       "showBalances": "Salden anzeigen",
       "savingsGoals": "Sparziele",
@@ -1979,6 +1983,7 @@
         "someone": "Jemand",
         "untitledBill": "Geteilte Rechnung",
         "paidTitle": "Zurückgezahlt",
+        "personPaid": "{name} hat bezahlt",
         "undoTitle": "Diesen Anteil als unbezahlt markieren?",
         "undoBody": "Er wird dir wieder geschuldet, und die Ausgabe steigt wieder um diesen Betrag. Eine Rückzahlungsumbuchung auf ein anderes Konto wird entfernt.",
         "itemizedTotal": "Gesamt: {sum}",

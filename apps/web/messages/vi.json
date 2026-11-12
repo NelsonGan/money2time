@@ -1045,7 +1045,7 @@
       "splits": {
         "nav": "Hóa đơn chia",
         "title": "Hóa đơn chia",
-        "subtitle": "Ai còn nợ bạn"
+        "subtitle": "Số tiền bạn và bạn bè nợ nhau"
       },
       "mood": {
         "nav": "Cảm xúc & thói quen",
@@ -1359,13 +1359,16 @@
       "emptyTitle": "Chưa có hóa đơn chia",
       "emptyBody": "Các hóa đơn bạn chia với bạn bè trong ứng dụng sẽ hiện ở đây.",
       "owedToYou": "Nợ bạn",
+      "youOwe": "Bạn nợ",
+      "youOweNote": "Cho các hóa đơn bạn bè đã trả",
+      "owesYou": "Nợ bạn",
       "people": "{count, plural, =0 {Đã thanh toán hết} other {Từ # người}}",
       "settled": "Phần đã thanh toán",
       "ofShares": "{count, plural, other {Trên # phần}}",
       "bills": "Hóa đơn chia",
       "billsNote": "Giao dịch bạn đã chia sẻ",
-      "byPerson": "Ai nợ bạn",
-      "allSettled": "Mọi người đã trả lại bạn",
+      "byPerson": "Công nợ",
+      "allSettled": "Đã thanh toán hết",
       "open": "{count, plural, other {# phần chưa trả}}",
       "billsTitle": "Giao dịch chia sẻ",
       "unnamed": "Một người"
@@ -1448,6 +1451,7 @@
       "nudgePause": "Đáng suy nghĩ: ~{hours} làm việc",
       "nudgeLarge": "Đây là {hours} thời gian làm việc của bạn",
       "amountLocked": "Số tiền này gắn với một khoản chia hoặc hoàn tiền. Hãy đổi trong ứng dụng.",
+      "friendPaid": "{name} đã trả hóa đơn này. Hãy sửa trong ứng dụng.",
       "hideBalances": "Ẩn số dư",
       "showBalances": "Hiện số dư",
       "savingsGoals": "Mục tiêu tiết kiệm",
@@ -1979,6 +1983,7 @@
         "someone": "Ai đó",
         "untitledBill": "Chia hóa đơn",
         "paidTitle": "Đã trả",
+        "personPaid": "{name} đã trả",
         "undoTitle": "Đánh dấu phần này là chưa trả?",
         "undoBody": "Người đó lại nợ bạn khoản này và khoản chi tiêu sẽ tăng lên đúng số tiền đó. Giao dịch chuyển tiền trả lại vào tài khoản khác sẽ bị xóa.",
         "itemizedTotal": "Tổng: {sum}",

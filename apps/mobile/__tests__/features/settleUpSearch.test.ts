@@ -13,12 +13,19 @@ function person(
   return {
     key: name.toLowerCase(),
     name,
+    memberId: null,
     totalReporting: paidAt ? 0 : 10,
     paidReporting: paidAt ? 10 : 0,
+    owedReporting: 0,
+    owedPaidReporting: 0,
+    netReporting: 0,
     byCurrency: [],
+    owedByCurrency: [],
+    netByCurrency: [],
     bills: [
       {
         splitId: `${name}-split`,
+        direction: 'owes_you' as const,
         transactionId: `${name}-tx`,
         date: '2026-09-24',
         amount: 10,
@@ -37,6 +44,7 @@ function person(
     oldestDate: '2026-09-24',
     billCount: 1,
     unpaidBillCount: paidAt ? 0 : 1,
+    youOweCount: 0,
   };
 }
 
@@ -49,6 +57,9 @@ function transaction(
 ): TransactionDebt {
   return {
     transactionId,
+    paidBy: null,
+    billTotalNative: null,
+    participants: [],
     date: '2026-09-24',
     note,
     categoryName,
@@ -61,6 +72,7 @@ function transaction(
     splits: [
       {
         splitId: `${transactionId}-split`,
+        direction: 'owes_you' as const,
         personName,
         amount: 10,
         currency: 'MYR',

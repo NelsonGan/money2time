@@ -5,7 +5,8 @@ import { Text } from '~/components/ui';
 import { useUnpaidPersonCount } from '~/features/transactions/lib/useSettleUpSummary';
 
 /**
- * Red count badge for the Settings "Who owes you" tile. Isolated in its own
+ * Red count badge for the Settings "Balances" tile: the people with an open
+ * balance, whichever way it is owed. Isolated in its own
  * component so the transaction-derived count re-renders only this badge, not
  * the whole (mounted) Settings screen; uses the cheap count-only selector so a
  * write anywhere doesn't run the full per-person roll-up just for this number.

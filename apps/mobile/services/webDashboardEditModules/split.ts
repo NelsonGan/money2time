@@ -31,6 +31,7 @@ import {
   countAccountsTowardFreeLimit,
   isNewTransactionBlockedByAccounts,
 } from '~/features/transactions/lib/accountEntryGate';
+import { isFriendPaidBill } from '~/features/transactions/lib/splitPayer';
 import type { TransactionSplit, TransactionWithRelations } from '~/types';
 
 import type { EditModule, EditStep, ModuleOp, PlanTools, TxFields } from '../webDashboardEdits';
@@ -248,6 +249,11 @@ function planUpdate(
   if (!current || current.deletedAt || current.updatedAt !== op.at) {
     return tools.refuse('conflict');
   }
+  // A bill a friend paid is changed in the app only. Its rows hold each
+  // friend's share beside a zero amount (lib/splitPayer.ts), which the web's
+  // Split Bill rows cannot carry, so an edit from a page that does not know
+  // would turn it into a bill the user paid with nobody owing.
+  if (isFriendPaidBill(liveSplits(current))) return tools.refuse('invalid');
   const { set } = op;
   // A refund and its expense stay in step, as the core planner keeps them.
   const moves = 'amount' in set || 'currency' in set || 'type' in set || 'accountId' in set;
@@ -384,6 +390,9 @@ function planSettle(
     return tools.refuse('conflict');
   }
   if (split.isSelf) return tools.refuse('invalid');
+  // Nobody owes the user on a bill a friend paid; paying that friend back is
+  // done in the app (payBackPayer), not by settling a share.
+  if (isFriendPaidBill(liveSplits(parent))) return tools.refuse('invalid');
   if (op.op === 'remove' || op.op === 'payback') {
     // Settle Up offers these on a share still owed: the bin (deleteSplit, after
     // "Remove this request?") and the account chip (updateSplitPaybackAccount).

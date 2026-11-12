@@ -315,6 +315,8 @@ export function TxList({ txs, pageSize = 30, selection, onPage }: { txs: Tx[]; p
                   <p className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5 text-[12px] text-foreground-soft">
                     {/* Said once: an untitled payback row is already titled "Paid back". */}
                     {paybackRow && tx.note ? <Pill tone="good">{te("split.paidTitle")}</Pill> : null}
+                    {/* A split bill a friend paid: the row is the user's own share, owed to them until it has an account. */}
+                    {tx.paidBy !== undefined ? <Pill tone={account ? "neutral" : "warn"}>{te("split.personPaid", { name: tx.paidBy || te("split.someone") })}</Pill> : null}
                     {category ? <span className="truncate">{parent ? `${parent.name} · ${category.name}` : category.name}</span> : null}
                     {account ? (
                       <span className="inline-flex items-center gap-1 truncate">

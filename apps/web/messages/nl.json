@@ -1045,7 +1045,7 @@
       "splits": {
         "nav": "Gedeelde rekeningen",
         "title": "Gedeelde rekeningen",
-        "subtitle": "Wie je nog geld schuldig is"
+        "subtitle": "Wat jij en je vrienden elkaar schuldig zijn"
       },
       "mood": {
         "nav": "Stemming en gewoonten",
@@ -1359,13 +1359,16 @@
       "emptyTitle": "Geen gedeelde rekeningen",
       "emptyBody": "Rekeningen die je in de app met vrienden deelt, verschijnen hier.",
       "owedToYou": "Aan jou verschuldigd",
+      "youOwe": "Jij bent schuldig",
+      "youOweNote": "Voor rekeningen die vrienden betaalden",
+      "owesYou": "Moet jou nog",
       "people": "{count, plural, =0 {Alles vereffend} one {Door # persoon} other {Door # personen}}",
       "settled": "Vereffende delen",
       "ofShares": "{count, plural, one {Van # deel} other {Van # delen}}",
       "bills": "Gedeelde rekeningen",
       "billsNote": "Transacties die je hebt gedeeld",
-      "byPerson": "Wie je nog geld schuldig is",
-      "allSettled": "Iedereen heeft je terugbetaald",
+      "byPerson": "Saldi",
+      "allSettled": "Alles is verrekend",
       "open": "{count, plural, one {# openstaand deel} other {# openstaande delen}}",
       "billsTitle": "Gedeelde transacties",
       "unnamed": "Iemand"
@@ -1448,6 +1451,7 @@
       "nudgePause": "Even nadenken: ~{hours} werktijd",
       "nudgeLarge": "Dat is {hours} van je werktijd",
       "amountLocked": "Dit bedrag hoort bij een splitsing of terugbetaling. Wijzig het in de app.",
+      "friendPaid": "{name} betaalde deze rekening. Wijzig hem in de app.",
       "hideBalances": "Saldi verbergen",
       "showBalances": "Saldi tonen",
       "savingsGoals": "Spaardoelen",
@@ -1979,6 +1983,7 @@
         "someone": "Iemand",
         "untitledBill": "Gesplitste rekening",
         "paidTitle": "Terugbetaald",
+        "personPaid": "{name} betaalde",
         "undoTitle": "Dit aandeel als onbetaald markeren?",
         "undoBody": "Het wordt je weer verschuldigd en de uitgave gaat met dit bedrag omhoog. Een terugbetaling naar een andere rekening wordt verwijderd.",
         "itemizedTotal": "Totaal: {sum}",

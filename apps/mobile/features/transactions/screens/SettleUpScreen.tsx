@@ -1,4 +1,4 @@
-import { ChevronRight, ReceiptText, Search, Settings2 } from 'lucide-react-native';
+import { Check, ChevronRight, ReceiptText, Search, Settings2 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { TextInputInstance } from 'react-native';
 import { Keyboard, Pressable, ScrollView, View } from 'react-native';
@@ -14,8 +14,9 @@ import { CategoryEmoji, SettingsHeader, SettingsPageLayout, Text } from '~/compo
 import { useApp } from '~/context/AppContext';
 import { ActivitySearchRow } from '~/features/transactions/components/ActivitySearchRow';
 import { SettleUpDateHeader } from '~/features/transactions/components/SettleUpDateHeader';
+import { avatarColor, personInitial } from '~/features/transactions/lib/personAvatar';
+import { personBalanceState } from '~/features/transactions/lib/settleUp';
 import {
-  groupSettleUpPeopleByDate,
   groupSettleUpSearchResultsByDate,
   groupSettleUpTransactionsByDate,
 } from '~/features/transactions/lib/settleUpDateGroups';
@@ -50,28 +51,6 @@ interface SettleUpScreenProps {
   onSplitReceipt: () => void;
 }
 
-const AVATAR_COLORS = [
-  '#C2604A',
-  '#4A78C2',
-  '#8A5AC2',
-  '#3E9A78',
-  '#C28A3E',
-  '#B94A78',
-  '#4AA5C2',
-  '#7A7A3E',
-];
-
-function avatarColor(key: string): string {
-  let hash = 0;
-  for (let i = 0; i < key.length; i += 1) hash = (hash * 31 + key.charCodeAt(i)) >>> 0;
-  return AVATAR_COLORS[hash % AVATAR_COLORS.length];
-}
-
-function personInitial(person: PersonDebt): string {
-  const name = person.name?.trim();
-  return name ? name[0]!.toUpperCase() : '?';
-}
-
 export function SettleUpScreen({
   onBack,
   onOpenPerson,
@@ -103,7 +82,13 @@ export function SettleUpScreen({
         : byTransaction.transactions,
     [isSearchOpen, byTransaction.transactions, debouncedSearchQuery],
   );
-  const peopleGroups = useMemo(() => groupSettleUpPeopleByDate(people), [people]);
+  // The summary lists open balances first (biggest either way), then the
+  // people who are settled up.
+  const openPeople = useMemo(() => people.filter((person) => person.unpaidBillCount > 0), [people]);
+  const settledPeople = useMemo(
+    () => people.filter((person) => person.unpaidBillCount === 0),
+    [people],
+  );
   const transactionGroups = useMemo(
     () => groupSettleUpTransactionsByDate(transactions),
     [transactions],
@@ -193,160 +178,220 @@ export function SettleUpScreen({
     paddingBottom: Math.max(insets.bottom, bottomNavInset) + 24,
   };
 
-  // Outstanding hero — a clean centered total (matching the split subtotal /
-  // insights breakdown hero): plain label + big amount + accent underline.
+  // The hero is the one number that matters: what the user is owed or owes
+  // once everyone is netted, with both sides of it underneath.
+  const hasOpenBalances = summary.billCount > 0;
+  const netState =
+    summary.netReporting >= 0.005 ? 'owed' : summary.netReporting <= -0.005 ? 'owe' : 'even';
+  // Both sides are shown only when there are two: with everyone owing the same
+  // way the net above already is that side, and a second copy of it (beside a
+  // zero) is noise.
+  const bothWays = summary.owedToYouReporting > 0 && summary.youOweReporting > 0;
   const renderHero = () => (
-    <View className="items-center px-4 pt-4 pb-2">
+    <View className="items-center px-5 pt-4 pb-4">
       <Text variant="caption" tone="muted">
-        {I18n.t('transactions.settleUp.outstanding_label')}
+        {I18n.t(
+          !hasOpenBalances
+            ? 'transactions.settleUp.hero_settled'
+            : netState === 'owed'
+              ? 'transactions.settleUp.hero_owed'
+              : netState === 'owe'
+                ? 'transactions.settleUp.you_owe_tag'
+                : 'transactions.settleUp.hero_even',
+        )}
       </Text>
-      <Text variant="title" className="mt-1 text-center">
-        {formatReporting(summary.totalReporting)}
+      <Text
+        variant="title"
+        className={cn(
+          'mt-1 text-center',
+          hasOpenBalances && netState === 'owed'
+            ? 'text-success'
+            : hasOpenBalances && netState === 'owe'
+              ? 'text-destructive'
+              : '',
+        )}
+      >
+        {formatReporting(Math.abs(summary.netReporting))}
       </Text>
-      <View className="mt-2 h-[3px] w-8 rounded-full bg-primary/30" />
+      {bothWays ? (
+        // The two sides of the net, to scale: one slim bar split by how much
+        // is owed each way, with each figure under its own end.
+        <View className="mt-4 self-stretch">
+          <View className="h-1.5 flex-row gap-1 overflow-hidden rounded-full">
+            <View
+              className="rounded-full bg-success/60"
+              style={{ flex: summary.owedToYouReporting }}
+            />
+            <View
+              className="rounded-full bg-destructive/50"
+              style={{ flex: summary.youOweReporting }}
+            />
+          </View>
+          <View className="mt-2 flex-row justify-between">
+            <View>
+              <Text variant="caption" tone="muted">
+                {I18n.t('transactions.settleUp.owed_to_you')}
+              </Text>
+              <Text variant="bodyStrong" className="text-success">
+                {formatReporting(summary.owedToYouReporting)}
+              </Text>
+            </View>
+            <View className="items-end">
+              <Text variant="caption" tone="muted">
+                {I18n.t('transactions.settleUp.you_owe_tag')}
+              </Text>
+              <Text variant="bodyStrong" className="text-destructive">
+                {formatReporting(summary.youOweReporting)}
+              </Text>
+            </View>
+          </View>
+        </View>
+      ) : (
+        <View className="mt-2 h-[3px] w-8 rounded-full bg-primary/30" />
+      )}
     </View>
   );
 
-  const renderPersonCard = (person: PersonDebt) => (
-    <View key={`person:${person.key}`} className="relative">
-      {person.unpaidBillCount > 0 ? (
-        <View
-          pointerEvents="none"
-          className="absolute z-10 -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-destructive border-2 border-background items-center justify-center"
-        >
-          <Text className="text-white text-[10px] font-bold leading-[12px]">
-            {person.unpaidBillCount}
-          </Text>
-        </View>
-      ) : null}
+  const renderPersonCard = (person: PersonDebt) => {
+    const state = personBalanceState(person);
+    const settled = state === 'settled';
+    // Open bills while there is a balance; every bill once it is settled.
+    const billCount = settled ? person.billCount : person.unpaidBillCount;
+    const billsLabel =
+      billCount === 1
+        ? I18n.t('transactions.settleUp.bills_one')
+        : I18n.t('transactions.settleUp.bills_other', { count: billCount });
+    const stateLabel =
+      state === 'owes_you'
+        ? I18n.t('transactions.settleUp.person_owes_label')
+        : state === 'you_owe'
+          ? I18n.t('transactions.settleUp.you_owe_tag')
+          : I18n.t('transactions.settleUp.even_tag');
+    return (
       <Pressable
+        key={`person:${person.key}`}
         onPress={() => {
           Keyboard.dismiss();
           void triggerHaptic('selection');
           onOpenPerson(person.key);
         }}
         accessibilityRole="button"
-        accessibilityHint={
-          person.unpaidBillCount === 0
-            ? undefined
-            : person.unpaidBillCount === 1
-              ? I18n.t('transactions.settleUp.bills_one')
-              : I18n.t('transactions.settleUp.bills_other', {
-                  count: person.unpaidBillCount,
-                })
-        }
         className={cn(
           'flex-row items-center gap-3 rounded-2xl border px-3.5 py-3 active:opacity-80',
-          person.unpaidBillCount === 0
-            ? 'border-border/15 bg-secondary/20'
-            : 'border-border/30 bg-card',
+          settled ? 'border-border/15 bg-secondary/20' : 'border-border/30 bg-card',
         )}
       >
         <View
           className="h-11 w-11 items-center justify-center rounded-full"
-          style={{ backgroundColor: avatarColor(person.key) }}
+          style={{ backgroundColor: avatarColor(person.key), opacity: settled ? 0.55 : 1 }}
         >
           <Text variant="bodyStrong" style={{ color: '#fff' }}>
-            {personInitial(person)}
+            {personInitial(person.name)}
           </Text>
         </View>
         <View className="flex-1">
-          <Text
-            variant="bodyStrong"
-            tone={person.unpaidBillCount === 0 ? 'muted' : undefined}
-            numberOfLines={1}
-          >
+          <Text variant="bodyStrong" tone={settled ? 'muted' : undefined} numberOfLines={1}>
             {person.name ?? I18n.t('transactions.settleUp.someone')}
           </Text>
-        </View>
-        <View className="items-end">
-          <Text
-            variant="bodyStrong"
-            className={person.unpaidBillCount === 0 ? 'text-muted-foreground' : 'text-warning'}
-          >
-            {formatReporting(
-              person.unpaidBillCount === 0 ? person.paidReporting : person.totalReporting,
-            )}
+          <Text variant="caption" tone="muted" numberOfLines={1}>
+            {billsLabel}
           </Text>
         </View>
+        {settled ? (
+          <Check size={18} color={themeColors.success} />
+        ) : (
+          <View className="items-end">
+            <Text variant="caption" tone="muted">
+              {stateLabel}
+            </Text>
+            <Text
+              variant="bodyStrong"
+              className={
+                state === 'owes_you'
+                  ? 'text-success'
+                  : state === 'you_owe'
+                    ? 'text-destructive'
+                    : 'text-muted-foreground'
+              }
+            >
+              {formatReporting(Math.abs(person.netReporting))}
+            </Text>
+          </View>
+        )}
         <ChevronRight size={18} color={themeColors.textMuted} />
       </Pressable>
-    </View>
-  );
+    );
+  };
 
-  const renderTransactionCard = (bill: TransactionDebt) => (
-    <View key={`transaction:${bill.transactionId}`} className="relative">
-      {bill.unpaidSplitCount > 0 ? (
-        <View
-          pointerEvents="none"
-          className="absolute z-10 -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-destructive border-2 border-background items-center justify-center"
-        >
-          <Text className="text-white text-[10px] font-bold leading-[12px]">
-            {bill.unpaidSplitCount}
-          </Text>
-        </View>
-      ) : null}
+  const renderTransactionCard = (bill: TransactionDebt) => {
+    const settled = bill.unpaidSplitCount === 0;
+    return (
       <Pressable
+        key={`transaction:${bill.transactionId}`}
         onPress={() => {
           Keyboard.dismiss();
           void triggerHaptic('selection');
           onOpenTransaction(bill.transactionId);
         }}
         accessibilityRole="button"
-        accessibilityHint={
-          bill.unpaidSplitCount === 0
-            ? undefined
-            : bill.unpaidSplitCount === 1
-              ? I18n.t('transactions.settleUp.people_one')
-              : I18n.t('transactions.settleUp.people_other', {
-                  count: bill.unpaidSplitCount,
-                })
-        }
         className={cn(
           'flex-row items-center gap-3 rounded-2xl border px-3.5 py-3 active:opacity-80',
-          bill.unpaidSplitCount === 0
-            ? 'border-border/15 bg-secondary/20'
-            : 'border-border/30 bg-card',
+          settled ? 'border-border/15 bg-secondary/20' : 'border-border/30 bg-card',
         )}
       >
         <View className="h-11 w-11 items-center justify-center rounded-full bg-secondary/50">
           <CategoryEmoji icon={bill.categoryIcon} size={22} className="text-[19px]" />
         </View>
         <View className="flex-1">
-          <Text
-            variant="bodyStrong"
-            tone={bill.unpaidSplitCount === 0 ? 'muted' : undefined}
-            numberOfLines={1}
-          >
+          <Text variant="bodyStrong" tone={settled ? 'muted' : undefined} numberOfLines={1}>
             {bill.note?.trim() ||
               bill.categoryName ||
               I18n.t('transactions.settleUp.untitled_bill')}
           </Text>
+          {/* Who put the money down, which is which way the bill is owed. */}
+          <Text variant="caption" tone="muted" numberOfLines={1}>
+            {bill.paidBy
+              ? I18n.t('transactions.settleUp.person_paid', {
+                  name: bill.paidBy.name ?? I18n.t('transactions.settleUp.someone'),
+                })
+              : I18n.t('transactions.settleUp.you_paid')}
+          </Text>
         </View>
         <View className="items-end">
+          {settled ? null : (
+            <Text variant="caption" tone="muted">
+              {I18n.t(
+                bill.paidBy
+                  ? 'transactions.settleUp.you_owe_tag'
+                  : 'transactions.settleUp.owed_to_you',
+              )}
+            </Text>
+          )}
           <Text
             variant="bodyStrong"
-            className={bill.unpaidSplitCount === 0 ? 'text-muted-foreground' : 'text-warning'}
+            className={
+              settled ? 'text-muted-foreground' : bill.paidBy ? 'text-destructive' : 'text-success'
+            }
           >
-            {formatNative(
-              bill.unpaidSplitCount === 0 ? bill.paidNative : bill.totalNative,
-              bill.currency,
-            )}
+            {formatNative(settled ? bill.paidNative : bill.totalNative, bill.currency)}
           </Text>
         </View>
         <ChevronRight size={18} color={themeColors.textMuted} />
       </Pressable>
-    </View>
-  );
+    );
+  };
 
   const renderPeopleList = () => (
-    <View className="mt-5 gap-3">
-      {peopleGroups.map((group) => (
-        <View key={group.dayKey} className="gap-2">
-          <SettleUpDateHeader dayKey={group.dayKey} locale={locale} />
-          {group.items.map(renderPersonCard)}
-        </View>
-      ))}
+    <View className="mt-4 gap-2">
+      {openPeople.map(renderPersonCard)}
+      {settledPeople.length > 0 ? (
+        <>
+          <Text variant="label" tone="muted" className="pt-3 pb-1">
+            {I18n.t('transactions.settleUp.settled_up')}
+          </Text>
+          {settledPeople.map(renderPersonCard)}
+        </>
+      ) : null}
     </View>
   );
 
@@ -477,7 +522,7 @@ export function SettleUpScreen({
                   {t.label}
                 </Text>
                 <View
-                  className="mt-2 h-0.5 rounded-full"
+                  className="mt-2 h-0.5 w-16 rounded-full"
                   style={{ backgroundColor: isActive ? themeColors.primary : 'transparent' }}
                 />
               </Pressable>

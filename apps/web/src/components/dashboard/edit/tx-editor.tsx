@@ -50,6 +50,7 @@ import {
   newRowKey,
   num,
   rowsForOp,
+  payerOf,
   splitsOf,
   unpaidSplitBills,
   unpaidSum,
@@ -171,6 +172,9 @@ function TxForm({ tx, onClose }: { tx: Tx | null; onClose: () => void }) {
   // Split Bill, as the app's editor keeps it: the rows saved with the expense,
   // staged here until Save; the sheet opens with `splitSeed`.
   const savedSplits = useMemo(() => (tx ? draftRows(splitsOf(model, tx.id)) : []), [tx, model]);
+  // A bill a friend paid is changed in the app: its rows mean something else
+  // there, and the phone refuses a split edit of one. It can still be deleted here.
+  const friendPayer = useMemo(() => (tx ? payerOf(model, tx.id) : null), [tx, model]);
   const [splitRows, setSplitRows] = useState<SplitDraftRow[]>(savedSplits);
   const [splitEvenly, setSplitEvenly] = useState(!savedSplits.length);
   const [splitSeed, setSplitSeed] = useState<SplitDraftRow[] | null>(null);
@@ -211,6 +215,7 @@ function TxForm({ tx, onClose }: { tx: Tx | null; onClose: () => void }) {
   const defaultPayback = useMemo(() => defaultPaybackId(model), [model]);
 
   const openSplit = () => {
+    if (friendPayer) return;
     // Starting a split bill is the free plan's limit; managing one never is.
     const startsUnsettled = savedSplits.some((row) => !row.isSelf && !row.paid && num(row.amount) > 0);
     if (!startsUnsettled && !splitRows.length && !link.pro && unpaidSplitBills(model) >= FREE_MAX_UNSETTLED_SPLIT_BILLS) {
@@ -304,6 +309,7 @@ function TxForm({ tx, onClose }: { tx: Tx | null; onClose: () => void }) {
   };
 
   const save = async (again: boolean) => {
+    if (friendPayer) return;
     setTouched(true);
     if (invalid || !ready || busy) return;
     const tx_ = fields();
@@ -419,7 +425,7 @@ function TxForm({ tx, onClose }: { tx: Tx | null; onClose: () => void }) {
               {t("addAnother")}
             </button>
           ) : null}
-          <SaveButton label={tx ? t("update") : t("add")} busy={busy} disabled={!ready || confirmDelete} form={formId} />
+          <SaveButton label={tx ? t("update") : t("add")} busy={busy} disabled={!ready || confirmDelete || !!friendPayer} form={formId} />
         </div>
       }
     >
@@ -557,6 +563,9 @@ function TxForm({ tx, onClose }: { tx: Tx | null; onClose: () => void }) {
               </p>
             ) : null}
             {locked ? <p className="mt-1 text-[12px] text-foreground-muted">{t("amountLocked")}</p> : null}
+            {friendPayer ? (
+              <p className="mt-1 text-[12px] font-semibold text-foreground-soft">{t("friendPaid", { name: friendPayer.person_name?.trim() || ts("someone") })}</p>
+            ) : null}
             <label className="mt-2 flex items-center gap-2 border-t border-border/50 pt-2">
               <ClayImg name="ui/checklist" size={16} />
               <span className="sr-only">{t("note")}</span>

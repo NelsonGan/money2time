@@ -1178,7 +1178,7 @@ export const TUTORIALS: Tutorial[] = [
       "id": "split-a-bill",
       "category": "share",
       "title": "Split a bill with friends",
-      "summary": "Record who owes you what, straight from the entry screen.",
+      "summary": "Record who owes whom, straight from the entry screen.",
       "keywords": [
         "split",
         "share",
@@ -1198,7 +1198,7 @@ export const TUTORIALS: Tutorial[] = [
         {
           "image": "split-a-bill-2",
           "title": "Add the people",
-          "body": "Type a name, or pick one you have split with before. Swipe a row left to remove it."
+          "body": "Type a name, or pick one you have split with before. Swipe a row left to remove it. If a friend paid the bill, pick them under Paid by and you owe them your share."
         },
         {
           "image": "split-a-bill-3",
@@ -1266,8 +1266,8 @@ export const TUTORIALS: Tutorial[] = [
     {
       "id": "settle-up",
       "category": "share",
-      "title": "See who owes you and settle up",
-      "summary": "One place for every unpaid share, with a receipt you can send.",
+      "title": "See who owes what and settle up",
+      "summary": "One place for what you and your friends owe each other, with a receipt you can send.",
       "keywords": [
         "settle",
         "owe",
@@ -1275,24 +1275,26 @@ export const TUTORIALS: Tutorial[] = [
         "paid",
         "collect",
         "receipt",
+        "balances",
         "who owes you",
+        "you owe",
         "qr"
       ],
       "steps": [
         {
           "image": "settle-up-1",
-          "title": "Open Who owes you",
-          "body": "Settings, then Who owes you. The badge counts unpaid shares."
+          "title": "Open Balances",
+          "body": "Settings, then Balances. The badge counts the people you have an open balance with."
         },
         {
           "image": "settle-up-2",
           "title": "By person or by bill",
-          "body": "By person rolls everything one friend owes into a single figure. By transaction lists it bill by bill."
+          "body": "By person nets everything between you and one friend into a single figure, whichever way it is owed. By transaction lists it bill by bill."
         },
         {
           "image": "settle-up-3",
           "title": "Mark it paid",
-          "body": "Tap a person to see their bills. Mark paid clears one, and the payback account picker says where the money went."
+          "body": "Tap a person to see their bills. Mark paid clears one, and the payback account picker says where the money went. Settle up clears everything between you in one go."
         },
         {
           "image": "settle-up-4",

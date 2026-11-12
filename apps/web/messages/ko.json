@@ -1045,7 +1045,7 @@
       "splits": {
         "nav": "더치페이",
         "title": "더치페이",
-        "subtitle": "아직 못 받은 돈"
+        "subtitle": "나와 친구들이 서로 주고받을 돈"
       },
       "mood": {
         "nav": "기분과 습관",
@@ -1359,13 +1359,16 @@
       "emptyTitle": "더치페이가 없어요",
       "emptyBody": "앱에서 친구와 나눈 결제가 여기에 표시돼요.",
       "owedToYou": "받을 돈",
+      "youOwe": "줄 돈",
+      "youOweNote": "친구가 결제한 청구의 몫",
+      "owesYou": "받을 금액",
       "people": "{count, plural, =0 {모두 정산 완료} other {#명에게서}}",
       "settled": "정산된 몫",
       "ofShares": "{count, plural, other {#개 몫 중}}",
       "bills": "더치페이",
       "billsNote": "함께 나눈 거래",
-      "byPerson": "나에게 갚을 사람",
-      "allSettled": "모두 갚았어요",
+      "byPerson": "주고받을 돈",
+      "allSettled": "모두 정산 완료",
       "open": "{count, plural, other {미정산 #개}}",
       "billsTitle": "함께 나눈 거래",
       "unnamed": "누군가"
@@ -1448,6 +1451,7 @@
       "nudgePause": "잠깐, 약 {hours} 분량의 일이에요",
       "nudgeLarge": "이건 {hours} 분량의 근무 시간이에요",
       "amountLocked": "이 금액은 더치페이나 환불과 연결되어 있어요. 앱에서 변경하세요.",
+      "friendPaid": "{name} 님이 이 청구를 결제했어요. 앱에서 수정하세요.",
       "hideBalances": "잔액 숨기기",
       "showBalances": "잔액 표시",
       "savingsGoals": "저축 목표",
@@ -1979,6 +1983,7 @@
         "someone": "이름 없음",
         "untitledBill": "더치페이",
         "paidTitle": "돌려받음",
+        "personPaid": "{name} 님이 결제",
         "undoTitle": "이 몫을 미정산으로 되돌릴까요?",
         "undoBody": "다시 받을 돈으로 돌아가고, 지출도 이 금액만큼 다시 늘어나요. 다른 계좌로 들어온 정산 이체는 삭제돼요.",
         "itemizedTotal": "합계: {sum}",

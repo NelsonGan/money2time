@@ -1045,7 +1045,7 @@
       "splits": {
         "nav": "割り勘",
         "title": "割り勘",
-        "subtitle": "まだ払ってもらっていない人"
+        "subtitle": "あなたと友だちの貸し借り"
       },
       "mood": {
         "nav": "気持ちと習慣",
@@ -1359,13 +1359,16 @@
       "emptyTitle": "割り勘はありません",
       "emptyBody": "アプリで友達と割り勘にした支払いが、ここに表示されます。",
       "owedToYou": "受け取る予定の額",
+      "youOwe": "返す分",
+      "youOweNote": "友だちが支払った会計の分",
+      "owesYou": "受け取り予定",
       "people": "{count, plural, =0 {すべて精算済み} other {#人から}}",
       "settled": "精算済みの負担分",
       "ofShares": "{count, plural, other {#件の負担分のうち}}",
       "bills": "割り勘",
       "billsNote": "共有した取引",
-      "byPerson": "あなたに支払う人",
-      "allSettled": "全員が支払い済みです",
+      "byPerson": "貸し借り",
+      "allSettled": "すべて精算済み",
       "open": "{count, plural, other {未精算の負担分 #件}}",
       "billsTitle": "共有した取引",
       "unnamed": "だれか"
@@ -1448,6 +1451,7 @@
       "nudgePause": "少し考えて：約 {hours} の労働量です",
       "nudgeLarge": "これはあなたの {hours} の労働時間です",
       "amountLocked": "この金額は割り勘または払い戻しに紐づいています。アプリで変更してください。",
+      "friendPaid": "{name}がこの会計を支払いました。変更はアプリで行ってください。",
       "hideBalances": "残高を非表示",
       "showBalances": "残高を表示",
       "savingsGoals": "貯金目標",
@@ -1979,6 +1983,7 @@
         "someone": "名前なし",
         "untitledBill": "割り勘",
         "paidTitle": "返金済み",
+        "personPaid": "{name}が支払い",
         "undoTitle": "この分を未払いに戻しますか？",
         "undoBody": "再びあなたへの未払いになり、支出もこの金額だけ元に戻ります。ほかの口座への返金の振替は削除されます。",
         "itemizedTotal": "合計: {sum}",

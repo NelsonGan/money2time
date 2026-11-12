@@ -1,6 +1,7 @@
 import {
   Check,
   ChevronLeft,
+  ChevronRight,
   ChevronsLeft,
   Minus,
   Plus,
@@ -35,6 +36,12 @@ import {
   sanitizeInitialAmount,
 } from '~/features/transactions/components/editor/calculatorEngine';
 import { MiniNumpad } from '~/features/transactions/components/editor/MiniNumpad';
+import {
+  type PaidByOption,
+  PaidByPickerSheet,
+} from '~/features/transactions/components/editor/PaidByPickerSheet';
+import { PersonAvatar } from '~/features/transactions/components/PersonAvatar';
+import { debtPartyKey } from '~/features/transactions/lib/debtParty';
 import { recentSplitPersonNames } from '~/features/transactions/lib/settleUp';
 import {
   applyPercent,
@@ -42,6 +49,7 @@ import {
   spreadOverShares,
   sumUnpaidRows,
 } from '~/features/transactions/lib/splitMath';
+import { draftPayer, storedFriendPaidRow } from '~/features/transactions/lib/splitPayer';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -62,6 +70,17 @@ export interface SplitDraft {
   /** The share this row belongs to (`splitShareKey`); a share paid in parts
    *  has paid rows beside its unpaid one. Absent on a row added here. */
   shareKey?: string;
+  /** This friend paid the bill, so the user owes them the Me row
+   *  (features/transactions/lib/splitPayer.ts). At most one row. */
+  isPayer?: boolean;
+  /** On the payer's row once the user has paid them back: who paid is then
+   *  fixed until that payment is undone in Balances. */
+  settled?: { paidAt: string };
+  /** On the payer's row: what the user has already paid them in parts. Their
+   *  own share cannot go below it, and who paid is fixed while it is there. */
+  paidBack?: number;
+  /** The Cloud Sync account this person is, once people can be real users. */
+  memberId?: string | null;
 }
 
 interface SplitBillModalProps {
@@ -173,15 +192,29 @@ function toSplitDraftInputs(
   splits: SplitDraft[],
   fallbackAccountId: string | null | undefined,
 ): SplitDraftInput[] {
-  return splits.map((s, idx) => ({
-    id: s.id,
-    personName: s.personName.trim() || null,
-    amount: Number(s.amount) || 0,
-    isSelf: s.isSelf,
-    paybackAccountId: s.paybackAccountId ?? fallbackAccountId ?? null,
-    sortOrder: idx,
-    paid: s.paid,
-  }));
+  // A bill a friend paid: nobody on it owes the user, so every friend row
+  // holds its share in `shareAmount` beside a zero `amount`, and names no
+  // payback account (`storedFriendPaidRow`).
+  const friendPaid = draftPayer(splits) !== null;
+  return splits.map((s, idx) => {
+    const row = {
+      id: s.id,
+      personName: s.personName.trim() || null,
+      amount: Number(s.amount) || 0,
+      isSelf: s.isSelf,
+      paybackAccountId: s.paybackAccountId ?? fallbackAccountId ?? null,
+      sortOrder: idx,
+      paid: s.paid,
+      memberId: s.memberId ?? null,
+    };
+    if (!friendPaid) return { ...row, isPayer: false, shareAmount: null };
+    return {
+      ...storedFriendPaidRow(row),
+      paybackAccountId: s.isPayer && s.settled ? (fallbackAccountId ?? null) : null,
+      paid: undefined,
+      isPayer: !s.isSelf && !!s.isPayer,
+    };
+  });
 }
 
 export const splitsHelpers = {
@@ -419,6 +452,70 @@ export function SplitBillModal({
 
   const diff = useMemo(() => Math.round((total - unpaidSum) * 100) / 100, [total, unpaidSum]);
 
+  // Who paid the bill: the user (the default), or the friend whose row carries
+  // `isPayer`. When a friend paid, the user owes them the Me row and nobody
+  // owes the user, so there is nothing here to mark paid.
+  const payerRow = useMemo(() => draftPayer(splits), [splits]);
+  const friendPaid = payerRow !== null;
+  const hasFriends = splits.some((s) => !s.isSelf);
+  // A recorded payment fixes who paid: a friend's payback lowered the expense
+  // the user paid, and the user's own payback put it on an account.
+  const paidBack = payerRow?.paidBack ?? 0;
+  const payerLocked = splits.some((s) => !!s.paid) || !!payerRow?.settled || paidBack > 0;
+  const selfAmount = useMemo(() => {
+    const value = Number(splits.find((s) => s.isSelf)?.amount);
+    return Number.isFinite(value) ? Math.max(0, value) : 0;
+  }, [splits]);
+  const friendsOwe = useMemo(
+    () => (friendPaid ? 0 : Math.max(0, Math.round((unpaidSum - selfAmount) * 100) / 100)),
+    [friendPaid, selfAmount, unpaidSum],
+  );
+
+  // The payer's name as the Paid by row shows it, and the people it offers.
+  const payerLabel = payerRow
+    ? payerRow.personName.trim() || I18n.t('transactions.settleUp.someone')
+    : I18n.t('transactions.editor.split.me_label');
+  const [payerPickerOpen, setPayerPickerOpen] = useState(false);
+  const payerOptions = useMemo<PaidByOption[]>(
+    () =>
+      splits.flatMap((row, index) => {
+        // A friend who has paid the user back is not the one who paid the bill.
+        if (row.paid && !row.isSelf) return [];
+        return [
+          {
+            key: row.id ?? `row_${index}`,
+            rowIndex: row.isSelf ? null : index,
+            name: row.isSelf
+              ? I18n.t('transactions.editor.split.me_label')
+              : row.personName.trim() || I18n.t('transactions.settleUp.someone'),
+            partyKey: row.isSelf ? null : debtPartyKey(row.personName, row.memberId),
+            selected: row.isSelf ? !friendPaid : row === payerRow,
+          },
+        ];
+      }),
+    [friendPaid, payerRow, splits],
+  );
+
+  const handlePayerChange = useCallback(
+    (payerIndex: number | null) => {
+      if (payerLocked) {
+        void triggerHaptic('warning');
+        setToast(I18n.t('transactions.editor.split.paid_by_locked'));
+        if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+        toastTimerRef.current = setTimeout(() => setToast(null), 2800);
+        return;
+      }
+      void triggerHaptic('selection');
+      onChange(
+        splits.map((row, i) => {
+          const isPayer = payerIndex !== null && i === payerIndex && !row.isSelf;
+          return row.isPayer === isPayer || (!row.isPayer && !isPayer) ? row : { ...row, isPayer };
+        }),
+      );
+    },
+    [onChange, payerLocked, splits],
+  );
+
   // Tax & service adjustment: a single percentage stepper.
   // Applying is a one-shot transform of the row amounts; applying twice
   // stacks intentionally (service charge, then GST).
@@ -531,6 +628,14 @@ export function SplitBillModal({
       void triggerHaptic('warning');
       const target = splits[index];
       if (!target || target.isSelf) return;
+      // The friend the user has already paid back stays the payer until that
+      // payment is undone: removing them would make it a bill the user paid.
+      if (target.isPayer && (target.settled || (target.paidBack ?? 0) > 0)) {
+        setToast(I18n.t('transactions.editor.split.paid_by_locked'));
+        if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+        toastTimerRef.current = setTimeout(() => setToast(null), 2800);
+        return;
+      }
       // Removing a paid row drops the local entry but leaves the linked
       // transfer + parent's reduced amount alone — the user can clean up the
       // transfer separately from the activity list if they want.
@@ -639,9 +744,34 @@ export function SplitBillModal({
   const sumMatches = Math.abs(diff) < 0.005;
   // Itemized mode has no fixed total to match — Done just needs something to
   // commit; the editor derives the parent amount from the rows.
-  const canDone = itemized ? unpaidSum > 0.004 : sumMatches;
+  // The user's own share cannot drop below what they have already paid back.
+  const belowPaidBack = friendPaid && selfAmount + 0.005 < paidBack;
+  const canDone = (itemized ? unpaidSum > 0.004 : sumMatches) && !belowPaidBack;
   // Whether the sum bar shows its "all good" state (drives the check + hint).
   const sumComplete = itemized ? canDone : sumMatches;
+
+  // Once the rows add up, the bar says what the split means for the user in
+  // one line instead of repeating the total above: what they owe the friend
+  // who paid, or what comes back to them from a bill they paid.
+  const settlementLine = belowPaidBack
+    ? I18n.t('transactions.editor.split.paid_floor', { amount: formatMoney(paidBack) })
+    : !sumComplete
+      ? null
+      : friendPaid
+        ? payerRow?.settled
+          ? I18n.t('transactions.settleUp.you_paid_back', {
+              name: payerRow.personName.trim() || I18n.t('transactions.settleUp.someone'),
+            })
+          : selfAmount > 0
+            ? I18n.t('transactions.editor.split.you_owe_summary', {
+                name: payerRow?.personName.trim() || I18n.t('transactions.settleUp.someone'),
+                // What is still owed: the share less what is already paid back.
+                amount: formatMoney(Math.max(0, selfAmount - paidBack)),
+              })
+            : I18n.t('transactions.editor.split.you_owe_nothing')
+        : friendsOwe > 0
+          ? I18n.t('transactions.editor.split.get_back_hint', { amount: formatMoney(friendsOwe) })
+          : null;
 
   // The row whose "paid back to" account is being chosen after the user tapped
   // Mark paid on the swipe actions. Selecting an account settles that row.
@@ -718,7 +848,9 @@ export function SplitBillModal({
               {I18n.t(
                 itemized
                   ? 'transactions.editor.split.subtotal_label'
-                  : 'transactions.editor.amount',
+                  : friendPaid
+                    ? 'transactions.editor.split.bill_total_label'
+                    : 'transactions.editor.amount',
               )}
             </Text>
             <Text variant="title" className="mt-1 text-center">
@@ -727,19 +859,63 @@ export function SplitBillModal({
             <View className="mt-2 h-[3px] w-8 rounded-full bg-primary/30" />
           </View>
 
-          {/* Split evenly (fixed-total mode only): a clean right-aligned control
-              instead of a boxed card. */}
-          {!itemized ? (
-            <View className="mx-5 mt-1 flex-row items-center justify-end gap-2.5">
-              <Text variant="caption" tone="muted">
-                {I18n.t('transactions.editor.split.even_toggle')}
-              </Text>
-              <Switch
-                value={splitEvenly}
-                onValueChange={handleToggleEven}
-                trackColor={{ false: `${themeColors.border}80`, true: themeColors.primary }}
-                thumbColor="#FFFFFF"
-              />
+          {/* How the bill is settled, in one card: who paid it (Me, or a friend
+              on it, in which case the user owes them their own share), and
+              whether it is shared evenly. */}
+          {hasFriends || !itemized ? (
+            <View className="mx-4 mt-3 overflow-hidden rounded-[20px] border border-border/25 bg-card/60">
+              {hasFriends ? (
+                <Pressable
+                  onPress={() => {
+                    if (payerLocked) {
+                      handlePayerChange(null);
+                      return;
+                    }
+                    void triggerHaptic('selection');
+                    Keyboard.dismiss();
+                    setPayerPickerOpen(true);
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('transactions.editor.split.paid_by_chip', {
+                    name: payerLabel,
+                  })}
+                  className="flex-row items-center gap-2.5 px-4 py-3 active:opacity-70"
+                >
+                  <Text variant="body" className="flex-1">
+                    {I18n.t('transactions.editor.split.paid_by_label')}
+                  </Text>
+                  <PersonAvatar
+                    name={payerLabel}
+                    partyKey={
+                      payerRow ? debtPartyKey(payerRow.personName, payerRow.memberId) : null
+                    }
+                    size={26}
+                  />
+                  <Text
+                    variant="bodyStrong"
+                    numberOfLines={1}
+                    className="max-w-[45%]"
+                    tone={payerLocked ? 'muted' : undefined}
+                  >
+                    {payerLabel}
+                  </Text>
+                  <ChevronRight size={16} color={themeColors.textMuted} />
+                </Pressable>
+              ) : null}
+              {hasFriends && !itemized ? <View className="mx-4 h-[1px] bg-border/15" /> : null}
+              {!itemized ? (
+                <View className="flex-row items-center px-4 py-2">
+                  <Text variant="body" className="flex-1">
+                    {I18n.t('transactions.editor.split.even_toggle')}
+                  </Text>
+                  <Switch
+                    value={splitEvenly}
+                    onValueChange={handleToggleEven}
+                    trackColor={{ false: `${themeColors.border}80`, true: themeColors.primary }}
+                    thumbColor="#FFFFFF"
+                  />
+                </View>
+              ) : null}
             </View>
           ) : null}
 
@@ -751,7 +927,10 @@ export function SplitBillModal({
               const effectiveAcct = acct ?? fallbackAcct ?? null;
               const acctLabel = effectiveAcct?.name ?? I18n.t('common.no_account');
               const disabledRow = !!row.paid;
-              const canMarkPaid = !row.isSelf && !!row.id && !disabledRow && !!onMarkPaid;
+              // On a bill a friend paid nobody owes the user: nothing to mark paid.
+              const canMarkPaid =
+                !friendPaid && !row.isSelf && !!row.id && !disabledRow && !!onMarkPaid;
+              const isPayerRow = friendPaid && row === payerRow;
               const canUndo = disabledRow && !!row.id && !!onMarkUnpaid && newlyPaidIds.has(row.id);
               const rowKey = row.id ?? `new_${index}`;
               const isUnpaidFriend = !row.isSelf && !disabledRow;
@@ -808,6 +987,13 @@ export function SplitBillModal({
                     ]}
                   />
 
+                  {isPayerRow ? (
+                    <View className="rounded-full bg-success/15 px-2 py-0.5">
+                      <Text variant="caption" className="font-medium text-success">
+                        {I18n.t('transactions.editor.split.payer_tag')}
+                      </Text>
+                    </View>
+                  ) : null}
                   <Text variant="caption" tone="muted">
                     {currencySymbol}
                   </Text>
@@ -924,7 +1110,7 @@ export function SplitBillModal({
               <ChevronsLeft size={13} color={themeColors.textMuted} />
               <Text variant="caption" tone="muted" className="text-center">
                 {I18n.t(
-                  onMarkPaid
+                  onMarkPaid && !friendPaid
                     ? 'transactions.editor.split.swipe_hint_actions'
                     : 'transactions.editor.split.swipe_hint_delete',
                 )}
@@ -1025,19 +1211,22 @@ export function SplitBillModal({
         >
           <View className="px-5 pt-3 pb-2 items-center">
             <View className="flex-row items-center gap-2">
-              <Text variant="bodyStrong" className="text-foreground">
-                {itemized
-                  ? I18n.t('transactions.editor.split.itemized_total', {
-                      sum: formatMoney(unpaidSum),
-                    })
-                  : I18n.t('transactions.editor.split.sum_match', {
-                      sum: formatMoney(unpaidSum),
-                      total: formatMoney(total),
-                    })}
+              <Text variant="bodyStrong" className="shrink text-center text-foreground">
+                {settlementLine ??
+                  (itemized
+                    ? I18n.t('transactions.editor.split.itemized_total', {
+                        sum: formatMoney(unpaidSum),
+                      })
+                    : I18n.t('transactions.editor.split.sum_match', {
+                        sum: formatMoney(unpaidSum),
+                        total: formatMoney(total),
+                      }))}
               </Text>
-              {sumComplete ? <Check size={16} color={themeColors.success} /> : null}
+              {sumComplete && !belowPaidBack ? (
+                <Check size={16} color={themeColors.success} />
+              ) : null}
             </View>
-            {sumComplete ? null : itemized ? (
+            {sumComplete || belowPaidBack ? null : itemized ? (
               <Text variant="caption" tone="muted" className="mt-0.5">
                 {I18n.t('transactions.editor.split.itemized_total_zero_hint')}
               </Text>
@@ -1088,6 +1277,16 @@ export function SplitBillModal({
           </View>
         </Animated.View>
       ) : null}
+
+      <PaidByPickerSheet
+        visible={payerPickerOpen}
+        options={payerOptions}
+        onClose={() => setPayerPickerOpen(false)}
+        onSelect={(rowIndex) => {
+          setPayerPickerOpen(false);
+          handlePayerChange(rowIndex);
+        }}
+      />
 
       <AccountPickerSheet
         visible={accountPickerSplit !== null}

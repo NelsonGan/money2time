@@ -1045,7 +1045,7 @@
       "splits": {
         "nav": "Delte regninger",
         "title": "Delte regninger",
-        "subtitle": "Hvem der stadig skylder dig penge"
+        "subtitle": "Hvad du og dine venner skylder hinanden"
       },
       "mood": {
         "nav": "Humør og vaner",
@@ -1359,13 +1359,16 @@
       "emptyTitle": "Ingen delte regninger",
       "emptyBody": "Regninger, du deler med venner i appen, vises her.",
       "owedToYou": "Du til gode",
+      "youOwe": "Du skylder",
+      "youOweNote": "For regninger, venner har betalt",
+      "owesYou": "Skylder dig",
       "people": "{count, plural, =0 {Alt er gjort op} one {Fra # person} other {Fra # personer}}",
       "settled": "Afregnede andele",
       "ofShares": "{count, plural, one {Af # andel} other {Af # andele}}",
       "bills": "Delte regninger",
       "billsNote": "Transaktioner, du har delt",
-      "byPerson": "Hvem der skylder dig penge",
-      "allSettled": "Alle har betalt dig tilbage",
+      "byPerson": "Mellemværender",
+      "allSettled": "Alt er afregnet",
       "open": "{count, plural, one {# åben andel} other {# åbne andele}}",
       "billsTitle": "Delte transaktioner",
       "unnamed": "En person"
@@ -1448,6 +1451,7 @@
       "nudgePause": "Tænk dig om: ~{hours} arbejde",
       "nudgeLarge": "Det er {hours} af din arbejdstid",
       "amountLocked": "Dette beløb er knyttet til en deling eller en refusion. Ret det i appen.",
+      "friendPaid": "{name} betalte denne regning. Ret den i appen.",
       "hideBalances": "Skjul saldoer",
       "showBalances": "Vis saldoer",
       "savingsGoals": "Opsparingsmål",
@@ -1979,6 +1983,7 @@
         "someone": "Nogen",
         "untitledBill": "Delregning",
         "paidTitle": "Betalt tilbage",
+        "personPaid": "{name} betalte",
         "undoTitle": "Markér denne andel som ubetalt?",
         "undoBody": "Beløbet skyldes dig igen, og udgiften stiger med dette beløb. En tilbagebetaling til en anden konto fjernes.",
         "itemizedTotal": "I alt: {sum}",

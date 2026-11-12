@@ -1043,6 +1043,26 @@ export interface TransactionSplit {
    * sharing `partOfSplitId ?? id` (`splitShareKey`).
    */
   partOfSplitId: string | null;
+  /**
+   * This friend paid the bill, so the user owes them the Me row's amount
+   * (migration 089). False on every row of a bill the user paid. The row's
+   * `paidAt` is then when the user paid them back, and `paybackAccountId`
+   * the account it was paid from. See features/transactions/lib/splitPayer.ts.
+   */
+  isPayer: boolean;
+  /**
+   * A friend's share of a bill another friend paid. `amount` is what a person
+   * owes the user, which is nothing on such a bill, so it stays 0 there and
+   * the share lives here. Null on a bill the user paid.
+   */
+  shareAmount: number | null;
+  /**
+   * The Cloud Sync account this person is, once they are a real user (a
+   * member of a shared group). Null for a name typed on the bill, which is
+   * every row today. Balances group a person by this when it is set, else by
+   * their name (`debtPartyOf`).
+   */
+  memberId: string | null;
   sortOrder: number;
   createdAt: string;
   updatedAt: string;
@@ -1050,10 +1070,13 @@ export interface TransactionSplit {
 }
 
 export interface TransactionSplitsSummary {
+  /** Shares to settle: the friends who owe, or 1 on a bill a friend paid. */
   count: number;
   paidCount: number;
   unpaidAmount: number;
   totalOwed: number;
+  /** A friend paid this bill, so the one share is what the user owes them. */
+  youOwe: boolean;
 }
 
 /** Where a receipt split's itemized detail originated. */
@@ -1100,9 +1123,17 @@ export interface ReceiptSplit {
   deletedAt: string | null;
 }
 
+/**
+ * Which way a share is owed: `owes_you` on a bill the user paid (the person
+ * owes the user), `you_owe` on a bill that person paid (the user owes them).
+ */
+export type DebtDirection = 'owes_you' | 'you_owe';
+
 /** One split a person owes or has paid, tied back to its parent transaction. */
 export interface PersonDebtBill {
+  /** The row Mark paid acts on: the friend's own row, or for `you_owe` the payer's. */
   splitId: string;
+  direction: DebtDirection;
   transactionId: string;
   /** Parent transaction date (ISO / YYYY-MM-DD). */
   date: string;
@@ -1135,32 +1166,64 @@ export interface PersonDebtBill {
   shareKey: string;
 }
 
-/** Everything one person owes the user, rolled up across every transaction. */
+/**
+ * The balance between the user and one person, rolled up across every
+ * transaction: what they owe the user, what the user owes them, and the net.
+ */
 export interface PersonDebt {
   /** Grouping key: trimmed + case-folded name, or the unnamed sentinel. */
   key: string;
   /** Display name (from the most recent bill), or null when the split was unnamed. */
   name: string | null;
-  /** Total owed in the reporting currency. */
+  /** Their Cloud Sync account once people can be real users; null for a name. */
+  memberId: string | null;
+  /** What they still owe the user, in the reporting currency. */
   totalReporting: number;
-  /** Amount already paid, in the reporting currency. */
+  /** What they have paid the user back, in the reporting currency. */
   paidReporting: number;
-  /** Native per-currency subtotals, for tabs that span currencies. */
+  /** What the user still owes them (bills they paid), in the reporting currency. */
+  owedReporting: number;
+  /** What the user has paid them back, in the reporting currency. */
+  owedPaidReporting: number;
+  /**
+   * `totalReporting - owedReporting`: positive when they owe the user on
+   * balance, negative when the user owes them.
+   */
+  netReporting: number;
+  /** What they still owe the user per currency, for tabs that span currencies. */
   byCurrency: { currency: string; amount: number }[];
+  /** What the user still owes them per currency. */
+  owedByCurrency: { currency: string; amount: number }[];
+  /** The net per currency, signed as `netReporting`; currencies that cancel out are left out. */
+  netByCurrency: { currency: string; amount: number }[];
   bills: PersonDebtBill[];
   /** Oldest unpaid bill date, or oldest paid bill when everything is settled. */
   oldestDate: string;
   /** All shares for this person, paid and unpaid. */
   billCount: number;
-  /** Shares still owed, used for the outstanding count and actions. */
+  /** Shares still owed either way, used for the outstanding count and actions. */
   unpaidBillCount: number;
+  /** Of those, the shares the user owes them. */
+  youOweCount: number;
 }
 
-/** The whole "who owes you" roll-up; totals count unpaid splits only. */
+/** The whole Balances roll-up; totals count unpaid shares only. */
 export interface SettleUpSummary {
   people: PersonDebt[];
-  /** Grand total owed across everyone, in the reporting currency. */
+  /** Grand total owed to the user across everyone, in the reporting currency. */
   totalReporting: number;
+  /** Grand total the user owes across everyone, in the reporting currency. */
+  owedReporting: number;
+  /** `totalReporting - owedReporting`. */
+  netReporting: number;
+  /**
+   * The same split after netting each person: what the people who owe the user
+   * on balance owe, and what the user owes the people they owe on balance.
+   * These are the two figures Balances shows, since a person is settled with
+   * one payment either way.
+   */
+  owedToYouReporting: number;
+  youOweReporting: number;
   /** People with any paid or unpaid share. */
   personCount: number;
   /** Unpaid shares only. */
@@ -1171,7 +1234,11 @@ export interface SettleUpSummary {
 /** One person's share of a single transaction (paid or unpaid). */
 export interface TransactionDebtSplit {
   splitId: string;
-  /** Person who owes, or null when the split was never named. */
+  direction: DebtDirection;
+  /**
+   * Person who owes (or, for `you_owe`, the payer the user owes), or null
+   * when the split was never named.
+   */
   personName: string | null;
   /** The split amount, in the parent transaction's own entered currency. */
   amount: number;
@@ -1198,9 +1265,29 @@ export interface TransactionDebtSplit {
   shareKey: string;
 }
 
-/** A transaction with paid or unpaid non-self splits owed to the user. */
+/** Someone else's share of a bill a friend paid: shown, never owed to the user. */
+export interface TransactionDebtParticipant {
+  splitId: string;
+  personName: string | null;
+  /** The key their balance is grouped under (`debtPartyOf`). */
+  partyKey: string;
+  /** Their share, in the bill's currency. */
+  amount: number;
+  /** The friend who paid the bill. */
+  isPayer: boolean;
+}
+
+/** A split bill: shares owed to the user, or the user's own share of a bill a friend paid. */
 export interface TransactionDebt {
   transactionId: string;
+  /**
+   * Who paid: null when the user did, else the friend (`name` null when
+   * unnamed) and the key their balance is grouped under.
+   */
+  paidBy: { name: string | null; key: string } | null;
+  /** On a bill a friend paid: the whole bill and everyone else's share of it. */
+  billTotalNative: number | null;
+  participants: TransactionDebtParticipant[];
   /** Transaction date (ISO / YYYY-MM-DD). */
   date: string;
   note: string | null;
@@ -1221,11 +1308,13 @@ export interface TransactionDebt {
   unpaidSplitCount: number;
 }
 
-/** The "who owes you" roll-up grouped by transaction instead of by person. */
+/** The Balances roll-up grouped by transaction instead of by person. */
 export interface SettleUpByTransactionSummary {
   transactions: TransactionDebt[];
-  /** Grand total owed across every bill, in the reporting currency. */
+  /** Grand total owed to the user across every bill, in the reporting currency. */
   totalReporting: number;
+  /** Grand total the user owes across every bill, in the reporting currency. */
+  owedReporting: number;
   /** Bills with any paid or unpaid share. */
   transactionCount: number;
   /** Unpaid shares only. */

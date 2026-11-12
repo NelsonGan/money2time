@@ -112,6 +112,20 @@ export type TransactionSplitRow = Row & {
    * `part_of_split_id ?? id` (`splitShareKey`).
    */
   part_of_split_id?: string | null;
+  /**
+   * A bill a friend paid (the app's migration 089): the payer's row carries
+   * `is_payer`, and each friend's share of the bill is in `share_amount`
+   * while `amount` (what a person owes the user) stays 0. The payer row's
+   * `paid_at` is then when the user paid them back. Absent on every row from
+   * an app before this. See `lib/backup/split-payer.ts`.
+   */
+  is_payer?: number | boolean | null;
+  share_amount?: number | null;
+  /**
+   * The Cloud Sync account this person is, once people can be real users.
+   * Null or absent today; balances group by it when it is set (`partyKey`).
+   */
+  member_id?: string | null;
 };
 
 export type ExchangeRateRow = Row & {

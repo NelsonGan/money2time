@@ -1045,7 +1045,7 @@
       "splits": {
         "nav": "Contas divididas",
         "title": "Contas divididas",
-        "subtitle": "Quem ainda te deve"
+        "subtitle": "O que você e seus amigos devem uns aos outros"
       },
       "mood": {
         "nav": "Humor e hábitos",
@@ -1359,13 +1359,16 @@
       "emptyTitle": "Nenhuma conta dividida",
       "emptyBody": "As contas que você divide com amigos no app aparecem aqui.",
       "owedToYou": "Devido a você",
+      "youOwe": "Você deve",
+      "youOweNote": "Por contas que amigos pagaram",
+      "owesYou": "Te deve",
       "people": "{count, plural, =0 {Tudo acertado} one {Por # pessoa} other {Por # pessoas}}",
       "settled": "Partes acertadas",
       "ofShares": "{count, plural, one {De # parte} other {De # partes}}",
       "bills": "Contas divididas",
       "billsNote": "Transações que você compartilhou",
-      "byPerson": "Quem te deve",
-      "allSettled": "Todos já pagaram você",
+      "byPerson": "Saldos",
+      "allSettled": "Tudo acertado",
       "open": "{count, plural, one {# parte em aberto} other {# partes em aberto}}",
       "billsTitle": "Transações compartilhadas",
       "unnamed": "Alguém"
@@ -1448,6 +1451,7 @@
       "nudgePause": "Vale refletir: ~{hours} de trabalho",
       "nudgeLarge": "Isso representa {hours} do seu tempo de trabalho",
       "amountLocked": "Este valor está ligado a uma divisão ou a um reembolso. Altere-o no app.",
+      "friendPaid": "{name} pagou esta conta. Altere no app.",
       "hideBalances": "Ocultar saldos",
       "showBalances": "Mostrar saldos",
       "savingsGoals": "Metas de poupança",
@@ -1979,6 +1983,7 @@
         "someone": "Alguém",
         "untitledBill": "Conta dividida",
         "paidTitle": "Devolvido",
+        "personPaid": "{name} pagou",
         "undoTitle": "Marcar esta parte como não paga?",
         "undoBody": "Ela volta a ser devida a você, e a despesa aumenta por este valor. Uma transferência de devolução para outra conta é removida.",
         "itemizedTotal": "Total: {sum}",

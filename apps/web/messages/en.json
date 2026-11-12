@@ -1045,7 +1045,7 @@
       "splits": {
         "nav": "Split bills",
         "title": "Split bills",
-        "subtitle": "Who still owes you"
+        "subtitle": "What you and your friends owe each other"
       },
       "mood": {
         "nav": "Mood & habits",
@@ -1359,13 +1359,16 @@
       "emptyTitle": "No split bills",
       "emptyBody": "Bills you split with friends in the app show here.",
       "owedToYou": "Owed to you",
+      "youOwe": "You owe",
+      "youOweNote": "For bills friends paid",
+      "owesYou": "Owes you",
       "people": "{count, plural, =0 {All settled} one {By # person} other {By # people}}",
       "settled": "Shares settled",
       "ofShares": "{count, plural, one {Of # share} other {Of # shares}}",
       "bills": "Split bills",
       "billsNote": "Transactions you shared",
-      "byPerson": "Who owes you",
-      "allSettled": "Everyone has paid you back",
+      "byPerson": "Balances",
+      "allSettled": "All settled up",
       "open": "{count, plural, one {# open share} other {# open shares}}",
       "billsTitle": "Shared transactions",
       "unnamed": "Someone"
@@ -1448,6 +1451,7 @@
       "nudgePause": "Worth a pause: ~{hours} of work",
       "nudgeLarge": "That's {hours} of your work time",
       "amountLocked": "This amount is linked to a split or a refund. Change it in the app.",
+      "friendPaid": "{name} paid this bill. Change it in the app.",
       "hideBalances": "Hide balances",
       "showBalances": "Show balances",
       "savingsGoals": "Savings goals",
@@ -1979,6 +1983,7 @@
         "someone": "Someone",
         "untitledBill": "Split bill",
         "paidTitle": "Paid back",
+        "personPaid": "{name} paid",
         "undoTitle": "Mark this share unpaid?",
         "undoBody": "It is owed to you again, and the expense goes back up by this amount. A payback transfer into another account is removed.",
         "itemizedTotal": "Total: {sum}",

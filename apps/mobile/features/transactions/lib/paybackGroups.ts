@@ -9,6 +9,7 @@
  */
 
 import { buildPaybackTransferNote } from '~/features/transactions/lib/settleUp';
+import { isPayBackPart } from '~/features/transactions/lib/splitPayer';
 import {
   frozenAccountRate,
   paybackTransferAmounts,
@@ -62,6 +63,9 @@ export function indexPaybacks(
   for (const tx of transactions) {
     if (!tx.splits?.length) continue;
     for (const split of tx.splits) {
+      // A part the user paid a friend back is an expense of its own, not a
+      // payback to the user: it reads as the plain expense it is.
+      if (isPayBackPart(split)) continue;
       const rowId = !split.paidAt
         ? null
         : split.paidTransactionId

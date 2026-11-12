@@ -1045,7 +1045,7 @@
       "splits": {
         "nav": "Hating bayarin",
         "title": "Hating bayarin",
-        "subtitle": "Sino pa ang may utang sa iyo"
+        "subtitle": "Ang utang ninyo ng mga kaibigan mo sa isa't isa"
       },
       "mood": {
         "nav": "Mood at gawi",
@@ -1359,13 +1359,16 @@
       "emptyTitle": "Walang hating bayarin",
       "emptyBody": "Lalabas dito ang mga bayaring hinati mo sa mga kaibigan sa app.",
       "owedToYou": "Utang sa iyo",
+      "youOwe": "Utang mo",
+      "youOweNote": "Para sa mga bill na binayaran ng mga kaibigan",
+      "owesYou": "May utang sa iyo",
       "people": "{count, plural, =0 {Bayad na lahat} other {Mula sa # tao}}",
       "settled": "Bayad nang bahagi",
       "ofShares": "{count, plural, other {Sa # bahagi}}",
       "bills": "Hating bayarin",
       "billsNote": "Mga transaksyong pinaghatian",
-      "byPerson": "Sino ang may utang sa iyo",
-      "allSettled": "Nabayaran ka na ng lahat",
+      "byPerson": "Mga Balanse",
+      "allSettled": "Bayad na lahat",
       "open": "{count, plural, other {# bahaging hindi pa bayad}}",
       "billsTitle": "Mga pinaghatiang transaksyon",
       "unnamed": "Isang tao"
@@ -1448,6 +1451,7 @@
       "nudgePause": "Pag-isipan: ~{hours} ng trabaho",
       "nudgeLarge": "Iyon ay {hours} ng iyong oras sa trabaho",
       "amountLocked": "Naka-link ang halagang ito sa isang hatian o refund. Palitan ito sa app.",
+      "friendPaid": "Si {name} ang nagbayad ng bill na ito. Baguhin ito sa app.",
       "hideBalances": "Itago ang mga balance",
       "showBalances": "Ipakita ang mga balance",
       "savingsGoals": "Mga Savings Goal",
@@ -1979,6 +1983,7 @@
         "someone": "Isang tao",
         "untitledBill": "Split bill",
         "paidTitle": "Nabayaran na",
+        "personPaid": "Nagbayad si {name}",
         "undoTitle": "Markahang hindi pa bayad ang bahaging ito?",
         "undoBody": "Utang ito sa iyo ulit, at tataas muli ang gastos ng halagang ito. Aalisin ang payback transfer sa ibang account.",
         "itemizedTotal": "Kabuuan: {sum}",

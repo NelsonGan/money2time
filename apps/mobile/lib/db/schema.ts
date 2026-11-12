@@ -339,6 +339,15 @@ export const transactionSplitsTable = sqliteTable('transaction_splits', {
   paidTransactionId: text('paid_transaction_id'),
   // A part payment's row points at the share it was paid out of (migration 082).
   partOfSplitId: text('part_of_split_id'),
+  // A bill a friend paid for (migration 089): the payer's row carries
+  // `isPayer`, and each friend's share of the bill is in `shareAmount` while
+  // `amount` (what a person owes the user) stays 0. Null on every other row.
+  isPayer: integer('is_payer', { mode: 'boolean' }),
+  shareAmount: real('share_amount'),
+  // The Cloud Sync account this person is, once they are a real user (a member
+  // of a shared group). Null for a name typed on the bill, which is every row
+  // today; balances group by it when set. See features/transactions/lib/debtParty.ts.
+  memberId: text('member_id'),
   sortOrder: integer('sort_order').notNull().default(0),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),

@@ -18,6 +18,15 @@ import {
 import { TransactionEditorScreen } from '~/features/transactions/components';
 import { type SplitDraft, splitsHelpers } from '~/features/transactions/components/editor';
 import type { TransactionEditorSubmitExtras } from '~/features/transactions/components/TransactionEditorScreen';
+import {
+  billPayer,
+  draftPayer,
+  friendPaidBillTotal,
+  friendPaidExpense,
+  friendShare,
+  isPayBackPart,
+  paidBackInParts,
+} from '~/features/transactions/lib/splitPayer';
 import { splitShareKey } from '~/features/transactions/lib/splitPayments';
 import {
   transferFeeAccountAmount,
@@ -251,6 +260,40 @@ function TransactionEditor({
       splits: SplitDraft[],
       extras?: TransactionEditorSubmitExtras,
     ) => {
+      // A friend paid: the expense is the user's own share and nobody owes the
+      // user, so there are no paybacks to flush. It stays on no account until
+      // the user has paid that friend back, then keeps the one it was paid from.
+      const payer = draftPayer(splits);
+      if (payer) {
+        // The Me row is the user's whole share; the bill itself is what is
+        // left of it after the parts already paid back, which stay as they are.
+        const share = Number(splits.find((s) => s.isSelf)?.amount) || 0;
+        const paidBack = payer.paidBack ?? 0;
+        const expense = friendPaidExpense(input, share - paidBack, !!payer.settled);
+        const parts = (transaction.splits ?? []).filter(
+          (s) => isPayBackPart(s) && s.partOfSplitId === payer.id,
+        );
+        updateTransactionSplits(transaction.id, [
+          ...splitsHelpers
+            .toSplitDraftInputs(splits, expense.accountId ?? null)
+            .map((row) => (row.isSelf ? { ...row, amount: expense.amount } : row)),
+          ...parts.map((part) => ({
+            id: part.id,
+            personName: payer.personName.trim() || null,
+            amount: 0,
+            isSelf: false,
+            paybackAccountId: part.paybackAccountId,
+            sortOrder: part.sortOrder,
+            partOfSplitId: part.partOfSplitId,
+            isPayer: false,
+            shareAmount: part.shareAmount,
+            memberId: part.memberId,
+          })),
+        ]);
+        updateTransaction(transaction.id, expense);
+        return;
+      }
+
       // Diff editor splits against the persisted state to find newly paid /
       // newly unpaid rows. These were staged locally — flush them to the DB now.
       // NOTE: a brand-new split (no prior in DB) with `s.paid` set is also
@@ -317,6 +360,28 @@ function TransactionEditor({
   const initialSplits = useMemo<SplitDraft[] | undefined>(() => {
     const persisted = transaction.splits;
     if (!persisted || persisted.length === 0) return undefined;
+    // A bill a friend paid is edited whole: each friend's row shows its share
+    // of the bill (stored beside a zero `amount`), and the payer's `paidAt`,
+    // which is the user paying them back, is not a payback to the user.
+    const payer = billPayer(persisted);
+    if (payer) {
+      // What the user already paid back in parts was cut out of the bill, so
+      // their whole share is what is left plus those parts.
+      const paidBack = paidBackInParts(persisted);
+      return persisted
+        .filter((s) => !s.partOfSplitId)
+        .map((s) => ({
+          id: s.id,
+          personName: s.personName ?? '',
+          amount: (s.isSelf ? s.amount + paidBack : friendShare(s)).toFixed(2),
+          isSelf: s.isSelf,
+          paybackAccountId: null,
+          isPayer: s.id === payer.id,
+          settled: s.id === payer.id && s.paidAt ? { paidAt: s.paidAt } : undefined,
+          paidBack: s.id === payer.id && paidBack > 0 ? paidBack : undefined,
+          memberId: s.memberId,
+        }));
+    }
     return persisted.map((s) => ({
       id: s.id,
       personName: s.personName ?? '',
@@ -325,6 +390,7 @@ function TransactionEditor({
       paybackAccountId: s.paybackAccountId,
       paid: s.paidAt ? { paidAt: s.paidAt, paidTransactionId: s.paidTransactionId } : undefined,
       shareKey: s.isSelf ? undefined : splitShareKey(s),
+      memberId: s.memberId,
     }));
   }, [transaction.splits]);
 
@@ -349,7 +415,12 @@ function TransactionEditor({
       }
       initialValues={{
         type: isBalanceAdjustment ? 'balance_adjustment' : transaction.type,
-        amount: String(transaction.amount),
+        // A bill a friend paid is edited whole; the expense is the user's share.
+        amount: String(
+          billPayer(transaction.splits)
+            ? friendPaidBillTotal(transaction.splits ?? [], transaction.amount)
+            : transaction.amount,
+        ),
         date: dayKeyFromIsoLocal(transaction.date),
         accountId: transaction.accountId,
         fromAccountId: transaction.fromAccountId,

@@ -7,6 +7,7 @@ import { useMemo, useState } from "react";
 
 import { DAYS_PER_MONTH, daysBetween, monthRange, shiftMonthKey } from "@/lib/backup/dates";
 import type { Tx } from "@/lib/backup/model";
+import { netByPerson } from "@/lib/backup/split-payer";
 
 import type { ItemRow } from "@/lib/backup/types";
 
@@ -396,30 +397,27 @@ export function SplitsView() {
   const { model } = useDashboard();
   const f = useFormat();
 
-  const people = useMemo(() => {
-    const map = new Map<string, { person: string; amount: number; count: number }>();
-    for (const debt of model.splitDebts) {
-      const key = debt.person.toLocaleLowerCase();
-      const entry = map.get(key) ?? { person: debt.person, amount: 0, count: 0 };
-      // Kept to the cent at each step, as the app's Settle Up totals are.
-      entry.amount = Math.round((entry.amount + debt.amountBase) * 100) / 100;
-      entry.count += 1;
-      map.set(key, entry);
-    }
-    return [...map.values()].sort((a, b) => b.amount - a.amount);
-  }, [model.splitDebts]);
-  const owed = people.reduce((s, p) => s + p.amount, 0);
+  // One net balance per person, either way, as the app's Balances lists them:
+  // what they owe on the bills the user paid, less what the user owes them
+  // for the bills they paid.
+  const people = useMemo(() => netByPerson(model.splitDebts, model.splitOwed), [model.splitDebts, model.splitOwed]);
+  const owed = people.reduce((s, p) => (p.net > 0 ? s + p.net : s), 0);
+  const youOwe = people.reduce((s, p) => (p.net < 0 ? s - p.net : s), 0);
+  const largest = people.reduce((max, p) => Math.max(max, Math.abs(p.net)), 0);
   // Counted by share: a friend who paid in parts has a paid row per payment
-  // and maybe one still owed, and is settled once nothing is owed.
+  // and maybe one still owed, and is settled once nothing is owed. A bill a
+  // friend paid has one share to settle, the user's own, kept on the payer's row.
   const { shares, settled } = useMemo(() => {
+    const friendPaid = new Set(model.txs.filter((tx) => tx.paidBy !== undefined).map((tx) => tx.id));
     const owing = new Map<string, boolean>();
     for (const split of model.splits) {
       if (split.is_self) continue;
+      if (friendPaid.has(split.transaction_id) && !split.is_payer) continue;
       const key = splitShareKey(split);
       owing.set(key, (owing.get(key) ?? false) || !split.paid_at);
     }
     return { shares: owing.size, settled: [...owing.values()].filter((owes) => !owes).length };
-  }, [model.splits]);
+  }, [model.splits, model.txs]);
   // Memoised: a new array would send the list back to its first page on every render.
   const splitTxs = useMemo(() => {
     const ids = new Set(model.splits.map((s) => s.transaction_id));
@@ -436,8 +434,9 @@ export function SplitsView() {
 
   return (
     <div className="space-y-5">
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Kpi icon="settings/settle-up" tone="income" label={t("owedToYou")} value={f.money(owed)} sub={t("people", { count: people.length })} />
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <Kpi icon="settings/settle-up" tone="income" label={t("owedToYou")} value={f.money(owed)} sub={t("people", { count: people.filter((p) => p.net > 0).length })} />
+        <Kpi icon="status/people-two" tone={youOwe > 0 ? "expense" : "neutral"} label={t("youOwe")} value={f.money(youOwe)} sub={t("youOweNote")} />
         <Kpi icon="status/handshake" tone="neutral" label={t("settled")} value={f.number(settled)} sub={t("ofShares", { count: shares })} />
         <Kpi icon="insights/split-bill" tone="neutral" label={t("bills")} value={f.number(splitTxs.length)} sub={t("billsNote")} />
       </div>
@@ -452,10 +451,10 @@ export function SplitsView() {
                   key={p.person}
                   icon={<ClayImg name="status/people-two" size={30} />}
                   name={p.person || t("unnamed")}
-                  meta={t("open", { count: p.count })}
-                  value={f.money(p.amount)}
-                  share={owed ? p.amount / owed : 0}
-                  color="#1E9468"
+                  meta={`${p.net < 0 ? t("youOwe") : t("owesYou")} · ${t("open", { count: p.count })}`}
+                  value={<span className={p.net < 0 ? "text-error" : undefined}>{f.money(Math.abs(p.net))}</span>}
+                  share={largest ? Math.abs(p.net) / largest : 0}
+                  color={p.net < 0 ? "#C2604A" : "#1E9468"}
                 />
               ))}
             </div>

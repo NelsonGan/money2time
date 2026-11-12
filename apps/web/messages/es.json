@@ -1045,7 +1045,7 @@
       "splits": {
         "nav": "Gastos compartidos",
         "title": "Gastos compartidos",
-        "subtitle": "Quién aún te debe"
+        "subtitle": "Lo que tú y tus amigos se deben"
       },
       "mood": {
         "nav": "Ánimo y hábitos",
@@ -1359,13 +1359,16 @@
       "emptyTitle": "Sin gastos compartidos",
       "emptyBody": "Los gastos que compartes con amigos en la app aparecen aquí.",
       "owedToYou": "Te deben",
+      "youOwe": "Debes",
+      "youOweNote": "Por cuentas que pagaron tus amigos",
+      "owesYou": "Te debe",
       "people": "{count, plural, =0 {Todo saldado} one {De # persona} other {De # personas}}",
       "settled": "Partes saldadas",
       "ofShares": "{count, plural, one {De # parte} other {De # partes}}",
       "bills": "Gastos compartidos",
       "billsNote": "Transacciones que compartiste",
-      "byPerson": "Quién te debe",
-      "allSettled": "Todos te han devuelto el dinero",
+      "byPerson": "Saldos",
+      "allSettled": "Todo saldado",
       "open": "{count, plural, one {# parte pendiente} other {# partes pendientes}}",
       "billsTitle": "Transacciones compartidas",
       "unnamed": "Alguien"
@@ -1448,6 +1451,7 @@
       "nudgePause": "Vale la pena pensarlo: ~{hours} de trabajo",
       "nudgeLarge": "Eso son {hours} de tu tiempo laboral",
       "amountLocked": "Este importe está vinculado a una división o a un reembolso. Cámbialo en la app.",
+      "friendPaid": "{name} pagó esta cuenta. Cámbiala en la app.",
       "hideBalances": "Ocultar saldos",
       "showBalances": "Mostrar saldos",
       "savingsGoals": "Metas de ahorro",
@@ -1979,6 +1983,7 @@
         "someone": "Alguien",
         "untitledBill": "Cuenta dividida",
         "paidTitle": "Devuelto",
+        "personPaid": "{name} pagó",
         "undoTitle": "¿Marcar esta parte como no pagada?",
         "undoBody": "Vuelve a deberse y el gasto sube de nuevo por este monto. Se elimina la transferencia de devolución a otra cuenta.",
         "itemizedTotal": "Total: {sum}",

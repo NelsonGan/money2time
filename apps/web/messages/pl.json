@@ -1045,7 +1045,7 @@
       "splits": {
         "nav": "Wspólne rachunki",
         "title": "Wspólne rachunki",
-        "subtitle": "Kto jeszcze Ci oddaje"
+        "subtitle": "Ile ty i twoi znajomi jesteście sobie winni"
       },
       "mood": {
         "nav": "Nastrój i nawyki",
@@ -1359,13 +1359,16 @@
       "emptyTitle": "Brak wspólnych rachunków",
       "emptyBody": "Rachunki, które dzielisz ze znajomymi w aplikacji, pojawią się tutaj.",
       "owedToYou": "Do zwrotu dla Ciebie",
+      "youOwe": "Jesteś winien",
+      "youOweNote": "Za rachunki opłacone przez znajomych",
+      "owesYou": "Jest ci winien",
       "people": "{count, plural, =0 {Wszystko rozliczone} one {Od # osoby} few {Od # osób} many {Od # osób} other {Od # osoby}}",
       "settled": "Rozliczone udziały",
       "ofShares": "{count, plural, one {Z # udziału} few {Z # udziałów} many {Z # udziałów} other {Z # udziału}}",
       "bills": "Wspólne rachunki",
       "billsNote": "Transakcje podzielone z innymi",
-      "byPerson": "Kto jest Ci winien",
-      "allSettled": "Wszyscy już Ci oddali",
+      "byPerson": "Rozliczenia",
+      "allSettled": "Wszystko rozliczone",
       "open": "{count, plural, one {# nierozliczony udział} few {# nierozliczone udziały} many {# nierozliczonych udziałów} other {# nierozliczonego udziału}}",
       "billsTitle": "Wspólne transakcje",
       "unnamed": "Ktoś"
@@ -1448,6 +1451,7 @@
       "nudgePause": "Warto się zastanowić: ~{hours} pracy",
       "nudgeLarge": "To {hours} twojego czasu pracy",
       "amountLocked": "Ta kwota jest powiązana z podziałem lub zwrotem. Zmień ją w aplikacji.",
+      "friendPaid": "{name} zapłacił(a) ten rachunek. Zmień go w aplikacji.",
       "hideBalances": "Ukryj salda",
       "showBalances": "Pokaż salda",
       "savingsGoals": "Cele oszczędnościowe",
@@ -1979,6 +1983,7 @@
         "someone": "Ktoś",
         "untitledBill": "Podzielony rachunek",
         "paidTitle": "Zwrócono",
+        "personPaid": "{name} zapłacił(a)",
         "undoTitle": "Oznaczyć ten udział jako niezapłacony?",
         "undoBody": "Znów jest Ci winien, a wydatek rośnie o tę kwotę. Przelew zwrotny na inne konto zostanie usunięty.",
         "itemizedTotal": "Razem: {sum}",
