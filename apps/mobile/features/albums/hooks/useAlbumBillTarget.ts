@@ -26,16 +26,18 @@ export function albumBillRows(rows: readonly DraftRow[]): AlbumBillRowInput[] {
 
 /**
  * The shared album a split bill is saved into: the one the entry already
- * belongs to (`transactionId`), else for a new entry the active album.
- * Null when that album is not shared on this phone.
+ * belongs to (`transactionId`), else for a new entry the album it is being
+ * added to (`albumId`, the active album when not given). Null when that
+ * album is not shared on this phone.
  */
-export function useAlbumBillTarget(transactionId?: string): string | null {
+export function useAlbumBillTarget(transactionId?: string, albumId?: string): string | null {
   const { activeAlbumId, getAlbumTransactionIds, albums } = useApp();
   const shares = useSharedAlbums();
+  const newEntryAlbumId = albumId ?? activeAlbumId;
   return useMemo(() => {
     if (!shares.length) return null;
     if (!transactionId) {
-      return shares.find((share) => share.ledgerId === activeAlbumId)?.ledgerId ?? null;
+      return shares.find((share) => share.ledgerId === newEntryAlbumId)?.ledgerId ?? null;
     }
     return (
       shares.find((share) => getAlbumTransactionIds(share.ledgerId).includes(transactionId))
@@ -43,5 +45,5 @@ export function useAlbumBillTarget(transactionId?: string): string | null {
     );
     // `albums` changes when an album's entries do.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeAlbumId, albums, getAlbumTransactionIds, shares, transactionId]);
+  }, [albums, getAlbumTransactionIds, newEntryAlbumId, shares, transactionId]);
 }

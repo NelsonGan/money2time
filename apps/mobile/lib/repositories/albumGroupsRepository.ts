@@ -12,7 +12,7 @@ import { newId, nowIso } from '~/utils/id';
 
 import { toAlbumExpense, toAlbumMember, toAlbumSettlement } from './mappers';
 
-export interface AlbumExpenseInput {
+interface AlbumExpenseInput {
   id: string;
   groupId: string;
   date: string;
@@ -26,7 +26,7 @@ export interface AlbumExpenseInput {
   createdBy: string | null;
 }
 
-export interface AlbumSettlementInput {
+interface AlbumSettlementInput {
   id?: string;
   groupId: string;
   expenseId: string | null;
@@ -124,15 +124,6 @@ class AlbumGroupsRepository {
       .map(toAlbumExpense);
   }
 
-  getExpense(id: string): AlbumExpense | null {
-    const row = getDb()
-      .select()
-      .from(albumExpensesTable)
-      .where(eq(albumExpensesTable.id, id))
-      .get();
-    return row ? toAlbumExpense(row) : null;
-  }
-
   /** Writes a bill as it now is; one deleted before comes back. */
   upsertExpense(input: AlbumExpenseInput): void {
     const now = nowIso();
@@ -157,12 +148,18 @@ class AlbumGroupsRepository {
       .run();
   }
 
+  /** Deletes a bill for the group, and the payments made on it with it. */
   softDeleteExpense(id: string): void {
     const now = nowIso();
     getDb()
       .update(albumExpensesTable)
       .set({ deletedAt: now, updatedAt: now })
       .where(and(eq(albumExpensesTable.id, id), isNull(albumExpensesTable.deletedAt)))
+      .run();
+    getDb()
+      .update(albumSettlementsTable)
+      .set({ deletedAt: now, updatedAt: now })
+      .where(and(eq(albumSettlementsTable.expenseId, id), isNull(albumSettlementsTable.deletedAt)))
       .run();
   }
 
@@ -178,15 +175,6 @@ class AlbumGroupsRepository {
       .orderBy(albumSettlementsTable.createdAt, albumSettlementsTable.id)
       .all()
       .map(toAlbumSettlement);
-  }
-
-  getSettlement(id: string): AlbumSettlement | null {
-    const row = getDb()
-      .select()
-      .from(albumSettlementsTable)
-      .where(eq(albumSettlementsTable.id, id))
-      .get();
-    return row ? toAlbumSettlement(row) : null;
   }
 
   createSettlement(input: AlbumSettlementInput): string {

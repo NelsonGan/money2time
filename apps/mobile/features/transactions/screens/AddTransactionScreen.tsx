@@ -32,6 +32,8 @@ interface AddTransactionScreenProps {
   openSplitBillOnMount?: boolean;
   /** Start with "pay in instalments" on. */
   startInstalmentPlan?: boolean;
+  /** The album the entry goes into and starts split with; the active album when not given. */
+  albumId?: string;
 }
 
 export function AddTransactionScreen({
@@ -41,6 +43,7 @@ export function AddTransactionScreen({
   initialValues,
   openSplitBillOnMount,
   startInstalmentPlan = false,
+  albumId,
 }: AddTransactionScreenProps) {
   const {
     createTransaction,
@@ -49,16 +52,27 @@ export function AddTransactionScreen({
     createInstalmentPlan,
     albums,
     activeAlbumId,
+    addTransactionsToAlbum,
     saveAlbumBill,
     getUnpaidSplitBillCount,
   } = useApp();
-  // The active album's people: a new expense starts split with them. In a
-  // shared album that is everyone in its group, once this phone has said who
-  // it is; there the bill is saved through the group, and counts toward no
-  // free limit (the album syncs on someone's Pro).
-  const activeAlbum = albums.find((album) => album.id === activeAlbumId) ?? null;
-  const albumGroup = useAlbumGroup(activeAlbum);
-  const albumGroupId = useAlbumBillTarget();
+  // The people of the album the entry goes into (the one it was opened from,
+  // else the active one): a new expense starts split with them. In a shared
+  // album that is everyone in its group, once this phone has said who it is;
+  // there the bill is saved through the group, and counts toward no free
+  // limit (the album syncs on someone's Pro).
+  const targetAlbumId = albumId ?? activeAlbumId;
+  const targetAlbum = albums.find((album) => album.id === targetAlbumId) ?? null;
+  const albumGroup = useAlbumGroup(targetAlbum);
+  const albumGroupId = useAlbumBillTarget(undefined, albumId);
+  // An entry of the user's own goes into the active album by itself; one
+  // opened from another album is put there.
+  const addToAlbum = useCallback(
+    (id: string) => {
+      if (albumId && albumId !== activeAlbumId) addTransactionsToAlbum(albumId, [id]);
+    },
+    [activeAlbumId, addTransactionsToAlbum, albumId],
+  );
   const groupBill = albumGroupId !== null && albumGroup.self !== null;
   const isPro = useIsPro();
   const withinSplitLimit =
@@ -124,9 +138,10 @@ export function AddTransactionScreen({
         input,
         extras?.transferFee ? { transferFee: extras.transferFee } : undefined,
       );
+      addToAlbum(id);
       requestHighlightTransaction(id);
     },
-    [createTransaction],
+    [addToAlbum, createTransaction],
   );
 
   const handleSubmitWithSplits = useCallback(
@@ -143,9 +158,11 @@ export function AddTransactionScreen({
       // until they pay that friend back, and nobody owes the user anything.
       if (draftPayer(splits)) {
         const share = Number(splits.find((s) => s.isSelf)?.amount) || 0;
-        createTransactionWithSplits(
-          friendPaidExpense(input, share, false),
-          splitsHelpers.toSplitDraftInputs(splits, null),
+        addToAlbum(
+          createTransactionWithSplits(
+            friendPaidExpense(input, share, false),
+            splitsHelpers.toSplitDraftInputs(splits, null),
+          ),
         );
         return;
       }
@@ -174,16 +191,18 @@ export function AddTransactionScreen({
       // every split unpaid. The markSplitPaid calls below flip the paid ones.
       const unpaidDrafts = splits.map((s) => ({ ...s, paid: undefined }));
 
-      createTransactionWithSplits(
-        { ...input, amount: originalTotal },
-        splitsHelpers.toSplitDraftInputs(unpaidDrafts, input.accountId),
+      addToAlbum(
+        createTransactionWithSplits(
+          { ...input, amount: originalTotal },
+          splitsHelpers.toSplitDraftInputs(unpaidDrafts, input.accountId),
+        ),
       );
 
       pendingMarkPaid.forEach(({ id, paybackAccountId }) => {
         markSplitPaid(id, { paybackAccountId });
       });
     },
-    [albumGroupId, createTransactionWithSplits, markSplitPaid, saveAlbumBill],
+    [addToAlbum, albumGroupId, createTransactionWithSplits, markSplitPaid, saveAlbumBill],
   );
 
   if (blocked) {

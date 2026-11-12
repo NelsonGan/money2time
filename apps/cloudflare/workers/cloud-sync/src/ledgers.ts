@@ -87,8 +87,10 @@ interface SharedLedgerRow {
 type Role = 'owner' | 'member';
 type Kind = 'ledger' | 'album';
 
+/** Whether shared ledger `l` is an album's group: it has a row in `shared_albums`. */
+const IS_ALBUM_SQL = 'EXISTS (SELECT 1 FROM shared_albums a WHERE a.ledger_id = l.id)';
 /** `shared_ledgers` aliased `l`, with whether it is an album's group. */
-const LEDGER_COLUMNS = `l.*, EXISTS (SELECT 1 FROM shared_albums a WHERE a.ledger_id = l.id) AS is_album`;
+const LEDGER_COLUMNS = `l.*, ${IS_ALBUM_SQL} AS is_album`;
 
 const kindOf = (ledger: SharedLedgerRow): Kind => (ledger.is_album === 1 ? 'album' : 'ledger');
 const maxMembersOf = (ledger: SharedLedgerRow) =>
@@ -483,7 +485,6 @@ async function shareLedger(env: Env, user: SessionUser, request: Request): Promi
   // An album's group: `ledgerId` is the album's id, counted against its own limit.
   const album = body?.kind === 'album';
   const limit = album ? MAX_OWNED_ALBUMS : MAX_OWNED;
-  const isAlbumSql = 'EXISTS (SELECT 1 FROM shared_albums a WHERE a.ledger_id = l.id)';
   if (!LEDGER_ID.test(ledgerId) || ledgerId === 'default' || !name) {
     return json({ error: 'bad_request' }, 400);
   }
@@ -497,7 +498,7 @@ async function shareLedger(env: Env, user: SessionUser, request: Request): Promi
   if (existing) return json({ ledger: await view(env, existing, 'owner') });
 
   const owned = await env.AUTH_DB.prepare(
-    `SELECT COUNT(*) AS n FROM shared_ledgers l WHERE l.owner_user_id = ?1 AND ${isAlbumSql} = ?2`,
+    `SELECT COUNT(*) AS n FROM shared_ledgers l WHERE l.owner_user_id = ?1 AND ${IS_ALBUM_SQL} = ?2`,
   )
     .bind(user.id, album ? 1 : 0)
     .first<{ n: number }>();
@@ -519,7 +520,7 @@ async function shareLedger(env: Env, user: SessionUser, request: Request): Promi
          (id, ledger_id, owner_user_id, name, emoji, db_name, db_url, created_at)
        SELECT ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8
        WHERE (SELECT COUNT(*) FROM shared_ledgers l
-              WHERE l.owner_user_id = ?3 AND ${isAlbumSql} = ?10) < ?9`,
+              WHERE l.owner_user_id = ?3 AND ${IS_ALBUM_SQL} = ?10) < ?9`,
     ).bind(
       id,
       ledgerId,

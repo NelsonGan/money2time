@@ -2994,7 +2994,6 @@ const pl = {
       who_message:
         'Wybierz swoje imię, aby Twoja część każdego rachunku trafiała do Twojej księgi.',
       who_new: 'Nie ma mnie na liście',
-      rename_title: 'Zmień nazwę',
     },
     share: {
       row: 'Udostępnij ten album',
@@ -3009,15 +3008,12 @@ const pl = {
       paused: 'Wstrzymano. Synchronizacja wróci, gdy ktoś w albumie będzie miał Pro.',
       limit: 'Możesz udostępniać do {{max}} albumów naraz.',
       full: 'Do albumu może dołączyć maksymalnie {{max}} osób.',
+      needs_cloud_sync: 'Zaloguj się do Cloud Sync, aby udostępnić ten album.',
     },
     balances: {
       tab: 'Salda',
       empty_message: 'Podziel rachunek w tym albumie, a pojawi się tutaj.',
       total_line: 'Wydano łącznie {{total}} · Twoja część {{share}}',
-      add_people_title: 'Podziel ten album',
-      add_people_message:
-        'Dodaj osoby z tego wyjazdu. Nowe wydatki będą zaczynać się podzielone z nimi.',
-      add_people_action: 'Dodaj osoby',
     },
     join: {
       title: 'Udostępniony album',
@@ -3027,6 +3023,8 @@ const pl = {
     },
     bill: {
       delete_shared: 'Ten rachunek jest w udostępnionym albumie. Usunięcie usunie go u wszystkich.',
+      remove_shared:
+        'Ten rachunek jest w udostępnionym albumie. Zostanie usunięty u wszystkich pozostałych.',
     },
   },
   assets: {

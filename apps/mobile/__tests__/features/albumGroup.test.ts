@@ -1,15 +1,10 @@
-import {
-  billFromRows,
-  groupNets,
-  groupTotals,
-  localBill,
-  ownSide,
-} from '~/features/albums/lib/albumGroup';
+import { billFromRows, groupTotals, localBill, ownSide } from '~/features/albums/lib/albumGroup';
 import {
   albumPeople,
-  memberByName,
+  memberForRow,
   selfMember,
   splitWithPeople,
+  uniquePersonName,
   withPersonAdded,
   withPersonRenamed,
 } from '~/features/albums/lib/albumPeople';
@@ -100,9 +95,19 @@ describe('album people', () => {
     expect(splitWithPeople(people)).toEqual([{ id: 'aisha', name: 'Aisha' }]);
     expect(selfMember(members, 'u-me')?.id).toBe('me');
     expect(selfMember(members, null)).toBeNull();
-    expect(memberByName(members, ' aisha ', 'me')?.id).toBe('aisha');
-    // The user's own name is never someone else.
-    expect(memberByName(members, 'Nelson', 'me')).toBeNull();
+  });
+
+  it('finds who a row of a bill is by its member, then by name', () => {
+    const members = [member('aisha', 'Aisha', 'u-aisha'), member('me', 'Nelson', 'u-me')];
+    expect(memberForRow(members, 'me', { personName: ' aisha ' })?.id).toBe('aisha');
+    expect(memberForRow(members, 'me', { albumMemberId: 'aisha', personName: 'A' })?.id).toBe(
+      'aisha',
+    );
+    // The user's own name, or their own member, is never someone else.
+    expect(memberForRow(members, 'me', { personName: 'Nelson' })).toBeNull();
+    expect(memberForRow(members, 'me', { albumMemberId: 'me', personName: 'Ben' })).toBeNull();
+    expect(uniquePersonName('Ben', members)).toBe('Ben');
+    expect(uniquePersonName('aisha', members)).toBe('aisha 2');
   });
 });
 
@@ -254,7 +259,7 @@ describe('one member’s own side of a bill', () => {
 });
 
 describe('the whole group', () => {
-  it('nets what everyone still owes, per currency, to zero', () => {
+  it('totals what was spent and the user’s own share, per currency', () => {
     const expenses = [
       bill(),
       bill({
@@ -278,15 +283,6 @@ describe('the whole group', () => {
         ],
       }),
     ];
-    const nets = groupNets(expenses, [
-      payment({ amount: 10 }),
-      payment({ id: 'gone-payment', expenseId: 'gone' }),
-    ]);
-    expect(Object.fromEntries(nets.get('MYR')!)).toEqual({ me: 30, aisha: 0, ben: -30 });
-    expect(Object.fromEntries(nets.get('JPY')!)).toEqual({ me: -1500, ben: 1500 });
-    for (const currency of nets.values()) {
-      expect([...currency.values()].reduce((sum, value) => sum + value, 0)).toBe(0);
-    }
     expect(Object.fromEntries(groupTotals(expenses, 'me'))).toEqual({
       MYR: { total: 130, selfShare: 50 },
       JPY: { total: 3000, selfShare: 1500 },

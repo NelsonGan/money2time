@@ -2981,7 +2981,6 @@ const da = {
       who_title: 'Hvem af dem er du?',
       who_message: 'Vælg dit navn, så din andel af hver regning lander i din kassebog.',
       who_new: 'Jeg er ikke på listen',
-      rename_title: 'Omdøb',
     },
     share: {
       row: 'Del dette album',
@@ -2996,14 +2995,12 @@ const da = {
       paused: 'Sat på pause. Det synkroniseres igen, når en i albummet har Pro.',
       limit: 'Du kan dele op til {{max}} album ad gangen.',
       full: 'Op til {{max}} personer kan deltage i et album.',
+      needs_cloud_sync: 'Log ind på Cloud Sync for at dele dette album.',
     },
     balances: {
       tab: 'Saldi',
       empty_message: 'Del en regning i dette album, så vises den her.',
       total_line: 'Brugt i alt {{total}} · Din andel {{share}}',
-      add_people_title: 'Del dette album',
-      add_people_message: 'Tilføj dem, der er med på turen. Nye udgifter starter så delt med dem.',
-      add_people_action: 'Tilføj personer',
     },
     join: {
       title: 'Delt album',
@@ -3013,6 +3010,7 @@ const da = {
     },
     bill: {
       delete_shared: 'Regningen er i et delt album. Sletter du den, fjernes den for alle.',
+      remove_shared: 'Regningen er i et delt album. Den fjernes for alle andre.',
     },
   },
   assets: {

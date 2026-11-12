@@ -28,8 +28,6 @@ export interface CreateTransactionSplitInput {
   memberId?: string | null;
   /** The member of a shared album's group this share is with. */
   albumMemberId?: string | null;
-  /** The group settlement this paid row came from or was sent as. */
-  settlementId?: string | null;
 }
 
 export interface UpdateTransactionSplitInput {
@@ -180,7 +178,7 @@ class TransactionSplitsRepository {
       shareAmount: input.shareAmount == null ? null : normalizeMoneyAmount(input.shareAmount),
       memberId: input.memberId ?? null,
       albumMemberId: input.albumMemberId ?? null,
-      settlementId: input.settlementId ?? null,
+      settlementId: null,
       sortOrder: input.sortOrder ?? 0,
       createdAt: now,
       updatedAt: now,

@@ -3022,7 +3022,6 @@ const fr = {
       who_message:
         'Choisissez votre nom pour que votre part de chaque note arrive dans votre livre.',
       who_new: 'Je ne suis pas dans la liste',
-      rename_title: 'Renommer',
     },
     share: {
       row: 'Partager cet album',
@@ -3038,15 +3037,12 @@ const fr = {
       paused: "En pause. La synchronisation reprend dès qu'un membre a Pro.",
       limit: "Vous pouvez partager jusqu'à {{max}} albums à la fois.",
       full: "Jusqu'à {{max}} personnes peuvent rejoindre un album.",
+      needs_cloud_sync: 'Connectez-vous à Cloud Sync pour partager cet album.',
     },
     balances: {
       tab: 'Soldes',
       empty_message: 'Partagez une note dans cet album et elle apparaîtra ici.',
       total_line: 'Total dépensé {{total}} · Votre part {{share}}',
-      add_people_title: 'Partager cet album',
-      add_people_message:
-        'Ajoutez les personnes de ce voyage. Les nouvelles dépenses commenceront partagées avec elles.',
-      add_people_action: 'Ajouter des personnes',
     },
     join: {
       title: 'Album partagé',
@@ -3057,6 +3053,8 @@ const fr = {
     bill: {
       delete_shared:
         'Cette note est dans un album partagé. La supprimer la retire pour tout le monde.',
+      remove_shared:
+        'Cette note est dans un album partagé. Elle sera retirée pour tous les autres.',
     },
   },
   assets: {

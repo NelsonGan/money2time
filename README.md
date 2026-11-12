@@ -2070,11 +2070,13 @@ plumbing (above). The app side is `features/albums/` (`lib/albumPeople.ts`,
 **What the user sees**
 
 - **Split with.** The album page has a People button on its cover (the
-  people's avatars, or "Split with" while there are none), which opens the
-  People page: Me, then each person by name, with a field to add one. Names
-  are unique in an album (case-folded), at most 20. A row renames, the ×
-  removes. Not offered for an album in a shared ledger, where entries already
-  belong to people.
+  people's avatars, or "Split with" while there are
+  none), which opens the People page: Me, then each person by name, with a
+  field to add one. Names are unique in an album (case-folded), at most 20. A
+  row renames, the × removes. In a shared album the user's own row shows the
+  name the others see and renames like anyone's, and a person still on one of
+  its bills cannot be removed. Not offered for an album in a shared ledger,
+  where entries already belong to people.
 - **A new expense starts split.** While the album is the active one, a new
   expense opens already split evenly between Me and its people, Paid by Me
   (the Split chip shows the count). It is an ordinary split from there: change
@@ -2085,7 +2087,10 @@ plumbing (above). The app side is `features/albums/` (`lib/albumPeople.ts`,
   tab: what the user is owed or owes across the album's bills, then a row per
   person with their net. A row opens the person's page with only this album's
   bills, and its Settle up settles only those. It is the Balances roll-up over
-  the album's entries (`useSettleUpSummary(albumId)`).
+  the album's entries (`useSettleUpSummary(albumId)`). Its **Add Transaction**
+  button opens a new expense that goes into this album and starts split with
+  its people, whether or not the album is the active one (the `albumId` param
+  of `AddTransactionDetailed`), and comes back to the album when saved.
 - **Share this album.** A switch on the People page, for the album's owner:
   Pro and a Cloud Sync sign-in, at most **3** shared albums at a time. The
   page then shows the album's invite link (Copy, New link; the same 24-hour
@@ -2096,14 +2101,18 @@ plumbing (above). The app side is `features/albums/` (`lib/albumPeople.ts`,
   the main one when the open ledger is shared), and its People page asks
   **Which one is you?**: one of the names the owner added, or "I'm not on the
   list" (then they are added under their own name). Until they answer,
-  nothing of the group reaches their ledger.
+  nothing of the group reaches their ledger, and the album's Balances tab
+  shows only that question. An album deleted here and joined again comes back.
 - **Bills and payments are everyone's.** A split bill saved in a shared album
   reaches everyone in it: each person gets their own side of it, in their own
   ledger, their own currency totals and their own category (matched by name,
   then icon, else Other). A payment recorded on one phone (Mark paid, a part,
   paying a member back, Settle up) is applied on the other person's phone too,
   and an undo undoes it there. Editing a bill changes it for everyone;
-  deleting one asks first ("…removes it for everyone").
+  deleting one asks first ("…removes it for everyone"). So does taking one
+  out of the album or removing everyone from its split: the bill then leaves
+  the group, for everyone else, and stays the user's own entry. The entry a
+  payment made (a part the user paid) cannot be split itself.
 - **Leaving and stopping.** A member leaves from the People page; the owner
   turns the switch off, or removes someone who joined. Either way everyone
   keeps the album with their own entries as ordinary split bills, split with
@@ -2159,10 +2168,12 @@ plumbing (above). The app side is `features/albums/` (`lib/albumPeople.ts`,
   (`saveAlbumBill`), recording a payment on one (`markSplitPaid`,
   `recordSplitPayment`, `payBackPayer`, `recordPayBack` and Settle up all
   route there), undoing one, and deleting the bill or the entry a payment made
-  each write the group's row first and then project. Nothing derives the
-  group from the user's entries, except once: when an album is shared, its
-  existing split bills and the payments on them become the group's
-  (`publishAlbumBills`, `groupFromLocalBill`), their rows unchanged.
+  each write the group's row first and then project. A payment is cut to what
+  is still owed as stored, so a second tap never pays a share twice. The group
+  is derived from the user's entries only when a split bill that was their own
+  becomes the group's (`publishAlbumBills`, `groupFromLocalBill`, its rows
+  unchanged): the album's split bills when it is shared, one added to a shared
+  album later, and those a phone saved before it said who it is.
 - **When it runs.** After every shared sync that applied rows
   (`reloadAfterApply`), at launch and when a ledger opens. A group whose
   album is in another ledger than the open one waits for that ledger: the
@@ -5031,7 +5042,8 @@ app's `services/webDashboardLink.ts`, `webDashboardCrypto.ts`,
   (`tx.groupBill`). It reads as any split bill, both directions, since that is
   how the phone keeps it. It is **view only** here, with no Delete: the bill is
   everyone's in the album, so the editor says it is changed in the app, and the
-  phone refuses a split edit, a change of its day or title, and a delete of one
+  phone refuses a split edit, a change of its day or title, a delete of one,
+  taking one out of its album, and deleting a shared album
   (`invalid`), which also covers a page loaded before this. The group's own
   tables (`album_members`, `album_expenses`, `album_settlements`) are not in
   what the phone sends.

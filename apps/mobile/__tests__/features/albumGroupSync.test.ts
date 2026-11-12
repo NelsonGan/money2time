@@ -1,4 +1,9 @@
-import { releaseAlbumGroup } from '~/features/albums/services/albumGroupStore';
+import {
+  albumLedgerId,
+  albumState,
+  ensureLocalAlbum,
+  releaseAlbumGroup,
+} from '~/features/albums/services/albumGroupStore';
 import {
   type GroupEnv,
   projectGroup,
@@ -268,6 +273,30 @@ describe('changes to a bill', () => {
     expect(balances()).toEqual({ Aisha: 40, Ben: 40 });
   });
 
+  it('a bill taken out of the group takes its payments with it', () => {
+    addBill('dinner', 'me');
+    pay('s1', 'dinner', 'aisha', 'me', 10, '2026-11-13T08:00:00.000Z');
+    projectGroup(GROUP, env);
+    albumGroupsRepository.softDeleteExpense('dinner');
+    projectGroup(GROUP, env);
+    expect(liveTransactions()).toEqual([]);
+    expect(albumGroupsRepository.listSettlements(GROUP).filter((s) => !s.deletedAt)).toEqual([]);
+    // Saved again under its id, nobody has paid anything yet.
+    addBill('dinner', 'me');
+    projectGroup(GROUP, env);
+    expect(liveTransactions()).toEqual([{ id: 'dinner', type: 'expense', amount: 90 }]);
+    expect(balances()).toEqual({ Aisha: 30, Ben: 30 });
+  });
+
+  it('leaves the user’s own row as another phone of theirs named it', () => {
+    addBill('dinner', 'aisha');
+    projectGroup(GROUP, env);
+    // The same account on a phone in another language.
+    expect(projectGroup(GROUP, { ...env, meLabel: '我' })).toBe(false);
+    const own = transactionSplitsRepository.listByTransactionId('dinner').find((s) => s.isSelf);
+    expect(own?.personName).toBe('Me');
+  });
+
   it('is not the user’s entry when they have no part in it', () => {
     albumGroupsRepository.upsertExpense({
       id: 'massage',
@@ -319,7 +348,7 @@ describe('sharing an album that already has split bills', () => {
   it('puts the bill and its payments in the group without changing the entries', () => {
     addLocalBill();
     publishAlbumBills(GROUP, env);
-    const expense = albumGroupsRepository.getExpense('lunch')!;
+    const expense = albumGroupsRepository.listExpenses(GROUP).find((e) => e.id === 'lunch')!;
     const chen = albumGroupsRepository.listMembers(GROUP).find((m) => m.name === 'Chen')!;
     expect(expense).toMatchObject({ amount: 60, paidBy: 'me', categoryName: null });
     expect(expense.shares).toEqual([
@@ -352,6 +381,15 @@ describe('sharing an album that already has split bills', () => {
     );
     expect(balances()).toEqual({ Aisha: 10, Chen: 20 });
     expect(projectGroup(GROUP, env)).toBe(false);
+  });
+
+  it('brings back an album deleted here when it is joined again', () => {
+    app.connection.exec(`UPDATE albums SET deleted_at = '${NOW}' WHERE id = '${GROUP}'`);
+    expect(albumState(GROUP)).toBe('deleted');
+    ensureLocalAlbum({ ledgerId: GROUP, name: 'Bali trip' });
+    expect(albumState(GROUP)).toBe('live');
+    expect(albumLedgerId(GROUP)).toBe('default');
+    expect(app.all('SELECT COUNT(*) AS n FROM albums')[0].n).toBe(1);
   });
 
   it('gives the album back as the user’s own when sharing ends', () => {

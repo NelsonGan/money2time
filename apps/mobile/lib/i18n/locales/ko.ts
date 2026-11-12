@@ -2944,7 +2944,6 @@ const ko = {
       who_title: '누가 본인인가요?',
       who_message: '이름을 선택하면 각 청구의 내 몫이 내 장부에 들어와요.',
       who_new: '목록에 없어요',
-      rename_title: '이름 변경',
     },
     share: {
       row: '이 앨범 공유',
@@ -2958,15 +2957,12 @@ const ko = {
       paused: '일시 중지됨. 참여자 중 누군가 Pro가 되면 다시 동기화돼요.',
       limit: '한 번에 최대 {{max}}개의 앨범을 공유할 수 있어요.',
       full: '앨범 하나에는 최대 {{max}}명이 참여할 수 있어요.',
+      needs_cloud_sync: '이 앨범을 공유하려면 Cloud Sync에 로그인하세요.',
     },
     balances: {
       tab: '정산 현황',
       empty_message: '이 앨범에서 청구를 나누면 여기에 표시돼요.',
       total_line: '총 지출 {{total}} · 내 몫 {{share}}',
-      add_people_title: '이 앨범 나누기',
-      add_people_message:
-        '이번 여행의 사람들을 추가하세요. 새 지출은 그 사람들과 나눈 상태로 시작해요.',
-      add_people_action: '사람 추가',
     },
     join: {
       title: '공유 앨범',
@@ -2976,6 +2972,7 @@ const ko = {
     },
     bill: {
       delete_shared: '이 청구는 공유 앨범에 있어요. 삭제하면 모두에게서 사라져요.',
+      remove_shared: '이 청구는 공유 앨범에 있어요. 다른 모든 사람에게서도 사라져요.',
     },
   },
   assets: {

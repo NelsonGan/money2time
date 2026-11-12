@@ -1,4 +1,4 @@
-import { Check, ChevronRight, UserPlus } from 'lucide-react-native';
+import { Check, ChevronRight } from 'lucide-react-native';
 import React, { useMemo, useSyncExternalStore } from 'react';
 import { Pressable, View } from 'react-native';
 
@@ -24,7 +24,10 @@ interface AlbumBalancesProps {
   group: AlbumGroup;
   /** Opens the person's page, with only this album's bills. */
   onOpenPerson: (personKey: string) => void;
+  /** Opens the album's People page, where someone who joined says who they are. */
   onOpenPeople: () => void;
+  /** Opens a new expense in this album, split with its people. */
+  onAddExpense: () => void;
 }
 
 const NO_EXPENSES: AlbumExpense[] = [];
@@ -35,7 +38,13 @@ const NO_EXPENSES: AlbumExpense[] = [];
  * Balances page, over this album's entries alone. A shared album adds what
  * the whole group spent and the user's share of it.
  */
-export function AlbumBalances({ albumId, group, onOpenPerson, onOpenPeople }: AlbumBalancesProps) {
+export function AlbumBalances({
+  albumId,
+  group,
+  onOpenPerson,
+  onOpenPeople,
+  onAddExpense,
+}: AlbumBalancesProps) {
   const { settings } = useApp();
   const colors = useThemeColors();
   const summary = useSettleUpSummary(albumId);
@@ -54,22 +63,28 @@ export function AlbumBalances({ albumId, group, onOpenPerson, onOpenPeople }: Al
   const open = summary.billCount > 0;
   const netState = net >= 0.005 ? 'owed' : net <= -0.005 ? 'owe' : 'even';
 
-  // Nobody to split with yet: say what the page is for, once.
-  if (!group.share && group.others.length === 0 && summary.people.length === 0) {
+  // Joined, and not yet said who they are: none of the album's bills are
+  // theirs until they do, so that is all there is to show.
+  if (group.share && !group.self) {
     return (
-      <View className="items-center gap-3 px-8 pt-10">
-        <View className="h-14 w-14 items-center justify-center rounded-full bg-primary/15">
-          <UserPlus size={24} color={colors.primary} />
-        </View>
-        <Text variant="subheading" className="text-center">
-          {I18n.t('albums.balances.add_people_title')}
-        </Text>
-        <Text variant="body" tone="muted" className="text-center">
-          {I18n.t('albums.balances.add_people_message')}
-        </Text>
-        <Button onPress={onOpenPeople} className="mt-1 self-stretch">
-          <Text>{I18n.t('albums.balances.add_people_action')}</Text>
-        </Button>
+      <View className="px-5 pt-5">
+        <Pressable
+          onPress={() => {
+            void triggerHaptic('selection');
+            onOpenPeople();
+          }}
+          accessibilityRole="button"
+          testID="album-balances-who"
+          className="flex-row items-center gap-3 rounded-2xl border border-primary/30 bg-primary/10 px-4 py-3.5 active:opacity-70"
+        >
+          <View className="flex-1 gap-0.5">
+            <Text variant="bodyStrong">{I18n.t('albums.people.who_title')}</Text>
+            <Text variant="caption" tone="muted">
+              {I18n.t('albums.people.who_message')}
+            </Text>
+          </View>
+          <ChevronRight size={18} color={colors.textMuted} />
+        </Pressable>
       </View>
     );
   }
@@ -182,6 +197,10 @@ export function AlbumBalances({ albumId, group, onOpenPerson, onOpenPeople }: Al
           ))}
         </View>
       ) : null}
+
+      <Button onPress={onAddExpense} className="mt-5" testID="album-add-expense">
+        <Text>{I18n.t('onboarding.bootstrap.add_transaction')}</Text>
+      </Button>
     </View>
   );
 }

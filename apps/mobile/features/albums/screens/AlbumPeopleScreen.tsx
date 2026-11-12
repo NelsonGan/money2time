@@ -1,14 +1,14 @@
 import * as Clipboard from 'expo-clipboard';
 import { Check, Copy, LogOut, Plus, RefreshCw, X } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, Pressable, ScrollView, Switch, View } from 'react-native';
+import { Alert, Pressable, Switch, View } from 'react-native';
 
 import { LoadingDots } from '~/components/feedback/LoadingDots';
 import {
   Button,
   Card,
+  FormScrollView,
   Input,
-  PromptSheet,
   SETTINGS_HORIZONTAL_PADDING,
   SettingsHeader,
   SettingsPageLayout,
@@ -37,18 +37,21 @@ import { triggerHaptic } from '~/services/haptics';
 import { newId } from '~/utils/id';
 
 import { useAlbumGroup } from '../hooks/useAlbumGroup';
+import { memberIsOnBill } from '../lib/albumGroup';
 import {
   type AlbumGroupPerson,
+  cleanPersonName,
   MAX_ALBUM_PEOPLE,
   type PeopleEditError,
   withPersonAdded,
   withPersonRemoved,
   withPersonRenamed,
 } from '../lib/albumPeople';
+import { listGroupExpenses } from '../services/albumGroupStore';
 
 /** Albums one Pro user can share at a time, and people who can join one (the Worker's limits). */
-export const MAX_SHARED_ALBUMS = 3;
-export const MAX_ALBUM_JOINERS = 9;
+const MAX_SHARED_ALBUMS = 3;
+const MAX_ALBUM_JOINERS = 9;
 
 interface AlbumPeopleScreenProps {
   albumId: string;
@@ -202,19 +205,22 @@ export function AlbumPeopleScreen({
     setNewName('');
   };
 
-  const saveRename = () => {
+  /** Ends a rename in the list: kept when the name changed and is free, else dropped. */
+  const endRename = () => {
     if (!renaming) return;
-    if (share) {
-      if (!showEditError(renameAlbumMember(album.id, renaming.id, renaming.name))) return;
-    } else {
-      const next = withPersonRenamed(album.splitWith, renaming.id, renaming.name);
-      if (typeof next === 'string') {
-        showEditError(next);
-        return;
-      }
-      setAlbumPeople(album.id, next);
-    }
     setRenaming(null);
+    const name = cleanPersonName(renaming.name);
+    const current = share
+      ? group.members.find((member) => member.id === renaming.id)?.name
+      : album.splitWith.find((person) => person.id === renaming.id)?.name;
+    if (!name || name === current) return;
+    if (share) {
+      showEditError(renameAlbumMember(album.id, renaming.id, name));
+      return;
+    }
+    const next = withPersonRenamed(album.splitWith, renaming.id, name);
+    if (typeof next === 'string') showEditError(next);
+    else setAlbumPeople(album.id, next);
   };
 
   const isJoined = (person: AlbumGroupPerson) => {
@@ -251,6 +257,11 @@ export function AlbumPeopleScreen({
           },
         ],
       );
+      return;
+    }
+    // Someone still on a bill stays: said before asking, not after.
+    if (share && memberIsOnBill(listGroupExpenses(share.ledgerId), id)) {
+      Alert.alert(I18n.t('albums.people.remove_in_use', { name: person.name }));
       return;
     }
     Alert.alert(
@@ -301,9 +312,8 @@ export function AlbumPeopleScreen({
           style: 'destructive',
           onPress: () =>
             void run('stop', async () => {
-              await sync.stopSharingLedger(album.id, {
-                whenUnreachable: signedOut ? 'local' : 'fail',
-              });
+              // Also with no session or network: the Worker is told later.
+              await sync.stopSharingLedger(album.id, { whenUnreachable: 'local' });
             }),
         },
       ],
@@ -369,9 +379,8 @@ export function AlbumPeopleScreen({
         onBack={onBack}
         title={I18n.t('albums.people.title')}
       />
-      <ScrollView
+      <FormScrollView
         className="flex-1"
-        keyboardShouldPersistTaps="handled"
         contentContainerStyle={[
           { paddingHorizontal: SETTINGS_HORIZONTAL_PADDING, gap: 16 },
           bottomInset,
@@ -420,40 +429,60 @@ export function AlbumPeopleScreen({
               // Someone who joined is the owner's to remove; a name is anyone's.
               const removable =
                 !person.isSelf && !mustClaim && (!share || !joined || (isOwner && !!person.id));
+              // In a shared album the user reads as the others see them, and
+              // can change that name like anyone's.
+              const name = person.isSelf && group.self ? group.self.name : person.name;
               return (
                 <View
                   key={person.id ?? 'me'}
                   className={`flex-row items-center gap-3 px-4 py-3 ${index > 0 ? 'border-t border-border/15' : ''}`}
                 >
                   <PersonAvatar
-                    name={person.name}
-                    partyKey={person.isSelf ? null : debtPartyKey(person.name)}
+                    name={name}
+                    partyKey={person.isSelf ? null : debtPartyKey(name)}
                     size={38}
                   />
-                  <Pressable
-                    className="flex-1"
-                    disabled={person.isSelf || !person.id || mustClaim}
-                    onPress={() => person.id && setRenaming({ id: person.id, name: person.name })}
-                    accessibilityRole="button"
-                  >
-                    <Text variant="bodyStrong" numberOfLines={1}>
-                      {person.name}
-                    </Text>
-                    {share ? (
-                      <Text variant="caption" tone="muted">
-                        {person.isSelf
-                          ? I18n.t('albums.people.me_tag')
-                          : joined
-                            ? I18n.t('albums.people.joined')
-                            : I18n.t('albums.people.not_joined')}
+                  {renaming && renaming.id === person.id ? (
+                    // Renamed in place: Return or a tap elsewhere keeps it.
+                    <View className="flex-1">
+                      <Input
+                        testID="album-person-rename"
+                        value={renaming.name}
+                        onChangeText={(text) => setRenaming({ id: renaming.id, name: text })}
+                        autoFocus
+                        selectTextOnFocus
+                        autoCapitalize="words"
+                        autoCorrect={false}
+                        returnKeyType="done"
+                        onBlur={endRename}
+                      />
+                    </View>
+                  ) : (
+                    <Pressable
+                      className="flex-1"
+                      disabled={!person.id || mustClaim}
+                      onPress={() => person.id && setRenaming({ id: person.id, name })}
+                      accessibilityRole="button"
+                    >
+                      <Text variant="bodyStrong" numberOfLines={1}>
+                        {name}
                       </Text>
-                    ) : null}
-                  </Pressable>
-                  {removable ? (
+                      {share ? (
+                        <Text variant="caption" tone="muted">
+                          {person.isSelf
+                            ? I18n.t('albums.people.me_tag')
+                            : joined
+                              ? I18n.t('albums.people.joined')
+                              : I18n.t('albums.people.not_joined')}
+                        </Text>
+                      ) : null}
+                    </Pressable>
+                  )}
+                  {removable && renaming?.id !== person.id ? (
                     <Pressable
                       onPress={() => confirmRemove(person)}
                       accessibilityRole="button"
-                      accessibilityLabel={`${I18n.t('common.remove')} ${person.name}`}
+                      accessibilityLabel={`${I18n.t('common.remove')} ${name}`}
                       hitSlop={8}
                       className="h-8 w-8 items-center justify-center rounded-full bg-secondary/50 active:opacity-70"
                     >
@@ -509,7 +538,11 @@ export function AlbumPeopleScreen({
               <View className="flex-1 gap-0.5">
                 <Text variant="bodyStrong">{I18n.t('albums.share.row')}</Text>
                 <Text variant="caption" tone="muted">
-                  {I18n.t('albums.share.caption')}
+                  {I18n.t(
+                    !share && isPro && sync.status !== 'ready'
+                      ? 'albums.share.needs_cloud_sync'
+                      : 'albums.share.caption',
+                  )}
                 </Text>
               </View>
               {busy === 'share' || busy === 'stop' ? (
@@ -576,27 +609,7 @@ export function AlbumPeopleScreen({
             </View>
           </Button>
         ) : null}
-      </ScrollView>
-
-      <PromptSheet visible={renaming !== null} onDismiss={() => setRenaming(null)}>
-        <View className="gap-3 p-5">
-          <Text variant="subheading">{I18n.t('albums.people.rename_title')}</Text>
-          <Input
-            value={renaming?.name ?? ''}
-            onChangeText={(name) =>
-              setRenaming((current) => (current ? { ...current, name } : current))
-            }
-            autoFocus
-            autoCapitalize="words"
-            autoCorrect={false}
-            returnKeyType="done"
-            onSubmitEditing={saveRename}
-          />
-          <Button onPress={saveRename} disabled={!renaming?.name.trim()}>
-            <Text>{I18n.t('common.save')}</Text>
-          </Button>
-        </View>
-      </PromptSheet>
+      </FormScrollView>
     </SettingsPageLayout>
   );
 }

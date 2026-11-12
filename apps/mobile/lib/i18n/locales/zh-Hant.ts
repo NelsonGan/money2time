@@ -2862,7 +2862,6 @@ const zhHant = {
       who_title: '哪一個是你？',
       who_message: '選擇你的名字，這樣每張帳單中你的份額會記入你的帳本。',
       who_new: '我不在清單中',
-      rename_title: '重新命名',
     },
     share: {
       row: '分享此相簿',
@@ -2876,14 +2875,12 @@ const zhHant = {
       paused: '已暫停。相簿中有人開通 Pro 後會恢復同步。',
       limit: '你最多可同時分享 {{max}} 本相簿。',
       full: '一本相簿最多可有 {{max}} 人加入。',
+      needs_cloud_sync: '登入 Cloud Sync 即可共享此相簿。',
     },
     balances: {
       tab: '結餘',
       empty_message: '在此相簿中分攤一張帳單，它就會顯示在這裡。',
       total_line: '總支出 {{total}} · 你的份額 {{share}}',
-      add_people_title: '分攤此相簿',
-      add_people_message: '新增這次旅行的成員，新支出會預設與他們分攤。',
-      add_people_action: '新增成員',
     },
     join: {
       title: '共享相簿',
@@ -2893,6 +2890,7 @@ const zhHant = {
     },
     bill: {
       delete_shared: '此帳單在共享相簿中。刪除後所有人那裡都會移除。',
+      remove_shared: '此帳單在共享相簿中。其他所有人那裡都會移除。',
     },
   },
   assets: {

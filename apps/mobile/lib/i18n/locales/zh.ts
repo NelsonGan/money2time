@@ -2862,7 +2862,6 @@ const zh = {
       who_title: '哪一个是你？',
       who_message: '选择你的名字，这样每张账单中你的份额会记入你的账本。',
       who_new: '我不在列表中',
-      rename_title: '重命名',
     },
     share: {
       row: '共享此相册',
@@ -2876,14 +2875,12 @@ const zh = {
       paused: '已暂停。相册中有人开通 Pro 后会恢复同步。',
       limit: '你最多可同时共享 {{max}} 个相册。',
       full: '一个相册最多可有 {{max}} 人加入。',
+      needs_cloud_sync: '登录 Cloud Sync 即可共享此相册。',
     },
     balances: {
       tab: '结余',
       empty_message: '在此相册中分摊一张账单，它就会显示在这里。',
       total_line: '总支出 {{total}} · 你的份额 {{share}}',
-      add_people_title: '分摊此相册',
-      add_people_message: '添加这次旅行的成员，新支出会默认与他们分摊。',
-      add_people_action: '添加成员',
     },
     join: {
       title: '共享相册',
@@ -2893,6 +2890,7 @@ const zh = {
     },
     bill: {
       delete_shared: '此账单在共享相册中。删除后所有人那里都会移除。',
+      remove_shared: '此账单在共享相册中。其他所有人那里都会移除。',
     },
   },
   assets: {

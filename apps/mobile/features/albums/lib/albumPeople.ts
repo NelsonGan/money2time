@@ -120,11 +120,34 @@ export function splitWithPeople(people: readonly AlbumGroupPerson[]): AlbumPerso
   );
 }
 
+/** `base`, or `base 2`, `base 3`… when someone in `members` already has the name. */
+export function uniquePersonName(base: string, members: readonly AlbumMember[]): string {
+  const taken = new Set(members.map((member) => personNameKey(member.name)));
+  let unique = base;
+  for (let n = 2; taken.has(personNameKey(unique)); n += 1) unique = `${base} ${n}`;
+  return unique;
+}
+
+/**
+ * Who a friend's row of a split bill is in a group: the member the row
+ * already names, else the one of that name. Null when it is someone new.
+ */
+export function memberForRow(
+  members: readonly AlbumMember[],
+  selfId: string,
+  row: { albumMemberId?: string | null; personName?: string | null },
+): AlbumMember | null {
+  const named = row.albumMemberId
+    ? members.find((member) => member.id === row.albumMemberId && member.id !== selfId)
+    : null;
+  return named ?? memberByName(members, row.personName, selfId);
+}
+
 /**
  * The member a typed name stands for in a group: the one of that name, the
  * user aside. Names are unique in a group, compared case-folded.
  */
-export function memberByName(
+function memberByName(
   members: readonly AlbumMember[],
   name: string | null | undefined,
   selfId: string | null,

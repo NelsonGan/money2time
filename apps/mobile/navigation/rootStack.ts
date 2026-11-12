@@ -48,6 +48,11 @@ export type RootStackParamList = {
         /** Start with "pay in instalments" on (Settings › Instalments' add button). */
         startInstalmentPlan?: boolean;
         /**
+         * The album the entry is added to, and starts split with (the album
+         * page's own add button), whichever album is the active one.
+         */
+        albumId?: string;
+        /**
          * Skip the post-save jump to the calendar tab. Set by callers whose own
          * screen already shows the result (Accounts or a goal's deposit / withdraw),
          * so backing out later lands where the user started instead of

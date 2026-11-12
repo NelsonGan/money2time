@@ -82,18 +82,33 @@ export function albumState(albumId: string): 'live' | 'deleted' | 'none' {
   return !row ? 'none' : row.deleted_at ? 'deleted' : 'live';
 }
 
+/** The ledger an album is in, whichever one is open. */
+export function albumLedgerId(albumId: string): string | null {
+  return albumRow(albumId)?.ledger_id ?? null;
+}
+
 /**
  * The album a group this phone joined shows as: made here, with the group's
  * id, in a ledger of the user's own (the open one, unless that is a shared
  * ledger, where an album is never split). Left alone when it is already here,
- * so two phones of one person agree on it once their own data syncs.
+ * so two phones of one person agree on it once their own data syncs; one
+ * deleted here and then joined again comes back.
  */
 export function ensureLocalAlbum(share: { ledgerId: string; name: string | null }): void {
-  if (albumRow(share.ledgerId)) return;
-  const open = getActiveLedgerId();
-  const ledgerId = sharedLedgerFor(open) ? DEFAULT_LEDGER_ID : open;
   const now = nowIso();
   const db = getSQLite();
+  const existing = albumRow(share.ledgerId);
+  if (existing) {
+    if (existing.deleted_at) {
+      db.runSync('UPDATE albums SET deleted_at = NULL, updated_at = ? WHERE id = ?', [
+        now,
+        share.ledgerId,
+      ]);
+    }
+    return;
+  }
+  const open = getActiveLedgerId();
+  const ledgerId = sharedLedgerFor(open) ? DEFAULT_LEDGER_ID : open;
   const top = db.getFirstSync<{ top: number | null }>(
     'SELECT MIN(sort_order) AS top FROM albums WHERE ledger_id = ? AND deleted_at IS NULL',
     [ledgerId],
@@ -124,7 +139,7 @@ export function beginAlbumGroup(albumId: string, self: { userId: string; name: s
   const ids = new Set(existing.map((member) => member.id));
   if (!existing.some((member) => member.userId === self.userId && !member.deletedAt)) {
     albumGroupsRepository.createMember(albumId, {
-      name: cleanPersonName(self.name) || 'Me',
+      name: cleanPersonName(self.name),
       userId: self.userId,
       sortOrder: 0,
     });

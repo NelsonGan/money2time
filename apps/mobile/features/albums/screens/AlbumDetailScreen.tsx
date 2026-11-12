@@ -70,6 +70,8 @@ interface AlbumDetailScreenProps {
   onEditDetails: (albumId: string) => void;
   /** Who the album is split with, and its sharing. */
   onOpenPeople: (albumId: string) => void;
+  /** Opens a new expense in this album. */
+  onAddExpense: (albumId: string) => void;
   /** A person's page, with only this album's bills. */
   onOpenPerson: (personKey: string, albumId: string) => void;
   onOpenTransaction: (transaction: TransactionWithRelations) => void;
@@ -83,6 +85,7 @@ export function AlbumDetailScreen({
   onAddTransactions,
   onEditDetails,
   onOpenPeople,
+  onAddExpense,
   onOpenPerson,
   onOpenTransaction,
   onOpenBreakdown,
@@ -407,9 +410,13 @@ export function AlbumDetailScreen({
   const handleRemoveSelected = useCallback(() => {
     if (selectedTransactionIds.length === 0) return;
     const idsToRemove = [...selectedTransactionIds];
+    // A shared album's bill leaves its group with it, for everyone.
+    const shared = idsToRemove.some((id) => transactionById.get(id)?.albumGroupId === albumId);
     Alert.alert(
       I18n.t('albums.remove_from_album'),
-      I18n.t('albums.remove_selected_body', { count: idsToRemove.length }),
+      shared
+        ? I18n.t('albums.bill.remove_shared')
+        : I18n.t('albums.remove_selected_body', { count: idsToRemove.length }),
       [
         { text: I18n.t('common.cancel'), style: 'cancel' },
         {
@@ -421,7 +428,7 @@ export function AlbumDetailScreen({
         },
       ],
     );
-  }, [albumId, removeTransactionsFromAlbum, selectedTransactionIds]);
+  }, [albumId, removeTransactionsFromAlbum, selectedTransactionIds, transactionById]);
 
   // Track whether the cover hero has scrolled away so the toggle arrow can flip
   // direction. Only flips state when crossing the halfway point to avoid churn.
@@ -528,7 +535,9 @@ export function AlbumDetailScreen({
           accessibilityLabel={I18n.t('albums.people.title')}
           hitSlop={8}
           style={{ position: 'absolute', right: 16, bottom: 12, zIndex: 1 }}
-          className="flex-row items-center rounded-full bg-black/45 py-1 pl-1 pr-2.5"
+          className={`flex-row items-center rounded-full bg-black/45 py-1 pl-1 ${
+            group.others.length > 0 && group.people.length <= 4 ? 'pr-1' : 'pr-2.5'
+          }`}
         >
           {group.others.length > 0 ? (
             <>
@@ -545,9 +554,12 @@ export function AlbumDetailScreen({
                   />
                 </View>
               ))}
-              <Text variant="label" className="ml-1.5 text-white">
-                {group.people.length > 4 ? `+${group.people.length - 4}` : group.people.length}
-              </Text>
+              {/* Only the people the avatars leave out. */}
+              {group.people.length > 4 ? (
+                <Text variant="label" className="ml-1.5 text-white">
+                  +{group.people.length - 4}
+                </Text>
+              ) : null}
             </>
           ) : (
             <>
@@ -622,6 +634,7 @@ export function AlbumDetailScreen({
         group={group}
         onOpenPerson={(personKey) => onOpenPerson(personKey, albumId)}
         onOpenPeople={() => onOpenPeople(albumId)}
+        onAddExpense={() => onAddExpense(albumId)}
       />
     </ScrollView>
   );
@@ -789,6 +802,7 @@ export function AlbumDetailScreen({
                       group={group}
                       onOpenPerson={(personKey) => onOpenPerson(personKey, albumId)}
                       onOpenPeople={() => onOpenPeople(albumId)}
+                      onAddExpense={() => onAddExpense(albumId)}
                     />
                   ) : null}
                   <Text variant="label" tone="muted" style={styles.splitHeading}>

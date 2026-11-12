@@ -2995,7 +2995,6 @@ const id = {
       who_title: 'Yang mana kamu?',
       who_message: 'Pilih namamu agar bagianmu dari tiap tagihan masuk ke buku kasmu.',
       who_new: 'Saya tidak ada di daftar',
-      rename_title: 'Ganti nama',
     },
     share: {
       row: 'Bagikan album ini',
@@ -3011,15 +3010,12 @@ const id = {
       paused: 'Dijeda. Sinkron lagi saat ada anggota yang punya Pro.',
       limit: 'Kamu bisa membagikan hingga {{max}} album sekaligus.',
       full: 'Hingga {{max}} orang bisa bergabung ke satu album.',
+      needs_cloud_sync: 'Masuk ke Cloud Sync untuk membagikan album ini.',
     },
     balances: {
       tab: 'Saldo',
       empty_message: 'Bagi sebuah tagihan di album ini dan akan muncul di sini.',
       total_line: 'Total pengeluaran {{total}} · Bagianmu {{share}}',
-      add_people_title: 'Bagi album ini',
-      add_people_message:
-        'Tambahkan orang-orang di perjalanan ini. Pengeluaran baru akan langsung dibagi dengan mereka.',
-      add_people_action: 'Tambah orang',
     },
     join: {
       title: 'Album bersama',
@@ -3030,6 +3026,8 @@ const id = {
     bill: {
       delete_shared:
         'Tagihan ini ada di album bersama. Menghapusnya akan menghapusnya untuk semua orang.',
+      remove_shared:
+        'Tagihan ini ada di album bersama. Tagihan akan dihapus untuk semua orang lain.',
     },
   },
   assets: {

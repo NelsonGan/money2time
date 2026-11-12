@@ -76,7 +76,7 @@ export function billFromRows(
 // One member's own side of a bill
 
 /** What a bill is to one member. */
-export type OwnSide =
+type OwnSide =
   | { kind: 'none' }
   /** They paid it: the others owe them their shares. */
   | { kind: 'paid'; total: number; selfShare: number; others: AlbumShare[] }
@@ -166,7 +166,7 @@ function countedPayments(
 }
 
 /** A split row of the user's own side of a bill, before the phone's own choices (accounts). */
-export interface LocalSplitRow {
+interface LocalSplitRow {
   /** What the row is, for finding the row a phone already has. */
   role: 'self' | 'member' | 'payment';
   /** The member the row is with; null on the Me row. */
@@ -197,7 +197,7 @@ export interface LocalPayment {
 }
 
 /** The user's own side of a bill, as rows. */
-export interface LocalBill {
+interface LocalBill {
   kind: 'paid' | 'owes';
   /** The expense's amount now: what is left of it after the payments. */
   amount: number;
@@ -341,44 +341,6 @@ type LiveBill = Pick<
   AlbumExpense,
   'id' | 'amount' | 'currency' | 'paidBy' | 'shares' | 'deletedAt'
 >;
-type LivePayment = Payment;
-
-/**
- * What each member is owed (positive) or owes (negative) in the group, per
- * currency: what they paid less their own shares, and the payments made
- * since. A payment only counts toward a bill that still stands, and never for
- * more than the share it pays. The nets of one currency add up to zero.
- */
-export function groupNets(
-  expenses: readonly LiveBill[],
-  settlements: readonly LivePayment[],
-): Map<string, Map<string, number>> {
-  const byCurrency = new Map<string, Map<string, number>>();
-  const add = (currency: string, memberId: string, amountCents: number) => {
-    let nets = byCurrency.get(currency);
-    if (!nets) byCurrency.set(currency, (nets = new Map()));
-    nets.set(memberId, (nets.get(memberId) ?? 0) + amountCents);
-  };
-  for (const bill of expenses) {
-    if (bill.deletedAt) continue;
-    const members = [...new Set(bill.shares.map((share) => share.memberId))];
-    for (const memberId of members) {
-      if (memberId === bill.paidBy) continue;
-      const share = bill.shares
-        .filter((item) => item.memberId === memberId)
-        .reduce((sum, item) => sum + item.amount, 0);
-      const { left } = countedPayments(bill, settlements, memberId, bill.paidBy, share);
-      if (!(left > 0)) continue;
-      add(bill.currency, memberId, -cents(left));
-      add(bill.currency, bill.paidBy, cents(left));
-    }
-  }
-  for (const nets of byCurrency.values()) {
-    for (const [memberId, amount] of nets) nets.set(memberId, amount / 100);
-  }
-  return byCurrency;
-}
-
 /** What the group spent and what one member's share of it is, per currency. */
 export function groupTotals(
   expenses: readonly LiveBill[],
@@ -403,7 +365,7 @@ export function groupTotals(
 // From an album's own split bill to the group's (when an album is shared)
 
 /** A payment already on a split bill, as the settlement it becomes. */
-export interface LocalBillPayment {
+interface LocalBillPayment {
   /** The paid row that holds it, which is then stamped with the settlement. */
   splitId: string;
   fromMember: string;
@@ -504,4 +466,13 @@ export function groupFromLocalBill(
   }
   const built = billFromRows(rows, selfId);
   return built ? { ...built, payments } : null;
+}
+
+/** Whether a bill that still stands names the member, as its payer or with a share. */
+export function memberIsOnBill(expenses: readonly AlbumExpense[], memberId: string): boolean {
+  return expenses.some(
+    (expense) =>
+      !expense.deletedAt &&
+      (expense.paidBy === memberId || expense.shares.some((share) => share.memberId === memberId)),
+  );
 }

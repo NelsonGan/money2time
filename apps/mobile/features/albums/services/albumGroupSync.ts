@@ -32,7 +32,7 @@ import { normalizeMoneyAmount } from '~/utils/formatters';
 import { nowIso } from '~/utils/id';
 
 import { groupFromLocalBill, localBill, type LocalPayment } from '../lib/albumGroup';
-import { cleanPersonName, memberByName, selfMember } from '../lib/albumPeople';
+import { cleanPersonName, memberForRow, selfMember } from '../lib/albumPeople';
 import { notifyAlbumGroups } from './albumGroupStore';
 
 /** What the open ledger and the user's settings give the group's entries. */
@@ -53,11 +53,11 @@ export interface GroupEnv {
 }
 
 /** What only this phone knows about a write it is about to project. */
-export interface ProjectHints {
+interface ProjectHints {
   /** A bill the editor is saving: the fields that are the user's own. */
   entry?: Pick<
     CreateTransactionInput,
-    'accountId' | 'categoryId' | 'details' | 'receiptUri' | 'sentiment'
+    'accountId' | 'categoryId' | 'details' | 'receiptUri' | 'sentiment' | 'reimbursable'
   >;
   /** The account a settlement just recorded here moved through, by settlement id. */
   accounts?: ReadonlyMap<string, string | null>;
@@ -376,6 +376,7 @@ function projectExpense(
             details: hints.entry?.details ?? null,
             receiptUri: hints.entry?.receiptUri ?? null,
             sentiment: hints.entry?.sentiment ?? 'neutral',
+            reimbursable: hints.entry?.reimbursable ?? false,
           }),
       albumGroupId: groupId,
     }) || changed;
@@ -383,10 +384,21 @@ function projectExpense(
   const tx = readTx(expense.id)!;
 
   // --- Its shares ----------------------------------------------------------
-  const selfRow = splits.find((split) => split.isSelf);
+  // The row a phone already has for the user or a member, the one with the
+  // group's own id first: when two sets of rows meet (another phone of the
+  // user's wrote one), every phone keeps the same set.
+  const pick = (candidates: TransactionSplit[], id: string) =>
+    candidates.find((split) => split.id === id) ?? candidates[0];
+  const selfRow = pick(
+    splits.filter((split) => split.isSelf),
+    `${expense.id}:self`,
+  );
   const rootOf = (memberId: string) =>
-    splits.find(
-      (split) => !split.isSelf && !split.partOfSplitId && split.albumMemberId === memberId,
+    pick(
+      splits.filter(
+        (split) => !split.isSelf && !split.partOfSplitId && split.albumMemberId === memberId,
+      ),
+      `${expense.id}:${memberId}`,
     );
   const rootId = (memberId: string) => rootOf(memberId)?.id ?? `${expense.id}:${memberId}`;
   const partId = (settlementId: string) =>
@@ -443,7 +455,10 @@ function projectExpense(
           : row.role === 'member'
             ? rootId(row.memberId!)
             : partId(row.settlementId!),
-      personName: row.role === 'self' ? env.meLabel : nameOf(row.memberId!),
+      // The user's own row keeps the word it was first written with: two
+      // phones in different languages would otherwise rewrite it forever.
+      personName:
+        row.role === 'self' ? (selfRow?.personName ?? env.meLabel) : nameOf(row.memberId!),
       amount: row.amount,
       isSelf: row.role === 'self',
       isPayer: row.isPayer,
@@ -533,9 +548,12 @@ function projectExpense(
       changed = ensureInAlbum(groupId, entry.id) || changed;
     }
   }
-  // Entries of payments that are no longer there (undone, or past the share).
-  const stale = [...prior.values()].flatMap((known) =>
-    known.linkedId && !linked.has(known.linkedId) ? [known.linkedId] : [],
+  // Entries of payments that are no longer there: undone, past the share, or
+  // made on this entry while it was not the group's (so the group has none).
+  const stale = splits.flatMap((split) =>
+    split.paidTransactionId && !linked.has(split.paidTransactionId)
+      ? [split.paidTransactionId]
+      : [],
   );
   if (stale.length) {
     transactionsRepository.softDeleteMany(stale);
@@ -574,9 +592,9 @@ export function projectGroup(
 /**
  * An album just shared from this phone: every split bill already in it
  * becomes a bill of the group, with the payments on it, and people on those
- * bills who are not in the group yet are added by name. The entries
- * themselves do not change: they are marked as the group's, and the rows
- * `projectGroup` would write are the ones already there.
+ * bills who are not in the group yet are added by name. The entries keep
+ * their rows, amounts and payments: they are marked as the group's, and
+ * `projectGroup` then only tidies them (who each share is with, its order).
  */
 export function publishAlbumBills(groupId: string, env: GroupEnv): void {
   const db = getSQLite();
@@ -608,14 +626,10 @@ export function publishAlbumBills(groupId: string, env: GroupEnv): void {
       // Who each friend's row is: the member it already names, else the one
       // of that name, else someone new by that name.
       const memberOf = (split: TransactionSplit): string | null => {
-        const named = split.albumMemberId
-          ? members.find((member) => member.id === split.albumMemberId && member.id !== self.id)
-          : null;
-        if (named) return named.id;
+        const known = memberForRow(members, self.id, split);
+        if (known) return known.id;
         const name = cleanPersonName(split.personName ?? '');
         if (!name) return null;
-        const known = memberByName(members, name, self.id);
-        if (known) return known.id;
         const added = albumGroupsRepository.createMember(groupId, { name });
         members = [...members, added];
         return added.id;

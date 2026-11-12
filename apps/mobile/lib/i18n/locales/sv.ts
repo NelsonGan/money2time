@@ -2982,7 +2982,6 @@ const sv = {
       who_title: 'Vem av dem är du?',
       who_message: 'Välj ditt namn så hamnar din andel av varje nota i din kassabok.',
       who_new: 'Jag finns inte i listan',
-      rename_title: 'Byt namn',
     },
     share: {
       row: 'Dela det här albumet',
@@ -2997,15 +2996,12 @@ const sv = {
       paused: 'Pausat. Det synkas igen när någon i albumet har Pro.',
       limit: 'Du kan dela upp till {{max}} album åt gången.',
       full: 'Upp till {{max}} personer kan gå med i ett album.',
+      needs_cloud_sync: 'Logga in på Cloud Sync för att dela det här albumet.',
     },
     balances: {
       tab: 'Saldon',
       empty_message: 'Dela en nota i det här albumet så visas den här.',
       total_line: 'Totalt spenderat {{total}} · Din andel {{share}}',
-      add_people_title: 'Dela det här albumet',
-      add_people_message:
-        'Lägg till dem som är med på resan. Nya utgifter börjar då delade med dem.',
-      add_people_action: 'Lägg till personer',
     },
     join: {
       title: 'Delat album',
@@ -3015,6 +3011,7 @@ const sv = {
     },
     bill: {
       delete_shared: 'Notan finns i ett delat album. Om du raderar den försvinner den för alla.',
+      remove_shared: 'Notan finns i ett delat album. Den försvinner för alla andra.',
     },
   },
   assets: {

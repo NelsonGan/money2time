@@ -2974,7 +2974,6 @@ const en = {
       who_title: 'Which one is you?',
       who_message: 'Pick your name, so your share of each bill lands in your ledger.',
       who_new: "I'm not on the list",
-      rename_title: 'Rename',
     },
     share: {
       row: 'Share this album',
@@ -2989,14 +2988,12 @@ const en = {
       paused: 'Paused. It syncs again when someone in it has Pro.',
       limit: 'You can share up to {{max}} albums at a time.',
       full: 'Up to {{max}} people can join an album.',
+      needs_cloud_sync: 'Sign in to Cloud Sync to share this album.',
     },
     balances: {
       tab: 'Balances',
       empty_message: 'Split a bill in this album and it shows here.',
       total_line: 'Total spent {{total}} · Your share {{share}}',
-      add_people_title: 'Split this album',
-      add_people_message: 'Add the people on this trip. New expenses then start split with them.',
-      add_people_action: 'Add people',
     },
     join: {
       title: 'Shared album',
@@ -3006,6 +3003,7 @@ const en = {
     },
     bill: {
       delete_shared: 'This bill is in a shared album. Deleting it removes it for everyone.',
+      remove_shared: 'This bill is in a shared album. It will be removed for everyone else.',
     },
   },
   assets: {

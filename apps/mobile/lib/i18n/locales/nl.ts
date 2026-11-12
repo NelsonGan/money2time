@@ -3018,7 +3018,6 @@ const nl = {
       who_title: 'Welke ben jij?',
       who_message: 'Kies je naam, zodat jouw deel van elke rekening in je kasboek komt.',
       who_new: 'Ik sta niet in de lijst',
-      rename_title: 'Naam wijzigen',
     },
     share: {
       row: 'Dit album delen',
@@ -3033,15 +3032,12 @@ const nl = {
       paused: 'Gepauzeerd. Het synchroniseert weer zodra iemand in het album Pro heeft.',
       limit: 'Je kunt maximaal {{max}} albums tegelijk delen.',
       full: 'Maximaal {{max}} personen kunnen aan een album meedoen.',
+      needs_cloud_sync: 'Meld je aan bij Cloud Sync om dit album te delen.',
     },
     balances: {
       tab: "Saldo's",
       empty_message: 'Deel een rekening in dit album en die verschijnt hier.',
       total_line: 'Totaal uitgegeven {{total}} · Jouw deel {{share}}',
-      add_people_title: 'Dit album delen',
-      add_people_message:
-        'Voeg de mensen van deze reis toe. Nieuwe uitgaven beginnen dan gedeeld met hen.',
-      add_people_action: 'Personen toevoegen',
     },
     join: {
       title: 'Gedeeld album',
@@ -3052,6 +3048,7 @@ const nl = {
     bill: {
       delete_shared:
         'Deze rekening staat in een gedeeld album. Als je hem verwijdert, verdwijnt hij voor iedereen.',
+      remove_shared: 'Deze rekening staat in een gedeeld album. Hij verdwijnt voor alle anderen.',
     },
   },
   assets: {

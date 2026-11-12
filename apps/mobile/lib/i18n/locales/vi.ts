@@ -2964,7 +2964,6 @@ const vi = {
       who_title: 'Bạn là ai trong số này?',
       who_message: 'Chọn tên của bạn để phần của bạn trong mỗi hóa đơn vào sổ của bạn.',
       who_new: 'Tôi không có trong danh sách',
-      rename_title: 'Đổi tên',
     },
     share: {
       row: 'Chia sẻ album này',
@@ -2979,15 +2978,12 @@ const vi = {
       paused: 'Đã tạm dừng. Sẽ đồng bộ lại khi có người trong album dùng Pro.',
       limit: 'Bạn có thể chia sẻ tối đa {{max}} album cùng lúc.',
       full: 'Tối đa {{max}} người có thể tham gia một album.',
+      needs_cloud_sync: 'Đăng nhập Cloud Sync để chia sẻ album này.',
     },
     balances: {
       tab: 'Số dư',
       empty_message: 'Chia một hóa đơn trong album này và nó sẽ hiện ở đây.',
       total_line: 'Tổng chi {{total}} · Phần của bạn {{share}}',
-      add_people_title: 'Chia album này',
-      add_people_message:
-        'Thêm những người trong chuyến đi này. Khoản chi mới sẽ bắt đầu được chia với họ.',
-      add_people_action: 'Thêm người',
     },
     join: {
       title: 'Album chung',
@@ -2997,6 +2993,7 @@ const vi = {
     },
     bill: {
       delete_shared: 'Hóa đơn này nằm trong album chung. Xóa nó sẽ gỡ khỏi mọi người.',
+      remove_shared: 'Hóa đơn này nằm trong album chung. Nó sẽ bị gỡ khỏi mọi người khác.',
     },
   },
   assets: {

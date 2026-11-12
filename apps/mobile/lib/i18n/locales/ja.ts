@@ -2963,7 +2963,6 @@ const ja = {
       who_title: 'あなたはどれですか？',
       who_message: '自分の名前を選ぶと、各会計のあなたの分が自分の帳簿に入ります。',
       who_new: 'リストにいません',
-      rename_title: '名前を変更',
     },
     share: {
       row: 'このアルバムを共有',
@@ -2978,15 +2977,12 @@ const ja = {
       paused: '一時停止中。メンバーの誰かがProになると再び同期されます。',
       limit: '同時に共有できるアルバムは{{max}}件までです。',
       full: '1つのアルバムに参加できるのは{{max}}人までです。',
+      needs_cloud_sync: 'このアルバムを共有するにはCloud Syncにサインインしてください。',
     },
     balances: {
       tab: '残高',
       empty_message: 'このアルバムで会計を割り勘すると、ここに表示されます。',
       total_line: '合計支出 {{total}} · あなたの分 {{share}}',
-      add_people_title: 'このアルバムを割り勘にする',
-      add_people_message:
-        'この旅行のメンバーを追加しましょう。新しい支出はその人たちとの割り勘で始まります。',
-      add_people_action: '人を追加',
     },
     join: {
       title: '共有アルバム',
@@ -2996,6 +2992,7 @@ const ja = {
     },
     bill: {
       delete_shared: 'この会計は共有アルバムにあります。削除すると全員の分が消えます。',
+      remove_shared: 'この会計は共有アルバムにあります。ほかの全員の分も消えます。',
     },
   },
   assets: {

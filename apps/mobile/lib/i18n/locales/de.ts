@@ -3028,7 +3028,6 @@ const de = {
       who_message:
         'Wähle deinen Namen, damit dein Anteil jeder Rechnung in deinem Kassenbuch landet.',
       who_new: 'Ich stehe nicht auf der Liste',
-      rename_title: 'Umbenennen',
     },
     share: {
       row: 'Dieses Album teilen',
@@ -3044,15 +3043,12 @@ const de = {
       paused: 'Pausiert. Es synchronisiert wieder, sobald jemand im Album Pro hat.',
       limit: 'Du kannst bis zu {{max}} Alben gleichzeitig teilen.',
       full: 'Bis zu {{max}} Personen können einem Album beitreten.',
+      needs_cloud_sync: 'Melde dich bei Cloud Sync an, um dieses Album zu teilen.',
     },
     balances: {
       tab: 'Salden',
       empty_message: 'Teile eine Rechnung in diesem Album, dann erscheint sie hier.',
       total_line: 'Insgesamt ausgegeben {{total}} · Dein Anteil {{share}}',
-      add_people_title: 'Dieses Album teilen',
-      add_people_message:
-        'Füge die Personen dieser Reise hinzu. Neue Ausgaben werden dann zunächst mit ihnen geteilt.',
-      add_people_action: 'Personen hinzufügen',
     },
     join: {
       title: 'Geteiltes Album',
@@ -3063,6 +3059,8 @@ const de = {
     bill: {
       delete_shared:
         'Diese Rechnung ist in einem geteilten Album. Wenn du sie löschst, wird sie für alle entfernt.',
+      remove_shared:
+        'Diese Rechnung ist in einem geteilten Album. Sie wird für alle anderen entfernt.',
     },
   },
   assets: {

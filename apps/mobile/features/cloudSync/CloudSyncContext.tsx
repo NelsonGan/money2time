@@ -25,6 +25,7 @@ import { useApp } from '~/context/AppContext';
 import { usePro } from '~/context/ProContext';
 import { ownDisplayName, writeOwnLedgerProfiles } from '~/features/sharedLedgers/lib/ledgerPeople';
 import { DEFAULT_LEDGER_ID, getActiveLedgerId } from '~/lib/db/ledgerScope';
+import { I18n } from '~/lib/i18n';
 import { ledgersRepository } from '~/lib/repositories/ledgersRepository';
 import {
   clearAccountPro,
@@ -1280,8 +1281,10 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
 
   const shareAlbum = useCallback(
     async (album: { id: string; name: string }) => {
-      const shared = await sharedLedgerSync.shareAlbum(album, ownDisplayName() ?? '', () =>
-        publishAlbumGroupRef.current(album.id),
+      const shared = await sharedLedgerSync.shareAlbum(
+        album,
+        ownDisplayName() ?? I18n.t('albums.people.unnamed'),
+        () => publishAlbumGroupRef.current(album.id),
       );
       void trackEvent(AnalyticsEvents.ALBUM_SHARED);
       reloadAfterApply();

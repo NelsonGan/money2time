@@ -3000,7 +3000,6 @@ const ms = {
       who_title: 'Yang mana satu anda?',
       who_message: 'Pilih nama anda supaya bahagian anda bagi setiap bil masuk ke lejar anda.',
       who_new: 'Saya tiada dalam senarai',
-      rename_title: 'Tukar nama',
     },
     share: {
       row: 'Kongsi album ini',
@@ -3016,15 +3015,12 @@ const ms = {
       paused: 'Dijeda. Ia segerak semula apabila seseorang di dalamnya ada Pro.',
       limit: 'Anda boleh kongsi sehingga {{max}} album pada satu masa.',
       full: 'Sehingga {{max}} orang boleh sertai satu album.',
+      needs_cloud_sync: 'Log masuk ke Cloud Sync untuk berkongsi album ini.',
     },
     balances: {
       tab: 'Baki',
       empty_message: 'Bahagi satu bil dalam album ini dan ia akan muncul di sini.',
       total_line: 'Jumlah belanja {{total}} · Bahagian anda {{share}}',
-      add_people_title: 'Bahagi album ini',
-      add_people_message:
-        'Tambah orang dalam perjalanan ini. Perbelanjaan baharu akan bermula dibahagi dengan mereka.',
-      add_people_action: 'Tambah orang',
     },
     join: {
       title: 'Album kongsi',
@@ -3035,6 +3031,7 @@ const ms = {
     bill: {
       delete_shared:
         'Bil ini berada dalam album kongsi. Memadamnya akan membuangnya untuk semua orang.',
+      remove_shared: 'Bil ini berada dalam album kongsi. Ia akan dibuang untuk semua orang lain.',
     },
   },
   assets: {

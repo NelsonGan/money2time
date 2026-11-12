@@ -27,13 +27,15 @@ import {
   ONBOARDING_MINIMAL_INCOME_CATEGORIES,
 } from '~/constants/appDefaults';
 import { PRO_LIMITS } from '~/constants/proLimits';
-import { billFromRows, type GroupBillRow } from '~/features/albums/lib/albumGroup';
+import { billFromRows, type GroupBillRow, memberIsOnBill } from '~/features/albums/lib/albumGroup';
 import {
   cleanPersonName,
-  memberByName,
+  MAX_ALBUM_PEOPLE,
+  memberForRow,
   type PeopleEditError,
   personNameKey,
   selfMember,
+  uniquePersonName,
 } from '~/features/albums/lib/albumPeople';
 import { notifyAlbumGroups } from '~/features/albums/services/albumGroupStore';
 import {
@@ -341,8 +343,6 @@ export interface SplitDraftInput {
   memberId?: string | null;
   /** The member of a shared album's group this share is with. */
   albumMemberId?: string | null;
-  /** The group settlement a paid row came from or was sent as. */
-  settlementId?: string | null;
 }
 
 /** How a transaction was entered. Drives which analytics event fires on
@@ -592,7 +592,7 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   /** Adds someone to a shared album's group by name, or says why not. */
   addAlbumMember: (groupId: string, name: string) => PeopleEditError | null;
   renameAlbumMember: (groupId: string, memberId: string, name: string) => PeopleEditError | null;
-  /** Removes a member nobody's bill names; false when a bill still does, or they have joined. */
+  /** Removes a member no bill names (a name, or someone who has left); false when a bill still does. */
   removeAlbumMember: (groupId: string, memberId: string) => boolean;
   /**
    * Says who the user is in a group they joined: one of its placeholders
@@ -3938,6 +3938,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const cleaned = cleanPersonName(name);
       if (!cleaned) return 'blank';
       const members = albumGroupsRepository.listMembers(groupId);
+      // The user is one of them.
+      if (members.length > MAX_ALBUM_PEOPLE) return 'full';
       const key = personNameKey(cleaned);
       if (members.some((member) => personNameKey(member.name) === key)) return 'taken';
       albumGroupsRepository.createMember(groupId, { name: cleaned });
@@ -3969,16 +3971,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const removeAlbumMember = useCallback(
     (groupId: string, memberId: string): boolean => {
       const member = albumGroupsRepository.listMembers(groupId).find((m) => m.id === memberId);
-      if (!member || member.userId) return false;
-      const named = albumGroupsRepository
-        .listExpenses(groupId)
-        .some(
-          (expense) =>
-            !expense.deletedAt &&
-            (expense.paidBy === memberId ||
-              expense.shares.some((share) => share.memberId === memberId)),
-        );
-      if (named) return false;
+      if (!member) return false;
+      if (memberIsOnBill(albumGroupsRepository.listExpenses(groupId), memberId)) return false;
       albumGroupsRepository.softDeleteMember(memberId);
       afterGroupWrite();
       return true;
@@ -3999,13 +3993,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           albumGroupsRepository.updateMember(placeholder.id, { userId: env.userId });
         } else {
           // A name of their own; one already taken gets a number.
-          const base = cleanPersonName(name) || env.meLabel;
-          const taken = new Set(members.map((member) => personNameKey(member.name)));
-          let unique = base;
-          for (let n = 2; taken.has(personNameKey(unique)); n += 1) unique = `${base} ${n}`;
-          albumGroupsRepository.createMember(groupId, { name: unique, userId: env.userId });
+          const base = cleanPersonName(name) || I18n.t('albums.people.unnamed');
+          albumGroupsRepository.createMember(groupId, {
+            name: uniquePersonName(base, members),
+            userId: env.userId,
+          });
         }
       }
+      // Split bills this phone put in the album before it said who it is.
+      publishAlbumBills(groupId, env);
       projectGroup(groupId, env);
       afterGroupWrite();
     },
@@ -4033,16 +4029,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
         // Who the row is: the member it names, else the one of that name,
         // else someone new by that name.
-        let member =
-          (row.albumMemberId
-            ? members.find((m) => m.id === row.albumMemberId && m.id !== self.id)
-            : null) ?? memberByName(members, row.personName, self.id);
+        let member = memberForRow(members, self.id, row);
         if (!member) {
           const base = cleanPersonName(row.personName ?? '') || I18n.t('albums.people.unnamed');
-          const taken = new Set(members.map((m) => personNameKey(m.name)));
-          let unique = base;
-          for (let n = 2; taken.has(personNameKey(unique)); n += 1) unique = `${base} ${n}`;
-          member = albumGroupsRepository.createMember(groupId, { name: unique });
+          member = albumGroupsRepository.createMember(groupId, {
+            name: uniquePersonName(base, members),
+          });
           members = [...members, member];
         }
         billRows.push({ memberId: member.id, amount, isPayer: !!row.isPayer });
@@ -4088,6 +4080,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           details: input.details ?? null,
           receiptUri: input.receiptUri ?? null,
           sentiment: input.sentiment ?? 'neutral',
+          reimbursable: input.reimbursable ?? false,
         };
         if (existingId) {
           // The fields that are the user's own, on the entry they already have.
@@ -4096,6 +4089,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             details: entry.details,
             receiptUri: entry.receiptUri,
             sentiment: entry.sentiment,
+            reimbursable: entry.reimbursable,
             ...(built.paidBy === self.id && entry.accountId
               ? { accountId: entry.accountId }
               : null),
@@ -4160,6 +4154,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           const self = selfMember(albumGroupsRepository.listMembers(bill.groupId), env.userId);
           const other = payer ? payer.albumMemberId : bill.split.albumMemberId;
           if (!self || !other) return;
+          // What is still owed now, as stored: a second tap, or a payment that
+          // landed meanwhile, never pays the same share twice.
+          const rows = transactionSplitsRepository.listByTransactionId(bill.tx.id);
+          const left = payer
+            ? (owedToPayer(rows, bill.tx.amount)?.owed ?? 0)
+            : (rows.find((row) => row.id === bill.split.id && !row.paidAt)?.amount ?? 0);
+          const paid = normalizeMoneyAmount(Math.min(amount, left));
+          if (!(paid > 0)) return;
           albumGroupsRepository.createSettlement({
             id: settlementId,
             groupId: bill.groupId,
@@ -4167,7 +4169,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             // The user pays the member who paid; anyone else pays the user.
             fromMember: payer ? self.id : other,
             toMember: payer ? other : self.id,
-            amount,
+            amount: paid,
             currency: bill.tx.currency,
             date: dayKeyFromDateLocal(new Date()),
             createdBy: env.userId,
@@ -4945,7 +4947,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           shareAmount: draft.shareAmount == null ? null : normalizeMoneyAmount(draft.shareAmount),
           memberId: draft.memberId ?? null,
           albumMemberId: draft.albumMemberId ?? null,
-          settlementId: draft.settlementId ?? null,
+          settlementId: null,
           sortOrder: draft.sortOrder ?? index,
           createdAt: now,
           updatedAt: now,
@@ -5117,7 +5119,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           shareAmount: draft.shareAmount == null ? null : normalizeMoneyAmount(draft.shareAmount),
           memberId: draft.memberId ?? null,
           albumMemberId: draft.albumMemberId ?? null,
-          settlementId: draft.settlementId ?? null,
+          settlementId: null,
           sortOrder: draft.sortOrder ?? index,
           createdAt: now,
           updatedAt: now,

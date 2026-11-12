@@ -338,7 +338,7 @@ export function toAlbumMember(row: AlbumMemberRow): AlbumMember {
 }
 
 /** `album_expenses.shares_json`: each member's share of the bill. */
-export function parseAlbumShares(json: string | null | undefined): AlbumShare[] {
+function parseAlbumShares(json: string | null | undefined): AlbumShare[] {
   if (!json) return [];
   try {
     const parsed: unknown = JSON.parse(json);

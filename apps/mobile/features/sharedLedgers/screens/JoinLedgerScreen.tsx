@@ -24,6 +24,7 @@ import {
   Text,
 } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
+import { albumLedgerId } from '~/features/albums/services/albumGroupStore';
 import { useCloudSync, useCloudSyncEnabled } from '~/features/cloudSync/CloudSyncContext';
 import { KeepDataChoice } from '~/features/cloudSync/components/KeepDataChoice';
 import { SignedOutView } from '~/features/cloudSync/components/SignedOutView';
@@ -34,12 +35,11 @@ import {
 } from '~/features/cloudSync/services/sharedLedgerStore';
 import { ledgerDisplayName } from '~/features/ledgers/lib/ledgerDisplay';
 import { useThemeColors } from '~/hooks/useThemeColors';
-import { DEFAULT_LEDGER_ID } from '~/lib/db/ledgerScope';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 
 import { SharedLedgerHero } from '../components/SharedLedgerHero';
-import { useSharedAlbums, useSharedLedger, useSharedLedgers } from '../hooks/useSharedLedgers';
+import { useSharedAlbums, useSharedLedgers } from '../hooks/useSharedLedgers';
 import { sharingErrorMessage } from '../lib/sharing';
 
 interface JoinLedgerScreenProps {
@@ -68,11 +68,11 @@ export function JoinLedgerScreen({
   const { ledgers, switchLedger, activeLedger } = useApp();
   const sharedLedgers = useSharedLedgers();
   const sharedAlbums = useSharedAlbums();
-  // An album is never split inside a shared ledger: a joined one is made in
-  // the user's main ledger then, which opens with it.
-  const openLedgerIsShared = useSharedLedger(activeLedger.id) !== null;
+  // The album is in a ledger of the user's own, which opens with it: the open
+  // one for an album just joined, unless that is a shared ledger.
   const openAlbum = (albumId: string) => {
-    if (openLedgerIsShared) switchLedger(DEFAULT_LEDGER_ID);
+    const ledgerId = albumLedgerId(albumId);
+    if (ledgerId && ledgerId !== activeLedger.id) switchLedger(ledgerId);
     onJoinedAlbum(albumId);
   };
   const colors = useThemeColors();

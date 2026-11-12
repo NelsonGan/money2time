@@ -2990,7 +2990,6 @@ const tr = {
       who_title: 'Hangisi sizsiniz?',
       who_message: 'Adınızı seçin; her hesaptaki payınız kendi defterinize düşsün.',
       who_new: 'Listede yokum',
-      rename_title: 'Yeniden adlandır',
     },
     share: {
       row: 'Bu albümü paylaş',
@@ -3004,15 +3003,12 @@ const tr = {
       paused: 'Duraklatıldı. Albümdeki biri Pro olduğunda yeniden eşitlenir.',
       limit: 'Aynı anda en fazla {{max}} albüm paylaşabilirsiniz.',
       full: 'Bir albüme en fazla {{max}} kişi katılabilir.',
+      needs_cloud_sync: "Bu albümü paylaşmak için Cloud Sync'e giriş yapın.",
     },
     balances: {
       tab: 'Bakiyeler',
       empty_message: 'Bu albümde bir hesap bölüşün, burada görünsün.',
       total_line: 'Toplam harcama {{total}} · Payınız {{share}}',
-      add_people_title: 'Bu albümü bölüş',
-      add_people_message:
-        'Bu gezideki kişileri ekleyin. Yeni giderler onlarla bölüşülmüş olarak başlar.',
-      add_people_action: 'Kişi ekle',
     },
     join: {
       title: 'Paylaşılan albüm',
@@ -3022,6 +3018,7 @@ const tr = {
     },
     bill: {
       delete_shared: 'Bu hesap paylaşılan bir albümde. Silerseniz herkes için kaldırılır.',
+      remove_shared: 'Bu hesap paylaşılan bir albümde. Diğer herkes için kaldırılır.',
     },
   },
   assets: {

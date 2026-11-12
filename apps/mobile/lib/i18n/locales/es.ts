@@ -2999,7 +2999,6 @@ const es = {
       who_title: '¿Cuál eres tú?',
       who_message: 'Elige tu nombre para que tu parte de cada cuenta llegue a tu libro.',
       who_new: 'No estoy en la lista',
-      rename_title: 'Cambiar nombre',
     },
     share: {
       row: 'Compartir este álbum',
@@ -3014,15 +3013,12 @@ const es = {
       paused: 'En pausa. Vuelve a sincronizarse cuando alguien del álbum tenga Pro.',
       limit: 'Puedes compartir hasta {{max}} álbumes a la vez.',
       full: 'Pueden unirse hasta {{max}} personas a un álbum.',
+      needs_cloud_sync: 'Inicia sesión en Cloud Sync para compartir este álbum.',
     },
     balances: {
       tab: 'Saldos',
       empty_message: 'Divide una cuenta en este álbum y aparecerá aquí.',
       total_line: 'Total gastado {{total}} · Tu parte {{share}}',
-      add_people_title: 'Divide este álbum',
-      add_people_message:
-        'Añade a las personas de este viaje. Los gastos nuevos empezarán divididos con ellas.',
-      add_people_action: 'Añadir personas',
     },
     join: {
       title: 'Álbum compartido',
@@ -3033,6 +3029,7 @@ const es = {
     bill: {
       delete_shared:
         'Esta cuenta está en un álbum compartido. Si la eliminas, se quita para todos.',
+      remove_shared: 'Esta cuenta está en un álbum compartido. Se quitará para todos los demás.',
     },
   },
   assets: {

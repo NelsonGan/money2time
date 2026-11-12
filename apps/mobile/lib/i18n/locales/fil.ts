@@ -3024,7 +3024,6 @@ const fil = {
       who_title: 'Alin ka rito?',
       who_message: 'Piliin ang pangalan mo para mapunta sa ledger mo ang bahagi mo sa bawat bill.',
       who_new: 'Wala ako sa listahan',
-      rename_title: 'Palitan ang pangalan',
     },
     share: {
       row: 'Ibahagi ang album na ito',
@@ -3040,15 +3039,12 @@ const fil = {
       paused: 'Naka-pause. Magsi-sync ulit kapag may Pro ang isa sa mga kasali.',
       limit: 'Hanggang {{max}} album ang puwede mong ibahagi nang sabay.',
       full: 'Hanggang {{max}} tao ang puwedeng sumali sa isang album.',
+      needs_cloud_sync: 'Mag-sign in sa Cloud Sync para i-share ang album na ito.',
     },
     balances: {
       tab: 'Mga balanse',
       empty_message: 'Maghati ng bill sa album na ito at lalabas ito rito.',
       total_line: 'Kabuuang gastos {{total}} · Bahagi mo {{share}}',
-      add_people_title: 'Hatiin ang album na ito',
-      add_people_message:
-        'Idagdag ang mga kasama sa biyaheng ito. Magsisimulang hati sa kanila ang mga bagong gastos.',
-      add_people_action: 'Magdagdag ng mga tao',
     },
     join: {
       title: 'Shared na album',
@@ -3059,6 +3055,7 @@ const fil = {
     bill: {
       delete_shared:
         'Nasa shared na album ang bill na ito. Kapag binura mo, mawawala ito para sa lahat.',
+      remove_shared: 'Nasa shared na album ang bill na ito. Mawawala ito para sa lahat ng iba.',
     },
   },
   assets: {

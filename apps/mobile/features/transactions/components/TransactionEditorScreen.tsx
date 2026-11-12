@@ -2047,7 +2047,7 @@ export function TransactionEditorScreen({
         // Nor on a shared album's bill, where a payment is the group's and is
         // recorded on the bill's page in Balances.
         onMarkPaid: mode === 'edit' && !groupBill ? handleSplitMarkPaidLocal : undefined,
-        onMarkUnpaid: handleSplitMarkUnpaidLocal,
+        onMarkUnpaid: groupBill ? undefined : handleSplitMarkUnpaidLocal,
         newlyPaidIds,
         onDone: handleDoneSplitBill,
         onCancel: handleCancelSplitBill,

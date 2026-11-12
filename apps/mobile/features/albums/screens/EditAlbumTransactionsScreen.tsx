@@ -10,6 +10,8 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import type { TransactionWithRelations } from '~/types';
 
+import { useRemoveFromAlbum } from '../hooks/useRemoveFromAlbum';
+
 interface EditAlbumTransactionsScreenProps {
   albumId: string;
   onClose: () => void;
@@ -23,10 +25,10 @@ export function EditAlbumTransactionsScreen({
   const {
     settings,
     getAlbumTransactions,
-    removeTransactionsFromAlbum,
     getDisplayValueForTransaction,
     getTrueHourlyRateForDate,
   } = useApp();
+  const removeFromAlbum = useRemoveFromAlbum(albumId);
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
 
@@ -55,9 +57,8 @@ export function EditAlbumTransactionsScreen({
 
   const handleRemove = useCallback(() => {
     if (selectedIds.length === 0) return;
-    removeTransactionsFromAlbum(albumId, selectedIds);
-    onClose();
-  }, [albumId, onClose, removeTransactionsFromAlbum, selectedIds]);
+    removeFromAlbum(selectedIds, onClose);
+  }, [onClose, removeFromAlbum, selectedIds]);
 
   return (
     <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>

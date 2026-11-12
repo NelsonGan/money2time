@@ -1607,6 +1607,7 @@ function AddTransactionDetailedRouteScreen({
       initialValues={route.params?.initialValues}
       openSplitBillOnMount={route.params?.openSplitBill}
       startInstalmentPlan={route.params?.startInstalmentPlan}
+      albumId={route.params?.albumId}
     />
   );
 }
@@ -2452,6 +2453,10 @@ function AlbumDetailRouteScreen({ route, navigation }: RootStackRouteProps<'Albu
       onAddTransactions={(albumId) => navigation.navigate('AddAlbumTransactions', { albumId })}
       onEditDetails={(albumId) => navigation.navigate('EditAlbumDetails', { albumId })}
       onOpenPeople={(albumId) => navigation.navigate('AlbumPeople', { albumId })}
+      onAddExpense={(albumId) =>
+        // Back on the album afterwards, where the new bill shows.
+        navigation.navigate('AddTransactionDetailed', { albumId, keepCurrentTab: true })
+      }
       onOpenPerson={(personKey, albumId) =>
         navigation.navigate('SettleUpPerson', { personKey, albumId })
       }
