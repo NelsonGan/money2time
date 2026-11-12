@@ -171,7 +171,7 @@ export function AlbumBalances({
     <PersonAvatar
       name={isSelf ? I18n.t('transactions.editor.split.me_label') : name}
       partyKey={isSelf ? null : debtPartyKey(name)}
-      size={30}
+      size={26}
     />
   );
   const shown = (name: string | null) => name ?? I18n.t('transactions.settleUp.someone');
@@ -197,25 +197,26 @@ export function AlbumBalances({
         accessibilityRole={row.onPress ? 'button' : 'text'}
         accessibilityLabel={`${sentence}, ${row.amountText}`}
         className={cn(
-          'flex-row items-center gap-3 px-4 py-3 active:opacity-70',
+          'flex-row items-center gap-2.5 px-4 py-3 active:opacity-70',
           index > 0 ? 'border-t border-border/15' : '',
         )}
       >
-        <View className="flex-row items-center gap-1.5">
+        <View className="flex-row items-center gap-1">
           {avatar(row.fromName, row.mine === 'owe')}
-          <ArrowRight size={14} color={colors.textMuted} />
+          <ArrowRight size={12} color={colors.textMuted} />
           {avatar(row.toName, row.mine === 'owed')}
         </View>
         <Text
-          variant={row.mine ? 'bodyStrong' : 'body'}
+          variant="caption"
           tone={row.mine ? undefined : 'muted'}
-          numberOfLines={1}
+          // Small, and on two lines when it must: long names stay whole.
+          numberOfLines={2}
           className="flex-1"
         >
           {sentence}
         </Text>
         <Text
-          variant="bodyStrong"
+          variant="caption"
           className={
             row.mine === 'owed'
               ? 'text-success'
@@ -227,8 +228,8 @@ export function AlbumBalances({
           {row.amountText}
         </Text>
         {/* Kept as a gap on rows that open nothing, so the amounts line up. */}
-        <View className="w-[18px]">
-          {row.onPress ? <ChevronRight size={18} color={colors.textMuted} /> : null}
+        <View className="w-4">
+          {row.onPress ? <ChevronRight size={16} color={colors.textMuted} /> : null}
         </View>
       </Pressable>
     );
