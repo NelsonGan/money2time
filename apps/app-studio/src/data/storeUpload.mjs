@@ -18,8 +18,10 @@ import {
   IOS_LOCALE_MAP, ANDROID_LOCALE_MAP,
   IOS_DEVICE_TYPE, ANDROID_IMAGE_TYPES,
   ANDROID_MAX_SCREENSHOTS, ANDROID_MAX_IMAGES, IOS_MAX_SCREENSHOTS,
-  ANDROID_ICON_FILE,
+  ANDROID_ICON_FILE, UPLOAD_CONCURRENCY,
 } from './storeLocales.mjs';
+
+export { UPLOAD_CONCURRENCY };
 
 const MAX_BUFFER = 32 * 1024 * 1024;
 
@@ -93,6 +95,49 @@ export async function androidReady() {
   }
 
   return { ok: true, detail: `gplay profile "${wanted ?? res.json?.profile ?? profiles[0].name}"` };
+}
+
+// ── Concurrency ──────────────────────────────────────────────────────────────
+
+/**
+ * Run `fn` on every item, at most `limit` at once (`UPLOAD_CONCURRENCY`, from
+ * `storeLocales.mjs`, is the stores' limit). Items finish in any order. If one
+ * throws, no new item starts, the ones already running finish, and then the
+ * first error is thrown: a store upload abandoned mid-way leaves a listing
+ * half replaced.
+ */
+export async function forEachLimit(items, limit, fn) {
+  if (!Number.isInteger(limit) || limit < 1) {
+    throw new Error(`forEachLimit needs a positive whole limit, got ${limit}`);
+  }
+  let next = 0;
+  let failure = null;
+  const worker = async () => {
+    while (!failure && next < items.length) {
+      const i = next++;
+      try {
+        await fn(items[i], i);
+      } catch (err) {
+        failure ??= { err };
+      }
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
+  if (failure) throw failure.err;
+}
+
+/**
+ * The `--concurrency` a script was given, or `UPLOAD_CONCURRENCY` when it was
+ * not. A value that is not a positive whole number is refused rather than
+ * quietly replaced: it was usually typed to go slower.
+ */
+export function parseConcurrency(value) {
+  if (value === undefined) return UPLOAD_CONCURRENCY;
+  const n = Number(value);
+  if (!Number.isInteger(n) || n < 1) {
+    throw new Error(`--concurrency must be a whole number of at least 1, got "${value}"`);
+  }
+  return n;
 }
 
 // ── Staging ──────────────────────────────────────────────────────────────────

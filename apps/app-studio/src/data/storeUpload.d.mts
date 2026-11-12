@@ -94,6 +94,14 @@ export declare function briefError(res: CliResult): string;
 export declare function iosReady(): Promise<Readiness>;
 export declare function androidReady(): Promise<Readiness>;
 
+export declare const UPLOAD_CONCURRENCY: number;
+export declare function forEachLimit<T>(
+  items: T[],
+  limit: number,
+  fn: (item: T, index: number) => Promise<void>,
+): Promise<void>;
+export declare function parseConcurrency(value: string | undefined): number;
+
 export declare function stageLocale(root: string, locale: string, screenshots: Screenshot[]): string;
 export declare function sortedPngs(dir: string): string[];
 

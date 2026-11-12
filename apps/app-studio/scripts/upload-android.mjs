@@ -3,13 +3,14 @@
  * upload-android.mjs
  * Uploads exported screenshots to Google Play via the `gplay` CLI.
  *
- *   node scripts/upload-android.mjs --dir ./money2time-screenshots-all [--device phone|tablet|feature] [--dry-run]
+ *   node scripts/upload-android.mjs --dir ./money2time-screenshots-all [--device phone|tablet|feature] [--concurrency 6] [--dry-run]
  *   node scripts/upload-android.mjs --device icon [--file <png>] [--dry-run]
  *
  * `--dir` holds one folder per locale, which is what "Export All Locales"
  * unzips to. Everything goes into a single Play edit and commits once, so a
  * failure part-way through leaves the listing untouched rather than half
- * updated.
+ * updated. Locales upload into that edit six at a time, like the Studio's
+ * Upload to Store.
  *
  * `--device icon` is the odd one: there is no per-locale artwork to walk, just
  * the one file in the repo, written to every listing Play holds.
@@ -25,7 +26,7 @@ import path from 'path';
 import {
   androidReady, androidEditCreate, androidEditCommit, androidEditDelete,
   uploadAndroidLocale, uploadAndroidIcon, androidListingLocales, androidIconPath,
-  ANDROID_LOCALE_MAP,
+  forEachLimit, parseConcurrency, ANDROID_LOCALE_MAP,
 } from '../src/data/storeUpload.mjs';
 
 // Next reads .env.local on its own; a plain node script has to be told. The
@@ -44,6 +45,13 @@ const device = getArg('--device', 'phone');
  * uncommitted edit never reaches the store.
  */
 const dryRun = args.includes('--dry-run');
+let concurrency;
+try {
+  concurrency = parseConcurrency(getArg('--concurrency', undefined));
+} catch (err) {
+  console.error(`\n❌ ${err.message}\n`);
+  process.exit(1);
+}
 
 const ready = await androidReady();
 if (!ready.ok) {
@@ -82,23 +90,34 @@ try {
       }
     }
   } else {
-  for (const ourLocale of Object.keys(ANDROID_LOCALE_MAP)) {
+  await forEachLimit(Object.keys(ANDROID_LOCALE_MAP), concurrency, async (ourLocale) => {
     const dir = path.join(screenshotsDir, ourLocale);
-    if (!fs.existsSync(dir)) { console.log(`⚠  No folder for "${ourLocale}", skipping`); continue; }
+    // Buffered so parallel locales do not interleave their lines.
+    const lines = [];
+    try {
+      if (!fs.existsSync(dir)) { console.log(`⚠  No folder for "${ourLocale}", skipping`); return; }
+      const pngs = fs.readdirSync(dir).filter(f => f.toLowerCase().endsWith('.png'));
+      if (!pngs.length) { console.log(`⚠  Empty folder for "${ourLocale}", skipping`); return; }
+      lines.push(`📂 ${ourLocale}  (${pngs.length} screenshots)`);
 
-    const pngs = fs.readdirSync(dir).filter(f => f.toLowerCase().endsWith('.png'));
-    if (!pngs.length) { console.log(`⚠  Empty folder for "${ourLocale}", skipping`); continue; }
-
-    console.log(`📂 ${ourLocale}  (${pngs.length} screenshots)`);
-
-    const result = await uploadAndroidLocale({
-      device, locale: ourLocale, dir, editId, log: (line) => console.log(line),
-    });
-    if (result.skipped) { console.log(`   ⚠  ${result.reason}`); continue; }
-    const where = result.galleries.length > 1 ? ` → ${result.galleries.join(' + ')}` : '';
-    for (const playLocale of result.uploaded) console.log(`   ✓ ${playLocale} (${result.count})${where}`);
-    for (const err of result.errors) { failures++; console.log(`   ✗ ${err}`); }
-  }
+      const result = await uploadAndroidLocale({
+        device, locale: ourLocale, dir, editId, log: (line) => lines.push(line),
+      });
+      if (result.skipped) lines.push(`   ⚠  ${result.reason}`);
+      else {
+        const where = result.galleries.length > 1 ? ` → ${result.galleries.join(' + ')}` : '';
+        for (const playLocale of result.uploaded) lines.push(`   ✓ ${playLocale} (${result.count})${where}`);
+        for (const err of result.errors) { failures++; lines.push(`   ✗ ${err}`); }
+      }
+    } catch (err) {
+      // One locale throwing must not abandon the others mid-upload; the edit
+      // is discarded below once every locale has finished.
+      failures++;
+      if (!lines.length) lines.push(`📂 ${ourLocale}`);
+      lines.push(`   ✗ ${err.message}`);
+    }
+    console.log(lines.join('\n'));
+  });
   }
 
   if (failures) {

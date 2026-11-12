@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 import type { ExportDeviceType } from '../utils/export';
 import { isCreativePlacement } from '../data/appStoreCreative';
-import { IOS_LOCALE_MAP } from '../data/storeLocales.mjs';
+import { IOS_LOCALE_MAP, UPLOAD_CONCURRENCY } from '../data/storeLocales.mjs';
 import {
   checkServer, captureCurrentView,
   uploadIOSLocale, startAndroidSession, uploadAndroidLocale, commitAndroidSession,
@@ -14,7 +14,7 @@ import type { ServerStatus, UploadDevice } from '../utils/upload';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-const MAX_UPLOAD_CONCURRENCY = 6;
+const MAX_UPLOAD_CONCURRENCY = UPLOAD_CONCURRENCY;
 
 type Platform = 'ios' | 'android';
 type Scope    = 'current' | 'all';
