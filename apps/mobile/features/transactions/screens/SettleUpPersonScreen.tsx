@@ -1,4 +1,4 @@
-import { Send } from 'lucide-react-native';
+import { Check, Send } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 
@@ -11,8 +11,6 @@ import {
 import {
   partPaidBullet,
   SettleUpSectionHeader,
-  SettleUpShareList,
-  type SettleUpShareSection,
 } from '~/features/transactions/components/SettleUpShareList';
 import type {
   ReceiptContent,
@@ -22,7 +20,10 @@ import { SplitReceiptShareModal } from '~/features/transactions/components/Split
 import { avatarColor, personInitial } from '~/features/transactions/lib/personAvatar';
 import { personItemNames } from '~/features/transactions/lib/receiptSplitShare';
 import { personBalanceState } from '~/features/transactions/lib/settleUp';
-import { buildSettleUpShareCards } from '~/features/transactions/lib/settleUpDateGroups';
+import {
+  buildSettleUpShareCards,
+  type SettleUpShareCard,
+} from '~/features/transactions/lib/settleUpDateGroups';
 import { useSettleUpSummary } from '~/features/transactions/lib/useSettleUpSummary';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -30,12 +31,14 @@ import { triggerHaptic } from '~/services/haptics';
 import type { PersonDebt, PersonDebtBill } from '~/types';
 import { cn } from '~/utils';
 import { currencySymbolForCode } from '~/utils/currency';
-import { formatCurrency, formatShortDate } from '~/utils/formatters';
+import { formatCurrency, formatShortDate, normalizeMoneyAmount } from '~/utils/formatters';
 
 interface SettleUpPersonScreenProps {
   personKey: string;
   onBack: () => void;
   onOpenSettings: () => void;
+  /** Open one bill, where its shares are marked paid, undone or removed. */
+  onOpenTransaction: (transactionId: string) => void;
 }
 
 /**
@@ -55,10 +58,16 @@ function netAmountText(
   return person.netByCurrency.length > 1 ? `≈ ${reporting}` : reporting;
 }
 
+/**
+ * One person's balance: the net between the user and them, then the bills
+ * that make it up as a plain ledger, green for what they owe and red for what
+ * the user owes. A row opens its bill; Settle up clears everything at once.
+ */
 export function SettleUpPersonScreen({
   personKey,
   onBack,
   onOpenSettings,
+  onOpenTransaction,
 }: SettleUpPersonScreenProps) {
   const themeColors = useThemeColors();
   const { settings, getReceiptSplitForTransaction, settleUpWithPerson } = useApp();
@@ -72,51 +81,17 @@ export function SettleUpPersonScreen({
     () => summary.people.find((p) => p.key === personKey) ?? null,
     [summary.people, personKey],
   );
-  const locale = settings.locale ?? I18n.locale ?? 'en';
   const state = person ? personBalanceState(person) : 'settled';
 
   // Blank while the person is missing (the last share was removed) so the header
   // doesn't flash a fallback name for the one frame before the screen pops.
   const title = person ? (person.name ?? `${I18n.t('transactions.settleUp.someone')}`) : '';
 
-  // What is open, by which way it is owed, then everything already settled.
-  const sections = useMemo<SettleUpShareSection<PersonDebtBill>[]>(() => {
-    if (!person) return [];
-    const { owed, settled } = buildSettleUpShareCards(person.bills);
-    const owesYou = owed.filter((card) => card.share.direction === 'owes_you');
-    const youOwe = owed.filter((card) => card.share.direction === 'you_owe');
-    const result: SettleUpShareSection<PersonDebtBill>[] = [];
-    if (owesYou.length > 0) {
-      result.push({
-        key: 'owes_you',
-        header: (
-          <SettleUpSectionHeader
-            title={I18n.t('transactions.settleUp.section_owes_you', { name: title })}
-          />
-        ),
-        cards: owesYou,
-      });
-    }
-    if (youOwe.length > 0) {
-      result.push({
-        key: 'you_owe',
-        header: (
-          <SettleUpSectionHeader
-            title={I18n.t('transactions.settleUp.section_you_owe', { name: title })}
-          />
-        ),
-        cards: youOwe,
-      });
-    }
-    if (settled.length > 0) {
-      result.push({
-        key: 'settled',
-        header: <SettleUpSectionHeader title={I18n.t('transactions.settleUp.section_paid')} />,
-        cards: settled,
-      });
-    }
-    return result;
-  }, [person, title]);
+  // One row per share: what is still open, then what is paid back.
+  const { owed, settled } = useMemo(
+    () => (person ? buildSettleUpShareCards(person.bills) : { owed: [], settled: [] }),
+    [person],
+  );
 
   // A paid-only person remains in the summary; leave only after all shares are removed.
   useEffect(() => {
@@ -137,20 +112,12 @@ export function SettleUpPersonScreen({
     setShareVisible(true);
   }, []);
 
-  // How the net came about, shown only when shares go both ways.
-  const breakdown =
-    person && person.totalReporting > 0 && person.owedReporting > 0
-      ? I18n.t('transactions.settleUp.net_breakdown', {
-          name: title,
-          owes: formatReporting(person.totalReporting),
-          owe: formatReporting(person.owedReporting),
-        })
-      : null;
-
   const settleContent = useMemo<SettleUpConfirmContent | null>(() => {
     if (!person || !settleVisible) return null;
     return {
-      title: I18n.t('transactions.settleUp.settle_with', { name: title }),
+      personKey: person.key,
+      personName: person.name,
+      flow: state === 'owes_you' ? 'receive' : state === 'you_owe' ? 'pay' : 'even',
       caption:
         state === 'owes_you'
           ? I18n.t('transactions.settleUp.person_pays_you', { name: title })
@@ -158,11 +125,18 @@ export function SettleUpPersonScreen({
             ? I18n.t('transactions.settleUp.you_pay_person', { name: title })
             : I18n.t('transactions.settleUp.even_caption'),
       amountText: netAmountText(person, formatNative, formatReporting),
-      flow: state === 'owes_you' ? 'receive' : state === 'you_owe' ? 'pay' : 'even',
-      detail: breakdown,
+      // How the net came about, only when shares go both ways.
+      detail:
+        person.totalReporting > 0 && person.owedReporting > 0
+          ? I18n.t('transactions.settleUp.net_breakdown', {
+              name: title,
+              owes: formatReporting(person.totalReporting),
+              owe: formatReporting(person.owedReporting),
+            })
+          : null,
       confirmLabel: I18n.t('transactions.settleUp.settle_up'),
     };
-  }, [person, settleVisible, title, state, formatNative, formatReporting, breakdown]);
+  }, [person, settleVisible, title, state, formatNative, formatReporting]);
 
   // Receipt: title is the person's name, one line per bill with its date. A
   // bill saved through Split by Item lists the person's items as bullets, and
@@ -200,6 +174,76 @@ export function SettleUpPersonScreen({
     };
   }, [person, title, formatNative, formatReporting, getReceiptSplitForTransaction]);
 
+  const renderRow = (
+    { share, payments }: SettleUpShareCard<PersonDebtBill>,
+    index: number,
+    paid: boolean,
+  ) => {
+    const youOwe = share.direction === 'you_owe';
+    const whoPaid = youOwe
+      ? I18n.t('transactions.settleUp.person_paid', { name: title })
+      : I18n.t('transactions.settleUp.you_paid');
+    // A share paid back shows what was paid; one still open, what is left.
+    const amount = paid
+      ? normalizeMoneyAmount(payments.reduce((sum, payment) => sum + payment.amount, 0))
+      : share.amount;
+    const caption = paid
+      ? I18n.t(youOwe ? 'transactions.settleUp.you_paid_on' : 'transactions.settleUp.paid_on', {
+          date: share.paidAt ? formatShortDate(share.paidAt) : '',
+        })
+      : [
+          formatShortDate(share.date),
+          whoPaid,
+          share.sharePaid > 0
+            ? I18n.t('transactions.settleUp.share_paid', {
+                paid: formatNative(share.sharePaid, share.currency),
+              })
+            : null,
+        ]
+          .filter(Boolean)
+          .join(' · ');
+    return (
+      <Pressable
+        key={share.splitId}
+        onPress={() => {
+          void triggerHaptic('selection');
+          onOpenTransaction(share.transactionId);
+        }}
+        accessibilityRole="button"
+        className={cn(
+          'flex-row items-center gap-3 px-4 py-3 active:opacity-70',
+          index > 0 ? 'border-t border-border/15' : '',
+        )}
+      >
+        <View className="h-10 w-10 items-center justify-center rounded-full bg-secondary/50">
+          <CategoryEmoji icon={share.categoryIcon} size={22} className="text-[19px]" />
+          {paid ? (
+            <View className="absolute -bottom-1 -right-1 h-4 w-4 items-center justify-center rounded-full border-2 border-background bg-success">
+              <Check size={8} strokeWidth={3.5} color={themeColors.background} />
+            </View>
+          ) : null}
+        </View>
+        <View className="flex-1">
+          <Text variant="bodyStrong" tone={paid ? 'muted' : undefined} numberOfLines={1}>
+            {share.note?.trim() ||
+              share.categoryName ||
+              I18n.t('transactions.settleUp.untitled_bill')}
+          </Text>
+          <Text variant="caption" tone="muted" numberOfLines={1}>
+            {caption}
+          </Text>
+        </View>
+        <Text
+          variant="bodyStrong"
+          className={paid ? 'text-muted-foreground' : youOwe ? 'text-destructive' : 'text-success'}
+        >
+          {paid ? '' : youOwe ? '−' : '+'}
+          {formatNative(amount, share.currency)}
+        </Text>
+      </Pressable>
+    );
+  };
+
   return (
     <SettingsPageLayout>
       <SettingsHeader className="px-5 pt-5 pb-3" onBack={onBack} title={title} />
@@ -222,13 +266,15 @@ export function SettleUpPersonScreen({
                 </Text>
               </View>
               <Text variant="caption" tone="muted" className="mt-3 text-center">
-                {state === 'owes_you'
-                  ? I18n.t('transactions.settleUp.section_owes_you', { name: title })
-                  : state === 'you_owe'
-                    ? I18n.t('transactions.settleUp.section_you_owe', { name: title })
-                    : state === 'even'
-                      ? I18n.t('transactions.settleUp.even_caption')
-                      : I18n.t('transactions.settleUp.settled_up')}
+                {I18n.t(
+                  state === 'owes_you'
+                    ? 'transactions.settleUp.person_owes_label'
+                    : state === 'you_owe'
+                      ? 'transactions.settleUp.you_owe_tag'
+                      : state === 'even'
+                        ? 'transactions.settleUp.hero_even'
+                        : 'transactions.settleUp.settled_up',
+                )}
               </Text>
               {state === 'settled' ? null : (
                 <Text
@@ -245,27 +291,22 @@ export function SettleUpPersonScreen({
                   {netAmountText(person, formatNative, formatReporting)}
                 </Text>
               )}
-              {breakdown ? (
-                <Text variant="caption" tone="muted" className="mt-1 text-center">
-                  {breakdown}
-                </Text>
-              ) : null}
             </View>
 
-            <SettleUpShareList
-              sections={sections}
-              locale={locale}
-              renderLeading={(bill) => (
-                <CategoryEmoji icon={bill.categoryIcon} size={22} className="text-[19px]" />
-              )}
-              label={(bill) =>
-                bill.note?.trim() ||
-                bill.categoryName ||
-                I18n.t('transactions.settleUp.untitled_bill')
-              }
-              caption={(bill) => formatShortDate(bill.date)}
-              tagYouOwe={false}
-            />
+            {owed.length > 0 ? (
+              <View className="mt-4 overflow-hidden rounded-2xl border border-border/25 bg-card/60">
+                {owed.map((card, index) => renderRow(card, index, false))}
+              </View>
+            ) : null}
+
+            {settled.length > 0 ? (
+              <View className="mt-3">
+                <SettleUpSectionHeader title={I18n.t('transactions.settleUp.section_paid')} />
+                <View className="mt-1 overflow-hidden rounded-2xl border border-border/15 bg-secondary/20">
+                  {settled.map((card, index) => renderRow(card, index, true))}
+                </View>
+              </View>
+            ) : null}
           </ScrollView>
 
           {person.unpaidBillCount > 0 ? (

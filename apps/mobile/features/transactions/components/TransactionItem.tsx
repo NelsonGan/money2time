@@ -1,4 +1,4 @@
-import { ArrowRight, CalendarRange, GripVertical, Undo2 } from 'lucide-react-native';
+import { ArrowRight, CalendarRange, GripVertical, Undo2, UserRound } from 'lucide-react-native';
 import React, { memo, useEffect } from 'react';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
@@ -223,12 +223,16 @@ export function TransactionAccountBadge({
   label,
   compact,
   className,
+  person = false,
 }: {
   account?: Account;
   label: string;
   compact: boolean;
   className?: string;
+  /** The pill names a person (the friend who paid the bill), not an account. */
+  person?: boolean;
 }) {
+  const themeColors = useThemeColors();
   const labelSizeClass = compact ? 'text-[10px] leading-[12px]' : 'text-[11px] leading-[14px]';
   return (
     <View
@@ -237,12 +241,18 @@ export function TransactionAccountBadge({
         className,
       )}
     >
-      <AccountLogo
-        logoId={account?.logoId}
-        type={account?.type}
-        goalEmoji={account?.goalEmoji}
-        size={compact ? 12 : 14}
-      />
+      {person ? (
+        <View className="pl-0.5">
+          <UserRound size={compact ? 10 : 12} color={themeColors.primary} />
+        </View>
+      ) : (
+        <AccountLogo
+          logoId={account?.logoId}
+          type={account?.type}
+          goalEmoji={account?.goalEmoji}
+          size={compact ? 12 : 14}
+        />
+      )}
       {/* Sized from a hidden copy, drawn over it a little wider: inside the
           long-range month pagers a box that hugs its text can come out a
           sliver narrower than the text, which ellipsized names that fit
@@ -568,6 +578,7 @@ const TransactionItemBody = memo(
                 account={account}
                 label={accountSubtitleLabel}
                 compact={compact}
+                person={!!friendPayer}
                 className={compact ? 'min-w-[40px] shrink' : 'min-w-[44px] shrink'}
               />
               <InstalmentPill label={instalmentLabel} compact={compact} />
@@ -577,6 +588,7 @@ const TransactionItemBody = memo(
               account={account}
               label={accountSubtitleLabel}
               compact={compact}
+              person={!!friendPayer}
               className={accountBadgeMarginClassName}
             />
           ) : instalmentLabel ? (

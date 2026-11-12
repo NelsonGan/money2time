@@ -183,6 +183,10 @@ export function SettleUpScreen({
   const hasOpenBalances = summary.billCount > 0;
   const netState =
     summary.netReporting >= 0.005 ? 'owed' : summary.netReporting <= -0.005 ? 'owe' : 'even';
+  // Both sides are shown only when there are two: with everyone owing the same
+  // way the net above already is that side, and a second copy of it (beside a
+  // zero) is noise.
+  const bothWays = summary.owedToYouReporting > 0 && summary.youOweReporting > 0;
   const renderHero = () => (
     <View className="items-center px-4 pt-4 pb-4">
       <Text variant="caption" tone="muted">
@@ -196,42 +200,34 @@ export function SettleUpScreen({
                 : 'transactions.settleUp.hero_even',
         )}
       </Text>
-      <Text variant="title" className="mt-1 text-center">
+      <Text
+        variant="title"
+        className={cn(
+          'mt-1 text-center',
+          hasOpenBalances && netState === 'owed'
+            ? 'text-success'
+            : hasOpenBalances && netState === 'owe'
+              ? 'text-destructive'
+              : '',
+        )}
+      >
         {formatReporting(Math.abs(summary.netReporting))}
       </Text>
-      {hasOpenBalances ? (
+      {bothWays ? (
         <View className="mt-3 flex-row gap-2.5 self-stretch">
-          <View
-            className={cn(
-              'flex-1 items-center rounded-2xl px-3 py-2.5',
-              summary.owedToYouReporting > 0 ? 'bg-success/10' : 'bg-secondary/40',
-            )}
-          >
+          <View className="flex-1 items-center rounded-2xl bg-success/10 px-3 py-2.5">
             <Text variant="caption" tone="muted" numberOfLines={1}>
               {I18n.t('transactions.settleUp.owed_to_you')}
             </Text>
-            <Text
-              variant="bodyStrong"
-              className={summary.owedToYouReporting > 0 ? 'text-success' : 'text-muted-foreground'}
-              numberOfLines={1}
-            >
+            <Text variant="bodyStrong" className="text-success" numberOfLines={1}>
               {formatReporting(summary.owedToYouReporting)}
             </Text>
           </View>
-          <View
-            className={cn(
-              'flex-1 items-center rounded-2xl px-3 py-2.5',
-              summary.youOweReporting > 0 ? 'bg-destructive/10' : 'bg-secondary/40',
-            )}
-          >
+          <View className="flex-1 items-center rounded-2xl bg-destructive/10 px-3 py-2.5">
             <Text variant="caption" tone="muted" numberOfLines={1}>
               {I18n.t('transactions.settleUp.you_owe_tag')}
             </Text>
-            <Text
-              variant="bodyStrong"
-              className={summary.youOweReporting > 0 ? 'text-destructive' : 'text-muted-foreground'}
-              numberOfLines={1}
-            >
+            <Text variant="bodyStrong" className="text-destructive" numberOfLines={1}>
               {formatReporting(summary.youOweReporting)}
             </Text>
           </View>
@@ -344,13 +340,7 @@ export function SettleUpScreen({
               ? I18n.t('transactions.settleUp.person_paid', {
                   name: bill.paidBy.name ?? I18n.t('transactions.settleUp.someone'),
                 })
-              : bill.unpaidSplitCount === 1
-                ? I18n.t('transactions.settleUp.people_owe_one')
-                : bill.unpaidSplitCount > 1
-                  ? I18n.t('transactions.settleUp.people_owe_other', {
-                      count: bill.unpaidSplitCount,
-                    })
-                  : I18n.t('transactions.settleUp.section_paid')}
+              : I18n.t('transactions.settleUp.you_paid')}
           </Text>
         </View>
         <View className="items-end">

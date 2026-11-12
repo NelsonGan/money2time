@@ -709,6 +709,26 @@ export function SplitBillModal({
   // Whether the sum bar shows its "all good" state (drives the check + hint).
   const sumComplete = itemized ? canDone : sumMatches;
 
+  // Once the rows add up, the bar says what the split means for the user in
+  // one line instead of repeating the total above: what they owe the friend
+  // who paid, or what comes back to them from a bill they paid.
+  const settlementLine = !sumComplete
+    ? null
+    : friendPaid
+      ? payerRow?.settled
+        ? I18n.t('transactions.settleUp.you_paid_back', {
+            name: payerRow.personName.trim() || I18n.t('transactions.settleUp.someone'),
+          })
+        : selfAmount > 0
+          ? I18n.t('transactions.editor.split.you_owe_summary', {
+              name: payerRow?.personName.trim() || I18n.t('transactions.settleUp.someone'),
+              amount: formatMoney(selfAmount),
+            })
+          : I18n.t('transactions.editor.split.you_owe_nothing')
+      : friendsOwe > 0
+        ? I18n.t('transactions.editor.split.get_back_hint', { amount: formatMoney(friendsOwe) })
+        : null;
+
   // The row whose "paid back to" account is being chosen after the user tapped
   // Mark paid on the swipe actions. Selecting an account settles that row.
   const accountPickerSplit = useMemo(() => {
@@ -1158,49 +1178,19 @@ export function SplitBillModal({
           <View className="px-5 pt-3 pb-2 items-center">
             <View className="flex-row items-center gap-2">
               <Text variant="bodyStrong" className="shrink text-center text-foreground">
-                {friendPaid && sumComplete
-                  ? payerRow?.settled
-                    ? I18n.t('transactions.settleUp.you_paid_back', {
-                        name: payerRow.personName.trim() || I18n.t('transactions.settleUp.someone'),
-                      })
-                    : selfAmount > 0
-                      ? I18n.t('transactions.editor.split.you_owe_summary', {
-                          name:
-                            payerRow?.personName.trim() || I18n.t('transactions.settleUp.someone'),
-                          amount: formatMoney(selfAmount),
-                        })
-                      : I18n.t('transactions.editor.split.you_owe_nothing')
-                  : itemized
+                {settlementLine ??
+                  (itemized
                     ? I18n.t('transactions.editor.split.itemized_total', {
                         sum: formatMoney(unpaidSum),
                       })
                     : I18n.t('transactions.editor.split.sum_match', {
                         sum: formatMoney(unpaidSum),
                         total: formatMoney(total),
-                      })}
+                      }))}
               </Text>
               {sumComplete ? <Check size={16} color={themeColors.success} /> : null}
             </View>
-            {sumComplete ? (
-              // What the split means for the user, in one line: a bill they
-              // paid comes back from the friends, a bill a friend paid is owed.
-              friendPaid ? (
-                selfAmount > 0 ? (
-                  <Text variant="caption" tone="muted" className="mt-0.5 text-center">
-                    {I18n.t('transactions.editor.split.sum_match', {
-                      sum: formatMoney(unpaidSum),
-                      total: formatMoney(itemized ? unpaidSum : total),
-                    })}
-                  </Text>
-                ) : null
-              ) : friendsOwe > 0 ? (
-                <Text variant="caption" tone="muted" className="mt-0.5 text-center">
-                  {I18n.t('transactions.editor.split.get_back_hint', {
-                    amount: formatMoney(friendsOwe),
-                  })}
-                </Text>
-              ) : null
-            ) : itemized ? (
+            {sumComplete ? null : itemized ? (
               <Text variant="caption" tone="muted" className="mt-0.5">
                 {I18n.t('transactions.editor.split.itemized_total_zero_hint')}
               </Text>

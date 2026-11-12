@@ -1,13 +1,9 @@
-import { Check, ChevronDown, ChevronUp, RotateCcw, Trash2 } from 'lucide-react-native';
+import { Check, ChevronDown, ChevronUp, Trash2 } from 'lucide-react-native';
 import React, { type ReactNode, useCallback, useState } from 'react';
 import { Alert, Pressable, View } from 'react-native';
 
 import { AccountLogo, AccountPickerSheet, Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
-import {
-  type SettleUpConfirmContent,
-  SettleUpConfirmSheet,
-} from '~/features/transactions/components/SettleUpConfirmSheet';
 import {
   SplitPaymentSheet,
   type SplitPaymentTarget,
@@ -16,7 +12,6 @@ import type { SettleUpShareCard } from '~/features/transactions/lib/settleUpDate
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import type { DebtDirection } from '~/types';
 import { currencySymbolForCode } from '~/utils/currency';
 import { formatDayHeaderParts } from '~/utils/dayHeader';
 import { dayKeyFromIsoLocal, formatCurrency, normalizeMoneyAmount } from '~/utils/formatters';
@@ -24,8 +19,6 @@ import { dayKeyFromIsoLocal, formatCurrency, normalizeMoneyAmount } from '~/util
 /** One person's share of one bill, as both settle-up detail screens list it. */
 interface SettleUpShare {
   splitId: string;
-  /** `you_owe` for the user's share of a bill a friend paid. */
-  direction: DebtDirection;
   paidAt: string | null;
   paybackAccountId: string | null;
   billHasAccount?: boolean;
@@ -50,13 +43,6 @@ interface SettleUpShareListProps<T extends SettleUpShare> {
   /** The 40pt disc at the start of a card (a category icon, or a person's initial). */
   renderLeading: (share: T) => ReactNode;
   label: (share: T) => string;
-  /** A muted line under the label of a share still owed (the bill's date). */
-  caption?: (share: T) => string | null;
-  /**
-   * Tag a share the user owes "You owe". On by default; off where a heading
-   * already says so (the person page's "You owe Aisha" section).
-   */
-  tagYouOwe?: boolean;
 }
 
 /** "Paid RM300 of RM1,000" under a receipt line whose share is paid in parts. */
@@ -83,24 +69,18 @@ export function SettleUpSectionHeader({ title }: { title: string }) {
 }
 
 /**
- * The share cards on the Balances person and bill pages, one card per share
+ * The share cards on the Settle Up person and bill pages, one card per share
  * with its payments in it. A share still owed carries its payback account
  * (opens the account picker), its payments under a progress bar, Remove, and
  * Mark paid, which opens `SplitPaymentSheet` on the full amount (less records
  * a part payment). A share paid back in full is a compact muted card; one
  * paid in parts opens to list them.
- *
- * A share the user owes (`you_owe`, a bill a friend paid) is the mirror: its
- * card is tagged You owe, Mark paid asks only which account it was paid from
- * (`SettleUpConfirmSheet`; it is paid in full), and once paid the card offers Undo.
  */
 export function SettleUpShareList<T extends SettleUpShare>({
   sections,
   locale,
   renderLeading,
   label,
-  caption,
-  tagYouOwe = true,
 }: SettleUpShareListProps<T>) {
   const themeColors = useThemeColors();
   const {
@@ -110,11 +90,7 @@ export function SettleUpShareList<T extends SettleUpShare>({
     recordSplitPayment,
     updateSplitPaybackAccount,
     deleteSplit,
-    payBackPayer,
-    undoPayBackPayer,
   } = useApp();
-  // The share the user is about to pay a friend back for.
-  const [payBackShare, setPayBackShare] = useState<T | null>(null);
   const [pickerShare, setPickerShare] = useState<T | null>(null);
   const [paymentTarget, setPaymentTarget] = useState<SplitPaymentTarget | null>(null);
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(() => new Set());
@@ -149,40 +125,6 @@ export function SettleUpShareList<T extends SettleUpShare>({
     },
     [deleteSplit],
   );
-
-  const handleUndoPayBack = useCallback(
-    (share: T) => {
-      void triggerHaptic('warning');
-      Alert.alert(
-        I18n.t('transactions.settleUp.undo_payment_title'),
-        I18n.t('transactions.settleUp.undo_payment_message', {
-          amount: formatCurrency(share.amount, currencySymbolForCode(share.currency)),
-        }),
-        [
-          { text: I18n.t('common.cancel'), style: 'cancel' },
-          {
-            text: I18n.t('transactions.editor.split.undo_paid'),
-            style: 'destructive',
-            onPress: () => undoPayBackPayer(share.splitId),
-          },
-        ],
-      );
-    },
-    [undoPayBackPayer],
-  );
-
-  const payBackContent: SettleUpConfirmContent | null = payBackShare
-    ? {
-        title: I18n.t('transactions.settleUp.pay_back_title'),
-        caption: label(payBackShare),
-        amountText: formatCurrency(
-          payBackShare.amount,
-          currencySymbolForCode(payBackShare.currency),
-        ),
-        flow: 'pay',
-        confirmLabel: I18n.t('transactions.editor.split.mark_paid'),
-      }
-    : null;
 
   const toggleExpanded = useCallback((key: string) => {
     void triggerHaptic('selection');
@@ -222,103 +164,6 @@ export function SettleUpShareList<T extends SettleUpShare>({
     </View>
   );
 
-  // What the user owes a friend for a bill that friend paid: one tap to mark
-  // it paid, with nothing to remove (the bill itself is edited instead).
-  const renderYouOweCard = ({ share }: SettleUpShareCard<T>) => (
-    <View
-      key={share.splitId}
-      className="rounded-2xl border border-border/25 bg-card/60 px-4 pt-3.5 pb-2.5"
-    >
-      <View className="flex-row items-start gap-3">
-        <View className="h-10 w-10 items-center justify-center rounded-full bg-secondary/50">
-          {renderLeading(share)}
-        </View>
-        <View className="flex-1">
-          <Text variant="bodyStrong" numberOfLines={1}>
-            {label(share)}
-          </Text>
-          {caption?.(share) ? (
-            <Text variant="caption" tone="muted" numberOfLines={1}>
-              {caption(share)}
-            </Text>
-          ) : null}
-          {tagYouOwe ? (
-            <View className="mt-1 self-start rounded-full bg-destructive/10 px-2.5 py-1">
-              <Text variant="caption" className="font-medium text-destructive">
-                {I18n.t('transactions.settleUp.you_owe_tag')}
-              </Text>
-            </View>
-          ) : null}
-        </View>
-        <Text variant="bodyStrong" className="text-destructive">
-          {formatCurrency(share.amount, currencySymbolForCode(share.currency))}
-        </Text>
-      </View>
-      <View className="mt-2 flex-row items-center justify-end">
-        <Pressable
-          onPress={() => {
-            void triggerHaptic('selection');
-            setPayBackShare(share);
-          }}
-          hitSlop={8}
-          accessibilityRole="button"
-          className="flex-row items-center gap-1 rounded-full bg-success/15 px-3.5 py-2 active:opacity-70"
-        >
-          <Check size={14} color={themeColors.success} />
-          <Text variant="caption" className="font-medium text-success">
-            {I18n.t('transactions.editor.split.mark_paid')}
-          </Text>
-        </Pressable>
-      </View>
-    </View>
-  );
-
-  const renderYouPaidCard = ({ share }: SettleUpShareCard<T>) => {
-    const account = share.paybackAccountId ? getAccountById(share.paybackAccountId) : null;
-    const paidOn = I18n.t('transactions.settleUp.you_paid_on', {
-      date: share.paidAt ? dayLabel(share.paidAt) : '',
-    });
-    return (
-      <View
-        key={share.splitId}
-        className="rounded-2xl border border-border/15 bg-secondary/20 px-4 py-3"
-      >
-        <View className="flex-row items-center gap-3">
-          <View className="h-10 w-10 items-center justify-center rounded-full bg-secondary/50">
-            {renderLeading(share)}
-            <View className="absolute -bottom-1 -right-1 h-4 w-4 items-center justify-center rounded-full border-2 border-background bg-success">
-              <Check size={8} strokeWidth={3.5} color={themeColors.background} />
-            </View>
-          </View>
-          <View className="flex-1">
-            <Text variant="bodyStrong" numberOfLines={1}>
-              {label(share)}
-            </Text>
-            <Text variant="caption" tone="muted" numberOfLines={1}>
-              {account ? `${paidOn} · ${account.name}` : paidOn}
-            </Text>
-          </View>
-          <View className="items-end gap-1">
-            <Text variant="bodyStrong" tone="muted">
-              {formatCurrency(share.amount, currencySymbolForCode(share.currency))}
-            </Text>
-            <Pressable
-              onPress={() => handleUndoPayBack(share)}
-              hitSlop={8}
-              accessibilityRole="button"
-              className="flex-row items-center gap-1 active:opacity-60"
-            >
-              <RotateCcw size={11} color={themeColors.textMuted} />
-              <Text variant="caption" tone="muted">
-                {I18n.t('transactions.editor.split.undo_paid')}
-              </Text>
-            </Pressable>
-          </View>
-        </View>
-      </View>
-    );
-  };
-
   const renderOwedCard = ({ share, payments }: SettleUpShareCard<T>) => {
     const account = share.paybackAccountId ? getAccountById(share.paybackAccountId) : null;
     const symbol = currencySymbolForCode(share.currency);
@@ -342,11 +187,6 @@ export function SettleUpShareList<T extends SettleUpShare>({
             <Text variant="bodyStrong" numberOfLines={1}>
               {label(share)}
             </Text>
-            {caption?.(share) ? (
-              <Text variant="caption" tone="muted" numberOfLines={1}>
-                {caption(share)}
-              </Text>
-            ) : null}
             {/* A bill paid from no account moves no money on payback: no account to pick. */}
             {share.billHasAccount === false ? null : (
               <Pressable
@@ -373,9 +213,7 @@ export function SettleUpShareList<T extends SettleUpShare>({
             )}
           </View>
           <View className="items-end">
-            <Text variant="bodyStrong" className="text-success">
-              {formatCurrency(share.amount, symbol)}
-            </Text>
+            <Text variant="bodyStrong">{formatCurrency(share.amount, symbol)}</Text>
             {paidRatio !== null ? (
               <Text variant="caption" tone="muted">
                 {I18n.t('transactions.settleUp.share_of_total', {
@@ -508,13 +346,7 @@ export function SettleUpShareList<T extends SettleUpShare>({
           <View key={section.key} className="gap-2">
             {section.header}
             {section.cards.map((card) =>
-              card.share.direction === 'you_owe'
-                ? card.share.paidAt
-                  ? renderYouPaidCard(card)
-                  : renderYouOweCard(card)
-                : card.share.paidAt
-                  ? renderSettledCard(card)
-                  : renderOwedCard(card),
+              card.share.paidAt ? renderSettledCard(card) : renderOwedCard(card),
             )}
           </View>
         ))}
@@ -536,15 +368,6 @@ export function SettleUpShareList<T extends SettleUpShare>({
         target={paymentTarget}
         onClose={() => setPaymentTarget(null)}
         onRecord={handleRecordPayment}
-      />
-
-      <SettleUpConfirmSheet
-        content={payBackContent}
-        onClose={() => setPayBackShare(null)}
-        onConfirm={(accountId) => {
-          if (payBackShare) payBackPayer(payBackShare.splitId, { accountId });
-          setPayBackShare(null);
-        }}
       />
     </>
   );

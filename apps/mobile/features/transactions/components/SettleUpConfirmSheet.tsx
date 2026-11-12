@@ -6,6 +6,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AccountLogo, AccountPickerSheet, Button, Text } from '~/components/ui';
 import { ThemeModal } from '~/components/ui/theme-modal';
 import { useApp } from '~/context/AppContext';
+import {
+  type SettleUpFlow,
+  SettleUpFlowAvatars,
+} from '~/features/transactions/components/SettleUpFlowAvatars';
 import { pickPaybackAccountId } from '~/features/transactions/lib/entryDefaults';
 import { useSheetColumnStyle } from '~/hooks/useSheetColumnStyle';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -13,18 +17,17 @@ import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
 
-/** Which way the money goes: to the user, from the user, or neither. */
-export type SettleUpFlow = 'receive' | 'pay' | 'even';
-
 /** What a settlement is about to record, already worded and formatted. */
 export interface SettleUpConfirmContent {
-  title: string;
+  /** The other person: their avatar's colour and initial. */
+  personKey: string;
+  personName: string | null;
+  flow: SettleUpFlow;
   /** Who pays whom, in a line ("Aisha pays you"). */
   caption: string;
   /** The amount that changes hands. */
   amountText: string;
-  flow: SettleUpFlow;
-  /** How the amount came about, when shares go both ways; null to omit. */
+  /** A muted line under the amount (how a net came about, or the bill); null to omit. */
   detail?: string | null;
   confirmLabel: string;
 }
@@ -39,7 +42,8 @@ interface SettleUpConfirmSheetProps {
 /**
  * The one confirmation both Balances settlements share: Settle up with a
  * person (everything open, both ways) and paying a friend back for one bill.
- * The amount is fixed, so all it asks is which account the money moved through.
+ * It shows who pays whom as two avatars and an arrow, then the amount, which
+ * is fixed, so all it asks is which account the money moved through.
  */
 export function SettleUpConfirmSheet({ content, onClose, onConfirm }: SettleUpConfirmSheetProps) {
   const themeColors = useThemeColors();
@@ -49,6 +53,12 @@ export function SettleUpConfirmSheet({ content, onClose, onConfirm }: SettleUpCo
 
   const [accountId, setAccountId] = useState<string | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
+
+  // The sheet keeps what it showed while it slides away, instead of emptying
+  // the moment the caller clears its content.
+  const lastContent = useRef<SettleUpConfirmContent | null>(null);
+  if (content) lastContent.current = content;
+  const shown = content ?? lastContent.current;
 
   // Seeded when the sheet opens, not on every account change while it is open:
   // the account money is paid to by default, which is never an archived one.
@@ -66,7 +76,7 @@ export function SettleUpConfirmSheet({ content, onClose, onConfirm }: SettleUpCo
 
   return (
     <ThemeModal
-      visible={content !== null}
+      visible={open}
       transparent
       animationType="slide"
       presentationStyle="overFullScreen"
@@ -78,17 +88,19 @@ export function SettleUpConfirmSheet({ content, onClose, onConfirm }: SettleUpCo
           className="overflow-hidden rounded-t-[28px] bg-background"
           style={[sheetColumnStyle, { paddingBottom: Math.max(insets.bottom, 16) + 8 }]}
         >
-          {content ? (
+          {shown ? (
             <>
               <View className="items-center pt-2.5">
                 <View className="h-1 w-10 rounded-full bg-border/60" />
               </View>
-              <View className="items-center px-6 pt-4">
-                <Text variant="subheading" numberOfLines={1} className="text-center">
-                  {content.title}
-                </Text>
+              <View className="items-center px-6 pt-6">
+                <SettleUpFlowAvatars
+                  personKey={shown.personKey}
+                  personName={shown.personName}
+                  flow={shown.flow}
+                />
                 <Text variant="caption" tone="muted" numberOfLines={1} className="mt-3">
-                  {content.caption}
+                  {shown.caption}
                 </Text>
                 <Text
                   variant="display"
@@ -96,18 +108,23 @@ export function SettleUpConfirmSheet({ content, onClose, onConfirm }: SettleUpCo
                   adjustsFontSizeToFit
                   className={cn(
                     'mt-0.5 text-center',
-                    content.flow === 'receive'
+                    shown.flow === 'receive'
                       ? 'text-success'
-                      : content.flow === 'pay'
+                      : shown.flow === 'pay'
                         ? 'text-destructive'
                         : '',
                   )}
                 >
-                  {content.amountText}
+                  {shown.amountText}
                 </Text>
-                {content.detail ? (
-                  <Text variant="caption" tone="muted" className="mt-1.5 text-center">
-                    {content.detail}
+                {shown.detail ? (
+                  <Text
+                    variant="caption"
+                    tone="muted"
+                    numberOfLines={2}
+                    className="mt-1 text-center"
+                  >
+                    {shown.detail}
                   </Text>
                 ) : null}
               </View>
@@ -123,7 +140,7 @@ export function SettleUpConfirmSheet({ content, onClose, onConfirm }: SettleUpCo
                 >
                   <Text variant="body" tone="muted" className="flex-1">
                     {I18n.t(
-                      content.flow === 'pay'
+                      shown.flow === 'pay'
                         ? 'transactions.settleUp.paid_from'
                         : 'transactions.settleUp.payment_paid_to',
                     )}
@@ -151,7 +168,7 @@ export function SettleUpConfirmSheet({ content, onClose, onConfirm }: SettleUpCo
                   }}
                   className="w-full"
                 >
-                  <Text>{content.confirmLabel}</Text>
+                  <Text>{shown.confirmLabel}</Text>
                 </Button>
               </View>
             </>

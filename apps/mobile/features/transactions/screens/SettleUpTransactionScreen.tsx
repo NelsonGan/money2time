@@ -1,9 +1,14 @@
-import { ChevronRight, Pencil, ReceiptText, Send } from 'lucide-react-native';
+import { ChevronRight, Pencil, ReceiptText, RotateCcw, Send } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { Alert, Pressable, ScrollView, View } from 'react-native';
 
 import { Button, CategoryEmoji, SettingsHeader, SettingsPageLayout, Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
+import {
+  type SettleUpConfirmContent,
+  SettleUpConfirmSheet,
+} from '~/features/transactions/components/SettleUpConfirmSheet';
+import { SettleUpFlowAvatars } from '~/features/transactions/components/SettleUpFlowAvatars';
 import {
   partPaidBullet,
   SettleUpSectionHeader,
@@ -14,6 +19,7 @@ import type { ReceiptContent } from '~/features/transactions/components/SplitRec
 import { SplitReceiptShareModal } from '~/features/transactions/components/SplitReceiptShareModal';
 import { personInitial } from '~/features/transactions/lib/personAvatar';
 import { personItemNames } from '~/features/transactions/lib/receiptSplitShare';
+import { personKeyOf } from '~/features/transactions/lib/settleUp';
 import { buildSettleUpShareCards } from '~/features/transactions/lib/settleUpDateGroups';
 import { useSettleUpByTransaction } from '~/features/transactions/lib/useSettleUpSummary';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -42,9 +48,16 @@ export function SettleUpTransactionScreen({
   onOpenReceiptSplit,
 }: SettleUpTransactionScreenProps) {
   const themeColors = useThemeColors();
-  const { settings, getReceiptSplitForTransaction } = useApp();
+  const {
+    settings,
+    getReceiptSplitForTransaction,
+    getAccountById,
+    payBackPayer,
+    undoPayBackPayer,
+  } = useApp();
 
   const [shareVisible, setShareVisible] = useState(false);
+  const [payBackVisible, setPayBackVisible] = useState(false);
 
   const summary = useSettleUpByTransaction();
 
@@ -137,30 +150,195 @@ export function SettleUpTransactionScreen({
     };
   }, [bill, title, formatNative, receiptRecord]);
 
+  // A bill a friend paid has one share to settle, the user's own, owed to that
+  // friend. The page says so once, lists how the bill was shared, and offers
+  // the one action: mark it paid (or undo that).
+  const myShare = bill?.paidBy ? (bill.splits[0] ?? null) : null;
+  const payerName = bill?.paidBy
+    ? (bill.paidBy.name ?? `${I18n.t('transactions.settleUp.someone')}`)
+    : '';
+  const paidFrom = myShare?.paybackAccountId ? getAccountById(myShare.paybackAccountId) : null;
+
+  const payBackContent = useMemo<SettleUpConfirmContent | null>(() => {
+    if (!bill?.paidBy || !myShare || !payBackVisible) return null;
+    return {
+      personKey: personKeyOf(bill.paidBy.name),
+      personName: bill.paidBy.name,
+      flow: 'pay',
+      caption: I18n.t('transactions.settleUp.you_pay_person', { name: payerName }),
+      amountText: formatNative(myShare.amount, myShare.currency),
+      confirmLabel: I18n.t('transactions.editor.split.mark_paid'),
+    };
+  }, [bill, myShare, payBackVisible, payerName, formatNative]);
+
+  const handleUndoPayBack = useCallback(() => {
+    if (!myShare) return;
+    void triggerHaptic('warning');
+    Alert.alert(
+      I18n.t('transactions.settleUp.undo_payment_title'),
+      I18n.t('transactions.settleUp.undo_payment_message', {
+        amount: formatNative(myShare.amount, myShare.currency),
+      }),
+      [
+        { text: I18n.t('common.cancel'), style: 'cancel' },
+        {
+          text: I18n.t('transactions.editor.split.undo_paid'),
+          style: 'destructive',
+          onPress: () => undoPayBackPayer(myShare.splitId),
+        },
+      ],
+    );
+  }, [formatNative, myShare, undoPayBackPayer]);
+
+  const header = (
+    <SettingsHeader
+      fitActions
+      className="px-5 pt-5 pb-3"
+      onBack={onBack}
+      title={title}
+      rightAccessory={
+        bill ? (
+          <Pressable
+            onPress={handleEdit}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel={I18n.t('common.edit')}
+            className="h-9 flex-row items-center gap-1 rounded-full bg-secondary/60 px-3 active:opacity-70"
+          >
+            <Pencil size={14} color={themeColors.text} />
+            <Text variant="caption" className="font-medium">
+              {I18n.t('common.edit')}
+            </Text>
+          </Pressable>
+        ) : undefined
+      }
+    />
+  );
+
+  if (bill?.paidBy && myShare) {
+    const paid = !!myShare.paidAt;
+    return (
+      <SettingsPageLayout>
+        {header}
+        <ScrollView
+          className="flex-1"
+          contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 4, paddingBottom: 24 }}
+        >
+          <View className="items-center px-4 pt-2 pb-2">
+            <View className="flex-row items-center gap-1.5">
+              <CategoryEmoji icon={bill.categoryIcon} size={16} />
+              <Text variant="caption" tone="muted">
+                {formatShortDate(bill.date)}
+              </Text>
+            </View>
+            <View className="mt-4">
+              <SettleUpFlowAvatars
+                personKey={personKeyOf(bill.paidBy.name)}
+                personName={bill.paidBy.name}
+                flow="pay"
+                muted={paid}
+              />
+            </View>
+            <Text variant="caption" tone="muted" className="mt-3 text-center">
+              {I18n.t(
+                paid
+                  ? 'transactions.settleUp.you_paid_back'
+                  : 'transactions.settleUp.section_you_owe',
+                { name: payerName },
+              )}
+            </Text>
+            <Text
+              variant="title"
+              className={cn('text-center', paid ? 'text-muted-foreground' : 'text-destructive')}
+            >
+              {formatNative(myShare.amount, myShare.currency)}
+            </Text>
+            {paid ? (
+              <Text variant="caption" tone="muted" className="mt-1 text-center">
+                {[myShare.paidAt ? formatShortDate(myShare.paidAt) : null, paidFrom?.name]
+                  .filter(Boolean)
+                  .join(' · ')}
+              </Text>
+            ) : null}
+          </View>
+
+          {/* How the bill was shared out. Only the user's own share is theirs
+              to settle; the rest is between the others and the payer. */}
+          <View className="mt-5 overflow-hidden rounded-2xl border border-border/25 bg-card/60">
+            <View className="px-4 pt-3.5 pb-2.5">
+              <Text variant="bodyStrong" numberOfLines={1}>
+                {I18n.t('transactions.settleUp.person_paid_total', {
+                  name: payerName,
+                  amount: formatNative(bill.billTotalNative ?? myShare.amount, bill.currency),
+                })}
+              </Text>
+            </View>
+            {[
+              {
+                key: 'me',
+                name: `${I18n.t('transactions.editor.split.me_label')}`,
+                amount: myShare.shareTotal,
+              },
+              ...bill.participants.map((participant) => ({
+                key: participant.splitId,
+                name: participant.personName ?? `${I18n.t('transactions.settleUp.someone')}`,
+                amount: participant.amount,
+              })),
+            ].map((row) => (
+              <View
+                key={row.key}
+                className="flex-row items-center gap-2.5 border-t border-border/15 px-4 py-2.5"
+              >
+                <View className="h-8 w-8 items-center justify-center rounded-full bg-secondary/50">
+                  <Text variant="caption" className="font-semibold">
+                    {personInitial(row.name)}
+                  </Text>
+                </View>
+                <Text variant="body" numberOfLines={1} className="flex-1">
+                  {row.name}
+                </Text>
+                <Text variant="body" tone="muted">
+                  {formatNative(row.amount, bill.currency)}
+                </Text>
+              </View>
+            ))}
+          </View>
+        </ScrollView>
+
+        <View className="px-5 pb-8 pt-2">
+          {paid ? (
+            <Button variant="outline" onPress={handleUndoPayBack} className="w-full gap-2">
+              <RotateCcw size={16} color={themeColors.primary} />
+              <Text>{I18n.t('transactions.editor.split.undo_paid')}</Text>
+            </Button>
+          ) : (
+            <Button
+              onPress={() => {
+                void triggerHaptic('selection');
+                setPayBackVisible(true);
+              }}
+              className="w-full"
+            >
+              <Text>{I18n.t('transactions.editor.split.mark_paid')}</Text>
+            </Button>
+          )}
+        </View>
+
+        <SettleUpConfirmSheet
+          content={payBackContent}
+          onClose={() => setPayBackVisible(false)}
+          onConfirm={(accountId) => {
+            setPayBackVisible(false);
+            payBackPayer(myShare.splitId, { accountId });
+          }}
+        />
+      </SettingsPageLayout>
+    );
+  }
+
   return (
     <SettingsPageLayout>
-      <SettingsHeader
-        fitActions
-        className="px-5 pt-5 pb-3"
-        onBack={onBack}
-        title={title}
-        rightAccessory={
-          bill ? (
-            <Pressable
-              onPress={handleEdit}
-              hitSlop={8}
-              accessibilityRole="button"
-              accessibilityLabel={I18n.t('common.edit')}
-              className="h-9 flex-row items-center gap-1 rounded-full bg-secondary/60 px-3 active:opacity-70"
-            >
-              <Pencil size={14} color={themeColors.text} />
-              <Text variant="caption" className="font-medium">
-                {I18n.t('common.edit')}
-              </Text>
-            </Pressable>
-          ) : undefined
-        }
-      />
+      {header}
       {bill ? (
         <>
           <ScrollView
@@ -174,41 +352,17 @@ export function SettleUpTransactionScreen({
                   {formatShortDate(bill.date)}
                 </Text>
               </View>
-              {/* A bill a friend paid is owed the other way: the user's own share, to them. */}
-              {bill.paidBy ? (
-                <Text variant="caption" tone="muted" className="mt-2 text-center">
-                  {I18n.t(
-                    bill.unpaidSplitCount > 0
-                      ? 'transactions.settleUp.section_you_owe'
-                      : 'transactions.settleUp.you_paid_back',
-                    { name: bill.paidBy.name ?? I18n.t('transactions.settleUp.someone') },
-                  )}
-                </Text>
-              ) : bill.unpaidSplitCount > 0 ? (
+              {bill.unpaidSplitCount > 0 ? (
                 <Text variant="caption" tone="muted" className="mt-2">
                   {I18n.t('transactions.settleUp.section_owed')}
                 </Text>
               ) : null}
-              <Text
-                variant="title"
-                className={cn(
-                  'text-center',
-                  bill.paidBy && bill.unpaidSplitCount > 0 ? 'text-destructive' : '',
-                )}
-              >
+              <Text variant="title" className="text-center">
                 {formatNative(
                   bill.unpaidSplitCount === 0 ? bill.paidNative : bill.totalNative,
                   bill.currency,
                 )}
               </Text>
-              {bill.paidBy && bill.billTotalNative !== null ? (
-                <Text variant="caption" tone="muted" className="mt-1 text-center">
-                  {I18n.t('transactions.settleUp.person_paid_total', {
-                    name: bill.paidBy.name ?? I18n.t('transactions.settleUp.someone'),
-                    amount: formatNative(bill.billTotalNative, bill.currency),
-                  })}
-                </Text>
-              ) : null}
               {bill.unpaidSplitCount > 0 && bill.paidNative > 0 ? (
                 <View className="mt-3 w-full items-center px-6">
                   <View className="h-1.5 w-full max-w-[240px] overflow-hidden rounded-full bg-secondary/60">
@@ -261,61 +415,9 @@ export function SettleUpTransactionScreen({
               )}
               label={(split) => split.personName ?? I18n.t('transactions.settleUp.someone')}
             />
-
-            {/* How a bill a friend paid was shared out. Only the user's own
-                share is theirs to settle; the rest is between the others. */}
-            {bill.paidBy && bill.participants.length > 0 ? (
-              <View className="mt-4">
-                <SettleUpSectionHeader title={I18n.t('transactions.settleUp.everyone_share')} />
-                <View className="mt-1 overflow-hidden rounded-2xl border border-border/25 bg-card/60">
-                  {[
-                    {
-                      key: 'me',
-                      name: I18n.t('transactions.editor.split.me_label'),
-                      amount: bill.splits[0]?.shareTotal ?? 0,
-                      isPayer: false,
-                    },
-                    ...bill.participants.map((participant) => ({
-                      key: participant.splitId,
-                      name: participant.personName ?? I18n.t('transactions.settleUp.someone'),
-                      amount: participant.amount,
-                      isPayer: participant.isPayer,
-                    })),
-                  ].map((row, index) => (
-                    <View
-                      key={row.key}
-                      className={cn(
-                        'flex-row items-center gap-2.5 px-4 py-3',
-                        index > 0 ? 'border-t border-border/15' : '',
-                      )}
-                    >
-                      <View className="h-8 w-8 items-center justify-center rounded-full bg-secondary/50">
-                        <Text variant="caption" className="font-semibold">
-                          {personInitial(row.name)}
-                        </Text>
-                      </View>
-                      <Text variant="body" numberOfLines={1} className="shrink">
-                        {row.name}
-                      </Text>
-                      {row.isPayer ? (
-                        <View className="rounded-full bg-success/15 px-2 py-0.5">
-                          <Text variant="caption" className="font-medium text-success">
-                            {I18n.t('transactions.editor.split.payer_tag')}
-                          </Text>
-                        </View>
-                      ) : null}
-                      <View className="flex-1" />
-                      <Text variant="body" tone="muted">
-                        {formatNative(row.amount, bill.currency)}
-                      </Text>
-                    </View>
-                  ))}
-                </View>
-              </View>
-            ) : null}
           </ScrollView>
 
-          {bill.unpaidSplitCount > 0 && !bill.paidBy ? (
+          {bill.unpaidSplitCount > 0 ? (
             <View className="px-5 pb-8 pt-2">
               <Button onPress={handleShare} className="w-full gap-2">
                 <Send size={18} color="#fff" />

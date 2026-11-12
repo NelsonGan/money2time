@@ -2731,6 +2731,9 @@ function SettleUpPersonRouteScreen({ route, navigation }: RootStackRouteProps<'S
       personKey={route.params.personKey}
       onBack={() => navigation.goBack()}
       onOpenSettings={() => navigation.navigate('SettleUpSettings')}
+      onOpenTransaction={(transactionId) =>
+        navigation.navigate('SettleUpTransaction', { transactionId })
+      }
     />
   );
 }
