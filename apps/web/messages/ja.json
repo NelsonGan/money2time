@@ -1452,6 +1452,7 @@
       "nudgeLarge": "これはあなたの {hours} の労働時間です",
       "amountLocked": "この金額は割り勘または払い戻しに紐づいています。アプリで変更してください。",
       "friendPaid": "{name}がこの会計を支払いました。変更はアプリで行ってください。",
+      "groupBill": "この会計は共有アルバムにあります。変更はアプリで行ってください。",
       "hideBalances": "残高を非表示",
       "showBalances": "残高を表示",
       "savingsGoals": "貯金目標",

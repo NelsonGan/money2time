@@ -175,6 +175,10 @@ function TxForm({ tx, onClose }: { tx: Tx | null; onClose: () => void }) {
   // A bill a friend paid is changed in the app: its rows mean something else
   // there, and the phone refuses a split edit of one. It can still be deleted here.
   const friendPayer = useMemo(() => (tx ? payerOf(model, tx.id) : null), [tx, model]);
+  // A shared album's bill is everyone's in the album: the phone keeps this
+  // entry in step with it, and refuses a change or a delete from here.
+  const groupBill = !!tx?.groupBill;
+  const appOnly = !!friendPayer || groupBill;
   const [splitRows, setSplitRows] = useState<SplitDraftRow[]>(savedSplits);
   const [splitEvenly, setSplitEvenly] = useState(!savedSplits.length);
   const [splitSeed, setSplitSeed] = useState<SplitDraftRow[] | null>(null);
@@ -215,7 +219,7 @@ function TxForm({ tx, onClose }: { tx: Tx | null; onClose: () => void }) {
   const defaultPayback = useMemo(() => defaultPaybackId(model), [model]);
 
   const openSplit = () => {
-    if (friendPayer) return;
+    if (appOnly) return;
     // Starting a split bill is the free plan's limit; managing one never is.
     const startsUnsettled = savedSplits.some((row) => !row.isSelf && !row.paid && num(row.amount) > 0);
     if (!startsUnsettled && !splitRows.length && !link.pro && unpaidSplitBills(model) >= FREE_MAX_UNSETTLED_SPLIT_BILLS) {
@@ -309,7 +313,7 @@ function TxForm({ tx, onClose }: { tx: Tx | null; onClose: () => void }) {
   };
 
   const save = async (again: boolean) => {
-    if (friendPayer) return;
+    if (appOnly) return;
     setTouched(true);
     if (invalid || !ready || busy) return;
     const tx_ = fields();
@@ -410,7 +414,7 @@ function TxForm({ tx, onClose }: { tx: Tx | null; onClose: () => void }) {
           ))}
         </span>
       }
-      headerAction={tx ? <DeleteButton label={t("deleteTransaction")} onClick={() => setConfirmDelete(true)} disabled={busy} /> : null}
+      headerAction={tx && !groupBill ? <DeleteButton label={t("deleteTransaction")} onClick={() => setConfirmDelete(true)} disabled={busy} /> : null}
       footer={
         <div className="flex flex-wrap gap-2">
           {!tx ? (
@@ -425,7 +429,7 @@ function TxForm({ tx, onClose }: { tx: Tx | null; onClose: () => void }) {
               {t("addAnother")}
             </button>
           ) : null}
-          <SaveButton label={tx ? t("update") : t("add")} busy={busy} disabled={!ready || confirmDelete || !!friendPayer} form={formId} />
+          <SaveButton label={tx ? t("update") : t("add")} busy={busy} disabled={!ready || confirmDelete || appOnly} form={formId} />
         </div>
       }
     >
@@ -565,6 +569,8 @@ function TxForm({ tx, onClose }: { tx: Tx | null; onClose: () => void }) {
             {locked ? <p className="mt-1 text-[12px] text-foreground-muted">{t("amountLocked")}</p> : null}
             {friendPayer ? (
               <p className="mt-1 text-[12px] font-semibold text-foreground-soft">{t("friendPaid", { name: friendPayer.person_name?.trim() || ts("someone") })}</p>
+            ) : groupBill ? (
+              <p className="mt-1 text-[12px] font-semibold text-foreground-soft">{t("groupBill")}</p>
             ) : null}
             <label className="mt-2 flex items-center gap-2 border-t border-border/50 pt-2">
               <ClayImg name="ui/checklist" size={16} />

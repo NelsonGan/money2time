@@ -1452,6 +1452,7 @@
       "nudgeLarge": "Dat is {hours} van je werktijd",
       "amountLocked": "Dit bedrag hoort bij een splitsing of terugbetaling. Wijzig het in de app.",
       "friendPaid": "{name} betaalde deze rekening. Wijzig hem in de app.",
+      "groupBill": "Deze rekening staat in een gedeeld album. Wijzig hem in de app.",
       "hideBalances": "Saldi verbergen",
       "showBalances": "Saldi tonen",
       "savingsGoals": "Spaardoelen",

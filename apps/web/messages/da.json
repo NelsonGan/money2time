@@ -1452,6 +1452,7 @@
       "nudgeLarge": "Det er {hours} af din arbejdstid",
       "amountLocked": "Dette beløb er knyttet til en deling eller en refusion. Ret det i appen.",
       "friendPaid": "{name} betalte denne regning. Ret den i appen.",
+      "groupBill": "Regningen er i et delt album. Ret den i appen.",
       "hideBalances": "Skjul saldoer",
       "showBalances": "Vis saldoer",
       "savingsGoals": "Opsparingsmål",

@@ -23,9 +23,11 @@ import { Text } from '~/components/ui';
 import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { chartCategoryColor } from '~/constants/chartColors';
 import { useApp, useTransactions } from '~/context/AppContext';
+import { useCloudSync } from '~/features/cloudSync/CloudSyncContext';
 import { type BreakdownChartRow, CategoryBreakdownChart } from '~/features/insights/components';
 import type { InsightsDrilldownPayload } from '~/features/insights/screens';
 import { countsTowardSpending } from '~/features/reimbursements/lib/reimbursementMath';
+import { sharingErrorMessage } from '~/features/sharedLedgers/lib/sharing';
 import {
   buildBulkUpdateInputs,
   BulkEditTransactionsSheet,
@@ -101,6 +103,7 @@ export function AlbumDetailScreen({
     addTransactionsToAlbum,
   } = useApp();
   const { transactions } = useTransactions();
+  const sync = useCloudSync();
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
   const { width: windowWidth, height: windowHeight } = useContentFrame();
@@ -247,18 +250,39 @@ export function AlbumDetailScreen({
 
   const handleDelete = useCallback(() => {
     void triggerHaptic('warning');
-    Alert.alert(I18n.t('albums.delete_title'), I18n.t('albums.delete_body'), [
+    const body =
+      group.share?.role === 'owner'
+        ? `${I18n.t('albums.delete_body')} ${I18n.t('albums.share.stop_message')}`
+        : I18n.t('albums.delete_body');
+    Alert.alert(I18n.t('albums.delete_title'), body, [
       { text: I18n.t('common.cancel'), style: 'cancel' },
       {
         text: I18n.t('common.delete'),
         style: 'destructive',
         onPress: () => {
-          deleteAlbum(albumId);
-          onDeleted();
+          const share = group.share;
+          if (!share) {
+            deleteAlbum(albumId);
+            onDeleted();
+            return;
+          }
+          // A shared album stops being shared with it: the owner stops it for
+          // everyone, a member leaves. Told to the Worker now, or after the
+          // next sign-in when it cannot be reached.
+          const ending =
+            share.role === 'owner'
+              ? sync.stopSharingLedger(albumId, { whenUnreachable: 'local' })
+              : sync.leaveLedger(albumId, { force: true });
+          ending
+            .then(() => {
+              deleteAlbum(albumId);
+              onDeleted();
+            })
+            .catch((error: unknown) => Alert.alert(sharingErrorMessage(error)));
         },
       },
     ]);
-  }, [albumId, deleteAlbum, onDeleted]);
+  }, [albumId, deleteAlbum, group.share, onDeleted, sync]);
 
   const changeCover = useCallback(async () => {
     void triggerHaptic('selection');

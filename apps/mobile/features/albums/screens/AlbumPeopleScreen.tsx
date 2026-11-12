@@ -453,9 +453,7 @@ export function AlbumPeopleScreen({
                     <Pressable
                       onPress={() => confirmRemove(person)}
                       accessibilityRole="button"
-                      accessibilityLabel={I18n.t('shared_ledgers.remove_title', {
-                        name: person.name,
-                      })}
+                      accessibilityLabel={`${I18n.t('common.remove')} ${person.name}`}
                       hitSlop={8}
                       className="h-8 w-8 items-center justify-center rounded-full bg-secondary/50 active:opacity-70"
                     >

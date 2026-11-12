@@ -693,6 +693,9 @@ function planTransaction(
     rows.push(current);
   }
   if (op.op === 'delete') {
+    // A shared album's bill is everyone's in the album: deleting it deletes
+    // it for them too, which the app asks about first. Not from the browser.
+    if (rows.some((tx) => tx.albumGroupId)) return refuse('invalid');
     steps.push({ kind: 'tx.delete', ids: rows.map((tx) => tx.id) });
     return ok(rows.length);
   }

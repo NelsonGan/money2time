@@ -3066,12 +3066,27 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // Membership edits only touch the album join table — a full refreshAll() would
   // re-init the DB and reload everything (slow). Reloading just `albums` gives the
   // membership-derived memos a fresh reference and updates the UI immediately.
+  // A shared album's group follows what is put into and taken out of the
+  // album (set further down, once the group's functions exist).
+  const albumGroupHooksRef = useRef<{
+    publish: (groupId: string) => void;
+    detach: (transactionId: string) => void;
+  } | null>(null);
+
   const addTransactionsToAlbum = useCallback((albumId: string, transactionIds: string[]) => {
     albumsRepository.addTransactions(albumId, transactionIds);
     setAlbums(albumsRepository.list());
+    // A split bill added to a shared album becomes the group's.
+    if (sharedAlbumFor(albumId)) albumGroupHooksRef.current?.publish(albumId);
   }, []);
 
   const removeTransactionsFromAlbum = useCallback((albumId: string, transactionIds: string[]) => {
+    // A group's bill taken out of its album leaves the group and stays the
+    // user's own entry.
+    for (const id of transactionIds) {
+      const tx = transactionsRef.current.find((item) => item.id === id);
+      if (tx?.albumGroupId === albumId) albumGroupHooksRef.current?.detach(id);
+    }
     albumsRepository.removeTransactions(albumId, transactionIds);
     setAlbums(albumsRepository.list());
   }, []);
@@ -4035,6 +4050,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const built = billFromRows(billRows, self.id);
       if (!built) return null;
       const id = existingId ?? newId();
+      // A split bill that was the user's own until now (added to the album,
+      // or made before this phone said who it is) goes in as it stands first,
+      // with the payments already on it, so the edit below keeps them.
+      const existing = existingId
+        ? transactionsRef.current.find((item) => item.id === existingId)
+        : null;
+      if (existing && !existing.albumGroupId && (existing.splits?.length ?? 0) > 0) {
+        try {
+          publishAlbumBills(groupId, env);
+        } catch (error) {
+          reportError(error, { scope: 'album_group_publish' });
+        }
+      }
       const category = input.categoryId
         ? categoriesRef.current.find((item) => item.id === input.categoryId)
         : null;
@@ -4044,7 +4072,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         albumGroupsRepository.upsertExpense({
           id,
           groupId,
-          date: dateForNewTransaction(input.date, new Date()),
+          date: existingId ? input.date : dateForNewTransaction(input.date, new Date()),
           note: input.note?.trim() || null,
           amount: built.amount,
           currency: input.currency,
@@ -4098,6 +4126,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     },
     [afterGroupWrite],
   );
+
+  albumGroupHooksRef.current = { publish: publishAlbumGroup, detach: detachAlbumBill };
 
   /** The group's bill a share belongs to, when its album is shared on this phone. */
   const groupBillOf = useCallback((splitId: string) => {

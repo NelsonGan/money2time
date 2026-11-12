@@ -1452,6 +1452,7 @@
       "nudgeLarge": "C'est {hours} de votre temps de travail",
       "amountLocked": "Ce montant est lié à un partage ou à un remboursement. Modifiez-le dans l'app.",
       "friendPaid": "{name} a payé cette facture. Modifiez-la dans l'app.",
+      "groupBill": "Cette note est dans un album partagé. Modifiez-la dans l'app.",
       "hideBalances": "Masquer les soldes",
       "showBalances": "Afficher les soldes",
       "savingsGoals": "Objectifs d'épargne",

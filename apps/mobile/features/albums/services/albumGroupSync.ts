@@ -588,7 +588,13 @@ export function publishAlbumBills(groupId: string, env: GroupEnv): void {
       `SELECT at.transaction_id FROM album_transactions at
        JOIN transactions t ON t.id = at.transaction_id
        WHERE at.album_id = ? AND at.deleted_at IS NULL AND t.deleted_at IS NULL
-         AND t.type = 'expense' AND t.album_group_id IS NULL`,
+         AND t.type = 'expense' AND t.album_group_id IS NULL
+         -- A bill split by item stays the user's own: its shares come from
+         -- its items, which the group does not hold.
+         AND NOT EXISTS (
+           SELECT 1 FROM receipt_splits r
+           WHERE r.transaction_id = t.id AND r.deleted_at IS NULL
+         )`,
       [groupId],
     )
     .map((row) => row.transaction_id);

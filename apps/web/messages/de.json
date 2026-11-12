@@ -1452,6 +1452,7 @@
       "nudgeLarge": "Das entspricht {hours} deiner Arbeitszeit",
       "amountLocked": "Dieser Betrag ist mit einer Aufteilung oder Erstattung verknüpft. Ändere ihn in der App.",
       "friendPaid": "{name} hat diese Rechnung bezahlt. Ändere sie in der App.",
+      "groupBill": "Diese Rechnung ist in einem geteilten Album. Ändere sie in der App.",
       "hideBalances": "Salden ausblenden",
       "showBalances": "Salden anzeigen",
       "savingsGoals": "Sparziele",

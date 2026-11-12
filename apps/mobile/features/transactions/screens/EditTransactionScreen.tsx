@@ -91,10 +91,13 @@ function TransactionEditor({
     getAccountById,
     saveAlbumBill,
     detachAlbumBill,
+    getReceiptSplitForTransaction,
   } = useApp();
   // A shared album's bill is saved through its group (README: Album members
   // and shared albums): the entry here follows from what the group holds.
-  const albumGroupId = useAlbumBillTarget(transaction.id);
+  // A bill split by item stays the user's own: the group does not hold its items.
+  const albumTarget = useAlbumBillTarget(transaction.id);
+  const albumGroupId = getReceiptSplitForTransaction(transaction.id) ? null : albumTarget;
   const canStartPlan = useCanStartInstalmentPlan();
   // The fee this transfer was charged, edited with it.
   const feeLink = useTransferFeeIndex().byTransferId.get(transaction.id) ?? null;
