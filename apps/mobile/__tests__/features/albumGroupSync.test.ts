@@ -6,6 +6,7 @@ import {
   releaseAlbumGroup,
 } from '~/features/albums/services/albumGroupStore';
 import {
+  closeEvenGroup,
   type GroupEnv,
   projectGroup,
   publishAlbumBills,
@@ -378,6 +379,68 @@ describe('simplify group debts', () => {
     expect(tx('dinner')).toMatchObject({ amount: 30 });
     expect(tx('boat')).toMatchObject({ amount: 30, account_id: 'cash' });
     expect(projectGroup(GROUP, env)).toBe(false);
+  });
+});
+
+describe('payments recorded as one act', () => {
+  const add = (id: string, paidBy: string, owes: Record<string, number>) =>
+    albumGroupsRepository.upsertExpense({
+      id,
+      groupId: GROUP,
+      date: '2026-11-12',
+      note: id,
+      amount: Object.values(owes).reduce((sum, value) => sum + value, 0),
+      currency: 'MYR',
+      categoryName: null,
+      categoryIcon: null,
+      paidBy,
+      shares: Object.entries(owes).map(([memberId, amount]) => ({ memberId, amount })),
+      createdBy: 'u-me',
+    });
+  const live = () => albumGroupsRepository.listSettlements(GROUP).filter((s) => !s.deletedAt);
+
+  it('undoing one of them undoes them all, so nobody’s total moves', () => {
+    add('dinner', 'me', { me: 30, aisha: 30 });
+    add('boat', 'ben', { ben: 30, me: 30 });
+    const [first, second] = albumGroupsRepository.createSettlements(
+      GROUP,
+      [
+        { expenseId: 'dinner', fromMember: 'aisha', toMember: 'me', amount: 30, currency: 'MYR' },
+        { expenseId: 'boat', fromMember: 'me', toMember: 'ben', amount: 30, currency: 'MYR' },
+      ],
+      { date: '2026-11-13', createdBy: 'u-aisha' },
+    );
+    projectGroup(GROUP, env);
+    expect(balances()).toEqual({ Aisha: 0, Ben: 0 });
+    // Undone from the dinner alone: the boat's goes with it.
+    albumGroupsRepository.softDeleteSettlement(first);
+    expect(live()).toEqual([]);
+    expect(second.split('.')[0]).toBe(first.split('.')[0]);
+    projectGroup(GROUP, env);
+    expect(balances()).toEqual({ Aisha: 30, Ben: -30 });
+    // A payment on its own is undone on its own.
+    pay('solo', 'dinner', 'aisha', 'me', 5, '2026-11-13T08:00:00.000Z');
+    pay('other', 'boat', 'me', 'ben', 5, '2026-11-13T09:00:00.000Z');
+    albumGroupsRepository.softDeleteSettlement('solo');
+    expect(live().map((s) => s.id)).toEqual(['other']);
+  });
+
+  it('closes a group that has come out even, only with Simplify on', () => {
+    // A circle: Aisha owes the user, the user owes Ben, Ben owes Aisha.
+    add('dinner', 'me', { aisha: 10 });
+    add('boat', 'ben', { me: 10 });
+    add('taxi', 'aisha', { ben: 10 });
+    projectGroup(GROUP, env);
+    expect(closeEvenGroup(GROUP, env)).toBe(false);
+    albumGroupsRepository.setSimplifyDebts(GROUP, true);
+    expect(closeEvenGroup(GROUP, env)).toBe(true);
+    projectGroup(GROUP, env);
+    expect(balances()).toEqual({ Aisha: 0, Ben: 0 });
+    expect(live()).toHaveLength(3);
+    // Nothing left to close; and a group with a real debt is left alone.
+    expect(closeEvenGroup(GROUP, env)).toBe(false);
+    add('hotel', 'me', { me: 50, ben: 50 });
+    expect(closeEvenGroup(GROUP, env)).toBe(false);
   });
 });
 

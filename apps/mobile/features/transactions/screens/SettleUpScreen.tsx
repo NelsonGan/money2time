@@ -25,6 +25,8 @@ import {
   filterSettleUpTransactions,
 } from '~/features/transactions/lib/settleUpSearch';
 import {
+  type AlbumBalance,
+  useAlbumBalances,
   useSettleUpByTransaction,
   useSettleUpSummary,
 } from '~/features/transactions/lib/useSettleUpSummary';
@@ -46,6 +48,8 @@ interface SettleUpScreenProps {
   onBack?: () => void;
   onOpenPerson: (personKey: string) => void;
   onOpenTransaction: (transactionId: string) => void;
+  /** Opens an album, where its own bills are settled. */
+  onOpenAlbum: (albumId: string) => void;
   onOpenSettings: () => void;
   /** Start a new itemized receipt split (Split by Item). */
   onSplitReceipt: () => void;
@@ -55,6 +59,7 @@ export function SettleUpScreen({
   onBack,
   onOpenPerson,
   onOpenTransaction,
+  onOpenAlbum,
   onOpenSettings,
   onSplitReceipt,
 }: SettleUpScreenProps) {
@@ -68,8 +73,10 @@ export function SettleUpScreen({
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const searchInputRef = useRef<TextInputInstance | null>(null);
+  // The bills in no album; an album's are settled in it, and listed below.
   const summary = useSettleUpSummary();
-  const byTransaction = useSettleUpByTransaction();
+  const byTransaction = useSettleUpByTransaction('outside_albums');
+  const albumBalances = useAlbumBalances();
   const people = useMemo(
     () =>
       isSearchOpen ? filterSettleUpPeople(summary.people, debouncedSearchQuery) : summary.people,
@@ -381,8 +388,69 @@ export function SettleUpScreen({
     );
   };
 
+  const renderAlbumCard = ({ album, netReporting }: AlbumBalance) => {
+    const state = netReporting >= 0.005 ? 'owed' : netReporting <= -0.005 ? 'owe' : 'even';
+    return (
+      <Pressable
+        key={`album:${album.id}`}
+        onPress={() => {
+          void triggerHaptic('selection');
+          onOpenAlbum(album.id);
+        }}
+        accessibilityRole="button"
+        className="flex-row items-center gap-3 rounded-2xl border border-border/30 bg-card px-3.5 py-3 active:opacity-80"
+      >
+        <View className="h-11 w-11 items-center justify-center rounded-xl bg-primary/15">
+          <Text variant="bodyStrong" className="text-primary">
+            {personInitial(album.name)}
+          </Text>
+        </View>
+        <Text variant="bodyStrong" numberOfLines={1} className="flex-1">
+          {album.name}
+        </Text>
+        <View className="items-end">
+          <Text variant="caption" tone="muted">
+            {I18n.t(
+              state === 'owed'
+                ? 'transactions.settleUp.hero_owed'
+                : state === 'owe'
+                  ? 'transactions.settleUp.you_owe_tag'
+                  : 'transactions.settleUp.even_tag',
+            )}
+          </Text>
+          <Text
+            variant="bodyStrong"
+            className={
+              state === 'owed'
+                ? 'text-success'
+                : state === 'owe'
+                  ? 'text-destructive'
+                  : 'text-muted-foreground'
+            }
+          >
+            {formatReporting(Math.abs(netReporting))}
+          </Text>
+        </View>
+        <ChevronRight size={18} color={themeColors.textMuted} />
+      </Pressable>
+    );
+  };
+
   const renderPeopleList = () => (
     <View className="mt-4 gap-2">
+      {albumBalances.length > 0 ? (
+        <>
+          <Text variant="label" tone="muted" className="pb-1">
+            {I18n.t('albums.title')}
+          </Text>
+          {albumBalances.map(renderAlbumCard)}
+          {openPeople.length > 0 ? (
+            <Text variant="label" tone="muted" className="pb-1 pt-3">
+              {I18n.t('albums.people.title')}
+            </Text>
+          ) : null}
+        </>
+      ) : null}
       {openPeople.map(renderPersonCard)}
       {settledPeople.length > 0 ? (
         <>
@@ -497,7 +565,9 @@ export function SettleUpScreen({
         </View>
       ) : null}
 
-      {!isSearchOpen ? renderHero() : null}
+      {/* The total is of the bills in no album: with nothing open among them,
+          it would say "All settled up" above an album that is not. */}
+      {!isSearchOpen && (summary.billCount > 0 || albumBalances.length === 0) ? renderHero() : null}
 
       {!isSearchOpen ? (
         <View className="flex-row border-b border-border/15 px-3">
@@ -546,7 +616,10 @@ export function SettleUpScreen({
           onPageScrollStateChanged={handlePagerScrollStateChanged}
         >
           {TAB_ORDER.map((value) => {
-            const hasResults = value === 'people' ? people.length > 0 : transactions.length > 0;
+            const hasResults =
+              value === 'people'
+                ? people.length > 0 || albumBalances.length > 0
+                : transactions.length > 0;
             return (
               <View key={value} style={{ flex: 1 }}>
                 <ScrollView

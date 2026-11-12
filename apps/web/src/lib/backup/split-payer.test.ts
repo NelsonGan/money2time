@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { billPayer, isPayBackPart, netByPerson, owedToPayers, partyKey } from "./split-payer.ts";
+import { balancesByAlbum, billPayer, isPayBackPart, netByPerson, owedToPayers, partyKey } from "./split-payer.ts";
 
 const dinner = [
   { id: "me", transaction_id: "dinner", amount: 30, is_self: 1 },
@@ -75,5 +75,32 @@ test("a real user is one person whatever name they were typed under", () => {
   assert.deepEqual(balances, [
     { person: "Aisha", net: 50, count: 2 },
     { person: "Aisha", net: 5, count: 1 },
+  ]);
+});
+
+test("an album answers for its own bills, and the people list for the rest", () => {
+  const balances = balancesByAlbum(
+    [
+      { person: "Aisha", amountBase: 30, txId: "dinner" },
+      { person: "Ben", amountBase: 30, txId: "dinner" },
+      { person: "Aisha", amountBase: 12, txId: "lunch" },
+    ],
+    [{ person: "aisha", amountBase: 40, txId: "boat" }],
+    [
+      { id: "bali", name: "Bali trip", txIds: ["dinner", "boat"] },
+      { id: "quiet", name: "Nothing open", txIds: ["paid"] },
+    ],
+  );
+  assert.deepEqual(balances.people, [{ person: "Aisha", net: 12, count: 1 }]);
+  assert.deepEqual(balances.albums, [
+    {
+      id: "bali",
+      name: "Bali trip",
+      net: 20,
+      people: [
+        { person: "Ben", net: 30, count: 1 },
+        { person: "Aisha", net: -10, count: 2 },
+      ],
+    },
   ]);
 });

@@ -58,6 +58,22 @@ describe('settling part of what is between two people', () => {
     ]);
   });
 
+  it('goes by the one currency left, even when the reporting net points the other way', () => {
+    // RM5 owed to the user; the dollar bills cancel out but at different rates.
+    const person = {
+      netReporting: -2,
+      netByCurrency: [{ currency: 'MYR', amount: 5 }],
+      bills: [
+        bill('myr', 'owes_you', 5),
+        bill('usd-in', 'owes_you', 10, { currency: 'USD', reportingAmount: 40 }),
+        bill('usd-out', 'you_owe', 10, { currency: 'USD', reportingAmount: 47 }),
+      ],
+    };
+    expect(planPartSettlement(person, 3)).toEqual([
+      { splitId: 'myr', direction: 'owes_you', amount: 3 },
+    ]);
+  });
+
   it('takes an amount in the reporting currency when the bills are in several', () => {
     // $10 (RM40 here) and RM30 owed to the user: RM50 of the RM70 is paid.
     const person = {

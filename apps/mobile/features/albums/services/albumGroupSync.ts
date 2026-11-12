@@ -28,11 +28,12 @@ import type {
   TransactionSplit,
 } from '~/types';
 import { convert } from '~/utils/currency';
-import { normalizeMoneyAmount } from '~/utils/formatters';
+import { dayKeyFromDateLocal, normalizeMoneyAmount } from '~/utils/formatters';
 import { nowIso } from '~/utils/id';
 
 import { groupFromLocalBill, localBill, type LocalPayment } from '../lib/albumGroup';
 import { cleanPersonName, memberForRow, selfMember } from '../lib/albumPeople';
+import { openShares, simplifyDebts } from '../lib/groupDebts';
 import { notifyAlbumGroups } from './albumGroupStore';
 
 /** What the open ledger and the user's settings give the group's entries. */
@@ -587,6 +588,34 @@ export function projectGroup(
     }
   });
   return changed;
+}
+
+/**
+ * With "Simplify group debts" on, a group where nobody owes anything on
+ * balance has nothing left to pay: whatever is still open on its bills goes
+ * round in a circle, so every open share is closed, as one act. Run after a
+ * change made on this phone (not after a sync, or every phone would write the
+ * same payments). Returns whether anything was closed; the caller projects.
+ */
+export function closeEvenGroup(groupId: string, env: GroupEnv): boolean {
+  if (!albumGroupsRepository.simplifiesDebts(groupId)) return false;
+  const open = openShares(
+    albumGroupsRepository.listExpenses(groupId),
+    albumGroupsRepository.listSettlements(groupId),
+  );
+  if (open.length === 0 || simplifyDebts(open).length > 0) return false;
+  albumGroupsRepository.createSettlements(
+    groupId,
+    open.map((share) => ({
+      expenseId: share.expenseId,
+      fromMember: share.from,
+      toMember: share.to,
+      amount: share.amount,
+      currency: share.currency,
+    })),
+    { date: dayKeyFromDateLocal(new Date()), createdBy: env.userId },
+  );
+  return true;
 }
 
 /**

@@ -62,7 +62,7 @@ export function SettleUpTransactionScreen({
   const [shareVisible, setShareVisible] = useState(false);
   const [payBackVisible, setPayBackVisible] = useState(false);
 
-  const summary = useSettleUpByTransaction();
+  const summary = useSettleUpByTransaction('all');
 
   const bill = useMemo(
     () => summary.transactions.find((t) => t.transactionId === transactionId) ?? null,

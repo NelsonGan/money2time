@@ -46,6 +46,7 @@ import {
 } from '~/features/albums/lib/groupDebts';
 import { notifyAlbumGroups } from '~/features/albums/services/albumGroupStore';
 import {
+  closeEvenGroup,
   type GroupEnv,
   projectGroup,
   publishAlbumBills,
@@ -66,6 +67,7 @@ import {
   listAlbumShares,
   openLedgerSharedAndActive,
   sharedAlbumFor,
+  sharedLedgerFor,
 } from '~/features/cloudSync/services/sharedLedgerStore';
 import {
   buildInstalmentPlans,
@@ -632,6 +634,15 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   addTransactionsToAlbum: (albumId: string, transactionIds: string[]) => void;
   removeTransactionsFromAlbum: (albumId: string, transactionIds: string[]) => void;
   getAlbumTransactionIds: (albumId: string) => string[];
+  /**
+   * The entries whose balances belong to an album: every entry in an album of
+   * the open ledger. An album's Balances answers for them, and the Balances
+   * page leaves them out. None in a shared ledger, where an album is not
+   * split with people.
+   */
+  getAlbumOwnedTransactionIds: () => ReadonlySet<string>;
+  /** The entries of every album of the open ledger, by album; one read per change of `albums`. */
+  getAlbumEntryIds: () => ReadonlyMap<string, readonly string[]>;
   getAlbumTransactions: (albumId: string) => TransactionWithRelations[];
   getAlbumStats: (albumId: string) => AlbumStats;
 
@@ -942,7 +953,7 @@ function computeAlbumStats(
     valueForDisplay: (amount: number, dateIso: string) => number;
     reimbursementsCountAsExpense: boolean;
   },
-  transactionIdsByAlbum: Map<string, string[]>,
+  transactionIdsByAlbum: ReadonlyMap<string, readonly string[]>,
 ): Map<string, AlbumStats> {
   const map = new Map<string, AlbumStats>();
   if (albums.length === 0) return map;
@@ -3117,6 +3128,36 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [],
   );
 
+  // Which entries are in which album, read once per change of `albums` (a
+  // new array whenever an album or its entries change) and shared by the
+  // album stats and the balances.
+  const albumsRef = useRef(albums);
+  albumsRef.current = albums;
+  const albumMembershipRef = useRef<{
+    albums: Album[];
+    transactionIdsByAlbum: Map<string, string[]>;
+  } | null>(null);
+  const getAlbumEntryIds = useCallback((): ReadonlyMap<string, readonly string[]> => {
+    const current = albumsRef.current;
+    let membership = albumMembershipRef.current;
+    if (!membership || membership.albums !== current) {
+      membership = {
+        albums: current,
+        transactionIdsByAlbum:
+          current.length > 0
+            ? albumsRepository.getAllTransactionIdsByAlbum()
+            : new Map<string, string[]>(),
+      };
+      albumMembershipRef.current = membership;
+    }
+    return membership.transactionIdsByAlbum;
+  }, []);
+
+  const getAlbumOwnedTransactionIds = useCallback((): ReadonlySet<string> => {
+    if (sharedLedgerFor(getActiveLedgerId())) return new Set();
+    return new Set([...getAlbumEntryIds().values()].flat());
+  }, [getAlbumEntryIds]);
+
   const getAlbumTransactions = useCallback((albumId: string): TransactionWithRelations[] => {
     const ids = albumsRepository.getTransactionIds(albumId);
     // Batched load (fixed query count) instead of one getById per id.
@@ -4023,12 +4064,30 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [afterGroupWrite, groupEnvFor],
   );
 
-  const setAlbumSimplifyDebts = useCallback((groupId: string, simplify: boolean) => {
-    if (!sharedAlbumFor(groupId)) return;
-    albumGroupsRepository.setSimplifyDebts(groupId, simplify);
-    notifyAlbumGroups();
-    void trackEvent(AnalyticsEvents.ALBUM_SIMPLIFY_DEBTS_SET, { on: simplify });
+  /**
+   * After a change to a group made here: with Simplify on, a group that has
+   * come out even has its bills closed (`closeEvenGroup`), and the entries
+   * follow.
+   */
+  const settleEvenGroup = useCallback((groupId: string, env: GroupEnv) => {
+    if (closeEvenGroup(groupId, env)) projectGroup(groupId, env);
   }, []);
+
+  const setAlbumSimplifyDebts = useCallback(
+    (groupId: string, simplify: boolean) => {
+      const env = groupEnvFor(groupId);
+      if (!env) return;
+      albumGroupsRepository.setSimplifyDebts(groupId, simplify);
+      void trackEvent(AnalyticsEvents.ALBUM_SIMPLIFY_DEBTS_SET, { on: simplify });
+      try {
+        settleEvenGroup(groupId, env);
+      } catch (error) {
+        reportError(error, { scope: 'album_group_payment' });
+      }
+      afterGroupWrite();
+    },
+    [afterGroupWrite, groupEnvFor, settleEvenGroup],
+  );
 
   const settleGroupDebt = useCallback(
     (groupId: string, debt: GroupDebt, accountId: string | null) => {
@@ -4057,23 +4116,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             ...debt,
             amount: Math.min(debt.amount, current.amount),
           });
-          const date = dayKeyFromDateLocal(new Date());
-          // Every payment of the user's own goes through the one account, so
-          // those that only pass a debt along leave it as it was.
-          const paidThrough = new Map<string, string | null>();
-          for (const payment of payments) {
-            const id = albumGroupsRepository.createSettlement({
-              groupId,
+          if (payments.length === 0) return;
+          const ids = albumGroupsRepository.createSettlements(
+            groupId,
+            payments.map((payment) => ({
               expenseId: payment.expenseId,
               fromMember: payment.from,
               toMember: payment.to,
               amount: payment.amount,
               currency: debt.currency,
-              date,
-              createdBy: env.userId,
-            });
-            if (payment.from === self.id || payment.to === self.id) paidThrough.set(id, accountId);
-          }
+            })),
+            { date: dayKeyFromDateLocal(new Date()), createdBy: env.userId },
+          );
+          // Every payment of the user's own goes through the one account, so
+          // those that only pass a debt along leave it as it was.
+          const paidThrough = new Map<string, string | null>();
+          payments.forEach((payment, index) => {
+            if (payment.from === self.id || payment.to === self.id) {
+              paidThrough.set(ids[index], accountId);
+            }
+          });
           projectGroup(groupId, env, { hints: { accounts: paidThrough } });
           void trackEvent(AnalyticsEvents.ALBUM_PAYMENT_RECORDED, {
             direction: debt.from === self.id ? 'paid' : 'received',
@@ -4176,6 +4238,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           });
         }
         projectGroup(groupId, env, { expenseId: id, hints: { entry } });
+        settleEvenGroup(groupId, env);
         void trackEvent(AnalyticsEvents.ALBUM_BILL_SAVED, {
           edit: !!existingId,
           paid_by: built.paidBy === self.id ? 'me' : 'friend',
@@ -4187,7 +4250,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       afterGroupWrite();
       return { id, mine };
     },
-    [afterGroupWrite, groupEnvFor],
+    [afterGroupWrite, groupEnvFor, settleEvenGroup],
   );
 
   const detachAlbumBill = useCallback(
@@ -4259,6 +4322,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             hints:
               accountId === undefined ? {} : { accounts: new Map([[settlementId, accountId]]) },
           });
+          settleEvenGroup(bill.groupId, env);
           void trackEvent(AnalyticsEvents.ALBUM_PAYMENT_RECORDED, {
             direction: payer ? 'paid' : 'received',
             via: 'bill',
@@ -4269,10 +4333,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         afterGroupWrite();
       });
     },
-    [afterGroupWrite, groupEnvFor],
+    [afterGroupWrite, groupEnvFor, settleEvenGroup],
   );
 
-  /** Undoes a payment on a group's bill: its settlement goes, for everyone. */
+  /**
+   * Undoes a payment on a group's bill: its settlement goes, for everyone,
+   * with any others recorded in the same act (a debt paid along several
+   * bills), so every bill they touched follows.
+   */
   const undoGroupPayment = useCallback(
     (bill: { tx: TransactionWithRelations; groupId: string }, settlementId: string | null) => {
       const env = groupEnvFor(bill.groupId);
@@ -4280,7 +4348,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       runDeferredWrite(() => {
         try {
           albumGroupsRepository.softDeleteSettlement(settlementId);
-          projectGroup(bill.groupId, env, { expenseId: bill.tx.id });
+          projectGroup(bill.groupId, env);
           void trackEvent(AnalyticsEvents.ALBUM_PAYMENT_UNDONE);
         } catch (error) {
           reportError(error, { scope: 'album_group_payment' });
@@ -4300,17 +4368,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const deleteGroupEntries = useCallback(
     (ids: readonly string[]): Set<string> => {
       const taken = new Set<string>();
-      const touched = new Map<string, Set<string>>();
-      const touch = (groupId: string, expenseId: string) => {
-        const set = touched.get(groupId) ?? new Set<string>();
-        set.add(expenseId);
-        touched.set(groupId, set);
-      };
+      const touched = new Set<string>();
       for (const id of ids) {
         const tx = transactionsRef.current.find((item) => item.id === id);
         if (tx?.albumGroupId && sharedAlbumFor(tx.albumGroupId)) {
           albumGroupsRepository.softDeleteExpense(id);
-          touch(tx.albumGroupId, id);
+          touched.add(tx.albumGroupId);
           taken.add(id);
           continue;
         }
@@ -4323,16 +4386,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const split = bill?.splits?.find((item) => item.paidTransactionId === id);
         if (bill?.albumGroupId && split?.settlementId) {
           albumGroupsRepository.softDeleteSettlement(split.settlementId);
-          touch(bill.albumGroupId, bill.id);
+          touched.add(bill.albumGroupId);
           taken.add(id);
         }
       }
       if (!taken.size) return taken;
-      for (const [groupId, expenseIds] of touched) {
+      for (const groupId of touched) {
         const env = groupEnvFor(groupId);
         if (!env) continue;
         try {
-          for (const expenseId of expenseIds) projectGroup(groupId, env, { expenseId });
+          // The whole group: a payment undone can reach several of its bills.
+          projectGroup(groupId, env);
+          settleEvenGroup(groupId, env);
         } catch (error) {
           reportError(error, { scope: 'album_group_delete' });
         }
@@ -4340,7 +4405,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       afterGroupWrite();
       return taken;
     },
-    [afterGroupWrite, groupEnvFor],
+    [afterGroupWrite, groupEnvFor, settleEvenGroup],
   );
 
   const deleteTransactionsBulk = useCallback(
@@ -6135,11 +6200,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const settleUpWithPerson = useCallback(
     (personKey: string, accountId: string | null, albumId?: string) => {
-      const inAlbum = albumId ? new Set(albumsRepository.getTransactionIds(albumId)) : null;
+      // An album's bills, or those in no album: the two are settled apart.
+      const inAlbums = albumId
+        ? new Set(albumsRepository.getTransactionIds(albumId))
+        : getAlbumOwnedTransactionIds();
       const rows = personSettlementRows(
-        inAlbum
-          ? transactionsRef.current.filter((tx) => inAlbum.has(tx.id))
-          : transactionsRef.current,
+        transactionsRef.current.filter((tx) => inAlbums.has(tx.id) === !!albumId),
         personKey,
       );
       if (rows.receive.length === 0 && rows.pay.length === 0) return;
@@ -6150,7 +6216,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         paid: rows.pay.length,
       });
     },
-    [markSplitPaid, payBackPayer],
+    [getAlbumOwnedTransactionIds, markSplitPaid, payBackPayer],
   );
 
   const canUseTimeDisplayMode = useMemo(
@@ -6941,41 +7007,29 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
   const albumStatsInputsRef = useRef(albumStatsInputs);
   albumStatsInputsRef.current = albumStatsInputs;
-  const albumMembershipRef = useRef<{
-    albums: Album[];
-    transactionIdsByAlbum: Map<string, string[]>;
-  } | null>(null);
   const albumStatsCacheRef = useRef<{
     inputs: typeof albumStatsInputs;
     byId: Map<string, AlbumStats>;
   } | null>(null);
 
-  const getAlbumStats = useCallback((albumId: string): AlbumStats => {
-    const inputs = albumStatsInputsRef.current;
-    let cache = albumStatsCacheRef.current;
-    if (
-      !cache ||
-      cache.inputs.albums !== inputs.albums ||
-      cache.inputs.transactions !== inputs.transactions ||
-      cache.inputs.valueForDisplay !== inputs.valueForDisplay ||
-      cache.inputs.reimbursementsCountAsExpense !== inputs.reimbursementsCountAsExpense
-    ) {
-      let membership = albumMembershipRef.current;
-      if (!membership || membership.albums !== inputs.albums) {
-        membership = {
-          albums: inputs.albums,
-          transactionIdsByAlbum:
-            inputs.albums.length > 0
-              ? albumsRepository.getAllTransactionIdsByAlbum()
-              : new Map<string, string[]>(),
-        };
-        albumMembershipRef.current = membership;
+  const getAlbumStats = useCallback(
+    (albumId: string): AlbumStats => {
+      const inputs = albumStatsInputsRef.current;
+      let cache = albumStatsCacheRef.current;
+      if (
+        !cache ||
+        cache.inputs.albums !== inputs.albums ||
+        cache.inputs.transactions !== inputs.transactions ||
+        cache.inputs.valueForDisplay !== inputs.valueForDisplay ||
+        cache.inputs.reimbursementsCountAsExpense !== inputs.reimbursementsCountAsExpense
+      ) {
+        cache = { inputs, byId: computeAlbumStats(inputs, getAlbumEntryIds()) };
+        albumStatsCacheRef.current = cache;
       }
-      cache = { inputs, byId: computeAlbumStats(inputs, membership.transactionIdsByAlbum) };
-      albumStatsCacheRef.current = cache;
-    }
-    return cache.byId.get(albumId) ?? EMPTY_ALBUM_STATS;
-  }, []);
+      return cache.byId.get(albumId) ?? EMPTY_ALBUM_STATS;
+    },
+    [getAlbumEntryIds],
+  );
 
   const locatedAlbums = useMemo<LocatedAlbum[]>(() => albums.filter(isLocatedAlbum), [albums]);
 
@@ -7719,6 +7773,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             addTransactionsToAlbum,
             removeTransactionsFromAlbum,
             getAlbumTransactionIds,
+            getAlbumOwnedTransactionIds,
+            getAlbumEntryIds,
             getAlbumTransactions,
             getAlbumStats,
             items: itemsWithStats,
@@ -7873,6 +7929,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       addTransactionsToAlbum,
       removeTransactionsFromAlbum,
       getAlbumTransactionIds,
+      getAlbumOwnedTransactionIds,
+      getAlbumEntryIds,
       getAlbumTransactions,
       getAlbumStats,
       itemsWithStats,

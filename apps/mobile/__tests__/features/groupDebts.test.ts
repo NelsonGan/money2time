@@ -203,6 +203,44 @@ describe('settling a debt', () => {
     expect(after(expenses, recorded)).toEqual([]);
   });
 
+  it('pays part of a simplified debt along the chain, and the rest stays owed', () => {
+    const expenses = [bill('a', 'bob', { anna: 20 }), bill('b', 'charlie', { bob: 20 })];
+    const open = openShares(expenses, []);
+    const payments = settleDebt(open, { from: 'anna', to: 'charlie', currency: 'MYR', amount: 5 });
+    expect(payments).toEqual([
+      { expenseId: 'a', from: 'anna', to: 'bob', amount: 5 },
+      { expenseId: 'b', from: 'bob', to: 'charlie', amount: 5 },
+    ]);
+    expect(text(simplifyDebts(after(expenses, payments)))).toEqual(['anna>charlie MYR 15']);
+  });
+
+  it('closes every bill when shares do not divide evenly', () => {
+    // RM100 three ways, twice, paid by different people: odd cents either way.
+    const expenses = [
+      bill('one', 'a', { a: 33.34, b: 33.33, c: 33.33 }),
+      bill('two', 'b', { a: 33.33, b: 33.34, c: 33.33 }),
+      bill('three', 'c', { a: 0.01, c: 0.02 }),
+    ];
+    const recorded: { expenseId: string; from: string; to: string; amount: number }[] = [];
+    for (let round = 0; round < 10; round += 1) {
+      const open = after(expenses, recorded);
+      const [debt] = simplifyDebts(open);
+      if (!debt) break;
+      recorded.push(...settleDebt(open, debt));
+    }
+    expect(after(expenses, recorded)).toEqual([]);
+    // Nobody was asked to pay more than their shares came to.
+    const paidBy = (member: string) =>
+      Math.round(
+        recorded
+          .filter((item) => item.from === member)
+          .reduce((sum, item) => sum + item.amount * 100, 0),
+      );
+    expect(paidBy('c')).toBe(6666);
+    expect(paidBy('a')).toBe(3334);
+    expect(paidBy('b')).toBe(3333);
+  });
+
   it('pays part of a debt across several bills, the oldest first', () => {
     const expenses = [
       bill('late', 'b', { a: 10 }, { date: '2026-11-14' }),

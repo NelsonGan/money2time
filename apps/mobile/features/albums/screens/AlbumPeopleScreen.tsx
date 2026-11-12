@@ -366,6 +366,7 @@ export function AlbumPeopleScreen({
       />
       <FormScrollView
         className="flex-1"
+        keyboardDismissMode="on-drag"
         contentContainerStyle={[
           { paddingHorizontal: SETTINGS_HORIZONTAL_PADDING, gap: 16 },
           bottomInset,

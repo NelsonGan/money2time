@@ -70,7 +70,7 @@ export function personKeyOf(personName: string | null | undefined): string {
  * it is with. Balances are rolled up from these, so a later source of debts
  * (a shared group's expenses) only has to produce entries.
  */
-export interface DebtEntry extends PersonDebtBill {
+interface DebtEntry extends PersonDebtBill {
   party: DebtParty;
 }
 
@@ -170,7 +170,7 @@ function debtEntriesOf(
  * both directions. It takes any list, so the debts of one album (or later a
  * shared group) are the entries of that album's transactions.
  */
-export function collectDebtEntries(
+function collectDebtEntries(
   transactions: readonly TransactionWithRelations[],
   options: AggregateSettleUpOptions,
 ): DebtEntry[] {
@@ -224,7 +224,7 @@ function netCurrencyTotals(
  * bucket. Totals are in the reporting currency and only include unpaid shares;
  * the `byCurrency` lists preserve the unpaid native subtotals.
  */
-export function rollUpDebtsByPerson(
+function rollUpDebtsByPerson(
   entries: readonly DebtEntry[],
   reportingCurrency: string,
 ): SettleUpSummary {
@@ -467,7 +467,7 @@ export function personSettlementRows(
 }
 
 /** A payment on one bill, as a part of settling up with a person. */
-export interface PartSettlement {
+interface PartSettlement {
   /** The row it is recorded on: the friend's unpaid row, or the payer's for `you_owe`. */
   splitId: string;
   direction: DebtDirection;
@@ -485,8 +485,12 @@ export function planPartSettlement(
   person: Pick<PersonDebt, 'netReporting' | 'netByCurrency' | 'bills'>,
   amount: number,
 ): PartSettlement[] {
-  const direction: DebtDirection = person.netReporting >= 0 ? 'owes_you' : 'you_owe';
-  const only = person.netByCurrency.length === 1 ? person.netByCurrency[0]!.currency : null;
+  // The net in one currency says who pays; the reporting net only when the
+  // bills are in several (frozen rates can turn its sign the other way).
+  const single = person.netByCurrency.length === 1 ? person.netByCurrency[0]! : null;
+  const only = single?.currency ?? null;
+  const direction: DebtDirection =
+    (single ? single.amount : person.netReporting) >= 0 ? 'owes_you' : 'you_owe';
   const open = person.bills
     .filter(
       (bill) =>

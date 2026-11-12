@@ -1498,6 +1498,7 @@ function MainShellScreen({
             <MemoSettleUpScreen
               onOpenPerson={openSettleUpPerson}
               onOpenTransaction={openSettleUpTransaction}
+              onOpenAlbum={openAlbumDetail}
               onOpenSettings={openSettleUpSettings}
               onSplitReceipt={openSettleUpSplitReceipt}
             />
@@ -2746,6 +2747,7 @@ function SettleUpRouteScreen({ navigation }: RootStackRouteProps<'SettleUp'>) {
       onOpenTransaction={(transactionId) =>
         navigation.navigate('SettleUpTransaction', { transactionId })
       }
+      onOpenAlbum={(albumId) => navigation.navigate('AlbumDetail', { albumId })}
       onOpenSettings={() => navigation.navigate('SettleUpSettings')}
       onSplitReceipt={() => promptSettleUpSplitReceipt(navigation, startScan)}
     />

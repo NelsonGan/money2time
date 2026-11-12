@@ -1,4 +1,4 @@
-import { ArrowRight, ChevronRight } from 'lucide-react-native';
+import { ArrowRight, Check, ChevronRight } from 'lucide-react-native';
 import React, { useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
 
@@ -11,10 +11,10 @@ import {
 } from '~/features/transactions/components/SettleUpConfirmSheet';
 import { debtPartyKey } from '~/features/transactions/lib/debtParty';
 import { personBalanceState } from '~/features/transactions/lib/settleUp';
-import { useSettleUpSummary } from '~/features/transactions/lib/useSettleUpSummary';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
+import type { SettleUpSummary } from '~/types';
 import { cn } from '~/utils';
 import { currencySymbolForCode } from '~/utils/currency';
 import { formatCurrency } from '~/utils/formatters';
@@ -24,7 +24,8 @@ import { useGroupDebts } from '../hooks/useGroupDebts';
 import type { GroupDebt } from '../lib/groupDebts';
 
 interface AlbumBalancesProps {
-  albumId: string;
+  /** The roll-up of the album's own bills (`useSettleUpSummary(albumId)`). */
+  summary: SettleUpSummary;
   group: AlbumGroup;
   /** Opens the person's page, with only this album's bills. */
   onOpenPerson: (personKey: string) => void;
@@ -53,7 +54,7 @@ interface DebtRow {
  * (simplified when the group has that on) and what the group spent.
  */
 export function AlbumBalances({
-  albumId,
+  summary,
   group,
   onOpenPerson,
   onOpenPeople,
@@ -61,7 +62,6 @@ export function AlbumBalances({
 }: AlbumBalancesProps) {
   const { settings, settleGroupDebt } = useApp();
   const colors = useThemeColors();
-  const summary = useSettleUpSummary(albumId);
   const groupId = group.share?.ledgerId ?? null;
   const selfId = group.self?.id ?? null;
   const shared = useGroupDebts(groupId, selfId);
@@ -120,6 +120,13 @@ export function AlbumBalances({
           },
         ];
       });
+
+  // The people with nothing to pay either way (settled, or level): their
+  // bills in the album are reached from here.
+  const settledPeople = summary.people.filter((person) => {
+    const state = personBalanceState(person);
+    return state === 'settled' || state === 'even';
+  });
 
   const settleContent = useMemo<SettleUpConfirmContent | null>(() => {
     if (!settling) return null;
@@ -283,10 +290,43 @@ export function AlbumBalances({
           </Text>
           {rows.map(debtRow)}
         </View>
-      ) : !open && !shared?.spending.size ? (
+      ) : summary.people.length === 0 && !shared?.spending.size ? (
         <Text variant="body" tone="muted" className="px-4 text-center">
           {I18n.t('albums.balances.empty_message')}
         </Text>
+      ) : null}
+
+      {settledPeople.length > 0 ? (
+        <View className="overflow-hidden rounded-2xl border border-border/15 bg-secondary/20">
+          <Text variant="label" tone="muted" className="px-4 pb-1 pt-3">
+            {I18n.t('transactions.settleUp.settled_up')}
+          </Text>
+          {settledPeople.map((person) => (
+            <Pressable
+              key={person.key}
+              onPress={() => {
+                void triggerHaptic('selection');
+                onOpenPerson(person.key);
+              }}
+              accessibilityRole="button"
+              className="flex-row items-center gap-2.5 px-4 py-2.5 active:opacity-70"
+            >
+              <View style={{ opacity: 0.55 }}>{avatar(person.name, false)}</View>
+              <Text variant="caption" tone="muted" numberOfLines={1} className="flex-1">
+                {shown(person.name)}
+              </Text>
+              {personBalanceState(person) === 'even' ? (
+                // Bills open both ways that come to nothing: not paid, just level.
+                <Text variant="caption" tone="muted">
+                  {I18n.t('transactions.settleUp.even_tag')}
+                </Text>
+              ) : (
+                <Check size={16} color={colors.success} />
+              )}
+              <ChevronRight size={16} color={colors.textMuted} />
+            </Pressable>
+          ))}
+        </View>
       ) : null}
 
       {shared && shared.spending.size > 0 ? (

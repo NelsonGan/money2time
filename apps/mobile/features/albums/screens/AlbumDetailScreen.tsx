@@ -39,6 +39,7 @@ import { ActivityTransactionList } from '~/features/transactions/components/Acti
 import { PersonAvatar } from '~/features/transactions/components/PersonAvatar';
 import { debtPartyKey } from '~/features/transactions/lib/debtParty';
 import { selectDuplicableTransactions } from '~/features/transactions/lib/duplicateTransaction';
+import { useSettleUpSummary } from '~/features/transactions/lib/useSettleUpSummary';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { useWideTabColumns } from '~/hooks/useWideTabColumns';
 import { I18n } from '~/lib/i18n';
@@ -118,10 +119,14 @@ export function AlbumDetailScreen({
     (Math.min(windowWidth, wideColumns.maxWidth ?? windowWidth) - SPLIT_PADDING * 2 - SPLIT_GAP) /
     2;
   const album = albums.find((a) => a.id === albumId);
-  // Who the album is split with. With people (or once shared) the page leads
-  // with their balances; an album nobody is split with reads as before.
+  // Who the album is split with. With people, once shared, or with a split
+  // bill in it, the page leads with its balances.
   const group = useAlbumGroup(album);
-  const showBalances = group.available && (group.others.length > 0 || group.share !== null);
+  // An album answers for its own bills.
+  const balances = useSettleUpSummary(albumId);
+  const showBalances =
+    group.available &&
+    (group.others.length > 0 || group.share !== null || balances.people.length > 0);
   const tabs = useMemo<DetailTab[]>(
     () =>
       showBalances ? ['balances', 'breakdown', 'transactions'] : ['breakdown', 'transactions'],
@@ -630,7 +635,7 @@ export function AlbumDetailScreen({
       contentContainerStyle={{ paddingBottom: insets.bottom + 32 }}
     >
       <AlbumBalances
-        albumId={albumId}
+        summary={balances}
         group={group}
         onOpenPerson={(personKey) => onOpenPerson(personKey, albumId)}
         onOpenPeople={() => onOpenPeople(albumId)}
@@ -798,7 +803,7 @@ export function AlbumDetailScreen({
                   {coverHero(SPLIT_COVER_HEIGHT, true)}
                   {showBalances && contentReady ? (
                     <AlbumBalances
-                      albumId={albumId}
+                      summary={balances}
                       group={group}
                       onOpenPerson={(personKey) => onOpenPerson(personKey, albumId)}
                       onOpenPeople={() => onOpenPeople(albumId)}

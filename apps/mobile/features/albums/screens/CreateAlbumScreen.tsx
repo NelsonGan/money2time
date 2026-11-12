@@ -10,6 +10,7 @@ import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { useApp } from '~/context/AppContext';
 import { useIsPro } from '~/context/ProContext';
 import { useCloudSync } from '~/features/cloudSync/CloudSyncContext';
+import { useSharedLedger } from '~/features/sharedLedgers/hooks/useSharedLedgers';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -46,9 +47,12 @@ export function CreateAlbumScreen({
   onCreated,
   onOpenProPaywall,
 }: CreateAlbumScreenProps) {
-  const { createAlbum, setAlbumPeople, setAlbumSimplifyDebts } = useApp();
+  const { createAlbum, setAlbumPeople, setAlbumSimplifyDebts, activeLedger } = useApp();
   const sync = useCloudSync();
   const isPro = useIsPro();
+  // An album in a shared ledger is not split with people: its entries already
+  // belong to the ledger's own.
+  const canSplit = useSharedLedger(activeLedger.id) === null;
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
 
@@ -208,7 +212,12 @@ export function CreateAlbumScreen({
           onBack={onClose}
         />
 
-        <FormScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 24 }}>
+        <FormScrollView
+          className="flex-1"
+          contentContainerStyle={{ paddingBottom: 24 }}
+          // The add-person field keeps the keyboard up; a scroll puts it away.
+          keyboardDismissMode="on-drag"
+        >
           {/* Full-bleed cover picker */}
           <Pressable
             onPress={pickCover}
@@ -274,34 +283,40 @@ export function CreateAlbumScreen({
               <ChevronRight size={20} color={themeColors.textMuted} />
             </Pressable>
 
-            <Text variant="label" tone="muted" className="mb-2 mt-5 px-1">
-              {I18n.t('albums.people.split_with')}
-            </Text>
-            <View className="gap-4">
-              <SplitWithCard
-                rows={rows}
-                canAdd={people.length < MAX_ALBUM_PEOPLE}
-                onAdd={(personName) => applyPeople(withPersonAdded(people, personName, newId()))}
-                onRename={(id, personName) =>
-                  applyPeople(withPersonRenamed(people, id, personName))
-                }
-                onRemove={(row) => row.id && setPeople(withPersonRemoved(people, row.id))}
-              />
-              <AlbumSharingCard
-                share={{ value: share, onChange: toggleShare }}
-                simplify={
-                  share
-                    ? {
-                        value: simplify,
-                        onChange: (next) => {
-                          void triggerHaptic('selection');
-                          setSimplify(next);
-                        },
-                      }
-                    : null
-                }
-              />
-            </View>
+            {canSplit ? (
+              <>
+                <Text variant="label" tone="muted" className="mb-2 mt-5 px-1">
+                  {I18n.t('albums.people.split_with')}
+                </Text>
+                <View className="gap-4">
+                  <SplitWithCard
+                    rows={rows}
+                    canAdd={people.length < MAX_ALBUM_PEOPLE}
+                    onAdd={(personName) =>
+                      applyPeople(withPersonAdded(people, personName, newId()))
+                    }
+                    onRename={(id, personName) =>
+                      applyPeople(withPersonRenamed(people, id, personName))
+                    }
+                    onRemove={(row) => row.id && setPeople(withPersonRemoved(people, row.id))}
+                  />
+                  <AlbumSharingCard
+                    share={{ value: share, onChange: toggleShare }}
+                    simplify={
+                      share
+                        ? {
+                            value: simplify,
+                            onChange: (next) => {
+                              void triggerHaptic('selection');
+                              setSimplify(next);
+                            },
+                          }
+                        : null
+                    }
+                  />
+                </View>
+              </>
+            ) : null}
           </View>
         </FormScrollView>
 

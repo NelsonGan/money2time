@@ -2,9 +2,9 @@
 // These rows sync with the group's own cloud database, not the user's: their
 // `ledger_id` is the group's id (features/cloudSync/lib/ledgerRows.ts).
 
-import { and, eq, isNull } from 'drizzle-orm';
+import { and, eq, isNull, like } from 'drizzle-orm';
 
-import { getDb } from '~/lib/db/client';
+import { getDb, getSQLite } from '~/lib/db/client';
 import {
   albumExpensesTable,
   albumGroupsTable,
@@ -206,12 +206,43 @@ class AlbumGroupsRepository {
     return id;
   }
 
+  /**
+   * Records several payments as one act (a debt paid along a chain of bills):
+   * all of them or none, under ids that say they belong together
+   * (`<batch>.<n>`), so undoing one undoes them all. Returns their ids, in
+   * the order given.
+   */
+  createSettlements(
+    groupId: string,
+    payments: readonly Pick<
+      AlbumSettlementInput,
+      'expenseId' | 'fromMember' | 'toMember' | 'amount' | 'currency'
+    >[],
+    stamp: Pick<AlbumSettlementInput, 'date' | 'createdBy'>,
+  ): string[] {
+    const batch = newId();
+    const ids = payments.map((_, index) => `${batch}.${index}`);
+    getSQLite().withTransactionSync(() => {
+      payments.forEach((payment, index) => {
+        this.createSettlement({ ...payment, ...stamp, groupId, id: ids[index] });
+      });
+    });
+    return ids;
+  }
+
+  /** Undoes a payment, and with it every other payment recorded in the same act. */
   softDeleteSettlement(id: string): void {
     const now = nowIso();
+    const batch = id.includes('.') ? id.slice(0, id.indexOf('.')) : null;
     getDb()
       .update(albumSettlementsTable)
       .set({ deletedAt: now, updatedAt: now })
-      .where(and(eq(albumSettlementsTable.id, id), isNull(albumSettlementsTable.deletedAt)))
+      .where(
+        and(
+          batch ? like(albumSettlementsTable.id, `${batch}.%`) : eq(albumSettlementsTable.id, id),
+          isNull(albumSettlementsTable.deletedAt),
+        ),
+      )
       .run();
   }
 

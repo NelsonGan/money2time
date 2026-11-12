@@ -75,6 +75,7 @@ export function SettleUpPersonScreen({
   const themeColors = useThemeColors();
   const {
     settings,
+    albums,
     getReceiptSplitForTransaction,
     settleUpWithPerson,
     recordSplitPayment,
@@ -91,6 +92,7 @@ export function SettleUpPersonScreen({
     [summary.people, personKey],
   );
   const state = person ? personBalanceState(person) : 'settled';
+  const albumName = albumId ? albums.find((album) => album.id === albumId)?.name : null;
 
   // Blank while the person is missing (the last share was removed) so the header
   // doesn't flash a fallback name for the one frame before the screen pops.
@@ -123,14 +125,19 @@ export function SettleUpPersonScreen({
 
   const settleContent = useMemo<SettleUpConfirmContent | null>(() => {
     if (!person || !settleVisible) return null;
+    // Who pays, as the amount below says it: the net in the one currency the
+    // bills share, else the reporting net (`planPartSettlement` reads it so).
+    const single = person.netByCurrency.length === 1 ? person.netByCurrency[0]!.amount : null;
+    const flow =
+      state === 'even' ? 'even' : (single ?? person.netReporting) >= 0 ? 'receive' : 'pay';
     return {
       personKey: person.key,
       personName: person.name,
-      flow: state === 'owes_you' ? 'receive' : state === 'you_owe' ? 'pay' : 'even',
+      flow,
       caption:
-        state === 'owes_you'
+        flow === 'receive'
           ? I18n.t('transactions.settleUp.person_pays_you', { name: title })
-          : state === 'you_owe'
+          : flow === 'pay'
             ? I18n.t('transactions.settleUp.you_pay_person', { name: title })
             : I18n.t('transactions.settleUp.even_caption'),
       amountText: netAmountText(person, formatNative, formatReporting),
@@ -299,6 +306,14 @@ export function SettleUpPersonScreen({
                   {personInitial(person.name)}
                 </Text>
               </View>
+              {/* Opened from an album: these are that album's bills alone. */}
+              {albumName ? (
+                <View className="mt-2.5 rounded-full bg-secondary/60 px-3 py-0.5">
+                  <Text variant="caption" tone="muted" numberOfLines={1}>
+                    {albumName}
+                  </Text>
+                </View>
+              ) : null}
               <Text variant="caption" tone="muted" className="mt-3 text-center">
                 {I18n.t(
                   state === 'owes_you'
