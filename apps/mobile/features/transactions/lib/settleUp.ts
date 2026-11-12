@@ -1,4 +1,5 @@
 import type {
+  DebtDirection,
   PersonDebt,
   PersonDebtBill,
   SettleUpByTransactionSummary,
@@ -463,6 +464,53 @@ export function personSettlementRows(
     }
   }
   return rows;
+}
+
+/** A payment on one bill, as a part of settling up with a person. */
+export interface PartSettlement {
+  /** The row it is recorded on: the friend's unpaid row, or the payer's for `you_owe`. */
+  splitId: string;
+  direction: DebtDirection;
+  /** In the bill's own currency. */
+  amount: number;
+}
+
+/**
+ * A part of the net with a person, as payments on bills: whoever pays on
+ * balance pays their oldest open shares first, as far as `amount` reaches.
+ * `amount` is in the currency the net is shown in: the bills' own when the
+ * net is in one currency, else the reporting currency.
+ */
+export function planPartSettlement(
+  person: Pick<PersonDebt, 'netReporting' | 'netByCurrency' | 'bills'>,
+  amount: number,
+): PartSettlement[] {
+  const direction: DebtDirection = person.netReporting >= 0 ? 'owes_you' : 'you_owe';
+  const only = person.netByCurrency.length === 1 ? person.netByCurrency[0]!.currency : null;
+  const open = person.bills
+    .filter(
+      (bill) =>
+        !bill.paidAt && bill.direction === direction && (only === null || bill.currency === only),
+    )
+    .sort((a, b) =>
+      a.date !== b.date ? (a.date < b.date ? -1 : 1) : a.splitId < b.splitId ? -1 : 1,
+    );
+  const payments: PartSettlement[] = [];
+  let left = Math.round(amount * 100);
+  for (const bill of open) {
+    if (left <= 0) break;
+    // What the bill counts for in the currency `amount` is in.
+    const worth = Math.round((only === null ? bill.reportingAmount : bill.amount) * 100);
+    if (worth <= 0) continue;
+    const paid = Math.min(left, worth);
+    left -= paid;
+    payments.push({
+      splitId: bill.splitId,
+      direction,
+      amount: paid === worth ? bill.amount : roundCents((bill.amount * paid) / worth),
+    });
+  }
+  return payments.filter((payment) => payment.amount > 0);
 }
 
 /**

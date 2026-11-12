@@ -137,6 +137,7 @@ export function AlbumBalances({
         { name: shown },
       ),
       amountText: formatCurrency(settling.amount, currencySymbolForCode(settling.currency)),
+      partial: { full: settling.amount, prefix: currencySymbolForCode(settling.currency) },
       confirmLabel: I18n.t('transactions.settleUp.settle_up'),
     };
   }, [group.members, selfId, settling]);
@@ -311,8 +312,10 @@ export function AlbumBalances({
       <SettleUpConfirmSheet
         content={settleContent}
         onClose={() => setSettling(null)}
-        onConfirm={(accountId) => {
-          if (groupId && settling) settleGroupDebt(groupId, settling, accountId);
+        onConfirm={(accountId, amount) => {
+          if (groupId && settling) {
+            settleGroupDebt(groupId, { ...settling, amount: amount ?? settling.amount }, accountId);
+          }
           setSettling(null);
         }}
       />

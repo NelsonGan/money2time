@@ -19,7 +19,7 @@ import type {
 import { SplitReceiptShareModal } from '~/features/transactions/components/SplitReceiptShareModal';
 import { avatarColor, personInitial } from '~/features/transactions/lib/personAvatar';
 import { personItemNames } from '~/features/transactions/lib/receiptSplitShare';
-import { personBalanceState } from '~/features/transactions/lib/settleUp';
+import { personBalanceState, planPartSettlement } from '~/features/transactions/lib/settleUp';
 import {
   buildSettleUpShareCards,
   type SettleUpShareCard,
@@ -73,7 +73,13 @@ export function SettleUpPersonScreen({
   onOpenTransaction,
 }: SettleUpPersonScreenProps) {
   const themeColors = useThemeColors();
-  const { settings, getReceiptSplitForTransaction, settleUpWithPerson } = useApp();
+  const {
+    settings,
+    getReceiptSplitForTransaction,
+    settleUpWithPerson,
+    recordSplitPayment,
+    recordPayBack,
+  } = useApp();
 
   const [shareVisible, setShareVisible] = useState(false);
   const [settleVisible, setSettleVisible] = useState(false);
@@ -128,6 +134,19 @@ export function SettleUpPersonScreen({
             ? I18n.t('transactions.settleUp.you_pay_person', { name: title })
             : I18n.t('transactions.settleUp.even_caption'),
       amountText: netAmountText(person, formatNative, formatReporting),
+      // Less of it can be paid, in the currency the net is shown in.
+      partial:
+        state === 'even'
+          ? undefined
+          : person.netByCurrency.length === 1
+            ? {
+                full: Math.abs(person.netByCurrency[0]!.amount),
+                prefix: currencySymbolForCode(person.netByCurrency[0]!.currency),
+              }
+            : {
+                full: Math.abs(person.netReporting),
+                prefix: `${person.netByCurrency.length > 1 ? '≈ ' : ''}${settings.currencySymbol}`,
+              },
       // How the net came about, only when shares go both ways.
       detail:
         person.totalReporting > 0 && person.owedReporting > 0
@@ -139,7 +158,7 @@ export function SettleUpPersonScreen({
           : null,
       confirmLabel: I18n.t('transactions.settleUp.settle_up'),
     };
-  }, [person, settleVisible, title, state, formatNative, formatReporting]);
+  }, [person, settleVisible, title, state, formatNative, formatReporting, settings.currencySymbol]);
 
   // Receipt: title is the person's name, one line per bill with its date. A
   // bill saved through Split by Item lists the person's items as bullets, and
@@ -360,9 +379,22 @@ export function SettleUpPersonScreen({
           <SettleUpConfirmSheet
             content={settleContent}
             onClose={() => setSettleVisible(false)}
-            onConfirm={(accountId) => {
+            onConfirm={(accountId, amount) => {
               setSettleVisible(false);
-              settleUpWithPerson(person.key, accountId, albumId);
+              if (amount === null) {
+                settleUpWithPerson(person.key, accountId, albumId);
+                return;
+              }
+              // A part of it: onto the oldest open bills of whoever pays.
+              for (const payment of planPartSettlement(person, amount)) {
+                if (payment.direction === 'owes_you') {
+                  recordSplitPayment(payment.splitId, payment.amount, {
+                    paybackAccountId: accountId,
+                  });
+                } else {
+                  recordPayBack(payment.splitId, payment.amount, { accountId });
+                }
+              }
             }}
           />
         </>

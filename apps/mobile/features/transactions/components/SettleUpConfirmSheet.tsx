@@ -1,4 +1,4 @@
-import { ChevronRight } from 'lucide-react-native';
+import { ChevronRight, Pencil } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -6,6 +6,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AccountLogo, AccountPickerSheet, Button, Text } from '~/components/ui';
 import { ThemeModal } from '~/components/ui/theme-modal';
 import { useApp } from '~/context/AppContext';
+import {
+  evaluateExpression,
+  sanitizeInitialAmount,
+} from '~/features/transactions/components/editor/calculatorEngine';
+import { MiniNumpad } from '~/features/transactions/components/editor/MiniNumpad';
 import {
   type SettleUpFlow,
   SettleUpFlowAvatars,
@@ -16,6 +21,7 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
+import { formatCurrency, normalizeMoneyAmount } from '~/utils/formatters';
 
 /** What a settlement is about to record, already worded and formatted. */
 export interface SettleUpConfirmContent {
@@ -27,6 +33,12 @@ export interface SettleUpConfirmContent {
   caption: string;
   /** The amount that changes hands. */
   amountText: string;
+  /**
+   * That amount as a number, when less of it can be paid: tapping the amount
+   * opens a pad, and a smaller one settles part of it. `prefix` is what goes
+   * before the number ("RM", "≈ RM").
+   */
+  partial?: { full: number; prefix: string };
   /** A muted line under the amount (how a net came about, or the bill); null to omit. */
   detail?: string | null;
   confirmLabel: string;
@@ -35,16 +47,19 @@ export interface SettleUpConfirmContent {
 interface SettleUpConfirmSheetProps {
   content: SettleUpConfirmContent | null;
   onClose: () => void;
-  /** The account the money arrived in or left from; null when the user has none. */
-  onConfirm: (accountId: string | null) => void;
+  /**
+   * The account the money arrived in or left from (null when the user has
+   * none), and how much of it: null for all of it.
+   */
+  onConfirm: (accountId: string | null, amount: number | null) => void;
 }
 
 /**
  * The confirmation for Settle up with a person: everything open between the
  * two, both ways, in one payment. It shows who pays whom as two avatars and an
- * arrow, then the amount, which is fixed, so all it asks is which account the
- * money moved through. (Paying one bill back, which can be in parts, uses
- * SplitPaymentSheet.)
+ * arrow, then the amount, and asks which account the money moved through.
+ * Tapping the amount opens a pad to pay less of it. (Paying one bill back
+ * uses SplitPaymentSheet.)
  */
 export function SettleUpConfirmSheet({ content, onClose, onConfirm }: SettleUpConfirmSheetProps) {
   const themeColors = useThemeColors();
@@ -54,6 +69,8 @@ export function SettleUpConfirmSheet({ content, onClose, onConfirm }: SettleUpCo
 
   const [accountId, setAccountId] = useState<string | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
+  // The amount as typed, once the user chose to pay less than all of it.
+  const [expression, setExpression] = useState<string | null>(null);
 
   // The sheet keeps what it showed while it slides away, instead of emptying
   // the moment the caller clears its content.
@@ -70,7 +87,23 @@ export function SettleUpConfirmSheet({ content, onClose, onConfirm }: SettleUpCo
     if (!open) return;
     setAccountId(openingAccountId.current());
     setPickerOpen(false);
+    setExpression(null);
   }, [open]);
+
+  const partial = shown?.partial ?? null;
+  const editing = partial !== null && expression !== null;
+  const typed = editing ? evaluateExpression(expression) : 0;
+  const tooMuch = editing && typed > partial.full + 0.005;
+  const isPart = editing && typed < partial.full - 0.005;
+  const format = (value: number) => formatCurrency(value, partial?.prefix ?? '');
+  const confirm = () => {
+    if (editing && (tooMuch || !(typed > 0))) {
+      void triggerHaptic('warning');
+      return;
+    }
+    void triggerHaptic('success');
+    onConfirm(hasAccounts ? accountId : null, isPart ? normalizeMoneyAmount(typed) : null);
+  };
 
   const account = accountId ? getAccountById(accountId) : null;
   const hasAccounts = accounts.length > 0;
@@ -87,7 +120,11 @@ export function SettleUpConfirmSheet({ content, onClose, onConfirm }: SettleUpCo
         <Pressable accessible={false} className="absolute inset-0 bg-black/40" onPress={onClose} />
         <View
           className="overflow-hidden rounded-t-[28px] bg-background"
-          style={[sheetColumnStyle, { paddingBottom: Math.max(insets.bottom, 16) + 8 }]}
+          // The pad brings its own bottom inset.
+          style={[
+            sheetColumnStyle,
+            editing ? null : { paddingBottom: Math.max(insets.bottom, 16) + 8 },
+          ]}
         >
           {shown ? (
             <>
@@ -103,22 +140,49 @@ export function SettleUpConfirmSheet({ content, onClose, onConfirm }: SettleUpCo
                 <Text variant="caption" tone="muted" numberOfLines={1} className="mt-3">
                   {shown.caption}
                 </Text>
-                <Text
-                  variant="display"
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
-                  className={cn(
-                    'mt-0.5 text-center',
-                    shown.flow === 'receive'
-                      ? 'text-success'
-                      : shown.flow === 'pay'
-                        ? 'text-destructive'
-                        : '',
-                  )}
+                <Pressable
+                  disabled={!partial || editing}
+                  onPress={() => {
+                    if (!partial) return;
+                    void triggerHaptic('selection');
+                    setExpression(
+                      sanitizeInitialAmount(String(normalizeMoneyAmount(partial.full))),
+                    );
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('transactions.settleUp.payment_amount')}
+                  testID="settle-up-amount"
+                  className="mt-0.5 flex-row items-center gap-2 active:opacity-70"
                 >
-                  {shown.amountText}
-                </Text>
-                {shown.detail ? (
+                  <Text
+                    variant="display"
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    className={cn(
+                      'text-center',
+                      tooMuch || shown.flow === 'pay'
+                        ? 'text-destructive'
+                        : shown.flow === 'receive'
+                          ? 'text-success'
+                          : '',
+                    )}
+                  >
+                    {editing ? `${partial.prefix}${expression || '0'}` : shown.amountText}
+                  </Text>
+                  {partial && !editing ? <Pencil size={16} color={themeColors.textMuted} /> : null}
+                </Pressable>
+                {editing ? (
+                  <Text variant="caption" tone={tooMuch ? 'error' : 'muted'} className="mt-1">
+                    {tooMuch
+                      ? I18n.t('transactions.settleUp.payment_too_much', {
+                          owed: format(partial.full),
+                        })
+                      : I18n.t('transactions.settleUp.payment_left_of', {
+                          left: format(Math.max(0, normalizeMoneyAmount(partial.full - typed))),
+                          total: format(partial.full),
+                        })}
+                  </Text>
+                ) : shown.detail ? (
                   <Text
                     variant="caption"
                     tone="muted"
@@ -161,17 +225,24 @@ export function SettleUpConfirmSheet({ content, onClose, onConfirm }: SettleUpCo
                 </Pressable>
               ) : null}
 
-              <View className="px-4 pt-4">
-                <Button
-                  onPress={() => {
-                    void triggerHaptic('success');
-                    onConfirm(hasAccounts ? accountId : null);
-                  }}
-                  className="w-full"
-                >
-                  <Text>{shown.confirmLabel}</Text>
-                </Button>
-              </View>
+              {editing ? (
+                <View className="pt-3">
+                  <MiniNumpad
+                    initialExpression={expression}
+                    onValueChange={setExpression}
+                    onConfirm={confirm}
+                    confirmLabel={
+                      isPart ? I18n.t('transactions.settleUp.part_paid') : shown.confirmLabel
+                    }
+                  />
+                </View>
+              ) : (
+                <View className="px-4 pt-4">
+                  <Button onPress={confirm} className="w-full">
+                    <Text>{shown.confirmLabel}</Text>
+                  </Button>
+                </View>
+              )}
             </>
           ) : null}
         </View>
