@@ -3003,6 +3003,63 @@ const fil = {
     delete_body: 'Tatanggalin nito ang album. Hindi binubura ang iyong mga transaksyon.',
     cover_permission_title: 'Kailangan ng access sa photos',
     cover_permission_body: 'Payagan ang access sa photos para pumili ng cover image.',
+    people: {
+      title: 'Mga tao',
+      split_with: 'Hatiin kasama',
+      me_tag: 'Ikaw',
+      joined: 'Sumali na',
+      not_joined: 'Hindi pa sumasali',
+      add_person: 'Magdagdag ng tao',
+      add: 'Idagdag',
+      unnamed: 'Kaibigan',
+      name_taken: 'May ganyang pangalan na rito.',
+      full: 'Hanggang {{max}} tao ang puwedeng kahati sa isang album.',
+      remove_title: 'Alisin si {{name}}?',
+      remove_message: 'Hindi na sila kahati sa mga bagong bill sa album na ito.',
+      remove_in_use: 'Nasa isang bill sa album na ito si {{name}}. Alisin muna sila sa mga bill.',
+      remove_joined_title: 'Alisin si {{name}} sa album?',
+      remove_joined_message:
+        'Hindi na nila matatanggap ang mga bill ng album na ito. Mananatili ang mga bill na kasama sila.',
+      hint: 'Habang aktibo ang album na ito, nagsisimulang hati sa mga taong ito ang bagong gastos.',
+      who_title: 'Alin ka rito?',
+      who_message: 'Piliin ang pangalan mo para mapunta sa ledger mo ang bahagi mo sa bawat bill.',
+      who_new: 'Wala ako sa listahan',
+      rename_title: 'Palitan ang pangalan',
+    },
+    share: {
+      row: 'Ibahagi ang album na ito',
+      caption: 'Nakikita ng lahat ang mga bill at kung sino ang may utang kanino.',
+      link_note: 'Gumagana nang 24 oras. Makakasali ang sinumang may link.',
+      stop_title: 'Itigil ang pagbabahagi ng {{name}}?',
+      stop_message:
+        'Mananatili sa lahat ang album kasama ang sarili nilang mga entry, pero hindi na ito mag-a-update sa pagitan ninyo.',
+      leave: 'Umalis sa album',
+      leave_title: 'Umalis sa {{name}}?',
+      leave_message:
+        'Mananatili sa iyo ang album kasama ang sarili mong mga entry, pero hindi na ito mag-a-update.',
+      paused: 'Naka-pause. Magsi-sync ulit kapag may Pro ang isa sa mga kasali.',
+      limit: 'Hanggang {{max}} album ang puwede mong ibahagi nang sabay.',
+      full: 'Hanggang {{max}} tao ang puwedeng sumali sa isang album.',
+    },
+    balances: {
+      tab: 'Mga balanse',
+      empty_message: 'Maghati ng bill sa album na ito at lalabas ito rito.',
+      total_line: 'Kabuuang gastos {{total}} · Bahagi mo {{share}}',
+      add_people_title: 'Hatiin ang album na ito',
+      add_people_message:
+        'Idagdag ang mga kasama sa biyaheng ito. Magsisimulang hati sa kanila ang mga bagong gastos.',
+      add_people_action: 'Magdagdag ng mga tao',
+    },
+    join: {
+      title: 'Shared na album',
+      note: 'Idadagdag ito bilang album sa sarili mong ledger, kasama ang bahagi mo sa bawat bill.',
+      own: 'Isa ito sa sarili mong mga album.',
+      already: 'Kasali ka na sa album na ito.',
+    },
+    bill: {
+      delete_shared:
+        'Nasa shared na album ang bill na ito. Kapag binura mo, mawawala ito para sa lahat.',
+    },
   },
   assets: {
     tab_accounts: 'Mga account',

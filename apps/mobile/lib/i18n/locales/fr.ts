@@ -2999,6 +2999,65 @@ const fr = {
     delete_body: "Cela supprime l'album. Vos transactions ne sont pas supprimées.",
     cover_permission_title: 'Accès aux photos requis',
     cover_permission_body: "Autorisez l'accès aux photos pour choisir une image de couverture.",
+    people: {
+      title: 'Personnes',
+      split_with: 'Partager avec',
+      me_tag: 'Vous',
+      joined: 'A rejoint',
+      not_joined: 'Pas encore rejoint',
+      add_person: 'Ajouter une personne',
+      add: 'Ajouter',
+      unnamed: 'Ami',
+      name_taken: "Quelqu'un porte déjà ce nom ici.",
+      full: 'Un album se partage avec {{max}} personnes au plus.',
+      remove_title: 'Retirer {{name}} ?',
+      remove_message:
+        'Les nouvelles notes de cet album ne seront plus partagées avec cette personne.',
+      remove_in_use: "{{name}} figure sur une note de cet album. Retirez-la d'abord de ses notes.",
+      remove_joined_title: "Retirer {{name}} de l'album ?",
+      remove_joined_message:
+        'Cette personne ne recevra plus les notes de cet album. Les notes où elle figure restent.',
+      hint: 'Tant que cet album est actif, une nouvelle dépense commence partagée avec ces personnes.',
+      who_title: 'Lequel êtes-vous ?',
+      who_message:
+        'Choisissez votre nom pour que votre part de chaque note arrive dans votre livre.',
+      who_new: 'Je ne suis pas dans la liste',
+      rename_title: 'Renommer',
+    },
+    share: {
+      row: 'Partager cet album',
+      caption: 'Tout le monde voit les notes et qui doit quoi à qui.',
+      link_note: "Valable 24 heures. Toute personne qui l'a peut rejoindre.",
+      stop_title: 'Arrêter de partager {{name}} ?',
+      stop_message:
+        "Chacun garde l'album avec ses propres écritures, mais il ne se met plus à jour entre vous.",
+      leave: "Quitter l'album",
+      leave_title: 'Quitter {{name}} ?',
+      leave_message:
+        "Vous gardez l'album avec vos propres écritures, mais il ne se met plus à jour.",
+      paused: "En pause. La synchronisation reprend dès qu'un membre a Pro.",
+      limit: "Vous pouvez partager jusqu'à {{max}} albums à la fois.",
+      full: "Jusqu'à {{max}} personnes peuvent rejoindre un album.",
+    },
+    balances: {
+      tab: 'Soldes',
+      empty_message: 'Partagez une note dans cet album et elle apparaîtra ici.',
+      total_line: 'Total dépensé {{total}} · Votre part {{share}}',
+      add_people_title: 'Partager cet album',
+      add_people_message:
+        'Ajoutez les personnes de ce voyage. Les nouvelles dépenses commenceront partagées avec elles.',
+      add_people_action: 'Ajouter des personnes',
+    },
+    join: {
+      title: 'Album partagé',
+      note: 'Il est ajouté comme album dans votre propre livre, avec votre part de chaque note.',
+      own: "C'est l'un de vos propres albums.",
+      already: 'Vous êtes déjà dans cet album.',
+    },
+    bill: {
+      delete_shared:
+        'Cette note est dans un album partagé. La supprimer la retire pour tout le monde.',
+    },
   },
   assets: {
     tab_accounts: 'Comptes',

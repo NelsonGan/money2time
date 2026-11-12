@@ -10,11 +10,22 @@ import {
   countUnpaidDebtors,
 } from './settleUp';
 
-/** Shared reporting-currency wiring for the Settle Up roll-ups. */
-function useSettleUpContext() {
-  const { settings, rateTable } = useApp();
-  const { transactions } = useTransactions();
+/**
+ * Shared reporting-currency wiring for the Settle Up roll-ups. `albumId`
+ * keeps only that album's bills: an album's balances are the same roll-up
+ * over its own entries.
+ */
+function useSettleUpContext(albumId?: string) {
+  const { settings, rateTable, getAlbumTransactionIds, albums } = useApp();
+  const { transactions: all } = useTransactions();
   const reportingCurrency = settings.currencyCode;
+  const transactions = useMemo(() => {
+    if (!albumId) return all;
+    const ids = new Set(getAlbumTransactionIds(albumId));
+    return all.filter((transaction) => ids.has(transaction.id));
+    // `albums` changes when an album's entries do.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [albumId, all, albums, getAlbumTransactionIds]);
 
   const rateToReporting = useCallback(
     (currency: string) => convert(1, currency, reportingCurrency, rateTable).rateUsed,
@@ -29,8 +40,8 @@ function useSettleUpContext() {
  * reporting currency. Shared by the Settle Up list and the per-person page so
  * the aggregation wiring lives in one place. Memoized on the transactions + rates.
  */
-export function useSettleUpSummary(): SettleUpSummary {
-  const { transactions, reportingCurrency, rateToReporting } = useSettleUpContext();
+export function useSettleUpSummary(albumId?: string): SettleUpSummary {
+  const { transactions, reportingCurrency, rateToReporting } = useSettleUpContext(albumId);
   return useMemo(
     () => aggregateSettleUpByPerson(transactions, { reportingCurrency, rateToReporting }),
     [transactions, reportingCurrency, rateToReporting],

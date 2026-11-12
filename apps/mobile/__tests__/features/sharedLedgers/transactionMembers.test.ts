@@ -180,7 +180,6 @@ describe('stamping a new entry', () => {
       amount: 5,
       createdBy: 'user-mei',
       memberId: 'user-mei',
-      albumGroupId: null,
     });
   });
 
@@ -201,12 +200,10 @@ describe('stamping a new entry', () => {
     expect(withEntryStamp({ memberId: null }, 'home')).toEqual({
       createdBy: 'user-mei',
       memberId: null,
-      albumGroupId: null,
     });
     expect(withEntryStamp({ createdBy: 'user-ana', memberId: 'user-ana' }, 'home')).toEqual({
       createdBy: 'user-ana',
       memberId: 'user-ana',
-      albumGroupId: null,
     });
   });
 

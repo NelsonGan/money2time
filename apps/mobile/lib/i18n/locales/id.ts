@@ -2974,6 +2974,63 @@ const id = {
     delete_body: 'Ini menghapus album. Transaksi Anda tidak dihapus.',
     cover_permission_title: 'Perlu akses foto',
     cover_permission_body: 'Izinkan akses foto untuk memilih gambar sampul.',
+    people: {
+      title: 'Orang',
+      split_with: 'Bagi dengan',
+      me_tag: 'Kamu',
+      joined: 'Sudah bergabung',
+      not_joined: 'Belum bergabung',
+      add_person: 'Tambah orang',
+      add: 'Tambah',
+      unnamed: 'Teman',
+      name_taken: 'Sudah ada yang memakai nama itu di sini.',
+      full: 'Satu album dibagi dengan paling banyak {{max}} orang.',
+      remove_title: 'Hapus {{name}}?',
+      remove_message: 'Tagihan baru di album ini tidak lagi dibagi dengannya.',
+      remove_in_use: '{{name}} ada di sebuah tagihan di album ini. Keluarkan dulu dari tagihannya.',
+      remove_joined_title: 'Keluarkan {{name}} dari album?',
+      remove_joined_message:
+        'Dia tidak lagi menerima tagihan album ini. Tagihan yang memuatnya tetap ada.',
+      hint: 'Selama album ini aktif, pengeluaran baru langsung dibagi dengan orang-orang ini.',
+      who_title: 'Yang mana kamu?',
+      who_message: 'Pilih namamu agar bagianmu dari tiap tagihan masuk ke buku kasmu.',
+      who_new: 'Saya tidak ada di daftar',
+      rename_title: 'Ganti nama',
+    },
+    share: {
+      row: 'Bagikan album ini',
+      caption: 'Semua orang melihat tagihan dan siapa berutang kepada siapa.',
+      link_note: 'Berlaku 24 jam. Siapa pun yang memilikinya bisa bergabung.',
+      stop_title: 'Berhenti membagikan {{name}}?',
+      stop_message:
+        'Semua orang tetap memiliki album dengan catatannya sendiri, tetapi tidak lagi diperbarui di antara kalian.',
+      leave: 'Keluar dari album',
+      leave_title: 'Keluar dari {{name}}?',
+      leave_message:
+        'Kamu tetap memiliki album dengan catatanmu sendiri, tetapi tidak lagi diperbarui.',
+      paused: 'Dijeda. Sinkron lagi saat ada anggota yang punya Pro.',
+      limit: 'Kamu bisa membagikan hingga {{max}} album sekaligus.',
+      full: 'Hingga {{max}} orang bisa bergabung ke satu album.',
+    },
+    balances: {
+      tab: 'Saldo',
+      empty_message: 'Bagi sebuah tagihan di album ini dan akan muncul di sini.',
+      total_line: 'Total pengeluaran {{total}} · Bagianmu {{share}}',
+      add_people_title: 'Bagi album ini',
+      add_people_message:
+        'Tambahkan orang-orang di perjalanan ini. Pengeluaran baru akan langsung dibagi dengan mereka.',
+      add_people_action: 'Tambah orang',
+    },
+    join: {
+      title: 'Album bersama',
+      note: 'Ditambahkan sebagai album di buku kasmu sendiri, dengan bagianmu dari tiap tagihan.',
+      own: 'Ini salah satu albummu sendiri.',
+      already: 'Kamu sudah ada di album ini.',
+    },
+    bill: {
+      delete_shared:
+        'Tagihan ini ada di album bersama. Menghapusnya akan menghapusnya untuk semua orang.',
+    },
   },
   assets: {
     tab_accounts: 'Akun',

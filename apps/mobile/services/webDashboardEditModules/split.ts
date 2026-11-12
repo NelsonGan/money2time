@@ -254,6 +254,9 @@ function planUpdate(
   // Split Bill rows cannot carry, so an edit from a page that does not know
   // would turn it into a bill the user paid with nobody owing.
   if (isFriendPaidBill(liveSplits(current))) return tools.refuse('invalid');
+  // So is a shared album's bill: it is the group's, and this entry only
+  // follows from it (features/albums/services/albumGroupSync.ts).
+  if (current.albumGroupId) return tools.refuse('invalid');
   const { set } = op;
   // A refund and its expense stay in step, as the core planner keeps them.
   const moves = 'amount' in set || 'currency' in set || 'type' in set || 'accountId' in set;
@@ -393,6 +396,8 @@ function planSettle(
   // Nobody owes the user on a bill a friend paid; paying that friend back is
   // done in the app (payBackPayer), not by settling a share.
   if (isFriendPaidBill(liveSplits(parent))) return tools.refuse('invalid');
+  // A payment on a shared album's bill is the group's, recorded in the app.
+  if (parent.albumGroupId) return tools.refuse('invalid');
   if (op.op === 'remove' || op.op === 'payback') {
     // Settle Up offers these on a share still owed: the bin (deleteSplit, after
     // "Remove this request?") and the account chip (updateSplitPaybackAccount).

@@ -3004,6 +3004,66 @@ const de = {
     delete_body: 'Damit wird das Album entfernt. Deine Transaktionen werden nicht gelöscht.',
     cover_permission_title: 'Fotozugriff erforderlich',
     cover_permission_body: 'Erlaube den Fotozugriff, um ein Titelbild auszuwählen.',
+    people: {
+      title: 'Personen',
+      split_with: 'Teilen mit',
+      me_tag: 'Du',
+      joined: 'Beigetreten',
+      not_joined: 'Noch nicht beigetreten',
+      add_person: 'Person hinzufügen',
+      add: 'Hinzufügen',
+      unnamed: 'Freund',
+      name_taken: 'Jemand hier hat bereits diesen Namen.',
+      full: 'Ein Album wird mit bis zu {{max}} Personen geteilt.',
+      remove_title: '{{name}} entfernen?',
+      remove_message:
+        'Neue Rechnungen in diesem Album werden nicht mehr mit dieser Person geteilt.',
+      remove_in_use:
+        '{{name}} steht auf einer Rechnung in diesem Album. Entferne die Person zuerst von den Rechnungen.',
+      remove_joined_title: '{{name}} aus dem Album entfernen?',
+      remove_joined_message:
+        'Die Person erhält keine Rechnungen dieses Albums mehr. Rechnungen, auf denen sie steht, bleiben.',
+      hint: 'Solange dieses Album aktiv ist, wird eine neue Ausgabe zunächst mit diesen Personen geteilt.',
+      who_title: 'Wer davon bist du?',
+      who_message:
+        'Wähle deinen Namen, damit dein Anteil jeder Rechnung in deinem Kassenbuch landet.',
+      who_new: 'Ich stehe nicht auf der Liste',
+      rename_title: 'Umbenennen',
+    },
+    share: {
+      row: 'Dieses Album teilen',
+      caption: 'Alle sehen die Rechnungen und wer wem etwas schuldet.',
+      link_note: 'Gilt 24 Stunden. Jeder mit dem Link kann beitreten.',
+      stop_title: '{{name}} nicht mehr teilen?',
+      stop_message:
+        'Alle behalten das Album mit ihren eigenen Einträgen, aber es wird nicht mehr untereinander aktualisiert.',
+      leave: 'Album verlassen',
+      leave_title: '{{name}} verlassen?',
+      leave_message:
+        'Du behältst das Album mit deinen eigenen Einträgen, aber es wird nicht mehr aktualisiert.',
+      paused: 'Pausiert. Es synchronisiert wieder, sobald jemand im Album Pro hat.',
+      limit: 'Du kannst bis zu {{max}} Alben gleichzeitig teilen.',
+      full: 'Bis zu {{max}} Personen können einem Album beitreten.',
+    },
+    balances: {
+      tab: 'Salden',
+      empty_message: 'Teile eine Rechnung in diesem Album, dann erscheint sie hier.',
+      total_line: 'Insgesamt ausgegeben {{total}} · Dein Anteil {{share}}',
+      add_people_title: 'Dieses Album teilen',
+      add_people_message:
+        'Füge die Personen dieser Reise hinzu. Neue Ausgaben werden dann zunächst mit ihnen geteilt.',
+      add_people_action: 'Personen hinzufügen',
+    },
+    join: {
+      title: 'Geteiltes Album',
+      note: 'Es wird als Album in deinem eigenen Kassenbuch hinzugefügt, mit deinem Anteil jeder Rechnung.',
+      own: 'Das ist eines deiner eigenen Alben.',
+      already: 'Du bist bereits in diesem Album.',
+    },
+    bill: {
+      delete_shared:
+        'Diese Rechnung ist in einem geteilten Album. Wenn du sie löschst, wird sie für alle entfernt.',
+    },
   },
   assets: {
     tab_accounts: 'Konten',

@@ -2,6 +2,7 @@ import {
   Check,
   CircleAlert,
   Crown,
+  Images,
   Info,
   PauseCircle,
   ShieldCheck,
@@ -33,11 +34,12 @@ import {
 } from '~/features/cloudSync/services/sharedLedgerStore';
 import { ledgerDisplayName } from '~/features/ledgers/lib/ledgerDisplay';
 import { useThemeColors } from '~/hooks/useThemeColors';
+import { DEFAULT_LEDGER_ID } from '~/lib/db/ledgerScope';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 
 import { SharedLedgerHero } from '../components/SharedLedgerHero';
-import { useSharedLedgers } from '../hooks/useSharedLedgers';
+import { useSharedAlbums, useSharedLedger, useSharedLedgers } from '../hooks/useSharedLedgers';
 import { sharingErrorMessage } from '../lib/sharing';
 
 interface JoinLedgerScreenProps {
@@ -45,17 +47,34 @@ interface JoinLedgerScreenProps {
   onClose: () => void;
   /** After joining: the ledger is open, go to the app. */
   onJoined: () => void;
+  /** After joining a shared album: open it, where the user says who they are. */
+  onJoinedAlbum: (albumId: string) => void;
 }
 
 /**
  * Where an invite link lands: what the ledger is and who shares it, a sign-in
- * if needed (anyone can join, Pro or not), then Join.
+ * if needed (anyone can join, Pro or not), then Join. A link to a shared
+ * album lands here too: joining it adds the album to a ledger of the user's
+ * own instead of opening someone's ledger.
  */
-export function JoinLedgerScreen({ code, onClose, onJoined }: JoinLedgerScreenProps) {
+export function JoinLedgerScreen({
+  code,
+  onClose,
+  onJoined,
+  onJoinedAlbum,
+}: JoinLedgerScreenProps) {
   const enabled = useCloudSyncEnabled();
   const sync = useCloudSync();
-  const { ledgers, switchLedger } = useApp();
+  const { ledgers, switchLedger, activeLedger } = useApp();
   const sharedLedgers = useSharedLedgers();
+  const sharedAlbums = useSharedAlbums();
+  // An album is never split inside a shared ledger: a joined one is made in
+  // the user's main ledger then, which opens with it.
+  const openLedgerIsShared = useSharedLedger(activeLedger.id) !== null;
+  const openAlbum = (albumId: string) => {
+    if (openLedgerIsShared) switchLedger(DEFAULT_LEDGER_ID);
+    onJoinedAlbum(albumId);
+  };
   const colors = useThemeColors();
   const insets = useSafeAreaInsets();
   const [preview, setPreview] = useState<InvitePreview | null>(null);
@@ -85,6 +104,10 @@ export function JoinLedgerScreen({ code, onClose, onJoined }: JoinLedgerScreenPr
     try {
       const ledgerId = await sync.joinLedger(code);
       void triggerHaptic('success');
+      if (preview?.kind === 'album') {
+        openAlbum(ledgerId);
+        return;
+      }
       switchLedger(ledgerId);
       onJoined();
     } catch (e) {
@@ -107,12 +130,30 @@ export function JoinLedgerScreen({ code, onClose, onJoined }: JoinLedgerScreenPr
       : null;
   const hereRole = here ? (sharedHere?.role ?? 'owner') : null;
 
+  const isAlbum = preview?.kind === 'album';
+  const albumHere = isAlbum && id ? (sharedAlbums.find((a) => a.ledgerId === id) ?? null) : null;
+
   let action: React.ReactNode;
   if (!enabled) {
     action = <NoticeBanner icon={Info} text={I18n.t('shared_ledgers.join_unavailable')} />;
   } else if (!preview) {
     action = null;
-  } else if (here && hereRole) {
+  } else if (albumHere) {
+    action = (
+      <View className="gap-3">
+        <NoticeBanner
+          icon={albumHere.role === 'owner' ? Crown : Check}
+          text={
+            albumHere.role === 'owner' ? I18n.t('albums.join.own') : I18n.t('albums.join.already')
+          }
+        />
+        <FatButton
+          label={I18n.t('shared_ledgers.open_ledger', { name: preview.name })}
+          onPress={() => openAlbum(albumHere.ledgerId)}
+        />
+      </View>
+    );
+  } else if (here && hereRole && !isAlbum) {
     action = (
       <View className="gap-3">
         <NoticeBanner
@@ -164,14 +205,20 @@ export function JoinLedgerScreen({ code, onClose, onJoined }: JoinLedgerScreenPr
           onPress={() => void join()}
         />
         {sync.user?.email ? <IdentityRow email={sync.user.email} /> : null}
-        <NoticeBanner icon={ShieldCheck} text={I18n.t('shared_ledgers.join_note')} />
+        <NoticeBanner
+          icon={ShieldCheck}
+          text={I18n.t(isAlbum ? 'albums.join.note' : 'shared_ledgers.join_note')}
+        />
       </View>
     );
   }
 
   return (
     <SettingsPageLayout>
-      <SettingsHeader title={I18n.t('shared_ledgers.join_title')} onBack={onClose} />
+      <SettingsHeader
+        title={I18n.t(isAlbum ? 'albums.join.title' : 'shared_ledgers.join_title')}
+        onBack={onClose}
+      />
       <ScrollView
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{
@@ -185,7 +232,11 @@ export function JoinLedgerScreen({ code, onClose, onJoined }: JoinLedgerScreenPr
         {preview ? (
           <Card className="items-center gap-2 px-5 py-6">
             <View className="h-[72px] w-[72px] items-center justify-center rounded-full bg-primary/10">
-              <CategoryEmoji icon={preview.emoji} size={38} />
+              {isAlbum ? (
+                <Images size={32} color={colors.primary} />
+              ) : (
+                <CategoryEmoji icon={preview.emoji} size={38} />
+              )}
             </View>
             <Text variant="title" className="mt-1 text-center" numberOfLines={2}>
               {preview.name}

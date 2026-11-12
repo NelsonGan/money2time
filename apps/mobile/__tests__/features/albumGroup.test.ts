@@ -169,6 +169,7 @@ describe('one member’s own side of a bill', () => {
         memberId: 'aisha',
         amount: 10,
         paidAt: '2026-11-13T08:00:00.000Z',
+        date: '2026-11-13',
         kind: 'received',
       },
     ]);

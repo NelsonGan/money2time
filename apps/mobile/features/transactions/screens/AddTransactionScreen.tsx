@@ -1,6 +1,11 @@
 import React, { useCallback, useMemo } from 'react';
 
+import { PRO_LIMITS } from '~/constants/proLimits';
 import { useApp } from '~/context/AppContext';
+import { useIsPro } from '~/context/ProContext';
+import { albumBillRows, useAlbumBillTarget } from '~/features/albums/hooks/useAlbumBillTarget';
+import { useAlbumGroup } from '~/features/albums/hooks/useAlbumGroup';
+import { splitWithPeople } from '~/features/albums/lib/albumPeople';
 import {
   DEFAULT_INSTALMENT_CHOICE,
   type InstalmentChoice,
@@ -37,8 +42,34 @@ export function AddTransactionScreen({
   openSplitBillOnMount,
   startInstalmentPlan = false,
 }: AddTransactionScreenProps) {
-  const { createTransaction, createTransactionWithSplits, markSplitPaid, createInstalmentPlan } =
-    useApp();
+  const {
+    createTransaction,
+    createTransactionWithSplits,
+    markSplitPaid,
+    createInstalmentPlan,
+    albums,
+    activeAlbumId,
+    saveAlbumBill,
+    getUnpaidSplitBillCount,
+  } = useApp();
+  // The active album's people: a new expense starts split with them. In a
+  // shared album that is everyone in its group, once this phone has said who
+  // it is; there the bill is saved through the group, and counts toward no
+  // free limit (the album syncs on someone's Pro).
+  const activeAlbum = albums.find((album) => album.id === activeAlbumId) ?? null;
+  const albumGroup = useAlbumGroup(activeAlbum);
+  const albumGroupId = useAlbumBillTarget();
+  const groupBill = albumGroupId !== null && albumGroup.self !== null;
+  const isPro = useIsPro();
+  const withinSplitLimit =
+    isPro || groupBill || getUnpaidSplitBillCount() < PRO_LIMITS.FREE_MAX_UNSETTLED_SPLIT_BILLS;
+  const splitWith = useMemo(
+    () =>
+      albumGroup.available && withinSplitLimit && (!albumGroup.share || albumGroup.self)
+        ? splitWithPeople(albumGroup.people)
+        : [],
+    [albumGroup, withinSplitLimit],
+  );
   const { blocked, activeAccountCount } = useNewTransactionGate();
   const canStartPlan = useCanStartInstalmentPlan();
 
@@ -100,6 +131,14 @@ export function AddTransactionScreen({
 
   const handleSubmitWithSplits = useCallback(
     (input: CreateTransactionInput, splits: SplitDraft[]) => {
+      // A shared album's bill is the group's: this phone's entry follows from it.
+      if (albumGroupId) {
+        const saved = saveAlbumBill(albumGroupId, input, albumBillRows(splits));
+        if (saved) {
+          if (saved.mine) requestHighlightTransaction(saved.id);
+          return;
+        }
+      }
       // A friend paid: the expense is the user's own share, on no account
       // until they pay that friend back, and nobody owes the user anything.
       if (draftPayer(splits)) {
@@ -144,7 +183,7 @@ export function AddTransactionScreen({
         markSplitPaid(id, { paybackAccountId });
       });
     },
-    [createTransactionWithSplits, markSplitPaid],
+    [albumGroupId, createTransactionWithSplits, markSplitPaid, saveAlbumBill],
   );
 
   if (blocked) {
@@ -164,6 +203,8 @@ export function AddTransactionScreen({
       initialValues={initialValues}
       openSplitBillOnMount={openSplitBillOnMount}
       instalmentOptions={instalmentOptions}
+      defaultSplitWith={splitWith}
+      groupBill={groupBill}
     />
   );
 }

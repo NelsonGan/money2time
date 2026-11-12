@@ -420,6 +420,17 @@ interface TransactionEditorScreenProps {
   onDelete?: () => void;
   initialValues?: Partial<TransactionEditorInitialValues>;
   initialSplits?: SplitDraft[];
+  /**
+   * A new expense starts split evenly with these people (an active album's
+   * "Split with"), the user paying. The rows are as open to change as any
+   * split: removing every person makes it an ordinary expense.
+   */
+  defaultSplitWith?: readonly { id: string; name: string }[];
+  /**
+   * The bill belongs to a shared album's group. Its payments are recorded on
+   * its page in Balances, not staged here, and it counts toward no free limit.
+   */
+  groupBill?: boolean;
   titleOverride?: string;
   subtitleOverride?: string;
   submitLabelOverride?: string;
@@ -686,6 +697,8 @@ export function TransactionEditorScreen({
   onDelete,
   initialValues,
   initialSplits,
+  defaultSplitWith,
+  groupBill = false,
   titleOverride,
   subtitleOverride,
   submitLabelOverride,
@@ -1047,7 +1060,31 @@ export function TransactionEditorScreen({
   const startsAsUnsettledSplitBill = initialPayer
     ? !initialPayer.settled
     : !!initialSplits && initialSplits.some((s) => !s.isSelf && !s.paid && Number(s.amount) > 0);
-  const [splitMode, setSplitMode] = useState(hasInitialSplits);
+  // The active album's people, as the rows a new expense starts with. Read
+  // once: the editor keeps its own rows after it opens.
+  const [defaultSplitRows] = useState<SplitDraft[] | null>(() => {
+    if (mode !== 'create' || hasInitialSplits || hideSplitMode || recurringOptions) return null;
+    if ((initialValues?.type ?? 'expense') !== 'expense') return null;
+    if (!defaultSplitWith?.length) return null;
+    return [
+      {
+        id: newId(),
+        personName: I18n.t('transactions.editor.split.me_label'),
+        amount: '0.00',
+        isSelf: true,
+        paybackAccountId: null,
+      },
+      ...defaultSplitWith.map((person) => ({
+        id: newId(),
+        personName: person.name,
+        amount: '0.00',
+        isSelf: false,
+        paybackAccountId: null,
+        albumMemberId: person.id,
+      })),
+    ];
+  });
+  const [splitMode, setSplitMode] = useState(hasInitialSplits || defaultSplitRows !== null);
   // The instalment plan chosen for this new expense, or null for an ordinary
   // one. Kept while the type changes so switching back restores it.
   const [instalmentChoice, setInstalmentChoice] = useState<InstalmentChoice | null>(
@@ -1057,7 +1094,7 @@ export function TransactionEditorScreen({
   // The sheet's choice while its "First payment" row has the date picker
   // open: the sheet comes back to it once a date is picked.
   const [instalmentDraft, setInstalmentDraft] = useState<InstalmentChoice | null>(null);
-  const [splits, setSplits] = useState<SplitDraft[]>(initialSplits ?? []);
+  const [splits, setSplits] = useState<SplitDraft[]>(initialSplits ?? defaultSplitRows ?? []);
   const [splitEvenly, setSplitEvenly] = useState(!hasInitialSplits);
   // Whether the pushed Split Bill route is open. Drives the live session
   // republish so the screen mirrors edits made back here.
@@ -1787,6 +1824,7 @@ export function TransactionEditorScreen({
       // split bill (or is mid-edit in split mode) is already counted, so managing
       // it isn't blocked.
       if (
+        !groupBill &&
         !startsAsUnsettledSplitBill &&
         !splitMode &&
         !checkLimit('split_bills', getUnpaidSplitBillCount())
@@ -1804,13 +1842,13 @@ export function TransactionEditorScreen({
       const nextSplits = hadSplits ? splits : buildInitialSplitRows();
       // Fresh itemized rows must NOT start in split-evenly — there is no total
       // to divide, and the toggle is hidden on the itemized page.
-      const nextEvenly = hadSplits ? splitEvenly : !itemized;
+      // Rows that were following the amount (an album's default split) are
+      // free-form too once there is no amount to divide.
+      const nextEvenly = itemized ? false : hadSplits ? splitEvenly : true;
       splitBillSnapshotRef.current = { splits, amount, splitEvenly, splitMode };
       if (!splitMode) setSplitMode(true);
-      if (!hadSplits) {
-        setSplits(nextSplits);
-        setSplitEvenly(nextEvenly);
-      }
+      if (!hadSplits) setSplits(nextSplits);
+      if (nextEvenly !== splitEvenly) setSplitEvenly(nextEvenly);
       setSplitItemized(itemized);
       setSplitRouteOpen(true);
       // Publish synchronously (batched with the navigation) so the pushed screen
@@ -1828,6 +1866,7 @@ export function TransactionEditorScreen({
       canOpenSplitBill,
       checkLimit,
       getUnpaidSplitBillCount,
+      groupBill,
       startsAsUnsettledSplitBill,
       navigation,
       splitEvenly,
@@ -2005,7 +2044,9 @@ export function TransactionEditorScreen({
         // Mark paid is an "update existing transaction" action — settling a
         // friend adjusts the saved amount and stages a payback. It makes no
         // sense while creating a brand-new bill, so it's edit-mode only.
-        onMarkPaid: mode === 'edit' ? handleSplitMarkPaidLocal : undefined,
+        // Nor on a shared album's bill, where a payment is the group's and is
+        // recorded on the bill's page in Balances.
+        onMarkPaid: mode === 'edit' && !groupBill ? handleSplitMarkPaidLocal : undefined,
         onMarkUnpaid: handleSplitMarkUnpaidLocal,
         newlyPaidIds,
         onDone: handleDoneSplitBill,
@@ -2023,6 +2064,7 @@ export function TransactionEditorScreen({
       handleSplitMarkPaidLocal,
       handleSplitMarkUnpaidLocal,
       handleSplitChange,
+      groupBill,
       mode,
       newlyPaidIds,
       setSplitSession,

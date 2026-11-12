@@ -742,9 +742,10 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   /**
    * Settles everything open with one person, both ways, through `accountId`:
    * their unpaid shares are marked paid into it and the bills they paid are
-   * paid back from it, so the account moves by the net.
+   * paid back from it, so the account moves by the net. `albumId` settles
+   * only that album's bills with them.
    */
-  settleUpWithPerson: (personKey: string, accountId: string | null) => void;
+  settleUpWithPerson: (personKey: string, accountId: string | null, albumId?: string) => void;
 
   /** Reimbursements: an expense someone else pays back. */
   markTransactionReimbursed: (
@@ -5025,6 +5026,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               isPayer: s.isPayer,
               shareAmount: s.shareAmount,
               memberId: s.memberId,
+              albumMemberId: s.albumMemberId,
             });
           });
           if (receiptSplit) {
@@ -5156,6 +5158,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 isPayer: next.isPayer,
                 shareAmount: next.shareAmount,
                 memberId: next.memberId,
+                albumMemberId: next.albumMemberId,
               });
             } else {
               transactionSplitsRepository.createWithId(next.id, {
@@ -5169,6 +5172,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 isPayer: next.isPayer,
                 shareAmount: next.shareAmount,
                 memberId: next.memberId,
+                albumMemberId: next.albumMemberId,
               });
             }
           });
@@ -6017,8 +6021,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   );
 
   const settleUpWithPerson = useCallback(
-    (personKey: string, accountId: string | null) => {
-      const rows = personSettlementRows(transactionsRef.current, personKey);
+    (personKey: string, accountId: string | null, albumId?: string) => {
+      const inAlbum = albumId ? new Set(albumsRepository.getTransactionIds(albumId)) : null;
+      const rows = personSettlementRows(
+        inAlbum
+          ? transactionsRef.current.filter((tx) => inAlbum.has(tx.id))
+          : transactionsRef.current,
+        personKey,
+      );
       if (rows.receive.length === 0 && rows.pay.length === 0) return;
       rows.receive.forEach((splitId) => markSplitPaid(splitId, { paybackAccountId: accountId }));
       rows.pay.forEach((splitId) => payBackPayer(splitId, { accountId, via: 'settle_up' }));

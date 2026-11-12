@@ -2979,6 +2979,63 @@ const ms = {
     delete_body: 'Ini mengeluarkan album. Transaksi anda tidak dipadam.',
     cover_permission_title: 'Akses foto diperlukan',
     cover_permission_body: 'Benarkan akses foto untuk memilih imej kulit.',
+    people: {
+      title: 'Orang',
+      split_with: 'Bahagi dengan',
+      me_tag: 'Anda',
+      joined: 'Telah sertai',
+      not_joined: 'Belum sertai',
+      add_person: 'Tambah orang',
+      add: 'Tambah',
+      unnamed: 'Rakan',
+      name_taken: 'Sudah ada orang dengan nama itu di sini.',
+      full: 'Satu album dibahagi dengan sehingga {{max}} orang.',
+      remove_title: 'Buang {{name}}?',
+      remove_message: 'Bil baharu dalam album ini tidak lagi dibahagi dengannya.',
+      remove_in_use:
+        '{{name}} ada dalam satu bil album ini. Keluarkan dia daripada bil itu dahulu.',
+      remove_joined_title: 'Keluarkan {{name}} daripada album?',
+      remove_joined_message: 'Dia tidak lagi menerima bil album ini. Bil yang ada namanya kekal.',
+      hint: 'Selagi album ini aktif, perbelanjaan baharu bermula dibahagi dengan orang-orang ini.',
+      who_title: 'Yang mana satu anda?',
+      who_message: 'Pilih nama anda supaya bahagian anda bagi setiap bil masuk ke lejar anda.',
+      who_new: 'Saya tiada dalam senarai',
+      rename_title: 'Tukar nama',
+    },
+    share: {
+      row: 'Kongsi album ini',
+      caption: 'Semua orang nampak bil dan siapa berhutang kepada siapa.',
+      link_note: 'Sah selama 24 jam. Sesiapa yang ada pautan ini boleh sertai.',
+      stop_title: 'Berhenti kongsi {{name}}?',
+      stop_message:
+        'Semua orang kekal dengan album dan catatan masing-masing, tetapi ia tidak lagi dikemas kini antara anda.',
+      leave: 'Keluar album',
+      leave_title: 'Keluar daripada {{name}}?',
+      leave_message:
+        'Anda kekal dengan album dan catatan anda sendiri, tetapi ia tidak lagi dikemas kini.',
+      paused: 'Dijeda. Ia segerak semula apabila seseorang di dalamnya ada Pro.',
+      limit: 'Anda boleh kongsi sehingga {{max}} album pada satu masa.',
+      full: 'Sehingga {{max}} orang boleh sertai satu album.',
+    },
+    balances: {
+      tab: 'Baki',
+      empty_message: 'Bahagi satu bil dalam album ini dan ia akan muncul di sini.',
+      total_line: 'Jumlah belanja {{total}} · Bahagian anda {{share}}',
+      add_people_title: 'Bahagi album ini',
+      add_people_message:
+        'Tambah orang dalam perjalanan ini. Perbelanjaan baharu akan bermula dibahagi dengan mereka.',
+      add_people_action: 'Tambah orang',
+    },
+    join: {
+      title: 'Album kongsi',
+      note: 'Ia ditambah sebagai album dalam lejar anda sendiri, dengan bahagian anda bagi setiap bil.',
+      own: 'Ini salah satu album anda sendiri.',
+      already: 'Anda sudah berada dalam album ini.',
+    },
+    bill: {
+      delete_shared:
+        'Bil ini berada dalam album kongsi. Memadamnya akan membuangnya untuk semua orang.',
+    },
   },
   assets: {
     tab_accounts: 'Akaun',

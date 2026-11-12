@@ -2996,6 +2996,63 @@ const nl = {
     delete_body: 'Hiermee wordt het album verwijderd. Je transacties worden niet verwijderd.',
     cover_permission_title: "Toegang tot foto's nodig",
     cover_permission_body: "Geef toegang tot foto's om een omslagafbeelding te kiezen.",
+    people: {
+      title: 'Personen',
+      split_with: 'Delen met',
+      me_tag: 'Jij',
+      joined: 'Doet mee',
+      not_joined: 'Doet nog niet mee',
+      add_person: 'Persoon toevoegen',
+      add: 'Toevoegen',
+      unnamed: 'Vriend',
+      name_taken: 'Iemand hier heeft die naam al.',
+      full: 'Een album wordt met maximaal {{max}} personen gedeeld.',
+      remove_title: '{{name}} verwijderen?',
+      remove_message: 'Nieuwe rekeningen in dit album worden niet meer met diegene gedeeld.',
+      remove_in_use:
+        '{{name}} staat op een rekening in dit album. Haal diegene eerst van de rekeningen.',
+      remove_joined_title: '{{name}} uit het album verwijderen?',
+      remove_joined_message:
+        'Diegene krijgt de rekeningen van dit album niet meer. Rekeningen waar diegene op staat, blijven.',
+      hint: 'Zolang dit album actief is, begint een nieuwe uitgave gedeeld met deze personen.',
+      who_title: 'Welke ben jij?',
+      who_message: 'Kies je naam, zodat jouw deel van elke rekening in je kasboek komt.',
+      who_new: 'Ik sta niet in de lijst',
+      rename_title: 'Naam wijzigen',
+    },
+    share: {
+      row: 'Dit album delen',
+      caption: 'Iedereen ziet de rekeningen en wie wat aan wie verschuldigd is.',
+      link_note: '24 uur geldig. Iedereen met de link kan meedoen.',
+      stop_title: 'Stoppen met delen van {{name}}?',
+      stop_message:
+        'Iedereen houdt het album met de eigen posten, maar het wordt niet meer onderling bijgewerkt.',
+      leave: 'Album verlaten',
+      leave_title: '{{name}} verlaten?',
+      leave_message: 'Je houdt het album met je eigen posten, maar het wordt niet meer bijgewerkt.',
+      paused: 'Gepauzeerd. Het synchroniseert weer zodra iemand in het album Pro heeft.',
+      limit: 'Je kunt maximaal {{max}} albums tegelijk delen.',
+      full: 'Maximaal {{max}} personen kunnen aan een album meedoen.',
+    },
+    balances: {
+      tab: "Saldo's",
+      empty_message: 'Deel een rekening in dit album en die verschijnt hier.',
+      total_line: 'Totaal uitgegeven {{total}} · Jouw deel {{share}}',
+      add_people_title: 'Dit album delen',
+      add_people_message:
+        'Voeg de mensen van deze reis toe. Nieuwe uitgaven beginnen dan gedeeld met hen.',
+      add_people_action: 'Personen toevoegen',
+    },
+    join: {
+      title: 'Gedeeld album',
+      note: 'Het wordt als album aan je eigen kasboek toegevoegd, met jouw deel van elke rekening.',
+      own: 'Dit is een van je eigen albums.',
+      already: 'Je doet al mee aan dit album.',
+    },
+    bill: {
+      delete_shared:
+        'Deze rekening staat in een gedeeld album. Als je hem verwijdert, verdwijnt hij voor iedereen.',
+    },
   },
   assets: {
     tab_accounts: 'Rekeningen',

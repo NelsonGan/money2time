@@ -60,7 +60,8 @@ export type RootStackParamList = {
   // Scan intent: 'split' routes the parsed result into Split by Item.
   SettleUp: undefined;
   SettleUpSettings: undefined;
-  SettleUpPerson: { personKey: string };
+  /** `albumId`: only that album's bills with the person. */
+  SettleUpPerson: { personKey: string; albumId?: string };
   SettleUpTransaction: { transactionId: string };
   SplitBill: { toast?: string } | undefined;
   // Itemized receipt split editor. Its launch payload (parsed items, seed
@@ -112,6 +113,8 @@ export type RootStackParamList = {
   EditAlbumTransactions: { albumId: string };
   AddAlbumTransactions: { albumId: string };
   EditAlbumDetails: { albumId: string };
+  /** Who an album is split with, and its sharing. */
+  AlbumPeople: { albumId: string };
   ItemEditor: { itemId?: string } | undefined;
   // Full-page item icon picker. Its selected id + onSelect callback ride a
   // module bridge (itemIconPickerBridge) rather than params, so the route stays

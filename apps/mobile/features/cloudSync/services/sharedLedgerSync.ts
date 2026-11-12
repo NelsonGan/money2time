@@ -5,6 +5,12 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import {
+  albumState,
+  beginAlbumGroup,
+  ensureLocalAlbum,
+  releaseAlbumGroup,
+} from '~/features/albums/services/albumGroupStore';
 import { getSQLite } from '~/lib/db/client';
 import { getActiveLedgerId } from '~/lib/db/ledgerScope';
 import {
@@ -13,12 +19,6 @@ import {
   type BackupRestoreOptions,
   type ImportResult,
 } from '~/services/dataManagementService';
-import {
-  albumState,
-  beginAlbumGroup,
-  ensureLocalAlbum,
-  releaseAlbumGroup,
-} from '~/features/albums/services/albumGroupStore';
 import { restoreLedgerChoices } from '~/utils/backupLedgerPolicy';
 
 import { CloudSyncApiError, ledgerMediaPath, type SyncCredentials } from './cloudSyncApi';

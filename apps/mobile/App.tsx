@@ -69,6 +69,7 @@ import { ThemeProvider, useResolvedTheme } from '~/context/ThemeContext';
 import {
   AddAlbumTransactionsScreen,
   AlbumDetailScreen,
+  AlbumPeopleScreen,
   AlbumsScreen,
   CreateAlbumScreen,
   EditAlbumDetailsScreen,
@@ -2450,10 +2451,29 @@ function AlbumDetailRouteScreen({ route, navigation }: RootStackRouteProps<'Albu
       onDeleted={() => navigation.goBack()}
       onAddTransactions={(albumId) => navigation.navigate('AddAlbumTransactions', { albumId })}
       onEditDetails={(albumId) => navigation.navigate('EditAlbumDetails', { albumId })}
+      onOpenPeople={(albumId) => navigation.navigate('AlbumPeople', { albumId })}
+      onOpenPerson={(personKey, albumId) =>
+        navigation.navigate('SettleUpPerson', { personKey, albumId })
+      }
       onOpenTransaction={(transaction) =>
         navigation.navigate('EditTransaction', { transactionId: transaction.id })
       }
       onOpenBreakdown={(payload) => navigation.navigate('InsightsDrilldown', payload)}
+    />
+  );
+}
+
+function AlbumPeopleRouteScreen({ route, navigation }: RootStackRouteProps<'AlbumPeople'>) {
+  return (
+    <AlbumPeopleScreen
+      albumId={route.params.albumId}
+      onBack={() => navigation.goBack()}
+      onOpenCloudSync={() => {
+        navigation.popToTop();
+        requestOpenTab('settings');
+        requestOpenSettingsScreen('CloudSync');
+      }}
+      onOpenProPaywall={(source) => navigation.navigate('ProPaywall', { source })}
     />
   );
 }
@@ -2636,6 +2656,11 @@ function JoinLedgerRouteScreen({ navigation, route }: RootStackRouteProps<'JoinL
       code={route.params.code}
       onClose={() => navigation.goBack()}
       onJoined={() => navigation.goBack()}
+      onJoinedAlbum={(albumId) => {
+        // The album, then its People page on top, where they say who they are.
+        navigation.replace('AlbumDetail', { albumId });
+        navigation.navigate('AlbumPeople', { albumId });
+      }}
     />
   );
 }
@@ -2729,6 +2754,7 @@ function SettleUpPersonRouteScreen({ route, navigation }: RootStackRouteProps<'S
   return (
     <SettleUpPersonScreen
       personKey={route.params.personKey}
+      albumId={route.params.albumId}
       onBack={() => navigation.goBack()}
       onOpenSettings={() => navigation.navigate('SettleUpSettings')}
       onOpenTransaction={(transactionId) =>
@@ -3393,6 +3419,7 @@ function AppContent() {
               component={AddAlbumTransactionsRouteScreen}
             />
             <RootStack.Screen name="EditAlbumDetails" component={EditAlbumDetailsRouteScreen} />
+            <RootStack.Screen name="AlbumPeople" component={AlbumPeopleRouteScreen} />
             <RootStack.Screen name="InsightsDrilldown" component={InsightsDrilldownRouteScreen} />
             <RootStack.Screen name="RecurringEditor" component={RecurringEditorRouteScreen} />
             <RootStack.Screen name="ProPaywall" component={ProPaywallRouteScreen} />

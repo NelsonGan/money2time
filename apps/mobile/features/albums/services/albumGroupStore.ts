@@ -9,18 +9,21 @@ import { getSQLite } from '~/lib/db/client';
 import { DEFAULT_LEDGER_ID, getActiveLedgerId } from '~/lib/db/ledgerScope';
 import { albumGroupsRepository } from '~/lib/repositories/albumGroupsRepository';
 import { parseAlbumPeople } from '~/lib/repositories/mappers';
-import type { AlbumMember } from '~/types';
+import type { AlbumExpense, AlbumMember } from '~/types';
 import { nowIso } from '~/utils/id';
 
 import { cleanPersonName, personNameKey } from '../lib/albumPeople';
 
 const cache = new Map<string, AlbumMember[]>();
+const expenseCache = new Map<string, AlbumExpense[]>();
 const listeners = new Set<() => void>();
 const NO_MEMBERS: AlbumMember[] = [];
+const NO_EXPENSES: AlbumExpense[] = [];
 
 /** A group's rows changed (a sync, an edit, a share or its end): readers look again. */
 export function notifyAlbumGroups(): void {
   cache.clear();
+  expenseCache.clear();
   for (const listener of listeners) listener();
 }
 
@@ -42,6 +45,20 @@ export function listGroupMembers(groupId: string): AlbumMember[] {
   }
   cache.set(groupId, members);
   return members;
+}
+
+/** A group's bills that still stand. The same array until something changes. */
+export function listGroupExpenses(groupId: string): AlbumExpense[] {
+  const known = expenseCache.get(groupId);
+  if (known) return known;
+  let expenses: AlbumExpense[];
+  try {
+    expenses = albumGroupsRepository.listExpenses(groupId).filter((item) => !item.deletedAt);
+  } catch {
+    expenses = NO_EXPENSES;
+  }
+  expenseCache.set(groupId, expenses);
+  return expenses;
 }
 
 interface AlbumRow {

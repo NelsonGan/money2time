@@ -81,6 +81,12 @@ export interface SplitDraft {
   paidBack?: number;
   /** The Cloud Sync account this person is, once people can be real users. */
   memberId?: string | null;
+  /**
+   * The album person this row is for (an active album's "Split with", or a
+   * shared album's member). Dropped when the name is retyped: the row is then
+   * whoever that name is.
+   */
+  albumMemberId?: string | null;
 }
 
 interface SplitBillModalProps {
@@ -206,6 +212,7 @@ function toSplitDraftInputs(
       sortOrder: idx,
       paid: s.paid,
       memberId: s.memberId ?? null,
+      albumMemberId: s.albumMemberId ?? null,
     };
     if (!friendPaid) return { ...row, isPayer: false, shareAmount: null };
     return {
@@ -651,7 +658,11 @@ export function SplitBillModal({
 
   const handleNameChange = useCallback(
     (index: number, value: string) => {
-      onChange(splits.map((row, i) => (i === index ? { ...row, personName: value } : row)));
+      onChange(
+        splits.map((row, i) =>
+          i === index ? { ...row, personName: value, albumMemberId: null } : row,
+        ),
+      );
     },
     [onChange, splits],
   );

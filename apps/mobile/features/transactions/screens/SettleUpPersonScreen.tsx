@@ -35,6 +35,8 @@ import { formatCurrency, formatShortDate, normalizeMoneyAmount } from '~/utils/f
 
 interface SettleUpPersonScreenProps {
   personKey: string;
+  /** Only this album's bills with the person (opened from the album's Balances). */
+  albumId?: string;
   onBack: () => void;
   onOpenSettings: () => void;
   /** Open one bill, where its shares are marked paid, undone or removed. */
@@ -65,6 +67,7 @@ function netAmountText(
  */
 export function SettleUpPersonScreen({
   personKey,
+  albumId,
   onBack,
   onOpenSettings,
   onOpenTransaction,
@@ -75,7 +78,7 @@ export function SettleUpPersonScreen({
   const [shareVisible, setShareVisible] = useState(false);
   const [settleVisible, setSettleVisible] = useState(false);
 
-  const summary = useSettleUpSummary();
+  const summary = useSettleUpSummary(albumId);
 
   const person = useMemo(
     () => summary.people.find((p) => p.key === personKey) ?? null,
@@ -359,7 +362,7 @@ export function SettleUpPersonScreen({
             onClose={() => setSettleVisible(false)}
             onConfirm={(accountId) => {
               setSettleVisible(false);
-              settleUpWithPerson(person.key, accountId);
+              settleUpWithPerson(person.key, accountId, albumId);
             }}
           />
         </>

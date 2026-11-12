@@ -719,6 +719,9 @@ function planTransaction(
     if (moves && ((current.splits?.length ?? 0) > 0 || current.reimbursementOfId)) {
       return refuse('amount_locked');
     }
+    // A shared album's bill keeps its day and title from the group, where
+    // everyone in it sees them; they are changed in the app.
+    if (current.albumGroupId && ('date' in set || 'note' in set)) return refuse('invalid');
     const payload = transactionPayload(ctx, set, current);
     if (!payload.ok) return payload;
     const input = changedFields(payload.value, current);
