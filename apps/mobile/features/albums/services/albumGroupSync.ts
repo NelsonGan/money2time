@@ -399,6 +399,11 @@ function projectExpense(
       .map((share, index) => [share.memberId, index + 1]),
   );
 
+  // Where a member's share is expected to be paid back to: what the share's
+  // own row says, else the user's "paid to" account, else the bill's own.
+  const expectedAccount = (memberId: string) =>
+    rootOf(memberId)?.paybackAccountId ?? env.defaultPaybackAccountId ?? tx.account_id;
+
   // Entries a payment needs beside the bill: a transfer for money paid back
   // into another account, an expense for a part of the user's share.
   const linked = new Map<string, { id: string; payment: LocalPayment; accountId: string | null }>();
@@ -407,7 +412,7 @@ function projectExpense(
     let paybackAccountId: string | null = null;
     let paidTransactionId: string | null = null;
     if (payment?.kind === 'received') {
-      paybackAccountId = paymentAccount(payment, env.defaultPaybackAccountId ?? tx.account_id);
+      paybackAccountId = paymentAccount(payment, expectedAccount(payment.memberId));
       if (tx.account_id && paybackAccountId && paybackAccountId !== tx.account_id) {
         paidTransactionId =
           prior.get(payment.settlementId)?.linkedId ?? `${expense.id}:t:${payment.settlementId}`;
@@ -429,8 +434,7 @@ function projectExpense(
     } else if (payment?.kind === 'sent_final') {
       paybackAccountId = accountId;
     } else if (row.role === 'member' && bill.kind === 'paid') {
-      // Where an unpaid share is expected to be paid back to.
-      paybackAccountId = rootOf(row.memberId!)?.paybackAccountId ?? tx.account_id;
+      paybackAccountId = expectedAccount(row.memberId!);
     }
     return {
       id:

@@ -135,6 +135,14 @@ function ownName(own: OwnProfile): string | null {
   return own.name ?? (user?.name.trim() || maskEmail(user?.email));
 }
 
+/**
+ * What this phone's person goes by to others: the Settings name, else the
+ * sign-in name, else the masked address. Null when signed out with no name.
+ */
+export function ownDisplayName(): string | null {
+  return ownName(readOwnProfile());
+}
+
 type AvatarResolver = (path: string | null) => string | null;
 
 /** Longest name kept: a profile row comes from another phone, so it is bounded here. */

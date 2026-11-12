@@ -27,6 +27,20 @@ import {
   ONBOARDING_MINIMAL_INCOME_CATEGORIES,
 } from '~/constants/appDefaults';
 import { PRO_LIMITS } from '~/constants/proLimits';
+import { billFromRows, type GroupBillRow } from '~/features/albums/lib/albumGroup';
+import {
+  cleanPersonName,
+  memberByName,
+  type PeopleEditError,
+  personNameKey,
+  selfMember,
+} from '~/features/albums/lib/albumPeople';
+import { notifyAlbumGroups } from '~/features/albums/services/albumGroupStore';
+import {
+  type GroupEnv,
+  projectGroup,
+  publishAlbumBills,
+} from '~/features/albums/services/albumGroupSync';
 import { parsePaymentAlertPrefs, serializePaymentAlertPrefs } from '~/features/autoLog/lib/prefs';
 import { persistAutoLogTransaction } from '~/features/autoLog/persistTransaction';
 import { budgetRateToFreeze, storedBudgetCurrency } from '~/features/budget/lib/budgetCurrency';
@@ -39,7 +53,11 @@ import {
   isBudgetPeriodKey,
 } from '~/features/budget/lib/budgetPeriods';
 import { deletePersonalLedgerRows } from '~/features/cloudSync/services/ledgerChannels';
-import { openLedgerSharedAndActive } from '~/features/cloudSync/services/sharedLedgerStore';
+import {
+  listAlbumShares,
+  openLedgerSharedAndActive,
+  sharedAlbumFor,
+} from '~/features/cloudSync/services/sharedLedgerStore';
 import {
   buildInstalmentPlans,
   frequencyOfSchedule,
@@ -57,7 +75,11 @@ import {
 import { withEntryStamp } from '~/features/sharedLedgers/lib/entryStamp';
 import { invalidateLedgerPeople } from '~/features/sharedLedgers/lib/ledgerPeople';
 import { countAccountsTowardFreeLimit } from '~/features/transactions/lib/accountEntryGate';
-import { pickPaybackAccountId } from '~/features/transactions/lib/entryDefaults';
+import {
+  findFallbackCategory,
+  pickDefaultAccountId,
+  pickPaybackAccountId,
+} from '~/features/transactions/lib/entryDefaults';
 import {
   type AccountCurrencyLookup,
   buildPaybackRows,
@@ -139,6 +161,7 @@ import {
 import { I18n, setAppLocale } from '~/lib/i18n';
 import { accountGroupsRepository } from '~/lib/repositories/accountGroupsRepository';
 import { accountsRepository } from '~/lib/repositories/accountsRepository';
+import { albumGroupsRepository } from '~/lib/repositories/albumGroupsRepository';
 import { albumsRepository } from '~/lib/repositories/albumsRepository';
 import {
   type BudgetAllocationInput,
@@ -212,6 +235,7 @@ import {
   ADD_BUTTON_ACTIONS,
   type Album,
   type AlbumLocation,
+  type AlbumPerson,
   type AlbumStats,
   type AppState,
   type BudgetPeriod,
@@ -286,6 +310,15 @@ import {
   transactionSearchText,
 } from '~/utils/transactions';
 import { insertTransactionsByDateDesc, sortTransactions } from '~/utils/transactionSorting';
+
+/** A row of the split editor, as `saveAlbumBill` takes it: a person and their share of the whole bill. */
+export interface AlbumBillRowInput {
+  personName: string | null;
+  amount: number;
+  isSelf: boolean;
+  isPayer?: boolean;
+  albumMemberId?: string | null;
+}
 
 export interface SplitDraftInput {
   id?: string;
@@ -546,6 +579,41 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   deleteAlbum: (id: string) => void;
   reorderAlbums: (ids: string[]) => void;
   setActiveAlbum: (albumId: string | null) => void;
+  /** Sets the people an album that is not shared is split with. */
+  setAlbumPeople: (albumId: string, people: AlbumPerson[]) => void;
+  /**
+   * Shared albums (README: Album members and shared albums). Brings the
+   * user's entries in step with every shared album's group; true when
+   * anything was written (the caller then reloads).
+   */
+  syncAlbumGroups: () => boolean;
+  /** An album just shared from this phone: its split bills become the group's. */
+  publishAlbumGroup: (groupId: string) => void;
+  /** Adds someone to a shared album's group by name, or says why not. */
+  addAlbumMember: (groupId: string, name: string) => PeopleEditError | null;
+  renameAlbumMember: (groupId: string, memberId: string, name: string) => PeopleEditError | null;
+  /** Removes a member nobody's bill names; false when a bill still does, or they have joined. */
+  removeAlbumMember: (groupId: string, memberId: string) => boolean;
+  /**
+   * Says who the user is in a group they joined: one of its placeholders
+   * (`memberId`), or someone new (`null`, named `name`).
+   */
+  claimAlbumMember: (groupId: string, memberId: string | null, name: string) => void;
+  /**
+   * Saves a split bill of a shared album: the group's bill is written, and
+   * the user's own entry follows from it. `rows` are the split editor's, for
+   * the whole bill. Null when the album is not shared on this phone (the
+   * caller saves it as any split bill); `mine` false when the user has no
+   * part in the bill, which is then not in their ledger.
+   */
+  saveAlbumBill: (
+    groupId: string,
+    input: CreateTransactionInput,
+    rows: AlbumBillRowInput[],
+    existingId?: string,
+  ) => { id: string; mine: boolean } | null;
+  /** A group's bill that is no longer split: it leaves the group and stays the user's own entry. */
+  detachAlbumBill: (transactionId: string) => void;
   addTransactionsToAlbum: (albumId: string, transactionIds: string[]) => void;
   removeTransactionsFromAlbum: (albumId: string, transactionIds: string[]) => void;
   getAlbumTransactionIds: (albumId: string) => string[];
@@ -2986,6 +3054,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [refreshAlbums, runMutation],
   );
 
+  const setAlbumPeople = useCallback((albumId: string, people: AlbumPerson[]) => {
+    albumsRepository.update(albumId, {
+      splitWithJson: people.length ? JSON.stringify(people) : null,
+    });
+    setAlbums(albumsRepository.list());
+    void trackEvent(AnalyticsEvents.ALBUM_PEOPLE_SET, { count: people.length });
+  }, []);
+
   // Membership edits only touch the album join table — a full refreshAll() would
   // re-init the DB and reload everything (slow). Reloading just `albums` gives the
   // membership-derived memos a fresh reference and updates the UI immediately.
@@ -3767,6 +3843,392 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     ],
   );
 
+  // -------------------------------------------------------------------------
+  // Shared albums (README: Album members and shared albums). A shared album's
+  // group holds whole bills and the payments between its members; the user's
+  // own entries for them are written from the group and never the other way
+  // (features/albums/services/albumGroupSync.ts). So everything here writes
+  // the group's rows and then lets the entries follow.
+
+  const categoriesRef = useRef<Category[]>(categories);
+  categoriesRef.current = categories;
+
+  /** What the open ledger gives a group's entries, or null when the album is not shared here. */
+  const groupEnvFor = useCallback(
+    (groupId: string): GroupEnv | null => {
+      const userId = sharedAlbumFor(groupId)?.userId;
+      if (!userId) return null;
+      return {
+        userId,
+        meLabel: I18n.t('transactions.editor.split.me_label'),
+        rateTable: rateTableRef.current,
+        reportingCurrency: reportingCurrencyRef.current,
+        currencyOf: (accountId) => accountCurrencyOf(accountId) ?? null,
+        defaultAccountId: pickDefaultAccountId(accountsRef.current),
+        defaultPaybackAccountId: pickPaybackAccountId(
+          accountsRef.current,
+          settingsRef.current?.defaultPaybackAccountId,
+        ),
+        // Another phone's category by name, then by icon, else the user's "Other".
+        categoryIdFor: (name, icon) => {
+          const expense = categoriesRef.current.filter((category) => category.type === 'expense');
+          const key = name?.trim().toLowerCase();
+          const match =
+            (key ? expense.find((category) => category.name.trim().toLowerCase() === key) : null) ??
+            (icon ? expense.find((category) => category.icon === icon) : null) ??
+            findFallbackCategory(categoriesRef.current, 'expense');
+          return match?.id ?? null;
+        },
+      };
+    },
+    [accountCurrencyOf],
+  );
+
+  /** After the group's rows and the entries changed: the screens look again. */
+  const afterGroupWrite = useCallback(() => {
+    notifyAlbumGroups();
+    setAlbums(albumsRepository.list());
+    scheduleRefreshTransactions();
+  }, [scheduleRefreshTransactions]);
+
+  const syncAlbumGroups = useCallback((): boolean => {
+    let changed = false;
+    for (const share of listAlbumShares()) {
+      const env = groupEnvFor(share.ledgerId);
+      if (!env) continue;
+      try {
+        changed = projectGroup(share.ledgerId, env) || changed;
+      } catch (error) {
+        reportError(error, { scope: 'album_group_project' });
+      }
+    }
+    notifyAlbumGroups();
+    return changed;
+  }, [groupEnvFor]);
+
+  const publishAlbumGroup = useCallback(
+    (groupId: string) => {
+      const env = groupEnvFor(groupId);
+      if (!env) return;
+      publishAlbumBills(groupId, env);
+      projectGroup(groupId, env);
+      afterGroupWrite();
+    },
+    [afterGroupWrite, groupEnvFor],
+  );
+
+  const addAlbumMember = useCallback(
+    (groupId: string, name: string): PeopleEditError | null => {
+      const cleaned = cleanPersonName(name);
+      if (!cleaned) return 'blank';
+      const members = albumGroupsRepository.listMembers(groupId);
+      const key = personNameKey(cleaned);
+      if (members.some((member) => personNameKey(member.name) === key)) return 'taken';
+      albumGroupsRepository.createMember(groupId, { name: cleaned });
+      afterGroupWrite();
+      return null;
+    },
+    [afterGroupWrite],
+  );
+
+  const renameAlbumMember = useCallback(
+    (groupId: string, memberId: string, name: string): PeopleEditError | null => {
+      const cleaned = cleanPersonName(name);
+      if (!cleaned) return 'blank';
+      const key = personNameKey(cleaned);
+      const members = albumGroupsRepository.listMembers(groupId);
+      if (members.some((member) => member.id !== memberId && personNameKey(member.name) === key)) {
+        return 'taken';
+      }
+      albumGroupsRepository.updateMember(memberId, { name: cleaned });
+      // The shares that name them follow.
+      const env = groupEnvFor(groupId);
+      if (env) projectGroup(groupId, env);
+      afterGroupWrite();
+      return null;
+    },
+    [afterGroupWrite, groupEnvFor],
+  );
+
+  const removeAlbumMember = useCallback(
+    (groupId: string, memberId: string): boolean => {
+      const member = albumGroupsRepository.listMembers(groupId).find((m) => m.id === memberId);
+      if (!member || member.userId) return false;
+      const named = albumGroupsRepository
+        .listExpenses(groupId)
+        .some(
+          (expense) =>
+            !expense.deletedAt &&
+            (expense.paidBy === memberId ||
+              expense.shares.some((share) => share.memberId === memberId)),
+        );
+      if (named) return false;
+      albumGroupsRepository.softDeleteMember(memberId);
+      afterGroupWrite();
+      return true;
+    },
+    [afterGroupWrite],
+  );
+
+  const claimAlbumMember = useCallback(
+    (groupId: string, memberId: string | null, name: string) => {
+      const env = groupEnvFor(groupId);
+      if (!env) return;
+      const members = albumGroupsRepository.listMembers(groupId);
+      if (!selfMember(members, env.userId)) {
+        const placeholder = memberId
+          ? members.find((member) => member.id === memberId && !member.userId)
+          : null;
+        if (placeholder) {
+          albumGroupsRepository.updateMember(placeholder.id, { userId: env.userId });
+        } else {
+          // A name of their own; one already taken gets a number.
+          const base = cleanPersonName(name) || env.meLabel;
+          const taken = new Set(members.map((member) => personNameKey(member.name)));
+          let unique = base;
+          for (let n = 2; taken.has(personNameKey(unique)); n += 1) unique = `${base} ${n}`;
+          albumGroupsRepository.createMember(groupId, { name: unique, userId: env.userId });
+        }
+      }
+      projectGroup(groupId, env);
+      afterGroupWrite();
+    },
+    [afterGroupWrite, groupEnvFor],
+  );
+
+  const saveAlbumBill = useCallback(
+    (
+      groupId: string,
+      input: CreateTransactionInput,
+      rows: AlbumBillRowInput[],
+      existingId?: string,
+    ): { id: string; mine: boolean } | null => {
+      const env = groupEnvFor(groupId);
+      if (!env) return null;
+      let members = albumGroupsRepository.listMembers(groupId);
+      const self = selfMember(members, env.userId);
+      if (!self) return null;
+      const billRows: GroupBillRow[] = [];
+      for (const row of rows) {
+        const amount = Number(row.amount) || 0;
+        if (row.isSelf) {
+          billRows.push({ memberId: self.id, amount });
+          continue;
+        }
+        // Who the row is: the member it names, else the one of that name,
+        // else someone new by that name.
+        let member =
+          (row.albumMemberId
+            ? members.find((m) => m.id === row.albumMemberId && m.id !== self.id)
+            : null) ?? memberByName(members, row.personName, self.id);
+        if (!member) {
+          const base = cleanPersonName(row.personName ?? '') || I18n.t('albums.people.unnamed');
+          const taken = new Set(members.map((m) => personNameKey(m.name)));
+          let unique = base;
+          for (let n = 2; taken.has(personNameKey(unique)); n += 1) unique = `${base} ${n}`;
+          member = albumGroupsRepository.createMember(groupId, { name: unique });
+          members = [...members, member];
+        }
+        billRows.push({ memberId: member.id, amount, isPayer: !!row.isPayer });
+      }
+      const built = billFromRows(billRows, self.id);
+      if (!built) return null;
+      const id = existingId ?? newId();
+      const category = input.categoryId
+        ? categoriesRef.current.find((item) => item.id === input.categoryId)
+        : null;
+      const selfShare = built.shares.find((share) => share.memberId === self.id)?.amount ?? 0;
+      const mine = built.paidBy === self.id || selfShare > 0;
+      try {
+        albumGroupsRepository.upsertExpense({
+          id,
+          groupId,
+          date: dateForNewTransaction(input.date, new Date()),
+          note: input.note?.trim() || null,
+          amount: built.amount,
+          currency: input.currency,
+          categoryName: category?.name ?? null,
+          categoryIcon: category?.icon ?? null,
+          paidBy: built.paidBy,
+          shares: built.shares,
+          createdBy: env.userId,
+        });
+        const entry = {
+          accountId: input.accountId ?? null,
+          categoryId: input.categoryId ?? null,
+          details: input.details ?? null,
+          receiptUri: input.receiptUri ?? null,
+          sentiment: input.sentiment ?? 'neutral',
+        };
+        if (existingId) {
+          // The fields that are the user's own, on the entry they already have.
+          transactionsRepository.update(existingId, {
+            categoryId: entry.categoryId,
+            details: entry.details,
+            receiptUri: entry.receiptUri,
+            sentiment: entry.sentiment,
+            ...(built.paidBy === self.id && entry.accountId
+              ? { accountId: entry.accountId }
+              : null),
+          });
+        }
+        projectGroup(groupId, env, { expenseId: id, hints: { entry } });
+        void trackEvent(AnalyticsEvents.ALBUM_BILL_SAVED, {
+          edit: !!existingId,
+          paid_by: built.paidBy === self.id ? 'me' : 'friend',
+          people: built.shares.length,
+        });
+      } catch (error) {
+        reportError(error, { scope: 'album_group_save' });
+      }
+      afterGroupWrite();
+      return { id, mine };
+    },
+    [afterGroupWrite, groupEnvFor],
+  );
+
+  const detachAlbumBill = useCallback(
+    (transactionId: string) => {
+      const tx = transactionsRef.current.find((item) => item.id === transactionId);
+      if (!tx?.albumGroupId) return;
+      transactionsRepository.update(transactionId, { albumGroupId: null });
+      albumGroupsRepository.softDeleteExpense(transactionId);
+      afterGroupWrite();
+    },
+    [afterGroupWrite],
+  );
+
+  /** The group's bill a share belongs to, when its album is shared on this phone. */
+  const groupBillOf = useCallback((splitId: string) => {
+    const tx = transactionsRef.current.find(
+      (item) => item.albumGroupId && item.splits?.some((split) => split.id === splitId),
+    );
+    if (!tx?.albumGroupId || !sharedAlbumFor(tx.albumGroupId)) return null;
+    const split = tx.splits?.find((item) => item.id === splitId);
+    return split ? { tx, split, groupId: tx.albumGroupId } : null;
+  }, []);
+
+  /**
+   * A payment on a group's bill: a settlement in the group, from the member
+   * who owes to the one who paid, and the user's entry follows from it.
+   * `accountId` is the account it moved through here; left out, the share's
+   * own.
+   */
+  const recordGroupPayment = useCallback(
+    (
+      bill: { tx: TransactionWithRelations; split: TransactionSplit; groupId: string },
+      amount: number,
+      accountId: string | null | undefined,
+    ) => {
+      const env = groupEnvFor(bill.groupId);
+      if (!env || !(amount > 0)) return;
+      const settlementId = newId();
+      const payer = billPayer(bill.tx.splits);
+      runDeferredWrite(() => {
+        try {
+          const self = selfMember(albumGroupsRepository.listMembers(bill.groupId), env.userId);
+          const other = payer ? payer.albumMemberId : bill.split.albumMemberId;
+          if (!self || !other) return;
+          albumGroupsRepository.createSettlement({
+            id: settlementId,
+            groupId: bill.groupId,
+            expenseId: bill.tx.id,
+            // The user pays the member who paid; anyone else pays the user.
+            fromMember: payer ? self.id : other,
+            toMember: payer ? other : self.id,
+            amount,
+            currency: bill.tx.currency,
+            date: dayKeyFromDateLocal(new Date()),
+            createdBy: env.userId,
+          });
+          projectGroup(bill.groupId, env, {
+            expenseId: bill.tx.id,
+            hints:
+              accountId === undefined ? {} : { accounts: new Map([[settlementId, accountId]]) },
+          });
+          void trackEvent(AnalyticsEvents.ALBUM_PAYMENT_RECORDED, {
+            direction: payer ? 'paid' : 'received',
+          });
+        } catch (error) {
+          reportError(error, { scope: 'album_group_payment' });
+        }
+        afterGroupWrite();
+      });
+    },
+    [afterGroupWrite, groupEnvFor],
+  );
+
+  /** Undoes a payment on a group's bill: its settlement goes, for everyone. */
+  const undoGroupPayment = useCallback(
+    (bill: { tx: TransactionWithRelations; groupId: string }, settlementId: string | null) => {
+      const env = groupEnvFor(bill.groupId);
+      if (!env || !settlementId) return;
+      runDeferredWrite(() => {
+        try {
+          albumGroupsRepository.softDeleteSettlement(settlementId);
+          projectGroup(bill.groupId, env, { expenseId: bill.tx.id });
+          void trackEvent(AnalyticsEvents.ALBUM_PAYMENT_UNDONE);
+        } catch (error) {
+          reportError(error, { scope: 'album_group_payment' });
+        }
+        afterGroupWrite();
+      });
+    },
+    [afterGroupWrite, groupEnvFor],
+  );
+
+  /**
+   * Deleting a group's bill deletes it for everyone, and deleting the entry
+   * one of its payments made (the expense of a part the user paid, the
+   * transfer of a payback) undoes that payment. Returns the ids it took: the
+   * entries themselves then go as the group's rows say.
+   */
+  const deleteGroupEntries = useCallback(
+    (ids: readonly string[]): Set<string> => {
+      const taken = new Set<string>();
+      const touched = new Map<string, Set<string>>();
+      const touch = (groupId: string, expenseId: string) => {
+        const set = touched.get(groupId) ?? new Set<string>();
+        set.add(expenseId);
+        touched.set(groupId, set);
+      };
+      for (const id of ids) {
+        const tx = transactionsRef.current.find((item) => item.id === id);
+        if (tx?.albumGroupId && sharedAlbumFor(tx.albumGroupId)) {
+          albumGroupsRepository.softDeleteExpense(id);
+          touch(tx.albumGroupId, id);
+          taken.add(id);
+          continue;
+        }
+        const bill = transactionsRef.current.find(
+          (item) =>
+            item.albumGroupId &&
+            sharedAlbumFor(item.albumGroupId) &&
+            item.splits?.some((split) => split.paidTransactionId === id && split.settlementId),
+        );
+        const split = bill?.splits?.find((item) => item.paidTransactionId === id);
+        if (bill?.albumGroupId && split?.settlementId) {
+          albumGroupsRepository.softDeleteSettlement(split.settlementId);
+          touch(bill.albumGroupId, bill.id);
+          taken.add(id);
+        }
+      }
+      if (!taken.size) return taken;
+      for (const [groupId, expenseIds] of touched) {
+        const env = groupEnvFor(groupId);
+        if (!env) continue;
+        try {
+          for (const expenseId of expenseIds) projectGroup(groupId, env, { expenseId });
+        } catch (error) {
+          reportError(error, { scope: 'album_group_delete' });
+        }
+      }
+      afterGroupWrite();
+      return taken;
+    },
+    [afterGroupWrite, groupEnvFor],
+  );
+
   const deleteTransactionsBulk = useCallback(
     // `track: false` for a row removed as part of another edit (a transfer's
     // fee taken off in the editor), which is not a deletion the user asked for.
@@ -3781,6 +4243,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         uniqueIds.push(id);
       });
       if (uniqueIds.length === 0) return;
+
+      // A shared album's bills and their payments go through the group.
+      const groupTaken = deleteGroupEntries(uniqueIds);
+      if (groupTaken.size) {
+        for (let index = uniqueIds.length - 1; index >= 0; index -= 1) {
+          if (groupTaken.has(uniqueIds[index])) uniqueIds.splice(index, 1);
+        }
+        if (uniqueIds.length === 0) return;
+      }
 
       // A reimbursed expense and the income row written for its refund are two
       // halves of one thing, so deleting the expense takes the refund with it.
@@ -4019,7 +4490,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         else refreshAccountBalances();
       });
     },
-    [accountCurrencyOf, refreshAccountBalances, scheduleRefreshTransactions],
+    [accountCurrencyOf, deleteGroupEntries, refreshAccountBalances, scheduleRefreshTransactions],
   );
 
   const updateTransaction = useCallback(
@@ -4759,6 +5230,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       splitId: string,
       options?: { paybackAccountId?: string | null; date?: string; note?: string | null },
     ) => {
+      // A shared album's bill: the payment is the group's, and the entry follows.
+      const groupBill = groupBillOf(splitId);
+      if (groupBill) {
+        if (groupBill.split.isSelf || groupBill.split.paidAt) return;
+        recordGroupPayment(groupBill, groupBill.split.amount, options?.paybackAccountId);
+        return;
+      }
       const transferTxId = newId();
       const paidAtIso = nowIso();
       const date = options?.date ?? dayKeyFromDateLocal(new Date());
@@ -4877,7 +5355,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         scheduleRefreshTransactions();
       });
     },
-    [accountCurrencyOf, resolvePaybackAccountId, resolveRelationNames, scheduleRefreshTransactions],
+    [
+      accountCurrencyOf,
+      groupBillOf,
+      recordGroupPayment,
+      resolvePaybackAccountId,
+      resolveRelationNames,
+      scheduleRefreshTransactions,
+    ],
   );
 
   // A friend pays back part of their share. The paid part becomes its own paid
@@ -4899,6 +5384,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (!plan) return;
       if (plan.kind === 'full') {
         markSplitPaid(splitId, options);
+        return;
+      }
+      const groupBill = groupBillOf(splitId);
+      if (groupBill) {
+        recordGroupPayment(groupBill, plan.amount, options?.paybackAccountId);
         return;
       }
 
@@ -5021,7 +5511,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     },
     [
       accountCurrencyOf,
+      groupBillOf,
       markSplitPaid,
+      recordGroupPayment,
       resolvePaybackAccountId,
       resolveRelationNames,
       scheduleRefreshTransactions,
@@ -5030,6 +5522,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const markSplitUnpaid = useCallback(
     (splitId: string) => {
+      const groupBill = groupBillOf(splitId);
+      if (groupBill) {
+        undoGroupPayment(groupBill, groupBill.split.settlementId);
+        return;
+      }
       const now = nowIso();
       const undone = undonePaybackOf(splitId);
 
@@ -5098,7 +5595,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         scheduleRefreshTransactions();
       });
     },
-    [accountCurrencyOf, scheduleRefreshTransactions, undonePaybackOf],
+    [
+      accountCurrencyOf,
+      groupBillOf,
+      scheduleRefreshTransactions,
+      undoGroupPayment,
+      undonePaybackOf,
+    ],
   );
 
   // Re-point an unpaid split's payback account (no amount/transfer change). Only
@@ -5195,6 +5698,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // records when, and from which account (features/transactions/lib/splitPayer.ts).
   const payBackPayer = useCallback(
     (payerSplitId: string, options?: { accountId?: string | null; via?: 'bill' | 'settle_up' }) => {
+      const groupBill = groupBillOf(payerSplitId);
+      if (groupBill) {
+        const owed = owedToPayer(groupBill.tx.splits, groupBill.tx.amount);
+        if (owed && owed.owed > 0) {
+          recordGroupPayment(groupBill, owed.owed, options?.accountId ?? null);
+        }
+        return;
+      }
       const paidAtIso = nowIso();
       const accountId = options?.accountId ?? null;
       const via = options?.via ?? 'bill';
@@ -5251,12 +5762,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         scheduleRefreshTransactions();
       });
     },
-    [accountCurrencyOf, resolveRelationNames, scheduleRefreshTransactions],
+    [
+      accountCurrencyOf,
+      groupBillOf,
+      recordGroupPayment,
+      resolveRelationNames,
+      scheduleRefreshTransactions,
+    ],
   );
 
   // Undo: the user owes the share again, and the expense leaves the account.
   const undoPayBackPayer = useCallback(
     (payerSplitId: string) => {
+      const groupBill = groupBillOf(payerSplitId);
+      if (groupBill) {
+        undoGroupPayment(groupBill, groupBill.split.settlementId);
+        return;
+      }
       const now = nowIso();
       setTransactions((prev) =>
         prev.map((tx) => {
@@ -5299,7 +5821,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         scheduleRefreshTransactions();
       });
     },
-    [scheduleRefreshTransactions],
+    [groupBillOf, scheduleRefreshTransactions, undoGroupPayment],
   );
 
   // The user pays a friend back part of what they owe on a bill that friend
@@ -5318,6 +5840,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const accountId = options?.accountId ?? null;
       if (plan.kind === 'full') {
         payBackPayer(payerSplitId, { accountId });
+        return;
+      }
+      const groupBill = groupBillOf(payerSplitId);
+      if (groupBill) {
+        recordGroupPayment(groupBill, plan.amount, accountId);
         return;
       }
 
@@ -5460,7 +5987,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         scheduleRefreshTransactions();
       });
     },
-    [accountCurrencyOf, payBackPayer, resolveRelationNames, scheduleRefreshTransactions],
+    [
+      accountCurrencyOf,
+      groupBillOf,
+      payBackPayer,
+      recordGroupPayment,
+      resolveRelationNames,
+      scheduleRefreshTransactions,
+    ],
   );
 
   // Undoing a part payment is deleting its expense, which puts the part back
@@ -5471,10 +6005,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         .flatMap((tx) => tx.splits ?? [])
         .find((split) => split.id === partSplitId);
       if (!part || !isPayBackPart(part) || !part.paidTransactionId) return;
+      const groupBill = groupBillOf(partSplitId);
+      if (groupBill) {
+        undoGroupPayment(groupBill, part.settlementId);
+        return;
+      }
       deleteTransactionsBulk([part.paidTransactionId], { track: false });
       void trackEvent(AnalyticsEvents.SPLIT_DEBT_REOPENED, { part: true });
     },
-    [deleteTransactionsBulk],
+    [deleteTransactionsBulk, groupBillOf, undoGroupPayment],
   );
 
   const settleUpWithPerson = useCallback(
@@ -6615,6 +7154,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // Ledgers
 
   const activeLedgerId = settings?.activeLedgerId ?? DEFAULT_LEDGER_ID;
+  // A shared album's bills that came while its album's ledger was not the
+  // open one are caught up when that ledger opens (and at launch).
+  useEffect(() => {
+    if (isLoading) return;
+    if (syncAlbumGroups()) {
+      setAlbums(albumsRepository.list());
+      scheduleRefreshTransactions();
+    }
+  }, [activeLedgerId, isLoading, scheduleRefreshTransactions, syncAlbumGroups]);
   const activeLedger = useMemo<Ledger>(
     () =>
       ledgers.find((ledger) => ledger.id === activeLedgerId) ??
@@ -7034,6 +7582,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             deleteAlbum,
             reorderAlbums,
             setActiveAlbum,
+            setAlbumPeople,
+            syncAlbumGroups,
+            publishAlbumGroup,
+            addAlbumMember,
+            renameAlbumMember,
+            removeAlbumMember,
+            claimAlbumMember,
+            saveAlbumBill,
+            detachAlbumBill,
             addTransactionsToAlbum,
             removeTransactionsFromAlbum,
             getAlbumTransactionIds,
@@ -7177,6 +7734,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       deleteAlbum,
       reorderAlbums,
       setActiveAlbum,
+      setAlbumPeople,
+      syncAlbumGroups,
+      publishAlbumGroup,
+      addAlbumMember,
+      renameAlbumMember,
+      removeAlbumMember,
+      claimAlbumMember,
+      saveAlbumBill,
+      detachAlbumBill,
       addTransactionsToAlbum,
       removeTransactionsFromAlbum,
       getAlbumTransactionIds,
