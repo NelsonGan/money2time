@@ -1,6 +1,9 @@
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 
-const SCOPES = ['https://www.googleapis.com/auth/drive.file'];
+const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
+const SCOPES = [DRIVE_SCOPE];
+// Full Drive access covers `drive.file`, so an account granted it can back up.
+const DRIVE_SCOPES_THAT_COVER_BACKUP = [DRIVE_SCOPE, 'https://www.googleapis.com/auth/drive'];
 
 // IMPORTANT: configure in eas.json / .env and inject as EXPO_PUBLIC_*.
 // Without a webClientId, GoogleSignin.signIn() will fail at runtime.
@@ -47,8 +50,36 @@ export function isGoogleDriveConfigured(): boolean {
 // back to a local backup.
 let restorePromise: Promise<boolean> | null = null;
 
+/**
+ * Whether the account let this app reach Drive. Google's consent screen lets
+ * people untick the Drive box; the sign-in still succeeds, but every Drive
+ * call then fails with 403 `insufficientPermissions`, so the backup was
+ * neither on Drive nor anywhere else. Such a session counts as not connected:
+ * the backup falls back to the phone and the screen offers to reconnect,
+ * which asks for Drive again. A session the SDK reports no scopes for is
+ * trusted as before.
+ */
+function hasDriveAccess(user: { scopes?: string[] } | null): boolean {
+  const scopes = user?.scopes;
+  if (!Array.isArray(scopes) || scopes.length === 0) return true;
+  return DRIVE_SCOPES_THAT_COVER_BACKUP.some((scope) => scopes.includes(scope));
+}
+
+/** A usable Google session for Drive: restored, and allowed to reach Drive. */
 export async function ensureGoogleSession(opts?: { force?: boolean }): Promise<boolean> {
-  configureOnce();
+  if (!(await restoreGoogleSession(opts))) return false;
+  return hasDriveAccess(GoogleSignin.getCurrentUser());
+}
+
+/**
+ * Rebuilds the remembered Google session, whatever it may reach. Cloud Sync's
+ * sign-in only needs its ID token, so it must not depend on Drive access.
+ */
+async function restoreGoogleSession(opts?: {
+  force?: boolean;
+  purpose?: 'drive' | 'sign_in';
+}): Promise<boolean> {
+  configureOnce(opts?.purpose);
   if (!opts?.force && GoogleSignin.getCurrentUser()) return true;
   if (!GoogleSignin.hasPreviousSignIn()) return false;
 
@@ -79,6 +110,9 @@ export async function getGoogleAccountEmail(): Promise<string | null> {
   return GoogleSignin.getCurrentUser()?.user.email ?? null;
 }
 
+/** Android's rejection when the person refuses the extra Drive scope. */
+const ADD_SCOPES_REFUSED = 'Failed to add scopes.';
+
 export async function signInWithGoogle(): Promise<
   | { ok: true; email: string | null }
   | { ok: false; reason: 'cancelled' | 'unavailable' | 'error'; message?: string }
@@ -87,8 +121,21 @@ export async function signInWithGoogle(): Promise<
   try {
     await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
     const result = await GoogleSignin.signIn();
-    if (result.type === 'success') {
-      return { ok: true, email: result.data.user.email ?? null };
+    if (result.type !== 'success') return { ok: false, reason: 'cancelled' };
+    if (hasDriveAccess(result.data)) return { ok: true, email: result.data.user.email ?? null };
+    // Drive was unticked on the consent screen: ask for just that once more.
+    // Refusing again is a choice, so it ends like a cancel. Android rejects a
+    // refusal with this message where iOS resolves `cancelled`; any other
+    // rejection (no activity, a sign-in already running) is a real error.
+    const added = await GoogleSignin.addScopes({ scopes: SCOPES }).catch((e: unknown) => {
+      if ((e as { message?: unknown } | null)?.message === ADD_SCOPES_REFUSED) return null;
+      throw e;
+    });
+    // Android reads the account back with a silent sign-in after the grant;
+    // if that comes back empty, the remembered account still has the answer.
+    const user = added?.type === 'success' ? added.data : GoogleSignin.getCurrentUser();
+    if (user?.scopes?.length && hasDriveAccess(user)) {
+      return { ok: true, email: user.user.email ?? null };
     }
     return { ok: false, reason: 'cancelled' };
   } catch (e) {
@@ -156,7 +203,8 @@ export type GoogleIdTokenResult =
 /**
  * A fresh Google ID token for Cloud Sync sign-in. The Google SDK holds one
  * signed-in account, shared with Drive backup:
- * - Already signed in for Drive: restore that session and use its ID token.
+ * - A Google account is remembered (Drive backup signed it in, whether or not
+ *   Drive access was granted): restore that session and use its ID token.
  * - Otherwise: sign in once without the Drive scope (no Drive consent screen),
  *   take the token, and sign out again so Drive backup still asks for its own
  *   access when the user turns it on.
@@ -164,8 +212,14 @@ export type GoogleIdTokenResult =
 export async function getGoogleIdToken(): Promise<GoogleIdTokenResult> {
   if (!WEB_CLIENT_ID) return { ok: false, reason: 'unavailable', message: 'not configured' };
   configureOnce();
-  const hadDriveAccount = GoogleSignin.hasPreviousSignIn();
-  if (await ensureGoogleSession({ force: true })) {
+  const hadGoogleAccount = GoogleSignin.hasPreviousSignIn();
+  // Android's silent sign-in fails with SIGN_IN_REQUIRED when the SDK asks for
+  // a scope the account never granted, so an account without Drive access is
+  // restored with the sign-in scopes only. Android reads the remembered
+  // account's scopes before the restore; on iOS `getCurrentUser()` is empty
+  // until then, and its restore does not depend on the configured scopes.
+  const purpose = hasDriveAccess(GoogleSignin.getCurrentUser()) ? 'drive' : 'sign_in';
+  if (await restoreGoogleSession({ force: true, purpose })) {
     try {
       const tokens = await GoogleSignin.getTokens();
       if (tokens.idToken) return { ok: true, idToken: tokens.idToken };
@@ -173,9 +227,9 @@ export async function getGoogleIdToken(): Promise<GoogleIdTokenResult> {
       // Fall through to an interactive sign-in.
     }
   }
-  // A Drive account is remembered but could not be restored (offline, token
+  // A Google account is remembered but could not be restored (offline, token
   // refresh): stop here rather than sign it out below and disconnect backups.
-  if (hadDriveAccount) {
+  if (hadGoogleAccount) {
     return { ok: false, reason: 'error', message: 'google session unavailable' };
   }
   configureOnce('sign_in');
