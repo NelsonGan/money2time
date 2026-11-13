@@ -3163,9 +3163,13 @@ export function TransactionEditorScreen({
   const handleAccountSelect = useCallback(
     (nextAccountId: string) => {
       setAccountId(nextAccountId);
-      // Default the entry currency to the newly chosen account's currency.
-      setEntryCurrency(accountCurrency(nextAccountId));
-      resetCustomFx();
+      // Default the entry currency to the newly chosen account's currency,
+      // except on a shared album's bill being edited: its currency is the
+      // group's, and the account only says where the user's money moved.
+      if (!(groupBill && mode === 'edit')) {
+        setEntryCurrency(accountCurrency(nextAccountId));
+        resetCustomFx();
+      }
       // Sticky mode picks the category from the always-visible background grid,
       // so just close the account sheet instead of opening the category modal.
       if (useStickyNumpad) {
@@ -3183,7 +3187,9 @@ export function TransactionEditorScreen({
       activateField,
       categoryId,
       clearActiveField,
+      groupBill,
       isBalanceAdjustmentType,
+      mode,
       resetCustomFx,
       useStickyNumpad,
     ],

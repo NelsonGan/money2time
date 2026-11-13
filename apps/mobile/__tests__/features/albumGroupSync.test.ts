@@ -269,9 +269,10 @@ describe('changes to a bill', () => {
     projectGroup(GROUP, env);
     expect(tx('dinner')).toMatchObject({ amount: 40, category_id: 'drinks' });
 
-    // Now the user paid it: the same entry becomes the whole bill.
+    // Now the user paid it (saved in the editor, which names the account):
+    // the same entry becomes the whole bill.
     addBill('dinner', 'me', 120);
-    projectGroup(GROUP, env);
+    projectGroup(GROUP, env, { expenseId: 'dinner', hints: { entry: { accountId: 'cash' } } });
     expect(tx('dinner')).toMatchObject({ amount: 120, account_id: 'cash' });
     expect(balances()).toEqual({ Aisha: 40, Ben: 40 });
 
@@ -392,6 +393,38 @@ describe('changes someone else made', () => {
     addBill('dinner', 'me', 90, 'u-aisha');
     projectGroup(GROUP, env);
     expect(tx('dinner')).toMatchObject({ amount: 90, account_id: null });
+  });
+
+  it('someone else making the user the payer of a bill they paid back does not carry its account over', () => {
+    addBill('dinner', 'aisha');
+    pay('s1', 'dinner', 'me', 'aisha', 30, '2026-11-13T08:00:00.000Z');
+    projectGroup(GROUP, env, { hints: { accounts: new Map([['s1', 'bank']]) } });
+    expect(tx('dinner')).toMatchObject({ amount: 30, account_id: 'bank' });
+    addBill('dinner', 'me', 90, 'u-aisha');
+    projectGroup(GROUP, env);
+    expect(tx('dinner')).toMatchObject({ amount: 90, account_id: null });
+  });
+
+  it('a change the user made on another phone waits for that phone’s account, not the default', () => {
+    addBill('dinner', 'me', 90, 'u-aisha');
+    projectGroup(GROUP, env);
+    // Confirmed on the other phone: the group row says the user wrote it
+    // last, but the entry's account has not come over yet.
+    addBill('dinner', 'me', 90, 'u-me');
+    projectGroup(GROUP, env);
+    expect(tx('dinner')).toMatchObject({ account_id: null });
+  });
+
+  it('an account picked in the editor works its account amount out afresh', () => {
+    const usd = { ...env, currencyOf: (id: string) => (id === 'usd' ? 'USD' : 'MYR') };
+    usd.rateTable = { base: 'MYR', rates: { MYR: 1, USD: 0.25 }, asOfDate: null };
+    addBill('dinner', 'me');
+    projectGroup(GROUP, usd);
+    expect(tx('dinner')).toMatchObject({ account_id: 'cash' });
+    projectGroup(GROUP, usd, { expenseId: 'dinner', hints: { entry: { accountId: 'usd' } } });
+    expect(
+      app.all('SELECT account_id, account_amount FROM transactions WHERE id = ?', 'dinner')[0],
+    ).toEqual({ account_id: 'usd', account_amount: 22.5 });
   });
 
   it('a bill the user paid, deleted by someone else, stays the user’s own on its account', () => {

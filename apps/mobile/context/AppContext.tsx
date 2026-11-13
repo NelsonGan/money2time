@@ -4224,13 +4224,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
       const built = billFromRows(billRows, self.id);
       if (!built) return null;
-      const id = existingId ?? newId();
-      // A split bill that was the user's own until now (added to the album,
-      // or made before this phone said who it is) goes in as it stands first,
-      // with the payments already on it, so the edit below keeps them.
       const existing = existingId
         ? transactionsRef.current.find((item) => item.id === existingId)
         : null;
+      // An entry the group let go of after money moved on it (someone else
+      // deleted the bill, or took the user off it) still has that bill's id,
+      // which the group may still hold: split again, it becomes a new bill
+      // that replaces the entry, never a write over that one.
+      const replacesEntry =
+        !!existingId &&
+        !!existing &&
+        !existing.albumGroupId &&
+        albumGroupsRepository.hasExpense(groupId, existingId);
+      const id = replacesEntry ? newId() : (existingId ?? newId());
+      // A split bill that was the user's own until now (added to the album,
+      // or made before this phone said who it is) goes in as it stands first,
+      // with the payments already on it, so the edit below keeps them.
       if (existing && !existing.albumGroupId && (existing.splits?.length ?? 0) > 0) {
         try {
           publishAlbumBills(groupId, env);
@@ -4268,23 +4277,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           sentiment: input.sentiment ?? 'neutral',
           reimbursable: input.reimbursable ?? false,
         };
-        if (existingId) {
-          // The fields that are the user's own, on the entry they already have.
+        if (existingId && !replacesEntry) {
+          // The fields that are the user's own, on the entry they already
+          // have. Its account comes from the projection below, which works
+          // out its account amount for it.
           transactionsRepository.update(existingId, {
             categoryId: entry.categoryId,
             details: entry.details,
             receiptUri: entry.receiptUri,
             sentiment: entry.sentiment,
             reimbursable: entry.reimbursable,
-            // An entry on no account yet (a friend paid it, or someone else
-            // said the user did) takes its first account from the projection
-            // below, which works its account amount out for it.
-            ...(built.paidBy === self.id && entry.accountId && existing?.accountId
-              ? { accountId: entry.accountId }
-              : null),
           });
         }
         projectGroup(groupId, env, { expenseId: id, hints: { entry } });
+        if (replacesEntry && existingId) transactionsRepository.softDeleteMany([existingId]);
         settleEvenGroup(groupId, env);
         void trackEvent(AnalyticsEvents.ALBUM_BILL_SAVED, {
           edit: !!existingId,

@@ -11,6 +11,7 @@
 import { sharedAlbumFor } from '~/features/cloudSync/services/sharedLedgerStore';
 import { buildPaybackTransferNote } from '~/features/transactions/lib/settleUp';
 import { rescaleSplitAdjustedAmounts } from '~/features/transactions/lib/splitAmountSnapshot';
+import { isFriendPaidBill } from '~/features/transactions/lib/splitPayer';
 import { paybackTransferAmounts } from '~/features/transactions/lib/splitPayments';
 import { getSQLite } from '~/lib/db/client';
 import { DEFAULT_LEDGER_ID, getActiveLedgerId } from '~/lib/db/ledgerScope';
@@ -491,14 +492,21 @@ function projectExpense(
 
   // --- The entry itself ---------------------------------------------------
   const finalPayment = bill.payments.find((payment) => payment.kind === 'sent_final') ?? null;
-  // A bill someone else says the user paid lands on no account: it waits
-  // for them to say which account it left (`needsAccountConfirm`), rather
-  // than moving their default account's balance on another's word.
+  // A bill the user paid is on the account this phone's editor just picked;
+  // else on the one the entry already has, while it was already the user's
+  // to pay (a bill someone else turned into one the user paid must not
+  // carry over the account their payback left); else, for a new bill the
+  // user saved, their default account. A bill someone else says the user
+  // paid lands on no account: it waits for them to say which account it
+  // left (`needsAccountConfirm`), rather than moving a balance on another's
+  // word. An entry already here never falls back to the default account:
+  // the account the user's other phone gave it is on its way.
+  const wasPaidByUser = !!live && !isFriendPaidBill(splits);
   const accountId =
     bill.kind === 'paid'
-      ? (live?.account_id ??
-        hints.entry?.accountId ??
-        (changedByUser ? env.defaultAccountId : null))
+      ? (hints.entry?.accountId ??
+        (live?.account_id && (wasPaidByUser || changedByUser) ? live.account_id : null) ??
+        (changedByUser && !live ? env.defaultAccountId : null))
       : finalPayment
         ? paymentAccount(finalPayment, env.defaultAccountId)
         : null;

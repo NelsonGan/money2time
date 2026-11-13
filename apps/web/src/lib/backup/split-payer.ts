@@ -45,7 +45,6 @@ export function billPayer<T extends PayerSplit>(rows: readonly T[]): T | null {
   return rows.find((row) => !!row.is_payer && !row.is_self && !row.part_of_split_id) ?? null;
 }
 
-/** What the user owes on one bill a friend paid (the app's `owedToPayer`). */
 /**
  * The shared album's bills the user is said to have paid that are on none of
  * their accounts: someone else saved them naming the user as payer, and they
@@ -72,6 +71,7 @@ export function awaitingAccount(
   return ids;
 }
 
+/** What the user owes on one bill a friend paid (the app's `owedToPayer`). */
 export type OwedToPayer = {
   txId: string;
   /** The payer's row. */

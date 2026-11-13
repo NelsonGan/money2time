@@ -2217,8 +2217,12 @@ migrations `090` and `091`.
   saying which account the money left. Until then it counts as the user's
   spending and the others owe them as usual, but no balance moves; a payback
   received meanwhile lowers the bill, and its transfer to the payback account
-  is written once the bill has its account. One the user saved themselves,
-  on any phone of theirs, lands on their default account as before.
+  is written once the bill has its account. One the user saved themselves
+  lands on the account their editor picked (a new one on another phone of
+  theirs, on their default account). Picking the account keeps the bill's
+  own currency: the editor of a shared album's bill does not switch it to
+  the account's, as it would for the user's own entry, since that would
+  change the bill for everyone.
 - **What moved stays.** When someone else deletes a bill, or takes the user
   off it, after money moved on the user's side (the bill is on one of their
   accounts because they paid it or paid their share back in full, or a part
@@ -2226,7 +2230,9 @@ migrations `090` and `091`.
   entries stay as the user's own, in the album, with no shares left on them
   (nobody owes anyone on that bill any more). What was still only owed goes.
   So the user's accounts still match their bank. A bill the user deletes
-  themselves goes with everything on it, as before.
+  themselves goes with everything on it, as before. A kept entry split again
+  becomes a new bill of the group that replaces it (the group may still hold
+  a bill under the old id).
 - **Leaving and stopping.** A member leaves from the People page; the owner
   turns the switch off, or removes someone who joined. Either way everyone
   keeps the album with their own entries as ordinary split bills, split with
@@ -2284,10 +2290,12 @@ migrations `090` and `091`.
 - **Who changed it.** `album_expenses.created_by` is the account that last
   wrote a bill, a delete included (`softDeleteExpense` takes the deleter).
   It decides two things on each phone (`projectExpense`): a bill the user
-  paid lands on their default account only when they wrote it, else on no
-  account (`needsAccountConfirm` in `lib/albumGroup.ts` is that state; the
-  editor's save gives the bill its account through the projection's
-  `hints.entry`, which works out its account amount); and a bill taken away
+  paid is on the account the editor just picked (`hints.entry`, which
+  `saveAlbumBill` passes rather than writing the account itself, so the
+  projection works out the account amount), else the entry's own while the
+  user was already its payer or made the change, else, new and written by
+  the user, their default account, else no account (`needsAccountConfirm`
+  in `lib/albumGroup.ts` is that state); and a bill taken away
   by someone else keeps what moved (`movedMoney`, `keepMovedMoney`), where
   one taken away by the user is removed (`removeLocalBill`). The editor's
   line reads it through `useGroupBillOrigin`. A delete from an app version
@@ -2370,7 +2378,13 @@ migrations `090` and `091`.
     many bills as they like, or mark themselves as another person on the
     list. A payment someone else records on the user's behalf (the user paid
     them back, or they paid the user) still lands on the user's default or
-    payback account. Leaving the album ends it; the entries
+    payback account, and a bill someone else turns from one the user paid
+    into one another member paid still drops to the user's share on no
+    account. `album_expenses.created_by` is written by the phone, not checked
+    by the Worker, so a member who knows another's account id (every
+    member's `user_id` is in `album_members`) can write a bill as if the
+    other wrote it: it then lands on their default account, or, as a delete,
+    takes what moved with it. Leaving the album ends it; the entries
     already made stay, as the user's own to delete.
 
 **Limits.** Split by Item bills are not shared (they have no Paid by). A member without Pro adds

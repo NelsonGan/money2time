@@ -178,6 +178,15 @@ class AlbumGroupsRepository {
       );
   }
 
+  /** Whether the group has ever held a bill with this id, deleted or not. */
+  hasExpense(groupId: string, id: string): boolean {
+    return !!getDb()
+      .select({ id: albumExpensesTable.id })
+      .from(albumExpensesTable)
+      .where(and(eq(albumExpensesTable.ledgerId, groupId), eq(albumExpensesTable.id, id)))
+      .get();
+  }
+
   /** Writes a bill as it now is; one deleted before comes back. */
   upsertExpense(input: AlbumExpenseInput): void {
     const now = nowIso();
