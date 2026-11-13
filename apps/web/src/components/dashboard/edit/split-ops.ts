@@ -54,16 +54,20 @@ export function splitsOf(model: Model, txId: string): SplitRecord[] {
 /**
  * Expenses with a friend's share still owed, or that a friend paid and the
  * user has not paid back: what the free plan counts (the app's
- * `countUnpaidSplitBills`).
+ * `countUnpaidSplitBills`). A shared album's bills are not counted: sharing an
+ * album has no free limit, and its bills are other people's to add.
  */
-export function unpaidSplitBills(model: Model): number {
-  const live = new Set(model.txs.map((tx) => tx.id));
+export function unpaidSplitBills(model: Pick<Model, "txById" | "raw" | "splitOwed">): number {
+  const counts = (txId: string) => {
+    const tx = model.txById.get(txId);
+    return !!tx && !tx.groupId;
+  };
   const bills = new Set<string>();
   for (const row of model.raw.transaction_splits ?? []) {
-    if (row.deleted_at || row.is_self || row.paid_at || !(row.amount > 0) || !live.has(row.transaction_id)) continue;
+    if (row.deleted_at || row.is_self || row.paid_at || !(row.amount > 0) || !counts(row.transaction_id)) continue;
     bills.add(row.transaction_id);
   }
-  for (const debt of model.splitOwed) bills.add(debt.txId);
+  for (const debt of model.splitOwed) if (counts(debt.txId)) bills.add(debt.txId);
   return bills.size;
 }
 

@@ -97,7 +97,8 @@ export function SplitShares() {
           </span>
           <span className={`tabular text-[14px] font-extrabold ${settled ? "text-foreground-muted" : "text-foreground"}`}>{f.foreign(row.amount, tx.currency)}</span>
         </div>
-        {editable ? (
+        {/* A shared album's bill is the group's: its payments are recorded in the app, and the phone refuses them from here. */}
+        {editable && !tx.groupId ? (
           <div className="mt-2 flex items-center gap-2 pl-12">
             {settled ? (
               <>

@@ -5188,12 +5188,18 @@ app's `services/webDashboardLink.ts`, `webDashboardCrypto.ts`,
   the same way; unlike the app it also sets albums apart in a shared ledger.
 - **A shared album's bills** (app migration 090, see Album members and shared
   albums): the phone's own entry for a group's bill carries `album_group_id`
-  (`tx.groupBill`). It reads as any split bill, both directions, since that is
-  how the phone keeps it. It is **view only** here, with no Delete: the bill is
-  everyone's in the album, so the editor says it is changed in the app, and the
-  phone refuses a split edit, a change of its day or title, a delete of one,
-  taking one out of its album, and deleting a shared album
-  (`invalid`), which also covers a page loaded before this. The group's own
+  (`tx.groupId`, the group's id, which is its album's). It reads as any split
+  bill, both directions, since that is how the phone keeps it. It is **view
+  only** here: the bill is everyone's in the album, so the editor says it is
+  changed in the app and has no Delete, its cards under Who owes you have no
+  Mark paid, Undo, Remove or account chip, the album's Edit transactions keeps
+  its own shared bills ticked, and an album with bills of its group has no
+  Delete (ending the share clears `album_group_id`, so that is the album's
+  sharing as of the last sync). The free plan's unsettled-split count leaves
+  these bills out, as the app's `countUnpaidSplitBills` does. The phone refuses
+  a split edit, a settle, a change of its day or title, a delete of one, taking
+  one out of its album, and deleting a shared album (`invalid`), which covers a
+  page loaded before this and a shared album with no bills yet. The group's own
   tables (`album_members`, `album_expenses`, `album_settlements`,
   `album_groups`) are not in
   what the phone sends.

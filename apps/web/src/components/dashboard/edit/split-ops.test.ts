@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { balanceFriends, draftRows, evenAcrossUnpaid, evenOwedAmounts, type SplitDraftRow, type SplitRecord } from "./split-ops.ts";
+import { balanceFriends, draftRows, evenAcrossUnpaid, evenOwedAmounts, unpaidSplitBills, type SplitDraftRow, type SplitRecord } from "./split-ops.ts";
 
 const row = (amount: string, extra: Partial<SplitDraftRow> = {}): SplitDraftRow => ({
   key: extra.id ?? `k${amount}`,
@@ -89,4 +89,22 @@ test("draftRows keys each friend by share", () => {
     draftRows(records).map((r) => r.shareKey),
     [undefined, "a", "a", "b"],
   );
+});
+
+test("the free plan's split count leaves a shared album's bills out, as the app's countUnpaidSplitBills", () => {
+  const tx = (id: string, groupId?: string) => [id, { id, ...(groupId ? { groupId } : null) }] as const;
+  const split = (id: string, transaction_id: string, amount: number, extra: Partial<SplitRecord> = {}) => ({ id, transaction_id, person_name: "Ben", amount, ...extra });
+  const model = {
+    txById: new Map([tx("mine"), tx("group", "album-1"), tx("paid"), tx("friend-paid"), tx("group-friend-paid", "album-1")]),
+    raw: {
+      transaction_splits: [
+        split("a", "mine", 10),
+        split("b", "group", 10),
+        split("c", "paid", 10, { paid_at: "2026-11-01T00:00:00.000Z" }),
+        split("d", "gone", 10),
+      ],
+    },
+    splitOwed: [{ txId: "friend-paid" }, { txId: "group-friend-paid" }],
+  } as unknown as Parameters<typeof unpaidSplitBills>[0];
+  assert.equal(unpaidSplitBills(model), 2);
 });
