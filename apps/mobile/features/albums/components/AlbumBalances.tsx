@@ -93,7 +93,9 @@ export function AlbumBalances({ summary, group, onOpenPerson }: AlbumBalancesPro
           const hasPage = summary.people.some((person) => person.key === personKey);
           // Whoever pays records it (README: Who can change what): a debt to
           // the user from someone who joined is theirs to settle.
-          const canSettle = selfId ? canRecordPayment(selfId, debt.from) : false;
+          const canSettle = selfId
+            ? canRecordPayment(group.members, selfId, debt.from, debt.to)
+            : false;
           return {
             key: `${debt.currency}:${debt.from}:${debt.to}`,
             mine,

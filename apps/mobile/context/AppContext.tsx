@@ -1008,7 +1008,13 @@ function addSelfToGroup(
   members: readonly AlbumMember[],
 ): void {
   const id = `u-${userId}`;
-  const taken = albumGroupsRepository.listAllMembers(groupId).some((member) => member.id === id);
+  const existing = albumGroupsRepository.listAllMembers(groupId).find((member) => member.id === id);
+  // Joined again after leaving: the row they left behind is theirs again.
+  if (existing && !existing.userId && !existing.deletedAt) {
+    albumGroupsRepository.updateMember(groupId, id, { userId });
+    return;
+  }
+  const taken = !!existing;
   albumGroupsRepository.createMember(groupId, {
     id: taken ? undefined : id,
     name: uniquePersonName(cleanPersonName(name) || I18n.t('albums.people.unnamed'), members),
@@ -3102,6 +3108,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const albumGroupHooksRef = useRef<{
     publish: (groupId: string) => void;
     detach: (transactionId: string) => void;
+    block: (groupId: string, billId: string) => 'not_payer' | 'has_payments' | null;
   } | null>(null);
 
   const addTransactionsToAlbum = useCallback((albumId: string, transactionIds: string[]) => {
@@ -3113,12 +3120,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const removeTransactionsFromAlbum = useCallback((albumId: string, transactionIds: string[]) => {
     // A group's bill taken out of its album leaves the group and stays the
-    // user's own entry.
-    for (const id of transactionIds) {
+    // user's own entry; one the user cannot change stays where it is, and
+    // they are told why (README: Who can change what).
+    let blocked: 'not_payer' | 'has_payments' | null = null;
+    const removing = transactionIds.filter((id) => {
       const tx = transactionsRef.current.find((item) => item.id === id);
-      if (tx?.albumGroupId === albumId) albumGroupHooksRef.current?.detach(id);
-    }
-    albumsRepository.removeTransactions(albumId, transactionIds);
+      if (tx?.albumGroupId !== albumId) return true;
+      const block = albumGroupHooksRef.current?.block(albumId, id) ?? null;
+      if (block) {
+        blocked = block;
+        return false;
+      }
+      albumGroupHooksRef.current?.detach(id);
+      return true;
+    });
+    if (blocked) Alert.alert(I18n.t(`albums.rules.${blocked}`));
+    if (removing.length === 0) return;
+    albumsRepository.removeTransactions(albumId, removing);
     setAlbums(albumsRepository.list());
   }, []);
 
@@ -3141,8 +3159,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const albumMembershipRef = useRef<{
     albums: Album[];
     transactionIdsByAlbum: Map<string, string[]>;
-    /** Every entry that is in some album, made the first time it is asked for. */
-    owned: ReadonlySet<string> | null;
+    /**
+     * Every entry in a shared album, made the first time it is asked for, and
+     * the shared albums it was made for (a share can start or end while the
+     * albums stay the same).
+     */
+    owned: { shares: string; ids: ReadonlySet<string> } | null;
   } | null>(null);
   const getAlbumEntryIds = useCallback((): ReadonlyMap<string, readonly string[]> => {
     const current = albumsRef.current;
@@ -3168,10 +3190,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (!membership) return NO_ENTRY_IDS;
     // Only a shared album settles its own bills; a split bill in an album of
     // the user's own is settled on the Balances page like any other.
-    membership.owned ??= new Set(
-      listAlbumShares().flatMap((share) => entryIds.get(share.ledgerId) ?? []),
-    );
-    return membership.owned;
+    const shareIds = listAlbumShares().map((share) => share.ledgerId);
+    const shares = shareIds.join(',');
+    if (membership.owned?.shares !== shares) {
+      membership.owned = {
+        shares,
+        ids: new Set(shareIds.flatMap((id) => entryIds.get(id) ?? [])),
+      };
+    }
+    return membership.owned.ids;
   }, [getAlbumEntryIds]);
 
   const getAlbumTransactions = useCallback((albumId: string): TransactionWithRelations[] => {
@@ -4097,7 +4124,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           const self = selfMember(members, env.userId);
           if (!self || (debt.from !== self.id && debt.to !== self.id)) return;
           // Whoever pays the debt records it (README: Who can change what).
-          if (!canRecordPayment(self.id, debt.from)) return;
+          if (!canRecordPayment(members, self.id, debt.from, debt.to)) return;
           const memberIds = albumGroupsRepository.memberIds(groupId);
           const open = openShares(
             albumGroupsRepository.listExpenses(groupId, memberIds),
@@ -4300,7 +4327,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [afterGroupWrite, albumBillBlock],
   );
 
-  albumGroupHooksRef.current = { publish: publishAlbumGroup, detach: detachAlbumBill };
+  albumGroupHooksRef.current = {
+    publish: publishAlbumGroup,
+    detach: detachAlbumBill,
+    block: albumBillBlock,
+  };
 
   /** The group's bill a share belongs to, when its album is shared on this phone. */
   const groupBillOf = useCallback((splitId: string) => {
@@ -4376,7 +4407,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               // has not joined.
               const fromMember = payer ? self.id : other;
               const toMember = payer ? other : self.id;
-              if (!canRecordPayment(self.id, fromMember)) {
+              if (!canRecordPayment(members, self.id, fromMember, toMember)) {
                 blockedPayment = true;
                 continue;
               }
@@ -4434,7 +4465,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const settlement = albumGroupsRepository
         .listSettlements(bill.groupId)
         .find((item) => item.id === settlementId);
-      if (rules && settlement && !canRecordPayment(rules.selfId, settlement.fromMember)) {
+      if (
+        rules &&
+        settlement &&
+        !canRecordPayment(rules.members, rules.selfId, settlement.fromMember, settlement.toMember)
+      ) {
         Alert.alert(I18n.t('albums.rules.not_your_payment'));
         return;
       }
@@ -4507,7 +4542,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           const settlement = albumGroupsRepository
             .listSettlements(payment.groupId)
             .find((item) => item.id === payment.settlementId);
-          if (rules && settlement && !canRecordPayment(rules.selfId, settlement.fromMember)) {
+          if (
+            rules &&
+            settlement &&
+            !canRecordPayment(
+              rules.members,
+              rules.selfId,
+              settlement.fromMember,
+              settlement.toMember,
+            )
+          ) {
             blocked = 'not_your_payment';
             taken.add(id);
             continue;

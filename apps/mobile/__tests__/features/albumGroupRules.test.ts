@@ -23,8 +23,16 @@ describe('shared album rules', () => {
     expect(billChangeBlock('me', { paidBy: 'aisha' }, [], 'tea')).toBe('not_payer');
   });
 
-  it('lets only the person paying record or undo a payment', () => {
-    expect(canRecordPayment('me', 'me')).toBe(true);
-    expect(canRecordPayment('me', 'aisha')).toBe(false);
+  it('lets only the person paying record or undo a payment, or its receiver once the payer left', () => {
+    const members = [
+      { id: 'me', userId: 'u-me' },
+      { id: 'aisha', userId: 'u-aisha' },
+      // Left the album.
+      { id: 'ben', userId: null },
+    ];
+    expect(canRecordPayment(members, 'me', 'me', 'aisha')).toBe(true);
+    expect(canRecordPayment(members, 'me', 'aisha', 'me')).toBe(false);
+    expect(canRecordPayment(members, 'me', 'ben', 'me')).toBe(true);
+    expect(canRecordPayment(members, 'me', 'ben', 'aisha')).toBe(false);
   });
 });

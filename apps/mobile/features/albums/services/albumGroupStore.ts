@@ -189,6 +189,27 @@ export function beginAlbumGroup(albumId: string, self: { userId: string; name: s
 }
 
 /**
+ * Someone left a shared album, or its owner took them out: their row stays,
+ * with its bills, so nobody's balances change, but it no longer names an
+ * account (`userId` null). New bills leave them out, and a payment from them
+ * is recorded by the person it went to (README: Who can change what).
+ * `userId`: the account that left, when it is the user's own.
+ */
+export function markMemberLeft(groupId: string, memberId: string): void {
+  albumGroupsRepository.updateMember(groupId, memberId, { userId: null });
+  notifyAlbumGroups();
+}
+
+/** The user's own member in a group, marked as having left (see `markMemberLeft`). */
+export function markSelfLeft(groupId: string, userId: string | null): void {
+  if (!userId) return;
+  const self = albumGroupsRepository
+    .listMembers(groupId)
+    .find((member) => member.userId === userId && !member.deletedAt);
+  if (self) markMemberLeft(groupId, self.id);
+}
+
+/**
  * An album that is no longer shared on this phone (sharing stopped, the user
  * left or was removed, or signed out): it goes on as an album of the user's
  * own. The group's rows leave the phone without recording deletions, since

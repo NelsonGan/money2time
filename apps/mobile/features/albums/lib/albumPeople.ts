@@ -70,12 +70,12 @@ export function albumPeople(
   return [...people.filter((person) => person.isSelf), ...people.filter((p) => !p.isSelf)];
 }
 
-/** The people a new bill starts split with: everyone but the user. */
+/** The people a new bill starts split with: everyone but the user who is still in the album. */
 export function splitWithPeople(
   people: readonly AlbumGroupPerson[],
 ): { id: string; name: string }[] {
   return people.flatMap((person) =>
-    person.isSelf || !person.id ? [] : [{ id: person.id, name: person.name }],
+    person.isSelf || !person.id || !person.joined ? [] : [{ id: person.id, name: person.name }],
   );
 }
 

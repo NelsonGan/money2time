@@ -31,7 +31,11 @@ import { SplitWithCard, type SplitWithRow } from '../components/SplitWithCard';
 import { useAlbumGroup } from '../hooks/useAlbumGroup';
 import { albumSharingMessage, peopleEditMessage } from '../lib/albumMessages';
 import { type AlbumGroupPerson, type PeopleEditError } from '../lib/albumPeople';
-import { groupSimplifiesDebts, subscribeAlbumGroups } from '../services/albumGroupStore';
+import {
+  groupSimplifiesDebts,
+  markMemberLeft,
+  subscribeAlbumGroups,
+} from '../services/albumGroupStore';
 
 interface AlbumPeopleScreenProps {
   albumId: string;
@@ -183,6 +187,7 @@ export function AlbumPeopleScreen({ albumId, onBack }: AlbumPeopleScreenProps) {
             void run(`remove:${member.id}`, async () => {
               if (!shareId || !member.userId) return;
               await removeMember(await getSessionToken(), shareId, member.userId);
+              markMemberLeft(album.id, member.id);
               setLink(null);
               void trackEvent(AnalyticsEvents.ALBUM_MEMBER_REMOVED);
               await loadJoined();

@@ -11,6 +11,7 @@ import {
   ensureLocalAlbum,
   isAlbumDeleted,
   mainLedgerTakesSharedAlbums,
+  markSelfLeft,
   releaseAlbumGroup,
 } from '~/features/albums/services/albumGroupStore';
 import { getSQLite } from '~/lib/db/client';
@@ -731,6 +732,17 @@ class SharedLedgerSync {
   async leave(ledgerId: string, opts: { force?: boolean } = {}): Promise<void> {
     const ledger = sharedLedgerFor(ledgerId);
     if (!ledger || ledger.role !== 'member') return;
+    // A member leaving a shared album says so in its group first (their row
+    // and bills stay; README: Album members and shared albums), pushed now
+    // even when leaving by force.
+    if (ledger.kind === 'album') {
+      markSelfLeft(ledger.ledgerId, ledger.userId ?? null);
+      if (ledger.active && this.session) {
+        await this.engineFor(ledger)
+          .then((engine) => engine.syncNow())
+          .catch(() => undefined);
+      }
+    }
     if (!opts.force && this.hasUnsent(ledger)) {
       if (ledger.active && this.session) {
         await this.engineFor(ledger)

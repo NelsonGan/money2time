@@ -101,6 +101,7 @@ export function SettleUpPersonScreen({
   const albumMembers = useSyncExternalStore(subscribeAlbumGroups, () =>
     listGroupMembers(albumId && sharedAlbumFor(albumId) ? albumId : null),
   );
+  const inSharedAlbum = albumMembers.length > 0;
   const theyRecordIt =
     state === 'owes_you' &&
     !!person &&
@@ -368,7 +369,9 @@ export function SettleUpPersonScreen({
             ) : null}
           </ScrollView>
 
-          {person.unpaidBillCount > 0 && theyRecordIt ? (
+          {person.unpaidBillCount > 0 &&
+          inSharedAlbum &&
+          state === 'even' ? null : person.unpaidBillCount > 0 && theyRecordIt ? (
             <Text variant="caption" tone="muted" className="px-5 pb-8 pt-2 text-center">
               {I18n.t('albums.rules.they_record', { name: person.name ?? '' })}
             </Text>
@@ -410,12 +413,25 @@ export function SettleUpPersonScreen({
             onClose={() => setSettleVisible(false)}
             onConfirm={(accountId, amount) => {
               setSettleVisible(false);
-              if (amount === null) {
+              // In a shared album nobody records the other side's payments
+              // (README: Who can change what), so when shares go both ways
+              // the user pays the net, onto their oldest open bills, and the
+              // offsetting shares stay as they are.
+              const netOnly =
+                inSharedAlbum && person.totalReporting > 0 && person.owedReporting > 0;
+              if (amount === null && !netOnly) {
                 settleUpWithPerson(person.key, accountId, albumId);
                 return;
               }
+              const paying =
+                amount ??
+                Math.abs(
+                  person.netByCurrency.length === 1
+                    ? person.netByCurrency[0]!.amount
+                    : person.netReporting,
+                );
               // A part of it: onto the oldest open bills of whoever pays.
-              for (const payment of planPartSettlement(person, amount)) {
+              for (const payment of planPartSettlement(person, paying)) {
                 if (payment.direction === 'owes_you') {
                   recordSplitPayment(payment.splitId, payment.amount, {
                     paybackAccountId: accountId,

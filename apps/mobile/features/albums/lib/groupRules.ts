@@ -11,6 +11,8 @@
  * - **Payments lock a bill.** With a payment recorded on it, nobody changes
  *   or deletes it until the payments are undone.
  * - **Only the person paying records a payment**, and only they undo it.
+ *   Someone who has left the album can no longer record theirs, so a payment
+ *   from them is recorded by the person it went to.
  */
 
 interface Bill {
@@ -46,7 +48,22 @@ export function billChangeBlock(
   return null;
 }
 
-/** Whether the user may record (or undo) a payment: only one they make. */
-export function canRecordPayment(selfId: string, fromMember: string): boolean {
-  return fromMember === selfId;
+interface Member {
+  id: string;
+  /** The account that joined; null once they have left. */
+  userId: string | null;
+}
+
+/**
+ * Whether the user may record (or undo) a payment: one they make, or one to
+ * them from someone who has left.
+ */
+export function canRecordPayment(
+  members: readonly Member[],
+  selfId: string,
+  fromMember: string,
+  toMember: string,
+): boolean {
+  if (fromMember === selfId) return true;
+  return toMember === selfId && !members.find((member) => member.id === fromMember)?.userId;
 }

@@ -492,7 +492,11 @@ function TransactionEditor({
         // A group's bill is only ever saved through its group: when that
         // failed (signed out, the share gone), say so rather than drop it.
         if (isGroupBill) {
-          Alert.alert(I18n.t('errors.generic_operation_failed'));
+          // A payment may have landed while the editor was open.
+          const block = albumBillBlock(albumGroupId, transaction.id);
+          Alert.alert(
+            block ? I18n.t(`albums.rules.${block}`) : I18n.t('errors.generic_operation_failed'),
+          );
           return;
         }
       } else if (isGroupBill) {
@@ -503,6 +507,7 @@ function TransactionEditor({
       saveOwnSplits(input, splits, extras);
     },
     [
+      albumBillBlock,
       albumGroupId,
       billBlock,
       saveOwnFieldsOnly,
