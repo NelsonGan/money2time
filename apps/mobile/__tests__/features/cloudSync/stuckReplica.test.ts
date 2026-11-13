@@ -14,6 +14,7 @@ const REPLICA_DIR = '/data/user/0/app/databases';
 const files = new Set<string>();
 const log: string[] = [];
 let freshOpenError: Error | null = null;
+let deleteFails = false;
 
 jest.mock('@tursodatabase/sync-react-native', () => {
   class Database {
@@ -57,6 +58,7 @@ jest.mock('expo-file-system', () => ({
       return [...files].map((name) => ({
         name,
         delete: () => {
+          if (deleteFails) throw new Error('EPERM');
           files.delete(name);
           log.push(`delete ${name}`);
         },
@@ -87,6 +89,7 @@ beforeEach(() => {
   files.clear();
   log.length = 0;
   freshOpenError = null;
+  deleteFails = false;
   jest.mocked(reportError).mockClear();
 });
 
@@ -117,8 +120,8 @@ describe('pulling before a link', () => {
       deleted,
       deleted,
       deleted,
-      // Opening an empty replica downloads the latest cloud copy: no second pull.
       'open fresh',
+      'pull',
     ]);
     // Recovered, but still reported, so the engine fault's rate stays visible.
     expect(reportError).toHaveBeenCalledWith(expect.objectContaining({ message: STUCK }), {
@@ -140,6 +143,23 @@ describe('pulling before a link', () => {
       'open kept',
       'open fresh',
     ]);
+    expect(reportError).not.toHaveBeenCalled();
+
+    // Back online, the next try opens a fresh copy instead of a closed replica.
+    freshOpenError = null;
+    log.length = 0;
+    await expect(sync.pullLatest()).resolves.toBeUndefined();
+    expect(log).toEqual(['open fresh', 'pull']);
+  });
+
+  it('fails as before when the stuck files could not be deleted', async () => {
+    await engine().open();
+    const sync = engine();
+    await sync.open();
+    deleteFails = true;
+
+    await expect(sync.pullLatest()).rejects.toThrow(STUCK);
+    expect(reportError).not.toHaveBeenCalled();
   });
 
   it('does not throw away the replica for other failures', async () => {

@@ -681,6 +681,8 @@ export function runExclusive<T>(fn: () => Promise<T> | T): Promise<T> {
 
 export class SyncEngine {
   private replica: Replica | null = null;
+  /** A rebuild failed (offline, say) after deleting the replica: the next pull opens a fresh one. */
+  private rebuildPending = false;
   private running: Promise<SyncOutcome> | null = null;
   /** The last apply left ledger-row removals for later (see applyRemoteChanges). */
   private removalsDeferred = false;
@@ -715,13 +717,22 @@ export class SyncEngine {
       clientName: 'money2time',
       bootstrapIfEmpty: true,
     });
-    await replica.connect();
-    // The engine writes temporary indexes (an `IN (…)` list, a large sort) to
-    // $TMPDIR, or to /data/local/tmp on Android, which apps cannot write.
-    // Android sets $TMPDIR only when the app's cache dir is ready at start-up,
-    // so keep them in memory, as the app database does.
-    await replica.exec('PRAGMA temp_store = MEMORY');
-    for (const sql of CLOUD_SCHEMA_SQL) await replica.exec(sql);
+    try {
+      await replica.connect();
+      // The engine writes temporary indexes (an `IN (…)` list, a large sort) to
+      // $TMPDIR, or to /data/local/tmp on Android, which apps cannot write.
+      // Android sets $TMPDIR only when the app's cache dir is ready at start-up,
+      // so keep them in memory, as the app database does.
+      await replica.exec('PRAGMA temp_store = MEMORY');
+      for (const sql of CLOUD_SCHEMA_SQL) await replica.exec(sql);
+    } catch (error) {
+      try {
+        replica.close();
+      } catch {
+        // Never opened: nothing to release.
+      }
+      throw error;
+    }
     this.replica = replica;
   }
 
@@ -755,18 +766,20 @@ export class SyncEngine {
    * Returns whether the pull may have brought changes.
    */
   private async pullOrRebuild(beforeLink = false): Promise<boolean> {
+    await this.reopenAfterFailedRebuild();
     try {
       return await this.db().pull();
     } catch (error) {
       if (!isStuckReplicaError(error)) throw error;
       if (!beforeLink) {
+        if (hasUnpushedChanges(this.channel)) throw error;
         const replicaWrites = await this.db()
           .stats()
           .then(
             (stats) => stats.cdcOperations,
             () => 1,
           );
-        if (hasUnpushedChanges(this.channel) || replicaWrites > 0) throw error;
+        if (replicaWrites > 0) throw error;
       }
       await this.rebuildReplica(error);
       return true;
@@ -775,12 +788,23 @@ export class SyncEngine {
 
   /** Replaces a stuck replica with a fresh download of the cloud copy. */
   private async rebuildReplica(cause: unknown): Promise<void> {
-    // Recovered, but reported, so the rate of the engine fault stays visible.
-    reportError(cause, { scope: 'cloud_sync', stage: 'replica_rebuilt' });
     this.close();
     deleteReplicaFiles(this.config.userId, this.config.channel);
+    this.rebuildPending = true;
     // Opening an empty replica downloads the latest cloud copy.
     await this.open();
+    this.rebuildPending = false;
+    // Fails again, safely, if a file could not be deleted and the stuck
+    // replica was opened instead.
+    await this.db().pull();
+    // Recovered, but reported, so the rate of the engine fault stays visible.
+    reportError(cause, { scope: 'cloud_sync', stage: 'replica_rebuilt' });
+  }
+
+  private async reopenAfterFailedRebuild(): Promise<void> {
+    if (!this.rebuildPending) return;
+    await this.open();
+    this.rebuildPending = false;
   }
 
   /**
@@ -1028,6 +1052,7 @@ export class SyncEngine {
   }
 
   private async runSync(): Promise<SyncOutcome> {
+    await this.reopenAfterFailedRebuild();
     enableCapture();
     let appliedRows = 0;
     this.applyFailure = null;

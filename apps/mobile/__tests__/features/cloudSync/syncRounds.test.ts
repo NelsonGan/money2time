@@ -951,14 +951,26 @@ describe('exchange rates', () => {
 });
 
 describe('with a replica the engine cannot pull into', () => {
-  /** Stands in for deleting the replica and downloading the cloud copy again. */
+  /**
+   * Stands in for deleting the replica and downloading the cloud copy again:
+   * the engine gets a new replica object, and the old one is closed.
+   */
   function spyOnRebuild() {
-    return jest
-      .spyOn(engine as unknown as { rebuildReplica: () => Promise<void> }, 'rebuildReplica')
-      .mockImplementation(async () => {
-        calls.push('rebuild');
-        stuckPull = false;
-      });
+    const internals = engine as unknown as {
+      replica: Record<string, unknown>;
+      rebuildReplica: () => Promise<void>;
+    };
+    return jest.spyOn(internals, 'rebuildReplica').mockImplementation(async () => {
+      calls.push('rebuild');
+      stuckPull = false;
+      const old = internals.replica;
+      internals.replica = { ...old };
+      for (const key of Object.keys(old)) {
+        old[key] = async () => {
+          throw new Error('used the closed replica');
+        };
+      }
+    });
   }
 
   it('downloads it again when nothing waits to be pushed, and applies what came down', async () => {
@@ -982,6 +994,13 @@ describe('with a replica the engine cannot pull into', () => {
       'rebuild',
     ]);
     expect(app.prepare('SELECT profile_name FROM settings').get()?.profile_name).toBe('Sam');
+
+    // An edit right after goes up through the new replica.
+    calls = [];
+    addTransaction('lunch', 12);
+    await engine.syncNow();
+    expect(rounds()).toEqual(['pull', 'push']);
+    expect(cloudRow('lunch')?.amount).toBe(12);
   });
 
   it('keeps it, and fails as before, while an edit waits to be pushed', async () => {
