@@ -738,10 +738,23 @@ export class SyncEngine {
    * copy when the replica is empty, so one kept from an earlier session (an
    * expired sign-in, an app closed mid-link) must be pulled before any
    * decision is made from it.
+   *
+   * Turso's engine records how far into the WAL its last pull reached; a kept
+   * replica whose WAL no longer holds those frames fails every pull. Before a
+   * link the replica is only a copy of the cloud, so it is deleted and
+   * downloaded again, as a second try after a failed link would.
    */
   pullLatest(): Promise<void> {
     return this.exclusive(async () => {
-      await this.db().pull();
+      try {
+        await this.db().pull();
+      } catch (error) {
+        if (!isStuckReplicaError(error)) throw error;
+        this.close();
+        deleteReplicaFiles(this.config.userId, this.config.channel);
+        await this.open();
+        await this.db().pull();
+      }
     });
   }
 
@@ -1736,6 +1749,15 @@ async function uploadWithRetry(upload: () => Promise<void>): Promise<void> {
 
 function assetFile(relativePath: string): File {
   return new File(Paths.document, 'user-assets', relativePath);
+}
+
+/**
+ * The engine's own bookkeeping no longer matches the replica's WAL (Turso
+ * 0.8.3, like tursodatabase/turso#8366): pulls into it keep failing.
+ */
+function isStuckReplicaError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  return message.includes('unable to checkpoint synced portion of WAL');
 }
 
 /**
