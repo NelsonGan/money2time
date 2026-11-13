@@ -2183,7 +2183,11 @@ migrations `090` and `091`.
     leaves (`SettleUpConfirmSheet`); the person paid gets it on their own
     payback account. Where someone owes the user, the person's page says
     "Aisha records it when they pay you." in place of Settle up, and the
-    Balances line opens that page rather than a Settle up sheet.
+    Balances line opens that page rather than a Settle up sheet. When shares
+    go both ways, Settle up pays only the net, onto the user's oldest bills,
+    and the shares the other way stay open (no Settle up when they come out
+    even). A shared bill's own page offers no Remove (its payer edits the
+    bill), and Mark paid only on a share of someone who has left.
 - **A shared album's balances are its own.** A bill in a shared album is
   settled in that album and nowhere else: its Balances tab and its people's
   pages cover the bills in it, and the Balances page covers every other split
@@ -2222,8 +2226,11 @@ migrations `090` and `091`.
   ordinary split bills (settled on the Balances page); it just no longer
   updates. Deleting the album stops sharing it, for the owner, the same way
   for everyone. Signing out does the same until the next sign-in, which links
-  it again. A payment from someone who has left can no longer be recorded,
-  since only they could record it.
+  it again. Leaving marks their member row as left (it keeps no account;
+  `markSelfLeft` in `sharedLedgerSync.leave`, pushed before the phone lets
+  go, and `markMemberLeft` when the owner takes them out): new bills leave
+  them out, and a payment from them is recorded by the person it went to.
+  Joining again links the same row back.
 - **Pro plays no part.** Unlike a shared ledger, a shared album syncs
   whoever in it is Pro or not, and is never paused.
 
