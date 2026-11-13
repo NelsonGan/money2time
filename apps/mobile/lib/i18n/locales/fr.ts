@@ -3004,14 +3004,8 @@ const fr = {
       me_tag: 'Vous',
       joined: 'A rejoint',
       left: 'Parti',
-      add_person: 'Ajouter une personne',
-      add: 'Ajouter',
       unnamed: 'Ami',
       name_taken: "Quelqu'un porte déjà ce nom ici.",
-      full: 'Un album se partage avec {{max}} personnes au plus.',
-      remove_title: 'Retirer {{name}} ?',
-      remove_message:
-        'Les nouvelles notes de cet album ne seront plus partagées avec cette personne.',
       remove_joined_title: "Retirer {{name}} de l'album ?",
       remove_joined_message:
         'Cette personne ne recevra plus les notes de cet album. Les notes où elle figure restent.',
@@ -3020,7 +3014,6 @@ const fr = {
       row: 'Partager avec des amis',
       caption: 'Tout le monde voit les notes et qui doit quoi à qui.',
       link_note: "Valable 24 heures. Toute personne qui l'a peut rejoindre.",
-      stop_title: 'Arrêter de partager {{name}} ?',
       stop_message:
         "Chacun garde l'album avec ses propres écritures, mais il ne se met plus à jour entre vous.",
       leave: "Quitter l'album",

@@ -2984,13 +2984,8 @@ const pt = {
       me_tag: 'Você',
       joined: 'Entrou',
       left: 'Saiu',
-      add_person: 'Adicionar pessoa',
-      add: 'Adicionar',
       unnamed: 'Amigo',
       name_taken: 'Alguém aqui já tem esse nome.',
-      full: 'Um álbum é dividido com até {{max}} pessoas.',
-      remove_title: 'Remover {{name}}?',
-      remove_message: 'As novas contas deste álbum não serão mais divididas com essa pessoa.',
       remove_joined_title: 'Remover {{name}} do álbum?',
       remove_joined_message:
         'A pessoa deixa de receber as contas deste álbum. As contas em que ela está permanecem.',
@@ -2999,7 +2994,6 @@ const pt = {
       row: 'Dividir com amigos',
       caption: 'Todos veem as contas e quem deve a quem.',
       link_note: 'Vale por 24 horas. Qualquer pessoa com ele pode entrar.',
-      stop_title: 'Parar de compartilhar {{name}}?',
       stop_message:
         'Todos ficam com o álbum e seus próprios lançamentos, mas ele não é mais atualizado entre vocês.',
       leave: 'Sair do álbum',

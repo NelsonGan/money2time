@@ -397,12 +397,3 @@ export function groupTotals(
   }
   return totals;
 }
-
-/** Whether a bill that still stands names the member, as its payer or with a share. */
-export function memberIsOnBill(expenses: readonly AlbumExpense[], memberId: string): boolean {
-  return expenses.some(
-    (expense) =>
-      !expense.deletedAt &&
-      (expense.paidBy === memberId || expense.shares.some((share) => share.memberId === memberId)),
-  );
-}

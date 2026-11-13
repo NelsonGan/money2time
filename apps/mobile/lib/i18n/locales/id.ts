@@ -2979,13 +2979,8 @@ const id = {
       me_tag: 'Kamu',
       joined: 'Sudah bergabung',
       left: 'Keluar',
-      add_person: 'Tambah orang',
-      add: 'Tambah',
       unnamed: 'Teman',
       name_taken: 'Sudah ada yang memakai nama itu di sini.',
-      full: 'Satu album dibagi dengan paling banyak {{max}} orang.',
-      remove_title: 'Hapus {{name}}?',
-      remove_message: 'Tagihan baru di album ini tidak lagi dibagi dengannya.',
       remove_joined_title: 'Keluarkan {{name}} dari album?',
       remove_joined_message:
         'Dia tidak lagi menerima tagihan album ini. Tagihan yang memuatnya tetap ada.',
@@ -2994,7 +2989,6 @@ const id = {
       row: 'Bagi dengan teman',
       caption: 'Semua orang melihat tagihan dan siapa berutang kepada siapa.',
       link_note: 'Berlaku 24 jam. Siapa pun yang memilikinya bisa bergabung.',
-      stop_title: 'Berhenti membagikan {{name}}?',
       stop_message:
         'Semua orang tetap memiliki album dengan catatannya sendiri, tetapi tidak lagi diperbarui di antara kalian.',
       leave: 'Keluar dari album',

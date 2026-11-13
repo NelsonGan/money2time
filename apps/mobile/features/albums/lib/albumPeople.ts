@@ -9,9 +9,9 @@
  * groups a person by. An album that is not shared has nobody but the user.
  */
 
-import type { Album, AlbumMember, AlbumPerson } from '~/types';
+import type { AlbumMember } from '~/types';
 
-/** The most people an album is split with, the user aside. */
+/** The most people who can join a shared album, its owner aside (the Worker's limit). */
 export const MAX_ALBUM_PEOPLE = 20;
 const MAX_PERSON_NAME = 40;
 
@@ -25,44 +25,12 @@ export function personNameKey(name: string | null | undefined): string {
   return cleanPersonName(name ?? '').toLowerCase();
 }
 
-export type PeopleEditError = 'blank' | 'taken' | 'full';
-
-/** `people` with someone added, or why not. */
-export function withPersonAdded(
-  people: readonly AlbumPerson[],
-  name: string,
-  id: string,
-): AlbumPerson[] | PeopleEditError {
-  const cleaned = cleanPersonName(name);
-  if (!cleaned) return 'blank';
-  if (people.length >= MAX_ALBUM_PEOPLE) return 'full';
-  const key = personNameKey(cleaned);
-  if (people.some((person) => personNameKey(person.name) === key)) return 'taken';
-  return [...people, { id, name: cleaned }];
-}
-
-/** `people` with one of them renamed, or why not. */
-export function withPersonRenamed(
-  people: readonly AlbumPerson[],
-  id: string,
-  name: string,
-): AlbumPerson[] | PeopleEditError {
-  const cleaned = cleanPersonName(name);
-  if (!cleaned) return 'blank';
-  const key = personNameKey(cleaned);
-  if (people.some((person) => person.id !== id && personNameKey(person.name) === key)) {
-    return 'taken';
-  }
-  return people.map((person) => (person.id === id ? { ...person, name: cleaned } : person));
-}
-
-export function withPersonRemoved(people: readonly AlbumPerson[], id: string): AlbumPerson[] {
-  return people.filter((person) => person.id !== id);
-}
+/** Why a name was not taken: empty, or someone else's in the album. */
+export type PeopleEditError = 'blank' | 'taken';
 
 /** A person of an album, the user included, whichever way the album keeps them. */
 export interface AlbumGroupPerson {
-  /** The person's id: an `AlbumPerson` or `AlbumMember` id; null for the user in an album that is not shared. */
+  /** The person's `AlbumMember` id; null for the user in an album that is not shared. */
   id: string | null;
   name: string;
   isSelf: boolean;
@@ -81,10 +49,10 @@ export function selfMember(
 
 /**
  * Everyone an album is split between, the user first. `members` are the
- * group's live members when the album is shared, else null.
+ * group's live members when the album is shared, else null: an album that is
+ * not shared has nobody but the user.
  */
 export function albumPeople(
-  album: Pick<Album, 'splitWith'>,
   members: readonly AlbumMember[] | null,
   userId: string | null | undefined,
   meLabel: string,
@@ -103,7 +71,9 @@ export function albumPeople(
 }
 
 /** The people a new bill starts split with: everyone but the user. */
-export function splitWithPeople(people: readonly AlbumGroupPerson[]): AlbumPerson[] {
+export function splitWithPeople(
+  people: readonly AlbumGroupPerson[],
+): { id: string; name: string }[] {
   return people.flatMap((person) =>
     person.isSelf || !person.id ? [] : [{ id: person.id, name: person.name }],
   );

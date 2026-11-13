@@ -11,11 +11,9 @@ import { MAX_ALBUM_PEOPLE, type PeopleEditError } from './albumPeople';
  */
 const MAX_SHARED_ALBUMS = 50;
 
-/** Why a person could not be added or renamed, in words; null when there is nothing to say. */
+/** Why the user's name could not be changed, in words; null when there is nothing to say. */
 export function peopleEditMessage(error: PeopleEditError): string | null {
-  if (error === 'taken') return I18n.t('albums.people.name_taken');
-  if (error === 'full') return I18n.t('albums.people.full', { max: MAX_ALBUM_PEOPLE });
-  return null;
+  return error === 'taken' ? I18n.t('albums.people.name_taken') : null;
 }
 
 /** Why sharing an album (or a change to its sharing) failed, in words. */

@@ -2968,13 +2968,8 @@ const nb = {
       me_tag: 'Deg',
       joined: 'Blitt med',
       left: 'Forlatt',
-      add_person: 'Legg til person',
-      add: 'Legg til',
       unnamed: 'Venn',
       name_taken: 'Noen her har allerede det navnet.',
-      full: 'Et album kan deles med opptil {{max}} personer.',
-      remove_title: 'Fjerne {{name}}?',
-      remove_message: 'Nye regninger i albumet deles ikke lenger med dem.',
       remove_joined_title: 'Fjerne {{name}} fra albumet?',
       remove_joined_message:
         'De får ikke lenger albumets regninger. Regningene de står på, blir værende.',
@@ -2983,7 +2978,6 @@ const nb = {
       row: 'Del med venner',
       caption: 'Alle ser regningene og hvem som skylder hvem.',
       link_note: 'Virker i 24 timer. Alle som har lenken, kan bli med.',
-      stop_title: 'Slutte å dele {{name}}?',
       stop_message:
         'Alle beholder albumet med sine egne poster, men det oppdateres ikke lenger mellom dere.',
       leave: 'Forlat album',

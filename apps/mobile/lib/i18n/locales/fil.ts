@@ -3008,13 +3008,8 @@ const fil = {
       me_tag: 'Ikaw',
       joined: 'Sumali na',
       left: 'Umalis na',
-      add_person: 'Magdagdag ng tao',
-      add: 'Idagdag',
       unnamed: 'Kaibigan',
       name_taken: 'May ganyang pangalan na rito.',
-      full: 'Hanggang {{max}} tao ang puwedeng kahati sa isang album.',
-      remove_title: 'Alisin si {{name}}?',
-      remove_message: 'Hindi na sila kahati sa mga bagong bill sa album na ito.',
       remove_joined_title: 'Alisin si {{name}} sa album?',
       remove_joined_message:
         'Hindi na nila matatanggap ang mga bill ng album na ito. Mananatili ang mga bill na kasama sila.',
@@ -3023,7 +3018,6 @@ const fil = {
       row: 'Hatiin sa mga kaibigan',
       caption: 'Nakikita ng lahat ang mga bill at kung sino ang may utang kanino.',
       link_note: 'Gumagana nang 24 oras. Makakasali ang sinumang may link.',
-      stop_title: 'Itigil ang pagbabahagi ng {{name}}?',
       stop_message:
         'Mananatili sa lahat ang album kasama ang sarili nilang mga entry, pero hindi na ito mag-a-update sa pagitan ninyo.',
       leave: 'Umalis sa album',

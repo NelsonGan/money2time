@@ -2977,13 +2977,8 @@ const pl = {
       me_tag: 'Ty',
       joined: 'Dołączono',
       left: 'Opuścił(a)',
-      add_person: 'Dodaj osobę',
-      add: 'Dodaj',
       unnamed: 'Znajomy',
       name_taken: 'Ktoś tutaj ma już to imię.',
-      full: 'Album można dzielić z maksymalnie {{max}} osobami.',
-      remove_title: 'Usunąć {{name}}?',
-      remove_message: 'Nowe rachunki w tym albumie nie będą już dzielone z tą osobą.',
       remove_joined_title: 'Usunąć {{name}} z albumu?',
       remove_joined_message:
         'Ta osoba przestanie dostawać rachunki z tego albumu. Rachunki, na których jest, zostają.',
@@ -2992,7 +2987,6 @@ const pl = {
       row: 'Dziel ze znajomymi',
       caption: 'Wszyscy widzą rachunki i kto komu jest winien.',
       link_note: 'Działa przez 24 godziny. Każdy, kto go ma, może dołączyć.',
-      stop_title: 'Przestać udostępniać {{name}}?',
       stop_message:
         'Każdy zachowuje album ze swoimi wpisami, ale nie będzie się on już aktualizował między wami.',
       leave: 'Opuść album',

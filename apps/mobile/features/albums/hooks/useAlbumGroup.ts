@@ -14,8 +14,6 @@ import { listGroupMembers, subscribeAlbumGroups } from '../services/albumGroupSt
 export interface AlbumGroup {
   /** Whether the album is split with people: a shared album, never one in a shared ledger. */
   available: boolean;
-  /** Whether it can be shared: only an album of the main ledger, while that is not shared. */
-  canShare: boolean;
   /** The album's sharing on this phone, or null while it is not shared. */
   share: SharedLedger | null;
   /** Everyone the album is split between, the user first. */
@@ -43,27 +41,26 @@ export function useAlbumScope(): { canSplit: boolean; canShare: boolean } {
 }
 
 /**
- * The people of an album, whichever way it keeps them (the album's own list,
- * or its group's members once shared), kept current as either changes.
+ * The people of an album: a shared album's group members, kept current as
+ * they change; an album that is not shared has only the user.
  */
 export function useAlbumGroup(album: Album | null | undefined): AlbumGroup {
-  const { canSplit, canShare } = useAlbumScope();
+  const { canSplit } = useAlbumScope();
   const share = useSharedAlbum(album?.id);
   const groupId = share ? share.ledgerId : null;
   const members = useSyncExternalStore(subscribeAlbumGroups, () => listGroupMembers(groupId));
   // The user reads as their Settings name, "Me" without one.
   const meLabel = useSelfPerson().name;
   return useMemo(() => {
-    const people = album ? albumPeople(album, share ? members : null, share?.userId, meLabel) : [];
+    const people = album ? albumPeople(share ? members : null, share?.userId, meLabel) : [];
     const self = share ? selfMember(members, share.userId) : null;
     return {
       available: !!album && canSplit && !!share,
-      canShare: !!album && canShare,
       share,
       people,
       others: people.filter((person) => !person.isSelf),
       self,
       members,
     };
-  }, [album, canShare, canSplit, meLabel, members, share]);
+  }, [album, canSplit, meLabel, members, share]);
 }

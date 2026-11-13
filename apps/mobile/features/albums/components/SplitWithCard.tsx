@@ -1,4 +1,4 @@
-import { Plus, X } from 'lucide-react-native';
+import { X } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Pressable, View } from 'react-native';
 
@@ -14,11 +14,11 @@ import { cleanPersonName } from '../lib/albumPeople';
 
 /** A person in the list. */
 export interface SplitWithRow {
-  /** Null for the user in an album that is not shared, shown by their Settings name. */
+  /** The member's id; null only for the user before their member is written. */
   id: string | null;
   name: string;
   isSelf: boolean;
-  /** A muted line under the name (Joined, Not joined yet, You). */
+  /** A muted line under the name (You, Joined, Left). */
   caption?: string;
   renamable: boolean;
   removable: boolean;
@@ -26,31 +26,20 @@ export interface SplitWithRow {
 
 interface SplitWithCardProps {
   rows: readonly SplitWithRow[];
-  /** Whether another person can be added. */
-  canAdd: boolean;
-  /** Adds a person by name; true when they were added, so the field clears. */
-  onAdd: (name: string) => boolean;
   /** A row's new name, already cleaned and different from the old one. */
   onRename: (id: string, name: string) => void;
   onRemove: (row: SplitWithRow) => void;
 }
 
 /**
- * The people an album is split with: the user first, then a row per person
- * with a field to add one. A name is changed in place (Return or a tap
- * elsewhere keeps it), and the × removes.
+ * A shared album's people: the user first, then everyone who joined. The
+ * user's own name is changed in place (Return or a tap elsewhere keeps it),
+ * and the × takes someone out of the share.
  */
-export function SplitWithCard({ rows, canAdd, onAdd, onRename, onRemove }: SplitWithCardProps) {
+export function SplitWithCard({ rows, onRename, onRemove }: SplitWithCardProps) {
   const colors = useThemeColors();
   const selfAvatarUri = useSelfPerson().avatarUri;
-  const [newName, setNewName] = useState('');
   const [renaming, setRenaming] = useState<{ id: string; name: string } | null>(null);
-
-  const add = () => {
-    if (!newName.trim()) return;
-    void triggerHaptic('selection');
-    if (onAdd(newName)) setNewName('');
-  };
 
   const endRename = () => {
     if (!renaming) return;
@@ -123,40 +112,6 @@ export function SplitWithCard({ rows, canAdd, onAdd, onRename, onRemove }: Split
           </View>
         );
       })}
-      {canAdd ? (
-        <View className="flex-row items-center gap-3 border-t border-border/15 px-4 py-2.5">
-          <View className="h-[38px] w-[38px] items-center justify-center rounded-full bg-primary/15">
-            <Plus size={18} color={colors.primary} />
-          </View>
-          <View className="flex-1">
-            <Input
-              testID="album-person-name"
-              value={newName}
-              onChangeText={setNewName}
-              placeholder={I18n.t('albums.people.add_person')}
-              returnKeyType="done"
-              autoCapitalize="words"
-              autoCorrect={false}
-              onSubmitEditing={add}
-              // A name keeps the field for the next one; Done on an empty
-              // field puts the keyboard away, uncovering Create.
-              submitBehavior={newName.trim() ? 'submit' : 'blurAndSubmit'}
-            />
-          </View>
-          {newName.trim() ? (
-            <Pressable
-              onPress={add}
-              accessibilityRole="button"
-              accessibilityLabel={I18n.t('albums.people.add_person')}
-              className="h-9 items-center justify-center rounded-full bg-primary px-4 active:opacity-80"
-            >
-              <Text variant="label" className="text-primary-foreground">
-                {I18n.t('albums.people.add')}
-              </Text>
-            </Pressable>
-          ) : null}
-        </View>
-      ) : null}
     </Card>
   );
 }

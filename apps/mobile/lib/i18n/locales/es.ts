@@ -2983,13 +2983,8 @@ const es = {
       me_tag: 'Tú',
       joined: 'Se unió',
       left: 'Salió',
-      add_person: 'Añadir persona',
-      add: 'Añadir',
       unnamed: 'Amigo',
       name_taken: 'Alguien aquí ya tiene ese nombre.',
-      full: 'Un álbum se divide con hasta {{max}} personas.',
-      remove_title: '¿Quitar a {{name}}?',
-      remove_message: 'Las cuentas nuevas de este álbum ya no se dividirán con esa persona.',
       remove_joined_title: '¿Quitar a {{name}} del álbum?',
       remove_joined_message:
         'Dejará de recibir las cuentas de este álbum. Las cuentas en las que aparece se quedan.',
@@ -2998,7 +2993,6 @@ const es = {
       row: 'Dividir con amigos',
       caption: 'Todos ven las cuentas y quién debe a quién.',
       link_note: 'Funciona durante 24 horas. Cualquiera que lo tenga puede unirse.',
-      stop_title: '¿Dejar de compartir {{name}}?',
       stop_message:
         'Todos conservan el álbum con sus propios movimientos, pero ya no se actualiza entre vosotros.',
       leave: 'Salir del álbum',

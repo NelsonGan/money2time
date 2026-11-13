@@ -2947,13 +2947,8 @@ const vi = {
       me_tag: 'Bạn',
       joined: 'Đã tham gia',
       left: 'Đã rời',
-      add_person: 'Thêm người',
-      add: 'Thêm',
       unnamed: 'Bạn bè',
       name_taken: 'Ở đây đã có người mang tên đó.',
-      full: 'Một album được chia với tối đa {{max}} người.',
-      remove_title: 'Xóa {{name}}?',
-      remove_message: 'Các hóa đơn mới trong album này sẽ không còn chia với người đó.',
       remove_joined_title: 'Xóa {{name}} khỏi album?',
       remove_joined_message:
         'Họ sẽ không còn nhận hóa đơn của album này. Các hóa đơn có họ vẫn được giữ.',
@@ -2962,7 +2957,6 @@ const vi = {
       row: 'Chia với bạn bè',
       caption: 'Mọi người đều thấy các hóa đơn và ai nợ ai.',
       link_note: 'Có hiệu lực 24 giờ. Ai có liên kết đều tham gia được.',
-      stop_title: 'Dừng chia sẻ {{name}}?',
       stop_message:
         'Mọi người vẫn giữ album cùng các mục của riêng mình, nhưng nó không còn cập nhật giữa các bạn.',
       leave: 'Rời album',

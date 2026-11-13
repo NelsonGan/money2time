@@ -3009,14 +3009,8 @@ const de = {
       me_tag: 'Du',
       joined: 'Beigetreten',
       left: 'Ausgetreten',
-      add_person: 'Person hinzufügen',
-      add: 'Hinzufügen',
       unnamed: 'Freund',
       name_taken: 'Jemand hier hat bereits diesen Namen.',
-      full: 'Ein Album wird mit bis zu {{max}} Personen geteilt.',
-      remove_title: '{{name}} entfernen?',
-      remove_message:
-        'Neue Rechnungen in diesem Album werden nicht mehr mit dieser Person geteilt.',
       remove_joined_title: '{{name}} aus dem Album entfernen?',
       remove_joined_message:
         'Die Person erhält keine Rechnungen dieses Albums mehr. Rechnungen, auf denen sie steht, bleiben.',
@@ -3025,7 +3019,6 @@ const de = {
       row: 'Mit Freunden teilen',
       caption: 'Alle sehen die Rechnungen und wer wem etwas schuldet.',
       link_note: 'Gilt 24 Stunden. Jeder mit dem Link kann beitreten.',
-      stop_title: '{{name}} nicht mehr teilen?',
       stop_message:
         'Alle behalten das Album mit ihren eigenen Einträgen, aber es wird nicht mehr untereinander aktualisiert.',
       leave: 'Album verlassen',

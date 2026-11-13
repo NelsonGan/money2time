@@ -3001,13 +3001,8 @@ const nl = {
       me_tag: 'Jij',
       joined: 'Doet mee',
       left: 'Vertrokken',
-      add_person: 'Persoon toevoegen',
-      add: 'Toevoegen',
       unnamed: 'Vriend',
       name_taken: 'Iemand hier heeft die naam al.',
-      full: 'Een album wordt met maximaal {{max}} personen gedeeld.',
-      remove_title: '{{name}} verwijderen?',
-      remove_message: 'Nieuwe rekeningen in dit album worden niet meer met diegene gedeeld.',
       remove_joined_title: '{{name}} uit het album verwijderen?',
       remove_joined_message:
         'Diegene krijgt de rekeningen van dit album niet meer. Rekeningen waar diegene op staat, blijven.',
@@ -3016,7 +3011,6 @@ const nl = {
       row: 'Delen met vrienden',
       caption: 'Iedereen ziet de rekeningen en wie wat aan wie verschuldigd is.',
       link_note: '24 uur geldig. Iedereen met de link kan meedoen.',
-      stop_title: 'Stoppen met delen van {{name}}?',
       stop_message:
         'Iedereen houdt het album met de eigen posten, maar het wordt niet meer onderling bijgewerkt.',
       leave: 'Album verlaten',

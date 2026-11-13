@@ -2947,13 +2947,8 @@ const ja = {
       me_tag: 'あなた',
       joined: '参加済み',
       left: '退出済み',
-      add_person: '人を追加',
-      add: '追加',
       unnamed: '友だち',
       name_taken: '同じ名前の人がすでにいます。',
-      full: '1つのアルバムで割り勘できるのは{{max}}人までです。',
-      remove_title: '{{name}}を削除しますか？',
-      remove_message: 'このアルバムの新しい会計は、この人とは割り勘されなくなります。',
       remove_joined_title: '{{name}}をアルバムから外しますか？',
       remove_joined_message:
         'この人にはこのアルバムの会計が届かなくなります。この人が含まれる会計は残ります。',
@@ -2962,7 +2957,6 @@ const ja = {
       row: '友だちと割り勘',
       caption: '全員が会計と、誰が誰にいくら払うかを見られます。',
       link_note: '24時間有効です。リンクを知っている人は誰でも参加できます。',
-      stop_title: '{{name}}の共有を停止しますか？',
       stop_message:
         '全員が自分の記録とともにアルバムを持ち続けますが、互いに更新されなくなります。',
       leave: 'アルバムから退出',

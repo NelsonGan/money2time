@@ -2965,13 +2965,8 @@ const da = {
       me_tag: 'Dig',
       joined: 'Deltager',
       left: 'Forladt',
-      add_person: 'Tilføj person',
-      add: 'Tilføj',
       unnamed: 'Ven',
       name_taken: 'En person her har allerede det navn.',
-      full: 'Et album kan deles med op til {{max}} personer.',
-      remove_title: 'Fjern {{name}}?',
-      remove_message: 'Nye regninger i albummet deles ikke længere med dem.',
       remove_joined_title: 'Fjern {{name}} fra albummet?',
       remove_joined_message:
         'De får ikke længere albummets regninger. De regninger, de står på, bliver.',
@@ -2980,7 +2975,6 @@ const da = {
       row: 'Del med venner',
       caption: 'Alle ser regningerne, og hvem der skylder hvem.',
       link_note: 'Virker i 24 timer. Alle med linket kan deltage.',
-      stop_title: 'Stop deling af {{name}}?',
       stop_message:
         'Alle beholder albummet med deres egne poster, men det opdateres ikke længere mellem jer.',
       leave: 'Forlad album',

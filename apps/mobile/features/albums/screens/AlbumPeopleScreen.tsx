@@ -273,8 +273,6 @@ export function AlbumPeopleScreen({ albumId, onBack }: AlbumPeopleScreenProps) {
           </Text>
           <SplitWithCard
             rows={rows}
-            canAdd={false}
-            onAdd={() => false}
             onRename={renamePerson}
             onRemove={(row) => {
               const person = group.people.find((item) => item.id === row.id);
