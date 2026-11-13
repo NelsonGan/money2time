@@ -135,8 +135,8 @@ export function reuseUnchangedTransactions(
 /**
  * Puts the stored copy of a just-written row in place of its optimistic one,
  * or drops the row if the write did not land. With `restoreIfMissing` (a full
- * reload ran between the optimistic insert and the write: filing a new entry
- * into a shared album schedules one), a stored row the list no longer has goes
+ * reload ran between the optimistic insert and the write: a sync, or any
+ * `refreshAll`), a stored row the list no longer has goes
  * back in its place, since that reload read the table before the row was in
  * it; otherwise a missing row was deleted meanwhile and stays out. When the two already match field
  * for field, which is the norm because the optimistic row is built from the

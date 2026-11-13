@@ -60,7 +60,7 @@ export function BreakdownMemberSheet({
                 onSelect(choice.key);
               }}
               accessibilityRole="radio"
-              accessibilityState={{ selected }}
+              accessibilityState={{ checked: selected }}
               accessibilityLabel={choice.name}
               testID={`album-breakdown-member-${choice.key}`}
               className={

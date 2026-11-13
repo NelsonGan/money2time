@@ -672,6 +672,8 @@ export function SplitBillModal({
 
   const handleAddMember = useCallback(
     (member: { id: string; name: string }) => {
+      // Already on the bill (a second tap before the first one rendered).
+      if (splits.some((row) => !row.isSelf && row.albumMemberId === member.id)) return;
       const added: SplitDraft = {
         id: newId(),
         personName: member.name,
@@ -681,13 +683,15 @@ export function SplitBillModal({
         albumMemberId: member.id,
       };
       // The blank row a split opens with (an entry with no split yet) takes
-      // the first member chosen.
+      // the first member chosen, keeping whatever amount it already holds.
       const blank = splits.findIndex(
         (row) => !row.isSelf && !row.albumMemberId && !row.personName.trim(),
       );
       const next: SplitDraft[] =
         blank >= 0
-          ? splits.map((row, index) => (index === blank ? { ...added, id: row.id } : row))
+          ? splits.map((row, index) =>
+              index === blank ? { ...row, personName: member.name, albumMemberId: member.id } : row,
+            )
           : [...splits, added];
       if (itemized) {
         onChange(next);

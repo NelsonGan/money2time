@@ -128,7 +128,13 @@ export function MemberPickerSheet({
       >
         {/* The user: always on the bill. */}
         {query.trim() ? null : (
-          <View className="mx-4 flex-row items-center gap-3 px-2 py-3">
+          <View
+            accessible
+            accessibilityRole="checkbox"
+            accessibilityState={{ checked: true, disabled: true }}
+            accessibilityLabel={me.name}
+            className="mx-4 flex-row items-center gap-3 px-2 py-3"
+          >
             <PersonAvatar name={me.name} partyKey={null} size={36} imageUri={me.avatarUri} />
             <Text variant="body" numberOfLines={1} className="flex-1">
               {me.name}
@@ -148,7 +154,8 @@ export function MemberPickerSheet({
             <Pressable
               key={member.id}
               onPress={() => {
-                void triggerHaptic('selection');
+                // Taking someone off plays the split's own warning haptic.
+                if (!on) void triggerHaptic('selection');
                 onToggle(member, !on);
               }}
               disabled={locked}
