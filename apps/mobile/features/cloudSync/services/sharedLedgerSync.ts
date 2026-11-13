@@ -7,9 +7,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {
   albumLedgerId,
-  albumState,
   beginAlbumGroup,
   ensureLocalAlbum,
+  isAlbumDeleted,
   mainLedgerTakesSharedAlbums,
   releaseAlbumGroup,
 } from '~/features/albums/services/albumGroupStore';
@@ -247,7 +247,9 @@ class SharedLedgerSync {
       const known = sharedLedgerFor(item.ledgerId);
       if (item.kind === 'album') {
         if (known && known.shareId !== item.id) continue;
-        if (item.role === 'owner' && !known && albumState(item.ledgerId) === 'deleted') {
+        // Never a group named after one of this phone's ledgers (`join`).
+        if (!known && ledgerExists(item.ledgerId)) continue;
+        if (item.role === 'owner' && !known && isAlbumDeleted(item.ledgerId)) {
           // The album was deleted on this phone while signed out: sharing
           // ends with it.
           await this.finishPending(token, item.id, 'stop');
@@ -765,8 +767,11 @@ class SharedLedgerSync {
     // own ledgers (or another share's) is never written into.
     const preview = await previewInvite(code);
     // An album's group never writes into a ledger: the album it shows as is
-    // the user's own, so one already here is simply joined again.
+    // the user's own, so one already here is simply joined again. But its id
+    // is whatever its owner sent, and must not be one of this phone's
+    // ledgers: nothing of a ledger may ever be taken for a group's.
     const album = preview.kind === 'album';
+    if (preview.ledgerId && album) this.assertNotLedger(preview.ledgerId);
     if (preview.ledgerId && !album) this.assertJoinable(preview.ledgerId, null);
     const remote = await acceptInvite(await this.token(), code);
     if (remote.kind === 'album') return this.joinAlbum(remote);
@@ -788,6 +793,7 @@ class SharedLedgerSync {
 
   /** The album half of `join`: the group syncs down, and the album it shows as is made. */
   private async joinAlbum(remote: RemoteSharedLedger): Promise<string> {
+    this.assertNotLedger(remote.ledgerId);
     const known = sharedLedgerFor(remote.ledgerId);
     if (known && known.shareId !== remote.id) throw new CloudSyncApiError('own_ledger', 409);
     await removePendingLedgerAction(remote.id);
@@ -803,6 +809,13 @@ class SharedLedgerSync {
       throw error;
     }
     return shared.ledgerId;
+  }
+
+  /** A shared album's id is never the id of a ledger on this phone, deleted or not. */
+  private assertNotLedger(albumId: string): void {
+    if (albumId === DEFAULT_LEDGER_ID || ledgerExists(albumId)) {
+      throw new CloudSyncApiError('own_ledger', 409);
+    }
   }
 
   private assertJoinable(ledgerId: string, shareId: string | null): void {

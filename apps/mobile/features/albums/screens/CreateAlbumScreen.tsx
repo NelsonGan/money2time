@@ -8,11 +8,9 @@ import { TabletContentContainer } from '~/components/layout/TabletContentContain
 import { FatButton, FormScrollView, Input, SettingsHeader, Text } from '~/components/ui';
 import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { useApp } from '~/context/AppContext';
-import { useCloudSync, useCloudSyncEnabled } from '~/features/cloudSync/CloudSyncContext';
+import { useCloudSync } from '~/features/cloudSync/CloudSyncContext';
 import { useSignedIn } from '~/features/cloudSync/components/SignInGate';
-import { useSharedLedger } from '~/features/sharedLedgers/hooks/useSharedLedgers';
 import { useThemeColors } from '~/hooks/useThemeColors';
-import { DEFAULT_LEDGER_ID } from '~/lib/db/ledgerScope';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { pickLibraryImage } from '~/services/libraryImagePicker';
@@ -26,6 +24,7 @@ import { AlbumLocationField } from '../components/AlbumLocationField';
 import { AlbumMonthPicker } from '../components/AlbumMonthPicker';
 import { AlbumSharingCard } from '../components/AlbumSharingCard';
 import { SplitWithCard, type SplitWithRow } from '../components/SplitWithCard';
+import { useAlbumScope } from '../hooks/useAlbumGroup';
 import { albumSharingMessage, peopleEditMessage } from '../lib/albumMessages';
 import {
   MAX_ALBUM_PEOPLE,
@@ -46,14 +45,11 @@ export function CreateAlbumScreen({
   onClose,
   onCreated,
 }: CreateAlbumScreenProps) {
-  const { createAlbum, setAlbumPeople, setAlbumSimplifyDebts, activeLedger } = useApp();
+  const { createAlbum, setAlbumPeople, setAlbumSimplifyDebts } = useApp();
   const sync = useCloudSync();
   // Sharing is free and needs only an account: asked for under the switch.
   const signedIn = useSignedIn();
-  // An album in a shared ledger is not split with people: its entries already
-  // belong to the ledger's own. And only an album of the main ledger is shared.
-  const canSplit = useSharedLedger(activeLedger.id) === null;
-  const canShare = useCloudSyncEnabled() && canSplit && activeLedger.id === DEFAULT_LEDGER_ID;
+  const { canSplit, canShare } = useAlbumScope();
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
 

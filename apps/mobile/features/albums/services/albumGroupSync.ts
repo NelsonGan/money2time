@@ -31,7 +31,12 @@ import { convert } from '~/utils/currency';
 import { dayKeyFromDateLocal, normalizeMoneyAmount } from '~/utils/formatters';
 import { nowIso } from '~/utils/id';
 
-import { groupFromLocalBill, localBill, type LocalPayment } from '../lib/albumGroup';
+import {
+  groupFromLocalBill,
+  localBill,
+  type LocalPayment,
+  settlementsByBill,
+} from '../lib/albumGroup';
 import { cleanPersonName, memberForRow, selfMember } from '../lib/albumPeople';
 import { openShares, simplifyDebts } from '../lib/groupDebts';
 import { notifyAlbumGroups } from './albumGroupStore';
@@ -94,6 +99,48 @@ function readTx(id: string): TxRow | null {
   ]);
 }
 
+/**
+ * What bringing a whole group in step reads, in three statements up front
+ * instead of four for every bill: the entries its bills already have, their
+ * shares, and which entries the album holds. Most passes then write nothing.
+ */
+interface Preloaded {
+  entries: Map<string, TxRow>;
+  splits: Map<string, TransactionSplit[]>;
+  inAlbum: Set<string>;
+}
+
+function preload(groupId: string, billIds: string[]): Preloaded {
+  const db = getSQLite();
+  const entries = new Map<string, TxRow>();
+  // In parts: a statement takes only so many values.
+  for (let start = 0; start < billIds.length; start += 400) {
+    const ids = billIds.slice(start, start + 400);
+    const rows = db.getAllSync<TxRow>(
+      `SELECT ${TX_COLUMNS} FROM transactions WHERE id IN (${ids.map(() => '?').join(', ')})`,
+      ids,
+    );
+    for (const row of rows) entries.set(row.id, row);
+  }
+  const splits = new Map<string, TransactionSplit[]>();
+  const held = [...entries.keys()];
+  for (let start = 0; start < held.length; start += 400) {
+    const part = transactionSplitsRepository.listByTransactionIds(held.slice(start, start + 400));
+    for (const [id, rows] of part) splits.set(id, rows);
+  }
+  const inAlbum = new Set(
+    db
+      .getAllSync<{
+        transaction_id: string;
+      }>(
+        'SELECT transaction_id FROM album_transactions WHERE album_id = ? AND deleted_at IS NULL',
+        [groupId],
+      )
+      .map((row) => row.transaction_id),
+  );
+  return { entries, splits, inAlbum };
+}
+
 const sameMoney = (a: number | null | undefined, b: number | null | undefined) =>
   a == null || b == null ? a == null && b == null : Math.round(a * 100) === Math.round(b * 100);
 
@@ -110,6 +157,26 @@ function albumIsOpen(groupId: string): boolean {
   return !!row && !row.deleted_at && row.ledger_id === getActiveLedgerId();
 }
 
+/**
+ * Whether an entry that already has a bill's id is that bill. A bill's id is
+ * whatever its group says, so it could name any entry on this phone. Only one
+ * the group already holds is taken, or, before it is marked (a group joined
+ * again after leaving it), a live expense of this very album. Any other entry
+ * with that id is left exactly as it is, and the bill is passed over.
+ */
+function isGroupsEntry(row: TxRow, groupId: string, loaded: Preloaded | null): boolean {
+  if (row.album_group_id) return row.album_group_id === groupId;
+  if (row.deleted_at || row.type !== 'expense') return false;
+  return loaded ? loaded.inAlbum.has(row.id) : isInAlbum(groupId, row.id);
+}
+
+function isInAlbum(albumId: string, transactionId: string): boolean {
+  return !!getSQLite().getFirstSync(
+    'SELECT 1 FROM album_transactions WHERE album_id = ? AND transaction_id = ? AND deleted_at IS NULL',
+    [albumId, transactionId],
+  );
+}
+
 /** Brings a soft-deleted entry back, so a deterministic id can be written again. */
 function reviveTx(id: string): void {
   getSQLite().runSync('UPDATE transactions SET deleted_at = NULL, updated_at = ? WHERE id = ?', [
@@ -120,11 +187,7 @@ function reviveTx(id: string): void {
 
 function ensureInAlbum(albumId: string, transactionId: string): boolean {
   const db = getSQLite();
-  const live = db.getFirstSync(
-    'SELECT 1 FROM album_transactions WHERE album_id = ? AND transaction_id = ? AND deleted_at IS NULL',
-    [albumId, transactionId],
-  );
-  if (live) return false;
+  if (isInAlbum(albumId, transactionId)) return false;
   const now = nowIso();
   // One id per album and entry, so two phones add the same row.
   db.runSync(
@@ -309,17 +372,24 @@ function projectExpense(
   members: readonly AlbumMember[],
   env: GroupEnv,
   hints: ProjectHints,
+  loaded: Preloaded | null,
 ): boolean {
   const groupId = expense.groupId;
   const self = selfMember(members, env.userId);
   const bill = expense.deletedAt ? null : localBill(expense, settlements, self?.id ?? null);
-  const existing = readTx(expense.id);
+  const existing = loaded ? (loaded.entries.get(expense.id) ?? null) : readTx(expense.id);
+  // An entry with this id that is not the group's: never written into.
+  if (existing && !isGroupsEntry(existing, groupId, loaded)) return false;
   const live = existing && !existing.deleted_at ? existing : null;
-  const splits = live ? transactionSplitsRepository.listByTransactionId(expense.id) : [];
+  const splits = !live
+    ? []
+    : loaded
+      ? (loaded.splits.get(expense.id) ?? [])
+      : transactionSplitsRepository.listByTransactionId(expense.id);
 
   if (!bill) {
     // Not the user's bill (any more): their side of it goes. Only an entry
-    // that is this group's is touched.
+    // the group has marked as its own is touched.
     if (!live || live.album_group_id !== groupId) return false;
     removeLocalBill(live, splits);
     return true;
@@ -362,27 +432,28 @@ function projectExpense(
     live?.category_id ??
     env.categoryIdFor(expense.categoryName, expense.categoryIcon);
   const amounts = expenseAmounts(env, live, bill.amount, expense.currency, accountId);
-  changed =
-    writeExpense(expense.id, existing, {
-      type: 'expense',
-      ...amounts,
-      currency: expense.currency,
-      date: expense.date,
-      accountId,
-      categoryId,
-      note: expense.note,
-      ...(live
-        ? null
-        : {
-            details: hints.entry?.details ?? null,
-            receiptUri: hints.entry?.receiptUri ?? null,
-            sentiment: hints.entry?.sentiment ?? 'neutral',
-            reimbursable: hints.entry?.reimbursable ?? false,
-          }),
-      albumGroupId: groupId,
-    }) || changed;
-  changed = ensureInAlbum(groupId, expense.id) || changed;
-  const tx = readTx(expense.id)!;
+  const wrote = writeExpense(expense.id, existing, {
+    type: 'expense',
+    ...amounts,
+    currency: expense.currency,
+    date: expense.date,
+    accountId,
+    categoryId,
+    note: expense.note,
+    ...(live
+      ? null
+      : {
+          details: hints.entry?.details ?? null,
+          receiptUri: hints.entry?.receiptUri ?? null,
+          sentiment: hints.entry?.sentiment ?? 'neutral',
+          reimbursable: hints.entry?.reimbursable ?? false,
+        }),
+    albumGroupId: groupId,
+  });
+  changed = wrote || changed;
+  if (!loaded?.inAlbum.has(expense.id)) changed = ensureInAlbum(groupId, expense.id) || changed;
+  // Unchanged, the entry is the one already read.
+  const tx = !wrote && live ? live : readTx(expense.id)!;
 
   // --- Its shares ----------------------------------------------------------
   // The row a phone already has for the user or a member, the one with the
@@ -487,6 +558,8 @@ function projectExpense(
   // --- The entries its payments make ---------------------------------------
   for (const entry of linked.values()) {
     const before = readTx(entry.id);
+    // The entry a payment makes is never a bill of a group.
+    if (before?.album_group_id) continue;
     if (entry.payment.kind === 'received') {
       const fromCurrency =
         (tx.account_id ? env.currencyOf(tx.account_id) : null) || expense.currency;
@@ -577,14 +650,23 @@ export function projectGroup(
   if (!sharedAlbumFor(groupId) || !albumIsOpen(groupId)) return false;
   const members = albumGroupsRepository.listAllMembers(groupId);
   if (!selfMember(members, env.userId)) return false;
-  const settlements = albumGroupsRepository.listSettlements(groupId);
+  const paid = settlementsByBill(albumGroupsRepository.listSettlements(groupId));
   const expenses = albumGroupsRepository
     .listExpenses(groupId)
     .filter((expense) => !options.expenseId || expense.id === options.expenseId);
   let changed = false;
   getSQLite().withTransactionSync(() => {
+    // One bill reads its own rows; a whole group reads them all at once.
+    const loaded = options.expenseId
+      ? null
+      : preload(
+          groupId,
+          expenses.map((expense) => expense.id),
+        );
     for (const expense of expenses) {
-      changed = projectExpense(expense, settlements, members, env, options.hints ?? {}) || changed;
+      const payments = paid.get(expense.id) ?? [];
+      changed =
+        projectExpense(expense, payments, members, env, options.hints ?? {}, loaded) || changed;
     }
   });
   return changed;

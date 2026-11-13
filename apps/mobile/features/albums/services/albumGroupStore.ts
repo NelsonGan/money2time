@@ -3,7 +3,7 @@
 // React here: Cloud Sync calls it between syncs.
 // See README.md > Album members and shared albums.
 
-import { deleteLedgerLocally } from '~/features/cloudSync/services/ledgerChannels';
+import { deleteGroupRowsLocally } from '~/features/cloudSync/services/ledgerChannels';
 import { sharedLedgerFor } from '~/features/cloudSync/services/sharedLedgerStore';
 import { getSQLite } from '~/lib/db/client';
 import { DEFAULT_LEDGER_ID } from '~/lib/db/ledgerScope';
@@ -38,7 +38,8 @@ export function subscribeAlbumGroups(listener: () => void): () => void {
 }
 
 /** A group's live members. The same array until something changes, so a hook can hold it. */
-export function listGroupMembers(groupId: string): AlbumMember[] {
+export function listGroupMembers(groupId: string | null): AlbumMember[] {
+  if (!groupId) return NO_MEMBERS;
   const known = cache.get(groupId);
   if (known) return known;
   let members: AlbumMember[];
@@ -53,7 +54,8 @@ export function listGroupMembers(groupId: string): AlbumMember[] {
 }
 
 /** A group's bills that still stand. The same array until something changes. */
-export function listGroupExpenses(groupId: string): AlbumExpense[] {
+export function listGroupExpenses(groupId: string | null): AlbumExpense[] {
+  if (!groupId) return NO_EXPENSES;
   const known = expenseCache.get(groupId);
   if (known) return known;
   let expenses: AlbumExpense[];
@@ -67,7 +69,8 @@ export function listGroupExpenses(groupId: string): AlbumExpense[] {
 }
 
 /** A group's payments that still stand. The same array until something changes. */
-export function listGroupSettlements(groupId: string): AlbumSettlement[] {
+export function listGroupSettlements(groupId: string | null): AlbumSettlement[] {
+  if (!groupId) return NO_SETTLEMENTS;
   const known = settlementCache.get(groupId);
   if (known) return known;
   let settlements: AlbumSettlement[];
@@ -110,10 +113,9 @@ function albumRow(albumId: string): AlbumRow | null {
   );
 }
 
-/** Whether this phone has the album (in any ledger), deleted or not. */
-export function albumState(albumId: string): 'live' | 'deleted' | 'none' {
-  const row = albumRow(albumId);
-  return !row ? 'none' : row.deleted_at ? 'deleted' : 'live';
+/** Whether the album was deleted on this phone (in any ledger). */
+export function isAlbumDeleted(albumId: string): boolean {
+  return !!albumRow(albumId)?.deleted_at;
 }
 
 /** The ledger an album is in, whichever one is open. */
@@ -234,6 +236,6 @@ export function releaseAlbumGroup(groupId: string, selfUserId: string | null): v
     'UPDATE transactions SET album_group_id = NULL, updated_at = ? WHERE album_group_id = ?',
     [now, groupId],
   );
-  deleteLedgerLocally(groupId);
+  deleteGroupRowsLocally(groupId);
   notifyAlbumGroups();
 }

@@ -149,9 +149,11 @@ export function AlbumBalances({
     };
   }, [group.members, selfId, settling]);
 
-  // Joined, and not yet said who they are: none of the album's bills are
-  // theirs until they do, so that is all there is to show.
-  if (group.share && !group.self) {
+  // Joined, and not on the album's list yet: none of its bills are theirs
+  // until they are. With a name to pick, that question is all there is to
+  // show; with none, they are being added as themselves.
+  if (group.share && !group.self && !group.mustClaim) return null;
+  if (group.mustClaim) {
     return (
       <View className="px-5 pt-5">
         <Pressable

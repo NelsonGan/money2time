@@ -5,6 +5,7 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 import {
   inLedgersSql,
   isLedgerScoped,
+  NO_CHANNEL,
   PERSONAL_CHANNEL,
 } from '~/features/cloudSync/lib/ledgerRows';
 import { GROUP_SYNC_TABLES, SYNC_TABLES } from '~/features/cloudSync/lib/syncTables';
@@ -74,21 +75,40 @@ it('syncs the group tables, scoped like a ledger’s rows', () => {
 
 it('routes a shared album’s group rows to its own channel, and only those', () => {
   const member = { id: 'm1', ledger_id: 'bali', name: 'Aisha' };
-  // Not shared (yet, or any more): nothing to route them by.
-  expect(channelOfRow('album_members', member)).toBe(PERSONAL_CHANNEL);
+  // Not shared (yet, or any more): a group's rows are never the user's own
+  // data, so they go nowhere.
+  expect(channelOfRow('album_members', member)).toBe(NO_CHANNEL);
   share('bali', 'album');
   share('home', 'ledger');
   expect(channelOfRow('album_members', member)).toBe('share-bali');
   expect(channelOfRow('album_expenses', { id: 'e1', ledger_id: 'bali' })).toBe('share-bali');
   expect(channelOfRow('album_settlements', { id: 's1', ledger_id: 'bali' })).toBe('share-bali');
   // Another group's row never rides this channel.
-  expect(channelOfRow('album_expenses', { id: 'e2', ledger_id: 'tokyo' })).toBe(PERSONAL_CHANNEL);
+  expect(channelOfRow('album_expenses', { id: 'e2', ledger_id: 'tokyo' })).toBe(NO_CHANNEL);
   // The user's own entry for a bill is theirs, in their own ledger.
   expect(
     channelOfRow('transactions', { id: 'e1', ledger_id: 'default', album_group_id: 'bali' }),
   ).toBe(PERSONAL_CHANNEL);
-  // And the user's own copy leaves the group's rows out.
-  expect(personalRowsSql('album_expenses')).toBe(`NOT (ledger_id IN ('bali', 'home'))`);
+  // And the user's own copy leaves every group's rows out.
+  expect(personalRowsSql('album_expenses')).toBe('0');
+  expect(personalRowsSql('transactions')).toBe(`NOT (ledger_id IN ('bali', 'home'))`);
+});
+
+// Anyone in a shared album can write anything into its database. Whatever a
+// row there claims, only the group's own tables are taken from it.
+it('never takes a ledger’s rows from a shared album’s database', () => {
+  share('bali', 'album');
+  share('home', 'ledger');
+  // Rows naming the album as their ledger are not the album's.
+  for (const table of ['transactions', 'accounts', 'categories', 'albums', 'recurring_rules']) {
+    expect(channelOfRow(table, { id: 'x', ledger_id: 'bali' })).toBe(PERSONAL_CHANNEL);
+  }
+  expect(channelOfRow('ledgers', { id: 'bali' })).toBe(PERSONAL_CHANNEL);
+  // A shared ledger's database carries no group.
+  expect(channelOfRow('album_expenses', { id: 'e3', ledger_id: 'home' })).toBe(NO_CHANNEL);
+  // A group's settings are one row, named after the group.
+  expect(channelOfRow('album_groups', { id: 'bali', ledger_id: 'bali' })).toBe('share-bali');
+  expect(channelOfRow('album_groups', { id: 'tokyo', ledger_id: 'bali' })).toBe(NO_CHANNEL);
 });
 
 it('keeps shared albums apart from shared ledgers for the screens', () => {

@@ -9,6 +9,7 @@ import {
   deletePersonalLedgerRows,
   unpushedKey,
 } from '~/features/cloudSync/services/ledgerChannels';
+import * as sharedLedgersApi from '~/features/cloudSync/services/sharedLedgersApi';
 import {
   clearDeferredLedgerDeletes,
   deferLedgerDelete,
@@ -586,6 +587,31 @@ describe('ledgersRepository on SQLite', () => {
       }
     },
   );
+
+  // A shared album's id is whatever its owner sent. One that names a ledger
+  // here would route that ledger's rows to the album's database.
+  it('refuses to join a shared album whose id is one of this phone’s ledgers', async () => {
+    const preview = jest.spyOn(sharedLedgersApi, 'previewInvite').mockResolvedValue({
+      ledgerId: 'work',
+      name: 'Trip',
+      emoji: null,
+      ownerName: 'Sam',
+      memberCount: 1,
+      full: false,
+      active: true,
+      kind: 'album',
+    });
+    const accept = jest.spyOn(sharedLedgersApi, 'acceptInvite');
+    try {
+      await expect(sharedLedgerSync.join('code')).rejects.toMatchObject({ code: 'own_ledger' });
+      // No seat is taken, and the ledger is untouched.
+      expect(accept).not.toHaveBeenCalled();
+      expect(harness.all("SELECT id FROM ledgers WHERE id = 'work'")).toHaveLength(1);
+    } finally {
+      preview.mockRestore();
+      accept.mockRestore();
+    }
+  });
 
   it('never deletes the default ledger', () => {
     expect(() => ledgersRepository.softDelete(DEFAULT_LEDGER_ID)).toThrow();

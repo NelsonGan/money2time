@@ -2153,7 +2153,12 @@ migrations `090` and `091`.
   **Which one is you?**: one of the names the owner added, or "I'm not on the
   list" (then they are added under their own name). Until they answer,
   nothing of the group reaches their ledger, and the album's Balances tab
-  shows only that question. An album deleted here and joined again comes back.
+  shows only that question. **With no name left to pick** (the owner added
+  nobody, or every name is already someone's), nothing is asked: they are
+  put on the list under their own name as soon as the group's people have
+  come down (`syncAlbumGroups`, `useAlbumGroup.mustClaim`), under an id made
+  from their account, so two phones of theirs write one row. An album
+  deleted here and joined again comes back.
 - **Bills and payments are everyone's.** A split bill saved in a shared album
   reaches everyone in it: each person gets their own side of it, in their own
   ledger, their own currency totals and their own category (matched by name,
@@ -2194,12 +2199,14 @@ migrations `090` and `091`.
 - **Its own database, through the shared-ledger plumbing.** The four tables
   carry the group's id in `ledger_id`, the column Cloud Sync routes a row by
   (`LEDGER_ROOT_SYNC_TABLES`), and a shared album is kept in `shared_ledgers`
-  with `kind` `'album'`. So everything a shared ledger has applies unchanged:
-  a channel and replica per share, the list from `GET /v1/ledgers`, invite
-  links, live nudges, tokens and their revocation, the Pro rule, leaving and
-  stopping. No ledger has that id, so nothing else of the user's rides the
-  channel, and the user's own copy leaves these rows out. The screens read
-  the two kinds apart (`listLedgerShares`, `listAlbumShares`). A backup leaves
+  with `kind` `'album'`. So what a shared ledger has applies: a channel and
+  replica per share, the list from `GET /v1/ledgers`, invite links, live
+  nudges, tokens and their revocation, leaving and stopping (not the Pro
+  rule). The two kinds of share never cross (`channelOfRow`): an album's
+  channel carries the four group tables and nothing else, and a ledger's
+  carries none of them, so the user's own copy never holds a group's rows
+  and a group's rows with no share to go to go nowhere. The screens read the
+  two kinds apart (`listLedgerShares`, `listAlbumShares`). A backup leaves
   the four tables out (`GROUP_SYNC_TABLES`): the group is not the user's
   data, their own side of its bills is.
 - **Each phone keeps only its own side.** `localBill` (pure) says what a
@@ -2247,16 +2254,54 @@ migrations `090` and `091`.
   on the phone that made it). A member in
   the middle sees one payment in and one out for the same amount; on the
   phone that records it both go through the one account picked.
-- **When it runs.** After every shared sync that applied rows
-  (`reloadAfterApply`), at launch and when a ledger opens. A group's
-  album is in the main ledger, so while another ledger is open it waits: the
-  entries land on its accounts and categories.
-- **Trust.** As a shared ledger: a member's token can write anything in the
-  group's database. A phone only ever writes its own member's side from it,
-  into its own ledger.
+- **When it runs.** After every sync that applied rows (`reloadAfterApply`),
+  at launch and when a ledger opens. A group's album is in the main ledger,
+  so while another ledger is open it waits: the entries land on its accounts
+  and categories. A whole group reads its entries, their shares and the
+  album's contents in three statements (`preload`), and a pass that finds
+  nothing to change writes nothing. Payments recorded together (Settle up
+  with a person, across all their bills) are one write and one refresh
+  (`recordGroupPayment`).
+- **Trust: every row of a group is read as if someone hostile wrote it.**
+  Anyone in a shared album, which is anyone who was given its link, holds a
+  token that can write anything into the group's database. What they are
+  meant to be able to do is what the album offers: add, change and delete its
+  bills, record and undo payments, rename people, switch Simplify. So:
+  - **Only the group's tables come from it.** Whatever `ledger_id` a row
+    claims, an album's channel never delivers a ledger, an entry, an account
+    or a category (`channelOfRow`, and `remoteChanges` does not even fetch
+    them). A group's settings row is taken only under the group's own id.
+  - **A group is never one of the phone's ledgers.** A share's id is whatever
+    its owner sent, so joining an album whose id is a ledger here is refused
+    before a seat is taken (`assertNotLedger`), and letting a group go deletes
+    its four tables by the group's id and nothing else
+    (`deleteGroupRowsLocally`, never the ledger delete).
+  - **Rows are checked where they are read** (`toAlbumMember`,
+    `toAlbumExpense`, `toAlbumSettlement` in `lib/repositories/mappers.ts`):
+    ids of the shapes the app makes, amounts that are finite and not
+    negative, real days, a currency code, one share per member. One that
+    fails is left out as if it were not there, and so is a bill paid by, a
+    share of, or a payment between people who are not the group's members.
+    A group is read no further than 200 member rows.
+  - **A bill takes over only an entry that is already the album's**
+    (`isGroupsEntry`): one the group marked, or a live expense in this album
+    (a group joined again). A bill named after any other entry on the phone
+    is passed over, and that entry is never changed or deleted.
+  - **Every change names its group** as well as the row
+    (`albumGroupsRepository`), and undoing a batch of payments matches its
+    id as an exact prefix within that group, never as a pattern.
+  - **A row the phone cannot store is passed over**, not retried: it is
+    never a sync error that stays up, nor a reason the owner cannot stop
+    sharing or delete their account.
+    What stays possible, as in any shared bill splitter: someone in the album
+    can add a bill naming the user as its payer (it lands as an expense on
+    their default account), add as many bills as they like, or mark themselves
+    as another person on the list. Leaving the album ends it; the entries
+    already made stay, as the user's own to delete.
 
 **Limits.** Split by Item bills are not shared (they have no Paid by). A member without Pro adds
-bills in a shared album whatever their count of unsettled split bills. A bill's day and title belong to the
+bills in a shared album whatever their count of unsettled split bills, and a shared album's bills are
+left out of that count everywhere (`countUnpaidSplitBills`). A bill's day and title belong to the
 group, so a bulk edit of either on a group's bill is put back at the next
 sync. Names and photos from Cloud Sync profiles are not used: a person goes by
 the name on their member row, which anyone in the album can change. The
@@ -4610,8 +4655,12 @@ link), with two differences. It needs no Pro: any signed-in account shares
 one, and it is always active (`needsPro` in `src/ledgers.ts`), so `not_pro`
 and `ledger_paused` are never answered for it. And it has no limit the app
 speaks of, only ceilings against one account making databases without end:
-50 shared albums per owner (409 `limit_reached`) and 20 people joining each
-(409 `full`, the number of people an album holds). An app from before shared albums never meets one: `GET
+50 shared albums per owner (409 `limit_reached`), 20 started in a day (429
+`rate_limited`, counted in Better Auth's rate-limit table, so sharing and
+stopping in a loop cannot churn databases) and 20 people joining each (409
+`full`, the number of people an album holds). `GET /v1/ledgers` reads each
+share's owner and member count with the list itself, so an album adds no
+statement of its own. An app from before shared albums never meets one: `GET
 /v1/ledgers` leaves them out unless asked with `?albums=1`, and `POST
 /v1/invites/<code>/accept` on an album's link answers 409 `update_required`
 unless the body says `albums: true`.

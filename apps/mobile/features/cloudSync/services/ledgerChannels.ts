@@ -15,8 +15,13 @@ import {
   PERSONAL_CHANNEL,
 } from '../lib/ledgerRows';
 import type { Row } from '../lib/rowCodec';
-import { SYNC_TABLES, type SyncTable } from '../lib/syncTables';
-import { getDeferredLedgerDeletes, listSharedLedgers, sharedLedgerFor } from './sharedLedgerStore';
+import { GROUP_SYNC_TABLES, isGroupTable, SYNC_TABLES, type SyncTable } from '../lib/syncTables';
+import {
+  getDeferredLedgerDeletes,
+  listLedgerShares,
+  listSharedLedgers,
+  sharedAlbumFor,
+} from './sharedLedgerStore';
 
 /** The ledger a row belongs to, or null for the user's own tables. */
 function ledgerOfRow(table: string, row: Row): string | null {
@@ -42,13 +47,31 @@ function ledgerOfRow(table: string, row: Row): string | null {
 function channelOfLedger(ledgerId: string | null): string {
   if (!ledgerId) return PERSONAL_CHANNEL;
   if (getDeferredLedgerDeletes().includes(ledgerId)) return NO_CHANNEL;
-  return sharedLedgerFor(ledgerId)?.shareId ?? PERSONAL_CHANNEL;
+  // A shared ledger only: a shared album's id never names a ledger's rows.
+  return (
+    listLedgerShares().find((share) => share.ledgerId === ledgerId)?.shareId ?? PERSONAL_CHANNEL
+  );
 }
 
+/**
+ * The channel a row syncs on. The two kinds of share never cross: a shared
+ * album's database carries its group's four tables and nothing else, and a
+ * shared ledger's carries none of them. So whoever can write to an album's
+ * database (anyone in it) cannot send a ledger, an entry or an account into
+ * this phone, whatever `ledger_id` the row claims.
+ */
 export function channelOfRow(table: string, row: Row): string {
   if (!isLedgerScoped(table)) return PERSONAL_CHANNEL;
-  // Most users share nothing: no lookups then.
-  if (!listSharedLedgers().length && !getDeferredLedgerDeletes().length) return PERSONAL_CHANNEL;
+  if (isGroupTable(table)) {
+    // A group's rows are never the user's own data: with no share to go to
+    // (it ended), they go nowhere.
+    const groupId = typeof row.ledger_id === 'string' ? row.ledger_id : null;
+    // A group's settings are one row, named after the group itself.
+    if (table === 'album_groups' && row.id !== groupId) return NO_CHANNEL;
+    return (groupId ? sharedAlbumFor(groupId)?.shareId : null) ?? NO_CHANNEL;
+  }
+  // Most users share no ledger: no lookups then.
+  if (!listLedgerShares().length && !getDeferredLedgerDeletes().length) return PERSONAL_CHANNEL;
   return channelOfLedger(ledgerOfRow(table, row));
 }
 
@@ -67,8 +90,12 @@ export function sharedLedgerIds(): string[] {
   return listSharedLedgers().map((ledger) => ledger.ledgerId);
 }
 
-/** SQL condition for "this row is the user's own, not in a shared ledger". */
+/**
+ * SQL condition for "this row is the user's own, not in a shared ledger".
+ * Never true of a shared album's group: its rows are not the user's data.
+ */
 export function personalRowsSql(table: string): string {
+  if (isGroupTable(table)) return '0';
   return `NOT (${inLedgersSql(table, sharedLedgerIds())})`;
 }
 
@@ -149,24 +176,47 @@ export function deletePersonalLedgerRows(): void {
 export function deleteLedgerLocally(ledgerId: string): void {
   const db = getSQLite();
   const order = [...SYNC_TABLES].filter(isLedgerScoped).reverse();
+  withoutCapture(() => {
+    for (const table of order) deleteUnrecorded(table, inLedgersSql(table, [ledgerId]));
+    db.runSync('DELETE FROM auto_log_captures WHERE ledger_id = ?', [ledgerId]);
+    db.runSync('UPDATE settings SET active_ledger_id = NULL WHERE active_ledger_id = ?', [
+      ledgerId,
+    ]);
+  });
+}
+
+/**
+ * Deletes a shared album's group from this phone without recording the
+ * deletion: the group is not this phone's to delete. Only the group's own
+ * tables, by the group's id: nothing else on the phone is ever a group's,
+ * whatever id the group was given.
+ */
+export function deleteGroupRowsLocally(groupId: string): void {
+  withoutCapture(() => {
+    for (const table of GROUP_SYNC_TABLES) deleteUnrecorded(table, inLedgersSql(table, [groupId]));
+  });
+}
+
+/** Deletes the rows of `table` matching `where`, and whatever they had queued to sync. */
+function deleteUnrecorded(table: string, where: string): void {
+  const db = getSQLite();
+  db.runSync(
+    `DELETE FROM sync_outbox WHERE table_name = ? AND row_id IN (SELECT id FROM "${table}" WHERE ${where})`,
+    [table],
+  );
+  db.runSync(`DELETE FROM "${table}" WHERE ${where}`);
+}
+
+/** Runs `work` in one transaction whose writes are not captured for sync. */
+function withoutCapture(work: () => void): void {
+  const db = getSQLite();
   db.withTransactionSync(() => {
     db.runSync(
       `INSERT INTO sync_state (key, value) VALUES ('applying', '1')
        ON CONFLICT(key) DO UPDATE SET value = '1'`,
     );
     try {
-      for (const table of order) {
-        const where = inLedgersSql(table, [ledgerId]);
-        db.runSync(
-          `DELETE FROM sync_outbox WHERE table_name = ? AND row_id IN (SELECT id FROM "${table}" WHERE ${where})`,
-          [table],
-        );
-        db.runSync(`DELETE FROM "${table}" WHERE ${where}`);
-      }
-      db.runSync('DELETE FROM auto_log_captures WHERE ledger_id = ?', [ledgerId]);
-      db.runSync('UPDATE settings SET active_ledger_id = NULL WHERE active_ledger_id = ?', [
-        ledgerId,
-      ]);
+      work();
     } finally {
       db.runSync(`UPDATE sync_state SET value = '0' WHERE key = 'applying'`);
     }

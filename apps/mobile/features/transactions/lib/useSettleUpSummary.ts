@@ -89,11 +89,13 @@ export function useAlbumBalances(): AlbumBalance[] {
     const rateToReporting = (currency: string) =>
       convert(1, currency, reportingCurrency, rateTable).rateUsed;
     const entryIds = getAlbumEntryIds();
+    // Only split bills can be owed on: found once, not once per album.
+    const bills = transactions.filter((transaction) => transaction.splits?.length);
     return albums.flatMap((album) => {
       const ids = new Set(entryIds.get(album.id));
       if (ids.size === 0) return [];
       const summary = aggregateSettleUpByPerson(
-        transactions.filter((transaction) => ids.has(transaction.id)),
+        bills.filter((transaction) => ids.has(transaction.id)),
         { reportingCurrency, rateToReporting },
       );
       return summary.billCount > 0 ? [{ album, netReporting: summary.netReporting }] : [];

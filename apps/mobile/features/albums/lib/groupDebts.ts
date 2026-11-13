@@ -19,7 +19,7 @@
 
 import type { AlbumExpense, AlbumSettlement } from '~/types';
 
-import { shareLeft } from './albumGroup';
+import { cents, settlementsByBill, shareLeft } from './albumGroup';
 
 type Bill = Pick<
   AlbumExpense,
@@ -29,8 +29,6 @@ type Payment = Pick<
   AlbumSettlement,
   'id' | 'expenseId' | 'fromMember' | 'toMember' | 'amount' | 'date' | 'createdAt' | 'deletedAt'
 >;
-
-const cents = (value: number) => Math.round(value * 100);
 
 /** What one member still owes another on one bill. */
 interface OpenShare {
@@ -65,6 +63,7 @@ export function openShares(
   settlements: readonly Payment[],
 ): OpenShare[] {
   const open: OpenShare[] = [];
+  const paid = settlementsByBill(settlements);
   const bills = expenses
     .filter((bill) => !bill.deletedAt)
     .sort((a, b) => (a.date !== b.date ? (a.date < b.date ? -1 : 1) : a.id < b.id ? -1 : 1));
@@ -75,7 +74,7 @@ export function openShares(
     }
     for (const [memberId, share] of shares) {
       if (memberId === bill.paidBy) continue;
-      const amount = shareLeft(bill, settlements, memberId, bill.paidBy, share);
+      const amount = shareLeft(bill, paid.get(bill.id) ?? [], memberId, bill.paidBy, share);
       if (amount > 0) {
         open.push({
           expenseId: bill.id,
@@ -113,7 +112,11 @@ function addNet(graph: Graph, from: string, to: string, amount: number): void {
 
 function byCurrency<T extends { currency: string }>(rows: readonly T[]): Map<string, T[]> {
   const groups = new Map<string, T[]>();
-  for (const row of rows) groups.set(row.currency, [...(groups.get(row.currency) ?? []), row]);
+  for (const row of rows) {
+    const group = groups.get(row.currency);
+    if (group) group.push(row);
+    else groups.set(row.currency, [row]);
+  }
   return groups;
 }
 

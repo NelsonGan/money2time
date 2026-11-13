@@ -400,13 +400,15 @@ export function countUnpaidDebtors(transactions: TransactionWithRelations[]): nu
  * at least one unpaid, non-self split with a positive amount, or are a bill a
  * friend paid that the user has not paid back. Unlike
  * {@link aggregateSettleUpByTransaction}, excludes paid history and skips the
- * roll-up work. Used to gate free-plan split-bill creation.
+ * roll-up work. Used to gate free-plan split-bill creation. A shared album's
+ * bills are not counted: sharing an album has no free limit, and its bills
+ * are other people's to add.
  */
 export function countUnpaidSplitBills(transactions: TransactionWithRelations[]): number {
   let count = 0;
   for (const tx of transactions) {
     const splits = tx.splits;
-    if (!splits || splits.length === 0) continue;
+    if (!splits || splits.length === 0 || tx.albumGroupId) continue;
     const hasUnpaid = isFriendPaidBill(splits)
       ? owesPayer(splits, tx.amount)
       : splits.some((split) => !split.isSelf && !split.paidAt && split.amount > 0);

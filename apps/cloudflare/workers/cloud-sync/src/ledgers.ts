@@ -53,6 +53,12 @@ const MAX_MEMBERS = 5;
  */
 const MAX_OWNED_ALBUMS = 50;
 const MAX_ALBUM_MEMBERS = 20;
+/**
+ * And how many an account may start sharing in a day: sharing and stopping
+ * in a loop would make and delete a database each time, without ever holding
+ * more than one.
+ */
+const MAX_ALBUM_SHARES_A_DAY = 20;
 const DAY_MS = 24 * 60 * 60 * 1000;
 /** An invite link lasts a day; asking again within it returns the same link. */
 const INVITE_TTL_MS = DAY_MS;
@@ -325,13 +331,34 @@ async function ownerOf(
   return owner ?? { name: '', email: '' };
 }
 
-async function view(env: Env, ledger: SharedLedgerRow, role: Role): Promise<LedgerView> {
-  // The members are read once, for the count and (when the owner is not Pro)
-  // for whether one of them keeps the ledger syncing.
-  const [owner, members, ownerActive] = await Promise.all([
-    ownerOf(env, ledger),
-    memberIds(env, ledger.id),
-    !needsPro(ledger) || isAccountPro(env, ledger.owner_user_id),
+/** A share as the list reads it: with its owner and how many joined, in the same statement. */
+interface ListedLedgerRow extends SharedLedgerRow {
+  owner_name: string | null;
+  owner_email: string | null;
+  member_count: number;
+}
+
+const LISTED_COLUMNS = `${LEDGER_COLUMNS}, u.name AS owner_name, u.email AS owner_email,
+  (SELECT COUNT(*) FROM ledger_members c WHERE c.ledger_id = l.id) AS member_count`;
+const LISTED_FROM = 'shared_ledgers l LEFT JOIN "user" u ON u.id = l.owner_user_id';
+
+async function view(
+  env: Env,
+  ledger: SharedLedgerRow | ListedLedgerRow,
+  role: Role,
+): Promise<LedgerView> {
+  const listed = 'member_count' in ledger ? ledger : null;
+  const proRule = needsPro(ledger);
+  // A ledger's members are read once, for the count and (when the owner is
+  // not Pro) for whether one of them keeps it syncing. An album needs only
+  // the count, and a listed one has it already: nothing more is read.
+  const [owner, members, count, ownerActive] = await Promise.all([
+    listed
+      ? { name: listed.owner_name ?? '', email: listed.owner_email ?? '' }
+      : ownerOf(env, ledger),
+    proRule ? memberIds(env, ledger.id) : [],
+    proRule ? null : (listed?.member_count ?? memberCount(env, ledger.id)),
+    !proRule || isAccountPro(env, ledger.owner_user_id),
   ]);
   const active = ownerActive || (await anyAccountPro(env, members));
   return {
@@ -342,7 +369,7 @@ async function view(env: Env, ledger: SharedLedgerRow, role: Role): Promise<Ledg
     role,
     ownerId: ledger.owner_user_id,
     ownerName: displayName(owner.name, owner.email),
-    memberCount: members.length,
+    memberCount: count ?? members.length,
     active,
     kind: kindOf(ledger),
   };
@@ -468,15 +495,15 @@ export async function ledgerForMedia(
 async function listLedgers(env: Env, user: SessionUser, withAlbums: boolean): Promise<Response> {
   // Asked together: the app lists its ledgers before almost every sync.
   const [owned, joined] = await Promise.all([
-    env.AUTH_DB.prepare(`SELECT ${LEDGER_COLUMNS} FROM shared_ledgers l WHERE l.owner_user_id = ?1`)
+    env.AUTH_DB.prepare(`SELECT ${LISTED_COLUMNS} FROM ${LISTED_FROM} WHERE l.owner_user_id = ?1`)
       .bind(user.id)
-      .all<SharedLedgerRow>(),
+      .all<ListedLedgerRow>(),
     env.AUTH_DB.prepare(
-      `SELECT ${LEDGER_COLUMNS} FROM shared_ledgers l JOIN ledger_members m ON m.ledger_id = l.id
+      `SELECT ${LISTED_COLUMNS} FROM ${LISTED_FROM} JOIN ledger_members m ON m.ledger_id = l.id
        WHERE m.user_id = ?1`,
     )
       .bind(user.id)
-      .all<SharedLedgerRow>(),
+      .all<ListedLedgerRow>(),
   ]);
   const shown = (row: SharedLedgerRow) => withAlbums || kindOf(row) === 'ledger';
   const ledgers = await Promise.all([
@@ -514,6 +541,9 @@ async function shareLedger(env: Env, user: SessionUser, request: Request): Promi
     .bind(user.id, album ? 1 : 0)
     .first<{ n: number }>();
   if ((owned?.n ?? 0) >= limit) return json({ error: 'limit_reached' }, 409);
+  if (album && !(await underDailyLimit(env, `album-share:${user.id}`, MAX_ALBUM_SHARES_A_DAY))) {
+    return json({ error: 'rate_limited' }, 429);
+  }
 
   const id = randomHex(12);
   const dbName = `m2t-ledger-${id}`;
@@ -576,6 +606,26 @@ async function shareLedger(env: Env, user: SessionUser, request: Request): Promi
   const row = await getLedger(env, id);
   if (!row) return json({ error: 'server_error' }, 500);
   return json({ ledger: await view(env, row, 'owner') });
+}
+
+/**
+ * Counts one more use of `key` today and says whether it is still within
+ * `max`. Kept in Better Auth's rate-limit table (`lastRequest` is when the
+ * day began), which the daily cron clears; one statement, so two requests at
+ * once are both counted.
+ */
+async function underDailyLimit(env: Env, key: string, max: number): Promise<boolean> {
+  const now = Date.now();
+  const row = await env.AUTH_DB.prepare(
+    `INSERT INTO "rateLimit" ("id", "key", "count", "lastRequest") VALUES (?1, ?1, 1, ?2)
+     ON CONFLICT("key") DO UPDATE SET
+       "count" = CASE WHEN "lastRequest" < ?3 THEN 1 ELSE "count" + 1 END,
+       "lastRequest" = CASE WHEN "lastRequest" < ?3 THEN ?2 ELSE "lastRequest" END
+     RETURNING "count"`,
+  )
+    .bind(key, now, now - DAY_MS)
+    .first<{ count: number }>();
+  return (row?.count ?? 1) <= max;
 }
 
 /** Local development: the first sync server no shared ledger uses yet. */

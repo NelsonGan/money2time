@@ -332,7 +332,8 @@ export function AlbumPeopleScreen({ albumId, onBack }: AlbumPeopleScreenProps) {
 
   // Joined, and not yet said who they are: nothing of the group reaches their
   // ledger until they do.
-  const mustClaim = !!share && !group.self;
+  // Joined, and not on the list yet: nothing here is theirs to change.
+  const pending = !!share && !group.self;
   const placeholders = group.members.filter((member) => !member.userId);
   const claim = (memberId: string | null) => {
     void triggerHaptic('success');
@@ -354,9 +355,9 @@ export function AlbumPeopleScreen({ albumId, onBack }: AlbumPeopleScreenProps) {
           : joined
             ? I18n.t('albums.people.joined')
             : I18n.t('albums.people.not_joined'),
-      renamable: !mustClaim,
+      renamable: !pending,
       // Someone who joined is the owner's to remove; a name is anyone's.
-      removable: !person.isSelf && !mustClaim && (!share || !joined || (isOwner && !!person.id)),
+      removable: !person.isSelf && !pending && (!share || !joined || (isOwner && !!person.id)),
     };
   });
 
@@ -375,7 +376,7 @@ export function AlbumPeopleScreen({ albumId, onBack }: AlbumPeopleScreenProps) {
           bottomInset,
         ]}
       >
-        {mustClaim ? (
+        {group.mustClaim ? (
           <Card className="gap-3 px-4 py-4">
             <View className="gap-1">
               <Text variant="bodyStrong">{I18n.t('albums.people.who_title')}</Text>
@@ -408,7 +409,7 @@ export function AlbumPeopleScreen({ albumId, onBack }: AlbumPeopleScreenProps) {
           </Text>
           <SplitWithCard
             rows={rows}
-            canAdd={group.others.length < MAX_ALBUM_PEOPLE && !mustClaim}
+            canAdd={group.others.length < MAX_ALBUM_PEOPLE && !pending}
             onAdd={addPerson}
             onRename={renamePerson}
             onRemove={(row) => {
@@ -430,7 +431,7 @@ export function AlbumPeopleScreen({ albumId, onBack }: AlbumPeopleScreenProps) {
               : null
           }
           simplify={
-            share && !mustClaim
+            share && !pending
               ? {
                   value: simplifies,
                   onChange: (next) => {

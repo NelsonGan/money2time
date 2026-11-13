@@ -729,6 +729,16 @@ describe('countUnpaidSplitBills', () => {
     ).toBe(0);
   });
 
+  it('leaves out a shared album’s bills: they count toward no free limit', () => {
+    const open = [makeSplit({ id: 's1', personName: 'Sarah', amount: 10 })];
+    expect(
+      countUnpaidSplitBills([
+        makeTx({ id: 't1', splits: open, albumGroupId: 'bali' }),
+        makeTx({ id: 't2', splits: open }),
+      ]),
+    ).toBe(1);
+  });
+
   it('counts one per transaction regardless of how many people owe on it', () => {
     const txs = [
       makeTx({

@@ -2,7 +2,7 @@
 // These rows sync with the group's own cloud database, not the user's: their
 // `ledger_id` is the group's id (features/cloudSync/lib/ledgerRows.ts).
 
-import { and, eq, isNull, like } from 'drizzle-orm';
+import { and, eq, isNull, sql } from 'drizzle-orm';
 
 import { getDb, getSQLite } from '~/lib/db/client';
 import {
@@ -45,6 +45,15 @@ interface AlbumSettlementInput {
   createdAt?: string;
 }
 
+/**
+ * Far more member rows than a group ever has (20 people and the user, and
+ * the ones since removed). A group is read no further than this, so nobody
+ * in it can make every phone work through thousands of made-up people.
+ */
+const MAX_MEMBER_ROWS = 200;
+
+const present = <T>(value: T | null): value is T => value !== null;
+
 function sharesJson(shares: readonly AlbumShare[]): string {
   return JSON.stringify(
     shares.map((share) => ({
@@ -60,13 +69,7 @@ class AlbumGroupsRepository {
 
   /** The group's people, in the order they were added. */
   listMembers(groupId: string): AlbumMember[] {
-    return getDb()
-      .select()
-      .from(albumMembersTable)
-      .where(and(eq(albumMembersTable.ledgerId, groupId), isNull(albumMembersTable.deletedAt)))
-      .orderBy(albumMembersTable.sortOrder, albumMembersTable.createdAt, albumMembersTable.id)
-      .all()
-      .map(toAlbumMember);
+    return this.listAllMembers(groupId).filter((member) => !member.deletedAt);
   }
 
   /** Every member row, removed ones too: a bill keeps the name of someone who left. */
@@ -76,8 +79,15 @@ class AlbumGroupsRepository {
       .from(albumMembersTable)
       .where(eq(albumMembersTable.ledgerId, groupId))
       .orderBy(albumMembersTable.sortOrder, albumMembersTable.createdAt, albumMembersTable.id)
+      .limit(MAX_MEMBER_ROWS)
       .all()
-      .map(toAlbumMember);
+      .map(toAlbumMember)
+      .filter(present);
+  }
+
+  /** The ids a bill or a payment of the group may name: its members, removed ones too. */
+  private memberIds(groupId: string): Set<string> {
+    return new Set(this.listAllMembers(groupId).map((member) => member.id));
   }
 
   createMember(
@@ -96,37 +106,71 @@ class AlbumGroupsRepository {
       deletedAt: null,
     };
     getDb().insert(albumMembersTable).values(row).run();
-    return toAlbumMember(row);
+    return {
+      id: row.id,
+      groupId,
+      name: row.name,
+      userId: row.userId,
+      sortOrder: row.sortOrder,
+      createdAt: now,
+      updatedAt: now,
+      deletedAt: null,
+    };
   }
 
-  updateMember(id: string, updates: { name?: string; userId?: string | null }): void {
+  // Every change names its group as well as the row: ids are the group's to
+  // choose, and one group's row must never be reached through another's.
+
+  updateMember(
+    groupId: string,
+    id: string,
+    updates: { name?: string; userId?: string | null },
+  ): void {
     getDb()
       .update(albumMembersTable)
       .set({ ...updates, updatedAt: nowIso() })
-      .where(eq(albumMembersTable.id, id))
+      .where(and(eq(albumMembersTable.ledgerId, groupId), eq(albumMembersTable.id, id)))
       .run();
   }
 
-  softDeleteMember(id: string): void {
+  softDeleteMember(groupId: string, id: string): void {
     const now = nowIso();
     getDb()
       .update(albumMembersTable)
       .set({ deletedAt: now, updatedAt: now })
-      .where(and(eq(albumMembersTable.id, id), isNull(albumMembersTable.deletedAt)))
+      .where(
+        and(
+          eq(albumMembersTable.ledgerId, groupId),
+          eq(albumMembersTable.id, id),
+          isNull(albumMembersTable.deletedAt),
+        ),
+      )
       .run();
   }
 
   // -------------------------------------------------------------------------
   // Bills
 
-  /** Every bill of the group, deleted ones too (a phone removes its own side of those). */
+  /**
+   * Every bill of the group, deleted ones too (a phone removes its own side
+   * of those). A bill counts only between the group's own members: one paid
+   * by nobody in it is left out, and so is a share of nobody's.
+   */
   listExpenses(groupId: string): AlbumExpense[] {
+    const members = this.memberIds(groupId);
     return getDb()
       .select()
       .from(albumExpensesTable)
       .where(eq(albumExpensesTable.ledgerId, groupId))
       .all()
-      .map(toAlbumExpense);
+      .map(toAlbumExpense)
+      .filter(present)
+      .filter((bill) => members.has(bill.paidBy))
+      .map((bill) =>
+        bill.shares.every((share) => members.has(share.memberId))
+          ? bill
+          : { ...bill, shares: bill.shares.filter((share) => members.has(share.memberId)) },
+      );
   }
 
   /** Writes a bill as it now is; one deleted before comes back. */
@@ -154,32 +198,50 @@ class AlbumGroupsRepository {
   }
 
   /** Deletes a bill for the group, and the payments made on it with it. */
-  softDeleteExpense(id: string): void {
+  softDeleteExpense(groupId: string, id: string): void {
     const now = nowIso();
     getDb()
       .update(albumExpensesTable)
       .set({ deletedAt: now, updatedAt: now })
-      .where(and(eq(albumExpensesTable.id, id), isNull(albumExpensesTable.deletedAt)))
+      .where(
+        and(
+          eq(albumExpensesTable.ledgerId, groupId),
+          eq(albumExpensesTable.id, id),
+          isNull(albumExpensesTable.deletedAt),
+        ),
+      )
       .run();
     getDb()
       .update(albumSettlementsTable)
       .set({ deletedAt: now, updatedAt: now })
-      .where(and(eq(albumSettlementsTable.expenseId, id), isNull(albumSettlementsTable.deletedAt)))
+      .where(
+        and(
+          eq(albumSettlementsTable.ledgerId, groupId),
+          eq(albumSettlementsTable.expenseId, id),
+          isNull(albumSettlementsTable.deletedAt),
+        ),
+      )
       .run();
   }
 
   // -------------------------------------------------------------------------
   // Settlements
 
-  /** Every settlement of the group, undone ones too (a phone undoes its own side of those). */
+  /**
+   * Every settlement of the group, undone ones too (a phone undoes its own
+   * side of those), between its own members only.
+   */
   listSettlements(groupId: string): AlbumSettlement[] {
+    const members = this.memberIds(groupId);
     return getDb()
       .select()
       .from(albumSettlementsTable)
       .where(eq(albumSettlementsTable.ledgerId, groupId))
       .orderBy(albumSettlementsTable.createdAt, albumSettlementsTable.id)
       .all()
-      .map(toAlbumSettlement);
+      .map(toAlbumSettlement)
+      .filter(present)
+      .filter((payment) => members.has(payment.fromMember) && members.has(payment.toMember));
   }
 
   createSettlement(input: AlbumSettlementInput): string {
@@ -230,16 +292,23 @@ class AlbumGroupsRepository {
     return ids;
   }
 
-  /** Undoes a payment, and with it every other payment recorded in the same act. */
-  softDeleteSettlement(id: string): void {
+  /**
+   * Undoes a payment of the group, and with it every other payment recorded
+   * in the same act. The batch is matched as an exact prefix, in this group
+   * alone: an id is the group's to choose, so it is never used as a pattern.
+   */
+  softDeleteSettlement(groupId: string, id: string): void {
     const now = nowIso();
-    const batch = id.includes('.') ? id.slice(0, id.indexOf('.')) : null;
+    const prefix = id.includes('.') ? id.slice(0, id.indexOf('.') + 1) : null;
     getDb()
       .update(albumSettlementsTable)
       .set({ deletedAt: now, updatedAt: now })
       .where(
         and(
-          batch ? like(albumSettlementsTable.id, `${batch}.%`) : eq(albumSettlementsTable.id, id),
+          eq(albumSettlementsTable.ledgerId, groupId),
+          prefix
+            ? sql`substr(${albumSettlementsTable.id}, 1, ${prefix.length}) = ${prefix}`
+            : eq(albumSettlementsTable.id, id),
           isNull(albumSettlementsTable.deletedAt),
         ),
       )
@@ -254,7 +323,13 @@ class AlbumGroupsRepository {
     const row = getDb()
       .select({ simplifyDebts: albumGroupsTable.simplifyDebts })
       .from(albumGroupsTable)
-      .where(and(eq(albumGroupsTable.id, groupId), isNull(albumGroupsTable.deletedAt)))
+      .where(
+        and(
+          eq(albumGroupsTable.id, groupId),
+          eq(albumGroupsTable.ledgerId, groupId),
+          isNull(albumGroupsTable.deletedAt),
+        ),
+      )
       .get();
     return row?.simplifyDebts ?? false;
   }

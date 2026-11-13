@@ -118,7 +118,7 @@ export function netByPerson(
 type OpenShare = { person: string; key?: string; amountBase: number; txId: string };
 
 /** An album with something still owed in it, and the user's net there. */
-export type AlbumBalance = { id: string; name: string; net: number; people: PersonBalance[] };
+type AlbumBalance = { id: string; name: string; net: number; people: PersonBalance[] };
 
 /**
  * Balances as the app keeps them: an album answers for the bills in it, and

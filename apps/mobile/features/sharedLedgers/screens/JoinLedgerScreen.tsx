@@ -54,8 +54,8 @@ interface JoinLedgerScreenProps {
 /**
  * Where an invite link lands: what the ledger is and who shares it, a sign-in
  * if needed (anyone can join, Pro or not), then Join. A link to a shared
- * album lands here too: joining it adds the album to a ledger of the user's
- * own instead of opening someone's ledger.
+ * album lands here too: joining it adds the album to the user's main ledger
+ * instead of opening someone's ledger.
  */
 export function JoinLedgerScreen({
   code,
@@ -68,8 +68,7 @@ export function JoinLedgerScreen({
   const { ledgers, switchLedger, activeLedger } = useApp();
   const sharedLedgers = useSharedLedgers();
   const sharedAlbums = useSharedAlbums();
-  // The album is in a ledger of the user's own, which opens with it: the open
-  // one for an album just joined, unless that is a shared ledger.
+  // The album is in the user's main ledger, which opens with it.
   const openAlbum = (albumId: string) => {
     const ledgerId = albumLedgerId(albumId);
     if (ledgerId && ledgerId !== activeLedger.id) switchLedger(ledgerId);

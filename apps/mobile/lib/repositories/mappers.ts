@@ -324,51 +324,120 @@ export function parseAlbumPeople(json: string | null | undefined): AlbumPerson[]
   }
 }
 
-export function toAlbumMember(row: AlbumMemberRow): AlbumMember {
+// --- A shared album's group --------------------------------------------------
+// Everyone in a shared album writes its group's rows straight into the
+// group's database, so a row is checked before anything reads it. One that is
+// not what this app would have written maps to null and is left out, as if it
+// were not there: nothing downstream has to doubt an id, an amount or a date.
+
+/** A member's id, and the account id of someone who joined. */
+const GROUP_ROW_ID = /^[A-Za-z0-9_-]{1,64}$/;
+/** A bill's id is its payer's entry id, which may be a recurring run's (`rr:<rule>:<day>`). */
+const GROUP_BILL_ID = /^[A-Za-z0-9_:.-]{1,120}$/;
+/** A settlement's id: a plain id, or one of a batch recorded together (`<batch>.<n>`). */
+const GROUP_SETTLEMENT_ID = /^[A-Za-z0-9_-]{1,64}(\.\d{1,4})?$/;
+const GROUP_CURRENCY = /^[A-Za-z][A-Za-z0-9]{1,9}$/;
+const GROUP_DAY = /^(\d{4})-(\d{2})-(\d{2})(T[0-9:.Z+-]{1,30})?$/;
+const MAX_GROUP_AMOUNT = 1e12;
+const MAX_GROUP_NAME = 40;
+const MAX_GROUP_NOTE = 500;
+const MAX_GROUP_LABEL = 80;
+/** More shares than an album can have people (20 and the user), with room for people since removed. */
+const MAX_GROUP_SHARES = 64;
+
+function isGroupAmount(value: unknown): value is number {
+  return (
+    typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= MAX_GROUP_AMOUNT
+  );
+}
+
+/**
+ * The day of a bill or payment, `YYYY-MM-DD`, when it is a real one; null
+ * otherwise. An entry stamped with a time (a balance adjustment) gives its day.
+ */
+function groupDay(value: unknown): string | null {
+  const match = typeof value === 'string' ? GROUP_DAY.exec(value) : null;
+  if (!match) return null;
+  const [year, month, day] = [Number(match[1]), Number(match[2]), Number(match[3])];
+  if (year < 1970 || year > 2200 || month < 1 || month > 12 || day < 1) return null;
+  if (day > new Date(Date.UTC(year, month, 0)).getUTCDate()) return null;
+  return `${match[1]}-${match[2]}-${match[3]}`;
+}
+
+function isGroupTimestamp(value: unknown): value is string {
+  return typeof value === 'string' && value.length <= 40 && !Number.isNaN(Date.parse(value));
+}
+
+const clip = (value: string | null | undefined, max: number): string | null =>
+  typeof value === 'string' ? value.slice(0, max) : null;
+
+export function toAlbumMember(row: AlbumMemberRow): AlbumMember | null {
+  const name =
+    typeof row.name === 'string'
+      ? row.name.replace(/\s+/g, ' ').trim().slice(0, MAX_GROUP_NAME)
+      : '';
+  if (!GROUP_ROW_ID.test(row.id) || !name) return null;
+  if (row.userId != null && !GROUP_ROW_ID.test(row.userId)) return null;
+  if (!isGroupTimestamp(row.createdAt)) return null;
   return {
     id: row.id,
     groupId: row.ledgerId,
-    name: row.name,
+    name,
     userId: row.userId ?? null,
-    sortOrder: row.sortOrder ?? 0,
+    sortOrder: Number.isFinite(row.sortOrder) ? (row.sortOrder ?? 0) : 0,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     deletedAt: row.deletedAt,
   };
 }
 
-/** `album_expenses.shares_json`: each member's share of the bill. */
-function parseAlbumShares(json: string | null | undefined): AlbumShare[] {
+/** `album_expenses.shares_json`: each member's share of the bill, one per member. */
+function parseAlbumShares(json: string | null | undefined): AlbumShare[] | null {
   if (!json) return [];
   try {
     const parsed: unknown = JSON.parse(json);
-    if (!Array.isArray(parsed)) return [];
+    if (!Array.isArray(parsed) || parsed.length > MAX_GROUP_SHARES) return null;
     const shares: AlbumShare[] = [];
+    const seen = new Set<string>();
     for (const item of parsed) {
       const entry = item as { memberId?: unknown; amount?: unknown } | null;
-      const amount = Number(entry?.amount);
-      if (typeof entry?.memberId === 'string' && entry.memberId && Number.isFinite(amount)) {
-        shares.push({ memberId: entry.memberId, amount: Math.max(0, amount) });
-      }
+      const memberId = entry?.memberId;
+      if (typeof memberId !== 'string' || !GROUP_ROW_ID.test(memberId)) return null;
+      if (!isGroupAmount(entry?.amount) || seen.has(memberId)) return null;
+      seen.add(memberId);
+      shares.push({ memberId, amount: entry.amount });
     }
     return shares;
   } catch {
-    return [];
+    return null;
   }
 }
 
-export function toAlbumExpense(row: AlbumExpenseRow): AlbumExpense {
+export function toAlbumExpense(row: AlbumExpenseRow): AlbumExpense | null {
+  const shares = parseAlbumShares(row.sharesJson);
+  const date = groupDay(row.date);
+  if (
+    !shares ||
+    !date ||
+    !GROUP_BILL_ID.test(row.id) ||
+    !GROUP_ROW_ID.test(row.paidBy) ||
+    !isGroupAmount(row.amount) ||
+    !GROUP_CURRENCY.test(row.currency) ||
+    !isGroupTimestamp(row.createdAt)
+  ) {
+    return null;
+  }
   return {
     id: row.id,
     groupId: row.ledgerId,
-    date: row.date,
-    note: row.note ?? null,
+    date,
+    note: clip(row.note, MAX_GROUP_NOTE),
     amount: row.amount,
     currency: row.currency,
-    categoryName: row.categoryName ?? null,
-    categoryIcon: row.categoryIcon ?? null,
+    categoryName: clip(row.categoryName, MAX_GROUP_LABEL),
+    categoryIcon: clip(row.categoryIcon, MAX_GROUP_LABEL),
     paidBy: row.paidBy,
-    shares: parseAlbumShares(row.sharesJson),
+    shares,
     createdBy: row.createdBy ?? null,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
@@ -376,7 +445,21 @@ export function toAlbumExpense(row: AlbumExpenseRow): AlbumExpense {
   };
 }
 
-export function toAlbumSettlement(row: AlbumSettlementRow): AlbumSettlement {
+export function toAlbumSettlement(row: AlbumSettlementRow): AlbumSettlement | null {
+  const date = groupDay(row.date);
+  if (
+    !date ||
+    !GROUP_SETTLEMENT_ID.test(row.id) ||
+    (row.expenseId != null && !GROUP_BILL_ID.test(row.expenseId)) ||
+    !GROUP_ROW_ID.test(row.fromMember) ||
+    !GROUP_ROW_ID.test(row.toMember) ||
+    row.fromMember === row.toMember ||
+    !isGroupAmount(row.amount) ||
+    !GROUP_CURRENCY.test(row.currency) ||
+    !isGroupTimestamp(row.createdAt)
+  ) {
+    return null;
+  }
   return {
     id: row.id,
     groupId: row.ledgerId,
@@ -385,7 +468,7 @@ export function toAlbumSettlement(row: AlbumSettlementRow): AlbumSettlement {
     toMember: row.toMember,
     amount: row.amount,
     currency: row.currency,
-    date: row.date,
+    date,
     createdBy: row.createdBy ?? null,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,

@@ -1,8 +1,8 @@
 import { openShares, settleDebt, simplifyDebts } from '~/features/albums/lib/groupDebts';
 import {
   albumLedgerId,
-  albumState,
   ensureLocalAlbum,
+  isAlbumDeleted,
   mainLedgerTakesSharedAlbums,
   releaseAlbumGroup,
 } from '~/features/albums/services/albumGroupStore';
@@ -187,7 +187,7 @@ describe('a bill another member paid', () => {
     expect(projectGroup(GROUP, env)).toBe(false);
 
     // The first part undone: the bill is owed again, less the part still paid.
-    albumGroupsRepository.softDeleteSettlement('s1');
+    albumGroupsRepository.softDeleteSettlement(GROUP, 's1');
     projectGroup(GROUP, env);
     expect(tx('dinner:x:s1').deleted_at).not.toBeNull();
     expect(tx('dinner')).toMatchObject({ amount: 12, account_id: null });
@@ -234,8 +234,8 @@ describe('a bill the user paid', () => {
     expect(balances()).toEqual({ Aisha: 0, Ben: 30 });
 
     // Both undone: the bill and the account are as they were.
-    albumGroupsRepository.softDeleteSettlement('s1');
-    albumGroupsRepository.softDeleteSettlement('s2');
+    albumGroupsRepository.softDeleteSettlement(GROUP, 's1');
+    albumGroupsRepository.softDeleteSettlement(GROUP, 's2');
     projectGroup(GROUP, env);
     expect(tx('dinner')).toMatchObject({ amount: 90, reporting_amount: 90 });
     expect(liveTransactions()).toEqual([{ id: 'dinner', type: 'expense', amount: 90 }]);
@@ -267,7 +267,7 @@ describe('changes to a bill', () => {
     expect(tx('dinner')).toMatchObject({ amount: 120, account_id: 'cash' });
     expect(balances()).toEqual({ Aisha: 40, Ben: 40 });
 
-    albumGroupsRepository.softDeleteExpense('dinner');
+    albumGroupsRepository.softDeleteExpense(GROUP, 'dinner');
     projectGroup(GROUP, env);
     expect(liveTransactions()).toEqual([]);
     // And comes back with it.
@@ -281,7 +281,7 @@ describe('changes to a bill', () => {
     addBill('dinner', 'me');
     pay('s1', 'dinner', 'aisha', 'me', 10, '2026-11-13T08:00:00.000Z');
     projectGroup(GROUP, env);
-    albumGroupsRepository.softDeleteExpense('dinner');
+    albumGroupsRepository.softDeleteExpense(GROUP, 'dinner');
     projectGroup(GROUP, env);
     expect(liveTransactions()).toEqual([]);
     expect(albumGroupsRepository.listSettlements(GROUP).filter((s) => !s.deletedAt)).toEqual([]);
@@ -415,7 +415,7 @@ describe('payments recorded as one act', () => {
     projectGroup(GROUP, env);
     expect(balances()).toEqual({ Aisha: 0, Ben: 0 });
     // Undone from the dinner alone: the boat's goes with it.
-    albumGroupsRepository.softDeleteSettlement(first);
+    albumGroupsRepository.softDeleteSettlement(GROUP, first);
     expect(live()).toEqual([]);
     expect(second.split('.')[0]).toBe(first.split('.')[0]);
     projectGroup(GROUP, env);
@@ -423,7 +423,7 @@ describe('payments recorded as one act', () => {
     // A payment on its own is undone on its own.
     pay('solo', 'dinner', 'aisha', 'me', 5, '2026-11-13T08:00:00.000Z');
     pay('other', 'boat', 'me', 'ben', 5, '2026-11-13T09:00:00.000Z');
-    albumGroupsRepository.softDeleteSettlement('solo');
+    albumGroupsRepository.softDeleteSettlement(GROUP, 'solo');
     expect(live().map((s) => s.id)).toEqual(['other']);
   });
 
@@ -506,9 +506,9 @@ describe('sharing an album that already has split bills', () => {
 
   it('brings back an album deleted here when it is joined again', () => {
     app.connection.exec(`UPDATE albums SET deleted_at = '${NOW}' WHERE id = '${GROUP}'`);
-    expect(albumState(GROUP)).toBe('deleted');
+    expect(isAlbumDeleted(GROUP)).toBe(true);
     ensureLocalAlbum({ ledgerId: GROUP, name: 'Bali trip' });
-    expect(albumState(GROUP)).toBe('live');
+    expect(isAlbumDeleted(GROUP)).toBe(false);
     expect(albumLedgerId(GROUP)).toBe('default');
     expect(app.all('SELECT COUNT(*) AS n FROM albums')[0].n).toBe(1);
   });
@@ -553,5 +553,133 @@ describe('sharing an album that already has split bills', () => {
     ).toEqual(['Aisha', 'Ben', 'Chen']);
     // The entries stay, as ordinary split bills.
     expect(balances()).toEqual({ Aisha: 10, Chen: 20 });
+  });
+});
+
+// Anyone in a shared album writes its group's rows straight into the group's
+// database, so every row is read as if someone hostile wrote it.
+describe('rows another member wrote are not trusted', () => {
+  const rawBill = (id: string, fields: { amount?: string; date?: string; shares?: string }) =>
+    app.connection.exec(`
+      INSERT INTO album_expenses (id, ledger_id, date, note, amount, currency, paid_by, shares_json, created_at, updated_at)
+        VALUES ('${id}', '${GROUP}', '${fields.date ?? '2026-11-12'}', 'Dinner', ${fields.amount ?? '90'}, 'MYR', 'aisha',
+          '${fields.shares ?? '[{"memberId":"me","amount":30},{"memberId":"aisha","amount":60}]'}', '${NOW}', '${NOW}');
+    `);
+  const addOwnIncome = () =>
+    app.connection.exec(`
+      INSERT INTO transactions (id, ledger_id, type, amount, currency, reporting_currency, reporting_amount, fx_rate, date, account_id, category_id, note, created_at, updated_at)
+        VALUES ('salary', 'default', 'income', 5000, 'MYR', 'MYR', 5000, 1, '2026-11-01', 'bank', 'pay', 'Salary', '${NOW}', '${NOW}');
+    `);
+
+  it('a bill named after one of the user’s own entries leaves that entry alone', () => {
+    addOwnIncome();
+    rawBill('salary', {});
+    expect(projectGroup(GROUP, env)).toBe(false);
+    expect(tx('salary')).toMatchObject({ type: 'income', amount: 5000, album_group_id: null });
+    expect(transactionSplitsRepository.listByTransactionId('salary')).toEqual([]);
+    // Nor does deleting that bill take the entry with it.
+    albumGroupsRepository.softDeleteExpense(GROUP, 'salary');
+    expect(projectGroup(GROUP, env)).toBe(false);
+    expect(tx('salary')).toMatchObject({ amount: 5000, deleted_at: null });
+  });
+
+  it('a group joined again takes back the entries it left in the album', () => {
+    addBill('dinner', 'aisha');
+    projectGroup(GROUP, env);
+    // Left: the entry stays, as the user's own, in the album.
+    app.connection.exec(`UPDATE transactions SET album_group_id = NULL WHERE id = 'dinner'`);
+    expect(projectGroup(GROUP, env)).toBe(true);
+    expect(tx('dinner')).toMatchObject({ amount: 30, album_group_id: GROUP });
+    expect(liveTransactions().map((row) => row.id)).toEqual(['dinner']);
+  });
+
+  it('leaves out rows this app would never have written, and settles', () => {
+    addBill('dinner', 'aisha');
+    rawBill('text-amount', { amount: `'abc'` });
+    rawBill('huge', { amount: '1e308' });
+    rawBill('negative', { amount: '-5' });
+    rawBill('no-day', { date: '9999-99-99' });
+    rawBill('odd%id', {});
+    rawBill('huge-share', { shares: '[{"memberId":"me","amount":1e308}]' });
+    rawBill('not-json', { shares: 'nope' });
+    // A day stamped with a time (a balance adjustment) is read as its day.
+    rawBill('stamped', { date: '2026-11-12T08:00:00.000Z' });
+    // A share of somebody who is not in the group is dropped; the bill stays.
+    rawBill('stranger', {
+      shares: '[{"memberId":"me","amount":30},{"memberId":"ghost","amount":60}]',
+    });
+    app.connection.exec(`
+      INSERT INTO album_members (id, ledger_id, name, sort_order, created_at, updated_at)
+        VALUES ('blank', '${GROUP}', '   ', 9, '${NOW}', '${NOW}');
+      INSERT INTO album_settlements (id, ledger_id, expense_id, from_member, to_member, amount, currency, date, created_at, updated_at)
+        VALUES ('text-pay', '${GROUP}', 'dinner', 'me', 'aisha', 'abc', 'MYR', '2026-11-13', '${NOW}', '${NOW}'),
+               ('ghost-pay', '${GROUP}', 'dinner', 'me', 'ghost', 5, 'MYR', '2026-11-13', '${NOW}', '${NOW}'),
+               ('bad-day', '${GROUP}', 'dinner', 'me', 'aisha', 5, 'MYR', 'yesterday', '${NOW}', '${NOW}');
+    `);
+    expect(
+      albumGroupsRepository
+        .listExpenses(GROUP)
+        .map((bill) => [bill.id, bill.shares.length])
+        .sort(),
+    ).toEqual([
+      ['dinner', 3],
+      ['stamped', 2],
+      ['stranger', 1],
+    ]);
+    expect(
+      albumGroupsRepository.listExpenses(GROUP).find((bill) => bill.id === 'stamped')?.date,
+    ).toBe('2026-11-12');
+    expect(albumGroupsRepository.listSettlements(GROUP)).toEqual([]);
+    expect(albumGroupsRepository.listMembers(GROUP).map((member) => member.id)).toEqual([
+      'me',
+      'aisha',
+      'ben',
+    ]);
+    expect(projectGroup(GROUP, env)).toBe(true);
+    expect(tx('dinner')).toMatchObject({ amount: 30 });
+    // Nothing keeps it writing: the next pass has nothing to do.
+    expect(projectGroup(GROUP, env)).toBe(false);
+    expect(openShares(albumGroupsRepository.listExpenses(GROUP), []).length).toBe(4);
+  });
+
+  it('undoing a payment reaches no other payment, in this group or another', () => {
+    addBill('dinner', 'aisha');
+    pay('b1.0', 'dinner', 'me', 'aisha', 5, '2026-11-13T08:00:00.000Z');
+    pay('b1.1', 'dinner', 'ben', 'aisha', 5, '2026-11-13T08:00:00.000Z');
+    pay('b10.0', 'dinner', 'me', 'aisha', 5, '2026-11-13T08:00:00.000Z');
+    // A payment whose id reads as a pattern.
+    pay('%.0', 'dinner', 'me', 'aisha', 1, '2026-11-13T08:00:00.000Z');
+    app.connection.exec(`
+      INSERT INTO album_settlements (id, ledger_id, expense_id, from_member, to_member, amount, currency, date, created_at, updated_at)
+        VALUES ('b1.2', 'tokyo', 'ramen', 'x', 'y', 5, 'JPY', '2026-11-13', '${NOW}', '${NOW}');
+    `);
+    const live = () =>
+      app
+        .all('SELECT id FROM album_settlements WHERE deleted_at IS NULL ORDER BY id')
+        .map((row) => row.id);
+    albumGroupsRepository.softDeleteSettlement(GROUP, '%.0');
+    expect(live()).toEqual(['b1.0', 'b1.1', 'b1.2', 'b10.0']);
+    // The batch, in this group only, and not the batch whose name starts the same.
+    albumGroupsRepository.softDeleteSettlement(GROUP, 'b1.1');
+    expect(live()).toEqual(['b1.2', 'b10.0']);
+    // Another group's row is out of reach by its id.
+    albumGroupsRepository.softDeleteSettlement(GROUP, 'b1.2');
+    albumGroupsRepository.softDeleteExpense(GROUP, 'ramen');
+    expect(live()).toEqual(['b1.2', 'b10.0']);
+  });
+
+  it('letting a group go never deletes a ledger that shares its id', () => {
+    app.connection.exec(`
+      INSERT INTO ledgers (id, name, sort_order, created_at, updated_at)
+        VALUES ('${GROUP}', 'Work', 1, '${NOW}', '${NOW}');
+      INSERT INTO transactions (id, ledger_id, type, amount, currency, date, created_at, updated_at)
+        VALUES ('work-1', '${GROUP}', 'expense', 12, 'MYR', '2026-11-10', '${NOW}', '${NOW}');
+    `);
+    addBill('dinner', 'aisha');
+    removeSharedLedger(GROUP);
+    releaseAlbumGroup(GROUP, 'u-me');
+    expect(app.all('SELECT COUNT(*) AS n FROM album_expenses')[0].n).toBe(0);
+    expect(app.all('SELECT id FROM ledgers WHERE id = ?', GROUP)).toEqual([{ id: GROUP }]);
+    expect(tx('work-1')).toMatchObject({ amount: 12, deleted_at: null });
   });
 });

@@ -214,7 +214,7 @@ describe('one member’s own side of a bill', () => {
 
   it('a bill someone else paid is the user’s share, then what is left of it', () => {
     const unpaid = localBill(bill(), [], 'aisha')!;
-    expect(unpaid).toMatchObject({ kind: 'owes', amount: 30, settled: false, payments: [] });
+    expect(unpaid).toMatchObject({ kind: 'owes', amount: 30, payments: [] });
     expect(
       unpaid.splits.map((row) => [row.role, row.memberId, row.amount, row.shareAmount]),
     ).toEqual([
@@ -229,7 +229,7 @@ describe('one member’s own side of a bill', () => {
       [payment({ fromMember: 'aisha', toMember: 'me', amount: 12 })],
       'aisha',
     )!;
-    expect(part).toMatchObject({ amount: 18, settled: false });
+    expect(part).toMatchObject({ amount: 18 });
     expect(part.payments[0]).toMatchObject({ kind: 'sent_part', amount: 12 });
     expect(part.splits.at(-1)).toMatchObject({
       role: 'payment',
@@ -247,7 +247,7 @@ describe('one member’s own side of a bill', () => {
       ],
       'aisha',
     )!;
-    expect(paid).toMatchObject({ amount: 18, settled: true });
+    expect(paid).toMatchObject({ amount: 18 });
     expect(paid.payments.map((item) => item.kind)).toEqual(['sent_part', 'sent_final']);
     expect(paid.splits[1]).toMatchObject({ isPayer: true, settlementId: 's2' });
     expect(paid.splits[1].paidAt).toBe('2026-11-14T08:00:00.000Z');

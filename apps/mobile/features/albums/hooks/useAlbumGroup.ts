@@ -22,38 +22,54 @@ export interface AlbumGroup {
   people: AlbumGroupPerson[];
   /** The others alone: who a new bill starts split with. */
   others: AlbumGroupPerson[];
-  /** Shared albums: the user's own member, or null until they have said who they are. */
+  /** Shared albums: the user's own member, or null until they are on its list. */
   self: AlbumMember | null;
+  /**
+   * Shared albums: the user joined and has to say which name on the list is
+   * theirs. Only while there is a name nobody has taken: with none to pick
+   * they are put on the list as themselves, unasked (`syncAlbumGroups`).
+   */
+  mustClaim: boolean;
   /** Shared albums: the group's live members. */
   members: AlbumMember[];
 }
 
-const NO_MEMBERS: AlbumMember[] = [];
+/**
+ * What an album of the open ledger may do, made yet or not. `canSplit`: it
+ * can be split with people, which an album in a shared ledger never is (its
+ * entries already belong to the ledger's own). `canShare`: it can be shared,
+ * which only an album of the main ledger is, while that ledger is not shared
+ * and the build can sync.
+ */
+export function useAlbumScope(): { canSplit: boolean; canShare: boolean } {
+  const { activeLedger } = useApp();
+  const canSplit = useSharedLedger(activeLedger.id) === null;
+  const canSync = useCloudSyncEnabled();
+  return { canSplit, canShare: canSync && canSplit && activeLedger.id === DEFAULT_LEDGER_ID };
+}
 
 /**
  * The people of an album, whichever way it keeps them (the album's own list,
  * or its group's members once shared), kept current as either changes.
  */
 export function useAlbumGroup(album: Album | null | undefined): AlbumGroup {
-  const { activeLedger } = useApp();
+  const { canSplit, canShare } = useAlbumScope();
   const share = useSharedAlbum(album?.id);
-  const inSharedLedger = useSharedLedger(activeLedger.id) !== null;
-  const canSync = useCloudSyncEnabled();
   const groupId = share ? share.ledgerId : null;
-  const members = useSyncExternalStore(subscribeAlbumGroups, () =>
-    groupId ? listGroupMembers(groupId) : NO_MEMBERS,
-  );
+  const members = useSyncExternalStore(subscribeAlbumGroups, () => listGroupMembers(groupId));
   return useMemo(() => {
     const meLabel = I18n.t('transactions.editor.split.me_label');
     const people = album ? albumPeople(album, share ? members : null, share?.userId, meLabel) : [];
+    const self = share ? selfMember(members, share.userId) : null;
     return {
-      available: !!album && !inSharedLedger,
-      canShare: canSync && !!album && !inSharedLedger && activeLedger.id === DEFAULT_LEDGER_ID,
+      available: !!album && canSplit,
+      canShare: !!album && canShare,
       share,
       people,
       others: people.filter((person) => !person.isSelf),
-      self: share ? selfMember(members, share.userId) : null,
+      self,
+      mustClaim: !!share && !self && members.some((member) => !member.userId),
       members,
     };
-  }, [activeLedger.id, album, canSync, inSharedLedger, members, share]);
+  }, [album, canShare, canSplit, members, share]);
 }

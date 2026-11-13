@@ -32,7 +32,8 @@ type Payment = Pick<
   'id' | 'expenseId' | 'fromMember' | 'toMember' | 'amount' | 'date' | 'createdAt' | 'deletedAt'
 >;
 
-const cents = (value: number) => Math.round(value * 100);
+/** An amount in whole cents, which is what the sums are done in. */
+export const cents = (value: number) => Math.round(value * 100);
 
 // ---------------------------------------------------------------------------
 // From the split editor to the group's bill
@@ -165,6 +166,22 @@ function countedPayments(
   return { payments, left: left / 100 };
 }
 
+/**
+ * A group's live settlements by the bill they are for. Whoever goes through
+ * every bill of a group asks each one for its own payments, instead of
+ * searching all of them once per bill and member.
+ */
+export function settlementsByBill<T extends Payment>(settlements: readonly T[]): Map<string, T[]> {
+  const byBill = new Map<string, T[]>();
+  for (const item of settlements) {
+    if (item.deletedAt || !item.expenseId) continue;
+    const list = byBill.get(item.expenseId);
+    if (list) list.push(item);
+    else byBill.set(item.expenseId, [item]);
+  }
+  return byBill;
+}
+
 /** What `fromMember` still owes `toMember` of a `share` of `bill`, after the payments on it. */
 export function shareLeft(
   bill: Bill,
@@ -212,8 +229,6 @@ interface LocalBill {
   kind: 'paid' | 'owes';
   /** The expense's amount now: what is left of it after the payments. */
   amount: number;
-  /** `owes`: the user has paid all of it, so the bill is on an account. */
-  settled: boolean;
   splits: LocalSplitRow[];
   payments: LocalPayment[];
 }
@@ -279,7 +294,6 @@ export function localBill(
     return {
       kind: 'paid',
       amount: Math.max(0, cents(side.total) - received) / 100,
-      settled: false,
       splits,
       payments,
     };
@@ -342,7 +356,7 @@ export function localBill(
       settlementId: payment.settlementId,
     });
   }
-  return { kind: 'owes', amount, settled: final !== null, splits, payments };
+  return { kind: 'owes', amount, splits, payments };
 }
 
 // ---------------------------------------------------------------------------

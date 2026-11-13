@@ -214,6 +214,20 @@ test('joining a shared album needs an app that knows albums', async (t) => {
   assert.equal((await list('outsider', '?albums=1'))[0].memberCount, 1);
 });
 
+test('listing shared albums reads nothing more than the list', async (t) => {
+  const { list, addAlbum, waited } = fixture(t, []);
+  addAlbum();
+  waited();
+  const albums = (await list('owner', '?albums=1')).filter((item) => item.kind === 'album');
+  assert.deepEqual(
+    albums.map((item) => [item.ownerName, item.memberCount, item.active]),
+    [['Mei', 0, true]],
+  );
+  // The ledger beside it still costs its two (its owner's Pro, then its
+  // members'); the album adds no round trip of its own.
+  assert.equal(waited(), 3);
+});
+
 test('a shared album needs nobody to be Pro', async (t) => {
   const { env, list, addAlbum, accept } = fixture(t, []);
   const code = addAlbum();
@@ -247,4 +261,27 @@ test('anyone signed in shares an album; a ledger still needs Pro', async (t) => 
     [shared.ledgerId, shared.kind, shared.role, shared.active],
     ['album-789', 'album', 'owner', true],
   );
+});
+
+test('an account starts sharing only so many albums in a day', async (t) => {
+  const { env, share } = fixture(t, []);
+  env.LOCAL_SYNC_URL = 'http://127.0.0.1:8080';
+  // One free server: the first share takes it, the rest are refused for it
+  // (501) until the day's count is used up, and then for the count.
+  env.LOCAL_LEDGER_SYNC_URLS = 'http://127.0.0.1:8093';
+  const answers: (number | undefined)[] = [];
+  for (let n = 0; n < 22; n += 1) {
+    const answer = await share('outsider', {
+      ledgerId: `album-${1000 + n}`,
+      name: 'Trip',
+      kind: 'album',
+    });
+    answers.push(answer.status);
+  }
+  assert.equal(answers[0], 200);
+  assert.deepEqual(answers.slice(1, 20), Array(19).fill(501));
+  assert.deepEqual(answers.slice(20), [429, 429]);
+  // Another account is counted on its own.
+  const other = await share('member', { ledgerId: 'album-2000', name: 'Trip', kind: 'album' });
+  assert.equal(other.status, 501);
 });

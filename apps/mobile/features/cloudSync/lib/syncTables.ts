@@ -52,6 +52,13 @@ export const GROUP_SYNC_TABLES: readonly SyncTable[] = [
   'album_groups',
 ];
 
+const GROUP_TABLES: ReadonlySet<string> = new Set(GROUP_SYNC_TABLES);
+
+/** Whether `table` is one of a shared album's group tables. */
+export function isGroupTable(table: string): boolean {
+  return GROUP_TABLES.has(table);
+}
+
 export function isSyncTable(name: string): name is SyncTable {
   return (SYNC_TABLES as readonly string[]).includes(name);
 }
