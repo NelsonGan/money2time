@@ -2905,6 +2905,7 @@ const th = {
     remove_selected_body: 'นำ {{count}} รายการออกจากอัลบั้มนี้หรือไม่? รายการจะไม่ถูกลบ',
     tab_breakdown: 'สัดส่วน',
     breakdown_everyone: 'ทุกคน',
+    breakdown_showing: 'แสดง',
     tab_transactions: 'รายการ',
     tab_map: 'แผนที่',
     no_transactions_title: 'ไม่มีรายการ',

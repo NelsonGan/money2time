@@ -3001,6 +3001,7 @@ const de = {
       '{{count}} Transaktionen aus diesem Album entfernen? Sie werden nicht gelöscht.',
     tab_breakdown: 'Aufschlüsselung',
     breakdown_everyone: 'Alle',
+    breakdown_showing: 'Anzeige',
     tab_transactions: 'Transaktionen',
     tab_map: 'Karte',
     no_transactions_title: 'Keine Transaktionen',

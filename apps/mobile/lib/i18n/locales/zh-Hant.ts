@@ -2839,6 +2839,7 @@ const zhHant = {
     remove_selected_body: '從該相簿中移除 {{count}} 筆交易？交易不會被刪除。',
     tab_breakdown: '分類',
     breakdown_everyone: '所有人',
+    breakdown_showing: '顯示',
     tab_transactions: '交易',
     tab_map: '地圖',
     no_transactions_title: '沒有交易',

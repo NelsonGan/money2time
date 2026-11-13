@@ -3000,6 +3000,7 @@ const fil = {
       'Alisin ang {{count}} na transaksyon sa album na ito? Hindi ito buburahin.',
     tab_breakdown: 'Breakdown',
     breakdown_everyone: 'Lahat',
+    breakdown_showing: 'Ipinapakita',
     tab_transactions: 'Mga transaksyon',
     tab_map: 'Mapa',
     no_transactions_title: 'Walang transaksyon',

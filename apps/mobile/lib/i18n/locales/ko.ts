@@ -2920,6 +2920,7 @@ const ko = {
     remove_selected_body: '이 앨범에서 거래 {{count}}건을 제거할까요? 거래는 삭제되지 않습니다.',
     tab_breakdown: '분석',
     breakdown_everyone: '모두',
+    breakdown_showing: '표시',
     tab_transactions: '거래',
     tab_map: '지도',
     no_transactions_title: '거래 없음',

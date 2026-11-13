@@ -2976,6 +2976,7 @@ const ms = {
       'Keluarkan {{count}} transaksi daripada album ini? Ia tidak akan dipadam.',
     tab_breakdown: 'Pecahan',
     breakdown_everyone: 'Semua',
+    breakdown_showing: 'Menunjukkan',
     tab_transactions: 'Transaksi',
     tab_map: 'Peta',
     no_transactions_title: 'Tiada transaksi',

@@ -2993,6 +2993,7 @@ const nl = {
       '{{count}} transacties uit dit album verwijderen? Ze worden niet verwijderd.',
     tab_breakdown: 'Verdeling',
     breakdown_everyone: 'Iedereen',
+    breakdown_showing: 'Toont',
     tab_transactions: 'Transacties',
     tab_map: 'Kaart',
     no_transactions_title: 'Geen transacties',

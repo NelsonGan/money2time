@@ -2839,6 +2839,7 @@ const zh = {
     remove_selected_body: '从该相册中移除 {{count}} 笔交易？交易不会被删除。',
     tab_breakdown: '分类',
     breakdown_everyone: '所有人',
+    breakdown_showing: '显示',
     tab_transactions: '交易',
     tab_map: '地图',
     no_transactions_title: '没有交易',

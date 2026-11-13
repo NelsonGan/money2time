@@ -2,7 +2,16 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Camera, ChevronLeft, Pencil, Plus, Trash2, UserPlus } from 'lucide-react-native';
+import {
+  Camera,
+  ChevronDown,
+  ChevronLeft,
+  Pencil,
+  Plus,
+  Trash2,
+  UserPlus,
+  Users,
+} from 'lucide-react-native';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { NativeScrollEvent, NativeSyntheticEvent, ScrollViewInstance } from 'react-native';
 import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
@@ -63,6 +72,10 @@ import { formatAmount, formatHours } from '~/utils/formatters';
 import { countsAsExpenseRow } from '~/utils/spending';
 
 import { AlbumBalances } from '../components/AlbumBalances';
+import {
+  type BreakdownMemberChoice,
+  BreakdownMemberSheet,
+} from '../components/BreakdownMemberSheet';
 import { useAlbumGroup } from '../hooks/useAlbumGroup';
 import { breakdownMemberOptions, memberShare } from '../lib/memberShare';
 import { formatAlbumDateRange } from '../utils';
@@ -169,6 +182,7 @@ export function AlbumDetailScreen({
     if (showBulkUpdate) setBulkSheetUsed(true);
   }, [showBulkUpdate]);
   const [breakdownMemberKey, setBreakdownMemberKey] = useState(EVERYONE);
+  const [showMemberSheet, setShowMemberSheet] = useState(false);
   const pagerRef = useRef<ScrollViewInstance | null>(null);
   // Page size drives the pager layout and the tap→scroll math. Seeded with
   // the frame and corrected once the pager measures itself (tablets render
@@ -776,60 +790,58 @@ export function AlbumDetailScreen({
     </>
   );
 
-  // Whose spending the Breakdown shows, once a bill in it is split.
-  const memberFilter =
-    memberOptions.length > 0 ? (
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.memberChips}
-        testID="album-breakdown-members"
-      >
-        {[
-          { key: EVERYONE, name: I18n.t('albums.breakdown_everyone'), avatar: null },
+  // Whose spending the Breakdown shows, once a bill in it is split: one line
+  // that opens a sheet of the choices, however many people the album has.
+  const memberChoices: BreakdownMemberChoice[] =
+    memberOptions.length === 0
+      ? []
+      : [
+          {
+            key: EVERYONE,
+            name: I18n.t('albums.breakdown_everyone'),
+            icon: (
+              <View className="h-7 w-7 items-center justify-center rounded-full bg-primary/15">
+                <Users size={15} color={themeColors.primary} />
+              </View>
+            ),
+          },
           ...memberOptions.map((option) => ({
             key: option.key,
             name: option.name,
-            avatar: (
+            icon: (
               <PersonAvatar
                 name={option.name}
                 partyKey={option.member.kind === 'self' ? null : debtPartyKey(option.name)}
-                size={22}
+                size={28}
                 imageUri={option.member.kind === 'self' ? me.avatarUri : null}
               />
             ),
           })),
-        ].map((chip) => {
-          const selected =
-            chip.key === EVERYONE ? breakdownMember === null : chip.key === breakdownMemberKey;
-          return (
-            <Pressable
-              key={chip.key}
-              onPress={() => {
-                void triggerHaptic('selection');
-                setBreakdownMemberKey(chip.key);
-              }}
-              accessibilityRole="button"
-              accessibilityState={{ selected }}
-              className={cn(
-                'flex-row items-center gap-1.5 rounded-full border py-1',
-                chip.avatar ? 'pl-1 pr-3' : 'px-3.5',
-                selected ? 'border-primary bg-primary/12' : 'border-border/40 bg-card',
-              )}
-            >
-              {chip.avatar}
-              <Text
-                variant="label"
-                numberOfLines={1}
-                className={selected ? 'text-primary' : 'text-muted-foreground'}
-              >
-                {chip.name}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </ScrollView>
-    ) : null;
+        ];
+
+  const shownChoice =
+    memberChoices.find((choice) => choice.key === breakdownMemberKey) ?? memberChoices[0];
+  const memberFilter = shownChoice ? (
+    <Pressable
+      onPress={() => {
+        void triggerHaptic('selection');
+        setShowMemberSheet(true);
+      }}
+      accessibilityRole="button"
+      accessibilityLabel={`${I18n.t('albums.breakdown_showing')}: ${shownChoice.name}`}
+      testID="album-breakdown-members"
+      className="mx-5 mt-4 h-12 flex-row items-center gap-2.5 rounded-2xl border border-border/40 bg-card px-4 active:opacity-80"
+    >
+      <Text variant="body" tone="muted">
+        {I18n.t('albums.breakdown_showing')}
+      </Text>
+      {shownChoice.icon}
+      <Text variant="bodyStrong" numberOfLines={1} className="flex-1">
+        {shownChoice.name}
+      </Text>
+      <ChevronDown size={18} color={themeColors.textMuted} />
+    </Pressable>
+  ) : null;
 
   const breakdownBody = (
     <>
@@ -842,7 +854,7 @@ export function AlbumDetailScreen({
           animateIn={false}
         />
       ) : (
-        <View style={{ paddingTop: memberFilter ? 8 : 20 }}>
+        <View style={{ paddingTop: memberFilter ? 12 : 20 }}>
           <MemoBreakdownChart
             rows={breakdownRows}
             formatValue={formatValue}
@@ -923,6 +935,18 @@ export function AlbumDetailScreen({
   // the page: nobody needs them on the way in.
   const sheets = (
     <>
+      {memberChoices.length > 0 ? (
+        <BreakdownMemberSheet
+          visible={showMemberSheet}
+          choices={memberChoices}
+          selectedKey={shownChoice?.key ?? EVERYONE}
+          onSelect={(key) => {
+            setBreakdownMemberKey(key);
+            setShowMemberSheet(false);
+          }}
+          onClose={() => setShowMemberSheet(false)}
+        />
+      ) : null}
       {showBulkUpdate || bulkSheetUsed ? (
         <BulkEditTransactionsSheet
           visible={showBulkUpdate}
@@ -1374,7 +1398,6 @@ const styles = StyleSheet.create({
   coverTitle: { position: 'absolute', left: 0, right: 0, bottom: 0 },
   coverPeople: { position: 'absolute', right: 16 },
   tabBar: { marginTop: -SHEET_OVERLAP, overflow: 'visible' },
-  memberChips: { gap: 8, paddingHorizontal: 20, paddingTop: 16, paddingBottom: 4 },
   fab: { position: 'absolute', right: spacing.lg, zIndex: 10 },
   splitRow: {
     flex: 1,

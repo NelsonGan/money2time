@@ -2959,6 +2959,7 @@ const sv = {
     remove_selected_body: 'Ta bort {{count}} transaktioner från det här albumet? De raderas inte.',
     tab_breakdown: 'Fördelning',
     breakdown_everyone: 'Alla',
+    breakdown_showing: 'Visar',
     tab_transactions: 'Transaktioner',
     tab_map: 'Karta',
     no_transactions_title: 'Inga transaktioner',

@@ -2940,6 +2940,7 @@ const en = {
     remove_selected_body: "Remove {{count}} transactions from this album? They won't be deleted.",
     tab_breakdown: 'Breakdown',
     breakdown_everyone: 'Everyone',
+    breakdown_showing: 'Showing',
     tab_transactions: 'Transactions',
     tab_map: 'Map',
     no_transactions_title: 'No transactions',

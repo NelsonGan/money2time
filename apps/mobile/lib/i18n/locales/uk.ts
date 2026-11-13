@@ -2957,6 +2957,7 @@ const uk = {
     remove_selected_body: 'Прибрати {{count}} операцій з цього альбому? Їх не буде видалено.',
     tab_breakdown: 'Розподіл',
     breakdown_everyone: 'Усі',
+    breakdown_showing: 'Показано',
     tab_transactions: 'Операції',
     tab_map: 'Карта',
     no_transactions_title: 'Немає операцій',

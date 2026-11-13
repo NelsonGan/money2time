@@ -2957,6 +2957,7 @@ const da = {
     remove_selected_body: 'Fjern {{count}} transaktioner fra dette album? De slettes ikke.',
     tab_breakdown: 'Fordeling',
     breakdown_everyone: 'Alle',
+    breakdown_showing: 'Viser',
     tab_transactions: 'Transaktioner',
     tab_map: 'Kort',
     no_transactions_title: 'Ingen transaktioner',

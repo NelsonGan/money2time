@@ -2971,6 +2971,7 @@ const id = {
       'Keluarkan {{count}} transaksi dari album ini? Transaksi tidak akan dihapus.',
     tab_breakdown: 'Rincian',
     breakdown_everyone: 'Semua',
+    breakdown_showing: 'Menampilkan',
     tab_transactions: 'Transaksi',
     tab_map: 'Peta',
     no_transactions_title: 'Tidak ada transaksi',

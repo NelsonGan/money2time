@@ -2996,6 +2996,7 @@ const fr = {
       'Retirer {{count}} transactions de cet album ? Elles ne seront pas supprimées.',
     tab_breakdown: 'Répartition',
     breakdown_everyone: 'Tout le monde',
+    breakdown_showing: 'Affichage',
     tab_transactions: 'Transactions',
     tab_map: 'Carte',
     no_transactions_title: 'Aucune transaction',

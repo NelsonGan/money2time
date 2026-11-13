@@ -2969,6 +2969,7 @@ const pl = {
     remove_selected_body: 'Usunąć {{count}} transakcji z tego albumu? Nie zostaną skasowane.',
     tab_breakdown: 'Podział',
     breakdown_everyone: 'Wszyscy',
+    breakdown_showing: 'Pokazuje',
     tab_transactions: 'Transakcje',
     tab_map: 'Mapa',
     no_transactions_title: 'Brak transakcji',

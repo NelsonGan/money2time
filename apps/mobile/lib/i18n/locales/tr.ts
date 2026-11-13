@@ -2966,6 +2966,7 @@ const tr = {
     remove_selected_body: '{{count}} işlem bu albümden çıkarılsın mı? İşlemler silinmez.',
     tab_breakdown: 'Dağılım',
     breakdown_everyone: 'Herkes',
+    breakdown_showing: 'Gösterilen',
     tab_transactions: 'İşlemler',
     tab_map: 'Harita',
     no_transactions_title: 'İşlem yok',

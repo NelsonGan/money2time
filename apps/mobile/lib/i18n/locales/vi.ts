@@ -2939,6 +2939,7 @@ const vi = {
     remove_selected_body: 'Gỡ {{count}} giao dịch khỏi album này? Giao dịch sẽ không bị xóa.',
     tab_breakdown: 'Phân tích',
     breakdown_everyone: 'Mọi người',
+    breakdown_showing: 'Đang xem',
     tab_transactions: 'Giao dịch',
     tab_map: 'Bản đồ',
     no_transactions_title: 'Không có giao dịch',

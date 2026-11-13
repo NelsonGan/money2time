@@ -2960,6 +2960,7 @@ const nb = {
     remove_selected_body: 'Fjern {{count}} transaksjoner fra dette albumet? De blir ikke slettet.',
     tab_breakdown: 'Fordeling',
     breakdown_everyone: 'Alle',
+    breakdown_showing: 'Viser',
     tab_transactions: 'Transaksjoner',
     tab_map: 'Kart',
     no_transactions_title: 'Ingen transaksjoner',

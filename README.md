@@ -2252,8 +2252,10 @@ migrations `090` and `091`.
   **Settled up** (marked Even when bills are open both ways and come to
   nothing), which is where the album's bills with them are found.
 - **The Breakdown by person.** Once a bill in a shared album is split, the
-  Breakdown has a row of chips: **Everyone** (the album's entries as they
-  stand), the user, then each person. A person's Breakdown counts each bill
+  Breakdown opens with one line above its total, "Showing **Everyone** ⌄",
+  which opens a sheet (`BreakdownMemberSheet`): **Everyone** (the album's
+  entries as they stand), the user, then each person, so it stays one line
+  however many people the album has. A person's Breakdown counts each bill
   by their share of it (`lib/memberShare.ts`, turned into the entry's
   displayed value by its own rate). A category opens the bills that person
   has a share in.

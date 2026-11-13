@@ -2944,6 +2944,7 @@ const hi = {
     remove_selected_body: 'इस एल्बम से {{count}} लेन-देन हटाएँ? वे हटाए नहीं जाएंगे।',
     tab_breakdown: 'विवरण',
     breakdown_everyone: 'सभी',
+    breakdown_showing: 'दिखा रहे हैं',
     tab_transactions: 'लेन-देन',
     tab_map: 'मानचित्र',
     no_transactions_title: 'कोई लेन-देन नहीं',

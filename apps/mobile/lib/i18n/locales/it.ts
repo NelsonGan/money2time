@@ -2974,6 +2974,7 @@ const it = {
       'Rimuovere {{count}} transazioni da questo album? Non verranno eliminate.',
     tab_breakdown: 'Ripartizione',
     breakdown_everyone: 'Tutti',
+    breakdown_showing: 'Mostra',
     tab_transactions: 'Transazioni',
     tab_map: 'Mappa',
     no_transactions_title: 'Nessuna transazione',

@@ -2976,6 +2976,7 @@ const pt = {
     remove_selected_body: 'Remover {{count}} transações deste álbum? Elas não serão excluídas.',
     tab_breakdown: 'Detalhamento',
     breakdown_everyone: 'Todos',
+    breakdown_showing: 'Mostrando',
     tab_transactions: 'Transações',
     tab_map: 'Mapa',
     no_transactions_title: 'Sem transações',
