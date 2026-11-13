@@ -3037,10 +3037,9 @@ const de = {
       leave_title: '{{name}} verlassen?',
       leave_message:
         'Du behältst das Album mit deinen eigenen Einträgen, aber es wird nicht mehr aktualisiert.',
-      paused: 'Pausiert. Es synchronisiert wieder, sobald jemand im Album Pro hat.',
       limit: 'Du kannst bis zu {{max}} Alben gleichzeitig teilen.',
       full: 'Bis zu {{max}} Personen können einem Album beitreten.',
-      needs_cloud_sync: 'Melde dich bei Cloud Sync an, um dieses Album zu teilen.',
+      sign_in: 'Melde dich an, um dieses Album zu teilen.',
     },
     balances: {
       tab: 'Salden',

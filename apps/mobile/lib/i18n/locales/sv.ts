@@ -2990,10 +2990,9 @@ const sv = {
       leave: 'Lämna album',
       leave_title: 'Lämna {{name}}?',
       leave_message: 'Du behåller albumet med dina egna poster, men det uppdateras inte längre.',
-      paused: 'Pausat. Det synkas igen när någon i albumet har Pro.',
       limit: 'Du kan dela upp till {{max}} album åt gången.',
       full: 'Upp till {{max}} personer kan gå med i ett album.',
-      needs_cloud_sync: 'Logga in på Cloud Sync för att dela det här albumet.',
+      sign_in: 'Logga in för att dela det här albumet.',
     },
     balances: {
       tab: 'Saldon',

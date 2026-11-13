@@ -166,7 +166,7 @@ interface CloudSyncContextValue {
     emoji: string | null;
   }) => Promise<SharedLedger>;
   /**
-   * Shares one of the user's albums (Pro, signed in): its people and split
+   * Shares one of the user's albums (signed in; it needs no Pro): its people and split
    * bills become a group others can join (README: Album members and shared
    * albums).
    */

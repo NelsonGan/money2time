@@ -14,8 +14,8 @@ import {
   useSettingsBottomNavInset,
 } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
-import { useIsPro } from '~/context/ProContext';
 import { useCloudSync } from '~/features/cloudSync/CloudSyncContext';
+import { useSignedIn } from '~/features/cloudSync/components/SignInGate';
 import {
   getInviteLink,
   getLedgerMembers,
@@ -54,8 +54,6 @@ import {
 interface AlbumPeopleScreenProps {
   albumId: string;
   onBack: () => void;
-  onOpenCloudSync: () => void;
-  onOpenProPaywall: (source: string) => void;
 }
 
 /**
@@ -65,12 +63,7 @@ interface AlbumPeopleScreenProps {
  * the link, removes people or stops; someone who joined says who they are and
  * can leave.
  */
-export function AlbumPeopleScreen({
-  albumId,
-  onBack,
-  onOpenCloudSync,
-  onOpenProPaywall,
-}: AlbumPeopleScreenProps) {
+export function AlbumPeopleScreen({ albumId, onBack }: AlbumPeopleScreenProps) {
   const {
     albums,
     setAlbumPeople,
@@ -81,7 +74,9 @@ export function AlbumPeopleScreen({
     setAlbumSimplifyDebts,
   } = useApp();
   const sync = useCloudSync();
-  const isPro = useIsPro();
+  // Sharing is free and needs only an account: asked for under the switch.
+  const signedIn = useSignedIn();
+  const [wantsShare, setWantsShare] = useState(false);
   const colors = useThemeColors();
   const bottomInset = useSettingsBottomNavInset();
   const album = albums.find((item) => item.id === albumId) ?? null;
@@ -127,7 +122,7 @@ export function AlbumPeopleScreen({
     void loadJoined();
   }, [loadJoined, share?.memberCount]);
 
-  const canInvite = isOwner && !!share?.active && !signedOut;
+  const canInvite = isOwner && !signedOut;
   const albumName = album?.name ?? '';
   const linkRequestRef = useRef(0);
   const fetchLink = useCallback(
@@ -163,6 +158,22 @@ export function AlbumPeopleScreen({
       setBusy(null);
     }
   };
+
+  // Share this album, asked for before signing in: done once signed in.
+  const startShare = () => {
+    if (!album) return;
+    void run('share', async () => {
+      await sync.shareAlbum({ id: album.id, name: album.name });
+      void triggerHaptic('success');
+    });
+  };
+  const startShareRef = useRef(startShare);
+  startShareRef.current = startShare;
+  useEffect(() => {
+    if (!wantsShare || !signedIn) return;
+    setWantsShare(false);
+    startShareRef.current();
+  }, [signedIn, wantsShare]);
 
   if (!album) return <SettingsPageLayout>{null}</SettingsPageLayout>;
 
@@ -252,19 +263,11 @@ export function AlbumPeopleScreen({
 
   const toggleShare = (next: boolean) => {
     if (next) {
-      if (!isPro) {
-        onOpenProPaywall('album_share');
-        return;
-      }
-      if (sync.status !== 'ready') {
-        onOpenCloudSync();
-        return;
-      }
       void triggerHaptic('selection');
-      void run('share', async () => {
-        await sync.shareAlbum({ id: album.id, name: album.name });
-        void triggerHaptic('success');
-      });
+      // With no account yet, the sign-in shows under the switch (a second
+      // tap puts it away) and the album is shared once it is done.
+      if (signedIn) startShare();
+      else setWantsShare((wanted) => !wanted);
       return;
     }
     void triggerHaptic('warning');
@@ -372,12 +375,6 @@ export function AlbumPeopleScreen({
           bottomInset,
         ]}
       >
-        {share && !share.active ? (
-          <Card className="border-warning/30 bg-warning/10 px-4 py-3.5">
-            <Text variant="caption">{I18n.t('albums.share.paused')}</Text>
-          </Card>
-        ) : null}
-
         {mustClaim ? (
           <Card className="gap-3 px-4 py-4">
             <View className="gap-1">
@@ -428,10 +425,7 @@ export function AlbumPeopleScreen({
                   value: !!share,
                   onChange: toggleShare,
                   busy: busy === 'share' || busy === 'stop',
-                  note:
-                    !share && isPro && sync.status !== 'ready'
-                      ? I18n.t('albums.share.needs_cloud_sync')
-                      : null,
+                  signIn: !share && wantsShare && !signedIn,
                 }
               : null
           }

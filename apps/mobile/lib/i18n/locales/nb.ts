@@ -2992,10 +2992,9 @@ const nb = {
       leave: 'Forlat album',
       leave_title: 'Forlate {{name}}?',
       leave_message: 'Du beholder albumet med dine egne poster, men det oppdateres ikke lenger.',
-      paused: 'Satt på pause. Det synkroniseres igjen når noen i albumet har Pro.',
       limit: 'Du kan dele opptil {{max}} album om gangen.',
       full: 'Opptil {{max}} personer kan bli med i et album.',
-      needs_cloud_sync: 'Logg inn på Cloud Sync for å dele dette albumet.',
+      sign_in: 'Logg inn for å dele dette albumet.',
     },
     balances: {
       tab: 'Saldoer',

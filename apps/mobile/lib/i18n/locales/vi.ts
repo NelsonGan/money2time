@@ -2972,10 +2972,9 @@ const vi = {
       leave: 'Rời album',
       leave_title: 'Rời {{name}}?',
       leave_message: 'Bạn vẫn giữ album cùng các mục của riêng mình, nhưng nó không còn cập nhật.',
-      paused: 'Đã tạm dừng. Sẽ đồng bộ lại khi có người trong album dùng Pro.',
       limit: 'Bạn có thể chia sẻ tối đa {{max}} album cùng lúc.',
       full: 'Tối đa {{max}} người có thể tham gia một album.',
-      needs_cloud_sync: 'Đăng nhập Cloud Sync để chia sẻ album này.',
+      sign_in: 'Đăng nhập để chia sẻ album này.',
     },
     balances: {
       tab: 'Số dư',

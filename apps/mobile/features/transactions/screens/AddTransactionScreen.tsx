@@ -60,7 +60,7 @@ export function AddTransactionScreen({
   // else the active one): a new expense starts split with them. In a shared
   // album that is everyone in its group, once this phone has said who it is;
   // there the bill is saved through the group, and counts toward no free
-  // limit (the album syncs on someone's Pro).
+  // limit (a shared album has none).
   const targetAlbumId = albumId ?? activeAlbumId;
   const targetAlbum = albums.find((album) => album.id === targetAlbumId) ?? null;
   const albumGroup = useAlbumGroup(targetAlbum);

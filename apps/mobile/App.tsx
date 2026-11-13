@@ -2441,7 +2441,6 @@ function CreateAlbumRouteScreen({ route, navigation }: RootStackRouteProps<'Crea
       initialTransactionIds={route.params?.initialTransactionIds}
       onClose={() => navigation.goBack()}
       onCreated={(albumId) => navigation.replace('AlbumDetail', { albumId })}
-      onOpenProPaywall={(source) => navigation.navigate('ProPaywall', { source })}
     />
   );
 }
@@ -2471,18 +2470,7 @@ function AlbumDetailRouteScreen({ route, navigation }: RootStackRouteProps<'Albu
 }
 
 function AlbumPeopleRouteScreen({ route, navigation }: RootStackRouteProps<'AlbumPeople'>) {
-  return (
-    <AlbumPeopleScreen
-      albumId={route.params.albumId}
-      onBack={() => navigation.goBack()}
-      onOpenCloudSync={() => {
-        navigation.popToTop();
-        requestOpenTab('settings');
-        requestOpenSettingsScreen('CloudSync');
-      }}
-      onOpenProPaywall={(source) => navigation.navigate('ProPaywall', { source })}
-    />
-  );
+  return <AlbumPeopleScreen albumId={route.params.albumId} onBack={() => navigation.goBack()} />;
 }
 
 function EditAlbumDetailsRouteScreen({

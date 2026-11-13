@@ -40,8 +40,10 @@ function fixture(t: TestContext, proUsers: string[]) {
   };
   // Live nudges go nowhere here.
   const hub = { fetch: async () => new Response(null) };
+  const batch = (statements: { run: () => Promise<unknown> }[]) =>
+    Promise.all(statements.map((statement) => statement.run()));
   const env = {
-    AUTH_DB: { prepare },
+    AUTH_DB: { prepare, batch },
     SYNC_HUB: { idFromName: (name: string) => name, get: () => hub },
   } as unknown as Env;
   for (const id of ['owner', 'member', 'second', 'outsider']) {
@@ -107,11 +109,22 @@ function fixture(t: TestContext, proUsers: string[]) {
     const response = await routeLedgers(request, url, env, session(user));
     return { status: response?.status, body: (await response?.json()) as Record<string, unknown> };
   };
+  const share = async (user: string, body: unknown) => {
+    const url = new URL('https://worker.example/v1/ledgers');
+    const request = new Request(url, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const response = await routeLedgers(request, url, env, session(user));
+    return { status: response?.status, body: (await response?.json()) as Record<string, unknown> };
+  };
   return {
     env,
     list,
     addAlbum,
     accept,
+    share,
     waited() {
       const waited = clock;
       clock = 0;
@@ -199,4 +212,39 @@ test('joining a shared album needs an app that knows albums', async (t) => {
   // The link stays open, and joining twice is the same seat.
   assert.equal((await accept('outsider', code, { albums: true })).status, 200);
   assert.equal((await list('outsider', '?albums=1'))[0].memberCount, 1);
+});
+
+test('a shared album needs nobody to be Pro', async (t) => {
+  const { env, list, addAlbum, accept } = fixture(t, []);
+  const code = addAlbum();
+  // The ledger beside it is paused; the album is not.
+  assert.deepEqual(
+    (await list('owner', '?albums=1')).map((item) => [item.kind, item.active]).sort(),
+    [
+      ['album', true],
+      ['ledger', false],
+    ],
+  );
+  const preview = (await (await previewInvite(env, code)).json()) as Record<string, unknown>;
+  assert.equal(preview.active, true);
+  const joined = await accept('outsider', code, { albums: true });
+  assert.equal(joined.status, 200);
+  assert.equal((joined.body.ledger as Record<string, unknown>).active, true);
+});
+
+test('anyone signed in shares an album; a ledger still needs Pro', async (t) => {
+  const { env, share } = fixture(t, []);
+  // A local sync server stands in for the database a share makes.
+  env.LOCAL_SYNC_URL = 'http://127.0.0.1:8080';
+  env.LOCAL_LEDGER_SYNC_URLS = 'http://127.0.0.1:8093';
+  const ledger = await share('outsider', { ledgerId: 'ledger-789', name: 'Mine' });
+  assert.equal(ledger.status, 403);
+  assert.equal(ledger.body.error, 'not_pro');
+  const album = await share('outsider', { ledgerId: 'album-789', name: 'Tokyo', kind: 'album' });
+  assert.equal(album.status, 200);
+  const shared = album.body.ledger as Record<string, unknown>;
+  assert.deepEqual(
+    [shared.ledgerId, shared.kind, shared.role, shared.active],
+    ['album-789', 'album', 'owner', true],
+  );
 });

@@ -3031,10 +3031,9 @@ const fr = {
       leave_title: 'Quitter {{name}} ?',
       leave_message:
         "Vous gardez l'album avec vos propres écritures, mais il ne se met plus à jour.",
-      paused: "En pause. La synchronisation reprend dès qu'un membre a Pro.",
       limit: "Vous pouvez partager jusqu'à {{max}} albums à la fois.",
       full: "Jusqu'à {{max}} personnes peuvent rejoindre un album.",
-      needs_cloud_sync: 'Connectez-vous à Cloud Sync pour partager cet album.',
+      sign_in: 'Connectez-vous pour partager cet album.',
     },
     balances: {
       tab: 'Soldes',

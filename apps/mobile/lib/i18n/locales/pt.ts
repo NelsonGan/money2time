@@ -3009,10 +3009,9 @@ const pt = {
       leave_title: 'Sair de {{name}}?',
       leave_message:
         'Você fica com o álbum e seus próprios lançamentos, mas ele não é mais atualizado.',
-      paused: 'Pausado. Volta a sincronizar quando alguém no álbum tiver Pro.',
       limit: 'Você pode compartilhar até {{max}} álbuns por vez.',
       full: 'Até {{max}} pessoas podem entrar em um álbum.',
-      needs_cloud_sync: 'Entre no Cloud Sync para compartilhar este álbum.',
+      sign_in: 'Entre para compartilhar este álbum.',
     },
     balances: {
       tab: 'Saldos',

@@ -3005,10 +3005,9 @@ const it = {
       leave: "Lascia l'album",
       leave_title: 'Lasciare {{name}}?',
       leave_message: "Tieni l'album con le tue voci, ma non si aggiorna più.",
-      paused: "In pausa. Riprende a sincronizzarsi quando qualcuno nell'album ha Pro.",
       limit: 'Puoi condividere fino a {{max}} album alla volta.',
       full: 'Possono unirsi a un album fino a {{max}} persone.',
-      needs_cloud_sync: 'Accedi a Cloud Sync per condividere questo album.',
+      sign_in: 'Accedi per condividere questo album.',
     },
     balances: {
       tab: 'Saldi',

@@ -3009,10 +3009,9 @@ const ms = {
       leave_title: 'Keluar daripada {{name}}?',
       leave_message:
         'Anda kekal dengan album dan catatan anda sendiri, tetapi ia tidak lagi dikemas kini.',
-      paused: 'Dijeda. Ia segerak semula apabila seseorang di dalamnya ada Pro.',
       limit: 'Anda boleh kongsi sehingga {{max}} album pada satu masa.',
       full: 'Sehingga {{max}} orang boleh sertai satu album.',
-      needs_cloud_sync: 'Log masuk ke Cloud Sync untuk berkongsi album ini.',
+      sign_in: 'Log masuk untuk berkongsi album ini.',
     },
     balances: {
       tab: 'Baki',

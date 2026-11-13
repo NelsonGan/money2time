@@ -2951,10 +2951,9 @@ const ko = {
       leave: '앨범 나가기',
       leave_title: '{{name}}에서 나갈까요?',
       leave_message: '내 내역과 함께 앨범은 남지만 더 이상 업데이트되지 않아요.',
-      paused: '일시 중지됨. 참여자 중 누군가 Pro가 되면 다시 동기화돼요.',
       limit: '한 번에 최대 {{max}}개의 앨범을 공유할 수 있어요.',
       full: '앨범 하나에는 최대 {{max}}명이 참여할 수 있어요.',
-      needs_cloud_sync: '이 앨범을 공유하려면 Cloud Sync에 로그인하세요.',
+      sign_in: '이 앨범을 공유하려면 로그인하세요.',
     },
     balances: {
       tab: '정산 현황',

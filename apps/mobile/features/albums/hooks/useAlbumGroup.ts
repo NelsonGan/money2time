@@ -1,6 +1,7 @@
 import { useMemo, useSyncExternalStore } from 'react';
 
 import { useApp } from '~/context/AppContext';
+import { useCloudSyncEnabled } from '~/features/cloudSync/CloudSyncContext';
 import type { SharedLedger } from '~/features/cloudSync/services/sharedLedgerStore';
 import { useSharedAlbum, useSharedLedger } from '~/features/sharedLedgers/hooks/useSharedLedgers';
 import { DEFAULT_LEDGER_ID } from '~/lib/db/ledgerScope';
@@ -37,6 +38,7 @@ export function useAlbumGroup(album: Album | null | undefined): AlbumGroup {
   const { activeLedger } = useApp();
   const share = useSharedAlbum(album?.id);
   const inSharedLedger = useSharedLedger(activeLedger.id) !== null;
+  const canSync = useCloudSyncEnabled();
   const groupId = share ? share.ledgerId : null;
   const members = useSyncExternalStore(subscribeAlbumGroups, () =>
     groupId ? listGroupMembers(groupId) : NO_MEMBERS,
@@ -46,12 +48,12 @@ export function useAlbumGroup(album: Album | null | undefined): AlbumGroup {
     const people = album ? albumPeople(album, share ? members : null, share?.userId, meLabel) : [];
     return {
       available: !!album && !inSharedLedger,
-      canShare: !!album && !inSharedLedger && activeLedger.id === DEFAULT_LEDGER_ID,
+      canShare: canSync && !!album && !inSharedLedger && activeLedger.id === DEFAULT_LEDGER_ID,
       share,
       people,
       others: people.filter((person) => !person.isSelf),
       self: share ? selfMember(members, share.userId) : null,
       members,
     };
-  }, [activeLedger.id, album, inSharedLedger, members, share]);
+  }, [activeLedger.id, album, canSync, inSharedLedger, members, share]);
 }

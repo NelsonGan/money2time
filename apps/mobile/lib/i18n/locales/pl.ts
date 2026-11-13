@@ -3002,10 +3002,9 @@ const pl = {
       leave: 'Opuść album',
       leave_title: 'Opuścić {{name}}?',
       leave_message: 'Zachowujesz album ze swoimi wpisami, ale nie będzie się już aktualizował.',
-      paused: 'Wstrzymano. Synchronizacja wróci, gdy ktoś w albumie będzie miał Pro.',
       limit: 'Możesz udostępniać do {{max}} albumów naraz.',
       full: 'Do albumu może dołączyć maksymalnie {{max}} osób.',
-      needs_cloud_sync: 'Zaloguj się do Cloud Sync, aby udostępnić ten album.',
+      sign_in: 'Zaloguj się, aby udostępnić ten album.',
     },
     balances: {
       tab: 'Salda',

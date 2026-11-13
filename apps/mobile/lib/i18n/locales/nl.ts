@@ -3026,10 +3026,9 @@ const nl = {
       leave: 'Album verlaten',
       leave_title: '{{name}} verlaten?',
       leave_message: 'Je houdt het album met je eigen posten, maar het wordt niet meer bijgewerkt.',
-      paused: 'Gepauzeerd. Het synchroniseert weer zodra iemand in het album Pro heeft.',
       limit: 'Je kunt maximaal {{max}} albums tegelijk delen.',
       full: 'Maximaal {{max}} personen kunnen aan een album meedoen.',
-      needs_cloud_sync: 'Meld je aan bij Cloud Sync om dit album te delen.',
+      sign_in: 'Meld je aan om dit album te delen.',
     },
     balances: {
       tab: "Saldo's",

@@ -4,6 +4,7 @@ import { Pressable, Switch, View } from 'react-native';
 
 import { LoadingDots } from '~/components/feedback/LoadingDots';
 import { Card, InfoTooltipButton, Text } from '~/components/ui';
+import { SignInGate } from '~/features/cloudSync/components/SignInGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 
@@ -13,8 +14,12 @@ interface Toggle {
 }
 
 interface AlbumSharingCardProps {
-  /** "Share this album"; null where it is not offered (someone who joined). */
-  share: (Toggle & { busy?: boolean; note?: string | null }) | null;
+  /**
+   * "Share this album"; null where it is not offered (someone who joined).
+   * `signIn`: it was turned on with no account signed in, so the sign-in
+   * shows under it.
+   */
+  share: (Toggle & { busy?: boolean; signIn?: boolean }) | null;
   /** "Simplify group debts"; null while the album is not shared. */
   simplify: Toggle | null;
   /** The invite link, for the owner of a shared album; `url` null while it loads. */
@@ -39,31 +44,31 @@ export function AlbumSharingCard({ share, simplify, link }: AlbumSharingCardProp
     key: string,
     title: string,
     info: string,
-    toggle: Toggle & { busy?: boolean; note?: string | null },
+    toggle: Toggle & { busy?: boolean; signIn?: boolean },
     testID: string,
   ) => (
-    <View key={key} className="flex-row items-center gap-3 px-4 py-3">
-      <View className="flex-1 gap-0.5">
-        <View className="flex-row items-center gap-1.5">
+    <View key={key}>
+      <View className="flex-row items-center gap-3 px-4 py-3">
+        <View className="flex-1 flex-row items-center gap-1.5">
           <Text variant="bodyStrong">{title}</Text>
           <InfoTooltipButton title={title} infoTooltip={info} />
         </View>
-        {toggle.note ? (
-          <Text variant="caption" tone="muted">
-            {toggle.note}
-          </Text>
-        ) : null}
+        {toggle.busy ? (
+          <LoadingDots size="small" />
+        ) : (
+          <Switch
+            testID={testID}
+            value={toggle.value}
+            onValueChange={toggle.onChange}
+            trackColor={{ false: undefined, true: colors.primary }}
+          />
+        )}
       </View>
-      {toggle.busy ? (
-        <LoadingDots size="small" />
-      ) : (
-        <Switch
-          testID={testID}
-          value={toggle.value}
-          onValueChange={toggle.onChange}
-          trackColor={{ false: undefined, true: colors.primary }}
-        />
-      )}
+      {toggle.signIn ? (
+        <View className="px-4 pb-4">
+          <SignInGate prompt={I18n.t('albums.share.sign_in')} />
+        </View>
+      ) : null}
     </View>
   );
 

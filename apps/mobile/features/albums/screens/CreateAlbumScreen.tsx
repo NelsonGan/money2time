@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { ChevronRight, ImageIcon, X } from 'lucide-react-native';
-import { useCallback, useMemo, useState } from 'react';
+import { type ComponentRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -8,8 +8,8 @@ import { TabletContentContainer } from '~/components/layout/TabletContentContain
 import { FatButton, FormScrollView, Input, SettingsHeader, Text } from '~/components/ui';
 import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { useApp } from '~/context/AppContext';
-import { useIsPro } from '~/context/ProContext';
-import { useCloudSync } from '~/features/cloudSync/CloudSyncContext';
+import { useCloudSync, useCloudSyncEnabled } from '~/features/cloudSync/CloudSyncContext';
+import { useSignedIn } from '~/features/cloudSync/components/SignInGate';
 import { useSharedLedger } from '~/features/sharedLedgers/hooks/useSharedLedgers';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { DEFAULT_LEDGER_ID } from '~/lib/db/ledgerScope';
@@ -39,22 +39,21 @@ interface CreateAlbumScreenProps {
   initialTransactionIds?: string[];
   onClose: () => void;
   onCreated: (albumId: string) => void;
-  onOpenProPaywall: (source: string) => void;
 }
 
 export function CreateAlbumScreen({
   initialTransactionIds,
   onClose,
   onCreated,
-  onOpenProPaywall,
 }: CreateAlbumScreenProps) {
   const { createAlbum, setAlbumPeople, setAlbumSimplifyDebts, activeLedger } = useApp();
   const sync = useCloudSync();
-  const isPro = useIsPro();
+  // Sharing is free and needs only an account: asked for under the switch.
+  const signedIn = useSignedIn();
   // An album in a shared ledger is not split with people: its entries already
   // belong to the ledger's own. And only an album of the main ledger is shared.
   const canSplit = useSharedLedger(activeLedger.id) === null;
-  const canShare = canSplit && activeLedger.id === DEFAULT_LEDGER_ID;
+  const canShare = useCloudSyncEnabled() && canSplit && activeLedger.id === DEFAULT_LEDGER_ID;
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
 
@@ -67,7 +66,17 @@ export function CreateAlbumScreen({
   const [pickerOpen, setPickerOpen] = useState(false);
   // Who it is split with and how it is shared, set up with the album.
   const [people, setPeople] = useState<AlbumPerson[]>([]);
-  const [share, setShare] = useState(false);
+  // What the user asked for; it is shared only once an account is signed in.
+  const [wantsShare, setWantsShare] = useState(false);
+  const share = wantsShare && signedIn;
+  // The sign-in opens at the foot of the form: bring it into view.
+  const scrollRef = useRef<ComponentRef<typeof FormScrollView>>(null);
+  const signInOpen = wantsShare && !signedIn;
+  useEffect(() => {
+    if (!signInOpen) return;
+    const frame = requestAnimationFrame(() => scrollRef.current?.scrollToEnd({ animated: true }));
+    return () => cancelAnimationFrame(frame);
+  }, [signInOpen]);
   const [simplify, setSimplify] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -152,16 +161,9 @@ export function CreateAlbumScreen({
     })),
   ];
   const toggleShare = (next: boolean) => {
-    if (next && !isPro) {
-      onOpenProPaywall('album_share');
-      return;
-    }
-    if (next && sync.status !== 'ready') {
-      Alert.alert(I18n.t('albums.share.needs_cloud_sync'));
-      return;
-    }
     void triggerHaptic('selection');
-    setShare(next);
+    // Signed out, the switch stays off over the sign-in: a second tap puts it away.
+    setWantsShare(signedIn ? next : (wanted) => !wanted);
   };
 
   if (pickerOpen) {
@@ -215,6 +217,7 @@ export function CreateAlbumScreen({
         />
 
         <FormScrollView
+          ref={scrollRef}
           className="flex-1"
           contentContainerStyle={{ paddingBottom: 24 }}
           // The add-person field keeps the keyboard up; a scroll puts it away.
@@ -303,7 +306,9 @@ export function CreateAlbumScreen({
                     onRemove={(row) => row.id && setPeople(withPersonRemoved(people, row.id))}
                   />
                   <AlbumSharingCard
-                    share={canShare ? { value: share, onChange: toggleShare } : null}
+                    share={
+                      canShare ? { value: share, onChange: toggleShare, signIn: signInOpen } : null
+                    }
                     simplify={
                       share
                         ? {

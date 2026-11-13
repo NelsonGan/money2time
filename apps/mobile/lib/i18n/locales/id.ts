@@ -3004,10 +3004,9 @@ const id = {
       leave_title: 'Keluar dari {{name}}?',
       leave_message:
         'Kamu tetap memiliki album dengan catatanmu sendiri, tetapi tidak lagi diperbarui.',
-      paused: 'Dijeda. Sinkron lagi saat ada anggota yang punya Pro.',
       limit: 'Kamu bisa membagikan hingga {{max}} album sekaligus.',
       full: 'Hingga {{max}} orang bisa bergabung ke satu album.',
-      needs_cloud_sync: 'Masuk ke Cloud Sync untuk membagikan album ini.',
+      sign_in: 'Masuk untuk membagikan album ini.',
     },
     balances: {
       tab: 'Saldo',

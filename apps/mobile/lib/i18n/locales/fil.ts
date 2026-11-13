@@ -3033,10 +3033,9 @@ const fil = {
       leave_title: 'Umalis sa {{name}}?',
       leave_message:
         'Mananatili sa iyo ang album kasama ang sarili mong mga entry, pero hindi na ito mag-a-update.',
-      paused: 'Naka-pause. Magsi-sync ulit kapag may Pro ang isa sa mga kasali.',
       limit: 'Hanggang {{max}} album ang puwede mong ibahagi nang sabay.',
       full: 'Hanggang {{max}} tao ang puwedeng sumali sa isang album.',
-      needs_cloud_sync: 'Mag-sign in sa Cloud Sync para i-share ang album na ito.',
+      sign_in: 'Mag-sign in para i-share ang album na ito.',
     },
     balances: {
       tab: 'Mga balanse',

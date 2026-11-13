@@ -3007,10 +3007,9 @@ const es = {
       leave: 'Salir del álbum',
       leave_title: '¿Salir de {{name}}?',
       leave_message: 'Conservas el álbum con tus propios movimientos, pero ya no se actualiza.',
-      paused: 'En pausa. Vuelve a sincronizarse cuando alguien del álbum tenga Pro.',
       limit: 'Puedes compartir hasta {{max}} álbumes a la vez.',
       full: 'Pueden unirse hasta {{max}} personas a un álbum.',
-      needs_cloud_sync: 'Inicia sesión en Cloud Sync para compartir este álbum.',
+      sign_in: 'Inicia sesión para compartir este álbum.',
     },
     balances: {
       tab: 'Saldos',

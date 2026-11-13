@@ -2989,10 +2989,9 @@ const da = {
       leave: 'Forlad album',
       leave_title: 'Forlad {{name}}?',
       leave_message: 'Du beholder albummet med dine egne poster, men det opdateres ikke længere.',
-      paused: 'Sat på pause. Det synkroniseres igen, når en i albummet har Pro.',
       limit: 'Du kan dele op til {{max}} album ad gangen.',
       full: 'Op til {{max}} personer kan deltage i et album.',
-      needs_cloud_sync: 'Log ind på Cloud Sync for at dele dette album.',
+      sign_in: 'Log ind for at dele dette album.',
     },
     balances: {
       tab: 'Saldi',

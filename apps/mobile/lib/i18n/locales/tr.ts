@@ -2997,10 +2997,9 @@ const tr = {
       leave: 'Albümden ayrıl',
       leave_title: '{{name}} albümünden ayrılınsın mı?',
       leave_message: 'Albümü kendi kayıtlarınızla saklarsınız, ancak artık güncellenmez.',
-      paused: 'Duraklatıldı. Albümdeki biri Pro olduğunda yeniden eşitlenir.',
       limit: 'Aynı anda en fazla {{max}} albüm paylaşabilirsiniz.',
       full: 'Bir albüme en fazla {{max}} kişi katılabilir.',
-      needs_cloud_sync: "Bu albümü paylaşmak için Cloud Sync'e giriş yapın.",
+      sign_in: 'Bu albümü paylaşmak için giriş yapın.',
     },
     balances: {
       tab: 'Bakiyeler',

@@ -20,11 +20,14 @@
 // Shared albums. A share can instead carry an album's group: its members,
 // bills and settlements, which each phone turns into its own side in its own
 // ledger (README: Album members and shared albums). To the Worker it is the
-// same thing, a database with an owner, members, a link and the Pro rule,
+// same thing, a database with an owner, members and a link,
 // marked by a row in `shared_albums`; `ledger_id` is then the album's id.
-// It has its own limits (MAX_OWNED_ALBUMS, MAX_ALBUM_MEMBERS), and an app
-// from before albums could be shared never sees one: the list leaves them
-// out unless asked, and joining one must say the app knows them.
+// Two things differ. It needs no Pro: anyone signed in shares one, and it
+// never pauses (`needsPro`). And it has no limit the app speaks of, only
+// ceilings against misuse, since a share is a database (MAX_OWNED_ALBUMS,
+// MAX_ALBUM_MEMBERS). An app from before albums could be shared never sees
+// one: the list leaves them out unless asked, and joining one must say the
+// app knows them.
 
 import { csv, type Env } from './env';
 import { json, readJson } from './http';
@@ -43,9 +46,13 @@ import {
 
 const MAX_OWNED = 2;
 const MAX_MEMBERS = 5;
-/** A trip's album is for a group of friends: more of them, each a database of its own. */
-const MAX_OWNED_ALBUMS = 3;
-const MAX_ALBUM_MEMBERS = 9;
+/**
+ * Shared albums are not limited as a plan: these only stop one account from
+ * making databases without end. An album holds 20 people besides its owner
+ * (the app's MAX_ALBUM_PEOPLE), so that many can join.
+ */
+const MAX_OWNED_ALBUMS = 50;
+const MAX_ALBUM_MEMBERS = 20;
 const DAY_MS = 24 * 60 * 60 * 1000;
 /** An invite link lasts a day; asking again within it returns the same link. */
 const INVITE_TTL_MS = DAY_MS;
@@ -93,6 +100,8 @@ const IS_ALBUM_SQL = 'EXISTS (SELECT 1 FROM shared_albums a WHERE a.ledger_id = 
 const LEDGER_COLUMNS = `l.*, ${IS_ALBUM_SQL} AS is_album`;
 
 const kindOf = (ledger: SharedLedgerRow): Kind => (ledger.is_album === 1 ? 'album' : 'ledger');
+/** A shared ledger syncs on someone's Pro; a shared album on nobody's. */
+const needsPro = (ledger: SharedLedgerRow): boolean => kindOf(ledger) === 'ledger';
 const maxMembersOf = (ledger: SharedLedgerRow) =>
   kindOf(ledger) === 'album' ? MAX_ALBUM_MEMBERS : MAX_MEMBERS;
 
@@ -296,6 +305,7 @@ export async function ledgerAudience(env: Env, ledger: SharedLedgerRow): Promise
  * (src/revenuecat.ts), so this costs little.
  */
 export async function isLedgerActive(env: Env, ledger: SharedLedgerRow): Promise<boolean> {
+  if (!needsPro(ledger)) return true;
   if (await isAccountPro(env, ledger.owner_user_id)) return true;
   return anyAccountPro(env, await memberIds(env, ledger.id));
 }
@@ -318,12 +328,12 @@ async function ownerOf(
 async function view(env: Env, ledger: SharedLedgerRow, role: Role): Promise<LedgerView> {
   // The members are read once, for the count and (when the owner is not Pro)
   // for whether one of them keeps the ledger syncing.
-  const [owner, members, ownerPro] = await Promise.all([
+  const [owner, members, ownerActive] = await Promise.all([
     ownerOf(env, ledger),
     memberIds(env, ledger.id),
-    isAccountPro(env, ledger.owner_user_id),
+    !needsPro(ledger) || isAccountPro(env, ledger.owner_user_id),
   ]);
-  const active = ownerPro || (await anyAccountPro(env, members));
+  const active = ownerActive || (await anyAccountPro(env, members));
   return {
     id: ledger.id,
     ledgerId: ledger.ledger_id,
@@ -482,13 +492,14 @@ async function shareLedger(env: Env, user: SessionUser, request: Request): Promi
   );
   const ledgerId = typeof body?.ledgerId === 'string' ? body.ledgerId : '';
   const name = cleanName(body?.name);
-  // An album's group: `ledgerId` is the album's id, counted against its own limit.
+  // An album's group: `ledgerId` is the album's id. It needs no Pro, and is
+  // counted against its own ceiling.
   const album = body?.kind === 'album';
   const limit = album ? MAX_OWNED_ALBUMS : MAX_OWNED;
   if (!LEDGER_ID.test(ledgerId) || ledgerId === 'default' || !name) {
     return json({ error: 'bad_request' }, 400);
   }
-  if (!(await isAccountPro(env, user.id))) return json({ error: 'not_pro' }, 403);
+  if (!album && !(await isAccountPro(env, user.id))) return json({ error: 'not_pro' }, 403);
 
   const existing = await env.AUTH_DB.prepare(
     `SELECT ${LEDGER_COLUMNS} FROM shared_ledgers l WHERE l.owner_user_id = ?1 AND l.ledger_id = ?2`,

@@ -4,9 +4,12 @@ import { I18n } from '~/lib/i18n';
 
 import { MAX_ALBUM_PEOPLE, type PeopleEditError } from './albumPeople';
 
-/** Albums one Pro user can share at a time, and people who can join one (the Worker's limits). */
-const MAX_SHARED_ALBUMS = 3;
-const MAX_ALBUM_JOINERS = 9;
+/**
+ * Sharing an album is free and has no limit of its own: this is the Worker's
+ * ceiling against misuse, far above what anyone shares. As many people can
+ * join as an album holds (MAX_ALBUM_PEOPLE).
+ */
+const MAX_SHARED_ALBUMS = 50;
 
 /** Why a person could not be added or renamed, in words; null when there is nothing to say. */
 export function peopleEditMessage(error: PeopleEditError): string | null {
@@ -21,7 +24,7 @@ export function albumSharingMessage(error: unknown): string {
     if (error.code === 'limit_reached') {
       return I18n.t('albums.share.limit', { max: MAX_SHARED_ALBUMS });
     }
-    if (error.code === 'full') return I18n.t('albums.share.full', { max: MAX_ALBUM_JOINERS });
+    if (error.code === 'full') return I18n.t('albums.share.full', { max: MAX_ALBUM_PEOPLE });
   }
   return sharingErrorMessage(error);
 }

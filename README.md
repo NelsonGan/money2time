@@ -1207,7 +1207,8 @@ longer reads it; the flag can be archived in PostHog. A phone may still hold the
   Pro or not: a free phone sees "Have Pro on another phone? Sign in here to
   unlock it on this one too." under the title. Syncing is Pro: a signed-in
   account with no Pro shows _Syncing needs Pro_ with Get Pro (paywall source
-  `cloud_sync`) and syncs only the shared ledgers it joined. The paywall's Free
+  `cloud_sync`) and syncs only the shared ledgers it joined and its shared
+  albums. The paywall's Free
   vs Pro table lists Cloud Sync, and Shared ledgers (free: Join, Pro: Share). Signed in,
   it shows the last sync, Sync now, Sign out (data stays on the phone) and
   Delete account (cloud copy, images and sign-in, required by App Store rule
@@ -2116,8 +2117,14 @@ migrations `090` and `091`.
   button opens a new expense that goes into this album and starts split with
   its people, whether or not the album is the active one (the `albumId` param
   of `AddTransactionDetailed`), and comes back to the album when saved.
-- **Share this album.** A switch on the People page, for the album's owner:
-  Pro and a Cloud Sync sign-in, at most **3** shared albums at a time. **Only
+- **Share this album.** A switch on the People page, for the album's owner.
+  **Sharing is free and has no limit of its own**: the only limit on albums
+  is the free plan's count of them (`FREE_MAX_ALBUMS`), and a bill in a
+  shared album counts toward no free limit. It needs an account and nothing
+  else: turned on with nobody signed in, the sign-in options show under the
+  switch (`SignInGate`, the one the Join screen uses; a second tap puts them
+  away) and the album is shared once that is done. No paywall is shown, and
+  signing in this way does not turn on Cloud Sync for a free user. **Only
   an album of the main ledger can be shared, and only while that ledger is
   not itself shared** (`mainLedgerTakesSharedAlbums`, `useAlbumGroup.canShare`):
   in any other ledger the switch is not offered, a main ledger that holds a
@@ -2136,8 +2143,8 @@ migrations `090` and `091`.
   line of the user's own then opens a Settle up sheet for that one payment,
   where a smaller amount can be typed to pay part of it.
 - **Joining.** The link opens the Join screen (the one shared ledgers use,
-  titled Shared album). Anyone signed in can join, Pro or not, up to **9**
-  people. The album is added to the user's main ledger, which opens with it
+  titled Shared album). Anyone signed in can join, as many as the album
+  holds people (20 besides its owner). The album is added to the user's main ledger, which opens with it
   (someone whose main ledger is shared is told it cannot hold one), and its
   People page asks
   **Which one is you?**: one of the names the owner added, or "I'm not on the
@@ -2159,8 +2166,8 @@ migrations `090` and `091`.
   keeps the album with their own entries as ordinary split bills, split with
   the same people by name; it just no longer updates between them. Signing
   out does the same until the next sign-in, which links it again.
-- **When Pro ends.** As a shared ledger: it syncs while anyone in it is Pro,
-  else the People page says Paused.
+- **Pro plays no part.** Unlike a shared ledger, a shared album syncs
+  whoever in it is Pro or not, and is never paused.
 
 **How it works**
 
@@ -2846,7 +2853,7 @@ Every paywall entry point must pass its own source. Sources segment `Pro Paywall
 | `app_icon`, `custom_card_designs`, `custom_category_icons`, `custom_subscription_logos`, `icon_packs`, `live_earnings_auto_start`, `reimbursements`                                                             | Pro-only feature gates.                                                                                                                                                     |
 | `ledgers_create`, `ledgers_switch`                                                                                                                                                                              | Ledger switcher or Manage ledgers: a free user taps New ledger, or a ledger locked since Pro ended.                                                                         |
 | `ledgers_pro_ended`                                                                                                                                                                                             | Renew Pro on the notice shown when Pro ends while a ledger other than the default one is open.                                                                              |
-| `ledger_share`, `album_share`                                                                                                                                                                                   | A free user turns on sharing for a ledger (its Sharing page) or an album (Share this album on its People page).                                                             |
+| `ledger_share`                                                                                                                                                                                                  | A free user turns on sharing for a ledger (its Sharing page).                                                                                                               |
 | `widget_<kind>`, `widget`                                                                                                                                                                                       | Widget Pro CTA; iOS can specify kind, Android uses widget.                                                                                                                  |
 | `unknown`                                                                                                                                                                                                       | Fallback for a missing source; investigate as an attribution bug.                                                                                                           |
 
@@ -4595,9 +4602,13 @@ A share can carry an album's group instead of a ledger
 ([Album members and shared albums](#album-members-and-shared-albums)): `POST
 /v1/ledgers` with `kind: 'album'` (then `ledgerId` is the album's id), marked
 by a row in `shared_albums` and reported as `kind` on every answer about it.
-It is the same thing to the Worker (a database, an owner, members, one link,
-the Pro rule), with its own limits: 3 shared albums per owner, 9 people
-joining each. An app from before shared albums never meets one: `GET
+It is the same thing to the Worker (a database, an owner, members, one
+link), with two differences. It needs no Pro: any signed-in account shares
+one, and it is always active (`needsPro` in `src/ledgers.ts`), so `not_pro`
+and `ledger_paused` are never answered for it. And it has no limit the app
+speaks of, only ceilings against one account making databases without end:
+50 shared albums per owner (409 `limit_reached`) and 20 people joining each
+(409 `full`, the number of people an album holds). An app from before shared albums never meets one: `GET
 /v1/ledgers` leaves them out unless asked with `?albums=1`, and `POST
 /v1/invites/<code>/accept` on an album's link answers 409 `update_required`
 unless the body says `albums: true`.

@@ -2982,10 +2982,9 @@ const en = {
       leave: 'Leave album',
       leave_title: 'Leave {{name}}?',
       leave_message: 'You keep the album with your own entries, but it no longer updates.',
-      paused: 'Paused. It syncs again when someone in it has Pro.',
       limit: 'You can share up to {{max}} albums at a time.',
       full: 'Up to {{max}} people can join an album.',
-      needs_cloud_sync: 'Sign in to Cloud Sync to share this album.',
+      sign_in: 'Sign in to share this album.',
     },
     balances: {
       tab: 'Balances',

@@ -26,8 +26,7 @@ import {
 import { useApp } from '~/context/AppContext';
 import { albumLedgerId } from '~/features/albums/services/albumGroupStore';
 import { useCloudSync, useCloudSyncEnabled } from '~/features/cloudSync/CloudSyncContext';
-import { KeepDataChoice } from '~/features/cloudSync/components/KeepDataChoice';
-import { SignedOutView } from '~/features/cloudSync/components/SignedOutView';
+import { SignInGate, useSignedIn } from '~/features/cloudSync/components/SignInGate';
 import { type InvitePreview, previewInvite } from '~/features/cloudSync/services/sharedLedgersApi';
 import {
   getDeferredLedgerDeletes,
@@ -117,7 +116,7 @@ export function JoinLedgerScreen({
     }
   };
 
-  const signedIn = sync.user !== null && sync.status !== 'signedOut';
+  const signedIn = useSignedIn();
   // The invited ledger is already on this phone: the user's own (sharing it
   // from here or another phone of theirs), or one they already joined.
   // A joined ledger left while open stays until the main screens (deferred):
@@ -182,24 +181,9 @@ export function JoinLedgerScreen({
     action = <NoticeBanner icon={PauseCircle} text={I18n.t('shared_ledgers.join_paused')} />;
   } else if (preview.full) {
     action = <NoticeBanner icon={Users} text={I18n.t('shared_ledgers.join_full')} />;
-  } else if (sync.status === 'loading' || sync.status === 'linking') {
-    action = (
-      <View className="items-center py-4">
-        <LoadingDots />
-      </View>
-    );
-  } else if (sync.status === 'needsChoice' && sync.choice) {
-    // A Pro user signing in here first settles their own data, as on the Cloud Sync screen.
-    action = <KeepDataChoice choice={sync.choice} />;
   } else if (!signedIn) {
-    action = (
-      <View className="gap-2">
-        <Text variant="body" tone="muted" className="text-center">
-          {I18n.t('shared_ledgers.join_sign_in')}
-        </Text>
-        <SignedOutView hideHero />
-      </View>
-    );
+    // A Pro user signing in here first settles their own data, as on the Cloud Sync screen.
+    action = <SignInGate prompt={I18n.t('shared_ledgers.join_sign_in')} />;
   } else {
     action = (
       <View className="gap-3">

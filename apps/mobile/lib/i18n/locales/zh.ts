@@ -2869,10 +2869,9 @@ const zh = {
       leave: '退出相册',
       leave_title: '退出 {{name}}？',
       leave_message: '你会保留相册和自己的记录，但不再更新。',
-      paused: '已暂停。相册中有人开通 Pro 后会恢复同步。',
       limit: '你最多可同时共享 {{max}} 个相册。',
       full: '一个相册最多可有 {{max}} 人加入。',
-      needs_cloud_sync: '登录 Cloud Sync 即可共享此相册。',
+      sign_in: '登录即可共享此相册。',
     },
     balances: {
       tab: '结余',
