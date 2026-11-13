@@ -2991,7 +2991,7 @@ const id = {
         'Dia tidak lagi menerima tagihan album ini. Tagihan yang memuatnya tetap ada.',
     },
     share: {
-      row: 'Bagikan album ini',
+      row: 'Bagi dengan teman',
       caption: 'Semua orang melihat tagihan dan siapa berutang kepada siapa.',
       link_note: 'Berlaku 24 jam. Siapa pun yang memilikinya bisa bergabung.',
       stop_title: 'Berhenti membagikan {{name}}?',

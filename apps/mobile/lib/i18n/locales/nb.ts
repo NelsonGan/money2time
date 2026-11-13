@@ -2980,7 +2980,7 @@ const nb = {
         'De får ikke lenger albumets regninger. Regningene de står på, blir værende.',
     },
     share: {
-      row: 'Del dette albumet',
+      row: 'Del med venner',
       caption: 'Alle ser regningene og hvem som skylder hvem.',
       link_note: 'Virker i 24 timer. Alle som har lenken, kan bli med.',
       stop_title: 'Slutte å dele {{name}}?',

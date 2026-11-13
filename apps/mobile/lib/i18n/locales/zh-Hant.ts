@@ -2858,7 +2858,7 @@ const zhHant = {
       remove_joined_message: '對方將不再收到此相簿的帳單。包含對方的帳單會保留。',
     },
     share: {
-      row: '分享此相簿',
+      row: '與朋友分帳',
       caption: '所有人都能看到帳單以及誰欠誰。',
       link_note: '24 小時內有效。拿到連結的人都可以加入。',
       stop_title: '停止分享 {{name}}？',

@@ -2994,7 +2994,7 @@ const it = {
         'Non riceverà più i conti di questo album. I conti in cui compare restano.',
     },
     share: {
-      row: 'Condividi questo album',
+      row: 'Dividi con gli amici',
       caption: 'Tutti vedono i conti e chi deve cosa a chi.',
       link_note: 'Vale 24 ore. Chiunque lo abbia può unirsi.',
       stop_title: 'Smettere di condividere {{name}}?',

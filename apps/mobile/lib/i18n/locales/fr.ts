@@ -3017,7 +3017,7 @@ const fr = {
         'Cette personne ne recevra plus les notes de cet album. Les notes où elle figure restent.',
     },
     share: {
-      row: 'Partager cet album',
+      row: 'Partager avec des amis',
       caption: 'Tout le monde voit les notes et qui doit quoi à qui.',
       link_note: "Valable 24 heures. Toute personne qui l'a peut rejoindre.",
       stop_title: 'Arrêter de partager {{name}} ?',

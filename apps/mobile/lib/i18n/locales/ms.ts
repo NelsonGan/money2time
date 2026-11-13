@@ -2995,7 +2995,7 @@ const ms = {
       remove_joined_message: 'Dia tidak lagi menerima bil album ini. Bil yang ada namanya kekal.',
     },
     share: {
-      row: 'Kongsi album ini',
+      row: 'Kongsi dengan rakan',
       caption: 'Semua orang nampak bil dan siapa berhutang kepada siapa.',
       link_note: 'Sah selama 24 jam. Sesiapa yang ada pautan ini boleh sertai.',
       stop_title: 'Berhenti kongsi {{name}}?',

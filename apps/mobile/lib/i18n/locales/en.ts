@@ -2970,7 +2970,7 @@ const en = {
       remove_joined_message: "They stop getting this album's bills. The bills they are on stay.",
     },
     share: {
-      row: 'Share this album',
+      row: 'Split with friends',
       caption: 'Everyone sees the bills and who owes whom.',
       link_note: 'Works for 24 hours. Anyone with it can join.',
       stop_title: 'Stop sharing {{name}}?',

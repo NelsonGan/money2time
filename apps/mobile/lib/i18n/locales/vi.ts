@@ -2959,7 +2959,7 @@ const vi = {
         'Họ sẽ không còn nhận hóa đơn của album này. Các hóa đơn có họ vẫn được giữ.',
     },
     share: {
-      row: 'Chia sẻ album này',
+      row: 'Chia với bạn bè',
       caption: 'Mọi người đều thấy các hóa đơn và ai nợ ai.',
       link_note: 'Có hiệu lực 24 giờ. Ai có liên kết đều tham gia được.',
       stop_title: 'Dừng chia sẻ {{name}}?',

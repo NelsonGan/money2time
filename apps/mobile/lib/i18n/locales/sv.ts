@@ -2978,7 +2978,7 @@ const sv = {
       remove_joined_message: 'De får inte längre albumets notor. Notorna de finns på ligger kvar.',
     },
     share: {
-      row: 'Dela det här albumet',
+      row: 'Dela med vänner',
       caption: 'Alla ser notorna och vem som är skyldig vem.',
       link_note: 'Gäller i 24 timmar. Alla som har länken kan gå med.',
       stop_title: 'Sluta dela {{name}}?',

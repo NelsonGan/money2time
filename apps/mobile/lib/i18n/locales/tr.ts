@@ -2986,7 +2986,7 @@ const tr = {
         'Bu kişi artık bu albümün hesaplarını almaz. Yer aldığı hesaplar kalır.',
     },
     share: {
-      row: 'Bu albümü paylaş',
+      row: 'Arkadaşlarla böl',
       caption: 'Herkes hesapları ve kimin kime borçlu olduğunu görür.',
       link_note: '24 saat geçerlidir. Bağlantıya sahip herkes katılabilir.',
       stop_title: '{{name}} paylaşımı durdurulsun mu?',

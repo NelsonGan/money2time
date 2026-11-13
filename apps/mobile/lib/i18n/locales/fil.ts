@@ -3020,7 +3020,7 @@ const fil = {
         'Hindi na nila matatanggap ang mga bill ng album na ito. Mananatili ang mga bill na kasama sila.',
     },
     share: {
-      row: 'Ibahagi ang album na ito',
+      row: 'Hatiin sa mga kaibigan',
       caption: 'Nakikita ng lahat ang mga bill at kung sino ang may utang kanino.',
       link_note: 'Gumagana nang 24 oras. Makakasali ang sinumang may link.',
       stop_title: 'Itigil ang pagbabahagi ng {{name}}?',

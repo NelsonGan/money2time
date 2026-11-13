@@ -2995,7 +2995,7 @@ const es = {
         'Dejará de recibir las cuentas de este álbum. Las cuentas en las que aparece se quedan.',
     },
     share: {
-      row: 'Compartir este álbum',
+      row: 'Dividir con amigos',
       caption: 'Todos ven las cuentas y quién debe a quién.',
       link_note: 'Funciona durante 24 horas. Cualquiera que lo tenga puede unirse.',
       stop_title: '¿Dejar de compartir {{name}}?',

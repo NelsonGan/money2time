@@ -3022,7 +3022,7 @@ const de = {
         'Die Person erhält keine Rechnungen dieses Albums mehr. Rechnungen, auf denen sie steht, bleiben.',
     },
     share: {
-      row: 'Dieses Album teilen',
+      row: 'Mit Freunden teilen',
       caption: 'Alle sehen die Rechnungen und wer wem etwas schuldet.',
       link_note: 'Gilt 24 Stunden. Jeder mit dem Link kann beitreten.',
       stop_title: '{{name}} nicht mehr teilen?',

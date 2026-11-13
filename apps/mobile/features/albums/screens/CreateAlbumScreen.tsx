@@ -251,10 +251,7 @@ export function CreateAlbumScreen({
 
             {canSplit && canShare ? (
               <>
-                <Text variant="label" tone="muted" className="mb-2 mt-5 px-1">
-                  {I18n.t('albums.people.split_with')}
-                </Text>
-                <View className="gap-4">
+                <View className="mt-5 gap-4">
                   <AlbumSharingCard
                     share={{ value: share, onChange: toggleShare, signIn: signInOpen }}
                     simplify={

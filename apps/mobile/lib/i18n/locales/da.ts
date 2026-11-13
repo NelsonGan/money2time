@@ -2977,7 +2977,7 @@ const da = {
         'De får ikke længere albummets regninger. De regninger, de står på, bliver.',
     },
     share: {
-      row: 'Del dette album',
+      row: 'Del med venner',
       caption: 'Alle ser regningerne, og hvem der skylder hvem.',
       link_note: 'Virker i 24 timer. Alle med linket kan deltage.',
       stop_title: 'Stop deling af {{name}}?',

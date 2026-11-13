@@ -2858,7 +2858,7 @@ const zh = {
       remove_joined_message: '对方将不再收到此相册的账单。包含对方的账单会保留。',
     },
     share: {
-      row: '共享此相册',
+      row: '与朋友分账',
       caption: '所有人都能看到账单以及谁欠谁。',
       link_note: '24 小时内有效。拿到链接的人都可以加入。',
       stop_title: '停止共享 {{name}}？',

@@ -3013,7 +3013,7 @@ const nl = {
         'Diegene krijgt de rekeningen van dit album niet meer. Rekeningen waar diegene op staat, blijven.',
     },
     share: {
-      row: 'Dit album delen',
+      row: 'Delen met vrienden',
       caption: 'Iedereen ziet de rekeningen en wie wat aan wie verschuldigd is.',
       link_note: '24 uur geldig. Iedereen met de link kan meedoen.',
       stop_title: 'Stoppen met delen van {{name}}?',

@@ -2996,7 +2996,7 @@ const pt = {
         'A pessoa deixa de receber as contas deste álbum. As contas em que ela está permanecem.',
     },
     share: {
-      row: 'Compartilhar este álbum',
+      row: 'Dividir com amigos',
       caption: 'Todos veem as contas e quem deve a quem.',
       link_note: 'Vale por 24 horas. Qualquer pessoa com ele pode entrar.',
       stop_title: 'Parar de compartilhar {{name}}?',

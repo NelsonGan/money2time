@@ -2989,7 +2989,7 @@ const pl = {
         'Ta osoba przestanie dostawać rachunki z tego albumu. Rachunki, na których jest, zostają.',
     },
     share: {
-      row: 'Udostępnij ten album',
+      row: 'Dziel ze znajomymi',
       caption: 'Wszyscy widzą rachunki i kto komu jest winien.',
       link_note: 'Działa przez 24 godziny. Każdy, kto go ma, może dołączyć.',
       stop_title: 'Przestać udostępniać {{name}}?',
