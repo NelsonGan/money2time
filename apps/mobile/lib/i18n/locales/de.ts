@@ -3008,30 +3008,17 @@ const de = {
       split_with: 'Teilen mit',
       me_tag: 'Du',
       joined: 'Beigetreten',
-      not_joined: 'Noch nicht beigetreten',
-      add_person: 'Person hinzufügen',
-      add: 'Hinzufügen',
+      left: 'Ausgetreten',
       unnamed: 'Freund',
       name_taken: 'Jemand hier hat bereits diesen Namen.',
-      full: 'Ein Album wird mit bis zu {{max}} Personen geteilt.',
-      remove_title: '{{name}} entfernen?',
-      remove_message:
-        'Neue Rechnungen in diesem Album werden nicht mehr mit dieser Person geteilt.',
-      remove_in_use:
-        '{{name}} steht auf einer Rechnung in diesem Album. Entferne die Person zuerst von den Rechnungen.',
       remove_joined_title: '{{name}} aus dem Album entfernen?',
       remove_joined_message:
         'Die Person erhält keine Rechnungen dieses Albums mehr. Rechnungen, auf denen sie steht, bleiben.',
-      who_title: 'Wer davon bist du?',
-      who_message:
-        'Wähle deinen Namen, damit dein Anteil jeder Rechnung in deinem Kassenbuch landet.',
-      who_new: 'Ich stehe nicht auf der Liste',
     },
     share: {
-      row: 'Dieses Album teilen',
+      row: 'Mit Freunden teilen',
       caption: 'Alle sehen die Rechnungen und wer wem etwas schuldet.',
       link_note: 'Gilt 24 Stunden. Jeder mit dem Link kann beitreten.',
-      stop_title: '{{name}} nicht mehr teilen?',
       stop_message:
         'Alle behalten das Album mit ihren eigenen Einträgen, aber es wird nicht mehr untereinander aktualisiert.',
       leave: 'Album verlassen',
@@ -3066,6 +3053,17 @@ const de = {
         'Diese Rechnung ist in einem geteilten Album. Wenn du sie löschst, wird sie für alle entfernt.',
       remove_shared:
         'Diese Rechnung ist in einem geteilten Album. Sie wird für alle anderen entfernt.',
+      from_album: 'Aus {{album}}',
+      shared_album: 'Geteiltes Album',
+    },
+    rules: {
+      not_payer: 'Nur wer bezahlt hat, kann diese Rechnung ändern oder löschen.',
+      has_payments:
+        'Auf dieser Rechnung sind Zahlungen. Mach sie zuerst rückgängig, um sie zu ändern oder zu löschen.',
+      not_your_payment: 'Nur wer zahlt, kann eine Zahlung erfassen oder rückgängig machen.',
+      note_not_payer: 'Bezahlt von {{name}}. Nur diese Person kann sie ändern.',
+      note_has_payments: 'Hat Zahlungen. Mach sie rückgängig, um sie zu ändern.',
+      they_record: '{{name}} erfasst es, wenn diese Person dich bezahlt.',
     },
   },
   assets: {

@@ -1,9 +1,12 @@
 import { Check, Send } from 'lucide-react-native';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 
 import { Button, CategoryEmoji, SettingsHeader, SettingsPageLayout, Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
+import { personNameKey } from '~/features/albums/lib/albumPeople';
+import { listGroupMembers, subscribeAlbumGroups } from '~/features/albums/services/albumGroupStore';
+import { sharedAlbumFor } from '~/features/cloudSync/services/sharedLedgerStore';
 import { PersonAvatar } from '~/features/transactions/components/PersonAvatar';
 import {
   type SettleUpConfirmContent,
@@ -93,6 +96,21 @@ export function SettleUpPersonScreen({
   );
   const state = person ? personBalanceState(person) : 'settled';
   const albumName = albumId ? albums.find((album) => album.id === albumId)?.name : null;
+  // In a shared album, whoever pays records it (README: Who can change what):
+  // what someone who joined owes the user is theirs to settle, not the user's.
+  const albumMembers = useSyncExternalStore(subscribeAlbumGroups, () =>
+    listGroupMembers(albumId && sharedAlbumFor(albumId) ? albumId : null),
+  );
+  const inSharedAlbum = albumMembers.length > 0;
+  const theyRecordIt =
+    state === 'owes_you' &&
+    !!person &&
+    albumMembers.some(
+      (member) =>
+        !!member.userId &&
+        member.userId !== (albumId ? sharedAlbumFor(albumId)?.userId : null) &&
+        personNameKey(member.name) === personNameKey(person.name),
+    );
 
   // Blank while the person is missing (the last share was removed) so the header
   // doesn't flash a fallback name for the one frame before the screen pops.
@@ -351,7 +369,13 @@ export function SettleUpPersonScreen({
             ) : null}
           </ScrollView>
 
-          {person.unpaidBillCount > 0 ? (
+          {person.unpaidBillCount > 0 &&
+          inSharedAlbum &&
+          state === 'even' ? null : person.unpaidBillCount > 0 && theyRecordIt ? (
+            <Text variant="caption" tone="muted" className="px-5 pb-8 pt-2 text-center">
+              {I18n.t('albums.rules.they_record', { name: person.name ?? '' })}
+            </Text>
+          ) : person.unpaidBillCount > 0 ? (
             <View className="flex-row items-center gap-3 px-5 pb-8 pt-2">
               <Button
                 onPress={() => {
@@ -389,12 +413,25 @@ export function SettleUpPersonScreen({
             onClose={() => setSettleVisible(false)}
             onConfirm={(accountId, amount) => {
               setSettleVisible(false);
-              if (amount === null) {
+              // In a shared album nobody records the other side's payments
+              // (README: Who can change what), so when shares go both ways
+              // the user pays the net, onto their oldest open bills, and the
+              // offsetting shares stay as they are.
+              const netOnly =
+                inSharedAlbum && person.totalReporting > 0 && person.owedReporting > 0;
+              if (amount === null && !netOnly) {
                 settleUpWithPerson(person.key, accountId, albumId);
                 return;
               }
+              const paying =
+                amount ??
+                Math.abs(
+                  person.netByCurrency.length === 1
+                    ? person.netByCurrency[0]!.amount
+                    : person.netReporting,
+                );
               // A part of it: onto the oldest open bills of whoever pays.
-              for (const payment of planPartSettlement(person, amount)) {
+              for (const payment of planPartSettlement(person, paying)) {
                 if (payment.direction === 'owes_you') {
                   recordSplitPayment(payment.splitId, payment.amount, {
                     paybackAccountId: accountId,

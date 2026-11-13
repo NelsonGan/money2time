@@ -1988,6 +1988,7 @@
         "untitledBill": "Cuenta dividida",
         "paidTitle": "Devuelto",
         "personPaid": "{name} pagó",
+        "sharedAlbum": "Álbum compartido",
         "undoTitle": "¿Marcar esta parte como no pagada?",
         "undoBody": "Vuelve a deberse y el gasto sube de nuevo por este monto. Se elimina la transferencia de devolución a otra cuenta.",
         "itemizedTotal": "Total: {sum}",

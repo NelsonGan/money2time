@@ -2976,28 +2976,17 @@ const pl = {
       split_with: 'Podziel z',
       me_tag: 'Ty',
       joined: 'Dołączono',
-      not_joined: 'Jeszcze nie dołączono',
-      add_person: 'Dodaj osobę',
-      add: 'Dodaj',
+      left: 'Opuścił(a)',
       unnamed: 'Znajomy',
       name_taken: 'Ktoś tutaj ma już to imię.',
-      full: 'Album można dzielić z maksymalnie {{max}} osobami.',
-      remove_title: 'Usunąć {{name}}?',
-      remove_message: 'Nowe rachunki w tym albumie nie będą już dzielone z tą osobą.',
-      remove_in_use: '{{name}} jest na rachunku w tym albumie. Najpierw usuń tę osobę z rachunków.',
       remove_joined_title: 'Usunąć {{name}} z albumu?',
       remove_joined_message:
         'Ta osoba przestanie dostawać rachunki z tego albumu. Rachunki, na których jest, zostają.',
-      who_title: 'Którą osobą jesteś?',
-      who_message:
-        'Wybierz swoje imię, aby Twoja część każdego rachunku trafiała do Twojej księgi.',
-      who_new: 'Nie ma mnie na liście',
     },
     share: {
-      row: 'Udostępnij ten album',
+      row: 'Dziel ze znajomymi',
       caption: 'Wszyscy widzą rachunki i kto komu jest winien.',
       link_note: 'Działa przez 24 godziny. Każdy, kto go ma, może dołączyć.',
-      stop_title: 'Przestać udostępniać {{name}}?',
       stop_message:
         'Każdy zachowuje album ze swoimi wpisami, ale nie będzie się on już aktualizował między wami.',
       leave: 'Opuść album',
@@ -3031,6 +3020,16 @@ const pl = {
       delete_shared: 'Ten rachunek jest w udostępnionym albumie. Usunięcie usunie go u wszystkich.',
       remove_shared:
         'Ten rachunek jest w udostępnionym albumie. Zostanie usunięty u wszystkich pozostałych.',
+      from_album: 'Z albumu {{album}}',
+      shared_album: 'Udostępniony album',
+    },
+    rules: {
+      not_payer: 'Tylko osoba, która zapłaciła, może zmienić lub usunąć ten rachunek.',
+      has_payments: 'Ten rachunek ma płatności. Najpierw je cofnij, aby go zmienić lub usunąć.',
+      not_your_payment: 'Tylko osoba płacąca może zapisać lub cofnąć płatność.',
+      note_not_payer: 'Płaci: {{name}}. Tylko ta osoba może go zmienić.',
+      note_has_payments: 'Ma płatności. Cofnij je, aby go zmienić.',
+      they_record: '{{name}} zapisze to przy płatności dla Ciebie.',
     },
   },
   assets: {

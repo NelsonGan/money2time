@@ -691,22 +691,10 @@ export interface Album {
   placeAdmin: string | null;
   /** ISO 3166-1 alpha-2 country code, e.g. "JP". */
   countryCode: string | null;
-  /**
-   * The people an album that is not shared is split with: while it is active,
-   * a new expense starts split with them. A shared album's people are its
-   * group's members instead (`AlbumMember`).
-   */
-  splitWith: AlbumPerson[];
   sortOrder?: number;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
-}
-
-/** Someone an album is split with. The user is never listed: they are "Me". */
-export interface AlbumPerson {
-  id: string;
-  name: string;
 }
 
 /** A person of a shared album's group. */

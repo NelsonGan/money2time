@@ -3000,28 +3000,17 @@ const nl = {
       split_with: 'Delen met',
       me_tag: 'Jij',
       joined: 'Doet mee',
-      not_joined: 'Doet nog niet mee',
-      add_person: 'Persoon toevoegen',
-      add: 'Toevoegen',
+      left: 'Vertrokken',
       unnamed: 'Vriend',
       name_taken: 'Iemand hier heeft die naam al.',
-      full: 'Een album wordt met maximaal {{max}} personen gedeeld.',
-      remove_title: '{{name}} verwijderen?',
-      remove_message: 'Nieuwe rekeningen in dit album worden niet meer met diegene gedeeld.',
-      remove_in_use:
-        '{{name}} staat op een rekening in dit album. Haal diegene eerst van de rekeningen.',
       remove_joined_title: '{{name}} uit het album verwijderen?',
       remove_joined_message:
         'Diegene krijgt de rekeningen van dit album niet meer. Rekeningen waar diegene op staat, blijven.',
-      who_title: 'Welke ben jij?',
-      who_message: 'Kies je naam, zodat jouw deel van elke rekening in je kasboek komt.',
-      who_new: 'Ik sta niet in de lijst',
     },
     share: {
-      row: 'Dit album delen',
+      row: 'Delen met vrienden',
       caption: 'Iedereen ziet de rekeningen en wie wat aan wie verschuldigd is.',
       link_note: '24 uur geldig. Iedereen met de link kan meedoen.',
-      stop_title: 'Stoppen met delen van {{name}}?',
       stop_message:
         'Iedereen houdt het album met de eigen posten, maar het wordt niet meer onderling bijgewerkt.',
       leave: 'Album verlaten',
@@ -3054,6 +3043,17 @@ const nl = {
       delete_shared:
         'Deze rekening staat in een gedeeld album. Als je hem verwijdert, verdwijnt hij voor iedereen.',
       remove_shared: 'Deze rekening staat in een gedeeld album. Hij verdwijnt voor alle anderen.',
+      from_album: 'Uit {{album}}',
+      shared_album: 'Gedeeld album',
+    },
+    rules: {
+      not_payer: 'Alleen wie betaald heeft kan deze rekening wijzigen of verwijderen.',
+      has_payments:
+        'Op deze rekening staan betalingen. Maak ze eerst ongedaan om hem te wijzigen of te verwijderen.',
+      not_your_payment: 'Alleen wie betaalt kan een betaling vastleggen of ongedaan maken.',
+      note_not_payer: 'Betaald door {{name}}. Alleen die persoon kan hem wijzigen.',
+      note_has_payments: 'Heeft betalingen. Maak ze ongedaan om hem te wijzigen.',
+      they_record: '{{name}} legt het vast als die jou betaalt.',
     },
   },
   assets: {

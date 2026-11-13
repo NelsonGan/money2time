@@ -5,8 +5,6 @@ import {
   selfMember,
   splitWithPeople,
   uniquePersonName,
-  withPersonAdded,
-  withPersonRenamed,
 } from '~/features/albums/lib/albumPeople';
 import { toAlbumMember, toAlbumSettlement } from '~/lib/repositories/mappers';
 import type { AlbumExpense, AlbumMember, AlbumSettlement } from '~/types';
@@ -69,26 +67,12 @@ function member(id: string, name: string, userId: string | null = null): AlbumMe
 }
 
 describe('album people', () => {
-  it('adds and renames people by a clean, unique name', () => {
-    const one = withPersonAdded([], '  Aisha   Tan ', 'a');
-    expect(one).toEqual([{ id: 'a', name: 'Aisha Tan' }]);
-    const people = one as { id: string; name: string }[];
-    expect(withPersonAdded(people, 'aisha tan', 'b')).toBe('taken');
-    expect(withPersonAdded(people, '   ', 'b')).toBe('blank');
-    expect(withPersonRenamed(people, 'a', 'Aisha')).toEqual([{ id: 'a', name: 'Aisha' }]);
-    expect(withPersonRenamed([...people, { id: 'b', name: 'Ben' }], 'b', 'AISHA TAN')).toBe(
-      'taken',
-    );
-  });
-
-  it('lists the user first, from the album or from the group', () => {
-    const album = { splitWith: [{ id: 'a', name: 'Aisha' }] };
-    expect(albumPeople(album, null, null, 'Me')).toEqual([
+  it('lists the user first; an album that is not shared has nobody else', () => {
+    expect(albumPeople(null, null, 'Me')).toEqual([
       { id: null, name: 'Me', isSelf: true, joined: true },
-      { id: 'a', name: 'Aisha', isSelf: false, joined: false },
     ]);
     const members = [member('aisha', 'Aisha', 'u-aisha'), member('me', 'Nelson', 'u-me')];
-    const people = albumPeople(album, members, 'u-me', 'Me');
+    const people = albumPeople(members, 'u-me', 'Me');
     expect(people.map((person) => [person.id, person.name, person.isSelf, person.joined])).toEqual([
       ['me', 'Me', true, true],
       ['aisha', 'Aisha', false, true],

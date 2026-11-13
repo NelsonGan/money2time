@@ -1988,6 +1988,7 @@
         "untitledBill": "Delad nota",
         "paidTitle": "Återbetalt",
         "personPaid": "{name} betalade",
+        "sharedAlbum": "Delat album",
         "undoTitle": "Markera den här andelen som obetald?",
         "undoBody": "Du är skyldig den igen, och utgiften ökar med det här beloppet. En återbetalningsöverföring till ett annat konto tas bort.",
         "itemizedTotal": "Totalt: {sum}",

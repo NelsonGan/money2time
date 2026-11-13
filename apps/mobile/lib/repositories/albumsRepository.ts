@@ -19,8 +19,6 @@ interface CreateAlbumInput {
   placeName?: string | null;
   placeAdmin?: string | null;
   countryCode?: string | null;
-  /** `[{ id, name }]` as JSON: the people an album that is not shared is split with. */
-  splitWithJson?: string | null;
   sortOrder?: number;
   deletedAt?: string | null;
 }
@@ -76,7 +74,6 @@ class AlbumsRepository {
         placeName: input.placeName ?? null,
         placeAdmin: input.placeAdmin ?? null,
         countryCode: input.countryCode ?? null,
-        splitWithJson: input.splitWithJson ?? null,
         sortOrder: nextSortOrder,
         createdAt: now,
         updatedAt: now,

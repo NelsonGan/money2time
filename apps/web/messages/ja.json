@@ -1988,6 +1988,7 @@
         "untitledBill": "割り勘",
         "paidTitle": "返金済み",
         "personPaid": "{name}が支払い",
+        "sharedAlbum": "共有アルバム",
         "undoTitle": "この分を未払いに戻しますか？",
         "undoBody": "再びあなたへの未払いになり、支出もこの金額だけ元に戻ります。ほかの口座への返金の振替は削除されます。",
         "itemizedTotal": "合計: {sum}",

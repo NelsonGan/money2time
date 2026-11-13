@@ -43,6 +43,14 @@ interface SettleUpShareListProps<T extends SettleUpShare> {
   /** The 40pt disc at the start of a card (a category icon, or a person's initial). */
   renderLeading: (share: T) => ReactNode;
   label: (share: T) => string;
+  /**
+   * Whether the user may mark a share paid here; all of them when left out.
+   * A shared album's bill: only a share of someone who has left, since
+   * everyone else records their own payments (README: Who can change what).
+   */
+  canMarkPaid?: (share: T) => boolean;
+  /** Whether a share can be removed from the bill here (not on a shared album's bill). */
+  canRemove?: boolean;
 }
 
 /** "Paid RM300 of RM1,000" under a receipt line whose share is paid in parts. */
@@ -81,6 +89,8 @@ export function SettleUpShareList<T extends SettleUpShare>({
   locale,
   renderLeading,
   label,
+  canMarkPaid,
+  canRemove = true,
 }: SettleUpShareListProps<T>) {
   const themeColors = useThemeColors();
   const {
@@ -248,45 +258,49 @@ export function SettleUpShareList<T extends SettleUpShare>({
               : 'mt-2 flex-row items-center'
           }
         >
-          <Pressable
-            onPress={() =>
-              handleDelete(
-                share.splitId,
-                payments.length > 0 ? formatCurrency(share.amount, symbol) : null,
-              )
-            }
-            hitSlop={8}
-            accessibilityRole="button"
-            className="flex-row items-center gap-1.5 py-1.5 pr-2 active:opacity-60"
-          >
-            <Trash2 size={14} color={themeColors.textMuted} />
-            <Text variant="caption" tone="muted">
-              {I18n.t('common.remove')}
-            </Text>
-          </Pressable>
+          {canRemove ? (
+            <Pressable
+              onPress={() =>
+                handleDelete(
+                  share.splitId,
+                  payments.length > 0 ? formatCurrency(share.amount, symbol) : null,
+                )
+              }
+              hitSlop={8}
+              accessibilityRole="button"
+              className="flex-row items-center gap-1.5 py-1.5 pr-2 active:opacity-60"
+            >
+              <Trash2 size={14} color={themeColors.textMuted} />
+              <Text variant="caption" tone="muted">
+                {I18n.t('common.remove')}
+              </Text>
+            </Pressable>
+          ) : null}
           <View className="flex-1" />
-          <Pressable
-            onPress={() => {
-              void triggerHaptic('selection');
-              setPaymentTarget({
-                splitId: share.splitId,
-                label: label(share),
-                owed: share.amount,
-                shareTotal: share.shareTotal,
-                currency: share.currency,
-                paybackAccountId: share.paybackAccountId,
-                billHasAccount: share.billHasAccount !== false,
-              });
-            }}
-            hitSlop={8}
-            accessibilityRole="button"
-            className="flex-row items-center gap-1 rounded-full bg-success/15 px-3.5 py-2 active:opacity-70"
-          >
-            <Check size={14} color={themeColors.success} />
-            <Text variant="caption" className="font-medium text-success">
-              {I18n.t('transactions.editor.split.mark_paid')}
-            </Text>
-          </Pressable>
+          {canMarkPaid && !canMarkPaid(share) ? null : (
+            <Pressable
+              onPress={() => {
+                void triggerHaptic('selection');
+                setPaymentTarget({
+                  splitId: share.splitId,
+                  label: label(share),
+                  owed: share.amount,
+                  shareTotal: share.shareTotal,
+                  currency: share.currency,
+                  paybackAccountId: share.paybackAccountId,
+                  billHasAccount: share.billHasAccount !== false,
+                });
+              }}
+              hitSlop={8}
+              accessibilityRole="button"
+              className="flex-row items-center gap-1 rounded-full bg-success/15 px-3.5 py-2 active:opacity-70"
+            >
+              <Check size={14} color={themeColors.success} />
+              <Text variant="caption" className="font-medium text-success">
+                {I18n.t('transactions.editor.split.mark_paid')}
+              </Text>
+            </Pressable>
+          )}
         </View>
       </View>
     );

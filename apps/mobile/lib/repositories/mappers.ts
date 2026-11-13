@@ -31,7 +31,6 @@ import type {
   Album,
   AlbumExpense,
   AlbumMember,
-  AlbumPerson,
   AlbumSettlement,
   AlbumShare,
   AppIconId,
@@ -298,30 +297,11 @@ export function toAlbum(row: AlbumRow): Album {
     placeName: row.placeName ?? null,
     placeAdmin: row.placeAdmin ?? null,
     countryCode: row.countryCode ?? null,
-    splitWith: parseAlbumPeople(row.splitWithJson),
     sortOrder: row.sortOrder ?? 0,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     deletedAt: row.deletedAt,
   };
-}
-
-/** `albums.split_with_json`: the people of an album that is not shared. */
-export function parseAlbumPeople(json: string | null | undefined): AlbumPerson[] {
-  if (!json) return [];
-  try {
-    const parsed: unknown = JSON.parse(json);
-    if (!Array.isArray(parsed)) return [];
-    const people: AlbumPerson[] = [];
-    for (const item of parsed) {
-      const entry = item as { id?: unknown; name?: unknown } | null;
-      const name = typeof entry?.name === 'string' ? entry.name.trim() : '';
-      if (typeof entry?.id === 'string' && entry.id && name) people.push({ id: entry.id, name });
-    }
-    return people;
-  } catch {
-    return [];
-  }
 }
 
 // --- A shared album's group --------------------------------------------------

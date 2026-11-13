@@ -3003,29 +3003,17 @@ const fr = {
       split_with: 'Partager avec',
       me_tag: 'Vous',
       joined: 'A rejoint',
-      not_joined: 'Pas encore rejoint',
-      add_person: 'Ajouter une personne',
-      add: 'Ajouter',
+      left: 'Parti',
       unnamed: 'Ami',
       name_taken: "Quelqu'un porte déjà ce nom ici.",
-      full: 'Un album se partage avec {{max}} personnes au plus.',
-      remove_title: 'Retirer {{name}} ?',
-      remove_message:
-        'Les nouvelles notes de cet album ne seront plus partagées avec cette personne.',
-      remove_in_use: "{{name}} figure sur une note de cet album. Retirez-la d'abord de ses notes.",
       remove_joined_title: "Retirer {{name}} de l'album ?",
       remove_joined_message:
         'Cette personne ne recevra plus les notes de cet album. Les notes où elle figure restent.',
-      who_title: 'Lequel êtes-vous ?',
-      who_message:
-        'Choisissez votre nom pour que votre part de chaque note arrive dans votre livre.',
-      who_new: 'Je ne suis pas dans la liste',
     },
     share: {
-      row: 'Partager cet album',
+      row: 'Partager avec des amis',
       caption: 'Tout le monde voit les notes et qui doit quoi à qui.',
       link_note: "Valable 24 heures. Toute personne qui l'a peut rejoindre.",
-      stop_title: 'Arrêter de partager {{name}} ?',
       stop_message:
         "Chacun garde l'album avec ses propres écritures, mais il ne se met plus à jour entre vous.",
       leave: "Quitter l'album",
@@ -3061,6 +3049,17 @@ const fr = {
         'Cette note est dans un album partagé. La supprimer la retire pour tout le monde.',
       remove_shared:
         'Cette note est dans un album partagé. Elle sera retirée pour tous les autres.',
+      from_album: 'De {{album}}',
+      shared_album: 'Album partagé',
+    },
+    rules: {
+      not_payer: 'Seule la personne qui a payé peut modifier ou supprimer cette note.',
+      has_payments:
+        'Cette note a des paiements. Annulez-les d’abord pour la modifier ou la supprimer.',
+      not_your_payment: 'Seule la personne qui paie peut enregistrer ou annuler un paiement.',
+      note_not_payer: 'Payé par {{name}}. Seule cette personne peut la modifier.',
+      note_has_payments: 'Paiements enregistrés. Annulez-les pour la modifier.',
+      they_record: '{{name}} l’enregistre en vous payant.',
     },
   },
   assets: {

@@ -2964,27 +2964,17 @@ const da = {
       split_with: 'Del med',
       me_tag: 'Dig',
       joined: 'Deltager',
-      not_joined: 'Ikke med endnu',
-      add_person: 'Tilføj person',
-      add: 'Tilføj',
+      left: 'Forladt',
       unnamed: 'Ven',
       name_taken: 'En person her har allerede det navn.',
-      full: 'Et album kan deles med op til {{max}} personer.',
-      remove_title: 'Fjern {{name}}?',
-      remove_message: 'Nye regninger i albummet deles ikke længere med dem.',
-      remove_in_use: '{{name}} står på en regning i albummet. Fjern dem fra regningerne først.',
       remove_joined_title: 'Fjern {{name}} fra albummet?',
       remove_joined_message:
         'De får ikke længere albummets regninger. De regninger, de står på, bliver.',
-      who_title: 'Hvem af dem er du?',
-      who_message: 'Vælg dit navn, så din andel af hver regning lander i din kassebog.',
-      who_new: 'Jeg er ikke på listen',
     },
     share: {
-      row: 'Del dette album',
+      row: 'Del med venner',
       caption: 'Alle ser regningerne, og hvem der skylder hvem.',
       link_note: 'Virker i 24 timer. Alle med linket kan deltage.',
-      stop_title: 'Stop deling af {{name}}?',
       stop_message:
         'Alle beholder albummet med deres egne poster, men det opdateres ikke længere mellem jer.',
       leave: 'Forlad album',
@@ -3016,6 +3006,17 @@ const da = {
     bill: {
       delete_shared: 'Regningen er i et delt album. Sletter du den, fjernes den for alle.',
       remove_shared: 'Regningen er i et delt album. Den fjernes for alle andre.',
+      from_album: 'Fra {{album}}',
+      shared_album: 'Delt album',
+    },
+    rules: {
+      not_payer: 'Kun den, der betalte, kan ændre eller slette regningen.',
+      has_payments:
+        'Der er betalinger på regningen. Fortryd dem først for at ændre eller slette den.',
+      not_your_payment: 'Kun den, der betaler, kan registrere eller fortryde en betaling.',
+      note_not_payer: 'Betalt af {{name}}. Kun de kan ændre den.',
+      note_has_payments: 'Har betalinger. Fortryd dem for at ændre den.',
+      they_record: '{{name}} registrerer det, når de betaler dig.',
     },
   },
   assets: {

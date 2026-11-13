@@ -1,10 +1,12 @@
 import React, { useCallback, useMemo } from 'react';
+import { Alert } from 'react-native';
 
 import { PRO_LIMITS } from '~/constants/proLimits';
 import { useApp } from '~/context/AppContext';
 import { useIsPro } from '~/context/ProContext';
 import { albumBillRows, useAlbumBillTarget } from '~/features/albums/hooks/useAlbumBillTarget';
 import { useAlbumGroup } from '~/features/albums/hooks/useAlbumGroup';
+import { useGroupOthers } from '~/features/albums/hooks/useGroupBillOrigin';
 import { splitWithPeople } from '~/features/albums/lib/albumPeople';
 import {
   DEFAULT_INSTALMENT_CHOICE,
@@ -17,6 +19,7 @@ import { type SplitDraft, splitsHelpers } from '~/features/transactions/componen
 import type { TransactionEditorSubmitExtras } from '~/features/transactions/components/TransactionEditorScreen';
 import { useNewTransactionGate } from '~/features/transactions/hooks/useNewTransactionGate';
 import { draftPayer, friendPaidExpense } from '~/features/transactions/lib/splitPayer';
+import { I18n } from '~/lib/i18n';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
 import type { AddTransactionInitialValues } from '~/navigation/rootStack';
 import { requestHighlightTransaction } from '~/services/transactionsNavigation';
@@ -74,6 +77,8 @@ export function AddTransactionScreen({
     [activeAlbumId, addTransactionsToAlbum, albumId],
   );
   const groupBill = albumGroupId !== null && albumGroup.self !== null;
+  // A shared album's bill is split only between people who joined it.
+  const groupMembers = useGroupOthers(albumGroupId);
   const isPro = useIsPro();
   const withinSplitLimit =
     isPro || groupBill || getUnpaidSplitBillCount() < PRO_LIMITS.FREE_MAX_UNSETTLED_SPLIT_BILLS;
@@ -147,12 +152,16 @@ export function AddTransactionScreen({
   const handleSubmitWithSplits = useCallback(
     (input: CreateTransactionInput, splits: SplitDraft[]) => {
       // A shared album's bill is the group's: this phone's entry follows from it.
-      if (albumGroupId) {
+      if (albumGroupId && splits.some((row) => !row.isSelf)) {
         const saved = saveAlbumBill(albumGroupId, input, albumBillRows(splits));
         if (saved) {
           if (saved.mine) requestHighlightTransaction(saved.id);
           return;
         }
+        // Never kept as a bill of the user's own in its place, which nobody
+        // else would get: say it failed (signed out, the share gone).
+        Alert.alert(I18n.t('errors.generic_operation_failed'));
+        return;
       }
       // A friend paid: the expense is the user's own share, on no account
       // until they pay that friend back, and nobody owes the user anything.
@@ -226,6 +235,7 @@ export function AddTransactionScreen({
       // Split with the album's people: Add shows the split before it saves.
       confirmSplitBeforeAdd={splitWith.length > 0}
       groupBill={groupBill}
+      groupMembers={groupBill ? groupMembers : undefined}
     />
   );
 }

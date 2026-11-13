@@ -25,6 +25,7 @@ import { formatCurrency } from '~/utils/formatters';
 import type { AlbumGroup } from '../hooks/useAlbumGroup';
 import { useGroupDebts } from '../hooks/useGroupDebts';
 import type { GroupDebt } from '../lib/groupDebts';
+import { canRecordPayment } from '../lib/groupRules';
 
 interface AlbumBalancesProps {
   /** The roll-up of the album's own bills (`useSettleUpSummary(albumId)`). */
@@ -32,8 +33,6 @@ interface AlbumBalancesProps {
   group: AlbumGroup;
   /** Opens the person's page, with only this album's bills. */
   onOpenPerson: (personKey: string) => void;
-  /** Opens the album's People page, where someone who joined says who they are. */
-  onOpenPeople: () => void;
 }
 
 /** A line of "Who owes whom". */
@@ -54,7 +53,7 @@ interface DebtRow {
  * balance with each person; a shared one lists the whole group's debts
  * (simplified when the group has that on) and what the group spent.
  */
-export function AlbumBalances({ summary, group, onOpenPerson, onOpenPeople }: AlbumBalancesProps) {
+export function AlbumBalances({ summary, group, onOpenPerson }: AlbumBalancesProps) {
   const { settings, settleGroupDebt } = useApp();
   const colors = useThemeColors();
   const me = useSelfPerson();
@@ -92,6 +91,11 @@ export function AlbumBalances({ summary, group, onOpenPerson, onOpenPeople }: Al
           // with none here yet (renamed since, or nameless) is settled as the
           // debt stands instead of opening a page that would find nobody.
           const hasPage = summary.people.some((person) => person.key === personKey);
+          // Whoever pays records it (README: Who can change what): a debt to
+          // the user from someone who joined is theirs to settle.
+          const canSettle = selfId
+            ? canRecordPayment(group.members, selfId, debt.from, debt.to)
+            : false;
           return {
             key: `${debt.currency}:${debt.from}:${debt.to}`,
             mine,
@@ -102,9 +106,11 @@ export function AlbumBalances({ summary, group, onOpenPerson, onOpenPeople }: Al
             // person's page, beside its bills.
             onPress: !mine
               ? undefined
-              : shared.simplified || !hasPage
+              : (shared.simplified || !hasPage) && canSettle
                 ? () => setSettling(debt)
-                : () => onOpenPerson(personKey),
+                : hasPage
+                  ? () => onOpenPerson(personKey)
+                  : undefined,
           };
         })
     : summary.people.flatMap((person): DebtRow[] => {
@@ -150,36 +156,12 @@ export function AlbumBalances({ summary, group, onOpenPerson, onOpenPeople }: Al
     };
   }, [group.members, selfId, settling]);
 
-  // Joined, and not on the album's list yet: none of its bills are theirs
-  // until they are. With a name to pick, that question is all there is to
-  // show; with none, they are being added as themselves.
-  if (group.share && !group.self && !group.mustClaim) {
+  // Joined, and not on the album's list yet: they are being added as
+  // themselves (`syncAlbumGroups`).
+  if (group.share && !group.self) {
     return (
       <View className="items-center px-5 pt-8">
         <LoadingDots />
-      </View>
-    );
-  }
-  if (group.mustClaim) {
-    return (
-      <View className="px-5 pt-5">
-        <Pressable
-          onPress={() => {
-            void triggerHaptic('selection');
-            onOpenPeople();
-          }}
-          accessibilityRole="button"
-          testID="album-balances-who"
-          className="flex-row items-center gap-3 rounded-2xl border border-primary/30 bg-primary/10 px-4 py-3.5 active:opacity-70"
-        >
-          <View className="flex-1 gap-0.5">
-            <Text variant="bodyStrong">{I18n.t('albums.people.who_title')}</Text>
-            <Text variant="caption" tone="muted">
-              {I18n.t('albums.people.who_message')}
-            </Text>
-          </View>
-          <ChevronRight size={18} color={colors.textMuted} />
-        </Pressable>
       </View>
     );
   }

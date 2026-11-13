@@ -252,7 +252,6 @@ export const GA4_ONLY_EVENTS = {
   ALBUM_LOCATION_SET: 'Album Location Set',
   ALBUM_LOCATIONS_OPENED: 'Album Locations Opened',
   // Album members and shared albums
-  ALBUM_PEOPLE_SET: 'Album People Set',
   ALBUM_SHARED: 'Album Shared',
   ALBUM_SHARE_STOPPED: 'Album Share Stopped',
   ALBUM_JOINED: 'Album Joined',

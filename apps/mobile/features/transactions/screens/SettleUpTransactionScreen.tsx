@@ -1,9 +1,11 @@
 import { Check, ChevronRight, Pencil, ReceiptText, RotateCcw, Send } from 'lucide-react-native';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
 
 import { Button, CategoryEmoji, SettingsHeader, SettingsPageLayout, Text } from '~/components/ui';
-import { useApp } from '~/context/AppContext';
+import { useApp, useTransactions } from '~/context/AppContext';
+import { listGroupMembers, subscribeAlbumGroups } from '~/features/albums/services/albumGroupStore';
+import { sharedAlbumFor } from '~/features/cloudSync/services/sharedLedgerStore';
 import { PersonAvatar } from '~/features/transactions/components/PersonAvatar';
 import { SettleUpFlowAvatars } from '~/features/transactions/components/SettleUpFlowAvatars';
 import {
@@ -63,6 +65,23 @@ export function SettleUpTransactionScreen({
   const [payBackVisible, setPayBackVisible] = useState(false);
 
   const summary = useSettleUpByTransaction('all');
+  // A shared album's bill: its shares are only removed in its editor (by its
+  // payer), and only a share of someone who has left is marked paid here,
+  // since everyone else records their own payments (README: Who can change what).
+  const { transactions } = useTransactions();
+  const groupId = transactions.find((tx) => tx.id === transactionId)?.albumGroupId ?? null;
+  const groupMembers = useSyncExternalStore(subscribeAlbumGroups, () =>
+    listGroupMembers(groupId && sharedAlbumFor(groupId) ? groupId : null),
+  );
+  const groupSplits = groupId
+    ? (transactions.find((tx) => tx.id === transactionId)?.splits ?? [])
+    : null;
+  const canMarkPaid = groupSplits
+    ? (share: TransactionDebtSplit) => {
+        const memberId = groupSplits.find((split) => split.id === share.splitId)?.albumMemberId;
+        return !groupMembers.find((member) => member.id === memberId)?.userId;
+      }
+    : undefined;
 
   const bill = useMemo(
     () => summary.transactions.find((t) => t.transactionId === transactionId) ?? null,
@@ -498,6 +517,8 @@ export function SettleUpTransactionScreen({
                 <Text variant="bodyStrong">{personInitial(split.personName)}</Text>
               )}
               label={(split) => split.personName ?? I18n.t('transactions.settleUp.someone')}
+              canMarkPaid={canMarkPaid}
+              canRemove={!groupSplits}
             />
           </ScrollView>
 

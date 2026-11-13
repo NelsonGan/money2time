@@ -10,30 +10,20 @@ import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { useApp } from '~/context/AppContext';
 import { useCloudSync } from '~/features/cloudSync/CloudSyncContext';
 import { useSignedIn } from '~/features/cloudSync/components/SignInGate';
-import { useSelfPerson } from '~/hooks/useSelfPerson';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { pickLibraryImage } from '~/services/libraryImagePicker';
 import { deleteAlbumCover, getAlbumCoverUri, saveAlbumCover } from '~/services/userAssets';
-import type { AlbumLocation, AlbumPerson } from '~/types';
+import type { AlbumLocation } from '~/types';
 import { getErrorMessage } from '~/utils/errorHandling';
-import { newId } from '~/utils/id';
 
 import { AlbumDateRangeFields } from '../components/AlbumDateRangeFields';
 import { AlbumLocationField } from '../components/AlbumLocationField';
 import { AlbumMonthPicker } from '../components/AlbumMonthPicker';
 import { AlbumSharingCard } from '../components/AlbumSharingCard';
-import { SplitWithCard, type SplitWithRow } from '../components/SplitWithCard';
 import { useAlbumScope } from '../hooks/useAlbumGroup';
-import { albumSharingMessage, peopleEditMessage } from '../lib/albumMessages';
-import {
-  MAX_ALBUM_PEOPLE,
-  type PeopleEditError,
-  withPersonAdded,
-  withPersonRemoved,
-  withPersonRenamed,
-} from '../lib/albumPeople';
+import { albumSharingMessage } from '../lib/albumMessages';
 
 interface CreateAlbumScreenProps {
   initialTransactionIds?: string[];
@@ -46,14 +36,13 @@ export function CreateAlbumScreen({
   onClose,
   onCreated,
 }: CreateAlbumScreenProps) {
-  const { createAlbum, setAlbumPeople, setAlbumSimplifyDebts } = useApp();
+  const { createAlbum, setAlbumSimplifyDebts } = useApp();
   const sync = useCloudSync();
   // Sharing is free and needs only an account: asked for under the switch.
   const signedIn = useSignedIn();
   const { canSplit, canShare } = useAlbumScope();
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
-  const selfName = useSelfPerson().name;
 
   const [name, setName] = useState('');
   const [coverPath, setCoverPath] = useState<string | null>(null);
@@ -62,9 +51,9 @@ export function CreateAlbumScreen({
   const [selectedIds, setSelectedIds] = useState<string[]>(initialTransactionIds ?? []);
   const [location, setLocation] = useState<AlbumLocation | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
-  // Who it is split with and how it is shared, set up with the album.
-  const [people, setPeople] = useState<AlbumPerson[]>([]);
-  // What the user asked for; it is shared only once an account is signed in.
+  // Whether it is split with friends: a shared album, chosen here and never
+  // later (README: Album members and shared albums). It is shared only once
+  // an account is signed in.
   const [wantsShare, setWantsShare] = useState(false);
   const share = wantsShare && signedIn;
   // The sign-in opens at the foot of the form: bring it into view.
@@ -115,7 +104,6 @@ export function CreateAlbumScreen({
         transactionIds: selectedIds,
         location,
       });
-      if (people.length) setAlbumPeople(albumId, people);
     } catch (error) {
       Alert.alert(I18n.t('errors.generic_operation_failed'), getErrorMessage(error));
       return;
@@ -126,38 +114,13 @@ export function CreateAlbumScreen({
         await sync.shareAlbum({ id: albumId, name: name.trim() });
         if (simplify) setAlbumSimplifyDebts(albumId, true);
       } catch (error) {
-        // The album is made; it can be shared from its People page.
+        // The album is made, as one of the user's own.
         Alert.alert(albumSharingMessage(error));
       }
     }
     onCreated(albumId);
   };
 
-  const applyPeople = (next: AlbumPerson[] | PeopleEditError): boolean => {
-    if (typeof next !== 'string') {
-      setPeople(next);
-      return true;
-    }
-    const message = peopleEditMessage(next);
-    if (message) Alert.alert(message);
-    return false;
-  };
-  const rows: SplitWithRow[] = [
-    {
-      id: null,
-      name: selfName,
-      isSelf: true,
-      renamable: false,
-      removable: false,
-    },
-    ...people.map((person) => ({
-      id: person.id,
-      name: person.name,
-      isSelf: false,
-      renamable: true,
-      removable: true,
-    })),
-  ];
   const toggleShare = (next: boolean) => {
     void triggerHaptic('selection');
     // Signed out, the switch stays off over the sign-in: a second tap puts it away.
@@ -286,27 +249,11 @@ export function CreateAlbumScreen({
               <ChevronRight size={20} color={themeColors.textMuted} />
             </Pressable>
 
-            {canSplit ? (
+            {canSplit && canShare ? (
               <>
-                <Text variant="label" tone="muted" className="mb-2 mt-5 px-1">
-                  {I18n.t('albums.people.split_with')}
-                </Text>
-                <View className="gap-4">
-                  <SplitWithCard
-                    rows={rows}
-                    canAdd={people.length < MAX_ALBUM_PEOPLE}
-                    onAdd={(personName) =>
-                      applyPeople(withPersonAdded(people, personName, newId()))
-                    }
-                    onRename={(id, personName) =>
-                      applyPeople(withPersonRenamed(people, id, personName))
-                    }
-                    onRemove={(row) => row.id && setPeople(withPersonRemoved(people, row.id))}
-                  />
+                <View className="mt-5 gap-4">
                   <AlbumSharingCard
-                    share={
-                      canShare ? { value: share, onChange: toggleShare, signIn: signInOpen } : null
-                    }
+                    share={{ value: share, onChange: toggleShare, signIn: signInOpen }}
                     simplify={
                       share
                         ? {

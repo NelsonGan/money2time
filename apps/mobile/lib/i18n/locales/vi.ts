@@ -2946,28 +2946,17 @@ const vi = {
       split_with: 'Chia với',
       me_tag: 'Bạn',
       joined: 'Đã tham gia',
-      not_joined: 'Chưa tham gia',
-      add_person: 'Thêm người',
-      add: 'Thêm',
+      left: 'Đã rời',
       unnamed: 'Bạn bè',
       name_taken: 'Ở đây đã có người mang tên đó.',
-      full: 'Một album được chia với tối đa {{max}} người.',
-      remove_title: 'Xóa {{name}}?',
-      remove_message: 'Các hóa đơn mới trong album này sẽ không còn chia với người đó.',
-      remove_in_use:
-        '{{name}} có trong một hóa đơn của album này. Hãy bỏ họ khỏi các hóa đơn trước.',
       remove_joined_title: 'Xóa {{name}} khỏi album?',
       remove_joined_message:
         'Họ sẽ không còn nhận hóa đơn của album này. Các hóa đơn có họ vẫn được giữ.',
-      who_title: 'Bạn là ai trong số này?',
-      who_message: 'Chọn tên của bạn để phần của bạn trong mỗi hóa đơn vào sổ của bạn.',
-      who_new: 'Tôi không có trong danh sách',
     },
     share: {
-      row: 'Chia sẻ album này',
+      row: 'Chia với bạn bè',
       caption: 'Mọi người đều thấy các hóa đơn và ai nợ ai.',
       link_note: 'Có hiệu lực 24 giờ. Ai có liên kết đều tham gia được.',
-      stop_title: 'Dừng chia sẻ {{name}}?',
       stop_message:
         'Mọi người vẫn giữ album cùng các mục của riêng mình, nhưng nó không còn cập nhật giữa các bạn.',
       leave: 'Rời album',
@@ -2999,6 +2988,16 @@ const vi = {
     bill: {
       delete_shared: 'Hóa đơn này nằm trong album chung. Xóa nó sẽ gỡ khỏi mọi người.',
       remove_shared: 'Hóa đơn này nằm trong album chung. Nó sẽ bị gỡ khỏi mọi người khác.',
+      from_album: 'Từ {{album}}',
+      shared_album: 'Album chung',
+    },
+    rules: {
+      not_payer: 'Chỉ người đã trả mới có thể sửa hoặc xóa hóa đơn này.',
+      has_payments: 'Hóa đơn này đã có thanh toán. Hãy hoàn tác trước khi sửa hoặc xóa.',
+      not_your_payment: 'Chỉ người trả mới có thể ghi hoặc hoàn tác một khoản thanh toán.',
+      note_not_payer: '{{name}} đã trả. Chỉ họ mới sửa được.',
+      note_has_payments: 'Đã có thanh toán. Hoàn tác để sửa.',
+      they_record: '{{name}} sẽ ghi lại khi trả bạn.',
     },
   },
   assets: {

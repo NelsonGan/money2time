@@ -23,7 +23,6 @@ function makeAlbum(overrides: Partial<Album>): Album {
     placeName: null,
     placeAdmin: null,
     countryCode: null,
-    splitWith: [],
     sortOrder: 0,
     ...STAMPS,
     ...overrides,

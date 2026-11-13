@@ -29,17 +29,11 @@ import type {
 } from '~/types';
 import { convert } from '~/utils/currency';
 import { dayKeyFromDateLocal, normalizeMoneyAmount } from '~/utils/formatters';
-import { newId, nowIso } from '~/utils/id';
+import { nowIso } from '~/utils/id';
 
-import {
-  groupFromLocalBill,
-  localBill,
-  type LocalPayment,
-  settlementsByBill,
-} from '../lib/albumGroup';
-import { cleanPersonName, memberForRow, personNameKey, selfMember } from '../lib/albumPeople';
+import { localBill, type LocalPayment, settlementsByBill } from '../lib/albumGroup';
+import { selfMember } from '../lib/albumPeople';
 import { openShares, simplifyDebts } from '../lib/groupDebts';
-import { notifyAlbumGroups } from './albumGroupStore';
 
 /** What the open ledger and the user's settings give the group's entries. */
 export interface GroupEnv {
@@ -429,9 +423,14 @@ function projectExpense(
       ? (loaded.splits.get(expense.id) ?? [])
       : transactionSplitsRepository.listByTransactionId(expense.id);
 
+  // Whether this account made the bill's last change (a phone of the user's).
+  const changedByUser = expense.createdBy === env.userId;
+
   if (!bill) {
     // Not the user's bill (any more): their side of it goes. Only an entry
-    // the group has marked as its own is touched.
+    // the group has marked as its own is touched. A bill with payments on it
+    // cannot be deleted or changed, so no money that moved goes with it
+    // (README: Who can change what).
     if (!live || live.album_group_id !== groupId) return false;
     removeLocalBill(live, splits);
     return true;
@@ -463,9 +462,18 @@ function projectExpense(
 
   // --- The entry itself ---------------------------------------------------
   const finalPayment = bill.payments.find((payment) => payment.kind === 'sent_final') ?? null;
+  // A bill the user paid is on the account this phone's editor just picked,
+  // else the one the entry already has, else, new and saved by the user, on
+  // their default account. One the user paid that someone else wrote (they
+  // joined under a name it was already paid by) lands on no account until
+  // they say which account it left (`needsAccountConfirm`). An entry already
+  // here never falls back to the default account: the account the user's
+  // other phone gave it is on its way.
   const accountId =
     bill.kind === 'paid'
-      ? (live?.account_id ?? hints.entry?.accountId ?? env.defaultAccountId)
+      ? (hints.entry?.accountId ??
+        live?.account_id ??
+        (changedByUser && !live ? env.defaultAccountId : null))
       : finalPayment
         ? paymentAccount(finalPayment, env.defaultAccountId)
         : null;
@@ -747,104 +755,4 @@ export function closeEvenGroup(groupId: string, env: GroupEnv): boolean {
     { date: dayKeyFromDateLocal(new Date()), createdBy: env.userId },
   );
   return true;
-}
-
-/**
- * An album just shared from this phone: every split bill already in it
- * becomes a bill of the group, with the payments on it, and people on those
- * bills who are not in the group yet are added by name. The entries keep
- * their rows, amounts and payments: they are marked as the group's, and
- * `projectGroup` then only tidies them (who each share is with, its order).
- */
-export function publishAlbumBills(groupId: string, env: GroupEnv): void {
-  const db = getSQLite();
-  let members = albumGroupsRepository.listMembers(groupId);
-  const self = selfMember(members, env.userId);
-  if (!self) return;
-  const ids = db
-    .getAllSync<{ transaction_id: string }>(
-      `SELECT at.transaction_id FROM album_transactions at
-       JOIN transactions t ON t.id = at.transaction_id
-       WHERE at.album_id = ? AND at.deleted_at IS NULL AND t.deleted_at IS NULL
-         AND t.type = 'expense' AND t.album_group_id IS NULL
-         -- A bill split by item stays the user's own: its shares come from
-         -- its items, which the group does not hold.
-         AND NOT EXISTS (
-           SELECT 1 FROM receipt_splits r
-           WHERE r.transaction_id = t.id AND r.deleted_at IS NULL
-         )`,
-      [groupId],
-    )
-    .map((row) => row.transaction_id);
-  const splitsByTx = transactionSplitsRepository.listByTransactionIds(ids);
-  db.withTransactionSync(() => {
-    for (const id of ids) {
-      const splits = splitsByTx.get(id) ?? [];
-      if (!splits.some((split) => !split.isSelf)) continue;
-      const tx = readTx(id);
-      if (!tx) continue;
-      // Who each friend's row is: the member it already names, else the one
-      // of that name, else someone new by that name. The new are only added
-      // once the bill turns out to be one the group can hold.
-      const pending = new Map<string, { id: string; name: string }>();
-      const memberOf = (split: TransactionSplit): string | null => {
-        const known = memberForRow(members, self.id, split);
-        if (known) return known.id;
-        const name = cleanPersonName(split.personName ?? '');
-        if (!name) return null;
-        const key = personNameKey(name);
-        const person = pending.get(key) ?? { id: newId(), name };
-        pending.set(key, person);
-        return person.id;
-      };
-      const built = groupFromLocalBill(tx, splits, self.id, memberOf);
-      if (!built) continue;
-      for (const person of pending.values()) {
-        members = [...members, albumGroupsRepository.createMember(groupId, person)];
-      }
-      const category = tx.category_id
-        ? db.getFirstSync<{ name: string | null; icon: string | null }>(
-            'SELECT name, icon FROM categories WHERE id = ?',
-            [tx.category_id],
-          )
-        : null;
-      albumGroupsRepository.upsertExpense({
-        id,
-        groupId,
-        date: tx.date,
-        note: tx.note,
-        amount: built.amount,
-        currency: tx.currency,
-        categoryName: category?.name ?? null,
-        categoryIcon: category?.icon ?? null,
-        paidBy: built.paidBy,
-        shares: built.shares,
-        createdBy: env.userId,
-      });
-      for (const payment of built.payments) {
-        const settlementId = albumGroupsRepository.createSettlement({
-          groupId,
-          expenseId: id,
-          fromMember: payment.fromMember,
-          toMember: payment.toMember,
-          amount: payment.amount,
-          currency: tx.currency,
-          // The day it was paid where the user is, as every other payment's.
-          date: dayKeyFromDateLocal(new Date(payment.paidAt)),
-          createdBy: env.userId,
-          createdAt: payment.paidAt,
-        });
-        transactionSplitsRepository.update(payment.splitId, { settlementId });
-      }
-      for (const split of splits) {
-        if (split.isSelf) continue;
-        const memberId = memberOf(split);
-        if (memberId && split.albumMemberId !== memberId) {
-          transactionSplitsRepository.update(split.id, { albumMemberId: memberId });
-        }
-      }
-      transactionsRepository.update(id, { albumGroupId: groupId });
-    }
-  });
-  notifyAlbumGroups();
 }

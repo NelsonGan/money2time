@@ -2065,10 +2065,14 @@ how the household is spending, and who is covering what.
 ### Album members and shared albums
 
 An album can be the face of a group, as a trip with friends is: the people it
-is split with, the bills between them, and who owes whom. It builds on Split
-Bill and Balances (Key patterns: Paid by and Balances) and on shared ledgers'
-plumbing (above). The app side is `features/albums/` (`lib/albumPeople.ts`,
-`lib/albumGroup.ts`, `services/albumGroupStore.ts`,
+is split with, the bills between them, and who owes whom. **Only a shared
+album is split**: an album is either one of the user's own (no people, no
+splitting) or shared with friends who join it with a link, chosen when it is
+made and never changed. Ordinary expenses outside shared albums keep Split
+Bill with typed names as before (Key patterns: Paid by and Balances). Shared
+albums are built on shared ledgers' plumbing (above). The app side is
+`features/albums/` (`lib/albumPeople.ts`, `lib/albumGroup.ts`,
+`lib/groupRules.ts`, `services/albumGroupStore.ts`,
 `services/albumGroupSync.ts`, `screens/AlbumPeopleScreen.tsx`,
 `lib/groupDebts.ts`, `components/AlbumBalances.tsx`,
 `components/SplitWithCard.tsx`, `components/AlbumSharingCard.tsx`) and
@@ -2078,149 +2082,174 @@ migrations `090` and `091`.
 
 - **The album page.** The cover photo runs to the top of the screen under
   the status bar, with Back, Change cover, Edit, Add transactions and Delete
-  floating over it, and the tab bar (**Transactions**, **Breakdown**, then
-  **Balances**) resting on its bottom on rounded corners. Each tab is its own
-  list under that header (`AlbumDetailScreen`): scrolling the open tab moves
-  the header with it until only a solid bar with the album's name and the
-  tabs are left, the controls crossfading into it as on a goal's page, and
-  pulling down past the top stretches the photo. Switching tabs (tap or
-  swipe) first brings the other tabs to where the header is, so it never
-  jumps. A held transaction starts selecting, and the tab bar turns into the
-  selection's bar (Cancel, the count and total, duplicate, edit, remove), as
-  the calendar's header does, clear of the rows. A floating + at the bottom right
-  opens a new expense that goes into this album and starts split with its
-  people, whether or not the album is the active one (the `albumId` param of
+  floating over it, and the tab bar (**Transactions**, **Breakdown**, then,
+  in a shared album, **Balances**) resting on its bottom on rounded corners.
+  Each tab is its own list under that header (`AlbumDetailScreen`):
+  scrolling the open tab moves the header with it until only a solid bar
+  with the album's name and the tabs are left, the controls crossfading into
+  it as on a goal's page, and pulling down past the top stretches the photo.
+  Switching tabs (tap or swipe) first brings the other tabs to where the
+  header is, so it never jumps. A held transaction starts selecting, and the
+  tab bar turns into the selection's bar (Cancel, the count and total,
+  duplicate, edit, remove), as the calendar's header does, clear of the
+  rows. A floating + at the bottom right opens a new expense that goes into
+  this album (and, in a shared album, starts split with its people), whether
+  or not the album is the active one (the `albumId` param of
   `AddTransactionDetailed`), and comes back to the album when saved.
-- **The Breakdown by person.** Once a bill in the album is split, the
-  Breakdown has a row of chips: **Everyone** (the album's entries as they
-  stand), the user, then each person. A person's Breakdown counts each bill
-  by their share of it: the user's own entries in full and their Me row of a
-  split bill, anyone else's row of each split bill (`lib/memberShare.ts`,
-  turned into the entry's displayed value by its own rate). A category opens
-  the bills that person has a share in.
-- **Split with.** The album page has a People button on its cover (the
-  people's avatars, or "Split with" while there are
-  none), which opens the People page: the user, then each person by name, with a
-  field to add one. Wherever an album or a split bill lists the user, they
-  show as their Settings name and photo (`useSelfPerson`), "Me" and an
-  initial while they set neither; a bill's own row keeps what it was written
-  with. Names are unique in an album (case-folded), at most 20. A
-  row renames, the × removes. In a shared album the user's own row shows the
-  name the others see and renames like anyone's, and a person still on one of
-  its bills cannot be removed. Not offered for an album in a shared ledger,
-  where entries already belong to people. The same list and switches are on
-  the New Album screen, so an album can be set up with its people, shared and
-  simplified as it is created (if sharing fails there, the album is still
-  made and can be shared from its People page).
-- **A new expense starts split.** While the album is the active one, a new
-  expense opens already split evenly between Me and its people, Paid by Me
-  (the Split chip shows the count). It is an ordinary split from there: change
-  the amounts, who paid, or remove everyone to make it an expense of the
-  user's own. Add does not save it straight away: Split Bill opens first, its
-  Done reading **Add** (`confirmSplitBeforeAdd`), so the split is seen and can
-  be changed before the bill is saved; Back returns to the form unsaved. A
-  free user at the unsettled-split-bill limit gets no default split.
-- **An album's balances are its own.** A split bill in an album is settled
-  in that album and nowhere else: the album's Balances tab and its people's
-  pages cover the bills in it, and the Balances page covers the bills in no
-  album (`getAlbumOwnedTransactionIds`, `useSettleUpSummary`,
-  `settleUpWithPerson`). So "Aisha" on a trip and "Aisha" on an unrelated bill
-  are two balances, and a shared album's simplified debts have one place to
-  be paid. The Balances page lists each album with something still owed
-  first, with the user's net there, and the row opens the album
-  (`useAlbumBalances`). A bill in two albums shows in both. A bill's own page
-  and the Settings badge still look at every bill. In a shared ledger, where
-  an album is not split with people, nothing is set apart.
-- **Balances tab.** An album with people, shared, or with a split bill in it
-  has a Balances tab, after Transactions and Breakdown: what the user is owed or owes across the album's bills, then a **Who
-  owes whom** card: one line per debt, the two people's avatars with an arrow
-  between them, a sentence ("Ben owes you", "You owe Aisha") and the amount.
-  An album that is not shared lists the user's balance with each person (the
-  Balances roll-up over the album's entries, `useSettleUpSummary(albumId)`).
-  Before the album's first split bill the tab is an empty placeholder (No
-  balances yet), with no "All settled up" figure.
-  A shared album lists the whole group's debts in each currency, the user's
-  own first and the others' quieter, and adds a **Group spending** card
-  (Total, You paid, Your share). A line of the user's own opens the person's
-  page with only this album's bills, whose Settle up settles only those.
-  People with nothing to pay either way are listed under **Settled up**
-  (marked Even when bills are open both ways and come to nothing), which is
-  where the album's bills with them are found. New bills come from the
-  page's floating +.
-- **Share this album.** A switch on the People page, for the album's owner.
-  **Sharing is free and has no limit of its own**: the only limit on albums
-  is the free plan's count of them (`FREE_MAX_ALBUMS`), and a bill in a
-  shared album counts toward no free limit. It needs an account and nothing
-  else: turned on with nobody signed in, the sign-in options show under the
-  switch (`SignInGate`, the one the Join screen uses; a second tap puts them
-  away) and the album is shared once that is done. No paywall is shown, and
-  signing in this way does not turn on Cloud Sync for a free user. **Only
-  an album of the main ledger can be shared, and only while that ledger is
-  not itself shared** (`mainLedgerTakesSharedAlbums`, `useAlbumGroup.canShare`):
-  in any other ledger the switch is not offered, a main ledger that holds a
-  shared album cannot be shared until its albums are not, and a copy of a
-  ledger carries a shared album's bills as ordinary split bills
-  (`album_group_id` and `settlement_id` are cleared). One
-  card holds it, the Simplify group debts switch and, once shared, the
-  album's invite link (Copy, New link; the same 24-hour link a shared ledger
-  has, on its own host: `https://album.money2time.com/join/<code>`, so that
-  a web join for friends without the app can take that host over later);
-  what
-  each does is behind its info button. Each person then reads as
-  Joined or Not joined yet.
-- **Simplify group debts.** A switch on a shared album's People page, off to
-  start with, that anyone in the album can turn on, for everyone. On, Who owes
-  whom shows the same balances with as few payments as it can: when Anna owes
-  Bob and Bob owes Charlie, Anna owes Charlie. Nobody pays or gets back more
-  in total. A
-  line of the user's own then opens a Settle up sheet for that one payment,
-  where a smaller amount can be typed to pay part of it.
+  **Opening is light**: the cover and controls mount with the push, the
+  content once the native stack says the transition ended (or after 450 ms),
+  the open tab first and the others one at a time after it (a swipe mounts
+  any still waiting), and the header's collapsed state lives in the small bar
+  it controls (`SolidHeaderBar`), so scrolling past the collapse point
+  re-renders that bar alone, never the page under the moving cover.
+- **Split with friends is chosen at creation.** The New Album screen has the
+  switch (in one card with Simplify group debts); on, the album is shared as
+  it is made, with nobody but the user until others join. **Sharing is free
+  and has no limit of its own**: the only limit on albums is the free plan's
+  count of them (`FREE_MAX_ALBUMS`), and a bill in a shared album counts
+  toward no free limit. It needs an account and nothing else: turned on with
+  nobody signed in, the sign-in options show under the switch (`SignInGate`;
+  a second tap puts them away). No paywall is shown, and signing in this way
+  does not turn on Cloud Sync for a free user. If sharing fails, the album is
+  still made, as one of the user's own. An existing album never becomes a
+  shared one. **Only an album of the main ledger can be shared, and only
+  while that ledger is not itself shared** (`mainLedgerTakesSharedAlbums`,
+  `useAlbumScope`): in any other ledger the switch is not offered, a main
+  ledger that holds a shared album cannot be shared until its albums are not,
+  and a copy of a ledger carries a shared album's bills as ordinary split
+  bills (`album_group_id` and `settlement_id` are cleared).
+- **People.** A shared album's people are exactly those who joined with its
+  link: there are no typed names. Its cover has a People button (their
+  avatars) opening the People page: the user (whose name, the one the others
+  see, they can change), then each member, **Joined** or **Left**; the
+  owner's invite link (Copy, New link; the same 24-hour link a shared ledger
+  has, on its own host: `https://album.money2time.com/join/<code>`); the
+  Simplify switch; and Leave for anyone but the owner. The owner can take
+  someone out of the share. Wherever a split bill lists the user, they show as
+  their Settings name and photo (`useSelfPerson`), "Me" and an initial while
+  they set neither. Not offered for an album in a shared ledger.
 - **Joining.** The link opens the Join screen (the one shared ledgers use,
   titled Shared album). Anyone signed in can join, as many as the album
-  holds people (20 besides its owner). The album is added to the user's main ledger, which opens with it
-  (someone whose main ledger is shared is told it cannot hold one; a link
-  whose album id is already an album of another ledger is refused, and a
-  group only ever writes into an album of the main ledger), and its
-  People page asks
-  **Which one is you?**: one of the names the owner added, or "I'm not on the
-  list" (then they are added under their own name). Until they answer,
-  nothing of the group reaches their ledger, and the album's Balances tab
-  shows only that question. **With no name left to pick** (the owner added
-  nobody, or every name is already someone's), nothing is asked: they are
-  put on the list under their own name as soon as the group's people have
-  come down (`syncAlbumGroups`, `useAlbumGroup.mustClaim`), under an id made
-  from their account, so two phones of theirs write one row. An album
-  deleted here and joined again comes back.
-- **Bills and payments are everyone's.** A split bill saved in a shared album
+  holds people (20 besides its owner). The album is added to the user's main
+  ledger, which opens with it (someone whose main ledger is shared is told it
+  cannot hold one; a link whose album id is already an album of another
+  ledger is refused, and a group only ever writes into an album of the main
+  ledger), and they are put on its list under their own name as soon as the
+  group's people have come down (`syncAlbumGroups`), under an id made from
+  their account, so two phones of theirs write one row. An album deleted
+  here and joined again comes back.
+- **A new bill starts split.** In a shared album a new expense opens split
+  evenly between the user and everyone who joined. The user is always its
+  payer (Split Bill has no Paid by there), and people are added from the
+  members list, one tap each, never typed (`groupMembers`). Add does not
+  save it straight away: Split Bill opens first, its Done reading **Add**
+  (`confirmSplitBeforeAdd`), so the split is seen and can be changed before
+  the bill is saved; Back returns to the form unsaved. Removing everyone
+  makes it an expense of the user's own.
+- **Bills and payments are everyone's.** A bill saved in a shared album
   reaches everyone in it: each person gets their own side of it, in their own
   ledger, their own currency totals and their own category (matched by name,
-  then icon, else Other). A payment recorded on one phone (Mark paid, a part,
-  paying a member back, Settle up) is applied on the other person's phone too,
-  and an undo undoes it there. Editing a bill changes it for everyone;
-  deleting one asks first ("…removes it for everyone"). So does taking one
-  out of the album or removing everyone from its split (asked while the
-  editor is still open, so Cancel keeps every edit): the bill then leaves
-  the group, for everyone else, and stays the user's own entry. The entry a
-  payment made (a part the user paid) cannot be split itself.
-- **Leaving and stopping.** A member leaves from the People page; the owner
-  turns the switch off, or removes someone who joined. Either way everyone
-  keeps the album with their own entries as ordinary split bills, split with
-  the same people by name; it just no longer updates between them. Signing
-  out does the same until the next sign-in, which links it again.
+  then icon, else Other). A payment recorded on one phone (paying a member
+  back, a part, Settle up) is applied on the other person's phone too, and an
+  undo undoes it there. Editing a bill changes it for everyone; deleting one
+  asks first ("…removes it for everyone"), and so does taking one out of the
+  album or removing everyone from its split (asked while the editor is still
+  open, so Cancel keeps every edit): the bill then leaves the group, for
+  everyone else, and stays the user's own entry. Its row in every list has a
+  small people mark after the title (read out as "Shared album"), and its
+  editor a line under the amount with the same mark ("From Bali trip"),
+  which opens the album (`albumNote`). An existing entry added to a shared
+  album stays the user's own, local split and all.
+- **Who can change what: nobody moves anyone else's money.** The rules are
+  in `lib/groupRules.ts`, applied by the app (`saveAlbumBill`,
+  `deleteGroupEntries`, `deleteSplit`, `recordGroupPayment`,
+  `undoGroupPayment`, `settleGroupDebt`) and offered only where they allow
+  in the screens:
+  - **Only you can say you paid.** A bill's payer is whoever adds it, so a
+    bill never arrives saying someone else paid.
+  - **A bill belongs to whoever paid it.** Only they change it (amount, day,
+    title, shares) or delete it. Anyone else's editor locks those
+    (`lockedReason`: no keypad, no Delete, only Expense; a tap on the amount,
+    day or Split says why), its line under the amount says "Paid by Aisha.
+    Only they can change it.", and saving keeps only the user's own fields
+    (category, longer note, receipt, mood; `saveAlbumBillOwnFields`).
+  - **Payments lock a bill.** With a payment recorded on it, nobody changes
+    it, takes a share off it or deletes it until the payments are undone
+    ("Has payments. Undo them to change it."). So no money that moved is
+    ever deleted from under anyone, and its account (the user's own field)
+    still changes.
+  - **Only the person paying records a payment**, and only they undo it.
+    Paying back and Settle up, where the user pays, ask which account it
+    leaves (`SettleUpConfirmSheet`); the person paid gets it on their own
+    payback account. Where someone owes the user, the person's page says
+    "Aisha records it when they pay you." in place of Settle up, and the
+    Balances line opens that page rather than a Settle up sheet. When shares
+    go both ways, Settle up pays only the net, onto the user's oldest bills,
+    and the shares the other way stay open (no Settle up when they come out
+    even). A shared bill's own page offers no Remove (its payer edits the
+    bill), and Mark paid only on a share of someone who has left.
+- **A shared album's balances are its own.** A bill in a shared album is
+  settled in that album and nowhere else: its Balances tab and its people's
+  pages cover the bills in it, and the Balances page covers every other split
+  bill, in an album of the user's own or in none
+  (`getAlbumOwnedTransactionIds`, `useSettleUpSummary`,
+  `settleUpWithPerson`). The Balances page lists each shared album with
+  something still owed first, with the user's net there, and the row opens
+  the album (`useAlbumBalances`). A bill's own page and the Settings badge
+  still look at every bill.
+- **Balances tab.** What the user is owed or owes across the album's bills,
+  then a **Who owes whom** card: one line per debt in each currency, the two
+  people's avatars with an arrow between them, a sentence ("Ben owes you",
+  "You owe Aisha") and the amount, the user's own first and the others'
+  quieter, then a **Group spending** card (Total, You paid, Your share).
+  Before the album's first bill the tab is an empty placeholder (No balances
+  yet). A line of the user's own opens the person's page with only this
+  album's bills. People with nothing to pay either way are listed under
+  **Settled up** (marked Even when bills are open both ways and come to
+  nothing), which is where the album's bills with them are found.
+- **The Breakdown by person.** Once a bill in a shared album is split, the
+  Breakdown has a row of chips: **Everyone** (the album's entries as they
+  stand), the user, then each person. A person's Breakdown counts each bill
+  by their share of it (`lib/memberShare.ts`, turned into the entry's
+  displayed value by its own rate). A category opens the bills that person
+  has a share in.
+- **Simplify group debts.** A switch, off to start with, that anyone in the
+  album can turn on, for everyone. On, Who owes whom shows the same balances
+  with as few payments as it can: when Anna owes Bob and Bob owes Charlie,
+  Anna owes Charlie. Nobody pays or gets back more in total. A line where the
+  user pays then opens a Settle up sheet for that one payment, where a
+  smaller amount can be typed to pay part of it.
+- **Leaving and stopping.** A member leaves from the People page, or the
+  owner takes them out of the share. **Their row and their bills stay in the
+  group**, so nobody else's bills or balances change; they read as Left. On
+  their own phone the album goes on as one of their own, their entries as
+  ordinary split bills (settled on the Balances page); it just no longer
+  updates. Deleting the album stops sharing it, for the owner, the same way
+  for everyone. Signing out does the same until the next sign-in, which links
+  it again. Leaving marks their member row as left (it keeps no account;
+  `markSelfLeft` in `sharedLedgerSync.leave`, pushed before the phone lets
+  go, and `markMemberLeft` when the owner takes them out): new bills leave
+  them out, and a payment from them is recorded by the person it went to.
+  Joining again links the same row back.
 - **Pro plays no part.** Unlike a shared ledger, a shared album syncs
   whoever in it is Pro or not, and is never paused.
 
 **How it works**
 
-- **People.** An album that is not shared keeps its people on the album row
-  (`albums.split_with_json`, `[{ id, name }]`); the user is never listed. A
-  shared album's people are its group's members (`album_members`), the user
-  among them: `user_id` is the Cloud Sync account of someone who joined, null
-  a placeholder. Sharing turns the album's people into members with the same
-  ids, and the end of sharing turns the members back into the album's people
-  (`beginAlbumGroup`, `releaseAlbumGroup`). `useAlbumGroup` reads either.
-  A share row carries the person it is with as `album_member_id`; within an
-  album Balances still groups a person by name (`debtPartyKey`).
+- **People.** A shared album's people are its group's members
+  (`album_members`), the user among them, each with the Cloud Sync account
+  that joined (`user_id`). The group starts with the user alone when the
+  album is made (`beginAlbumGroup`); the others add themselves as they join
+  (`addSelfToGroup` from `syncAlbumGroups`). Nobody's row is ever deleted:
+  someone who leaves keeps theirs, so the bills that name them stay whole
+  (the People page reads who is still in the share from the Worker's list,
+  `getLedgerMembers`, to say Joined or Left). The end of sharing on a phone
+  drops the group's rows there and clears `album_group_id`, leaving the
+  user's entries as ordinary split bills (`releaseAlbumGroup`).
+  `albums.split_with_json` (an album's typed people, from before only shared
+  albums were split) is no longer read. A share row carries the person it is
+  with as `album_member_id`; within an album Balances still groups a person
+  by name (`debtPartyKey`).
 - **The group.** Four tables hold it: `album_members`, `album_expenses`
   (one row per bill: who paid, and each member's share in `shares_json`),
   `album_settlements` (a payment from one member to another for one bill;
@@ -2256,16 +2285,24 @@ migrations `090` and `091`.
   each payment moved through) is kept from the rows already there.
   `transactions.album_group_id` marks such an entry; `settlement_id` on a paid
   share is the settlement it stands for.
+- **Which account.** A bill the user paid is on the account the editor just
+  picked (`hints.entry`: `saveAlbumBill` passes it rather than writing the
+  account itself, so the projection works out the account amount), else the
+  one the entry already has, else, new and written by the user
+  (`album_expenses.created_by`, the bill's last writer, deletes included),
+  their default account, else no account (`needsAccountConfirm` in
+  `lib/albumGroup.ts`). An entry already on the phone never falls back to
+  the default account: one the user's other phone gave it is on its way.
+  The editor's line reads the album, the payer and the last writer through
+  `useGroupBillOrigin`.
 - **One direction.** Saving a split bill in a shared album
   (`saveAlbumBill`), recording a payment on one (`markSplitPaid`,
   `recordSplitPayment`, `payBackPayer`, `recordPayBack` and Settle up all
   route there), undoing one, and deleting the bill or the entry a payment made
   each write the group's row first and then project. A payment is cut to what
   is still owed as stored, so a second tap never pays a share twice. The group
-  is derived from the user's entries only when a split bill that was their own
-  becomes the group's (`publishAlbumBills`, `groupFromLocalBill`, its rows
-  unchanged): the album's split bills when it is shared, one added to a shared
-  album later, and those a phone saved before it said who it is.
+  is never derived from the user's entries: an album is shared before it has
+  any, and an entry of the user's own added later stays theirs.
 - **Who owes whom.** `lib/groupDebts.ts` (pure) derives it from the group's
   bills and payments: `openShares` (each share still owed to its bill's
   payer), `pairwiseDebts` (each pair's net, per currency) and `simplifyDebts`:
@@ -2329,10 +2366,16 @@ migrations `090` and `091`.
     never a sync error that stays up, nor a reason the owner cannot stop
     sharing or delete their account.
     What stays possible, as in any shared bill splitter: someone in the album
-    can add a bill naming the user as its payer (it lands as an expense on
-    their default account), add as many bills as they like, or mark themselves
-    as another person on the list. Leaving the album ends it; the entries
-    already made stay, as the user's own to delete.
+    can add as many bills as they like, or mark themselves as another person
+    on the list. **Who can change what is kept by the app, not the
+    server**: each phone writes the group's database directly with its own
+    token, so the Worker never sees a write and cannot tell who made it. A
+    modified app could still name someone else as payer, change or delete
+    their bill, record a payment as them, or write `created_by` as them
+    (every member's `user_id` is in `album_members`). Enforcing the rules on
+    the server needs the album's writes to go through the Worker, which
+    checks each against the writer's sign-in. Leaving the album ends it; the
+    entries already made stay, as the user's own to delete.
 
 **Limits.** Split by Item bills are not shared (they have no Paid by). A member without Pro adds
 bills in a shared album whatever their count of unsettled split bills, and a shared album's bills are
@@ -2357,9 +2400,9 @@ Two providers, two jobs:
 
 | Coverage                                               | Definitions | Meaning                                                                                                 |
 | ------------------------------------------------------ | ----------- | ------------------------------------------------------------------------------------------------------- |
-| All custom events                                      | 167         | Every event in the custom-event tables goes to GA4.                                                     |
+| All custom events                                      | 166         | Every event in the custom-event tables goes to GA4.                                                     |
 | PostHog + GA4 custom events                            | 71          | Install, activation, daily engagement, adoption milestones, the Pro funnel and low-volume moments.      |
-| GA4-only custom events                                 | 96          | Frequent per-use telemetry and data maintenance; PostHog sees these uses only through `Feature Used`.   |
+| GA4-only custom events                                 | 95          | Frequent per-use telemetry and data maintenance; PostHog sees these uses only through `Feature Used`.   |
 | Feature first-use definitions                          | 20          | One adoption event per qualifying feature on eligible installs.                                         |
 | Transaction milestone thresholds                       | 6           | One event at each documented logged-transaction count.                                                  |
 | Maximum adoption/milestone events per eligible install | 26          | Feature first uses plus transaction milestones, with working persistent storage; not a total event cap. |
@@ -2595,9 +2638,8 @@ Bank and wallet notifications (Android listener) and the Log Notification Shortc
 | `ALBUM_DELETED`                 | `Album Deleted`                 | `m2t_album_deleted`                 | No      | An album is deleted; each successful deletion.                                                                                                                                                          | None                                                                                                                                                                                                                                                                                                                                             | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
 | `ALBUM_LOCATION_SET`            | `Album Location Set`            | `m2t_album_location_set`            | No      | An album location is set or cleared; each successful change.                                                                                                                                            | `cleared`                                                                                                                                                                                                                                                                                                                                        | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
 | `ALBUM_LOCATIONS_OPENED`        | `Album Locations Opened`        | `m2t_album_locations_opened`        | No      | The album map panel opens; each panel mount.                                                                                                                                                            | `count`                                                                                                                                                                                                                                                                                                                                          | [features/albums/components/AlbumMapPanel.tsx](apps/mobile/features/albums/components/AlbumMapPanel.tsx)                   |
-| `ALBUM_PEOPLE_SET`              | `Album People Set`              | `m2t_album_people_set`              | No      | An album that is not shared gets its "Split with" people changed (added, renamed or removed); each change.                                                                                              | `count`                                                                                                                                                                                                                                                                                                                                          | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
-| `ALBUM_SHARED`                  | `Album Shared`                  | `m2t_album_shared`                  | No      | An album is shared (Share this album turned on); each successful share.                                                                                                                                 | None                                                                                                                                                                                                                                                                                                                                             | [features/cloudSync/CloudSyncContext.tsx](apps/mobile/features/cloudSync/CloudSyncContext.tsx)                             |
-| `ALBUM_SHARE_STOPPED`           | `Album Share Stopped`           | `m2t_album_share_stopped`           | No      | The owner stops sharing an album; each successful stop.                                                                                                                                                 | None                                                                                                                                                                                                                                                                                                                                             | [features/cloudSync/CloudSyncContext.tsx](apps/mobile/features/cloudSync/CloudSyncContext.tsx)                             |
+| `ALBUM_SHARED`                  | `Album Shared`                  | `m2t_album_shared`                  | No      | An album is made shared (Split with friends on New Album); each successful share.                                                                                                                       | None                                                                                                                                                                                                                                                                                                                                             | [features/cloudSync/CloudSyncContext.tsx](apps/mobile/features/cloudSync/CloudSyncContext.tsx)                             |
+| `ALBUM_SHARE_STOPPED`           | `Album Share Stopped`           | `m2t_album_share_stopped`           | No      | The owner stops sharing an album (by deleting it); each successful stop.                                                                                                                                | None                                                                                                                                                                                                                                                                                                                                             | [features/cloudSync/CloudSyncContext.tsx](apps/mobile/features/cloudSync/CloudSyncContext.tsx)                             |
 | `ALBUM_JOINED`                  | `Album Joined`                  | `m2t_album_joined`                  | No      | Someone joins a shared album with its link; each successful join.                                                                                                                                       | `is_pro`                                                                                                                                                                                                                                                                                                                                         | [features/cloudSync/CloudSyncContext.tsx](apps/mobile/features/cloudSync/CloudSyncContext.tsx)                             |
 | `ALBUM_LEFT`                    | `Album Left`                    | `m2t_album_left`                    | No      | A member leaves a shared album; each successful leave.                                                                                                                                                  | None                                                                                                                                                                                                                                                                                                                                             | [features/cloudSync/CloudSyncContext.tsx](apps/mobile/features/cloudSync/CloudSyncContext.tsx)                             |
 | `ALBUM_MEMBER_REMOVED`          | `Album Member Removed`          | `m2t_album_member_removed`          | No      | The owner removes someone who joined a shared album; each successful removal.                                                                                                                           | None                                                                                                                                                                                                                                                                                                                                             | [features/albums/screens/AlbumPeopleScreen.tsx](apps/mobile/features/albums/screens/AlbumPeopleScreen.tsx)                 |
@@ -2992,6 +3034,7 @@ Earlier retirements still matter for historical reports:
 | Gate-level limit event immediately followed by paywall                       | The paywall view with the gate source; retain the account alert's separate limit event. |
 | `Settle Up Opened`, `Reimbursements Opened`, `Insights Drilldown Opened`     | GA4 `screen_view`; Insights visits also count as `Feature Used` (`insights`).           |
 | `Map Pin Tapped`, `Review Prompt Skipped`                                    | Removed without a current custom-event replacement.                                     |
+| `Album People Set`                                                           | Removed: only shared albums have people, who join with a link (`Album Joined`).         |
 | Unshipped payment-alert review, binding-learning and Smart categories events | Removed when payment alerts became a local review queue.                                |
 
 ### Maintenance contract
@@ -5252,7 +5295,8 @@ app's `services/webDashboardLink.ts`, `webDashboardCrypto.ts`,
   page loaded before this and a shared album with no bills yet. The group's own
   tables (`album_members`, `album_expenses`, `album_settlements`,
   `album_groups`) are not in
-  what the phone sends.
+  what the phone sends. In the lists (`TxList`) such a row has a **Shared
+  album** pill, as the app's row has its people mark.
 - **Split bills a friend paid** (app migration 089, see Paid by and Balances):
   the payer's row carries `is_payer`, the friends' rows hold their share in
   `share_amount` beside an `amount` of 0, and the expense is the user's own

@@ -12,10 +12,8 @@ import { type AlbumGroupPerson, albumPeople, selfMember } from '../lib/albumPeop
 import { listGroupMembers, subscribeAlbumGroups } from '../services/albumGroupStore';
 
 export interface AlbumGroup {
-  /** Whether the album can be split with people: never one in a shared ledger. */
+  /** Whether the album is split with people: a shared album, never one in a shared ledger. */
   available: boolean;
-  /** Whether it can be shared: only an album of the main ledger, while that is not shared. */
-  canShare: boolean;
   /** The album's sharing on this phone, or null while it is not shared. */
   share: SharedLedger | null;
   /** Everyone the album is split between, the user first. */
@@ -24,12 +22,6 @@ export interface AlbumGroup {
   others: AlbumGroupPerson[];
   /** Shared albums: the user's own member, or null until they are on its list. */
   self: AlbumMember | null;
-  /**
-   * Shared albums: the user joined and has to say which name on the list is
-   * theirs. Only while there is a name nobody has taken: with none to pick
-   * they are put on the list as themselves, unasked (`syncAlbumGroups`).
-   */
-  mustClaim: boolean;
   /** Shared albums: the group's live members. */
   members: AlbumMember[];
 }
@@ -49,28 +41,26 @@ export function useAlbumScope(): { canSplit: boolean; canShare: boolean } {
 }
 
 /**
- * The people of an album, whichever way it keeps them (the album's own list,
- * or its group's members once shared), kept current as either changes.
+ * The people of an album: a shared album's group members, kept current as
+ * they change; an album that is not shared has only the user.
  */
 export function useAlbumGroup(album: Album | null | undefined): AlbumGroup {
-  const { canSplit, canShare } = useAlbumScope();
+  const { canSplit } = useAlbumScope();
   const share = useSharedAlbum(album?.id);
   const groupId = share ? share.ledgerId : null;
   const members = useSyncExternalStore(subscribeAlbumGroups, () => listGroupMembers(groupId));
   // The user reads as their Settings name, "Me" without one.
   const meLabel = useSelfPerson().name;
   return useMemo(() => {
-    const people = album ? albumPeople(album, share ? members : null, share?.userId, meLabel) : [];
+    const people = album ? albumPeople(share ? members : null, share?.userId, meLabel) : [];
     const self = share ? selfMember(members, share.userId) : null;
     return {
-      available: !!album && canSplit,
-      canShare: !!album && canShare,
+      available: !!album && canSplit && !!share,
       share,
       people,
       others: people.filter((person) => !person.isSelf),
       self,
-      mustClaim: !!share && !self && members.some((member) => !member.userId),
       members,
     };
-  }, [album, canShare, canSplit, meLabel, members, share]);
+  }, [album, canSplit, meLabel, members, share]);
 }

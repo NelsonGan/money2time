@@ -23,6 +23,7 @@ import {
   Trash2,
   Type,
   UserRound,
+  UsersRound,
 } from 'lucide-react-native';
 import React, { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -482,6 +483,24 @@ interface TransactionEditorScreenProps {
   };
   /** A line under the header that links somewhere (a payment's instalment plan). */
   headerNotice?: { label: string; actionLabel: string; onPress: () => void };
+  /**
+   * A shared album's bill: a line under the amount saying which album it is
+   * from (or why the user cannot change it), which opens the album.
+   */
+  albumNote?: { label: string; onOpenAlbum: () => void };
+  /**
+   * A shared album's bill the user cannot change (someone else's, or one
+   * with payments on it): the amount, day, title and split stay as they are,
+   * and touching them shows this. The user's own fields (category, account,
+   * details, receipt, mood) still change.
+   */
+  lockedReason?: string;
+  /**
+   * A shared album's bill: the people it can be split with (README: Album
+   * members and shared albums). Split Bill adds only these, and the user is
+   * always the payer.
+   */
+  groupMembers?: readonly { id: string; name: string }[];
   /** The fee a transfer being edited already has. */
   initialTransferFee?: TransferFeeDraft | null;
   /**
@@ -725,6 +744,9 @@ export function TransactionEditorScreen({
   recurringOptions,
   instalmentOptions,
   headerNotice,
+  albumNote,
+  lockedReason,
+  groupMembers,
   initialTransferFee = null,
 }: TransactionEditorScreenProps) {
   const {
@@ -1278,13 +1300,17 @@ export function TransactionEditorScreen({
   );
   const activateField = useCallback(
     (field: ActiveField) => {
+      if (lockedReason && (field === 'amount' || field === 'date' || field === 'note')) {
+        showToast(lockedReason);
+        return;
+      }
       if (!field || !isNativeKeyboardField(field)) {
         blurNativeInputs();
         Keyboard.dismiss();
       }
       setActiveField(field);
     },
-    [blurNativeInputs, isNativeKeyboardField],
+    [blurNativeInputs, isNativeKeyboardField, lockedReason, showToast],
   );
   const clearActiveField = useCallback(() => {
     activateField(null);
@@ -1844,6 +1870,10 @@ export function TransactionEditorScreen({
   const handleOpenSplitBill = useCallback(
     (options?: { skipHaptic?: boolean }) => {
       if (!canOpenSplitBill) return;
+      if (lockedReason) {
+        showToast(lockedReason);
+        return;
+      }
       // Starting a fresh split bill adds a new unsettled bill to the free-plan
       // total. Gate that case only: a transaction that is already an unsettled
       // split bill (or is mid-edit in split mode) is already counted, so managing
@@ -1892,6 +1922,8 @@ export function TransactionEditorScreen({
       checkLimit,
       getUnpaidSplitBillCount,
       groupBill,
+      lockedReason,
+      showToast,
       startsAsUnsettledSplitBill,
       navigation,
       splitEvenly,
@@ -2087,6 +2119,7 @@ export function TransactionEditorScreen({
         onDone: handleDoneSplitBill,
         // Read from the ref, so the publish made as the page opens has it.
         doneLabel: splitConfirmRef.current ? I18n.t('transactions.editor.title_create') : undefined,
+        groupMembers,
         onCancel: handleCancelSplitBill,
       });
     },
@@ -2104,6 +2137,7 @@ export function TransactionEditorScreen({
       groupBill,
       mode,
       newlyPaidIds,
+      groupMembers,
       setSplitSession,
       settings,
     ],
@@ -3119,6 +3153,10 @@ export function TransactionEditorScreen({
   // Tapping the amount display dismisses the note keyboard (bringing the numpad
   // back); in the classic layout it activates the amount tool zone.
   const handleAmountRowPress = useCallback(() => {
+    if (lockedReason) {
+      showToast(lockedReason);
+      return;
+    }
     if (useStickyNumpad) {
       void triggerHaptic('selection');
       noteInputRef.current?.blur();
@@ -3130,7 +3168,7 @@ export function TransactionEditorScreen({
       return;
     }
     activateField('amount');
-  }, [activateField, useStickyNumpad]);
+  }, [activateField, lockedReason, showToast, useStickyNumpad]);
 
   // Toolbar sentiment: neutral -> happy -> sad -> neutral.
   const cycleSentiment = useCallback(() => {
@@ -3143,9 +3181,13 @@ export function TransactionEditorScreen({
   const handleAccountSelect = useCallback(
     (nextAccountId: string) => {
       setAccountId(nextAccountId);
-      // Default the entry currency to the newly chosen account's currency.
-      setEntryCurrency(accountCurrency(nextAccountId));
-      resetCustomFx();
+      // Default the entry currency to the newly chosen account's currency,
+      // except on a shared album's bill being edited: its currency is the
+      // group's, and the account only says where the user's money moved.
+      if (!(groupBill && mode === 'edit')) {
+        setEntryCurrency(accountCurrency(nextAccountId));
+        resetCustomFx();
+      }
       // Sticky mode picks the category from the always-visible background grid,
       // so just close the account sheet instead of opening the category modal.
       if (useStickyNumpad) {
@@ -3163,7 +3205,9 @@ export function TransactionEditorScreen({
       activateField,
       categoryId,
       clearActiveField,
+      groupBill,
       isBalanceAdjustmentType,
+      mode,
       resetCustomFx,
       useStickyNumpad,
     ],
@@ -3395,14 +3439,16 @@ export function TransactionEditorScreen({
               </>
             ) : null}
             <View className="flex-1">
-              <NumpadPanel
-                resetNonce={bulkEntryNonce}
-                key={splitAmountRevision}
-                initialExpression={amount}
-                onBackgroundPress={clearActiveField}
-                onValueChange={handleAmountValueChange}
-                onConfirm={handleAmountConfirm}
-              />
+              {lockedReason ? null : (
+                <NumpadPanel
+                  resetNonce={bulkEntryNonce}
+                  key={splitAmountRevision}
+                  initialExpression={amount}
+                  onBackgroundPress={clearActiveField}
+                  onValueChange={handleAmountValueChange}
+                  onConfirm={handleAmountConfirm}
+                />
+              )}
             </View>
           </View>
         );
@@ -4035,6 +4081,7 @@ export function TransactionEditorScreen({
                           <View className="max-w-[66%] min-w-[40%]">
                             <TextInput
                               ref={noteInputRef}
+                              editable={!lockedReason}
                               value={note}
                               onChangeText={handleNoteChange}
                               placeholder={I18n.t('transactions.editor.optional')}
@@ -4929,6 +4976,22 @@ export function TransactionEditorScreen({
                       {workTimeNudgeParts.after}
                     </Text>
                   ) : null}
+                  {albumNote ? (
+                    <Pressable
+                      onPress={() => {
+                        void triggerHaptic('selection');
+                        albumNote.onOpenAlbum();
+                      }}
+                      hitSlop={6}
+                      accessibilityRole="button"
+                      className="mt-0.5 flex-row items-center gap-1 self-start active:opacity-70"
+                    >
+                      <UsersRound size={12} color={themeColors.textMuted} />
+                      <Text variant="caption" tone="muted" numberOfLines={1} className="shrink">
+                        {albumNote.label}
+                      </Text>
+                    </Pressable>
+                  ) : null}
                   {instalmentSummary ? (
                     <Pressable
                       onPress={openInstalmentSheet}
@@ -5010,6 +5073,7 @@ export function TransactionEditorScreen({
                 <FileText size={16} color={themeColors.textMuted} />
                 <TextInput
                   ref={noteInputRef}
+                  editable={!lockedReason}
                   value={note}
                   onChangeText={handleNoteChange}
                   placeholder={I18n.t('transactions.editor.optional')}
@@ -5172,7 +5236,7 @@ export function TransactionEditorScreen({
                         />
                       )}
                     </ScrollView>
-                  ) : (
+                  ) : lockedReason ? null : (
                     <NumpadPanel
                       compact
                       onScreen={numpadExpanded}

@@ -1988,6 +1988,7 @@
         "untitledBill": "Bahagi Bil",
         "paidTitle": "Dibayar balik",
         "personPaid": "{name} membayar",
+        "sharedAlbum": "Album kongsi",
         "undoTitle": "Tandakan bahagian ini belum dibayar?",
         "undoBody": "Ia terhutang kepada anda semula, dan perbelanjaan naik semula sebanyak jumlah ini. Pindahan bayaran balik ke akaun lain akan dibuang.",
         "itemizedTotal": "Jumlah: {sum}",

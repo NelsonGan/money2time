@@ -1988,6 +1988,7 @@
         "untitledBill": "Podzielony rachunek",
         "paidTitle": "Zwrócono",
         "personPaid": "{name} zapłacił(a)",
+        "sharedAlbum": "Udostępniony album",
         "undoTitle": "Oznaczyć ten udział jako niezapłacony?",
         "undoBody": "Znów jest Ci winien, a wydatek rośnie o tę kwotę. Przelew zwrotny na inne konto zostanie usunięty.",
         "itemizedTotal": "Razem: {sum}",

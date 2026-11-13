@@ -36,6 +36,12 @@ export interface SplitBillSession {
   onDone: () => void;
   /** The Done button's word when committing also saves the bill ("Add"). */
   doneLabel?: string;
+  /**
+   * A shared album's bill: the people it can be split with (everyone who
+   * joined but the user). Rows are only ever these, added from a list, and
+   * the user is always the payer.
+   */
+  groupMembers?: readonly { id: string; name: string }[];
   /** Discard staged edits back to the snapshot taken when the flow opened. */
   onCancel: () => void;
 }

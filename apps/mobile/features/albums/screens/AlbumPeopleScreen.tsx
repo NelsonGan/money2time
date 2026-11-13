@@ -1,11 +1,10 @@
 import * as Clipboard from 'expo-clipboard';
 import { LogOut } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
-import { Alert, Pressable, View } from 'react-native';
+import { Alert, View } from 'react-native';
 
 import {
   Button,
-  Card,
   FormScrollView,
   SETTINGS_HORIZONTAL_PADDING,
   SettingsHeader,
@@ -15,7 +14,6 @@ import {
 } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import { useCloudSync } from '~/features/cloudSync/CloudSyncContext';
-import { useSignedIn } from '~/features/cloudSync/components/SignInGate';
 import {
   getInviteLink,
   getLedgerMembers,
@@ -23,31 +21,19 @@ import {
   removeMember,
 } from '~/features/cloudSync/services/sharedLedgersApi';
 import { leaveAskingFirst } from '~/features/sharedLedgers/lib/confirmLeave';
-import { ownDisplayName } from '~/features/sharedLedgers/lib/ledgerPeople';
-import { PersonAvatar } from '~/features/transactions/components/PersonAvatar';
-import { debtPartyKey } from '~/features/transactions/lib/debtParty';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
-import { newId } from '~/utils/id';
 
 import { AlbumSharingCard } from '../components/AlbumSharingCard';
 import { SplitWithCard, type SplitWithRow } from '../components/SplitWithCard';
 import { useAlbumGroup } from '../hooks/useAlbumGroup';
-import { memberIsOnBill } from '../lib/albumGroup';
 import { albumSharingMessage, peopleEditMessage } from '../lib/albumMessages';
-import {
-  type AlbumGroupPerson,
-  MAX_ALBUM_PEOPLE,
-  type PeopleEditError,
-  withPersonAdded,
-  withPersonRemoved,
-  withPersonRenamed,
-} from '../lib/albumPeople';
+import { type AlbumGroupPerson, type PeopleEditError } from '../lib/albumPeople';
 import {
   groupSimplifiesDebts,
-  listGroupExpenses,
+  markMemberLeft,
   subscribeAlbumGroups,
 } from '../services/albumGroupStore';
 
@@ -57,26 +43,16 @@ interface AlbumPeopleScreenProps {
 }
 
 /**
- * Who an album is split with, and its sharing. The people are names on the
- * album until it is shared; then they are its group's members, some of them
- * people who joined with the album's link. The owner shares it, invites with
- * the link, removes people or stops; someone who joined says who they are and
- * can leave.
+ * A shared album's people and its sharing: everyone who joined with its link
+ * (an album is shared when it is made, and its people are only those who
+ * joined). The owner invites with the link and can take someone out of the
+ * share; everyone else can leave. Someone who leaves, or is taken out, keeps
+ * their row and their bills in the group, so nobody's balances change: they
+ * read as Left.
  */
 export function AlbumPeopleScreen({ albumId, onBack }: AlbumPeopleScreenProps) {
-  const {
-    albums,
-    setAlbumPeople,
-    addAlbumMember,
-    renameAlbumMember,
-    removeAlbumMember,
-    claimAlbumMember,
-    setAlbumSimplifyDebts,
-  } = useApp();
+  const { albums, renameAlbumMember, setAlbumSimplifyDebts } = useApp();
   const sync = useCloudSync();
-  // Sharing is free and needs only an account: asked for under the switch.
-  const signedIn = useSignedIn();
-  const [wantsShare, setWantsShare] = useState(false);
   const colors = useThemeColors();
   const bottomInset = useSettingsBottomNavInset();
   const album = albums.find((item) => item.id === albumId) ?? null;
@@ -167,22 +143,6 @@ export function AlbumPeopleScreen({ albumId, onBack }: AlbumPeopleScreenProps) {
     }
   };
 
-  // Share this album, asked for before signing in: done once signed in.
-  const startShare = () => {
-    if (!album) return;
-    void run('share', async () => {
-      await sync.shareAlbum({ id: album.id, name: album.name });
-      void triggerHaptic('success');
-    });
-  };
-  const startShareRef = useRef(startShare);
-  startShareRef.current = startShare;
-  useEffect(() => {
-    if (!wantsShare || !signedIn) return;
-    setWantsShare(false);
-    startShareRef.current();
-  }, [signedIn, wantsShare]);
-
   const copiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(
     () => () => {
@@ -199,22 +159,9 @@ export function AlbumPeopleScreen({ albumId, onBack }: AlbumPeopleScreenProps) {
     return error === null;
   };
 
-  const addPerson = (name: string): boolean => {
-    if (share) return showEditError(addAlbumMember(album.id, name));
-    const next = withPersonAdded(album.splitWith, name, newId());
-    if (typeof next === 'string') return showEditError(next);
-    setAlbumPeople(album.id, next);
-    return true;
-  };
-
+  // Only the user's own name changes here: everyone else names themselves.
   const renamePerson = (id: string, name: string) => {
-    if (share) {
-      showEditError(renameAlbumMember(album.id, id, name));
-      return;
-    }
-    const next = withPersonRenamed(album.splitWith, id, name);
-    if (typeof next === 'string') showEditError(next);
-    else setAlbumPeople(album.id, next);
+    showEditError(renameAlbumMember(album.id, id, name));
   };
 
   const isJoined = (person: AlbumGroupPerson) => {
@@ -223,82 +170,28 @@ export function AlbumPeopleScreen({ albumId, onBack }: AlbumPeopleScreenProps) {
     return joinedIds && member?.userId ? joinedIds.has(member.userId) : person.joined;
   };
 
+  // The owner takes someone out of the share. Their row and bills stay in
+  // the group (nobody's balances change); they only stop seeing it.
   const confirmRemove = (person: AlbumGroupPerson) => {
-    if (!person.id) return;
-    const id = person.id;
-    const member = group.members.find((item) => item.id === id);
-    if (share && member?.userId && isJoined(person)) {
-      // Someone who joined: the owner takes them out of the share.
-      if (!isOwner) return;
-      Alert.alert(
-        I18n.t('albums.people.remove_joined_title', { name: person.name }),
-        I18n.t('albums.people.remove_joined_message'),
-        [
-          { text: I18n.t('common.cancel'), style: 'cancel' },
-          {
-            text: I18n.t('common.remove'),
-            style: 'destructive',
-            onPress: () =>
-              void run(`remove:${id}`, async () => {
-                if (!shareId || !member.userId) return;
-                await removeMember(await getSessionToken(), shareId, member.userId);
-                setLink(null);
-                void trackEvent(AnalyticsEvents.ALBUM_MEMBER_REMOVED);
-                await loadJoined();
-                fetchLink().catch(() => undefined);
-              }),
-          },
-        ],
-      );
-      return;
-    }
-    // Someone still on a bill stays: said before asking, not after.
-    if (share && memberIsOnBill(listGroupExpenses(share.ledgerId), id)) {
-      Alert.alert(I18n.t('albums.people.remove_in_use', { name: person.name }));
-      return;
-    }
+    const member = group.members.find((item) => item.id === person.id);
+    if (!isOwner || !member?.userId) return;
     Alert.alert(
-      I18n.t('albums.people.remove_title', { name: person.name }),
-      I18n.t('albums.people.remove_message'),
+      I18n.t('albums.people.remove_joined_title', { name: person.name }),
+      I18n.t('albums.people.remove_joined_message'),
       [
         { text: I18n.t('common.cancel'), style: 'cancel' },
         {
           text: I18n.t('common.remove'),
           style: 'destructive',
-          onPress: () => {
-            if (!share) {
-              setAlbumPeople(album.id, withPersonRemoved(album.splitWith, id));
-            } else if (!removeAlbumMember(album.id, id)) {
-              Alert.alert(I18n.t('albums.people.remove_in_use', { name: person.name }));
-            }
-          },
-        },
-      ],
-    );
-  };
-
-  const toggleShare = (next: boolean) => {
-    if (next) {
-      void triggerHaptic('selection');
-      // With no account yet, the sign-in shows under the switch (a second
-      // tap puts it away) and the album is shared once it is done.
-      if (signedIn) startShare();
-      else setWantsShare((wanted) => !wanted);
-      return;
-    }
-    void triggerHaptic('warning');
-    Alert.alert(
-      I18n.t('albums.share.stop_title', { name: album.name }),
-      I18n.t('albums.share.stop_message'),
-      [
-        { text: I18n.t('common.cancel'), style: 'cancel' },
-        {
-          text: I18n.t('shared_ledgers.stop_sharing'),
-          style: 'destructive',
           onPress: () =>
-            void run('stop', async () => {
-              // Also with no session or network: the Worker is told later.
-              await sync.stopSharingLedger(album.id, { whenUnreachable: 'local' });
+            void run(`remove:${member.id}`, async () => {
+              if (!shareId || !member.userId) return;
+              await removeMember(await getSessionToken(), shareId, member.userId);
+              markMemberLeft(album.id, member.id);
+              setLink(null);
+              void trackEvent(AnalyticsEvents.ALBUM_MEMBER_REMOVED);
+              await loadJoined();
+              fetchLink().catch(() => undefined);
             }),
         },
       ],
@@ -347,32 +240,20 @@ export function AlbumPeopleScreen({ albumId, onBack }: AlbumPeopleScreenProps) {
     );
   };
 
-  // Joined, and not on the list yet: nothing here is theirs to change.
-  const pending = !!share && !group.self;
-  const placeholders = group.members.filter((member) => !member.userId);
-  const claim = (memberId: string | null) => {
-    void triggerHaptic('success');
-    claimAlbumMember(album.id, memberId, ownDisplayName() ?? '');
-  };
-
   const rows = group.people.map((person): SplitWithRow => {
     const joined = isJoined(person);
     return {
       id: person.id,
-      // In a shared album the user reads as the others see them, and can
-      // change that name like anyone's.
+      // The user reads as the others see them, and can change that name.
       name: person.isSelf && group.self ? group.self.name : person.name,
       isSelf: person.isSelf,
-      caption: !share
-        ? undefined
-        : person.isSelf
-          ? I18n.t('albums.people.me_tag')
-          : joined
-            ? I18n.t('albums.people.joined')
-            : I18n.t('albums.people.not_joined'),
-      renamable: !pending,
-      // Someone who joined is the owner's to remove; a name is anyone's.
-      removable: !person.isSelf && !pending && (!share || !joined || (isOwner && !!person.id)),
+      caption: person.isSelf
+        ? I18n.t('albums.people.me_tag')
+        : joined
+          ? I18n.t('albums.people.joined')
+          : I18n.t('albums.people.left'),
+      renamable: person.isSelf && !!group.self,
+      removable: !person.isSelf && isOwner && joined,
     };
   });
 
@@ -391,41 +272,12 @@ export function AlbumPeopleScreen({ albumId, onBack }: AlbumPeopleScreenProps) {
           bottomInset,
         ]}
       >
-        {group.mustClaim ? (
-          <Card className="gap-3 px-4 py-4">
-            <View className="gap-1">
-              <Text variant="bodyStrong">{I18n.t('albums.people.who_title')}</Text>
-              <Text variant="caption" tone="muted">
-                {I18n.t('albums.people.who_message')}
-              </Text>
-            </View>
-            <View className="flex-row flex-wrap gap-2">
-              {placeholders.map((member) => (
-                <Pressable
-                  key={member.id}
-                  onPress={() => claim(member.id)}
-                  accessibilityRole="button"
-                  className="flex-row items-center gap-2 rounded-full border border-border/40 bg-card py-1.5 pl-1.5 pr-3.5 active:opacity-70"
-                >
-                  <PersonAvatar name={member.name} partyKey={debtPartyKey(member.name)} size={26} />
-                  <Text variant="bodyStrong">{member.name}</Text>
-                </Pressable>
-              ))}
-            </View>
-            <Button variant="secondary" onPress={() => claim(null)}>
-              <Text>{I18n.t('albums.people.who_new')}</Text>
-            </Button>
-          </Card>
-        ) : null}
-
         <View>
           <Text variant="label" tone="muted" className="mb-2.5 px-1">
             {I18n.t('albums.people.split_with')}
           </Text>
           <SplitWithCard
             rows={rows}
-            canAdd={group.others.length < MAX_ALBUM_PEOPLE && !pending}
-            onAdd={addPerson}
             onRename={renamePerson}
             onRemove={(row) => {
               const person = group.people.find((item) => item.id === row.id);
@@ -435,18 +287,9 @@ export function AlbumPeopleScreen({ albumId, onBack }: AlbumPeopleScreenProps) {
         </View>
 
         <AlbumSharingCard
-          share={
-            (share ? isOwner : group.canShare)
-              ? {
-                  value: !!share,
-                  onChange: toggleShare,
-                  busy: busy === 'share' || busy === 'stop',
-                  signIn: !share && wantsShare && !signedIn,
-                }
-              : null
-          }
+          share={null}
           simplify={
-            share && !pending
+            share && group.self
               ? {
                   value: simplifies,
                   onChange: (next) => {

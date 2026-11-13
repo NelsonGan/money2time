@@ -1,4 +1,11 @@
-import { ArrowRight, CalendarRange, GripVertical, Undo2, UserRound } from 'lucide-react-native';
+import {
+  ArrowRight,
+  CalendarRange,
+  GripVertical,
+  Undo2,
+  UserRound,
+  UsersRound,
+} from 'lucide-react-native';
 import React, { memo, useEffect } from 'react';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
@@ -333,6 +340,10 @@ const TransactionItemBody = memo(
               })
             : I18n.t('common.no_account')))
         : null;
+    // A bill from a shared album: someone else can add, change or remove it,
+    // so the row says where it came from.
+    const fromSharedAlbum = !!transaction.albumGroupId;
+    const titleMarks = transaction.reimbursable || fromSharedAlbum;
     const account = transaction.accountId ? getAccountById(transaction.accountId) : undefined;
     const fromAccount = transaction.fromAccountId
       ? getAccountById(transaction.fromAccountId)
@@ -485,7 +496,7 @@ const TransactionItemBody = memo(
               by the reimbursable badge sizes its slot from a hidden copy and
               draws the visible title over it with room to spare. */}
           <View className="flex-row items-center gap-1.5">
-            {transaction.reimbursable ? (
+            {titleMarks ? (
               <>
                 {/* The row's spoken summary is built from its children's
                     labels, and would read both copies; labelling the slot
@@ -493,7 +504,11 @@ const TransactionItemBody = memo(
                 <View
                   className="min-w-0 shrink"
                   collapsable={false}
-                  accessibilityLabel={title ?? undefined}
+                  accessibilityLabel={
+                    fromSharedAlbum
+                      ? `${title ?? ''}, ${I18n.t('albums.bill.shared_album')}`
+                      : (title ?? undefined)
+                  }
                 >
                   <Text
                     variant="bodyStrong"
@@ -512,13 +527,18 @@ const TransactionItemBody = memo(
                     {title}
                   </Text>
                 </View>
+                {fromSharedAlbum ? (
+                  <UsersRound size={compact ? 11 : 12} color={themeColors.textMuted} />
+                ) : null}
                 {/* A reimbursable expense can be missing from the spending
                     totals above it, so the row says why rather than looking
                     miscounted. */}
-                <Undo2
-                  size={compact ? 11 : 12}
-                  color={transaction.reimbursedAt ? themeColors.success : themeColors.primary}
-                />
+                {transaction.reimbursable ? (
+                  <Undo2
+                    size={compact ? 11 : 12}
+                    color={transaction.reimbursedAt ? themeColors.success : themeColors.primary}
+                  />
+                ) : null}
               </>
             ) : (
               <Text

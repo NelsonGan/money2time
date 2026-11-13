@@ -1988,6 +1988,7 @@
         "untitledBill": "Gesplitste rekening",
         "paidTitle": "Terugbetaald",
         "personPaid": "{name} betaalde",
+        "sharedAlbum": "Gedeeld album",
         "undoTitle": "Dit aandeel als onbetaald markeren?",
         "undoBody": "Het wordt je weer verschuldigd en de uitgave gaat met dit bedrag omhoog. Een terugbetaling naar een andere rekening wordt verwijderd.",
         "itemizedTotal": "Totaal: {sum}",

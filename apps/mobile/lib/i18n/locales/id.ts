@@ -2978,27 +2978,17 @@ const id = {
       split_with: 'Bagi dengan',
       me_tag: 'Kamu',
       joined: 'Sudah bergabung',
-      not_joined: 'Belum bergabung',
-      add_person: 'Tambah orang',
-      add: 'Tambah',
+      left: 'Keluar',
       unnamed: 'Teman',
       name_taken: 'Sudah ada yang memakai nama itu di sini.',
-      full: 'Satu album dibagi dengan paling banyak {{max}} orang.',
-      remove_title: 'Hapus {{name}}?',
-      remove_message: 'Tagihan baru di album ini tidak lagi dibagi dengannya.',
-      remove_in_use: '{{name}} ada di sebuah tagihan di album ini. Keluarkan dulu dari tagihannya.',
       remove_joined_title: 'Keluarkan {{name}} dari album?',
       remove_joined_message:
         'Dia tidak lagi menerima tagihan album ini. Tagihan yang memuatnya tetap ada.',
-      who_title: 'Yang mana kamu?',
-      who_message: 'Pilih namamu agar bagianmu dari tiap tagihan masuk ke buku kasmu.',
-      who_new: 'Saya tidak ada di daftar',
     },
     share: {
-      row: 'Bagikan album ini',
+      row: 'Bagi dengan teman',
       caption: 'Semua orang melihat tagihan dan siapa berutang kepada siapa.',
       link_note: 'Berlaku 24 jam. Siapa pun yang memilikinya bisa bergabung.',
-      stop_title: 'Berhenti membagikan {{name}}?',
       stop_message:
         'Semua orang tetap memiliki album dengan catatannya sendiri, tetapi tidak lagi diperbarui di antara kalian.',
       leave: 'Keluar dari album',
@@ -3033,6 +3023,17 @@ const id = {
         'Tagihan ini ada di album bersama. Menghapusnya akan menghapusnya untuk semua orang.',
       remove_shared:
         'Tagihan ini ada di album bersama. Tagihan akan dihapus untuk semua orang lain.',
+      from_album: 'Dari {{album}}',
+      shared_album: 'Album bersama',
+    },
+    rules: {
+      not_payer: 'Hanya orang yang membayar yang bisa mengubah atau menghapus tagihan ini.',
+      has_payments:
+        'Tagihan ini sudah ada pembayaran. Batalkan dulu untuk mengubah atau menghapusnya.',
+      not_your_payment: 'Hanya orang yang membayar yang bisa mencatat atau membatalkan pembayaran.',
+      note_not_payer: 'Dibayar oleh {{name}}. Hanya mereka yang bisa mengubahnya.',
+      note_has_payments: 'Ada pembayaran. Batalkan untuk mengubahnya.',
+      they_record: '{{name}} mencatatnya saat membayar Anda.',
     },
   },
   assets: {
