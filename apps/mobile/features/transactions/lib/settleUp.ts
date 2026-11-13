@@ -1,4 +1,5 @@
 import type {
+  DebtDirection,
   PersonDebt,
   PersonDebtBill,
   SettleUpByTransactionSummary,
@@ -69,7 +70,7 @@ export function personKeyOf(personName: string | null | undefined): string {
  * it is with. Balances are rolled up from these, so a later source of debts
  * (a shared group's expenses) only has to produce entries.
  */
-export interface DebtEntry extends PersonDebtBill {
+interface DebtEntry extends PersonDebtBill {
   party: DebtParty;
 }
 
@@ -169,7 +170,7 @@ function debtEntriesOf(
  * both directions. It takes any list, so the debts of one album (or later a
  * shared group) are the entries of that album's transactions.
  */
-export function collectDebtEntries(
+function collectDebtEntries(
   transactions: readonly TransactionWithRelations[],
   options: AggregateSettleUpOptions,
 ): DebtEntry[] {
@@ -223,7 +224,7 @@ function netCurrencyTotals(
  * bucket. Totals are in the reporting currency and only include unpaid shares;
  * the `byCurrency` lists preserve the unpaid native subtotals.
  */
-export function rollUpDebtsByPerson(
+function rollUpDebtsByPerson(
   entries: readonly DebtEntry[],
   reportingCurrency: string,
 ): SettleUpSummary {
@@ -399,13 +400,15 @@ export function countUnpaidDebtors(transactions: TransactionWithRelations[]): nu
  * at least one unpaid, non-self split with a positive amount, or are a bill a
  * friend paid that the user has not paid back. Unlike
  * {@link aggregateSettleUpByTransaction}, excludes paid history and skips the
- * roll-up work. Used to gate free-plan split-bill creation.
+ * roll-up work. Used to gate free-plan split-bill creation. A shared album's
+ * bills are not counted: sharing an album has no free limit, and its bills
+ * are other people's to add.
  */
 export function countUnpaidSplitBills(transactions: TransactionWithRelations[]): number {
   let count = 0;
   for (const tx of transactions) {
     const splits = tx.splits;
-    if (!splits || splits.length === 0) continue;
+    if (!splits || splits.length === 0 || tx.albumGroupId) continue;
     const hasUnpaid = isFriendPaidBill(splits)
       ? owesPayer(splits, tx.amount)
       : splits.some((split) => !split.isSelf && !split.paidAt && split.amount > 0);
@@ -463,6 +466,57 @@ export function personSettlementRows(
     }
   }
   return rows;
+}
+
+/** A payment on one bill, as a part of settling up with a person. */
+interface PartSettlement {
+  /** The row it is recorded on: the friend's unpaid row, or the payer's for `you_owe`. */
+  splitId: string;
+  direction: DebtDirection;
+  /** In the bill's own currency. */
+  amount: number;
+}
+
+/**
+ * A part of the net with a person, as payments on bills: whoever pays on
+ * balance pays their oldest open shares first, as far as `amount` reaches.
+ * `amount` is in the currency the net is shown in: the bills' own when the
+ * net is in one currency, else the reporting currency.
+ */
+export function planPartSettlement(
+  person: Pick<PersonDebt, 'netReporting' | 'netByCurrency' | 'bills'>,
+  amount: number,
+): PartSettlement[] {
+  // The net in one currency says who pays; the reporting net only when the
+  // bills are in several (frozen rates can turn its sign the other way).
+  const single = person.netByCurrency.length === 1 ? person.netByCurrency[0]! : null;
+  const only = single?.currency ?? null;
+  const direction: DebtDirection =
+    (single ? single.amount : person.netReporting) >= 0 ? 'owes_you' : 'you_owe';
+  const open = person.bills
+    .filter(
+      (bill) =>
+        !bill.paidAt && bill.direction === direction && (only === null || bill.currency === only),
+    )
+    .sort((a, b) =>
+      a.date !== b.date ? (a.date < b.date ? -1 : 1) : a.splitId < b.splitId ? -1 : 1,
+    );
+  const payments: PartSettlement[] = [];
+  let left = Math.round(amount * 100);
+  for (const bill of open) {
+    if (left <= 0) break;
+    // What the bill counts for in the currency `amount` is in.
+    const worth = Math.round((only === null ? bill.reportingAmount : bill.amount) * 100);
+    if (worth <= 0) continue;
+    const paid = Math.min(left, worth);
+    left -= paid;
+    payments.push({
+      splitId: bill.splitId,
+      direction,
+      amount: paid === worth ? bill.amount : roundCents((bill.amount * paid) / worth),
+    });
+  }
+  return payments.filter((payment) => payment.amount > 0);
 }
 
 /**

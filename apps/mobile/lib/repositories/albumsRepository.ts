@@ -19,6 +19,8 @@ interface CreateAlbumInput {
   placeName?: string | null;
   placeAdmin?: string | null;
   countryCode?: string | null;
+  /** `[{ id, name }]` as JSON: the people an album that is not shared is split with. */
+  splitWithJson?: string | null;
   sortOrder?: number;
   deletedAt?: string | null;
 }
@@ -74,6 +76,7 @@ class AlbumsRepository {
         placeName: input.placeName ?? null,
         placeAdmin: input.placeAdmin ?? null,
         countryCode: input.countryCode ?? null,
+        splitWithJson: input.splitWithJson ?? null,
         sortOrder: nextSortOrder,
         createdAt: now,
         updatedAt: now,
@@ -194,7 +197,7 @@ class AlbumsRepository {
         `SELECT album_id AS albumId, transaction_id AS transactionId
        FROM album_transactions
        WHERE deleted_at IS NULL
-         AND album_id IN (SELECT id FROM albums WHERE ledger_id = ?)`,
+         AND album_id IN (SELECT id FROM albums WHERE ledger_id = ? AND deleted_at IS NULL)`,
         [getActiveLedgerId()],
       )
       .forEach((row) => {

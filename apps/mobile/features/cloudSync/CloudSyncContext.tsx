@@ -23,8 +23,9 @@ import { AppState } from 'react-native';
 
 import { useApp } from '~/context/AppContext';
 import { usePro } from '~/context/ProContext';
-import { writeOwnLedgerProfiles } from '~/features/sharedLedgers/lib/ledgerPeople';
+import { ownDisplayName, writeOwnLedgerProfiles } from '~/features/sharedLedgers/lib/ledgerPeople';
 import { DEFAULT_LEDGER_ID, getActiveLedgerId } from '~/lib/db/ledgerScope';
+import { I18n } from '~/lib/i18n';
 import { ledgersRepository } from '~/lib/repositories/ledgersRepository';
 import {
   clearAccountPro,
@@ -80,8 +81,9 @@ import { LIVE_DEVICE_ID, startLiveSync } from './services/liveSync';
 import { NATIVE_PROVIDERS, type NativeProvider } from './services/nativeSignIn';
 import { finishPendingSignOut, unlinkAndEndSession } from './services/pendingSignOut';
 import {
-  listSharedLedgers,
+  listLedgerShares,
   type SharedLedger,
+  sharedLedgerFor,
   subscribeSharedLedgers,
 } from './services/sharedLedgerStore';
 import { sharedLedgerSync } from './services/sharedLedgerSync';
@@ -164,6 +166,12 @@ interface CloudSyncContextValue {
     emoji: string | null;
   }) => Promise<SharedLedger>;
   /**
+   * Shares one of the user's albums (signed in; it needs no Pro): its people and split
+   * bills become a group others can join (README: Album members and shared
+   * albums).
+   */
+  shareAlbum: (album: { id: string; name: string }) => Promise<SharedLedger>;
+  /**
    * Owner: stop sharing; members lose the ledger and its cloud database goes.
    * `whenUnreachable: 'local'` also stops it with no session or network (the
    * Worker is told after the next sign-in), as deleting the ledger needs.
@@ -231,7 +239,7 @@ function errorKind(error: unknown): CloudSyncErrorKind {
 export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
   // The engine runs whenever the build can sync, as the UI shows (useCloudSyncEnabled).
   const enabled = isCloudSyncAvailable();
-  const { settings, refreshAll, switchLedger } = useApp();
+  const { settings, refreshAll, switchLedger, syncAlbumGroups, publishAlbumGroup } = useApp();
   const { isPro, isStorePro, isStatusKnown } = usePro();
   const appUserId = settings?.appUserId ?? null;
 
@@ -299,6 +307,10 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
   refreshAllRef.current = refreshAll;
   const switchLedgerRef = useRef(switchLedger);
   switchLedgerRef.current = switchLedger;
+  const syncAlbumGroupsRef = useRef(syncAlbumGroups);
+  syncAlbumGroupsRef.current = syncAlbumGroups;
+  const publishAlbumGroupRef = useRef(publishAlbumGroup);
+  publishAlbumGroupRef.current = publishAlbumGroup;
 
   /**
    * Reloads the app after rows came from the cloud. If the ledger open on this
@@ -306,6 +318,13 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
    * taken), the default ledger opens instead.
    */
   const reloadAfterApply = useCallback(() => {
+    // A shared album's group may have changed: the user's own entries for its
+    // bills follow before the reload reads them.
+    try {
+      syncAlbumGroupsRef.current();
+    } catch (error) {
+      console.warn('[cloudSync] could not apply shared albums', error);
+    }
     const open = getActiveLedgerId();
     if (open !== DEFAULT_LEDGER_ID && !ledgersRepository.getById(open)) {
       switchLedgerRef.current(DEFAULT_LEDGER_ID);
@@ -318,7 +337,8 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
   // others see who added an entry (README: Shared ledgers > Who added it).
   // Written again when the list or the Settings profile changes; unchanged
   // rows are left alone, so nothing syncs for nothing.
-  const sharedLedgerList = React.useSyncExternalStore(subscribeSharedLedgers, listSharedLedgers);
+  // Ledgers only: a shared album's people are its group's members, by name.
+  const sharedLedgerList = React.useSyncExternalStore(subscribeSharedLedgers, listLedgerShares);
   const profileName = settings?.profileName ?? null;
   const profileAvatarUri = settings?.profileAvatarUri ?? null;
   const signedInUserId = user?.id ?? null;
@@ -1259,10 +1279,29 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
     [runSync],
   );
 
+  const shareAlbum = useCallback(
+    async (album: { id: string; name: string }) => {
+      const shared = await sharedLedgerSync.shareAlbum(
+        album,
+        ownDisplayName() ?? I18n.t('albums.people.unnamed'),
+        () => publishAlbumGroupRef.current(album.id),
+      );
+      void trackEvent(AnalyticsEvents.ALBUM_SHARED);
+      reloadAfterApply();
+      // The entries just marked as the group's go to the user's own copy.
+      void runSync();
+      return shared;
+    },
+    [reloadAfterApply, runSync],
+  );
+
   const stopSharingLedger = useCallback(
     async (ledgerId: string, opts?: { whenUnreachable?: 'fail' | 'local' }) => {
+      const album = sharedLedgerFor(ledgerId)?.kind === 'album';
       await sharedLedgerSync.stopSharing(ledgerId, opts);
-      void trackEvent(AnalyticsEvents.SHARED_LEDGER_STOPPED);
+      void trackEvent(
+        album ? AnalyticsEvents.ALBUM_SHARE_STOPPED : AnalyticsEvents.SHARED_LEDGER_STOPPED,
+      );
       reloadAfterApply();
       void runSync();
     },
@@ -1271,8 +1310,9 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
 
   const leaveLedger = useCallback(
     async (ledgerId: string, opts?: { force?: boolean }) => {
+      const album = sharedLedgerFor(ledgerId)?.kind === 'album';
       await sharedLedgerSync.leave(ledgerId, opts);
-      void trackEvent(AnalyticsEvents.SHARED_LEDGER_LEFT);
+      void trackEvent(album ? AnalyticsEvents.ALBUM_LEFT : AnalyticsEvents.SHARED_LEDGER_LEFT);
       reloadAfterApply();
     },
     [reloadAfterApply],
@@ -1281,13 +1321,18 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
   const joinLedger = useCallback(
     async (code: string) => {
       const ledgerId = await sharedLedgerSync.join(code);
-      void trackEvent(AnalyticsEvents.SHARED_LEDGER_JOINED, {
-        is_pro: isPro,
-      });
-      refreshAllRef.current();
+      if (sharedLedgerFor(ledgerId)?.kind === 'album') {
+        void trackEvent(AnalyticsEvents.ALBUM_JOINED, { is_pro: isPro });
+        reloadAfterApply();
+      } else {
+        void trackEvent(AnalyticsEvents.SHARED_LEDGER_JOINED, {
+          is_pro: isPro,
+        });
+        refreshAllRef.current();
+      }
       return ledgerId;
     },
-    [isPro],
+    [isPro, reloadAfterApply],
   );
 
   const refreshSharedLedgers = useCallback(async () => {
@@ -1332,6 +1377,7 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       signOut,
       deleteAccount,
       shareLedger,
+      shareAlbum,
       stopSharingLedger,
       leaveLedger,
       joinLedger,
@@ -1357,6 +1403,7 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       signOut,
       deleteAccount,
       shareLedger,
+      shareAlbum,
       stopSharingLedger,
       leaveLedger,
       joinLedger,

@@ -61,6 +61,7 @@ import {
   ASSET_COLUMNS,
   CURRENT_SYNCED_SHAPE,
   hasMeaningfulRows,
+  isGroupTable,
   isSyncedRow,
   isSyncTable,
   type LiveRows,
@@ -82,7 +83,7 @@ import {
   sharedLedgerIds,
   unpushedKey,
 } from './ledgerChannels';
-import { listSharedLedgers } from './sharedLedgerStore';
+import { listAlbumShares, listLedgerShares, listSharedLedgers } from './sharedLedgerStore';
 
 type TursoModule = typeof import('@tursodatabase/sync-react-native');
 type Replica = InstanceType<TursoModule['Database']>;
@@ -494,6 +495,15 @@ export function enableCapture(): void {
 export function disableCapture(): void {
   const db = getSQLite();
   for (const table of SYNC_TABLES) db.execSync(dropCaptureTriggersSql(table));
+}
+
+/**
+ * Whether a row of `table` could belong to a share on this phone: a group
+ * table always (to an album's group or to nothing), any other only while a
+ * ledger is shared. Someone who shares albums alone keeps the fast paths.
+ */
+function routesByShare(table: string): boolean {
+  return isGroupTable(table) || listLedgerShares().length > 0;
 }
 
 /**
@@ -1373,11 +1383,13 @@ export class SyncEngine {
       )
       .map((r) => ({ table: r.table_name, id: r.row_id, rev: r.rev }));
     const pending = outboxKeys();
-    // A shared ledger's database only ever carries that ledger's rows.
+    // A shared ledger's database only ever carries that ledger's rows, and a
+    // shared album's only its group's tables (`channelOfRow` checks each row).
+    const album = listAlbumShares().some((share) => share.shareId === this.channel);
+    const carried = (table: string) =>
+      this.isPersonal || (album ? isGroupTable(table) : isLedgerScoped(table));
     const keep = (e: { table: string; id: string }) =>
-      isSyncTable(e.table) &&
-      (this.isPersonal || isLedgerScoped(e.table)) &&
-      !pending.has(rowKey(e.table, e.id));
+      isSyncTable(e.table) && carried(e.table) && !pending.has(rowKey(e.table, e.id));
     const diff = diffRevs(remote, local);
     return { changed: diff.changed.filter(keep), removed: diff.removed.filter(keep) };
   }
@@ -1458,6 +1470,14 @@ export class SyncEngine {
         }
         const written = writeRowSafely(item.table, row);
         if (written instanceof Error) {
+          if (isGroupTable(item.table)) {
+            // A shared album's group is written by everyone in it. A row of
+            // theirs this phone cannot store is passed over for good (until
+            // it changes), never an error that stays up or keeps the owner
+            // from stopping the share.
+            recordRev(item.table, item.id, item.rev, this.channel);
+            continue;
+          }
           // Left unrecorded, so every later sync tries it again.
           failure ??= written;
           continue;
@@ -1489,7 +1509,7 @@ export class SyncEngine {
    * a row: it belongs to this channel (`ownsLocalRow`) and is one that syncs.
    */
   private removableHere(table: string, id: string): boolean {
-    const shared = listSharedLedgers().length > 0;
+    const shared = routesByShare(table);
     if (!shared && syncedRowSql(table) === '1') return this.isPersonal;
     const local = getSQLite().getFirstSync<Row>(`SELECT * FROM "${table}" WHERE id = ?`, [id]);
     if (!local) return shared || this.isPersonal;
@@ -1499,8 +1519,8 @@ export class SyncEngine {
 
   /** Whether this phone's copy of a row (if any) belongs to this channel. */
   private ownsLocalRow(table: string, id: string): boolean {
-    // Nothing shared: every row is the user's own.
-    if (!listSharedLedgers().length) return this.isPersonal;
+    // Nothing shared that could hold it: the row is the user's own.
+    if (!routesByShare(table)) return this.isPersonal;
     const local = getSQLite().getFirstSync<Row>(`SELECT * FROM "${table}" WHERE id = ?`, [id]);
     return !local || channelOfRow(table, local) === this.channel;
   }

@@ -69,6 +69,7 @@ import { ThemeProvider, useResolvedTheme } from '~/context/ThemeContext';
 import {
   AddAlbumTransactionsScreen,
   AlbumDetailScreen,
+  AlbumPeopleScreen,
   AlbumsScreen,
   CreateAlbumScreen,
   EditAlbumDetailsScreen,
@@ -1497,6 +1498,7 @@ function MainShellScreen({
             <MemoSettleUpScreen
               onOpenPerson={openSettleUpPerson}
               onOpenTransaction={openSettleUpTransaction}
+              onOpenAlbum={openAlbumDetail}
               onOpenSettings={openSettleUpSettings}
               onSplitReceipt={openSettleUpSplitReceipt}
             />
@@ -1606,6 +1608,7 @@ function AddTransactionDetailedRouteScreen({
       initialValues={route.params?.initialValues}
       openSplitBillOnMount={route.params?.openSplitBill}
       startInstalmentPlan={route.params?.startInstalmentPlan}
+      albumId={route.params?.albumId}
     />
   );
 }
@@ -2450,12 +2453,24 @@ function AlbumDetailRouteScreen({ route, navigation }: RootStackRouteProps<'Albu
       onDeleted={() => navigation.goBack()}
       onAddTransactions={(albumId) => navigation.navigate('AddAlbumTransactions', { albumId })}
       onEditDetails={(albumId) => navigation.navigate('EditAlbumDetails', { albumId })}
+      onOpenPeople={(albumId) => navigation.navigate('AlbumPeople', { albumId })}
+      onAddExpense={(albumId) =>
+        // Back on the album afterwards, where the new bill shows.
+        navigation.navigate('AddTransactionDetailed', { albumId, keepCurrentTab: true })
+      }
+      onOpenPerson={(personKey, albumId) =>
+        navigation.navigate('SettleUpPerson', { personKey, albumId })
+      }
       onOpenTransaction={(transaction) =>
         navigation.navigate('EditTransaction', { transactionId: transaction.id })
       }
       onOpenBreakdown={(payload) => navigation.navigate('InsightsDrilldown', payload)}
     />
   );
+}
+
+function AlbumPeopleRouteScreen({ route, navigation }: RootStackRouteProps<'AlbumPeople'>) {
+  return <AlbumPeopleScreen albumId={route.params.albumId} onBack={() => navigation.goBack()} />;
 }
 
 function EditAlbumDetailsRouteScreen({
@@ -2636,6 +2651,11 @@ function JoinLedgerRouteScreen({ navigation, route }: RootStackRouteProps<'JoinL
       code={route.params.code}
       onClose={() => navigation.goBack()}
       onJoined={() => navigation.goBack()}
+      onJoinedAlbum={(albumId) => {
+        // The album, then its People page on top, where they say who they are.
+        navigation.replace('AlbumDetail', { albumId });
+        navigation.navigate('AlbumPeople', { albumId });
+      }}
     />
   );
 }
@@ -2715,6 +2735,7 @@ function SettleUpRouteScreen({ navigation }: RootStackRouteProps<'SettleUp'>) {
       onOpenTransaction={(transactionId) =>
         navigation.navigate('SettleUpTransaction', { transactionId })
       }
+      onOpenAlbum={(albumId) => navigation.navigate('AlbumDetail', { albumId })}
       onOpenSettings={() => navigation.navigate('SettleUpSettings')}
       onSplitReceipt={() => promptSettleUpSplitReceipt(navigation, startScan)}
     />
@@ -2729,6 +2750,7 @@ function SettleUpPersonRouteScreen({ route, navigation }: RootStackRouteProps<'S
   return (
     <SettleUpPersonScreen
       personKey={route.params.personKey}
+      albumId={route.params.albumId}
       onBack={() => navigation.goBack()}
       onOpenSettings={() => navigation.navigate('SettleUpSettings')}
       onOpenTransaction={(transactionId) =>
@@ -3393,6 +3415,7 @@ function AppContent() {
               component={AddAlbumTransactionsRouteScreen}
             />
             <RootStack.Screen name="EditAlbumDetails" component={EditAlbumDetailsRouteScreen} />
+            <RootStack.Screen name="AlbumPeople" component={AlbumPeopleRouteScreen} />
             <RootStack.Screen name="InsightsDrilldown" component={InsightsDrilldownRouteScreen} />
             <RootStack.Screen name="RecurringEditor" component={RecurringEditorRouteScreen} />
             <RootStack.Screen name="ProPaywall" component={ProPaywallRouteScreen} />

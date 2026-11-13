@@ -28,6 +28,8 @@ function makeSplit(overrides: Partial<TransactionSplit>): TransactionSplit {
     isPayer: false,
     shareAmount: null,
     memberId: null,
+    albumMemberId: null,
+    settlementId: null,
     sortOrder: 0,
     createdAt: '2026-05-13T00:00:00.000Z',
     updatedAt: '2026-05-13T00:00:00.000Z',
@@ -47,6 +49,7 @@ function makeTx(overrides: Partial<TransactionWithRelations>): TransactionWithRe
     instalmentNumber: null,
     createdBy: null,
     memberId: null,
+    albumGroupId: null,
     reportingCurrency: 'USD',
     reportingAmount: 100,
     fxRate: 1,
@@ -724,6 +727,16 @@ describe('countUnpaidSplitBills', () => {
     expect(
       countUnpaidSplitBills([makeTx({ splits: [makeSplit({ isSelf: true, amount: 10 })] })]),
     ).toBe(0);
+  });
+
+  it('leaves out a shared album’s bills: they count toward no free limit', () => {
+    const open = [makeSplit({ id: 's1', personName: 'Sarah', amount: 10 })];
+    expect(
+      countUnpaidSplitBills([
+        makeTx({ id: 't1', splits: open, albumGroupId: 'bali' }),
+        makeTx({ id: 't2', splits: open }),
+      ]),
+    ).toBe(1);
   });
 
   it('counts one per transaction regardless of how many people owe on it', () => {

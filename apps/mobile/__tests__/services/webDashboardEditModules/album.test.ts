@@ -23,19 +23,26 @@ const album = (id: string, patch: Partial<Album> = {}): Album => ({
   placeName: null,
   placeAdmin: null,
   countryCode: null,
+  splitWith: [],
   createdAt: AT,
   updatedAt: AT,
   deletedAt: null,
   ...patch,
 });
 
-const tx = (id: string, type = 'expense') =>
-  ({ id, type, updatedAt: AT, deletedAt: null }) as unknown as TransactionWithRelations;
+const tx = (id: string, type = 'expense', albumGroupId: string | null = null) =>
+  ({
+    id,
+    type,
+    albumGroupId,
+    updatedAt: AT,
+    deletedAt: null,
+  }) as unknown as TransactionWithRelations;
 
-function lookup(albums: Album[], isPro = false): EditLookup {
-  const extra: AlbumExtra = { albums };
+function lookup(albums: Album[], isPro = false, sharedAlbumIds: string[] = []): EditLookup {
+  const extra: AlbumExtra = { albums, sharedAlbumIds };
   return {
-    transactions: [tx('t1'), tx('t2'), tx('in1', 'income')],
+    transactions: [tx('t1'), tx('t2'), tx('in1', 'income'), tx('bill', 'expense', 'shared')],
     accounts: [],
     accountGroups: [],
     categories: [],
@@ -60,10 +67,15 @@ function read(ops: Record<string, unknown>[]) {
   });
 }
 
-function plan(ops: Record<string, unknown>[], albums: Album[] = [], isPro = false) {
+function plan(
+  ops: Record<string, unknown>[],
+  albums: Album[] = [],
+  isPro = false,
+  sharedAlbumIds: string[] = [],
+) {
   const request = read(ops);
   if (request.kind !== 'request') return { ok: false as const, error: 'unread' };
-  return planEdit(request.request, lookup(albums, isPro));
+  return planEdit(request.request, lookup(albums, isPro, sharedAlbumIds));
 }
 
 const details = (patch: Record<string, unknown> = {}) => ({
@@ -183,6 +195,31 @@ describe('module:album planning', () => {
     expect(
       plan([{ op: 'delete', id: 'a1', at: AT }], [album('a1', { deletedAt: AT })]),
     ).toMatchObject({ error: 'conflict' });
+  });
+
+  it('leaves a shared album and its bills to the app', () => {
+    const albums = [album('shared')];
+    const shared = ['shared'];
+    expect(plan([{ op: 'delete', id: 'shared', at: AT }], albums, false, shared)).toMatchObject({
+      error: 'invalid',
+    });
+    expect(
+      plan(
+        [{ op: 'transactions', id: 'shared', at: AT, add: [], remove: ['bill'] }],
+        albums,
+        false,
+        shared,
+      ),
+    ).toMatchObject({ error: 'invalid' });
+    // An entry of the user's own in it comes out as in any album.
+    expect(
+      plan(
+        [{ op: 'transactions', id: 'shared', at: AT, add: ['t2'], remove: ['t1'] }],
+        albums,
+        false,
+        shared,
+      ),
+    ).toMatchObject({ ok: true });
   });
 });
 

@@ -7,7 +7,7 @@ import { useMemo, useState } from "react";
 
 import { DAYS_PER_MONTH, daysBetween, monthRange, shiftMonthKey } from "@/lib/backup/dates";
 import type { Tx } from "@/lib/backup/model";
-import { netByPerson } from "@/lib/backup/split-payer";
+import { balancesByAlbum } from "@/lib/backup/split-payer";
 
 import type { ItemRow } from "@/lib/backup/types";
 
@@ -399,11 +399,17 @@ export function SplitsView() {
 
   // One net balance per person, either way, as the app's Balances lists them:
   // what they owe on the bills the user paid, less what the user owes them
-  // for the bills they paid.
-  const people = useMemo(() => netByPerson(model.splitDebts, model.splitOwed), [model.splitDebts, model.splitOwed]);
-  const owed = people.reduce((s, p) => (p.net > 0 ? s + p.net : s), 0);
-  const youOwe = people.reduce((s, p) => (p.net < 0 ? s - p.net : s), 0);
-  const largest = people.reduce((max, p) => Math.max(max, Math.abs(p.net)), 0);
+  // for the bills they paid. Balances are kept per album, as in the app: an
+  // album's bills are listed under it, and the people are the bills in none.
+  const { people, albums } = useMemo(
+    () => balancesByAlbum(model.splitDebts, model.splitOwed, model.trips),
+    [model.splitDebts, model.splitOwed, model.trips],
+  );
+  // The totals are every open share, each once (a bill can be in two albums).
+  const owed = model.splitDebts.reduce((s, debt) => s + debt.amountBase, 0);
+  const youOwe = model.splitOwed.reduce((s, debt) => s + debt.amountBase, 0);
+  const owingPeople = new Set(model.splitDebts.map((debt) => debt.key)).size;
+  const largest = [...people, ...albums].reduce((max, p) => Math.max(max, Math.abs(p.net)), 0);
   // Counted by share: a friend who paid in parts has a paid row per payment
   // and maybe one still owed, and is settled once nothing is owed. A bill a
   // friend paid has one share to settle, the user's own, kept on the payer's row.
@@ -435,17 +441,28 @@ export function SplitsView() {
   return (
     <div className="space-y-5">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Kpi icon="settings/settle-up" tone="income" label={t("owedToYou")} value={f.money(owed)} sub={t("people", { count: people.filter((p) => p.net > 0).length })} />
+        <Kpi icon="settings/settle-up" tone="income" label={t("owedToYou")} value={f.money(owed)} sub={t("people", { count: owingPeople })} />
         <Kpi icon="status/people-two" tone={youOwe > 0 ? "expense" : "neutral"} label={t("youOwe")} value={f.money(youOwe)} sub={t("youOweNote")} />
         <Kpi icon="status/handshake" tone="neutral" label={t("settled")} value={f.number(settled)} sub={t("ofShares", { count: shares })} />
         <Kpi icon="insights/split-bill" tone="neutral" label={t("bills")} value={f.number(splitTxs.length)} sub={t("billsNote")} />
       </div>
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)]">
         <Card title={t("byPerson")}>
-          {people.length === 0 ? (
+          {people.length === 0 && albums.length === 0 ? (
             <Empty title={t("allSettled")} mascot="presenting" />
           ) : (
             <div className="space-y-0.5">
+              {albums.map((album) => (
+                <RankRow
+                  key={`album:${album.id}`}
+                  icon={<ClayImg name="settings/albums" size={30} />}
+                  name={album.name}
+                  meta={`${album.net < 0 ? t("youOwe") : t("owedToYou")} · ${t("open", { count: album.people.reduce((n, p) => n + p.count, 0) })}`}
+                  value={<span className={album.net < 0 ? "text-error" : undefined}>{f.money(Math.abs(album.net))}</span>}
+                  share={largest ? Math.abs(album.net) / largest : 0}
+                  color={album.net < 0 ? "#C2604A" : "#1E9468"}
+                />
+              ))}
               {people.map((p) => (
                 <RankRow
                   key={p.person}

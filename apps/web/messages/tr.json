@@ -1452,6 +1452,7 @@
       "nudgeLarge": "Bu {hours} çalışma sürenize denk geliyor",
       "amountLocked": "Bu tutar bir bölüşüme veya iadeye bağlı. Uygulamada değiştirin.",
       "friendPaid": "Bu hesabı {name} ödedi. Uygulamada değiştirin.",
+      "groupBill": "Bu hesap paylaşılan bir albümde. Uygulamada değiştirin.",
       "hideBalances": "Bakiyeleri gizle",
       "showBalances": "Bakiyeleri göster",
       "savingsGoals": "Birikim Hedefleri",

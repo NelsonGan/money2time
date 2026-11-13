@@ -10,6 +10,7 @@ import type { Row } from '~/features/cloudSync/lib/rowCodec';
 import {
   ASSET_COLUMNS,
   DEVICE_LOCAL_SETTINGS_COLUMNS,
+  GROUP_SYNC_TABLES,
   hasMeaningfulRows,
   isDeviceLocalColumn,
   SYNC_TABLES,
@@ -27,7 +28,10 @@ describe('synced tables', () => {
     const start = source.indexOf('tables: {');
     const body = source.slice(start, source.indexOf('\n    },', start));
     const backupTables = [...body.matchAll(/^\s{6}([a-z_]+)(?::|,$)/gm)].map((m) => m[1]);
-    expect([...SYNC_TABLES].sort()).toEqual([...new Set(backupTables)].sort());
+    // A shared album's group syncs but is not the user's data to back up.
+    expect([...SYNC_TABLES].sort()).toEqual(
+      [...new Set(backupTables), ...GROUP_SYNC_TABLES].sort(),
+    );
   });
 
   it('cover every image column the orphan sweep protects', () => {

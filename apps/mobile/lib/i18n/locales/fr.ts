@@ -1088,8 +1088,6 @@ const fr = {
         get_back_hint: 'Vous récupérez {{amount}}',
         paid_floor: 'Vous avez déjà remboursé {{amount}}',
         your_share: 'Votre part {{amount}}',
-        swipe_hint_actions: 'Balayez une ligne vers la gauche pour marquer payé ou supprimer',
-        swipe_hint_delete: 'Balayez une ligne vers la gauche pour supprimer',
         section_subtitle_unpaid: '{{count}} vous doit encore',
         section_subtitle_unpaid_plural: '{{count}} vous doivent encore',
         subtotal_label: 'Sous-total',
@@ -2999,6 +2997,70 @@ const fr = {
     delete_body: "Cela supprime l'album. Vos transactions ne sont pas supprimées.",
     cover_permission_title: 'Accès aux photos requis',
     cover_permission_body: "Autorisez l'accès aux photos pour choisir une image de couverture.",
+    people: {
+      title: 'Personnes',
+      split_with: 'Partager avec',
+      me_tag: 'Vous',
+      joined: 'A rejoint',
+      not_joined: 'Pas encore rejoint',
+      add_person: 'Ajouter une personne',
+      add: 'Ajouter',
+      unnamed: 'Ami',
+      name_taken: "Quelqu'un porte déjà ce nom ici.",
+      full: 'Un album se partage avec {{max}} personnes au plus.',
+      remove_title: 'Retirer {{name}} ?',
+      remove_message:
+        'Les nouvelles notes de cet album ne seront plus partagées avec cette personne.',
+      remove_in_use: "{{name}} figure sur une note de cet album. Retirez-la d'abord de ses notes.",
+      remove_joined_title: "Retirer {{name}} de l'album ?",
+      remove_joined_message:
+        'Cette personne ne recevra plus les notes de cet album. Les notes où elle figure restent.',
+      who_title: 'Lequel êtes-vous ?',
+      who_message:
+        'Choisissez votre nom pour que votre part de chaque note arrive dans votre livre.',
+      who_new: 'Je ne suis pas dans la liste',
+    },
+    share: {
+      row: 'Partager cet album',
+      caption: 'Tout le monde voit les notes et qui doit quoi à qui.',
+      link_note: "Valable 24 heures. Toute personne qui l'a peut rejoindre.",
+      stop_title: 'Arrêter de partager {{name}} ?',
+      stop_message:
+        "Chacun garde l'album avec ses propres écritures, mais il ne se met plus à jour entre vous.",
+      leave: "Quitter l'album",
+      leave_title: 'Quitter {{name}} ?',
+      leave_message:
+        "Vous gardez l'album avec vos propres écritures, mais il ne se met plus à jour.",
+      limit: "Vous pouvez partager jusqu'à {{max}} albums à la fois.",
+      full: "Jusqu'à {{max}} personnes peuvent rejoindre un album.",
+      sign_in: 'Connectez-vous pour partager cet album.',
+    },
+    balances: {
+      tab: 'Soldes',
+      empty_message: 'Partagez une note dans cet album et elle apparaîtra ici.',
+      who_owes_whom: 'Qui doit à qui',
+      owes_you: '{{name}} vous doit',
+      owes: '{{from}} doit à {{to}}',
+      group_spending: 'Dépenses du groupe',
+      your_share: 'Votre part',
+    },
+    simplify: {
+      row: 'Simplifier les dettes du groupe',
+      info: 'Regroupe les dettes du groupe pour qu’il y ait moins de paiements à faire. Personne ne paie ni ne reçoit plus au total.',
+    },
+    join: {
+      title: 'Album partagé',
+      own: "C'est l'un de vos propres albums.",
+      already: 'Vous êtes déjà dans cet album.',
+      main_shared:
+        'Votre carnet principal est partagé, il ne peut donc pas contenir d’album partagé.',
+    },
+    bill: {
+      delete_shared:
+        'Cette note est dans un album partagé. La supprimer la retire pour tout le monde.',
+      remove_shared:
+        'Cette note est dans un album partagé. Elle sera retirée pour tous les autres.',
+    },
   },
   assets: {
     tab_accounts: 'Comptes',
@@ -3305,6 +3367,7 @@ const fr = {
     share_toggle: 'Partager ce carnet',
     share_toggle_caption: "Invitez jusqu'à {{max}} personnes. Elles n'ont pas besoin de Pro.",
     needs_cloud_sync: 'Connectez-vous à Cloud Sync pour partager un carnet.',
+    has_shared_albums: 'Ce carnet contient des albums partagés. Arrêtez d’abord de les partager.',
     limit_reached: "Vous pouvez partager jusqu'à {{max}} carnets pour l'instant.",
     share_failed:
       "Le carnet a été créé, mais le partage n'a pas démarré. Réessayez depuis la page Partage du carnet.",

@@ -1452,6 +1452,7 @@
       "nudgeLarge": "这相当于 {hours} 的工作时间",
       "amountLocked": "此金额与分摊或退款关联。请在应用中更改。",
       "friendPaid": "这张账单由 {name} 付款，请在 App 中修改。",
+      "groupBill": "此账单在共享相册中，请在 App 中修改。",
       "hideBalances": "隐藏余额",
       "showBalances": "显示余额",
       "savingsGoals": "储蓄目标",

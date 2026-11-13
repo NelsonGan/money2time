@@ -131,6 +131,13 @@ CREATE TABLE IF NOT EXISTS shared_ledgers (
   UNIQUE (owner_user_id, ledger_id)
 );
 
+-- Shares that carry an album's group (its members, bills and settlements)
+-- instead of a ledger: `shared_ledgers.ledger_id` is then the album's id. A
+-- table of its own, so adding it is safe to repeat where ALTER TABLE is not.
+CREATE TABLE IF NOT EXISTS shared_albums (
+  ledger_id TEXT NOT NULL PRIMARY KEY REFERENCES shared_ledgers ("id") ON DELETE CASCADE
+);
+
 -- People who joined a shared ledger with an invite. The owner is not listed.
 CREATE TABLE IF NOT EXISTS ledger_members (
   ledger_id TEXT NOT NULL REFERENCES shared_ledgers ("id") ON DELETE CASCADE,

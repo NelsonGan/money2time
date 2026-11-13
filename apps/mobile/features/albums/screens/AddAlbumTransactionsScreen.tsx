@@ -8,6 +8,7 @@ import { useApp } from '~/context/AppContext';
 import { I18n } from '~/lib/i18n';
 
 import { AlbumMonthPicker } from '../components/AlbumMonthPicker';
+import { useRemoveFromAlbum } from '../hooks/useRemoveFromAlbum';
 
 interface AddAlbumTransactionsScreenProps {
   albumId: string;
@@ -16,7 +17,8 @@ interface AddAlbumTransactionsScreenProps {
 
 /** General month-pager picker for adding (or removing) transactions to an album. */
 export function AddAlbumTransactionsScreen({ albumId, onClose }: AddAlbumTransactionsScreenProps) {
-  const { getAlbumTransactionIds, addTransactionsToAlbum, removeTransactionsFromAlbum } = useApp();
+  const { getAlbumTransactionIds, addTransactionsToAlbum } = useApp();
+  const removeFromAlbum = useRemoveFromAlbum(albumId);
   const insets = useSafeAreaInsets();
 
   const initialIds = useMemo(
@@ -31,16 +33,9 @@ export function AddAlbumTransactionsScreen({ albumId, onClose }: AddAlbumTransac
     const toAdd = selectedIds.filter((id) => !before.has(id));
     const toRemove = initialIds.filter((id) => !after.has(id));
     if (toAdd.length > 0) addTransactionsToAlbum(albumId, toAdd);
-    if (toRemove.length > 0) removeTransactionsFromAlbum(albumId, toRemove);
-    onClose();
-  }, [
-    albumId,
-    addTransactionsToAlbum,
-    initialIds,
-    onClose,
-    removeTransactionsFromAlbum,
-    selectedIds,
-  ]);
+    if (toRemove.length > 0) removeFromAlbum(toRemove, onClose);
+    else onClose();
+  }, [albumId, addTransactionsToAlbum, initialIds, onClose, removeFromAlbum, selectedIds]);
 
   return (
     <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>

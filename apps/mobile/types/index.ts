@@ -691,7 +691,77 @@ export interface Album {
   placeAdmin: string | null;
   /** ISO 3166-1 alpha-2 country code, e.g. "JP". */
   countryCode: string | null;
+  /**
+   * The people an album that is not shared is split with: while it is active,
+   * a new expense starts split with them. A shared album's people are its
+   * group's members instead (`AlbumMember`).
+   */
+  splitWith: AlbumPerson[];
   sortOrder?: number;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+}
+
+/** Someone an album is split with. The user is never listed: they are "Me". */
+export interface AlbumPerson {
+  id: string;
+  name: string;
+}
+
+/** A person of a shared album's group. */
+export interface AlbumMember {
+  id: string;
+  /** The group's id, which is the album's id. */
+  groupId: string;
+  name: string;
+  /** The Cloud Sync account of someone who joined; null is a placeholder. */
+  userId: string | null;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+}
+
+/** One member's share of a group's bill. */
+export interface AlbumShare {
+  memberId: string;
+  amount: number;
+}
+
+/** A bill of a shared album's group, as every phone in it sees it. */
+export interface AlbumExpense {
+  /** Also the id of each phone's own entry for it. */
+  id: string;
+  groupId: string;
+  date: string;
+  note: string | null;
+  amount: number;
+  currency: string;
+  /** The category on the phone that wrote it, as a hint for the others. */
+  categoryName: string | null;
+  categoryIcon: string | null;
+  /** The member who paid. */
+  paidBy: string;
+  shares: AlbumShare[];
+  /** The Cloud Sync account that last wrote it. */
+  createdBy: string | null;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+}
+
+/** A payment from one member of a group to another, for one bill. */
+export interface AlbumSettlement {
+  id: string;
+  groupId: string;
+  expenseId: string | null;
+  fromMember: string;
+  toMember: string;
+  amount: number;
+  currency: string;
+  date: string;
+  createdBy: string | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
@@ -1009,6 +1079,11 @@ export interface Transaction {
    * Starts as `createdBy` and can be changed. Null means the ledger's owner.
    */
   memberId: string | null;
+  /**
+   * Shared albums: the group whose bill this entry is the user's side of
+   * (the group's expense has this entry's id). Null on every other entry.
+   */
+  albumGroupId: string | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
@@ -1063,6 +1138,13 @@ export interface TransactionSplit {
    * their name (`debtPartyOf`).
    */
   memberId: string | null;
+  /** The member of a shared album's group this share is with, else null. */
+  albumMemberId: string | null;
+  /**
+   * The group settlement a paid row came from or was sent as (a shared
+   * album's bill), so one payment is applied once. Null on every other row.
+   */
+  settlementId: string | null;
   sortOrder: number;
   createdAt: string;
   updatedAt: string;

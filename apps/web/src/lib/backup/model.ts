@@ -106,6 +106,11 @@ export type Tx = {
    * expense is then the user's own share, owed to that friend.
    */
   paidBy?: string;
+  /**
+   * The user's side of a shared album's bill (the app's `albumGroupId`): the
+   * bill is everyone's in the album, so it is changed and deleted in the app.
+   */
+  groupBill?: boolean;
   /** Made by an ordinary recurring rule (`isRecurringRun`), tinted in the lists while `Model.highlightRecurring`. */
   recurring?: boolean;
 };
@@ -557,6 +562,7 @@ export function buildModel(backup: BackupFile, opts: { timeZone?: string | null 
       countsAsExpense: row.counts_as_expense === 1,
       toAmount: row.to_amount ?? null,
       recurring: isRecurringRun(row, planRuleIds),
+      ...(row.album_group_id ? { groupBill: true } : null),
     });
   }
   txs.sort((a, b) => b.date.getTime() - a.date.getTime());

@@ -174,6 +174,7 @@ export function buildPaybackRows(
         feeOfId: null,
         createdBy: bill.createdBy,
         memberId: bill.memberId,
+        albumGroupId: null,
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,

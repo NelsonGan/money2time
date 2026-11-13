@@ -128,8 +128,9 @@ export const LEDGER_COPY_TABLES: readonly TableSpec[] = [
       instalment_rule_id: 'recurring_rules',
     },
     // A shared ledger's people are not the new ledger's: its entries become
-    // the user's own (null is the ledger's owner).
-    cleared: ['created_by', 'member_id'],
+    // the user's own (null is the ledger's owner). Nor is a copy of a shared
+    // album's bill the group's: it is an ordinary split bill.
+    cleared: ['created_by', 'member_id', 'album_group_id'],
   },
   {
     table: 'recurring_rules',
@@ -154,6 +155,8 @@ export const LEDGER_COPY_TABLES: readonly TableSpec[] = [
       part_of_split_id: 'transaction_splits',
     },
     required: ['transaction_id'],
+    // A group's payment is not the copy's.
+    cleared: ['settlement_id'],
     finish: keepPartPaymentsTogether,
   },
   { table: 'albums', owner: { ledger: true }, refs: {} },

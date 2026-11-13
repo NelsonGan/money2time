@@ -1452,6 +1452,7 @@
       "nudgeLarge": "Det är {hours} av din arbetstid",
       "amountLocked": "Det här beloppet är kopplat till en delning eller en återbetalning. Ändra det i appen.",
       "friendPaid": "{name} betalade den här notan. Ändra den i appen.",
+      "groupBill": "Notan finns i ett delat album. Ändra den i appen.",
       "hideBalances": "Dölj saldon",
       "showBalances": "Visa saldon",
       "savingsGoals": "Sparmål",

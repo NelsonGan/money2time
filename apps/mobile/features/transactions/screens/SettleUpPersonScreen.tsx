@@ -19,7 +19,7 @@ import type {
 import { SplitReceiptShareModal } from '~/features/transactions/components/SplitReceiptShareModal';
 import { avatarColor, personInitial } from '~/features/transactions/lib/personAvatar';
 import { personItemNames } from '~/features/transactions/lib/receiptSplitShare';
-import { personBalanceState } from '~/features/transactions/lib/settleUp';
+import { personBalanceState, planPartSettlement } from '~/features/transactions/lib/settleUp';
 import {
   buildSettleUpShareCards,
   type SettleUpShareCard,
@@ -35,6 +35,8 @@ import { formatCurrency, formatShortDate, normalizeMoneyAmount } from '~/utils/f
 
 interface SettleUpPersonScreenProps {
   personKey: string;
+  /** Only this album's bills with the person (opened from the album's Balances). */
+  albumId?: string;
   onBack: () => void;
   onOpenSettings: () => void;
   /** Open one bill, where its shares are marked paid, undone or removed. */
@@ -65,23 +67,32 @@ function netAmountText(
  */
 export function SettleUpPersonScreen({
   personKey,
+  albumId,
   onBack,
   onOpenSettings,
   onOpenTransaction,
 }: SettleUpPersonScreenProps) {
   const themeColors = useThemeColors();
-  const { settings, getReceiptSplitForTransaction, settleUpWithPerson } = useApp();
+  const {
+    settings,
+    albums,
+    getReceiptSplitForTransaction,
+    settleUpWithPerson,
+    recordSplitPayment,
+    recordPayBack,
+  } = useApp();
 
   const [shareVisible, setShareVisible] = useState(false);
   const [settleVisible, setSettleVisible] = useState(false);
 
-  const summary = useSettleUpSummary();
+  const summary = useSettleUpSummary(albumId);
 
   const person = useMemo(
     () => summary.people.find((p) => p.key === personKey) ?? null,
     [summary.people, personKey],
   );
   const state = person ? personBalanceState(person) : 'settled';
+  const albumName = albumId ? albums.find((album) => album.id === albumId)?.name : null;
 
   // Blank while the person is missing (the last share was removed) so the header
   // doesn't flash a fallback name for the one frame before the screen pops.
@@ -114,17 +125,35 @@ export function SettleUpPersonScreen({
 
   const settleContent = useMemo<SettleUpConfirmContent | null>(() => {
     if (!person || !settleVisible) return null;
+    // Who pays, as the amount below says it: the net in the one currency the
+    // bills share, else the reporting net (`planPartSettlement` reads it so).
+    const single = person.netByCurrency.length === 1 ? person.netByCurrency[0]!.amount : null;
+    const flow =
+      state === 'even' ? 'even' : (single ?? person.netReporting) >= 0 ? 'receive' : 'pay';
     return {
       personKey: person.key,
       personName: person.name,
-      flow: state === 'owes_you' ? 'receive' : state === 'you_owe' ? 'pay' : 'even',
+      flow,
       caption:
-        state === 'owes_you'
+        flow === 'receive'
           ? I18n.t('transactions.settleUp.person_pays_you', { name: title })
-          : state === 'you_owe'
+          : flow === 'pay'
             ? I18n.t('transactions.settleUp.you_pay_person', { name: title })
             : I18n.t('transactions.settleUp.even_caption'),
       amountText: netAmountText(person, formatNative, formatReporting),
+      // Less of it can be paid, in the currency the net is shown in.
+      partial:
+        state === 'even'
+          ? undefined
+          : person.netByCurrency.length === 1
+            ? {
+                full: Math.abs(person.netByCurrency[0]!.amount),
+                prefix: currencySymbolForCode(person.netByCurrency[0]!.currency),
+              }
+            : {
+                full: Math.abs(person.netReporting),
+                prefix: `${person.netByCurrency.length > 1 ? '≈ ' : ''}${settings.currencySymbol}`,
+              },
       // How the net came about, only when shares go both ways.
       detail:
         person.totalReporting > 0 && person.owedReporting > 0
@@ -136,7 +165,7 @@ export function SettleUpPersonScreen({
           : null,
       confirmLabel: I18n.t('transactions.settleUp.settle_up'),
     };
-  }, [person, settleVisible, title, state, formatNative, formatReporting]);
+  }, [person, settleVisible, title, state, formatNative, formatReporting, settings.currencySymbol]);
 
   // Receipt: title is the person's name, one line per bill with its date. A
   // bill saved through Split by Item lists the person's items as bullets, and
@@ -277,6 +306,14 @@ export function SettleUpPersonScreen({
                   {personInitial(person.name)}
                 </Text>
               </View>
+              {/* Opened from an album: these are that album's bills alone. */}
+              {albumName ? (
+                <View className="mt-2.5 rounded-full bg-secondary/60 px-3 py-0.5">
+                  <Text variant="caption" tone="muted" numberOfLines={1}>
+                    {albumName}
+                  </Text>
+                </View>
+              ) : null}
               <Text variant="caption" tone="muted" className="mt-3 text-center">
                 {I18n.t(
                   state === 'owes_you'
@@ -357,9 +394,22 @@ export function SettleUpPersonScreen({
           <SettleUpConfirmSheet
             content={settleContent}
             onClose={() => setSettleVisible(false)}
-            onConfirm={(accountId) => {
+            onConfirm={(accountId, amount) => {
               setSettleVisible(false);
-              settleUpWithPerson(person.key, accountId);
+              if (amount === null) {
+                settleUpWithPerson(person.key, accountId, albumId);
+                return;
+              }
+              // A part of it: onto the oldest open bills of whoever pays.
+              for (const payment of planPartSettlement(person, amount)) {
+                if (payment.direction === 'owes_you') {
+                  recordSplitPayment(payment.splitId, payment.amount, {
+                    paybackAccountId: accountId,
+                  });
+                } else {
+                  recordPayBack(payment.splitId, payment.amount, { accountId });
+                }
+              }
             }}
           />
         </>

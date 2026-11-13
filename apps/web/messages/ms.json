@@ -1452,6 +1452,7 @@
       "nudgeLarge": "Ini bersamaan {hours} waktu kerja anda",
       "amountLocked": "Jumlah ini dipautkan kepada pembahagian bil atau bayaran balik. Ubah dalam apl.",
       "friendPaid": "{name} membayar bil ini. Ubah dalam aplikasi.",
+      "groupBill": "Bil ini berada dalam album kongsi. Ubah dalam aplikasi.",
       "hideBalances": "Sembunyikan baki",
       "showBalances": "Tunjukkan baki",
       "savingsGoals": "Matlamat Simpanan",

@@ -3,7 +3,10 @@ import { DEFAULT_LEDGER_ID } from '~/lib/db/ledgerScope';
 import type {
   AccountGroupRow,
   AccountRow,
+  AlbumExpenseRow,
+  AlbumMemberRow,
   AlbumRow,
+  AlbumSettlementRow,
   AutoLogCaptureRow,
   BudgetTemplateCategoryRow,
   BudgetTemplateRow,
@@ -26,6 +29,11 @@ import type {
   Account,
   AccountGroup,
   Album,
+  AlbumExpense,
+  AlbumMember,
+  AlbumPerson,
+  AlbumSettlement,
+  AlbumShare,
   AppIconId,
   BackupTarget,
   BudgetPeriod,
@@ -290,7 +298,178 @@ export function toAlbum(row: AlbumRow): Album {
     placeName: row.placeName ?? null,
     placeAdmin: row.placeAdmin ?? null,
     countryCode: row.countryCode ?? null,
+    splitWith: parseAlbumPeople(row.splitWithJson),
     sortOrder: row.sortOrder ?? 0,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    deletedAt: row.deletedAt,
+  };
+}
+
+/** `albums.split_with_json`: the people of an album that is not shared. */
+export function parseAlbumPeople(json: string | null | undefined): AlbumPerson[] {
+  if (!json) return [];
+  try {
+    const parsed: unknown = JSON.parse(json);
+    if (!Array.isArray(parsed)) return [];
+    const people: AlbumPerson[] = [];
+    for (const item of parsed) {
+      const entry = item as { id?: unknown; name?: unknown } | null;
+      const name = typeof entry?.name === 'string' ? entry.name.trim() : '';
+      if (typeof entry?.id === 'string' && entry.id && name) people.push({ id: entry.id, name });
+    }
+    return people;
+  } catch {
+    return [];
+  }
+}
+
+// --- A shared album's group --------------------------------------------------
+// Everyone in a shared album writes its group's rows straight into the
+// group's database, so a row is checked before anything reads it. One that is
+// not what this app would have written maps to null and is left out, as if it
+// were not there: nothing downstream has to doubt an id, an amount or a date.
+
+/** A member's id, and the account id of someone who joined. */
+const GROUP_ROW_ID = /^[A-Za-z0-9_-]{1,64}$/;
+/** A bill's id is its payer's entry id, which may be a recurring run's (`rr:<rule>:<day>`). */
+const GROUP_BILL_ID = /^[A-Za-z0-9_:.-]{1,120}$/;
+/** A settlement's id: a plain id, or one of a batch recorded together (`<batch>.<n>`). */
+const GROUP_SETTLEMENT_ID = /^[A-Za-z0-9_-]{1,64}(\.\d{1,4})?$/;
+const GROUP_CURRENCY = /^[A-Za-z][A-Za-z0-9]{1,9}$/;
+const GROUP_DAY = /^(\d{4})-(\d{2})-(\d{2})(T[0-9:.Z+-]{1,30})?$/;
+const MAX_GROUP_AMOUNT = 1e12;
+const MAX_GROUP_NAME = 40;
+const MAX_GROUP_NOTE = 500;
+const MAX_GROUP_LABEL = 80;
+/** More shares than an album can have people (20 and the user), with room for people since removed. */
+const MAX_GROUP_SHARES = 64;
+
+function isGroupAmount(value: unknown): value is number {
+  return (
+    typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= MAX_GROUP_AMOUNT
+  );
+}
+
+/**
+ * The day of a bill or payment, `YYYY-MM-DD`, when it is a real one; null
+ * otherwise. An entry stamped with a time (a balance adjustment) gives its day.
+ */
+function groupDay(value: unknown): string | null {
+  const match = typeof value === 'string' ? GROUP_DAY.exec(value) : null;
+  if (!match) return null;
+  const [year, month, day] = [Number(match[1]), Number(match[2]), Number(match[3])];
+  if (year < 1970 || year > 2200 || month < 1 || month > 12 || day < 1) return null;
+  if (day > new Date(Date.UTC(year, month, 0)).getUTCDate()) return null;
+  return `${match[1]}-${match[2]}-${match[3]}`;
+}
+
+function isGroupTimestamp(value: unknown): value is string {
+  return typeof value === 'string' && value.length <= 40 && !Number.isNaN(Date.parse(value));
+}
+
+const clip = (value: string | null | undefined, max: number): string | null =>
+  typeof value === 'string' ? value.slice(0, max) : null;
+
+export function toAlbumMember(row: AlbumMemberRow): AlbumMember | null {
+  const name =
+    typeof row.name === 'string'
+      ? row.name.replace(/\s+/g, ' ').trim().slice(0, MAX_GROUP_NAME)
+      : '';
+  if (!GROUP_ROW_ID.test(row.id) || !name) return null;
+  if (row.userId != null && !GROUP_ROW_ID.test(row.userId)) return null;
+  if (!isGroupTimestamp(row.createdAt)) return null;
+  return {
+    id: row.id,
+    groupId: row.ledgerId,
+    name,
+    userId: row.userId ?? null,
+    sortOrder: Number.isFinite(row.sortOrder) ? (row.sortOrder ?? 0) : 0,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    deletedAt: row.deletedAt,
+  };
+}
+
+/** `album_expenses.shares_json`: each member's share of the bill, one per member. */
+function parseAlbumShares(json: string | null | undefined): AlbumShare[] | null {
+  if (!json) return [];
+  try {
+    const parsed: unknown = JSON.parse(json);
+    if (!Array.isArray(parsed) || parsed.length > MAX_GROUP_SHARES) return null;
+    const shares: AlbumShare[] = [];
+    const seen = new Set<string>();
+    for (const item of parsed) {
+      const entry = item as { memberId?: unknown; amount?: unknown } | null;
+      const memberId = entry?.memberId;
+      if (typeof memberId !== 'string' || !GROUP_ROW_ID.test(memberId)) return null;
+      if (!isGroupAmount(entry?.amount) || seen.has(memberId)) return null;
+      seen.add(memberId);
+      shares.push({ memberId, amount: entry.amount });
+    }
+    return shares;
+  } catch {
+    return null;
+  }
+}
+
+export function toAlbumExpense(row: AlbumExpenseRow): AlbumExpense | null {
+  const shares = parseAlbumShares(row.sharesJson);
+  const date = groupDay(row.date);
+  if (
+    !shares ||
+    !date ||
+    !GROUP_BILL_ID.test(row.id) ||
+    !GROUP_ROW_ID.test(row.paidBy) ||
+    !isGroupAmount(row.amount) ||
+    !GROUP_CURRENCY.test(row.currency) ||
+    !isGroupTimestamp(row.createdAt)
+  ) {
+    return null;
+  }
+  return {
+    id: row.id,
+    groupId: row.ledgerId,
+    date,
+    note: clip(row.note, MAX_GROUP_NOTE),
+    amount: row.amount,
+    currency: row.currency,
+    categoryName: clip(row.categoryName, MAX_GROUP_LABEL),
+    categoryIcon: clip(row.categoryIcon, MAX_GROUP_LABEL),
+    paidBy: row.paidBy,
+    shares,
+    createdBy: row.createdBy ?? null,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    deletedAt: row.deletedAt,
+  };
+}
+
+export function toAlbumSettlement(row: AlbumSettlementRow): AlbumSettlement | null {
+  const date = groupDay(row.date);
+  if (
+    !date ||
+    !GROUP_SETTLEMENT_ID.test(row.id) ||
+    (row.expenseId != null && !GROUP_BILL_ID.test(row.expenseId)) ||
+    !GROUP_ROW_ID.test(row.fromMember) ||
+    !GROUP_ROW_ID.test(row.toMember) ||
+    row.fromMember === row.toMember ||
+    !isGroupAmount(row.amount) ||
+    !GROUP_CURRENCY.test(row.currency) ||
+    !isGroupTimestamp(row.createdAt)
+  ) {
+    return null;
+  }
+  return {
+    id: row.id,
+    groupId: row.ledgerId,
+    expenseId: row.expenseId ?? null,
+    fromMember: row.fromMember,
+    toMember: row.toMember,
+    amount: row.amount,
+    currency: row.currency,
+    date,
+    createdBy: row.createdBy ?? null,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     deletedAt: row.deletedAt,
@@ -446,6 +625,7 @@ export function toTransaction(row: TransactionRow): Transaction {
     instalmentNumber: row.instalmentNumber ?? null,
     createdBy: row.createdBy ?? null,
     memberId: row.memberId ?? null,
+    albumGroupId: row.albumGroupId ?? null,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     deletedAt: row.deletedAt,
@@ -471,7 +651,8 @@ export const TRANSACTION_RAW_COLUMNS_SQL = `
   t.recurrence_parent_id, t.sentiment, t.reimbursable, t.reimbursed_at,
   t.reimbursement_account_id, t.reimbursement_transaction_id, t.reimbursement_of_id,
   t.counts_as_expense, t.day_order, t.created_at, t.updated_at, t.deleted_at, t.details,
-  t.instalment_rule_id, t.instalment_number, t.created_by, t.member_id, t.fee_of_id`;
+  t.instalment_rule_id, t.instalment_number, t.created_by, t.member_id, t.fee_of_id,
+  t.album_group_id`;
 
 type RawValue = string | number | null;
 
@@ -523,14 +704,15 @@ export function toTransactionWithRelationsFromRaw(
     createdBy: (values[34] as string | null) ?? null,
     memberId: (values[35] as string | null) ?? null,
     feeOfId: (values[36] as string | null) ?? null,
-    accountName: (values[37] as string | null) ?? null,
-    fromAccountName: (values[38] as string | null) ?? null,
-    toAccountName: (values[39] as string | null) ?? null,
-    categoryName: (values[40] as string | null) ?? null,
-    categoryParentId: (values[42] as string | null) ?? null,
-    categoryParentName: (values[43] as string | null) ?? null,
-    categoryIcon: (values[41] as string | null) ?? null,
-    instalmentCount: (values[44] as number | null) ?? null,
+    albumGroupId: (values[37] as string | null) ?? null,
+    accountName: (values[38] as string | null) ?? null,
+    fromAccountName: (values[39] as string | null) ?? null,
+    toAccountName: (values[40] as string | null) ?? null,
+    categoryName: (values[41] as string | null) ?? null,
+    categoryParentId: (values[43] as string | null) ?? null,
+    categoryParentName: (values[44] as string | null) ?? null,
+    categoryIcon: (values[42] as string | null) ?? null,
+    instalmentCount: (values[45] as number | null) ?? null,
   };
 }
 
@@ -573,6 +755,7 @@ const TRANSACTION_SPARSE_DEFAULTS: Readonly<Record<string, RawValue>> = {
   created_by: null,
   member_id: null,
   fee_of_id: null,
+  album_group_id: null,
 };
 
 const SPARSE_COLUMNS = TRANSACTION_RAW_COLUMNS.filter(
@@ -757,6 +940,7 @@ export function createTransactionAssembler(
       createdBy: null,
       memberId: null,
       feeOfId: null,
+      albumGroupId: null,
       accountName: nameOf(common[8]),
       fromAccountName: nameOf(common[9]),
       toAccountName: nameOf(common[10]),
@@ -783,6 +967,8 @@ export function toTransactionSplit(row: TransactionSplitRow): TransactionSplit {
     isPayer: !!row.isPayer,
     shareAmount: row.shareAmount ?? null,
     memberId: row.memberId ?? null,
+    albumMemberId: row.albumMemberId ?? null,
+    settlementId: row.settlementId ?? null,
     sortOrder: row.sortOrder ?? 0,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,

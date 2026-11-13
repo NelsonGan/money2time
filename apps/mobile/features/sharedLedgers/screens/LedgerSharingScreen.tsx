@@ -25,6 +25,7 @@ import {
   type LedgerMembers,
   removeMember,
 } from '~/features/cloudSync/services/sharedLedgersApi';
+import { listAlbumShares } from '~/features/cloudSync/services/sharedLedgerStore';
 import { ledgerDisplayName, ledgerIcon } from '~/features/ledgers/lib/ledgerDisplay';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { DEFAULT_LEDGER_ID } from '~/lib/db/ledgerScope';
@@ -161,6 +162,11 @@ export function LedgerSharingScreen({
     }
     if (sync.status !== 'ready') {
       onOpenCloudSync();
+      return;
+    }
+    // Shared albums live in the main ledger, and only while it is not shared.
+    if (ledger.id === DEFAULT_LEDGER_ID && listAlbumShares().length > 0) {
+      Alert.alert(I18n.t('shared_ledgers.has_shared_albums'));
       return;
     }
     void triggerHaptic('selection');

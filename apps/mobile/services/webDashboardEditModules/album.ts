@@ -22,8 +22,11 @@ import type { Album } from '~/types';
 import type { EditModule, ModuleOp, PlanTools, Result } from '../webDashboardEdits';
 import { isAt, isDayKey, isId, isRecord, MAX_EDIT_ROWS } from './shared';
 
-/** What the planner reads from the app (the apply module's `select`). */
-export type AlbumExtra = { albums: Album[] };
+/**
+ * What the planner reads from the app (the apply module's `select`).
+ * `sharedAlbumIds`: the albums shared as a group on this phone.
+ */
+export type AlbumExtra = { albums: Album[]; sharedAlbumIds: string[] };
 
 type Details = { name: string; startDate: string | null; endDate: string | null };
 
@@ -194,6 +197,9 @@ export const albumModule: EditModule = {
     if (!current || current.updatedAt !== op.at) return tools.refuse('conflict');
 
     if (op.op === 'delete') {
+      // A shared album stops being shared (or is left) before it is deleted,
+      // which the app asks about. Not from the browser.
+      if (extra.sharedAlbumIds.includes(op.id)) return tools.refuse('invalid');
       steps.push({
         kind: 'module',
         entity: 'module:album',
@@ -215,6 +221,12 @@ export const albumModule: EditModule = {
     }
     const checked = checkExpenses(tools, op.add);
     if (!checked.ok) return checked;
+    // A shared album's bill taken out of it is removed for everyone in the
+    // album, which the app asks about first. Not from the browser.
+    const removing = new Set(op.remove);
+    if (tools.lookup.transactions.some((tx) => tx.albumGroupId === op.id && removing.has(tx.id))) {
+      return tools.refuse('invalid');
+    }
     steps.push({
       kind: 'module',
       entity: 'module:album',

@@ -1452,6 +1452,7 @@
       "nudgeLarge": "Isso representa {hours} do seu tempo de trabalho",
       "amountLocked": "Este valor está ligado a uma divisão ou a um reembolso. Altere-o no app.",
       "friendPaid": "{name} pagou esta conta. Altere no app.",
+      "groupBill": "Esta conta está em um álbum compartilhado. Altere no app.",
       "hideBalances": "Ocultar saldos",
       "showBalances": "Mostrar saldos",
       "savingsGoals": "Metas de poupança",

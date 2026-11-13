@@ -1,6 +1,11 @@
 // This phone's shared ledgers (table shared_ledgers, migration 075), as the
 // Worker last reported them. Read synchronously by the sync engine to route
 // rows, and by the ledger screens through `useSharedLedgers`.
+//
+// A shared album's group (migration 090) is kept here too, with `kind`
+// 'album' and the album's id as `ledgerId`: its rows route, sync and stop
+// exactly as a shared ledger's do. The screens read the two kinds apart
+// (`listLedgerShares`, `listAlbumShares`).
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -30,7 +35,11 @@ export interface SharedLedger {
    * Null from an older Worker.
    */
   ownerUserId?: string | null;
+  /** What is shared: a ledger (absent on a row from before albums could be), or an album's group. */
+  kind?: ShareKind;
 }
+
+export type ShareKind = 'ledger' | 'album';
 
 interface Row {
   ledger_id: string;
@@ -42,13 +51,18 @@ interface Row {
   active: number;
   user_id?: string | null;
   owner_user_id?: string | null;
+  kind?: string | null;
 }
 
 let cache: SharedLedger[] | null = null;
+let ledgerCache: SharedLedger[] | null = null;
+let albumCache: SharedLedger[] | null = null;
 const listeners = new Set<() => void>();
 
 function notify(): void {
   cache = null;
+  ledgerCache = null;
+  albumCache = null;
   for (const listener of listeners) listener();
 }
 
@@ -72,6 +86,7 @@ export function listSharedLedgers(): SharedLedger[] {
         active: row.active === 1,
         userId: row.user_id ?? null,
         ownerUserId: row.owner_user_id ?? null,
+        kind: row.kind === 'album' ? 'album' : 'ledger',
       }));
   } catch {
     // Before migration 075 has run.
@@ -82,6 +97,23 @@ export function listSharedLedgers(): SharedLedger[] {
 
 export function sharedLedgerFor(ledgerId: string): SharedLedger | null {
   return listSharedLedgers().find((ledger) => ledger.ledgerId === ledgerId) ?? null;
+}
+
+/** The shared ledgers alone: what the ledger screens list. One array until the list changes. */
+export function listLedgerShares(): SharedLedger[] {
+  ledgerCache ??= listSharedLedgers().filter((share) => share.kind !== 'album');
+  return ledgerCache;
+}
+
+/** The shared albums' groups alone. One array until the list changes. */
+export function listAlbumShares(): SharedLedger[] {
+  albumCache ??= listSharedLedgers().filter((share) => share.kind === 'album');
+  return albumCache;
+}
+
+/** The group of a shared album, by the album's id, or null when it is not shared. */
+export function sharedAlbumFor(albumId: string): SharedLedger | null {
+  return listAlbumShares().find((share) => share.ledgerId === albumId) ?? null;
 }
 
 /**
@@ -102,13 +134,14 @@ export function saveSharedLedger(ledger: SharedLedger): void {
     return;
   }
   getSQLite().runSync(
-    `INSERT INTO shared_ledgers (ledger_id, share_id, role, name, owner_name, member_count, active, updated_at, user_id, owner_user_id)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `INSERT INTO shared_ledgers (ledger_id, share_id, role, name, owner_name, member_count, active, updated_at, user_id, owner_user_id, kind)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(ledger_id) DO UPDATE SET share_id = excluded.share_id, role = excluded.role,
        name = excluded.name, owner_name = excluded.owner_name,
        member_count = excluded.member_count, active = excluded.active,
        user_id = COALESCE(excluded.user_id, shared_ledgers.user_id),
-       owner_user_id = COALESCE(excluded.owner_user_id, shared_ledgers.owner_user_id)`,
+       owner_user_id = COALESCE(excluded.owner_user_id, shared_ledgers.owner_user_id),
+       kind = excluded.kind`,
     [
       ledger.ledgerId,
       ledger.shareId,
@@ -120,6 +153,7 @@ export function saveSharedLedger(ledger: SharedLedger): void {
       Date.now(),
       ledger.userId ?? null,
       ledger.ownerUserId ?? null,
+      ledger.kind === 'album' ? 'album' : null,
     ],
   );
   notify();

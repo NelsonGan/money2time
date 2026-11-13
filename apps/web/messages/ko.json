@@ -1452,6 +1452,7 @@
       "nudgeLarge": "이건 {hours} 분량의 근무 시간이에요",
       "amountLocked": "이 금액은 더치페이나 환불과 연결되어 있어요. 앱에서 변경하세요.",
       "friendPaid": "{name} 님이 이 청구를 결제했어요. 앱에서 수정하세요.",
+      "groupBill": "이 청구는 공유 앨범에 있어요. 앱에서 수정하세요.",
       "hideBalances": "잔액 숨기기",
       "showBalances": "잔액 표시",
       "savingsGoals": "저축 목표",

@@ -2,6 +2,7 @@
 // cloud-sync/src/ledgers.ts). See README.md > Cloud Sync > Shared ledgers.
 
 import { request, type SyncCredentials } from './cloudSyncApi';
+import type { ShareKind } from './sharedLedgerStore';
 
 export interface RemoteSharedLedger {
   /** The Worker's id of the share. */
@@ -17,6 +18,8 @@ export interface RemoteSharedLedger {
   memberCount: number;
   /** False while nobody in it (owner or member) is Pro. */
   active: boolean;
+  /** 'album' for a shared album's group; absent (a ledger) from an older Worker. */
+  kind?: ShareKind;
 }
 
 export interface LedgerPerson {
@@ -41,17 +44,26 @@ export interface InvitePreview {
   /** No place left: joining would be refused. */
   full?: boolean;
   active: boolean;
+  /** 'album' when the link is to a shared album; absent (a ledger) from an older Worker. */
+  kind?: ShareKind;
 }
 
 const path = (shareId: string, rest = '') => `/v1/ledgers/${encodeURIComponent(shareId)}${rest}`;
 
+/**
+ * Everything this account shares or has joined. `albums=1` says this app
+ * knows shared albums: the Worker leaves them out for one that does not ask,
+ * which would take an album's group for a ledger.
+ */
 export async function listSharedLedgers(token: string): Promise<RemoteSharedLedger[]> {
-  return (await request<{ ledgers: RemoteSharedLedger[] }>('/v1/ledgers', { token })).ledgers;
+  return (await request<{ ledgers: RemoteSharedLedger[] }>('/v1/ledgers?albums=1', { token }))
+    .ledgers;
 }
 
+/** Shares a ledger, or with `kind: 'album'` an album (`ledgerId` is then the album's id). */
 export async function shareLedger(
   token: string,
-  ledger: { ledgerId: string; name: string; emoji: string | null },
+  ledger: { ledgerId: string; name: string; emoji: string | null; kind?: ShareKind },
 ): Promise<RemoteSharedLedger> {
   return (await request<{ ledger: RemoteSharedLedger }>('/v1/ledgers', { body: ledger, token }))
     .ledger;
@@ -117,11 +129,12 @@ export function previewInvite(code: string): Promise<InvitePreview> {
   return request<InvitePreview>(`/v1/invites/${encodeURIComponent(code)}`);
 }
 
+/** Joins. `albums: true` says this app can join a shared album (the Worker refuses one that cannot). */
 export async function acceptInvite(token: string, code: string): Promise<RemoteSharedLedger> {
   return (
     await request<{ ledger: RemoteSharedLedger }>(
       `/v1/invites/${encodeURIComponent(code)}/accept`,
-      { body: {}, token },
+      { body: { albums: true }, token },
     )
   ).ledger;
 }

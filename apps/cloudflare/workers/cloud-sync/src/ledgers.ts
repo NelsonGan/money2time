@@ -16,6 +16,18 @@
 // app itself can (delete entries, say). The owner's phone only ever applies
 // rows that belong to the ledger (see the app's syncEngine `accepts`), so a
 // member cannot reach the owner's other data.
+//
+// Shared albums. A share can instead carry an album's group: its members,
+// bills and settlements, which each phone turns into its own side in its own
+// ledger (README: Album members and shared albums). To the Worker it is the
+// same thing, a database with an owner, members and a link,
+// marked by a row in `shared_albums`; `ledger_id` is then the album's id.
+// Two things differ. It needs no Pro: anyone signed in shares one, and it
+// never pauses (`needsPro`). And it has no limit the app speaks of, only
+// ceilings against misuse, since a share is a database (MAX_OWNED_ALBUMS,
+// MAX_ALBUM_MEMBERS). An app from before albums could be shared never sees
+// one: the list leaves them out unless asked, and joining one must say the
+// app knows them.
 
 import { csv, type Env } from './env';
 import { json, readJson } from './http';
@@ -34,6 +46,19 @@ import {
 
 const MAX_OWNED = 2;
 const MAX_MEMBERS = 5;
+/**
+ * Shared albums are not limited as a plan: these only stop one account from
+ * making databases without end. An album holds 20 people besides its owner
+ * (the app's MAX_ALBUM_PEOPLE), so that many can join.
+ */
+const MAX_OWNED_ALBUMS = 50;
+const MAX_ALBUM_MEMBERS = 20;
+/**
+ * And how many an account may start sharing in a day: sharing and stopping
+ * in a loop would make and delete a database each time, without ever holding
+ * more than one.
+ */
+const MAX_ALBUM_SHARES_A_DAY = 20;
 const DAY_MS = 24 * 60 * 60 * 1000;
 /** An invite link lasts a day; asking again within it returns the same link. */
 const INVITE_TTL_MS = DAY_MS;
@@ -68,9 +93,23 @@ interface SharedLedgerRow {
   token: string | null;
   token_expires_at: number | null;
   created_at: number;
+  /** 1 when the share carries an album's group (a row in `shared_albums`). */
+  is_album?: number;
 }
 
 type Role = 'owner' | 'member';
+type Kind = 'ledger' | 'album';
+
+/** Whether shared ledger `l` is an album's group: it has a row in `shared_albums`. */
+const IS_ALBUM_SQL = 'EXISTS (SELECT 1 FROM shared_albums a WHERE a.ledger_id = l.id)';
+/** `shared_ledgers` aliased `l`, with whether it is an album's group. */
+const LEDGER_COLUMNS = `l.*, ${IS_ALBUM_SQL} AS is_album`;
+
+const kindOf = (ledger: SharedLedgerRow): Kind => (ledger.is_album === 1 ? 'album' : 'ledger');
+/** A shared ledger syncs on someone's Pro; a shared album on nobody's. */
+const needsPro = (ledger: SharedLedgerRow): boolean => kindOf(ledger) === 'ledger';
+const maxMembersOf = (ledger: SharedLedgerRow) =>
+  kindOf(ledger) === 'album' ? MAX_ALBUM_MEMBERS : MAX_MEMBERS;
 
 /** What the app is told about a shared ledger. */
 interface LedgerView {
@@ -90,6 +129,8 @@ interface LedgerView {
   memberCount: number;
   /** False while nobody in it (owner or member) is Pro: nobody syncs it. */
   active: boolean;
+  /** What the share carries: a ledger, or an album's group. */
+  kind: Kind;
 }
 
 // ---------------------------------------------------------------------------
@@ -137,7 +178,7 @@ function cleanEmoji(value: unknown): string | null {
 }
 
 async function getLedger(env: Env, id: string): Promise<SharedLedgerRow | null> {
-  return env.AUTH_DB.prepare('SELECT * FROM shared_ledgers WHERE id = ?1')
+  return env.AUTH_DB.prepare(`SELECT ${LEDGER_COLUMNS} FROM shared_ledgers l WHERE l.id = ?1`)
     .bind(id)
     .first<SharedLedgerRow>();
 }
@@ -151,7 +192,7 @@ async function access(
   // One read for the ledger and whether the user is in it: every ledger
   // route, image and notify starts here, and a member used to wait for two.
   const row = await env.AUTH_DB.prepare(
-    `SELECT l.*, EXISTS (
+    `SELECT ${LEDGER_COLUMNS}, EXISTS (
        SELECT 1 FROM ledger_members m WHERE m.ledger_id = l.id AND m.user_id = ?2
      ) AS is_member
      FROM shared_ledgers l WHERE l.id = ?1`,
@@ -270,6 +311,7 @@ export async function ledgerAudience(env: Env, ledger: SharedLedgerRow): Promise
  * (src/revenuecat.ts), so this costs little.
  */
 export async function isLedgerActive(env: Env, ledger: SharedLedgerRow): Promise<boolean> {
+  if (!needsPro(ledger)) return true;
   if (await isAccountPro(env, ledger.owner_user_id)) return true;
   return anyAccountPro(env, await memberIds(env, ledger.id));
 }
@@ -289,15 +331,36 @@ async function ownerOf(
   return owner ?? { name: '', email: '' };
 }
 
-async function view(env: Env, ledger: SharedLedgerRow, role: Role): Promise<LedgerView> {
-  // The members are read once, for the count and (when the owner is not Pro)
-  // for whether one of them keeps the ledger syncing.
-  const [owner, members, ownerPro] = await Promise.all([
-    ownerOf(env, ledger),
-    memberIds(env, ledger.id),
-    isAccountPro(env, ledger.owner_user_id),
+/** A share as the list reads it: with its owner and how many joined, in the same statement. */
+interface ListedLedgerRow extends SharedLedgerRow {
+  owner_name: string | null;
+  owner_email: string | null;
+  member_count: number;
+}
+
+const LISTED_COLUMNS = `${LEDGER_COLUMNS}, u.name AS owner_name, u.email AS owner_email,
+  (SELECT COUNT(*) FROM ledger_members c WHERE c.ledger_id = l.id) AS member_count`;
+const LISTED_FROM = 'shared_ledgers l LEFT JOIN "user" u ON u.id = l.owner_user_id';
+
+async function view(
+  env: Env,
+  ledger: SharedLedgerRow | ListedLedgerRow,
+  role: Role,
+): Promise<LedgerView> {
+  const listed = 'member_count' in ledger ? ledger : null;
+  const proRule = needsPro(ledger);
+  // A ledger's members are read once, for the count and (when the owner is
+  // not Pro) for whether one of them keeps it syncing. An album needs only
+  // the count, and a listed one has it already: nothing more is read.
+  const [owner, members, count, ownerActive] = await Promise.all([
+    listed
+      ? { name: listed.owner_name ?? '', email: listed.owner_email ?? '' }
+      : ownerOf(env, ledger),
+    proRule ? memberIds(env, ledger.id) : [],
+    proRule ? null : (listed?.member_count ?? memberCount(env, ledger.id)),
+    !proRule || isAccountPro(env, ledger.owner_user_id),
   ]);
-  const active = ownerPro || (await anyAccountPro(env, members));
+  const active = ownerActive || (await anyAccountPro(env, members));
   return {
     id: ledger.id,
     ledgerId: ledger.ledger_id,
@@ -306,8 +369,9 @@ async function view(env: Env, ledger: SharedLedgerRow, role: Role): Promise<Ledg
     role,
     ownerId: ledger.owner_user_id,
     ownerName: displayName(owner.name, owner.email),
-    memberCount: members.length,
+    memberCount: count ?? members.length,
     active,
+    kind: kindOf(ledger),
   };
 }
 
@@ -338,12 +402,13 @@ export async function routeLedgers(
   const method = request.method;
 
   if (parts[1] === 'invites' && parts.length === 4 && parts[3] === 'accept' && method === 'POST') {
-    return acceptInvite(env, user, parts[2]);
+    const body = await readJson<{ albums: unknown }>(request);
+    return acceptInvite(env, user, parts[2], body?.albums === true);
   }
   if (parts[1] !== 'ledgers') return null;
 
   if (parts.length === 2) {
-    if (method === 'GET') return listLedgers(env, user);
+    if (method === 'GET') return listLedgers(env, user, url.searchParams.get('albums') === '1');
     if (method === 'POST') return shareLedger(env, user, request);
     return null;
   }
@@ -423,48 +488,62 @@ export async function ledgerForMedia(
   return (await access(env, id, userId))?.ledger ?? null;
 }
 
-async function listLedgers(env: Env, user: SessionUser): Promise<Response> {
+/**
+ * `withAlbums`: the app asked for shared albums too (`?albums=1`). One that
+ * does not would take an album's group for a ledger, so it is not told.
+ */
+async function listLedgers(env: Env, user: SessionUser, withAlbums: boolean): Promise<Response> {
   // Asked together: the app lists its ledgers before almost every sync.
   const [owned, joined] = await Promise.all([
-    env.AUTH_DB.prepare('SELECT * FROM shared_ledgers WHERE owner_user_id = ?1')
+    env.AUTH_DB.prepare(`SELECT ${LISTED_COLUMNS} FROM ${LISTED_FROM} WHERE l.owner_user_id = ?1`)
       .bind(user.id)
-      .all<SharedLedgerRow>(),
+      .all<ListedLedgerRow>(),
     env.AUTH_DB.prepare(
-      `SELECT l.* FROM shared_ledgers l JOIN ledger_members m ON m.ledger_id = l.id
+      `SELECT ${LISTED_COLUMNS} FROM ${LISTED_FROM} JOIN ledger_members m ON m.ledger_id = l.id
        WHERE m.user_id = ?1`,
     )
       .bind(user.id)
-      .all<SharedLedgerRow>(),
+      .all<ListedLedgerRow>(),
   ]);
+  const shown = (row: SharedLedgerRow) => withAlbums || kindOf(row) === 'ledger';
   const ledgers = await Promise.all([
-    ...owned.results.map((row) => view(env, row, 'owner')),
-    ...joined.results.map((row) => view(env, row, 'member')),
+    ...owned.results.filter(shown).map((row) => view(env, row, 'owner')),
+    ...joined.results.filter(shown).map((row) => view(env, row, 'member')),
   ]);
   return json({ ledgers });
 }
 
 async function shareLedger(env: Env, user: SessionUser, request: Request): Promise<Response> {
-  const body = await readJson<{ ledgerId: unknown; name: unknown; emoji: unknown }>(request);
+  const body = await readJson<{ ledgerId: unknown; name: unknown; emoji: unknown; kind: unknown }>(
+    request,
+  );
   const ledgerId = typeof body?.ledgerId === 'string' ? body.ledgerId : '';
   const name = cleanName(body?.name);
+  // An album's group: `ledgerId` is the album's id. It needs no Pro, and is
+  // counted against its own ceiling.
+  const album = body?.kind === 'album';
+  const limit = album ? MAX_OWNED_ALBUMS : MAX_OWNED;
   if (!LEDGER_ID.test(ledgerId) || ledgerId === 'default' || !name) {
     return json({ error: 'bad_request' }, 400);
   }
-  if (!(await isAccountPro(env, user.id))) return json({ error: 'not_pro' }, 403);
+  if (!album && !(await isAccountPro(env, user.id))) return json({ error: 'not_pro' }, 403);
 
   const existing = await env.AUTH_DB.prepare(
-    'SELECT * FROM shared_ledgers WHERE owner_user_id = ?1 AND ledger_id = ?2',
+    `SELECT ${LEDGER_COLUMNS} FROM shared_ledgers l WHERE l.owner_user_id = ?1 AND l.ledger_id = ?2`,
   )
     .bind(user.id, ledgerId)
     .first<SharedLedgerRow>();
   if (existing) return json({ ledger: await view(env, existing, 'owner') });
 
   const owned = await env.AUTH_DB.prepare(
-    'SELECT COUNT(*) AS n FROM shared_ledgers WHERE owner_user_id = ?1',
+    `SELECT COUNT(*) AS n FROM shared_ledgers l WHERE l.owner_user_id = ?1 AND ${IS_ALBUM_SQL} = ?2`,
   )
-    .bind(user.id)
+    .bind(user.id, album ? 1 : 0)
     .first<{ n: number }>();
-  if ((owned?.n ?? 0) >= MAX_OWNED) return json({ error: 'limit_reached' }, 409);
+  if ((owned?.n ?? 0) >= limit) return json({ error: 'limit_reached' }, 409);
+  if (album && !(await underDailyLimit(env, `album-share:${user.id}`, MAX_ALBUM_SHARES_A_DAY))) {
+    return json({ error: 'rate_limited' }, 429);
+  }
 
   const id = randomHex(12);
   const dbName = `m2t-ledger-${id}`;
@@ -475,27 +554,40 @@ async function shareLedger(env: Env, user: SessionUser, request: Request): Promi
   try {
     if (!local) await applyCloudSchema(url, await createToken(env, dbName, TOKEN_TTL_DAYS));
     // The limit and the insert are one statement, so two shares at once
-    // cannot pass MAX_OWNED. A second tap on the same ledger hits the unique
-    // index and gets the first share back below.
-    const result = await env.AUTH_DB.prepare(
+    // cannot pass the limit of their kind. A second tap on the same ledger
+    // hits the unique index and gets the first share back below.
+    const insert = env.AUTH_DB.prepare(
       `INSERT OR IGNORE INTO shared_ledgers
          (id, ledger_id, owner_user_id, name, emoji, db_name, db_url, created_at)
        SELECT ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8
-       WHERE (SELECT COUNT(*) FROM shared_ledgers WHERE owner_user_id = ?3) < ?9`,
-    )
-      .bind(
-        id,
-        ledgerId,
-        user.id,
-        name,
-        cleanEmoji(body?.emoji),
-        dbName,
-        url,
-        Date.now(),
-        MAX_OWNED,
-      )
-      .run();
-    inserted = result.meta.changes > 0;
+       WHERE (SELECT COUNT(*) FROM shared_ledgers l
+              WHERE l.owner_user_id = ?3 AND ${IS_ALBUM_SQL} = ?10) < ?9`,
+    ).bind(
+      id,
+      ledgerId,
+      user.id,
+      name,
+      cleanEmoji(body?.emoji),
+      dbName,
+      url,
+      Date.now(),
+      limit,
+      album ? 1 : 0,
+    );
+    if (album) {
+      // With its mark, in one batch: a share is never left as a ledger by a
+      // Worker stopped between the two.
+      const [result] = await env.AUTH_DB.batch([
+        insert,
+        env.AUTH_DB.prepare(
+          `INSERT OR IGNORE INTO shared_albums (ledger_id)
+           SELECT ?1 WHERE EXISTS (SELECT 1 FROM shared_ledgers WHERE id = ?1)`,
+        ).bind(id),
+      ]);
+      inserted = result.meta.changes > 0;
+    } else {
+      inserted = (await insert.run()).meta.changes > 0;
+    }
   } catch (error) {
     // A deleted account (foreign key): no orphan database.
     await deleteDatabase(env, dbName).catch(() => undefined);
@@ -504,7 +596,7 @@ async function shareLedger(env: Env, user: SessionUser, request: Request): Promi
   if (!inserted) {
     await deleteDatabase(env, dbName).catch(() => undefined);
     const raced = await env.AUTH_DB.prepare(
-      'SELECT * FROM shared_ledgers WHERE owner_user_id = ?1 AND ledger_id = ?2',
+      `SELECT ${LEDGER_COLUMNS} FROM shared_ledgers l WHERE l.owner_user_id = ?1 AND l.ledger_id = ?2`,
     )
       .bind(user.id, ledgerId)
       .first<SharedLedgerRow>();
@@ -514,6 +606,26 @@ async function shareLedger(env: Env, user: SessionUser, request: Request): Promi
   const row = await getLedger(env, id);
   if (!row) return json({ error: 'server_error' }, 500);
   return json({ ledger: await view(env, row, 'owner') });
+}
+
+/**
+ * Counts one more use of `key` today and says whether it is still within
+ * `max`. Kept in Better Auth's rate-limit table (`lastRequest` is when the
+ * day began), which the daily cron clears; one statement, so two requests at
+ * once are both counted.
+ */
+async function underDailyLimit(env: Env, key: string, max: number): Promise<boolean> {
+  const now = Date.now();
+  const row = await env.AUTH_DB.prepare(
+    `INSERT INTO "rateLimit" ("id", "key", "count", "lastRequest") VALUES (?1, ?1, 1, ?2)
+     ON CONFLICT("key") DO UPDATE SET
+       "count" = CASE WHEN "lastRequest" < ?3 THEN 1 ELSE "count" + 1 END,
+       "lastRequest" = CASE WHEN "lastRequest" < ?3 THEN ?2 ELSE "lastRequest" END
+     RETURNING "count"`,
+  )
+    .bind(key, now, now - DAY_MS)
+    .first<{ count: number }>();
+  return (row?.count ?? 1) <= max;
 }
 
 /** Local development: the first sync server no shared ledger uses yet. */
@@ -609,7 +721,7 @@ async function listMembers(env: Env, ledger: SharedLedgerRow, role: Role): Promi
   return json({
     owner: person(owner),
     members: members.results.map((m) => ({ id: m.id, joinedAt: m.joined_at, ...person(m) })),
-    maxMembers: MAX_MEMBERS,
+    maxMembers: maxMembersOf(ledger),
   });
 }
 
@@ -630,7 +742,8 @@ async function inviteLink(env: Env, ledger: SharedLedgerRow, request: Request): 
       .bind(ledger.id, name, cleanEmoji(body?.emoji))
       .run();
   }
-  if ((await memberCount(env, ledger.id)) >= MAX_MEMBERS) return json({ error: 'full' }, 409);
+  if ((await memberCount(env, ledger.id)) >= maxMembersOf(ledger))
+    return json({ error: 'full' }, 409);
   const base = (env.INVITE_URL || env.BETTER_AUTH_URL).replace(/\/+$/, '');
   const now = Date.now();
   const current = await env.AUTH_DB.prepare(
@@ -706,15 +819,23 @@ export async function previewInvite(env: Env, code: string): Promise<Response> {
     emoji: ledger.emoji,
     ownerName: displayName(owner.name, owner.email),
     memberCount: count,
-    full: count >= MAX_MEMBERS,
+    full: count >= maxMembersOf(ledger),
     active: await isLedgerActive(env, ledger),
+    kind: kindOf(ledger),
   });
 }
 
-async function acceptInvite(env: Env, user: SessionUser, code: string): Promise<Response> {
+/** `knowsAlbums`: the app said it can join a shared album; one that cannot would take it for a ledger. */
+async function acceptInvite(
+  env: Env,
+  user: SessionUser,
+  code: string,
+  knowsAlbums: boolean,
+): Promise<Response> {
   const invite = await findInvite(env, code);
   const ledger = invite ? await getLedger(env, invite.ledger_id) : null;
   if (!invite || !ledger) return json({ error: 'invite_not_found' }, 404);
+  if (kindOf(ledger) === 'album' && !knowsAlbums) return json({ error: 'update_required' }, 409);
   if (ledger.owner_user_id === user.id) return json({ error: 'own_ledger' }, 409);
   const already = await access(env, ledger.id, user.id);
   if (!already) {
@@ -731,7 +852,7 @@ async function acceptInvite(env: Env, user: SessionUser, code: string): Promise<
          AND EXISTS (SELECT 1 FROM ledger_links
                      WHERE ledger_id = ?1 AND code_hash = ?5 AND expires_at > ?3)`,
     )
-      .bind(ledger.id, user.id, now, MAX_MEMBERS, invite.code_hash)
+      .bind(ledger.id, user.id, now, maxMembersOf(ledger), invite.code_hash)
       .run();
     if (!joined.meta.changes) {
       // The same user joining twice at once: already in.
@@ -753,11 +874,13 @@ async function acceptInvite(env: Env, user: SessionUser, code: string): Promise<
  * their apps catch up at once (a removed ledger goes, a count drops).
  */
 export async function deleteLedgerAccess(env: Env, userId: string): Promise<void> {
-  const owned = await env.AUTH_DB.prepare('SELECT * FROM shared_ledgers WHERE owner_user_id = ?1')
+  const owned = await env.AUTH_DB.prepare(
+    `SELECT ${LEDGER_COLUMNS} FROM shared_ledgers l WHERE l.owner_user_id = ?1`,
+  )
     .bind(userId)
     .all<SharedLedgerRow>();
   const joined = await env.AUTH_DB.prepare(
-    `SELECT l.* FROM shared_ledgers l JOIN ledger_members m ON m.ledger_id = l.id
+    `SELECT ${LEDGER_COLUMNS} FROM shared_ledgers l JOIN ledger_members m ON m.ledger_id = l.id
      WHERE m.user_id = ?1`,
   )
     .bind(userId)

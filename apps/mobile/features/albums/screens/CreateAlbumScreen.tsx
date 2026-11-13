@@ -1,24 +1,38 @@
 import { Image } from 'expo-image';
 import { ChevronRight, ImageIcon, X } from 'lucide-react-native';
-import { useCallback, useMemo, useState } from 'react';
-import { Alert, Pressable, ScrollView, View } from 'react-native';
+import { type ComponentRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Alert, Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
-import { FatButton, Input, SettingsHeader, Text } from '~/components/ui';
+import { FatButton, FormScrollView, Input, SettingsHeader, Text } from '~/components/ui';
 import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { useApp } from '~/context/AppContext';
+import { useCloudSync } from '~/features/cloudSync/CloudSyncContext';
+import { useSignedIn } from '~/features/cloudSync/components/SignInGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { pickLibraryImage } from '~/services/libraryImagePicker';
 import { deleteAlbumCover, getAlbumCoverUri, saveAlbumCover } from '~/services/userAssets';
-import type { AlbumLocation } from '~/types';
+import type { AlbumLocation, AlbumPerson } from '~/types';
 import { getErrorMessage } from '~/utils/errorHandling';
+import { newId } from '~/utils/id';
 
 import { AlbumDateRangeFields } from '../components/AlbumDateRangeFields';
 import { AlbumLocationField } from '../components/AlbumLocationField';
 import { AlbumMonthPicker } from '../components/AlbumMonthPicker';
+import { AlbumSharingCard } from '../components/AlbumSharingCard';
+import { SplitWithCard, type SplitWithRow } from '../components/SplitWithCard';
+import { useAlbumScope } from '../hooks/useAlbumGroup';
+import { albumSharingMessage, peopleEditMessage } from '../lib/albumMessages';
+import {
+  MAX_ALBUM_PEOPLE,
+  type PeopleEditError,
+  withPersonAdded,
+  withPersonRemoved,
+  withPersonRenamed,
+} from '../lib/albumPeople';
 
 interface CreateAlbumScreenProps {
   initialTransactionIds?: string[];
@@ -31,7 +45,11 @@ export function CreateAlbumScreen({
   onClose,
   onCreated,
 }: CreateAlbumScreenProps) {
-  const { createAlbum } = useApp();
+  const { createAlbum, setAlbumPeople, setAlbumSimplifyDebts } = useApp();
+  const sync = useCloudSync();
+  // Sharing is free and needs only an account: asked for under the switch.
+  const signedIn = useSignedIn();
+  const { canSplit, canShare } = useAlbumScope();
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
 
@@ -42,6 +60,21 @@ export function CreateAlbumScreen({
   const [selectedIds, setSelectedIds] = useState<string[]>(initialTransactionIds ?? []);
   const [location, setLocation] = useState<AlbumLocation | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
+  // Who it is split with and how it is shared, set up with the album.
+  const [people, setPeople] = useState<AlbumPerson[]>([]);
+  // What the user asked for; it is shared only once an account is signed in.
+  const [wantsShare, setWantsShare] = useState(false);
+  const share = wantsShare && signedIn;
+  // The sign-in opens at the foot of the form: bring it into view.
+  const scrollRef = useRef<ComponentRef<typeof FormScrollView>>(null);
+  const signInOpen = wantsShare && !signedIn;
+  useEffect(() => {
+    if (!signInOpen) return;
+    const frame = requestAnimationFrame(() => scrollRef.current?.scrollToEnd({ animated: true }));
+    return () => cancelAnimationFrame(frame);
+  }, [signInOpen]);
+  const [simplify, setSimplify] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const coverUri = useMemo(() => getAlbumCoverUri(coverPath), [coverPath]);
   // Skip a uri that failed to load natively; see CategoryEmoji for why.
@@ -68,10 +101,11 @@ export function CreateAlbumScreen({
     );
   }, [coverPath]);
 
-  const handleSave = useCallback(() => {
-    if (!canSave) return;
+  const handleSave = async () => {
+    if (!canSave || saving) return;
+    let albumId: string;
     try {
-      const albumId = createAlbum({
+      albumId = createAlbum({
         name: name.trim(),
         coverPhotoUri: coverPath,
         startDate,
@@ -79,11 +113,54 @@ export function CreateAlbumScreen({
         transactionIds: selectedIds,
         location,
       });
-      onCreated(albumId);
+      if (people.length) setAlbumPeople(albumId, people);
     } catch (error) {
       Alert.alert(I18n.t('errors.generic_operation_failed'), getErrorMessage(error));
+      return;
     }
-  }, [canSave, coverPath, createAlbum, endDate, location, name, onCreated, selectedIds, startDate]);
+    if (share) {
+      setSaving(true);
+      try {
+        await sync.shareAlbum({ id: albumId, name: name.trim() });
+        if (simplify) setAlbumSimplifyDebts(albumId, true);
+      } catch (error) {
+        // The album is made; it can be shared from its People page.
+        Alert.alert(albumSharingMessage(error));
+      }
+    }
+    onCreated(albumId);
+  };
+
+  const applyPeople = (next: AlbumPerson[] | PeopleEditError): boolean => {
+    if (typeof next !== 'string') {
+      setPeople(next);
+      return true;
+    }
+    const message = peopleEditMessage(next);
+    if (message) Alert.alert(message);
+    return false;
+  };
+  const rows: SplitWithRow[] = [
+    {
+      id: null,
+      name: I18n.t('transactions.editor.split.me_label'),
+      isSelf: true,
+      renamable: false,
+      removable: false,
+    },
+    ...people.map((person) => ({
+      id: person.id,
+      name: person.name,
+      isSelf: false,
+      renamable: true,
+      removable: true,
+    })),
+  ];
+  const toggleShare = (next: boolean) => {
+    void triggerHaptic('selection');
+    // Signed out, the switch stays off over the sign-in: a second tap puts it away.
+    setWantsShare(signedIn ? next : (wanted) => !wanted);
+  };
 
   if (pickerOpen) {
     return (
@@ -135,10 +212,12 @@ export function CreateAlbumScreen({
           onBack={onClose}
         />
 
-        <ScrollView
+        <FormScrollView
+          ref={scrollRef}
           className="flex-1"
           contentContainerStyle={{ paddingBottom: 24 }}
-          keyboardShouldPersistTaps="handled"
+          // The add-person field keeps the keyboard up; a scroll puts it away.
+          keyboardDismissMode="on-drag"
         >
           {/* Full-bleed cover picker */}
           <Pressable
@@ -204,8 +283,45 @@ export function CreateAlbumScreen({
               </View>
               <ChevronRight size={20} color={themeColors.textMuted} />
             </Pressable>
+
+            {canSplit ? (
+              <>
+                <Text variant="label" tone="muted" className="mb-2 mt-5 px-1">
+                  {I18n.t('albums.people.split_with')}
+                </Text>
+                <View className="gap-4">
+                  <SplitWithCard
+                    rows={rows}
+                    canAdd={people.length < MAX_ALBUM_PEOPLE}
+                    onAdd={(personName) =>
+                      applyPeople(withPersonAdded(people, personName, newId()))
+                    }
+                    onRename={(id, personName) =>
+                      applyPeople(withPersonRenamed(people, id, personName))
+                    }
+                    onRemove={(row) => row.id && setPeople(withPersonRemoved(people, row.id))}
+                  />
+                  <AlbumSharingCard
+                    share={
+                      canShare ? { value: share, onChange: toggleShare, signIn: signInOpen } : null
+                    }
+                    simplify={
+                      share
+                        ? {
+                            value: simplify,
+                            onChange: (next) => {
+                              void triggerHaptic('selection');
+                              setSimplify(next);
+                            },
+                          }
+                        : null
+                    }
+                  />
+                </View>
+              </>
+            ) : null}
           </View>
-        </ScrollView>
+        </FormScrollView>
 
         <View
           className="border-t border-border/30 bg-background px-5 pt-3"
@@ -213,8 +329,9 @@ export function CreateAlbumScreen({
         >
           <FatButton
             label={I18n.t('albums.create')}
-            onPress={handleSave}
+            onPress={() => void handleSave()}
             disabled={!canSave}
+            loading={saving}
             haptic="success"
           />
         </View>

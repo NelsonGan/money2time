@@ -1452,6 +1452,7 @@
       "nudgeLarge": "Iyon ay {hours} ng iyong oras sa trabaho",
       "amountLocked": "Naka-link ang halagang ito sa isang hatian o refund. Palitan ito sa app.",
       "friendPaid": "Si {name} ang nagbayad ng bill na ito. Baguhin ito sa app.",
+      "groupBill": "Nasa shared na album ang bill na ito. Baguhin ito sa app.",
       "hideBalances": "Itago ang mga balance",
       "showBalances": "Ipakita ang mga balance",
       "savingsGoals": "Mga Savings Goal",

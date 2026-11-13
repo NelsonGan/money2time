@@ -1096,8 +1096,6 @@ const de = {
         get_back_hint: 'Du bekommst {{amount}} zurück',
         paid_floor: 'Du hast bereits {{amount}} zurückgezahlt',
         your_share: 'Dein Anteil {{amount}}',
-        swipe_hint_actions: 'Zeile nach links wischen zum Bezahltmarkieren oder Löschen',
-        swipe_hint_delete: 'Zeile nach links wischen zum Löschen',
         section_subtitle_unpaid: '{{count}} schuldet noch',
         section_subtitle_unpaid_plural: '{{count}} schulden noch',
         subtotal_label: 'Zwischensumme',
@@ -3004,6 +3002,70 @@ const de = {
     delete_body: 'Damit wird das Album entfernt. Deine Transaktionen werden nicht gelöscht.',
     cover_permission_title: 'Fotozugriff erforderlich',
     cover_permission_body: 'Erlaube den Fotozugriff, um ein Titelbild auszuwählen.',
+    people: {
+      title: 'Personen',
+      split_with: 'Teilen mit',
+      me_tag: 'Du',
+      joined: 'Beigetreten',
+      not_joined: 'Noch nicht beigetreten',
+      add_person: 'Person hinzufügen',
+      add: 'Hinzufügen',
+      unnamed: 'Freund',
+      name_taken: 'Jemand hier hat bereits diesen Namen.',
+      full: 'Ein Album wird mit bis zu {{max}} Personen geteilt.',
+      remove_title: '{{name}} entfernen?',
+      remove_message:
+        'Neue Rechnungen in diesem Album werden nicht mehr mit dieser Person geteilt.',
+      remove_in_use:
+        '{{name}} steht auf einer Rechnung in diesem Album. Entferne die Person zuerst von den Rechnungen.',
+      remove_joined_title: '{{name}} aus dem Album entfernen?',
+      remove_joined_message:
+        'Die Person erhält keine Rechnungen dieses Albums mehr. Rechnungen, auf denen sie steht, bleiben.',
+      who_title: 'Wer davon bist du?',
+      who_message:
+        'Wähle deinen Namen, damit dein Anteil jeder Rechnung in deinem Kassenbuch landet.',
+      who_new: 'Ich stehe nicht auf der Liste',
+    },
+    share: {
+      row: 'Dieses Album teilen',
+      caption: 'Alle sehen die Rechnungen und wer wem etwas schuldet.',
+      link_note: 'Gilt 24 Stunden. Jeder mit dem Link kann beitreten.',
+      stop_title: '{{name}} nicht mehr teilen?',
+      stop_message:
+        'Alle behalten das Album mit ihren eigenen Einträgen, aber es wird nicht mehr untereinander aktualisiert.',
+      leave: 'Album verlassen',
+      leave_title: '{{name}} verlassen?',
+      leave_message:
+        'Du behältst das Album mit deinen eigenen Einträgen, aber es wird nicht mehr aktualisiert.',
+      limit: 'Du kannst bis zu {{max}} Alben gleichzeitig teilen.',
+      full: 'Bis zu {{max}} Personen können einem Album beitreten.',
+      sign_in: 'Melde dich an, um dieses Album zu teilen.',
+    },
+    balances: {
+      tab: 'Salden',
+      empty_message: 'Teile eine Rechnung in diesem Album, dann erscheint sie hier.',
+      who_owes_whom: 'Wer schuldet wem',
+      owes_you: '{{name}} schuldet dir',
+      owes: '{{from}} schuldet {{to}}',
+      group_spending: 'Ausgaben der Gruppe',
+      your_share: 'Dein Anteil',
+    },
+    simplify: {
+      row: 'Gruppenschulden vereinfachen',
+      info: 'Fasst Schulden in der Gruppe zusammen, damit weniger Zahlungen nötig sind. Insgesamt zahlt oder bekommt niemand mehr.',
+    },
+    join: {
+      title: 'Geteiltes Album',
+      own: 'Das ist eines deiner eigenen Alben.',
+      already: 'Du bist bereits in diesem Album.',
+      main_shared: 'Dein Hauptbuch ist geteilt und kann deshalb kein geteiltes Album enthalten.',
+    },
+    bill: {
+      delete_shared:
+        'Diese Rechnung ist in einem geteilten Album. Wenn du sie löschst, wird sie für alle entfernt.',
+      remove_shared:
+        'Diese Rechnung ist in einem geteilten Album. Sie wird für alle anderen entfernt.',
+    },
   },
   assets: {
     tab_accounts: 'Konten',
@@ -3309,6 +3371,7 @@ const de = {
     share_toggle: 'Dieses Buch teilen',
     share_toggle_caption: 'Lade bis zu {{max}} Personen ein. Sie brauchen kein Pro.',
     needs_cloud_sync: 'Melde dich bei Cloud Sync an, um ein Buch zu teilen.',
+    has_shared_albums: 'Dieses Buch enthält geteilte Alben. Beende zuerst deren Freigabe.',
     limit_reached: 'Du kannst vorerst bis zu {{max}} Bücher teilen.',
     share_failed:
       'Das Buch wurde erstellt, aber das Teilen hat nicht begonnen. Versuch es auf der Teilen-Seite des Buchs noch einmal.',

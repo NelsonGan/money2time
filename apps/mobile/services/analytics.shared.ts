@@ -251,6 +251,17 @@ export const GA4_ONLY_EVENTS = {
   ALBUM_DELETED: 'Album Deleted',
   ALBUM_LOCATION_SET: 'Album Location Set',
   ALBUM_LOCATIONS_OPENED: 'Album Locations Opened',
+  // Album members and shared albums
+  ALBUM_PEOPLE_SET: 'Album People Set',
+  ALBUM_SHARED: 'Album Shared',
+  ALBUM_SHARE_STOPPED: 'Album Share Stopped',
+  ALBUM_JOINED: 'Album Joined',
+  ALBUM_LEFT: 'Album Left',
+  ALBUM_MEMBER_REMOVED: 'Album Member Removed',
+  ALBUM_BILL_SAVED: 'Album Bill Saved',
+  ALBUM_PAYMENT_RECORDED: 'Album Payment Recorded',
+  ALBUM_PAYMENT_UNDONE: 'Album Payment Undone',
+  ALBUM_SIMPLIFY_DEBTS_SET: 'Album Simplify Debts Set',
 
   // Budgets
   BUDGET_TEMPLATE_CREATED: 'Budget Template Created',

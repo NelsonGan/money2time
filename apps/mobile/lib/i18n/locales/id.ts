@@ -1086,8 +1086,6 @@ const id = {
         get_back_hint: 'Kamu menerima kembali {{amount}}',
         paid_floor: 'Kamu sudah membayar {{amount}}',
         your_share: 'Bagianmu {{amount}}',
-        swipe_hint_actions: 'Geser baris ke kiri untuk menandai lunas atau menghapus',
-        swipe_hint_delete: 'Geser baris ke kiri untuk menghapus',
         section_subtitle_unpaid: '{{count}} masih berutang padamu',
         section_subtitle_unpaid_plural: '{{count}} masih berutang padamu',
         subtotal_label: 'Subtotal',
@@ -2974,6 +2972,67 @@ const id = {
     delete_body: 'Ini menghapus album. Transaksi Anda tidak dihapus.',
     cover_permission_title: 'Perlu akses foto',
     cover_permission_body: 'Izinkan akses foto untuk memilih gambar sampul.',
+    people: {
+      title: 'Orang',
+      split_with: 'Bagi dengan',
+      me_tag: 'Kamu',
+      joined: 'Sudah bergabung',
+      not_joined: 'Belum bergabung',
+      add_person: 'Tambah orang',
+      add: 'Tambah',
+      unnamed: 'Teman',
+      name_taken: 'Sudah ada yang memakai nama itu di sini.',
+      full: 'Satu album dibagi dengan paling banyak {{max}} orang.',
+      remove_title: 'Hapus {{name}}?',
+      remove_message: 'Tagihan baru di album ini tidak lagi dibagi dengannya.',
+      remove_in_use: '{{name}} ada di sebuah tagihan di album ini. Keluarkan dulu dari tagihannya.',
+      remove_joined_title: 'Keluarkan {{name}} dari album?',
+      remove_joined_message:
+        'Dia tidak lagi menerima tagihan album ini. Tagihan yang memuatnya tetap ada.',
+      who_title: 'Yang mana kamu?',
+      who_message: 'Pilih namamu agar bagianmu dari tiap tagihan masuk ke buku kasmu.',
+      who_new: 'Saya tidak ada di daftar',
+    },
+    share: {
+      row: 'Bagikan album ini',
+      caption: 'Semua orang melihat tagihan dan siapa berutang kepada siapa.',
+      link_note: 'Berlaku 24 jam. Siapa pun yang memilikinya bisa bergabung.',
+      stop_title: 'Berhenti membagikan {{name}}?',
+      stop_message:
+        'Semua orang tetap memiliki album dengan catatannya sendiri, tetapi tidak lagi diperbarui di antara kalian.',
+      leave: 'Keluar dari album',
+      leave_title: 'Keluar dari {{name}}?',
+      leave_message:
+        'Kamu tetap memiliki album dengan catatanmu sendiri, tetapi tidak lagi diperbarui.',
+      limit: 'Kamu bisa membagikan hingga {{max}} album sekaligus.',
+      full: 'Hingga {{max}} orang bisa bergabung ke satu album.',
+      sign_in: 'Masuk untuk membagikan album ini.',
+    },
+    balances: {
+      tab: 'Saldo',
+      empty_message: 'Bagi sebuah tagihan di album ini dan akan muncul di sini.',
+      who_owes_whom: 'Siapa berutang kepada siapa',
+      owes_you: '{{name}} berutang kepada Anda',
+      owes: '{{from}} berutang kepada {{to}}',
+      group_spending: 'Pengeluaran grup',
+      your_share: 'Bagian Anda',
+    },
+    simplify: {
+      row: 'Sederhanakan utang grup',
+      info: 'Menggabungkan utang di grup agar pembayarannya lebih sedikit. Total yang dibayar atau diterima tiap orang tetap sama.',
+    },
+    join: {
+      title: 'Album bersama',
+      own: 'Ini salah satu albummu sendiri.',
+      already: 'Kamu sudah ada di album ini.',
+      main_shared: 'Buku utama Anda dibagikan, jadi tidak bisa memuat album bersama.',
+    },
+    bill: {
+      delete_shared:
+        'Tagihan ini ada di album bersama. Menghapusnya akan menghapusnya untuk semua orang.',
+      remove_shared:
+        'Tagihan ini ada di album bersama. Tagihan akan dihapus untuk semua orang lain.',
+    },
   },
   assets: {
     tab_accounts: 'Akun',
@@ -3276,6 +3335,8 @@ const id = {
     share_toggle: 'Bagikan buku ini',
     share_toggle_caption: 'Undang hingga {{max}} orang. Mereka tidak perlu Pro.',
     needs_cloud_sync: 'Masuk ke Cloud Sync untuk membagikan buku.',
+    has_shared_albums:
+      'Buku ini memiliki album bersama. Hentikan berbagi album itu terlebih dahulu.',
     limit_reached: 'Untuk saat ini Anda bisa membagikan hingga {{max}} buku.',
     share_failed:
       'Buku sudah dibuat, tetapi berbagi belum dimulai. Coba lagi dari halaman Berbagi buku itu.',

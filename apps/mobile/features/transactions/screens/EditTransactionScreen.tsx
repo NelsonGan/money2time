@@ -9,6 +9,7 @@ import {
   useTransactions,
   useTransferFeeIndex,
 } from '~/context/AppContext';
+import { albumBillRows, useAlbumBillTarget } from '~/features/albums/hooks/useAlbumBillTarget';
 import type { InstalmentChoice } from '~/features/instalments/components/InstalmentSheet';
 import { useCanStartInstalmentPlan } from '~/features/instalments/hooks/useCanStartInstalmentPlan';
 import {
@@ -88,7 +89,27 @@ function TransactionEditor({
     saveTransferFee,
     settings,
     getAccountById,
+    saveAlbumBill,
+    detachAlbumBill,
+    getReceiptSplitForTransaction,
   } = useApp();
+  const { transactions } = useTransactions();
+  // A shared album's bill is saved through its group (README: Album members
+  // and shared albums): the entry here follows from what the group holds.
+  // A bill split by item stays the user's own: the group does not hold its items.
+  const albumTarget = useAlbumBillTarget(transaction.id);
+  const albumGroupId = getReceiptSplitForTransaction(transaction.id) ? null : albumTarget;
+  // The expense a part payment on a group's bill made follows that payment:
+  // split, it would become a bill of its own under the payment's id.
+  const isGroupPayment = useMemo(
+    () =>
+      transactions.some(
+        (tx) =>
+          !!tx.albumGroupId &&
+          !!tx.splits?.some((split) => split.paidTransactionId === transaction.id),
+      ),
+    [transaction.id, transactions],
+  );
   const canStartPlan = useCanStartInstalmentPlan();
   // The fee this transfer was charged, edited with it.
   const feeLink = useTransferFeeIndex().byTransferId.get(transaction.id) ?? null;
@@ -205,19 +226,22 @@ function TransactionEditor({
   const handleDelete = useCallback(() => {
     Alert.alert(
       I18n.t('transactions.editor.delete_transaction'),
-      paybackLink
-        ? paybackLink.personName
-          ? I18n.t('transactions.editor.delete_payback_confirm', { name: paybackLink.personName })
-          : I18n.t('transactions.editor.delete_payback_confirm_unnamed')
-        : feeLink
-          ? I18n.t('transactions.editor.transfer_fee.delete_confirm', {
-              fee: formatAmount(transferFeeAccountAmount(feeLink), settings, {
-                currencyCode:
-                  (feeLink.accountId ? getAccountById(feeLink.accountId)?.currency : null) ??
-                  feeLink.currency,
-              }),
-            })
-          : I18n.t('transactions.editor.delete_confirm'),
+      transaction.albumGroupId && albumGroupId
+        ? // A shared album's bill is everyone's: deleting it deletes it for them too.
+          I18n.t('albums.bill.delete_shared')
+        : paybackLink
+          ? paybackLink.personName
+            ? I18n.t('transactions.editor.delete_payback_confirm', { name: paybackLink.personName })
+            : I18n.t('transactions.editor.delete_payback_confirm_unnamed')
+          : feeLink
+            ? I18n.t('transactions.editor.transfer_fee.delete_confirm', {
+                fee: formatAmount(transferFeeAccountAmount(feeLink), settings, {
+                  currencyCode:
+                    (feeLink.accountId ? getAccountById(feeLink.accountId)?.currency : null) ??
+                    feeLink.currency,
+                }),
+              })
+            : I18n.t('transactions.editor.delete_confirm'),
       [
         { text: I18n.t('common.cancel'), style: 'cancel' },
         {
@@ -234,7 +258,17 @@ function TransactionEditor({
         },
       ],
     );
-  }, [deleteTransaction, feeLink, getAccountById, onClose, paybackLink, settings, transaction.id]);
+  }, [
+    albumGroupId,
+    deleteTransaction,
+    feeLink,
+    getAccountById,
+    onClose,
+    paybackLink,
+    settings,
+    transaction.albumGroupId,
+    transaction.id,
+  ]);
 
   const handleSubmit = useCallback(
     (input: Parameters<typeof updateTransaction>[1], extras?: TransactionEditorSubmitExtras) => {
@@ -254,7 +288,8 @@ function TransactionEditor({
     [isLegacyBalanceAdjustmentTransfer, saveFeeFor, transaction.id, updateTransaction],
   );
 
-  const handleSubmitWithSplits = useCallback(
+  /** Saves a split bill that is the user's own (not a shared album's). */
+  const saveOwnSplits = useCallback(
     (
       input: CreateTransactionInput,
       splits: SplitDraft[],
@@ -357,6 +392,51 @@ function TransactionEditor({
     ],
   );
 
+  const handleSubmitWithSplits = useCallback(
+    (
+      input: CreateTransactionInput,
+      splits: SplitDraft[],
+      extras?: TransactionEditorSubmitExtras,
+    ) => {
+      const isGroupBill = !!albumGroupId && !!transaction.albumGroupId;
+      if (albumGroupId && splits.some((row) => !row.isSelf)) {
+        const saved = saveAlbumBill(
+          albumGroupId,
+          { ...input, date: dateKeepingTimeOfDay(input.date, transaction.date) },
+          albumBillRows(splits),
+          transaction.id,
+        );
+        // A group's bill is only ever saved through its group.
+        if (saved || isGroupBill) return;
+      } else if (isGroupBill) {
+        // No longer split: the bill leaves the group, for everyone, and stays
+        // the user's own entry. Asked first, since the others lose it.
+        Alert.alert(I18n.t('albums.bill.remove_shared'), undefined, [
+          { text: I18n.t('common.cancel'), style: 'cancel' },
+          {
+            text: I18n.t('common.remove'),
+            style: 'destructive',
+            onPress: () => {
+              detachAlbumBill(transaction.id);
+              saveOwnSplits(input, splits, extras);
+            },
+          },
+        ]);
+        return;
+      }
+      saveOwnSplits(input, splits, extras);
+    },
+    [
+      albumGroupId,
+      detachAlbumBill,
+      saveAlbumBill,
+      saveOwnSplits,
+      transaction.albumGroupId,
+      transaction.date,
+      transaction.id,
+    ],
+  );
+
   const initialSplits = useMemo<SplitDraft[] | undefined>(() => {
     const persisted = transaction.splits;
     if (!persisted || persisted.length === 0) return undefined;
@@ -380,6 +460,7 @@ function TransactionEditor({
           settled: s.id === payer.id && s.paidAt ? { paidAt: s.paidAt } : undefined,
           paidBack: s.id === payer.id && paidBack > 0 ? paidBack : undefined,
           memberId: s.memberId,
+          albumMemberId: s.albumMemberId,
         }));
     }
     return persisted.map((s) => ({
@@ -391,6 +472,7 @@ function TransactionEditor({
       paid: s.paidAt ? { paidAt: s.paidAt, paidTransactionId: s.paidTransactionId } : undefined,
       shareKey: s.isSelf ? undefined : splitShareKey(s),
       memberId: s.memberId,
+      albumMemberId: s.albumMemberId,
     }));
   }, [transaction.splits]);
 
@@ -402,8 +484,9 @@ function TransactionEditor({
       onSubmit={handleSubmit}
       onSubmitWithSplits={handleSubmitWithSplits}
       restrictTypeOptions={restrictedTypes}
-      hideSplitMode={isInstalmentPayment}
+      hideSplitMode={isInstalmentPayment || isGroupPayment}
       initialSplits={initialSplits}
+      groupBill={albumGroupId !== null}
       initialTransferFee={initialTransferFee}
       openSplitBillOnMount={openSplitBillOnMount}
       headerNotice={headerNotice}

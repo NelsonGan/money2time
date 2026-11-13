@@ -2,7 +2,6 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
-  ChevronsLeft,
   Minus,
   Plus,
   RotateCcw,
@@ -81,6 +80,12 @@ export interface SplitDraft {
   paidBack?: number;
   /** The Cloud Sync account this person is, once people can be real users. */
   memberId?: string | null;
+  /**
+   * The album person this row is for (an active album's "Split with", or a
+   * shared album's member). Dropped when the name is retyped: the row is then
+   * whoever that name is.
+   */
+  albumMemberId?: string | null;
 }
 
 interface SplitBillModalProps {
@@ -206,6 +211,7 @@ function toSplitDraftInputs(
       sortOrder: idx,
       paid: s.paid,
       memberId: s.memberId ?? null,
+      albumMemberId: s.albumMemberId ?? null,
     };
     if (!friendPaid) return { ...row, isPayer: false, shareAmount: null };
     return {
@@ -651,7 +657,11 @@ export function SplitBillModal({
 
   const handleNameChange = useCallback(
     (index: number, value: string) => {
-      onChange(splits.map((row, i) => (i === index ? { ...row, personName: value } : row)));
+      onChange(
+        splits.map((row, i) =>
+          i === index ? { ...row, personName: value, albumMemberId: null } : row,
+        ),
+      );
     },
     [onChange, splits],
   );
@@ -1102,21 +1112,6 @@ export function SplitBillModal({
               </Text>
             </Pressable>
           </View>
-
-          {/* Swipe coach: teaches the left-swipe row actions. Shown only while
-              there is an unpaid friend row to act on. */}
-          {splits.some((s) => !s.isSelf && !s.paid) ? (
-            <View className="mx-5 mt-2.5 flex-row items-center justify-center gap-1.5">
-              <ChevronsLeft size={13} color={themeColors.textMuted} />
-              <Text variant="caption" tone="muted" className="text-center">
-                {I18n.t(
-                  onMarkPaid && !friendPaid
-                    ? 'transactions.editor.split.swipe_hint_actions'
-                    : 'transactions.editor.split.swipe_hint_delete',
-                )}
-              </Text>
-            </View>
-          ) : null}
 
           {/* Tax & service: a percentage stepper applied
               proportionally on top of the entered amounts. */}

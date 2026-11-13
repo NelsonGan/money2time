@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react';
 
 import { useApp, useTransactions } from '~/context/AppContext';
-import type { SettleUpByTransactionSummary, SettleUpSummary } from '~/types';
+import type { Album, SettleUpByTransactionSummary, SettleUpSummary } from '~/types';
 import { convert } from '~/utils/currency';
 
 import {
@@ -10,11 +10,31 @@ import {
   countUnpaidDebtors,
 } from './settleUp';
 
-/** Shared reporting-currency wiring for the Settle Up roll-ups. */
-function useSettleUpContext() {
-  const { settings, rateTable } = useApp();
-  const { transactions } = useTransactions();
+/**
+ * Which bills a roll-up covers. Balances are kept per album: an album answers
+ * for the bills in it, and the Balances page for the bills in no album.
+ * `all` is for looking one bill up, wherever it is.
+ */
+type SettleUpScope = { albumId: string } | 'outside_albums' | 'all';
+
+/** Shared reporting-currency wiring for the Settle Up roll-ups, over the bills of `scope`. */
+function useSettleUpContext(scope: SettleUpScope) {
+  const { settings, rateTable, getAlbumTransactionIds, getAlbumOwnedTransactionIds, albums } =
+    useApp();
+  const { transactions: all } = useTransactions();
   const reportingCurrency = settings.currencyCode;
+  const albumId = typeof scope === 'object' ? scope.albumId : null;
+  const transactions = useMemo(() => {
+    if (scope === 'all') return all;
+    if (albumId) {
+      const ids = new Set(getAlbumTransactionIds(albumId));
+      return all.filter((transaction) => ids.has(transaction.id));
+    }
+    const inAlbums = getAlbumOwnedTransactionIds();
+    return inAlbums.size ? all.filter((transaction) => !inAlbums.has(transaction.id)) : all;
+    // `albums` changes when an album's entries do, and with the open ledger.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [albumId, all, albums, getAlbumOwnedTransactionIds, getAlbumTransactionIds, scope === 'all']);
 
   const rateToReporting = useCallback(
     (currency: string) => convert(1, currency, reportingCurrency, rateTable).rateUsed,
@@ -25,12 +45,13 @@ function useSettleUpContext() {
 }
 
 /**
- * The "who owes you" roll-up over all transactions, grouped by person, in the
- * reporting currency. Shared by the Settle Up list and the per-person page so
- * the aggregation wiring lives in one place. Memoized on the transactions + rates.
+ * The "who owes whom" roll-up grouped by person, in the reporting currency:
+ * over one album's bills, or without `albumId` over the bills in no album
+ * (the Balances page). Memoized on the transactions + rates.
  */
-export function useSettleUpSummary(): SettleUpSummary {
-  const { transactions, reportingCurrency, rateToReporting } = useSettleUpContext();
+export function useSettleUpSummary(albumId?: string): SettleUpSummary {
+  const scope = useMemo<SettleUpScope>(() => (albumId ? { albumId } : 'outside_albums'), [albumId]);
+  const { transactions, reportingCurrency, rateToReporting } = useSettleUpContext(scope);
   return useMemo(
     () => aggregateSettleUpByPerson(transactions, { reportingCurrency, rateToReporting }),
     [transactions, reportingCurrency, rateToReporting],
@@ -38,15 +59,55 @@ export function useSettleUpSummary(): SettleUpSummary {
 }
 
 /**
- * The same roll-up grouped by transaction instead of by person, for the
- * Transactions tab and the per-transaction page.
+ * The same roll-up grouped by transaction instead of by person: the bills in
+ * no album for the Balances page's Transactions tab, `all` for a bill's own
+ * page.
  */
-export function useSettleUpByTransaction(): SettleUpByTransactionSummary {
-  const { transactions, reportingCurrency, rateToReporting } = useSettleUpContext();
+export function useSettleUpByTransaction(
+  scope: 'outside_albums' | 'all',
+): SettleUpByTransactionSummary {
+  const { transactions, reportingCurrency, rateToReporting } = useSettleUpContext(scope);
   return useMemo(
     () => aggregateSettleUpByTransaction(transactions, { reportingCurrency, rateToReporting }),
     [transactions, reportingCurrency, rateToReporting],
   );
+}
+
+/** An album with something still owed in it, and the user's net there (reporting currency). */
+export interface AlbumBalance {
+  album: Album;
+  netReporting: number;
+}
+
+/** The albums that still have open bills, for the Balances page: each is settled in the album. */
+export function useAlbumBalances(): AlbumBalance[] {
+  const { settings, rateTable, albums, getAlbumEntryIds, getAlbumOwnedTransactionIds } = useApp();
+  const { transactions } = useTransactions();
+  const reportingCurrency = settings.currencyCode;
+  return useMemo(() => {
+    if (getAlbumOwnedTransactionIds().size === 0) return [];
+    const rateToReporting = (currency: string) =>
+      convert(1, currency, reportingCurrency, rateTable).rateUsed;
+    const entryIds = getAlbumEntryIds();
+    // Only split bills can be owed on: found once, not once per album.
+    const bills = transactions.filter((transaction) => transaction.splits?.length);
+    return albums.flatMap((album) => {
+      const ids = new Set(entryIds.get(album.id));
+      if (ids.size === 0) return [];
+      const summary = aggregateSettleUpByPerson(
+        bills.filter((transaction) => ids.has(transaction.id)),
+        { reportingCurrency, rateToReporting },
+      );
+      return summary.billCount > 0 ? [{ album, netReporting: summary.netReporting }] : [];
+    });
+  }, [
+    albums,
+    getAlbumEntryIds,
+    getAlbumOwnedTransactionIds,
+    rateTable,
+    reportingCurrency,
+    transactions,
+  ]);
 }
 
 /**

@@ -3,15 +3,27 @@ import { useCallback, useSyncExternalStore } from 'react';
 import { useApp } from '~/context/AppContext';
 import { useIsPro } from '~/context/ProContext';
 import {
-  listSharedLedgers,
+  listAlbumShares,
+  listLedgerShares,
   type SharedLedger,
   subscribeSharedLedgers,
 } from '~/features/cloudSync/services/sharedLedgerStore';
 import { type LedgerLock, ledgerLock } from '~/features/ledgers/lib/ledgerAccess';
 
-/** This phone's shared ledgers, re-rendering when the list changes. */
+/** This phone's shared ledgers, re-rendering when the list changes. Shared albums are not among them. */
 export function useSharedLedgers(): SharedLedger[] {
-  return useSyncExternalStore(subscribeSharedLedgers, listSharedLedgers);
+  return useSyncExternalStore(subscribeSharedLedgers, listLedgerShares);
+}
+
+/** This phone's shared albums' groups, re-rendering when the list changes. */
+export function useSharedAlbums(): SharedLedger[] {
+  return useSyncExternalStore(subscribeSharedLedgers, listAlbumShares);
+}
+
+/** One album's sharing, by the album's id, or null when it is not shared. */
+export function useSharedAlbum(albumId: string | undefined): SharedLedger | null {
+  const albums = useSharedAlbums();
+  return albums.find((share) => share.ledgerId === albumId) ?? null;
 }
 
 /** One ledger's sharing, or null when it is not shared. */

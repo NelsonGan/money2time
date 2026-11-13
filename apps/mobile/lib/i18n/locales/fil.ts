@@ -1090,8 +1090,6 @@ const fil = {
         get_back_hint: 'Maibabalik sa iyo ang {{amount}}',
         paid_floor: 'Nabayaran mo na ang {{amount}}',
         your_share: 'Hati mo {{amount}}',
-        swipe_hint_actions: 'I-swipe pakaliwa ang row para markahang bayad o burahin',
-        swipe_hint_delete: 'I-swipe pakaliwa ang row para burahin',
         section_subtitle_unpaid: '{{count}} ay may utang pa sa iyo',
         section_subtitle_unpaid_plural: '{{count}} ay may utang pa sa iyo',
         subtotal_label: 'Subtotal',
@@ -3003,6 +3001,67 @@ const fil = {
     delete_body: 'Tatanggalin nito ang album. Hindi binubura ang iyong mga transaksyon.',
     cover_permission_title: 'Kailangan ng access sa photos',
     cover_permission_body: 'Payagan ang access sa photos para pumili ng cover image.',
+    people: {
+      title: 'Mga tao',
+      split_with: 'Hatiin kasama',
+      me_tag: 'Ikaw',
+      joined: 'Sumali na',
+      not_joined: 'Hindi pa sumasali',
+      add_person: 'Magdagdag ng tao',
+      add: 'Idagdag',
+      unnamed: 'Kaibigan',
+      name_taken: 'May ganyang pangalan na rito.',
+      full: 'Hanggang {{max}} tao ang puwedeng kahati sa isang album.',
+      remove_title: 'Alisin si {{name}}?',
+      remove_message: 'Hindi na sila kahati sa mga bagong bill sa album na ito.',
+      remove_in_use: 'Nasa isang bill sa album na ito si {{name}}. Alisin muna sila sa mga bill.',
+      remove_joined_title: 'Alisin si {{name}} sa album?',
+      remove_joined_message:
+        'Hindi na nila matatanggap ang mga bill ng album na ito. Mananatili ang mga bill na kasama sila.',
+      who_title: 'Alin ka rito?',
+      who_message: 'Piliin ang pangalan mo para mapunta sa ledger mo ang bahagi mo sa bawat bill.',
+      who_new: 'Wala ako sa listahan',
+    },
+    share: {
+      row: 'Ibahagi ang album na ito',
+      caption: 'Nakikita ng lahat ang mga bill at kung sino ang may utang kanino.',
+      link_note: 'Gumagana nang 24 oras. Makakasali ang sinumang may link.',
+      stop_title: 'Itigil ang pagbabahagi ng {{name}}?',
+      stop_message:
+        'Mananatili sa lahat ang album kasama ang sarili nilang mga entry, pero hindi na ito mag-a-update sa pagitan ninyo.',
+      leave: 'Umalis sa album',
+      leave_title: 'Umalis sa {{name}}?',
+      leave_message:
+        'Mananatili sa iyo ang album kasama ang sarili mong mga entry, pero hindi na ito mag-a-update.',
+      limit: 'Hanggang {{max}} album ang puwede mong ibahagi nang sabay.',
+      full: 'Hanggang {{max}} tao ang puwedeng sumali sa isang album.',
+      sign_in: 'Mag-sign in para i-share ang album na ito.',
+    },
+    balances: {
+      tab: 'Mga balanse',
+      empty_message: 'Maghati ng bill sa album na ito at lalabas ito rito.',
+      who_owes_whom: 'Sino ang may utang kanino',
+      owes_you: 'May utang sa iyo si {{name}}',
+      owes: 'May utang si {{from}} kay {{to}}',
+      group_spending: 'Gastos ng grupo',
+      your_share: 'Ang parte mo',
+    },
+    simplify: {
+      row: 'Pasimplehin ang utang ng grupo',
+      info: 'Pinagsasama ang mga utang sa grupo para mas kaunti ang babayaran. Walang magbabayad o makakatanggap ng mas malaki sa kabuuan.',
+    },
+    join: {
+      title: 'Shared na album',
+      own: 'Isa ito sa sarili mong mga album.',
+      already: 'Kasali ka na sa album na ito.',
+      main_shared:
+        'Naka-share ang main ledger mo, kaya hindi ito puwedeng maglaman ng shared na album.',
+    },
+    bill: {
+      delete_shared:
+        'Nasa shared na album ang bill na ito. Kapag binura mo, mawawala ito para sa lahat.',
+      remove_shared: 'Nasa shared na album ang bill na ito. Mawawala ito para sa lahat ng iba.',
+    },
   },
   assets: {
     tab_accounts: 'Mga account',
@@ -3311,6 +3370,8 @@ const fil = {
     share_toggle: 'I-share ang ledger na ito',
     share_toggle_caption: 'Mag-imbita ng hanggang {{max}} tao. Hindi nila kailangan ng Pro.',
     needs_cloud_sync: 'Mag-sign in sa Cloud Sync para mag-share ng ledger.',
+    has_shared_albums:
+      'May mga shared na album ang ledger na ito. Itigil muna ang pag-share sa mga iyon.',
     limit_reached: 'Hanggang {{max}} ledger lang ang puwede mong i-share sa ngayon.',
     share_failed:
       'Nagawa ang ledger, pero hindi nagsimula ang pag-share. Subukan ulit mula sa Pag-share na page ng ledger.',

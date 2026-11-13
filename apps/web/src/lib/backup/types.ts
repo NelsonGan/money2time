@@ -95,6 +95,12 @@ export type TransactionRow = Row & {
   counts_as_expense?: number | null;
   /** The instalment plan (a recurring rule) this row is a payment of. */
   instalment_rule_id?: string | null;
+  /**
+   * A shared album's bill (the app's migration 090): the group this entry is
+   * the user's side of. Such an entry follows from what the group holds, so
+   * it is changed in the app. Absent from an app that predates shared albums.
+   */
+  album_group_id?: string | null;
 };
 
 export type TransactionSplitRow = Row & {

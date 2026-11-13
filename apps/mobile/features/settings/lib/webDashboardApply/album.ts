@@ -1,3 +1,4 @@
+import { listAlbumShares } from '~/features/cloudSync/services/sharedLedgerStore';
 import type { AlbumExtra } from '~/services/webDashboardEditModules/album';
 
 import type { ApplyModule } from './types';
@@ -15,7 +16,10 @@ type Payload = {
 
 /** Saves the `module:album` steps planned in services/webDashboardEditModules/album.ts. */
 export const albumApply: ApplyModule = {
-  select: (app): AlbumExtra => ({ albums: app.albums }),
+  select: (app): AlbumExtra => ({
+    albums: app.albums,
+    sharedAlbumIds: listAlbumShares().map((share) => share.ledgerId),
+  }),
   apply: (app, step) => {
     const p = step.payload as Payload;
     switch (step.action) {

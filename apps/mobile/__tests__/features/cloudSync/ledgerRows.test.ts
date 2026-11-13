@@ -4,7 +4,7 @@ import {
   LEDGER_CHILD_SYNC_TABLES,
   LEDGER_ROOT_SYNC_TABLES,
 } from '~/features/cloudSync/lib/ledgerRows';
-import { SYNC_TABLES } from '~/features/cloudSync/lib/syncTables';
+import { GROUP_SYNC_TABLES, SYNC_TABLES } from '~/features/cloudSync/lib/syncTables';
 import { LEDGER_TABLES } from '~/lib/db/ledgerScope';
 
 describe('ledger rows for shared ledgers', () => {
@@ -12,7 +12,8 @@ describe('ledger rows for shared ledgers', () => {
     const synced = LEDGER_TABLES.filter((table) =>
       (SYNC_TABLES as readonly string[]).includes(table),
     );
-    expect([...LEDGER_ROOT_SYNC_TABLES].sort()).toEqual([...synced].sort());
+    // And a shared album's group, which routes by the same column.
+    expect([...LEDGER_ROOT_SYNC_TABLES].sort()).toEqual([...synced, ...GROUP_SYNC_TABLES].sort());
   });
 
   it('every child points at a synced parent that comes before it', () => {

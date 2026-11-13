@@ -113,3 +113,35 @@ export function netByPerson(
   for (const debt of youOwe) add(debt.person, -debt.amountBase, debt.key);
   return [...map.values()].sort((a, b) => Math.abs(b.net) - Math.abs(a.net));
 }
+
+/** A share still owed, either way, with the bill it is on. */
+type OpenShare = { person: string; key?: string; amountBase: number; txId: string };
+
+/** An album with something still owed in it, and the user's net there. */
+type AlbumBalance = { id: string; name: string; net: number; people: PersonBalance[] };
+
+/**
+ * Balances as the app keeps them: an album answers for the bills in it, and
+ * the people list for the bills in no album (the app's
+ * `getAlbumOwnedTransactionIds`, `useAlbumBalances`). Albums with nothing open
+ * are left out; a bill in two albums counts in both, as in the app.
+ */
+export function balancesByAlbum(
+  owesYou: readonly OpenShare[],
+  youOwe: readonly OpenShare[],
+  albums: readonly { id: string; name: string; txIds: readonly string[] }[],
+): { people: PersonBalance[]; albums: AlbumBalance[] } {
+  const inAlbums = new Set(albums.flatMap((album) => album.txIds));
+  const outside = (debt: OpenShare) => !inAlbums.has(debt.txId);
+  return {
+    people: netByPerson(owesYou.filter(outside), youOwe.filter(outside)),
+    albums: albums.flatMap((album) => {
+      const ids = new Set(album.txIds);
+      const inAlbum = (debt: OpenShare) => ids.has(debt.txId);
+      const people = netByPerson(owesYou.filter(inAlbum), youOwe.filter(inAlbum));
+      if (people.length === 0) return [];
+      const net = Math.round(people.reduce((sum, person) => sum + person.net, 0) * 100) / 100;
+      return [{ id: album.id, name: album.name, net, people }];
+    }),
+  };
+}

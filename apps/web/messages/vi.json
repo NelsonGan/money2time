@@ -1452,6 +1452,7 @@
       "nudgeLarge": "Đây là {hours} thời gian làm việc của bạn",
       "amountLocked": "Số tiền này gắn với một khoản chia hoặc hoàn tiền. Hãy đổi trong ứng dụng.",
       "friendPaid": "{name} đã trả hóa đơn này. Hãy sửa trong ứng dụng.",
+      "groupBill": "Hóa đơn này nằm trong album chung. Hãy sửa trong ứng dụng.",
       "hideBalances": "Ẩn số dư",
       "showBalances": "Hiện số dư",
       "savingsGoals": "Mục tiêu tiết kiệm",

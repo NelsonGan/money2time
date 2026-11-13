@@ -7,7 +7,7 @@
 // them), and the `ledgers` row is the ledger itself. Every other synced table
 // (settings, wage months, exchange rates) is the user's own.
 
-import type { SyncTable } from './syncTables';
+import { GROUP_SYNC_TABLES, type SyncTable } from './syncTables';
 
 export const PERSONAL_CHANNEL = 'personal';
 
@@ -18,7 +18,10 @@ export const PERSONAL_CHANNEL = 'personal';
  */
 export const NO_CHANNEL = 'none';
 
-/** Synced tables with a `ledger_id` column (`LEDGER_TABLES` minus the unsynced captures). */
+/**
+ * Synced tables with a `ledger_id` column: `LEDGER_TABLES` minus the unsynced
+ * captures, and the tables of a shared album's group.
+ */
 export const LEDGER_ROOT_SYNC_TABLES: ReadonlySet<SyncTable> = new Set<SyncTable>([
   'account_groups',
   'accounts',
@@ -30,6 +33,9 @@ export const LEDGER_ROOT_SYNC_TABLES: ReadonlySet<SyncTable> = new Set<SyncTable
   'budget_templates',
   'monthly_budgets',
   'ledger_profiles',
+  // A shared album's group: `ledger_id` holds the group's id (the album's
+  // id), so its rows route to the group's own database. No ledger has that id.
+  ...GROUP_SYNC_TABLES,
 ]);
 
 /** Child table → [its parent-id column, the parent table]. */

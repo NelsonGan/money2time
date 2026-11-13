@@ -693,6 +693,9 @@ function planTransaction(
     rows.push(current);
   }
   if (op.op === 'delete') {
+    // A shared album's bill is everyone's in the album: deleting it deletes
+    // it for them too, which the app asks about first. Not from the browser.
+    if (rows.some((tx) => tx.albumGroupId)) return refuse('invalid');
     steps.push({ kind: 'tx.delete', ids: rows.map((tx) => tx.id) });
     return ok(rows.length);
   }
@@ -719,6 +722,9 @@ function planTransaction(
     if (moves && ((current.splits?.length ?? 0) > 0 || current.reimbursementOfId)) {
       return refuse('amount_locked');
     }
+    // A shared album's bill keeps its day and title from the group, where
+    // everyone in it sees them; they are changed in the app.
+    if (current.albumGroupId && ('date' in set || 'note' in set)) return refuse('invalid');
     const payload = transactionPayload(ctx, set, current);
     if (!payload.ok) return payload;
     const input = changedFields(payload.value, current);
