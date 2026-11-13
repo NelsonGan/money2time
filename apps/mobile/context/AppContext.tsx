@@ -43,7 +43,11 @@ import {
   settleDebt,
   simplifyDebts,
 } from '~/features/albums/lib/groupDebts';
-import { billChangeBlock, canRecordPayment } from '~/features/albums/lib/groupRules';
+import {
+  billChangeBlock,
+  canRecordPayment,
+  canUndoPayment,
+} from '~/features/albums/lib/groupRules';
 import { notifyAlbumGroups } from '~/features/albums/services/albumGroupStore';
 import {
   closeEvenGroup,
@@ -4460,16 +4464,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     (bill: { tx: TransactionWithRelations; groupId: string }, settlementId: string | null) => {
       const env = groupEnvFor(bill.groupId);
       if (!env || !settlementId) return;
-      // Only the person who paid undoes a payment.
+      // Only its recorder undoes a payment, including a simplified batch.
       const rules = groupRuleState(bill.groupId);
       const settlement = albumGroupsRepository
         .listSettlements(bill.groupId)
         .find((item) => item.id === settlementId);
-      if (
-        rules &&
-        settlement &&
-        !canRecordPayment(rules.members, rules.selfId, settlement.fromMember, settlement.toMember)
-      ) {
+      if (!rules || !settlement || !canUndoPayment(rules.members, rules.selfId, settlement)) {
         Alert.alert(I18n.t('albums.rules.not_your_payment'));
         return;
       }
@@ -4542,16 +4542,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           const settlement = albumGroupsRepository
             .listSettlements(payment.groupId)
             .find((item) => item.id === payment.settlementId);
-          if (
-            rules &&
-            settlement &&
-            !canRecordPayment(
-              rules.members,
-              rules.selfId,
-              settlement.fromMember,
-              settlement.toMember,
-            )
-          ) {
+          if (!rules || !settlement || !canUndoPayment(rules.members, rules.selfId, settlement)) {
             blocked = 'not_your_payment';
             taken.add(id);
             continue;
