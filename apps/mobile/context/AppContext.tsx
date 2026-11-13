@@ -246,7 +246,6 @@ import {
   type Album,
   type AlbumLocation,
   type AlbumMember,
-  type AlbumPerson,
   type AlbumStats,
   type AppState,
   type BudgetPeriod,
@@ -589,7 +588,6 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   reorderAlbums: (ids: string[]) => void;
   setActiveAlbum: (albumId: string | null) => void;
   /** Sets the people an album that is not shared is split with. */
-  setAlbumPeople: (albumId: string, people: AlbumPerson[]) => void;
   /**
    * Shared albums (README: Album members and shared albums). Brings the
    * user's entries in step with every shared album's group; true when
@@ -3095,14 +3093,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     },
     [refreshAlbums, runMutation],
   );
-
-  const setAlbumPeople = useCallback((albumId: string, people: AlbumPerson[]) => {
-    albumsRepository.update(albumId, {
-      splitWithJson: people.length ? JSON.stringify(people) : null,
-    });
-    setAlbums(albumsRepository.list());
-    void trackEvent(AnalyticsEvents.ALBUM_PEOPLE_SET, { count: people.length });
-  }, []);
 
   // Membership edits only touch the album join table — a full refreshAll() would
   // re-init the DB and reload everything (slow). Reloading just `albums` gives the
@@ -7921,7 +7911,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             deleteAlbum,
             reorderAlbums,
             setActiveAlbum,
-            setAlbumPeople,
             syncAlbumGroups,
             publishAlbumGroup,
             renameAlbumMember,
@@ -8075,7 +8064,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       deleteAlbum,
       reorderAlbums,
       setActiveAlbum,
-      setAlbumPeople,
       syncAlbumGroups,
       publishAlbumGroup,
       renameAlbumMember,
