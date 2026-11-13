@@ -98,7 +98,7 @@ interface SharedLedgerRow {
 }
 
 type Role = 'owner' | 'member';
-type Kind = 'ledger' | 'album';
+export type Kind = 'ledger' | 'album';
 
 /** Whether shared ledger `l` is an album's group: it has a row in `shared_albums`. */
 const IS_ALBUM_SQL = 'EXISTS (SELECT 1 FROM shared_albums a WHERE a.ledger_id = l.id)';
@@ -726,6 +726,15 @@ async function listMembers(env: Env, ledger: SharedLedgerRow, role: Role): Promi
 }
 
 /**
+ * Where a share's invite links point: an album's to ALBUM_INVITE_URL, a
+ * ledger's to INVITE_URL, each falling back to the one before it.
+ */
+export function inviteOrigin(env: Env, kind: Kind): string {
+  const ledgers = env.INVITE_URL || env.BETTER_AUTH_URL;
+  return ((kind === 'album' && env.ALBUM_INVITE_URL) || ledgers).replace(/\/+$/, '');
+}
+
+/**
  * The ledger's invite link: the one still open if there is one, else a new
  * one that lasts a day. Anyone with it can join until it expires or the
  * ledger is full, so the owner shares one link with the whole household.
@@ -744,7 +753,7 @@ async function inviteLink(env: Env, ledger: SharedLedgerRow, request: Request): 
   }
   if ((await memberCount(env, ledger.id)) >= maxMembersOf(ledger))
     return json({ error: 'full' }, 409);
-  const base = (env.INVITE_URL || env.BETTER_AUTH_URL).replace(/\/+$/, '');
+  const base = inviteOrigin(env, kindOf(ledger));
   const now = Date.now();
   const current = await env.AUTH_DB.prepare(
     'SELECT code, expires_at FROM ledger_links WHERE ledger_id = ?1',
@@ -907,13 +916,14 @@ export function expiredInvitesStatement(env: Env): D1PreparedStatement {
 /**
  * Hands the link to the app, or points to the stores (pages.ts). It shows
  * nothing about the ledger, so the page needs no database read and has
- * nothing to inject; the app looks the invite up itself.
+ * nothing to inject; the app looks the invite up itself. `kind` comes from
+ * the host the link was opened on, and only changes the page's wording.
  */
-export function invitePage(code: string): Response {
+export function invitePage(code: string, kind: Kind = 'ledger'): Response {
   if (!INVITE_CODE.test(code)) {
-    const page = brokenInvitePageHtml();
+    const page = brokenInvitePageHtml(kind);
     return new Response(page.html, { status: 404, headers: page.headers });
   }
-  const page = invitePageHtml(code, crypto.randomUUID().replace(/-/g, ''));
+  const page = invitePageHtml(code, crypto.randomUUID().replace(/-/g, ''), kind);
   return new Response(page.html, { headers: page.headers });
 }
