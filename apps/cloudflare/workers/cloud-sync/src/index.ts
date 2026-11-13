@@ -40,6 +40,7 @@ import {
   expiredInvitesStatement,
   invitePage,
   isLedgerActive,
+  type Kind,
   ledgerForMedia,
   previewInvite,
   routeLedgers,
@@ -79,19 +80,29 @@ const AUTH_ROUTES: Readonly<Record<string, 'GET' | 'POST'>> = {
 };
 const RATE_LIMIT_ROW_TTL_MS = 24 * 60 * 60 * 1000;
 
-/** Whether the request came in on INVITE_URL's host, when that is not the API's host too. */
-function isInviteOnlyHost(env: Env, url: URL): boolean {
-  if (!env.INVITE_URL) return false;
-  const inviteHost = new URL(env.INVITE_URL).host;
-  return url.host === inviteHost && inviteHost !== new URL(env.BETTER_AUTH_URL).host;
-}
+const hostOf = (origin: string | undefined): string | null =>
+  origin ? new URL(origin).host : null;
+
+/** The hosts invite links are made on: INVITE_URL's (else the API's) and ALBUM_INVITE_URL's. */
+const inviteHosts = (env: Env): (string | null)[] => [
+  hostOf(env.INVITE_URL || env.BETTER_AUTH_URL),
+  hostOf(env.ALBUM_INVITE_URL),
+];
+
+/** Whether the request came in on an invite host that is not the API's host too. */
+const isInviteOnlyHost = (env: Env, url: URL): boolean =>
+  url.host !== hostOf(env.BETTER_AUTH_URL) && inviteHosts(env).includes(url.host);
+
+/** The kind of share a link on this host invites to: the album host's are albums. */
+const inviteKindOf = (env: Env, url: URL): Kind =>
+  url.host === hostOf(env.ALBUM_INVITE_URL) ? 'album' : 'ledger';
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
     try {
       const join = /^\/join\/([^/]+)$/.exec(url.pathname);
-      // The invite host only opens invite links: sign-in and the API answer
+      // The invite hosts only open invite links: sign-in and the API answer
       // on BETTER_AUTH_URL alone.
       if (isInviteOnlyHost(env, url) && !(join && request.method === 'GET')) {
         return json({ error: 'not_found' }, 404);
@@ -101,7 +112,11 @@ export default {
         const refused = await authGate(request, url, env);
         return refused ?? (await getAuth(env).handler(request));
       }
-      if (join && request.method === 'GET') return invitePage(join[1]);
+      // Invite links open on the invite hosts alone: links on any other host
+      // (the API's, once) are gone.
+      if (join && request.method === 'GET' && inviteHosts(env).includes(url.host)) {
+        return invitePage(join[1], inviteKindOf(env, url));
+      }
       if (!url.pathname.startsWith('/v1/')) return json({ error: 'not_found' }, 404);
 
       const preview = /^\/v1\/invites\/([^/]+)$/.exec(url.pathname);

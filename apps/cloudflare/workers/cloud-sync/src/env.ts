@@ -17,8 +17,10 @@ export interface Env {
   /** Public origin of this Worker, e.g. https://workers-cloud-sync.money2time.com. */
   BETTER_AUTH_URL: string;
   BETTER_AUTH_SECRET: string;
-  /** Origin of shared-ledger invite links, e.g. https://shared-ledgers.money2time.com. Falls back to BETTER_AUTH_URL. */
+  /** Origin of shared-ledger invite links, e.g. https://ledger.money2time.com. Falls back to BETTER_AUTH_URL. */
   INVITE_URL?: string;
+  /** Origin of shared-album invite links, e.g. https://album.money2time.com. Falls back to INVITE_URL. */
+  ALBUM_INVITE_URL?: string;
 
   /** Comma-separated Google OAuth client ids whose ID tokens are accepted (iOS, Android, web). */
   GOOGLE_CLIENT_IDS: string;

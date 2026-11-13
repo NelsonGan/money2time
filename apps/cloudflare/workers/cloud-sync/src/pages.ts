@@ -17,6 +17,24 @@ import {
   PLAY_STORE_URL,
   SITE_URL,
 } from './brand';
+import type { Kind } from './ledgers';
+
+/** What the invite pages call the share: a ledger's link and an album's read differently. */
+const INVITE_COPY: Record<Kind, { eyebrow: string; heading: string; lede: string; title: string }> =
+  {
+    ledger: {
+      eyebrow: 'Shared ledger',
+      heading: "You're invited to a shared ledger",
+      lede: "Open the invite in Money2Time to see who shared it, then join in one tap. You don't need Pro to join.",
+      title: 'Join a shared ledger · Money2Time',
+    },
+    album: {
+      eyebrow: 'Shared album',
+      heading: "You're invited to a shared album",
+      lede: 'Open the invite in Money2Time to see who shared it, then join in one tap to split its bills together. Joining is free.',
+      title: 'Join a shared album · Money2Time',
+    },
+  };
 
 type Palette = typeof LIGHT | typeof DARK;
 
@@ -118,18 +136,21 @@ function headers(nonce?: string): HeadersInit {
 /**
  * The page `GET /join/<code>` answers with. `code` must already be checked
  * (ledgers.ts); it is escaped regardless. Shows nothing about the ledger, so
- * it needs no database read: the app looks the invite up itself.
+ * it needs no database read: the app looks the invite up itself. `kind` (from
+ * the host) only picks the wording; the app works out what the code joins.
  */
 export function invitePageHtml(
   code: string,
   nonce: string,
+  kind: Kind = 'ledger',
 ): { html: string; headers: HeadersInit } {
+  const copy = INVITE_COPY[kind];
   const deepLink = `money2time://join/${encodeURIComponent(code)}`;
   const body = `<section class="card">
   <div class="mascot"><img src="${MASCOT_URL}" alt="" width="116" height="116"></div>
-  <p class="eyebrow">Shared ledger</p>
-  <h1>You're invited to a shared ledger</h1>
-  <p class="lede">Open the invite in Money2Time to see who shared it, then join in one tap. You don't need Pro to join.</p>
+  <p class="eyebrow">${copy.eyebrow}</p>
+  <h1>${copy.heading}</h1>
+  <p class="lede">${copy.lede}</p>
   <a class="button" href="${escapeHtml(deepLink)}">Open in Money2Time</a>
   <div class="divider">Don't have the app yet?</div>
   <div class="stores">
@@ -142,7 +163,7 @@ export function invitePageHtml(
   const redirect = `setTimeout(function(){location.href=${JSON.stringify(deepLink).replace(/</g, '\\u003c')}},300);`;
   return {
     html: shell({
-      title: 'Join a shared ledger · Money2Time',
+      title: copy.title,
       body,
       script: { nonce, code: redirect },
     }),
@@ -151,10 +172,13 @@ export function invitePageHtml(
 }
 
 /** A `/join/…` link whose code cannot be one: mistyped or cut short. */
-export function brokenInvitePageHtml(): { html: string; headers: HeadersInit } {
+export function brokenInvitePageHtml(kind: Kind = 'ledger'): {
+  html: string;
+  headers: HeadersInit;
+} {
   const body = `<section class="card">
   <div class="mascot"><img src="${MASCOT_THINKING_URL}" alt="" width="116" height="116"></div>
-  <p class="eyebrow">Shared ledger</p>
+  <p class="eyebrow">${INVITE_COPY[kind].eyebrow}</p>
   <h1>This invite link doesn't look right</h1>
   <p class="lede">It may have been cut short when it was copied. Ask the person who shared it to send the link again.</p>
   <a class="button" href="${SITE_URL}">Go to money2time.com</a>

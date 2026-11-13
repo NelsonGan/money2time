@@ -1705,8 +1705,9 @@ The app side is `features/sharedLedgers/` (screens) and
   of its own. The main ledger cannot be shared: its id is the same on every
   phone.
 - **Inviting.** The owner's Sharing page shows the ledger's link
-  (`https://shared-ledgers.money2time.com/join/<code>`; links made before
-  the move, on `workers-cloud-sync.money2time.com`, still open) while the ledger
+  (`https://ledger.money2time.com/join/<code>`; links only open on this
+  host and the album host, so links made on the older ones no longer do)
+  while the ledger
   has room, is active and the owner is signed in, with a Copy icon and a
   separate New link icon; the owner pastes it wherever they like (there is no
   share sheet). There is only ever one working link per ledger: asking again
@@ -2138,7 +2139,10 @@ migrations `090` and `091`.
   (`album_group_id` and `settlement_id` are cleared). One
   card holds it, the Simplify group debts switch and, once shared, the
   album's invite link (Copy, New link; the same 24-hour link a shared ledger
-  has); what each does is behind its info button. Each person then reads as
+  has, on its own host: `https://album.money2time.com/join/<code>`, so that
+  a web join for friends without the app can take that host over later);
+  what
+  each does is behind its info button. Each person then reads as
   Joined or Not joined yet.
 - **Simplify group debts.** A switch on a shared album's People page, off to
   start with, that anyone in the album can turn on, for everyone. On, Who owes
@@ -4597,11 +4601,16 @@ returns 200 for a payload the device then discards.
 ### Cloud-sync Worker
 
 `workers/cloud-sync` (`money2time-workers-cloud-sync`, custom domains
-`workers-cloud-sync.money2time.com` and `shared-ledgers.money2time.com`) serves
-[Cloud Sync](#cloud-sync): sign-in with Better Auth, one Turso database per
-user, and the user's images. Invite links are built on `INVITE_URL` (the
-shared-ledgers host), which answers only `GET /join/<code>`; sign-in and the
-API stay on `BETTER_AUTH_URL`.
+`workers-cloud-sync.money2time.com`, `ledger.money2time.com` and
+`album.money2time.com`) serves [Cloud Sync](#cloud-sync): sign-in with Better
+Auth, one Turso database per user, and the user's images. A ledger's invite
+links are built on `INVITE_URL` (the ledger host) and a shared album's on
+`ALBUM_INVITE_URL` (the album host, falling back to `INVITE_URL`;
+`inviteOrigin`). Those two hosts answer only `GET /join/<code>`, the album
+host's page worded for an album, and no other host answers it; sign-in and
+the API stay on `BETTER_AUTH_URL`. (Before November 2026, links were made on
+`shared-ledgers.money2time.com` and the API host; both stopped opening them
+when the two invite hosts came in.)
 
 | File            | What it holds                                              |
 | --------------- | ---------------------------------------------------------- |
@@ -4638,20 +4647,20 @@ API stay on `BETTER_AUTH_URL`.
 
 Shared ledgers ([Shared ledgers](#shared-ledgers)):
 
-| Route                                      | What it does                                                                                                                                                       |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `GET /v1/ledgers`                          | The user's shared ledgers, owned and joined, with role, owner name and account id, member count and `active` (anyone in it Pro)                                    |
-| `POST /v1/ledgers`                         | `{ledgerId, name, emoji}` → shares a ledger: Pro, at most 2 per owner; makes its Turso database                                                                    |
-| `DELETE /v1/ledgers/<id>`                  | Stop sharing (owner): deletes its database and images; members and the link cascade; everyone is nudged                                                            |
-| `POST /v1/ledgers/<id>/leave`              | Revokes this ledger's tokens, then a member leaves                                                                                                                 |
-| `POST /v1/ledgers/<id>/credentials`        | Its Turso URL and a 1-day token, for the owner or a member, while anyone in it is Pro (403 `ledger_paused`)                                                        |
-| `GET /v1/ledgers/<id>/members`             | Owner and members (addresses for the owner only)                                                                                                                   |
-| `DELETE /v1/ledgers/<id>/members/<userId>` | Owner revokes this ledger's tokens, then removes the member and retires the invite; all affected users are nudged (403 for another member, 404 without access)     |
-| `POST /v1/ledgers/<id>/invites`            | Owner gets the ledger's link: the open one, or a new one valid a day (always new with `rotate: true`, killing the old); two phones asking at once get the same one |
-| `/v1/ledgers/<id>/media/…`                 | Like `/v1/media`, under `l/<id>/` with its own quota; writing needs the ledger active                                                                              |
-| `GET /v1/invites/<code>`                   | No sign-in: the app's ledger id, name, owner, member count, `full` and `active`; rate limited per IP                                                               |
-| `POST /v1/invites/<code>/accept`           | Joins (any signed-in user, no Pro) while active, with a place and the link not retired, in one statement                                                           |
-| `GET /join/<code>`                         | The page an invite link opens: hands `money2time://join/<code>` to the app, or links the stores. Static: no names; a code that cannot be one gets a 404 page       |
+| Route                                      | What it does                                                                                                                                                                                   |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET /v1/ledgers`                          | The user's shared ledgers, owned and joined, with role, owner name and account id, member count and `active` (anyone in it Pro)                                                                |
+| `POST /v1/ledgers`                         | `{ledgerId, name, emoji}` → shares a ledger: Pro, at most 2 per owner; makes its Turso database                                                                                                |
+| `DELETE /v1/ledgers/<id>`                  | Stop sharing (owner): deletes its database and images; members and the link cascade; everyone is nudged                                                                                        |
+| `POST /v1/ledgers/<id>/leave`              | Revokes this ledger's tokens, then a member leaves                                                                                                                                             |
+| `POST /v1/ledgers/<id>/credentials`        | Its Turso URL and a 1-day token, for the owner or a member, while anyone in it is Pro (403 `ledger_paused`)                                                                                    |
+| `GET /v1/ledgers/<id>/members`             | Owner and members (addresses for the owner only)                                                                                                                                               |
+| `DELETE /v1/ledgers/<id>/members/<userId>` | Owner revokes this ledger's tokens, then removes the member and retires the invite; all affected users are nudged (403 for another member, 404 without access)                                 |
+| `POST /v1/ledgers/<id>/invites`            | Owner gets the ledger's link: the open one, or a new one valid a day (always new with `rotate: true`, killing the old); two phones asking at once get the same one                             |
+| `/v1/ledgers/<id>/media/…`                 | Like `/v1/media`, under `l/<id>/` with its own quota; writing needs the ledger active                                                                                                          |
+| `GET /v1/invites/<code>`                   | No sign-in: the app's ledger id, name, owner, member count, `full` and `active`; rate limited per IP                                                                                           |
+| `POST /v1/invites/<code>/accept`           | Joins (any signed-in user, no Pro) while active, with a place and the link not retired, in one statement                                                                                       |
+| `GET /join/<code>`                         | The page an invite link opens: hands `money2time://join/<code>` to the app, or links the stores. Static: no names, worded by host (album or ledger); a code that cannot be one gets a 404 page |
 
 A share can carry an album's group instead of a ledger
 ([Album members and shared albums](#album-members-and-shared-albums)): `POST
@@ -4886,7 +4895,7 @@ Made for this feature on 2026-10-28, all new (nothing existing is shared):
 
 | Resource                 | Name / id                                                                                                               | Remove with                                                                                 |
 | ------------------------ | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| Worker + custom domains  | `money2time-workers-cloud-sync`, `workers-cloud-sync` + `shared-ledgers` .money2time.com, cron `17 3 * * *`             | `npx wrangler delete` in `workers/cloud-sync` (removes the domain route and cron too)       |
+| Worker + custom domains  | `money2time-workers-cloud-sync`, `workers-cloud-sync` + `ledger` + `album` .money2time.com, cron `17 3 * * *`           | `npx wrangler delete` in `workers/cloud-sync` (removes the domain route and cron too)       |
 | D1 database              | `money2time-cloud-sync-auth`, `2154e310-6fce-49eb-aa4b-565e343c9eb7`                                                    | `npx wrangler d1 delete money2time-cloud-sync-auth`                                         |
 | R2 bucket (private)      | `money2time-cloud-sync-media-apac` (APAC, added 2026-11-10)                                                             | empty it, then `npx wrangler r2 bucket delete money2time-cloud-sync-media-apac`             |
 | Rate limit namespaces    | `2402` (`AUTH_LIMITER`), `2403` (`OTP_LIMITER`)                                                                         | go with the Worker                                                                          |
