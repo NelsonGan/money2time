@@ -1,9 +1,7 @@
 import {
   Check,
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
-  ChevronUp,
   Minus,
   Plus,
   RotateCcw,
@@ -36,6 +34,7 @@ import {
   formatMoney as formatCalcAmount,
   sanitizeInitialAmount,
 } from '~/features/transactions/components/editor/calculatorEngine';
+import { MemberPickerSheet } from '~/features/transactions/components/editor/MemberPickerSheet';
 import { MiniNumpad } from '~/features/transactions/components/editor/MiniNumpad';
 import {
   type PaidByOption,
@@ -146,55 +145,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 });
-
-/**
- * The album's members to pick from, unfolded under the row (or Add person)
- * that opened it: a shared album's bill is split only with them, so there is
- * nothing to type.
- */
-function MemberDropdown({
-  members,
-  selectedId,
-  onPick,
-}: {
-  members: readonly { id: string; name: string }[];
-  selectedId: string | null;
-  onPick: (member: { id: string; name: string }) => void;
-}) {
-  const themeColors = useThemeColors();
-  return (
-    <View className="mx-4 mb-3 overflow-hidden rounded-2xl border border-border/30 bg-secondary/40">
-      {members.length === 0 ? (
-        // Nobody else has joined the album yet: nobody to split with.
-        <Text variant="caption" tone="muted" className="px-3 py-3">
-          {I18n.t('transactions.editor.split.no_members')}
-        </Text>
-      ) : null}
-      {members.map((member, index) => {
-        const selected = member.id === selectedId;
-        return (
-          <Pressable
-            key={member.id}
-            onPress={() => onPick(member)}
-            accessibilityRole="menuitem"
-            accessibilityState={{ selected }}
-            accessibilityLabel={member.name}
-            className={cn(
-              'flex-row items-center gap-2.5 px-3 py-2.5 active:opacity-70',
-              index > 0 ? 'border-t border-border/20' : '',
-            )}
-          >
-            <PersonAvatar name={member.name} partyKey={debtPartyKey(member.name)} size={26} />
-            <Text variant="body" numberOfLines={1} className="flex-1">
-              {member.name}
-            </Text>
-            {selected ? <Check size={16} color={themeColors.primary} /> : null}
-          </Pressable>
-        );
-      })}
-    </View>
-  );
-}
 
 // Tax & service percentage stepper bounds. Negative values are
 // a discount; applyPercent supports anything > -100.
@@ -442,9 +392,9 @@ export function SplitBillModal({
   // Name autocomplete: names entered on past splits, most-recent first.
   const { transactions } = useTransactions();
   const [focusedNameIndex, setFocusedNameIndex] = useState<number | null>(null);
-  // A shared album's bill picks its people from a dropdown of the album's
-  // members: the open one is a row's (its index) or Add person's.
-  const [memberMenu, setMemberMenu] = useState<number | 'add' | null>(null);
+  // A shared album's bill picks its people in a sheet of the album's
+  // members, over the rows, so nothing under it moves while choosing.
+  const [memberSheetOpen, setMemberSheetOpen] = useState(false);
   // Which row's amount the mini numpad is editing (null = numpad hidden). The
   // live raw expression ("12+3") is held separately so the row can display it.
   const [focusedAmountIndex, setFocusedAmountIndex] = useState<number | null>(null);
@@ -707,43 +657,38 @@ export function SplitBillModal({
       ),
     [groupMembers, splits],
   );
-  // The members a row can switch to: anyone not on another row.
-  const memberOptionsFor = useCallback(
-    (index: number) =>
-      (groupMembers ?? []).filter(
-        (member) =>
-          !splits.some((row, i) => i !== index && !row.isSelf && row.albumMemberId === member.id),
-      ),
-    [groupMembers, splits],
-  );
-  const handlePickMember = useCallback(
-    (index: number, member: { id: string; name: string }) => {
-      void triggerHaptic('selection');
-      setMemberMenu(null);
-      onChange(
-        splits.map((row, i) =>
-          i === index ? { ...row, personName: member.name, albumMemberId: member.id } : row,
-        ),
-      );
-    },
-    [onChange, splits],
-  );
+  // Who is on the bill, and who cannot come off it (a payment is recorded
+  // with them), by member.
+  const { memberIdsOnBill, lockedMemberIds } = useMemo(() => {
+    const on = new Set<string>();
+    const locked = new Set<string>();
+    for (const row of splits) {
+      if (row.isSelf || !row.albumMemberId) continue;
+      on.add(row.albumMemberId);
+      if (row.paid || row.settled || (row.paidBack ?? 0) > 0) locked.add(row.albumMemberId);
+    }
+    return { memberIdsOnBill: on, lockedMemberIds: locked };
+  }, [splits]);
 
   const handleAddMember = useCallback(
     (member: { id: string; name: string }) => {
-      void triggerHaptic('selection');
-      setMemberMenu(null);
-      const next: SplitDraft[] = [
-        ...splits,
-        {
-          id: newId(),
-          personName: member.name,
-          amount: '0',
-          isSelf: false,
-          paybackAccountId: defaultAccountId,
-          albumMemberId: member.id,
-        },
-      ];
+      const added: SplitDraft = {
+        id: newId(),
+        personName: member.name,
+        amount: '0',
+        isSelf: false,
+        paybackAccountId: defaultAccountId,
+        albumMemberId: member.id,
+      };
+      // The blank row a split opens with (an entry with no split yet) takes
+      // the first member chosen.
+      const blank = splits.findIndex(
+        (row) => !row.isSelf && !row.albumMemberId && !row.personName.trim(),
+      );
+      const next: SplitDraft[] =
+        blank >= 0
+          ? splits.map((row, index) => (index === blank ? { ...added, id: row.id } : row))
+          : [...splits, added];
       if (itemized) {
         onChange(next);
         return;
@@ -758,7 +703,6 @@ export function SplitBillModal({
       void triggerHaptic('warning');
       const target = splits[index];
       if (!target || target.isSelf) return;
-      setMemberMenu(null);
       // The friend the user has already paid back stays the payer until that
       // payment is undone: removing them would make it a bill the user paid.
       if (target.isPayer && (target.settled || (target.paidBack ?? 0) > 0)) {
@@ -778,6 +722,20 @@ export function SplitBillModal({
       onChange(splitEvenly ? applyEvenSplit(next) : autoBalanceSelf(next, total));
     },
     [applyEvenSplit, itemized, onChange, splitEvenly, splits, total],
+  );
+
+  // A member ticked on or off in the sheet: added to the bill, or taken off it
+  // (with removing's own guards).
+  const handleToggleMember = useCallback(
+    (member: { id: string; name: string }, on: boolean) => {
+      if (on) {
+        handleAddMember(member);
+        return;
+      }
+      const index = splits.findIndex((row) => !row.isSelf && row.albumMemberId === member.id);
+      if (index >= 0) handleRemove(index);
+    },
+    [handleAddMember, handleRemove, splits],
   );
 
   const handleNameChange = useCallback(
@@ -1124,20 +1082,18 @@ export function SplitBillModal({
                     <Pressable
                       onPress={() => {
                         void triggerHaptic('selection');
-                        setMemberMenu((open) => (open === index ? null : index));
+                        setMemberSheetOpen(true);
                       }}
                       disabled={disabledRow}
                       accessibilityRole="button"
-                      accessibilityState={{ expanded: memberMenu === index }}
                       accessibilityLabel={
                         row.personName.trim() || I18n.t('transactions.editor.split.choose_member')
                       }
                       testID={`split-member-${index}`}
-                      className="flex-1 flex-row items-center gap-1 py-1"
+                      className="flex-1 py-1"
                     >
                       <Text
                         numberOfLines={1}
-                        className="shrink"
                         style={{
                           color: disabledRow
                             ? themeColors.textMuted
@@ -1149,11 +1105,6 @@ export function SplitBillModal({
                       >
                         {row.personName.trim() || I18n.t('transactions.editor.split.choose_member')}
                       </Text>
-                      {disabledRow ? null : memberMenu === index ? (
-                        <ChevronUp size={15} color={themeColors.textMuted} />
-                      ) : (
-                        <ChevronDown size={15} color={themeColors.textMuted} />
-                      )}
                     </Pressable>
                   ) : (
                     <TextInput
@@ -1276,13 +1227,6 @@ export function SplitBillModal({
                       ) : null}
                     </View>
                   )}
-                  {memberMenu === index ? (
-                    <MemberDropdown
-                      members={memberOptionsFor(index)}
-                      selectedId={row.albumMemberId ?? null}
-                      onPick={(member) => handlePickMember(index, member)}
-                    />
-                  ) : null}
                 </View>
               );
             })}
@@ -1291,41 +1235,24 @@ export function SplitBillModal({
 
             {groupMembers ? (
               // A shared album's bill: its people are only the album's
-              // members, so Add person is a dropdown of those not on it yet,
-              // offered once every row on it names one.
-              addableMembers.length > 0 &&
-              splits.every((row) => row.isSelf || !!row.albumMemberId) ? (
-                <View>
-                  <Pressable
-                    onPress={() => {
-                      void triggerHaptic('selection');
-                      setMemberMenu((open) => (open === 'add' ? null : 'add'));
-                    }}
-                    accessibilityRole="button"
-                    accessibilityState={{ expanded: memberMenu === 'add' }}
-                    testID="split-add-member"
-                    className="flex-row items-center gap-3 px-4 py-3.5"
-                  >
-                    <View className="h-7 w-7 rounded-full bg-primary/15 items-center justify-center">
-                      <Plus size={14} color={themeColors.primary} />
-                    </View>
-                    <Text variant="body" className="flex-1 text-primary font-medium">
-                      {I18n.t('transactions.editor.split.add_person')}
-                    </Text>
-                    {memberMenu === 'add' ? (
-                      <ChevronUp size={16} color={themeColors.primary} />
-                    ) : (
-                      <ChevronDown size={16} color={themeColors.primary} />
-                    )}
-                  </Pressable>
-                  {memberMenu === 'add' ? (
-                    <MemberDropdown
-                      members={addableMembers}
-                      selectedId={null}
-                      onPick={handleAddMember}
-                    />
-                  ) : null}
-                </View>
+              // members, chosen in the sheet.
+              addableMembers.length > 0 ? (
+                <Pressable
+                  onPress={() => {
+                    void triggerHaptic('selection');
+                    setMemberSheetOpen(true);
+                  }}
+                  accessibilityRole="button"
+                  testID="split-add-member"
+                  className="flex-row items-center gap-3 px-4 py-3.5"
+                >
+                  <View className="h-7 w-7 rounded-full bg-primary/15 items-center justify-center">
+                    <Plus size={14} color={themeColors.primary} />
+                  </View>
+                  <Text variant="body" className="text-primary font-medium">
+                    {I18n.t('transactions.editor.split.add_person')}
+                  </Text>
+                </Pressable>
               ) : null
             ) : (
               <Pressable
@@ -1511,6 +1438,17 @@ export function SplitBillModal({
           handlePayerChange(rowIndex);
         }}
       />
+
+      {groupMembers ? (
+        <MemberPickerSheet
+          visible={memberSheetOpen}
+          members={groupMembers}
+          selectedIds={memberIdsOnBill}
+          lockedIds={lockedMemberIds}
+          onToggle={handleToggleMember}
+          onClose={() => setMemberSheetOpen(false)}
+        />
+      ) : null}
 
       <AccountPickerSheet
         visible={accountPickerSplit !== null}
