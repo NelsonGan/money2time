@@ -203,9 +203,27 @@ describe('reconcileTransactionRow', () => {
     expect(reconcileTransactionRow([optimistic, other], 'new', null)).toEqual([other]);
   });
 
-  it('ignores an id that is no longer in the list', () => {
+  it('puts back a stored row a reload took out before the write landed', () => {
+    // Filing a new entry into a shared album reloads the list on the next
+    // tick, before the deferred insert: the reload drops the optimistic row.
+    const newer = makeTx({ id: 'newer', date: '2026-05-20' });
+    const older = makeTx({ id: 'older', date: '2026-05-01' });
+    const stored = makeTx({ id: 'new', date: '2026-05-10' });
+    expect(reconcileTransactionRow([newer, older], 'new', stored, true)).toEqual([
+      newer,
+      stored,
+      older,
+    ]);
+  });
+
+  it('keeps out a row deleted before its write landed, with no reload between', () => {
     const prev = [other];
     expect(reconcileTransactionRow(prev, 'new', optimistic)).toBe(prev);
+  });
+
+  it('leaves the list alone for a row neither in it nor stored', () => {
+    const prev = [other];
+    expect(reconcileTransactionRow(prev, 'new', null, true)).toBe(prev);
   });
 });
 

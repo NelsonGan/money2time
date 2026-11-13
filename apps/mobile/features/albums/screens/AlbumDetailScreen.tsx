@@ -2,7 +2,16 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Camera, ChevronLeft, Pencil, Plus, Trash2, UserPlus } from 'lucide-react-native';
+import {
+  Camera,
+  ChevronDown,
+  ChevronLeft,
+  Pencil,
+  Plus,
+  Trash2,
+  UserPlus,
+  Users,
+} from 'lucide-react-native';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { NativeScrollEvent, NativeSyntheticEvent, ScrollViewInstance } from 'react-native';
 import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
@@ -21,7 +30,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { scheduleOnRN } from 'react-native-worklets';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
-import { LoadingDots } from '~/components/feedback/LoadingDots';
 import { ContentFrameProvider, useContentFrame } from '~/components/layout/ContentFrame';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { ADD_FAB_SIZE, AddFabButton } from '~/components/navigation/AddFab';
@@ -64,6 +72,10 @@ import { formatAmount, formatHours } from '~/utils/formatters';
 import { countsAsExpenseRow } from '~/utils/spending';
 
 import { AlbumBalances } from '../components/AlbumBalances';
+import {
+  type BreakdownMemberChoice,
+  BreakdownMemberSheet,
+} from '../components/BreakdownMemberSheet';
 import { useAlbumGroup } from '../hooks/useAlbumGroup';
 import { breakdownMemberOptions, memberShare } from '../lib/memberShare';
 import { formatAlbumDateRange } from '../utils';
@@ -75,7 +87,7 @@ const TOP_BAR_HEIGHT = 52;
 const TAB_BAR_HEIGHT = 48;
 /** Share of the screen the cover photo takes, status bar included. */
 const COVER_HEIGHT_RATIO = 0.36;
-/** When the push's end is never reported, the content mounts after this long anyway. */
+/** When the push's end is never reported, the other tabs mount after this long anyway. */
 const CONTENT_FALLBACK_MS = 450;
 /** The tabs not shown first mount one at a time, this far apart, after it. */
 const TAB_MOUNT_STAGGER_MS = 250;
@@ -86,9 +98,6 @@ const HEADER_FADE_DISTANCE = 56;
 const FAB_BOTTOM_GAP = 12;
 /** "Everyone" in the Breakdown's member filter. */
 const EVERYONE = 'everyone';
-
-// Stable reference for the pre-ready window so dependent memos don't churn.
-const EMPTY_TRANSACTIONS: TransactionWithRelations[] = [];
 
 interface AlbumDetailScreenProps {
   albumId: string;
@@ -173,18 +182,19 @@ export function AlbumDetailScreen({
     if (showBulkUpdate) setBulkSheetUsed(true);
   }, [showBulkUpdate]);
   const [breakdownMemberKey, setBreakdownMemberKey] = useState(EVERYONE);
+  const [showMemberSheet, setShowMemberSheet] = useState(false);
   const pagerRef = useRef<ScrollViewInstance | null>(null);
   // Page size drives the pager layout and the tap→scroll math. Seeded with
   // the frame and corrected once the pager measures itself (tablets render
   // narrower than the full window inside TabletContentContainer).
   const [pageWidth, setPageWidth] = useState(windowWidth);
   const [pageHeight, setPageHeight] = useState(windowHeight);
-  // Hold the heavy content (the lists, the breakdown donut, the balances) off
-  // until the page has slid in, so it never computes and paints on the JS
-  // thread during the push: that is what made opening an album feel slow.
-  // The cover, controls and tab bar mount at once; the content when the
+  // The album's entries are already in memory, so the open tab's list shows
+  // with the page, never behind a loading state. Only the tabs not shown
+  // (the breakdown donut, the balances) wait until the page has slid in, so
+  // they never compute and paint on the JS thread during the push: when the
   // native stack says the transition ended, or after a short wait when it
-  // never says so (no animation, the iPad layout).
+  // never says so (no animation).
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [contentReady, setContentReady] = useState(false);
   useEffect(() => {
@@ -276,7 +286,7 @@ export function AlbumDetailScreen({
     return { borderTopLeftRadius: radius, borderTopRightRadius: radius };
   });
 
-  // Mounted only once the content is ready (Balances only with people), so
+  // Mounted once the page has slid in (Balances only with people), so
   // their offsets come from their own scroll handlers.
   const breakdownScrollRef = useAnimatedRef<Animated.ScrollView>();
   const balancesScrollRef = useAnimatedRef<Animated.ScrollView>();
@@ -311,11 +321,11 @@ export function AlbumDetailScreen({
     }
   }, [collapseDistance, offsets, scrollTabTo, shownTab, tabs]);
 
-  // The open tab mounts with the content; the others follow one at a time,
-  // so opening the album renders one list, not three. A tab still waiting
-  // mounts at once when it is swiped or tapped to. Each joins the header
-  // where it is as it mounts.
-  const [mountedTabs, setMountedTabs] = useState<readonly DetailTab[]>([]);
+  // The open tab mounts with the page; the others follow one at a time once
+  // it has slid in, so opening the album renders one list, not three. A tab
+  // still waiting mounts at once when it is swiped or tapped to. Each joins
+  // the header where it is as it mounts.
+  const [mountedTabs, setMountedTabs] = useState<readonly DetailTab[]>(['transactions']);
   const mountTabs = useCallback((wanted: readonly DetailTab[]) => {
     setMountedTabs((current) =>
       wanted.every((value) => current.includes(value))
@@ -324,10 +334,10 @@ export function AlbumDetailScreen({
     );
   }, []);
   useEffect(() => {
-    if (contentReady) mountTabs([shownTab]);
-  }, [contentReady, mountTabs, shownTab]);
+    mountTabs([shownTab]);
+  }, [mountTabs, shownTab]);
   useEffect(() => {
-    if (!contentReady || mountedTabs.length === 0) return;
+    if (!contentReady) return;
     const next = tabs.find((value) => !mountedTabs.includes(value));
     if (!next) return;
     const timer = setTimeout(() => mountTabs([next]), TAB_MOUNT_STAGGER_MS);
@@ -347,13 +357,14 @@ export function AlbumDetailScreen({
   // same object while nothing changed, and never goes stale the way a memo keyed
   // on the function would after a switch to time mode.
   const stats = getAlbumStats(albumId);
-  // `getAlbumTransactions` reads the table, and both it and `albums` are stable
-  // across transaction churn, so `transactions` is what tells this memo a row
-  // written from here (a duplicate) has landed and can now be read back.
+  // `getAlbumTransactions` reads the loaded list through refs and keeps one
+  // identity, so `albums` (which entries are in it) and `transactions` (the
+  // rows themselves, optimistic ones included) are what tell this memo that
+  // something it shows changed.
   const albumTransactions = useMemo(
-    () => (contentReady ? getAlbumTransactions(albumId) : EMPTY_TRANSACTIONS),
+    () => getAlbumTransactions(albumId),
     // eslint-disable-next-line react-hooks/exhaustive-deps -- see above
-    [contentReady, getAlbumTransactions, albumId, albums, transactions],
+    [getAlbumTransactions, albumId, albums, transactions],
   );
   const coverUri = useMemo(() => getAlbumCoverUri(album?.coverPhotoUri), [album?.coverPhotoUri]);
   // Skip a uri that failed to load natively; see CategoryEmoji for why.
@@ -526,9 +537,14 @@ export function AlbumDetailScreen({
     [albumTransactions],
   );
   const clearSelection = useCallback(() => setSelectedTransactionIds([]), []);
+  // A shared album takes no entries made elsewhere: only bills made in it,
+  // split with its members (README: Album members and shared albums). So no
+  // picking existing transactions, and no copies of its bills.
+  const takesExisting = group.share === null;
   const duplicableSelectedTransactions = useMemo(
-    () => selectDuplicableTransactions(albumTransactions, selectedTransactionIds),
-    [albumTransactions, selectedTransactionIds],
+    () =>
+      takesExisting ? selectDuplicableTransactions(albumTransactions, selectedTransactionIds) : [],
+    [albumTransactions, selectedTransactionIds, takesExisting],
   );
   // `createTransaction` files a new row into the *active* album, which is not
   // necessarily the one being viewed, so the copies are added here explicitly.
@@ -774,60 +790,58 @@ export function AlbumDetailScreen({
     </>
   );
 
-  // Whose spending the Breakdown shows, once a bill in it is split.
-  const memberFilter =
-    memberOptions.length > 0 ? (
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.memberChips}
-        testID="album-breakdown-members"
-      >
-        {[
-          { key: EVERYONE, name: I18n.t('albums.breakdown_everyone'), avatar: null },
+  // Whose spending the Breakdown shows, once a bill in it is split: one line
+  // that opens a sheet of the choices, however many people the album has.
+  const memberChoices: BreakdownMemberChoice[] =
+    memberOptions.length === 0
+      ? []
+      : [
+          {
+            key: EVERYONE,
+            name: I18n.t('albums.breakdown_everyone'),
+            icon: (
+              <View className="h-7 w-7 items-center justify-center rounded-full bg-primary/15">
+                <Users size={15} color={themeColors.primary} />
+              </View>
+            ),
+          },
           ...memberOptions.map((option) => ({
             key: option.key,
             name: option.name,
-            avatar: (
+            icon: (
               <PersonAvatar
                 name={option.name}
                 partyKey={option.member.kind === 'self' ? null : debtPartyKey(option.name)}
-                size={22}
+                size={28}
                 imageUri={option.member.kind === 'self' ? me.avatarUri : null}
               />
             ),
           })),
-        ].map((chip) => {
-          const selected =
-            chip.key === EVERYONE ? breakdownMember === null : chip.key === breakdownMemberKey;
-          return (
-            <Pressable
-              key={chip.key}
-              onPress={() => {
-                void triggerHaptic('selection');
-                setBreakdownMemberKey(chip.key);
-              }}
-              accessibilityRole="button"
-              accessibilityState={{ selected }}
-              className={cn(
-                'flex-row items-center gap-1.5 rounded-full border py-1',
-                chip.avatar ? 'pl-1 pr-3' : 'px-3.5',
-                selected ? 'border-primary bg-primary/12' : 'border-border/40 bg-card',
-              )}
-            >
-              {chip.avatar}
-              <Text
-                variant="label"
-                numberOfLines={1}
-                className={selected ? 'text-primary' : 'text-muted-foreground'}
-              >
-                {chip.name}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </ScrollView>
-    ) : null;
+        ];
+
+  const shownChoice =
+    memberChoices.find((choice) => choice.key === breakdownMemberKey) ?? memberChoices[0];
+  const memberFilter = shownChoice ? (
+    <Pressable
+      onPress={() => {
+        void triggerHaptic('selection');
+        setShowMemberSheet(true);
+      }}
+      accessibilityRole="button"
+      accessibilityLabel={`${I18n.t('albums.breakdown_showing')}: ${shownChoice.name}`}
+      testID="album-breakdown-members"
+      className="mx-5 mt-4 h-12 flex-row items-center gap-2.5 rounded-2xl border border-border/40 bg-card px-4 active:opacity-80"
+    >
+      <Text variant="body" tone="muted">
+        {I18n.t('albums.breakdown_showing')}
+      </Text>
+      {shownChoice.icon}
+      <Text variant="bodyStrong" numberOfLines={1} className="flex-1">
+        {shownChoice.name}
+      </Text>
+      <ChevronDown size={18} color={themeColors.textMuted} />
+    </Pressable>
+  ) : null;
 
   const breakdownBody = (
     <>
@@ -840,7 +854,7 @@ export function AlbumDetailScreen({
           animateIn={false}
         />
       ) : (
-        <View style={{ paddingTop: memberFilter ? 8 : 20 }}>
+        <View style={{ paddingTop: memberFilter ? 12 : 20 }}>
           <MemoBreakdownChart
             rows={breakdownRows}
             formatValue={formatValue}
@@ -921,6 +935,18 @@ export function AlbumDetailScreen({
   // the page: nobody needs them on the way in.
   const sheets = (
     <>
+      {memberChoices.length > 0 ? (
+        <BreakdownMemberSheet
+          visible={showMemberSheet}
+          choices={memberChoices}
+          selectedKey={shownChoice?.key ?? EVERYONE}
+          onSelect={(key) => {
+            setBreakdownMemberKey(key);
+            setShowMemberSheet(false);
+          }}
+          onClose={() => setShowMemberSheet(false)}
+        />
+      ) : null}
       {showBulkUpdate || bulkSheetUsed ? (
         <BulkEditTransactionsSheet
           visible={showBulkUpdate}
@@ -978,14 +1004,16 @@ export function AlbumDetailScreen({
                   I18n.t('albums.edit_details_title'),
                   <Pencil size={17} color={themeColors.textMuted} />,
                 )}
-                {splitIconButton(
-                  () => {
-                    void triggerHaptic('selection');
-                    onAddTransactions(albumId);
-                  },
-                  I18n.t('albums.add_transactions_title'),
-                  <Plus size={19} color={themeColors.textMuted} />,
-                )}
+                {takesExisting
+                  ? splitIconButton(
+                      () => {
+                        void triggerHaptic('selection');
+                        onAddTransactions(albumId);
+                      },
+                      I18n.t('albums.add_transactions_title'),
+                      <Plus size={19} color={themeColors.textMuted} />,
+                    )
+                  : null}
                 {splitIconButton(
                   handleDelete,
                   I18n.t('common.delete'),
@@ -1014,7 +1042,8 @@ export function AlbumDetailScreen({
                   <Text variant="label" tone="muted" style={styles.splitHeading}>
                     {I18n.t('albums.tab_breakdown')}
                   </Text>
-                  {contentReady ? breakdownBody : <LoadingDots />}
+                  {/* Like the phone's other tabs, after the page has slid in. */}
+                  {contentReady ? breakdownBody : null}
                   {showBalances && contentReady ? (
                     <>
                       <Text variant="label" tone="muted" style={styles.splitHeading}>
@@ -1032,31 +1061,25 @@ export function AlbumDetailScreen({
                   {I18n.t('albums.tab_transactions')}
                 </Text>
                 <View style={styles.flexOne}>
-                  {contentReady ? (
-                    <>
-                      {transactionList(4, false)}
-                      {isSelectionMode ? (
-                        <TransactionSelectionToolbar
-                          selectedCount={selectedTransactionCount}
-                          totalNode={
-                            <Text variant="label" className="text-foreground">
-                              {formatValue(selectedTotal)}
-                            </Text>
-                          }
-                          onCancel={clearSelection}
-                          onDuplicate={
-                            duplicableSelectedTransactions.length > 0
-                              ? () => setShowDuplicatePicker(true)
-                              : undefined
-                          }
-                          onEdit={() => setShowBulkUpdate(true)}
-                          onDelete={handleRemoveSelected}
-                        />
-                      ) : null}
-                    </>
-                  ) : (
-                    <LoadingDots />
-                  )}
+                  {transactionList(4, false)}
+                  {isSelectionMode ? (
+                    <TransactionSelectionToolbar
+                      selectedCount={selectedTransactionCount}
+                      totalNode={
+                        <Text variant="label" className="text-foreground">
+                          {formatValue(selectedTotal)}
+                        </Text>
+                      }
+                      onCancel={clearSelection}
+                      onDuplicate={
+                        duplicableSelectedTransactions.length > 0
+                          ? () => setShowDuplicatePicker(true)
+                          : undefined
+                      }
+                      onEdit={() => setShowBulkUpdate(true)}
+                      onDelete={handleRemoveSelected}
+                    />
+                  ) : null}
                 </View>
               </ContentFrameProvider>
             </View>
@@ -1128,26 +1151,20 @@ export function AlbumDetailScreen({
             if (height > 0 && height !== pageHeight) setPageHeight(height);
           }}
         >
-          {!contentReady ? (
-            <View style={{ paddingTop: headerHeight + 32 }} className="items-center">
-              <LoadingDots />
-            </View>
-          ) : (
-            <ScrollView
-              ref={pagerRef}
-              horizontal
-              pagingEnabled
-              directionalLockEnabled
-              showsHorizontalScrollIndicator={false}
-              nestedScrollEnabled
-              keyboardShouldPersistTaps="handled"
-              scrollEventThrottle={32}
-              onScrollBeginDrag={handlePagerDragBegin}
-              onMomentumScrollEnd={handlePagerMomentumEnd}
-            >
-              {tabs.map(page)}
-            </ScrollView>
-          )}
+          <ScrollView
+            ref={pagerRef}
+            horizontal
+            pagingEnabled
+            directionalLockEnabled
+            showsHorizontalScrollIndicator={false}
+            nestedScrollEnabled
+            keyboardShouldPersistTaps="handled"
+            scrollEventThrottle={32}
+            onScrollBeginDrag={handlePagerDragBegin}
+            onMomentumScrollEnd={handlePagerMomentumEnd}
+          >
+            {tabs.map(page)}
+          </ScrollView>
         </View>
 
         {/* The header: the cover photo and the tab bar resting on it. Drags
@@ -1282,18 +1299,20 @@ export function AlbumDetailScreen({
                 <Pencil size={17} color={overPhoto ? '#ffffff' : themeColors.textMuted} />
               )}
             />
-            <HeroHeaderButton
-              onPress={() => {
-                void triggerHaptic('selection');
-                onAddTransactions(albumId);
-              }}
-              accessibilityLabel={I18n.t('albums.add_transactions_title')}
-              floatingStyle={floatingChromeStyle}
-              solidStyle={solidHeaderStyle}
-              renderIcon={(overPhoto) => (
-                <Plus size={19} color={overPhoto ? '#ffffff' : themeColors.textMuted} />
-              )}
-            />
+            {takesExisting ? (
+              <HeroHeaderButton
+                onPress={() => {
+                  void triggerHaptic('selection');
+                  onAddTransactions(albumId);
+                }}
+                accessibilityLabel={I18n.t('albums.add_transactions_title')}
+                floatingStyle={floatingChromeStyle}
+                solidStyle={solidHeaderStyle}
+                renderIcon={(overPhoto) => (
+                  <Plus size={19} color={overPhoto ? '#ffffff' : themeColors.textMuted} />
+                )}
+              />
+            ) : null}
             <HeroHeaderButton
               onPress={handleDelete}
               accessibilityLabel={I18n.t('common.delete')}
@@ -1379,7 +1398,6 @@ const styles = StyleSheet.create({
   coverTitle: { position: 'absolute', left: 0, right: 0, bottom: 0 },
   coverPeople: { position: 'absolute', right: 16 },
   tabBar: { marginTop: -SHEET_OVERLAP, overflow: 'visible' },
-  memberChips: { gap: 8, paddingHorizontal: 20, paddingTop: 16, paddingBottom: 4 },
   fab: { position: 'absolute', right: spacing.lg, zIndex: 10 },
   splitRow: {
     flex: 1,

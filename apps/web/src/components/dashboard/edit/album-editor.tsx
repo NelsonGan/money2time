@@ -245,6 +245,7 @@ function AlbumTransactionsPicker({
   touches,
   max = MAX_EDIT_ROWS,
   locked,
+  noAdding = false,
   children,
 }: {
   initial: string[];
@@ -260,6 +261,8 @@ function AlbumTransactionsPicker({
   max?: number;
   /** Entries that cannot be unticked: the album's own shared bills, which are taken out of it in the app. */
   locked?: ReadonlySet<string>;
+  /** A shared album takes no entries made elsewhere: only its own entries can be ticked (back). */
+  noAdding?: boolean;
   children?: ReactNode;
 }) {
   const t = useTranslations("dashboard.edit.album");
@@ -269,6 +272,9 @@ function AlbumTransactionsPicker({
   const f = useFormat();
   const [picked, setPicked] = useState<string[]>(initial);
   const pickedSet = useMemo(() => new Set(picked), [picked]);
+  // Entries that can be ticked: any, or in a shared album only those it already holds.
+  const initialSet = useMemo(() => new Set(initial), [initial]);
+  const canTick = (id: string) => !noAdding || initialSet.has(id);
 
   const expenses = useMemo(() => model.txs.filter((tx) => tx.type === "expense"), [model]);
   const [month, setMonth] = useState(() => {
@@ -278,7 +284,9 @@ function AlbumTransactionsPicker({
   });
   const rows = useMemo(() => expenses.filter((tx) => tx.month === month).sort((a, b) => b.date.getTime() - a.date.getTime()), [expenses, month]);
   const toggle = (id: string) =>
-    setPicked((current) => (current.includes(id) ? (locked?.has(id) ? current : current.filter((x) => x !== id)) : [...current, id]));
+    setPicked((current) =>
+      current.includes(id) ? (locked?.has(id) ? current : current.filter((x) => x !== id)) : canTick(id) ? [...current, id] : current,
+    );
   const tooMany = touches(picked) > MAX_EDIT_ROWS;
 
   const arrow = (delta: number, label: string, path: string) => (
@@ -324,11 +332,11 @@ function AlbumTransactionsPicker({
               const category = tx.categoryId ? model.categories.get(tx.categoryId) : null;
               const label = tx.note || category?.name || tc("uncategorized");
               const on = pickedSet.has(tx.id);
-              const fixed = on && !!locked?.has(tx.id);
+              const fixed = on ? !!locked?.has(tx.id) : !canTick(tx.id);
               return (
                 <li key={tx.id}>
                   <label
-                    title={fixed ? te("groupBill") : undefined}
+                    title={on && fixed ? te("groupBill") : undefined}
                     className={`flex items-center gap-3 rounded-xl px-2 py-2.5 ${fixed ? "cursor-default" : "cursor-pointer"} ${on ? "bg-primary/10" : "hover:bg-background-subtle"}`}
                   >
                     <input type="checkbox" checked={on} disabled={fixed} onChange={() => toggle(tx.id)} className="h-5 w-5 shrink-0 rounded-md accent-[var(--color-primary)] disabled:opacity-60" />
@@ -385,7 +393,7 @@ function AlbumTransactionsForm({ trip: shown, onClose }: { trip: Trip; onClose: 
   };
   const locked = useMemo(() => albumGroupBillIds(model, shown.id), [model, shown.id]);
   return (
-    <AlbumTransactionsPicker initial={base.txIds} touches={touches} locked={locked} title={t("editTransactions")} doneLabel={t("save")} onDone={(ids) => void save(ids)} onClose={onClose} busy={busy} disabled={!ready}>
+    <AlbumTransactionsPicker initial={base.txIds} touches={touches} locked={locked} noAdding={locked.size > 0} title={t("editTransactions")} doneLabel={t("save")} onDone={(ids) => void save(ids)} onClose={onClose} busy={busy} disabled={!ready}>
       <EditBlocked />
       <EditError message={error} onReload={reload} />
     </AlbumTransactionsPicker>

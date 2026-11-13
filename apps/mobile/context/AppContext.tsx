@@ -1906,6 +1906,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // re-renders every consumer, defeating the two-context split.
   const transactionsRef = useRef<TransactionWithRelations[]>(transactions);
   transactionsRef.current = transactions;
+  // Counts the full reloads of the list, so a create can tell whether one
+  // ran between its optimistic row and its write (see reconcileTransactionRow).
+  const transactionReloadsRef = useRef(0);
   // Balance aggregates read from SQLite. Kept in state (refreshed after each
   // write) instead of queried inside a render-time memo — the synchronous
   // aggregate query was blocking every render triggered by a transactions
@@ -2308,6 +2311,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setRecurringRules(nextRecurringRules);
       setAccounts(nextAccounts);
       setCategories(nextCategories);
+      transactionReloadsRef.current += 1;
       setTransactions((prev) => reuseUnchangedTransactions(prev, nextTransactions));
       setAlbums(nextAlbums);
       setItems(nextItems);
@@ -2329,6 +2333,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const refreshTransactions = useCallback(() => {
     try {
       const next = transactionsRepository.list();
+      transactionReloadsRef.current += 1;
       setTransactions((prev) => reuseUnchangedTransactions(prev, next));
       setRawAccountBalances(accountsRepository.getBalances());
     } catch (error) {
@@ -3107,19 +3112,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // Membership edits only touch the album join table — a full refreshAll() would
   // re-init the DB and reload everything (slow). Reloading just `albums` gives the
   // membership-derived memos a fresh reference and updates the UI immediately.
-  // A shared album's group follows what is put into and taken out of the
-  // album (set further down, once the group's functions exist).
+  // A shared album's group follows what is taken out of the album (set
+  // further down, once the group's functions exist).
   const albumGroupHooksRef = useRef<{
-    publish: (groupId: string) => void;
     detach: (transactionId: string) => void;
     block: (groupId: string, billId: string) => 'not_payer' | 'has_payments' | null;
   } | null>(null);
 
   const addTransactionsToAlbum = useCallback((albumId: string, transactionIds: string[]) => {
+    // A shared album only takes new entries of the user's own here (its
+    // bills go through `saveAlbumBill`), which its group has nothing to do
+    // with: no re-projection, and no reload racing the entry's own insert.
     albumsRepository.addTransactions(albumId, transactionIds);
     setAlbums(albumsRepository.list());
-    // A split bill added to a shared album becomes the group's.
-    if (sharedAlbumFor(albumId)) albumGroupHooksRef.current?.publish(albumId);
   }, []);
 
   const removeTransactionsFromAlbum = useCallback((albumId: string, transactionIds: string[]) => {
@@ -3149,11 +3154,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     albumsRepository.reorder(ids);
     setAlbums(albumsRepository.list());
   }, []);
-
-  const getAlbumTransactionIds = useCallback(
-    (albumId: string) => albumsRepository.getTransactionIds(albumId),
-    [],
-  );
 
   // Which entries are in which album, read once per change of `albums` (a
   // new array whenever an album or its entries change) and shared by the
@@ -3205,13 +3205,29 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return membership.owned.ids;
   }, [getAlbumEntryIds]);
 
-  const getAlbumTransactions = useCallback((albumId: string): TransactionWithRelations[] => {
-    const ids = albumsRepository.getTransactionIds(albumId);
-    // Batched load (fixed query count) instead of one getById per id.
-    return transactionsRepository
-      .listByIds(ids)
-      .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
-  }, []);
+  // An album's entries, from the loaded list (newest first), not the table:
+  // a new entry is in the list at once while its insert waits behind the
+  // editor's dismiss, so a read of the table missed it, and once the insert
+  // landed nothing told the album page to look again. The loaded list holds
+  // the same live rows of the open ledger the table read joined on.
+  const getAlbumTransactions = useCallback(
+    (albumId: string): TransactionWithRelations[] => {
+      const ids = getAlbumEntryIds().get(albumId);
+      if (!ids || ids.length === 0) return [];
+      const members = new Set(ids);
+      return transactionsRef.current.filter((tx) => members.has(tx.id));
+    },
+    [getAlbumEntryIds],
+  );
+
+  // The ids of the album's live entries. Deleting an entry leaves its row in
+  // `album_transactions` (on this phone, or a bill deleted on another phone of
+  // a shared album), so the table alone also counted entries that are gone:
+  // the picker started with them selected ("5 selected" over one entry).
+  const getAlbumTransactionIds = useCallback(
+    (albumId: string) => getAlbumTransactions(albumId).map((tx) => tx.id),
+    [getAlbumTransactions],
+  );
 
   const accountNameById = useMemo(
     () => new Map(accounts.map((account) => [account.id, account.name])),
@@ -3547,6 +3563,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         });
       }
       setTransactions((prev) => insertTransactionsByDateDesc(prev, [optimistic]));
+      const reloadsAtInsert = transactionReloadsRef.current;
       const feeWrite =
         meta?.transferFee && normalizedInput.type === 'transfer'
           ? planTransferFeeWrite({
@@ -3618,7 +3635,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           // their row-level memoization defeated — the main JS-thread stall
           // felt right after Save in bulk create mode.
           const persisted = transactionsRepository.getById(id);
-          setTransactions((prev) => reconcileTransactionRow(prev, id, persisted));
+          // A reload since the optimistic row read the table before this
+          // write and took the row out: it goes back in. Without one, a row
+          // missing now was deleted meanwhile and stays out.
+          const reloaded = transactionReloadsRef.current !== reloadsAtInsert;
+          setTransactions((prev) => reconcileTransactionRow(prev, id, persisted, reloaded));
         } catch (error) {
           if (meta?.source === 'autolog' || meta?.source === 'notification_review') {
             // The expense is already committed; a failed album or UI refresh
@@ -4353,7 +4374,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   );
 
   albumGroupHooksRef.current = {
-    publish: publishAlbumGroup,
     detach: detachAlbumBill,
     block: albumBillBlock,
   };
@@ -5366,9 +5386,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       runDeferredWrite(() => {
         try {
           transactionsRepository.createWithId(txId, normalizedInput);
-          // Auto-file the primary transaction into the active album, if any.
+          // Auto-file the primary transaction into the active album, if any,
+          // but never a bill split with typed names into a shared album: that
+          // album's bills are split only with its members, through its group
+          // (README: Album members and shared albums).
           const activeAlbumId = albumsRepository.getActiveId();
-          if (activeAlbumId) {
+          if (
+            activeAlbumId &&
+            !(sharedAlbumFor(activeAlbumId) && splits.some((split) => !split.isSelf))
+          ) {
             albumsRepository.addTransactions(activeAlbumId, [txId]);
             setAlbums(albumsRepository.list());
           }

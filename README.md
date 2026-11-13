@@ -510,7 +510,7 @@ Traditional Chinese is `zh-Hant`. Device tags for Taiwan, Hong Kong, and Macau s
 - **Insights pages and trend charts**: The Insights menu has six entries, and a seventh, **Household**, while the open ledger is shared (see [Shared ledgers](#shared-ledgers) > Household insights). **Breakdown** and **Trends** each hold several insight types behind tabs (`features/insights/insightGroups.ts`, `InsightSubTabs`): Breakdown is Expense and Income (plain text tabs), Trends is Expense, Income, Category and Assets (the old Asset History, now Asset Trends; an icon row). Each tab is still its own insight type, so its period, filters, saved preferences and `money2time://insights?focus=<type>` deep links are unchanged; the menu reopens a group on the tab last used in it (`lastInsightTypeByGroup` in the Insights preferences). Every page shares one header: the menu button, the page title with a quiet `‹ period ›` under it (`InsightPeriodSwitcher`; the header's own month capsule is hidden), the filter button, then the tabs. Chart pages share one body: a headline (`TrendHeadline`: an optional small label, the big figure, one quiet tinted pill such as "↓ 32% vs avg"), the chart, then plain white rows. Each Savings Rate month row has a month tile tinted by its rate (a star on the best month once two months have income), the amount saved or overspent over "of RM… income", and the rate as a small ring and a tinted pill; months with nothing in them are faint dashed rows. Every trend, Savings Rate's monthly rate and Expense Sentiment's mood counts (one line per mood) is a line-and-point chart, `TrendLineChart` (Skia, geometry in `features/insights/lib/trendLineGeometry.ts`): a dot per bucket, a dashed guide and a white legend card with a pointer on the selected one, a haptic tick per bucket while scrubbing, and months that have not happened yet left off rather than drawn at zero. Spending and income read from zero with a dashed average line (the month still under way is left out of the average); assets keep their own range so a balance below zero still shows its direction. Savings Rate draws -100% to 100% (`valueFloor` / `valueCeiling`): a month that spent several times its income can reach -350% or lower, which would flatten every other month, so a month past a cap sits on that edge as an arrowhead pointing off the chart, and its tooltip and row still show the real rate. Category picks from chips in the header (`CategoryTrendChips`, biggest spend first): a tap charts a category, and the leading "Compare" chip arms the next tap to add a second line (`categoryTrendCompareCategoryId`), with both totals and a one-line verdict under the chart. A touch on a chart picks a month only on a tap or a sideways drag, so a vertical drag that starts on it still scrolls the page; while a finger is down only the period pager is locked. Skia canvases are not clipped by their scroll view, so the header is stacked above the pages (`stackedHeader`) to cover a scrolled chart. Expense Sentiment uses Review's mood names. Chart inputs are cached per page (`trendChartModelCacheRef`), so scrubbing redraws only the selection. Any Skia path code must build paths from SVG strings or `Skia.PathBuilder`: Skia 2.14 made `SkPath` immutable.
 - **Multi-currency**: Each transaction stores its entered `currency` plus a frozen reporting-currency snapshot (`reportingCurrency`/`reportingAmount`/`fxRate`) taken at write time so historical aggregates never drift when FX rates move. Use `convert`/`buildRateTable` from `~/utils/currency`; never recompute historical totals from live rates. FX rates come from `services/exchangeRates.ts`.
 - **Changing an account's currency**: the account editor previews the converted balance as soon as a new currency is picked; on save, Convert & change re-denominates the account and its history at the latest rate (`changeAccountCurrency`). A balance typed in the same save is then recorded on top, in the new currency: the editor asks how to record it (account difference, or income/expense), exactly as for a plain balance edit, and nothing is saved until both prompts are answered. `changeAccountCurrency` returns the balance after conversion so the recorded change lands the account on the typed figure; `balanceChangeWithCurrencySwitch` (`features/settings/lib/accountBalanceChange.ts`) tells a typed balance from the editor's own rounded preview. The goal editor still leaves its saved amount for a follow-up edit.
-- **Albums**: Trip albums are a Pro-limited feature (`FREE_MAX_ALBUMS`). One album can be "active" (`activeAlbumId`) so new transactions auto-add. Manage via `useApp()` album ops. An album can be split with people and shared with them: see [Album members and shared albums](#album-members-and-shared-albums).
+- **Albums**: Trip albums are a Pro-limited feature (`FREE_MAX_ALBUMS`). One album can be "active" (`activeAlbumId`) so new transactions auto-add. Manage via `useApp()` album ops. An album can be split with people and shared with them: see [Album members and shared albums](#album-members-and-shared-albums). **An album's entries are read from the loaded transactions, never the table** (`getAlbumTransactions`, `getAlbumTransactionIds`: its live ids from `album_transactions`, kept to rows in the loaded list): a new entry is in the list at once while its insert waits behind the editor's dismiss, and deleting an entry leaves its `album_transactions` row behind, so a read of the table missed the new entry (the album page did not show it until reopened) and counted deleted ones (Add transactions opened with "5 selected" over one entry). On the Albums page a shared album's card has a pill over its photo, just above the name: up to three of its people's avatars ("+N" for the rest), a cloud with a tick and "Shared" (on a card too short for that, beside the reorder handle instead), and VoiceOver reads the card as "<name>, Shared". The top right is left to the active album's green dot.
 - **Icons (categories, goals, budget templates)**: The four icon columns (`categories.icon`, `accounts.goal_emoji`, `budget_templates.emoji`, `monthly_budgets.template_emoji`) store one tagged string, documented in `constants/categoryIcons.ts`: a bare kebab id (`meal`) is a bundled clay icon, `emoji:X` is a Unicode emoji the user picked, `custom:category-icons/<uuid>.png` is an uploaded image, and `''`/null is none. Classify with `classifyCategoryIcon`; render with `CategoryEmoji`, which handles all three forms. **Never re-derive an icon from an emoji at render time** — that indirection is gone. Older rows stored a bare glyph that was mapped through a table at render; migration `048_normalize_icon_values` backfilled them, and the frozen `LEGACY_EMOJI_TO_ICON` in `lib/db/normalizeIcons.ts` survives **only** at data ingress (the migration, backup restore, `.mmbak` import) because old backups can be restored at any time. `normalizeIconValue` is a fixpoint, which is what makes a replayed migration safe. **The free `default` pack IS the Clay artwork** — the separate `clay` pack was folded into it, so its 110 ids are bare (`meal`, not `clay/meal`) and every pre-existing row keeps rendering without a rewrite. Rows that had explicitly picked a Clay icon are remapped `clay/x` → `x` by `RETIRED_ICON_PACK_PREFIXES` in `lib/db/normalizeIcons.ts`, run by migration `050_retire_clay_icon_pack` and, like the legacy-emoji table, frozen there for the backups and `.mmbak` files that still carry qualified ids. The pack keeps the folder name `default` on purpose (renaming it would re-qualify every id and break every row); the label users see comes from `category_icon.pack_default`, which reads "Clay". Surfaces that can only render a string (native widgets via `widgetSnapshot.shared.ts`, the Shortcuts catalog via `autoLogCatalog.ts`, the Excel export) go through `categoryIconToEmoji`. The bundled set is generated by `scripts/generate-category-icons.mjs` and grouped/searchable via the hand-maintained `constants/categoryIconGroups.ts` (a test fails if a PNG has no grouping). One shared `CategoryIconPickerSheet` (root route `CategoryIconPicker`, handed its session by `categoryIconPickerBridge`) serves all three editors, with Icons / Emoji / My uploads tabs; the emoji tab lazy-imports the ~1,900-entry `constants/emojiCatalog.generated.ts`. Uploads are **Pro-only** (`useProGate().requirePro`), stored under the `category-icons` user-asset kind. **Any new column holding one of these values must be added to `collectReferencedAssetPaths` in `services/userAssetGc.ts`, or the orphan sweep will delete live images.** Non-default packs are **Pro-only**: a free user can browse them (with a banner, and a PRO badge in the pack list) but selecting an icon calls `useProGate().requirePro('icon_packs')` and opens the paywall instead. **EAS Update caps an update at 1000 assets and Metro resolves ~1380 here, so `expo.updates.assetPatternsToBeBundled` in `app.json` keeps `assets/account-logos` (528 files) out of updates, riding in the native binary instead; that leaves 949 of the 1000 in the current export (measured 2026-10-19; 74 of them are the card designs in `assets/card-designs`). (This governs the internal-only OTA builds — store builds ship with updates disabled, see CI / Deploy.) The list is an allow-list, not a deny-list, so it must also carry `node_modules/**/\*`— without it a JS-only update that bumps a dependency shipping assets (the Work Sans faces,`@react-navigation/elements`' chrome PNGs) references asset hashes that are in neither the update nor the installed binary. Adding artwork anywhere else eats that headroom, so re-check with `npx expo export --dump-assetmap` afterwards.\*\*
 - **Clay UI icons (`assets/clay-icons/`)**: 160 soft-clay illustrations for the app's own _chrome_ — a separate namespace from the user-selectable category packs. Eight sets: `nav/` (bottom-tab glyphs as resting/active pairs, plus the + FAB), `settings/` (one per SettingsGridTile, plus the profile and CTA art), `entry/` (editor, quick-add, voice, receipt-scan affordances), `money-time/`, `ui/`, `status/` (empty-state and warning art, and the notification auto-review icons), `insights/` (the insight-type illustrations, reached through `constants/utilityIcons.ts`) and `sentiment/` (the three faces behind `SentimentIcons`). Render with `<ClayIcon name="nav/home" size={26} />`; the registry is generated by `scripts/generate-clay-icons.mjs` into `constants/clayIcons.generated.ts`, so adding a PNG and re-running is the whole workflow. **Two rules the artwork depends on:** clay is never tinted (not per theme, not for an active state — an active tab is a different _file_, a resting one is dimmed with `opacity`), and clay is never wrapped in a tinted plate (`bg-primary/10` behind it reads as a second, competing container; the surrounding card or tile is the container). Clay needs room, so it is for anything naming a _thing_ at 18px and up; small chrome that must stay crisp at 15–16px (chevrons, close and back buttons, numpad keys, header search/filter) stays on Lucide line icons.
 - **Icon style (clay vs flat)**: `settings.iconStyle` (`'clay' | 'flat'`, default clay, migration `051_add_icon_style`, toggled on `DisplaySettingsScreen`) lets the user put the pre-clay flat line icons back. It rides on `ThemeContext` alongside the theme colour, read with **`useIconStyle()` / `useIsFlatIcons()`** (defaulting to clay outside the provider, so an error boundary above `ThemeGate` still renders). `ClayIcon` is the choke point: in flat mode it draws the Lucide icon from `FLAT_ICON_FOR_CLAY` in `constants/flatIcons.ts` — a total `Record<ClayIconName, …>`, so a new clay icon does not typecheck until it has a flat counterpart — centred in the same `size` box so no layout shifts. A call site whose _pre-clay icon differed_ from that shared entry passes `flat={{ icon: X }}`; sizes come from `flatSize` (flat line art reads at roughly 60-75% of clay, and the ratio differed per surface, so the historical value is passed explicitly and `DEFAULT_FLAT_SIZE_RATIO` only catches the rest). **The two clay rules above invert in flat mode**, so a site whose _container_ also changed branches on `useIsFlatIcons()` rather than going through `ClayIcon`: `SettingsGridTile` and `AddActionSheet`'s tiles put their tinted plate back, `AddFab`/`AddIconButton` put the filled primary disc and white `+` back, `BottomNav` swaps to the tinted-and-filled SVG pairs in `components/icons/NavIcons.tsx`, `SentimentIcons` swaps to the emoji SVGs in `assets/icons/`, `InOutHeader` swaps the wallet art for its tone dot, and `SettingsScreen`'s avatar and Pro/Share CTAs get their discs back. **Deliberately out of scope:** category icons, the insight-type art (`constants/utilityIcons.ts`) and the mascots render the same in both styles.
@@ -2096,12 +2096,21 @@ migrations `090` and `091`.
   this album (and, in a shared album, starts split with its people), whether
   or not the album is the active one (the `albumId` param of
   `AddTransactionDetailed`), and comes back to the album when saved.
-  **Opening is light**: the cover and controls mount with the push, the
-  content once the native stack says the transition ended (or after 450 ms),
-  the open tab first and the others one at a time after it (a swipe mounts
-  any still waiting), and the header's collapsed state lives in the small bar
-  it controls (`SolidHeaderBar`), so scrolling past the collapse point
-  re-renders that bar alone, never the page under the moving cover.
+  **Opening is light and never waits**: the cover, controls and the open
+  tab's list mount with the push (the entries are already in memory, so
+  there is no loading state); the other tabs (the breakdown donut, the
+  balances) one at a time once the native stack says the transition ended
+  (or after 450 ms), and a swipe mounts any still waiting. The header's
+  collapsed state lives in the small bar it controls (`SolidHeaderBar`), so
+  scrolling past the collapse point re-renders that bar alone, never the
+  page under the moving cover. **The header moves on the UI thread without
+  React**: `package.json` turns on Reanimated's
+  `IOS_SYNCHRONOUSLY_UPDATE_UI_PROPS` and
+  `ANDROID_SYNCHRONOUSLY_UPDATE_UI_PROPS`, so a scroll-driven transform,
+  opacity or corner radius is written to the native view in the frame it is
+  computed instead of through a shadow-tree commit, which waited behind
+  FlashList rendering cells and made the cover stutter while scrolling
+  (native flags: a change needs a new build).
 - **Split with friends is chosen at creation.** The New Album screen has the
   switch (in one card with Simplify group debts); on, the album is shared as
   it is made, with nobody but the user until others join. **Sharing is free
@@ -2140,8 +2149,15 @@ migrations `090` and `091`.
   here and joined again comes back.
 - **A new bill starts split.** In a shared album a new expense opens split
   evenly between the user and everyone who joined. The user is always its
-  payer (Split Bill has no Paid by there), and people are added from the
-  members list, one tap each, never typed (`groupMembers`). Add does not
+  payer (Split Bill has no Paid by there), and people come only from the
+  album's members, never typed (`groupMembers`). A person's name, the
+  blank row a split opens with ("Choose a member") and Add person all open
+  one sheet over the bill (`MemberPickerSheet`): every member with a check
+  circle, the user always on, ticked on or off in place (a member with a
+  payment recorded cannot come off), "3 of 8 people" under the title and a
+  search field from 7 members up, at a fixed height so filtering never
+  resizes it and it stays above the keyboard. The rows under it never move
+  while choosing; the first member ticked fills the blank row. Add does not
   save it straight away: Split Bill opens first, its Done reading **Add**
   (`confirmSplitBeforeAdd`), so the split is seen and can be changed before
   the bill is saved; Back returns to the form unsaved. Removing everyone
@@ -2158,8 +2174,27 @@ migrations `090` and `091`.
   everyone else, and stays the user's own entry. Its row in every list has a
   small people mark after the title (read out as "Shared album"), and its
   editor a row at the foot of the amount card naming the album, which opens
-  it (`albumNote`), under the panel with the user's share and who paid. An existing entry added to a shared
-  album stays the user's own, local split and all.
+  it (`albumNote`), under the panel with the user's share and who paid.
+- **A shared album only holds bills made in it.** Existing entries are never
+  added to one: its page has no Add transactions button and no Duplicate in
+  its selection bar, New Album hides Select transactions while Split with
+  friends is on (picked entries go in only if sharing then fails and the
+  album stays the user's own), and the Web Dashboard's picker cannot tick
+  other entries into an album with bills of its group (the phone refuses
+  any add to a shared album, which covers one with no bills yet). As the
+  active album it takes new entries as any album does, except a bill split
+  with typed names (`createTransactionWithSplits` leaves that one out: a
+  receipt Split by Item, say). An expense in it is split only through the
+  group, with its members (`EditTransactionScreen` and
+  `AddTransactionScreen` set `groupBill`): an entry of the user's own there
+  split with nobody becomes a bill of the group once split, never a local
+  split with typed names that nobody else in the album would get. An entry
+  of the user's own already split with others (from before this rule: typed
+  names, a friend who paid, paybacks, items) keeps its own split, since the
+  group could not take those names and its paybacks would count twice. A
+  save the group cannot take (signed out, someone on it who is not a member)
+  says it failed and keeps nothing. The member sheet says when nobody else
+  has joined yet.
 - **Who can change what: nobody moves anyone else's money.** The rules are
   in `lib/groupRules.ts`, applied by the app (`saveAlbumBill`,
   `deleteGroupEntries`, `deleteSplit`, `recordGroupPayment`,
@@ -2217,8 +2252,10 @@ migrations `090` and `091`.
   **Settled up** (marked Even when bills are open both ways and come to
   nothing), which is where the album's bills with them are found.
 - **The Breakdown by person.** Once a bill in a shared album is split, the
-  Breakdown has a row of chips: **Everyone** (the album's entries as they
-  stand), the user, then each person. A person's Breakdown counts each bill
+  Breakdown opens with one line above its total, "Showing **Everyone** ⌄",
+  which opens a sheet (`BreakdownMemberSheet`): **Everyone** (the album's
+  entries as they stand), the user, then each person, so it stays one line
+  however many people the album has. A person's Breakdown counts each bill
   by their share of it (`lib/memberShare.ts`, turned into the entry's
   displayed value by its own rate). A category opens the bills that person
   has a share in.
@@ -5299,13 +5336,15 @@ app's `services/webDashboardLink.ts`, `webDashboardCrypto.ts`,
   have no Mark paid, Undo, Remove or account chip (a paid one still says when
   and to which account, and the card's tooltip says to change it in the app),
   the bulk bar's Date, Note and Delete say the same when one is selected, the
-  album's Edit transactions cannot untick its own shared bills, and an album
+  album's Edit transactions cannot untick its own shared bills nor tick any
+  other entry into it (a shared album only holds bills made in it), and an album
   with bills of its group has no Delete (`albumGroupBillIds`, read from the
   unfiltered data; ending the share clears `album_group_id`, so that is the
   album's sharing as of the last sync). The free plan's unsettled-split count leaves
   these bills out, as the app's `countUnpaidSplitBills` does. The phone refuses
   a split edit, a settle, a change of its day or title, a delete of one, taking
-  one out of its album, and deleting a shared album (`invalid`), which covers a
+  one out of its album, adding any entry to a shared album, and deleting a
+  shared album (`invalid`), which covers a
   page loaded before this and a shared album with no bills yet. The group's own
   tables (`album_members`, `album_expenses`, `album_settlements`,
   `album_groups`) are not in

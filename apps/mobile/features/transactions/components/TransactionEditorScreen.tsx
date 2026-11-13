@@ -445,8 +445,10 @@ interface TransactionEditorScreenProps {
    */
   defaultSplitWith?: readonly { id: string; name: string }[];
   /**
-   * The bill belongs to a shared album's group. Its payments are recorded on
-   * its page in Balances, not staged here, and it counts toward no free limit.
+   * The expense is in a shared album, so a split of it is the group's: a bill
+   * of the group already, or an entry of the user's own there that becomes
+   * one once split. Its payments are recorded on its page in Balances, not
+   * staged here, and it counts toward no free limit.
    */
   groupBill?: boolean;
   titleOverride?: string;
@@ -3209,8 +3211,10 @@ export function TransactionEditorScreen({
       setAccountId(nextAccountId);
       // Default the entry currency to the newly chosen account's currency,
       // except on a shared album's bill being edited: its currency is the
-      // group's, and the account only says where the user's money moved.
-      if (!(groupBill && mode === 'edit')) {
+      // group's, and the account only says where the user's money moved. An
+      // entry of the user's own in a shared album, split with nobody, is not
+      // the group's yet and follows its account like any other.
+      if (!(groupBill && mode === 'edit' && hasFriendSplits)) {
         setEntryCurrency(accountCurrency(nextAccountId));
         resetCustomFx();
       }
@@ -3232,6 +3236,7 @@ export function TransactionEditorScreen({
       categoryId,
       clearActiveField,
       groupBill,
+      hasFriendSplits,
       isBalanceAdjustmentType,
       mode,
       resetCustomFx,
