@@ -2991,6 +2991,8 @@ const vi = {
       own: 'Đây là một trong các album của bạn.',
       already: 'Bạn đã ở trong album này.',
       main_shared: 'Sổ chính của bạn đang được chia sẻ nên không thể chứa album chung.',
+      unavailable: 'Album chia sẻ chưa có trong phiên bản này.',
+      full: 'Album này đã đầy. Hãy nhờ chủ album nhường chỗ.',
     },
     bill: {
       delete_shared: 'Hóa đơn này nằm trong album chung. Xóa nó sẽ gỡ khỏi mọi người.',

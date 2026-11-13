@@ -28,7 +28,8 @@ test('the invite page escapes the code wherever it goes', () => {
 test('an album invite reads as an album, a ledger invite as a ledger', () => {
   const album = invitePageHtml(code, 'n', 'album').html;
   assert.ok(album.includes("You're invited to a shared album"));
-  assert.ok(album.includes(`href="money2time://join/${code}"`));
+  assert.ok(album.includes(`href="money2time://join/${code}?kind=album"`));
+  assert.ok(album.includes(`"money2time://join/${code}?kind=album"`), 'the redirect script');
   assert.ok(!album.includes('shared ledger'));
   assert.ok(invitePageHtml(code, 'n').html.includes("You're invited to a shared ledger"));
   assert.ok(brokenInvitePageHtml('album').html.includes('Shared album'));

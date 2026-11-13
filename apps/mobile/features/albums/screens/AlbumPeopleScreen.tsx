@@ -210,7 +210,10 @@ export function AlbumPeopleScreen({ albumId, onBack }: AlbumPeopleScreenProps) {
           style: 'destructive',
           onPress: () =>
             void run('leave', async () => {
-              await leaveAskingFirst((opts) => sync.leaveLedger(album.id, opts), album.name);
+              // Left, the album is the user's own: it has no people page.
+              if (await leaveAskingFirst((opts) => sync.leaveLedger(album.id, opts), album.name)) {
+                onBack();
+              }
             }),
         },
       ],

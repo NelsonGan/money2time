@@ -3054,6 +3054,8 @@ const fil = {
       already: 'Kasali ka na sa album na ito.',
       main_shared:
         'Naka-share ang main ledger mo, kaya hindi ito puwedeng maglaman ng shared na album.',
+      unavailable: 'Hindi pa available ang mga shared album sa bersyong ito.',
+      full: 'Puno na ang album na ito. Hilingin sa may-ari na magbigay ng puwang.',
     },
     bill: {
       delete_shared:

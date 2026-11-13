@@ -85,6 +85,10 @@ export function collectReferencedAssetPaths(): Set<string> {
   collect(
     `SELECT avatar_uri AS v FROM ledger_profiles WHERE deleted_at IS NULL AND avatar_uri IS NOT NULL`,
   );
+  // A shared album's cover, kept for its group (migration 092).
+  collect(
+    `SELECT cover_photo_uri AS v FROM album_groups WHERE deleted_at IS NULL AND cover_photo_uri IS NOT NULL AND cover_photo_uri <> ''`,
+  );
   return paths;
 }
 

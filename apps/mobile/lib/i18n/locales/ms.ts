@@ -3028,6 +3028,8 @@ const ms = {
       own: 'Ini salah satu album anda sendiri.',
       already: 'Anda sudah berada dalam album ini.',
       main_shared: 'Buku utama anda dikongsi, jadi ia tidak boleh mengandungi album kongsi.',
+      unavailable: 'Album kongsi belum tersedia dalam versi ini.',
+      full: 'Album ini sudah penuh. Minta pemiliknya memberi ruang.',
     },
     bill: {
       delete_shared:

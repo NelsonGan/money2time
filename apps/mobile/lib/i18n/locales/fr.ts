@@ -3050,6 +3050,8 @@ const fr = {
       already: 'Vous êtes déjà dans cet album.',
       main_shared:
         'Votre carnet principal est partagé, il ne peut donc pas contenir d’album partagé.',
+      unavailable: 'Les albums partagés ne sont pas encore disponibles dans cette version.',
+      full: 'Cet album est complet. Demande à son propriétaire de faire de la place.',
     },
     bill: {
       delete_shared:

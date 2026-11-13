@@ -445,6 +445,8 @@ export const albumGroupsTable = sqliteTable('album_groups', {
   id: text('id').primaryKey(),
   ledgerId: text('ledger_id').notNull(),
   simplifyDebts: integer('simplify_debts', { mode: 'boolean' }).notNull().default(false),
+  /** The group's cover (migration 092): NULL never set, '' removed. */
+  coverPhotoUri: text('cover_photo_uri'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
   deletedAt: text('deleted_at'),

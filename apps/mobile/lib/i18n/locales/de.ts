@@ -3054,6 +3054,8 @@ const de = {
       own: 'Das ist eines deiner eigenen Alben.',
       already: 'Du bist bereits in diesem Album.',
       main_shared: 'Dein Hauptbuch ist geteilt und kann deshalb kein geteiltes Album enthalten.',
+      unavailable: 'Geteilte Alben sind in dieser Version noch nicht verfügbar.',
+      full: 'Dieses Album ist voll. Bitte den Besitzer, Platz zu schaffen.',
     },
     bill: {
       delete_shared:

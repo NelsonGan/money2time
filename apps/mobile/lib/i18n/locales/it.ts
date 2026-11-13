@@ -3026,6 +3026,8 @@ const it = {
       already: 'Sei già in questo album.',
       main_shared:
         'Il tuo registro principale è condiviso, quindi non può contenere un album condiviso.',
+      unavailable: 'Gli album condivisi non sono ancora disponibili in questa versione.',
+      full: 'Questo album è pieno. Chiedi al proprietario di fare spazio.',
     },
     bill: {
       delete_shared: 'Questo conto è in un album condiviso. Eliminandolo viene rimosso per tutti.',

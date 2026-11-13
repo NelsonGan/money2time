@@ -137,7 +137,8 @@ function headers(nonce?: string): HeadersInit {
  * The page `GET /join/<code>` answers with. `code` must already be checked
  * (ledgers.ts); it is escaped regardless. Shows nothing about the ledger, so
  * it needs no database read: the app looks the invite up itself. `kind` (from
- * the host) only picks the wording; the app works out what the code joins.
+ * the host) picks the wording and is handed to the app for its first frame;
+ * the app works out what the code joins.
  */
 export function invitePageHtml(
   code: string,
@@ -145,7 +146,9 @@ export function invitePageHtml(
   kind: Kind = 'ledger',
 ): { html: string; headers: HeadersInit } {
   const copy = INVITE_COPY[kind];
-  const deepLink = `money2time://join/${encodeURIComponent(code)}`;
+  // The app reads `kind` while it looks the invite up, so an album's link
+  // never opens on a shared ledger's screen first.
+  const deepLink = `money2time://join/${encodeURIComponent(code)}${kind === 'album' ? '?kind=album' : ''}`;
   const body = `<section class="card">
   <div class="mascot"><img src="${MASCOT_URL}" alt="" width="116" height="116"></div>
   <p class="eyebrow">${copy.eyebrow}</p>

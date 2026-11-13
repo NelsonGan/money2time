@@ -3010,6 +3010,8 @@ const sv = {
       own: 'Det här är ett av dina egna album.',
       already: 'Du är redan med i det här albumet.',
       main_shared: 'Din huvudkassabok är delad, så den kan inte innehålla ett delat album.',
+      unavailable: 'Delade album är inte tillgängliga i den här versionen än.',
+      full: 'Albumet är fullt. Be ägaren att göra plats.',
     },
     bill: {
       delete_shared: 'Notan finns i ett delat album. Om du raderar den försvinner den för alla.',
