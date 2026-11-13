@@ -1,8 +1,14 @@
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Camera, ChevronLeft, Pencil, Plus, Trash2, UserPlus } from 'lucide-react-native';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { NativeScrollEvent, NativeSyntheticEvent, ScrollViewInstance } from 'react-native';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type {
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  ScrollViewInstance,
+} from 'react-native';
 import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, {
   Extrapolation,
@@ -51,6 +57,7 @@ import { useSelfPerson } from '~/hooks/useSelfPerson';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { useWideTabColumns } from '~/hooks/useWideTabColumns';
 import { I18n } from '~/lib/i18n';
+import type { RootStackParamList } from '~/navigation/rootStack';
 import { triggerHaptic } from '~/services/haptics';
 import { pickLibraryImage } from '~/services/libraryImagePicker';
 import { deleteAlbumCover, getAlbumCoverUri, saveAlbumCover } from '~/services/userAssets';
@@ -58,7 +65,6 @@ import type { CategoryType, TransactionWithRelations } from '~/types';
 import { cn } from '~/utils';
 import { withColorAlpha } from '~/utils/color';
 import { formatAmount, formatHours } from '~/utils/formatters';
-import { runAfterInteractions } from '~/utils/interactions';
 import { countsAsExpenseRow } from '~/utils/spending';
 
 import { AlbumBalances } from '../components/AlbumBalances';
@@ -73,6 +79,10 @@ const TOP_BAR_HEIGHT = 52;
 const TAB_BAR_HEIGHT = 48;
 /** Share of the screen the cover photo takes, status bar included. */
 const COVER_HEIGHT_RATIO = 0.36;
+/** When the push's end is never reported, the content mounts after this long anyway. */
+const CONTENT_FALLBACK_MS = 450;
+/** The tabs not shown first mount one at a time, this far apart, after it. */
+const TAB_MOUNT_STAGGER_MS = 250;
 /** How far the tab bar rides up over the photo's bottom, on rounded corners. */
 const SHEET_OVERLAP = 22;
 /** The scroll distance over which the floating chrome turns into the bar. */
@@ -158,6 +168,14 @@ export function AlbumDetailScreen({
   const [selectedTransactionIds, setSelectedTransactionIds] = useState<string[]>([]);
   const [showDuplicatePicker, setShowDuplicatePicker] = useState(false);
   const [showBulkUpdate, setShowBulkUpdate] = useState(false);
+  const [duplicatePickerUsed, setDuplicatePickerUsed] = useState(false);
+  const [bulkSheetUsed, setBulkSheetUsed] = useState(false);
+  useEffect(() => {
+    if (showDuplicatePicker) setDuplicatePickerUsed(true);
+  }, [showDuplicatePicker]);
+  useEffect(() => {
+    if (showBulkUpdate) setBulkSheetUsed(true);
+  }, [showBulkUpdate]);
   const [breakdownMemberKey, setBreakdownMemberKey] = useState(EVERYONE);
   const pagerRef = useRef<ScrollViewInstance | null>(null);
   // Page size drives the pager layout and the tap→scroll math. Seeded with
@@ -165,16 +183,26 @@ export function AlbumDetailScreen({
   // narrower than the full window inside TabletContentContainer).
   const [pageWidth, setPageWidth] = useState(windowWidth);
   const [pageHeight, setPageHeight] = useState(windowHeight);
-  // Hold the heavy content (breakdown donut + full transaction list) off the
-  // first render so it doesn't compute and paint on the JS thread *during* the
-  // slide-in animation — that jank is what made the screen feel laggy on open.
-  // We mount the cheap cover/tab-bar chrome immediately and swap in the content
-  // once the navigation transition has settled.
+  // Hold the heavy content (the lists, the breakdown donut, the balances) off
+  // until the page has slid in, so it never computes and paints on the JS
+  // thread during the push: that is what made opening an album feel slow.
+  // The cover, controls and tab bar mount at once; the content when the
+  // native stack says the transition ended, or after a short wait when it
+  // never says so (no animation, the iPad layout).
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [contentReady, setContentReady] = useState(false);
   useEffect(() => {
-    const task = runAfterInteractions(() => setContentReady(true));
-    return () => task.cancel();
-  }, []);
+    if (contentReady) return;
+    const ready = () => setContentReady(true);
+    const fallback = setTimeout(ready, CONTENT_FALLBACK_MS);
+    const unsubscribe = navigation.addListener('transitionEnd', (event) => {
+      if (!event.data.closing) ready();
+    });
+    return () => {
+      clearTimeout(fallback);
+      unsubscribe();
+    };
+  }, [contentReady, navigation]);
 
   // --- The cover header --------------------------------------------------
   // The photo runs to the top edge under the status bar with the controls
@@ -252,16 +280,6 @@ export function AlbumDetailScreen({
     return { borderTopLeftRadius: radius, borderTopRightRadius: radius };
   });
 
-  // Once collapsed, the solid bar takes the touches it covers, so a tap on
-  // it never reaches a row scrolled underneath.
-  const [headerCollapsed, setHeaderCollapsed] = useState(false);
-  useAnimatedReaction(
-    () => scrollY.value >= fadeStart + (collapseDistance - fadeStart) / 2,
-    (collapsed, previous) => {
-      if (collapsed !== previous) scheduleOnRN(setHeaderCollapsed, collapsed);
-    },
-    [collapseDistance, fadeStart],
-  );
 
   // Mounted only once the content is ready (Balances only with people), so
   // their offsets come from their own scroll handlers.
@@ -297,6 +315,36 @@ export function AlbumDetailScreen({
       if (Math.abs(current - target) > 0.5) scrollTabTo(value, target);
     }
   }, [collapseDistance, offsets, scrollTabTo, shownTab, tabs]);
+
+  // The open tab mounts with the content; the others follow one at a time,
+  // so opening the album renders one list, not three. A tab still waiting
+  // mounts at once when it is swiped or tapped to. Each joins the header
+  // where it is as it mounts.
+  const [mountedTabs, setMountedTabs] = useState<readonly DetailTab[]>([]);
+  const mountTabs = useCallback((wanted: readonly DetailTab[]) => {
+    setMountedTabs((current) =>
+      wanted.every((value) => current.includes(value))
+        ? current
+        : [...current, ...wanted.filter((value) => !current.includes(value))],
+    );
+  }, []);
+  useEffect(() => {
+    if (contentReady) mountTabs([shownTab]);
+  }, [contentReady, mountTabs, shownTab]);
+  useEffect(() => {
+    if (!contentReady || mountedTabs.length === 0) return;
+    const next = tabs.find((value) => !mountedTabs.includes(value));
+    if (!next) return;
+    const timer = setTimeout(() => mountTabs([next]), TAB_MOUNT_STAGGER_MS);
+    return () => clearTimeout(timer);
+  }, [contentReady, mountTabs, mountedTabs, tabs]);
+  useEffect(() => {
+    if (mountedTabs.length < 2) return;
+    const frame = requestAnimationFrame(alignTabsToHeader);
+    return () => cancelAnimationFrame(frame);
+    // Only when a tab mounts, not on every change of what aligning reads.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mountedTabs]);
 
   // Read on every render: `getAlbumStats` keeps one identity and looks the
   // album up in a cache it rebuilds only when its inputs change (membership,
@@ -405,6 +453,12 @@ export function AlbumDetailScreen({
     },
     [albumId, breakdownRows, breakdownTransactionsByRoot, getCategoryById, onOpenBreakdown],
   );
+
+  const openPersonHere = useCallback(
+    (personKey: string) => onOpenPerson(personKey, albumId),
+    [albumId, onOpenPerson],
+  );
+  const openPeopleHere = useCallback(() => onOpenPeople(albumId), [albumId, onOpenPeople]);
 
   const formatValue = useCallback(
     (amount: number) =>
@@ -609,6 +663,12 @@ export function AlbumDetailScreen({
     [alignTabsToHeader, pageWidth, tabs],
   );
 
+  // A swipe can reach a tab still waiting to mount: they all mount now.
+  const handlePagerDragBegin = useCallback(() => {
+    mountTabs(tabs);
+    alignTabsToHeader();
+  }, [alignTabsToHeader, mountTabs, tabs]);
+
   // Swipe settles on a page → sync the active tab and clear any selection.
   const handlePagerMomentumEnd = useCallback(
     (e: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -787,7 +847,7 @@ export function AlbumDetailScreen({
         />
       ) : (
         <View style={{ paddingTop: memberFilter ? 8 : 20 }}>
-          <CategoryBreakdownChart
+          <MemoBreakdownChart
             rows={breakdownRows}
             formatValue={formatValue}
             onSelectRow={handleOpenBreakdownRow}
@@ -798,11 +858,11 @@ export function AlbumDetailScreen({
   );
 
   const balancesBody = (
-    <AlbumBalances
+    <MemoAlbumBalances
       summary={balances}
       group={group}
-      onOpenPerson={(personKey) => onOpenPerson(personKey, albumId)}
-      onOpenPeople={() => onOpenPeople(albumId)}
+      onOpenPerson={openPersonHere}
+      onOpenPeople={openPeopleHere}
     />
   );
 
@@ -868,21 +928,27 @@ export function AlbumDetailScreen({
     </View>
   );
 
+  // Mounted once first opened (and kept, so they animate closed), not with
+  // the page: nobody needs them on the way in.
   const sheets = (
     <>
-      <BulkEditTransactionsSheet
-        visible={showBulkUpdate}
-        selectedCount={selectedTransactionCount}
-        categoryTypes={selectionCategoryTypes}
-        onClose={() => setShowBulkUpdate(false)}
-        onApply={handleApplyBulkUpdate}
-      />
-      <DuplicateTransactionsDatePicker
-        visible={showDuplicatePicker}
-        transactions={duplicableSelectedTransactions}
-        onClose={() => setShowDuplicatePicker(false)}
-        onDuplicated={handleDuplicated}
-      />
+      {showBulkUpdate || bulkSheetUsed ? (
+        <BulkEditTransactionsSheet
+          visible={showBulkUpdate}
+          selectedCount={selectedTransactionCount}
+          categoryTypes={selectionCategoryTypes}
+          onClose={() => setShowBulkUpdate(false)}
+          onApply={handleApplyBulkUpdate}
+        />
+      ) : null}
+      {showDuplicatePicker || duplicatePickerUsed ? (
+        <DuplicateTransactionsDatePicker
+          visible={showDuplicatePicker}
+          transactions={duplicableSelectedTransactions}
+          onClose={() => setShowDuplicatePicker(false)}
+          onDuplicated={handleDuplicated}
+        />
+      ) : null}
     </>
   );
 
@@ -1026,7 +1092,9 @@ export function AlbumDetailScreen({
 
   const page = (value: DetailTab) => {
     let body: React.ReactNode;
-    if (value === 'transactions') {
+    if (!mountedTabs.includes(value)) {
+      body = null;
+    } else if (value === 'transactions') {
       body = transactionList(headerHeight + 4, true);
     } else if (value === 'breakdown') {
       body = (
@@ -1085,7 +1153,7 @@ export function AlbumDetailScreen({
               nestedScrollEnabled
               keyboardShouldPersistTaps="handled"
               scrollEventThrottle={32}
-              onScrollBeginDrag={alignTabsToHeader}
+              onScrollBeginDrag={handlePagerDragBegin}
               onMomentumScrollEnd={handlePagerMomentumEnd}
             >
               {tabs.map(page)}
@@ -1179,18 +1247,15 @@ export function AlbumDetailScreen({
         </Animated.View>
 
         {/* The bar the floating chrome becomes. */}
-        <Animated.View
-          pointerEvents={headerCollapsed ? 'auto' : 'none'}
-          className="absolute inset-x-0 top-0 border-b border-border/40 bg-background"
-          style={[solidHeaderStyle, { height: headerBarHeight, paddingTop: insets.top }]}
-        >
-          {/* Beside Back: four controls on the right leave no room to centre it. */}
-          <View className="flex-1 justify-center pl-16 pr-[204px]">
-            <Text variant="bodyStrong" numberOfLines={1}>
-              {album.name}
-            </Text>
-          </View>
-        </Animated.View>
+        <SolidHeaderBar
+          title={album.name}
+          scrollY={scrollY}
+          fadeStart={fadeStart}
+          collapseDistance={collapseDistance}
+          style={solidHeaderStyle}
+          height={headerBarHeight}
+          paddingTop={insets.top}
+        />
 
         <View
           pointerEvents="box-none"
@@ -1258,6 +1323,60 @@ export function AlbumDetailScreen({
     </View>
   );
 }
+
+// The page re-renders on every selection, tab and mount; these two keep
+// their own work for when their props change.
+const MemoBreakdownChart = memo(CategoryBreakdownChart);
+const MemoAlbumBalances = memo(AlbumBalances);
+
+/**
+ * The solid bar the cover's controls dock into. Once the header is collapsed
+ * it takes the touches it covers, so a tap on it never reaches a row scrolled
+ * underneath. It holds that state itself: flipping it while scrolling then
+ * re-renders this bar alone, not the whole album page with its lists, which
+ * stuttered the cover mid-scroll.
+ */
+const SolidHeaderBar = memo(function SolidHeaderBarImpl({
+  title,
+  scrollY,
+  fadeStart,
+  collapseDistance,
+  style,
+  height,
+  paddingTop,
+}: {
+  title: string;
+  scrollY: SharedValue<number>;
+  fadeStart: number;
+  collapseDistance: number;
+  /** Its fade in, read on the UI thread. */
+  style: ReturnType<typeof useAnimatedStyle>;
+  height: number;
+  paddingTop: number;
+}) {
+  const [collapsed, setCollapsed] = useState(false);
+  useAnimatedReaction(
+    () => scrollY.value >= fadeStart + (collapseDistance - fadeStart) / 2,
+    (next, previous) => {
+      if (next !== previous) scheduleOnRN(setCollapsed, next);
+    },
+    [collapseDistance, fadeStart],
+  );
+  return (
+    <Animated.View
+      pointerEvents={collapsed ? 'auto' : 'none'}
+      className="absolute inset-x-0 top-0 border-b border-border/40 bg-background"
+      style={[style, { height, paddingTop }]}
+    >
+      {/* Beside Back: four controls on the right leave no room to centre it. */}
+      <View className="flex-1 justify-center pl-16 pr-[204px]">
+        <Text variant="bodyStrong" numberOfLines={1}>
+          {title}
+        </Text>
+      </View>
+    </Animated.View>
+  );
+});
 
 /** Two-pane layout: page padding, the gap between panes, the cover's height. */
 const SPLIT_PADDING = 12;
