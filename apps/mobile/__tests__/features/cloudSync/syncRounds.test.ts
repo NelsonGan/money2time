@@ -70,6 +70,9 @@ let pushError: Error | null;
 let pushedRows: Map<string, Record<string, unknown>>;
 /** The next pull brings a change (another phone wrote to `cloud`). */
 let remoteChanged: boolean;
+/** Turso's engine refuses every pull into this replica (see stuckReplica.test.ts). */
+let stuckPull: boolean;
+const STUCK = 'database sync engine error: unable to checkpoint synced portion of WAL';
 
 function addTransaction(id: string, amount: number, extra: Record<string, string> = {}) {
   const columns = [
@@ -153,6 +156,7 @@ beforeEach(() => {
   walSize = 0;
   pushError = null;
   remoteChanged = false;
+  stuckPull = false;
   pushedRows = new Map();
   const write = (sql: string, args: (string | number | null)[] = []) => {
     calls.push(sql.trim().split(/\s+/).slice(0, 3).join(' ').toUpperCase());
@@ -179,6 +183,7 @@ beforeEach(() => {
     },
     pull: async () => {
       calls.push('pull');
+      if (stuckPull) throw new Error(STUCK);
       const changed = remoteChanged;
       remoteChanged = false;
       return changed;
@@ -942,5 +947,71 @@ describe('exchange rates', () => {
     expect(rateRow('queued')).toBeDefined();
     addRate('later', 'SEK', 'api');
     expect(outboxCount()).toBe(0);
+  });
+});
+
+describe('with a replica the engine cannot pull into', () => {
+  /**
+   * Stands in for deleting the replica and downloading the cloud copy again:
+   * the engine gets a new replica object, and the old one is closed.
+   */
+  function spyOnRebuild() {
+    const internals = engine as unknown as {
+      replica: Record<string, unknown>;
+      rebuildReplica: () => Promise<void>;
+    };
+    return jest.spyOn(internals, 'rebuildReplica').mockImplementation(async () => {
+      calls.push('rebuild');
+      stuckPull = false;
+      const old = internals.replica;
+      internals.replica = { ...old };
+      for (const key of Object.keys(old)) {
+        old[key] = async () => {
+          throw new Error('used the closed replica');
+        };
+      }
+    });
+  }
+
+  it('downloads it again when nothing waits to be pushed, and applies what came down', async () => {
+    await engine.uploadAllReplacingCloud();
+    // Another phone renamed the profile; this phone's replica is stuck.
+    const { rev: _rev, ...settings } = cloudRow('primary')!;
+    cloud
+      .prepare("UPDATE sync_rows SET data = ?, rev = 'rev-other' WHERE row_id = 'primary'")
+      .run(
+        JSON.stringify({ ...settings, profile_name: 'Sam', updated_at: '2026-11-07T21:00:00Z' }),
+      );
+    stuckPull = true;
+    const rebuild = spyOnRebuild();
+    calls = [];
+
+    await engine.syncNow();
+
+    expect(rebuild).toHaveBeenCalledTimes(1);
+    expect(calls.filter((call) => ['pull', 'rebuild', 'push'].includes(call))).toEqual([
+      'pull',
+      'rebuild',
+    ]);
+    expect(app.prepare('SELECT profile_name FROM settings').get()?.profile_name).toBe('Sam');
+
+    // An edit right after goes up through the new replica.
+    calls = [];
+    addTransaction('lunch', 12);
+    await engine.syncNow();
+    expect(rounds()).toEqual(['pull', 'push']);
+    expect(cloudRow('lunch')?.amount).toBe(12);
+  });
+
+  it('keeps it, and fails as before, while an edit waits to be pushed', async () => {
+    addTransaction('lunch', 12);
+    pushError = new Error('offline');
+    await expect(engine.syncNow()).rejects.toThrow('offline');
+    pushError = null;
+    stuckPull = true;
+    const rebuild = spyOnRebuild();
+
+    await expect(engine.syncNow()).rejects.toThrow(STUCK);
+    expect(rebuild).not.toHaveBeenCalled();
   });
 });

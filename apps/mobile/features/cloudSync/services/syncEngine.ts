@@ -26,6 +26,7 @@ import { Directory, File, Paths } from 'expo-file-system';
 
 import { getSQLite } from '~/lib/db/client';
 import { DEFAULT_LEDGER_ID } from '~/lib/db/ledgerScope';
+import { reportError } from '~/services/errorReporting';
 import { collectReferencedAssetPaths } from '~/services/userAssetGc';
 import { assetRelativePathFromRef, invalidateCustomUriCache } from '~/services/userAssets';
 import { newId } from '~/utils/id';
@@ -680,6 +681,8 @@ export function runExclusive<T>(fn: () => Promise<T> | T): Promise<T> {
 
 export class SyncEngine {
   private replica: Replica | null = null;
+  /** A rebuild failed (offline, say) after deleting the replica: the next pull opens a fresh one. */
+  private rebuildPending = false;
   private running: Promise<SyncOutcome> | null = null;
   /** The last apply left ledger-row removals for later (see applyRemoteChanges). */
   private removalsDeferred = false;
@@ -714,13 +717,22 @@ export class SyncEngine {
       clientName: 'money2time',
       bootstrapIfEmpty: true,
     });
-    await replica.connect();
-    // The engine writes temporary indexes (an `IN (…)` list, a large sort) to
-    // $TMPDIR, or to /data/local/tmp on Android, which apps cannot write.
-    // Android sets $TMPDIR only when the app's cache dir is ready at start-up,
-    // so keep them in memory, as the app database does.
-    await replica.exec('PRAGMA temp_store = MEMORY');
-    for (const sql of CLOUD_SCHEMA_SQL) await replica.exec(sql);
+    try {
+      await replica.connect();
+      // The engine writes temporary indexes (an `IN (…)` list, a large sort) to
+      // $TMPDIR, or to /data/local/tmp on Android, which apps cannot write.
+      // Android sets $TMPDIR only when the app's cache dir is ready at start-up,
+      // so keep them in memory, as the app database does.
+      await replica.exec('PRAGMA temp_store = MEMORY');
+      for (const sql of CLOUD_SCHEMA_SQL) await replica.exec(sql);
+    } catch (error) {
+      try {
+        replica.close();
+      } catch {
+        // Never opened: nothing to release.
+      }
+      throw error;
+    }
     this.replica = replica;
   }
 
@@ -741,8 +753,58 @@ export class SyncEngine {
    */
   pullLatest(): Promise<void> {
     return this.exclusive(async () => {
-      await this.db().pull();
+      await this.pullOrRebuild(true);
     });
+  }
+
+  /**
+   * Pulls. Turso's engine records how far into the WAL its last pull reached;
+   * a replica whose WAL no longer holds those frames fails every pull
+   * (`isStuckReplicaError`). Such a replica is deleted and downloaded again
+   * when it holds nothing the cloud lacks: always before a link (it is only a
+   * copy of the cloud then), and in a sync when nothing waits to be pushed.
+   * Returns whether the pull may have brought changes.
+   */
+  private async pullOrRebuild(beforeLink = false): Promise<boolean> {
+    await this.reopenAfterFailedRebuild();
+    try {
+      return await this.db().pull();
+    } catch (error) {
+      if (!isStuckReplicaError(error)) throw error;
+      if (!beforeLink) {
+        if (hasUnpushedChanges(this.channel)) throw error;
+        const replicaWrites = await this.db()
+          .stats()
+          .then(
+            (stats) => stats.cdcOperations,
+            () => 1,
+          );
+        if (replicaWrites > 0) throw error;
+      }
+      await this.rebuildReplica(error);
+      return true;
+    }
+  }
+
+  /** Replaces a stuck replica with a fresh download of the cloud copy. */
+  private async rebuildReplica(cause: unknown): Promise<void> {
+    this.close();
+    deleteReplicaFiles(this.config.userId, this.config.channel);
+    this.rebuildPending = true;
+    // Opening an empty replica downloads the latest cloud copy.
+    await this.open();
+    this.rebuildPending = false;
+    // Fails again, safely, if a file could not be deleted and the stuck
+    // replica was opened instead.
+    await this.db().pull();
+    // Recovered, but reported, so the rate of the engine fault stays visible.
+    reportError(cause, { scope: 'cloud_sync', stage: 'replica_rebuilt' });
+  }
+
+  private async reopenAfterFailedRebuild(): Promise<void> {
+    if (!this.rebuildPending) return;
+    await this.open();
+    this.rebuildPending = false;
   }
 
   /**
@@ -990,7 +1052,7 @@ export class SyncEngine {
   }
 
   private async runSync(): Promise<SyncOutcome> {
-    const replica = this.db();
+    await this.reopenAfterFailedRebuild();
     enableCapture();
     let appliedRows = 0;
     this.applyFailure = null;
@@ -1004,7 +1066,7 @@ export class SyncEngine {
       catchUpSyncedShape();
       await this.detachSharedLedgers();
     } else if (attaching) {
-      await replica.pull();
+      await this.pullOrRebuild();
       appliedRows += await this.applyRemoteChanges({ attaching: true });
       enqueueLedgerRows(this.config.ledgerId ?? '', this.channel);
     }
@@ -1012,7 +1074,7 @@ export class SyncEngine {
     // that this phone changed meanwhile (`deletedElsewhere`). It is the only
     // pull: a change pushed by another phone after it comes with that phone's
     // live nudge, or the next scheduled sync.
-    const pulled = !attaching && (await replica.pull());
+    const pulled = !attaching && (await this.pullOrRebuild());
     const droppedRows =
       this.isPersonal && getState(REPLACE_STATE_KEY) === '1'
         ? await this.dropCloudRowsNotHere()
@@ -1033,6 +1095,8 @@ export class SyncEngine {
     // A push costs two round trips even with nothing to send, so it runs only
     // when the replica holds changes the cloud has not had (any write, also
     // a ledger's detach, counts in the engine's change log).
+    // The replica may have been downloaded again by the pull: read it afresh.
+    const replica = this.db();
     if (pushed || (await replica.stats()).cdcOperations > 0) await replica.push();
     setState(unpushedKey(this.channel), '0');
     if (attaching) setState(attachedKey(this.channel), '1');
@@ -1736,6 +1800,15 @@ async function uploadWithRetry(upload: () => Promise<void>): Promise<void> {
 
 function assetFile(relativePath: string): File {
   return new File(Paths.document, 'user-assets', relativePath);
+}
+
+/**
+ * The engine's own bookkeeping no longer matches the replica's WAL (Turso
+ * 0.8.3, like tursodatabase/turso#8366): pulls into it keep failing.
+ */
+function isStuckReplicaError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  return message.includes('unable to checkpoint synced portion of WAL');
 }
 
 /**
