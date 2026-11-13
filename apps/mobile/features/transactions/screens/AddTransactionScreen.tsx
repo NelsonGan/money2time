@@ -82,12 +82,17 @@ export function AddTransactionScreen({
   const isPro = useIsPro();
   const withinSplitLimit =
     isPro || groupBill || getUnpaidSplitBillCount() < PRO_LIMITS.FREE_MAX_UNSETTLED_SPLIT_BILLS;
+  // The instalment plans page's add button: a plan's payments are the user's
+  // own, so the form does not start split with the album's people.
   const splitWith = useMemo(
     () =>
-      albumGroup.available && withinSplitLimit && (!albumGroup.share || albumGroup.self)
+      !startInstalmentPlan &&
+      albumGroup.available &&
+      withinSplitLimit &&
+      (!albumGroup.share || albumGroup.self)
         ? splitWithPeople(albumGroup.people)
         : [],
-    [albumGroup, withinSplitLimit],
+    [albumGroup, startInstalmentPlan, withinSplitLimit],
   );
   const { blocked, activeAccountCount } = useNewTransactionGate();
   const canStartPlan = useCanStartInstalmentPlan();
@@ -230,7 +235,10 @@ export function AddTransactionScreen({
       initialAccountId={initialAccountId}
       initialValues={initialValues}
       openSplitBillOnMount={openSplitBillOnMount}
-      instalmentOptions={instalmentOptions}
+      // A new bill in a shared album is never paid in instalments: everyone
+      // in the album has a side of it, and a plan's payments are the user's
+      // own. The plans page's add button still starts one.
+      instalmentOptions={albumGroupId && !startInstalmentPlan ? undefined : instalmentOptions}
       defaultSplitWith={splitWith}
       // Split with the album's people: Add shows the split before it saves.
       confirmSplitBeforeAdd={splitWith.length > 0}

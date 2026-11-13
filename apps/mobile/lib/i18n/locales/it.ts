@@ -1089,7 +1089,8 @@ const it = {
         you_owe_nothing: 'Non devi nulla per questo conto',
         get_back_hint: 'Ti tornano {{amount}}',
         paid_floor: 'Hai già restituito {{amount}}',
-        your_share: 'La tua quota {{amount}}',
+        your_share_label: 'La tua quota',
+        paid_by_you: 'Pagato da te',
         section_subtitle_unpaid: '{{count}} ti deve ancora',
         section_subtitle_unpaid_plural: '{{count}} ti devono ancora',
         subtotal_label: 'Subtotale',
@@ -3023,7 +3024,6 @@ const it = {
     bill: {
       delete_shared: 'Questo conto è in un album condiviso. Eliminandolo viene rimosso per tutti.',
       remove_shared: 'Questo conto è in un album condiviso. Verrà rimosso per tutti gli altri.',
-      from_album: 'Da {{album}}',
       shared_album: 'Album condiviso',
     },
     rules: {
@@ -3031,8 +3031,9 @@ const it = {
       has_payments:
         'Su questo conto ci sono pagamenti. Annullali prima per modificarlo o eliminarlo.',
       not_your_payment: 'Solo chi paga può registrare o annullare un pagamento.',
-      note_not_payer: 'Pagato da {{name}}. Solo questa persona può modificarlo.',
-      note_has_payments: 'Ci sono pagamenti. Annullali per modificarlo.',
+      not_your_undo: 'Solo chi ha registrato questo pagamento può annullarlo.',
+      badge_not_payer: 'Bloccato',
+      badge_has_payments: 'Ci sono pagamenti',
       they_record: '{{name}} lo registra quando ti paga.',
     },
   },

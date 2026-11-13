@@ -2,10 +2,50 @@ import {
   billChangeBlock,
   billHasPayments,
   canRecordPayment,
+  canUndoPayment,
   ownsBill,
 } from '~/features/albums/lib/groupRules';
 
 describe('shared album rules', () => {
+  it('lets only the recorder undo a simplified payment, including its intermediate bills', () => {
+    const members = [
+      { id: 'me', userId: 'u-me' },
+      { id: 'aisha', userId: 'u-aisha' },
+      { id: 'ben', userId: 'u-ben' },
+    ];
+    // Aisha pays Ben along Aisha -> me -> Ben. Both rows are one payment.
+    const payment = { fromMember: 'me', toMember: 'ben', createdBy: 'u-aisha' };
+    expect(canUndoPayment(members, 'me', payment)).toBe(false);
+    expect(canUndoPayment(members, 'aisha', payment)).toBe(true);
+    expect(canUndoPayment(members, 'ben', payment)).toBe(false);
+    expect(canUndoPayment(members, 'missing', payment)).toBe(false);
+  });
+
+  it('keeps undo with its recorder if a departed payer rejoins, with legacy fallback', () => {
+    const members = [
+      { id: 'me', userId: 'u-me' },
+      { id: 'ben', userId: 'u-ben' },
+    ];
+    const payment = { fromMember: 'ben', toMember: 'me', createdBy: 'u-me' };
+    expect(canUndoPayment(members, 'me', payment)).toBe(true);
+    expect(canUndoPayment(members, 'ben', payment)).toBe(false);
+    expect(canUndoPayment(members, 'ben', { ...payment, createdBy: null })).toBe(true);
+    expect(canUndoPayment(members, 'me', { ...payment, createdBy: null })).toBe(false);
+  });
+
+  it('falls back to the payer rule once the recorder has left, so no bill stays locked', () => {
+    // Aisha recorded her payment to me, then left: her member row has no account.
+    const members = [
+      { id: 'me', userId: 'u-me' },
+      { id: 'aisha', userId: null },
+    ];
+    const payment = { fromMember: 'aisha', toMember: 'me', createdBy: 'u-aisha' };
+    expect(canUndoPayment(members, 'me', payment)).toBe(true);
+    // A recorder who is still in the album keeps it to themselves.
+    const stayed = [...members, { id: 'ben', userId: 'u-aisha' }];
+    expect(canUndoPayment(stayed, 'me', payment)).toBe(false);
+  });
+
   it('gives a bill to its payer alone', () => {
     expect(ownsBill('me', { paidBy: 'me' })).toBe(true);
     expect(ownsBill('me', { paidBy: 'aisha' })).toBe(false);

@@ -203,6 +203,76 @@ describe('a bill another member paid', () => {
 });
 
 describe('a bill the user paid', () => {
+  it('keeps a recorded payback frozen when exchange rates refresh', () => {
+    const usd = {
+      ...env,
+      currencyOf: (id: string) => (id === 'bank' ? 'USD' : 'MYR'),
+      rateTable: { base: 'MYR', rates: { MYR: 1, USD: 0.25 }, asOfDate: null },
+    };
+    addBill('dinner', 'me');
+    pay('s1', 'dinner', 'aisha', 'me', 10, '2026-11-13T08:00:00.000Z');
+    projectGroup(GROUP, usd);
+    const transfer = () =>
+      app.all(
+        'SELECT amount, currency, to_amount FROM transactions WHERE id = ?',
+        'dinner:t:s1',
+      )[0];
+    expect(transfer()).toEqual({ amount: 10, currency: 'MYR', to_amount: 2.5 });
+    const refreshed = { ...usd, rateTable: { ...usd.rateTable, rates: { MYR: 1, USD: 0.3 } } };
+    expect(projectGroup(GROUP, refreshed)).toBe(false);
+    expect(transfer()).toEqual({ amount: 10, currency: 'MYR', to_amount: 2.5 });
+    // An unrelated member rename must not reprice that historical payment either.
+    albumGroupsRepository.updateMember(GROUP, 'ben', { name: 'Benjamin' });
+    projectGroup(GROUP, refreshed);
+    expect(transfer().to_amount).toBe(2.5);
+    albumGroupsRepository.updateMember(GROUP, 'aisha', { name: 'Ash' });
+    projectGroup(GROUP, refreshed);
+    expect(tx('dinner:t:s1').note).toBe('Ash: Dinner');
+    expect(transfer().to_amount).toBe(2.5);
+    expect(projectGroup(GROUP, refreshed)).toBe(false);
+  });
+
+  it('prices a payback again that was written 1:1 while the rate was missing', () => {
+    const noRate = {
+      ...env,
+      currencyOf: (id: string) => (id === 'bank' ? 'USD' : 'MYR'),
+      rateTable: { base: 'MYR', rates: { MYR: 1 }, asOfDate: null },
+    };
+    addBill('dinner', 'me');
+    pay('s1', 'dinner', 'aisha', 'me', 10, '2026-11-13T08:00:00.000Z');
+    projectGroup(GROUP, noRate);
+    const toAmount = () =>
+      app.all('SELECT to_amount FROM transactions WHERE id = ?', 'dinner:t:s1')[0].to_amount;
+    expect(toAmount()).toBe(10);
+    const rated = { ...noRate, rateTable: { ...noRate.rateTable, rates: { MYR: 1, USD: 0.25 } } };
+    projectGroup(GROUP, rated);
+    expect(toAmount()).toBe(2.5);
+    // Then it is frozen like any other.
+    projectGroup(GROUP, {
+      ...rated,
+      rateTable: { ...rated.rateTable, rates: { MYR: 1, USD: 0.3 } },
+    });
+    expect(toAmount()).toBe(2.5);
+  });
+
+  it('prices a payback again once its receiving account changes currency', () => {
+    let bankCurrency = 'MYR';
+    const live = {
+      ...env,
+      currencyOf: (id: string) => (id === 'bank' ? bankCurrency : 'MYR'),
+      rateTable: { base: 'MYR', rates: { MYR: 1, SGD: 0.3 }, asOfDate: null },
+    };
+    addBill('dinner', 'me');
+    pay('s1', 'dinner', 'aisha', 'me', 10, '2026-11-13T08:00:00.000Z');
+    projectGroup(GROUP, live);
+    const toAmount = () =>
+      app.all('SELECT to_amount FROM transactions WHERE id = ?', 'dinner:t:s1')[0].to_amount;
+    expect(toAmount()).toBeNull();
+    bankCurrency = 'SGD';
+    projectGroup(GROUP, live);
+    expect(toAmount()).toBe(3);
+  });
+
   it('is the whole bill, with what each member owes', () => {
     addBill('dinner', 'me');
     projectGroup(GROUP, env);

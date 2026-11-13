@@ -1090,7 +1090,8 @@ const nl = {
         you_owe_nothing: 'Je bent niets schuldig op deze rekening',
         get_back_hint: 'Je krijgt {{amount}} terug',
         paid_floor: 'Je hebt al {{amount}} terugbetaald',
-        your_share: 'Jouw deel {{amount}}',
+        your_share_label: 'Jouw deel',
+        paid_by_you: 'Betaald door jou',
         section_subtitle_unpaid: '{{count}} is je nog schuldig',
         section_subtitle_unpaid_plural: '{{count}} zijn je nog schuldig',
         subtotal_label: 'Subtotaal',
@@ -3043,7 +3044,6 @@ const nl = {
       delete_shared:
         'Deze rekening staat in een gedeeld album. Als je hem verwijdert, verdwijnt hij voor iedereen.',
       remove_shared: 'Deze rekening staat in een gedeeld album. Hij verdwijnt voor alle anderen.',
-      from_album: 'Uit {{album}}',
       shared_album: 'Gedeeld album',
     },
     rules: {
@@ -3051,8 +3051,9 @@ const nl = {
       has_payments:
         'Op deze rekening staan betalingen. Maak ze eerst ongedaan om hem te wijzigen of te verwijderen.',
       not_your_payment: 'Alleen wie betaalt kan een betaling vastleggen of ongedaan maken.',
-      note_not_payer: 'Betaald door {{name}}. Alleen die persoon kan hem wijzigen.',
-      note_has_payments: 'Heeft betalingen. Maak ze ongedaan om hem te wijzigen.',
+      not_your_undo: 'Alleen wie deze betaling heeft vastgelegd, kan hem ongedaan maken.',
+      badge_not_payer: 'Vergrendeld',
+      badge_has_payments: 'Heeft betalingen',
       they_record: '{{name}} legt het vast als die jou betaalt.',
     },
   },

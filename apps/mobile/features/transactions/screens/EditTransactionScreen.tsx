@@ -171,14 +171,8 @@ function TransactionEditor({
   );
   const albumNote = groupOrigin
     ? {
-        label:
-          billBlock === 'not_payer' && groupOrigin.payerName
-            ? I18n.t('albums.rules.note_not_payer', { name: groupOrigin.payerName })
-            : billBlock === 'has_payments'
-              ? I18n.t('albums.rules.note_has_payments')
-              : I18n.t('albums.bill.from_album', {
-                  album: groupOrigin.albumName ?? I18n.t('albums.bill.shared_album'),
-                }),
+        albumName: groupOrigin.albumName ?? I18n.t<string>('albums.bill.shared_album'),
+        status: billBlock ? I18n.t(`albums.rules.badge_${billBlock}`) : undefined,
         onOpenAlbum: () =>
           navigation.navigate('AlbumDetail', { albumId: groupOrigin.albumId }, { pop: true }),
       }
@@ -219,7 +213,11 @@ function TransactionEditor({
   // An expense saved already (often by a receipt scan or a notification) can
   // still be paid in instalments: the editor offers the same Instalments chip
   // as the add form, and saving turns the expense into the plan's payment 1.
-  const canConvertToPlan = canConvertToInstalmentPlan(transaction);
+  // Nothing in a shared album becomes a plan, as nothing added there starts
+  // one: not its bills, an entry of the user's own in it, or the expense a
+  // payment on a bill made (which follows its payment).
+  const canConvertToPlan =
+    canConvertToInstalmentPlan(transaction) && !albumTarget && !isGroupPayment;
   const instalmentOptions = useMemo(
     () =>
       canConvertToPlan

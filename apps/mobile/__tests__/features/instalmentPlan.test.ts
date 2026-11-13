@@ -204,6 +204,11 @@ describe('canConvertToInstalmentPlan', () => {
     );
     expect(canConvertToInstalmentPlan({ ...expense, splits: [{}] })).toBe(false);
   });
+
+  it('refuses a shared album’s bill, even one the user paid alone', () => {
+    expect(canConvertToInstalmentPlan({ ...expense, albumGroupId: 'ledger-trip' })).toBe(false);
+    expect(canConvertToInstalmentPlan({ ...expense, albumGroupId: null })).toBe(true);
+  });
 });
 
 describe('paymentsAlreadyDue', () => {

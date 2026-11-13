@@ -10,7 +10,8 @@
  * - **A bill belongs to its payer.** Only they change it or delete it.
  * - **Payments lock a bill.** With a payment recorded on it, nobody changes
  *   or deletes it until the payments are undone.
- * - **Only the person paying records a payment**, and only they undo it.
+ * - **Only the person paying records a payment**, and only its recorder
+ *   undoes it (including all the bills of a simplified payment).
  *   Someone who has left the album can no longer record theirs, so a payment
  *   from them is recorded by the person it went to.
  */
@@ -66,4 +67,25 @@ export function canRecordPayment(
 ): boolean {
   if (fromMember === selfId) return true;
   return toMember === selfId && !members.find((member) => member.id === fromMember)?.userId;
+}
+
+/**
+ * A simplified payment may close bills through other members. Only its
+ * recorder undoes that whole act, not a member on an intermediate bill.
+ * Old payments without an author, and payments whose recorder has since
+ * left (so nobody could undo them and their bills stayed locked), follow the
+ * payer rule: the payer, or the person paid once the payer has left.
+ */
+export function canUndoPayment(
+  members: readonly Member[],
+  selfId: string,
+  payment: { fromMember: string; toMember: string; createdBy: string | null },
+): boolean {
+  const self = members.find((member) => member.id === selfId);
+  if (!self?.userId) return false;
+  if (payment.createdBy === self.userId) return true;
+  const recorderStayed =
+    !!payment.createdBy && members.some((member) => member.userId === payment.createdBy);
+  if (recorderStayed) return false;
+  return canRecordPayment(members, selfId, payment.fromMember, payment.toMember);
 }

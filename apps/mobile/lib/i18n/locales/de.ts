@@ -1096,7 +1096,8 @@ const de = {
         you_owe_nothing: 'Du schuldest bei dieser Rechnung nichts',
         get_back_hint: 'Du bekommst {{amount}} zurück',
         paid_floor: 'Du hast bereits {{amount}} zurückgezahlt',
-        your_share: 'Dein Anteil {{amount}}',
+        your_share_label: 'Dein Anteil',
+        paid_by_you: 'Von dir bezahlt',
         section_subtitle_unpaid: '{{count}} schuldet noch',
         section_subtitle_unpaid_plural: '{{count}} schulden noch',
         subtotal_label: 'Zwischensumme',
@@ -3053,7 +3054,6 @@ const de = {
         'Diese Rechnung ist in einem geteilten Album. Wenn du sie löschst, wird sie für alle entfernt.',
       remove_shared:
         'Diese Rechnung ist in einem geteilten Album. Sie wird für alle anderen entfernt.',
-      from_album: 'Aus {{album}}',
       shared_album: 'Geteiltes Album',
     },
     rules: {
@@ -3061,8 +3061,9 @@ const de = {
       has_payments:
         'Auf dieser Rechnung sind Zahlungen. Mach sie zuerst rückgängig, um sie zu ändern oder zu löschen.',
       not_your_payment: 'Nur wer zahlt, kann eine Zahlung erfassen oder rückgängig machen.',
-      note_not_payer: 'Bezahlt von {{name}}. Nur diese Person kann sie ändern.',
-      note_has_payments: 'Hat Zahlungen. Mach sie rückgängig, um sie zu ändern.',
+      not_your_undo: 'Nur wer diese Zahlung erfasst hat, kann sie rückgängig machen.',
+      badge_not_payer: 'Gesperrt',
+      badge_has_payments: 'Hat Zahlungen',
       they_record: '{{name}} erfasst es, wenn diese Person dich bezahlt.',
     },
   },

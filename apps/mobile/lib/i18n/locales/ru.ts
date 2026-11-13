@@ -1085,7 +1085,8 @@ const ru = {
         you_owe_nothing: 'По этому счёту вы ничего не должны',
         get_back_hint: 'Вам вернётся {{amount}}',
         paid_floor: 'Вы уже вернули {{amount}}',
-        your_share: 'Ваша доля {{amount}}',
+        your_share_label: 'Ваша доля',
+        paid_by_you: 'Платили вы',
         section_subtitle_unpaid: '{{count}} ещё должен вам',
         section_subtitle_unpaid_plural: '{{count}} ещё должны вам',
         subtotal_label: 'Промежуточный итог',
@@ -3013,7 +3014,6 @@ const ru = {
     bill: {
       delete_shared: 'Этот счёт в общем альбоме. Удаление уберёт его у всех.',
       remove_shared: 'Этот счёт в общем альбоме. Он исчезнет у всех остальных.',
-      from_album: 'Из альбома {{album}}',
       shared_album: 'Общий альбом',
     },
     rules: {
@@ -3021,8 +3021,9 @@ const ru = {
       has_payments:
         'По этому счёту есть платежи. Сначала отмените их, чтобы изменить или удалить его.',
       not_your_payment: 'Записать или отменить платёж может только тот, кто платит.',
-      note_not_payer: 'Платил(а): {{name}}. Изменить может только этот человек.',
-      note_has_payments: 'Есть платежи. Отмените их, чтобы изменить.',
+      not_your_undo: 'Отменить этот платёж может только тот, кто его записал.',
+      badge_not_payer: 'Заблокировано',
+      badge_has_payments: 'Есть платежи',
       they_record: '{{name}} запишет это, когда заплатит вам.',
     },
   },

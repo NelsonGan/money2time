@@ -7,13 +7,16 @@ import {
   Camera,
   ChevronDown,
   ChevronLeft,
+  ChevronRight,
   ChevronUp,
   Clock,
   Coins,
   CreditCard,
   FileText,
   Hash,
+  Images,
   Layers,
+  Lock,
   Pencil,
   Power,
   Receipt,
@@ -22,7 +25,6 @@ import {
   Timer,
   Trash2,
   Type,
-  UserRound,
   UsersRound,
 } from 'lucide-react-native';
 import React, { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -104,6 +106,8 @@ import {
 } from '~/features/transactions/components/editor/calculatorEngine';
 import { TransactionOptionsCard } from '~/features/transactions/components/editor/TransactionOptionsCard';
 import { TransferFeeSheet } from '~/features/transactions/components/editor/TransferFeeSheet';
+import { PersonAvatar } from '~/features/transactions/components/PersonAvatar';
+import { debtPartyKey } from '~/features/transactions/lib/debtParty';
 import {
   pickDefaultAccountId,
   pickPaybackAccountId,
@@ -120,6 +124,7 @@ import { resolveBucketCategoryIds } from '~/features/transactions/utils/category
 import { offscreenPageLimitFor, usePagerTabSync } from '~/hooks/usePagerTabSync';
 import { usePressScale } from '~/hooks/usePressScale';
 import { useProGate } from '~/hooks/useProGate';
+import { useSelfPerson } from '~/hooks/useSelfPerson';
 import { useStableSafeAreaInsets } from '~/hooks/useStableSafeAreaInsets';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { getActiveLedgerId } from '~/lib/db/ledgerScope';
@@ -484,10 +489,11 @@ interface TransactionEditorScreenProps {
   /** A line under the header that links somewhere (a payment's instalment plan). */
   headerNotice?: { label: string; actionLabel: string; onPress: () => void };
   /**
-   * A shared album's bill: a line under the amount saying which album it is
-   * from (or why the user cannot change it), which opens the album.
+   * A shared album's bill: a row at the foot of the amount card naming the
+   * album it is from, which opens the album, with a small badge when the user
+   * cannot change the bill (`status`; tapping it says why, `lockedReason`).
    */
-  albumNote?: { label: string; onOpenAlbum: () => void };
+  albumNote?: { albumName: string; status?: string; onOpenAlbum: () => void };
   /**
    * A shared album's bill the user cannot change (someone else's, or one
    * with payments on it): the amount, day, title and split stay as they are,
@@ -1851,6 +1857,26 @@ export function TransactionEditorScreen({
   // account until they pay that friend back (lib/splitPayer.ts).
   const friendPayer = splitMode && type === 'expense' ? draftPayer(splits) : null;
   const owesFriendPayer = !!friendPayer && !friendPayer.settled;
+  // Who paid and the user's share, in one panel under the amount: on a bill a
+  // friend paid (the amount is the whole bill, the expense saved only the
+  // user's share of it) and on a shared album's bill the user paid.
+  const me = useSelfPerson();
+  const sharePanel =
+    friendPayer || (groupBill && hasFriendSplits && type === 'expense')
+      ? {
+          share: Number(splits.find((s) => s.isSelf)?.amount) || 0,
+          payerLabel: friendPayer
+            ? I18n.t('transactions.editor.split.paid_by_chip', {
+                name: friendPayer.personName.trim() || I18n.t('transactions.settleUp.someone'),
+              })
+            : I18n.t('transactions.editor.split.paid_by_you'),
+          avatarName: friendPayer ? friendPayer.personName : me.name,
+          avatarKey: friendPayer
+            ? debtPartyKey(friendPayer.personName, friendPayer.memberId)
+            : null,
+          avatarUri: friendPayer ? null : me.avatarUri,
+        }
+      : null;
   const canOpenSplitBill =
     !hideSplitMode && type === 'expense' && !recurringOptions && !instalmentActive;
 
@@ -4707,24 +4733,9 @@ export function TransactionEditorScreen({
               style={styles.actionRow}
               contentContainerStyle={styles.actionRowContent}
             >
-              {showAccountChip && owesFriendPayer ? (
-                // A friend paid: no account to pick until the user pays them
-                // back, so the chip says who paid and opens the split instead.
-                <Pressable
-                  onPress={() => handleOpenSplitBill()}
-                  accessibilityRole="button"
-                  style={styles.accountChip}
-                  className="h-9 flex-row items-center gap-1.5 rounded-full border border-primary/40 bg-primary/15 px-3 active:opacity-70"
-                >
-                  <UserRound size={14} color={themeColors.primary} />
-                  <Text variant="caption" numberOfLines={1} className="shrink text-primary">
-                    {I18n.t('transactions.editor.split.paid_by_chip', {
-                      name:
-                        friendPayer?.personName.trim() || I18n.t('transactions.settleUp.someone'),
-                    })}
-                  </Text>
-                </Pressable>
-              ) : showAccountChip ? (
+              {/* A friend paid: no account to pick until the user pays them
+                  back, and the panel under the amount says who paid. */}
+              {showAccountChip && !owesFriendPayer ? (
                 <Pressable
                   onPress={() => {
                     void triggerHaptic('selection');
@@ -4954,19 +4965,6 @@ export function TransactionEditorScreen({
                   >
                     {amountDisplay}
                   </Text>
-                  {/* A friend paid: the amount is the whole bill, the expense saved
-                      is only the user's share of it. */}
-                  {friendPayer ? (
-                    <Text variant="caption" tone="primary" numberOfLines={1}>
-                      {I18n.t('transactions.editor.split.your_share', {
-                        amount: formatAmount(
-                          Number(splits.find((s) => s.isSelf)?.amount) || 0,
-                          settings,
-                          { currencyCode: entryCurrency },
-                        ),
-                      })}
-                    </Text>
-                  ) : null}
                   {workTimeNudgeParts ? (
                     <Text variant="caption" tone="muted" style={styles.nudgeLabel}>
                       {workTimeNudgeParts.before}
@@ -4975,22 +4973,6 @@ export function TransactionEditorScreen({
                       </Text>
                       {workTimeNudgeParts.after}
                     </Text>
-                  ) : null}
-                  {albumNote ? (
-                    <Pressable
-                      onPress={() => {
-                        void triggerHaptic('selection');
-                        albumNote.onOpenAlbum();
-                      }}
-                      hitSlop={6}
-                      accessibilityRole="button"
-                      className="mt-0.5 flex-row items-center gap-1 self-start active:opacity-70"
-                    >
-                      <UsersRound size={12} color={themeColors.textMuted} />
-                      <Text variant="caption" tone="muted" numberOfLines={1} className="shrink">
-                        {albumNote.label}
-                      </Text>
-                    </Pressable>
                   ) : null}
                   {instalmentSummary ? (
                     <Pressable
@@ -5060,37 +5042,116 @@ export function TransactionEditorScreen({
                 ) : null}
               </Pressable>
 
+              {sharePanel ? (
+                // Opens the split, as the account chip it stands in for did.
+                <Pressable
+                  onPress={() => handleOpenSplitBill()}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${I18n.t('transactions.editor.split.your_share_label')} ${formatAmount(
+                    sharePanel.share,
+                    settings,
+                    { currencyCode: entryCurrency },
+                  )}, ${sharePanel.payerLabel}`}
+                  className="mx-3 mb-3 flex-row items-center rounded-xl bg-secondary/60 px-3 py-2 active:opacity-70"
+                >
+                  <View className="shrink flex-row items-center gap-1.5">
+                    <UsersRound size={14} color={themeColors.textMuted} />
+                    <Text variant="caption" tone="muted" numberOfLines={1}>
+                      {I18n.t('transactions.editor.split.your_share_label')}
+                    </Text>
+                    <Text variant="bodyStrong" numberOfLines={1} className="shrink">
+                      {formatAmount(sharePanel.share, settings, { currencyCode: entryCurrency })}
+                    </Text>
+                  </View>
+                  <View className="mx-2.5 h-5 w-[1px] bg-border/40" />
+                  <View className="flex-1 flex-row items-center gap-1.5">
+                    <PersonAvatar
+                      name={sharePanel.avatarName}
+                      partyKey={sharePanel.avatarKey}
+                      size={20}
+                      imageUri={sharePanel.avatarUri}
+                    />
+                    <Text variant="caption" numberOfLines={1} className="shrink">
+                      {sharePanel.payerLabel}
+                    </Text>
+                  </View>
+                </Pressable>
+              ) : null}
+
               <View className="h-[1px] bg-border/20" />
 
-              {/* Note — focusing it raises the keyboard. */}
+              {/* Note — focusing it raises the keyboard. Measured with the
+                  album row under it, so the suggestions float above both. */}
               <View
-                className="flex-row items-center gap-2.5 px-4 py-3.5"
                 onLayout={(event) => {
                   const measured = event.nativeEvent.layout.height;
                   setNoteRowHeight((prev) => (Math.abs(prev - measured) < 1 ? prev : measured));
                 }}
               >
-                <FileText size={16} color={themeColors.textMuted} />
-                <TextInput
-                  ref={noteInputRef}
-                  editable={!lockedReason}
-                  value={note}
-                  onChangeText={handleNoteChange}
-                  placeholder={I18n.t('transactions.editor.optional')}
-                  placeholderTextColor={`${themeColors.mutedForeground}99`}
-                  returnKeyType="done"
-                  onFocus={handleNoteFocus}
-                  onBlur={handleNoteBlur}
-                  onSubmitEditing={() => noteInputRef.current?.blur()}
-                  autoCorrect={false}
-                  autoComplete="off"
-                  spellCheck={false}
-                  style={[
-                    SINGLE_LINE_TEXT_INPUT_STYLE,
-                    styles.noteInput,
-                    { color: themeColors.text },
-                  ]}
-                />
+                <View className="flex-row items-center gap-2.5 px-4 py-3.5">
+                  <FileText size={16} color={themeColors.textMuted} />
+                  <TextInput
+                    ref={noteInputRef}
+                    editable={!lockedReason}
+                    value={note}
+                    onChangeText={handleNoteChange}
+                    placeholder={I18n.t('transactions.editor.optional')}
+                    placeholderTextColor={`${themeColors.mutedForeground}99`}
+                    returnKeyType="done"
+                    onFocus={handleNoteFocus}
+                    onBlur={handleNoteBlur}
+                    onSubmitEditing={() => noteInputRef.current?.blur()}
+                    autoCorrect={false}
+                    autoComplete="off"
+                    spellCheck={false}
+                    style={[
+                      SINGLE_LINE_TEXT_INPUT_STYLE,
+                      styles.noteInput,
+                      { color: themeColors.text },
+                    ]}
+                  />
+                </View>
+                {albumNote ? (
+                  <>
+                    <View className="h-[1px] bg-border/20" />
+                    <Pressable
+                      onPress={() => {
+                        void triggerHaptic('selection');
+                        albumNote.onOpenAlbum();
+                      }}
+                      accessibilityRole="button"
+                      accessibilityLabel={
+                        albumNote.status
+                          ? `${albumNote.albumName}, ${albumNote.status}`
+                          : albumNote.albumName
+                      }
+                      // The badge's own tap says why; a screen reader hears it here.
+                      accessibilityHint={albumNote.status ? lockedReason : undefined}
+                      className="flex-row items-center gap-2.5 px-4 py-3 active:opacity-70"
+                    >
+                      <Images size={16} color={themeColors.textMuted} />
+                      <Text variant="body" numberOfLines={1} className="flex-1">
+                        {albumNote.albumName}
+                      </Text>
+                      {albumNote.status ? (
+                        // Why it is locked, as a tap on a locked field says.
+                        <Pressable
+                          onPress={() => {
+                            if (lockedReason) showToast(lockedReason);
+                          }}
+                          hitSlop={6}
+                          className="flex-row items-center gap-1 rounded-full border border-border/30 bg-secondary/70 px-2 py-0.5"
+                        >
+                          <Lock size={11} color={themeColors.textMuted} />
+                          <Text variant="caption" tone="muted" numberOfLines={1}>
+                            {albumNote.status}
+                          </Text>
+                        </Pressable>
+                      ) : null}
+                      <ChevronRight size={16} color={themeColors.textMuted} />
+                    </Pressable>
+                  </>
+                ) : null}
               </View>
             </View>
           </GestureDetector>
