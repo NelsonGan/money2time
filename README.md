@@ -5567,7 +5567,14 @@ reported when the build has finished, not before the tests.
   Worker's history; deploy only a version built from `main`.
 - The media check fails a run whose `media/` has files the bucket does not, so
   a page cannot ship before its pictures. Publish them with
-  `node scripts/upload-media.mjs` from your machine.
+  `node scripts/upload-media.mjs` from your machine. A picture whose bytes
+  differ from the bucket's fails it only when the pull request or push being
+  checked touched it (`--touched`, the files the GitHub API lists for it); any
+  other difference is a warning. A branch publishes its pictures before it
+  merges, so until it does the bucket holds its copies, and those must not
+  fail every other merge (main's deploy failed this way while #733's privacy
+  screenshots waited). A run that cannot list its files, or one started by
+  hand, checks every picture.
 
 The workflow authenticates with the repository secret
 `CLOUDFLARE_WEB_API_TOKEN`, the account API token

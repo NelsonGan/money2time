@@ -89,12 +89,36 @@ jobs:
           fi
 
       # A deploy does not upload media, so a page must not ship before the
-      # pictures it shows are in the bucket.
+      # pictures it shows are in the bucket. A picture that differs from the
+      # bucket's fails only when this pull request or push touched it: a
+      # branch publishes its pictures before it merges, and that must not fail
+      # every other merge until it does. Listing the files is best effort; a
+      # run that cannot list them (or a manual one) checks every picture.
+      - name: List the files this change touched
+        if: steps.token.outputs.present == 'true' && github.event_name != 'workflow_dispatch'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          BEFORE: ${{ github.event.before }}
+        run: |
+          if [ -n "$PR_NUMBER" ]; then
+            gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/files" --jq '.[].filename' > "$RUNNER_TEMP/touched.txt"
+          else
+            gh api "repos/$GITHUB_REPOSITORY/compare/$BEFORE...$GITHUB_SHA" --jq '.files[].filename' > "$RUNNER_TEMP/touched.txt"
+          fi
+          wc -l < "$RUNNER_TEMP/touched.txt"
+
       - name: Check media/ is published to R2
         if: steps.token.outputs.present == 'true'
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_WEB_API_TOKEN }}
-        run: node scripts/upload-media.mjs --check
+        run: |
+          if [ -s "$RUNNER_TEMP/touched.txt" ]; then
+            node scripts/upload-media.mjs --check --touched "$RUNNER_TEMP/touched.txt"
+          else
+            node scripts/upload-media.mjs --check
+          fi
 
       # Lint runs while the build does, not before it: neither reads what the
       # other writes (eslint.config.mjs ignores every build output), and the

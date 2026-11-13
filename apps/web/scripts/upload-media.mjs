@@ -14,6 +14,9 @@
  *   node scripts/upload-media.mjs            # upload what changed
  *   node scripts/upload-media.mjs --dry-run  # say what would change
  *   node scripts/upload-media.mjs --check    # exit 1 if anything would change
+ *   node scripts/upload-media.mjs --check --touched <file>
+ *                                            # exit 1 if a picture is missing, or
+ *                                            # one the change touched differs
  *   node scripts/upload-media.mjs --prune    # also delete bucket objects under
  *                                            # web/ that media/ no longer has
  *
@@ -22,7 +25,7 @@
  */
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join, relative, sep } from "node:path";
 
@@ -50,8 +53,30 @@ const ROOT = new URL("..", import.meta.url).pathname;
 const MEDIA_DIR = join(ROOT, "media");
 const API = "https://api.cloudflare.com/client/v4";
 
-const args = new Set(process.argv.slice(2));
+const argv = process.argv.slice(2);
+const args = new Set(argv);
 const dryRun = args.has("--dry-run") || args.has("--check");
+
+/*
+ * `--touched <file>`: the repository paths the change being checked touched,
+ * one per line (the workflow lists a pull request's files, or a push's). A
+ * picture that differs from the bucket's copy then fails the check only when
+ * the change touched it. Another branch can publish its pictures before it
+ * merges, as it should, and its copies must not fail every other merge in the
+ * meantime. A picture missing from the bucket always fails.
+ */
+const touchedAt = argv.indexOf("--touched");
+const touchedFile = touchedAt >= 0 ? argv[touchedAt + 1] : undefined;
+const touched =
+  touchedFile && existsSync(touchedFile)
+    ? new Set(
+        readFileSync(touchedFile, "utf8")
+          .split("\n")
+          .map((line) => line.trim())
+          .filter((line) => line.startsWith("apps/web/media/"))
+          .map((line) => line.slice("apps/web/media/".length)),
+      )
+    : null;
 
 function apiToken() {
   if (process.env.CLOUDFLARE_API_TOKEN) return process.env.CLOUDFLARE_API_TOKEN;
@@ -154,7 +179,18 @@ console.log(
 for (const file of [...added, ...changed]) console.log(`  ${added.includes(file) ? "+" : "~"} ${file}`);
 for (const key of stale) console.log(`  ${args.has("--prune") ? "-" : "?"} ${key.slice(PREFIX.length)}`);
 
-if (args.has("--check")) process.exit(added.length || changed.length ? 1 : 0);
+if (args.has("--check")) {
+  const failing = touched ? changed.filter((file) => touched.has(file)) : changed;
+  const elsewhere = changed.filter((file) => !failing.includes(file));
+  if (elsewhere.length) {
+    console.log(
+      `::warning::${elsewhere.length} picture(s) in the bucket differ from this checkout but this change ` +
+        `does not touch them (another branch published its own, or main's were never uploaded): ` +
+        elsewhere.join(", "),
+    );
+  }
+  process.exit(added.length || failing.length ? 1 : 0);
+}
 if (dryRun) process.exit(0);
 
 let done = 0;
