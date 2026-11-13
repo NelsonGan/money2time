@@ -46,9 +46,20 @@ on:
           - preview
           - development
 
+# Only pull request runs cancel each other here. A push to main gets a group of
+# its own: a Worker- or docs-only merge used to start a run in the same group
+# as the running release and cancel the store build before `changes` had even
+# seen that it touches no app path, and its own run then built nothing. The
+# store build cancels an older one at the job level instead (`deploy`), so only
+# a push that builds the app replaces a release.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
   cancel-in-progress: true
+
+env:
+  # Paths that cannot change the shipped binary; anything else is an app
+  # change. Read by `changes` and by `plan`'s newer-release check.
+  NON_APP_PATHS: '^(apps/cloudflare/|apps/web/|apps/app-studio/|\.github/|\.claude/|\.agents/|\.codex/|\.vscode/)|(^|/)[^/]*\.md$|^LICENSE$'
 
 jobs:
   # Classifies the diff into the three flags the jobs below gate on:
@@ -147,9 +158,10 @@ jobs:
           # never cuts a store build. It is size-dependent, so it passed on every
           # normal diff and first bit on a 2,265-file one. Keep these unpiped.
           grep -qvE '^apps/(web|app-studio)/' changed.txt && checks=true
-          # Paths that cannot change the shipped binary. Anything else counts as
-          # an app change, so an unrecognised path always builds the app.
-          grep -vE '^(apps/cloudflare/|apps/web/|apps/app-studio/|\.github/|\.claude/|\.agents/|\.codex/|\.vscode/)|(^|/)[^/]*\.md$|^LICENSE$' changed.txt > app_paths.txt || true
+          # Paths that cannot change the shipped binary (NON_APP_PATHS, above).
+          # Anything else counts as an app change, so an unrecognised path
+          # always builds the app.
+          grep -vE "$NON_APP_PATHS" changed.txt > app_paths.txt || true
           [ -s app_paths.txt ] && app=true
           # The bundle job also runs for a change to the job itself.
           if [ "$app" = true ] || grep -qE '^\.github/(workflows/deploy\.yml|actions/)' changed.txt; then bundle=true; fi
@@ -395,7 +407,43 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       include: ${{ steps.matrix.outputs.include }}
+      release: ${{ steps.newer.outputs.release || 'true' }}
     steps:
+      # Pushes no longer cancel each other at the workflow level, so two app
+      # merges close together both get here. Whichever store build starts
+      # last cancels the other (`deploy`'s concurrency), so if this older run
+      # got here after the newer one, it would cancel the build of the newer
+      # code. When main has already moved on with an app change, the newer
+      # run ships this commit too, and this one stands down. Fails open.
+      - name: Check out repository
+        if: github.event_name == 'push'
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: .github
+
+      - name: Check for a newer app change on main
+        id: newer
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          set -uo pipefail
+          if ! git fetch --depth=1 --filter=blob:none origin main 2>/dev/null \
+            || ! git diff --name-only --no-renames "$GITHUB_SHA" FETCH_HEAD > newer.txt 2>/dev/null; then
+            echo "Could not compare with main; releasing."
+            echo "release=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          grep -vE "$NON_APP_PATHS" newer.txt > newer_app.txt || true
+          if [ -s newer_app.txt ]; then
+            echo "main ($(git rev-parse --short FETCH_HEAD)) already has newer app changes; its own run ships them with this commit:"
+            sed 's/^/  /' newer_app.txt
+            echo "release=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "release=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Resolve build matrix
         id: matrix
         shell: bash
@@ -416,7 +464,15 @@ jobs:
   deploy:
     name: Production · App (${{ matrix.label }} · ${{ matrix.profile }})
     needs: plan
-    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.profile != 'development')
+    if: >-
+      needs.plan.outputs.release == 'true'
+      && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.profile != 'development'))
+    # A newer store build of the same platform and profile replaces this one.
+    # Job-level, so only a run that gets this far (an app change) cancels a
+    # release; a skipped job never joins the group.
+    concurrency:
+      group: store-build-${{ github.ref }}-${{ matrix.platform }}-${{ matrix.profile }}
+      cancel-in-progress: true
     strategy:
       fail-fast: false
       matrix:
