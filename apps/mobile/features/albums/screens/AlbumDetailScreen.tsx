@@ -1140,46 +1140,42 @@ export function AlbumDetailScreen({
             style={[styles.tabBar, { height: TAB_BAR_HEIGHT }, tabBarCornerStyle]}
             className="border-b border-border/30 bg-background"
           >
-            <View className="flex-1 flex-row px-5">
-              {tabs.map((value) => {
-                const active = shownTab === value;
-                return (
-                  <Pressable
-                    key={value}
-                    onPress={() => selectTab(value)}
-                    accessibilityRole="tab"
-                    accessibilityState={{ selected: active }}
-                    testID={`album-tab-${value}`}
-                    className="mr-6 justify-center"
-                  >
-                    <Text
-                      variant="bodyStrong"
-                      className={cn(active ? 'text-primary' : 'text-muted-foreground')}
-                    >
-                      {tabLabel(value)}
-                    </Text>
-                    <View
-                      className="mt-1.5 h-0.5 rounded-full"
-                      style={{ backgroundColor: active ? themeColors.primary : 'transparent' }}
-                    />
-                  </Pressable>
-                );
-              })}
-            </View>
-          </Animated.View>
-          {/* Selecting transactions: the actions sit over the tabs, clear of
-              the rows being picked. A child of the header, inside its bounds,
-              so Android delivers touches to all of it. */}
-          {isSelectionMode ? (
-            <View
-              style={[styles.selectionOverTabs, { top: coverHeight - SHEET_OVERLAP - 8 }]}
-              testID="album-selection-toolbar"
-            >
-              <View className="flex-row items-center rounded-[26px] border border-border/40 bg-card px-3 py-2.5">
+            {isSelectionMode ? (
+              // Selecting transactions: the tab bar becomes the selection's
+              // bar (as the calendar's header does), clear of the rows being
+              // picked and docked with the header as it scrolls.
+              <View className="flex-1 flex-row items-center px-4" testID="album-selection-toolbar">
                 {selectionActions}
               </View>
-            </View>
-          ) : null}
+            ) : (
+              <View className="flex-1 flex-row px-5">
+                {tabs.map((value) => {
+                  const active = shownTab === value;
+                  return (
+                    <Pressable
+                      key={value}
+                      onPress={() => selectTab(value)}
+                      accessibilityRole="tab"
+                      accessibilityState={{ selected: active }}
+                      testID={`album-tab-${value}`}
+                      className="mr-6 justify-center"
+                    >
+                      <Text
+                        variant="bodyStrong"
+                        className={cn(active ? 'text-primary' : 'text-muted-foreground')}
+                      >
+                        {tabLabel(value)}
+                      </Text>
+                      <View
+                        className="mt-1.5 h-0.5 rounded-full"
+                        style={{ backgroundColor: active ? themeColors.primary : 'transparent' }}
+                      />
+                    </Pressable>
+                  );
+                })}
+              </View>
+            )}
+          </Animated.View>
         </Animated.View>
 
         {/* The bar the floating chrome becomes. */}
@@ -1275,7 +1271,6 @@ const styles = StyleSheet.create({
   coverTitle: { position: 'absolute', left: 0, right: 0, bottom: 0 },
   coverPeople: { position: 'absolute', right: 16 },
   tabBar: { marginTop: -SHEET_OVERLAP, overflow: 'visible' },
-  selectionOverTabs: { position: 'absolute', left: 12, right: 12 },
   memberChips: { gap: 8, paddingHorizontal: 20, paddingTop: 16, paddingBottom: 4 },
   fab: { position: 'absolute', right: spacing.lg, zIndex: 10 },
   splitRow: {

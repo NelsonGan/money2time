@@ -2085,8 +2085,9 @@ migrations `090` and `091`.
   tabs are left, the controls crossfading into it as on a goal's page, and
   pulling down past the top stretches the photo. Switching tabs (tap or
   swipe) first brings the other tabs to where the header is, so it never
-  jumps. A held transaction starts selecting, and the selection's actions sit
-  over the tab bar, clear of the rows. A floating + at the bottom right
+  jumps. A held transaction starts selecting, and the tab bar turns into the
+  selection's bar (Cancel, the count and total, duplicate, edit, remove), as
+  the calendar's header does, clear of the rows. A floating + at the bottom right
   opens a new expense that goes into this album and starts split with its
   people, whether or not the album is the active one (the `albumId` param of
   `AddTransactionDetailed`), and comes back to the album when saved.
