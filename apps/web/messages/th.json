@@ -1336,6 +1336,8 @@
       "perDay": "วันละ {amount}",
       "breakdown": "ตามหมวดหมู่",
       "transactionsTitle": "ธุรกรรม",
+      "everyone": "ทุกคน",
+      "me": "ฉัน",
       "pick": "เลือกทริปเพื่อดูรายละเอียด"
     },
     "items": {

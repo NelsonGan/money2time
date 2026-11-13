@@ -7,7 +7,8 @@ import { useMemo, useState } from "react";
 
 import { DAYS_PER_MONTH, daysBetween, monthRange, shiftMonthKey } from "@/lib/backup/dates";
 import type { Tx } from "@/lib/backup/model";
-import { balancesByAlbum } from "@/lib/backup/split-payer";
+import { memberShare, type TripMember, tripPeople } from "@/lib/backup/member-share";
+import { balancesByAlbum, type PayerSplit } from "@/lib/backup/split-payer";
 
 import type { ItemRow } from "@/lib/backup/types";
 
@@ -214,6 +215,34 @@ export function TripsView() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selected = trips.find((x) => x.trip.id === selectedId) ?? null;
   const selectedTxs = useMemo(() => (selected ? [...selected.txs].sort((a, b) => b.date.getTime() - a.date.getTime()) : []), [selected]);
+  // With a split bill in the trip, its breakdown can show one person's share,
+  // as the app's album Breakdown does.
+  const splitsByTx = useMemo(() => {
+    const map = new Map<string, PayerSplit[]>();
+    for (const split of model.splits) {
+      const list = map.get(split.transaction_id);
+      if (list) list.push(split);
+      else map.set(split.transaction_id, [split]);
+    }
+    return map;
+  }, [model.splits]);
+  const people = useMemo(() => (selected ? tripPeople(splitsByTx, selected.trip.txIds) : []), [selected, splitsByTx]);
+  const [memberKey, setMemberKey] = useState<string | null>(null);
+  // Each entry at the member's share of it, by its own rate; null for everyone.
+  const memberTxs = useMemo(() => {
+    const member: TripMember | null =
+      memberKey === "self" ? { kind: "self" } : memberKey && people.some((p) => p.key === memberKey) ? { kind: "person", key: memberKey } : null;
+    if (!selected || !member || people.length === 0) return null;
+    return selected.txs.flatMap((tx) => {
+      const original = Math.abs(tx.originalAmount);
+      const share = memberShare(splitsByTx.get(tx.id), original, member);
+      if (share <= 0 || original <= 0) return [];
+      const ratio = share / original;
+      return [{ ...tx, amount: tx.amount * ratio, hours: tx.hours * ratio }];
+    });
+  }, [selected, memberKey, people, splitsByTx]);
+  const breakdownTxs = memberTxs ?? selected?.txs ?? [];
+  const breakdownSpend = memberTxs ? sumAmt(memberTxs.filter((tx) => tx.spending)) : (selected?.spend ?? ZERO);
   const total = trips.reduce((s, x) => addAmt(s, x.spend), ZERO);
 
   if (trips.length === 0) {
@@ -246,7 +275,10 @@ export function TripsView() {
             <button
               key={trip.id}
               type="button"
-              onClick={() => setSelectedId(active ? null : trip.id)}
+              onClick={() => {
+                setSelectedId(active ? null : trip.id);
+                setMemberKey(null);
+              }}
               className={`card-surface card-lift overflow-hidden rounded-[22px] text-left ${active ? "ring-2 ring-primary" : ""}`}
             >
               <div className="relative h-36 bg-gradient-to-br from-sky/40 via-primary-soft to-accent-soft">
@@ -283,16 +315,34 @@ export function TripsView() {
       {selected ? (
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
           <Card title={selected.trip.name} subtitle={t("breakdown")}>
+            {people.length > 0 ? (
+              <div className="mb-3 flex flex-wrap gap-2">
+                {[{ key: null, name: t("everyone") }, { key: "self", name: t("me") }, ...people].map((chip) => {
+                  const active = chip.key === null ? memberTxs === null : chip.key === memberKey;
+                  return (
+                    <button
+                      key={chip.key ?? "everyone"}
+                      type="button"
+                      onClick={() => setMemberKey(chip.key)}
+                      aria-pressed={active}
+                      className={`rounded-full border px-3 py-1 text-[12.5px] font-semibold transition-colors ${active ? "border-primary bg-primary/10 text-primary" : "border-border text-foreground-soft hover:bg-background-subtle"}`}
+                    >
+                      {chip.name}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : null}
             <div className="space-y-0.5">
-              {breakdown(selected.txs, model, "spending").map((slice) => (
+              {breakdown(breakdownTxs, model, "spending").map((slice) => (
                 <RankRow
                   key={slice.id}
                   icon={<CategoryGlyph icon={slice.icon} name={slice.name || "?"} color={slice.color} size={28} />}
                   name={slice.name || tc("uncategorized")}
-                  meta={f.percent(selected.spend.money ? slice.amt.money / selected.spend.money : 0)}
+                  meta={f.percent(breakdownSpend.money ? slice.amt.money / breakdownSpend.money : 0)}
                   value={f.value(slice.amt)}
                   other={f.other(slice.amt)}
-                  share={selected.spend.money ? slice.amt.money / selected.spend.money : 0}
+                  share={breakdownSpend.money ? slice.amt.money / breakdownSpend.money : 0}
                   color={slice.color}
                 />
               ))}

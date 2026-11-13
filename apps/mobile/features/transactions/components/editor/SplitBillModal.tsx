@@ -49,6 +49,7 @@ import {
   sumUnpaidRows,
 } from '~/features/transactions/lib/splitMath';
 import { draftPayer, storedFriendPaidRow } from '~/features/transactions/lib/splitPayer';
+import { useSelfPerson } from '~/hooks/useSelfPerson';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -108,6 +109,11 @@ interface SplitBillModalProps {
   onCancel: () => void;
   /** Commit staged edits and close. Wired to the Done button. */
   onDone: () => void;
+  /**
+   * The Done button's word, when committing does more than close: "Add" when
+   * the page is confirming a new bill's split before it is saved.
+   */
+  doneLabel?: string;
   /** Current parent expense amount (already reduced by any paid splits). */
   total: number;
   defaultAccountId: string | null;
@@ -307,6 +313,7 @@ export function SplitBillModal({
   itemized = false,
   onCancel,
   onDone,
+  doneLabel,
   total,
   defaultAccountId,
   splits,
@@ -323,6 +330,8 @@ export function SplitBillModal({
 }: SplitBillModalProps) {
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
+  // The user's row reads as their Settings name and photo ("Me" without).
+  const me = useSelfPerson();
   // Row key whose "paid back to" account is being chosen. Set when the user taps
   // Mark paid on a row's swipe actions; picking an account settles that row.
   const [accountPickerForKey, setAccountPickerForKey] = useState<string | null>(null);
@@ -480,7 +489,7 @@ export function SplitBillModal({
   // The payer's name as the Paid by row shows it, and the people it offers.
   const payerLabel = payerRow
     ? payerRow.personName.trim() || I18n.t('transactions.settleUp.someone')
-    : I18n.t('transactions.editor.split.me_label');
+    : me.name;
   const [payerPickerOpen, setPayerPickerOpen] = useState(false);
   const payerOptions = useMemo<PaidByOption[]>(
     () =>
@@ -492,14 +501,14 @@ export function SplitBillModal({
             key: row.id ?? `row_${index}`,
             rowIndex: row.isSelf ? null : index,
             name: row.isSelf
-              ? I18n.t('transactions.editor.split.me_label')
+              ? me.name
               : row.personName.trim() || I18n.t('transactions.settleUp.someone'),
             partyKey: row.isSelf ? null : debtPartyKey(row.personName, row.memberId),
             selected: row.isSelf ? !friendPaid : row === payerRow,
           },
         ];
       }),
-    [friendPaid, payerRow, splits],
+    [friendPaid, me.name, payerRow, splits],
   );
 
   const handlePayerChange = useCallback(
@@ -840,7 +849,7 @@ export function SplitBillModal({
                   canDone ? 'text-primary-foreground' : 'text-muted-foreground',
                 )}
               >
-                {I18n.t('common.done')}
+                {doneLabel ?? I18n.t('common.done')}
               </Text>
             </Pressable>
           </View>
@@ -900,6 +909,7 @@ export function SplitBillModal({
                       payerRow ? debtPartyKey(payerRow.personName, payerRow.memberId) : null
                     }
                     size={26}
+                    imageUri={payerRow ? null : me.avatarUri}
                   />
                   <Text
                     variant="bodyStrong"
@@ -949,10 +959,17 @@ export function SplitBillModal({
               // plainly for Me and already-paid rows.
               const topLine = (
                 <View className="flex-row items-center gap-2.5">
-                  {!row.isSelf &&
-                  !disabledRow &&
-                  focusedNameIndex !== index &&
-                  row.personName.trim() ? (
+                  {row.isSelf && me.avatarUri ? (
+                    <PersonAvatar
+                      name={me.name}
+                      partyKey={null}
+                      size={36}
+                      imageUri={me.avatarUri}
+                    />
+                  ) : !row.isSelf &&
+                    !disabledRow &&
+                    focusedNameIndex !== index &&
+                    row.personName.trim() ? (
                     // A named friend gets the colour they have everywhere else
                     // (Paid by, Balances, the album). The row being typed in keeps
                     // the static icon, so a keystroke never redraws its avatar.
@@ -977,7 +994,7 @@ export function SplitBillModal({
                         <Check size={14} color={themeColors.success} />
                       ) : row.isSelf ? (
                         <Text variant="caption" className="font-semibold text-primary">
-                          {I18n.t('transactions.editor.split.me_label').slice(0, 1).toUpperCase()}
+                          {Array.from(me.name)[0]?.toUpperCase()}
                         </Text>
                       ) : (
                         <UserRound size={15} color={themeColors.textMuted} />
@@ -986,9 +1003,7 @@ export function SplitBillModal({
                   )}
 
                   <TextInput
-                    value={
-                      row.isSelf ? I18n.t('transactions.editor.split.me_label') : row.personName
-                    }
+                    value={row.isSelf ? me.name : row.personName}
                     editable={!row.isSelf && !disabledRow}
                     onFocus={() => handleNameFocus(index)}
                     onBlur={handleNameBlur}

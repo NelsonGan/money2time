@@ -11,7 +11,7 @@ import type {
 } from 'react-native';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { GestureDetector } from 'react-native-gesture-handler';
-import { useAnimatedRef } from 'react-native-reanimated';
+import { type SharedValue, useAnimatedRef, useScrollOffset } from 'react-native-reanimated';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { useContentFrame } from '~/components/layout/ContentFrame';
@@ -164,6 +164,19 @@ interface ActivityTransactionListProps {
   disableVirtualization?: boolean;
   groupByDate?: boolean;
   scrollToTopRef?: React.MutableRefObject<(() => void) | null>;
+  /** Scrolls the list to an offset at once (a page under a shared header keeping its place). */
+  scrollToOffsetRef?: React.MutableRefObject<((offset: number) => void) | null>;
+  /**
+   * Kept up to date with the list's scroll offset on the UI thread, for a
+   * header that moves with it.
+   */
+  scrollOffset?: SharedValue<number>;
+  /**
+   * The least the content is tall, padding included: a short list is padded
+   * at its foot to this, so a header over it can still scroll away.
+   */
+  minContentHeight?: number;
+  scrollIndicatorInsets?: { top?: number; bottom?: number };
   /** Scrolls the list to a given day's section header (YYYY-MM-DD). */
   scrollToDayRef?: React.MutableRefObject<((dayKey: string) => void) | null>;
   locale?: string;
@@ -333,6 +346,10 @@ export const ActivityTransactionList = memo(function ActivityTransactionListImpl
   disableVirtualization = false,
   groupByDate = true,
   scrollToTopRef,
+  scrollToOffsetRef,
+  scrollOffset,
+  minContentHeight,
+  scrollIndicatorInsets,
   scrollToDayRef,
   locale = I18n.locale ?? 'en',
   extendUnderBottomNav = false,
@@ -343,6 +360,9 @@ export const ActivityTransactionList = memo(function ActivityTransactionListImpl
   const scrollViewRef = useRef<ScrollViewInstance | null>(null);
   // The same list, for Reanimated: a drag scrolls it from the UI thread.
   const listScrollRef = useAnimatedRef<any>();
+  // Read on the UI thread, where the scroll happens. Only for a caller that
+  // asked; the hook itself cannot be skipped.
+  useScrollOffset(scrollOffset ? listScrollRef : null, scrollOffset);
   const { updateTransactionsBulk, settings: appSettings, instalmentPlans } = useApp();
   const bottomNavInset = useBottomNavContentInset();
   const reportBottomNavScroll = useBottomNavScrollReporter();
@@ -719,16 +739,38 @@ export const ActivityTransactionList = memo(function ActivityTransactionListImpl
     return [...rows, { kind: 'spacer', id: 'trailing-spacer', height: trailingSpacerHeight }];
   }, [hasTrailingSpacer, rows, trailingSpacerHeight]);
 
+  // What a short list adds at its foot to reach `minContentHeight`, worked
+  // out from the content's own height (less what was already added).
+  const [fillPadding, setFillPadding] = useState(0);
+  const fillPaddingRef = useRef(0);
+  fillPaddingRef.current = fillPadding;
+  const { handleContentSizeChange: reportReorderContentSize } = reorder;
+  const handleContentSizeChange = useCallback(
+    (width: number, height: number) => {
+      reportReorderContentSize(width, height);
+      if (minContentHeight == null) return;
+      const next = Math.max(0, Math.ceil(minContentHeight - (height - fillPaddingRef.current)));
+      setFillPadding((prev) => (Math.abs(prev - next) < 1 ? prev : next));
+    },
+    [minContentHeight, reportReorderContentSize],
+  );
+
   const contentContainerStyle = useMemo(
     () => ({
       // The spacer row already carries at least the base bottom padding; adding
       // container padding on top would push scrollToIndex targets beyond
       // FlashList's clamped max offset (it ignores container padding).
-      paddingBottom: hasTrailingSpacer ? 0 : baseBottomPadding,
+      paddingBottom: (hasTrailingSpacer ? 0 : baseBottomPadding) + fillPadding,
       paddingHorizontal: contentPaddingHorizontal,
       paddingTop: contentPaddingTop,
     }),
-    [baseBottomPadding, contentPaddingHorizontal, contentPaddingTop, hasTrailingSpacer],
+    [
+      baseBottomPadding,
+      contentPaddingHorizontal,
+      contentPaddingTop,
+      fillPadding,
+      hasTrailingSpacer,
+    ],
   );
 
   // Paybacks are tinted, and fold per bill and day (see PaybackGroupRow).
@@ -967,6 +1009,20 @@ export const ActivityTransactionList = memo(function ActivityTransactionListImpl
     };
   }, [disableVirtualization, scrollToTopRef]);
 
+  useEffect(() => {
+    if (!scrollToOffsetRef) return;
+    scrollToOffsetRef.current = (offset: number) => {
+      if (disableVirtualization) {
+        scrollViewRef.current?.scrollTo({ y: offset, animated: false });
+      } else {
+        flashListRef.current?.scrollToOffset({ offset, animated: false });
+      }
+    };
+    return () => {
+      scrollToOffsetRef.current = null;
+    };
+  }, [disableVirtualization, scrollToOffsetRef]);
+
   // Scroll a day's cell to the top of the viewport. FlashList v2's scrollToIndex
   // converges on the target itself (it re-reads the layout as cells render and
   // restarts if the target moves), and the trailing spacer is a real row so its
@@ -1085,7 +1141,8 @@ export const ActivityTransactionList = memo(function ActivityTransactionListImpl
       keyboardShouldPersistTaps="always"
       contentContainerStyle={contentContainerStyle}
       onLayout={handleListLayout}
-      onContentSizeChange={reorder.handleContentSizeChange}
+      onContentSizeChange={handleContentSizeChange}
+      scrollIndicatorInsets={scrollIndicatorInsets}
       {...navScrollProps}
     >
       {listHeader}
@@ -1110,7 +1167,8 @@ export const ActivityTransactionList = memo(function ActivityTransactionListImpl
       keyboardShouldPersistTaps="always"
       contentContainerStyle={contentContainerStyle}
       onLayout={handleListLayout}
-      onContentSizeChange={reorder.handleContentSizeChange}
+      onContentSizeChange={handleContentSizeChange}
+      scrollIndicatorInsets={scrollIndicatorInsets}
       renderItem={renderListItem}
       ListHeaderComponent={listHeader}
       ListEmptyComponent={listEmpty}

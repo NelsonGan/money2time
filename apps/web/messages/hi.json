@@ -1336,6 +1336,8 @@
       "perDay": "{amount} प्रति दिन",
       "breakdown": "श्रेणी के अनुसार",
       "transactionsTitle": "लेन-देन",
+      "everyone": "सभी",
+      "me": "मैं",
       "pick": "ब्योरा देखने के लिए कोई यात्रा चुनें।"
     },
     "items": {

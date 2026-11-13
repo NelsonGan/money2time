@@ -10,6 +10,7 @@ import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { useApp } from '~/context/AppContext';
 import { useCloudSync } from '~/features/cloudSync/CloudSyncContext';
 import { useSignedIn } from '~/features/cloudSync/components/SignInGate';
+import { useSelfPerson } from '~/hooks/useSelfPerson';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -52,6 +53,7 @@ export function CreateAlbumScreen({
   const { canSplit, canShare } = useAlbumScope();
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
+  const selfName = useSelfPerson().name;
 
   const [name, setName] = useState('');
   const [coverPath, setCoverPath] = useState<string | null>(null);
@@ -143,7 +145,7 @@ export function CreateAlbumScreen({
   const rows: SplitWithRow[] = [
     {
       id: null,
-      name: I18n.t('transactions.editor.split.me_label'),
+      name: selfName,
       isSelf: true,
       renamable: false,
       removable: false,

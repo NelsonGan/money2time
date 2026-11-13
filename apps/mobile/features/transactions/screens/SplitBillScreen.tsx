@@ -100,6 +100,7 @@ export function SplitBillScreen() {
       onMarkUnpaid={session.onMarkUnpaid}
       newlyPaidIds={session.newlyPaidIds}
       onDone={handleDone}
+      doneLabel={session.doneLabel}
       onCancel={handleCancel}
     />
   );

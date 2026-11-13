@@ -2994,10 +2994,9 @@ const de = {
     remove_selected_body:
       '{{count}} Transaktionen aus diesem Album entfernen? Sie werden nicht gelöscht.',
     tab_breakdown: 'Aufschlüsselung',
+    breakdown_everyone: 'Alle',
     tab_transactions: 'Transaktionen',
     tab_map: 'Karte',
-    show_cover: 'Titelbild anzeigen',
-    show_details: 'Details anzeigen',
     no_transactions_title: 'Keine Transaktionen',
     no_transactions_message: 'Füge diesem Album Transaktionen hinzu, um sie hier zu sehen.',
     delete_title: 'Album löschen?',
@@ -3045,7 +3044,7 @@ const de = {
     },
     balances: {
       tab: 'Salden',
-      empty_message: 'Teile eine Rechnung in diesem Album, dann erscheint sie hier.',
+      empty_title: 'Noch keine Salden',
       who_owes_whom: 'Wer schuldet wem',
       owes_you: '{{name}} schuldet dir',
       owes: '{{from}} schuldet {{to}}',

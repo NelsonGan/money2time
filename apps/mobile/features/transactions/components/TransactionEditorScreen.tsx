@@ -423,6 +423,12 @@ interface TransactionEditorScreenProps {
    * in it (a shared album's bill losing its split asks first).
    */
   confirmSplitSubmit?: (splits: SplitDraft[]) => Promise<boolean>;
+  /**
+   * A new bill split with people (an album's) is not saved straight from
+   * Add: the Split Bill page opens first, its Done reading "Add", so the
+   * split is seen and can still be changed before the bill is saved.
+   */
+  confirmSplitBeforeAdd?: boolean;
   onDelete?: () => void;
   initialValues?: Partial<TransactionEditorInitialValues>;
   initialSplits?: SplitDraft[];
@@ -700,6 +706,7 @@ export function TransactionEditorScreen({
   onSubmitConfirmed,
   onSubmitWithSplits,
   confirmSplitSubmit,
+  confirmSplitBeforeAdd = false,
   onSubmitReady,
   onDelete,
   initialValues,
@@ -738,6 +745,17 @@ export function TransactionEditorScreen({
   // user can add several transactions back-to-back. Persisted in quickEntryPrefs.
   // Only meaningful in create mode (not edit / recurring).
   const confirmedSubmitRef = useRef(false);
+  // `confirmSplitBeforeAdd`: the Split Bill page is open to confirm the split
+  // of the bill being added (with the bulk choice of that Add), and once its
+  // Done commits, the Add that follows has been confirmed.
+  const splitConfirmRef = useRef<{ bulk?: boolean } | null>(null);
+  // The amount the Split Bill page was last closed with Done at: the split was
+  // seen there, so Add does not ask again unless the amount has changed.
+  const splitReviewedAmountRef = useRef<string | null>(null);
+  const splitConfirmedRef = useRef(false);
+  const [submitAfterSplitConfirm, setSubmitAfterSplitConfirm] = useState<{
+    bulk?: boolean;
+  } | null>(null);
   const editorMountedRef = useRef(true);
   const [confirmedSaving, setConfirmedSaving] = useState(false);
   useEffect(() => {
@@ -1885,6 +1903,8 @@ export function TransactionEditorScreen({
   const handleDoneSplitBill = useCallback(() => {
     setSplitRouteOpen(false);
     splitBillSnapshotRef.current = null;
+    // The amount the bill now has: the split was seen at it.
+    let committedAmount = amount;
     if (splitItemized) {
       // Itemized visit: the rows are the source of truth — derive the parent
       // amount from the unpaid rows (matches the save validation and the
@@ -1894,18 +1914,26 @@ export function TransactionEditorScreen({
         Math.round(
           splits.reduce((acc, s) => (s.paid ? acc : acc + (Number(s.amount) || 0)), 0) * 100,
         ) / 100;
-      replaceAmountFromSplit(sum > 0 ? sum.toFixed(2) : '');
+      committedAmount = sum > 0 ? sum.toFixed(2) : '';
+      replaceAmountFromSplit(committedAmount);
       setSplitEvenly(false);
       setSplitItemized(false);
     }
+    splitReviewedAmountRef.current = committedAmount;
     // If user committed an empty configuration, fold split mode back off.
     if (splits.filter((s) => !s.isSelf).length === 0) {
       setSplitMode(false);
       setSplits([]);
     }
-  }, [replaceAmountFromSplit, splitItemized, splits]);
+    // Confirming an Add: save once these rows are back in the editor.
+    const confirming = splitConfirmRef.current;
+    splitConfirmRef.current = null;
+    if (confirming) setSubmitAfterSplitConfirm(confirming);
+  }, [amount, replaceAmountFromSplit, splitItemized, splits]);
 
   const handleCancelSplitBill = useCallback(() => {
+    // Back from a confirmation keeps the bill open, unsaved.
+    splitConfirmRef.current = null;
     setSplitRouteOpen(false);
     setSplitItemized(false);
     const snapshot = splitBillSnapshotRef.current;
@@ -2057,6 +2085,8 @@ export function TransactionEditorScreen({
         onMarkUnpaid: groupBill ? undefined : handleSplitMarkUnpaidLocal,
         newlyPaidIds,
         onDone: handleDoneSplitBill,
+        // Read from the ref, so the publish made as the page opens has it.
+        doneLabel: splitConfirmRef.current ? I18n.t('transactions.editor.title_create') : undefined,
         onCancel: handleCancelSplitBill,
       });
     },
@@ -2230,6 +2260,9 @@ export function TransactionEditorScreen({
 
   const handleSubmit = async (bulkOverride?: boolean) => {
     if (confirmedSubmitRef.current) return;
+    // Whether this save is the one a split confirmation just let through.
+    const splitConfirmed = splitConfirmedRef.current;
+    splitConfirmedRef.current = false;
     // Two explicit save actions drive this: "Add" (bulk = false, closes) and
     // "Add" + bulk icon (bulk = true, stays open). Falls back to the persisted
     // pref for the recurring editor's single Save button.
@@ -2510,6 +2543,26 @@ export function TransactionEditorScreen({
         submitPayload = null;
       }
 
+      // A new bill split with an album's people: show the split for a last
+      // look (or a change) before it is saved; its Done adds the bill. Not
+      // when the page was already closed with Done at this amount, and before
+      // anything reacts to the save (`onSubmitReady`), since Back keeps the
+      // bill unsaved.
+      if (
+        confirmSplitBeforeAdd &&
+        mode === 'create' &&
+        !splitConfirmed &&
+        splitReviewedAmountRef.current !== amount &&
+        canOpenSplitBill &&
+        splitMode &&
+        submitPayload?.type === 'expense' &&
+        splits.some((s) => !s.isSelf)
+      ) {
+        splitConfirmRef.current = { bulk: bulkOverride };
+        handleOpenSplitBill();
+        return;
+      }
+
       if (preparedSubmitPayload) {
         onSubmitReady?.(preparedSubmitPayload);
       }
@@ -2634,6 +2687,8 @@ export function TransactionEditorScreen({
           setSplits([]);
           setNewlyPaidIds(new Set());
         }
+        // The next entry's split has not been seen yet.
+        splitReviewedAmountRef.current = null;
         // The reimbursement tick belongs to the entry that was just saved, not
         // to the next one, and the panel has to give the keypad back. The
         // transfer's spending tick stays: someone logging several repayments in
@@ -2677,6 +2732,17 @@ export function TransactionEditorScreen({
       setError(getErrorMessage(submitError, I18n.t('errors.generic_operation_failed')));
     }
   };
+
+  // A confirmed split: the Add it was opened from goes ahead, now that the
+  // page has closed and its rows are the editor's.
+  const handleSubmitRef = useRef(handleSubmit);
+  handleSubmitRef.current = handleSubmit;
+  useEffect(() => {
+    if (!submitAfterSplitConfirm || splitRouteOpen) return;
+    setSubmitAfterSplitConfirm(null);
+    splitConfirmedRef.current = true;
+    void handleSubmitRef.current(submitAfterSplitConfirm.bulk);
+  }, [splitRouteOpen, submitAfterSplitConfirm]);
 
   const title =
     titleOverride ??

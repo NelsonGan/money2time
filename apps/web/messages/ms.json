@@ -1336,6 +1336,8 @@
       "perDay": "{amount} sehari",
       "breakdown": "Mengikut kategori",
       "transactionsTitle": "Transaksi",
+      "everyone": "Semua",
+      "me": "Saya",
       "pick": "Pilih satu perjalanan untuk melihat pecahannya."
     },
     "items": {

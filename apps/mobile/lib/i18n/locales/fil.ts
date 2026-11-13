@@ -2993,10 +2993,9 @@ const fil = {
     remove_selected_body:
       'Alisin ang {{count}} na transaksyon sa album na ito? Hindi ito buburahin.',
     tab_breakdown: 'Breakdown',
+    breakdown_everyone: 'Lahat',
     tab_transactions: 'Mga transaksyon',
     tab_map: 'Mapa',
-    show_cover: 'Ipakita ang cover photo',
-    show_details: 'Ipakita ang mga detalye',
     no_transactions_title: 'Walang transaksyon',
     no_transactions_message: 'Magdagdag ng transaksyon sa album na ito para makita dito.',
     delete_title: 'Tanggalin ang album?',
@@ -3041,7 +3040,7 @@ const fil = {
     },
     balances: {
       tab: 'Mga balanse',
-      empty_message: 'Maghati ng bill sa album na ito at lalabas ito rito.',
+      empty_title: 'Wala pang balanse',
       who_owes_whom: 'Sino ang may utang kanino',
       owes_you: 'May utang sa iyo si {{name}}',
       owes: 'May utang si {{from}} kay {{to}}',

@@ -1336,6 +1336,8 @@
       "perDay": "Günde {amount}",
       "breakdown": "Kategoriye göre",
       "transactionsTitle": "İşlemler",
+      "everyone": "Herkes",
+      "me": "Ben",
       "pick": "Dökümünü görmek için bir gezi seçin."
     },
     "items": {

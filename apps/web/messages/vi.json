@@ -1336,6 +1336,8 @@
       "perDay": "{amount} mỗi ngày",
       "breakdown": "Theo danh mục",
       "transactionsTitle": "Giao dịch",
+      "everyone": "Mọi người",
+      "me": "Tôi",
       "pick": "Chọn một chuyến đi để xem chi tiết."
     },
     "items": {

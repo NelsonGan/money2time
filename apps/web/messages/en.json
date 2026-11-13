@@ -1336,6 +1336,8 @@
       "perDay": "{amount} a day",
       "breakdown": "By category",
       "transactionsTitle": "Transactions",
+      "everyone": "Everyone",
+      "me": "Me",
       "pick": "Choose a trip to see its breakdown."
     },
     "items": {

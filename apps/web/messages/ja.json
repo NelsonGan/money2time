@@ -1336,6 +1336,8 @@
       "perDay": "1日あたり{amount}",
       "breakdown": "カテゴリ別",
       "transactionsTitle": "取引",
+      "everyone": "全員",
+      "me": "自分",
       "pick": "旅行を選ぶと内訳が表示されます。"
     },
     "items": {

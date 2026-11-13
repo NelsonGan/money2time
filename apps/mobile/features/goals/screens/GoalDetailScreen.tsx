@@ -13,6 +13,7 @@ import Animated, {
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button, CategoryEmoji, SettingsHeader, Text } from '~/components/ui';
+import { HeroHeaderButton } from '~/components/ui/HeroHeaderButton';
 import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { useApp, useTransactions } from '~/context/AppContext';
 import {
@@ -57,7 +58,6 @@ const HERO_SCROLL_CONTENT = { paddingBottom: 0 } as const;
 // blocks. Matches the sheet's own 28px corner radius.
 const SHEET_OVERLAP_PX = 26;
 const SHEET_OVERLAP = { marginTop: -SHEET_OVERLAP_PX } as const;
-const OVER_PHOTO_CHIP = { backgroundColor: 'rgba(0,0,0,0.45)' } as const;
 // Share of the screen the cover photo takes before the content starts.
 const HERO_HEIGHT_RATIO = 0.38;
 // Height of the header bar below the status bar, and the scroll distance over
@@ -95,53 +95,6 @@ function labelForTransaction(tx: TransactionWithRelations): string {
     default:
       return I18n.t('nav.expense');
   }
-}
-
-/**
- * One control in the cover-photo header. Over the photo it is a dark
- * translucent circle with a white glyph; once the photo has scrolled past it is
- * the ordinary card chip with a muted glyph. Both layers are rendered and
- * crossfaded by the scroll position rather than swapped at a threshold, so the
- * change follows the finger — and the Pressable underneath never changes, so a
- * press in progress is not interrupted by the transition.
- */
-function HeroHeaderButton({
-  onPress,
-  accessibilityLabel,
-  floatingStyle,
-  solidStyle,
-  renderIcon,
-}: {
-  onPress: () => void;
-  accessibilityLabel: string;
-  floatingStyle: ReturnType<typeof useAnimatedStyle>;
-  solidStyle: ReturnType<typeof useAnimatedStyle>;
-  renderIcon: (overPhoto: boolean) => React.ReactNode;
-}) {
-  return (
-    <Pressable
-      onPress={onPress}
-      hitSlop={8}
-      accessibilityRole="button"
-      accessibilityLabel={accessibilityLabel}
-      className="h-10 w-10 items-center justify-center"
-    >
-      <Animated.View
-        style={[floatingStyle, OVER_PHOTO_CHIP]}
-        className="absolute inset-0 items-center justify-center rounded-full"
-        pointerEvents="none"
-      >
-        {renderIcon(true)}
-      </Animated.View>
-      <Animated.View
-        style={solidStyle}
-        className="absolute inset-0 items-center justify-center rounded-full border border-border/30 bg-card"
-        pointerEvents="none"
-      >
-        {renderIcon(false)}
-      </Animated.View>
-    </Pressable>
-  );
 }
 
 /** One line in the goal's activity list. */
