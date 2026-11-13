@@ -27,7 +27,7 @@ Seven jobs (`bundle` once per platform): `changes → checks + lint → plan →
 - **plan** — push-to-`main` and manual-dispatch only. Resolves the build matrix (push = iOS + Android production; dispatch = the chosen single platform/profile).
 - **deploy** — push-to-`main` and manual-dispatch only. `eas build --local` on the matched runner (`xcode-27` with Xcode 27.1 pinned for iOS, ubuntu-latest for Android; see the README for why the pin matters), then `eas submit`. `fail-fast: false`, so one platform failing doesn't kill the other.
 
-Concurrency cancels in-flight runs on a new push to the same ref.
+A newer store build cancels an in-flight one (job-level concurrency on `deploy`, per platform and profile); a push that builds no app (Workers, website, App Studio, docs) never cancels a release.
 
 ## How to release
 
