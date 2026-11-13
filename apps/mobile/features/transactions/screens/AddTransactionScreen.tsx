@@ -76,7 +76,10 @@ export function AddTransactionScreen({
     },
     [activeAlbumId, addTransactionsToAlbum, albumId],
   );
-  const groupBill = albumGroupId !== null && albumGroup.self !== null;
+  // In a shared album every split is the group's, made from its members:
+  // never typed names, even before this phone has said who it is (the save
+  // then says it could not be made).
+  const groupBill = albumGroupId !== null;
   // A shared album's bill is split only between people who joined it.
   const groupMembers = useGroupOthers(albumGroupId);
   const isPro = useIsPro();

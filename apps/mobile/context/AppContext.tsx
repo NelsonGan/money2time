@@ -3150,11 +3150,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setAlbums(albumsRepository.list());
   }, []);
 
-  const getAlbumTransactionIds = useCallback(
-    (albumId: string) => albumsRepository.getTransactionIds(albumId),
-    [],
-  );
-
   // Which entries are in which album, read once per change of `albums` (a
   // new array whenever an album or its entries change) and shared by the
   // album stats and the balances.
@@ -3205,13 +3200,29 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return membership.owned.ids;
   }, [getAlbumEntryIds]);
 
-  const getAlbumTransactions = useCallback((albumId: string): TransactionWithRelations[] => {
-    const ids = albumsRepository.getTransactionIds(albumId);
-    // Batched load (fixed query count) instead of one getById per id.
-    return transactionsRepository
-      .listByIds(ids)
-      .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
-  }, []);
+  // An album's entries, from the loaded list (newest first), not the table:
+  // a new entry is in the list at once while its insert waits behind the
+  // editor's dismiss, so a read of the table missed it, and once the insert
+  // landed nothing told the album page to look again. The loaded list holds
+  // the same live rows of the open ledger the table read joined on.
+  const getAlbumTransactions = useCallback(
+    (albumId: string): TransactionWithRelations[] => {
+      const ids = getAlbumEntryIds().get(albumId);
+      if (!ids || ids.length === 0) return [];
+      const members = new Set(ids);
+      return transactionsRef.current.filter((tx) => members.has(tx.id));
+    },
+    [getAlbumEntryIds],
+  );
+
+  // The ids of the album's live entries. Deleting an entry leaves its row in
+  // `album_transactions` (on this phone, or a bill deleted on another phone of
+  // a shared album), so the table alone also counted entries that are gone:
+  // the picker started with them selected ("5 selected" over one entry).
+  const getAlbumTransactionIds = useCallback(
+    (albumId: string) => getAlbumTransactions(albumId).map((tx) => tx.id),
+    [getAlbumTransactions],
+  );
 
   const accountNameById = useMemo(
     () => new Map(accounts.map((account) => [account.id, account.name])),

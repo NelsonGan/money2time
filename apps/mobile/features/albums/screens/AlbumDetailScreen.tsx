@@ -21,7 +21,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { scheduleOnRN } from 'react-native-worklets';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
-import { LoadingDots } from '~/components/feedback/LoadingDots';
 import { ContentFrameProvider, useContentFrame } from '~/components/layout/ContentFrame';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { ADD_FAB_SIZE, AddFabButton } from '~/components/navigation/AddFab';
@@ -75,7 +74,7 @@ const TOP_BAR_HEIGHT = 52;
 const TAB_BAR_HEIGHT = 48;
 /** Share of the screen the cover photo takes, status bar included. */
 const COVER_HEIGHT_RATIO = 0.36;
-/** When the push's end is never reported, the content mounts after this long anyway. */
+/** When the push's end is never reported, the other tabs mount after this long anyway. */
 const CONTENT_FALLBACK_MS = 450;
 /** The tabs not shown first mount one at a time, this far apart, after it. */
 const TAB_MOUNT_STAGGER_MS = 250;
@@ -86,9 +85,6 @@ const HEADER_FADE_DISTANCE = 56;
 const FAB_BOTTOM_GAP = 12;
 /** "Everyone" in the Breakdown's member filter. */
 const EVERYONE = 'everyone';
-
-// Stable reference for the pre-ready window so dependent memos don't churn.
-const EMPTY_TRANSACTIONS: TransactionWithRelations[] = [];
 
 interface AlbumDetailScreenProps {
   albumId: string;
@@ -179,12 +175,12 @@ export function AlbumDetailScreen({
   // narrower than the full window inside TabletContentContainer).
   const [pageWidth, setPageWidth] = useState(windowWidth);
   const [pageHeight, setPageHeight] = useState(windowHeight);
-  // Hold the heavy content (the lists, the breakdown donut, the balances) off
-  // until the page has slid in, so it never computes and paints on the JS
-  // thread during the push: that is what made opening an album feel slow.
-  // The cover, controls and tab bar mount at once; the content when the
+  // The album's entries are already in memory, so the open tab's list shows
+  // with the page, never behind a loading state. Only the tabs not shown
+  // (the breakdown donut, the balances) wait until the page has slid in, so
+  // they never compute and paint on the JS thread during the push: when the
   // native stack says the transition ended, or after a short wait when it
-  // never says so (no animation, the iPad layout).
+  // never says so (no animation).
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [contentReady, setContentReady] = useState(false);
   useEffect(() => {
@@ -276,7 +272,7 @@ export function AlbumDetailScreen({
     return { borderTopLeftRadius: radius, borderTopRightRadius: radius };
   });
 
-  // Mounted only once the content is ready (Balances only with people), so
+  // Mounted once the page has slid in (Balances only with people), so
   // their offsets come from their own scroll handlers.
   const breakdownScrollRef = useAnimatedRef<Animated.ScrollView>();
   const balancesScrollRef = useAnimatedRef<Animated.ScrollView>();
@@ -311,11 +307,11 @@ export function AlbumDetailScreen({
     }
   }, [collapseDistance, offsets, scrollTabTo, shownTab, tabs]);
 
-  // The open tab mounts with the content; the others follow one at a time,
-  // so opening the album renders one list, not three. A tab still waiting
-  // mounts at once when it is swiped or tapped to. Each joins the header
-  // where it is as it mounts.
-  const [mountedTabs, setMountedTabs] = useState<readonly DetailTab[]>([]);
+  // The open tab mounts with the page; the others follow one at a time once
+  // it has slid in, so opening the album renders one list, not three. A tab
+  // still waiting mounts at once when it is swiped or tapped to. Each joins
+  // the header where it is as it mounts.
+  const [mountedTabs, setMountedTabs] = useState<readonly DetailTab[]>(['transactions']);
   const mountTabs = useCallback((wanted: readonly DetailTab[]) => {
     setMountedTabs((current) =>
       wanted.every((value) => current.includes(value))
@@ -324,10 +320,10 @@ export function AlbumDetailScreen({
     );
   }, []);
   useEffect(() => {
-    if (contentReady) mountTabs([shownTab]);
-  }, [contentReady, mountTabs, shownTab]);
+    mountTabs([shownTab]);
+  }, [mountTabs, shownTab]);
   useEffect(() => {
-    if (!contentReady || mountedTabs.length === 0) return;
+    if (!contentReady) return;
     const next = tabs.find((value) => !mountedTabs.includes(value));
     if (!next) return;
     const timer = setTimeout(() => mountTabs([next]), TAB_MOUNT_STAGGER_MS);
@@ -347,13 +343,14 @@ export function AlbumDetailScreen({
   // same object while nothing changed, and never goes stale the way a memo keyed
   // on the function would after a switch to time mode.
   const stats = getAlbumStats(albumId);
-  // `getAlbumTransactions` reads the table, and both it and `albums` are stable
-  // across transaction churn, so `transactions` is what tells this memo a row
-  // written from here (a duplicate) has landed and can now be read back.
+  // `getAlbumTransactions` reads the loaded list through refs and keeps one
+  // identity, so `albums` (which entries are in it) and `transactions` (the
+  // rows themselves, optimistic ones included) are what tell this memo that
+  // something it shows changed.
   const albumTransactions = useMemo(
-    () => (contentReady ? getAlbumTransactions(albumId) : EMPTY_TRANSACTIONS),
+    () => getAlbumTransactions(albumId),
     // eslint-disable-next-line react-hooks/exhaustive-deps -- see above
-    [contentReady, getAlbumTransactions, albumId, albums, transactions],
+    [getAlbumTransactions, albumId, albums, transactions],
   );
   const coverUri = useMemo(() => getAlbumCoverUri(album?.coverPhotoUri), [album?.coverPhotoUri]);
   // Skip a uri that failed to load natively; see CategoryEmoji for why.
@@ -526,9 +523,14 @@ export function AlbumDetailScreen({
     [albumTransactions],
   );
   const clearSelection = useCallback(() => setSelectedTransactionIds([]), []);
+  // A shared album takes no entries made elsewhere: only bills made in it,
+  // split with its members (README: Album members and shared albums). So no
+  // picking existing transactions, and no copies of its bills.
+  const takesExisting = group.share === null;
   const duplicableSelectedTransactions = useMemo(
-    () => selectDuplicableTransactions(albumTransactions, selectedTransactionIds),
-    [albumTransactions, selectedTransactionIds],
+    () =>
+      takesExisting ? selectDuplicableTransactions(albumTransactions, selectedTransactionIds) : [],
+    [albumTransactions, selectedTransactionIds, takesExisting],
   );
   // `createTransaction` files a new row into the *active* album, which is not
   // necessarily the one being viewed, so the copies are added here explicitly.
@@ -978,14 +980,16 @@ export function AlbumDetailScreen({
                   I18n.t('albums.edit_details_title'),
                   <Pencil size={17} color={themeColors.textMuted} />,
                 )}
-                {splitIconButton(
-                  () => {
-                    void triggerHaptic('selection');
-                    onAddTransactions(albumId);
-                  },
-                  I18n.t('albums.add_transactions_title'),
-                  <Plus size={19} color={themeColors.textMuted} />,
-                )}
+                {takesExisting
+                  ? splitIconButton(
+                      () => {
+                        void triggerHaptic('selection');
+                        onAddTransactions(albumId);
+                      },
+                      I18n.t('albums.add_transactions_title'),
+                      <Plus size={19} color={themeColors.textMuted} />,
+                    )
+                  : null}
                 {splitIconButton(
                   handleDelete,
                   I18n.t('common.delete'),
@@ -1014,8 +1018,8 @@ export function AlbumDetailScreen({
                   <Text variant="label" tone="muted" style={styles.splitHeading}>
                     {I18n.t('albums.tab_breakdown')}
                   </Text>
-                  {contentReady ? breakdownBody : <LoadingDots />}
-                  {showBalances && contentReady ? (
+                  {breakdownBody}
+                  {showBalances ? (
                     <>
                       <Text variant="label" tone="muted" style={styles.splitHeading}>
                         {I18n.t('albums.balances.tab')}
@@ -1032,31 +1036,25 @@ export function AlbumDetailScreen({
                   {I18n.t('albums.tab_transactions')}
                 </Text>
                 <View style={styles.flexOne}>
-                  {contentReady ? (
-                    <>
-                      {transactionList(4, false)}
-                      {isSelectionMode ? (
-                        <TransactionSelectionToolbar
-                          selectedCount={selectedTransactionCount}
-                          totalNode={
-                            <Text variant="label" className="text-foreground">
-                              {formatValue(selectedTotal)}
-                            </Text>
-                          }
-                          onCancel={clearSelection}
-                          onDuplicate={
-                            duplicableSelectedTransactions.length > 0
-                              ? () => setShowDuplicatePicker(true)
-                              : undefined
-                          }
-                          onEdit={() => setShowBulkUpdate(true)}
-                          onDelete={handleRemoveSelected}
-                        />
-                      ) : null}
-                    </>
-                  ) : (
-                    <LoadingDots />
-                  )}
+                  {transactionList(4, false)}
+                  {isSelectionMode ? (
+                    <TransactionSelectionToolbar
+                      selectedCount={selectedTransactionCount}
+                      totalNode={
+                        <Text variant="label" className="text-foreground">
+                          {formatValue(selectedTotal)}
+                        </Text>
+                      }
+                      onCancel={clearSelection}
+                      onDuplicate={
+                        duplicableSelectedTransactions.length > 0
+                          ? () => setShowDuplicatePicker(true)
+                          : undefined
+                      }
+                      onEdit={() => setShowBulkUpdate(true)}
+                      onDelete={handleRemoveSelected}
+                    />
+                  ) : null}
                 </View>
               </ContentFrameProvider>
             </View>
@@ -1128,26 +1126,20 @@ export function AlbumDetailScreen({
             if (height > 0 && height !== pageHeight) setPageHeight(height);
           }}
         >
-          {!contentReady ? (
-            <View style={{ paddingTop: headerHeight + 32 }} className="items-center">
-              <LoadingDots />
-            </View>
-          ) : (
-            <ScrollView
-              ref={pagerRef}
-              horizontal
-              pagingEnabled
-              directionalLockEnabled
-              showsHorizontalScrollIndicator={false}
-              nestedScrollEnabled
-              keyboardShouldPersistTaps="handled"
-              scrollEventThrottle={32}
-              onScrollBeginDrag={handlePagerDragBegin}
-              onMomentumScrollEnd={handlePagerMomentumEnd}
-            >
-              {tabs.map(page)}
-            </ScrollView>
-          )}
+          <ScrollView
+            ref={pagerRef}
+            horizontal
+            pagingEnabled
+            directionalLockEnabled
+            showsHorizontalScrollIndicator={false}
+            nestedScrollEnabled
+            keyboardShouldPersistTaps="handled"
+            scrollEventThrottle={32}
+            onScrollBeginDrag={handlePagerDragBegin}
+            onMomentumScrollEnd={handlePagerMomentumEnd}
+          >
+            {tabs.map(page)}
+          </ScrollView>
         </View>
 
         {/* The header: the cover photo and the tab bar resting on it. Drags
@@ -1282,18 +1274,20 @@ export function AlbumDetailScreen({
                 <Pencil size={17} color={overPhoto ? '#ffffff' : themeColors.textMuted} />
               )}
             />
-            <HeroHeaderButton
-              onPress={() => {
-                void triggerHaptic('selection');
-                onAddTransactions(albumId);
-              }}
-              accessibilityLabel={I18n.t('albums.add_transactions_title')}
-              floatingStyle={floatingChromeStyle}
-              solidStyle={solidHeaderStyle}
-              renderIcon={(overPhoto) => (
-                <Plus size={19} color={overPhoto ? '#ffffff' : themeColors.textMuted} />
-              )}
-            />
+            {takesExisting ? (
+              <HeroHeaderButton
+                onPress={() => {
+                  void triggerHaptic('selection');
+                  onAddTransactions(albumId);
+                }}
+                accessibilityLabel={I18n.t('albums.add_transactions_title')}
+                floatingStyle={floatingChromeStyle}
+                solidStyle={solidHeaderStyle}
+                renderIcon={(overPhoto) => (
+                  <Plus size={19} color={overPhoto ? '#ffffff' : themeColors.textMuted} />
+                )}
+              />
+            ) : null}
             <HeroHeaderButton
               onPress={handleDelete}
               accessibilityLabel={I18n.t('common.delete')}

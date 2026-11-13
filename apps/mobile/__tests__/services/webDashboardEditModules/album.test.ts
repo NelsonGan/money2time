@@ -210,15 +210,24 @@ describe('module:album planning', () => {
         shared,
       ),
     ).toMatchObject({ error: 'invalid' });
-    // An entry of the user's own in it comes out as in any album.
+    // An entry of the user's own in it comes out as in any album...
     expect(
       plan(
-        [{ op: 'transactions', id: 'shared', at: AT, add: ['t2'], remove: ['t1'] }],
+        [{ op: 'transactions', id: 'shared', at: AT, add: [], remove: ['t1'] }],
         albums,
         false,
         shared,
       ),
     ).toMatchObject({ ok: true });
+    // ...but nothing made elsewhere goes in: a shared album only holds bills made in it.
+    expect(
+      plan(
+        [{ op: 'transactions', id: 'shared', at: AT, add: ['t2'], remove: [] }],
+        albums,
+        false,
+        shared,
+      ),
+    ).toMatchObject({ error: 'invalid' });
   });
 });
 

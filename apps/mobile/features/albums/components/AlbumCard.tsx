@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { Menu } from 'lucide-react-native';
+import { Cloud, Menu } from 'lucide-react-native';
 import { memo, useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import Animated from 'react-native-reanimated';
@@ -8,6 +8,7 @@ import Sortable from 'react-native-sortables';
 import { Text, TimeValueInline } from '~/components/ui';
 import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { useApp } from '~/context/AppContext';
+import { useSharedAlbum } from '~/features/sharedLedgers/hooks/useSharedLedgers';
 import { usePressScale } from '~/hooks/usePressScale';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -43,6 +44,8 @@ export const AlbumCard = memo(function AlbumCardImpl({
   // A lookup in a cache `getAlbumStats` rebuilds only after its inputs change;
   // the memo wrapper re-renders this card when `album` or `statsVersion` does.
   const stats = getAlbumStats(album.id);
+  // A shared album is kept in step with everyone in it through Cloud Sync.
+  const synced = useSharedAlbum(album.id) !== null;
   const coverUri = useMemo(() => getAlbumCoverUri(album.coverPhotoUri), [album.coverPhotoUri]);
   // Skip a uri that failed to load natively; see CategoryEmoji for why.
   const [brokenUri, setBrokenUri] = useState<string | null>(null);
@@ -122,10 +125,26 @@ export const AlbumCard = memo(function AlbumCardImpl({
         </View>
       </Pressable>
 
-      {/* Active marker — small blinking green dot pinned to the top-right. */}
-      {isActive ? (
-        <View className="absolute right-3 top-3" pointerEvents="none">
-          <AlbumActiveDot />
+      {/* Top right: the active marker (a small blinking green dot) and, on a
+          shared album, the cloud that says it is synced. */}
+      {isActive || synced ? (
+        <View
+          className="absolute right-3 top-3 h-8 flex-row items-center gap-1.5"
+          pointerEvents="none"
+        >
+          {isActive ? <AlbumActiveDot /> : null}
+          {synced ? (
+            <View
+              accessible
+              accessibilityRole="image"
+              accessibilityLabel={I18n.t('albums.synced_badge')}
+              testID="album-card-synced"
+              className="h-8 w-8 items-center justify-center rounded-full"
+              style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
+            >
+              <Cloud size={16} color="#fff" />
+            </View>
+          ) : null}
         </View>
       ) : null}
 

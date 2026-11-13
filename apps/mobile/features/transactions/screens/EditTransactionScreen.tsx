@@ -100,10 +100,16 @@ function TransactionEditor({
   // and shared albums): the entry here follows from what the group holds.
   // A bill split by item stays the user's own: the group does not hold its items.
   const albumTarget = useAlbumBillTarget(transaction.id);
-  // Only a bill of the group is: an entry of the user's own in a shared album
-  // (a local split bill added to it, say) is edited as their own.
+  // A shared album's expense is split only through its group: a bill of the
+  // group, or an entry of the user's own there (one added with nothing
+  // split), which becomes the group's once it is split. Never a local split
+  // with typed names, which nobody else in the album would get.
   const albumGroupId =
-    transaction.albumGroupId && albumTarget === transaction.albumGroupId ? albumTarget : null;
+    albumTarget &&
+    (transaction.albumGroupId === albumTarget ||
+      (!transaction.albumGroupId && transaction.type === 'expense'))
+      ? albumTarget
+      : null;
   // The expense a part payment on a group's bill made follows that payment:
   // split, it would become a bill of its own under the payment's id.
   const isGroupPayment = useMemo(
@@ -487,16 +493,15 @@ function TransactionEditor({
           transaction.id,
         );
         if (saved) return;
-        // A group's bill is only ever saved through its group: when that
-        // failed (signed out, the share gone), say so rather than drop it.
-        if (isGroupBill) {
-          // A payment may have landed while the editor was open.
-          const block = albumBillBlock(albumGroupId, transaction.id);
-          Alert.alert(
-            block ? I18n.t(`albums.rules.${block}`) : I18n.t('errors.generic_operation_failed'),
-          );
-          return;
-        }
+        // A shared album's bill is only ever saved through its group: when
+        // that failed (signed out, the share gone, someone on it who is not
+        // in the album), say so rather than keep it as a local split.
+        // A payment may have landed while the editor was open.
+        const block = isGroupBill ? albumBillBlock(albumGroupId, transaction.id) : null;
+        Alert.alert(
+          block ? I18n.t(`albums.rules.${block}`) : I18n.t('errors.generic_operation_failed'),
+        );
+        return;
       } else if (isGroupBill) {
         // No longer split: the bill leaves the group, for everyone, and stays
         // the user's own entry (asked in `confirmSplitSubmit`, before closing).

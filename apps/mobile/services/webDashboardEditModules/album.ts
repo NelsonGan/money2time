@@ -219,6 +219,11 @@ export const albumModule: EditModule = {
       });
       return tools.ok(1);
     }
+    // A shared album takes no entries made elsewhere, only bills made in it
+    // (README: Album members and shared albums), from the browser as on the phone.
+    if (op.add.length > 0 && extra.sharedAlbumIds.includes(op.id)) {
+      return tools.refuse('invalid');
+    }
     const checked = checkExpenses(tools, op.add);
     if (!checked.ok) return checked;
     // A shared album's bill taken out of it is removed for everyone in the
