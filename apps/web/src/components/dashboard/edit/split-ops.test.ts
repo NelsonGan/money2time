@@ -92,7 +92,7 @@ test("draftRows keys each friend by share", () => {
 });
 
 test("the free plan's split count leaves a shared album's bills out, as the app's countUnpaidSplitBills", () => {
-  const tx = (id: string, groupId?: string) => [id, { id, ...(groupId ? { groupId } : null) }] as const;
+  const tx = (id: string, albumGroupId?: string) => [id, { id, ...(albumGroupId ? { albumGroupId } : null) }] as const;
   const split = (id: string, transaction_id: string, amount: number, extra: Partial<SplitRecord> = {}) => ({ id, transaction_id, person_name: "Ben", amount, ...extra });
   const model = {
     txById: new Map([tx("mine"), tx("group", "album-1"), tx("paid"), tx("friend-paid"), tx("group-friend-paid", "album-1")]),

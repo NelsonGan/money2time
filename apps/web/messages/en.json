@@ -1453,6 +1453,7 @@
       "amountLocked": "This amount is linked to a split or a refund. Change it in the app.",
       "friendPaid": "{name} paid this bill. Change it in the app.",
       "groupBill": "This bill is in a shared album. Change it in the app.",
+      "groupBills": "Some of these are in a shared album. Change them in the app.",
       "hideBalances": "Hide balances",
       "showBalances": "Show balances",
       "savingsGoals": "Savings goals",

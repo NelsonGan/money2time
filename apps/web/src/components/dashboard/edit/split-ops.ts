@@ -60,7 +60,7 @@ export function splitsOf(model: Model, txId: string): SplitRecord[] {
 export function unpaidSplitBills(model: Pick<Model, "txById" | "raw" | "splitOwed">): number {
   const counts = (txId: string) => {
     const tx = model.txById.get(txId);
-    return !!tx && !tx.groupId;
+    return !!tx && !tx.albumGroupId;
   };
   const bills = new Set<string>();
   for (const row of model.raw.transaction_splits ?? []) {

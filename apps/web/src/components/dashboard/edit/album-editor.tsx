@@ -41,6 +41,17 @@ function albumRows(model: Model): AlbumRow[] {
     .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0) || a.name.localeCompare(b.name));
 }
 
+/**
+ * The album's own shared bills: entries of its group, whose id is the album's.
+ * Ending the share clears their group, so a shared album is one that has any
+ * (as of the last sync). Read from the full data, so a page filter cannot
+ * hide them. Taking one out, or deleting the album, changes it for everyone in
+ * it, which the app asks about first and the phone refuses from here.
+ */
+function albumGroupBillIds(model: Model, albumId: string): Set<string> {
+  return new Set(model.txs.filter((tx) => tx.albumGroupId === albumId).map((tx) => tx.id));
+}
+
 /** The album as stored, with its `updated_at`. */
 function albumRow(model: Model, id: string): AlbumRow | null {
   return (model.raw.albums ?? []).find((row) => row.id === id && !row.deleted_at) ?? null;
@@ -247,7 +258,7 @@ function AlbumTransactionsPicker({
   touches: (picked: string[]) => number;
   /** The most entries the message names. */
   max?: number;
-  /** Entries that stay ticked: the album's own shared bills, which are taken out of it in the app. */
+  /** Entries that cannot be unticked: the album's own shared bills, which are taken out of it in the app. */
   locked?: ReadonlySet<string>;
   children?: ReactNode;
 }) {
@@ -266,10 +277,8 @@ function AlbumTransactionsPicker({
     return newest?.month ?? model.currentMonth;
   });
   const rows = useMemo(() => expenses.filter((tx) => tx.month === month).sort((a, b) => b.date.getTime() - a.date.getTime()), [expenses, month]);
-  const toggle = (id: string) => {
-    if (locked?.has(id)) return;
-    setPicked((current) => (current.includes(id) ? current.filter((x) => x !== id) : [...current, id]));
-  };
+  const toggle = (id: string) =>
+    setPicked((current) => (current.includes(id) ? (locked?.has(id) ? current : current.filter((x) => x !== id)) : [...current, id]));
   const tooMany = touches(picked) > MAX_EDIT_ROWS;
 
   const arrow = (delta: number, label: string, path: string) => (
@@ -315,7 +324,7 @@ function AlbumTransactionsPicker({
               const category = tx.categoryId ? model.categories.get(tx.categoryId) : null;
               const label = tx.note || category?.name || tc("uncategorized");
               const on = pickedSet.has(tx.id);
-              const fixed = !!locked?.has(tx.id);
+              const fixed = on && !!locked?.has(tx.id);
               return (
                 <li key={tx.id}>
                   <label
@@ -374,9 +383,7 @@ function AlbumTransactionsForm({ trip: shown, onClose }: { trip: Trip; onClose: 
     const { add, remove } = changes(ids);
     return add.length + remove.length;
   };
-  // A shared album's own bills leave the group, for everyone, when taken out:
-  // the app asks first, and the phone refuses it from here.
-  const locked = useMemo(() => new Set(base.txIds.filter((id) => model.txById.get(id)?.groupId === shown.id)), [base.txIds, model, shown.id]);
+  const locked = useMemo(() => albumGroupBillIds(model, shown.id), [model, shown.id]);
   return (
     <AlbumTransactionsPicker initial={base.txIds} touches={touches} locked={locked} title={t("editTransactions")} doneLabel={t("save")} onDone={(ids) => void save(ids)} onClose={onClose} busy={busy} disabled={!ready}>
       <EditBlocked />
@@ -392,12 +399,9 @@ export function AlbumActions({ trip }: { trip: Trip }) {
   const { fullModel: model } = useDashboard();
   const { run, busy, error, ready } = useEditRun();
   const [open, setOpen] = useState<"details" | "transactions" | "delete" | null>(null);
-  // An album with bills of its group is shared: it stops being shared (or is
-  // left) in the app before it is deleted, and the phone refuses it from here.
-  // Ending the share clears the bills' group, so this is the album's sharing as
-  // of the last sync. A shared album with no bills yet still offers it, and the
-  // phone says no.
-  const shared = useMemo(() => trip.txIds.some((id) => model.txById.get(id)?.groupId === trip.id), [model, trip]);
+  // A shared album stops being shared (or is left) in the app before it is
+  // deleted. One with no bills yet still offers it, and the phone says no.
+  const shared = useMemo(() => albumGroupBillIds(model, trip.id).size > 0, [model, trip.id]);
 
   const remove = async () => {
     if (!ready || busy) return;

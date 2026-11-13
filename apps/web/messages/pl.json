@@ -1453,6 +1453,7 @@
       "amountLocked": "Ta kwota jest powiązana z podziałem lub zwrotem. Zmień ją w aplikacji.",
       "friendPaid": "{name} zapłacił(a) ten rachunek. Zmień go w aplikacji.",
       "groupBill": "Ten rachunek jest w udostępnionym albumie. Zmień go w aplikacji.",
+      "groupBills": "Niektóre z nich są w udostępnionym albumie. Zmień je w aplikacji.",
       "hideBalances": "Ukryj salda",
       "showBalances": "Pokaż salda",
       "savingsGoals": "Cele oszczędnościowe",
