@@ -69,13 +69,15 @@ export function isInstalmentPlan(
  * it again), not split with friends, not a transfer's fee, and not one whose
  * reimbursement came back (its refund is for the whole amount, which the
  * first payment no longer is). A pending reimbursement is fine: the tick
- * stays on payment 1, as on a plan from the add form.
+ * stays on payment 1, as on a plan from the add form. Never a shared album's
+ * bill: everyone in the album has a side of it, and a plan's payments are the
+ * user's own.
  */
 export function canConvertToInstalmentPlan(
   transaction: Pick<
     Transaction,
     'id' | 'type' | 'instalmentRuleId' | 'feeOfId' | 'reimbursedAt' | 'reimbursementTransactionId'
-  > & { splits?: readonly unknown[] | null },
+  > & { splits?: readonly unknown[] | null; albumGroupId?: string | null },
 ): boolean {
   return (
     transaction.type === 'expense' &&
@@ -84,6 +86,7 @@ export function canConvertToInstalmentPlan(
     !transaction.feeOfId &&
     !transaction.reimbursedAt &&
     !transaction.reimbursementTransactionId &&
+    !transaction.albumGroupId &&
     (transaction.splits?.length ?? 0) === 0
   );
 }

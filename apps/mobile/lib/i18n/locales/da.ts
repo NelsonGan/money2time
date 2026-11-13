@@ -1083,7 +1083,8 @@ const da = {
         you_owe_nothing: 'Du skylder intet på denne regning',
         get_back_hint: 'Du får {{amount}} tilbage',
         paid_floor: 'Du har allerede betalt {{amount}} tilbage',
-        your_share: 'Din andel {{amount}}',
+        your_share_label: 'Din andel',
+        paid_by_you: 'Betalt af dig',
         section_subtitle_unpaid: '{{count}} skylder dig stadig',
         section_subtitle_unpaid_plural: '{{count}} skylder dig stadig',
         subtotal_label: 'Subtotal',
@@ -3006,7 +3007,6 @@ const da = {
     bill: {
       delete_shared: 'Regningen er i et delt album. Sletter du den, fjernes den for alle.',
       remove_shared: 'Regningen er i et delt album. Den fjernes for alle andre.',
-      from_album: 'Fra {{album}}',
       shared_album: 'Delt album',
     },
     rules: {
@@ -3014,8 +3014,8 @@ const da = {
       has_payments:
         'Der er betalinger på regningen. Fortryd dem først for at ændre eller slette den.',
       not_your_payment: 'Kun den, der betaler, kan registrere eller fortryde en betaling.',
-      note_not_payer: 'Betalt af {{name}}. Kun de kan ændre den.',
-      note_has_payments: 'Har betalinger. Fortryd dem for at ændre den.',
+      badge_not_payer: 'Låst',
+      badge_has_payments: 'Har betalinger',
       they_record: '{{name}} registrerer det, når de betaler dig.',
     },
   },

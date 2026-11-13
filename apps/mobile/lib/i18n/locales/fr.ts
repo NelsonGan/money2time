@@ -1088,7 +1088,8 @@ const fr = {
         you_owe_nothing: 'Vous ne devez rien sur cette facture',
         get_back_hint: 'Vous récupérez {{amount}}',
         paid_floor: 'Vous avez déjà remboursé {{amount}}',
-        your_share: 'Votre part {{amount}}',
+        your_share_label: 'Votre part',
+        paid_by_you: 'Payé par vous',
         section_subtitle_unpaid: '{{count}} vous doit encore',
         section_subtitle_unpaid_plural: '{{count}} vous doivent encore',
         subtotal_label: 'Sous-total',
@@ -3049,7 +3050,6 @@ const fr = {
         'Cette note est dans un album partagé. La supprimer la retire pour tout le monde.',
       remove_shared:
         'Cette note est dans un album partagé. Elle sera retirée pour tous les autres.',
-      from_album: 'De {{album}}',
       shared_album: 'Album partagé',
     },
     rules: {
@@ -3057,8 +3057,8 @@ const fr = {
       has_payments:
         'Cette note a des paiements. Annulez-les d’abord pour la modifier ou la supprimer.',
       not_your_payment: 'Seule la personne qui paie peut enregistrer ou annuler un paiement.',
-      note_not_payer: 'Payé par {{name}}. Seule cette personne peut la modifier.',
-      note_has_payments: 'Paiements enregistrés. Annulez-les pour la modifier.',
+      badge_not_payer: 'Verrouillé',
+      badge_has_payments: 'Paiements enregistrés',
       they_record: '{{name}} l’enregistre en vous payant.',
     },
   },

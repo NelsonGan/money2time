@@ -1086,7 +1086,8 @@ const id = {
         you_owe_nothing: 'Kamu tidak berutang apa pun di tagihan ini',
         get_back_hint: 'Kamu menerima kembali {{amount}}',
         paid_floor: 'Kamu sudah membayar {{amount}}',
-        your_share: 'Bagianmu {{amount}}',
+        your_share_label: 'Bagianmu',
+        paid_by_you: 'Dibayar olehmu',
         section_subtitle_unpaid: '{{count}} masih berutang padamu',
         section_subtitle_unpaid_plural: '{{count}} masih berutang padamu',
         subtotal_label: 'Subtotal',
@@ -3023,7 +3024,6 @@ const id = {
         'Tagihan ini ada di album bersama. Menghapusnya akan menghapusnya untuk semua orang.',
       remove_shared:
         'Tagihan ini ada di album bersama. Tagihan akan dihapus untuk semua orang lain.',
-      from_album: 'Dari {{album}}',
       shared_album: 'Album bersama',
     },
     rules: {
@@ -3031,8 +3031,8 @@ const id = {
       has_payments:
         'Tagihan ini sudah ada pembayaran. Batalkan dulu untuk mengubah atau menghapusnya.',
       not_your_payment: 'Hanya orang yang membayar yang bisa mencatat atau membatalkan pembayaran.',
-      note_not_payer: 'Dibayar oleh {{name}}. Hanya mereka yang bisa mengubahnya.',
-      note_has_payments: 'Ada pembayaran. Batalkan untuk mengubahnya.',
+      badge_not_payer: 'Terkunci',
+      badge_has_payments: 'Ada pembayaran',
       they_record: '{{name}} mencatatnya saat membayar Anda.',
     },
   },
