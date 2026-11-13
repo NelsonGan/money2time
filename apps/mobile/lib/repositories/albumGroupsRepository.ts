@@ -202,12 +202,17 @@ class AlbumGroupsRepository {
       .run();
   }
 
-  /** Deletes a bill for the group, and the payments made on it with it. */
-  softDeleteExpense(groupId: string, id: string): void {
+  /**
+   * Deletes a bill for the group, and the payments made on it with it.
+   * `deletedBy` is the account deleting it, the bill's last writer: the
+   * others' phones keep what money moved on it (README: Album members and
+   * shared albums).
+   */
+  softDeleteExpense(groupId: string, id: string, deletedBy: string | null): void {
     const now = nowIso();
     getDb()
       .update(albumExpensesTable)
-      .set({ deletedAt: now, updatedAt: now })
+      .set({ deletedAt: now, updatedAt: now, createdBy: deletedBy })
       .where(
         and(
           eq(albumExpensesTable.ledgerId, groupId),

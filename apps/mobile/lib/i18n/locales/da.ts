@@ -3016,6 +3016,13 @@ const da = {
     bill: {
       delete_shared: 'Regningen er i et delt album. Sletter du den, fjernes den for alle.',
       remove_shared: 'Regningen er i et delt album. Den fjernes for alle andre.',
+      confirm_account: 'Bekræft konto',
+      confirm_paid_by: '{{name}} siger, du betalte. Vælg kontoen.',
+      confirm_paid: 'Markeret som betalt af dig. Vælg kontoen.',
+      changed_by: 'Ændret af {{name}} i {{album}}',
+      from_album: 'Fra {{album}}',
+      shared_album: 'Delt album',
+      view_album: 'Se album',
     },
   },
   assets: {

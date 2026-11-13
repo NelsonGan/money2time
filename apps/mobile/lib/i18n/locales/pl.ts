@@ -3031,6 +3031,13 @@ const pl = {
       delete_shared: 'Ten rachunek jest w udostępnionym albumie. Usunięcie usunie go u wszystkich.',
       remove_shared:
         'Ten rachunek jest w udostępnionym albumie. Zostanie usunięty u wszystkich pozostałych.',
+      confirm_account: 'Potwierdź konto',
+      confirm_paid_by: '{{name}} wskazuje Ciebie jako płatnika. Wybierz konto.',
+      confirm_paid: 'Wskazano Ciebie jako płatnika. Wybierz konto.',
+      changed_by: 'Zmiana: {{name}}, {{album}}',
+      from_album: 'Z albumu {{album}}',
+      shared_album: 'Udostępniony album',
+      view_album: 'Zobacz album',
     },
   },
   assets: {

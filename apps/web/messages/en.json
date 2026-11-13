@@ -1988,6 +1988,8 @@
         "untitledBill": "Split bill",
         "paidTitle": "Paid back",
         "personPaid": "{name} paid",
+        "sharedAlbum": "Shared album",
+        "confirmAccount": "Confirm account in the app",
         "undoTitle": "Mark this share unpaid?",
         "undoBody": "It is owed to you again, and the expense goes back up by this amount. A payback transfer into another account is removed.",
         "itemizedTotal": "Total: {sum}",

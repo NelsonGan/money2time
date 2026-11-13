@@ -4276,7 +4276,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             receiptUri: entry.receiptUri,
             sentiment: entry.sentiment,
             reimbursable: entry.reimbursable,
-            ...(built.paidBy === self.id && entry.accountId
+            // An entry on no account yet (a friend paid it, or someone else
+            // said the user did) takes its first account from the projection
+            // below, which works its account amount out for it.
+            ...(built.paidBy === self.id && entry.accountId && existing?.accountId
               ? { accountId: entry.accountId }
               : null),
           });
@@ -4304,7 +4307,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (!groupId) return;
       getSQLite().withTransactionSync(() => {
         transactionsRepository.update(transactionId, { albumGroupId: null });
-        albumGroupsRepository.softDeleteExpense(groupId, transactionId);
+        albumGroupsRepository.softDeleteExpense(
+          groupId,
+          transactionId,
+          sharedAlbumFor(groupId)?.userId ?? null,
+        );
       });
       afterGroupWrite();
     },
@@ -4473,7 +4480,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       for (const id of ids) {
         const groupId = bills.get(id);
         if (groupId) {
-          albumGroupsRepository.softDeleteExpense(groupId, id);
+          albumGroupsRepository.softDeleteExpense(
+            groupId,
+            id,
+            sharedAlbumFor(groupId)?.userId ?? null,
+          );
           touched.add(groupId);
           taken.add(id);
           continue;

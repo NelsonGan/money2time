@@ -2962,6 +2962,13 @@ const th = {
     bill: {
       delete_shared: 'บิลนี้อยู่ในอัลบั้มที่แชร์ การลบจะนำออกสำหรับทุกคน',
       remove_shared: 'บิลนี้อยู่ในอัลบั้มที่แชร์ บิลจะถูกนำออกสำหรับคนอื่นทุกคน',
+      confirm_account: 'ยืนยันบัญชี',
+      confirm_paid_by: '{{name}} บอกว่าคุณเป็นคนจ่าย เลือกบัญชี',
+      confirm_paid: 'คุณถูกระบุว่าเป็นคนจ่าย เลือกบัญชี',
+      changed_by: '{{name}} แก้ไขใน {{album}}',
+      from_album: 'จาก {{album}}',
+      shared_album: 'อัลบั้มที่แชร์',
+      view_album: 'ดูอัลบั้ม',
     },
   },
   assets: {

@@ -1988,6 +1988,8 @@
         "untitledBill": "Chia hóa đơn",
         "paidTitle": "Đã trả",
         "personPaid": "{name} đã trả",
+        "sharedAlbum": "Album chung",
+        "confirmAccount": "Xác nhận tài khoản trong ứng dụng",
         "undoTitle": "Đánh dấu phần này là chưa trả?",
         "undoBody": "Người đó lại nợ bạn khoản này và khoản chi tiêu sẽ tăng lên đúng số tiền đó. Giao dịch chuyển tiền trả lại vào tài khoản khác sẽ bị xóa.",
         "itemizedTotal": "Tổng: {sum}",

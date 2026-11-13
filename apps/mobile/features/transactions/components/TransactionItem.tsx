@@ -1,4 +1,12 @@
-import { ArrowRight, CalendarRange, GripVertical, Undo2, UserRound } from 'lucide-react-native';
+import {
+  ArrowRight,
+  CalendarRange,
+  CircleAlert,
+  GripVertical,
+  Undo2,
+  UserRound,
+  UsersRound,
+} from 'lucide-react-native';
 import React, { memo, useEffect } from 'react';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
@@ -15,6 +23,7 @@ import { AccountLogo, CategoryEmoji, Text, TimeValueInline } from '~/components/
 import { motionDurations } from '~/constants/motion';
 import { useApp } from '~/context/AppContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
+import { needsAccountConfirm } from '~/features/albums/lib/albumGroup';
 import { PersonAvatar } from '~/features/sharedLedgers/components/PersonAvatar';
 import { shortName, useOpenLedgerPeople } from '~/features/sharedLedgers/lib/ledgerPeople';
 import {
@@ -224,6 +233,7 @@ export function TransactionAccountBadge({
   compact,
   className,
   person = false,
+  confirm = false,
 }: {
   account?: Account;
   label: string;
@@ -231,6 +241,8 @@ export function TransactionAccountBadge({
   className?: string;
   /** The pill names a person (the friend who paid the bill), not an account. */
   person?: boolean;
+  /** The pill asks for an account (a shared album's bill waiting to be confirmed). */
+  confirm?: boolean;
 }) {
   const themeColors = useThemeColors();
   const labelSizeClass = compact ? 'text-[10px] leading-[12px]' : 'text-[11px] leading-[14px]';
@@ -244,6 +256,10 @@ export function TransactionAccountBadge({
       {person ? (
         <View className="pl-0.5">
           <UserRound size={compact ? 10 : 12} color={themeColors.primary} />
+        </View>
+      ) : confirm ? (
+        <View className="pl-0.5">
+          <CircleAlert size={compact ? 10 : 12} color={themeColors.primary} />
         </View>
       ) : (
         <AccountLogo
@@ -324,8 +340,13 @@ const TransactionItemBody = memo(
       transaction.splitsSummary?.youOwe && !transaction.accountId
         ? billPayer(transaction.splits)
         : null;
-    const accountSubtitleLabel =
-      !isTransfer && appSettings.showTransactionAccount
+    // A shared album's bill someone else said the user paid waits for its
+    // account, and says so even with account badges switched off: it is
+    // something to do, not a detail.
+    const confirmAccount = needsAccountConfirm(transaction);
+    const accountSubtitleLabel = confirmAccount
+      ? I18n.t('albums.bill.confirm_account')
+      : !isTransfer && appSettings.showTransactionAccount
         ? (transaction.accountName ??
           (friendPayer
             ? I18n.t('transactions.settleUp.person_paid', {
@@ -333,6 +354,10 @@ const TransactionItemBody = memo(
               })
             : I18n.t('common.no_account')))
         : null;
+    // A bill from a shared album: someone else can add, change or remove it,
+    // so the row says where it came from.
+    const fromSharedAlbum = !!transaction.albumGroupId;
+    const titleMarks = transaction.reimbursable || fromSharedAlbum;
     const account = transaction.accountId ? getAccountById(transaction.accountId) : undefined;
     const fromAccount = transaction.fromAccountId
       ? getAccountById(transaction.fromAccountId)
@@ -485,7 +510,7 @@ const TransactionItemBody = memo(
               by the reimbursable badge sizes its slot from a hidden copy and
               draws the visible title over it with room to spare. */}
           <View className="flex-row items-center gap-1.5">
-            {transaction.reimbursable ? (
+            {titleMarks ? (
               <>
                 {/* The row's spoken summary is built from its children's
                     labels, and would read both copies; labelling the slot
@@ -493,7 +518,11 @@ const TransactionItemBody = memo(
                 <View
                   className="min-w-0 shrink"
                   collapsable={false}
-                  accessibilityLabel={title ?? undefined}
+                  accessibilityLabel={
+                    fromSharedAlbum
+                      ? `${title ?? ''}, ${I18n.t('albums.bill.shared_album')}`
+                      : (title ?? undefined)
+                  }
                 >
                   <Text
                     variant="bodyStrong"
@@ -512,13 +541,18 @@ const TransactionItemBody = memo(
                     {title}
                   </Text>
                 </View>
+                {fromSharedAlbum ? (
+                  <UsersRound size={compact ? 11 : 12} color={themeColors.textMuted} />
+                ) : null}
                 {/* A reimbursable expense can be missing from the spending
                     totals above it, so the row says why rather than looking
                     miscounted. */}
-                <Undo2
-                  size={compact ? 11 : 12}
-                  color={transaction.reimbursedAt ? themeColors.success : themeColors.primary}
-                />
+                {transaction.reimbursable ? (
+                  <Undo2
+                    size={compact ? 11 : 12}
+                    color={transaction.reimbursedAt ? themeColors.success : themeColors.primary}
+                  />
+                ) : null}
               </>
             ) : (
               <Text
@@ -579,6 +613,7 @@ const TransactionItemBody = memo(
                 label={accountSubtitleLabel}
                 compact={compact}
                 person={!!friendPayer}
+                confirm={confirmAccount}
                 className={compact ? 'min-w-[40px] shrink' : 'min-w-[44px] shrink'}
               />
               <InstalmentPill label={instalmentLabel} compact={compact} />
@@ -589,6 +624,7 @@ const TransactionItemBody = memo(
               label={accountSubtitleLabel}
               compact={compact}
               person={!!friendPayer}
+              confirm={confirmAccount}
               className={accountBadgeMarginClassName}
             />
           ) : instalmentLabel ? (

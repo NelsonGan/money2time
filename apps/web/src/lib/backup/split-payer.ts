@@ -46,6 +46,32 @@ export function billPayer<T extends PayerSplit>(rows: readonly T[]): T | null {
 }
 
 /** What the user owes on one bill a friend paid (the app's `owedToPayer`). */
+/**
+ * The shared album's bills the user is said to have paid that are on none of
+ * their accounts: someone else saved them naming the user as payer, and they
+ * wait for the user to pick the account in the app (the app's
+ * `needsAccountConfirm`). A bill a friend paid is on no account for another
+ * reason, so it is left out.
+ */
+export function awaitingAccount(
+  txs: Iterable<{ id: string; type: string; accountId: string | null; albumGroupId?: string }>,
+  splits: readonly PayerSplit[],
+): Set<string> {
+  const byTx = new Map<string, PayerSplit[]>();
+  for (const split of splits) {
+    const rows = byTx.get(split.transaction_id);
+    if (rows) rows.push(split);
+    else byTx.set(split.transaction_id, [split]);
+  }
+  const ids = new Set<string>();
+  for (const tx of txs) {
+    if (!tx.albumGroupId || tx.type !== "expense" || tx.accountId) continue;
+    const rows = byTx.get(tx.id) ?? [];
+    if (rows.some((row) => !row.is_self) && !billPayer(rows)) ids.add(tx.id);
+  }
+  return ids;
+}
+
 export type OwedToPayer = {
   txId: string;
   /** The payer's row. */

@@ -3037,6 +3037,13 @@ const ms = {
       delete_shared:
         'Bil ini berada dalam album kongsi. Memadamnya akan membuangnya untuk semua orang.',
       remove_shared: 'Bil ini berada dalam album kongsi. Ia akan dibuang untuk semua orang lain.',
+      confirm_account: 'Sahkan akaun',
+      confirm_paid_by: 'Menurut {{name}}, Anda yang membayar. Pilih akaun.',
+      confirm_paid: 'Anda ditanda sebagai pembayar. Pilih akaun.',
+      changed_by: 'Diubah oleh {{name}} dalam {{album}}',
+      from_album: 'Dari {{album}}',
+      shared_album: 'Album kongsi',
+      view_album: 'Lihat album',
     },
   },
   assets: {

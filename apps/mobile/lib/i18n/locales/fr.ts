@@ -3061,6 +3061,13 @@ const fr = {
         'Cette note est dans un album partagé. La supprimer la retire pour tout le monde.',
       remove_shared:
         'Cette note est dans un album partagé. Elle sera retirée pour tous les autres.',
+      confirm_account: 'Confirmer le compte',
+      confirm_paid_by: '{{name}} indique que vous avez payé. Choisissez le compte.',
+      confirm_paid: 'Indiqué comme payé par vous. Choisissez le compte.',
+      changed_by: 'Modifié par {{name}} dans {{album}}',
+      from_album: 'De {{album}}',
+      shared_album: 'Album partagé',
+      view_album: 'Voir l’album',
     },
   },
   assets: {

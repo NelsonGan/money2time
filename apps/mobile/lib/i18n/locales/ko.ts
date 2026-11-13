@@ -2978,6 +2978,13 @@ const ko = {
     bill: {
       delete_shared: '이 청구는 공유 앨범에 있어요. 삭제하면 모두에게서 사라져요.',
       remove_shared: '이 청구는 공유 앨범에 있어요. 다른 모든 사람에게서도 사라져요.',
+      confirm_account: '계좌 확인',
+      confirm_paid_by: '{{name}}님이 내가 결제했다고 했어요. 계좌를 골라 주세요.',
+      confirm_paid: '내가 결제한 것으로 되어 있어요. 계좌를 골라 주세요.',
+      changed_by: '{{album}}에서 {{name}}님이 변경',
+      from_album: '{{album}}에서',
+      shared_album: '공유 앨범',
+      view_album: '앨범 보기',
     },
   },
   assets: {

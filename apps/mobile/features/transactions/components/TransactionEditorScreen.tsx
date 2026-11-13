@@ -70,7 +70,7 @@ import {
   SubscriptionLogo,
   Text,
 } from '~/components/ui';
-import { ClayIcon } from '~/components/ui/ClayIcon';
+import { ClayIcon, type ClayIconName } from '~/components/ui/ClayIcon';
 import { SentimentIcon } from '~/components/ui/SentimentIcons';
 import { hasSubscriptionLogoArt } from '~/components/ui/SubscriptionLogo';
 import { SINGLE_LINE_TEXT_INPUT_STYLE } from '~/components/ui/textInputStyles';
@@ -480,8 +480,17 @@ interface TransactionEditorScreenProps {
       transferFee: TransferFeeDraft | null;
     }) => void;
   };
-  /** A line under the header that links somewhere (a payment's instalment plan). */
-  headerNotice?: { label: string; actionLabel: string; onPress: () => void };
+  /**
+   * A line under the header that links somewhere (a payment's instalment
+   * plan, a shared album's bill's album). `icon` defaults to the plan's.
+   */
+  headerNotice?: { label: string; actionLabel: string; onPress: () => void; icon?: ClayIconName };
+  /**
+   * Opens on no account even when `initialValues` has none, so one has to be
+   * picked before saving (a shared album's bill someone else said the user
+   * paid). Without it an edit with no account starts on the first account.
+   */
+  startWithoutAccount?: boolean;
   /** The fee a transfer being edited already has. */
   initialTransferFee?: TransferFeeDraft | null;
   /**
@@ -725,6 +734,7 @@ export function TransactionEditorScreen({
   recurringOptions,
   instalmentOptions,
   headerNotice,
+  startWithoutAccount = false,
   initialTransferFee = null,
 }: TransactionEditorScreenProps) {
   const {
@@ -806,7 +816,11 @@ export function TransactionEditorScreen({
   const initialSingleAccountId =
     initialValues?.accountId ??
     initialAccountId ??
-    (mode === 'create' ? quickDefaultAccountId : (accounts[0]?.id ?? null));
+    (startWithoutAccount
+      ? null
+      : mode === 'create'
+        ? quickDefaultAccountId
+        : (accounts[0]?.id ?? null));
   const initialFromSelectionId =
     initialValues?.fromAccountId ?? (mode === 'create' ? null : (accounts[0]?.id ?? null));
   const initialToSelectionId =
@@ -4521,7 +4535,7 @@ export function TransactionEditorScreen({
                 className="flex-row items-center gap-2 rounded-2xl border border-primary/25 bg-primary/10 px-3.5 py-2.5 active:opacity-70"
               >
                 <ClayIcon
-                  name="settings/instalments"
+                  name={headerNotice.icon ?? 'settings/instalments'}
                   size={18}
                   flatSize={15}
                   flatColor={themeColors.primary}

@@ -2896,6 +2896,13 @@ const zhHant = {
     bill: {
       delete_shared: '此帳單在共享相簿中。刪除後所有人那裡都會移除。',
       remove_shared: '此帳單在共享相簿中。其他所有人那裡都會移除。',
+      confirm_account: '確認帳戶',
+      confirm_paid_by: '{{name}} 說是你付的。請選擇帳戶。',
+      confirm_paid: '記為由你付款。請選擇帳戶。',
+      changed_by: '{{name}} 在 {{album}} 中修改',
+      from_album: '來自 {{album}}',
+      shared_album: '共享相簿',
+      view_album: '查看相簿',
     },
   },
   assets: {

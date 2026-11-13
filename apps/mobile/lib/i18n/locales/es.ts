@@ -3036,6 +3036,13 @@ const es = {
       delete_shared:
         'Esta cuenta está en un álbum compartido. Si la eliminas, se quita para todos.',
       remove_shared: 'Esta cuenta está en un álbum compartido. Se quitará para todos los demás.',
+      confirm_account: 'Confirmar cuenta',
+      confirm_paid_by: '{{name}} dice que pagaste tú. Elige la cuenta.',
+      confirm_paid: 'Marcado como pagado por ti. Elige la cuenta.',
+      changed_by: 'Cambiado por {{name}} en {{album}}',
+      from_album: 'De {{album}}',
+      shared_album: 'Álbum compartido',
+      view_album: 'Ver álbum',
     },
   },
   assets: {

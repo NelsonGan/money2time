@@ -10,6 +10,8 @@ import {
   useTransferFeeIndex,
 } from '~/context/AppContext';
 import { albumBillRows, useAlbumBillTarget } from '~/features/albums/hooks/useAlbumBillTarget';
+import { useGroupBillOrigin } from '~/features/albums/hooks/useGroupBillOrigin';
+import { needsAccountConfirm } from '~/features/albums/lib/albumGroup';
 import type { InstalmentChoice } from '~/features/instalments/components/InstalmentSheet';
 import { useCanStartInstalmentPlan } from '~/features/instalments/hooks/useCanStartInstalmentPlan';
 import {
@@ -150,6 +152,31 @@ function TransactionEditor({
   const instalmentPlan = transaction.instalmentRuleId
     ? (instalmentPlans.find((plan) => plan.rule.id === transaction.instalmentRuleId) ?? null)
     : null;
+  // A shared album's bill says where it is from and who last changed it, so a
+  // figure that moved has a reason; one someone else said the user paid asks
+  // which account it left (README: Album members and shared albums).
+  const groupOrigin = useGroupBillOrigin(transaction);
+  const confirmAccount = needsAccountConfirm(transaction);
+  const groupNotice = groupOrigin
+    ? {
+        label: confirmAccount
+          ? groupOrigin.changedBy
+            ? I18n.t('albums.bill.confirm_paid_by', { name: groupOrigin.changedBy })
+            : I18n.t('albums.bill.confirm_paid')
+          : groupOrigin.changedBy
+            ? I18n.t('albums.bill.changed_by', {
+                name: groupOrigin.changedBy,
+                album: groupOrigin.albumName ?? I18n.t('albums.bill.shared_album'),
+              })
+            : I18n.t('albums.bill.from_album', {
+                album: groupOrigin.albumName ?? I18n.t('albums.bill.shared_album'),
+              }),
+        actionLabel: I18n.t('albums.bill.view_album'),
+        icon: 'settings/albums' as const,
+        onPress: () =>
+          navigation.navigate('AlbumDetail', { albumId: groupOrigin.albumId }, { pop: true }),
+      }
+    : undefined;
   const headerNotice = instalmentPlan
     ? {
         label:
@@ -166,7 +193,7 @@ function TransactionEditor({
         onPress: () =>
           navigation.navigate('InstalmentPlan', { planId: instalmentPlan.rule.id }, { pop: true }),
       }
-    : undefined;
+    : groupNotice;
   const isLegacyBalanceAdjustmentTransfer =
     transaction.type === 'transfer' &&
     !!transaction.accountId &&
@@ -511,6 +538,7 @@ function TransactionEditor({
       initialTransferFee={initialTransferFee}
       openSplitBillOnMount={openSplitBillOnMount}
       headerNotice={headerNotice}
+      startWithoutAccount={confirmAccount}
       instalmentOptions={instalmentOptions}
       subtitleOverride={
         isBalanceAdjustment

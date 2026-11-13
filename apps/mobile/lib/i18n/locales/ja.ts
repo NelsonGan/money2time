@@ -2998,6 +2998,13 @@ const ja = {
     bill: {
       delete_shared: 'この会計は共有アルバムにあります。削除すると全員の分が消えます。',
       remove_shared: 'この会計は共有アルバムにあります。ほかの全員の分も消えます。',
+      confirm_account: '口座を確認',
+      confirm_paid_by: '{{name}}さんによるとあなたが支払いました。口座を選んでください。',
+      confirm_paid: 'あなたが支払ったことになっています。口座を選んでください。',
+      changed_by: '{{album}}で{{name}}さんが変更',
+      from_album: '{{album}}から',
+      shared_album: '共有アルバム',
+      view_album: 'アルバムを見る',
     },
   },
   assets: {

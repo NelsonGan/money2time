@@ -3024,6 +3024,13 @@ const tr = {
     bill: {
       delete_shared: 'Bu hesap paylaşılan bir albümde. Silerseniz herkes için kaldırılır.',
       remove_shared: 'Bu hesap paylaşılan bir albümde. Diğer herkes için kaldırılır.',
+      confirm_account: 'Hesabı onayla',
+      confirm_paid_by: '{{name}}, ödeyenin siz olduğunu söylüyor. Hesabı seçin.',
+      confirm_paid: 'Ödeyen olarak siz işaretlendiniz. Hesabı seçin.',
+      changed_by: '{{album}} içinde {{name}} değiştirdi',
+      from_album: '{{album}} albümünden',
+      shared_album: 'Paylaşılan albüm',
+      view_album: 'Albümü gör',
     },
   },
   assets: {

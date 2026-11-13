@@ -3002,6 +3002,13 @@ const hi = {
     bill: {
       delete_shared: 'यह बिल एक साझा एल्बम में है। इसे हटाने पर यह सभी के लिए हट जाएगा।',
       remove_shared: 'यह बिल एक साझा एल्बम में है। यह बाकी सभी के लिए हट जाएगा।',
+      confirm_account: 'खाता पुष्टि करें',
+      confirm_paid_by: '{{name}} के अनुसार भुगतान आपने किया। खाता चुनें।',
+      confirm_paid: 'भुगतान करने वाले के रूप में आपका नाम है। खाता चुनें।',
+      changed_by: '{{album}} में {{name}} ने बदला',
+      from_album: '{{album}} से',
+      shared_album: 'साझा एल्बम',
+      view_album: 'एल्बम देखें',
     },
   },
   assets: {

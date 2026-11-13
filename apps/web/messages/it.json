@@ -1988,6 +1988,8 @@
         "untitledBill": "Conto diviso",
         "paidTitle": "Rimborsato",
         "personPaid": "{name} ha pagato",
+        "sharedAlbum": "Album condiviso",
+        "confirmAccount": "Conferma il conto nell’app",
         "undoTitle": "Segnare questa quota come non pagata?",
         "undoBody": "Ti viene dovuta di nuovo e la spesa torna a salire di questo importo. Un trasferimento di rimborso verso un altro conto viene rimosso.",
         "itemizedTotal": "Totale: {sum}",

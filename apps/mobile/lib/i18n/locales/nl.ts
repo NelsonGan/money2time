@@ -3054,6 +3054,13 @@ const nl = {
       delete_shared:
         'Deze rekening staat in een gedeeld album. Als je hem verwijdert, verdwijnt hij voor iedereen.',
       remove_shared: 'Deze rekening staat in een gedeeld album. Hij verdwijnt voor alle anderen.',
+      confirm_account: 'Rekening bevestigen',
+      confirm_paid_by: 'Volgens {{name}} heb jij betaald. Kies de rekening.',
+      confirm_paid: 'Gemarkeerd als door jou betaald. Kies de rekening.',
+      changed_by: 'Gewijzigd door {{name}} in {{album}}',
+      from_album: 'Uit {{album}}',
+      shared_album: 'Gedeeld album',
+      view_album: 'Album bekijken',
     },
   },
   assets: {

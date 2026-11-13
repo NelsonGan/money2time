@@ -21,7 +21,7 @@
  * running it twice changes nothing.
  */
 
-import { owedToPayer } from '~/features/transactions/lib/splitPayer';
+import { billPayer, owedToPayer } from '~/features/transactions/lib/splitPayer';
 import { splitShareKey } from '~/features/transactions/lib/splitPayments';
 import type { AlbumExpense, AlbumSettlement, AlbumShare, TransactionSplit } from '~/types';
 import { normalizeMoneyAmount } from '~/utils/formatters';
@@ -505,6 +505,26 @@ export function groupFromLocalBill(
   }
   const built = billFromRows(rows, selfId);
   return built ? { ...built, payments } : null;
+}
+
+/**
+ * Whether a group's bill is one the user is said to have paid that is on
+ * none of their accounts yet: someone else saved it naming them as the payer,
+ * so it waits for the user to say which account it left (README: Album
+ * members and shared albums).
+ */
+export function needsAccountConfirm(
+  tx: { albumGroupId?: string | null; type: string; accountId: string | null } & {
+    splits?: readonly Pick<TransactionSplit, 'isPayer' | 'isSelf' | 'partOfSplitId'>[] | null;
+  },
+): boolean {
+  return (
+    !!tx.albumGroupId &&
+    tx.type === 'expense' &&
+    !tx.accountId &&
+    !!tx.splits?.some((split) => !split.isSelf) &&
+    !billPayer(tx.splits)
+  );
 }
 
 /** Whether a bill that still stands names the member, as its payer or with a share. */

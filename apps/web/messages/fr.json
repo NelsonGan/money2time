@@ -1988,6 +1988,8 @@
         "untitledBill": "Facture partagée",
         "paidTitle": "Remboursé",
         "personPaid": "{name} a payé",
+        "sharedAlbum": "Album partagé",
+        "confirmAccount": "Confirmez le compte dans l’app",
         "undoTitle": "Marquer cette part comme impayée ?",
         "undoBody": "Elle vous est de nouveau due, et la dépense remonte de ce montant. Un virement de remboursement vers un autre compte est supprimé.",
         "itemizedTotal": "Total : {sum}",

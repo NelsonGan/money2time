@@ -3062,6 +3062,13 @@ const fil = {
       delete_shared:
         'Nasa shared na album ang bill na ito. Kapag binura mo, mawawala ito para sa lahat.',
       remove_shared: 'Nasa shared na album ang bill na ito. Mawawala ito para sa lahat ng iba.',
+      confirm_account: 'Kumpirmahin ang account',
+      confirm_paid_by: 'Sabi ni {{name}}, ikaw ang nagbayad. Piliin ang account.',
+      confirm_paid: 'Ikaw ang nakalistang nagbayad. Piliin ang account.',
+      changed_by: 'Binago ni {{name}} sa {{album}}',
+      from_album: 'Mula sa {{album}}',
+      shared_album: 'Shared na album',
+      view_album: 'Tingnan ang album',
     },
   },
   assets: {

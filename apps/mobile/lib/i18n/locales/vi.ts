@@ -2999,6 +2999,13 @@ const vi = {
     bill: {
       delete_shared: 'Hóa đơn này nằm trong album chung. Xóa nó sẽ gỡ khỏi mọi người.',
       remove_shared: 'Hóa đơn này nằm trong album chung. Nó sẽ bị gỡ khỏi mọi người khác.',
+      confirm_account: 'Xác nhận tài khoản',
+      confirm_paid_by: '{{name}} nói bạn đã trả. Chọn tài khoản.',
+      confirm_paid: 'Bạn được ghi là người trả. Chọn tài khoản.',
+      changed_by: '{{name}} đã sửa trong {{album}}',
+      from_album: 'Từ {{album}}',
+      shared_album: 'Album chung',
+      view_album: 'Xem album',
     },
   },
   assets: {

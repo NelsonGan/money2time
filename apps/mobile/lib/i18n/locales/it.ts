@@ -3033,6 +3033,13 @@ const it = {
     bill: {
       delete_shared: 'Questo conto è in un album condiviso. Eliminandolo viene rimosso per tutti.',
       remove_shared: 'Questo conto è in un album condiviso. Verrà rimosso per tutti gli altri.',
+      confirm_account: 'Conferma conto',
+      confirm_paid_by: 'Secondo {{name}} hai pagato tu. Scegli il conto.',
+      confirm_paid: 'Risulti tu come chi ha pagato. Scegli il conto.',
+      changed_by: 'Modificato da {{name}} in {{album}}',
+      from_album: 'Da {{album}}',
+      shared_album: 'Album condiviso',
+      view_album: 'Vedi album',
     },
   },
   assets: {

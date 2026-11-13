@@ -3009,6 +3009,13 @@ const en = {
     bill: {
       delete_shared: 'This bill is in a shared album. Deleting it removes it for everyone.',
       remove_shared: 'This bill is in a shared album. It will be removed for everyone else.',
+      confirm_account: 'Confirm account',
+      confirm_paid_by: '{{name}} says you paid. Pick the account.',
+      confirm_paid: 'Marked as paid by you. Pick the account.',
+      changed_by: 'Changed by {{name}} in {{album}}',
+      from_album: 'From {{album}}',
+      shared_album: 'Shared album',
+      view_album: 'View album',
     },
   },
   assets: {

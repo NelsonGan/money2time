@@ -3033,6 +3033,13 @@ const id = {
         'Tagihan ini ada di album bersama. Menghapusnya akan menghapusnya untuk semua orang.',
       remove_shared:
         'Tagihan ini ada di album bersama. Tagihan akan dihapus untuk semua orang lain.',
+      confirm_account: 'Konfirmasi akun',
+      confirm_paid_by: 'Menurut {{name}}, Anda yang membayar. Pilih akunnya.',
+      confirm_paid: 'Anda tercatat sebagai pembayar. Pilih akunnya.',
+      changed_by: 'Diubah oleh {{name}} di {{album}}',
+      from_album: 'Dari {{album}}',
+      shared_album: 'Album bersama',
+      view_album: 'Lihat album',
     },
   },
   assets: {

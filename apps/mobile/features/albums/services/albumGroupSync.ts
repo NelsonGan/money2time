@@ -405,6 +405,29 @@ function removeLocalBill(tx: TxRow, splits: readonly TransactionSplit[]): void {
 }
 
 /**
+ * Whether the user's side of a bill has moved money: the bill is on one of
+ * their accounts (they paid it, or paid their share back in full), or a
+ * payment on it made an entry of its own (a part paid, a payback received
+ * into another account).
+ */
+function movedMoney(tx: TxRow, splits: readonly TransactionSplit[]): boolean {
+  return !!tx.account_id || splits.some((split) => !!split.paidTransactionId);
+}
+
+/**
+ * A bill someone else took away (deleted, or the user taken off it) after
+ * money moved on it: what moved stays as the user's own, so their accounts
+ * still match their bank. The bill stays on its account, in the album, with
+ * no shares (nobody owes anyone on it any more); one still owed, on no
+ * account, goes; the entries its payments made stay as they are.
+ */
+function keepMovedMoney(tx: TxRow): void {
+  transactionSplitsRepository.softDeleteByTransactionId(tx.id);
+  if (tx.account_id) transactionsRepository.update(tx.id, { albumGroupId: null });
+  else transactionsRepository.softDeleteMany([tx.id]);
+}
+
+/**
  * Brings the user's own side of one bill in step with the group. Returns
  * whether anything was written.
  */
@@ -429,11 +452,16 @@ function projectExpense(
       ? (loaded.splits.get(expense.id) ?? [])
       : transactionSplitsRepository.listByTransactionId(expense.id);
 
+  // Whether this account made the bill's last change (a phone of the user's).
+  const changedByUser = expense.createdBy === env.userId;
+
   if (!bill) {
     // Not the user's bill (any more): their side of it goes. Only an entry
-    // the group has marked as its own is touched.
+    // the group has marked as its own is touched. Taken away by someone else
+    // after money moved on it, what moved stays.
     if (!live || live.album_group_id !== groupId) return false;
-    removeLocalBill(live, splits);
+    if (!changedByUser && movedMoney(live, splits)) keepMovedMoney(live);
+    else removeLocalBill(live, splits);
     return true;
   }
 
@@ -463,9 +491,14 @@ function projectExpense(
 
   // --- The entry itself ---------------------------------------------------
   const finalPayment = bill.payments.find((payment) => payment.kind === 'sent_final') ?? null;
+  // A bill someone else says the user paid lands on no account: it waits
+  // for them to say which account it left (`needsAccountConfirm`), rather
+  // than moving their default account's balance on another's word.
   const accountId =
     bill.kind === 'paid'
-      ? (live?.account_id ?? hints.entry?.accountId ?? env.defaultAccountId)
+      ? (live?.account_id ??
+        hints.entry?.accountId ??
+        (changedByUser ? env.defaultAccountId : null))
       : finalPayment
         ? paymentAccount(finalPayment, env.defaultAccountId)
         : null;

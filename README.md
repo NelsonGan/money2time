@@ -2202,6 +2202,29 @@ migrations `090` and `091`.
   editor is still open, so Cancel keeps every edit): the bill then leaves
   the group, for everyone else, and stays the user's own entry. The entry a
   payment made (a part the user paid) cannot be split itself.
+- **A bill from a shared album says so.** Its row in every list has a small
+  people mark after the title (read out as "Shared album"), since someone
+  else can add, change or remove it, and its editor opens with a line naming
+  the album ("From Bali trip", or "Changed by Aisha in Bali trip" when
+  someone else made the last change), whose View album opens it.
+- **Nobody else moves the user's accounts.** A bill someone else saves, or
+  changes, naming the user as its payer lands on **no account**: its row
+  reads **Confirm account** where the account would be (shown even with
+  account badges off), and its editor says "Aisha says you paid. Pick the
+  account." and opens with no account picked, so saving it is the user
+  saying which account the money left. Until then it counts as the user's
+  spending and the others owe them as usual, but no balance moves; a payback
+  received meanwhile lowers the bill, and its transfer to the payback account
+  is written once the bill has its account. One the user saved themselves,
+  on any phone of theirs, lands on their default account as before.
+- **What moved stays.** When someone else deletes a bill, or takes the user
+  off it, after money moved on the user's side (the bill is on one of their
+  accounts because they paid it or paid their share back in full, or a part
+  paid or a payback's transfer made an entry of its own), that money's
+  entries stay as the user's own, in the album, with no shares left on them
+  (nobody owes anyone on that bill any more). What was still only owed goes.
+  So the user's accounts still match their bank. A bill the user deletes
+  themselves goes with everything on it, as before.
 - **Leaving and stopping.** A member leaves from the People page; the owner
   turns the switch off, or removes someone who joined. Either way everyone
   keeps the album with their own entries as ordinary split bills, split with
@@ -2256,6 +2279,17 @@ migrations `090` and `091`.
   each payment moved through) is kept from the rows already there.
   `transactions.album_group_id` marks such an entry; `settlement_id` on a paid
   share is the settlement it stands for.
+- **Who changed it.** `album_expenses.created_by` is the account that last
+  wrote a bill, a delete included (`softDeleteExpense` takes the deleter).
+  It decides two things on each phone (`projectExpense`): a bill the user
+  paid lands on their default account only when they wrote it, else on no
+  account (`needsAccountConfirm` in `lib/albumGroup.ts` is that state; the
+  editor's save gives the bill its account through the projection's
+  `hints.entry`, which works out its account amount); and a bill taken away
+  by someone else keeps what moved (`movedMoney`, `keepMovedMoney`), where
+  one taken away by the user is removed (`removeLocalBill`). The editor's
+  line reads it through `useGroupBillOrigin`. A delete from an app version
+  before this leaves the bill's last writer in place, so it is read as theirs.
 - **One direction.** Saving a split bill in a shared album
   (`saveAlbumBill`), recording a payment on one (`markSplitPaid`,
   `recordSplitPayment`, `payBackPayer`, `recordPayBack` and Settle up all
@@ -2329,9 +2363,12 @@ migrations `090` and `091`.
     never a sync error that stays up, nor a reason the owner cannot stop
     sharing or delete their account.
     What stays possible, as in any shared bill splitter: someone in the album
-    can add a bill naming the user as its payer (it lands as an expense on
-    their default account), add as many bills as they like, or mark themselves
-    as another person on the list. Leaving the album ends it; the entries
+    can add a bill naming the user as its payer (it lands on no account, as
+    Confirm account, so no balance moves until the user says it did), add as
+    many bills as they like, or mark themselves as another person on the
+    list. A payment someone else records on the user's behalf (the user paid
+    them back, or they paid the user) still lands on the user's default or
+    payback account. Leaving the album ends it; the entries
     already made stay, as the user's own to delete.
 
 **Limits.** Split by Item bills are not shared (they have no Paid by). A member without Pro adds
@@ -5252,7 +5289,12 @@ app's `services/webDashboardLink.ts`, `webDashboardCrypto.ts`,
   page loaded before this and a shared album with no bills yet. The group's own
   tables (`album_members`, `album_expenses`, `album_settlements`,
   `album_groups`) are not in
-  what the phone sends.
+  what the phone sends. In the lists (`TxList`) such a row has a **Shared
+  album** pill, as the app's row has its people mark, and one someone else
+  said the user paid, still on no account, a **Confirm account in the app**
+  pill (`awaitingAccount` in `src/lib/backup/split-payer.ts`, the app's
+  `needsAccountConfirm`): picking its account is the app's, since the page
+  cannot change a group's bill.
 - **Split bills a friend paid** (app migration 089, see Paid by and Balances):
   the payer's row carries `is_payer`, the friends' rows hold their share in
   `share_amount` beside an `amount` of 0, and the expense is the user's own

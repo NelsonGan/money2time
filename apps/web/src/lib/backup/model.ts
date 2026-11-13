@@ -24,7 +24,7 @@ import {
 import { storedBudgetCurrency, storedBudgetRate } from "./budget-currency";
 import { monthlyBudgetRows } from "./budget-period";
 import { paidWithoutTransfer, paybackNote } from "./paybacks";
-import { isPayBackPart, owedToPayers, partyKey } from "./split-payer";
+import { awaitingAccount, isPayBackPart, owedToPayers, partyKey } from "./split-payer";
 import { highlightsRecurringRuns, isRecurringRun, planRuleIdsOf, recurringRuleFee } from "./recurring-run";
 import {
   accrueReducingBalance,
@@ -112,6 +112,11 @@ export type Tx = {
    * so it is changed, settled, deleted and taken out of the album in the app.
    */
   albumGroupId?: string;
+  /**
+   * A shared album's bill someone else said the user paid, on none of their
+   * accounts until they pick one in the app (the app's `needsAccountConfirm`).
+   */
+  confirmAccount?: boolean;
   /** Made by an ordinary recurring rule (`isRecurringRun`), tinted in the lists while `Model.highlightRecurring`. */
   recurring?: boolean;
 };
@@ -940,6 +945,11 @@ export function buildModel(backup: BackupFile, opts: { timeZone?: string | null 
       note: tx.note,
     });
   }
+
+  // A shared album's bill the user is said to have paid, with no account yet:
+  // someone else saved it, and the user says in the app which account it left
+  // (the app's `needsAccountConfirm`).
+  for (const id of awaitingAccount(txById.values(), splits)) txById.get(id)!.confirmAccount = true;
 
   // A friend's paybacks. One into another account wrote a transfer, which is
   // tinted as a payback; one into the bill's own account wrote nothing but the

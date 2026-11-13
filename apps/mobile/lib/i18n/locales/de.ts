@@ -3066,6 +3066,13 @@ const de = {
         'Diese Rechnung ist in einem geteilten Album. Wenn du sie löschst, wird sie für alle entfernt.',
       remove_shared:
         'Diese Rechnung ist in einem geteilten Album. Sie wird für alle anderen entfernt.',
+      confirm_account: 'Konto bestätigen',
+      confirm_paid_by: '{{name}} sagt, du hast bezahlt. Wähle das Konto.',
+      confirm_paid: 'Als von dir bezahlt markiert. Wähle das Konto.',
+      changed_by: 'Geändert von {{name}} in {{album}}',
+      from_album: 'Aus {{album}}',
+      shared_album: 'Geteiltes Album',
+      view_album: 'Album ansehen',
     },
   },
   assets: {

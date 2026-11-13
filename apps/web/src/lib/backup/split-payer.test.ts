@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { balancesByAlbum, billPayer, isPayBackPart, netByPerson, owedToPayers, partyKey } from "./split-payer.ts";
+import { awaitingAccount, balancesByAlbum, billPayer, isPayBackPart, netByPerson, owedToPayers, partyKey } from "./split-payer.ts";
 
 const dinner = [
   { id: "me", transaction_id: "dinner", amount: 30, is_self: 1 },
@@ -103,4 +103,30 @@ test("an album answers for its own bills, and the people list for the rest", () 
       ],
     },
   ]);
+});
+
+test("a shared album's bill someone else said the user paid waits for its account, as the app's needsAccountConfirm", () => {
+  const tx = (id: string, extra: { accountId?: string | null; albumGroupId?: string; type?: string } = {}) => ({
+    id,
+    type: extra.type ?? "expense",
+    accountId: extra.accountId ?? null,
+    ...(extra.albumGroupId ? { albumGroupId: extra.albumGroupId } : null),
+  });
+  const splits = [
+    { id: "w-me", transaction_id: "waiting", amount: 30, is_self: 1 },
+    { id: "w-ben", transaction_id: "waiting", person_name: "Ben", amount: 30 },
+    { id: "c-me", transaction_id: "confirmed", amount: 30, is_self: 1 },
+    { id: "c-ben", transaction_id: "confirmed", person_name: "Ben", amount: 30 },
+    { id: "o-ben", transaction_id: "own", person_name: "Ben", amount: 30 },
+    ...dinner.map((row) => ({ ...row, transaction_id: "friend-paid" })),
+  ];
+  const txs = [
+    tx("waiting", { albumGroupId: "bali" }),
+    tx("confirmed", { albumGroupId: "bali", accountId: "cash" }),
+    // Not a group's bill: on no account for the user's own reasons.
+    tx("own"),
+    // A friend paid it: owed, not waiting.
+    tx("friend-paid", { albumGroupId: "bali" }),
+  ];
+  assert.deepEqual([...awaitingAccount(txs, splits)], ["waiting"]);
 });

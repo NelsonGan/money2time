@@ -2896,6 +2896,13 @@ const zh = {
     bill: {
       delete_shared: '此账单在共享相册中。删除后所有人那里都会移除。',
       remove_shared: '此账单在共享相册中。其他所有人那里都会移除。',
+      confirm_account: '确认账户',
+      confirm_paid_by: '{{name}} 说是你付的。请选择账户。',
+      confirm_paid: '记为由你付款。请选择账户。',
+      changed_by: '{{name}} 在 {{album}} 中修改',
+      from_album: '来自 {{album}}',
+      shared_album: '共享相册',
+      view_album: '查看相册',
     },
   },
   assets: {

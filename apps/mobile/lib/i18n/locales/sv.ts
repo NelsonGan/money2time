@@ -3017,6 +3017,13 @@ const sv = {
     bill: {
       delete_shared: 'Notan finns i ett delat album. Om du raderar den försvinner den för alla.',
       remove_shared: 'Notan finns i ett delat album. Den försvinner för alla andra.',
+      confirm_account: 'Bekräfta konto',
+      confirm_paid_by: '{{name}} säger att du betalade. Välj kontot.',
+      confirm_paid: 'Markerad som betald av dig. Välj kontot.',
+      changed_by: 'Ändrad av {{name}} i {{album}}',
+      from_album: 'Från {{album}}',
+      shared_album: 'Delat album',
+      view_album: 'Visa album',
     },
   },
   assets: {

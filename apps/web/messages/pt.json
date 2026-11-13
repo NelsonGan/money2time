@@ -1988,6 +1988,8 @@
         "untitledBill": "Conta dividida",
         "paidTitle": "Devolvido",
         "personPaid": "{name} pagou",
+        "sharedAlbum": "Álbum compartilhado",
+        "confirmAccount": "Confirme a conta no app",
         "undoTitle": "Marcar esta parte como não paga?",
         "undoBody": "Ela volta a ser devida a você, e a despesa aumenta por este valor. Uma transferência de devolução para outra conta é removida.",
         "itemizedTotal": "Total: {sum}",
