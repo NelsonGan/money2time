@@ -1,91 +1,101 @@
 /**
  * Scene 02: the privacy and trust panel, the one iPhone scene without a phone.
- * It sits in the opening panorama between Home and Accounts, so this draws
- * only the content; the headline and background come from ScreenshotScene
- * like every other panorama scene.
+ * It sits in the opening panorama between Home and Accounts and draws its own
+ * header, so the scene has no headline and only the background comes from
+ * ScreenshotScene.
  *
- * Three blocks, each readable at App Store thumbnail size: the rating in a
- * pill, the three promises in one card, and the book behind the app in a
- * second card with its cover breaking out of the top edge. Everything but the
- * book cover is drawn here, so it stays sharp at export size.
+ * Top to bottom: the headline beside the chick mascot hugging a shield, the
+ * laurel rating in a card, one card per promise (Local first, No ads, Private
+ * by design) and the book behind the app. The mascot badge and the three
+ * promise icons are generated art in `public/assets/privacy/`, painted in the
+ * mascot's crayon style; everything else is drawn here.
  */
 
-import type { ReactNode } from 'react';
-import { DISPLAY_FONT } from './sceneParts';
+import { DISPLAY_FONT, renderHeadline } from './sceneParts';
 import { useFitText } from './useFitText';
 import type { PhoneStrings } from '../scenes/locales';
 
 const INK = '#2F2521';
-const MUTED = '#5F4D45';
+const MUTED = '#84685C';
 const ACCENT = '#D9564A';
-const GOLD = '#E3A93B';
-const LAUREL = '#DDA236';
+const LAUREL = '#F0A431';
 const CARD = {
-  background: 'rgba(255,255,255,0.78)',
-  borderRadius: 72,
-  boxShadow: '0 30px 70px rgba(160,84,58,0.12), 0 4px 14px rgba(160,84,58,0.06)',
+  width: 1140, boxSizing: 'border-box',
+  background: 'rgba(255,255,255,0.6)',
+  borderRadius: 56,
+  boxShadow: '0 26px 64px rgba(160,84,58,0.12)',
 } as const;
 
-/** One laurel wing (left side); mirror with `flip` for the right. */
+/** Per-promise tinted circle and the colour of its supporting line. */
+const PROMISES = {
+  local:   { icon: '/assets/privacy/local.png',   tint: '#E7EDDC', accent: '#71945B' },
+  noAds:   { icon: '/assets/privacy/noads.png',   tint: '#F7E8CD', accent: '#C9861F' },
+  privacy: { icon: '/assets/privacy/private.png', tint: '#FADFD6', accent: '#D9564A' },
+};
+
+const STAR_PATH = 'M12 2 L14.9 8.6 L22 9.2 L16.6 13.9 L18.2 21 L12 17.3 L5.8 21 L7.4 13.9 L2 9.2 L9.1 8.6 Z';
+
+/** A star filled left to right by `fill` (0–1), so 4.8 shows as 4 and most of a fifth. */
+function Star({ size, fill }: { size: number; fill: number }) {
+  return (
+    <div style={{ position: 'relative', width: size, height: size }}>
+      <svg width={size} height={size} viewBox="0 0 24 24" style={{ position: 'absolute' }}>
+        <path d={STAR_PATH} fill="#E9D3BE" />
+      </svg>
+      <div style={{ position: 'absolute', width: size * fill, height: size, overflow: 'hidden' }}>
+        <svg width={size} height={size} viewBox="0 0 24 24">
+          <path d={STAR_PATH} fill={LAUREL} />
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * One laurel wing (left side); mirror with `flip` for the right. Pairs of
+ * leaves splay from a C-shaped arc, larger at the base and tapering to the tip.
+ */
 function LaurelWing({ flip = false }: { flip?: boolean }) {
   return (
     <svg
-      width={136} height={300} viewBox="0 0 100 220" fill={LAUREL}
-      style={{ flexShrink: 0, transform: flip ? 'scaleX(-1)' : undefined }}
+      width={100} height={230} viewBox="0 0 100 220" fill={LAUREL}
+      style={{ transform: flip ? 'scaleX(-1)' : undefined }}
     >
-      <path d="M70 216 C 34 186, 14 140, 22 92 C 28 56, 50 24, 80 8" fill="none" stroke={LAUREL} strokeWidth={4} strokeLinecap="round" />
-      <ellipse cx="72" cy="188" rx="19" ry="11.9" transform="rotate(-105 72 188)" />
-      <ellipse cx="63" cy="204" rx="19" ry="11.9" transform="rotate(-15 63 204)" />
-      <ellipse cx="51" cy="163" rx="18" ry="11.2" transform="rotate(-80 51 163)" />
-      <ellipse cx="37" cy="173" rx="18" ry="11.2" transform="rotate(10 37 173)" />
-      <ellipse cx="39" cy="132" rx="17" ry="10.5" transform="rotate(-55 39 132)" />
-      <ellipse cx="21" cy="136" rx="17" ry="10.5" transform="rotate(35 21 136)" />
-      <ellipse cx="35" cy="99" rx="16" ry="9.8" transform="rotate(-40 35 99)" />
-      <ellipse cx="17" cy="97" rx="16" ry="9.8" transform="rotate(50 17 97)" />
-      <ellipse cx="40" cy="68" rx="15" ry="9.1" transform="rotate(-20 40 68)" />
-      <ellipse cx="24" cy="60" rx="15" ry="9.1" transform="rotate(70 24 60)" />
-      <ellipse cx="52" cy="42" rx="14" ry="8.4" transform="rotate(0 52 42)" />
-      <ellipse cx="40" cy="30" rx="14" ry="8.4" transform="rotate(-90 40 30)" />
-      <ellipse cx="68" cy="24" rx="13" ry="7.7" transform="rotate(20 68 24)" />
-      <ellipse cx="60" cy="8" rx="13" ry="7.7" transform="rotate(-70 60 8)" />
-      <ellipse cx="80" cy="10" rx="11" ry="7.0" transform="rotate(-10 80 10)" />
+      <ellipse cx="72" cy="188" rx="19" ry="8.5" transform="rotate(-105 72 188)" />
+      <ellipse cx="63" cy="204" rx="19" ry="8.5" transform="rotate(-15 63 204)" />
+      <ellipse cx="51" cy="163" rx="18" ry="8" transform="rotate(-80 51 163)" />
+      <ellipse cx="37" cy="173" rx="18" ry="8" transform="rotate(10 37 173)" />
+      <ellipse cx="39" cy="132" rx="17" ry="7.5" transform="rotate(-55 39 132)" />
+      <ellipse cx="21" cy="136" rx="17" ry="7.5" transform="rotate(35 21 136)" />
+      <ellipse cx="35" cy="99" rx="16" ry="7" transform="rotate(-40 35 99)" />
+      <ellipse cx="17" cy="97" rx="16" ry="7" transform="rotate(50 17 97)" />
+      <ellipse cx="40" cy="68" rx="15" ry="6.5" transform="rotate(-20 40 68)" />
+      <ellipse cx="24" cy="60" rx="15" ry="6.5" transform="rotate(70 24 60)" />
+      <ellipse cx="52" cy="42" rx="14" ry="6" transform="rotate(0 52 42)" />
+      <ellipse cx="40" cy="30" rx="14" ry="6" transform="rotate(-90 40 30)" />
+      <ellipse cx="68" cy="24" rx="13" ry="5.5" transform="rotate(20 68 24)" />
+      <ellipse cx="60" cy="8" rx="13" ry="5.5" transform="rotate(-70 60 8)" />
+      <ellipse cx="80" cy="10" rx="11" ry="5" transform="rotate(-10 80 10)" />
     </svg>
   );
 }
 
-function Star() {
+/** App Store style laurel rating: 4.8 over stars, flanked by wings. */
+function LaurelRating({ users }: { users: string }) {
   return (
-    <svg width={74} height={74} viewBox="0 0 24 24">
-      <path
-        d="M12 2.6l2.83 5.9 6.47.8-4.76 4.46 1.2 6.42L12 17.06l-5.74 3.12 1.2-6.42L2.7 9.3l6.47-.8z"
-        fill={GOLD}
-      />
-    </svg>
-  );
-}
-
-function Rating({ users }: { users: string }) {
-  const usersRef = useFitText<HTMLDivElement>(48, 0.6);
-  return (
-    <div style={{
-      position: 'absolute', top: 490, left: '50%', transform: 'translateX(-50%)',
-      width: 940, height: 370, boxSizing: 'border-box', padding: '0 52px',
-      ...CARD, borderRadius: 180,
-      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      zIndex: 6,
-    }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 30 }}>
       <LaurelWing />
-      <div style={{ flex: 1, minWidth: 0, textAlign: 'center' }}>
-        <div style={{
-          fontFamily: DISPLAY_FONT, fontSize: 160, fontWeight: 800, color: INK,
-          lineHeight: 1, letterSpacing: '-4px',
-        }}>4.8</div>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 4, margin: '10px 0 10px' }}>
-          {[0, 1, 2, 3, 4].map((i) => <Star key={i} />)}
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <span style={{
+          fontSize: 108, fontWeight: 800, color: INK,
+          letterSpacing: '-3px', lineHeight: 1, fontFamily: DISPLAY_FONT,
+        }}>4.8</span>
+        <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+          {[1, 1, 1, 1, 0.8].map((fill, i) => <Star key={i} size={42} fill={fill} />)}
         </div>
-        <div ref={usersRef} style={{
-          fontFamily: DISPLAY_FONT, fontSize: 48, fontWeight: 700, color: INK,
-          whiteSpace: 'nowrap',
+        <div style={{
+          fontSize: 27, fontWeight: 700, color: MUTED,
+          letterSpacing: '3px', textTransform: 'uppercase', marginTop: 20,
         }}>{users}</div>
       </div>
       <LaurelWing flip />
@@ -93,106 +103,112 @@ function Rating({ users }: { users: string }) {
   );
 }
 
-/* Flat icons on tinted circles, one hue per promise: coral, mustard, sage. */
-
-const ShieldIcon = (
-  <svg width={140} height={140} viewBox="5 2.5 38 43">
-    <path d="M24 4 L40 10 V22 C40 33 33 40 24 44 C15 40 8 33 8 22 V10 Z" fill="#E0644F" />
-    <path d="M19 23 v-3.5 a5 5 0 0 1 10 0 V23" fill="none" stroke="#FFF6EC" strokeWidth={3} strokeLinecap="round" />
-    <rect x="16.5" y="22" width="15" height="12" rx="3" fill="#FFF6EC" />
-    <circle cx="24" cy="27" r="1.9" fill="#E0644F" />
-    <rect x="23.1" y="27.5" width="1.8" height="3.6" rx="0.9" fill="#E0644F" />
-  </svg>
-);
-
-const NoAdsIcon = (
-  <svg width={140} height={140} viewBox="4.5 5 38 38">
-    <path d="M9 19 h6 l15 -8 v26 l-15 -8 h-6 a2 2 0 0 1 -2 -2 v-6 a2 2 0 0 1 2 -2 Z" fill="#DE9E2C" />
-    <path d="M13 29 l3 8 a2 2 0 0 0 2.6 1.1 l1.2 -0.5 a2 2 0 0 0 1.1 -2.6 L19 30" fill="#C98A22" />
-    <path d="M35 17 q4 7 0 14" fill="none" stroke="#DE9E2C" strokeWidth={3.4} strokeLinecap="round" />
-    <path d="M8 40 L40 8" stroke="#F9EBD0" strokeWidth={6.5} strokeLinecap="round" />
-    <path d="M8 40 L40 8" stroke="#D9564A" strokeWidth={4.4} strokeLinecap="round" />
-  </svg>
-);
-
-const LocalIcon = (
-  <svg width={140} height={140} viewBox="5 2.5 38 43">
-    <rect x="13" y="4" width="22" height="40" rx="5" fill="#7FA86D" />
-    <rect x="16" y="9" width="16" height="28" rx="2" fill="#FFF6EC" />
-    <rect x="21" y="40" width="6" height="1.8" rx="0.9" fill="#FFF6EC" />
-    <path d="M18.5 23.5 L24 18.5 L29.5 23.5 V31 a1 1 0 0 1 -1 1 H19.5 a1 1 0 0 1 -1 -1 Z" fill="#5B8BA8" />
-    <rect x="22.3" y="26.5" width="3.4" height="5.5" rx="0.8" fill="#FFF6EC" />
-  </svg>
-);
-
-function PromiseRow({ icon, tint, title, sub, divider }: {
-  icon: ReactNode; tint: string; title: string; sub: string; divider: boolean;
+function PromiseCard({ promise, title, sub }: {
+  promise: (typeof PROMISES)[keyof typeof PROMISES]; title: string; sub: string;
 }) {
-  const titleRef = useFitText<HTMLDivElement>(80, 0.55);
+  const titleRef = useFitText<HTMLDivElement>(64, 0.6);
   return (
     <div style={{
-      display: 'flex', alignItems: 'center', gap: 48, height: 316,
-      borderBottom: divider ? '3px solid rgba(160,84,58,0.10)' : 'none',
+      ...CARD, padding: '42px 54px',
+      display: 'flex', alignItems: 'center', gap: 52, textAlign: 'left',
     }}>
       <div style={{
-        width: 216, height: 216, borderRadius: '50%', background: tint, flexShrink: 0,
+        width: 186, height: 186, borderRadius: '50%', flexShrink: 0,
+        background: promise.tint,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-      }}>{icon}</div>
-      <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
+      }}>
+        <img src={promise.icon} alt="" style={{ width: 152, height: 152 }} />
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
         <div ref={titleRef} style={{
-          fontFamily: DISPLAY_FONT, fontSize: 80, fontWeight: 800, color: INK,
-          lineHeight: 1.05, letterSpacing: '-1.5px', whiteSpace: 'nowrap',
+          fontSize: 64, fontWeight: 800, color: INK, whiteSpace: 'nowrap',
+          letterSpacing: '-2px', lineHeight: 1.05, fontFamily: DISPLAY_FONT,
         }}>{title}</div>
         <div style={{
-          fontSize: 50, fontWeight: 500, color: MUTED, lineHeight: 1.28, marginTop: 14,
-          textWrap: 'balance',
+          fontSize: 41, fontWeight: 600, color: promise.accent,
+          marginTop: 16, lineHeight: 1.3,
         }}>{sub}</div>
       </div>
     </div>
   );
 }
 
-function Book({ t }: { t: PhoneStrings['s15'] }) {
+export function PrivacyPanel({ t }: { t: PhoneStrings['s15'] }) {
+  const headlineRef = useFitText<HTMLHeadingElement>(122, 0.55);
   return (
     <div style={{
-      position: 'absolute', top: 2080, left: 72, right: 72, height: 430,
-      boxSizing: 'border-box', padding: '0 400px 0 64px',
-      ...CARD,
-      display: 'flex', flexDirection: 'column', justifyContent: 'center',
-      textAlign: 'left', zIndex: 6,
+      position: 'absolute', inset: 0, zIndex: 10,
+      boxSizing: 'border-box', padding: '96px 72px 110px',
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
     }}>
+      {/* Header: headline left, mascot badge right. Fixed height so the rating,
+          cards and book sit at the same y in every locale. */}
       <div style={{
-        fontFamily: DISPLAY_FONT, fontSize: 48, fontWeight: 800, color: ACCENT,
-        letterSpacing: '4px', textTransform: 'uppercase',
-      }}>{t.inspiredPre}</div>
-      <div style={{
-        fontFamily: 'Georgia, "Times New Roman", serif', fontStyle: 'italic',
-        fontSize: 52, color: INK, lineHeight: 1.3, marginTop: 24,
-        textWrap: 'balance',
-      }}>“{t.bookSub}”</div>
-      <img src="/assets/icons/ymoyl-cover.jpg" alt="" style={{
-        position: 'absolute', right: 60, top: -96, width: 330,
-        borderRadius: 12, transform: 'rotate(5deg)',
-        boxShadow: '0 30px 60px rgba(120,60,40,0.28), 0 8px 18px rgba(120,60,40,0.16)',
-      }} />
-    </div>
-  );
-}
-
-export function PrivacyPanel({ t }: { t: PhoneStrings['s15'] }) {
-  return (
-    <>
-      <Rating users={t.users} />
-      <div style={{
-        position: 'absolute', top: 905, left: 72, right: 72,
-        boxSizing: 'border-box', padding: '22px 60px',
-        ...CARD, zIndex: 6,
+        width: 1140, height: 500, display: 'flex',
+        alignItems: 'center', justifyContent: 'space-between', gap: 30,
       }}>
-        <PromiseRow icon={ShieldIcon} tint="#FBE1D9" title={t.privacy} sub={t.privacySub} divider />
-        <PromiseRow icon={NoAdsIcon} tint="#F9EBD0" title={t.noAds} sub={t.noAdsSub} divider />
-        <PromiseRow icon={LocalIcon} tint="#E5EEDD" title={t.local} sub={t.localSub} divider={false} />
+        <h1 ref={headlineRef} style={{
+          flex: 1, minWidth: 0,
+          fontSize: 122, fontWeight: 800, color: INK,
+          lineHeight: 1.1, margin: 0, textAlign: 'left',
+          whiteSpace: 'pre-line', letterSpacing: '-3px',
+          fontFamily: DISPLAY_FONT,
+        }}>{renderHeadline(t.h, t.hl, ACCENT)}</h1>
+        <img
+          src="/assets/privacy/hero.png" alt=""
+          style={{ height: 390, width: 'auto', flexShrink: 0, display: 'block' }}
+        />
       </div>
-      <Book t={t} />
-    </>
+
+      <div style={{ ...CARD, padding: '46px 40px', marginTop: 40 }}>
+        <LaurelRating users={t.users} />
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 32, marginTop: 40 }}>
+        <PromiseCard promise={PROMISES.local} title={t.local} sub={t.localSub} />
+        <PromiseCard promise={PROMISES.noAds} title={t.noAds} sub={t.noAdsSub} />
+        <PromiseCard promise={PROMISES.privacy} title={t.privacy} sub={t.privacySub} />
+      </div>
+
+      {/* The book that inspired the app, pinned to the remaining space */}
+      <div style={{
+        marginTop: 'auto', paddingTop: 44, width: 1140,
+        display: 'flex', flexDirection: 'column', alignItems: 'center',
+      }}>
+        <div style={{
+          width: '100%', display: 'flex', alignItems: 'center',
+          justifyContent: 'center', gap: 44,
+        }}>
+          <div style={{ width: 470, flexShrink: 0, textAlign: 'left' }}>
+            <div style={{
+              display: 'inline-block',
+              padding: '16px 38px', borderRadius: 100,
+              background: 'rgba(217,86,74,0.12)',
+              fontSize: 25, fontWeight: 800, color: ACCENT,
+              letterSpacing: '2.5px', textTransform: 'uppercase',
+            }}>{t.inspiredPre}</div>
+            <div style={{
+              fontSize: 42, fontWeight: 500, color: INK,
+              lineHeight: 1.4, marginTop: 30,
+            }}>{t.bookDesc}</div>
+          </div>
+          <img
+            src="/assets/icons/ymoyl-cover.jpg"
+            alt="Your Money or Your Life"
+            crossOrigin="anonymous"
+            style={{
+              width: 340, height: 'auto', display: 'block', flexShrink: 0,
+              borderRadius: 14, transform: 'rotate(2deg)',
+              boxShadow: '0 46px 100px rgba(80,40,30,0.30), 0 14px 32px rgba(80,40,30,0.15)',
+            }}
+          />
+        </div>
+        <div style={{
+          fontSize: 36, fontWeight: 500, color: MUTED,
+          lineHeight: 1.4, fontStyle: 'italic', marginTop: 44,
+          textAlign: 'center', maxWidth: 1100,
+        }}>“{t.bookSub}”</div>
+      </div>
+    </div>
   );
 }

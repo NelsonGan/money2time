@@ -32,6 +32,7 @@ const ms: LocaleModule = {
       users: '70,000+ pengguna',
       inspiredPre: 'Diilhamkan daripada',
       bookSub: 'Wang ialah tenaga hidup yang anda tukarkan',
+      bookDesc: 'Panduan kewangan peribadi klasik yang abadi. Kebijaksanaan praktikal tentang wang, masa dan kehidupan.',
     },
     s16: { h: 'Tetapkan Bajet.\nKekal Terkawal.', hl: 'Kekal Terkawal.', sh: 'Setiap kategori, sentiasa kelihatan', she: '🎯', ring: '80%', left: 'baki $730.85', budgeted: 'Perbelanjaan berbajet', unbudgeted: 'Perbelanjaan luar bajet' },
   },

@@ -26,6 +26,7 @@ const zh: LocaleModule = {
       users: '70,000+ 用户',
       inspiredPre: '灵感来自',
       bookSub: '金钱，是你用生命能量换来的',
+      bookDesc: '经久不衰的个人理财经典，关于金钱、时间与人生的实用智慧。',
     },
     s16: { h: '设好预算\n不再超支', hl: '不再超支', sh: '每个分类，一目了然', she: '🎯', ring: '80%', left: '还剩 $730.85', budgeted: '预算内支出', unbudgeted: '预算外支出' },
   },

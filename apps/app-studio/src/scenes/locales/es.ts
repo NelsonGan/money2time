@@ -32,6 +32,7 @@ const es: LocaleModule = {
       users: '+70 mil usuarios',
       inspiredPre: 'Inspirada en',
       bookSub: 'El dinero es la energía vital que intercambias por él',
+      bookDesc: 'El clásico atemporal de las finanzas personales. Sabiduría práctica sobre dinero, tiempo y vida.',
     },
     s16: { h: 'Pon un Límite.\nCúmplelo.', hl: 'Cúmplelo.', sh: 'Cada categoría, siempre a la vista', she: '🎯', ring: '80%', left: '$730.85 restante', budgeted: 'Gasto presupuestado', unbudgeted: 'Gasto no presupuestado' },
   },

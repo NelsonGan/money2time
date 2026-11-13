@@ -5913,12 +5913,15 @@ continuous warm background (`src/components/triptych.tsx`, cut into four
 panels):
 
 1. Ledger: money and working time beside transactions.
-2. Privacy: the 4.8 rating and user count, three promises (private by design,
-   no ads, local first) and the book that inspired the app. The only scene
-   without a phone, drawn in code by `src/components/PrivacyPanel.tsx` with
-   its copy in each locale's `s15`. Each promise must stay true: data lives on
-   the phone and Cloud Sync is an opt-in, so it never says data "never leaves
-   your phone". Update the user count in all 23 locales when it moves.
+2. Privacy: its own headline beside the chick mascot hugging a shield, the
+   4.8 rating and user count, three promise cards (local first, no ads, private
+   by design) and the book that inspired the app. The only scene without a
+   phone, laid out by `src/components/PrivacyPanel.tsx` with its copy in each
+   locale's `s15`. The mascot badge and the three promise icons are generated
+   art in `public/assets/privacy/`, painted in the mascot's crayon style; the
+   rest is drawn in code. Each promise must stay true: data lives on the phone and
+   Cloud Sync is an opt-in, so it never says data "never leaves your phone".
+   Update the user count in all 23 locales when it moves.
 3. Accounts: where money is held.
 4. Budgets: how much to spend.
 5. Expense breakdown: spending categories.

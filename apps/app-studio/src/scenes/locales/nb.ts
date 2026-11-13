@@ -32,6 +32,7 @@ const nb: LocaleModule = {
       users: '70 000+ brukere',
       inspiredPre: 'Inspirert av',
       bookSub: 'Penger er livsenergien du bytter bort for dem',
+      bookDesc: 'Den tidløse klassikeren om personlig økonomi. Praktisk visdom om penger, tid og liv.',
     },
     s16: { h: 'Sett et Budsjett.\nHold Kursen.', hl: 'Hold Kursen.', sh: 'Hver kategori, alltid synlig', she: '🎯', ring: '80%', left: '$730.85 igjen', budgeted: 'Budsjetterte utgifter', unbudgeted: 'Ikke budsjettert' },
   },

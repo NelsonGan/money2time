@@ -32,6 +32,7 @@ const tr: LocaleModule = {
       users: '70.000+ kullanıcı',
       inspiredPre: 'İlham kaynağı',
       bookSub: 'Para, karşılığında verdiğin yaşam enerjisidir',
+      bookDesc: 'Kişisel finansın zamansız klasiği. Para, zaman ve hayata dair pratik bilgelik.',
     },
     s16: { h: 'Bütçeni Kur.\nYolunda Kal.', hl: 'Yolunda Kal.', sh: 'Her kategori, her zaman görünür', she: '🎯', ring: '80%', left: '$730.85 kaldı', budgeted: 'Bütçeli harcama', unbudgeted: 'Bütçe dışı harcama' },
   },

@@ -32,6 +32,7 @@ const pt: LocaleModule = {
       users: '+70 mil usuários',
       inspiredPre: 'Inspirado em',
       bookSub: 'Dinheiro é a energia vital que você troca por ele',
+      bookDesc: 'O clássico atemporal das finanças pessoais. Sabedoria prática sobre dinheiro, tempo e vida.',
     },
     s16: { h: 'Defina o Limite.\nSiga o Plano.', hl: 'Siga o Plano.', sh: 'Cada categoria, sempre à vista', she: '🎯', ring: '80%', left: '$730.85 restante', budgeted: 'Gasto orçado', unbudgeted: 'Gasto fora do orçamento' },
   },

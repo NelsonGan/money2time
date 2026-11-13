@@ -32,6 +32,7 @@ const fil: LocaleModule = {
       users: '70,000+ na user',
       inspiredPre: 'Hango sa',
       bookSub: 'Ang pera ay ang lakas ng buhay na ipinagpalit mo',
+      bookDesc: 'Ang walang-kupas na gabay sa personal na pananalapi. Praktikal na karunungan sa pera, oras, at buhay.',
     },
     s16: { h: 'Magbudget.\nSundin Mo Ito.', hl: 'Sundin Mo Ito.', sh: 'Bawat kategorya, laging nakikita', she: '🎯', ring: '80%', left: '$730.85 ang natitira', budgeted: 'Nakabudget na gastos', unbudgeted: 'Hindi nakabudget' },
   },

@@ -32,6 +32,7 @@ const id: LocaleModule = {
       users: '70.000+ pengguna',
       inspiredPre: 'Terinspirasi dari',
       bookSub: 'Uang adalah energi hidup yang kamu tukarkan',
+      bookDesc: 'Panduan keuangan pribadi klasik yang abadi. Kebijaksanaan praktis tentang uang, waktu, dan hidup.',
     },
     s16: { h: 'Atur Anggaran.\nTetap di Jalur.', hl: 'Tetap di Jalur.', sh: 'Setiap kategori, selalu terlihat', she: '🎯', ring: '80%', left: 'sisa $730.85', budgeted: 'Belanja teranggarkan', unbudgeted: 'Belanja di luar anggaran' },
   },
