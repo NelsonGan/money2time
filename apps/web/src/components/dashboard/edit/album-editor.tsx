@@ -41,6 +41,17 @@ function albumRows(model: Model): AlbumRow[] {
     .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0) || a.name.localeCompare(b.name));
 }
 
+/**
+ * The album's own shared bills: entries of its group, whose id is the album's.
+ * Ending the share clears their group, so a shared album is one that has any
+ * (as of the last sync). Read from the full data, so a page filter cannot
+ * hide them. Taking one out, or deleting the album, changes it for everyone in
+ * it, which the app asks about first and the phone refuses from here.
+ */
+function albumGroupBillIds(model: Model, albumId: string): Set<string> {
+  return new Set(model.txs.filter((tx) => tx.albumGroupId === albumId).map((tx) => tx.id));
+}
+
 /** The album as stored, with its `updated_at`. */
 function albumRow(model: Model, id: string): AlbumRow | null {
   return (model.raw.albums ?? []).find((row) => row.id === id && !row.deleted_at) ?? null;
@@ -233,6 +244,7 @@ function AlbumTransactionsPicker({
   disabled,
   touches,
   max = MAX_EDIT_ROWS,
+  locked,
   children,
 }: {
   initial: string[];
@@ -246,6 +258,8 @@ function AlbumTransactionsPicker({
   touches: (picked: string[]) => number;
   /** The most entries the message names. */
   max?: number;
+  /** Entries that cannot be unticked: the album's own shared bills, which are taken out of it in the app. */
+  locked?: ReadonlySet<string>;
   children?: ReactNode;
 }) {
   const t = useTranslations("dashboard.edit.album");
@@ -263,7 +277,8 @@ function AlbumTransactionsPicker({
     return newest?.month ?? model.currentMonth;
   });
   const rows = useMemo(() => expenses.filter((tx) => tx.month === month).sort((a, b) => b.date.getTime() - a.date.getTime()), [expenses, month]);
-  const toggle = (id: string) => setPicked((current) => (current.includes(id) ? current.filter((x) => x !== id) : [...current, id]));
+  const toggle = (id: string) =>
+    setPicked((current) => (current.includes(id) ? (locked?.has(id) ? current : current.filter((x) => x !== id)) : [...current, id]));
   const tooMany = touches(picked) > MAX_EDIT_ROWS;
 
   const arrow = (delta: number, label: string, path: string) => (
@@ -309,10 +324,14 @@ function AlbumTransactionsPicker({
               const category = tx.categoryId ? model.categories.get(tx.categoryId) : null;
               const label = tx.note || category?.name || tc("uncategorized");
               const on = pickedSet.has(tx.id);
+              const fixed = on && !!locked?.has(tx.id);
               return (
                 <li key={tx.id}>
-                  <label className={`flex cursor-pointer items-center gap-3 rounded-xl px-2 py-2.5 ${on ? "bg-primary/10" : "hover:bg-background-subtle"}`}>
-                    <input type="checkbox" checked={on} onChange={() => toggle(tx.id)} className="h-5 w-5 shrink-0 rounded-md accent-[var(--color-primary)]" />
+                  <label
+                    title={fixed ? te("groupBill") : undefined}
+                    className={`flex items-center gap-3 rounded-xl px-2 py-2.5 ${fixed ? "cursor-default" : "cursor-pointer"} ${on ? "bg-primary/10" : "hover:bg-background-subtle"}`}
+                  >
+                    <input type="checkbox" checked={on} disabled={fixed} onChange={() => toggle(tx.id)} className="h-5 w-5 shrink-0 rounded-md accent-[var(--color-primary)] disabled:opacity-60" />
                     <CategoryGlyph icon={category?.icon} name={category?.name ?? label} color={category?.color} size={32} />
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-[14px] font-bold text-foreground">{label}</span>
@@ -364,8 +383,9 @@ function AlbumTransactionsForm({ trip: shown, onClose }: { trip: Trip; onClose: 
     const { add, remove } = changes(ids);
     return add.length + remove.length;
   };
+  const locked = useMemo(() => albumGroupBillIds(model, shown.id), [model, shown.id]);
   return (
-    <AlbumTransactionsPicker initial={base.txIds} touches={touches} title={t("editTransactions")} doneLabel={t("save")} onDone={(ids) => void save(ids)} onClose={onClose} busy={busy} disabled={!ready}>
+    <AlbumTransactionsPicker initial={base.txIds} touches={touches} locked={locked} title={t("editTransactions")} doneLabel={t("save")} onDone={(ids) => void save(ids)} onClose={onClose} busy={busy} disabled={!ready}>
       <EditBlocked />
       <EditError message={error} onReload={reload} />
     </AlbumTransactionsPicker>
@@ -379,6 +399,9 @@ export function AlbumActions({ trip }: { trip: Trip }) {
   const { fullModel: model } = useDashboard();
   const { run, busy, error, ready } = useEditRun();
   const [open, setOpen] = useState<"details" | "transactions" | "delete" | null>(null);
+  // A shared album stops being shared (or is left) in the app before it is
+  // deleted. One with no bills yet still offers it, and the phone says no.
+  const shared = useMemo(() => albumGroupBillIds(model, trip.id).size > 0, [model, trip.id]);
 
   const remove = async () => {
     if (!ready || busy) return;
@@ -405,7 +428,7 @@ export function AlbumActions({ trip }: { trip: Trip }) {
       <div className="flex flex-wrap items-center justify-end gap-1.5">
         {button("details", "ui/pencil", t("editTitle"))}
         {button("transactions", "ui/checklist", t("editTransactions"))}
-        {button("delete", "ui/trash", te("delete"))}
+        {shared ? null : button("delete", "ui/trash", te("delete"))}
       </div>
       {open === "delete" ? (
         <Confirm

@@ -1453,6 +1453,7 @@
       "amountLocked": "Jumlah ini terkait dengan pembagian tagihan atau pengembalian dana. Ubah di aplikasi.",
       "friendPaid": "{name} membayar tagihan ini. Ubah di aplikasi.",
       "groupBill": "Tagihan ini ada di album bersama. Ubah di aplikasi.",
+      "groupBills": "Sebagian ada di album bersama. Ubah di aplikasi.",
       "hideBalances": "Sembunyikan saldo",
       "showBalances": "Tampilkan saldo",
       "savingsGoals": "Target Tabungan",

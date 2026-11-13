@@ -107,10 +107,11 @@ export type Tx = {
    */
   paidBy?: string;
   /**
-   * The user's side of a shared album's bill (the app's `albumGroupId`): the
-   * bill is everyone's in the album, so it is changed and deleted in the app.
+   * The user's side of a shared album's bill: the group's id, which is its
+   * album's (the app's `albumGroupId`). The bill is everyone's in the album,
+   * so it is changed, settled, deleted and taken out of the album in the app.
    */
-  groupBill?: boolean;
+  albumGroupId?: string;
   /** Made by an ordinary recurring rule (`isRecurringRun`), tinted in the lists while `Model.highlightRecurring`. */
   recurring?: boolean;
 };
@@ -562,7 +563,7 @@ export function buildModel(backup: BackupFile, opts: { timeZone?: string | null 
       countsAsExpense: row.counts_as_expense === 1,
       toAmount: row.to_amount ?? null,
       recurring: isRecurringRun(row, planRuleIds),
-      ...(row.album_group_id ? { groupBill: true } : null),
+      ...(row.album_group_id ? { albumGroupId: row.album_group_id } : null),
     });
   }
   txs.sort((a, b) => b.date.getTime() - a.date.getTime());

@@ -1453,6 +1453,7 @@
       "amountLocked": "Dette beløpet er knyttet til en deling eller en refusjon. Endre det i appen.",
       "friendPaid": "{name} betalte denne regningen. Endre den i appen.",
       "groupBill": "Regningen er i et delt album. Endre den i appen.",
+      "groupBills": "Noen av disse er i et delt album. Endre dem i appen.",
       "hideBalances": "Skjul saldoer",
       "showBalances": "Vis saldoer",
       "savingsGoals": "Sparemål",

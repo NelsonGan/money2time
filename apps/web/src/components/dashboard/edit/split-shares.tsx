@@ -24,6 +24,7 @@ const PAID_SHOWN = 20;
  */
 export function SplitShares() {
   const t = useTranslations("dashboard.edit.split");
+  const te = useTranslations("dashboard.edit");
   const { fullModel: model, link } = useDashboard();
   const f = useFormat();
   const { run, busy, error, ready } = useEditRun();
@@ -83,8 +84,11 @@ export function SplitShares() {
     const accountId = row.payback_account_id ?? tx.accountId;
     const account = accountId ? (model.accountById.get(accountId) ?? null) : null;
     const settled = !!row.paid_at;
+    // A shared album's bill is the group's: its payments are recorded in the
+    // app, and the phone refuses them from here, so its cards have no buttons.
+    const groupBill = !!tx.albumGroupId;
     return (
-      <li key={row.id} className={`rounded-2xl border px-4 py-3 ${settled ? "border-border/40 bg-background-subtle/40" : "border-border/70 bg-card"}`}>
+      <li key={row.id} title={groupBill ? te("groupBill") : undefined} className={`rounded-2xl border px-4 py-3 ${settled ? "border-border/40 bg-background-subtle/40" : "border-border/70 bg-card"}`}>
         <div className="flex items-center gap-3">
           <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-background-subtle text-[13px] font-extrabold text-foreground-soft">
             {(row.person_name?.trim() || t("someone")).slice(0, 1).toUpperCase()}
@@ -97,7 +101,7 @@ export function SplitShares() {
           </span>
           <span className={`tabular text-[14px] font-extrabold ${settled ? "text-foreground-muted" : "text-foreground"}`}>{f.foreign(row.amount, tx.currency)}</span>
         </div>
-        {editable ? (
+        {editable && (settled || !groupBill) ? (
           <div className="mt-2 flex items-center gap-2 pl-12">
             {settled ? (
               <>
@@ -106,15 +110,17 @@ export function SplitShares() {
                   {account ? ` · ${account.name}` : ""}
                 </span>
                 <span className="flex-1" />
-                <button
-                  type="button"
-                  onClick={() => setUndoFor(share)}
-                  disabled={busy || !ready}
-                  className="inline-flex shrink-0 items-center gap-1 rounded-full bg-background-subtle px-2.5 py-1 text-[12px] font-bold text-foreground-soft hover:text-foreground disabled:opacity-50"
-                >
-                  <ClayImg name="ui/undo" size={12} />
-                  {t("undo")}
-                </button>
+                {groupBill ? null : (
+                  <button
+                    type="button"
+                    onClick={() => setUndoFor(share)}
+                    disabled={busy || !ready}
+                    className="inline-flex shrink-0 items-center gap-1 rounded-full bg-background-subtle px-2.5 py-1 text-[12px] font-bold text-foreground-soft hover:text-foreground disabled:opacity-50"
+                  >
+                    <ClayImg name="ui/undo" size={12} />
+                    {t("undo")}
+                  </button>
+                )}
               </>
             ) : (
               <>

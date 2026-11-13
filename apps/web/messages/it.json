@@ -1453,6 +1453,7 @@
       "amountLocked": "Questo importo è collegato a una divisione o a un rimborso. Modificalo nell'app.",
       "friendPaid": "{name} ha pagato questo conto. Modificalo nell'app.",
       "groupBill": "Questo conto è in un album condiviso. Modificalo nell'app.",
+      "groupBills": "Alcune sono in un album condiviso. Modificale nell'app.",
       "hideBalances": "Nascondi saldi",
       "showBalances": "Mostra saldi",
       "savingsGoals": "Obiettivi di risparmio",

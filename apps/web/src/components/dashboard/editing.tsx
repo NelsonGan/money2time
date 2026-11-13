@@ -215,6 +215,9 @@ export function BulkToolbar({ selected, onClear }: { selected: Tx[]; onClear: ()
   const flows = (["expense", "income"] as const).filter((type) => selected.some((tx) => tx.type === type));
   const anyTransfer = selected.some((tx) => tx.type !== "expense" && tx.type !== "income");
   const anyLocked = selected.some((tx) => tx.amountLocked);
+  // A shared album's bill keeps its day and title from the group and is
+  // deleted in the app: the phone refuses the whole batch when one is in it.
+  const anyGroupBill = selected.some((tx) => tx.albumGroupId);
   const copies = selected.filter(canDuplicate);
   // A bulk move keeps each amount as it is, so the phone takes it only into
   // an account of the entries' own currency: one currency, or none to offer.
@@ -312,7 +315,9 @@ export function BulkToolbar({ selected, onClear }: { selected: Tx[]; onClear: ()
     </div>
   );
 
-  const dateMenu = (
+  const dateMenu = anyGroupBill ? (
+    notice(t("groupBills"))
+  ) : (
     <div>
       <MenuForm applyLabel={t("apply")} busy={busy} disabled={!can || !isDayKey(day)} onApply={() => void update(selected, { date: day })}>
         <input type="date" data-autofocus min={DAY_MIN} max={DAY_MAX} value={day} onChange={(event) => setDay(event.target.value)} aria-label={t("date")} className={FIELD} autoFocus />
@@ -321,7 +326,9 @@ export function BulkToolbar({ selected, onClear }: { selected: Tx[]; onClear: ()
     </div>
   );
 
-  const noteMenu = (
+  const noteMenu = anyGroupBill ? (
+    notice(t("groupBills"))
+  ) : (
     <div>
       {/* An emptied note clears it, as the app's bulk sheet does. */}
       <MenuForm applyLabel={t("apply")} busy={busy} disabled={!can} onApply={() => void update(selected, { note: note.trim() })}>
@@ -397,22 +404,24 @@ export function BulkToolbar({ selected, onClear }: { selected: Tx[]; onClear: ()
       {open === "delete" ? (
         <Sheet title={t("delete")} onClose={() => setOpen(null)} busy={busy}>
           <div className="space-y-4">
-            <p className="text-[14px] leading-relaxed text-foreground">{t("deleteConfirm", { count })}</p>
+            <p className="text-[14px] leading-relaxed text-foreground">{anyGroupBill ? t("groupBills") : t("deleteConfirm", { count })}</p>
             <EditError message={error} />
             <EditBlocked />
             <div className="flex justify-end gap-2">
               <button type="button" onClick={() => setOpen(null)} disabled={busy} className="h-10 rounded-full px-4 text-[13.5px] font-bold text-foreground-soft hover:bg-background-subtle disabled:opacity-40">
                 {t("cancel")}
               </button>
-              <button
-                type="button"
-                data-autofocus
-                onClick={() => void send([{ entity: "transaction", op: "delete", rows: rows(selected) }], "transaction_bulk_delete")}
-                disabled={!can}
-                className="h-10 rounded-full bg-error px-5 text-[13.5px] font-extrabold text-card disabled:opacity-50"
-              >
-                {busy ? t("statusSaving") : t("delete")}
-              </button>
+              {anyGroupBill ? null : (
+                <button
+                  type="button"
+                  data-autofocus
+                  onClick={() => void send([{ entity: "transaction", op: "delete", rows: rows(selected) }], "transaction_bulk_delete")}
+                  disabled={!can}
+                  className="h-10 rounded-full bg-error px-5 text-[13.5px] font-extrabold text-card disabled:opacity-50"
+                >
+                  {busy ? t("statusSaving") : t("delete")}
+                </button>
+              )}
             </div>
           </div>
         </Sheet>

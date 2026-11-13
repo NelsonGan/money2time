@@ -177,7 +177,7 @@ function TxForm({ tx, onClose }: { tx: Tx | null; onClose: () => void }) {
   const friendPayer = useMemo(() => (tx ? payerOf(model, tx.id) : null), [tx, model]);
   // A shared album's bill is everyone's in the album: the phone keeps this
   // entry in step with it, and refuses a change or a delete from here.
-  const groupBill = !!tx?.groupBill;
+  const groupBill = !!tx?.albumGroupId;
   const appOnly = !!friendPayer || groupBill;
   const [splitRows, setSplitRows] = useState<SplitDraftRow[]>(savedSplits);
   const [splitEvenly, setSplitEvenly] = useState(!savedSplits.length);
