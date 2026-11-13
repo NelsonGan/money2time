@@ -1608,7 +1608,11 @@ updated_at)`, with each row as JSON, plus `sync_info` (the choice screen's
   personal sync runs at a time; a request during one runs one more after it.
   After rows are applied the app runs `refreshAll()`. Linking pulls the latest
   cloud copy first, since a replica kept from an earlier session is only
-  refreshed by a pull.
+  refreshed by a pull. If that pull fails because the Turso engine's record
+  of how far its last pull reached no longer matches the replica's WAL
+  ("unable to checkpoint synced portion of WAL", Turso 0.8.3), the replica is
+  deleted and downloaded again once: before a link it is only a copy of the
+  cloud.
 - **Live updates** (`services/liveSync.ts`, Worker `src/live.ts`). While the
   app is open and signed in it keeps one WebSocket to the Worker
   (`GET /v1/live`), held by a Durable Object per user (`SyncHub`, hibernating,

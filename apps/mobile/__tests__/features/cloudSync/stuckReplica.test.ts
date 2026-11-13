@@ -121,9 +121,11 @@ describe('pulling before a link', () => {
     const sync = engine();
     await sync.open();
     const offline = new Error('HTTP response failed (network error)');
-    jest.spyOn(sync as unknown as { db: () => { pull: () => Promise<void> } }, 'db').mockReturnValue({
-      pull: () => Promise.reject(offline),
-    });
+    jest
+      .spyOn(sync as unknown as { db: () => { pull: () => Promise<void> } }, 'db')
+      .mockReturnValue({
+        pull: () => Promise.reject(offline),
+      });
 
     await expect(sync.pullLatest()).rejects.toBe(offline);
     expect(log.some((entry) => entry.startsWith('delete'))).toBe(false);
