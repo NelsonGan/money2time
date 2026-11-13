@@ -949,29 +949,41 @@ export function SplitBillModal({
               // plainly for Me and already-paid rows.
               const topLine = (
                 <View className="flex-row items-center gap-2.5">
-                  <View
-                    className={cn(
-                      'h-9 w-9 rounded-full items-center justify-center',
-                      row.isSelf
-                        ? 'bg-primary/15'
-                        : disabledRow
-                          ? 'bg-success/15'
-                          : 'bg-secondary/60',
-                    )}
-                  >
-                    {disabledRow ? (
-                      <Check size={14} color={themeColors.success} />
-                    ) : row.isSelf ? (
-                      <Text variant="caption" className="font-semibold text-primary">
-                        {I18n.t('transactions.editor.split.me_label').slice(0, 1).toUpperCase()}
-                      </Text>
-                    ) : (
-                      // A static icon (not the typed name's initial) — recomputing the
-                      // initial on every keystroke re-rendered the row and caused input
-                      // lag. Other screens (Settle Up) still show the name initial.
-                      <UserRound size={15} color={themeColors.textMuted} />
-                    )}
-                  </View>
+                  {!row.isSelf &&
+                  !disabledRow &&
+                  focusedNameIndex !== index &&
+                  row.personName.trim() ? (
+                    // A named friend gets the colour they have everywhere else
+                    // (Paid by, Balances, the album). The row being typed in keeps
+                    // the static icon, so a keystroke never redraws its avatar.
+                    <PersonAvatar
+                      name={row.personName}
+                      partyKey={debtPartyKey(row.personName, row.memberId)}
+                      // h-9, beside the Me row's circle
+                      size={31.5}
+                    />
+                  ) : (
+                    <View
+                      className={cn(
+                        'h-9 w-9 rounded-full items-center justify-center',
+                        row.isSelf
+                          ? 'bg-primary/15'
+                          : disabledRow
+                            ? 'bg-success/15'
+                            : 'bg-secondary/60',
+                      )}
+                    >
+                      {disabledRow ? (
+                        <Check size={14} color={themeColors.success} />
+                      ) : row.isSelf ? (
+                        <Text variant="caption" className="font-semibold text-primary">
+                          {I18n.t('transactions.editor.split.me_label').slice(0, 1).toUpperCase()}
+                        </Text>
+                      ) : (
+                        <UserRound size={15} color={themeColors.textMuted} />
+                      )}
+                    </View>
+                  )}
 
                   <TextInput
                     value={

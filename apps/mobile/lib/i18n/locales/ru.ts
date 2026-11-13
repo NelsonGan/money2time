@@ -881,6 +881,7 @@ const ru = {
       you_pay_person: 'Вы платите: {{name}}',
       even_caption: 'Вы в расчёте, платить нечего',
       you_paid_on: 'Вы оплатили {{date}}',
+      person_paid_on: '{{name}} оплатил(а) {{date}}',
       undo_payment_title: 'Отменить этот платёж?',
       undo_payment_message:
         'Вы снова будете должны {{amount}}, и сумма уйдёт со счёта, с которого была оплачена.',
@@ -2918,6 +2919,7 @@ const ru = {
     save_scanned_hint: 'Сохранять фото при сканировании чека для записи или разделения счёта.',
   },
   albums: {
+    untitled: 'Альбом',
     location: {
       label: 'Местоположение',
       add: 'Добавить место',

@@ -2,8 +2,7 @@ import { ArrowLeftRight, ArrowRight } from 'lucide-react-native';
 import React from 'react';
 import { View } from 'react-native';
 
-import { Text } from '~/components/ui';
-import { avatarColor, personInitial } from '~/features/transactions/lib/personAvatar';
+import { PersonAvatar } from '~/features/transactions/components/PersonAvatar';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 
@@ -30,22 +29,9 @@ export function SettleUpFlowAvatars({
   muted = false,
 }: SettleUpFlowAvatarsProps) {
   const themeColors = useThemeColors();
-  const person = (
-    <View
-      className="h-14 w-14 items-center justify-center rounded-full"
-      style={{ backgroundColor: avatarColor(personKey) }}
-    >
-      <Text variant="subheading" style={{ color: '#fff' }}>
-        {personInitial(personName)}
-      </Text>
-    </View>
-  );
+  const person = <PersonAvatar name={personName} partyKey={personKey} size={49} />;
   const me = (
-    <View className="h-14 w-14 items-center justify-center rounded-full bg-primary/15">
-      <Text variant="bodyStrong" className="text-primary" numberOfLines={1}>
-        {I18n.t('transactions.editor.split.me_label')}
-      </Text>
-    </View>
+    <PersonAvatar name={I18n.t('transactions.editor.split.me_label')} partyKey={null} size={49} />
   );
   const Arrow = flow === 'even' ? ArrowLeftRight : ArrowRight;
   return (

@@ -13,7 +13,7 @@ import { buildPaybackTransferNote } from '~/features/transactions/lib/settleUp';
 import { rescaleSplitAdjustedAmounts } from '~/features/transactions/lib/splitAmountSnapshot';
 import { paybackTransferAmounts } from '~/features/transactions/lib/splitPayments';
 import { getSQLite } from '~/lib/db/client';
-import { getActiveLedgerId } from '~/lib/db/ledgerScope';
+import { DEFAULT_LEDGER_ID, getActiveLedgerId } from '~/lib/db/ledgerScope';
 import { albumGroupsRepository } from '~/lib/repositories/albumGroupsRepository';
 import { transactionSplitsRepository } from '~/lib/repositories/transactionSplitsRepository';
 import {
@@ -29,7 +29,7 @@ import type {
 } from '~/types';
 import { convert } from '~/utils/currency';
 import { dayKeyFromDateLocal, normalizeMoneyAmount } from '~/utils/formatters';
-import { nowIso } from '~/utils/id';
+import { newId, nowIso } from '~/utils/id';
 
 import {
   groupFromLocalBill,
@@ -37,7 +37,7 @@ import {
   type LocalPayment,
   settlementsByBill,
 } from '../lib/albumGroup';
-import { cleanPersonName, memberForRow, selfMember } from '../lib/albumPeople';
+import { cleanPersonName, memberForRow, personNameKey, selfMember } from '../lib/albumPeople';
 import { openShares, simplifyDebts } from '../lib/groupDebts';
 import { notifyAlbumGroups } from './albumGroupStore';
 
@@ -100,34 +100,64 @@ function readTx(id: string): TxRow | null {
 }
 
 /**
- * What bringing a whole group in step reads, in three statements up front
- * instead of four for every bill: the entries its bills already have, their
- * shares, and which entries the album holds. Most passes then write nothing.
+ * What bringing a whole group in step reads, in a few statements up front
+ * instead of several for every bill: the entries its bills already have,
+ * their shares, the entries its payments made, and which entries the album
+ * holds. Most passes then write nothing.
  */
 interface Preloaded {
   entries: Map<string, TxRow>;
   splits: Map<string, TransactionSplit[]>;
+  /** The entries payments made (or would make), by id; an id read and not found is null. */
+  linked: Map<string, TxRow | null>;
   inAlbum: Set<string>;
 }
 
-function preload(groupId: string, billIds: string[]): Preloaded {
+/** The entries with these ids, in parts: a statement takes only so many values. */
+function readTxs(ids: readonly string[]): Map<string, TxRow> {
   const db = getSQLite();
-  const entries = new Map<string, TxRow>();
-  // In parts: a statement takes only so many values.
-  for (let start = 0; start < billIds.length; start += 400) {
-    const ids = billIds.slice(start, start + 400);
-    const rows = db.getAllSync<TxRow>(
-      `SELECT ${TX_COLUMNS} FROM transactions WHERE id IN (${ids.map(() => '?').join(', ')})`,
-      ids,
-    );
-    for (const row of rows) entries.set(row.id, row);
+  const rows = new Map<string, TxRow>();
+  for (let start = 0; start < ids.length; start += 400) {
+    const part = ids.slice(start, start + 400);
+    for (const row of db.getAllSync<TxRow>(
+      `SELECT ${TX_COLUMNS} FROM transactions WHERE id IN (${part.map(() => '?').join(', ')})`,
+      part,
+    )) {
+      rows.set(row.id, row);
+    }
   }
+  return rows;
+}
+
+function preload(
+  groupId: string,
+  billIds: string[],
+  paid: ReadonlyMap<string, readonly AlbumSettlement[]>,
+): Preloaded {
+  const db = getSQLite();
+  const entries = readTxs(billIds);
   const splits = new Map<string, TransactionSplit[]>();
   const held = [...entries.keys()];
   for (let start = 0; start < held.length; start += 400) {
     const part = transactionSplitsRepository.listByTransactionIds(held.slice(start, start + 400));
     for (const [id, rows] of part) splits.set(id, rows);
   }
+  // Every id a payment's entry can have: the one a share row already names,
+  // else the one it would be made with (`linkedIdFor`).
+  const linkedIds = new Set<string>();
+  for (const rows of splits.values()) {
+    for (const split of rows) if (split.paidTransactionId) linkedIds.add(split.paidTransactionId);
+  }
+  for (const billId of billIds) {
+    for (const payment of paid.get(billId) ?? []) {
+      linkedIds.add(linkedIdFor(billId, 'received', payment.id));
+      linkedIds.add(linkedIdFor(billId, 'sent_part', payment.id));
+    }
+  }
+  const found = readTxs([...linkedIds]);
+  const linked = new Map<string, TxRow | null>(
+    [...linkedIds].map((id) => [id, found.get(id) ?? null]),
+  );
   const inAlbum = new Set(
     db
       .getAllSync<{
@@ -138,23 +168,35 @@ function preload(groupId: string, billIds: string[]): Preloaded {
       )
       .map((row) => row.transaction_id),
   );
-  return { entries, splits, inAlbum };
+  return { entries, splits, linked, inAlbum };
+}
+
+/** The id of the entry a payment makes: a transfer for money received, an expense for a part sent. */
+function linkedIdFor(billId: string, kind: 'received' | 'sent_part', settlementId: string): string {
+  return `${billId}:${kind === 'received' ? 't' : 'x'}:${settlementId}`;
 }
 
 const sameMoney = (a: number | null | undefined, b: number | null | undefined) =>
   a == null || b == null ? a == null && b == null : Math.round(a * 100) === Math.round(b * 100);
 
 /**
- * Whether this phone keeps the group's entries now: the album is in the open
- * ledger (the entries land on its accounts and categories). A group whose
- * album is in another ledger is caught up when that ledger is opened.
+ * Whether this phone keeps the group's entries now: the album is in the main
+ * ledger, which is open (the entries land on its accounts and categories).
+ * A shared album lives only in the main ledger, so a group whose id names an
+ * album of another ledger (one a member of a shared ledger could know) never
+ * writes there; one in the main ledger is caught up when it is opened.
  */
 function albumIsOpen(groupId: string): boolean {
   const row = getSQLite().getFirstSync<{ ledger_id: string; deleted_at: string | null }>(
     'SELECT ledger_id, deleted_at FROM albums WHERE id = ?',
     [groupId],
   );
-  return !!row && !row.deleted_at && row.ledger_id === getActiveLedgerId();
+  return (
+    !!row &&
+    !row.deleted_at &&
+    row.ledger_id === DEFAULT_LEDGER_ID &&
+    getActiveLedgerId() === DEFAULT_LEDGER_ID
+  );
 }
 
 /**
@@ -499,7 +541,8 @@ function projectExpense(
       paybackAccountId = paymentAccount(payment, expectedAccount(payment.memberId));
       if (tx.account_id && paybackAccountId && paybackAccountId !== tx.account_id) {
         paidTransactionId =
-          prior.get(payment.settlementId)?.linkedId ?? `${expense.id}:t:${payment.settlementId}`;
+          prior.get(payment.settlementId)?.linkedId ??
+          linkedIdFor(expense.id, 'received', payment.settlementId);
         linked.set(paidTransactionId, {
           id: paidTransactionId,
           payment,
@@ -509,7 +552,8 @@ function projectExpense(
     } else if (payment?.kind === 'sent_part') {
       paybackAccountId = paymentAccount(payment, env.defaultAccountId);
       paidTransactionId =
-        prior.get(payment.settlementId)?.linkedId ?? `${expense.id}:x:${payment.settlementId}`;
+        prior.get(payment.settlementId)?.linkedId ??
+        linkedIdFor(expense.id, 'sent_part', payment.settlementId);
       linked.set(paidTransactionId, {
         id: paidTransactionId,
         payment,
@@ -557,7 +601,9 @@ function projectExpense(
 
   // --- The entries its payments make ---------------------------------------
   for (const entry of linked.values()) {
-    const before = readTx(entry.id);
+    const before = loaded?.linked.has(entry.id)
+      ? (loaded.linked.get(entry.id) ?? null)
+      : readTx(entry.id);
     // The entry a payment makes is never a bill of a group.
     if (before?.album_group_id) continue;
     if (entry.payment.kind === 'received') {
@@ -619,7 +665,7 @@ function projectExpense(
           note: expense.note,
           albumGroupId: null,
         }) || changed;
-      changed = ensureInAlbum(groupId, entry.id) || changed;
+      if (!loaded?.inAlbum.has(entry.id)) changed = ensureInAlbum(groupId, entry.id) || changed;
     }
   }
   // Entries of payments that are no longer there: undone, past the share, or
@@ -650,9 +696,10 @@ export function projectGroup(
   if (!sharedAlbumFor(groupId) || !albumIsOpen(groupId)) return false;
   const members = albumGroupsRepository.listAllMembers(groupId);
   if (!selfMember(members, env.userId)) return false;
-  const paid = settlementsByBill(albumGroupsRepository.listSettlements(groupId));
+  const memberIds = new Set(members.map((member) => member.id));
+  const paid = settlementsByBill(albumGroupsRepository.listSettlements(groupId, memberIds));
   const expenses = albumGroupsRepository
-    .listExpenses(groupId)
+    .listExpenses(groupId, memberIds)
     .filter((expense) => !options.expenseId || expense.id === options.expenseId);
   let changed = false;
   getSQLite().withTransactionSync(() => {
@@ -662,6 +709,7 @@ export function projectGroup(
       : preload(
           groupId,
           expenses.map((expense) => expense.id),
+          paid,
         );
     for (const expense of expenses) {
       const payments = paid.get(expense.id) ?? [];
@@ -681,9 +729,10 @@ export function projectGroup(
  */
 export function closeEvenGroup(groupId: string, env: GroupEnv): boolean {
   if (!albumGroupsRepository.simplifiesDebts(groupId)) return false;
+  const memberIds = albumGroupsRepository.memberIds(groupId);
   const open = openShares(
-    albumGroupsRepository.listExpenses(groupId),
-    albumGroupsRepository.listSettlements(groupId),
+    albumGroupsRepository.listExpenses(groupId, memberIds),
+    albumGroupsRepository.listSettlements(groupId, memberIds),
   );
   if (open.length === 0 || simplifyDebts(open).length > 0) return false;
   albumGroupsRepository.createSettlements(
@@ -735,18 +784,24 @@ export function publishAlbumBills(groupId: string, env: GroupEnv): void {
       const tx = readTx(id);
       if (!tx) continue;
       // Who each friend's row is: the member it already names, else the one
-      // of that name, else someone new by that name.
+      // of that name, else someone new by that name. The new are only added
+      // once the bill turns out to be one the group can hold.
+      const pending = new Map<string, { id: string; name: string }>();
       const memberOf = (split: TransactionSplit): string | null => {
         const known = memberForRow(members, self.id, split);
         if (known) return known.id;
         const name = cleanPersonName(split.personName ?? '');
         if (!name) return null;
-        const added = albumGroupsRepository.createMember(groupId, { name });
-        members = [...members, added];
-        return added.id;
+        const key = personNameKey(name);
+        const person = pending.get(key) ?? { id: newId(), name };
+        pending.set(key, person);
+        return person.id;
       };
       const built = groupFromLocalBill(tx, splits, self.id, memberOf);
       if (!built) continue;
+      for (const person of pending.values()) {
+        members = [...members, albumGroupsRepository.createMember(groupId, person)];
+      }
       const category = tx.category_id
         ? db.getFirstSync<{ name: string | null; icon: string | null }>(
             'SELECT name, icon FROM categories WHERE id = ?',
@@ -774,7 +829,8 @@ export function publishAlbumBills(groupId: string, env: GroupEnv): void {
           toMember: payment.toMember,
           amount: payment.amount,
           currency: tx.currency,
-          date: payment.paidAt.slice(0, 10),
+          // The day it was paid where the user is, as every other payment's.
+          date: dayKeyFromDateLocal(new Date(payment.paidAt)),
           createdBy: env.userId,
           createdAt: payment.paidAt,
         });

@@ -63,6 +63,9 @@ function sharesJson(shares: readonly AlbumShare[]): string {
   );
 }
 
+/** The key of the user's own split row of a group's bill on their phone (`<bill>:self`). */
+const SELF_ROW_KEY = 'self';
+
 class AlbumGroupsRepository {
   // -------------------------------------------------------------------------
   // Members
@@ -85,8 +88,11 @@ class AlbumGroupsRepository {
       .filter(present);
   }
 
-  /** The ids a bill or a payment of the group may name: its members, removed ones too. */
-  private memberIds(groupId: string): Set<string> {
+  /**
+   * The ids a bill or a payment of the group may name: its members, removed
+   * ones too. A caller reading bills and payments together passes it to both.
+   */
+  memberIds(groupId: string): Set<string> {
     return new Set(this.listAllMembers(groupId).map((member) => member.id));
   }
 
@@ -156,8 +162,7 @@ class AlbumGroupsRepository {
    * of those). A bill counts only between the group's own members: one paid
    * by nobody in it is left out, and so is a share of nobody's.
    */
-  listExpenses(groupId: string): AlbumExpense[] {
-    const members = this.memberIds(groupId);
+  listExpenses(groupId: string, members = this.memberIds(groupId)): AlbumExpense[] {
     return getDb()
       .select()
       .from(albumExpensesTable)
@@ -231,8 +236,7 @@ class AlbumGroupsRepository {
    * Every settlement of the group, undone ones too (a phone undoes its own
    * side of those), between its own members only.
    */
-  listSettlements(groupId: string): AlbumSettlement[] {
-    const members = this.memberIds(groupId);
+  listSettlements(groupId: string, members = this.memberIds(groupId)): AlbumSettlement[] {
     return getDb()
       .select()
       .from(albumSettlementsTable)
@@ -241,7 +245,16 @@ class AlbumGroupsRepository {
       .all()
       .map(toAlbumSettlement)
       .filter(present)
-      .filter((payment) => members.has(payment.fromMember) && members.has(payment.toMember));
+      .filter(
+        (payment) =>
+          members.has(payment.fromMember) &&
+          members.has(payment.toMember) &&
+          // A payment's row on a phone is `<bill>:<payment id>`, beside
+          // `<bill>:<member id>` and `<bill>:self`: an id that is one of those
+          // would take another row's place.
+          !members.has(payment.id) &&
+          payment.id !== SELF_ROW_KEY,
+      );
   }
 
   createSettlement(input: AlbumSettlementInput): string {

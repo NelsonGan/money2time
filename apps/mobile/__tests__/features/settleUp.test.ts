@@ -1,4 +1,5 @@
 import { NO_REIMBURSEMENT } from '~/features/reimbursements/lib/reimbursementMath';
+import { UNNAMED_PERSON_KEY } from '~/features/transactions/lib/debtParty';
 import {
   aggregateSettleUpByPerson,
   aggregateSettleUpByTransaction,
@@ -10,7 +11,6 @@ import {
   personSettlementRows,
   receiptShareFileName,
   recentSplitPersonNames,
-  UNNAMED_PERSON_KEY,
 } from '~/features/transactions/lib/settleUp';
 import type { TransactionSplit, TransactionWithRelations } from '~/types';
 

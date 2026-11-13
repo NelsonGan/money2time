@@ -19,22 +19,22 @@ type SettleUpScope = { albumId: string } | 'outside_albums' | 'all';
 
 /** Shared reporting-currency wiring for the Settle Up roll-ups, over the bills of `scope`. */
 function useSettleUpContext(scope: SettleUpScope) {
-  const { settings, rateTable, getAlbumTransactionIds, getAlbumOwnedTransactionIds, albums } =
-    useApp();
+  const { settings, rateTable, getAlbumEntryIds, getAlbumOwnedTransactionIds, albums } = useApp();
   const { transactions: all } = useTransactions();
   const reportingCurrency = settings.currencyCode;
   const albumId = typeof scope === 'object' ? scope.albumId : null;
   const transactions = useMemo(() => {
     if (scope === 'all') return all;
     if (albumId) {
-      const ids = new Set(getAlbumTransactionIds(albumId));
+      // The cached membership, not a database read on every recompute.
+      const ids = new Set(getAlbumEntryIds().get(albumId));
       return all.filter((transaction) => ids.has(transaction.id));
     }
     const inAlbums = getAlbumOwnedTransactionIds();
     return inAlbums.size ? all.filter((transaction) => !inAlbums.has(transaction.id)) : all;
     // `albums` changes when an album's entries do, and with the open ledger.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [albumId, all, albums, getAlbumOwnedTransactionIds, getAlbumTransactionIds, scope === 'all']);
+  }, [albumId, all, albums, getAlbumEntryIds, getAlbumOwnedTransactionIds, scope === 'all']);
 
   const rateToReporting = useCallback(
     (currency: string) => convert(1, currency, reportingCurrency, rateTable).rateUsed,

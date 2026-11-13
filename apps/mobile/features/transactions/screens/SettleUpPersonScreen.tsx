@@ -4,6 +4,7 @@ import { Pressable, ScrollView, View } from 'react-native';
 
 import { Button, CategoryEmoji, SettingsHeader, SettingsPageLayout, Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
+import { PersonAvatar } from '~/features/transactions/components/PersonAvatar';
 import {
   type SettleUpConfirmContent,
   SettleUpConfirmSheet,
@@ -17,7 +18,6 @@ import type {
   ReceiptLine,
 } from '~/features/transactions/components/SplitReceiptCard';
 import { SplitReceiptShareModal } from '~/features/transactions/components/SplitReceiptShareModal';
-import { avatarColor, personInitial } from '~/features/transactions/lib/personAvatar';
 import { personItemNames } from '~/features/transactions/lib/receiptSplitShare';
 import { personBalanceState, planPartSettlement } from '~/features/transactions/lib/settleUp';
 import {
@@ -217,9 +217,10 @@ export function SettleUpPersonScreen({
       ? normalizeMoneyAmount(payments.reduce((sum, payment) => sum + payment.amount, 0))
       : share.amount;
     const caption = paid
-      ? I18n.t(youOwe ? 'transactions.settleUp.you_paid_on' : 'transactions.settleUp.paid_on', {
-          date: share.paidAt ? formatShortDate(share.paidAt) : '',
-        })
+      ? I18n.t(
+          youOwe ? 'transactions.settleUp.you_paid_on' : 'transactions.settleUp.person_paid_on',
+          { name: title, date: share.paidAt ? formatShortDate(share.paidAt) : '' },
+        )
       : `${formatShortDate(share.date)} · ${whoPaid}`;
     // A share partly paid shows how far along it is as a slim bar under the
     // line, read out in words: the line itself has no room for the figures.
@@ -295,16 +296,8 @@ export function SettleUpPersonScreen({
             contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 4, paddingBottom: 24 }}
           >
             <View className="items-center px-4 pt-1 pb-2">
-              <View
-                className="h-16 w-16 items-center justify-center rounded-full"
-                style={{
-                  backgroundColor: avatarColor(person.key),
-                  opacity: state === 'settled' ? 0.55 : 1,
-                }}
-              >
-                <Text variant="subheading" style={{ color: '#fff' }}>
-                  {personInitial(person.name)}
-                </Text>
+              <View style={{ opacity: state === 'settled' ? 0.55 : 1 }}>
+                <PersonAvatar name={person.name} partyKey={person.key} size={56} />
               </View>
               {/* Opened from an album: these are that album's bills alone. */}
               {albumName ? (

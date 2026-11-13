@@ -856,6 +856,7 @@ const en = {
       you_pay_person: 'You pay {{name}}',
       even_caption: 'You are even, nothing to pay',
       you_paid_on: 'You paid {{date}}',
+      person_paid_on: '{{name}} paid {{date}}',
       undo_payment_title: 'Undo this payment?',
       undo_payment_message:
         'You will owe {{amount}} again. The payment is removed from the account it was paid from.',
@@ -2906,6 +2907,7 @@ const en = {
     save_scanned_hint: 'Keep the photo when you scan a receipt to log or split a bill.',
   },
   albums: {
+    untitled: 'Album',
     title: 'Albums',
     active_label: 'Auto-add new transactions to',
     active_sheet_title: 'Active trip',

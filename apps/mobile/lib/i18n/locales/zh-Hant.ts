@@ -845,6 +845,7 @@ const zhHant = {
       you_pay_person: '你付給 {{name}}',
       even_caption: '你們兩清了，無需付款',
       you_paid_on: '你於 {{date}} 付款',
+      person_paid_on: '{{name}} 於 {{date}} 已還',
       undo_payment_title: '撤銷這筆還款？',
       undo_payment_message: '你將再次欠 {{amount}}，這筆金額也會從付款帳戶中移除。',
     },
@@ -2794,6 +2795,7 @@ const zhHant = {
     save_scanned_hint: '掃描收據來記帳或分攤帳單時保留照片。',
   },
   albums: {
+    untitled: '相簿',
     location: {
       label: '地點',
       add: '新增地點',

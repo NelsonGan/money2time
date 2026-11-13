@@ -878,6 +878,7 @@ const ja = {
       you_pay_person: '{{name}}に支払う',
       even_caption: '差し引きゼロです。支払いはありません',
       you_paid_on: '{{date}}に支払い',
+      person_paid_on: '{{name}}が{{date}}に支払い',
       undo_payment_title: 'この支払いを取り消しますか?',
       undo_payment_message: '{{amount}}がふたたび未払いになり、支払い元の口座から外れます。',
     },
@@ -2894,6 +2895,7 @@ const ja = {
     save_scanned_hint: 'レシートをスキャンして記録・割り勘するとき、写真を残します。',
   },
   albums: {
+    untitled: 'アルバム',
     location: {
       label: '場所',
       add: '場所を追加',

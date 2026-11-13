@@ -883,6 +883,7 @@ const nl = {
       you_pay_person: 'Jij betaalt {{name}}',
       even_caption: 'Jullie staan gelijk, niets te betalen',
       you_paid_on: 'Je betaalde op {{date}}',
+      person_paid_on: '{{name}} betaalde op {{date}}',
       undo_payment_title: 'Deze betaling ongedaan maken?',
       undo_payment_message:
         'Je bent weer {{amount}} schuldig en het bedrag gaat van de rekening af waarmee het is betaald.',
@@ -2947,6 +2948,7 @@ const nl = {
       'Bewaar de foto wanneer je een bon scant om te boeken of een rekening te splitsen.',
   },
   albums: {
+    untitled: 'Album',
     location: {
       label: 'Locatie',
       add: 'Locatie toevoegen',

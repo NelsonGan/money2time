@@ -28,7 +28,8 @@ type Bill = Pick<
 type Payment = Pick<
   AlbumSettlement,
   'id' | 'expenseId' | 'fromMember' | 'toMember' | 'amount' | 'date' | 'createdAt' | 'deletedAt'
->;
+> &
+  Partial<Pick<AlbumSettlement, 'currency'>>;
 
 /** What one member still owes another on one bill. */
 interface OpenShare {
@@ -207,6 +208,13 @@ function moveAlong(room: Graph, from: string, to: string, limit: number): number
   return limit - left;
 }
 
+/** Moves up to `limit` straight from `from` to `to`, along their own debt only. Returns what moved. */
+function moveDirect(room: Graph, from: string, to: string, limit: number): number {
+  const amount = Math.min(limit, owed(room, from, to));
+  if (amount > 0) setOwed(room, from, to, owed(room, from, to) - amount);
+  return amount;
+}
+
 /** Debts passed along: while someone both owes and is owed, what they are owed goes to the one they owe. */
 function passedAlong(pairs: Graph): Graph {
   const graph: Graph = new Map([...pairs].map(([from, row]) => [from, new Map(row)]));
@@ -285,13 +293,24 @@ export function simplifyDebts(open: readonly OpenShare[]): GroupDebt[] {
  * through the members in between, whose own books come out even), never more
  * than those debts carry. Then every circle of debts left is closed, since
  * nobody has to pay it. Empty when nothing is owed along the way.
+ *
+ * With `simplified` off the album lists each pair's own net, so the money
+ * moves only along the debts between the two, and only the two's debts to
+ * each other are set off: nobody else's line changes.
  */
-export function settleDebt(open: readonly OpenShare[], debt: GroupDebt): BillPayment[] {
+export function settleDebt(
+  open: readonly OpenShare[],
+  debt: GroupDebt,
+  { simplified = true }: { simplified?: boolean } = {},
+): BillPayment[] {
   const shares = open.filter((share) => share.currency === debt.currency);
   // What the debts are to start with, and what can still move along each.
   const before = owedOnBills(shares);
   const room = owedOnBills(shares);
-  if (moveAlong(room, debt.from, debt.to, cents(debt.amount)) === 0) return [];
+  const sent = simplified
+    ? moveAlong(room, debt.from, debt.to, cents(debt.amount))
+    : moveDirect(room, debt.from, debt.to, cents(debt.amount));
+  if (sent === 0) return [];
   // What moved along each debt, and what is still owed on it.
   const paid: Graph = new Map();
   const still: Graph = new Map();
@@ -302,7 +321,13 @@ export function settleDebt(open: readonly OpenShare[], debt: GroupDebt): BillPay
       setOwed(still, from, to, amount - moved);
     }
   }
-  for (let circle = findCircle(still); circle; circle = findCircle(still)) {
+  const circleOf = simplified
+    ? findCircle
+    : (graph: Graph) =>
+        owed(graph, debt.from, debt.to) > 0 && owed(graph, debt.to, debt.from) > 0
+          ? [debt.from, debt.to, debt.from]
+          : null;
+  for (let circle = circleOf(still); circle; circle = circleOf(still)) {
     const amount = Math.min(...circle.slice(0, -1).map((m, i) => owed(still, m, circle[i + 1])));
     for (let i = 0; i + 1 < circle.length; i += 1) {
       const [from, to] = [circle[i], circle[i + 1]];

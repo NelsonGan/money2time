@@ -327,6 +327,20 @@ describe('changes to a bill', () => {
     expect(projectGroup(GROUP, { ...env, userId: 'u-someone-new' })).toBe(false);
     expect(liveTransactions()).toEqual([]);
   });
+
+  it('never writes into an album of another ledger that has the group’s id', () => {
+    // A member of a shared ledger knows its albums' ids, and could share a
+    // group under one: the group only ever writes into the main ledger.
+    app.connection.exec(`UPDATE albums SET ledger_id = 'work' WHERE id = '${GROUP}'`);
+    addBill('dinner', 'aisha');
+    setActiveLedgerId('work');
+    try {
+      expect(projectGroup(GROUP, env)).toBe(false);
+    } finally {
+      setActiveLedgerId(DEFAULT_LEDGER_ID);
+    }
+    expect(liveTransactions()).toEqual([]);
+  });
 });
 
 describe('simplify group debts', () => {

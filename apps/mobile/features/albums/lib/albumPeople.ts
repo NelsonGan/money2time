@@ -124,7 +124,11 @@ export function splitWithPeople(people: readonly AlbumGroupPerson[]): AlbumPerso
 export function uniquePersonName(base: string, members: readonly AlbumMember[]): string {
   const taken = new Set(members.map((member) => personNameKey(member.name)));
   let unique = base;
-  for (let n = 2; taken.has(personNameKey(unique)); n += 1) unique = `${base} ${n}`;
+  for (let n = 2; taken.has(personNameKey(unique)); n += 1) {
+    // Within the longest name a group keeps, or it reads back as the taken one.
+    const suffix = ` ${n}`;
+    unique = `${base.slice(0, MAX_PERSON_NAME - suffix.length).trimEnd()}${suffix}`;
+  }
   return unique;
 }
 

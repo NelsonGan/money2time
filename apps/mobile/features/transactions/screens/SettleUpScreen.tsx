@@ -13,8 +13,9 @@ import { useBottomNavContentInset } from '~/components/navigation/BottomNavMinim
 import { CategoryEmoji, SettingsHeader, SettingsPageLayout, Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import { ActivitySearchRow } from '~/features/transactions/components/ActivitySearchRow';
+import { PersonAvatar } from '~/features/transactions/components/PersonAvatar';
 import { SettleUpDateHeader } from '~/features/transactions/components/SettleUpDateHeader';
-import { avatarColor, personInitial } from '~/features/transactions/lib/personAvatar';
+import { personInitial } from '~/features/transactions/lib/personAvatar';
 import { personBalanceState } from '~/features/transactions/lib/settleUp';
 import {
   groupSettleUpSearchResultsByDate,
@@ -288,13 +289,8 @@ export function SettleUpScreen({
           settled ? 'border-border/15 bg-secondary/20' : 'border-border/30 bg-card',
         )}
       >
-        <View
-          className="h-11 w-11 items-center justify-center rounded-full"
-          style={{ backgroundColor: avatarColor(person.key), opacity: settled ? 0.55 : 1 }}
-        >
-          <Text variant="bodyStrong" style={{ color: '#fff' }}>
-            {personInitial(person.name)}
-          </Text>
+        <View style={{ opacity: settled ? 0.55 : 1 }}>
+          <PersonAvatar name={person.name} partyKey={person.key} size={38.5} />
         </View>
         <View className="flex-1">
           <Text variant="bodyStrong" tone={settled ? 'muted' : undefined} numberOfLines={1}>
@@ -436,21 +432,27 @@ export function SettleUpScreen({
     );
   };
 
+  // Albums answer for their own bills, so both tabs list the albums with
+  // something owed first: without them the Transactions tab would read as
+  // empty while an album still has money open.
+  const renderAlbumSection = (followedBy: string | null) =>
+    albumBalances.length > 0 ? (
+      <>
+        <Text variant="label" tone="muted" className="pb-1">
+          {I18n.t('albums.title')}
+        </Text>
+        {albumBalances.map(renderAlbumCard)}
+        {followedBy ? (
+          <Text variant="label" tone="muted" className="pb-1 pt-3">
+            {followedBy}
+          </Text>
+        ) : null}
+      </>
+    ) : null;
+
   const renderPeopleList = () => (
     <View className="mt-4 gap-2">
-      {albumBalances.length > 0 ? (
-        <>
-          <Text variant="label" tone="muted" className="pb-1">
-            {I18n.t('albums.title')}
-          </Text>
-          {albumBalances.map(renderAlbumCard)}
-          {openPeople.length > 0 ? (
-            <Text variant="label" tone="muted" className="pb-1 pt-3">
-              {I18n.t('albums.people.title')}
-            </Text>
-          ) : null}
-        </>
-      ) : null}
+      {renderAlbumSection(openPeople.length > 0 ? I18n.t('albums.people.title') : null)}
       {openPeople.map(renderPersonCard)}
       {settledPeople.length > 0 ? (
         <>
@@ -465,6 +467,7 @@ export function SettleUpScreen({
 
   const renderTransactionsList = () => (
     <View className="mt-5 gap-3">
+      {albumBalances.length > 0 ? <View className="gap-2">{renderAlbumSection(null)}</View> : null}
       {transactionGroups.map((group) => (
         <View key={group.dayKey} className="gap-2">
           <SettleUpDateHeader dayKey={group.dayKey} locale={locale} />
@@ -619,7 +622,7 @@ export function SettleUpScreen({
             const hasResults =
               value === 'people'
                 ? people.length > 0 || albumBalances.length > 0
-                : transactions.length > 0;
+                : transactions.length > 0 || albumBalances.length > 0;
             return (
               <View key={value} style={{ flex: 1 }}>
                 <ScrollView

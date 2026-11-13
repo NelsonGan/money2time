@@ -1047,6 +1047,11 @@ export const TransactionItem = memo(
     prev.transaction.splitsSummary?.paidCount === next.transaction.splitsSummary?.paidCount &&
     prev.transaction.splitsSummary?.unpaidAmount === next.transaction.splitsSummary?.unpaidAmount &&
     prev.transaction.splitsSummary?.youOwe === next.transaction.splitsSummary?.youOwe &&
+    // "Aisha paid" reads the payer's row, which a rename or another phone
+    // changes without touching the bill.
+    (!next.transaction.splitsSummary?.youOwe ||
+      billPayer(prev.transaction.splits)?.personName ===
+        billPayer(next.transaction.splits)?.personName) &&
     // Same story for the denormalized relation fields: renaming a category or
     // changing its icon rewrites the category row, not the transaction, so the
     // refreshed row arrives with its old updatedAt. Without these the list keeps

@@ -880,6 +880,7 @@ const hi = {
       you_pay_person: 'आप {{name}} को देंगे',
       even_caption: 'हिसाब बराबर है, कुछ नहीं देना',
       you_paid_on: 'आपने {{date}} को चुकाया',
+      person_paid_on: '{{name}} ने {{date}} को चुकाया',
       undo_payment_title: 'यह भुगतान वापस लें?',
       undo_payment_message:
         'आपको फिर से {{amount}} देने होंगे, और यह रकम उस खाते से हट जाएगी जिससे भुगतान हुआ था।',
@@ -2899,6 +2900,7 @@ const hi = {
     save_scanned_hint: 'लेन-देन दर्ज करने या बिल बांटने के लिए रसीद स्कैन करते समय फ़ोटो रखें।',
   },
   albums: {
+    untitled: 'एल्बम',
     location: {
       label: 'स्थान',
       add: 'स्थान जोड़ें',

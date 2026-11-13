@@ -91,6 +91,7 @@ export function AlbumPeopleScreen({ albumId, onBack }: AlbumPeopleScreenProps) {
 
   const [busy, setBusy] = useState<string | null>(null);
   const [link, setLink] = useState<InviteLink | null>(null);
+  const [linkFailed, setLinkFailed] = useState(false);
   const [copied, setCopied] = useState(false);
   // The accounts in the share now, as the Worker lists them: someone who left
   // keeps their row and name, and reads as not joined again.
@@ -129,13 +130,20 @@ export function AlbumPeopleScreen({ albumId, onBack }: AlbumPeopleScreenProps) {
     async (rotate = false) => {
       if (!shareId) return;
       const request = ++linkRequestRef.current;
-      const next = await getInviteLink(
-        await getSessionToken(),
-        shareId,
-        { name: albumName, emoji: null },
-        { rotate },
-      );
-      if (request === linkRequestRef.current) setLink(next);
+      setLinkFailed(false);
+      try {
+        const next = await getInviteLink(
+          await getSessionToken(),
+          shareId,
+          { name: albumName, emoji: null },
+          { rotate },
+        );
+        if (request === linkRequestRef.current) setLink(next);
+      } catch (error) {
+        // Offline, or the account not ready: offered again from the field.
+        if (request === linkRequestRef.current) setLinkFailed(true);
+        throw error;
+      }
     },
     [albumName, getSessionToken, shareId],
   );
@@ -174,6 +182,14 @@ export function AlbumPeopleScreen({ albumId, onBack }: AlbumPeopleScreenProps) {
     setWantsShare(false);
     startShareRef.current();
   }, [signedIn, wantsShare]);
+
+  const copiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(
+    () => () => {
+      if (copiedTimer.current) clearTimeout(copiedTimer.current);
+    },
+    [],
+  );
 
   if (!album) return <SettingsPageLayout>{null}</SettingsPageLayout>;
 
@@ -313,7 +329,8 @@ export function AlbumPeopleScreen({ albumId, onBack }: AlbumPeopleScreenProps) {
     await Clipboard.setStringAsync(link.url);
     void triggerHaptic('success');
     setCopied(true);
-    setTimeout(() => setCopied(false), 1600);
+    if (copiedTimer.current) clearTimeout(copiedTimer.current);
+    copiedTimer.current = setTimeout(() => setCopied(false), 1600);
   };
 
   const confirmNewLink = () => {
@@ -330,8 +347,6 @@ export function AlbumPeopleScreen({ albumId, onBack }: AlbumPeopleScreenProps) {
     );
   };
 
-  // Joined, and not yet said who they are: nothing of the group reaches their
-  // ledger until they do.
   // Joined, and not on the list yet: nothing here is theirs to change.
   const pending = !!share && !group.self;
   const placeholders = group.members.filter((member) => !member.userId);
@@ -445,10 +460,12 @@ export function AlbumPeopleScreen({ albumId, onBack }: AlbumPeopleScreenProps) {
             canInvite
               ? {
                   url: link?.url ?? null,
+                  failed: linkFailed,
                   copied,
                   disabled: busy !== null,
                   onCopy: () => void copyLink(),
                   onNewLink: confirmNewLink,
+                  onRetry: () => fetchLink().catch(() => undefined),
                 }
               : null
           }

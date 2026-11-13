@@ -742,22 +742,13 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   markSplitUnpaid: (splitId: string) => void;
   updateSplitPaybackAccount: (splitId: string, paybackAccountId: string | null) => void;
   deleteSplit: (splitId: string) => void;
-  /**
-   * The user paid a friend back for a bill that friend paid (`payerSplitId` is
-   * the payer's row). The expense moves onto `accountId`, the account it was
-   * paid from; null records the payment without one.
-   */
-  payBackPayer: (
-    payerSplitId: string,
-    options?: { accountId?: string | null; via?: 'bill' | 'settle_up' },
-  ) => void;
-  /** Undoes {@link payBackPayer}: the user owes the share again. */
+  /** Undoes paying a friend back in full: the user owes the share again. */
   undoPayBackPayer: (payerSplitId: string) => void;
   /**
    * The user paid `amount` of what they owe the friend who paid a bill. Less
    * than what is owed is a part payment: an expense of its own on
    * `accountId`, cut out of the bill, with the rest still owed. Everything
-   * that is left is {@link payBackPayer}.
+   * that is left moves the whole expense onto `accountId`.
    */
   recordPayBack: (
     payerSplitId: string,
@@ -4135,25 +4126,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         try {
           const self = selfMember(albumGroupsRepository.listMembers(groupId), env.userId);
           if (!self || (debt.from !== self.id && debt.to !== self.id)) return;
+          const memberIds = albumGroupsRepository.memberIds(groupId);
           const open = openShares(
-            albumGroupsRepository.listExpenses(groupId),
-            albumGroupsRepository.listSettlements(groupId),
+            albumGroupsRepository.listExpenses(groupId, memberIds),
+            albumGroupsRepository.listSettlements(groupId, memberIds),
           );
+          const simplified = albumGroupsRepository.simplifiesDebts(groupId);
           // The debt as the group holds it now: a second tap, or a payment
           // that landed meanwhile, never pays it twice.
-          const current = (
-            albumGroupsRepository.simplifiesDebts(groupId)
-              ? simplifyDebts(open)
-              : pairwiseDebts(open)
-          ).find(
+          const current = (simplified ? simplifyDebts(open) : pairwiseDebts(open)).find(
             (item) =>
               item.from === debt.from && item.to === debt.to && item.currency === debt.currency,
           );
           if (!current) return;
-          const payments = settleDebt(open, {
-            ...debt,
-            amount: Math.min(debt.amount, current.amount),
-          });
+          // Simplify off, only the two people's own debt moves.
+          const payments = settleDebt(
+            open,
+            { ...debt, amount: Math.min(debt.amount, current.amount) },
+            { simplified },
+          );
           if (payments.length === 0) return;
           const ids = albumGroupsRepository.createSettlements(
             groupId,
@@ -4201,6 +4192,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const self = selfMember(members, env.userId);
       if (!self) return null;
       const billRows: GroupBillRow[] = [];
+      // People new to the group are only named here; they are written with
+      // the bill, so a bill that does not add up leaves the group as it was.
+      const newMembers: { id: string; name: string }[] = [];
       for (const row of rows) {
         const amount = Number(row.amount) || 0;
         if (row.isSelf) {
@@ -4212,9 +4206,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         let member = memberForRow(members, self.id, row);
         if (!member) {
           const base = cleanPersonName(row.personName ?? '') || I18n.t('albums.people.unnamed');
-          member = albumGroupsRepository.createMember(groupId, {
+          const now = new Date().toISOString();
+          member = {
+            id: newId(),
+            groupId,
             name: uniquePersonName(base, members),
-          });
+            userId: null,
+            sortOrder: members.length,
+            createdAt: now,
+            updatedAt: now,
+            deletedAt: null,
+          };
+          newMembers.push({ id: member.id, name: member.name });
           members = [...members, member];
         }
         billRows.push({ memberId: member.id, amount, isPayer: !!row.isPayer });
@@ -4241,18 +4244,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const selfShare = built.shares.find((share) => share.memberId === self.id)?.amount ?? 0;
       const mine = built.paidBy === self.id || selfShare > 0;
       try {
-        albumGroupsRepository.upsertExpense({
-          id,
-          groupId,
-          date: existingId ? input.date : dateForNewTransaction(input.date, new Date()),
-          note: input.note?.trim() || null,
-          amount: built.amount,
-          currency: input.currency,
-          categoryName: category?.name ?? null,
-          categoryIcon: category?.icon ?? null,
-          paidBy: built.paidBy,
-          shares: built.shares,
-          createdBy: env.userId,
+        getSQLite().withTransactionSync(() => {
+          for (const member of newMembers) albumGroupsRepository.createMember(groupId, member);
+          albumGroupsRepository.upsertExpense({
+            id,
+            groupId,
+            date: existingId ? input.date : dateForNewTransaction(input.date, new Date()),
+            note: input.note?.trim() || null,
+            amount: built.amount,
+            currency: input.currency,
+            categoryName: category?.name ?? null,
+            categoryIcon: category?.icon ?? null,
+            paidBy: built.paidBy,
+            shares: built.shares,
+            createdBy: env.userId,
+          });
         });
         const entry = {
           accountId: input.accountId ?? null,
@@ -4294,9 +4300,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const detachAlbumBill = useCallback(
     (transactionId: string) => {
       const tx = transactionsRef.current.find((item) => item.id === transactionId);
-      if (!tx?.albumGroupId) return;
-      transactionsRepository.update(transactionId, { albumGroupId: null });
-      albumGroupsRepository.softDeleteExpense(tx.albumGroupId, transactionId);
+      const groupId = tx?.albumGroupId;
+      if (!groupId) return;
+      getSQLite().withTransactionSync(() => {
+        transactionsRepository.update(transactionId, { albumGroupId: null });
+        albumGroupsRepository.softDeleteExpense(groupId, transactionId);
+      });
       afterGroupWrite();
     },
     [afterGroupWrite],
@@ -4351,6 +4360,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             if (!self) continue;
             const paidThrough = new Map<string, string | null>();
             const billIds = new Set<string>();
+            // What this batch has already paid on each share: the stored rows
+            // only move once the group is projected after the loop.
+            const paidInBatch = new Map<string, number>();
             for (const payment of payments) {
               const { tx, split } = payment.bill;
               if (payment.bill.groupId !== groupId) continue;
@@ -4360,11 +4372,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               // What is still owed now, as stored: a second tap, or a payment
               // that landed meanwhile, never pays the same share twice.
               const rows = transactionSplitsRepository.listByTransactionId(tx.id);
-              const left = payer
-                ? (owedToPayer(rows, tx.amount)?.owed ?? 0)
-                : (rows.find((row) => row.id === split.id && !row.paidAt)?.amount ?? 0);
+              const shareKey = payer ? tx.id : `${tx.id}:${split.id}`;
+              const left =
+                (payer
+                  ? (owedToPayer(rows, tx.amount)?.owed ?? 0)
+                  : (rows.find((row) => row.id === split.id && !row.paidAt)?.amount ?? 0)) -
+                (paidInBatch.get(shareKey) ?? 0);
               const paid = normalizeMoneyAmount(Math.min(payment.amount, left));
               if (!(paid > 0)) continue;
+              paidInBatch.set(shareKey, (paidInBatch.get(shareKey) ?? 0) + paid);
               albumGroupsRepository.createSettlement({
                 id: payment.settlementId,
                 groupId,
@@ -5592,19 +5608,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           const sameAccount =
             !parent.accountId || !paybackAccountId || paybackAccountId === parent.accountId;
           const usedTransferTxId = sameAccount ? null : transferTxId;
-          writePaybackInDb(parent, {
-            amount: split.amount,
-            toAccountId: paybackAccountId,
-            transferTxId: usedTransferTxId,
-            date,
-            note: explicitNote ?? buildPaybackTransferNote(split.personName, parent.note),
-            rateTable: rateTableRef.current,
-            currencyOf: accountCurrencyOf,
-          });
-          transactionSplitsRepository.update(splitId, {
-            paybackAccountId,
-            paidAt: paidAtIso,
-            paidTransactionId: usedTransferTxId,
+          // One write: a payback without its paid share would lower the bill
+          // while the friend still reads as owing.
+          getSQLite().withTransactionSync(() => {
+            writePaybackInDb(parent, {
+              amount: split.amount,
+              toAccountId: paybackAccountId,
+              transferTxId: usedTransferTxId,
+              date,
+              note: explicitNote ?? buildPaybackTransferNote(split.personName, parent.note),
+              rateTable: rateTableRef.current,
+              currencyOf: accountCurrencyOf,
+            });
+            transactionSplitsRepository.update(splitId, {
+              paybackAccountId,
+              paidAt: paidAtIso,
+              paidTransactionId: usedTransferTxId,
+            });
           });
           void trackEvent(AnalyticsEvents.SPLIT_MARKED_PAID, {
             payback_account_changed: !sameAccount,
@@ -5761,6 +5781,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               paidAt: paidAtIso,
               paidTransactionId: sameAccount ? null : transferTxId,
               partOfSplitId: splitShareKey(split),
+              memberId: split.memberId,
+              albumMemberId: split.albumMemberId,
             });
           });
           void trackEvent(AnalyticsEvents.SPLIT_PART_PAID, { same_account: sameAccount });
@@ -6197,6 +6219,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           const rowPlan = planSplitPayment(self.amount, plan.amount);
           if (rowPlan?.kind !== 'partial') return;
           const reduced = rescaleSplitAdjustedAmounts(parent, parent.amount - rowPlan.amount);
+          let inAlbum = false;
           getSQLite().withTransactionSync(() => {
             transactionsRepository.createWithId(paymentTxId, {
               type: 'expense',
@@ -6233,10 +6256,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             });
             // The part stays in the albums the bill is in.
             albumsRepository.getAllTransactionIdsByAlbum().forEach((ids, albumId) => {
-              if (ids.includes(parent.id)) albumsRepository.addTransactions(albumId, [paymentTxId]);
+              if (!ids.includes(parent.id)) return;
+              albumsRepository.addTransactions(albumId, [paymentTxId]);
+              inAlbum = true;
             });
           });
-          setAlbums(albumsRepository.list());
+          // Album counts only move when the part joined one.
+          if (inAlbum) setAlbums(albumsRepository.list());
           void trackEvent(AnalyticsEvents.SPLIT_DEBT_PAID, {
             with_account: !!accountId,
             via: 'bill',
@@ -7887,7 +7913,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             markSplitUnpaid,
             updateSplitPaybackAccount,
             deleteSplit,
-            payBackPayer,
             undoPayBackPayer,
             recordPayBack,
             undoPayBackPart,
@@ -8043,7 +8068,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       markSplitUnpaid,
       updateSplitPaybackAccount,
       deleteSplit,
-      payBackPayer,
       undoPayBackPayer,
       recordPayBack,
       undoPayBackPart,

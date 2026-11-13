@@ -880,6 +880,7 @@ const uk = {
       you_pay_person: 'Ви платите: {{name}}',
       even_caption: 'Ви в розрахунку, платити нічого',
       you_paid_on: 'Ви сплатили {{date}}',
+      person_paid_on: '{{name}} сплатив(ла) {{date}}',
       undo_payment_title: 'Скасувати цей платіж?',
       undo_payment_message:
         'Ви знову будете винні {{amount}}, і сума зникне з рахунку, з якого її було сплачено.',
@@ -2912,6 +2913,7 @@ const uk = {
     save_scanned_hint: 'Зберігати фото, коли скануєте чек, щоб записати чи розділити рахунок.',
   },
   albums: {
+    untitled: 'Альбом',
     location: {
       label: 'Місцезнаходження',
       add: 'Додати місце',

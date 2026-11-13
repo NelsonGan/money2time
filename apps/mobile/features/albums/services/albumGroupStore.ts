@@ -7,6 +7,7 @@ import { deleteGroupRowsLocally } from '~/features/cloudSync/services/ledgerChan
 import { sharedLedgerFor } from '~/features/cloudSync/services/sharedLedgerStore';
 import { getSQLite } from '~/lib/db/client';
 import { DEFAULT_LEDGER_ID } from '~/lib/db/ledgerScope';
+import { I18n } from '~/lib/i18n';
 import { albumGroupsRepository } from '~/lib/repositories/albumGroupsRepository';
 import { parseAlbumPeople } from '~/lib/repositories/mappers';
 import type { AlbumExpense, AlbumMember, AlbumSettlement } from '~/types';
@@ -162,7 +163,7 @@ export function ensureLocalAlbum(share: { ledgerId: string; name: string | null 
     [
       share.ledgerId,
       DEFAULT_LEDGER_ID,
-      cleanPersonName(share.name ?? '') || 'Album',
+      cleanPersonName(share.name ?? '') || I18n.t('albums.untitled'),
       (top?.top ?? 0) - 1,
       now,
       now,

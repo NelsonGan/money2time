@@ -417,6 +417,12 @@ interface TransactionEditorScreenProps {
     extras?: TransactionEditorSubmitExtras,
   ) => void;
   onSubmitReady?: (input: CreateTransactionInput) => void;
+  /**
+   * Asked before a save through `onSubmitWithSplits` closes the editor, with
+   * the rows about to be saved; false keeps the editor open with every edit
+   * in it (a shared album's bill losing its split asks first).
+   */
+  confirmSplitSubmit?: (splits: SplitDraft[]) => Promise<boolean>;
   onDelete?: () => void;
   initialValues?: Partial<TransactionEditorInitialValues>;
   initialSplits?: SplitDraft[];
@@ -693,6 +699,7 @@ export function TransactionEditorScreen({
   onSubmit,
   onSubmitConfirmed,
   onSubmitWithSplits,
+  confirmSplitSubmit,
   onSubmitReady,
   onDelete,
   initialValues,
@@ -2532,7 +2539,7 @@ export function TransactionEditorScreen({
           (Number(splits.find((s) => s.isSelf)?.amount) || 0) + 0.005 < paidBack
         ) {
           pendingSplitToastRef.current = I18n.t('transactions.editor.split.paid_floor', {
-            amount: `${entryCurrencySymbol}${paidBack.toFixed(2)}`,
+            amount: formatAmount(paidBack, settings, { currencyCode: entryCurrency }),
           });
           handleOpenSplitBill();
           return;
@@ -2546,7 +2553,9 @@ export function TransactionEditorScreen({
           pendingSplitToastRef.current = overBy
             ? I18n.t('transactions.editor.split.negative_self')
             : I18n.t('transactions.editor.split.sum_mismatch', {
-                diff: `${entryCurrencySymbol}${(submitPayload.amount - sumOfUnpaidSplits).toFixed(2)}`,
+                diff: formatAmount(submitPayload.amount - sumOfUnpaidSplits, settings, {
+                  currencyCode: entryCurrency,
+                }),
               });
           handleOpenSplitBill();
           return;
@@ -2589,6 +2598,7 @@ export function TransactionEditorScreen({
       if (splitSaveRoute !== 'plain' && submitPayload && onSubmitWithSplits) {
         const capturedPayload = submitPayload;
         const capturedSplits = useSplitsPath ? splits : [];
+        if (confirmSplitSubmit && !(await confirmSplitSubmit(capturedSplits))) return;
         deferredSubmit = () => onSubmitWithSplits(capturedPayload, capturedSplits, capturedExtras);
       } else if (submitPayload) {
         const capturedPayload = submitPayload;
@@ -4836,9 +4846,11 @@ export function TransactionEditorScreen({
                   {friendPayer ? (
                     <Text variant="caption" tone="primary" numberOfLines={1}>
                       {I18n.t('transactions.editor.split.your_share', {
-                        amount: `${entryCurrencySymbol}${(
-                          Number(splits.find((s) => s.isSelf)?.amount) || 0
-                        ).toFixed(2)}`,
+                        amount: formatAmount(
+                          Number(splits.find((s) => s.isSelf)?.amount) || 0,
+                          settings,
+                          { currencyCode: entryCurrency },
+                        ),
                       })}
                     </Text>
                   ) : null}

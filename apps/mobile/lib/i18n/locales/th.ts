@@ -876,6 +876,7 @@ const th = {
       you_pay_person: 'คุณจ่ายให้ {{name}}',
       even_caption: 'หักลบแล้วเท่ากัน ไม่ต้องจ่าย',
       you_paid_on: 'คุณจ่ายเมื่อ {{date}}',
+      person_paid_on: '{{name}} จ่ายเมื่อ {{date}}',
       undo_payment_title: 'เลิกทำการจ่ายเงินนี้ไหม',
       undo_payment_message:
         'คุณจะติดเงิน {{amount}} อีกครั้ง และยอดนี้จะถูกนำออกจากบัญชีที่ใช้จ่าย',
@@ -2860,6 +2861,7 @@ const th = {
     save_scanned_hint: 'เก็บรูปภาพไว้เมื่อคุณสแกนใบเสร็จเพื่อบันทึกหรือแบ่งบิล',
   },
   albums: {
+    untitled: 'อัลบั้ม',
     location: {
       label: 'สถานที่',
       add: 'เพิ่มสถานที่',

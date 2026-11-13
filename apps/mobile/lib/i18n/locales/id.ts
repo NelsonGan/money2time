@@ -882,6 +882,7 @@ const id = {
       you_pay_person: 'Kamu membayar {{name}}',
       even_caption: 'Kalian impas, tidak ada yang perlu dibayar',
       you_paid_on: 'Kamu membayar pada {{date}}',
+      person_paid_on: '{{name}} membayar pada {{date}}',
       undo_payment_title: 'Batalkan pembayaran ini?',
       undo_payment_message:
         'Kamu akan berutang {{amount}} lagi, dan jumlahnya dihapus dari akun yang dipakai membayar.',
@@ -2925,6 +2926,7 @@ const id = {
     save_scanned_hint: 'Simpan foto saat Anda memindai struk untuk mencatat atau membagi tagihan.',
   },
   albums: {
+    untitled: 'Album',
     location: {
       label: 'Lokasi',
       add: 'Tambah lokasi',

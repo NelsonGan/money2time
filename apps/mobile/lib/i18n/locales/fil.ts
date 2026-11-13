@@ -884,6 +884,7 @@ const fil = {
       you_pay_person: 'Babayaran mo si {{name}}',
       even_caption: 'Patas na kayo, walang babayaran',
       you_paid_on: 'Nagbayad ka noong {{date}}',
+      person_paid_on: 'Nagbayad si {{name}} noong {{date}}',
       undo_payment_title: 'I-undo ang bayad na ito?',
       undo_payment_message:
         'Magkakautang ka ulit ng {{amount}}, at aalisin ito sa account na pinagbayaran.',
@@ -2954,6 +2955,7 @@ const fil = {
       'Panatilihin ang larawan kapag nag-scan ka ng resibo para mag-log o maghati ng bill.',
   },
   albums: {
+    untitled: 'Album',
     location: {
       label: 'Lokasyon',
       add: 'Magdagdag ng lokasyon',

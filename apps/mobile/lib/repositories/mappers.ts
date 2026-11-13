@@ -336,7 +336,7 @@ const GROUP_ROW_ID = /^[A-Za-z0-9_-]{1,64}$/;
 const GROUP_BILL_ID = /^[A-Za-z0-9_:.-]{1,120}$/;
 /** A settlement's id: a plain id, or one of a batch recorded together (`<batch>.<n>`). */
 const GROUP_SETTLEMENT_ID = /^[A-Za-z0-9_-]{1,64}(\.\d{1,4})?$/;
-const GROUP_CURRENCY = /^[A-Za-z][A-Za-z0-9]{1,9}$/;
+const GROUP_CURRENCY = /^[A-Z][A-Z0-9]{1,9}$/;
 const GROUP_DAY = /^(\d{4})-(\d{2})-(\d{2})(T[0-9:.Z+-]{1,30})?$/;
 const MAX_GROUP_AMOUNT = 1e12;
 const MAX_GROUP_NAME = 40;
@@ -376,7 +376,8 @@ export function toAlbumMember(row: AlbumMemberRow): AlbumMember | null {
     typeof row.name === 'string'
       ? row.name.replace(/\s+/g, ' ').trim().slice(0, MAX_GROUP_NAME)
       : '';
-  if (!GROUP_ROW_ID.test(row.id) || !name) return null;
+  // `self` is the key of the user's own split row of a bill (`<bill>:self`).
+  if (!GROUP_ROW_ID.test(row.id) || row.id === 'self' || !name) return null;
   if (row.userId != null && !GROUP_ROW_ID.test(row.userId)) return null;
   if (!isGroupTimestamp(row.createdAt)) return null;
   return {
