@@ -3068,6 +3068,15 @@ const fr = {
       from_album: 'De {{album}}',
       shared_album: 'Album partagé',
     },
+    rules: {
+      not_payer: 'Seule la personne qui a payé peut modifier ou supprimer cette note.',
+      has_payments:
+        'Cette note a des paiements. Annulez-les d’abord pour la modifier ou la supprimer.',
+      not_your_payment: 'Seule la personne qui paie peut enregistrer ou annuler un paiement.',
+      note_not_payer: 'Payé par {{name}}. Seule cette personne peut la modifier.',
+      note_has_payments: 'Paiements enregistrés. Annulez-les pour la modifier.',
+      they_record: '{{name}} l’enregistre en vous payant.',
+    },
   },
   assets: {
     tab_accounts: 'Comptes',

@@ -3016,6 +3016,14 @@ const en = {
       from_album: 'From {{album}}',
       shared_album: 'Shared album',
     },
+    rules: {
+      not_payer: 'Only the person who paid can change or delete this bill.',
+      has_payments: 'This bill has payments on it. Undo them first to change or delete it.',
+      not_your_payment: 'Only the person paying can record or undo a payment.',
+      note_not_payer: 'Paid by {{name}}. Only they can change it.',
+      note_has_payments: 'Has payments. Undo them to change it.',
+      they_record: '{{name}} records it when they pay you.',
+    },
   },
   assets: {
     tab_accounts: 'Accounts',

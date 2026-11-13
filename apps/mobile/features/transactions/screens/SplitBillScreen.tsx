@@ -101,6 +101,7 @@ export function SplitBillScreen() {
       newlyPaidIds={session.newlyPaidIds}
       onDone={handleDone}
       doneLabel={session.doneLabel}
+      payerExcludedMemberIds={session.payerExcludedMemberIds}
       onCancel={handleCancel}
     />
   );

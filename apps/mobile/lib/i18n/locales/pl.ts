@@ -3038,6 +3038,14 @@ const pl = {
       from_album: 'Z albumu {{album}}',
       shared_album: 'Udostępniony album',
     },
+    rules: {
+      not_payer: 'Tylko osoba, która zapłaciła, może zmienić lub usunąć ten rachunek.',
+      has_payments: 'Ten rachunek ma płatności. Najpierw je cofnij, aby go zmienić lub usunąć.',
+      not_your_payment: 'Tylko osoba płacąca może zapisać lub cofnąć płatność.',
+      note_not_payer: 'Płaci: {{name}}. Tylko ta osoba może go zmienić.',
+      note_has_payments: 'Ma płatności. Cofnij je, aby go zmienić.',
+      they_record: '{{name}} zapisze to przy płatności dla Ciebie.',
+    },
   },
   assets: {
     tab_accounts: 'Konta',

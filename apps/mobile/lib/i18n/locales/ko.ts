@@ -2985,6 +2985,14 @@ const ko = {
       from_album: '{{album}}에서',
       shared_album: '공유 앨범',
     },
+    rules: {
+      not_payer: '이 청구는 결제한 사람만 바꾸거나 삭제할 수 있어요.',
+      has_payments: '이 청구에는 결제 기록이 있어요. 바꾸거나 삭제하려면 먼저 취소하세요.',
+      not_your_payment: '결제는 내는 사람만 기록하거나 취소할 수 있어요.',
+      note_not_payer: '{{name}}님이 결제했어요. 그분만 바꿀 수 있어요.',
+      note_has_payments: '결제 기록이 있어요. 바꾸려면 취소하세요.',
+      they_record: '{{name}}님이 갚을 때 기록해요.',
+    },
   },
   assets: {
     tab_accounts: '계정',

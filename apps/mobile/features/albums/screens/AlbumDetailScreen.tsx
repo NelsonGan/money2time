@@ -4,11 +4,7 @@ import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Camera, ChevronLeft, Pencil, Plus, Trash2, UserPlus } from 'lucide-react-native';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type {
-  NativeScrollEvent,
-  NativeSyntheticEvent,
-  ScrollViewInstance,
-} from 'react-native';
+import type { NativeScrollEvent, NativeSyntheticEvent, ScrollViewInstance } from 'react-native';
 import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, {
   Extrapolation,
@@ -279,7 +275,6 @@ export function AlbumDetailScreen({
     );
     return { borderTopLeftRadius: radius, borderTopRightRadius: radius };
   });
-
 
   // Mounted only once the content is ready (Balances only with people), so
   // their offsets come from their own scroll handlers.

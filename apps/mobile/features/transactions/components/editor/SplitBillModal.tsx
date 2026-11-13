@@ -114,6 +114,8 @@ interface SplitBillModalProps {
    * the page is confirming a new bill's split before it is saved.
    */
   doneLabel?: string;
+  /** Album members Paid by does not offer (joined members of a shared album but the user). */
+  payerExcludedMemberIds?: ReadonlySet<string>;
   /** Current parent expense amount (already reduced by any paid splits). */
   total: number;
   defaultAccountId: string | null;
@@ -314,6 +316,7 @@ export function SplitBillModal({
   onCancel,
   onDone,
   doneLabel,
+  payerExcludedMemberIds,
   total,
   defaultAccountId,
   splits,
@@ -496,6 +499,11 @@ export function SplitBillModal({
       splits.flatMap((row, index) => {
         // A friend who has paid the user back is not the one who paid the bill.
         if (row.paid && !row.isSelf) return [];
+        // Only you can say you paid: someone who joined the album says so
+        // themselves (README: Who can change what).
+        if (!row.isSelf && row.albumMemberId && payerExcludedMemberIds?.has(row.albumMemberId)) {
+          return [];
+        }
         return [
           {
             key: row.id ?? `row_${index}`,
@@ -508,7 +516,7 @@ export function SplitBillModal({
           },
         ];
       }),
-    [friendPaid, me.name, payerRow, splits],
+    [friendPaid, me.name, payerExcludedMemberIds, payerRow, splits],
   );
 
   const handlePayerChange = useCallback(

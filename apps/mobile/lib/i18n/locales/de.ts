@@ -3073,6 +3073,15 @@ const de = {
       from_album: 'Aus {{album}}',
       shared_album: 'Geteiltes Album',
     },
+    rules: {
+      not_payer: 'Nur wer bezahlt hat, kann diese Rechnung ändern oder löschen.',
+      has_payments:
+        'Auf dieser Rechnung sind Zahlungen. Mach sie zuerst rückgängig, um sie zu ändern oder zu löschen.',
+      not_your_payment: 'Nur wer zahlt, kann eine Zahlung erfassen oder rückgängig machen.',
+      note_not_payer: 'Bezahlt von {{name}}. Nur diese Person kann sie ändern.',
+      note_has_payments: 'Hat Zahlungen. Mach sie rückgängig, um sie zu ändern.',
+      they_record: '{{name}} erfasst es, wenn diese Person dich bezahlt.',
+    },
   },
   assets: {
     tab_accounts: 'Konten',

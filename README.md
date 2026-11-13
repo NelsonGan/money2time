@@ -2196,43 +2196,55 @@ migrations `090` and `091`.
   ledger, their own currency totals and their own category (matched by name,
   then icon, else Other). A payment recorded on one phone (Mark paid, a part,
   paying a member back, Settle up) is applied on the other person's phone too,
-  and an undo undoes it there. Editing a bill changes it for everyone;
-  deleting one asks first ("…removes it for everyone"). So does taking one
+  and an undo undoes it there. Editing a bill changes it for everyone, and
+  only its payer can (below); deleting one asks first ("…removes it for
+  everyone"). So does taking one
   out of the album or removing everyone from its split (asked while the
   editor is still open, so Cancel keeps every edit): the bill then leaves
   the group, for everyone else, and stays the user's own entry. The entry a
   payment made (a part the user paid) cannot be split itself.
 - **A bill from a shared album says so.** Its row in every list has a small
   people mark after the title (read out as "Shared album"), since someone
-  else can add, change or remove it, and its editor has a line under the
+  else may have added it, and its editor has a line under the
   amount with the same mark naming the album ("From Bali trip", or "Changed
   by Aisha in Bali trip" when someone else made the last change), which opens
   the album (`albumNote`).
-- **Nobody else moves the user's accounts.** A bill someone else saves, or
-  changes, naming the user as its payer lands on **no account**: its row
-  reads **Confirm account** where the account would be (shown even with
-  account badges off), and its editor's line under the amount says "Aisha
-  says you paid. Pick the account." (a tap opens the account picker) and it
-  opens with no account picked, so saving it is the user
-  saying which account the money left. Until then it counts as the user's
-  spending and the others owe them as usual, but no balance moves; a payback
-  received meanwhile lowers the bill, and its transfer to the payback account
-  is written once the bill has its account. One the user saved themselves
-  lands on the account their editor picked (a new one on another phone of
-  theirs, on their default account). Picking the account keeps the bill's
-  own currency: the editor of a shared album's bill does not switch it to
-  the account's, as it would for the user's own entry, since that would
-  change the bill for everyone.
-- **What moved stays.** When someone else deletes a bill, or takes the user
-  off it, after money moved on the user's side (the bill is on one of their
-  accounts because they paid it or paid their share back in full, or a part
-  paid or a payback's transfer made an entry of its own), that money's
-  entries stay as the user's own, in the album, with no shares left on them
-  (nobody owes anyone on that bill any more). What was still only owed goes.
-  So the user's accounts still match their bank. A bill the user deletes
-  themselves goes with everything on it, as before. A kept entry split again
-  becomes a new bill of the group that replaces it (the group may still hold
-  a bill under the old id).
+- **Who can change what: nobody moves anyone else's money.** The rules are
+  in `lib/groupRules.ts`, applied by the app (`saveAlbumBill`,
+  `deleteGroupEntries`, `recordGroupPayment`, `undoGroupPayment`,
+  `settleGroupDebt`) and offered only where they allow in the screens:
+  - **Only you can say you paid.** A bill's payer is the user, or someone on
+    the list who has not joined yet (no phone of theirs, so no account
+    moves). Paid by does not offer anyone else who joined
+    (`payerExcludedMemberIds`).
+  - **A bill belongs to whoever paid it.** Only they change it (amount,
+    day, title, shares, payer) or delete it; a bill paid by someone who has
+    not joined belongs to everyone. Anyone else's editor has no Delete, its
+    line under the amount says "Paid by Aisha. Only they can change it.",
+    and saving keeps only the user's own fields (category, longer note,
+    receipt, mood; `saveAlbumBillOwnFields`), saying why when they tried to
+    change the bill itself.
+  - **Payments lock a bill.** With a payment recorded on it, nobody changes
+    or deletes it until the payments are undone ("Has payments. Undo them
+    to change it."). So no money that moved is ever deleted from under
+    anyone.
+  - **Only the person paying records a payment**, and only they undo it.
+    Paying back and Settle up, where the user pays, ask which account it
+    leaves (`SettleUpConfirmSheet`); the person paid gets it on their own
+    payback account. A payment from someone who has not joined is recorded
+    by the person it went to. Where someone who joined owes the user, the
+    person's page says "Aisha records it when they pay you." in place of
+    Settle up, and the Balances line opens that page rather than a Settle up
+    sheet.
+  - **Joining under a name that already paid.** A bill paid under the name
+    the user picks as theirs ("Which one is you?") was written by someone
+    else: it lands on **no account**, its row reads **Confirm account**
+    (shown even with account badges off), and its editor's line says "Aisha
+    says you paid. Pick the account." (a tap opens the account picker),
+    opening with no account picked. Until then it counts as the user's
+    spending, but no balance moves. Picking the account keeps the bill's own
+    currency: the editor of a shared album's bill never switches it to the
+    account's, as it would for an entry of the user's own.
 - **Leaving and stopping.** A member leaves from the People page; the owner
   turns the switch off, or removes someone who joined. Either way everyone
   keeps the album with their own entries as ordinary split bills, split with
@@ -2287,19 +2299,16 @@ migrations `090` and `091`.
   each payment moved through) is kept from the rows already there.
   `transactions.album_group_id` marks such an entry; `settlement_id` on a paid
   share is the settlement it stands for.
-- **Who changed it.** `album_expenses.created_by` is the account that last
-  wrote a bill, a delete included (`softDeleteExpense` takes the deleter).
-  It decides two things on each phone (`projectExpense`): a bill the user
-  paid is on the account the editor just picked (`hints.entry`, which
-  `saveAlbumBill` passes rather than writing the account itself, so the
-  projection works out the account amount), else the entry's own while the
-  user was already its payer or made the change, else, new and written by
-  the user, their default account, else no account (`needsAccountConfirm`
-  in `lib/albumGroup.ts` is that state); and a bill taken away
-  by someone else keeps what moved (`movedMoney`, `keepMovedMoney`), where
-  one taken away by the user is removed (`removeLocalBill`). The editor's
-  line reads it through `useGroupBillOrigin`. A delete from an app version
-  before this leaves the bill's last writer in place, so it is read as theirs.
+- **Which account.** A bill the user paid is on the account the editor just
+  picked (`hints.entry`: `saveAlbumBill` passes it rather than writing the
+  account itself, so the projection works out the account amount), else the
+  one the entry already has, else, new and written by the user
+  (`album_expenses.created_by`, the bill's last writer, deletes included),
+  their default account, else no account (`needsAccountConfirm` in
+  `lib/albumGroup.ts`). An entry already on the phone never falls back to
+  the default account: one the user's other phone gave it is on its way.
+  The editor's line reads the album, the payer and the last writer through
+  `useGroupBillOrigin`.
 - **One direction.** Saving a split bill in a shared album
   (`saveAlbumBill`), recording a payment on one (`markSplitPaid`,
   `recordSplitPayment`, `payBackPayer`, `recordPayBack` and Settle up all
@@ -2373,19 +2382,16 @@ migrations `090` and `091`.
     never a sync error that stays up, nor a reason the owner cannot stop
     sharing or delete their account.
     What stays possible, as in any shared bill splitter: someone in the album
-    can add a bill naming the user as its payer (it lands on no account, as
-    Confirm account, so no balance moves until the user says it did), add as
-    many bills as they like, or mark themselves as another person on the
-    list. A payment someone else records on the user's behalf (the user paid
-    them back, or they paid the user) still lands on the user's default or
-    payback account, and a bill someone else turns from one the user paid
-    into one another member paid still drops to the user's share on no
-    account. `album_expenses.created_by` is written by the phone, not checked
-    by the Worker, so a member who knows another's account id (every
-    member's `user_id` is in `album_members`) can write a bill as if the
-    other wrote it: it then lands on their default account, or, as a delete,
-    takes what moved with it. Leaving the album ends it; the entries
-    already made stay, as the user's own to delete.
+    can add as many bills as they like, or mark themselves as another person
+    on the list. **Who can change what is kept by the app, not the
+    server**: each phone writes the group's database directly with its own
+    token, so the Worker never sees a write and cannot tell who made it. A
+    modified app could still name someone else as payer, change or delete
+    their bill, record a payment as them, or write `created_by` as them
+    (every member's `user_id` is in `album_members`). Enforcing the rules on
+    the server needs the album's writes to go through the Worker, which
+    checks each against the writer's sign-in. Leaving the album ends it; the
+    entries already made stay, as the user's own to delete.
 
 **Limits.** Split by Item bills are not shared (they have no Paid by). A member without Pro adds
 bills in a shared album whatever their count of unsettled split bills, and a shared album's bills are

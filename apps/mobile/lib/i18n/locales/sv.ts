@@ -3024,6 +3024,14 @@ const sv = {
       from_album: 'Från {{album}}',
       shared_album: 'Delat album',
     },
+    rules: {
+      not_payer: 'Bara den som betalade kan ändra eller radera notan.',
+      has_payments: 'Notan har betalningar. Ångra dem först för att ändra eller radera den.',
+      not_your_payment: 'Bara den som betalar kan registrera eller ångra en betalning.',
+      note_not_payer: 'Betald av {{name}}. Bara de kan ändra den.',
+      note_has_payments: 'Har betalningar. Ångra dem för att ändra den.',
+      they_record: '{{name}} registrerar det när de betalar dig.',
+    },
   },
   assets: {
     tab_accounts: 'Konton',

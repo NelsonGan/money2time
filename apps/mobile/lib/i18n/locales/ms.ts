@@ -3044,6 +3044,14 @@ const ms = {
       from_album: 'Dari {{album}}',
       shared_album: 'Album kongsi',
     },
+    rules: {
+      not_payer: 'Hanya orang yang membayar boleh mengubah atau memadam bil ini.',
+      has_payments: 'Bil ini ada bayaran. Batalkan dahulu untuk mengubah atau memadamnya.',
+      not_your_payment: 'Hanya orang yang membayar boleh merekod atau membatalkan bayaran.',
+      note_not_payer: 'Dibayar oleh {{name}}. Hanya mereka boleh mengubahnya.',
+      note_has_payments: 'Ada bayaran. Batalkan untuk mengubahnya.',
+      they_record: '{{name}} merekodnya apabila membayar anda.',
+    },
   },
   assets: {
     tab_accounts: 'Akaun',

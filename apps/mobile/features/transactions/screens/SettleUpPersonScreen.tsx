@@ -1,9 +1,12 @@
 import { Check, Send } from 'lucide-react-native';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 
 import { Button, CategoryEmoji, SettingsHeader, SettingsPageLayout, Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
+import { personNameKey } from '~/features/albums/lib/albumPeople';
+import { listGroupMembers, subscribeAlbumGroups } from '~/features/albums/services/albumGroupStore';
+import { sharedAlbumFor } from '~/features/cloudSync/services/sharedLedgerStore';
 import { PersonAvatar } from '~/features/transactions/components/PersonAvatar';
 import {
   type SettleUpConfirmContent,
@@ -93,6 +96,20 @@ export function SettleUpPersonScreen({
   );
   const state = person ? personBalanceState(person) : 'settled';
   const albumName = albumId ? albums.find((album) => album.id === albumId)?.name : null;
+  // In a shared album, whoever pays records it (README: Who can change what):
+  // what someone who joined owes the user is theirs to settle, not the user's.
+  const albumMembers = useSyncExternalStore(subscribeAlbumGroups, () =>
+    listGroupMembers(albumId && sharedAlbumFor(albumId) ? albumId : null),
+  );
+  const theyRecordIt =
+    state === 'owes_you' &&
+    !!person &&
+    albumMembers.some(
+      (member) =>
+        !!member.userId &&
+        member.userId !== (albumId ? sharedAlbumFor(albumId)?.userId : null) &&
+        personNameKey(member.name) === personNameKey(person.name),
+    );
 
   // Blank while the person is missing (the last share was removed) so the header
   // doesn't flash a fallback name for the one frame before the screen pops.
@@ -351,7 +368,11 @@ export function SettleUpPersonScreen({
             ) : null}
           </ScrollView>
 
-          {person.unpaidBillCount > 0 ? (
+          {person.unpaidBillCount > 0 && theyRecordIt ? (
+            <Text variant="caption" tone="muted" className="px-5 pb-8 pt-2 text-center">
+              {I18n.t('albums.rules.they_record', { name: person.name ?? '' })}
+            </Text>
+          ) : person.unpaidBillCount > 0 ? (
             <View className="flex-row items-center gap-3 px-5 pb-8 pt-2">
               <Button
                 onPress={() => {

@@ -11,7 +11,6 @@
 import { sharedAlbumFor } from '~/features/cloudSync/services/sharedLedgerStore';
 import { buildPaybackTransferNote } from '~/features/transactions/lib/settleUp';
 import { rescaleSplitAdjustedAmounts } from '~/features/transactions/lib/splitAmountSnapshot';
-import { isFriendPaidBill } from '~/features/transactions/lib/splitPayer';
 import { paybackTransferAmounts } from '~/features/transactions/lib/splitPayments';
 import { getSQLite } from '~/lib/db/client';
 import { DEFAULT_LEDGER_ID, getActiveLedgerId } from '~/lib/db/ledgerScope';
@@ -406,29 +405,6 @@ function removeLocalBill(tx: TxRow, splits: readonly TransactionSplit[]): void {
 }
 
 /**
- * Whether the user's side of a bill has moved money: the bill is on one of
- * their accounts (they paid it, or paid their share back in full), or a
- * payment on it made an entry of its own (a part paid, a payback received
- * into another account).
- */
-function movedMoney(tx: TxRow, splits: readonly TransactionSplit[]): boolean {
-  return !!tx.account_id || splits.some((split) => !!split.paidTransactionId);
-}
-
-/**
- * A bill someone else took away (deleted, or the user taken off it) after
- * money moved on it: what moved stays as the user's own, so their accounts
- * still match their bank. The bill stays on its account, in the album, with
- * no shares (nobody owes anyone on it any more); one still owed, on no
- * account, goes; the entries its payments made stay as they are.
- */
-function keepMovedMoney(tx: TxRow): void {
-  transactionSplitsRepository.softDeleteByTransactionId(tx.id);
-  if (tx.account_id) transactionsRepository.update(tx.id, { albumGroupId: null });
-  else transactionsRepository.softDeleteMany([tx.id]);
-}
-
-/**
  * Brings the user's own side of one bill in step with the group. Returns
  * whether anything was written.
  */
@@ -458,11 +434,11 @@ function projectExpense(
 
   if (!bill) {
     // Not the user's bill (any more): their side of it goes. Only an entry
-    // the group has marked as its own is touched. Taken away by someone else
-    // after money moved on it, what moved stays.
+    // the group has marked as its own is touched. A bill with payments on it
+    // cannot be deleted or changed, so no money that moved goes with it
+    // (README: Who can change what).
     if (!live || live.album_group_id !== groupId) return false;
-    if (!changedByUser && movedMoney(live, splits)) keepMovedMoney(live);
-    else removeLocalBill(live, splits);
+    removeLocalBill(live, splits);
     return true;
   }
 
@@ -492,20 +468,17 @@ function projectExpense(
 
   // --- The entry itself ---------------------------------------------------
   const finalPayment = bill.payments.find((payment) => payment.kind === 'sent_final') ?? null;
-  // A bill the user paid is on the account this phone's editor just picked;
-  // else on the one the entry already has, while it was already the user's
-  // to pay (a bill someone else turned into one the user paid must not
-  // carry over the account their payback left); else, for a new bill the
-  // user saved, their default account. A bill someone else says the user
-  // paid lands on no account: it waits for them to say which account it
-  // left (`needsAccountConfirm`), rather than moving a balance on another's
-  // word. An entry already here never falls back to the default account:
-  // the account the user's other phone gave it is on its way.
-  const wasPaidByUser = !!live && !isFriendPaidBill(splits);
+  // A bill the user paid is on the account this phone's editor just picked,
+  // else the one the entry already has, else, new and saved by the user, on
+  // their default account. One the user paid that someone else wrote (they
+  // joined under a name it was already paid by) lands on no account until
+  // they say which account it left (`needsAccountConfirm`). An entry already
+  // here never falls back to the default account: the account the user's
+  // other phone gave it is on its way.
   const accountId =
     bill.kind === 'paid'
       ? (hints.entry?.accountId ??
-        (live?.account_id && (wasPaidByUser || changedByUser) ? live.account_id : null) ??
+        live?.account_id ??
         (changedByUser && !live ? env.defaultAccountId : null))
       : finalPayment
         ? paymentAccount(finalPayment, env.defaultAccountId)

@@ -36,6 +36,11 @@ export interface SplitBillSession {
   onDone: () => void;
   /** The Done button's word when committing also saves the bill ("Add"). */
   doneLabel?: string;
+  /**
+   * Album members Paid by does not offer: in a shared album, everyone who has
+   * joined but the user (only you can say you paid).
+   */
+  payerExcludedMemberIds?: ReadonlySet<string>;
   /** Discard staged edits back to the snapshot taken when the flow opened. */
   onCancel: () => void;
 }

@@ -19,6 +19,8 @@ export interface GroupBillOrigin {
    * when that was not the user: null when the user did, or it is not known.
    */
   changedBy: string | null;
+  /** Who paid the bill, by the name they go by in the album, when not the user. */
+  payerName: string | null;
 }
 
 /**
@@ -36,7 +38,9 @@ export function useGroupBillOrigin(
   return useMemo(() => {
     if (!groupId) return null;
     const userId = sharedAlbumFor(groupId)?.userId ?? null;
-    const writer = expenses.find((expense) => expense.id === transactionId)?.createdBy ?? null;
+    const bill = expenses.find((expense) => expense.id === transactionId) ?? null;
+    const writer = bill?.createdBy ?? null;
+    const payer = bill ? (members.find((member) => member.id === bill.paidBy) ?? null) : null;
     const changedBy =
       writer && writer !== userId
         ? (members.find((member) => member.userId === writer)?.name ?? null)
@@ -45,6 +49,24 @@ export function useGroupBillOrigin(
       albumId: groupId,
       albumName: albums.find((album) => album.id === groupId)?.name ?? null,
       changedBy,
+      payerName: payer && payer.userId !== userId ? payer.name : null,
     };
   }, [albums, expenses, groupId, members, transactionId]);
+}
+
+/**
+ * The album members the user cannot name as a bill's payer: everyone who has
+ * joined but them (README: Who can change what). Empty for an album that is
+ * not shared.
+ */
+export function useJoinedOthers(groupId: string | null): ReadonlySet<string> {
+  const members = useSyncExternalStore(subscribeAlbumGroups, () => listGroupMembers(groupId));
+  return useMemo(() => {
+    const userId = groupId ? (sharedAlbumFor(groupId)?.userId ?? null) : null;
+    return new Set(
+      members
+        .filter((member) => !!member.userId && member.userId !== userId)
+        .map((member) => member.id),
+    );
+  }, [groupId, members]);
 }

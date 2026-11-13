@@ -3069,6 +3069,14 @@ const fil = {
       from_album: 'Mula sa {{album}}',
       shared_album: 'Shared na album',
     },
+    rules: {
+      not_payer: 'Ang nagbayad lang ang puwedeng magbago o magbura ng bill na ito.',
+      has_payments: 'May mga bayad sa bill na ito. I-undo muna ang mga ito para mabago o mabura.',
+      not_your_payment: 'Ang nagbabayad lang ang puwedeng mag-record o mag-undo ng bayad.',
+      note_not_payer: 'Binayaran ni {{name}}. Siya lang ang puwedeng magbago nito.',
+      note_has_payments: 'May mga bayad. I-undo ang mga ito para mabago.',
+      they_record: 'Si {{name}} ang magre-record kapag binayaran ka niya.',
+    },
   },
   assets: {
     tab_accounts: 'Mga account',

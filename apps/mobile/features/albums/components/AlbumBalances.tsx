@@ -25,6 +25,7 @@ import { formatCurrency } from '~/utils/formatters';
 import type { AlbumGroup } from '../hooks/useAlbumGroup';
 import { useGroupDebts } from '../hooks/useGroupDebts';
 import type { GroupDebt } from '../lib/groupDebts';
+import { canRecordPayment } from '../lib/groupRules';
 
 interface AlbumBalancesProps {
   /** The roll-up of the album's own bills (`useSettleUpSummary(albumId)`). */
@@ -92,6 +93,11 @@ export function AlbumBalances({ summary, group, onOpenPerson, onOpenPeople }: Al
           // with none here yet (renamed since, or nameless) is settled as the
           // debt stands instead of opening a page that would find nobody.
           const hasPage = summary.people.some((person) => person.key === personKey);
+          // Whoever pays records it (README: Who can change what): a debt to
+          // the user from someone who joined is theirs to settle.
+          const canSettle = selfId
+            ? canRecordPayment(group.members, selfId, debt.from, debt.to)
+            : false;
           return {
             key: `${debt.currency}:${debt.from}:${debt.to}`,
             mine,
@@ -102,9 +108,11 @@ export function AlbumBalances({ summary, group, onOpenPerson, onOpenPeople }: Al
             // person's page, beside its bills.
             onPress: !mine
               ? undefined
-              : shared.simplified || !hasPage
+              : (shared.simplified || !hasPage) && canSettle
                 ? () => setSettling(debt)
-                : () => onOpenPerson(personKey),
+                : hasPage
+                  ? () => onOpenPerson(personKey)
+                  : undefined,
           };
         })
     : summary.people.flatMap((person): DebtRow[] => {

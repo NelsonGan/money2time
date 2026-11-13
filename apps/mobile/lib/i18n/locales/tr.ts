@@ -3031,6 +3031,14 @@ const tr = {
       from_album: '{{album}} albümünden',
       shared_album: 'Paylaşılan albüm',
     },
+    rules: {
+      not_payer: 'Bu hesabı yalnızca ödeyen kişi değiştirebilir veya silebilir.',
+      has_payments: 'Bu hesapta ödemeler var. Değiştirmek veya silmek için önce bunları geri alın.',
+      not_your_payment: 'Bir ödemeyi yalnızca ödeyen kişi kaydedebilir veya geri alabilir.',
+      note_not_payer: '{{name}} ödedi. Yalnızca o değiştirebilir.',
+      note_has_payments: 'Ödemeler var. Değiştirmek için geri alın.',
+      they_record: '{{name}} size ödediğinde kaydeder.',
+    },
   },
   assets: {
     tab_accounts: 'Hesaplar',

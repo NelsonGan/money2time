@@ -3005,6 +3005,14 @@ const ja = {
       from_album: '{{album}}から',
       shared_album: '共有アルバム',
     },
+    rules: {
+      not_payer: 'この会計を変更・削除できるのは支払った人だけです。',
+      has_payments: 'この会計には支払いがあります。変更・削除するには先に取り消してください。',
+      not_your_payment: '支払いを記録・取り消しできるのは支払う人だけです。',
+      note_not_payer: '{{name}}さんが支払い。変更できるのはその人だけです。',
+      note_has_payments: '支払いあり。変更するには取り消してください。',
+      they_record: '{{name}}さんが支払うときに記録します。',
+    },
   },
   assets: {
     tab_accounts: '口座',

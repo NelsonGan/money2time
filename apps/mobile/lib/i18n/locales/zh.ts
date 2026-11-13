@@ -2903,6 +2903,14 @@ const zh = {
       from_album: '来自 {{album}}',
       shared_album: '共享相册',
     },
+    rules: {
+      not_payer: '只有付款的人可以修改或删除这笔账单。',
+      has_payments: '这笔账单已有付款。请先撤销付款才能修改或删除。',
+      not_your_payment: '只有付款的人可以记录或撤销付款。',
+      note_not_payer: '由 {{name}} 付款。只有对方可以修改。',
+      note_has_payments: '已有付款。撤销后才能修改。',
+      they_record: '{{name}} 付款给你时会自行记录。',
+    },
   },
   assets: {
     tab_accounts: '账户',

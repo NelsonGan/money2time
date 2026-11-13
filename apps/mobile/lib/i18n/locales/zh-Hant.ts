@@ -2903,6 +2903,14 @@ const zhHant = {
       from_album: '來自 {{album}}',
       shared_album: '共享相簿',
     },
+    rules: {
+      not_payer: '只有付款的人可以修改或刪除這筆帳單。',
+      has_payments: '這筆帳單已有付款。請先撤銷付款才能修改或刪除。',
+      not_your_payment: '只有付款的人可以記錄或撤銷付款。',
+      note_not_payer: '由 {{name}} 付款。只有對方可以修改。',
+      note_has_payments: '已有付款。撤銷後才能修改。',
+      they_record: '{{name}} 付款給你時會自行記錄。',
+    },
   },
   assets: {
     tab_accounts: '帳戶',

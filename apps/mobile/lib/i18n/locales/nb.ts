@@ -3026,6 +3026,14 @@ const nb = {
       from_album: 'Fra {{album}}',
       shared_album: 'Delt album',
     },
+    rules: {
+      not_payer: 'Bare den som betalte kan endre eller slette regningen.',
+      has_payments: 'Det er betalinger på regningen. Angre dem først for å endre eller slette den.',
+      not_your_payment: 'Bare den som betaler kan registrere eller angre en betaling.',
+      note_not_payer: 'Betalt av {{name}}. Bare de kan endre den.',
+      note_has_payments: 'Har betalinger. Angre dem for å endre den.',
+      they_record: '{{name}} registrerer det når de betaler deg.',
+    },
   },
   assets: {
     tab_accounts: 'Kontoer',

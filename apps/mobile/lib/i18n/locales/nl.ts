@@ -3061,6 +3061,15 @@ const nl = {
       from_album: 'Uit {{album}}',
       shared_album: 'Gedeeld album',
     },
+    rules: {
+      not_payer: 'Alleen wie betaald heeft kan deze rekening wijzigen of verwijderen.',
+      has_payments:
+        'Op deze rekening staan betalingen. Maak ze eerst ongedaan om hem te wijzigen of te verwijderen.',
+      not_your_payment: 'Alleen wie betaalt kan een betaling vastleggen of ongedaan maken.',
+      note_not_payer: 'Betaald door {{name}}. Alleen die persoon kan hem wijzigen.',
+      note_has_payments: 'Heeft betalingen. Maak ze ongedaan om hem te wijzigen.',
+      they_record: '{{name}} legt het vast als die jou betaalt.',
+    },
   },
   assets: {
     tab_accounts: 'Rekeningen',

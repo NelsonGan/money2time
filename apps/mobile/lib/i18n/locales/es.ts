@@ -3043,6 +3043,14 @@ const es = {
       from_album: 'De {{album}}',
       shared_album: 'Álbum compartido',
     },
+    rules: {
+      not_payer: 'Solo quien pagó puede cambiar o eliminar esta cuenta.',
+      has_payments: 'Esta cuenta tiene pagos. Deshazlos primero para cambiarla o eliminarla.',
+      not_your_payment: 'Solo quien paga puede registrar o deshacer un pago.',
+      note_not_payer: 'Pagado por {{name}}. Solo esa persona puede cambiarlo.',
+      note_has_payments: 'Tiene pagos. Deshazlos para cambiarla.',
+      they_record: '{{name}} lo registra cuando te pague.',
+    },
   },
   assets: {
     tab_accounts: 'Cuentas',

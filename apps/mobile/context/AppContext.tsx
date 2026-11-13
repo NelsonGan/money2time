@@ -44,6 +44,7 @@ import {
   settleDebt,
   simplifyDebts,
 } from '~/features/albums/lib/groupDebts';
+import { billChangeBlock, canBePayer, canRecordPayment } from '~/features/albums/lib/groupRules';
 import { notifyAlbumGroups } from '~/features/albums/services/albumGroupStore';
 import {
   closeEvenGroup,
@@ -632,6 +633,16 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   ) => { id: string; mine: boolean } | null;
   /** A group's bill that is no longer split: it leaves the group and stays the user's own entry. */
   detachAlbumBill: (transactionId: string) => void;
+  /** A group's bill's own fields, saved on the user's entry alone (any bill, even one they cannot change). */
+  saveAlbumBillOwnFields: (
+    transactionId: string,
+    fields: Pick<
+      CreateTransactionInput,
+      'categoryId' | 'details' | 'receiptUri' | 'sentiment' | 'reimbursable' | 'accountId'
+    >,
+  ) => void;
+  /** Why the user cannot change a group's bill (README: Who can change what), or null. */
+  albumBillBlock: (groupId: string, billId: string) => 'not_payer' | 'has_payments' | null;
   addTransactionsToAlbum: (albumId: string, transactionIds: string[]) => void;
   removeTransactionsFromAlbum: (albumId: string, transactionIds: string[]) => void;
   getAlbumTransactionIds: (albumId: string) => string[];
@@ -3984,6 +3995,39 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     scheduleRefreshTransactions();
   }, [scheduleRefreshTransactions]);
 
+  /**
+   * What the group's rules need (README: Album members and shared albums >
+   * Who can change what): its live members and the user's own member, or
+   * null when the user is not in it (yet).
+   */
+  const groupRuleState = useCallback((groupId: string) => {
+    const userId = sharedAlbumFor(groupId)?.userId;
+    if (!userId) return null;
+    const members = albumGroupsRepository.listMembers(groupId);
+    const self = selfMember(members, userId);
+    return self ? { members, selfId: self.id } : null;
+  }, []);
+
+  /** Why the user cannot change a group's bill, or null when they can. */
+  const albumBillBlock = useCallback(
+    (groupId: string, billId: string): 'not_payer' | 'has_payments' | null => {
+      const rules = groupRuleState(groupId);
+      if (!rules) return null;
+      const bill = albumGroupsRepository
+        .listExpenses(groupId)
+        .find((item) => item.id === billId && !item.deletedAt);
+      if (!bill) return null;
+      return billChangeBlock(
+        rules.members,
+        rules.selfId,
+        bill,
+        albumGroupsRepository.listSettlements(groupId),
+        billId,
+      );
+    },
+    [groupRuleState],
+  );
+
   const syncAlbumGroups = useCallback((): boolean => {
     let changed = false;
     for (const share of listAlbumShares()) {
@@ -4124,8 +4168,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (!env) return;
       runDeferredWrite(() => {
         try {
-          const self = selfMember(albumGroupsRepository.listMembers(groupId), env.userId);
+          const members = albumGroupsRepository.listMembers(groupId);
+          const self = selfMember(members, env.userId);
           if (!self || (debt.from !== self.id && debt.to !== self.id)) return;
+          // Whoever pays the debt records it (README: Who can change what).
+          if (!canRecordPayment(members, self.id, debt.from, debt.to)) return;
           const memberIds = albumGroupsRepository.memberIds(groupId);
           const open = openShares(
             albumGroupsRepository.listExpenses(groupId, memberIds),
@@ -4224,19 +4271,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
       const built = billFromRows(billRows, self.id);
       if (!built) return null;
+      // Only the user can say they paid, and only the payer changes a bill,
+      // never one with payments on it.
+      if (!canBePayer(members, self.id, built.paidBy)) return null;
+      if (existingId && albumBillBlock(groupId, existingId)) return null;
       const existing = existingId
         ? transactionsRef.current.find((item) => item.id === existingId)
         : null;
-      // An entry the group let go of after money moved on it (someone else
-      // deleted the bill, or took the user off it) still has that bill's id,
-      // which the group may still hold: split again, it becomes a new bill
-      // that replaces the entry, never a write over that one.
-      const replacesEntry =
-        !!existingId &&
-        !!existing &&
-        !existing.albumGroupId &&
-        albumGroupsRepository.hasExpense(groupId, existingId);
-      const id = replacesEntry ? newId() : (existingId ?? newId());
+      const id = existingId ?? newId();
       // A split bill that was the user's own until now (added to the album,
       // or made before this phone said who it is) goes in as it stands first,
       // with the payments already on it, so the edit below keeps them.
@@ -4277,7 +4319,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           sentiment: input.sentiment ?? 'neutral',
           reimbursable: input.reimbursable ?? false,
         };
-        if (existingId && !replacesEntry) {
+        if (existingId) {
           // The fields that are the user's own, on the entry they already
           // have. Its account comes from the projection below, which works
           // out its account amount for it.
@@ -4290,7 +4332,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           });
         }
         projectGroup(groupId, env, { expenseId: id, hints: { entry } });
-        if (replacesEntry && existingId) transactionsRepository.softDeleteMany([existingId]);
         settleEvenGroup(groupId, env);
         void trackEvent(AnalyticsEvents.ALBUM_BILL_SAVED, {
           edit: !!existingId,
@@ -4303,14 +4344,56 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       afterGroupWrite();
       return { id, mine };
     },
-    [afterGroupWrite, groupEnvFor, settleEvenGroup],
+    [afterGroupWrite, albumBillBlock, groupEnvFor, settleEvenGroup],
+  );
+
+  /**
+   * The fields of a group's bill that are the user's own (its category, longer
+   * note, receipt, mood, and the account of a bill they paid), saved on their
+   * entry alone: a bill they cannot change (README: Who can change what)
+   * still takes them. A new account goes through the projection, which works
+   * out its account amount.
+   */
+  const saveAlbumBillOwnFields = useCallback(
+    (
+      transactionId: string,
+      fields: Pick<
+        CreateTransactionInput,
+        'categoryId' | 'details' | 'receiptUri' | 'sentiment' | 'reimbursable' | 'accountId'
+      >,
+    ) => {
+      const tx = transactionsRef.current.find((item) => item.id === transactionId);
+      const groupId = tx?.albumGroupId;
+      const env = groupId ? groupEnvFor(groupId) : null;
+      if (!tx || !groupId || !env) return;
+      try {
+        transactionsRepository.update(transactionId, {
+          categoryId: fields.categoryId ?? null,
+          details: fields.details ?? null,
+          receiptUri: fields.receiptUri ?? null,
+          sentiment: fields.sentiment ?? 'neutral',
+          reimbursable: fields.reimbursable ?? false,
+        });
+        const paidByUser = !billPayer(tx.splits);
+        if (paidByUser && fields.accountId && fields.accountId !== tx.accountId) {
+          projectGroup(groupId, env, {
+            expenseId: transactionId,
+            hints: { entry: { accountId: fields.accountId } },
+          });
+        }
+      } catch (error) {
+        reportError(error, { scope: 'album_group_save' });
+      }
+      afterGroupWrite();
+    },
+    [afterGroupWrite, groupEnvFor],
   );
 
   const detachAlbumBill = useCallback(
     (transactionId: string) => {
       const tx = transactionsRef.current.find((item) => item.id === transactionId);
       const groupId = tx?.albumGroupId;
-      if (!groupId) return;
+      if (!groupId || albumBillBlock(groupId, transactionId)) return;
       getSQLite().withTransactionSync(() => {
         transactionsRepository.update(transactionId, { albumGroupId: null });
         albumGroupsRepository.softDeleteExpense(
@@ -4321,7 +4404,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       });
       afterGroupWrite();
     },
-    [afterGroupWrite],
+    [afterGroupWrite, albumBillBlock],
   );
 
   albumGroupHooksRef.current = { publish: publishAlbumGroup, detach: detachAlbumBill };
@@ -4365,11 +4448,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       runDeferredWrite(() => {
         const payments = pendingGroupPaymentsRef.current;
         pendingGroupPaymentsRef.current = [];
+        let blockedPayment = false;
         for (const groupId of new Set(payments.map((payment) => payment.bill.groupId))) {
           const env = groupEnvFor(groupId);
           if (!env) continue;
           try {
-            const self = selfMember(albumGroupsRepository.listMembers(groupId), env.userId);
+            const members = albumGroupsRepository.listMembers(groupId);
+            const self = selfMember(members, env.userId);
             if (!self) continue;
             const paidThrough = new Map<string, string | null>();
             const billIds = new Set<string>();
@@ -4393,14 +4478,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 (paidInBatch.get(shareKey) ?? 0);
               const paid = normalizeMoneyAmount(Math.min(payment.amount, left));
               if (!(paid > 0)) continue;
+              // Only the person paying records a payment (README: Who can
+              // change what): the user's own, or one to them from someone who
+              // has not joined.
+              const fromMember = payer ? self.id : other;
+              const toMember = payer ? other : self.id;
+              if (!canRecordPayment(members, self.id, fromMember, toMember)) {
+                blockedPayment = true;
+                continue;
+              }
               paidInBatch.set(shareKey, (paidInBatch.get(shareKey) ?? 0) + paid);
               albumGroupsRepository.createSettlement({
                 id: payment.settlementId,
                 groupId,
                 expenseId: tx.id,
                 // The user pays the member who paid; anyone else pays the user.
-                fromMember: payer ? self.id : other,
-                toMember: payer ? other : self.id,
+                fromMember,
+                toMember,
                 amount: paid,
                 currency: tx.currency,
                 date: dayKeyFromDateLocal(new Date()),
@@ -4426,6 +4520,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             reportError(error, { scope: 'album_group_payment' });
           }
         }
+        if (blockedPayment) Alert.alert(I18n.t('albums.rules.not_your_payment'));
         afterGroupWrite();
       });
     },
@@ -4441,6 +4536,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     (bill: { tx: TransactionWithRelations; groupId: string }, settlementId: string | null) => {
       const env = groupEnvFor(bill.groupId);
       if (!env || !settlementId) return;
+      // Only the person who paid undoes a payment.
+      const rules = groupRuleState(bill.groupId);
+      const settlement = albumGroupsRepository
+        .listSettlements(bill.groupId)
+        .find((item) => item.id === settlementId);
+      if (
+        rules &&
+        settlement &&
+        !canRecordPayment(rules.members, rules.selfId, settlement.fromMember, settlement.toMember)
+      ) {
+        Alert.alert(I18n.t('albums.rules.not_your_payment'));
+        return;
+      }
       runDeferredWrite(() => {
         try {
           albumGroupsRepository.softDeleteSettlement(bill.groupId, settlementId);
@@ -4452,7 +4560,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         afterGroupWrite();
       });
     },
-    [afterGroupWrite, groupEnvFor],
+    [afterGroupWrite, groupEnvFor, groupRuleState],
   );
 
   /**
@@ -4483,9 +4591,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           }
         }
       }
+      // A bill the user cannot delete, or a payment they cannot undo, stays
+      // as it is (and so does their entry), and they are told why.
+      let blocked: 'not_payer' | 'has_payments' | 'not_your_payment' | null = null;
       for (const id of ids) {
         const groupId = bills.get(id);
         if (groupId) {
+          const block = albumBillBlock(groupId, id);
+          if (block) {
+            blocked = block;
+            taken.add(id);
+            continue;
+          }
           albumGroupsRepository.softDeleteExpense(
             groupId,
             id,
@@ -4497,12 +4614,31 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
         const payment = payments.get(id);
         if (payment) {
+          const rules = groupRuleState(payment.groupId);
+          const settlement = albumGroupsRepository
+            .listSettlements(payment.groupId)
+            .find((item) => item.id === payment.settlementId);
+          if (
+            rules &&
+            settlement &&
+            !canRecordPayment(
+              rules.members,
+              rules.selfId,
+              settlement.fromMember,
+              settlement.toMember,
+            )
+          ) {
+            blocked = 'not_your_payment';
+            taken.add(id);
+            continue;
+          }
           albumGroupsRepository.softDeleteSettlement(payment.groupId, payment.settlementId);
           touched.add(payment.groupId);
           taken.add(id);
         }
       }
-      if (!taken.size) return taken;
+      if (blocked) Alert.alert(I18n.t(`albums.rules.${blocked}`));
+      if (!touched.size) return taken;
       for (const groupId of touched) {
         const env = groupEnvFor(groupId);
         if (!env) continue;
@@ -4517,7 +4653,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       afterGroupWrite();
       return taken;
     },
-    [afterGroupWrite, groupEnvFor, settleEvenGroup],
+    [afterGroupWrite, albumBillBlock, groupEnvFor, groupRuleState, settleEvenGroup],
   );
 
   const deleteTransactionsBulk = useCallback(
@@ -5935,6 +6071,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // books stay consistent, then soft-delete the split.
   const deleteSplit = useCallback(
     (splitId: string) => {
+      // Taking a share off a shared album's bill changes the bill, which only
+      // its payer may, and nobody while it has payments (README: Who can
+      // change what).
+      const groupParent = transactionsRef.current.find(
+        (tx) => tx.albumGroupId && tx.splits?.some((s) => s.id === splitId),
+      );
+      const block =
+        groupParent?.albumGroupId && sharedAlbumFor(groupParent.albumGroupId)
+          ? albumBillBlock(groupParent.albumGroupId, groupParent.id)
+          : null;
+      if (block) {
+        Alert.alert(I18n.t(`albums.rules.${block}`));
+        return;
+      }
       const now = nowIso();
       const undone = undonePaybackOf(splitId);
       setTransactions((prev) => {
@@ -5988,7 +6138,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         scheduleRefreshTransactions();
       });
     },
-    [accountCurrencyOf, scheduleRefreshTransactions, undonePaybackOf],
+    [accountCurrencyOf, albumBillBlock, scheduleRefreshTransactions, undonePaybackOf],
   );
 
   // The user pays a friend back for a bill that friend paid. Until now the
@@ -7892,6 +8042,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             settleGroupDebt,
             saveAlbumBill,
             detachAlbumBill,
+            saveAlbumBillOwnFields,
+            albumBillBlock,
             addTransactionsToAlbum,
             removeTransactionsFromAlbum,
             getAlbumTransactionIds,
@@ -8047,6 +8199,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       settleGroupDebt,
       saveAlbumBill,
       detachAlbumBill,
+      saveAlbumBillOwnFields,
+      albumBillBlock,
       addTransactionsToAlbum,
       removeTransactionsFromAlbum,
       getAlbumTransactionIds,

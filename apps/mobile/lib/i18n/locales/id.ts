@@ -3040,6 +3040,15 @@ const id = {
       from_album: 'Dari {{album}}',
       shared_album: 'Album bersama',
     },
+    rules: {
+      not_payer: 'Hanya orang yang membayar yang bisa mengubah atau menghapus tagihan ini.',
+      has_payments:
+        'Tagihan ini sudah ada pembayaran. Batalkan dulu untuk mengubah atau menghapusnya.',
+      not_your_payment: 'Hanya orang yang membayar yang bisa mencatat atau membatalkan pembayaran.',
+      note_not_payer: 'Dibayar oleh {{name}}. Hanya mereka yang bisa mengubahnya.',
+      note_has_payments: 'Ada pembayaran. Batalkan untuk mengubahnya.',
+      they_record: '{{name}} mencatatnya saat membayar Anda.',
+    },
   },
   assets: {
     tab_accounts: 'Akun',

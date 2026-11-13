@@ -3023,6 +3023,15 @@ const da = {
       from_album: 'Fra {{album}}',
       shared_album: 'Delt album',
     },
+    rules: {
+      not_payer: 'Kun den, der betalte, kan ændre eller slette regningen.',
+      has_payments:
+        'Der er betalinger på regningen. Fortryd dem først for at ændre eller slette den.',
+      not_your_payment: 'Kun den, der betaler, kan registrere eller fortryde en betaling.',
+      note_not_payer: 'Betalt af {{name}}. Kun de kan ændre den.',
+      note_has_payments: 'Har betalinger. Fortryd dem for at ændre den.',
+      they_record: '{{name}} registrerer det, når de betaler dig.',
+    },
   },
   assets: {
     tab_accounts: 'Konti',
