@@ -3960,6 +3960,22 @@ Worker automatically retries the request once with `BACKUP_MODEL`
 backup 25 seconds of the 70-second scan budget (`BACKUP_RESERVE_MS`, or half
 of what is left when less), so a hung primary cannot starve it.
 
+**Where the Worker runs.** `wrangler.toml` pins the Worker to Singapore
+(`[placement]`, `mode = "targeted"`, `region = "aws:ap-southeast-1"`) instead
+of the Cloudflare data centre nearest the user. OpenRouter checks Claude
+against the region the call comes from, and refuses it from Hong Kong with a
+403 "This model is not available in your region". Unpinned, every scan from
+Hong Kong and mainland China users ran there, so each one fell to
+`BACKUP_MODEL`. In the two weeks to 2026-11-13, OpenRouter refused 325 of the
+404 Claude calls from users in Hong Kong and China this way. Qwen answered no
+transactions to 37% of screenshot scans and was rate limited on 7%, and a
+failed screenshot scan is dropped without a message, so "Log Screenshot" looked
+as if it did nothing until it was run again. Most users are in Singapore and
+Malaysia, whose scans already reached Claude from their local data centres
+(6 refused calls out of about 28,600), and Claude answers from the US whichever
+Asian region the Worker sits in. Region 403s in
+the `$ai_generation` errors mean this placement has stopped holding.
+
 **`MODEL` is Claude Haiku 5.5 on our own Anthropic key, and `BACKUP_MODEL` is
 `qwen/qwen3.7-flash` on OpenRouter credits.** Claude must never run on credits,
 and three things hold that line:
