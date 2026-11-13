@@ -3008,7 +3008,6 @@ const hi = {
       changed_by: '{{album}} में {{name}} ने बदला',
       from_album: '{{album}} से',
       shared_album: 'साझा एल्बम',
-      view_album: 'एल्बम देखें',
     },
   },
   assets: {

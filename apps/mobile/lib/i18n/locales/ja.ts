@@ -3004,7 +3004,6 @@ const ja = {
       changed_by: '{{album}}で{{name}}さんが変更',
       from_album: '{{album}}から',
       shared_album: '共有アルバム',
-      view_album: 'アルバムを見る',
     },
   },
   assets: {

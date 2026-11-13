@@ -3043,7 +3043,6 @@ const ms = {
       changed_by: 'Diubah oleh {{name}} dalam {{album}}',
       from_album: 'Dari {{album}}',
       shared_album: 'Album kongsi',
-      view_album: 'Lihat album',
     },
   },
   assets: {

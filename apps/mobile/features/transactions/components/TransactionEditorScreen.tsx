@@ -23,6 +23,7 @@ import {
   Trash2,
   Type,
   UserRound,
+  UsersRound,
 } from 'lucide-react-native';
 import React, { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -70,7 +71,7 @@ import {
   SubscriptionLogo,
   Text,
 } from '~/components/ui';
-import { ClayIcon, type ClayIconName } from '~/components/ui/ClayIcon';
+import { ClayIcon } from '~/components/ui/ClayIcon';
 import { SentimentIcon } from '~/components/ui/SentimentIcons';
 import { hasSubscriptionLogoArt } from '~/components/ui/SubscriptionLogo';
 import { SINGLE_LINE_TEXT_INPUT_STYLE } from '~/components/ui/textInputStyles';
@@ -480,11 +481,15 @@ interface TransactionEditorScreenProps {
       transferFee: TransferFeeDraft | null;
     }) => void;
   };
+  /** A line under the header that links somewhere (a payment's instalment plan). */
+  headerNotice?: { label: string; actionLabel: string; onPress: () => void };
   /**
-   * A line under the header that links somewhere (a payment's instalment
-   * plan, a shared album's bill's album). `icon` defaults to the plan's.
+   * A shared album's bill: a line under the amount saying which album it is
+   * from and who last changed it, which opens the album; or, while the bill
+   * waits for the user's account (`asksAccount`), who said they paid it,
+   * which opens the account picker.
    */
-  headerNotice?: { label: string; actionLabel: string; onPress: () => void; icon?: ClayIconName };
+  albumNote?: { label: string; onOpenAlbum: () => void; asksAccount?: boolean };
   /**
    * Opens on no account even when `initialValues` has none, so one has to be
    * picked before saving (a shared album's bill someone else said the user
@@ -734,6 +739,7 @@ export function TransactionEditorScreen({
   recurringOptions,
   instalmentOptions,
   headerNotice,
+  albumNote,
   startWithoutAccount = false,
   initialTransferFee = null,
 }: TransactionEditorScreenProps) {
@@ -4535,7 +4541,7 @@ export function TransactionEditorScreen({
                 className="flex-row items-center gap-2 rounded-2xl border border-primary/25 bg-primary/10 px-3.5 py-2.5 active:opacity-70"
               >
                 <ClayIcon
-                  name={headerNotice.icon ?? 'settings/instalments'}
+                  name="settings/instalments"
                   size={18}
                   flatSize={15}
                   flatColor={themeColors.primary}
@@ -4942,6 +4948,35 @@ export function TransactionEditorScreen({
                       </Text>
                       {workTimeNudgeParts.after}
                     </Text>
+                  ) : null}
+                  {albumNote ? (
+                    <Pressable
+                      onPress={() => {
+                        void triggerHaptic('selection');
+                        if (albumNote.asksAccount && !accountId) activateField('account');
+                        else albumNote.onOpenAlbum();
+                      }}
+                      hitSlop={6}
+                      accessibilityRole="button"
+                      className="mt-0.5 flex-row items-center gap-1 self-start active:opacity-70"
+                    >
+                      <UsersRound
+                        size={12}
+                        color={
+                          albumNote.asksAccount && !accountId
+                            ? themeColors.primary
+                            : themeColors.textMuted
+                        }
+                      />
+                      <Text
+                        variant="caption"
+                        tone={albumNote.asksAccount && !accountId ? 'primary' : 'muted'}
+                        numberOfLines={1}
+                        className="shrink"
+                      >
+                        {albumNote.label}
+                      </Text>
+                    </Pressable>
                   ) : null}
                   {instalmentSummary ? (
                     <Pressable

@@ -2968,7 +2968,6 @@ const th = {
       changed_by: '{{name}} แก้ไขใน {{album}}',
       from_album: 'จาก {{album}}',
       shared_album: 'อัลบั้มที่แชร์',
-      view_album: 'ดูอัลบั้ม',
     },
   },
   assets: {

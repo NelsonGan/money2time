@@ -3044,7 +3044,6 @@ const pt = {
       changed_by: 'Alterado por {{name}} em {{album}}',
       from_album: 'De {{album}}',
       shared_album: 'Álbum compartilhado',
-      view_album: 'Ver álbum',
     },
   },
   assets: {

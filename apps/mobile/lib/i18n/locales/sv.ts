@@ -3023,7 +3023,6 @@ const sv = {
       changed_by: 'Ändrad av {{name}} i {{album}}',
       from_album: 'Från {{album}}',
       shared_album: 'Delat album',
-      view_album: 'Visa album',
     },
   },
   assets: {

@@ -3005,7 +3005,6 @@ const vi = {
       changed_by: '{{name}} đã sửa trong {{album}}',
       from_album: 'Từ {{album}}',
       shared_album: 'Album chung',
-      view_album: 'Xem album',
     },
   },
   assets: {

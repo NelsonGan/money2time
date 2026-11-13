@@ -2984,7 +2984,6 @@ const ko = {
       changed_by: '{{album}}에서 {{name}}님이 변경',
       from_album: '{{album}}에서',
       shared_album: '공유 앨범',
-      view_album: '앨범 보기',
     },
   },
   assets: {

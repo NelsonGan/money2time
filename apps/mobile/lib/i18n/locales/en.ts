@@ -3015,7 +3015,6 @@ const en = {
       changed_by: 'Changed by {{name}} in {{album}}',
       from_album: 'From {{album}}',
       shared_album: 'Shared album',
-      view_album: 'View album',
     },
   },
   assets: {

@@ -3025,7 +3025,6 @@ const nb = {
       changed_by: 'Endret av {{name}} i {{album}}',
       from_album: 'Fra {{album}}',
       shared_album: 'Delt album',
-      view_album: 'Se album',
     },
   },
   assets: {

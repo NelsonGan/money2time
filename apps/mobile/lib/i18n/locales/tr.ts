@@ -3030,7 +3030,6 @@ const tr = {
       changed_by: '{{album}} içinde {{name}} değiştirdi',
       from_album: '{{album}} albümünden',
       shared_album: 'Paylaşılan albüm',
-      view_album: 'Albümü gör',
     },
   },
   assets: {

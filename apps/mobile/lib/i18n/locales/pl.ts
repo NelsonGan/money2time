@@ -3037,7 +3037,6 @@ const pl = {
       changed_by: 'Zmiana: {{name}}, {{album}}',
       from_album: 'Z albumu {{album}}',
       shared_album: 'Udostępniony album',
-      view_album: 'Zobacz album',
     },
   },
   assets: {

@@ -2902,7 +2902,6 @@ const zh = {
       changed_by: '{{name}} 在 {{album}} 中修改',
       from_album: '来自 {{album}}',
       shared_album: '共享相册',
-      view_album: '查看相册',
     },
   },
   assets: {

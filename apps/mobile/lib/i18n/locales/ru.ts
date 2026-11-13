@@ -3030,7 +3030,6 @@ const ru = {
       changed_by: 'Изменено: {{name}}, {{album}}',
       from_album: 'Из альбома {{album}}',
       shared_album: 'Общий альбом',
-      view_album: 'Открыть альбом',
     },
   },
   assets: {

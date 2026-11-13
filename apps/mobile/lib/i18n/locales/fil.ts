@@ -3068,7 +3068,6 @@ const fil = {
       changed_by: 'Binago ni {{name}} sa {{album}}',
       from_album: 'Mula sa {{album}}',
       shared_album: 'Shared na album',
-      view_album: 'Tingnan ang album',
     },
   },
   assets: {

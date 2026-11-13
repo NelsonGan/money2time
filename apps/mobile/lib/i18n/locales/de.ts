@@ -3072,7 +3072,6 @@ const de = {
       changed_by: 'Geändert von {{name}} in {{album}}',
       from_album: 'Aus {{album}}',
       shared_album: 'Geteiltes Album',
-      view_album: 'Album ansehen',
     },
   },
   assets: {

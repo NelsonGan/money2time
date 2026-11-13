@@ -3039,7 +3039,6 @@ const id = {
       changed_by: 'Diubah oleh {{name}} di {{album}}',
       from_album: 'Dari {{album}}',
       shared_album: 'Album bersama',
-      view_album: 'Lihat album',
     },
   },
   assets: {

@@ -157,7 +157,7 @@ function TransactionEditor({
   // which account it left (README: Album members and shared albums).
   const groupOrigin = useGroupBillOrigin(transaction);
   const confirmAccount = needsAccountConfirm(transaction);
-  const groupNotice = groupOrigin
+  const albumNote = groupOrigin
     ? {
         label: confirmAccount
           ? groupOrigin.changedBy
@@ -171,9 +171,8 @@ function TransactionEditor({
             : I18n.t('albums.bill.from_album', {
                 album: groupOrigin.albumName ?? I18n.t('albums.bill.shared_album'),
               }),
-        actionLabel: I18n.t('albums.bill.view_album'),
-        icon: 'settings/albums' as const,
-        onPress: () =>
+        asksAccount: confirmAccount,
+        onOpenAlbum: () =>
           navigation.navigate('AlbumDetail', { albumId: groupOrigin.albumId }, { pop: true }),
       }
     : undefined;
@@ -193,7 +192,7 @@ function TransactionEditor({
         onPress: () =>
           navigation.navigate('InstalmentPlan', { planId: instalmentPlan.rule.id }, { pop: true }),
       }
-    : groupNotice;
+    : undefined;
   const isLegacyBalanceAdjustmentTransfer =
     transaction.type === 'transfer' &&
     !!transaction.accountId &&
@@ -538,6 +537,7 @@ function TransactionEditor({
       initialTransferFee={initialTransferFee}
       openSplitBillOnMount={openSplitBillOnMount}
       headerNotice={headerNotice}
+      albumNote={albumNote}
       startWithoutAccount={confirmAccount}
       instalmentOptions={instalmentOptions}
       subtitleOverride={

@@ -3060,7 +3060,6 @@ const nl = {
       changed_by: 'Gewijzigd door {{name}} in {{album}}',
       from_album: 'Uit {{album}}',
       shared_album: 'Gedeeld album',
-      view_album: 'Album bekijken',
     },
   },
   assets: {

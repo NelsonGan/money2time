@@ -2204,14 +2204,16 @@ migrations `090` and `091`.
   payment made (a part the user paid) cannot be split itself.
 - **A bill from a shared album says so.** Its row in every list has a small
   people mark after the title (read out as "Shared album"), since someone
-  else can add, change or remove it, and its editor opens with a line naming
-  the album ("From Bali trip", or "Changed by Aisha in Bali trip" when
-  someone else made the last change), whose View album opens it.
+  else can add, change or remove it, and its editor has a line under the
+  amount with the same mark naming the album ("From Bali trip", or "Changed
+  by Aisha in Bali trip" when someone else made the last change), which opens
+  the album (`albumNote`).
 - **Nobody else moves the user's accounts.** A bill someone else saves, or
   changes, naming the user as its payer lands on **no account**: its row
   reads **Confirm account** where the account would be (shown even with
-  account badges off), and its editor says "Aisha says you paid. Pick the
-  account." and opens with no account picked, so saving it is the user
+  account badges off), and its editor's line under the amount says "Aisha
+  says you paid. Pick the account." (a tap opens the account picker) and it
+  opens with no account picked, so saving it is the user
   saying which account the money left. Until then it counts as the user's
   spending and the others owe them as usual, but no balance moves; a payback
   received meanwhile lowers the bill, and its transfer to the payback account

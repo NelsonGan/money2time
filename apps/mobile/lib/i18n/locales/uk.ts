@@ -3024,7 +3024,6 @@ const uk = {
       changed_by: 'Змінено: {{name}}, {{album}}',
       from_album: 'З альбому {{album}}',
       shared_album: 'Спільний альбом',
-      view_album: 'Відкрити альбом',
     },
   },
   assets: {
