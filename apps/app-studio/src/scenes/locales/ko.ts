@@ -24,6 +24,15 @@ const ko: LocaleModule = {
     s12: { h: '나만의\n분위기', hl: '분위기', sh: '언어, 통화, 테마를 내 맘대로', she: '🎨', language: '한국어 (ko)', currency: 'USD ($)', theme: 'Light · Sage' },
     s13: { h: '한 번에\n불러오기', hl: '불러오기', sh: 'AI가 내역을 읽고 확인만 하면 끝', she: '🤖', aiPowered: 'AI 기반', oneTap: '프롬프트 복사', pasteJSON: 'JSON 붙여넣기' },
     s14: { h: '입력하면\n바로 끝.', hl: '바로 끝.', sh: '키보드가 가장 빠른 입구예요', she: '⌨️', type: '커피 6.50', tap: '↵', done: '0m 만에 기록', category: '자동 · 식비 / 커피' },
+    s15: {
+      h: '내 데이터는\n오직 나의 것.', hl: '오직 나의 것.',
+      privacy: '설계부터 프라이버시', privacySub: '휴대폰에 저장돼요. 동기화는 선택이에요',
+      noAds: '광고 없음', noAdsSub: '방해 요소 없이 가계부에만 집중',
+      local: '로컬 우선', localSub: '오프라인에서도 작동. 계정 필요 없음',
+      users: '70,000+ 사용자',
+      inspiredPre: '영감의 원천',
+      bookSub: '돈은 당신이 맞바꾼 생명 에너지입니다',
+    },
     s16: { h: '예산을 정하고\n지켜내기', hl: '지켜내기', sh: '모든 카테고리를 한눈에', she: '🎯', ring: '80%', left: '$730.85 남음', budgeted: '예산 내 지출', unbudgeted: '예산 외 지출' },
   },
 

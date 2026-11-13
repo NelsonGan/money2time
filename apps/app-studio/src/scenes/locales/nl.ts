@@ -24,6 +24,15 @@ const nl: LocaleModule = {
     s12: { h: 'Kies Je\nStijl', hl: 'Stijl', sh: 'Taal, valuta en thema — op jouw manier', she: '🎨', language: 'Nederlands (nl)', currency: 'USD ($)', theme: 'Licht · Salie' },
     s13: { h: 'Importeer\nin Eén Tik', hl: 'in Eén Tik', sh: 'AI leest je afschrift. Jij bevestigt', she: '🤖', aiPowered: 'Met AI', oneTap: 'Kopieer Tekst', pasteJSON: 'Plak JSON' },
     s14: { h: 'Typ.\nTik. Klaar.', hl: 'Klaar.', sh: 'Je toetsenbord is de snelste weg', she: '⌨️', type: 'Koffie 6.50', tap: '↵', done: '0m om te boeken', category: 'Auto · Eten / Koffie' },
+    s15: {
+      h: 'Jouw data\nblijft van jou.', hl: 'blijft van jou.',
+      privacy: 'Privacy ingebouwd', privacySub: 'Opgeslagen op je telefoon. Synchroniseren is optioneel.',
+      noAds: 'Geen advertenties', noAdsSub: 'Geen afleiding. Alleen je financiën.',
+      local: 'Lokaal eerst', localSub: 'Werkt offline. Geen account nodig.',
+      users: '70.000+ gebruikers',
+      inspiredPre: 'Geïnspireerd door',
+      bookSub: 'Geld is de levensenergie die je ervoor inruilt',
+    },
     s16: { h: 'Stel een Budget.\nHou Koers.', hl: 'Hou Koers.', sh: 'Elke categorie, altijd in beeld', she: '🎯', ring: '80%', left: '$730.85 over', budgeted: 'Begrote uitgaven', unbudgeted: 'Niet begroot' },
   },
 

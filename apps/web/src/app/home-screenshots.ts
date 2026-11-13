@@ -4,7 +4,7 @@ export const SCREENSHOTS = [
     key: "home",
   },
   {
-    file: "02-features.webp",
+    file: "02-privacy.webp",
     key: "privacy",
   },
   {

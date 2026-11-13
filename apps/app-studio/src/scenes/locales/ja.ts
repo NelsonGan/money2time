@@ -18,6 +18,15 @@ const ja: LocaleModule = {
     s12: { h: '好きな\n雰囲気で', hl: '雰囲気で', sh: '言語・通貨・テーマを自在に', she: '🎨', language: '日本語 (ja)', currency: 'USD ($)', theme: 'Light · Sage' },
     s13: { h: '一瞬で\n取込み', hl: '取込み', sh: 'AIが明細を読み取り確認のみ', she: '🤖', aiPowered: 'AI 搭載', oneTap: 'プロンプト複製', pasteJSON: 'JSON 貼付' },
     s14: { h: '打って\n即完了', hl: '即完了', sh: 'キーボードが最速の入口', she: '⌨️', type: 'コーヒー 6.50', tap: '↵', done: '0mで記録', category: '自動 · 飲食 / コーヒー' },
+    s15: {
+      h: 'あなたのデータは\nあなたのもの。', hl: 'あなたのもの。',
+      privacy: 'プライバシー重視の設計', privacySub: '端末に保存。同期は任意です',
+      noAds: '広告なし', noAdsSub: '余計なものなし。家計に集中',
+      local: 'ローカル優先', localSub: 'オフラインで動作。アカウント不要',
+      users: '70,000+ ユーザー',
+      inspiredPre: 'インスピレーション',
+      bookSub: 'お金とは、あなたが引き換えにした生命エネルギーである',
+    },
     s16: { h: '予算を決めて\n守り抜く', hl: '守り抜く', sh: 'すべてのカテゴリを一目で', she: '🎯', ring: '80%', left: '残り $730.85', budgeted: '予算内の支出', unbudgeted: '予算外の支出' },
   },
 

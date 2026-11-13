@@ -24,6 +24,15 @@ const id: LocaleModule = {
     s12: { h: 'Pilih\nGayamu', hl: 'Gayamu', sh: 'Bahasa, mata uang, dan tema — sesukamu', she: '🎨', language: 'Indonesia (id)', currency: 'USD ($)', theme: 'Terang · Sage' },
     s13: { h: 'Impor\nSekali Ketuk', hl: 'Sekali Ketuk', sh: 'AI baca laporanmu. Kamu konfirmasi', she: '🤖', aiPowered: 'Pakai AI', oneTap: 'Salin Teks', pasteJSON: 'Tempel JSON' },
     s14: { h: 'Ketik.\nKetuk. Beres.', hl: 'Beres.', sh: 'Keyboard adalah cara tercepat', she: '⌨️', type: 'Kopi 6.50', tap: '↵', done: '0m mencatat', category: 'Otomatis · Makanan / Kopi' },
+    s15: {
+      h: 'Datamu\nTetap Milikmu.', hl: 'Tetap Milikmu.',
+      privacy: 'Privat sejak awal', privacySub: 'Tersimpan di ponselmu. Sinkronisasi opsional.',
+      noAds: 'Tanpa iklan', noAdsSub: 'Tanpa gangguan. Hanya keuanganmu.',
+      local: 'Lokal dulu', localSub: 'Bisa offline. Tanpa perlu akun.',
+      users: '70.000+ pengguna',
+      inspiredPre: 'Terinspirasi dari',
+      bookSub: 'Uang adalah energi hidup yang kamu tukarkan',
+    },
     s16: { h: 'Atur Anggaran.\nTetap di Jalur.', hl: 'Tetap di Jalur.', sh: 'Setiap kategori, selalu terlihat', she: '🎯', ring: '80%', left: 'sisa $730.85', budgeted: 'Belanja teranggarkan', unbudgeted: 'Belanja di luar anggaran' },
   },
 

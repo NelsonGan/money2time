@@ -24,6 +24,15 @@ const nb: LocaleModule = {
     s12: { h: 'Velg Din\nStil', hl: 'Stil', sh: 'Språk, valuta og tema — på din måte', she: '🎨', language: 'Norsk (nb)', currency: 'USD ($)', theme: 'Lys · Salvie' },
     s13: { h: 'Importer\nmed Ett Trykk', hl: 'med Ett Trykk', sh: 'KI leser kontoutskriften. Du bekrefter', she: '🤖', aiPowered: 'Med KI', oneTap: 'Kopier Tekst', pasteJSON: 'Lim inn JSON' },
     s14: { h: 'Skriv.\nTrykk. Ferdig.', hl: 'Ferdig.', sh: 'Tastaturet er den raskeste veien', she: '⌨️', type: 'Kaffe 6.50', tap: '↵', done: '0m å føre', category: 'Auto · Mat / Kaffe' },
+    s15: {
+      h: 'Dataene dine\nforblir dine.', hl: 'forblir dine.',
+      privacy: 'Personvern innebygd', privacySub: 'Lagret på telefonen din. Synkronisering er valgfritt.',
+      noAds: 'Ingen annonser', noAdsSub: 'Ingen distraksjoner. Bare økonomien din.',
+      local: 'Lokalt først', localSub: 'Fungerer offline. Ingen konto nødvendig.',
+      users: '70 000+ brukere',
+      inspiredPre: 'Inspirert av',
+      bookSub: 'Penger er livsenergien du bytter bort for dem',
+    },
     s16: { h: 'Sett et Budsjett.\nHold Kursen.', hl: 'Hold Kursen.', sh: 'Hver kategori, alltid synlig', she: '🎯', ring: '80%', left: '$730.85 igjen', budgeted: 'Budsjetterte utgifter', unbudgeted: 'Ikke budsjettert' },
   },
 

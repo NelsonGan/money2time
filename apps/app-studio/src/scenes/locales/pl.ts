@@ -24,6 +24,15 @@ const pl: LocaleModule = {
     s12: { h: 'Wybierz\nStyl', hl: 'Styl', sh: 'Język, waluta i motyw — po swojemu', she: '🎨', language: 'Polski (pl)', currency: 'USD ($)', theme: 'Jasny · Szałwia' },
     s13: { h: 'Import\nza Dotyk', hl: 'za Dotyk', sh: 'AI czyta wyciąg. Ty potwierdzasz', she: '🤖', aiPowered: 'Z AI', oneTap: 'Kopiuj Tekst', pasteJSON: 'Wklej JSON' },
     s14: { h: 'Pisz.\nTknij. Już.', hl: 'Już.', sh: 'Klawiatura to najszybsza droga', she: '⌨️', type: 'Kawa 6.50', tap: '↵', done: '0m na wpis', category: 'Auto · Jedzenie / Kawa' },
+    s15: {
+      h: 'Twoje dane\nzostają twoje.', hl: 'zostają twoje.',
+      privacy: 'Pełna prywatność', privacySub: 'Zapisane w telefonie. Synchronizacja jest opcjonalna.',
+      noAds: 'Bez reklam', noAdsSub: 'Zero rozpraszaczy. Tylko twoje finanse.',
+      local: 'Najpierw lokalnie', localSub: 'Działa offline. Bez zakładania konta.',
+      users: '70 000+ użytkowników',
+      inspiredPre: 'Inspiracja',
+      bookSub: 'Pieniądze to energia życiowa, którą za nie oddajesz',
+    },
     s16: { h: 'Ustal Budżet.\nTrzymaj Kurs.', hl: 'Trzymaj Kurs.', sh: 'Każda kategoria zawsze na widoku', she: '🎯', ring: '80%', left: 'zostało $730.85', budgeted: 'Wydatki w budżecie', unbudgeted: 'Poza budżetem' },
   },
 
