@@ -845,6 +845,7 @@ const zh = {
       you_pay_person: '你付给 {{name}}',
       even_caption: '你们两清了，无需付款',
       you_paid_on: '你于 {{date}} 付款',
+      person_paid_on: '{{name}} 于 {{date}} 已还',
       undo_payment_title: '撤销这笔还款？',
       undo_payment_message: '你将再次欠 {{amount}}，这笔金额也会从付款账户中移除。',
     },
@@ -2794,6 +2795,7 @@ const zh = {
     save_scanned_hint: '扫描收据来记账或分摊账单时保留照片。',
   },
   albums: {
+    untitled: '相册',
     location: {
       label: '地点',
       add: '添加地点',

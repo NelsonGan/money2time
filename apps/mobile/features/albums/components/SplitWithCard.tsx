@@ -91,7 +91,7 @@ export function SplitWithCard({ rows, canAdd, onAdd, onRename, onRemove }: Split
                 className="flex-1"
                 disabled={!row.id || !row.renamable}
                 onPress={() => row.id && setRenaming({ id: row.id, name: row.name })}
-                accessibilityRole="button"
+                accessibilityRole={row.id && row.renamable ? 'button' : 'text'}
               >
                 <Text variant="bodyStrong" numberOfLines={1}>
                   {row.name}
@@ -135,7 +135,9 @@ export function SplitWithCard({ rows, canAdd, onAdd, onRename, onRemove }: Split
               autoCapitalize="words"
               autoCorrect={false}
               onSubmitEditing={add}
-              blurOnSubmit={false}
+              // A name keeps the field for the next one; Done on an empty
+              // field puts the keyboard away, uncovering Create.
+              submitBehavior={newName.trim() ? 'submit' : 'blurAndSubmit'}
             />
           </View>
           {newName.trim() ? (

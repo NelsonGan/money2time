@@ -253,4 +253,49 @@ describe('settling a debt', () => {
       { expenseId: 'late', from: 'a', to: 'b', amount: 5 },
     ]);
   });
+
+  it('leaves other pairs alone when debts are not simplified', () => {
+    // b, c and d owe round in a circle, b owes a, and a owes x.
+    const expenses = [
+      bill('ab', 'a', { b: 10 }),
+      bill('bc', 'b', { c: 10 }),
+      bill('cd', 'c', { d: 10 }),
+      bill('db', 'd', { b: 10 }),
+      bill('xa', 'x', { a: 5 }),
+    ];
+    const open = openShares(expenses, []);
+    const debt = { from: 'a', to: 'x', currency: 'MYR', amount: 5 };
+    expect(settleDebt(open, debt, { simplified: false })).toEqual([
+      { expenseId: 'xa', from: 'a', to: 'x', amount: 5 },
+    ]);
+    // A part payment between two moves only their own lines.
+    const part = settleDebt(
+      open,
+      { from: 'b', to: 'a', currency: 'MYR', amount: 4 },
+      {
+        simplified: false,
+      },
+    );
+    expect(part).toEqual([{ expenseId: 'ab', from: 'b', to: 'a', amount: 4 }]);
+    expect(text(pairwiseDebts(after(expenses, part)))).toEqual([
+      'a>x MYR 5',
+      'b>a MYR 6',
+      'b>d MYR 10',
+      'c>b MYR 10',
+      'd>c MYR 10',
+    ]);
+  });
+
+  it("sets off only the two people's own debts when not simplified", () => {
+    const expenses = [bill('x', 'c', { a: 10 }), bill('y', 'a', { c: 4 })];
+    const payments = settleDebt(
+      openShares(expenses, []),
+      { from: 'a', to: 'c', currency: 'MYR', amount: 6 },
+      { simplified: false },
+    );
+    expect(payments).toEqual([
+      { expenseId: 'x', from: 'a', to: 'c', amount: 10 },
+      { expenseId: 'y', from: 'c', to: 'a', amount: 4 },
+    ]);
+  });
 });

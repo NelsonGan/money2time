@@ -117,6 +117,12 @@ function fromRemote(remote: RemoteSharedLedger, userId: string): SharedLedger {
   };
 }
 
+/** Whether an album with this id is on this phone (deleted or not) in a ledger other than the main one. */
+function albumOutsideMain(albumId: string): boolean {
+  const ledgerId = albumLedgerId(albumId);
+  return ledgerId !== null && ledgerId !== DEFAULT_LEDGER_ID;
+}
+
 function ledgerExists(ledgerId: string): boolean {
   return !!getSQLite().getFirstSync('SELECT 1 FROM ledgers WHERE id = ?', [ledgerId]);
 }
@@ -247,8 +253,9 @@ class SharedLedgerSync {
       const known = sharedLedgerFor(item.ledgerId);
       if (item.kind === 'album') {
         if (known && known.shareId !== item.id) continue;
-        // Never a group named after one of this phone's ledgers (`join`).
-        if (!known && ledgerExists(item.ledgerId)) continue;
+        // Never a group named after one of this phone's ledgers, or after an
+        // album of a ledger other than the main one (`assertNotLedger`).
+        if (!known && (ledgerExists(item.ledgerId) || albumOutsideMain(item.ledgerId))) continue;
         if (item.role === 'owner' && !known && isAlbumDeleted(item.ledgerId)) {
           // The album was deleted on this phone while signed out: sharing
           // ends with it.
@@ -811,9 +818,14 @@ class SharedLedgerSync {
     return shared.ledgerId;
   }
 
-  /** A shared album's id is never the id of a ledger on this phone, deleted or not. */
+  /**
+   * A shared album's id is never the id of a ledger on this phone, deleted or
+   * not, nor of an album of another ledger than the main one (a member of a
+   * shared ledger knows its albums' ids): a group only ever writes into the
+   * album it shows as, in the main ledger.
+   */
   private assertNotLedger(albumId: string): void {
-    if (albumId === DEFAULT_LEDGER_ID || ledgerExists(albumId)) {
+    if (albumId === DEFAULT_LEDGER_ID || ledgerExists(albumId) || albumOutsideMain(albumId)) {
       throw new CloudSyncApiError('own_ledger', 409);
     }
   }

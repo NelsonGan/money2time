@@ -883,6 +883,7 @@ const ms = {
       you_pay_person: 'Anda bayar {{name}}',
       even_caption: 'Anda berdua seri, tiada apa perlu dibayar',
       you_paid_on: 'Anda bayar pada {{date}}',
+      person_paid_on: '{{name}} bayar pada {{date}}',
       undo_payment_title: 'Buat asal bayaran ini?',
       undo_payment_message:
         'Anda akan berhutang {{amount}} semula, dan jumlah itu dikeluarkan daripada akaun yang digunakan untuk membayar.',
@@ -2930,6 +2931,7 @@ const ms = {
       'Kekalkan foto apabila anda mengimbas resit untuk merekod atau membahagi bil.',
   },
   albums: {
+    untitled: 'Album',
     location: {
       label: 'Lokasi',
       add: 'Tambah lokasi',

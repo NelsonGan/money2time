@@ -406,23 +406,17 @@ function TransactionEditor({
           albumBillRows(splits),
           transaction.id,
         );
-        // A group's bill is only ever saved through its group.
-        if (saved || isGroupBill) return;
+        if (saved) return;
+        // A group's bill is only ever saved through its group: when that
+        // failed (signed out, the share gone), say so rather than drop it.
+        if (isGroupBill) {
+          Alert.alert(I18n.t('errors.generic_operation_failed'));
+          return;
+        }
       } else if (isGroupBill) {
         // No longer split: the bill leaves the group, for everyone, and stays
-        // the user's own entry. Asked first, since the others lose it.
-        Alert.alert(I18n.t('albums.bill.remove_shared'), undefined, [
-          { text: I18n.t('common.cancel'), style: 'cancel' },
-          {
-            text: I18n.t('common.remove'),
-            style: 'destructive',
-            onPress: () => {
-              detachAlbumBill(transaction.id);
-              saveOwnSplits(input, splits, extras);
-            },
-          },
-        ]);
-        return;
+        // the user's own entry (asked in `confirmSplitSubmit`, before closing).
+        detachAlbumBill(transaction.id);
       }
       saveOwnSplits(input, splits, extras);
     },
@@ -435,6 +429,32 @@ function TransactionEditor({
       transaction.date,
       transaction.id,
     ],
+  );
+
+  // Taking everyone off a shared album's bill takes it from everyone else, so
+  // that is asked while the editor is still open: Cancel keeps every edit.
+  const confirmSplitSubmit = useCallback(
+    (splits: SplitDraft[]) =>
+      new Promise<boolean>((resolve) => {
+        const leavesGroup =
+          !!albumGroupId && !!transaction.albumGroupId && !splits.some((row) => !row.isSelf);
+        if (!leavesGroup) {
+          resolve(true);
+          return;
+        }
+        // The bill stays in this album as the user's own, so the alert is the
+        // sentence alone, not "Remove from album".
+        Alert.alert(
+          I18n.t('albums.bill.remove_shared'),
+          undefined,
+          [
+            { text: I18n.t('common.cancel'), style: 'cancel', onPress: () => resolve(false) },
+            { text: I18n.t('common.remove'), style: 'destructive', onPress: () => resolve(true) },
+          ],
+          { cancelable: true, onDismiss: () => resolve(false) },
+        );
+      }),
+    [albumGroupId, transaction.albumGroupId],
   );
 
   const initialSplits = useMemo<SplitDraft[] | undefined>(() => {
@@ -483,6 +503,7 @@ function TransactionEditor({
       onDelete={handleDelete}
       onSubmit={handleSubmit}
       onSubmitWithSplits={handleSubmitWithSplits}
+      confirmSplitSubmit={confirmSplitSubmit}
       restrictTypeOptions={restrictedTypes}
       hideSplitMode={isInstalmentPayment || isGroupPayment}
       initialSplits={initialSplits}

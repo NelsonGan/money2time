@@ -25,10 +25,13 @@ interface AlbumSharingCardProps {
   /** The invite link, for the owner of a shared album; `url` null while it loads. */
   link?: {
     url: string | null;
+    /** The link could not be fetched: the field offers Retry instead of loading. */
+    failed: boolean;
     copied: boolean;
     disabled: boolean;
     onCopy: () => void;
     onNewLink: () => void;
+    onRetry: () => void;
   } | null;
 }
 
@@ -106,6 +109,17 @@ export function AlbumSharingCard({ share, simplify, link }: AlbumSharingCardProp
               <Text variant="caption" numberOfLines={1} selectable testID="album-invite-link">
                 {link.url.replace(/^https?:\/\//, '')}
               </Text>
+            ) : link.failed ? (
+              <Pressable
+                onPress={link.onRetry}
+                disabled={link.disabled}
+                accessibilityRole="button"
+                className="active:opacity-70"
+              >
+                <Text variant="caption" className="text-primary">
+                  {I18n.t('common.retry')}
+                </Text>
+              </Pressable>
             ) : (
               <LoadingDots size="small" />
             )}

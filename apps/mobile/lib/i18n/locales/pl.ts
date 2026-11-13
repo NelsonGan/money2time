@@ -883,6 +883,7 @@ const pl = {
       you_pay_person: 'Ty płacisz: {{name}}',
       even_caption: 'Jesteście kwita, nic do zapłaty',
       you_paid_on: 'Zapłacono {{date}}',
+      person_paid_on: '{{name}} zapłacił(a) {{date}}',
       undo_payment_title: 'Cofnąć tę płatność?',
       undo_payment_message:
         'Znów będziesz winien {{amount}}, a kwota zniknie z konta, z którego zapłacono.',
@@ -2924,6 +2925,7 @@ const pl = {
       'Zachowaj zdjęcie, gdy skanujesz paragon, aby zapisać lub podzielić rachunek.',
   },
   albums: {
+    untitled: 'Album',
     location: {
       label: 'Lokalizacja',
       add: 'Dodaj lokalizację',

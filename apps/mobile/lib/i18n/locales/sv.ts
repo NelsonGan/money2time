@@ -880,6 +880,7 @@ const sv = {
       you_pay_person: 'Du betalar {{name}}',
       even_caption: 'Ni är kvitt, inget att betala',
       you_paid_on: 'Du betalade {{date}}',
+      person_paid_on: '{{name}} betalade {{date}}',
       undo_payment_title: 'Ångra den här betalningen?',
       undo_payment_message:
         'Du blir skyldig {{amount}} igen, och beloppet tas bort från kontot det betalades från.',
@@ -2914,6 +2915,7 @@ const sv = {
     save_scanned_hint: 'Behåll fotot när du skannar ett kvitto för att bokföra eller dela en nota.',
   },
   albums: {
+    untitled: 'Album',
     location: {
       label: 'Plats',
       add: 'Lägg till plats',

@@ -880,6 +880,7 @@ const nb = {
       you_pay_person: 'Du betaler {{name}}',
       even_caption: 'Dere står likt, ingenting å betale',
       you_paid_on: 'Du betalte {{date}}',
+      person_paid_on: '{{name}} betalte {{date}}',
       undo_payment_title: 'Angre denne betalingen?',
       undo_payment_message:
         'Du skylder {{amount}} igjen, og beløpet fjernes fra kontoen det ble betalt fra.',
@@ -2915,6 +2916,7 @@ const nb = {
       'Behold bildet når du skanner en kvittering for å bokføre eller dele en regning.',
   },
   albums: {
+    untitled: 'Album',
     location: {
       label: 'Sted',
       add: 'Legg til sted',

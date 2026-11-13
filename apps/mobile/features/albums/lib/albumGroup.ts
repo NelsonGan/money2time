@@ -26,11 +26,13 @@ import { splitShareKey } from '~/features/transactions/lib/splitPayments';
 import type { AlbumExpense, AlbumSettlement, AlbumShare, TransactionSplit } from '~/types';
 import { normalizeMoneyAmount } from '~/utils/formatters';
 
-type Bill = Pick<AlbumExpense, 'id' | 'amount' | 'paidBy' | 'shares'>;
+type Bill = Pick<AlbumExpense, 'id' | 'amount' | 'paidBy' | 'shares'> &
+  Partial<Pick<AlbumExpense, 'currency'>>;
 type Payment = Pick<
   AlbumSettlement,
   'id' | 'expenseId' | 'fromMember' | 'toMember' | 'amount' | 'date' | 'createdAt' | 'deletedAt'
->;
+> &
+  Partial<Pick<AlbumSettlement, 'currency'>>;
 
 /** An amount in whole cents, which is what the sums are done in. */
 export const cents = (value: number) => Math.round(value * 100);
@@ -147,7 +149,9 @@ function countedPayments(
         !item.deletedAt &&
         item.expenseId === bill.id &&
         item.fromMember === fromMember &&
-        item.toMember === toMember,
+        item.toMember === toMember &&
+        // A payment in another currency than its bill's is not a payment on it.
+        (!item.currency || !bill.currency || item.currency === bill.currency),
     )
     .sort((a, b) =>
       a.createdAt !== b.createdAt ? (a.createdAt < b.createdAt ? -1 : 1) : a.id < b.id ? -1 : 1,

@@ -883,6 +883,7 @@ const fr = {
       you_pay_person: 'Vous payez {{name}}',
       even_caption: 'Vous êtes quittes, rien à payer',
       you_paid_on: 'Payé le {{date}}',
+      person_paid_on: '{{name}} a payé le {{date}}',
       undo_payment_title: 'Annuler ce paiement ?',
       undo_payment_message:
         'Vous devrez à nouveau {{amount}}, et le montant sera retiré du compte utilisé pour payer.',
@@ -2950,6 +2951,7 @@ const fr = {
       'Conservez la photo quand vous scannez un reçu pour enregistrer ou partager une note.',
   },
   albums: {
+    untitled: 'Album',
     location: {
       label: 'Lieu',
       add: 'Ajouter un lieu',

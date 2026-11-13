@@ -875,6 +875,7 @@ const ko = {
       you_pay_person: '내가 {{name}} 님에게 보냄',
       even_caption: '주고받을 돈이 같아 보낼 금액이 없어요',
       you_paid_on: '{{date}}에 갚음',
+      person_paid_on: '{{name}} 님이 {{date}}에 갚음',
       undo_payment_title: '이 정산을 취소할까요?',
       undo_payment_message: '{{amount}}을(를) 다시 갚아야 하고, 출금했던 계좌에서 금액이 빠집니다.',
     },
@@ -2875,6 +2876,7 @@ const ko = {
     save_scanned_hint: '영수증을 스캔해 기록하거나 나눠 계산할 때 사진을 보관합니다.',
   },
   albums: {
+    untitled: '앨범',
     location: {
       label: '위치',
       add: '위치 추가',

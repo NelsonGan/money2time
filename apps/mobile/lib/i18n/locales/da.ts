@@ -879,6 +879,7 @@ const da = {
       you_pay_person: 'Du betaler {{name}}',
       even_caption: 'I står lige, intet at betale',
       you_paid_on: 'Du betalte {{date}}',
+      person_paid_on: '{{name}} betalte {{date}}',
       undo_payment_title: 'Fortryd denne betaling?',
       undo_payment_message:
         'Du skylder {{amount}} igen, og beløbet fjernes fra den konto, det blev betalt fra.',
@@ -2912,6 +2913,7 @@ const da = {
       'Behold billedet, når du scanner en kvittering for at bogføre eller dele en regning.',
   },
   albums: {
+    untitled: 'Album',
     location: {
       label: 'Placering',
       add: 'Tilføj placering',

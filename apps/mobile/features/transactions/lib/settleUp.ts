@@ -9,7 +9,7 @@ import type {
   TransactionWithRelations,
 } from '~/types';
 
-import { type DebtParty, debtPartyKey, debtPartyOf, UNNAMED_PERSON_KEY } from './debtParty';
+import { type DebtParty, debtPartyOf, UNNAMED_PERSON_KEY } from './debtParty';
 import {
   billPayer,
   friendPaidBillTotal,
@@ -18,8 +18,6 @@ import {
   owesPayer,
 } from './splitPayer';
 import { splitShareKey, summarizeSplitShares } from './splitPayments';
-
-export { UNNAMED_PERSON_KEY };
 
 export interface AggregateSettleUpOptions {
   /** The user's reporting currency; the roll-up total is expressed in it. */
@@ -55,14 +53,6 @@ function splitReportingAmount(
   if (rate != null && Number.isFinite(rate)) return amount * rate;
   // Give up gracefully: count the native amount rather than dropping the bill.
   return amount;
-}
-
-/**
- * The key a name typed on a bill is grouped under. A split row's own key comes
- * from `debtPartyOf`, which prefers its member once people can be real users.
- */
-export function personKeyOf(personName: string | null | undefined): string {
-  return debtPartyKey(personName);
 }
 
 /**

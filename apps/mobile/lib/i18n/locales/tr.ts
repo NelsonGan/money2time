@@ -879,6 +879,7 @@ const tr = {
       you_pay_person: 'Siz {{name}} kişisine ödersiniz',
       even_caption: 'Ödeşmiş durumdasınız, ödenecek bir şey yok',
       you_paid_on: '{{date}} tarihinde ödediniz',
+      person_paid_on: '{{name}} {{date}} tarihinde ödedi',
       undo_payment_title: 'Bu ödeme geri alınsın mı?',
       undo_payment_message:
         '{{amount}} tutarını yeniden borçlanırsınız ve tutar ödendiği hesaptan çıkarılır.',
@@ -2921,6 +2922,7 @@ const tr = {
       'Bir işlemi kaydetmek veya hesabı bölmek için fiş taradığınızda fotoğrafı saklayın.',
   },
   albums: {
+    untitled: 'Albüm',
     location: {
       label: 'Konum',
       add: 'Konum ekle',

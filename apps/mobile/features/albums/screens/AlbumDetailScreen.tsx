@@ -478,13 +478,14 @@ export function AlbumDetailScreen({
     [pageWidth, shownTab, tabs],
   );
 
-  // Keep the pager aligned to the active tab when the page width changes
-  // (tablet layout correction, orientation change). Re-aligning on width only —
-  // not on tab — so tap/swipe transitions aren't interrupted by a snap.
+  // Keep the pager aligned to the active tab when the page width or the set of
+  // tabs changes (tablet layout correction, orientation change, Balances coming
+  // or going). Not on tab, so tap/swipe transitions aren't interrupted by a
+  // snap. Index 0 is re-aligned too: when a tab before it goes, the pager is
+  // still scrolled to the page it was on.
   const activeIndexRef = useRef(0);
   activeIndexRef.current = Math.max(0, tabs.indexOf(shownTab));
   useEffect(() => {
-    if (activeIndexRef.current === 0) return;
     pagerRef.current?.scrollTo({ x: activeIndexRef.current * pageWidth, animated: false });
   }, [pageWidth, tabs.length]);
 
@@ -550,7 +551,9 @@ export function AlbumDetailScreen({
                 <View
                   key={person.id ?? 'me'}
                   style={{ marginLeft: index === 0 ? 0 : -8 }}
-                  className="rounded-full border-2 border-black/30"
+                  // Opaque behind the user's tinted circle, which otherwise
+                  // shows the dark cover through it.
+                  className="rounded-full border-2 border-black/30 bg-card"
                 >
                   <PersonAvatar
                     name={person.name}

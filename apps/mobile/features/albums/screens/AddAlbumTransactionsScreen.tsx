@@ -32,9 +32,14 @@ export function AddAlbumTransactionsScreen({ albumId, onClose }: AddAlbumTransac
     const after = new Set(selectedIds);
     const toAdd = selectedIds.filter((id) => !before.has(id));
     const toRemove = initialIds.filter((id) => !after.has(id));
-    if (toAdd.length > 0) addTransactionsToAlbum(albumId, toAdd);
-    if (toRemove.length > 0) removeFromAlbum(toRemove, onClose);
-    else onClose();
+    const save = () => {
+      if (toAdd.length > 0) addTransactionsToAlbum(albumId, toAdd);
+      onClose();
+    };
+    // Removing a shared album's bill is asked first; the additions wait for
+    // that answer, so Cancel leaves the album exactly as it was.
+    if (toRemove.length > 0) removeFromAlbum(toRemove, save);
+    else save();
   }, [albumId, addTransactionsToAlbum, initialIds, onClose, removeFromAlbum, selectedIds]);
 
   return (

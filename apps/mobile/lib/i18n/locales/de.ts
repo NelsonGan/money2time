@@ -887,6 +887,7 @@ const de = {
       you_pay_person: 'Du zahlst {{name}}',
       even_caption: 'Ihr seid quitt, nichts zu zahlen',
       you_paid_on: 'Bezahlt am {{date}}',
+      person_paid_on: '{{name}} hat am {{date}} bezahlt',
       undo_payment_title: 'Diese Zahlung rückgängig machen?',
       undo_payment_message:
         'Du schuldest wieder {{amount}}, und der Betrag wird von dem Konto entfernt, von dem er bezahlt wurde.',
@@ -2955,6 +2956,7 @@ const de = {
     save_scanned_hint: 'Behalte das Foto, wenn du einen Beleg zum Buchen oder Teilen scannst.',
   },
   albums: {
+    untitled: 'Album',
     location: {
       label: 'Ort',
       add: 'Ort hinzufügen',

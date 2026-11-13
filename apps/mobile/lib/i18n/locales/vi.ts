@@ -879,6 +879,7 @@ const vi = {
       you_pay_person: 'Bạn trả cho {{name}}',
       even_caption: 'Hai bên hòa nhau, không cần trả gì',
       you_paid_on: 'Bạn đã trả ngày {{date}}',
+      person_paid_on: '{{name}} đã trả ngày {{date}}',
       undo_payment_title: 'Hoàn tác khoản thanh toán này?',
       undo_payment_message:
         'Bạn sẽ lại nợ {{amount}}, và số tiền được gỡ khỏi tài khoản đã dùng để trả.',
@@ -2894,6 +2895,7 @@ const vi = {
     save_scanned_hint: 'Giữ ảnh khi bạn quét biên lai để ghi hoặc chia hóa đơn.',
   },
   albums: {
+    untitled: 'Album',
     location: {
       label: 'Vị trí',
       add: 'Thêm vị trí',

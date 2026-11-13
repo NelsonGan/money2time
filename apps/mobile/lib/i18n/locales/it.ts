@@ -884,6 +884,7 @@ const it = {
       you_pay_person: 'Paghi {{name}}',
       even_caption: 'Siete pari, niente da pagare',
       you_paid_on: 'Pagato il {{date}}',
+      person_paid_on: '{{name}} ha pagato il {{date}}',
       undo_payment_title: 'Annullare questo pagamento?',
       undo_payment_message:
         "Dovrai di nuovo {{amount}} e l'importo verrà tolto dal conto da cui era stato pagato.",
@@ -2928,6 +2929,7 @@ const it = {
       'Conserva la foto quando scansioni una ricevuta per registrare o dividere un conto.',
   },
   albums: {
+    untitled: 'Album',
     location: {
       label: 'Luogo',
       add: 'Aggiungi luogo',

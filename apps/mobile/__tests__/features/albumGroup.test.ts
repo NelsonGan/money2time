@@ -8,6 +8,7 @@ import {
   withPersonAdded,
   withPersonRenamed,
 } from '~/features/albums/lib/albumPeople';
+import { toAlbumMember, toAlbumSettlement } from '~/lib/repositories/mappers';
 import type { AlbumExpense, AlbumMember, AlbumSettlement } from '~/types';
 
 const at = '2026-11-12T00:00:00.000Z';
@@ -108,6 +109,11 @@ describe('album people', () => {
     expect(memberForRow(members, 'me', { albumMemberId: 'me', personName: 'Ben' })).toBeNull();
     expect(uniquePersonName('Ben', members)).toBe('Ben');
     expect(uniquePersonName('aisha', members)).toBe('aisha 2');
+    // Never past the longest name a group keeps, or it reads back as the taken one.
+    const long = 'A'.repeat(40);
+    const named = uniquePersonName(long, [member('x', long)]);
+    expect(named).toHaveLength(40);
+    expect(named.endsWith(' 2')).toBe(true);
   });
 });
 
@@ -156,6 +162,12 @@ describe('one member’s own side of a bill', () => {
     });
     expect(ownSide(bill(), 'chen')).toEqual({ kind: 'none' });
     expect(ownSide(bill(), null)).toEqual({ kind: 'none' });
+  });
+
+  it('a payment in another currency than its bill is not a payment on it', () => {
+    const local = localBill(bill(), [payment({ amount: 10, currency: 'USD' })], 'me')!;
+    expect(local.amount).toBe(90);
+    expect(local.payments).toEqual([]);
   });
 
   it('a bill the user paid drops by what the others paid back', () => {
@@ -287,5 +299,29 @@ describe('the whole group', () => {
       MYR: { total: 130, selfPaid: 90, selfShare: 50 },
       JPY: { total: 3000, selfPaid: 0, selfShare: 1500 },
     });
+  });
+});
+
+describe('a group row read from its database', () => {
+  const memberRow = (id: string) => ({
+    id,
+    ledgerId: 'bali',
+    name: 'Aisha',
+    userId: null,
+    sortOrder: 0,
+    createdAt: at,
+    updatedAt: at,
+    deletedAt: null,
+  });
+
+  it('never takes `self`, the key of the user’s own row, as a member id', () => {
+    expect(toAlbumMember(memberRow('aisha'))?.id).toBe('aisha');
+    expect(toAlbumMember(memberRow('self'))).toBeNull();
+  });
+
+  it('takes a currency only as the app writes it, in capitals', () => {
+    const row = { ...payment(), ledgerId: 'bali' };
+    expect(toAlbumSettlement(row)?.currency).toBe('MYR');
+    expect(toAlbumSettlement({ ...row, currency: 'myr' })).toBeNull();
   });
 });

@@ -2,6 +2,7 @@ import { ArrowRight, Check, ChevronRight } from 'lucide-react-native';
 import React, { useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
 
+import { LoadingDots } from '~/components/feedback/LoadingDots';
 import { Button, Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import { PersonAvatar } from '~/features/transactions/components/PersonAvatar';
@@ -91,6 +92,11 @@ export function AlbumBalances({
           const mine = mineOf(debt);
           const fromName = nameOf(debt.from);
           const toName = nameOf(debt.to);
+          const personKey = debtPartyKey(mine === 'owed' ? fromName : toName);
+          // The person's page lists this album's bills with them; a member
+          // with none here yet (renamed since, or nameless) is settled as the
+          // debt stands instead of opening a page that would find nobody.
+          const hasPage = summary.people.some((person) => person.key === personKey);
           return {
             key: `${debt.currency}:${debt.from}:${debt.to}`,
             mine,
@@ -101,9 +107,9 @@ export function AlbumBalances({
             // person's page, beside its bills.
             onPress: !mine
               ? undefined
-              : shared.simplified
+              : shared.simplified || !hasPage
                 ? () => setSettling(debt)
-                : () => onOpenPerson(debtPartyKey(mine === 'owed' ? fromName : toName)),
+                : () => onOpenPerson(personKey),
           };
         })
     : summary.people.flatMap((person): DebtRow[] => {
@@ -152,7 +158,13 @@ export function AlbumBalances({
   // Joined, and not on the album's list yet: none of its bills are theirs
   // until they are. With a name to pick, that question is all there is to
   // show; with none, they are being added as themselves.
-  if (group.share && !group.self && !group.mustClaim) return null;
+  if (group.share && !group.self && !group.mustClaim) {
+    return (
+      <View className="items-center px-5 pt-8">
+        <LoadingDots />
+      </View>
+    );
+  }
   if (group.mustClaim) {
     return (
       <View className="px-5 pt-5">
@@ -256,34 +268,40 @@ export function AlbumBalances({
     </View>
   );
 
+  // Before the album's first split bill there is no balance to state: the
+  // empty message says what goes here instead of "All settled up".
+  const empty = rows.length === 0 && summary.people.length === 0 && !shared?.spending.size;
+
   return (
     <View className="gap-4 px-5 pt-5">
-      <View className="items-center">
-        <Text variant="caption" tone="muted">
-          {I18n.t(
-            !open
-              ? 'transactions.settleUp.hero_settled'
-              : netState === 'owed'
-                ? 'transactions.settleUp.hero_owed'
-                : netState === 'owe'
-                  ? 'transactions.settleUp.you_owe_tag'
-                  : 'transactions.settleUp.hero_even',
-          )}
-        </Text>
-        <Text
-          variant="title"
-          className={cn(
-            'mt-1',
-            open && netState === 'owed'
-              ? 'text-success'
-              : open && netState === 'owe'
-                ? 'text-destructive'
-                : '',
-          )}
-        >
-          {format(Math.abs(net))}
-        </Text>
-      </View>
+      {empty ? null : (
+        <View className="items-center">
+          <Text variant="caption" tone="muted">
+            {I18n.t(
+              !open
+                ? 'transactions.settleUp.hero_settled'
+                : netState === 'owed'
+                  ? 'transactions.settleUp.hero_owed'
+                  : netState === 'owe'
+                    ? 'transactions.settleUp.you_owe_tag'
+                    : 'transactions.settleUp.hero_even',
+            )}
+          </Text>
+          <Text
+            variant="title"
+            className={cn(
+              'mt-1',
+              open && netState === 'owed'
+                ? 'text-success'
+                : open && netState === 'owe'
+                  ? 'text-destructive'
+                  : '',
+            )}
+          >
+            {format(Math.abs(net))}
+          </Text>
+        </View>
+      )}
 
       {rows.length > 0 ? (
         <View className="overflow-hidden rounded-2xl border border-border/30 bg-card">
@@ -292,8 +310,8 @@ export function AlbumBalances({
           </Text>
           {rows.map(debtRow)}
         </View>
-      ) : summary.people.length === 0 && !shared?.spending.size ? (
-        <Text variant="body" tone="muted" className="px-4 text-center">
+      ) : empty ? (
+        <Text variant="body" tone="muted" className="px-4 pt-3 text-center">
           {I18n.t('albums.balances.empty_message')}
         </Text>
       ) : null}

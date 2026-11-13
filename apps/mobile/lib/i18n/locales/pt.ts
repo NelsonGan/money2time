@@ -882,6 +882,7 @@ const pt = {
       you_pay_person: 'Você paga {{name}}',
       even_caption: 'Vocês estão quites, nada a pagar',
       you_paid_on: 'Você pagou em {{date}}',
+      person_paid_on: '{{name}} pagou em {{date}}',
       undo_payment_title: 'Desfazer este pagamento?',
       undo_payment_message:
         'Você voltará a dever {{amount}}, e o valor sai da conta de onde foi pago.',
@@ -2931,6 +2932,7 @@ const pt = {
       'Mantenha a foto ao digitalizar um recibo para registrar ou dividir uma conta.',
   },
   albums: {
+    untitled: 'Álbum',
     location: {
       label: 'Localização',
       add: 'Adicionar localização',
