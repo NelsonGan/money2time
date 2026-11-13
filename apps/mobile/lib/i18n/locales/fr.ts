@@ -3057,6 +3057,7 @@ const fr = {
       has_payments:
         'Cette note a des paiements. Annulez-les d’abord pour la modifier ou la supprimer.',
       not_your_payment: 'Seule la personne qui paie peut enregistrer ou annuler un paiement.',
+      not_your_undo: 'Seule la personne qui a enregistré ce paiement peut l’annuler.',
       badge_not_payer: 'Verrouillé',
       badge_has_payments: 'Paiements enregistrés',
       they_record: '{{name}} l’enregistre en vous payant.',

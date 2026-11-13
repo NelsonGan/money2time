@@ -3059,6 +3059,7 @@ const fil = {
       not_payer: 'Ang nagbayad lang ang puwedeng magbago o magbura ng bill na ito.',
       has_payments: 'May mga bayad sa bill na ito. I-undo muna ang mga ito para mabago o mabura.',
       not_your_payment: 'Ang nagbabayad lang ang puwedeng mag-record o mag-undo ng bayad.',
+      not_your_undo: 'Ang nag-record lang ng bayad na ito ang puwedeng mag-undo nito.',
       badge_not_payer: 'Naka-lock',
       badge_has_payments: 'May mga bayad',
       they_record: 'Si {{name}} ang magre-record kapag binayaran ka niya.',

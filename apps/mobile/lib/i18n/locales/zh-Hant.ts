@@ -2893,6 +2893,7 @@ const zhHant = {
       not_payer: '只有付款的人可以修改或刪除這筆帳單。',
       has_payments: '這筆帳單已有付款。請先撤銷付款才能修改或刪除。',
       not_your_payment: '只有付款的人可以記錄或撤銷付款。',
+      not_your_undo: '只有記錄這筆付款的人才能撤銷。',
       badge_not_payer: '已鎖定',
       badge_has_payments: '已有付款',
       they_record: '{{name}} 付款給你時會自行記錄。',

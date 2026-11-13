@@ -3027,6 +3027,7 @@ const pl = {
       not_payer: 'Tylko osoba, która zapłaciła, może zmienić lub usunąć ten rachunek.',
       has_payments: 'Ten rachunek ma płatności. Najpierw je cofnij, aby go zmienić lub usunąć.',
       not_your_payment: 'Tylko osoba płacąca może zapisać lub cofnąć płatność.',
+      not_your_undo: 'Tylko osoba, która zapisała tę płatność, może ją cofnąć.',
       badge_not_payer: 'Zablokowane',
       badge_has_payments: 'Ma płatności',
       they_record: '{{name}} zapisze to przy płatności dla Ciebie.',

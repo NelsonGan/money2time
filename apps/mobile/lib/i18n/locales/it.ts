@@ -3031,6 +3031,7 @@ const it = {
       has_payments:
         'Su questo conto ci sono pagamenti. Annullali prima per modificarlo o eliminarlo.',
       not_your_payment: 'Solo chi paga può registrare o annullare un pagamento.',
+      not_your_undo: 'Solo chi ha registrato questo pagamento può annullarlo.',
       badge_not_payer: 'Bloccato',
       badge_has_payments: 'Ci sono pagamenti',
       they_record: '{{name}} lo registra quando ti paga.',

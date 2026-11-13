@@ -5125,6 +5125,8 @@ export function TransactionEditorScreen({
                           ? `${albumNote.albumName}, ${albumNote.status}`
                           : albumNote.albumName
                       }
+                      // The badge's own tap says why; a screen reader hears it here.
+                      accessibilityHint={albumNote.status ? lockedReason : undefined}
                       className="flex-row items-center gap-2.5 px-4 py-3 active:opacity-70"
                     >
                       <Images size={16} color={themeColors.textMuted} />

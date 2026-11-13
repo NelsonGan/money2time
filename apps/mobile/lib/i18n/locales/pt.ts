@@ -3035,6 +3035,7 @@ const pt = {
       not_payer: 'Só quem pagou pode alterar ou excluir esta conta.',
       has_payments: 'Esta conta tem pagamentos. Desfaça-os primeiro para alterá-la ou excluí-la.',
       not_your_payment: 'Só quem paga pode registrar ou desfazer um pagamento.',
+      not_your_undo: 'Só quem registrou este pagamento pode desfazê-lo.',
       badge_not_payer: 'Bloqueado',
       badge_has_payments: 'Tem pagamentos',
       they_record: '{{name}} registra quando te pagar.',

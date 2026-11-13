@@ -3051,6 +3051,7 @@ const nl = {
       has_payments:
         'Op deze rekening staan betalingen. Maak ze eerst ongedaan om hem te wijzigen of te verwijderen.',
       not_your_payment: 'Alleen wie betaalt kan een betaling vastleggen of ongedaan maken.',
+      not_your_undo: 'Alleen wie deze betaling heeft vastgelegd, kan hem ongedaan maken.',
       badge_not_payer: 'Vergrendeld',
       badge_has_payments: 'Heeft betalingen',
       they_record: '{{name}} legt het vast als die jou betaalt.',

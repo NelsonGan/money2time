@@ -3061,6 +3061,7 @@ const de = {
       has_payments:
         'Auf dieser Rechnung sind Zahlungen. Mach sie zuerst rückgängig, um sie zu ändern oder zu löschen.',
       not_your_payment: 'Nur wer zahlt, kann eine Zahlung erfassen oder rückgängig machen.',
+      not_your_undo: 'Nur wer diese Zahlung erfasst hat, kann sie rückgängig machen.',
       badge_not_payer: 'Gesperrt',
       badge_has_payments: 'Hat Zahlungen',
       they_record: '{{name}} erfasst es, wenn diese Person dich bezahlt.',

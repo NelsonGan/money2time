@@ -3031,6 +3031,7 @@ const id = {
       has_payments:
         'Tagihan ini sudah ada pembayaran. Batalkan dulu untuk mengubah atau menghapusnya.',
       not_your_payment: 'Hanya orang yang membayar yang bisa mencatat atau membatalkan pembayaran.',
+      not_your_undo: 'Hanya orang yang mencatat pembayaran ini yang bisa membatalkannya.',
       badge_not_payer: 'Terkunci',
       badge_has_payments: 'Ada pembayaran',
       they_record: '{{name}} mencatatnya saat membayar Anda.',

@@ -72,7 +72,9 @@ export function canRecordPayment(
 /**
  * A simplified payment may close bills through other members. Only its
  * recorder undoes that whole act, not a member on an intermediate bill.
- * Old payments without an author retain the original payer rule.
+ * Old payments without an author, and payments whose recorder has since
+ * left (so nobody could undo them and their bills stayed locked), follow the
+ * payer rule: the payer, or the person paid once the payer has left.
  */
 export function canUndoPayment(
   members: readonly Member[],
@@ -81,6 +83,9 @@ export function canUndoPayment(
 ): boolean {
   const self = members.find((member) => member.id === selfId);
   if (!self?.userId) return false;
-  if (payment.createdBy) return payment.createdBy === self.userId;
+  if (payment.createdBy === self.userId) return true;
+  const recorderStayed =
+    !!payment.createdBy && members.some((member) => member.userId === payment.createdBy);
+  if (recorderStayed) return false;
   return canRecordPayment(members, selfId, payment.fromMember, payment.toMember);
 }

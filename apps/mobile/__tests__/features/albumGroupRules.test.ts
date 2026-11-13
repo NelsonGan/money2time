@@ -33,6 +33,19 @@ describe('shared album rules', () => {
     expect(canUndoPayment(members, 'me', { ...payment, createdBy: null })).toBe(false);
   });
 
+  it('falls back to the payer rule once the recorder has left, so no bill stays locked', () => {
+    // Aisha recorded her payment to me, then left: her member row has no account.
+    const members = [
+      { id: 'me', userId: 'u-me' },
+      { id: 'aisha', userId: null },
+    ];
+    const payment = { fromMember: 'aisha', toMember: 'me', createdBy: 'u-aisha' };
+    expect(canUndoPayment(members, 'me', payment)).toBe(true);
+    // A recorder who is still in the album keeps it to themselves.
+    const stayed = [...members, { id: 'ben', userId: 'u-aisha' }];
+    expect(canUndoPayment(stayed, 'me', payment)).toBe(false);
+  });
+
   it('gives a bill to its payer alone', () => {
     expect(ownsBill('me', { paidBy: 'me' })).toBe(true);
     expect(ownsBill('me', { paidBy: 'aisha' })).toBe(false);

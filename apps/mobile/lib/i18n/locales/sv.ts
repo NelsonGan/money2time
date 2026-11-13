@@ -3014,6 +3014,7 @@ const sv = {
       not_payer: 'Bara den som betalade kan ändra eller radera notan.',
       has_payments: 'Notan har betalningar. Ångra dem först för att ändra eller radera den.',
       not_your_payment: 'Bara den som betalar kan registrera eller ångra en betalning.',
+      not_your_undo: 'Bara den som registrerade betalningen kan ångra den.',
       badge_not_payer: 'Låst',
       badge_has_payments: 'Har betalningar',
       they_record: '{{name}} registrerar det när de betalar dig.',

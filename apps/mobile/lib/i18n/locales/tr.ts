@@ -3021,6 +3021,7 @@ const tr = {
       not_payer: 'Bu hesabı yalnızca ödeyen kişi değiştirebilir veya silebilir.',
       has_payments: 'Bu hesapta ödemeler var. Değiştirmek veya silmek için önce bunları geri alın.',
       not_your_payment: 'Bir ödemeyi yalnızca ödeyen kişi kaydedebilir veya geri alabilir.',
+      not_your_undo: 'Bu ödemeyi yalnızca kaydeden kişi geri alabilir.',
       badge_not_payer: 'Kilitli',
       badge_has_payments: 'Ödemeler var',
       they_record: '{{name}} size ödediğinde kaydeder.',

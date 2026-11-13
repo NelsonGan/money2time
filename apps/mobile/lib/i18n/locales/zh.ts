@@ -2893,6 +2893,7 @@ const zh = {
       not_payer: '只有付款的人可以修改或删除这笔账单。',
       has_payments: '这笔账单已有付款。请先撤销付款才能修改或删除。',
       not_your_payment: '只有付款的人可以记录或撤销付款。',
+      not_your_undo: '只有记录这笔付款的人才能撤销。',
       badge_not_payer: '已锁定',
       badge_has_payments: '已有付款',
       they_record: '{{name}} 付款给你时会自行记录。',

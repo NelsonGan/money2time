@@ -4023,6 +4023,27 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return self ? { members, selfId: self.id } : null;
   }, []);
 
+  /**
+   * Whether the user may undo a group's payment (README: Who can change
+   * what). `gone`: its settlement is already gone (undone on another phone),
+   * so there is nothing to refuse and the projection only has to catch up.
+   */
+  const groupPaymentUndo = useCallback(
+    (
+      groupId: string,
+      settlementId: string,
+      settlements = albumGroupsRepository.listSettlements(groupId),
+    ): 'allowed' | 'gone' | 'refused' => {
+      const settlement = settlements.find((item) => item.id === settlementId);
+      if (!settlement) return 'gone';
+      const rules = groupRuleState(groupId);
+      return rules && canUndoPayment(rules.members, rules.selfId, settlement)
+        ? 'allowed'
+        : 'refused';
+    },
+    [groupRuleState],
+  );
+
   /** Why the user cannot change a group's bill, or null when they can. */
   const albumBillBlock = useCallback(
     (groupId: string, billId: string): 'not_payer' | 'has_payments' | null => {
@@ -4465,17 +4486,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const env = groupEnvFor(bill.groupId);
       if (!env || !settlementId) return;
       // Only its recorder undoes a payment, including a simplified batch.
-      const rules = groupRuleState(bill.groupId);
-      const settlement = albumGroupsRepository
-        .listSettlements(bill.groupId)
-        .find((item) => item.id === settlementId);
-      if (!rules || !settlement || !canUndoPayment(rules.members, rules.selfId, settlement)) {
-        Alert.alert(I18n.t('albums.rules.not_your_payment'));
+      const undo = groupPaymentUndo(bill.groupId, settlementId);
+      if (undo === 'refused') {
+        Alert.alert(I18n.t('albums.rules.not_your_undo'));
         return;
       }
       runDeferredWrite(() => {
         try {
-          albumGroupsRepository.softDeleteSettlement(bill.groupId, settlementId);
+          // Already gone: only the projection catches up. Never a delete by
+          // its batch, which could take legs someone else recorded.
+          if (undo === 'allowed') {
+            albumGroupsRepository.softDeleteSettlement(bill.groupId, settlementId);
+          }
           projectGroup(bill.groupId, env);
           void trackEvent(AnalyticsEvents.ALBUM_PAYMENT_UNDONE);
         } catch (error) {
@@ -4484,7 +4506,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         afterGroupWrite();
       });
     },
-    [afterGroupWrite, groupEnvFor, groupRuleState],
+    [afterGroupWrite, groupEnvFor, groupPaymentUndo],
   );
 
   /**
@@ -4517,7 +4539,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
       // A bill the user cannot delete, or a payment they cannot undo, stays
       // as it is (and so does their entry), and they are told why.
-      let blocked: 'not_payer' | 'has_payments' | 'not_your_payment' | null = null;
+      let blocked: 'not_payer' | 'has_payments' | 'not_your_undo' | null = null;
+      // Each group's payments, read once for the whole delete.
+      const settlementsOf = new Map<
+        string,
+        ReturnType<typeof albumGroupsRepository.listSettlements>
+      >();
       for (const id of ids) {
         const groupId = bills.get(id);
         if (groupId) {
@@ -4538,16 +4565,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
         const payment = payments.get(id);
         if (payment) {
-          const rules = groupRuleState(payment.groupId);
-          const settlement = albumGroupsRepository
-            .listSettlements(payment.groupId)
-            .find((item) => item.id === payment.settlementId);
-          if (!rules || !settlement || !canUndoPayment(rules.members, rules.selfId, settlement)) {
-            blocked = 'not_your_payment';
+          let settlements = settlementsOf.get(payment.groupId);
+          if (!settlements) {
+            settlements = albumGroupsRepository.listSettlements(payment.groupId);
+            settlementsOf.set(payment.groupId, settlements);
+          }
+          const undo = groupPaymentUndo(payment.groupId, payment.settlementId, settlements);
+          if (undo === 'refused') {
+            blocked = 'not_your_undo';
             taken.add(id);
             continue;
           }
-          albumGroupsRepository.softDeleteSettlement(payment.groupId, payment.settlementId);
+          // Already gone: the projection below removes its entry.
+          if (undo === 'allowed') {
+            albumGroupsRepository.softDeleteSettlement(payment.groupId, payment.settlementId);
+          }
           touched.add(payment.groupId);
           taken.add(id);
         }
@@ -4568,7 +4600,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       afterGroupWrite();
       return taken;
     },
-    [afterGroupWrite, albumBillBlock, groupEnvFor, groupRuleState, settleEvenGroup],
+    [afterGroupWrite, albumBillBlock, groupEnvFor, groupPaymentUndo, settleEvenGroup],
   );
 
   const deleteTransactionsBulk = useCallback(

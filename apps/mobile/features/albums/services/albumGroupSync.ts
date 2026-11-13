@@ -627,13 +627,24 @@ function projectExpense(
         rateTable: env.rateTable,
       });
       // An existing payment froze its exchange rate when money moved. Syncs,
-      // renames and fresh market rates must not reprice that transfer.
+      // renames and fresh market rates must not reprice that transfer. Not
+      // when the receiving side changed currency (one side has a converted
+      // amount and the other none), nor a 1:1 figure written while the rate
+      // was missing (convert falls back to the same number) that a known
+      // rate now prices otherwise.
+      const unpricedBefore =
+        before?.to_amount != null &&
+        transfer.toAmount != null &&
+        sameMoney(before.to_amount, before.amount) &&
+        !sameMoney(transfer.toAmount, transfer.amount);
       if (
         before?.type === 'transfer' &&
         before.currency === transfer.currency &&
         before.from_account_id === tx.account_id &&
         before.to_account_id === entry.accountId &&
-        before.amount > 0
+        before.amount > 0 &&
+        (before.to_amount == null) === (transfer.toAmount == null) &&
+        !unpricedBefore
       ) {
         transfer.toAmount =
           before.to_amount == null

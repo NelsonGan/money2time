@@ -2975,6 +2975,7 @@ const ko = {
       not_payer: '이 청구는 결제한 사람만 바꾸거나 삭제할 수 있어요.',
       has_payments: '이 청구에는 결제 기록이 있어요. 바꾸거나 삭제하려면 먼저 취소하세요.',
       not_your_payment: '결제는 내는 사람만 기록하거나 취소할 수 있어요.',
+      not_your_undo: '이 결제는 기록한 사람만 취소할 수 있어요.',
       badge_not_payer: '잠김',
       badge_has_payments: '결제 기록 있음',
       they_record: '{{name}}님이 갚을 때 기록해요.',

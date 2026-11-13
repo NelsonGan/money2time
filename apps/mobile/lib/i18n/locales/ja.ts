@@ -2995,6 +2995,7 @@ const ja = {
       not_payer: 'この会計を変更・削除できるのは支払った人だけです。',
       has_payments: 'この会計には支払いがあります。変更・削除するには先に取り消してください。',
       not_your_payment: '支払いを記録・取り消しできるのは支払う人だけです。',
+      not_your_undo: 'この支払いを取り消せるのは、記録した人だけです。',
       badge_not_payer: 'ロック中',
       badge_has_payments: '支払いあり',
       they_record: '{{name}}さんが支払うときに記録します。',

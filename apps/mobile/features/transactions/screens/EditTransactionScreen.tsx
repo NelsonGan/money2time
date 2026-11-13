@@ -213,9 +213,11 @@ function TransactionEditor({
   // An expense saved already (often by a receipt scan or a notification) can
   // still be paid in instalments: the editor offers the same Instalments chip
   // as the add form, and saving turns the expense into the plan's payment 1.
-  // Never a shared album's bill, nor the expense a payment on one made: a
-  // plan's payments are the user's own, and that expense follows its payment.
-  const canConvertToPlan = canConvertToInstalmentPlan(transaction) && !isGroupPayment;
+  // Nothing in a shared album becomes a plan, as nothing added there starts
+  // one: not its bills, an entry of the user's own in it, or the expense a
+  // payment on a bill made (which follows its payment).
+  const canConvertToPlan =
+    canConvertToInstalmentPlan(transaction) && !albumTarget && !isGroupPayment;
   const instalmentOptions = useMemo(
     () =>
       canConvertToPlan

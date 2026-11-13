@@ -3014,6 +3014,7 @@ const da = {
       has_payments:
         'Der er betalinger på regningen. Fortryd dem først for at ændre eller slette den.',
       not_your_payment: 'Kun den, der betaler, kan registrere eller fortryde en betaling.',
+      not_your_undo: 'Kun den, der registrerede betalingen, kan fortryde den.',
       badge_not_payer: 'Låst',
       badge_has_payments: 'Har betalinger',
       they_record: '{{name}} registrerer det, når de betaler dig.',

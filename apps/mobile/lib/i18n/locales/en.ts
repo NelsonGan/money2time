@@ -3006,6 +3006,7 @@ const en = {
       not_payer: 'Only the person who paid can change or delete this bill.',
       has_payments: 'This bill has payments on it. Undo them first to change or delete it.',
       not_your_payment: 'Only the person paying can record or undo a payment.',
+      not_your_undo: 'Only the person who recorded this payment can undo it.',
       badge_not_payer: 'Locked',
       badge_has_payments: 'Has payments',
       they_record: '{{name}} records it when they pay you.',

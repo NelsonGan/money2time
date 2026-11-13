@@ -3016,6 +3016,7 @@ const nb = {
       not_payer: 'Bare den som betalte kan endre eller slette regningen.',
       has_payments: 'Det er betalinger på regningen. Angre dem først for å endre eller slette den.',
       not_your_payment: 'Bare den som betaler kan registrere eller angre en betaling.',
+      not_your_undo: 'Bare den som registrerte betalingen, kan angre den.',
       badge_not_payer: 'Låst',
       badge_has_payments: 'Har betalinger',
       they_record: '{{name}} registrerer det når de betaler deg.',

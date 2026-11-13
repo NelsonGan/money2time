@@ -3033,6 +3033,7 @@ const es = {
       not_payer: 'Solo quien pagó puede cambiar o eliminar esta cuenta.',
       has_payments: 'Esta cuenta tiene pagos. Deshazlos primero para cambiarla o eliminarla.',
       not_your_payment: 'Solo quien paga puede registrar o deshacer un pago.',
+      not_your_undo: 'Solo quien registró este pago puede deshacerlo.',
       badge_not_payer: 'Bloqueado',
       badge_has_payments: 'Tiene pagos',
       they_record: '{{name}} lo registra cuando te pague.',

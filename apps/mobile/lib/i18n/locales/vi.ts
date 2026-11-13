@@ -2995,6 +2995,7 @@ const vi = {
       not_payer: 'Chỉ người đã trả mới có thể sửa hoặc xóa hóa đơn này.',
       has_payments: 'Hóa đơn này đã có thanh toán. Hãy hoàn tác trước khi sửa hoặc xóa.',
       not_your_payment: 'Chỉ người trả mới có thể ghi hoặc hoàn tác một khoản thanh toán.',
+      not_your_undo: 'Chỉ người đã ghi khoản thanh toán này mới hoàn tác được.',
       badge_not_payer: 'Đã khóa',
       badge_has_payments: 'Đã có thanh toán',
       they_record: '{{name}} sẽ ghi lại khi trả bạn.',

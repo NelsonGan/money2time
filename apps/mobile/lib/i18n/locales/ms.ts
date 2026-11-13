@@ -3033,6 +3033,7 @@ const ms = {
       not_payer: 'Hanya orang yang membayar boleh mengubah atau memadam bil ini.',
       has_payments: 'Bil ini ada bayaran. Batalkan dahulu untuk mengubah atau memadamnya.',
       not_your_payment: 'Hanya orang yang membayar boleh merekod atau membatalkan bayaran.',
+      not_your_undo: 'Hanya orang yang merekodkan bayaran ini boleh membatalkannya.',
       badge_not_payer: 'Dikunci',
       badge_has_payments: 'Ada bayaran',
       they_record: '{{name}} merekodnya apabila membayar anda.',
