@@ -2265,7 +2265,8 @@ migrations `090`, `091` and `092`.
 - **The cover is everyone's.** A shared album's cover photo is the group's:
   whoever changes it (Change cover, Edit) changes it on every phone, and
   someone who joins gets it. The image goes up to the group's image space
-  like a shared ledger's receipts. An album shared before covers were the
+  like a shared ledger's receipts; another phone keeps showing the cover it
+  had until the new image has downloaded. An album shared before covers were the
   group's gets its owner's cover the first time the owner's phone syncs it.
   The album's name stays each person's own.
 - **Simplify group debts.** A switch, off to start with, that anyone in the

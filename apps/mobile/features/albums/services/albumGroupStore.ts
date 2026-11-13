@@ -9,6 +9,7 @@ import { getSQLite } from '~/lib/db/client';
 import { DEFAULT_LEDGER_ID } from '~/lib/db/ledgerScope';
 import { I18n } from '~/lib/i18n';
 import { albumGroupsRepository } from '~/lib/repositories/albumGroupsRepository';
+import { getAlbumCoverUri } from '~/services/userAssets';
 import type { AlbumExpense, AlbumMember, AlbumSettlement } from '~/types';
 import { nowIso } from '~/utils/id';
 
@@ -196,7 +197,8 @@ export function beginAlbumGroup(albumId: string, self: { userId: string; name: s
  * A shared album's cover is the group's, the same on every phone: whoever
  * changes it changes it for everyone (`updateAlbum` writes the group's), and
  * each phone takes the group's cover onto its own album here, once its image
- * has come down with the group's rows. A group nobody has set a cover in yet
+ * has come down with the group's rows: until then the album keeps the cover
+ * it shows, and a later sync takes it. A group nobody has set a cover in yet
  * (shared before covers were the group's) gets the owner's. Returns whether
  * the album changed.
  */
@@ -211,6 +213,7 @@ export function syncAlbumCover(groupId: string, role: 'owner' | 'member'): boole
     return false;
   }
   if (cover === (album.cover_photo_uri ?? null)) return false;
+  if (cover !== null && !getAlbumCoverUri(cover)) return false;
   getSQLite().runSync('UPDATE albums SET cover_photo_uri = ?, updated_at = ? WHERE id = ?', [
     cover,
     nowIso(),

@@ -41,7 +41,12 @@ jest.mock('drizzle-orm', () => ({
   ...jest.requireActual('../../node_modules/drizzle-orm/index.cjs'),
   ...jest.requireActual('../../node_modules/drizzle-orm/sqlite-core/index.cjs'),
 }));
-jest.mock('~/services/userAssets', () => ({ getProfileAvatarUri: () => null }));
+const mockCoverFileHere = jest.fn((_path: string | null | undefined) => true);
+jest.mock('~/services/userAssets', () => ({
+  getProfileAvatarUri: () => null,
+  getAlbumCoverUri: (path: string | null | undefined) =>
+    mockCoverFileHere(path) ? `file:///${path}` : null,
+}));
 
 const NOW = '2026-11-12T00:00:00.000Z';
 const GROUP = 'bali';
@@ -797,6 +802,20 @@ describe('the album cover', () => {
     expect(cover()).toBe('album-covers/theirs.jpg');
     // Applied once: nothing changes the second time.
     expect(syncAlbumCover(GROUP, 'member')).toBe(false);
+  });
+
+  it('waits for the photo to come down before showing it', () => {
+    setLocal('album-covers/mine.jpg');
+    albumGroupsRepository.setGroupCover(GROUP, 'album-covers/theirs.jpg');
+    mockCoverFileHere.mockReturnValue(false);
+    try {
+      expect(syncAlbumCover(GROUP, 'member')).toBe(false);
+      expect(cover()).toBe('album-covers/mine.jpg');
+    } finally {
+      mockCoverFileHere.mockReturnValue(true);
+    }
+    expect(syncAlbumCover(GROUP, 'member')).toBe(true);
+    expect(cover()).toBe('album-covers/theirs.jpg');
   });
 
   it('removed by someone, it goes on every phone', () => {
