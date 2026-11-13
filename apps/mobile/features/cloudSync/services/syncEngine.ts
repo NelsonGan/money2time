@@ -26,6 +26,7 @@ import { Directory, File, Paths } from 'expo-file-system';
 
 import { getSQLite } from '~/lib/db/client';
 import { DEFAULT_LEDGER_ID } from '~/lib/db/ledgerScope';
+import { reportError } from '~/services/errorReporting';
 import { collectReferencedAssetPaths } from '~/services/userAssetGc';
 import { assetRelativePathFromRef, invalidateCustomUriCache } from '~/services/userAssets';
 import { newId } from '~/utils/id';
@@ -738,24 +739,48 @@ export class SyncEngine {
    * copy when the replica is empty, so one kept from an earlier session (an
    * expired sign-in, an app closed mid-link) must be pulled before any
    * decision is made from it.
-   *
-   * Turso's engine records how far into the WAL its last pull reached; a kept
-   * replica whose WAL no longer holds those frames fails every pull. Before a
-   * link the replica is only a copy of the cloud, so it is deleted and
-   * downloaded again, as a second try after a failed link would.
    */
   pullLatest(): Promise<void> {
     return this.exclusive(async () => {
-      try {
-        await this.db().pull();
-      } catch (error) {
-        if (!isStuckReplicaError(error)) throw error;
-        this.close();
-        deleteReplicaFiles(this.config.userId, this.config.channel);
-        await this.open();
-        await this.db().pull();
-      }
+      await this.pullOrRebuild(true);
     });
+  }
+
+  /**
+   * Pulls. Turso's engine records how far into the WAL its last pull reached;
+   * a replica whose WAL no longer holds those frames fails every pull
+   * (`isStuckReplicaError`). Such a replica is deleted and downloaded again
+   * when it holds nothing the cloud lacks: always before a link (it is only a
+   * copy of the cloud then), and in a sync when nothing waits to be pushed.
+   * Returns whether the pull may have brought changes.
+   */
+  private async pullOrRebuild(beforeLink = false): Promise<boolean> {
+    try {
+      return await this.db().pull();
+    } catch (error) {
+      if (!isStuckReplicaError(error)) throw error;
+      if (!beforeLink) {
+        const replicaWrites = await this.db()
+          .stats()
+          .then(
+            (stats) => stats.cdcOperations,
+            () => 1,
+          );
+        if (hasUnpushedChanges(this.channel) || replicaWrites > 0) throw error;
+      }
+      await this.rebuildReplica(error);
+      return true;
+    }
+  }
+
+  /** Replaces a stuck replica with a fresh download of the cloud copy. */
+  private async rebuildReplica(cause: unknown): Promise<void> {
+    // Recovered, but reported, so the rate of the engine fault stays visible.
+    reportError(cause, { scope: 'cloud_sync', stage: 'replica_rebuilt' });
+    this.close();
+    deleteReplicaFiles(this.config.userId, this.config.channel);
+    // Opening an empty replica downloads the latest cloud copy.
+    await this.open();
   }
 
   /**
@@ -1003,7 +1028,6 @@ export class SyncEngine {
   }
 
   private async runSync(): Promise<SyncOutcome> {
-    const replica = this.db();
     enableCapture();
     let appliedRows = 0;
     this.applyFailure = null;
@@ -1017,7 +1041,7 @@ export class SyncEngine {
       catchUpSyncedShape();
       await this.detachSharedLedgers();
     } else if (attaching) {
-      await replica.pull();
+      await this.pullOrRebuild();
       appliedRows += await this.applyRemoteChanges({ attaching: true });
       enqueueLedgerRows(this.config.ledgerId ?? '', this.channel);
     }
@@ -1025,7 +1049,7 @@ export class SyncEngine {
     // that this phone changed meanwhile (`deletedElsewhere`). It is the only
     // pull: a change pushed by another phone after it comes with that phone's
     // live nudge, or the next scheduled sync.
-    const pulled = !attaching && (await replica.pull());
+    const pulled = !attaching && (await this.pullOrRebuild());
     const droppedRows =
       this.isPersonal && getState(REPLACE_STATE_KEY) === '1'
         ? await this.dropCloudRowsNotHere()
@@ -1046,6 +1070,8 @@ export class SyncEngine {
     // A push costs two round trips even with nothing to send, so it runs only
     // when the replica holds changes the cloud has not had (any write, also
     // a ledger's detach, counts in the engine's change log).
+    // The replica may have been downloaded again by the pull: read it afresh.
+    const replica = this.db();
     if (pushed || (await replica.stats()).cdcOperations > 0) await replica.push();
     setState(unpushedKey(this.channel), '0');
     if (attaching) setState(attachedKey(this.channel), '1');

@@ -1,4 +1,5 @@
 import { SyncEngine } from '~/features/cloudSync/services/syncEngine';
+import { reportError } from '~/services/errorReporting';
 
 // Turso's sync engine (0.8.3) keeps, beside the replica, how far into the WAL
 // its last pull reached. A replica kept from an earlier session whose WAL no
@@ -12,6 +13,7 @@ const STUCK =
 const REPLICA_DIR = '/data/user/0/app/databases';
 const files = new Set<string>();
 const log: string[] = [];
+let freshOpenError: Error | null = null;
 
 jest.mock('@tursodatabase/sync-react-native', () => {
   class Database {
@@ -25,6 +27,7 @@ jest.mock('@tursodatabase/sync-react-native', () => {
     async connect() {
       const name = this.path.slice(this.path.lastIndexOf('/') + 1);
       log.push(this.stuck ? 'open kept' : 'open fresh');
+      if (!this.stuck && freshOpenError) throw freshOpenError;
       for (const suffix of ['', '-wal', '-info']) files.add(`${name}${suffix}`);
     }
     async exec() {}
@@ -66,6 +69,7 @@ jest.mock('~/services/userAssets', () => ({
   invalidateCustomUriCache: jest.fn(),
 }));
 jest.mock('~/services/userAssetGc', () => ({ collectReferencedAssetPaths: () => new Set() }));
+jest.mock('~/services/errorReporting', () => ({ reportError: jest.fn() }));
 
 function engine(): SyncEngine {
   return new SyncEngine({
@@ -82,6 +86,8 @@ function engine(): SyncEngine {
 beforeEach(() => {
   files.clear();
   log.length = 0;
+  freshOpenError = null;
+  jest.mocked(reportError).mockClear();
 });
 
 describe('pulling before a link', () => {
@@ -111,8 +117,28 @@ describe('pulling before a link', () => {
       deleted,
       deleted,
       deleted,
+      // Opening an empty replica downloads the latest cloud copy: no second pull.
       'open fresh',
-      'pull',
+    ]);
+    // Recovered, but still reported, so the engine fault's rate stays visible.
+    expect(reportError).toHaveBeenCalledWith(expect.objectContaining({ message: STUCK }), {
+      scope: 'cloud_sync',
+      stage: 'replica_rebuilt',
+    });
+  });
+
+  it('gives up after one fresh copy, so a failing download is reported as before', async () => {
+    await engine().open();
+    const sync = engine();
+    await sync.open();
+    freshOpenError = new Error('HTTP response failed (network error)');
+
+    await expect(sync.pullLatest()).rejects.toBe(freshOpenError);
+    // The earlier session's replica, the kept one, then one fresh copy only.
+    expect(log.filter((entry) => entry.startsWith('open'))).toEqual([
+      'open fresh',
+      'open kept',
+      'open fresh',
     ]);
   });
 
