@@ -3009,6 +3009,8 @@ const da = {
       own: 'Dette er et af dine egne album.',
       already: 'Du er allerede med i dette album.',
       main_shared: 'Dit hovedregnskab er delt, så det kan ikke rumme et delt album.',
+      unavailable: 'Delte album er endnu ikke tilgængelige i denne version.',
+      full: 'Dette album er fuldt. Bed ejeren om at gøre plads.',
     },
     bill: {
       delete_shared: 'Regningen er i et delt album. Sletter du den, fjernes den for alle.',

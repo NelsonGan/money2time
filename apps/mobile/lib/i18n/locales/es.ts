@@ -3028,6 +3028,8 @@ const es = {
       already: 'Ya estás en este álbum.',
       main_shared:
         'Tu libro principal está compartido, así que no puede contener un álbum compartido.',
+      unavailable: 'Los álbumes compartidos aún no están disponibles en esta versión.',
+      full: 'Este álbum está lleno. Pide a su propietario que haga sitio.',
     },
     bill: {
       delete_shared:

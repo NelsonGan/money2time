@@ -3024,6 +3024,8 @@ const id = {
       own: 'Ini salah satu albummu sendiri.',
       already: 'Kamu sudah ada di album ini.',
       main_shared: 'Buku utama Anda dibagikan, jadi tidak bisa memuat album bersama.',
+      unavailable: 'Album bersama belum tersedia di versi ini.',
+      full: 'Album ini sudah penuh. Minta pemiliknya untuk memberi ruang.',
     },
     bill: {
       delete_shared:

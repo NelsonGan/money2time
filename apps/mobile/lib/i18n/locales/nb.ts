@@ -3012,6 +3012,8 @@ const nb = {
       own: 'Dette er et av dine egne album.',
       already: 'Du er allerede med i dette albumet.',
       main_shared: 'Hovedregnskapet ditt er delt, så det kan ikke inneholde et delt album.',
+      unavailable: 'Delte album er ikke tilgjengelige i denne versjonen ennå.',
+      full: 'Dette albumet er fullt. Be eieren om å gjøre plass.',
     },
     bill: {
       delete_shared: 'Regningen er i et delt album. Sletter du den, fjernes den for alle.',

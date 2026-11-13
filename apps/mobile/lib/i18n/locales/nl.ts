@@ -3045,6 +3045,8 @@ const nl = {
       own: 'Dit is een van je eigen albums.',
       already: 'Je doet al mee aan dit album.',
       main_shared: 'Je hoofdboek is gedeeld en kan daarom geen gedeeld album bevatten.',
+      unavailable: 'Gedeelde albums zijn nog niet beschikbaar in deze versie.',
+      full: 'Dit album is vol. Vraag de eigenaar om ruimte te maken.',
     },
     bill: {
       delete_shared:

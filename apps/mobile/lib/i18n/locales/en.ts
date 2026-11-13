@@ -3002,6 +3002,8 @@ const en = {
       own: 'This is one of your own albums.',
       already: "You're already in this album.",
       main_shared: "Your main ledger is shared, so it can't hold a shared album.",
+      unavailable: "Shared albums aren't available in this version yet.",
+      full: 'This album is full. Ask its owner to make room.',
     },
     bill: {
       delete_shared: 'This bill is in a shared album. Deleting it removes it for everyone.',

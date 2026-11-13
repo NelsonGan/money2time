@@ -9,6 +9,7 @@ import { getSQLite } from '~/lib/db/client';
 import { DEFAULT_LEDGER_ID } from '~/lib/db/ledgerScope';
 import { I18n } from '~/lib/i18n';
 import { albumGroupsRepository } from '~/lib/repositories/albumGroupsRepository';
+import { getAlbumCoverUri } from '~/services/userAssets';
 import type { AlbumExpense, AlbumMember, AlbumSettlement } from '~/types';
 import { nowIso } from '~/utils/id';
 
@@ -103,12 +104,13 @@ interface AlbumRow {
   ledger_id: string;
   name: string;
   split_with_json: string | null;
+  cover_photo_uri: string | null;
   deleted_at: string | null;
 }
 
 function albumRow(albumId: string): AlbumRow | null {
   return getSQLite().getFirstSync<AlbumRow>(
-    'SELECT id, ledger_id, name, split_with_json, deleted_at FROM albums WHERE id = ?',
+    'SELECT id, ledger_id, name, split_with_json, cover_photo_uri, deleted_at FROM albums WHERE id = ?',
     [albumId],
   );
 }
@@ -176,7 +178,10 @@ export function ensureLocalAlbum(share: { ledgerId: string; name: string | null 
  * join with its link.
  */
 export function beginAlbumGroup(albumId: string, self: { userId: string; name: string }): void {
-  if (!albumRow(albumId)) return;
+  const album = albumRow(albumId);
+  if (!album) return;
+  // Its cover is the group's from the start, so everyone who joins gets it.
+  if (album.cover_photo_uri) albumGroupsRepository.setGroupCover(albumId, album.cover_photo_uri);
   const existing = albumGroupsRepository.listAllMembers(albumId);
   if (!existing.some((member) => member.userId === self.userId && !member.deletedAt)) {
     albumGroupsRepository.createMember(albumId, {
@@ -186,6 +191,35 @@ export function beginAlbumGroup(albumId: string, self: { userId: string; name: s
     });
   }
   notifyAlbumGroups();
+}
+
+/**
+ * A shared album's cover is the group's, the same on every phone: whoever
+ * changes it changes it for everyone (`updateAlbum` writes the group's), and
+ * each phone takes the group's cover onto its own album here, once its image
+ * has come down with the group's rows: until then the album keeps the cover
+ * it shows, and a later sync takes it. A group nobody has set a cover in yet
+ * (shared before covers were the group's) gets the owner's. Returns whether
+ * the album changed.
+ */
+export function syncAlbumCover(groupId: string, role: 'owner' | 'member'): boolean {
+  const album = albumRow(groupId);
+  if (!album || album.deleted_at) return false;
+  const cover = albumGroupsRepository.groupCover(groupId);
+  if (cover === undefined) {
+    if (role === 'owner' && album.cover_photo_uri) {
+      albumGroupsRepository.setGroupCover(groupId, album.cover_photo_uri);
+    }
+    return false;
+  }
+  if (cover === (album.cover_photo_uri ?? null)) return false;
+  if (cover !== null && !getAlbumCoverUri(cover)) return false;
+  getSQLite().runSync('UPDATE albums SET cover_photo_uri = ?, updated_at = ? WHERE id = ?', [
+    cover,
+    nowIso(),
+    groupId,
+  ]);
+  return true;
 }
 
 /**

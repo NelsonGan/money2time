@@ -5,6 +5,7 @@ import {
   isAlbumDeleted,
   mainLedgerTakesSharedAlbums,
   releaseAlbumGroup,
+  syncAlbumCover,
 } from '~/features/albums/services/albumGroupStore';
 import {
   closeEvenGroup,
@@ -40,7 +41,12 @@ jest.mock('drizzle-orm', () => ({
   ...jest.requireActual('../../node_modules/drizzle-orm/index.cjs'),
   ...jest.requireActual('../../node_modules/drizzle-orm/sqlite-core/index.cjs'),
 }));
-jest.mock('~/services/userAssets', () => ({ getProfileAvatarUri: () => null }));
+const mockCoverFileHere = jest.fn((_path: string | null | undefined) => true);
+jest.mock('~/services/userAssets', () => ({
+  getProfileAvatarUri: () => null,
+  getAlbumCoverUri: (path: string | null | undefined) =>
+    mockCoverFileHere(path) ? `file:///${path}` : null,
+}));
 
 const NOW = '2026-11-12T00:00:00.000Z';
 const GROUP = 'bali';
@@ -780,5 +786,75 @@ describe('rows another member wrote are not trusted', () => {
     expect(app.all('SELECT COUNT(*) AS n FROM album_expenses')[0].n).toBe(0);
     expect(app.all('SELECT id FROM ledgers WHERE id = ?', GROUP)).toEqual([{ id: GROUP }]);
     expect(tx('work-1')).toMatchObject({ amount: 12, deleted_at: null });
+  });
+});
+
+describe('the album cover', () => {
+  const cover = () =>
+    app.all('SELECT cover_photo_uri AS c FROM albums WHERE id = ?', GROUP)[0].c as string | null;
+  const setLocal = (path: string | null) =>
+    app.db.runSync('UPDATE albums SET cover_photo_uri = ? WHERE id = ?', [path, GROUP]);
+
+  it('is the group’s: every phone takes the cover someone set', () => {
+    setLocal('album-covers/mine.jpg');
+    albumGroupsRepository.setGroupCover(GROUP, 'album-covers/theirs.jpg');
+    expect(syncAlbumCover(GROUP, 'member')).toBe(true);
+    expect(cover()).toBe('album-covers/theirs.jpg');
+    // Applied once: nothing changes the second time.
+    expect(syncAlbumCover(GROUP, 'member')).toBe(false);
+  });
+
+  it('waits for the photo to come down before showing it', () => {
+    setLocal('album-covers/mine.jpg');
+    albumGroupsRepository.setGroupCover(GROUP, 'album-covers/theirs.jpg');
+    mockCoverFileHere.mockReturnValue(false);
+    try {
+      expect(syncAlbumCover(GROUP, 'member')).toBe(false);
+      expect(cover()).toBe('album-covers/mine.jpg');
+    } finally {
+      mockCoverFileHere.mockReturnValue(true);
+    }
+    expect(syncAlbumCover(GROUP, 'member')).toBe(true);
+    expect(cover()).toBe('album-covers/theirs.jpg');
+  });
+
+  it('removed by someone, it goes on every phone', () => {
+    setLocal('album-covers/mine.jpg');
+    albumGroupsRepository.setGroupCover(GROUP, null);
+    expect(syncAlbumCover(GROUP, 'owner')).toBe(true);
+    expect(cover()).toBeNull();
+  });
+
+  it('a group shared before covers were the group’s takes the owner’s', () => {
+    setLocal('album-covers/mine.jpg');
+    expect(albumGroupsRepository.groupCover(GROUP)).toBeUndefined();
+    // A member never publishes theirs: it would race the owner’s.
+    expect(syncAlbumCover(GROUP, 'member')).toBe(false);
+    expect(albumGroupsRepository.groupCover(GROUP)).toBeUndefined();
+    expect(syncAlbumCover(GROUP, 'owner')).toBe(false);
+    expect(albumGroupsRepository.groupCover(GROUP)).toBe('album-covers/mine.jpg');
+  });
+
+  it('keeps the group’s other settings', () => {
+    albumGroupsRepository.setSimplifyDebts(GROUP, true);
+    albumGroupsRepository.setGroupCover(GROUP, 'album-covers/a.png');
+    albumGroupsRepository.setSimplifyDebts(GROUP, false);
+    expect(albumGroupsRepository.groupCover(GROUP)).toBe('album-covers/a.png');
+    expect(albumGroupsRepository.simplifiesDebts(GROUP)).toBe(false);
+  });
+
+  it('reads anything but a cover path the app makes as unset', () => {
+    for (const bad of ['../settings.db', '/etc/passwd', 'receipts/x.jpg', 'album-covers/a/b.jpg']) {
+      app.db.runSync(
+        `INSERT INTO album_groups (id, ledger_id, simplify_debts, cover_photo_uri, created_at, updated_at)
+           VALUES (?, ?, 0, ?, ?, ?)
+         ON CONFLICT(id) DO UPDATE SET cover_photo_uri = excluded.cover_photo_uri`,
+        [GROUP, GROUP, bad, NOW, NOW],
+      );
+      expect(albumGroupsRepository.groupCover(GROUP)).toBeUndefined();
+      expect(syncAlbumCover(GROUP, 'member')).toBe(false);
+    }
+    albumGroupsRepository.setGroupCover(GROUP, '../escape.jpg');
+    expect(albumGroupsRepository.groupCover(GROUP)).toBeUndefined();
   });
 });

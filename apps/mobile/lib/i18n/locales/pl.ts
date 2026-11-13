@@ -3022,6 +3022,8 @@ const pl = {
       already: 'Jesteś już w tym albumie.',
       main_shared:
         'Twoja główna księga jest udostępniona, więc nie może zawierać udostępnionego albumu.',
+      unavailable: 'Udostępnione albumy nie są jeszcze dostępne w tej wersji.',
+      full: 'Ten album jest pełny. Poproś właściciela o zrobienie miejsca.',
     },
     bill: {
       delete_shared: 'Ten rachunek jest w udostępnionym albumie. Usunięcie usunie go u wszystkich.',

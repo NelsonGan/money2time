@@ -104,7 +104,8 @@ export type RootStackParamList = {
   /** Root-level alias so a pairing link from the system camera can reach it. */
   SettingsWebDashboard: { pair?: string } | undefined;
   /** An invite link to a shared ledger (`money2time://join/<code>`). */
-  JoinLedger: { code: string };
+  /** `kind`: what the invite page said the link joins, shown until the invite is read. */
+  JoinLedger: { code: string; kind?: 'album' };
   SettingsTimeDisplay: undefined;
   AddWageMonth: undefined;
   SettingsQuickEntry: undefined;

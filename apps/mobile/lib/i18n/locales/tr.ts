@@ -3017,6 +3017,8 @@ const tr = {
       own: 'Bu, kendi albümlerinizden biri.',
       already: 'Zaten bu albümdesiniz.',
       main_shared: 'Ana defteriniz paylaşıldığı için paylaşılan bir albüm barındıramaz.',
+      unavailable: 'Paylaşılan albümler bu sürümde henüz kullanılamıyor.',
+      full: 'Bu albüm dolu. Sahibinden yer açmasını iste.',
     },
     bill: {
       delete_shared: 'Bu hesap paylaşılan bir albümde. Silerseniz herkes için kaldırılır.',

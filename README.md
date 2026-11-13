@@ -2076,7 +2076,7 @@ albums are built on shared ledgers' plumbing (above). The app side is
 `services/albumGroupSync.ts`, `screens/AlbumPeopleScreen.tsx`,
 `lib/groupDebts.ts`, `components/AlbumBalances.tsx`,
 `components/SplitWithCard.tsx`, `components/AlbumSharingCard.tsx`) and
-migrations `090` and `091`.
+migrations `090`, `091` and `092`.
 
 **What the user sees**
 
@@ -2138,15 +2138,18 @@ migrations `090` and `091`.
   their Settings name and photo (`useSelfPerson`), "Me" and an initial while
   they set neither. Not offered for an album in a shared ledger.
 - **Joining.** The link opens the Join screen (the one shared ledgers use,
-  titled Shared album). Anyone signed in can join, as many as the album
+  titled Shared album). The album host's invite page hands the app
+  `money2time://join/<code>?kind=album`, so the screen reads as an album from
+  its first frame, before the invite is looked up (and if the lookup fails);
+  the invite itself decides once read. Anyone signed in can join, as many as the album
   holds people (20 besides its owner). The album is added to the user's main
   ledger, which opens with it (someone whose main ledger is shared is told it
   cannot hold one; a link whose album id is already an album of another
   ledger is refused, and a group only ever writes into an album of the main
   ledger), and they are put on its list under their own name as soon as the
   group's people have come down (`syncAlbumGroups`), under an id made from
-  their account, so two phones of theirs write one row. An album deleted
-  here and joined again comes back.
+  their account, so two phones of theirs write one row. Joining opens the
+  album itself. An album deleted here and joined again comes back.
 - **A new bill starts split.** In a shared album a new expense opens split
   evenly between the user and everyone who joined. The user is always its
   payer (Split Bill has no Paid by there), and people come only from the
@@ -2259,14 +2262,21 @@ migrations `090` and `091`.
   by their share of it (`lib/memberShare.ts`, turned into the entry's
   displayed value by its own rate). A category opens the bills that person
   has a share in.
+- **The cover is everyone's.** A shared album's cover photo is the group's:
+  whoever changes it (Change cover, Edit) changes it on every phone, and
+  someone who joins gets it. The image goes up to the group's image space
+  like a shared ledger's receipts; another phone keeps showing the cover it
+  had until the new image has downloaded. An album shared before covers were the
+  group's gets its owner's cover the first time the owner's phone syncs it.
+  The album's name stays each person's own.
 - **Simplify group debts.** A switch, off to start with, that anyone in the
   album can turn on, for everyone. On, Who owes whom shows the same balances
   with as few payments as it can: when Anna owes Bob and Bob owes Charlie,
   Anna owes Charlie. Nobody pays or gets back more in total. A line where the
   user pays then opens a Settle up sheet for that one payment, where a
   smaller amount can be typed to pay part of it.
-- **Leaving and stopping.** A member leaves from the People page, or the
-  owner takes them out of the share. **Their row and their bills stay in the
+- **Leaving and stopping.** A member leaves from the People page (which
+  then closes, back to the album), or the owner takes them out of the share. **Their row and their bills stay in the
   group**, so nobody else's bills or balances change; they read as Left. On
   their own phone the album goes on as one of their own, their entries as
   ordinary split bills (settled on the Balances page); it just no longer
@@ -2301,7 +2311,14 @@ migrations `090` and `091`.
   `album_settlements` (a payment from one member to another for one bill;
   rows are only added, or deleted when the payment is undone) and
   `album_groups` (migration `091`: one row of settings per group, made when
-  one is first changed; `simplify_debts`). The group's id
+  one is first changed; `simplify_debts`, and since migration `092`
+  `cover_photo_uri`: NULL while nobody has set a cover, `''` once someone
+  removed it, else an `album-covers/<id>.<ext>` path, an image column
+  (`ASSET_COLUMNS`) synced on the album's channel. `updateAlbum` writes it
+  for a shared album, and `syncAlbumCover` (from `syncAlbumGroups`, after
+  every sync) puts it on the phone's own album, or, while it is NULL, the
+  owner's phone publishes the cover the album has; any other value reads as
+  unset). The group's id
   is the album's id: the owner's album, and the album each person who joins
   gets, which is made with that same id.
 - **Its own database, through the shared-ledger plumbing.** The four tables
@@ -2434,7 +2451,7 @@ left out of that count everywhere (`countUnpaidSplitBills`). A bill's day and ti
 group, so a bulk edit of either on a group's bill is put back at the next
 sync. Names and photos from Cloud Sync profiles are not used: a person goes by
 the name on their member row, which anyone in the album can change. The
-joined album's own name and cover are each person's own.
+joined album's own name is each person's own; its cover is the group's.
 
 ## Analytics
 

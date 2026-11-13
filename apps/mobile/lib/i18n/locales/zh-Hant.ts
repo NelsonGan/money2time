@@ -2889,6 +2889,8 @@ const zhHant = {
       own: '這是你自己的相簿。',
       already: '你已在此相簿中。',
       main_shared: '你的主帳本已共享，因此無法放入共享相簿。',
+      unavailable: '此版本尚未提供共享相簿。',
+      full: '此相簿已滿。請相簿擁有者騰出位置。',
     },
     bill: {
       delete_shared: '此帳單在共享相簿中。刪除後所有人那裡都會移除。',

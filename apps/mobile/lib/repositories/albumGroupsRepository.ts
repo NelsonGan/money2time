@@ -370,6 +370,55 @@ class AlbumGroupsRepository {
       })
       .run();
   }
+
+  /**
+   * The group's cover photo: a path of the album-cover store, null once
+   * someone removed it, or undefined while nobody has set one. Anyone in the
+   * group writes this row, so a value that is not a cover path the app makes
+   * reads as unset.
+   */
+  groupCover(groupId: string): string | null | undefined {
+    const row = getDb()
+      .select({ cover: albumGroupsTable.coverPhotoUri })
+      .from(albumGroupsTable)
+      .where(
+        and(
+          eq(albumGroupsTable.id, groupId),
+          eq(albumGroupsTable.ledgerId, groupId),
+          isNull(albumGroupsTable.deletedAt),
+        ),
+      )
+      .get();
+    if (row?.cover == null) return undefined;
+    if (row.cover === '') return null;
+    return GROUP_COVER_PATH.test(row.cover) ? row.cover : undefined;
+  }
+
+  /** Sets the group's cover for everyone (`null`: removed). */
+  setGroupCover(groupId: string, cover: string | null): void {
+    if (cover !== null && !GROUP_COVER_PATH.test(cover)) return;
+    const coverPhotoUri = cover ?? '';
+    const now = nowIso();
+    getDb()
+      .insert(albumGroupsTable)
+      .values({
+        id: groupId,
+        ledgerId: groupId,
+        simplifyDebts: false,
+        coverPhotoUri,
+        createdAt: now,
+        updatedAt: now,
+        deletedAt: null,
+      })
+      .onConflictDoUpdate({
+        target: albumGroupsTable.id,
+        set: { coverPhotoUri, updatedAt: now, deletedAt: null },
+      })
+      .run();
+  }
 }
+
+/** The paths `saveAlbumCover` makes: `album-covers/<id>.<ext>`. */
+const GROUP_COVER_PATH = /^album-covers\/[A-Za-z0-9_-]{1,64}\.[A-Za-z0-9]{1,5}$/;
 
 export const albumGroupsRepository = new AlbumGroupsRepository();

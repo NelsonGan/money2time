@@ -48,7 +48,7 @@ import {
   canRecordPayment,
   canUndoPayment,
 } from '~/features/albums/lib/groupRules';
-import { notifyAlbumGroups } from '~/features/albums/services/albumGroupStore';
+import { notifyAlbumGroups, syncAlbumCover } from '~/features/albums/services/albumGroupStore';
 import {
   closeEvenGroup,
   type GroupEnv,
@@ -3061,6 +3061,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       },
     ) => {
       albumsRepository.update(id, updates);
+      // A shared album's cover is everyone's: the group's changes with it.
+      if (updates.coverPhotoUri !== undefined && sharedAlbumFor(id)) {
+        albumGroupsRepository.setGroupCover(id, updates.coverPhotoUri);
+      }
       setAlbums(albumsRepository.list());
       void trackEvent(AnalyticsEvents.ALBUM_UPDATED);
     },
@@ -4086,6 +4090,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const syncAlbumGroups = useCallback((): boolean => {
     let changed = false;
+    let coverChanged = false;
     for (const share of listAlbumShares()) {
       const env = groupEnvFor(share.ledgerId);
       if (!env) continue;
@@ -4098,12 +4103,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           changed = true;
         }
         changed = projectGroup(share.ledgerId, env) || changed;
+        if (syncAlbumCover(share.ledgerId, share.role)) coverChanged = true;
       } catch (error) {
         reportError(error, { scope: 'album_group_project' });
       }
     }
+    if (coverChanged) setAlbums(albumsRepository.list());
     notifyAlbumGroups();
-    return changed;
+    return changed || coverChanged;
   }, [groupEnvFor]);
 
   const publishAlbumGroup = useCallback(

@@ -2649,13 +2649,11 @@ function JoinLedgerRouteScreen({ navigation, route }: RootStackRouteProps<'JoinL
   return (
     <JoinLedgerScreen
       code={route.params.code}
+      kindHint={route.params.kind}
       onClose={() => navigation.goBack()}
       onJoined={() => navigation.goBack()}
-      onJoinedAlbum={(albumId) => {
-        // The album, then its People page on top, where they say who they are.
-        navigation.replace('AlbumDetail', { albumId });
-        navigation.navigate('AlbumPeople', { albumId });
-      }}
+      // The album itself: the joiner is already on its list as themselves.
+      onJoinedAlbum={(albumId) => navigation.replace('AlbumDetail', { albumId })}
     />
   );
 }

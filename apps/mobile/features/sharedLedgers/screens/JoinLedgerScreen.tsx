@@ -44,10 +44,12 @@ import { sharingErrorMessage } from '../lib/sharing';
 
 interface JoinLedgerScreenProps {
   code: string;
+  /** What the invite page said the link joins, until the invite is read. */
+  kindHint?: 'album';
   onClose: () => void;
   /** After joining: the ledger is open, go to the app. */
   onJoined: () => void;
-  /** After joining a shared album: open it, where the user says who they are. */
+  /** After joining a shared album: open it. */
   onJoinedAlbum: (albumId: string) => void;
 }
 
@@ -59,6 +61,7 @@ interface JoinLedgerScreenProps {
  */
 export function JoinLedgerScreen({
   code,
+  kindHint,
   onClose,
   onJoined,
   onJoinedAlbum,
@@ -129,13 +132,20 @@ export function JoinLedgerScreen({
       : null;
   const hereRole = here ? (sharedHere?.role ?? 'owner') : null;
 
-  const isAlbum = preview?.kind === 'album';
+  // The invite page says what its link joins, so the screen reads right from
+  // its first frame; the invite itself decides once it is read.
+  const isAlbum = preview ? preview.kind === 'album' : kindHint === 'album';
   const mainLedgerIsShared = sharedLedgers.some((l) => l.ledgerId === DEFAULT_LEDGER_ID);
   const albumHere = isAlbum && id ? (sharedAlbums.find((a) => a.ledgerId === id) ?? null) : null;
 
   let action: React.ReactNode;
   if (!enabled) {
-    action = <NoticeBanner icon={Info} text={I18n.t('shared_ledgers.join_unavailable')} />;
+    action = (
+      <NoticeBanner
+        icon={Info}
+        text={I18n.t(isAlbum ? 'albums.join.unavailable' : 'shared_ledgers.join_unavailable')}
+      />
+    );
   } else if (!preview) {
     action = null;
   } else if (albumHere) {
@@ -179,7 +189,12 @@ export function JoinLedgerScreen({
   } else if (!preview.active) {
     action = <NoticeBanner icon={PauseCircle} text={I18n.t('shared_ledgers.join_paused')} />;
   } else if (preview.full) {
-    action = <NoticeBanner icon={Users} text={I18n.t('shared_ledgers.join_full')} />;
+    action = (
+      <NoticeBanner
+        icon={Users}
+        text={I18n.t(isAlbum ? 'albums.join.full' : 'shared_ledgers.join_full')}
+      />
+    );
   } else if (!signedIn) {
     // A Pro user signing in here first settles their own data, as on the Cloud Sync screen.
     action = <SignInGate prompt={I18n.t('shared_ledgers.join_sign_in')} />;

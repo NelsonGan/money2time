@@ -154,6 +154,8 @@ export const ASSET_COLUMNS: Readonly<Partial<Record<SyncTable, readonly string[]
   recurring_rules: ['logo_id'],
   settings: ['profile_avatar_uri', 'payment_qr_uri'],
   ledger_profiles: ['avatar_uri'],
+  // A shared album's cover, in the group's image space (migration 092).
+  album_groups: ['cover_photo_uri'],
 };
 
 /**
