@@ -1068,6 +1068,7 @@ const nb = {
         me_label: 'Meg',
         person_placeholder: 'Vennens navn',
         choose_member: 'Velg et medlem',
+        no_members: 'Ingen har blitt med i albumet ennå',
         sum_match: '{{sum}} av {{total}}',
         sum_left: '{{diff}} gjenstår',
         sum_mismatch: '{{diff}} ikke fordelt',

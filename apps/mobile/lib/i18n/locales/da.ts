@@ -1067,6 +1067,7 @@ const da = {
         me_label: 'Mig',
         person_placeholder: 'Vens navn',
         choose_member: 'Vælg et medlem',
+        no_members: 'Ingen har tilsluttet sig albummet endnu',
         sum_match: '{{sum}} af {{total}}',
         sum_left: '{{diff}} tilbage',
         sum_mismatch: '{{diff}} uregistreret',

@@ -1067,6 +1067,7 @@ const vi = {
         me_label: 'Tôi',
         person_placeholder: 'Tên bạn bè',
         choose_member: 'Chọn thành viên',
+        no_members: 'Chưa có ai tham gia album này',
         sum_match: '{{sum}} / {{total}}',
         sum_left: 'Còn {{diff}}',
         sum_mismatch: 'Thiếu {{diff}}',

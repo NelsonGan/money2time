@@ -1079,6 +1079,7 @@ const de = {
         me_label: 'Ich',
         person_placeholder: 'Name des Freundes',
         choose_member: 'Mitglied wählen',
+        no_members: 'Noch niemand ist dem Album beigetreten',
         sum_match: '{{sum}} von {{total}}',
         sum_left: '{{diff}} übrig',
         sum_mismatch: '{{diff}} nicht zugeordnet',

@@ -1066,6 +1066,7 @@ const hi = {
         me_label: 'मैं',
         person_placeholder: 'दोस्त का नाम',
         choose_member: 'सदस्य चुनें',
+        no_members: 'अभी तक इस एल्बम में कोई शामिल नहीं हुआ',
         sum_match: '{{sum}} / {{total}}',
         sum_left: '{{diff}} बचा',
         sum_mismatch: '{{diff}} अनिर्धारित',

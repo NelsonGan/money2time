@@ -1070,6 +1070,7 @@ const es = {
         me_label: 'Yo',
         person_placeholder: 'Nombre del amigo',
         choose_member: 'Elige un miembro',
+        no_members: 'Nadie se ha unido a este álbum todavía',
         sum_match: '{{sum}} de {{total}}',
         sum_left: '{{diff}} restante',
         sum_mismatch: '{{diff}} sin asignar',

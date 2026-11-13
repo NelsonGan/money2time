@@ -1063,6 +1063,7 @@ const ja = {
         me_label: '自分',
         person_placeholder: '友人の名前',
         choose_member: 'メンバーを選択',
+        no_members: 'まだ誰もこのアルバムに参加していません',
         sum_match: '{{sum}} / {{total}}',
         sum_left: '残り {{diff}}',
         sum_mismatch: '差額 {{diff}}',

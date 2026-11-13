@@ -1029,6 +1029,7 @@ const zhHant = {
         me_label: '我',
         person_placeholder: '好友姓名',
         choose_member: '選擇成員',
+        no_members: '還沒有人加入這本相簿',
         sum_match: '{{sum}} / {{total}}',
         sum_left: '還需 {{diff}}',
         sum_mismatch: '差額 {{diff}}',

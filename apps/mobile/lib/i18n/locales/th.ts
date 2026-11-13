@@ -1064,6 +1064,7 @@ const th = {
         me_label: 'ฉัน',
         person_placeholder: 'ชื่อเพื่อน',
         choose_member: 'เลือกสมาชิก',
+        no_members: 'ยังไม่มีใครเข้าร่วมอัลบั้มนี้',
         sum_match: '{{sum}} จาก {{total}}',
         sum_left: 'เหลือ {{diff}}',
         sum_mismatch: 'ขาด {{diff}}',

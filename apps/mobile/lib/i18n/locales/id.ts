@@ -1070,6 +1070,7 @@ const id = {
         me_label: 'Saya',
         person_placeholder: 'Nama teman',
         choose_member: 'Pilih anggota',
+        no_members: 'Belum ada yang bergabung ke album ini',
         sum_match: '{{sum}} dari {{total}}',
         sum_left: '{{diff}} tersisa',
         sum_mismatch: '{{diff}} belum tercakup',

@@ -1072,6 +1072,7 @@ const ms = {
         me_label: 'Saya',
         person_placeholder: 'Nama rakan',
         choose_member: 'Pilih ahli',
+        no_members: 'Belum ada sesiapa menyertai album ini',
         sum_match: '{{sum}} daripada {{total}}',
         sum_left: '{{diff}} lagi',
         sum_mismatch: '{{diff}} tidak diambil kira',

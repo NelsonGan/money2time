@@ -1043,6 +1043,7 @@ const en = {
         me_label: 'Me',
         person_placeholder: "Friend's name",
         choose_member: 'Choose a member',
+        no_members: 'Nobody has joined this album yet',
         sum_match: '{{sum}} of {{total}}',
         sum_left: '{{diff}} left',
         sum_mismatch: '{{diff}} unaccounted',

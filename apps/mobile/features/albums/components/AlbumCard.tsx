@@ -128,10 +128,7 @@ export const AlbumCard = memo(function AlbumCardImpl({
       {/* Top right: the active marker (a small blinking green dot) and, on a
           shared album, the cloud that says it is synced. */}
       {isActive || synced ? (
-        <View
-          className="absolute right-3 top-3 h-8 flex-row items-center gap-1.5"
-          pointerEvents="none"
-        >
+        <View className="absolute right-3 top-3 flex-row items-center gap-1.5" pointerEvents="none">
           {isActive ? <AlbumActiveDot /> : null}
           {synced ? (
             <View

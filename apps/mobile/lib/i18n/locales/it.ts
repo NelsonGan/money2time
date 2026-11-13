@@ -1073,6 +1073,7 @@ const it = {
         me_label: 'Io',
         person_placeholder: 'Nome amico',
         choose_member: 'Scegli un membro',
+        no_members: 'Nessuno si è ancora unito a questo album',
         sum_match: '{{sum}} di {{total}}',
         sum_left: '{{diff}} rimanenti',
         sum_mismatch: '{{diff}} non contabilizzati',

@@ -2174,15 +2174,24 @@ migrations `090` and `091`.
   it (`albumNote`), under the panel with the user's share and who paid.
 - **A shared album only holds bills made in it.** Existing entries are never
   added to one: its page has no Add transactions button and no Duplicate in
-  its selection bar, and the Web Dashboard's picker cannot tick new entries
-  into it (the phone refuses such an edit too). An expense in it is split
-  only through the group, with its members (`EditTransactionScreen` and
-  `AddTransactionScreen` set `groupBill` for any expense in a shared album):
-  an entry of the user's own there (one added with nothing split, or added
-  before this rule) becomes a bill of the group once split, never a local
-  split with typed names that nobody else in the album would get. A save
-  the group cannot take (signed out, someone on it who is not a member)
-  says it failed and keeps nothing.
+  its selection bar, New Album hides Select transactions while Split with
+  friends is on (picked entries go in only if sharing then fails and the
+  album stays the user's own), and the Web Dashboard's picker cannot tick
+  other entries into an album with bills of its group (the phone refuses
+  any add to a shared album, which covers one with no bills yet). As the
+  active album it takes new entries as any album does, except a bill split
+  with typed names (`createTransactionWithSplits` leaves that one out: a
+  receipt Split by Item, say). An expense in it is split only through the
+  group, with its members (`EditTransactionScreen` and
+  `AddTransactionScreen` set `groupBill`): an entry of the user's own there
+  split with nobody becomes a bill of the group once split, never a local
+  split with typed names that nobody else in the album would get. An entry
+  of the user's own already split with others (from before this rule: typed
+  names, a friend who paid, paybacks, items) keeps its own split, since the
+  group could not take those names and its paybacks would count twice. A
+  save the group cannot take (signed out, someone on it who is not a member)
+  says it failed and keeps nothing. Split Bill's member dropdown says when
+  nobody else has joined yet.
 - **Who can change what: nobody moves anyone else's money.** The rules are
   in `lib/groupRules.ts`, applied by the app (`saveAlbumBill`,
   `deleteGroupEntries`, `deleteSplit`, `recordGroupPayment`,

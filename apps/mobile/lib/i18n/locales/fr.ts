@@ -1072,6 +1072,7 @@ const fr = {
         me_label: 'Moi',
         person_placeholder: "Nom de l'ami",
         choose_member: 'Choisir un membre',
+        no_members: "Personne n'a encore rejoint cet album",
         sum_match: '{{sum}} sur {{total}}',
         sum_left: '{{diff}} restant',
         sum_mismatch: '{{diff}} non comptabilisé',

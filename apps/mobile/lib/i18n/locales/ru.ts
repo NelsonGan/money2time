@@ -1069,6 +1069,7 @@ const ru = {
         me_label: 'Я',
         person_placeholder: 'Имя друга',
         choose_member: 'Выберите участника',
+        no_members: 'К альбому ещё никто не присоединился',
         sum_match: '{{sum}} из {{total}}',
         sum_left: 'Осталось {{diff}}',
         sum_mismatch: 'Не учтено {{diff}}',

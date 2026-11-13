@@ -261,7 +261,7 @@ function AlbumTransactionsPicker({
   max?: number;
   /** Entries that cannot be unticked: the album's own shared bills, which are taken out of it in the app. */
   locked?: ReadonlySet<string>;
-  /** A shared album takes no entries made elsewhere: entries can only be taken out. */
+  /** A shared album takes no entries made elsewhere: only its own entries can be ticked (back). */
   noAdding?: boolean;
   children?: ReactNode;
 }) {
@@ -272,6 +272,9 @@ function AlbumTransactionsPicker({
   const f = useFormat();
   const [picked, setPicked] = useState<string[]>(initial);
   const pickedSet = useMemo(() => new Set(picked), [picked]);
+  // Entries that can be ticked: any, or in a shared album only those it already holds.
+  const initialSet = useMemo(() => new Set(initial), [initial]);
+  const canTick = (id: string) => !noAdding || initialSet.has(id);
 
   const expenses = useMemo(() => model.txs.filter((tx) => tx.type === "expense"), [model]);
   const [month, setMonth] = useState(() => {
@@ -282,7 +285,7 @@ function AlbumTransactionsPicker({
   const rows = useMemo(() => expenses.filter((tx) => tx.month === month).sort((a, b) => b.date.getTime() - a.date.getTime()), [expenses, month]);
   const toggle = (id: string) =>
     setPicked((current) =>
-      current.includes(id) ? (locked?.has(id) ? current : current.filter((x) => x !== id)) : noAdding ? current : [...current, id],
+      current.includes(id) ? (locked?.has(id) ? current : current.filter((x) => x !== id)) : canTick(id) ? [...current, id] : current,
     );
   const tooMany = touches(picked) > MAX_EDIT_ROWS;
 
@@ -329,7 +332,7 @@ function AlbumTransactionsPicker({
               const category = tx.categoryId ? model.categories.get(tx.categoryId) : null;
               const label = tx.note || category?.name || tc("uncategorized");
               const on = pickedSet.has(tx.id);
-              const fixed = on ? !!locked?.has(tx.id) : noAdding;
+              const fixed = on ? !!locked?.has(tx.id) : !canTick(tx.id);
               return (
                 <li key={tx.id}>
                   <label

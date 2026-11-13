@@ -36,7 +36,7 @@ export function CreateAlbumScreen({
   onClose,
   onCreated,
 }: CreateAlbumScreenProps) {
-  const { createAlbum, setAlbumSimplifyDebts } = useApp();
+  const { createAlbum, setAlbumSimplifyDebts, addTransactionsToAlbum } = useApp();
   const sync = useCloudSync();
   // Sharing is free and needs only an account: asked for under the switch.
   const signedIn = useSignedIn();
@@ -101,7 +101,9 @@ export function CreateAlbumScreen({
         coverPhotoUri: coverPath,
         startDate,
         endDate,
-        transactionIds: selectedIds,
+        // A shared album only holds bills made in it (README: Album members
+        // and shared albums), so it starts empty.
+        transactionIds: share ? [] : selectedIds,
         location,
       });
     } catch (error) {
@@ -114,7 +116,9 @@ export function CreateAlbumScreen({
         await sync.shareAlbum({ id: albumId, name: name.trim() });
         if (simplify) setAlbumSimplifyDebts(albumId, true);
       } catch (error) {
-        // The album is made, as one of the user's own.
+        // The album is made, as one of the user's own, with the entries
+        // picked for it.
+        addTransactionsToAlbum(albumId, selectedIds);
         Alert.alert(albumSharingMessage(error));
       }
     }
@@ -232,22 +236,26 @@ export function CreateAlbumScreen({
 
             <AlbumLocationField location={location} onChange={setLocation} />
 
-            <Pressable
-              onPress={() => {
-                void triggerHaptic('selection');
-                setPickerOpen(true);
-              }}
-              accessibilityRole="button"
-              className="mt-5 flex-row items-center justify-between rounded-2xl border border-border/40 bg-card px-4 py-3.5"
-            >
-              <View className="flex-1 pr-3">
-                <Text variant="bodyStrong">{I18n.t('albums.select_transactions')}</Text>
-                <Text variant="caption" tone="muted" className="mt-0.5">
-                  {I18n.t('albums.transactions_selected', { count: selectedIds.length })}
-                </Text>
-              </View>
-              <ChevronRight size={20} color={themeColors.textMuted} />
-            </Pressable>
+            {/* Split with friends, it starts empty: a shared album only
+                holds bills made in it. */}
+            {wantsShare ? null : (
+              <Pressable
+                onPress={() => {
+                  void triggerHaptic('selection');
+                  setPickerOpen(true);
+                }}
+                accessibilityRole="button"
+                className="mt-5 flex-row items-center justify-between rounded-2xl border border-border/40 bg-card px-4 py-3.5"
+              >
+                <View className="flex-1 pr-3">
+                  <Text variant="bodyStrong">{I18n.t('albums.select_transactions')}</Text>
+                  <Text variant="caption" tone="muted" className="mt-0.5">
+                    {I18n.t('albums.transactions_selected', { count: selectedIds.length })}
+                  </Text>
+                </View>
+                <ChevronRight size={20} color={themeColors.textMuted} />
+              </Pressable>
+            )}
 
             {canSplit && canShare ? (
               <>

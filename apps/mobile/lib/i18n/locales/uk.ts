@@ -1069,6 +1069,7 @@ const uk = {
         me_label: 'Я',
         person_placeholder: "Ім'я друга",
         choose_member: 'Виберіть учасника',
+        no_members: 'До альбому ще ніхто не приєднався',
         sum_match: '{{sum}} з {{total}}',
         sum_left: '{{diff}} залишилось',
         sum_mismatch: '{{diff}} не враховано',

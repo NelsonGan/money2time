@@ -162,9 +162,14 @@ function MemberDropdown({
   onPick: (member: { id: string; name: string }) => void;
 }) {
   const themeColors = useThemeColors();
-  if (members.length === 0) return null;
   return (
     <View className="mx-4 mb-3 overflow-hidden rounded-2xl border border-border/30 bg-secondary/40">
+      {members.length === 0 ? (
+        // Nobody else has joined the album yet: nobody to split with.
+        <Text variant="caption" tone="muted" className="px-3 py-3">
+          {I18n.t('transactions.editor.split.no_members')}
+        </Text>
+      ) : null}
       {members.map((member, index) => {
         const selected = member.id === selectedId;
         return (
@@ -728,25 +733,17 @@ export function SplitBillModal({
     (member: { id: string; name: string }) => {
       void triggerHaptic('selection');
       setMemberMenu(null);
-      const added: SplitDraft = {
-        id: newId(),
-        personName: member.name,
-        amount: '0',
-        isSelf: false,
-        paybackAccountId: defaultAccountId,
-        albumMemberId: member.id,
-      };
-      // The blank friend row a split opens with (an entry with no split yet)
-      // cannot be typed into here, so the member takes its place: left
-      // beside them, it was a row nobody could name and the bill could not
-      // be saved.
-      const blank = splits.findIndex(
-        (row) => !row.isSelf && !row.albumMemberId && !row.personName.trim(),
-      );
-      const next: SplitDraft[] =
-        blank >= 0
-          ? splits.map((row, index) => (index === blank ? { ...added, id: row.id } : row))
-          : [...splits, added];
+      const next: SplitDraft[] = [
+        ...splits,
+        {
+          id: newId(),
+          personName: member.name,
+          amount: '0',
+          isSelf: false,
+          paybackAccountId: defaultAccountId,
+          albumMemberId: member.id,
+        },
+      ];
       if (itemized) {
         onChange(next);
         return;
@@ -1161,7 +1158,7 @@ export function SplitBillModal({
                   ) : (
                     <TextInput
                       value={row.isSelf ? me.name : row.personName}
-                      editable={!row.isSelf && !disabledRow && !groupMembers}
+                      editable={!row.isSelf && !disabledRow}
                       onFocus={() => handleNameFocus(index)}
                       onBlur={handleNameBlur}
                       onChangeText={(text) => handleNameChange(index, text)}

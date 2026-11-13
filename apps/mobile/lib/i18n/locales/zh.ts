@@ -1029,6 +1029,7 @@ const zh = {
         me_label: '我',
         person_placeholder: '好友姓名',
         choose_member: '选择成员',
+        no_members: '还没有人加入这本相册',
         sum_match: '{{sum}} / {{total}}',
         sum_left: '还需 {{diff}}',
         sum_mismatch: '差额 {{diff}}',

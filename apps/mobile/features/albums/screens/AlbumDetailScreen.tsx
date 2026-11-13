@@ -1018,8 +1018,9 @@ export function AlbumDetailScreen({
                   <Text variant="label" tone="muted" style={styles.splitHeading}>
                     {I18n.t('albums.tab_breakdown')}
                   </Text>
-                  {breakdownBody}
-                  {showBalances ? (
+                  {/* Like the phone's other tabs, after the page has slid in. */}
+                  {contentReady ? breakdownBody : null}
+                  {showBalances && contentReady ? (
                     <>
                       <Text variant="label" tone="muted" style={styles.splitHeading}>
                         {I18n.t('albums.balances.tab')}

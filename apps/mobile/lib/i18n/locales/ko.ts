@@ -1061,6 +1061,7 @@ const ko = {
         me_label: '나',
         person_placeholder: '친구 이름',
         choose_member: '멤버 선택',
+        no_members: '아직 이 앨범에 참여한 사람이 없어요',
         sum_match: '{{sum}} / {{total}}',
         sum_left: '{{diff}} 남음',
         sum_mismatch: '{{diff}} 미배분',

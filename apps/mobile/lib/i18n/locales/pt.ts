@@ -1073,6 +1073,7 @@ const pt = {
         me_label: 'Eu',
         person_placeholder: 'Nome do amigo',
         choose_member: 'Escolha um membro',
+        no_members: 'Ninguém entrou neste álbum ainda',
         sum_match: '{{sum}} de {{total}}',
         sum_left: '{{diff}} restante',
         sum_mismatch: '{{diff}} não alocado',

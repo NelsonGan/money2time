@@ -1068,6 +1068,7 @@ const tr = {
         me_label: 'Ben',
         person_placeholder: 'Arkadaşın adı',
         choose_member: 'Bir üye seç',
+        no_members: 'Bu albüme henüz kimse katılmadı',
         sum_match: '{{sum}} / {{total}}',
         sum_left: '{{diff}} kaldı',
         sum_mismatch: '{{diff}} eksik',

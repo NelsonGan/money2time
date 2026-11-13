@@ -1072,6 +1072,7 @@ const pl = {
         me_label: 'Ja',
         person_placeholder: 'Imię znajomego',
         choose_member: 'Wybierz członka',
+        no_members: 'Nikt jeszcze nie dołączył do tego albumu',
         sum_match: '{{sum}} z {{total}}',
         sum_left: 'Pozostało {{diff}}',
         sum_mismatch: 'Nieprzypisano {{diff}}',

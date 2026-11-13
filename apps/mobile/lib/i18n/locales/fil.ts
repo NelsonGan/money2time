@@ -1073,6 +1073,7 @@ const fil = {
         me_label: 'Ako',
         person_placeholder: 'Pangalan ng kaibigan',
         choose_member: 'Pumili ng miyembro',
+        no_members: 'Wala pang sumali sa album na ito',
         sum_match: '{{sum}} ng {{total}}',
         sum_left: '{{diff}} na natitira',
         sum_mismatch: '{{diff}} na hindi naka-account',

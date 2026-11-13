@@ -1068,6 +1068,7 @@ const sv = {
         me_label: 'Jag',
         person_placeholder: 'Väns namn',
         choose_member: 'Välj en medlem',
+        no_members: 'Ingen har gått med i albumet än',
         sum_match: '{{sum}} av {{total}}',
         sum_left: '{{diff}} kvar',
         sum_mismatch: '{{diff}} ofördelat',

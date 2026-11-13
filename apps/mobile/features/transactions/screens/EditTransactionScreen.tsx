@@ -101,13 +101,18 @@ function TransactionEditor({
   // A bill split by item stays the user's own: the group does not hold its items.
   const albumTarget = useAlbumBillTarget(transaction.id);
   // A shared album's expense is split only through its group: a bill of the
-  // group, or an entry of the user's own there (one added with nothing
-  // split), which becomes the group's once it is split. Never a local split
-  // with typed names, which nobody else in the album would get.
+  // group, or an entry of the user's own there split with nobody, which
+  // becomes the group's once it is split. Never a new local split with typed
+  // names, which nobody else in the album would get. One already split with
+  // others (from before a shared album took only its own bills: typed names,
+  // a friend who paid, paybacks, items) keeps its own split: the group could
+  // not take those names, and its paybacks would count twice.
   const albumGroupId =
     albumTarget &&
     (transaction.albumGroupId === albumTarget ||
-      (!transaction.albumGroupId && transaction.type === 'expense'))
+      (!transaction.albumGroupId &&
+        transaction.type === 'expense' &&
+        !transaction.splits?.some((split) => !split.isSelf)))
       ? albumTarget
       : null;
   // The expense a part payment on a group's bill made follows that payment:

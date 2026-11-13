@@ -1073,6 +1073,7 @@ const nl = {
         me_label: 'Ik',
         person_placeholder: 'Naam van vriend',
         choose_member: 'Kies een lid',
+        no_members: 'Nog niemand doet mee aan dit album',
         sum_match: '{{sum}} van {{total}}',
         sum_left: '{{diff}} over',
         sum_mismatch: '{{diff}} niet meegerekend',

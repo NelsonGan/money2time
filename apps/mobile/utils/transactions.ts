@@ -134,11 +134,11 @@ export function reuseUnchangedTransactions(
 
 /**
  * Puts the stored copy of a just-written row in place of its optimistic one,
- * or drops the row if the write did not land. A stored row the list no longer
- * has goes back in its place: a full reload that ran between the optimistic
- * insert and the write (filing a new entry into a shared album schedules one)
- * read the table before the row was in it, and nothing else would bring it
- * back until the next reload. When the two already match field
+ * or drops the row if the write did not land. With `restoreIfMissing` (a full
+ * reload ran between the optimistic insert and the write: filing a new entry
+ * into a shared album schedules one), a stored row the list no longer has goes
+ * back in its place, since that reload read the table before the row was in
+ * it; otherwise a missing row was deleted meanwhile and stays out. When the two already match field
  * for field, which is the norm because the optimistic row is built from the
  * same input and timestamp, `prev` itself is returned: React then skips the
  * render, instead of re-rendering every transaction consumer a second time for
@@ -148,9 +148,12 @@ export function reconcileTransactionRow(
   prev: TransactionWithRelations[],
   id: string,
   persisted: TransactionWithRelations | null,
+  restoreIfMissing = false,
 ): TransactionWithRelations[] {
   const index = prev.findIndex((tx) => tx.id === id);
-  if (index < 0) return persisted ? insertTransactionsByDateDesc(prev, [persisted]) : prev;
+  if (index < 0) {
+    return restoreIfMissing && persisted ? insertTransactionsByDateDesc(prev, [persisted]) : prev;
+  }
   if (!persisted) return prev.filter((tx) => tx.id !== id);
   const current = prev[index];
   if (current && sameTransactionFields(current, persisted)) return prev;
