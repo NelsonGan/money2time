@@ -2,8 +2,9 @@ import { ArrowRight, Check, ChevronRight } from 'lucide-react-native';
 import React, { useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
 
+import { EmptyState } from '~/components/feedback/EmptyState';
 import { LoadingDots } from '~/components/feedback/LoadingDots';
-import { Button, Text } from '~/components/ui';
+import { Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import { PersonAvatar } from '~/features/transactions/components/PersonAvatar';
 import {
@@ -12,6 +13,7 @@ import {
 } from '~/features/transactions/components/SettleUpConfirmSheet';
 import { debtPartyKey } from '~/features/transactions/lib/debtParty';
 import { personBalanceState } from '~/features/transactions/lib/settleUp';
+import { useSelfPerson } from '~/hooks/useSelfPerson';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -32,8 +34,6 @@ interface AlbumBalancesProps {
   onOpenPerson: (personKey: string) => void;
   /** Opens the album's People page, where someone who joined says who they are. */
   onOpenPeople: () => void;
-  /** Opens a new expense in this album, split with its people. */
-  onAddExpense: () => void;
 }
 
 /** A line of "Who owes whom". */
@@ -54,15 +54,10 @@ interface DebtRow {
  * balance with each person; a shared one lists the whole group's debts
  * (simplified when the group has that on) and what the group spent.
  */
-export function AlbumBalances({
-  summary,
-  group,
-  onOpenPerson,
-  onOpenPeople,
-  onAddExpense,
-}: AlbumBalancesProps) {
+export function AlbumBalances({ summary, group, onOpenPerson, onOpenPeople }: AlbumBalancesProps) {
   const { settings, settleGroupDebt } = useApp();
   const colors = useThemeColors();
+  const me = useSelfPerson();
   const groupId = group.share?.ledgerId ?? null;
   const selfId = group.self?.id ?? null;
   const shared = useGroupDebts(groupId, selfId);
@@ -191,9 +186,10 @@ export function AlbumBalances({
 
   const avatar = (name: string | null, isSelf: boolean) => (
     <PersonAvatar
-      name={isSelf ? I18n.t('transactions.editor.split.me_label') : name}
+      name={isSelf ? me.name : name}
       partyKey={isSelf ? null : debtPartyKey(name)}
       size={26}
+      imageUri={isSelf ? me.avatarUri : null}
     />
   );
   const shown = (name: string | null) => name ?? I18n.t('transactions.settleUp.someone');
@@ -268,40 +264,47 @@ export function AlbumBalances({
     </View>
   );
 
-  // Before the album's first split bill there is no balance to state: the
-  // empty message says what goes here instead of "All settled up".
+  // Before the album's first split bill there is no balance to state: an
+  // empty placeholder instead of "All settled up".
   const empty = rows.length === 0 && summary.people.length === 0 && !shared?.spending.size;
+  if (empty) {
+    return (
+      <EmptyState
+        title={I18n.t('albums.balances.empty_title')}
+        mascotMood="curious"
+        animateIn={false}
+      />
+    );
+  }
 
   return (
     <View className="gap-4 px-5 pt-5">
-      {empty ? null : (
-        <View className="items-center">
-          <Text variant="caption" tone="muted">
-            {I18n.t(
-              !open
-                ? 'transactions.settleUp.hero_settled'
-                : netState === 'owed'
-                  ? 'transactions.settleUp.hero_owed'
-                  : netState === 'owe'
-                    ? 'transactions.settleUp.you_owe_tag'
-                    : 'transactions.settleUp.hero_even',
-            )}
-          </Text>
-          <Text
-            variant="title"
-            className={cn(
-              'mt-1',
-              open && netState === 'owed'
-                ? 'text-success'
-                : open && netState === 'owe'
-                  ? 'text-destructive'
-                  : '',
-            )}
-          >
-            {format(Math.abs(net))}
-          </Text>
-        </View>
-      )}
+      <View className="items-center">
+        <Text variant="caption" tone="muted">
+          {I18n.t(
+            !open
+              ? 'transactions.settleUp.hero_settled'
+              : netState === 'owed'
+                ? 'transactions.settleUp.hero_owed'
+                : netState === 'owe'
+                  ? 'transactions.settleUp.you_owe_tag'
+                  : 'transactions.settleUp.hero_even',
+          )}
+        </Text>
+        <Text
+          variant="title"
+          className={cn(
+            'mt-1',
+            open && netState === 'owed'
+              ? 'text-success'
+              : open && netState === 'owe'
+                ? 'text-destructive'
+                : '',
+          )}
+        >
+          {format(Math.abs(net))}
+        </Text>
+      </View>
 
       {rows.length > 0 ? (
         <View className="overflow-hidden rounded-2xl border border-border/30 bg-card">
@@ -310,10 +313,6 @@ export function AlbumBalances({
           </Text>
           {rows.map(debtRow)}
         </View>
-      ) : empty ? (
-        <Text variant="body" tone="muted" className="px-4 pt-3 text-center">
-          {I18n.t('albums.balances.empty_message')}
-        </Text>
       ) : null}
 
       {settledPeople.length > 0 ? (
@@ -364,10 +363,6 @@ export function AlbumBalances({
           ))}
         </View>
       ) : null}
-
-      <Button onPress={onAddExpense} testID="album-add-expense">
-        <Text>{I18n.t('onboarding.bootstrap.add_transaction')}</Text>
-      </Button>
 
       <SettleUpConfirmSheet
         content={settleContent}

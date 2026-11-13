@@ -5,6 +5,7 @@ import { Pressable, View } from 'react-native';
 import { Card, Input, Text } from '~/components/ui';
 import { PersonAvatar } from '~/features/transactions/components/PersonAvatar';
 import { debtPartyKey } from '~/features/transactions/lib/debtParty';
+import { useSelfPerson } from '~/hooks/useSelfPerson';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -13,7 +14,7 @@ import { cleanPersonName } from '../lib/albumPeople';
 
 /** A person in the list. */
 export interface SplitWithRow {
-  /** Null for the user in an album that is not shared, who is only ever "Me". */
+  /** Null for the user in an album that is not shared, shown by their Settings name. */
   id: string | null;
   name: string;
   isSelf: boolean;
@@ -41,6 +42,7 @@ interface SplitWithCardProps {
  */
 export function SplitWithCard({ rows, canAdd, onAdd, onRename, onRemove }: SplitWithCardProps) {
   const colors = useThemeColors();
+  const selfAvatarUri = useSelfPerson().avatarUri;
   const [newName, setNewName] = useState('');
   const [renaming, setRenaming] = useState<{ id: string; name: string } | null>(null);
 
@@ -71,6 +73,7 @@ export function SplitWithCard({ rows, canAdd, onAdd, onRename, onRemove }: Split
               name={row.name}
               partyKey={row.isSelf ? null : debtPartyKey(row.name)}
               size={38}
+              imageUri={row.isSelf ? selfAvatarUri : null}
             />
             {editing ? (
               <View className="flex-1">

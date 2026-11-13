@@ -2986,10 +2986,9 @@ const nl = {
     remove_selected_body:
       '{{count}} transacties uit dit album verwijderen? Ze worden niet verwijderd.',
     tab_breakdown: 'Verdeling',
+    breakdown_everyone: 'Iedereen',
     tab_transactions: 'Transacties',
     tab_map: 'Kaart',
-    show_cover: 'Omslagfoto tonen',
-    show_details: 'Details tonen',
     no_transactions_title: 'Geen transacties',
     no_transactions_message: 'Voeg transacties aan dit album toe om ze hier te zien.',
     delete_title: 'Album verwijderen?',
@@ -3034,7 +3033,7 @@ const nl = {
     },
     balances: {
       tab: "Saldo's",
-      empty_message: 'Deel een rekening in dit album en die verschijnt hier.',
+      empty_title: "Nog geen saldo's",
       who_owes_whom: 'Wie is wie wat schuldig',
       owes_you: '{{name}} is jou schuldig',
       owes: '{{from}} is {{to}} schuldig',

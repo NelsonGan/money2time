@@ -4,8 +4,8 @@ import { useApp } from '~/context/AppContext';
 import { useCloudSyncEnabled } from '~/features/cloudSync/CloudSyncContext';
 import type { SharedLedger } from '~/features/cloudSync/services/sharedLedgerStore';
 import { useSharedAlbum, useSharedLedger } from '~/features/sharedLedgers/hooks/useSharedLedgers';
+import { useSelfPerson } from '~/hooks/useSelfPerson';
 import { DEFAULT_LEDGER_ID } from '~/lib/db/ledgerScope';
-import { I18n } from '~/lib/i18n';
 import type { Album, AlbumMember } from '~/types';
 
 import { type AlbumGroupPerson, albumPeople, selfMember } from '../lib/albumPeople';
@@ -57,8 +57,9 @@ export function useAlbumGroup(album: Album | null | undefined): AlbumGroup {
   const share = useSharedAlbum(album?.id);
   const groupId = share ? share.ledgerId : null;
   const members = useSyncExternalStore(subscribeAlbumGroups, () => listGroupMembers(groupId));
+  // The user reads as their Settings name, "Me" without one.
+  const meLabel = useSelfPerson().name;
   return useMemo(() => {
-    const meLabel = I18n.t('transactions.editor.split.me_label');
     const people = album ? albumPeople(album, share ? members : null, share?.userId, meLabel) : [];
     const self = share ? selfMember(members, share.userId) : null;
     return {
@@ -71,5 +72,5 @@ export function useAlbumGroup(album: Album | null | undefined): AlbumGroup {
       mustClaim: !!share && !self && members.some((member) => !member.userId),
       members,
     };
-  }, [album, canShare, canSplit, members, share]);
+  }, [album, canShare, canSplit, meLabel, members, share]);
 }

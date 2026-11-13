@@ -2964,10 +2964,9 @@ const id = {
     remove_selected_body:
       'Keluarkan {{count}} transaksi dari album ini? Transaksi tidak akan dihapus.',
     tab_breakdown: 'Rincian',
+    breakdown_everyone: 'Semua',
     tab_transactions: 'Transaksi',
     tab_map: 'Peta',
-    show_cover: 'Tampilkan foto sampul',
-    show_details: 'Tampilkan detail',
     no_transactions_title: 'Tidak ada transaksi',
     no_transactions_message: 'Tambahkan transaksi ke album ini untuk melihatnya di sini.',
     delete_title: 'Hapus album?',
@@ -3012,7 +3011,7 @@ const id = {
     },
     balances: {
       tab: 'Saldo',
-      empty_message: 'Bagi sebuah tagihan di album ini dan akan muncul di sini.',
+      empty_title: 'Belum ada saldo',
       who_owes_whom: 'Siapa berutang kepada siapa',
       owes_you: '{{name}} berutang kepada Anda',
       owes: '{{from}} berutang kepada {{to}}',

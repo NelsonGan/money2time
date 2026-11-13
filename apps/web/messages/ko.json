@@ -1336,6 +1336,8 @@
       "perDay": "하루 {amount}",
       "breakdown": "카테고리별",
       "transactionsTitle": "거래",
+      "everyone": "모두",
+      "me": "나",
       "pick": "여행을 선택하면 내역을 볼 수 있어요."
     },
     "items": {

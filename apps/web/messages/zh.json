@@ -1336,6 +1336,8 @@
       "perDay": "每天 {amount}",
       "breakdown": "按分类",
       "transactionsTitle": "交易",
+      "everyone": "所有人",
+      "me": "我",
       "pick": "选择一次旅行，查看明细。"
     },
     "items": {

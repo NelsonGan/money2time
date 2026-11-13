@@ -1336,6 +1336,8 @@
       "perDay": "{amount} kada araw",
       "breakdown": "Ayon sa kategorya",
       "transactionsTitle": "Mga transaksyon",
+      "everyone": "Lahat",
+      "me": "Ako",
       "pick": "Pumili ng biyahe para makita ang breakdown nito."
     },
     "items": {

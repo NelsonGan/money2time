@@ -223,6 +223,8 @@ export function AddTransactionScreen({
       openSplitBillOnMount={openSplitBillOnMount}
       instalmentOptions={instalmentOptions}
       defaultSplitWith={splitWith}
+      // Split with the album's people: Add shows the split before it saves.
+      confirmSplitBeforeAdd={splitWith.length > 0}
       groupBill={groupBill}
     />
   );

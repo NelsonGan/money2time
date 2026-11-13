@@ -1336,6 +1336,8 @@
       "perDay": "{amount} per dag",
       "breakdown": "Per categorie",
       "transactionsTitle": "Transacties",
+      "everyone": "Iedereen",
+      "me": "Ik",
       "pick": "Kies een reis om de uitsplitsing te zien."
     },
     "items": {

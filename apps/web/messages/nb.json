@@ -1336,6 +1336,8 @@
       "perDay": "{amount} per dag",
       "breakdown": "Etter kategori",
       "transactionsTitle": "Transaksjoner",
+      "everyone": "Alle",
+      "me": "Meg",
       "pick": "Velg en reise for å se fordelingen."
     },
     "items": {

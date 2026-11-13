@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Text } from '~/components/ui';
 import { BottomSheetModal } from '~/components/ui/bottom-sheet-modal';
 import { PersonAvatar } from '~/features/transactions/components/PersonAvatar';
+import { useSelfPerson } from '~/hooks/useSelfPerson';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -37,6 +38,7 @@ interface PaidByPickerSheetProps {
 export function PaidByPickerSheet({ visible, options, onClose, onSelect }: PaidByPickerSheetProps) {
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
+  const selfAvatarUri = useSelfPerson().avatarUri;
 
   return (
     <BottomSheetModal
@@ -67,7 +69,12 @@ export function PaidByPickerSheet({ visible, options, onClose, onSelect }: PaidB
                 : 'mx-4 flex-row items-center gap-3 px-2 py-3 active:opacity-70'
             }
           >
-            <PersonAvatar name={option.name} partyKey={option.partyKey} size={36} />
+            <PersonAvatar
+              name={option.name}
+              partyKey={option.partyKey}
+              size={36}
+              imageUri={option.partyKey === null ? selfAvatarUri : null}
+            />
             <Text variant="body" numberOfLines={1} className="flex-1">
               {option.name}
             </Text>

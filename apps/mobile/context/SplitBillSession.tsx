@@ -34,6 +34,8 @@ export interface SplitBillSession {
   newlyPaidIds: Set<string>;
   /** Commit staged edits (editor keeps them). */
   onDone: () => void;
+  /** The Done button's word when committing also saves the bill ("Add"). */
+  doneLabel?: string;
   /** Discard staged edits back to the snapshot taken when the flow opened. */
   onCancel: () => void;
 }

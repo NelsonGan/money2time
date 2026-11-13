@@ -2967,10 +2967,9 @@ const it = {
     remove_selected_body:
       'Rimuovere {{count}} transazioni da questo album? Non verranno eliminate.',
     tab_breakdown: 'Ripartizione',
+    breakdown_everyone: 'Tutti',
     tab_transactions: 'Transazioni',
     tab_map: 'Mappa',
-    show_cover: 'Mostra copertina',
-    show_details: 'Mostra dettagli',
     no_transactions_title: 'Nessuna transazione',
     no_transactions_message: 'Aggiungi transazioni a questo album per vederle qui.',
     delete_title: "Eliminare l'album?",
@@ -3013,7 +3012,7 @@ const it = {
     },
     balances: {
       tab: 'Saldi',
-      empty_message: 'Dividi un conto in questo album e comparirà qui.',
+      empty_title: 'Ancora nessun saldo',
       who_owes_whom: 'Chi deve a chi',
       owes_you: '{{name}} ti deve',
       owes: '{{from}} deve a {{to}}',

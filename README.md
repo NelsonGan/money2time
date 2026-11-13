@@ -488,7 +488,7 @@ Traditional Chinese is `zh-Hant`. Device tags for Taiwan, Hong Kong, and Macau s
   - **600 pt and wider**: the tabs move into the `SideNavRail` on the leading (left) edge, at the top where a sidebar sits (`navRailAlign: 'top'`), with the + right under its pill (`AddFab` reads where the pill ends through `onRailPillEnd`). Tab pages get the window less the 84 pt rail (`ShellContentFrame`).
   - **Two panes** once the content beside the rail is at least 800 pt (a 13-inch iPad both ways round, an 11-inch or iPad mini in landscape): Home and Insights split it evenly, using the same pane code as the open Duo. On iPad the month grid also grows into the height of its pane (`CalendarMonthGrid`'s `fillHeight`, cells up to half again as tall as wide, as in iPad Calendar), the breakdown pie draws up to a 150 pt radius and its rows get roomier.
   - **Wide tab pages** (`WIDE_TABS` in `App.tsx`: Accounts, Albums, Goals, Receipts, Settings) take the whole content width where `wideTabs` is set (iPad; on the open Duo they get the fold frame instead, below). They read `useWideTabColumns()` (`wideTabColumns` in `utils/adaptiveLayout.ts`): two columns in a column of at most 1180 pt once there is 880 pt, otherwise one readable 600 pt column. Accounts lays its groups out in two balanced columns under a one-row net assets summary (net assets a third of it on iPad, half on the Duo, so its divider falls on the fold); Goals (`ColumnGrid`), Items and Albums (`Sortable.Flex` wrapping, so drag-to-reorder still works) lay their cards out in two columns; Settings puts the profile and its cards in a 380 pt column beside the tile sections, whose `SettingsGrid` fits a fourth tile per row once it is 640 pt wide (on the Duo the two columns are equal). With two columns the Albums footer puts its label over the left column and the active-trip picker over the right. `TabletContentContainer`, `SettingsPageLayout` and `MonthControlsHeader` take a `maxWidth`/`contentMaxWidth` so a page's header and content share that width. Every other tab page, pushed route and settings sub-page stays in the readable 600 pt column (`isWide`), and bottom sheets centre themselves in it (`useSheetColumnStyle`, now also on `PromptSheet`, `FeatureAnnouncementModal`, `DatePickerModal` and `LedgerProGuard` and the quick-entry sheet).
-  - **Wide pages elsewhere**: Insights' Review and Budgeting views also read `useWideTabColumns()` (Insights passes their width to `MonthControlsHeader`). Review puts the period's numbers (spent, in and out, trend, pace) in one column and where the money went (categories, goals, mood, standouts) in the other; Budgeting puts the budget card with its rings beside the category rows. Receipts tiles four to a row instead of two. Album detail (`WIDE_ROUTES` in `App.tsx`, root routes that own the window's width) shows the cover and breakdown in one pane and the transactions in the other, in place of its tabs; below 880 pt it keeps the tabs in the readable column, each page given its own measured width through `ContentFrameProvider`. In two-pane Insights (iPad and the open Duo) the trend, sentiment and savings charts draw 1.6 times taller (`WIDE_LINE_CHART_SCALE`).
+  - **Wide pages elsewhere**: Insights' Review and Budgeting views also read `useWideTabColumns()` (Insights passes their width to `MonthControlsHeader`). Review puts the period's numbers (spent, in and out, trend, pace) in one column and where the money went (categories, goals, mood, standouts) in the other; Budgeting puts the budget card with its rings beside the category rows. Receipts tiles four to a row instead of two. Album detail (`WIDE_ROUTES` in `App.tsx`, root routes that own the window's width) shows the cover, breakdown and balances in one pane and the transactions in the other, in place of its tabs; below 880 pt it keeps the tabs in the readable column, each page given its own measured width through `ContentFrameProvider`. In two-pane Insights (iPad and the open Duo) the trend, sentiment and savings charts draw 1.6 times taller (`WIDE_LINE_CHART_SCALE`).
   - **Floating buttons**: a button pinned to a page's corner (the + on the Accounts and Hourly value settings pages) uses `ColumnCornerView` (`components/layout/ColumnGutter.tsx`), which reads the gutter between the column and the window's edge (`ColumnGutterProvider`, set by `TabletContentContainer`, `SideStripSafeArea` and the shell's tab frame) and sits in the window's corner instead of over the column's content (on the open Duo, the corner beside the side strip). The gutter is set wherever `isWide` is; elsewhere it is 0.
   - **Page sheets**: `ThemeModal` presents a `pageSheet` as a `formSheet` where `wideTabs` is set, so Filters, bulk edit and similar sheets open as a centred card instead of a full-width page.
   - **Year view in two panes** (iPad and the open Duo): on Home the month header and grid stay in the first pane while the year scrolls in the second, and the header follows the list's month (`headerFollowsList` in `CalendarScreen`). With one pane the header fades out in the year view as before.
@@ -2076,10 +2076,35 @@ migrations `090` and `091`.
 
 **What the user sees**
 
+- **The album page.** The cover photo runs to the top of the screen under
+  the status bar, with Back, Change cover, Edit, Add transactions and Delete
+  floating over it, and the tab bar (**Transactions**, **Breakdown**, then
+  **Balances**) resting on its bottom on rounded corners. Each tab is its own
+  list under that header (`AlbumDetailScreen`): scrolling the open tab moves
+  the header with it until only a solid bar with the album's name and the
+  tabs are left, the controls crossfading into it as on a goal's page, and
+  pulling down past the top stretches the photo. Switching tabs (tap or
+  swipe) first brings the other tabs to where the header is, so it never
+  jumps. A held transaction starts selecting, and the tab bar turns into the
+  selection's bar (Cancel, the count and total, duplicate, edit, remove), as
+  the calendar's header does, clear of the rows. A floating + at the bottom right
+  opens a new expense that goes into this album and starts split with its
+  people, whether or not the album is the active one (the `albumId` param of
+  `AddTransactionDetailed`), and comes back to the album when saved.
+- **The Breakdown by person.** Once a bill in the album is split, the
+  Breakdown has a row of chips: **Everyone** (the album's entries as they
+  stand), the user, then each person. A person's Breakdown counts each bill
+  by their share of it: the user's own entries in full and their Me row of a
+  split bill, anyone else's row of each split bill (`lib/memberShare.ts`,
+  turned into the entry's displayed value by its own rate). A category opens
+  the bills that person has a share in.
 - **Split with.** The album page has a People button on its cover (the
   people's avatars, or "Split with" while there are
-  none), which opens the People page: Me, then each person by name, with a
-  field to add one. Names are unique in an album (case-folded), at most 20. A
+  none), which opens the People page: the user, then each person by name, with a
+  field to add one. Wherever an album or a split bill lists the user, they
+  show as their Settings name and photo (`useSelfPerson`), "Me" and an
+  initial while they set neither; a bill's own row keeps what it was written
+  with. Names are unique in an album (case-folded), at most 20. A
   row renames, the × removes. In a shared album the user's own row shows the
   name the others see and renames like anyone's, and a person still on one of
   its bills cannot be removed. Not offered for an album in a shared ledger,
@@ -2091,8 +2116,10 @@ migrations `090` and `091`.
   expense opens already split evenly between Me and its people, Paid by Me
   (the Split chip shows the count). It is an ordinary split from there: change
   the amounts, who paid, or remove everyone to make it an expense of the
-  user's own. A free user at the unsettled-split-bill limit gets no default
-  split.
+  user's own. Add does not save it straight away: Split Bill opens first, its
+  Done reading **Add** (`confirmSplitBeforeAdd`), so the split is seen and can
+  be changed before the bill is saved; Back returns to the form unsaved. A
+  free user at the unsettled-split-bill limit gets no default split.
 - **An album's balances are its own.** A split bill in an album is settled
   in that album and nowhere else: the album's Balances tab and its people's
   pages cover the bills in it, and the Balances page covers the bills in no
@@ -2105,24 +2132,21 @@ migrations `090` and `091`.
   and the Settings badge still look at every bill. In a shared ledger, where
   an album is not split with people, nothing is set apart.
 - **Balances tab.** An album with people, shared, or with a split bill in it
-  leads with a Balances tab: what the user is owed or owes across the album's bills, then a **Who
+  has a Balances tab, after Transactions and Breakdown: what the user is owed or owes across the album's bills, then a **Who
   owes whom** card: one line per debt, the two people's avatars with an arrow
   between them, a sentence ("Ben owes you", "You owe Aisha") and the amount.
   An album that is not shared lists the user's balance with each person (the
   Balances roll-up over the album's entries, `useSettleUpSummary(albumId)`).
-  Before the album's first split bill the tab is only a line saying what
-  goes there, with no "All settled up" figure.
+  Before the album's first split bill the tab is an empty placeholder (No
+  balances yet), with no "All settled up" figure.
   A shared album lists the whole group's debts in each currency, the user's
   own first and the others' quieter, and adds a **Group spending** card
   (Total, You paid, Your share). A line of the user's own opens the person's
   page with only this album's bills, whose Settle up settles only those.
   People with nothing to pay either way are listed under **Settled up**
   (marked Even when bills are open both ways and come to nothing), which is
-  where the album's bills with them are found. Its
-  **Add Transaction**
-  button opens a new expense that goes into this album and starts split with
-  its people, whether or not the album is the active one (the `albumId` param
-  of `AddTransactionDetailed`), and comes back to the album when saved.
+  where the album's bills with them are found. New bills come from the
+  page's floating +.
 - **Share this album.** A switch on the People page, for the album's owner.
   **Sharing is free and has no limit of its own**: the only limit on albums
   is the free plan's count of them (`FREE_MAX_ALBUMS`), and a bill in a
@@ -5202,6 +5226,13 @@ app's `services/webDashboardLink.ts`, `webDashboardCrypto.ts`,
   (`balancesByAlbum` in `src/lib/backup/split-payer.ts`). The totals at the
   top add every open share once, in an album or not. It is built from `album_transactions`, so older data reads
   the same way; unlike the app it also sets albums apart in a shared ledger.
+- **A trip's breakdown by person**: once a bill in the selected trip is
+  split, its By category card has chips (Everyone, Me, then each name on its
+  split bills) that count each entry at that person's share, as the app's
+  album Breakdown does (`src/lib/backup/member-share.ts`, mirroring
+  `features/albums/lib/memberShare.ts`; people are matched by name, since the
+  backup carries no album people). Built from `transaction_splits`, so older
+  data reads the same way.
 - **A shared album's bills** (app migration 090, see Album members and shared
   albums): the phone's own entry for a group's bill carries `album_group_id`
   (`tx.albumGroupId`, the group's id, which is its album's). It reads as any

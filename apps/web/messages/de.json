@@ -1336,6 +1336,8 @@
       "perDay": "{amount} pro Tag",
       "breakdown": "Nach Kategorie",
       "transactionsTitle": "Transaktionen",
+      "everyone": "Alle",
+      "me": "Ich",
       "pick": "Wähle eine Reise, um die Aufschlüsselung zu sehen."
     },
     "items": {
