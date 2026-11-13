@@ -4,10 +4,11 @@
  * header, so the scene has no headline and only the background comes from
  * ScreenshotScene.
  *
- * Top to bottom: the headline beside a shield, the laurel rating in a card,
- * one card per promise (Local first, No ads, Private by design) and the book
- * behind the app. The three promise icons are generated art in
- * `public/assets/privacy/`; everything else is drawn here.
+ * Top to bottom: the headline beside the chick mascot hugging a shield, the
+ * laurel rating in a card, one card per promise (Local first, No ads, Private
+ * by design) and the book behind the app. The mascot badge and the three
+ * promise icons are generated art in `public/assets/privacy/`, painted in the
+ * mascot's crayon style; everything else is drawn here.
  */
 
 import { DISPLAY_FONT, renderHeadline } from './sceneParts';
@@ -31,44 +32,6 @@ const PROMISES = {
   noAds:   { icon: '/assets/privacy/noads.png',   tint: '#F7E8CD', accent: '#C9861F' },
   privacy: { icon: '/assets/privacy/private.png', tint: '#FADFD6', accent: '#D9564A' },
 };
-
-/** Dimensional shield-with-lock hero graphic for the panel header. */
-function ShieldGraphic() {
-  return (
-    <svg
-      width={330} height={360} viewBox="0 0 220 240"
-      style={{ flexShrink: 0, filter: 'drop-shadow(0 26px 44px rgba(160,70,50,0.32))' }}
-    >
-      <defs>
-        <linearGradient id="fp-g-shield" x1="0" y1="0" x2="0.4" y2="1">
-          <stop offset="0" stopColor="#F09781" />
-          <stop offset="1" stopColor="#D9564A" />
-        </linearGradient>
-      </defs>
-      {/* Leaves peeking out behind the shield */}
-      <g fill="#EFA48B">
-        <ellipse cx="30" cy="176" rx="34" ry="13" transform="rotate(-32 30 176)" />
-        <ellipse cx="46" cy="206" rx="30" ry="12" transform="rotate(14 46 206)" />
-        <ellipse cx="196" cy="70" rx="30" ry="12" transform="rotate(-58 196 70)" />
-        <ellipse cx="192" cy="158" rx="32" ry="12" transform="rotate(30 192 158)" />
-      </g>
-      <path
-        d="M110 14 L190 44 V118 C190 172 154 206 110 226 C66 206 30 172 30 118 V44 Z"
-        fill="url(#fp-g-shield)"
-      />
-      <path
-        d="M110 30 L176 55 V116 C176 161 146 190 110 208 C74 190 44 161 44 116 V55 Z"
-        fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth={6}
-      />
-      {/* Cream lock */}
-      <path d="M92 112 v-13 a18 18 0 0 1 36 0 v13"
-        fill="none" stroke="#FFF7EC" strokeWidth={12} strokeLinecap="round" />
-      <rect x="80" y="108" width="60" height="48" rx="13" fill="#FFF7EC" />
-      <circle cx="110" cy="127" r="6.5" fill="#D9564A" />
-      <rect x="107" y="130" width="6" height="12" rx="3" fill="#D9564A" />
-    </svg>
-  );
-}
 
 const STAR_PATH = 'M12 2 L14.9 8.6 L22 9.2 L16.6 13.9 L18.2 21 L12 17.3 L5.8 21 L7.4 13.9 L2 9.2 L9.1 8.6 Z';
 
@@ -154,7 +117,7 @@ function PromiseCard({ promise, title, sub }: {
         background: promise.tint,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}>
-        <img src={promise.icon} alt="" style={{ width: 136, height: 136 }} />
+        <img src={promise.icon} alt="" style={{ width: 152, height: 152 }} />
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div ref={titleRef} style={{
@@ -178,7 +141,7 @@ export function PrivacyPanel({ t }: { t: PhoneStrings['s15'] }) {
       boxSizing: 'border-box', padding: '96px 72px 110px',
       display: 'flex', flexDirection: 'column', alignItems: 'center',
     }}>
-      {/* Header: headline left, shield right. Fixed height so the rating,
+      {/* Header: headline left, mascot badge right. Fixed height so the rating,
           cards and book sit at the same y in every locale. */}
       <div style={{
         width: 1140, height: 500, display: 'flex',
@@ -191,7 +154,10 @@ export function PrivacyPanel({ t }: { t: PhoneStrings['s15'] }) {
           whiteSpace: 'pre-line', letterSpacing: '-3px',
           fontFamily: DISPLAY_FONT,
         }}>{renderHeadline(t.h, t.hl, ACCENT)}</h1>
-        <ShieldGraphic />
+        <img
+          src="/assets/privacy/hero.png" alt=""
+          style={{ height: 390, width: 'auto', flexShrink: 0, display: 'block' }}
+        />
       </div>
 
       <div style={{ ...CARD, padding: '46px 40px', marginTop: 40 }}>
