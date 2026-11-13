@@ -11,8 +11,9 @@ import {
 } from './settleUp';
 
 /**
- * Which bills a roll-up covers. Balances are kept per album: an album answers
- * for the bills in it, and the Balances page for the bills in no album.
+ * Which bills a roll-up covers. A shared album answers for the bills in it,
+ * and the Balances page for every other split bill (in an album of the
+ * user's own or in none).
  * `all` is for looking one bill up, wherever it is.
  */
 type SettleUpScope = { albumId: string } | 'outside_albums' | 'all';
@@ -91,8 +92,10 @@ export function useAlbumBalances(): AlbumBalance[] {
     const entryIds = getAlbumEntryIds();
     // Only split bills can be owed on: found once, not once per album.
     const bills = transactions.filter((transaction) => transaction.splits?.length);
+    const owned = getAlbumOwnedTransactionIds();
     return albums.flatMap((album) => {
-      const ids = new Set(entryIds.get(album.id));
+      // Only a shared album settles its own bills.
+      const ids = new Set((entryIds.get(album.id) ?? []).filter((id) => owned.has(id)));
       if (ids.size === 0) return [];
       const summary = aggregateSettleUpByPerson(
         bills.filter((transaction) => ids.has(transaction.id)),

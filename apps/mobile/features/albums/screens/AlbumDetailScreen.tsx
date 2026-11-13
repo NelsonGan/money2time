@@ -453,7 +453,6 @@ export function AlbumDetailScreen({
     (personKey: string) => onOpenPerson(personKey, albumId),
     [albumId, onOpenPerson],
   );
-  const openPeopleHere = useCallback(() => onOpenPeople(albumId), [albumId, onOpenPeople]);
 
   const formatValue = useCallback(
     (amount: number) =>
@@ -853,12 +852,7 @@ export function AlbumDetailScreen({
   );
 
   const balancesBody = (
-    <MemoAlbumBalances
-      summary={balances}
-      group={group}
-      onOpenPerson={openPersonHere}
-      onOpenPeople={openPeopleHere}
-    />
+    <MemoAlbumBalances summary={balances} group={group} onOpenPerson={openPersonHere} />
   );
 
   const selectionActions = (

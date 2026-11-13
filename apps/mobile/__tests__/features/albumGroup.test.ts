@@ -81,11 +81,11 @@ describe('album people', () => {
     );
   });
 
-  it('lists the user first, from the album or from the group', () => {
+  it('lists the user first; an album that is not shared has nobody else', () => {
+    // Names an album kept before it could only be split once shared count for nothing.
     const album = { splitWith: [{ id: 'a', name: 'Aisha' }] };
     expect(albumPeople(album, null, null, 'Me')).toEqual([
       { id: null, name: 'Me', isSelf: true, joined: true },
-      { id: 'a', name: 'Aisha', isSelf: false, joined: false },
     ]);
     const members = [member('aisha', 'Aisha', 'u-aisha'), member('me', 'Nelson', 'u-me')];
     const people = albumPeople(album, members, 'u-me', 'Me');

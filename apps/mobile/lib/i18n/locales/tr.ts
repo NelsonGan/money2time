@@ -2973,7 +2973,7 @@ const tr = {
       split_with: 'Şunlarla bölüş',
       me_tag: 'Siz',
       joined: 'Katıldı',
-      not_joined: 'Henüz katılmadı',
+      left: 'Ayrıldı',
       add_person: 'Kişi ekle',
       add: 'Ekle',
       unnamed: 'Arkadaş',
@@ -2981,13 +2981,9 @@ const tr = {
       full: 'Bir albüm en fazla {{max}} kişiyle bölüşülür.',
       remove_title: '{{name}} kaldırılsın mı?',
       remove_message: 'Bu albümdeki yeni hesaplar artık bu kişiyle bölüşülmez.',
-      remove_in_use: '{{name}} bu albümdeki bir hesapta yer alıyor. Önce hesaplardan çıkarın.',
       remove_joined_title: '{{name}} albümden çıkarılsın mı?',
       remove_joined_message:
         'Bu kişi artık bu albümün hesaplarını almaz. Yer aldığı hesaplar kalır.',
-      who_title: 'Hangisi sizsiniz?',
-      who_message: 'Adınızı seçin; her hesaptaki payınız kendi defterinize düşsün.',
-      who_new: 'Listede yokum',
     },
     share: {
       row: 'Bu albümü paylaş',
@@ -3024,10 +3020,6 @@ const tr = {
     bill: {
       delete_shared: 'Bu hesap paylaşılan bir albümde. Silerseniz herkes için kaldırılır.',
       remove_shared: 'Bu hesap paylaşılan bir albümde. Diğer herkes için kaldırılır.',
-      confirm_account: 'Hesabı onayla',
-      confirm_paid_by: '{{name}}, ödeyenin siz olduğunu söylüyor. Hesabı seçin.',
-      confirm_paid: 'Ödeyen olarak siz işaretlendiniz. Hesabı seçin.',
-      changed_by: '{{album}} içinde {{name}} değiştirdi',
       from_album: '{{album}} albümünden',
       shared_album: 'Paylaşılan albüm',
     },

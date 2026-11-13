@@ -3000,7 +3000,7 @@ const nl = {
       split_with: 'Delen met',
       me_tag: 'Jij',
       joined: 'Doet mee',
-      not_joined: 'Doet nog niet mee',
+      left: 'Vertrokken',
       add_person: 'Persoon toevoegen',
       add: 'Toevoegen',
       unnamed: 'Vriend',
@@ -3008,14 +3008,9 @@ const nl = {
       full: 'Een album wordt met maximaal {{max}} personen gedeeld.',
       remove_title: '{{name}} verwijderen?',
       remove_message: 'Nieuwe rekeningen in dit album worden niet meer met diegene gedeeld.',
-      remove_in_use:
-        '{{name}} staat op een rekening in dit album. Haal diegene eerst van de rekeningen.',
       remove_joined_title: '{{name}} uit het album verwijderen?',
       remove_joined_message:
         'Diegene krijgt de rekeningen van dit album niet meer. Rekeningen waar diegene op staat, blijven.',
-      who_title: 'Welke ben jij?',
-      who_message: 'Kies je naam, zodat jouw deel van elke rekening in je kasboek komt.',
-      who_new: 'Ik sta niet in de lijst',
     },
     share: {
       row: 'Dit album delen',
@@ -3054,10 +3049,6 @@ const nl = {
       delete_shared:
         'Deze rekening staat in een gedeeld album. Als je hem verwijdert, verdwijnt hij voor iedereen.',
       remove_shared: 'Deze rekening staat in een gedeeld album. Hij verdwijnt voor alle anderen.',
-      confirm_account: 'Rekening bevestigen',
-      confirm_paid_by: 'Volgens {{name}} heb jij betaald. Kies de rekening.',
-      confirm_paid: 'Gemarkeerd als door jou betaald. Kies de rekening.',
-      changed_by: 'Gewijzigd door {{name}} in {{album}}',
       from_album: 'Uit {{album}}',
       shared_album: 'Gedeeld album',
     },

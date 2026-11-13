@@ -2,12 +2,11 @@
  * The people an album is split with. Pure, shared by the album screens, the
  * entry editor and the group sync.
  *
- * An album that is not shared keeps them as names on the album itself
- * (`Album.splitWith`); the user is never listed, they are "Me". A shared
- * album's people are its group's members (`AlbumMember`), the user among
- * them. Either way a person has an id, which the shares of the album's bills
- * carry (`TransactionSplit.albumMemberId`), and a name, which is what
- * Balances groups a person by.
+ * Only a shared album is split: its people are its group's members
+ * (`AlbumMember`), everyone who joined with its link, the user among them. A
+ * person has an id, which the shares of the album's bills carry
+ * (`TransactionSplit.albumMemberId`), and a name, which is what Balances
+ * groups a person by. An album that is not shared has nobody but the user.
  */
 
 import type { Album, AlbumMember, AlbumPerson } from '~/types';
@@ -90,17 +89,7 @@ export function albumPeople(
   userId: string | null | undefined,
   meLabel: string,
 ): AlbumGroupPerson[] {
-  if (!members) {
-    return [
-      { id: null, name: meLabel, isSelf: true, joined: true },
-      ...album.splitWith.map((person) => ({
-        id: person.id,
-        name: person.name,
-        isSelf: false,
-        joined: false,
-      })),
-    ];
-  }
+  if (!members) return [{ id: null, name: meLabel, isSelf: true, joined: true }];
   const live = members.filter((member) => !member.deletedAt);
   const self = selfMember(live, userId);
   const people: AlbumGroupPerson[] = live.map((member) => ({

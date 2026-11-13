@@ -1989,7 +1989,6 @@
         "paidTitle": "已还款",
         "personPaid": "{name} 付款",
         "sharedAlbum": "共享相册",
-        "confirmAccount": "请在 App 中确认账户",
         "undoTitle": "将这份标记为未还吗？",
         "undoBody": "对方会重新欠你这笔钱，支出也会增加相应金额。转入其他账户的还款转账会被移除。",
         "itemizedTotal": "合计：{sum}",

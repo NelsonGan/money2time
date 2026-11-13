@@ -1989,7 +1989,6 @@
         "paidTitle": "Dibayar kembali",
         "personPaid": "{name} membayar",
         "sharedAlbum": "Album bersama",
-        "confirmAccount": "Konfirmasi akun di aplikasi",
         "undoTitle": "Tandai bagian ini belum dibayar?",
         "undoBody": "Bagian ini kembali menjadi utang untukmu, dan pengeluaran naik lagi sebesar jumlah ini. Transfer pembayaran kembali ke akun lain akan dihapus.",
         "itemizedTotal": "Total: {sum}",

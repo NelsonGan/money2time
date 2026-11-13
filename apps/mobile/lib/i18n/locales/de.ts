@@ -3008,7 +3008,7 @@ const de = {
       split_with: 'Teilen mit',
       me_tag: 'Du',
       joined: 'Beigetreten',
-      not_joined: 'Noch nicht beigetreten',
+      left: 'Ausgetreten',
       add_person: 'Person hinzufügen',
       add: 'Hinzufügen',
       unnamed: 'Freund',
@@ -3017,15 +3017,9 @@ const de = {
       remove_title: '{{name}} entfernen?',
       remove_message:
         'Neue Rechnungen in diesem Album werden nicht mehr mit dieser Person geteilt.',
-      remove_in_use:
-        '{{name}} steht auf einer Rechnung in diesem Album. Entferne die Person zuerst von den Rechnungen.',
       remove_joined_title: '{{name}} aus dem Album entfernen?',
       remove_joined_message:
         'Die Person erhält keine Rechnungen dieses Albums mehr. Rechnungen, auf denen sie steht, bleiben.',
-      who_title: 'Wer davon bist du?',
-      who_message:
-        'Wähle deinen Namen, damit dein Anteil jeder Rechnung in deinem Kassenbuch landet.',
-      who_new: 'Ich stehe nicht auf der Liste',
     },
     share: {
       row: 'Dieses Album teilen',
@@ -3066,10 +3060,6 @@ const de = {
         'Diese Rechnung ist in einem geteilten Album. Wenn du sie löschst, wird sie für alle entfernt.',
       remove_shared:
         'Diese Rechnung ist in einem geteilten Album. Sie wird für alle anderen entfernt.',
-      confirm_account: 'Konto bestätigen',
-      confirm_paid_by: '{{name}} sagt, du hast bezahlt. Wähle das Konto.',
-      confirm_paid: 'Als von dir bezahlt markiert. Wähle das Konto.',
-      changed_by: 'Geändert von {{name}} in {{album}}',
       from_album: 'Aus {{album}}',
       shared_album: 'Geteiltes Album',
     },

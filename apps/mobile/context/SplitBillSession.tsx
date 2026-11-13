@@ -37,10 +37,11 @@ export interface SplitBillSession {
   /** The Done button's word when committing also saves the bill ("Add"). */
   doneLabel?: string;
   /**
-   * Album members Paid by does not offer: in a shared album, everyone who has
-   * joined but the user (only you can say you paid).
+   * A shared album's bill: the people it can be split with (everyone who
+   * joined but the user). Rows are only ever these, added from a list, and
+   * the user is always the payer.
    */
-  payerExcludedMemberIds?: ReadonlySet<string>;
+  groupMembers?: readonly { id: string; name: string }[];
   /** Discard staged edits back to the snapshot taken when the flow opened. */
   onCancel: () => void;
 }

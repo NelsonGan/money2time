@@ -2983,7 +2983,7 @@ const ms = {
       split_with: 'Bahagi dengan',
       me_tag: 'Anda',
       joined: 'Telah sertai',
-      not_joined: 'Belum sertai',
+      left: 'Keluar',
       add_person: 'Tambah orang',
       add: 'Tambah',
       unnamed: 'Rakan',
@@ -2991,13 +2991,8 @@ const ms = {
       full: 'Satu album dibahagi dengan sehingga {{max}} orang.',
       remove_title: 'Buang {{name}}?',
       remove_message: 'Bil baharu dalam album ini tidak lagi dibahagi dengannya.',
-      remove_in_use:
-        '{{name}} ada dalam satu bil album ini. Keluarkan dia daripada bil itu dahulu.',
       remove_joined_title: 'Keluarkan {{name}} daripada album?',
       remove_joined_message: 'Dia tidak lagi menerima bil album ini. Bil yang ada namanya kekal.',
-      who_title: 'Yang mana satu anda?',
-      who_message: 'Pilih nama anda supaya bahagian anda bagi setiap bil masuk ke lejar anda.',
-      who_new: 'Saya tiada dalam senarai',
     },
     share: {
       row: 'Kongsi album ini',
@@ -3037,10 +3032,6 @@ const ms = {
       delete_shared:
         'Bil ini berada dalam album kongsi. Memadamnya akan membuangnya untuk semua orang.',
       remove_shared: 'Bil ini berada dalam album kongsi. Ia akan dibuang untuk semua orang lain.',
-      confirm_account: 'Sahkan akaun',
-      confirm_paid_by: 'Menurut {{name}}, Anda yang membayar. Pilih akaun.',
-      confirm_paid: 'Anda ditanda sebagai pembayar. Pilih akaun.',
-      changed_by: 'Diubah oleh {{name}} dalam {{album}}',
       from_album: 'Dari {{album}}',
       shared_album: 'Album kongsi',
     },

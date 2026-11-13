@@ -2967,7 +2967,7 @@ const nb = {
       split_with: 'Del med',
       me_tag: 'Deg',
       joined: 'Blitt med',
-      not_joined: 'Ikke med ennå',
+      left: 'Forlatt',
       add_person: 'Legg til person',
       add: 'Legg til',
       unnamed: 'Venn',
@@ -2975,13 +2975,9 @@ const nb = {
       full: 'Et album kan deles med opptil {{max}} personer.',
       remove_title: 'Fjerne {{name}}?',
       remove_message: 'Nye regninger i albumet deles ikke lenger med dem.',
-      remove_in_use: '{{name}} står på en regning i albumet. Fjern dem fra regningene først.',
       remove_joined_title: 'Fjerne {{name}} fra albumet?',
       remove_joined_message:
         'De får ikke lenger albumets regninger. Regningene de står på, blir værende.',
-      who_title: 'Hvem av dem er du?',
-      who_message: 'Velg navnet ditt, så havner din andel av hver regning i din regnskapsbok.',
-      who_new: 'Jeg står ikke på listen',
     },
     share: {
       row: 'Del dette albumet',
@@ -3019,10 +3015,6 @@ const nb = {
     bill: {
       delete_shared: 'Regningen er i et delt album. Sletter du den, fjernes den for alle.',
       remove_shared: 'Regningen er i et delt album. Den fjernes for alle andre.',
-      confirm_account: 'Bekreft konto',
-      confirm_paid_by: '{{name}} sier at du betalte. Velg kontoen.',
-      confirm_paid: 'Markert som betalt av deg. Velg kontoen.',
-      changed_by: 'Endret av {{name}} i {{album}}',
       from_album: 'Fra {{album}}',
       shared_album: 'Delt album',
     },

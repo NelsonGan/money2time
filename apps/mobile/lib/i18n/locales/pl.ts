@@ -2976,7 +2976,7 @@ const pl = {
       split_with: 'Podziel z',
       me_tag: 'Ty',
       joined: 'Dołączono',
-      not_joined: 'Jeszcze nie dołączono',
+      left: 'Opuścił(a)',
       add_person: 'Dodaj osobę',
       add: 'Dodaj',
       unnamed: 'Znajomy',
@@ -2984,14 +2984,9 @@ const pl = {
       full: 'Album można dzielić z maksymalnie {{max}} osobami.',
       remove_title: 'Usunąć {{name}}?',
       remove_message: 'Nowe rachunki w tym albumie nie będą już dzielone z tą osobą.',
-      remove_in_use: '{{name}} jest na rachunku w tym albumie. Najpierw usuń tę osobę z rachunków.',
       remove_joined_title: 'Usunąć {{name}} z albumu?',
       remove_joined_message:
         'Ta osoba przestanie dostawać rachunki z tego albumu. Rachunki, na których jest, zostają.',
-      who_title: 'Którą osobą jesteś?',
-      who_message:
-        'Wybierz swoje imię, aby Twoja część każdego rachunku trafiała do Twojej księgi.',
-      who_new: 'Nie ma mnie na liście',
     },
     share: {
       row: 'Udostępnij ten album',
@@ -3031,10 +3026,6 @@ const pl = {
       delete_shared: 'Ten rachunek jest w udostępnionym albumie. Usunięcie usunie go u wszystkich.',
       remove_shared:
         'Ten rachunek jest w udostępnionym albumie. Zostanie usunięty u wszystkich pozostałych.',
-      confirm_account: 'Potwierdź konto',
-      confirm_paid_by: '{{name}} wskazuje Ciebie jako płatnika. Wybierz konto.',
-      confirm_paid: 'Wskazano Ciebie jako płatnika. Wybierz konto.',
-      changed_by: 'Zmiana: {{name}}, {{album}}',
       from_album: 'Z albumu {{album}}',
       shared_album: 'Udostępniony album',
     },

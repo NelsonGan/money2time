@@ -2946,7 +2946,7 @@ const ja = {
       split_with: '割り勘の相手',
       me_tag: 'あなた',
       joined: '参加済み',
-      not_joined: '未参加',
+      left: '退出済み',
       add_person: '人を追加',
       add: '追加',
       unnamed: '友だち',
@@ -2954,13 +2954,9 @@ const ja = {
       full: '1つのアルバムで割り勘できるのは{{max}}人までです。',
       remove_title: '{{name}}を削除しますか？',
       remove_message: 'このアルバムの新しい会計は、この人とは割り勘されなくなります。',
-      remove_in_use: '{{name}}はこのアルバムの会計に含まれています。先に会計から外してください。',
       remove_joined_title: '{{name}}をアルバムから外しますか？',
       remove_joined_message:
         'この人にはこのアルバムの会計が届かなくなります。この人が含まれる会計は残ります。',
-      who_title: 'あなたはどれですか？',
-      who_message: '自分の名前を選ぶと、各会計のあなたの分が自分の帳簿に入ります。',
-      who_new: 'リストにいません',
     },
     share: {
       row: 'このアルバムを共有',
@@ -2998,10 +2994,6 @@ const ja = {
     bill: {
       delete_shared: 'この会計は共有アルバムにあります。削除すると全員の分が消えます。',
       remove_shared: 'この会計は共有アルバムにあります。ほかの全員の分も消えます。',
-      confirm_account: '口座を確認',
-      confirm_paid_by: '{{name}}さんによるとあなたが支払いました。口座を選んでください。',
-      confirm_paid: 'あなたが支払ったことになっています。口座を選んでください。',
-      changed_by: '{{album}}で{{name}}さんが変更',
       from_album: '{{album}}から',
       shared_album: '共有アルバム',
     },

@@ -10,8 +10,7 @@ import {
   useTransferFeeIndex,
 } from '~/context/AppContext';
 import { albumBillRows, useAlbumBillTarget } from '~/features/albums/hooks/useAlbumBillTarget';
-import { useGroupBillOrigin, useJoinedOthers } from '~/features/albums/hooks/useGroupBillOrigin';
-import { needsAccountConfirm } from '~/features/albums/lib/albumGroup';
+import { useGroupBillOrigin, useGroupOthers } from '~/features/albums/hooks/useGroupBillOrigin';
 import type { InstalmentChoice } from '~/features/instalments/components/InstalmentSheet';
 import { useCanStartInstalmentPlan } from '~/features/instalments/hooks/useCanStartInstalmentPlan';
 import {
@@ -95,14 +94,16 @@ function TransactionEditor({
     detachAlbumBill,
     saveAlbumBillOwnFields,
     albumBillBlock,
-    getReceiptSplitForTransaction,
   } = useApp();
   const { transactions } = useTransactions();
   // A shared album's bill is saved through its group (README: Album members
   // and shared albums): the entry here follows from what the group holds.
   // A bill split by item stays the user's own: the group does not hold its items.
   const albumTarget = useAlbumBillTarget(transaction.id);
-  const albumGroupId = getReceiptSplitForTransaction(transaction.id) ? null : albumTarget;
+  // Only a bill of the group is: an entry of the user's own in a shared album
+  // (a local split bill added to it, say) is edited as their own.
+  const albumGroupId =
+    transaction.albumGroupId && albumTarget === transaction.albumGroupId ? albumTarget : null;
   // The expense a part payment on a group's bill made follows that payment:
   // split, it would become a bill of its own under the payment's id.
   const isGroupPayment = useMemo(
@@ -154,15 +155,12 @@ function TransactionEditor({
   const instalmentPlan = transaction.instalmentRuleId
     ? (instalmentPlans.find((plan) => plan.rule.id === transaction.instalmentRuleId) ?? null)
     : null;
-  // A shared album's bill says where it is from and who last changed it, so a
-  // figure that moved has a reason; one someone else said the user paid asks
-  // which account it left (README: Album members and shared albums).
-  const groupOrigin = useGroupBillOrigin(transaction);
-  const confirmAccount = needsAccountConfirm(transaction);
-  const payerExcludedMemberIds = useJoinedOthers(albumGroupId);
-  // A bill the user cannot change (someone else's, or one with payments on
-  // it; README: Who can change what) keeps only their own fields on save, and
+  // A shared album's bill says which album it is from, and, when the user
+  // cannot change it (someone else's, or one with payments on it; README:
+  // Who can change what), why: it keeps only their own fields on save, and
   // has no Delete.
+  const groupOrigin = useGroupBillOrigin(transaction);
+  const groupMembers = useGroupOthers(albumGroupId);
   const billBlock = useMemo(
     () =>
       transaction.albumGroupId && albumGroupId
@@ -178,19 +176,9 @@ function TransactionEditor({
             ? I18n.t('albums.rules.note_not_payer', { name: groupOrigin.payerName })
             : billBlock === 'has_payments'
               ? I18n.t('albums.rules.note_has_payments')
-              : confirmAccount
-                ? groupOrigin.changedBy
-                  ? I18n.t('albums.bill.confirm_paid_by', { name: groupOrigin.changedBy })
-                  : I18n.t('albums.bill.confirm_paid')
-                : groupOrigin.changedBy
-                  ? I18n.t('albums.bill.changed_by', {
-                      name: groupOrigin.changedBy,
-                      album: groupOrigin.albumName ?? I18n.t('albums.bill.shared_album'),
-                    })
-                  : I18n.t('albums.bill.from_album', {
-                      album: groupOrigin.albumName ?? I18n.t('albums.bill.shared_album'),
-                    }),
-        asksAccount: confirmAccount,
+              : I18n.t('albums.bill.from_album', {
+                  album: groupOrigin.albumName ?? I18n.t('albums.bill.shared_album'),
+                }),
         onOpenAlbum: () =>
           navigation.navigate('AlbumDetail', { albumId: groupOrigin.albumId }, { pop: true }),
       }
@@ -610,8 +598,7 @@ function TransactionEditor({
       headerNotice={headerNotice}
       albumNote={albumNote}
       lockedReason={billBlock ? I18n.t(`albums.rules.${billBlock}`) : undefined}
-      payerExcludedMemberIds={payerExcludedMemberIds}
-      startWithoutAccount={confirmAccount}
+      groupMembers={groupMembers}
       instalmentOptions={instalmentOptions}
       subtitleOverride={
         isBalanceAdjustment

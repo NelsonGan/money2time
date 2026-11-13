@@ -1989,7 +1989,6 @@
         "paidTitle": "돌려받음",
         "personPaid": "{name} 님이 결제",
         "sharedAlbum": "공유 앨범",
-        "confirmAccount": "앱에서 계좌 확인",
         "undoTitle": "이 몫을 미정산으로 되돌릴까요?",
         "undoBody": "다시 받을 돈으로 돌아가고, 지출도 이 금액만큼 다시 늘어나요. 다른 계좌로 들어온 정산 이체는 삭제돼요.",
         "itemizedTotal": "합계: {sum}",

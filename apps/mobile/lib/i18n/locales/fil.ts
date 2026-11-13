@@ -3007,7 +3007,7 @@ const fil = {
       split_with: 'Hatiin kasama',
       me_tag: 'Ikaw',
       joined: 'Sumali na',
-      not_joined: 'Hindi pa sumasali',
+      left: 'Umalis na',
       add_person: 'Magdagdag ng tao',
       add: 'Idagdag',
       unnamed: 'Kaibigan',
@@ -3015,13 +3015,9 @@ const fil = {
       full: 'Hanggang {{max}} tao ang puwedeng kahati sa isang album.',
       remove_title: 'Alisin si {{name}}?',
       remove_message: 'Hindi na sila kahati sa mga bagong bill sa album na ito.',
-      remove_in_use: 'Nasa isang bill sa album na ito si {{name}}. Alisin muna sila sa mga bill.',
       remove_joined_title: 'Alisin si {{name}} sa album?',
       remove_joined_message:
         'Hindi na nila matatanggap ang mga bill ng album na ito. Mananatili ang mga bill na kasama sila.',
-      who_title: 'Alin ka rito?',
-      who_message: 'Piliin ang pangalan mo para mapunta sa ledger mo ang bahagi mo sa bawat bill.',
-      who_new: 'Wala ako sa listahan',
     },
     share: {
       row: 'Ibahagi ang album na ito',
@@ -3062,10 +3058,6 @@ const fil = {
       delete_shared:
         'Nasa shared na album ang bill na ito. Kapag binura mo, mawawala ito para sa lahat.',
       remove_shared: 'Nasa shared na album ang bill na ito. Mawawala ito para sa lahat ng iba.',
-      confirm_account: 'Kumpirmahin ang account',
-      confirm_paid_by: 'Sabi ni {{name}}, ikaw ang nagbayad. Piliin ang account.',
-      confirm_paid: 'Ikaw ang nakalistang nagbayad. Piliin ang account.',
-      changed_by: 'Binago ni {{name}} sa {{album}}',
       from_album: 'Mula sa {{album}}',
       shared_album: 'Shared na album',
     },

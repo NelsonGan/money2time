@@ -319,8 +319,6 @@ export function TxList({ txs, pageSize = 30, selection, onPage }: { txs: Tx[]; p
                     {tx.paidBy !== undefined ? <Pill tone={account ? "neutral" : "warn"}>{te("split.personPaid", { name: tx.paidBy || te("split.someone") })}</Pill> : null}
                     {/* A shared album's bill: someone else can add, change or remove it (the app's people mark). */}
                     {tx.albumGroupId ? <Pill>{te("split.sharedAlbum")}</Pill> : null}
-                    {/* Someone else said the user paid it: it waits for an account, picked in the app. */}
-                    {tx.confirmAccount ? <Pill tone="warn">{te("split.confirmAccount")}</Pill> : null}
                     {category ? <span className="truncate">{parent ? `${parent.name} · ${category.name}` : category.name}</span> : null}
                     {account ? (
                       <span className="inline-flex items-center gap-1 truncate">

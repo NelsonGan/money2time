@@ -5,7 +5,7 @@ import { useApp } from '~/context/AppContext';
 import { useIsPro } from '~/context/ProContext';
 import { albumBillRows, useAlbumBillTarget } from '~/features/albums/hooks/useAlbumBillTarget';
 import { useAlbumGroup } from '~/features/albums/hooks/useAlbumGroup';
-import { useJoinedOthers } from '~/features/albums/hooks/useGroupBillOrigin';
+import { useGroupOthers } from '~/features/albums/hooks/useGroupBillOrigin';
 import { splitWithPeople } from '~/features/albums/lib/albumPeople';
 import {
   DEFAULT_INSTALMENT_CHOICE,
@@ -75,8 +75,8 @@ export function AddTransactionScreen({
     [activeAlbumId, addTransactionsToAlbum, albumId],
   );
   const groupBill = albumGroupId !== null && albumGroup.self !== null;
-  // Only you can say you paid: Paid by leaves out everyone else who joined.
-  const payerExcludedMemberIds = useJoinedOthers(albumGroupId);
+  // A shared album's bill is split only between people who joined it.
+  const groupMembers = useGroupOthers(albumGroupId);
   const isPro = useIsPro();
   const withinSplitLimit =
     isPro || groupBill || getUnpaidSplitBillCount() < PRO_LIMITS.FREE_MAX_UNSETTLED_SPLIT_BILLS;
@@ -229,7 +229,7 @@ export function AddTransactionScreen({
       // Split with the album's people: Add shows the split before it saves.
       confirmSplitBeforeAdd={splitWith.length > 0}
       groupBill={groupBill}
-      payerExcludedMemberIds={payerExcludedMemberIds}
+      groupMembers={groupBill ? groupMembers : undefined}
     />
   );
 }

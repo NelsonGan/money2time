@@ -2927,7 +2927,7 @@ const ko = {
       split_with: '함께 나누기',
       me_tag: '나',
       joined: '참여함',
-      not_joined: '아직 참여 안 함',
+      left: '나감',
       add_person: '사람 추가',
       add: '추가',
       unnamed: '친구',
@@ -2935,13 +2935,9 @@ const ko = {
       full: '앨범 하나는 최대 {{max}}명과 나눌 수 있어요.',
       remove_title: '{{name}} 님을 삭제할까요?',
       remove_message: '이 앨범의 새 청구는 더 이상 이 사람과 나누지 않아요.',
-      remove_in_use: '{{name}} 님이 이 앨범의 청구에 포함되어 있어요. 먼저 청구에서 빼 주세요.',
       remove_joined_title: '{{name}} 님을 앨범에서 내보낼까요?',
       remove_joined_message:
         '이 사람은 이 앨범의 청구를 더 이상 받지 않아요. 포함된 청구는 그대로 남아요.',
-      who_title: '누가 본인인가요?',
-      who_message: '이름을 선택하면 각 청구의 내 몫이 내 장부에 들어와요.',
-      who_new: '목록에 없어요',
     },
     share: {
       row: '이 앨범 공유',
@@ -2978,10 +2974,6 @@ const ko = {
     bill: {
       delete_shared: '이 청구는 공유 앨범에 있어요. 삭제하면 모두에게서 사라져요.',
       remove_shared: '이 청구는 공유 앨범에 있어요. 다른 모든 사람에게서도 사라져요.',
-      confirm_account: '계좌 확인',
-      confirm_paid_by: '{{name}}님이 내가 결제했다고 했어요. 계좌를 골라 주세요.',
-      confirm_paid: '내가 결제한 것으로 되어 있어요. 계좌를 골라 주세요.',
-      changed_by: '{{album}}에서 {{name}}님이 변경',
       from_album: '{{album}}에서',
       shared_album: '공유 앨범',
     },

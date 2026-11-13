@@ -1989,7 +1989,6 @@
         "paidTitle": "Zurückgezahlt",
         "personPaid": "{name} hat bezahlt",
         "sharedAlbum": "Geteiltes Album",
-        "confirmAccount": "Konto in der App bestätigen",
         "undoTitle": "Diesen Anteil als unbezahlt markieren?",
         "undoBody": "Er wird dir wieder geschuldet, und die Ausgabe steigt wieder um diesen Betrag. Eine Rückzahlungsumbuchung auf ein anderes Konto wird entfernt.",
         "itemizedTotal": "Gesamt: {sum}",

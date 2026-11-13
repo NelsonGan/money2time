@@ -1,7 +1,6 @@
 import {
   ArrowRight,
   CalendarRange,
-  CircleAlert,
   GripVertical,
   Undo2,
   UserRound,
@@ -23,7 +22,6 @@ import { AccountLogo, CategoryEmoji, Text, TimeValueInline } from '~/components/
 import { motionDurations } from '~/constants/motion';
 import { useApp } from '~/context/AppContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
-import { needsAccountConfirm } from '~/features/albums/lib/albumGroup';
 import { PersonAvatar } from '~/features/sharedLedgers/components/PersonAvatar';
 import { shortName, useOpenLedgerPeople } from '~/features/sharedLedgers/lib/ledgerPeople';
 import {
@@ -233,7 +231,6 @@ export function TransactionAccountBadge({
   compact,
   className,
   person = false,
-  confirm = false,
 }: {
   account?: Account;
   label: string;
@@ -241,8 +238,6 @@ export function TransactionAccountBadge({
   className?: string;
   /** The pill names a person (the friend who paid the bill), not an account. */
   person?: boolean;
-  /** The pill asks for an account (a shared album's bill waiting to be confirmed). */
-  confirm?: boolean;
 }) {
   const themeColors = useThemeColors();
   const labelSizeClass = compact ? 'text-[10px] leading-[12px]' : 'text-[11px] leading-[14px]';
@@ -256,10 +251,6 @@ export function TransactionAccountBadge({
       {person ? (
         <View className="pl-0.5">
           <UserRound size={compact ? 10 : 12} color={themeColors.primary} />
-        </View>
-      ) : confirm ? (
-        <View className="pl-0.5">
-          <CircleAlert size={compact ? 10 : 12} color={themeColors.primary} />
         </View>
       ) : (
         <AccountLogo
@@ -340,13 +331,8 @@ const TransactionItemBody = memo(
       transaction.splitsSummary?.youOwe && !transaction.accountId
         ? billPayer(transaction.splits)
         : null;
-    // A shared album's bill someone else said the user paid waits for its
-    // account, and says so even with account badges switched off: it is
-    // something to do, not a detail.
-    const confirmAccount = needsAccountConfirm(transaction);
-    const accountSubtitleLabel = confirmAccount
-      ? I18n.t('albums.bill.confirm_account')
-      : !isTransfer && appSettings.showTransactionAccount
+    const accountSubtitleLabel =
+      !isTransfer && appSettings.showTransactionAccount
         ? (transaction.accountName ??
           (friendPayer
             ? I18n.t('transactions.settleUp.person_paid', {
@@ -613,7 +599,6 @@ const TransactionItemBody = memo(
                 label={accountSubtitleLabel}
                 compact={compact}
                 person={!!friendPayer}
-                confirm={confirmAccount}
                 className={compact ? 'min-w-[40px] shrink' : 'min-w-[44px] shrink'}
               />
               <InstalmentPill label={instalmentLabel} compact={compact} />
@@ -624,7 +609,6 @@ const TransactionItemBody = memo(
               label={accountSubtitleLabel}
               compact={compact}
               person={!!friendPayer}
-              confirm={confirmAccount}
               className={accountBadgeMarginClassName}
             />
           ) : instalmentLabel ? (

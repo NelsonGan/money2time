@@ -2946,7 +2946,7 @@ const vi = {
       split_with: 'Chia với',
       me_tag: 'Bạn',
       joined: 'Đã tham gia',
-      not_joined: 'Chưa tham gia',
+      left: 'Đã rời',
       add_person: 'Thêm người',
       add: 'Thêm',
       unnamed: 'Bạn bè',
@@ -2954,14 +2954,9 @@ const vi = {
       full: 'Một album được chia với tối đa {{max}} người.',
       remove_title: 'Xóa {{name}}?',
       remove_message: 'Các hóa đơn mới trong album này sẽ không còn chia với người đó.',
-      remove_in_use:
-        '{{name}} có trong một hóa đơn của album này. Hãy bỏ họ khỏi các hóa đơn trước.',
       remove_joined_title: 'Xóa {{name}} khỏi album?',
       remove_joined_message:
         'Họ sẽ không còn nhận hóa đơn của album này. Các hóa đơn có họ vẫn được giữ.',
-      who_title: 'Bạn là ai trong số này?',
-      who_message: 'Chọn tên của bạn để phần của bạn trong mỗi hóa đơn vào sổ của bạn.',
-      who_new: 'Tôi không có trong danh sách',
     },
     share: {
       row: 'Chia sẻ album này',
@@ -2999,10 +2994,6 @@ const vi = {
     bill: {
       delete_shared: 'Hóa đơn này nằm trong album chung. Xóa nó sẽ gỡ khỏi mọi người.',
       remove_shared: 'Hóa đơn này nằm trong album chung. Nó sẽ bị gỡ khỏi mọi người khác.',
-      confirm_account: 'Xác nhận tài khoản',
-      confirm_paid_by: '{{name}} nói bạn đã trả. Chọn tài khoản.',
-      confirm_paid: 'Bạn được ghi là người trả. Chọn tài khoản.',
-      changed_by: '{{name}} đã sửa trong {{album}}',
       from_album: 'Từ {{album}}',
       shared_album: 'Album chung',
     },

@@ -2978,7 +2978,7 @@ const id = {
       split_with: 'Bagi dengan',
       me_tag: 'Kamu',
       joined: 'Sudah bergabung',
-      not_joined: 'Belum bergabung',
+      left: 'Keluar',
       add_person: 'Tambah orang',
       add: 'Tambah',
       unnamed: 'Teman',
@@ -2986,13 +2986,9 @@ const id = {
       full: 'Satu album dibagi dengan paling banyak {{max}} orang.',
       remove_title: 'Hapus {{name}}?',
       remove_message: 'Tagihan baru di album ini tidak lagi dibagi dengannya.',
-      remove_in_use: '{{name}} ada di sebuah tagihan di album ini. Keluarkan dulu dari tagihannya.',
       remove_joined_title: 'Keluarkan {{name}} dari album?',
       remove_joined_message:
         'Dia tidak lagi menerima tagihan album ini. Tagihan yang memuatnya tetap ada.',
-      who_title: 'Yang mana kamu?',
-      who_message: 'Pilih namamu agar bagianmu dari tiap tagihan masuk ke buku kasmu.',
-      who_new: 'Saya tidak ada di daftar',
     },
     share: {
       row: 'Bagikan album ini',
@@ -3033,10 +3029,6 @@ const id = {
         'Tagihan ini ada di album bersama. Menghapusnya akan menghapusnya untuk semua orang.',
       remove_shared:
         'Tagihan ini ada di album bersama. Tagihan akan dihapus untuk semua orang lain.',
-      confirm_account: 'Konfirmasi akun',
-      confirm_paid_by: 'Menurut {{name}}, Anda yang membayar. Pilih akunnya.',
-      confirm_paid: 'Anda tercatat sebagai pembayar. Pilih akunnya.',
-      changed_by: 'Diubah oleh {{name}} di {{album}}',
       from_album: 'Dari {{album}}',
       shared_album: 'Album bersama',
     },

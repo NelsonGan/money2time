@@ -1989,7 +1989,6 @@
         "paidTitle": "Geri ödendi",
         "personPaid": "{name} ödedi",
         "sharedAlbum": "Paylaşılan albüm",
-        "confirmAccount": "Hesabı uygulamada onaylayın",
         "undoTitle": "Bu pay ödenmedi olarak işaretlensin mi?",
         "undoBody": "Tutar yeniden size borçlu olur ve gider bu tutar kadar artar. Başka bir hesaba yapılan geri ödeme transferi kaldırılır.",
         "itemizedTotal": "Toplam: {sum}",

@@ -2983,7 +2983,7 @@ const pt = {
       split_with: 'Dividir com',
       me_tag: 'Você',
       joined: 'Entrou',
-      not_joined: 'Ainda não entrou',
+      left: 'Saiu',
       add_person: 'Adicionar pessoa',
       add: 'Adicionar',
       unnamed: 'Amigo',
@@ -2991,13 +2991,9 @@ const pt = {
       full: 'Um álbum é dividido com até {{max}} pessoas.',
       remove_title: 'Remover {{name}}?',
       remove_message: 'As novas contas deste álbum não serão mais divididas com essa pessoa.',
-      remove_in_use: '{{name}} está em uma conta deste álbum. Tire a pessoa das contas primeiro.',
       remove_joined_title: 'Remover {{name}} do álbum?',
       remove_joined_message:
         'A pessoa deixa de receber as contas deste álbum. As contas em que ela está permanecem.',
-      who_title: 'Qual deles é você?',
-      who_message: 'Escolha seu nome para que sua parte de cada conta chegue ao seu livro.',
-      who_new: 'Não estou na lista',
     },
     share: {
       row: 'Compartilhar este álbum',
@@ -3038,10 +3034,6 @@ const pt = {
       delete_shared: 'Esta conta está em um álbum compartilhado. Excluí-la a remove para todos.',
       remove_shared:
         'Esta conta está em um álbum compartilhado. Ela será removida para todos os outros.',
-      confirm_account: 'Confirmar conta',
-      confirm_paid_by: '{{name}} diz que você pagou. Escolha a conta.',
-      confirm_paid: 'Marcado como pago por você. Escolha a conta.',
-      changed_by: 'Alterado por {{name}} em {{album}}',
       from_album: 'De {{album}}',
       shared_album: 'Álbum compartilhado',
     },

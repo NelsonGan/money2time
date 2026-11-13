@@ -114,8 +114,12 @@ interface SplitBillModalProps {
    * the page is confirming a new bill's split before it is saved.
    */
   doneLabel?: string;
-  /** Album members Paid by does not offer (joined members of a shared album but the user). */
-  payerExcludedMemberIds?: ReadonlySet<string>;
+  /**
+   * A shared album's bill: the people it can be split with (everyone who
+   * joined but the user). Rows are added from this list, never typed, their
+   * names are not edited, and there is no Paid by: the user paid.
+   */
+  groupMembers?: readonly { id: string; name: string }[];
   /** Current parent expense amount (already reduced by any paid splits). */
   total: number;
   defaultAccountId: string | null;
@@ -316,7 +320,7 @@ export function SplitBillModal({
   onCancel,
   onDone,
   doneLabel,
-  payerExcludedMemberIds,
+  groupMembers,
   total,
   defaultAccountId,
   splits,
@@ -499,11 +503,6 @@ export function SplitBillModal({
       splits.flatMap((row, index) => {
         // A friend who has paid the user back is not the one who paid the bill.
         if (row.paid && !row.isSelf) return [];
-        // Only you can say you paid: someone who joined the album says so
-        // themselves (README: Who can change what).
-        if (!row.isSelf && row.albumMemberId && payerExcludedMemberIds?.has(row.albumMemberId)) {
-          return [];
-        }
         return [
           {
             key: row.id ?? `row_${index}`,
@@ -516,7 +515,7 @@ export function SplitBillModal({
           },
         ];
       }),
-    [friendPaid, me.name, payerExcludedMemberIds, payerRow, splits],
+    [friendPaid, me.name, payerRow, splits],
   );
 
   const handlePayerChange = useCallback(
@@ -645,6 +644,37 @@ export function SplitBillModal({
     }
     onChange(splitEvenly ? applyEvenSplit(next) : autoBalanceSelf(next, total));
   }, [applyEvenSplit, defaultAccountId, itemized, onChange, splitEvenly, splits, total]);
+
+  // A shared album's bill adds people who joined it, not typed names.
+  const addableMembers = useMemo(
+    () =>
+      (groupMembers ?? []).filter(
+        (member) => !splits.some((row) => !row.isSelf && row.albumMemberId === member.id),
+      ),
+    [groupMembers, splits],
+  );
+  const handleAddMember = useCallback(
+    (member: { id: string; name: string }) => {
+      void triggerHaptic('selection');
+      const next: SplitDraft[] = [
+        ...splits,
+        {
+          id: newId(),
+          personName: member.name,
+          amount: '0',
+          isSelf: false,
+          paybackAccountId: defaultAccountId,
+          albumMemberId: member.id,
+        },
+      ];
+      if (itemized) {
+        onChange(next);
+        return;
+      }
+      onChange(splitEvenly ? applyEvenSplit(next) : autoBalanceSelf(next, total));
+    },
+    [applyEvenSplit, defaultAccountId, itemized, onChange, splitEvenly, splits, total],
+  );
 
   const handleRemove = useCallback(
     (index: number) => {
@@ -889,9 +919,9 @@ export function SplitBillModal({
           {/* How the bill is settled, in one card: who paid it (Me, or a friend
               on it, in which case the user owes them their own share), and
               whether it is shared evenly. */}
-          {hasFriends || !itemized ? (
+          {(hasFriends && !groupMembers) || !itemized ? (
             <View className="mx-4 mt-3 overflow-hidden rounded-[20px] border border-border/25 bg-card/60">
-              {hasFriends ? (
+              {hasFriends && !groupMembers ? (
                 <Pressable
                   onPress={() => {
                     if (payerLocked) {
@@ -930,7 +960,9 @@ export function SplitBillModal({
                   <ChevronRight size={16} color={themeColors.textMuted} />
                 </Pressable>
               ) : null}
-              {hasFriends && !itemized ? <View className="mx-4 h-[1px] bg-border/15" /> : null}
+              {hasFriends && !groupMembers && !itemized ? (
+                <View className="mx-4 h-[1px] bg-border/15" />
+              ) : null}
               {!itemized ? (
                 <View className="flex-row items-center px-4 py-2">
                   <Text variant="body" className="flex-1">
@@ -1012,7 +1044,7 @@ export function SplitBillModal({
 
                   <TextInput
                     value={row.isSelf ? me.name : row.personName}
-                    editable={!row.isSelf && !disabledRow}
+                    editable={!row.isSelf && !disabledRow && !groupMembers}
                     onFocus={() => handleNameFocus(index)}
                     onBlur={handleNameBlur}
                     onChangeText={(text) => handleNameChange(index, text)}
@@ -1135,17 +1167,45 @@ export function SplitBillModal({
 
             <View className="h-[1px] bg-border/15 mx-4" />
 
-            <Pressable
-              onPress={handleAddPerson}
-              className="flex-row items-center gap-3 px-4 py-3.5"
-            >
-              <View className="h-7 w-7 rounded-full bg-primary/15 items-center justify-center">
-                <Plus size={14} color={themeColors.primary} />
-              </View>
-              <Text variant="body" className="text-primary font-medium">
-                {I18n.t('transactions.editor.split.add_person')}
-              </Text>
-            </Pressable>
+            {groupMembers ? (
+              // A shared album's bill: the people who joined and are not on
+              // it yet, one tap each.
+              addableMembers.length > 0 ? (
+                <View className="flex-row flex-wrap gap-2 px-4 py-3">
+                  {addableMembers.map((member) => (
+                    <Pressable
+                      key={member.id}
+                      onPress={() => handleAddMember(member)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${I18n.t('transactions.editor.split.add_person')}: ${member.name}`}
+                      className="flex-row items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 py-1 pl-1 pr-3 active:opacity-70"
+                    >
+                      <PersonAvatar
+                        name={member.name}
+                        partyKey={debtPartyKey(member.name)}
+                        size={22}
+                      />
+                      <Plus size={12} color={themeColors.primary} />
+                      <Text variant="caption" className="font-medium text-primary">
+                        {member.name}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
+              ) : null
+            ) : (
+              <Pressable
+                onPress={handleAddPerson}
+                className="flex-row items-center gap-3 px-4 py-3.5"
+              >
+                <View className="h-7 w-7 rounded-full bg-primary/15 items-center justify-center">
+                  <Plus size={14} color={themeColors.primary} />
+                </View>
+                <Text variant="body" className="text-primary font-medium">
+                  {I18n.t('transactions.editor.split.add_person')}
+                </Text>
+              </Pressable>
+            )}
           </View>
 
           {/* Tax & service: a percentage stepper applied

@@ -9,11 +9,10 @@ import { getSQLite } from '~/lib/db/client';
 import { DEFAULT_LEDGER_ID } from '~/lib/db/ledgerScope';
 import { I18n } from '~/lib/i18n';
 import { albumGroupsRepository } from '~/lib/repositories/albumGroupsRepository';
-import { parseAlbumPeople } from '~/lib/repositories/mappers';
 import type { AlbumExpense, AlbumMember, AlbumSettlement } from '~/types';
 import { nowIso } from '~/utils/id';
 
-import { cleanPersonName, personNameKey } from '../lib/albumPeople';
+import { cleanPersonName } from '../lib/albumPeople';
 
 const cache = new Map<string, AlbumMember[]>();
 const expenseCache = new Map<string, AlbumExpense[]>();
@@ -172,15 +171,13 @@ export function ensureLocalAlbum(share: { ledgerId: string; name: string | null 
 }
 
 /**
- * An album just shared from this phone: its group starts with the user and
- * the people the album was split with, who keep their ids, so the shares
- * already on the album's bills stay theirs.
+ * An album just made shared on this phone (an album is shared when it is
+ * created, never later): its group starts with the user alone; the others
+ * join with its link.
  */
 export function beginAlbumGroup(albumId: string, self: { userId: string; name: string }): void {
-  const album = albumRow(albumId);
-  if (!album) return;
+  if (!albumRow(albumId)) return;
   const existing = albumGroupsRepository.listAllMembers(albumId);
-  const ids = new Set(existing.map((member) => member.id));
   if (!existing.some((member) => member.userId === self.userId && !member.deletedAt)) {
     albumGroupsRepository.createMember(albumId, {
       name: cleanPersonName(self.name),
@@ -188,51 +185,21 @@ export function beginAlbumGroup(albumId: string, self: { userId: string; name: s
       sortOrder: 0,
     });
   }
-  parseAlbumPeople(album.split_with_json).forEach((person, index) => {
-    if (ids.has(person.id)) return;
-    albumGroupsRepository.createMember(albumId, {
-      id: person.id,
-      name: person.name,
-      sortOrder: index + 1,
-    });
-  });
   notifyAlbumGroups();
 }
 
 /**
  * An album that is no longer shared on this phone (sharing stopped, the user
  * left or was removed, or signed out): it goes on as an album of the user's
- * own, split with the same people by name. The group's rows leave the phone
- * without recording deletions, since the group is not this phone's to delete;
- * the user's own entries for its bills stay, as ordinary split bills.
- * `selfUserId`: the account this phone was in the group as.
+ * own. The group's rows leave the phone without recording deletions, since
+ * the group is not this phone's to delete, and the group keeps everything the
+ * user wrote, so nobody else's bills or balances change; the user's own
+ * entries for its bills stay, as ordinary split bills (settled on the
+ * Balances page). `selfUserId`: the account this phone was in the group as.
  */
-export function releaseAlbumGroup(groupId: string, selfUserId: string | null): void {
+export function releaseAlbumGroup(groupId: string, _selfUserId: string | null): void {
   const db = getSQLite();
   const now = nowIso();
-  const album = albumRow(groupId);
-  if (album) {
-    const seen = new Set<string>();
-    const people = albumGroupsRepository
-      .listMembers(groupId)
-      .filter((member) => !selfUserId || member.userId !== selfUserId)
-      .filter((member) => {
-        const key = personNameKey(member.name);
-        if (!key || seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      })
-      .map((member) => ({ id: member.id, name: member.name }));
-    // Only when the group's members were here: a phone that never took them
-    // down keeps the people the album already had.
-    if (people.length) {
-      db.runSync('UPDATE albums SET split_with_json = ?, updated_at = ? WHERE id = ?', [
-        JSON.stringify(people),
-        now,
-        groupId,
-      ]);
-    }
-  }
   db.runSync(
     'UPDATE transactions SET album_group_id = NULL, updated_at = ? WHERE album_group_id = ?',
     [now, groupId],

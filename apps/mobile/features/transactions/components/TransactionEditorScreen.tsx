@@ -485,11 +485,9 @@ interface TransactionEditorScreenProps {
   headerNotice?: { label: string; actionLabel: string; onPress: () => void };
   /**
    * A shared album's bill: a line under the amount saying which album it is
-   * from and who last changed it, which opens the album; or, while the bill
-   * waits for the user's account (`asksAccount`), who said they paid it,
-   * which opens the account picker.
+   * from (or why the user cannot change it), which opens the album.
    */
-  albumNote?: { label: string; onOpenAlbum: () => void; asksAccount?: boolean };
+  albumNote?: { label: string; onOpenAlbum: () => void };
   /**
    * A shared album's bill the user cannot change (someone else's, or one
    * with payments on it): the amount, day, title and split stay as they are,
@@ -498,16 +496,11 @@ interface TransactionEditorScreenProps {
    */
   lockedReason?: string;
   /**
-   * A shared album's members Paid by does not offer (everyone who has joined
-   * but the user; README: Who can change what).
+   * A shared album's bill: the people it can be split with (README: Album
+   * members and shared albums). Split Bill adds only these, and the user is
+   * always the payer.
    */
-  payerExcludedMemberIds?: ReadonlySet<string>;
-  /**
-   * Opens on no account even when `initialValues` has none, so one has to be
-   * picked before saving (a shared album's bill someone else said the user
-   * paid). Without it an edit with no account starts on the first account.
-   */
-  startWithoutAccount?: boolean;
+  groupMembers?: readonly { id: string; name: string }[];
   /** The fee a transfer being edited already has. */
   initialTransferFee?: TransferFeeDraft | null;
   /**
@@ -753,8 +746,7 @@ export function TransactionEditorScreen({
   headerNotice,
   albumNote,
   lockedReason,
-  payerExcludedMemberIds,
-  startWithoutAccount = false,
+  groupMembers,
   initialTransferFee = null,
 }: TransactionEditorScreenProps) {
   const {
@@ -836,11 +828,7 @@ export function TransactionEditorScreen({
   const initialSingleAccountId =
     initialValues?.accountId ??
     initialAccountId ??
-    (startWithoutAccount
-      ? null
-      : mode === 'create'
-        ? quickDefaultAccountId
-        : (accounts[0]?.id ?? null));
+    (mode === 'create' ? quickDefaultAccountId : (accounts[0]?.id ?? null));
   const initialFromSelectionId =
     initialValues?.fromAccountId ?? (mode === 'create' ? null : (accounts[0]?.id ?? null));
   const initialToSelectionId =
@@ -2131,7 +2119,7 @@ export function TransactionEditorScreen({
         onDone: handleDoneSplitBill,
         // Read from the ref, so the publish made as the page opens has it.
         doneLabel: splitConfirmRef.current ? I18n.t('transactions.editor.title_create') : undefined,
-        payerExcludedMemberIds,
+        groupMembers,
         onCancel: handleCancelSplitBill,
       });
     },
@@ -2149,7 +2137,7 @@ export function TransactionEditorScreen({
       groupBill,
       mode,
       newlyPaidIds,
-      payerExcludedMemberIds,
+      groupMembers,
       setSplitSession,
       settings,
     ],
@@ -4992,27 +4980,14 @@ export function TransactionEditorScreen({
                     <Pressable
                       onPress={() => {
                         void triggerHaptic('selection');
-                        if (albumNote.asksAccount && !accountId) activateField('account');
-                        else albumNote.onOpenAlbum();
+                        albumNote.onOpenAlbum();
                       }}
                       hitSlop={6}
                       accessibilityRole="button"
                       className="mt-0.5 flex-row items-center gap-1 self-start active:opacity-70"
                     >
-                      <UsersRound
-                        size={12}
-                        color={
-                          albumNote.asksAccount && !accountId
-                            ? themeColors.primary
-                            : themeColors.textMuted
-                        }
-                      />
-                      <Text
-                        variant="caption"
-                        tone={albumNote.asksAccount && !accountId ? 'primary' : 'muted'}
-                        numberOfLines={1}
-                        className="shrink"
-                      >
+                      <UsersRound size={12} color={themeColors.textMuted} />
+                      <Text variant="caption" tone="muted" numberOfLines={1} className="shrink">
                         {albumNote.label}
                       </Text>
                     </Pressable>

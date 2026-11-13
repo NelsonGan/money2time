@@ -12,7 +12,7 @@ import { type AlbumGroupPerson, albumPeople, selfMember } from '../lib/albumPeop
 import { listGroupMembers, subscribeAlbumGroups } from '../services/albumGroupStore';
 
 export interface AlbumGroup {
-  /** Whether the album can be split with people: never one in a shared ledger. */
+  /** Whether the album is split with people: a shared album, never one in a shared ledger. */
   available: boolean;
   /** Whether it can be shared: only an album of the main ledger, while that is not shared. */
   canShare: boolean;
@@ -24,12 +24,6 @@ export interface AlbumGroup {
   others: AlbumGroupPerson[];
   /** Shared albums: the user's own member, or null until they are on its list. */
   self: AlbumMember | null;
-  /**
-   * Shared albums: the user joined and has to say which name on the list is
-   * theirs. Only while there is a name nobody has taken: with none to pick
-   * they are put on the list as themselves, unasked (`syncAlbumGroups`).
-   */
-  mustClaim: boolean;
   /** Shared albums: the group's live members. */
   members: AlbumMember[];
 }
@@ -63,13 +57,12 @@ export function useAlbumGroup(album: Album | null | undefined): AlbumGroup {
     const people = album ? albumPeople(album, share ? members : null, share?.userId, meLabel) : [];
     const self = share ? selfMember(members, share.userId) : null;
     return {
-      available: !!album && canSplit,
+      available: !!album && canSplit && !!share,
       canShare: !!album && canShare,
       share,
       people,
       others: people.filter((person) => !person.isSelf),
       self,
-      mustClaim: !!share && !self && members.some((member) => !member.userId),
       members,
     };
   }, [album, canShare, canSplit, meLabel, members, share]);

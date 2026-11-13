@@ -1989,7 +1989,6 @@
         "paidTitle": "Zwrócono",
         "personPaid": "{name} zapłacił(a)",
         "sharedAlbum": "Udostępniony album",
-        "confirmAccount": "Potwierdź konto w aplikacji",
         "undoTitle": "Oznaczyć ten udział jako niezapłacony?",
         "undoBody": "Znów jest Ci winien, a wydatek rośnie o tę kwotę. Przelew zwrotny na inne konto zostanie usunięty.",
         "itemizedTotal": "Razem: {sum}",

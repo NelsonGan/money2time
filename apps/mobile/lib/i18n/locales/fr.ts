@@ -3003,7 +3003,7 @@ const fr = {
       split_with: 'Partager avec',
       me_tag: 'Vous',
       joined: 'A rejoint',
-      not_joined: 'Pas encore rejoint',
+      left: 'Parti',
       add_person: 'Ajouter une personne',
       add: 'Ajouter',
       unnamed: 'Ami',
@@ -3012,14 +3012,9 @@ const fr = {
       remove_title: 'Retirer {{name}} ?',
       remove_message:
         'Les nouvelles notes de cet album ne seront plus partagées avec cette personne.',
-      remove_in_use: "{{name}} figure sur une note de cet album. Retirez-la d'abord de ses notes.",
       remove_joined_title: "Retirer {{name}} de l'album ?",
       remove_joined_message:
         'Cette personne ne recevra plus les notes de cet album. Les notes où elle figure restent.',
-      who_title: 'Lequel êtes-vous ?',
-      who_message:
-        'Choisissez votre nom pour que votre part de chaque note arrive dans votre livre.',
-      who_new: 'Je ne suis pas dans la liste',
     },
     share: {
       row: 'Partager cet album',
@@ -3061,10 +3056,6 @@ const fr = {
         'Cette note est dans un album partagé. La supprimer la retire pour tout le monde.',
       remove_shared:
         'Cette note est dans un album partagé. Elle sera retirée pour tous les autres.',
-      confirm_account: 'Confirmer le compte',
-      confirm_paid_by: '{{name}} indique que vous avez payé. Choisissez le compte.',
-      confirm_paid: 'Indiqué comme payé par vous. Choisissez le compte.',
-      changed_by: 'Modifié par {{name}} dans {{album}}',
       from_album: 'De {{album}}',
       shared_album: 'Album partagé',
     },

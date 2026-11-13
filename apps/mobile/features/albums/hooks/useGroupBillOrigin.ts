@@ -55,18 +55,16 @@ export function useGroupBillOrigin(
 }
 
 /**
- * The album members the user cannot name as a bill's payer: everyone who has
- * joined but them (README: Who can change what). Empty for an album that is
- * not shared.
+ * Everyone in a shared album but the user, the people a bill of it can be
+ * split with (only those who joined; README: Album members and shared
+ * albums). Empty for an album that is not shared.
  */
-export function useJoinedOthers(groupId: string | null): ReadonlySet<string> {
+export function useGroupOthers(groupId: string | null): readonly { id: string; name: string }[] {
   const members = useSyncExternalStore(subscribeAlbumGroups, () => listGroupMembers(groupId));
   return useMemo(() => {
     const userId = groupId ? (sharedAlbumFor(groupId)?.userId ?? null) : null;
-    return new Set(
-      members
-        .filter((member) => !!member.userId && member.userId !== userId)
-        .map((member) => member.id),
-    );
+    return members
+      .filter((member) => member.userId !== userId)
+      .map((member) => ({ id: member.id, name: member.name }));
   }, [groupId, members]);
 }

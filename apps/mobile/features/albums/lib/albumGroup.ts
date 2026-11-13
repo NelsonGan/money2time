@@ -21,9 +21,7 @@
  * running it twice changes nothing.
  */
 
-import { billPayer, owedToPayer } from '~/features/transactions/lib/splitPayer';
-import { splitShareKey } from '~/features/transactions/lib/splitPayments';
-import type { AlbumExpense, AlbumSettlement, AlbumShare, TransactionSplit } from '~/types';
+import type { AlbumExpense, AlbumSettlement, AlbumShare } from '~/types';
 import { normalizeMoneyAmount } from '~/utils/formatters';
 
 type Bill = Pick<AlbumExpense, 'id' | 'amount' | 'paidBy' | 'shares'> &
@@ -398,133 +396,6 @@ export function groupTotals(
     totals.set(bill.currency, entry);
   }
   return totals;
-}
-
-// ---------------------------------------------------------------------------
-// From an album's own split bill to the group's (when an album is shared)
-
-/** A payment already on a split bill, as the settlement it becomes. */
-interface LocalBillPayment {
-  /** The paid row that holds it, which is then stamped with the settlement. */
-  splitId: string;
-  fromMember: string;
-  toMember: string;
-  amount: number;
-  paidAt: string;
-}
-
-/**
- * The group's bill for a split bill the user already has, with the payments
- * on it, so that `localBill` of the result gives the same rows back.
- * `memberOf` names the member a friend's row is with, or null when it has
- * none (a nameless share): such a bill stays the user's own, and null is
- * returned.
- */
-export function groupFromLocalBill(
-  bill: { amount: number },
-  splits: readonly TransactionSplit[],
-  selfId: string,
-  memberOf: (split: TransactionSplit) => string | null,
-): { paidBy: string; shares: AlbumShare[]; amount: number; payments: LocalBillPayment[] } | null {
-  const friends = splits.filter((split) => !split.isSelf);
-  if (!friends.length) return null;
-  const rows: GroupBillRow[] = [];
-  const payments: LocalBillPayment[] = [];
-
-  const owed = owedToPayer([...splits], bill.amount);
-  if (owed) {
-    // A friend paid: the bill is what is left of the user's share, the parts
-    // paid are beside the payer's row, and the friends hold their shares.
-    const payerRow = friends.find((split) => split.id === owed.splitId);
-    const payerId = payerRow ? memberOf(payerRow) : null;
-    if (!payerRow || !payerId) return null;
-    rows.push({ memberId: selfId, amount: owed.total });
-    for (const split of friends) {
-      if (split.partOfSplitId) continue;
-      const memberId = memberOf(split);
-      if (!memberId) return null;
-      rows.push({
-        memberId,
-        amount: split.shareAmount ?? 0,
-        isPayer: split.id === payerRow.id,
-      });
-    }
-    for (const part of owed.payments) {
-      payments.push({
-        splitId: part.splitId,
-        fromMember: selfId,
-        toMember: payerId,
-        amount: part.amount,
-        paidAt: part.paidAt,
-      });
-    }
-    if (owed.paidAt) {
-      payments.push({
-        splitId: owed.splitId,
-        fromMember: selfId,
-        toMember: payerId,
-        amount: owed.amount,
-        paidAt: owed.paidAt,
-      });
-    }
-  } else {
-    // The user paid: every row of a friend's share (what is still owed and
-    // each part paid) adds up to the share, and the expense has dropped by
-    // what was paid back.
-    const memberByShare = new Map<string, string>();
-    for (const split of friends) {
-      if (split.partOfSplitId) continue;
-      const memberId = memberOf(split);
-      if (!memberId) return null;
-      memberByShare.set(splitShareKey(split), memberId);
-    }
-    let paidBack = 0;
-    let friendsTotal = 0;
-    for (const split of friends) {
-      const memberId = memberByShare.get(splitShareKey(split)) ?? memberOf(split);
-      if (!memberId) return null;
-      rows.push({ memberId, amount: split.amount });
-      friendsTotal += cents(split.amount);
-      if (split.paidAt) {
-        paidBack += cents(split.amount);
-        payments.push({
-          splitId: split.id,
-          fromMember: memberId,
-          toMember: selfId,
-          amount: split.amount,
-          paidAt: split.paidAt,
-        });
-      }
-    }
-    const self = splits.find((split) => split.isSelf);
-    const whole = cents(bill.amount) + paidBack;
-    rows.push({
-      memberId: selfId,
-      amount: self ? self.amount : Math.max(0, whole - friendsTotal) / 100,
-    });
-  }
-  const built = billFromRows(rows, selfId);
-  return built ? { ...built, payments } : null;
-}
-
-/**
- * Whether a group's bill is one the user is said to have paid that is on
- * none of their accounts yet: someone else saved it naming them as the payer,
- * so it waits for the user to say which account it left (README: Album
- * members and shared albums).
- */
-export function needsAccountConfirm(
-  tx: { albumGroupId?: string | null; type: string; accountId: string | null } & {
-    splits?: readonly Pick<TransactionSplit, 'isPayer' | 'isSelf' | 'partOfSplitId'>[] | null;
-  },
-): boolean {
-  return (
-    !!tx.albumGroupId &&
-    tx.type === 'expense' &&
-    !tx.accountId &&
-    !!tx.splits?.some((split) => !split.isSelf) &&
-    !billPayer(tx.splits)
-  );
 }
 
 /** Whether a bill that still stands names the member, as its payer or with a share. */

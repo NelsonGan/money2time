@@ -1989,7 +1989,6 @@
         "paidTitle": "Betalt tilbake",
         "personPaid": "{name} betalte",
         "sharedAlbum": "Delt album",
-        "confirmAccount": "Bekreft konto i appen",
         "undoTitle": "Merke denne andelen som ubetalt?",
         "undoBody": "Du har krav på den igjen, og utgiften går opp med dette beløpet. En tilbakebetalingsoverføring til en annen konto fjernes.",
         "itemizedTotal": "Totalt: {sum}",
