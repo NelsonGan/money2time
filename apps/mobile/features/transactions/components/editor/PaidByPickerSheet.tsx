@@ -4,9 +4,8 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '~/components/ui';
-import { ThemeModal } from '~/components/ui/theme-modal';
+import { BottomSheetModal } from '~/components/ui/bottom-sheet-modal';
 import { PersonAvatar } from '~/features/transactions/components/PersonAvatar';
-import { useSheetColumnStyle } from '~/hooks/useSheetColumnStyle';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -38,54 +37,44 @@ interface PaidByPickerSheetProps {
 export function PaidByPickerSheet({ visible, options, onClose, onSelect }: PaidByPickerSheetProps) {
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
-  const sheetColumnStyle = useSheetColumnStyle();
 
   return (
-    <ThemeModal
+    <BottomSheetModal
       visible={visible}
-      transparent
-      animationType="slide"
-      presentationStyle="overFullScreen"
-      onRequestClose={onClose}
+      onClose={onClose}
+      maxHeight="70%"
+      style={{ paddingBottom: Math.max(insets.bottom, 16) + 4 }}
     >
-      <View className="flex-1 justify-end">
-        <Pressable accessible={false} className="absolute inset-0 bg-black/40" onPress={onClose} />
-        <View
-          className="max-h-[70%] overflow-hidden rounded-t-[28px] bg-background"
-          style={[sheetColumnStyle, { paddingBottom: Math.max(insets.bottom, 16) + 4 }]}
-        >
-          <View className="items-center pt-2.5">
-            <View className="h-1 w-10 rounded-full bg-border/60" />
-          </View>
-          <Text variant="subheading" className="px-6 pb-2 pt-4 text-center">
-            {I18n.t('transactions.editor.split.paid_by_label')}
-          </Text>
-          <ScrollView keyboardShouldPersistTaps="handled">
-            {options.map((option, index) => (
-              <Pressable
-                key={option.key}
-                onPress={() => {
-                  void triggerHaptic('selection');
-                  onSelect(option.rowIndex);
-                }}
-                accessibilityRole="radio"
-                accessibilityState={{ selected: option.selected }}
-                className={
-                  index > 0
-                    ? 'mx-4 flex-row items-center gap-3 border-t border-border/15 px-2 py-3 active:opacity-70'
-                    : 'mx-4 flex-row items-center gap-3 px-2 py-3 active:opacity-70'
-                }
-              >
-                <PersonAvatar name={option.name} partyKey={option.partyKey} size={36} />
-                <Text variant="body" numberOfLines={1} className="flex-1">
-                  {option.name}
-                </Text>
-                {option.selected ? <Check size={18} color={themeColors.primary} /> : null}
-              </Pressable>
-            ))}
-          </ScrollView>
-        </View>
+      <View className="items-center pt-2.5">
+        <View className="h-1 w-10 rounded-full bg-border/60" />
       </View>
-    </ThemeModal>
+      <Text variant="subheading" className="px-6 pb-2 pt-4 text-center">
+        {I18n.t('transactions.editor.split.paid_by_label')}
+      </Text>
+      <ScrollView keyboardShouldPersistTaps="handled">
+        {options.map((option, index) => (
+          <Pressable
+            key={option.key}
+            onPress={() => {
+              void triggerHaptic('selection');
+              onSelect(option.rowIndex);
+            }}
+            accessibilityRole="radio"
+            accessibilityState={{ selected: option.selected }}
+            className={
+              index > 0
+                ? 'mx-4 flex-row items-center gap-3 border-t border-border/15 px-2 py-3 active:opacity-70'
+                : 'mx-4 flex-row items-center gap-3 px-2 py-3 active:opacity-70'
+            }
+          >
+            <PersonAvatar name={option.name} partyKey={option.partyKey} size={36} />
+            <Text variant="body" numberOfLines={1} className="flex-1">
+              {option.name}
+            </Text>
+            {option.selected ? <Check size={18} color={themeColors.primary} /> : null}
+          </Pressable>
+        ))}
+      </ScrollView>
+    </BottomSheetModal>
   );
 }

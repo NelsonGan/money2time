@@ -119,7 +119,8 @@ const UPLOAD_CONCURRENCY = 4;
  * Waits before each further try of an image upload that failed. One failed
  * upload stops the round, and while Cloud Sync is being turned on that sends
  * the user back to the sign-in screen, so a blip (the upload breaking on the
- * phone, a server error) gets two more tries first.
+ * phone, a server error, a 408 from something on the way) gets two more tries
+ * first.
  */
 const UPLOAD_RETRY_DELAYS_MS = [500, 2_000];
 /** The `sync_info` key that names one phone (`origin` in `sync_rows`). */
@@ -1694,8 +1695,9 @@ async function inParallel<T>(
 
 /**
  * Runs one image upload, again after a short wait while the failure looks
- * passing: the upload broke on the phone (`network`), or the server failed
- * (`server` without a 4xx status). A refused session, Pro or image is final.
+ * passing: the upload broke on the phone (`network`), the server failed
+ * (`server` without a 4xx status), or something on the way timed it out (a
+ * 408, which the Worker never sends). A refused session, Pro or image is final.
  */
 async function uploadWithRetry(upload: () => Promise<void>): Promise<void> {
   for (let attempt = 0; ; attempt++) {
@@ -1704,9 +1706,8 @@ async function uploadWithRetry(upload: () => Promise<void>): Promise<void> {
       return;
     } catch (error) {
       const { code, status } = (error ?? {}) as { code?: unknown; status?: unknown };
-      const passing =
-        code === 'network' ||
-        (code === 'server' && !(typeof status === 'number' && status >= 400 && status < 500));
+      const refused = typeof status === 'number' && status >= 400 && status < 500 && status !== 408;
+      const passing = code === 'network' || (code === 'server' && !refused);
       if (!passing || attempt >= UPLOAD_RETRY_DELAYS_MS.length) throw error;
       await new Promise((resolve) => setTimeout(resolve, UPLOAD_RETRY_DELAYS_MS[attempt]));
     }

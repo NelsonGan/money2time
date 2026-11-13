@@ -626,6 +626,12 @@ describe('images', () => {
       if (path === 'receipts/r3.jpg' && n === 1) {
         throw Object.assign(new Error('network'), { code: 'network', status: 0 });
       }
+      // 2026-11-12, 1.7.5: "server: http_408". The Worker never answers 408
+      // (Cloudflare logged none for its host that week), so something on the
+      // way timed the upload out: not a refusal of the image.
+      if (path === 'receipts/r4.jpg' && n === 1) {
+        throw Object.assign(new Error('server: http_408'), { code: 'server', status: 408 });
+      }
     });
     for (let i = 0; i < 5; i++) {
       files.add(`user-assets/receipts/r${i}.jpg`);
@@ -634,6 +640,7 @@ describe('images', () => {
     await expect(engine.syncNow()).resolves.toMatchObject({ pushed: true });
     expect(tries.get('receipts/r1.jpg')).toBe(2);
     expect(tries.get('receipts/r3.jpg')).toBe(2);
+    expect(tries.get('receipts/r4.jpg')).toBe(2);
     expect(app.prepare('SELECT COUNT(*) AS n FROM sync_media_pending').get()?.n).toBe(0);
   }, 15_000);
 
@@ -641,6 +648,7 @@ describe('images', () => {
     ['the session was refused', 'unauthorized', 401],
     ['Pro was refused', 'not_pro', 403],
     ['the image was refused', 'server', 413],
+    ['the request was malformed', 'server', 400],
   ] as const)('do not try again when %s', async (_case, code, status) => {
     const { CloudSyncApiError } = jest.requireActual<
       typeof import('~/features/cloudSync/services/cloudSyncApi')

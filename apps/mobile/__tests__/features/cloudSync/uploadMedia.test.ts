@@ -46,6 +46,17 @@ it('names the status of a server failure', async () => {
   expect(error.message).toBe('server: http_500');
 });
 
+// The sync engine tries a 408 again (something on the way timed it out), so
+// it must come out as `server` with its status, not as a refusal code.
+it('keeps a 408 from something on the way as a server failure with its status', async () => {
+  const error = await failure(
+    jest.fn().mockResolvedValue({ status: 408, body: '<html>Request Timeout</html>', headers: {} }),
+  );
+  expect(error.code).toBe('server');
+  expect(error.status).toBe(408);
+  expect(error.message).toBe('server: http_408');
+});
+
 it("keeps the Worker's refusals apart", async () => {
   const refused = (status: number, body: string) =>
     failure(jest.fn().mockResolvedValue({ status, body, headers: {} }));
