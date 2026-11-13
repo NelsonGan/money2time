@@ -31,6 +31,7 @@ const de: LocaleModule = {
       users: '70.000+ Nutzer',
       inspiredPre: 'Inspiriert von',
       bookSub: 'Geld ist die Lebensenergie, die du dafür eintauschst',
+      bookDesc: 'Der zeitlose Klassiker der privaten Finanzen. Praktische Weisheit zu Geld, Zeit und Leben.',
     },
     s16: { h: 'Budget setzen.\nKurs halten.', hl: 'Kurs halten.', sh: 'Jede Kategorie, immer im Blick', she: '🎯', ring: '80%', left: '$730.85 übrig', budgeted: 'Budgetierte Ausgaben', unbudgeted: 'Nicht budgetiert' },
   },

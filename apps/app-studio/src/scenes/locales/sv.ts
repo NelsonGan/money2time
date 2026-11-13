@@ -32,6 +32,7 @@ const sv: LocaleModule = {
       users: '70 000+ användare',
       inspiredPre: 'Inspirerad av',
       bookSub: 'Pengar är den livsenergi du byter bort för dem',
+      bookDesc: 'Den tidlösa klassikern om privatekonomi. Praktisk visdom om pengar, tid och liv.',
     },
     s16: { h: 'Sätt en Budget.\nHåll Kursen.', hl: 'Håll Kursen.', sh: 'Varje kategori, alltid i sikte', she: '🎯', ring: '80%', left: '$730.85 kvar', budgeted: 'Budgeterade utgifter', unbudgeted: 'Ej budgeterat' },
   },

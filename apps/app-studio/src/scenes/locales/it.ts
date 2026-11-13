@@ -32,6 +32,7 @@ const it: LocaleModule = {
       users: '70.000+ utenti',
       inspiredPre: 'Ispirata a',
       bookSub: 'Il denaro è l’energia vitale che scambi per averlo',
+      bookDesc: 'Il classico intramontabile della finanza personale. Saggezza pratica su denaro, tempo e vita.',
     },
     s16: { h: 'Fissa il Budget.\nResta in Rotta.', hl: 'Resta in Rotta.', sh: 'Ogni categoria, sempre in vista', she: '🎯', ring: '80%', left: '$730.85 rimasti', budgeted: 'Spesa a budget', unbudgeted: 'Spesa fuori budget' },
   },

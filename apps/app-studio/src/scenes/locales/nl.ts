@@ -32,6 +32,7 @@ const nl: LocaleModule = {
       users: '70.000+ gebruikers',
       inspiredPre: 'Geïnspireerd door',
       bookSub: 'Geld is de levensenergie die je ervoor inruilt',
+      bookDesc: 'De tijdloze klassieker over persoonlijke financiën. Praktische wijsheid over geld, tijd en leven.',
     },
     s16: { h: 'Stel een Budget.\nHou Koers.', hl: 'Hou Koers.', sh: 'Elke categorie, altijd in beeld', she: '🎯', ring: '80%', left: '$730.85 over', budgeted: 'Begrote uitgaven', unbudgeted: 'Niet begroot' },
   },

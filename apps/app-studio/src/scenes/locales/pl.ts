@@ -32,6 +32,7 @@ const pl: LocaleModule = {
       users: '70 000+ użytkowników',
       inspiredPre: 'Inspiracja',
       bookSub: 'Pieniądze to energia życiowa, którą za nie oddajesz',
+      bookDesc: 'Ponadczasowy klasyk finansów osobistych. Praktyczna mądrość o pieniądzach, czasie i życiu.',
     },
     s16: { h: 'Ustal Budżet.\nTrzymaj Kurs.', hl: 'Trzymaj Kurs.', sh: 'Każda kategoria zawsze na widoku', she: '🎯', ring: '80%', left: 'zostało $730.85', budgeted: 'Wydatki w budżecie', unbudgeted: 'Poza budżetem' },
   },

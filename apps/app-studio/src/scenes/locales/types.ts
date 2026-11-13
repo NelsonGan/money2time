@@ -25,11 +25,12 @@ export interface PhoneStrings {
   s13: { h: string; hl: string; sh: string; she: string; aiPowered: string; oneTap: string; pasteJSON: string };
   s14: { h: string; hl: string; sh: string; she: string; type: string; tap: string; done: string; category: string };
   /**
-   * Privacy and trust panel (scene 02, no phone): the rating, three promises
-   * and the book behind the app (`inspiredPre` labels it, `bookSub` quotes
-   * it). `users` is the install count beside the 4.8 rating. Each promise
-   * must stay true: data lives on the phone and Cloud Sync is an opt-in, so
-   * no "never leaves your phone".
+   * Privacy and trust panel (scene 02, no phone): `h`/`hl` head it beside a
+   * shield, then the rating, three promises and the book behind the app
+   * (`inspiredPre` labels it, `bookDesc` describes it, `bookSub` quotes it).
+   * `users` is the install count under the 4.8 rating. Each promise must stay
+   * true: data lives on the phone and Cloud Sync is an opt-in, so no "never
+   * leaves your phone".
    */
   s15: {
     h: string; hl: string;
@@ -37,7 +38,7 @@ export interface PhoneStrings {
     noAds: string; noAdsSub: string;
     local: string; localSub: string;
     users: string;
-    inspiredPre: string; bookSub: string;
+    inspiredPre: string; bookSub: string; bookDesc: string;
   };
   /** Budgeting. */
   s16: { h: string; hl: string; sh: string; she: string; ring: string; left: string; budgeted: string; unbudgeted: string };

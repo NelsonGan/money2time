@@ -124,8 +124,7 @@ export function getScenes(locale: string): SceneConfig[] {
        The trust panel: rating, three promises, the book behind the app. */
     {
       id: '02-privacy',
-      headline: t.s15.h,
-      highlight: t.s15.hl,
+      headline: '', // PrivacyPanel draws its own header beside the shield
       subheadline: '',
       screenshot: '',
       ...base,

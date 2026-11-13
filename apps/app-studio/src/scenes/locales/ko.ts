@@ -32,6 +32,7 @@ const ko: LocaleModule = {
       users: '70,000+ 사용자',
       inspiredPre: '영감의 원천',
       bookSub: '돈은 당신이 맞바꾼 생명 에너지입니다',
+      bookDesc: '시대를 초월한 개인 재무의 고전. 돈과 시간, 삶에 대한 실용적인 지혜.',
     },
     s16: { h: '예산을 정하고\n지켜내기', hl: '지켜내기', sh: '모든 카테고리를 한눈에', she: '🎯', ring: '80%', left: '$730.85 남음', budgeted: '예산 내 지출', unbudgeted: '예산 외 지출' },
   },

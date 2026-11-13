@@ -32,6 +32,7 @@ const fr: LocaleModule = {
       users: '+70 000 utilisateurs',
       inspiredPre: 'Inspiré de',
       bookSub: 'L’argent est l’énergie vitale que vous échangez contre lui',
+      bookDesc: 'Le classique intemporel des finances personnelles. Une sagesse pratique sur l’argent, le temps et la vie.',
     },
     s16: { h: 'Fixe ton Budget.\nGarde le Cap.', hl: 'Garde le Cap.', sh: 'Chaque catégorie, toujours en vue', she: '🎯', ring: '80%', left: '$730.85 restant', budgeted: 'Dépenses budgétées', unbudgeted: 'Dépenses hors budget' },
   },

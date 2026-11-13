@@ -31,6 +31,7 @@ const en: LocaleModule = {
       users: '70K+ Users',
       inspiredPre: 'Inspired by',
       bookSub: 'Money is the life energy you trade for it',
+      bookDesc: 'The timeless personal finance guide. Practical wisdom for money, time, and life.',
     },
     s16: { h: 'Set Budgets.\nStay on Track.', hl: 'Stay on Track.', sh: 'Every category, always in view', she: '🎯', ring: '80%', left: '$730.85 left', budgeted: 'Budgeted spend', unbudgeted: 'Unbudgeted spend' },
   },

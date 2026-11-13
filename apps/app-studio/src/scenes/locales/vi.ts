@@ -32,6 +32,7 @@ const vi: LocaleModule = {
       users: '70.000+ người dùng',
       inspiredPre: 'Lấy cảm hứng từ',
       bookSub: 'Tiền là năng lượng sống mà bạn đánh đổi',
+      bookDesc: 'Cuốn cẩm nang tài chính cá nhân kinh điển. Trí tuệ thiết thực về tiền bạc, thời gian và cuộc sống.',
     },
     s16: { h: 'Đặt Ngân Sách.\nGiữ Đúng Hướng.', hl: 'Giữ Đúng Hướng.', sh: 'Mọi danh mục, luôn trong tầm mắt', she: '🎯', ring: '80%', left: 'còn $730.85', budgeted: 'Chi trong ngân sách', unbudgeted: 'Chi ngoài ngân sách' },
   },
