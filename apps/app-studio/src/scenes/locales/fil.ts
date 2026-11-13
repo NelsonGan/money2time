@@ -24,6 +24,15 @@ const fil: LocaleModule = {
     s12: { h: 'Piliin ang\nVibe Mo', hl: 'Vibe Mo', sh: 'Wika, currency, at tema — sa gusto mo', she: '🎨', language: 'Filipino (fil)', currency: 'USD ($)', theme: 'Maliwanag · Sage' },
     s13: { h: 'Import\nsa Isang Tap', hl: 'sa Isang Tap', sh: 'Binabasa ng AI ang statement. Ikaw ang kumpirma', she: '🤖', aiPowered: 'May AI', oneTap: 'Copy Prompt', pasteJSON: 'Paste JSON' },
     s14: { h: 'I-type.\nI-tap. Tapos.', hl: 'Tapos.', sh: 'Ang keyboard ang pinakamabilis na paraan', she: '⌨️', type: 'Kape 6.50', tap: '↵', done: '0m i-log', category: 'Auto · Pagkain / Kape' },
+    s15: {
+      h: 'Sa Iyo Lang\nang Data Mo.', hl: 'ang Data Mo.',
+      privacy: 'Pribado mula umpisa', privacySub: 'Naka-save sa phone mo. Opsyonal ang sync.',
+      noAds: 'Walang ads', noAdsSub: 'Walang abala. Puro pananalapi mo lang.',
+      local: 'Local muna', localSub: 'Gumagana offline. Walang account na kailangan.',
+      users: '70,000+ na user',
+      inspiredPre: 'Hango sa',
+      bookSub: 'Ang pera ay ang lakas ng buhay na ipinagpalit mo',
+    },
     s16: { h: 'Magbudget.\nSundin Mo Ito.', hl: 'Sundin Mo Ito.', sh: 'Bawat kategorya, laging nakikita', she: '🎯', ring: '80%', left: '$730.85 ang natitira', budgeted: 'Nakabudget na gastos', unbudgeted: 'Hindi nakabudget' },
   },
 

@@ -24,6 +24,15 @@ const es: LocaleModule = {
     s12: { h: 'Elige tu\nEstilo', hl: 'Estilo', sh: 'Idioma, moneda y tema — a tu manera', she: '🎨', language: 'Español (es)', currency: 'USD ($)', theme: 'Claro · Salvia' },
     s13: { h: 'Importa\nde un Toque', hl: 'de un Toque', sh: 'La IA lee tu estado. Tú confirmas', she: '🤖', aiPowered: 'Con IA', oneTap: 'Copiar Texto', pasteJSON: 'Pegar JSON' },
     s14: { h: 'Escribe.\nToca. Listo.', hl: 'Listo.', sh: 'Tu teclado es la vía más rápida', she: '⌨️', type: 'Café 6.50', tap: '↵', done: '0m al anotar', category: 'Auto · Comida / Café' },
+    s15: {
+      h: 'Tus datos\nson tuyos.', hl: 'son tuyos.',
+      privacy: 'Privada por diseño', privacySub: 'Guardados en tu teléfono. Sincronizar es opcional.',
+      noAds: 'Sin anuncios', noAdsSub: 'Cero distracciones. Solo tus finanzas.',
+      local: 'Local primero', localSub: 'Funciona sin conexión. Sin cuenta.',
+      users: '+70 mil usuarios',
+      inspiredPre: 'Inspirada en',
+      bookSub: 'El dinero es la energía vital que intercambias por él',
+    },
     s16: { h: 'Pon un Límite.\nCúmplelo.', hl: 'Cúmplelo.', sh: 'Cada categoría, siempre a la vista', she: '🎯', ring: '80%', left: '$730.85 restante', budgeted: 'Gasto presupuestado', unbudgeted: 'Gasto no presupuestado' },
   },
 

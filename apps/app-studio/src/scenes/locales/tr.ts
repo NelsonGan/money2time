@@ -24,6 +24,15 @@ const tr: LocaleModule = {
     s12: { h: 'Tarzını\nSeç', hl: 'Seç', sh: 'Dil, para birimi ve tema — sana göre', she: '🎨', language: 'Türkçe (tr)', currency: 'USD ($)', theme: 'Açık · Adaçayı' },
     s13: { h: 'Tek Dokunuşla\nİçe Aktar', hl: 'İçe Aktar', sh: 'Yapay zekâ ekstrenı okur. Sen onaylarsın', she: '🤖', aiPowered: 'Yapay zekâ', oneTap: 'Metni Kopyala', pasteJSON: 'JSON Yapıştır' },
     s14: { h: 'Yaz.\nDokun. Bitti.', hl: 'Bitti.', sh: 'Klavyen en hızlı yoldur', she: '⌨️', type: 'Kahve 6.50', tap: '↵', done: '0m kayıt', category: 'Oto · Yemek / Kahve' },
+    s15: {
+      h: 'Verilerin\nSende Kalır.', hl: 'Sende Kalır.',
+      privacy: 'Gizlilik odaklı tasarım', privacySub: 'Telefonunda saklanır. Senkronizasyon isteğe bağlı.',
+      noAds: 'Reklam yok', noAdsSub: 'Dikkat dağıtan hiçbir şey yok. Sadece finansların.',
+      local: 'Önce yerel', localSub: 'Çevrimdışı çalışır. Hesap gerekmez.',
+      users: '70.000+ kullanıcı',
+      inspiredPre: 'İlham kaynağı',
+      bookSub: 'Para, karşılığında verdiğin yaşam enerjisidir',
+    },
     s16: { h: 'Bütçeni Kur.\nYolunda Kal.', hl: 'Yolunda Kal.', sh: 'Her kategori, her zaman görünür', she: '🎯', ring: '80%', left: '$730.85 kaldı', budgeted: 'Bütçeli harcama', unbudgeted: 'Bütçe dışı harcama' },
   },
 

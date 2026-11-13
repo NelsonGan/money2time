@@ -5329,9 +5329,9 @@ category headings) is ordinary `messages/*.json` and is translated here as
 usual; only the guide copy itself is English on both platforms.
 
 The landing gallery in `media/screenshots/<language>/` uses the nine iPhone
-marketing scenes from [App Studio](#app-studio). The current set was exported
-on October 1, 2026, with local app data in all 23 languages; regional English pages share the
-English set. To refresh it, export **iPhone → Export All Locales** in App
+marketing scenes from [App Studio](#app-studio), the same set the App Store
+gallery uses. The current set was exported on November 13, 2026, with local
+app data in all 23 languages; regional English pages share the English set. To refresh it, export **iPhone → Export All Locales** in App
 Studio, convert the PNGs to WebP at quality 90 while keeping their
 1284 × 2778 dimensions, and use the scene IDs as filenames. Keep the order and
 translation keys in `src/app/home-screenshots.ts` aligned with the scenes,
@@ -5728,7 +5728,7 @@ screenshots show the app in use. Keep messaging brief and key artwork centered
 | ------------------- | ----------- | ----------------------------------- | ------------------------------------------------------ |
 | Product page header | 3840 × 1646 | RGB JPEG                            | App name on the left, fresh waving mascot on the right |
 | Search results      | 1920 × 1280 | Silent H.264 MP4, 30 fps, 8 seconds | Apple Pay tap → confirmation → automatic expense       |
-| iPhone gallery      | 1284 × 2778 | PNG                                 | Explain eight actual app experiences                   |
+| iPhone gallery      | 1284 × 2778 | PNG                                 | Explain eight app experiences and the privacy promise  |
 
 Apple accepts JPEG for both dedicated creative placements and prohibits alpha
 channels. Header JPEG exports use a quality of 0.98 and an opaque cream
@@ -5852,20 +5852,27 @@ order, crop and timeline. The preview plays once and holds its last frame
 (pause or Replay to inspect it); reduced motion and the preview toggle pause
 it, and exports always carry the full sequence.
 
-**Screenshot gallery.** Eight scenes, each a complete message over a real
-screen, the first three sharing a continuous warm background:
+**Screenshot gallery.** Nine iPhone scenes, the first four sharing one
+continuous warm background (`src/components/triptych.tsx`, cut into four
+panels):
 
 1. Ledger: money and working time beside transactions.
-2. Accounts: where money is held.
-3. Budgets: how much to spend.
-4. Expense breakdown: spending categories.
-5. Add an expense: enter a transaction quickly.
-6. Recurring payments: regular commitments.
-7. Hourly value: the rate behind time conversions.
-8. Split bill: shared spending.
+2. Privacy: the 4.8 rating and user count, three promises (private by design,
+   no ads, local first) and the book that inspired the app. The only scene
+   without a phone, drawn in code by `src/components/PrivacyPanel.tsx` with
+   its copy in each locale's `s15`. Each promise must stay true: data lives on
+   the phone and Cloud Sync is an opt-in, so it never says data "never leaves
+   your phone". Update the user count in all 23 locales when it moves.
+3. Accounts: where money is held.
+4. Budgets: how much to spend.
+5. Expense breakdown: spending categories.
+6. Add an expense: enter a transaction quickly.
+7. Recurring payments: regular commitments.
+8. Hourly value: the rate behind time conversions.
+9. Split bill: shared spending.
 
-Every slot shows the app; privacy belongs in the listing copy, not in the
-opening sequence. Long localized headlines fit to their authored lines after
+The iPad and iPhone Duo sets keep the eight app scenes and have no privacy
+panel. Long localized headlines and titles fit to their authored lines after
 fonts load.
 
 **Localization and export.** The Header is one composition for all 23 locales.

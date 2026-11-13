@@ -24,6 +24,15 @@ const pt: LocaleModule = {
     s12: { h: 'Escolha seu\nEstilo', hl: 'Estilo', sh: 'Idioma, moeda e tema — do seu jeito', she: '🎨', language: 'Português (pt)', currency: 'USD ($)', theme: 'Claro · Sálvia' },
     s13: { h: 'Importe\ncom um Toque', hl: 'com um Toque', sh: 'A IA lê seu extrato. Você confirma', she: '🤖', aiPowered: 'Com IA', oneTap: 'Copiar Texto', pasteJSON: 'Colar JSON' },
     s14: { h: 'Digite.\nToque. Pronto.', hl: 'Pronto.', sh: 'Seu teclado é o caminho mais rápido', she: '⌨️', type: 'Café 6.50', tap: '↵', done: '0m ao anotar', category: 'Auto · Comida / Café' },
+    s15: {
+      h: 'Seus dados\nsão só seus.', hl: 'são só seus.',
+      privacy: 'Privado desde a origem', privacySub: 'Salvos no seu celular. Sincronizar é opcional.',
+      noAds: 'Sem anúncios', noAdsSub: 'Zero distrações. Só suas finanças.',
+      local: 'Local primeiro', localSub: 'Funciona offline. Sem precisar de conta.',
+      users: '+70 mil usuários',
+      inspiredPre: 'Inspirado em',
+      bookSub: 'Dinheiro é a energia vital que você troca por ele',
+    },
     s16: { h: 'Defina o Limite.\nSiga o Plano.', hl: 'Siga o Plano.', sh: 'Cada categoria, sempre à vista', she: '🎯', ring: '80%', left: '$730.85 restante', budgeted: 'Gasto orçado', unbudgeted: 'Gasto fora do orçamento' },
   },
 

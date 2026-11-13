@@ -24,6 +24,15 @@ const da: LocaleModule = {
     s12: { h: 'Vælg Din\nStil', hl: 'Stil', sh: 'Sprog, valuta og tema — på din måde', she: '🎨', language: 'Dansk (da)', currency: 'USD ($)', theme: 'Lys · Salvie' },
     s13: { h: 'Importér\nMed Ét Tryk', hl: 'Med Ét Tryk', sh: 'AI læser din kontoudskrift. Du bekræfter', she: '🤖', aiPowered: 'AI-drevet', oneTap: 'Kopiér Tekst', pasteJSON: 'Indsæt JSON' },
     s14: { h: 'Skriv.\nTryk. Klar.', hl: 'Klar.', sh: 'Dit tastatur er den hurtigste vej ind', she: '⌨️', type: 'Kaffe 6.50', tap: '↵', done: '0m at notere', category: 'Auto · Mad / Kaffe' },
+    s15: {
+      h: 'Dine data\nforbliver dine.', hl: 'forbliver dine.',
+      privacy: 'Privatliv indbygget', privacySub: 'Gemt på din telefon. Synkronisering er valgfri.',
+      noAds: 'Ingen reklamer', noAdsSub: 'Ingen distraktioner. Kun din økonomi.',
+      local: 'Lokal først', localSub: 'Virker offline. Ingen konto nødvendig.',
+      users: '70.000+ brugere',
+      inspiredPre: 'Inspireret af',
+      bookSub: 'Penge er den livsenergi, du bytter væk for dem',
+    },
     s16: { h: 'Sæt et Budget.\nHold Kursen.', hl: 'Hold Kursen.', sh: 'Hver kategori, altid i syne', she: '🎯', ring: '80%', left: '$730.85 tilbage', budgeted: 'Budgetterede udgifter', unbudgeted: 'Ikke budgetteret' },
   },
 

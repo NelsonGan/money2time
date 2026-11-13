@@ -24,6 +24,15 @@ const ms: LocaleModule = {
     s12: { h: 'Pilih\nGayamu', hl: 'Gayamu', sh: 'Bahasa, mata wang, tema — caramu', she: '🎨', language: 'Melayu (ms)', currency: 'USD ($)', theme: 'Cerah · Sage' },
     s13: { h: 'Import\nSekali Ketik', hl: 'Sekali Ketik', sh: 'AI baca penyatamu. Kau sahkan', she: '🤖', aiPowered: 'Guna AI', oneTap: 'Salin Teks', pasteJSON: 'Tampal JSON' },
     s14: { h: 'Taip.\nKetik. Siap.', hl: 'Siap.', sh: 'Papan kekunci jalan terpantas', she: '⌨️', type: 'Kopi 6.50', tap: '↵', done: '0m catat', category: 'Auto · Makanan / Kopi' },
+    s15: {
+      h: 'Data Anda\nKekal Milik Anda.', hl: 'Kekal Milik Anda.',
+      privacy: 'Peribadi sejak awal', privacySub: 'Disimpan dalam telefon anda. Penyegerakan pilihan.',
+      noAds: 'Tiada iklan', noAdsSub: 'Tiada gangguan. Hanya kewangan anda.',
+      local: 'Setempat dahulu', localSub: 'Berfungsi luar talian. Tiada akaun diperlukan.',
+      users: '70,000+ pengguna',
+      inspiredPre: 'Diilhamkan daripada',
+      bookSub: 'Wang ialah tenaga hidup yang anda tukarkan',
+    },
     s16: { h: 'Tetapkan Bajet.\nKekal Terkawal.', hl: 'Kekal Terkawal.', sh: 'Setiap kategori, sentiasa kelihatan', she: '🎯', ring: '80%', left: 'baki $730.85', budgeted: 'Perbelanjaan berbajet', unbudgeted: 'Perbelanjaan luar bajet' },
   },
 

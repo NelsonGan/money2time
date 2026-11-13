@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Blob, Branch } from '../components/flora';
+import { PrivacyPanel } from '../components/PrivacyPanel';
 import { PHONE_STRINGS, screenshotLocale } from './locales';
 import type { PhoneStrings } from './locales';
 
@@ -26,7 +27,7 @@ export interface SceneConfig {
   /** How many px of the device are hidden past the bleed edge. */
   phoneCrop?: number;
   decorations?: ReactNode;
-  /** Scenes 01–03 form one continuous composition cut into three panels. */
+  /** Scenes 01–04 form one continuous composition cut into four panels. */
   panorama?: { panel: number };
 }
 
@@ -105,7 +106,7 @@ export function getScenes(locale: string): SceneConfig[] {
   };
 
   return [
-    /* ─────────── TRIPTYCH 1/3 ─ HOME (the hero: time beside every row) ───────────
+    /* ─────────── PANORAMA 1/4 ─ HOME (the hero: time beside every row) ───────────
        The ledger screen leads the gallery — it is the one place the whole
        premise is visible at a glance, with a work-time badge on every row. */
     {
@@ -119,33 +120,46 @@ export function getScenes(locale: string): SceneConfig[] {
       panorama: { panel: 0 },
     },
 
-    /* ─────────── TRIPTYCH 2/3 ─ ACCOUNTS / NET ASSETS ─────────── */
+    /* ─────────── PANORAMA 2/4 ─ PRIVACY (no phone) ───────────
+       The trust panel: rating, three promises, the book behind the app. */
     {
-      id: '02-accounts',
+      id: '02-privacy',
+      headline: t.s15.h,
+      highlight: t.s15.hl,
+      subheadline: '',
+      screenshot: '',
+      ...base,
+      panorama: { panel: 1 },
+      decorations: <PrivacyPanel t={t.s15} />,
+    },
+
+    /* ─────────── PANORAMA 3/4 ─ ACCOUNTS / NET ASSETS ─────────── */
+    {
+      id: '03-accounts',
       headline: t.s2.h,
       highlight: t.s2.hl,
       subheadline: '',
       screenshot: `${basePath}/02-accounts.png`,
       ...base,
       phoneScale: 3.6, phoneCrop: 430, phoneRotate: 0,
-      panorama: { panel: 1 },
+      panorama: { panel: 2 },
     },
 
-    /* ─────────── TRIPTYCH 3/3 ─ BUDGETING ─────────── */
+    /* ─────────── PANORAMA 4/4 ─ BUDGETING ─────────── */
     {
-      id: '03-budgeting',
+      id: '04-budgeting',
       headline: t.s16.h,
       highlight: t.s16.hl,
       subheadline: '',
       screenshot: `${basePath}/08-budgeting.png`,
       ...base,
       phoneScale: 3.6, phoneCrop: 430, phoneRotate: 0,
-      panorama: { panel: 2 },
+      panorama: { panel: 3 },
     },
 
-    /* ───────────────────── 04 ─ EXPENSE BREAKDOWN ───────────────────── */
+    /* ───────────────────── 05 ─ EXPENSE BREAKDOWN ───────────────────── */
     {
-      id: '04-insights',
+      id: '05-insights',
       headline: t.s4.h,
       highlight: t.s4.hl,
       subheadline: '',
@@ -155,12 +169,12 @@ export function getScenes(locale: string): SceneConfig[] {
       decorations: <FloraInsights />,
     },
 
-    /* ───────────────────── 05 ─ CREATE TRANSACTION ─────────────────────
+    /* ───────────────────── 06 ─ CREATE TRANSACTION ─────────────────────
        Bleeds off the bottom like every other scene. The amount and its
        work-time line sit mid-screen, so they survive the standard crop; only
        the Add buttons fall past the edge. */
     {
-      id: '05-add-expense',
+      id: '06-add-expense',
       headline: t.s14.h,
       highlight: t.s14.hl,
       subheadline: '',
@@ -170,9 +184,9 @@ export function getScenes(locale: string): SceneConfig[] {
       decorations: <FloraEntry />,
     },
 
-    /* ───────────────────── 06 ─ RECURRING ───────────────────── */
+    /* ───────────────────── 07 ─ RECURRING ───────────────────── */
     {
-      id: '06-recurrings',
+      id: '07-recurrings',
       headline: t.s10.h,
       highlight: t.s10.hl,
       subheadline: '',
@@ -182,9 +196,9 @@ export function getScenes(locale: string): SceneConfig[] {
       decorations: <FloraRecurrings />,
     },
 
-    /* ───────────────────── 07 ─ HOURLY VALUE ───────────────────── */
+    /* ───────────────────── 08 ─ HOURLY VALUE ───────────────────── */
     {
-      id: '07-hourly-rates',
+      id: '08-hourly-rates',
       headline: t.s9.h,
       highlight: t.s9.hl,
       subheadline: '',
@@ -194,9 +208,9 @@ export function getScenes(locale: string): SceneConfig[] {
       decorations: <FloraHourly />,
     },
 
-    /* ───────────────────── 08 ─ SPLIT BILL ───────────────────── */
+    /* ───────────────────── 09 ─ SPLIT BILL ───────────────────── */
     {
-      id: '08-split-bill',
+      id: '09-split-bill',
       headline: t.s8.h,
       highlight: t.s8.hl,
       subheadline: '',

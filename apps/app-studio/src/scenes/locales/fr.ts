@@ -24,6 +24,15 @@ const fr: LocaleModule = {
     s12: { h: 'Choisissez\nVotre Style', hl: 'Votre Style', sh: 'Langue, devise et thème — à votre goût', she: '🎨', language: 'Français (fr)', currency: 'USD ($)', theme: 'Clair · Sauge' },
     s13: { h: 'Importez\nen un Clic', hl: 'en un Clic', sh: 'L\'IA lit votre relevé. Vous confirmez', she: '🤖', aiPowered: 'Via IA', oneTap: 'Copier Texte', pasteJSON: 'Coller JSON' },
     s14: { h: 'Tapez.\nClic. Fini.', hl: 'Fini.', sh: 'Votre clavier est la voie la plus rapide', she: '⌨️', type: 'Café 6.50', tap: '↵', done: '0m à noter', category: 'Auto · Repas / Café' },
+    s15: {
+      h: 'Vos données\nrestent à vous.', hl: 'restent à vous.',
+      privacy: 'Confidentialité intégrée', privacySub: 'Stockées sur votre téléphone. Synchro facultative.',
+      noAds: 'Zéro publicité', noAdsSub: 'Zéro distraction. Seulement vos finances.',
+      local: 'Local d’abord', localSub: 'Fonctionne hors ligne. Aucun compte requis.',
+      users: '+70 000 utilisateurs',
+      inspiredPre: 'Inspiré de',
+      bookSub: 'L’argent est l’énergie vitale que vous échangez contre lui',
+    },
     s16: { h: 'Fixe ton Budget.\nGarde le Cap.', hl: 'Garde le Cap.', sh: 'Chaque catégorie, toujours en vue', she: '🎯', ring: '80%', left: '$730.85 restant', budgeted: 'Dépenses budgétées', unbudgeted: 'Dépenses hors budget' },
   },
 

@@ -18,6 +18,15 @@ const zh: LocaleModule = {
     s12: { h: '你的\n风格', hl: '风格', sh: '语言、货币、主题随心切换', she: '🎨', language: '中文', currency: 'CNY (¥)', theme: '浅色 · 鼠尾草' },
     s13: { h: '一键\n导入账单', hl: '导入账单', sh: 'AI 读账单，你只需确认', she: '🤖', aiPowered: 'AI 智能', oneTap: '复制提示', pasteJSON: '粘贴 JSON' },
     s14: { h: '输入\n即记账', hl: '即记账', sh: '键盘是最快的入口', she: '⌨️', type: '咖啡 25', tap: '↵', done: '0分钟搞定', category: '自动 · 餐饮 / 咖啡' },
+    s15: {
+      h: '你的数据\n只属于你。', hl: '只属于你。',
+      privacy: '隐私为本', privacySub: '保存在你的手机上，同步可选',
+      noAds: '没有广告', noAdsSub: '没有干扰，只有你的账本',
+      local: '本地为先', localSub: '完全离线可用，无需注册账号',
+      users: '70,000+ 用户',
+      inspiredPre: '灵感来自',
+      bookSub: '金钱，是你用生命能量换来的',
+    },
     s16: { h: '设好预算\n不再超支', hl: '不再超支', sh: '每个分类，一目了然', she: '🎯', ring: '80%', left: '还剩 $730.85', budgeted: '预算内支出', unbudgeted: '预算外支出' },
   },
 

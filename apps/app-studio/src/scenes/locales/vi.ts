@@ -24,6 +24,15 @@ const vi: LocaleModule = {
     s12: { h: 'Chọn Phong\nCách', hl: 'Cách', sh: 'Ngôn ngữ, tiền tệ và giao diện — tùy bạn', she: '🎨', language: 'Tiếng Việt (vi)', currency: 'USD ($)', theme: 'Sáng · Xô thơm' },
     s13: { h: 'Nhập Liệu\nMột Chạm', hl: 'Một Chạm', sh: 'AI đọc sao kê. Bạn xác nhận', she: '🤖', aiPowered: 'Dùng AI', oneTap: 'Sao Chép', pasteJSON: 'Dán JSON' },
     s14: { h: 'Gõ.\nChạm. Xong.', hl: 'Xong.', sh: 'Bàn phím là cách nhanh nhất', she: '⌨️', type: 'Cà phê 6.50', tap: '↵', done: '0m để ghi', category: 'Tự động · Ăn uống / Cà phê' },
+    s15: {
+      h: 'Dữ liệu của bạn\nlà của bạn.', hl: 'là của bạn.',
+      privacy: 'Riêng tư từ thiết kế', privacySub: 'Lưu trên điện thoại của bạn. Đồng bộ là tùy chọn.',
+      noAds: 'Không quảng cáo', noAdsSub: 'Không phiền nhiễu. Chỉ có tài chính của bạn.',
+      local: 'Ưu tiên cục bộ', localSub: 'Dùng được ngoại tuyến. Không cần tài khoản.',
+      users: '70.000+ người dùng',
+      inspiredPre: 'Lấy cảm hứng từ',
+      bookSub: 'Tiền là năng lượng sống mà bạn đánh đổi',
+    },
     s16: { h: 'Đặt Ngân Sách.\nGiữ Đúng Hướng.', hl: 'Giữ Đúng Hướng.', sh: 'Mọi danh mục, luôn trong tầm mắt', she: '🎯', ring: '80%', left: 'còn $730.85', budgeted: 'Chi trong ngân sách', unbudgeted: 'Chi ngoài ngân sách' },
   },
 

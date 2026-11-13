@@ -23,6 +23,15 @@ const en: LocaleModule = {
     s12: { h: 'Pick Your\nVibe', hl: 'Vibe', sh: 'Language, currency, and theme — your way', she: '🎨', language: 'English (en)', currency: 'USD ($)', theme: 'Light · Sage' },
     s13: { h: 'Import\nin a Tap', hl: 'in a Tap', sh: 'AI reads your statement. You confirm', she: '🤖', aiPowered: 'AI-powered', oneTap: 'Copy Prompt', pasteJSON: 'Paste JSON' },
     s14: { h: 'Type.\nTap. Done.', hl: 'Done.', sh: 'Your keyboard is the fastest way in', she: '⌨️', type: 'Coffee 6.50', tap: '↵', done: '0m to log', category: 'Auto · Food / Coffee' },
+    s15: {
+      h: 'Your Data\nStays Yours.', hl: 'Stays Yours.',
+      privacy: 'Private by design', privacySub: 'Stored on your phone. Sync is optional.',
+      noAds: 'No ads', noAdsSub: 'Zero distractions. Just your finances.',
+      local: 'Local first', localSub: 'Works offline. No account needed.',
+      users: '70K+ Users',
+      inspiredPre: 'Inspired by',
+      bookSub: 'Money is the life energy you trade for it',
+    },
     s16: { h: 'Set Budgets.\nStay on Track.', hl: 'Stay on Track.', sh: 'Every category, always in view', she: '🎯', ring: '80%', left: '$730.85 left', budgeted: 'Budgeted spend', unbudgeted: 'Unbudgeted spend' },
   },
 
