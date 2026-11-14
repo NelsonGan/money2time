@@ -58,8 +58,9 @@ head_sampling_rate = 1
 MODEL = "anthropic/claude-haiku-5.5"
 # Backup model tried automatically if the primary MODEL errors, times out or
 # (for Claude) answers without JSON. Paid from OpenRouter credits. Any
-# multimodal OpenRouter model works; set it to the same value as MODEL to
-# disable failover, or swap the two lines to put Qwen back in front.
+# multimodal OpenRouter model works; set it to the same value as MODEL and
+# remove SECOND_BACKUP_MODEL to disable failover, or swap the two lines to put
+# Qwen back in front.
 BACKUP_MODEL = "qwen/qwen3.7-flash"
 # Tried last, when BACKUP_MODEL fails too. Paid from OpenRouter credits.
 # OpenRouter serves qwen3.7-flash from Alibaba alone, which rate-limits it
