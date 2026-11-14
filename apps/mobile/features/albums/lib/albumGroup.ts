@@ -30,7 +30,7 @@ type Payment = Pick<
   AlbumSettlement,
   'id' | 'expenseId' | 'fromMember' | 'toMember' | 'amount' | 'date' | 'createdAt' | 'deletedAt'
 > &
-  Partial<Pick<AlbumSettlement, 'currency'>>;
+  Partial<Pick<AlbumSettlement, 'currency' | 'createdBy'>>;
 
 /** An amount in whole cents, which is what the sums are done in. */
 export const cents = (value: number) => Math.round(value * 100);
@@ -125,6 +125,8 @@ interface CountedPayment {
   paidAt: string;
   /** The day the money moved. */
   date: string;
+  /** The account that recorded it. */
+  recordedBy: string | null;
 }
 
 /**
@@ -163,6 +165,7 @@ function countedPayments(
       amount: amount / 100,
       paidAt: item.createdAt,
       date: item.date,
+      recordedBy: item.createdBy ?? null,
     });
   }
   return { payments, left: left / 100 };
@@ -182,17 +185,6 @@ export function settlementsByBill<T extends Payment>(settlements: readonly T[]):
     else byBill.set(item.expenseId, [item]);
   }
   return byBill;
-}
-
-/** What `fromMember` still owes `toMember` of a `share` of `bill`, after the payments on it. */
-export function shareLeft(
-  bill: Bill,
-  settlements: readonly Payment[],
-  fromMember: string,
-  toMember: string,
-  share: number,
-): number {
-  return countedPayments(bill, settlements, fromMember, toMember, share).left;
 }
 
 /** A split row of the user's own side of a bill, before the phone's own choices (accounts). */
@@ -217,6 +209,8 @@ export interface LocalPayment {
   amount: number;
   paidAt: string;
   date: string;
+  /** The account that recorded it: a payment the user sent lands on no account when it was not them. */
+  recordedBy: string | null;
   /**
    * `received`: a member paid the user back (a transfer when it went to
    * another account than the bill's). `sent_part`: the user paid part of

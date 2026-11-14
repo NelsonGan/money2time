@@ -1338,7 +1338,45 @@
       "transactionsTitle": "Transações",
       "everyone": "Todos",
       "me": "Eu",
-      "pick": "Escolha uma viagem para ver o detalhamento."
+      "pick": "Escolha uma viagem para ver o detalhamento.",
+      "activity": {
+        "title": "Atividade",
+        "empty_title": "Ainda sem atividade",
+        "empty_message": "Cada alteração que alguém faça a este álbum aparece aqui.",
+        "restore": "Restaurar",
+        "restoring": "A restaurar…",
+        "you": "Você",
+        "you_lower": "você",
+        "untitled": "uma despesa",
+        "added": "{actor}: adicionou {title} · {money}",
+        "said_you_paid": "{actor}: {title} pago por você · {money}",
+        "restored": "{actor}: restaurou {title} · {money}",
+        "deleted": "{actor}: apagou {title} · {money}",
+        "changed_amount": "{actor}: alterou {title}: {before} → {after}",
+        "changed_payer": "{actor}: alterou quem pagou {title}: {before} → {after}",
+        "changed_split": "{actor}: alterou a divisão de {title}",
+        "renamed_bill": "{actor}: mudou o nome de {before} para {after}",
+        "moved_bill": "{actor}: moveu {title} para {day}",
+        "changed_bill": "{actor}: alterou {title}",
+        "changed_album": "{actor}: alterou o álbum",
+        "your_share": "A sua parte {money}",
+        "your_share_change": "A sua parte {before} → {after}",
+        "your_share_gone": "A sua parte de {money} desapareceu",
+        "you_paid": "Você pagou",
+        "you_paid_choose_account": "Você pagou · Escolha a conta",
+        "they_paid": "Agora quem pagou foi {name}",
+        "choose_account": "Escolha a conta",
+        "paid": "{from} → {to}: {money} pago",
+        "paid_even": "{from} → {to}: {money} pago para acertar",
+        "undid_payment": "{actor}: desfez o pagamento {from} → {to} de {money}",
+        "recorded_by": "Registado por {actor}",
+        "joined": "{name} entrou no álbum",
+        "left": "{name} saiu do álbum",
+        "renamed_member": "{before} agora é {after}",
+        "simplify_on": "{actor}: ativou Simplificar dívidas",
+        "simplify_off": "{actor}: desativou Simplificar dívidas",
+        "cover": "{actor}: alterou a capa"
+      }
     },
     "items": {
       "emptyTitle": "Ainda sem itens",
@@ -2053,7 +2091,17 @@
           "yearly": "/ano"
         }
       },
-      "notePlaceholder": "Nova nota. Deixe em branco para apagá-la."
+      "notePlaceholder": "Nova nota. Deixe em branco para apagá-la.",
+      "sharedBill": {
+        "intro": "No álbum partilhado {album}: qualquer pessoa pode alterar esta despesa. A categoria, a conta, os detalhes e o humor continuam a ser seus.",
+        "paidBy": "Pago por",
+        "splitBetween": "Dividido entre",
+        "nobodyElse": "Divida com outra pessoa do álbum, ou faça outra pessoa pagar.",
+        "deleteBody": "Esta despesa está num álbum partilhado. Apagá-la remove-a para todos. Os pagamentos ficam, e o que já foi pago fica por devolver.",
+        "deleteSome": "Algumas estão num álbum partilhado. Apagá-las remove-as para todos; os pagamentos ficam.",
+        "payments": "Os pagamentos de uma despesa de um álbum partilhado são registados na app.",
+        "accountOthers": "Algumas foram pagas por outra pessoa. Passam para uma das suas contas quando as devolver."
+      }
     },
     "cloud": {
       "strip": "Dados de {device}, sincronizados {date}.",

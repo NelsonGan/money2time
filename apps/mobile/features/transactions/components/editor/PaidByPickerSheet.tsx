@@ -11,12 +11,14 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 
-/** Someone who can have paid the bill: the user, or a person on it. */
+/** Someone who can have paid the bill: the user, or a person on it (or in its shared album). */
 export interface PaidByOption {
   /** Stable across renders: the row's id, else its position. */
   key: string;
-  /** Null for the user. */
+  /** Null for the user, and for a member of a shared album not on the bill yet. */
   rowIndex: number | null;
+  /** A shared album's member not on the bill yet: choosing them puts them on it. */
+  member?: { id: string; name: string };
   name: string;
   /** The key the person's avatar colour comes from; null for the user. */
   partyKey: string | null;
@@ -27,8 +29,8 @@ interface PaidByPickerSheetProps {
   visible: boolean;
   options: PaidByOption[];
   onClose: () => void;
-  /** The row that paid, or null for the user. */
-  onSelect: (rowIndex: number | null) => void;
+  /** Who paid. */
+  onSelect: (option: PaidByOption) => void;
 }
 
 /**
@@ -59,7 +61,7 @@ export function PaidByPickerSheet({ visible, options, onClose, onSelect }: PaidB
             key={option.key}
             onPress={() => {
               void triggerHaptic('selection');
-              onSelect(option.rowIndex);
+              onSelect(option);
             }}
             accessibilityRole="radio"
             accessibilityState={{ selected: option.selected }}

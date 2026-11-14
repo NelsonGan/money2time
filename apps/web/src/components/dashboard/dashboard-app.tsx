@@ -24,7 +24,7 @@ import {
 import { browserSupported, gunzipText, sealForCache } from "@/lib/cloud/crypto";
 import { editCount, type EditOp, type EditResult } from "@/lib/cloud/edits";
 import { applyPatch } from "@/lib/cloud/patch";
-import { BrowserSession, CHUNK_BYTES, phoneTakesBudgetCurrencies, phoneTakesCreditDueDaysAfter, reopen, type BrowserState, type LinkedPhone, type Received } from "@/lib/cloud/relay";
+import { BrowserSession, CHUNK_BYTES, phoneTakesBudgetCurrencies, phoneTakesCreditDueDaysAfter, phoneTakesSharedAlbums, reopen, type BrowserState, type LinkedPhone, type Received } from "@/lib/cloud/relay";
 
 import { LinkScreen } from "./link-screen";
 import { isViewId, type ViewId } from "./nav";
@@ -713,6 +713,7 @@ export function DashboardApp() {
       pro: cached.meta.pro === true,
       budgetCurrencies: phoneTakesBudgetCurrencies(cached.meta),
       creditDueDaysAfter: phoneTakesCreditDueDaysAfter(cached.meta),
+      sharedAlbums: phoneTakesSharedAlbums(cached.meta),
       error,
       needsPhone,
       refresh,

@@ -27,11 +27,22 @@
 // ceilings against misuse, since a share is a database (MAX_OWNED_ALBUMS,
 // MAX_ALBUM_MEMBERS). An app from before albums could be shared never sees
 // one: the list leaves them out unless asked, and joining one must say the
-// app knows them.
+// app knows them. And its phones only read: their token is read-only, and
+// every change goes through POST /v1/ledgers/<id>/album (src/albumGroups.ts),
+// which writes it, stamped with its author, beside the album's activity log.
 
+import {
+  groupWriteErrorResponse,
+  hranaDb,
+  planJoin,
+  planLeave,
+  planWrite,
+  type WriteRequest,
+  writeGroup,
+} from './albumGroups';
 import { csv, type Env } from './env';
 import { json, readJson } from './http';
-import { notifyUsers } from './live';
+import { isValidDeviceId, notifyUsers } from './live';
 import { deleteAllMedia, ledgerSpace } from './media';
 import { isAccountPro } from './revenuecat';
 import { brokenInvitePageHtml, invitePageHtml } from './pages';
@@ -428,6 +439,7 @@ export async function routeLedgers(
     if (!(await removeMemberAccess(env, ledger.id, user.id, false))) {
       return json({ error: 'not_found' }, 404);
     }
+    await markLeftInAlbum(env, ledger, user.id, user.id);
     // The leaver's own other phones are told it was them (no "removed" notice).
     await notifyUsers(
       env,
@@ -453,6 +465,7 @@ export async function routeLedgers(
     if (!(await removeMemberAccess(env, ledger.id, parts[4], true))) {
       return json({ error: 'not_found' }, 404);
     }
+    await markLeftInAlbum(env, ledger, parts[4], user.id);
     await notifyUsers(
       env,
       [parts[4], ...(await ledgerAudience(env, ledger))],
@@ -461,6 +474,10 @@ export async function routeLedgers(
       'access',
     );
     return json({ ok: true });
+  }
+  if (action === 'album' && parts.length === 4 && method === 'POST') {
+    if (kindOf(ledger) !== 'album') return json({ error: 'not_found' }, 404);
+    return albumWrite(env, ledger, user, request);
   }
   if (action === 'invites' && parts.length === 4 && method === 'POST') {
     if (role !== 'owner') return json({ error: 'forbidden' }, 403);
@@ -683,6 +700,14 @@ async function credentials(
     await confirmAccess();
     return json({ url: ledger.db_url, authToken: 'local', expiresAt: now + DAY_MS });
   }
+  if (kindOf(ledger) === 'album') {
+    // An album's phones only pull: the Worker writes its rows (albumWrite).
+    // `token` is the Worker's own writer token there, which a write may
+    // replace meanwhile, so only the access itself is checked again.
+    const token = await createToken(env, ledger.db_name, TOKEN_TTL_DAYS, 'read-only');
+    if (!(await access(env, ledger.id, userId))) throw new Error('ledger_access_changed');
+    return json({ url: ledger.db_url, authToken: token, expiresAt: now + TOKEN_TTL_DAYS * DAY_MS });
+  }
   if (ledger.token && (ledger.token_expires_at ?? 0) - now > TOKEN_REUSE_MARGIN_MS) {
     const token = await open(env, 'turso-token', ledger.token);
     if (token) {
@@ -723,6 +748,125 @@ async function listMembers(env: Env, ledger: SharedLedgerRow, role: Role): Promi
     members: members.results.map((m) => ({ id: m.id, joinedAt: m.joined_at, ...person(m) })),
     maxMembers: maxMembersOf(ledger),
   });
+}
+
+/**
+ * The Worker's own full-access token for an album's database, the only one
+ * that writes it. Cached sealed in `shared_ledgers.token` (phones of an album
+ * get read-only tokens of their own), and minted again after a revocation.
+ */
+async function writerToken(env: Env, ledger: SharedLedgerRow): Promise<string> {
+  if (env.LOCAL_SYNC_URL) return 'local';
+  const now = Date.now();
+  if (ledger.token?.startsWith(REVOKING_PREFIX) && (ledger.token_expires_at ?? 0) > now) {
+    throw new Error('ledger_access_changing');
+  }
+  if (ledger.token && (ledger.token_expires_at ?? 0) - now > TOKEN_REUSE_MARGIN_MS) {
+    const token = await open(env, 'turso-token', ledger.token);
+    if (token) return token;
+  }
+  const token = await createToken(env, ledger.db_name, TOKEN_TTL_DAYS);
+  // Kept only if nobody changed it meanwhile (a revocation's lock wins).
+  await env.AUTH_DB.prepare(
+    `UPDATE shared_ledgers SET token = ?2, token_expires_at = ?3
+     WHERE id = ?1 AND token IS ?4 AND (token IS NULL OR token NOT LIKE 'revoking:%')`,
+  )
+    .bind(
+      ledger.id,
+      await seal(env, 'turso-token', token),
+      now + TOKEN_TTL_DAYS * DAY_MS,
+      ledger.token,
+    )
+    .run();
+  return token;
+}
+
+/** What an album's write is stamped with: the group, the writer and the time. */
+function groupContext(ledger: SharedLedgerRow, userId: string) {
+  return {
+    groupId: ledger.ledger_id,
+    userId,
+    now: new Date().toISOString(),
+    newId: () => randomHex(12),
+  };
+}
+
+/**
+ * POST /v1/ledgers/<id>/album: a change to a shared album's group, written
+ * by the Worker (src/albumGroups.ts). `{action: 'join', name}` puts the user
+ * on the album's list as themselves; `{action: 'write', rows}` writes bills,
+ * payments, a rename or the settings. Answers with the rows written, which
+ * the phone applies at once; everyone else's phones are told to sync.
+ */
+async function albumWrite(
+  env: Env,
+  ledger: SharedLedgerRow,
+  user: SessionUser,
+  request: Request,
+): Promise<Response> {
+  const body = await readJson<{
+    action: unknown;
+    name: unknown;
+    rows: unknown;
+    reason: unknown;
+    device: unknown;
+  }>(request, 512 * 1024);
+  if (!body) return json({ error: 'bad_request' }, 400);
+  const db = hranaDb(ledger.db_url, await writerToken(env, ledger));
+  try {
+    let rows;
+    if (body.action === 'join') {
+      const name = typeof body.name === 'string' ? body.name : '';
+      rows = await writeGroup(db, null, (state) =>
+        planJoin(state, groupContext(ledger, user.id), name),
+      );
+    } else if (body.action === 'write' && Array.isArray(body.rows)) {
+      const write: WriteRequest = {
+        rows: body.rows as WriteRequest['rows'],
+        reason: body.reason === 'close_even' ? 'close_even' : undefined,
+      };
+      rows = await writeGroup(db, write, (state) =>
+        planWrite(state, groupContext(ledger, user.id), write, ledger.owner_user_id),
+      );
+    } else {
+      return json({ error: 'bad_request' }, 400);
+    }
+    if (rows.length) {
+      const device = isValidDeviceId(body.device) ? body.device : null;
+      await notifyUsers(env, await ledgerAudience(env, ledger), ledger.id, device);
+    }
+    return json({ rows });
+  } catch (error) {
+    const refused = groupWriteErrorResponse(error);
+    if (refused) return refused;
+    // Someone's access is being changed right now: the phone tries again.
+    if (error instanceof Error && error.message.startsWith('ledger_access_chang')) {
+      return json({ error: 'busy' }, 409);
+    }
+    throw error;
+  }
+}
+
+/**
+ * Someone is out of an album (they left, or its owner took them out): their
+ * member row stays, with its bills, but names no account any more, and the
+ * log says so. After the access change, so a failure here never keeps anyone
+ * in; a row left saying they are in only lets them be put on a bill.
+ */
+async function markLeftInAlbum(
+  env: Env,
+  ledger: SharedLedgerRow,
+  leaverId: string,
+  actorId: string,
+): Promise<void> {
+  if (kindOf(ledger) !== 'album') return;
+  try {
+    const fresh = (await getLedger(env, ledger.id)) ?? ledger;
+    const db = hranaDb(fresh.db_url, await writerToken(env, fresh));
+    await writeGroup(db, null, (state) => planLeave(state, groupContext(fresh, actorId), leaverId));
+  } catch (error) {
+    console.error('album_mark_left_failed', error);
+  }
 }
 
 /**
@@ -896,7 +1040,10 @@ export async function deleteLedgerAccess(env: Env, userId: string): Promise<void
     .all<SharedLedgerRow>();
   // End each membership through the same revocation fence as Remove/Leave.
   // Completed ones stay removed if another ledger's rotation needs a retry.
-  for (const row of joined.results) await removeMemberAccess(env, row.id, userId, false);
+  for (const row of joined.results) {
+    await removeMemberAccess(env, row.id, userId, false);
+    await markLeftInAlbum(env, row, userId, userId);
+  }
   await Promise.all([
     ...owned.results.map((row) => destroy(env, row)),
     ...joined.results.map(async (row) =>

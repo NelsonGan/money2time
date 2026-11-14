@@ -1338,7 +1338,45 @@
       "transactionsTitle": "Transacties",
       "everyone": "Iedereen",
       "me": "Ik",
-      "pick": "Kies een reis om de uitsplitsing te zien."
+      "pick": "Kies een reis om de uitsplitsing te zien.",
+      "activity": {
+        "title": "Activiteit",
+        "empty_title": "Nog geen activiteit",
+        "empty_message": "Elke wijziging die iemand in dit album maakt, verschijnt hier.",
+        "restore": "Herstellen",
+        "restoring": "Herstellen…",
+        "you": "Jij",
+        "you_lower": "jij",
+        "untitled": "een uitgave",
+        "added": "{actor}: {title} toegevoegd · {money}",
+        "said_you_paid": "{actor}: {title} door jou betaald · {money}",
+        "restored": "{actor}: {title} hersteld · {money}",
+        "deleted": "{actor}: {title} verwijderd · {money}",
+        "changed_amount": "{actor}: {title} gewijzigd: {before} → {after}",
+        "changed_payer": "{actor}: betaler van {title} gewijzigd: {before} → {after}",
+        "changed_split": "{actor}: verdeling van {title} gewijzigd",
+        "renamed_bill": "{actor}: {before} hernoemd naar {after}",
+        "moved_bill": "{actor}: {title} verplaatst naar {day}",
+        "changed_bill": "{actor}: {title} gewijzigd",
+        "changed_album": "{actor}: album gewijzigd",
+        "your_share": "Jouw deel {money}",
+        "your_share_change": "Jouw deel {before} → {after}",
+        "your_share_gone": "Jouw deel van {money} vervalt",
+        "you_paid": "Jij hebt betaald",
+        "you_paid_choose_account": "Jij hebt betaald · Kies de rekening",
+        "they_paid": "Nu heeft {name} betaald",
+        "choose_account": "Kies de rekening",
+        "paid": "{from} → {to}: {money} betaald",
+        "paid_even": "{from} → {to}: {money} betaald om te vereffenen",
+        "undid_payment": "{actor}: betaling {from} → {to} van {money} ongedaan gemaakt",
+        "recorded_by": "Vastgelegd door {actor}",
+        "joined": "{name} doet mee met het album",
+        "left": "{name} heeft het album verlaten",
+        "renamed_member": "{before} heet nu {after}",
+        "simplify_on": "{actor}: Groepsschulden vereenvoudigen aangezet",
+        "simplify_off": "{actor}: Groepsschulden vereenvoudigen uitgezet",
+        "cover": "{actor}: omslag gewijzigd"
+      }
     },
     "items": {
       "emptyTitle": "Nog geen items",
@@ -2053,7 +2091,17 @@
           "yearly": "/jr"
         }
       },
-      "notePlaceholder": "Nieuwe notitie. Laat leeg om hem te wissen."
+      "notePlaceholder": "Nieuwe notitie. Laat leeg om hem te wissen.",
+      "sharedBill": {
+        "intro": "In het gedeelde album {album}: iedereen erin kan deze uitgave wijzigen. De categorie, rekening, details en stemming blijven van jou.",
+        "paidBy": "Betaald door",
+        "splitBetween": "Verdeeld over",
+        "nobodyElse": "Deel hem met iemand anders in het album, of laat iemand anders betalen.",
+        "deleteBody": "Deze uitgave staat in een gedeeld album. Verwijderen haalt hem voor iedereen weg. Betalingen erop blijven, en wat al betaald is, moet terug.",
+        "deleteSome": "Sommige staan in een gedeeld album. Verwijderen haalt ze voor iedereen weg; betalingen erop blijven.",
+        "payments": "Betalingen op een uitgave van een gedeeld album leg je vast in de app.",
+        "accountOthers": "Sommige heeft iemand anders betaald. Ze komen op een van je rekeningen zodra je ze terugbetaalt."
+      }
     },
     "cloud": {
       "strip": "Gegevens van {device}, gesynchroniseerd {date}.",

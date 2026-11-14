@@ -3,6 +3,7 @@ import { DEFAULT_LEDGER_ID } from '~/lib/db/ledgerScope';
 import type {
   AccountGroupRow,
   AccountRow,
+  AlbumActivityRow,
   AlbumExpenseRow,
   AlbumMemberRow,
   AlbumRow,
@@ -29,6 +30,9 @@ import type {
   Account,
   AccountGroup,
   Album,
+  AlbumActivity,
+  AlbumActivityKind,
+  AlbumBillSnapshot,
   AlbumExpense,
   AlbumMember,
   AlbumSettlement,
@@ -454,6 +458,114 @@ export function toAlbumSettlement(row: AlbumSettlementRow): AlbumSettlement | nu
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     deletedAt: row.deletedAt,
+  };
+}
+
+const ACTIVITY_KINDS: ReadonlySet<string> = new Set<AlbumActivityKind>([
+  'bill_added',
+  'bill_edited',
+  'bill_deleted',
+  'bill_restored',
+  'payment_recorded',
+  'payment_undone',
+  'member_joined',
+  'member_left',
+  'member_renamed',
+  'simplify_changed',
+  'cover_changed',
+]);
+
+function billSnapshot(value: unknown): AlbumBillSnapshot | null {
+  const raw = value as Record<string, unknown> | null;
+  if (!raw || typeof raw !== 'object') return null;
+  const shares = parseAlbumShares(JSON.stringify(raw.shares ?? []));
+  const date = groupDay(raw.date);
+  if (
+    !shares ||
+    !date ||
+    !isGroupAmount(raw.amount) ||
+    typeof raw.currency !== 'string' ||
+    !GROUP_CURRENCY.test(raw.currency) ||
+    typeof raw.paidBy !== 'string' ||
+    !GROUP_ROW_ID.test(raw.paidBy)
+  ) {
+    return null;
+  }
+  return {
+    note: clip(typeof raw.note === 'string' ? raw.note : null, MAX_GROUP_NOTE),
+    amount: raw.amount,
+    currency: raw.currency,
+    date,
+    paidBy: raw.paidBy,
+    shares,
+  };
+}
+
+/** An activity entry, as the Worker wrote it; null when it is not one this app can show. */
+export function toAlbumActivity(row: AlbumActivityRow): AlbumActivity | null {
+  if (!GROUP_ROW_ID.test(row.id) || !ACTIVITY_KINDS.has(row.kind)) return null;
+  if (!isGroupTimestamp(row.createdAt)) return null;
+  let data: Record<string, unknown> = {};
+  try {
+    const parsed: unknown = row.dataJson ? JSON.parse(row.dataJson) : {};
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      data = parsed as Record<string, unknown>;
+    }
+  } catch {
+    return null;
+  }
+  const kind = row.kind as AlbumActivityKind;
+  const nameOf = (value: unknown) => {
+    const name = (value as { name?: unknown } | null)?.name;
+    return typeof name === 'string' ? name.slice(0, MAX_GROUP_NAME) : null;
+  };
+  let bill: AlbumActivity['bill'] = null;
+  let rename: AlbumActivity['rename'] = null;
+  let payment: AlbumActivity['payment'] = null;
+  if (kind.startsWith('bill_')) {
+    bill = { before: billSnapshot(data.before), after: billSnapshot(data.after) };
+    if (!bill.before && !bill.after) return null;
+  } else if (kind === 'member_renamed') {
+    const before = nameOf(data.before);
+    const after = nameOf(data.after);
+    if (!before || !after) return null;
+    rename = { before, after };
+  } else if (kind === 'payment_recorded' || kind === 'payment_undone') {
+    const { from, to, currency, amount } = data;
+    if (
+      typeof from !== 'string' ||
+      typeof to !== 'string' ||
+      typeof currency !== 'string' ||
+      !GROUP_CURRENCY.test(currency) ||
+      !isGroupAmount(amount)
+    ) {
+      return null;
+    }
+    payment = {
+      from,
+      to,
+      currency,
+      amount,
+      bills: Array.isArray(data.bills)
+        ? data.bills.filter((id): id is string => typeof id === 'string' && GROUP_BILL_ID.test(id))
+        : [],
+      even: data.even === true,
+    };
+  }
+  const after = data.after as { on?: unknown } | undefined;
+  return {
+    id: row.id,
+    groupId: row.ledgerId,
+    kind,
+    actorMemberId: row.actorMemberId ?? null,
+    expenseId: row.expenseId && GROUP_BILL_ID.test(row.expenseId) ? row.expenseId : null,
+    memberId: row.memberId ?? null,
+    bill,
+    rename,
+    payment,
+    simplify: kind === 'simplify_changed' ? after?.on === true : null,
+    sortOrder: Number.isFinite(row.sortOrder) ? row.sortOrder : 0,
+    createdAt: row.createdAt,
   };
 }
 

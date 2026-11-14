@@ -31,11 +31,7 @@ import { SplitWithCard, type SplitWithRow } from '../components/SplitWithCard';
 import { useAlbumGroup } from '../hooks/useAlbumGroup';
 import { albumSharingMessage, peopleEditMessage } from '../lib/albumMessages';
 import { type AlbumGroupPerson, type PeopleEditError } from '../lib/albumPeople';
-import {
-  groupSimplifiesDebts,
-  markMemberLeft,
-  subscribeAlbumGroups,
-} from '../services/albumGroupStore';
+import { groupSimplifiesDebts, subscribeAlbumGroups } from '../services/albumGroupStore';
 
 interface AlbumPeopleScreenProps {
   albumId: string;
@@ -161,7 +157,7 @@ export function AlbumPeopleScreen({ albumId, onBack }: AlbumPeopleScreenProps) {
 
   // Only the user's own name changes here: everyone else names themselves.
   const renamePerson = (id: string, name: string) => {
-    showEditError(renameAlbumMember(album.id, id, name));
+    void renameAlbumMember(album.id, id, name).then(showEditError);
   };
 
   const isJoined = (person: AlbumGroupPerson) => {
@@ -186,8 +182,8 @@ export function AlbumPeopleScreen({ albumId, onBack }: AlbumPeopleScreenProps) {
           onPress: () =>
             void run(`remove:${member.id}`, async () => {
               if (!shareId || !member.userId) return;
+              // The Worker marks them as left in the group, and logs it.
               await removeMember(await getSessionToken(), shareId, member.userId);
-              markMemberLeft(album.id, member.id);
               setLink(null);
               void trackEvent(AnalyticsEvents.ALBUM_MEMBER_REMOVED);
               await loadJoined();
@@ -297,7 +293,7 @@ export function AlbumPeopleScreen({ albumId, onBack }: AlbumPeopleScreenProps) {
                   value: simplifies,
                   onChange: (next) => {
                     void triggerHaptic('selection');
-                    setAlbumSimplifyDebts(album.id, next);
+                    void setAlbumSimplifyDebts(album.id, next);
                   },
                 }
               : null

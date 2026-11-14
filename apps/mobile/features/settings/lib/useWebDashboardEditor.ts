@@ -74,12 +74,19 @@ export function useWebDashboardEditor(onApplied: (count: number) => void): WebDa
       };
     },
     apply: async (plan: EditPlan) => {
-      const track: ApplyTrack = { created: [], deleted: [], checks: [] };
+      const track: ApplyTrack = { created: [], deleted: [], checks: [], pending: [] };
+      const went: boolean[] = [];
       for (const step of plan.steps) {
         applyStep(latest.current.app, step, track);
+        // A shared album's write goes through the Worker: the next step waits
+        // for it, as the app's own screens do one change after another.
+        if (track.pending.length) went.push(...(await Promise.all(track.pending.splice(0))));
       }
       // The browser's fresh copy is built from the database.
       await afterDeferredWrites();
+      // A group write that did not go (offline, signed out, no longer in the
+      // album): the phone has said why, and nothing of it was saved.
+      if (went.some((ok) => !ok)) throw new Error('not sent');
       // The app's deferred writes report nothing back; check the rows did land.
       const { created, deleted, checks } = track;
       if (created.some((id) => !transactionsRepository.getById(id))) throw new Error('not saved');

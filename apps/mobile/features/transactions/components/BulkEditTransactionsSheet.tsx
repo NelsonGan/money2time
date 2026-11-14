@@ -4,6 +4,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { DatePickerModal } from '~/components/datePicker';
 import {
+  AccountLogo,
+  AccountPickerSheet,
   CategoryEmoji,
   type CategoryPickerOption,
   CategoryPickerSheet,
@@ -27,6 +29,8 @@ const SCROLL_CONTENT_STYLE = {
 } as const;
 
 export interface BulkTransactionChanges {
+  /** Shared albums: the account the user's own bills go on (README: Which account). */
+  accountId?: string;
   date?: string;
   note?: string | null;
   /** Applied only to selected income transactions. */
@@ -113,6 +117,8 @@ interface BulkEditTransactionsSheetProps {
    * is selected. Empty (e.g. transfers only) hides the category section.
    */
   categoryTypes: CategoryType[];
+  /** A shared album's selection: its bills can be put on one of the user's accounts. */
+  offerAccount?: boolean;
   onClose: () => void;
   onApply: (changes: BulkTransactionChanges) => void;
 }
@@ -126,10 +132,13 @@ export function BulkEditTransactionsSheet({
   visible,
   selectedCount,
   categoryTypes,
+  offerAccount = false,
   onClose,
   onApply,
 }: BulkEditTransactionsSheetProps) {
-  const { categories } = useApp();
+  const { categories, accounts, accountGroups, getAccountById } = useApp();
+  const [accountId, setAccountId] = useState<string | null>(null);
+  const [accountPickerOpen, setAccountPickerOpen] = useState(false);
 
   const [bulkDate, setBulkDate] = useState(() => formatDateInput(new Date()));
   const [bulkDateTouched, setBulkDateTouched] = useState(false);
@@ -159,14 +168,22 @@ export function BulkEditTransactionsSheet({
     setIncomeCategoryId(null);
     setExpenseCategoryId(null);
     setActiveCategoryPicker(null);
+    setAccountId(null);
+    setAccountPickerOpen(false);
   }, [visible]);
 
   const hasBulkChanges =
-    bulkDateTouched || bulkNoteTouched || incomeCategoryId !== null || expenseCategoryId !== null;
+    bulkDateTouched ||
+    bulkNoteTouched ||
+    incomeCategoryId !== null ||
+    expenseCategoryId !== null ||
+    (offerAccount && accountId !== null);
+  const account = accountId ? getAccountById(accountId) : undefined;
 
   const handleApply = () => {
     if (!hasBulkChanges) return;
     const changes: BulkTransactionChanges = {};
+    if (offerAccount && accountId) changes.accountId = accountId;
     if (bulkDateTouched) changes.date = bulkDate;
     if (bulkNoteTouched) {
       const normalizedNote = bulkNote.trim();
@@ -271,6 +288,42 @@ export function BulkEditTransactionsSheet({
         </View>
 
         <ScrollView className="flex-1" contentContainerStyle={SCROLL_CONTENT_STYLE}>
+          {offerAccount ? (
+            <View className="gap-2.5">
+              <Text variant="caption" tone="muted">
+                {I18n.t('transactions.editor.account')}
+              </Text>
+              <Pressable
+                onPress={() => {
+                  void triggerHaptic('selection');
+                  setAccountPickerOpen(true);
+                }}
+                accessibilityRole="button"
+                accessibilityLabel={I18n.t('transactions.editor.account')}
+                testID="bulk-edit-account"
+                className="rounded-2xl border border-border/30 bg-card px-3.5 py-3.5 flex-row items-center gap-2"
+              >
+                {account ? (
+                  <>
+                    <AccountLogo
+                      logoId={account.logoId}
+                      type={account.type}
+                      goalEmoji={account.goalEmoji}
+                      size={18}
+                    />
+                    <Text variant="caption" className="flex-1">
+                      {account.name}
+                    </Text>
+                  </>
+                ) : (
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('transactions.editor.choose_account')}
+                  </Text>
+                )}
+              </Pressable>
+            </View>
+          ) : null}
+
           <View className="gap-2.5">
             <Text variant="caption" tone="muted">
               {I18n.t('transactions.editor.date')}
@@ -314,6 +367,20 @@ export function BulkEditTransactionsSheet({
           }}
           onClose={() => setBulkDateModalVisible(false)}
         />
+        {offerAccount ? (
+          <AccountPickerSheet
+            overlay
+            visible={accountPickerOpen}
+            onClose={() => setAccountPickerOpen(false)}
+            accounts={accounts}
+            accountGroups={accountGroups}
+            selectedAccountId={accountId}
+            onSelect={(picked) => {
+              setAccountId(picked);
+              setAccountPickerOpen(false);
+            }}
+          />
+        ) : null}
         <CategoryPickerSheet
           overlay
           visible={activeCategoryPicker === 'income'}

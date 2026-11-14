@@ -2,7 +2,8 @@
  * Who owes whom in a shared album's group. Pure: no database, no clock.
  *
  * The group's debts live on its bills: each member's share of a bill is owed
- * to the member who paid it, less the payments made on it (`openShares`).
+ * to the member who paid it, less the payments made on it, and a payment past
+ * what was owed is owed back (`openShares`).
  * Everything here is derived from those, per currency, in cents:
  *
  * - `pairwiseDebts`: each pair's net. What the album shows as it is.
@@ -19,7 +20,7 @@
 
 import type { AlbumExpense, AlbumSettlement } from '~/types';
 
-import { cents, settlementsByBill, shareLeft } from './albumGroup';
+import { cents, settlementsByBill } from './albumGroup';
 
 type Bill = Pick<
   AlbumExpense,
@@ -36,7 +37,7 @@ interface OpenShare {
   expenseId: string;
   /** The member who owes. */
   from: string;
-  /** The member who paid the bill. */
+  /** The member owed: the bill's payer, or someone who paid past their share. */
   to: string;
   currency: string;
   amount: number;
@@ -58,7 +59,14 @@ interface BillPayment {
   amount: number;
 }
 
-/** Every share of the group's standing bills that is still owed, oldest bill first. */
+/**
+ * What is still owed on each of the group's bills, oldest bill first: each
+ * share owed to the bill's payer, less the payments made on it. A payment is
+ * money one member gave another for that bill, so it is set off against what
+ * they owed each other on it: past a share (an edit lowered it, the payer
+ * changed, or the bill was deleted, which leaves its payments standing), the
+ * difference is owed back the other way.
+ */
 export function openShares(
   expenses: readonly Bill[],
   settlements: readonly Payment[],
@@ -66,25 +74,23 @@ export function openShares(
   const open: OpenShare[] = [];
   const paid = settlementsByBill(settlements);
   const bills = expenses
-    .filter((bill) => !bill.deletedAt)
+    .filter((bill) => !bill.deletedAt || paid.has(bill.id))
     .sort((a, b) => (a.date !== b.date ? (a.date < b.date ? -1 : 1) : a.id < b.id ? -1 : 1));
   for (const bill of bills) {
-    const shares = new Map<string, number>();
-    for (const share of bill.shares) {
-      shares.set(share.memberId, (shares.get(share.memberId) ?? 0) + share.amount);
-    }
-    for (const [memberId, share] of shares) {
-      if (memberId === bill.paidBy) continue;
-      const amount = shareLeft(bill, paid.get(bill.id) ?? [], memberId, bill.paidBy, share);
-      if (amount > 0) {
-        open.push({
-          expenseId: bill.id,
-          from: memberId,
-          to: bill.paidBy,
-          currency: bill.currency,
-          amount,
-        });
+    const graph: Graph = new Map();
+    if (!bill.deletedAt) {
+      for (const share of bill.shares) {
+        if (share.memberId === bill.paidBy) continue;
+        addNet(graph, share.memberId, bill.paidBy, cents(share.amount));
       }
+    }
+    for (const payment of paid.get(bill.id) ?? []) {
+      // A payment in another currency than its bill's is not a payment on it.
+      if (payment.currency && payment.currency !== bill.currency) continue;
+      addNet(graph, payment.toMember, payment.fromMember, Math.max(0, cents(payment.amount)));
+    }
+    for (const debt of debtsOf(graph, bill.currency)) {
+      open.push({ expenseId: bill.id, ...debt });
     }
   }
   return open;

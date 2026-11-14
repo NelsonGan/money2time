@@ -1338,7 +1338,45 @@
       "transactionsTitle": "Transazioni",
       "everyone": "Tutti",
       "me": "Io",
-      "pick": "Scegli un viaggio per vederne il dettaglio."
+      "pick": "Scegli un viaggio per vederne il dettaglio.",
+      "activity": {
+        "title": "Attività",
+        "empty_title": "Nessuna attività",
+        "empty_message": "Ogni modifica fatta a questo album compare qui.",
+        "restore": "Ripristina",
+        "restoring": "Ripristino…",
+        "you": "Tu",
+        "you_lower": "tu",
+        "untitled": "una spesa",
+        "added": "{actor}: {title} aggiunta · {money}",
+        "said_you_paid": "{actor}: {title} pagata da te · {money}",
+        "restored": "{actor}: {title} ripristinata · {money}",
+        "deleted": "{actor}: {title} eliminata · {money}",
+        "changed_amount": "{actor}: {title} modificata: {before} → {after}",
+        "changed_payer": "{actor}: chi ha pagato {title}: {before} → {after}",
+        "changed_split": "{actor}: divisione di {title} modificata",
+        "renamed_bill": "{actor}: {before} rinominata in {after}",
+        "moved_bill": "{actor}: {title} spostata al {day}",
+        "changed_bill": "{actor}: {title} modificata",
+        "changed_album": "{actor}: album modificato",
+        "your_share": "La tua quota {money}",
+        "your_share_change": "La tua quota {before} → {after}",
+        "your_share_gone": "La tua quota di {money} non c'è più",
+        "you_paid": "Hai pagato tu",
+        "you_paid_choose_account": "Hai pagato tu · Scegli il conto",
+        "they_paid": "Ora l'ha pagata {name}",
+        "choose_account": "Scegli il conto",
+        "paid": "{from} → {to}: {money} pagati",
+        "paid_even": "{from} → {to}: {money} pagati per pareggiare",
+        "undid_payment": "{actor}: annullato il pagamento {from} → {to} di {money}",
+        "recorded_by": "Registrato da {actor}",
+        "joined": "{name} è entrato nell'album",
+        "left": "{name} ha lasciato l'album",
+        "renamed_member": "{before} ora si chiama {after}",
+        "simplify_on": "{actor}: Semplifica i debiti attivato",
+        "simplify_off": "{actor}: Semplifica i debiti disattivato",
+        "cover": "{actor}: copertina modificata"
+      }
     },
     "items": {
       "emptyTitle": "Nessun oggetto",
@@ -2053,7 +2091,17 @@
           "yearly": "/anno"
         }
       },
-      "notePlaceholder": "Nuova nota. Lascia vuoto per cancellarla."
+      "notePlaceholder": "Nuova nota. Lascia vuoto per cancellarla.",
+      "sharedBill": {
+        "intro": "Nell'album condiviso {album}: chiunque può modificare questa spesa. Categoria, conto, dettagli e umore restano tuoi.",
+        "paidBy": "Pagato da",
+        "splitBetween": "Diviso tra",
+        "nobodyElse": "Dividila con qualcun altro dell'album, o falla pagare a qualcun altro.",
+        "deleteBody": "Questa spesa è in un album condiviso. Eliminarla la elimina per tutti. I pagamenti restano, e quanto già pagato va restituito.",
+        "deleteSome": "Alcune sono in un album condiviso. Eliminarle le elimina per tutti; i loro pagamenti restano.",
+        "payments": "I pagamenti di una spesa di un album condiviso si registrano nell'app.",
+        "accountOthers": "Alcune le ha pagate qualcun altro. Vanno su uno dei tuoi conti quando le avrai rimborsate."
+      }
     },
     "cloud": {
       "strip": "Dati da {device}, sincronizzati {date}.",

@@ -1338,7 +1338,45 @@
       "transactionsTitle": "Transaktioner",
       "everyone": "Alle",
       "me": "Mig",
-      "pick": "Vælg en rejse for at se opdelingen."
+      "pick": "Vælg en rejse for at se opdelingen.",
+      "activity": {
+        "title": "Aktivitet",
+        "empty_title": "Ingen aktivitet endnu",
+        "empty_message": "Alle ændringer i dette album vises her.",
+        "restore": "Gendan",
+        "restoring": "Gendanner…",
+        "you": "Du",
+        "you_lower": "du",
+        "untitled": "en regning",
+        "added": "{actor} tilføjede {title} · {money}",
+        "said_you_paid": "{actor} sagde, at du betalte {title} · {money}",
+        "restored": "{actor} gendannede {title} · {money}",
+        "deleted": "{actor} slettede {title} · {money}",
+        "changed_amount": "{actor} ændrede {title}: {before} → {after}",
+        "changed_payer": "{actor} ændrede, hvem der betalte {title}: {before} → {after}",
+        "changed_split": "{actor} ændrede fordelingen af {title}",
+        "renamed_bill": "{actor} omdøbte {before} til {after}",
+        "moved_bill": "{actor} flyttede {title} til {day}",
+        "changed_bill": "{actor} ændrede {title}",
+        "changed_album": "{actor} ændrede albummet",
+        "your_share": "Din andel {money}",
+        "your_share_change": "Din andel {before} → {after}",
+        "your_share_gone": "Din andel på {money} er væk",
+        "you_paid": "Siger, du betalte",
+        "you_paid_choose_account": "Siger, du betalte · Vælg kontoen",
+        "they_paid": "{name} betalte den nu",
+        "choose_account": "Vælg kontoen",
+        "paid": "{from} betalte {to} {money}",
+        "paid_even": "{from} betalte {to} {money} for at udligne",
+        "undid_payment": "{actor} fortrød, at {from} betalte {to} {money}",
+        "recorded_by": "Registreret af {actor}",
+        "joined": "{name} kom med i albummet",
+        "left": "{name} forlod albummet",
+        "renamed_member": "{before} hedder nu {after}",
+        "simplify_on": "{actor} slog Forenkl gruppegæld til",
+        "simplify_off": "{actor} slog Forenkl gruppegæld fra",
+        "cover": "{actor} ændrede forsidebilledet"
+      }
     },
     "items": {
       "emptyTitle": "Ingen ting endnu",
@@ -2053,7 +2091,17 @@
           "yearly": "/år"
         }
       },
-      "notePlaceholder": "Ny note. Lad feltet stå tomt for at rydde den."
+      "notePlaceholder": "Ny note. Lad feltet stå tomt for at rydde den.",
+      "sharedBill": {
+        "intro": "I det delte album {album}: alle i det kan ændre denne regning. Kategori, konto, detaljer og humør forbliver dine.",
+        "paidBy": "Betalt af",
+        "splitBetween": "Delt mellem",
+        "nobodyElse": "Del den med en anden i albummet, eller lad en anden betale.",
+        "deleteBody": "Denne regning er i et delt album. Sletter du den, forsvinder den for alle. Betalinger på den bliver, og det allerede betalte skal betales tilbage.",
+        "deleteSome": "Nogle af dem er i et delt album. Sletter du dem, forsvinder de for alle; betalinger på dem bliver.",
+        "payments": "Betalinger på en regning i et delt album registreres i appen.",
+        "accountOthers": "Nogle af dem har en anden betalt. De kommer på en af dine konti, når du har betalt tilbage."
+      }
     },
     "cloud": {
       "strip": "Data fra {device}, synkroniseret {date}.",

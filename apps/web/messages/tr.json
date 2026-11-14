@@ -1338,7 +1338,45 @@
       "transactionsTitle": "İşlemler",
       "everyone": "Herkes",
       "me": "Ben",
-      "pick": "Dökümünü görmek için bir gezi seçin."
+      "pick": "Dökümünü görmek için bir gezi seçin.",
+      "activity": {
+        "title": "Etkinlik",
+        "empty_title": "Henüz etkinlik yok",
+        "empty_message": "Bu albümde yapılan her değişiklik burada görünür.",
+        "restore": "Geri yükle",
+        "restoring": "Geri yükleniyor…",
+        "you": "Siz",
+        "you_lower": "siz",
+        "untitled": "bir fatura",
+        "added": "{actor}: {title} eklendi · {money}",
+        "said_you_paid": "{actor}: {title} sizin ödediğiniz olarak eklendi · {money}",
+        "restored": "{actor}: {title} geri yüklendi · {money}",
+        "deleted": "{actor}: {title} silindi · {money}",
+        "changed_amount": "{actor}: {title} değişti: {before} → {after}",
+        "changed_payer": "{actor}: {title} ödeyeni değişti: {before} → {after}",
+        "changed_split": "{actor}: {title} paylaşımı değişti",
+        "renamed_bill": "{actor}: {before} adı {after} oldu",
+        "moved_bill": "{actor}: {title} {day} tarihine taşındı",
+        "changed_bill": "{actor}: {title} değişti",
+        "changed_album": "{actor}: albüm değişti",
+        "your_share": "Payınız {money}",
+        "your_share_change": "Payınız {before} → {after}",
+        "your_share_gone": "{money} payınız kalktı",
+        "you_paid": "Sizin ödediğiniz yazıyor",
+        "you_paid_choose_account": "Sizin ödediğiniz yazıyor · Hesabı seçin",
+        "they_paid": "Artık {name} ödedi",
+        "choose_account": "Hesabı seçin",
+        "paid": "{from} → {to}: {money} ödendi",
+        "paid_even": "{from} → {to}: denkleştirmek için {money} ödendi",
+        "undid_payment": "{actor}: {from} → {to} {money} ödemesi geri alındı",
+        "recorded_by": "Kaydeden: {actor}",
+        "joined": "{name} albüme katıldı",
+        "left": "{name} albümden ayrıldı",
+        "renamed_member": "{before} artık {after}",
+        "simplify_on": "{actor}: Grup borçlarını sadeleştir açıldı",
+        "simplify_off": "{actor}: Grup borçlarını sadeleştir kapatıldı",
+        "cover": "{actor}: kapak değişti"
+      }
     },
     "items": {
       "emptyTitle": "Henüz eşya yok",
@@ -2053,7 +2091,17 @@
           "yearly": "/yıl"
         }
       },
-      "notePlaceholder": "Yeni not. Silmek için boş bırakın."
+      "notePlaceholder": "Yeni not. Silmek için boş bırakın.",
+      "sharedBill": {
+        "intro": "Paylaşılan albüm {album}: içindeki herkes bu faturayı değiştirebilir. Kategorisi, hesabı, ayrıntıları ve ruh hâli sizde kalır.",
+        "paidBy": "Ödeyen",
+        "splitBetween": "Paylaşılanlar",
+        "nobodyElse": "Albümdeki başka biriyle paylaşın ya da başkası ödesin.",
+        "deleteBody": "Bu fatura paylaşılan bir albümde. Silmek onu herkes için kaldırır. Üzerindeki ödemeler kalır ve zaten ödenen geri borçlanılır.",
+        "deleteSome": "Bazıları paylaşılan bir albümde. Silmek onları herkes için kaldırır; üzerlerindeki ödemeler kalır.",
+        "payments": "Paylaşılan albüm faturasının ödemeleri uygulamada kaydedilir.",
+        "accountOthers": "Bazılarını başkası ödedi. Geri ödediğinizde hesaplarınızdan birine geçerler."
+      }
     },
     "cloud": {
       "strip": "{device} cihazından veriler, {date} tarihinde eşitlendi.",

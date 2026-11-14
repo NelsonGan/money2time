@@ -694,7 +694,8 @@ function planTransaction(
   }
   if (op.op === 'delete') {
     // A shared album's bill is everyone's in the album: deleting it deletes
-    // it for them too, which the app asks about first. Not from the browser.
+    // it for them too, which the app asks about first. A page that asks the
+    // same sends `module:albumbill` delete instead (webDashboardEditModules/albumBill.ts).
     if (rows.some((tx) => tx.albumGroupId)) return refuse('invalid');
     steps.push({ kind: 'tx.delete', ids: rows.map((tx) => tx.id) });
     return ok(rows.length);
@@ -723,7 +724,8 @@ function planTransaction(
       return refuse('amount_locked');
     }
     // A shared album's bill keeps its day and title from the group, where
-    // everyone in it sees them; they are changed in the app.
+    // everyone in it sees them: they change through the group
+    // (`module:albumbill`), never on this entry alone.
     if (current.albumGroupId && ('date' in set || 'note' in set)) return refuse('invalid');
     const payload = transactionPayload(ctx, set, current);
     if (!payload.ok) return payload;

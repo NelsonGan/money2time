@@ -755,6 +755,60 @@ export interface AlbumSettlement {
   deletedAt: string | null;
 }
 
+/** What a shared album's activity entry records (README: Album members and shared albums > Activity). */
+export type AlbumActivityKind =
+  | 'bill_added'
+  | 'bill_edited'
+  | 'bill_deleted'
+  | 'bill_restored'
+  | 'payment_recorded'
+  | 'payment_undone'
+  | 'member_joined'
+  | 'member_left'
+  | 'member_renamed'
+  | 'simplify_changed'
+  | 'cover_changed';
+
+/** A bill's fields as the activity log keeps them, before or after a change. */
+export interface AlbumBillSnapshot {
+  note: string | null;
+  amount: number;
+  currency: string;
+  date: string;
+  paidBy: string;
+  shares: AlbumShare[];
+}
+
+/** One entry of a shared album's activity log, written by the Worker with the change it records. */
+export interface AlbumActivity {
+  id: string;
+  groupId: string;
+  kind: AlbumActivityKind;
+  /** The member who made the change. */
+  actorMemberId: string | null;
+  /** The bill it is about. */
+  expenseId: string | null;
+  /** The member it is about (joined, left, renamed). */
+  memberId: string | null;
+  /** A bill's fields before and after (added: no before; deleted: no after). */
+  bill: { before: AlbumBillSnapshot | null; after: AlbumBillSnapshot | null } | null;
+  rename: { before: string; after: string } | null;
+  /** Payments recorded or undone together between two members. */
+  payment: {
+    from: string;
+    to: string;
+    currency: string;
+    amount: number;
+    bills: string[];
+    /** Recorded by the app to close an even group (Simplify). */
+    even: boolean;
+  } | null;
+  /** Simplify group debts, as it was switched. */
+  simplify: boolean | null;
+  sortOrder: number;
+  createdAt: string;
+}
+
 /** The location fields of an album, written together as a unit. */
 export interface AlbumLocation {
   latitude: number;

@@ -1,5 +1,4 @@
 import React, { useCallback, useMemo } from 'react';
-import { Alert } from 'react-native';
 
 import { PRO_LIMITS } from '~/constants/proLimits';
 import { useApp } from '~/context/AppContext';
@@ -19,7 +18,6 @@ import { type SplitDraft, splitsHelpers } from '~/features/transactions/componen
 import type { TransactionEditorSubmitExtras } from '~/features/transactions/components/TransactionEditorScreen';
 import { useNewTransactionGate } from '~/features/transactions/hooks/useNewTransactionGate';
 import { draftPayer, friendPaidExpense } from '~/features/transactions/lib/splitPayer';
-import { I18n } from '~/lib/i18n';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
 import type { AddTransactionInitialValues } from '~/navigation/rootStack';
 import { requestHighlightTransaction } from '~/services/transactionsNavigation';
@@ -158,18 +156,15 @@ export function AddTransactionScreen({
   );
 
   const handleSubmitWithSplits = useCallback(
-    (input: CreateTransactionInput, splits: SplitDraft[]) => {
-      // A shared album's bill is the group's: this phone's entry follows from it.
+    async (input: CreateTransactionInput, splits: SplitDraft[]): Promise<boolean> => {
+      // A shared album's bill is the group's: this phone's entry follows from
+      // it. Never kept as a bill of the user's own in its place, which nobody
+      // else would get: when it did not go, the user was told why and the
+      // editor stays open.
       if (albumGroupId && splits.some((row) => !row.isSelf)) {
-        const saved = saveAlbumBill(albumGroupId, input, albumBillRows(splits));
-        if (saved) {
-          if (saved.mine) requestHighlightTransaction(saved.id);
-          return;
-        }
-        // Never kept as a bill of the user's own in its place, which nobody
-        // else would get: say it failed (signed out, the share gone).
-        Alert.alert(I18n.t('errors.generic_operation_failed'));
-        return;
+        const saved = await saveAlbumBill(albumGroupId, input, albumBillRows(splits));
+        if (saved?.mine) requestHighlightTransaction(saved.id);
+        return saved !== null;
       }
       // A friend paid: the expense is the user's own share, on no account
       // until they pay that friend back, and nobody owes the user anything.
@@ -181,7 +176,7 @@ export function AddTransactionScreen({
             splitsHelpers.toSplitDraftInputs(splits, null),
           ),
         );
-        return;
+        return true;
       }
 
       // Stage the locally-marked-paid friends so we can flush them via
@@ -218,6 +213,7 @@ export function AddTransactionScreen({
       pendingMarkPaid.forEach(({ id, paybackAccountId }) => {
         markSplitPaid(id, { paybackAccountId });
       });
+      return true;
     },
     [addToAlbum, albumGroupId, createTransactionWithSplits, markSplitPaid, saveAlbumBill],
   );
@@ -246,6 +242,7 @@ export function AddTransactionScreen({
       // Split with the album's people: Add shows the split before it saves.
       confirmSplitBeforeAdd={splitWith.length > 0}
       groupBill={groupBill}
+      awaitSplitSubmit={groupBill}
       groupMembers={groupBill ? groupMembers : undefined}
     />
   );

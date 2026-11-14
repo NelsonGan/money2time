@@ -635,7 +635,13 @@ export function SplitBillModal({
   // A recorded payment fixes who paid: a friend's payback lowered the expense
   // the user paid, and the user's own payback put it on an account.
   const paidBack = payerRow?.paidBack ?? 0;
-  const payerLocked = splits.some((s) => !!s.paid) || !!payerRow?.settled || paidBack > 0;
+  // In a shared album anyone can change who paid: payments made stay, and the
+  // album's Balances count what was paid past a share as owed back.
+  const payerLocked =
+    !groupMembers && (splits.some((s) => !!s.paid) || !!payerRow?.settled || paidBack > 0);
+  // Who paid is shown with friends on the bill, and in a shared album with
+  // anyone in it (any of them can have paid, on the bill or not).
+  const showPaidBy = groupMembers ? groupMembers.length > 0 : hasFriends;
   const selfAmount = useMemo(() => {
     const value = Number(splits.find((s) => s.isSelf)?.amount);
     return Number.isFinite(value) ? Math.max(0, value) : 0;
@@ -651,10 +657,10 @@ export function SplitBillModal({
     : me.name;
   const [payerPickerOpen, setPayerPickerOpen] = useState(false);
   const payerOptions = useMemo<PaidByOption[]>(
-    () =>
-      splits.flatMap((row, index) => {
+    () => [
+      ...splits.flatMap((row, index): PaidByOption[] => {
         // A friend who has paid the user back is not the one who paid the bill.
-        if (row.paid && !row.isSelf) return [];
+        if (row.paid && !row.isSelf && !groupMembers) return [];
         return [
           {
             key: row.id ?? `row_${index}`,
@@ -667,27 +673,21 @@ export function SplitBillModal({
           },
         ];
       }),
-    [friendPaid, me.name, payerRow, splits],
-  );
-
-  const handlePayerChange = useCallback(
-    (payerIndex: number | null) => {
-      if (payerLocked) {
-        void triggerHaptic('warning');
-        setToast(I18n.t('transactions.editor.split.paid_by_locked'));
-        if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
-        toastTimerRef.current = setTimeout(() => setToast(null), 2800);
-        return;
-      }
-      void triggerHaptic('selection');
-      onChange(
-        splits.map((row, i) => {
-          const isPayer = payerIndex !== null && i === payerIndex && !row.isSelf;
-          return row.isPayer === isPayer || (!row.isPayer && !isPayer) ? row : { ...row, isPayer };
-        }),
-      );
-    },
-    [onChange, payerLocked, splits],
+      // A shared album's bill can be paid by anyone in the album.
+      ...(groupMembers ?? [])
+        .filter((member) => !splits.some((row) => !row.isSelf && row.albumMemberId === member.id))
+        .map(
+          (member): PaidByOption => ({
+            key: `member_${member.id}`,
+            rowIndex: null,
+            member,
+            name: member.name,
+            partyKey: debtPartyKey(member.name),
+            selected: false,
+          }),
+        ),
+    ],
+    [friendPaid, groupMembers, me.name, payerRow, splits],
   );
 
   // Tax & service adjustment: a single percentage stepper.
@@ -828,6 +828,45 @@ export function SplitBillModal({
     [applyEvenSplit, itemized, method, methodValuesFor, splitEvenly, storeMethodValues, total],
   );
 
+  const handlePayerChange = useCallback(
+    (option: PaidByOption | null) => {
+      if (payerLocked) {
+        void triggerHaptic('warning');
+        setToast(I18n.t('transactions.editor.split.paid_by_locked'));
+        if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+        toastTimerRef.current = setTimeout(() => setToast(null), 2800);
+        return;
+      }
+      if (!option) return;
+      void triggerHaptic('selection');
+      const payerIndex = option.member ? splits.length : option.rowIndex;
+      const withPayer = (rows: SplitDraft[]) =>
+        rows.map((row, i) => {
+          const isPayer = payerIndex !== null && i === payerIndex && !row.isSelf;
+          return row.isPayer === isPayer || (!row.isPayer && !isPayer) ? row : { ...row, isPayer };
+        });
+      if (!option.member) {
+        onChange(withPayer(splits));
+        return;
+      }
+      // A member not on the bill yet who paid it goes on it like anyone added
+      // (with an even share when the bill is shared evenly).
+      const next = withPayer([
+        ...splits,
+        {
+          id: newId(),
+          personName: option.member.name,
+          amount: '0',
+          isSelf: false,
+          paybackAccountId: defaultAccountId,
+          albumMemberId: option.member.id,
+        },
+      ]);
+      onChange(rebalanceRows(next));
+    },
+    [defaultAccountId, onChange, payerLocked, rebalanceRows, splits],
+  );
+
   const handleMethodSelect = useCallback(
     (next: SplitMethod) => {
       if (next === method) return;
@@ -936,18 +975,15 @@ export function SplitBillModal({
       ),
     [groupMembers, splits],
   );
-  // Who is on the bill, and who cannot come off it (a payment is recorded
-  // with them), by member.
-  const { memberIdsOnBill, lockedMemberIds } = useMemo(() => {
-    const on = new Set<string>();
-    const locked = new Set<string>();
-    for (const row of splits) {
-      if (row.isSelf || !row.albumMemberId) continue;
-      on.add(row.albumMemberId);
-      if (row.paid || row.settled || (row.paidBack ?? 0) > 0) locked.add(row.albumMemberId);
-    }
-    return { memberIdsOnBill: on, lockedMemberIds: locked };
-  }, [splits]);
+  // Who is on the bill, by member. Anyone can come off it, payments or not
+  // (README: Anyone in it can change it).
+  const memberIdsOnBill = useMemo(
+    () =>
+      new Set(
+        splits.flatMap((row) => (!row.isSelf && row.albumMemberId ? [row.albumMemberId] : [])),
+      ),
+    [splits],
+  );
 
   const handleAddMember = useCallback(
     (member: { id: string; name: string }) => {
@@ -984,7 +1020,7 @@ export function SplitBillModal({
       if (!target || target.isSelf) return;
       // The friend the user has already paid back stays the payer until that
       // payment is undone: removing them would make it a bill the user paid.
-      if (target.isPayer && (target.settled || (target.paidBack ?? 0) > 0)) {
+      if (!groupMembers && target.isPayer && (target.settled || (target.paidBack ?? 0) > 0)) {
         setToast(I18n.t('transactions.editor.split.paid_by_locked'));
         if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
         toastTimerRef.current = setTimeout(() => setToast(null), 2800);
@@ -996,7 +1032,7 @@ export function SplitBillModal({
       const next = splits.filter((_, i) => i !== index);
       onChange(rebalanceRows(next));
     },
-    [onChange, rebalanceRows, splits],
+    [groupMembers, onChange, rebalanceRows, splits],
   );
 
   // A member ticked on or off in the sheet: added to the bill, or taken off it
@@ -1317,9 +1353,9 @@ export function SplitBillModal({
           {/* How the bill is settled, in one card: who paid it (Me, or a friend
               on it, in which case the user owes them their own share), and,
               when typing amounts, whether it is shared evenly. */}
-          {(hasFriends && !groupMembers) || showEvenToggle ? (
+          {showPaidBy || showEvenToggle ? (
             <View className="mx-4 mt-3 overflow-hidden rounded-[20px] border border-border/25 bg-card/60">
-              {hasFriends && !groupMembers ? (
+              {showPaidBy ? (
                 <Pressable
                   onPress={() => {
                     if (payerLocked) {
@@ -1358,9 +1394,7 @@ export function SplitBillModal({
                   <ChevronRight size={16} color={themeColors.textMuted} />
                 </Pressable>
               ) : null}
-              {hasFriends && !groupMembers && showEvenToggle ? (
-                <View className="mx-4 h-[1px] bg-border/15" />
-              ) : null}
+              {showPaidBy && showEvenToggle ? <View className="mx-4 h-[1px] bg-border/15" /> : null}
               {showEvenToggle ? (
                 <View className="flex-row items-center px-4 py-2">
                   <Text variant="body" className="flex-1">
@@ -1860,9 +1894,9 @@ export function SplitBillModal({
         visible={payerPickerOpen}
         options={payerOptions}
         onClose={() => setPayerPickerOpen(false)}
-        onSelect={(rowIndex) => {
+        onSelect={(option) => {
           setPayerPickerOpen(false);
-          handlePayerChange(rowIndex);
+          handlePayerChange(option);
         }}
       />
 
@@ -1871,7 +1905,6 @@ export function SplitBillModal({
           visible={memberSheetOpen}
           members={groupMembers}
           selectedIds={memberIdsOnBill}
-          lockedIds={lockedMemberIds}
           onToggle={handleToggleMember}
           onClose={() => setMemberSheetOpen(false)}
         />

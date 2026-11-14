@@ -45,6 +45,10 @@ type CloudSyncErrorCode =
   | 'unsent_changes'
   /** Email sign-in: the Turnstile check failed (the Worker thinks a bot is sending). */
   | 'captcha_failed'
+  /** Shared albums: the user is not (or no longer) in the album, so cannot change it. */
+  | 'not_member'
+  /** Shared albums: someone else in the album already goes by that name. */
+  | 'name_taken'
   | 'server';
 
 export class CloudSyncApiError extends Error {
@@ -141,6 +145,8 @@ function toError(status: number, body: unknown): CloudSyncApiError {
   if (status === 409 && (code === 'limit_reached' || code === 'full' || code === 'own_ledger')) {
     return new CloudSyncApiError(code, status);
   }
+  if (status === 403 && code === 'not_member') return new CloudSyncApiError('not_member', status);
+  if (status === 409 && code === 'name_taken') return new CloudSyncApiError('name_taken', status);
   if (status === 429) return new CloudSyncApiError('rate_limited', status);
   if (/OTP|INVALID|EXPIRED|TOO_MANY_ATTEMPTS/i.test(code)) {
     return new CloudSyncApiError('invalid_code', status, code);

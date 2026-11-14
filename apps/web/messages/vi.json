@@ -1338,7 +1338,45 @@
       "transactionsTitle": "Giao dịch",
       "everyone": "Mọi người",
       "me": "Tôi",
-      "pick": "Chọn một chuyến đi để xem chi tiết."
+      "pick": "Chọn một chuyến đi để xem chi tiết.",
+      "activity": {
+        "title": "Hoạt động",
+        "empty_title": "Chưa có hoạt động",
+        "empty_message": "Mọi thay đổi trong album này đều hiện ở đây.",
+        "restore": "Khôi phục",
+        "restoring": "Đang khôi phục…",
+        "you": "Bạn",
+        "you_lower": "bạn",
+        "untitled": "một hóa đơn",
+        "added": "{actor} đã thêm {title} · {money}",
+        "said_you_paid": "{actor} ghi bạn đã trả {title} · {money}",
+        "restored": "{actor} đã khôi phục {title} · {money}",
+        "deleted": "{actor} đã xóa {title} · {money}",
+        "changed_amount": "{actor} đã sửa {title}: {before} → {after}",
+        "changed_payer": "{actor} đã đổi người trả {title}: {before} → {after}",
+        "changed_split": "{actor} đã đổi cách chia {title}",
+        "renamed_bill": "{actor} đã đổi tên {before} thành {after}",
+        "moved_bill": "{actor} đã chuyển {title} sang {day}",
+        "changed_bill": "{actor} đã sửa {title}",
+        "changed_album": "{actor} đã sửa album",
+        "your_share": "Phần của bạn {money}",
+        "your_share_change": "Phần của bạn {before} → {after}",
+        "your_share_gone": "Phần {money} của bạn không còn",
+        "you_paid": "Ghi là bạn đã trả",
+        "you_paid_choose_account": "Ghi là bạn đã trả · Chọn tài khoản",
+        "they_paid": "Giờ {name} đã trả",
+        "choose_account": "Chọn tài khoản",
+        "paid": "{from} đã trả {to} {money}",
+        "paid_even": "{from} đã trả {to} {money} để cân bằng",
+        "undid_payment": "{actor} đã hoàn tác {from} trả {to} {money}",
+        "recorded_by": "Ghi bởi {actor}",
+        "joined": "{name} đã tham gia album",
+        "left": "{name} đã rời album",
+        "renamed_member": "{before} giờ là {after}",
+        "simplify_on": "{actor} đã bật Đơn giản hóa nợ nhóm",
+        "simplify_off": "{actor} đã tắt Đơn giản hóa nợ nhóm",
+        "cover": "{actor} đã đổi ảnh bìa"
+      }
     },
     "items": {
       "emptyTitle": "Chưa có vật dụng",
@@ -2053,7 +2091,17 @@
           "yearly": "/năm"
         }
       },
-      "notePlaceholder": "Ghi chú mới. Để trống để xóa ghi chú."
+      "notePlaceholder": "Ghi chú mới. Để trống để xóa ghi chú.",
+      "sharedBill": {
+        "intro": "Trong album chia sẻ {album}: bất kỳ ai trong album đều có thể sửa hóa đơn này. Danh mục, tài khoản, chi tiết và tâm trạng vẫn là của bạn.",
+        "paidBy": "Người trả",
+        "splitBetween": "Chia cho",
+        "nobodyElse": "Chia với người khác trong album, hoặc để người khác trả.",
+        "deleteBody": "Hóa đơn này nằm trong album chia sẻ. Xóa sẽ xóa cho mọi người. Các khoản thanh toán vẫn còn, và phần đã trả sẽ phải hoàn lại.",
+        "deleteSome": "Một số nằm trong album chia sẻ. Xóa sẽ xóa cho mọi người; các khoản thanh toán vẫn còn.",
+        "payments": "Thanh toán cho hóa đơn của album chia sẻ được ghi trong ứng dụng.",
+        "accountOthers": "Một số do người khác trả. Chúng sẽ vào một tài khoản của bạn khi bạn trả lại."
+      }
     },
     "cloud": {
       "strip": "Dữ liệu từ {device}, đồng bộ {date}.",

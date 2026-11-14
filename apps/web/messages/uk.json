@@ -1338,7 +1338,45 @@
       "transactionsTitle": "Транзакції",
       "everyone": "Усі",
       "me": "Я",
-      "pick": "Виберіть поїздку, щоб побачити витрати по ній."
+      "pick": "Виберіть поїздку, щоб побачити витрати по ній.",
+      "activity": {
+        "title": "Активність",
+        "empty_title": "Поки немає активності",
+        "empty_message": "Тут з’являється кожна зміна в цьому альбомі.",
+        "restore": "Відновити",
+        "restoring": "Відновлення…",
+        "you": "Ви",
+        "you_lower": "ви",
+        "untitled": "рахунок",
+        "added": "{actor}: додано {title} · {money}",
+        "said_you_paid": "{actor}: {title} сплачено вами · {money}",
+        "restored": "{actor}: відновлено {title} · {money}",
+        "deleted": "{actor}: видалено {title} · {money}",
+        "changed_amount": "{actor}: змінено {title}: {before} → {after}",
+        "changed_payer": "{actor}: змінено платника {title}: {before} → {after}",
+        "changed_split": "{actor}: змінено поділ {title}",
+        "renamed_bill": "{actor}: {before} перейменовано на {after}",
+        "moved_bill": "{actor}: {title} перенесено на {day}",
+        "changed_bill": "{actor}: змінено {title}",
+        "changed_album": "{actor}: змінено альбом",
+        "your_share": "Ваша частка {money}",
+        "your_share_change": "Ваша частка {before} → {after}",
+        "your_share_gone": "Вашої частки {money} більше немає",
+        "you_paid": "Сплачено вами",
+        "you_paid_choose_account": "Сплачено вами · Виберіть рахунок",
+        "they_paid": "Тепер сплатив(ла) {name}",
+        "choose_account": "Виберіть рахунок",
+        "paid": "{from} → {to}: сплачено {money}",
+        "paid_even": "{from} → {to}: сплачено {money} для вирівнювання",
+        "undid_payment": "{actor}: скасовано платіж {from} → {to} на {money}",
+        "recorded_by": "Записав(ла): {actor}",
+        "joined": "{name}: приєднання до альбому",
+        "left": "{name}: вихід з альбому",
+        "renamed_member": "{before} тепер {after}",
+        "simplify_on": "{actor}: увімкнено «Спростити борги»",
+        "simplify_off": "{actor}: вимкнено «Спростити борги»",
+        "cover": "{actor}: змінено обкладинку"
+      }
     },
     "items": {
       "emptyTitle": "Ще немає речей",
@@ -2053,7 +2091,17 @@
           "yearly": "/рік"
         }
       },
-      "notePlaceholder": "Нова нотатка. Залиште порожньою, щоб видалити її."
+      "notePlaceholder": "Нова нотатка. Залиште порожньою, щоб видалити її.",
+      "sharedBill": {
+        "intro": "У спільному альбомі {album}: будь-хто в ньому може змінити цей рахунок. Категорія, рахунок, подробиці та настрій лишаються вашими.",
+        "paidBy": "Сплатив(ла)",
+        "splitBetween": "Поділено між",
+        "nobodyElse": "Поділіть його з кимось іще з альбому або нехай заплатить хтось інший.",
+        "deleteBody": "Цей рахунок у спільному альбомі. Видалення прибере його для всіх. Платежі за ним лишаться, а вже сплачене треба буде повернути.",
+        "deleteSome": "Деякі з них у спільному альбомі. Видалення прибере їх для всіх; платежі за ними лишаться.",
+        "payments": "Платежі за рахунком спільного альбому записуються в застосунку.",
+        "accountOthers": "Деякі сплатив хтось інший. Вони потраплять на один із ваших рахунків, коли ви повернете гроші."
+      }
     },
     "cloud": {
       "strip": "Дані з {device}, синхронізовано {date}.",

@@ -1,78 +1,43 @@
 import {
-  billChangeBlock,
   billHasPayments,
-  canRecordPayment,
-  canUndoPayment,
-  ownsBill,
+  billPeople,
+  canEditGroup,
+  isCurrentMember,
 } from '~/features/albums/lib/groupRules';
 
-describe('shared album rules', () => {
-  it('lets only the recorder undo a simplified payment, including its intermediate bills', () => {
-    const members = [
-      { id: 'me', userId: 'u-me' },
-      { id: 'aisha', userId: 'u-aisha' },
-      { id: 'ben', userId: 'u-ben' },
-    ];
-    // Aisha pays Ben along Aisha -> me -> Ben. Both rows are one payment.
-    const payment = { fromMember: 'me', toMember: 'ben', createdBy: 'u-aisha' };
-    expect(canUndoPayment(members, 'me', payment)).toBe(false);
-    expect(canUndoPayment(members, 'aisha', payment)).toBe(true);
-    expect(canUndoPayment(members, 'ben', payment)).toBe(false);
-    expect(canUndoPayment(members, 'missing', payment)).toBe(false);
+// Who may do what in a shared album (README: Album members and shared albums
+// > Anyone in it can change it). The Worker keeps the same rules; these are
+// what the screens offer.
+
+const members = [
+  { id: 'me', userId: 'u-me' },
+  { id: 'aisha', userId: 'u-aisha' },
+  // Left the album: their row and bills stay.
+  { id: 'ben', userId: null },
+];
+
+describe('anyone in the album can change it', () => {
+  it('lets everyone still in it change anything, and nobody who left', () => {
+    expect(canEditGroup(members, 'u-me')).toBe(true);
+    expect(canEditGroup(members, 'u-aisha')).toBe(true);
+    expect(canEditGroup(members, 'u-ben')).toBe(false);
+    expect(canEditGroup(members, null)).toBe(false);
+    expect(canEditGroup([{ id: 'me', userId: 'u-me', deletedAt: 'x' }], 'u-me')).toBe(false);
   });
 
-  it('keeps undo with its recorder if a departed payer rejoins, with legacy fallback', () => {
-    const members = [
-      { id: 'me', userId: 'u-me' },
-      { id: 'ben', userId: 'u-ben' },
-    ];
-    const payment = { fromMember: 'ben', toMember: 'me', createdBy: 'u-me' };
-    expect(canUndoPayment(members, 'me', payment)).toBe(true);
-    expect(canUndoPayment(members, 'ben', payment)).toBe(false);
-    expect(canUndoPayment(members, 'ben', { ...payment, createdBy: null })).toBe(true);
-    expect(canUndoPayment(members, 'me', { ...payment, createdBy: null })).toBe(false);
+  it('puts only people still in it on a bill, and keeps whoever is already on it', () => {
+    expect(isCurrentMember(members[2])).toBe(false);
+    expect(billPeople(members).map((member) => member.id)).toEqual(['me', 'aisha']);
+    expect(billPeople(members, ['ben']).map((member) => member.id)).toEqual(['me', 'aisha', 'ben']);
   });
 
-  it('falls back to the payer rule once the recorder has left, so no bill stays locked', () => {
-    // Aisha recorded her payment to me, then left: her member row has no account.
-    const members = [
-      { id: 'me', userId: 'u-me' },
-      { id: 'aisha', userId: null },
-    ];
-    const payment = { fromMember: 'aisha', toMember: 'me', createdBy: 'u-aisha' };
-    expect(canUndoPayment(members, 'me', payment)).toBe(true);
-    // A recorder who is still in the album keeps it to themselves.
-    const stayed = [...members, { id: 'ben', userId: 'u-aisha' }];
-    expect(canUndoPayment(stayed, 'me', payment)).toBe(false);
-  });
-
-  it('gives a bill to its payer alone', () => {
-    expect(ownsBill('me', { paidBy: 'me' })).toBe(true);
-    expect(ownsBill('me', { paidBy: 'aisha' })).toBe(false);
-  });
-
-  it('locks a bill while a payment stands on it', () => {
+  it('asks before a bill with payments changes, and only then', () => {
     const payments = [
-      { expenseId: 'dinner', fromMember: 'aisha', toMember: 'me' },
-      { expenseId: 'lunch', fromMember: 'aisha', toMember: 'me', deletedAt: '2026-11-13' },
+      { expenseId: 'dinner', deletedAt: null },
+      { expenseId: 'lunch', deletedAt: '2026-11-13T00:00:00.000Z' },
     ];
     expect(billHasPayments(payments, 'dinner')).toBe(true);
     expect(billHasPayments(payments, 'lunch')).toBe(false);
-    expect(billChangeBlock('me', { paidBy: 'me' }, payments, 'dinner')).toBe('has_payments');
-    expect(billChangeBlock('me', { paidBy: 'me' }, payments, 'lunch')).toBeNull();
-    expect(billChangeBlock('me', { paidBy: 'aisha' }, [], 'tea')).toBe('not_payer');
-  });
-
-  it('lets only the person paying record or undo a payment, or its receiver once the payer left', () => {
-    const members = [
-      { id: 'me', userId: 'u-me' },
-      { id: 'aisha', userId: 'u-aisha' },
-      // Left the album.
-      { id: 'ben', userId: null },
-    ];
-    expect(canRecordPayment(members, 'me', 'me', 'aisha')).toBe(true);
-    expect(canRecordPayment(members, 'me', 'aisha', 'me')).toBe(false);
-    expect(canRecordPayment(members, 'me', 'ben', 'me')).toBe(true);
-    expect(canRecordPayment(members, 'me', 'ben', 'aisha')).toBe(false);
+    expect(billHasPayments(payments, 'taxi')).toBe(false);
   });
 });

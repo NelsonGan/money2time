@@ -1338,7 +1338,45 @@
       "transactionsTitle": "ธุรกรรม",
       "everyone": "ทุกคน",
       "me": "ฉัน",
-      "pick": "เลือกทริปเพื่อดูรายละเอียด"
+      "pick": "เลือกทริปเพื่อดูรายละเอียด",
+      "activity": {
+        "title": "กิจกรรม",
+        "empty_title": "ยังไม่มีกิจกรรม",
+        "empty_message": "ทุกการเปลี่ยนแปลงในอัลบั้มนี้จะแสดงที่นี่",
+        "restore": "กู้คืน",
+        "restoring": "กำลังกู้คืน…",
+        "you": "คุณ",
+        "you_lower": "คุณ",
+        "untitled": "บิล",
+        "added": "{actor} เพิ่ม {title} · {money}",
+        "said_you_paid": "{actor} บอกว่าคุณจ่าย {title} · {money}",
+        "restored": "{actor} กู้คืน {title} · {money}",
+        "deleted": "{actor} ลบ {title} · {money}",
+        "changed_amount": "{actor} เปลี่ยน {title}: {before} → {after}",
+        "changed_payer": "{actor} เปลี่ยนคนจ่าย {title}: {before} → {after}",
+        "changed_split": "{actor} เปลี่ยนการหาร {title}",
+        "renamed_bill": "{actor} เปลี่ยนชื่อ {before} เป็น {after}",
+        "moved_bill": "{actor} ย้าย {title} ไปวันที่ {day}",
+        "changed_bill": "{actor} เปลี่ยน {title}",
+        "changed_album": "{actor} เปลี่ยนอัลบั้ม",
+        "your_share": "ส่วนของคุณ {money}",
+        "your_share_change": "ส่วนของคุณ {before} → {after}",
+        "your_share_gone": "ส่วนของคุณ {money} ถูกยกเลิก",
+        "you_paid": "ระบุว่าคุณจ่าย",
+        "you_paid_choose_account": "ระบุว่าคุณจ่าย · เลือกบัญชี",
+        "they_paid": "ตอนนี้ {name} เป็นคนจ่าย",
+        "choose_account": "เลือกบัญชี",
+        "paid": "{from} จ่าย {to} {money}",
+        "paid_even": "{from} จ่าย {to} {money} เพื่อให้เท่ากัน",
+        "undid_payment": "{actor} ยกเลิกการจ่ายจาก {from} ถึง {to} {money}",
+        "recorded_by": "บันทึกโดย {actor}",
+        "joined": "{name} เข้าร่วมอัลบั้ม",
+        "left": "{name} ออกจากอัลบั้ม",
+        "renamed_member": "{before} ตอนนี้คือ {after}",
+        "simplify_on": "{actor} เปิดลดความซับซ้อนของหนี้กลุ่ม",
+        "simplify_off": "{actor} ปิดลดความซับซ้อนของหนี้กลุ่ม",
+        "cover": "{actor} เปลี่ยนภาพปก"
+      }
     },
     "items": {
       "emptyTitle": "ยังไม่มีของใช้",
@@ -2053,7 +2091,17 @@
           "yearly": "/ปี"
         }
       },
-      "notePlaceholder": "บันทึกใหม่ เว้นว่างไว้เพื่อลบออก"
+      "notePlaceholder": "บันทึกใหม่ เว้นว่างไว้เพื่อลบออก",
+      "sharedBill": {
+        "intro": "ในอัลบั้มที่แชร์ {album}: ทุกคนในอัลบั้มแก้ไขบิลนี้ได้ หมวดหมู่ บัญชี รายละเอียด และอารมณ์ยังเป็นของคุณ",
+        "paidBy": "จ่ายโดย",
+        "splitBetween": "หารกับ",
+        "nobodyElse": "หารกับคนอื่นในอัลบั้ม หรือให้คนอื่นเป็นคนจ่าย",
+        "deleteBody": "บิลนี้อยู่ในอัลบั้มที่แชร์ การลบจะลบสำหรับทุกคน การชำระเงินยังอยู่ และยอดที่จ่ายไปแล้วต้องคืน",
+        "deleteSome": "บางรายการอยู่ในอัลบั้มที่แชร์ การลบจะลบสำหรับทุกคน การชำระเงินยังอยู่",
+        "payments": "การชำระเงินของบิลในอัลบั้มที่แชร์บันทึกในแอป",
+        "accountOthers": "บางรายการมีคนอื่นจ่ายไว้ จะเข้าบัญชีของคุณเมื่อคุณคืนเงินแล้ว"
+      }
     },
     "cloud": {
       "strip": "ข้อมูลจาก {device} ซิงก์เมื่อ {date}",

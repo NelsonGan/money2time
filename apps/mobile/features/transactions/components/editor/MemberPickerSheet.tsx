@@ -30,8 +30,6 @@ interface MemberPickerSheetProps {
   members: readonly PickerMember[];
   /** The members on the bill now. */
   selectedIds: ReadonlySet<string>;
-  /** Members who cannot be taken off (a payment is recorded with them). */
-  lockedIds: ReadonlySet<string>;
   onToggle: (member: PickerMember, on: boolean) => void;
   onClose: () => void;
 }
@@ -47,7 +45,6 @@ export function MemberPickerSheet({
   visible,
   members,
   selectedIds,
-  lockedIds,
   onToggle,
   onClose,
 }: MemberPickerSheetProps) {
@@ -149,7 +146,6 @@ export function MemberPickerSheet({
         ) : null}
         {shown.map((member) => {
           const on = selectedIds.has(member.id);
-          const locked = on && lockedIds.has(member.id);
           return (
             <Pressable
               key={member.id}
@@ -158,9 +154,8 @@ export function MemberPickerSheet({
                 if (!on) void triggerHaptic('selection');
                 onToggle(member, !on);
               }}
-              disabled={locked}
               accessibilityRole="checkbox"
-              accessibilityState={{ checked: on, disabled: locked }}
+              accessibilityState={{ checked: on }}
               accessibilityLabel={member.name}
               testID={`split-member-option-${member.id}`}
               className="mx-4 flex-row items-center gap-3 border-t border-border/15 px-2 py-3 active:opacity-70"
@@ -169,7 +164,7 @@ export function MemberPickerSheet({
               <Text variant="body" numberOfLines={1} className="flex-1">
                 {member.name}
               </Text>
-              {checkCircle(on, locked)}
+              {checkCircle(on, false)}
             </Pressable>
           );
         })}
