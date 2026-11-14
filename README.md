@@ -2118,8 +2118,9 @@ migrations `090`, `091` and `092`.
   FlashList rendering cells and made the cover stutter while scrolling
   (native flags: a change needs a new build).
 - **Split with friends is chosen at creation.** The New Album screen has the
-  switch (in one card with Simplify group debts); on, the album is shared as
-  it is made, with nobody but the user until others join. **Sharing is free
+  switch (in one card with Simplify group debts), for users on the
+  shared-albums rollout (see [Shared albums rollout](#shared-albums-rollout));
+  on, the album is shared as it is made, with nobody but the user until others join. **Sharing is free
   and has no limit of its own**: the only limit on albums is the free plan's
   count of them (`FREE_MAX_ALBUMS`), and a bill in a shared album counts
   toward no free limit. It needs an account and nothing else: turned on with
@@ -2295,6 +2296,43 @@ migrations `090`, `091` and `092`.
   Joining again links the same row back.
 - **Pro plays no part.** Unlike a shared ledger, a shared album syncs
   whoever in it is Pro or not, and is never paused.
+
+#### Shared albums rollout
+
+Making a shared album is rolled out with the PostHog flag `shared_albums`
+(id `1079986`): New Album shows Split with friends only when it is `true` for
+this install (`useSharedAlbumsAllowed`, `lib/sharedAlbumsRollout.ts`). Only
+**making** one is gated. Joining from a link, the Join screen, the album page,
+People, Balances, new bills, payments and leaving never read the flag, so
+someone off the rollout who is sent a link joins and uses the album exactly as
+someone on it does, and an owner taken off the rollout keeps their albums and
+invite links. Off the rollout, a joiner still cannot make shared albums of
+their own.
+
+- **Fails closed.** Anything but `true` hides the switch: `false`, a variant
+  string, flags not loaded yet (the SDK keeps the last answer between
+  launches, so only a fresh install's first seconds), PostHog unreachable or
+  over quota. A switch turned on is dropped if the flag goes away while New
+  Album is open, so a hidden switch never shares an album. A development build
+  without flags (they load only with `EXPO_PUBLIC_POSTHOG_DEV=1`) counts as
+  on; with that variable it obeys the real flag.
+- **Targeting.** It starts with one release condition: no property, 0%, so
+  nobody makes shared albums until someone is added. Conditions are ORed: add
+  an allow-list group (person `distinct_id` exactly one of a list of app user
+  ids, `m2t_<uuid>`, at 100%) for testers, and raise the percentage group to
+  roll out to a share of installs (PostHog buckets by the hash of
+  `distinct_id`, so an install keeps its answer as the percentage grows), then
+  to 100%. Users see only the last 8 characters of their id (Settings >
+  Display > User ID); the full id is their RevenueCat app user id. The id is
+  the install's, not the person's: a second phone or a reinstall has its own.
+- **Exposure.** Read with `sendEvent: false`: no `$feature_flag_called`
+  events, so the flag adds requests but no events to the budget.
+- **Server.** The Worker does not read the flag (the website never evaluates
+  flags); it is a rollout, not a security boundary, and a client that shares
+  an album anyway gets a working one.
+- **Finishing.** At 100%, remove the flag from `FEATURE_FLAGS` and New Album,
+  then archive it in PostHog: requests are billed only while a flag is
+  active.
 
 **How it works**
 
@@ -2509,7 +2547,7 @@ The free tier is **1,000,000 product-analytics events a month** (identified even
 | Error tracking (`$exception`) | 100,000 exceptions                  | Deduplicated and capped on the device at 25 distinct exceptions per 5 minutes.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | Session replay                | 2,500 mobile + 5,000 web recordings | App ~1,500 (5% of first-day launches, 0.25% of later ones) against the mobile allowance; at 15% and 0.4% it measured ~3,900. The website's 10% sample against the web one. Recordings under 5 s are dropped.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | AI observability (`$ai_*`)    | 100,000 events                      | One `$ai_generation` per OpenRouter call from the receipt scanner: ~65,000 including multi-select album batches, plus one per AI notification review batch (`notification_review`, up to 20 notifications each): ~6,600. Every app version scans through the Worker, so this already counts all users; screenshot scans (~1,800 a day) dominate. Without the screenshot empty-result retry it measured ~85,000. A scan Claude fails adds one generation for the Qwen backup. PostHog's own clustering jobs bill too: the default trace and generation jobs wrote ~18,000 `$ai_trace_summary` / `$ai_generation_summary` events a month and are off (see [AI observability](#ai-observability)); without them it measured ~72,000. |
-| Feature flags                 | 1,000,000 requests                  | None: the app reads no flag since the Cloud Sync launch. Flag requests are billed only while a flag is active, so archive `cloud_sync` in PostHog.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| Feature flags                 | 1,000,000 requests                  | `shared_albums` is active, so each launch and identify is one flag request: about one or two per active user per day. It sends no `$feature_flag_called`. Archive `cloud_sync` in PostHog; archive `shared_albums` once its rollout reaches 100%.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 
 Rules that keep it inside the free tier:
 
@@ -2959,7 +2997,13 @@ Replays answer "what did the user see and do" next to an exception or a funnel d
 
 [services/featureFlags.ts](apps/mobile/services/featureFlags.ts) wraps PostHog flags for future rollouts and experiments: register each key in `FEATURE_FLAGS`, read it with `useFeatureFlag(key)` in components or `getFeatureFlag(key)` elsewhere, and treat `undefined` (not loaded, disabled, web, development) as off. Flags load at launch and on identify; person-property writes never trigger a reload. Each read sends `$feature_flag_called` once per flag per session for experiment exposure (pass `{ sendEvent: false }` for plain rollouts); add those events to the budget when a flag ships. Flag requests are only billed while at least one flag is active; archive a flag once its rollout is complete. The website never evaluates flags.
 
-Active flags: none. `cloud_sync`, the allow list for the Cloud Sync UI, was retired at the public launch (see [Availability](#availability)).
+Active flags:
+
+| Flag            | Gates                                                                                                                        | Off means                                                                         |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `shared_albums` | Making a shared album: Split with friends on New Album ([Shared albums rollout](#shared-albums-rollout)), `sendEvent: false` | No switch on New Album; joining from a link and existing shared albums still work |
+
+`cloud_sync`, the allow list for the Cloud Sync UI, was retired at the public launch (see [Availability](#availability)).
 
 ### AI observability
 

@@ -23,6 +23,7 @@ import { AlbumLocationField } from '../components/AlbumLocationField';
 import { AlbumMonthPicker } from '../components/AlbumMonthPicker';
 import { AlbumSharingCard } from '../components/AlbumSharingCard';
 import { useAlbumScope } from '../hooks/useAlbumGroup';
+import { useSharedAlbumsAllowed } from '../hooks/useSharedAlbumsAllowed';
 import { albumSharingMessage } from '../lib/albumMessages';
 
 interface CreateAlbumScreenProps {
@@ -41,6 +42,10 @@ export function CreateAlbumScreen({
   // Sharing is free and needs only an account: asked for under the switch.
   const signedIn = useSignedIn();
   const { canSplit, canShare } = useAlbumScope();
+  // Split with friends is offered only to users on the shared-albums rollout;
+  // anyone can still join a shared album from a link.
+  const rolledOut = useSharedAlbumsAllowed();
+  const shareOffered = canSplit && canShare && rolledOut;
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
 
@@ -53,8 +58,10 @@ export function CreateAlbumScreen({
   const [pickerOpen, setPickerOpen] = useState(false);
   // Whether it is split with friends: a shared album, chosen here and never
   // later (README: Album members and shared albums). It is shared only once
-  // an account is signed in.
-  const [wantsShare, setWantsShare] = useState(false);
+  // an account is signed in, and only while the switch is offered (it can go
+  // away while this screen is open: flags reload, the ledger changes).
+  const [wantsShareChoice, setWantsShare] = useState(false);
+  const wantsShare = wantsShareChoice && shareOffered;
   const share = wantsShare && signedIn;
   // The sign-in opens at the foot of the form: bring it into view.
   const scrollRef = useRef<ComponentRef<typeof FormScrollView>>(null);
@@ -257,7 +264,7 @@ export function CreateAlbumScreen({
               </Pressable>
             )}
 
-            {canSplit && canShare ? (
+            {shareOffered ? (
               <>
                 <View className="mt-5 gap-4">
                   <AlbumSharingCard
