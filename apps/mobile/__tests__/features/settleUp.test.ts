@@ -7,6 +7,7 @@ import {
   buildReceiptText,
   countUnpaidDebtors,
   countUnpaidSplitBills,
+  currencyOrder,
   personBalanceState,
   personSettlementRows,
   receiptShareFileName,
@@ -168,6 +169,7 @@ describe('aggregateSettleUpByPerson', () => {
       netReporting: 0,
       owedToYouReporting: 0,
       youOweReporting: 0,
+      netByCurrency: [],
       personCount: 0,
       billCount: 0,
       reportingCurrency: 'USD',
@@ -279,6 +281,84 @@ describe('aggregateSettleUpByPerson', () => {
       { currency: 'SGD', amount: 80 },
       { currency: 'USD', amount: 32 },
     ]);
+  });
+
+  it('keeps the whole net per currency, never converted, across people and directions', () => {
+    const txs = [
+      makeTx({
+        id: 'food',
+        currency: 'MYR',
+        reportingCurrency: 'MYR',
+        fxRate: 1,
+        splits: [makeSplit({ id: 'food-ana', personName: 'Ana', amount: 49.5 })],
+      }),
+      // A bill Ana paid in ringgit: the user owes her 48 of it.
+      makeTx({
+        id: 'groceries',
+        currency: 'MYR',
+        reportingCurrency: 'MYR',
+        fxRate: 1,
+        splits: [
+          makeSplit({ id: 'g-me', transactionId: 'groceries', isSelf: true, amount: 48 }),
+          makeSplit({
+            id: 'g-ana',
+            transactionId: 'groceries',
+            personName: 'Ana',
+            amount: 0,
+            isPayer: true,
+            shareAmount: 48,
+          }),
+        ],
+      }),
+      makeTx({
+        id: 'hotel',
+        currency: 'USD',
+        reportingCurrency: 'MYR',
+        fxRate: 4.2,
+        splits: [makeSplit({ id: 'hotel-ben', personName: 'Ben', amount: 20 })],
+      }),
+      // Settled shares count for nothing.
+      makeTx({
+        id: 'taxi',
+        currency: 'USD',
+        reportingCurrency: 'MYR',
+        fxRate: 4.2,
+        splits: [makeSplit({ id: 'taxi-ben', personName: 'Ben', amount: 5, paidAt: '2026-05-20' })],
+      }),
+    ];
+    const summary = aggregateSettleUpByPerson(txs, { reportingCurrency: 'MYR' });
+    // The reporting currency first, whatever the amounts.
+    expect(summary.netByCurrency).toEqual([
+      { currency: 'MYR', amount: 1.5 },
+      { currency: 'USD', amount: 20 },
+    ]);
+    expect(summary.netReporting).toBe(85.5); // 1.5 + 20 × 4.2
+  });
+
+  it('leaves a currency that nets to nothing out of the whole net', () => {
+    const txs = [
+      makeTx({
+        id: 'a',
+        currency: 'EUR',
+        splits: [makeSplit({ id: 'a-1', personName: 'Ana', amount: 10 })],
+      }),
+      makeTx({
+        id: 'b',
+        currency: 'EUR',
+        splits: [
+          makeSplit({ id: 'b-me', transactionId: 'b', isSelf: true, amount: 10 }),
+          makeSplit({
+            id: 'b-ben',
+            transactionId: 'b',
+            personName: 'Ben',
+            amount: 0,
+            isPayer: true,
+            shareAmount: 10,
+          }),
+        ],
+      }),
+    ];
+    expect(aggregateSettleUpByPerson(txs, { reportingCurrency: 'USD' }).netByCurrency).toEqual([]);
   });
 
   it('uses the live fallback rate only when no frozen snapshot is usable', () => {
@@ -1240,5 +1320,16 @@ describe('people who are real users', () => {
       pay: [],
     });
     expect(countUnpaidDebtors([bill])).toBe(2);
+  });
+});
+
+describe('currencyOrder', () => {
+  it('puts the reporting currency first, then the rest by code', () => {
+    expect(['USD', 'VND', 'MYR', 'EUR'].sort(currencyOrder('MYR'))).toEqual([
+      'MYR',
+      'EUR',
+      'USD',
+      'VND',
+    ]);
   });
 });

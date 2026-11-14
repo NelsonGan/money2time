@@ -768,7 +768,13 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
    * paid back from it, so the account moves by the net. `albumId` settles
    * only that album's bills with them.
    */
-  settleUpWithPerson: (personKey: string, accountId: string | null, albumId?: string) => void;
+  settleUpWithPerson: (
+    personKey: string,
+    accountId: string | null,
+    albumId?: string,
+    /** Only the bills in this currency (a person's page opened from one currency of an album). */
+    currency?: string,
+  ) => void;
 
   /** Reimbursements: an expense someone else pays back. */
   markTransactionReimbursed: (
@@ -6463,13 +6469,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   );
 
   const settleUpWithPerson = useCallback(
-    (personKey: string, accountId: string | null, albumId?: string) => {
+    (personKey: string, accountId: string | null, albumId?: string, currency?: string) => {
       // An album's bills, or those in no album: the two are settled apart.
       const inAlbums = albumId
         ? new Set(albumsRepository.getTransactionIds(albumId))
         : getAlbumOwnedTransactionIds();
       const rows = personSettlementRows(
-        transactionsRef.current.filter((tx) => inAlbums.has(tx.id) === !!albumId),
+        transactionsRef.current.filter(
+          (tx) =>
+            inAlbums.has(tx.id) === !!albumId &&
+            (currency === undefined || tx.currency === currency),
+        ),
         personKey,
       );
       if (rows.receive.length === 0 && rows.pay.length === 0) return;

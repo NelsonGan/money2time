@@ -384,8 +384,18 @@ export function SettleUpScreen({
     );
   };
 
-  const renderAlbumCard = ({ album, netReporting }: AlbumBalance) => {
-    const state = netReporting >= 0.005 ? 'owed' : netReporting <= -0.005 ? 'owe' : 'even';
+  const renderAlbumCard = ({ album, netByCurrency }: AlbumBalance) => {
+    // An album's balance is never converted: one figure per currency, in the
+    // album's own order.
+    const [only] = netByCurrency;
+    // Several currencies show signed figures alone; read each with what it is.
+    const netsLabel = netByCurrency
+      .map(
+        ({ currency, amount }) =>
+          `${I18n.t(amount > 0 ? 'transactions.settleUp.hero_owed' : 'transactions.settleUp.you_owe_tag')} ${formatNative(Math.abs(amount), currency)}`,
+      )
+      .join(', ');
+    const state = netByCurrency.length !== 1 ? 'even' : only!.amount > 0 ? 'owed' : 'owe';
     return (
       <Pressable
         key={`album:${album.id}`}
@@ -394,6 +404,7 @@ export function SettleUpScreen({
           onOpenAlbum(album.id);
         }}
         accessibilityRole="button"
+        accessibilityLabel={netByCurrency.length > 1 ? `${album.name}, ${netsLabel}` : undefined}
         className="flex-row items-center gap-3 rounded-2xl border border-border/30 bg-card px-3.5 py-3 active:opacity-80"
       >
         <View className="h-11 w-11 items-center justify-center rounded-xl bg-primary/15">
@@ -404,29 +415,45 @@ export function SettleUpScreen({
         <Text variant="bodyStrong" numberOfLines={1} className="flex-1">
           {album.name}
         </Text>
-        <View className="items-end">
-          <Text variant="caption" tone="muted">
-            {I18n.t(
-              state === 'owed'
-                ? 'transactions.settleUp.hero_owed'
-                : state === 'owe'
-                  ? 'transactions.settleUp.you_owe_tag'
-                  : 'transactions.settleUp.even_tag',
-            )}
-          </Text>
-          <Text
-            variant="bodyStrong"
-            className={
-              state === 'owed'
-                ? 'text-success'
-                : state === 'owe'
-                  ? 'text-destructive'
-                  : 'text-muted-foreground'
-            }
-          >
-            {formatReporting(Math.abs(netReporting))}
-          </Text>
-        </View>
+        {netByCurrency.length > 1 ? (
+          // Several currencies: each signed, + what the user is owed.
+          <View className="items-end">
+            {netByCurrency.map(({ currency, amount }) => (
+              <Text
+                key={currency}
+                variant="bodyStrong"
+                className={amount > 0 ? 'text-success' : 'text-destructive'}
+              >
+                {amount > 0 ? '+' : '−'}
+                {formatNative(Math.abs(amount), currency)}
+              </Text>
+            ))}
+          </View>
+        ) : (
+          <View className="items-end">
+            <Text variant="caption" tone="muted">
+              {I18n.t(
+                state === 'owed'
+                  ? 'transactions.settleUp.hero_owed'
+                  : state === 'owe'
+                    ? 'transactions.settleUp.you_owe_tag'
+                    : 'transactions.settleUp.even_tag',
+              )}
+            </Text>
+            <Text
+              variant="bodyStrong"
+              className={
+                state === 'owed'
+                  ? 'text-success'
+                  : state === 'owe'
+                    ? 'text-destructive'
+                    : 'text-muted-foreground'
+              }
+            >
+              {only ? formatNative(Math.abs(only.amount), only.currency) : formatReporting(0)}
+            </Text>
+          </View>
+        )}
         <ChevronRight size={18} color={themeColors.textMuted} />
       </Pressable>
     );

@@ -66,7 +66,7 @@ export type RootStackParamList = {
   SettleUp: undefined;
   SettleUpSettings: undefined;
   /** `albumId`: only that album's bills with the person. */
-  SettleUpPerson: { personKey: string; albumId?: string };
+  SettleUpPerson: { personKey: string; albumId?: string; currency?: string };
   SettleUpTransaction: { transactionId: string };
   SplitBill: { toast?: string } | undefined;
   // Itemized receipt split editor. Its launch payload (parsed items, seed

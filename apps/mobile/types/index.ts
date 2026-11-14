@@ -1294,6 +1294,12 @@ export interface SettleUpSummary {
    */
   owedToYouReporting: number;
   youOweReporting: number;
+  /**
+   * The user's net in each currency, signed as `netReporting`, never converted:
+   * an album shows its balance this way. Currencies that cancel out are left
+   * out; the reporting currency first, then by code (`currencyOrder`).
+   */
+  netByCurrency: { currency: string; amount: number }[];
   /** People with any paid or unpaid share. */
   personCount: number;
   /** Unpaid shares only. */

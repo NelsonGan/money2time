@@ -264,6 +264,9 @@ export type SplitDebt = {
   key: string;
   /** The share in the main currency, rounded to the cent as the app's Settle Up does. */
   amountBase: number;
+  /** The share in the bill's own currency, never converted. */
+  amount: number;
+  currency: string;
   txId: string;
   date: Date;
   note: string;
@@ -918,6 +921,8 @@ export function buildModel(backup: BackupFile, opts: { timeZone?: string | null 
       person: (split.person_name ?? "").trim(),
       key: partyKey(split.person_name, split.member_id),
       amountBase: shareInBase(split.amount, tx),
+      amount: money(split.amount),
+      currency: tx.currency,
       txId: tx.id,
       date: tx.date,
       note: tx.note,
@@ -935,6 +940,8 @@ export function buildModel(backup: BackupFile, opts: { timeZone?: string | null 
       person: owed.person,
       key: owed.key,
       amountBase: shareInBase(owed.amount, tx),
+      amount: owed.amount,
+      currency: tx.currency,
       txId: tx.id,
       date: tx.date,
       note: tx.note,

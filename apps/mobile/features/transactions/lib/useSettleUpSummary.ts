@@ -48,14 +48,22 @@ function useSettleUpContext(scope: SettleUpScope) {
 /**
  * The "who owes whom" roll-up grouped by person, in the reporting currency:
  * over one shared album's bills, or without `albumId` over every bill not in
- * a shared album (the Balances page). Memoized on the transactions + rates.
+ * a shared album (the Balances page). `currency` keeps only the bills in it,
+ * for a person's page opened from one currency of an album's Balances.
+ * Memoized on the transactions + rates.
  */
-export function useSettleUpSummary(albumId?: string): SettleUpSummary {
+export function useSettleUpSummary(albumId?: string, currency?: string): SettleUpSummary {
   const scope = useMemo<SettleUpScope>(() => (albumId ? { albumId } : 'outside_albums'), [albumId]);
   const { transactions, reportingCurrency, rateToReporting } = useSettleUpContext(scope);
   return useMemo(
-    () => aggregateSettleUpByPerson(transactions, { reportingCurrency, rateToReporting }),
-    [transactions, reportingCurrency, rateToReporting],
+    () =>
+      aggregateSettleUpByPerson(
+        currency
+          ? transactions.filter((transaction) => transaction.currency === currency)
+          : transactions,
+        { reportingCurrency, rateToReporting },
+      ),
+    [transactions, currency, reportingCurrency, rateToReporting],
   );
 }
 
@@ -74,10 +82,11 @@ export function useSettleUpByTransaction(
   );
 }
 
-/** An album with something still owed in it, and the user's net there (reporting currency). */
+/** An album with something still owed in it, and the user's net there. */
 export interface AlbumBalance {
   album: Album;
-  netReporting: number;
+  /** In each currency, never converted (`SettleUpSummary.netByCurrency`). */
+  netByCurrency: SettleUpSummary['netByCurrency'];
 }
 
 /** The albums that still have open bills, for the Balances page: each is settled in the album. */
@@ -101,7 +110,7 @@ export function useAlbumBalances(): AlbumBalance[] {
         bills.filter((transaction) => ids.has(transaction.id)),
         { reportingCurrency, rateToReporting },
       );
-      return summary.billCount > 0 ? [{ album, netReporting: summary.netReporting }] : [];
+      return summary.billCount > 0 ? [{ album, netByCurrency: summary.netByCurrency }] : [];
     });
   }, [
     albums,
