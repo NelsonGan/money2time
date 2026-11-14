@@ -47,8 +47,8 @@ function useSettleUpContext(scope: SettleUpScope) {
 
 /**
  * The "who owes whom" roll-up grouped by person, in the reporting currency:
- * over one album's bills, or without `albumId` over the bills in no album
- * (the Balances page). Memoized on the transactions + rates.
+ * over one shared album's bills, or without `albumId` over every bill not in
+ * a shared album (the Balances page). Memoized on the transactions + rates.
  */
 export function useSettleUpSummary(albumId?: string): SettleUpSummary {
   const scope = useMemo<SettleUpScope>(() => (albumId ? { albumId } : 'outside_albums'), [albumId]);

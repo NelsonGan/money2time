@@ -510,7 +510,7 @@ Traditional Chinese is `zh-Hant`. Device tags for Taiwan, Hong Kong, and Macau s
 - **Insights pages and trend charts**: The Insights menu has six entries, and a seventh, **Household**, while the open ledger is shared (see [Shared ledgers](#shared-ledgers) > Household insights). **Breakdown** and **Trends** each hold several insight types behind tabs (`features/insights/insightGroups.ts`, `InsightSubTabs`): Breakdown is Expense and Income (plain text tabs), Trends is Expense, Income, Category and Assets (the old Asset History, now Asset Trends; an icon row). Each tab is still its own insight type, so its period, filters, saved preferences and `money2time://insights?focus=<type>` deep links are unchanged; the menu reopens a group on the tab last used in it (`lastInsightTypeByGroup` in the Insights preferences). Every page shares one header: the menu button, the page title with a quiet `‹ period ›` under it (`InsightPeriodSwitcher`; the header's own month capsule is hidden), the filter button, then the tabs. Chart pages share one body: a headline (`TrendHeadline`: an optional small label, the big figure, one quiet tinted pill such as "↓ 32% vs avg"), the chart, then plain white rows. Each Savings Rate month row has a month tile tinted by its rate (a star on the best month once two months have income), the amount saved or overspent over "of RM… income", and the rate as a small ring and a tinted pill; months with nothing in them are faint dashed rows. Every trend, Savings Rate's monthly rate and Expense Sentiment's mood counts (one line per mood) is a line-and-point chart, `TrendLineChart` (Skia, geometry in `features/insights/lib/trendLineGeometry.ts`): a dot per bucket, a dashed guide and a white legend card with a pointer on the selected one, a haptic tick per bucket while scrubbing, and months that have not happened yet left off rather than drawn at zero. Spending and income read from zero with a dashed average line (the month still under way is left out of the average); assets keep their own range so a balance below zero still shows its direction. Savings Rate draws -100% to 100% (`valueFloor` / `valueCeiling`): a month that spent several times its income can reach -350% or lower, which would flatten every other month, so a month past a cap sits on that edge as an arrowhead pointing off the chart, and its tooltip and row still show the real rate. Category picks from chips in the header (`CategoryTrendChips`, biggest spend first): a tap charts a category, and the leading "Compare" chip arms the next tap to add a second line (`categoryTrendCompareCategoryId`), with both totals and a one-line verdict under the chart. A touch on a chart picks a month only on a tap or a sideways drag, so a vertical drag that starts on it still scrolls the page; while a finger is down only the period pager is locked. Skia canvases are not clipped by their scroll view, so the header is stacked above the pages (`stackedHeader`) to cover a scrolled chart. Expense Sentiment uses Review's mood names. Chart inputs are cached per page (`trendChartModelCacheRef`), so scrubbing redraws only the selection. Any Skia path code must build paths from SVG strings or `Skia.PathBuilder`: Skia 2.14 made `SkPath` immutable.
 - **Multi-currency**: Each transaction stores its entered `currency` plus a frozen reporting-currency snapshot (`reportingCurrency`/`reportingAmount`/`fxRate`) taken at write time so historical aggregates never drift when FX rates move. Use `convert`/`buildRateTable` from `~/utils/currency`; never recompute historical totals from live rates. FX rates come from `services/exchangeRates.ts`.
 - **Changing an account's currency**: the account editor previews the converted balance as soon as a new currency is picked; on save, Convert & change re-denominates the account and its history at the latest rate (`changeAccountCurrency`). A balance typed in the same save is then recorded on top, in the new currency: the editor asks how to record it (account difference, or income/expense), exactly as for a plain balance edit, and nothing is saved until both prompts are answered. `changeAccountCurrency` returns the balance after conversion so the recorded change lands the account on the typed figure; `balanceChangeWithCurrencySwitch` (`features/settings/lib/accountBalanceChange.ts`) tells a typed balance from the editor's own rounded preview. The goal editor still leaves its saved amount for a follow-up edit.
-- **Albums**: Trip albums are a Pro-limited feature (`FREE_MAX_ALBUMS`). One album can be "active" (`activeAlbumId`) so new transactions auto-add. Manage via `useApp()` album ops. An album can be split with people and shared with them: see [Album members and shared albums](#album-members-and-shared-albums). **An album's entries are read from the loaded transactions, never the table** (`getAlbumTransactions`, `getAlbumTransactionIds`: its live ids from `album_transactions`, kept to rows in the loaded list): a new entry is in the list at once while its insert waits behind the editor's dismiss, and deleting an entry leaves its `album_transactions` row behind, so a read of the table missed the new entry (the album page did not show it until reopened) and counted deleted ones (Add transactions opened with "5 selected" over one entry). On the Albums page a shared album's card has a pill over its photo, just above the name: up to three of its people's avatars ("+N" for the rest), a cloud with a tick and "Shared" (on a card too short for that, beside the reorder handle instead), and VoiceOver reads the card as "<name>, Shared". The top right is left to the active album's green dot.
+- **Albums**: Trip albums are a Pro-limited feature (`FREE_MAX_ALBUMS`). One album can be "active" (`activeAlbumId`) so new transactions auto-add. Manage via `useApp()` album ops. An album can be split with people and shared with them: see [Album members and shared albums](#album-members-and-shared-albums). **An album's entries are read from the loaded transactions, never the table** (`getAlbumTransactions`, `getAlbumTransactionIds`: its live ids from `album_transactions`, kept to rows in the loaded list): a new entry is in the list at once while its insert waits behind the editor's dismiss, and deleting an entry leaves its `album_transactions` row behind, so the table alone would miss new entries and count deleted ones. On the Albums page a shared album's card has a pill over its photo, just above the name: up to three of its people's avatars ("+N" for the rest), a cloud with a tick and "Shared" (on a card too short for that, beside the reorder handle instead), and VoiceOver reads the card as "<name>, Shared". The top right is left to the active album's green dot.
 - **Icons (categories, goals, budget templates)**: The four icon columns (`categories.icon`, `accounts.goal_emoji`, `budget_templates.emoji`, `monthly_budgets.template_emoji`) store one tagged string, documented in `constants/categoryIcons.ts`: a bare kebab id (`meal`) is a bundled clay icon, `emoji:X` is a Unicode emoji the user picked, `custom:category-icons/<uuid>.png` is an uploaded image, and `''`/null is none. Classify with `classifyCategoryIcon`; render with `CategoryEmoji`, which handles all three forms. **Never re-derive an icon from an emoji at render time** — that indirection is gone. Older rows stored a bare glyph that was mapped through a table at render; migration `048_normalize_icon_values` backfilled them, and the frozen `LEGACY_EMOJI_TO_ICON` in `lib/db/normalizeIcons.ts` survives **only** at data ingress (the migration, backup restore, `.mmbak` import) because old backups can be restored at any time. `normalizeIconValue` is a fixpoint, which is what makes a replayed migration safe. **The free `default` pack IS the Clay artwork** — the separate `clay` pack was folded into it, so its 110 ids are bare (`meal`, not `clay/meal`) and every pre-existing row keeps rendering without a rewrite. Rows that had explicitly picked a Clay icon are remapped `clay/x` → `x` by `RETIRED_ICON_PACK_PREFIXES` in `lib/db/normalizeIcons.ts`, run by migration `050_retire_clay_icon_pack` and, like the legacy-emoji table, frozen there for the backups and `.mmbak` files that still carry qualified ids. The pack keeps the folder name `default` on purpose (renaming it would re-qualify every id and break every row); the label users see comes from `category_icon.pack_default`, which reads "Clay". Surfaces that can only render a string (native widgets via `widgetSnapshot.shared.ts`, the Shortcuts catalog via `autoLogCatalog.ts`, the Excel export) go through `categoryIconToEmoji`. The bundled set is generated by `scripts/generate-category-icons.mjs` and grouped/searchable via the hand-maintained `constants/categoryIconGroups.ts` (a test fails if a PNG has no grouping). One shared `CategoryIconPickerSheet` (root route `CategoryIconPicker`, handed its session by `categoryIconPickerBridge`) serves all three editors, with Icons / Emoji / My uploads tabs; the emoji tab lazy-imports the ~1,900-entry `constants/emojiCatalog.generated.ts`. Uploads are **Pro-only** (`useProGate().requirePro`), stored under the `category-icons` user-asset kind. **Any new column holding one of these values must be added to `collectReferencedAssetPaths` in `services/userAssetGc.ts`, or the orphan sweep will delete live images.** Non-default packs are **Pro-only**: a free user can browse them (with a banner, and a PRO badge in the pack list) but selecting an icon calls `useProGate().requirePro('icon_packs')` and opens the paywall instead. **EAS Update caps an update at 1000 assets and Metro resolves ~1380 here, so `expo.updates.assetPatternsToBeBundled` in `app.json` keeps `assets/account-logos` (528 files) out of updates, riding in the native binary instead; that leaves 949 of the 1000 in the current export (measured 2026-10-19; 74 of them are the card designs in `assets/card-designs`). (This governs the internal-only OTA builds — store builds ship with updates disabled, see CI / Deploy.) The list is an allow-list, not a deny-list, so it must also carry `node_modules/**/\*`— without it a JS-only update that bumps a dependency shipping assets (the Work Sans faces,`@react-navigation/elements`' chrome PNGs) references asset hashes that are in neither the update nor the installed binary. Adding artwork anywhere else eats that headroom, so re-check with `npx expo export --dump-assetmap` afterwards.\*\*
 - **Clay UI icons (`assets/clay-icons/`)**: 160 soft-clay illustrations for the app's own _chrome_ — a separate namespace from the user-selectable category packs. Eight sets: `nav/` (bottom-tab glyphs as resting/active pairs, plus the + FAB), `settings/` (one per SettingsGridTile, plus the profile and CTA art), `entry/` (editor, quick-add, voice, receipt-scan affordances), `money-time/`, `ui/`, `status/` (empty-state and warning art, and the notification auto-review icons), `insights/` (the insight-type illustrations, reached through `constants/utilityIcons.ts`) and `sentiment/` (the three faces behind `SentimentIcons`). Render with `<ClayIcon name="nav/home" size={26} />`; the registry is generated by `scripts/generate-clay-icons.mjs` into `constants/clayIcons.generated.ts`, so adding a PNG and re-running is the whole workflow. **Two rules the artwork depends on:** clay is never tinted (not per theme, not for an active state — an active tab is a different _file_, a resting one is dimmed with `opacity`), and clay is never wrapped in a tinted plate (`bg-primary/10` behind it reads as a second, competing container; the surrounding card or tile is the container). Clay needs room, so it is for anything naming a _thing_ at 18px and up; small chrome that must stay crisp at 15–16px (chevrons, close and back buttons, numpad keys, header search/filter) stays on Lucide line icons.
 - **Icon style (clay vs flat)**: `settings.iconStyle` (`'clay' | 'flat'`, default clay, migration `051_add_icon_style`, toggled on `DisplaySettingsScreen`) lets the user put the pre-clay flat line icons back. It rides on `ThemeContext` alongside the theme colour, read with **`useIconStyle()` / `useIsFlatIcons()`** (defaulting to clay outside the provider, so an error boundary above `ThemeGate` still renders). `ClayIcon` is the choke point: in flat mode it draws the Lucide icon from `FLAT_ICON_FOR_CLAY` in `constants/flatIcons.ts` — a total `Record<ClayIconName, …>`, so a new clay icon does not typecheck until it has a flat counterpart — centred in the same `size` box so no layout shifts. A call site whose _pre-clay icon differed_ from that shared entry passes `flat={{ icon: X }}`; sizes come from `flatSize` (flat line art reads at roughly 60-75% of clay, and the ratio differed per surface, so the historical value is passed explicitly and `DEFAULT_FLAT_SIZE_RATIO` only catches the rest). **The two clay rules above invert in flat mode**, so a site whose _container_ also changed branches on `useIsFlatIcons()` rather than going through `ClayIcon`: `SettingsGridTile` and `AddActionSheet`'s tiles put their tinted plate back, `AddFab`/`AddIconButton` put the filled primary disc and white `+` back, `BottomNav` swaps to the tinted-and-filled SVG pairs in `components/icons/NavIcons.tsx`, `SentimentIcons` swaps to the emoji SVGs in `assets/icons/`, `InOutHeader` swaps the wallet art for its tone dot, and `SettingsScreen`'s avatar and Pro/Share CTAs get their discs back. **Deliberately out of scope:** category icons, the insight-type art (`constants/utilityIcons.ts`) and the mascots render the same in both styles.
@@ -540,7 +540,7 @@ Traditional Chinese is `zh-Hant`. Device tags for Taiwan, Hong Kong, and Macau s
 - **Savings goals**: A goal is an account with `type: 'goal'` plus the `goal*` columns (target amount required, optional target date/emoji, achievement + archive stamps). Deposits/withdrawals are ordinary transfers; auto-save is a recurring transfer rule targeting the goal. Every balance-sign branch tests `type === 'credit'`, so goals inherit debit/asset semantics everywhere. Derived numbers come from the pure `computeGoalProgress`/`monthlyEquivalentRate` in `features/goals/lib/goalMath.ts`, composed by `useGoals()` (`features/goals/useGoals.ts`). Goals are a dedicated sub-tab of the assets page (`AssetsTab`: Accounts | Goals | Items) rendered by `GoalsScreen` (`features/goals/screens/GoalsScreen.tsx`), sharing the shell's balance-visibility toggle; the gated add button is `AddGoalButton`. `GoalDetail`/`GoalEditor` are root routes. Achievement detection is an AppContext effect that stamps `goalAchievedAt` once (celebration via `GoalCelebrationOverlay`); `setGoalArchived` deactivates auto-save rules on archive. Pro-limited to `FREE_MAX_SAVINGS_GOALS` (non-archived count); goal accounts do not count toward `FREE_MAX_ACCOUNTS`. Archived goals are hidden from `AccountPickerSheet`.
 - **Budgeting**: Weekly, monthly and yearly **expense-only** budgets built from reusable **budget templates** (`budget_templates`/`budget_template_categories`) — a template sets how often it repeats (`period`: `week`, `month` or `year`), a total plus per-root-category allocations, an optional emoji, and a `count_unbudgeted` toggle (whether spend in categories with no line counts toward the period total). Each week, month or year gets a **frozen** budget row (`monthly_budgets`/`monthly_budget_categories`; the table predates periods and keeps its name) copied from a template at creation; editing a template never rewrites already-created budgets, and soft-deleted rows double as **tombstones** so auto-create never resurrects a period the user deleted. **Periods** (`features/budget/lib/budgetPeriods.ts`): a row's `period` column says which, and its `month` column holds the period key — `YYYY-MM-DD` (the week's first day, per `settings.weekStartsOn`) for a week, `YYYY-MM` (a financial month, per the month cycle) for a month, `YYYY` (January–December, whatever the month cycle) for a year. The shapes never collide, and one live row is allowed per period and key (`idx_monthly_budgets_period_key`, migration `071_budget_periods`, which also gave every existing row and template `period = 'month'`). A week budget always covers its key day and the six after it. One made before the user changed the first day of the week keeps its own seven days: the pager shows it on the week its first day falls in (`budgetSlotKey`, titled with the budget's own dates; if two land on one week, the one keyed on it wins), while the widgets and Review find the running budget by its days (`budgetCoveringDay`), and auto-create and back-fill skip any week that shares a day with an existing one (`budgetWeekOverlaps`), so no overlapping week is made. Several periods can run at once (say a weekly food budget and a yearly travel budget). **Auto-create**: on every load, and right after a template of that period is saved, `autoCreateCurrentBudgets` in `AppContext` makes the running week's, month's and year's budget from that period's default template (`pickAutoCreateTemplate`) unless the period has or ever had one. Exactly one template **per period** is the default while that period has any (`budgetTemplatesRepository` re-normalizes after every create, update and delete; a template moved to another period leaves its default flag behind, so it becomes that period's default only when the period had none). Back-fill (offered when creating a template) fills the template's own period from the first expense to the last completed period. All screen/widget numbers come from the pure `buildBudgetSummary` in `features/budget/lib/budgetMath.ts`, valuing spend at `reportingAmount ?? amount` (never drifts with FX) and counting only spend inside the budget's own days. **Currencies** (`features/budget/lib/budgetCurrency.ts`, migration `081_budget_currencies`): a template can be in a currency other than the ledger's main one (a JPY trip budget in a MYR ledger, an SGD monthly budget for someone paid in SGD), picked beside the total from the currencies the entry flows offer (main, sub-currencies, account currencies; `BudgetTotalField`). `currency` is null for the main currency, so every budget from before reads as before. An older app version (another phone on the same account through Cloud Sync, or a member of a shared ledger) does not know the column: it shows a budget in another currency as a main-currency one, and a budget it makes from such a template has no currency; Cloud Sync has no version gate for this. This version gives such a budget its currency back on load (`repairDroppedCurrencies`): a row that is still exactly its template's copy (same total, never edited, made after the template last changed) with no currency while the template has one can only come from an older version, since this one always copies the currency. A budget copies its template's currency and freezes `fx_rate` (1 unit of it in the main currency, `budgetRateToFreeze`) when it is made: auto-create, back-fill (today's rate for every period it fills), a manual pick, a custom budget, or a period edit that changes its currency (keeping the currency keeps the frozen rate). A budget made while no rate for its currency was known (auto-create on a phone that had not downloaded rates yet) gets one frozen on the next load or rate refresh (`freezeMissingRates`), so phones stop disagreeing about it. Spending in the budget's currency counts at its entered `amount`; the rest is its `reportingAmount` divided by the frozen rate, so a past budget never moves with the exchange rate. A budget made with no known rate falls back to the latest one; with none at all, that spending is left out and the page says how many expenses are not counted (`unconvertedCount`); the widgets have no room to say so, and Review's pace card then compares with no budget. A main-currency budget is valued exactly as before. Every figure of a budget (page, editors, template list and picker, widgets) reads in its own currency (`withBudgetCurrency`); the page adds a currency chip beside the period pill and what is left in the main currency ("≈ RM180.00"), and the editors explain the conversion under the total (or that a rate is missing). Review's pace card compares the period's spend with the budget's total in the main currency (`budgetTotalInMainCurrency`). **UI**: the budget view is an **embedded Insights page** (`BudgetPagerView` inside `InsightsScreen`, chosen from the insights type menu, not a Settings tile). There is no period switch: the page pages by **month** (`computeBudgetPagerMonths`: from the first budget of any period or expense to 12 months ahead; the header's month capsule opens the month wheel), and each month page (`buildBudgetMonthPage`) shows every budget that touches the month, drawn as **nested activity-style rings** (thick, with a small empty centre) with the figures beside them: the year outside, the month in the middle, the week inside, each in its own colour (year `success`, month `primary`, week `accent`) and filled by how much of its budget is used (a period without a budget leaves a faint dashed ring). The month is in focus by default (else the week, else the year): its ring is drawn full strength, the others faded, and beside the rings sits only its amount: green while some is left, red with a minus sign once over (screen readers hear "RM580 left" / "RM40 over"), under a header naming it: the template's icon (or a calendar) on a tile tinted with the ring's colour, the budget's name, and a pill in that colour naming its period ("October", "Oct 26 – Nov 1", "2026") with the days left beside it while it runs, and edit and delete. Tapping a ring (hit-tested by distance from the centre, `ringAtDistance` in `features/budget/lib/budgetRings.ts`) or its row in the legend beside them (Year / Month / Week with each percent, the focused row highlighted) focuses that budget; with the week in focus, the month's budgeted weeks appear as date chips to move the inner ring to another week (by default it shows the running week, else the month's latest; a picked week stays on the inner ring while another ring is focused). Below, the focused budget's categories, each a row with its emoji, name and amount left (red when over), a full-width depletion bar in a chart-palette colour picked by the line's place in the budget (`budgetLineColor`, which skips the red, orange, yellow and magenta that read as warnings) (red and full when over; the colour does not change when an over line is sorted first), spent / budgeted and a usage badge (green, amber from 80%, red when over; a zero-budget overspend reads 999%+), with its subcategory lines as tinted one-line pills under it whose fill is the progress (their spent / budgeted amber from 80%, red when over); each opens its transactions. Unbudgeted spending is folded into one total row that expands. A month, week or year with a template of its period but no budget gets a dashed "No budget for …" row (for weeks, the running week when it is in the month, else the month's first); a month nothing touches keeps the classic empty state. Week titles name the years when the week is outside this year or spans two. The template editor's Repeats switch sets the period (with a hint such as "A new budget starts every Monday") and relabels the total, the back-fill and the count-unbudgeted copy; the templates screen groups templates by period, each group with its own default; the template picker on the page offers only templates of the shown period. Template/period/allocation editors are root-stack routes (`BudgetTemplateEditor`, `BudgetPeriodEditor`, `BudgetCategoryAllocation`, `SettingsBudgetTemplates`). Root allocations must sum exactly to the total; a root's subcategory breakdown is optional and may be **partial** (the unassigned rest stays on the parent line, which keeps its full amount and rolled-up spend). Save is blocked only when the subcategories exceed their parent (`childAllocationExceedsParent`). Pro-limited to `FREE_MAX_BUDGET_TEMPLATES` templates across all periods (the page's Create template button checks it too); two home-screen widgets (`budget_ring`, `budget_breakdown`) show the running month's budget, else the week's, else the year's, and count today in their days left, as the page does. Review's pace card compares a week, month or year with the budget of the same period. The Web Dashboard knows monthly budgets only: the phone sends it monthly templates and month budgets alone (`services/webDashboardBudgets.ts`), and its edits can only make or change monthly ones. It shows and edits their currencies as the app does (a currency beside the total, figures in the budget's currency, the main-currency equivalent, uncounted spending), but only a page that says it can (its `budget-currencies` want feature, see Web-dashboard Worker) is sent budgets in another currency; an older page gets main-currency ones only, and its edits, naming no currency, leave a template's or budget's own. A web edit may name a currency the entry flows offer, or null for the main one; anything else is refused. Manage via `useApp()` budget ops.
 - **Split bills & Settle Up**: Splits live on `transactionSplitsTable` (per-transaction). The `SettleUp` screen has two underline tabs — **Person** and **Transactions** — over all positive, non-self splits, with paid shares shown in muted rows and only unpaid shares counted in outstanding totals. **Part payments**: a friend can pay back part of their share. Settle Up's **Mark paid** opens `SplitPaymentSheet` on everything still owed (the mini numpad and the account it was paid to); confirming as is settles the share as before, and lowering the amount turns the confirm key into **Part paid** and records a part payment. The confirm key fires when the finger lifts (`confirmOnRelease`): closing the Modal under a finger still down made iOS swallow the next tap. `recordSplitPayment` cuts a paid row out of the share's unpaid row, so paying RM300 of RM1,000 leaves a paid RM300 row and an unpaid RM700 row; the paid row's `partOfSplitId` (migration 082) points at the share's first row, and `splitShareKey` (`partOfSplitId ?? id`) groups a share's rows, which keeps unnamed friends apart. Each row stays a complete split under the existing rules (a paid row lowered the expense by its amount and owns its payback transfer when the account differs), so older app versions, the Web Dashboard's settle and unsettle, Cloud Sync, backups and the other members of a shared ledger read a part-paid share correctly without knowing about part payments; the Web Dashboard shows the parts as separate rows and cannot record a part payment itself. Paying everything left is Mark paid. Undoing a payment (the editor's Undo, the Web Dashboard's unsettle, or deleting a payment's transfer) folds it back into the row still owed (`planUnpaidMerge`), so a share owes on one row. Renaming the share's first row renames its paid parts (a part owed again keeps the name it is given). Removing what is still owed (Remove, whose confirmation then says the payments stay recorded) or an edit that drops the first row hands the share to its oldest part (`planShareHandover`), so the parts never point at a deleted row, which a ledger copy would drop and split the share apart. Undo (including deleting a payback's transfer), Remove and part payments each write in one SQLite transaction. A ledger copy keeps a removed first row's parts together the same way (`keepPartPaymentsTogether`), which also covers an older app version that removed it without handing over. **Older app versions** see a part-paid share as a paid row and an owed row and settle, undo or remove them correctly, but their Undo does not fold the payment back, so the share owes on two rows; Settle Up shows the second as its own card, and saving the bill in Split Bill folds them into one (`consolidateOwedRows`), except a row the same save marks paid (`markingPaidIds`), which is paid as it stands, so the payment and the expense match what the user marked. Their split evenly, and the Web Dashboard's before it was updated, spread what is owed per row, so a part-paid friend's share comes out larger by what they paid; that only happens when the user asks for it, and the amounts show before Done. A row that owes 0 (Split evenly after a friend paid back more than an even part) counts as settled in `summarizeSplits`, as in Settle Up, so the list shows no "still owes" badge for it. **Payback transfers carry each account's currency** (`paybackTransferAmounts`): `amount` is what leaves the bill's account, at the bill's own frozen account rate (at face value when the bill has no account snapshot, as its balance counts it), so that account nets to zero for the payback, and `toAmount` what reaches the payback account in its currency (the share itself in the bill's currency, else converted at today's rate). A bill with no account records Mark paid and part payments without a transfer and without a payback account (the sheet asks for none): the expense drops and the share is paid. Undoing a payment on a bill that had reached 0 (every share paid back, the user's own 0) rebuilds its reporting and account amounts, since there is no ratio left to rescale by: the account amount at the rate the undone payback's transfer used, else the frozen `fxRate` when the account is in the reporting currency, else today's; the reporting amount at the frozen `fxRate`, else today's. A day's folded paybacks for one bill are totalled per currency, since paybacks from before this change are in the bill's currency. Deleting a payback's transfer says the payment goes back on what the friend owes. Two phones recording payments on the same share offline can, after Cloud Sync's last-write-wins merge, count more paid than the share (as two offline Mark paids already leave two transfers). The pure rules live in `features/transactions/lib/splitPayments.ts`; the person and bill pages show **one card per share** (`buildSettleUpShareCards` / `groupSettleUpShareCards`, keyed by `shareKey`): a share still owed shows what is left with "of RM1,000", a progress bar and its payments listed under it (date and amount), with Remove and Mark paid at the bottom; a share paid back in full is a compact muted card with a check badge ("Paid Nov 7", or "Paid back in 3 payments · last Nov 7", which opens to list them). What is still owed comes before the paid history. The bill page heads them **Still owed** and **Paid back** (every share there is from the same bill, so a date header would only repeat it) and shows "Still owed" over its total with how much of the bill is paid back; the person page keeps date headers. A shared receipt adds "Paid RM300 of RM1,000" under a part-paid share. **In the activity list** a payback transfer (one a split row points at with `paidTransactionId`, indexed once from all transactions in `AppProvider`, since the bill can be in another month, and read with `usePaybackIndex` from a context that only changes when the paybacks do) has a faint green card instead of the plain one, and two or more paybacks for the same bill on the same day fold into one row (`foldPaybackRows`, `PaybackGroupRow`): the bill, "7 paybacks" and who paid, the accounts line a payback's own row has (from → to, "+2" for more destinations), so it is as tall as the rows around it, and their total; tapping it opens the paybacks underneath. Folding stays within a day so the list keeps its date order, and it is off while selecting or reordering so every row can be picked or dragged; long-pressing a folded row starts selecting with all its paybacks selected (through the list's `onToggleDaySelection`, else its first payback). A payback that writes no transfer (Mark paid or a part payment into the bill's own account, or on a bill with no account) gets a **payback row** instead (`buildPaybackRows`, built in `AppProvider` from the paid split rows that have no `paidTransactionId` and read with `usePaybackRows`): shaped as a transfer that stays in the bill's account (no total, balance or statement counts it), on the day it was paid (`paidAt`), titled like a payback transfer ("Aisha: Dinner") with "Paid back" and the one account under it, and with the amount a payback transfer out of that account would carry (`paybackTransferAmounts`), in the account's currency. Once every share of a foreign-currency bill is paid back the bill is at 0 with no rate left to read, so its rows use the bill's frozen `fxRate` when the account is in the reporting currency (the rate undoing a payback restores it at), else today's rate. Nothing is stored, so older app versions, the Web Dashboard, Cloud Sync and backups see the same paid split as before, and paybacks recorded before the rows existed show too. The calendar list and its search merge them in (`mergeTransactionsByDateDesc`), and so does an account's page, but not its statement totals. Its id is `payback-row:<split id>` (`isPaybackRow`), indexed with the payback transfers so it gets the same tint and folds with them; tapping it opens the bill in Settle Up (`SettleUpTransaction`), since there is no transaction to edit, and it cannot be long-pressed, selected or dragged: while the list is selecting or reordering, payback rows step aside, and a folded row's long press selects only its transfers. A folded row whose paybacks all stayed in the account shows that one account. Split Bill's split evenly counts what a part-paid share already paid, from the share's paid rows in the editor (`spreadOverShares`, `evenOwedAmounts`), so the shares stay even. By-person rolls up via `aggregateSettleUpByPerson` (grouped by trimmed/case-folded name); by-transaction rolls up via `aggregateSettleUpByTransaction` (one entry per bill, each carrying every person's share). Both live in `features/transactions/lib/settleUp.ts` and total in the reporting currency via each parent's frozen `fxRate`. Tapping a person opens `SettleUpPerson` (itemized bills); tapping a bill opens `SettleUpTransaction` (each person's share). Both full-page root screens keep paid history visible; unpaid shares support editable payback account, mark-paid, delete-request, and share. Share opens `SplitReceiptShareModal`, which previews a fixed-light `SplitReceiptCard` (the shipped app icon beside a Money2Time wordmark in the brand's fixed warm split, big QR, generic `ReceiptContent`: title + optional date subtitle + itemized lines + total, no footer) and captures it to a PNG via Skia's `makeImageFromView` (lazily imported) → `expo-sharing` for a cross-platform image share, falling back to a plain-text `buildReceiptText` receipt if capture fails. Each share writes its PNG under a new name from `receiptShareFileName` (title slug + timestamp) and deletes it afterwards: iOS and the receiving apps cache a shared file by its URL, so one fixed path sent the first person's receipt to everyone shared after them. **That capture does not clip the way the screen does on Android**: it walks the view tree itself (TextureView and SurfaceView children need their own path) instead of drawing the root, so it never reaches `ReactViewGroup.dispatchDraw()` and has to replay the `overflow: hidden` clip by hand. Skia 2.2.12 replayed it by reflecting for `dispatchOverflowDraw`, which React Native dropped in 0.81; the lookup throws, the throw is only logged, and every clipped child drew unclipped, which put the whole category-icon sprite atlas across the shared receipt (the app's own screens were fine, since they draw normally). Skia 2.12.0 fixed it upstream (the app patched 2.2.12 until the Expo SDK 58 upgrade), and `__tests__/patches/skiaOverflowClip.test.ts` reads the installed module so a version that loses the fix fails loudly rather than silently shipping the wrong pixels. **Anything new put on this card that relies on a clip (an atlas cell, a rounded image, a cropped avatar) is only as correct as that fix.** The user attaches their own payment QR (settings `paymentQrUri`, stored via the `payment-qr` `userAssets` kind). `useSettleUpSummary` / `useSettleUpByTransaction` wrap the two aggregations. The split editor (`SplitBillModal`, opened from the transaction editor's numpad toolbar) is a **pushed root screen** (`SplitBill`): the editor publishes its live split draft + callbacks through `context/SplitBillSession.tsx` and `SplitBillScreen` consumes them, mapping Done/Cancel (incl. swipe-back via `beforeRemove`) onto the editor's commit/discard. `SplitBillModal` renders bare in `presentation="page"` mode; it autocompletes friend names from past splits (`recentSplitPersonNames`). Reached from Settings → "Balances". Who paid the bill, and what the user owes the other way, is the next entry.
-- **Paid by and Balances** (migration `089`, `features/transactions/lib/splitPayer.ts`): Split Bill has a **Paid by** row, shown once the bill has a friend, at the top of the card that also holds Split evenly. It names who paid beside their avatar and opens a sheet (`PaidByPickerSheet`) listing Me (the default) and every named person on the bill. **A bill the user paid** is unchanged: the expense is the whole bill and each friend's row holds what they owe in `amount`. **A bill a friend paid** turns that round: the expense saved is the user's **own share** (the Me row), which the user owes to the payer, whose row carries `isPayer`; nobody on it owes the user, so every friend row keeps `amount` at 0 and holds its share of the bill in `shareAmount` (`storedFriendPaidRow`). The zero is deliberate. An app version from before this, another member of a shared ledger on one, and a Web Dashboard page from before it read only `amount`, and every roll-up counts a share as owed only when `amount > 0`, so they see a plain expense for the user's share and never count these friends as owing; they do not show the debt, but nothing they show is wrong. The other friends' shares are kept so the bill reads whole (the bill page lists them under "Aisha paid RM90.00") and so a later album or group balance can use them; they are owed to the payer, not the user, and are never counted. **Money.** While it is owed the expense sits on **no account** (the money has not left the user), on the bill's own day and at the user's share, so spending, budgets and an album count it from the start; the editor needs no account for it, so it has no account chip: the panel under the amount says who paid (it opens Split Bill). Paying the friend back (`payBackPayer`) puts the expense on the account it was paid from, converting to that account's currency at today's rate when it differs (`accountAmount`), and stamps the payer row's `paidAt` and `paybackAccountId`; **Undo** (`undoPayBackPayer`) clears both. No transaction is written and the amount never changes, so there is no payback row or transfer for it (`paidWithoutTransfer` needs `amount > 0`). **Paying in parts** (`recordPayBack`): Mark paid opens the same amount sheet a friend's payback uses (`SplitPaymentSheet`, here asking **Paid from**), preset to what is left; a lower amount is a part payment. The part has left an account while the rest has not, so it becomes **its own expense** on that account (same date, category, note, member and albums), cut out of the bill: the bill and its Me row drop by the part, so the bill is always what is still owed, and a paid row under the payer's (`partOfSplitId`, `amount` 0, the part in `shareAmount`, `paidAt`, `paybackAccountId`, and `paidTransactionId` pointing at that expense) records it (`isPayBackPart`, `owedToPayer().payments`). The bill and its parts always add up to the user's share, so spending never changes. Paying everything that is left is the full payback above. **Undo** on a part (`undoPayBackPart`) deletes its expense, and deleting that expense from anywhere does the same: the part goes back on the bill and its Me row and the row is removed (only while something is still owed; once the last of it is paid the bill has its account and the part's row just goes). Undo is offered on the final payment while the bill is paid, and on each part once it is not. An app version from before this sees the part's row at `amount` 0 and its expense as a plain expense, so nothing it shows is wrong. **The editor works on the whole bill.** It opens a friend-paid bill at its bill total (`friendPaidBillTotal`) with each row at its share, shows a panel under the amount with **Your share RM30.00** and **Paid by Aisha** beside their avatar (on a shared album's bill the user paid, **Paid by you**), and on save writes the user's share less what is already paid in parts as the expense (`paidBackInParts`, `friendPaidExpense`, which shrinks the frozen reporting and account snapshots by the same ratio, so the frozen rate is kept). Once the rows add up, the sum bar says what the split means in one line instead of repeating the total (`settlementLine`): **You owe Aisha RM30.00**, or **You get back RM60.00** on a bill the user paid. Swipe has no Mark paid there, since nobody owes the user. **Who paid is fixed once a payment is recorded** on the bill (a friend's payback lowered an expense the user paid; the user's own payback put it on an account): the Paid by row dims and a tap says to undo the payments first. A partly paid share cannot be set below what was already paid (the sum bar says **You already paid back RM15.00** and Done is off). Removing the payer's row makes it a bill the user paid again, which the editor refuses once that payer has been paid back. Split by Item has no Paid by. **Balances** is the page that was Who owes you (same routes and `settleUp` tab). `aggregateSettleUpByPerson` rolls up both directions per person (`debtPartyKey`: the case-folded name, as before): `totalReporting` is what they owe, `owedReporting` what the user owes them, `netReporting` the difference, with `netByCurrency` beside it; each `PersonDebtBill` carries a `direction` (`owes_you` or `you_owe`), and a `you_owe` bill's `splitId` is the payer's row. The Balances page covers the bills in no album; an album answers for its own ([Album members and shared albums](#album-members-and-shared-albums)). The hero shows the net over everyone on those bills (**You are owed** in green, **You owe** in red, **You are even** or **All settled up**). Only when people owe both ways does it add one slim bar under the net, split in proportion, green for **Owed to you** and red for **You owe**, with each figure under its own end: the sums after netting each person (`owedToYouReporting`, `youOweReporting`), since a person is settled with one payment either way; with everyone owing the same way the net already is that side. Albums with something still owed come first, on both tabs, each with the user's net there, and open the album; with nothing open outside them the hero is left out, so it never says "All settled up" above an album that is not, and the Transactions tab never reads as empty while an album still has money open. People are a flat list, open balances first and the biggest either way on top, each with its net and **Owes you** or **You owe**; settled people follow under **Settled up**. The Transactions tab says who paid each bill. A person's page is a ledger: the net under their avatar, then one row per open share (**+** in green for what they owe, **−** in red for what the user owes, with the date and who paid, and a slim progress bar under the line when part of it is paid), then what is paid back. A person's bill count is bills, not rows, so a share paid in parts is one bill. A row opens its bill (`SettleUpTransaction`), where a share is marked paid, part paid, removed or undone, so the page itself carries one action, Settle up. A bill a friend paid shows who pays whom as two avatars and an arrow (`SettleUpFlowAvatars`), what the user still owes once, a progress bar and "RM15.00 of RM40.00 paid back" once part of it is paid, a **Paid back** list of the payments (amount, date and account, with Undo), how the bill was shared, and one button, **Mark paid**, until nothing is left. **Settle up** (`settleUpWithPerson`, `personSettlementRows`) clears everything open with that person in one confirmation through one account: their unpaid shares are marked paid into it (`markSplitPaid`, with its usual transfer when the bill was paid from another account) and what is left of the bills they paid is paid back from it, so that account moves by exactly the net. Its confirmation (`SettleUpConfirmSheet`) asks for the account, and tapping the amount opens a pad to pay less of it: a part payment goes onto the oldest open bills of whoever pays on balance, as far as it reaches (`planPartSettlement`, through `recordSplitPayment` or `recordPayBack`), and leaves what the other side owes as it is. The sheet shows the same two avatars and arrow, the net in the bills' currency when they share one (else in the reporting currency marked ≈), and how it came about when shares go both ways ("Aisha owes RM200.00 · You owe RM30.00"). The shared receipt takes a bill they paid off as a negative line and totals the net. The activity list labels a friend-paid bill **Aisha paid** where the account would be (a person icon in place of the account logo), with the unsettled tint and badge while it is owed (`summarizeSplits` counts it as one share, `youOwe`); the badge opens the bill in Balances, where it is paid back. The Settings badge counts people with an open balance either way (`countUnpaidDebtors`), and a friend-paid bill the user has not paid back counts as an unsettled split bill for the free plan (`countUnpaidSplitBills`). **What albums build on** ([Album members and shared albums](#album-members-and-shared-albums)). Two seams. (1) **Who a person is** goes through one key (`features/transactions/lib/debtParty.ts`): `transaction_splits.member_id` (migration 089, null today, carried through the repository, the editor's drafts, Cloud Sync and backups like any column) is the person's Cloud Sync account once a name can be linked to one, and `debtPartyKey` groups by `member:<id>` when a row has it, else by the case-folded name. Balances, Settle up, avatars' colours and the person route all use that key, so linking a name to an account changes who is grouped together and nothing else. (2) **Scope**: the roll-ups take any list of transactions, so an album's balances are the same call over that album's entries, and the Balances page's over the entries in no album. A shared album's bills need nothing more: each phone holds its own side of them as rows of its ledger. A debt is keyed by its bill, the share's first row (`shareKey`) and the party, where a group id can attach; the other friends' shares on a bill a friend paid are stored for that group view. Each phone writes only its own money effect into its own ledger (the user's share, on the account it left), which is what a shared group needs from it. **Known limits.** A phone that synced a friend-paid bill before it was updated holds the row without the two columns and does not re-read them from the cloud until the row changes again (Cloud Sync applies a row only when its revision moves); edited there first, the row goes back up without them and the bill reads as one the user paid with nobody owing. An older app's Split Bill shows the friends at 0 and can give them amounts, which the new app ignores while the bill has a payer.
+- **Paid by and Balances** (migration `089`, `features/transactions/lib/splitPayer.ts`): Split Bill has a **Paid by** row, shown once the bill has a friend, at the top of the card that also holds Split evenly. It names who paid beside their avatar and opens a sheet (`PaidByPickerSheet`) listing Me (the default) and every named person on the bill. **A bill the user paid** is unchanged: the expense is the whole bill and each friend's row holds what they owe in `amount`. **A bill a friend paid** turns that round: the expense saved is the user's **own share** (the Me row), which the user owes to the payer, whose row carries `isPayer`; nobody on it owes the user, so every friend row keeps `amount` at 0 and holds its share of the bill in `shareAmount` (`storedFriendPaidRow`). The zero is deliberate. An app version from before this, another member of a shared ledger on one, and a Web Dashboard page from before it read only `amount`, and every roll-up counts a share as owed only when `amount > 0`, so they see a plain expense for the user's share and never count these friends as owing; they do not show the debt, but nothing they show is wrong. The other friends' shares are kept so the bill reads whole (the bill page lists them under "Aisha paid RM90.00"); they are owed to the payer, not the user, and are never counted. **Money.** While it is owed the expense sits on **no account** (the money has not left the user), on the bill's own day and at the user's share, so spending, budgets and an album count it from the start; the editor needs no account for it, so it has no account chip: the panel under the amount says who paid (it opens Split Bill). Paying the friend back (`payBackPayer`) puts the expense on the account it was paid from, converting to that account's currency at today's rate when it differs (`accountAmount`), and stamps the payer row's `paidAt` and `paybackAccountId`; **Undo** (`undoPayBackPayer`) clears both. No transaction is written and the amount never changes, so there is no payback row or transfer for it (`paidWithoutTransfer` needs `amount > 0`). **Paying in parts** (`recordPayBack`): Mark paid opens the same amount sheet a friend's payback uses (`SplitPaymentSheet`, here asking **Paid from**), preset to what is left; a lower amount is a part payment. The part has left an account while the rest has not, so it becomes **its own expense** on that account (same date, category, note, member and albums), cut out of the bill: the bill and its Me row drop by the part, so the bill is always what is still owed, and a paid row under the payer's (`partOfSplitId`, `amount` 0, the part in `shareAmount`, `paidAt`, `paybackAccountId`, and `paidTransactionId` pointing at that expense) records it (`isPayBackPart`, `owedToPayer().payments`). The bill and its parts always add up to the user's share, so spending never changes. Paying everything that is left is the full payback above. **Undo** on a part (`undoPayBackPart`) deletes its expense, and deleting that expense from anywhere does the same: the part goes back on the bill and its Me row and the row is removed (only while something is still owed; once the last of it is paid the bill has its account and the part's row just goes). Undo is offered on the final payment while the bill is paid, and on each part once it is not. An app version from before this sees the part's row at `amount` 0 and its expense as a plain expense, so nothing it shows is wrong. **The editor works on the whole bill.** It opens a friend-paid bill at its bill total (`friendPaidBillTotal`) with each row at its share, shows a panel under the amount with **Your share RM30.00** and **Paid by Aisha** beside their avatar (on a shared album's bill the user paid, **Paid by you**), and on save writes the user's share less what is already paid in parts as the expense (`paidBackInParts`, `friendPaidExpense`, which shrinks the frozen reporting and account snapshots by the same ratio, so the frozen rate is kept). Once the rows add up, the sum bar says what the split means in one line instead of repeating the total (`settlementLine`): **You owe Aisha RM30.00**, or **You get back RM60.00** on a bill the user paid. Swipe has no Mark paid there, since nobody owes the user. **Who paid is fixed once a payment is recorded** on the bill (a friend's payback lowered an expense the user paid; the user's own payback put it on an account): the Paid by row dims and a tap says to undo the payments first. A partly paid share cannot be set below what was already paid (the sum bar says **You already paid back RM15.00** and Done is off). Removing the payer's row makes it a bill the user paid again, which the editor refuses once that payer has been paid back. Split by Item has no Paid by. **Balances** (its routes and tab keep the `settleUp` names). `aggregateSettleUpByPerson` rolls up both directions per person (`debtPartyKey`: the case-folded name, as before): `totalReporting` is what they owe, `owedReporting` what the user owes them, `netReporting` the difference, with `netByCurrency` beside it; each `PersonDebtBill` carries a `direction` (`owes_you` or `you_owe`), and a `you_owe` bill's `splitId` is the payer's row. The Balances page covers every split bill except those in a shared album, which settles its own ([Album members and shared albums](#album-members-and-shared-albums)). The hero shows the net over everyone on those bills (**You are owed** in green, **You owe** in red, **You are even** or **All settled up**). Only when people owe both ways does it add one slim bar under the net, split in proportion, green for **Owed to you** and red for **You owe**, with each figure under its own end: the sums after netting each person (`owedToYouReporting`, `youOweReporting`), since a person is settled with one payment either way; with everyone owing the same way the net already is that side. Shared albums with something still owed come first, on both tabs, each with the user's net there, and open the album; with nothing open outside them the hero is left out, so it never says "All settled up" above an album that is not, and the Transactions tab never reads as empty while an album still has money open. People are a flat list, open balances first and the biggest either way on top, each with its net and **Owes you** or **You owe**; settled people follow under **Settled up**. The Transactions tab says who paid each bill. A person's page is a ledger: the net under their avatar, then one row per open share (**+** in green for what they owe, **−** in red for what the user owes, with the date and who paid, and a slim progress bar under the line when part of it is paid), then what is paid back. A person's bill count is bills, not rows, so a share paid in parts is one bill. A row opens its bill (`SettleUpTransaction`), where a share is marked paid, part paid, removed or undone, so the page itself carries one action, Settle up. A bill a friend paid shows who pays whom as two avatars and an arrow (`SettleUpFlowAvatars`), what the user still owes once, a progress bar and "RM15.00 of RM40.00 paid back" once part of it is paid, a **Paid back** list of the payments (amount, date and account, with Undo), how the bill was shared, and one button, **Mark paid**, until nothing is left. **Settle up** (`settleUpWithPerson`, `personSettlementRows`) clears everything open with that person in one confirmation through one account: their unpaid shares are marked paid into it (`markSplitPaid`, with its usual transfer when the bill was paid from another account) and what is left of the bills they paid is paid back from it, so that account moves by exactly the net. Its confirmation (`SettleUpConfirmSheet`) asks for the account, and tapping the amount opens a pad to pay less of it: a part payment goes onto the oldest open bills of whoever pays on balance, as far as it reaches (`planPartSettlement`, through `recordSplitPayment` or `recordPayBack`), and leaves what the other side owes as it is. The sheet shows the same two avatars and arrow, the net in the bills' currency when they share one (else in the reporting currency marked ≈), and how it came about when shares go both ways ("Aisha owes RM200.00 · You owe RM30.00"). The shared receipt takes a bill they paid off as a negative line and totals the net. The activity list labels a friend-paid bill **Aisha paid** where the account would be (a person icon in place of the account logo), with the unsettled tint and badge while it is owed (`summarizeSplits` counts it as one share, `youOwe`); the badge opens the bill in Balances, where it is paid back. The Settings badge counts people with an open balance either way (`countUnpaidDebtors`), and a friend-paid bill the user has not paid back counts as an unsettled split bill for the free plan (`countUnpaidSplitBills`). **How shared albums use this** ([Album members and shared albums](#album-members-and-shared-albums)). (1) **Who a person is** goes through one key (`features/transactions/lib/debtParty.ts`): `debtPartyKey` groups by the case-folded name, or by `member:<id>` when a share's `transaction_splits.member_id` is set (migration 089; carried through the repository, the editor's drafts, Cloud Sync and backups, but nothing writes it, so it is always null). Balances, Settle up, avatars' colours and the person route all use that key, so a shared album's people are grouped by their member names too (its shares also carry `album_member_id`, which says whether that member has left). (2) **Scope**: the roll-ups take any list of transactions, so a shared album's balances are the same call over that album's entries, and the Balances page's over every other entry. A shared album's bills need nothing more: each phone holds only its own side of them, its own money effect (the user's share, on the account it left), as ordinary rows of its ledger. A debt is keyed by its bill, the share's first row (`shareKey`) and the party. **Known limits.** A phone that synced a friend-paid bill before it was updated holds the row without the two columns and does not re-read them from the cloud until the row changes again (Cloud Sync applies a row only when its revision moves); edited there first, the row goes back up without them and the bill reads as one the user paid with nobody owing. An older app's Split Bill shows the friends at 0 and can give them amounts, which the new app ignores while the bill has a payer.
 - **Split by Item (itemized receipt split)**: Scan (or hand-enter) a receipt's line items and split them among people. Step 1 is items only (name + amount) plus an **"apply tax/service %"** stepper (defaults to 10%, like Split Bill's adjustment control) whose Apply **multiplies the item amounts in place** — there is no separate tax field; the receipt total is just the sum of items. Step 2 sets **how many people** are splitting (a count stepper; unnamed people auto-label **"Person A", "Person B", …**, a custom name is optional) and assigns each item to its host(s); a shared item splits evenly among its people. Step 3 summarizes per-person totals (no payback-account picker — payback defaults to the settings default). The itemized detail lives on its **own tables** (`receipt_splits` header + `receipt_split_items` + `receipt_split_item_shares`, one live header per transaction; header holds only currency/merchant/date/source/image — item `line_total`s are tax-inclusive) as the source of truth; on save the computed per-person totals are written as ordinary `transactionSplitsTable` **bridge rows** (unnamed people materialized as "Person A"…), so all Settle Up machinery works unchanged. All math is the pure `computeReceiptSplit` in `features/transactions/lib/receiptSplitMath.ts` (integer cents, largest-remainder, odd cents to the self share; groups by an opaque per-person key so two unnamed people never collide; Σ per-person ≡ item subtotal). The 3-step editor (`ReceiptSplitScreen`: Items → Assign → Summary) is a root route launched via the `receiptSplitBridge` module (payload never rides params); entry points: the scan-ready banner's "Split by item" chip (quick scans that parsed ≥2 items), split-intent scans (`startScan('split')` → Worker `mode: 'itemized'` → banner opens the editor directly), the add-action sheet's Split tab ("Scan to split"), the Settle Up empty-state CTA (scan or manual; scanning returns to the home tab so its progress banner shows), and the "Itemized receipt" row on `SettleUpTransaction` — shown **only** for bills that already have itemized detail (a plain Split Bill can't be converted); **paid rows freeze** on re-edit: a fully paid share's total cannot change, a part-paid share's new total must cover what was paid (the row still owed takes the rest), and the saved expense is the receipt total less what friends paid back. Manual entry needs no scan/quota and works offline. The Settle Up **share receipt** lists each person's items as bullet points (`receiptSplitShare.personItemNames`). Editing saves via `updateTransactionReceiptSplit` (replace-on-save detail + bridge-row rewrite); deleting the parent cascades; backup round-trips the three tables.
 - **App Lock**: Biometric gate via `services/biometricAuth.ts`, configured in `AppLockScreen`; settings `biometricLockEnabled` / `biometricLockDelaySeconds`. When Pro lapses, `BiometricLockGate` turns the setting off only while the app is in the foreground and unlocked, so after the next successful unlock: `isPro` also turns false when a cached expiry passes offline, including while the app is backgrounded and `locked` has not been set yet, so switching it off at once would let a stolen phone kept in airplane mode open itself. Back Tap's `money2time://add` actions (which can start the microphone or camera) wait for the unlock too (`whenAppUnlocked`); only the latest one runs, and only if the unlock comes within a minute.
 - **Receipt scan**: Background OCR of a snapped/uploaded receipt, orchestrated by `context/ReceiptScanContext.tsx` (`useReceiptScans()` → `startScan`, `scanReceiptImage`, banner `jobs`). `startScan` gates the free-tier receipts limit, then opens the **inline camera** via the `requestOpenScanCamera` bridge. There is no pushed camera route: `ReceiptCameraSheet` is mounted once by the app shell (above the navigator) and raises the viewfinder as a bottom sheet over whatever screen asked for it, so dismissing lands the user exactly where they were. The viewfinder itself is `components/InlineReceiptCamera` — a fixed-height framing box plus a shutter, an album button and a close button — and the transaction editor renders the _same_ component in its numpad slot when the receipt chip is tapped, so framing a shot never covers the amount and note being filled in. A snap is held for Retake / Use photo; an album pick skips that (the picker was the review step); either path downscales the photo (`downscaleReceiptForStorage` in the platform-split `services/receiptImage` — caps the long edge at 1600px and re-encodes JPEG via `expo-image-manipulator` so the one stored copy is small enough for both the attachment view and the base64 upload; `.ts` is a web/test passthrough) then saves it (`saveReceiptImage`) and calls `scanReceiptImage`, which enqueues a background job and hits the Worker (`services/receiptScan`). **Several receipts at once (Add only)**: on a plain scan (`intent: 'quick'`: the + sheet's Add-tab Scan receipt, or the + button mapped to scan) the album opens in multi-select for up to 10 receipts (`MAX_RECEIPT_BATCH`, numbered in pick order via `pickReceiptAssets`); a free user with "Save scanned receipts" on can pick no more than the receipt images they have left (`receiptBatchPickLimit`). Split scans, Settle Up and the transaction editor's receipt chip stay one photo, and a single pick takes the one-receipt path unchanged. The sheet closes at once and `scanReceiptBatch` queues one job per receipt under a shared `batchId`: each is downscaled, stored and scanned in the background, three at a time (`RECEIPT_BATCH_CONCURRENCY`, `runReceiptQueue`), and logs its own expense. The first scan to hit the quota opens the paywall (or the Pro limit alert) once; scans already in flight drop quietly and the rest never start. The banner shows a batch as one card (`ScanBatchCard`: "Scanning receipts 3/10", then "N expenses logged" and how many could not be read) that expands into a row per receipt, each opening its expense or dismissing its error; one row flashes and one haptic plays when the whole batch is done. The pure parts live in `features/transactions/lib/receiptScanBatch.ts`. A single parsed draft becomes a tappable "ready to review" banner (opens a pre-filled editor; a secondary "Split by item" chip appears when the itemized breakdown parsed ≥2 line items); multiple drafts are added directly. `startScan('split')` carries a split intent through the camera so the ready card opens the Split-by-Item editor directly (Worker `mode: 'itemized'`). **`expo-camera` is a native module** (config plugin in `app.json`), so `InlineReceiptCamera` is `React.lazy`-loaded behind an error boundary by both hosts — never import it eagerly — adding/upgrading it needs a **dev-client/prebuild rebuild** (like MapLibre). `patches/expo-camera+58.0.12.patch` makes iOS `takePictureAsync` reject instead of crashing when the preview connection stops mid-capture, and `patches/expo-image-picker+58.0.10.patch` stops a failed read of an Android Photo Picker `content://` uri being masked by a `Uri.toFile()` crash (Sentry MONEY2TIME-26). `__tests__/patches/expoCameraStoppedConnection.test.ts` and `expoImagePickerContentUri.test.ts` fail if an upgrade drops either.
@@ -1711,10 +1711,7 @@ The app side is `features/sharedLedgers/` (screens) and
   of its own. The main ledger cannot be shared: its id is the same on every
   phone.
 - **Inviting.** The owner's Sharing page shows the ledger's link
-  (`https://ledger.money2time.com/join/<code>`; links only open on this
-  host and the album host, so links made on the older ones no longer do)
-  while the ledger
-  has room, is active and the owner is signed in, with a Copy icon and a
+  (`https://ledger.money2time.com/join/<code>`) while the ledger has room, is active and the owner is signed in, with a Copy icon and a
   separate New link icon; the owner pastes it wherever they like (there is no
   share sheet). There is only ever one working link per ledger: asking again
   gives the same link until it expires a day after it was made, then a new
@@ -2071,107 +2068,115 @@ how the household is spending, and who is covering what.
 ### Album members and shared albums
 
 An album can be the face of a group, as a trip with friends is: the people it
-is split with, the bills between them, and who owes whom. **Only a shared
-album is split**: an album is either one of the user's own (no people, no
-splitting) or shared with friends who join it with a link, chosen when it is
-made and never changed. Ordinary expenses outside shared albums keep Split
-Bill with typed names as before (Key patterns: Paid by and Balances). Shared
-albums are built on shared ledgers' plumbing (above). The app side is
+is split with, the bills between them, and who owes whom. An album is one of
+two kinds, chosen when it is made and never changed:
+
+- **The user's own**: no people, no Balances tab. Its expenses can still be
+  split with typed names like any other (Key patterns: Paid by and Balances),
+  and those bills are settled on the Balances page.
+- **Shared**: friends join it with a link, and only its members split its
+  bills. This section is about these.
+
+A shared album is built on shared ledgers' plumbing (above). The app side is
 `features/albums/` (`lib/albumPeople.ts`, `lib/albumGroup.ts`,
-`lib/groupRules.ts`, `services/albumGroupStore.ts`,
-`services/albumGroupSync.ts`, `screens/AlbumPeopleScreen.tsx`,
-`lib/groupDebts.ts`, `components/AlbumBalances.tsx`,
-`components/SplitWithCard.tsx`, `components/AlbumSharingCard.tsx`) and
-migrations `090`, `091` and `092`.
+`lib/groupRules.ts`, `lib/groupDebts.ts`, `lib/memberShare.ts`,
+`services/albumGroupStore.ts`, `services/albumGroupSync.ts`,
+`screens/AlbumPeopleScreen.tsx`, `components/AlbumBalances.tsx`,
+`components/SplitWithCard.tsx`, `components/AlbumSharingCard.tsx`), and its
+tables come from migrations `090`, `091` and `092`.
 
 **What the user sees**
 
-- **The album page.** The cover photo runs to the top of the screen under
-  the status bar, with Back, Change cover, Edit, Add transactions and Delete
-  floating over it, and the tab bar (**Transactions**, **Breakdown**, then,
-  in a shared album, **Balances**) resting on its bottom on rounded corners.
-  Each tab is its own list under that header (`AlbumDetailScreen`):
-  scrolling the open tab moves the header with it until only a solid bar
-  with the album's name and the tabs are left, the controls crossfading into
-  it as on a goal's page, and pulling down past the top stretches the photo.
-  Switching tabs (tap or swipe) first brings the other tabs to where the
-  header is, so it never jumps. A held transaction starts selecting, and the
-  tab bar turns into the selection's bar (Cancel, the count and total,
-  duplicate, edit, remove), as the calendar's header does, clear of the
-  rows. A floating + at the bottom right opens a new expense that goes into
-  this album (and, in a shared album, starts split with its people), whether
-  or not the album is the active one (the `albumId` param of
-  `AddTransactionDetailed`), and comes back to the album when saved.
-  **Opening is light and never waits**: the cover, controls and the open
-  tab's list mount with the push (the entries are already in memory, so
-  there is no loading state); the other tabs (the breakdown donut, the
-  balances) one at a time once the native stack says the transition ended
-  (or after 450 ms), and a swipe mounts any still waiting. The header's
-  collapsed state lives in the small bar it controls (`SolidHeaderBar`), so
-  scrolling past the collapse point re-renders that bar alone, never the
-  page under the moving cover. **The header moves on the UI thread without
-  React**: `package.json` turns on Reanimated's
-  `IOS_SYNCHRONOUSLY_UPDATE_UI_PROPS` and
-  `ANDROID_SYNCHRONOUSLY_UPDATE_UI_PROPS`, so a scroll-driven transform,
-  opacity or corner radius is written to the native view in the frame it is
-  computed instead of through a shadow-tree commit, which waited behind
-  FlashList rendering cells and made the cover stutter while scrolling
-  (native flags: a change needs a new build).
-- **Split with friends is chosen at creation.** The New Album screen has the
-  switch (in one card with Simplify group debts), for users on the
-  shared-albums rollout (see [Shared albums rollout](#shared-albums-rollout));
-  on, the album is shared as it is made, with nobody but the user until others join. **Sharing is free
-  and has no limit of its own**: the only limit on albums is the free plan's
-  count of them (`FREE_MAX_ALBUMS`), and a bill in a shared album counts
-  toward no free limit. It needs an account and nothing else: turned on with
-  nobody signed in, the sign-in options show under the switch (`SignInGate`;
-  a second tap puts them away). No paywall is shown, and signing in this way
-  does not turn on Cloud Sync for a free user. If sharing fails, the album is
-  still made, as one of the user's own. An existing album never becomes a
-  shared one. **Only an album of the main ledger can be shared, and only
-  while that ledger is not itself shared** (`mainLedgerTakesSharedAlbums`,
-  `useAlbumScope`): in any other ledger the switch is not offered, a main
-  ledger that holds a shared album cannot be shared until its albums are not,
-  and a copy of a ledger carries a shared album's bills as ordinary split
-  bills (`album_group_id` and `settlement_id` are cleared).
+- **The album page** (`AlbumDetailScreen`, both kinds). The cover photo runs
+  to the top of the screen under the status bar, with Back, Change cover,
+  Edit, Add transactions (not in a shared album) and Delete floating over it,
+  and the tab bar (**Transactions**, **Breakdown**, then, in a shared album,
+  **Balances**) resting on its bottom on rounded corners. Each tab is its own
+  list under that header: scrolling the open tab moves the header with it
+  until only a solid bar with the album's name and the tabs is left, the
+  controls crossfading into it as on a goal's page, and pulling down past the
+  top stretches the photo. Switching tabs (tap or swipe) first brings the
+  other tabs to where the header is, so it never jumps. A held transaction
+  starts selecting, and the tab bar turns into the selection's bar (Cancel,
+  the count and total, duplicate, edit, remove), as the calendar's header
+  does. A floating + at the bottom right opens a new expense that goes into
+  this album (in a shared album, split with its people), whether or not the
+  album is the active one (the `albumId` param of `AddTransactionDetailed`),
+  and comes back to the album when saved.
+  - **Opening never waits.** The cover, controls and the open tab's list
+    mount with the push (the entries are already in memory, so there is no
+    loading state); the other tabs (the breakdown donut, the balances) mount
+    one at a time once the native stack says the transition ended (or after
+    450 ms), and a swipe mounts any still waiting.
+  - **Scrolling re-renders almost nothing.** The header's collapsed state
+    lives in the small bar it controls (`SolidHeaderBar`), so crossing the
+    collapse point re-renders that bar alone. The header moves on the UI
+    thread without React: `package.json` turns on Reanimated's
+    `IOS_SYNCHRONOUSLY_UPDATE_UI_PROPS` and
+    `ANDROID_SYNCHRONOUSLY_UPDATE_UI_PROPS`, so a scroll-driven transform,
+    opacity or corner radius reaches the native view in the frame it is
+    computed rather than through a shadow-tree commit, which waits behind
+    FlashList rendering cells and makes the cover stutter. They are native
+    flags: a change needs a new build.
+- **Making one.** New Album has a **Split with friends** switch (in one card
+  with Simplify group debts), for users on the rollout (below). On, the album
+  is shared as it is made, with nobody but the user until others join, and
+  Select transactions is hidden (a shared album only holds bills made in it).
+  If sharing fails, the album is still made, as one of the user's own, with
+  any picked entries. An existing album never becomes a shared one.
+  - **Free, with an account.** Sharing needs a Cloud Sync sign-in and nothing
+    else: turned on with nobody signed in, the sign-in options show under the
+    switch (`SignInGate`; a second tap puts them away). No paywall is shown,
+    and signing in this way does not turn on Cloud Sync for a free user. The
+    free plan's only limit on albums is their count (`FREE_MAX_ALBUMS`), and a
+    bill in a shared album counts toward no free limit. The Worker's ceilings
+    against runaway databases (50 shared albums per owner, 20 started a day;
+    see [Cloud-sync Worker](#cloud-sync-worker)) show as an error when reached
+    (`albumMessages.ts`).
+  - **Only in the main ledger, and only while it is not shared**
+    (`mainLedgerTakesSharedAlbums`, `useAlbumScope`). In any other ledger the
+    switch is not offered; a main ledger
+    that holds a shared album cannot be shared until none of its albums is;
+    and a copy of a ledger carries a shared album's bills as ordinary split
+    bills (`album_group_id` and `settlement_id` are cleared).
 - **People.** A shared album's people are exactly those who joined with its
   link: there are no typed names. Its cover has a People button (their
   avatars) opening the People page: the user (whose name, the one the others
-  see, they can change), then each member, **Joined** or **Left**; the
-  owner's invite link (Copy, New link; the same 24-hour link a shared ledger
-  has, on its own host: `https://album.money2time.com/join/<code>`); the
-  Simplify switch; and Leave for anyone but the owner. The owner can take
-  someone out of the share. Wherever a split bill lists the user, they show as
-  their Settings name and photo (`useSelfPerson`), "Me" and an initial while
-  they set neither. Not offered for an album in a shared ledger.
+  see, they can change; names are unique within the album), then each member,
+  **Joined** or **Left**; the owner's invite link (Copy, New link; the same
+  24-hour link a shared ledger has, on its own host:
+  `https://album.money2time.com/join/<code>`); the Simplify switch; and Leave
+  for anyone but the owner. The owner can take someone out of the share.
+  Wherever a split bill lists the user, they show as their Settings name and
+  photo (`useSelfPerson`), "Me" and an initial while they set neither.
 - **Joining.** The link opens the Join screen (the one shared ledgers use,
   titled Shared album). The album host's invite page hands the app
   `money2time://join/<code>?kind=album`, so the screen reads as an album from
   its first frame, before the invite is looked up (and if the lookup fails);
-  the invite itself decides once read. Anyone signed in can join, as many as the album
-  holds people (20 besides its owner). The album is added to the user's main
-  ledger, which opens with it (someone whose main ledger is shared is told it
-  cannot hold one; a link whose album id is already an album of another
-  ledger is refused, and a group only ever writes into an album of the main
-  ledger), and they are put on its list under their own name as soon as the
-  group's people have come down (`syncAlbumGroups`), under an id made from
-  their account, so two phones of theirs write one row. Joining opens the
-  album itself. An album deleted here and joined again comes back.
+  the invite itself decides once read. Anyone signed in can join, up to 20
+  people besides the owner. The album is added to the user's main ledger,
+  which opens with it, and joining opens the album itself. Someone whose main
+  ledger is shared is told it cannot hold one, and a link whose album id is
+  already an album of another ledger is refused. The joiner is put on the
+  list under their own name (a number added if it is taken: "Ben 2") as soon
+  as the group's people have come down (`syncAlbumGroups`). An album deleted
+  here and joined again comes back.
 - **A new bill starts split.** In a shared album a new expense opens split
   evenly between the user and everyone who joined. The user is always its
   payer (Split Bill has no Paid by there), and people come only from the
-  album's members, never typed (`groupMembers`). A person's name, the
-  blank row a split opens with ("Choose a member") and Add person all open
-  one sheet over the bill (`MemberPickerSheet`): every member with a check
-  circle, the user always on, ticked on or off in place (a member with a
-  payment recorded cannot come off), "3 of 8 people" under the title and a
-  search field from 7 members up, at a fixed height so filtering never
-  resizes it and it stays above the keyboard. The rows under it never move
-  while choosing; the first member ticked fills the blank row. Add does not
-  save it straight away: Split Bill opens first, its Done reading **Add**
-  (`confirmSplitBeforeAdd`), so the split is seen and can be changed before
-  the bill is saved; Back returns to the form unsaved. Removing everyone
-  makes it an expense of the user's own.
+  album's members (`groupMembers`). A person's name, the blank row a split
+  opens with ("Choose a member") and Add person all open one sheet over the
+  bill (`MemberPickerSheet`): every member with a check circle, the user
+  always on, ticked on or off in place (a member with a payment recorded
+  cannot come off), "3 of 8 people" under the title and a search field from
+  7 members besides the user up, at a fixed height so
+  filtering never resizes it and it stays above the keyboard. The rows under
+  it never move while choosing; the first member ticked fills the blank row.
+  Add does not save straight away: Split Bill opens first, its Done reading
+  **Add** (`confirmSplitBeforeAdd`), so the split is seen and can be changed
+  before the bill is saved; Back returns to the form unsaved. Removing
+  everyone makes it an expense of the user's own. The member sheet says when
+  nobody else has joined yet.
 - **Bills and payments are everyone's.** A bill saved in a shared album
   reaches everyone in it: each person gets their own side of it, in their own
   ledger, their own currency totals and their own category (matched by name,
@@ -2184,27 +2189,24 @@ migrations `090`, `091` and `092`.
   everyone else, and stays the user's own entry. Its row in every list has a
   small people mark after the title (read out as "Shared album"), and its
   editor a row at the foot of the amount card naming the album, which opens
-  it (`albumNote`), under the panel with the user's share and who paid.
+  it (`albumNote`), under the panel with the user's share and who paid. A
+  shared album's bill cannot become an instalment plan
+  (`canConvertToInstalmentPlan`).
 - **A shared album only holds bills made in it.** Existing entries are never
   added to one: its page has no Add transactions button and no Duplicate in
-  its selection bar, New Album hides Select transactions while Split with
-  friends is on (picked entries go in only if sharing then fails and the
-  album stays the user's own), and the Web Dashboard's picker cannot tick
-  other entries into an album with bills of its group (the phone refuses
-  any add to a shared album, which covers one with no bills yet). As the
-  active album it takes new entries as any album does, except a bill split
-  with typed names (`createTransactionWithSplits` leaves that one out: a
-  receipt Split by Item, say). An expense in it is split only through the
-  group, with its members (`EditTransactionScreen` and
-  `AddTransactionScreen` set `groupBill`): an entry of the user's own there
-  split with nobody becomes a bill of the group once split, never a local
-  split with typed names that nobody else in the album would get. An entry
-  of the user's own already split with others (from before this rule: typed
-  names, a friend who paid, paybacks, items) keeps its own split, since the
-  group could not take those names and its paybacks would count twice. A
-  save the group cannot take (signed out, someone on it who is not a member)
-  says it failed and keeps nothing. The member sheet says when nobody else
-  has joined yet.
+  its selection bar, and the Web Dashboard cannot tick other entries into it
+  (the phone refuses any add to a shared album). As the active album it takes
+  new entries as any album does, except a bill split with typed names
+  (`createTransactionWithSplits` leaves that one out: a receipt Split by Item,
+  say). An expense in it is split only through the group, with its members
+  (`EditTransactionScreen` and `AddTransactionScreen` set `groupBill`): an
+  entry of the user's own there split with nobody becomes a bill of the group
+  once split, never a local split that nobody else in the album would get. An
+  entry of the user's own already split with others (typed names, a friend
+  who paid, paybacks, items) keeps its own split, since the group could not
+  take those names and its paybacks would count twice. A save the group
+  cannot take (signed out, someone on it who is not a member) says it failed
+  and keeps nothing.
 - **Who can change what: nobody moves anyone else's money.** The rules are
   in `lib/groupRules.ts`, applied by the app (`saveAlbumBill`,
   `deleteGroupEntries`, `deleteSplit`, `recordGroupPayment`,
@@ -2221,22 +2223,22 @@ migrations `090`, `091` and `092`.
   - **Payments lock a bill.** With a payment recorded on it, nobody changes
     it, takes a share off it or deletes it until the payments are undone
     (the album row's badge reads **Has payments**). So no money that moved is
-    ever deleted from under anyone, and its account (the user's own field)
-    still changes.
+    ever deleted from under anyone; its account (the user's own field) still
+    changes.
   - **Only the person paying records a payment**, and only they undo it.
     A simplified payment can span other people's bills: undo belongs to the
     account that recorded the whole payment (`canUndoPayment`, `created_by`),
     never an intermediate payer ("Only the person who recorded this payment
-    can undo it."). Payments without a recorded author, and payments whose
-    recorder has left the album, follow the payer rule (the payer, or the
-    person paid once the payer has left), so no bill stays locked for good;
-    a payment recorded for someone who left stays undoable by its recorder
-    if that person rejoins. A payment already undone on another phone is
-    not refused: the album's entries just catch up.
-    Paying back and Settle up, where the user pays, ask which account it
-    leaves (`SettleUpConfirmSheet`); the person paid gets it on their own
-    payback account. Where someone owes the user, the person's page says
-    "Aisha records it when they pay you." in place of Settle up, and the
+    can undo it."). A payment with no recorded author, or whose recorder has
+    left the album, follows the payer rule (the payer, or the person paid
+    once the payer has left), so no bill stays locked for good; a payment
+    recorded for someone who left stays undoable by its recorder if that
+    person rejoins. A payment already undone on another phone is not refused:
+    the album's entries just catch up.
+  - **Paying.** Paying back and Settle up, where the user pays, ask which
+    account it leaves (`SettleUpConfirmSheet`); the person paid gets it on
+    their own payback account. Where someone owes the user, the person's page
+    says "Aisha records it when they pay you." in place of Settle up, and the
     Balances line opens that page rather than a Settle up sheet. When shares
     go both ways, Settle up pays only the net, onto the user's oldest bills,
     and the shares the other way stay open (no Settle up when they come out
@@ -2261,6 +2263,13 @@ migrations `090`, `091` and `092`.
   album's bills. People with nothing to pay either way are listed under
   **Settled up** (marked Even when bills are open both ways and come to
   nothing), which is where the album's bills with them are found.
+- **Simplify group debts.** A switch, off to start with (New Album can turn
+  it on as the album is made), that anyone in the album can turn on, for
+  everyone. On, Who owes whom shows the same balances with as few payments as
+  it can: when Anna owes Bob and Bob owes Charlie, Anna owes Charlie. Nobody
+  pays or gets back more in total. A line where the user pays then opens a
+  Settle up sheet for that one payment, where a smaller amount can be typed
+  to pay part of it.
 - **The Breakdown by person.** Once a bill in a shared album is split, the
   Breakdown opens with one line above its total, "Showing **Everyone** ⌄",
   which opens a sheet (`BreakdownMemberSheet`): **Everyone** (the album's
@@ -2269,31 +2278,22 @@ migrations `090`, `091` and `092`.
   by their share of it (`lib/memberShare.ts`, turned into the entry's
   displayed value by its own rate). A category opens the bills that person
   has a share in.
-- **The cover is everyone's.** A shared album's cover photo is the group's:
-  whoever changes it (Change cover, Edit) changes it on every phone, and
+- **The cover is everyone's; the name is each person's.** Whoever changes a
+  shared album's cover (Change cover, Edit) changes it on every phone, and
   someone who joins gets it. The image goes up to the group's image space
   like a shared ledger's receipts; another phone keeps showing the cover it
-  had until the new image has downloaded. An album shared before covers were the
-  group's gets its owner's cover the first time the owner's phone syncs it.
-  The album's name stays each person's own.
-- **Simplify group debts.** A switch, off to start with, that anyone in the
-  album can turn on, for everyone. On, Who owes whom shows the same balances
-  with as few payments as it can: when Anna owes Bob and Bob owes Charlie,
-  Anna owes Charlie. Nobody pays or gets back more in total. A line where the
-  user pays then opens a Settle up sheet for that one payment, where a
-  smaller amount can be typed to pay part of it.
-- **Leaving and stopping.** A member leaves from the People page (which
-  then closes, back to the album), or the owner takes them out of the share. **Their row and their bills stay in the
-  group**, so nobody else's bills or balances change; they read as Left. On
+  had until the new image has downloaded. The album's name stays each
+  person's own.
+- **Leaving and stopping.** A member leaves from the People page (which then
+  closes, back to the album) or by deleting the album; the owner can take
+  them out of the share. **Their row and their bills stay in the group**, so
+  nobody else's bills or balances change; they read as Left, new bills leave
+  them out, and a payment from them is recorded by the person it went to. On
   their own phone the album goes on as one of their own, their entries as
   ordinary split bills (settled on the Balances page); it just no longer
-  updates. Deleting the album stops sharing it, for the owner, the same way
-  for everyone. Signing out does the same until the next sign-in, which links
-  it again. Leaving marks their member row as left (it keeps no account;
-  `markSelfLeft` in `sharedLedgerSync.leave`, pushed before the phone lets
-  go, and `markMemberLeft` when the owner takes them out): new bills leave
-  them out, and a payment from them is recorded by the person it went to.
-  Joining again links the same row back.
+  updates. The owner deleting the album stops sharing it, which ends it the
+  same way for everyone. Signing out does the same on that phone until the
+  next sign-in, which links it again. Joining again links the same row back.
 - **Pro plays no part.** Unlike a shared ledger, a shared album syncs
   whoever in it is Pro or not, and is never paused.
 
@@ -2336,35 +2336,35 @@ their own.
 
 **How it works**
 
-- **People.** A shared album's people are its group's members
-  (`album_members`), the user among them, each with the Cloud Sync account
-  that joined (`user_id`). The group starts with the user alone when the
-  album is made (`beginAlbumGroup`); the others add themselves as they join
-  (`addSelfToGroup` from `syncAlbumGroups`). Nobody's row is ever deleted:
-  someone who leaves keeps theirs, so the bills that name them stay whole
-  (the People page reads who is still in the share from the Worker's list,
-  `getLedgerMembers`, to say Joined or Left). The end of sharing on a phone
-  drops the group's rows there and clears `album_group_id`, leaving the
-  user's entries as ordinary split bills (`releaseAlbumGroup`).
-  `albums.split_with_json` (an album's typed people, from before only shared
-  albums were split) is no longer read. A share row carries the person it is
-  with as `album_member_id`; within an album Balances still groups a person
-  by name (`debtPartyKey`).
-- **The group.** Four tables hold it: `album_members`, `album_expenses`
-  (one row per bill: who paid, and each member's share in `shares_json`),
-  `album_settlements` (a payment from one member to another for one bill;
-  rows are only added, or deleted when the payment is undone) and
-  `album_groups` (migration `091`: one row of settings per group, made when
-  one is first changed; `simplify_debts`, and since migration `092`
-  `cover_photo_uri`: NULL while nobody has set a cover, `''` once someone
-  removed it, else an `album-covers/<id>.<ext>` path, an image column
-  (`ASSET_COLUMNS`) synced on the album's channel. `updateAlbum` writes it
-  for a shared album, and `syncAlbumCover` (from `syncAlbumGroups`, after
-  every sync) puts it on the phone's own album, or, while it is NULL, the
-  owner's phone publishes the cover the album has; any other value reads as
-  unset). The group's id
-  is the album's id: the owner's album, and the album each person who joins
-  gets, which is made with that same id.
+- **The group.** Four tables hold it, and its id is the album's id (the
+  owner's album, and the album each person who joins gets, which is made with
+  that same id):
+  - `album_members`: the people, the user among them, each with the Cloud
+    Sync account that joined (`user_id`). The group starts with the user
+    alone when the album is made (`beginAlbumGroup`); the others add
+    themselves as they join (`addSelfToGroup` from `syncAlbumGroups`), under
+    an id made from their account (`u-<userId>`), so two phones of theirs
+    write one row. Nobody's row is ever deleted: leaving clears its
+    `user_id` (`markSelfLeft` in `sharedLedgerSync.leave`, pushed before the
+    phone lets go; `markMemberLeft` when the owner takes someone out), so the
+    bills that name them stay whole, and joining again takes the row back.
+    The People page reads who is still in the share from the Worker's list
+    (`getLedgerMembers`) to say Joined or Left.
+  - `album_expenses`: one row per bill: who paid (`paid_by`), each member's
+    share (`shares_json`) and its last writer (`created_by`, deletes
+    included).
+  - `album_settlements`: a payment from one member to another for one bill.
+    Rows are only added, or deleted when the payment is undone.
+  - `album_groups` (migration `091`): the group's settings, one row:
+    `simplify_debts`, and `cover_photo_uri` (migration `092`). The row is
+    made when the album is shared with a cover, or when a setting is first
+    changed. The cover is NULL while nobody has set one, `''` once someone
+    removed it, else an `album-covers/<id>.<ext>` path, an image column
+    (`ASSET_COLUMNS`) synced on the album's channel. `updateAlbum` writes it
+    for a shared album, and `syncAlbumCover` (from `syncAlbumGroups`, after
+    every sync) puts it on the phone's own album; while it is NULL, the
+    owner's phone publishes the cover its album has. Any other value reads as
+    unset.
 - **Its own database, through the shared-ledger plumbing.** The four tables
   carry the group's id in `ledger_id`, the column Cloud Sync routes a row by
   (`LEDGER_ROOT_SYNC_TABLES`), and a shared album is kept in `shared_ledgers`
@@ -2377,36 +2377,37 @@ their own.
   and a group's rows with no share to go to go nowhere. The screens read the
   two kinds apart (`listLedgerShares`, `listAlbumShares`). A backup leaves
   the four tables out (`GROUP_SYNC_TABLES`): the group is not the user's
-  data, their own side of its bills is.
+  data, their own side of its bills is. The end of sharing on a phone drops
+  the group's rows there and clears `album_group_id`, leaving the user's
+  entries as ordinary split bills (`releaseAlbumGroup`).
 - **Each phone keeps only its own side.** `localBill` (pure) says what a
   group's bill is to one member, and `projectGroup` writes exactly that into
-  the user's ledger as the split bill the app always had: a bill they paid is
-  the whole expense on their account with the others' shares owed to them; a
-  bill someone else paid is their own share, owed to that member, on no
-  account until paid back (the storage of Paid by and Balances, part payments
+  the user's ledger as an ordinary split bill: a bill they paid is the whole
+  expense on their account with the others' shares owed to them; a bill
+  someone else paid is their own share, owed to that member, on no account
+  until paid back (the storage of Paid by and Balances, part payments
   included); a bill they have no part in is not in their ledger. The entry's
   id is the bill's id, its shares have ids made from it, and the group is the
   only writer of those rows, so two phones of one person write the same rows
   and applying the group twice changes nothing. What is the user's own on the
   entry (its account, category, longer note, receipt, mood, and the account
-  each payment moved through) is kept from the rows already there.
-  A payback transfer also keeps its recorded exchange rate: a fresh rate
-  table or a member rename never changes how much money reached the account.
-  It is priced again only when its receiving side changed currency, or when
-  it was written 1:1 while the rate was missing and a known rate now says
-  otherwise.
-  `transactions.album_group_id` marks such an entry; `settlement_id` on a paid
-  share is the settlement it stands for.
+  each payment moved through) is kept from the rows already there. A payback
+  transfer keeps its recorded exchange rate, so a fresh rate table or a
+  member rename never changes how much money reached the account; it is
+  priced again only when its receiving side changed currency, or when it was
+  written 1:1 while the rate was missing and a known rate now says
+  otherwise. `transactions.album_group_id` marks such an entry,
+  `transaction_splits.album_member_id` the member a share is with, and
+  `settlement_id` on a paid share the settlement it stands for. Within an
+  album, Balances groups a person by name (`debtPartyKey`).
 - **Which account.** A bill the user paid is on the account the editor just
   picked (`hints.entry`: `saveAlbumBill` passes it rather than writing the
   account itself, so the projection works out the account amount), else the
-  one the entry already has, else, new and written by the user
-  (`album_expenses.created_by`, the bill's last writer, deletes included),
-  their default account, else no account (`needsAccountConfirm` in
-  `lib/albumGroup.ts`). An entry already on the phone never falls back to
-  the default account: one the user's other phone gave it is on its way.
-  The editor's line reads the album, the payer and the last writer through
-  `useGroupBillOrigin`.
+  one the entry already has, else, when the user is the bill's last writer,
+  their default account, else no account (`albumGroupSync.ts`). An entry
+  already on the phone never falls back to the default account: one the
+  user's other phone gave it is on its way. The editor's line reads the
+  album and the payer through `useGroupBillOrigin`.
 - **One direction.** Saving a split bill in a shared album
   (`saveAlbumBill`), recording a payment on one (`markSplitPaid`,
   `recordSplitPayment`, `payBackPayer`, `recordPayBack` and Settle up all
@@ -2422,44 +2423,49 @@ their own.
   whoever is owed most), when each of them can be paid along the group's bills
   as they stand; else the debts passed along (while someone both owes and is
   owed, the debt to them goes to the one they owe), which always can. Every
-  phone lists the result in the same order. A simplified
-  debt has no bill of its own, so paying one (`settleGroupDebt`, `settleDebt`)
-  writes payments onto the bills between the two: the payer's share of the
-  middle member's bill, the middle member's share of the payee's. Circles of
-  debts left over, which nobody has to pay, are closed with it, so once every
-  simplified debt is paid every bill is settled on every phone. With Simplify
-  off, paying a debt moves only that pair's own debt (their bills with each
-  other, netted both ways): nobody else's debts change. The payments
-  of one act share an id (`<batch>.<n>`, `createSettlements`), and undoing any
-  of them undoes them all, so nobody's total moves. A group that comes out
-  even with Simplify on (debts that only go round in a circle, with no line to
-  tap) has every open share closed after the change that made it so
-  (`closeEvenGroup`: a bill saved, a payment, a delete, or the switch itself,
-  on the phone that made it). A member in
-  the middle sees one payment in and one out for the same amount; on the
-  phone that records it both go through the one account picked.
+  phone lists the result in the same order.
+  - **Paying a simplified debt.** It has no bill of its own, so paying one
+    (`settleGroupDebt`, `settleDebt`) writes payments onto the bills between
+    the two: the payer's share of the middle member's bill, the middle
+    member's share of the payee's. Circles of debts left over, which nobody
+    has to pay, are closed with it, so once every simplified debt is paid
+    every bill is settled on every phone. A member in the middle sees one
+    payment in and one out for the same amount; on the phone that records it
+    both go through the one account picked. With Simplify off, paying a debt
+    moves only that pair's own debt (their bills with each other, netted both
+    ways): nobody else's debts change.
+  - **One act, one batch.** The payments of one act share an id
+    (`<batch>.<n>`, `createSettlements`), and undoing any of them undoes them
+    all, so nobody's total moves.
+  - **Even groups close.** A group that comes out even with Simplify on
+    (debts that only go round in a circle, with no line to tap) has every
+    open share closed after the change that made it so (`closeEvenGroup`: a
+    bill saved, a payment, a delete, or the switch itself, on the phone that
+    made it).
 - **When it runs.** After every sync that applied rows (`reloadAfterApply`),
   at launch and when a ledger opens. A group's album is in the main ledger,
   so while another ledger is open it waits: the entries land on its accounts
-  and categories. A whole group reads its entries, their shares and the
-  album's contents in three statements (`preload`), and a pass that finds
-  nothing to change writes nothing. Payments recorded together (Settle up
-  with a person, across all their bills) are one write and one refresh
-  (`recordGroupPayment`).
+  and categories. A whole group reads its entries, their shares, the entries
+  its payments made and the album's contents in a few batched statements
+  (`preload`), and a pass that finds nothing to change writes nothing.
+  Payments recorded together (Settle up with a person, across all their
+  bills) are one write and one refresh (`recordGroupPayment`).
 - **Trust: every row of a group is read as if someone hostile wrote it.**
   Anyone in a shared album, which is anyone who was given its link, holds a
   token that can write anything into the group's database. What they are
-  meant to be able to do is what the album offers: add, change and delete its
-  bills, record and undo payments, rename people, switch Simplify. So:
+  meant to be able to do is what the album offers: add, change and delete
+  their bills, record and undo their payments, rename themselves, switch
+  Simplify. So:
   - **Only the group's tables come from it.** Whatever `ledger_id` a row
     claims, an album's channel never delivers a ledger, an entry, an account
     or a category (`channelOfRow`, and `remoteChanges` does not even fetch
     them). A group's settings row is taken only under the group's own id.
   - **A group is never one of the phone's ledgers.** A share's id is whatever
     its owner sent, so joining an album whose id is a ledger here is refused
-    before a seat is taken (`assertNotLedger`), and letting a group go deletes
-    its four tables by the group's id and nothing else
-    (`deleteGroupRowsLocally`, never the ledger delete).
+    before a seat is taken (`assertNotLedger`), a group only ever writes into
+    an album of the main ledger, and letting a group go deletes its four
+    tables by the group's id and nothing else (`deleteGroupRowsLocally`,
+    never the ledger delete).
   - **Rows are checked where they are read** (`toAlbumMember`,
     `toAlbumExpense`, `toAlbumSettlement` in `lib/repositories/mappers.ts`):
     ids of the shapes the app makes, amounts that are finite and not
@@ -2477,25 +2483,26 @@ their own.
   - **A row the phone cannot store is passed over**, not retried: it is
     never a sync error that stays up, nor a reason the owner cannot stop
     sharing or delete their account.
-    What stays possible, as in any shared bill splitter: someone in the album
-    can add as many bills as they like, or mark themselves as another person
-    on the list. **Who can change what is kept by the app, not the
-    server**: each phone writes the group's database directly with its own
-    token, so the Worker never sees a write and cannot tell who made it. A
-    modified app could still name someone else as payer, change or delete
-    their bill, record a payment as them, or write `created_by` as them
-    (every member's `user_id` is in `album_members`). Enforcing the rules on
-    the server needs the album's writes to go through the Worker, which
-    checks each against the writer's sign-in. Leaving the album ends it; the
-    entries already made stay, as the user's own to delete.
+  - **Who can change what is kept by the app, not the server.** Each phone
+    writes the group's database directly with its own token, so the Worker
+    never sees a write and cannot tell who made it. As in any shared bill
+    splitter, someone in the album can add as many bills as they like; a
+    modified app could also rename or pose as another member, name someone
+    else as payer, change or delete their bill, record a payment as them, or
+    write `created_by` as them (every member's `user_id` is in
+    `album_members`). Enforcing the rules on the server needs the album's
+    writes to go through the Worker, which would check each against the
+    writer's sign-in. Leaving the album ends it; the entries already made
+    stay, as the user's own to delete.
 
-**Limits.** Split by Item bills are not shared (they have no Paid by). A member without Pro adds
-bills in a shared album whatever their count of unsettled split bills, and a shared album's bills are
-left out of that count everywhere (`countUnpaidSplitBills`). A bill's day and title belong to the
+**Limits.** Split by Item bills are not shared (they have no Paid by). A
+member without Pro adds bills in a shared album whatever their count of
+unsettled split bills, and a shared album's bills are left out of that count
+everywhere (`countUnpaidSplitBills`). A bill's day and title belong to the
 group, so a bulk edit of either on a group's bill is put back at the next
 sync. Names and photos from Cloud Sync profiles are not used: a person goes by
-the name on their member row, which anyone in the album can change. The
-joined album's own name is each person's own; its cover is the group's.
+the name on their member row. `albums.split_with_json` (migration `090`) is
+an unused column.
 
 ## Analytics
 
@@ -2856,7 +2863,7 @@ No transaction amounts, balances, notes, merchant text, receipt images, person n
 | Review `trigger`                                                   | `transaction_milestone`, `insights_view`, `pro_purchase`, `manual`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | Web Dashboard `trigger`, `payload`, `result`, `kind`, `count`      | Sent `trigger`: `browser_opened`, `refresh` (also a browser asking for everything after a patch it could not apply), `manual` (Send now) or `edit` (after a saved or partly saved edit, a refused stale or conflicting one, or a change to this browser's permission); Sent `payload`: `full` (the whole export) or `patch` (only what changed since the copy the browser holds). Edited `result`: `applied`, `stale`, `conflict`, `amount_locked`, `pro_required`, `off`, `invalid`, `failed`, `busy` or `unknown`; on `applied` only, `kind` is the entity and operation (`transaction_update`, `account_create`, `group_delete`, `category_update`, `recurring_create`, and for modules `goal_archive`, `loan_update`, `budget_template_create`, `split_settle`, `reimbursement_mark`, `wage_create`, `currency_add`, `reorder_accounts`, …) or `mixed`, and `count` the entries changed. Entries a browser adds, split bills included, report `source: web_dashboard` in `First Transaction Created` and `Daily Transaction Logged`. Send Failed `reason`: a `WebDashboardErrorCode` (`timeout`, `offline`, `closed`, `rejected`, `too_large`, `failed`, …; `services/webDashboard.shared.ts`). |
 | Split `paid_by`, `via`, `with_account`, `part`, `received`, `paid` | `paid_by`: `me` or `friend` (who paid the bill that was just split). `via`: `bill` (Mark paid on one share the user owes) or `settle_up` (the person page's Settle up). `with_account`: whether an account was named as paid from. `part`: `true` for a part payment (an amount below what is left) or its undo, `false` for the payment that clears the bill or its undo. `received` and `paid`: how many shares a Settle up marked paid to the user, and how many bills it paid back.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| Album `count`, `edit`, `paid_by`, `people`, `direction`, `is_pro`  | `count`: how many people an album is split with after the change. `edit`: whether the saved bill already existed. `paid_by`: `me` or `friend`. `people`: how many members have a share of the bill. `direction`: `received` (a member paid the user) or `paid` (the user paid a member). `is_pro`: whether the person joining has Pro.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| Album `count`, `edit`, `paid_by`, `people`, `direction`, `is_pro`  | `count`: how many albums with a location the map shows (`Album Locations Opened`). `edit`: whether the saved bill already existed. `paid_by`: `me` or `friend`. `people`: how many members have a share of the bill. `direction`: `received` (a member paid the user) or `paid` (the user paid a member). `is_pro`: whether the person joining has Pro.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 
 ### Feature adoption
 
@@ -4811,9 +4818,8 @@ links are built on `INVITE_URL` (the ledger host) and a shared album's on
 `ALBUM_INVITE_URL` (the album host, falling back to `INVITE_URL`;
 `inviteOrigin`). Those two hosts answer only `GET /join/<code>`, the album
 host's page worded for an album, and no other host answers it; sign-in and
-the API stay on `BETTER_AUTH_URL`. (Before November 2026, links were made on
-`shared-ledgers.money2time.com` and the API host; both stopped opening them
-when the two invite hosts came in.)
+the API stay on `BETTER_AUTH_URL`. Links on any other host (older ones were made on
+`shared-ledgers.money2time.com` and the API host) no longer open.
 
 | File            | What it holds                                              |
 | --------------- | ---------------------------------------------------------- |
@@ -5386,9 +5392,10 @@ app's `services/webDashboardLink.ts`, `webDashboardCrypto.ts`,
 - **Balances per album** (see Album members and shared albums): the Balances
   page's people are netted over the bills in no album, and each album with
   something still owed is listed above them with the user's net there
-  (`balancesByAlbum` in `src/lib/backup/split-payer.ts`). The totals at the
-  top add every open share once, in an album or not. It is built from `album_transactions`, so older data reads
-  the same way; unlike the app it also sets albums apart in a shared ledger.
+  (`balancesByAlbum` in `src/lib/backup/split-payer.ts`, built from
+  `album_transactions`). The totals at the top add every open share once, in
+  an album or not. Unlike the app, which sets only shared albums apart, it
+  sets every album apart, in a shared ledger too.
 - **A trip's breakdown by person**: once a bill in the selected trip is
   split, its By category card has chips (Everyone, Me, then each name on its
   split bills) that count each entry at that person's share, as the app's
@@ -5414,7 +5421,7 @@ app's `services/webDashboardLink.ts`, `webDashboardCrypto.ts`,
   a split edit, a settle, a change of its day or title, a delete of one, taking
   one out of its album, adding any entry to a shared album, and deleting a
   shared album (`invalid`), which covers a
-  page loaded before this and a shared album with no bills yet. The group's own
+  page loaded before the last sync and a shared album with no bills yet. The group's own
   tables (`album_members`, `album_expenses`, `album_settlements`,
   `album_groups`) are not in
   what the phone sends. In the lists (`TxList`) such a row has a **Shared
