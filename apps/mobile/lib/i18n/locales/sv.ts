@@ -1577,9 +1577,21 @@ const sv = {
         q: 'Behöver jag Pro för att logga in?',
         a: 'Nej. Att logga in, dela album och gå med i delade liggare är gratis. Pro är för att synka dina egna data och dela en liggare.',
       },
-      sign_out: {
-        q: 'Hur loggar jag ut?',
-        a: 'Tryck på Logga ut på ditt profilkort i Inställningar. Dina data stannar på telefonen.',
+      shared_pro: {
+        q: 'Behöver en delad kassabok Pro?',
+        a: 'Bara en person i den behöver Pro, ägaren eller vilken medlem som helst. Om ingen i den har Pro pausas den för alla tills någon har det. Inget raderas.',
+      },
+      shared_free_limits: {
+        q: 'Kan jag lägga till poster i en delad kassabok utan Pro?',
+        a: 'Ja, även när den har fler än 6 konton. Gratisplanens andra gränser gäller fortfarande, som att lägga till konton eller kategorier utöver gränsen. Be kassabokens ägare att göra de ändringarna.',
+      },
+      family_pro: {
+        q: 'Kan min familj använda min Pro?',
+        a: 'Dela en kassabok med dem: personer du bjuder in behöver inte Pro. Om du loggade in på ditt konto på deras telefon skulle de se all din ekonomidata.',
+      },
+      sign_out_delete: {
+        q: 'Vad händer om jag loggar ut eller raderar mitt konto?',
+        a: 'När du loggar ut stannar din data på den här telefonen, och kassaböcker som andra har delat med dig försvinner från den tills du loggar in igen. När du raderar ditt konto raderas molnkopian. Kassaböcker du delar försvinner från alla andras telefoner, och du behåller dem.',
       },
     },
     stat_days: 'Dagar spårade',
@@ -2896,17 +2908,17 @@ const sv = {
     faq: {
       title: 'Frågor',
       items: {
-        sign_in_without_pro: {
-          q: 'Behöver jag Pro för att logga in?',
-          a: 'Nej. Alla kan logga in. Att synka din egen data kräver Pro, men kassaböcker som andra delar med dig synkas utan.',
+        needs_pro: {
+          q: 'Kräver Cloud Sync Pro?',
+          a: 'Ja, att synka dina egna data kräver Pro. Album och liggare som andra delar med dig synkas utan det.',
         },
         pro_other_phone: {
           q: 'Jag har Pro på en annan telefon. Varför inte på den här?',
-          a: 'Logga in på Cloud Sync med samma konto på båda telefonerna. När den här telefonen har synkat har den också Pro, så länge en telefon på kontot har Pro, även en du inte använder längre. Kontots Pro gäller för upp till 5 telefoner.',
+          a: 'Logga in med samma konto på båda telefonerna och slå på Cloud Sync. När den här telefonen har synkat har den också Pro så länge en telefon på kontot har Pro, även en du inte längre använder. Kontots Pro räcker till upp till 5 telefoner.',
         },
         restore_moved_pro: {
           q: 'Jag återställde mitt köp och min andra telefon förlorade Pro.',
-          a: 'En återställning via butiken flyttar köpet till telefonen som återställde det. Håll båda telefonerna inloggade på Cloud Sync så behåller båda Pro.',
+          a: 'En återställning i butiken flyttar köpet till telefonen som återställde det. Låt Cloud Sync vara på på båda telefonerna så behåller båda Pro.',
         },
         pro_ends: {
           q: 'Vad händer när Pro går ut?',
@@ -2915,22 +2927,6 @@ const sv = {
         how_fast: {
           q: 'Hur snabbt når ändringar mina andra telefoner?',
           a: 'Inom några sekunder medan appen är öppen på båda. Annars nästa gång appen öppnas. Ändringar gjorda offline laddas upp så snart du är online igen.',
-        },
-        shared_pro: {
-          q: 'Behöver en delad kassabok Pro?',
-          a: 'Bara en person i den behöver Pro, ägaren eller vilken medlem som helst. Om ingen i den har Pro pausas den för alla tills någon har det. Inget raderas.',
-        },
-        shared_free_limits: {
-          q: 'Kan jag lägga till poster i en delad kassabok utan Pro?',
-          a: 'Ja, även när den har fler än 6 konton. Gratisplanens andra gränser gäller fortfarande, som att lägga till konton eller kategorier utöver gränsen. Be kassabokens ägare att göra de ändringarna.',
-        },
-        family_pro: {
-          q: 'Kan min familj använda min Pro?',
-          a: 'Dela en kassabok med dem: personer du bjuder in behöver inte Pro. Om du loggade in på ditt konto på deras telefon skulle de se all din ekonomidata.',
-        },
-        sign_out_delete: {
-          q: 'Vad händer om jag loggar ut eller raderar mitt konto?',
-          a: 'När du loggar ut stannar din data på den här telefonen, och kassaböcker som andra har delat med dig försvinner från den tills du loggar in igen. När du raderar ditt konto raderas molnkopian. Kassaböcker du delar försvinner från alla andras telefoner, och du behåller dem.',
         },
       },
     },

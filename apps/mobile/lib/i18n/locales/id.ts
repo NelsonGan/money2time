@@ -1584,9 +1584,21 @@ const id = {
         q: 'Apakah perlu Pro untuk masuk?',
         a: 'Tidak. Masuk, berbagi album, dan bergabung ke buku bersama itu gratis. Pro untuk menyinkronkan datamu sendiri dan membagikan buku.',
       },
-      sign_out: {
-        q: 'Bagaimana cara keluar?',
-        a: 'Ketuk Keluar di kartu profilmu di Pengaturan. Datamu tetap di ponsel ini.',
+      shared_pro: {
+        q: 'Apakah buku bersama perlu Pro?',
+        a: 'Hanya satu orang di dalamnya yang perlu Pro, pemilik atau anggota mana pun. Jika tidak ada yang punya Pro, buku itu dijeda untuk semua orang sampai ada yang punya. Tidak ada yang dihapus.',
+      },
+      shared_free_limits: {
+        q: 'Bisakah saya menambah transaksi di buku bersama tanpa Pro?',
+        a: 'Bisa, meskipun buku itu punya lebih dari 6 akun. Batas paket gratis lainnya tetap berlaku, seperti menambah akun atau kategori melebihi batas. Minta pemilik buku untuk melakukan perubahan itu.',
+      },
+      family_pro: {
+        q: 'Bisakah keluargaku memakai Pro-ku?',
+        a: 'Bagikan buku dengan mereka: orang yang kamu undang tidak perlu Pro. Masuk ke akunmu di ponsel mereka akan memperlihatkan semua data keuanganmu kepada mereka.',
+      },
+      sign_out_delete: {
+        q: 'Bagaimana jika aku keluar atau menghapus akun?',
+        a: 'Saat keluar, datamu tetap di ponsel ini, dan buku yang dibagikan orang lain kepadamu hilang dari ponsel ini sampai kamu masuk lagi. Menghapus akun akan menghapus salinan cloud. Buku yang kamu bagikan hilang dari ponsel semua orang lain, dan kamu tetap menyimpannya.',
       },
     },
     stat_days: 'Hari melacak',
@@ -2908,17 +2920,17 @@ const id = {
     faq: {
       title: 'Pertanyaan',
       items: {
-        sign_in_without_pro: {
-          q: 'Apakah aku perlu Pro untuk masuk?',
-          a: 'Tidak. Siapa pun bisa masuk. Menyinkronkan datamu sendiri butuh Pro, tetapi buku yang dibagikan orang lain kepadamu tetap tersinkron tanpa Pro.',
+        needs_pro: {
+          q: 'Apakah Cloud Sync butuh Pro?',
+          a: 'Ya, menyinkronkan datamu sendiri butuh Pro. Album dan buku yang dibagikan orang lain tetap sinkron tanpa Pro.',
         },
         pro_other_phone: {
           q: 'Aku punya Pro di ponsel lain. Kenapa tidak di ponsel ini?',
-          a: 'Masuk ke Cloud Sync dengan akun yang sama di kedua ponsel. Setelah ponsel ini tersinkron, ponsel ini juga Pro, selama ada ponsel di akun itu yang punya Pro, termasuk ponsel yang sudah tidak kamu pakai. Pro di akunmu berlaku hingga 5 ponsel.',
+          a: 'Masuk dengan akun yang sama di kedua ponsel dan nyalakan Cloud Sync. Setelah ponsel ini sinkron, ponsel ini juga Pro selama ada ponsel di akun itu yang Pro, bahkan yang sudah tidak kamu pakai. Pro akunmu berlaku untuk hingga 5 ponsel.',
         },
         restore_moved_pro: {
           q: 'Aku memulihkan pembelian dan ponselku yang lain kehilangan Pro.',
-          a: 'Pemulihan dari toko memindahkan pembelian ke ponsel yang memulihkannya. Biarkan kedua ponsel tetap masuk ke Cloud Sync, dan keduanya tetap Pro.',
+          a: 'Pemulihan di toko memindahkan pembelian ke ponsel yang memulihkannya. Biarkan Cloud Sync menyala di kedua ponsel dan keduanya tetap Pro.',
         },
         pro_ends: {
           q: 'Apa yang terjadi saat Pro berakhir?',
@@ -2927,22 +2939,6 @@ const id = {
         how_fast: {
           q: 'Seberapa cepat perubahan sampai ke ponselku yang lain?',
           a: 'Dalam beberapa detik selama aplikasi terbuka di keduanya. Jika tidak, saat aplikasi dibuka berikutnya. Perubahan saat offline terunggah begitu kamu online lagi.',
-        },
-        shared_pro: {
-          q: 'Apakah buku bersama perlu Pro?',
-          a: 'Hanya satu orang di dalamnya yang perlu Pro, pemilik atau anggota mana pun. Jika tidak ada yang punya Pro, buku itu dijeda untuk semua orang sampai ada yang punya. Tidak ada yang dihapus.',
-        },
-        shared_free_limits: {
-          q: 'Bisakah saya menambah transaksi di buku bersama tanpa Pro?',
-          a: 'Bisa, meskipun buku itu punya lebih dari 6 akun. Batas paket gratis lainnya tetap berlaku, seperti menambah akun atau kategori melebihi batas. Minta pemilik buku untuk melakukan perubahan itu.',
-        },
-        family_pro: {
-          q: 'Bisakah keluargaku memakai Pro-ku?',
-          a: 'Bagikan buku dengan mereka: orang yang kamu undang tidak perlu Pro. Masuk ke akunmu di ponsel mereka akan memperlihatkan semua data keuanganmu kepada mereka.',
-        },
-        sign_out_delete: {
-          q: 'Bagaimana jika aku keluar atau menghapus akun?',
-          a: 'Saat keluar, datamu tetap di ponsel ini, dan buku yang dibagikan orang lain kepadamu hilang dari ponsel ini sampai kamu masuk lagi. Menghapus akun akan menghapus salinan cloud. Buku yang kamu bagikan hilang dari ponsel semua orang lain, dan kamu tetap menyimpannya.',
         },
       },
     },

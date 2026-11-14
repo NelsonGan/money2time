@@ -1586,9 +1586,21 @@ const tr = {
         q: 'Giriş yapmak için Pro gerekir mi?',
         a: 'Hayır. Giriş yapmak, albüm paylaşmak ve paylaşılan defterlere katılmak ücretsizdir. Pro, kendi verilerini eşitlemek ve defter paylaşmak içindir.',
       },
-      sign_out: {
-        q: 'Nasıl çıkış yaparım?',
-        a: "Ayarlar'daki profil kartında Çıkış yap'a dokun. Verilerin bu telefonda kalır.",
+      shared_pro: {
+        q: 'Paylaşılan bir defter için Pro gerekir mi?',
+        a: "İçindeki tek bir kişinin Pro'su olması yeter: sahibi ya da herhangi bir üye. İçinde kimsenin Pro'su yoksa biri Pro alana kadar herkes için duraklar. Hiçbir şey silinmez.",
+      },
+      shared_free_limits: {
+        q: 'Pro olmadan paylaşılan bir deftere kayıt ekleyebilir miyim?',
+        a: "Evet, 6'dan fazla hesabı olsa bile. Ücretsiz planın diğer sınırları orada da geçerli, örneğin sınırın üzerinde hesap veya kategori eklemek. Bu değişiklikleri defterin sahibinden isteyin.",
+      },
+      family_pro: {
+        q: "Ailem benim Pro'mu kullanabilir mi?",
+        a: "Onlarla bir defter paylaş: davet ettiğin kişilerin Pro'ya ihtiyacı yok. Onların telefonunda kendi hesabına giriş yaparsan tüm para verilerini görürler.",
+      },
+      sign_out_delete: {
+        q: 'Çıkış yaparsam ya da hesabımı silersem ne olur?',
+        a: 'Çıkış yaptığında verilerin bu telefonda kalır, başkalarının seninle paylaştığı defterler ise tekrar giriş yapana kadar bu telefondan kalkar. Hesabını silmek bulut kopyasını siler. Paylaştığın defterler diğer herkesin telefonundan kalkar, sende kalır.',
       },
     },
     stat_days: 'Takip günü',
@@ -2903,17 +2915,17 @@ const tr = {
     faq: {
       title: 'Sorular',
       items: {
-        sign_in_without_pro: {
-          q: 'Giriş yapmak için Pro gerekir mi?',
-          a: 'Hayır. Herkes giriş yapabilir. Kendi verilerini senkronize etmek Pro gerektirir, ama başkalarının seninle paylaştığı defterler Pro olmadan da senkronize olur.',
+        needs_pro: {
+          q: 'Cloud Sync Pro gerektirir mi?',
+          a: 'Evet, kendi verilerini eşitlemek Pro gerektirir. Başkalarının seninle paylaştığı albümler ve defterler Pro olmadan da eşitlenir.',
         },
         pro_other_phone: {
           q: 'Başka bir telefonda Pro var. Neden bu telefonda yok?',
-          a: "İki telefonda da aynı hesapla Cloud Sync'e giriş yap. Bu telefon senkronize olunca, hesaptaki bir telefonda Pro olduğu sürece bu telefon da Pro olur, artık kullanmadığın bir telefon olsa bile. Hesabının Pro'su en fazla 5 telefona ulaşır.",
+          a: "İki telefonda da aynı hesapla giriş yap ve Cloud Sync'i aç. Bu telefon bir kez eşitlendiğinde, hesaptaki bir telefonda Pro olduğu sürece bu da Pro olur, artık kullanmadığın bir telefon olsa bile. Hesabının Pro'su 5 telefona kadar geçerlidir.",
         },
         restore_moved_pro: {
           q: "Satın alımımı geri yükledim ve diğer telefonum Pro'yu kaybetti.",
-          a: "Mağazadan geri yükleme, satın alımı geri yükleyen telefona taşır. İki telefonda da Cloud Sync'te oturumu açık tut, ikisi de Pro kalır.",
+          a: "Mağazadan geri yükleme, satın alımı geri yükleyen telefona taşır. İki telefonda da Cloud Sync'i açık tut, ikisi de Pro kalır.",
         },
         pro_ends: {
           q: 'Pro bitince ne olur?',
@@ -2922,22 +2934,6 @@ const tr = {
         how_fast: {
           q: 'Değişiklikler diğer telefonlarıma ne kadar hızlı ulaşır?',
           a: 'Uygulama ikisinde de açıkken birkaç saniye içinde. Değilse uygulama bir sonraki açıldığında. Çevrimdışıyken yapılan değişiklikler tekrar çevrimiçi olunca yüklenir.',
-        },
-        shared_pro: {
-          q: 'Paylaşılan bir defter için Pro gerekir mi?',
-          a: "İçindeki tek bir kişinin Pro'su olması yeter: sahibi ya da herhangi bir üye. İçinde kimsenin Pro'su yoksa biri Pro alana kadar herkes için duraklar. Hiçbir şey silinmez.",
-        },
-        shared_free_limits: {
-          q: 'Pro olmadan paylaşılan bir deftere kayıt ekleyebilir miyim?',
-          a: "Evet, 6'dan fazla hesabı olsa bile. Ücretsiz planın diğer sınırları orada da geçerli, örneğin sınırın üzerinde hesap veya kategori eklemek. Bu değişiklikleri defterin sahibinden isteyin.",
-        },
-        family_pro: {
-          q: "Ailem benim Pro'mu kullanabilir mi?",
-          a: "Onlarla bir defter paylaş: davet ettiğin kişilerin Pro'ya ihtiyacı yok. Onların telefonunda kendi hesabına giriş yaparsan tüm para verilerini görürler.",
-        },
-        sign_out_delete: {
-          q: 'Çıkış yaparsam ya da hesabımı silersem ne olur?',
-          a: 'Çıkış yaptığında verilerin bu telefonda kalır, başkalarının seninle paylaştığı defterler ise tekrar giriş yapana kadar bu telefondan kalkar. Hesabını silmek bulut kopyasını siler. Paylaştığın defterler diğer herkesin telefonundan kalkar, sende kalır.',
         },
       },
     },

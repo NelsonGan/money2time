@@ -1581,9 +1581,21 @@ const it = {
         q: 'Serve Pro per accedere?',
         a: 'No. Accedere, condividere album e unirti ai registri condivisi è gratis. Pro serve a sincronizzare i tuoi dati e condividere un registro.',
       },
-      sign_out: {
-        q: 'Come esco dall’account?',
-        a: 'Tocca Esci sulla scheda del profilo in Impostazioni. I tuoi dati restano su questo telefono.',
+      shared_pro: {
+        q: 'Un registro condiviso richiede Pro?',
+        a: 'Basta che una sola persona del registro abbia Pro, il proprietario o qualsiasi membro. Se nessuno ha Pro, va in pausa per tutti finché qualcuno non lo ha. Non viene eliminato nulla.',
+      },
+      shared_free_limits: {
+        q: 'Posso aggiungere movimenti a un registro condiviso senza Pro?',
+        a: 'Sì, anche se ha più di 6 conti. Gli altri limiti del piano gratuito restano validi, come aggiungere conti o categorie oltre il limite. Chiedi al proprietario del registro di fare queste modifiche.',
+      },
+      family_pro: {
+        q: 'La mia famiglia può usare il mio Pro?',
+        a: 'Condividi un registro con loro: le persone che inviti non hanno bisogno di Pro. Accedere al tuo account sul loro telefono mostrerebbe loro tutti i tuoi dati finanziari.',
+      },
+      sign_out_delete: {
+        q: 'Cosa succede se esco o elimino l’account?',
+        a: 'Se esci, i tuoi dati restano su questo telefono e i registri che altri hanno condiviso con te spariscono finché non accedi di nuovo. Eliminare l’account cancella la copia cloud. I registri che condividi spariscono dai telefoni di tutti gli altri, e tu li tieni.',
       },
     },
     stat_days: 'Giorni di tracciamento',
@@ -2909,17 +2921,17 @@ const it = {
     faq: {
       title: 'Domande',
       items: {
-        sign_in_without_pro: {
-          q: 'Serve Pro per accedere?',
-          a: 'No. Chiunque può accedere. Sincronizzare i tuoi dati richiede Pro, ma i registri che altri condividono con te si sincronizzano anche senza.',
+        needs_pro: {
+          q: 'Cloud Sync richiede Pro?',
+          a: 'Sì, sincronizzare i tuoi dati richiede Pro. Album e registri che altri condividono con te si sincronizzano anche senza.',
         },
         pro_other_phone: {
           q: 'Ho Pro su un altro telefono. Perché non su questo?',
-          a: 'Accedi a Cloud Sync con lo stesso account su entrambi i telefoni. Quando questo telefono si sarà sincronizzato, avrà Pro anche lui, finché un telefono dell’account ha Pro, anche uno che non usi più. Il Pro del tuo account arriva fino a 5 telefoni.',
+          a: 'Accedi con lo stesso account su entrambi i telefoni e attiva Cloud Sync. Quando questo telefono si è sincronizzato, è Pro anche lui finché un telefono dell’account ha Pro, anche uno che non usi più. Il Pro del tuo account copre fino a 5 telefoni.',
         },
         restore_moved_pro: {
           q: 'Ho ripristinato l’acquisto e l’altro telefono ha perso Pro.',
-          a: 'Un ripristino dallo store sposta l’acquisto sul telefono che l’ha ripristinato. Tieni entrambi i telefoni collegati a Cloud Sync ed entrambi restano Pro.',
+          a: 'Un ripristino dallo store sposta l’acquisto sul telefono che l’ha ripristinato. Tieni Cloud Sync attivo su entrambi i telefoni e restano Pro tutti e due.',
         },
         pro_ends: {
           q: 'Cosa succede quando Pro scade?',
@@ -2928,22 +2940,6 @@ const it = {
         how_fast: {
           q: 'Quanto ci mettono le modifiche ad arrivare sugli altri telefoni?',
           a: 'Pochi secondi se l’app è aperta su entrambi. Altrimenti alla successiva apertura dell’app. Le modifiche fatte offline vengono caricate appena torni online.',
-        },
-        shared_pro: {
-          q: 'Un registro condiviso richiede Pro?',
-          a: 'Basta che una sola persona del registro abbia Pro, il proprietario o qualsiasi membro. Se nessuno ha Pro, va in pausa per tutti finché qualcuno non lo ha. Non viene eliminato nulla.',
-        },
-        shared_free_limits: {
-          q: 'Posso aggiungere movimenti a un registro condiviso senza Pro?',
-          a: 'Sì, anche se ha più di 6 conti. Gli altri limiti del piano gratuito restano validi, come aggiungere conti o categorie oltre il limite. Chiedi al proprietario del registro di fare queste modifiche.',
-        },
-        family_pro: {
-          q: 'La mia famiglia può usare il mio Pro?',
-          a: 'Condividi un registro con loro: le persone che inviti non hanno bisogno di Pro. Accedere al tuo account sul loro telefono mostrerebbe loro tutti i tuoi dati finanziari.',
-        },
-        sign_out_delete: {
-          q: 'Cosa succede se esco o elimino l’account?',
-          a: 'Se esci, i tuoi dati restano su questo telefono e i registri che altri hanno condiviso con te spariscono finché non accedi di nuovo. Eliminare l’account cancella la copia cloud. I registri che condividi spariscono dai telefoni di tutti gli altri, e tu li tieni.',
         },
       },
     },

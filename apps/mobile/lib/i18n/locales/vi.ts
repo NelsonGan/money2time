@@ -1565,9 +1565,21 @@ const vi = {
         q: 'Có cần Pro để đăng nhập không?',
         a: 'Không. Đăng nhập, chia sẻ album và tham gia sổ dùng chung đều miễn phí. Pro dùng để đồng bộ dữ liệu của bạn và chia sẻ sổ.',
       },
-      sign_out: {
-        q: 'Làm sao để đăng xuất?',
-        a: 'Nhấn Đăng xuất trên thẻ hồ sơ trong Cài đặt. Dữ liệu của bạn vẫn ở trên điện thoại này.',
+      shared_pro: {
+        q: 'Sổ được chia sẻ có cần Pro không?',
+        a: 'Chỉ cần một người trong sổ có Pro, là chủ sổ hoặc bất kỳ thành viên nào. Nếu không ai trong sổ có Pro, sổ sẽ tạm dừng với mọi người cho đến khi có người có Pro. Không có gì bị xóa.',
+      },
+      shared_free_limits: {
+        q: 'Tôi có thể thêm giao dịch vào sổ chung khi không có Pro không?',
+        a: 'Có, kể cả khi sổ có hơn 6 tài khoản. Các giới hạn khác của gói miễn phí vẫn áp dụng, như thêm tài khoản hoặc danh mục vượt giới hạn. Hãy nhờ chủ sổ thực hiện những thay đổi đó.',
+      },
+      family_pro: {
+        q: 'Gia đình tôi có dùng được Pro của tôi không?',
+        a: 'Hãy chia sẻ một sổ với họ: người bạn mời không cần Pro. Đăng nhập tài khoản của bạn trên điện thoại của họ sẽ cho họ thấy toàn bộ dữ liệu tiền bạc của bạn.',
+      },
+      sign_out_delete: {
+        q: 'Nếu tôi đăng xuất hoặc xóa tài khoản thì sao?',
+        a: 'Khi đăng xuất, dữ liệu của bạn vẫn ở trên điện thoại này, còn các sổ người khác chia sẻ với bạn sẽ rời khỏi điện thoại cho đến khi bạn đăng nhập lại. Xóa tài khoản sẽ xóa bản sao đám mây. Các sổ bạn chia sẻ sẽ rời khỏi điện thoại của mọi người khác, và bạn vẫn giữ chúng.',
       },
     },
     stat_days: 'Ngày theo dõi',
@@ -2875,17 +2887,17 @@ const vi = {
     faq: {
       title: 'Câu hỏi',
       items: {
-        sign_in_without_pro: {
-          q: 'Tôi có cần Pro để đăng nhập không?',
-          a: 'Không. Ai cũng có thể đăng nhập. Đồng bộ dữ liệu của riêng bạn cần Pro, nhưng các sổ người khác chia sẻ với bạn vẫn đồng bộ mà không cần Pro.',
+        needs_pro: {
+          q: 'Cloud Sync có cần Pro không?',
+          a: 'Có, đồng bộ dữ liệu của riêng bạn cần Pro. Album và sổ người khác chia sẻ với bạn vẫn đồng bộ mà không cần Pro.',
         },
         pro_other_phone: {
           q: 'Tôi có Pro trên điện thoại khác. Sao điện thoại này lại không có?',
-          a: 'Đăng nhập Cloud Sync bằng cùng một tài khoản trên cả hai điện thoại. Khi điện thoại này đã đồng bộ, nó cũng có Pro, miễn là có một điện thoại trong tài khoản có Pro, kể cả điện thoại bạn không còn dùng. Pro của tài khoản bạn áp dụng cho tối đa 5 điện thoại.',
+          a: 'Đăng nhập cùng một tài khoản trên cả hai điện thoại và bật Cloud Sync. Khi điện thoại này đã đồng bộ, nó cũng có Pro miễn là có một điện thoại trong tài khoản có Pro, kể cả máy bạn không còn dùng. Pro của tài khoản dùng được trên tối đa 5 điện thoại.',
         },
         restore_moved_pro: {
           q: 'Tôi đã khôi phục giao dịch mua và điện thoại kia bị mất Pro.',
-          a: 'Khôi phục qua cửa hàng sẽ chuyển giao dịch mua sang điện thoại đã khôi phục. Hãy giữ cả hai điện thoại đăng nhập Cloud Sync và cả hai sẽ vẫn có Pro.',
+          a: 'Khôi phục từ cửa hàng sẽ chuyển giao dịch mua sang điện thoại đã khôi phục. Giữ Cloud Sync bật trên cả hai điện thoại thì cả hai vẫn có Pro.',
         },
         pro_ends: {
           q: 'Chuyện gì xảy ra khi Pro hết hạn?',
@@ -2894,22 +2906,6 @@ const vi = {
         how_fast: {
           q: 'Thay đổi đến các điện thoại khác của tôi nhanh thế nào?',
           a: 'Trong vài giây khi ứng dụng đang mở trên cả hai. Nếu không thì vào lần mở ứng dụng tiếp theo. Các thay đổi khi ngoại tuyến sẽ tải lên ngay khi bạn trực tuyến trở lại.',
-        },
-        shared_pro: {
-          q: 'Sổ được chia sẻ có cần Pro không?',
-          a: 'Chỉ cần một người trong sổ có Pro, là chủ sổ hoặc bất kỳ thành viên nào. Nếu không ai trong sổ có Pro, sổ sẽ tạm dừng với mọi người cho đến khi có người có Pro. Không có gì bị xóa.',
-        },
-        shared_free_limits: {
-          q: 'Tôi có thể thêm giao dịch vào sổ chung khi không có Pro không?',
-          a: 'Có, kể cả khi sổ có hơn 6 tài khoản. Các giới hạn khác của gói miễn phí vẫn áp dụng, như thêm tài khoản hoặc danh mục vượt giới hạn. Hãy nhờ chủ sổ thực hiện những thay đổi đó.',
-        },
-        family_pro: {
-          q: 'Gia đình tôi có dùng được Pro của tôi không?',
-          a: 'Hãy chia sẻ một sổ với họ: người bạn mời không cần Pro. Đăng nhập tài khoản của bạn trên điện thoại của họ sẽ cho họ thấy toàn bộ dữ liệu tiền bạc của bạn.',
-        },
-        sign_out_delete: {
-          q: 'Nếu tôi đăng xuất hoặc xóa tài khoản thì sao?',
-          a: 'Khi đăng xuất, dữ liệu của bạn vẫn ở trên điện thoại này, còn các sổ người khác chia sẻ với bạn sẽ rời khỏi điện thoại cho đến khi bạn đăng nhập lại. Xóa tài khoản sẽ xóa bản sao đám mây. Các sổ bạn chia sẻ sẽ rời khỏi điện thoại của mọi người khác, và bạn vẫn giữ chúng.',
         },
       },
     },

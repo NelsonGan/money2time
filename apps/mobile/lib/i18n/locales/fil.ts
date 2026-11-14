@@ -1600,9 +1600,21 @@ const fil = {
         q: 'Kailangan ko ba ng Pro para mag-sign in?',
         a: 'Hindi. Libre ang pag-sign in, pagbabahagi ng album at pagsali sa mga shared ledger. Para sa pag-sync ng sarili mong data at pagbabahagi ng ledger ang Pro.',
       },
-      sign_out: {
-        q: 'Paano mag-sign out?',
-        a: 'I-tap ang Mag-sign out sa profile card mo sa Settings. Mananatili ang data mo sa phone na ito.',
+      shared_pro: {
+        q: 'Kailangan ba ng Pro ang shared na ledger?',
+        a: 'Isang tao lang dito ang kailangang may Pro, ang may-ari o kahit sinong miyembro. Kapag walang may Pro dito, mapo-pause ito para sa lahat hanggang may magka-Pro. Walang mabubura.',
+      },
+      shared_free_limits: {
+        q: 'Puwede ba akong magdagdag ng entry sa shared ledger nang walang Pro?',
+        a: 'Oo, kahit may higit sa 6 na account ito. Nalalapat pa rin ang ibang limit ng libreng plan, gaya ng pagdagdag ng account o category lampas sa limit. Hilingin sa may-ari ng ledger na gawin ang mga pagbabagong iyon.',
+      },
+      family_pro: {
+        q: 'Puwede bang gamitin ng pamilya ko ang Pro ko?',
+        a: 'Mag-share ng ledger sa kanila: hindi kailangan ng Pro ng mga inimbita mo. Kapag nag-sign in ka sa account mo sa telepono nila, makikita nila ang lahat ng data ng pera mo.',
+      },
+      sign_out_delete: {
+        q: 'Paano kung mag-sign out ako o burahin ang account ko?',
+        a: 'Kapag nag-sign out ka, mananatili ang data mo sa teleponong ito, at mawawala rito ang mga ledger na shine-share sa iyo ng iba hanggang mag-sign in ka ulit. Kapag binura mo ang account mo, mabubura ang cloud copy. Mawawala ang mga ledger na shine-share mo sa mga telepono ng iba, at mananatili ang mga ito sa iyo.',
       },
     },
     stat_days: 'Araw na sinusubaybayan',
@@ -2935,17 +2947,17 @@ const fil = {
     faq: {
       title: 'Mga tanong',
       items: {
-        sign_in_without_pro: {
-          q: 'Kailangan ko ba ng Pro para mag-sign in?',
-          a: 'Hindi. Kahit sino ay puwedeng mag-sign in. Kailangan ng Pro para i-sync ang sarili mong data, pero nagsi-sync kahit wala nito ang mga ledger na shine-share sa iyo ng iba.',
+        needs_pro: {
+          q: 'Kailangan ba ng Pro ang Cloud Sync?',
+          a: 'Oo, kailangan ng Pro para i-sync ang sarili mong data. Nagsi-sync nang wala nito ang mga album at ledger na ibinabahagi sa iyo.',
         },
         pro_other_phone: {
           q: 'May Pro ako sa ibang telepono. Bakit wala sa teleponong ito?',
-          a: 'Mag-sign in sa Cloud Sync gamit ang parehong account sa dalawang telepono. Kapag nakapag-sync na ang teleponong ito, Pro na rin ito, hangga’t may teleponong may Pro sa account, kahit isang hindi mo na ginagamit. Hanggang 5 telepono ang naaabot ng Pro ng account mo.',
+          a: 'Mag-sign in gamit ang parehong account sa dalawang phone at i-on ang Cloud Sync. Kapag nakapag-sync na ang phone na ito, Pro na rin ito habang may phone sa account na may Pro, kahit hindi mo na ginagamit. Umaabot sa hanggang 5 phone ang Pro ng account mo.',
         },
         restore_moved_pro: {
           q: 'Ni-restore ko ang purchase ko at nawalan ng Pro ang isa ko pang telepono.',
-          a: 'Inililipat ng store restore ang purchase sa teleponong nag-restore nito. Panatilihing naka-sign in sa Cloud Sync ang dalawang telepono at mananatiling Pro ang dalawa.',
+          a: 'Inililipat ng store restore ang binili sa phone na nag-restore nito. Panatilihing naka-on ang Cloud Sync sa dalawang phone at pareho silang mananatiling Pro.',
         },
         pro_ends: {
           q: 'Ano ang mangyayari kapag natapos ang Pro?',
@@ -2954,22 +2966,6 @@ const fil = {
         how_fast: {
           q: 'Gaano kabilis makarating ang mga pagbabago sa iba kong telepono?',
           a: 'Sa loob ng ilang segundo habang bukas ang app sa dalawa. Kung hindi, sa susunod na pagbukas ng app. Maa-upload ang mga pagbabagong ginawa offline kapag online ka na ulit.',
-        },
-        shared_pro: {
-          q: 'Kailangan ba ng Pro ang shared na ledger?',
-          a: 'Isang tao lang dito ang kailangang may Pro, ang may-ari o kahit sinong miyembro. Kapag walang may Pro dito, mapo-pause ito para sa lahat hanggang may magka-Pro. Walang mabubura.',
-        },
-        shared_free_limits: {
-          q: 'Puwede ba akong magdagdag ng entry sa shared ledger nang walang Pro?',
-          a: 'Oo, kahit may higit sa 6 na account ito. Nalalapat pa rin ang ibang limit ng libreng plan, gaya ng pagdagdag ng account o category lampas sa limit. Hilingin sa may-ari ng ledger na gawin ang mga pagbabagong iyon.',
-        },
-        family_pro: {
-          q: 'Puwede bang gamitin ng pamilya ko ang Pro ko?',
-          a: 'Mag-share ng ledger sa kanila: hindi kailangan ng Pro ng mga inimbita mo. Kapag nag-sign in ka sa account mo sa telepono nila, makikita nila ang lahat ng data ng pera mo.',
-        },
-        sign_out_delete: {
-          q: 'Paano kung mag-sign out ako o burahin ang account ko?',
-          a: 'Kapag nag-sign out ka, mananatili ang data mo sa teleponong ito, at mawawala rito ang mga ledger na shine-share sa iyo ng iba hanggang mag-sign in ka ulit. Kapag binura mo ang account mo, mabubura ang cloud copy. Mawawala ang mga ledger na shine-share mo sa mga telepono ng iba, at mananatili ang mga ito sa iyo.',
         },
       },
     },

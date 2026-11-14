@@ -1592,9 +1592,21 @@ const fr = {
         q: 'Faut-il Pro pour se connecter ?',
         a: 'Non. Se connecter, partager des albums et rejoindre des carnets partagés est gratuit. Pro sert à synchroniser vos propres données et à partager un carnet.',
       },
-      sign_out: {
-        q: 'Comment me déconnecter ?',
-        a: 'Touchez Se déconnecter sur votre carte de profil dans Réglages. Vos données restent sur ce téléphone.',
+      shared_pro: {
+        q: 'Un carnet partagé nécessite-t-il Pro ?',
+        a: 'Une seule personne du carnet doit avoir Pro, le propriétaire ou n’importe quel membre. Si personne n’a Pro, il est en pause pour tout le monde jusqu’à ce que quelqu’un l’ait. Rien n’est supprimé.',
+      },
+      shared_free_limits: {
+        q: 'Puis-je ajouter des opérations à un registre partagé sans Pro ?',
+        a: "Oui, même s'il compte plus de 6 comptes. Les autres limites du forfait gratuit s'y appliquent toujours, par exemple pour ajouter des comptes ou des catégories au-delà de la limite. Demandez au propriétaire du registre de faire ces changements.",
+      },
+      family_pro: {
+        q: 'Ma famille peut-elle utiliser mon Pro ?',
+        a: 'Partagez un carnet avec eux : les personnes que vous invitez n’ont pas besoin de Pro. Vous connecter à votre compte sur leur téléphone leur montrerait toutes vos données financières.',
+      },
+      sign_out_delete: {
+        q: 'Et si je me déconnecte ou supprime mon compte ?',
+        a: 'En vous déconnectant, vos données restent sur ce téléphone, et les carnets que d’autres ont partagés avec vous en disparaissent jusqu’à votre prochaine connexion. Supprimer votre compte efface la copie cloud. Les carnets que vous partagez disparaissent des téléphones des autres, et vous les gardez.',
       },
     },
     stat_days: 'Jours de suivi',
@@ -2931,17 +2943,17 @@ const fr = {
     faq: {
       title: 'Questions',
       items: {
-        sign_in_without_pro: {
-          q: 'Faut-il Pro pour se connecter ?',
-          a: 'Non. Tout le monde peut se connecter. Synchroniser vos propres données nécessite Pro, mais les carnets que d’autres partagent avec vous se synchronisent sans.',
+        needs_pro: {
+          q: 'Cloud Sync nécessite-t-il Pro ?',
+          a: 'Oui, synchroniser vos propres données nécessite Pro. Les albums et carnets que d’autres partagent avec vous se synchronisent sans.',
         },
         pro_other_phone: {
           q: 'J’ai Pro sur un autre téléphone. Pourquoi pas sur celui-ci ?',
-          a: 'Connectez-vous à Cloud Sync avec le même compte sur les deux téléphones. Une fois ce téléphone synchronisé, il a Pro lui aussi, tant qu’un téléphone du compte a Pro, même un que vous n’utilisez plus. Le Pro de votre compte couvre jusqu’à 5 téléphones.',
+          a: 'Connectez-vous avec le même compte sur les deux téléphones et activez Cloud Sync. Une fois ce téléphone synchronisé, il est Pro aussi, tant qu’un téléphone du compte a Pro, même un que vous n’utilisez plus. Le Pro de votre compte couvre jusqu’à 5 téléphones.',
         },
         restore_moved_pro: {
           q: 'J’ai restauré mon achat et mon autre téléphone a perdu Pro.',
-          a: 'Une restauration depuis le store déplace l’achat vers le téléphone qui l’a restauré. Gardez les deux téléphones connectés à Cloud Sync et les deux restent Pro.',
+          a: 'Une restauration dans la boutique déplace l’achat vers le téléphone qui l’a restauré. Gardez Cloud Sync activé sur les deux téléphones et ils restent Pro tous les deux.',
         },
         pro_ends: {
           q: 'Que se passe-t-il quand Pro prend fin ?',
@@ -2950,22 +2962,6 @@ const fr = {
         how_fast: {
           q: 'En combien de temps les modifications arrivent-elles sur mes autres téléphones ?',
           a: 'En quelques secondes si l’app est ouverte sur les deux. Sinon, à la prochaine ouverture de l’app. Les modifications faites hors ligne sont envoyées dès que vous êtes de nouveau en ligne.',
-        },
-        shared_pro: {
-          q: 'Un carnet partagé nécessite-t-il Pro ?',
-          a: 'Une seule personne du carnet doit avoir Pro, le propriétaire ou n’importe quel membre. Si personne n’a Pro, il est en pause pour tout le monde jusqu’à ce que quelqu’un l’ait. Rien n’est supprimé.',
-        },
-        shared_free_limits: {
-          q: 'Puis-je ajouter des opérations à un registre partagé sans Pro ?',
-          a: "Oui, même s'il compte plus de 6 comptes. Les autres limites du forfait gratuit s'y appliquent toujours, par exemple pour ajouter des comptes ou des catégories au-delà de la limite. Demandez au propriétaire du registre de faire ces changements.",
-        },
-        family_pro: {
-          q: 'Ma famille peut-elle utiliser mon Pro ?',
-          a: 'Partagez un carnet avec eux : les personnes que vous invitez n’ont pas besoin de Pro. Vous connecter à votre compte sur leur téléphone leur montrerait toutes vos données financières.',
-        },
-        sign_out_delete: {
-          q: 'Et si je me déconnecte ou supprime mon compte ?',
-          a: 'En vous déconnectant, vos données restent sur ce téléphone, et les carnets que d’autres ont partagés avec vous en disparaissent jusqu’à votre prochaine connexion. Supprimer votre compte efface la copie cloud. Les carnets que vous partagez disparaissent des téléphones des autres, et vous les gardez.',
         },
       },
     },

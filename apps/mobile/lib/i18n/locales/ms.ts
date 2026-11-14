@@ -1586,9 +1586,21 @@ const ms = {
         q: 'Perlukah Pro untuk log masuk?',
         a: 'Tidak. Log masuk, berkongsi album dan menyertai lejar dikongsi adalah percuma. Pro untuk menyegerakkan data anda sendiri dan berkongsi lejar.',
       },
-      sign_out: {
-        q: 'Bagaimana untuk log keluar?',
-        a: 'Ketik Log keluar pada kad profil anda di Tetapan. Data anda kekal di telefon ini.',
+      shared_pro: {
+        q: 'Adakah buku yang dikongsi memerlukan Pro?',
+        a: 'Hanya seorang di dalamnya perlu ada Pro, pemilik atau mana-mana ahli. Jika tiada sesiapa di dalamnya ada Pro, ia dijeda untuk semua orang sehingga seseorang mendapatkannya. Tiada apa-apa yang dipadam.',
+      },
+      shared_free_limits: {
+        q: 'Bolehkah saya menambah entri dalam lejar kongsi tanpa Pro?',
+        a: 'Boleh, walaupun lejar itu ada lebih daripada 6 akaun. Had pelan percuma yang lain masih terpakai, seperti menambah akaun atau kategori melebihi had. Minta pemilik lejar membuat perubahan itu.',
+      },
+      family_pro: {
+        q: 'Bolehkah keluarga saya menggunakan Pro saya?',
+        a: 'Kongsi buku dengan mereka: orang yang anda jemput tidak perlukan Pro. Log masuk ke akaun anda pada telefon mereka akan menunjukkan semua data kewangan anda kepada mereka.',
+      },
+      sign_out_delete: {
+        q: 'Bagaimana jika saya log keluar atau memadam akaun saya?',
+        a: 'Log keluar mengekalkan data anda pada telefon ini, dan buku yang dikongsi oleh orang lain dengan anda hilang daripadanya sehingga anda log masuk semula. Memadam akaun anda akan memadam salinan awan. Buku yang anda kongsi hilang daripada telefon semua orang lain, dan anda menyimpannya.',
       },
     },
     stat_days: 'Hari menjejak',
@@ -2911,17 +2923,17 @@ const ms = {
     faq: {
       title: 'Soalan',
       items: {
-        sign_in_without_pro: {
-          q: 'Adakah saya perlukan Pro untuk log masuk?',
-          a: 'Tidak. Sesiapa sahaja boleh log masuk. Menyegerak data anda sendiri memerlukan Pro, tetapi buku yang dikongsi oleh orang lain dengan anda disegerakkan tanpanya.',
+        needs_pro: {
+          q: 'Adakah Cloud Sync memerlukan Pro?',
+          a: 'Ya, menyegerakkan data anda sendiri memerlukan Pro. Album dan lejar yang dikongsi orang lain dengan anda disegerakkan tanpanya.',
         },
         pro_other_phone: {
           q: 'Saya ada Pro pada telefon lain. Kenapa tidak pada telefon ini?',
-          a: 'Log masuk ke Cloud Sync dengan akaun yang sama pada kedua-dua telefon. Sebaik sahaja telefon ini disegerakkan, ia juga mendapat Pro, selagi ada telefon dalam akaun itu yang mempunyai Pro, termasuk telefon yang anda tidak gunakan lagi. Pro akaun anda meliputi sehingga 5 telefon.',
+          a: 'Log masuk dengan akaun yang sama pada kedua-dua telefon dan hidupkan Cloud Sync. Setelah telefon ini disegerakkan, ia juga Pro selagi ada telefon dalam akaun itu yang Pro, walaupun yang tidak lagi anda guna. Pro akaun anda meliputi sehingga 5 telefon.',
         },
         restore_moved_pro: {
           q: 'Saya memulihkan pembelian dan telefon saya yang lain kehilangan Pro.',
-          a: 'Pemulihan dari kedai memindahkan pembelian ke telefon yang memulihkannya. Biarkan kedua-dua telefon kekal log masuk ke Cloud Sync dan kedua-duanya kekal Pro.',
+          a: 'Pemulihan di kedai memindahkan pembelian ke telefon yang memulihkannya. Biarkan Cloud Sync hidup pada kedua-dua telefon dan kedua-duanya kekal Pro.',
         },
         pro_ends: {
           q: 'Apakah yang berlaku apabila Pro tamat?',
@@ -2930,22 +2942,6 @@ const ms = {
         how_fast: {
           q: 'Berapa cepat perubahan sampai ke telefon saya yang lain?',
           a: 'Dalam beberapa saat semasa apl dibuka pada kedua-duanya. Jika tidak, pada kali seterusnya apl dibuka. Perubahan semasa luar talian dimuat naik sebaik sahaja anda kembali dalam talian.',
-        },
-        shared_pro: {
-          q: 'Adakah buku yang dikongsi memerlukan Pro?',
-          a: 'Hanya seorang di dalamnya perlu ada Pro, pemilik atau mana-mana ahli. Jika tiada sesiapa di dalamnya ada Pro, ia dijeda untuk semua orang sehingga seseorang mendapatkannya. Tiada apa-apa yang dipadam.',
-        },
-        shared_free_limits: {
-          q: 'Bolehkah saya menambah entri dalam lejar kongsi tanpa Pro?',
-          a: 'Boleh, walaupun lejar itu ada lebih daripada 6 akaun. Had pelan percuma yang lain masih terpakai, seperti menambah akaun atau kategori melebihi had. Minta pemilik lejar membuat perubahan itu.',
-        },
-        family_pro: {
-          q: 'Bolehkah keluarga saya menggunakan Pro saya?',
-          a: 'Kongsi buku dengan mereka: orang yang anda jemput tidak perlukan Pro. Log masuk ke akaun anda pada telefon mereka akan menunjukkan semua data kewangan anda kepada mereka.',
-        },
-        sign_out_delete: {
-          q: 'Bagaimana jika saya log keluar atau memadam akaun saya?',
-          a: 'Log keluar mengekalkan data anda pada telefon ini, dan buku yang dikongsi oleh orang lain dengan anda hilang daripadanya sehingga anda log masuk semula. Memadam akaun anda akan memadam salinan awan. Buku yang anda kongsi hilang daripada telefon semua orang lain, dan anda menyimpannya.',
         },
       },
     },

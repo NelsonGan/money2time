@@ -1583,9 +1583,21 @@ const pl = {
         q: 'Czy potrzebuję Pro, aby się zalogować?',
         a: 'Nie. Logowanie, udostępnianie albumów i dołączanie do wspólnych ksiąg jest bezpłatne. Pro służy do synchronizacji własnych danych i udostępniania księgi.',
       },
-      sign_out: {
-        q: 'Jak się wylogować?',
-        a: 'Stuknij Wyloguj się na karcie profilu w Ustawieniach. Twoje dane zostają na tym telefonie.',
+      shared_pro: {
+        q: 'Czy udostępniona księga wymaga Pro?',
+        a: 'Pro potrzebuje tylko jedna osoba w niej, właściciel lub dowolny członek. Jeśli nikt w niej nie ma Pro, zostaje wstrzymana dla wszystkich, dopóki ktoś go nie będzie miał. Nic nie zostanie usunięte.',
+      },
+      shared_free_limits: {
+        q: 'Czy mogę dodawać wpisy do wspólnej księgi bez Pro?',
+        a: 'Tak, nawet jeśli ma więcej niż 6 kont. Pozostałe limity darmowego planu nadal obowiązują, np. dodawanie kont lub kategorii ponad limit. Poproś właściciela księgi o wprowadzenie tych zmian.',
+      },
+      family_pro: {
+        q: 'Czy moja rodzina może korzystać z mojego Pro?',
+        a: 'Udostępnij im księgę: osoby, które zaprosisz, nie potrzebują Pro. Zalogowanie się na Twoje konto na ich telefonie pokazałoby im wszystkie Twoje dane finansowe.',
+      },
+      sign_out_delete: {
+        q: 'Co jeśli się wyloguję lub usunę konto?',
+        a: 'Po wylogowaniu Twoje dane zostają na tym telefonie, a księgi udostępnione Ci przez innych znikają z niego, dopóki nie zalogujesz się ponownie. Usunięcie konta kasuje kopię w chmurze. Księgi, które udostępniasz, znikają z telefonów wszystkich pozostałych osób, a Ty je zachowujesz.',
       },
     },
     stat_days: 'Dni śledzenia',
@@ -2906,17 +2918,17 @@ const pl = {
     faq: {
       title: 'Pytania',
       items: {
-        sign_in_without_pro: {
-          q: 'Czy do logowania potrzebuję Pro?',
-          a: 'Nie. Każdy może się zalogować. Synchronizacja własnych danych wymaga Pro, ale księgi udostępnione Ci przez innych synchronizują się bez niego.',
+        needs_pro: {
+          q: 'Czy Cloud Sync wymaga Pro?',
+          a: 'Tak, synchronizacja własnych danych wymaga Pro. Albumy i księgi, które inni Ci udostępniają, synchronizują się bez niego.',
         },
         pro_other_phone: {
           q: 'Mam Pro na innym telefonie. Dlaczego nie na tym?',
-          a: 'Zaloguj się do Cloud Sync tym samym kontem na obu telefonach. Gdy ten telefon się zsynchronizuje, też będzie miał Pro, dopóki jakiś telefon na koncie ma Pro, nawet taki, którego już nie używasz. Pro na Twoim koncie obejmuje maksymalnie 5 telefonów.',
+          a: 'Zaloguj się na tym samym koncie na obu telefonach i włącz Cloud Sync. Gdy ten telefon się zsynchronizuje, też ma Pro, dopóki ma je którykolwiek telefon na koncie, nawet ten, którego już nie używasz. Pro konta obejmuje do 5 telefonów.',
         },
         restore_moved_pro: {
           q: 'Przywróciłem zakup, a mój drugi telefon stracił Pro.',
-          a: 'Przywrócenie zakupu w sklepie przenosi zakup na telefon, który go przywrócił. Pozostań zalogowany do Cloud Sync na obu telefonach, a oba zachowają Pro.',
+          a: 'Przywrócenie zakupu w sklepie przenosi go na telefon, który go przywrócił. Zostaw Cloud Sync włączone na obu telefonach, a oba zachowają Pro.',
         },
         pro_ends: {
           q: 'Co się stanie, gdy Pro się skończy?',
@@ -2925,22 +2937,6 @@ const pl = {
         how_fast: {
           q: 'Jak szybko zmiany docierają na moje inne telefony?',
           a: 'W ciągu kilku sekund, gdy aplikacja jest otwarta na obu. W przeciwnym razie przy następnym otwarciu aplikacji. Zmiany wprowadzone offline wyślą się, gdy znów będziesz online.',
-        },
-        shared_pro: {
-          q: 'Czy udostępniona księga wymaga Pro?',
-          a: 'Pro potrzebuje tylko jedna osoba w niej, właściciel lub dowolny członek. Jeśli nikt w niej nie ma Pro, zostaje wstrzymana dla wszystkich, dopóki ktoś go nie będzie miał. Nic nie zostanie usunięte.',
-        },
-        shared_free_limits: {
-          q: 'Czy mogę dodawać wpisy do wspólnej księgi bez Pro?',
-          a: 'Tak, nawet jeśli ma więcej niż 6 kont. Pozostałe limity darmowego planu nadal obowiązują, np. dodawanie kont lub kategorii ponad limit. Poproś właściciela księgi o wprowadzenie tych zmian.',
-        },
-        family_pro: {
-          q: 'Czy moja rodzina może korzystać z mojego Pro?',
-          a: 'Udostępnij im księgę: osoby, które zaprosisz, nie potrzebują Pro. Zalogowanie się na Twoje konto na ich telefonie pokazałoby im wszystkie Twoje dane finansowe.',
-        },
-        sign_out_delete: {
-          q: 'Co jeśli się wyloguję lub usunę konto?',
-          a: 'Po wylogowaniu Twoje dane zostają na tym telefonie, a księgi udostępnione Ci przez innych znikają z niego, dopóki nie zalogujesz się ponownie. Usunięcie konta kasuje kopię w chmurze. Księgi, które udostępniasz, znikają z telefonów wszystkich pozostałych osób, a Ty je zachowujesz.',
         },
       },
     },

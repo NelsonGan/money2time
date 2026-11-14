@@ -1596,9 +1596,21 @@ const de = {
         q: 'Brauche ich Pro, um mich anzumelden?',
         a: 'Nein. Anmelden, Alben teilen und geteilten Haushaltsbüchern beitreten sind kostenlos. Pro brauchst du, um deine eigenen Daten zu synchronisieren und ein Haushaltsbuch zu teilen.',
       },
-      sign_out: {
-        q: 'Wie melde ich mich ab?',
-        a: 'Tippe in den Einstellungen auf deiner Profilkarte auf Abmelden. Deine Daten bleiben auf diesem Handy.',
+      shared_pro: {
+        q: 'Braucht ein geteiltes Buch Pro?',
+        a: 'Nur eine Person darin braucht Pro, der Besitzer oder ein beliebiges Mitglied. Hat niemand darin Pro, pausiert es für alle, bis jemand Pro hat. Nichts wird gelöscht.',
+      },
+      shared_free_limits: {
+        q: 'Kann ich ohne Pro Einträge in einem geteilten Kassenbuch anlegen?',
+        a: 'Ja, auch wenn es mehr als 6 Konten hat. Die übrigen Grenzen des kostenlosen Plans gelten dort weiter, etwa für weitere Konten oder Kategorien über die Grenze hinaus. Bitte den Besitzer des Kassenbuchs, diese Änderungen vorzunehmen.',
+      },
+      family_pro: {
+        q: 'Kann meine Familie mein Pro nutzen?',
+        a: 'Teile ein Buch mit ihnen: Personen, die du einlädst, brauchen kein Pro. Würdest du dich auf ihrem Handy bei deinem Konto anmelden, sähen sie alle deine Finanzdaten.',
+      },
+      sign_out_delete: {
+        q: 'Was passiert, wenn ich mich abmelde oder mein Konto lösche?',
+        a: 'Beim Abmelden bleiben deine Daten auf diesem Handy, und Bücher, die andere mit dir geteilt haben, verschwinden davon, bis du dich wieder anmeldest. Beim Löschen deines Kontos wird die Cloud-Kopie gelöscht. Bücher, die du teilst, verschwinden von den Handys aller anderen, und du behältst sie.',
       },
     },
     stat_days: 'Tage erfasst',
@@ -2937,17 +2949,17 @@ const de = {
     faq: {
       title: 'Fragen',
       items: {
-        sign_in_without_pro: {
-          q: 'Brauche ich Pro, um mich anzumelden?',
-          a: 'Nein. Jeder kann sich anmelden. Für den Sync deiner eigenen Daten brauchst du Pro, aber Bücher, die andere mit dir teilen, werden auch ohne Pro synchronisiert.',
+        needs_pro: {
+          q: 'Braucht Cloud Sync Pro?',
+          a: 'Ja, deine eigenen Daten zu synchronisieren braucht Pro. Alben und Haushaltsbücher, die andere mit dir teilen, werden auch ohne synchronisiert.',
         },
         pro_other_phone: {
           q: 'Ich habe Pro auf einem anderen Handy. Warum nicht auf diesem?',
-          a: 'Melde dich auf beiden Handys mit demselben Konto bei Cloud Sync an. Sobald dieses Handy synchronisiert hat, hat es auch Pro, solange ein Handy im Konto Pro hat, auch eines, das du nicht mehr nutzt. Das Pro deines Kontos gilt für bis zu 5 Handys.',
+          a: 'Melde dich auf beiden Handys mit demselben Konto an und schalte Cloud Sync ein. Sobald dieses Handy synchronisiert hat, hat es auch Pro, solange ein Handy des Kontos Pro hat, auch eins, das du nicht mehr nutzt. Das Pro deines Kontos reicht für bis zu 5 Handys.',
         },
         restore_moved_pro: {
           q: 'Ich habe meinen Kauf wiederhergestellt, und mein anderes Handy hat Pro verloren.',
-          a: 'Eine Wiederherstellung im Store verschiebt den Kauf auf das Handy, das ihn wiederhergestellt hat. Bleib auf beiden Handys bei Cloud Sync angemeldet, dann haben beide weiter Pro.',
+          a: 'Eine Wiederherstellung im Store verschiebt den Kauf auf das Handy, das ihn wiederhergestellt hat. Lass Cloud Sync auf beiden Handys an, dann behalten beide Pro.',
         },
         pro_ends: {
           q: 'Was passiert, wenn Pro abläuft?',
@@ -2956,22 +2968,6 @@ const de = {
         how_fast: {
           q: 'Wie schnell kommen Änderungen auf meinen anderen Handys an?',
           a: 'Innerhalb weniger Sekunden, wenn die App auf beiden geöffnet ist. Sonst beim nächsten Öffnen der App. Offline gemachte Änderungen werden hochgeladen, sobald du wieder online bist.',
-        },
-        shared_pro: {
-          q: 'Braucht ein geteiltes Buch Pro?',
-          a: 'Nur eine Person darin braucht Pro, der Besitzer oder ein beliebiges Mitglied. Hat niemand darin Pro, pausiert es für alle, bis jemand Pro hat. Nichts wird gelöscht.',
-        },
-        shared_free_limits: {
-          q: 'Kann ich ohne Pro Einträge in einem geteilten Kassenbuch anlegen?',
-          a: 'Ja, auch wenn es mehr als 6 Konten hat. Die übrigen Grenzen des kostenlosen Plans gelten dort weiter, etwa für weitere Konten oder Kategorien über die Grenze hinaus. Bitte den Besitzer des Kassenbuchs, diese Änderungen vorzunehmen.',
-        },
-        family_pro: {
-          q: 'Kann meine Familie mein Pro nutzen?',
-          a: 'Teile ein Buch mit ihnen: Personen, die du einlädst, brauchen kein Pro. Würdest du dich auf ihrem Handy bei deinem Konto anmelden, sähen sie alle deine Finanzdaten.',
-        },
-        sign_out_delete: {
-          q: 'Was passiert, wenn ich mich abmelde oder mein Konto lösche?',
-          a: 'Beim Abmelden bleiben deine Daten auf diesem Handy, und Bücher, die andere mit dir geteilt haben, verschwinden davon, bis du dich wieder anmeldest. Beim Löschen deines Kontos wird die Cloud-Kopie gelöscht. Bücher, die du teilst, verschwinden von den Handys aller anderen, und du behältst sie.',
         },
       },
     },

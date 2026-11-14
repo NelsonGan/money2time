@@ -1584,9 +1584,21 @@ const es = {
         q: '¿Necesito Pro para iniciar sesión?',
         a: 'No. Iniciar sesión, compartir álbumes y unirte a libros compartidos es gratis. Pro sirve para sincronizar tus propios datos y compartir un libro.',
       },
-      sign_out: {
-        q: '¿Cómo cierro sesión?',
-        a: 'Toca Cerrar sesión en tu tarjeta de perfil en Ajustes. Tus datos se quedan en este teléfono.',
+      shared_pro: {
+        q: '¿Un libro compartido necesita Pro?',
+        a: 'Solo una persona del libro necesita Pro, el dueño o cualquier miembro. Si nadie en él tiene Pro, se pausa para todos hasta que alguien lo tenga. No se borra nada.',
+      },
+      shared_free_limits: {
+        q: '¿Puedo añadir movimientos a un libro compartido sin Pro?',
+        a: 'Sí, aunque tenga más de 6 cuentas. Los demás límites del plan gratuito siguen aplicándose, como añadir cuentas o categorías por encima del límite. Pide al propietario del libro que haga esos cambios.',
+      },
+      family_pro: {
+        q: '¿Mi familia puede usar mi Pro?',
+        a: 'Comparte un libro con ellos: las personas que invitas no necesitan Pro. Iniciar sesión con tu cuenta en su teléfono les mostraría todos tus datos de dinero.',
+      },
+      sign_out_delete: {
+        q: '¿Qué pasa si cierro sesión o elimino mi cuenta?',
+        a: 'Al cerrar sesión, tus datos se quedan en este teléfono, y los libros que otros compartieron contigo desaparecen de él hasta que vuelvas a iniciar sesión. Al eliminar tu cuenta se borra la copia en la nube. Los libros que compartes desaparecen de los teléfonos de los demás, y tú los conservas.',
       },
     },
     stat_days: 'Días registrando',
@@ -2911,17 +2923,17 @@ const es = {
     faq: {
       title: 'Preguntas',
       items: {
-        sign_in_without_pro: {
-          q: '¿Necesito Pro para iniciar sesión?',
-          a: 'No. Cualquiera puede iniciar sesión. Sincronizar tus propios datos requiere Pro, pero los libros que otros comparten contigo se sincronizan sin él.',
+        needs_pro: {
+          q: '¿Cloud Sync requiere Pro?',
+          a: 'Sí, sincronizar tus propios datos requiere Pro. Los álbumes y libros que otros comparten contigo se sincronizan sin él.',
         },
         pro_other_phone: {
           q: 'Tengo Pro en otro teléfono. ¿Por qué no en este?',
-          a: 'Inicia sesión en Cloud Sync con la misma cuenta en los dos teléfonos. Cuando este teléfono se haya sincronizado, también tendrá Pro, mientras algún teléfono de la cuenta tenga Pro, incluso uno que ya no uses. El Pro de tu cuenta llega a un máximo de 5 teléfonos.',
+          a: 'Inicia sesión con la misma cuenta en ambos teléfonos y activa Cloud Sync. Cuando este teléfono se haya sincronizado, también tendrá Pro mientras algún teléfono de la cuenta lo tenga, incluso uno que ya no uses. El Pro de tu cuenta llega a 5 teléfonos.',
         },
         restore_moved_pro: {
           q: 'Restauré mi compra y mi otro teléfono perdió Pro.',
-          a: 'Restaurar desde la tienda mueve la compra al teléfono que la restauró. Mantén la sesión de Cloud Sync iniciada en los dos teléfonos y ambos seguirán con Pro.',
+          a: 'Una restauración en la tienda mueve la compra al teléfono que la restauró. Mantén Cloud Sync activado en ambos teléfonos y los dos seguirán con Pro.',
         },
         pro_ends: {
           q: '¿Qué pasa cuando termina Pro?',
@@ -2930,22 +2942,6 @@ const es = {
         how_fast: {
           q: '¿Qué tan rápido llegan los cambios a mis otros teléfonos?',
           a: 'En pocos segundos si la app está abierta en ambos. Si no, la próxima vez que se abra la app. Los cambios hechos sin conexión se suben en cuanto vuelvas a estar en línea.',
-        },
-        shared_pro: {
-          q: '¿Un libro compartido necesita Pro?',
-          a: 'Solo una persona del libro necesita Pro, el dueño o cualquier miembro. Si nadie en él tiene Pro, se pausa para todos hasta que alguien lo tenga. No se borra nada.',
-        },
-        shared_free_limits: {
-          q: '¿Puedo añadir movimientos a un libro compartido sin Pro?',
-          a: 'Sí, aunque tenga más de 6 cuentas. Los demás límites del plan gratuito siguen aplicándose, como añadir cuentas o categorías por encima del límite. Pide al propietario del libro que haga esos cambios.',
-        },
-        family_pro: {
-          q: '¿Mi familia puede usar mi Pro?',
-          a: 'Comparte un libro con ellos: las personas que invitas no necesitan Pro. Iniciar sesión con tu cuenta en su teléfono les mostraría todos tus datos de dinero.',
-        },
-        sign_out_delete: {
-          q: '¿Qué pasa si cierro sesión o elimino mi cuenta?',
-          a: 'Al cerrar sesión, tus datos se quedan en este teléfono, y los libros que otros compartieron contigo desaparecen de él hasta que vuelvas a iniciar sesión. Al eliminar tu cuenta se borra la copia en la nube. Los libros que compartes desaparecen de los teléfonos de los demás, y tú los conservas.',
         },
       },
     },

@@ -1579,9 +1579,21 @@ const da = {
         q: 'Skal jeg have Pro for at logge ind?',
         a: 'Nej. Login, deling af album og deltagelse i delte regnskaber er gratis. Pro er til at synkronisere dine egne data og dele et regnskab.',
       },
-      sign_out: {
-        q: 'Hvordan logger jeg ud?',
-        a: 'Tryk på Log ud på dit profilkort i Indstillinger. Dine data bliver på telefonen.',
+      shared_pro: {
+        q: 'Kræver et delt regnskab Pro?',
+        a: 'Kun én person i det skal have Pro, ejeren eller et hvilket som helst medlem. Hvis ingen i det har Pro, sættes det på pause for alle, indtil nogen får det. Intet bliver slettet.',
+      },
+      shared_free_limits: {
+        q: 'Kan jeg tilføje poster i en delt kassebog uden Pro?',
+        a: 'Ja, også når den har mere end 6 konti. Gratisplanens andre grænser gælder stadig, fx når du vil tilføje konti eller kategorier ud over grænsen. Bed kassebogens ejer om at lave de ændringer.',
+      },
+      family_pro: {
+        q: 'Kan min familie bruge min Pro?',
+        a: 'Del et regnskab med dem: personer, du inviterer, behøver ikke Pro. Hvis du loggede ind på din konto på deres telefon, ville de kunne se alle dine pengedata.',
+      },
+      sign_out_delete: {
+        q: 'Hvad sker der, hvis jeg logger ud eller sletter min konto?',
+        a: 'Når du logger ud, bliver dine data på denne telefon, og regnskaber, som andre har delt med dig, forsvinder fra den, indtil du logger ind igen. Når du sletter din konto, slettes cloud-kopien. Regnskaber, du deler, forsvinder fra alle andres telefoner, og du beholder dem.',
       },
     },
     stat_days: 'Dage sporet',
@@ -2894,17 +2906,17 @@ const da = {
     faq: {
       title: 'Spørgsmål',
       items: {
-        sign_in_without_pro: {
-          q: 'Skal jeg have Pro for at logge ind?',
-          a: 'Nej. Alle kan logge ind. Synkronisering af dine egne data kræver Pro, men regnskaber, som andre deler med dig, synkroniseres uden.',
+        needs_pro: {
+          q: 'Kræver Cloud Sync Pro?',
+          a: 'Ja, synkronisering af dine egne data kræver Pro. Album og regnskaber, andre deler med dig, synkroniseres uden.',
         },
         pro_other_phone: {
           q: 'Jeg har Pro på en anden telefon. Hvorfor ikke på denne?',
-          a: 'Log ind på Cloud Sync med den samme konto på begge telefoner. Når denne telefon har synkroniseret, har den også Pro, så længe en telefon på kontoen har Pro, også en, du ikke længere bruger. Din kontos Pro gælder op til 5 telefoner.',
+          a: 'Log ind med den samme konto på begge telefoner, og slå Cloud Sync til. Når denne telefon har synkroniseret, har den også Pro, så længe en telefon på kontoen har Pro, også en, du ikke længere bruger. Kontoens Pro rækker til op til 5 telefoner.',
         },
         restore_moved_pro: {
           q: 'Jeg gendannede mit køb, og min anden telefon mistede Pro.',
-          a: 'En gendannelse via butikken flytter købet til den telefon, der gendannede det. Hold begge telefoner logget ind på Cloud Sync, så har begge stadig Pro.',
+          a: 'En gendannelse i butikken flytter købet til den telefon, der gendannede det. Hold Cloud Sync slået til på begge telefoner, så har begge Pro.',
         },
         pro_ends: {
           q: 'Hvad sker der, når Pro udløber?',
@@ -2913,22 +2925,6 @@ const da = {
         how_fast: {
           q: 'Hvor hurtigt når ændringer frem til mine andre telefoner?',
           a: 'Inden for få sekunder, mens appen er åben på begge. Ellers næste gang appen åbnes. Ændringer lavet offline sendes op, så snart du er online igen.',
-        },
-        shared_pro: {
-          q: 'Kræver et delt regnskab Pro?',
-          a: 'Kun én person i det skal have Pro, ejeren eller et hvilket som helst medlem. Hvis ingen i det har Pro, sættes det på pause for alle, indtil nogen får det. Intet bliver slettet.',
-        },
-        shared_free_limits: {
-          q: 'Kan jeg tilføje poster i en delt kassebog uden Pro?',
-          a: 'Ja, også når den har mere end 6 konti. Gratisplanens andre grænser gælder stadig, fx når du vil tilføje konti eller kategorier ud over grænsen. Bed kassebogens ejer om at lave de ændringer.',
-        },
-        family_pro: {
-          q: 'Kan min familie bruge min Pro?',
-          a: 'Del et regnskab med dem: personer, du inviterer, behøver ikke Pro. Hvis du loggede ind på din konto på deres telefon, ville de kunne se alle dine pengedata.',
-        },
-        sign_out_delete: {
-          q: 'Hvad sker der, hvis jeg logger ud eller sletter min konto?',
-          a: 'Når du logger ud, bliver dine data på denne telefon, og regnskaber, som andre har delt med dig, forsvinder fra den, indtil du logger ind igen. Når du sletter din konto, slettes cloud-kopien. Regnskaber, du deler, forsvinder fra alle andres telefoner, og du beholder dem.',
         },
       },
     },

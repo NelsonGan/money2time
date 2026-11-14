@@ -1548,9 +1548,21 @@ const en = {
         q: 'Do I need Pro to sign in?',
         a: 'No. Signing in, sharing albums and joining shared ledgers are free. Pro is for syncing your own data and sharing a ledger.',
       },
-      sign_out: {
-        q: 'How do I sign out?',
-        a: 'Tap Sign out on your profile card in Settings. Your data stays on this phone.',
+      shared_pro: {
+        q: 'Does a shared ledger need Pro?',
+        a: 'Only one person in it needs Pro, the owner or any member. If nobody in it has Pro, it pauses for everyone until someone does. Nothing is deleted.',
+      },
+      shared_free_limits: {
+        q: 'Can I add entries to a shared ledger without Pro?',
+        a: "Yes, even when it has more than 6 accounts. Other free plan limits still apply in it, such as adding accounts or categories past the free limit. Ask the ledger's owner to make those changes.",
+      },
+      family_pro: {
+        q: 'Can my family use my Pro?',
+        a: 'Share a ledger with them: people you invite do not need Pro. Signing in to your account on their phone would show them all your money data.',
+      },
+      sign_out_delete: {
+        q: 'What if I sign out or delete my account?',
+        a: "Signing out keeps your data on this phone, and ledgers others shared with you leave it until you sign in again. Deleting your account erases the cloud copy. Ledgers you share leave everyone else's phones, and you keep them.",
       },
     },
     stat_days: 'Days tracking',
@@ -2888,17 +2900,17 @@ const en = {
     faq: {
       title: 'Questions',
       items: {
-        sign_in_without_pro: {
-          q: 'Do I need Pro to sign in?',
-          a: 'No. Anyone can sign in. Syncing your own data needs Pro, but ledgers others share with you sync without it.',
+        needs_pro: {
+          q: 'Does Cloud Sync need Pro?',
+          a: 'Yes, syncing your own data needs Pro. Albums and ledgers others share with you sync without it.',
         },
         pro_other_phone: {
           q: 'I have Pro on another phone. Why not on this one?',
-          a: "Sign in to Cloud Sync with the same account on both phones. Once this phone has synced, it is Pro too, for as long as a phone on the account has Pro, even one you no longer use. Your account's Pro reaches up to 5 phones.",
+          a: "Sign in with the same account on both phones and turn on Cloud Sync. Once this phone has synced, it is Pro too, for as long as a phone on the account has Pro, even one you no longer use. Your account's Pro reaches up to 5 phones.",
         },
         restore_moved_pro: {
           q: 'I restored my purchase and my other phone lost Pro.',
-          a: 'A store restore moves the purchase to the phone that restored it. Keep both phones signed in to Cloud Sync and both stay Pro.',
+          a: 'A store restore moves the purchase to the phone that restored it. Keep Cloud Sync running on both phones and both stay Pro.',
         },
         pro_ends: {
           q: 'What happens when Pro ends?',
@@ -2907,22 +2919,6 @@ const en = {
         how_fast: {
           q: 'How fast do changes reach my other phones?',
           a: 'Within a few seconds while the app is open on both. Otherwise the next time the app opens. Offline changes go up once you are back online.',
-        },
-        shared_pro: {
-          q: 'Does a shared ledger need Pro?',
-          a: 'Only one person in it needs Pro, the owner or any member. If nobody in it has Pro, it pauses for everyone until someone does. Nothing is deleted.',
-        },
-        shared_free_limits: {
-          q: 'Can I add entries to a shared ledger without Pro?',
-          a: "Yes, even when it has more than 6 accounts. Other free plan limits still apply in it, such as adding accounts or categories past the free limit. Ask the ledger's owner to make those changes.",
-        },
-        family_pro: {
-          q: 'Can my family use my Pro?',
-          a: 'Share a ledger with them: people you invite do not need Pro. Signing in to your account on their phone would show them all your money data.',
-        },
-        sign_out_delete: {
-          q: 'What if I sign out or delete my account?',
-          a: "Signing out keeps your data on this phone, and ledgers others shared with you leave it until you sign in again. Deleting your account erases the cloud copy. Ledgers you share leave everyone else's phones, and you keep them.",
         },
       },
     },

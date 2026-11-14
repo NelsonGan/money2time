@@ -1253,9 +1253,11 @@ longer reads it; the flag can be archived in PostHog. A phone may still hold the
   make way for the email form, as on the Cloud Sync screen. Signed in, titled
   _Account_: the email, a Cloud Sync row with its state (opens the Cloud Sync
   screen), then Sign out (data stays on the phone) and Delete account (cloud
-  copy, images and sign-in, required by App Store rule 5.1.1(v)). Both show a
-  short FAQ (`AccountFaq`, keys in `lib/faq.ts`: what signing in does, that it
-  does not sync, that it needs no Pro, how to sign out). Signing in, out, or
+  copy, images and sign-in, required by App Store rule 5.1.1(v)). Both show the
+  account's Questions (`AccountFaq`, `ACCOUNT_FAQ_KEYS` in `lib/faq.ts`): what
+  signing in does, that it does not sync, that it needs no Pro, shared ledgers
+  and Pro, a free member's limits in a shared ledger, letting family use Pro
+  (share a ledger), and signing out or deleting the account. Signing in, out, or
   deleting the account here goes back to Settings. Neither the row nor the page
   sends an event of its own: sign-ins, sign-outs and deletions send the same
   events from wherever they start, and GA4's `screen_view` records the page.
@@ -1300,13 +1302,14 @@ longer reads it; the flag can be archived in PostHog. A phone may still hold the
   install seeds its own ids) and double-counts balances. Offline during this
   step, the phone stays signed in and tries again when it is back online.
 
-- **Questions.** Under the sign-in buttons, the synced status and the paused
-  view, a Questions list answers what people ask about Cloud Sync and Pro:
-  signing in without Pro, Pro from another phone, a restore moving Pro, Pro
-  ending, how fast changes arrive, shared ledgers and Pro, a free member's
-  limits in a shared ledger, letting family use Pro (share a ledger), and
-  signing out or deleting the account. Tap a
-  question to open its answer, one at a time (`CloudSyncFaq`, keys in
+- **Questions.** Under the sign-in buttons, the off, synced and paused
+  views, a Questions list answers what people ask about syncing their own
+  data: whether Cloud Sync needs Pro, Pro from another phone, a restore moving
+  Pro, Pro ending, and how fast changes arrive. Questions about the account
+  and sharing (signing in, shared ledgers and Pro, family, signing out or
+  deleting) are on the Account page instead, so the two lists never repeat a
+  question (`__tests__/features/cloudSync/faq.test.ts`). Tap a question to open
+  its answer, one at a time (`CloudSyncFaq`, `CLOUD_SYNC_FAQ_KEYS` in
   `lib/faq.ts`). The answers restate this section: change both together. Not
   shown while linking or on the keep-which-data choice.
 - **Pro on every signed-in phone.** <a id="pro-on-every-signed-in-phone"></a>

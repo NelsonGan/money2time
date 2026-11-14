@@ -1592,9 +1592,21 @@ const nl = {
         q: 'Heb ik Pro nodig om in te loggen?',
         a: 'Nee. Inloggen, albums delen en meedoen met gedeelde grootboeken is gratis. Pro is voor het synchroniseren van je eigen gegevens en het delen van een grootboek.',
       },
-      sign_out: {
-        q: 'Hoe log ik uit?',
-        a: 'Tik op Uitloggen op je profielkaart in Instellingen. Je gegevens blijven op deze telefoon.',
+      shared_pro: {
+        q: 'Heeft een gedeeld boek Pro nodig?',
+        a: 'Maar één persoon erin heeft Pro nodig, de eigenaar of een willekeurig lid. Heeft niemand erin Pro, dan pauzeert het voor iedereen tot iemand het heeft. Er wordt niets verwijderd.',
+      },
+      shared_free_limits: {
+        q: 'Kan ik zonder Pro boekingen toevoegen aan een gedeeld kasboek?',
+        a: 'Ja, ook als het meer dan 6 rekeningen heeft. De andere limieten van het gratis plan blijven gelden, zoals rekeningen of categorieën toevoegen boven de limiet. Vraag de eigenaar van het kasboek om die wijzigingen te doen.',
+      },
+      family_pro: {
+        q: 'Kan mijn gezin mijn Pro gebruiken?',
+        a: 'Deel een boek met ze: mensen die je uitnodigt, hebben geen Pro nodig. Als je op hun telefoon aanmeldt met je account, zien ze al je geldgegevens.',
+      },
+      sign_out_delete: {
+        q: 'Wat als ik me afmeld of mijn account verwijder?',
+        a: 'Als je je afmeldt, blijven je gegevens op deze telefoon, en boeken die anderen met je hebben gedeeld, verdwijnen ervan tot je je weer aanmeldt. Als je je account verwijdert, wordt de cloudkopie gewist. Boeken die je deelt, verdwijnen van de telefoons van alle anderen, en jij houdt ze.',
       },
     },
     stat_days: 'Dagen bijgehouden',
@@ -2928,17 +2940,17 @@ const nl = {
     faq: {
       title: 'Vragen',
       items: {
-        sign_in_without_pro: {
-          q: 'Heb ik Pro nodig om me aan te melden?',
-          a: 'Nee. Iedereen kan zich aanmelden. Je eigen gegevens synchroniseren vraagt Pro, maar boeken die anderen met je delen, synchroniseren ook zonder.',
+        needs_pro: {
+          q: 'Heeft Cloud Sync Pro nodig?',
+          a: 'Ja, je eigen gegevens synchroniseren vraagt Pro. Albums en grootboeken die anderen met je delen, synchroniseren ook zonder.',
         },
         pro_other_phone: {
           q: 'Ik heb Pro op een andere telefoon. Waarom niet op deze?',
-          a: 'Meld je op beide telefoons met hetzelfde account aan bij Cloud Sync. Zodra deze telefoon heeft gesynchroniseerd, heeft hij ook Pro, zolang een telefoon op het account Pro heeft, ook een die je niet meer gebruikt. Het Pro van je account geldt voor maximaal 5 telefoons.',
+          a: 'Log op beide telefoons in met hetzelfde account en zet Cloud Sync aan. Zodra deze telefoon heeft gesynchroniseerd, is hij ook Pro zolang een telefoon van het account Pro heeft, ook een die je niet meer gebruikt. De Pro van je account geldt voor maximaal 5 telefoons.',
         },
         restore_moved_pro: {
           q: 'Ik heb mijn aankoop hersteld en mijn andere telefoon is Pro kwijt.',
-          a: 'Herstellen via de store verplaatst de aankoop naar de telefoon die hem heeft hersteld. Blijf op beide telefoons aangemeld bij Cloud Sync, dan houden ze allebei Pro.',
+          a: 'Een herstel in de store verplaatst de aankoop naar de telefoon die hem herstelde. Laat Cloud Sync op beide telefoons aan staan, dan blijven ze allebei Pro.',
         },
         pro_ends: {
           q: 'Wat gebeurt er als Pro afloopt?',
@@ -2947,22 +2959,6 @@ const nl = {
         how_fast: {
           q: 'Hoe snel komen wijzigingen op mijn andere telefoons aan?',
           a: 'Binnen een paar seconden als de app op allebei open is. Anders de volgende keer dat de app opengaat. Offline wijzigingen gaan omhoog zodra je weer online bent.',
-        },
-        shared_pro: {
-          q: 'Heeft een gedeeld boek Pro nodig?',
-          a: 'Maar één persoon erin heeft Pro nodig, de eigenaar of een willekeurig lid. Heeft niemand erin Pro, dan pauzeert het voor iedereen tot iemand het heeft. Er wordt niets verwijderd.',
-        },
-        shared_free_limits: {
-          q: 'Kan ik zonder Pro boekingen toevoegen aan een gedeeld kasboek?',
-          a: 'Ja, ook als het meer dan 6 rekeningen heeft. De andere limieten van het gratis plan blijven gelden, zoals rekeningen of categorieën toevoegen boven de limiet. Vraag de eigenaar van het kasboek om die wijzigingen te doen.',
-        },
-        family_pro: {
-          q: 'Kan mijn gezin mijn Pro gebruiken?',
-          a: 'Deel een boek met ze: mensen die je uitnodigt, hebben geen Pro nodig. Als je op hun telefoon aanmeldt met je account, zien ze al je geldgegevens.',
-        },
-        sign_out_delete: {
-          q: 'Wat als ik me afmeld of mijn account verwijder?',
-          a: 'Als je je afmeldt, blijven je gegevens op deze telefoon, en boeken die anderen met je hebben gedeeld, verdwijnen ervan tot je je weer aanmeldt. Als je je account verwijdert, wordt de cloudkopie gewist. Boeken die je deelt, verdwijnen van de telefoons van alle anderen, en jij houdt ze.',
         },
       },
     },
