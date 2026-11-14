@@ -149,9 +149,21 @@ export function reduceNumpadKey(
 
   let current = expression;
   let nextPristine = pristine;
+  if (key === 'neg') {
+    // Flip the value's sign (Split Bill's adjustments). A pending operation is
+    // worked out first; a plain number just gains or loses its leading "-"
+    // and stays a pre-fill, so typing next replaces it and keeps the sign.
+    const body = current.startsWith('-') ? current.slice(1) : current;
+    if (/[+\-×÷]/.test(body)) {
+      return { expression: formatMoney(-evaluateExpression(current)), pristine: true };
+    }
+    if (!body) return { expression: current ? '' : '-', pristine: false };
+    return { expression: current.startsWith('-') ? body : `-${current}`, pristine };
+  }
   if (pristine) {
     nextPristine = false;
-    if ((key >= '0' && key <= '9') || key === '.') current = '';
+    // A pre-fill is replaced by what is typed, keeping a sign it was given.
+    if ((key >= '0' && key <= '9') || key === '.') current = current.startsWith('-') ? '-' : '';
   }
 
   if (key >= '0' && key <= '9') {

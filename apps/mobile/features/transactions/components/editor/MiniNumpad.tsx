@@ -9,6 +9,12 @@ import { I18n } from '~/lib/i18n';
 import { reduceNumpadKey, sanitizeInitialAmount } from './calculatorEngine';
 import { type KeyValue, MINUS_DIVIDE_ICON, NumpadKey, PLUS_TIMES_ICON } from './NumpadKey';
 
+const SIGN_ICON = (
+  <Text variant="subheading" tone="muted">
+    ±
+  </Text>
+);
+
 interface MiniNumpadProps {
   /** Seed value (the focused row's amount). The parent remounts via `key` per row. */
   initialExpression: string;
@@ -24,6 +30,8 @@ interface MiniNumpadProps {
    * swallowing the next tap: Split Bill's Done needed two taps after the pad's.
    */
   confirmOnRelease?: boolean;
+  /** Swap "=" for a "±" key that flips the value's sign (Split Bill's adjustments). */
+  signKey?: boolean;
 }
 
 /**
@@ -39,6 +47,7 @@ export function MiniNumpad({
   onConfirm,
   confirmLabel,
   confirmOnRelease = true,
+  signKey = false,
 }: MiniNumpadProps) {
   // Tap positions on these keys would spell out the amount.
   usePauseSessionReplay();
@@ -128,7 +137,11 @@ export function MiniNumpad({
         <View className="flex-1 flex-row gap-1.5">
           <NumpadKey value="." onPress={handleKeyPress} />
           <NumpadKey value="0" onPress={handleKeyPress} />
-          <NumpadKey value="=" variant="utility" onPress={handleKeyPress} />
+          {signKey ? (
+            <NumpadKey value="neg" variant="utility" onPress={handleKeyPress} icon={SIGN_ICON} />
+          ) : (
+            <NumpadKey value="=" variant="utility" onPress={handleKeyPress} />
+          )}
           <NumpadKey
             value="done"
             variant="confirm"
