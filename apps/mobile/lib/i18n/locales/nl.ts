@@ -2906,7 +2906,7 @@ const nl = {
       'Het Pro van je account geldt voor maximaal 5 telefoons, en alle 5 plekken zijn bezet. Meld je af bij Cloud Sync op een telefoon die je niet meer gebruikt (een telefoon die 30 dagen niet is gebruikt, maakt zijn plek ook vrij). Of neem Pro op deze telefoon.',
     needs_pro_title: 'Synchroniseren vereist Pro',
     needs_pro_body:
-      'Je bent aangemeld. Neem Pro om te beginnen met synchroniseren. Pro gekocht op een andere telefoon? Meld je daar ook aan bij Cloud Sync, dan wordt het hier ontgrendeld.',
+      'Je bent ingelogd. Neem Pro om te beginnen met synchroniseren. Pro gekocht op een andere telefoon? Zet daar ook Cloud Sync aan, dan wordt het hier ontgrendeld.',
     tile_on: 'Aan',
     profile_off: 'Uit',
     profile_paused: 'Gepauzeerd',
@@ -3390,7 +3390,7 @@ const nl = {
     title: 'Delen',
     share_toggle: 'Dit boek delen',
     share_toggle_caption: 'Nodig tot {{max}} mensen uit. Ze hebben geen Pro nodig.',
-    needs_cloud_sync: 'Meld je aan bij Cloud Sync om een boek te delen.',
+    needs_cloud_sync: 'Zet Cloud Sync aan om een grootboek te delen.',
     has_shared_albums: 'Dit boek heeft gedeelde albums. Stop eerst met het delen daarvan.',
     limit_reached: 'Je kunt voorlopig tot {{max}} boeken delen.',
     share_failed:
@@ -3412,7 +3412,7 @@ const nl = {
     owner_note: 'Gedeeld door jou. Iedereen hier kan posten toevoegen en bewerken.',
     member_note: 'Gedeeld door {{owner}}. Iedereen hier kan posten toevoegen en bewerken.',
     people: 'Mensen',
-    people_signed_out: 'Meld je aan bij Cloud Sync om te zien wie erin zit.',
+    people_signed_out: 'Log in om te zien wie erin zit.',
     you: 'Jij',
     owner_badge: 'Eigenaar',
     joined_today: 'Vandaag lid geworden',

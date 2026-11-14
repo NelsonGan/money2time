@@ -2909,7 +2909,7 @@ const fr = {
       'Le Pro de votre compte couvre jusqu’à 5 téléphones, et les 5 places sont prises. Déconnectez-vous de Cloud Sync sur un téléphone que vous n’utilisez plus (un téléphone inutilisé pendant 30 jours libère aussi sa place). Ou prenez Pro sur ce téléphone.',
     needs_pro_title: 'La synchro nécessite Pro',
     needs_pro_body:
-      'Vous êtes connecté. Passez à Pro pour lancer la synchro. Vous avez acheté Pro sur un autre téléphone ? Connectez-vous aussi à Cloud Sync sur ce téléphone-là, et il sera débloqué ici.',
+      'Vous êtes connecté. Passez à Pro pour commencer la synchronisation. Pro acheté sur un autre téléphone ? Activez aussi Cloud Sync dessus, et il se débloque ici.',
     tile_on: 'Activé',
     profile_off: 'Désactivé',
     profile_paused: 'En pause',
@@ -3399,7 +3399,7 @@ const fr = {
     title: 'Partage',
     share_toggle: 'Partager ce carnet',
     share_toggle_caption: "Invitez jusqu'à {{max}} personnes. Elles n'ont pas besoin de Pro.",
-    needs_cloud_sync: 'Connectez-vous à Cloud Sync pour partager un carnet.',
+    needs_cloud_sync: 'Activez Cloud Sync pour partager un carnet.',
     has_shared_albums: 'Ce carnet contient des albums partagés. Arrêtez d’abord de les partager.',
     limit_reached: "Vous pouvez partager jusqu'à {{max}} carnets pour l'instant.",
     share_failed:
@@ -3423,7 +3423,7 @@ const fr = {
     member_note:
       'Partagé par {{owner}}. Tout le monde ici peut ajouter et modifier des opérations.',
     people: 'Personnes',
-    people_signed_out: 'Connectez-vous à Cloud Sync pour voir qui en fait partie.',
+    people_signed_out: 'Connectez-vous pour voir qui en fait partie.',
     you: 'Vous',
     owner_badge: 'Propriétaire',
     joined_today: "A rejoint aujourd'hui",

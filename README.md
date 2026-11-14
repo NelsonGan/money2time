@@ -1321,8 +1321,8 @@ longer reads it; the flag can be archived in PostHog. A phone may still hold the
   `services/accountPro.ts`). Requiring the link is the guard against sharing a
   sign-in to share Pro: it would mean sharing one's money data. There is no
   cap on phones per account. So:
-  - Pro bought on an iPhone unlocks an iPad by signing in to the same account,
-    with no store Restore.
+  - Pro bought on an iPhone unlocks an iPad by signing in to the same account
+    and turning on Cloud Sync, with no store Restore.
   - A store Restore on phone B moves the purchase to B's App User ID
     (RevenueCat's transfer), which leaves phone A free in RevenueCat. With
     both signed in, A stays Pro through the account: B's install is linked as
@@ -1330,7 +1330,7 @@ longer reads it; the flag can be archived in PostHog. A phone may still hold the
     again when its own Pro ends. If A asked before B's link landed, B's new
     Pro nudges A over the live socket and A resumes. Signed out, A loses Pro,
     as before Cloud Sync.
-  - The answer is asked at sign-in, when linking, whenever this phone's own
+  - The answer is asked when turning Cloud Sync on, when linking, whenever this phone's own
     Pro changes, and while paused (below); otherwise with a sync, at most
     every 30 minutes, or once a day for a linked phone with its own purchase,
     which is Pro whatever the account says (`lib/accountCheck.ts`). The
@@ -1449,7 +1449,7 @@ app tables ◀──apply──── diff of revisions ◀──── replica.
 | `lib/syncTables.ts`                 | What syncs: tables, image columns, device-local settings and rows                                 |
 | `lib/offlineError.ts`               | Whether a Turso engine error means the phone is offline                                           |
 | `lib/capture.ts`, `rowCodec.ts`     | Trigger SQL; rows to and from JSON, revisions                                                     |
-| `lib/linking.ts`, `lib/messages.ts` | The first-sign-in decision; error and time text                                                   |
+| `lib/linking.ts`, `lib/messages.ts` | The turn-on (link) decision; error and time text                                                  |
 | `screens/CloudSyncScreen.tsx`       | Picks one view per status from `components/` (signed out, email, linking, choice, synced, paused) |
 
 - **Synced tables** are exactly the tables a backup holds (`SYNC_TABLES`; a
@@ -1757,8 +1757,9 @@ The app side is `features/sharedLedgers/` (screens) and
 
 - **Sharing a ledger.** The New ledger form has a _Share this ledger_ switch,
   and every ledger but the main one has a Sharing page (the people icon on
-  Manage ledgers, or the Sharing row of its editor). Sharing needs Pro and a
-  Cloud Sync sign-in (otherwise the row says so and leads to Cloud Sync). One
+  Manage ledgers, or the Sharing row of its editor). Sharing needs Pro and
+  Cloud Sync turned on, not only a sign-in (otherwise the row says _Turn on
+  Cloud Sync to share a ledger._ and leads to Cloud Sync). One
   user shares at most **2** ledgers at a time, since each is a cloud database
   of its own. The main ledger cannot be shared: its id is the same on every
   phone.
@@ -1854,7 +1855,7 @@ The app side is `features/sharedLedgers/` (screens) and
   everyone can add and edit entries is in the info button next to the
   Sharing title, not under the name.
 - **Without a session** (signed out, or the account deleted on another
-  phone) the People list says to sign in to Cloud Sync. Deleting a shared
+  phone) the People list says to sign in. Deleting a shared
   ledger, Stop sharing and Leave still work there, and deleting and Leave
   also offline (Stop sharing while signed in waits for the network, so
   members' last entries come in first): the ledger is
@@ -1866,8 +1867,8 @@ The app side is `features/sharedLedgers/` (screens) and
   confirmation says so. An owner keeps theirs. It sends their unsent entries
   first; while one still cannot go (offline, or the ledger is paused), it
   asks before signing out (Sign out anyway), as those entries would go with
-  the ledger. Cancel on the
-  keep-which-data choice signs out the same way.
+  the ledger. Cancel on the keep-which-data choice no longer signs out: it
+  leaves Cloud Sync off and the account signed in.
 
 **Who added it**
 

@@ -2889,7 +2889,7 @@ const ms = {
       'Pro akaun anda meliputi sehingga 5 telefon, dan kesemua 5 tempat sudah diisi. Log keluar dari Cloud Sync pada telefon yang anda tidak gunakan lagi (telefon yang tidak digunakan selama 30 hari juga mengosongkan tempatnya). Atau dapatkan Pro pada telefon ini.',
     needs_pro_title: 'Penyegerakan memerlukan Pro',
     needs_pro_body:
-      'Anda telah log masuk. Dapatkan Pro untuk mula menyegerak. Membeli Pro pada telefon lain? Log masuk ke Cloud Sync di sana juga, dan ia akan dibuka di sini.',
+      'Anda sudah log masuk. Dapatkan Pro untuk mula menyegerak. Beli Pro di telefon lain? Hidupkan Cloud Sync di sana juga, dan ia dibuka di sini.',
     tile_on: 'Hidup',
     profile_off: 'Mati',
     profile_paused: 'Dijeda',
@@ -3371,7 +3371,7 @@ const ms = {
     title: 'Perkongsian',
     share_toggle: 'Kongsi buku ini',
     share_toggle_caption: 'Jemput sehingga {{max}} orang. Mereka tidak perlukan Pro.',
-    needs_cloud_sync: 'Log masuk ke Cloud Sync untuk berkongsi buku.',
+    needs_cloud_sync: 'Hidupkan Cloud Sync untuk berkongsi lejar.',
     has_shared_albums: 'Buku ini mempunyai album kongsi. Hentikan perkongsian album itu dahulu.',
     limit_reached: 'Buat masa ini anda boleh berkongsi sehingga {{max}} buku.',
     share_failed:
@@ -3394,7 +3394,7 @@ const ms = {
     member_note:
       'Dikongsi oleh {{owner}}. Semua orang di sini boleh menambah dan mengedit catatan.',
     people: 'Orang',
-    people_signed_out: 'Log masuk ke Cloud Sync untuk melihat siapa di dalamnya.',
+    people_signed_out: 'Log masuk untuk melihat siapa yang ada di dalamnya.',
     you: 'Anda',
     owner_badge: 'Pemilik',
     joined_today: 'Menyertai hari ini',

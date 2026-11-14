@@ -2891,7 +2891,7 @@ const pt = {
       'O Pro da sua conta vale para até 5 celulares, e as 5 vagas estão ocupadas. Saia do Cloud Sync em um celular que você não usa mais (um celular sem uso por 30 dias também libera a vaga). Ou obtenha o Pro neste celular.',
     needs_pro_title: 'A sincronização precisa do Pro',
     needs_pro_body:
-      'Você entrou. Assine o Pro para começar a sincronizar. Comprou o Pro em outro celular? Entre no Cloud Sync lá também, e ele será desbloqueado aqui.',
+      'Tem sessão iniciada. Obtenha o Pro para começar a sincronizar. Comprou o Pro noutro telemóvel? Ative também lá o Cloud Sync e fica desbloqueado aqui.',
     tile_on: 'Ligado',
     profile_off: 'Desligado',
     profile_paused: 'Pausado',
@@ -3375,7 +3375,7 @@ const pt = {
     title: 'Compartilhamento',
     share_toggle: 'Compartilhar este livro',
     share_toggle_caption: 'Convide até {{max}} pessoas. Elas não precisam do Pro.',
-    needs_cloud_sync: 'Entre no Cloud Sync para compartilhar um livro.',
+    needs_cloud_sync: 'Ative o Cloud Sync para partilhar um livro.',
     has_shared_albums: 'Este livro tem álbuns compartilhados. Pare de compartilhá-los primeiro.',
     limit_reached: 'Por enquanto, você pode compartilhar até {{max}} livros.',
     share_failed:
@@ -3398,7 +3398,7 @@ const pt = {
     owner_note: 'Compartilhado por você. Todos aqui podem adicionar e editar lançamentos.',
     member_note: 'Compartilhado por {{owner}}. Todos aqui podem adicionar e editar lançamentos.',
     people: 'Pessoas',
-    people_signed_out: 'Entre no Cloud Sync para ver quem está nele.',
+    people_signed_out: 'Entre para ver quem faz parte.',
     you: 'Você',
     owner_badge: 'Dono',
     joined_today: 'Entrou hoje',

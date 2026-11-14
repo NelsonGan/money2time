@@ -2887,7 +2887,7 @@ const it = {
       'Il Pro del tuo account arriva fino a 5 telefoni, e tutti e 5 i posti sono occupati. Esci da Cloud Sync su un telefono che non usi più (anche un telefono inutilizzato per 30 giorni libera il suo posto). Oppure prendi Pro su questo telefono.',
     needs_pro_title: 'La sincronizzazione richiede Pro',
     needs_pro_body:
-      "Hai effettuato l'accesso. Passa a Pro per iniziare a sincronizzare. Hai acquistato Pro su un altro telefono? Accedi a Cloud Sync anche lì e verrà sbloccato qui.",
+      'Hai effettuato l’accesso. Passa a Pro per iniziare a sincronizzare. Hai comprato Pro su un altro telefono? Attiva Cloud Sync anche lì e si sblocca qui.',
     tile_on: 'Attivo',
     profile_off: 'Disattivo',
     profile_paused: 'In pausa',
@@ -3371,7 +3371,7 @@ const it = {
     title: 'Condivisione',
     share_toggle: 'Condividi questo registro',
     share_toggle_caption: 'Invita fino a {{max}} persone. Non serve Pro.',
-    needs_cloud_sync: 'Accedi a Cloud Sync per condividere un registro.',
+    needs_cloud_sync: 'Attiva Cloud Sync per condividere un registro.',
     has_shared_albums:
       'Questo registro contiene album condivisi. Interrompi prima la loro condivisione.',
     limit_reached: 'Per ora puoi condividere fino a {{max}} registri.',
@@ -3394,7 +3394,7 @@ const it = {
     owner_note: 'Condiviso da te. Tutti qui possono aggiungere e modificare le voci.',
     member_note: 'Condiviso da {{owner}}. Tutti qui possono aggiungere e modificare le voci.',
     people: 'Persone',
-    people_signed_out: 'Accedi a Cloud Sync per vedere chi ne fa parte.',
+    people_signed_out: 'Accedi per vedere chi ne fa parte.',
     you: 'Tu',
     owner_badge: 'Proprietario',
     joined_today: 'Si è unito oggi',

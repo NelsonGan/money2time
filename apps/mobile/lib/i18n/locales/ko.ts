@@ -2834,7 +2834,7 @@ const ko = {
       '계정의 Pro는 휴대폰 최대 5대까지 적용되며, 5자리가 모두 찼어요. 더 이상 쓰지 않는 휴대폰에서 Cloud Sync에서 로그아웃하세요(30일 동안 사용하지 않은 휴대폰도 자리가 비워져요). 또는 이 휴대폰에서 Pro를 구매하세요.',
     needs_pro_title: '동기화하려면 Pro가 필요합니다',
     needs_pro_body:
-      '로그인되었습니다. 동기화를 시작하려면 Pro를 구매하세요. 다른 휴대폰에서 Pro를 구매했나요? 그 휴대폰에서도 Cloud Sync에 로그인하면 여기서 잠금 해제됩니다.',
+      '로그인되어 있어요. 동기화를 시작하려면 Pro를 받으세요. 다른 휴대폰에서 Pro를 샀나요? 그 휴대폰에서도 Cloud Sync를 켜면 여기서도 열려요.',
     tile_on: '켜짐',
     profile_off: '꺼짐',
     profile_paused: '일시 중지됨',
@@ -3307,7 +3307,7 @@ const ko = {
     share_toggle: '이 가계부 공유',
     share_toggle_caption:
       '최대 {{max}}명까지 초대할 수 있어요. 초대받은 사람은 Pro가 없어도 됩니다.',
-    needs_cloud_sync: '가계부를 공유하려면 Cloud Sync에 로그인하세요.',
+    needs_cloud_sync: '장부를 공유하려면 Cloud Sync를 켜세요.',
     has_shared_albums: '이 가계부에 공유 앨범이 있어요. 먼저 앨범 공유를 중지하세요.',
     limit_reached: '지금은 가계부를 최대 {{max}}개까지 공유할 수 있습니다.',
     share_failed:
@@ -3329,7 +3329,7 @@ const ko = {
     member_note:
       '{{owner}} 님이 공유한 가계부입니다. 모든 멤버가 항목을 추가하고 편집할 수 있습니다.',
     people: '멤버',
-    people_signed_out: '참여자를 보려면 Cloud Sync에 로그인하세요.',
+    people_signed_out: '누가 있는지 보려면 로그인하세요.',
     you: '나',
     owner_badge: '소유자',
     joined_today: '오늘 참여',

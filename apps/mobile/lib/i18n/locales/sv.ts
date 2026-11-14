@@ -2874,7 +2874,7 @@ const sv = {
       'Kontots Pro gäller för upp till 5 telefoner, och alla 5 platser är upptagna. Logga ut från Cloud Sync på en telefon du inte använder längre (en telefon som inte använts på 30 dagar frigör också sin plats). Eller skaffa Pro på den här telefonen.',
     needs_pro_title: 'Synkning kräver Pro',
     needs_pro_body:
-      'Du är inloggad. Skaffa Pro för att börja synka. Köpt Pro på en annan telefon? Logga in på Cloud Sync där också, så låses det upp här.',
+      'Du är inloggad. Skaffa Pro för att börja synka. Köpt Pro på en annan telefon? Slå på Cloud Sync där också, så låses det upp här.',
     tile_on: 'På',
     profile_off: 'Av',
     profile_paused: 'Pausad',
@@ -3352,7 +3352,7 @@ const sv = {
     title: 'Delning',
     share_toggle: 'Dela den här kassaboken',
     share_toggle_caption: 'Bjud in upp till {{max}} personer. De behöver inte Pro.',
-    needs_cloud_sync: 'Logga in på Cloud Sync för att dela en kassabok.',
+    needs_cloud_sync: 'Slå på Cloud Sync för att dela en liggare.',
     has_shared_albums: 'Den här kassaboken har delade album. Sluta dela dem först.',
     limit_reached: 'Du kan dela upp till {{max}} kassaböcker tills vidare.',
     share_failed:
@@ -3374,7 +3374,7 @@ const sv = {
     owner_note: 'Delad av dig. Alla här kan lägga till och redigera poster.',
     member_note: 'Delad av {{owner}}. Alla här kan lägga till och redigera poster.',
     people: 'Personer',
-    people_signed_out: 'Logga in på Cloud Sync för att se vilka som är med.',
+    people_signed_out: 'Logga in för att se vilka som är med.',
     you: 'Du',
     owner_badge: 'Ägare',
     joined_today: 'Gick med i dag',

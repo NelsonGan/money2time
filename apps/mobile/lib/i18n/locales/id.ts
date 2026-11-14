@@ -2886,7 +2886,7 @@ const id = {
       'Pro di akunmu berlaku hingga 5 ponsel, dan kelima tempatnya sudah terisi. Keluar dari Cloud Sync di ponsel yang sudah tidak kamu pakai (ponsel yang tidak dipakai selama 30 hari juga mengosongkan tempatnya). Atau dapatkan Pro di ponsel ini.',
     needs_pro_title: 'Sinkronisasi butuh Pro',
     needs_pro_body:
-      'Anda sudah masuk. Dapatkan Pro untuk mulai sinkronisasi. Membeli Pro di ponsel lain? Masuk juga ke Cloud Sync di sana, dan Pro akan terbuka di sini.',
+      'Kamu sudah masuk. Dapatkan Pro untuk mulai sinkron. Beli Pro di ponsel lain? Nyalakan Cloud Sync di sana juga, dan Pro terbuka di sini.',
     tile_on: 'Aktif',
     profile_off: 'Mati',
     profile_paused: 'Dijeda',
@@ -3370,7 +3370,7 @@ const id = {
     title: 'Berbagi',
     share_toggle: 'Bagikan buku ini',
     share_toggle_caption: 'Undang hingga {{max}} orang. Mereka tidak perlu Pro.',
-    needs_cloud_sync: 'Masuk ke Cloud Sync untuk membagikan buku.',
+    needs_cloud_sync: 'Nyalakan Cloud Sync untuk membagikan buku.',
     has_shared_albums:
       'Buku ini memiliki album bersama. Hentikan berbagi album itu terlebih dahulu.',
     limit_reached: 'Untuk saat ini Anda bisa membagikan hingga {{max}} buku.',
@@ -3394,7 +3394,7 @@ const id = {
     member_note:
       'Dibagikan oleh {{owner}}. Semua orang di sini bisa menambah dan mengedit catatan.',
     people: 'Orang',
-    people_signed_out: 'Masuk ke Cloud Sync untuk melihat siapa saja anggotanya.',
+    people_signed_out: 'Masuk untuk melihat siapa saja di dalamnya.',
     you: 'Anda',
     owner_badge: 'Pemilik',
     joined_today: 'Bergabung hari ini',

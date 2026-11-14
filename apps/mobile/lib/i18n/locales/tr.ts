@@ -2881,7 +2881,7 @@ const tr = {
       "Hesabının Pro'su en fazla 5 telefona ulaşır ve 5 yerin hepsi dolu. Artık kullanmadığın bir telefonda Cloud Sync'ten çıkış yap (30 gün kullanılmayan bir telefon da yerini boşaltır). Ya da bu telefonda Pro al.",
     needs_pro_title: 'Senkron için Pro gerekli',
     needs_pro_body:
-      "Giriş yaptın. Senkronu başlatmak için Pro al. Pro'yu başka bir telefonda mı aldın? Orada da Cloud Sync'e giriş yap, burada da açılsın.",
+      "Giriş yaptın. Eşitlemeye başlamak için Pro al. Başka bir telefonda Pro mu aldın? Orada da Cloud Sync'i aç, burada da açılır.",
     tile_on: 'Açık',
     profile_off: 'Kapalı',
     profile_paused: 'Duraklatıldı',
@@ -3359,7 +3359,7 @@ const tr = {
     title: 'Paylaşım',
     share_toggle: 'Bu defteri paylaş',
     share_toggle_caption: "En fazla {{max}} kişiyi davet et. Pro'ya ihtiyaçları yok.",
-    needs_cloud_sync: "Defter paylaşmak için Cloud Sync'e giriş yap.",
+    needs_cloud_sync: "Defter paylaşmak için Cloud Sync'i aç.",
     has_shared_albums: 'Bu defterde paylaşılan albümler var. Önce onları paylaşmayı bırakın.',
     limit_reached: 'Şimdilik en fazla {{max}} defter paylaşabilirsin.',
     share_failed:
@@ -3381,7 +3381,7 @@ const tr = {
     owner_note: 'Sen paylaştın. Buradaki herkes kayıt ekleyip düzenleyebilir.',
     member_note: 'Paylaşan: {{owner}}. Buradaki herkes kayıt ekleyip düzenleyebilir.',
     people: 'Kişiler',
-    people_signed_out: "Kimlerin olduğunu görmek için Cloud Sync'e giriş yap.",
+    people_signed_out: 'Kimlerin olduğunu görmek için giriş yap.',
     you: 'Sen',
     owner_badge: 'Sahip',
     joined_today: 'Bugün katıldı',

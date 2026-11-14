@@ -2915,7 +2915,7 @@ const de = {
       'Das Pro deines Kontos gilt für bis zu 5 Handys, und alle 5 Plätze sind belegt. Melde dich auf einem Handy, das du nicht mehr nutzt, von Cloud Sync ab (ein Handy, das 30 Tage lang nicht genutzt wird, gibt seinen Platz ebenfalls frei). Oder hol dir Pro auf diesem Handy.',
     needs_pro_title: 'Sync braucht Pro',
     needs_pro_body:
-      'Du bist angemeldet. Hol dir Pro, um mit dem Sync zu beginnen. Pro auf einem anderen Handy gekauft? Melde dich auch dort bei Cloud Sync an, dann wird es hier freigeschaltet.',
+      'Du bist angemeldet. Hol dir Pro, um mit dem Synchronisieren zu beginnen. Pro auf einem anderen Handy gekauft? Schalte dort auch Cloud Sync ein, dann wird es hier freigeschaltet.',
     tile_on: 'An',
     profile_off: 'Aus',
     profile_paused: 'Pausiert',
@@ -3402,7 +3402,7 @@ const de = {
     title: 'Teilen',
     share_toggle: 'Dieses Buch teilen',
     share_toggle_caption: 'Lade bis zu {{max}} Personen ein. Sie brauchen kein Pro.',
-    needs_cloud_sync: 'Melde dich bei Cloud Sync an, um ein Buch zu teilen.',
+    needs_cloud_sync: 'Schalte Cloud Sync ein, um ein Haushaltsbuch zu teilen.',
     has_shared_albums: 'Dieses Buch enthält geteilte Alben. Beende zuerst deren Freigabe.',
     limit_reached: 'Du kannst vorerst bis zu {{max}} Bücher teilen.',
     share_failed:
@@ -3424,7 +3424,7 @@ const de = {
     owner_note: 'Von dir geteilt. Alle hier können Einträge hinzufügen und bearbeiten.',
     member_note: 'Geteilt von {{owner}}. Alle hier können Einträge hinzufügen und bearbeiten.',
     people: 'Personen',
-    people_signed_out: 'Melde dich bei Cloud Sync an, um zu sehen, wer dabei ist.',
+    people_signed_out: 'Melde dich an, um zu sehen, wer dabei ist.',
     you: 'Du',
     owner_badge: 'Eigentümer',
     joined_today: 'Heute beigetreten',

@@ -2875,7 +2875,7 @@ const nb = {
       'Kontoens Pro gjelder for opptil 5 telefoner, og alle 5 plassene er tatt. Logg ut av Cloud Sync på en telefon du ikke bruker lenger (en telefon som ikke har vært brukt på 30 dager, frigjør også plassen sin). Eller få Pro på denne telefonen.',
     needs_pro_title: 'Synkronisering krever Pro',
     needs_pro_body:
-      'Du er logget inn. Skaff deg Pro for å begynne å synkronisere. Kjøpt Pro på en annen telefon? Logg inn på Cloud Sync der også, så låses det opp her.',
+      'Du er logget inn. Skaff deg Pro for å begynne å synkronisere. Kjøpt Pro på en annen telefon? Slå på Cloud Sync der også, så låses det opp her.',
     tile_on: 'På',
     profile_off: 'Av',
     profile_paused: 'På pause',
@@ -3353,7 +3353,7 @@ const nb = {
     title: 'Deling',
     share_toggle: 'Del dette regnskapet',
     share_toggle_caption: 'Inviter opptil {{max}} personer. De trenger ikke Pro.',
-    needs_cloud_sync: 'Logg inn på Cloud Sync for å dele et regnskap.',
+    needs_cloud_sync: 'Slå på Cloud Sync for å dele et regnskap.',
     has_shared_albums: 'Dette regnskapet har delte album. Slutt å dele dem først.',
     limit_reached: 'Foreløpig kan du dele opptil {{max}} regnskap.',
     share_failed:
@@ -3375,7 +3375,7 @@ const nb = {
     owner_note: 'Delt av deg. Alle her kan legge til og redigere poster.',
     member_note: 'Delt av {{owner}}. Alle her kan legge til og redigere poster.',
     people: 'Personer',
-    people_signed_out: 'Logg inn på Cloud Sync for å se hvem som er med.',
+    people_signed_out: 'Logg inn for å se hvem som er med.',
     you: 'Deg',
     owner_badge: 'Eier',
     joined_today: 'Ble med i dag',

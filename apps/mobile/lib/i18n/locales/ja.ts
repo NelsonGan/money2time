@@ -2854,7 +2854,7 @@ const ja = {
       'アカウントのProは最大5台のスマホまで有効で、5台分の枠はすべて埋まっています。使わなくなったスマホでCloud Syncからサインアウトしてください（30日間使われていないスマホも枠が空きます）。または、このスマホでProを購入してください。',
     needs_pro_title: '同期にはProが必要です',
     needs_pro_body:
-      'サインイン済みです。同期を始めるにはProを入手してください。別のスマホでProを購入した場合は、そのスマホでもCloud Syncにサインインすると、ここでも使えるようになります。',
+      'サインイン済みです。同期を始めるには Pro にしてください。ほかの端末で Pro を購入済みなら、その端末でも Cloud Sync をオンにすると、ここでも使えます。',
     tile_on: 'オン',
     profile_off: 'オフ',
     profile_paused: '一時停止中',
@@ -3326,7 +3326,7 @@ const ja = {
     title: '共有',
     share_toggle: 'この帳簿を共有',
     share_toggle_caption: '最大{{max}}人まで招待できます。招待された人はProが不要です。',
-    needs_cloud_sync: '帳簿を共有するにはCloud Syncにサインインしてください。',
+    needs_cloud_sync: '帳簿を共有するには Cloud Sync をオンにしてください。',
     has_shared_albums: 'この帳簿には共有アルバムがあります。先にアルバムの共有を停止してください。',
     limit_reached: '現在、共有できる帳簿は{{max}}件までです。',
     share_failed:
@@ -3348,7 +3348,7 @@ const ja = {
     owner_note: 'あなたが共有しています。メンバー全員が記録を追加・編集できます。',
     member_note: '{{owner}}さんが共有しています。メンバー全員が記録を追加・編集できます。',
     people: 'メンバー',
-    people_signed_out: 'メンバーを見るにはCloud Syncにサインインしてください。',
+    people_signed_out: '参加者を見るにはサインインしてください。',
     you: 'あなた',
     owner_badge: 'オーナー',
     joined_today: '今日参加',

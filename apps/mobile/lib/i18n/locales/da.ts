@@ -2872,7 +2872,7 @@ const da = {
       'Din kontos Pro gælder op til 5 telefoner, og alle 5 pladser er optaget. Log ud af Cloud Sync på en telefon, du ikke længere bruger (en telefon, der ikke har været brugt i 30 dage, frigør også sin plads). Eller få Pro på denne telefon.',
     needs_pro_title: 'Synkronisering kræver Pro',
     needs_pro_body:
-      'Du er logget ind. Få Pro for at begynde at synkronisere. Har du købt Pro på en anden telefon? Log også ind på Cloud Sync der, så låses det op her.',
+      'Du er logget ind. Få Pro for at begynde at synkronisere. Har du købt Pro på en anden telefon? Slå også Cloud Sync til der, så låses det op her.',
     tile_on: 'Til',
     profile_off: 'Fra',
     profile_paused: 'På pause',
@@ -3350,7 +3350,7 @@ const da = {
     title: 'Deling',
     share_toggle: 'Del dette regnskab',
     share_toggle_caption: 'Inviter op til {{max}} personer. De behøver ikke Pro.',
-    needs_cloud_sync: 'Log ind på Cloud Sync for at dele et regnskab.',
+    needs_cloud_sync: 'Slå Cloud Sync til for at dele et regnskab.',
     has_shared_albums: 'Dette regnskab har delte album. Stop med at dele dem først.',
     limit_reached: 'Du kan dele op til {{max}} regnskaber indtil videre.',
     share_failed:
@@ -3372,7 +3372,7 @@ const da = {
     owner_note: 'Delt af dig. Alle her kan tilføje og redigere poster.',
     member_note: 'Delt af {{owner}}. Alle her kan tilføje og redigere poster.',
     people: 'Personer',
-    people_signed_out: 'Log ind på Cloud Sync for at se, hvem der er med.',
+    people_signed_out: 'Log ind for at se, hvem der er med.',
     you: 'Dig',
     owner_badge: 'Ejer',
     joined_today: 'Kom med i dag',

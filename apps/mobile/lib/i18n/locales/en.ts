@@ -2866,7 +2866,7 @@ const en = {
       "Your account's Pro reaches up to 5 phones, and all 5 places are taken. Sign out of Cloud Sync on a phone you no longer use (a phone left unused for 30 days frees its place too). Or get Pro on this phone.",
     needs_pro_title: 'Syncing needs Pro',
     needs_pro_body:
-      "You're signed in. Get Pro to start syncing. Bought Pro on another phone? Sign in to Cloud Sync there too, and it unlocks here.",
+      "You're signed in. Get Pro to start syncing. Bought Pro on another phone? Turn on Cloud Sync there too, and it unlocks here.",
     tile_on: 'On',
     profile_off: 'Off',
     profile_paused: 'Paused',
@@ -3342,7 +3342,7 @@ const en = {
     title: 'Sharing',
     share_toggle: 'Share this ledger',
     share_toggle_caption: "Invite up to {{max}} people. They don't need Pro.",
-    needs_cloud_sync: 'Sign in to Cloud Sync to share a ledger.',
+    needs_cloud_sync: 'Turn on Cloud Sync to share a ledger.',
     has_shared_albums: 'This ledger has shared albums. Stop sharing them first.',
     limit_reached: 'You can share up to {{max}} ledgers for now.',
     share_failed:
@@ -3363,7 +3363,7 @@ const en = {
     owner_note: 'Shared by you. Everyone here can add and edit entries.',
     member_note: 'Shared by {{owner}}. Everyone here can add and edit entries.',
     people: 'People',
-    people_signed_out: 'Sign in to Cloud Sync to see who is in it.',
+    people_signed_out: 'Sign in to see who is in it.',
     you: 'You',
     owner_badge: 'Owner',
     joined_today: 'Joined today',

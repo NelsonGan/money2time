@@ -2913,7 +2913,7 @@ const fil = {
       'Hanggang 5 telepono ang naaabot ng Pro ng account mo, at puno na ang lahat ng 5 puwesto. Mag-sign out sa Cloud Sync sa teleponong hindi mo na ginagamit (nababakante rin ang puwesto ng teleponong 30 araw nang hindi ginagamit). O kumuha ng Pro sa teleponong ito.',
     needs_pro_title: 'Kailangan ng Pro para mag-sync',
     needs_pro_body:
-      'Naka-sign in ka na. Kumuha ng Pro para magsimulang mag-sync. Bumili ng Pro sa ibang telepono? Mag-sign in din sa Cloud Sync doon, at maa-unlock ito dito.',
+      'Naka-sign in ka. Kumuha ng Pro para magsimulang mag-sync. Bumili ng Pro sa ibang phone? I-on din doon ang Cloud Sync, at maa-unlock ito rito.',
     tile_on: 'On',
     profile_off: 'Off',
     profile_paused: 'Naka-pause',
@@ -3403,7 +3403,7 @@ const fil = {
     title: 'Pag-share',
     share_toggle: 'I-share ang ledger na ito',
     share_toggle_caption: 'Mag-imbita ng hanggang {{max}} tao. Hindi nila kailangan ng Pro.',
-    needs_cloud_sync: 'Mag-sign in sa Cloud Sync para mag-share ng ledger.',
+    needs_cloud_sync: 'I-on ang Cloud Sync para magbahagi ng ledger.',
     has_shared_albums:
       'May mga shared na album ang ledger na ito. Itigil muna ang pag-share sa mga iyon.',
     limit_reached: 'Hanggang {{max}} ledger lang ang puwede mong i-share sa ngayon.',
@@ -3428,7 +3428,7 @@ const fil = {
     owner_note: 'Shinare mo. Puwedeng magdagdag at mag-edit ng entry ang lahat dito.',
     member_note: 'Shinare ni {{owner}}. Puwedeng magdagdag at mag-edit ng entry ang lahat dito.',
     people: 'Mga Tao',
-    people_signed_out: 'Mag-sign in sa Cloud Sync para makita kung sino ang nandito.',
+    people_signed_out: 'Mag-sign in para makita kung sino ang kasali.',
     you: 'Ikaw',
     owner_badge: 'May-ari',
     joined_today: 'Sumali ngayong araw',

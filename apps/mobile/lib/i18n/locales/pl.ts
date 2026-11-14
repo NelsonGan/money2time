@@ -2884,7 +2884,7 @@ const pl = {
       'Pro na Twoim koncie obejmuje maksymalnie 5 telefonów i wszystkie 5 miejsc jest zajętych. Wyloguj się z Cloud Sync na telefonie, którego już nie używasz (telefon nieużywany przez 30 dni też zwalnia swoje miejsce). Albo kup Pro na tym telefonie.',
     needs_pro_title: 'Synchronizacja wymaga Pro',
     needs_pro_body:
-      'Jesteś zalogowany. Kup Pro, aby zacząć synchronizację. Kupiłeś Pro na innym telefonie? Zaloguj się tam też do Cloud Sync, a odblokuje się tutaj.',
+      'Jesteś zalogowany. Kup Pro, aby zacząć synchronizację. Kupiłeś Pro na innym telefonie? Włącz tam też Cloud Sync, a odblokuje się tutaj.',
     tile_on: 'Wł.',
     profile_off: 'Wył.',
     profile_paused: 'Wstrzymano',
@@ -3361,7 +3361,7 @@ const pl = {
     title: 'Udostępnianie',
     share_toggle: 'Udostępnij tę księgę',
     share_toggle_caption: 'Zaproś do {{max}} osób. Nie potrzebują Pro.',
-    needs_cloud_sync: 'Zaloguj się do Cloud Sync, aby udostępnić księgę.',
+    needs_cloud_sync: 'Włącz Cloud Sync, aby udostępnić księgę.',
     has_shared_albums: 'Ta księga zawiera udostępnione albumy. Najpierw przestań je udostępniać.',
     limit_reached: 'Na razie możesz udostępnić maksymalnie {{max}} księgi.',
     share_failed:
@@ -3384,7 +3384,7 @@ const pl = {
     owner_note: 'Udostępniasz tę księgę. Każdy tutaj może dodawać i edytować wpisy.',
     member_note: 'Udostępnia: {{owner}}. Każdy tutaj może dodawać i edytować wpisy.',
     people: 'Osoby',
-    people_signed_out: 'Zaloguj się do Cloud Sync, aby zobaczyć, kto w niej jest.',
+    people_signed_out: 'Zaloguj się, aby zobaczyć, kto w niej jest.',
     you: 'Ty',
     owner_badge: 'Właściciel',
     joined_today: 'Dołączył(a) dziś',
