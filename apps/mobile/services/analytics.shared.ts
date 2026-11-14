@@ -201,6 +201,8 @@ export const GA4_ONLY_EVENTS = {
   // Split bills (Pay First)
   /** A transaction gained a share owed by someone else, on create or on edit. */
   SPLIT_BILL_CREATED: 'Split Bill Created',
+  /** Split Bill's Split by changed how the bill is divided (amount, percentage, shares, adjustment). */
+  SPLIT_METHOD_CHOSEN: 'Split Method Chosen',
   SPLIT_MARKED_PAID: 'Split Marked Paid',
   /** Part of a share was paid back; the rest is still owed. */
   SPLIT_PART_PAID: 'Split Part Paid',

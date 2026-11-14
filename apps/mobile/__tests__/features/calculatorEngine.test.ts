@@ -172,6 +172,21 @@ describe('reduceNumpadKey', () => {
     });
   });
 
+  it('flips the sign with the neg key, keeping it when a pre-fill is replaced', () => {
+    expect(reduceNumpadKey('', false, 'neg')).toEqual({ expression: '-', pristine: false });
+    expect(reduceNumpadKey('-', false, 'neg')).toEqual({ expression: '', pristine: false });
+    expect(reduceNumpadKey('5.00', true, 'neg')).toEqual({ expression: '-5.00', pristine: true });
+    expect(reduceNumpadKey('-5.00', true, 'neg')).toEqual({ expression: '5.00', pristine: true });
+    expect(reduceNumpadKey('-5.00', true, '7', { keepSign: true })).toEqual({
+      expression: '-7',
+      pristine: false,
+    });
+    // Without the sign key (the main pad, a computed "=" result) typing replaces it all.
+    expect(reduceNumpadKey('-5.00', true, '7')).toEqual({ expression: '7', pristine: false });
+    expect(reduceNumpadKey('12', false, 'neg')).toEqual({ expression: '-12', pristine: false });
+    expect(reduceNumpadKey('10+5', false, 'neg')).toEqual({ expression: '-15.00', pristine: true });
+  });
+
   it('deletes the last character', () => {
     expect(reduceNumpadKey('123', false, 'del')).toEqual({ expression: '12', pristine: false });
   });

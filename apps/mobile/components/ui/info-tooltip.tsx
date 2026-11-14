@@ -16,6 +16,9 @@ interface InfoTooltipButtonProps {
   iconSize?: number;
   /** Override the icon color; defaults to the muted theme color. */
   iconColor?: string;
+  /** Laid-out content shown in place of the plain `infoTooltip` text, which
+   *  then serves only as the screen reader's hint. */
+  children?: React.ReactNode;
 }
 
 /**
@@ -28,6 +31,7 @@ export function InfoTooltipButton({
   infoTooltip,
   iconSize = 16,
   iconColor,
+  children,
 }: InfoTooltipButtonProps) {
   const themeColors = useThemeColors();
   const [visible, setVisible] = React.useState(false);
@@ -79,9 +83,11 @@ export function InfoTooltipButton({
                 <X size={16} color={themeColors.textMuted} />
               </Pressable>
             </View>
-            <Text variant="friendly" tone="muted">
-              {infoTooltip}
-            </Text>
+            {children ?? (
+              <Text variant="friendly" tone="muted">
+                {infoTooltip}
+              </Text>
+            )}
           </Pressable>
         </Pressable>
       </Modal>

@@ -26,7 +26,14 @@ import ReanimatedSwipeable, {
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AccountLogo, AccountPickerSheet, Text, ThemeModal } from '~/components/ui';
+import {
+  AccountLogo,
+  AccountPickerSheet,
+  InfoTooltipButton,
+  SegmentedToggle,
+  Text,
+  ThemeModal,
+} from '~/components/ui';
 import { SINGLE_LINE_TEXT_INPUT_STYLE } from '~/components/ui/textInputStyles';
 import { type SplitDraftInput, useTransactions } from '~/context/AppContext';
 import {
@@ -49,10 +56,23 @@ import {
   spreadOverShares,
   sumUnpaidRows,
 } from '~/features/transactions/lib/splitMath';
+import {
+  applyMethodValues,
+  balanceSelfPercent,
+  defaultMethodValue,
+  initialMethodValues,
+  methodNumber,
+  scaleAdjustments,
+  SPLIT_METHODS,
+  type SplitMethod,
+  splitMethodProblem,
+  trimNumber,
+} from '~/features/transactions/lib/splitMethods';
 import { draftPayer, storedFriendPaidRow } from '~/features/transactions/lib/splitPayer';
 import { useSelfPerson } from '~/hooks/useSelfPerson';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
+import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import type { Account, AccountGroup } from '~/types';
 import { cn } from '~/utils';
@@ -236,6 +256,36 @@ function toSplitDraftInputs(
   });
 }
 
+/** The mini numpad's seed for a method value: blank for nothing, so "±" or a digit starts it. */
+function methodSeed(value: string | undefined): string {
+  return methodNumber(value) === 0 ? '' : sanitizeInitialAmount(value ?? '');
+}
+
+/** A method value from the numpad: percentages and shares cannot go below 0. */
+function methodValueFromExpression(method: SplitMethod, expression: string): string {
+  const value = evaluateExpression(expression);
+  return trimNumber(method === 'adjust' ? value : Math.max(0, value));
+}
+
+/** A split method's name, as Split by's explanation and screen readers say it. */
+function methodName(method: SplitMethod): string {
+  return I18n.t(`transactions.editor.split.method_${method}`);
+}
+
+/**
+ * The segments that read as a symbol, so all four fit one row in every
+ * language; the others show their name. The info button spells each one out.
+ */
+const METHOD_SEGMENT_LABELS: Partial<Record<SplitMethod, string>> = {
+  percent: '%',
+  adjust: '+/−',
+};
+
+/** A row's key while the page is open: its id, else its position. */
+function splitRowKey(row: SplitDraft, index: number): string {
+  return row.id ?? `new_${index}`;
+}
+
 export const splitsHelpers = {
   distributeEvenly,
   toSplitDraftInputs,
@@ -310,6 +360,104 @@ function SplitSwipeRow({
     >
       {children}
     </ReanimatedSwipeable>
+  );
+}
+
+/**
+ * What a person entered for a method other than Amount, on the right of their
+ * row: a percentage, a number of shares between − and + steppers, or a signed
+ * adjustment. Tapping the value opens the mini numpad on it.
+ */
+function MethodValueField({
+  method,
+  value,
+  focused,
+  expression,
+  currencySymbol,
+  onFocus,
+  onStep,
+  themeColors,
+  testID,
+}: {
+  method: Exclude<SplitMethod, 'amount'>;
+  value: string;
+  focused: boolean;
+  expression: string;
+  currencySymbol: string;
+  onFocus: () => void;
+  onStep: (delta: number) => void;
+  themeColors: ReturnType<typeof useThemeColors>;
+  testID: string;
+}) {
+  const number = methodNumber(value);
+  const fieldClass = cn(
+    'min-w-[56px] flex-row items-center justify-end rounded-lg px-2 py-1',
+    focused ? 'border border-primary/45 bg-primary/10' : 'bg-secondary/40',
+  );
+
+  if (method === 'shares') {
+    return (
+      <View className="flex-row items-center rounded-full bg-secondary/50">
+        <Pressable
+          onPress={() => onStep(-1)}
+          disabled={number <= 0}
+          hitSlop={4}
+          accessibilityRole="button"
+          accessibilityLabel={I18n.t('transactions.editor.split.fewer_shares')}
+          className="h-8 w-8 items-center justify-center"
+          style={{ opacity: number <= 0 ? 0.35 : 1 }}
+        >
+          <Minus size={14} color={themeColors.text} />
+        </Pressable>
+        <Pressable
+          onPress={onFocus}
+          testID={testID}
+          className={cn(
+            'min-w-[34px] items-center justify-center rounded-lg px-1 py-1',
+            focused ? 'border border-primary/45 bg-primary/10' : '',
+          )}
+        >
+          <Text variant="bodyStrong">{focused ? expression || '0' : trimNumber(number)}</Text>
+        </Pressable>
+        <Pressable
+          onPress={() => onStep(1)}
+          hitSlop={4}
+          accessibilityRole="button"
+          accessibilityLabel={I18n.t('transactions.editor.split.more_shares')}
+          className="h-8 w-8 items-center justify-center"
+        >
+          <Plus size={14} color={themeColors.text} />
+        </Pressable>
+      </View>
+    );
+  }
+
+  if (method === 'percent') {
+    return (
+      <Pressable onPress={onFocus} testID={testID} className={fieldClass}>
+        <Text style={{ color: themeColors.text, fontSize: 15 }}>
+          {focused ? expression || '0' : trimNumber(number)}
+        </Text>
+        <Text variant="caption" tone="muted" className="ml-0.5">
+          %
+        </Text>
+      </Pressable>
+    );
+  }
+
+  // Adjustment: + adds to the person's even part, − takes off it.
+  const sign = number > 0 ? '+' : number < 0 ? '−' : '';
+  const color =
+    number > 0 ? themeColors.success : number < 0 ? themeColors.error : themeColors.text;
+  return (
+    <Pressable onPress={onFocus} testID={testID} className={fieldClass}>
+      <Text variant="caption" tone="muted" className="mr-1">
+        {currencySymbol}
+      </Text>
+      <Text style={{ color: focused ? themeColors.text : color, fontSize: 15 }}>
+        {focused ? expression || '0' : `${sign}${Math.abs(number).toFixed(2)}`}
+      </Text>
+    </Pressable>
   );
 }
 
@@ -589,25 +737,6 @@ export function SplitBillModal({
   );
   useEffect(() => stopHold, [stopHold]);
 
-  // Nothing to scale (no amounts) or a 0% no-op → keep Apply disabled so it
-  // never fires a "success" for a change that doesn't happen.
-  const canApplyPercent = unpaidSum > 0 && percent !== 0;
-
-  const handleApplyPercent = useCallback(() => {
-    if (percent === 0) return;
-    const next = applyPercent(splits, percent);
-    if (!next) return;
-    void triggerHaptic('success');
-    onChange(next, itemized ? undefined : sumUnpaidRows(next));
-    Keyboard.dismiss();
-    // Close the mini numpad. Without this the focused row keeps showing its live
-    // expression (not the freshly scaled amount) and confirming the pad would
-    // overwrite the applied percentage — so applying appeared to do nothing on
-    // the highlighted field.
-    setFocusedAmountIndex(null);
-    setFocusedExpression('');
-  }, [itemized, onChange, percent, splits]);
-
   const formatMoney = useCallback(
     (n: number) => {
       if (formatSettings) return formatAmount(n, formatSettings);
@@ -630,6 +759,160 @@ export function SplitBillModal({
     [applyEvenSplit, onChange, onSplitEvenlyChange, splits],
   );
 
+  // How the bill is divided (Split by). Amount is the default and works as it
+  // always has; the others fill each unpaid row's amount from what the user
+  // enters per person (a percentage, a number of shares, or an adjustment on
+  // an even split). Only the amounts are saved, so the method is chosen per
+  // visit and every visit opens on Amount. Itemized visits have no total to
+  // divide and stay on Amount.
+  const [method, setMethod] = useState<SplitMethod>('amount');
+  // Split evenly belongs to typed amounts; the other methods are even by default.
+  const showEvenToggle = !itemized && method === 'amount';
+  // What each person entered for the method, by row key.
+  const [methodValuesByKey, setMethodValuesByKey] = useState<Record<string, string>>({});
+  const methodValuesFor = useCallback(
+    (rows: SplitDraft[], byKey: Record<string, string> = methodValuesByKey) =>
+      rows.map((row, index) =>
+        row.paid ? '' : (byKey[splitRowKey(row, index)] ?? defaultMethodValue(method)),
+      ),
+    [method, methodValuesByKey],
+  );
+  const methodValues = useMemo(() => methodValuesFor(splits), [methodValuesFor, splits]);
+  const storeMethodValues = useCallback((rows: SplitDraft[], values: string[]) => {
+    const byKey: Record<string, string> = {};
+    rows.forEach((row, index) => {
+      byKey[splitRowKey(row, index)] = values[index] ?? '';
+    });
+    setMethodValuesByKey(byKey);
+  }, []);
+
+  // A payment marked or undone here changes who the bill is divided over.
+  // Percentages and adjustments are worked out again from the amounts (which
+  // stay as they are); shares still hold when a share is paid, but a share
+  // owed again has none, so the page goes back to Amount.
+  const paidSignature = splits.map((row) => (row.paid ? '1' : '0')).join('');
+  const seenPaidSignature = useRef(paidSignature);
+  useEffect(() => {
+    if (seenPaidSignature.current === paidSignature) return;
+    seenPaidSignature.current = paidSignature;
+    if (method === 'amount') return;
+    // The open pad holds a value worked out before; leaving it open would let
+    // Done write it back (or, once the page is on Amount, as an amount).
+    setFocusedAmountIndex(null);
+    setFocusedExpression('');
+    if (method === 'shares') {
+      const missing = splits.some(
+        // A row that was paid holds '' (or nothing, if it was paid on opening).
+        (row, index) => !row.paid && !methodValuesByKey[splitRowKey(row, index)],
+      );
+      if (missing) setMethod('amount');
+      return;
+    }
+    storeMethodValues(splits, initialMethodValues(method, splits, total));
+  }, [method, methodValuesByKey, paidSignature, splits, storeMethodValues, total]);
+
+  // Rows after a person is added or removed: the method divides the bill
+  // again (a percentage that left goes to the user's row), otherwise the
+  // amounts rebalance the way they always have.
+  const rebalanceRows = useCallback(
+    (next: SplitDraft[]): SplitDraft[] => {
+      if (itemized) return next;
+      if (method === 'amount') {
+        return splitEvenly ? applyEvenSplit(next) : autoBalanceSelf(next, total);
+      }
+      let values = methodValuesFor(next);
+      if (method === 'percent') values = balanceSelfPercent(next, values, -1);
+      storeMethodValues(next, values);
+      return applyMethodValues(method, next, values, total);
+    },
+    [applyEvenSplit, itemized, method, methodValuesFor, splitEvenly, storeMethodValues, total],
+  );
+
+  const handleMethodSelect = useCallback(
+    (next: SplitMethod) => {
+      if (next === method) return;
+      void trackEvent(AnalyticsEvents.SPLIT_METHOD_CHOSEN, { method: next });
+      setMethod(next);
+      setFocusedAmountIndex(null);
+      setFocusedExpression('');
+      // Amount keeps the amounts the last method worked out.
+      if (next === 'amount') return;
+      if (splitEvenly) onSplitEvenlyChange(false);
+      const values = initialMethodValues(next, splits, total);
+      storeMethodValues(splits, values);
+      onChange(applyMethodValues(next, splits, values, total));
+    },
+    [method, onChange, onSplitEvenlyChange, splitEvenly, splits, storeMethodValues, total],
+  );
+
+  // A person's value changed: percentages give the user's row what is left of
+  // 100 (as typed amounts give it what is left of the bill), then every
+  // unpaid row's amount is worked out again. Returns the values it stored, so
+  // a caller can seed the next field from them rather than a stale closure.
+  const handleMethodValueChange = useCallback(
+    (index: number, value: string): string[] => {
+      const target = splits[index];
+      if (!target || target.paid || method === 'amount') return methodValues;
+      let values = [...methodValues];
+      values[index] = value;
+      if (method === 'percent') values = balanceSelfPercent(splits, values, index);
+      storeMethodValues(splits, values);
+      onChange(applyMethodValues(method, splits, values, total));
+      return values;
+    },
+    [method, methodValues, onChange, splits, storeMethodValues, total],
+  );
+
+  const handleShareStep = useCallback(
+    (index: number, delta: number) => {
+      const current = methodNumber(methodValues[index]);
+      const next = Math.max(0, Math.round((current + delta) * 100) / 100);
+      if (next === current) return;
+      void triggerHaptic('selection');
+      // Stepping the row the pad is on: close the pad, or its Done would put
+      // back the count it was opened with.
+      if (index === focusedAmountIndex) {
+        setFocusedAmountIndex(null);
+        setFocusedExpression('');
+      }
+      handleMethodValueChange(index, trimNumber(next));
+    },
+    [focusedAmountIndex, handleMethodValueChange, methodValues],
+  );
+
+  // A percentage, share or adjustment split that does not work out yet.
+  const methodProblem = itemized ? null : splitMethodProblem(method, splits, methodValues);
+
+  // Nothing to scale (no amounts) or a 0% no-op → keep Apply disabled so it
+  // never fires a "success" for a change that doesn't happen. A method that
+  // does not add up yet has nothing sound to scale either.
+  const canApplyPercent = unpaidSum > 0 && percent !== 0 && methodProblem === null;
+
+  const handleApplyPercent = useCallback(() => {
+    if (percent === 0) return;
+    const scaled = applyPercent(splits, percent);
+    if (!scaled) return;
+    let next = scaled;
+    let nextTotal = itemized ? undefined : sumUnpaidRows(scaled);
+    if (method !== 'amount' && !itemized) {
+      // Percentages and shares divide the larger bill the same way;
+      // adjustments grow with it.
+      nextTotal = Math.round(total * (1 + percent / 100) * 100) / 100;
+      const values = method === 'adjust' ? scaleAdjustments(methodValues, percent) : methodValues;
+      storeMethodValues(splits, values);
+      next = applyMethodValues(method, splits, values, nextTotal);
+    }
+    void triggerHaptic('success');
+    onChange(next, nextTotal);
+    Keyboard.dismiss();
+    // Close the mini numpad. Without this the focused row keeps showing its live
+    // expression (not the freshly scaled amount) and confirming the pad would
+    // overwrite the applied percentage — so applying appeared to do nothing on
+    // the highlighted field.
+    setFocusedAmountIndex(null);
+    setFocusedExpression('');
+  }, [itemized, method, methodValues, onChange, percent, splits, storeMethodValues, total]);
+
   const handleAddPerson = useCallback(() => {
     void triggerHaptic('selection');
     const next: SplitDraft[] = [
@@ -642,12 +925,8 @@ export function SplitBillModal({
         paybackAccountId: defaultAccountId,
       },
     ];
-    if (itemized) {
-      onChange(next);
-      return;
-    }
-    onChange(splitEvenly ? applyEvenSplit(next) : autoBalanceSelf(next, total));
-  }, [applyEvenSplit, defaultAccountId, itemized, onChange, splitEvenly, splits, total]);
+    onChange(rebalanceRows(next));
+  }, [defaultAccountId, onChange, rebalanceRows, splits]);
 
   // A shared album's bill adds people who joined it, not typed names.
   const addableMembers = useMemo(
@@ -693,13 +972,9 @@ export function SplitBillModal({
               index === blank ? { ...row, personName: member.name, albumMemberId: member.id } : row,
             )
           : [...splits, added];
-      if (itemized) {
-        onChange(next);
-        return;
-      }
-      onChange(splitEvenly ? applyEvenSplit(next) : autoBalanceSelf(next, total));
+      onChange(rebalanceRows(next));
     },
-    [applyEvenSplit, defaultAccountId, itemized, onChange, splitEvenly, splits, total],
+    [defaultAccountId, onChange, rebalanceRows, splits],
   );
 
   const handleRemove = useCallback(
@@ -719,13 +994,9 @@ export function SplitBillModal({
       // transfer + parent's reduced amount alone — the user can clean up the
       // transfer separately from the activity list if they want.
       const next = splits.filter((_, i) => i !== index);
-      if (itemized) {
-        onChange(next);
-        return;
-      }
-      onChange(splitEvenly ? applyEvenSplit(next) : autoBalanceSelf(next, total));
+      onChange(rebalanceRows(next));
     },
-    [applyEvenSplit, itemized, onChange, splitEvenly, splits, total],
+    [onChange, rebalanceRows, splits],
   );
 
   // A member ticked on or off in the sheet: added to the bill, or taken off it
@@ -792,9 +1063,13 @@ export function SplitBillModal({
       Keyboard.dismiss();
       setFocusedNameIndex(null);
       setFocusedAmountIndex(index);
-      setFocusedExpression(sanitizeInitialAmount(target.amount));
+      setFocusedExpression(
+        method === 'amount'
+          ? sanitizeInitialAmount(target.amount)
+          : methodSeed(methodValues[index]),
+      );
     },
-    [splits],
+    [method, methodValues, splits],
   );
 
   // Each keystroke: keep the live expression for display and push the evaluated
@@ -803,15 +1078,41 @@ export function SplitBillModal({
     (expression: string) => {
       if (focusedAmountIndex === null) return;
       setFocusedExpression(expression);
+      if (method !== 'amount') {
+        handleMethodValueChange(focusedAmountIndex, methodValueFromExpression(method, expression));
+        return;
+      }
       handleAmountChange(focusedAmountIndex, formatCalcAmount(evaluateExpression(expression)));
     },
-    [focusedAmountIndex, handleAmountChange],
+    [focusedAmountIndex, handleAmountChange, handleMethodValueChange, method],
   );
 
   // Done: finalize the row (normalized 2dp), then advance to the next editable
   // row keeping the pad open, or close it when there is none left.
   const handleNumpadConfirm = useCallback(() => {
     if (focusedAmountIndex === null) return;
+    if (method !== 'amount') {
+      // The value is already applied keystroke by keystroke, so only a value
+      // that differs (a pending operation worked out) is applied again: passing
+      // through a friend's percentage untouched must not give the user's row
+      // back what they just typed for it. Then move on to the next person
+      // still owing, seeded with what the method now holds.
+      const finalMethodValue = methodValueFromExpression(method, focusedExpression);
+      const values =
+        finalMethodValue !== trimNumber(methodNumber(methodValues[focusedAmountIndex]))
+          ? handleMethodValueChange(focusedAmountIndex, finalMethodValue)
+          : methodValues;
+      const following = nextEditableAmountIndex(splits, focusedAmountIndex);
+      if (following === null) {
+        setFocusedAmountIndex(null);
+        setFocusedExpression('');
+        return;
+      }
+      void triggerHaptic('selection');
+      setFocusedAmountIndex(following);
+      setFocusedExpression(methodSeed(values[following]));
+      return;
+    }
     const finalValue = formatCalcAmount(evaluateExpression(focusedExpression));
     // Commit and seed the next row from the SAME resulting array — deriving the
     // next seed from the `splits` closure would miss this commit's rebalance.
@@ -831,7 +1132,10 @@ export function SplitBillModal({
     computeAmountUpdate,
     focusedAmountIndex,
     focusedExpression,
+    handleMethodValueChange,
     itemized,
+    method,
+    methodValues,
     onChange,
     onSplitEvenlyChange,
     splitEvenly,
@@ -843,9 +1147,10 @@ export function SplitBillModal({
   // commit; the editor derives the parent amount from the rows.
   // The user's own share cannot drop below what they have already paid back.
   const belowPaidBack = friendPaid && selfAmount + 0.005 < paidBack;
-  const canDone = (itemized ? unpaidSum > 0.004 : sumMatches) && !belowPaidBack;
+  const canDone =
+    (itemized ? unpaidSum > 0.004 : sumMatches) && !belowPaidBack && methodProblem === null;
   // Whether the sum bar shows its "all good" state (drives the check + hint).
-  const sumComplete = itemized ? canDone : sumMatches;
+  const sumComplete = (itemized ? canDone : sumMatches) && methodProblem === null;
 
   // Once the rows add up, the bar says what the split means for the user in
   // one line instead of repeating the total above: what they owe the friend
@@ -956,10 +1261,63 @@ export function SplitBillModal({
             <View className="mt-2 h-[3px] w-8 rounded-full bg-primary/30" />
           </View>
 
+          {/* Split by: how the bill is divided, one tap away. Amount is the
+              page as it always was; what each method does is behind the
+              info button. Not on an itemized visit, which has no total. */}
+          {!itemized ? (
+            <View className="mx-4 mt-3 flex-row items-center gap-2.5">
+              <SegmentedToggle
+                value={method}
+                onChange={handleMethodSelect}
+                size="compact"
+                className="flex-1"
+                options={SPLIT_METHODS.map((option) => ({
+                  value: option,
+                  label: METHOD_SEGMENT_LABELS[option] ?? methodName(option),
+                  accessibilityLabel: methodName(option),
+                }))}
+              />
+              <InfoTooltipButton
+                title={I18n.t('transactions.editor.split.split_by_label')}
+                infoTooltip={SPLIT_METHODS.map(
+                  (option) =>
+                    `${methodName(option)}: ${I18n.t(`transactions.editor.split.method_${option}_hint`)}`,
+                ).join('\n')}
+                iconSize={18}
+              >
+                <View className="mt-2 gap-3">
+                  {SPLIT_METHODS.map((option) => (
+                    <View key={option} className="flex-row items-center gap-3">
+                      <View
+                        className={cn(
+                          'min-w-[68px] items-center rounded-xl px-2 py-1.5',
+                          option === method ? 'bg-primary' : 'bg-secondary/60',
+                        )}
+                      >
+                        <Text
+                          variant="caption"
+                          className={cn(
+                            'font-medium',
+                            option === method ? 'text-primary-foreground' : 'text-foreground',
+                          )}
+                        >
+                          {METHOD_SEGMENT_LABELS[option] ?? methodName(option)}
+                        </Text>
+                      </View>
+                      <Text variant="body" tone="muted" className="flex-1">
+                        {I18n.t(`transactions.editor.split.method_${option}_hint`)}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              </InfoTooltipButton>
+            </View>
+          ) : null}
+
           {/* How the bill is settled, in one card: who paid it (Me, or a friend
-              on it, in which case the user owes them their own share), and
-              whether it is shared evenly. */}
-          {(hasFriends && !groupMembers) || !itemized ? (
+              on it, in which case the user owes them their own share), and,
+              when typing amounts, whether it is shared evenly. */}
+          {(hasFriends && !groupMembers) || showEvenToggle ? (
             <View className="mx-4 mt-3 overflow-hidden rounded-[20px] border border-border/25 bg-card/60">
               {hasFriends && !groupMembers ? (
                 <Pressable
@@ -1000,10 +1358,10 @@ export function SplitBillModal({
                   <ChevronRight size={16} color={themeColors.textMuted} />
                 </Pressable>
               ) : null}
-              {hasFriends && !groupMembers && !itemized ? (
+              {hasFriends && !groupMembers && showEvenToggle ? (
                 <View className="mx-4 h-[1px] bg-border/15" />
               ) : null}
-              {!itemized ? (
+              {showEvenToggle ? (
                 <View className="flex-row items-center px-4 py-2">
                   <Text variant="body" className="flex-1">
                     {I18n.t('transactions.editor.split.even_toggle')}
@@ -1032,11 +1390,66 @@ export function SplitBillModal({
                 !friendPaid && !row.isSelf && !!row.id && !disabledRow && !!onMarkPaid;
               const isPayerRow = friendPaid && row === payerRow;
               const canUndo = disabledRow && !!row.id && !!onMarkUnpaid && newlyPaidIds.has(row.id);
-              const rowKey = row.id ?? `new_${index}`;
+              const rowKey = splitRowKey(row, index);
               const isUnpaidFriend = !row.isSelf && !disabledRow;
               // Top line (avatar + name + amount) — identical for every row.
               // Reused as the swipeable foreground for unpaid friends and rendered
               // plainly for Me and already-paid rows.
+              // With a method other than Amount the row shows the amount it
+              // works out to under the name, and the value entered on the right.
+              const showComputed = method !== 'amount' && !disabledRow;
+              const nameField =
+                groupMembers && !row.isSelf ? (
+                  <Pressable
+                    onPress={() => {
+                      void triggerHaptic('selection');
+                      setMemberSheetOpen(true);
+                    }}
+                    disabled={disabledRow}
+                    accessibilityRole="button"
+                    accessibilityLabel={
+                      row.personName.trim() || I18n.t('transactions.editor.split.choose_member')
+                    }
+                    testID={`split-member-${index}`}
+                    className={showComputed ? 'py-0.5' : 'flex-1 py-1'}
+                  >
+                    <Text
+                      numberOfLines={1}
+                      style={{
+                        color: disabledRow
+                          ? themeColors.textMuted
+                          : row.personName.trim()
+                            ? themeColors.text
+                            : `${themeColors.mutedForeground}99`,
+                        fontSize: 15,
+                      }}
+                    >
+                      {row.personName.trim() || I18n.t('transactions.editor.split.choose_member')}
+                    </Text>
+                  </Pressable>
+                ) : (
+                  <TextInput
+                    value={row.isSelf ? me.name : row.personName}
+                    editable={!row.isSelf && !disabledRow}
+                    onFocus={() => handleNameFocus(index)}
+                    onBlur={handleNameBlur}
+                    onChangeText={(text) => handleNameChange(index, text)}
+                    placeholder={
+                      row.isSelf
+                        ? I18n.t('transactions.editor.split.me_label')
+                        : I18n.t('transactions.editor.split.person_placeholder')
+                    }
+                    placeholderTextColor={`${themeColors.mutedForeground}99`}
+                    style={[
+                      SINGLE_LINE_TEXT_INPUT_STYLE,
+                      showComputed ? null : styles.nameInput,
+                      {
+                        color: disabledRow ? themeColors.textMuted : themeColors.text,
+                        fontSize: 15,
+                      },
+                    ]}
+                  />
+                );
               const topLine = (
                 <View className="flex-row items-center gap-2.5">
                   {row.isSelf && me.avatarUri ? (
@@ -1082,56 +1495,21 @@ export function SplitBillModal({
                     </View>
                   )}
 
-                  {groupMembers && !row.isSelf ? (
-                    <Pressable
-                      onPress={() => {
-                        void triggerHaptic('selection');
-                        setMemberSheetOpen(true);
-                      }}
-                      disabled={disabledRow}
-                      accessibilityRole="button"
-                      accessibilityLabel={
-                        row.personName.trim() || I18n.t('transactions.editor.split.choose_member')
-                      }
-                      testID={`split-member-${index}`}
-                      className="flex-1 py-1"
-                    >
+                  {showComputed ? (
+                    <View className="min-w-0 flex-1">
+                      {nameField}
                       <Text
+                        variant="caption"
                         numberOfLines={1}
-                        style={{
-                          color: disabledRow
-                            ? themeColors.textMuted
-                            : row.personName.trim()
-                              ? themeColors.text
-                              : `${themeColors.mutedForeground}99`,
-                          fontSize: 15,
-                        }}
+                        className={cn(
+                          Number(row.amount) < 0 ? 'text-destructive' : 'text-muted-foreground',
+                        )}
                       >
-                        {row.personName.trim() || I18n.t('transactions.editor.split.choose_member')}
+                        {formatMoney(Number(row.amount) || 0)}
                       </Text>
-                    </Pressable>
+                    </View>
                   ) : (
-                    <TextInput
-                      value={row.isSelf ? me.name : row.personName}
-                      editable={!row.isSelf && !disabledRow}
-                      onFocus={() => handleNameFocus(index)}
-                      onBlur={handleNameBlur}
-                      onChangeText={(text) => handleNameChange(index, text)}
-                      placeholder={
-                        row.isSelf
-                          ? I18n.t('transactions.editor.split.me_label')
-                          : I18n.t('transactions.editor.split.person_placeholder')
-                      }
-                      placeholderTextColor={`${themeColors.mutedForeground}99`}
-                      style={[
-                        SINGLE_LINE_TEXT_INPUT_STYLE,
-                        styles.nameInput,
-                        {
-                          color: disabledRow ? themeColors.textMuted : themeColors.text,
-                          fontSize: 15,
-                        },
-                      ]}
-                    />
+                    nameField
                   )}
 
                   {isPayerRow ? (
@@ -1141,26 +1519,46 @@ export function SplitBillModal({
                       </Text>
                     </View>
                   ) : null}
-                  <Text variant="caption" tone="muted">
-                    {currencySymbol}
-                  </Text>
-                  <Pressable
-                    onPress={() => handleAmountFocus(index)}
-                    disabled={disabledRow}
-                    className={cn(
-                      'min-w-[64px] items-end justify-center rounded-lg px-2 py-1',
-                      focusedAmountIndex === index ? 'border border-primary/45 bg-primary/10' : '',
-                    )}
-                  >
-                    <Text
-                      style={{
-                        color: disabledRow ? themeColors.textMuted : themeColors.text,
-                        fontSize: 15,
-                      }}
-                    >
-                      {focusedAmountIndex === index ? focusedExpression || '0' : row.amount || '0'}
-                    </Text>
-                  </Pressable>
+                  {showComputed ? (
+                    <MethodValueField
+                      method={method}
+                      value={methodValues[index] ?? ''}
+                      focused={focusedAmountIndex === index}
+                      expression={focusedExpression}
+                      currencySymbol={currencySymbol}
+                      onFocus={() => handleAmountFocus(index)}
+                      onStep={(delta) => handleShareStep(index, delta)}
+                      themeColors={themeColors}
+                      testID={`split-value-${index}`}
+                    />
+                  ) : (
+                    <>
+                      <Text variant="caption" tone="muted">
+                        {currencySymbol}
+                      </Text>
+                      <Pressable
+                        onPress={() => handleAmountFocus(index)}
+                        disabled={disabledRow}
+                        className={cn(
+                          'min-w-[64px] items-end justify-center rounded-lg px-2 py-1',
+                          focusedAmountIndex === index
+                            ? 'border border-primary/45 bg-primary/10'
+                            : '',
+                        )}
+                      >
+                        <Text
+                          style={{
+                            color: disabledRow ? themeColors.textMuted : themeColors.text,
+                            fontSize: 15,
+                          }}
+                        >
+                          {focusedAmountIndex === index
+                            ? focusedExpression || '0'
+                            : row.amount || '0'}
+                        </Text>
+                      </Pressable>
+                    </>
+                  )}
                 </View>
               );
               return (
@@ -1372,10 +1770,14 @@ export function SplitBillModal({
                     ? I18n.t('transactions.editor.split.itemized_total', {
                         sum: formatMoney(unpaidSum),
                       })
-                    : I18n.t('transactions.editor.split.sum_match', {
-                        sum: formatMoney(unpaidSum),
-                        total: formatMoney(total),
-                      }))}
+                    : methodProblem?.kind === 'percent'
+                      ? I18n.t('transactions.editor.split.percent_sum', {
+                          given: trimNumber(methodProblem.given),
+                        })
+                      : I18n.t('transactions.editor.split.sum_match', {
+                          sum: formatMoney(unpaidSum),
+                          total: formatMoney(total),
+                        }))}
               </Text>
               {sumComplete && !belowPaidBack ? (
                 <Check size={16} color={themeColors.success} />
@@ -1384,6 +1786,26 @@ export function SplitBillModal({
             {sumComplete || belowPaidBack ? null : itemized ? (
               <Text variant="caption" tone="muted" className="mt-0.5">
                 {I18n.t('transactions.editor.split.itemized_total_zero_hint')}
+              </Text>
+            ) : methodProblem ? (
+              <Text
+                variant="caption"
+                className={cn(
+                  'mt-0.5',
+                  methodProblem.kind === 'percent' && methodProblem.diff > 0
+                    ? 'text-success'
+                    : 'text-destructive',
+                )}
+              >
+                {methodProblem.kind === 'percent'
+                  ? methodProblem.diff > 0
+                    ? I18n.t('transactions.editor.split.percent_left', {
+                        diff: trimNumber(methodProblem.diff),
+                      })
+                    : I18n.t('transactions.editor.split.percent_over', {
+                        diff: trimNumber(Math.abs(methodProblem.diff)),
+                      })
+                  : I18n.t(`transactions.editor.split.${methodProblem.kind}`)}
               </Text>
             ) : (
               <Text
@@ -1407,6 +1829,7 @@ export function SplitBillModal({
             initialExpression={focusedExpression}
             onValueChange={handleNumpadValueChange}
             onConfirm={handleNumpadConfirm}
+            signKey={method === 'adjust'}
           />
         ) : null}
       </SafeAreaView>
