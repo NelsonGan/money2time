@@ -4150,16 +4150,16 @@ times out early enough to leave the next 25 seconds of the 70-second scan
 budget (`BACKUP_RESERVE_MS`, or half of what is left when less), so a hung
 model cannot starve the rest.
 
-**`SECOND_BACKUP_MODEL` is `openai/gpt-6-luna`.** OpenRouter serves
-`qwen/qwen3.7-flash` from Alibaba alone, and since 2026-11-11 Alibaba has
-refused it at busy times with a 429 "temporarily rate-limited upstream" (none
-of 268 Qwen calls in the week before, 42 of 183 from 11 to 14 November). Where
-Claude runs first, that 429 rarely matters; for users who skip Claude (below)
-it was the end of the scan, which the app drops without a message. The second
-backup runs on OpenAI, Azure and Bedrock, so the same limit does not catch it.
-OpenAI does not serve China, Hong Kong or Macau, so OpenRouter may refuse it
-for those users as it refuses Claude; region 403s on `openai/` generations in
-`$ai_generation` mean it does, and the slot then needs a model they can reach.
+**`SECOND_BACKUP_MODEL` is `deepseek/deepseek-v4.1-flash-1017`.** OpenRouter
+serves `qwen/qwen3.7-flash` from Alibaba alone, and since 2026-11-11 Alibaba
+has refused it at busy times with a 429 "temporarily rate-limited upstream"
+(none of 268 Qwen calls in the week before, 42 of 183 from 11 to 14 November).
+Where Claude runs first, that 429 rarely matters; for users who skip Claude
+(below) it was the end of the scan, which the app drops without a message.
+DeepSeek V4.1 Flash reads images and runs on dozens of providers, so one busy
+provider does not stop it, and as a Chinese model it is not refused for users
+in China or Hong Kong the way Claude and OpenAI models are. Region 403s on its
+generations would mean that has changed.
 
 **Hong Kong, China and Macau users skip Claude.** OpenRouter refuses Claude
 for users there with a 403 "This model is not available in your region": 492

@@ -64,11 +64,10 @@ BACKUP_MODEL = "qwen/qwen3.7-flash"
 # Tried last, when BACKUP_MODEL fails too. Paid from OpenRouter credits.
 # OpenRouter serves qwen3.7-flash from Alibaba alone, which rate-limits it
 # ("temporarily rate-limited upstream") at busy times since 2026-11-11; this
-# model runs on OpenAI, Azure and Bedrock, so it is not caught by the same
-# limit. OpenAI does not serve China, Hong Kong or Macau, so it may be refused
-# for the users in CLAUDE_BLOCKED_COUNTRIES too: watch its region 403s in
-# PostHog. Remove the line to stop at BACKUP_MODEL.
-SECOND_BACKUP_MODEL = "openai/gpt-6-luna"
+# model runs on dozens of providers, so one busy provider does not stop it, and
+# it is not refused in China or Hong Kong the way Claude and OpenAI are.
+# Remove the line to stop at BACKUP_MODEL.
+SECOND_BACKUP_MODEL = "deepseek/deepseek-v4.1-flash-1017"
 # Countries whose users skip Claude and start at BACKUP_MODEL. OpenRouter
 # refuses Claude there ("This model is not available in your region", 403),
 # going by where the user is: a Worker pinned to Singapore was still refused.
