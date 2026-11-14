@@ -1,7 +1,7 @@
 type MobilePlatform = "android" | "ios";
 export type DownloadTarget = "app_store" | "google_play" | "none";
 
-const PRODUCTION_HOSTS = new Set(["money2time.com", "www.money2time.com", "app.money2time.com"]);
+const PRODUCTION_HOSTS = new Set(["money2time.com", "www.money2time.com", "app.money2time.com", "album.money2time.com"]);
 
 /**
  * The Web Dashboard lives on its own host. The same Next.js app
@@ -20,6 +20,18 @@ export function appUrl(locale: string): string {
 
 export function isAppHost(hostname: string): boolean {
   return hostname.startsWith("app.");
+}
+
+/**
+ * Shared albums on the web: where an album's invite link opens, and where
+ * someone without the app joins and uses the album. `src/proxy.ts` sends
+ * every page on an `album.` host to the album route; `album.localhost`
+ * stands in for it in development.
+ */
+export const ALBUM_ORIGIN = "https://album.money2time.com";
+
+export function isAlbumHost(hostname: string): boolean {
+  return hostname.startsWith("album.");
 }
 
 const IOS_PATTERN = /iphone|ipad|ipod/i;

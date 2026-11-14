@@ -1,8 +1,8 @@
 import { bindings, defineConfig, defineWorker, triggers } from "cf/config";
 
 /**
- * The one Worker that serves www.money2time.com and the Web Dashboard at
- * app.money2time.com. vinext builds it with Vite, and `cf` deploys it from this
+ * The one Worker that serves www.money2time.com, the Web Dashboard at
+ * app.money2time.com and shared albums at album.money2time.com. vinext builds it with Vite, and `cf` deploys it from this
  * file, so this is where every binding, domain and runtime flag lives. There
  * is no `wrangler.jsonc`. README: *Hosting*.
  */
@@ -31,10 +31,11 @@ export default defineConfig({
     },
 
     /*
-     * `www` is the site and `app` the Web Dashboard (`src/proxy.ts` tells them
-     * apart); each is a custom domain, so Cloudflare keeps its DNS record.
+     * `www` is the site, `app` the Web Dashboard and `album` shared albums
+     * (`src/proxy.ts` tells them apart); each is a custom domain, so
+     * Cloudflare keeps its DNS record.
      */
-    domains: ["www.money2time.com", "app.money2time.com"],
+    domains: ["www.money2time.com", "app.money2time.com", "album.money2time.com"],
 
     /*
      * The apex only `308`s to `www` (`src/proxy.ts`). It reaches the Worker
@@ -57,6 +58,13 @@ export default defineConfig({
     env: {
       /* Build output, and the prerendered pages vinext reads back from it. */
       ASSETS: bindings.assets(),
+      /*
+       * The cloud-sync Worker (apps/cloudflare/workers/cloud-sync): accounts
+       * and shared albums, for album.money2time.com's API (`src/app/api`).
+       * A binding rather than a fetch, so it runs in the same place and the
+       * visitor's address reaches the Worker's rate limits.
+       */
+      CLOUD_SYNC: bindings.worker({ worker: "money2time-workers-cloud-sync" }),
     },
   }),
 });

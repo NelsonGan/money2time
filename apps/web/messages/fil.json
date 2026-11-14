@@ -50,6 +50,10 @@
     "dashboard": {
       "title": "Web Dashboard - Money2Time",
       "description": "I-scan gamit ang iyong telepono para makita ang Money2Time data mo sa malaking screen: paggastos, net worth, budget at ang mga oras sa likod ng bawat pagbili. May end-to-end encryption, walang iniimbak online."
+    },
+    "album": {
+      "title": "Sumali sa shared album ko · Money2Time",
+      "description": "Hatiin ang gastos sa trip at tingnan kung sino ang may utang kanino. Libre, sa browser mo mismo, hindi kailangan ng app."
     }
   },
   "common": {
@@ -2216,6 +2220,230 @@
     "dropdown": {
       "search": "Maghanap",
       "noMatch": "Walang tugma"
+    }
+  },
+  "album": {
+    "untitled": "Shared na album",
+    "someone": "Isang tao",
+    "cancel": "Kanselahin",
+    "save": "I-save",
+    "undo": "I-undo",
+    "retry": "Subukan ulit",
+    "today": "Ngayon",
+    "signOut": "Mag-sign out",
+    "tabs": {
+      "transactions": "Mga transaksyon",
+      "breakdown": "Breakdown",
+      "balances": "Mga balanse"
+    },
+    "categories": {
+      "food": "Pagkain",
+      "groceries": "Grocery",
+      "transport": "Transportasyon",
+      "housing": "Tirahan",
+      "bills": "Mga Bayarin",
+      "healthcare": "Kalusugan",
+      "shopping": "Shopping",
+      "other": "Iba pa"
+    },
+    "signIn": {
+      "email": "Magpatuloy gamit ang email",
+      "emailLabel": "Email address",
+      "emailPlaceholder": "ikaw@example.com",
+      "badEmail": "Maglagay ng tamang email address.",
+      "sendCode": "Ipadala ang code",
+      "codeSent": "Ilagay ang 6-digit na code na ipinadala namin sa <strong>{email}</strong>.",
+      "codeLabel": "Sign-in code",
+      "verify": "Mag-sign in",
+      "resend": "Magpadala ng bagong code",
+      "otherEmail": "Gumamit ng ibang email",
+      "otherWays": "Ibang paraan para mag-sign in",
+      "wrongCode": "Hindi gumana ang code na iyan. Suriin ito, o magpadala ng bago."
+    },
+    "home": {
+      "title": "Ang mga shared album mo",
+      "landingTitle": "Hatiin ang gastos sa trip kasama ang barkada",
+      "landingBody": "Idagdag ang binayaran mo, tingnan kung sino ang may utang kanino, at mag-settle up. Libre, dito mismo sa browser mo.",
+      "signedInAs": "Naka-sign in bilang {email}",
+      "emptyTitle": "Wala pang shared album",
+      "emptyBody": "Buksan ang invite link na ipinadala ng kaibigan mo para sumali sa album nila. Sa Money2Time app ginagawa ang mga album.",
+      "yours": "Sa iyo"
+    },
+    "join": {
+      "eyebrow": "Shared na album",
+      "invitedBy": "Inimbitahan ka ni {name} na maghati ng mga bill",
+      "signInTitle": "Mag-sign in para sumali",
+      "signInBody": "Libre, at hindi kailangan ng app: gumagana ang lahat dito mismo.",
+      "nameLabel": "Pangalan mo sa album na ito",
+      "join": "Sumali sa album",
+      "signedInAs": "Naka-sign in bilang {email}.",
+      "haveApp": "May Money2Time app ka?",
+      "openInApp": "Buksan sa app",
+      "expiredTitle": "Expired na ang invite link na ito",
+      "expiredBody": "Gumagana ang mga invite link nang 24 oras. Hilingin kay {name} na magpadala ng bago.",
+      "ledgerTitle": "Para sa shared na ledger ang link na ito",
+      "ledgerBody": "Nasa Money2Time app lang ang mga shared na ledger. Buksan doon ang link para sumali.",
+      "full": "Puno na ang album na ito. Hilingin sa may-ari na magbigay ng puwang."
+    },
+    "joined": {
+      "eyebrow": "Kasali ka na",
+      "title": "Welcome sa {name}",
+      "body": "Idagdag ang binayaran mo at tingnan kung sino ang may utang kanino. Puwede mong ituloy dito, o lumipat sa app anumang oras.",
+      "web": "Ituloy sa web"
+    },
+    "app": {
+      "title": "Kunin ang Money2Time app",
+      "body": "Mag-sign in gamit ang parehong account at kasama mo ang mga shared album mo, pati lahat ng idinagdag mo rito."
+    },
+    "banner": {
+      "title": "Mas madali sa app",
+      "body": "Parehong account, parehong album",
+      "get": "Kunin",
+      "dismiss": "Hindi ngayon"
+    },
+    "album": {
+      "sections": "Mga seksyon ng album",
+      "signInTitle": "Mag-sign in para makita ang album na ito",
+      "signInBody": "Gamitin ang account na ginamit mo sa pagsali.",
+      "goneTitle": "Wala ka sa album na ito",
+      "goneBody": "Baka binura na ito, o umalis ka o inalis ka rito. Humingi ng bagong invite link para sumali ulit."
+    },
+    "people": {
+      "title": "Mga tao",
+      "count": "{count, plural, one {# tao} other {# na tao}}",
+      "you": "Ikaw",
+      "joined": "Sumali na",
+      "left": "Umalis na",
+      "unnamed": "Kaibigan",
+      "rename": "Palitan ang pangalan",
+      "yourName": "Pangalan mo",
+      "nameTaken": "May ganyang pangalan na rito.",
+      "invite": "Invite link",
+      "inviteInfo": "Makakasali sa album ang sinumang may link na ito. Gumagana ito nang 24 oras; pinapatigil agad ng Bagong link ang luma.",
+      "inviteShareTitle": "Sumali sa shared album ko",
+      "share": "I-share",
+      "copy": "Kopyahin",
+      "copied": "Nakopya",
+      "newLink": "Bagong link",
+      "simplify": "Pasimplehin ang utang ng grupo",
+      "simplifyInfo": "Pinagsasama ang mga utang sa grupo para mas kaunti ang babayaran. Walang magbabayad o makakatanggap ng mas malaki sa kabuuan.",
+      "leave": "Umalis sa album",
+      "leaveTitle": "Umalis sa {name}?",
+      "leaveBody": "Mananatili sa album ang mga bill mo para sa iba, at hindi mo na ito mababago.",
+      "remove": "Alisin",
+      "removeTitle": "Alisin si {name} sa album?",
+      "removeBody": "Hindi na nila matatanggap ang mga bill ng album na ito. Mananatili ang mga bill na kasama sila."
+    },
+    "bill": {
+      "add": "Magdagdag ng bill",
+      "new": "Bagong bill",
+      "edit": "I-edit ang bill",
+      "view": "Bill",
+      "amount": "Halaga",
+      "currency": "Currency",
+      "inThisAlbum": "Sa album na ito",
+      "allCurrencies": "Lahat ng currency",
+      "note": "Para saan ito?",
+      "notePlaceholder": "Para saan ito?",
+      "category": "Kategorya",
+      "ownCategory": "Nasa {name}",
+      "date": "Petsa",
+      "paidBy": "Binayaran ni",
+      "save": "I-save",
+      "saved": "Na-save ang bill",
+      "added": "Naidagdag ang bill",
+      "deleted": "Nabura ang bill",
+      "delete": "Burahin",
+      "deleteTitle": "Burahin ang bill na ito?",
+      "deleteBody": "Mawawala ito para sa lahat sa album.",
+      "deleteBodyPaid": "Mawawala ito para sa lahat sa album. Mananatili ang mga bayad dito, at kailangang ibalik ang anumang nabayaran na.",
+      "paidEditTitle": "May mga bayad ang bill na ito",
+      "paidEditBody": "Mananatili ang mga bayad. Kapag bumaba ang isang parte sa nabayaran na, kailangang ibalik ang diperensya.",
+      "payments": "Mga bayad",
+      "paymentLine": "Binayaran ni {from} si {to} ng {amount}",
+      "shared": "Shared na album",
+      "untitled": "Bill",
+      "youPaid": "Ikaw ang nagbayad",
+      "youLent": "Ikaw ang nagbayad · nagpautang ka ng {amount}",
+      "theyPaidYourShare": "Nagbayad si {name} · hati mo {amount}",
+      "notInvolved": "Nagbayad si {name} · hindi mo bill",
+      "emptyTitle": "Wala pang bill",
+      "emptyBody": "Idagdag ang una: magkano, sino ang nagbayad, at kanino ito hahatiin."
+    },
+    "split": {
+      "evenly": "Hatiin nang pantay",
+      "by": "Hatiin ayon sa",
+      "amount": "Halaga",
+      "amountHint": "I-type ang babayaran ng bawat isa",
+      "percentHint": "Bigyan ang bawat isa ng porsyento ng bill",
+      "shares": "Bahagi",
+      "sharesHint": "Ang 2 bahagi ay doble ng 1",
+      "adjustHint": "Hatiin nang pantay, saka dagdagan o bawasan ang isang tao",
+      "valueFor": "Parte ni {name}",
+      "enterAmount": "Ilagay ang halaga",
+      "youOwe": "May utang kang {amount} kay {name}",
+      "youLent": "Nagpautang ka ng {amount}",
+      "justYou": "Sarili mong hati lang",
+      "notYou": "Sa pagitan ng iba; si {name} ang nagbayad",
+      "left": "{amount} pa ang hahatiin",
+      "over": "Lagpas ng {amount}",
+      "percent": "{given}% ng 100%",
+      "noShares": "Bigyan ng bahagi ang isang tao",
+      "adjustOver": "Mas malaki ang adjustments kaysa sa bill",
+      "nobody": "Piliin kung kanino ito hahatiin",
+      "nobodyElse": "Wala pang ibang sumali. I-share ang invite link mula sa Mga tao."
+    },
+    "settle": {
+      "payTitle": "Bayaran si {name}",
+      "receivedTitle": "Binayaran ka ni {name}",
+      "othersTitle": "Mag-record ng bayad",
+      "amount": "Halagang ibinayad",
+      "owed": "Utang: {amount}",
+      "record": "I-record ang bayad",
+      "recorded": "Na-record: binayaran ni {from} si {to} ng {amount}",
+      "note": "Nire-record lang nito ang bayad. Ipadala ang pera gaya ng dati.",
+      "othersNote": "I-record lang ito kung talagang nagbayad si {from} kay {to}."
+    },
+    "balances": {
+      "youOwe": "Utang mo",
+      "youAreOwed": "May sisingilin ka",
+      "settled": "Bayad ka na sa lahat",
+      "andOwed": "at may sisingilin kang {amount}",
+      "emptyTitle": "Wala pang balanse",
+      "emptyBody": "Magdagdag ng bill at makikita mo rito kung sino ang may utang kanino.",
+      "whoOwesWhom": "Sino ang may utang kanino",
+      "youOweName": "May utang ka kay {name}",
+      "owesYou": "May utang sa iyo si {name}",
+      "owes": "May utang si {from} kay {to}",
+      "settleUp": "Mag-settle up",
+      "record": "I-record",
+      "settledUp": "Bayad na",
+      "groupSpending": "Gastos ng grupo",
+      "total": "Kabuuan",
+      "youPaid": "Ikaw ang nagbayad",
+      "yourShare": "Ang parte mo"
+    },
+    "breakdown": {
+      "showing": "Ipinapakita",
+      "everyone": "Lahat",
+      "total": "Kabuuan",
+      "bills": "{count, plural, one {# bill} other {# bill}}",
+      "emptyTitle": "Wala pang maipapakitang breakdown"
+    },
+    "activity": {
+      "showAll": "Ipakita lahat ng {count}",
+      "showLess": "Ipakita ang mas kaunti"
+    },
+    "errors": {
+      "generic": "May nangyaring mali. Subukang muli.",
+      "network": "Hindi maabot ang Money2Time. Suriin ang koneksyon mo at subukan ulit.",
+      "networkTitle": "Mukhang offline ka",
+      "rateLimited": "Sobrang daming subok. Maghintay ng isang minuto at subukan ulit.",
+      "captcha": "Hindi namin ma-verify ang request na ito. I-reload ang page at subukan ulit.",
+      "signedOut": "Mag-sign in ulit para mabago ang album na ito.",
+      "notMember": "Wala ka na sa album na ito, kaya hindi mo na ito mababago.",
+      "busy": "May ibang nagbabago ng album na ito. Subukan ulit maya-maya.",
+      "saveFailed": "Hindi na-save ang pagbabago sa album na ito. Subukan ulit."
     }
   }
 }

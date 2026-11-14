@@ -15,7 +15,7 @@ export default defineConfig({
    * (the apex redirect, the dashboard host, its CSP) can be checked locally:
    * `curl -H "Host: app.money2time.com" localhost:3000`.
    */
-  preview: { allowedHosts: ["money2time.com", "www.money2time.com", "app.money2time.com"] },
+  preview: { allowedHosts: ["money2time.com", "www.money2time.com", "app.money2time.com", "album.money2time.com"] },
   plugins: [
     vinext({
       /*

@@ -10,6 +10,8 @@ import {
   memberRowId,
   planLeave,
   planWrite,
+  readGroup,
+  readOwnerName,
   type WriteRequest,
   writeGroup,
 } from '../src/albumGroups.ts';
@@ -369,4 +371,58 @@ test('two writes at once never lose one another', async () => {
   assert.equal(JSON.parse(edit.data_json).before.amount, 100);
   assert.equal(rows('album_expenses')[0].amount, 140);
   assert.equal(rows('album_activity').filter((a) => a.kind === 'bill_edited').length, 1);
+});
+
+test('a bill or payment written on the website names its writer as web:<account>', async () => {
+  const { group, rows } = await trip();
+  const web = (request: WriteRequest) =>
+    writeGroup(group, request, (state) =>
+      planWrite(state, { ...ctx('tess'), via: 'web' }, request, 'owner'),
+    );
+  await web({ rows: [bill('u-bali-tess', { 'u-bali-tess': 50, 'u-bali-owner': 50 })] });
+  await web({
+    rows: [
+      {
+        table: 'album_settlements',
+        row: {
+          id: 'pay1',
+          expense_id: 'dinner',
+          from_member: 'u-bali-owner',
+          to_member: 'u-bali-tess',
+          amount: 50,
+          currency: 'MYR',
+          date: '2026-11-14',
+        },
+      },
+    ],
+  });
+  assert.equal(rows('album_expenses')[0].created_by, 'web:tess');
+  assert.equal(rows('album_settlements')[0].created_by, 'web:tess');
+  // The log still names the account: it is who did it, wherever they were.
+  assert.ok(rows('album_activity').every((a) => a.actor_user_id !== 'web:tess'));
+  // The same writer on a phone is their plain account again.
+  await write(group, 'tess', {
+    rows: [bill('u-bali-tess', { 'u-bali-tess': 60, 'u-bali-owner': 60 })],
+  });
+  assert.equal(rows('album_expenses')[0].created_by, 'tess');
+});
+
+test('the website reads the whole group, the newest log entries first', async () => {
+  const { group } = await trip();
+  await write(group, 'tess', {
+    rows: [bill('u-bali-tess', { 'u-bali-tess': 50, 'u-bali-owner': 50 })],
+  });
+  const read = await readGroup(group);
+  const count = (table: string) => read.filter((row) => row.table === table).length;
+  assert.equal(count('album_members'), 3);
+  assert.equal(count('album_expenses'), 1);
+  assert.equal(count('album_groups'), 1);
+  assert.equal(count('album_activity'), 4);
+  assert.equal(read.find((row) => row.table === 'album_expenses')?.data.note, 'Dinner');
+});
+
+test("an invite names its owner as the album knows them", async () => {
+  const { group } = await trip();
+  assert.equal(await readOwnerName(group, 'owner'), 'Nelson');
+  assert.equal(await readOwnerName(group, 'nobody'), null);
 });

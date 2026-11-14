@@ -50,6 +50,10 @@
     "dashboard": {
       "title": "Web Dashboard - Money2Time",
       "description": "Scan with your phone to see your Money2Time data on a big screen: spending, net worth, budgets and the hours behind every purchase. End-to-end encrypted, nothing stored online."
+    },
+    "album": {
+      "title": "Join my shared album · Money2Time",
+      "description": "Split trip bills together and see who owes whom. Free, right in your browser, no app needed."
     }
   },
   "common": {
@@ -2216,6 +2220,230 @@
     "dropdown": {
       "search": "Search",
       "noMatch": "No matches"
+    }
+  },
+  "album": {
+    "untitled": "Shared album",
+    "someone": "Someone",
+    "cancel": "Cancel",
+    "save": "Save",
+    "undo": "Undo",
+    "retry": "Try again",
+    "today": "Today",
+    "signOut": "Sign out",
+    "tabs": {
+      "transactions": "Transactions",
+      "breakdown": "Breakdown",
+      "balances": "Balances"
+    },
+    "categories": {
+      "food": "Food",
+      "groceries": "Groceries",
+      "transport": "Transport",
+      "housing": "Housing",
+      "bills": "Bills",
+      "healthcare": "Healthcare",
+      "shopping": "Shopping",
+      "other": "Other"
+    },
+    "signIn": {
+      "email": "Continue with email",
+      "emailLabel": "Email address",
+      "emailPlaceholder": "you@example.com",
+      "badEmail": "Enter a valid email address.",
+      "sendCode": "Send code",
+      "codeSent": "Enter the 6-digit code we sent to <strong>{email}</strong>.",
+      "codeLabel": "Sign-in code",
+      "verify": "Sign in",
+      "resend": "Send a new code",
+      "otherEmail": "Use another email",
+      "otherWays": "Other ways to sign in",
+      "wrongCode": "That code didn't work. Check it, or send a new one."
+    },
+    "home": {
+      "title": "Your shared albums",
+      "landingTitle": "Split trip bills with friends",
+      "landingBody": "Add what you paid, see who owes whom, and settle up. Free, right here in your browser.",
+      "signedInAs": "Signed in as {email}",
+      "emptyTitle": "No shared albums yet",
+      "emptyBody": "Open the invite link a friend sent you to join their album. Albums are started in the Money2Time app.",
+      "yours": "Yours"
+    },
+    "join": {
+      "eyebrow": "Shared album",
+      "invitedBy": "{name} invited you to split bills",
+      "signInTitle": "Sign in to join",
+      "signInBody": "Free, and no app needed: everything works right here.",
+      "nameLabel": "Your name in this album",
+      "join": "Join album",
+      "signedInAs": "Signed in as {email}.",
+      "haveApp": "Have the Money2Time app?",
+      "openInApp": "Open in the app",
+      "expiredTitle": "This invite link has expired",
+      "expiredBody": "Invite links work for 24 hours. Ask {name} to send a new one.",
+      "ledgerTitle": "This link is for a shared ledger",
+      "ledgerBody": "Shared ledgers are only in the Money2Time app. Open the link there to join.",
+      "full": "This album is full. Ask its owner to make room."
+    },
+    "joined": {
+      "eyebrow": "You're in",
+      "title": "Welcome to {name}",
+      "body": "Add what you paid and see who owes whom. You can keep using it here, or move to the app any time.",
+      "web": "Continue on the web"
+    },
+    "app": {
+      "title": "Get the Money2Time app",
+      "body": "Sign in with the same account and your shared albums come with you, everything you added here included."
+    },
+    "banner": {
+      "title": "Easier in the app",
+      "body": "Same account, same albums",
+      "get": "Get",
+      "dismiss": "Not now"
+    },
+    "album": {
+      "sections": "Album sections",
+      "signInTitle": "Sign in to see this album",
+      "signInBody": "Use the account you joined it with.",
+      "goneTitle": "You're not in this album",
+      "goneBody": "It may have been deleted, or you left or were taken out of it. Ask for a new invite link to join again."
+    },
+    "people": {
+      "title": "People",
+      "count": "{count, plural, one {# person} other {# people}}",
+      "you": "You",
+      "joined": "Joined",
+      "left": "Left",
+      "unnamed": "Friend",
+      "rename": "Rename",
+      "yourName": "Your name",
+      "nameTaken": "Someone here already has that name.",
+      "invite": "Invite link",
+      "inviteInfo": "Anyone with this link can join the album. It works for 24 hours; New link stops the old one at once.",
+      "inviteShareTitle": "Join my shared album",
+      "share": "Share",
+      "copy": "Copy",
+      "copied": "Copied",
+      "newLink": "New link",
+      "simplify": "Simplify group debts",
+      "simplifyInfo": "Combines debts in the group so there are fewer payments to make. Nobody pays or gets back more in total.",
+      "leave": "Leave album",
+      "leaveTitle": "Leave {name}?",
+      "leaveBody": "Your bills stay in the album for the others, and you can't change it any more.",
+      "remove": "Remove",
+      "removeTitle": "Remove {name} from the album?",
+      "removeBody": "They stop getting this album's bills. The bills they are on stay."
+    },
+    "bill": {
+      "add": "Add bill",
+      "new": "New bill",
+      "edit": "Edit bill",
+      "view": "Bill",
+      "amount": "Amount",
+      "currency": "Currency",
+      "inThisAlbum": "In this album",
+      "allCurrencies": "All currencies",
+      "note": "What was it for?",
+      "notePlaceholder": "What was it for?",
+      "category": "Category",
+      "ownCategory": "Filed under {name}",
+      "date": "Date",
+      "paidBy": "Paid by",
+      "save": "Save",
+      "saved": "Bill saved",
+      "added": "Bill added",
+      "deleted": "Bill deleted",
+      "delete": "Delete",
+      "deleteTitle": "Delete this bill?",
+      "deleteBody": "It's removed for everyone in the album.",
+      "deleteBodyPaid": "It's removed for everyone in the album. The payments on it stay, and anything already paid is owed back.",
+      "paidEditTitle": "This bill has payments",
+      "paidEditBody": "The payments stay. If a share drops below what was already paid, the difference is owed back.",
+      "payments": "Payments",
+      "paymentLine": "{from} paid {to} {amount}",
+      "shared": "Shared album",
+      "untitled": "Bill",
+      "youPaid": "You paid",
+      "youLent": "You paid · you lent {amount}",
+      "theyPaidYourShare": "{name} paid · your share {amount}",
+      "notInvolved": "{name} paid · not your bill",
+      "emptyTitle": "No bills yet",
+      "emptyBody": "Add the first one: what it cost, who paid and who it's split with."
+    },
+    "split": {
+      "evenly": "Split evenly",
+      "by": "Split by",
+      "amount": "Amount",
+      "amountHint": "Type what each person pays",
+      "percentHint": "Give each person a percentage of the bill",
+      "shares": "Shares",
+      "sharesHint": "2 shares pay double",
+      "adjustHint": "Split evenly, then add or take off for someone",
+      "valueFor": "{name}'s part",
+      "enterAmount": "Enter the amount",
+      "youOwe": "You owe {name} {amount}",
+      "youLent": "You lent {amount}",
+      "justYou": "Only your own share",
+      "notYou": "Between the others; {name} paid",
+      "left": "{amount} left to split",
+      "over": "Over by {amount}",
+      "percent": "{given}% of 100%",
+      "noShares": "Give someone a share",
+      "adjustOver": "The adjustments are more than the bill",
+      "nobody": "Choose who it's split with",
+      "nobodyElse": "Nobody else has joined yet. Share the invite link from People."
+    },
+    "settle": {
+      "payTitle": "Pay {name}",
+      "receivedTitle": "{name} paid you",
+      "othersTitle": "Record a payment",
+      "amount": "Amount paid",
+      "owed": "Owed: {amount}",
+      "record": "Record payment",
+      "recorded": "Recorded: {from} paid {to} {amount}",
+      "note": "This only records the payment. Send the money as you usually do.",
+      "othersNote": "Record this only if {from} really paid {to}."
+    },
+    "balances": {
+      "youOwe": "You owe",
+      "youAreOwed": "You are owed",
+      "settled": "You're all settled up",
+      "andOwed": "and you're owed {amount}",
+      "emptyTitle": "No balances yet",
+      "emptyBody": "Add a bill and you'll see who owes whom here.",
+      "whoOwesWhom": "Who owes whom",
+      "youOweName": "You owe {name}",
+      "owesYou": "{name} owes you",
+      "owes": "{from} owes {to}",
+      "settleUp": "Settle up",
+      "record": "Record",
+      "settledUp": "Settled up",
+      "groupSpending": "Group spending",
+      "total": "Total",
+      "youPaid": "You paid",
+      "yourShare": "Your share"
+    },
+    "breakdown": {
+      "showing": "Showing",
+      "everyone": "Everyone",
+      "total": "Total",
+      "bills": "{count, plural, one {# bill} other {# bills}}",
+      "emptyTitle": "Nothing to break down yet"
+    },
+    "activity": {
+      "showAll": "Show all {count}",
+      "showLess": "Show less"
+    },
+    "errors": {
+      "generic": "Something went wrong. Try again.",
+      "network": "Can't reach Money2Time. Check your connection and try again.",
+      "networkTitle": "You seem to be offline",
+      "rateLimited": "Too many tries. Wait a minute and try again.",
+      "captcha": "We couldn't check this request. Reload the page and try again.",
+      "signedOut": "Sign in again to change this album.",
+      "notMember": "You're no longer in this album, so you can't change it.",
+      "busy": "Someone else is changing this album. Try again in a moment.",
+      "saveFailed": "Couldn't save the change to this album. Try again."
     }
   }
 }

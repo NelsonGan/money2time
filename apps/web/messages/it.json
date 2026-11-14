@@ -50,6 +50,10 @@
     "dashboard": {
       "title": "Dashboard web - Money2Time",
       "description": "Scansiona il codice con il telefono per vedere i tuoi dati di Money2Time su uno schermo grande: spese, patrimonio netto, budget e le ore dietro ogni acquisto. Crittografia end-to-end, nulla salvato online."
+    },
+    "album": {
+      "title": "Unisciti al mio album condiviso · Money2Time",
+      "description": "Dividi le spese del viaggio e vedi chi deve a chi. Gratis, nel browser, senza app."
     }
   },
   "common": {
@@ -2216,6 +2220,230 @@
     "dropdown": {
       "search": "Cerca",
       "noMatch": "Nessun risultato"
+    }
+  },
+  "album": {
+    "untitled": "Album condiviso",
+    "someone": "Qualcuno",
+    "cancel": "Annulla",
+    "save": "Salva",
+    "undo": "Annulla",
+    "retry": "Riprova",
+    "today": "Oggi",
+    "signOut": "Esci",
+    "tabs": {
+      "transactions": "Transazioni",
+      "breakdown": "Ripartizione",
+      "balances": "Saldi"
+    },
+    "categories": {
+      "food": "Cibo",
+      "groceries": "Spesa",
+      "transport": "Trasporti",
+      "housing": "Casa",
+      "bills": "Bollette",
+      "healthcare": "Salute",
+      "shopping": "Shopping",
+      "other": "Altro"
+    },
+    "signIn": {
+      "email": "Continua con email",
+      "emailLabel": "Indirizzo email",
+      "emailPlaceholder": "tu@esempio.it",
+      "badEmail": "Inserisci un indirizzo email valido.",
+      "sendCode": "Invia codice",
+      "codeSent": "Inserisci il codice di 6 cifre che abbiamo inviato a <strong>{email}</strong>.",
+      "codeLabel": "Codice di accesso",
+      "verify": "Accedi",
+      "resend": "Invia un nuovo codice",
+      "otherEmail": "Usa un'altra email",
+      "otherWays": "Altri modi per accedere",
+      "wrongCode": "Il codice non ha funzionato. Controllalo o richiedine uno nuovo."
+    },
+    "home": {
+      "title": "I tuoi album condivisi",
+      "landingTitle": "Dividi le spese del viaggio con gli amici",
+      "landingBody": "Aggiungi quello che hai pagato, vedi chi deve a chi e salda i conti. Gratis, qui nel tuo browser.",
+      "signedInAs": "Accesso effettuato come {email}",
+      "emptyTitle": "Ancora nessun album condiviso",
+      "emptyBody": "Apri il link di invito che ti ha mandato un amico per unirti al suo album. Gli album si creano nell'app Money2Time.",
+      "yours": "Tuo"
+    },
+    "join": {
+      "eyebrow": "Album condiviso",
+      "invitedBy": "{name} ti invita a dividere i conti",
+      "signInTitle": "Accedi per unirti",
+      "signInBody": "Gratis e senza app: funziona tutto qui.",
+      "nameLabel": "Il tuo nome in questo album",
+      "join": "Unisciti all'album",
+      "signedInAs": "Accesso effettuato come {email}.",
+      "haveApp": "Hai l'app Money2Time?",
+      "openInApp": "Apri nell'app",
+      "expiredTitle": "Questo link di invito è scaduto",
+      "expiredBody": "I link di invito valgono 24 ore. Chiedi a {name} di mandartene uno nuovo.",
+      "ledgerTitle": "Questo link è per un registro condiviso",
+      "ledgerBody": "I registri condivisi sono solo nell'app Money2Time. Apri lì il link per unirti.",
+      "full": "Questo album è pieno. Chiedi al proprietario di fare spazio."
+    },
+    "joined": {
+      "eyebrow": "Ci sei",
+      "title": "Benvenuto in {name}",
+      "body": "Aggiungi quello che hai pagato e vedi chi deve a chi. Puoi continuare qui o passare all'app quando vuoi.",
+      "web": "Continua sul web"
+    },
+    "app": {
+      "title": "Scarica l'app Money2Time",
+      "body": "Accedi con lo stesso account e i tuoi album condivisi ti seguono, compreso tutto quello che hai aggiunto qui."
+    },
+    "banner": {
+      "title": "Più facile nell'app",
+      "body": "Stesso account, stessi album",
+      "get": "Scarica",
+      "dismiss": "Non ora"
+    },
+    "album": {
+      "sections": "Sezioni dell'album",
+      "signInTitle": "Accedi per vedere questo album",
+      "signInBody": "Usa l'account con cui ti sei unito.",
+      "goneTitle": "Non fai parte di questo album",
+      "goneBody": "Potrebbe essere stato eliminato, oppure l'hai lasciato o sei stato rimosso. Chiedi un nuovo link di invito per unirti di nuovo."
+    },
+    "people": {
+      "title": "Persone",
+      "count": "{count, plural, one {# persona} other {# persone}}",
+      "you": "Tu",
+      "joined": "Si è unito",
+      "left": "Uscito",
+      "unnamed": "Amico",
+      "rename": "Rinomina",
+      "yourName": "Il tuo nome",
+      "nameTaken": "Qualcuno qui ha già questo nome.",
+      "invite": "Link di invito",
+      "inviteInfo": "Chiunque abbia questo link può unirsi all'album. Vale 24 ore; Nuovo link disattiva subito quello vecchio.",
+      "inviteShareTitle": "Unisciti al mio album condiviso",
+      "share": "Condividi",
+      "copy": "Copia",
+      "copied": "Copiato",
+      "newLink": "Nuovo link",
+      "simplify": "Semplifica i debiti del gruppo",
+      "simplifyInfo": "Unisce i debiti del gruppo così ci sono meno pagamenti da fare. Nessuno paga o riceve di più in totale.",
+      "leave": "Lascia l'album",
+      "leaveTitle": "Lasciare {name}?",
+      "leaveBody": "I tuoi conti restano nell'album per gli altri, e non potrai più modificarlo.",
+      "remove": "Rimuovi",
+      "removeTitle": "Rimuovere {name} dall'album?",
+      "removeBody": "Non riceverà più i conti di questo album. I conti in cui compare restano."
+    },
+    "bill": {
+      "add": "Aggiungi conto",
+      "new": "Nuovo conto",
+      "edit": "Modifica conto",
+      "view": "Conto",
+      "amount": "Importo",
+      "currency": "Valuta",
+      "inThisAlbum": "In questo album",
+      "allCurrencies": "Tutte le valute",
+      "note": "Per cosa era?",
+      "notePlaceholder": "Per cosa era?",
+      "category": "Categoria",
+      "ownCategory": "In {name}",
+      "date": "Data",
+      "paidBy": "Pagato da",
+      "save": "Salva",
+      "saved": "Conto salvato",
+      "added": "Conto aggiunto",
+      "deleted": "Conto eliminato",
+      "delete": "Elimina",
+      "deleteTitle": "Eliminare questo conto?",
+      "deleteBody": "Viene rimosso per tutti nell'album.",
+      "deleteBodyPaid": "Viene rimosso per tutti nell'album. I pagamenti restano, e quanto già pagato andrà restituito.",
+      "paidEditTitle": "Questo conto ha dei pagamenti",
+      "paidEditBody": "I pagamenti restano. Se una quota scende sotto quanto già pagato, la differenza andrà restituita.",
+      "payments": "Pagamenti",
+      "paymentLine": "{from} ha pagato {amount} a {to}",
+      "shared": "Album condiviso",
+      "untitled": "Conto",
+      "youPaid": "Hai pagato tu",
+      "youLent": "Hai pagato tu · hai prestato {amount}",
+      "theyPaidYourShare": "{name} ha pagato · la tua quota {amount}",
+      "notInvolved": "{name} ha pagato · non è tuo",
+      "emptyTitle": "Ancora nessun conto",
+      "emptyBody": "Aggiungi il primo: quanto è costato, chi ha pagato e con chi si divide."
+    },
+    "split": {
+      "evenly": "Dividi equamente",
+      "by": "Dividi per",
+      "amount": "Importo",
+      "amountHint": "Scrivi quanto paga ciascuno",
+      "percentHint": "Dai a ciascuno una percentuale del conto",
+      "shares": "Quote",
+      "sharesHint": "2 quote pagano il doppio di 1",
+      "adjustHint": "Dividi equamente, poi aggiungi o togli a qualcuno",
+      "valueFor": "Parte di {name}",
+      "enterAmount": "Inserisci l'importo",
+      "youOwe": "Devi {amount} a {name}",
+      "youLent": "Hai prestato {amount}",
+      "justYou": "Solo la tua quota",
+      "notYou": "Tra gli altri; ha pagato {name}",
+      "left": "{amount} ancora da dividere",
+      "over": "Eccedenza di {amount}",
+      "percent": "{given}% su 100%",
+      "noShares": "Dai una quota a qualcuno",
+      "adjustOver": "Le correzioni superano il conto",
+      "nobody": "Scegli con chi dividere",
+      "nobodyElse": "Nessun altro si è ancora unito. Condividi il link di invito da Persone."
+    },
+    "settle": {
+      "payTitle": "Paga {name}",
+      "receivedTitle": "{name} ti ha pagato",
+      "othersTitle": "Registra un pagamento",
+      "amount": "Importo pagato",
+      "owed": "Dovuto: {amount}",
+      "record": "Registra pagamento",
+      "recorded": "Registrato: {from} ha pagato {amount} a {to}",
+      "note": "Qui registri solo il pagamento. Invia i soldi come fai di solito.",
+      "othersNote": "Registralo solo se {from} ha davvero pagato {to}."
+    },
+    "balances": {
+      "youOwe": "Devi",
+      "youAreOwed": "Ti devono",
+      "settled": "Sei in pari con tutti",
+      "andOwed": "e ti devono {amount}",
+      "emptyTitle": "Ancora nessun saldo",
+      "emptyBody": "Aggiungi un conto e qui vedrai chi deve a chi.",
+      "whoOwesWhom": "Chi deve a chi",
+      "youOweName": "Devi a {name}",
+      "owesYou": "{name} ti deve",
+      "owes": "{from} deve a {to}",
+      "settleUp": "Salda",
+      "record": "Registra",
+      "settledUp": "Saldato",
+      "groupSpending": "Spesa del gruppo",
+      "total": "Totale",
+      "youPaid": "Hai pagato tu",
+      "yourShare": "La tua quota"
+    },
+    "breakdown": {
+      "showing": "Mostra",
+      "everyone": "Tutti",
+      "total": "Totale",
+      "bills": "{count, plural, one {# conto} other {# conti}}",
+      "emptyTitle": "Ancora niente da ripartire"
+    },
+    "activity": {
+      "showAll": "Mostra tutte ({count})",
+      "showLess": "Mostra meno"
+    },
+    "errors": {
+      "generic": "Qualcosa è andato storto. Riprova.",
+      "network": "Impossibile raggiungere Money2Time. Controlla la connessione e riprova.",
+      "networkTitle": "Sembra che tu sia offline",
+      "rateLimited": "Troppi tentativi. Attendi un minuto e riprova.",
+      "captcha": "Non siamo riusciti a verificare la richiesta. Ricarica la pagina e riprova.",
+      "signedOut": "Accedi di nuovo per modificare questo album.",
+      "notMember": "Non fai più parte di questo album, quindi non puoi modificarlo.",
+      "busy": "Qualcun altro sta modificando questo album. Riprova tra un momento.",
+      "saveFailed": "Impossibile salvare la modifica a questo album. Riprova."
     }
   }
 }

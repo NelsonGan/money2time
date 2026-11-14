@@ -2209,11 +2209,16 @@ Worker's `src/albumGroups.ts`; its tables come from migrations `090` to
   for anyone but the owner. The owner can take someone out of the share.
   Wherever a split bill lists the user, they show as their Settings name and
   photo (`useSelfPerson`), "Me" and an initial while they set neither.
-- **Joining.** The link opens the Join screen (the one shared ledgers use,
-  titled Shared album). The album host's invite page hands the app
-  `money2time://join/<code>?kind=album`, so the screen reads as an album from
-  its first frame, before the invite is looked up (and if the lookup fails);
-  the invite itself decides once read. Anyone signed in can join, up to 20
+- **Joining.** The link opens on the website (album.money2time.com, see
+  [Shared albums on the web](#shared-albums-on-the-web)), which joins there
+  for friends without the app and, for those with it, offers **Open in the
+  app**: that hands the app `money2time://join/<code>?kind=album`, which opens
+  the Join screen (the one shared ledgers use, titled Shared album) reading as
+  an album from its first frame, before the invite is looked up (and if the
+  lookup fails); the invite itself decides once read. Someone who joined on
+  the website and signs in to the app later with the same account gets the
+  album at their first list read (`refreshList`, `ensureLocalAlbum`), as for
+  an album joined on another phone. Anyone signed in can join, up to 20
   people besides the owner. The album is added to the user's main ledger,
   which opens with it, and joining opens the album itself. Someone whose main
   ledger is shared is told it cannot hold one, and a link whose album id is
@@ -2305,6 +2310,13 @@ Worker's `src/albumGroups.ts`; its tables come from migrations `090` to
     someone else recorded. A bill with no account counts in spending,
     budgets, Breakdown and the album's totals at once; it only moves no
     account balance.
+  - **Made on the website, the same.** A bill or payment the user writes on
+    album.money2time.com, where nobody has accounts, is stamped by the
+    Worker with `created_by` `web:<account>` (`authorStamp`), so no phone
+    takes it for one of the user's own phones' writes: it lands with **no
+    account** too, never on the default account, and the user picks one when
+    they move to the app. This needs no app change: an older app compares
+    `created_by` with the user's account as well.
   - Someone else's edit never changes the account the user chose. When someone changes the payer
     away from the user, the user's side becomes their share owed to the new
     payer, with no account, as any bill a friend paid; a bill the user adds
@@ -2668,22 +2680,22 @@ Every native app user is identified in both providers with the same pseudonymous
 
 The free tier is **1,000,000 product-analytics events a month** (identified events included), with separate free allowances for the other products. On the free plan nothing is billed: once a product's allowance is used up, PostHog stops ingesting that product's data until the month resets, so staying under budget protects month-end data, not money. The organization (`Money2Time`) is on the free plan with no payment method, so every product's billing limit equals its free allowance and spend is fixed at $0. Adding a card would remove those limits; if that ever happens, set every product's billing limit to $0 in Organization → Billing first. Estimates below were re-baselined on **2026-10-19** from PostHog's first week (2026-10-12 to 2026-10-19, while 1.5.13 rolled out): rates per active user measured on the rollout days, scaled to **~5,000 DAU**, and **~5,000 installs a month** (60 to 220 `First App Open` a day; Mixpanel's 19,000 counted far more). Check them against the [budget insight](#live-posthog-dashboards) as the rollout completes.
 
-| Source                                                                   | Estimated events / month | Basis                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| ------------------------------------------------------------------------ | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Daily App Open`                                                         | 150,000                  | One per active user per day (5,000 × 30).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `Daily Transaction Logged`                                               | 120,000                  | ~80% of users who open the app log that day (measured).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `Feature Used`                                                           | 75,000                   | ~0.5 feature-days per active user per day (measured 0.48). Instalment plans add one feature, used rarely (well under 1,000 a month).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| Install and onboarding (11 events)                                       | 45,000                   | ~5K installs × ~7 onboarding events, plus first transactions and wage saves.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| Pro funnel (13 events)                                                   | 40,000                   | `Pro Paywall Viewed` ~0.23 per active user per day; purchase, restore and limit events ~5K.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| Adoption milestones                                                      | 10,000                   | `Feature First Used` and `Transaction Milestone Reached`; high while existing users first run this build.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| Scans, sharing, setup, payoff, data, backup and satisfaction (27 events) | 83,000                   | `Receipt Scan Completed` ~0.34 per active user per day, plus ~5,000 for multi-select album batches (one per receipt; a batch makes scanning several receipts quicker, and the Worker's scan quota bounds it); `Auto Backup Failed` capped by the six-hour retry backoff, or once a day for a backup that falls back to the phone. AI notification review adds ~3,000: `Notification AI Review Completed` at most once per launch, foreground or live capture that brings new notifications (on iOS too since it watches the queue while open, which only splits a batch into a few runs), for the few users who turn it on (free users stop after 40 reviews), plus rare toggles, failures and undos. |
-| Cloud Sync (7 events)                                                    | 8,000                    | Open to everyone since the public launch (announcement 24): users who open the Cloud Sync screen (once per install, so a one-off rise as existing users try it from the announcement, then ~1,500 a month from new installs), see the one-time offer or sign in (free users can sign in too); `Cloud Sync Enabled` once each time a phone turns Cloud Sync on (a sign-in no longer does). Sync runs and live updates send nothing. Re-measure a month after launch.                                                                                                                                                                                                                                   |
-| Shared ledgers (8 events)                                                | 2,600                    | Deliberate one-off actions: sharing (at most 2 ledgers per owner), invite-link copies and resets, and joins (at most 5 people per ledger), removals and leaving. Syncing a shared ledger sends nothing. `Shared Ledger Entry Assigned` only when an entry is given to someone else: ~2,000 at ~10 a month in each of ~200 shared ledgers.                                                                                                                                                                                                                                                                                                                                                             |
-| `$identify` and `$set`                                                   | 30,000                   | One `$identify` per install; `$set` when a person property changes: four on an install's first sync, then theme and Pro changes. Existing users' first sync is a one-off.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| RevenueCat server events                                                 | 3,000                    | Lifecycle events from RevenueCat's PostHog integration (~530 a week measured).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| Prompt fetches (`$llm_prompt_fetched`)                                   | 7,000                    | Logged by PostHog per Worker prompt fetch: about one per prompt per Cloudflare location per 30 minutes. At 5 minutes it measured ~37,000.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| Website (`$pageview`, CTA and Web Dashboard events)                      | 5,000                    | Production host only, Do Not Track respected (~500 a week measured before the Web Dashboard). Marketing pages stay anonymous (the dashboard keeps its PostHog state and GA4 cookie on its own host); a linked dashboard identifies as the phone's `appUserId` (one `$identify` per linked browser, then its events are identified). Dashboard events scale with its use: a page view per page shown, one per transfer, one per edit batch; re-measure.                                                                                                                                                                                                                                                |
-| **Total**                                                                | **~578,600 (58%)**       | ~42% headroom for growth.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| Source                                                                   | Estimated events / month | Basis                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ------------------------------------------------------------------------ | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Daily App Open`                                                         | 150,000                  | One per active user per day (5,000 × 30).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `Daily Transaction Logged`                                               | 120,000                  | ~80% of users who open the app log that day (measured).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `Feature Used`                                                           | 75,000                   | ~0.5 feature-days per active user per day (measured 0.48). Instalment plans add one feature, used rarely (well under 1,000 a month).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| Install and onboarding (11 events)                                       | 45,000                   | ~5K installs × ~7 onboarding events, plus first transactions and wage saves.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| Pro funnel (13 events)                                                   | 40,000                   | `Pro Paywall Viewed` ~0.23 per active user per day; purchase, restore and limit events ~5K.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| Adoption milestones                                                      | 10,000                   | `Feature First Used` and `Transaction Milestone Reached`; high while existing users first run this build.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| Scans, sharing, setup, payoff, data, backup and satisfaction (27 events) | 83,000                   | `Receipt Scan Completed` ~0.34 per active user per day, plus ~5,000 for multi-select album batches (one per receipt; a batch makes scanning several receipts quicker, and the Worker's scan quota bounds it); `Auto Backup Failed` capped by the six-hour retry backoff, or once a day for a backup that falls back to the phone. AI notification review adds ~3,000: `Notification AI Review Completed` at most once per launch, foreground or live capture that brings new notifications (on iOS too since it watches the queue while open, which only splits a batch into a few runs), for the few users who turn it on (free users stop after 40 reviews), plus rare toggles, failures and undos.                                                                                 |
+| Cloud Sync (7 events)                                                    | 8,000                    | Open to everyone since the public launch (announcement 24): users who open the Cloud Sync screen (once per install, so a one-off rise as existing users try it from the announcement, then ~1,500 a month from new installs), see the one-time offer or sign in (free users can sign in too); `Cloud Sync Enabled` once each time a phone turns Cloud Sync on (a sign-in no longer does). Sync runs and live updates send nothing. Re-measure a month after launch.                                                                                                                                                                                                                                                                                                                   |
+| Shared ledgers (8 events)                                                | 2,600                    | Deliberate one-off actions: sharing (at most 2 ledgers per owner), invite-link copies and resets, and joins (at most 5 people per ledger), removals and leaving. Syncing a shared ledger sends nothing. `Shared Ledger Entry Assigned` only when an entry is given to someone else: ~2,000 at ~10 a month in each of ~200 shared ledgers.                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `$identify` and `$set`                                                   | 30,000                   | One `$identify` per install; `$set` when a person property changes: four on an install's first sync, then theme and Pro changes. Existing users' first sync is a one-off.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| RevenueCat server events                                                 | 3,000                    | Lifecycle events from RevenueCat's PostHog integration (~530 a week measured).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| Prompt fetches (`$llm_prompt_fetched`)                                   | 7,000                    | Logged by PostHog per Worker prompt fetch: about one per prompt per Cloudflare location per 30 minutes. At 5 minutes it measured ~37,000.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| Website (`$pageview`, CTA, Web Dashboard and shared-album events)        | 8,000                    | Production host only, Do Not Track respected (~500 a week measured before the Web Dashboard). Marketing pages stay anonymous (the dashboard keeps its PostHog state and GA4 cookie on its own host); a linked dashboard identifies as the phone's `appUserId` (one `$identify` per linked browser, then its events are identified). Dashboard events scale with its use: a page view per page shown, one per transfer, one per edit batch; re-measure. Shared albums on the web add about 3,000: per web member a sign-in and a join once, then a page view and an `Album Viewed` per album or tab shown and an `Album Edited` per change (a trip of 5 visits with 10 changes is about 30 events), for a few hundred web members while the rollout is small; re-measure after launch. |
+| **Total**                                                                | **~581,600 (58%)**       | ~42% headroom for growth.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 
 | Other PostHog product         | Free allowance / month              | Expected use                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | ----------------------------- | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -3639,6 +3651,11 @@ catalog, or country/locale codes; none passes arbitrary visitor text.
 | `m2t_dashboard_pro_prompt_viewed` | `Dashboard Pro Prompt Viewed`           | The Pro paywall opens: a free account picks a period only Pro shows (12M, YTD, Year or All), reaches a free-plan limit, or the phone refuses a change for one | `feature` (`period`, or the limit: `accounts`, `categories`, `recurring`, `reimbursements`, `goals`, `loans`, `items`, `albums`, `budget_templates`, `split_bills`, `subcurrencies`, `wage_entries`; `other` when the phone names none)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | `m2t_dashboard_view_opened`       | `Dashboard View Opened`                 | A dashboard page is shown, including the one a refresh lands on                                                                                               | `view`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | `m2t_dashboard_unlinked`          | `Dashboard Unlinked`                    | The browser is unlinked and forgets its key and copy                                                                                                          | `by` (`browser`/`phone`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `m2t_album_web_signed_in`         | `Album Signed In`                       | Sign-in finishes on album.money2time.com                                                                                                                      | `method` (`google`, `email`), `context` (`join`, `home`, `album`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `m2t_album_web_joined`            | `Album Joined`                          | Join album on an invite answers                                                                                                                               | `result` (`joined`, `full`, `expired`, `failed`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `m2t_album_web_viewed`            | `Album Viewed`                          | An album or one of its tabs is shown                                                                                                                          | `tab` (`transactions`, `breakdown`, `balances`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `m2t_album_web_edited`            | `Album Edited`                          | A change sent to the Worker is written or refused                                                                                                             | `action` (`bill_add`, `bill_edit`, `bill_delete`, `payment_record`, `payment_undo`, `rename`, `simplify`), `result` (`saved`, `offline`, `not_member`, `failed`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `m2t_album_web_open_in_app`       | `Album Open In App`                     | Open in the app on an invite (`join_page`) or after joining (`joined`)                                                                                        | `placement`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | `m2t_discord_link_clicked`        | `Discord Link Clicked`                  | Discord link click                                                                                                                                            | `placement`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | `m2t_language_changed`            | `Language Changed`                      | Site locale changes                                                                                                                                           | `locale_from`, `locale_to`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | `select_content`                  | `Tutorial Selected`                     | Tutorial selected                                                                                                                                             | GA4 `content_id`, `content_type`, `source`, `results`; PostHog `tutorial`, `source`, `results`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
@@ -3659,10 +3676,12 @@ Existing property definitions are reused for `locale` (user scope), `mode`,
 `source`, `target`, and `tutorial`. Website-specific event dimensions are
 `placement`, `screenshot`, `form_status`, `base_country`, `compare_from`,
 `compare_to`, `locale_from`, `locale_to`. Custom metrics are `results` and
-`position`. The dashboard's `view`, `result`, `action`, `feature` and `by`
-reach GA4 as event parameters but are not registered as custom dimensions
-yet, so GA4 reports them only after they are; `count` is not a custom metric
-either.
+`position`. The dashboard's `view`, `result`, `action`, `feature` and `by`,
+and the shared-album site's `method`, `context` and `tab`, reach GA4 as event
+parameters but are not registered as custom dimensions yet, so GA4 reports
+them only after they are; `count` is not a custom metric either.
+`m2t_app_download_clicked` also comes from album.money2time.com, with
+`placement` `album_home`, `album_joined` or `album_sheet`.
 
 #### Website GA4 dashboard
 
@@ -3707,7 +3726,14 @@ opened, what kind of change was made and how the phone answered, and which Pro
 feature was asked for, never an amount, a name, a note, a category or an account. Only `utm_source`, `utm_medium`, `utm_campaign`,
 `utm_content`, `utm_term`, and `utm_id` are read from the landing URL, and each
 value is capped at 100 Unicode code points. GA4 referrers retain the path only
-for Money2Time hosts and the origin only for external sites.
+for Money2Time hosts and the origin only for external sites. On
+album.money2time.com the path itself is a secret (an invite code joins anyone
+who has it) or private (an album's id), so every path there is reported as
+`/join/:code`, `/a/:album` or `/` in page views, PostHog's URL and path
+properties, GA4's page location and referrers (`publicPath`). Its events say
+what kind of change was made and how the Worker answered, never a name, an
+amount, a title or a category, and it records no sessions and captures no
+errors, as the dashboard does not.
 
 PostHog autocapture, automatic page views, heatmaps and click-ID campaign
 properties are disabled or stripped, and URL and referrer properties are
@@ -4996,14 +5022,15 @@ returns 200 for a payload the device then discards.
 ### Cloud-sync Worker
 
 `workers/cloud-sync` (`money2time-workers-cloud-sync`, custom domains
-`workers-cloud-sync.money2time.com`, `ledger.money2time.com` and
-`album.money2time.com`) serves [Cloud Sync](#cloud-sync): sign-in with Better
-Auth, one Turso database per user, and the user's images. A ledger's invite
-links are built on `INVITE_URL` (the ledger host) and a shared album's on
-`ALBUM_INVITE_URL` (the album host, falling back to `INVITE_URL`;
-`inviteOrigin`). Those two hosts answer only `GET /join/<code>`, the album
-host's page worded for an album, and no other host answers it; sign-in and
-the API stay on `BETTER_AUTH_URL`. Links on any other host (older ones were made on
+`workers-cloud-sync.money2time.com` and `ledger.money2time.com`) serves
+[Cloud Sync](#cloud-sync): sign-in with Better Auth, one Turso database per
+user, and the user's images. A ledger's invite links are built on
+`INVITE_URL` (the ledger host) and a shared album's on `ALBUM_INVITE_URL`
+(`album.money2time.com`, falling back to `INVITE_URL`; `inviteOrigin`). The
+ledger host answers only `GET /join/<code>`, and no other host of this Worker
+answers it; sign-in and the API stay on `BETTER_AUTH_URL`. The album host is
+the website's ([Shared albums on the web](#shared-albums-on-the-web)), which
+reaches this Worker over the `CLOUD_SYNC` service binding. Links on any other host (older ones were made on
 `shared-ledgers.money2time.com` and the API host) no longer open.
 
 | File            | What it holds                                              |
@@ -5041,21 +5068,22 @@ the API stay on `BETTER_AUTH_URL`. Links on any other host (older ones were made
 
 Shared ledgers ([Shared ledgers](#shared-ledgers)):
 
-| Route                                      | What it does                                                                                                                                                                                                                                                                                |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET /v1/ledgers`                          | The user's shared ledgers, owned and joined, with role, owner name and account id, member count and `active` (anyone in it Pro)                                                                                                                                                             |
-| `POST /v1/ledgers`                         | `{ledgerId, name, emoji}` → shares a ledger: Pro, at most 2 per owner; makes its Turso database                                                                                                                                                                                             |
-| `DELETE /v1/ledgers/<id>`                  | Stop sharing (owner): deletes its database and images; members and the link cascade; everyone is nudged                                                                                                                                                                                     |
-| `POST /v1/ledgers/<id>/leave`              | Revokes this ledger's tokens, then a member leaves                                                                                                                                                                                                                                          |
-| `POST /v1/ledgers/<id>/credentials`        | Its Turso URL and a 1-day token, for the owner or a member, while anyone in it is Pro (403 `ledger_paused`); read-only for a shared album                                                                                                                                                   |
-| `GET /v1/ledgers/<id>/members`             | Owner and members (addresses for the owner only)                                                                                                                                                                                                                                            |
-| `DELETE /v1/ledgers/<id>/members/<userId>` | Owner revokes this ledger's tokens, then removes the member and retires the invite; all affected users are nudged (403 for another member, 404 without access)                                                                                                                              |
-| `POST /v1/ledgers/<id>/invites`            | Owner gets the ledger's link: the open one, or a new one valid a day (always new with `rotate: true`, killing the old); two phones asking at once get the same one                                                                                                                          |
-| `POST /v1/ledgers/<id>/album`              | A shared album's change, which only the Worker writes (`src/albumGroups.ts`): `{action: "join", name}` or `{action: "write", rows}`; checked, stamped with the writer and logged in `album_activity`, in one transaction; answers with the rows written; 403 `not_member`, 409 `name_taken` |
-| `/v1/ledgers/<id>/media/…`                 | Like `/v1/media`, under `l/<id>/` with its own quota; writing needs the ledger active                                                                                                                                                                                                       |
-| `GET /v1/invites/<code>`                   | No sign-in: the app's ledger id, name, owner, member count, `full` and `active`; rate limited per IP                                                                                                                                                                                        |
-| `POST /v1/invites/<code>/accept`           | Joins (any signed-in user, no Pro) while active, with a place and the link not retired, in one statement                                                                                                                                                                                    |
-| `GET /join/<code>`                         | The page an invite link opens: hands `money2time://join/<code>` to the app, or links the stores. Static: no names, worded by host (album or ledger); a code that cannot be one gets a 404 page                                                                                              |
+| Route                                      | What it does                                                                                                                                                                                                                                                                                                                                                            |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET /v1/ledgers`                          | The user's shared ledgers, owned and joined, with role, owner name and account id, member count and `active` (anyone in it Pro)                                                                                                                                                                                                                                         |
+| `POST /v1/ledgers`                         | `{ledgerId, name, emoji}` → shares a ledger: Pro, at most 2 per owner; makes its Turso database                                                                                                                                                                                                                                                                         |
+| `DELETE /v1/ledgers/<id>`                  | Stop sharing (owner): deletes its database and images; members and the link cascade; everyone is nudged                                                                                                                                                                                                                                                                 |
+| `POST /v1/ledgers/<id>/leave`              | Revokes this ledger's tokens, then a member leaves                                                                                                                                                                                                                                                                                                                      |
+| `POST /v1/ledgers/<id>/credentials`        | Its Turso URL and a 1-day token, for the owner or a member, while anyone in it is Pro (403 `ledger_paused`); read-only for a shared album                                                                                                                                                                                                                               |
+| `GET /v1/ledgers/<id>/members`             | Owner and members (addresses for the owner only)                                                                                                                                                                                                                                                                                                                        |
+| `DELETE /v1/ledgers/<id>/members/<userId>` | Owner revokes this ledger's tokens, then removes the member and retires the invite; all affected users are nudged (403 for another member, 404 without access)                                                                                                                                                                                                          |
+| `POST /v1/ledgers/<id>/invites`            | Owner gets the ledger's link: the open one, or a new one valid a day (always new with `rotate: true`, killing the old); two phones asking at once get the same one                                                                                                                                                                                                      |
+| `POST /v1/ledgers/<id>/album`              | A shared album's change, which only the Worker writes (`src/albumGroups.ts`): `{action: "join", name}` or `{action: "write", rows}`; checked, stamped with the writer and logged in `album_activity`, in one transaction; answers with the rows written; 403 `not_member`, 409 `name_taken`. `via: "web"` (the website sends it) stamps `created_by` as `web:<account>` |
+| `GET /v1/ledgers/<id>/album`               | A shared album's whole group for the website, read with the Worker's own token: `{album, userId, rows}`, the members, bills (deleted ones too), payments, settings and the newest 1,000 log entries; members only (404 otherwise)                                                                                                                                       |
+| `/v1/ledgers/<id>/media/…`                 | Like `/v1/media`, under `l/<id>/` with its own quota; writing needs the ledger active                                                                                                                                                                                                                                                                                   |
+| `GET /v1/invites/<code>`                   | No sign-in: the app's ledger id, name, owner, member count, `full` and `active`; rate limited per IP. An album's owner is named as they are in the album (their member row), not by a masked address                                                                                                                                                                    |
+| `POST /v1/invites/<code>/accept`           | Joins (any signed-in user, no Pro) while active, with a place and the link not retired, in one statement                                                                                                                                                                                                                                                                |
+| `GET /join/<code>`                         | On `ledger.money2time.com` only: the page a shared ledger's invite link opens, which hands `money2time://join/<code>` to the app or links the stores. Static: no names; a code that cannot be one gets a 404 page. A shared album's links open on the website                                                                                                           |
 
 A share can carry an album's group instead of a ledger
 ([Album members and shared albums](#album-members-and-shared-albums)): `POST
@@ -5097,7 +5125,10 @@ Leave and account deletion return an error if a token revocation fails, so
 membership is not silently ended while an issued token still works.
 
 Every `/v1` route except the invite preview needs `Authorization: Bearer <session token>` (Better Auth's
-bearer plugin; the app never uses cookies). Internal error text stays in the
+bearer plugin; the app never uses cookies). The shared-album website calls the
+same routes over a service binding, turning its own HttpOnly cookie into that
+header ([Shared albums on the web](#shared-albums-on-the-web)); this Worker still
+sets no cookies and no CORS headers. Internal error text stays in the
 logs; responses carry only a code. A cron at 03:17 UTC daily deletes expired
 email codes, expired invite links and rate-limit rows older than a day.
 
@@ -5227,7 +5258,10 @@ someone's three codes a minute. A refusal is 403 `{error: 'captcha_failed'}`.
 | set                    | `true`              | refused  | refused       | refused         |
 
 A token must also come from a page on `TURNSTILE_HOSTNAMES`
-(`money2time.com`; empty skips that check).
+(`money2time.com` for the app's WebView, `album.money2time.com` for the
+shared-album website's email sign-in; empty skips that check). The widget's
+domain `money2time.com` covers its subdomains, so the website uses the same
+site key.
 
 **It is enforced** (`TURNSTILE_ENFORCE = "true"`, secret set, since
 2026-10-29, while Cloud Sync was still in development and no shipped build
@@ -5288,22 +5322,22 @@ each deleted with its user or ledger by `ON DELETE CASCADE`. The schema drops
 
 Made for this feature on 2026-10-28, all new (nothing existing is shared):
 
-| Resource                 | Name / id                                                                                                               | Remove with                                                                                 |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| Worker + custom domains  | `money2time-workers-cloud-sync`, `workers-cloud-sync` + `ledger` + `album` .money2time.com, cron `17 3 * * *`           | `npx wrangler delete` in `workers/cloud-sync` (removes the domain route and cron too)       |
-| D1 database              | `money2time-cloud-sync-auth`, `2154e310-6fce-49eb-aa4b-565e343c9eb7`                                                    | `npx wrangler d1 delete money2time-cloud-sync-auth`                                         |
-| R2 bucket (private)      | `money2time-cloud-sync-media-apac` (APAC, added 2026-11-10)                                                             | empty it, then `npx wrangler r2 bucket delete money2time-cloud-sync-media-apac`             |
-| Rate limit namespaces    | `2402` (`AUTH_LIMITER`), `2403` (`OTP_LIMITER`)                                                                         | go with the Worker                                                                          |
-| Worker secrets           | `BETTER_AUTH_SECRET`, `TURSO_API_TOKEN`, `APPLE_PRIVATE_KEY`                                                            | go with the Worker                                                                          |
-| Apple App ID capability  | Sign in with Apple (`APPLE_ID_AUTH`, primary) on `com.nelsongan.money2time`                                             | `asc bundle-ids capabilities remove --id 2ASN39AS8V_APPLE_ID_AUTH --confirm` (then rebuild) |
-| Sign in with Apple key   | `Money2Time Cloud Sync`, key id `F5629ZF4G6` (.p8 in `~/.config/money2time/` and the Worker secret `APPLE_PRIVATE_KEY`) | revoke it in the Apple Developer portal, Keys                                               |
-| Turso group              | `m2t-sync` (aws-ap-southeast-1), organization `nelsongan`                                                               | delete its databases, then the group, in the Turso dashboard                                |
-| Turso databases          | `m2t-sync-*`, one per user, in group `m2t-sync`                                                                         | `turso db destroy <name>`, or the Turso dashboard                                           |
-| Turso databases (shared) | `m2t-ledger-*`, one per shared ledger, in group `m2t-sync` (added 2026-10-28)                                           | `turso db destroy <name>`, or the Turso dashboard                                           |
-| D1 tables (shared)       | `shared_ledgers`, `ledger_members`, `ledger_links`, `ledger_media_usage` in `money2time-cloud-sync-auth`                | go with the D1 database                                                                     |
-| Durable Object class     | `SyncHub` (live updates, one per user, SQLite-backed, added 2026-10-28)                                                 | goes with the Worker                                                                        |
-| Turso Platform API token | the Worker secret `TURSO_API_TOKEN` (copy in `~/.config/money2time/turso-api-token`)                                    | revoke it in the Turso dashboard, Settings > API Tokens                                     |
-| PostHog feature flag     | `cloud_sync`, the retired allow list for the Cloud Sync UI (no longer read, see [Availability](#availability))          | archive or delete in PostHog                                                                |
+| Resource                 | Name / id                                                                                                                          | Remove with                                                                                 |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Worker + custom domains  | `money2time-workers-cloud-sync`, `workers-cloud-sync` + `ledger` .money2time.com, cron `17 3 * * *` (`album` is now the website's) | `npx wrangler delete` in `workers/cloud-sync` (removes the domain route and cron too)       |
+| D1 database              | `money2time-cloud-sync-auth`, `2154e310-6fce-49eb-aa4b-565e343c9eb7`                                                               | `npx wrangler d1 delete money2time-cloud-sync-auth`                                         |
+| R2 bucket (private)      | `money2time-cloud-sync-media-apac` (APAC, added 2026-11-10)                                                                        | empty it, then `npx wrangler r2 bucket delete money2time-cloud-sync-media-apac`             |
+| Rate limit namespaces    | `2402` (`AUTH_LIMITER`), `2403` (`OTP_LIMITER`)                                                                                    | go with the Worker                                                                          |
+| Worker secrets           | `BETTER_AUTH_SECRET`, `TURSO_API_TOKEN`, `APPLE_PRIVATE_KEY`                                                                       | go with the Worker                                                                          |
+| Apple App ID capability  | Sign in with Apple (`APPLE_ID_AUTH`, primary) on `com.nelsongan.money2time`                                                        | `asc bundle-ids capabilities remove --id 2ASN39AS8V_APPLE_ID_AUTH --confirm` (then rebuild) |
+| Sign in with Apple key   | `Money2Time Cloud Sync`, key id `F5629ZF4G6` (.p8 in `~/.config/money2time/` and the Worker secret `APPLE_PRIVATE_KEY`)            | revoke it in the Apple Developer portal, Keys                                               |
+| Turso group              | `m2t-sync` (aws-ap-southeast-1), organization `nelsongan`                                                                          | delete its databases, then the group, in the Turso dashboard                                |
+| Turso databases          | `m2t-sync-*`, one per user, in group `m2t-sync`                                                                                    | `turso db destroy <name>`, or the Turso dashboard                                           |
+| Turso databases (shared) | `m2t-ledger-*`, one per shared ledger, in group `m2t-sync` (added 2026-10-28)                                                      | `turso db destroy <name>`, or the Turso dashboard                                           |
+| D1 tables (shared)       | `shared_ledgers`, `ledger_members`, `ledger_links`, `ledger_media_usage` in `money2time-cloud-sync-auth`                           | go with the D1 database                                                                     |
+| Durable Object class     | `SyncHub` (live updates, one per user, SQLite-backed, added 2026-10-28)                                                            | goes with the Worker                                                                        |
+| Turso Platform API token | the Worker secret `TURSO_API_TOKEN` (copy in `~/.config/money2time/turso-api-token`)                                               | revoke it in the Turso dashboard, Settings > API Tokens                                     |
+| PostHog feature flag     | `cloud_sync`, the retired allow list for the Cloud Sync UI (no longer read, see [Availability](#availability))                     | archive or delete in PostHog                                                                |
 
 Teardown order: delete the Worker first (nothing can make new databases), then
 the Turso databases listed in D1 (`SELECT db_name FROM sync_databases` and
@@ -5426,8 +5460,9 @@ table above. No Worker deployment or app native rebuild is required.
 ## Website
 
 `apps/web` is [money2time.com](https://www.money2time.com) (the marketing site
-and the legal pages the stores link to) and the Web Dashboard on
-[app.money2time.com](https://app.money2time.com). It is its own npm project, and
+and the legal pages the stores link to), the Web Dashboard on
+[app.money2time.com](https://app.money2time.com) and shared albums on
+[album.money2time.com](https://album.money2time.com). It is its own npm project, and
 paths in this section are relative to it.
 
 **This is Next.js code that does not run on Next.js.** The site is written
@@ -5462,7 +5497,8 @@ in production.
 | -------------------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Cloudflare Worker                | `money2time-workers-web`                                                                                | Serves the marketing site, the legal pages and the Web Dashboard. Configured by `cloudflare.config.ts`                                           |
 | Cloudflare Workers Static Assets | part of `money2time-workers-web`                                                                        | Build output, the ~1,460 prerendered pages under `/_vinext/static-cache/`, the favicon and the dashboard's art in `public/dashboard-assets/`     |
-| Cloudflare custom domains        | `www.money2time.com`, `app.money2time.com` → `money2time-workers-web`                                   | `www` is the site, `app` the Web Dashboard. Cloudflare manages their DNS records                                                                 |
+| Cloudflare custom domains        | `www.money2time.com`, `app.money2time.com`, `album.money2time.com` → `money2time-workers-web`           | `www` is the site, `app` the Web Dashboard, `album` shared albums. Cloudflare manages their DNS records                                          |
+| Cloudflare service binding       | `CLOUD_SYNC` → `money2time-workers-cloud-sync`                                                          | The album host's API calls the cloud-sync Worker ([Shared albums on the web](#shared-albums-on-the-web))                                         |
 | Cloudflare Worker route          | `money2time.com/*` → `money2time-workers-web`                                                           | The apex, which only `308`s to `www`. Needs the DNS record below                                                                                 |
 | Cloudflare DNS record            | `AAAA money2time.com 100::`, proxied                                                                    | Originless record the apex route runs on. Keep it: a route works only on a proxied record                                                        |
 | Cloudflare zone                  | `money2time.com` (Free plan)                                                                            | DNS, the domains above, Image Transformations (switched on, same-zone sources only), Email Routing                                               |
@@ -5524,7 +5560,10 @@ To run the Web Dashboard against a local relay, start the relay in
 `app.money2time.com` is the Web Dashboard, served by the same Worker:
 `src/proxy.ts` rewrites every path on an `app.` host to `/[locale]/dashboard`,
 and `/dashboard` on the marketing host `308`s there. It is `noindex` and out of
-the sitemap.
+the sitemap. `album.money2time.com` is shared albums
+([Shared albums on the web](#shared-albums-on-the-web)): every page there is
+`/[locale]/album`, its `/api/*` the front for the cloud-sync Worker; `noindex`
+too, and out of the sitemap.
 
 ### Web Dashboard in the browser
 
@@ -5728,6 +5767,157 @@ app's `services/webDashboardLink.ts`, `webDashboardCrypto.ts`,
 - The IndexedDB database is named `money2time-web-dashboard`
   (`src/lib/cloud/cache.ts`). Renaming it would drop every browser's link.
 
+### Shared albums on the web
+
+[album.money2time.com](https://album.money2time.com) is where a shared album's
+invite link opens, and where friends without the app join the album and use
+it: the usual case is someone with Money2Time sharing a trip album with
+friends who have never installed it, and who do not care about accounts or
+budgets. It is the same album, with the same rules, as in the app
+([Album members and shared albums](#album-members-and-shared-albums)): the
+website only reads the group and asks the cloud-sync Worker to write it, as a
+phone does. The code is `src/components/album/` (the page), `src/lib/album/`
+(the rules and the API) and `src/app/api/[...path]/route.ts`.
+
+**What the visitor sees.** One page, mobile-first and laid out as the app's
+album page, so moving to the app later needs no relearning. `src/proxy.ts`
+rewrites every page on an `album.` host to `/[locale]/album`, in the
+visitor's language, and the page reads where it is from the address
+(`site.tsx`, moving with `history.pushState`):
+
+- **`/join/<code>`, the invite.** The album's name, who invited them and how
+  many people are in it (`GET /v1/invites/<code>`, the owner named as the
+  album knows them). Signed out: **Continue with Google** (Google's own
+  button) or **Continue with email** (a 6-digit code, behind the same
+  Turnstile widget the app uses). Signed in: **Your name in this album**
+  (their account's name, else their address's first part, capitalised), then
+  **Join album**, which accepts the invite and puts them on the album's list
+  under that name. Then **You're in**: **Continue on the web**, or the app
+  (the store for their phone, or both on a computer, and **Open in the app**,
+  the same link handed to the app as `money2time://join/<code>?kind=album`).
+  A card at the foot offers **Open in the app** to someone who already has it.
+  An expired link, a full album and a shared ledger's link (which needs the
+  app) each say so; the owner opening their own link goes to the album.
+- **`/a/<share>`, the album** (`?tab=breakdown|balances`). The cover (its
+  photo, else the name's letter), Back, the people's avatars (People), the
+  name and the days its bills span; the tabs resting on the cover's rounded
+  edge as in the app; a slim **Easier in the app** banner (Get opens the
+  stores; put away for a week); on Transactions, what the user owes or is
+  owed and what the group spent, then the bills by day, each with its
+  category, who paid and the user's part ("Tess paid · your share RM60.00",
+  "You paid · you lent RM100.00"). The app's clay **+** adds a bill.
+  - **A bill** (new or tapped) as the app's editor and Split Bill: amount and
+    currency (the album's currencies first), what it was for, one of the
+    app's eight default categories (a bill filed under someone's own category
+    keeps it until changed), the day, **Paid by** anyone still in the album,
+    and **Split evenly**, or by amount, percentage, shares or adjustment
+    (`src/lib/album/split.ts`, the app's `splitMethods.ts`: the user's own row
+    takes what is left, odd cents go to the user). The foot says what it
+    means for the user ("You owe Tess RM60.00") or what is wrong. Delete asks
+    first, and so does changing a bill with payments on it; a bill's payments
+    are listed under it with **Undo** (the whole act, `undonePaymentRows`).
+  - **Breakdown**: by category per currency, for Everyone or one person (each
+    bill by their share), with the dashboard's donut.
+  - **Balances**: the user's net per currency, centred as in the app; **Who
+    owes whom** with **Settle up** on the user's own debts and **Record** on
+    the rest (all or part of it; on the web no account is chosen); Settled
+    up; Group spending; and the Activity log (newest five, then Show all),
+    worded by the dashboard's `describeActivity`.
+  - **People** (the avatars): the user's name in the album (Rename), everyone
+    else Joined or Left, the owner's invite link (Share, Copy, New link) and
+    Remove, **Simplify group debts**, Leave, and sign-out.
+- **`/`, the visitor's shared albums** (`GET /v1/ledgers?albums=1`), or what
+  the site is for and the way to sign in. Albums are started in the app.
+
+Every change is saved by the Worker before it shows (Save is busy until then);
+one that cannot go says why in a toast and keeps the editor open. With
+Simplify on, a change that leaves the group even closes its circle
+(`evenGroupRows`, the app's `evenGroupPayments`). An open album reads the
+group again every 20 seconds while the page is in view and whenever it comes
+back to it, so others' changes arrive without a reload.
+
+**Moving to the app.** The same account (the same Google account or address)
+signed in to the app brings the album along, with everything added on the
+web: the app lists the user's shared albums at sign-in and makes each one it
+does not have yet. What they paid on the web lands with **no account** (the
+dashed box), never on a default account, since the website has none: the
+Worker names the writer of a web change `web:<account>`
+([Which account](#album-members-and-shared-albums)). They choose an account in
+the app, one bill at a time or several at once.
+
+**How it works.**
+
+- **The page never holds a token.** `/api/*` on the album host
+  (`src/lib/album/server.ts`) is an allowlisted front for the cloud-sync
+  Worker: signing in stores the Worker's session token in an HttpOnly,
+  `SameSite=Lax`, `Secure` cookie (`m2t_album_session`, a year, the session's
+  own length), and every call turns it back into `Authorization: Bearer …`.
+  Only these pass, each with only the fields it needs: the session (`GET`,
+  `DELETE`, Google ID token, email code and its check), an invite's preview
+  and join (accept, then the album's `join` under the chosen name; a ledger's
+  link is refused), the album list, an album (`GET /v1/ledgers/<id>/album`),
+  its writes (always sent `via: 'web'`), invite link, leave, removing a
+  member, and its cover picture (served only as an image, never SVG, cached
+  privately). Nothing else of the Worker's (a database token, account
+  deletion, a ledger) can be reached from the page.
+- **Writes come only from the page itself**: every request but a `GET` needs
+  the `x-m2t-album: 1` header and, when it sends one, its own `Origin`, so a
+  form or script on another site gets 403 (and, `SameSite=Lax`, no cookie).
+- **A service binding, not a fetch.** `CLOUD_SYNC` (`cloudflare.config.ts`)
+  calls `money2time-workers-cloud-sync` inside Cloudflare, and the visitor's
+  `cf-connecting-ip` goes with each call, so the Worker's sign-in limits count
+  each visitor on their own. The Worker sets no CORS header: browsers never
+  call it directly.
+- **Every row is checked as a phone checks it** (`src/lib/album/group.ts`,
+  the app's mappers and its filter to the group's own members): anyone given
+  the link can write what the rules allow, so a row of the wrong shape, or a
+  bill or payment naming someone outside the group, is left out. Debts,
+  totals and payments are the app's own code (`src/lib/album/debts.ts` is
+  `groupDebts.ts` line for line, `writes.ts` its `groupRows.ts`), so the
+  website and every phone show the same balances and record the same
+  payments.
+- **Sign-in.** Google: Google Identity Services' button with the web OAuth
+  client the Worker already accepts (`229377044166-862v…`, also Android's
+  `webClientId`); **its Authorized JavaScript origins must include
+  `https://album.money2time.com`** in Google Cloud Console, or the button says
+  the origin is not allowed. Email: the Turnstile site key the app uses (its
+  domain `money2time.com` covers the album host; the Worker's
+  `TURNSTILE_HOSTNAMES` lists `album.money2time.com`), Cloudflare's always-pass
+  test key on `*.localhost`. Sign in with Apple on the web would need a
+  Services ID with this domain and its return URL, added to the Worker's
+  `APPLE_CLIENT_IDS`; it is not offered yet.
+- **Headers.** The album host's CSP (`next.config.ts`, `albumPolicy`) allows
+  this site's scripts, Google's sign-in script and frame, Turnstile's script
+  and frame, and GA4; it connects only to itself, Google's sign-in, PostHog
+  and GA4; pictures from itself and the media bucket; no framing. It sends
+  `Cross-Origin-Opener-Policy: same-origin-allow-popups` (Google's popup) and
+  `Referrer-Policy: strict-origin-when-cross-origin` (Google checks the
+  origin). Every page and the API are `noindex`, `robots.txt` disallows
+  everything, and there is no sitemap: invites and albums are private.
+- **Analytics** carry what was done, never what is in the album, and never an
+  invite code or album id: every path on the album host is reported as
+  `/join/:code`, `/a/:album` or `/` (`publicPath`, in page views, PostHog's
+  URL and path properties, GA4's page location and referrers). Like the
+  dashboard it is a private page: no session recording, no error capture,
+  and analytics state on its own host. The events are in the
+  [Website event contract](#website-event-contract).
+
+**Local.** Run the cloud-sync Worker with `wrangler dev` (its `.dev.vars` with
+`LOCAL_SYNC_URL` and `LOCAL_LEDGER_SYNC_URLS` pointing at a sync server for
+the album, as in the Worker's own Local notes), put
+`NEXT_PUBLIC_CLOUD_SYNC_URL=http://127.0.0.1:8787` in `.env.development.local`
+(the API then calls it instead of the binding), and open
+`http://album.localhost:<port>/join/<code>`. Email codes print in the Worker's
+log. Google's button needs the origin added to the OAuth client, so test
+sign-in with email locally.
+
+**Shipping it.** `album.money2time.com` moved from the cloud-sync Worker to
+this one. A custom domain can belong to one Worker only, so before the first
+deploy that carries it, detach it from `money2time-workers-cloud-sync`
+(Workers & Pages → the Worker → Settings → Domains & Routes); the website's
+deploy then attaches it. Also add `https://album.money2time.com` to the
+Google OAuth web client's Authorized JavaScript origins.
+
 ### Website localization
 
 The site ships 32 locales (`messages/*.json`), including regional English
@@ -5804,7 +5994,8 @@ run and a deployed one fail in the same places.
 
 - **Prerendered pages.** `prerender: { routes: "*" }` renders every page
   `generateStaticParams` names at build time: the marketing, legal and
-  tutorial pages in every prefixed locale, about 1,460 in all.
+  tutorial pages in every prefixed locale, about 1,520 in all (the album page
+  in each locale among them, an empty shell its script fills).
   `staticAssetsAdapter()` ships them in the Worker version's Static Assets
   under `/_vinext/static-cache/` and serves them read-only
   (`x-vinext-cache: HIT`), so a deploy replaces every page at once and a
@@ -5813,18 +6004,19 @@ run and a deployed one fail in the same places.
   proxy reaches them by rewriting to `/en/…`, and vinext keeps a rewritten
   request out of the prerender cache, so they render on each request in a few
   milliseconds, with `no-store`. So does `/` in Malaysia and Singapore (the
-  same rewrite, to `en-my` and `en-sg`), the Web Dashboard on `app.`, the 404
+  same rewrite, to `en-my` and `en-sg`), the Web Dashboard on `app.`, shared
+  albums on `album.` (the same rewrite) and their `/api/*`, the 404
   page, `/download`, and the metadata routes (sitemap, robots, manifest, the OG
   and Twitter cards), which vinext does not prerender.
-- **The build log's `48 errors` are those English pages.** Every build prints
-  `Prerendered 1489 routes (2 skipped, 48 errors)`. The 48 are the `/en/…`
+- **The build log's `49 errors` are those English pages.** Every build prints
+  `Prerendered 1520 routes (3 skipped, 49 errors)`. The 49 are the `/en/…`
   paths: the proxy answers them with a `307` to the unprefixed path, which the
   prerenderer records as `RSC handler returned 307` in
   `dist/server/vinext-prerender.json`. Nothing is broken, and those pages
-  render per request either way. If the number is not 48, read that file. The
+  render per request either way. If the number is not 49, read that file. The
   deploy step prints the line a second time: `deploy --skip-build` skips the
   Vite build but prerenders again (about 12 seconds), and then uploads all
-  2,978 prerendered files (an `.html` and an `.rsc` per page), because each
+  3,040 prerendered files (an `.html` and an `.rsc` per page), because each
   one names the new build's ID.
 - **What each response tells caches.** Prerendered pages carry vinext's
   `s-maxage=31536000, stale-while-revalidate`, which only a shared cache reads,
@@ -5848,13 +6040,16 @@ run and a deployed one fail in the same places.
   string (a `next.config.ts` redirect would do, but vinext drops the query when
   a redirect leaves the host, and campaign links carry UTM tags); its matcher
   has a host-conditioned entry so files and `/download` on the apex are
-  covered too. It also sends every path on `app.` to the dashboard, picks a
+  covered too. It also sends every path on `app.` to the dashboard and every
+  page on `album.` to shared albums (its `/api/*` goes straight to the route
+  handler, which answers on that host only), picks a
   locale from `cf-ipcountry` (Cloudflare's IP geolocation) and the browser's
   languages, and `308`s `/dashboard` on `www` to the app host. It matches that
   path decoded (`decodedPath`), as the router does, so `/%64ashboard` cannot
   render the dashboard on `www` without the app host's headers. In
   `next.config.ts`, every host but `www` and `app` gets
-  `X-Robots-Tag: noindex`, and the `app.` host gets the dashboard's CSP.
+  `X-Robots-Tag: noindex`, the `app.` host gets the dashboard's CSP and the
+  `album.` host its own.
 - **HTTPS only.** The zone's **Always Use HTTPS** setting is on, so Cloudflare
   `301`s plain HTTP on every hostname (the site, the dashboard and the
   Workers' custom domains), and every host sends
