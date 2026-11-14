@@ -30,6 +30,7 @@ import { Gzip, strToU8 } from 'fflate';
 import { transactionsRepository } from '~/lib/repositories/transactionsRepository';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { buildBackupData, yieldToEventLoop } from '~/services/dataManagementService';
+import { previousInstallForgotten } from '~/services/previousInstall';
 import type { UserAssetReadCache } from '~/services/userAssets';
 import { webDashboardBudgetsOnly } from '~/services/webDashboardBudgets';
 
@@ -144,6 +145,8 @@ let cacheEpoch = 0;
 async function readList<T extends { roomId: string }>(key: string): Promise<T[]> {
   const cached = listCache.get(key);
   if (cached) return cached as T[];
+  // A reinstall turns the deleted install's links into unlinks first.
+  await previousInstallForgotten();
   const epoch = cacheEpoch;
   const items = await readStoredList<T>(key);
   if (items && epoch === cacheEpoch) listCache.set(key, items);
@@ -973,6 +976,26 @@ export class WebDashboardConnections {
     this.snapshots.clear();
     this.assetCache.clear();
   }
+}
+
+/**
+ * A new install found links in the keychain: ones a deleted install of this
+ * app left (iOS keeps the keychain across a reinstall), whose data is gone.
+ * Each becomes a pending unlink, so the browser forgets the old copy the next
+ * time it and the Web Dashboard screen are both open, and the phone shows no
+ * linked browsers. Not the user unlinking, so no event. Returns how many.
+ */
+export async function forgetPreviousInstallBrowsers(): Promise<number> {
+  const links = (await readStoredList<LinkRecord>(LINKS_KEY)) ?? [];
+  if (links.length === 0) return 0;
+  const unlinkedAt = Date.now();
+  const rooms = new Set(links.map((link) => link.roomId));
+  await updateUnlinks((unlinks) => [
+    ...unlinks.filter((unlink) => !rooms.has(unlink.roomId)),
+    ...links.map((link) => ({ ...link, unlinkedAt })),
+  ]);
+  await updateLinks(() => []);
+  return links.length;
 }
 
 /**

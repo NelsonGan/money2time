@@ -58,6 +58,10 @@ export async function setBrowserEdits(_roomId: string, _allowed: boolean): Promi
   throw new WebDashboardError('unavailable');
 }
 
+export async function forgetPreviousInstallBrowsers(): Promise<number> {
+  return 0;
+}
+
 export async function unlinkBrowserOffline(_roomId: string): Promise<void> {
   throw new WebDashboardError('unavailable');
 }

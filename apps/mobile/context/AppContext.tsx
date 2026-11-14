@@ -65,6 +65,7 @@ import {
   budgetWeekOverlaps,
   isBudgetPeriodKey,
 } from '~/features/budget/lib/budgetPeriods';
+import { forgetPreviousInstallSession } from '~/features/cloudSync/services/cloudSyncSession';
 import { deletePersonalLedgerRows } from '~/features/cloudSync/services/ledgerChannels';
 import {
   listAlbumShares,
@@ -238,6 +239,7 @@ import {
   normalizeNotificationPrefs,
   syncScheduledNotifications,
 } from '~/services/notifications';
+import { forgetPreviousInstall } from '~/services/previousInstall';
 import { resetAutomationCaptureData } from '~/services/resetAutomationCaptureData';
 import { initReviewPrompt, recordTransactionLogged } from '~/services/reviewPrompt';
 import { runUserAssetGc, runUserAssetGcBackfillOnce } from '~/services/userAssetGc';
@@ -2137,6 +2139,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const nextLedgers = ledgersRepository.list();
       const nextSettings = settingsRepository.get();
       if (databaseInit.isNewInstall) {
+        // iOS keeps the keychain when the app is deleted: drop the old
+        // install's Cloud Sync session and Web Dashboard links before
+        // anything reads them, so a reinstall starts signed out.
+        void forgetPreviousInstall(() =>
+          Promise.all([
+            forgetPreviousInstallSession(),
+            // Loaded only here: the Web Dashboard is not needed at launch.
+            import('~/services/webDashboard').then((web) => web.forgetPreviousInstallBrowsers()),
+          ]),
+        );
         // The install's first launch; PostHog's automatic lifecycle events are off.
         // Queued until the new appUserId is identified, like any early event.
         void trackEvent(AnalyticsEvents.FIRST_APP_OPEN, {
