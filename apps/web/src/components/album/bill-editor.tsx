@@ -10,7 +10,7 @@ import { billRow, deletedBillRow, newId, undonePaymentRows } from "@/lib/album/w
 import { marketFor } from "@/lib/money";
 
 import type { AlbumActions } from "./album-screen";
-import { Avatar, BILL_CATEGORIES, Button, CategoryIcon, Confirm, Icon, Segmented, Sheet, Switch, currencyOrder, personColor, today, useCategoryLabel, useDay, useMoney } from "./ui";
+import { Avatar, BILL_CATEGORIES, Button, CategoryIcon, Confirm, Icon, InfoTip, Segmented, Sheet, Switch, currencySymbol, currencyOrder, personColor, today, useCategoryLabel, useDay, useMoney } from "./ui";
 
 const MAX_AMOUNT = 1e12;
 /** Currencies offered when the browser cannot list them. */
@@ -158,13 +158,7 @@ export function BillEditor({ group, bill, actions, onClose, onSaved }: { group: 
     return myShare > 0 ? t("split.youOwe", { name: nameOf(paidBy), amount: money(myShare, currency) }) : t("split.notYou", { name: nameOf(paidBy) });
   }
 
-  const unit = method === "percent" ? "%" : method === "shares" ? "×" : (() => {
-    try {
-      return new Intl.NumberFormat(locale, { style: "currency", currency, currencyDisplay: "narrowSymbol" }).formatToParts(0).find((part) => part.type === "currency")?.value ?? currency;
-    } catch {
-      return currency;
-    }
-  })();
+  const unit = method === "percent" ? "%" : method === "shares" ? "×" : currencySymbol(locale, currency);
 
   return (
     <Sheet
@@ -289,9 +283,9 @@ export function BillEditor({ group, bill, actions, onClose, onSaved }: { group: 
                     type="button"
                     aria-pressed={active}
                     onClick={() => setCategory({ name: option.name, icon: option.icon })}
-                    className={`flex flex-col items-center gap-1 rounded-[16px] border px-1 py-2 text-[12px] font-bold transition-colors ${active ? "border-primary-muted bg-primary-soft text-primary" : "border-transparent bg-background-subtle text-foreground-soft hover:text-foreground"}`}
+                    className={`flex flex-col items-center gap-0.5 rounded-[16px] border px-1 py-1.5 text-[11.5px] font-bold transition-colors ${active ? "border-primary-muted bg-primary-soft text-primary" : "border-transparent bg-background-subtle text-foreground-soft hover:text-foreground"}`}
                   >
-                    <CategoryIcon icon={option.icon} name={option.name} size={28} />
+                    <CategoryIcon icon={option.icon} name={option.name} size={26} />
                     <span className="max-w-full truncate">{categoryLabel(option.name, option.icon)}</span>
                   </button>
                 );
@@ -305,67 +299,85 @@ export function BillEditor({ group, bill, actions, onClose, onSaved }: { group: 
             ) : null}
           </div>
 
-          <label className="flex items-center justify-between gap-3 rounded-[18px] border border-border bg-card px-4 py-2.5">
+          {/* The day: one chip, as in the app; the browser's own date picker opens from it. */}
+          <div className="flex items-center justify-between gap-3 rounded-[18px] border border-border bg-card px-4 py-2">
             <span className="text-[15px] font-semibold">{t("bill.date")}</span>
-            <span className="flex items-center gap-2">
-              <span className="text-[14px] text-foreground-soft">{date ? day(date, { weekday: true }) : ""}</span>
+            <span className="relative inline-flex h-9 items-center gap-1.5 rounded-full bg-background-subtle px-3.5 text-[14px] font-bold text-foreground">
+              {date ? day(date, { weekday: true }) : ""}
               <input
                 type="date"
                 value={date}
                 min="1970-01-01"
                 max="2200-12-31"
                 onChange={(event) => event.target.value && setDate(event.target.value)}
+                onClick={(event) => (event.currentTarget as HTMLInputElement & { showPicker?: () => void }).showPicker?.()}
                 aria-label={t("bill.date")}
-                className="h-9 rounded-[12px] bg-background-subtle px-2 text-[14px] font-semibold text-foreground outline-none"
+                className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
               />
             </span>
-          </label>
+          </div>
 
-          {/* Paid by: anyone still in the album. */}
-          <div>
-            <p className="mb-2 px-1 text-[13px] font-bold text-foreground-soft">{t("bill.paidBy")}</p>
-            <div role="radiogroup" aria-label={t("bill.paidBy")} className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
-              {ordered.map((member) => (
-                <button
-                  key={member.id}
-                  type="button"
-                  role="radio"
-                  aria-checked={paidBy === member.id}
-                  onClick={() => {
-                    setPaidBy(member.id);
-                    if (!onBill.includes(member.id)) togglePerson(member.id);
-                  }}
-                  className={`flex shrink-0 items-center gap-2 rounded-full border py-1.5 pl-1.5 pr-3.5 text-[14px] font-bold transition-colors ${paidBy === member.id ? "border-primary bg-primary-soft text-primary" : "border-border bg-card text-foreground"}`}
-                >
-                  <Avatar name={member.name} color={personColor(group.members, member.id, selfId)} size={28} />
-                  {nameOf(member.id)}
-                </button>
-              ))}
+          {/* Split Bill, laid out as the app's: the method, then who paid and Split evenly, then the people. */}
+          <div className="flex items-center gap-1">
+            <div className="min-w-0 flex-1">
+              <Segmented
+                label={t("split.by")}
+                value={method === "even" ? "amount" : method}
+                onChange={(next) => next !== "amount" || method !== "even" ? chooseMethod(next) : undefined}
+                options={[
+                  { value: "amount", label: t("split.amount") },
+                  { value: "percent", label: "%" },
+                  { value: "shares", label: t("split.shares") },
+                  { value: "adjust", label: "+/−" },
+                ]}
+              />
+            </div>
+            <InfoTip
+              label={t("split.by")}
+              text={[
+                `${t("split.amount")}: ${t("split.amountHint")}`,
+                `%: ${t("split.percentHint")}`,
+                `${t("split.shares")}: ${t("split.sharesHint")}`,
+                `+/−: ${t("split.adjustHint")}`,
+              ].join("\n")}
+            />
+          </div>
+
+          <div className="rounded-[22px] border border-border bg-card">
+            {/* Paid by: anyone still in the album. */}
+            <label className="relative flex items-center justify-between gap-3 border-b border-border px-4 py-3">
+              <span className="text-[15px] font-semibold">{t("bill.paidBy")}</span>
+              <span className="flex min-w-0 items-center gap-2">
+                <Avatar name={group.members.find((member) => member.id === paidBy)?.name ?? "?"} color={personColor(group.members, paidBy, selfId)} size={28} />
+                <span className="truncate text-[15px] font-bold">{nameOf(paidBy)}</span>
+                <span className="text-foreground-muted">
+                  <Icon name="chevron" size={18} />
+                </span>
+              </span>
+              <select
+                value={paidBy}
+                onChange={(event) => {
+                  setPaidBy(event.target.value);
+                  if (!onBill.includes(event.target.value)) togglePerson(event.target.value);
+                }}
+                aria-label={t("bill.paidBy")}
+                className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+              >
+                {ordered.map((member) => (
+                  <option key={member.id} value={member.id}>
+                    {nameOf(member.id)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <div className="flex items-center justify-between gap-3 px-4 py-3">
+              <span className="text-[15px] font-semibold">{t("split.evenly")}</span>
+              <Switch checked={method === "even"} onChange={(on) => chooseMethod(on ? "even" : "amount")} label={t("split.evenly")} />
             </div>
           </div>
 
-          {/* Split between. */}
           <div className="rounded-[22px] border border-border bg-card">
-            <div className="flex items-center justify-between gap-3 px-4 py-3">
-              <span className="text-[15px] font-bold">{t("split.evenly")}</span>
-              <Switch checked={method === "even"} onChange={(on) => chooseMethod(on ? "even" : "amount")} label={t("split.evenly")} />
-            </div>
-            {method !== "even" ? (
-              <div className="px-3 pb-3">
-                <Segmented
-                  label={t("split.by")}
-                  value={method}
-                  onChange={chooseMethod}
-                  options={[
-                    { value: "amount", label: t("split.amount"), title: t("split.amountHint") },
-                    { value: "percent", label: "%", title: t("split.percentHint") },
-                    { value: "shares", label: t("split.shares"), title: t("split.sharesHint") },
-                    { value: "adjust", label: "+/−", title: t("split.adjustHint") },
-                  ]}
-                />
-              </div>
-            ) : null}
-            <ul className="border-t border-border">
+            <ul>
               {ordered.map((member) => {
                 const on = onBill.includes(member.id);
                 const index = peopleOnBill.indexOf(member.id);
@@ -393,7 +405,7 @@ export function BillEditor({ group, bill, actions, onClose, onSaved }: { group: 
                           value={values[member.id] ?? ""}
                           onChange={(event) => typeValue(member.id, event.target.value)}
                           inputMode="decimal"
-                          aria-label={t("split.valueFor", { name: nameOf(member.id) })}
+                          aria-label={t("split.valueFor", { name: member.name })}
                           className="h-10 w-[84px] rounded-[12px] border border-border bg-background-subtle px-2.5 text-right text-[15px] font-bold outline-none focus:border-primary tabular"
                         />
                       </span>

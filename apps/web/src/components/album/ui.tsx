@@ -13,19 +13,33 @@ export { Confirm, Sheet } from "@/components/dashboard/edit/kit";
 
 // ------------------------------------------------------------------ money --
 
-/** Amounts as the app writes them: in their own currency, never converted. */
+/**
+ * An amount as the app writes it: in its own currency, never converted, the
+ * symbol right against the number when it comes first ("RM48.00", "$12.50";
+ * "48,00 €" keeps its space).
+ */
+export function formatMoney(locale: string, amount: number, currency: string): string {
+  try {
+    const parts = new Intl.NumberFormat(locale, { style: "currency", currency, currencyDisplay: "narrowSymbol" }).formatToParts(amount);
+    const symbolFirst = parts.findIndex((part) => part.type === "currency") < parts.findIndex((part) => part.type === "integer");
+    return parts.filter((part, index) => !(symbolFirst && part.type === "literal" && /^\s+$/.test(part.value) && parts[index - 1]?.type === "currency")).map((part) => part.value).join("");
+  } catch {
+    return `${currency} ${amount.toFixed(2)}`;
+  }
+}
+
+/** A currency's symbol as the page's locale writes it ("RM", "$"), else its code. */
+export function currencySymbol(locale: string, currency: string): string {
+  try {
+    return new Intl.NumberFormat(locale, { style: "currency", currency, currencyDisplay: "narrowSymbol" }).formatToParts(0).find((part) => part.type === "currency")?.value ?? currency;
+  } catch {
+    return currency;
+  }
+}
+
 export function useMoney() {
   const locale = useLocale();
-  return useCallback(
-    (amount: number, currency: string) => {
-      try {
-        return new Intl.NumberFormat(locale, { style: "currency", currency, currencyDisplay: "narrowSymbol" }).format(amount);
-      } catch {
-        return `${currency} ${amount.toFixed(2)}`;
-      }
-    },
-    [locale],
-  );
+  return useCallback((amount: number, currency: string) => formatMoney(locale, amount, currency), [locale]);
 }
 
 /** Currencies in the order the app lists an album's: the most used first. */
@@ -240,17 +254,25 @@ export function Segmented<T extends string>({ value, options, onChange, label }:
 
 /** An (i) that explains a setting on tap, as the app's info buttons do, instead of a caption under it. */
 export function InfoTip({ text, label }: { text: string; label: string }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState<{ left: number; width: number } | null>(null);
   const id = useId();
+  const show = (button: HTMLButtonElement) => {
+    // Kept on screen whatever side of it the button is on.
+    const rect = button.getBoundingClientRect();
+    const width = Math.min(256, window.innerWidth - 32);
+    const wanted = rect.left + rect.width / 2 - width / 2;
+    const left = Math.min(Math.max(wanted, 16), window.innerWidth - 16 - width) - rect.left;
+    setOpen({ left, width });
+  };
   return (
     <span className="relative inline-flex">
       <button
         type="button"
         aria-label={label}
-        aria-expanded={open}
+        aria-expanded={!!open}
         aria-describedby={open ? id : undefined}
-        onClick={() => setOpen((value) => !value)}
-        onBlur={() => setOpen(false)}
+        onClick={(event) => (open ? setOpen(null) : show(event.currentTarget))}
+        onBlur={() => setOpen(null)}
         className="inline-flex h-7 w-7 items-center justify-center rounded-full text-foreground-muted hover:text-foreground"
       >
         <svg viewBox="0 0 24 24" width={18} height={18} fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
@@ -259,7 +281,12 @@ export function InfoTip({ text, label }: { text: string; label: string }) {
         </svg>
       </button>
       {open ? (
-        <span id={id} role="tooltip" className="absolute left-1/2 top-8 z-20 w-64 -translate-x-1/2 rounded-[14px] bg-foreground px-3 py-2 text-[12.5px] font-medium leading-snug text-card shadow-lg">
+        <span
+          id={id}
+          role="tooltip"
+          style={{ left: open.left, width: open.width }}
+          className="absolute top-8 z-20 whitespace-pre-line rounded-[14px] bg-foreground px-3 py-2 text-[12.5px] font-medium leading-snug text-card shadow-lg"
+        >
           {text}
         </span>
       ) : null}

@@ -2264,7 +2264,6 @@
       "title": "Deine geteilten Alben",
       "landingTitle": "Reisekosten mit Freunden teilen",
       "landingBody": "Trag ein, was du bezahlt hast, sieh, wer wem etwas schuldet, und begleiche es. Kostenlos, direkt hier im Browser.",
-      "signedInAs": "Angemeldet als {email}",
       "emptyTitle": "Noch keine geteilten Alben",
       "emptyBody": "Öffne den Einladungslink, den dir ein Freund geschickt hat, um seinem Album beizutreten. Alben werden in der Money2Time-App erstellt.",
       "yours": "Deins"
@@ -2408,7 +2407,6 @@
       "youOwe": "Du schuldest",
       "youAreOwed": "Du bekommst",
       "settled": "Bei dir ist alles beglichen",
-      "andOwed": "und du bekommst {amount}",
       "emptyTitle": "Noch keine Salden",
       "emptyBody": "Füge eine Rechnung hinzu, dann siehst du hier, wer wem etwas schuldet.",
       "whoOwesWhom": "Wer schuldet wem",

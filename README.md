@@ -5796,33 +5796,39 @@ visitor's language, and the page reads where it is from the address
   (the store for their phone, or both on a computer, and **Open in the app**,
   the same link handed to the app as `money2time://join/<code>?kind=album`).
   A card at the foot offers **Open in the app** to someone who already has it.
-  An expired link, a full album and a shared ledger's link (which needs the
-  app) each say so; the owner opening their own link goes to the album.
+  An expired link and a shared ledger's link (which needs the app) each say
+  so; a full album says so when joining (someone already in it gets back in),
+  and the owner opening their own link goes to the album. The invite names
+  the owner and counts the others ("+3"), never their names.
 - **`/a/<share>`, the album** (`?tab=breakdown|balances`). The cover (its
   photo, else the name's letter), Back, the people's avatars (People), the
   name and the days its bills span; the tabs resting on the cover's rounded
   edge as in the app; a slim **Easier in the app** banner (Get opens the
-  stores; put away for a week); on Transactions, what the user owes or is
-  owed and what the group spent, then the bills by day, each with its
-  category, who paid and the user's part ("Tess paid · your share RM60.00",
-  "You paid · you lent RM100.00"). The app's clay **+** adds a bill.
+  stores; put away for a week); then, as in the app, the bills by day, each
+  with its category, who paid and the user's part ("Tess paid · your share
+  RM60.00", "You paid · you lent RM100.00"). Amounts are written as the app
+  writes them ("RM48.00", `formatMoney`). The app's clay **+** adds a bill.
+  On a wide screen the cover becomes a card over the same column.
   - **A bill** (new or tapped) as the app's editor and Split Bill: amount and
     currency (the album's currencies first), what it was for, one of the
     app's eight default categories (a bill filed under someone's own category
-    keeps it until changed), the day, **Paid by** anyone still in the album,
-    and **Split evenly**, or by amount, percentage, shares or adjustment
-    (`src/lib/album/split.ts`, the app's `splitMethods.ts`: the user's own row
-    takes what is left, odd cents go to the user). The foot says what it
+    keeps it until changed) and the day; then Split Bill's own layout: the
+    method (Amount, %, Shares, +/−, explained behind its ⓘ), one card with
+    **Paid by** (anyone still in the album) and **Split evenly**, and the
+    people (`src/lib/album/split.ts`, the app's `splitMethods.ts`: the user's
+    own row takes what is left, odd cents go to the user). Tax and service
+    are app-only. The foot says what it
     means for the user ("You owe Tess RM60.00") or what is wrong. Delete asks
     first, and so does changing a bill with payments on it; a bill's payments
     are listed under it with **Undo** (the whole act, `undonePaymentRows`).
   - **Breakdown**: by category per currency, for Everyone or one person (each
     bill by their share), with the dashboard's donut.
   - **Balances**: the user's net per currency, centred as in the app; **Who
-    owes whom** with **Settle up** on the user's own debts and **Record** on
-    the rest (all or part of it; on the web no account is chosen); Settled
-    up; Group spending; and the Activity log (newest five, then Show all),
-    worded by the dashboard's `describeActivity`.
+    owes whom**, each line opening the payment for it (Pay, Paid you, or
+    another pair's after a yes; all of it or part; on the web no account is
+    chosen); Settled up; Group spending's three tiles; and the Activity log
+    (the person in bold, newest five, then Show all), worded by the
+    dashboard's `describeActivity`.
   - **People** (the avatars): the user's name in the album (Rename), everyone
     else Joined or Left, the owner's invite link (Share, Copy, New link) and
     Remove, **Simplify group debts**, Leave, and sign-out.

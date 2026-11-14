@@ -2264,7 +2264,6 @@
       "title": "Album chung của bạn",
       "landingTitle": "Chia hóa đơn chuyến đi với bạn bè",
       "landingBody": "Thêm khoản bạn đã trả, xem ai nợ ai và thanh toán. Miễn phí, ngay trên trình duyệt.",
-      "signedInAs": "Đã đăng nhập: {email}",
       "emptyTitle": "Chưa có album chung nào",
       "emptyBody": "Mở liên kết mời bạn bè gửi để tham gia album của họ. Album được tạo trong ứng dụng Money2Time.",
       "yours": "Của bạn"
@@ -2408,7 +2407,6 @@
       "youOwe": "Bạn nợ",
       "youAreOwed": "Bạn được nhận",
       "settled": "Bạn đã thanh toán hết",
-      "andOwed": "và bạn được nhận {amount}",
       "emptyTitle": "Chưa có số dư nào",
       "emptyBody": "Thêm một hóa đơn và bạn sẽ thấy ai nợ ai ở đây.",
       "whoOwesWhom": "Ai nợ ai",

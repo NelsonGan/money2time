@@ -2264,7 +2264,6 @@
       "title": "Dina delade album",
       "landingTitle": "Dela reseutgifter med vänner",
       "landingBody": "Lägg till vad du betalade, se vem som är skyldig vem och gör upp. Gratis, direkt i webbläsaren.",
-      "signedInAs": "Inloggad som {email}",
       "emptyTitle": "Inga delade album än",
       "emptyBody": "Öppna inbjudningslänken som en vän skickade för att gå med i albumet. Album skapas i Money2Time-appen.",
       "yours": "Ditt"
@@ -2408,7 +2407,6 @@
       "youOwe": "Du är skyldig",
       "youAreOwed": "Du har att få",
       "settled": "Allt är reglerat",
-      "andOwed": "och du har {amount} att få",
       "emptyTitle": "Inga saldon än",
       "emptyBody": "Lägg till en nota så ser du här vem som är skyldig vem.",
       "whoOwesWhom": "Vem är skyldig vem",

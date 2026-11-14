@@ -2264,7 +2264,6 @@
       "title": "Your shared albums",
       "landingTitle": "Split trip bills with friends",
       "landingBody": "Add what you paid, see who owes whom, and settle up. Free, right here in your browser.",
-      "signedInAs": "Signed in as {email}",
       "emptyTitle": "No shared albums yet",
       "emptyBody": "Open the invite link a friend sent you to join their album. Albums are started in the Money2Time app.",
       "yours": "Yours"
@@ -2408,7 +2407,6 @@
       "youOwe": "You owe",
       "youAreOwed": "You are owed",
       "settled": "You're all settled up",
-      "andOwed": "and you're owed {amount}",
       "emptyTitle": "No balances yet",
       "emptyBody": "Add a bill and you'll see who owes whom here.",
       "whoOwesWhom": "Who owes whom",

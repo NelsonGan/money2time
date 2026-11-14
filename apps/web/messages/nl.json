@@ -2264,7 +2264,6 @@
       "title": "Je gedeelde albums",
       "landingTitle": "Deel reisrekeningen met vrienden",
       "landingBody": "Vul in wat je betaalde, zie wie wat aan wie verschuldigd is en verreken. Gratis, gewoon in je browser.",
-      "signedInAs": "Ingelogd als {email}",
       "emptyTitle": "Nog geen gedeelde albums",
       "emptyBody": "Open de uitnodigingslink die een vriend je stuurde om mee te doen met diens album. Albums begin je in de Money2Time-app.",
       "yours": "Van jou"
@@ -2408,7 +2407,6 @@
       "youOwe": "Jij bent schuldig",
       "youAreOwed": "Je krijgt nog",
       "settled": "Alles is verrekend",
-      "andOwed": "en je krijgt nog {amount}",
       "emptyTitle": "Nog geen saldo's",
       "emptyBody": "Voeg een rekening toe en je ziet hier wie wat aan wie verschuldigd is.",
       "whoOwesWhom": "Wie is wie wat schuldig",

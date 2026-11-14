@@ -98,7 +98,7 @@ export function TransactionsTab({ group, onOpen, onAdd }: { group: Group; onOpen
                         </span>
                       </span>
                       {bill.note?.trim() && category ? <span className="block truncate text-[13px] text-foreground-soft">{category}</span> : null}
-                      <span className={`block truncate text-[13px] font-semibold ${sub.tone === "lent" ? "text-success" : sub.tone === "owe" ? "text-primary" : "text-foreground-muted"}`}>{sub.text}</span>
+                      <span className={`block text-[13px] font-semibold leading-snug ${sub.tone === "lent" ? "text-success" : sub.tone === "owe" ? "text-primary" : "text-foreground-muted"}`}>{sub.text}</span>
                     </span>
                     <span className="shrink-0 text-right text-[15.5px] font-extrabold text-error tabular">{money(bill.amount, bill.currency)}</span>
                   </button>

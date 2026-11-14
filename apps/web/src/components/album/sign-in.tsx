@@ -219,13 +219,12 @@ function EmailSignIn({ onSignedIn, onBack }: { onSignedIn: (user: SessionUser) =
     }
   };
 
-  const verify = async (event: FormEvent) => {
-    event.preventDefault();
-    if (!sentTo || code.trim().length < 6 || busy) return;
+  const verify = async (entered = code) => {
+    if (!sentTo || entered.trim().length < 6 || busy) return;
     setBusy(true);
     setError(null);
     try {
-      onSignedIn(await api.signInWithEmail(sentTo, code.trim()));
+      onSignedIn(await api.signInWithEmail(sentTo, entered.trim()));
     } catch (err) {
       setError(t(signInErrorKey(err)));
       setBusy(false);
@@ -235,17 +234,28 @@ function EmailSignIn({ onSignedIn, onBack }: { onSignedIn: (user: SessionUser) =
   return (
     <div className="flex flex-col gap-3">
       {sentTo ? (
-        <form onSubmit={verify} className="flex flex-col gap-3">
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            void verify();
+          }}
+          className="flex flex-col gap-3"
+        >
           <p className="text-center text-[14px] text-foreground-soft">{t.rich("signIn.codeSent", { email: sentTo, strong: (chunks) => <strong className="text-foreground">{chunks}</strong> })}</p>
           <input
             value={code}
-            onChange={(event) => setCode(event.target.value.replace(/\D/g, "").slice(0, 6))}
+            onChange={(event) => {
+              const next = event.target.value.replace(/\D/g, "").slice(0, 6);
+              setCode(next);
+              // The sixth digit signs in, as the app's code field does.
+              if (next.length === 6 && code.length < 6) void verify(next);
+            }}
             inputMode="numeric"
             autoComplete="one-time-code"
             aria-label={t("signIn.codeLabel")}
             placeholder="••••••"
             autoFocus
-            className="h-14 rounded-[18px] border border-border bg-card text-center font-mono text-[26px] font-semibold tracking-[0.4em] text-foreground outline-none focus:border-primary"
+            className="h-14 rounded-[18px] border border-border bg-card text-center text-[26px] font-bold tracking-[0.35em] text-foreground outline-none tabular focus:border-primary"
           />
           <Button type="submit" size="lg" busy={busy} disabled={code.length < 6} className="w-full">
             {t("signIn.verify")}

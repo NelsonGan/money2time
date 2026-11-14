@@ -8,7 +8,7 @@ import { cents, groupTotals, type GroupDebt } from "@/lib/album/debts";
 import type { Group } from "@/lib/album/group";
 import { groupDebts } from "@/lib/album/writes";
 
-import { Avatar, Button, Icon, Mascot, currencyOrder, personColor, useDay, useMoney } from "./ui";
+import { Avatar, Icon, Mascot, currencyOrder, currencySymbol, personColor, useDay, useMoney } from "./ui";
 
 export type SettleTarget = GroupDebt;
 
@@ -91,21 +91,29 @@ export function BalancesTab({ group, onSettle }: { group: Group; onSettle: (targ
                     const sentence =
                       debt.from === selfId ? t("balances.youOweName", { name: nameOf(debt.to) }) : debt.to === selfId ? t("balances.owesYou", { name: nameOf(debt.from) }) : t("balances.owes", { from: nameOf(debt.from), to: nameOf(debt.to) });
                     return (
-                      <li key={`${debt.from}-${debt.to}-${debt.currency}`} className="flex items-center gap-3 border-b border-border py-3 last:border-b-0">
-                        <span className="flex shrink-0 items-center gap-1 text-foreground-muted">
-                          <Avatar name={nameOf(debt.from)} color={colorOf(debt.from)} size={28} />
-                          <Icon name="arrow" size={14} />
-                          <Avatar name={nameOf(debt.to)} color={colorOf(debt.to)} size={28} />
-                        </span>
-                        <span className={`min-w-0 flex-1 text-[14.5px] ${mine ? "font-bold text-foreground" : "font-semibold text-foreground-soft"}`}>
-                          <span className="block truncate">{sentence}</span>
-                          <span className={`block text-[15px] font-extrabold tabular ${debt.from === selfId ? "text-primary" : debt.to === selfId ? "text-success" : "text-foreground-soft"}`}>{money(debt.amount, debt.currency)}</span>
-                        </span>
-                        {selfId ? (
-                          <Button tone={debt.from === selfId ? "primary" : debt.to === selfId ? "soft" : "plain"} size="sm" onClick={() => onSettle(debt)} className="shrink-0">
-                            {debt.from === selfId ? t("balances.settleUp") : t("balances.record")}
-                          </Button>
-                        ) : null}
+                      <li key={`${debt.from}-${debt.to}-${debt.currency}`} className="border-b border-border last:border-b-0">
+                        {/* As in the app: the whole line opens it (here, recording the payment), the amount at its end. */}
+                        <button
+                          type="button"
+                          disabled={!selfId}
+                          onClick={() => onSettle(debt)}
+                          className="-mx-2 flex w-[calc(100%+16px)] items-center gap-3 rounded-[14px] px-2 py-3 text-left transition-colors hover:bg-background-subtle disabled:hover:bg-transparent"
+                        >
+                          <span className="flex shrink-0 items-center gap-1 text-foreground-muted">
+                            <Avatar name={nameOf(debt.from)} color={colorOf(debt.from)} size={28} />
+                            <Icon name="arrow" size={14} />
+                            <Avatar name={nameOf(debt.to)} color={colorOf(debt.to)} size={28} />
+                          </span>
+                          <span className={`line-clamp-2 min-w-0 flex-1 text-[15px] leading-snug ${mine ? "font-bold text-foreground" : "font-semibold text-foreground-soft"}`}>{sentence}</span>
+                          <span className={`shrink-0 text-[15px] font-extrabold tabular ${debt.from === selfId ? "text-primary" : debt.to === selfId ? "text-success" : "text-foreground-soft"}`}>
+                            {money(debt.amount, debt.currency)}
+                          </span>
+                          {selfId ? (
+                            <span className="shrink-0 text-foreground-muted">
+                              <Icon name="chevron" size={16} />
+                            </span>
+                          ) : null}
+                        </button>
                       </li>
                     );
                   })}
@@ -152,18 +160,15 @@ export function BalancesTab({ group, onSettle }: { group: Group; onSettle: (targ
           return (
             <div key={currency} className="mb-2 last:mb-0">
               {multi ? <CurrencyChip currency={currency} /> : null}
-              <div className="rounded-[16px] bg-background-subtle px-4 py-3">
-                <p className="text-[12.5px] font-semibold text-foreground-soft">{t("balances.total")}</p>
-                <p className="text-[22px] font-extrabold tracking-[-0.02em] tabular">{money(entry.total, currency)}</p>
-              </div>
-              <div className="mt-2 grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-3 gap-2">
                 {[
+                  { label: t("balances.total"), value: entry.total },
                   { label: t("balances.youPaid"), value: entry.selfPaid },
                   { label: t("balances.yourShare"), value: entry.selfShare },
                 ].map((tile) => (
-                  <div key={tile.label} className="min-w-0 rounded-[16px] bg-background-subtle px-4 py-2.5">
+                  <div key={tile.label} className="min-w-0 rounded-[16px] bg-background-subtle px-2.5 py-2.5">
                     <p className="truncate text-[12.5px] font-semibold text-foreground-soft">{tile.label}</p>
-                    <p className="text-[16px] font-extrabold tabular [overflow-wrap:anywhere]">{money(tile.value, currency)}</p>
+                    <TileFigure text={money(tile.value, currency)} />
                   </div>
                 ))}
               </div>
@@ -178,13 +183,7 @@ export function BalancesTab({ group, onSettle }: { group: Group; onSettle: (targ
 }
 
 function CurrencyChip({ currency }: { currency: string }) {
-  const locale = useLocale();
-  let symbol = currency;
-  try {
-    symbol = new Intl.NumberFormat(locale, { style: "currency", currency, currencyDisplay: "narrowSymbol" }).formatToParts(0).find((part) => part.type === "currency")?.value ?? currency;
-  } catch {
-    // An unknown code shows as itself.
-  }
+  const symbol = currencySymbol(useLocale(), currency);
   return (
     <div className="mb-1 mt-3 flex items-center gap-2">
       <span className="rounded-full bg-background-subtle px-2.5 py-0.5 text-[11.5px] font-bold text-foreground-soft">
@@ -234,7 +233,9 @@ function Activity({ group }: { group: Group }) {
                   size={28}
                 />
                 <span className="min-w-0 flex-1">
-                  <span className="block text-[14.5px] leading-snug [overflow-wrap:anywhere]">{line.text}</span>
+                  <span className="block text-[14.5px] leading-snug [overflow-wrap:anywhere]">
+                    <BoldLead text={line.text} lead={line.actorId === group.selfId ? t("you") : (group.members.find((member) => member.id === line.actorId)?.name ?? null)} />
+                  </span>
                   {line.mine ? <span className="mt-0.5 block text-[13px] font-bold text-primary">{line.mine}</span> : null}
                 </span>
                 <span className="shrink-0 pt-0.5 text-[12.5px] font-semibold text-foreground-muted">{time.format(new Date(line.createdAt))}</span>
@@ -249,5 +250,26 @@ function Activity({ group }: { group: Group }) {
         </button>
       ) : null}
     </section>
+  );
+}
+
+/** A line with the person who did it in bold, as the app's Activity writes it ("**Tess** paid you RM40.00"). */
+function BoldLead({ text, lead }: { text: string; lead: string | null }) {
+  if (!lead || !text.startsWith(lead)) return <>{text}</>;
+  return (
+    <>
+      <strong className="font-bold">{lead}</strong>
+      {text.slice(lead.length)}
+    </>
+  );
+}
+
+/** A tile's figure on one line, a little smaller the longer it is, so three fit side by side on a phone as in the app. */
+function TileFigure({ text }: { text: string }) {
+  const size = text.length > 11 ? 11.5 : text.length > 9 ? 13 : 15.5;
+  return (
+    <p className="truncate whitespace-nowrap font-extrabold tracking-[-0.01em] tabular" style={{ fontSize: size }} title={text}>
+      {text}
+    </p>
   );
 }

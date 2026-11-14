@@ -2264,7 +2264,6 @@
       "title": "Album kongsi anda",
       "landingTitle": "Bahagi bil percutian dengan rakan",
       "landingBody": "Tambah apa yang anda bayar, lihat siapa berhutang kepada siapa, dan selesaikan. Percuma, terus dalam pelayar anda.",
-      "signedInAs": "Log masuk sebagai {email}",
       "emptyTitle": "Belum ada album kongsi",
       "emptyBody": "Buka pautan jemputan yang dihantar oleh rakan anda untuk menyertai album mereka. Album dibuat dalam aplikasi Money2Time.",
       "yours": "Milik anda"
@@ -2408,7 +2407,6 @@
       "youOwe": "Anda berhutang",
       "youAreOwed": "Anda akan terima",
       "settled": "Semua sudah selesai",
-      "andOwed": "dan anda akan terima {amount}",
       "emptyTitle": "Belum ada baki",
       "emptyBody": "Tambah bil dan anda akan nampak siapa berhutang kepada siapa di sini.",
       "whoOwesWhom": "Siapa berhutang kepada siapa",

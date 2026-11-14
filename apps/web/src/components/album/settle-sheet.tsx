@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useState, type FormEvent } from "react";
 
 import { cents } from "@/lib/album/debts";
@@ -10,7 +10,7 @@ import { settleRows, type GroupRowWrite } from "@/lib/album/writes";
 
 import type { AlbumActions } from "./album-screen";
 import type { SettleTarget } from "./balances-tab";
-import { Avatar, Button, Icon, Sheet, personColor, today, useMoney } from "./ui";
+import { Avatar, Button, Icon, Sheet, currencySymbol, personColor, today, useMoney } from "./ui";
 
 /**
  * Recording a payment on one line of Who owes whom: the user paying someone
@@ -32,6 +32,7 @@ export function SettleSheet({
   onRecorded: (text: string, undo: GroupRowWrite[] | null) => void;
 }) {
   const t = useTranslations("album");
+  const locale = useLocale();
   const money = useMoney();
   const [amountText, setAmountText] = useState(trimNumber(target.amount));
   const [busy, setBusy] = useState(false);
@@ -91,16 +92,22 @@ export function SettleSheet({
         </div>
         <label className="w-full">
           <span className="sr-only">{t("settle.amount")}</span>
-          <span className="flex items-center justify-center gap-2 rounded-[22px] border border-border bg-background-subtle px-4 py-3">
-            <span className="text-[18px] font-bold text-foreground-soft">{target.currency}</span>
+          <span className="flex items-center justify-center gap-1 rounded-[22px] border border-border bg-background-subtle px-4 py-3 focus-within:border-primary">
+            <span className="text-[30px] font-extrabold tracking-[-0.03em] text-foreground-soft">{currencySymbol(locale, target.currency)}</span>
             <input
               value={amountText}
               onChange={(event) => setAmountText(event.target.value.replace(/[^\d.,]/g, "").slice(0, 15))}
               inputMode="decimal"
               aria-label={t("settle.amount")}
               data-autofocus
-              className="w-[60%] bg-transparent text-center text-[36px] font-extrabold tracking-[-0.03em] outline-none tabular"
+              size={Math.max(2, amountText.length)}
+              className="min-w-0 bg-transparent text-[36px] font-extrabold tracking-[-0.03em] outline-none tabular"
             />
+            <span className="text-foreground-muted" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width={18} height={18} fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4" />
+              </svg>
+            </span>
           </span>
         </label>
         <p className={`text-[13.5px] ${valid || !amountText ? "text-foreground-soft" : "font-semibold text-error"}`}>{t("settle.owed", { amount: money(target.amount, target.currency) })}</p>

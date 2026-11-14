@@ -115,7 +115,15 @@ function InviteCard({ preview }: { preview: InvitePreview }) {
         <h1 className="mt-1 text-[28px] font-extrabold leading-tight tracking-[-0.03em] [overflow-wrap:anywhere]">{name}</h1>
         <p className="mt-1 text-[15px] text-foreground-soft">{t("join.invitedBy", { name: preview.ownerName || t("someone") })}</p>
         <div className="mt-3 flex items-center gap-2.5">
-          <Avatar name={preview.ownerName || "?"} color="#4E7BD1" size={30} />
+          {/* The owner, and how many more: the others' names are for the people in it. */}
+          <span className="flex items-center">
+            <Avatar name={preview.ownerName || "?"} color="#4E7BD1" size={30} ring />
+            {preview.memberCount > 0 ? (
+              <span className="-ml-2 inline-flex h-[30px] min-w-[30px] items-center justify-center rounded-full bg-background-subtle px-1.5 text-[12px] font-bold text-foreground-soft ring-2 ring-card">
+                +{preview.memberCount}
+              </span>
+            ) : null}
+          </span>
           <span className="text-[14px] font-semibold text-foreground-soft">{t("people.count", { count: preview.memberCount + 1 })}</span>
         </div>
       </div>

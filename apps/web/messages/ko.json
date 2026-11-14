@@ -2264,7 +2264,6 @@
       "title": "내 공유 앨범",
       "landingTitle": "친구와 여행 비용 나누기",
       "landingBody": "낸 돈을 추가하고, 누가 누구에게 얼마를 줘야 하는지 보고, 정산하세요. 무료이고, 브라우저에서 바로 쓸 수 있어요.",
-      "signedInAs": "{email}(으)로 로그인됨",
       "emptyTitle": "아직 공유 앨범이 없어요",
       "emptyBody": "친구가 보낸 초대 링크를 열면 친구의 앨범에 참여할 수 있어요. 앨범은 Money2Time 앱에서 만들어요.",
       "yours": "내 앨범"
@@ -2408,7 +2407,6 @@
       "youOwe": "줄 돈",
       "youAreOwed": "받을 돈",
       "settled": "모두 정산 완료",
-      "andOwed": "받을 돈 {amount}",
       "emptyTitle": "아직 정산 내역이 없어요",
       "emptyBody": "청구를 추가하면 누가 누구에게 얼마를 줘야 하는지 여기에 표시돼요.",
       "whoOwesWhom": "누가 누구에게",

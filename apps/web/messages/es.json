@@ -2264,7 +2264,6 @@
       "title": "Tus álbumes compartidos",
       "landingTitle": "Divide los gastos del viaje con amigos",
       "landingBody": "Añade lo que pagaste, mira quién debe a quién y salda cuentas. Gratis, aquí mismo en tu navegador.",
-      "signedInAs": "Sesión iniciada como {email}",
       "emptyTitle": "Aún no hay álbumes compartidos",
       "emptyBody": "Abre el enlace de invitación que te envió un amigo para unirte a su álbum. Los álbumes se crean en la app Money2Time.",
       "yours": "Tuyo"
@@ -2408,7 +2407,6 @@
       "youOwe": "Debes",
       "youAreOwed": "Te deben",
       "settled": "Lo tienes todo saldado",
-      "andOwed": "y te deben {amount}",
       "emptyTitle": "Aún no hay saldos",
       "emptyBody": "Añade una cuenta y verás aquí quién debe a quién.",
       "whoOwesWhom": "Quién debe a quién",

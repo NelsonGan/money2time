@@ -2264,7 +2264,6 @@
       "title": "Vos albums partagés",
       "landingTitle": "Partagez les frais de voyage entre amis",
       "landingBody": "Ajoutez ce que vous avez payé, voyez qui doit à qui et réglez vos comptes. Gratuit, directement dans votre navigateur.",
-      "signedInAs": "Connecté en tant que {email}",
       "emptyTitle": "Aucun album partagé pour l'instant",
       "emptyBody": "Ouvrez le lien d'invitation qu'un ami vous a envoyé pour rejoindre son album. Les albums se créent dans l'app Money2Time.",
       "yours": "À vous"
@@ -2408,7 +2407,6 @@
       "youOwe": "Vous devez",
       "youAreOwed": "On vous doit",
       "settled": "Tout est réglé pour vous",
-      "andOwed": "et on vous doit {amount}",
       "emptyTitle": "Aucun solde pour l'instant",
       "emptyBody": "Ajoutez une note pour voir ici qui doit à qui.",
       "whoOwesWhom": "Qui doit à qui",

@@ -2264,7 +2264,6 @@
       "title": "Paylaşılan albümleriniz",
       "landingTitle": "Seyahat hesaplarını arkadaşlarınızla bölün",
       "landingBody": "Ödediğinizi ekleyin, kimin kime borçlu olduğunu görün ve ödeşin. Ücretsiz, doğrudan tarayıcınızda.",
-      "signedInAs": "{email} olarak giriş yapıldı",
       "emptyTitle": "Henüz paylaşılan albüm yok",
       "emptyBody": "Bir arkadaşınızın albümüne katılmak için gönderdiği davet bağlantısını açın. Albümler Money2Time uygulamasında oluşturulur.",
       "yours": "Sizin"
@@ -2408,7 +2407,6 @@
       "youOwe": "Borcunuz",
       "youAreOwed": "Alacağınız",
       "settled": "Her şey ödeşildi",
-      "andOwed": "ve {amount} alacağınız var",
       "emptyTitle": "Henüz bakiye yok",
       "emptyBody": "Bir hesap ekleyin, kimin kime borçlu olduğunu burada görün.",
       "whoOwesWhom": "Kim kime borçlu",

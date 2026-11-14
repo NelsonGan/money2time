@@ -1,9 +1,9 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import { groupDebts, evenGroupRows, type GroupRowWrite } from "@/lib/album/writes";
+import { evenGroupRows, type GroupRowWrite } from "@/lib/album/writes";
 import type { Bill, Group } from "@/lib/album/group";
 import { EVENTS, track, type AlbumEditAction } from "@/lib/analytics";
 import { media } from "@/lib/media";
@@ -19,7 +19,7 @@ import { PeopleSheet } from "./people-sheet";
 import { SettleSheet } from "./settle-sheet";
 import { SignIn } from "./sign-in";
 import { TransactionsTab } from "./transactions-tab";
-import { AvatarStack, Button, Icon, Mascot, Sheet, Spinner, currencyOrder, personColor, today, useDay, useMoney } from "./ui";
+import { AvatarStack, Button, Icon, Mascot, Sheet, Spinner, personColor, today, useDay } from "./ui";
 
 /** How often an open album asks for what others changed, while the page is in view. */
 const POLL_MS = 20_000;
@@ -211,17 +211,14 @@ function AlbumView({ shareId, tab }: { shareId: string; tab: Tab }) {
     <div className="flex flex-1 flex-col pb-28">
       <Cover group={group} shareId={shareId} onBack={() => go({ name: "home" })} onPeople={() => setSheet({ kind: "people" })} />
       {/* As in the app, the tabs rest on the cover's bottom edge on rounded corners. */}
-      <div className="relative z-10 -mt-6 rounded-t-[28px] bg-background">
+      <div className="relative z-10 -mt-6 rounded-t-[28px] bg-background min-[900px]:mt-2 min-[900px]:rounded-none">
         <Tabs tab={tab} onChange={setTab} />
         <div className="mx-auto w-full max-w-[680px] px-4 pt-4">
           <AppBanner onOpen={() => setSheet({ kind: "app" })} />
           {tab === "transactions" ? (
-            <>
-              <Summary group={group} onOpen={() => setTab("balances")} />
-              <div className="mt-5">
-                <TransactionsTab group={group} onOpen={(bill) => setSheet({ kind: "bill", bill })} onAdd={() => setSheet({ kind: "bill", bill: null })} />
-              </div>
-            </>
+            <div className="mt-5">
+              <TransactionsTab group={group} onOpen={(bill) => setSheet({ kind: "bill", bill })} onAdd={() => setSheet({ kind: "bill", bill: null })} />
+            </div>
           ) : tab === "breakdown" ? (
             <div className="mt-4">
               <BreakdownTab group={group} />
@@ -300,7 +297,7 @@ function Cover({ group, shareId, onBack, onPeople }: { group: Group; shareId: st
     .map((member) => ({ id: member.id, name: member.name, color: personColor(group.members, member.id, group.selfId) }));
   const cover = group.cover && !broken ? api.coverUrl(shareId, group.cover) : null;
   return (
-    <header className="relative h-[240px] overflow-hidden bg-[linear-gradient(165deg,#F8E7EA_0%,#EDD2D7_50%,#DDB9C0_100%)] sm:h-[270px]">
+    <header className="relative h-[240px] overflow-hidden bg-[linear-gradient(165deg,#F8E7EA_0%,#EDD2D7_50%,#DDB9C0_100%)] sm:h-[270px] min-[900px]:mx-auto min-[900px]:mt-6 min-[900px]:w-[680px] min-[900px]:rounded-[28px]">
       {cover ? (
         // eslint-disable-next-line @next/next/no-img-element -- a private picture from the album's API, never optimised
         <img src={cover} alt="" onError={() => setBroken(true)} className="absolute inset-0 h-full w-full object-cover" />
@@ -310,7 +307,7 @@ function Cover({ group, shareId, onBack, onPeople }: { group: Group; shareId: st
         </span>
       )}
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.18)_0%,rgba(0,0,0,0)_35%,rgba(0,0,0,0)_50%,rgba(26,46,42,0.62)_100%)]" />
-      <div className="relative mx-auto flex h-full max-w-[680px] flex-col justify-between px-4 pb-10 pt-[max(14px,env(safe-area-inset-top))]">
+      <div className="relative mx-auto flex h-full max-w-[680px] flex-col justify-between px-4 pb-10 pt-[max(14px,env(safe-area-inset-top))] min-[900px]:px-6 min-[900px]:pb-6">
         <div className="flex items-center justify-between">
           <button type="button" onClick={onBack} aria-label={t("home.title")} className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur-md hover:bg-black/40">
             <Icon name="back" />
@@ -331,61 +328,11 @@ function Cover({ group, shareId, onBack, onPeople }: { group: Group; shareId: st
   );
 }
 
-/** The user's standing at a glance: what they owe or are owed, per currency, and what the group spent. */
-function Summary({ group, onOpen }: { group: Group; onOpen: () => void }) {
-  const t = useTranslations("album");
-  const money = useMoney();
-  const { nets, spent, order } = useMemo(() => {
-    const nets = new Map<string, number>();
-    for (const debt of groupDebts({ ...group, simplify: false })) {
-      if (debt.to === group.selfId) nets.set(debt.currency, (nets.get(debt.currency) ?? 0) + Math.round(debt.amount * 100));
-      if (debt.from === group.selfId) nets.set(debt.currency, (nets.get(debt.currency) ?? 0) - Math.round(debt.amount * 100));
-    }
-    const spent = new Map<string, number>();
-    const counts = new Map<string, number>();
-    for (const bill of group.bills) {
-      if (bill.deleted) continue;
-      spent.set(bill.currency, (spent.get(bill.currency) ?? 0) + Math.round(bill.amount * 100));
-      counts.set(bill.currency, (counts.get(bill.currency) ?? 0) + 1);
-    }
-    return { nets: [...nets].filter(([, cents]) => cents !== 0), spent, order: currencyOrder(spent.keys(), counts) };
-  }, [group]);
-  if (!spent.size) return null;
-  const owe = nets.filter(([, cents]) => cents < 0);
-  const owed = nets.filter(([, cents]) => cents > 0);
-  return (
-    <button type="button" onClick={onOpen} className="mt-4 grid w-full grid-cols-2 overflow-hidden rounded-[22px] border border-border bg-card text-left shadow-[var(--shadow-soft)] active:scale-[0.995]">
-      <div className="min-w-0 border-r border-border px-4 py-3.5">
-        <p className="text-[13px] font-semibold text-foreground-soft">{owe.length ? t("balances.youOwe") : owed.length ? t("balances.youAreOwed") : t("balances.settled")}</p>
-        {(owe.length ? owe : owed).map(([currency, cents]) => (
-          <p key={currency} className={`truncate text-[21px] font-extrabold tracking-[-0.02em] tabular ${owe.length ? "text-primary" : "text-success"}`}>
-            {money(Math.abs(cents) / 100, currency)}
-          </p>
-        ))}
-        {owe.length && owed.length ? (
-          <p className="truncate text-[12.5px] font-semibold text-success">
-            {t("balances.andOwed", { amount: owed.map(([currency, cents]) => money(cents / 100, currency)).join(" · ") })}
-          </p>
-        ) : null}
-        {!nets.length ? <p className="text-[21px] font-extrabold tracking-[-0.02em] text-success">✓</p> : null}
-      </div>
-      <div className="min-w-0 px-4 py-3.5">
-        <p className="text-[13px] font-semibold text-foreground-soft">{t("balances.groupSpending")}</p>
-        {order.map((currency) => (
-          <p key={currency} className="truncate text-[21px] font-extrabold tracking-[-0.02em] tabular">
-            {money((spent.get(currency) ?? 0) / 100, currency)}
-          </p>
-        ))}
-      </div>
-    </button>
-  );
-}
-
 function Tabs({ tab, onChange }: { tab: Tab; onChange: (tab: Tab) => void }) {
   const t = useTranslations("album");
   const tabs: Tab[] = ["transactions", "breakdown", "balances"];
   return (
-    <nav className="sticky top-0 z-20 rounded-t-[28px] border-b border-border bg-background/95 backdrop-blur-md">
+    <nav className="sticky top-0 z-20 rounded-t-[28px] border-b border-border bg-background/95 backdrop-blur-md min-[900px]:mx-auto min-[900px]:w-[680px] min-[900px]:rounded-none">
       <div role="tablist" aria-label={t("album.sections")} className="mx-auto flex max-w-[680px] gap-6 px-5 pt-1">
         {tabs.map((value) => (
           <button

@@ -2264,7 +2264,6 @@
       "title": "你的共享相册",
       "landingTitle": "和朋友分摊旅行账单",
       "landingBody": "记下你付的钱，看看谁欠谁，然后结清。免费，直接在浏览器里用。",
-      "signedInAs": "已登录为 {email}",
       "emptyTitle": "还没有共享相册",
       "emptyBody": "打开朋友发给你的邀请链接，即可加入对方的相册。相册需在 Money2Time 应用中创建。",
       "yours": "你的"
@@ -2408,7 +2407,6 @@
       "youOwe": "你欠",
       "youAreOwed": "别人欠你",
       "settled": "已全部结清",
-      "andOwed": "别人还欠你 {amount}",
       "emptyTitle": "暂无余额",
       "emptyBody": "添加一笔账单，就能在这里看到谁欠谁。",
       "whoOwesWhom": "谁欠谁",

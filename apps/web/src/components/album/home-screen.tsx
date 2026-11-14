@@ -10,7 +10,7 @@ import { api } from "./api";
 import { GetTheApp } from "./get-app";
 import { Page } from "./join-screen";
 import { SignIn } from "./sign-in";
-import { Button, Icon, Mascot, Spinner } from "./ui";
+import { Icon, Mascot, Spinner } from "./ui";
 
 /**
  * album.money2time.com on its own: the visitor's shared albums once signed
@@ -35,22 +35,21 @@ export function HomeScreen() {
     );
   }
   return (
-    <Page
-      action={
-        <Button tone="plain" size="sm" onClick={() => void signOut()}>
-          <Icon name="logout" size={16} />
-          {t("signOut")}
-        </Button>
-      }
-    >
+    <Page>
       <AlbumList />
+      <p className="mt-6 text-center text-[13px] text-foreground-muted">
+        {t("join.signedInAs", { email: user.email })}{" "}
+        <button type="button" onClick={() => void signOut()} className="font-semibold text-foreground-soft hover:underline">
+          {t("signOut")}
+        </button>
+      </p>
     </Page>
   );
 }
 
 function AlbumList() {
   const t = useTranslations("album");
-  const { user, go } = useSite();
+  const { go } = useSite();
   const [albums, setAlbums] = useState<AlbumView[] | null>(null);
   const [failed, setFailed] = useState(false);
 
@@ -67,8 +66,7 @@ function AlbumList() {
 
   return (
     <>
-      <h1 className="text-[28px] font-extrabold tracking-[-0.03em]">{t("home.title")}</h1>
-      <p className="mb-5 mt-0.5 text-[14px] text-foreground-soft">{t("home.signedInAs", { email: user?.email ?? "" })}</p>
+      <h1 className="mb-5 text-[28px] font-extrabold tracking-[-0.03em]">{t("home.title")}</h1>
       {failed ? (
         <p role="alert" className="rounded-[20px] bg-error-soft px-4 py-3 text-[14px] font-semibold text-error">
           {t("errors.network")}

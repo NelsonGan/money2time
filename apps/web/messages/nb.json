@@ -2264,7 +2264,6 @@
       "title": "Dine delte album",
       "landingTitle": "Del reiseregninger med venner",
       "landingBody": "Legg inn det du betalte, se hvem som skylder hvem, og gjør opp. Gratis, rett her i nettleseren.",
-      "signedInAs": "Logget inn som {email}",
       "emptyTitle": "Ingen delte album ennå",
       "emptyBody": "Åpne invitasjonslenken en venn sendte deg for å bli med i albumet. Album opprettes i Money2Time-appen.",
       "yours": "Ditt"
@@ -2408,7 +2407,6 @@
       "youOwe": "Du skylder",
       "youAreOwed": "Du har til gode",
       "settled": "Alt er gjort opp",
-      "andOwed": "og du har {amount} til gode",
       "emptyTitle": "Ingen saldoer ennå",
       "emptyBody": "Legg til en regning, så ser du hvem som skylder hvem her.",
       "whoOwesWhom": "Hvem skylder hvem",

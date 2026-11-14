@@ -2264,7 +2264,6 @@
       "title": "Ang mga shared album mo",
       "landingTitle": "Hatiin ang gastos sa trip kasama ang barkada",
       "landingBody": "Idagdag ang binayaran mo, tingnan kung sino ang may utang kanino, at mag-settle up. Libre, dito mismo sa browser mo.",
-      "signedInAs": "Naka-sign in bilang {email}",
       "emptyTitle": "Wala pang shared album",
       "emptyBody": "Buksan ang invite link na ipinadala ng kaibigan mo para sumali sa album nila. Sa Money2Time app ginagawa ang mga album.",
       "yours": "Sa iyo"
@@ -2408,7 +2407,6 @@
       "youOwe": "Utang mo",
       "youAreOwed": "May sisingilin ka",
       "settled": "Bayad ka na sa lahat",
-      "andOwed": "at may sisingilin kang {amount}",
       "emptyTitle": "Wala pang balanse",
       "emptyBody": "Magdagdag ng bill at makikita mo rito kung sino ang may utang kanino.",
       "whoOwesWhom": "Sino ang may utang kanino",

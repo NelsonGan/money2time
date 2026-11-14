@@ -2264,7 +2264,6 @@
       "title": "Album bersamamu",
       "landingTitle": "Bagi tagihan liburan dengan teman",
       "landingBody": "Tambahkan yang kamu bayar, lihat siapa berutang kepada siapa, lalu lunasi. Gratis, langsung di browsermu.",
-      "signedInAs": "Masuk sebagai {email}",
       "emptyTitle": "Belum ada album bersama",
       "emptyBody": "Buka tautan undangan yang dikirim temanmu untuk bergabung ke albumnya. Album dibuat di aplikasi Money2Time.",
       "yours": "Milikmu"
@@ -2408,7 +2407,6 @@
       "youOwe": "Kamu berutang",
       "youAreOwed": "Kamu akan menerima",
       "settled": "Semua sudah lunas",
-      "andOwed": "dan kamu akan menerima {amount}",
       "emptyTitle": "Belum ada saldo",
       "emptyBody": "Tambahkan tagihan dan kamu akan melihat siapa berutang kepada siapa di sini.",
       "whoOwesWhom": "Siapa berutang kepada siapa",

@@ -2264,7 +2264,6 @@
       "title": "Twoje udostępnione albumy",
       "landingTitle": "Dziel rachunki z podróży ze znajomymi",
       "landingBody": "Dodaj, ile zapłacono, zobacz, kto komu jest winien, i rozlicz się. Za darmo, tutaj w przeglądarce.",
-      "signedInAs": "Zalogowano jako {email}",
       "emptyTitle": "Brak udostępnionych albumów",
       "emptyBody": "Otwórz link z zaproszeniem od znajomego, aby dołączyć do jego albumu. Albumy zakłada się w aplikacji Money2Time.",
       "yours": "Twój"
@@ -2408,7 +2407,6 @@
       "youOwe": "Jesteś winien",
       "youAreOwed": "Masz do odebrania",
       "settled": "Wszystko rozliczone",
-      "andOwed": "i masz do odebrania {amount}",
       "emptyTitle": "Brak sald",
       "emptyBody": "Dodaj rachunek, a tutaj zobaczysz, kto komu jest winien.",
       "whoOwesWhom": "Kto komu jest winien",
