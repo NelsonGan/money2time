@@ -134,11 +134,14 @@ export function appendOperator(current: string, operator: Operator) {
  * operators append. Component-specific keys (`C`, `enter`/`done`) are handled by
  * the caller. Unknown keys are a no-op. Returns the next expression + pristine
  * flag so both NumpadPanel and MiniNumpad can share one implementation.
+ * `keepSign` (a pad with the "±" key) keeps a negative pre-fill's sign when
+ * typing replaces it; elsewhere typing replaces the whole pre-fill.
  */
 export function reduceNumpadKey(
   expression: string,
   pristine: boolean,
   rawKey: string,
+  { keepSign = false }: { keepSign?: boolean } = {},
 ): { expression: string; pristine: boolean } {
   let key = rawKey;
   if (rawKey === 'plusTimes' || rawKey === 'minusDivide') {
@@ -162,8 +165,10 @@ export function reduceNumpadKey(
   }
   if (pristine) {
     nextPristine = false;
-    // A pre-fill is replaced by what is typed, keeping a sign it was given.
-    if ((key >= '0' && key <= '9') || key === '.') current = current.startsWith('-') ? '-' : '';
+    // A pre-fill is replaced by what is typed, keeping a sign "±" gave it.
+    if ((key >= '0' && key <= '9') || key === '.') {
+      current = keepSign && current.startsWith('-') ? '-' : '';
+    }
   }
 
   if (key >= '0' && key <= '9') {

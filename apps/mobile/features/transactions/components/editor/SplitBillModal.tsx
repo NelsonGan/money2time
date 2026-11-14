@@ -796,6 +796,10 @@ export function SplitBillModal({
     if (seenPaidSignature.current === paidSignature) return;
     seenPaidSignature.current = paidSignature;
     if (method === 'amount') return;
+    // The open pad holds a value worked out before; leaving it open would let
+    // Done write it back (or, once the page is on Amount, as an amount).
+    setFocusedAmountIndex(null);
+    setFocusedExpression('');
     if (method === 'shares') {
       const missing = splits.some(
         // A row that was paid holds '' (or nothing, if it was paid on opening).
@@ -843,16 +847,18 @@ export function SplitBillModal({
 
   // A person's value changed: percentages give the user's row what is left of
   // 100 (as typed amounts give it what is left of the bill), then every
-  // unpaid row's amount is worked out again.
+  // unpaid row's amount is worked out again. Returns the values it stored, so
+  // a caller can seed the next field from them rather than a stale closure.
   const handleMethodValueChange = useCallback(
-    (index: number, value: string) => {
+    (index: number, value: string): string[] => {
       const target = splits[index];
-      if (!target || target.paid || method === 'amount') return;
+      if (!target || target.paid || method === 'amount') return methodValues;
       let values = [...methodValues];
       values[index] = value;
       if (method === 'percent') values = balanceSelfPercent(splits, values, index);
       storeMethodValues(splits, values);
       onChange(applyMethodValues(method, splits, values, total));
+      return values;
     },
     [method, methodValues, onChange, splits, storeMethodValues, total],
   );
@@ -863,16 +869,24 @@ export function SplitBillModal({
       const next = Math.max(0, Math.round((current + delta) * 100) / 100);
       if (next === current) return;
       void triggerHaptic('selection');
+      // Stepping the row the pad is on: close the pad, or its Done would put
+      // back the count it was opened with.
+      if (index === focusedAmountIndex) {
+        setFocusedAmountIndex(null);
+        setFocusedExpression('');
+      }
       handleMethodValueChange(index, trimNumber(next));
     },
-    [handleMethodValueChange, methodValues],
+    [focusedAmountIndex, handleMethodValueChange, methodValues],
   );
+
+  // A percentage, share or adjustment split that does not work out yet.
+  const methodProblem = itemized ? null : splitMethodProblem(method, splits, methodValues);
 
   // Nothing to scale (no amounts) or a 0% no-op → keep Apply disabled so it
   // never fires a "success" for a change that doesn't happen. A method that
   // does not add up yet has nothing sound to scale either.
-  const canApplyPercent =
-    unpaidSum > 0 && percent !== 0 && !splitMethodProblem(method, splits, methodValues);
+  const canApplyPercent = unpaidSum > 0 && percent !== 0 && methodProblem === null;
 
   const handleApplyPercent = useCallback(() => {
     if (percent === 0) return;
@@ -1084,9 +1098,10 @@ export function SplitBillModal({
       // back what they just typed for it. Then move on to the next person
       // still owing, seeded with what the method now holds.
       const finalMethodValue = methodValueFromExpression(method, focusedExpression);
-      if (finalMethodValue !== trimNumber(methodNumber(methodValues[focusedAmountIndex]))) {
-        handleMethodValueChange(focusedAmountIndex, finalMethodValue);
-      }
+      const values =
+        finalMethodValue !== trimNumber(methodNumber(methodValues[focusedAmountIndex]))
+          ? handleMethodValueChange(focusedAmountIndex, finalMethodValue)
+          : methodValues;
       const following = nextEditableAmountIndex(splits, focusedAmountIndex);
       if (following === null) {
         setFocusedAmountIndex(null);
@@ -1095,7 +1110,7 @@ export function SplitBillModal({
       }
       void triggerHaptic('selection');
       setFocusedAmountIndex(following);
-      setFocusedExpression(methodSeed(methodValues[following]));
+      setFocusedExpression(methodSeed(values[following]));
       return;
     }
     const finalValue = formatCalcAmount(evaluateExpression(focusedExpression));
@@ -1132,8 +1147,6 @@ export function SplitBillModal({
   // commit; the editor derives the parent amount from the rows.
   // The user's own share cannot drop below what they have already paid back.
   const belowPaidBack = friendPaid && selfAmount + 0.005 < paidBack;
-  // A percentage, share or adjustment split that does not work out yet.
-  const methodProblem = itemized ? null : splitMethodProblem(method, splits, methodValues);
   const canDone =
     (itemized ? unpaidSum > 0.004 : sumMatches) && !belowPaidBack && methodProblem === null;
   // Whether the sum bar shows its "all good" state (drives the check + hint).

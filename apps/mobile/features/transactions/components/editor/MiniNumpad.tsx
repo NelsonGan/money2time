@@ -60,12 +60,14 @@ export function MiniNumpad({
 
   const handleKeyPress = useCallback(
     (rawKey: KeyValue) => {
-      const result = reduceNumpadKey(expression, pristineRef.current, rawKey);
+      const result = reduceNumpadKey(expression, pristineRef.current, rawKey, {
+        keepSign: signKey,
+      });
       pristineRef.current = result.pristine;
       setExpression(result.expression);
       onValueChange(result.expression);
     },
-    [expression, onValueChange],
+    [expression, onValueChange, signKey],
   );
 
   const handleClear = useCallback(() => {
