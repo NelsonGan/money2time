@@ -1,4 +1,4 @@
-import { ChevronRight, Pencil } from 'lucide-react-native';
+import { ChevronRight } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -33,9 +33,9 @@ export interface SettleUpConfirmContent {
   /** The amount that changes hands. */
   amountText: string;
   /**
-   * That amount as a number, when less of it can be paid: tapping the amount
-   * opens a pad, and a smaller one settles part of it. `prefix` is what goes
-   * before the number ("RM", "≈ RM").
+   * That amount as a number, when less of it can be paid: the sheet opens
+   * with a pad seeded with it, and a smaller one settles part of it. `prefix`
+   * is what goes before the number ("RM", "≈ RM").
    */
   partial?: { full: number; prefix: string };
   /** A muted line under the amount (how a net came about, or the bill); null to omit. */
@@ -57,8 +57,9 @@ interface SettleUpConfirmSheetProps {
  * The confirmation for Settle up with a person: everything open between the
  * two, both ways, in one payment. It shows who pays whom as two avatars and an
  * arrow, then the amount, and asks which account the money moved through.
- * Tapping the amount opens a pad to pay less of it. (Paying one bill back
- * uses SplitPaymentSheet.)
+ * When less of it can be paid, the pad is open from the start, seeded with all
+ * of it: the first digit typed replaces it. (Paying one bill back uses
+ * SplitPaymentSheet.)
  */
 export function SettleUpConfirmSheet({ content, onClose, onConfirm }: SettleUpConfirmSheetProps) {
   const themeColors = useThemeColors();
@@ -67,19 +68,27 @@ export function SettleUpConfirmSheet({ content, onClose, onConfirm }: SettleUpCo
 
   const [accountId, setAccountId] = useState<string | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
-  // The amount as typed, once the user chose to pay less than all of it.
+  // The amount as typed on the pad; null while the sheet has no pad (an
+  // amount that is paid whole).
   const [expression, setExpression] = useState<string | null>(null);
 
   // Seeded when the sheet opens, not on every account change while it is open:
   // the account money is paid to by default, which is never an archived one.
   const openingAccountId = useRef<() => string | null>(() => null);
   openingAccountId.current = () => pickPaybackAccountId(accounts, settings.defaultPaybackAccountId);
+  // The pad opens seeded with the whole amount, so a part payment is typed
+  // straight away instead of after a tap on the amount.
+  const openingExpression = useRef<() => string | null>(() => null);
+  openingExpression.current = () =>
+    content?.partial
+      ? sanitizeInitialAmount(String(normalizeMoneyAmount(content.partial.full)))
+      : null;
   const open = content !== null;
   useEffect(() => {
     if (!open) return;
     setAccountId(openingAccountId.current());
     setPickerOpen(false);
-    setExpression(null);
+    setExpression(openingExpression.current());
   }, [open]);
 
   const partial = content?.partial ?? null;
@@ -135,17 +144,11 @@ export function SettleUpConfirmSheet({ content, onClose, onConfirm }: SettleUpCo
             <Text variant="caption" tone="muted" numberOfLines={1} className="mt-3">
               {content.caption}
             </Text>
-            <Pressable
-              disabled={!partial || editing}
-              onPress={() => {
-                if (!partial) return;
-                void triggerHaptic('selection');
-                setExpression(sanitizeInitialAmount(String(normalizeMoneyAmount(partial.full))));
-              }}
-              accessibilityRole="button"
+            <View
+              accessible
               accessibilityLabel={I18n.t('transactions.settleUp.payment_amount')}
               testID="settle-up-amount"
-              className="mt-0.5 flex-row items-center gap-2 active:opacity-70"
+              className="mt-0.5 flex-row items-center"
             >
               <Text
                 variant="display"
@@ -162,9 +165,10 @@ export function SettleUpConfirmSheet({ content, onClose, onConfirm }: SettleUpCo
               >
                 {editing ? `${partial.prefix}${expression || '0'}` : content.amountText}
               </Text>
-              {partial && !editing ? <Pencil size={16} color={themeColors.textMuted} /> : null}
-            </Pressable>
-            {editing ? (
+            </View>
+            {/* The whole amount, as it opens, keeps how it came about; a
+                different one says what it leaves. */}
+            {editing && (tooMuch || isPart) ? (
               <Text variant="caption" tone={tooMuch ? 'error' : 'muted'} className="mt-1">
                 {tooMuch
                   ? I18n.t('transactions.settleUp.payment_too_much', {

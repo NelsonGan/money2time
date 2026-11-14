@@ -44,6 +44,8 @@ interface DebtRow {
   fromName: string | null;
   toName: string | null;
   amountText: string;
+  /** The debt's currency: a shared album's rows are grouped by it. */
+  currency: string | null;
   onPress?: () => void;
 }
 
@@ -102,6 +104,7 @@ export function AlbumBalances({ summary, group, onOpenPerson }: AlbumBalancesPro
             fromName,
             toName,
             amountText: formatIn(debt.amount, debt.currency),
+            currency: debt.currency,
             // A simplified debt is settled as it stands; a pair's own on the
             // person's page, beside its bills.
             onPress: !mine
@@ -123,10 +126,30 @@ export function AlbumBalances({ summary, group, onOpenPerson }: AlbumBalancesPro
             fromName: person.name,
             toName: person.name,
             amountText: format(Math.abs(person.netReporting)),
+            currency: null,
             onPress: () => onOpenPerson(person.key),
           },
         ];
       });
+
+  // A shared album's debts and spending never add across currencies: with
+  // more than one, each currency is its own section under a chip, so a dollar
+  // debt is not read as ringgit beside it. The reporting currency comes first.
+  const currencies = [
+    ...new Set([
+      ...(shared?.debts.map((debt) => debt.currency) ?? []),
+      ...(shared ? [...shared.spending.keys()] : []),
+      ...summary.people.flatMap((person) => person.netByCurrency.map((entry) => entry.currency)),
+    ]),
+  ].sort(
+    (a, b) =>
+      Number(b === summary.reportingCurrency) - Number(a === summary.reportingCurrency) ||
+      a.localeCompare(b),
+  );
+  const byCurrency = !!shared && currencies.length > 1;
+  // The hero adds everything up in the reporting currency: an estimate once
+  // any of it was in another, so marked as one.
+  const estimated = currencies.some((currency) => currency !== summary.reportingCurrency);
 
   // The people with nothing to pay either way (settled, or level): their
   // bills in the album are reached from here.
@@ -235,6 +258,20 @@ export function AlbumBalances({ summary, group, onOpenPerson }: AlbumBalancesPro
     );
   };
 
+  const currencyHeader = (currency: string) => {
+    const symbol = currencySymbolForCode(currency);
+    return (
+      <View className="flex-row items-center gap-2.5">
+        <View className="rounded-full bg-secondary/70 px-3 py-1">
+          <Text variant="caption" className="font-semibold">
+            {symbol === currency ? currency : `${currency} · ${symbol}`}
+          </Text>
+        </View>
+        <View className="h-px flex-1 bg-border/30" />
+      </View>
+    );
+  };
+
   const tile = (label: string, value: string) => (
     <View className="flex-1 gap-0.5 rounded-xl bg-secondary/40 px-3 py-2.5">
       <Text variant="caption" tone="muted" numberOfLines={1}>
@@ -284,7 +321,7 @@ export function AlbumBalances({ summary, group, onOpenPerson }: AlbumBalancesPro
                 : '',
           )}
         >
-          {format(Math.abs(net))}
+          {open && estimated ? `≈ ${format(Math.abs(net))}` : format(Math.abs(net))}
         </Text>
       </View>
 
@@ -293,7 +330,18 @@ export function AlbumBalances({ summary, group, onOpenPerson }: AlbumBalancesPro
           <Text variant="bodyStrong" className="px-4 pb-1 pt-3.5">
             {I18n.t('albums.balances.who_owes_whom')}
           </Text>
-          {rows.map(debtRow)}
+          {byCurrency
+            ? currencies.map((currency) => {
+                const inCurrency = rows.filter((row) => row.currency === currency);
+                if (inCurrency.length === 0) return null;
+                return (
+                  <View key={currency}>
+                    <View className="px-4 pb-0.5 pt-2.5">{currencyHeader(currency)}</View>
+                    {inCurrency.map(debtRow)}
+                  </View>
+                );
+              })
+            : rows.map(debtRow)}
         </View>
       ) : null}
 
@@ -333,16 +381,26 @@ export function AlbumBalances({ summary, group, onOpenPerson }: AlbumBalancesPro
       {shared && shared.spending.size > 0 ? (
         <View className="gap-2.5 rounded-2xl border border-border/30 bg-card px-4 py-3.5">
           <Text variant="bodyStrong">{I18n.t('albums.balances.group_spending')}</Text>
-          {[...shared.spending].map(([currency, spent]) => (
-            <View key={currency} className="flex-row gap-2">
-              {tile(
-                I18n.t('transactions.settleUp.receipt_total_label'),
-                formatIn(spent.total, currency),
-              )}
-              {tile(I18n.t('transactions.settleUp.you_paid'), formatIn(spent.selfPaid, currency))}
-              {tile(I18n.t('albums.balances.your_share'), formatIn(spent.selfShare, currency))}
-            </View>
-          ))}
+          {currencies.map((currency) => {
+            const spent = shared.spending.get(currency);
+            if (!spent) return null;
+            return (
+              <View key={currency} className={cn('gap-2', byCurrency ? 'pt-1' : '')}>
+                {byCurrency ? currencyHeader(currency) : null}
+                <View className="flex-row gap-2">
+                  {tile(
+                    I18n.t('transactions.settleUp.receipt_total_label'),
+                    formatIn(spent.total, currency),
+                  )}
+                  {tile(
+                    I18n.t('transactions.settleUp.you_paid'),
+                    formatIn(spent.selfPaid, currency),
+                  )}
+                  {tile(I18n.t('albums.balances.your_share'), formatIn(spent.selfShare, currency))}
+                </View>
+              </View>
+            );
+          })}
         </View>
       ) : null}
 

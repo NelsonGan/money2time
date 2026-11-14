@@ -22,7 +22,10 @@ interface PersonAvatarProps {
 /** A person's round initial: one colour per person, the theme tint for the user. */
 export function PersonAvatar({ name, partyKey, size, imageUri }: PersonAvatarProps) {
   const dimensions = { width: size, height: size, borderRadius: size / 2 };
-  const fontSize = Math.max(10, Math.round(size * 0.4));
+  // A small one (a pill's) scales its initial down to fit; the rest keep at
+  // least 10pt. Not scaled with the text size: it would spill out of the circle.
+  const fontSize = size < 20 ? Math.round(size * 0.6) : Math.max(10, Math.round(size * 0.4));
+  const textStyle = { fontSize, lineHeight: Math.round(fontSize * 1.2) };
   // A photo that fails to load falls back to the initial.
   const [brokenUri, setBrokenUri] = useState<string | null>(null);
   if (imageUri && imageUri !== brokenUri) {
@@ -39,7 +42,12 @@ export function PersonAvatar({ name, partyKey, size, imageUri }: PersonAvatarPro
   if (partyKey === null) {
     return (
       <View className="items-center justify-center bg-primary/15" style={dimensions}>
-        <Text className="font-semibold text-primary" style={{ fontSize }} numberOfLines={1}>
+        <Text
+          className="font-semibold text-primary"
+          style={textStyle}
+          numberOfLines={1}
+          allowFontScaling={false}
+        >
           {personInitial(name)}
         </Text>
       </View>
@@ -50,7 +58,12 @@ export function PersonAvatar({ name, partyKey, size, imageUri }: PersonAvatarPro
       className="items-center justify-center"
       style={[dimensions, { backgroundColor: avatarColor(partyKey) }]}
     >
-      <Text className="font-semibold" style={{ fontSize, color: '#fff' }} numberOfLines={1}>
+      <Text
+        className="font-semibold"
+        style={[textStyle, { color: '#fff' }]}
+        numberOfLines={1}
+        allowFontScaling={false}
+      >
         {personInitial(name)}
       </Text>
     </View>

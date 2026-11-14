@@ -1,11 +1,4 @@
-import {
-  ArrowRight,
-  CalendarRange,
-  GripVertical,
-  Undo2,
-  UserRound,
-  UsersRound,
-} from 'lucide-react-native';
+import { ArrowRight, CalendarRange, GripVertical, Undo2, UsersRound } from 'lucide-react-native';
 import React, { memo, useEffect } from 'react';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
@@ -24,11 +17,13 @@ import { useApp } from '~/context/AppContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
 import { PersonAvatar } from '~/features/sharedLedgers/components/PersonAvatar';
 import { shortName, useOpenLedgerPeople } from '~/features/sharedLedgers/lib/ledgerPeople';
+import { PersonAvatar as InitialAvatar } from '~/features/transactions/components/PersonAvatar';
 import {
   ReorderGrip,
   useReorderItemLayout,
   useReorderItemStyle,
 } from '~/features/transactions/components/transactionReorder';
+import { debtPartyKey } from '~/features/transactions/lib/debtParty';
 import { isPaybackRow } from '~/features/transactions/lib/paybackGroups';
 import { recurringTintColors } from '~/features/transactions/lib/recurringTint';
 import { billPayer } from '~/features/transactions/lib/splitPayer';
@@ -230,16 +225,18 @@ export function TransactionAccountBadge({
   label,
   compact,
   className,
-  person = false,
+  person = null,
 }: {
   account?: Account;
   label: string;
   compact: boolean;
   className?: string;
-  /** The pill names a person (the friend who paid the bill), not an account. */
-  person?: boolean;
+  /**
+   * The pill names a person (the friend who paid the bill), not an account:
+   * their avatar, as Balances and the album draw them, in place of the logo.
+   */
+  person?: { name: string | null } | null;
 }) {
-  const themeColors = useThemeColors();
   const labelSizeClass = compact ? 'text-[10px] leading-[12px]' : 'text-[11px] leading-[14px]';
   return (
     <View
@@ -249,8 +246,17 @@ export function TransactionAccountBadge({
       )}
     >
       {person ? (
-        <View className="pl-0.5">
-          <UserRound size={compact ? 10 : 12} color={themeColors.primary} />
+        // The label says who: the initial is not read out as well.
+        <View
+          className="rounded-full border border-primary/40"
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+        >
+          <InitialAvatar
+            name={person.name}
+            partyKey={debtPartyKey(person.name)}
+            size={compact ? 11 : 13}
+          />
         </View>
       ) : (
         <AccountLogo
@@ -598,7 +604,7 @@ const TransactionItemBody = memo(
                 account={account}
                 label={accountSubtitleLabel}
                 compact={compact}
-                person={!!friendPayer}
+                person={friendPayer ? { name: friendPayer.personName } : null}
                 className={compact ? 'min-w-[40px] shrink' : 'min-w-[44px] shrink'}
               />
               <InstalmentPill label={instalmentLabel} compact={compact} />
@@ -608,7 +614,7 @@ const TransactionItemBody = memo(
               account={account}
               label={accountSubtitleLabel}
               compact={compact}
-              person={!!friendPayer}
+              person={friendPayer ? { name: friendPayer.personName } : null}
               className={accountBadgeMarginClassName}
             />
           ) : instalmentLabel ? (
