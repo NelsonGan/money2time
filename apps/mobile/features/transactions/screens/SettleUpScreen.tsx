@@ -16,7 +16,7 @@ import { ActivitySearchRow } from '~/features/transactions/components/ActivitySe
 import { PersonAvatar } from '~/features/transactions/components/PersonAvatar';
 import { SettleUpDateHeader } from '~/features/transactions/components/SettleUpDateHeader';
 import { personInitial } from '~/features/transactions/lib/personAvatar';
-import { currencyOrder, personBalanceState } from '~/features/transactions/lib/settleUp';
+import { personBalanceState } from '~/features/transactions/lib/settleUp';
 import {
   groupSettleUpSearchResultsByDate,
   groupSettleUpTransactionsByDate,
@@ -384,12 +384,17 @@ export function SettleUpScreen({
     );
   };
 
-  const renderAlbumCard = ({ album, netByCurrency: nets }: AlbumBalance) => {
+  const renderAlbumCard = ({ album, netByCurrency }: AlbumBalance) => {
     // An album's balance is never converted: one figure per currency, in the
     // album's own order.
-    const order = currencyOrder(settings.currencyCode);
-    const netByCurrency = [...nets].sort((a, b) => order(a.currency, b.currency));
     const [only] = netByCurrency;
+    // Several currencies show signed figures alone; read each with what it is.
+    const netsLabel = netByCurrency
+      .map(
+        ({ currency, amount }) =>
+          `${I18n.t(amount > 0 ? 'transactions.settleUp.hero_owed' : 'transactions.settleUp.you_owe_tag')} ${formatNative(Math.abs(amount), currency)}`,
+      )
+      .join(', ');
     const state = netByCurrency.length !== 1 ? 'even' : only!.amount > 0 ? 'owed' : 'owe';
     return (
       <Pressable
@@ -399,6 +404,7 @@ export function SettleUpScreen({
           onOpenAlbum(album.id);
         }}
         accessibilityRole="button"
+        accessibilityLabel={netByCurrency.length > 1 ? `${album.name}, ${netsLabel}` : undefined}
         className="flex-row items-center gap-3 rounded-2xl border border-border/30 bg-card px-3.5 py-3 active:opacity-80"
       >
         <View className="h-11 w-11 items-center justify-center rounded-xl bg-primary/15">

@@ -357,7 +357,10 @@ function rollUpDebtsByPerson(
     netReporting: roundCents(grandTotal - grandOwed),
     owedToYouReporting: owedToYou,
     youOweReporting: youOwe,
-    netByCurrency: netCurrencyTotals(owesYouByCurrency, youOweByCurrency),
+    // In the order an album lists its currencies, which is how it is shown.
+    netByCurrency: netCurrencyTotals(owesYouByCurrency, youOweByCurrency).sort((a, b) =>
+      currencyOrder(reportingCurrency)(a.currency, b.currency),
+    ),
     personCount: result.length,
     billCount,
     reportingCurrency,

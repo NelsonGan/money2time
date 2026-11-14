@@ -327,9 +327,10 @@ describe('aggregateSettleUpByPerson', () => {
       }),
     ];
     const summary = aggregateSettleUpByPerson(txs, { reportingCurrency: 'MYR' });
+    // The reporting currency first, whatever the amounts.
     expect(summary.netByCurrency).toEqual([
-      { currency: 'USD', amount: 20 },
       { currency: 'MYR', amount: 1.5 },
+      { currency: 'USD', amount: 20 },
     ]);
     expect(summary.netReporting).toBe(85.5); // 1.5 + 20 × 4.2
   });

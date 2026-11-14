@@ -2289,7 +2289,10 @@ tables come from migrations `090`, `091` and `092`.
   currency's alone, and Settle up there settles only them
   (`settleUpWithPerson`'s `currency`). People with nothing to pay either way are listed under
   **Settled up** (marked Even when bills are open both ways and come to
-  nothing), which is where the album's bills with them are found.
+  nothing), which is where the album's bills with them are found. With
+  several currencies Settled up goes per currency too, under the same chips,
+  so someone who still owes in ringgit is listed under USD once the dollar
+  bills are settled, and that line opens their dollar bills.
 - **Simplify group debts.** A switch, off to start with (New Album can turn
   it on as the album is made), that anyone in the album can turn on, for
   everyone. On, Who owes whom shows the same balances with as few payments as

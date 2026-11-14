@@ -510,13 +510,14 @@ export function SplitsView() {
                 const open = t("open", { count: album.people.reduce((n, p) => n + p.count, 0) });
                 const [only] = album.netByCurrency;
                 const several = album.netByCurrency.length > 1;
-                const owe = only ? only.amount < 0 : album.net < 0;
+                // Every currency nets to nothing: level, so no direction and a plain zero.
+                const owe = !!only && only.amount < 0;
                 return (
                   <RankRow
                     key={`album:${album.id}`}
                     icon={<ClayImg name="settings/albums" size={30} />}
                     name={album.name}
-                    meta={several ? open : `${owe ? t("youOwe") : t("owedToYou")} · ${open}`}
+                    meta={several || !only ? open : `${owe ? t("youOwe") : t("owedToYou")} · ${open}`}
                     value={
                       several ? (
                         <span className="flex flex-col items-end">
