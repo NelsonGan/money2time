@@ -71,7 +71,8 @@ export function CreateAlbumScreen({
     const frame = requestAnimationFrame(() => scrollRef.current?.scrollToEnd({ animated: true }));
     return () => cancelAnimationFrame(frame);
   }, [signInOpen]);
-  const [simplify, setSimplify] = useState(false);
+  // A shared album starts simplified (the Worker makes it so); off is the choice.
+  const [simplify, setSimplify] = useState(true);
   const [saving, setSaving] = useState(false);
 
   const coverUri = useMemo(() => getAlbumCoverUri(coverPath), [coverPath]);
@@ -121,7 +122,7 @@ export function CreateAlbumScreen({
       setSaving(true);
       try {
         await sync.shareAlbum({ id: albumId, name: name.trim() });
-        if (simplify) await setAlbumSimplifyDebts(albumId, true);
+        if (!simplify) await setAlbumSimplifyDebts(albumId, false);
       } catch (error) {
         // The album is made, as one of the user's own, with the entries
         // picked for it.

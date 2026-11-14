@@ -49,7 +49,6 @@ import {
   type GroupRowWrite,
   paymentRow,
   renameRow,
-  restoredBillRow,
   settingsRow,
   undonePaymentRows,
 } from '~/features/albums/lib/groupRows';
@@ -643,8 +642,6 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   ) => Promise<{ id: string; mine: boolean } | null>;
   /** A group's bill that is no longer split: it leaves the group, for everyone, and stays the user's own entry. */
   detachAlbumBill: (transactionId: string) => Promise<boolean>;
-  /** A deleted bill of a shared album brought back, for everyone (Activity's Restore). */
-  restoreAlbumBill: (groupId: string, billId: string) => Promise<boolean>;
   /** A group's bill's own fields, saved on the user's entry alone (nothing goes to the group). */
   saveAlbumBillOwnFields: (
     transactionId: string,
@@ -4520,27 +4517,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [afterGroupWrite, sendGroupWrite],
   );
 
-  /** Brings back a bill someone deleted, with its shares, for everyone (the Activity tab's Restore). */
-  const restoreAlbumBill = useCallback(
-    async (groupId: string, billId: string): Promise<boolean> => {
-      const env = groupEnvFor(groupId);
-      const bill = albumGroupsRepository
-        .listExpenses(groupId)
-        .find((item) => item.id === billId && item.deletedAt);
-      if (!env || !bill || !groupSelf(groupId, env)) return false;
-      if (!(await sendGroupWrite(groupId, [restoredBillRow(bill)]))) return false;
-      try {
-        projectGroup(groupId, env, { expenseId: billId });
-        void trackEvent(AnalyticsEvents.ALBUM_BILL_RESTORED);
-      } catch (error) {
-        reportError(error, { scope: 'album_group_save' });
-      }
-      afterGroupWrite();
-      return true;
-    },
-    [afterGroupWrite, groupEnvFor, groupSelf, sendGroupWrite],
-  );
-
   /** The group's bill a share belongs to, when its album is shared on this phone. */
   const groupBillOf = useCallback((splitId: string) => {
     const tx = transactionsRef.current.find(
@@ -8150,7 +8126,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             saveAlbumBill,
             detachAlbumBill,
             saveAlbumBillOwnFields,
-            restoreAlbumBill,
             setGroupEntriesAccount,
             editGroupBills,
             deleteGroupBills,
@@ -8305,7 +8280,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       saveAlbumBill,
       detachAlbumBill,
       saveAlbumBillOwnFields,
-      restoreAlbumBill,
       setGroupEntriesAccount,
       editGroupBills,
       deleteGroupBills,

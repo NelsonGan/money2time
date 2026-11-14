@@ -263,7 +263,6 @@ export const GA4_ONLY_EVENTS = {
   ALBUM_PAYMENT_RECORDED: 'Album Payment Recorded',
   ALBUM_PAYMENT_UNDONE: 'Album Payment Undone',
   ALBUM_SIMPLIFY_DEBTS_SET: 'Album Simplify Debts Set',
-  ALBUM_BILL_RESTORED: 'Album Bill Restored',
   ALBUM_BILL_ACCOUNT_SET: 'Album Bill Account Set',
   ALBUM_ACTIVITY_OPENED: 'Album Activity Opened',
 

@@ -325,6 +325,8 @@ export type WebAlbumActivityRow = {
   rename?: { before: string; after: string } | null;
   payment?: { from: string; to: string; currency: string; amount: number; bills?: string[]; even?: boolean } | null;
   simplify?: boolean | null;
+  /** A join that started the album (the owner's); absent from older apps. */
+  started?: boolean | null;
   sort_order?: number | null;
   created_at: string;
 };

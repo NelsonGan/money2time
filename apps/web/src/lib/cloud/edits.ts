@@ -179,7 +179,7 @@ function moduleSize(op: ModuleOp): number {
       return op.op === "create" || op.op === "update" ? 1 + length(op.splits) : 1;
     case "module:albumbill":
       if (op.op === "update") return 1 + length(record("set").shares);
-      return op.op === "restore" ? 1 : length(op.rows);
+      return length(op.rows);
     default:
       return 1;
   }

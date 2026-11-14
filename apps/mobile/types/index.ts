@@ -805,6 +805,8 @@ export interface AlbumActivity {
   } | null;
   /** Simplify group debts, as it was switched. */
   simplify: boolean | null;
+  /** A join that started the album: the owner's, as they shared it. */
+  started: boolean;
   sortOrder: number;
   createdAt: string;
 }

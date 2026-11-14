@@ -68,6 +68,7 @@ const entry: AlbumActivity = {
   rename: null,
   payment: null,
   simplify: null,
+  started: false,
   sortOrder: 0,
   createdAt: AT,
 };

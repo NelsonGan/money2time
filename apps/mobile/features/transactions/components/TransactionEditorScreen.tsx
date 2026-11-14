@@ -1152,7 +1152,12 @@ export function TransactionEditorScreen({
   // open: the sheet comes back to it once a date is picked.
   const [instalmentDraft, setInstalmentDraft] = useState<InstalmentChoice | null>(null);
   const [splits, setSplits] = useState<SplitDraft[]>(initialSplits ?? defaultSplitRows ?? []);
-  const [splitEvenly, setSplitEvenly] = useState(!hasInitialSplits);
+  // A saved split reopens evenly when its shares are an even split of its
+  // total, so a corrected total stays even (in a shared album anyone fixes
+  // it) instead of the user's own share taking the whole difference.
+  const [splitEvenly, setSplitEvenly] = useState(
+    () => !hasInitialSplits || splitsHelpers.isEvenSplit(initialSplits ?? [], Number(amount)),
+  );
   // Whether the pushed Split Bill route is open. Drives the live session
   // republish so the screen mirrors edits made back here.
   const [splitRouteOpen, setSplitRouteOpen] = useState(false);
@@ -4757,7 +4762,8 @@ export function TransactionEditorScreen({
                   }}
                   accessibilityRole="button"
                   accessibilityLabel={I18n.t('transactions.editor.account')}
-                  style={styles.accountChip}
+                  // A long account name is cut short; "Choose account" never is.
+                  style={selectedAccount ? styles.accountChip : undefined}
                   className={cn(
                     'h-9 flex-row items-center gap-1.5 rounded-full border px-3 active:opacity-70',
                     fieldErrors.account

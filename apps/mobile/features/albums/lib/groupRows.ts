@@ -3,7 +3,7 @@
 // checks each row, works out a bill's total and stamps who made it and when.
 // See README.md > Album members and shared albums.
 
-import type { AlbumExpense, AlbumSettlement, AlbumShare } from '~/types';
+import type { AlbumSettlement, AlbumShare } from '~/types';
 import { normalizeMoneyAmount } from '~/utils/formatters';
 import { newId } from '~/utils/id';
 
@@ -47,11 +47,6 @@ export function billRow(bill: {
 /** A bill deleted for everyone. Its payments stay (README: Anyone can change a bill). */
 export function deletedBillRow(id: string): GroupRowWrite {
   return { table: 'album_expenses', row: { id, deleted_at: 'deleted' } };
-}
-
-/** A deleted bill brought back as it was, with its shares. */
-export function restoredBillRow(bill: AlbumExpense): GroupRowWrite {
-  return billRow(bill);
 }
 
 /** A payment from one member to another on a bill. */

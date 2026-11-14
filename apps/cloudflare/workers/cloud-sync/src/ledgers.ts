@@ -34,7 +34,7 @@
 import {
   groupWriteErrorResponse,
   hranaDb,
-  planJoin,
+  joinGroup,
   planLeave,
   planWrite,
   type WriteRequest,
@@ -569,7 +569,9 @@ async function shareLedger(env: Env, user: SessionUser, request: Request): Promi
   const url = local ?? `libsql://${await createDatabase(env, dbName)}`;
   let inserted = false;
   try {
-    if (!local) await applyCloudSchema(url, await createToken(env, dbName, TOKEN_TTL_DAYS));
+    // A local server too: phones never write an album's tables, so nothing
+    // else would create them before the Worker's first write.
+    await applyCloudSchema(url, local ? 'local' : await createToken(env, dbName, TOKEN_TTL_DAYS));
     // The limit and the insert are one statement, so two shares at once
     // cannot pass the limit of their kind. A second tap on the same ledger
     // hits the unique index and gets the first share back below.
@@ -817,9 +819,7 @@ async function albumWrite(
     let rows;
     if (body.action === 'join') {
       const name = typeof body.name === 'string' ? body.name : '';
-      rows = await writeGroup(db, null, (state) =>
-        planJoin(state, groupContext(ledger, user.id), name),
-      );
+      rows = await joinGroup(db, groupContext(ledger, user.id), name);
     } else if (body.action === 'write' && Array.isArray(body.rows)) {
       const write: WriteRequest = {
         rows: body.rows as WriteRequest['rows'],

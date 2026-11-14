@@ -25,8 +25,6 @@ const ctx = {
   nameOf: (id: string | null) => (id ? names[id] : 'Someone'),
   money: (amount: number) => `RM${amount}`,
   day: (date: string) => date,
-  needsAccount: () => false,
-  isDeleted: () => true,
 };
 
 const dinner = (amount: number, paidBy = 'tess', share = amount / 3): AlbumBillSnapshot => ({
@@ -50,6 +48,7 @@ function entry(partial: Partial<AlbumActivity>): AlbumActivity {
     rename: null,
     payment: null,
     simplify: null,
+    started: false,
     sortOrder: 0,
     createdAt: '2026-11-14T13:41:00.000Z',
     ...partial,
@@ -61,7 +60,6 @@ describe('the activity log, one line each', () => {
     const line = describeActivity(entry({ bill: { before: dinner(90), after: dinner(120) } }), ctx);
     expect(line.text).toBe('Tess changed Dinner: RM90 → RM120');
     expect(line.mine).toBe('Your share RM30 → RM40');
-    expect(line.billId).toBe('dinner');
   });
 
   it('never highlights the user’s own change', () => {
@@ -73,7 +71,7 @@ describe('the activity log, one line each', () => {
     expect(line.mine).toBeNull();
   });
 
-  it('says when someone else said the user paid, and asks for the account while there is none', () => {
+  it('says when someone else said the user paid', () => {
     const added = entry({
       kind: 'bill_added',
       actorMemberId: 'ben',
@@ -83,9 +81,6 @@ describe('the activity log, one line each', () => {
       text: 'Ben said you paid Dinner · RM60',
       mine: 'Your share RM20',
     });
-    expect(describeActivity(added, { ...ctx, needsAccount: () => true }).mine).toBe(
-      'Choose the account',
-    );
     const changed = entry({
       actorMemberId: 'ben',
       bill: { before: dinner(60), after: dinner(60, 'me') },
@@ -96,14 +91,12 @@ describe('the activity log, one line each', () => {
     });
   });
 
-  it('offers Restore on a bill that is still deleted', () => {
+  it('says what a delete took from the user', () => {
     const deleted = entry({ kind: 'bill_deleted', bill: { before: dinner(360), after: null } });
     expect(describeActivity(deleted, ctx)).toMatchObject({
       text: 'Tess deleted Dinner · RM360',
       mine: 'Your share of RM120 is gone',
-      restorable: true,
     });
-    expect(describeActivity(deleted, { ...ctx, isDeleted: () => false }).restorable).toBe(false);
   });
 
   it('reads payments, members and settings', () => {
@@ -129,10 +122,23 @@ describe('the activity log, one line each', () => {
       text: 'You paid Ben RM10',
       mine: 'Recorded by Tess',
     });
+    // The payer's own word needs no "Recorded by": the line already names them.
+    const toMe = entry({
+      kind: 'payment_recorded',
+      actorMemberId: 'tess',
+      payment: { from: 'tess', to: 'me', currency: 'MYR', amount: 10, bills: [], even: false },
+    });
+    expect(describeActivity(toMe, ctx)).toMatchObject({ text: 'Tess paid you RM10', mine: null });
     expect(
       describeActivity(entry({ kind: 'member_joined', memberId: 'ben', expenseId: null }), ctx)
         .text,
     ).toBe('Ben joined the album');
+    expect(
+      describeActivity(
+        entry({ kind: 'member_joined', actorMemberId: 'me', memberId: 'me', started: true }),
+        ctx,
+      ).text,
+    ).toBe('You started the album');
     expect(
       describeActivity(
         entry({ kind: 'member_renamed', rename: { before: 'Ben', after: 'Benjamin' } }),

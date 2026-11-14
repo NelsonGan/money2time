@@ -185,7 +185,7 @@ export type LinkState = {
   budgetCurrencies: boolean;
   /** The phone saves a card's due date as days after the statement (`phoneTakesCreditDueDaysAfter`). */
   creditDueDaysAfter: boolean;
-  /** The phone saves a shared album's bills from here, and restores deleted ones (`phoneTakesSharedAlbums`). */
+  /** The phone saves a shared album's bills from here (`phoneTakesSharedAlbums`). */
   sharedAlbums: boolean;
   /** The last transfer that failed, if the latest one did. */
   error: string | null;

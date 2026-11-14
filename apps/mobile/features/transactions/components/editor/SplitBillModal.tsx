@@ -52,6 +52,7 @@ import { debtPartyKey } from '~/features/transactions/lib/debtParty';
 import { recentSplitPersonNames } from '~/features/transactions/lib/settleUp';
 import {
   applyPercent,
+  isEvenSplit,
   nextEditableAmountIndex,
   spreadOverShares,
   sumUnpaidRows,
@@ -290,6 +291,7 @@ export const splitsHelpers = {
   distributeEvenly,
   toSplitDraftInputs,
   distributeEvenlyAcrossUnpaid,
+  isEvenSplit,
   autoBalanceSelf,
 };
 

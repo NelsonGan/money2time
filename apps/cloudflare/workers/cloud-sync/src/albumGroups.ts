@@ -296,15 +296,27 @@ function selfOf(members: readonly Member[], userId: string): Member | null {
 }
 
 /**
+ * A member's row id: made from the album and the account, so two phones of
+ * one person write one row, and their rows in two albums never share an id
+ * (a phone keeps every album's members in one table).
+ */
+export function memberRowId(groupId: string, userId: string): string {
+  const album = groupId.replace(/[^A-Za-z0-9]/g, '').slice(0, 12);
+  return `u-${album}-${userId}`.slice(0, 64);
+}
+
+/**
  * The user joining (or the owner starting) the album: their own member row,
- * under an id made from their account so two phones of theirs write one row.
+ * under an id made from the album and their account (`memberRowId`).
  * Joined again after leaving, the row they left takes them back. Nothing is
- * written when they are already in.
+ * written when they are already in. The owner starting it also writes its
+ * settings row, with Simplify group debts on: an album starts simplified.
+ * `state` must hold that row if it exists (`joinGroup` loads it).
  */
 export function planJoin(state: GroupState, ctx: PlanContext, name: string): Plan {
   const members = membersOf(state);
   if (selfOf(members, ctx.userId)) return { writes: [] };
-  const id = `u-${ctx.userId}`;
+  const id = memberRowId(ctx.groupId, ctx.userId);
   const stored = state.members.find((row) => row.id === id);
   const sortOrder = state.members.length;
   let data: Row;
@@ -326,12 +338,44 @@ export function planJoin(state: GroupState, ctx: PlanContext, name: string): Pla
   const rowId = data.id as string;
   const member: Member = toMember(data)!;
   const before = state.members.find((row) => row.id === rowId) ?? null;
-  return {
-    writes: [
-      { table: 'album_members', id: rowId, data, expectRev: before?.rev ?? null },
-      activityRow(ctx, member, { kind: 'member_joined', memberId: rowId, data: {} }, 0),
-    ],
-  };
+  const writes: PlannedWrite[] = [
+    { table: 'album_members', id: rowId, data, expectRev: before?.rev ?? null },
+    // The first in starts the album: its log says so.
+    activityRow(
+      ctx,
+      member,
+      {
+        kind: 'member_joined',
+        memberId: rowId,
+        data: state.members.length ? {} : { started: true },
+      },
+      0,
+    ),
+  ];
+  const settings = state.rows.get(rowKey('album_groups', ctx.groupId));
+  if (!state.members.length && !settings) {
+    writes.push({
+      table: 'album_groups',
+      id: ctx.groupId,
+      data: {
+        id: ctx.groupId,
+        ledger_id: ctx.groupId,
+        simplify_debts: 1,
+        cover_photo_uri: null,
+        created_at: ctx.now,
+        updated_at: ctx.now,
+        deleted_at: null,
+      },
+      expectRev: null,
+    });
+  }
+  return { writes };
+}
+
+/** `planJoin`, written, with the album's settings row read first. */
+export function joinGroup(db: GroupDb, ctx: PlanContext, name: string) {
+  const request: WriteRequest = { rows: [{ table: 'album_groups', row: { id: ctx.groupId } }] };
+  return writeGroup(db, request, (state) => planJoin(state, ctx, name));
 }
 
 /**

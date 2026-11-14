@@ -6,7 +6,8 @@ import { CLOUD_SCHEMA_SQL } from '../src/turso.ts';
 import {
   type GroupDb,
   GroupWriteError,
-  planJoin,
+  joinGroup,
+  memberRowId,
   planLeave,
   planWrite,
   type WriteRequest,
@@ -60,8 +61,7 @@ const ctx = (userId: string) => ({
   now: '2026-11-14T10:00:00.000Z',
   newId: () => `id${(ids += 1)}`,
 });
-const join = (group: GroupDb, userId: string, name: string) =>
-  writeGroup(group, null, (state) => planJoin(state, ctx(userId), name));
+const join = (group: GroupDb, userId: string, name: string) => joinGroup(group, ctx(userId), name);
 const write = (group: GroupDb, userId: string, request: WriteRequest) =>
   writeGroup(group, request, (state) => planWrite(state, ctx(userId), request, 'owner'));
 
@@ -100,15 +100,61 @@ test('joining puts each person on the list once, under a name nobody else has', 
   assert.deepEqual(
     rows('album_members').map((m) => [m.id, m.name, m.user_id]),
     [
-      ['u-owner', 'Nelson', 'owner'],
-      ['u-tess', 'nelson 2', 'tess'],
+      ['u-bali-owner', 'Nelson', 'owner'],
+      ['u-bali-tess', 'nelson 2', 'tess'],
     ],
   );
   assert.deepEqual(
     rows('album_activity').map((a) => [a.kind, a.actor_user_id, a.member_id]),
     [
-      ['member_joined', 'owner', 'u-owner'],
-      ['member_joined', 'tess', 'u-tess'],
+      ['member_joined', 'owner', 'u-bali-owner'],
+      ['member_joined', 'tess', 'u-bali-tess'],
+    ],
+  );
+});
+
+test("one person's rows in two albums never share an id", async () => {
+  // A phone keeps every album's members in one table, keyed by id alone.
+  const bali = memberRowId('814391bf-69f9-40fc-8657-b6c0277cba51', 'owner');
+  const tioman = memberRowId('27005a5c-7bcb-41d1-9759-ed9982951c4e', 'owner');
+  assert.notEqual(bali, tioman);
+  assert.match(bali, /^[A-Za-z0-9_-]{1,64}$/);
+  assert.equal(memberRowId('814391bf-69f9-40fc-8657-b6c0277cba51', 'owner'), bali);
+  const { group, rows } = database();
+  await join(group, 'owner', 'Nelson');
+  assert.deepEqual(
+    rows('album_members').map((m) => m.id),
+    [memberRowId('bali', 'owner')],
+  );
+});
+
+test('an album starts with Simplify group debts on, and turning it off sticks', async () => {
+  const { group, rows } = database();
+  await join(group, 'owner', 'Nelson');
+  assert.deepEqual(
+    rows('album_groups').map((g) => [g.id, g.simplify_debts]),
+    [['bali', 1]],
+  );
+  // Starting it is no change of the setting: the log says only who started it.
+  assert.deepEqual(
+    rows('album_activity').map((a) => [a.kind, JSON.parse(a.data_json)]),
+    [['member_joined', { started: true }]],
+  );
+  await write(group, 'owner', {
+    rows: [{ table: 'album_groups', row: { id: 'bali', simplify_debts: 0 } }],
+  });
+  // Someone joining later leaves the setting as the album has it.
+  await join(group, 'tess', 'Tess');
+  assert.deepEqual(
+    rows('album_groups').map((g) => g.simplify_debts),
+    [0],
+  );
+  assert.deepEqual(
+    rows('album_activity').map((a) => [a.kind, JSON.parse(a.data_json).started ?? false]),
+    [
+      ['member_joined', true],
+      ['simplify_changed', false],
+      ['member_joined', false],
     ],
   );
 });
@@ -117,11 +163,17 @@ test('anyone in the album adds and edits any bill, stamped and logged as them', 
   const { group, rows } = await trip();
   // Tess adds a bill Ben paid.
   await write(group, 'tess', {
-    rows: [bill('u-ben', { 'u-owner': 30, 'u-tess': 30, 'u-ben': 30 })],
+    rows: [bill('u-bali-ben', { 'u-bali-owner': 30, 'u-bali-tess': 30, 'u-bali-ben': 30 })],
   });
   // Ben edits it; the total is worked out from the shares, whatever was sent.
   await write(group, 'ben', {
-    rows: [bill('u-ben', { 'u-owner': 40, 'u-tess': 40, 'u-ben': 40 }, { amount: 1 })],
+    rows: [
+      bill(
+        'u-bali-ben',
+        { 'u-bali-owner': 40, 'u-bali-tess': 40, 'u-bali-ben': 40 },
+        { amount: 1 },
+      ),
+    ],
   });
   const [dinner] = rows('album_expenses');
   assert.equal(dinner.amount, 120);
@@ -130,7 +182,7 @@ test('anyone in the album adds and edits any bill, stamped and logged as them', 
   const log = rows('album_activity').filter((a) => a.kind.startsWith('bill_'));
   const edited = log.find((a) => a.kind === 'bill_edited');
   assert.ok(log.find((a) => a.kind === 'bill_added' && a.actor_user_id === 'tess'));
-  assert.equal(edited.actor_member_id, 'u-ben');
+  assert.equal(edited.actor_member_id, 'u-bali-ben');
   const data = JSON.parse(edited.data_json);
   assert.equal(data.before.amount, 90);
   assert.equal(data.after.amount, 120);
@@ -144,7 +196,7 @@ test('the author cannot be forged, and nothing is written outside the rules', as
   const { group, rows } = await trip();
   // A modified app naming someone else as its author.
   await write(group, 'tess', {
-    rows: [bill('u-tess', { 'u-tess': 10 }, { created_by: 'ben' })],
+    rows: [bill('u-bali-tess', { 'u-bali-tess': 10 }, { created_by: 'ben' })],
   });
   assert.equal(rows('album_expenses')[0].created_by, 'tess');
   const refused = async (userId: string, request: WriteRequest, code: string) =>
@@ -154,9 +206,9 @@ test('the author cannot be forged, and nothing is written outside the rules', as
       return true;
     });
   // Not in the album.
-  await refused('stranger', { rows: [bill('u-tess', { 'u-tess': 10 })] }, 'not_member');
+  await refused('stranger', { rows: [bill('u-bali-tess', { 'u-bali-tess': 10 })] }, 'not_member');
   // Someone who is not a member on a bill.
-  await refused('tess', { rows: [bill('u-tess', { 'u-nobody': 10 })] }, 'not_a_member');
+  await refused('tess', { rows: [bill('u-bali-tess', { 'u-nobody': 10 })] }, 'not_a_member');
   // The log is the Worker's alone.
   await refused(
     'tess',
@@ -166,12 +218,12 @@ test('the author cannot be forged, and nothing is written outside the rules', as
   // Another member's name.
   await refused(
     'tess',
-    { rows: [{ table: 'album_members', row: { id: 'u-ben', name: 'Bob' } }] },
+    { rows: [{ table: 'album_members', row: { id: 'u-bali-ben', name: 'Bob' } }] },
     'forbidden',
   );
   await refused(
     'tess',
-    { rows: [{ table: 'album_members', row: { id: 'u-tess', name: 'BEN' } }] },
+    { rows: [{ table: 'album_members', row: { id: 'u-bali-tess', name: 'BEN' } }] },
     'name_taken',
   );
 });
@@ -179,7 +231,7 @@ test('the author cannot be forged, and nothing is written outside the rules', as
 test('a deleted bill keeps its payments, and Restore brings it back, all logged', async () => {
   const { group, rows } = await trip();
   await write(group, 'owner', {
-    rows: [bill('u-owner', { 'u-owner': 30, 'u-tess': 30, 'u-ben': 30 })],
+    rows: [bill('u-bali-owner', { 'u-bali-owner': 30, 'u-bali-tess': 30, 'u-bali-ben': 30 })],
   });
   await write(group, 'tess', {
     rows: [
@@ -188,8 +240,8 @@ test('a deleted bill keeps its payments, and Restore brings it back, all logged'
         row: {
           id: 'p1',
           expense_id: 'dinner',
-          from_member: 'u-tess',
-          to_member: 'u-owner',
+          from_member: 'u-bali-tess',
+          to_member: 'u-bali-owner',
           amount: 30,
           currency: 'MYR',
           date: '2026-11-14',
@@ -225,30 +277,37 @@ test('a deleted bill keeps its payments, and Restore brings it back, all logged'
 
 test('payments of one act are one line per pair, and are only ever undone', async () => {
   const { group, rows } = await trip();
-  await write(group, 'owner', { rows: [bill('u-owner', { 'u-tess': 30, 'u-ben': 30 })] });
+  await write(group, 'owner', {
+    rows: [bill('u-bali-owner', { 'u-bali-tess': 30, 'u-bali-ben': 30 })],
+  });
   const pay = (id: string, from: string, amount: number) => ({
     table: 'album_settlements',
     row: {
       id,
       expense_id: 'dinner',
       from_member: from,
-      to_member: 'u-owner',
+      to_member: 'u-bali-owner',
       amount,
       currency: 'MYR',
       date: '2026-11-14',
     },
   });
-  await write(group, 'ben', { rows: [pay('b.0', 'u-tess', 10), pay('b.1', 'u-tess', 5)] });
+  await write(group, 'ben', {
+    rows: [pay('b.0', 'u-bali-tess', 10), pay('b.1', 'u-bali-tess', 5)],
+  });
   // A payment in another currency than its bill's would count nowhere.
   await assert.rejects(
     write(group, 'ben', {
       rows: [
-        { ...pay('usd', 'u-tess', 5), row: { ...pay('usd', 'u-tess', 5).row, currency: 'USD' } },
+        {
+          ...pay('usd', 'u-bali-tess', 5),
+          row: { ...pay('usd', 'u-bali-tess', 5).row, currency: 'USD' },
+        },
       ],
     }),
   );
   // Changing a recorded payment's amount is not a thing; undoing it is.
-  await write(group, 'ben', { rows: [pay('b.0', 'u-tess', 99)] });
+  await write(group, 'ben', { rows: [pay('b.0', 'u-bali-tess', 99)] });
   assert.equal(rows('album_settlements')[0].amount, 10);
   await write(group, 'ben', {
     rows: [
@@ -265,21 +324,25 @@ test('payments of one act are one line per pair, and are only ever undone', asyn
 
 test('someone who left changes nothing and is put on no new bill, but stays on old ones', async () => {
   const { group, rows } = await trip();
-  await write(group, 'owner', { rows: [bill('u-ben', { 'u-ben': 30, 'u-owner': 30 })] });
+  await write(group, 'owner', {
+    rows: [bill('u-bali-ben', { 'u-bali-ben': 30, 'u-bali-owner': 30 })],
+  });
   await writeGroup(group, null, (state) => planLeave(state, ctx('ben'), 'ben'));
-  assert.equal(rows('album_members').find((m) => m.id === 'u-ben').user_id, null);
+  assert.equal(rows('album_members').find((m) => m.id === 'u-bali-ben').user_id, null);
   assert.ok(rows('album_activity').find((a) => a.kind === 'member_left'));
-  await assert.rejects(write(group, 'ben', { rows: [bill('u-ben', { 'u-ben': 1 })] }));
+  await assert.rejects(write(group, 'ben', { rows: [bill('u-bali-ben', { 'u-bali-ben': 1 })] }));
   // Ben stays the payer of his bill, which the others can still edit.
-  await write(group, 'tess', { rows: [bill('u-ben', { 'u-ben': 40, 'u-owner': 40 })] });
+  await write(group, 'tess', {
+    rows: [bill('u-bali-ben', { 'u-bali-ben': 40, 'u-bali-owner': 40 })],
+  });
   assert.equal(rows('album_expenses')[0].amount, 80);
   // But nobody new names him.
   await assert.rejects(
     write(group, 'tess', {
       rows: [
         {
-          ...bill('u-ben', { 'u-tess': 10 }),
-          row: { ...bill('u-ben', { 'u-tess': 10 }).row, id: 'taxi' },
+          ...bill('u-bali-ben', { 'u-bali-tess': 10 }),
+          row: { ...bill('u-bali-ben', { 'u-bali-tess': 10 }).row, id: 'taxi' },
         },
       ],
     }),
@@ -288,7 +351,9 @@ test('someone who left changes nothing and is put on no new bill, but stays on o
 
 test('two writes at once never lose one another', async () => {
   const { db, group, rows, interleave } = await trip();
-  await write(group, 'owner', { rows: [bill('u-owner', { 'u-owner': 30, 'u-tess': 30 })] });
+  await write(group, 'owner', {
+    rows: [bill('u-bali-owner', { 'u-bali-owner': 30, 'u-bali-tess': 30 })],
+  });
   // Another write lands while Ben's is between its read and its own.
   interleave(() => {
     const dinner = { ...rows('album_expenses')[0], amount: 100 };
@@ -296,7 +361,9 @@ test('two writes at once never lose one another', async () => {
       "UPDATE sync_rows SET data = ?, rev = 'other' WHERE table_name = 'album_expenses' AND row_id = 'dinner'",
     ).run(JSON.stringify(dinner));
   });
-  await write(group, 'ben', { rows: [bill('u-owner', { 'u-owner': 70, 'u-tess': 70 })] });
+  await write(group, 'ben', {
+    rows: [bill('u-bali-owner', { 'u-bali-owner': 70, 'u-bali-tess': 70 })],
+  });
   // Ben's was planned again on what landed first.
   const edit = rows('album_activity').find((a) => a.kind === 'bill_edited');
   assert.equal(JSON.parse(edit.data_json).before.amount, 100);

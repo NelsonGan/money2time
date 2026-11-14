@@ -31,7 +31,7 @@ export type WebAlbumGroup = {
  *                         shares: [{ memberId, amount }], deleted, updated_at }
  *   web_album_activity  { id, album_id, kind, actor_member_id, expense_id,
  *                         member_id, bill, rename, payment, simplify,
- *                         sort_order, created_at }  (newest first)
+ *                         started, sort_order, created_at }  (newest first)
  */
 export function withWebDashboardAlbumGroups(
   data: BackupData,
@@ -83,6 +83,7 @@ export function withWebDashboardAlbumGroups(
         rename: entry.rename,
         payment: entry.payment,
         simplify: entry.simplify,
+        started: entry.started,
         sort_order: entry.sortOrder,
         created_at: entry.createdAt,
       });

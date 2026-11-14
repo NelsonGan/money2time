@@ -97,10 +97,6 @@ export type ActivityContext = {
   nameOf: (memberId: string | null | undefined) => string;
   money: (amount: number, currency: string) => string;
   day: (date: string) => string;
-  /** Whether a bill the user paid still waits for their account. */
-  needsAccount: (billId: string) => boolean;
-  /** Whether a deleted bill is still deleted (and so can be restored). */
-  isDeleted: (billId: string) => boolean;
 };
 
 export type ActivityLine = {
@@ -109,9 +105,6 @@ export type ActivityLine = {
   text: string;
   /** How it moved the user's own money, when someone else did it; null otherwise. */
   mine: string | null;
-  billId: string | null;
-  /** A deleted bill that can be brought back from here. */
-  restorable: boolean;
   createdAt: string;
 };
 
@@ -140,7 +133,6 @@ function myPart(bill: WebAlbumBillSnapshot | null, selfId: string | null) {
 export function describeActivity(entry: WebAlbumActivityRow, ctx: ActivityContext): ActivityLine {
   const { t } = ctx;
   const actorId = entry.actor_member_id ?? null;
-  const billId = entry.expense_id ?? null;
   const byMe = !!ctx.selfId && actorId === ctx.selfId;
   const who = (memberId: string | null | undefined, capital = true) => (memberId && memberId === ctx.selfId ? t(capital ? "you" : "you_lower") : ctx.nameOf(memberId));
   const actor = who(actorId);
@@ -152,8 +144,6 @@ export function describeActivity(entry: WebAlbumActivityRow, ctx: ActivityContex
     text,
     // Only someone else's change is news about the user's money.
     mine: byMe ? null : mine,
-    billId,
-    restorable: entry.kind === "bill_deleted" && !!billId && ctx.isDeleted(billId),
     createdAt: entry.created_at,
   });
 
@@ -168,7 +158,7 @@ export function describeActivity(entry: WebAlbumActivityRow, ctx: ActivityContex
       if (mine.paid && !byMe) {
         return line(
           t(entry.kind === "bill_added" ? "said_you_paid" : "restored", { actor, title, money }),
-          billId && ctx.needsAccount(billId) ? t("choose_account") : t("your_share", { money: ctx.money(mine.share, after.currency) }),
+          t("your_share", { money: ctx.money(mine.share, after.currency) }),
         );
       }
       return line(t(entry.kind === "bill_added" ? "added" : "restored", { actor, title, money }), mine.share > 0 ? t("your_share", { money: ctx.money(mine.share, after.currency) }) : null);
@@ -203,7 +193,7 @@ export function describeActivity(entry: WebAlbumActivityRow, ctx: ActivityContex
       const now = myPart(after, ctx.selfId);
       let mine: string | null = null;
       if (!was.paid && now.paid) {
-        mine = billId && ctx.needsAccount(billId) ? t("you_paid_choose_account") : t("you_paid");
+        mine = t("you_paid");
       } else if (was.paid && !now.paid) {
         mine = t("they_paid", { name: who(after.paidBy) });
       } else if (cents(was.share) !== cents(now.share)) {
@@ -216,12 +206,13 @@ export function describeActivity(entry: WebAlbumActivityRow, ctx: ActivityContex
       const payment = entry.payment;
       if (!payment) return line(t("changed_bill", { actor, title }));
       const values = { actor, from: who(payment.from), to: who(payment.to, false), money: ctx.money(payment.amount, payment.currency) };
-      const involvesMe = payment.from === ctx.selfId || payment.to === ctx.selfId;
-      if (entry.kind === "payment_undone") return line(t("undid_payment", values), involvesMe ? t("recorded_by", { actor }) : null);
-      return line(t(payment.even ? "paid_even" : "paid", values), involvesMe ? t("recorded_by", { actor }) : null);
+      // Who recorded it, when it moved the user's money and was not the payer's own word.
+      const recordedBy = (payment.from === ctx.selfId || payment.to === ctx.selfId) && actorId !== payment.from ? t("recorded_by", { actor }) : null;
+      if (entry.kind === "payment_undone") return line(t("undid_payment", values), recordedBy);
+      return line(t(payment.even ? "paid_even" : "paid", values), recordedBy);
     }
     case "member_joined":
-      return line(t("joined", { name: who(entry.member_id) }));
+      return line(t(entry.started ? "started" : "joined", { name: who(entry.member_id) }));
     case "member_left":
       return line(t("left", { name: who(entry.member_id) }));
     case "member_renamed":

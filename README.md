@@ -2273,9 +2273,9 @@ Worker's `src/albumGroups.ts`; its tables come from migrations `090` to
   take those names and its paybacks would count twice.
 - **Anyone in it can change it** (`lib/groupRules.ts`, and the Worker keeps
   the same rules for every write). Everyone still in the album adds, edits
-  (amount, day, title, payer, shares) and deletes any bill, restores a deleted
-  one, and records or undoes a payment between any two members. There are no
-  locks, badges or read-only editors.
+  (amount, day, title, payer, shares) and deletes any bill, and records or
+  undoes a payment between any two members. There are no locks, badges or
+  read-only editors.
   - **What is each person's own stays theirs**: a bill's account, category,
     longer note, receipt and mood. Only they change them, on their own phone;
     they are never sent to the group or logged. An edit that changes only
@@ -2305,8 +2305,7 @@ Worker's `src/albumGroups.ts`; its tables come from migrations `090` to
     someone else recorded. A bill with no account counts in spending,
     budgets, Breakdown and the album's totals at once; it only moves no
     account balance.
-  - Someone else's edit never changes the account the user chose, and a
-    deleted bill restored comes back on it. When someone changes the payer
+  - Someone else's edit never changes the account the user chose. When someone changes the payer
     away from the user, the user's side becomes their share owed to the new
     payer, with no account, as any bill a friend paid; a bill the user adds
     that someone else paid is the same.
@@ -2322,14 +2321,15 @@ Worker's `src/albumGroups.ts`; its tables come from migrations `090` to
 - **Activity.** At the foot of a shared album's Balances tab, one card lists
   every change anyone made, newest first, by day, one line each ("Tess
   changed Dinner: RM100 → RM120"; `lib/activityLines.ts`): bills added,
-  edited, deleted and restored, payments recorded and undone, people joining,
-  leaving and renaming themselves, Simplify switched, the cover changed. It
-  shows the newest five, then **Show all**. A change someone else made to the
-  user's own money has a rose bar and a second line saying how ("Your share
-  RM30 → RM40", "Says you paid · Choose the account", "Recorded by Tess").
-  A tap opens the bill, and a deleted bill's line has **Restore**, which
-  brings the bill back with its shares (its payments never left) and is
-  logged too.
+  edited and deleted, payments recorded and undone, the owner starting the
+  album ("Nelson started the album", the Worker's first join, marked
+  `started`), people joining, leaving and renaming themselves, Simplify
+  switched, the cover changed. It shows the newest five, then **Show all**.
+  It is history for reference only: nothing on it is tapped or undone from
+  there. A change someone else made to the user's own money has a rose bar
+  and a second line saying how ("Your share RM30 → RM40", "Your share RM15";
+  "Recorded by Tess" when Tess recorded someone else paying, never under
+  "Tess paid you").
 - **A shared album's balances are its own.** A bill in a shared album is
   settled in that album and nowhere else: its Balances tab and its people's
   pages cover the bills in it, and the Balances page covers every other split
@@ -2369,9 +2369,9 @@ Worker's `src/albumGroups.ts`; its tables come from migrations `090` to
   several currencies Settled up goes per currency too, under the same chips,
   so someone who still owes in ringgit is listed under USD once the dollar
   bills are settled, and that line opens their dollar bills.
-- **Simplify group debts.** A switch, off to start with (New Album can turn
-  it on as the album is made), that anyone in the album can turn on, for
-  everyone. On, Who owes whom shows the same balances with as few payments as
+- **Simplify group debts.** A switch, on to start with (the Worker writes it
+  on as the owner starts the album; New Album can turn it off as the album
+  is made), that anyone in the album can turn on or off, for everyone. On, Who owes whom shows the same balances with as few payments as
   it can: when Anna owes Bob and Bob owes Charlie, Anna owes Charlie. Nobody
   pays or gets back more in total. A line where the user pays then opens a
   Settle up sheet for that one payment, where a smaller amount can be typed
@@ -2448,9 +2448,11 @@ their own.
   that same id):
   - `album_members`: the people, the user among them, each with the Cloud
     Sync account that joined (`user_id`). The group starts with the owner
-    alone as the album is shared (`shareAlbum` asks the Worker to `join`);
-    the others are added the same way as they join, under an id made from
-    their account (`u-<userId>`), so two phones of theirs share one row.
+    alone as the album is shared (`shareAlbum` asks the Worker to `join`,
+    which also writes the `album_groups` row with Simplify on); the others are added the same way as they join, under an id made from
+    the album and their account (`u-<album>-<userId>`, `memberRowId`), so
+    two phones of theirs share one row and their rows in two albums never
+    share an id (a phone keeps every album's members in one table).
     Nobody's row is ever deleted: leaving, or the owner taking someone out,
     clears its `user_id` on the Worker (`planLeave`), so the bills that name
     them stay whole, and joining again takes the row back.
@@ -2458,8 +2460,7 @@ their own.
     (`getLedgerMembers`) to say Joined or Left.
   - `album_expenses`: one row per bill: who paid (`paid_by`), each member's
     share (`shares_json`) and its last writer (`created_by`, deletes
-    included, stamped by the Worker). A deleted bill keeps its last fields,
-    which Restore writes back.
+    included, stamped by the Worker). A deleted bill keeps its last fields.
   - `album_settlements`: a payment from one member to another for one bill,
     stamped with who recorded it. Rows are only added, or deleted when the
     payment is undone; deleting a bill leaves them.
@@ -2654,14 +2655,14 @@ Two providers, two jobs:
 
 | Coverage                                               | Definitions | Meaning                                                                                                 |
 | ------------------------------------------------------ | ----------- | ------------------------------------------------------------------------------------------------------- |
-| All custom events                                      | 170         | Every event in the custom-event tables goes to GA4.                                                     |
+| All custom events                                      | 169         | Every event in the custom-event tables goes to GA4.                                                     |
 | PostHog + GA4 custom events                            | 71          | Install, activation, daily engagement, adoption milestones, the Pro funnel and low-volume moments.      |
-| GA4-only custom events                                 | 99          | Frequent per-use telemetry and data maintenance; PostHog sees these uses only through `Feature Used`.   |
+| GA4-only custom events                                 | 98          | Frequent per-use telemetry and data maintenance; PostHog sees these uses only through `Feature Used`.   |
 | Feature first-use definitions                          | 20          | One adoption event per qualifying feature on eligible installs.                                         |
 | Transaction milestone thresholds                       | 6           | One event at each documented logged-transaction count.                                                  |
 | Maximum adoption/milestone events per eligible install | 26          | Feature first uses plus transaction milestones, with working persistent storage; not a total event cap. |
 
-Every native app user is identified in both providers with the same pseudonymous `settings.appUserId`; there is no user or event sampling of custom events. PostHog's automatic lifecycle events, screen events, touch autocapture and rage clicks are disabled. GA4 collects its SDK events after identity/consent configuration; manually emitted `screen_view` is documented below and is additional to the 170 custom definitions. RevenueCat server events are listed separately.
+Every native app user is identified in both providers with the same pseudonymous `settings.appUserId`; there is no user or event sampling of custom events. PostHog's automatic lifecycle events, screen events, touch autocapture and rage clicks are disabled. GA4 collects its SDK events after identity/consent configuration; manually emitted `screen_view` is documented below and is additional to the 169 custom definitions. RevenueCat server events are listed separately.
 
 ### PostHog event budget
 
@@ -2694,7 +2695,7 @@ The free tier is **1,000,000 product-analytics events a month** (identified even
 Rules that keep it inside the free tier:
 
 - Anything that fires on every use of a frequent action stays GA4-only; PostHog gets one `Feature Used` per feature per user per day instead.
-- Shared albums' events (`Album Bill Saved`, payments, `Album Bill Restored`, `Album Bill Account Set`, `Album Activity Opened`) are GA4-only: they add nothing to this budget.
+- Shared albums' events (`Album Bill Saved`, payments, `Album Bill Account Set`, `Album Activity Opened`) are GA4-only: they add nothing to this budget.
 - Daily caps are claimed on the device (`DailyState` in [analytics.shared.ts](apps/mobile/services/analytics.shared.ts)), so foregrounding the app repeatedly sends one `Daily App Open`.
 - Person properties are written only when their value changes, compared against the last write stored on the device (`@m2t/analytics_person/v1`); each write is a billable `$set`.
 - No `$screen` events, lifecycle events, touch autocapture or rage clicks; a `before_send` allowlist drops any event that is not an approved app event or `$identify`, `$set`, `$exception`, `$feature_flag_called`.
@@ -2901,9 +2902,8 @@ Bank and wallet notifications (Android listener) and the Log Notification Shortc
 | `ALBUM_MEMBER_REMOVED`          | `Album Member Removed`          | `m2t_album_member_removed`          | No      | The owner removes someone who joined a shared album; each successful removal.                                                                                                                                                                       | None                                                                                                                                                                                                                                                                                                                                             | [features/albums/screens/AlbumPeopleScreen.tsx](apps/mobile/features/albums/screens/AlbumPeopleScreen.tsx)                 |
 | `ALBUM_BILL_SAVED`              | `Album Bill Saved`              | `m2t_album_bill_saved`              | No      | A split bill is saved in a shared album (the Worker wrote the group's bill); each save from the entry editor.                                                                                                                                       | `edit`, `paid_by` (`me` when the user is the payer, `friend` when another member is), `people`, `has_payments`                                                                                                                                                                                                                                   | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
 | `ALBUM_PAYMENT_RECORDED`        | `Album Payment Recorded`        | `m2t_album_payment_recorded`        | No      | A payment is recorded on a shared album's bill (Mark paid, a part payment, paying a member back, or each bill of a Settle up), or a debt is settled from the album's Balances, the user's own or between two others; each payment the Worker wrote. | `direction` (`paid`, `received`, `between_others`), `via` (`bill` or `group_debt`)                                                                                                                                                                                                                                                               | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
-| `ALBUM_SIMPLIFY_DEBTS_SET`      | `Album Simplify Debts Set`      | `m2t_album_simplify_debts_set`      | No      | Simplify group debts is turned on or off on a shared album's People page, or on with a shared album made on New Album; each change.                                                                                                                 | `on`                                                                                                                                                                                                                                                                                                                                             | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
+| `ALBUM_SIMPLIFY_DEBTS_SET`      | `Album Simplify Debts Set`      | `m2t_album_simplify_debts_set`      | No      | Simplify group debts is turned on or off on a shared album's People page, or off with a shared album made on New Album (it starts on); each change.                                                                                                 | `on`                                                                                                                                                                                                                                                                                                                                             | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
 | `ALBUM_PAYMENT_UNDONE`          | `Album Payment Undone`          | `m2t_album_payment_undone`          | No      | Someone in a shared album undoes a payment on one of its bills (including its whole simplified batch); each undo the Worker wrote.                                                                                                                  | None                                                                                                                                                                                                                                                                                                                                             | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
-| `ALBUM_BILL_RESTORED`           | `Album Bill Restored`           | `m2t_album_bill_restored`           | No      | A deleted bill of a shared album is brought back with Restore in its Activity; each restore the Worker wrote.                                                                                                                                       | None                                                                                                                                                                                                                                                                                                                                             | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
 | `ALBUM_BILL_ACCOUNT_SET`        | `Album Bill Account Set`        | `m2t_album_bill_account_set`        | No      | Shared albums' bills are put on an account with the album's bulk Edit > Account (on the phone only); each bulk change that applied.                                                                                                                 | `count`, `bulk`                                                                                                                                                                                                                                                                                                                                  | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
 | `ALBUM_ACTIVITY_OPENED`         | `Album Activity Opened`         | `m2t_album_activity_opened`         | No      | A shared album's Balances tab, which holds its Activity, is first shown on a visit to the album.                                                                                                                                                    | `entries`                                                                                                                                                                                                                                                                                                                                        | [features/albums/screens/AlbumDetailScreen.tsx](apps/mobile/features/albums/screens/AlbumDetailScreen.tsx)                 |
 | `BUDGET_TEMPLATE_CREATED`       | `Budget Template Created`       | `m2t_budget_template_created`       | No      | A reusable budget template is created; each successful creation.                                                                                                                                                                                    | `categories`, `backPopulate`, `period`, `currency`                                                                                                                                                                                                                                                                                               | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
@@ -4681,8 +4681,8 @@ database, no bucket, no account and no secrets. Served at
     shares through `saveAlbumBill`, or only the user's own category, longer
     note, mood and account through `saveAlbumBillOwnFields`; `bulk` day and
     title through `editGroupBills`, account through `setGroupEntriesAccount`
-    and category as any entry's; `delete` through `deleteTransactionsBulk`;
-    `restore` through `restoreAlbumBill`): any current member of the album
+    and category as any entry's; `delete` through `deleteGroupBills`): any
+    current member of the album
     can be the payer, and anyone already on the bill stays on it
     (`billPeople`). The core planner and `module:split` keep refusing a
     shared album's day, title, split and delete, so a page from before this
@@ -5632,12 +5632,11 @@ app's `services/webDashboardLink.ts`, `webDashboardCrypto.ts`,
   income with no account (a bill the user paid that someone else entered)
   shows the app's dashed box and "No account" where the account goes.
 - **A shared album's Activity**: the album's page shows its log under the
-  transactions (`views/album-activity.tsx`), as the app's Activity tab:
+  transactions (`views/album-activity.tsx`), as the app's Activity card:
   newest first, by the phone's day, one line each, worded with the app's
   rules (`describeActivity`, mirroring `activityLines.ts`), a change someone
-  else made to the user's money tinted with a second line saying how, and a
-  deleted bill's line with Restore (`module:albumbill` `restore`) while the
-  phone takes edits. Nothing shows for an album the phone sent no group for.
+  else made to the user's money marked with a second line saying how. It is
+  history only, with nothing to tap. Nothing shows for an album the phone sent no group for.
 - **Split bills a friend paid** (app migration 089, see Paid by and Balances):
   the payer's row carries `is_payer`, the friends' rows hold their share in
   `share_amount` beside an `amount` of 0, and the expense is the user's own

@@ -564,6 +564,7 @@ export function toAlbumActivity(row: AlbumActivityRow): AlbumActivity | null {
     rename,
     payment,
     simplify: kind === 'simplify_changed' ? after?.on === true : null,
+    started: kind === 'member_joined' && data.started === true,
     sortOrder: Number.isFinite(row.sortOrder) ? row.sortOrder : 0,
     createdAt: row.createdAt,
   };

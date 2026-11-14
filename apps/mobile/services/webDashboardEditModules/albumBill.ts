@@ -14,7 +14,6 @@
  *   bulk    { rows, set }          the album's bulk Edit: day and title for
  *                                  everyone, category and account the user's own
  *   delete  { rows }               deletes bills for everyone (payments stay)
- *   restore { albumId, billId }    brings back a deleted bill (Activity's Restore)
  *
  * `set.shares` is the whole bill, one row per member with their share
  * (`{ memberId, amount }`), and `set.paidBy` the member who paid; the two go
@@ -101,8 +100,7 @@ type AlbumBillOp =
       set: AlbumBillFields;
     }
   | { entity: 'module:albumbill'; op: 'bulk'; rows: EditRow[]; set: BulkFields }
-  | { entity: 'module:albumbill'; op: 'delete'; rows: EditRow[] }
-  | { entity: 'module:albumbill'; op: 'restore'; albumId: string; billId: string };
+  | { entity: 'module:albumbill'; op: 'delete'; rows: EditRow[] };
 
 /** A shared album's people: the Worker's limit, the owner and 20 others. */
 const MAX_SHARES = 21;
@@ -178,12 +176,6 @@ function read(raw: Record<string, unknown>): ModuleOp | null {
     if (keys !== 'entity,op,rows') return null;
     const rows = readRows(raw.rows);
     return rows ? { entity, op, rows } : null;
-  }
-  if (op === 'restore') {
-    if (keys !== 'albumId,billId,entity,op' || !isId(raw.albumId) || !isId(raw.billId)) {
-      return null;
-    }
-    return { entity, op, albumId: raw.albumId, billId: raw.billId };
   }
   return null;
 }
@@ -355,41 +347,17 @@ function planDelete(
   return tools.ok(ids.length);
 }
 
-function planRestore(
-  tools: PlanTools,
-  op: Extract<AlbumBillOp, { op: 'restore' }>,
-  extra: AlbumBillExtra,
-  steps: EditStep[],
-) {
-  if (!tools.claim(`albumbill:${op.billId}`)) return tools.refuse('invalid');
-  const group = extra.groups.find((item) => item.id === op.albumId);
-  if (!group?.selfId) return tools.refuse('invalid');
-  const bill = group.bills.find((item) => item.id === op.billId);
-  // Already back (someone restored it first), or never this album's.
-  if (!bill) return tools.refuse('invalid');
-  if (!bill.deleted) return tools.refuse('conflict');
-  steps.push({
-    kind: 'module',
-    entity: 'module:albumbill',
-    action: 'restore',
-    payload: { groupId: group.id, billId: bill.id },
-  });
-  return tools.ok(1);
-}
-
 export const albumBillModule: EditModule = {
   entity: 'module:albumbill',
   read,
   rowIds: (raw) => {
     const op = raw as unknown as AlbumBillOp;
     if (op.op === 'update') return [op.id];
-    if (op.op === 'restore') return [];
     return op.rows.map((row) => row.id);
   },
   size: (raw) => {
     const op = raw as unknown as AlbumBillOp;
     if (op.op === 'update') return 1 + (op.set.shares?.length ?? 0);
-    if (op.op === 'restore') return 1;
     return op.rows.length;
   },
   plan: (tools, raw, steps) => {
@@ -402,8 +370,6 @@ export const albumBillModule: EditModule = {
         return planBulk(tools, op, extra, steps);
       case 'delete':
         return planDelete(tools, op, extra, steps);
-      case 'restore':
-        return planRestore(tools, op, extra, steps);
     }
   },
 };

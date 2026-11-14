@@ -160,7 +160,11 @@ describe('module:albumbill reading', () => {
         },
       ]),
     ).toEqual({ ok: false, error: 'unread' });
-    expect(plan([{ op: 'restore', albumId: GROUP }])).toEqual({ ok: false, error: 'unread' });
+    // Restore is no longer an edit: the Activity log is history only.
+    expect(plan([{ op: 'restore', albumId: GROUP, billId: 'old' }])).toEqual({
+      ok: false,
+      error: 'unread',
+    });
   });
 
   it('names the entries it touches', () => {
@@ -170,7 +174,6 @@ describe('module:albumbill reading', () => {
       ops: [
         { entity: ENTITY, op: 'update', id: 'b1', at: AT, set: { note: 'x' } },
         { entity: ENTITY, op: 'delete', rows: [{ id: 'b2', at: AT }] },
-        { entity: ENTITY, op: 'restore', albumId: GROUP, billId: 'old' },
       ],
     });
     expect(request.kind === 'request' && editTransactionIds(request.request)).toEqual(['b1', 'b2']);
@@ -310,7 +313,7 @@ describe('module:albumbill update', () => {
   });
 });
 
-describe('module:albumbill bulk, delete and restore', () => {
+describe('module:albumbill bulk and delete', () => {
   it('puts the user own account only on bills they paid', () => {
     expect(
       steps(plan([{ op: 'bulk', rows: [{ id: 'b1', at: AT }], set: { accountId: 'myr' } }])),
@@ -352,27 +355,10 @@ describe('module:albumbill bulk, delete and restore', () => {
     });
   });
 
-  it('deletes bills for everyone and restores a deleted one', () => {
+  it('deletes bills for everyone', () => {
     expect(steps(plan([{ op: 'delete', rows: [{ id: 'b1', at: AT }] }]))).toEqual([
       { kind: 'module', entity: ENTITY, action: 'delete', payload: { ids: ['b1'] } },
     ]);
-    expect(steps(plan([{ op: 'restore', albumId: GROUP, billId: 'old' }]))).toEqual([
-      {
-        kind: 'module',
-        entity: ENTITY,
-        action: 'restore',
-        payload: { groupId: GROUP, billId: 'old' },
-      },
-    ]);
-    // Someone brought it back first.
-    expect(plan([{ op: 'restore', albumId: GROUP, billId: 'b1' }])).toEqual({
-      ok: false,
-      error: 'conflict',
-    });
-    expect(plan([{ op: 'restore', albumId: 'other', billId: 'old' }])).toEqual({
-      ok: false,
-      error: 'invalid',
-    });
   });
 
   it('names each bill once per batch', () => {

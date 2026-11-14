@@ -1,6 +1,7 @@
 import type { SplitRowLike } from '~/features/transactions/lib/splitMath';
 import {
   applyPercent,
+  isEvenSplit,
   nextEditableAmountIndex,
   scaleToTarget,
   spreadOverShares,
@@ -221,5 +222,32 @@ describe('spreadOverShares', () => {
       '0.00',
       '666.66',
     ]);
+  });
+});
+
+describe('isEvenSplit', () => {
+  it('knows a saved even split, with its odd cent', () => {
+    expect(isEvenSplit([row('60.00', { isSelf: true }), row('60.00')], 120)).toBe(true);
+    expect(isEvenSplit([row('33.34', { isSelf: true }), row('33.33'), row('33.33')], 100)).toBe(
+      true,
+    );
+  });
+
+  it('reads a share paid back as its even portion, over what is still owed', () => {
+    // Ben paid his 50 back: his paid row holds it, his open row nothing, and
+    // the editor's amount is what is still owed (the user's 50).
+    const keyed = [
+      { ...row('50.00', { isSelf: true }), shareKey: 'me' },
+      { ...row('50.00', { paid: true }), shareKey: 'ben' },
+      { ...row('0.00'), shareKey: 'ben' },
+    ];
+    expect(isEvenSplit(keyed, 50)).toBe(true);
+    expect(isEvenSplit(keyed, 80)).toBe(false);
+  });
+
+  it('is not even when the amounts were set by hand, or nobody shares it', () => {
+    expect(isEvenSplit([row('90.00', { isSelf: true }), row('30.00')], 120)).toBe(false);
+    expect(isEvenSplit([row('120.00', { isSelf: true })], 120)).toBe(false);
+    expect(isEvenSplit([row('60.00', { isSelf: true }), row('60.00')], 0)).toBe(false);
   });
 });

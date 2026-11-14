@@ -143,10 +143,6 @@ export const albumBillApply: ApplyModule = {
         track.pending.push(app.deleteGroupBills(p.ids as string[]));
         return;
       }
-      case 'restore':
-        // The Activity tab's Restore.
-        track.pending.push(app.restoreAlbumBill(p.groupId as string, p.billId as string));
-        return;
       default:
         throw new Error(`unknown album bill step ${step.action}`);
     }

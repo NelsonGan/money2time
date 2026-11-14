@@ -1,5 +1,5 @@
 /**
- * A shared album's activity log as the Activity tab shows it: one line per
+ * A shared album's activity log as its Activity card shows it: one line per
  * entry ("Tess changed Dinner: RM100 → RM120"), and, when the change moved the
  * user's own money and someone else made it, a second line saying how ("Your
  * share RM30 → RM40"). Pure: the screen passes names, money and what this
@@ -20,10 +20,6 @@ export interface ActivityContext {
   money: (amount: number, currency: string) => string;
   /** A bill's day, for a bill moved to another one. */
   day: (date: string) => string;
-  /** Whether a bill the user paid still waits for their account here. */
-  needsAccount: (billId: string) => boolean;
-  /** Whether a deleted bill is still deleted (and so can be restored). */
-  isDeleted: (billId: string) => boolean;
 }
 
 export interface ActivityLine {
@@ -34,10 +30,6 @@ export interface ActivityLine {
   text: string;
   /** How it moved the user's own money, when someone else did it; null otherwise. */
   mine: string | null;
-  /** The bill a tap opens. */
-  billId: string | null;
-  /** A deleted bill that can be brought back from here. */
-  restorable: boolean;
   createdAt: string;
 }
 
@@ -77,9 +69,6 @@ export function describeActivity(entry: AlbumActivity, ctx: ActivityContext): Ac
     text,
     // Only someone else's change is news about the user's money.
     mine: byMe ? null : mine,
-    billId: entry.expenseId,
-    restorable:
-      entry.kind === 'bill_deleted' && !!entry.expenseId && ctx.isDeleted(entry.expenseId),
     createdAt: entry.createdAt,
   });
 
@@ -94,9 +83,7 @@ export function describeActivity(entry: AlbumActivity, ctx: ActivityContext): Ac
       if (mine.paid && !byMe) {
         return line(
           t(entry.kind === 'bill_added' ? 'said_you_paid' : 'restored', { actor, title, money }),
-          entry.expenseId && ctx.needsAccount(entry.expenseId)
-            ? t('choose_account')
-            : t('your_share', { money: ctx.money(mine.share, after.currency) }),
+          t('your_share', { money: ctx.money(mine.share, after.currency) }),
         );
       }
       return line(
@@ -153,10 +140,7 @@ export function describeActivity(entry: AlbumActivity, ctx: ActivityContext): Ac
       const now = myPart(after, ctx.selfId);
       let mine: string | null = null;
       if (!was.paid && now.paid) {
-        mine =
-          entry.expenseId && ctx.needsAccount(entry.expenseId)
-            ? t('you_paid_choose_account')
-            : t('you_paid');
+        mine = t('you_paid');
       } else if (was.paid && !now.paid) {
         mine = t('they_paid', { name: who(after.paidBy) });
       } else if (cents(was.share) !== cents(now.share)) {
@@ -177,21 +161,21 @@ export function describeActivity(entry: AlbumActivity, ctx: ActivityContext): Ac
         to: who(payment.to, false),
         money: ctx.money(payment.amount, payment.currency),
       };
-      const involvesMe = payment.from === ctx.selfId || payment.to === ctx.selfId;
+      // Who recorded it, when it moved the user's money and was not the
+      // payer's own word ("Tess paid you" needs no "Recorded by Tess").
+      const recordedBy =
+        (payment.from === ctx.selfId || payment.to === ctx.selfId) &&
+        entry.actorMemberId !== payment.from
+          ? t('recorded_by', { actor })
+          : null;
       if (entry.kind === 'payment_undone') {
         // "Tess undid you paying Ben": the payer is mid-sentence here.
-        return line(
-          t('undid_payment', { ...values, from: who(payment.from, false) }),
-          involvesMe ? t('recorded_by', { actor }) : null,
-        );
+        return line(t('undid_payment', { ...values, from: who(payment.from, false) }), recordedBy);
       }
-      return line(
-        t(payment.even ? 'paid_even' : 'paid', values),
-        involvesMe ? t('recorded_by', { actor }) : null,
-      );
+      return line(t(payment.even ? 'paid_even' : 'paid', values), recordedBy);
     }
     case 'member_joined':
-      return line(t('joined', { name: who(entry.memberId) }));
+      return line(t(entry.started ? 'started' : 'joined', { name: who(entry.memberId) }));
     case 'member_left':
       return line(t('left', { name: who(entry.memberId) }));
     case 'member_renamed':

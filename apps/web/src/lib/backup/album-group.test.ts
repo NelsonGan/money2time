@@ -65,11 +65,11 @@ const WORDS: Record<string, string> = {
   your_share: "Your share {money}",
   your_share_change: "Your share {before} → {after}",
   your_share_gone: "Your share of {money} is gone",
-  choose_account: "Choose the account",
   they_paid: "{name} paid it now",
   paid: "{from} paid {to} {money}",
   recorded_by: "Recorded by {actor}",
   joined: "{name} joined the album",
+  started: "{name} started the album",
   changed_album: "{actor} changed the album",
 };
 
@@ -79,8 +79,6 @@ const ctx = (patch: Partial<ActivityContext> = {}): ActivityContext => ({
   nameOf: (id) => (id === "tess" ? "Tess" : "Someone"),
   money: (amount) => `RM${amount}`,
   day: (date) => date,
-  needsAccount: () => false,
-  isDeleted: () => true,
   ...patch,
 });
 
@@ -112,10 +110,10 @@ test("describeActivity words each change as the app does, with the user's money 
     (({ text, mine }) => ({ text, mine }))(describeActivity(entry({ bill: { before: null, after: snap() } }), ctx())),
     { text: "Tess added Dinner · RM30", mine: "Your share RM15" },
   );
-  // Someone said the user paid, and the bill still waits for their account.
-  const said = describeActivity(entry({ bill: { before: null, after: snap({ paidBy: "me" }) } }), ctx({ needsAccount: () => true }));
+  // Someone said the user paid.
+  const said = describeActivity(entry({ bill: { before: null, after: snap({ paidBy: "me" }) } }), ctx());
   assert.equal(said.text, "Tess said you paid Dinner · RM30");
-  assert.equal(said.mine, "Choose the account");
+  assert.equal(said.mine, "Your share RM15");
   const edited = describeActivity(entry({ kind: "bill_edited", bill: { before: snap(), after: snap({ amount: 40, shares: [{ memberId: "me", amount: 20 }, { memberId: "tess", amount: 20 }] }) } }), ctx());
   assert.equal(edited.text, "Tess changed Dinner: RM30 → RM40");
   assert.equal(edited.mine, "Your share RM15 → RM20");
@@ -126,20 +124,20 @@ test("describeActivity words each change as the app does, with the user's money 
   assert.equal(describeActivity(entry({ actor_member_id: "me", bill: { before: null, after: snap() } }), ctx()).mine, null);
 });
 
-test("describeActivity offers Restore only on a bill still deleted", () => {
-  const deleted = entry({ kind: "bill_deleted", bill: { before: snap(), after: null } });
-  const line = describeActivity(deleted, ctx());
+test("describeActivity says what a delete took from the user", () => {
+  const line = describeActivity(entry({ kind: "bill_deleted", bill: { before: snap(), after: null } }), ctx());
   assert.equal(line.text, "Tess deleted Dinner · RM30");
   assert.equal(line.mine, "Your share of RM15 is gone");
-  assert.equal(line.restorable, true);
-  assert.equal(describeActivity(deleted, ctx({ isDeleted: () => false })).restorable, false);
 });
 
 test("describeActivity words payments, members and kinds from a later app", () => {
   const paid = describeActivity(entry({ kind: "payment_recorded", payment: { from: "me", to: "tess", currency: "MYR", amount: 15 } }), ctx());
   assert.equal(paid.text, "You paid Tess RM15");
   assert.equal(paid.mine, "Recorded by Tess");
+  // The payer's own word needs no "Recorded by".
+  assert.equal(describeActivity(entry({ kind: "payment_recorded", payment: { from: "tess", to: "me", currency: "MYR", amount: 15 } }), ctx()).mine, null);
   assert.equal(describeActivity(entry({ kind: "member_joined", member_id: "tess" }), ctx()).text, "Tess joined the album");
+  assert.equal(describeActivity(entry({ kind: "member_joined", member_id: "tess", started: true }), ctx()).text, "Tess started the album");
   assert.equal(describeActivity(entry({ kind: "from_the_future" }), ctx()).text, "Tess changed the album");
 });
 

@@ -607,14 +607,6 @@ export function AlbumDetailScreen({
     },
     [isSelectionMode, onOpenTransaction, toggleSelection],
   );
-  // An entry of the Activity tab opens the bill it is about.
-  const openBillFromActivity = useCallback(
-    (transactionId: string) => {
-      const transaction = transactionById.get(transactionId);
-      if (transaction) onOpenTransaction(transaction);
-    },
-    [onOpenTransaction, transactionById],
-  );
   const handleTransactionLongPress = useCallback(
     (transaction: TransactionWithRelations) => {
       if (isSelectionMode) {
@@ -909,12 +901,11 @@ export function AlbumDetailScreen({
     </>
   );
 
-  // A shared album's activity log follows its balances: who changed what,
-  // and Restore for a deleted bill.
+  // A shared album's activity log follows its balances: who changed what.
   const balancesBody = (
     <>
       <MemoAlbumBalances summary={balances} group={group} onOpenPerson={openPersonHere} />
-      {showActivity ? <MemoAlbumActivity group={group} onOpenBill={openBillFromActivity} /> : null}
+      {showActivity ? <MemoAlbumActivity group={group} /> : null}
     </>
   );
 

@@ -3,8 +3,8 @@ import React from 'react';
 import { View } from 'react-native';
 
 import { PersonAvatar } from '~/features/transactions/components/PersonAvatar';
+import { useSelfPerson } from '~/hooks/useSelfPerson';
 import { useThemeColors } from '~/hooks/useThemeColors';
-import { I18n } from '~/lib/i18n';
 
 /** Which way the money goes: to the user, from the user, or neither. */
 export type SettleUpFlow = 'receive' | 'pay' | 'even';
@@ -30,9 +30,9 @@ export function SettleUpFlowAvatars({
 }: SettleUpFlowAvatarsProps) {
   const themeColors = useThemeColors();
   const person = <PersonAvatar name={personName} partyKey={personKey} size={49} />;
-  const me = (
-    <PersonAvatar name={I18n.t('transactions.editor.split.me_label')} partyKey={null} size={49} />
-  );
+  // The user as everywhere else: their Settings name and photo.
+  const self = useSelfPerson();
+  const me = <PersonAvatar name={self.name} partyKey={null} size={49} imageUri={self.avatarUri} />;
   const Arrow = flow === 'even' ? ArrowLeftRight : ArrowRight;
   return (
     <View
