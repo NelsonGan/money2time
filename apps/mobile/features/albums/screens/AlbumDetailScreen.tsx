@@ -108,8 +108,8 @@ interface AlbumDetailScreenProps {
   onOpenPeople: (albumId: string) => void;
   /** Opens a new expense in this album (the floating +). */
   onAddExpense: (albumId: string) => void;
-  /** A person's page, with only this album's bills. */
-  onOpenPerson: (personKey: string, albumId: string) => void;
+  /** A person's page, with only this album's bills (and only `currency`'s, when given). */
+  onOpenPerson: (personKey: string, albumId: string, currency?: string) => void;
   onOpenTransaction: (transaction: TransactionWithRelations) => void;
   onOpenBreakdown: (payload: InsightsDrilldownPayload) => void;
   onDeleted: () => void;
@@ -461,7 +461,7 @@ export function AlbumDetailScreen({
   );
 
   const openPersonHere = useCallback(
-    (personKey: string) => onOpenPerson(personKey, albumId),
+    (personKey: string, currency?: string) => onOpenPerson(personKey, albumId, currency),
     [albumId, onOpenPerson],
   );
 

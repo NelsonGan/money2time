@@ -2264,21 +2264,30 @@ tables come from migrations `090`, `091` and `092`.
   (`getAlbumOwnedTransactionIds`, `useSettleUpSummary`,
   `settleUpWithPerson`). The Balances page lists each shared album with
   something still owed first, with the user's net there, and the row opens
-  the album (`useAlbumBalances`). A bill's own page and the Settings badge
+  the album (`useAlbumBalances`). That net is never converted: in one
+  currency it reads as the album's own figure ("You owe $20.00"), and in
+  several each currency is its own signed line ("+RM1.50", "−$20.00"), the
+  reporting currency first (`currencyOrder`). A bill's own page and the Settings badge
   still look at every bill.
 - **Balances tab.** What the user is owed or owes across the album's bills,
   then a **Who owes whom** card: one line per debt in each currency, the two
   people's avatars with an arrow between them, a sentence ("Ben owes you",
   "You owe Aisha") and the amount, the user's own first and the others'
   quieter, then a **Group spending** card (Total, You paid, Your share).
-  An album with bills in more than one currency never adds them up: both
-  cards split into one section per currency, each under a chip with the code
-  and symbol ("USD · $") and a hairline, the reporting currency first, and the
-  hero, which converts everything to the reporting currency, is marked ≈ (as
-  it is whenever any of it was in another currency).
-  Before the album's first bill the tab is an empty placeholder (No balances
-  yet). A line of the user's own opens the person's page with only this
-  album's bills. People with nothing to pay either way are listed under
+  **An album never converts or adds up currencies.** Every figure is in its
+  bills' own currency (`SettleUpSummary.netByCurrency`). With bills in more
+  than one, both cards split into one section per currency, each under a
+  chip with the code and symbol ("USD · $") and a hairline, the reporting
+  currency first (`currencyOrder`), and the hero shows one figure per
+  currency side by side, each under what it is ("You are owed RM1.50 · You
+  owe $33.00"). Before the album's first bill the tab is an empty
+  placeholder (No balances yet). A line of the user's own opens the
+  person's page with only this album's bills, and, when the album has
+  several currencies, only the line's currency's (`SettleUpPerson`'s
+  `currency`, `useSettleUpSummary(albumId, currency)`): the chip under the
+  avatar names it ("Vietnam Trip · USD"), the net and the bills are that
+  currency's alone, and Settle up there settles only them
+  (`settleUpWithPerson`'s `currency`). People with nothing to pay either way are listed under
   **Settled up** (marked Even when bills are open both ways and come to
   nothing), which is where the album's bills with them are found.
 - **Simplify group debts.** A switch, off to start with (New Album can turn
@@ -5424,7 +5433,10 @@ app's `services/webDashboardLink.ts`, `webDashboardCrypto.ts`,
   predates part payments carry no `part_of_split_id` and behave as before.
 - **Balances per album** (see Album members and shared albums): as in the
   app, each shared album with something still owed is listed above the
-  people with the user's net there, and the people are netted over every
+  people with the user's net there, never converted: one figure in the
+  album's one currency, else a signed line per currency, the main currency
+  first (`netByCurrency`, from each open share's own `amount` and
+  `currency`; the bar still compares main-currency nets), and the people are netted over every
   other bill, in an album of the user's own or in none (`balancesByAlbum` in
   `src/lib/backup/split-payer.ts`, built from `album_transactions`). An album
   counts as shared when the data holds its group's bills (`sharedAlbumIds`:

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { balancesByAlbum, billPayer, isPayBackPart, netByPerson, owedToPayers, partyKey, sharedAlbumIds } from "./split-payer.ts";
+import { balancesByAlbum, billPayer, isPayBackPart, netByCurrency, netByPerson, owedToPayers, partyKey, sharedAlbumIds } from "./split-payer.ts";
 
 const dinner = [
   { id: "me", transaction_id: "dinner", amount: 30, is_self: 1 },
@@ -81,11 +81,11 @@ test("a real user is one person whatever name they were typed under", () => {
 test("a shared album answers for its own bills, and the people list for the rest", () => {
   const balances = balancesByAlbum(
     [
-      { person: "Aisha", amountBase: 30, txId: "dinner" },
-      { person: "Ben", amountBase: 30, txId: "dinner" },
-      { person: "Aisha", amountBase: 12, txId: "lunch" },
+      { person: "Aisha", amountBase: 30, amount: 30, currency: "USD", txId: "dinner" },
+      { person: "Ben", amountBase: 30, amount: 30, currency: "USD", txId: "dinner" },
+      { person: "Aisha", amountBase: 12, amount: 12, currency: "USD", txId: "lunch" },
     ],
-    [{ person: "aisha", amountBase: 40, txId: "boat" }],
+    [{ person: "aisha", amountBase: 40, amount: 40, currency: "USD", txId: "boat" }],
     [
       { id: "bali", name: "Bali trip", txIds: ["dinner", "boat"] },
       { id: "quiet", name: "Nothing open", txIds: ["paid"] },
@@ -98,6 +98,7 @@ test("a shared album answers for its own bills, and the people list for the rest
       id: "bali",
       name: "Bali trip",
       net: 20,
+      netByCurrency: [{ currency: "USD", amount: 20 }],
       people: [
         { person: "Ben", net: 30, count: 1 },
         { person: "Aisha", net: -10, count: 2 },
@@ -109,8 +110,8 @@ test("a shared album answers for its own bills, and the people list for the rest
 test("an album of the user's own is settled on the Balances page like any bill", () => {
   const balances = balancesByAlbum(
     [
-      { person: "Aisha", amountBase: 30, txId: "dinner" },
-      { person: "Ben", amountBase: 20, txId: "taxi" },
+      { person: "Aisha", amountBase: 30, amount: 30, currency: "USD", txId: "dinner" },
+      { person: "Ben", amountBase: 20, amount: 20, currency: "USD", txId: "taxi" },
     ],
     [],
     [
@@ -129,4 +130,28 @@ test("an album of the user's own is settled on the Balances page like any bill",
 test("an album is shared when its group's bills are in the data", () => {
   const ids = sharedAlbumIds([{ albumGroupId: "bali" }, {}, { albumGroupId: "bali" }, { albumGroupId: "ski" }]);
   assert.deepEqual([...ids].sort(), ["bali", "ski"]);
+});
+
+test("an album's balance stays in each currency, never converted, the main currency first", () => {
+  const balances = balancesByAlbum(
+    [{ person: "Tess", amountBase: 49.5, amount: 49.5, currency: "MYR", txId: "food" }],
+    [
+      { person: "Tess", amountBase: 48, amount: 48, currency: "MYR", txId: "groceries" },
+      { person: "Tess", amountBase: 138.6, amount: 33, currency: "USD", txId: "hotel" },
+    ],
+    [{ id: "vn", name: "Vietnam Trip", txIds: ["food", "groceries", "hotel"] }],
+    new Set(["vn"]),
+    "MYR",
+  );
+  assert.deepEqual(balances.albums[0].netByCurrency, [
+    { currency: "MYR", amount: 1.5 },
+    { currency: "USD", amount: -33 },
+  ]);
+  assert.equal(balances.albums[0].net, -137.1);
+});
+
+test("a currency that nets to nothing is left out of an album's balance", () => {
+  assert.deepEqual(netByCurrency([{ amount: 10, currency: "EUR" }, { amount: 5, currency: "USD" }], [{ amount: 10, currency: "EUR" }]), [
+    { currency: "USD", amount: 5 },
+  ]);
 });

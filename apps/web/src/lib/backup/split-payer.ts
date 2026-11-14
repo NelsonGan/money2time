@@ -114,11 +114,39 @@ export function netByPerson(
   return [...map.values()].sort((a, b) => Math.abs(b.net) - Math.abs(a.net));
 }
 
-/** A share still owed, either way, with the bill it is on. */
-type OpenShare = { person: string; key?: string; amountBase: number; txId: string };
+/** A share still owed, either way, with the bill it is on: in the main currency, and as it is in the bill's own. */
+type OpenShare = { person: string; key?: string; amountBase: number; amount: number; currency: string; txId: string };
 
-/** An album with something still owed in it, and the user's net there. */
-type AlbumBalance = { id: string; name: string; net: number; people: PersonBalance[] };
+/** An amount in one currency. */
+export type CurrencyAmount = { currency: string; amount: number };
+
+/**
+ * An album with something still owed in it, and the user's net there: `net`
+ * in the main currency, `netByCurrency` in each currency, never converted,
+ * which is what the album shows.
+ */
+type AlbumBalance = { id: string; name: string; net: number; netByCurrency: CurrencyAmount[]; people: PersonBalance[] };
+
+/**
+ * What the user is owed less what they owe, per currency and never converted
+ * (the app's `SettleUpSummary.netByCurrency`): positive when owed. Currencies
+ * that cancel out are left out; `mainCurrency` first, then by code (the app's
+ * `currencyOrder`).
+ */
+export function netByCurrency(
+  owesYou: readonly { amount: number; currency: string }[],
+  youOwe: readonly { amount: number; currency: string }[],
+  mainCurrency?: string,
+): CurrencyAmount[] {
+  const net = new Map<string, number>();
+  const add = (currency: string, amount: number) => net.set(currency, Math.round(((net.get(currency) ?? 0) + amount) * 100) / 100);
+  for (const share of owesYou) add(share.currency, share.amount);
+  for (const share of youOwe) add(share.currency, -share.amount);
+  return [...net]
+    .filter(([, amount]) => Math.abs(amount) >= 0.005)
+    .map(([currency, amount]) => ({ currency, amount }))
+    .sort((a, b) => Number(b.currency === mainCurrency) - Number(a.currency === mainCurrency) || a.currency.localeCompare(b.currency));
+}
 
 /**
  * The albums that are shared: those with a group's bills in the data (the
@@ -143,6 +171,7 @@ export function balancesByAlbum(
   youOwe: readonly OpenShare[],
   allAlbums: readonly { id: string; name: string; txIds: readonly string[] }[],
   shared: ReadonlySet<string>,
+  mainCurrency?: string,
 ): { people: PersonBalance[]; albums: AlbumBalance[] } {
   const albums = allAlbums.filter((album) => shared.has(album.id));
   const inAlbums = new Set(albums.flatMap((album) => album.txIds));
@@ -152,10 +181,12 @@ export function balancesByAlbum(
     albums: albums.flatMap((album) => {
       const ids = new Set(album.txIds);
       const inAlbum = (debt: OpenShare) => ids.has(debt.txId);
-      const people = netByPerson(owesYou.filter(inAlbum), youOwe.filter(inAlbum));
+      const owes = owesYou.filter(inAlbum);
+      const owe = youOwe.filter(inAlbum);
+      const people = netByPerson(owes, owe);
       if (people.length === 0) return [];
       const net = Math.round(people.reduce((sum, person) => sum + person.net, 0) * 100) / 100;
-      return [{ id: album.id, name: album.name, net, people }];
+      return [{ id: album.id, name: album.name, net, netByCurrency: netByCurrency(owes, owe, mainCurrency), people }];
     }),
   };
 }

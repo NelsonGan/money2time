@@ -2458,8 +2458,8 @@ function AlbumDetailRouteScreen({ route, navigation }: RootStackRouteProps<'Albu
         // Back on the album afterwards, where the new bill shows.
         navigation.navigate('AddTransactionDetailed', { albumId, keepCurrentTab: true })
       }
-      onOpenPerson={(personKey, albumId) =>
-        navigation.navigate('SettleUpPerson', { personKey, albumId })
+      onOpenPerson={(personKey, albumId, currency) =>
+        navigation.navigate('SettleUpPerson', { personKey, albumId, currency })
       }
       onOpenTransaction={(transaction) =>
         navigation.navigate('EditTransaction', { transactionId: transaction.id })
@@ -2749,6 +2749,7 @@ function SettleUpPersonRouteScreen({ route, navigation }: RootStackRouteProps<'S
     <SettleUpPersonScreen
       personKey={route.params.personKey}
       albumId={route.params.albumId}
+      currency={route.params.currency}
       onBack={() => navigation.goBack()}
       onOpenSettings={() => navigation.navigate('SettleUpSettings')}
       onOpenTransaction={(transactionId) =>

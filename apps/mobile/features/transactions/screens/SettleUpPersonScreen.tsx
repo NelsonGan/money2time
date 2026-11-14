@@ -40,6 +40,11 @@ interface SettleUpPersonScreenProps {
   personKey: string;
   /** Only this album's bills with the person (opened from the album's Balances). */
   albumId?: string;
+  /**
+   * Only the bills in this currency: opened from one currency's line of an
+   * album's Balances, so the page totals what that line said.
+   */
+  currency?: string;
   onBack: () => void;
   onOpenSettings: () => void;
   /** Open one bill, where its shares are marked paid, undone or removed. */
@@ -64,6 +69,34 @@ function netAmountText(
 }
 
 /**
+ * What each side owes (for "Ana owes RM49.50 · You owe RM48.00"): in the
+ * bills' own currency when every open share is in one, else in the reporting
+ * currency.
+ */
+function sidesText(
+  person: PersonDebt,
+  formatNative: (amount: number, currency: string) => string,
+  formatReporting: (value: number) => string,
+): { owes: string; owe: string } {
+  const [owes] = person.byCurrency;
+  const [owe] = person.owedByCurrency;
+  if (
+    person.byCurrency.length === 1 &&
+    person.owedByCurrency.length === 1 &&
+    owes!.currency === owe!.currency
+  ) {
+    return {
+      owes: formatNative(owes!.amount, owes!.currency),
+      owe: formatNative(owe!.amount, owe!.currency),
+    };
+  }
+  return {
+    owes: formatReporting(person.totalReporting),
+    owe: formatReporting(person.owedReporting),
+  };
+}
+
+/**
  * One person's balance: the net between the user and them, then the bills
  * that make it up as a plain ledger, green for what they owe and red for what
  * the user owes. A row opens its bill; Settle up clears everything at once.
@@ -71,6 +104,7 @@ function netAmountText(
 export function SettleUpPersonScreen({
   personKey,
   albumId,
+  currency,
   onBack,
   onOpenSettings,
   onOpenTransaction,
@@ -88,7 +122,7 @@ export function SettleUpPersonScreen({
   const [shareVisible, setShareVisible] = useState(false);
   const [settleVisible, setSettleVisible] = useState(false);
 
-  const summary = useSettleUpSummary(albumId);
+  const summary = useSettleUpSummary(albumId, currency);
 
   const person = useMemo(
     () => summary.people.find((p) => p.key === personKey) ?? null,
@@ -132,7 +166,7 @@ export function SettleUpPersonScreen({
     [settings.currencySymbol],
   );
   const formatNative = useCallback(
-    (amount: number, currency: string) => formatCurrency(amount, currencySymbolForCode(currency)),
+    (amount: number, code: string) => formatCurrency(amount, currencySymbolForCode(code)),
     [],
   );
 
@@ -172,13 +206,13 @@ export function SettleUpPersonScreen({
                 full: Math.abs(person.netReporting),
                 prefix: `${person.netByCurrency.length > 1 ? '≈ ' : ''}${settings.currencySymbol}`,
               },
-      // How the net came about, only when shares go both ways.
+      // How the net came about, only when shares go both ways: in the bills'
+      // own currency when they share one.
       detail:
         person.totalReporting > 0 && person.owedReporting > 0
           ? I18n.t('transactions.settleUp.net_breakdown', {
               name: title,
-              owes: formatReporting(person.totalReporting),
-              owe: formatReporting(person.owedReporting),
+              ...sidesText(person, formatNative, formatReporting),
             })
           : null,
       confirmLabel: I18n.t('transactions.settleUp.settle_up'),
@@ -317,11 +351,12 @@ export function SettleUpPersonScreen({
               <View style={{ opacity: state === 'settled' ? 0.55 : 1 }}>
                 <PersonAvatar name={person.name} partyKey={person.key} size={56} />
               </View>
-              {/* Opened from an album: these are that album's bills alone. */}
+              {/* Opened from an album: these are that album's bills alone, and
+                  only one currency's when opened from that currency's line. */}
               {albumName ? (
                 <View className="mt-2.5 rounded-full bg-secondary/60 px-3 py-0.5">
                   <Text variant="caption" tone="muted" numberOfLines={1}>
-                    {albumName}
+                    {currency ? `${albumName} · ${currency}` : albumName}
                   </Text>
                 </View>
               ) : null}
@@ -420,7 +455,7 @@ export function SettleUpPersonScreen({
               const netOnly =
                 inSharedAlbum && person.totalReporting > 0 && person.owedReporting > 0;
               if (amount === null && !netOnly) {
-                settleUpWithPerson(person.key, accountId, albumId);
+                settleUpWithPerson(person.key, accountId, albumId, currency);
                 return;
               }
               const paying =

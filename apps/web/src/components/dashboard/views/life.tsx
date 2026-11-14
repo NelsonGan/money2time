@@ -453,8 +453,8 @@ export function SplitsView() {
   // under it, and the people are every other bill (an album of the user's own
   // is settled here like any bill).
   const { people, albums } = useMemo(
-    () => balancesByAlbum(model.splitDebts, model.splitOwed, model.trips, sharedAlbumIds(model.txs)),
-    [model.splitDebts, model.splitOwed, model.trips, model.txs],
+    () => balancesByAlbum(model.splitDebts, model.splitOwed, model.trips, sharedAlbumIds(model.txs), model.currency),
+    [model.splitDebts, model.splitOwed, model.trips, model.txs, model.currency],
   );
   // The totals are every open share, each once (a bill can be in two albums).
   const owed = model.splitDebts.reduce((s, debt) => s + debt.amountBase, 0);
@@ -503,17 +503,39 @@ export function SplitsView() {
             <Empty title={t("allSettled")} mascot="presenting" />
           ) : (
             <div className="space-y-0.5">
-              {albums.map((album) => (
-                <RankRow
-                  key={`album:${album.id}`}
-                  icon={<ClayImg name="settings/albums" size={30} />}
-                  name={album.name}
-                  meta={`${album.net < 0 ? t("youOwe") : t("owedToYou")} · ${t("open", { count: album.people.reduce((n, p) => n + p.count, 0) })}`}
-                  value={<span className={album.net < 0 ? "text-error" : undefined}>{f.money(Math.abs(album.net))}</span>}
-                  share={largest ? Math.abs(album.net) / largest : 0}
-                  color={album.net < 0 ? "#C2604A" : "#1E9468"}
-                />
-              ))}
+              {albums.map((album) => {
+                // As the app's Balances: an album's balance is never
+                // converted, one figure per currency, each signed when there
+                // are several. The bar still compares the main-currency net.
+                const open = t("open", { count: album.people.reduce((n, p) => n + p.count, 0) });
+                const [only] = album.netByCurrency;
+                const several = album.netByCurrency.length > 1;
+                const owe = only ? only.amount < 0 : album.net < 0;
+                return (
+                  <RankRow
+                    key={`album:${album.id}`}
+                    icon={<ClayImg name="settings/albums" size={30} />}
+                    name={album.name}
+                    meta={several ? open : `${owe ? t("youOwe") : t("owedToYou")} · ${open}`}
+                    value={
+                      several ? (
+                        <span className="flex flex-col items-end">
+                          {album.netByCurrency.map((entry) => (
+                            <span key={entry.currency} className={entry.amount < 0 ? "text-error" : undefined}>
+                              {entry.amount < 0 ? "−" : "+"}
+                              {f.moneyIn(Math.abs(entry.amount), entry.currency)}
+                            </span>
+                          ))}
+                        </span>
+                      ) : (
+                        <span className={owe ? "text-error" : undefined}>{only ? f.moneyIn(Math.abs(only.amount), only.currency) : f.money(0)}</span>
+                      )
+                    }
+                    share={largest ? Math.abs(album.net) / largest : 0}
+                    color={album.net < 0 ? "#C2604A" : "#1E9468"}
+                  />
+                );
+              })}
               {people.map((p) => (
                 <RankRow
                   key={p.person}

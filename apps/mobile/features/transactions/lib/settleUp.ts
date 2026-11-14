@@ -208,6 +208,15 @@ function netCurrencyTotals(
 }
 
 /**
+ * The order an album lists its currencies in, wherever it lists them: the
+ * reporting currency first, then by code.
+ */
+export function currencyOrder(reportingCurrency: string) {
+  return (a: string, b: string) =>
+    Number(b === reportingCurrency) - Number(a === reportingCurrency) || a.localeCompare(b);
+}
+
+/**
  * Rolls debt entries up by person. People are grouped by their party key (a
  * member once people can be real users, else the trimmed, case-folded name);
  * entries with no name collapse into a single {@link UNNAMED_PERSON_KEY}
@@ -277,7 +286,16 @@ function rollUpDebtsByPerson(
   let owedToYou = 0;
   let youOwe = 0;
   let billCount = 0;
+  const owesYouByCurrency = new Map<string, number>();
+  const youOweByCurrency = new Map<string, number>();
+  const addInto = (into: Map<string, number>, from: Map<string, number>) => {
+    for (const [currency, amount] of from) {
+      into.set(currency, roundCents((into.get(currency) ?? 0) + amount));
+    }
+  };
   for (const person of people.values()) {
+    addInto(owesYouByCurrency, person.byCurrency);
+    addInto(youOweByCurrency, person.owedByCurrency);
     // Outstanding shares first, then paid history; newest original bills first.
     person.bills.sort((a, b) => {
       if (Boolean(a.paidAt) !== Boolean(b.paidAt)) return a.paidAt ? 1 : -1;
@@ -339,6 +357,7 @@ function rollUpDebtsByPerson(
     netReporting: roundCents(grandTotal - grandOwed),
     owedToYouReporting: owedToYou,
     youOweReporting: youOwe,
+    netByCurrency: netCurrencyTotals(owesYouByCurrency, youOweByCurrency),
     personCount: result.length,
     billCount,
     reportingCurrency,
