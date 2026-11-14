@@ -20,7 +20,10 @@ import { useEffect, useSyncExternalStore } from 'react';
 import { getPostHog } from './posthog';
 
 /** Flag keys as configured in PostHog. */
-export const FEATURE_FLAGS = {} as const satisfies Record<string, string>;
+export const FEATURE_FLAGS = {
+  /** Who may make a shared album (README: Shared albums rollout). */
+  sharedAlbums: 'shared_albums',
+} as const satisfies Record<string, string>;
 
 export type FeatureFlagValue = boolean | string | undefined;
 

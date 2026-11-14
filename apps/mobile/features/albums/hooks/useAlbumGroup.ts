@@ -31,7 +31,8 @@ export interface AlbumGroup {
  * can be split with people, which an album in a shared ledger never is (its
  * entries already belong to the ledger's own). `canShare`: it can be shared,
  * which only an album of the main ledger is, while that ledger is not shared
- * and the build can sync.
+ * and the build can sync. Who may make one is the shared-albums rollout,
+ * asked only by New Album (`useSharedAlbumsAllowed`).
  */
 export function useAlbumScope(): { canSplit: boolean; canShare: boolean } {
   const { activeLedger } = useApp();
