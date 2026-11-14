@@ -1045,7 +1045,7 @@ const en = {
         method_percent: 'Percentage',
         method_percent_hint: 'Give each person a percentage of the bill',
         method_shares: 'Shares',
-        method_shares_hint: '2 shares pay twice as much as 1',
+        method_shares_hint: '2 shares pay double',
         method_adjust: 'Adjustment',
         method_adjust_hint: 'Split evenly, then add or take off for someone',
         percent_sum: '{{given}}% of 100%',

@@ -26,7 +26,14 @@ import ReanimatedSwipeable, {
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AccountLogo, AccountPickerSheet, Text, ThemeModal } from '~/components/ui';
+import {
+  AccountLogo,
+  AccountPickerSheet,
+  InfoTooltipButton,
+  SegmentedToggle,
+  Text,
+  ThemeModal,
+} from '~/components/ui';
 import { SINGLE_LINE_TEXT_INPUT_STYLE } from '~/components/ui/textInputStyles';
 import { type SplitDraftInput, useTransactions } from '~/context/AppContext';
 import {
@@ -40,10 +47,6 @@ import {
   type PaidByOption,
   PaidByPickerSheet,
 } from '~/features/transactions/components/editor/PaidByPickerSheet';
-import {
-  splitMethodLabel,
-  SplitMethodSheet,
-} from '~/features/transactions/components/editor/SplitMethodSheet';
 import { PersonAvatar } from '~/features/transactions/components/PersonAvatar';
 import { debtPartyKey } from '~/features/transactions/lib/debtParty';
 import { recentSplitPersonNames } from '~/features/transactions/lib/settleUp';
@@ -60,6 +63,7 @@ import {
   initialMethodValues,
   methodNumber,
   scaleAdjustments,
+  SPLIT_METHODS,
   type SplitMethod,
   splitMethodProblem,
   trimNumber,
@@ -262,6 +266,20 @@ function methodValueFromExpression(method: SplitMethod, expression: string): str
   const value = evaluateExpression(expression);
   return trimNumber(method === 'adjust' ? value : Math.max(0, value));
 }
+
+/** A split method's name, as Split by's explanation and screen readers say it. */
+function methodName(method: SplitMethod): string {
+  return I18n.t(`transactions.editor.split.method_${method}`);
+}
+
+/**
+ * The segments that read as a symbol, so all four fit one row in every
+ * language; the others show their name. The info button spells each one out.
+ */
+const METHOD_SEGMENT_LABELS: Partial<Record<SplitMethod, string>> = {
+  percent: '%',
+  adjust: '+/−',
+};
 
 /** A row's key while the page is open: its id, else its position. */
 function splitRowKey(row: SplitDraft, index: number): string {
@@ -748,7 +766,8 @@ export function SplitBillModal({
   // visit and every visit opens on Amount. Itemized visits have no total to
   // divide and stay on Amount.
   const [method, setMethod] = useState<SplitMethod>('amount');
-  const [methodSheetOpen, setMethodSheetOpen] = useState(false);
+  // Split evenly belongs to typed amounts; the other methods are even by default.
+  const showEvenToggle = !itemized && method === 'amount';
   // What each person entered for the method, by row key.
   const [methodValuesByKey, setMethodValuesByKey] = useState<Record<string, string>>({});
   const methodValuesFor = useCallback(
@@ -807,7 +826,6 @@ export function SplitBillModal({
 
   const handleMethodSelect = useCallback(
     (next: SplitMethod) => {
-      setMethodSheetOpen(false);
       if (next === method) return;
       void trackEvent(AnalyticsEvents.SPLIT_METHOD_CHOSEN, { method: next });
       setMethod(next);
@@ -1060,12 +1078,15 @@ export function SplitBillModal({
   const handleNumpadConfirm = useCallback(() => {
     if (focusedAmountIndex === null) return;
     if (method !== 'amount') {
-      // The value is already applied keystroke by keystroke; move on to the
-      // next person still owing, seeded with what the method now holds.
-      handleMethodValueChange(
-        focusedAmountIndex,
-        methodValueFromExpression(method, focusedExpression),
-      );
+      // The value is already applied keystroke by keystroke, so only a value
+      // that differs (a pending operation worked out) is applied again: passing
+      // through a friend's percentage untouched must not give the user's row
+      // back what they just typed for it. Then move on to the next person
+      // still owing, seeded with what the method now holds.
+      const finalMethodValue = methodValueFromExpression(method, focusedExpression);
+      if (finalMethodValue !== trimNumber(methodNumber(methodValues[focusedAmountIndex]))) {
+        handleMethodValueChange(focusedAmountIndex, finalMethodValue);
+      }
       const following = nextEditableAmountIndex(splits, focusedAmountIndex);
       if (following === null) {
         setFocusedAmountIndex(null);
@@ -1227,10 +1248,63 @@ export function SplitBillModal({
             <View className="mt-2 h-[3px] w-8 rounded-full bg-primary/30" />
           </View>
 
+          {/* Split by: how the bill is divided, one tap away. Amount is the
+              page as it always was; what each method does is behind the
+              info button. Not on an itemized visit, which has no total. */}
+          {!itemized ? (
+            <View className="mx-4 mt-3 flex-row items-center gap-2.5">
+              <SegmentedToggle
+                value={method}
+                onChange={handleMethodSelect}
+                size="compact"
+                className="flex-1"
+                options={SPLIT_METHODS.map((option) => ({
+                  value: option,
+                  label: METHOD_SEGMENT_LABELS[option] ?? methodName(option),
+                  accessibilityLabel: methodName(option),
+                }))}
+              />
+              <InfoTooltipButton
+                title={I18n.t('transactions.editor.split.split_by_label')}
+                infoTooltip={SPLIT_METHODS.map(
+                  (option) =>
+                    `${methodName(option)}: ${I18n.t(`transactions.editor.split.method_${option}_hint`)}`,
+                ).join('\n')}
+                iconSize={18}
+              >
+                <View className="mt-2 gap-3">
+                  {SPLIT_METHODS.map((option) => (
+                    <View key={option} className="flex-row items-center gap-3">
+                      <View
+                        className={cn(
+                          'min-w-[68px] items-center rounded-xl px-2 py-1.5',
+                          option === method ? 'bg-primary' : 'bg-secondary/60',
+                        )}
+                      >
+                        <Text
+                          variant="caption"
+                          className={cn(
+                            'font-medium',
+                            option === method ? 'text-primary-foreground' : 'text-foreground',
+                          )}
+                        >
+                          {METHOD_SEGMENT_LABELS[option] ?? methodName(option)}
+                        </Text>
+                      </View>
+                      <Text variant="body" tone="muted" className="flex-1">
+                        {I18n.t(`transactions.editor.split.method_${option}_hint`)}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              </InfoTooltipButton>
+            </View>
+          ) : null}
+
           {/* How the bill is settled, in one card: who paid it (Me, or a friend
-              on it, in which case the user owes them their own share), and
-              whether it is shared evenly. */}
-          {(hasFriends && !groupMembers) || !itemized ? (
+              on it, in which case the user owes them their own share), and,
+              when typing amounts, whether it is shared evenly. */}
+          {(hasFriends && !groupMembers) || showEvenToggle ? (
             <View className="mx-4 mt-3 overflow-hidden rounded-[20px] border border-border/25 bg-card/60">
               {hasFriends && !groupMembers ? (
                 <Pressable
@@ -1271,34 +1345,10 @@ export function SplitBillModal({
                   <ChevronRight size={16} color={themeColors.textMuted} />
                 </Pressable>
               ) : null}
-              {hasFriends && !groupMembers && !itemized ? (
+              {hasFriends && !groupMembers && showEvenToggle ? (
                 <View className="mx-4 h-[1px] bg-border/15" />
               ) : null}
-              {!itemized ? (
-                <Pressable
-                  onPress={() => {
-                    void triggerHaptic('selection');
-                    Keyboard.dismiss();
-                    setMethodSheetOpen(true);
-                  }}
-                  accessibilityRole="button"
-                  accessibilityLabel={`${I18n.t('transactions.editor.split.split_by_label')}: ${splitMethodLabel(method)}`}
-                  testID="split-method-row"
-                  className="flex-row items-center gap-2.5 px-4 py-3 active:opacity-70"
-                >
-                  <Text variant="body" className="flex-1">
-                    {I18n.t('transactions.editor.split.split_by_label')}
-                  </Text>
-                  <Text variant="bodyStrong" numberOfLines={1} className="max-w-[55%]">
-                    {splitMethodLabel(method)}
-                  </Text>
-                  <ChevronRight size={16} color={themeColors.textMuted} />
-                </Pressable>
-              ) : null}
-              {!itemized && method === 'amount' ? (
-                <View className="mx-4 h-[1px] bg-border/15" />
-              ) : null}
-              {!itemized && method === 'amount' ? (
+              {showEvenToggle ? (
                 <View className="flex-row items-center px-4 py-2">
                   <Text variant="body" className="flex-1">
                     {I18n.t('transactions.editor.split.even_toggle')}
@@ -1792,13 +1842,6 @@ export function SplitBillModal({
           </View>
         </Animated.View>
       ) : null}
-
-      <SplitMethodSheet
-        visible={methodSheetOpen}
-        method={method}
-        onClose={() => setMethodSheetOpen(false)}
-        onSelect={handleMethodSelect}
-      />
 
       <PaidByPickerSheet
         visible={payerPickerOpen}

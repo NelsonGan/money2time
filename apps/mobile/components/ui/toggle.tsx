@@ -12,6 +12,8 @@ import { Text } from './text';
 interface ToggleOption<T extends string> {
   value: T;
   label: string;
+  /** What a screen reader says when the label is a symbol (e.g. "%"). */
+  accessibilityLabel?: string;
   disabled?: boolean;
 }
 
@@ -95,6 +97,9 @@ export function SegmentedToggle<T extends string>({
           <Pressable
             key={option.value}
             disabled={option.disabled}
+            accessibilityRole="button"
+            accessibilityLabel={option.accessibilityLabel ?? option.label}
+            accessibilityState={{ selected: active, disabled: option.disabled }}
             onPress={() => {
               if (option.disabled || active) return;
               void triggerHaptic('selection');
