@@ -3025,7 +3025,7 @@ The [receipt-scanner Worker](#receipt-scanner-worker) sends one `$ai_generation`
 | `byok`                                                                                                    | `usage.is_byok`: `true` when our Anthropic key paid. An `anthropic/` generation with `false` means OpenRouter credits were spent on it, which the Worker's routing forbids (see [Config](#config)).                                                                  |
 | `$ai_latency`, `$ai_http_status`, `$ai_is_error`, `$ai_error`                                             | Seconds, status, and a 200-character error message on failure.                                                                                                                                                                                                       |
 | `$ai_temperature`, `$ai_max_tokens`                                                                       | The attempt's settings (temperature rises on the empty-result retry). Claude is sent no temperature, so its generations carry none.                                                                                                                                  |
-| `scan_mode`, `is_pro`, `is_backup_model`, `attempt`, `parsed_transactions`, `parsed_items`                | Request context and the parsed outcome of that attempt. `is_backup_model` is the `BACKUP_MODEL` slot, true even when Claude was skipped (an image it cannot read) and nothing ran first.                                                                             |
+| `scan_mode`, `is_pro`, `is_backup_model`, `attempt`, `parsed_transactions`, `parsed_items`                | Request context and the parsed outcome of that attempt. `is_backup_model` is true for `BACKUP_MODEL` and `SECOND_BACKUP_MODEL`, even when Claude was skipped (an image it cannot read, or a user in `CLAUDE_BLOCKED_COUNTRIES`) and nothing ran first.               |
 | `$ai_prompt_name`, `$ai_prompt_version`, `prompt_source`                                                  | The hosted prompt the call used (below); version is absent and `prompt_source` is `bundled` when the fallback served it.                                                                                                                                             |
 | `prompt_cache`                                                                                            | Claude only: `shared` when the prompt went in the 1-hour cache every user shares, `per_user` when its template has no shared part and was cached whole for that user. `per_user` with a hosted version means `production` is on a pre-split template.                |
 | `$geoip_disable`                                                                                          | Always `true`: the request comes from Cloudflare's network, whose location would otherwise overwrite the person's.                                                                                                                                                   |
@@ -4148,27 +4148,39 @@ OpenRouter's naming. Any multimodal model on OpenRouter that accepts image
 input works.
 
 If the primary `MODEL` errors or times out (provider down or overloaded), the
-Worker automatically retries the request once with `BACKUP_MODEL`
-(`google/gemma-3-4b-it` when unset). Set `BACKUP_MODEL` to the same value as
-`MODEL` to disable failover. The primary times out early enough to leave the
-backup 25 seconds of the 70-second scan budget (`BACKUP_RESERVE_MS`, or half
-of what is left when less), so a hung primary cannot starve it.
+Worker automatically retries the request with `BACKUP_MODEL`
+(`google/gemma-3-4b-it` when unset), and if that fails too, with
+`SECOND_BACKUP_MODEL` (none when unset). A slot equal to one before it is
+skipped, so setting `BACKUP_MODEL` to `MODEL` and removing
+`SECOND_BACKUP_MODEL` disables failover. Each model with another behind it
+times out early enough to leave the next 25 seconds of the 70-second scan
+budget (`BACKUP_RESERVE_MS`, or half of what is left when less), so a hung
+model cannot starve the rest.
 
-**Where the Worker runs.** `wrangler.toml` pins the Worker to Singapore
-(`[placement]`, `mode = "targeted"`, `region = "aws:ap-southeast-1"`) instead
-of the Cloudflare data centre nearest the user. OpenRouter checks Claude
-against the region the call comes from, and refuses it from Hong Kong with a
-403 "This model is not available in your region". Unpinned, every scan from
-Hong Kong and mainland China users ran there, so each one fell to
-`BACKUP_MODEL`. In the two weeks to 2026-11-13, OpenRouter refused 325 of the
-404 Claude calls from users in Hong Kong and China this way. Qwen answered no
-transactions to 37% of screenshot scans and was rate limited on 7%, and a
-failed screenshot scan is dropped without a message, so "Log Screenshot" looked
-as if it did nothing until it was run again. Most users are in Singapore and
-Malaysia, whose scans already reached Claude from their local data centres
-(6 refused calls out of about 28,600), and Claude answers from the US whichever
-Asian region the Worker sits in. Region 403s in
-the `$ai_generation` errors mean this placement has stopped holding.
+**`SECOND_BACKUP_MODEL` is `deepseek/deepseek-v4.1-flash-1017`.** OpenRouter
+serves `qwen/qwen3.7-flash` from Alibaba alone, and since 2026-11-11 Alibaba
+has refused it at busy times with a 429 "temporarily rate-limited upstream"
+(none of 268 Qwen calls in the week before, 42 of 183 from 11 to 14 November).
+Where Claude runs first, that 429 rarely matters; for users who skip Claude
+(below) it was the end of the scan, which the app drops without a message.
+DeepSeek V4.1 Flash reads images and runs on dozens of providers, so one busy
+provider does not stop it, and as a Chinese model it is not refused for users
+in China or Hong Kong the way Claude and OpenAI models are. Region 403s on its
+generations would mean that has changed.
+
+**Hong Kong, China and Macau users skip Claude.** OpenRouter refuses Claude
+for users there with a 403 "This model is not available in your region": 492
+of 624 Claude calls from users in Hong Kong and China in the 30 days to
+2026-11-14. The refusal follows where the user is, not where the Worker runs.
+Pinning the Worker to Singapore (`[placement]`, PR #732) changed nothing: those
+users were still refused 52 of 54 times, while the same user's scans reached
+Claude from a VPN in the US. So `CLAUDE_BLOCKED_COUNTRIES` (`"CN,HK,MO"`) lists
+the countries, matched against Cloudflare's `request.cf.country`, whose
+requests drop Anthropic models from the chain and start at `BACKUP_MODEL`,
+saving the refused call. A user abroad on a VPN still gets Claude. Region 403s
+in the `$ai_generation` errors now mean a country is missing from that list;
+`scan_request` in Workers Logs records each request's `country` and
+`claudeBlocked`. The Worker runs at Cloudflare's default placement.
 
 **`MODEL` is Claude Haiku 5.5 on our own Anthropic key, and `BACKUP_MODEL` is
 `qwen/qwen3.7-flash` on OpenRouter credits.** Claude must never run on credits,

@@ -1,6 +1,7 @@
 // Cloudflare Worker proxy for receipt scanning, served at /scan. Validates the
 // request, verifies the RevenueCat entitlement and per-user scan quota, runs
-// OpenRouter inference (primary MODEL, falling back to BACKUP_MODEL; a Claude
+// OpenRouter inference (primary MODEL, falling back to BACKUP_MODEL, then
+// SECOND_BACKUP_MODEL; Claude is skipped where it is refused; a Claude
 // model runs only on our own Anthropic key), and
 // returns the parsed transactions. The OpenRouter key lives only in this
 // Worker's secrets — never in the app.
@@ -44,6 +45,12 @@ export interface Env extends PostHogEnv, PromptEnv {
   // Backup model tried when the primary MODEL errors or times out. Unset falls
   // back to DEFAULT_BACKUP_MODEL; set equal to MODEL to disable failover.
   BACKUP_MODEL?: string;
+  // Tried last, when BACKUP_MODEL fails too. Optional; skipped when unset or
+  // equal to a model before it.
+  SECOND_BACKUP_MODEL?: string;
+  // Comma-separated ISO country codes whose requests skip Anthropic models:
+  // OpenRouter refuses Claude for users there ("not available in your region").
+  CLAUDE_BLOCKED_COUNTRIES?: string;
   // Per-tier scan caps + metering cadence. INTERVAL is day|week|month|year with
   // an optional count prefix ("100year" ≈ lifetime); see interval.ts.
   FREE_LIMIT: string;
@@ -233,12 +240,15 @@ export default {
       body.mode === 'itemized' || body.mode === 'screenshot'
         ? body.mode
         : 'quick';
+    const country = requestCountry(request);
     log('scan_request', {
       reqId,
       appUserId: body.appUserId,
       currency: body.currency,
       mime: body.mime,
       mode,
+      country,
+      claudeBlocked: claudeBlockedIn(env, country),
       imageBytes: body.image?.length ?? 0,
       categoryCount: Array.isArray(body.categories) ? body.categories.length : 0,
       accountCount: Array.isArray(body.accounts) ? body.accounts.length : 0,
@@ -296,6 +306,7 @@ export default {
         now,
         startedAt + SCAN_BUDGET_MS,
         trace,
+        country,
       ));
     } catch (err) {
       ctx.waitUntil(trace.flush(env));
@@ -467,6 +478,7 @@ async function handleNotifications(
         denyDataCollection: true,
       },
       '',
+      requestCountry(request),
       // An answer without a results array (prose, truncated JSON) moves on to
       // the backup model; if every model fails, nothing is charged.
       (answer) => {
@@ -589,6 +601,12 @@ function validate(body: ScanRequest): string | null {
   return null;
 }
 
+/** The caller's country as Cloudflare places their IP (ISO code), or null. */
+function requestCountry(request: Request): string | null {
+  const country = (request.cf as { country?: unknown } | undefined)?.country;
+  return typeof country === 'string' && country ? country : null;
+}
+
 /** True when this client IP is over its per-minute limit. No binding, no limit. */
 async function overLimit(limiter: RateLimit | undefined, request: Request): Promise<boolean> {
   if (!limiter) return false;
@@ -663,16 +681,35 @@ function isAnthropicModel(model: string): boolean {
   return /^~?anthropic\//i.test(model);
 }
 
-// Models to try in order: primary MODEL, then BACKUP_MODEL (skipped when equal).
+// True when the user's country (Cloudflare's `request.cf.country`) is one
+// where OpenRouter refuses Claude. The refusal follows where the user is, not
+// where the Worker runs: pinning the Worker to Singapore changed nothing.
+function claudeBlockedIn(env: Env, country: string | null): boolean {
+  if (!country) return false;
+  return (env.CLAUDE_BLOCKED_COUNTRIES ?? '')
+    .split(',')
+    .some((code) => code.trim().toUpperCase() === country.toUpperCase());
+}
+
+// Models to try in order: primary MODEL, then BACKUP_MODEL, then
+// SECOND_BACKUP_MODEL (each skipped when unset or already in the chain).
 // Anthropic models drop out once one has been billed to credits (`byokBroken`),
+// for a user in a country where Claude is refused (CLAUDE_BLOCKED_COUNTRIES),
 // and for an image whose bytes are not a type Claude reads (`imageType` null):
 // HEIC, labelled as it is or as a JPEG, is refused every time with a 400.
-function resolveModels(env: Env, imageType: string | null): ModelChoice[] {
+function resolveModels(
+  env: Env,
+  imageType: string | null,
+  country: string | null,
+): ModelChoice[] {
   const primary = env.MODEL?.trim() || DEFAULT_BACKUP_MODEL;
   const backup = env.BACKUP_MODEL?.trim() || DEFAULT_BACKUP_MODEL;
-  const chain = (backup !== primary ? [primary, backup] : [primary])
+  const second = env.SECOND_BACKUP_MODEL?.trim();
+  const skipClaude = byokBroken || !imageType || claudeBlockedIn(env, country);
+  const chain = [primary, backup, second]
+    .filter((model, i, all): model is string => !!model && all.indexOf(model) === i)
     .map((model, i) => ({ model, byok: isAnthropicModel(model), isBackup: i > 0 }))
-    .filter((choice) => !(choice.byok && (byokBroken || !imageType)));
+    .filter((choice) => !(choice.byok && skipClaude));
   return chain.length ? chain : [{ model: DEFAULT_BACKUP_MODEL, byok: false, isBackup: true }];
 }
 
@@ -861,6 +898,7 @@ async function completeWithFailover(
   env: Env,
   reqId: string,
   opts: AttemptOptions,
+  country: string | null,
   validateContent?: (content: string) => void,
 ): Promise<string> {
   const imageType = sniffImageMime(body.image ?? '');
@@ -869,7 +907,7 @@ async function completeWithFailover(
     env,
     reqId,
     opts,
-    resolveModels(env, imageType),
+    resolveModels(env, imageType, country),
     imageTail(body, env, mime),
     validateContent,
   );
@@ -881,6 +919,7 @@ export function completeTextWithFailover(
   reqId: string,
   opts: AttemptOptions,
   text: string,
+  country: string | null,
   validateContent?: (content: string) => void,
 ): Promise<string> {
   // An empty text block is refused by Anthropic, so the prompt alone is sent.
@@ -888,7 +927,7 @@ export function completeTextWithFailover(
     env,
     reqId,
     opts,
-    resolveModels(env, 'text/plain'),
+    resolveModels(env, 'text/plain', country),
     text ? [{ type: 'text', text }] : [],
     validateContent,
   );
@@ -946,6 +985,7 @@ async function runInference(
   now: Date,
   deadline: number,
   trace: AiTrace,
+  country: string | null,
 ): Promise<{
   transactions: ScannedTransaction[];
   receiptDetail: ScannedReceiptDetail | null;
@@ -972,16 +1012,22 @@ async function runInference(
     const attemptStartedAt = Date.now();
     let content: string;
     try {
-      content = await completeWithFailover(body, env, reqId, {
-        prompt: built,
-        maxTokens,
-        deadline,
-        temperature: attempt === 0 ? 0 : RETRY_TEMPERATURE,
-        attempt,
-        spanName: `receipt_scan_${mode}`,
-        trace,
-        promptRef: built.prompt,
-      });
+      content = await completeWithFailover(
+        body,
+        env,
+        reqId,
+        {
+          prompt: built,
+          maxTokens,
+          deadline,
+          temperature: attempt === 0 ? 0 : RETRY_TEMPERATURE,
+          attempt,
+          spanName: `receipt_scan_${mode}`,
+          trace,
+          promptRef: built.prompt,
+        },
+        country,
+      );
     } catch (err) {
       // The first attempt's failure is the request's failure, as before. A
       // later one only ever had an empty result to improve on, so a 429 or a
