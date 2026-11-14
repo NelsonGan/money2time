@@ -12,6 +12,12 @@ export type ApplyTrack = {
   deleted: string[];
   /** Checks that the step's change is in the database; any false fails the save. */
   checks: (() => boolean)[];
+  /**
+   * Writes still on their way (a shared album's, through the Worker): each
+   * resolves whether it went, and the save waits for them before its checks.
+   * Any false fails the save.
+   */
+  pending: Promise<boolean>[];
 };
 
 /** Saves one module's steps through AppContext, as the app's own editor does. */

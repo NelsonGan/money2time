@@ -88,7 +88,7 @@ export function SplitShares() {
     // app, and the phone refuses them from here, so its cards have no buttons.
     const groupBill = !!tx.albumGroupId;
     return (
-      <li key={row.id} title={groupBill ? te("groupBill") : undefined} className={`rounded-2xl border px-4 py-3 ${settled ? "border-border/40 bg-background-subtle/40" : "border-border/70 bg-card"}`}>
+      <li key={row.id} title={groupBill ? te("sharedBill.payments") : undefined} className={`rounded-2xl border px-4 py-3 ${settled ? "border-border/40 bg-background-subtle/40" : "border-border/70 bg-card"}`}>
         <div className="flex items-center gap-3">
           <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-background-subtle text-[13px] font-extrabold text-foreground-soft">
             {(row.person_name?.trim() || t("someone")).slice(0, 1).toUpperCase()}

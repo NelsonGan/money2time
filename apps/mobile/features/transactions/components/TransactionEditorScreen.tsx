@@ -16,7 +16,6 @@ import {
   Hash,
   Images,
   Layers,
-  Lock,
   Pencil,
   Power,
   Receipt,
@@ -421,7 +420,14 @@ interface TransactionEditorScreenProps {
     input: CreateTransactionInput,
     splits: SplitDraft[],
     extras?: TransactionEditorSubmitExtras,
-  ) => void;
+  ) => void | Promise<boolean>;
+  /**
+   * A save through `onSubmitWithSplits` that has to reach a server first (a
+   * shared album's bill, which the Worker writes): the editor waits for it,
+   * Save showing it is busy, and closes only once it went. False keeps the
+   * editor open with every edit in it (the user was told why).
+   */
+  awaitSplitSubmit?: boolean;
   onSubmitReady?: (input: CreateTransactionInput) => void;
   /**
    * Asked before a save through `onSubmitWithSplits` closes the editor, with
@@ -492,17 +498,9 @@ interface TransactionEditorScreenProps {
   headerNotice?: { label: string; actionLabel: string; onPress: () => void };
   /**
    * A shared album's bill: a row at the foot of the amount card naming the
-   * album it is from, which opens the album, with a small badge when the user
-   * cannot change the bill (`status`; tapping it says why, `lockedReason`).
+   * album it is from, which opens the album.
    */
-  albumNote?: { albumName: string; status?: string; onOpenAlbum: () => void };
-  /**
-   * A shared album's bill the user cannot change (someone else's, or one
-   * with payments on it): the amount, day, title and split stay as they are,
-   * and touching them shows this. The user's own fields (category, account,
-   * details, receipt, mood) still change.
-   */
-  lockedReason?: string;
+  albumNote?: { albumName: string; onOpenAlbum: () => void };
   /**
    * A shared album's bill: the people it can be split with (README: Album
    * members and shared albums). Split Bill adds only these, and the user is
@@ -732,6 +730,7 @@ export function TransactionEditorScreen({
   onSubmit,
   onSubmitConfirmed,
   onSubmitWithSplits,
+  awaitSplitSubmit = false,
   confirmSplitSubmit,
   confirmSplitBeforeAdd = false,
   onSubmitReady,
@@ -753,7 +752,6 @@ export function TransactionEditorScreen({
   instalmentOptions,
   headerNotice,
   albumNote,
-  lockedReason,
   groupMembers,
   initialTransferFee = null,
 }: TransactionEditorScreenProps) {
@@ -833,10 +831,14 @@ export function TransactionEditorScreen({
   // (honoured even when Quick Entry itself is disabled), falling back to the
   // first live account so the full editor never opens with no account selected.
   const quickDefaultAccountId = pickDefaultAccountId(accounts, quickEntryPrefs.defaultAccountId);
-  const initialSingleAccountId =
-    initialValues?.accountId ??
-    initialAccountId ??
-    (mode === 'create' ? quickDefaultAccountId : (accounts[0]?.id ?? null));
+  // A shared album's bill with no account waits for the user to choose one
+  // (README: Which account): it never takes an account it did not have.
+  const keepsNoAccount = mode === 'edit' && groupBill && initialValues?.accountId === null;
+  const initialSingleAccountId = keepsNoAccount
+    ? null
+    : (initialValues?.accountId ??
+      initialAccountId ??
+      (mode === 'create' ? quickDefaultAccountId : (accounts[0]?.id ?? null)));
   const initialFromSelectionId =
     initialValues?.fromAccountId ?? (mode === 'create' ? null : (accounts[0]?.id ?? null));
   const initialToSelectionId =
@@ -1150,7 +1152,12 @@ export function TransactionEditorScreen({
   // open: the sheet comes back to it once a date is picked.
   const [instalmentDraft, setInstalmentDraft] = useState<InstalmentChoice | null>(null);
   const [splits, setSplits] = useState<SplitDraft[]>(initialSplits ?? defaultSplitRows ?? []);
-  const [splitEvenly, setSplitEvenly] = useState(!hasInitialSplits);
+  // A saved split reopens evenly when its shares are an even split of its
+  // total, so a corrected total stays even (in a shared album anyone fixes
+  // it) instead of the user's own share taking the whole difference.
+  const [splitEvenly, setSplitEvenly] = useState(
+    () => !hasInitialSplits || splitsHelpers.isEvenSplit(initialSplits ?? [], Number(amount)),
+  );
   // Whether the pushed Split Bill route is open. Drives the live session
   // republish so the screen mirrors edits made back here.
   const [splitRouteOpen, setSplitRouteOpen] = useState(false);
@@ -1308,17 +1315,13 @@ export function TransactionEditorScreen({
   );
   const activateField = useCallback(
     (field: ActiveField) => {
-      if (lockedReason && (field === 'amount' || field === 'date' || field === 'note')) {
-        showToast(lockedReason);
-        return;
-      }
       if (!field || !isNativeKeyboardField(field)) {
         blurNativeInputs();
         Keyboard.dismiss();
       }
       setActiveField(field);
     },
-    [blurNativeInputs, isNativeKeyboardField, lockedReason, showToast],
+    [blurNativeInputs, isNativeKeyboardField],
   );
   const clearActiveField = useCallback(() => {
     activateField(null);
@@ -1898,10 +1901,6 @@ export function TransactionEditorScreen({
   const handleOpenSplitBill = useCallback(
     (options?: { skipHaptic?: boolean }) => {
       if (!canOpenSplitBill) return;
-      if (lockedReason) {
-        showToast(lockedReason);
-        return;
-      }
       // Starting a fresh split bill adds a new unsettled bill to the free-plan
       // total. Gate that case only: a transaction that is already an unsettled
       // split bill (or is mid-edit in split mode) is already counted, so managing
@@ -1950,8 +1949,6 @@ export function TransactionEditorScreen({
       checkLimit,
       getUnpaidSplitBillCount,
       groupBill,
-      lockedReason,
-      showToast,
       startsAsUnsettledSplitBill,
       navigation,
       splitEvenly,
@@ -2448,8 +2445,10 @@ export function TransactionEditorScreen({
         preparedSubmitPayload = submitPayload;
       } else {
         const baseErrors: typeof fieldErrors = {};
-        // A bill a friend paid has not left any of the user's accounts yet.
-        if (!accountId && !owesFriendPayer) {
+        // A bill a friend paid has not left any of the user's accounts yet,
+        // and a shared album's bill can wait on no account until the user
+        // picks one (README: Which account).
+        if (!accountId && !owesFriendPayer && !groupBill) {
           baseErrors.account = I18n.t('transactions.editor.error.required');
         }
         if (!categoryId) baseErrors.category = I18n.t('transactions.editor.error.required');
@@ -2714,7 +2713,29 @@ export function TransactionEditorScreen({
         const capturedPayload = submitPayload;
         const capturedSplits = useSplitsPath ? splits : [];
         if (confirmSplitSubmit && !(await confirmSplitSubmit(capturedSplits))) return;
-        deferredSubmit = () => onSubmitWithSplits(capturedPayload, capturedSplits, capturedExtras);
+        if (awaitSplitSubmit && !bulk) {
+          confirmedSubmitRef.current = true;
+          setConfirmedSaving(true);
+          try {
+            const saved = await onSubmitWithSplits(capturedPayload, capturedSplits, capturedExtras);
+            if (saved === false) {
+              // Not saved: the receipt still belongs to this unsaved entry.
+              receiptCommittedRef.current = false;
+              return;
+            }
+            settlePagerNow();
+            requestAnimationFrame(() => {
+              if (editorMountedRef.current) onClose();
+            });
+          } finally {
+            confirmedSubmitRef.current = false;
+            if (editorMountedRef.current) setConfirmedSaving(false);
+          }
+          return;
+        }
+        deferredSubmit = () => {
+          void onSubmitWithSplits(capturedPayload, capturedSplits, capturedExtras);
+        };
       } else if (submitPayload) {
         const capturedPayload = submitPayload;
         deferredSubmit = () => onSubmit(capturedPayload, capturedExtras);
@@ -3181,10 +3202,6 @@ export function TransactionEditorScreen({
   // Tapping the amount display dismisses the note keyboard (bringing the numpad
   // back); in the classic layout it activates the amount tool zone.
   const handleAmountRowPress = useCallback(() => {
-    if (lockedReason) {
-      showToast(lockedReason);
-      return;
-    }
     if (useStickyNumpad) {
       void triggerHaptic('selection');
       noteInputRef.current?.blur();
@@ -3196,7 +3213,7 @@ export function TransactionEditorScreen({
       return;
     }
     activateField('amount');
-  }, [activateField, lockedReason, showToast, useStickyNumpad]);
+  }, [activateField, useStickyNumpad]);
 
   // Toolbar sentiment: neutral -> happy -> sad -> neutral.
   const cycleSentiment = useCallback(() => {
@@ -3470,16 +3487,14 @@ export function TransactionEditorScreen({
               </>
             ) : null}
             <View className="flex-1">
-              {lockedReason ? null : (
-                <NumpadPanel
-                  resetNonce={bulkEntryNonce}
-                  key={splitAmountRevision}
-                  initialExpression={amount}
-                  onBackgroundPress={clearActiveField}
-                  onValueChange={handleAmountValueChange}
-                  onConfirm={handleAmountConfirm}
-                />
-              )}
+              <NumpadPanel
+                resetNonce={bulkEntryNonce}
+                key={splitAmountRevision}
+                initialExpression={amount}
+                onBackgroundPress={clearActiveField}
+                onValueChange={handleAmountValueChange}
+                onConfirm={handleAmountConfirm}
+              />
             </View>
           </View>
         );
@@ -4112,7 +4127,6 @@ export function TransactionEditorScreen({
                           <View className="max-w-[66%] min-w-[40%]">
                             <TextInput
                               ref={noteInputRef}
-                              editable={!lockedReason}
                               value={note}
                               onChangeText={handleNoteChange}
                               placeholder={I18n.t('transactions.editor.optional')}
@@ -4748,7 +4762,8 @@ export function TransactionEditorScreen({
                   }}
                   accessibilityRole="button"
                   accessibilityLabel={I18n.t('transactions.editor.account')}
-                  style={styles.accountChip}
+                  // A long account name is cut short; "Choose account" never is.
+                  style={selectedAccount ? styles.accountChip : undefined}
                   className={cn(
                     'h-9 flex-row items-center gap-1.5 rounded-full border px-3 active:opacity-70',
                     fieldErrors.account
@@ -5097,7 +5112,6 @@ export function TransactionEditorScreen({
                   <FileText size={16} color={themeColors.textMuted} />
                   <TextInput
                     ref={noteInputRef}
-                    editable={!lockedReason}
                     value={note}
                     onChangeText={handleNoteChange}
                     placeholder={I18n.t('transactions.editor.optional')}
@@ -5125,34 +5139,13 @@ export function TransactionEditorScreen({
                         albumNote.onOpenAlbum();
                       }}
                       accessibilityRole="button"
-                      accessibilityLabel={
-                        albumNote.status
-                          ? `${albumNote.albumName}, ${albumNote.status}`
-                          : albumNote.albumName
-                      }
-                      // The badge's own tap says why; a screen reader hears it here.
-                      accessibilityHint={albumNote.status ? lockedReason : undefined}
+                      accessibilityLabel={albumNote.albumName}
                       className="flex-row items-center gap-2.5 px-4 py-3 active:opacity-70"
                     >
                       <Images size={16} color={themeColors.textMuted} />
                       <Text variant="body" numberOfLines={1} className="flex-1">
                         {albumNote.albumName}
                       </Text>
-                      {albumNote.status ? (
-                        // Why it is locked, as a tap on a locked field says.
-                        <Pressable
-                          onPress={() => {
-                            if (lockedReason) showToast(lockedReason);
-                          }}
-                          hitSlop={6}
-                          className="flex-row items-center gap-1 rounded-full border border-border/30 bg-secondary/70 px-2 py-0.5"
-                        >
-                          <Lock size={11} color={themeColors.textMuted} />
-                          <Text variant="caption" tone="muted" numberOfLines={1}>
-                            {albumNote.status}
-                          </Text>
-                        </Pressable>
-                      ) : null}
                       <ChevronRight size={16} color={themeColors.textMuted} />
                     </Pressable>
                   </>
@@ -5302,7 +5295,7 @@ export function TransactionEditorScreen({
                         />
                       )}
                     </ScrollView>
-                  ) : lockedReason ? null : (
+                  ) : (
                     <NumpadPanel
                       compact
                       onScreen={numpadExpanded}
@@ -5341,8 +5334,10 @@ export function TransactionEditorScreen({
                       void handleSubmit(false);
                     }}
                     accessibilityRole="button"
+                    accessibilityState={{ busy: confirmedSaving }}
                     className="h-12 flex-1 flex-row items-center justify-center gap-1.5 rounded-2xl bg-primary active:opacity-90"
                   >
+                    {confirmedSaving ? <ActivityIndicator size="small" color="#fff" /> : null}
                     <Text variant="bodyStrong" className="text-primary-foreground">
                       {saveLabel}
                     </Text>

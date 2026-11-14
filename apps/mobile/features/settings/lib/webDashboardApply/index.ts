@@ -1,4 +1,5 @@
 import { albumApply } from './album';
+import { albumBillApply } from './albumBill';
 import { budgetApply } from './budget';
 import { currencyApply } from './currency';
 import { goalApply } from './goal';
@@ -17,6 +18,7 @@ export const APPLY_MODULES: Record<string, ApplyModule> = {
   'module:budget': budgetApply,
   'module:item': itemApply,
   'module:album': albumApply,
+  'module:albumbill': albumBillApply,
   'module:split': splitApply,
   'module:reimbursement': reimbursementApply,
   'module:wage': wageApply,

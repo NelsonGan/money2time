@@ -251,7 +251,7 @@ function errorKind(error: unknown): CloudSyncErrorKind {
 export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
   // The engine runs whenever the build can sync, as the UI shows (useCloudSyncEnabled).
   const enabled = isCloudSyncAvailable();
-  const { settings, refreshAll, switchLedger, syncAlbumGroups, publishAlbumGroup } = useApp();
+  const { settings, refreshAll, switchLedger, syncAlbumGroups } = useApp();
   const { isPro, isStorePro, isStatusKnown } = usePro();
   const appUserId = settings?.appUserId ?? null;
 
@@ -321,8 +321,6 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
   switchLedgerRef.current = switchLedger;
   const syncAlbumGroupsRef = useRef(syncAlbumGroups);
   syncAlbumGroupsRef.current = syncAlbumGroups;
-  const publishAlbumGroupRef = useRef(publishAlbumGroup);
-  publishAlbumGroupRef.current = publishAlbumGroup;
 
   /**
    * Reloads the app after rows came from the cloud. If the ledger open on this
@@ -452,6 +450,7 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
               userId: session.user.id,
               getSessionToken: sessionToken,
               deviceName: deviceName(),
+              liveDeviceId: LIVE_DEVICE_ID,
               personalInactive: () =>
                 statusRef.current === 'notPro' && sessionRef.current?.linked !== true,
               announce: (shareId) => announceRef.current(shareId),
@@ -1365,15 +1364,12 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       const shared = await sharedLedgerSync.shareAlbum(
         album,
         ownDisplayName() ?? I18n.t('albums.people.unnamed'),
-        () => publishAlbumGroupRef.current(album.id),
       );
       void trackEvent(AnalyticsEvents.ALBUM_SHARED);
       reloadAfterApply();
-      // The entries just marked as the group's go to the user's own copy.
-      void runSync();
       return shared;
     },
-    [reloadAfterApply, runSync],
+    [reloadAfterApply],
   );
 
   const stopSharingLedger = useCallback(

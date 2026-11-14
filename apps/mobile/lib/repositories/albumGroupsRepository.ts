@@ -1,49 +1,22 @@
-// A shared album's group: its members, bills and settlements (migration 090).
-// These rows sync with the group's own cloud database, not the user's: their
-// `ledger_id` is the group's id (features/cloudSync/lib/ledgerRows.ts).
+// A shared album's group: its members, bills, settlements, settings and
+// activity log (migrations 090-093). These rows come from the group's own
+// cloud database, which only the Worker writes (features/albums/services/
+// albumGroupWrites.ts sends it the changes): on the phone they are only read.
+// Their `ledger_id` is the group's id (features/cloudSync/lib/ledgerRows.ts).
 
-import { and, eq, isNull, sql } from 'drizzle-orm';
+import { and, desc, eq, isNull } from 'drizzle-orm';
 
-import { getDb, getSQLite } from '~/lib/db/client';
+import { getDb } from '~/lib/db/client';
 import {
+  albumActivityTable,
   albumExpensesTable,
   albumGroupsTable,
   albumMembersTable,
   albumSettlementsTable,
 } from '~/lib/db/schema';
-import type { AlbumExpense, AlbumMember, AlbumSettlement, AlbumShare } from '~/types';
-import { normalizeMoneyAmount } from '~/utils/formatters';
-import { newId, nowIso } from '~/utils/id';
+import type { AlbumActivity, AlbumExpense, AlbumMember, AlbumSettlement } from '~/types';
 
-import { toAlbumExpense, toAlbumMember, toAlbumSettlement } from './mappers';
-
-interface AlbumExpenseInput {
-  id: string;
-  groupId: string;
-  date: string;
-  note: string | null;
-  amount: number;
-  currency: string;
-  categoryName: string | null;
-  categoryIcon: string | null;
-  paidBy: string;
-  shares: AlbumShare[];
-  createdBy: string | null;
-}
-
-interface AlbumSettlementInput {
-  id?: string;
-  groupId: string;
-  expenseId: string | null;
-  fromMember: string;
-  toMember: string;
-  amount: number;
-  currency: string;
-  date: string;
-  createdBy: string | null;
-  /** When the payment was made, for one that predates the group (an album just shared). */
-  createdAt?: string;
-}
+import { toAlbumActivity, toAlbumExpense, toAlbumMember, toAlbumSettlement } from './mappers';
 
 /**
  * Far more member rows than a group ever has (20 people and the user, and
@@ -52,16 +25,10 @@ interface AlbumSettlementInput {
  */
 const MAX_MEMBER_ROWS = 200;
 
-const present = <T>(value: T | null): value is T => value !== null;
+/** The newest this many entries of an album's log are read; older ones stay in its database. */
+const MAX_ACTIVITY_ROWS = 1000;
 
-function sharesJson(shares: readonly AlbumShare[]): string {
-  return JSON.stringify(
-    shares.map((share) => ({
-      memberId: share.memberId,
-      amount: normalizeMoneyAmount(share.amount),
-    })),
-  );
-}
+const present = <T>(value: T | null): value is T => value !== null;
 
 /** The key of the user's own split row of a group's bill on their phone (`<bill>:self`). */
 const SELF_ROW_KEY = 'self';
@@ -96,64 +63,6 @@ class AlbumGroupsRepository {
     return new Set(this.listAllMembers(groupId).map((member) => member.id));
   }
 
-  createMember(
-    groupId: string,
-    input: { id?: string; name: string; userId?: string | null; sortOrder?: number },
-  ): AlbumMember {
-    const now = nowIso();
-    const row = {
-      id: input.id ?? newId(),
-      ledgerId: groupId,
-      name: input.name,
-      userId: input.userId ?? null,
-      sortOrder: input.sortOrder ?? this.listAllMembers(groupId).length,
-      createdAt: now,
-      updatedAt: now,
-      deletedAt: null,
-    };
-    getDb().insert(albumMembersTable).values(row).run();
-    return {
-      id: row.id,
-      groupId,
-      name: row.name,
-      userId: row.userId,
-      sortOrder: row.sortOrder,
-      createdAt: now,
-      updatedAt: now,
-      deletedAt: null,
-    };
-  }
-
-  // Every change names its group as well as the row: ids are the group's to
-  // choose, and one group's row must never be reached through another's.
-
-  updateMember(
-    groupId: string,
-    id: string,
-    updates: { name?: string; userId?: string | null },
-  ): void {
-    getDb()
-      .update(albumMembersTable)
-      .set({ ...updates, updatedAt: nowIso() })
-      .where(and(eq(albumMembersTable.ledgerId, groupId), eq(albumMembersTable.id, id)))
-      .run();
-  }
-
-  softDeleteMember(groupId: string, id: string): void {
-    const now = nowIso();
-    getDb()
-      .update(albumMembersTable)
-      .set({ deletedAt: now, updatedAt: now })
-      .where(
-        and(
-          eq(albumMembersTable.ledgerId, groupId),
-          eq(albumMembersTable.id, id),
-          isNull(albumMembersTable.deletedAt),
-        ),
-      )
-      .run();
-  }
-
   // -------------------------------------------------------------------------
   // Bills
 
@@ -176,62 +85,6 @@ class AlbumGroupsRepository {
           ? bill
           : { ...bill, shares: bill.shares.filter((share) => members.has(share.memberId)) },
       );
-  }
-
-  /** Writes a bill as it now is; one deleted before comes back. */
-  upsertExpense(input: AlbumExpenseInput): void {
-    const now = nowIso();
-    const values = {
-      ledgerId: input.groupId,
-      date: input.date,
-      note: input.note,
-      amount: normalizeMoneyAmount(input.amount),
-      currency: input.currency,
-      categoryName: input.categoryName,
-      categoryIcon: input.categoryIcon,
-      paidBy: input.paidBy,
-      sharesJson: sharesJson(input.shares),
-      createdBy: input.createdBy,
-      updatedAt: now,
-      deletedAt: null,
-    };
-    getDb()
-      .insert(albumExpensesTable)
-      .values({ id: input.id, ...values, createdAt: now })
-      .onConflictDoUpdate({ target: albumExpensesTable.id, set: values })
-      .run();
-  }
-
-  /**
-   * Deletes a bill for the group, and the payments made on it with it.
-   * `deletedBy` is the account deleting it, the bill's last writer: the
-   * others' phones keep what money moved on it (README: Album members and
-   * shared albums).
-   */
-  softDeleteExpense(groupId: string, id: string, deletedBy: string | null): void {
-    const now = nowIso();
-    getDb()
-      .update(albumExpensesTable)
-      .set({ deletedAt: now, updatedAt: now, createdBy: deletedBy })
-      .where(
-        and(
-          eq(albumExpensesTable.ledgerId, groupId),
-          eq(albumExpensesTable.id, id),
-          isNull(albumExpensesTable.deletedAt),
-        ),
-      )
-      .run();
-    getDb()
-      .update(albumSettlementsTable)
-      .set({ deletedAt: now, updatedAt: now })
-      .where(
-        and(
-          eq(albumSettlementsTable.ledgerId, groupId),
-          eq(albumSettlementsTable.expenseId, id),
-          isNull(albumSettlementsTable.deletedAt),
-        ),
-      )
-      .run();
   }
 
   // -------------------------------------------------------------------------
@@ -262,77 +115,6 @@ class AlbumGroupsRepository {
       );
   }
 
-  createSettlement(input: AlbumSettlementInput): string {
-    const id = input.id ?? newId();
-    const now = nowIso();
-    getDb()
-      .insert(albumSettlementsTable)
-      .values({
-        id,
-        ledgerId: input.groupId,
-        expenseId: input.expenseId,
-        fromMember: input.fromMember,
-        toMember: input.toMember,
-        amount: normalizeMoneyAmount(input.amount),
-        currency: input.currency,
-        date: input.date,
-        createdBy: input.createdBy,
-        createdAt: input.createdAt ?? now,
-        updatedAt: now,
-        deletedAt: null,
-      })
-      .onConflictDoNothing()
-      .run();
-    return id;
-  }
-
-  /**
-   * Records several payments as one act (a debt paid along a chain of bills):
-   * all of them or none, under ids that say they belong together
-   * (`<batch>.<n>`), so undoing one undoes them all. Returns their ids, in
-   * the order given.
-   */
-  createSettlements(
-    groupId: string,
-    payments: readonly Pick<
-      AlbumSettlementInput,
-      'expenseId' | 'fromMember' | 'toMember' | 'amount' | 'currency'
-    >[],
-    stamp: Pick<AlbumSettlementInput, 'date' | 'createdBy'>,
-  ): string[] {
-    const batch = newId();
-    const ids = payments.map((_, index) => `${batch}.${index}`);
-    getSQLite().withTransactionSync(() => {
-      payments.forEach((payment, index) => {
-        this.createSettlement({ ...payment, ...stamp, groupId, id: ids[index] });
-      });
-    });
-    return ids;
-  }
-
-  /**
-   * Undoes a payment of the group, and with it every other payment recorded
-   * in the same act. The batch is matched as an exact prefix, in this group
-   * alone: an id is the group's to choose, so it is never used as a pattern.
-   */
-  softDeleteSettlement(groupId: string, id: string): void {
-    const now = nowIso();
-    const prefix = id.includes('.') ? id.slice(0, id.indexOf('.') + 1) : null;
-    getDb()
-      .update(albumSettlementsTable)
-      .set({ deletedAt: now, updatedAt: now })
-      .where(
-        and(
-          eq(albumSettlementsTable.ledgerId, groupId),
-          prefix
-            ? sql`substr(${albumSettlementsTable.id}, 1, ${prefix.length}) = ${prefix}`
-            : eq(albumSettlementsTable.id, id),
-          isNull(albumSettlementsTable.deletedAt),
-        ),
-      )
-      .run();
-  }
-
   // -------------------------------------------------------------------------
   // Settings
 
@@ -350,25 +132,6 @@ class AlbumGroupsRepository {
       )
       .get();
     return row?.simplifyDebts ?? false;
-  }
-
-  setSimplifyDebts(groupId: string, simplifyDebts: boolean): void {
-    const now = nowIso();
-    getDb()
-      .insert(albumGroupsTable)
-      .values({
-        id: groupId,
-        ledgerId: groupId,
-        simplifyDebts,
-        createdAt: now,
-        updatedAt: now,
-        deletedAt: null,
-      })
-      .onConflictDoUpdate({
-        target: albumGroupsTable.id,
-        set: { simplifyDebts, updatedAt: now, deletedAt: null },
-      })
-      .run();
   }
 
   /**
@@ -394,31 +157,27 @@ class AlbumGroupsRepository {
     return GROUP_COVER_PATH.test(row.cover) ? row.cover : undefined;
   }
 
-  /** Sets the group's cover for everyone (`null`: removed). */
-  setGroupCover(groupId: string, cover: string | null): void {
-    if (cover !== null && !GROUP_COVER_PATH.test(cover)) return;
-    const coverPhotoUri = cover ?? '';
-    const now = nowIso();
-    getDb()
-      .insert(albumGroupsTable)
-      .values({
-        id: groupId,
-        ledgerId: groupId,
-        simplifyDebts: false,
-        coverPhotoUri,
-        createdAt: now,
-        updatedAt: now,
-        deletedAt: null,
-      })
-      .onConflictDoUpdate({
-        target: albumGroupsTable.id,
-        set: { coverPhotoUri, updatedAt: now, deletedAt: null },
-      })
-      .run();
+  // -------------------------------------------------------------------------
+  // Activity
+
+  /**
+   * The group's activity log, newest first: one entry per change the Worker
+   * wrote, the entries of one change in the order it wrote them.
+   */
+  listActivity(groupId: string): AlbumActivity[] {
+    return getDb()
+      .select()
+      .from(albumActivityTable)
+      .where(eq(albumActivityTable.ledgerId, groupId))
+      .orderBy(desc(albumActivityTable.createdAt), desc(albumActivityTable.sortOrder))
+      .limit(MAX_ACTIVITY_ROWS)
+      .all()
+      .map(toAlbumActivity)
+      .filter(present);
   }
 }
 
 /** The paths `saveAlbumCover` makes: `album-covers/<id>.<ext>`. */
-const GROUP_COVER_PATH = /^album-covers\/[A-Za-z0-9_-]{1,64}\.[A-Za-z0-9]{1,5}$/;
+export const GROUP_COVER_PATH = /^album-covers\/[A-Za-z0-9_-]{1,64}\.[A-Za-z0-9]{1,5}$/;
 
 export const albumGroupsRepository = new AlbumGroupsRepository();

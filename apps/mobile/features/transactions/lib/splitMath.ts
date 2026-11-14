@@ -168,3 +168,17 @@ export function spreadOverShares<T extends SplitRowLike & { shareKey?: string }>
     return extra.includes(index) ? { ...row, amount: (0).toFixed(2) } : row;
   });
 }
+
+/**
+ * Whether `rows` are what an even split of `total` would make: two or more
+ * people, each owing an equal portion (`spreadOverShares` over them all). A
+ * saved bill split this way reopens with Split evenly on.
+ */
+export function isEvenSplit<T extends SplitRowLike & { shareKey?: string }>(
+  rows: T[],
+  total: number,
+): boolean {
+  if (rows.length < 2 || !(total > 0)) return false;
+  const even = spreadOverShares(rows, total, () => true);
+  return even.every((row, index) => Number(row.amount) === Number(rows[index]?.amount));
+}

@@ -20,12 +20,13 @@ function enqueue(table: string, idExpr: string): string {
 }
 
 /**
- * Bumped whenever `captureTriggersSql` changes, so phones replace the
- * triggers they made with an earlier version (`CREATE TRIGGER IF NOT EXISTS`
- * would keep them). 2: rows that stay on the phone are not queued, nor
- * settings updates that only touched device-local settings.
+ * Bumped whenever the triggers change, so phones replace the triggers they
+ * made with an earlier version (`CREATE TRIGGER IF NOT EXISTS` would keep
+ * them). 2: rows that stay on the phone are not queued, nor settings updates
+ * that only touched device-local settings. 3: a shared album's group tables
+ * have none (the Worker writes them).
  */
-export const CAPTURE_VERSION = '2';
+export const CAPTURE_VERSION = '3';
 
 /**
  * What the triggers depend on: their version and the settings columns they

@@ -39,6 +39,7 @@ import {
   settledAmount,
 } from "./kit";
 import { ClaimBack } from "./claim-back";
+import { editableGroupBill, GroupBillForm } from "./group-bill-editor";
 import { SplitBillSheet } from "./split-bill";
 import {
   balanceSelf,
@@ -107,9 +108,16 @@ export function TxEditor({ tx, onClose }: { tx: Tx | null; onClose: () => void }
   const { fullModel: model } = useDashboard();
   return (
     <Reloadable row={tx} fresh={(row) => (row ? model.txById.get(row.id) : null)} at={(row) => row?.updatedAt}>
-      {(row) => <TxForm tx={row} onClose={onClose} />}
+      {(row) => <TxOrGroupBill tx={row} onClose={onClose} />}
     </Reloadable>
   );
+}
+
+/** A shared album's bill this phone lets the page change opens as one; anything else in the app's editor. */
+function TxOrGroupBill({ tx, onClose }: { tx: Tx | null; onClose: () => void }) {
+  const { fullModel: model, link } = useDashboard();
+  const shared = editableGroupBill(model, link.sharedAlbums, tx);
+  return tx && shared ? <GroupBillForm tx={tx} group={shared.group} bill={shared.bill} onClose={onClose} /> : <TxForm tx={tx} onClose={onClose} />;
 }
 
 function TxForm({ tx, onClose }: { tx: Tx | null; onClose: () => void }) {
@@ -176,7 +184,9 @@ function TxForm({ tx, onClose }: { tx: Tx | null; onClose: () => void }) {
   // there, and the phone refuses a split edit of one. It can still be deleted here.
   const friendPayer = useMemo(() => (tx ? payerOf(model, tx.id) : null), [tx, model]);
   // A shared album's bill is everyone's in the album: the phone keeps this
-  // entry in step with it, and refuses a change or a delete from here.
+  // entry in step with it. A phone that takes `module:albumbill` opens it in
+  // GroupBillForm instead; this one (an older app, or the user no longer in
+  // the album) refuses a change or a delete from here.
   const groupBill = !!tx?.albumGroupId;
   const appOnly = !!friendPayer || groupBill;
   const [splitRows, setSplitRows] = useState<SplitDraftRow[]>(savedSplits);

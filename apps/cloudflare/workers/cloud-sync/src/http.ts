@@ -11,12 +11,15 @@ export function json(body: unknown, status = 200): Response {
 }
 
 /** The parsed JSON body, or null when it is missing, too large or not JSON. */
-export async function readJson<T>(request: Request): Promise<Partial<T> | null> {
+export async function readJson<T>(
+  request: Request,
+  maxBytes = MAX_JSON_BYTES,
+): Promise<Partial<T> | null> {
   const declared = Number(request.headers.get('content-length') ?? '0');
-  if (declared > MAX_JSON_BYTES) return null;
+  if (declared > maxBytes) return null;
   try {
     const text = await request.text();
-    if (text.length > MAX_JSON_BYTES) return null;
+    if (text.length > maxBytes) return null;
     const value: unknown = JSON.parse(text);
     return value && typeof value === 'object' ? (value as Partial<T>) : null;
   } catch {

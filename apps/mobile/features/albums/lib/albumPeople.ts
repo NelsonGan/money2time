@@ -79,18 +79,6 @@ export function splitWithPeople(
   );
 }
 
-/** `base`, or `base 2`, `base 3`… when someone in `members` already has the name. */
-export function uniquePersonName(base: string, members: readonly AlbumMember[]): string {
-  const taken = new Set(members.map((member) => personNameKey(member.name)));
-  let unique = base;
-  for (let n = 2; taken.has(personNameKey(unique)); n += 1) {
-    // Within the longest name a group keeps, or it reads back as the taken one.
-    const suffix = ` ${n}`;
-    unique = `${base.slice(0, MAX_PERSON_NAME - suffix.length).trimEnd()}${suffix}`;
-  }
-  return unique;
-}
-
 /**
  * Who a friend's row of a split bill is in a group: the member the row
  * already names, else the one of that name. Null when it is someone new.

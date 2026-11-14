@@ -9,6 +9,7 @@ import { MAX_EDIT_OPS, MAX_EDIT_ROWS, type EditOp, type TxFields } from "@/lib/c
 
 import { accountOptions, Caret, categoryOptions, OptionMenu, Popover, useDismiss } from "./dropdown";
 import { AlbumBulkMenu } from "./edit/album-editor";
+import { editableGroupBill } from "./edit/group-bill-editor";
 import { DAY_MAX, DAY_MIN, EditBlocked, EditError, isDayKey, phoneToday, Sheet, useEditRun } from "./edit/kit";
 import { useDashboard, type EditAvailability } from "./state";
 import { ClayImg } from "./ui";
@@ -200,7 +201,7 @@ const FIELD = "h-10 w-full rounded-xl border border-border bg-card px-3 text-[14
 export function BulkToolbar({ selected, onClear }: { selected: Tx[]; onClear: () => void }) {
   const t = useTranslations("dashboard.edit");
   const ta = useTranslations("dashboard.edit.album");
-  const { fullModel: model } = useDashboard();
+  const { fullModel: model, link } = useDashboard();
   const { run, busy, error, ready, clear } = useEditRun();
   const ref = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState<BulkMenu | null>(null);
@@ -214,10 +215,19 @@ export function BulkToolbar({ selected, onClear }: { selected: Tx[]; onClear: ()
   // As the app's bulk sheet: an expense category for the expenses, an income one for the income.
   const flows = (["expense", "income"] as const).filter((type) => selected.some((tx) => tx.type === type));
   const anyTransfer = selected.some((tx) => tx.type !== "expense" && tx.type !== "income");
-  const anyLocked = selected.some((tx) => tx.amountLocked);
-  // A shared album's bill keeps its day and title from the group and is
-  // deleted in the app: the phone refuses the whole batch when one is in it.
-  const anyGroupBill = selected.some((tx) => tx.albumGroupId);
+  // A shared album's bill: its day and title are the group's, and deleting it
+  // deletes it for everyone. A phone that takes `module:albumbill` changes
+  // them through the group (as the album's bulk Edit); an older one refuses
+  // the whole batch when one is in it, so then they are changed in the app.
+  const groupRows = selected.filter((tx) => tx.albumGroupId);
+  const plainRows = selected.filter((tx) => !tx.albumGroupId);
+  const anyGroupBill = groupRows.length > 0;
+  const groupEditable = anyGroupBill && groupRows.every((tx) => editableGroupBill(model, link.sharedAlbums, tx));
+  const groupBlocked = anyGroupBill && !groupEditable;
+  // A shared album's bill goes on the user's own account only when they paid
+  // it (or paid it back); its split is kept in step through the group.
+  const anyLocked = selected.some((tx) => tx.amountLocked && !(groupEditable && tx.albumGroupId));
+  const groupAccountless = groupEditable && groupRows.some((tx) => tx.paidBy !== undefined && !tx.accountId);
   const copies = selected.filter(canDuplicate);
   // A bulk move keeps each amount as it is, so the phone takes it only into
   // an account of the entries' own currency: one currency, or none to offer.
@@ -257,6 +267,13 @@ export function BulkToolbar({ selected, onClear }: { selected: Tx[]; onClear: ()
     }
   };
   const update = (list: Tx[], set: TxFields) => send([{ entity: "transaction", op: "update", rows: rows(list), set }], "transaction_bulk_update");
+  // The day, title or account of a selection with shared albums' bills: theirs through the group, the rest as usual.
+  const updateWithGroup = (set: { date?: string; note?: string; accountId?: string }) => {
+    if (!groupEditable) return update(selected, set);
+    const ops: EditOp[] = [{ entity: "module:albumbill", op: "bulk", rows: rows(groupRows), set }];
+    if (plainRows.length) ops.unshift({ entity: "transaction", op: "update", rows: rows(plainRows), set });
+    return send(ops, "albumbill_bulk");
+  };
 
   const notice = (text: string) => <p className="p-3.5 text-[13px] leading-snug text-foreground-soft">{text}</p>;
   const errorLine = error ? (
@@ -301,6 +318,8 @@ export function BulkToolbar({ selected, onClear }: { selected: Tx[]; onClear: ()
     notice(t("accountTransfers"))
   ) : anyLocked ? (
     notice(t("accountLocked"))
+  ) : groupAccountless ? (
+    notice(t("sharedBill.accountOthers"))
   ) : moveCurrency === null ? (
     notice(t("accountCurrencies"))
   ) : (
@@ -309,29 +328,29 @@ export function BulkToolbar({ selected, onClear }: { selected: Tx[]; onClear: ()
         label={t("accountLabel")}
         searchable
         options={accountChoices.map((option) => ({ ...option, disabled: !can }))}
-        onSelect={(id) => void update(selected, { accountId: id })}
+        onSelect={(id) => void updateWithGroup({ accountId: id })}
       />
       {errorLine}
     </div>
   );
 
-  const dateMenu = anyGroupBill ? (
+  const dateMenu = groupBlocked ? (
     notice(t("groupBills"))
   ) : (
     <div>
-      <MenuForm applyLabel={t("apply")} busy={busy} disabled={!can || !isDayKey(day)} onApply={() => void update(selected, { date: day })}>
+      <MenuForm applyLabel={t("apply")} busy={busy} disabled={!can || !isDayKey(day)} onApply={() => void updateWithGroup({ date: day })}>
         <input type="date" data-autofocus min={DAY_MIN} max={DAY_MAX} value={day} onChange={(event) => setDay(event.target.value)} aria-label={t("date")} className={FIELD} autoFocus />
       </MenuForm>
       {errorLine}
     </div>
   );
 
-  const noteMenu = anyGroupBill ? (
+  const noteMenu = groupBlocked ? (
     notice(t("groupBills"))
   ) : (
     <div>
       {/* An emptied note clears it, as the app's bulk sheet does. */}
-      <MenuForm applyLabel={t("apply")} busy={busy} disabled={!can} onApply={() => void update(selected, { note: note.trim() })}>
+      <MenuForm applyLabel={t("apply")} busy={busy} disabled={!can} onApply={() => void updateWithGroup({ note: note.trim() })}>
         <input value={note} maxLength={500} onChange={(event) => setNote(event.target.value)} aria-label={t("note")} placeholder={t("notePlaceholder")} className={FIELD} autoFocus />
       </MenuForm>
       {errorLine}
@@ -404,18 +423,28 @@ export function BulkToolbar({ selected, onClear }: { selected: Tx[]; onClear: ()
       {open === "delete" ? (
         <Sheet title={t("delete")} onClose={() => setOpen(null)} busy={busy}>
           <div className="space-y-4">
-            <p className="text-[14px] leading-relaxed text-foreground">{anyGroupBill ? t("groupBills") : t("deleteConfirm", { count })}</p>
+            <p className="text-[14px] leading-relaxed text-foreground">{groupBlocked ? t("groupBills") : anyGroupBill ? t("sharedBill.deleteSome", { count }) : t("deleteConfirm", { count })}</p>
             <EditError message={error} />
             <EditBlocked />
             <div className="flex justify-end gap-2">
               <button type="button" onClick={() => setOpen(null)} disabled={busy} className="h-10 rounded-full px-4 text-[13.5px] font-bold text-foreground-soft hover:bg-background-subtle disabled:opacity-40">
                 {t("cancel")}
               </button>
-              {anyGroupBill ? null : (
+              {groupBlocked ? null : (
                 <button
                   type="button"
                   data-autofocus
-                  onClick={() => void send([{ entity: "transaction", op: "delete", rows: rows(selected) }], "transaction_bulk_delete")}
+                  onClick={() =>
+                    void send(
+                      anyGroupBill
+                        ? [
+                            ...(plainRows.length ? [{ entity: "transaction" as const, op: "delete" as const, rows: rows(plainRows) }] : []),
+                            { entity: "module:albumbill", op: "delete", rows: rows(groupRows) },
+                          ]
+                        : [{ entity: "transaction", op: "delete", rows: rows(selected) }],
+                      anyGroupBill ? "albumbill_bulk_delete" : "transaction_bulk_delete",
+                    )
+                  }
                   disabled={!can}
                   className="h-10 rounded-full bg-error px-5 text-[13.5px] font-extrabold text-card disabled:opacity-50"
                 >

@@ -4,7 +4,7 @@ import { type GroupSpending, groupTotals } from '../lib/albumGroup';
 import { type GroupDebt, openShares, pairwiseDebts, simplifyDebts } from '../lib/groupDebts';
 import {
   groupSimplifiesDebts,
-  listGroupExpenses,
+  listGroupBills,
   listGroupSettlements,
   subscribeAlbumGroups,
 } from '../services/albumGroupStore';
@@ -20,7 +20,8 @@ interface GroupDebts {
 
 /** A shared album's debts and spending, kept current as its group changes; null when not shared. */
 export function useGroupDebts(groupId: string | null, selfId: string | null): GroupDebts | null {
-  const expenses = useSyncExternalStore(subscribeAlbumGroups, () => listGroupExpenses(groupId));
+  // Deleted bills too: payments made on one stand, owed back (`openShares`).
+  const expenses = useSyncExternalStore(subscribeAlbumGroups, () => listGroupBills(groupId));
   const settlements = useSyncExternalStore(subscribeAlbumGroups, () =>
     listGroupSettlements(groupId),
   );

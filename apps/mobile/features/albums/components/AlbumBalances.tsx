@@ -1,6 +1,6 @@
 import { ArrowRight, Check, ChevronRight } from 'lucide-react-native';
 import React, { useMemo, useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { Alert, Pressable, View } from 'react-native';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { LoadingDots } from '~/components/feedback/LoadingDots';
@@ -25,7 +25,6 @@ import { formatCurrency } from '~/utils/formatters';
 import type { AlbumGroup } from '../hooks/useAlbumGroup';
 import { useGroupDebts } from '../hooks/useGroupDebts';
 import type { GroupDebt } from '../lib/groupDebts';
-import { canRecordPayment } from '../lib/groupRules';
 
 interface AlbumBalancesProps {
   /** The roll-up of the album's own bills (`useSettleUpSummary(albumId)`). */
@@ -86,7 +85,6 @@ export function AlbumBalances({ summary, group, onOpenPerson }: AlbumBalancesPro
   // currency it is owed in.
   const formatIn = (amount: number, currency: string) =>
     formatCurrency(amount, currencySymbolForCode(currency));
-  const open = summary.billCount > 0;
 
   // Debts, spending and the user's net never add across currencies: with
   // more than one, each currency is its own section under a chip, so a dollar
@@ -99,8 +97,22 @@ export function AlbumBalances({ summary, group, onOpenPerson }: AlbumBalancesPro
     ]),
   ].sort(currencyOrder(summary.reportingCurrency));
   const byCurrency = currencies.length > 1;
-  // The user's net in each currency, already in the sections' order.
-  const nets = summary.netByCurrency;
+  // The user's net in each currency, already in the sections' order. In a
+  // shared album it is the group's: what the user owes or is owed there,
+  // payments past a share and on deleted bills included (`openShares`).
+  const nets = shared
+    ? currencies.flatMap((currency) => {
+        const amount = shared.debts
+          .filter((debt) => debt.currency === currency)
+          .reduce(
+            (sum, debt) =>
+              sum + (debt.to === selfId ? debt.amount : debt.from === selfId ? -debt.amount : 0),
+            0,
+          );
+        return Math.abs(amount) >= 0.005 ? [{ currency, amount }] : [];
+      })
+    : summary.netByCurrency;
+  const open = summary.billCount > 0 || nets.length > 0;
   // A line of one currency of several opens the person's page on that
   // currency's bills alone, so its total is the line's.
   const openPerson = (personKey: string, currency: string) =>
@@ -108,6 +120,30 @@ export function AlbumBalances({ summary, group, onOpenPerson }: AlbumBalancesPro
 
   const nameOf = (memberId: string) =>
     group.members.find((member) => member.id === memberId)?.name ?? null;
+
+  // Two other people's debt: recorded as it stands, through no account of
+  // the user's, after a yes.
+  const confirmOthersPaid = (debt: GroupDebt, fromName: string | null, toName: string | null) => {
+    void triggerHaptic('selection');
+    const someone = I18n.t('transactions.settleUp.someone');
+    Alert.alert(
+      I18n.t('albums.balances.record_others_title'),
+      I18n.t('albums.balances.record_others_body', {
+        from: fromName ?? someone,
+        to: toName ?? someone,
+        amount: formatIn(debt.amount, debt.currency),
+      }),
+      [
+        { text: I18n.t('common.cancel'), style: 'cancel' },
+        {
+          text: I18n.t('albums.balances.record_others_confirm'),
+          onPress: () => {
+            if (groupId) void settleGroupDebt(groupId, debt, null);
+          },
+        },
+      ],
+    );
+  };
 
   const mineOf = (debt: GroupDebt) =>
     debt.to === selfId ? 'owed' : debt.from === selfId ? 'owe' : null;
@@ -130,11 +166,6 @@ export function AlbumBalances({ summary, group, onOpenPerson }: AlbumBalancesPro
           // nameless) is settled as the debt stands instead of opening a page
           // that would find nobody.
           const hasPage = pages.has(`${personKey}:${debt.currency}`);
-          // Whoever pays records it (README: Who can change what): a debt to
-          // the user from someone who joined is theirs to settle.
-          const canSettle = selfId
-            ? canRecordPayment(group.members, selfId, debt.from, debt.to)
-            : false;
           return {
             key: `${debt.currency}:${debt.from}:${debt.to}`,
             mine,
@@ -143,15 +174,17 @@ export function AlbumBalances({ summary, group, onOpenPerson }: AlbumBalancesPro
             amount: debt.amount,
             amountText: formatIn(debt.amount, debt.currency),
             currency: debt.currency,
-            // A simplified debt is settled as it stands; a pair's own on the
-            // person's page, beside its bills.
-            onPress: !mine
+            // Anyone in the album records a payment (README: Anyone in it can
+            // change it). The user's own: a simplified debt is settled as it
+            // stands, a pair's own on the person's page, beside its bills.
+            // Between two others: recorded as it stands, through no account.
+            onPress: !group.self
               ? undefined
-              : (shared.simplified || !hasPage) && canSettle
-                ? () => setSettling(debt)
-                : hasPage
-                  ? () => openPerson(personKey, debt.currency)
-                  : undefined,
+              : !mine
+                ? () => confirmOthersPaid(debt, fromName, toName)
+                : shared.simplified || !hasPage
+                  ? () => setSettling(debt)
+                  : () => openPerson(personKey, debt.currency),
           };
         })
       : // The user's own balance with each person, a line per currency.
@@ -480,7 +513,11 @@ export function AlbumBalances({ summary, group, onOpenPerson }: AlbumBalancesPro
         onClose={() => setSettling(null)}
         onConfirm={(accountId, amount) => {
           if (groupId && settling) {
-            settleGroupDebt(groupId, { ...settling, amount: amount ?? settling.amount }, accountId);
+            void settleGroupDebt(
+              groupId,
+              { ...settling, amount: amount ?? settling.amount },
+              accountId,
+            );
           }
           setSettling(null);
         }}

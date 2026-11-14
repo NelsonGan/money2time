@@ -8,6 +8,7 @@
 
 import type { EditModule } from '../webDashboardEdits';
 import { albumModule } from './album';
+import { albumBillModule } from './albumBill';
 import { budgetModule } from './budget';
 import { currencyModule } from './currency';
 import { goalModule } from './goal';
@@ -24,6 +25,7 @@ export const EDIT_MODULES: EditModule[] = [
   budgetModule,
   itemModule,
   albumModule,
+  albumBillModule,
   splitModule,
   reimbursementModule,
   wageModule,

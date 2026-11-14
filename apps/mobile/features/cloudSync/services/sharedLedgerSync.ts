@@ -6,12 +6,11 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {
+  albumCoverPath,
   albumLedgerId,
-  beginAlbumGroup,
   ensureLocalAlbum,
   isAlbumDeleted,
   mainLedgerTakesSharedAlbums,
-  markSelfLeft,
   releaseAlbumGroup,
 } from '~/features/albums/services/albumGroupStore';
 import { getSQLite } from '~/lib/db/client';
@@ -33,6 +32,7 @@ import {
 } from './ledgerChannels';
 import {
   acceptInvite,
+  type AlbumGroupWrite,
   getLedgerCredentials,
   leaveLedger,
   listSharedLedgers as fetchSharedLedgers,
@@ -40,6 +40,7 @@ import {
   type RemoteSharedLedger,
   shareLedger,
   stopSharing,
+  writeAlbumGroup,
 } from './sharedLedgersApi';
 import {
   addPendingLedgerAction,
@@ -53,10 +54,12 @@ import {
   removePendingLedgerAction,
   removeSharedLedger,
   saveSharedLedger,
+  sharedAlbumFor,
   type SharedLedger,
   sharedLedgerFor,
 } from './sharedLedgerStore';
 import {
+  applyServerRows,
   deleteReplicaFiles,
   dropPersonalOutbox,
   hasUnpushedChanges,
@@ -82,6 +85,8 @@ export interface SharedSyncSession {
   userId: string;
   getSessionToken: () => Promise<string>;
   deviceName: string;
+  /** This phone's live connection, so a change it sends does not nudge it back. */
+  liveDeviceId?: string;
   /**
    * Whether the user's own data definitely has no cloud copy to go to (signed
    * in without Pro and never linked). Never true while linking.
@@ -352,7 +357,7 @@ class SharedLedgerSync {
       if (ledger.kind === 'album') {
         // Owner and member alike keep the album and their own entries; the
         // group's rows go.
-        releaseAlbumGroup(ledger.ledgerId, ledger.userId ?? null);
+        releaseAlbumGroup(ledger.ledgerId);
       } else if (ledger.role !== 'owner') {
         // The open ledger waits for the user to be back on the main screens
         // (LedgerProGuard), so no editor loses its ledger under it.
@@ -611,16 +616,11 @@ class SharedLedgerSync {
   }
 
   /**
-   * Shares one of the user's albums: its group gets a database of its own,
-   * starting with the user (`selfName`) and the people the album was split
-   * with. `publish` then writes the album's bills into the group (the caller
-   * knows the entries); the first sync uploads it all.
+   * Shares one of the user's albums, as it is made: its group gets a
+   * database of its own, starting with the user (`selfName`) and the album's
+   * cover. Everyone else joins with its link.
    */
-  async shareAlbum(
-    album: { id: string; name: string },
-    selfName: string,
-    publish: () => void,
-  ): Promise<SharedLedger> {
+  async shareAlbum(album: { id: string; name: string }, selfName: string): Promise<SharedLedger> {
     const session = this.requireSession();
     // Only an album of the main ledger, while that ledger is not shared.
     if (albumLedgerId(album.id) !== DEFAULT_LEDGER_ID || !mainLedgerTakesSharedAlbums()) {
@@ -632,15 +632,51 @@ class SharedLedgerSync {
       emoji: null,
       kind: 'album',
     });
-    const shared = fromRemote(remote, session.userId);
-    // Between syncs: the group's rows are written once the channel routes them.
-    await runExclusive(() => {
-      saveSharedLedger(shared);
-      beginAlbumGroup(album.id, { userId: session.userId, name: selfName });
-      publish();
-    });
+    saveSharedLedger(fromRemote(remote, session.userId));
+    await this.writeAlbumGroup(album.id, { action: 'join', name: selfName });
+    // Its cover is the group's from the start, so everyone who joins gets it.
+    const cover = albumCoverPath(album.id);
+    if (cover) {
+      await this.writeAlbumGroup(
+        album.id,
+        {
+          action: 'write',
+          rows: [{ table: 'album_groups', row: { id: album.id, cover_photo_uri: cover } }],
+        },
+        [cover],
+      );
+    }
     await this.syncAll().catch(() => undefined);
-    return shared;
+    return sharedLedgerFor(album.id) ?? fromRemote(remote, session.userId);
+  }
+
+  /**
+   * A change to a shared album's group, which only the Worker writes
+   * (README: Album members and shared albums): sent, then the rows it wrote
+   * are applied here at once. `media`: images the rows name (a new cover),
+   * uploaded on the album's next sync, which starts now. Throws when the
+   * Worker cannot be reached or refuses it; nothing changes here then.
+   */
+  async writeAlbumGroup(
+    groupId: string,
+    change: AlbumGroupWrite,
+    media: string[] = [],
+  ): Promise<void> {
+    const share = sharedAlbumFor(groupId);
+    if (!share) throw new CloudSyncApiError('not_found', 404);
+    const session = this.requireSession();
+    const rows = await writeAlbumGroup(
+      await session.getSessionToken(),
+      share.shareId,
+      change,
+      session.liveDeviceId ?? '',
+    );
+    await applyServerRows(share.shareId, rows, media);
+    if (media.length) {
+      void this.engineFor(share)
+        .then((engine) => engine.syncNow())
+        .catch(() => undefined);
+    }
   }
 
   /**
@@ -732,17 +768,6 @@ class SharedLedgerSync {
   async leave(ledgerId: string, opts: { force?: boolean } = {}): Promise<void> {
     const ledger = sharedLedgerFor(ledgerId);
     if (!ledger || ledger.role !== 'member') return;
-    // A member leaving a shared album says so in its group first (their row
-    // and bills stay; README: Album members and shared albums), pushed now
-    // even when leaving by force.
-    if (ledger.kind === 'album') {
-      markSelfLeft(ledger.ledgerId, ledger.userId ?? null);
-      if (ledger.active && this.session) {
-        await this.engineFor(ledger)
-          .then((engine) => engine.syncNow())
-          .catch(() => undefined);
-      }
-    }
     if (!opts.force && this.hasUnsent(ledger)) {
       if (ledger.active && this.session) {
         await this.engineFor(ledger)
@@ -876,7 +901,7 @@ class SharedLedgerSync {
     for (const ledger of listSharedLedgers()) {
       removeSharedLedger(ledger.ledgerId);
       forgetChannel(ledger.shareId);
-      if (ledger.kind === 'album') releaseAlbumGroup(ledger.ledgerId, ledger.userId ?? null);
+      if (ledger.kind === 'album') releaseAlbumGroup(ledger.ledgerId);
       else if (ledger.role === 'member') deleteLedgerLocally(ledger.ledgerId);
       if (userId) deleteReplicaFiles(userId, ledger.shareId);
     }

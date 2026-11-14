@@ -27,6 +27,13 @@ import * as Device from 'expo-device';
 import { Directory, File, Paths } from 'expo-file-system/next';
 import { Gzip, strToU8 } from 'fflate';
 
+import { selfMember } from '~/features/albums/lib/albumPeople';
+import {
+  listGroupActivity,
+  listGroupBills,
+  listGroupMembers,
+} from '~/features/albums/services/albumGroupStore';
+import { listAlbumShares } from '~/features/cloudSync/services/sharedLedgerStore';
 import { transactionsRepository } from '~/lib/repositories/transactionsRepository';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { buildBackupData, yieldToEventLoop } from '~/services/dataManagementService';
@@ -43,6 +50,7 @@ import {
   WebDashboardError,
   type WebDashboardStatus,
 } from './webDashboard.shared';
+import { type WebAlbumGroup, withWebDashboardAlbumGroups } from './webDashboardAlbumGroups';
 import { toBase64Url } from './webDashboardCrypto';
 import {
   type EditRefusal,
@@ -398,6 +406,20 @@ async function gzipJson(json: string): Promise<Uint8Array> {
   return gzipped;
 }
 
+/** Each shared album's group as this phone holds it (the albums screens' store). */
+function readAlbumGroups(): WebAlbumGroup[] {
+  return listAlbumShares().map((share) => {
+    const members = listGroupMembers(share.ledgerId);
+    return {
+      albumId: share.ledgerId,
+      selfId: selfMember(members, share.userId)?.id ?? null,
+      members,
+      bills: listGroupBills(share.ledgerId),
+      activity: listGroupActivity(share.ledgerId),
+    };
+  });
+}
+
 /** A transfer ready to send, and the copy it carries, which the next patch is made against. */
 type Built = { prepared: PreparedTransfer; snapshot: Snapshot };
 
@@ -418,7 +440,7 @@ async function buildTransfer(
   // built is not in it, so the copy must not claim that change's version.
   const version = dataVersion;
   const { randomBytes } = await requireNative();
-  const data = webDashboardBudgetsOnly(
+  const backup = webDashboardBudgetsOnly(
     await buildBackupData({
       includeAsset: includeDashboardAsset,
       assetCache,
@@ -426,6 +448,10 @@ async function buildTransfer(
     }),
     { currencies: features.includes('budget-currencies') },
   );
+  // Shared albums' members and activity, for a page that can show them.
+  const data = features.includes('shared-albums')
+    ? withWebDashboardAlbumGroups(backup, readAlbumGroups())
+    : backup;
   await yieldToEventLoop();
   // A copy from before an app update that changed the backup's format is
   // not patched. Either way every row is serialized once, and that index is

@@ -11,6 +11,8 @@ import {
 } from '~/context/AppContext';
 import { albumBillRows, useAlbumBillTarget } from '~/features/albums/hooks/useAlbumBillTarget';
 import { useGroupBillOrigin, useGroupOthers } from '~/features/albums/hooks/useGroupBillOrigin';
+import { billHasPayments } from '~/features/albums/lib/groupRules';
+import { listGroupSettlements } from '~/features/albums/services/albumGroupStore';
 import type { InstalmentChoice } from '~/features/instalments/components/InstalmentSheet';
 import { useCanStartInstalmentPlan } from '~/features/instalments/hooks/useCanStartInstalmentPlan';
 import {
@@ -93,7 +95,6 @@ function TransactionEditor({
     saveAlbumBill,
     detachAlbumBill,
     saveAlbumBillOwnFields,
-    albumBillBlock,
   } = useApp();
   const { transactions } = useTransactions();
   // A shared album's bill is saved through its group (README: Album members
@@ -166,28 +167,23 @@ function TransactionEditor({
   const instalmentPlan = transaction.instalmentRuleId
     ? (instalmentPlans.find((plan) => plan.rule.id === transaction.instalmentRuleId) ?? null)
     : null;
-  // A shared album's bill says which album it is from, and, when the user
-  // cannot change it (someone else's, or one with payments on it; README:
-  // Who can change what), why: it keeps only their own fields on save, and
-  // has no Delete.
+  // A shared album's bill says which album it is from (anyone in it can
+  // change it; README: Album members and shared albums).
   const groupOrigin = useGroupBillOrigin(transaction);
   const groupMembers = useGroupOthers(albumGroupId);
-  const billBlock = useMemo(
-    () =>
-      transaction.albumGroupId && albumGroupId
-        ? albumBillBlock(transaction.albumGroupId, transaction.id)
-        : null,
-    // The transaction's object changes whenever its group writes it.
-    [albumBillBlock, albumGroupId, transaction],
-  );
   const albumNote = groupOrigin
     ? {
         albumName: groupOrigin.albumName ?? I18n.t<string>('albums.bill.shared_album'),
-        status: billBlock ? I18n.t(`albums.rules.badge_${billBlock}`) : undefined,
         onOpenAlbum: () =>
           navigation.navigate('AlbumDetail', { albumId: groupOrigin.albumId }, { pop: true }),
       }
     : undefined;
+  // A shared album's bill with payments on it: changing or deleting it asks
+  // first (the payments stay).
+  const groupBillPaid =
+    !!albumGroupId &&
+    transaction.albumGroupId === albumGroupId &&
+    billHasPayments(listGroupSettlements(albumGroupId), transaction.id);
   const headerNotice = instalmentPlan
     ? {
         label:
@@ -270,7 +266,7 @@ function TransactionEditor({
       I18n.t('transactions.editor.delete_transaction'),
       transaction.albumGroupId && albumGroupId
         ? // A shared album's bill is everyone's: deleting it deletes it for them too.
-          I18n.t('albums.bill.delete_shared')
+          I18n.t(groupBillPaid ? 'albums.bill.delete_shared_paid' : 'albums.bill.delete_shared')
         : paybackLink
           ? paybackLink.personName
             ? I18n.t('transactions.editor.delete_payback_confirm', { name: paybackLink.personName })
@@ -304,6 +300,7 @@ function TransactionEditor({
     albumGroupId,
     deleteTransaction,
     feeLink,
+    groupBillPaid,
     getAccountById,
     onClose,
     paybackLink,
@@ -312,46 +309,14 @@ function TransactionEditor({
     transaction.id,
   ]);
 
-  // The split rows as the editor opened them, to tell whether a save of a
-  // bill the user cannot change tried to change it (read at save time).
+  // The bill as the editor opened it (its day, title and split), to tell a
+  // save that changes the group's bill from one that only changes the user's
+  // own fields, which never leaves the phone.
+  const openedBillRef = useRef<string | null>(null);
   const openedSplitsRef = useRef<string | null>(null);
-
-  // A bill the user cannot change: their own fields alone are saved, and if
-  // they changed the bill itself they are told why it stayed as it was.
-  const saveOwnFieldsOnly = useCallback(
-    (input: Partial<CreateTransactionInput>, splits?: readonly SplitDraft[]) => {
-      saveAlbumBillOwnFields(transaction.id, {
-        categoryId: input.categoryId ?? transaction.categoryId,
-        details: input.details ?? null,
-        receiptUri: input.receiptUri ?? null,
-        sentiment: input.sentiment ?? 'neutral',
-        reimbursable: input.reimbursable ?? false,
-        accountId: input.accountId ?? transaction.accountId,
-      });
-      const triedBill =
-        (input.date !== undefined &&
-          dayKeyFromIsoLocal(input.date) !== dayKeyFromIsoLocal(transaction.date)) ||
-        (input.note !== undefined && (input.note ?? '') !== (transaction.note ?? '')) ||
-        (splits !== undefined && splitsSignature(splits) !== openedSplitsRef.current);
-      if (triedBill && billBlock) Alert.alert(I18n.t(`albums.rules.${billBlock}`));
-    },
-    [
-      billBlock,
-      saveAlbumBillOwnFields,
-      transaction.accountId,
-      transaction.categoryId,
-      transaction.date,
-      transaction.id,
-      transaction.note,
-    ],
-  );
 
   const handleSubmit = useCallback(
     (input: Parameters<typeof updateTransaction>[1], extras?: TransactionEditorSubmitExtras) => {
-      if (billBlock) {
-        saveOwnFieldsOnly(input);
-        return;
-      }
       if (isLegacyBalanceAdjustmentTransfer) {
         updateTransaction(transaction.id, {
           ...input,
@@ -365,14 +330,7 @@ function TransactionEditor({
       updateTransaction(transaction.id, input);
       saveFeeFor(input, extras?.transferFee ?? null);
     },
-    [
-      billBlock,
-      isLegacyBalanceAdjustmentTransfer,
-      saveFeeFor,
-      saveOwnFieldsOnly,
-      transaction.id,
-      updateTransaction,
-    ],
+    [isLegacyBalanceAdjustmentTransfer, saveFeeFor, transaction.id, updateTransaction],
   );
 
   /** Saves a split bill that is the user's own (not a shared album's). */
@@ -480,49 +438,52 @@ function TransactionEditor({
   );
 
   const handleSubmitWithSplits = useCallback(
-    (
+    async (
       input: CreateTransactionInput,
       splits: SplitDraft[],
       extras?: TransactionEditorSubmitExtras,
-    ) => {
+    ): Promise<boolean> => {
       const isGroupBill = !!albumGroupId && !!transaction.albumGroupId;
-      if (isGroupBill && billBlock) {
-        saveOwnFieldsOnly(input, splits);
-        return;
-      }
       if (albumGroupId && splits.some((row) => !row.isSelf)) {
-        const saved = saveAlbumBill(
+        // Only the user's own fields changed (category, account, longer note,
+        // receipt, mood): saved here alone, with nothing sent or logged.
+        if (isGroupBill && billSignature(input, splits) === openedBillRef.current) {
+          saveAlbumBillOwnFields(transaction.id, {
+            categoryId: input.categoryId ?? transaction.categoryId,
+            details: input.details ?? null,
+            receiptUri: input.receiptUri ?? null,
+            sentiment: input.sentiment ?? 'neutral',
+            reimbursable: input.reimbursable ?? false,
+            accountId: input.accountId ?? transaction.accountId,
+          });
+          return true;
+        }
+        // A shared album's bill is only ever saved through its group: when
+        // that failed (offline, signed out, the user no longer in it), they
+        // were told why, and the editor stays open with every edit.
+        const saved = await saveAlbumBill(
           albumGroupId,
           { ...input, date: dateKeepingTimeOfDay(input.date, transaction.date) },
           albumBillRows(splits),
           transaction.id,
         );
-        if (saved) return;
-        // A shared album's bill is only ever saved through its group: when
-        // that failed (signed out, the share gone, someone on it who is not
-        // in the album), say so rather than keep it as a local split.
-        // A payment may have landed while the editor was open.
-        const block = isGroupBill ? albumBillBlock(albumGroupId, transaction.id) : null;
-        Alert.alert(
-          block ? I18n.t(`albums.rules.${block}`) : I18n.t('errors.generic_operation_failed'),
-        );
-        return;
-      } else if (isGroupBill) {
-        // No longer split: the bill leaves the group, for everyone, and stays
-        // the user's own entry (asked in `confirmSplitSubmit`, before closing).
-        detachAlbumBill(transaction.id);
+        return saved !== null;
       }
+      // No longer split: the bill leaves the group, for everyone, and stays
+      // the user's own entry (asked in `confirmSplitSubmit`, before closing).
+      if (isGroupBill && !(await detachAlbumBill(transaction.id))) return false;
       saveOwnSplits(input, splits, extras);
+      return true;
     },
     [
-      albumBillBlock,
       albumGroupId,
-      billBlock,
-      saveOwnFieldsOnly,
       detachAlbumBill,
       saveAlbumBill,
+      saveAlbumBillOwnFields,
       saveOwnSplits,
+      transaction.accountId,
       transaction.albumGroupId,
+      transaction.categoryId,
       transaction.date,
       transaction.id,
     ],
@@ -536,6 +497,21 @@ function TransactionEditor({
         const leavesGroup =
           !!albumGroupId && !!transaction.albumGroupId && !splits.some((row) => !row.isSelf);
         if (!leavesGroup) {
+          // A change to a bill with payments on it: they stay, and anything
+          // paid past a share it lowers is owed back (README: Anyone in it can
+          // change it).
+          if (groupBillPaid && splitsSignature(splits) !== openedSplitsRef.current) {
+            Alert.alert(
+              I18n.t('albums.bill.edit_paid_title'),
+              I18n.t('albums.bill.edit_paid_message'),
+              [
+                { text: I18n.t('common.cancel'), style: 'cancel', onPress: () => resolve(false) },
+                { text: I18n.t('common.save'), onPress: () => resolve(true) },
+              ],
+              { cancelable: true, onDismiss: () => resolve(false) },
+            );
+            return;
+          }
           resolve(true);
           return;
         }
@@ -551,7 +527,7 @@ function TransactionEditor({
           { cancelable: true, onDismiss: () => resolve(false) },
         );
       }),
-    [albumGroupId, transaction.albumGroupId],
+    [albumGroupId, groupBillPaid, transaction.albumGroupId],
   );
 
   const initialSplits = useMemo<SplitDraft[] | undefined>(() => {
@@ -593,24 +569,30 @@ function TransactionEditor({
     }));
   }, [transaction.splits]);
   openedSplitsRef.current ??= splitsSignature(initialSplits);
+  openedBillRef.current ??= billSignature(
+    { date: transaction.date, note: transaction.note, currency: transaction.currency },
+    initialSplits,
+  );
 
   return (
     <TransactionEditorScreen
       mode="edit"
       onClose={onClose}
-      onDelete={billBlock ? undefined : handleDelete}
+      onDelete={handleDelete}
       onSubmit={handleSubmit}
       onSubmitWithSplits={handleSubmitWithSplits}
       confirmSplitSubmit={confirmSplitSubmit}
-      restrictTypeOptions={billBlock ? LOCKED_BILL_TYPES : restrictedTypes}
+      restrictTypeOptions={
+        transaction.albumGroupId && albumGroupId ? GROUP_BILL_TYPES : restrictedTypes
+      }
       hideSplitMode={isInstalmentPayment || isGroupPayment}
       initialSplits={initialSplits}
       groupBill={albumGroupId !== null}
+      awaitSplitSubmit={albumGroupId !== null}
       initialTransferFee={initialTransferFee}
       openSplitBillOnMount={openSplitBillOnMount}
       headerNotice={headerNotice}
       albumNote={albumNote}
-      lockedReason={billBlock ? I18n.t(`albums.rules.${billBlock}`) : undefined}
       groupMembers={groupMembers}
       instalmentOptions={instalmentOptions}
       subtitleOverride={
@@ -650,6 +632,19 @@ function TransactionEditor({
   );
 }
 
+/** A shared album's bill as the group holds it (its day, title and split), as a string. */
+function billSignature(
+  input: Partial<Pick<CreateTransactionInput, 'date' | 'note' | 'currency'>>,
+  splits?: readonly SplitDraft[],
+): string {
+  return JSON.stringify([
+    input.date !== undefined ? dayKeyFromIsoLocal(input.date) : null,
+    (input.note ?? '').trim(),
+    input.currency ?? null,
+    splitsSignature(splits),
+  ]);
+}
+
 /** A split draft's rows as a string, to tell an edited one from the one the editor opened with. */
 function splitsSignature(rows: readonly SplitDraft[] | undefined): string {
   return JSON.stringify(
@@ -662,5 +657,5 @@ function splitsSignature(rows: readonly SplitDraft[] | undefined): string {
   );
 }
 
-/** A shared album's bill the user cannot change stays an expense. */
-const LOCKED_BILL_TYPES: TransactionType[] = ['expense'];
+/** A shared album's bill stays an expense: to stop sharing it, take everyone off it. */
+const GROUP_BILL_TYPES: TransactionType[] = ['expense'];

@@ -47,8 +47,10 @@ const PROTOCOL = "m2t-v1";
  * What this page can show beyond the first version, named in every `want`
  * (the app's `WANT_FEATURES`). A phone sends a page only what it names:
  * - `budget-currencies`: monthly budgets in another currency than the main one.
+ * - `shared-albums`: each shared album's members, bills and activity log
+ *   (the `web_album_*` tables, `src/lib/backup/album-group.ts`).
  */
-const WANT_FEATURES = ["budget-currencies"];
+const WANT_FEATURES = ["budget-currencies", "shared-albums"];
 
 /** A QR code is good for this long before a fresh one replaces it. */
 const OFFER_TTL_MS = 2 * 60 * 1000;
@@ -99,8 +101,9 @@ export type TransferMeta = {
    * What the phone handles beyond the first version (the app's
    * `WANT_FEATURES`): `budget-currencies` means a budget edit may name its
    * currency; `credit-due-days-after` that an account edit may set
-   * `creditDueDaysAfterStatement`. Absent from an older app, which refuses a
-   * field it does not know.
+   * `creditDueDaysAfterStatement`; `shared-albums` that it takes
+   * `module:albumbill` edits (a shared album's bills, and Restore). Absent
+   * from an older app, which refuses a field or module it does not know.
    *
    * This page does not name `credit-due-days-after` in its `want`: it changes
    * nothing in what the phone sends, only what the phone takes.
@@ -111,6 +114,11 @@ export type TransferMeta = {
 /** Whether the phone that sent `meta` takes a credit card due some days after its statement. */
 export function phoneTakesCreditDueDaysAfter(meta: { features?: unknown } | null | undefined): boolean {
   return Array.isArray(meta?.features) && meta.features.includes("credit-due-days-after");
+}
+
+/** Whether the phone that sent `meta` takes a shared album's bills edited from here (`module:albumbill`). */
+export function phoneTakesSharedAlbums(meta: { features?: unknown } | null | undefined): boolean {
+  return Array.isArray(meta?.features) && meta.features.includes("shared-albums");
 }
 
 /** Whether the phone that sent `meta` takes a budget's currency in an edit. */

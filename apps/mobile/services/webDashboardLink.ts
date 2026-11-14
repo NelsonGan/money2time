@@ -119,8 +119,8 @@ type TransferMeta = {
    * What this phone handles beyond the first version (`WANT_FEATURES`), so a
    * page offers only what the phone can save: `budget-currencies`, that a web
    * edit may name a budget's currency; `credit-due-days-after`, that an
-   * account edit may set `creditDueDaysAfterStatement`. Absent from an older
-   * app.
+   * account edit may set `creditDueDaysAfterStatement`; `shared-albums`, that
+   * it takes `module:albumbill` edits. Absent from an older app.
    */
   features?: WantFeature[];
   /**
@@ -397,8 +397,17 @@ type SessionEvents = {
  *   reads `credit_due_day`, which a days-after card keeps close to its real
  *   due day); named so the phone's `meta.features` tells a page it takes the
  *   days-after due rule in an account edit.
+ * - `shared-albums`: each shared album's members, bills and activity log
+ *   (`web_album_*` tables, `webDashboardAlbumGroups.ts`), which an older page
+ *   has no use for; named in the phone's `meta.features` so a page offers
+ *   editing a shared album's bills (`module:albumbill`) and Restore only to a
+ *   phone that takes them (an older app refuses the module).
  */
-export const WANT_FEATURES = ['budget-currencies', 'credit-due-days-after'] as const;
+export const WANT_FEATURES = [
+  'budget-currencies',
+  'credit-due-days-after',
+  'shared-albums',
+] as const;
 export type WantFeature = (typeof WANT_FEATURES)[number];
 
 /** The known features a `want` names, ignoring anything else. */

@@ -22,6 +22,7 @@
 //   GET    /v1/ledgers/<id>/members          owner and members (addresses for the owner only)
 //   DELETE /v1/ledgers/<id>/members/<user>   remove a member (owner); the invite link rotates
 //   POST   /v1/ledgers/<id>/invites          the ledger's invite link, reused for a day (owner)
+//   POST   /v1/ledgers/<id>/album            a shared album's change, written by the Worker with its log
 //   POST|PUT|GET /v1/ledgers/<id>/media/…    its images, like /v1/media
 //   GET    /v1/invites/<code>                what an invite opens (no sign-in needed)
 //   POST   /v1/invites/<code>/accept         join (any signed-in user, no Pro needed; at most 5)

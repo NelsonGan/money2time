@@ -322,6 +322,15 @@ export function AccountLogo({ logoId, name, size = 32 }: { logoId: string | null
   return <Lettermark text={name} size={size} color="#6B7A77" />;
 }
 
+/**
+ * Where an account's logo goes when an entry has no account yet: an empty
+ * dashed box, as the app's `TransactionAccountBadge` draws it (a shared
+ * album's bill someone else said the user paid waits for one).
+ */
+export function NoAccountMark({ size = 14 }: { size?: number }) {
+  return <span aria-hidden="true" className="inline-block shrink-0 rounded-[3px] border border-dashed border-primary/70" style={{ width: size, height: size }} />;
+}
+
 export function SubscriptionLogo({ logoId, name, size = 32, fallbackIcon }: { logoId: string | null; name: string; size?: number; fallbackIcon?: string | null }) {
   const { asset } = useDashboard();
   if (logoId?.startsWith("custom:")) {
