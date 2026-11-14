@@ -2384,6 +2384,7 @@ const tr = {
       'Ücretsiz planda {{count}} alt para birimi ekleyebilirsiniz. Sınırsız çoklu para birimi için Pro’ya geçin.',
     upgrade: "Pro'ya Yükselt",
     upgrade_subtitle: 'Sınırsız özellikleri açın',
+    active: "Pro'dasınız",
     active_subtitle: 'Tüm özellikler açık',
     restore: 'Satın Almaları Geri Yükle',
     restoring: 'Geri yükleniyor...',

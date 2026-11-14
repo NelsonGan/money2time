@@ -2375,6 +2375,7 @@ const sv = {
       'Du kan lägga till {{count}} undervaluta i gratisplanen. Uppgradera till Pro för obegränsad flervaluta.',
     upgrade: 'Uppgradera till Pro',
     upgrade_subtitle: 'Lås upp obegränsade funktioner',
+    active: 'Du har Pro',
     active_subtitle: 'Alla funktioner upplåsta',
     restore: 'Återställ köp',
     restoring: 'Återställer...',

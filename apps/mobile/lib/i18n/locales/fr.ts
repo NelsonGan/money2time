@@ -2397,6 +2397,7 @@ const fr = {
       'Le suivi des remboursements est une fonctionnalité Pro. Passez à Pro pour marquer les dépenses que vous allez récupérer.',
     upgrade: 'Passer à Pro',
     upgrade_subtitle: 'Débloquez les fonctionnalités illimitées',
+    active: 'Vous êtes Pro',
     active_subtitle: 'Toutes les fonctionnalités débloquées',
     restore: 'Restaurer les achats',
     restoring: 'Restauration...',

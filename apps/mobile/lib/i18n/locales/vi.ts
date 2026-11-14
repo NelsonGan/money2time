@@ -2360,6 +2360,7 @@ const vi = {
       'Gói miễn phí cho phép thêm {{count}} tiền tệ phụ. Nâng cấp Pro để theo dõi đa tiền tệ không giới hạn.',
     upgrade: 'Nâng cấp lên Pro',
     upgrade_subtitle: 'Mở khóa tính năng không giới hạn',
+    active: 'Bạn đang dùng Pro',
     active_subtitle: 'Đã mở khóa tất cả tính năng',
     restore: 'Khôi phục giao dịch mua',
     restoring: 'Đang khôi phục...',

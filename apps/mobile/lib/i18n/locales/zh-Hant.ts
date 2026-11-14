@@ -2267,6 +2267,7 @@ const zhHant = {
     limit_subcurrencies: '免費版可新增 {{count}} 個子貨幣。升級到 Pro 即可無限使用多幣種追蹤。',
     upgrade: '升級到 Pro',
     upgrade_subtitle: '解鎖無限功能',
+    active: '你已是 Pro 使用者',
     active_subtitle: '全部功能已解鎖',
     restore: '恢復購買',
     restoring: '恢復中...',

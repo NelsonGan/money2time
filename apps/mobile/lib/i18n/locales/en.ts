@@ -2344,6 +2344,7 @@ const en = {
       'You can add {{count}} sub-currency on the free plan. Upgrade to Pro for unlimited multi-currency tracking.',
     upgrade: 'Upgrade to Pro',
     upgrade_subtitle: 'Unlock unlimited features',
+    active: "You're on Pro",
     active_subtitle: 'All features unlocked',
     restore: 'Restore Purchases',
     restoring: 'Restoring...',

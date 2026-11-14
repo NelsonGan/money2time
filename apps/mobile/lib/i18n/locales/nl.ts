@@ -2398,6 +2398,7 @@ const nl = {
       'Je kunt {{count}} subvaluta toevoegen in het gratis abonnement. Upgrade naar Pro voor onbeperkt multivaluta.',
     upgrade: 'Upgraden naar Pro',
     upgrade_subtitle: 'Onbeperkte functies ontgrendelen',
+    active: 'Je hebt Pro',
     active_subtitle: 'Alle functies ontgrendeld',
     restore: 'Aankopen herstellen',
     restoring: 'Herstellen...',

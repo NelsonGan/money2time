@@ -2267,6 +2267,7 @@ const zh = {
     limit_subcurrencies: '免费版可添加 {{count}} 个子货币。升级到 Pro 即可无限使用多币种追踪。',
     upgrade: '升级到 Pro',
     upgrade_subtitle: '解锁无限功能',
+    active: '你已是 Pro 用户',
     active_subtitle: '全部功能已解锁',
     restore: '恢复购买',
     restoring: '恢复中...',

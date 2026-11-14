@@ -2386,6 +2386,7 @@ const pt = {
       'Você pode adicionar {{count}} sub-moeda no plano gratuito. Atualize para o Pro para multimoeda ilimitada.',
     upgrade: 'Assinar Pro',
     upgrade_subtitle: 'Desbloqueie recursos ilimitados',
+    active: 'Você tem o Pro',
     active_subtitle: 'Todos os recursos desbloqueados',
     restore: 'Restaurar compras',
     restoring: 'Restaurando...',

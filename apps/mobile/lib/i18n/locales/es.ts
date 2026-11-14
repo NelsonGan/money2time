@@ -2384,6 +2384,7 @@ const es = {
       'Puedes añadir {{count}} subdivisa en el plan gratuito. Cambia a Pro para multidivisa ilimitada.',
     upgrade: 'Actualizar a Pro',
     upgrade_subtitle: 'Desbloquea funciones ilimitadas',
+    active: 'Tienes Pro',
     active_subtitle: 'Todas las funciones desbloqueadas',
     restore: 'Restaurar compras',
     restoring: 'Restaurando...',

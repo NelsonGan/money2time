@@ -2387,6 +2387,7 @@ const id = {
       'Anda dapat menambah {{count}} sub-mata uang di paket gratis. Tingkatkan ke Pro untuk multi-mata uang tanpa batas.',
     upgrade: 'Upgrade ke Pro',
     upgrade_subtitle: 'Buka fitur tanpa batas',
+    active: 'Anda sudah Pro',
     active_subtitle: 'Semua fitur terbuka',
     restore: 'Pulihkan Pembelian',
     restoring: 'Memulihkan...',

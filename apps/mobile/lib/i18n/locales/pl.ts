@@ -2383,6 +2383,7 @@ const pl = {
       'W planie darmowym możesz dodać {{count}} walutę podrzędną. Przejdź na Pro, aby śledzić wiele walut bez limitu.',
     upgrade: 'Przejdź na Pro',
     upgrade_subtitle: 'Odblokuj nieograniczone funkcje',
+    active: 'Masz Pro',
     active_subtitle: 'Wszystkie funkcje odblokowane',
     restore: 'Przywróć zakupy',
     restoring: 'Przywracanie...',

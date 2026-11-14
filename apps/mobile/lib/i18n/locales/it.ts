@@ -2381,6 +2381,7 @@ const it = {
       'Puoi aggiungere {{count}} sotto-valuta con il piano gratuito. Passa a Pro per il multivaluta illimitato.',
     upgrade: 'Passa a Pro',
     upgrade_subtitle: 'Sblocca funzionalità illimitate',
+    active: 'Hai Pro',
     active_subtitle: 'Tutte le funzionalità sbloccate',
     restore: 'Ripristina acquisti',
     restoring: 'Ripristino...',

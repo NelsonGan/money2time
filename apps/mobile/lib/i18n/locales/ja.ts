@@ -2358,6 +2358,7 @@ const ja = {
       '無料プランではサブ通貨を{{count}}件追加できます。無制限の多通貨管理はProにアップグレードしてください。',
     upgrade: 'Pro にアップグレード',
     upgrade_subtitle: '無制限機能を解放',
+    active: 'Proをご利用中',
     active_subtitle: 'すべての機能が解放済み',
     restore: '購入を復元',
     restoring: '復元中...',

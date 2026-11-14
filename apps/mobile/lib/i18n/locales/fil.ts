@@ -2404,6 +2404,7 @@ const fil = {
       'Maaari kang magdagdag ng {{count}} sub-currency sa libreng plano. Mag-upgrade sa Pro para walang limitasyon.',
     upgrade: 'Mag-upgrade sa Pro',
     upgrade_subtitle: 'I-unlock ang unlimited na mga feature',
+    active: 'Naka-Pro ka na',
     active_subtitle: 'Lahat ng feature ay naka-unlock',
     restore: 'I-restore ang Mga Binili',
     restoring: 'Ire-restore...',

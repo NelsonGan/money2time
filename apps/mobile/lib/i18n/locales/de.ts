@@ -2405,6 +2405,7 @@ const de = {
       'Im kostenlosen Plan kannst du {{count}} Unterwährung hinzufügen. Upgrade auf Pro für unbegrenzte Mehrwährungsverwaltung.',
     upgrade: 'Auf Pro upgraden',
     upgrade_subtitle: 'Unbegrenzte Funktionen freischalten',
+    active: 'Du hast Pro',
     active_subtitle: 'Alle Funktionen freigeschaltet',
     restore: 'Käufe wiederherstellen',
     restoring: 'Wird wiederhergestellt…',

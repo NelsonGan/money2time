@@ -2345,6 +2345,7 @@ const ko = {
       '무료 플랜에서는 보조 통화를 {{count}}개 추가할 수 있습니다. 무제한 다중 통화는 Pro로 업그레이드하세요.',
     upgrade: 'Pro로 업그레이드',
     upgrade_subtitle: '무제한 기능 잠금 해제',
+    active: 'Pro 이용 중',
     active_subtitle: '모든 기능 잠금 해제됨',
     restore: '구매 복원',
     restoring: '복원 중...',

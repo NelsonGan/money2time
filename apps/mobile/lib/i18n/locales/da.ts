@@ -2376,6 +2376,7 @@ const da = {
       'Du kan tilføje {{count}} undervaluta på gratisplanen. Opgradér til Pro for ubegrænset multivaluta.',
     upgrade: 'Opgrader til Pro',
     upgrade_subtitle: 'Lås ubegrænsede funktioner op',
+    active: 'Du har Pro',
     active_subtitle: 'Alle funktioner låst op',
     restore: 'Gendan køb',
     restoring: 'Gendanner...',

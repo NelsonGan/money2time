@@ -2388,6 +2388,7 @@ const ms = {
       'Anda boleh menambah {{count}} sub-mata wang dalam pelan percuma. Naik taraf ke Pro untuk berbilang mata wang tanpa had.',
     upgrade: 'Naik taraf ke Pro',
     upgrade_subtitle: 'Buka kunci ciri tanpa had',
+    active: 'Anda menggunakan Pro',
     active_subtitle: 'Semua ciri dibuka kunci',
     restore: 'Pulihkan Pembelian',
     restoring: 'Memulihkan...',

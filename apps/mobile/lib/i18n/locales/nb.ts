@@ -2375,6 +2375,7 @@ const nb = {
       'Du kan legge til {{count}} undervaluta på gratisplanen. Oppgrader til Pro for ubegrenset flervaluta.',
     upgrade: 'Oppgrader til Pro',
     upgrade_subtitle: 'Lås opp ubegrensede funksjoner',
+    active: 'Du har Pro',
     active_subtitle: 'Alle funksjoner låst opp',
     restore: 'Gjenopprett kjøp',
     restoring: 'Gjenoppretter...',
