@@ -144,6 +144,11 @@ function AlbumView({ shareId, tab }: { shareId: string; tab: Tab }) {
     void api.rejoin(shareId, defaultMemberName(user) || t("people.unnamed")).then(() => load({ fresh: true }), () => undefined);
   }, [group, load, shareId, t, user]);
 
+  // A session the Worker no longer knows (the server has cleared its cookie): sign in again.
+  useEffect(() => {
+    if (error?.code === "unauthorized") setUser(null);
+  }, [error, setUser]);
+
   useEffect(() => {
     track(EVENTS.albumViewed, { tab });
   }, [tab]);
@@ -175,7 +180,6 @@ function AlbumView({ shareId, tab }: { shareId: string; tab: Tab }) {
     },
     [load, setUser, shareId, t],
   );
-
 
   if (!group) {
     if (error && error.code !== "network" && error.code !== "busy") {

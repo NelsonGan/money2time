@@ -7,7 +7,7 @@
  * when. Pure.
  */
 
-import { cents, openShares, pairwiseDebts, settleDebt, simplifyDebts, type GroupDebt } from "./debts.ts";
+import { cents, openShares, pairwiseDebts, settleDebt, simplifyDebts, type GroupDebt, type OpenShare } from "./debts.ts";
 import type { Group, Payment, Share } from "./group";
 
 export type GroupRowWrite = {
@@ -98,10 +98,12 @@ export function simplifyRow(groupId: string, on: boolean): GroupRowWrite {
   return { table: "album_groups", row: { id: groupId, simplify_debts: on ? 1 : 0 } };
 }
 
+/** The debts of these open shares, simplified or pair by pair. */
+const debtsOf = (open: OpenShare[], simplify: boolean): GroupDebt[] => (simplify ? simplifyDebts(open) : pairwiseDebts(open));
+
 /** Who owes whom in the group now, simplified when the group has that on. */
 export function groupDebts(group: Pick<Group, "bills" | "payments" | "simplify">): GroupDebt[] {
-  const open = openShares(group.bills, group.payments);
-  return group.simplify ? simplifyDebts(open) : pairwiseDebts(open);
+  return debtsOf(openShares(group.bills, group.payments), group.simplify);
 }
 
 /**
@@ -111,9 +113,7 @@ export function groupDebts(group: Pick<Group, "bills" | "payments" | "simplify">
  */
 export function settleRows(group: Pick<Group, "bills" | "payments" | "simplify">, debt: GroupDebt, date: string): GroupRowWrite[] {
   const open = openShares(group.bills, group.payments);
-  const current = (group.simplify ? simplifyDebts(open) : pairwiseDebts(open)).find(
-    (item) => item.from === debt.from && item.to === debt.to && item.currency === debt.currency,
-  );
+  const current = debtsOf(open, group.simplify).find((item) => item.from === debt.from && item.to === debt.to && item.currency === debt.currency);
   if (!current) return [];
   const payments = settleDebt(open, { ...debt, amount: Math.min(debt.amount, current.amount) }, { simplified: group.simplify });
   return payments.length ? paymentRows(payments, debt.currency, date) : [];

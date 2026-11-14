@@ -103,3 +103,23 @@ test("a session the Worker no longer knows clears the cookie", async () => {
   assert.equal(res.status, 401);
   assert.match(res.headers.get("set-cookie") ?? "", /Max-Age=0/);
 });
+
+test("a busy group is asked once more to put the new member on its list", async () => {
+  let joins = 0;
+  const { calls, upstream } = worker((path) => {
+    if (path === `/v1/invites/${CODE}`) return Response.json({ kind: "album" });
+    if (path.endsWith("/accept")) return Response.json({ ledger: { id: "abcdef123456" } });
+    joins += 1;
+    return joins === 1 ? Response.json({ error: "busy" }, { status: 409 }) : Response.json({ rows: [] });
+  });
+  const res = await handleAlbumApi(request(`/api/invites/${CODE}/join`, { method: "POST", body: { name: "Tess" } }), upstream);
+  assert.equal(res.status, 200);
+  assert.equal(calls.filter((call) => call.path === "/v1/ledgers/abcdef123456/album").length, 2);
+});
+
+test("a session cookie that cannot be decoded is no session", async () => {
+  const { calls, upstream } = worker();
+  const res = await handleAlbumApi(request("/api/albums", { cookie: "%E0" }), upstream);
+  assert.equal(res.status, 401);
+  assert.equal(calls.length, 0);
+});

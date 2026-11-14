@@ -11,10 +11,11 @@
  * - `settleDebt`: a payment between two members as payments on bills.
  */
 
+import { cents } from "../backup/album-group.ts";
 import type { Bill, Payment } from "./group";
 
-/** An amount in whole cents, which is what the sums are done in. */
-export const cents = (value: number) => Math.round(value * 100);
+/** Amounts in whole cents, which is what the sums are done in (the dashboard's helper). */
+export { cents };
 
 /** A group's live payments by the bill they are for. */
 export function settlementsByBill<T extends Pick<Payment, "expenseId" | "deleted">>(payments: readonly T[]): Map<string, T[]> {

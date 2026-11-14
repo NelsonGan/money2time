@@ -202,7 +202,8 @@ function EmailSignIn({ onSignedIn, onBack }: { onSignedIn: (user: SessionUser) =
   const send = async (event?: FormEvent) => {
     event?.preventDefault();
     const address = email.trim();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(address) || busy) {
+    if (busy) return;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(address)) {
       setError(t("signIn.badEmail"));
       return;
     }

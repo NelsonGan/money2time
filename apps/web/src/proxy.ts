@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 import { isLocale, routing, type Locale } from "./i18n/routing";
-import { APP_ORIGIN, isAlbumHost, isAppHost, isProductionHost } from "./lib/platform";
+import { ALBUM_ORIGIN, APP_ORIGIN, isAlbumHost, isAppHost, isProductionHost } from "./lib/platform";
 
 /*
  * next-intl is typed against the `next` package it lists as a peer, which npm
@@ -155,6 +155,8 @@ function internalLocalizedPathname(pathname: string, locale: Locale) {
 
 /** `/dashboard` or `/<locale>/dashboard` on the marketing host. */
 const DASHBOARD_PATH = /^\/(?:([a-z]{2,3}(?:-[a-z]{2})?)\/)?dashboard\/?$/;
+/** `/album` or `/<locale>/album` on the marketing host, where its `/api` answers nothing. */
+const ALBUM_PATH = /^\/(?:[a-z]{2,3}(?:-[a-z]{2})?\/)?album\/?$/;
 
 /**
  * The path as the router will see it. Routing decodes percent escapes, so
@@ -250,6 +252,11 @@ export default function proxy(request: NextRequest) {
     const locale = dashboard[1] && isLocale(dashboard[1]) ? dashboard[1] : undefined;
     const target = new URL(locale && locale !== routing.defaultLocale ? `/${locale}` : "/", APP_ORIGIN);
     return NextResponse.redirect(target, 308);
+  }
+  // Shared albums likewise live on their own host only, which keeps the
+  // locale out of its paths and picks it itself.
+  if (ALBUM_PATH.test(decodedPath(pathname)) && isProductionHost(host)) {
+    return NextResponse.redirect(new URL("/", ALBUM_ORIGIN), 308);
   }
 
   if (pathnameLocale(pathname) || request.cookies.has("NEXT_LOCALE")) {

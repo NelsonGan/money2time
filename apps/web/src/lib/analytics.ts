@@ -944,14 +944,10 @@ export function trackLeaving<Event extends AnalyticsEvent>(
 }
 
 /**
- * Pages that render a visitor's own data. The dashboard draws balances,
- * transactions and notes from the visitor's backup, so session replay must
- * never capture it.
- */
-/**
- * The Web Dashboard and shared albums show a visitor's own money: no session
- * recording or error capture there, and their analytics state stays on their
- * own host.
+ * Pages that render a visitor's own data: the Web Dashboard (balances,
+ * transactions and notes from the visitor's backup) and shared albums. No
+ * session recording or error capture there, and their analytics state stays
+ * on their own host.
  */
 function isPrivatePage(): boolean {
   const type = pageTypeOf(window.location.pathname, window.location.hostname);

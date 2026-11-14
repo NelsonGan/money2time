@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import type { AlbumView } from "@/lib/album/group";
 
 import { useSite } from "./site";
-import { api } from "./api";
+import { AlbumApiError, api } from "./api";
 import { GetTheApp } from "./get-app";
 import { Page } from "./join-screen";
 import { SignIn } from "./sign-in";
@@ -49,7 +49,7 @@ export function HomeScreen() {
 
 function AlbumList() {
   const t = useTranslations("album");
-  const { go } = useSite();
+  const { go, setUser } = useSite();
   const [albums, setAlbums] = useState<AlbumView[] | null>(null);
   const [failed, setFailed] = useState(false);
 
@@ -58,11 +58,16 @@ function AlbumList() {
     api
       .albums()
       .then((list) => live && setAlbums(list))
-      .catch(() => live && setFailed(true));
+      .catch((error: unknown) => {
+        if (!live) return;
+        // A session the Worker no longer knows: sign in again.
+        if (error instanceof AlbumApiError && error.code === "unauthorized") setUser(null);
+        else setFailed(true);
+      });
     return () => {
       live = false;
     };
-  }, []);
+  }, [setUser]);
 
   return (
     <>

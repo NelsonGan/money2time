@@ -70,8 +70,19 @@ export function BillEditor({ group, bill, actions, onClose, onSaved }: { group: 
   const totalCents = total > 0 && total <= MAX_AMOUNT ? cents(total) : 0;
   const peopleOnBill = ordered.filter((member) => onBill.includes(member.id)).map((member) => member.id);
   const input: SplitInput = { method, totalCents, people: peopleOnBill, values, selfId };
-  const { shares, problem } = splitShares(input);
-  const amounts = splitCents(input);
+  const split = splitShares(input);
+  // An even bill keeps its own odd cents while its total and people stay the
+  // same: splitting it again would move them to the user, and change the bill.
+  const keepEven =
+    bill !== null &&
+    method === "even" &&
+    totalCents === cents(bill.amount) &&
+    methodOf(bill.shares) === "even" &&
+    bill.shares.length === peopleOnBill.length &&
+    bill.shares.every((share) => peopleOnBill.includes(share.memberId));
+  const shares = keepEven ? bill.shares : split.shares;
+  const problem = split.problem;
+  const amounts = keepEven ? peopleOnBill.map((id) => cents(bill.shares.find((share) => share.memberId === id)?.amount ?? 0)) : splitCents(input);
   const hasPayments = bill ? billHasPayments(group.payments, bill.id) : false;
   const payments = bill ? group.payments.filter((payment) => !payment.deleted && payment.expenseId === bill.id) : [];
   const valid = totalCents > 0 && !problem && !!paidBy && shares.length > 0;

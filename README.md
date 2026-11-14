@@ -5562,8 +5562,9 @@ To run the Web Dashboard against a local relay, start the relay in
 and `/dashboard` on the marketing host `308`s there. It is `noindex` and out of
 the sitemap. `album.money2time.com` is shared albums
 ([Shared albums on the web](#shared-albums-on-the-web)): every page there is
-`/[locale]/album`, its `/api/*` the front for the cloud-sync Worker; `noindex`
-too, and out of the sitemap.
+`/[locale]/album`, its `/api/*` the front for the cloud-sync Worker, and
+`/album` on the marketing host `308`s there; `noindex` too, and out of the
+sitemap.
 
 ### Web Dashboard in the browser
 
@@ -6050,8 +6051,9 @@ run and a deployed one fail in the same places.
   page on `album.` to shared albums (its `/api/*` goes straight to the route
   handler, which answers on that host only), picks a
   locale from `cf-ipcountry` (Cloudflare's IP geolocation) and the browser's
-  languages, and `308`s `/dashboard` on `www` to the app host. It matches that
-  path decoded (`decodedPath`), as the router does, so `/%64ashboard` cannot
+  languages, and `308`s `/dashboard` on `www` to the app host and `/album`
+  to the album host's home, where its API answers. It matches those paths
+  decoded (`decodedPath`), as the router does, so `/%64ashboard` cannot
   render the dashboard on `www` without the app host's headers. In
   `next.config.ts`, every host but `www` and `app` gets
   `X-Robots-Tag: noindex`, the `app.` host gets the dashboard's CSP and the

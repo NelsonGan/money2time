@@ -43,7 +43,13 @@ function readCookie(request: Request, name: string): string | null {
   const header = request.headers.get("cookie") ?? "";
   for (const part of header.split(";")) {
     const [key, ...rest] = part.trim().split("=");
-    if (key === name) return decodeURIComponent(rest.join("="));
+    if (key !== name) continue;
+    try {
+      return decodeURIComponent(rest.join("="));
+    } catch {
+      // A malformed value is no session: signed out, rather than every call failing.
+      return null;
+    }
   }
   return null;
 }
@@ -196,7 +202,11 @@ export async function handleAlbumApi(request: Request, upstream: Upstream): Prom
       const { ledger } = ((await accepted.json().catch(() => null)) ?? {}) as { ledger?: { id?: unknown } };
       if (typeof ledger?.id !== "string" || !SHARE_ID.test(ledger.id)) return json({ error: "server_error" }, 502);
       // On the album's list as themselves, under the name they chose.
-      const joined = await call(`/v1/ledgers/${ledger.id}/album`, { method: "POST", body: { action: "join", name, via: "web" } });
+      // The seat is taken by now, so a busy group is asked once more rather
+      // than leaving them in without a name.
+      const join = () => call(`/v1/ledgers/${ledger.id}/album`, { method: "POST", body: { action: "join", name, via: "web" } });
+      let joined = await join();
+      if (joined.status === 409 || joined.status >= 500) joined = await join();
       if (!joined.ok) return relay(joined);
       return json({ album: ledger });
     }
