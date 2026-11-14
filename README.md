@@ -6126,11 +6126,10 @@ panels):
    by design) and the book that inspired the app. The only scene without a
    phone, laid out by `src/components/PrivacyPanel.tsx` with its copy in each
    locale's `s15`. The mascot badge and the three promise icons are generated
-   art in `public/assets/privacy/`. The badge is the app's own chick, on model
-   with `public/assets/mascots/` (round white eyes, no eyebrows or blush, the
-   belt and coin pouch), so regenerate it from those PNGs when the mascot
-   changes; the icons are painted in a softer crayon take on it. The rest is
-   drawn in code. Each promise must stay true: data lives on the phone and
+   art in `public/assets/privacy/`. The badge is `mascots/premium-lifetime.png`
+   with its card edited into a shield, so the chick stays exactly the app's
+   mascot; redo it from the mascot art, never draw a new chick. The icons are
+   painted in a softer crayon take on it. The rest is drawn in code. Each promise must stay true: data lives on the phone and
    Cloud Sync is an opt-in, so it never says data "never leaves your phone".
    Update the user count in all 23 locales when it moves.
 3. Accounts: where money is held.

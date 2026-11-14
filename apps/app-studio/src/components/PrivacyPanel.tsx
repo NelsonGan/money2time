@@ -7,9 +7,10 @@
  * Top to bottom: the headline beside the chick mascot hugging a shield, the
  * laurel rating in a card, one card per promise (Local first, No ads, Private
  * by design) and the book behind the app. The mascot badge and the three
- * promise icons are generated art in `public/assets/privacy/`: the badge is the
- * app's own chick, on model with `public/assets/mascots/`, and the icons are
- * painted in a crayon take on it; everything else is drawn here.
+ * promise icons are generated art in `public/assets/privacy/`: the badge is
+ * `mascots/premium-lifetime.png` with its card edited into a shield, and the
+ * icons are painted in a crayon take on the mascot; everything else is drawn
+ * here.
  */
 
 import { DISPLAY_FONT, renderHeadline } from './sceneParts';
@@ -157,7 +158,7 @@ export function PrivacyPanel({ t }: { t: PhoneStrings['s15'] }) {
         }}>{renderHeadline(t.h, t.hl, ACCENT)}</h1>
         <img
           src="/assets/privacy/hero.png" alt=""
-          style={{ height: 430, width: 'auto', flexShrink: 0, display: 'block' }}
+          style={{ height: 390, width: 'auto', flexShrink: 0, display: 'block' }}
         />
       </div>
 
