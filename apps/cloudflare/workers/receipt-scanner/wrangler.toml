@@ -17,17 +17,6 @@ routes = [
 workers_dev = false
 preview_urls = true
 
-# Run every request in Singapore, not at the data centre nearest the user.
-# OpenRouter refuses Claude ("This model is not available in your region",
-# 403) when the call leaves from Hong Kong, where a Worker serving Hong Kong
-# and mainland China users otherwise runs; those scans then all fell to the
-# backup model, which is often rate-limited or reads nothing. Most users are
-# in Singapore and Malaysia, whose scans already reach Claude from their own
-# data centres. See "Where the Worker runs" in the README.
-[placement]
-mode = "targeted"
-region = "aws:ap-southeast-1"
-
 # Requests per client IP per minute. The quotas are per appUserId, which any
 # caller can invent, and an unreadable image uses no scan; these bound what one
 # address can spend on AI. Batch scanning sends at most 10 receipts, 3 at a time.
@@ -72,6 +61,18 @@ MODEL = "anthropic/claude-haiku-5.5"
 # multimodal OpenRouter model works; set it to the same value as MODEL to
 # disable failover, or swap the two lines to put Qwen back in front.
 BACKUP_MODEL = "qwen/qwen3.7-flash"
+# Tried last, when BACKUP_MODEL fails too. Paid from OpenRouter credits.
+# OpenRouter serves qwen3.7-flash from Alibaba alone, which rate-limits it
+# ("temporarily rate-limited upstream") at busy times since 2026-11-11; this
+# model runs on other providers (DeepInfra, Novita, SiliconFlow), so it is
+# not caught by the same limit. Remove the line to stop at BACKUP_MODEL.
+SECOND_BACKUP_MODEL = "qwen/qwen3-vl-30b-a3b-instruct"
+# Countries whose users skip Claude and start at BACKUP_MODEL. OpenRouter
+# refuses Claude there ("This model is not available in your region", 403),
+# going by where the user is: a Worker pinned to Singapore was still refused.
+# Matched against Cloudflare's request.cf.country, so a user on a VPN abroad
+# still gets Claude. Add a country if its users show those 403s in PostHog.
+CLAUDE_BLOCKED_COUNTRIES = "CN,HK,MO"
 ENTITLEMENT_ID = "pro"
 # Per-tier scan cap + metering cadence. INTERVAL is day | week | month | year
 # with an optional count prefix ("100year" ≈ lifetime); change it to re-meter a
