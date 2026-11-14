@@ -1652,6 +1652,19 @@ updated_at)`, with each row as JSON, plus `sync_info` (the choice screen's
 - **Session:** a Better Auth session token in the keychain
   (`cloudSyncSession.ts`, after-first-unlock, this device only). Turso tokens
   last 7 days and are fetched from the Worker as needed.
+- **A reinstall starts signed out.** iOS keeps an app's keychain entries when
+  the app is deleted, while the database, AsyncStorage and files go, so a
+  reinstalled app used to find the old session, marked linked, and sync an
+  empty phone without the link step. Now the launch that creates the install
+  (`initializeDatabase().isNewInstall`, the same signal as `First App Open`)
+  deletes a session it finds and ends it on the server (`/api/auth/sign-out`,
+  best effort), and `loadSession` waits for that
+  (`services/previousInstall.ts`). The old install keeps its place among the
+  account's phones until it goes 30 days without a check-in: its App User ID
+  went with the old database, so it cannot be unlinked. A pending sign-out is
+  kept and finished as usual. An update is not a new install and stays signed
+  in. On Android an uninstall deletes the Keystore key these entries are
+  encrypted with, so nothing readable survives it.
 
 Native sign-in: Apple via `expo-apple-authentication` with a SHA-256 nonce
 (a build without the entitlement hides the button);
@@ -4576,7 +4589,10 @@ database, no bucket, no account and no secrets. Served at
   until the other confirms, so an unlink made while the other side is closed
   is delivered the next time both are open (the phone keeps its tombstones for
   180 days). The browser then deletes its key and copy. Link keys live in the
-  phone's keychain (at most eight).
+  phone's keychain (at most eight). iOS keeps those after the app is deleted,
+  so a new install turns any it finds into pending unlinks (no
+  `Web Dashboard Unlinked` event) before the list is read: a reinstall shows
+  no linked browsers, and each old browser forgets its copy once it hears.
 
 No secrets. Vars in `wrangler.toml`: `ALLOWED_ORIGINS`. The app reads the base
 URL from `EXPO_PUBLIC_MONEY2TIME_WORKERS_WEB_DASHBOARD` (defaults to

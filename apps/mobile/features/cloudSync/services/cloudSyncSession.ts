@@ -4,7 +4,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 
-import type { CloudUser } from './cloudSyncApi';
+import { previousInstallForgotten } from '~/services/previousInstall';
+
+import { type CloudUser, signOutSession } from './cloudSyncApi';
 import { setCachedSessionUser } from './sessionUser';
 
 const KEY = 'm2t.cloudSync.session.v1';
@@ -18,17 +20,38 @@ export interface StoredSession {
 
 let cached: StoredSession | null | undefined;
 
-export async function loadSession(): Promise<StoredSession | null> {
-  if (cached !== undefined) return cached;
+async function readStoredSession(): Promise<StoredSession | null> {
   try {
     const raw = await SecureStore.getItemAsync(KEY);
     const parsed = raw ? (JSON.parse(raw) as StoredSession) : null;
-    cached = parsed?.token && parsed.user?.id ? parsed : null;
+    return parsed?.token && parsed.user?.id ? parsed : null;
   } catch {
-    cached = null;
+    return null;
   }
+}
+
+export async function loadSession(): Promise<StoredSession | null> {
+  if (cached !== undefined) return cached;
+  await previousInstallForgotten();
+  if (cached !== undefined) return cached;
+  cached = await readStoredSession();
   setCachedSessionUser(cached?.user ?? null);
   return cached;
+}
+
+/**
+ * A new install found a session in the keychain: one a deleted install of
+ * this app left (iOS keeps the keychain across a reinstall), whose data is
+ * gone. Signs it out here and ends it on the server when online. Its install
+ * stays among the account's phones until 30 days without a check-in, since
+ * its App User ID went with the old database. Returns whether there was one.
+ */
+export async function forgetPreviousInstallSession(): Promise<boolean> {
+  const stale = await readStoredSession();
+  if (!stale) return false;
+  await SecureStore.deleteItemAsync(KEY).catch(() => undefined);
+  void signOutSession(stale.token).catch(() => undefined);
+  return true;
 }
 
 export async function saveSession(session: StoredSession): Promise<void> {
