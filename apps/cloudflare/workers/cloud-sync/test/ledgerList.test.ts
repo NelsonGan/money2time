@@ -251,6 +251,8 @@ test('anyone signed in shares an album; a ledger still needs Pro', async (t) => 
   // A local sync server stands in for the database a share makes.
   env.LOCAL_SYNC_URL = 'http://127.0.0.1:8080';
   env.LOCAL_LEDGER_SYNC_URLS = 'http://127.0.0.1:8093';
+  // Phones never write an album's tables, so the share creates them there.
+  const schema = t.mock.method(globalThis, 'fetch', async () => new Response('{}'));
   const ledger = await share('outsider', { ledgerId: 'ledger-789', name: 'Mine' });
   assert.equal(ledger.status, 403);
   assert.equal(ledger.body.error, 'not_pro');
@@ -261,6 +263,10 @@ test('anyone signed in shares an album; a ledger still needs Pro', async (t) => 
     [shared.ledgerId, shared.kind, shared.role, shared.active],
     ['album-789', 'album', 'owner', true],
   );
+  assert.deepEqual(
+    schema.mock.calls.map((call) => String(call.arguments[0])),
+    ['http://127.0.0.1:8093/v2/pipeline'],
+  );
 });
 
 test('an account starts sharing only so many albums in a day', async (t) => {
@@ -269,6 +275,7 @@ test('an account starts sharing only so many albums in a day', async (t) => {
   // One free server: the first share takes it, the rest are refused for it
   // (501) until the day's count is used up, and then for the count.
   env.LOCAL_LEDGER_SYNC_URLS = 'http://127.0.0.1:8093';
+  t.mock.method(globalThis, 'fetch', async () => new Response('{}'));
   const answers: (number | undefined)[] = [];
   for (let n = 0; n < 22; n += 1) {
     const answer = await share('outsider', {
