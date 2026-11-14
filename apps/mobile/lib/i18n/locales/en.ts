@@ -1528,6 +1528,11 @@ const en = {
     profile_name_add: 'Add your name',
     profile_edit_name: 'Edit name',
     profile_edit_photo: 'Change photo',
+    account_sign_in: 'Sign in',
+    account_signed_out: 'Not signed in',
+    account_signed_in_a11y: 'Signed in as {{email}}',
+    account_sign_in_prompt:
+      "Sign in to sync with Cloud Sync and to share albums and ledgers. You don't need Pro.",
     stat_days: 'Days tracking',
     stat_transactions: 'Logged',
     stat_this_month: 'This month',

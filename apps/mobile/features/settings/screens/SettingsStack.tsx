@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { PaymentAlertSourceScreen } from '~/features/autoLog/screens/PaymentAlertSourceScreen';
 import { PaymentAlertsSettingsScreen } from '~/features/autoLog/screens/PaymentAlertsSettingsScreen';
 import { CloudSyncScreen } from '~/features/cloudSync/screens/CloudSyncScreen';
+import { SignInScreen } from '~/features/cloudSync/screens/SignInScreen';
 import { ItemsScreen } from '~/features/items/screens';
 import { LedgerEditorScreen } from '~/features/ledgers/screens/LedgerEditorScreen';
 import { LedgersScreen } from '~/features/ledgers/screens/LedgersScreen';
@@ -123,6 +124,7 @@ function SettingsHomeRoute({
       onOpenDataManagement={() => navigation.navigate('DataManagement')}
       onOpenWebDashboard={() => navigation.navigate('WebDashboard')}
       onOpenCloudSync={() => navigation.navigate('CloudSync')}
+      onOpenSignIn={() => navigation.navigate('SignIn')}
       onOpenNews={() => navigation.navigate('News')}
       onOpenStatementImport={() => navigation.navigate('StatementImport')}
       onOpenQuickEntry={() => navigation.navigate('QuickEntrySettings')}
@@ -443,6 +445,12 @@ export function SettingsStack({
               onOpenProPaywall={onOpenProPaywall}
             />
           );
+        }}
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="SignIn">
+        {(props) => {
+          stackNavigationRef.current = props.navigation;
+          return <SignInScreen onBack={() => props.navigation.goBack()} />;
         }}
       </SettingsStackNavigator.Screen>
       <SettingsStackNavigator.Screen name="WebDashboard">

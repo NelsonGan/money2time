@@ -1549,6 +1549,11 @@ const hi = {
     profile_name_add: 'अपना नाम जोड़ें',
     profile_edit_name: 'नाम संपादित करें',
     profile_edit_photo: 'फ़ोटो बदलें',
+    account_sign_in: 'साइन इन करें',
+    account_signed_out: 'साइन इन नहीं है',
+    account_signed_in_a11y: '{{email}} के रूप में साइन इन',
+    account_sign_in_prompt:
+      'Cloud Sync से सिंक करने और एल्बम व लेजर शेयर करने के लिए साइन इन करें। Pro की ज़रूरत नहीं है।',
     stat_days: 'ट्रैकिंग के दिन',
     stat_transactions: 'दर्ज',
     stat_this_month: 'इस महीने',

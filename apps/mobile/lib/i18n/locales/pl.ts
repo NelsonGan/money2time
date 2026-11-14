@@ -1563,6 +1563,11 @@ const pl = {
     profile_name_add: 'Dodaj swoje imię',
     profile_edit_name: 'Edytuj imię',
     profile_edit_photo: 'Zmień zdjęcie',
+    account_sign_in: 'Zaloguj się',
+    account_signed_out: 'Nie zalogowano',
+    account_signed_in_a11y: 'Zalogowano jako {{email}}',
+    account_sign_in_prompt:
+      'Zaloguj się, aby synchronizować przez Cloud Sync i udostępniać albumy oraz księgi. Nie potrzebujesz Pro.',
     stat_days: 'Dni śledzenia',
     stat_transactions: 'Zapisano',
     stat_this_month: 'W tym miesiącu',

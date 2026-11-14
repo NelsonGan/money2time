@@ -249,7 +249,7 @@ node scripts/sync-tutorials-web.mjs        # catalog -> apps/web
 `Main`, `AddTransaction`, `AddTransactionDetailed`, `EditTransaction`, `SettleUp`, `SettleUpSettings`, `SettleUpPerson`, `SettleUpTransaction`, `SplitBill`, `ReceiptSplit`, `AccountDetail`, `AccountEditor`, `GoalEditor`, `GoalDetail`, `AccountLogoPicker`, `CardDesignPicker`, `SubscriptionLogoPicker`, `PayCreditCard`, `AccountGroupEditor`, `CategoryEditor`, `InsightsDrilldown`, `RecurringEditor`, `SettingsRecurring`, `SettingsRecurringSettings`, `SettingsAccounts`, `SettingsHourlyValue`, `SettingsLiveEarnings`, `SettingsTimeDisplay`, `AddWageMonth`, `SettingsQuickEntry`, `SettingsMultiCurrency`, `SettingsAutoBackup`, `SettingsWageCalculator`, `ShareAndEarn`, `ProPaywall`, `CreateAlbum`, `AlbumDetail`, `EditAlbumTransactions`, `AddAlbumTransactions`, `EditAlbumDetails`, `ItemEditor`, `ItemIconPicker`, `CategoryIconPicker`, `BudgetTemplateEditor`, `BudgetPeriodEditor`, `BudgetCategoryAllocation`, `SettingsBudgetTemplates`, `Tutorials`, `TutorialDetail`, `PaymentAlertsSetup`, `SettingsInstalments`, `InstalmentPlan`.
 
 **Settings has its own nested stack** (`navigation/settingsStack.ts`):
-`SettingsHome`, `DisplaySettings`, `AppIcon`, `BottomBar`, `HourlyValue`, `HourlyValueSettings`, `AccountSettings`, `Accounts`, `Items`, `ExchangeRates`, `Categories`, `Recurring`, `RecurringSettings`, `Notifications`, `NotificationDetail`, `DataManagement`, `News`, `AutoBackupSettings`, `StatementImport`, `StatementImportList`, `ProManagement`, `CloudSync`, `ShareAndEarn`, `QuickEntrySettings`, `AutoLogSettings`, `AutoLogTutorial`, `AppLock`, `Receipts`, `ReceiptSettings`, `Reimbursements`, `ReimbursementSettings`, `Widgets`, `LiveEarnings`, `WidgetPreviews`, `PaymentAlerts`, `PaymentAlertSource`.
+`SettingsHome`, `DisplaySettings`, `AppIcon`, `BottomBar`, `HourlyValue`, `HourlyValueSettings`, `AccountSettings`, `Accounts`, `Items`, `ExchangeRates`, `Categories`, `Recurring`, `RecurringSettings`, `Notifications`, `NotificationDetail`, `DataManagement`, `News`, `AutoBackupSettings`, `StatementImport`, `StatementImportList`, `ProManagement`, `CloudSync`, `SignIn`, `ShareAndEarn`, `QuickEntrySettings`, `AutoLogSettings`, `AutoLogTutorial`, `AppLock`, `Receipts`, `ReceiptSettings`, `Reimbursements`, `ReimbursementSettings`, `Widgets`, `LiveEarnings`, `WidgetPreviews`, `PaymentAlerts`, `PaymentAlertSource`.
 
 Stack options live in `navigation/stackOptions.ts` (headerShown: false, slide animations, gesture-enabled back).
 
@@ -1225,6 +1225,23 @@ longer reads it; the flag can be archived in PostHog. A phone may still hold the
   builds without the native module. It sends no event of its own: the
   screen sends `Cloud Sync Screen Viewed` on an install's first visit from
   any entry point, and GA4's `screen_view` records every visit.
+- **Profile card account row.** Below the stats, the Settings profile card
+  closes with one quiet line for the account (`ProfileAccountRow`), so signing
+  in or out does not mean finding Cloud Sync first. Signed out it reads _Not
+  signed in_ with a _Sign in_ link in the primary colour, which opens
+  **Settings > Sign in** (`SignInScreen`, route `SignIn`): the Cloud Sync art,
+  a line saying an account is for Cloud Sync and sharing albums and ledgers
+  and needs no Pro, and the same sign-in buttons (`SignInGate`, so a Pro
+  phone with data on both sides gets the keep-which-data choice there). The
+  art and line make way for the email form, as on the Cloud Sync screen. Once
+  signed in the screen goes back to Settings. Signed in (linking, choosing,
+  syncing or paused) the row shows the account's email and a muted _Sign out_,
+  behind the same confirmation as the Cloud Sync screen's (`useConfirmSignOut`
+  in `AccountActions.tsx`, which also asks first when a joined ledger holds
+  unsent entries). Delete account stays on the Cloud Sync screen only. The row
+  is hidden in builds without the native module and while the session loads.
+  It sends no event of its own: sign-ins and sign-outs send the same events
+  from wherever they start, and GA4's `screen_view` records the Sign in screen.
 - **Loading.** Nothing on these screens is a bare spinner: work in a button
   shows `LoadingDots` in place of its label (`FatButton`'s `loading`), and
   the screen's own loading and linking states show `SyncLoader` (the

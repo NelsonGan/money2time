@@ -1566,6 +1566,11 @@ const ms = {
     profile_name_add: 'Tambah nama anda',
     profile_edit_name: 'Edit nama',
     profile_edit_photo: 'Tukar foto',
+    account_sign_in: 'Log masuk',
+    account_signed_out: 'Belum log masuk',
+    account_signed_in_a11y: 'Log masuk sebagai {{email}}',
+    account_sign_in_prompt:
+      'Log masuk untuk menyegerak dengan Cloud Sync dan berkongsi album serta lejar. Anda tidak perlu Pro.',
     stat_days: 'Hari menjejak',
     stat_transactions: 'Direkod',
     stat_this_month: 'Bulan ini',

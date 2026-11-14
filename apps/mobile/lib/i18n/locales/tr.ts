@@ -1566,6 +1566,11 @@ const tr = {
     profile_name_add: 'Adını ekle',
     profile_edit_name: 'Adı düzenle',
     profile_edit_photo: 'Fotoğrafı değiştir',
+    account_sign_in: 'Giriş yap',
+    account_signed_out: 'Giriş yapılmadı',
+    account_signed_in_a11y: '{{email}} olarak giriş yapıldı',
+    account_sign_in_prompt:
+      'Cloud Sync ile eşitlemek, albüm ve defter paylaşmak için giriş yap. Pro gerekmez.',
     stat_days: 'Takip günü',
     stat_transactions: 'Kaydedildi',
     stat_this_month: 'Bu ay',

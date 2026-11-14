@@ -1547,6 +1547,11 @@ const ja = {
     profile_name_add: '名前を追加',
     profile_edit_name: '名前を編集',
     profile_edit_photo: '写真を変更',
+    account_sign_in: 'サインイン',
+    account_signed_out: '未サインイン',
+    account_signed_in_a11y: '{{email}} でサインイン中',
+    account_sign_in_prompt:
+      'サインインすると Cloud Sync で同期し、アルバムや帳簿を共有できます。Pro は不要です。',
     stat_days: '記録日数',
     stat_transactions: '記録済み',
     stat_this_month: '今月',

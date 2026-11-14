@@ -1557,6 +1557,11 @@ const sv = {
     profile_name_add: 'Lägg till ditt namn',
     profile_edit_name: 'Redigera namn',
     profile_edit_photo: 'Byt bild',
+    account_sign_in: 'Logga in',
+    account_signed_out: 'Inte inloggad',
+    account_signed_in_a11y: 'Inloggad som {{email}}',
+    account_sign_in_prompt:
+      'Logga in för att synka med Cloud Sync och dela album och liggare. Du behöver inte Pro.',
     stat_days: 'Dagar spårade',
     stat_transactions: 'Registrerade',
     stat_this_month: 'Denna månad',

@@ -1545,6 +1545,11 @@ const vi = {
     profile_name_add: 'Thêm tên của bạn',
     profile_edit_name: 'Sửa tên',
     profile_edit_photo: 'Đổi ảnh',
+    account_sign_in: 'Đăng nhập',
+    account_signed_out: 'Chưa đăng nhập',
+    account_signed_in_a11y: 'Đã đăng nhập: {{email}}',
+    account_sign_in_prompt:
+      'Đăng nhập để đồng bộ bằng Cloud Sync và chia sẻ album, sổ chi tiêu. Không cần Pro.',
     stat_days: 'Ngày theo dõi',
     stat_transactions: 'Đã ghi',
     stat_this_month: 'Tháng này',

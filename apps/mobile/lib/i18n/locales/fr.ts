@@ -1572,6 +1572,11 @@ const fr = {
     profile_name_add: 'Ajoutez votre nom',
     profile_edit_name: 'Modifier le nom',
     profile_edit_photo: 'Changer la photo',
+    account_sign_in: 'Se connecter',
+    account_signed_out: 'Non connecté',
+    account_signed_in_a11y: 'Connecté en tant que {{email}}',
+    account_sign_in_prompt:
+      'Connectez-vous pour synchroniser avec Cloud Sync et partager des albums et des carnets. Pro n’est pas nécessaire.',
     stat_days: 'Jours de suivi',
     stat_transactions: 'Enregistrées',
     stat_this_month: 'Ce mois-ci',

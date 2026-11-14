@@ -1559,6 +1559,11 @@ const da = {
     profile_name_add: 'Tilføj dit navn',
     profile_edit_name: 'Rediger navn',
     profile_edit_photo: 'Skift billede',
+    account_sign_in: 'Log ind',
+    account_signed_out: 'Ikke logget ind',
+    account_signed_in_a11y: 'Logget ind som {{email}}',
+    account_sign_in_prompt:
+      'Log ind for at synkronisere med Cloud Sync og dele album og regnskaber. Du behøver ikke Pro.',
     stat_days: 'Dage sporet',
     stat_transactions: 'Registreret',
     stat_this_month: 'Denne måned',

@@ -1576,6 +1576,11 @@ const de = {
     profile_name_add: 'Namen hinzufügen',
     profile_edit_name: 'Name bearbeiten',
     profile_edit_photo: 'Foto ändern',
+    account_sign_in: 'Anmelden',
+    account_signed_out: 'Nicht angemeldet',
+    account_signed_in_a11y: 'Angemeldet als {{email}}',
+    account_sign_in_prompt:
+      'Melde dich an, um mit Cloud Sync zu synchronisieren und Alben und Haushaltsbücher zu teilen. Du brauchst kein Pro.',
     stat_days: 'Tage erfasst',
     stat_transactions: 'Erfasst',
     stat_this_month: 'Dieser Monat',

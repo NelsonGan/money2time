@@ -22,8 +22,16 @@ import { GoogleGIcon } from './GoogleGIcon';
 /**
  * The sign-in options. Cloud Sync is Pro: a free user tapping one gets the
  * paywall, except when signing in to join a shared ledger (`allowWithoutPro`).
+ * `hero` replaces the Cloud Sync art and title; like them, it is not shown
+ * while the email form is open.
  */
-export function SignedOutView({ hideHero = false }: { hideHero?: boolean }) {
+export function SignedOutView({
+  hideHero = false,
+  hero,
+}: {
+  hideHero?: boolean;
+  hero?: React.ReactNode;
+}) {
   const sync = useCloudSync();
   const colors = useThemeColors();
   const { isPro, isStatusKnown } = usePro();
@@ -69,7 +77,7 @@ export function SignedOutView({ hideHero = false }: { hideHero?: boolean }) {
 
   return (
     <View>
-      {hideHero ? null : <Hero showProHint={isStatusKnown && !isPro} />}
+      {hideHero ? null : (hero ?? <Hero showProHint={isStatusKnown && !isPro} />)}
 
       <View className={hideHero ? 'mt-2 gap-3' : 'mt-10 gap-3'}>
         {available.apple ? (

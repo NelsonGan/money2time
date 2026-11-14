@@ -1564,6 +1564,11 @@ const id = {
     profile_name_add: 'Tambahkan nama Anda',
     profile_edit_name: 'Edit nama',
     profile_edit_photo: 'Ganti foto',
+    account_sign_in: 'Masuk',
+    account_signed_out: 'Belum masuk',
+    account_signed_in_a11y: 'Masuk sebagai {{email}}',
+    account_sign_in_prompt:
+      'Masuk untuk sinkron dengan Cloud Sync dan berbagi album serta buku. Tidak perlu Pro.',
     stat_days: 'Hari melacak',
     stat_transactions: 'Tercatat',
     stat_this_month: 'Bulan ini',

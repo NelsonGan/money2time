@@ -1564,6 +1564,11 @@ const es = {
     profile_name_add: 'Añade tu nombre',
     profile_edit_name: 'Editar nombre',
     profile_edit_photo: 'Cambiar foto',
+    account_sign_in: 'Iniciar sesión',
+    account_signed_out: 'Sin iniciar sesión',
+    account_signed_in_a11y: 'Sesión iniciada como {{email}}',
+    account_sign_in_prompt:
+      'Inicia sesión para sincronizar con Cloud Sync y compartir álbumes y libros. No necesitas Pro.',
     stat_days: 'Días registrando',
     stat_transactions: 'Registradas',
     stat_this_month: 'Este mes',

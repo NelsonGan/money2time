@@ -1534,6 +1534,11 @@ const th = {
     profile_name_add: 'เพิ่มชื่อของคุณ',
     profile_edit_name: 'แก้ไขชื่อ',
     profile_edit_photo: 'เปลี่ยนรูปภาพ',
+    account_sign_in: 'ลงชื่อเข้าใช้',
+    account_signed_out: 'ยังไม่ได้ลงชื่อเข้าใช้',
+    account_signed_in_a11y: 'ลงชื่อเข้าใช้เป็น {{email}}',
+    account_sign_in_prompt:
+      'ลงชื่อเข้าใช้เพื่อซิงค์ด้วย Cloud Sync และแชร์อัลบั้มและสมุดบัญชี ไม่ต้องมี Pro',
     stat_days: 'วันที่บันทึก',
     stat_transactions: 'บันทึกแล้ว',
     stat_this_month: 'เดือนนี้',

@@ -1556,6 +1556,11 @@ const uk = {
     profile_name_add: 'Додайте своє імʼя',
     profile_edit_name: 'Редагувати імʼя',
     profile_edit_photo: 'Змінити фото',
+    account_sign_in: 'Увійти',
+    account_signed_out: 'Вхід не виконано',
+    account_signed_in_a11y: 'Ви увійшли як {{email}}',
+    account_sign_in_prompt:
+      'Увійдіть, щоб синхронізувати дані через Cloud Sync і ділитися альбомами та книгами. Pro не потрібен.',
     stat_days: 'Днів обліку',
     stat_transactions: 'Записано',
     stat_this_month: 'Цього місяця',

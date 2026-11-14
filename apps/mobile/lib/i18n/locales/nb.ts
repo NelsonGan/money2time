@@ -1557,6 +1557,11 @@ const nb = {
     profile_name_add: 'Legg til navnet ditt',
     profile_edit_name: 'Rediger navn',
     profile_edit_photo: 'Endre bilde',
+    account_sign_in: 'Logg inn',
+    account_signed_out: 'Ikke logget inn',
+    account_signed_in_a11y: 'Logget inn som {{email}}',
+    account_sign_in_prompt:
+      'Logg inn for å synkronisere med Cloud Sync og dele album og regnskap. Du trenger ikke Pro.',
     stat_days: 'Dager sporet',
     stat_transactions: 'Registrert',
     stat_this_month: 'Denne måneden',

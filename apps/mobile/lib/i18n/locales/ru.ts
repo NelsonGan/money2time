@@ -1561,6 +1561,11 @@ const ru = {
     profile_name_add: 'Добавьте своё имя',
     profile_edit_name: 'Изменить имя',
     profile_edit_photo: 'Изменить фото',
+    account_sign_in: 'Войти',
+    account_signed_out: 'Вход не выполнен',
+    account_signed_in_a11y: 'Вы вошли как {{email}}',
+    account_sign_in_prompt:
+      'Войдите, чтобы синхронизировать данные через Cloud Sync и делиться альбомами и книгами. Pro не нужен.',
     stat_days: 'Дней учёта',
     stat_transactions: 'Записано',
     stat_this_month: 'В этом месяце',

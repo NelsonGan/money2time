@@ -1533,6 +1533,11 @@ const ko = {
     profile_name_add: '이름 추가',
     profile_edit_name: '이름 편집',
     profile_edit_photo: '사진 변경',
+    account_sign_in: '로그인',
+    account_signed_out: '로그인 안 됨',
+    account_signed_in_a11y: '{{email}}(으)로 로그인됨',
+    account_sign_in_prompt:
+      '로그인하면 Cloud Sync로 동기화하고 앨범과 장부를 공유할 수 있어요. Pro가 없어도 돼요.',
     stat_days: '기록 일수',
     stat_transactions: '기록됨',
     stat_this_month: '이번 달',

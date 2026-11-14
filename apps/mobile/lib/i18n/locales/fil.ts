@@ -1580,6 +1580,11 @@ const fil = {
     profile_name_add: 'Idagdag ang pangalan mo',
     profile_edit_name: 'I-edit ang pangalan',
     profile_edit_photo: 'Palitan ang litrato',
+    account_sign_in: 'Mag-sign in',
+    account_signed_out: 'Hindi naka-sign in',
+    account_signed_in_a11y: 'Naka-sign in bilang {{email}}',
+    account_sign_in_prompt:
+      'Mag-sign in para mag-sync gamit ang Cloud Sync at magbahagi ng mga album at ledger. Hindi mo kailangan ng Pro.',
     stat_days: 'Araw na sinusubaybayan',
     stat_transactions: 'Naitala',
     stat_this_month: 'Ngayong buwan',

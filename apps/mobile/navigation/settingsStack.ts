@@ -44,6 +44,8 @@ export type SettingsStackParamList = {
   AutoBackupSettings: undefined;
   WebDashboard: undefined;
   CloudSync: undefined;
+  /** The account sign-in from the Settings profile card. */
+  SignIn: undefined;
   StatementImport: undefined;
   StatementImportList: {
     section: 'expense' | 'income';

@@ -1572,6 +1572,11 @@ const nl = {
     profile_name_add: 'Voeg je naam toe',
     profile_edit_name: 'Naam bewerken',
     profile_edit_photo: 'Foto wijzigen',
+    account_sign_in: 'Inloggen',
+    account_signed_out: 'Niet ingelogd',
+    account_signed_in_a11y: 'Ingelogd als {{email}}',
+    account_sign_in_prompt:
+      'Log in om te synchroniseren met Cloud Sync en albums en grootboeken te delen. Je hebt geen Pro nodig.',
     stat_days: 'Dagen bijgehouden',
     stat_transactions: 'Vastgelegd',
     stat_this_month: 'Deze maand',
