@@ -8,7 +8,7 @@ import { useMemo, useState } from "react";
 import { DAYS_PER_MONTH, daysBetween, monthRange, shiftMonthKey } from "@/lib/backup/dates";
 import type { Tx } from "@/lib/backup/model";
 import { memberShare, type TripMember, tripPeople } from "@/lib/backup/member-share";
-import { balancesByAlbum, type PayerSplit } from "@/lib/backup/split-payer";
+import { balancesByAlbum, sharedAlbumIds, type PayerSplit } from "@/lib/backup/split-payer";
 
 import type { ItemRow } from "@/lib/backup/types";
 
@@ -449,11 +449,12 @@ export function SplitsView() {
 
   // One net balance per person, either way, as the app's Balances lists them:
   // what they owe on the bills the user paid, less what the user owes them
-  // for the bills they paid. Balances are kept per album, as in the app: an
-  // album's bills are listed under it, and the people are the bills in none.
+  // for the bills they paid. As in the app, a shared album's bills are listed
+  // under it, and the people are every other bill (an album of the user's own
+  // is settled here like any bill).
   const { people, albums } = useMemo(
-    () => balancesByAlbum(model.splitDebts, model.splitOwed, model.trips),
-    [model.splitDebts, model.splitOwed, model.trips],
+    () => balancesByAlbum(model.splitDebts, model.splitOwed, model.trips, sharedAlbumIds(model.txs)),
+    [model.splitDebts, model.splitOwed, model.trips, model.txs],
   );
   // The totals are every open share, each once (a bill can be in two albums).
   const owed = model.splitDebts.reduce((s, debt) => s + debt.amountBase, 0);

@@ -3,10 +3,9 @@ import type { DbMigration } from './types';
 
 // Albums as the face of a group (README: Album members and shared albums).
 //
-// An album can list the people it is split with:
-// - albums.split_with_json: `[{ id, name }]`, the people of an album that is
-//   not shared. While the album is active a new expense starts split with
-//   them.
+// - albums.split_with_json: unused. It held typed people for an album that is
+//   not shared, before only shared albums had people; nothing reads or writes
+//   it now.
 //
 // A shared album's group lives in its own cloud database, reached as a
 // shared ledger is. The group's id is the album's id: the album of the person
@@ -15,9 +14,10 @@ import type { DbMigration } from './types';
 // `ledger_id`, the column Cloud Sync routes a row by, so their rows go to the
 // group's database and nowhere else. They are not a ledger's data: no ledger
 // has that id, and a backup leaves them out.
-// - album_members: the people of the group. `user_id` is the Cloud Sync
-//   account of someone who joined; null is a placeholder, a name someone in
-//   the group added, which a person who joins later can take over.
+// - album_members: the people of the group, each added by their own phone
+//   when they join. `user_id` is the Cloud Sync account of someone in the
+//   share; null is someone who left (their row stays, so the bills that name
+//   them stay whole, and they take it back if they join again).
 // - album_expenses: one row per bill, with who paid (`paid_by`, a member id)
 //   and what each person's share is (`shares_json`, `[{ memberId, amount }]`).
 // - album_settlements: a payment from one member to another for a bill. Rows

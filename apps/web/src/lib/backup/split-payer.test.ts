@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { balancesByAlbum, billPayer, isPayBackPart, netByPerson, owedToPayers, partyKey } from "./split-payer.ts";
+import { balancesByAlbum, billPayer, isPayBackPart, netByPerson, owedToPayers, partyKey, sharedAlbumIds } from "./split-payer.ts";
 
 const dinner = [
   { id: "me", transaction_id: "dinner", amount: 30, is_self: 1 },
@@ -78,7 +78,7 @@ test("a real user is one person whatever name they were typed under", () => {
   ]);
 });
 
-test("an album answers for its own bills, and the people list for the rest", () => {
+test("a shared album answers for its own bills, and the people list for the rest", () => {
   const balances = balancesByAlbum(
     [
       { person: "Aisha", amountBase: 30, txId: "dinner" },
@@ -90,6 +90,7 @@ test("an album answers for its own bills, and the people list for the rest", () 
       { id: "bali", name: "Bali trip", txIds: ["dinner", "boat"] },
       { id: "quiet", name: "Nothing open", txIds: ["paid"] },
     ],
+    new Set(["bali", "quiet"]),
   );
   assert.deepEqual(balances.people, [{ person: "Aisha", net: 12, count: 1 }]);
   assert.deepEqual(balances.albums, [
@@ -103,4 +104,29 @@ test("an album answers for its own bills, and the people list for the rest", () 
       ],
     },
   ]);
+});
+
+test("an album of the user's own is settled on the Balances page like any bill", () => {
+  const balances = balancesByAlbum(
+    [
+      { person: "Aisha", amountBase: 30, txId: "dinner" },
+      { person: "Ben", amountBase: 20, txId: "taxi" },
+    ],
+    [],
+    [
+      { id: "bali", name: "Bali trip", txIds: ["dinner"] },
+      { id: "home", name: "Weekend", txIds: ["taxi"] },
+    ],
+    new Set(["bali"]),
+  );
+  assert.deepEqual(balances.people, [{ person: "Ben", net: 20, count: 1 }]);
+  assert.deepEqual(
+    balances.albums.map((album) => album.id),
+    ["bali"],
+  );
+});
+
+test("an album is shared when its group's bills are in the data", () => {
+  const ids = sharedAlbumIds([{ albumGroupId: "bali" }, {}, { albumGroupId: "bali" }, { albumGroupId: "ski" }]);
+  assert.deepEqual([...ids].sort(), ["bali", "ski"]);
 });
