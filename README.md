@@ -5593,7 +5593,8 @@ usual; only the guide copy itself is English on both platforms.
 
 The landing gallery in `media/screenshots/<language>/` uses the nine iPhone
 marketing scenes from [App Studio](#app-studio), the same set the App Store
-gallery uses. The current set was exported on November 13, 2026, with local
+gallery uses. The current set was exported on November 13, 2026 (the privacy
+scene again on November 14, for its new badge), with local
 app data in all 23 languages; regional English pages share the English set. To refresh it, export **iPhone → Export All Locales** in App
 Studio, convert the PNGs to WebP at quality 90 while keeping their
 1284 × 2778 dimensions, and use the scene IDs as filenames. Keep the order and
@@ -6125,8 +6126,10 @@ panels):
    by design) and the book that inspired the app. The only scene without a
    phone, laid out by `src/components/PrivacyPanel.tsx` with its copy in each
    locale's `s15`. The mascot badge and the three promise icons are generated
-   art in `public/assets/privacy/`, painted in the mascot's crayon style; the
-   rest is drawn in code. Each promise must stay true: data lives on the phone and
+   art in `public/assets/privacy/`. The badge is `mascots/premium-lifetime.png`
+   with its card edited into a shield, so the chick stays exactly the app's
+   mascot; redo it from the mascot art, never draw a new chick. The icons are
+   painted in a softer crayon take on it. The rest is drawn in code. Each promise must stay true: data lives on the phone and
    Cloud Sync is an opt-in, so it never says data "never leaves your phone".
    Update the user count in all 23 locales when it moves.
 3. Accounts: where money is held.

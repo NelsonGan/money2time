@@ -7,8 +7,10 @@
  * Top to bottom: the headline beside the chick mascot hugging a shield, the
  * laurel rating in a card, one card per promise (Local first, No ads, Private
  * by design) and the book behind the app. The mascot badge and the three
- * promise icons are generated art in `public/assets/privacy/`, painted in the
- * mascot's crayon style; everything else is drawn here.
+ * promise icons are generated art in `public/assets/privacy/`: the badge is
+ * `mascots/premium-lifetime.png` with its card edited into a shield, and the
+ * icons are painted in a crayon take on the mascot; everything else is drawn
+ * here.
  */
 
 import { DISPLAY_FONT, renderHeadline } from './sceneParts';
