@@ -8,28 +8,33 @@ import { sharedLedgerFor } from '~/features/cloudSync/services/sharedLedgerStore
 import { getSQLite } from '~/lib/db/client';
 import { DEFAULT_LEDGER_ID } from '~/lib/db/ledgerScope';
 import { I18n } from '~/lib/i18n';
-import { albumGroupsRepository } from '~/lib/repositories/albumGroupsRepository';
+import { albumGroupsRepository, GROUP_COVER_PATH } from '~/lib/repositories/albumGroupsRepository';
 import { getAlbumCoverUri } from '~/services/userAssets';
-import type { AlbumExpense, AlbumMember, AlbumSettlement } from '~/types';
+import type { AlbumActivity, AlbumExpense, AlbumMember, AlbumSettlement } from '~/types';
 import { nowIso } from '~/utils/id';
 
 import { cleanPersonName } from '../lib/albumPeople';
 
 const cache = new Map<string, AlbumMember[]>();
 const expenseCache = new Map<string, AlbumExpense[]>();
+const allBillsCache = new Map<string, AlbumExpense[]>();
 const settlementCache = new Map<string, AlbumSettlement[]>();
 const simplifyCache = new Map<string, boolean>();
+const activityCache = new Map<string, AlbumActivity[]>();
 const listeners = new Set<() => void>();
 const NO_MEMBERS: AlbumMember[] = [];
 const NO_EXPENSES: AlbumExpense[] = [];
 const NO_SETTLEMENTS: AlbumSettlement[] = [];
+const NO_ACTIVITY: AlbumActivity[] = [];
 
 /** A group's rows changed (a sync, an edit, a share or its end): readers look again. */
 export function notifyAlbumGroups(): void {
   cache.clear();
   expenseCache.clear();
+  allBillsCache.clear();
   settlementCache.clear();
   simplifyCache.clear();
+  activityCache.clear();
   for (const listener of listeners) listener();
 }
 
@@ -54,17 +59,31 @@ export function listGroupMembers(groupId: string | null): AlbumMember[] {
   return members;
 }
 
+/**
+ * Every bill of a group, deleted ones too: a deleted bill's payments still
+ * count in Balances (owed back), and the Activity tab restores it. The same
+ * array until something changes.
+ */
+export function listGroupBills(groupId: string | null): AlbumExpense[] {
+  if (!groupId) return NO_EXPENSES;
+  const known = allBillsCache.get(groupId);
+  if (known) return known;
+  let bills: AlbumExpense[];
+  try {
+    bills = albumGroupsRepository.listExpenses(groupId);
+  } catch {
+    bills = NO_EXPENSES;
+  }
+  allBillsCache.set(groupId, bills);
+  return bills;
+}
+
 /** A group's bills that still stand. The same array until something changes. */
 export function listGroupExpenses(groupId: string | null): AlbumExpense[] {
   if (!groupId) return NO_EXPENSES;
   const known = expenseCache.get(groupId);
   if (known) return known;
-  let expenses: AlbumExpense[];
-  try {
-    expenses = albumGroupsRepository.listExpenses(groupId).filter((item) => !item.deletedAt);
-  } catch {
-    expenses = NO_EXPENSES;
-  }
+  const expenses = listGroupBills(groupId).filter((item) => !item.deletedAt);
   expenseCache.set(groupId, expenses);
   return expenses;
 }
@@ -82,6 +101,22 @@ export function listGroupSettlements(groupId: string | null): AlbumSettlement[] 
   }
   settlementCache.set(groupId, settlements);
   return settlements;
+}
+
+/** A group's activity log, newest first. The same array until something changes. */
+export function listGroupActivity(groupId: string | null): AlbumActivity[] {
+  if (!groupId) return NO_ACTIVITY;
+  const known = activityCache.get(groupId);
+  if (known) return known;
+  let activity: AlbumActivity[];
+  try {
+    activity = albumGroupsRepository.listActivity(groupId);
+  } catch {
+    // Before migration 093 has run.
+    activity = NO_ACTIVITY;
+  }
+  activityCache.set(groupId, activity);
+  return activity;
 }
 
 /** Whether the group has "Simplify group debts" on. */
@@ -173,24 +208,12 @@ export function ensureLocalAlbum(share: { ledgerId: string; name: string | null 
 }
 
 /**
- * An album just made shared on this phone (an album is shared when it is
- * created, never later): its group starts with the user alone; the others
- * join with its link.
+ * The album's cover as the group can take it (an image of the album-cover
+ * store), or null: published to the group as the album is shared.
  */
-export function beginAlbumGroup(albumId: string, self: { userId: string; name: string }): void {
-  const album = albumRow(albumId);
-  if (!album) return;
-  // Its cover is the group's from the start, so everyone who joins gets it.
-  if (album.cover_photo_uri) albumGroupsRepository.setGroupCover(albumId, album.cover_photo_uri);
-  const existing = albumGroupsRepository.listAllMembers(albumId);
-  if (!existing.some((member) => member.userId === self.userId && !member.deletedAt)) {
-    albumGroupsRepository.createMember(albumId, {
-      name: cleanPersonName(self.name),
-      userId: self.userId,
-      sortOrder: 0,
-    });
-  }
-  notifyAlbumGroups();
+export function albumCoverPath(albumId: string): string | null {
+  const cover = albumRow(albumId)?.cover_photo_uri ?? null;
+  return cover && GROUP_COVER_PATH.test(cover) ? cover : null;
 }
 
 /**
@@ -198,20 +221,13 @@ export function beginAlbumGroup(albumId: string, self: { userId: string; name: s
  * changes it changes it for everyone (`updateAlbum` writes the group's), and
  * each phone takes the group's cover onto its own album here, once its image
  * has come down with the group's rows: until then the album keeps the cover
- * it shows, and a later sync takes it. A group nobody has set a cover in yet
- * (shared before covers were the group's) gets the owner's. Returns whether
- * the album changed.
+ * it shows, and a later sync takes it. Returns whether the album changed.
  */
-export function syncAlbumCover(groupId: string, role: 'owner' | 'member'): boolean {
+export function syncAlbumCover(groupId: string): boolean {
   const album = albumRow(groupId);
   if (!album || album.deleted_at) return false;
   const cover = albumGroupsRepository.groupCover(groupId);
-  if (cover === undefined) {
-    if (role === 'owner' && album.cover_photo_uri) {
-      albumGroupsRepository.setGroupCover(groupId, album.cover_photo_uri);
-    }
-    return false;
-  }
+  if (cover === undefined) return false;
   if (cover === (album.cover_photo_uri ?? null)) return false;
   if (cover !== null && !getAlbumCoverUri(cover)) return false;
   getSQLite().runSync('UPDATE albums SET cover_photo_uri = ?, updated_at = ? WHERE id = ?', [
@@ -223,36 +239,15 @@ export function syncAlbumCover(groupId: string, role: 'owner' | 'member'): boole
 }
 
 /**
- * Someone left a shared album, or its owner took them out: their row stays,
- * with its bills, so nobody's balances change, but it no longer names an
- * account (`userId` null). New bills leave them out, and a payment from them
- * is recorded by the person it went to (README: Who can change what).
- * `userId`: the account that left, when it is the user's own.
- */
-export function markMemberLeft(groupId: string, memberId: string): void {
-  albumGroupsRepository.updateMember(groupId, memberId, { userId: null });
-  notifyAlbumGroups();
-}
-
-/** The user's own member in a group, marked as having left (see `markMemberLeft`). */
-export function markSelfLeft(groupId: string, userId: string | null): void {
-  if (!userId) return;
-  const self = albumGroupsRepository
-    .listMembers(groupId)
-    .find((member) => member.userId === userId && !member.deletedAt);
-  if (self) markMemberLeft(groupId, self.id);
-}
-
-/**
  * An album that is no longer shared on this phone (sharing stopped, the user
  * left or was removed, or signed out): it goes on as an album of the user's
  * own. The group's rows leave the phone without recording deletions, since
  * the group is not this phone's to delete, and the group keeps everything the
  * user wrote, so nobody else's bills or balances change; the user's own
  * entries for its bills stay, as ordinary split bills (settled on the
- * Balances page). `selfUserId`: the account this phone was in the group as.
+ * Balances page).
  */
-export function releaseAlbumGroup(groupId: string, _selfUserId: string | null): void {
+export function releaseAlbumGroup(groupId: string): void {
   const db = getSQLite();
   const now = nowIso();
   db.runSync(

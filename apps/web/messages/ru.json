@@ -1338,7 +1338,45 @@
       "transactionsTitle": "Транзакции",
       "everyone": "Все",
       "me": "Я",
-      "pick": "Выберите поездку, чтобы увидеть расходы по ней."
+      "pick": "Выберите поездку, чтобы увидеть расходы по ней.",
+      "activity": {
+        "title": "Активность",
+        "empty_title": "Пока нет активности",
+        "empty_message": "Здесь появляется каждое изменение в этом альбоме.",
+        "restore": "Восстановить",
+        "restoring": "Восстановление…",
+        "you": "Вы",
+        "you_lower": "вы",
+        "untitled": "счёт",
+        "added": "{actor}: добавлено {title} · {money}",
+        "said_you_paid": "{actor}: {title} оплачено вами · {money}",
+        "restored": "{actor}: восстановлено {title} · {money}",
+        "deleted": "{actor}: удалено {title} · {money}",
+        "changed_amount": "{actor}: изменено {title}: {before} → {after}",
+        "changed_payer": "{actor}: изменён плательщик {title}: {before} → {after}",
+        "changed_split": "{actor}: изменено разделение {title}",
+        "renamed_bill": "{actor}: {before} переименовано в {after}",
+        "moved_bill": "{actor}: {title} перенесено на {day}",
+        "changed_bill": "{actor}: изменено {title}",
+        "changed_album": "{actor}: изменён альбом",
+        "your_share": "Ваша доля {money}",
+        "your_share_change": "Ваша доля {before} → {after}",
+        "your_share_gone": "Вашей доли {money} больше нет",
+        "you_paid": "Оплачено вами",
+        "you_paid_choose_account": "Оплачено вами · Выберите счёт",
+        "they_paid": "Теперь оплатил(а) {name}",
+        "choose_account": "Выберите счёт",
+        "paid": "{from} → {to}: оплачено {money}",
+        "paid_even": "{from} → {to}: оплачено {money} для выравнивания",
+        "undid_payment": "{actor}: отменён платёж {from} → {to} на {money}",
+        "recorded_by": "Записал(а): {actor}",
+        "joined": "{name}: вступление в альбом",
+        "left": "{name}: выход из альбома",
+        "renamed_member": "{before} теперь {after}",
+        "simplify_on": "{actor}: включено «Упростить долги»",
+        "simplify_off": "{actor}: выключено «Упростить долги»",
+        "cover": "{actor}: изменена обложка"
+      }
     },
     "items": {
       "emptyTitle": "Пока нет вещей",
@@ -2053,7 +2091,17 @@
           "yearly": "/год"
         }
       },
-      "notePlaceholder": "Новая заметка. Оставьте пустой, чтобы удалить её."
+      "notePlaceholder": "Новая заметка. Оставьте пустой, чтобы удалить её.",
+      "sharedBill": {
+        "intro": "В общем альбоме {album}: любой участник может изменить этот счёт. Категория, счёт, подробности и настроение остаются вашими.",
+        "paidBy": "Оплатил(а)",
+        "splitBetween": "Разделено между",
+        "nobodyElse": "Разделите его с кем-то ещё из альбома или пусть заплатит кто-то другой.",
+        "deleteBody": "Этот счёт в общем альбоме. Удаление уберёт его у всех. Платежи по нему останутся, а уже оплаченное нужно будет вернуть.",
+        "deleteSome": "Некоторые из них в общем альбоме. Удаление уберёт их у всех; платежи по ним останутся.",
+        "payments": "Платежи по счёту общего альбома записываются в приложении.",
+        "accountOthers": "Некоторые оплатил кто-то другой. Они попадут на один из ваших счетов, когда вы вернёте деньги."
+      }
     },
     "cloud": {
       "strip": "Данные с {device}, синхронизированы {date}.",

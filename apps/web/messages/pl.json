@@ -1338,7 +1338,45 @@
       "transactionsTitle": "Transakcje",
       "everyone": "Wszyscy",
       "me": "Ja",
-      "pick": "Wybierz podróż, by zobaczyć jej podział."
+      "pick": "Wybierz podróż, by zobaczyć jej podział.",
+      "activity": {
+        "title": "Aktywność",
+        "empty_title": "Brak aktywności",
+        "empty_message": "Każda zmiana w tym albumie pojawi się tutaj.",
+        "restore": "Przywróć",
+        "restoring": "Przywracanie…",
+        "you": "Ty",
+        "you_lower": "ty",
+        "untitled": "rachunek",
+        "added": "{actor}: dodano {title} · {money}",
+        "said_you_paid": "{actor}: {title} opłacone przez Ciebie · {money}",
+        "restored": "{actor}: przywrócono {title} · {money}",
+        "deleted": "{actor}: usunięto {title} · {money}",
+        "changed_amount": "{actor}: zmieniono {title}: {before} → {after}",
+        "changed_payer": "{actor}: zmieniono płacącego za {title}: {before} → {after}",
+        "changed_split": "{actor}: zmieniono podział {title}",
+        "renamed_bill": "{actor}: zmieniono nazwę {before} na {after}",
+        "moved_bill": "{actor}: przeniesiono {title} na {day}",
+        "changed_bill": "{actor}: zmieniono {title}",
+        "changed_album": "{actor}: zmieniono album",
+        "your_share": "Twój udział {money}",
+        "your_share_change": "Twój udział {before} → {after}",
+        "your_share_gone": "Twój udział {money} zniknął",
+        "you_paid": "Zapłacono przez Ciebie",
+        "you_paid_choose_account": "Zapłacono przez Ciebie · Wybierz konto",
+        "they_paid": "Teraz zapłacił(a) {name}",
+        "choose_account": "Wybierz konto",
+        "paid": "{from} → {to}: zapłacono {money}",
+        "paid_even": "{from} → {to}: zapłacono {money} na wyrównanie",
+        "undid_payment": "{actor}: cofnięto płatność {from} → {to} na {money}",
+        "recorded_by": "Zapisane przez: {actor}",
+        "joined": "{name}: dołączenie do albumu",
+        "left": "{name}: opuszczenie albumu",
+        "renamed_member": "{before} to teraz {after}",
+        "simplify_on": "{actor}: włączono Upraszczanie długów",
+        "simplify_off": "{actor}: wyłączono Upraszczanie długów",
+        "cover": "{actor}: zmieniono okładkę"
+      }
     },
     "items": {
       "emptyTitle": "Brak przedmiotów",
@@ -2053,7 +2091,17 @@
           "yearly": "/rok"
         }
       },
-      "notePlaceholder": "Nowa notatka. Zostaw puste, aby ją usunąć."
+      "notePlaceholder": "Nowa notatka. Zostaw puste, aby ją usunąć.",
+      "sharedBill": {
+        "intro": "W udostępnionym albumie {album}: każdy w nim może zmienić ten rachunek. Kategoria, konto, szczegóły i nastrój pozostają Twoje.",
+        "paidBy": "Zapłacił(a)",
+        "splitBetween": "Podzielone między",
+        "nobodyElse": "Podziel go z kimś innym z albumu albo niech zapłaci ktoś inny.",
+        "deleteBody": "Ten rachunek jest w udostępnionym albumie. Usunięcie go usuwa go dla wszystkich. Płatności zostają, a to, co już zapłacono, trzeba oddać.",
+        "deleteSome": "Niektóre są w udostępnionym albumie. Usunięcie ich usuwa je dla wszystkich; płatności zostają.",
+        "payments": "Płatności za rachunek z udostępnionego albumu zapisuje się w aplikacji.",
+        "accountOthers": "Za niektóre zapłacił ktoś inny. Trafią na jedno z Twoich kont, gdy oddasz pieniądze."
+      }
     },
     "cloud": {
       "strip": "Dane z {device}, zsynchronizowane {date}.",

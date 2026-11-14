@@ -1338,7 +1338,45 @@
       "transactionsTitle": "거래",
       "everyone": "모두",
       "me": "나",
-      "pick": "여행을 선택하면 내역을 볼 수 있어요."
+      "pick": "여행을 선택하면 내역을 볼 수 있어요.",
+      "activity": {
+        "title": "활동",
+        "empty_title": "아직 활동이 없어요",
+        "empty_message": "이 앨범에서 누가 무엇을 바꾸든 여기에 표시돼요.",
+        "restore": "복원",
+        "restoring": "복원 중…",
+        "you": "나",
+        "you_lower": "나",
+        "untitled": "지출",
+        "added": "{actor} 님이 {title} 추가 · {money}",
+        "said_you_paid": "{actor} 님이 내가 {title}을(를) 결제했다고 기록 · {money}",
+        "restored": "{actor} 님이 {title} 복원 · {money}",
+        "deleted": "{actor} 님이 {title} 삭제 · {money}",
+        "changed_amount": "{actor} 님이 {title} 변경: {before} → {after}",
+        "changed_payer": "{actor} 님이 {title} 결제자 변경: {before} → {after}",
+        "changed_split": "{actor} 님이 {title} 나누기 변경",
+        "renamed_bill": "{actor} 님이 {before}을(를) {after}(으)로 이름 변경",
+        "moved_bill": "{actor} 님이 {title}을(를) {day}(으)로 이동",
+        "changed_bill": "{actor} 님이 {title} 변경",
+        "changed_album": "{actor} 님이 앨범 변경",
+        "your_share": "내 몫 {money}",
+        "your_share_change": "내 몫 {before} → {after}",
+        "your_share_gone": "내 몫 {money}이(가) 없어졌어요",
+        "you_paid": "내가 결제한 것으로",
+        "you_paid_choose_account": "내가 결제한 것으로 · 계좌 선택",
+        "they_paid": "이제 {name} 님이 결제",
+        "choose_account": "계좌 선택",
+        "paid": "{from} → {to} {money} 결제",
+        "paid_even": "{from} → {to} 정산을 위해 {money} 결제",
+        "undid_payment": "{actor} 님이 {from} → {to} {money} 결제 취소",
+        "recorded_by": "기록: {actor}",
+        "joined": "{name} 님이 앨범에 참여",
+        "left": "{name} 님이 앨범을 나감",
+        "renamed_member": "{before} → 이제 {after}",
+        "simplify_on": "{actor} 님이 그룹 빚 간소화 켬",
+        "simplify_off": "{actor} 님이 그룹 빚 간소화 끔",
+        "cover": "{actor} 님이 커버 변경"
+      }
     },
     "items": {
       "emptyTitle": "아직 물건이 없습니다",
@@ -2053,7 +2091,17 @@
           "yearly": "/년"
         }
       },
-      "notePlaceholder": "새 메모. 비워 두면 메모가 지워집니다."
+      "notePlaceholder": "새 메모. 비워 두면 메모가 지워집니다.",
+      "sharedBill": {
+        "intro": "공유 앨범 {album}의 지출입니다. 앨범의 누구나 바꿀 수 있어요. 카테고리, 계좌, 상세 내용, 기분은 내 것으로 남아요.",
+        "paidBy": "결제한 사람",
+        "splitBetween": "나눌 사람",
+        "nobodyElse": "앨범의 다른 사람과 나누거나 다른 사람이 결제하게 하세요.",
+        "deleteBody": "이 지출은 공유 앨범에 있어요. 삭제하면 모두에게서 사라져요. 결제 내역은 남고, 이미 낸 금액은 돌려받아야 해요.",
+        "deleteSome": "일부는 공유 앨범에 있어요. 삭제하면 모두에게서 사라지고, 결제 내역은 남아요.",
+        "payments": "공유 앨범 지출의 결제는 앱에서 기록해요.",
+        "accountOthers": "일부는 다른 사람이 결제했어요. 갚고 나면 내 계좌로 들어가요."
+      }
     },
     "cloud": {
       "strip": "{device}에서 {date}에 동기화된 데이터.",

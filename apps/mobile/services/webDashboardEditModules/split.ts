@@ -254,8 +254,9 @@ function planUpdate(
   // Split Bill rows cannot carry, so an edit from a page that does not know
   // would turn it into a bill the user paid with nobody owing.
   if (isFriendPaidBill(liveSplits(current))) return tools.refuse('invalid');
-  // So is a shared album's bill: it is the group's, and this entry only
-  // follows from it (features/albums/services/albumGroupSync.ts).
+  // So is a shared album's bill here: it is the group's, and this entry only
+  // follows from it (features/albums/services/albumGroupSync.ts). Its
+  // payer and shares change through `module:albumbill` (./albumBill.ts).
   if (current.albumGroupId) return tools.refuse('invalid');
   const { set } = op;
   // A refund and its expense stay in step, as the core planner keeps them.

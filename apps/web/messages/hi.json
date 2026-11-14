@@ -1338,7 +1338,45 @@
       "transactionsTitle": "लेन-देन",
       "everyone": "सभी",
       "me": "मैं",
-      "pick": "ब्योरा देखने के लिए कोई यात्रा चुनें।"
+      "pick": "ब्योरा देखने के लिए कोई यात्रा चुनें।",
+      "activity": {
+        "title": "गतिविधि",
+        "empty_title": "अभी कोई गतिविधि नहीं",
+        "empty_message": "इस एल्बम में किया गया हर बदलाव यहाँ दिखता है।",
+        "restore": "वापस लाएँ",
+        "restoring": "वापस ला रहे हैं…",
+        "you": "आप",
+        "you_lower": "आप",
+        "untitled": "एक बिल",
+        "added": "{actor}: {title} जोड़ा · {money}",
+        "said_you_paid": "{actor}: {title} का भुगतान आपने किया · {money}",
+        "restored": "{actor}: {title} वापस लाया · {money}",
+        "deleted": "{actor}: {title} हटाया · {money}",
+        "changed_amount": "{actor}: {title} बदला: {before} → {after}",
+        "changed_payer": "{actor}: {title} का भुगतानकर्ता बदला: {before} → {after}",
+        "changed_split": "{actor}: {title} का बँटवारा बदला",
+        "renamed_bill": "{actor}: {before} का नाम {after} किया",
+        "moved_bill": "{actor}: {title} को {day} पर ले जाया",
+        "changed_bill": "{actor}: {title} बदला",
+        "changed_album": "{actor}: एल्बम बदला",
+        "your_share": "आपका हिस्सा {money}",
+        "your_share_change": "आपका हिस्सा {before} → {after}",
+        "your_share_gone": "आपका {money} का हिस्सा हट गया",
+        "you_paid": "भुगतान आपने किया",
+        "you_paid_choose_account": "भुगतान आपने किया · खाता चुनें",
+        "they_paid": "अब {name} ने भुगतान किया",
+        "choose_account": "खाता चुनें",
+        "paid": "{from} → {to}: {money} चुकाए",
+        "paid_even": "{from} → {to}: बराबर करने के लिए {money} चुकाए",
+        "undid_payment": "{actor}: {from} → {to} {money} का भुगतान वापस लिया",
+        "recorded_by": "दर्ज किया: {actor}",
+        "joined": "{name} एल्बम में जुड़े",
+        "left": "{name} ने एल्बम छोड़ा",
+        "renamed_member": "{before} अब {after} है",
+        "simplify_on": "{actor}: ग्रुप कर्ज़ सरल करें चालू किया",
+        "simplify_off": "{actor}: ग्रुप कर्ज़ सरल करें बंद किया",
+        "cover": "{actor}: कवर बदला"
+      }
     },
     "items": {
       "emptyTitle": "अभी कोई चीज़ नहीं",
@@ -2053,7 +2091,17 @@
           "yearly": "/वर्ष"
         }
       },
-      "notePlaceholder": "नया नोट। इसे हटाने के लिए खाली छोड़ दें।"
+      "notePlaceholder": "नया नोट। इसे हटाने के लिए खाली छोड़ दें।",
+      "sharedBill": {
+        "intro": "शेयर किए गए एल्बम {album} में: इसमें कोई भी इस बिल को बदल सकता है। इसकी कैटेगरी, खाता, विवरण और मूड आपके ही रहते हैं।",
+        "paidBy": "भुगतान किया",
+        "splitBetween": "इनमें बाँटा",
+        "nobodyElse": "इसे एल्बम में किसी और के साथ बाँटें, या किसी और से भुगतान करवाएँ।",
+        "deleteBody": "यह बिल एक शेयर किए गए एल्बम में है। इसे हटाने से यह सबके लिए हट जाएगा। इस पर किए भुगतान बने रहेंगे, और जो पहले ही चुकाया गया है उसे लौटाना होगा।",
+        "deleteSome": "इनमें से कुछ शेयर किए गए एल्बम में हैं। इन्हें हटाने से ये सबके लिए हट जाएँगे; इन पर किए भुगतान बने रहेंगे।",
+        "payments": "शेयर किए गए एल्बम के बिल के भुगतान ऐप में दर्ज होते हैं।",
+        "accountOthers": "इनमें से कुछ का भुगतान किसी और ने किया। आपके चुकाने के बाद ये आपके किसी खाते में जाएँगे।"
+      }
     },
     "cloud": {
       "strip": "{device} से डेटा, {date} को सिंक किया गया।",

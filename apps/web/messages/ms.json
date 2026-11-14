@@ -1338,7 +1338,45 @@
       "transactionsTitle": "Transaksi",
       "everyone": "Semua",
       "me": "Saya",
-      "pick": "Pilih satu perjalanan untuk melihat pecahannya."
+      "pick": "Pilih satu perjalanan untuk melihat pecahannya.",
+      "activity": {
+        "title": "Aktiviti",
+        "empty_title": "Belum ada aktiviti",
+        "empty_message": "Setiap perubahan pada album ini dipaparkan di sini.",
+        "restore": "Pulihkan",
+        "restoring": "Memulihkan…",
+        "you": "Anda",
+        "you_lower": "anda",
+        "untitled": "bil",
+        "added": "{actor} menambah {title} · {money}",
+        "said_you_paid": "{actor} merekodkan anda membayar {title} · {money}",
+        "restored": "{actor} memulihkan {title} · {money}",
+        "deleted": "{actor} memadam {title} · {money}",
+        "changed_amount": "{actor} menukar {title}: {before} → {after}",
+        "changed_payer": "{actor} menukar pembayar {title}: {before} → {after}",
+        "changed_split": "{actor} menukar pembahagian {title}",
+        "renamed_bill": "{actor} menamakan semula {before} kepada {after}",
+        "moved_bill": "{actor} mengalihkan {title} ke {day}",
+        "changed_bill": "{actor} menukar {title}",
+        "changed_album": "{actor} menukar album",
+        "your_share": "Bahagian anda {money}",
+        "your_share_change": "Bahagian anda {before} → {after}",
+        "your_share_gone": "Bahagian anda sebanyak {money} sudah tiada",
+        "you_paid": "Direkod anda membayar",
+        "you_paid_choose_account": "Direkod anda membayar · Pilih akaun",
+        "they_paid": "Kini {name} yang membayar",
+        "choose_account": "Pilih akaun",
+        "paid": "{from} membayar {to} {money}",
+        "paid_even": "{from} membayar {to} {money} untuk mengimbangkan",
+        "undid_payment": "{actor} membatalkan bayaran {from} kepada {to} {money}",
+        "recorded_by": "Direkod oleh {actor}",
+        "joined": "{name} menyertai album",
+        "left": "{name} keluar dari album",
+        "renamed_member": "{before} kini {after}",
+        "simplify_on": "{actor} menghidupkan Permudahkan hutang kumpulan",
+        "simplify_off": "{actor} mematikan Permudahkan hutang kumpulan",
+        "cover": "{actor} menukar kulit album"
+      }
     },
     "items": {
       "emptyTitle": "Tiada item lagi",
@@ -2053,7 +2091,17 @@
           "yearly": "/thn"
         }
       },
-      "notePlaceholder": "Nota baharu. Biarkan kosong untuk mengosongkannya."
+      "notePlaceholder": "Nota baharu. Biarkan kosong untuk mengosongkannya.",
+      "sharedBill": {
+        "intro": "Dalam album kongsi {album}: sesiapa di dalamnya boleh menukar bil ini. Kategori, akaun, butiran dan moodnya kekal milik anda.",
+        "paidBy": "Dibayar oleh",
+        "splitBetween": "Dibahagi dengan",
+        "nobodyElse": "Bahagikan dengan orang lain dalam album, atau biar orang lain membayarnya.",
+        "deleteBody": "Bil ini dalam album kongsi. Memadamkannya akan membuangnya untuk semua orang. Bayarannya kekal, dan yang sudah dibayar perlu dipulangkan.",
+        "deleteSome": "Sebahagiannya dalam album kongsi. Memadamkannya akan membuangnya untuk semua orang; bayarannya kekal.",
+        "payments": "Bayaran bil album kongsi direkodkan dalam aplikasi.",
+        "accountOthers": "Sebahagiannya dibayar oleh orang lain. Bil itu masuk ke salah satu akaun anda selepas anda membayar balik."
+      }
     },
     "cloud": {
       "strip": "Data daripada {device}, disegerakkan {date}.",

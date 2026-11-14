@@ -157,7 +157,8 @@ const length = (value: unknown) => (Array.isArray(value) ? value.length : 0);
  * The rows a module op touches, as the phone's module counts them (each
  * module's `size` in the app's services/webDashboardEditModules/): a new
  * album and the entries in it, an album's entries added and removed, each
- * line of a budget, each row of a split bill, and each row a reorder moves.
+ * line of a budget, each row of a split bill, each share of a shared album's
+ * bill, and each row a reorder moves.
  */
 function moduleSize(op: ModuleOp): number {
   const record = (key: string) => (op[key] && typeof op[key] === "object" ? (op[key] as Record<string, unknown>) : {});
@@ -176,6 +177,9 @@ function moduleSize(op: ModuleOp): number {
       return length(op.ids);
     case "module:split":
       return op.op === "create" || op.op === "update" ? 1 + length(op.splits) : 1;
+    case "module:albumbill":
+      if (op.op === "update") return 1 + length(record("set").shares);
+      return op.op === "restore" ? 1 : length(op.rows);
     default:
       return 1;
   }

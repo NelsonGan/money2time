@@ -121,7 +121,7 @@ export function CreateAlbumScreen({
       setSaving(true);
       try {
         await sync.shareAlbum({ id: albumId, name: name.trim() });
-        if (simplify) setAlbumSimplifyDebts(albumId, true);
+        if (simplify) await setAlbumSimplifyDebts(albumId, true);
       } catch (error) {
         // The album is made, as one of the user's own, with the entries
         // picked for it.

@@ -1338,7 +1338,45 @@
       "transactionsTitle": "Transaksi",
       "everyone": "Semua",
       "me": "Saya",
-      "pick": "Pilih perjalanan untuk melihat rinciannya."
+      "pick": "Pilih perjalanan untuk melihat rinciannya.",
+      "activity": {
+        "title": "Aktivitas",
+        "empty_title": "Belum ada aktivitas",
+        "empty_message": "Setiap perubahan di album ini muncul di sini.",
+        "restore": "Pulihkan",
+        "restoring": "Memulihkan…",
+        "you": "Kamu",
+        "you_lower": "kamu",
+        "untitled": "tagihan",
+        "added": "{actor} menambahkan {title} · {money}",
+        "said_you_paid": "{actor} mencatat kamu membayar {title} · {money}",
+        "restored": "{actor} memulihkan {title} · {money}",
+        "deleted": "{actor} menghapus {title} · {money}",
+        "changed_amount": "{actor} mengubah {title}: {before} → {after}",
+        "changed_payer": "{actor} mengubah pembayar {title}: {before} → {after}",
+        "changed_split": "{actor} mengubah pembagian {title}",
+        "renamed_bill": "{actor} mengganti nama {before} menjadi {after}",
+        "moved_bill": "{actor} memindahkan {title} ke {day}",
+        "changed_bill": "{actor} mengubah {title}",
+        "changed_album": "{actor} mengubah album",
+        "your_share": "Bagianmu {money}",
+        "your_share_change": "Bagianmu {before} → {after}",
+        "your_share_gone": "Bagianmu sebesar {money} hilang",
+        "you_paid": "Tercatat kamu membayar",
+        "you_paid_choose_account": "Tercatat kamu membayar · Pilih akun",
+        "they_paid": "Sekarang {name} yang membayar",
+        "choose_account": "Pilih akun",
+        "paid": "{from} membayar {to} {money}",
+        "paid_even": "{from} membayar {to} {money} agar seimbang",
+        "undid_payment": "{actor} membatalkan pembayaran {from} ke {to} {money}",
+        "recorded_by": "Dicatat oleh {actor}",
+        "joined": "{name} bergabung ke album",
+        "left": "{name} keluar dari album",
+        "renamed_member": "{before} sekarang {after}",
+        "simplify_on": "{actor} menyalakan Sederhanakan utang grup",
+        "simplify_off": "{actor} mematikan Sederhanakan utang grup",
+        "cover": "{actor} mengubah sampul"
+      }
     },
     "items": {
       "emptyTitle": "Belum ada barang",
@@ -2053,7 +2091,17 @@
           "yearly": "/thn"
         }
       },
-      "notePlaceholder": "Catatan baru. Kosongkan untuk menghapusnya."
+      "notePlaceholder": "Catatan baru. Kosongkan untuk menghapusnya.",
+      "sharedBill": {
+        "intro": "Di album bersama {album}: siapa pun di dalamnya bisa mengubah tagihan ini. Kategori, akun, detail, dan suasana hatinya tetap milikmu.",
+        "paidBy": "Dibayar oleh",
+        "splitBetween": "Dibagi dengan",
+        "nobodyElse": "Bagi dengan orang lain di album, atau biarkan orang lain yang membayar.",
+        "deleteBody": "Tagihan ini ada di album bersama. Menghapusnya akan menghapusnya untuk semua orang. Pembayarannya tetap ada, dan yang sudah dibayar harus dikembalikan.",
+        "deleteSome": "Sebagian ada di album bersama. Menghapusnya akan menghapusnya untuk semua orang; pembayarannya tetap ada.",
+        "payments": "Pembayaran tagihan album bersama dicatat di aplikasi.",
+        "accountOthers": "Sebagian dibayar orang lain. Tagihan itu masuk ke salah satu akunmu setelah kamu membayarnya kembali."
+      }
     },
     "cloud": {
       "strip": "Data dari {device}, disinkronkan {date}.",

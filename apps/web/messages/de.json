@@ -1338,7 +1338,45 @@
       "transactionsTitle": "Transaktionen",
       "everyone": "Alle",
       "me": "Ich",
-      "pick": "Wähle eine Reise, um die Aufschlüsselung zu sehen."
+      "pick": "Wähle eine Reise, um die Aufschlüsselung zu sehen.",
+      "activity": {
+        "title": "Aktivität",
+        "empty_title": "Noch keine Aktivität",
+        "empty_message": "Jede Änderung, die jemand an diesem Album macht, erscheint hier.",
+        "restore": "Wiederherstellen",
+        "restoring": "Wird wiederhergestellt…",
+        "you": "Du",
+        "you_lower": "du",
+        "untitled": "eine Rechnung",
+        "added": "{actor}: {title} hinzugefügt · {money}",
+        "said_you_paid": "{actor}: {title} von dir bezahlt · {money}",
+        "restored": "{actor}: {title} wiederhergestellt · {money}",
+        "deleted": "{actor}: {title} gelöscht · {money}",
+        "changed_amount": "{actor}: {title} geändert: {before} → {after}",
+        "changed_payer": "{actor}: Zahler von {title} geändert: {before} → {after}",
+        "changed_split": "{actor}: Aufteilung von {title} geändert",
+        "renamed_bill": "{actor}: {before} umbenannt in {after}",
+        "moved_bill": "{actor}: {title} auf {day} verschoben",
+        "changed_bill": "{actor}: {title} geändert",
+        "changed_album": "{actor}: Album geändert",
+        "your_share": "Dein Anteil {money}",
+        "your_share_change": "Dein Anteil {before} → {after}",
+        "your_share_gone": "Dein Anteil von {money} entfällt",
+        "you_paid": "Du hast bezahlt",
+        "you_paid_choose_account": "Du hast bezahlt · Wähle das Konto",
+        "they_paid": "Jetzt hat {name} bezahlt",
+        "choose_account": "Wähle das Konto",
+        "paid": "{from} → {to}: {money} bezahlt",
+        "paid_even": "{from} → {to}: {money} zum Ausgleich bezahlt",
+        "undid_payment": "{actor}: Zahlung {from} → {to} über {money} rückgängig gemacht",
+        "recorded_by": "Erfasst von {actor}",
+        "joined": "{name} ist dem Album beigetreten",
+        "left": "{name} hat das Album verlassen",
+        "renamed_member": "{before} heißt jetzt {after}",
+        "simplify_on": "{actor}: Gruppenschulden vereinfachen eingeschaltet",
+        "simplify_off": "{actor}: Gruppenschulden vereinfachen ausgeschaltet",
+        "cover": "{actor}: Titelbild geändert"
+      }
     },
     "items": {
       "emptyTitle": "Noch keine Artikel",
@@ -2053,7 +2091,17 @@
           "yearly": "/Jahr"
         }
       },
-      "notePlaceholder": "Neue Notiz. Leer lassen, um sie zu löschen."
+      "notePlaceholder": "Neue Notiz. Leer lassen, um sie zu löschen.",
+      "sharedBill": {
+        "intro": "Im geteilten Album {album}: Alle darin können diese Rechnung ändern. Kategorie, Konto, Details und Stimmung bleiben deine.",
+        "paidBy": "Bezahlt von",
+        "splitBetween": "Aufgeteilt auf",
+        "nobodyElse": "Teile sie mit jemand anderem im Album oder lass jemand anderen zahlen.",
+        "deleteBody": "Diese Rechnung ist in einem geteilten Album. Wenn du sie löschst, verschwindet sie für alle. Zahlungen darauf bleiben, und bereits Bezahltes wird zurückgeschuldet.",
+        "deleteSome": "Einige davon sind in einem geteilten Album. Wenn du sie löschst, verschwinden sie für alle; Zahlungen darauf bleiben.",
+        "payments": "Zahlungen auf eine Rechnung eines geteilten Albums werden in der App erfasst.",
+        "accountOthers": "Einige davon hat jemand anderes bezahlt. Sie kommen auf eines deiner Konten, sobald du sie zurückzahlst."
+      }
     },
     "cloud": {
       "strip": "Daten von {device}, synchronisiert {date}.",

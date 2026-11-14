@@ -98,7 +98,8 @@ export type TransactionRow = Row & {
   /**
    * A shared album's bill (the app's migration 090): the group this entry is
    * the user's side of. Such an entry follows from what the group holds, so
-   * it is changed in the app. Absent from an app that predates shared albums.
+   * a change to the bill goes through the group (`module:albumbill`). Absent
+   * from an app that predates shared albums.
    */
   album_group_id?: string | null;
 };
@@ -262,6 +263,70 @@ export type BackupTables = {
   items: ItemRow[];
   monthly_budgets: MonthlyBudgetRow[];
   monthly_budget_categories: MonthlyBudgetCategoryRow[];
+  /**
+   * Shared albums' groups, sent only to a page that names `shared-albums`
+   * (the app's `webDashboardAlbumGroups.ts`); never in a backup, and absent
+   * from an older app. See `album-group.ts`.
+   */
+  web_album_members?: WebAlbumMemberRow[];
+  web_album_bills?: WebAlbumBillRow[];
+  web_album_activity?: WebAlbumActivityRow[];
+};
+
+/** A member of a shared album's group. No Cloud Sync account is named. */
+export type WebAlbumMemberRow = {
+  id: string;
+  /** The group's id, which is its album's. */
+  album_id: string;
+  name: string;
+  /** The user's own member. */
+  is_self?: number | null;
+  /** Still in the album: only they are put on a bill. */
+  current?: number | null;
+  sort_order?: number | null;
+};
+
+export type WebAlbumShare = { memberId: string; amount: number };
+
+/** A bill of a shared album's group, as everyone in it sees it; deleted ones too. */
+export type WebAlbumBillRow = {
+  id: string;
+  album_id: string;
+  /** `YYYY-MM-DD`. */
+  date: string;
+  note?: string | null;
+  amount: number;
+  currency: string;
+  paid_by: string;
+  shares: WebAlbumShare[];
+  deleted?: number | null;
+  updated_at?: string | null;
+};
+
+/** A bill's fields as the activity log keeps them, before or after a change (the app's `AlbumBillSnapshot`). */
+export type WebAlbumBillSnapshot = {
+  note: string | null;
+  amount: number;
+  currency: string;
+  date: string;
+  paidBy: string;
+  shares: WebAlbumShare[];
+};
+
+/** One entry of a shared album's activity log (the app's `AlbumActivity`). */
+export type WebAlbumActivityRow = {
+  id: string;
+  album_id: string;
+  kind: string;
+  actor_member_id?: string | null;
+  expense_id?: string | null;
+  member_id?: string | null;
+  bill?: { before: WebAlbumBillSnapshot | null; after: WebAlbumBillSnapshot | null } | null;
+  rename?: { before: string; after: string } | null;
+  payment?: { from: string; to: string; currency: string; amount: number; bills?: string[]; even?: boolean } | null;
+  simplify?: boolean | null;
+  sort_order?: number | null;
+  created_at: string;
 };
 
 /** Tables and top-level keys the dashboard does not read are carried through untouched. */

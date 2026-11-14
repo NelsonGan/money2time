@@ -258,12 +258,21 @@ export function TransactionAccountBadge({
             size={compact ? 11 : 13}
           />
         </View>
-      ) : (
+      ) : account ? (
         <AccountLogo
-          logoId={account?.logoId}
-          type={account?.type}
-          goalEmoji={account?.goalEmoji}
+          logoId={account.logoId}
+          type={account.type}
+          goalEmoji={account.goalEmoji}
           size={compact ? 12 : 14}
+        />
+      ) : (
+        // No account yet: an empty dashed box where the logo goes, waiting
+        // for one (a shared album's bill someone else said the user paid).
+        <View
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+          className="rounded-[3px] border border-dashed border-primary/70"
+          style={{ width: compact ? 12 : 14, height: compact ? 12 : 14 }}
         />
       )}
       {/* Sized from a hidden copy, drawn over it a little wider: inside the

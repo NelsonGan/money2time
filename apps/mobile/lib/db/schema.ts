@@ -452,6 +452,22 @@ export const albumGroupsTable = sqliteTable('album_groups', {
   deletedAt: text('deleted_at'),
 });
 
+// A shared album's activity log (migration 093), written by the Worker only.
+export const albumActivityTable = sqliteTable('album_activity', {
+  id: text('id').primaryKey(),
+  ledgerId: text('ledger_id').notNull(),
+  kind: text('kind').notNull(),
+  actorMemberId: text('actor_member_id'),
+  actorUserId: text('actor_user_id'),
+  expenseId: text('expense_id'),
+  memberId: text('member_id'),
+  dataJson: text('data_json'),
+  sortOrder: integer('sort_order').notNull().default(0),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+  deletedAt: text('deleted_at'),
+});
+
 export const albumTransactionsTable = sqliteTable('album_transactions', {
   id: text('id').primaryKey(),
   albumId: text('album_id').notNull(),
@@ -656,6 +672,7 @@ export type AlbumTransactionRow = typeof albumTransactionsTable.$inferSelect;
 export type AlbumMemberRow = typeof albumMembersTable.$inferSelect;
 export type AlbumExpenseRow = typeof albumExpensesTable.$inferSelect;
 export type AlbumSettlementRow = typeof albumSettlementsTable.$inferSelect;
+export type AlbumActivityRow = typeof albumActivityTable.$inferSelect;
 export type ItemRow = typeof itemsTable.$inferSelect;
 export type BudgetTemplateRow = typeof budgetTemplatesTable.$inferSelect;
 export type BudgetTemplateCategoryRow = typeof budgetTemplateCategoriesTable.$inferSelect;

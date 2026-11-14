@@ -11,7 +11,7 @@ import { SentimentIcon } from "../edit/kit";
 import { TxEditor } from "../edit/tx-editor";
 import { BulkToolbar, EditUnavailable } from "../editing";
 import { offersEdits, useDashboard, useFormat, usePeriodTxs } from "../state";
-import { AccountLogo, Card, CategoryGlyph, ClayImg, Empty, Pill } from "../ui";
+import { AccountLogo, Card, CategoryGlyph, ClayImg, Empty, NoAccountMark, Pill } from "../ui";
 
 type TypeFilter = "all" | "expense" | "income" | "transfer";
 
@@ -320,6 +320,13 @@ export function TxList({ txs, pageSize = 30, selection, onPage }: { txs: Tx[]; p
                     {/* A shared album's bill: someone else can add, change or remove it (the app's people mark). */}
                     {tx.albumGroupId ? <Pill>{te("split.sharedAlbum")}</Pill> : null}
                     {category ? <span className="truncate">{parent ? `${parent.name} · ${category.name}` : category.name}</span> : null}
+                    {/* No account yet (a shared album's bill someone else said the user paid): the app's dashed box and "No account". */}
+                    {!account && !isTransfer && !paybackRow ? (
+                      <span className="inline-flex items-center gap-1 truncate">
+                        <NoAccountMark size={12} />
+                        {te("split.noAccount")}
+                      </span>
+                    ) : null}
                     {account ? (
                       <span className="inline-flex items-center gap-1 truncate">
                         <AccountLogo logoId={account.logoId} name={account.name} size={14} />

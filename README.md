@@ -2131,13 +2131,19 @@ two kinds, chosen when it is made and never changed:
 - **Shared**: friends join it with a link, and only its members split its
   bills. This section is about these.
 
-A shared album is built on shared ledgers' plumbing (above). The app side is
-`features/albums/` (`lib/albumPeople.ts`, `lib/albumGroup.ts`,
-`lib/groupRules.ts`, `lib/groupDebts.ts`, `lib/memberShare.ts`,
-`services/albumGroupStore.ts`, `services/albumGroupSync.ts`,
+A shared album is built on shared ledgers' plumbing (above), and works like
+Splitwise with the user's own accounts kept in step: anyone in it adds,
+changes and deletes its bills and payments, every change is logged, and each
+person's own side lands in their own ledger, on their own account. The app
+side is `features/albums/` (`lib/albumPeople.ts`, `lib/albumGroup.ts`,
+`lib/groupRules.ts`, `lib/groupRows.ts`, `lib/groupDebts.ts`,
+`lib/activityLines.ts`, `lib/memberShare.ts`, `services/albumGroupStore.ts`,
+`services/albumGroupSync.ts`, `services/albumGroupWrites.ts`,
 `screens/AlbumPeopleScreen.tsx`, `components/AlbumBalances.tsx`,
-`components/SplitWithCard.tsx`, `components/AlbumSharingCard.tsx`), and its
-tables come from migrations `090`, `091` and `092`.
+`components/AlbumActivity.tsx`, `components/SplitWithCard.tsx`,
+`components/AlbumSharingCard.tsx`); the Worker side is the cloud-sync
+Worker's `src/albumGroups.ts`; its tables come from migrations `090` to
+`093`.
 
 **What the user sees**
 
@@ -2213,16 +2219,19 @@ tables come from migrations `090`, `091` and `092`.
   ledger is shared is told it cannot hold one, and a link whose album id is
   already an album of another ledger is refused. The joiner is put on the
   list under their own name (a number added if it is taken: "Ben 2") as soon
-  as the group's people have come down (`syncAlbumGroups`). An album deleted
-  here and joined again comes back.
+  as the group's people have come down (`syncAlbumGroups` asks the Worker,
+  `joinGroup`), and the log says they joined. An album deleted here and
+  joined again comes back.
 - **A new bill starts split.** In a shared album a new expense opens split
-  evenly between the user and everyone who joined. The user is always its
-  payer (Split Bill has no Paid by there), and people come only from the
-  album's members (`groupMembers`). A person's name, the blank row a split
-  opens with ("Choose a member") and Add person all open one sheet over the
-  bill (`MemberPickerSheet`): every member with a check circle, the user
-  always on, ticked on or off in place (a member with a payment recorded
-  cannot come off), "3 of 8 people" under the title and a search field from
+  evenly between the user and everyone who joined, paid by the user. Split
+  Bill's **Paid by** row lists the user and everyone in the album: anyone of
+  them can have paid, and choosing someone not on the bill yet puts them on
+  it (with an even share when the bill is split evenly; any split method
+  works). People come only from the album's members (`groupMembers`). A
+  person's name, the blank row a split opens with ("Choose a member") and Add
+  person all open one sheet over the bill (`MemberPickerSheet`): every member
+  with a check circle, the user always on, ticked on or off in place, "3 of 8
+  people" under the title and a search field from
   7 members besides the user up, at a fixed height so
   filtering never resizes it and it stays above the keyboard. The rows under
   it never move while choosing; the first member ticked fills the blank row.
@@ -2236,7 +2245,10 @@ tables come from migrations `090`, `091` and `092`.
   ledger, their own currency totals and their own category (matched by name,
   then icon, else Other). A payment recorded on one phone (paying a member
   back, a part, Settle up) is applied on the other person's phone too, and an
-  undo undoes it there. Editing a bill changes it for everyone; deleting one
+  undo undoes it there. A change needs a connection: saving waits for the
+  Worker (Save shows it is busy) and, when it cannot go (offline, signed out,
+  no longer in the album), says why and keeps the editor open with every edit
+  (`groupWriteMessage`). Editing a bill changes it for everyone; deleting one
   asks first ("…removes it for everyone"), and so does taking one out of the
   album or removing everyone from its split (asked while the editor is still
   open, so Cancel keeps every edit): the bill then leaves the group, for
@@ -2258,46 +2270,66 @@ tables come from migrations `090`, `091` and `092`.
   once split, never a local split that nobody else in the album would get. An
   entry of the user's own already split with others (typed names, a friend
   who paid, paybacks, items) keeps its own split, since the group could not
-  take those names and its paybacks would count twice. A save the group
-  cannot take (signed out, someone on it who is not a member) says it failed
-  and keeps nothing.
-- **Who can change what: nobody moves anyone else's money.** The rules are
-  in `lib/groupRules.ts`, applied by the app (`saveAlbumBill`,
-  `deleteGroupEntries`, `deleteSplit`, `recordGroupPayment`,
-  `undoGroupPayment`, `settleGroupDebt`) and offered only where they allow
-  in the screens:
-  - **Only you can say you paid.** A bill's payer is whoever adds it, so a
-    bill never arrives saying someone else paid.
-  - **A bill belongs to whoever paid it.** Only they change it (amount, day,
-    title, shares) or delete it. Anyone else's editor locks those
-    (`lockedReason`: no keypad, no Delete, only Expense; a tap on the amount,
-    day or Split says why), its album row carries a **Locked** badge (a tap
-    on it says why too), and saving keeps only the user's own fields
-    (category, longer note, receipt, mood; `saveAlbumBillOwnFields`).
-  - **Payments lock a bill.** With a payment recorded on it, nobody changes
-    it, takes a share off it or deletes it until the payments are undone
-    (the album row's badge reads **Has payments**). So no money that moved is
-    ever deleted from under anyone; its account (the user's own field) still
-    changes.
-  - **Only the person paying records a payment**, and only they undo it.
-    A simplified payment can span other people's bills: undo belongs to the
-    account that recorded the whole payment (`canUndoPayment`, `created_by`),
-    never an intermediate payer ("Only the person who recorded this payment
-    can undo it."). A payment with no recorded author, or whose recorder has
-    left the album, follows the payer rule (the payer, or the person paid
-    once the payer has left), so no bill stays locked for good; a payment
-    recorded for someone who left stays undoable by its recorder if that
-    person rejoins. A payment already undone on another phone is not refused:
-    the album's entries just catch up.
+  take those names and its paybacks would count twice.
+- **Anyone in it can change it** (`lib/groupRules.ts`, and the Worker keeps
+  the same rules for every write). Everyone still in the album adds, edits
+  (amount, day, title, payer, shares) and deletes any bill, restores a deleted
+  one, and records or undoes a payment between any two members. There are no
+  locks, badges or read-only editors.
+  - **What is each person's own stays theirs**: a bill's account, category,
+    longer note, receipt and mood. Only they change them, on their own phone;
+    they are never sent to the group or logged. An edit that changes only
+    those saves on the phone alone, offline too (`saveAlbumBillOwnFields`).
+  - **A bill with payments on it** can still be changed or deleted, after a
+    confirmation ("The payments stay…"). The payments stand and still count
+    in Balances: past a share that an edit lowered, on a bill whose payer
+    changed, or on a deleted bill, what was paid is owed back the other way
+    (`openShares`). Each phone's own side counts a payment only up to the
+    share it was for, so that money stays out of both ledgers until it is
+    paid back.
+  - **Someone who has left changes nothing.** Their row and bills stay; the
+    others can change those bills, but never put them on a new one
+    (`billPeople`).
   - **Paying.** Paying back and Settle up, where the user pays, ask which
-    account it leaves (`SettleUpConfirmSheet`); the person paid gets it on
-    their own payback account. Where someone owes the user, the person's page
-    says "Aisha records it when they pay you." in place of Settle up, and the
-    Balances line opens that page rather than a Settle up sheet. When shares
-    go both ways, Settle up pays only the net, onto the user's oldest bills,
-    and the shares the other way stay open (no Settle up when they come out
-    even). A shared bill's own page offers no Remove (its payer edits the
-    bill), and Mark paid only on a share of someone who has left.
+    account it leaves (`SettleUpConfirmSheet`). Where someone owes the user,
+    the user can record that they were paid too. A **Who owes whom** line
+    between two other people records "Ben paid Tess" after a yes, through no
+    account of the user's. When shares go both ways, Settle up pays only the
+    net, onto the user's oldest bills, and the shares the other way stay open
+    (no Settle up when they come out even).
+- **Which account.** The account is never shared: each person's stays on
+  their own phone.
+  - A bill the user adds and paid is on the account picked in the editor, as
+    any expense is. A bill someone else adds or edits so that the user paid
+    lands with **no account**, and so does a payment the user made that
+    someone else recorded. A bill with no account counts in spending,
+    budgets, Breakdown and the album's totals at once; it only moves no
+    account balance.
+  - Someone else's edit never changes the account the user chose, and a
+    deleted bill restored comes back on it. When someone changes the payer
+    away from the user, the user's side becomes their share owed to the new
+    payer, with no account, as any bill a friend paid; a bill the user adds
+    that someone else paid is the same.
+  - **Choosing it.** The user's bills with no account show a dashed box where
+    the bank logo goes and read **No account** (in the album, on Home and in
+    every list; `TransactionAccountBadge`). Tapping one opens the editor,
+    whose account chip reads **Choose account** and opens the account sheet
+    (a shared bill keeps no account rather than take the default;
+    `keepsNoAccount`). Several at once: select them in the album, Edit, then
+    **Account** (`BulkEditTransactionsSheet`'s `offerAccount`,
+    `setGroupEntriesAccount`). Choosing changes only the user's phone: it is
+    not logged and nobody else sees it.
+- **Activity.** At the foot of a shared album's Balances tab, one card lists
+  every change anyone made, newest first, by day, one line each ("Tess
+  changed Dinner: RM100 → RM120"; `lib/activityLines.ts`): bills added,
+  edited, deleted and restored, payments recorded and undone, people joining,
+  leaving and renaming themselves, Simplify switched, the cover changed. It
+  shows the newest five, then **Show all**. A change someone else made to the
+  user's own money has a rose bar and a second line saying how ("Your share
+  RM30 → RM40", "Says you paid · Choose the account", "Recorded by Tess").
+  A tap opens the bill, and a deleted bill's line has **Restore**, which
+  brings the bill back with its shares (its payments never left) and is
+  logged too.
 - **A shared album's balances are its own.** A bill in a shared album is
   settled in that album and nowhere else: its Balances tab and its people's
   pages cover the bills in it, and the Balances page covers every other split
@@ -2314,7 +2346,10 @@ tables come from migrations `090`, `091` and `092`.
   then a **Who owes whom** card: one line per debt in each currency, the two
   people's avatars with an arrow between them, a sentence ("Ben owes you",
   "You owe Aisha") and the amount, the user's own first and the others'
-  quieter, then a **Group spending** card (Total, You paid, Your share).
+  quieter, then a **Group spending** card (Total, You paid, Your share), then
+  the **Activity** card (above). In a shared album the hero and the lines are
+  the group's own debts, so money owed back on a deleted or lowered bill shows
+  even when the user has no entry for it any more.
   **An album never converts or adds up currencies.** Every figure is in its
   bills' own currency (`SettleUpSummary.netByCurrency`). With bills in more
   than one, both cards split into one section per currency, each under a
@@ -2359,7 +2394,8 @@ tables come from migrations `090`, `091` and `092`.
   closes, back to the album) or by deleting the album; the owner can take
   them out of the share. **Their row and their bills stay in the group**, so
   nobody else's bills or balances change; they read as Left, new bills leave
-  them out, and a payment from them is recorded by the person it went to. On
+  them out, and anyone still in the album records a payment from them. The
+  Worker marks them as left and logs it (`planLeave`). On
   their own phone the album goes on as one of their own, their entries as
   ordinary split bills (settled on the Balances page); it just no longer
   updates. The owner deleting the album stops sharing it, which ends it the
@@ -2407,25 +2443,33 @@ their own.
 
 **How it works**
 
-- **The group.** Four tables hold it, and its id is the album's id (the
+- **The group.** Five tables hold it, and its id is the album's id (the
   owner's album, and the album each person who joins gets, which is made with
   that same id):
   - `album_members`: the people, the user among them, each with the Cloud
-    Sync account that joined (`user_id`). The group starts with the user
-    alone when the album is made (`beginAlbumGroup`); the others add
-    themselves as they join (`addSelfToGroup` from `syncAlbumGroups`), under
-    an id made from their account (`u-<userId>`), so two phones of theirs
-    write one row. Nobody's row is ever deleted: leaving clears its
-    `user_id` (`markSelfLeft` in `sharedLedgerSync.leave`, pushed before the
-    phone lets go; `markMemberLeft` when the owner takes someone out), so the
-    bills that name them stay whole, and joining again takes the row back.
+    Sync account that joined (`user_id`). The group starts with the owner
+    alone as the album is shared (`shareAlbum` asks the Worker to `join`);
+    the others are added the same way as they join, under an id made from
+    their account (`u-<userId>`), so two phones of theirs share one row.
+    Nobody's row is ever deleted: leaving, or the owner taking someone out,
+    clears its `user_id` on the Worker (`planLeave`), so the bills that name
+    them stay whole, and joining again takes the row back.
     The People page reads who is still in the share from the Worker's list
     (`getLedgerMembers`) to say Joined or Left.
   - `album_expenses`: one row per bill: who paid (`paid_by`), each member's
     share (`shares_json`) and its last writer (`created_by`, deletes
-    included).
-  - `album_settlements`: a payment from one member to another for one bill.
-    Rows are only added, or deleted when the payment is undone.
+    included, stamped by the Worker). A deleted bill keeps its last fields,
+    which Restore writes back.
+  - `album_settlements`: a payment from one member to another for one bill,
+    stamped with who recorded it. Rows are only added, or deleted when the
+    payment is undone; deleting a bill leaves them.
+  - `album_activity` (migration `093`): the log, one row per change: its
+    `kind`, who made it (`actor_member_id`, `actor_user_id`), the bill or
+    member it is about, and `data_json` with the before and after of what
+    changed (a bill's amount, day, title, currency, payer and shares; a name;
+    Simplify) or the payments recorded (one entry per pair and currency of
+    one act). Only ever added; nothing personal (account, category, notes,
+    receipt, mood) is in it. Read through `toAlbumActivity`.
   - `album_groups` (migration `091`): the group's settings, one row:
     `simplify_debts`, and `cover_photo_uri` (migration `092`). The row is
     made when the album is shared with a cover, or when a setting is first
@@ -2436,18 +2480,22 @@ their own.
     every sync) puts it on the phone's own album; while it is NULL, the
     owner's phone publishes the cover its album has. Any other value reads as
     unset.
-- **Its own database, through the shared-ledger plumbing.** The four tables
+- **Its own database, written by the Worker.** The five tables
   carry the group's id in `ledger_id`, the column Cloud Sync routes a row by
   (`LEDGER_ROOT_SYNC_TABLES`), and a shared album is kept in `shared_ledgers`
   with `kind` `'album'`. So what a shared ledger has applies: a channel and
   replica per share, the list from `GET /v1/ledgers`, invite links, live
   nudges, tokens and their revocation, leaving and stopping (not the Pro
-  rule). The two kinds of share never cross (`channelOfRow`): an album's
-  channel carries the four group tables and nothing else, and a ledger's
+  rule). Unlike a ledger's, an album's phones only read it: the Worker hands
+  them a read-only token (`credentials`), their sync of that channel only
+  pulls (`runPullOnly`), and the group tables have no capture triggers
+  (`CAPTURE_VERSION` 3). The two kinds of share never cross (`channelOfRow`):
+  an album's channel carries the group tables and nothing else, and a
+  ledger's
   carries none of them, so the user's own copy never holds a group's rows
   and a group's rows with no share to go to go nowhere. The screens read the
   two kinds apart (`listLedgerShares`, `listAlbumShares`). A backup leaves
-  the four tables out (`GROUP_SYNC_TABLES`): the group is not the user's
+  the group tables out (`GROUP_SYNC_TABLES`): the group is not the user's
   data, their own side of its bills is. The end of sharing on a phone drops
   the group's rows there and clears `album_group_id`, leaving the user's
   entries as ordinary split bills (`releaseAlbumGroup`).
@@ -2471,25 +2519,36 @@ their own.
   `transaction_splits.album_member_id` the member a share is with, and
   `settlement_id` on a paid share the settlement it stands for. Within an
   album, Balances groups a person by name (`debtPartyKey`).
-- **Which account.** A bill the user paid is on the account the editor just
-  picked (`hints.entry`: `saveAlbumBill` passes it rather than writing the
-  account itself, so the projection works out the account amount), else the
-  one the entry already has, else, when the user is the bill's last writer,
-  their default account, else no account (`albumGroupSync.ts`). An entry
-  already on the phone never falls back to the default account: one the
-  user's other phone gave it is on its way. The editor's line reads the
-  album and the payer through `useGroupBillOrigin`.
-- **One direction.** Saving a split bill in a shared album
-  (`saveAlbumBill`), recording a payment on one (`markSplitPaid`,
+- **Which account, in the projection.** A bill the user paid is on the
+  account this phone just picked (`hints.entry`: the editor, or Choose
+  account through `setGroupEntryAccount`; the projection works out the
+  account amount), else the one the entry has or had before it was deleted,
+  else, when the user is the bill's last writer, their default account, else
+  no account (`albumGroupSync.ts`). Money the user sent on a bill someone
+  else paid follows the same rule per payment (`hints.accounts`, else what
+  the share remembers, else the default account only when the user recorded
+  it, `recordedBy`). Money received lands where the user's payback account
+  says, as always. An entry already on the phone never falls back to the
+  default account: one the user's other phone gave it is on its way.
+- **Every change goes through the Worker.** Saving a split bill
+  (`saveAlbumBill`), recording a payment (`markSplitPaid`,
   `recordSplitPayment`, `payBackPayer`, `recordPayBack` and Settle up all
-  route there), undoing one, and deleting the bill or the entry a payment made
-  each write the group's row first and then project. A payment is cut to what
-  is still owed as stored, so a second tap never pays a share twice. The group
-  is never derived from the user's entries: an album is shared before it has
-  any, and an entry of the user's own added later stays theirs.
+  route there), undoing one, deleting or restoring a bill, a bulk day or
+  title (`editGroupBills`), a rename, Simplify and the cover each build the
+  rows the change asks for (`lib/groupRows.ts`) and send them with
+  `writeGroup` (`POST /v1/ledgers/<id>/album`). The Worker checks them,
+  stamps them and writes them with their log entries in one transaction,
+  and answers with what it wrote, which the phone applies at once
+  (`applyServerRows`, in the queue syncs take turns on, with the revisions
+  recorded so the next pull changes nothing); then the user's own entries
+  follow (`projectGroup`). A payment is cut to what is still owed as stored,
+  so a second tap never pays a share twice. The group is never derived from
+  the user's entries: an album is shared before it has any, and an entry of
+  the user's own added later stays theirs.
 - **Who owes whom.** `lib/groupDebts.ts` (pure) derives it from the group's
-  bills and payments: `openShares` (each share still owed to its bill's
-  payer), `pairwiseDebts` (each pair's net, per currency) and `simplifyDebts`:
+  bills and payments: `openShares` (per bill, each share owed to its payer
+  set off against the payments made on it, so a payment past what was owed
+  is owed back; a deleted bill counts only its payments), `pairwiseDebts` (each pair's net, per currency) and `simplifyDebts`:
   the fewest payments that settle everyone's net (whoever owes most pays
   whoever is owed most), when each of them can be paid along the group's bills
   as they stand; else the debts passed along (while someone both owes and is
@@ -2510,9 +2569,9 @@ their own.
     all, so nobody's total moves.
   - **Even groups close.** A group that comes out even with Simplify on
     (debts that only go round in a circle, with no line to tap) has every
-    open share closed after the change that made it so (`closeEvenGroup`: a
-    bill saved, a payment, a delete, or the switch itself, on the phone that
-    made it).
+    open share closed after the change that made it so (`evenGroupPayments`
+    after a bill saved, a payment, a delete, or the switch itself, on the
+    phone that made it; logged as payments "to even up").
 - **When it runs.** After every sync that applied rows (`reloadAfterApply`),
   at launch and when a ledger opens. A group's album is in the main ledger,
   so while another ledger is open it waits: the entries land on its accounts
@@ -2521,12 +2580,9 @@ their own.
   (`preload`), and a pass that finds nothing to change writes nothing.
   Payments recorded together (Settle up with a person, across all their
   bills) are one write and one refresh (`recordGroupPayment`).
-- **Trust: every row of a group is read as if someone hostile wrote it.**
-  Anyone in a shared album, which is anyone who was given its link, holds a
-  token that can write anything into the group's database. What they are
-  meant to be able to do is what the album offers: add, change and delete
-  their bills, record and undo their payments, rename themselves, switch
-  Simplify. So:
+- **Trust: the Worker is the only writer, and every row is still checked
+  where it is read.** Anyone in a shared album is anyone who was given its
+  link, and what they may do is what the album offers. So:
   - **Only the group's tables come from it.** Whatever `ledger_id` a row
     claims, an album's channel never delivers a ledger, an entry, an account
     or a category (`channelOfRow`, and `remoteChanges` does not even fetch
@@ -2554,24 +2610,32 @@ their own.
   - **A row the phone cannot store is passed over**, not retried: it is
     never a sync error that stays up, nor a reason the owner cannot stop
     sharing or delete their account.
-  - **Who can change what is kept by the app, not the server.** Each phone
-    writes the group's database directly with its own token, so the Worker
-    never sees a write and cannot tell who made it. As in any shared bill
-    splitter, someone in the album can add as many bills as they like; a
-    modified app could also rename or pose as another member, name someone
-    else as payer, change or delete their bill, record a payment as them, or
-    write `created_by` as them (every member's `user_id` is in
-    `album_members`). Enforcing the rules on the server needs the album's
-    writes to go through the Worker, which would check each against the
-    writer's sign-in. Leaving the album ends it; the entries already made
-    stay, as the user's own to delete.
+  - **The author is the writer's sign-in.** The Worker (`albumGroups.ts`)
+    takes a change only from someone in the share whose member row still has
+    their account (`not_member` otherwise), and checks every row:
+    `planWrite` allows bills paid by and shared with the group's members (no
+    one who left newly put on one), payments between members on a bill of
+    the group and only ever undone, a rename of the writer's own row to a
+    name nobody else has (`name_taken`), and the group's settings; anything
+    else is refused. It overwrites `created_by` with the writer, works a
+    bill's total out from its shares, and writes the log itself: the log
+    cannot be written, changed or skipped from a phone. Each row is written
+    only if it still has the revision it was read at (`commitPlan`'s guard,
+    in one Hrana batch with `BEGIN IMMEDIATE`), so two writes at once are
+    planned again rather than lost.
+  - **Read-only tokens.** A phone's token for an album's database is
+    read-only, so a modified app cannot write there; leaving or being taken
+    out rotates the database's tokens as for a ledger, and the Worker mints
+    its own full one again (`writerToken`).
 
 **Limits.** Split by Item bills are not shared (they have no Paid by). A
 member without Pro adds bills in a shared album whatever their count of
 unsettled split bills, and a shared album's bills are left out of that count
-everywhere (`countUnpaidSplitBills`). A bill's day and title belong to the
-group, so a bulk edit of either on a group's bill is put back at the next
-sync. Names and photos from Cloud Sync profiles are not used: a person goes by
+everywhere (`countUnpaidSplitBills`). Changes to a shared album need a
+connection (the Worker writes them); only each person's own fields save
+offline. Money owed back on a deleted or lowered bill shows in the album's
+own Balances, not on the main Balances page (which reads the user's
+entries). Names and photos from Cloud Sync profiles are not used: a person goes by
 the name on their member row. `albums.split_with_json` (migration `090`) is
 an unused column.
 
@@ -2590,14 +2654,14 @@ Two providers, two jobs:
 
 | Coverage                                               | Definitions | Meaning                                                                                                 |
 | ------------------------------------------------------ | ----------- | ------------------------------------------------------------------------------------------------------- |
-| All custom events                                      | 167         | Every event in the custom-event tables goes to GA4.                                                     |
+| All custom events                                      | 170         | Every event in the custom-event tables goes to GA4.                                                     |
 | PostHog + GA4 custom events                            | 71          | Install, activation, daily engagement, adoption milestones, the Pro funnel and low-volume moments.      |
-| GA4-only custom events                                 | 96          | Frequent per-use telemetry and data maintenance; PostHog sees these uses only through `Feature Used`.   |
+| GA4-only custom events                                 | 99          | Frequent per-use telemetry and data maintenance; PostHog sees these uses only through `Feature Used`.   |
 | Feature first-use definitions                          | 20          | One adoption event per qualifying feature on eligible installs.                                         |
 | Transaction milestone thresholds                       | 6           | One event at each documented logged-transaction count.                                                  |
 | Maximum adoption/milestone events per eligible install | 26          | Feature first uses plus transaction milestones, with working persistent storage; not a total event cap. |
 
-Every native app user is identified in both providers with the same pseudonymous `settings.appUserId`; there is no user or event sampling of custom events. PostHog's automatic lifecycle events, screen events, touch autocapture and rage clicks are disabled. GA4 collects its SDK events after identity/consent configuration; manually emitted `screen_view` is documented below and is additional to the 167 custom definitions. RevenueCat server events are listed separately.
+Every native app user is identified in both providers with the same pseudonymous `settings.appUserId`; there is no user or event sampling of custom events. PostHog's automatic lifecycle events, screen events, touch autocapture and rage clicks are disabled. GA4 collects its SDK events after identity/consent configuration; manually emitted `screen_view` is documented below and is additional to the 170 custom definitions. RevenueCat server events are listed separately.
 
 ### PostHog event budget
 
@@ -2630,6 +2694,7 @@ The free tier is **1,000,000 product-analytics events a month** (identified even
 Rules that keep it inside the free tier:
 
 - Anything that fires on every use of a frequent action stays GA4-only; PostHog gets one `Feature Used` per feature per user per day instead.
+- Shared albums' events (`Album Bill Saved`, payments, `Album Bill Restored`, `Album Bill Account Set`, `Album Activity Opened`) are GA4-only: they add nothing to this budget.
 - Daily caps are claimed on the device (`DailyState` in [analytics.shared.ts](apps/mobile/services/analytics.shared.ts)), so foregrounding the app repeatedly sends one `Daily App Open`.
 - Person properties are written only when their value changes, compared against the last write stored on the device (`@m2t/analytics_person/v1`); each write is a billable `$set`.
 - No `$screen` events, lifecycle events, touch autocapture or rage clicks; a `before_send` allowlist drops any event that is not an approved app event or `$identify`, `$set`, `$exception`, `$feature_flag_called`.
@@ -2822,42 +2887,45 @@ Bank and wallet notifications (Android listener) and the Log Notification Shortc
 
 #### GA4 only: albums, budgets, items, ledgers, recurring rules and instalment plans
 
-| Constant                        | Event name                      | GA4 name                            | PostHog | Trigger and frequency                                                                                                                                                                                   | Extra properties                                                                                                                                                                                                                                                                                                                                 | Call sites                                                                                                                 |
-| ------------------------------- | ------------------------------- | ----------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
-| `ALBUM_CREATED`                 | `Album Created`                 | `m2t_album_created`                 | No      | An album is created; each successful creation.                                                                                                                                                          | `transactionCount`                                                                                                                                                                                                                                                                                                                               | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
-| `ALBUM_UPDATED`                 | `Album Updated`                 | `m2t_album_updated`                 | No      | Album details are updated; each successful update.                                                                                                                                                      | None                                                                                                                                                                                                                                                                                                                                             | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
-| `ALBUM_DELETED`                 | `Album Deleted`                 | `m2t_album_deleted`                 | No      | An album is deleted; each successful deletion.                                                                                                                                                          | None                                                                                                                                                                                                                                                                                                                                             | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
-| `ALBUM_LOCATION_SET`            | `Album Location Set`            | `m2t_album_location_set`            | No      | An album location is set or cleared; each successful change.                                                                                                                                            | `cleared`                                                                                                                                                                                                                                                                                                                                        | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
-| `ALBUM_LOCATIONS_OPENED`        | `Album Locations Opened`        | `m2t_album_locations_opened`        | No      | The album map panel opens; each panel mount.                                                                                                                                                            | `count`                                                                                                                                                                                                                                                                                                                                          | [features/albums/components/AlbumMapPanel.tsx](apps/mobile/features/albums/components/AlbumMapPanel.tsx)                   |
-| `ALBUM_SHARED`                  | `Album Shared`                  | `m2t_album_shared`                  | No      | An album is made shared (Split with friends on New Album); each successful share.                                                                                                                       | None                                                                                                                                                                                                                                                                                                                                             | [features/cloudSync/CloudSyncContext.tsx](apps/mobile/features/cloudSync/CloudSyncContext.tsx)                             |
-| `ALBUM_SHARE_STOPPED`           | `Album Share Stopped`           | `m2t_album_share_stopped`           | No      | The owner stops sharing an album (by deleting it); each successful stop.                                                                                                                                | None                                                                                                                                                                                                                                                                                                                                             | [features/cloudSync/CloudSyncContext.tsx](apps/mobile/features/cloudSync/CloudSyncContext.tsx)                             |
-| `ALBUM_JOINED`                  | `Album Joined`                  | `m2t_album_joined`                  | No      | Someone joins a shared album with its link; each successful join.                                                                                                                                       | `is_pro`                                                                                                                                                                                                                                                                                                                                         | [features/cloudSync/CloudSyncContext.tsx](apps/mobile/features/cloudSync/CloudSyncContext.tsx)                             |
-| `ALBUM_LEFT`                    | `Album Left`                    | `m2t_album_left`                    | No      | A member leaves a shared album; each successful leave.                                                                                                                                                  | None                                                                                                                                                                                                                                                                                                                                             | [features/cloudSync/CloudSyncContext.tsx](apps/mobile/features/cloudSync/CloudSyncContext.tsx)                             |
-| `ALBUM_MEMBER_REMOVED`          | `Album Member Removed`          | `m2t_album_member_removed`          | No      | The owner removes someone who joined a shared album; each successful removal.                                                                                                                           | None                                                                                                                                                                                                                                                                                                                                             | [features/albums/screens/AlbumPeopleScreen.tsx](apps/mobile/features/albums/screens/AlbumPeopleScreen.tsx)                 |
-| `ALBUM_BILL_SAVED`              | `Album Bill Saved`              | `m2t_album_bill_saved`              | No      | A split bill is saved in a shared album (the group's bill is written); each save from the entry editor.                                                                                                 | `edit`, `paid_by`, `people`                                                                                                                                                                                                                                                                                                                      | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
-| `ALBUM_PAYMENT_RECORDED`        | `Album Payment Recorded`        | `m2t_album_payment_recorded`        | No      | A payment is recorded on a shared album's bill (Mark paid, a part payment, paying a member back, or each bill of a Settle up), or a simplified debt is settled from the album's Balances; each payment. | `direction`, `via` (`bill` or `group_debt`)                                                                                                                                                                                                                                                                                                      | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
-| `ALBUM_SIMPLIFY_DEBTS_SET`      | `Album Simplify Debts Set`      | `m2t_album_simplify_debts_set`      | No      | Simplify group debts is turned on or off on a shared album's People page, or on with a shared album made on New Album; each change.                                                                     | `on`                                                                                                                                                                                                                                                                                                                                             | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
-| `ALBUM_PAYMENT_UNDONE`          | `Album Payment Undone`          | `m2t_album_payment_undone`          | No      | The recorder undoes a payment on a shared album's bill (including its whole simplified batch); each authorized undo.                                                                                    | None                                                                                                                                                                                                                                                                                                                                             | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
-| `BUDGET_TEMPLATE_CREATED`       | `Budget Template Created`       | `m2t_budget_template_created`       | No      | A reusable budget template is created; each successful creation.                                                                                                                                        | `categories`, `backPopulate`, `period`, `currency`                                                                                                                                                                                                                                                                                               | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
-| `BUDGET_TEMPLATE_UPDATED`       | `Budget Template Updated`       | `m2t_budget_template_updated`       | No      | A reusable budget template is updated; each successful update.                                                                                                                                          | `categories`, `period`, `currency` (app edits only)                                                                                                                                                                                                                                                                                              | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
-| `BUDGET_TEMPLATE_DELETED`       | `Budget Template Deleted`       | `m2t_budget_template_deleted`       | No      | A budget template is deleted; each successful deletion.                                                                                                                                                 | None                                                                                                                                                                                                                                                                                                                                             | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
-| `BUDGET_DEFAULT_CHANGED`        | `Budget Default Changed`        | `m2t_budget_default_changed`        | No      | A period's default budget template is changed; each successful action.                                                                                                                                  | None                                                                                                                                                                                                                                                                                                                                             | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
-| `BUDGET_MONTH_CREATED`          | `Budget Month Created`          | `m2t_budget_month_created`          | No      | A week's, month's or year's budget is created automatically (one event per period made), manually, custom, or by backfill; backfill is one aggregate event with the count.                              | `source`, `period`, `months`, `currency` (custom only)                                                                                                                                                                                                                                                                                           | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
-| `BUDGET_MONTH_UPDATED`          | `Budget Month Updated`          | `m2t_budget_month_updated`          | No      | A week's, month's or year's budget is updated; each successful update.                                                                                                                                  | `categories`, `period`, `currency` (app edits only)                                                                                                                                                                                                                                                                                              | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
-| `BUDGET_MONTH_DELETED`          | `Budget Month Deleted`          | `m2t_budget_month_deleted`          | No      | A week's, month's or year's budget is deleted; each successful deletion.                                                                                                                                | `period`                                                                                                                                                                                                                                                                                                                                         | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
-| `ITEM_CREATED`                  | `Item Created`                  | `m2t_item_created`                  | No      | An owned item is created; each successful creation.                                                                                                                                                     | None                                                                                                                                                                                                                                                                                                                                             | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
-| `LEDGER_CREATED`                | `Ledger Created`                | `m2t_ledger_created`                | No      | A Pro user creates a ledger (which opens it); each successful creation.                                                                                                                                 | `copied_accounts`, `copied_categories`, `copied_goals`, `copied_loans`, `copied_recurring`, `copied_budgets`, `copied_items`, `copied_albums`, `copied_month_cycle`, `copied_everything`, `copied_from_open`, `ledger_count` (every `copied_*` is true with `copied_everything`)                                                                 | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
-| `LEDGER_SWITCHED`               | `Ledger Switched`               | `m2t_ledger_switched`               | No      | Another ledger is opened: from the switcher, after creating one, or by the move back to the default ledger when Pro ends; each switch.                                                                  | `to_default`                                                                                                                                                                                                                                                                                                                                     | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
-| `LEDGER_DELETED`                | `Ledger Deleted`                | `m2t_ledger_deleted`                | No      | A ledger is deleted from Manage ledgers (the open one after the default ledger opens); each successful deletion.                                                                                        | None                                                                                                                                                                                                                                                                                                                                             | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
-| `RECURRING_RULE_CREATED`        | `Recurring Rule Created`        | `m2t_recurring_rule_created`        | No      | A recurring rule is created; each successful creation.                                                                                                                                                  | `type`, `pattern` (the frequency inferred from the saved schedule: `daily`, `weekly`, `monthly`, `quarterly`, `semiannually` or `yearly`; a monthly rule every 3 or 6 months reports `quarterly` or `semiannually`, so Quarterly every 2 reports `semiannually` and Quarterly every 3 reports `monthly`), `has_fee` (a transfer rule with a fee) | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
-| `RECURRING_RULE_UPDATED`        | `Recurring Rule Updated`        | `m2t_recurring_rule_updated`        | No      | A recurring rule is updated; each successful update.                                                                                                                                                    | `has_fee` when saved from the recurring editor (whether the rule is a transfer with a fee); none from other editors                                                                                                                                                                                                                              | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
-| `RECURRING_RULE_DELETED`        | `Recurring Rule Deleted`        | `m2t_recurring_rule_deleted`        | No      | A recurring rule is deleted; each successful deletion.                                                                                                                                                  | None                                                                                                                                                                                                                                                                                                                                             | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
-| `RECURRING_HIGHLIGHT_TOGGLED`   | `Recurring Highlight Toggled`   | `m2t_recurring_highlight_toggled`   | No      | The tint on entries a recurring rule made is switched on or off in Recurring settings; each change.                                                                                                     | `enabled`                                                                                                                                                                                                                                                                                                                                        | [features/settings/screens/RecurringSettingsScreen.tsx](apps/mobile/features/settings/screens/RecurringSettingsScreen.tsx) |
-| `INSTALMENT_PLAN_CREATED`       | `Instalment Plan Created`       | `m2t_instalment_plan_created`       | No      | An expense is saved as an instalment plan from the add form, or an expense saved earlier is turned into one from its edit screen; each successful plan.                                                 | `payments` (number of payments), `frequency` (`monthly`, `biweekly` or `weekly`), `first_payment_due` (whether the first payment was made at once; always true for a saved expense, which is payment 1), `custom_amount` (whether the bank's payment amount was typed instead of the even split), `source` (`add_form` or `saved_expense`)       | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
-| `INSTALMENT_PLAN_UPDATED`       | `Instalment Plan Updated`       | `m2t_instalment_plan_updated`       | No      | A plan's name, account, category or payment amount is saved from its edit sheet; each save.                                                                                                             | `amount_changed` (whether the payment amount changed)                                                                                                                                                                                                                                                                                            | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
-| `INSTALMENT_PLAN_DELETED`       | `Instalment Plan Deleted`       | `m2t_instalment_plan_deleted`       | No      | A plan is deleted from its edit sheet; each deletion.                                                                                                                                                   | `payments_removed` (whether the payments already made were deleted too)                                                                                                                                                                                                                                                                          | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
-| `INSTALMENT_PAYMENT_PAID_EARLY` | `Instalment Payment Paid Early` | `m2t_instalment_payment_paid_early` | No      | Pay now on a plan page makes the next payment today; each payment made.                                                                                                                                 | None                                                                                                                                                                                                                                                                                                                                             | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
-| `INSTALMENT_PLAN_PAID_OFF`      | `Instalment Plan Paid Off`      | `m2t_instalment_plan_paid_off`      | No      | Pay off on a plan page settles everything left in one payment; once per plan.                                                                                                                           | None                                                                                                                                                                                                                                                                                                                                             | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
+| Constant                        | Event name                      | GA4 name                            | PostHog | Trigger and frequency                                                                                                                                                                                                                               | Extra properties                                                                                                                                                                                                                                                                                                                                 | Call sites                                                                                                                 |
+| ------------------------------- | ------------------------------- | ----------------------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| `ALBUM_CREATED`                 | `Album Created`                 | `m2t_album_created`                 | No      | An album is created; each successful creation.                                                                                                                                                                                                      | `transactionCount`                                                                                                                                                                                                                                                                                                                               | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
+| `ALBUM_UPDATED`                 | `Album Updated`                 | `m2t_album_updated`                 | No      | Album details are updated; each successful update.                                                                                                                                                                                                  | None                                                                                                                                                                                                                                                                                                                                             | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
+| `ALBUM_DELETED`                 | `Album Deleted`                 | `m2t_album_deleted`                 | No      | An album is deleted; each successful deletion.                                                                                                                                                                                                      | None                                                                                                                                                                                                                                                                                                                                             | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
+| `ALBUM_LOCATION_SET`            | `Album Location Set`            | `m2t_album_location_set`            | No      | An album location is set or cleared; each successful change.                                                                                                                                                                                        | `cleared`                                                                                                                                                                                                                                                                                                                                        | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
+| `ALBUM_LOCATIONS_OPENED`        | `Album Locations Opened`        | `m2t_album_locations_opened`        | No      | The album map panel opens; each panel mount.                                                                                                                                                                                                        | `count`                                                                                                                                                                                                                                                                                                                                          | [features/albums/components/AlbumMapPanel.tsx](apps/mobile/features/albums/components/AlbumMapPanel.tsx)                   |
+| `ALBUM_SHARED`                  | `Album Shared`                  | `m2t_album_shared`                  | No      | An album is made shared (Split with friends on New Album); each successful share.                                                                                                                                                                   | None                                                                                                                                                                                                                                                                                                                                             | [features/cloudSync/CloudSyncContext.tsx](apps/mobile/features/cloudSync/CloudSyncContext.tsx)                             |
+| `ALBUM_SHARE_STOPPED`           | `Album Share Stopped`           | `m2t_album_share_stopped`           | No      | The owner stops sharing an album (by deleting it); each successful stop.                                                                                                                                                                            | None                                                                                                                                                                                                                                                                                                                                             | [features/cloudSync/CloudSyncContext.tsx](apps/mobile/features/cloudSync/CloudSyncContext.tsx)                             |
+| `ALBUM_JOINED`                  | `Album Joined`                  | `m2t_album_joined`                  | No      | Someone joins a shared album with its link; each successful join.                                                                                                                                                                                   | `is_pro`                                                                                                                                                                                                                                                                                                                                         | [features/cloudSync/CloudSyncContext.tsx](apps/mobile/features/cloudSync/CloudSyncContext.tsx)                             |
+| `ALBUM_LEFT`                    | `Album Left`                    | `m2t_album_left`                    | No      | A member leaves a shared album; each successful leave.                                                                                                                                                                                              | None                                                                                                                                                                                                                                                                                                                                             | [features/cloudSync/CloudSyncContext.tsx](apps/mobile/features/cloudSync/CloudSyncContext.tsx)                             |
+| `ALBUM_MEMBER_REMOVED`          | `Album Member Removed`          | `m2t_album_member_removed`          | No      | The owner removes someone who joined a shared album; each successful removal.                                                                                                                                                                       | None                                                                                                                                                                                                                                                                                                                                             | [features/albums/screens/AlbumPeopleScreen.tsx](apps/mobile/features/albums/screens/AlbumPeopleScreen.tsx)                 |
+| `ALBUM_BILL_SAVED`              | `Album Bill Saved`              | `m2t_album_bill_saved`              | No      | A split bill is saved in a shared album (the Worker wrote the group's bill); each save from the entry editor.                                                                                                                                       | `edit`, `paid_by` (`me` when the user is the payer, `friend` when another member is), `people`, `has_payments`                                                                                                                                                                                                                                   | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
+| `ALBUM_PAYMENT_RECORDED`        | `Album Payment Recorded`        | `m2t_album_payment_recorded`        | No      | A payment is recorded on a shared album's bill (Mark paid, a part payment, paying a member back, or each bill of a Settle up), or a debt is settled from the album's Balances, the user's own or between two others; each payment the Worker wrote. | `direction` (`paid`, `received`, `between_others`), `via` (`bill` or `group_debt`)                                                                                                                                                                                                                                                               | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
+| `ALBUM_SIMPLIFY_DEBTS_SET`      | `Album Simplify Debts Set`      | `m2t_album_simplify_debts_set`      | No      | Simplify group debts is turned on or off on a shared album's People page, or on with a shared album made on New Album; each change.                                                                                                                 | `on`                                                                                                                                                                                                                                                                                                                                             | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
+| `ALBUM_PAYMENT_UNDONE`          | `Album Payment Undone`          | `m2t_album_payment_undone`          | No      | Someone in a shared album undoes a payment on one of its bills (including its whole simplified batch); each undo the Worker wrote.                                                                                                                  | None                                                                                                                                                                                                                                                                                                                                             | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
+| `ALBUM_BILL_RESTORED`           | `Album Bill Restored`           | `m2t_album_bill_restored`           | No      | A deleted bill of a shared album is brought back with Restore in its Activity; each restore the Worker wrote.                                                                                                                                       | None                                                                                                                                                                                                                                                                                                                                             | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
+| `ALBUM_BILL_ACCOUNT_SET`        | `Album Bill Account Set`        | `m2t_album_bill_account_set`        | No      | Shared albums' bills are put on an account with the album's bulk Edit > Account (on the phone only); each bulk change that applied.                                                                                                                 | `count`, `bulk`                                                                                                                                                                                                                                                                                                                                  | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
+| `ALBUM_ACTIVITY_OPENED`         | `Album Activity Opened`         | `m2t_album_activity_opened`         | No      | A shared album's Balances tab, which holds its Activity, is first shown on a visit to the album.                                                                                                                                                    | `entries`                                                                                                                                                                                                                                                                                                                                        | [features/albums/screens/AlbumDetailScreen.tsx](apps/mobile/features/albums/screens/AlbumDetailScreen.tsx)                 |
+| `BUDGET_TEMPLATE_CREATED`       | `Budget Template Created`       | `m2t_budget_template_created`       | No      | A reusable budget template is created; each successful creation.                                                                                                                                                                                    | `categories`, `backPopulate`, `period`, `currency`                                                                                                                                                                                                                                                                                               | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
+| `BUDGET_TEMPLATE_UPDATED`       | `Budget Template Updated`       | `m2t_budget_template_updated`       | No      | A reusable budget template is updated; each successful update.                                                                                                                                                                                      | `categories`, `period`, `currency` (app edits only)                                                                                                                                                                                                                                                                                              | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
+| `BUDGET_TEMPLATE_DELETED`       | `Budget Template Deleted`       | `m2t_budget_template_deleted`       | No      | A budget template is deleted; each successful deletion.                                                                                                                                                                                             | None                                                                                                                                                                                                                                                                                                                                             | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
+| `BUDGET_DEFAULT_CHANGED`        | `Budget Default Changed`        | `m2t_budget_default_changed`        | No      | A period's default budget template is changed; each successful action.                                                                                                                                                                              | None                                                                                                                                                                                                                                                                                                                                             | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
+| `BUDGET_MONTH_CREATED`          | `Budget Month Created`          | `m2t_budget_month_created`          | No      | A week's, month's or year's budget is created automatically (one event per period made), manually, custom, or by backfill; backfill is one aggregate event with the count.                                                                          | `source`, `period`, `months`, `currency` (custom only)                                                                                                                                                                                                                                                                                           | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
+| `BUDGET_MONTH_UPDATED`          | `Budget Month Updated`          | `m2t_budget_month_updated`          | No      | A week's, month's or year's budget is updated; each successful update.                                                                                                                                                                              | `categories`, `period`, `currency` (app edits only)                                                                                                                                                                                                                                                                                              | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
+| `BUDGET_MONTH_DELETED`          | `Budget Month Deleted`          | `m2t_budget_month_deleted`          | No      | A week's, month's or year's budget is deleted; each successful deletion.                                                                                                                                                                            | `period`                                                                                                                                                                                                                                                                                                                                         | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
+| `ITEM_CREATED`                  | `Item Created`                  | `m2t_item_created`                  | No      | An owned item is created; each successful creation.                                                                                                                                                                                                 | None                                                                                                                                                                                                                                                                                                                                             | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
+| `LEDGER_CREATED`                | `Ledger Created`                | `m2t_ledger_created`                | No      | A Pro user creates a ledger (which opens it); each successful creation.                                                                                                                                                                             | `copied_accounts`, `copied_categories`, `copied_goals`, `copied_loans`, `copied_recurring`, `copied_budgets`, `copied_items`, `copied_albums`, `copied_month_cycle`, `copied_everything`, `copied_from_open`, `ledger_count` (every `copied_*` is true with `copied_everything`)                                                                 | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
+| `LEDGER_SWITCHED`               | `Ledger Switched`               | `m2t_ledger_switched`               | No      | Another ledger is opened: from the switcher, after creating one, or by the move back to the default ledger when Pro ends; each switch.                                                                                                              | `to_default`                                                                                                                                                                                                                                                                                                                                     | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
+| `LEDGER_DELETED`                | `Ledger Deleted`                | `m2t_ledger_deleted`                | No      | A ledger is deleted from Manage ledgers (the open one after the default ledger opens); each successful deletion.                                                                                                                                    | None                                                                                                                                                                                                                                                                                                                                             | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
+| `RECURRING_RULE_CREATED`        | `Recurring Rule Created`        | `m2t_recurring_rule_created`        | No      | A recurring rule is created; each successful creation.                                                                                                                                                                                              | `type`, `pattern` (the frequency inferred from the saved schedule: `daily`, `weekly`, `monthly`, `quarterly`, `semiannually` or `yearly`; a monthly rule every 3 or 6 months reports `quarterly` or `semiannually`, so Quarterly every 2 reports `semiannually` and Quarterly every 3 reports `monthly`), `has_fee` (a transfer rule with a fee) | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
+| `RECURRING_RULE_UPDATED`        | `Recurring Rule Updated`        | `m2t_recurring_rule_updated`        | No      | A recurring rule is updated; each successful update.                                                                                                                                                                                                | `has_fee` when saved from the recurring editor (whether the rule is a transfer with a fee); none from other editors                                                                                                                                                                                                                              | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
+| `RECURRING_RULE_DELETED`        | `Recurring Rule Deleted`        | `m2t_recurring_rule_deleted`        | No      | A recurring rule is deleted; each successful deletion.                                                                                                                                                                                              | None                                                                                                                                                                                                                                                                                                                                             | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
+| `RECURRING_HIGHLIGHT_TOGGLED`   | `Recurring Highlight Toggled`   | `m2t_recurring_highlight_toggled`   | No      | The tint on entries a recurring rule made is switched on or off in Recurring settings; each change.                                                                                                                                                 | `enabled`                                                                                                                                                                                                                                                                                                                                        | [features/settings/screens/RecurringSettingsScreen.tsx](apps/mobile/features/settings/screens/RecurringSettingsScreen.tsx) |
+| `INSTALMENT_PLAN_CREATED`       | `Instalment Plan Created`       | `m2t_instalment_plan_created`       | No      | An expense is saved as an instalment plan from the add form, or an expense saved earlier is turned into one from its edit screen; each successful plan.                                                                                             | `payments` (number of payments), `frequency` (`monthly`, `biweekly` or `weekly`), `first_payment_due` (whether the first payment was made at once; always true for a saved expense, which is payment 1), `custom_amount` (whether the bank's payment amount was typed instead of the even split), `source` (`add_form` or `saved_expense`)       | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
+| `INSTALMENT_PLAN_UPDATED`       | `Instalment Plan Updated`       | `m2t_instalment_plan_updated`       | No      | A plan's name, account, category or payment amount is saved from its edit sheet; each save.                                                                                                                                                         | `amount_changed` (whether the payment amount changed)                                                                                                                                                                                                                                                                                            | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
+| `INSTALMENT_PLAN_DELETED`       | `Instalment Plan Deleted`       | `m2t_instalment_plan_deleted`       | No      | A plan is deleted from its edit sheet; each deletion.                                                                                                                                                                                               | `payments_removed` (whether the payments already made were deleted too)                                                                                                                                                                                                                                                                          | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
+| `INSTALMENT_PAYMENT_PAID_EARLY` | `Instalment Payment Paid Early` | `m2t_instalment_payment_paid_early` | No      | Pay now on a plan page makes the next payment today; each payment made.                                                                                                                                                                             | None                                                                                                                                                                                                                                                                                                                                             | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
+| `INSTALMENT_PLAN_PAID_OFF`      | `Instalment Plan Paid Off`      | `m2t_instalment_plan_paid_off`      | No      | Pay off on a plan page settles everything left in one payment; once per plan.                                                                                                                                                                       | None                                                                                                                                                                                                                                                                                                                                             | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
 
 #### GA4 only: tutorials, settings, backup and review
 
@@ -4559,6 +4627,20 @@ database, no bucket, no account and no secrets. Served at
   changes nothing in what is sent; an older page reads `credit_due_day`, which
   a days-after card keeps near its real due day, and a fixed `creditDueDay`
   it saves switches the card back to the fixed day (`planAccount`).
+  `shared-albums` works both ways. A page that names it is sent each shared
+  album's group beside the backup's tables (`webDashboardAlbumGroups.ts`;
+  never in a backup, whose group tables are left out on purpose):
+  `web_album_members` (`id`, `album_id`, `name`, `is_self`, `current`,
+  `sort_order`), `web_album_bills` (`id`, `album_id`, `date`, `note`,
+  `amount`, `currency`, `paid_by`, `shares` as `[{ memberId, amount }]`,
+  `deleted`, `updated_at`, deleted bills included) and `web_album_activity`
+  (the app's `AlbumActivity` entries: `kind`, `actor_member_id`,
+  `expense_id`, `member_id`, `bill`, `rename`, `payment`, `simplify`,
+  `sort_order`, `created_at`). Only albums of the open ledger, and no Cloud
+  Sync account is named in them. Each row has a unique `id`, so a patch
+  carries only what changed. A phone that names it in `meta.features` takes
+  `module:albumbill` (below); an older app refuses the module as unknown and
+  sends no group, so the page keeps such bills view only.
 - **Skipped requests:** whole exports are rate limited. A browser that opens
   or reconnects and may not edit gets at most one copy a minute. Refresh and
   Send now rebuild at most every 10 s. The same data is not sent again within
@@ -4591,10 +4673,20 @@ database, no bucket, no account and no secrets. Served at
     `category`, `recurring`) are read and planned in
     `services/webDashboardEdits.ts`; the rest are modules in
     `services/webDashboardEditModules/` (`module:goal`, `module:loan`,
-    `module:budget`, `module:item`, `module:album`, `module:split`,
-    `module:reimbursement`, `module:wage`, `module:currency`,
-    `module:reorder`), each with a saver in
-    `features/settings/lib/webDashboardApply/`. A batch holds at most 50 ops
+    `module:budget`, `module:item`, `module:album`, `module:albumbill`,
+    `module:split`, `module:reimbursement`, `module:wage`,
+    `module:currency`, `module:reorder`), each with a saver in
+    `features/settings/lib/webDashboardApply/`. `module:albumbill` is a
+    shared album's bills (`update` one bill's day, title, currency, payer and
+    shares through `saveAlbumBill`, or only the user's own category, longer
+    note, mood and account through `saveAlbumBillOwnFields`; `bulk` day and
+    title through `editGroupBills`, account through `setGroupEntriesAccount`
+    and category as any entry's; `delete` through `deleteTransactionsBulk`;
+    `restore` through `restoreAlbumBill`): any current member of the album
+    can be the payer, and anyone already on the bill stays on it
+    (`billPeople`). The core planner and `module:split` keep refusing a
+    shared album's day, title, split and delete, so a page from before this
+    cannot change one. A batch holds at most 50 ops
     and 500 rows, and must fit the room's 64K-character text frame (the
     browser checks the rows and size before sending). The `edited` answer goes
     out on whichever connection is open when the save ends, so a reconnect
@@ -4623,7 +4715,13 @@ database, no bucket, no account and no secrets. Served at
     `afterDeferredWrites`, then a check that new, updated and deleted
     transactions landed and that a reimbursement was marked or unmarked (the
     app's deferred writes swallow a failure, and skip an expense they cannot
-    find without a word). Saving is step by step, not atomic: a step failing partway answers
+    find without a word). A shared album's change goes through the Worker
+    and resolves later: each saver hands it back in `ApplyTrack.pending`,
+    the next step waits for it, and one that did not go (offline, signed out,
+    no longer in the album; the phone says why) fails the save. A group
+    delete and a bulk day or title, which AppContext starts without handing
+    back a promise, are waited for until the user's entries show them (up to
+    20 s). Saving is step by step, not atomic: a step failing partway answers
     `unknown` (some may be saved), and fresh data follows. At most 4 edits wait
     at once (`busy` past that).
   - **Freshness:** each transfer carries a per-browser, single-use `editToken`
@@ -4943,20 +5041,21 @@ the API stay on `BETTER_AUTH_URL`. Links on any other host (older ones were made
 
 Shared ledgers ([Shared ledgers](#shared-ledgers)):
 
-| Route                                      | What it does                                                                                                                                                                                   |
-| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET /v1/ledgers`                          | The user's shared ledgers, owned and joined, with role, owner name and account id, member count and `active` (anyone in it Pro)                                                                |
-| `POST /v1/ledgers`                         | `{ledgerId, name, emoji}` → shares a ledger: Pro, at most 2 per owner; makes its Turso database                                                                                                |
-| `DELETE /v1/ledgers/<id>`                  | Stop sharing (owner): deletes its database and images; members and the link cascade; everyone is nudged                                                                                        |
-| `POST /v1/ledgers/<id>/leave`              | Revokes this ledger's tokens, then a member leaves                                                                                                                                             |
-| `POST /v1/ledgers/<id>/credentials`        | Its Turso URL and a 1-day token, for the owner or a member, while anyone in it is Pro (403 `ledger_paused`)                                                                                    |
-| `GET /v1/ledgers/<id>/members`             | Owner and members (addresses for the owner only)                                                                                                                                               |
-| `DELETE /v1/ledgers/<id>/members/<userId>` | Owner revokes this ledger's tokens, then removes the member and retires the invite; all affected users are nudged (403 for another member, 404 without access)                                 |
-| `POST /v1/ledgers/<id>/invites`            | Owner gets the ledger's link: the open one, or a new one valid a day (always new with `rotate: true`, killing the old); two phones asking at once get the same one                             |
-| `/v1/ledgers/<id>/media/…`                 | Like `/v1/media`, under `l/<id>/` with its own quota; writing needs the ledger active                                                                                                          |
-| `GET /v1/invites/<code>`                   | No sign-in: the app's ledger id, name, owner, member count, `full` and `active`; rate limited per IP                                                                                           |
-| `POST /v1/invites/<code>/accept`           | Joins (any signed-in user, no Pro) while active, with a place and the link not retired, in one statement                                                                                       |
-| `GET /join/<code>`                         | The page an invite link opens: hands `money2time://join/<code>` to the app, or links the stores. Static: no names, worded by host (album or ledger); a code that cannot be one gets a 404 page |
+| Route                                      | What it does                                                                                                                                                                                                                                                                                |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET /v1/ledgers`                          | The user's shared ledgers, owned and joined, with role, owner name and account id, member count and `active` (anyone in it Pro)                                                                                                                                                             |
+| `POST /v1/ledgers`                         | `{ledgerId, name, emoji}` → shares a ledger: Pro, at most 2 per owner; makes its Turso database                                                                                                                                                                                             |
+| `DELETE /v1/ledgers/<id>`                  | Stop sharing (owner): deletes its database and images; members and the link cascade; everyone is nudged                                                                                                                                                                                     |
+| `POST /v1/ledgers/<id>/leave`              | Revokes this ledger's tokens, then a member leaves                                                                                                                                                                                                                                          |
+| `POST /v1/ledgers/<id>/credentials`        | Its Turso URL and a 1-day token, for the owner or a member, while anyone in it is Pro (403 `ledger_paused`); read-only for a shared album                                                                                                                                                   |
+| `GET /v1/ledgers/<id>/members`             | Owner and members (addresses for the owner only)                                                                                                                                                                                                                                            |
+| `DELETE /v1/ledgers/<id>/members/<userId>` | Owner revokes this ledger's tokens, then removes the member and retires the invite; all affected users are nudged (403 for another member, 404 without access)                                                                                                                              |
+| `POST /v1/ledgers/<id>/invites`            | Owner gets the ledger's link: the open one, or a new one valid a day (always new with `rotate: true`, killing the old); two phones asking at once get the same one                                                                                                                          |
+| `POST /v1/ledgers/<id>/album`              | A shared album's change, which only the Worker writes (`src/albumGroups.ts`): `{action: "join", name}` or `{action: "write", rows}`; checked, stamped with the writer and logged in `album_activity`, in one transaction; answers with the rows written; 403 `not_member`, 409 `name_taken` |
+| `/v1/ledgers/<id>/media/…`                 | Like `/v1/media`, under `l/<id>/` with its own quota; writing needs the ledger active                                                                                                                                                                                                       |
+| `GET /v1/invites/<code>`                   | No sign-in: the app's ledger id, name, owner, member count, `full` and `active`; rate limited per IP                                                                                                                                                                                        |
+| `POST /v1/invites/<code>/accept`           | Joins (any signed-in user, no Pro) while active, with a place and the link not retired, in one statement                                                                                                                                                                                    |
+| `GET /join/<code>`                         | The page an invite link opens: hands `money2time://join/<code>` to the app, or links the stores. Static: no names, worded by host (album or ledger); a code that cannot be one gets a 404 page                                                                                              |
 
 A share can carry an album's group instead of a ledger
 ([Album members and shared albums](#album-members-and-shared-albums)): `POST
@@ -5455,10 +5554,11 @@ app's `services/webDashboardLink.ts`, `webDashboardCrypto.ts`,
   (`src/components/dashboard/edit/`, built on `kit.tsx` after the app's own
   editors) send a sealed `edit` with ops (`src/lib/cloud/edits.ts`) for
   transactions, accounts, account groups, categories and recurring rules, and
-  module ops for goals, loans, budgets, items, albums, split bills,
-  reimbursements, wage months, currencies and reorders (`module:goal`,
-  `module:loan`, `module:budget`, `module:item`, `module:album`,
-  `module:split`, `module:reimbursement`, `module:wage`, `module:currency`,
+  module ops for goals, loans, budgets, items, albums, shared albums' bills,
+  split bills, reimbursements, wage months, currencies and reorders
+  (`module:goal`, `module:loan`, `module:budget`, `module:item`,
+  `module:album`, `module:albumbill`, `module:split`,
+  `module:reimbursement`, `module:wage`, `module:currency`,
   `module:reorder`), carrying the single-use `editToken` from the data on
   screen and each row's `updated_at` as it was when the editor opened. The
   phone checks the whole batch, saves it or refuses it, answers `edited` with
@@ -5497,13 +5597,23 @@ app's `services/webDashboardLink.ts`, `webDashboardCrypto.ts`,
 - **A shared album's bills** (app migration 090, see Album members and shared
   albums): the phone's own entry for a group's bill carries `album_group_id`
   (`tx.albumGroupId`, the group's id, which is its album's). It reads as any
-  split bill, both directions, since that is how the phone keeps it. It is
-  **view only** here: the bill is everyone's in the album, so the editor says
-  it is changed in the app and has no Delete, its cards under Who owes you
-  have no Mark paid, Undo, Remove or account chip (a paid one still says when
-  and to which account, and the card's tooltip says to change it in the app),
-  the bulk bar's Date, Note and Delete say the same when one is selected, the
-  album's Edit transactions cannot untick its own shared bills nor tick any
+  split bill, both directions, since that is how the phone keeps it.
+  **Anyone in the album can change it**, here too, while the phone names
+  `shared-albums` and sent the album's group (`src/lib/backup/album-group.ts`,
+  `editableGroupBill`): the editor opens it as the group's bill
+  (`edit/group-bill-editor.tsx`, `GroupBillForm`) with its day, title,
+  currency, Paid by (any current member, and anyone already on the bill) and
+  who it is split between, evenly or by amount, saved for everyone; its
+  category, longer note, mood and, on a bill the user paid, account stay the
+  user's own. Its Delete says it goes for everyone and its payments stay. The
+  bulk bar sends the shared bills' day, title, account and delete through the
+  group beside the other rows (`albumbill_bulk`), and an account only on bills
+  the user paid or paid back. Payments on such a bill are recorded in the app,
+  so its cards under Who owes you have no Mark paid, Undo, Remove or account
+  chip (the tooltip says so). With an older app, or when the user has left the
+  album, the bill stays **view only**: the editor says it is changed in the
+  app and has no Delete, and the bulk bar's Date, Note and Delete say the same
+  when one is selected. Either way the album's Edit transactions cannot untick its own shared bills nor tick any
   other entry into it (a shared album only holds bills made in it), and an album
   with bills of its group has no Delete (`albumGroupBillIds`, read from the
   unfiltered data; ending the share clears `album_group_id`, so that is the
@@ -5512,11 +5622,22 @@ app's `services/webDashboardLink.ts`, `webDashboardCrypto.ts`,
   a split edit, a settle, a change of its day or title, a delete of one, taking
   one out of its album, adding any entry to a shared album, and deleting a
   shared album (`invalid`), which covers a
-  page loaded before the last sync and a shared album with no bills yet. The group's own
+  page loaded before the last sync and a shared album with no bills yet; it
+  changes shared bills only through `module:albumbill`. The group's own
   tables (`album_members`, `album_expenses`, `album_settlements`,
-  `album_groups`) are not in
-  what the phone sends. In the lists (`TxList`) such a row has a **Shared
-  album** pill, as the app's row has its people mark.
+  `album_groups`, `album_activity`) are not in the backup; the phone sends
+  what the dashboard needs of them as `web_album_*` tables (Web-dashboard
+  Worker > Page features). In the lists (`TxList`) such a row has a **Shared
+  album** pill, as the app's row has its people mark, and any expense or
+  income with no account (a bill the user paid that someone else entered)
+  shows the app's dashed box and "No account" where the account goes.
+- **A shared album's Activity**: the album's page shows its log under the
+  transactions (`views/album-activity.tsx`), as the app's Activity tab:
+  newest first, by the phone's day, one line each, worded with the app's
+  rules (`describeActivity`, mirroring `activityLines.ts`), a change someone
+  else made to the user's money tinted with a second line saying how, and a
+  deleted bill's line with Restore (`module:albumbill` `restore`) while the
+  phone takes edits. Nothing shows for an album the phone sent no group for.
 - **Split bills a friend paid** (app migration 089, see Paid by and Balances):
   the payer's row carries `is_payer`, the friends' rows hold their share in
   `share_amount` beside an `amount` of 0, and the expense is the user's own

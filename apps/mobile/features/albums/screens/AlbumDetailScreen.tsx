@@ -62,6 +62,7 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { useWideTabColumns } from '~/hooks/useWideTabColumns';
 import { I18n } from '~/lib/i18n';
 import type { RootStackParamList } from '~/navigation/rootStack';
+import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import { pickLibraryImage } from '~/services/libraryImagePicker';
 import { deleteAlbumCover, getAlbumCoverUri, saveAlbumCover } from '~/services/userAssets';
@@ -71,6 +72,7 @@ import { withColorAlpha } from '~/utils/color';
 import { formatAmount, formatHours } from '~/utils/formatters';
 import { countsAsExpenseRow } from '~/utils/spending';
 
+import { AlbumActivity } from '../components/AlbumActivity';
 import { AlbumBalances } from '../components/AlbumBalances';
 import {
   type BreakdownMemberChoice,
@@ -78,6 +80,7 @@ import {
 } from '../components/BreakdownMemberSheet';
 import { useAlbumGroup } from '../hooks/useAlbumGroup';
 import { breakdownMemberOptions, memberShare } from '../lib/memberShare';
+import { listGroupActivity } from '../services/albumGroupStore';
 import { formatAlbumDateRange } from '../utils';
 
 type DetailTab = 'balances' | 'breakdown' | 'transactions';
@@ -138,6 +141,8 @@ export function AlbumDetailScreen({
     deleteAlbum,
     updateAlbum,
     updateTransactionsBulk,
+    setGroupEntriesAccount,
+    editGroupBills,
     removeTransactionsFromAlbum,
     addTransactionsToAlbum,
   } = useApp();
@@ -167,6 +172,8 @@ export function AlbumDetailScreen({
       showBalances ? ['transactions', 'breakdown', 'balances'] : ['transactions', 'breakdown'],
     [showBalances],
   );
+  // A shared album's activity log sits under its Balances.
+  const showActivity = group.share !== null;
   const [tab, setTab] = useState<DetailTab>('transactions');
   // The Balances tab going (the last person removed) leaves the page on a tab it still has.
   const shownTab = tabs.includes(tab) ? tab : tabs[0];
@@ -233,9 +240,22 @@ export function AlbumDetailScreen({
   const breakdownY = useSharedValue(0);
   const balancesY = useSharedValue(0);
   const offsets = useMemo<Record<DetailTab, SharedValue<number>>>(
-    () => ({ transactions: transactionsY, breakdown: breakdownY, balances: balancesY }),
+    () => ({
+      transactions: transactionsY,
+      breakdown: breakdownY,
+      balances: balancesY,
+    }),
     [balancesY, breakdownY, transactionsY],
   );
+  // Opening a shared album's Balances, with its activity log, once per visit.
+  const activityOpenedRef = useRef(false);
+  useEffect(() => {
+    if (shownTab !== 'balances' || !showActivity || activityOpenedRef.current) return;
+    activityOpenedRef.current = true;
+    void trackEvent(AnalyticsEvents.ALBUM_ACTIVITY_OPENED, {
+      entries: listGroupActivity(albumId).length,
+    });
+  }, [albumId, showActivity, shownTab]);
   const activeTab = useSharedValue<DetailTab>('transactions');
   useEffect(() => {
     activeTab.value = shownTab;
@@ -587,6 +607,14 @@ export function AlbumDetailScreen({
     },
     [isSelectionMode, onOpenTransaction, toggleSelection],
   );
+  // An entry of the Activity tab opens the bill it is about.
+  const openBillFromActivity = useCallback(
+    (transactionId: string) => {
+      const transaction = transactionById.get(transactionId);
+      if (transaction) onOpenTransaction(transaction);
+    },
+    [onOpenTransaction, transactionById],
+  );
   const handleTransactionLongPress = useCallback(
     (transaction: TransactionWithRelations) => {
       if (isSelectionMode) {
@@ -622,19 +650,35 @@ export function AlbumDetailScreen({
   const handleApplyBulkUpdate = useCallback(
     (changes: BulkTransactionChanges) => {
       if (selectedTransactionIds.length === 0) return;
+      // A shared album's bills: their account is the user's own, on this phone;
+      // their day and title are the group's, changed for everyone; their
+      // category is the user's own, as on any entry.
+      const { accountId, ...rest } = changes;
+      if (accountId) setGroupEntriesAccount(selectedTransactionIds, accountId);
+      const { bills: groupBills } = editGroupBills(selectedTransactionIds, {
+        date: rest.date,
+        note: rest.note,
+      });
       const updates = buildBulkUpdateInputs(
         selectedTransactionIds,
-        changes,
+        rest,
         (id) => transactionById.get(id)?.type,
-      );
-      if (updates.length > 0) {
-        updateTransactionsBulk(updates);
-        void triggerHaptic('success');
-      }
+      ).flatMap(({ id, input }) => {
+        if (!groupBills.has(id)) return [{ id, input }];
+        return input.categoryId ? [{ id, input: { categoryId: input.categoryId } }] : [];
+      });
+      if (updates.length > 0) updateTransactionsBulk(updates);
+      void triggerHaptic('success');
       setShowBulkUpdate(false);
       setSelectedTransactionIds([]);
     },
-    [selectedTransactionIds, transactionById, updateTransactionsBulk],
+    [
+      editGroupBills,
+      selectedTransactionIds,
+      setGroupEntriesAccount,
+      transactionById,
+      updateTransactionsBulk,
+    ],
   );
   const handleRemoveSelected = useCallback(() => {
     if (selectedTransactionIds.length === 0) return;
@@ -865,8 +909,13 @@ export function AlbumDetailScreen({
     </>
   );
 
+  // A shared album's activity log follows its balances: who changed what,
+  // and Restore for a deleted bill.
   const balancesBody = (
-    <MemoAlbumBalances summary={balances} group={group} onOpenPerson={openPersonHere} />
+    <>
+      <MemoAlbumBalances summary={balances} group={group} onOpenPerson={openPersonHere} />
+      {showActivity ? <MemoAlbumActivity group={group} onOpenBill={openBillFromActivity} /> : null}
+    </>
   );
 
   const selectionActions = (
@@ -952,6 +1001,11 @@ export function AlbumDetailScreen({
           visible={showBulkUpdate}
           selectedCount={selectedTransactionCount}
           categoryTypes={selectionCategoryTypes}
+          // The account is offered for a shared album's own bills only.
+          offerAccount={
+            group.share !== null &&
+            selectedTransactionIds.every((id) => !!transactionById.get(id)?.albumGroupId)
+          }
           onClose={() => setShowBulkUpdate(false)}
           onApply={handleApplyBulkUpdate}
         />
@@ -1336,6 +1390,7 @@ export function AlbumDetailScreen({
 // their own work for when their props change.
 const MemoBreakdownChart = memo(CategoryBreakdownChart);
 const MemoAlbumBalances = memo(AlbumBalances);
+const MemoAlbumActivity = memo(AlbumActivity);
 
 /**
  * The solid bar the cover's controls dock into. Once the header is collapsed

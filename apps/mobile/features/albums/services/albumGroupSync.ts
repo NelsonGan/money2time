@@ -34,6 +34,7 @@ import { nowIso } from '~/utils/id';
 import { localBill, type LocalPayment, settlementsByBill } from '../lib/albumGroup';
 import { selfMember } from '../lib/albumPeople';
 import { openShares, simplifyDebts } from '../lib/groupDebts';
+import { batchPaymentIds, type GroupRowWrite, paymentRow } from '../lib/groupRows';
 
 /** What the open ledger and the user's settings give the group's entries. */
 export interface GroupEnv {
@@ -53,7 +54,7 @@ export interface GroupEnv {
 }
 
 /** What only this phone knows about a write it is about to project. */
-interface ProjectHints {
+export interface ProjectHints {
   /** A bill the editor is saving: the fields that are the user's own. */
   entry?: Pick<
     CreateTransactionInput,
@@ -417,6 +418,9 @@ function projectExpense(
   // An entry with this id that is not the group's: never written into.
   if (existing && !isGroupsEntry(existing, groupId, loaded)) return false;
   const live = existing && !existing.deleted_at ? existing : null;
+  // The user's own choices on a bill's entry outlive the bill being deleted,
+  // so a restore brings back the account and category they gave it.
+  const remembered = live ?? (existing?.album_group_id === groupId ? existing : null);
   const splits = !live
     ? []
     : loaded
@@ -451,35 +455,37 @@ function projectExpense(
     }
   }
   const payments = new Map(bill.payments.map((payment) => [payment.settlementId, payment]));
+  // What the user just chose here wins, then what this phone chose before.
   const paymentAccount = (payment: LocalPayment, fallback: string | null): string | null => {
-    const known = prior.get(payment.settlementId);
-    if (known) return known.accountId;
     if (hints.accounts?.has(payment.settlementId)) {
       return hints.accounts.get(payment.settlementId) ?? null;
     }
+    const known = prior.get(payment.settlementId);
+    if (known) return known.accountId;
     return fallback;
   };
 
   // --- The entry itself ---------------------------------------------------
   const finalPayment = bill.payments.find((payment) => payment.kind === 'sent_final') ?? null;
-  // A bill the user paid is on the account this phone's editor just picked,
-  // else the one the entry already has, else, new and saved by the user, on
-  // their default account. One the user paid that someone else wrote (they
-  // joined under a name it was already paid by) lands on no account until
-  // they say which account it left (`needsAccountConfirm`). An entry already
-  // here never falls back to the default account: the account the user's
-  // other phone gave it is on its way.
+  // Money the user sent lands on an account only they chose: one this phone
+  // picked, the one the entry already has, or, when the user recorded it
+  // (on another phone of theirs), their default account. Someone else saying
+  // the user paid leaves it on no account until the user picks one (README:
+  // Which account). An entry already here never falls back to the default
+  // account: the account the user's other phone gave it is on its way.
+  const sentAccount = (payment: LocalPayment) =>
+    paymentAccount(payment, payment.recordedBy === env.userId ? env.defaultAccountId : null);
   const accountId =
     bill.kind === 'paid'
       ? (hints.entry?.accountId ??
-        live?.account_id ??
-        (changedByUser && !live ? env.defaultAccountId : null))
+        remembered?.account_id ??
+        (changedByUser && !remembered ? env.defaultAccountId : null))
       : finalPayment
-        ? paymentAccount(finalPayment, env.defaultAccountId)
+        ? sentAccount(finalPayment)
         : null;
   const categoryId =
     hints.entry?.categoryId ??
-    live?.category_id ??
+    remembered?.category_id ??
     env.categoryIdFor(expense.categoryName, expense.categoryIcon);
   const amounts = expenseAmounts(env, live, bill.amount, expense.currency, accountId);
   const wrote = writeExpense(expense.id, existing, {
@@ -558,7 +564,7 @@ function projectExpense(
         });
       }
     } else if (payment?.kind === 'sent_part') {
-      paybackAccountId = paymentAccount(payment, env.defaultAccountId);
+      paybackAccountId = sentAccount(payment);
       paidTransactionId =
         prior.get(payment.settlementId)?.linkedId ??
         linkedIdFor(expense.id, 'sent_part', payment.settlementId);
@@ -761,27 +767,29 @@ export function projectGroup(
  * With "Simplify group debts" on, a group where nobody owes anything on
  * balance has nothing left to pay: whatever is still open on its bills goes
  * round in a circle, so every open share is closed, as one act. Run after a
- * change made on this phone (not after a sync, or every phone would write the
- * same payments). Returns whether anything was closed; the caller projects.
+ * change made on this phone (not after a sync, or every phone would record the
+ * same payments). Returns the payments to record, none when there is nothing
+ * to close.
  */
-export function closeEvenGroup(groupId: string, env: GroupEnv): boolean {
-  if (!albumGroupsRepository.simplifiesDebts(groupId)) return false;
+export function evenGroupPayments(groupId: string): GroupRowWrite[] {
+  if (!albumGroupsRepository.simplifiesDebts(groupId)) return [];
   const memberIds = albumGroupsRepository.memberIds(groupId);
   const open = openShares(
     albumGroupsRepository.listExpenses(groupId, memberIds),
     albumGroupsRepository.listSettlements(groupId, memberIds),
   );
-  if (open.length === 0 || simplifyDebts(open).length > 0) return false;
-  albumGroupsRepository.createSettlements(
-    groupId,
-    open.map((share) => ({
+  if (open.length === 0 || simplifyDebts(open).length > 0) return [];
+  const ids = batchPaymentIds(open.length);
+  const today = dayKeyFromDateLocal(new Date());
+  return open.map((share, index) =>
+    paymentRow({
+      id: ids[index],
       expenseId: share.expenseId,
-      fromMember: share.from,
-      toMember: share.to,
+      from: share.from,
+      to: share.to,
       amount: share.amount,
       currency: share.currency,
-    })),
-    { date: dayKeyFromDateLocal(new Date()), createdBy: env.userId },
+      date: today,
+    }),
   );
-  return true;
 }

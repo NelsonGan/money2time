@@ -1338,7 +1338,45 @@
       "transactionsTitle": "Transaktioner",
       "everyone": "Alla",
       "me": "Jag",
-      "pick": "Välj en resa för att se fördelningen."
+      "pick": "Välj en resa för att se fördelningen.",
+      "activity": {
+        "title": "Aktivitet",
+        "empty_title": "Ingen aktivitet än",
+        "empty_message": "Varje ändring någon gör i albumet visas här.",
+        "restore": "Återställ",
+        "restoring": "Återställer…",
+        "you": "Du",
+        "you_lower": "du",
+        "untitled": "en nota",
+        "added": "{actor} lade till {title} · {money}",
+        "said_you_paid": "{actor} sa att du betalade {title} · {money}",
+        "restored": "{actor} återställde {title} · {money}",
+        "deleted": "{actor} tog bort {title} · {money}",
+        "changed_amount": "{actor} ändrade {title}: {before} → {after}",
+        "changed_payer": "{actor} ändrade vem som betalade {title}: {before} → {after}",
+        "changed_split": "{actor} ändrade fördelningen av {title}",
+        "renamed_bill": "{actor} döpte om {before} till {after}",
+        "moved_bill": "{actor} flyttade {title} till {day}",
+        "changed_bill": "{actor} ändrade {title}",
+        "changed_album": "{actor} ändrade albumet",
+        "your_share": "Din andel {money}",
+        "your_share_change": "Din andel {before} → {after}",
+        "your_share_gone": "Din andel på {money} är borta",
+        "you_paid": "Säger att du betalade",
+        "you_paid_choose_account": "Säger att du betalade · Välj konto",
+        "they_paid": "{name} betalade den nu",
+        "choose_account": "Välj konto",
+        "paid": "{from} betalade {to} {money}",
+        "paid_even": "{from} betalade {to} {money} för att jämna ut",
+        "undid_payment": "{actor} ångrade att {from} betalade {to} {money}",
+        "recorded_by": "Registrerad av {actor}",
+        "joined": "{name} gick med i albumet",
+        "left": "{name} lämnade albumet",
+        "renamed_member": "{before} heter nu {after}",
+        "simplify_on": "{actor} slog på Förenkla gruppskulder",
+        "simplify_off": "{actor} slog av Förenkla gruppskulder",
+        "cover": "{actor} ändrade omslaget"
+      }
     },
     "items": {
       "emptyTitle": "Inga föremål än",
@@ -2053,7 +2091,17 @@
           "yearly": "/år"
         }
       },
-      "notePlaceholder": "Ny anteckning. Lämna tomt för att rensa den."
+      "notePlaceholder": "Ny anteckning. Lämna tomt för att rensa den.",
+      "sharedBill": {
+        "intro": "I det delade albumet {album}: alla i det kan ändra den här notan. Kategori, konto, detaljer och humör förblir dina.",
+        "paidBy": "Betald av",
+        "splitBetween": "Delad mellan",
+        "nobodyElse": "Dela den med någon annan i albumet, eller låt någon annan betala.",
+        "deleteBody": "Den här notan finns i ett delat album. Tar du bort den försvinner den för alla. Betalningar på den finns kvar, och det som redan betalats ska betalas tillbaka.",
+        "deleteSome": "Några av dem finns i ett delat album. Tar du bort dem försvinner de för alla; betalningar på dem finns kvar.",
+        "payments": "Betalningar på en nota i ett delat album registreras i appen.",
+        "accountOthers": "Några av dem har någon annan betalat. De hamnar på ett av dina konton när du har betalat tillbaka."
+      }
     },
     "cloud": {
       "strip": "Data från {device}, synkad {date}.",

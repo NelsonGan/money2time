@@ -1338,7 +1338,45 @@
       "transactionsTitle": "取引",
       "everyone": "全員",
       "me": "自分",
-      "pick": "旅行を選ぶと内訳が表示されます。"
+      "pick": "旅行を選ぶと内訳が表示されます。",
+      "activity": {
+        "title": "アクティビティ",
+        "empty_title": "まだアクティビティはありません",
+        "empty_message": "このアルバムへの変更はすべてここに表示されます。",
+        "restore": "元に戻す",
+        "restoring": "復元中…",
+        "you": "あなた",
+        "you_lower": "あなた",
+        "untitled": "支出",
+        "added": "{actor}が{title}を追加 · {money}",
+        "said_you_paid": "{actor}があなたが{title}を支払ったと記録 · {money}",
+        "restored": "{actor}が{title}を復元 · {money}",
+        "deleted": "{actor}が{title}を削除 · {money}",
+        "changed_amount": "{actor}が{title}を変更：{before} → {after}",
+        "changed_payer": "{actor}が{title}の支払者を変更：{before} → {after}",
+        "changed_split": "{actor}が{title}の割り方を変更",
+        "renamed_bill": "{actor}が{before}を{after}に名前変更",
+        "moved_bill": "{actor}が{title}を{day}に移動",
+        "changed_bill": "{actor}が{title}を変更",
+        "changed_album": "{actor}がアルバムを変更",
+        "your_share": "あなたの負担 {money}",
+        "your_share_change": "あなたの負担 {before} → {after}",
+        "your_share_gone": "あなたの負担 {money} はなくなりました",
+        "you_paid": "あなたが支払ったことに",
+        "you_paid_choose_account": "あなたが支払ったことに · 口座を選択",
+        "they_paid": "{name}が支払ったことに",
+        "choose_account": "口座を選択",
+        "paid": "{from}が{to}に{money}を支払い",
+        "paid_even": "{from}が精算のため{to}に{money}を支払い",
+        "undid_payment": "{actor}が{from}から{to}への{money}の支払いを取り消し",
+        "recorded_by": "記録：{actor}",
+        "joined": "{name}がアルバムに参加",
+        "left": "{name}がアルバムから退出",
+        "renamed_member": "{before}は{after}になりました",
+        "simplify_on": "{actor}が「グループの借りを簡略化」をオン",
+        "simplify_off": "{actor}が「グループの借りを簡略化」をオフ",
+        "cover": "{actor}がカバーを変更"
+      }
     },
     "items": {
       "emptyTitle": "アイテムがありません",
@@ -2053,7 +2091,17 @@
           "yearly": "/年"
         }
       },
-      "notePlaceholder": "新しいメモ。空にするとメモを消去します。"
+      "notePlaceholder": "新しいメモ。空にするとメモを消去します。",
+      "sharedBill": {
+        "intro": "共有アルバム「{album}」の支出です。参加者なら誰でも変更できます。カテゴリ、口座、詳細、気分はあなただけのものです。",
+        "paidBy": "支払った人",
+        "splitBetween": "割り勘する人",
+        "nobodyElse": "アルバムの他の人と割り勘するか、他の人に支払ってもらってください。",
+        "deleteBody": "この支出は共有アルバムにあります。削除すると全員から消えます。支払いは残り、支払い済みの分は返金が必要になります。",
+        "deleteSome": "一部は共有アルバムにあります。削除すると全員から消えます。支払いは残ります。",
+        "payments": "共有アルバムの支出の支払いはアプリで記録します。",
+        "accountOthers": "一部は他の人が支払いました。あなたが返金すると、あなたの口座に入ります。"
+      }
     },
     "cloud": {
       "strip": "{device}から{date}に同期されたデータ。",

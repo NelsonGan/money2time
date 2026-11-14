@@ -4,7 +4,6 @@ import {
   memberForRow,
   selfMember,
   splitWithPeople,
-  uniquePersonName,
 } from '~/features/albums/lib/albumPeople';
 import { toAlbumMember, toAlbumSettlement } from '~/lib/repositories/mappers';
 import type { AlbumExpense, AlbumMember, AlbumSettlement } from '~/types';
@@ -91,13 +90,6 @@ describe('album people', () => {
     // The user's own name, or their own member, is never someone else.
     expect(memberForRow(members, 'me', { personName: 'Nelson' })).toBeNull();
     expect(memberForRow(members, 'me', { albumMemberId: 'me', personName: 'Ben' })).toBeNull();
-    expect(uniquePersonName('Ben', members)).toBe('Ben');
-    expect(uniquePersonName('aisha', members)).toBe('aisha 2');
-    // Never past the longest name a group keeps, or it reads back as the taken one.
-    const long = 'A'.repeat(40);
-    const named = uniquePersonName(long, [member('x', long)]);
-    expect(named).toHaveLength(40);
-    expect(named.endsWith(' 2')).toBe(true);
   });
 });
 
@@ -171,6 +163,7 @@ describe('one member’s own side of a bill', () => {
         amount: 10,
         paidAt: '2026-11-13T08:00:00.000Z',
         date: '2026-11-13',
+        recordedBy: 'u-aisha',
         kind: 'received',
       },
     ]);

@@ -1338,7 +1338,45 @@
       "transactionsTitle": "交易",
       "everyone": "所有人",
       "me": "我",
-      "pick": "选择一次旅行，查看明细。"
+      "pick": "选择一次旅行，查看明细。",
+      "activity": {
+        "title": "动态",
+        "empty_title": "暂无动态",
+        "empty_message": "任何人对这个相册的每次修改都会显示在这里。",
+        "restore": "恢复",
+        "restoring": "正在恢复…",
+        "you": "你",
+        "you_lower": "你",
+        "untitled": "一笔账单",
+        "added": "{actor} 添加了 {title} · {money}",
+        "said_you_paid": "{actor} 记录你支付了 {title} · {money}",
+        "restored": "{actor} 恢复了 {title} · {money}",
+        "deleted": "{actor} 删除了 {title} · {money}",
+        "changed_amount": "{actor} 修改了 {title}：{before} → {after}",
+        "changed_payer": "{actor} 修改了 {title} 的付款人：{before} → {after}",
+        "changed_split": "{actor} 修改了 {title} 的分摊",
+        "renamed_bill": "{actor} 将 {before} 改名为 {after}",
+        "moved_bill": "{actor} 将 {title} 移到 {day}",
+        "changed_bill": "{actor} 修改了 {title}",
+        "changed_album": "{actor} 修改了相册",
+        "your_share": "你的份额 {money}",
+        "your_share_change": "你的份额 {before} → {after}",
+        "your_share_gone": "你的 {money} 份额已取消",
+        "you_paid": "记为你付款",
+        "you_paid_choose_account": "记为你付款 · 选择账户",
+        "they_paid": "现在由 {name} 付款",
+        "choose_account": "选择账户",
+        "paid": "{from} 付给 {to} {money}",
+        "paid_even": "{from} 付给 {to} {money} 以结清",
+        "undid_payment": "{actor} 撤销了 {from} 付给 {to} 的 {money}",
+        "recorded_by": "由 {actor} 记录",
+        "joined": "{name} 加入了相册",
+        "left": "{name} 离开了相册",
+        "renamed_member": "{before} 现在叫 {after}",
+        "simplify_on": "{actor} 开启了简化群组债务",
+        "simplify_off": "{actor} 关闭了简化群组债务",
+        "cover": "{actor} 更换了封面"
+      }
     },
     "items": {
       "emptyTitle": "还没有物品",
@@ -2053,7 +2091,17 @@
           "yearly": "/年"
         }
       },
-      "notePlaceholder": "新备注。留空即可清除。"
+      "notePlaceholder": "新备注。留空即可清除。",
+      "sharedBill": {
+        "intro": "在共享相册“{album}”中：其中任何人都可以修改这笔账单。它的分类、账户、详情和心情仍属于你。",
+        "paidBy": "付款人",
+        "splitBetween": "分摊给",
+        "nobodyElse": "与相册中的其他人分摊，或让其他人付款。",
+        "deleteBody": "这笔账单在共享相册中。删除后所有人都会看不到它。其上的付款会保留，已付的部分需要退还。",
+        "deleteSome": "其中一些在共享相册中。删除后所有人都会看不到它们；其上的付款会保留。",
+        "payments": "共享相册账单的付款在应用中记录。",
+        "accountOthers": "其中一些是别人付的。你还钱后它们会记到你的一个账户上。"
+      }
     },
     "cloud": {
       "strip": "来自 {device} 的数据，同步于 {date}。",

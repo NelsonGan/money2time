@@ -1,4 +1,9 @@
-import { openShares, settleDebt, simplifyDebts } from '~/features/albums/lib/groupDebts';
+import {
+  openShares,
+  pairwiseDebts,
+  settleDebt,
+  simplifyDebts,
+} from '~/features/albums/lib/groupDebts';
 import {
   albumLedgerId,
   ensureLocalAlbum,
@@ -8,7 +13,7 @@ import {
   syncAlbumCover,
 } from '~/features/albums/services/albumGroupStore';
 import {
-  closeEvenGroup,
+  evenGroupPayments,
   type GroupEnv,
   projectGroup,
 } from '~/features/albums/services/albumGroupSync';
@@ -24,6 +29,7 @@ import { albumGroupsRepository } from '~/lib/repositories/albumGroupsRepository'
 import { transactionSplitsRepository } from '~/lib/repositories/transactionSplitsRepository';
 import { transactionsRepository } from '~/lib/repositories/transactionsRepository';
 
+import { groupRows } from '../helpers/albumGroupRows';
 import { openAppDatabase } from '../helpers/appDatabase';
 
 // A shared album's group turned into the user's own entries (README: Album
@@ -84,9 +90,9 @@ beforeEach(() => {
     ownerUserId: 'u-me',
     kind: 'album',
   });
-  albumGroupsRepository.createMember(GROUP, { id: 'me', name: 'Nelson', userId: 'u-me' });
-  albumGroupsRepository.createMember(GROUP, { id: 'aisha', name: 'Aisha', userId: 'u-aisha' });
-  albumGroupsRepository.createMember(GROUP, { id: 'ben', name: 'Ben' });
+  groupRows.createMember(GROUP, { id: 'me', name: 'Nelson', userId: 'u-me' });
+  groupRows.createMember(GROUP, { id: 'aisha', name: 'Aisha', userId: 'u-aisha' });
+  groupRows.createMember(GROUP, { id: 'ben', name: 'Ben' });
 });
 
 afterEach(() => {
@@ -102,7 +108,7 @@ function addBill(
   amount = 90,
   by = paidBy === 'me' ? 'u-me' : 'u-aisha',
 ) {
-  albumGroupsRepository.upsertExpense({
+  groupRows.upsertExpense({
     id,
     groupId: GROUP,
     date: '2026-11-12',
@@ -117,8 +123,17 @@ function addBill(
   });
 }
 
-function pay(id: string, expenseId: string, from: string, to: string, amount: number, at: string) {
-  albumGroupsRepository.createSettlement({
+// Recorded by Aisha unless `by` says otherwise.
+function pay(
+  id: string,
+  expenseId: string,
+  from: string,
+  to: string,
+  amount: number,
+  at: string,
+  by = 'u-aisha',
+) {
+  groupRows.createSettlement({
     id,
     groupId: GROUP,
     expenseId,
@@ -127,9 +142,31 @@ function pay(id: string, expenseId: string, from: string, to: string, amount: nu
     amount,
     currency: 'MYR',
     date: at.slice(0, 10),
-    createdBy: 'u-aisha',
+    createdBy: by,
     createdAt: at,
   });
+}
+
+/**
+ * Records what `evenGroupPayments` asks for, as the Worker would: the open
+ * shares of a group that came out even, closed as one act.
+ */
+function closeEven(): boolean {
+  const rows = evenGroupPayments(GROUP);
+  for (const { row } of rows) {
+    groupRows.createSettlement({
+      id: row.id as string,
+      groupId: GROUP,
+      expenseId: row.expense_id as string,
+      fromMember: row.from_member as string,
+      toMember: row.to_member as string,
+      amount: row.amount as number,
+      currency: row.currency as string,
+      date: row.date as string,
+      createdBy: env.userId,
+    });
+  }
+  return rows.length > 0;
 }
 
 const tx = (id: string) =>
@@ -176,7 +213,7 @@ describe('a bill another member paid', () => {
 
   it('paid back in parts: each part is its own expense, the last puts the bill on its account', () => {
     addBill('dinner', 'aisha');
-    pay('s1', 'dinner', 'me', 'aisha', 12, '2026-11-13T08:00:00.000Z');
+    pay('s1', 'dinner', 'me', 'aisha', 12, '2026-11-13T08:00:00.000Z', 'u-me');
     projectGroup(GROUP, env);
     expect(tx('dinner')).toMatchObject({ amount: 18, account_id: null });
     expect(tx('dinner:x:s1')).toMatchObject({
@@ -199,7 +236,7 @@ describe('a bill another member paid', () => {
     expect(projectGroup(GROUP, env)).toBe(false);
 
     // The first part undone: the bill is owed again, less the part still paid.
-    albumGroupsRepository.softDeleteSettlement(GROUP, 's1');
+    groupRows.softDeleteSettlement(GROUP, 's1');
     projectGroup(GROUP, env);
     expect(tx('dinner:x:s1').deleted_at).not.toBeNull();
     expect(tx('dinner')).toMatchObject({ amount: 12, account_id: null });
@@ -228,10 +265,10 @@ describe('a bill the user paid', () => {
     expect(projectGroup(GROUP, refreshed)).toBe(false);
     expect(transfer()).toEqual({ amount: 10, currency: 'MYR', to_amount: 2.5 });
     // An unrelated member rename must not reprice that historical payment either.
-    albumGroupsRepository.updateMember(GROUP, 'ben', { name: 'Benjamin' });
+    groupRows.updateMember(GROUP, 'ben', { name: 'Benjamin' });
     projectGroup(GROUP, refreshed);
     expect(transfer().to_amount).toBe(2.5);
-    albumGroupsRepository.updateMember(GROUP, 'aisha', { name: 'Ash' });
+    groupRows.updateMember(GROUP, 'aisha', { name: 'Ash' });
     projectGroup(GROUP, refreshed);
     expect(tx('dinner:t:s1').note).toBe('Ash: Dinner');
     expect(transfer().to_amount).toBe(2.5);
@@ -316,8 +353,8 @@ describe('a bill the user paid', () => {
     expect(balances()).toEqual({ Aisha: 0, Ben: 30 });
 
     // Both undone: the bill and the account are as they were.
-    albumGroupsRepository.softDeleteSettlement(GROUP, 's1');
-    albumGroupsRepository.softDeleteSettlement(GROUP, 's2');
+    groupRows.softDeleteSettlement(GROUP, 's1');
+    groupRows.softDeleteSettlement(GROUP, 's2');
     projectGroup(GROUP, env);
     expect(tx('dinner')).toMatchObject({ amount: 90, reporting_amount: 90 });
     expect(liveTransactions()).toEqual([{ id: 'dinner', type: 'expense', amount: 90 }]);
@@ -350,7 +387,7 @@ describe('changes to a bill', () => {
     expect(tx('dinner')).toMatchObject({ amount: 120, account_id: 'cash' });
     expect(balances()).toEqual({ Aisha: 40, Ben: 40 });
 
-    albumGroupsRepository.softDeleteExpense(GROUP, 'dinner', 'u-me');
+    groupRows.softDeleteExpense(GROUP, 'dinner', 'u-me');
     projectGroup(GROUP, env);
     expect(liveTransactions()).toEqual([]);
     // And comes back with it.
@@ -360,19 +397,60 @@ describe('changes to a bill', () => {
     expect(balances()).toEqual({ Aisha: 40, Ben: 40 });
   });
 
-  it('a bill taken out of the group takes its payments with it', () => {
+  it('a deleted bill keeps its payments, owed back, and a restore brings it back with them', () => {
     addBill('dinner', 'me');
     pay('s1', 'dinner', 'aisha', 'me', 10, '2026-11-13T08:00:00.000Z');
     projectGroup(GROUP, env);
-    albumGroupsRepository.softDeleteExpense(GROUP, 'dinner', 'u-me');
+    groupRows.softDeleteExpense(GROUP, 'dinner', 'u-aisha');
+    projectGroup(GROUP, env);
+    // The user's side goes with the bill; Aisha's payment stays in the group,
+    // where the user now owes it back.
+    expect(liveTransactions()).toEqual([]);
+    const standing = albumGroupsRepository.listSettlements(GROUP).filter((s) => !s.deletedAt);
+    expect(standing.map((s) => s.id)).toEqual(['s1']);
+    expect(pairwiseDebts(openShares(albumGroupsRepository.listExpenses(GROUP), standing))).toEqual([
+      { from: 'me', to: 'aisha', currency: 'MYR', amount: 10 },
+    ]);
+    // Restored as it was, on the account it had: the payment counts on it
+    // again, paid back into the payback account as before.
+    addBill('dinner', 'me', 90, 'u-aisha');
+    projectGroup(GROUP, env);
+    expect(liveTransactions()).toEqual([
+      { id: 'dinner', type: 'expense', amount: 80 },
+      { id: 'dinner:t:s1', type: 'transfer', amount: 10 },
+    ]);
+    expect(tx('dinner')).toMatchObject({ account_id: 'cash' });
+    expect(balances()).toEqual({ Aisha: 20, Ben: 30 });
+  });
+
+  it('a restored bill keeps the account the user had given it', () => {
+    addBill('dinner', 'me', 90, 'u-aisha');
+    projectGroup(GROUP, env, { expenseId: 'dinner', hints: { entry: { accountId: 'bank' } } });
+    groupRows.softDeleteExpense(GROUP, 'dinner', 'u-aisha');
     projectGroup(GROUP, env);
     expect(liveTransactions()).toEqual([]);
-    expect(albumGroupsRepository.listSettlements(GROUP).filter((s) => !s.deletedAt)).toEqual([]);
-    // Saved again under its id, nobody has paid anything yet.
-    addBill('dinner', 'me');
+    addBill('dinner', 'me', 90, 'u-aisha');
     projectGroup(GROUP, env);
-    expect(liveTransactions()).toEqual([{ id: 'dinner', type: 'expense', amount: 90 }]);
-    expect(balances()).toEqual({ Aisha: 30, Ben: 30 });
+    expect(tx('dinner')).toMatchObject({ amount: 90, account_id: 'bank', deleted_at: null });
+  });
+
+  it('an edit below what was paid keeps the payment and owes the difference back', () => {
+    addBill('dinner', 'me');
+    pay('s1', 'dinner', 'aisha', 'me', 30, '2026-11-13T08:00:00.000Z');
+    projectGroup(GROUP, env);
+    expect(balances()).toEqual({ Aisha: 0, Ben: 30 });
+    // Aisha lowers the bill to 60: shares of 20, and she had paid 30.
+    addBill('dinner', 'me', 60, 'u-aisha');
+    projectGroup(GROUP, env);
+    const expenses = albumGroupsRepository.listExpenses(GROUP);
+    const payments = albumGroupsRepository.listSettlements(GROUP);
+    expect(payments.map((s) => [s.id, s.amount, s.deletedAt])).toEqual([['s1', 30, null]]);
+    expect(pairwiseDebts(openShares(expenses, payments))).toEqual([
+      { from: 'ben', to: 'me', currency: 'MYR', amount: 20 },
+      { from: 'me', to: 'aisha', currency: 'MYR', amount: 10 },
+    ]);
+    // The user's own side counts her payment up to her new share.
+    expect(tx('dinner')).toMatchObject({ amount: 40, account_id: 'cash' });
   });
 
   it('leaves the user’s own row as another phone of theirs named it', () => {
@@ -385,7 +463,7 @@ describe('changes to a bill', () => {
   });
 
   it('is not the user’s entry when they have no part in it', () => {
-    albumGroupsRepository.upsertExpense({
+    groupRows.upsertExpense({
       id: 'massage',
       groupId: GROUP,
       date: '2026-11-12',
@@ -486,10 +564,75 @@ describe('which account a bill is on', () => {
     ).toEqual({ account_id: 'usd', account_amount: 22.5 });
   });
 
+  it('a bill the user adds and pays is on the account the editor picked (rule 4)', () => {
+    addBill('dinner', 'me', 90, 'u-me');
+    projectGroup(GROUP, env, { expenseId: 'dinner', hints: { entry: { accountId: 'bank' } } });
+    expect(tx('dinner')).toMatchObject({ amount: 90, account_id: 'bank' });
+  });
+
+  it('someone else changing the payer away from the user leaves their share owed, on no account (rule 7)', () => {
+    addBill('dinner', 'me', 90, 'u-me');
+    projectGroup(GROUP, env, { expenseId: 'dinner', hints: { entry: { accountId: 'bank' } } });
+    expect(tx('dinner')).toMatchObject({ amount: 90, account_id: 'bank' });
+    // Aisha says she paid it after all.
+    addBill('dinner', 'aisha', 90, 'u-aisha');
+    projectGroup(GROUP, env);
+    expect(tx('dinner')).toMatchObject({ amount: 30, account_id: null });
+    expect(balances()).toEqual({ Aisha: -30 });
+    // And back to the user: no account until they pick one again.
+    addBill('dinner', 'me', 90, 'u-aisha');
+    projectGroup(GROUP, env);
+    expect(tx('dinner')).toMatchObject({ amount: 90, account_id: null });
+  });
+
+  it('a bill the user adds that someone else paid is their share owed to them, on no account (rule 8)', () => {
+    addBill('dinner', 'aisha', 90, 'u-me');
+    projectGroup(GROUP, env, { expenseId: 'dinner', hints: { entry: { accountId: 'cash' } } });
+    expect(tx('dinner')).toMatchObject({ amount: 30, account_id: null });
+    expect(balances()).toEqual({ Aisha: -30 });
+  });
+
+  it('a no-account bill counts as spending at once and moves no account (rule 6)', () => {
+    addBill('dinner', 'me', 90, 'u-aisha');
+    projectGroup(GROUP, env);
+    const row = app.all(
+      'SELECT type, amount, account_id, reporting_amount, category_id FROM transactions WHERE id = ?',
+      'dinner',
+    )[0];
+    expect(row).toEqual({
+      type: 'expense',
+      amount: 90,
+      account_id: null,
+      reporting_amount: 90,
+      category_id: 'food',
+    });
+  });
+
+  it('a payment the user sent lands on no account when someone else recorded it (rule 17)', () => {
+    addBill('dinner', 'aisha');
+    pay('s1', 'dinner', 'me', 'aisha', 30, '2026-11-13T08:00:00.000Z', 'u-aisha');
+    projectGroup(GROUP, env);
+    expect(tx('dinner')).toMatchObject({ amount: 30, account_id: null });
+    // The user picks the account it left from: the share remembers it.
+    projectGroup(GROUP, env, {
+      expenseId: 'dinner',
+      hints: { accounts: new Map([['s1', 'bank']]) },
+    });
+    expect(tx('dinner')).toMatchObject({ amount: 30, account_id: 'bank' });
+    expect(balances()).toEqual({ Aisha: 0 });
+  });
+
+  it('a payment the user recorded on another phone lands on their default account', () => {
+    addBill('dinner', 'aisha');
+    pay('s1', 'dinner', 'me', 'aisha', 30, '2026-11-13T08:00:00.000Z', 'u-me');
+    projectGroup(GROUP, env);
+    expect(tx('dinner')).toMatchObject({ amount: 30, account_id: 'cash' });
+  });
+
   it('a bill the user only owed on, deleted by someone else, goes', () => {
     addBill('dinner', 'aisha');
     projectGroup(GROUP, env);
-    albumGroupsRepository.softDeleteExpense(GROUP, 'dinner', 'u-aisha');
+    groupRows.softDeleteExpense(GROUP, 'dinner', 'u-aisha');
     projectGroup(GROUP, env);
     expect(liveTransactions()).toEqual([]);
   });
@@ -498,13 +641,13 @@ describe('which account a bill is on', () => {
 describe('simplify group debts', () => {
   it('is off until someone turns it on, for the whole group', () => {
     expect(albumGroupsRepository.simplifiesDebts(GROUP)).toBe(false);
-    albumGroupsRepository.setSimplifyDebts(GROUP, true);
+    groupRows.setSimplifyDebts(GROUP, true);
     expect(albumGroupsRepository.simplifiesDebts(GROUP)).toBe(true);
     // One row per group, routed with the group's other rows.
     expect(app.all('SELECT id, ledger_id, simplify_debts FROM album_groups')).toEqual([
       { id: GROUP, ledger_id: GROUP, simplify_debts: 1 },
     ]);
-    albumGroupsRepository.setSimplifyDebts(GROUP, false);
+    groupRows.setSimplifyDebts(GROUP, false);
     expect(albumGroupsRepository.simplifiesDebts(GROUP)).toBe(false);
   });
 
@@ -513,7 +656,7 @@ describe('simplify group debts', () => {
     const shares = (owes: Record<string, number>) =>
       Object.entries(owes).map(([memberId, amount]) => ({ memberId, amount }));
     const add = (id: string, paidBy: string, owes: Record<string, number>) =>
-      albumGroupsRepository.upsertExpense({
+      groupRows.upsertExpense({
         id,
         groupId: GROUP,
         date: '2026-11-12',
@@ -543,16 +686,17 @@ describe('simplify group debts', () => {
     );
     projectGroup(GROUP, env);
     expect(balances()).toEqual({ Aisha: 0, Ben: 0 });
-    // Paid back for the dinner, and paid for the boat: 30 in, 30 out.
+    // Paid back for the dinner, and paid for the boat: 30 in, 30 out. Aisha
+    // said the user paid Ben, so it waits on no account until the user picks one.
     expect(tx('dinner')).toMatchObject({ amount: 30 });
-    expect(tx('boat')).toMatchObject({ amount: 30, account_id: 'cash' });
+    expect(tx('boat')).toMatchObject({ amount: 30, account_id: null });
     expect(projectGroup(GROUP, env)).toBe(false);
   });
 });
 
 describe('payments recorded as one act', () => {
   const add = (id: string, paidBy: string, owes: Record<string, number>) =>
-    albumGroupsRepository.upsertExpense({
+    groupRows.upsertExpense({
       id,
       groupId: GROUP,
       date: '2026-11-12',
@@ -570,7 +714,7 @@ describe('payments recorded as one act', () => {
   it('undoing one of them undoes them all, so nobody’s total moves', () => {
     add('dinner', 'me', { me: 30, aisha: 30 });
     add('boat', 'ben', { ben: 30, me: 30 });
-    const [first, second] = albumGroupsRepository.createSettlements(
+    const [first, second] = groupRows.createSettlements(
       GROUP,
       [
         { expenseId: 'dinner', fromMember: 'aisha', toMember: 'me', amount: 30, currency: 'MYR' },
@@ -581,7 +725,7 @@ describe('payments recorded as one act', () => {
     projectGroup(GROUP, env);
     expect(balances()).toEqual({ Aisha: 0, Ben: 0 });
     // Undone from the dinner alone: the boat's goes with it.
-    albumGroupsRepository.softDeleteSettlement(GROUP, first);
+    groupRows.softDeleteSettlement(GROUP, first);
     expect(live()).toEqual([]);
     expect(second.split('.')[0]).toBe(first.split('.')[0]);
     projectGroup(GROUP, env);
@@ -589,7 +733,7 @@ describe('payments recorded as one act', () => {
     // A payment on its own is undone on its own.
     pay('solo', 'dinner', 'aisha', 'me', 5, '2026-11-13T08:00:00.000Z');
     pay('other', 'boat', 'me', 'ben', 5, '2026-11-13T09:00:00.000Z');
-    albumGroupsRepository.softDeleteSettlement(GROUP, 'solo');
+    groupRows.softDeleteSettlement(GROUP, 'solo');
     expect(live().map((s) => s.id)).toEqual(['other']);
   });
 
@@ -599,16 +743,16 @@ describe('payments recorded as one act', () => {
     add('boat', 'ben', { me: 10 });
     add('taxi', 'aisha', { ben: 10 });
     projectGroup(GROUP, env);
-    expect(closeEvenGroup(GROUP, env)).toBe(false);
-    albumGroupsRepository.setSimplifyDebts(GROUP, true);
-    expect(closeEvenGroup(GROUP, env)).toBe(true);
+    expect(closeEven()).toBe(false);
+    groupRows.setSimplifyDebts(GROUP, true);
+    expect(closeEven()).toBe(true);
     projectGroup(GROUP, env);
     expect(balances()).toEqual({ Aisha: 0, Ben: 0 });
     expect(live()).toHaveLength(3);
     // Nothing left to close; and a group with a real debt is left alone.
-    expect(closeEvenGroup(GROUP, env)).toBe(false);
+    expect(closeEven()).toBe(false);
     add('hotel', 'me', { me: 50, ben: 50 });
-    expect(closeEvenGroup(GROUP, env)).toBe(false);
+    expect(closeEven()).toBe(false);
   });
 });
 
@@ -652,7 +796,7 @@ describe('sharing and its end', () => {
     addBill('dinner', 'me');
     projectGroup(GROUP, env);
     removeSharedLedger(GROUP);
-    releaseAlbumGroup(GROUP, 'u-me');
+    releaseAlbumGroup(GROUP);
     expect(app.all('SELECT COUNT(*) AS n FROM album_expenses')[0].n).toBe(0);
     expect(app.all('SELECT COUNT(*) AS n FROM album_members')[0].n).toBe(0);
     expect(tx('dinner').album_group_id).toBeNull();
@@ -683,7 +827,7 @@ describe('rows another member wrote are not trusted', () => {
     expect(tx('salary')).toMatchObject({ type: 'income', amount: 5000, album_group_id: null });
     expect(transactionSplitsRepository.listByTransactionId('salary')).toEqual([]);
     // Nor does deleting that bill take the entry with it.
-    albumGroupsRepository.softDeleteExpense(GROUP, 'salary', 'u-aisha');
+    groupRows.softDeleteExpense(GROUP, 'salary', 'u-aisha');
     expect(projectGroup(GROUP, env)).toBe(false);
     expect(tx('salary')).toMatchObject({ amount: 5000, deleted_at: null });
   });
@@ -762,14 +906,14 @@ describe('rows another member wrote are not trusted', () => {
       app
         .all('SELECT id FROM album_settlements WHERE deleted_at IS NULL ORDER BY id')
         .map((row) => row.id);
-    albumGroupsRepository.softDeleteSettlement(GROUP, '%.0');
+    groupRows.softDeleteSettlement(GROUP, '%.0');
     expect(live()).toEqual(['b1.0', 'b1.1', 'b1.2', 'b10.0']);
     // The batch, in this group only, and not the batch whose name starts the same.
-    albumGroupsRepository.softDeleteSettlement(GROUP, 'b1.1');
+    groupRows.softDeleteSettlement(GROUP, 'b1.1');
     expect(live()).toEqual(['b1.2', 'b10.0']);
     // Another group's row is out of reach by its id.
-    albumGroupsRepository.softDeleteSettlement(GROUP, 'b1.2');
-    albumGroupsRepository.softDeleteExpense(GROUP, 'ramen', 'u-aisha');
+    groupRows.softDeleteSettlement(GROUP, 'b1.2');
+    groupRows.softDeleteExpense(GROUP, 'ramen', 'u-aisha');
     expect(live()).toEqual(['b1.2', 'b10.0']);
   });
 
@@ -782,7 +926,7 @@ describe('rows another member wrote are not trusted', () => {
     `);
     addBill('dinner', 'aisha');
     removeSharedLedger(GROUP);
-    releaseAlbumGroup(GROUP, 'u-me');
+    releaseAlbumGroup(GROUP);
     expect(app.all('SELECT COUNT(*) AS n FROM album_expenses')[0].n).toBe(0);
     expect(app.all('SELECT id FROM ledgers WHERE id = ?', GROUP)).toEqual([{ id: GROUP }]);
     expect(tx('work-1')).toMatchObject({ amount: 12, deleted_at: null });
@@ -797,48 +941,47 @@ describe('the album cover', () => {
 
   it('is the group’s: every phone takes the cover someone set', () => {
     setLocal('album-covers/mine.jpg');
-    albumGroupsRepository.setGroupCover(GROUP, 'album-covers/theirs.jpg');
-    expect(syncAlbumCover(GROUP, 'member')).toBe(true);
+    groupRows.setGroupCover(GROUP, 'album-covers/theirs.jpg');
+    expect(syncAlbumCover(GROUP)).toBe(true);
     expect(cover()).toBe('album-covers/theirs.jpg');
     // Applied once: nothing changes the second time.
-    expect(syncAlbumCover(GROUP, 'member')).toBe(false);
+    expect(syncAlbumCover(GROUP)).toBe(false);
   });
 
   it('waits for the photo to come down before showing it', () => {
     setLocal('album-covers/mine.jpg');
-    albumGroupsRepository.setGroupCover(GROUP, 'album-covers/theirs.jpg');
+    groupRows.setGroupCover(GROUP, 'album-covers/theirs.jpg');
     mockCoverFileHere.mockReturnValue(false);
     try {
-      expect(syncAlbumCover(GROUP, 'member')).toBe(false);
+      expect(syncAlbumCover(GROUP)).toBe(false);
       expect(cover()).toBe('album-covers/mine.jpg');
     } finally {
       mockCoverFileHere.mockReturnValue(true);
     }
-    expect(syncAlbumCover(GROUP, 'member')).toBe(true);
+    expect(syncAlbumCover(GROUP)).toBe(true);
     expect(cover()).toBe('album-covers/theirs.jpg');
   });
 
   it('removed by someone, it goes on every phone', () => {
     setLocal('album-covers/mine.jpg');
-    albumGroupsRepository.setGroupCover(GROUP, null);
-    expect(syncAlbumCover(GROUP, 'owner')).toBe(true);
+    groupRows.setGroupCover(GROUP, null);
+    expect(syncAlbumCover(GROUP)).toBe(true);
     expect(cover()).toBeNull();
   });
 
-  it('a group shared before covers were the group’s takes the owner’s', () => {
+  it('an album nobody set a group cover in keeps its own', () => {
     setLocal('album-covers/mine.jpg');
     expect(albumGroupsRepository.groupCover(GROUP)).toBeUndefined();
-    // A member never publishes theirs: it would race the owner’s.
-    expect(syncAlbumCover(GROUP, 'member')).toBe(false);
-    expect(albumGroupsRepository.groupCover(GROUP)).toBeUndefined();
-    expect(syncAlbumCover(GROUP, 'owner')).toBe(false);
-    expect(albumGroupsRepository.groupCover(GROUP)).toBe('album-covers/mine.jpg');
+    expect(syncAlbumCover(GROUP)).toBe(false);
+    expect(app.all('SELECT cover_photo_uri FROM albums WHERE id = ?', GROUP)[0]).toEqual({
+      cover_photo_uri: 'album-covers/mine.jpg',
+    });
   });
 
   it('keeps the group’s other settings', () => {
-    albumGroupsRepository.setSimplifyDebts(GROUP, true);
-    albumGroupsRepository.setGroupCover(GROUP, 'album-covers/a.png');
-    albumGroupsRepository.setSimplifyDebts(GROUP, false);
+    groupRows.setSimplifyDebts(GROUP, true);
+    groupRows.setGroupCover(GROUP, 'album-covers/a.png');
+    groupRows.setSimplifyDebts(GROUP, false);
     expect(albumGroupsRepository.groupCover(GROUP)).toBe('album-covers/a.png');
     expect(albumGroupsRepository.simplifiesDebts(GROUP)).toBe(false);
   });
@@ -852,9 +995,9 @@ describe('the album cover', () => {
         [GROUP, GROUP, bad, NOW, NOW],
       );
       expect(albumGroupsRepository.groupCover(GROUP)).toBeUndefined();
-      expect(syncAlbumCover(GROUP, 'member')).toBe(false);
+      expect(syncAlbumCover(GROUP)).toBe(false);
     }
-    albumGroupsRepository.setGroupCover(GROUP, '../escape.jpg');
+    groupRows.setGroupCover(GROUP, '../escape.jpg');
     expect(albumGroupsRepository.groupCover(GROUP)).toBeUndefined();
   });
 });

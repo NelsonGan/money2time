@@ -1338,7 +1338,45 @@
       "transactionsTitle": "Transactions",
       "everyone": "Everyone",
       "me": "Me",
-      "pick": "Choose a trip to see its breakdown."
+      "pick": "Choose a trip to see its breakdown.",
+      "activity": {
+        "title": "Activity",
+        "empty_title": "No activity yet",
+        "empty_message": "Every change anyone makes to this album shows up here.",
+        "restore": "Restore",
+        "restoring": "Restoring…",
+        "you": "You",
+        "you_lower": "you",
+        "untitled": "a bill",
+        "added": "{actor} added {title} · {money}",
+        "said_you_paid": "{actor} said you paid {title} · {money}",
+        "restored": "{actor} restored {title} · {money}",
+        "deleted": "{actor} deleted {title} · {money}",
+        "changed_amount": "{actor} changed {title}: {before} → {after}",
+        "changed_payer": "{actor} changed who paid {title}: {before} → {after}",
+        "changed_split": "{actor} changed the split of {title}",
+        "renamed_bill": "{actor} renamed {before} to {after}",
+        "moved_bill": "{actor} moved {title} to {day}",
+        "changed_bill": "{actor} changed {title}",
+        "changed_album": "{actor} changed the album",
+        "your_share": "Your share {money}",
+        "your_share_change": "Your share {before} → {after}",
+        "your_share_gone": "Your share of {money} is gone",
+        "you_paid": "Says you paid",
+        "you_paid_choose_account": "Says you paid · Choose the account",
+        "they_paid": "{name} paid it now",
+        "choose_account": "Choose the account",
+        "paid": "{from} paid {to} {money}",
+        "paid_even": "{from} paid {to} {money} to even up",
+        "undid_payment": "{actor} undid {from} paying {to} {money}",
+        "recorded_by": "Recorded by {actor}",
+        "joined": "{name} joined the album",
+        "left": "{name} left the album",
+        "renamed_member": "{before} is now {after}",
+        "simplify_on": "{actor} turned on Simplify group debts",
+        "simplify_off": "{actor} turned off Simplify group debts",
+        "cover": "{actor} changed the cover"
+      }
     },
     "items": {
       "emptyTitle": "No items yet",
@@ -2053,7 +2091,17 @@
           "yearly": "/yr"
         }
       },
-      "notePlaceholder": "New note. Leave empty to clear it."
+      "notePlaceholder": "New note. Leave empty to clear it.",
+      "sharedBill": {
+        "intro": "In the shared album {album}: anyone in it can change this bill. Its category, account, details and mood stay yours.",
+        "paidBy": "Paid by",
+        "splitBetween": "Split between",
+        "nobodyElse": "Split it with someone else in the album, or have them pay it.",
+        "deleteBody": "This bill is in a shared album. Deleting it removes it for everyone. Any payments on it stay, and anything already paid is owed back.",
+        "deleteSome": "Some of these are in a shared album. Deleting them removes them for everyone, and any payments on them stay.",
+        "payments": "Payments on a shared album's bill are recorded in the app.",
+        "accountOthers": "Some of these were paid by someone else. They go on one of your accounts once you pay them back."
+      }
     },
     "cloud": {
       "strip": "Data from {device}, synced {date}.",

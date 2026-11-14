@@ -299,3 +299,53 @@ describe('settling a debt', () => {
     ]);
   });
 });
+
+describe('a bill changed or deleted after it was paid (README: Anyone in it can change it)', () => {
+  it('owes back what was paid past a share an edit lowered', () => {
+    // Ben paid his 30 of Dinner; then it was edited down to 20 each.
+    const paid = [payment('p1', 'dinner', 'ben', 'me', 30)];
+    const edited = [bill('dinner', 'me', { me: 20, ben: 20, tess: 20 })];
+    expect(text(pairwiseDebts(openShares(edited, paid)))).toEqual([
+      'me>ben MYR 10',
+      'tess>me MYR 20',
+    ]);
+  });
+
+  it('keeps the payments of a deleted bill, owed back to whoever paid them', () => {
+    const paid = [payment('p1', 'dinner', 'ben', 'me', 30)];
+    const deleted = [
+      bill(
+        'dinner',
+        'me',
+        { me: 30, ben: 30, tess: 30 },
+        { deletedAt: '2026-11-14T00:00:00.000Z' },
+      ),
+    ];
+    expect(text(pairwiseDebts(openShares(deleted, paid)))).toEqual(['me>ben MYR 30']);
+    // A deleted bill nobody paid anything on owes nothing.
+    expect(openShares(deleted, [])).toEqual([]);
+  });
+
+  it('a payment to someone who no longer paid the bill is owed back by them', () => {
+    // Ben paid me for Dinner; then the payer was changed to Tess.
+    const paid = [payment('p1', 'dinner', 'ben', 'me', 30)];
+    const changed = [bill('dinner', 'tess', { me: 30, ben: 30, tess: 30 })];
+    expect(text(pairwiseDebts(openShares(changed, paid)))).toEqual([
+      'ben>tess MYR 30',
+      'me>ben MYR 30',
+      'me>tess MYR 30',
+    ]);
+  });
+
+  it('settling what is owed back closes it', () => {
+    const edited = [bill('dinner', 'me', { me: 20, ben: 20 })];
+    const paid = [payment('p1', 'dinner', 'ben', 'me', 30)];
+    const open = openShares(edited, paid);
+    const [owedBack] = pairwiseDebts(open);
+    expect(owedBack).toMatchObject({ from: 'me', to: 'ben', amount: 10 });
+    const back = settleDebt(open, owedBack, { simplified: false });
+    expect(back).toEqual([{ expenseId: 'dinner', from: 'me', to: 'ben', amount: 10 }]);
+    const settled = [...paid, payment('p2', 'dinner', 'me', 'ben', 10)];
+    expect(openShares(edited, settled)).toEqual([]);
+  });
+});

@@ -21,6 +21,11 @@
 // shared ledger's database (services/ledgerChannels.ts routes the rows). They
 // share the outbox and the bookkeeping, which records each row's channel, and
 // take turns on one queue.
+//
+// A shared album's channel only pulls. Its phones hold a read-only token, and
+// every change to its group goes through the Worker (features/albums/services/
+// albumGroupWrites.ts), which answers with the rows it wrote: `applyServerRows`
+// puts them in at once, as if they had been pulled.
 
 import { Directory, File, Paths } from 'expo-file-system';
 
@@ -61,6 +66,7 @@ import {
 import {
   ASSET_COLUMNS,
   CURRENT_SYNCED_SHAPE,
+  GROUP_SYNC_TABLES,
   hasMeaningfulRows,
   isGroupTable,
   isSyncedRow,
@@ -477,6 +483,8 @@ export function enableCapture(): void {
   const db = getSQLite();
   const create = () => {
     for (const table of SYNC_TABLES) {
+      // A shared album's group is written by the Worker, never sent from here.
+      if (isGroupTable(table)) continue;
       if (tableExists(table)) db.execSync(captureTriggersSql(table, localColumns(table)));
     }
   };
@@ -496,6 +504,33 @@ export function enableCapture(): void {
 export function disableCapture(): void {
   const db = getSQLite();
   for (const table of SYNC_TABLES) db.execSync(dropCaptureTriggersSql(table));
+}
+
+/**
+ * Rows the Worker just wrote to a shared album's database, applied here at
+ * once rather than at the next pull: written into the app tables quietly,
+ * with the revisions recorded, so the pull that brings them changes nothing.
+ * In the queue the syncs take turns on, so no sync compares an older replica
+ * with them halfway. Also queues `media` (a new cover) to go up on the album's
+ * next sync.
+ */
+export function applyServerRows(
+  channel: string,
+  rows: readonly { table: string; id: string; data: string; rev: string }[],
+  media: readonly string[] = [],
+): Promise<void> {
+  return runExclusive(() => {
+    applyQuietly(() => {
+      for (const row of rows) {
+        if (!isGroupTable(row.table) || !tableExists(row.table)) continue;
+        const decoded = decodeRow(row.table, row.data, localColumns(row.table), true);
+        if (decoded && decoded.id === row.id && writeRowSafely(row.table, decoded) === true) {
+          recordRev(row.table, row.id, row.rev, channel);
+        }
+      }
+      if (media.length) queueMedia(media, channel);
+    });
+  });
 }
 
 /**
@@ -1051,9 +1086,38 @@ export class SyncEngine {
     return this.running;
   }
 
+  /** A shared album's channel: pulled only (see the file comment). */
+  private get isAlbum(): boolean {
+    return listAlbumShares().some((share) => share.shareId === this.channel);
+  }
+
+  /** An album's sync: images up (a new cover), the group's rows down. Nothing else goes up. */
+  private async runPullOnly(): Promise<SyncOutcome> {
+    // Rows of a group queued by an earlier app version never go up from here.
+    getSQLite().runSync(
+      `DELETE FROM sync_outbox WHERE table_name IN (${GROUP_SYNC_TABLES.map((t) => `'${t}'`).join(', ')})`,
+    );
+    await this.uploadPendingMedia();
+    const pulled = await this.pullOrRebuild();
+    let appliedRows = 0;
+    const pendingKey = `apply_pending:${this.channel}`;
+    if (pulled || this.applyFailure || getState(pendingKey) !== '0') {
+      setState(pendingKey, '1');
+      appliedRows = await this.applyRemoteChanges();
+      if (!this.applyFailure) setState(pendingKey, '0');
+    }
+    await this.downloadMedia(new Set());
+    await this.checkpointIfLarge();
+    return { appliedRows, pushed: false, applyError: this.applyFailure };
+  }
+
   private async runSync(): Promise<SyncOutcome> {
     await this.reopenAfterFailedRebuild();
     enableCapture();
+    if (this.isAlbum) {
+      this.applyFailure = null;
+      return this.runPullOnly();
+    }
     let appliedRows = 0;
     this.applyFailure = null;
     // A ledger just shared, joined, or signed into again: take what the cloud

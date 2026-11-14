@@ -1338,7 +1338,45 @@
       "transactionsTitle": "Mga transaksyon",
       "everyone": "Lahat",
       "me": "Ako",
-      "pick": "Pumili ng biyahe para makita ang breakdown nito."
+      "pick": "Pumili ng biyahe para makita ang breakdown nito.",
+      "activity": {
+        "title": "Aktibidad",
+        "empty_title": "Wala pang aktibidad",
+        "empty_message": "Lalabas dito ang bawat pagbabago sa album na ito.",
+        "restore": "Ibalik",
+        "restoring": "Ibinabalik…",
+        "you": "Ikaw",
+        "you_lower": "ikaw",
+        "untitled": "isang bill",
+        "added": "{actor}: idinagdag ang {title} · {money}",
+        "said_you_paid": "{actor}: ikaw ang nagbayad ng {title} · {money}",
+        "restored": "{actor}: ibinalik ang {title} · {money}",
+        "deleted": "{actor}: binura ang {title} · {money}",
+        "changed_amount": "{actor}: binago ang {title}: {before} → {after}",
+        "changed_payer": "{actor}: binago ang nagbayad ng {title}: {before} → {after}",
+        "changed_split": "{actor}: binago ang hatian ng {title}",
+        "renamed_bill": "{actor}: pinalitan ang {before} ng {after}",
+        "moved_bill": "{actor}: inilipat ang {title} sa {day}",
+        "changed_bill": "{actor}: binago ang {title}",
+        "changed_album": "{actor}: binago ang album",
+        "your_share": "Bahagi mo {money}",
+        "your_share_change": "Bahagi mo {before} → {after}",
+        "your_share_gone": "Wala na ang bahagi mong {money}",
+        "you_paid": "Ikaw raw ang nagbayad",
+        "you_paid_choose_account": "Ikaw raw ang nagbayad · Piliin ang account",
+        "they_paid": "Si {name} na ang nagbayad",
+        "choose_account": "Piliin ang account",
+        "paid": "{from} → {to}: nagbayad ng {money}",
+        "paid_even": "{from} → {to}: nagbayad ng {money} para pantay",
+        "undid_payment": "{actor}: in-undo ang bayad {from} → {to} na {money}",
+        "recorded_by": "Itinala ni {actor}",
+        "joined": "Sumali si {name} sa album",
+        "left": "Umalis si {name} sa album",
+        "renamed_member": "{after} na ngayon si {before}",
+        "simplify_on": "{actor}: binuksan ang Simplify group debts",
+        "simplify_off": "{actor}: pinatay ang Simplify group debts",
+        "cover": "{actor}: binago ang cover"
+      }
     },
     "items": {
       "emptyTitle": "Wala pang item",
@@ -2053,7 +2091,17 @@
           "yearly": "/taon"
         }
       },
-      "notePlaceholder": "Bagong note. Iwanang blangko para burahin ito."
+      "notePlaceholder": "Bagong note. Iwanang blangko para burahin ito.",
+      "sharedBill": {
+        "intro": "Sa shared album na {album}: kahit sino rito ay puwedeng magbago ng bill na ito. Sa iyo pa rin ang category, account, detalye at mood nito.",
+        "paidBy": "Binayaran ni",
+        "splitBetween": "Hinati sa",
+        "nobodyElse": "Hatiin ito sa iba pang nasa album, o ipabayad sa iba.",
+        "deleteBody": "Nasa shared album ang bill na ito. Kapag binura mo, mawawala ito para sa lahat. Mananatili ang mga bayad dito, at ibabalik ang nabayaran na.",
+        "deleteSome": "Nasa shared album ang ilan dito. Kapag binura mo, mawawala ang mga ito para sa lahat; mananatili ang mga bayad.",
+        "payments": "Sa app itinatala ang mga bayad sa bill ng shared album.",
+        "accountOthers": "Iba ang nagbayad ng ilan dito. Mapupunta ang mga ito sa isa sa iyong mga account kapag nabayaran mo na sila."
+      }
     },
     "cloud": {
       "strip": "Data mula sa {device}, na-sync {date}.",

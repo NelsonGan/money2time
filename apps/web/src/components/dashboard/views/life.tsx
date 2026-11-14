@@ -26,6 +26,7 @@ import { offersEdits, addAmt, sumAmt, useDashboard, useFormat, useMonthLabels, u
 import { Card, CategoryGlyph, ClayImg, Empty, ItemArt, Kpi, Pill, Progress, RankRow } from "../ui";
 import { splitShareKey } from "../edit/split-ops";
 import { SplitShares } from "../edit/split-shares";
+import { AlbumActivity } from "./album-activity";
 import { TxList } from "./transactions";
 
 /** At least six months, so a monthly chart has a shape. */
@@ -351,6 +352,9 @@ export function TripsView() {
           <Card title={t("transactionsTitle")}>
             <TxList txs={selectedTxs} pageSize={20} />
           </Card>
+          <div className="xl:col-span-2">
+            <AlbumActivity key={selected.trip.id} albumId={selected.trip.id} />
+          </div>
         </div>
       ) : (
         <p className="text-center text-[13px] text-foreground-muted">{t("pick")}</p>
