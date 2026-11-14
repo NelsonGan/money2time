@@ -1557,6 +1557,43 @@ const sv = {
     profile_name_add: 'Lägg till ditt namn',
     profile_edit_name: 'Redigera namn',
     profile_edit_photo: 'Byt bild',
+    account_sign_in: 'Logga in',
+    account_title: 'Konto',
+    account_a11y_hint: 'Öppnar ditt konto',
+    account_signed_out: 'Inte inloggad',
+    account_signed_in_a11y: 'Inloggad som {{email}}',
+    account_sign_in_prompt:
+      'Logga in för att dela album och gå med i delade liggare. Dina data stannar på telefonen tills du slår på Cloud Sync.',
+    account_faq: {
+      what: {
+        q: 'Vad gör inloggningen?',
+        a: 'Du får ett konto så att du kan dela album och gå med i liggare som andra delar med dig. Dina data stannar på telefonen.',
+      },
+      sync: {
+        q: 'Synkar inloggningen mina data?',
+        a: 'Nej. Cloud Sync är av tills du slår på det under Inställningar > Cloud Sync. Att synka dina egna data kräver Pro.',
+      },
+      pro: {
+        q: 'Behöver jag Pro för att logga in?',
+        a: 'Nej. Att logga in, dela album och gå med i delade liggare är gratis. Pro är för att synka dina egna data och dela en liggare.',
+      },
+      shared_pro: {
+        q: 'Behöver en delad kassabok Pro?',
+        a: 'Bara en person i den behöver Pro, ägaren eller vilken medlem som helst. Om ingen i den har Pro pausas den för alla tills någon har det. Inget raderas.',
+      },
+      shared_free_limits: {
+        q: 'Kan jag lägga till poster i en delad kassabok utan Pro?',
+        a: 'Ja, även när den har fler än 6 konton. Gratisplanens andra gränser gäller fortfarande, som att lägga till konton eller kategorier utöver gränsen. Be kassabokens ägare att göra de ändringarna.',
+      },
+      family_pro: {
+        q: 'Kan min familj använda min Pro?',
+        a: 'Dela en kassabok med dem: personer du bjuder in behöver inte Pro. Om du loggade in på ditt konto på deras telefon skulle de se all din ekonomidata.',
+      },
+      sign_out_delete: {
+        q: 'Vad händer om jag loggar ut eller raderar mitt konto?',
+        a: 'När du loggar ut stannar din data på den här telefonen, och kassaböcker som andra har delat med dig försvinner från den tills du loggar in igen. När du raderar ditt konto raderas molnkopian. Kassaböcker du delar försvinner från alla andras telefoner, och du behåller dem.',
+      },
+    },
     stat_days: 'Dagar spårade',
     stat_transactions: 'Registrerade',
     stat_this_month: 'Denna månad',
@@ -2786,7 +2823,7 @@ const sv = {
     tile_label: 'Cloud Sync',
     hero_title: 'Synka mellan telefoner',
     hero_body:
-      'Har du Pro på en annan telefon? Logga in här för att låsa upp det på den här också.',
+      'Har du Pro på en annan telefon? Logga in och slå på Cloud Sync för att låsa upp det här också.',
     continue_apple: 'Fortsätt med Apple',
     continue_google: 'Fortsätt med Google',
     continue_email: 'Fortsätt med e-post',
@@ -2837,11 +2874,14 @@ const sv = {
       'Kontots Pro gäller för upp till 5 telefoner, och alla 5 platser är upptagna. Logga ut från Cloud Sync på en telefon du inte använder längre (en telefon som inte använts på 30 dagar frigör också sin plats). Eller skaffa Pro på den här telefonen.',
     needs_pro_title: 'Synkning kräver Pro',
     needs_pro_body:
-      'Du är inloggad. Skaffa Pro för att börja synka. Köpt Pro på en annan telefon? Logga in på Cloud Sync där också, så låses det upp här.',
+      'Du är inloggad. Skaffa Pro för att börja synka. Köpt Pro på en annan telefon? Slå på Cloud Sync där också, så låses det upp här.',
     tile_on: 'På',
     profile_off: 'Av',
     profile_paused: 'Pausad',
-    profile_needs_pro: 'Kräver Pro',
+    off_title: 'Cloud Sync är av',
+    off_body:
+      'Du är inloggad. Slå på Cloud Sync för att säkerhetskopiera dina data och hålla dina telefoner synkade.',
+    turn_on: 'Slå på Cloud Sync',
     profile_a11y_label: 'Cloud Sync, %{status}',
     profile_a11y_hint: 'Öppnar Cloud Sync',
     errors: {
@@ -2868,17 +2908,17 @@ const sv = {
     faq: {
       title: 'Frågor',
       items: {
-        sign_in_without_pro: {
-          q: 'Behöver jag Pro för att logga in?',
-          a: 'Nej. Alla kan logga in. Att synka din egen data kräver Pro, men kassaböcker som andra delar med dig synkas utan.',
+        needs_pro: {
+          q: 'Kräver Cloud Sync Pro?',
+          a: 'Ja, att synka dina egna data kräver Pro. Album och liggare som andra delar med dig synkas utan det.',
         },
         pro_other_phone: {
           q: 'Jag har Pro på en annan telefon. Varför inte på den här?',
-          a: 'Logga in på Cloud Sync med samma konto på båda telefonerna. När den här telefonen har synkat har den också Pro, så länge en telefon på kontot har Pro, även en du inte använder längre. Kontots Pro gäller för upp till 5 telefoner.',
+          a: 'Logga in med samma konto på båda telefonerna och slå på Cloud Sync. När den här telefonen har synkat har den också Pro så länge en telefon på kontot har Pro, även en du inte längre använder. Kontots Pro räcker till upp till 5 telefoner.',
         },
         restore_moved_pro: {
           q: 'Jag återställde mitt köp och min andra telefon förlorade Pro.',
-          a: 'En återställning via butiken flyttar köpet till telefonen som återställde det. Håll båda telefonerna inloggade på Cloud Sync så behåller båda Pro.',
+          a: 'En återställning i butiken flyttar köpet till telefonen som återställde det. Låt Cloud Sync vara på på båda telefonerna så behåller båda Pro.',
         },
         pro_ends: {
           q: 'Vad händer när Pro går ut?',
@@ -2887,22 +2927,6 @@ const sv = {
         how_fast: {
           q: 'Hur snabbt når ändringar mina andra telefoner?',
           a: 'Inom några sekunder medan appen är öppen på båda. Annars nästa gång appen öppnas. Ändringar gjorda offline laddas upp så snart du är online igen.',
-        },
-        shared_pro: {
-          q: 'Behöver en delad kassabok Pro?',
-          a: 'Bara en person i den behöver Pro, ägaren eller vilken medlem som helst. Om ingen i den har Pro pausas den för alla tills någon har det. Inget raderas.',
-        },
-        shared_free_limits: {
-          q: 'Kan jag lägga till poster i en delad kassabok utan Pro?',
-          a: 'Ja, även när den har fler än 6 konton. Gratisplanens andra gränser gäller fortfarande, som att lägga till konton eller kategorier utöver gränsen. Be kassabokens ägare att göra de ändringarna.',
-        },
-        family_pro: {
-          q: 'Kan min familj använda min Pro?',
-          a: 'Dela en kassabok med dem: personer du bjuder in behöver inte Pro. Om du loggade in på ditt konto på deras telefon skulle de se all din ekonomidata.',
-        },
-        sign_out_delete: {
-          q: 'Vad händer om jag loggar ut eller raderar mitt konto?',
-          a: 'När du loggar ut stannar din data på den här telefonen, och kassaböcker som andra har delat med dig försvinner från den tills du loggar in igen. När du raderar ditt konto raderas molnkopian. Kassaböcker du delar försvinner från alla andras telefoner, och du behåller dem.',
         },
       },
     },
@@ -3328,7 +3352,7 @@ const sv = {
     title: 'Delning',
     share_toggle: 'Dela den här kassaboken',
     share_toggle_caption: 'Bjud in upp till {{max}} personer. De behöver inte Pro.',
-    needs_cloud_sync: 'Logga in på Cloud Sync för att dela en kassabok.',
+    needs_cloud_sync: 'Slå på Cloud Sync för att dela en liggare.',
     has_shared_albums: 'Den här kassaboken har delade album. Sluta dela dem först.',
     limit_reached: 'Du kan dela upp till {{max}} kassaböcker tills vidare.',
     share_failed:
@@ -3350,7 +3374,7 @@ const sv = {
     owner_note: 'Delad av dig. Alla här kan lägga till och redigera poster.',
     member_note: 'Delad av {{owner}}. Alla här kan lägga till och redigera poster.',
     people: 'Personer',
-    people_signed_out: 'Logga in på Cloud Sync för att se vilka som är med.',
+    people_signed_out: 'Logga in för att se vilka som är med.',
     you: 'Du',
     owner_badge: 'Ägare',
     joined_today: 'Gick med i dag',

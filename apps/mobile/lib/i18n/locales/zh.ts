@@ -1482,6 +1482,43 @@ const zh = {
     profile_name_add: '添加你的名字',
     profile_edit_name: '编辑名字',
     profile_edit_photo: '更换照片',
+    account_sign_in: '登录',
+    account_title: '账号',
+    account_a11y_hint: '打开你的账号',
+    account_signed_out: '未登录',
+    account_signed_in_a11y: '已登录为 {{email}}',
+    account_sign_in_prompt:
+      '登录后可以分享相册、加入共享账本。在你开启 Cloud Sync 之前，数据只会留在这部手机上。',
+    account_faq: {
+      what: {
+        q: '登录有什么用？',
+        a: '你会有一个账号，可以分享相册，也可以加入别人和你共享的账本。数据仍留在这部手机上。',
+      },
+      sync: {
+        q: '登录会同步我的数据吗？',
+        a: '不会。在你到“设置 > Cloud Sync”开启之前，Cloud Sync 都是关闭的。同步自己的数据需要 Pro。',
+      },
+      pro: {
+        q: '登录需要 Pro 吗？',
+        a: '不需要。登录、分享相册和加入共享账本都是免费的。Pro 用于同步自己的数据和共享账本。',
+      },
+      shared_pro: {
+        q: '共享账本需要 Pro 吗？',
+        a: '账本里只要有一个人有 Pro 就行，所有者或任何成员都可以。如果账本里没人有 Pro，账本会对所有人暂停，直到有人有 Pro。不会删除任何内容。',
+      },
+      shared_free_limits: {
+        q: '没有 Pro 也能在共享账本里记账吗？',
+        a: '可以，即使账本超过 6 个账户也行。免费版的其他限制仍然适用，比如超出上限添加账户或分类。这些改动请让账本的所有者来做。',
+      },
+      family_pro: {
+        q: '家人可以用我的 Pro 吗？',
+        a: '和他们共享一个账本：你邀请的人不需要 Pro。在他们的手机上登录你的账户，会让他们看到你所有的财务数据。',
+      },
+      sign_out_delete: {
+        q: '如果我退出登录或删除账户会怎样？',
+        a: '退出登录后，你的数据会留在这部手机上，别人共享给你的账本会从这部手机上移除，直到你再次登录。删除账户会清除云端副本。你共享的账本会从其他所有人的手机上移除，而你会保留它们。',
+      },
+    },
     stat_days: '记录天数',
     stat_transactions: '已记录',
     stat_this_month: '本月',
@@ -2667,7 +2704,7 @@ const zh = {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
     hero_title: '多部手机同步',
-    hero_body: '在另一部手机上有 Pro？在这里登录，这部手机也能解锁。',
+    hero_body: '在其他手机上有 Pro？登录并开启 Cloud Sync，这部手机也能解锁。',
     continue_apple: '通过 Apple 继续',
     continue_google: '通过 Google 继续',
     continue_email: '通过邮箱继续',
@@ -2717,11 +2754,13 @@ const zh = {
       '你账户的 Pro 最多适用于 5 部手机，而 5 个名额都已用完。请在不再使用的手机上退出 Cloud Sync（30 天未使用的手机也会释放名额）。或者在这部手机上获取 Pro。',
     needs_pro_title: '同步需要 Pro',
     needs_pro_body:
-      '你已登录。获取 Pro 即可开始同步。在另一部手机上买了 Pro？在那部手机上也登录 Cloud Sync，这里就会解锁。',
+      '你已登录。获取 Pro 即可开始同步。在其他手机上买过 Pro？在那部手机上也开启 Cloud Sync，这里就会解锁。',
     tile_on: '开',
     profile_off: '关',
     profile_paused: '已暂停',
-    profile_needs_pro: '需要 Pro',
+    off_title: 'Cloud Sync 已关闭',
+    off_body: '你已登录。开启 Cloud Sync 即可备份数据，让多部手机保持同步。',
+    turn_on: '开启 Cloud Sync',
     profile_a11y_label: 'Cloud Sync，%{status}',
     profile_a11y_hint: '打开 Cloud Sync',
     errors: {
@@ -2748,17 +2787,17 @@ const zh = {
     faq: {
       title: '常见问题',
       items: {
-        sign_in_without_pro: {
-          q: '登录需要 Pro 吗？',
-          a: '不需要。任何人都能登录。同步你自己的数据需要 Pro，但别人共享给你的账本不需要 Pro 也能同步。',
+        needs_pro: {
+          q: 'Cloud Sync 需要 Pro 吗？',
+          a: '需要，同步自己的数据需要 Pro。别人和你共享的相册和账本不需要 Pro 也会同步。',
         },
         pro_other_phone: {
           q: '我在另一部手机上有 Pro，为什么这部没有？',
-          a: '在两部手机上用同一个账户登录 Cloud Sync。这部手机同步完成后也会是 Pro，只要账户里有一部手机有 Pro，即使是你不再使用的手机也可以。你账户的 Pro 最多适用于 5 部手机。',
+          a: '在两部手机上登录同一个账号并开启 Cloud Sync。这部手机同步过一次后，只要账号里有一部手机有 Pro，这部也会是 Pro，即使那部手机你已不再使用。账号的 Pro 最多适用 5 部手机。',
         },
         restore_moved_pro: {
           q: '我恢复了购买项目，结果另一部手机的 Pro 没了。',
-          a: '通过商店恢复购买，会把购买项目转到执行恢复的那部手机。让两部手机都保持登录 Cloud Sync，两部就都是 Pro。',
+          a: '在商店恢复购买会把购买移到执行恢复的手机。两部手机都保持 Cloud Sync 开启，两部都会保持 Pro。',
         },
         pro_ends: {
           q: 'Pro 到期后会怎样？',
@@ -2767,22 +2806,6 @@ const zh = {
         how_fast: {
           q: '更改多快能到我的其他手机？',
           a: '两部手机都打开 App 时，几秒内就会到。否则会在下次打开 App 时。离线时的更改会在你重新联网后上传。',
-        },
-        shared_pro: {
-          q: '共享账本需要 Pro 吗？',
-          a: '账本里只要有一个人有 Pro 就行，所有者或任何成员都可以。如果账本里没人有 Pro，账本会对所有人暂停，直到有人有 Pro。不会删除任何内容。',
-        },
-        shared_free_limits: {
-          q: '没有 Pro 也能在共享账本里记账吗？',
-          a: '可以，即使账本超过 6 个账户也行。免费版的其他限制仍然适用，比如超出上限添加账户或分类。这些改动请让账本的所有者来做。',
-        },
-        family_pro: {
-          q: '家人可以用我的 Pro 吗？',
-          a: '和他们共享一个账本：你邀请的人不需要 Pro。在他们的手机上登录你的账户，会让他们看到你所有的财务数据。',
-        },
-        sign_out_delete: {
-          q: '如果我退出登录或删除账户会怎样？',
-          a: '退出登录后，你的数据会留在这部手机上，别人共享给你的账本会从这部手机上移除，直到你再次登录。删除账户会清除云端副本。你共享的账本会从其他所有人的手机上移除，而你会保留它们。',
         },
       },
     },
@@ -3195,7 +3218,7 @@ const zh = {
     title: '共享',
     share_toggle: '共享这个账本',
     share_toggle_caption: '最多可邀请 {{max}} 人。他们不需要 Pro。',
-    needs_cloud_sync: '登录 Cloud Sync 即可共享账本。',
+    needs_cloud_sync: '开启 Cloud Sync 才能共享账本。',
     has_shared_albums: '此账本有共享相册，请先停止共享这些相册。',
     limit_reached: '目前最多可共享 {{max}} 个账本。',
     share_failed: '账本已创建，但共享没有开始。请到账本的“共享”页面再试一次。',
@@ -3215,7 +3238,7 @@ const zh = {
     owner_note: '由你共享。这里的每个人都能添加和编辑记录。',
     member_note: '由 {{owner}} 共享。这里的每个人都能添加和编辑记录。',
     people: '成员',
-    people_signed_out: '登录 Cloud Sync 即可查看成员。',
+    people_signed_out: '登录即可查看有哪些成员。',
     you: '你',
     owner_badge: '所有者',
     joined_today: '今天加入',

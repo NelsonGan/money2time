@@ -1567,6 +1567,43 @@ const pt = {
     profile_name_add: 'Adicione o seu nome',
     profile_edit_name: 'Editar nome',
     profile_edit_photo: 'Alterar foto',
+    account_sign_in: 'Entrar',
+    account_title: 'Conta',
+    account_a11y_hint: 'Abre a sua conta',
+    account_signed_out: 'Sem sessão iniciada',
+    account_signed_in_a11y: 'Sessão iniciada como {{email}}',
+    account_sign_in_prompt:
+      'Entre para partilhar álbuns e juntar-se a livros partilhados. Os seus dados ficam neste telemóvel até ativar o Cloud Sync.',
+    account_faq: {
+      what: {
+        q: 'O que faz entrar na conta?',
+        a: 'Dá-lhe uma conta para partilhar álbuns e juntar-se a livros que outros partilham consigo. Os seus dados ficam neste telemóvel.',
+      },
+      sync: {
+        q: 'Entrar sincroniza os meus dados?',
+        a: 'Não. O Cloud Sync fica desligado até o ativar em Definições > Cloud Sync. Sincronizar os seus próprios dados requer Pro.',
+      },
+      pro: {
+        q: 'Preciso de Pro para entrar?',
+        a: 'Não. Entrar, partilhar álbuns e juntar-se a livros partilhados é grátis. O Pro serve para sincronizar os seus próprios dados e partilhar um livro.',
+      },
+      shared_pro: {
+        q: 'Um livro compartilhado precisa do Pro?',
+        a: 'Só uma pessoa nele precisa do Pro, o dono ou qualquer membro. Se ninguém nele tiver o Pro, ele pausa para todos até alguém ter. Nada é apagado.',
+      },
+      shared_free_limits: {
+        q: 'Posso adicionar lançamentos a um livro partilhado sem Pro?',
+        a: 'Sim, mesmo que tenha mais de 6 contas. Os outros limites do plano gratuito continuam a valer, como adicionar contas ou categorias acima do limite. Peça ao dono do livro para fazer essas alterações.',
+      },
+      family_pro: {
+        q: 'Minha família pode usar meu Pro?',
+        a: 'Compartilhe um livro com eles: as pessoas que você convida não precisam do Pro. Entrar na sua conta no celular deles mostraria a eles todos os seus dados financeiros.',
+      },
+      sign_out_delete: {
+        q: 'E se eu sair ou excluir minha conta?',
+        a: 'Ao sair, seus dados ficam neste celular, e os livros que outras pessoas compartilharam com você saem dele até você entrar de novo. Excluir sua conta apaga a cópia na nuvem. Os livros que você compartilha saem dos celulares de todos os outros, e você continua com eles.',
+      },
+    },
     stat_days: 'Dias a registar',
     stat_transactions: 'Registadas',
     stat_this_month: 'Este mês',
@@ -2802,7 +2839,8 @@ const pt = {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
     hero_title: 'Sincronize seus celulares',
-    hero_body: 'Tem Pro em outro celular? Entre aqui para desbloquear neste também.',
+    hero_body:
+      'Tem Pro noutro telemóvel? Entre e ative o Cloud Sync para o desbloquear aqui também.',
     continue_apple: 'Continuar com a Apple',
     continue_google: 'Continuar com o Google',
     continue_email: 'Continuar com e-mail',
@@ -2853,11 +2891,14 @@ const pt = {
       'O Pro da sua conta vale para até 5 celulares, e as 5 vagas estão ocupadas. Saia do Cloud Sync em um celular que você não usa mais (um celular sem uso por 30 dias também libera a vaga). Ou obtenha o Pro neste celular.',
     needs_pro_title: 'A sincronização precisa do Pro',
     needs_pro_body:
-      'Você entrou. Assine o Pro para começar a sincronizar. Comprou o Pro em outro celular? Entre no Cloud Sync lá também, e ele será desbloqueado aqui.',
+      'Tem sessão iniciada. Obtenha o Pro para começar a sincronizar. Comprou o Pro noutro telemóvel? Ative também lá o Cloud Sync e fica desbloqueado aqui.',
     tile_on: 'Ligado',
     profile_off: 'Desligado',
     profile_paused: 'Pausado',
-    profile_needs_pro: 'Requer Pro',
+    off_title: 'O Cloud Sync está desligado',
+    off_body:
+      'Tem sessão iniciada. Ative o Cloud Sync para fazer cópia dos seus dados e manter os seus telemóveis sincronizados.',
+    turn_on: 'Ativar Cloud Sync',
     profile_a11y_label: 'Cloud Sync, %{status}',
     profile_a11y_hint: 'Abre o Cloud Sync',
     errors: {
@@ -2884,17 +2925,17 @@ const pt = {
     faq: {
       title: 'Perguntas',
       items: {
-        sign_in_without_pro: {
-          q: 'Preciso do Pro para entrar?',
-          a: 'Não. Qualquer pessoa pode entrar. Sincronizar seus próprios dados exige o Pro, mas os livros que outras pessoas compartilham com você sincronizam sem ele.',
+        needs_pro: {
+          q: 'O Cloud Sync precisa de Pro?',
+          a: 'Sim, sincronizar os seus próprios dados requer Pro. Álbuns e livros que outros partilham consigo sincronizam sem ele.',
         },
         pro_other_phone: {
           q: 'Tenho o Pro em outro celular. Por que não neste?',
-          a: 'Entre no Cloud Sync com a mesma conta nos dois celulares. Assim que este celular sincronizar, ele também terá o Pro, enquanto algum celular da conta tiver o Pro, mesmo um que você não usa mais. O Pro da sua conta vale para até 5 celulares.',
+          a: 'Entre com a mesma conta nos dois telemóveis e ative o Cloud Sync. Depois de este telemóvel sincronizar, também fica Pro enquanto algum telemóvel da conta tiver Pro, mesmo um que já não use. O Pro da sua conta abrange até 5 telemóveis.',
         },
         restore_moved_pro: {
           q: 'Restaurei minha compra e meu outro celular perdeu o Pro.',
-          a: 'Restaurar pela loja move a compra para o celular que a restaurou. Mantenha os dois celulares conectados ao Cloud Sync e os dois continuam com o Pro.',
+          a: 'Um restauro na loja move a compra para o telemóvel que a restaurou. Mantenha o Cloud Sync ativo nos dois telemóveis e ambos continuam Pro.',
         },
         pro_ends: {
           q: 'O que acontece quando o Pro termina?',
@@ -2903,22 +2944,6 @@ const pt = {
         how_fast: {
           q: 'Com que rapidez as alterações chegam aos meus outros celulares?',
           a: 'Em poucos segundos enquanto o app estiver aberto nos dois. Caso contrário, na próxima vez que o app abrir. Alterações feitas offline sobem assim que você voltar a ficar online.',
-        },
-        shared_pro: {
-          q: 'Um livro compartilhado precisa do Pro?',
-          a: 'Só uma pessoa nele precisa do Pro, o dono ou qualquer membro. Se ninguém nele tiver o Pro, ele pausa para todos até alguém ter. Nada é apagado.',
-        },
-        shared_free_limits: {
-          q: 'Posso adicionar lançamentos a um livro partilhado sem Pro?',
-          a: 'Sim, mesmo que tenha mais de 6 contas. Os outros limites do plano gratuito continuam a valer, como adicionar contas ou categorias acima do limite. Peça ao dono do livro para fazer essas alterações.',
-        },
-        family_pro: {
-          q: 'Minha família pode usar meu Pro?',
-          a: 'Compartilhe um livro com eles: as pessoas que você convida não precisam do Pro. Entrar na sua conta no celular deles mostraria a eles todos os seus dados financeiros.',
-        },
-        sign_out_delete: {
-          q: 'E se eu sair ou excluir minha conta?',
-          a: 'Ao sair, seus dados ficam neste celular, e os livros que outras pessoas compartilharam com você saem dele até você entrar de novo. Excluir sua conta apaga a cópia na nuvem. Os livros que você compartilha saem dos celulares de todos os outros, e você continua com eles.',
         },
       },
     },
@@ -3350,7 +3375,7 @@ const pt = {
     title: 'Compartilhamento',
     share_toggle: 'Compartilhar este livro',
     share_toggle_caption: 'Convide até {{max}} pessoas. Elas não precisam do Pro.',
-    needs_cloud_sync: 'Entre no Cloud Sync para compartilhar um livro.',
+    needs_cloud_sync: 'Ative o Cloud Sync para partilhar um livro.',
     has_shared_albums: 'Este livro tem álbuns compartilhados. Pare de compartilhá-los primeiro.',
     limit_reached: 'Por enquanto, você pode compartilhar até {{max}} livros.',
     share_failed:
@@ -3373,7 +3398,7 @@ const pt = {
     owner_note: 'Compartilhado por você. Todos aqui podem adicionar e editar lançamentos.',
     member_note: 'Compartilhado por {{owner}}. Todos aqui podem adicionar e editar lançamentos.',
     people: 'Pessoas',
-    people_signed_out: 'Entre no Cloud Sync para ver quem está nele.',
+    people_signed_out: 'Entre para ver quem faz parte.',
     you: 'Você',
     owner_badge: 'Dono',
     joined_today: 'Entrou hoje',

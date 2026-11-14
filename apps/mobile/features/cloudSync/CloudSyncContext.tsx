@@ -113,6 +113,11 @@ export type CloudSyncStatus =
   | 'unavailable'
   | 'loading'
   | 'signedOut'
+  /**
+   * Signed in, Cloud Sync off: the user's own data does not sync until they
+   * turn it on (`turnOnSync`). Shared ledgers and albums still sync.
+   */
+  | 'syncOff'
   /** Signed in; bringing this phone and the cloud copy together (retried while offline). */
   | 'linking'
   /** Both have data: waiting for the user to pick one. */
@@ -151,6 +156,13 @@ interface CloudSyncContextValue {
   sendEmailCode: (email: string, captchaToken?: string) => Promise<void>;
   verifyEmailCode: (email: string, code: string) => Promise<void>;
   resolveChoice: (keep: 'cloud' | 'phone') => Promise<void>;
+  /**
+   * Turns Cloud Sync on after a sign-in left it off: links this phone and the
+   * cloud copy. `needsPro` when the account is not Pro: it stays off.
+   */
+  turnOnSync: () => Promise<'started' | 'needsPro'>;
+  /** Cancel on the keep-which-data choice: stays signed in, Cloud Sync off, nothing changed. */
+  cancelTurnOn: () => Promise<void>;
   syncNow: () => Promise<void>;
   /**
    * Signs out. Ledgers others shared leave the phone with it, so while one
@@ -749,6 +761,16 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
     [markLinked, reloadAfterApply, runSync],
   );
 
+  /** Signed in with Cloud Sync off (a fresh sign-in, or turning on without Pro). */
+  const keepSyncOff = useCallback(async (session: StoredSession) => {
+    const next: StoredSession = { ...session, linked: false, syncOff: true };
+    sessionRef.current = next;
+    await saveSession(next);
+    setLinked(false);
+    setPhoneLimited(false);
+    setStatus('syncOff');
+  }, []);
+
   /**
    * Brings this phone and the cloud copy together after a sign-in. `asked`:
    * the caller has just asked the account status (even if it got no answer),
@@ -785,6 +807,12 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
         if (generation !== generationRef.current) return;
         if (isNotPro(error)) {
           closeEngine();
+          const session = sessionRef.current;
+          if (session && !session.linked && !isPhoneLimit(error)) {
+            // Never synced and no Pro: Cloud Sync is simply off, not paused.
+            await keepSyncOff(session);
+            return;
+          }
           setPhoneLimited(isPhoneLimit(error));
           setStatus('notPro');
           return;
@@ -796,15 +824,31 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
           setLastError(kind);
           return;
         }
-        // Start over from the sign-in screen, with the reason shown there.
         report(error, 'link', kind);
-        await forgetSession({ deleteReplica: true });
+        const session = sessionRef.current;
+        if (kind === 'session_expired' || !session) {
+          // Start over from the sign-in screen, with the reason shown there.
+          await forgetSession({ deleteReplica: true });
+        } else {
+          // Stay signed in with Cloud Sync off; turning it on tries again.
+          closeEngine();
+          await keepSyncOff(session);
+        }
         setLastError(kind);
       } finally {
         linkingRef.current = false;
       }
     },
-    [adoptCloudCopy, closeEngine, forgetSession, markLinked, openEngine, refreshAccountPro, report],
+    [
+      adoptCloudCopy,
+      closeEngine,
+      forgetSession,
+      keepSyncOff,
+      markLinked,
+      openEngine,
+      refreshAccountPro,
+      report,
+    ],
   );
 
   const resolveChoice = useCallback(
@@ -851,7 +895,11 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       if (getAccountProAnswer()?.userId !== signedIn.id) clearAccountPro();
       accountCheckedAtRef.current = 0;
       proAnswerRef.current = null;
-      const session: StoredSession = { token, user: signedIn, linked: resume };
+      // A fresh sign-in leaves Cloud Sync off until the user turns it on.
+      // Signing in again after the session expired carries on syncing.
+      const session: StoredSession = resume
+        ? { token, user: signedIn, linked: true }
+        : { token, user: signedIn, linked: false, syncOff: true };
       sessionRef.current = session;
       bindShared(session);
       await saveSession(session);
@@ -870,13 +918,39 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
         void refreshAccountPro(true);
         await runSync();
       } else {
-        await link();
+        setLinked(false);
+        setStatus('syncOff');
       }
       // Shared ledgers this account already belongs to come down too.
       void runSharedSync({ forceList: true });
     },
-    [bindShared, link, refreshAccountPro, runSharedSync, runSync],
+    [bindShared, refreshAccountPro, runSharedSync, runSync],
   );
+
+  const turnOnSync = useCallback(async (): Promise<'started' | 'needsPro'> => {
+    const session = sessionRef.current;
+    if (!session?.syncOff) return 'started';
+    // The account's Pro (any of its phones) first, so a free account goes to
+    // Get Pro without a setting-up screen. This install's own purchase only
+    // counts once linking asks for credentials (`mayHoldPurchase`).
+    const answer = await refreshAccountPro(true);
+    if (sessionRef.current?.user.id !== session.user.id) return 'started';
+    if (answer && !answer.isPro && !mayHoldPurchase()) return 'needsPro';
+    const next: StoredSession = { ...session, syncOff: false };
+    sessionRef.current = next;
+    await saveSession(next);
+    await link({ answer });
+    return sessionRef.current?.syncOff ? 'needsPro' : 'started';
+  }, [link, mayHoldPurchase, refreshAccountPro]);
+
+  const cancelTurnOn = useCallback(async () => {
+    const session = sessionRef.current;
+    if (!session || session.linked) return;
+    await runExclusive(closeEngine);
+    setChoice(null);
+    setLastError(null);
+    await keepSyncOff(session);
+  }, [closeEngine, keepSyncOff]);
 
   const signInWithNative = useCallback(
     async (provider: NativeProvider): Promise<'ok' | 'cancelled'> => {
@@ -1084,9 +1158,16 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       if (session.linked) void setLastLinkedUser(session.user.id);
       setUser(session.user);
       setLinked(session.linked);
-      // Not linked: the app closed during linking, or the account is not Pro
-      // yet. Start linking again (it asks the account status, and stops at
-      // notPro if so).
+      // Signed in with Cloud Sync off: only shared ledgers and albums sync.
+      if (session.syncOff) {
+        setStatus('syncOff');
+        await sharedLedgerSync.refreshList(true).catch(() => 0);
+        void runSharedSync({ forceList: true });
+        return;
+      }
+      // Not linked: the app closed during linking, or a session from before
+      // sign-in left Cloud Sync off. Start linking again (it asks the account
+      // status, and leaves Cloud Sync off without Pro).
       if (!session.linked) {
         await sharedLedgerSync.refreshList(true).catch(() => 0);
         await link();
@@ -1373,6 +1454,8 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       sendEmailCode,
       verifyEmailCode,
       resolveChoice,
+      turnOnSync,
+      cancelTurnOn,
       syncNow,
       signOut,
       deleteAccount,
@@ -1399,6 +1482,8 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       sendEmailCode,
       verifyEmailCode,
       resolveChoice,
+      turnOnSync,
+      cancelTurnOn,
       syncNow,
       signOut,
       deleteAccount,

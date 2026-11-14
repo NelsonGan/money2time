@@ -13,7 +13,6 @@ export type ProfileSyncTone = 'on' | 'busy' | 'action' | 'off' | 'problem';
 export type ProfileSyncStatusKey =
   | 'profile_off'
   | 'profile_paused'
-  | 'profile_needs_pro'
   | 'linking'
   | 'choice_title'
   | 'status_on'
@@ -56,6 +55,9 @@ export function profileSyncState({
       // An error here means the app signed the user out (session expired,
       // link failed), not the user.
       return { tone: lastError ? 'problem' : 'off', statusKey: 'profile_off' };
+    case 'syncOff':
+      // Signed in, never turned on: plain Off, with or without Pro.
+      return { tone: 'off', statusKey: 'profile_off' };
     case 'linking':
       // Linking waits for the network while offline.
       return lastError === 'offline'
@@ -64,11 +66,11 @@ export function profileSyncState({
     case 'needsChoice':
       return { tone: 'action', statusKey: 'choice_title' };
     case 'notPro':
-      // Past the phone limit or linked before: paused. Never linked: needs Pro.
-      return {
-        tone: 'problem',
-        statusKey: phoneLimited || linked ? 'profile_paused' : 'profile_needs_pro',
-      };
+      // Past the phone limit or synced before: paused. Never synced (a moment
+      // while turning on finds no Pro): off.
+      return phoneLimited || linked
+        ? { tone: 'problem', statusKey: 'profile_paused' }
+        : { tone: 'off', statusKey: 'profile_off' };
     case 'ready':
       if (isSyncing) return { tone: 'busy', statusKey: 'status_syncing' };
       if (lastError === 'offline') return { tone: 'problem', statusKey: 'status_offline' };

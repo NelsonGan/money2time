@@ -1563,6 +1563,43 @@ const pl = {
     profile_name_add: 'Dodaj swoje imię',
     profile_edit_name: 'Edytuj imię',
     profile_edit_photo: 'Zmień zdjęcie',
+    account_sign_in: 'Zaloguj się',
+    account_title: 'Konto',
+    account_a11y_hint: 'Otwiera Twoje konto',
+    account_signed_out: 'Nie zalogowano',
+    account_signed_in_a11y: 'Zalogowano jako {{email}}',
+    account_sign_in_prompt:
+      'Zaloguj się, aby udostępniać albumy i dołączać do wspólnych ksiąg. Twoje dane zostają na tym telefonie, dopóki nie włączysz Cloud Sync.',
+    account_faq: {
+      what: {
+        q: 'Co daje zalogowanie się?',
+        a: 'Dostajesz konto, dzięki któremu możesz udostępniać albumy i dołączać do ksiąg, które inni Ci udostępniają. Twoje dane zostają na tym telefonie.',
+      },
+      sync: {
+        q: 'Czy zalogowanie synchronizuje moje dane?',
+        a: 'Nie. Cloud Sync pozostaje wyłączone, dopóki nie włączysz go w Ustawienia > Cloud Sync. Synchronizacja własnych danych wymaga Pro.',
+      },
+      pro: {
+        q: 'Czy potrzebuję Pro, aby się zalogować?',
+        a: 'Nie. Logowanie, udostępnianie albumów i dołączanie do wspólnych ksiąg jest bezpłatne. Pro służy do synchronizacji własnych danych i udostępniania księgi.',
+      },
+      shared_pro: {
+        q: 'Czy udostępniona księga wymaga Pro?',
+        a: 'Pro potrzebuje tylko jedna osoba w niej, właściciel lub dowolny członek. Jeśli nikt w niej nie ma Pro, zostaje wstrzymana dla wszystkich, dopóki ktoś go nie będzie miał. Nic nie zostanie usunięte.',
+      },
+      shared_free_limits: {
+        q: 'Czy mogę dodawać wpisy do wspólnej księgi bez Pro?',
+        a: 'Tak, nawet jeśli ma więcej niż 6 kont. Pozostałe limity darmowego planu nadal obowiązują, np. dodawanie kont lub kategorii ponad limit. Poproś właściciela księgi o wprowadzenie tych zmian.',
+      },
+      family_pro: {
+        q: 'Czy moja rodzina może korzystać z mojego Pro?',
+        a: 'Udostępnij im księgę: osoby, które zaprosisz, nie potrzebują Pro. Zalogowanie się na Twoje konto na ich telefonie pokazałoby im wszystkie Twoje dane finansowe.',
+      },
+      sign_out_delete: {
+        q: 'Co jeśli się wyloguję lub usunę konto?',
+        a: 'Po wylogowaniu Twoje dane zostają na tym telefonie, a księgi udostępnione Ci przez innych znikają z niego, dopóki nie zalogujesz się ponownie. Usunięcie konta kasuje kopię w chmurze. Księgi, które udostępniasz, znikają z telefonów wszystkich pozostałych osób, a Ty je zachowujesz.',
+      },
+    },
     stat_days: 'Dni śledzenia',
     stat_transactions: 'Zapisano',
     stat_this_month: 'W tym miesiącu',
@@ -2796,7 +2833,8 @@ const pl = {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
     hero_title: 'Sync na wszystkich telefonach',
-    hero_body: 'Masz Pro na innym telefonie? Zaloguj się tutaj, aby odblokować je także na tym.',
+    hero_body:
+      'Masz Pro na innym telefonie? Zaloguj się i włącz Cloud Sync, aby odblokować je także tutaj.',
     continue_apple: 'Kontynuuj z Apple',
     continue_google: 'Kontynuuj z Google',
     continue_email: 'Kontynuuj z e-mailem',
@@ -2846,11 +2884,14 @@ const pl = {
       'Pro na Twoim koncie obejmuje maksymalnie 5 telefonów i wszystkie 5 miejsc jest zajętych. Wyloguj się z Cloud Sync na telefonie, którego już nie używasz (telefon nieużywany przez 30 dni też zwalnia swoje miejsce). Albo kup Pro na tym telefonie.',
     needs_pro_title: 'Synchronizacja wymaga Pro',
     needs_pro_body:
-      'Jesteś zalogowany. Kup Pro, aby zacząć synchronizację. Kupiłeś Pro na innym telefonie? Zaloguj się tam też do Cloud Sync, a odblokuje się tutaj.',
+      'Jesteś zalogowany. Kup Pro, aby zacząć synchronizację. Kupiłeś Pro na innym telefonie? Włącz tam też Cloud Sync, a odblokuje się tutaj.',
     tile_on: 'Wł.',
     profile_off: 'Wył.',
     profile_paused: 'Wstrzymano',
-    profile_needs_pro: 'Wymaga Pro',
+    off_title: 'Cloud Sync jest wyłączone',
+    off_body:
+      'Jesteś zalogowany. Włącz Cloud Sync, aby tworzyć kopię zapasową danych i synchronizować telefony.',
+    turn_on: 'Włącz Cloud Sync',
     profile_a11y_label: 'Cloud Sync, %{status}',
     profile_a11y_hint: 'Otwiera Cloud Sync',
     errors: {
@@ -2877,17 +2918,17 @@ const pl = {
     faq: {
       title: 'Pytania',
       items: {
-        sign_in_without_pro: {
-          q: 'Czy do logowania potrzebuję Pro?',
-          a: 'Nie. Każdy może się zalogować. Synchronizacja własnych danych wymaga Pro, ale księgi udostępnione Ci przez innych synchronizują się bez niego.',
+        needs_pro: {
+          q: 'Czy Cloud Sync wymaga Pro?',
+          a: 'Tak, synchronizacja własnych danych wymaga Pro. Albumy i księgi, które inni Ci udostępniają, synchronizują się bez niego.',
         },
         pro_other_phone: {
           q: 'Mam Pro na innym telefonie. Dlaczego nie na tym?',
-          a: 'Zaloguj się do Cloud Sync tym samym kontem na obu telefonach. Gdy ten telefon się zsynchronizuje, też będzie miał Pro, dopóki jakiś telefon na koncie ma Pro, nawet taki, którego już nie używasz. Pro na Twoim koncie obejmuje maksymalnie 5 telefonów.',
+          a: 'Zaloguj się na tym samym koncie na obu telefonach i włącz Cloud Sync. Gdy ten telefon się zsynchronizuje, też ma Pro, dopóki ma je którykolwiek telefon na koncie, nawet ten, którego już nie używasz. Pro konta obejmuje do 5 telefonów.',
         },
         restore_moved_pro: {
           q: 'Przywróciłem zakup, a mój drugi telefon stracił Pro.',
-          a: 'Przywrócenie zakupu w sklepie przenosi zakup na telefon, który go przywrócił. Pozostań zalogowany do Cloud Sync na obu telefonach, a oba zachowają Pro.',
+          a: 'Przywrócenie zakupu w sklepie przenosi go na telefon, który go przywrócił. Zostaw Cloud Sync włączone na obu telefonach, a oba zachowają Pro.',
         },
         pro_ends: {
           q: 'Co się stanie, gdy Pro się skończy?',
@@ -2896,22 +2937,6 @@ const pl = {
         how_fast: {
           q: 'Jak szybko zmiany docierają na moje inne telefony?',
           a: 'W ciągu kilku sekund, gdy aplikacja jest otwarta na obu. W przeciwnym razie przy następnym otwarciu aplikacji. Zmiany wprowadzone offline wyślą się, gdy znów będziesz online.',
-        },
-        shared_pro: {
-          q: 'Czy udostępniona księga wymaga Pro?',
-          a: 'Pro potrzebuje tylko jedna osoba w niej, właściciel lub dowolny członek. Jeśli nikt w niej nie ma Pro, zostaje wstrzymana dla wszystkich, dopóki ktoś go nie będzie miał. Nic nie zostanie usunięte.',
-        },
-        shared_free_limits: {
-          q: 'Czy mogę dodawać wpisy do wspólnej księgi bez Pro?',
-          a: 'Tak, nawet jeśli ma więcej niż 6 kont. Pozostałe limity darmowego planu nadal obowiązują, np. dodawanie kont lub kategorii ponad limit. Poproś właściciela księgi o wprowadzenie tych zmian.',
-        },
-        family_pro: {
-          q: 'Czy moja rodzina może korzystać z mojego Pro?',
-          a: 'Udostępnij im księgę: osoby, które zaprosisz, nie potrzebują Pro. Zalogowanie się na Twoje konto na ich telefonie pokazałoby im wszystkie Twoje dane finansowe.',
-        },
-        sign_out_delete: {
-          q: 'Co jeśli się wyloguję lub usunę konto?',
-          a: 'Po wylogowaniu Twoje dane zostają na tym telefonie, a księgi udostępnione Ci przez innych znikają z niego, dopóki nie zalogujesz się ponownie. Usunięcie konta kasuje kopię w chmurze. Księgi, które udostępniasz, znikają z telefonów wszystkich pozostałych osób, a Ty je zachowujesz.',
         },
       },
     },
@@ -3336,7 +3361,7 @@ const pl = {
     title: 'Udostępnianie',
     share_toggle: 'Udostępnij tę księgę',
     share_toggle_caption: 'Zaproś do {{max}} osób. Nie potrzebują Pro.',
-    needs_cloud_sync: 'Zaloguj się do Cloud Sync, aby udostępnić księgę.',
+    needs_cloud_sync: 'Włącz Cloud Sync, aby udostępnić księgę.',
     has_shared_albums: 'Ta księga zawiera udostępnione albumy. Najpierw przestań je udostępniać.',
     limit_reached: 'Na razie możesz udostępnić maksymalnie {{max}} księgi.',
     share_failed:
@@ -3359,7 +3384,7 @@ const pl = {
     owner_note: 'Udostępniasz tę księgę. Każdy tutaj może dodawać i edytować wpisy.',
     member_note: 'Udostępnia: {{owner}}. Każdy tutaj może dodawać i edytować wpisy.',
     people: 'Osoby',
-    people_signed_out: 'Zaloguj się do Cloud Sync, aby zobaczyć, kto w niej jest.',
+    people_signed_out: 'Zaloguj się, aby zobaczyć, kto w niej jest.',
     you: 'Ty',
     owner_badge: 'Właściciel',
     joined_today: 'Dołączył(a) dziś',

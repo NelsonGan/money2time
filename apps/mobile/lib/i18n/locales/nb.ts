@@ -1557,6 +1557,43 @@ const nb = {
     profile_name_add: 'Legg til navnet ditt',
     profile_edit_name: 'Rediger navn',
     profile_edit_photo: 'Endre bilde',
+    account_sign_in: 'Logg inn',
+    account_title: 'Konto',
+    account_a11y_hint: 'Åpner kontoen din',
+    account_signed_out: 'Ikke logget inn',
+    account_signed_in_a11y: 'Logget inn som {{email}}',
+    account_sign_in_prompt:
+      'Logg inn for å dele album og bli med i delte regnskap. Dataene dine blir på telefonen til du slår på Cloud Sync.',
+    account_faq: {
+      what: {
+        q: 'Hva gjør innlogging?',
+        a: 'Du får en konto, så du kan dele album og bli med i regnskap andre deler med deg. Dataene dine blir på telefonen.',
+      },
+      sync: {
+        q: 'Synkroniserer innlogging dataene mine?',
+        a: 'Nei. Cloud Sync er av til du slår det på under Innstillinger > Cloud Sync. Å synkronisere dine egne data krever Pro.',
+      },
+      pro: {
+        q: 'Trenger jeg Pro for å logge inn?',
+        a: 'Nei. Innlogging, deling av album og å bli med i delte regnskap er gratis. Pro er for å synkronisere dine egne data og dele et regnskap.',
+      },
+      shared_pro: {
+        q: 'Trenger et delt regnskap Pro?',
+        a: 'Bare én person i det trenger Pro, eieren eller et hvilket som helst medlem. Hvis ingen i det har Pro, settes det på pause for alle til noen får det. Ingenting slettes.',
+      },
+      shared_free_limits: {
+        q: 'Kan jeg legge til poster i en delt regnskapsbok uten Pro?',
+        a: 'Ja, også når den har mer enn 6 kontoer. Andre grenser i gratisplanen gjelder fortsatt, som å legge til kontoer eller kategorier utover grensen. Be eieren av regnskapsboken gjøre de endringene.',
+      },
+      family_pro: {
+        q: 'Kan familien min bruke Pro-en min?',
+        a: 'Del et regnskap med dem: personer du inviterer, trenger ikke Pro. Hvis du logget inn på kontoen din på telefonen deres, ville de se alle pengedataene dine.',
+      },
+      sign_out_delete: {
+        q: 'Hva skjer hvis jeg logger ut eller sletter kontoen min?',
+        a: 'Når du logger ut, blir dataene dine på denne telefonen, og regnskap som andre har delt med deg, forsvinner fra den til du logger inn igjen. Når du sletter kontoen, slettes skykopien. Regnskap du deler, forsvinner fra alle andres telefoner, og du beholder dem.',
+      },
+    },
     stat_days: 'Dager sporet',
     stat_transactions: 'Registrert',
     stat_this_month: 'Denne måneden',
@@ -2786,7 +2823,8 @@ const nb = {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
     hero_title: 'Synk på alle telefoner',
-    hero_body: 'Har du Pro på en annen telefon? Logg inn her for å låse det opp på denne også.',
+    hero_body:
+      'Har du Pro på en annen telefon? Logg inn og slå på Cloud Sync for å låse det opp her også.',
     continue_apple: 'Fortsett med Apple',
     continue_google: 'Fortsett med Google',
     continue_email: 'Fortsett med e-post',
@@ -2837,11 +2875,14 @@ const nb = {
       'Kontoens Pro gjelder for opptil 5 telefoner, og alle 5 plassene er tatt. Logg ut av Cloud Sync på en telefon du ikke bruker lenger (en telefon som ikke har vært brukt på 30 dager, frigjør også plassen sin). Eller få Pro på denne telefonen.',
     needs_pro_title: 'Synkronisering krever Pro',
     needs_pro_body:
-      'Du er logget inn. Skaff deg Pro for å begynne å synkronisere. Kjøpt Pro på en annen telefon? Logg inn på Cloud Sync der også, så låses det opp her.',
+      'Du er logget inn. Skaff deg Pro for å begynne å synkronisere. Kjøpt Pro på en annen telefon? Slå på Cloud Sync der også, så låses det opp her.',
     tile_on: 'På',
     profile_off: 'Av',
     profile_paused: 'På pause',
-    profile_needs_pro: 'Krever Pro',
+    off_title: 'Cloud Sync er av',
+    off_body:
+      'Du er logget inn. Slå på Cloud Sync for å sikkerhetskopiere dataene dine og holde telefonene synkronisert.',
+    turn_on: 'Slå på Cloud Sync',
     profile_a11y_label: 'Cloud Sync, %{status}',
     profile_a11y_hint: 'Åpner Cloud Sync',
     errors: {
@@ -2868,17 +2909,17 @@ const nb = {
     faq: {
       title: 'Spørsmål',
       items: {
-        sign_in_without_pro: {
-          q: 'Trenger jeg Pro for å logge inn?',
-          a: 'Nei. Alle kan logge inn. Synkronisering av dine egne data krever Pro, men regnskap som andre deler med deg, synkroniseres uten.',
+        needs_pro: {
+          q: 'Krever Cloud Sync Pro?',
+          a: 'Ja, å synkronisere dine egne data krever Pro. Album og regnskap andre deler med deg, synkroniseres uten.',
         },
         pro_other_phone: {
           q: 'Jeg har Pro på en annen telefon. Hvorfor ikke på denne?',
-          a: 'Logg inn på Cloud Sync med samme konto på begge telefonene. Når denne telefonen har synkronisert, har den også Pro, så lenge en telefon på kontoen har Pro, også en du ikke bruker lenger. Kontoens Pro gjelder for opptil 5 telefoner.',
+          a: 'Logg inn med samme konto på begge telefonene, og slå på Cloud Sync. Når denne telefonen har synkronisert, har den også Pro så lenge en telefon på kontoen har Pro, også en du ikke bruker lenger. Kontoens Pro gjelder opptil 5 telefoner.',
         },
         restore_moved_pro: {
           q: 'Jeg gjenopprettet kjøpet mitt, og den andre telefonen mistet Pro.',
-          a: 'En gjenoppretting via butikken flytter kjøpet til telefonen som gjenopprettet det. Hold begge telefonene logget inn på Cloud Sync, så har begge fortsatt Pro.',
+          a: 'En gjenoppretting i butikken flytter kjøpet til telefonen som gjenopprettet det. La Cloud Sync være på på begge telefonene, så beholder begge Pro.',
         },
         pro_ends: {
           q: 'Hva skjer når Pro utløper?',
@@ -2887,22 +2928,6 @@ const nb = {
         how_fast: {
           q: 'Hvor fort kommer endringer frem til de andre telefonene mine?',
           a: 'Innen noen sekunder mens appen er åpen på begge. Ellers neste gang appen åpnes. Endringer gjort uten nett lastes opp så snart du er på nett igjen.',
-        },
-        shared_pro: {
-          q: 'Trenger et delt regnskap Pro?',
-          a: 'Bare én person i det trenger Pro, eieren eller et hvilket som helst medlem. Hvis ingen i det har Pro, settes det på pause for alle til noen får det. Ingenting slettes.',
-        },
-        shared_free_limits: {
-          q: 'Kan jeg legge til poster i en delt regnskapsbok uten Pro?',
-          a: 'Ja, også når den har mer enn 6 kontoer. Andre grenser i gratisplanen gjelder fortsatt, som å legge til kontoer eller kategorier utover grensen. Be eieren av regnskapsboken gjøre de endringene.',
-        },
-        family_pro: {
-          q: 'Kan familien min bruke Pro-en min?',
-          a: 'Del et regnskap med dem: personer du inviterer, trenger ikke Pro. Hvis du logget inn på kontoen din på telefonen deres, ville de se alle pengedataene dine.',
-        },
-        sign_out_delete: {
-          q: 'Hva skjer hvis jeg logger ut eller sletter kontoen min?',
-          a: 'Når du logger ut, blir dataene dine på denne telefonen, og regnskap som andre har delt med deg, forsvinner fra den til du logger inn igjen. Når du sletter kontoen, slettes skykopien. Regnskap du deler, forsvinner fra alle andres telefoner, og du beholder dem.',
         },
       },
     },
@@ -3328,7 +3353,7 @@ const nb = {
     title: 'Deling',
     share_toggle: 'Del dette regnskapet',
     share_toggle_caption: 'Inviter opptil {{max}} personer. De trenger ikke Pro.',
-    needs_cloud_sync: 'Logg inn på Cloud Sync for å dele et regnskap.',
+    needs_cloud_sync: 'Slå på Cloud Sync for å dele et regnskap.',
     has_shared_albums: 'Dette regnskapet har delte album. Slutt å dele dem først.',
     limit_reached: 'Foreløpig kan du dele opptil {{max}} regnskap.',
     share_failed:
@@ -3350,7 +3375,7 @@ const nb = {
     owner_note: 'Delt av deg. Alle her kan legge til og redigere poster.',
     member_note: 'Delt av {{owner}}. Alle her kan legge til og redigere poster.',
     people: 'Personer',
-    people_signed_out: 'Logg inn på Cloud Sync for å se hvem som er med.',
+    people_signed_out: 'Logg inn for å se hvem som er med.',
     you: 'Deg',
     owner_badge: 'Eier',
     joined_today: 'Ble med i dag',

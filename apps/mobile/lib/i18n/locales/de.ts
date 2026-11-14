@@ -1576,6 +1576,43 @@ const de = {
     profile_name_add: 'Namen hinzufügen',
     profile_edit_name: 'Name bearbeiten',
     profile_edit_photo: 'Foto ändern',
+    account_sign_in: 'Anmelden',
+    account_title: 'Konto',
+    account_a11y_hint: 'Öffnet dein Konto',
+    account_signed_out: 'Nicht angemeldet',
+    account_signed_in_a11y: 'Angemeldet als {{email}}',
+    account_sign_in_prompt:
+      'Melde dich an, um Alben zu teilen und geteilten Haushaltsbüchern beizutreten. Deine Daten bleiben auf diesem Handy, bis du Cloud Sync einschaltest.',
+    account_faq: {
+      what: {
+        q: 'Was bewirkt die Anmeldung?',
+        a: 'Du bekommst ein Konto, mit dem du Alben teilen und Haushaltsbüchern beitreten kannst, die andere mit dir teilen. Deine Daten bleiben auf diesem Handy.',
+      },
+      sync: {
+        q: 'Synchronisiert die Anmeldung meine Daten?',
+        a: 'Nein. Cloud Sync bleibt aus, bis du es unter Einstellungen > Cloud Sync einschaltest. Deine eigenen Daten zu synchronisieren braucht Pro.',
+      },
+      pro: {
+        q: 'Brauche ich Pro, um mich anzumelden?',
+        a: 'Nein. Anmelden, Alben teilen und geteilten Haushaltsbüchern beitreten sind kostenlos. Pro brauchst du, um deine eigenen Daten zu synchronisieren und ein Haushaltsbuch zu teilen.',
+      },
+      shared_pro: {
+        q: 'Braucht ein geteiltes Buch Pro?',
+        a: 'Nur eine Person darin braucht Pro, der Besitzer oder ein beliebiges Mitglied. Hat niemand darin Pro, pausiert es für alle, bis jemand Pro hat. Nichts wird gelöscht.',
+      },
+      shared_free_limits: {
+        q: 'Kann ich ohne Pro Einträge in einem geteilten Kassenbuch anlegen?',
+        a: 'Ja, auch wenn es mehr als 6 Konten hat. Die übrigen Grenzen des kostenlosen Plans gelten dort weiter, etwa für weitere Konten oder Kategorien über die Grenze hinaus. Bitte den Besitzer des Kassenbuchs, diese Änderungen vorzunehmen.',
+      },
+      family_pro: {
+        q: 'Kann meine Familie mein Pro nutzen?',
+        a: 'Teile ein Buch mit ihnen: Personen, die du einlädst, brauchen kein Pro. Würdest du dich auf ihrem Handy bei deinem Konto anmelden, sähen sie alle deine Finanzdaten.',
+      },
+      sign_out_delete: {
+        q: 'Was passiert, wenn ich mich abmelde oder mein Konto lösche?',
+        a: 'Beim Abmelden bleiben deine Daten auf diesem Handy, und Bücher, die andere mit dir geteilt haben, verschwinden davon, bis du dich wieder anmeldest. Beim Löschen deines Kontos wird die Cloud-Kopie gelöscht. Bücher, die du teilst, verschwinden von den Handys aller anderen, und du behältst sie.',
+      },
+    },
     stat_days: 'Tage erfasst',
     stat_transactions: 'Erfasst',
     stat_this_month: 'Dieser Monat',
@@ -2827,7 +2864,7 @@ const de = {
     tile_label: 'Cloud Sync',
     hero_title: 'Sync auf allen Handys',
     hero_body:
-      'Du hast Pro auf einem anderen Handy? Melde dich hier an, um es auch auf diesem freizuschalten.',
+      'Pro auf einem anderen Handy? Melde dich an und schalte Cloud Sync ein, um es auch hier freizuschalten.',
     continue_apple: 'Mit Apple fortfahren',
     continue_google: 'Mit Google fortfahren',
     continue_email: 'Mit E-Mail fortfahren',
@@ -2878,11 +2915,14 @@ const de = {
       'Das Pro deines Kontos gilt für bis zu 5 Handys, und alle 5 Plätze sind belegt. Melde dich auf einem Handy, das du nicht mehr nutzt, von Cloud Sync ab (ein Handy, das 30 Tage lang nicht genutzt wird, gibt seinen Platz ebenfalls frei). Oder hol dir Pro auf diesem Handy.',
     needs_pro_title: 'Sync braucht Pro',
     needs_pro_body:
-      'Du bist angemeldet. Hol dir Pro, um mit dem Sync zu beginnen. Pro auf einem anderen Handy gekauft? Melde dich auch dort bei Cloud Sync an, dann wird es hier freigeschaltet.',
+      'Du bist angemeldet. Hol dir Pro, um mit dem Synchronisieren zu beginnen. Pro auf einem anderen Handy gekauft? Schalte dort auch Cloud Sync ein, dann wird es hier freigeschaltet.',
     tile_on: 'An',
     profile_off: 'Aus',
     profile_paused: 'Pausiert',
-    profile_needs_pro: 'Pro nötig',
+    off_title: 'Cloud Sync ist aus',
+    off_body:
+      'Du bist angemeldet. Schalte Cloud Sync ein, um deine Daten zu sichern und deine Handys synchron zu halten.',
+    turn_on: 'Cloud Sync einschalten',
     profile_a11y_label: 'Cloud Sync, %{status}',
     profile_a11y_hint: 'Öffnet Cloud Sync',
     errors: {
@@ -2909,17 +2949,17 @@ const de = {
     faq: {
       title: 'Fragen',
       items: {
-        sign_in_without_pro: {
-          q: 'Brauche ich Pro, um mich anzumelden?',
-          a: 'Nein. Jeder kann sich anmelden. Für den Sync deiner eigenen Daten brauchst du Pro, aber Bücher, die andere mit dir teilen, werden auch ohne Pro synchronisiert.',
+        needs_pro: {
+          q: 'Braucht Cloud Sync Pro?',
+          a: 'Ja, deine eigenen Daten zu synchronisieren braucht Pro. Alben und Haushaltsbücher, die andere mit dir teilen, werden auch ohne synchronisiert.',
         },
         pro_other_phone: {
           q: 'Ich habe Pro auf einem anderen Handy. Warum nicht auf diesem?',
-          a: 'Melde dich auf beiden Handys mit demselben Konto bei Cloud Sync an. Sobald dieses Handy synchronisiert hat, hat es auch Pro, solange ein Handy im Konto Pro hat, auch eines, das du nicht mehr nutzt. Das Pro deines Kontos gilt für bis zu 5 Handys.',
+          a: 'Melde dich auf beiden Handys mit demselben Konto an und schalte Cloud Sync ein. Sobald dieses Handy synchronisiert hat, hat es auch Pro, solange ein Handy des Kontos Pro hat, auch eins, das du nicht mehr nutzt. Das Pro deines Kontos reicht für bis zu 5 Handys.',
         },
         restore_moved_pro: {
           q: 'Ich habe meinen Kauf wiederhergestellt, und mein anderes Handy hat Pro verloren.',
-          a: 'Eine Wiederherstellung im Store verschiebt den Kauf auf das Handy, das ihn wiederhergestellt hat. Bleib auf beiden Handys bei Cloud Sync angemeldet, dann haben beide weiter Pro.',
+          a: 'Eine Wiederherstellung im Store verschiebt den Kauf auf das Handy, das ihn wiederhergestellt hat. Lass Cloud Sync auf beiden Handys an, dann behalten beide Pro.',
         },
         pro_ends: {
           q: 'Was passiert, wenn Pro abläuft?',
@@ -2928,22 +2968,6 @@ const de = {
         how_fast: {
           q: 'Wie schnell kommen Änderungen auf meinen anderen Handys an?',
           a: 'Innerhalb weniger Sekunden, wenn die App auf beiden geöffnet ist. Sonst beim nächsten Öffnen der App. Offline gemachte Änderungen werden hochgeladen, sobald du wieder online bist.',
-        },
-        shared_pro: {
-          q: 'Braucht ein geteiltes Buch Pro?',
-          a: 'Nur eine Person darin braucht Pro, der Besitzer oder ein beliebiges Mitglied. Hat niemand darin Pro, pausiert es für alle, bis jemand Pro hat. Nichts wird gelöscht.',
-        },
-        shared_free_limits: {
-          q: 'Kann ich ohne Pro Einträge in einem geteilten Kassenbuch anlegen?',
-          a: 'Ja, auch wenn es mehr als 6 Konten hat. Die übrigen Grenzen des kostenlosen Plans gelten dort weiter, etwa für weitere Konten oder Kategorien über die Grenze hinaus. Bitte den Besitzer des Kassenbuchs, diese Änderungen vorzunehmen.',
-        },
-        family_pro: {
-          q: 'Kann meine Familie mein Pro nutzen?',
-          a: 'Teile ein Buch mit ihnen: Personen, die du einlädst, brauchen kein Pro. Würdest du dich auf ihrem Handy bei deinem Konto anmelden, sähen sie alle deine Finanzdaten.',
-        },
-        sign_out_delete: {
-          q: 'Was passiert, wenn ich mich abmelde oder mein Konto lösche?',
-          a: 'Beim Abmelden bleiben deine Daten auf diesem Handy, und Bücher, die andere mit dir geteilt haben, verschwinden davon, bis du dich wieder anmeldest. Beim Löschen deines Kontos wird die Cloud-Kopie gelöscht. Bücher, die du teilst, verschwinden von den Handys aller anderen, und du behältst sie.',
         },
       },
     },
@@ -3378,7 +3402,7 @@ const de = {
     title: 'Teilen',
     share_toggle: 'Dieses Buch teilen',
     share_toggle_caption: 'Lade bis zu {{max}} Personen ein. Sie brauchen kein Pro.',
-    needs_cloud_sync: 'Melde dich bei Cloud Sync an, um ein Buch zu teilen.',
+    needs_cloud_sync: 'Schalte Cloud Sync ein, um ein Haushaltsbuch zu teilen.',
     has_shared_albums: 'Dieses Buch enthält geteilte Alben. Beende zuerst deren Freigabe.',
     limit_reached: 'Du kannst vorerst bis zu {{max}} Bücher teilen.',
     share_failed:
@@ -3400,7 +3424,7 @@ const de = {
     owner_note: 'Von dir geteilt. Alle hier können Einträge hinzufügen und bearbeiten.',
     member_note: 'Geteilt von {{owner}}. Alle hier können Einträge hinzufügen und bearbeiten.',
     people: 'Personen',
-    people_signed_out: 'Melde dich bei Cloud Sync an, um zu sehen, wer dabei ist.',
+    people_signed_out: 'Melde dich an, um zu sehen, wer dabei ist.',
     you: 'Du',
     owner_badge: 'Eigentümer',
     joined_today: 'Heute beigetreten',

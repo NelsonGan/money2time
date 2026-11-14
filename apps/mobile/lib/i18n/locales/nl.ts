@@ -1572,6 +1572,43 @@ const nl = {
     profile_name_add: 'Voeg je naam toe',
     profile_edit_name: 'Naam bewerken',
     profile_edit_photo: 'Foto wijzigen',
+    account_sign_in: 'Inloggen',
+    account_title: 'Account',
+    account_a11y_hint: 'Opent je account',
+    account_signed_out: 'Niet ingelogd',
+    account_signed_in_a11y: 'Ingelogd als {{email}}',
+    account_sign_in_prompt:
+      'Log in om albums te delen en mee te doen met gedeelde grootboeken. Je gegevens blijven op deze telefoon tot je Cloud Sync aanzet.',
+    account_faq: {
+      what: {
+        q: 'Wat doet inloggen?',
+        a: 'Je krijgt een account om albums te delen en mee te doen met grootboeken die anderen met je delen. Je gegevens blijven op deze telefoon.',
+      },
+      sync: {
+        q: 'Synchroniseert inloggen mijn gegevens?',
+        a: 'Nee. Cloud Sync blijft uit tot je het aanzet via Instellingen > Cloud Sync. Je eigen gegevens synchroniseren vraagt Pro.',
+      },
+      pro: {
+        q: 'Heb ik Pro nodig om in te loggen?',
+        a: 'Nee. Inloggen, albums delen en meedoen met gedeelde grootboeken is gratis. Pro is voor het synchroniseren van je eigen gegevens en het delen van een grootboek.',
+      },
+      shared_pro: {
+        q: 'Heeft een gedeeld boek Pro nodig?',
+        a: 'Maar één persoon erin heeft Pro nodig, de eigenaar of een willekeurig lid. Heeft niemand erin Pro, dan pauzeert het voor iedereen tot iemand het heeft. Er wordt niets verwijderd.',
+      },
+      shared_free_limits: {
+        q: 'Kan ik zonder Pro boekingen toevoegen aan een gedeeld kasboek?',
+        a: 'Ja, ook als het meer dan 6 rekeningen heeft. De andere limieten van het gratis plan blijven gelden, zoals rekeningen of categorieën toevoegen boven de limiet. Vraag de eigenaar van het kasboek om die wijzigingen te doen.',
+      },
+      family_pro: {
+        q: 'Kan mijn gezin mijn Pro gebruiken?',
+        a: 'Deel een boek met ze: mensen die je uitnodigt, hebben geen Pro nodig. Als je op hun telefoon aanmeldt met je account, zien ze al je geldgegevens.',
+      },
+      sign_out_delete: {
+        q: 'Wat als ik me afmeld of mijn account verwijder?',
+        a: 'Als je je afmeldt, blijven je gegevens op deze telefoon, en boeken die anderen met je hebben gedeeld, verdwijnen ervan tot je je weer aanmeldt. Als je je account verwijdert, wordt de cloudkopie gewist. Boeken die je deelt, verdwijnen van de telefoons van alle anderen, en jij houdt ze.',
+      },
+    },
     stat_days: 'Dagen bijgehouden',
     stat_transactions: 'Vastgelegd',
     stat_this_month: 'Deze maand',
@@ -2818,7 +2855,7 @@ const nl = {
     tile_label: 'Cloud Sync',
     hero_title: 'Sync op al je telefoons',
     hero_body:
-      'Heb je Pro op een andere telefoon? Meld je hier aan om het ook op deze te ontgrendelen.',
+      'Pro op een andere telefoon? Log in en zet Cloud Sync aan om het hier ook te ontgrendelen.',
     continue_apple: 'Doorgaan met Apple',
     continue_google: 'Doorgaan met Google',
     continue_email: 'Doorgaan met e-mail',
@@ -2869,11 +2906,14 @@ const nl = {
       'Het Pro van je account geldt voor maximaal 5 telefoons, en alle 5 plekken zijn bezet. Meld je af bij Cloud Sync op een telefoon die je niet meer gebruikt (een telefoon die 30 dagen niet is gebruikt, maakt zijn plek ook vrij). Of neem Pro op deze telefoon.',
     needs_pro_title: 'Synchroniseren vereist Pro',
     needs_pro_body:
-      'Je bent aangemeld. Neem Pro om te beginnen met synchroniseren. Pro gekocht op een andere telefoon? Meld je daar ook aan bij Cloud Sync, dan wordt het hier ontgrendeld.',
+      'Je bent ingelogd. Neem Pro om te beginnen met synchroniseren. Pro gekocht op een andere telefoon? Zet daar ook Cloud Sync aan, dan wordt het hier ontgrendeld.',
     tile_on: 'Aan',
     profile_off: 'Uit',
     profile_paused: 'Gepauzeerd',
-    profile_needs_pro: 'Pro nodig',
+    off_title: 'Cloud Sync staat uit',
+    off_body:
+      'Je bent ingelogd. Zet Cloud Sync aan om een back-up van je gegevens te maken en je telefoons gelijk te houden.',
+    turn_on: 'Cloud Sync aanzetten',
     profile_a11y_label: 'Cloud Sync, %{status}',
     profile_a11y_hint: 'Opent Cloud Sync',
     errors: {
@@ -2900,17 +2940,17 @@ const nl = {
     faq: {
       title: 'Vragen',
       items: {
-        sign_in_without_pro: {
-          q: 'Heb ik Pro nodig om me aan te melden?',
-          a: 'Nee. Iedereen kan zich aanmelden. Je eigen gegevens synchroniseren vraagt Pro, maar boeken die anderen met je delen, synchroniseren ook zonder.',
+        needs_pro: {
+          q: 'Heeft Cloud Sync Pro nodig?',
+          a: 'Ja, je eigen gegevens synchroniseren vraagt Pro. Albums en grootboeken die anderen met je delen, synchroniseren ook zonder.',
         },
         pro_other_phone: {
           q: 'Ik heb Pro op een andere telefoon. Waarom niet op deze?',
-          a: 'Meld je op beide telefoons met hetzelfde account aan bij Cloud Sync. Zodra deze telefoon heeft gesynchroniseerd, heeft hij ook Pro, zolang een telefoon op het account Pro heeft, ook een die je niet meer gebruikt. Het Pro van je account geldt voor maximaal 5 telefoons.',
+          a: 'Log op beide telefoons in met hetzelfde account en zet Cloud Sync aan. Zodra deze telefoon heeft gesynchroniseerd, is hij ook Pro zolang een telefoon van het account Pro heeft, ook een die je niet meer gebruikt. De Pro van je account geldt voor maximaal 5 telefoons.',
         },
         restore_moved_pro: {
           q: 'Ik heb mijn aankoop hersteld en mijn andere telefoon is Pro kwijt.',
-          a: 'Herstellen via de store verplaatst de aankoop naar de telefoon die hem heeft hersteld. Blijf op beide telefoons aangemeld bij Cloud Sync, dan houden ze allebei Pro.',
+          a: 'Een herstel in de store verplaatst de aankoop naar de telefoon die hem herstelde. Laat Cloud Sync op beide telefoons aan staan, dan blijven ze allebei Pro.',
         },
         pro_ends: {
           q: 'Wat gebeurt er als Pro afloopt?',
@@ -2919,22 +2959,6 @@ const nl = {
         how_fast: {
           q: 'Hoe snel komen wijzigingen op mijn andere telefoons aan?',
           a: 'Binnen een paar seconden als de app op allebei open is. Anders de volgende keer dat de app opengaat. Offline wijzigingen gaan omhoog zodra je weer online bent.',
-        },
-        shared_pro: {
-          q: 'Heeft een gedeeld boek Pro nodig?',
-          a: 'Maar één persoon erin heeft Pro nodig, de eigenaar of een willekeurig lid. Heeft niemand erin Pro, dan pauzeert het voor iedereen tot iemand het heeft. Er wordt niets verwijderd.',
-        },
-        shared_free_limits: {
-          q: 'Kan ik zonder Pro boekingen toevoegen aan een gedeeld kasboek?',
-          a: 'Ja, ook als het meer dan 6 rekeningen heeft. De andere limieten van het gratis plan blijven gelden, zoals rekeningen of categorieën toevoegen boven de limiet. Vraag de eigenaar van het kasboek om die wijzigingen te doen.',
-        },
-        family_pro: {
-          q: 'Kan mijn gezin mijn Pro gebruiken?',
-          a: 'Deel een boek met ze: mensen die je uitnodigt, hebben geen Pro nodig. Als je op hun telefoon aanmeldt met je account, zien ze al je geldgegevens.',
-        },
-        sign_out_delete: {
-          q: 'Wat als ik me afmeld of mijn account verwijder?',
-          a: 'Als je je afmeldt, blijven je gegevens op deze telefoon, en boeken die anderen met je hebben gedeeld, verdwijnen ervan tot je je weer aanmeldt. Als je je account verwijdert, wordt de cloudkopie gewist. Boeken die je deelt, verdwijnen van de telefoons van alle anderen, en jij houdt ze.',
         },
       },
     },
@@ -3366,7 +3390,7 @@ const nl = {
     title: 'Delen',
     share_toggle: 'Dit boek delen',
     share_toggle_caption: 'Nodig tot {{max}} mensen uit. Ze hebben geen Pro nodig.',
-    needs_cloud_sync: 'Meld je aan bij Cloud Sync om een boek te delen.',
+    needs_cloud_sync: 'Zet Cloud Sync aan om een grootboek te delen.',
     has_shared_albums: 'Dit boek heeft gedeelde albums. Stop eerst met het delen daarvan.',
     limit_reached: 'Je kunt voorlopig tot {{max}} boeken delen.',
     share_failed:
@@ -3388,7 +3412,7 @@ const nl = {
     owner_note: 'Gedeeld door jou. Iedereen hier kan posten toevoegen en bewerken.',
     member_note: 'Gedeeld door {{owner}}. Iedereen hier kan posten toevoegen en bewerken.',
     people: 'Mensen',
-    people_signed_out: 'Meld je aan bij Cloud Sync om te zien wie erin zit.',
+    people_signed_out: 'Log in om te zien wie erin zit.',
     you: 'Jij',
     owner_badge: 'Eigenaar',
     joined_today: 'Vandaag lid geworden',

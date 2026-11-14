@@ -1528,6 +1528,43 @@ const en = {
     profile_name_add: 'Add your name',
     profile_edit_name: 'Edit name',
     profile_edit_photo: 'Change photo',
+    account_sign_in: 'Sign in',
+    account_title: 'Account',
+    account_a11y_hint: 'Opens your account',
+    account_signed_out: 'Not signed in',
+    account_signed_in_a11y: 'Signed in as {{email}}',
+    account_sign_in_prompt:
+      'Sign in to share albums and join shared ledgers. Your data stays on this phone until you turn on Cloud Sync.',
+    account_faq: {
+      what: {
+        q: 'What does signing in do?',
+        a: 'It gives you an account, so you can share albums and join ledgers others share with you. Your data stays on this phone.',
+      },
+      sync: {
+        q: 'Does signing in sync my data?',
+        a: 'No. Cloud Sync stays off until you turn it on in Settings > Cloud Sync. Syncing your own data needs Pro.',
+      },
+      pro: {
+        q: 'Do I need Pro to sign in?',
+        a: 'No. Signing in, sharing albums and joining shared ledgers are free. Pro is for syncing your own data and sharing a ledger.',
+      },
+      shared_pro: {
+        q: 'Does a shared ledger need Pro?',
+        a: 'Only one person in it needs Pro, the owner or any member. If nobody in it has Pro, it pauses for everyone until someone does. Nothing is deleted.',
+      },
+      shared_free_limits: {
+        q: 'Can I add entries to a shared ledger without Pro?',
+        a: "Yes, even when it has more than 6 accounts. Other free plan limits still apply in it, such as adding accounts or categories past the free limit. Ask the ledger's owner to make those changes.",
+      },
+      family_pro: {
+        q: 'Can my family use my Pro?',
+        a: 'Share a ledger with them: people you invite do not need Pro. Signing in to your account on their phone would show them all your money data.',
+      },
+      sign_out_delete: {
+        q: 'What if I sign out or delete my account?',
+        a: "Signing out keeps your data on this phone, and ledgers others shared with you leave it until you sign in again. Deleting your account erases the cloud copy. Ledgers you share leave everyone else's phones, and you keep them.",
+      },
+    },
     stat_days: 'Days tracking',
     stat_transactions: 'Logged',
     stat_this_month: 'This month',
@@ -2779,7 +2816,7 @@ const en = {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
     hero_title: 'Sync across phones',
-    hero_body: 'Have Pro on another phone? Sign in here to unlock it on this one too.',
+    hero_body: 'Have Pro on another phone? Sign in and turn on Cloud Sync to unlock it here too.',
     continue_apple: 'Continue with Apple',
     continue_google: 'Continue with Google',
     continue_email: 'Continue with email',
@@ -2829,11 +2866,14 @@ const en = {
       "Your account's Pro reaches up to 5 phones, and all 5 places are taken. Sign out of Cloud Sync on a phone you no longer use (a phone left unused for 30 days frees its place too). Or get Pro on this phone.",
     needs_pro_title: 'Syncing needs Pro',
     needs_pro_body:
-      "You're signed in. Get Pro to start syncing. Bought Pro on another phone? Sign in to Cloud Sync there too, and it unlocks here.",
+      "You're signed in. Get Pro to start syncing. Bought Pro on another phone? Turn on Cloud Sync there too, and it unlocks here.",
     tile_on: 'On',
     profile_off: 'Off',
     profile_paused: 'Paused',
-    profile_needs_pro: 'Needs Pro',
+    off_title: 'Cloud Sync is off',
+    off_body:
+      "You're signed in. Turn on Cloud Sync to back up your data and keep your phones in sync.",
+    turn_on: 'Turn on Cloud Sync',
     profile_a11y_label: 'Cloud Sync, %{status}',
     profile_a11y_hint: 'Opens Cloud Sync',
     errors: {
@@ -2860,17 +2900,17 @@ const en = {
     faq: {
       title: 'Questions',
       items: {
-        sign_in_without_pro: {
-          q: 'Do I need Pro to sign in?',
-          a: 'No. Anyone can sign in. Syncing your own data needs Pro, but ledgers others share with you sync without it.',
+        needs_pro: {
+          q: 'Does Cloud Sync need Pro?',
+          a: 'Yes, syncing your own data needs Pro. Albums and ledgers others share with you sync without it.',
         },
         pro_other_phone: {
           q: 'I have Pro on another phone. Why not on this one?',
-          a: "Sign in to Cloud Sync with the same account on both phones. Once this phone has synced, it is Pro too, for as long as a phone on the account has Pro, even one you no longer use. Your account's Pro reaches up to 5 phones.",
+          a: "Sign in with the same account on both phones and turn on Cloud Sync. Once this phone has synced, it is Pro too, for as long as a phone on the account has Pro, even one you no longer use. Your account's Pro reaches up to 5 phones.",
         },
         restore_moved_pro: {
           q: 'I restored my purchase and my other phone lost Pro.',
-          a: 'A store restore moves the purchase to the phone that restored it. Keep both phones signed in to Cloud Sync and both stay Pro.',
+          a: 'A store restore moves the purchase to the phone that restored it. Keep Cloud Sync running on both phones and both stay Pro.',
         },
         pro_ends: {
           q: 'What happens when Pro ends?',
@@ -2879,22 +2919,6 @@ const en = {
         how_fast: {
           q: 'How fast do changes reach my other phones?',
           a: 'Within a few seconds while the app is open on both. Otherwise the next time the app opens. Offline changes go up once you are back online.',
-        },
-        shared_pro: {
-          q: 'Does a shared ledger need Pro?',
-          a: 'Only one person in it needs Pro, the owner or any member. If nobody in it has Pro, it pauses for everyone until someone does. Nothing is deleted.',
-        },
-        shared_free_limits: {
-          q: 'Can I add entries to a shared ledger without Pro?',
-          a: "Yes, even when it has more than 6 accounts. Other free plan limits still apply in it, such as adding accounts or categories past the free limit. Ask the ledger's owner to make those changes.",
-        },
-        family_pro: {
-          q: 'Can my family use my Pro?',
-          a: 'Share a ledger with them: people you invite do not need Pro. Signing in to your account on their phone would show them all your money data.',
-        },
-        sign_out_delete: {
-          q: 'What if I sign out or delete my account?',
-          a: "Signing out keeps your data on this phone, and ledgers others shared with you leave it until you sign in again. Deleting your account erases the cloud copy. Ledgers you share leave everyone else's phones, and you keep them.",
         },
       },
     },
@@ -3318,7 +3342,7 @@ const en = {
     title: 'Sharing',
     share_toggle: 'Share this ledger',
     share_toggle_caption: "Invite up to {{max}} people. They don't need Pro.",
-    needs_cloud_sync: 'Sign in to Cloud Sync to share a ledger.',
+    needs_cloud_sync: 'Turn on Cloud Sync to share a ledger.',
     has_shared_albums: 'This ledger has shared albums. Stop sharing them first.',
     limit_reached: 'You can share up to {{max}} ledgers for now.',
     share_failed:
@@ -3339,7 +3363,7 @@ const en = {
     owner_note: 'Shared by you. Everyone here can add and edit entries.',
     member_note: 'Shared by {{owner}}. Everyone here can add and edit entries.',
     people: 'People',
-    people_signed_out: 'Sign in to Cloud Sync to see who is in it.',
+    people_signed_out: 'Sign in to see who is in it.',
     you: 'You',
     owner_badge: 'Owner',
     joined_today: 'Joined today',

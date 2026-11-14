@@ -1564,6 +1564,43 @@ const id = {
     profile_name_add: 'Tambahkan nama Anda',
     profile_edit_name: 'Edit nama',
     profile_edit_photo: 'Ganti foto',
+    account_sign_in: 'Masuk',
+    account_title: 'Akun',
+    account_a11y_hint: 'Membuka akunmu',
+    account_signed_out: 'Belum masuk',
+    account_signed_in_a11y: 'Masuk sebagai {{email}}',
+    account_sign_in_prompt:
+      'Masuk untuk berbagi album dan bergabung ke buku bersama. Datamu tetap di ponsel ini sampai kamu menyalakan Cloud Sync.',
+    account_faq: {
+      what: {
+        q: 'Apa gunanya masuk?',
+        a: 'Kamu mendapat akun untuk berbagi album dan bergabung ke buku yang dibagikan orang lain. Datamu tetap di ponsel ini.',
+      },
+      sync: {
+        q: 'Apakah masuk menyinkronkan dataku?',
+        a: 'Tidak. Cloud Sync tetap mati sampai kamu menyalakannya di Pengaturan > Cloud Sync. Menyinkronkan datamu sendiri butuh Pro.',
+      },
+      pro: {
+        q: 'Apakah perlu Pro untuk masuk?',
+        a: 'Tidak. Masuk, berbagi album, dan bergabung ke buku bersama itu gratis. Pro untuk menyinkronkan datamu sendiri dan membagikan buku.',
+      },
+      shared_pro: {
+        q: 'Apakah buku bersama perlu Pro?',
+        a: 'Hanya satu orang di dalamnya yang perlu Pro, pemilik atau anggota mana pun. Jika tidak ada yang punya Pro, buku itu dijeda untuk semua orang sampai ada yang punya. Tidak ada yang dihapus.',
+      },
+      shared_free_limits: {
+        q: 'Bisakah saya menambah transaksi di buku bersama tanpa Pro?',
+        a: 'Bisa, meskipun buku itu punya lebih dari 6 akun. Batas paket gratis lainnya tetap berlaku, seperti menambah akun atau kategori melebihi batas. Minta pemilik buku untuk melakukan perubahan itu.',
+      },
+      family_pro: {
+        q: 'Bisakah keluargaku memakai Pro-ku?',
+        a: 'Bagikan buku dengan mereka: orang yang kamu undang tidak perlu Pro. Masuk ke akunmu di ponsel mereka akan memperlihatkan semua data keuanganmu kepada mereka.',
+      },
+      sign_out_delete: {
+        q: 'Bagaimana jika aku keluar atau menghapus akun?',
+        a: 'Saat keluar, datamu tetap di ponsel ini, dan buku yang dibagikan orang lain kepadamu hilang dari ponsel ini sampai kamu masuk lagi. Menghapus akun akan menghapus salinan cloud. Buku yang kamu bagikan hilang dari ponsel semua orang lain, dan kamu tetap menyimpannya.',
+      },
+    },
     stat_days: 'Hari melacak',
     stat_transactions: 'Tercatat',
     stat_this_month: 'Bulan ini',
@@ -2797,7 +2834,8 @@ const id = {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
     hero_title: 'Sinkron di semua ponsel',
-    hero_body: 'Punya Pro di ponsel lain? Masuk di sini untuk membukanya juga di ponsel ini.',
+    hero_body:
+      'Punya Pro di ponsel lain? Masuk dan nyalakan Cloud Sync untuk membukanya di sini juga.',
     continue_apple: 'Lanjutkan dengan Apple',
     continue_google: 'Lanjutkan dengan Google',
     continue_email: 'Lanjutkan dengan email',
@@ -2848,11 +2886,14 @@ const id = {
       'Pro di akunmu berlaku hingga 5 ponsel, dan kelima tempatnya sudah terisi. Keluar dari Cloud Sync di ponsel yang sudah tidak kamu pakai (ponsel yang tidak dipakai selama 30 hari juga mengosongkan tempatnya). Atau dapatkan Pro di ponsel ini.',
     needs_pro_title: 'Sinkronisasi butuh Pro',
     needs_pro_body:
-      'Anda sudah masuk. Dapatkan Pro untuk mulai sinkronisasi. Membeli Pro di ponsel lain? Masuk juga ke Cloud Sync di sana, dan Pro akan terbuka di sini.',
+      'Kamu sudah masuk. Dapatkan Pro untuk mulai sinkron. Beli Pro di ponsel lain? Nyalakan Cloud Sync di sana juga, dan Pro terbuka di sini.',
     tile_on: 'Aktif',
     profile_off: 'Mati',
     profile_paused: 'Dijeda',
-    profile_needs_pro: 'Perlu Pro',
+    off_title: 'Cloud Sync mati',
+    off_body:
+      'Kamu sudah masuk. Nyalakan Cloud Sync untuk mencadangkan datamu dan menjaga ponselmu tetap sinkron.',
+    turn_on: 'Nyalakan Cloud Sync',
     profile_a11y_label: 'Cloud Sync, %{status}',
     profile_a11y_hint: 'Membuka Cloud Sync',
     errors: {
@@ -2879,17 +2920,17 @@ const id = {
     faq: {
       title: 'Pertanyaan',
       items: {
-        sign_in_without_pro: {
-          q: 'Apakah aku perlu Pro untuk masuk?',
-          a: 'Tidak. Siapa pun bisa masuk. Menyinkronkan datamu sendiri butuh Pro, tetapi buku yang dibagikan orang lain kepadamu tetap tersinkron tanpa Pro.',
+        needs_pro: {
+          q: 'Apakah Cloud Sync butuh Pro?',
+          a: 'Ya, menyinkronkan datamu sendiri butuh Pro. Album dan buku yang dibagikan orang lain tetap sinkron tanpa Pro.',
         },
         pro_other_phone: {
           q: 'Aku punya Pro di ponsel lain. Kenapa tidak di ponsel ini?',
-          a: 'Masuk ke Cloud Sync dengan akun yang sama di kedua ponsel. Setelah ponsel ini tersinkron, ponsel ini juga Pro, selama ada ponsel di akun itu yang punya Pro, termasuk ponsel yang sudah tidak kamu pakai. Pro di akunmu berlaku hingga 5 ponsel.',
+          a: 'Masuk dengan akun yang sama di kedua ponsel dan nyalakan Cloud Sync. Setelah ponsel ini sinkron, ponsel ini juga Pro selama ada ponsel di akun itu yang Pro, bahkan yang sudah tidak kamu pakai. Pro akunmu berlaku untuk hingga 5 ponsel.',
         },
         restore_moved_pro: {
           q: 'Aku memulihkan pembelian dan ponselku yang lain kehilangan Pro.',
-          a: 'Pemulihan dari toko memindahkan pembelian ke ponsel yang memulihkannya. Biarkan kedua ponsel tetap masuk ke Cloud Sync, dan keduanya tetap Pro.',
+          a: 'Pemulihan di toko memindahkan pembelian ke ponsel yang memulihkannya. Biarkan Cloud Sync menyala di kedua ponsel dan keduanya tetap Pro.',
         },
         pro_ends: {
           q: 'Apa yang terjadi saat Pro berakhir?',
@@ -2898,22 +2939,6 @@ const id = {
         how_fast: {
           q: 'Seberapa cepat perubahan sampai ke ponselku yang lain?',
           a: 'Dalam beberapa detik selama aplikasi terbuka di keduanya. Jika tidak, saat aplikasi dibuka berikutnya. Perubahan saat offline terunggah begitu kamu online lagi.',
-        },
-        shared_pro: {
-          q: 'Apakah buku bersama perlu Pro?',
-          a: 'Hanya satu orang di dalamnya yang perlu Pro, pemilik atau anggota mana pun. Jika tidak ada yang punya Pro, buku itu dijeda untuk semua orang sampai ada yang punya. Tidak ada yang dihapus.',
-        },
-        shared_free_limits: {
-          q: 'Bisakah saya menambah transaksi di buku bersama tanpa Pro?',
-          a: 'Bisa, meskipun buku itu punya lebih dari 6 akun. Batas paket gratis lainnya tetap berlaku, seperti menambah akun atau kategori melebihi batas. Minta pemilik buku untuk melakukan perubahan itu.',
-        },
-        family_pro: {
-          q: 'Bisakah keluargaku memakai Pro-ku?',
-          a: 'Bagikan buku dengan mereka: orang yang kamu undang tidak perlu Pro. Masuk ke akunmu di ponsel mereka akan memperlihatkan semua data keuanganmu kepada mereka.',
-        },
-        sign_out_delete: {
-          q: 'Bagaimana jika aku keluar atau menghapus akun?',
-          a: 'Saat keluar, datamu tetap di ponsel ini, dan buku yang dibagikan orang lain kepadamu hilang dari ponsel ini sampai kamu masuk lagi. Menghapus akun akan menghapus salinan cloud. Buku yang kamu bagikan hilang dari ponsel semua orang lain, dan kamu tetap menyimpannya.',
         },
       },
     },
@@ -3345,7 +3370,7 @@ const id = {
     title: 'Berbagi',
     share_toggle: 'Bagikan buku ini',
     share_toggle_caption: 'Undang hingga {{max}} orang. Mereka tidak perlu Pro.',
-    needs_cloud_sync: 'Masuk ke Cloud Sync untuk membagikan buku.',
+    needs_cloud_sync: 'Nyalakan Cloud Sync untuk membagikan buku.',
     has_shared_albums:
       'Buku ini memiliki album bersama. Hentikan berbagi album itu terlebih dahulu.',
     limit_reached: 'Untuk saat ini Anda bisa membagikan hingga {{max}} buku.',
@@ -3369,7 +3394,7 @@ const id = {
     member_note:
       'Dibagikan oleh {{owner}}. Semua orang di sini bisa menambah dan mengedit catatan.',
     people: 'Orang',
-    people_signed_out: 'Masuk ke Cloud Sync untuk melihat siapa saja anggotanya.',
+    people_signed_out: 'Masuk untuk melihat siapa saja di dalamnya.',
     you: 'Anda',
     owner_badge: 'Pemilik',
     joined_today: 'Bergabung hari ini',

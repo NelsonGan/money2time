@@ -1580,6 +1580,43 @@ const fil = {
     profile_name_add: 'Idagdag ang pangalan mo',
     profile_edit_name: 'I-edit ang pangalan',
     profile_edit_photo: 'Palitan ang litrato',
+    account_sign_in: 'Mag-sign in',
+    account_title: 'Account',
+    account_a11y_hint: 'Binubuksan ang account mo',
+    account_signed_out: 'Hindi naka-sign in',
+    account_signed_in_a11y: 'Naka-sign in bilang {{email}}',
+    account_sign_in_prompt:
+      'Mag-sign in para magbahagi ng mga album at sumali sa mga shared ledger. Mananatili ang data mo sa phone na ito hanggang i-on mo ang Cloud Sync.',
+    account_faq: {
+      what: {
+        q: 'Ano ang nagagawa ng pag-sign in?',
+        a: 'Bibigyan ka nito ng account para makapagbahagi ng mga album at makasali sa mga ledger na ibinabahagi sa iyo. Mananatili ang data mo sa phone na ito.',
+      },
+      sync: {
+        q: 'Sini-sync ba ng pag-sign in ang data ko?',
+        a: 'Hindi. Naka-off ang Cloud Sync hanggang i-on mo ito sa Settings > Cloud Sync. Kailangan ng Pro para i-sync ang sarili mong data.',
+      },
+      pro: {
+        q: 'Kailangan ko ba ng Pro para mag-sign in?',
+        a: 'Hindi. Libre ang pag-sign in, pagbabahagi ng album at pagsali sa mga shared ledger. Para sa pag-sync ng sarili mong data at pagbabahagi ng ledger ang Pro.',
+      },
+      shared_pro: {
+        q: 'Kailangan ba ng Pro ang shared na ledger?',
+        a: 'Isang tao lang dito ang kailangang may Pro, ang may-ari o kahit sinong miyembro. Kapag walang may Pro dito, mapo-pause ito para sa lahat hanggang may magka-Pro. Walang mabubura.',
+      },
+      shared_free_limits: {
+        q: 'Puwede ba akong magdagdag ng entry sa shared ledger nang walang Pro?',
+        a: 'Oo, kahit may higit sa 6 na account ito. Nalalapat pa rin ang ibang limit ng libreng plan, gaya ng pagdagdag ng account o category lampas sa limit. Hilingin sa may-ari ng ledger na gawin ang mga pagbabagong iyon.',
+      },
+      family_pro: {
+        q: 'Puwede bang gamitin ng pamilya ko ang Pro ko?',
+        a: 'Mag-share ng ledger sa kanila: hindi kailangan ng Pro ng mga inimbita mo. Kapag nag-sign in ka sa account mo sa telepono nila, makikita nila ang lahat ng data ng pera mo.',
+      },
+      sign_out_delete: {
+        q: 'Paano kung mag-sign out ako o burahin ang account ko?',
+        a: 'Kapag nag-sign out ka, mananatili ang data mo sa teleponong ito, at mawawala rito ang mga ledger na shine-share sa iyo ng iba hanggang mag-sign in ka ulit. Kapag binura mo ang account mo, mabubura ang cloud copy. Mawawala ang mga ledger na shine-share mo sa mga telepono ng iba, at mananatili ang mga ito sa iyo.',
+      },
+    },
     stat_days: 'Araw na sinusubaybayan',
     stat_transactions: 'Naitala',
     stat_this_month: 'Ngayong buwan',
@@ -2825,7 +2862,7 @@ const fil = {
     tile_label: 'Cloud Sync',
     hero_title: 'I-sync sa lahat ng telepono',
     hero_body:
-      'May Pro ka sa ibang telepono? Mag-sign in dito para ma-unlock din ito sa teleponong ito.',
+      'May Pro ka sa ibang phone? Mag-sign in at i-on ang Cloud Sync para ma-unlock din ito rito.',
     continue_apple: 'Magpatuloy gamit ang Apple',
     continue_google: 'Magpatuloy gamit ang Google',
     continue_email: 'Magpatuloy gamit ang email',
@@ -2876,11 +2913,14 @@ const fil = {
       'Hanggang 5 telepono ang naaabot ng Pro ng account mo, at puno na ang lahat ng 5 puwesto. Mag-sign out sa Cloud Sync sa teleponong hindi mo na ginagamit (nababakante rin ang puwesto ng teleponong 30 araw nang hindi ginagamit). O kumuha ng Pro sa teleponong ito.',
     needs_pro_title: 'Kailangan ng Pro para mag-sync',
     needs_pro_body:
-      'Naka-sign in ka na. Kumuha ng Pro para magsimulang mag-sync. Bumili ng Pro sa ibang telepono? Mag-sign in din sa Cloud Sync doon, at maa-unlock ito dito.',
+      'Naka-sign in ka. Kumuha ng Pro para magsimulang mag-sync. Bumili ng Pro sa ibang phone? I-on din doon ang Cloud Sync, at maa-unlock ito rito.',
     tile_on: 'On',
     profile_off: 'Off',
     profile_paused: 'Naka-pause',
-    profile_needs_pro: 'Kailangan ng Pro',
+    off_title: 'Naka-off ang Cloud Sync',
+    off_body:
+      'Naka-sign in ka. I-on ang Cloud Sync para ma-back up ang data mo at manatiling naka-sync ang mga phone mo.',
+    turn_on: 'I-on ang Cloud Sync',
     profile_a11y_label: 'Cloud Sync, %{status}',
     profile_a11y_hint: 'Binubuksan ang Cloud Sync',
     errors: {
@@ -2907,17 +2947,17 @@ const fil = {
     faq: {
       title: 'Mga tanong',
       items: {
-        sign_in_without_pro: {
-          q: 'Kailangan ko ba ng Pro para mag-sign in?',
-          a: 'Hindi. Kahit sino ay puwedeng mag-sign in. Kailangan ng Pro para i-sync ang sarili mong data, pero nagsi-sync kahit wala nito ang mga ledger na shine-share sa iyo ng iba.',
+        needs_pro: {
+          q: 'Kailangan ba ng Pro ang Cloud Sync?',
+          a: 'Oo, kailangan ng Pro para i-sync ang sarili mong data. Nagsi-sync nang wala nito ang mga album at ledger na ibinabahagi sa iyo.',
         },
         pro_other_phone: {
           q: 'May Pro ako sa ibang telepono. Bakit wala sa teleponong ito?',
-          a: 'Mag-sign in sa Cloud Sync gamit ang parehong account sa dalawang telepono. Kapag nakapag-sync na ang teleponong ito, Pro na rin ito, hangga’t may teleponong may Pro sa account, kahit isang hindi mo na ginagamit. Hanggang 5 telepono ang naaabot ng Pro ng account mo.',
+          a: 'Mag-sign in gamit ang parehong account sa dalawang phone at i-on ang Cloud Sync. Kapag nakapag-sync na ang phone na ito, Pro na rin ito habang may phone sa account na may Pro, kahit hindi mo na ginagamit. Umaabot sa hanggang 5 phone ang Pro ng account mo.',
         },
         restore_moved_pro: {
           q: 'Ni-restore ko ang purchase ko at nawalan ng Pro ang isa ko pang telepono.',
-          a: 'Inililipat ng store restore ang purchase sa teleponong nag-restore nito. Panatilihing naka-sign in sa Cloud Sync ang dalawang telepono at mananatiling Pro ang dalawa.',
+          a: 'Inililipat ng store restore ang binili sa phone na nag-restore nito. Panatilihing naka-on ang Cloud Sync sa dalawang phone at pareho silang mananatiling Pro.',
         },
         pro_ends: {
           q: 'Ano ang mangyayari kapag natapos ang Pro?',
@@ -2926,22 +2966,6 @@ const fil = {
         how_fast: {
           q: 'Gaano kabilis makarating ang mga pagbabago sa iba kong telepono?',
           a: 'Sa loob ng ilang segundo habang bukas ang app sa dalawa. Kung hindi, sa susunod na pagbukas ng app. Maa-upload ang mga pagbabagong ginawa offline kapag online ka na ulit.',
-        },
-        shared_pro: {
-          q: 'Kailangan ba ng Pro ang shared na ledger?',
-          a: 'Isang tao lang dito ang kailangang may Pro, ang may-ari o kahit sinong miyembro. Kapag walang may Pro dito, mapo-pause ito para sa lahat hanggang may magka-Pro. Walang mabubura.',
-        },
-        shared_free_limits: {
-          q: 'Puwede ba akong magdagdag ng entry sa shared ledger nang walang Pro?',
-          a: 'Oo, kahit may higit sa 6 na account ito. Nalalapat pa rin ang ibang limit ng libreng plan, gaya ng pagdagdag ng account o category lampas sa limit. Hilingin sa may-ari ng ledger na gawin ang mga pagbabagong iyon.',
-        },
-        family_pro: {
-          q: 'Puwede bang gamitin ng pamilya ko ang Pro ko?',
-          a: 'Mag-share ng ledger sa kanila: hindi kailangan ng Pro ng mga inimbita mo. Kapag nag-sign in ka sa account mo sa telepono nila, makikita nila ang lahat ng data ng pera mo.',
-        },
-        sign_out_delete: {
-          q: 'Paano kung mag-sign out ako o burahin ang account ko?',
-          a: 'Kapag nag-sign out ka, mananatili ang data mo sa teleponong ito, at mawawala rito ang mga ledger na shine-share sa iyo ng iba hanggang mag-sign in ka ulit. Kapag binura mo ang account mo, mabubura ang cloud copy. Mawawala ang mga ledger na shine-share mo sa mga telepono ng iba, at mananatili ang mga ito sa iyo.',
         },
       },
     },
@@ -3379,7 +3403,7 @@ const fil = {
     title: 'Pag-share',
     share_toggle: 'I-share ang ledger na ito',
     share_toggle_caption: 'Mag-imbita ng hanggang {{max}} tao. Hindi nila kailangan ng Pro.',
-    needs_cloud_sync: 'Mag-sign in sa Cloud Sync para mag-share ng ledger.',
+    needs_cloud_sync: 'I-on ang Cloud Sync para magbahagi ng ledger.',
     has_shared_albums:
       'May mga shared na album ang ledger na ito. Itigil muna ang pag-share sa mga iyon.',
     limit_reached: 'Hanggang {{max}} ledger lang ang puwede mong i-share sa ngayon.',
@@ -3404,7 +3428,7 @@ const fil = {
     owner_note: 'Shinare mo. Puwedeng magdagdag at mag-edit ng entry ang lahat dito.',
     member_note: 'Shinare ni {{owner}}. Puwedeng magdagdag at mag-edit ng entry ang lahat dito.',
     people: 'Mga Tao',
-    people_signed_out: 'Mag-sign in sa Cloud Sync para makita kung sino ang nandito.',
+    people_signed_out: 'Mag-sign in para makita kung sino ang kasali.',
     you: 'Ikaw',
     owner_badge: 'May-ari',
     joined_today: 'Sumali ngayong araw',

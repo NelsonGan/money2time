@@ -16,6 +16,12 @@ export interface StoredSession {
   user: CloudUser;
   /** Set once this phone's data and the cloud copy have been brought together. */
   linked: boolean;
+  /**
+   * Signed in with Cloud Sync off: a sign-in does not start syncing, the user
+   * turns it on (`turnOnSync`). Absent on sessions from before this, which
+   * were syncing or linking.
+   */
+  syncOff?: boolean;
 }
 
 let cached: StoredSession | null | undefined;

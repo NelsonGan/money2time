@@ -1482,6 +1482,43 @@ const zhHant = {
     profile_name_add: '新增你的名字',
     profile_edit_name: '編輯名字',
     profile_edit_photo: '更換照片',
+    account_sign_in: '登入',
+    account_title: '帳號',
+    account_a11y_hint: '開啟你的帳號',
+    account_signed_out: '尚未登入',
+    account_signed_in_a11y: '已登入為 {{email}}',
+    account_sign_in_prompt:
+      '登入後可以分享相簿、加入共用帳本。在你開啟 Cloud Sync 之前，資料只會留在這支手機上。',
+    account_faq: {
+      what: {
+        q: '登入有什麼用？',
+        a: '你會有一個帳號，可以分享相簿，也可以加入別人和你共用的帳本。資料仍留在這支手機上。',
+      },
+      sync: {
+        q: '登入會同步我的資料嗎？',
+        a: '不會。在你到「設定 > Cloud Sync」開啟之前，Cloud Sync 都是關閉的。同步自己的資料需要 Pro。',
+      },
+      pro: {
+        q: '登入需要 Pro 嗎？',
+        a: '不需要。登入、分享相簿和加入共用帳本都是免費的。Pro 用於同步自己的資料和共用帳本。',
+      },
+      shared_pro: {
+        q: '共享帳本需要 Pro 嗎？',
+        a: '帳本裡只要有一個人有 Pro 就行，擁有者或任何成員都可以。如果帳本裡沒人有 Pro，帳本會對所有人暫停，直到有人有 Pro。不會刪除任何東西。',
+      },
+      shared_free_limits: {
+        q: '沒有 Pro 也能在共享帳本裡記帳嗎？',
+        a: '可以，即使帳本超過 6 個帳戶也行。免費版的其他限制仍然適用，例如超出上限新增帳戶或分類。這些變更請讓帳本的擁有者來做。',
+      },
+      family_pro: {
+        q: '家人可以用我的 Pro 嗎？',
+        a: '和他們共享一個帳本：你邀請的人不需要 Pro。在他們的手機上登入你的帳號，會讓他們看到你所有的金錢資料。',
+      },
+      sign_out_delete: {
+        q: '如果我登出或刪除帳號會怎樣？',
+        a: '登出後，你的資料會留在這支手機上，別人共享給你的帳本會從這支手機上移除，直到你再次登入。刪除帳號會清除雲端副本。你共享的帳本會從其他所有人的手機上移除，而你會保留它們。',
+      },
+    },
     stat_days: '記錄天數',
     stat_transactions: '已記錄',
     stat_this_month: '本月',
@@ -2667,7 +2704,7 @@ const zhHant = {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
     hero_title: '多支手機同步',
-    hero_body: '在另一支手機上有 Pro？在這裡登入，這支手機也能解鎖。',
+    hero_body: '在其他手機上有 Pro？登入並開啟 Cloud Sync，這支手機也能解鎖。',
     continue_apple: '透過 Apple 繼續',
     continue_google: '透過 Google 繼續',
     continue_email: '透過電子郵件繼續',
@@ -2717,11 +2754,13 @@ const zhHant = {
       '你帳號的 Pro 最多適用於 5 支手機，而 5 個名額都已用完。請在不再使用的手機上登出 Cloud Sync（30 天未使用的手機也會釋出名額）。或者在這支手機上取得 Pro。',
     needs_pro_title: '同步需要 Pro',
     needs_pro_body:
-      '你已登入。取得 Pro 即可開始同步。在另一支手機上買了 Pro？在那支手機上也登入 Cloud Sync，這裡就會解鎖。',
+      '你已登入。取得 Pro 即可開始同步。在其他手機上買過 Pro？在那支手機上也開啟 Cloud Sync，這裡就會解鎖。',
     tile_on: '開',
     profile_off: '關',
     profile_paused: '已暫停',
-    profile_needs_pro: '需要 Pro',
+    off_title: 'Cloud Sync 已關閉',
+    off_body: '你已登入。開啟 Cloud Sync 即可備份資料，讓多支手機保持同步。',
+    turn_on: '開啟 Cloud Sync',
     profile_a11y_label: 'Cloud Sync，%{status}',
     profile_a11y_hint: '開啟 Cloud Sync',
     errors: {
@@ -2748,17 +2787,17 @@ const zhHant = {
     faq: {
       title: '常見問題',
       items: {
-        sign_in_without_pro: {
-          q: '登入需要 Pro 嗎？',
-          a: '不需要。任何人都能登入。同步你自己的資料需要 Pro，但別人共享給你的帳本不需要 Pro 也能同步。',
+        needs_pro: {
+          q: 'Cloud Sync 需要 Pro 嗎？',
+          a: '需要，同步自己的資料需要 Pro。別人和你共用的相簿和帳本不需要 Pro 也會同步。',
         },
         pro_other_phone: {
           q: '我在另一支手機上有 Pro，為什麼這支沒有？',
-          a: '在兩支手機上用同一個帳號登入 Cloud Sync。這支手機同步完成後也會是 Pro，只要帳號裡有一支手機有 Pro，即使是你不再使用的手機也可以。你帳號的 Pro 最多適用於 5 支手機。',
+          a: '在兩支手機上登入同一個帳號並開啟 Cloud Sync。這支手機同步過一次後，只要帳號裡有一支手機有 Pro，這支也會是 Pro，即使那支手機你已不再使用。帳號的 Pro 最多適用 5 支手機。',
         },
         restore_moved_pro: {
           q: '我回復了購買項目，結果另一支手機的 Pro 不見了。',
-          a: '透過商店回復購買，會把購買項目移到執行回復的那支手機。讓兩支手機都保持登入 Cloud Sync，兩支就都是 Pro。',
+          a: '在商店恢復購買會把購買移到執行恢復的手機。兩支手機都保持 Cloud Sync 開啟，兩支都會維持 Pro。',
         },
         pro_ends: {
           q: 'Pro 到期後會怎樣？',
@@ -2767,22 +2806,6 @@ const zhHant = {
         how_fast: {
           q: '變更多快會到我的其他手機？',
           a: '兩支手機都開著 App 時，幾秒內就會到。否則會在下次開啟 App 時。離線時的變更會在你重新連線後上傳。',
-        },
-        shared_pro: {
-          q: '共享帳本需要 Pro 嗎？',
-          a: '帳本裡只要有一個人有 Pro 就行，擁有者或任何成員都可以。如果帳本裡沒人有 Pro，帳本會對所有人暫停，直到有人有 Pro。不會刪除任何東西。',
-        },
-        shared_free_limits: {
-          q: '沒有 Pro 也能在共享帳本裡記帳嗎？',
-          a: '可以，即使帳本超過 6 個帳戶也行。免費版的其他限制仍然適用，例如超出上限新增帳戶或分類。這些變更請讓帳本的擁有者來做。',
-        },
-        family_pro: {
-          q: '家人可以用我的 Pro 嗎？',
-          a: '和他們共享一個帳本：你邀請的人不需要 Pro。在他們的手機上登入你的帳號，會讓他們看到你所有的金錢資料。',
-        },
-        sign_out_delete: {
-          q: '如果我登出或刪除帳號會怎樣？',
-          a: '登出後，你的資料會留在這支手機上，別人共享給你的帳本會從這支手機上移除，直到你再次登入。刪除帳號會清除雲端副本。你共享的帳本會從其他所有人的手機上移除，而你會保留它們。',
         },
       },
     },
@@ -3194,7 +3217,7 @@ const zhHant = {
     title: '共享',
     share_toggle: '共享這個帳本',
     share_toggle_caption: '最多可邀請 {{max}} 人。他們不需要 Pro。',
-    needs_cloud_sync: '登入 Cloud Sync 即可共享帳本。',
+    needs_cloud_sync: '開啟 Cloud Sync 才能共用帳本。',
     has_shared_albums: '此帳本有共享相簿，請先停止共享這些相簿。',
     limit_reached: '目前最多可共享 {{max}} 個帳本。',
     share_failed: '帳本已建立，但共享沒有開始。請到帳本的「共享」頁面再試一次。',
@@ -3214,7 +3237,7 @@ const zhHant = {
     owner_note: '由你共享。這裡的每個人都能新增和編輯記錄。',
     member_note: '由 {{owner}} 共享。這裡的每個人都能新增和編輯記錄。',
     people: '成員',
-    people_signed_out: '登入 Cloud Sync 即可查看成員。',
+    people_signed_out: '登入即可查看有哪些成員。',
     you: '你',
     owner_badge: '擁有者',
     joined_today: '今天加入',

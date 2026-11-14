@@ -1566,6 +1566,43 @@ const ms = {
     profile_name_add: 'Tambah nama anda',
     profile_edit_name: 'Edit nama',
     profile_edit_photo: 'Tukar foto',
+    account_sign_in: 'Log masuk',
+    account_title: 'Akaun',
+    account_a11y_hint: 'Membuka akaun anda',
+    account_signed_out: 'Belum log masuk',
+    account_signed_in_a11y: 'Log masuk sebagai {{email}}',
+    account_sign_in_prompt:
+      'Log masuk untuk berkongsi album dan menyertai lejar dikongsi. Data anda kekal di telefon ini sehingga anda menghidupkan Cloud Sync.',
+    account_faq: {
+      what: {
+        q: 'Apakah fungsi log masuk?',
+        a: 'Anda mendapat akaun untuk berkongsi album dan menyertai lejar yang dikongsi orang lain dengan anda. Data anda kekal di telefon ini.',
+      },
+      sync: {
+        q: 'Adakah log masuk menyegerakkan data saya?',
+        a: 'Tidak. Cloud Sync kekal mati sehingga anda menghidupkannya di Tetapan > Cloud Sync. Menyegerakkan data anda sendiri memerlukan Pro.',
+      },
+      pro: {
+        q: 'Perlukah Pro untuk log masuk?',
+        a: 'Tidak. Log masuk, berkongsi album dan menyertai lejar dikongsi adalah percuma. Pro untuk menyegerakkan data anda sendiri dan berkongsi lejar.',
+      },
+      shared_pro: {
+        q: 'Adakah buku yang dikongsi memerlukan Pro?',
+        a: 'Hanya seorang di dalamnya perlu ada Pro, pemilik atau mana-mana ahli. Jika tiada sesiapa di dalamnya ada Pro, ia dijeda untuk semua orang sehingga seseorang mendapatkannya. Tiada apa-apa yang dipadam.',
+      },
+      shared_free_limits: {
+        q: 'Bolehkah saya menambah entri dalam lejar kongsi tanpa Pro?',
+        a: 'Boleh, walaupun lejar itu ada lebih daripada 6 akaun. Had pelan percuma yang lain masih terpakai, seperti menambah akaun atau kategori melebihi had. Minta pemilik lejar membuat perubahan itu.',
+      },
+      family_pro: {
+        q: 'Bolehkah keluarga saya menggunakan Pro saya?',
+        a: 'Kongsi buku dengan mereka: orang yang anda jemput tidak perlukan Pro. Log masuk ke akaun anda pada telefon mereka akan menunjukkan semua data kewangan anda kepada mereka.',
+      },
+      sign_out_delete: {
+        q: 'Bagaimana jika saya log keluar atau memadam akaun saya?',
+        a: 'Log keluar mengekalkan data anda pada telefon ini, dan buku yang dikongsi oleh orang lain dengan anda hilang daripadanya sehingga anda log masuk semula. Memadam akaun anda akan memadam salinan awan. Buku yang anda kongsi hilang daripada telefon semua orang lain, dan anda menyimpannya.',
+      },
+    },
     stat_days: 'Hari menjejak',
     stat_transactions: 'Direkod',
     stat_this_month: 'Bulan ini',
@@ -2801,7 +2838,7 @@ const ms = {
     tile_label: 'Cloud Sync',
     hero_title: 'Segerak semua telefon',
     hero_body:
-      'Ada Pro pada telefon lain? Log masuk di sini untuk membukanya pada telefon ini juga.',
+      'Ada Pro di telefon lain? Log masuk dan hidupkan Cloud Sync untuk membukanya di sini juga.',
     continue_apple: 'Teruskan dengan Apple',
     continue_google: 'Teruskan dengan Google',
     continue_email: 'Teruskan dengan e-mel',
@@ -2852,11 +2889,14 @@ const ms = {
       'Pro akaun anda meliputi sehingga 5 telefon, dan kesemua 5 tempat sudah diisi. Log keluar dari Cloud Sync pada telefon yang anda tidak gunakan lagi (telefon yang tidak digunakan selama 30 hari juga mengosongkan tempatnya). Atau dapatkan Pro pada telefon ini.',
     needs_pro_title: 'Penyegerakan memerlukan Pro',
     needs_pro_body:
-      'Anda telah log masuk. Dapatkan Pro untuk mula menyegerak. Membeli Pro pada telefon lain? Log masuk ke Cloud Sync di sana juga, dan ia akan dibuka di sini.',
+      'Anda sudah log masuk. Dapatkan Pro untuk mula menyegerak. Beli Pro di telefon lain? Hidupkan Cloud Sync di sana juga, dan ia dibuka di sini.',
     tile_on: 'Hidup',
     profile_off: 'Mati',
     profile_paused: 'Dijeda',
-    profile_needs_pro: 'Perlu Pro',
+    off_title: 'Cloud Sync dimatikan',
+    off_body:
+      'Anda sudah log masuk. Hidupkan Cloud Sync untuk menyandarkan data anda dan memastikan telefon anda segerak.',
+    turn_on: 'Hidupkan Cloud Sync',
     profile_a11y_label: 'Cloud Sync, %{status}',
     profile_a11y_hint: 'Membuka Cloud Sync',
     errors: {
@@ -2883,17 +2923,17 @@ const ms = {
     faq: {
       title: 'Soalan',
       items: {
-        sign_in_without_pro: {
-          q: 'Adakah saya perlukan Pro untuk log masuk?',
-          a: 'Tidak. Sesiapa sahaja boleh log masuk. Menyegerak data anda sendiri memerlukan Pro, tetapi buku yang dikongsi oleh orang lain dengan anda disegerakkan tanpanya.',
+        needs_pro: {
+          q: 'Adakah Cloud Sync memerlukan Pro?',
+          a: 'Ya, menyegerakkan data anda sendiri memerlukan Pro. Album dan lejar yang dikongsi orang lain dengan anda disegerakkan tanpanya.',
         },
         pro_other_phone: {
           q: 'Saya ada Pro pada telefon lain. Kenapa tidak pada telefon ini?',
-          a: 'Log masuk ke Cloud Sync dengan akaun yang sama pada kedua-dua telefon. Sebaik sahaja telefon ini disegerakkan, ia juga mendapat Pro, selagi ada telefon dalam akaun itu yang mempunyai Pro, termasuk telefon yang anda tidak gunakan lagi. Pro akaun anda meliputi sehingga 5 telefon.',
+          a: 'Log masuk dengan akaun yang sama pada kedua-dua telefon dan hidupkan Cloud Sync. Setelah telefon ini disegerakkan, ia juga Pro selagi ada telefon dalam akaun itu yang Pro, walaupun yang tidak lagi anda guna. Pro akaun anda meliputi sehingga 5 telefon.',
         },
         restore_moved_pro: {
           q: 'Saya memulihkan pembelian dan telefon saya yang lain kehilangan Pro.',
-          a: 'Pemulihan dari kedai memindahkan pembelian ke telefon yang memulihkannya. Biarkan kedua-dua telefon kekal log masuk ke Cloud Sync dan kedua-duanya kekal Pro.',
+          a: 'Pemulihan di kedai memindahkan pembelian ke telefon yang memulihkannya. Biarkan Cloud Sync hidup pada kedua-dua telefon dan kedua-duanya kekal Pro.',
         },
         pro_ends: {
           q: 'Apakah yang berlaku apabila Pro tamat?',
@@ -2902,22 +2942,6 @@ const ms = {
         how_fast: {
           q: 'Berapa cepat perubahan sampai ke telefon saya yang lain?',
           a: 'Dalam beberapa saat semasa apl dibuka pada kedua-duanya. Jika tidak, pada kali seterusnya apl dibuka. Perubahan semasa luar talian dimuat naik sebaik sahaja anda kembali dalam talian.',
-        },
-        shared_pro: {
-          q: 'Adakah buku yang dikongsi memerlukan Pro?',
-          a: 'Hanya seorang di dalamnya perlu ada Pro, pemilik atau mana-mana ahli. Jika tiada sesiapa di dalamnya ada Pro, ia dijeda untuk semua orang sehingga seseorang mendapatkannya. Tiada apa-apa yang dipadam.',
-        },
-        shared_free_limits: {
-          q: 'Bolehkah saya menambah entri dalam lejar kongsi tanpa Pro?',
-          a: 'Boleh, walaupun lejar itu ada lebih daripada 6 akaun. Had pelan percuma yang lain masih terpakai, seperti menambah akaun atau kategori melebihi had. Minta pemilik lejar membuat perubahan itu.',
-        },
-        family_pro: {
-          q: 'Bolehkah keluarga saya menggunakan Pro saya?',
-          a: 'Kongsi buku dengan mereka: orang yang anda jemput tidak perlukan Pro. Log masuk ke akaun anda pada telefon mereka akan menunjukkan semua data kewangan anda kepada mereka.',
-        },
-        sign_out_delete: {
-          q: 'Bagaimana jika saya log keluar atau memadam akaun saya?',
-          a: 'Log keluar mengekalkan data anda pada telefon ini, dan buku yang dikongsi oleh orang lain dengan anda hilang daripadanya sehingga anda log masuk semula. Memadam akaun anda akan memadam salinan awan. Buku yang anda kongsi hilang daripada telefon semua orang lain, dan anda menyimpannya.',
         },
       },
     },
@@ -3347,7 +3371,7 @@ const ms = {
     title: 'Perkongsian',
     share_toggle: 'Kongsi buku ini',
     share_toggle_caption: 'Jemput sehingga {{max}} orang. Mereka tidak perlukan Pro.',
-    needs_cloud_sync: 'Log masuk ke Cloud Sync untuk berkongsi buku.',
+    needs_cloud_sync: 'Hidupkan Cloud Sync untuk berkongsi lejar.',
     has_shared_albums: 'Buku ini mempunyai album kongsi. Hentikan perkongsian album itu dahulu.',
     limit_reached: 'Buat masa ini anda boleh berkongsi sehingga {{max}} buku.',
     share_failed:
@@ -3370,7 +3394,7 @@ const ms = {
     member_note:
       'Dikongsi oleh {{owner}}. Semua orang di sini boleh menambah dan mengedit catatan.',
     people: 'Orang',
-    people_signed_out: 'Log masuk ke Cloud Sync untuk melihat siapa di dalamnya.',
+    people_signed_out: 'Log masuk untuk melihat siapa yang ada di dalamnya.',
     you: 'Anda',
     owner_badge: 'Pemilik',
     joined_today: 'Menyertai hari ini',

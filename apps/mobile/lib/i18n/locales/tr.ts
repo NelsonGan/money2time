@@ -1566,6 +1566,43 @@ const tr = {
     profile_name_add: 'Adını ekle',
     profile_edit_name: 'Adı düzenle',
     profile_edit_photo: 'Fotoğrafı değiştir',
+    account_sign_in: 'Giriş yap',
+    account_title: 'Hesap',
+    account_a11y_hint: 'Hesabını açar',
+    account_signed_out: 'Giriş yapılmadı',
+    account_signed_in_a11y: '{{email}} olarak giriş yapıldı',
+    account_sign_in_prompt:
+      "Albüm paylaşmak ve paylaşılan defterlere katılmak için giriş yap. Cloud Sync'i açana kadar verilerin bu telefonda kalır.",
+    account_faq: {
+      what: {
+        q: 'Giriş yapmak ne işe yarar?',
+        a: 'Bir hesabın olur; albüm paylaşabilir ve başkalarının seninle paylaştığı defterlere katılabilirsin. Verilerin bu telefonda kalır.',
+      },
+      sync: {
+        q: 'Giriş yapmak verilerimi eşitler mi?',
+        a: "Hayır. Ayarlar > Cloud Sync'ten açana kadar Cloud Sync kapalı kalır. Kendi verilerini eşitlemek Pro gerektirir.",
+      },
+      pro: {
+        q: 'Giriş yapmak için Pro gerekir mi?',
+        a: 'Hayır. Giriş yapmak, albüm paylaşmak ve paylaşılan defterlere katılmak ücretsizdir. Pro, kendi verilerini eşitlemek ve defter paylaşmak içindir.',
+      },
+      shared_pro: {
+        q: 'Paylaşılan bir defter için Pro gerekir mi?',
+        a: "İçindeki tek bir kişinin Pro'su olması yeter: sahibi ya da herhangi bir üye. İçinde kimsenin Pro'su yoksa biri Pro alana kadar herkes için duraklar. Hiçbir şey silinmez.",
+      },
+      shared_free_limits: {
+        q: 'Pro olmadan paylaşılan bir deftere kayıt ekleyebilir miyim?',
+        a: "Evet, 6'dan fazla hesabı olsa bile. Ücretsiz planın diğer sınırları orada da geçerli, örneğin sınırın üzerinde hesap veya kategori eklemek. Bu değişiklikleri defterin sahibinden isteyin.",
+      },
+      family_pro: {
+        q: "Ailem benim Pro'mu kullanabilir mi?",
+        a: "Onlarla bir defter paylaş: davet ettiğin kişilerin Pro'ya ihtiyacı yok. Onların telefonunda kendi hesabına giriş yaparsan tüm para verilerini görürler.",
+      },
+      sign_out_delete: {
+        q: 'Çıkış yaparsam ya da hesabımı silersem ne olur?',
+        a: 'Çıkış yaptığında verilerin bu telefonda kalır, başkalarının seninle paylaştığı defterler ise tekrar giriş yapana kadar bu telefondan kalkar. Hesabını silmek bulut kopyasını siler. Paylaştığın defterler diğer herkesin telefonundan kalkar, sende kalır.',
+      },
+    },
     stat_days: 'Takip günü',
     stat_transactions: 'Kaydedildi',
     stat_this_month: 'Bu ay',
@@ -2793,7 +2830,8 @@ const tr = {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
     hero_title: 'Telefonlar arası senkron',
-    hero_body: "Başka bir telefonda Pro'n mu var? Bu telefonda da açmak için burada giriş yap.",
+    hero_body:
+      "Başka bir telefonda Pro'n mu var? Giriş yapıp Cloud Sync'i açarak burada da kullan.",
     continue_apple: 'Apple ile devam et',
     continue_google: 'Google ile devam et',
     continue_email: 'E-posta ile devam et',
@@ -2843,11 +2881,14 @@ const tr = {
       "Hesabının Pro'su en fazla 5 telefona ulaşır ve 5 yerin hepsi dolu. Artık kullanmadığın bir telefonda Cloud Sync'ten çıkış yap (30 gün kullanılmayan bir telefon da yerini boşaltır). Ya da bu telefonda Pro al.",
     needs_pro_title: 'Senkron için Pro gerekli',
     needs_pro_body:
-      "Giriş yaptın. Senkronu başlatmak için Pro al. Pro'yu başka bir telefonda mı aldın? Orada da Cloud Sync'e giriş yap, burada da açılsın.",
+      "Giriş yaptın. Eşitlemeye başlamak için Pro al. Başka bir telefonda Pro mu aldın? Orada da Cloud Sync'i aç, burada da açılır.",
     tile_on: 'Açık',
     profile_off: 'Kapalı',
     profile_paused: 'Duraklatıldı',
-    profile_needs_pro: 'Pro gerekli',
+    off_title: 'Cloud Sync kapalı',
+    off_body:
+      "Giriş yaptın. Verilerini yedeklemek ve telefonlarını eşit tutmak için Cloud Sync'i aç.",
+    turn_on: "Cloud Sync'i aç",
     profile_a11y_label: 'Cloud Sync, %{status}',
     profile_a11y_hint: "Cloud Sync'i açar",
     errors: {
@@ -2874,17 +2915,17 @@ const tr = {
     faq: {
       title: 'Sorular',
       items: {
-        sign_in_without_pro: {
-          q: 'Giriş yapmak için Pro gerekir mi?',
-          a: 'Hayır. Herkes giriş yapabilir. Kendi verilerini senkronize etmek Pro gerektirir, ama başkalarının seninle paylaştığı defterler Pro olmadan da senkronize olur.',
+        needs_pro: {
+          q: 'Cloud Sync Pro gerektirir mi?',
+          a: 'Evet, kendi verilerini eşitlemek Pro gerektirir. Başkalarının seninle paylaştığı albümler ve defterler Pro olmadan da eşitlenir.',
         },
         pro_other_phone: {
           q: 'Başka bir telefonda Pro var. Neden bu telefonda yok?',
-          a: "İki telefonda da aynı hesapla Cloud Sync'e giriş yap. Bu telefon senkronize olunca, hesaptaki bir telefonda Pro olduğu sürece bu telefon da Pro olur, artık kullanmadığın bir telefon olsa bile. Hesabının Pro'su en fazla 5 telefona ulaşır.",
+          a: "İki telefonda da aynı hesapla giriş yap ve Cloud Sync'i aç. Bu telefon bir kez eşitlendiğinde, hesaptaki bir telefonda Pro olduğu sürece bu da Pro olur, artık kullanmadığın bir telefon olsa bile. Hesabının Pro'su 5 telefona kadar geçerlidir.",
         },
         restore_moved_pro: {
           q: "Satın alımımı geri yükledim ve diğer telefonum Pro'yu kaybetti.",
-          a: "Mağazadan geri yükleme, satın alımı geri yükleyen telefona taşır. İki telefonda da Cloud Sync'te oturumu açık tut, ikisi de Pro kalır.",
+          a: "Mağazadan geri yükleme, satın alımı geri yükleyen telefona taşır. İki telefonda da Cloud Sync'i açık tut, ikisi de Pro kalır.",
         },
         pro_ends: {
           q: 'Pro bitince ne olur?',
@@ -2893,22 +2934,6 @@ const tr = {
         how_fast: {
           q: 'Değişiklikler diğer telefonlarıma ne kadar hızlı ulaşır?',
           a: 'Uygulama ikisinde de açıkken birkaç saniye içinde. Değilse uygulama bir sonraki açıldığında. Çevrimdışıyken yapılan değişiklikler tekrar çevrimiçi olunca yüklenir.',
-        },
-        shared_pro: {
-          q: 'Paylaşılan bir defter için Pro gerekir mi?',
-          a: "İçindeki tek bir kişinin Pro'su olması yeter: sahibi ya da herhangi bir üye. İçinde kimsenin Pro'su yoksa biri Pro alana kadar herkes için duraklar. Hiçbir şey silinmez.",
-        },
-        shared_free_limits: {
-          q: 'Pro olmadan paylaşılan bir deftere kayıt ekleyebilir miyim?',
-          a: "Evet, 6'dan fazla hesabı olsa bile. Ücretsiz planın diğer sınırları orada da geçerli, örneğin sınırın üzerinde hesap veya kategori eklemek. Bu değişiklikleri defterin sahibinden isteyin.",
-        },
-        family_pro: {
-          q: "Ailem benim Pro'mu kullanabilir mi?",
-          a: "Onlarla bir defter paylaş: davet ettiğin kişilerin Pro'ya ihtiyacı yok. Onların telefonunda kendi hesabına giriş yaparsan tüm para verilerini görürler.",
-        },
-        sign_out_delete: {
-          q: 'Çıkış yaparsam ya da hesabımı silersem ne olur?',
-          a: 'Çıkış yaptığında verilerin bu telefonda kalır, başkalarının seninle paylaştığı defterler ise tekrar giriş yapana kadar bu telefondan kalkar. Hesabını silmek bulut kopyasını siler. Paylaştığın defterler diğer herkesin telefonundan kalkar, sende kalır.',
         },
       },
     },
@@ -3334,7 +3359,7 @@ const tr = {
     title: 'Paylaşım',
     share_toggle: 'Bu defteri paylaş',
     share_toggle_caption: "En fazla {{max}} kişiyi davet et. Pro'ya ihtiyaçları yok.",
-    needs_cloud_sync: "Defter paylaşmak için Cloud Sync'e giriş yap.",
+    needs_cloud_sync: "Defter paylaşmak için Cloud Sync'i aç.",
     has_shared_albums: 'Bu defterde paylaşılan albümler var. Önce onları paylaşmayı bırakın.',
     limit_reached: 'Şimdilik en fazla {{max}} defter paylaşabilirsin.',
     share_failed:
@@ -3356,7 +3381,7 @@ const tr = {
     owner_note: 'Sen paylaştın. Buradaki herkes kayıt ekleyip düzenleyebilir.',
     member_note: 'Paylaşan: {{owner}}. Buradaki herkes kayıt ekleyip düzenleyebilir.',
     people: 'Kişiler',
-    people_signed_out: "Kimlerin olduğunu görmek için Cloud Sync'e giriş yap.",
+    people_signed_out: 'Kimlerin olduğunu görmek için giriş yap.',
     you: 'Sen',
     owner_badge: 'Sahip',
     joined_today: 'Bugün katıldı',

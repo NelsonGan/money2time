@@ -49,7 +49,8 @@ export function CloudSyncPromptHost({
     if (!allowed || !hasPendingCloudSyncPrompt() || showingRef.current) return;
     // Nothing to offer when sync is unavailable or already on.
     if (status === 'unavailable' || status === 'loading') return;
-    if (status !== 'signedOut') {
+    // Signed out, or signed in with Cloud Sync off: both still have it to turn on.
+    if (status !== 'signedOut' && status !== 'syncOff') {
       takePendingCloudSyncPrompt();
       return;
     }

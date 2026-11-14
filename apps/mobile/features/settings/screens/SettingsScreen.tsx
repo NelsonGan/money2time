@@ -50,6 +50,7 @@ import { useIsFlatIcons } from '~/context/ThemeContext';
 import { useCloudSyncEnabled, useCloudSyncProTag } from '~/features/cloudSync/CloudSyncContext';
 import { CloudSyncProfilePill } from '~/features/cloudSync/components/CloudSyncProfilePill';
 import { CloudSyncTileBadge } from '~/features/cloudSync/components/CloudSyncTileBadge';
+import { ProfileAccountRow } from '~/features/cloudSync/components/ProfileAccountRow';
 import { LedgerSwitcherCard } from '~/features/ledgers/components/LedgerSwitcherCard';
 import { LedgerSwitcherSheet } from '~/features/ledgers/components/LedgerSwitcherSheet';
 import { riceCalAnnouncement } from '~/features/news/announcements/017_ricecal';
@@ -94,6 +95,7 @@ interface SettingsScreenProps {
   onOpenDataManagement: () => void;
   onOpenWebDashboard: () => void;
   onOpenCloudSync: () => void;
+  onOpenAccount: () => void;
   onOpenNews: () => void;
   onOpenTutorials: () => void;
   onOpenStatementImport: () => void;
@@ -130,6 +132,7 @@ export function SettingsScreen({
   onOpenDataManagement,
   onOpenWebDashboard,
   onOpenCloudSync,
+  onOpenAccount,
   onOpenNews,
   onOpenTutorials,
   onOpenStatementImport,
@@ -440,6 +443,8 @@ export function SettingsScreen({
                   label={I18n.t('settings.stat_this_month')}
                 />
               </View>
+
+              <ProfileAccountRow onOpenAccount={onOpenAccount} />
             </View>
 
             <View className="mt-3">

@@ -26,23 +26,17 @@ export function signOutAskingFirst(
   });
 }
 
-/** Sign out and Delete account, each behind a confirmation. Shown whenever signed in. */
-export function AccountActions() {
+/**
+ * Sign out behind its confirmation, for every place that offers it (the Cloud
+ * Sync screen, the Settings profile card). `busy` is true while it runs.
+ */
+export function useConfirmSignOut(): { confirm: () => void; busy: boolean } {
   const sync = useCloudSync();
-  const colors = useThemeColors();
   const sharedLedgers = useSharedLedgers();
-  const ownsShared = sharedLedgers.some((ledger) => ledger.role === 'owner');
   const joinedShared = sharedLedgers.some((ledger) => ledger.role === 'member');
-  const [busy, setBusy] = useState<'sign_out' | 'delete' | null>(null);
+  const [busy, setBusy] = useState(false);
 
-  const run = (action: 'sign_out' | 'delete', work: () => Promise<void>) => {
-    setBusy(action);
-    work()
-      .catch((e: unknown) => Alert.alert(I18n.t('cloud_sync.title'), errorMessage(e)))
-      .finally(() => setBusy(null));
-  };
-
-  const confirmSignOut = () =>
+  const confirm = () =>
     Alert.alert(
       I18n.t('cloud_sync.sign_out_confirm_title'),
       joinedShared
@@ -52,11 +46,28 @@ export function AccountActions() {
         { text: I18n.t('common.cancel'), style: 'cancel' },
         {
           text: I18n.t('cloud_sync.sign_out'),
-          onPress: () =>
-            run('sign_out', () => signOutAskingFirst(sync.signOut).then(() => undefined)),
+          onPress: () => {
+            setBusy(true);
+            signOutAskingFirst(sync.signOut)
+              .catch((e: unknown) => Alert.alert(I18n.t('cloud_sync.title'), errorMessage(e)))
+              .finally(() => setBusy(false));
+          },
         },
       ],
     );
+
+  return { confirm, busy };
+}
+
+/** Sign out and Delete account, each behind a confirmation. Shown whenever signed in. */
+export function AccountActions() {
+  const sync = useCloudSync();
+  const colors = useThemeColors();
+  const sharedLedgers = useSharedLedgers();
+  const ownsShared = sharedLedgers.some((ledger) => ledger.role === 'owner');
+  const signOut = useConfirmSignOut();
+  const [deleting, setDeleting] = useState(false);
+  const busy = signOut.busy ? 'sign_out' : deleting ? 'delete' : null;
 
   const confirmDelete = () =>
     Alert.alert(
@@ -69,7 +80,13 @@ export function AccountActions() {
         {
           text: I18n.t('cloud_sync.delete_confirm_cta'),
           style: 'destructive',
-          onPress: () => run('delete', sync.deleteAccount),
+          onPress: () => {
+            setDeleting(true);
+            sync
+              .deleteAccount()
+              .catch((e: unknown) => Alert.alert(I18n.t('cloud_sync.title'), errorMessage(e)))
+              .finally(() => setDeleting(false));
+          },
         },
       ],
     );
@@ -86,7 +103,7 @@ export function AccountActions() {
         }
         label={I18n.t('cloud_sync.sign_out')}
         disabled={busy !== null}
-        onPress={confirmSignOut}
+        onPress={signOut.confirm}
       />
       <View style={{ height: StyleSheet.hairlineWidth, backgroundColor: colors.border }} />
       <ActionRow

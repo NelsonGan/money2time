@@ -1561,6 +1561,43 @@ const it = {
     profile_name_add: 'Aggiungi il tuo nome',
     profile_edit_name: 'Modifica nome',
     profile_edit_photo: 'Cambia foto',
+    account_sign_in: 'Accedi',
+    account_title: 'Account',
+    account_a11y_hint: 'Apre il tuo account',
+    account_signed_out: 'Accesso non effettuato',
+    account_signed_in_a11y: 'Accesso effettuato come {{email}}',
+    account_sign_in_prompt:
+      'Accedi per condividere album e unirti ai registri condivisi. I tuoi dati restano su questo telefono finché non attivi Cloud Sync.',
+    account_faq: {
+      what: {
+        q: 'A cosa serve accedere?',
+        a: 'Ti dà un account per condividere album e unirti ai registri che altri condividono con te. I tuoi dati restano su questo telefono.',
+      },
+      sync: {
+        q: 'Accedere sincronizza i miei dati?',
+        a: 'No. Cloud Sync resta disattivato finché non lo attivi in Impostazioni > Cloud Sync. Sincronizzare i tuoi dati richiede Pro.',
+      },
+      pro: {
+        q: 'Serve Pro per accedere?',
+        a: 'No. Accedere, condividere album e unirti ai registri condivisi è gratis. Pro serve a sincronizzare i tuoi dati e condividere un registro.',
+      },
+      shared_pro: {
+        q: 'Un registro condiviso richiede Pro?',
+        a: 'Basta che una sola persona del registro abbia Pro, il proprietario o qualsiasi membro. Se nessuno ha Pro, va in pausa per tutti finché qualcuno non lo ha. Non viene eliminato nulla.',
+      },
+      shared_free_limits: {
+        q: 'Posso aggiungere movimenti a un registro condiviso senza Pro?',
+        a: 'Sì, anche se ha più di 6 conti. Gli altri limiti del piano gratuito restano validi, come aggiungere conti o categorie oltre il limite. Chiedi al proprietario del registro di fare queste modifiche.',
+      },
+      family_pro: {
+        q: 'La mia famiglia può usare il mio Pro?',
+        a: 'Condividi un registro con loro: le persone che inviti non hanno bisogno di Pro. Accedere al tuo account sul loro telefono mostrerebbe loro tutti i tuoi dati finanziari.',
+      },
+      sign_out_delete: {
+        q: 'Cosa succede se esco o elimino l’account?',
+        a: 'Se esci, i tuoi dati restano su questo telefono e i registri che altri hanno condiviso con te spariscono finché non accedi di nuovo. Eliminare l’account cancella la copia cloud. I registri che condividi spariscono dai telefoni di tutti gli altri, e tu li tieni.',
+      },
+    },
     stat_days: 'Giorni di tracciamento',
     stat_transactions: 'Registrate',
     stat_this_month: 'Questo mese',
@@ -2799,7 +2836,7 @@ const it = {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
     hero_title: 'Sync su tutti i telefoni',
-    hero_body: 'Hai Pro su un altro telefono? Accedi qui per sbloccarlo anche su questo.',
+    hero_body: 'Hai Pro su un altro telefono? Accedi e attiva Cloud Sync per sbloccarlo anche qui.',
     continue_apple: 'Continua con Apple',
     continue_google: 'Continua con Google',
     continue_email: 'Continua con email',
@@ -2850,11 +2887,14 @@ const it = {
       'Il Pro del tuo account arriva fino a 5 telefoni, e tutti e 5 i posti sono occupati. Esci da Cloud Sync su un telefono che non usi più (anche un telefono inutilizzato per 30 giorni libera il suo posto). Oppure prendi Pro su questo telefono.',
     needs_pro_title: 'La sincronizzazione richiede Pro',
     needs_pro_body:
-      "Hai effettuato l'accesso. Passa a Pro per iniziare a sincronizzare. Hai acquistato Pro su un altro telefono? Accedi a Cloud Sync anche lì e verrà sbloccato qui.",
+      'Hai effettuato l’accesso. Passa a Pro per iniziare a sincronizzare. Hai comprato Pro su un altro telefono? Attiva Cloud Sync anche lì e si sblocca qui.',
     tile_on: 'Attivo',
     profile_off: 'Disattivo',
     profile_paused: 'In pausa',
-    profile_needs_pro: 'Serve Pro',
+    off_title: 'Cloud Sync è disattivato',
+    off_body:
+      'Hai effettuato l’accesso. Attiva Cloud Sync per fare il backup dei dati e tenere sincronizzati i tuoi telefoni.',
+    turn_on: 'Attiva Cloud Sync',
     profile_a11y_label: 'Cloud Sync, %{status}',
     profile_a11y_hint: 'Apre Cloud Sync',
     errors: {
@@ -2881,17 +2921,17 @@ const it = {
     faq: {
       title: 'Domande',
       items: {
-        sign_in_without_pro: {
-          q: 'Serve Pro per accedere?',
-          a: 'No. Chiunque può accedere. Sincronizzare i tuoi dati richiede Pro, ma i registri che altri condividono con te si sincronizzano anche senza.',
+        needs_pro: {
+          q: 'Cloud Sync richiede Pro?',
+          a: 'Sì, sincronizzare i tuoi dati richiede Pro. Album e registri che altri condividono con te si sincronizzano anche senza.',
         },
         pro_other_phone: {
           q: 'Ho Pro su un altro telefono. Perché non su questo?',
-          a: 'Accedi a Cloud Sync con lo stesso account su entrambi i telefoni. Quando questo telefono si sarà sincronizzato, avrà Pro anche lui, finché un telefono dell’account ha Pro, anche uno che non usi più. Il Pro del tuo account arriva fino a 5 telefoni.',
+          a: 'Accedi con lo stesso account su entrambi i telefoni e attiva Cloud Sync. Quando questo telefono si è sincronizzato, è Pro anche lui finché un telefono dell’account ha Pro, anche uno che non usi più. Il Pro del tuo account copre fino a 5 telefoni.',
         },
         restore_moved_pro: {
           q: 'Ho ripristinato l’acquisto e l’altro telefono ha perso Pro.',
-          a: 'Un ripristino dallo store sposta l’acquisto sul telefono che l’ha ripristinato. Tieni entrambi i telefoni collegati a Cloud Sync ed entrambi restano Pro.',
+          a: 'Un ripristino dallo store sposta l’acquisto sul telefono che l’ha ripristinato. Tieni Cloud Sync attivo su entrambi i telefoni e restano Pro tutti e due.',
         },
         pro_ends: {
           q: 'Cosa succede quando Pro scade?',
@@ -2900,22 +2940,6 @@ const it = {
         how_fast: {
           q: 'Quanto ci mettono le modifiche ad arrivare sugli altri telefoni?',
           a: 'Pochi secondi se l’app è aperta su entrambi. Altrimenti alla successiva apertura dell’app. Le modifiche fatte offline vengono caricate appena torni online.',
-        },
-        shared_pro: {
-          q: 'Un registro condiviso richiede Pro?',
-          a: 'Basta che una sola persona del registro abbia Pro, il proprietario o qualsiasi membro. Se nessuno ha Pro, va in pausa per tutti finché qualcuno non lo ha. Non viene eliminato nulla.',
-        },
-        shared_free_limits: {
-          q: 'Posso aggiungere movimenti a un registro condiviso senza Pro?',
-          a: 'Sì, anche se ha più di 6 conti. Gli altri limiti del piano gratuito restano validi, come aggiungere conti o categorie oltre il limite. Chiedi al proprietario del registro di fare queste modifiche.',
-        },
-        family_pro: {
-          q: 'La mia famiglia può usare il mio Pro?',
-          a: 'Condividi un registro con loro: le persone che inviti non hanno bisogno di Pro. Accedere al tuo account sul loro telefono mostrerebbe loro tutti i tuoi dati finanziari.',
-        },
-        sign_out_delete: {
-          q: 'Cosa succede se esco o elimino l’account?',
-          a: 'Se esci, i tuoi dati restano su questo telefono e i registri che altri hanno condiviso con te spariscono finché non accedi di nuovo. Eliminare l’account cancella la copia cloud. I registri che condividi spariscono dai telefoni di tutti gli altri, e tu li tieni.',
         },
       },
     },
@@ -3347,7 +3371,7 @@ const it = {
     title: 'Condivisione',
     share_toggle: 'Condividi questo registro',
     share_toggle_caption: 'Invita fino a {{max}} persone. Non serve Pro.',
-    needs_cloud_sync: 'Accedi a Cloud Sync per condividere un registro.',
+    needs_cloud_sync: 'Attiva Cloud Sync per condividere un registro.',
     has_shared_albums:
       'Questo registro contiene album condivisi. Interrompi prima la loro condivisione.',
     limit_reached: 'Per ora puoi condividere fino a {{max}} registri.',
@@ -3370,7 +3394,7 @@ const it = {
     owner_note: 'Condiviso da te. Tutti qui possono aggiungere e modificare le voci.',
     member_note: 'Condiviso da {{owner}}. Tutti qui possono aggiungere e modificare le voci.',
     people: 'Persone',
-    people_signed_out: 'Accedi a Cloud Sync per vedere chi ne fa parte.',
+    people_signed_out: 'Accedi per vedere chi ne fa parte.',
     you: 'Tu',
     owner_badge: 'Proprietario',
     joined_today: 'Si è unito oggi',

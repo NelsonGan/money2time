@@ -8,7 +8,6 @@ import { I18n } from '~/lib/i18n';
 
 import { useSharedLedgers } from '../../sharedLedgers/hooks/useSharedLedgers';
 import { useCloudSync } from '../CloudSyncContext';
-import { AccountActions } from './AccountActions';
 import { EmailPill } from './EmailPill';
 
 /**
@@ -81,7 +80,6 @@ export function SyncPausedView({
         }
         onPress={() => onOpenProPaywall('cloud_sync')}
       />
-      <AccountActions />
     </View>
   );
 }
