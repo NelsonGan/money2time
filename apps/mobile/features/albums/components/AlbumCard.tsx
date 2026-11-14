@@ -1,7 +1,7 @@
 import { Image } from 'expo-image';
-import { CloudCheck, Menu } from 'lucide-react-native';
+import { Menu } from 'lucide-react-native';
 import { memo, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import Sortable from 'react-native-sortables';
 
@@ -24,11 +24,6 @@ import { AlbumActiveDot } from './AlbumActiveDot';
 
 /** The people a shared album's card shows before "+N". */
 const SHARED_AVATARS = 3;
-/**
- * The shortest cover that keeps the pill above the scrim clear of the reorder
- * handle (the handle's 44pt, the pill's 34pt and the scrim's ~80pt).
- */
-const PILL_MIN_COVER = 160;
 
 interface AlbumCardProps {
   album: Album;
@@ -56,7 +51,7 @@ export const AlbumCard = memo(function AlbumCardImpl({
   // the memo wrapper re-renders this card when `album` or `statsVersion` does.
   const stats = getAlbumStats(album.id);
   // A shared album, kept in step with everyone in it through Cloud Sync: its
-  // people and a cloud over the name, clear of the active dot's corner.
+  // people beside its name.
   const group = useAlbumGroup(album);
   const me = useSelfPerson();
   const shared = group.share !== null;
@@ -69,27 +64,24 @@ export const AlbumCard = memo(function AlbumCardImpl({
 
   // Full-width 2:1 banner.
   const coverHeight = Math.round(width * 0.5);
-  // On a short card the pill would reach the reorder handle: it sits beside it.
-  const compactPill = coverHeight < PILL_MIN_COVER;
-  const sharedPill = shared ? (
+  // A shared album's people, at the end of its name's line: who it is shared
+  // with says it is shared.
+  const sharedAvatars = shared ? (
     <View
       testID="album-card-shared"
       pointerEvents="none"
-      // Over the photo: just above the scrim, so the scrim keeps its height,
-      // or on a short card beside the reorder handle.
-      style={compactPill ? styles.sharedPillTop : styles.sharedPill}
-      className="flex-row items-center rounded-full bg-black/50 py-0.5 pl-0.5 pr-2.5"
+      className="shrink-0 flex-row items-center"
     >
       {group.people.slice(0, SHARED_AVATARS).map((person, index) => (
         <View
           key={person.id ?? 'me'}
           style={{ marginLeft: index === 0 ? 0 : -6 }}
-          className="rounded-full border border-black/40 bg-card"
+          className="rounded-full border-2 border-black/40 bg-card"
         >
           <PersonAvatar
             name={person.name}
             partyKey={person.isSelf ? null : debtPartyKey(person.name)}
-            size={20}
+            size={22}
             imageUri={person.isSelf ? me.avatarUri : null}
           />
         </View>
@@ -99,10 +91,6 @@ export const AlbumCard = memo(function AlbumCardImpl({
           +{group.people.length - SHARED_AVATARS}
         </Text>
       ) : null}
-      <CloudCheck size={14} color="#fff" style={{ marginLeft: 6 }} />
-      <Text variant="caption" className="ml-1 font-semibold text-white">
-        {I18n.t('albums.synced_badge')}
-      </Text>
     </View>
   ) : null;
   const metaLabel =
@@ -145,10 +133,12 @@ export const AlbumCard = memo(function AlbumCardImpl({
           className="absolute inset-x-0 bottom-0 px-4 pb-3 pt-5"
           style={{ backgroundColor: 'rgba(0,0,0,0.52)' }}
         >
-          {sharedPill && !compactPill ? sharedPill : null}
-          <Text variant="caption" numberOfLines={1} className="text-white/80">
-            {album.name}
-          </Text>
+          <View className="flex-row items-center gap-2">
+            <Text variant="caption" numberOfLines={1} className="flex-1 text-white/80">
+              {album.name}
+            </Text>
+            {sharedAvatars}
+          </View>
           {/* Time mode renders a View (icon + text) which has no text baseline,
               so bottom-align it; money mode keeps baseline alignment. */}
           <View
@@ -177,8 +167,6 @@ export const AlbumCard = memo(function AlbumCardImpl({
         </View>
       </Pressable>
 
-      {sharedPill && compactPill ? sharedPill : null}
-
       {/* Active marker — small blinking green dot pinned to the top-right. */}
       {isActive ? (
         <View className="absolute right-3 top-3" pointerEvents="none">
@@ -204,11 +192,4 @@ export const AlbumCard = memo(function AlbumCardImpl({
       </View>
     </Animated.View>
   );
-});
-
-const styles = StyleSheet.create({
-  // 26pt tall (20pt avatars, their border and the padding), 8pt above the scrim.
-  sharedPill: { position: 'absolute', left: 16, top: -34 },
-  // Beside the reorder handle (12pt in, 32pt wide), level with its centre.
-  sharedPillTop: { position: 'absolute', left: 52, top: 15 },
 });
