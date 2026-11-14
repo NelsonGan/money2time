@@ -1529,10 +1529,30 @@ const en = {
     profile_edit_name: 'Edit name',
     profile_edit_photo: 'Change photo',
     account_sign_in: 'Sign in',
+    account_title: 'Account',
+    account_a11y_hint: 'Opens your account',
     account_signed_out: 'Not signed in',
     account_signed_in_a11y: 'Signed in as {{email}}',
     account_sign_in_prompt:
-      "Sign in to sync with Cloud Sync and to share albums and ledgers. You don't need Pro.",
+      'Sign in to share albums and join shared ledgers. Your data stays on this phone until you turn on Cloud Sync.',
+    account_faq: {
+      what: {
+        q: 'What does signing in do?',
+        a: 'It gives you an account, so you can share albums and join ledgers others share with you. Your data stays on this phone.',
+      },
+      sync: {
+        q: 'Does signing in sync my data?',
+        a: 'No. Cloud Sync stays off until you turn it on in Settings > Cloud Sync. Syncing your own data needs Pro.',
+      },
+      pro: {
+        q: 'Do I need Pro to sign in?',
+        a: 'No. Signing in, sharing albums and joining shared ledgers are free. Pro is for syncing your own data and sharing a ledger.',
+      },
+      sign_out: {
+        q: 'How do I sign out?',
+        a: 'Tap Sign out on your profile card in Settings. Your data stays on this phone.',
+      },
+    },
     stat_days: 'Days tracking',
     stat_transactions: 'Logged',
     stat_this_month: 'This month',
@@ -2784,7 +2804,7 @@ const en = {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
     hero_title: 'Sync across phones',
-    hero_body: 'Have Pro on another phone? Sign in here to unlock it on this one too.',
+    hero_body: 'Have Pro on another phone? Sign in and turn on Cloud Sync to unlock it here too.',
     continue_apple: 'Continue with Apple',
     continue_google: 'Continue with Google',
     continue_email: 'Continue with email',
@@ -2838,7 +2858,10 @@ const en = {
     tile_on: 'On',
     profile_off: 'Off',
     profile_paused: 'Paused',
-    profile_needs_pro: 'Needs Pro',
+    off_title: 'Cloud Sync is off',
+    off_body:
+      "You're signed in. Turn on Cloud Sync to back up your data and keep your phones in sync.",
+    turn_on: 'Turn on Cloud Sync',
     profile_a11y_label: 'Cloud Sync, %{status}',
     profile_a11y_hint: 'Opens Cloud Sync',
     errors: {

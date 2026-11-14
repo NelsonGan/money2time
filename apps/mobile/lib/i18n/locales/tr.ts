@@ -1567,10 +1567,30 @@ const tr = {
     profile_edit_name: 'Adı düzenle',
     profile_edit_photo: 'Fotoğrafı değiştir',
     account_sign_in: 'Giriş yap',
+    account_title: 'Hesap',
+    account_a11y_hint: 'Hesabını açar',
     account_signed_out: 'Giriş yapılmadı',
     account_signed_in_a11y: '{{email}} olarak giriş yapıldı',
     account_sign_in_prompt:
-      'Cloud Sync ile eşitlemek, albüm ve defter paylaşmak için giriş yap. Pro gerekmez.',
+      "Albüm paylaşmak ve paylaşılan defterlere katılmak için giriş yap. Cloud Sync'i açana kadar verilerin bu telefonda kalır.",
+    account_faq: {
+      what: {
+        q: 'Giriş yapmak ne işe yarar?',
+        a: 'Bir hesabın olur; albüm paylaşabilir ve başkalarının seninle paylaştığı defterlere katılabilirsin. Verilerin bu telefonda kalır.',
+      },
+      sync: {
+        q: 'Giriş yapmak verilerimi eşitler mi?',
+        a: "Hayır. Ayarlar > Cloud Sync'ten açana kadar Cloud Sync kapalı kalır. Kendi verilerini eşitlemek Pro gerektirir.",
+      },
+      pro: {
+        q: 'Giriş yapmak için Pro gerekir mi?',
+        a: 'Hayır. Giriş yapmak, albüm paylaşmak ve paylaşılan defterlere katılmak ücretsizdir. Pro, kendi verilerini eşitlemek ve defter paylaşmak içindir.',
+      },
+      sign_out: {
+        q: 'Nasıl çıkış yaparım?',
+        a: "Ayarlar'daki profil kartında Çıkış yap'a dokun. Verilerin bu telefonda kalır.",
+      },
+    },
     stat_days: 'Takip günü',
     stat_transactions: 'Kaydedildi',
     stat_this_month: 'Bu ay',
@@ -2798,7 +2818,8 @@ const tr = {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
     hero_title: 'Telefonlar arası senkron',
-    hero_body: "Başka bir telefonda Pro'n mu var? Bu telefonda da açmak için burada giriş yap.",
+    hero_body:
+      "Başka bir telefonda Pro'n mu var? Giriş yapıp Cloud Sync'i açarak burada da kullan.",
     continue_apple: 'Apple ile devam et',
     continue_google: 'Google ile devam et',
     continue_email: 'E-posta ile devam et',
@@ -2852,7 +2873,10 @@ const tr = {
     tile_on: 'Açık',
     profile_off: 'Kapalı',
     profile_paused: 'Duraklatıldı',
-    profile_needs_pro: 'Pro gerekli',
+    off_title: 'Cloud Sync kapalı',
+    off_body:
+      "Giriş yaptın. Verilerini yedeklemek ve telefonlarını eşit tutmak için Cloud Sync'i aç.",
+    turn_on: "Cloud Sync'i aç",
     profile_a11y_label: 'Cloud Sync, %{status}',
     profile_a11y_hint: "Cloud Sync'i açar",
     errors: {

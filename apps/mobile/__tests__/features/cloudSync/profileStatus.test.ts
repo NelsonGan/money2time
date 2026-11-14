@@ -56,13 +56,21 @@ describe('profileSyncState', () => {
     );
   });
 
-  it('tells a paused account from one that never had Pro', () => {
+  it('tells a paused account from one that never synced, which is just off', () => {
     expect(profileSyncState({ ...base, status: 'notPro', linked: true })?.statusKey).toBe(
       'profile_paused',
     );
-    expect(profileSyncState({ ...base, status: 'notPro', linked: false })?.statusKey).toBe(
-      'profile_needs_pro',
-    );
+    expect(profileSyncState({ ...base, status: 'notPro', linked: false })).toEqual({
+      tone: 'off',
+      statusKey: 'profile_off',
+    });
+  });
+
+  it('shows Off when signed in with Cloud Sync off, never Needs Pro', () => {
+    expect(profileSyncState({ ...base, status: 'syncOff' })).toEqual({
+      tone: 'off',
+      statusKey: 'profile_off',
+    });
   });
 
   it('follows the sync while signed in', () => {
@@ -86,6 +94,7 @@ describe('profileSyncState', () => {
     const strings = (en as unknown as { cloud_sync: Record<string, unknown> }).cloud_sync;
     const inputs = [
       { ...base, status: 'signedOut' },
+      { ...base, status: 'syncOff' },
       { ...base, status: 'linking' },
       { ...base, status: 'linking', lastError: 'offline' },
       { ...base, status: 'needsChoice' },

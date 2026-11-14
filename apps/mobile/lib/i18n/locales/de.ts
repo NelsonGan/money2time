@@ -1577,10 +1577,30 @@ const de = {
     profile_edit_name: 'Name bearbeiten',
     profile_edit_photo: 'Foto ändern',
     account_sign_in: 'Anmelden',
+    account_title: 'Konto',
+    account_a11y_hint: 'Öffnet dein Konto',
     account_signed_out: 'Nicht angemeldet',
     account_signed_in_a11y: 'Angemeldet als {{email}}',
     account_sign_in_prompt:
-      'Melde dich an, um mit Cloud Sync zu synchronisieren und Alben und Haushaltsbücher zu teilen. Du brauchst kein Pro.',
+      'Melde dich an, um Alben zu teilen und geteilten Haushaltsbüchern beizutreten. Deine Daten bleiben auf diesem Handy, bis du Cloud Sync einschaltest.',
+    account_faq: {
+      what: {
+        q: 'Was bewirkt die Anmeldung?',
+        a: 'Du bekommst ein Konto, mit dem du Alben teilen und Haushaltsbüchern beitreten kannst, die andere mit dir teilen. Deine Daten bleiben auf diesem Handy.',
+      },
+      sync: {
+        q: 'Synchronisiert die Anmeldung meine Daten?',
+        a: 'Nein. Cloud Sync bleibt aus, bis du es unter Einstellungen > Cloud Sync einschaltest. Deine eigenen Daten zu synchronisieren braucht Pro.',
+      },
+      pro: {
+        q: 'Brauche ich Pro, um mich anzumelden?',
+        a: 'Nein. Anmelden, Alben teilen und geteilten Haushaltsbüchern beitreten sind kostenlos. Pro brauchst du, um deine eigenen Daten zu synchronisieren und ein Haushaltsbuch zu teilen.',
+      },
+      sign_out: {
+        q: 'Wie melde ich mich ab?',
+        a: 'Tippe in den Einstellungen auf deiner Profilkarte auf Abmelden. Deine Daten bleiben auf diesem Handy.',
+      },
+    },
     stat_days: 'Tage erfasst',
     stat_transactions: 'Erfasst',
     stat_this_month: 'Dieser Monat',
@@ -2832,7 +2852,7 @@ const de = {
     tile_label: 'Cloud Sync',
     hero_title: 'Sync auf allen Handys',
     hero_body:
-      'Du hast Pro auf einem anderen Handy? Melde dich hier an, um es auch auf diesem freizuschalten.',
+      'Pro auf einem anderen Handy? Melde dich an und schalte Cloud Sync ein, um es auch hier freizuschalten.',
     continue_apple: 'Mit Apple fortfahren',
     continue_google: 'Mit Google fortfahren',
     continue_email: 'Mit E-Mail fortfahren',
@@ -2887,7 +2907,10 @@ const de = {
     tile_on: 'An',
     profile_off: 'Aus',
     profile_paused: 'Pausiert',
-    profile_needs_pro: 'Pro nötig',
+    off_title: 'Cloud Sync ist aus',
+    off_body:
+      'Du bist angemeldet. Schalte Cloud Sync ein, um deine Daten zu sichern und deine Handys synchron zu halten.',
+    turn_on: 'Cloud Sync einschalten',
     profile_a11y_label: 'Cloud Sync, %{status}',
     profile_a11y_hint: 'Öffnet Cloud Sync',
     errors: {

@@ -15,10 +15,11 @@ import { useConfirmSignOut } from './AccountActions';
 
 /**
  * The account line at the foot of the Settings profile card: who is signed in
- * with a quiet Sign out, or a Sign in link. Hidden in builds without Cloud Sync
+ * (tap for the Account page, where the account is managed) with a quiet Sign
+ * out, or a Sign in link to the same page. Hidden in builds without Cloud Sync
  * and while the session loads, so it never flashes the wrong state.
  */
-export function ProfileAccountRow({ onSignIn }: { onSignIn: () => void }) {
+export function ProfileAccountRow({ onOpenAccount }: { onOpenAccount: () => void }) {
   const enabled = useCloudSyncEnabled();
   const { status, user } = useCloudSync();
   const signOut = useConfirmSignOut();
@@ -36,7 +37,7 @@ export function ProfileAccountRow({ onSignIn }: { onSignIn: () => void }) {
           hitSlop={8}
           onPress={() => {
             void triggerHaptic('selection');
-            onSignIn();
+            onOpenAccount();
           }}
           className="flex-1 flex-row items-center gap-2.5 active:opacity-70"
         >
@@ -55,29 +56,35 @@ export function ProfileAccountRow({ onSignIn }: { onSignIn: () => void }) {
 
   return (
     <Footer>
-      <View
-        className="flex-1 flex-row items-center gap-2.5"
-        accessible
+      <Pressable
+        accessibilityRole="button"
         accessibilityLabel={
-          user?.email ? I18n.t('settings.account_signed_in_a11y', { email: user.email }) : undefined
+          user?.email
+            ? I18n.t('settings.account_signed_in_a11y', { email: user.email })
+            : I18n.t('settings.account_title')
         }
+        accessibilityHint={I18n.t('settings.account_a11y_hint')}
+        testID="settings-profile-account"
+        hitSlop={8}
+        onPress={() => {
+          void triggerHaptic('selection');
+          onOpenAccount();
+        }}
+        className="flex-1 flex-row items-center gap-2.5 active:opacity-70"
       >
         <CircleUserRound size={18} color={colors.textMuted} />
-        {user?.email ? (
-          <Text
-            {...REPLAY_PRIVATE}
-            variant="caption"
-            tone="muted"
-            numberOfLines={1}
-            ellipsizeMode="middle"
-            className="flex-1"
-          >
-            {user.email}
-          </Text>
-        ) : (
-          <View className="flex-1" />
-        )}
-      </View>
+        <Text
+          {...REPLAY_PRIVATE}
+          variant="caption"
+          tone="muted"
+          numberOfLines={1}
+          ellipsizeMode="middle"
+          className="shrink"
+        >
+          {user?.email ?? I18n.t('settings.account_title')}
+        </Text>
+        <ChevronRight size={14} color={colors.textMuted} />
+      </Pressable>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={I18n.t('cloud_sync.sign_out')}

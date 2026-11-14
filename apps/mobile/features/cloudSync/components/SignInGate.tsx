@@ -8,10 +8,13 @@ import { useCloudSync } from '../CloudSyncContext';
 import { KeepDataChoice } from './KeepDataChoice';
 import { SignedOutView } from './SignedOutView';
 
-/** An account is signed in, and past any choice between this phone and the cloud copy. */
+/**
+ * An account is signed in (Cloud Sync on, off or paused), and past any choice
+ * between this phone and the cloud copy.
+ */
 export function useSignedIn(): boolean {
   const { status } = useCloudSync();
-  return status === 'ready' || status === 'notPro';
+  return status === 'ready' || status === 'notPro' || status === 'syncOff';
 }
 
 /**

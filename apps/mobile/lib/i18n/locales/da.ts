@@ -1560,10 +1560,30 @@ const da = {
     profile_edit_name: 'Rediger navn',
     profile_edit_photo: 'Skift billede',
     account_sign_in: 'Log ind',
+    account_title: 'Konto',
+    account_a11y_hint: 'Åbner din konto',
     account_signed_out: 'Ikke logget ind',
     account_signed_in_a11y: 'Logget ind som {{email}}',
     account_sign_in_prompt:
-      'Log ind for at synkronisere med Cloud Sync og dele album og regnskaber. Du behøver ikke Pro.',
+      'Log ind for at dele album og deltage i delte regnskaber. Dine data bliver på telefonen, indtil du slår Cloud Sync til.',
+    account_faq: {
+      what: {
+        q: 'Hvad gør det at logge ind?',
+        a: 'Du får en konto, så du kan dele album og deltage i regnskaber, andre deler med dig. Dine data bliver på telefonen.',
+      },
+      sync: {
+        q: 'Synkroniserer login mine data?',
+        a: 'Nej. Cloud Sync er slået fra, indtil du slår det til under Indstillinger > Cloud Sync. Synkronisering af dine egne data kræver Pro.',
+      },
+      pro: {
+        q: 'Skal jeg have Pro for at logge ind?',
+        a: 'Nej. Login, deling af album og deltagelse i delte regnskaber er gratis. Pro er til at synkronisere dine egne data og dele et regnskab.',
+      },
+      sign_out: {
+        q: 'Hvordan logger jeg ud?',
+        a: 'Tryk på Log ud på dit profilkort i Indstillinger. Dine data bliver på telefonen.',
+      },
+    },
     stat_days: 'Dage sporet',
     stat_transactions: 'Registreret',
     stat_this_month: 'Denne måned',
@@ -2789,7 +2809,8 @@ const da = {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
     hero_title: 'Synk på alle telefoner',
-    hero_body: 'Har du Pro på en anden telefon? Log ind her for også at låse det op på denne.',
+    hero_body:
+      'Har du Pro på en anden telefon? Log ind og slå Cloud Sync til for også at låse det op her.',
     continue_apple: 'Fortsæt med Apple',
     continue_google: 'Fortsæt med Google',
     continue_email: 'Fortsæt med e-mail',
@@ -2843,7 +2864,10 @@ const da = {
     tile_on: 'Til',
     profile_off: 'Fra',
     profile_paused: 'På pause',
-    profile_needs_pro: 'Kræver Pro',
+    off_title: 'Cloud Sync er slået fra',
+    off_body:
+      'Du er logget ind. Slå Cloud Sync til for at sikkerhedskopiere dine data og holde dine telefoner synkroniseret.',
+    turn_on: 'Slå Cloud Sync til',
     profile_a11y_label: 'Cloud Sync, %{status}',
     profile_a11y_hint: 'Åbner Cloud Sync',
     errors: {

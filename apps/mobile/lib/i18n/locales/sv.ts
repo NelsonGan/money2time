@@ -1558,10 +1558,30 @@ const sv = {
     profile_edit_name: 'Redigera namn',
     profile_edit_photo: 'Byt bild',
     account_sign_in: 'Logga in',
+    account_title: 'Konto',
+    account_a11y_hint: 'Öppnar ditt konto',
     account_signed_out: 'Inte inloggad',
     account_signed_in_a11y: 'Inloggad som {{email}}',
     account_sign_in_prompt:
-      'Logga in för att synka med Cloud Sync och dela album och liggare. Du behöver inte Pro.',
+      'Logga in för att dela album och gå med i delade liggare. Dina data stannar på telefonen tills du slår på Cloud Sync.',
+    account_faq: {
+      what: {
+        q: 'Vad gör inloggningen?',
+        a: 'Du får ett konto så att du kan dela album och gå med i liggare som andra delar med dig. Dina data stannar på telefonen.',
+      },
+      sync: {
+        q: 'Synkar inloggningen mina data?',
+        a: 'Nej. Cloud Sync är av tills du slår på det under Inställningar > Cloud Sync. Att synka dina egna data kräver Pro.',
+      },
+      pro: {
+        q: 'Behöver jag Pro för att logga in?',
+        a: 'Nej. Att logga in, dela album och gå med i delade liggare är gratis. Pro är för att synka dina egna data och dela en liggare.',
+      },
+      sign_out: {
+        q: 'Hur loggar jag ut?',
+        a: 'Tryck på Logga ut på ditt profilkort i Inställningar. Dina data stannar på telefonen.',
+      },
+    },
     stat_days: 'Dagar spårade',
     stat_transactions: 'Registrerade',
     stat_this_month: 'Denna månad',
@@ -2791,7 +2811,7 @@ const sv = {
     tile_label: 'Cloud Sync',
     hero_title: 'Synka mellan telefoner',
     hero_body:
-      'Har du Pro på en annan telefon? Logga in här för att låsa upp det på den här också.',
+      'Har du Pro på en annan telefon? Logga in och slå på Cloud Sync för att låsa upp det här också.',
     continue_apple: 'Fortsätt med Apple',
     continue_google: 'Fortsätt med Google',
     continue_email: 'Fortsätt med e-post',
@@ -2846,7 +2866,10 @@ const sv = {
     tile_on: 'På',
     profile_off: 'Av',
     profile_paused: 'Pausad',
-    profile_needs_pro: 'Kräver Pro',
+    off_title: 'Cloud Sync är av',
+    off_body:
+      'Du är inloggad. Slå på Cloud Sync för att säkerhetskopiera dina data och hålla dina telefoner synkade.',
+    turn_on: 'Slå på Cloud Sync',
     profile_a11y_label: 'Cloud Sync, %{status}',
     profile_a11y_hint: 'Öppnar Cloud Sync',
     errors: {

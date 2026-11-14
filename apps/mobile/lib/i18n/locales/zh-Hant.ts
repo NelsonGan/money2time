@@ -1483,9 +1483,30 @@ const zhHant = {
     profile_edit_name: '編輯名字',
     profile_edit_photo: '更換照片',
     account_sign_in: '登入',
+    account_title: '帳號',
+    account_a11y_hint: '開啟你的帳號',
     account_signed_out: '尚未登入',
     account_signed_in_a11y: '已登入為 {{email}}',
-    account_sign_in_prompt: '登入後即可使用 Cloud Sync 同步，並分享相簿和帳本。不需要 Pro。',
+    account_sign_in_prompt:
+      '登入後可以分享相簿、加入共用帳本。在你開啟 Cloud Sync 之前，資料只會留在這支手機上。',
+    account_faq: {
+      what: {
+        q: '登入有什麼用？',
+        a: '你會有一個帳號，可以分享相簿，也可以加入別人和你共用的帳本。資料仍留在這支手機上。',
+      },
+      sync: {
+        q: '登入會同步我的資料嗎？',
+        a: '不會。在你到「設定 > Cloud Sync」開啟之前，Cloud Sync 都是關閉的。同步自己的資料需要 Pro。',
+      },
+      pro: {
+        q: '登入需要 Pro 嗎？',
+        a: '不需要。登入、分享相簿和加入共用帳本都是免費的。Pro 用於同步自己的資料和共用帳本。',
+      },
+      sign_out: {
+        q: '如何登出？',
+        a: '在「設定」的個人資料卡上點「登出」。資料仍留在這支手機上。',
+      },
+    },
     stat_days: '記錄天數',
     stat_transactions: '已記錄',
     stat_this_month: '本月',
@@ -2671,7 +2692,7 @@ const zhHant = {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
     hero_title: '多支手機同步',
-    hero_body: '在另一支手機上有 Pro？在這裡登入，這支手機也能解鎖。',
+    hero_body: '在其他手機上有 Pro？登入並開啟 Cloud Sync，這支手機也能解鎖。',
     continue_apple: '透過 Apple 繼續',
     continue_google: '透過 Google 繼續',
     continue_email: '透過電子郵件繼續',
@@ -2725,7 +2746,9 @@ const zhHant = {
     tile_on: '開',
     profile_off: '關',
     profile_paused: '已暫停',
-    profile_needs_pro: '需要 Pro',
+    off_title: 'Cloud Sync 已關閉',
+    off_body: '你已登入。開啟 Cloud Sync 即可備份資料，讓多支手機保持同步。',
+    turn_on: '開啟 Cloud Sync',
     profile_a11y_label: 'Cloud Sync，%{status}',
     profile_a11y_hint: '開啟 Cloud Sync',
     errors: {

@@ -1565,10 +1565,30 @@ const id = {
     profile_edit_name: 'Edit nama',
     profile_edit_photo: 'Ganti foto',
     account_sign_in: 'Masuk',
+    account_title: 'Akun',
+    account_a11y_hint: 'Membuka akunmu',
     account_signed_out: 'Belum masuk',
     account_signed_in_a11y: 'Masuk sebagai {{email}}',
     account_sign_in_prompt:
-      'Masuk untuk sinkron dengan Cloud Sync dan berbagi album serta buku. Tidak perlu Pro.',
+      'Masuk untuk berbagi album dan bergabung ke buku bersama. Datamu tetap di ponsel ini sampai kamu menyalakan Cloud Sync.',
+    account_faq: {
+      what: {
+        q: 'Apa gunanya masuk?',
+        a: 'Kamu mendapat akun untuk berbagi album dan bergabung ke buku yang dibagikan orang lain. Datamu tetap di ponsel ini.',
+      },
+      sync: {
+        q: 'Apakah masuk menyinkronkan dataku?',
+        a: 'Tidak. Cloud Sync tetap mati sampai kamu menyalakannya di Pengaturan > Cloud Sync. Menyinkronkan datamu sendiri butuh Pro.',
+      },
+      pro: {
+        q: 'Apakah perlu Pro untuk masuk?',
+        a: 'Tidak. Masuk, berbagi album, dan bergabung ke buku bersama itu gratis. Pro untuk menyinkronkan datamu sendiri dan membagikan buku.',
+      },
+      sign_out: {
+        q: 'Bagaimana cara keluar?',
+        a: 'Ketuk Keluar di kartu profilmu di Pengaturan. Datamu tetap di ponsel ini.',
+      },
+    },
     stat_days: 'Hari melacak',
     stat_transactions: 'Tercatat',
     stat_this_month: 'Bulan ini',
@@ -2802,7 +2822,8 @@ const id = {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
     hero_title: 'Sinkron di semua ponsel',
-    hero_body: 'Punya Pro di ponsel lain? Masuk di sini untuk membukanya juga di ponsel ini.',
+    hero_body:
+      'Punya Pro di ponsel lain? Masuk dan nyalakan Cloud Sync untuk membukanya di sini juga.',
     continue_apple: 'Lanjutkan dengan Apple',
     continue_google: 'Lanjutkan dengan Google',
     continue_email: 'Lanjutkan dengan email',
@@ -2857,7 +2878,10 @@ const id = {
     tile_on: 'Aktif',
     profile_off: 'Mati',
     profile_paused: 'Dijeda',
-    profile_needs_pro: 'Perlu Pro',
+    off_title: 'Cloud Sync mati',
+    off_body:
+      'Kamu sudah masuk. Nyalakan Cloud Sync untuk mencadangkan datamu dan menjaga ponselmu tetap sinkron.',
+    turn_on: 'Nyalakan Cloud Sync',
     profile_a11y_label: 'Cloud Sync, %{status}',
     profile_a11y_hint: 'Membuka Cloud Sync',
     errors: {

@@ -1548,10 +1548,30 @@ const ja = {
     profile_edit_name: '名前を編集',
     profile_edit_photo: '写真を変更',
     account_sign_in: 'サインイン',
+    account_title: 'アカウント',
+    account_a11y_hint: 'アカウントを開きます',
     account_signed_out: '未サインイン',
     account_signed_in_a11y: '{{email}} でサインイン中',
     account_sign_in_prompt:
-      'サインインすると Cloud Sync で同期し、アルバムや帳簿を共有できます。Pro は不要です。',
+      'サインインすると、アルバムの共有や共有帳簿への参加ができます。Cloud Sync をオンにするまで、データはこの端末に残ります。',
+    account_faq: {
+      what: {
+        q: 'サインインすると何ができますか？',
+        a: 'アカウントができ、アルバムの共有や、ほかの人が共有した帳簿への参加ができます。データはこの端末に残ります。',
+      },
+      sync: {
+        q: 'サインインするとデータが同期されますか？',
+        a: 'いいえ。設定 > Cloud Sync でオンにするまで、Cloud Sync はオフのままです。自分のデータの同期には Pro が必要です。',
+      },
+      pro: {
+        q: 'サインインに Pro は必要ですか？',
+        a: 'いいえ。サインイン、アルバムの共有、共有帳簿への参加は無料です。Pro は自分のデータの同期と帳簿の共有に使います。',
+      },
+      sign_out: {
+        q: 'サインアウトするには？',
+        a: '設定のプロフィールカードにある「サインアウト」をタップします。データはこの端末に残ります。',
+      },
+    },
     stat_days: '記録日数',
     stat_transactions: '記録済み',
     stat_this_month: '今月',
@@ -2772,7 +2792,7 @@ const ja = {
     tile_label: 'Cloud Sync',
     hero_title: '端末間で同期',
     hero_body:
-      '別のスマホでProをお持ちですか？ここでサインインすると、このスマホでも使えるようになります。',
+      'ほかの端末で Pro をお持ちですか？サインインして Cloud Sync をオンにすると、この端末でも使えます。',
     continue_apple: 'Appleで続ける',
     continue_google: 'Googleで続ける',
     continue_email: 'メールで続ける',
@@ -2826,7 +2846,10 @@ const ja = {
     tile_on: 'オン',
     profile_off: 'オフ',
     profile_paused: '一時停止中',
-    profile_needs_pro: 'Proが必要',
+    off_title: 'Cloud Sync はオフです',
+    off_body:
+      'サインイン済みです。Cloud Sync をオンにすると、データをバックアップして端末間で同期できます。',
+    turn_on: 'Cloud Sync をオンにする',
     profile_a11y_label: 'Cloud Sync、%{status}',
     profile_a11y_hint: 'Cloud Syncを開きます',
     errors: {

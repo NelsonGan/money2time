@@ -1534,10 +1534,30 @@ const ko = {
     profile_edit_name: '이름 편집',
     profile_edit_photo: '사진 변경',
     account_sign_in: '로그인',
+    account_title: '계정',
+    account_a11y_hint: '계정을 엽니다',
     account_signed_out: '로그인 안 됨',
     account_signed_in_a11y: '{{email}}(으)로 로그인됨',
     account_sign_in_prompt:
-      '로그인하면 Cloud Sync로 동기화하고 앨범과 장부를 공유할 수 있어요. Pro가 없어도 돼요.',
+      '로그인하면 앨범을 공유하고 공유 장부에 참여할 수 있어요. Cloud Sync를 켜기 전까지 데이터는 이 휴대폰에만 있어요.',
+    account_faq: {
+      what: {
+        q: '로그인하면 무엇을 할 수 있나요?',
+        a: '계정이 생겨서 앨범을 공유하고, 다른 사람이 공유한 장부에 참여할 수 있어요. 데이터는 이 휴대폰에 남아 있어요.',
+      },
+      sync: {
+        q: '로그인하면 데이터가 동기화되나요?',
+        a: '아니요. 설정 > Cloud Sync에서 켜기 전까지 Cloud Sync는 꺼져 있어요. 내 데이터를 동기화하려면 Pro가 필요해요.',
+      },
+      pro: {
+        q: '로그인하려면 Pro가 필요한가요?',
+        a: '아니요. 로그인, 앨범 공유, 공유 장부 참여는 무료예요. Pro는 내 데이터 동기화와 장부 공유에 필요해요.',
+      },
+      sign_out: {
+        q: '로그아웃은 어떻게 하나요?',
+        a: '설정의 프로필 카드에서 로그아웃을 탭하세요. 데이터는 이 휴대폰에 남아 있어요.',
+      },
+    },
     stat_days: '기록 일수',
     stat_transactions: '기록됨',
     stat_this_month: '이번 달',
@@ -2752,8 +2772,7 @@ const ko = {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
     hero_title: '모든 기기에서 동기화',
-    hero_body:
-      '다른 휴대폰에서 Pro를 사용 중인가요? 여기서 로그인하면 이 휴대폰에서도 잠금 해제됩니다.',
+    hero_body: '다른 휴대폰에 Pro가 있나요? 로그인하고 Cloud Sync를 켜면 여기서도 쓸 수 있어요.',
     continue_apple: 'Apple로 계속하기',
     continue_google: 'Google로 계속하기',
     continue_email: '이메일로 계속하기',
@@ -2807,7 +2826,10 @@ const ko = {
     tile_on: '켜짐',
     profile_off: '꺼짐',
     profile_paused: '일시 중지됨',
-    profile_needs_pro: 'Pro 필요',
+    off_title: 'Cloud Sync 꺼짐',
+    off_body:
+      '로그인되어 있어요. Cloud Sync를 켜면 데이터를 백업하고 휴대폰끼리 동기화할 수 있어요.',
+    turn_on: 'Cloud Sync 켜기',
     profile_a11y_label: 'Cloud Sync, %{status}',
     profile_a11y_hint: 'Cloud Sync를 엽니다',
     errors: {

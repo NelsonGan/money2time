@@ -95,7 +95,7 @@ interface SettingsScreenProps {
   onOpenDataManagement: () => void;
   onOpenWebDashboard: () => void;
   onOpenCloudSync: () => void;
-  onOpenSignIn: () => void;
+  onOpenAccount: () => void;
   onOpenNews: () => void;
   onOpenTutorials: () => void;
   onOpenStatementImport: () => void;
@@ -132,7 +132,7 @@ export function SettingsScreen({
   onOpenDataManagement,
   onOpenWebDashboard,
   onOpenCloudSync,
-  onOpenSignIn,
+  onOpenAccount,
   onOpenNews,
   onOpenTutorials,
   onOpenStatementImport,
@@ -444,7 +444,7 @@ export function SettingsScreen({
                 />
               </View>
 
-              <ProfileAccountRow onSignIn={onOpenSignIn} />
+              <ProfileAccountRow onOpenAccount={onOpenAccount} />
             </View>
 
             <View className="mt-3">

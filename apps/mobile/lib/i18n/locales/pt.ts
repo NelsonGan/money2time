@@ -1568,10 +1568,30 @@ const pt = {
     profile_edit_name: 'Editar nome',
     profile_edit_photo: 'Alterar foto',
     account_sign_in: 'Entrar',
+    account_title: 'Conta',
+    account_a11y_hint: 'Abre a sua conta',
     account_signed_out: 'Sem sessão iniciada',
     account_signed_in_a11y: 'Sessão iniciada como {{email}}',
     account_sign_in_prompt:
-      'Entre para sincronizar com o Cloud Sync e partilhar álbuns e livros. Não precisa do Pro.',
+      'Entre para partilhar álbuns e juntar-se a livros partilhados. Os seus dados ficam neste telemóvel até ativar o Cloud Sync.',
+    account_faq: {
+      what: {
+        q: 'O que faz entrar na conta?',
+        a: 'Dá-lhe uma conta para partilhar álbuns e juntar-se a livros que outros partilham consigo. Os seus dados ficam neste telemóvel.',
+      },
+      sync: {
+        q: 'Entrar sincroniza os meus dados?',
+        a: 'Não. O Cloud Sync fica desligado até o ativar em Definições > Cloud Sync. Sincronizar os seus próprios dados requer Pro.',
+      },
+      pro: {
+        q: 'Preciso de Pro para entrar?',
+        a: 'Não. Entrar, partilhar álbuns e juntar-se a livros partilhados é grátis. O Pro serve para sincronizar os seus próprios dados e partilhar um livro.',
+      },
+      sign_out: {
+        q: 'Como saio da conta?',
+        a: 'Toque em Terminar sessão no cartão de perfil nas Definições. Os seus dados ficam neste telemóvel.',
+      },
+    },
     stat_days: 'Dias a registar',
     stat_transactions: 'Registadas',
     stat_this_month: 'Este mês',
@@ -2807,7 +2827,8 @@ const pt = {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
     hero_title: 'Sincronize seus celulares',
-    hero_body: 'Tem Pro em outro celular? Entre aqui para desbloquear neste também.',
+    hero_body:
+      'Tem Pro noutro telemóvel? Entre e ative o Cloud Sync para o desbloquear aqui também.',
     continue_apple: 'Continuar com a Apple',
     continue_google: 'Continuar com o Google',
     continue_email: 'Continuar com e-mail',
@@ -2862,7 +2883,10 @@ const pt = {
     tile_on: 'Ligado',
     profile_off: 'Desligado',
     profile_paused: 'Pausado',
-    profile_needs_pro: 'Requer Pro',
+    off_title: 'O Cloud Sync está desligado',
+    off_body:
+      'Tem sessão iniciada. Ative o Cloud Sync para fazer cópia dos seus dados e manter os seus telemóveis sincronizados.',
+    turn_on: 'Ativar Cloud Sync',
     profile_a11y_label: 'Cloud Sync, %{status}',
     profile_a11y_hint: 'Abre o Cloud Sync',
     errors: {

@@ -17,6 +17,7 @@ import { KeepDataChoice } from '../components/KeepDataChoice';
 import { LinkingView } from '../components/LinkingView';
 import { SignedOutView } from '../components/SignedOutView';
 import { SyncLoader } from '../components/SyncLoader';
+import { SyncOffView } from '../components/SyncOffView';
 import { SyncPausedView } from '../components/SyncPausedView';
 import { SyncStatusView } from '../components/SyncStatusView';
 
@@ -25,6 +26,7 @@ const VIEWED_KEY = 'm2t.cloudSync.screenViewed.v1';
 /** Analytics values for the status the screen first settles on. */
 const VIEWED_STATUS: Partial<Record<CloudSyncStatus, string>> = {
   signedOut: 'signed_out',
+  syncOff: 'sync_off',
   linking: 'linking',
   needsChoice: 'needs_choice',
   ready: 'ready',
@@ -90,6 +92,9 @@ export function CloudSyncScreen({ onBack, onOpenProPaywall }: CloudSyncScreenPro
     case 'signedOut':
       content = <SignedOutView />;
       break;
+    case 'syncOff':
+      content = <SyncOffView onOpenProPaywall={onOpenProPaywall} />;
+      break;
   }
 
   return (
@@ -106,7 +111,10 @@ export function CloudSyncScreen({ onBack, onOpenProPaywall }: CloudSyncScreenPro
       >
         {content}
         {/* Not while linking or choosing: those screens ask for one thing. */}
-        {sync.status === 'signedOut' || sync.status === 'ready' || sync.status === 'notPro' ? (
+        {sync.status === 'signedOut' ||
+        sync.status === 'syncOff' ||
+        sync.status === 'ready' ||
+        sync.status === 'notPro' ? (
           <CloudSyncFaq />
         ) : null}
       </ScrollView>

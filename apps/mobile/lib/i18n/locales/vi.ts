@@ -1546,10 +1546,30 @@ const vi = {
     profile_edit_name: 'Sửa tên',
     profile_edit_photo: 'Đổi ảnh',
     account_sign_in: 'Đăng nhập',
+    account_title: 'Tài khoản',
+    account_a11y_hint: 'Mở tài khoản của bạn',
     account_signed_out: 'Chưa đăng nhập',
     account_signed_in_a11y: 'Đã đăng nhập: {{email}}',
     account_sign_in_prompt:
-      'Đăng nhập để đồng bộ bằng Cloud Sync và chia sẻ album, sổ chi tiêu. Không cần Pro.',
+      'Đăng nhập để chia sẻ album và tham gia sổ dùng chung. Dữ liệu của bạn vẫn ở trên điện thoại này cho đến khi bạn bật Cloud Sync.',
+    account_faq: {
+      what: {
+        q: 'Đăng nhập để làm gì?',
+        a: 'Bạn có một tài khoản để chia sẻ album và tham gia các sổ người khác chia sẻ với bạn. Dữ liệu của bạn vẫn ở trên điện thoại này.',
+      },
+      sync: {
+        q: 'Đăng nhập có đồng bộ dữ liệu của tôi không?',
+        a: 'Không. Cloud Sync vẫn tắt cho đến khi bạn bật trong Cài đặt > Cloud Sync. Đồng bộ dữ liệu của riêng bạn cần Pro.',
+      },
+      pro: {
+        q: 'Có cần Pro để đăng nhập không?',
+        a: 'Không. Đăng nhập, chia sẻ album và tham gia sổ dùng chung đều miễn phí. Pro dùng để đồng bộ dữ liệu của bạn và chia sẻ sổ.',
+      },
+      sign_out: {
+        q: 'Làm sao để đăng xuất?',
+        a: 'Nhấn Đăng xuất trên thẻ hồ sơ trong Cài đặt. Dữ liệu của bạn vẫn ở trên điện thoại này.',
+      },
+    },
     stat_days: 'Ngày theo dõi',
     stat_transactions: 'Đã ghi',
     stat_this_month: 'Tháng này',
@@ -2771,8 +2791,7 @@ const vi = {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
     hero_title: 'Đồng bộ mọi điện thoại',
-    hero_body:
-      'Đã có Pro trên điện thoại khác? Đăng nhập tại đây để mở khóa trên điện thoại này nữa.',
+    hero_body: 'Có Pro trên điện thoại khác? Đăng nhập và bật Cloud Sync để mở khóa ở đây nữa.',
     continue_apple: 'Tiếp tục với Apple',
     continue_google: 'Tiếp tục với Google',
     continue_email: 'Tiếp tục với email',
@@ -2826,7 +2845,10 @@ const vi = {
     tile_on: 'Bật',
     profile_off: 'Tắt',
     profile_paused: 'Tạm dừng',
-    profile_needs_pro: 'Cần Pro',
+    off_title: 'Cloud Sync đang tắt',
+    off_body:
+      'Bạn đã đăng nhập. Bật Cloud Sync để sao lưu dữ liệu và giữ các điện thoại luôn đồng bộ.',
+    turn_on: 'Bật Cloud Sync',
     profile_a11y_label: 'Cloud Sync, %{status}',
     profile_a11y_hint: 'Mở Cloud Sync',
     errors: {

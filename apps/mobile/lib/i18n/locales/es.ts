@@ -1565,10 +1565,30 @@ const es = {
     profile_edit_name: 'Editar nombre',
     profile_edit_photo: 'Cambiar foto',
     account_sign_in: 'Iniciar sesión',
+    account_title: 'Cuenta',
+    account_a11y_hint: 'Abre tu cuenta',
     account_signed_out: 'Sin iniciar sesión',
     account_signed_in_a11y: 'Sesión iniciada como {{email}}',
     account_sign_in_prompt:
-      'Inicia sesión para sincronizar con Cloud Sync y compartir álbumes y libros. No necesitas Pro.',
+      'Inicia sesión para compartir álbumes y unirte a libros compartidos. Tus datos se quedan en este teléfono hasta que actives Cloud Sync.',
+    account_faq: {
+      what: {
+        q: '¿Qué hace iniciar sesión?',
+        a: 'Te da una cuenta para compartir álbumes y unirte a libros que otros comparten contigo. Tus datos se quedan en este teléfono.',
+      },
+      sync: {
+        q: '¿Iniciar sesión sincroniza mis datos?',
+        a: 'No. Cloud Sync sigue desactivado hasta que lo actives en Ajustes > Cloud Sync. Sincronizar tus propios datos requiere Pro.',
+      },
+      pro: {
+        q: '¿Necesito Pro para iniciar sesión?',
+        a: 'No. Iniciar sesión, compartir álbumes y unirte a libros compartidos es gratis. Pro sirve para sincronizar tus propios datos y compartir un libro.',
+      },
+      sign_out: {
+        q: '¿Cómo cierro sesión?',
+        a: 'Toca Cerrar sesión en tu tarjeta de perfil en Ajustes. Tus datos se quedan en este teléfono.',
+      },
+    },
     stat_days: 'Días registrando',
     stat_transactions: 'Registradas',
     stat_this_month: 'Este mes',
@@ -2806,7 +2826,7 @@ const es = {
     tile_label: 'Cloud Sync',
     hero_title: 'Sincroniza tus teléfonos',
     hero_body:
-      '¿Tienes Pro en otro teléfono? Inicia sesión aquí para desbloquearlo también en este.',
+      '¿Tienes Pro en otro teléfono? Inicia sesión y activa Cloud Sync para desbloquearlo aquí también.',
     continue_apple: 'Continuar con Apple',
     continue_google: 'Continuar con Google',
     continue_email: 'Continuar con correo',
@@ -2861,7 +2881,10 @@ const es = {
     tile_on: 'Activado',
     profile_off: 'Desactivado',
     profile_paused: 'En pausa',
-    profile_needs_pro: 'Requiere Pro',
+    off_title: 'Cloud Sync está desactivado',
+    off_body:
+      'Has iniciado sesión. Activa Cloud Sync para respaldar tus datos y mantener tus teléfonos sincronizados.',
+    turn_on: 'Activar Cloud Sync',
     profile_a11y_label: 'Cloud Sync, %{status}',
     profile_a11y_hint: 'Abre Cloud Sync',
     errors: {

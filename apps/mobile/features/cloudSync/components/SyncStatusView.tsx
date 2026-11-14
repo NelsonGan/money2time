@@ -19,7 +19,6 @@ import { withColorAlpha } from '~/utils/color';
 
 import { useCloudSync } from '../CloudSyncContext';
 import { formatSyncedAt } from '../lib/messages';
-import { AccountActions } from './AccountActions';
 import { CLOUD_SYNC_HAPPY_ART } from './art';
 import { EmailPill } from './EmailPill';
 
@@ -92,8 +91,6 @@ export function SyncStatusView() {
           </Text>
         </Pressable>
       </Card>
-
-      <AccountActions />
     </View>
   );
 }

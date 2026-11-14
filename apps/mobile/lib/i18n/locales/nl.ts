@@ -1573,10 +1573,30 @@ const nl = {
     profile_edit_name: 'Naam bewerken',
     profile_edit_photo: 'Foto wijzigen',
     account_sign_in: 'Inloggen',
+    account_title: 'Account',
+    account_a11y_hint: 'Opent je account',
     account_signed_out: 'Niet ingelogd',
     account_signed_in_a11y: 'Ingelogd als {{email}}',
     account_sign_in_prompt:
-      'Log in om te synchroniseren met Cloud Sync en albums en grootboeken te delen. Je hebt geen Pro nodig.',
+      'Log in om albums te delen en mee te doen met gedeelde grootboeken. Je gegevens blijven op deze telefoon tot je Cloud Sync aanzet.',
+    account_faq: {
+      what: {
+        q: 'Wat doet inloggen?',
+        a: 'Je krijgt een account om albums te delen en mee te doen met grootboeken die anderen met je delen. Je gegevens blijven op deze telefoon.',
+      },
+      sync: {
+        q: 'Synchroniseert inloggen mijn gegevens?',
+        a: 'Nee. Cloud Sync blijft uit tot je het aanzet via Instellingen > Cloud Sync. Je eigen gegevens synchroniseren vraagt Pro.',
+      },
+      pro: {
+        q: 'Heb ik Pro nodig om in te loggen?',
+        a: 'Nee. Inloggen, albums delen en meedoen met gedeelde grootboeken is gratis. Pro is voor het synchroniseren van je eigen gegevens en het delen van een grootboek.',
+      },
+      sign_out: {
+        q: 'Hoe log ik uit?',
+        a: 'Tik op Uitloggen op je profielkaart in Instellingen. Je gegevens blijven op deze telefoon.',
+      },
+    },
     stat_days: 'Dagen bijgehouden',
     stat_transactions: 'Vastgelegd',
     stat_this_month: 'Deze maand',
@@ -2823,7 +2843,7 @@ const nl = {
     tile_label: 'Cloud Sync',
     hero_title: 'Sync op al je telefoons',
     hero_body:
-      'Heb je Pro op een andere telefoon? Meld je hier aan om het ook op deze te ontgrendelen.',
+      'Pro op een andere telefoon? Log in en zet Cloud Sync aan om het hier ook te ontgrendelen.',
     continue_apple: 'Doorgaan met Apple',
     continue_google: 'Doorgaan met Google',
     continue_email: 'Doorgaan met e-mail',
@@ -2878,7 +2898,10 @@ const nl = {
     tile_on: 'Aan',
     profile_off: 'Uit',
     profile_paused: 'Gepauzeerd',
-    profile_needs_pro: 'Pro nodig',
+    off_title: 'Cloud Sync staat uit',
+    off_body:
+      'Je bent ingelogd. Zet Cloud Sync aan om een back-up van je gegevens te maken en je telefoons gelijk te houden.',
+    turn_on: 'Cloud Sync aanzetten',
     profile_a11y_label: 'Cloud Sync, %{status}',
     profile_a11y_hint: 'Opent Cloud Sync',
     errors: {

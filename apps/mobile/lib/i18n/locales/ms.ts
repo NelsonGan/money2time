@@ -1567,10 +1567,30 @@ const ms = {
     profile_edit_name: 'Edit nama',
     profile_edit_photo: 'Tukar foto',
     account_sign_in: 'Log masuk',
+    account_title: 'Akaun',
+    account_a11y_hint: 'Membuka akaun anda',
     account_signed_out: 'Belum log masuk',
     account_signed_in_a11y: 'Log masuk sebagai {{email}}',
     account_sign_in_prompt:
-      'Log masuk untuk menyegerak dengan Cloud Sync dan berkongsi album serta lejar. Anda tidak perlu Pro.',
+      'Log masuk untuk berkongsi album dan menyertai lejar dikongsi. Data anda kekal di telefon ini sehingga anda menghidupkan Cloud Sync.',
+    account_faq: {
+      what: {
+        q: 'Apakah fungsi log masuk?',
+        a: 'Anda mendapat akaun untuk berkongsi album dan menyertai lejar yang dikongsi orang lain dengan anda. Data anda kekal di telefon ini.',
+      },
+      sync: {
+        q: 'Adakah log masuk menyegerakkan data saya?',
+        a: 'Tidak. Cloud Sync kekal mati sehingga anda menghidupkannya di Tetapan > Cloud Sync. Menyegerakkan data anda sendiri memerlukan Pro.',
+      },
+      pro: {
+        q: 'Perlukah Pro untuk log masuk?',
+        a: 'Tidak. Log masuk, berkongsi album dan menyertai lejar dikongsi adalah percuma. Pro untuk menyegerakkan data anda sendiri dan berkongsi lejar.',
+      },
+      sign_out: {
+        q: 'Bagaimana untuk log keluar?',
+        a: 'Ketik Log keluar pada kad profil anda di Tetapan. Data anda kekal di telefon ini.',
+      },
+    },
     stat_days: 'Hari menjejak',
     stat_transactions: 'Direkod',
     stat_this_month: 'Bulan ini',
@@ -2806,7 +2826,7 @@ const ms = {
     tile_label: 'Cloud Sync',
     hero_title: 'Segerak semua telefon',
     hero_body:
-      'Ada Pro pada telefon lain? Log masuk di sini untuk membukanya pada telefon ini juga.',
+      'Ada Pro di telefon lain? Log masuk dan hidupkan Cloud Sync untuk membukanya di sini juga.',
     continue_apple: 'Teruskan dengan Apple',
     continue_google: 'Teruskan dengan Google',
     continue_email: 'Teruskan dengan e-mel',
@@ -2861,7 +2881,10 @@ const ms = {
     tile_on: 'Hidup',
     profile_off: 'Mati',
     profile_paused: 'Dijeda',
-    profile_needs_pro: 'Perlu Pro',
+    off_title: 'Cloud Sync dimatikan',
+    off_body:
+      'Anda sudah log masuk. Hidupkan Cloud Sync untuk menyandarkan data anda dan memastikan telefon anda segerak.',
+    turn_on: 'Hidupkan Cloud Sync',
     profile_a11y_label: 'Cloud Sync, %{status}',
     profile_a11y_hint: 'Membuka Cloud Sync',
     errors: {

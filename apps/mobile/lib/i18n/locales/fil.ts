@@ -1581,10 +1581,30 @@ const fil = {
     profile_edit_name: 'I-edit ang pangalan',
     profile_edit_photo: 'Palitan ang litrato',
     account_sign_in: 'Mag-sign in',
+    account_title: 'Account',
+    account_a11y_hint: 'Binubuksan ang account mo',
     account_signed_out: 'Hindi naka-sign in',
     account_signed_in_a11y: 'Naka-sign in bilang {{email}}',
     account_sign_in_prompt:
-      'Mag-sign in para mag-sync gamit ang Cloud Sync at magbahagi ng mga album at ledger. Hindi mo kailangan ng Pro.',
+      'Mag-sign in para magbahagi ng mga album at sumali sa mga shared ledger. Mananatili ang data mo sa phone na ito hanggang i-on mo ang Cloud Sync.',
+    account_faq: {
+      what: {
+        q: 'Ano ang nagagawa ng pag-sign in?',
+        a: 'Bibigyan ka nito ng account para makapagbahagi ng mga album at makasali sa mga ledger na ibinabahagi sa iyo. Mananatili ang data mo sa phone na ito.',
+      },
+      sync: {
+        q: 'Sini-sync ba ng pag-sign in ang data ko?',
+        a: 'Hindi. Naka-off ang Cloud Sync hanggang i-on mo ito sa Settings > Cloud Sync. Kailangan ng Pro para i-sync ang sarili mong data.',
+      },
+      pro: {
+        q: 'Kailangan ko ba ng Pro para mag-sign in?',
+        a: 'Hindi. Libre ang pag-sign in, pagbabahagi ng album at pagsali sa mga shared ledger. Para sa pag-sync ng sarili mong data at pagbabahagi ng ledger ang Pro.',
+      },
+      sign_out: {
+        q: 'Paano mag-sign out?',
+        a: 'I-tap ang Mag-sign out sa profile card mo sa Settings. Mananatili ang data mo sa phone na ito.',
+      },
+    },
     stat_days: 'Araw na sinusubaybayan',
     stat_transactions: 'Naitala',
     stat_this_month: 'Ngayong buwan',
@@ -2830,7 +2850,7 @@ const fil = {
     tile_label: 'Cloud Sync',
     hero_title: 'I-sync sa lahat ng telepono',
     hero_body:
-      'May Pro ka sa ibang telepono? Mag-sign in dito para ma-unlock din ito sa teleponong ito.',
+      'May Pro ka sa ibang phone? Mag-sign in at i-on ang Cloud Sync para ma-unlock din ito rito.',
     continue_apple: 'Magpatuloy gamit ang Apple',
     continue_google: 'Magpatuloy gamit ang Google',
     continue_email: 'Magpatuloy gamit ang email',
@@ -2885,7 +2905,10 @@ const fil = {
     tile_on: 'On',
     profile_off: 'Off',
     profile_paused: 'Naka-pause',
-    profile_needs_pro: 'Kailangan ng Pro',
+    off_title: 'Naka-off ang Cloud Sync',
+    off_body:
+      'Naka-sign in ka. I-on ang Cloud Sync para ma-back up ang data mo at manatiling naka-sync ang mga phone mo.',
+    turn_on: 'I-on ang Cloud Sync',
     profile_a11y_label: 'Cloud Sync, %{status}',
     profile_a11y_hint: 'Binubuksan ang Cloud Sync',
     errors: {

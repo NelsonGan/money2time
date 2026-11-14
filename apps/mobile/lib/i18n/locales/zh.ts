@@ -1483,9 +1483,30 @@ const zh = {
     profile_edit_name: '编辑名字',
     profile_edit_photo: '更换照片',
     account_sign_in: '登录',
+    account_title: '账号',
+    account_a11y_hint: '打开你的账号',
     account_signed_out: '未登录',
     account_signed_in_a11y: '已登录为 {{email}}',
-    account_sign_in_prompt: '登录后即可使用 Cloud Sync 同步，并分享相册和账本。不需要 Pro。',
+    account_sign_in_prompt:
+      '登录后可以分享相册、加入共享账本。在你开启 Cloud Sync 之前，数据只会留在这部手机上。',
+    account_faq: {
+      what: {
+        q: '登录有什么用？',
+        a: '你会有一个账号，可以分享相册，也可以加入别人和你共享的账本。数据仍留在这部手机上。',
+      },
+      sync: {
+        q: '登录会同步我的数据吗？',
+        a: '不会。在你到“设置 > Cloud Sync”开启之前，Cloud Sync 都是关闭的。同步自己的数据需要 Pro。',
+      },
+      pro: {
+        q: '登录需要 Pro 吗？',
+        a: '不需要。登录、分享相册和加入共享账本都是免费的。Pro 用于同步自己的数据和共享账本。',
+      },
+      sign_out: {
+        q: '如何退出登录？',
+        a: '在“设置”的个人资料卡上点“退出登录”。数据仍留在这部手机上。',
+      },
+    },
     stat_days: '记录天数',
     stat_transactions: '已记录',
     stat_this_month: '本月',
@@ -2671,7 +2692,7 @@ const zh = {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
     hero_title: '多部手机同步',
-    hero_body: '在另一部手机上有 Pro？在这里登录，这部手机也能解锁。',
+    hero_body: '在其他手机上有 Pro？登录并开启 Cloud Sync，这部手机也能解锁。',
     continue_apple: '通过 Apple 继续',
     continue_google: '通过 Google 继续',
     continue_email: '通过邮箱继续',
@@ -2725,7 +2746,9 @@ const zh = {
     tile_on: '开',
     profile_off: '关',
     profile_paused: '已暂停',
-    profile_needs_pro: '需要 Pro',
+    off_title: 'Cloud Sync 已关闭',
+    off_body: '你已登录。开启 Cloud Sync 即可备份数据，让多部手机保持同步。',
+    turn_on: '开启 Cloud Sync',
     profile_a11y_label: 'Cloud Sync，%{status}',
     profile_a11y_hint: '打开 Cloud Sync',
     errors: {

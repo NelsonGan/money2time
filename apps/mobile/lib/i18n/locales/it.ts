@@ -1562,10 +1562,30 @@ const it = {
     profile_edit_name: 'Modifica nome',
     profile_edit_photo: 'Cambia foto',
     account_sign_in: 'Accedi',
+    account_title: 'Account',
+    account_a11y_hint: 'Apre il tuo account',
     account_signed_out: 'Accesso non effettuato',
     account_signed_in_a11y: 'Accesso effettuato come {{email}}',
     account_sign_in_prompt:
-      'Accedi per sincronizzare con Cloud Sync e condividere album e registri. Non serve Pro.',
+      'Accedi per condividere album e unirti ai registri condivisi. I tuoi dati restano su questo telefono finché non attivi Cloud Sync.',
+    account_faq: {
+      what: {
+        q: 'A cosa serve accedere?',
+        a: 'Ti dà un account per condividere album e unirti ai registri che altri condividono con te. I tuoi dati restano su questo telefono.',
+      },
+      sync: {
+        q: 'Accedere sincronizza i miei dati?',
+        a: 'No. Cloud Sync resta disattivato finché non lo attivi in Impostazioni > Cloud Sync. Sincronizzare i tuoi dati richiede Pro.',
+      },
+      pro: {
+        q: 'Serve Pro per accedere?',
+        a: 'No. Accedere, condividere album e unirti ai registri condivisi è gratis. Pro serve a sincronizzare i tuoi dati e condividere un registro.',
+      },
+      sign_out: {
+        q: 'Come esco dall’account?',
+        a: 'Tocca Esci sulla scheda del profilo in Impostazioni. I tuoi dati restano su questo telefono.',
+      },
+    },
     stat_days: 'Giorni di tracciamento',
     stat_transactions: 'Registrate',
     stat_this_month: 'Questo mese',
@@ -2804,7 +2824,7 @@ const it = {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
     hero_title: 'Sync su tutti i telefoni',
-    hero_body: 'Hai Pro su un altro telefono? Accedi qui per sbloccarlo anche su questo.',
+    hero_body: 'Hai Pro su un altro telefono? Accedi e attiva Cloud Sync per sbloccarlo anche qui.',
     continue_apple: 'Continua con Apple',
     continue_google: 'Continua con Google',
     continue_email: 'Continua con email',
@@ -2859,7 +2879,10 @@ const it = {
     tile_on: 'Attivo',
     profile_off: 'Disattivo',
     profile_paused: 'In pausa',
-    profile_needs_pro: 'Serve Pro',
+    off_title: 'Cloud Sync è disattivato',
+    off_body:
+      'Hai effettuato l’accesso. Attiva Cloud Sync per fare il backup dei dati e tenere sincronizzati i tuoi telefoni.',
+    turn_on: 'Attiva Cloud Sync',
     profile_a11y_label: 'Cloud Sync, %{status}',
     profile_a11y_hint: 'Apre Cloud Sync',
     errors: {

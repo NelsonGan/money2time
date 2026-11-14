@@ -1564,10 +1564,30 @@ const pl = {
     profile_edit_name: 'Edytuj imię',
     profile_edit_photo: 'Zmień zdjęcie',
     account_sign_in: 'Zaloguj się',
+    account_title: 'Konto',
+    account_a11y_hint: 'Otwiera Twoje konto',
     account_signed_out: 'Nie zalogowano',
     account_signed_in_a11y: 'Zalogowano jako {{email}}',
     account_sign_in_prompt:
-      'Zaloguj się, aby synchronizować przez Cloud Sync i udostępniać albumy oraz księgi. Nie potrzebujesz Pro.',
+      'Zaloguj się, aby udostępniać albumy i dołączać do wspólnych ksiąg. Twoje dane zostają na tym telefonie, dopóki nie włączysz Cloud Sync.',
+    account_faq: {
+      what: {
+        q: 'Co daje zalogowanie się?',
+        a: 'Dostajesz konto, dzięki któremu możesz udostępniać albumy i dołączać do ksiąg, które inni Ci udostępniają. Twoje dane zostają na tym telefonie.',
+      },
+      sync: {
+        q: 'Czy zalogowanie synchronizuje moje dane?',
+        a: 'Nie. Cloud Sync pozostaje wyłączone, dopóki nie włączysz go w Ustawienia > Cloud Sync. Synchronizacja własnych danych wymaga Pro.',
+      },
+      pro: {
+        q: 'Czy potrzebuję Pro, aby się zalogować?',
+        a: 'Nie. Logowanie, udostępnianie albumów i dołączanie do wspólnych ksiąg jest bezpłatne. Pro służy do synchronizacji własnych danych i udostępniania księgi.',
+      },
+      sign_out: {
+        q: 'Jak się wylogować?',
+        a: 'Stuknij Wyloguj się na karcie profilu w Ustawieniach. Twoje dane zostają na tym telefonie.',
+      },
+    },
     stat_days: 'Dni śledzenia',
     stat_transactions: 'Zapisano',
     stat_this_month: 'W tym miesiącu',
@@ -2801,7 +2821,8 @@ const pl = {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
     hero_title: 'Sync na wszystkich telefonach',
-    hero_body: 'Masz Pro na innym telefonie? Zaloguj się tutaj, aby odblokować je także na tym.',
+    hero_body:
+      'Masz Pro na innym telefonie? Zaloguj się i włącz Cloud Sync, aby odblokować je także tutaj.',
     continue_apple: 'Kontynuuj z Apple',
     continue_google: 'Kontynuuj z Google',
     continue_email: 'Kontynuuj z e-mailem',
@@ -2855,7 +2876,10 @@ const pl = {
     tile_on: 'Wł.',
     profile_off: 'Wył.',
     profile_paused: 'Wstrzymano',
-    profile_needs_pro: 'Wymaga Pro',
+    off_title: 'Cloud Sync jest wyłączone',
+    off_body:
+      'Jesteś zalogowany. Włącz Cloud Sync, aby tworzyć kopię zapasową danych i synchronizować telefony.',
+    turn_on: 'Włącz Cloud Sync',
     profile_a11y_label: 'Cloud Sync, %{status}',
     profile_a11y_hint: 'Otwiera Cloud Sync',
     errors: {
