@@ -121,16 +121,30 @@ type OpenShare = { person: string; key?: string; amountBase: number; txId: strin
 type AlbumBalance = { id: string; name: string; net: number; people: PersonBalance[] };
 
 /**
- * Balances as the app keeps them: an album answers for the bills in it, and
- * the people list for the bills in no album (the app's
- * `getAlbumOwnedTransactionIds`, `useAlbumBalances`). Albums with nothing open
- * are left out; a bill in two albums counts in both, as in the app.
+ * The albums that are shared: those with a group's bills in the data (the
+ * phone stamps each with `album_group_id`, its album's id, and clears it when
+ * the share ends). A shared album with no bills yet has nothing to settle.
+ */
+export function sharedAlbumIds(txs: readonly { albumGroupId?: string }[]): Set<string> {
+  const ids = new Set<string>();
+  for (const tx of txs) if (tx.albumGroupId) ids.add(tx.albumGroupId);
+  return ids;
+}
+
+/**
+ * Balances as the app keeps them: a shared album answers for the bills in it,
+ * and the people list for every other bill, in an album of the user's own or
+ * in none (the app's `getAlbumOwnedTransactionIds`, `useAlbumBalances`).
+ * Albums with nothing open are left out; a bill in two shared albums counts in
+ * both, as in the app.
  */
 export function balancesByAlbum(
   owesYou: readonly OpenShare[],
   youOwe: readonly OpenShare[],
-  albums: readonly { id: string; name: string; txIds: readonly string[] }[],
+  allAlbums: readonly { id: string; name: string; txIds: readonly string[] }[],
+  shared: ReadonlySet<string>,
 ): { people: PersonBalance[]; albums: AlbumBalance[] } {
+  const albums = allAlbums.filter((album) => shared.has(album.id));
   const inAlbums = new Set(albums.flatMap((album) => album.txIds));
   const outside = (debt: OpenShare) => !inAlbums.has(debt.txId);
   return {

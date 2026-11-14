@@ -5389,13 +5389,14 @@ app's `services/webDashboardLink.ts`, `webDashboardCrypto.ts`,
   Me edits count what a share already paid (`spreadOverShares`), as the app's
   do, and the split view counts settled shares, not rows. Rows from a phone that
   predates part payments carry no `part_of_split_id` and behave as before.
-- **Balances per album** (see Album members and shared albums): the Balances
-  page's people are netted over the bills in no album, and each album with
-  something still owed is listed above them with the user's net there
-  (`balancesByAlbum` in `src/lib/backup/split-payer.ts`, built from
-  `album_transactions`). The totals at the top add every open share once, in
-  an album or not. Unlike the app, which sets only shared albums apart, it
-  sets every album apart, in a shared ledger too.
+- **Balances per album** (see Album members and shared albums): as in the
+  app, each shared album with something still owed is listed above the
+  people with the user's net there, and the people are netted over every
+  other bill, in an album of the user's own or in none (`balancesByAlbum` in
+  `src/lib/backup/split-payer.ts`, built from `album_transactions`). An album
+  counts as shared when the data holds its group's bills (`sharedAlbumIds`:
+  an entry whose `album_group_id` is the album's id). The totals at the top
+  add every open share once, in an album or not.
 - **A trip's breakdown by person**: once a bill in the selected trip is
   split, its By category card has chips (Everyone, Me, then each name on its
   split bills) that count each entry at that person's share, as the app's
