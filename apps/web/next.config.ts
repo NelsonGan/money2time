@@ -31,6 +31,31 @@ const dashboardPolicy = [
 ].join("; ");
 
 /**
+ * album.money2time.com, where friends without the app join a shared album and
+ * use it. It runs this site's own scripts, Google's sign-in button and
+ * Cloudflare's Turnstile check (each in its own frame), and GA4; it reaches
+ * only itself (its `/api`, in front of the cloud-sync Worker), Google's
+ * sign-in, PostHog and GA4. Sign-in tokens never reach the page: they live
+ * in an HttpOnly cookie its API reads. Google's sign-in popup needs
+ * `same-origin-allow-popups` and the page's origin as referrer.
+ */
+const googleSignIn = "https://accounts.google.com/gsi/";
+const turnstile = "https://challenges.cloudflare.com";
+const albumPolicy = [
+  "default-src 'self'",
+  `script-src 'self' 'unsafe-inline' ${googleSignIn}client ${turnstile} ${googleTag}`,
+  `style-src 'self' 'unsafe-inline' ${googleSignIn}style`,
+  `img-src 'self' blob: data: ${MEDIA_ORIGIN} ${googleAnalytics}`,
+  "font-src 'self'",
+  `frame-src ${googleSignIn} ${turnstile}`,
+  `connect-src 'self' ${googleSignIn} https://us.i.posthog.com ${googleAnalytics}`,
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'none'",
+].join("; ");
+
+/**
  * Pictures and videos that used to be files in `public/`, and are now served
  * from the media bucket at the same path under `web/`. The redirects keep any
  * old URL working: an image search result, a cached page, a link in an email.
@@ -89,7 +114,7 @@ const nextConfig: NextConfig = {
       // The marketing site: no framing by other sites, no MIME sniffing.
       {
         source: "/:path*",
-        missing: [{ type: "host" as const, value: "app\\..*" }],
+        missing: [{ type: "host" as const, value: "(app|album)\\..*" }],
         headers: [
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "X-Frame-Options", value: "SAMEORIGIN" },
@@ -106,6 +131,18 @@ const nextConfig: NextConfig = {
           { key: "X-Frame-Options", value: "DENY" },
           { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
           { key: "Cross-Origin-Resource-Policy", value: "same-origin" },
+          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+        ],
+      },
+      {
+        source: "/:path*",
+        has: [{ type: "host" as const, value: "album\\..*" }],
+        headers: [
+          { key: "Content-Security-Policy", value: albumPolicy },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "Cross-Origin-Opener-Policy", value: "same-origin-allow-popups" },
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
         ],
       },

@@ -50,6 +50,10 @@
     "dashboard": {
       "title": "Webdashboard - Money2Time",
       "description": "Scan met je telefoon om je Money2Time-gegevens op een groot scherm te zien: uitgaven, vermogen, budgetten en de uren achter elke aankoop. End-to-end versleuteld, niets online opgeslagen."
+    },
+    "album": {
+      "title": "Doe mee met mijn gedeelde album · Money2Time",
+      "description": "Deel reisrekeningen en zie wie wat aan wie verschuldigd is. Gratis, gewoon in je browser, zonder app."
     }
   },
   "common": {
@@ -2216,6 +2220,226 @@
     "dropdown": {
       "search": "Zoeken",
       "noMatch": "Geen resultaten"
+    }
+  },
+  "album": {
+    "untitled": "Gedeeld album",
+    "someone": "Iemand",
+    "cancel": "Annuleren",
+    "save": "Opslaan",
+    "undo": "Ongedaan maken",
+    "retry": "Opnieuw proberen",
+    "today": "Vandaag",
+    "signOut": "Afmelden",
+    "tabs": {
+      "transactions": "Transacties",
+      "breakdown": "Verdeling",
+      "balances": "Saldo's"
+    },
+    "categories": {
+      "food": "Eten",
+      "groceries": "Boodschappen",
+      "transport": "Transport",
+      "housing": "Wonen",
+      "bills": "Rekeningen",
+      "healthcare": "Zorg",
+      "shopping": "Winkelen",
+      "other": "Overig"
+    },
+    "signIn": {
+      "email": "Doorgaan met e-mail",
+      "emailLabel": "E-mailadres",
+      "emailPlaceholder": "jij@voorbeeld.nl",
+      "badEmail": "Vul een geldig e-mailadres in.",
+      "sendCode": "Code sturen",
+      "codeSent": "Vul de 6-cijferige code in die we naar <strong>{email}</strong> hebben gestuurd.",
+      "codeLabel": "Inlogcode",
+      "verify": "Inloggen",
+      "resend": "Nieuwe code sturen",
+      "otherEmail": "Ander e-mailadres gebruiken",
+      "otherWays": "Andere manieren om in te loggen",
+      "wrongCode": "Die code werkte niet. Controleer hem, of stuur een nieuwe."
+    },
+    "home": {
+      "title": "Je gedeelde albums",
+      "landingTitle": "Deel reisrekeningen met vrienden",
+      "landingBody": "Vul in wat je betaalde, zie wie wat aan wie verschuldigd is en verreken. Gratis, gewoon in je browser.",
+      "emptyTitle": "Nog geen gedeelde albums",
+      "emptyBody": "Open de uitnodigingslink die een vriend je stuurde om mee te doen met diens album. Albums begin je in de Money2Time-app.",
+      "yours": "Van jou"
+    },
+    "join": {
+      "eyebrow": "Gedeeld album",
+      "invitedBy": "{name} nodigt je uit om rekeningen te delen",
+      "signInTitle": "Log in om mee te doen",
+      "signInBody": "Gratis en zonder app: alles werkt gewoon hier.",
+      "nameLabel": "Je naam in dit album",
+      "join": "Meedoen",
+      "signedInAs": "Ingelogd als {email}.",
+      "haveApp": "Heb je de Money2Time-app?",
+      "openInApp": "Openen in de app",
+      "expiredTitle": "Deze uitnodigingslink is verlopen",
+      "expiredBody": "Uitnodigingslinks zijn 24 uur geldig. Vraag {name} om een nieuwe te sturen.",
+      "ledgerTitle": "Deze link is voor een gedeeld boek",
+      "ledgerBody": "Gedeelde boeken zijn er alleen in de Money2Time-app. Open de link daar om mee te doen.",
+      "full": "Dit album is vol. Vraag de eigenaar om ruimte te maken."
+    },
+    "joined": {
+      "eyebrow": "Je doet mee",
+      "title": "Welkom bij {name}",
+      "body": "Vul in wat je betaalde en zie wie wat aan wie verschuldigd is. Je kunt hier verder, of op elk moment overstappen naar de app.",
+      "web": "Verder op het web"
+    },
+    "app": {
+      "title": "Download de Money2Time-app",
+      "body": "Log in met hetzelfde account en je gedeelde albums gaan mee, inclusief alles wat je hier hebt toegevoegd."
+    },
+    "banner": {
+      "title": "Makkelijker in de app",
+      "body": "Zelfde account, zelfde albums",
+      "get": "Download",
+      "dismiss": "Niet nu"
+    },
+    "album": {
+      "sections": "Onderdelen van het album",
+      "signInTitle": "Log in om dit album te zien",
+      "signInBody": "Gebruik het account waarmee je meedeed.",
+      "goneTitle": "Je zit niet in dit album",
+      "goneBody": "Het is misschien verwijderd, of je bent vertrokken of eruit gehaald. Vraag om een nieuwe uitnodigingslink om weer mee te doen."
+    },
+    "people": {
+      "title": "Personen",
+      "count": "{count, plural, one {# persoon} other {# personen}}",
+      "you": "Jij",
+      "joined": "Doet mee",
+      "left": "Vertrokken",
+      "unnamed": "Vriend",
+      "rename": "Naam wijzigen",
+      "yourName": "Je naam",
+      "nameTaken": "Iemand hier heeft die naam al.",
+      "invite": "Uitnodigingslink",
+      "inviteInfo": "Iedereen met deze link kan meedoen met het album. Hij is 24 uur geldig; Nieuwe link stopt de oude meteen.",
+      "inviteShareTitle": "Doe mee met mijn gedeelde album",
+      "share": "Delen",
+      "copy": "Kopiëren",
+      "copied": "Gekopieerd",
+      "newLink": "Nieuwe link",
+      "simplify": "Groepsschulden vereenvoudigen",
+      "simplifyInfo": "Voegt schulden in de groep samen, zodat er minder betalingen nodig zijn. Niemand betaalt of krijgt in totaal meer.",
+      "leave": "Album verlaten",
+      "leaveTitle": "{name} verlaten?",
+      "leaveBody": "Je rekeningen blijven in het album voor de anderen, en je kunt het niet meer wijzigen.",
+      "remove": "Verwijderen",
+      "removeTitle": "{name} uit het album verwijderen?",
+      "removeBody": "Diegene krijgt de rekeningen van dit album niet meer. Rekeningen waar diegene op staat, blijven."
+    },
+    "bill": {
+      "add": "Rekening toevoegen",
+      "new": "Nieuwe rekening",
+      "edit": "Rekening bewerken",
+      "view": "Rekening",
+      "amount": "Bedrag",
+      "currency": "Valuta",
+      "inThisAlbum": "In dit album",
+      "allCurrencies": "Alle valuta's",
+      "note": "Waarvoor was het?",
+      "notePlaceholder": "Waarvoor was het?",
+      "category": "Categorie",
+      "ownCategory": "Onder {name}",
+      "date": "Datum",
+      "paidBy": "Betaald door",
+      "save": "Opslaan",
+      "saved": "Rekening opgeslagen",
+      "added": "Rekening toegevoegd",
+      "deleted": "Rekening verwijderd",
+      "delete": "Verwijderen",
+      "deleteTitle": "Deze rekening verwijderen?",
+      "deleteBody": "Hij verdwijnt voor iedereen in het album.",
+      "deleteBodyPaid": "Hij verdwijnt voor iedereen in het album. De betalingen blijven staan, en wat al betaald is, moet worden terugbetaald.",
+      "paidEditTitle": "Deze rekening heeft betalingen",
+      "paidEditBody": "De betalingen blijven staan. Als een deel lager wordt dan wat al betaald is, moet het verschil worden terugbetaald.",
+      "payments": "Betalingen",
+      "paymentLine": "{from} betaalde {to} {amount}",
+      "shared": "Gedeeld album",
+      "untitled": "Rekening",
+      "youPaid": "Jij betaalde",
+      "youLent": "Jij betaalde · je leende {amount} uit",
+      "theyPaidYourShare": "{name} betaalde · jouw deel {amount}",
+      "notInvolved": "{name} betaalde · niet jouw rekening",
+      "emptyTitle": "Nog geen rekeningen",
+      "emptyBody": "Voeg de eerste toe: wat het kostte, wie betaalde en met wie het gedeeld wordt."
+    },
+    "split": {
+      "evenly": "Gelijk verdelen",
+      "by": "Verdelen op",
+      "amount": "Bedrag",
+      "amountHint": "Typ wat iedereen betaalt",
+      "percentHint": "Geef iedereen een percentage van de rekening",
+      "shares": "Delen",
+      "sharesHint": "2 delen betalen twee keer zoveel als 1",
+      "adjustHint": "Gelijk verdelen en dan iets bij- of aftrekken voor iemand",
+      "valueFor": "Deel van {name}",
+      "enterAmount": "Vul het bedrag in",
+      "youOwe": "Je bent {name} {amount} schuldig",
+      "youLent": "Je leende {amount} uit",
+      "justYou": "Alleen je eigen deel",
+      "notYou": "Tussen de anderen; {name} betaalde",
+      "left": "Nog {amount} te verdelen",
+      "over": "{amount} te veel",
+      "percent": "{given}% van 100%",
+      "noShares": "Geef iemand een deel",
+      "adjustOver": "De aanpassingen zijn hoger dan de rekening",
+      "nobody": "Kies met wie je deelt",
+      "nobodyElse": "Er doet nog niemand anders mee. Deel de uitnodigingslink via Personen."
+    },
+    "settle": {
+      "payTitle": "{name} betalen",
+      "receivedTitle": "{name} betaalde jou",
+      "othersTitle": "Betaling vastleggen",
+      "amount": "Betaald bedrag",
+      "owed": "Verschuldigd: {amount}",
+      "record": "Betaling vastleggen",
+      "recorded": "Vastgelegd: {from} betaalde {to} {amount}",
+      "note": "Dit legt alleen de betaling vast. Maak het geld over zoals je gewend bent.",
+      "othersNote": "Leg dit alleen vast als {from} echt {to} heeft betaald."
+    },
+    "balances": {
+      "youOwe": "Jij bent schuldig",
+      "youAreOwed": "Je krijgt nog",
+      "settled": "Alles is verrekend",
+      "emptyTitle": "Nog geen saldo's",
+      "emptyBody": "Voeg een rekening toe en je ziet hier wie wat aan wie verschuldigd is.",
+      "whoOwesWhom": "Wie is wie wat schuldig",
+      "youOweName": "Je bent {name} schuldig",
+      "owesYou": "{name} is jou schuldig",
+      "owes": "{from} is {to} schuldig",
+      "settledUp": "Verrekend",
+      "groupSpending": "Uitgaven van de groep",
+      "total": "Totaal",
+      "youPaid": "Jij betaalde",
+      "yourShare": "Jouw deel"
+    },
+    "breakdown": {
+      "showing": "Toont",
+      "everyone": "Iedereen",
+      "total": "Totaal",
+      "bills": "{count, plural, one {# rekening} other {# rekeningen}}",
+      "emptyTitle": "Nog niets te verdelen"
+    },
+    "activity": {
+      "showAll": "Alle {count} tonen",
+      "showLess": "Minder tonen"
+    },
+    "errors": {
+      "generic": "Er ging iets mis. Probeer het opnieuw.",
+      "network": "Money2Time is niet bereikbaar. Controleer je verbinding en probeer het opnieuw.",
+      "networkTitle": "Je lijkt offline te zijn",
+      "rateLimited": "Te veel pogingen. Wacht een minuut en probeer het opnieuw.",
+      "captcha": "We konden dit verzoek niet controleren. Laad de pagina opnieuw en probeer het nog eens.",
+      "signedOut": "Log opnieuw in om dit album te wijzigen.",
+      "notMember": "Je zit niet meer in dit album, dus je kunt het niet wijzigen.",
+      "busy": "Iemand anders wijzigt dit album. Probeer het zo opnieuw.",
+      "saveFailed": "De wijziging in dit album kon niet worden opgeslagen. Probeer het opnieuw."
     }
   }
 }

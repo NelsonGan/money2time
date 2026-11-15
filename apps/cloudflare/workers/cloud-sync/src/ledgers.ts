@@ -35,6 +35,8 @@ import {
   groupWriteErrorResponse,
   hranaDb,
   joinGroup,
+  readGroup,
+  readOwnerName,
   planLeave,
   planWrite,
   type WriteRequest,
@@ -42,7 +44,7 @@ import {
 } from './albumGroups';
 import { csv, type Env } from './env';
 import { json, readJson } from './http';
-import { isValidDeviceId, notifyUsers } from './live';
+import { isValidDeviceId, ledgerStamp, notifyUsers } from './live';
 import { deleteAllMedia, ledgerSpace } from './media';
 import { isAccountPro } from './revenuecat';
 import { brokenInvitePageHtml, invitePageHtml } from './pages';
@@ -109,7 +111,7 @@ interface SharedLedgerRow {
 }
 
 type Role = 'owner' | 'member';
-export type Kind = 'ledger' | 'album';
+type Kind = 'ledger' | 'album';
 
 /** Whether shared ledger `l` is an album's group: it has a row in `shared_albums`. */
 const IS_ALBUM_SQL = 'EXISTS (SELECT 1 FROM shared_albums a WHERE a.ledger_id = l.id)';
@@ -479,6 +481,10 @@ export async function routeLedgers(
     if (kindOf(ledger) !== 'album') return json({ error: 'not_found' }, 404);
     return albumWrite(env, ledger, user, request);
   }
+  if (action === 'album' && parts.length === 4 && method === 'GET') {
+    if (kindOf(ledger) !== 'album') return json({ error: 'not_found' }, 404);
+    return albumRead(env, ledger, role, user, url.searchParams.get('since'));
+  }
   if (action === 'invites' && parts.length === 4 && method === 'POST') {
     if (role !== 'owner') return json({ error: 'forbidden' }, 403);
     return inviteLink(env, ledger, request);
@@ -783,22 +789,58 @@ async function writerToken(env: Env, ledger: SharedLedgerRow): Promise<string> {
   return token;
 }
 
-/** What an album's write is stamped with: the group, the writer and the time. */
-function groupContext(ledger: SharedLedgerRow, userId: string) {
+/**
+ * What an album's write is stamped with: the group, the writer and the time.
+ * `via: 'web'`: written on the website, where nobody has accounts, so the
+ * rows it writes name the writer as `web:<user>` (`authorStamp`).
+ */
+function groupContext(ledger: SharedLedgerRow, userId: string, via?: 'web') {
   return {
     groupId: ledger.ledger_id,
     userId,
+    via,
     now: new Date().toISOString(),
     newId: () => randomHex(12),
   };
 }
 
 /**
+ * GET /v1/ledgers/<id>/album: a shared album's whole group (its people,
+ * bills, payments, settings and newest activity), read with the Worker's own
+ * token. The website reads it this way: a browser holds no database token,
+ * and only the album's members get here (`access`). `?since=<stamp>` with the
+ * stamp of the last answer gets `{unchanged: true}` while nothing changed,
+ * without touching the group's database.
+ */
+async function albumRead(
+  env: Env,
+  ledger: SharedLedgerRow,
+  role: Role,
+  user: SessionUser,
+  since: string | null,
+): Promise<Response> {
+  // Read first, so a change committed while the group is read is seen next time.
+  const stamp = await ledgerStamp(env, ledger.id);
+  if (since === stamp) return json({ unchanged: true, stamp });
+  try {
+    const db = hranaDb(ledger.db_url, await writerToken(env, ledger));
+    const [album, rows] = await Promise.all([view(env, ledger, role), readGroup(db)]);
+    return json({ album, userId: user.id, rows, stamp });
+  } catch (error) {
+    if (error instanceof Error && error.message.startsWith('ledger_access_chang')) {
+      return json({ error: 'busy' }, 409);
+    }
+    throw error;
+  }
+}
+
+/**
  * POST /v1/ledgers/<id>/album: a change to a shared album's group, written
  * by the Worker (src/albumGroups.ts). `{action: 'join', name}` puts the user
  * on the album's list as themselves; `{action: 'write', rows}` writes bills,
- * payments, a rename or the settings. Answers with the rows written, which
- * the phone applies at once; everyone else's phones are told to sync.
+ * payments, a rename or the settings. `via: 'web'` says the website sent it.
+ * Answers with the rows written, which the phone applies at once; everyone
+ * else's phones are told to sync.
  */
 async function albumWrite(
   env: Env,
@@ -812,21 +854,23 @@ async function albumWrite(
     rows: unknown;
     reason: unknown;
     device: unknown;
+    via: unknown;
   }>(request, 512 * 1024);
   if (!body) return json({ error: 'bad_request' }, 400);
+  const via = body.via === 'web' ? 'web' : undefined;
   const db = hranaDb(ledger.db_url, await writerToken(env, ledger));
   try {
     let rows;
     if (body.action === 'join') {
       const name = typeof body.name === 'string' ? body.name : '';
-      rows = await joinGroup(db, groupContext(ledger, user.id), name);
+      rows = await joinGroup(db, groupContext(ledger, user.id, via), name);
     } else if (body.action === 'write' && Array.isArray(body.rows)) {
       const write: WriteRequest = {
         rows: body.rows as WriteRequest['rows'],
         reason: body.reason === 'close_even' ? 'close_even' : undefined,
       };
       rows = await writeGroup(db, write, (state) =>
-        planWrite(state, groupContext(ledger, user.id), write, ledger.owner_user_id),
+        planWrite(state, groupContext(ledger, user.id, via), write, ledger.owner_user_id),
       );
     } else {
       return json({ error: 'bad_request' }, 400);
@@ -962,20 +1006,40 @@ export async function previewInvite(env: Env, code: string): Promise<Response> {
   const invite = await findInvite(env, code);
   const ledger = invite ? await getLedger(env, invite.ledger_id) : null;
   if (!ledger) return json({ error: 'invite_not_found' }, 404);
-  const owner = await ownerOf(env, ledger);
-  const count = await memberCount(env, ledger.id);
+  const [owner, count, ownerInAlbum] = await Promise.all([
+    ownerOf(env, ledger),
+    memberCount(env, ledger.id),
+    kindOf(ledger) === 'album' ? albumOwnerName(env, ledger) : null,
+  ]);
   return json({
     // The app's id, so a phone that already has this ledger (its own, or
     // another share) is told before joining rather than after taking a seat.
     ledgerId: ledger.ledger_id,
     name: ledger.name,
     emoji: ledger.emoji,
-    ownerName: displayName(owner.name, owner.email),
+    ownerName: ownerInAlbum ?? displayName(owner.name, owner.email),
     memberCount: count,
     full: count >= maxMembersOf(ledger),
     active: await isLedgerActive(env, ledger),
     kind: kindOf(ledger),
   });
+}
+
+/**
+ * The name an album's owner goes by in it (their member row), for the invite:
+ * someone who signed in with an email code has no account name, and a masked
+ * address ("ne***@gmail.com") is a poor way to say who is inviting. Null when
+ * it cannot be read, and the account's name is used.
+ */
+async function albumOwnerName(env: Env, ledger: SharedLedgerRow): Promise<string | null> {
+  try {
+    return await readOwnerName(
+      hranaDb(ledger.db_url, await writerToken(env, ledger)),
+      ledger.owner_user_id,
+    );
+  } catch {
+    return null;
+  }
 }
 
 /** `knowsAlbums`: the app said it can join a shared album; one that cannot would take it for a ledger. */
@@ -1058,19 +1122,20 @@ export function expiredInvitesStatement(env: Env): D1PreparedStatement {
 }
 
 // ---------------------------------------------------------------------------
-// GET /join/<code>: the page an invite link opens
+// GET /join/<code>: the page a shared ledger's invite link opens
 
 /**
- * Hands the link to the app, or points to the stores (pages.ts). It shows
- * nothing about the ledger, so the page needs no database read and has
- * nothing to inject; the app looks the invite up itself. `kind` comes from
- * the host the link was opened on, and only changes the page's wording.
+ * A shared ledger's link: hands it to the app, or points to the stores
+ * (pages.ts). It shows nothing about the ledger, so the page needs no
+ * database read and has nothing to inject; the app looks the invite up
+ * itself. A shared album's links open on the website instead, which lets
+ * someone without the app join there.
  */
-export function invitePage(code: string, kind: Kind = 'ledger'): Response {
+export function invitePage(code: string): Response {
   if (!INVITE_CODE.test(code)) {
-    const page = brokenInvitePageHtml(kind);
+    const page = brokenInvitePageHtml();
     return new Response(page.html, { status: 404, headers: page.headers });
   }
-  const page = invitePageHtml(code, crypto.randomUUID().replace(/-/g, ''), kind);
+  const page = invitePageHtml(code, crypto.randomUUID().replace(/-/g, ''));
   return new Response(page.html, { headers: page.headers });
 }

@@ -50,6 +50,10 @@
     "dashboard": {
       "title": "Web Panosu - Money2Time",
       "description": "Money2Time verilerinizi büyük ekranda görmek için telefonunuzla tarayın: harcamalar, net varlık, bütçeler ve her satın alımın ardındaki saatler. Uçtan uca şifreli, çevrimiçi saklanan hiçbir şey yok."
+    },
+    "album": {
+      "title": "Paylaşılan albümüme katıl · Money2Time",
+      "description": "Seyahat hesaplarını birlikte bölün, kimin kime borçlu olduğunu görün. Ücretsiz, tarayıcıda, uygulama gerekmez."
     }
   },
   "common": {
@@ -2216,6 +2220,226 @@
     "dropdown": {
       "search": "Ara",
       "noMatch": "Eşleşme yok"
+    }
+  },
+  "album": {
+    "untitled": "Paylaşılan albüm",
+    "someone": "Birisi",
+    "cancel": "İptal",
+    "save": "Kaydet",
+    "undo": "Geri al",
+    "retry": "Tekrar dene",
+    "today": "Bugün",
+    "signOut": "Çıkış yap",
+    "tabs": {
+      "transactions": "İşlemler",
+      "breakdown": "Dağılım",
+      "balances": "Bakiyeler"
+    },
+    "categories": {
+      "food": "Yeme & İçme",
+      "groceries": "Market",
+      "transport": "Ulaşım",
+      "housing": "Konut",
+      "bills": "Faturalar",
+      "healthcare": "Sağlık",
+      "shopping": "Alışveriş",
+      "other": "Diğer"
+    },
+    "signIn": {
+      "email": "E-posta ile devam et",
+      "emailLabel": "E-posta adresi",
+      "emailPlaceholder": "siz@ornek.com",
+      "badEmail": "Geçerli bir e-posta adresi girin.",
+      "sendCode": "Kod gönder",
+      "codeSent": "<strong>{email}</strong> adresine gönderdiğimiz 6 haneli kodu girin.",
+      "codeLabel": "Giriş kodu",
+      "verify": "Giriş yap",
+      "resend": "Yeni kod gönder",
+      "otherEmail": "Başka bir e-posta kullan",
+      "otherWays": "Diğer giriş yöntemleri",
+      "wrongCode": "Bu kod çalışmadı. Kontrol edin veya yeni bir kod gönderin."
+    },
+    "home": {
+      "title": "Paylaşılan albümleriniz",
+      "landingTitle": "Seyahat hesaplarını arkadaşlarınızla bölün",
+      "landingBody": "Ödediğinizi ekleyin, kimin kime borçlu olduğunu görün ve ödeşin. Ücretsiz, doğrudan tarayıcınızda.",
+      "emptyTitle": "Henüz paylaşılan albüm yok",
+      "emptyBody": "Bir arkadaşınızın albümüne katılmak için gönderdiği davet bağlantısını açın. Albümler Money2Time uygulamasında oluşturulur.",
+      "yours": "Sizin"
+    },
+    "join": {
+      "eyebrow": "Paylaşılan albüm",
+      "invitedBy": "{name} sizi hesapları bölüşmeye davet etti",
+      "signInTitle": "Katılmak için giriş yapın",
+      "signInBody": "Ücretsiz ve uygulama gerekmez: her şey burada çalışır.",
+      "nameLabel": "Bu albümdeki adınız",
+      "join": "Albüme katıl",
+      "signedInAs": "{email} olarak giriş yapıldı.",
+      "haveApp": "Money2Time uygulamanız var mı?",
+      "openInApp": "Uygulamada aç",
+      "expiredTitle": "Bu davet bağlantısının süresi doldu",
+      "expiredBody": "Davet bağlantıları 24 saat geçerlidir. {name} kişisinden yeni bir bağlantı isteyin.",
+      "ledgerTitle": "Bu bağlantı paylaşılan bir defter için",
+      "ledgerBody": "Paylaşılan defterler yalnızca Money2Time uygulamasında var. Katılmak için bağlantıyı orada açın.",
+      "full": "Bu albüm dolu. Sahibinden yer açmasını isteyin."
+    },
+    "joined": {
+      "eyebrow": "Katıldınız",
+      "title": "Hoş geldiniz: {name}",
+      "body": "Ödediğinizi ekleyin ve kimin kime borçlu olduğunu görün. Burada kullanmaya devam edebilir veya istediğiniz zaman uygulamaya geçebilirsiniz.",
+      "web": "Web'de devam et"
+    },
+    "app": {
+      "title": "Money2Time uygulamasını edinin",
+      "body": "Aynı hesapla giriş yapın; paylaşılan albümleriniz, burada eklediğiniz her şeyle birlikte sizinle gelir."
+    },
+    "banner": {
+      "title": "Uygulamada daha kolay",
+      "body": "Aynı hesap, aynı albümler",
+      "get": "İndir",
+      "dismiss": "Şimdi değil"
+    },
+    "album": {
+      "sections": "Albüm bölümleri",
+      "signInTitle": "Bu albümü görmek için giriş yapın",
+      "signInBody": "Albüme katıldığınız hesabı kullanın.",
+      "goneTitle": "Bu albümde değilsiniz",
+      "goneBody": "Albüm silinmiş olabilir ya da albümden ayrılmış veya çıkarılmış olabilirsiniz. Yeniden katılmak için yeni bir davet bağlantısı isteyin."
+    },
+    "people": {
+      "title": "Kişiler",
+      "count": "{count, plural, one {# kişi} other {# kişi}}",
+      "you": "Siz",
+      "joined": "Katıldı",
+      "left": "Ayrıldı",
+      "unnamed": "Arkadaş",
+      "rename": "Yeniden adlandır",
+      "yourName": "Adınız",
+      "nameTaken": "Burada bu ada sahip biri zaten var.",
+      "invite": "Davet bağlantısı",
+      "inviteInfo": "Bu bağlantıya sahip herkes albüme katılabilir. 24 saat geçerlidir; Yeni bağlantı eskisini hemen durdurur.",
+      "inviteShareTitle": "Paylaşılan albümüme katıl",
+      "share": "Paylaş",
+      "copy": "Kopyala",
+      "copied": "Kopyalandı",
+      "newLink": "Yeni bağlantı",
+      "simplify": "Grup borçlarını sadeleştir",
+      "simplifyInfo": "Gruptaki borçları birleştirir, böylece daha az ödeme yapılır. Kimse toplamda daha fazla ödemez veya almaz.",
+      "leave": "Albümden ayrıl",
+      "leaveTitle": "{name} albümünden ayrılınsın mı?",
+      "leaveBody": "Hesaplarınız diğerleri için albümde kalır ve albümü artık değiştiremezsiniz.",
+      "remove": "Kaldır",
+      "removeTitle": "{name} albümden çıkarılsın mı?",
+      "removeBody": "Bu kişi artık bu albümün hesaplarını almaz. Yer aldığı hesaplar kalır."
+    },
+    "bill": {
+      "add": "Hesap ekle",
+      "new": "Yeni hesap",
+      "edit": "Hesabı düzenle",
+      "view": "Hesap",
+      "amount": "Tutar",
+      "currency": "Para birimi",
+      "inThisAlbum": "Bu albümde",
+      "allCurrencies": "Tüm para birimleri",
+      "note": "Ne içindi?",
+      "notePlaceholder": "Ne içindi?",
+      "category": "Kategori",
+      "ownCategory": "Kategori: {name}",
+      "date": "Tarih",
+      "paidBy": "Ödeyen",
+      "save": "Kaydet",
+      "saved": "Hesap kaydedildi",
+      "added": "Hesap eklendi",
+      "deleted": "Hesap silindi",
+      "delete": "Sil",
+      "deleteTitle": "Bu hesap silinsin mi?",
+      "deleteBody": "Albümdeki herkes için kaldırılır.",
+      "deleteBodyPaid": "Albümdeki herkes için kaldırılır. Ödemeler kalır ve zaten ödenmiş tutar geri ödenmelidir.",
+      "paidEditTitle": "Bu hesapta ödemeler var",
+      "paidEditBody": "Ödemeler kalır. Bir pay zaten ödenen tutarın altına düşerse aradaki fark geri ödenmelidir.",
+      "payments": "Ödemeler",
+      "paymentLine": "{from} → {to}: {amount}",
+      "shared": "Paylaşılan albüm",
+      "untitled": "Hesap",
+      "youPaid": "Siz ödediniz",
+      "youLent": "Siz ödediniz · alacağınız {amount}",
+      "theyPaidYourShare": "Ödeyen: {name} · sizin payınız {amount}",
+      "notInvolved": "Ödeyen: {name} · sizin hesabınız değil",
+      "emptyTitle": "Henüz hesap yok",
+      "emptyBody": "İlkini ekleyin: ne kadar tuttuğu, kimin ödediği ve kiminle bölündüğü."
+    },
+    "split": {
+      "evenly": "Eşit böl",
+      "by": "Bölme şekli",
+      "amount": "Tutar",
+      "amountHint": "Herkesin ödeyeceğini yazın",
+      "percentHint": "Herkese hesabın bir yüzdesini verin",
+      "shares": "Pay",
+      "sharesHint": "2 pay, 1 payın iki katını öder",
+      "adjustHint": "Eşit bölün, sonra birine ekleyin ya da çıkarın",
+      "valueFor": "Pay: {name}",
+      "enterAmount": "Tutarı girin",
+      "youOwe": "{name} kişisine {amount} borcunuz var",
+      "youLent": "Alacağınız: {amount}",
+      "justYou": "Yalnızca kendi payınız",
+      "notYou": "Diğerleri arasında; ödeyen: {name}",
+      "left": "Bölünecek {amount} kaldı",
+      "over": "{amount} fazla",
+      "percent": "%100 içinde %{given}",
+      "noShares": "Birine pay verin",
+      "adjustOver": "Düzeltmeler hesaptan fazla",
+      "nobody": "Kiminle bölüneceğini seçin",
+      "nobodyElse": "Henüz başka kimse katılmadı. Davet bağlantısını Kişiler'den paylaşın."
+    },
+    "settle": {
+      "payTitle": "{name} kişisine öde",
+      "receivedTitle": "{name} size ödedi",
+      "othersTitle": "Ödeme kaydet",
+      "amount": "Ödenen tutar",
+      "owed": "Borç: {amount}",
+      "record": "Ödemeyi kaydet",
+      "recorded": "Kaydedildi: {from} → {to}: {amount}",
+      "note": "Bu yalnızca ödemeyi kaydeder. Parayı her zamanki gibi gönderin.",
+      "othersNote": "Bunu yalnızca {from}, {to} kişisine gerçekten ödediyse kaydedin."
+    },
+    "balances": {
+      "youOwe": "Borcunuz",
+      "youAreOwed": "Alacağınız",
+      "settled": "Her şey ödeşildi",
+      "emptyTitle": "Henüz bakiye yok",
+      "emptyBody": "Bir hesap ekleyin, kimin kime borçlu olduğunu burada görün.",
+      "whoOwesWhom": "Kim kime borçlu",
+      "youOweName": "{name} kişisine borcunuz var",
+      "owesYou": "{name} size borçlu",
+      "owes": "{from}, {to} kişisine borçlu",
+      "settledUp": "Ödeşildi",
+      "groupSpending": "Grup harcaması",
+      "total": "Toplam",
+      "youPaid": "Siz ödediniz",
+      "yourShare": "Sizin payınız"
+    },
+    "breakdown": {
+      "showing": "Gösterilen",
+      "everyone": "Herkes",
+      "total": "Toplam",
+      "bills": "{count, plural, one {# hesap} other {# hesap}}",
+      "emptyTitle": "Henüz gösterilecek dağılım yok"
+    },
+    "activity": {
+      "showAll": "Tümünü göster ({count})",
+      "showLess": "Daha az göster"
+    },
+    "errors": {
+      "generic": "Bir sorun oluştu. Tekrar deneyin.",
+      "network": "Money2Time'a ulaşılamıyor. Bağlantınızı kontrol edip tekrar deneyin.",
+      "networkTitle": "Çevrimdışı görünüyorsunuz",
+      "rateLimited": "Çok fazla deneme. Bir dakika bekleyip tekrar deneyin.",
+      "captcha": "Bu isteği doğrulayamadık. Sayfayı yenileyip tekrar deneyin.",
+      "signedOut": "Bu albümü değiştirmek için yeniden giriş yapın.",
+      "notMember": "Artık bu albümde değilsiniz, bu yüzden albümü değiştiremezsiniz.",
+      "busy": "Bu albümü şu anda başka biri değiştiriyor. Biraz sonra tekrar deneyin.",
+      "saveFailed": "Bu albümdeki değişiklik kaydedilemedi. Tekrar deneyin."
     }
   }
 }

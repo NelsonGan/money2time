@@ -50,6 +50,10 @@
     "dashboard": {
       "title": "Papan Pemuka Web - Money2Time",
       "description": "Imbas dengan telefon anda untuk melihat data Money2Time anda pada skrin besar: perbelanjaan, nilai bersih, belanjawan dan jam di sebalik setiap pembelian. Disulitkan hujung ke hujung, tiada apa-apa disimpan dalam talian."
+    },
+    "album": {
+      "title": "Sertai album kongsi saya · Money2Time",
+      "description": "Bahagi bil percutian bersama dan lihat siapa berhutang kepada siapa. Percuma, terus dalam pelayar, tanpa aplikasi."
     }
   },
   "common": {
@@ -2216,6 +2220,226 @@
     "dropdown": {
       "search": "Cari",
       "noMatch": "Tiada padanan"
+    }
+  },
+  "album": {
+    "untitled": "Album kongsi",
+    "someone": "Seseorang",
+    "cancel": "Batal",
+    "save": "Simpan",
+    "undo": "Buat asal",
+    "retry": "Cuba Lagi",
+    "today": "Hari ini",
+    "signOut": "Log keluar",
+    "tabs": {
+      "transactions": "Transaksi",
+      "breakdown": "Pecahan",
+      "balances": "Baki"
+    },
+    "categories": {
+      "food": "Makanan",
+      "groceries": "Barangan Runcit",
+      "transport": "Pengangkutan",
+      "housing": "Perumahan",
+      "bills": "Bil",
+      "healthcare": "Kesihatan",
+      "shopping": "Membeli-belah",
+      "other": "Lain-lain"
+    },
+    "signIn": {
+      "email": "Teruskan dengan e-mel",
+      "emailLabel": "Alamat e-mel",
+      "emailPlaceholder": "anda@contoh.com",
+      "badEmail": "Masukkan alamat e-mel yang sah.",
+      "sendCode": "Hantar kod",
+      "codeSent": "Masukkan kod 6 digit yang kami hantar ke <strong>{email}</strong>.",
+      "codeLabel": "Kod log masuk",
+      "verify": "Log masuk",
+      "resend": "Hantar kod baharu",
+      "otherEmail": "Guna e-mel lain",
+      "otherWays": "Cara lain untuk log masuk",
+      "wrongCode": "Kod itu tidak berjaya. Semak semula, atau hantar kod baharu."
+    },
+    "home": {
+      "title": "Album kongsi anda",
+      "landingTitle": "Bahagi bil percutian dengan rakan",
+      "landingBody": "Tambah apa yang anda bayar, lihat siapa berhutang kepada siapa, dan selesaikan. Percuma, terus dalam pelayar anda.",
+      "emptyTitle": "Belum ada album kongsi",
+      "emptyBody": "Buka pautan jemputan yang dihantar oleh rakan anda untuk menyertai album mereka. Album dibuat dalam aplikasi Money2Time.",
+      "yours": "Milik anda"
+    },
+    "join": {
+      "eyebrow": "Album kongsi",
+      "invitedBy": "{name} menjemput anda untuk berkongsi bil",
+      "signInTitle": "Log masuk untuk menyertai",
+      "signInBody": "Percuma, tanpa aplikasi: semuanya berfungsi di sini.",
+      "nameLabel": "Nama anda dalam album ini",
+      "join": "Sertai album",
+      "signedInAs": "Log masuk sebagai {email}.",
+      "haveApp": "Ada aplikasi Money2Time?",
+      "openInApp": "Buka dalam aplikasi",
+      "expiredTitle": "Pautan jemputan ini telah tamat tempoh",
+      "expiredBody": "Pautan jemputan sah selama 24 jam. Minta {name} menghantar pautan baharu.",
+      "ledgerTitle": "Pautan ini untuk lejar kongsi",
+      "ledgerBody": "Lejar kongsi hanya ada dalam aplikasi Money2Time. Buka pautan di sana untuk menyertai.",
+      "full": "Album ini sudah penuh. Minta pemiliknya memberi ruang."
+    },
+    "joined": {
+      "eyebrow": "Anda sudah menyertai",
+      "title": "Selamat datang ke {name}",
+      "body": "Tambah apa yang anda bayar dan lihat siapa berhutang kepada siapa. Anda boleh terus menggunakannya di sini, atau beralih ke aplikasi bila-bila masa.",
+      "web": "Teruskan di web"
+    },
+    "app": {
+      "title": "Dapatkan aplikasi Money2Time",
+      "body": "Log masuk dengan akaun yang sama dan album kongsi anda ikut bersama, termasuk semua yang anda tambah di sini."
+    },
+    "banner": {
+      "title": "Lebih mudah dalam aplikasi",
+      "body": "Akaun sama, album sama",
+      "get": "Dapatkan",
+      "dismiss": "Bukan Sekarang"
+    },
+    "album": {
+      "sections": "Bahagian album",
+      "signInTitle": "Log masuk untuk melihat album ini",
+      "signInBody": "Gunakan akaun yang anda guna semasa menyertai.",
+      "goneTitle": "Anda tiada dalam album ini",
+      "goneBody": "Album ini mungkin telah dipadam, atau anda telah keluar atau dikeluarkan. Minta pautan jemputan baharu untuk menyertai semula."
+    },
+    "people": {
+      "title": "Orang",
+      "count": "{count, plural, other {# orang}}",
+      "you": "Anda",
+      "joined": "Telah sertai",
+      "left": "Keluar",
+      "unnamed": "Rakan",
+      "rename": "Tukar nama",
+      "yourName": "Nama anda",
+      "nameTaken": "Sudah ada orang dengan nama itu di sini.",
+      "invite": "Pautan jemputan",
+      "inviteInfo": "Sesiapa yang ada pautan ini boleh menyertai album. Sah selama 24 jam; Pautan baharu terus menghentikan pautan lama.",
+      "inviteShareTitle": "Sertai album kongsi saya",
+      "share": "Kongsi",
+      "copy": "Salin",
+      "copied": "Disalin",
+      "newLink": "Pautan baharu",
+      "simplify": "Ringkaskan hutang kumpulan",
+      "simplifyInfo": "Menggabungkan hutang dalam kumpulan supaya bayaran lebih sedikit. Jumlah yang dibayar atau diterima setiap orang tidak berubah.",
+      "leave": "Keluar album",
+      "leaveTitle": "Keluar daripada {name}?",
+      "leaveBody": "Bil anda kekal dalam album untuk orang lain, dan anda tidak boleh mengubahnya lagi.",
+      "remove": "Keluarkan",
+      "removeTitle": "Keluarkan {name} daripada album?",
+      "removeBody": "Dia tidak lagi menerima bil album ini. Bil yang ada namanya kekal."
+    },
+    "bill": {
+      "add": "Tambah bil",
+      "new": "Bil baharu",
+      "edit": "Edit bil",
+      "view": "Bil",
+      "amount": "Jumlah",
+      "currency": "Mata wang",
+      "inThisAlbum": "Dalam album ini",
+      "allCurrencies": "Semua mata wang",
+      "note": "Untuk apa?",
+      "notePlaceholder": "Untuk apa?",
+      "category": "Kategori",
+      "ownCategory": "Dalam {name}",
+      "date": "Tarikh",
+      "paidBy": "Dibayar oleh",
+      "save": "Simpan",
+      "saved": "Bil disimpan",
+      "added": "Bil ditambah",
+      "deleted": "Bil dipadam",
+      "delete": "Padam",
+      "deleteTitle": "Padam bil ini?",
+      "deleteBody": "Ia dibuang untuk semua orang dalam album.",
+      "deleteBodyPaid": "Ia dibuang untuk semua orang dalam album. Bayaran padanya kekal, dan apa-apa yang sudah dibayar perlu dipulangkan.",
+      "paidEditTitle": "Bil ini ada bayaran",
+      "paidEditBody": "Bayaran kekal. Jika sesuatu bahagian menjadi kurang daripada jumlah yang sudah dibayar, bezanya perlu dipulangkan.",
+      "payments": "Bayaran",
+      "paymentLine": "{from} membayar {to} {amount}",
+      "shared": "Album kongsi",
+      "untitled": "Bil",
+      "youPaid": "Anda membayar",
+      "youLent": "Anda membayar · anda meminjamkan {amount}",
+      "theyPaidYourShare": "{name} membayar · bahagian anda {amount}",
+      "notInvolved": "{name} membayar · bukan bil anda",
+      "emptyTitle": "Belum ada bil",
+      "emptyBody": "Tambah yang pertama: berapa harganya, siapa yang membayar dan dibahagi dengan siapa."
+    },
+    "split": {
+      "evenly": "Bahagi sama rata",
+      "by": "Bahagi mengikut",
+      "amount": "Jumlah",
+      "amountHint": "Taip bayaran setiap orang",
+      "percentHint": "Beri setiap orang peratusan bil",
+      "shares": "Bahagian",
+      "sharesHint": "2 bahagian bayar dua kali ganda 1",
+      "adjustHint": "Bahagi sama rata, kemudian tambah atau tolak untuk seseorang",
+      "valueFor": "Bahagian {name}",
+      "enterAmount": "Masukkan jumlah",
+      "youOwe": "Anda berhutang {amount} kepada {name}",
+      "youLent": "Anda meminjamkan {amount}",
+      "justYou": "Hanya bahagian anda sendiri",
+      "notYou": "Antara orang lain; {name} membayar",
+      "left": "{amount} lagi untuk dibahagi",
+      "over": "Lebih {amount}",
+      "percent": "{given}% daripada 100%",
+      "noShares": "Beri seseorang satu bahagian",
+      "adjustOver": "Pelarasan melebihi bil",
+      "nobody": "Pilih dengan siapa untuk dibahagi",
+      "nobodyElse": "Belum ada orang lain yang menyertai. Kongsi pautan jemputan dari Orang."
+    },
+    "settle": {
+      "payTitle": "Bayar {name}",
+      "receivedTitle": "{name} membayar anda",
+      "othersTitle": "Rekod bayaran",
+      "amount": "Jumlah dibayar",
+      "owed": "Terhutang: {amount}",
+      "record": "Rekod bayaran",
+      "recorded": "Direkod: {from} membayar {to} {amount}",
+      "note": "Ini hanya merekod bayaran. Hantar wang seperti biasa.",
+      "othersNote": "Rekod ini hanya jika {from} benar-benar telah membayar {to}."
+    },
+    "balances": {
+      "youOwe": "Anda berhutang",
+      "youAreOwed": "Anda akan terima",
+      "settled": "Semua sudah selesai",
+      "emptyTitle": "Belum ada baki",
+      "emptyBody": "Tambah bil dan anda akan nampak siapa berhutang kepada siapa di sini.",
+      "whoOwesWhom": "Siapa berhutang kepada siapa",
+      "youOweName": "Anda berhutang kepada {name}",
+      "owesYou": "{name} berhutang kepada anda",
+      "owes": "{from} berhutang kepada {to}",
+      "settledUp": "Selesai",
+      "groupSpending": "Perbelanjaan kumpulan",
+      "total": "Jumlah",
+      "youPaid": "Anda membayar",
+      "yourShare": "Bahagian anda"
+    },
+    "breakdown": {
+      "showing": "Menunjukkan",
+      "everyone": "Semua",
+      "total": "Jumlah",
+      "bills": "{count, plural, other {# bil}}",
+      "emptyTitle": "Belum ada apa-apa untuk dipecahkan"
+    },
+    "activity": {
+      "showAll": "Tunjukkan semua {count}",
+      "showLess": "Tunjukkan kurang"
+    },
+    "errors": {
+      "generic": "Ada masalah. Cuba lagi.",
+      "network": "Tidak dapat menghubungi Money2Time. Semak sambungan anda dan cuba lagi.",
+      "networkTitle": "Anda nampaknya di luar talian",
+      "rateLimited": "Terlalu banyak cubaan. Tunggu seminit dan cuba lagi.",
+      "captcha": "Kami tidak dapat mengesahkan permintaan ini. Muat semula halaman dan cuba lagi.",
+      "signedOut": "Log masuk semula untuk mengubah album ini.",
+      "notMember": "Anda tidak lagi dalam album ini, jadi anda tidak boleh mengubahnya.",
+      "busy": "Orang lain sedang mengubah album ini. Cuba lagi sebentar nanti.",
+      "saveFailed": "Tidak dapat menyimpan perubahan pada album ini. Cuba lagi."
     }
   }
 }

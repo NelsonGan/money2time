@@ -7,6 +7,7 @@ import type { Env } from '../src/env.ts';
 import { createHash } from 'node:crypto';
 
 import { ledgerForMedia, previewInvite, routeLedgers } from '../src/ledgers.ts';
+import { ledgerStamp, notifyUsers } from '../src/live.ts';
 
 /**
  * Real SQL against the D1 schema. Every database call takes one tick of a
@@ -291,4 +292,39 @@ test('an account starts sharing only so many albums in a day', async (t) => {
   // Another account is counted on its own.
   const other = await share('member', { ledgerId: 'album-2000', name: 'Trip', kind: 'album' });
   assert.equal(other.status, 501);
+});
+
+test('an album read answers "unchanged" from its change stamp, without opening its database', async (t) => {
+  const { env, addAlbum } = fixture(t, []);
+  addAlbum();
+  const read = async (since: string) => {
+    const url = new URL(`https://worker.example/v1/ledgers/trip/album?since=${since}`);
+    const response = await routeLedgers(new Request(url), url, env, {
+      id: 'owner',
+      email: 'owner@example.test',
+      name: 'Mei',
+    });
+    return { status: response?.status, body: await response?.json() };
+  };
+  // Before any change the stamp is 0; the group's database is never asked.
+  assert.deepEqual(await read('0'), { status: 200, body: { unchanged: true, stamp: '0' } });
+
+  // Every notice to its phones moves it on, even two in the same millisecond.
+  await notifyUsers(env, ['owner'], 'trip', null);
+  const first = await ledgerStamp(env, 'trip');
+  await notifyUsers(env, ['owner'], 'trip', null, 'access');
+  const second = await ledgerStamp(env, 'trip');
+  assert.ok(Number(first) > 0 && Number(second) > Number(first));
+  assert.deepEqual(await read(String(second)), {
+    status: 200,
+    body: { unchanged: true, stamp: second },
+  });
+
+  // The personal channel, a plain shared ledger and one that is gone are passed over.
+  await notifyUsers(env, ['owner'], 'personal', null);
+  await notifyUsers(env, ['owner'], 'share', null);
+  await notifyUsers(env, ['owner'], 'gone', null);
+  assert.equal(await ledgerStamp(env, 'share'), '0');
+  assert.equal(await ledgerStamp(env, 'gone'), '0');
+  assert.equal(await ledgerStamp(env, 'trip'), second);
 });

@@ -50,6 +50,10 @@
     "dashboard": {
       "title": "Webbpanel - Money2Time",
       "description": "Skanna med telefonen för att se din Money2Time-data på en stor skärm: utgifter, nettoförmögenhet, budgetar och timmarna bakom varje köp. End-to-end-krypterat, inget lagras online."
+    },
+    "album": {
+      "title": "Gå med i mitt delade album · Money2Time",
+      "description": "Dela reseutgifter och se vem som är skyldig vem. Gratis, direkt i webbläsaren, ingen app behövs."
     }
   },
   "common": {
@@ -2216,6 +2220,226 @@
     "dropdown": {
       "search": "Sök",
       "noMatch": "Inga träffar"
+    }
+  },
+  "album": {
+    "untitled": "Delat album",
+    "someone": "Någon",
+    "cancel": "Avbryt",
+    "save": "Spara",
+    "undo": "Ångra",
+    "retry": "Försök igen",
+    "today": "Idag",
+    "signOut": "Logga ut",
+    "tabs": {
+      "transactions": "Transaktioner",
+      "breakdown": "Fördelning",
+      "balances": "Saldon"
+    },
+    "categories": {
+      "food": "Mat",
+      "groceries": "Matvaror",
+      "transport": "Transport",
+      "housing": "Boende",
+      "bills": "Räkningar",
+      "healthcare": "Hälsovård",
+      "shopping": "Shopping",
+      "other": "Övrigt"
+    },
+    "signIn": {
+      "email": "Fortsätt med e-post",
+      "emailLabel": "E-postadress",
+      "emailPlaceholder": "du@exempel.se",
+      "badEmail": "Ange en giltig e-postadress.",
+      "sendCode": "Skicka kod",
+      "codeSent": "Ange den sexsiffriga koden vi skickade till <strong>{email}</strong>.",
+      "codeLabel": "Inloggningskod",
+      "verify": "Logga in",
+      "resend": "Skicka en ny kod",
+      "otherEmail": "Använd en annan e-post",
+      "otherWays": "Andra sätt att logga in",
+      "wrongCode": "Koden fungerade inte. Kontrollera den eller skicka en ny."
+    },
+    "home": {
+      "title": "Dina delade album",
+      "landingTitle": "Dela reseutgifter med vänner",
+      "landingBody": "Lägg till vad du betalade, se vem som är skyldig vem och gör upp. Gratis, direkt i webbläsaren.",
+      "emptyTitle": "Inga delade album än",
+      "emptyBody": "Öppna inbjudningslänken som en vän skickade för att gå med i albumet. Album skapas i Money2Time-appen.",
+      "yours": "Ditt"
+    },
+    "join": {
+      "eyebrow": "Delat album",
+      "invitedBy": "{name} bjöd in dig att dela notor",
+      "signInTitle": "Logga in för att gå med",
+      "signInBody": "Gratis och ingen app behövs: allt fungerar här.",
+      "nameLabel": "Ditt namn i det här albumet",
+      "join": "Gå med i album",
+      "signedInAs": "Inloggad som {email}.",
+      "haveApp": "Har du Money2Time-appen?",
+      "openInApp": "Öppna i appen",
+      "expiredTitle": "Inbjudningslänken har gått ut",
+      "expiredBody": "Inbjudningslänkar gäller i 24 timmar. Be {name} att skicka en ny.",
+      "ledgerTitle": "Den här länken gäller en delad kassabok",
+      "ledgerBody": "Delade kassaböcker finns bara i Money2Time-appen. Öppna länken där för att gå med.",
+      "full": "Albumet är fullt. Be ägaren att göra plats."
+    },
+    "joined": {
+      "eyebrow": "Du är med",
+      "title": "Välkommen till {name}",
+      "body": "Lägg till vad du betalade och se vem som är skyldig vem. Du kan fortsätta här eller byta till appen när du vill.",
+      "web": "Fortsätt på webben"
+    },
+    "app": {
+      "title": "Skaffa Money2Time-appen",
+      "body": "Logga in med samma konto så följer dina delade album med, inklusive allt du har lagt till här."
+    },
+    "banner": {
+      "title": "Enklare i appen",
+      "body": "Samma konto, samma album",
+      "get": "Hämta",
+      "dismiss": "Inte nu"
+    },
+    "album": {
+      "sections": "Albumets delar",
+      "signInTitle": "Logga in för att se albumet",
+      "signInBody": "Använd kontot du gick med i det med.",
+      "goneTitle": "Du är inte med i det här albumet",
+      "goneBody": "Det kan ha raderats, eller så har du lämnat det eller tagits bort. Be om en ny inbjudningslänk för att gå med igen."
+    },
+    "people": {
+      "title": "Personer",
+      "count": "{count, plural, one {# person} other {# personer}}",
+      "you": "Du",
+      "joined": "Har gått med",
+      "left": "Lämnat",
+      "unnamed": "Vän",
+      "rename": "Byt namn",
+      "yourName": "Ditt namn",
+      "nameTaken": "Någon här har redan det namnet.",
+      "invite": "Inbjudningslänk",
+      "inviteInfo": "Alla som har länken kan gå med i albumet. Den gäller i 24 timmar; Ny länk stoppar den gamla direkt.",
+      "inviteShareTitle": "Gå med i mitt delade album",
+      "share": "Dela",
+      "copy": "Kopiera",
+      "copied": "Kopierat",
+      "newLink": "Ny länk",
+      "simplify": "Förenkla gruppens skulder",
+      "simplifyInfo": "Slår ihop skulderna i gruppen så att det blir färre betalningar. Ingen betalar eller får mer totalt.",
+      "leave": "Lämna album",
+      "leaveTitle": "Lämna {name}?",
+      "leaveBody": "Dina notor ligger kvar i albumet för de andra, och du kan inte längre ändra det.",
+      "remove": "Ta bort",
+      "removeTitle": "Ta bort {name} från albumet?",
+      "removeBody": "De får inte längre albumets notor. Notorna de finns på ligger kvar."
+    },
+    "bill": {
+      "add": "Lägg till nota",
+      "new": "Ny nota",
+      "edit": "Redigera nota",
+      "view": "Nota",
+      "amount": "Belopp",
+      "currency": "Valuta",
+      "inThisAlbum": "I det här albumet",
+      "allCurrencies": "Alla valutor",
+      "note": "Vad var det för?",
+      "notePlaceholder": "Vad var det för?",
+      "category": "Kategori",
+      "ownCategory": "Under {name}",
+      "date": "Datum",
+      "paidBy": "Betalt av",
+      "save": "Spara",
+      "saved": "Notan sparad",
+      "added": "Notan tillagd",
+      "deleted": "Notan raderad",
+      "delete": "Radera",
+      "deleteTitle": "Radera den här notan?",
+      "deleteBody": "Den försvinner för alla i albumet.",
+      "deleteBodyPaid": "Den försvinner för alla i albumet. Betalningarna finns kvar, och det som redan har betalats ska betalas tillbaka.",
+      "paidEditTitle": "Notan har betalningar",
+      "paidEditBody": "Betalningarna finns kvar. Blir en andel mindre än det som redan har betalats ska skillnaden betalas tillbaka.",
+      "payments": "Betalningar",
+      "paymentLine": "{from} betalade {to} {amount}",
+      "shared": "Delat album",
+      "untitled": "Nota",
+      "youPaid": "Du betalade",
+      "youLent": "Du betalade · du lånade ut {amount}",
+      "theyPaidYourShare": "{name} betalade · din andel {amount}",
+      "notInvolved": "{name} betalade · inte din nota",
+      "emptyTitle": "Inga notor än",
+      "emptyBody": "Lägg till den första: vad den kostade, vem som betalade och vilka den delas med."
+    },
+    "split": {
+      "evenly": "Dela lika",
+      "by": "Dela efter",
+      "amount": "Belopp",
+      "amountHint": "Skriv vad varje person betalar",
+      "percentHint": "Ge varje person en procentandel av notan",
+      "shares": "Andelar",
+      "sharesHint": "2 andelar betalar dubbelt så mycket som 1",
+      "adjustHint": "Dela lika och lägg sedan till eller dra av för någon",
+      "valueFor": "{name}s del",
+      "enterAmount": "Ange beloppet",
+      "youOwe": "Du är skyldig {name} {amount}",
+      "youLent": "Du lånade ut {amount}",
+      "justYou": "Bara din egen andel",
+      "notYou": "Mellan de andra; {name} betalade",
+      "left": "{amount} kvar att fördela",
+      "over": "{amount} för mycket",
+      "percent": "{given} % av 100 %",
+      "noShares": "Ge någon en andel",
+      "adjustOver": "Justeringarna är större än notan",
+      "nobody": "Välj vilka den delas med",
+      "nobodyElse": "Ingen annan har gått med än. Dela inbjudningslänken under Personer."
+    },
+    "settle": {
+      "payTitle": "Betala {name}",
+      "receivedTitle": "{name} betalade dig",
+      "othersTitle": "Registrera en betalning",
+      "amount": "Betalt belopp",
+      "owed": "Skuld: {amount}",
+      "record": "Registrera betalning",
+      "recorded": "Registrerat: {from} betalade {to} {amount}",
+      "note": "Det här registrerar bara betalningen. Skicka pengarna som du brukar.",
+      "othersNote": "Registrera bara detta om {from} verkligen har betalat {to}."
+    },
+    "balances": {
+      "youOwe": "Du är skyldig",
+      "youAreOwed": "Du har att få",
+      "settled": "Allt är reglerat",
+      "emptyTitle": "Inga saldon än",
+      "emptyBody": "Lägg till en nota så ser du här vem som är skyldig vem.",
+      "whoOwesWhom": "Vem är skyldig vem",
+      "youOweName": "Du är skyldig {name}",
+      "owesYou": "{name} är skyldig dig",
+      "owes": "{from} är skyldig {to}",
+      "settledUp": "Reglerat",
+      "groupSpending": "Gruppens utgifter",
+      "total": "Totalt",
+      "youPaid": "Du betalade",
+      "yourShare": "Din andel"
+    },
+    "breakdown": {
+      "showing": "Visar",
+      "everyone": "Alla",
+      "total": "Totalt",
+      "bills": "{count, plural, one {# nota} other {# notor}}",
+      "emptyTitle": "Inget att fördela än"
+    },
+    "activity": {
+      "showAll": "Visa alla {count}",
+      "showLess": "Visa färre"
+    },
+    "errors": {
+      "generic": "Något gick fel. Försök igen.",
+      "network": "Når inte Money2Time. Kontrollera anslutningen och försök igen.",
+      "networkTitle": "Du verkar vara offline",
+      "rateLimited": "För många försök. Vänta en minut och försök igen.",
+      "captcha": "Vi kunde inte kontrollera begäran. Ladda om sidan och försök igen.",
+      "signedOut": "Logga in igen för att ändra albumet.",
+      "notMember": "Du är inte längre med i albumet, så du kan inte ändra det.",
+      "busy": "Någon annan ändrar albumet just nu. Försök igen om en stund.",
+      "saveFailed": "Det gick inte att spara ändringen i albumet. Försök igen."
     }
   }
 }

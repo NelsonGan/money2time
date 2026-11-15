@@ -50,6 +50,10 @@
     "dashboard": {
       "title": "Tableau de bord web - Money2Time",
       "description": "Scannez avec votre téléphone pour voir vos données Money2Time sur grand écran : dépenses, patrimoine net, budgets et les heures derrière chaque achat. Chiffré de bout en bout, rien n'est stocké en ligne."
+    },
+    "album": {
+      "title": "Rejoignez mon album partagé · Money2Time",
+      "description": "Partagez les frais de voyage et voyez qui doit à qui. Gratuit, dans votre navigateur, sans app."
     }
   },
   "common": {
@@ -2216,6 +2220,226 @@
     "dropdown": {
       "search": "Rechercher",
       "noMatch": "Aucun résultat"
+    }
+  },
+  "album": {
+    "untitled": "Album partagé",
+    "someone": "Quelqu'un",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "undo": "Annuler",
+    "retry": "Réessayer",
+    "today": "Aujourd'hui",
+    "signOut": "Se déconnecter",
+    "tabs": {
+      "transactions": "Transactions",
+      "breakdown": "Répartition",
+      "balances": "Soldes"
+    },
+    "categories": {
+      "food": "Alimentation",
+      "groceries": "Courses",
+      "transport": "Transport",
+      "housing": "Logement",
+      "bills": "Factures",
+      "healthcare": "Santé",
+      "shopping": "Shopping",
+      "other": "Autre"
+    },
+    "signIn": {
+      "email": "Continuer avec un e-mail",
+      "emailLabel": "Adresse e-mail",
+      "emailPlaceholder": "vous@exemple.com",
+      "badEmail": "Saisissez une adresse e-mail valide.",
+      "sendCode": "Envoyer le code",
+      "codeSent": "Saisissez le code à 6 chiffres envoyé à <strong>{email}</strong>.",
+      "codeLabel": "Code de connexion",
+      "verify": "Se connecter",
+      "resend": "Envoyer un nouveau code",
+      "otherEmail": "Utiliser un autre e-mail",
+      "otherWays": "Autres moyens de connexion",
+      "wrongCode": "Ce code n'a pas fonctionné. Vérifiez-le ou demandez-en un nouveau."
+    },
+    "home": {
+      "title": "Vos albums partagés",
+      "landingTitle": "Partagez les frais de voyage entre amis",
+      "landingBody": "Ajoutez ce que vous avez payé, voyez qui doit à qui et réglez vos comptes. Gratuit, directement dans votre navigateur.",
+      "emptyTitle": "Aucun album partagé pour l'instant",
+      "emptyBody": "Ouvrez le lien d'invitation qu'un ami vous a envoyé pour rejoindre son album. Les albums se créent dans l'app Money2Time.",
+      "yours": "À vous"
+    },
+    "join": {
+      "eyebrow": "Album partagé",
+      "invitedBy": "{name} vous invite à partager des notes",
+      "signInTitle": "Connectez-vous pour rejoindre",
+      "signInBody": "Gratuit, sans app : tout fonctionne ici.",
+      "nameLabel": "Votre nom dans cet album",
+      "join": "Rejoindre l'album",
+      "signedInAs": "Connecté en tant que {email}.",
+      "haveApp": "Vous avez l'app Money2Time ?",
+      "openInApp": "Ouvrir dans l'app",
+      "expiredTitle": "Ce lien d'invitation a expiré",
+      "expiredBody": "Les liens d'invitation sont valables 24 heures. Demandez-en un nouveau à {name}.",
+      "ledgerTitle": "Ce lien concerne un registre partagé",
+      "ledgerBody": "Les registres partagés existent uniquement dans l'app Money2Time. Ouvrez le lien dans l'app pour rejoindre.",
+      "full": "Cet album est complet. Demandez à son propriétaire de faire de la place."
+    },
+    "joined": {
+      "eyebrow": "C'est fait",
+      "title": "Bienvenue dans {name}",
+      "body": "Ajoutez ce que vous avez payé et voyez qui doit à qui. Continuez ici, ou passez à l'app quand vous voulez.",
+      "web": "Continuer sur le web"
+    },
+    "app": {
+      "title": "Téléchargez l'app Money2Time",
+      "body": "Connectez-vous avec le même compte : vos albums partagés vous suivent, avec tout ce que vous avez ajouté ici."
+    },
+    "banner": {
+      "title": "Plus simple dans l'app",
+      "body": "Même compte, mêmes albums",
+      "get": "Obtenir",
+      "dismiss": "Pas maintenant"
+    },
+    "album": {
+      "sections": "Sections de l'album",
+      "signInTitle": "Connectez-vous pour voir cet album",
+      "signInBody": "Utilisez le compte avec lequel vous l'avez rejoint.",
+      "goneTitle": "Vous ne faites pas partie de cet album",
+      "goneBody": "Il a peut-être été supprimé, ou vous l'avez quitté ou en avez été retiré. Demandez un nouveau lien d'invitation pour le rejoindre à nouveau."
+    },
+    "people": {
+      "title": "Personnes",
+      "count": "{count, plural, one {# personne} other {# personnes}}",
+      "you": "Vous",
+      "joined": "A rejoint",
+      "left": "Parti",
+      "unnamed": "Ami",
+      "rename": "Renommer",
+      "yourName": "Votre nom",
+      "nameTaken": "Quelqu'un porte déjà ce nom ici.",
+      "invite": "Lien d'invitation",
+      "inviteInfo": "Toute personne ayant ce lien peut rejoindre l'album. Il est valable 24 heures ; Nouveau lien désactive aussitôt l'ancien.",
+      "inviteShareTitle": "Rejoignez mon album partagé",
+      "share": "Partager",
+      "copy": "Copier",
+      "copied": "Copié",
+      "newLink": "Nouveau lien",
+      "simplify": "Simplifier les dettes du groupe",
+      "simplifyInfo": "Regroupe les dettes du groupe pour qu'il y ait moins de paiements à faire. Personne ne paie ni ne reçoit plus au total.",
+      "leave": "Quitter l'album",
+      "leaveTitle": "Quitter {name} ?",
+      "leaveBody": "Vos notes restent dans l'album pour les autres, et vous ne pourrez plus le modifier.",
+      "remove": "Retirer",
+      "removeTitle": "Retirer {name} de l'album ?",
+      "removeBody": "Cette personne ne recevra plus les notes de cet album. Les notes où elle figure restent."
+    },
+    "bill": {
+      "add": "Ajouter une note",
+      "new": "Nouvelle note",
+      "edit": "Modifier la note",
+      "view": "Note",
+      "amount": "Montant",
+      "currency": "Devise",
+      "inThisAlbum": "Dans cet album",
+      "allCurrencies": "Toutes les devises",
+      "note": "C'était pour quoi ?",
+      "notePlaceholder": "C'était pour quoi ?",
+      "category": "Catégorie",
+      "ownCategory": "Classée dans {name}",
+      "date": "Date",
+      "paidBy": "Payé par",
+      "save": "Enregistrer",
+      "saved": "Note enregistrée",
+      "added": "Note ajoutée",
+      "deleted": "Note supprimée",
+      "delete": "Supprimer",
+      "deleteTitle": "Supprimer cette note ?",
+      "deleteBody": "Elle est retirée pour tout le monde dans l'album.",
+      "deleteBodyPaid": "Elle est retirée pour tout le monde dans l'album. Les paiements restent, et ce qui a déjà été payé devra être remboursé.",
+      "paidEditTitle": "Cette note a des paiements",
+      "paidEditBody": "Les paiements restent. Si une part passe sous ce qui a déjà été payé, la différence devra être remboursée.",
+      "payments": "Paiements",
+      "paymentLine": "{from} a payé {amount} à {to}",
+      "shared": "Album partagé",
+      "untitled": "Note",
+      "youPaid": "Vous avez payé",
+      "youLent": "Vous avez payé · vous avez avancé {amount}",
+      "theyPaidYourShare": "{name} a payé · votre part {amount}",
+      "notInvolved": "{name} a payé · pas votre note",
+      "emptyTitle": "Aucune note pour l'instant",
+      "emptyBody": "Ajoutez la première : son coût, qui a payé et avec qui la partager."
+    },
+    "split": {
+      "evenly": "Partager équitablement",
+      "by": "Partager par",
+      "amount": "Montant",
+      "amountHint": "Saisissez ce que paie chaque personne",
+      "percentHint": "Donnez à chacun un pourcentage de la note",
+      "shares": "Parts",
+      "sharesHint": "2 parts paient deux fois plus que 1",
+      "adjustHint": "Partager équitablement, puis ajouter ou retirer pour quelqu'un",
+      "valueFor": "Part de {name}",
+      "enterAmount": "Saisissez le montant",
+      "youOwe": "Vous devez {amount} à {name}",
+      "youLent": "Vous avez avancé {amount}",
+      "justYou": "Uniquement votre propre part",
+      "notYou": "Entre les autres ; {name} a payé",
+      "left": "Reste {amount} à partager",
+      "over": "Dépassement de {amount}",
+      "percent": "{given} % sur 100 %",
+      "noShares": "Donnez une part à quelqu'un",
+      "adjustOver": "Les ajustements dépassent la note",
+      "nobody": "Choisissez avec qui partager",
+      "nobodyElse": "Personne d'autre n'a encore rejoint. Partagez le lien d'invitation depuis Personnes."
+    },
+    "settle": {
+      "payTitle": "Payer {name}",
+      "receivedTitle": "{name} vous a payé",
+      "othersTitle": "Enregistrer un paiement",
+      "amount": "Montant payé",
+      "owed": "Dû : {amount}",
+      "record": "Enregistrer le paiement",
+      "recorded": "Enregistré : {from} a payé {amount} à {to}",
+      "note": "Ceci enregistre seulement le paiement. Envoyez l'argent comme d'habitude.",
+      "othersNote": "Enregistrez-le seulement si {from} a vraiment payé {to}."
+    },
+    "balances": {
+      "youOwe": "Vous devez",
+      "youAreOwed": "On vous doit",
+      "settled": "Tout est réglé pour vous",
+      "emptyTitle": "Aucun solde pour l'instant",
+      "emptyBody": "Ajoutez une note pour voir ici qui doit à qui.",
+      "whoOwesWhom": "Qui doit à qui",
+      "youOweName": "Vous devez à {name}",
+      "owesYou": "{name} vous doit",
+      "owes": "{from} doit à {to}",
+      "settledUp": "Réglé",
+      "groupSpending": "Dépenses du groupe",
+      "total": "Total",
+      "youPaid": "Vous avez payé",
+      "yourShare": "Votre part"
+    },
+    "breakdown": {
+      "showing": "Affichage",
+      "everyone": "Tout le monde",
+      "total": "Total",
+      "bills": "{count, plural, one {# note} other {# notes}}",
+      "emptyTitle": "Rien à répartir pour l'instant"
+    },
+    "activity": {
+      "showAll": "Tout afficher ({count})",
+      "showLess": "Afficher moins"
+    },
+    "errors": {
+      "generic": "Un problème est survenu. Réessayez.",
+      "network": "Impossible de joindre Money2Time. Vérifiez votre connexion et réessayez.",
+      "networkTitle": "Vous semblez hors ligne",
+      "rateLimited": "Trop d'essais. Patientez une minute et réessayez.",
+      "captcha": "Impossible de vérifier la demande. Rechargez la page et réessayez.",
+      "signedOut": "Reconnectez-vous pour modifier cet album.",
+      "notMember": "Vous ne faites plus partie de cet album et ne pouvez donc plus le modifier.",
+      "busy": "Quelqu'un d'autre modifie cet album. Réessayez dans un instant.",
+      "saveFailed": "Impossible d'enregistrer la modification de cet album. Réessayez."
     }
   }
 }

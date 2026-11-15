@@ -50,6 +50,10 @@
     "dashboard": {
       "title": "Webdashboard - Money2Time",
       "description": "Scan med din telefon for at se dine Money2Time-data på en stor skærm: forbrug, formue, budgetter og de timer, der ligger bag hvert køb. End-to-end-krypteret, intet gemt online."
+    },
+    "album": {
+      "title": "Deltag i mit delte album · Money2Time",
+      "description": "Del rejseudgifter med venner, og se hvem der skylder hvem. Gratis, direkte i din browser, ingen app nødvendig."
     }
   },
   "common": {
@@ -2216,6 +2220,226 @@
     "dropdown": {
       "search": "Søg",
       "noMatch": "Ingen resultater"
+    }
+  },
+  "album": {
+    "untitled": "Delt album",
+    "someone": "Nogen",
+    "cancel": "Annuller",
+    "save": "Gem",
+    "undo": "Fortryd",
+    "retry": "Prøv igen",
+    "today": "I dag",
+    "signOut": "Log ud",
+    "tabs": {
+      "transactions": "Transaktioner",
+      "breakdown": "Fordeling",
+      "balances": "Saldi"
+    },
+    "categories": {
+      "food": "Mad",
+      "groceries": "Dagligvarer",
+      "transport": "Transport",
+      "housing": "Bolig",
+      "bills": "Regninger",
+      "healthcare": "Sundhed",
+      "shopping": "Shopping",
+      "other": "Andet"
+    },
+    "signIn": {
+      "email": "Fortsæt med e-mail",
+      "emailLabel": "E-mailadresse",
+      "emailPlaceholder": "dig@eksempel.dk",
+      "badEmail": "Indtast en gyldig e-mailadresse.",
+      "sendCode": "Send kode",
+      "codeSent": "Indtast den 6-cifrede kode, vi har sendt til <strong>{email}</strong>.",
+      "codeLabel": "Login-kode",
+      "verify": "Log ind",
+      "resend": "Send en ny kode",
+      "otherEmail": "Brug en anden e-mail",
+      "otherWays": "Andre måder at logge ind på",
+      "wrongCode": "Koden virkede ikke. Tjek den, eller send en ny."
+    },
+    "home": {
+      "title": "Dine delte album",
+      "landingTitle": "Del rejseudgifter med venner",
+      "landingBody": "Tilføj det, du har betalt, se hvem der skylder hvem, og afregn. Gratis, direkte her i din browser.",
+      "emptyTitle": "Ingen delte album endnu",
+      "emptyBody": "Åbn det invitationslink, en ven har sendt dig, for at blive en del af vedkommendes album. Album oprettes i Money2Time-appen.",
+      "yours": "Dit"
+    },
+    "join": {
+      "eyebrow": "Delt album",
+      "invitedBy": "{name} har inviteret dig til at dele regninger",
+      "signInTitle": "Log ind for at deltage",
+      "signInBody": "Gratis og uden app: Alt virker lige her.",
+      "nameLabel": "Dit navn i dette album",
+      "join": "Deltag i album",
+      "signedInAs": "Logget ind som {email}.",
+      "haveApp": "Har du Money2Time-appen?",
+      "openInApp": "Åbn i appen",
+      "expiredTitle": "Dette invitationslink er udløbet",
+      "expiredBody": "Invitationslinks virker i 24 timer. Bed {name} om at sende et nyt.",
+      "ledgerTitle": "Dette link er til et delt regnskab",
+      "ledgerBody": "Delte regnskaber findes kun i Money2Time-appen. Åbn linket der for at deltage.",
+      "full": "Dette album er fuldt. Bed ejeren om at gøre plads."
+    },
+    "joined": {
+      "eyebrow": "Du er med",
+      "title": "Velkommen til {name}",
+      "body": "Tilføj det, du har betalt, og se hvem der skylder hvem. Du kan fortsætte her eller skifte til appen når som helst.",
+      "web": "Fortsæt på nettet"
+    },
+    "app": {
+      "title": "Hent Money2Time-appen",
+      "body": "Log ind med den samme konto, så følger dine delte album med, inklusive alt det, du har tilføjet her."
+    },
+    "banner": {
+      "title": "Nemmere i appen",
+      "body": "Samme konto, samme album",
+      "get": "Hent",
+      "dismiss": "Ikke nu"
+    },
+    "album": {
+      "sections": "Albummets sektioner",
+      "signInTitle": "Log ind for at se dette album",
+      "signInBody": "Brug den konto, du deltog med.",
+      "goneTitle": "Du er ikke med i dette album",
+      "goneBody": "Det er måske blevet slettet, eller du har forladt det eller er blevet fjernet. Bed om et nyt invitationslink for at deltage igen."
+    },
+    "people": {
+      "title": "Personer",
+      "count": "{count, plural, one {# person} other {# personer}}",
+      "you": "Dig",
+      "joined": "Deltager",
+      "left": "Forladt",
+      "unnamed": "Ven",
+      "rename": "Omdøb",
+      "yourName": "Dit navn",
+      "nameTaken": "En person her har allerede det navn.",
+      "invite": "Invitationslink",
+      "inviteInfo": "Alle med dette link kan deltage i albummet. Det virker i 24 timer; Nyt link stopper det gamle med det samme.",
+      "inviteShareTitle": "Deltag i mit delte album",
+      "share": "Del",
+      "copy": "Kopier",
+      "copied": "Kopieret",
+      "newLink": "Nyt link",
+      "simplify": "Forenkl gruppens gæld",
+      "simplifyInfo": "Samler gælden i gruppen, så der skal laves færre betalinger. Ingen betaler eller får mere i alt.",
+      "leave": "Forlad album",
+      "leaveTitle": "Forlad {name}?",
+      "leaveBody": "Dine regninger bliver i albummet for de andre, og du kan ikke længere ændre det.",
+      "remove": "Fjern",
+      "removeTitle": "Fjern {name} fra albummet?",
+      "removeBody": "De får ikke længere albummets regninger. De regninger, de står på, bliver."
+    },
+    "bill": {
+      "add": "Tilføj regning",
+      "new": "Ny regning",
+      "edit": "Rediger regning",
+      "view": "Regning",
+      "amount": "Beløb",
+      "currency": "Valuta",
+      "inThisAlbum": "I dette album",
+      "allCurrencies": "Alle valutaer",
+      "note": "Hvad var det til?",
+      "notePlaceholder": "Hvad var det til?",
+      "category": "Kategori",
+      "ownCategory": "Under {name}",
+      "date": "Dato",
+      "paidBy": "Betalt af",
+      "save": "Gem",
+      "saved": "Regning gemt",
+      "added": "Regning tilføjet",
+      "deleted": "Regning slettet",
+      "delete": "Slet",
+      "deleteTitle": "Slet denne regning?",
+      "deleteBody": "Den fjernes for alle i albummet.",
+      "deleteBodyPaid": "Den fjernes for alle i albummet. Betalingerne på den bliver stående, og det, der allerede er betalt, skal betales tilbage.",
+      "paidEditTitle": "Regningen har betalinger",
+      "paidEditBody": "Betalingerne bliver stående. Bliver en andel mindre end det, der allerede er betalt, skal forskellen betales tilbage.",
+      "payments": "Betalinger",
+      "paymentLine": "{from} betalte {to} {amount}",
+      "shared": "Delt album",
+      "untitled": "Regning",
+      "youPaid": "Du betalte",
+      "youLent": "Du betalte · du lånte {amount} ud",
+      "theyPaidYourShare": "{name} betalte · din andel {amount}",
+      "notInvolved": "{name} betalte · ikke din regning",
+      "emptyTitle": "Ingen regninger endnu",
+      "emptyBody": "Tilføj den første: hvad den kostede, hvem der betalte, og hvem den deles med."
+    },
+    "split": {
+      "evenly": "Del ligeligt",
+      "by": "Del efter",
+      "amount": "Beløb",
+      "amountHint": "Skriv, hvad hver person betaler",
+      "percentHint": "Giv hver person en procentdel af regningen",
+      "shares": "Andele",
+      "sharesHint": "2 andele betaler dobbelt så meget som 1",
+      "adjustHint": "Del ligeligt, og læg så til eller træk fra for nogen",
+      "valueFor": "{name}s del",
+      "enterAmount": "Indtast beløbet",
+      "youOwe": "Du skylder {name} {amount}",
+      "youLent": "Du lånte {amount} ud",
+      "justYou": "Kun din egen andel",
+      "notYou": "Mellem de andre; {name} betalte",
+      "left": "{amount} tilbage at dele",
+      "over": "Over med {amount}",
+      "percent": "{given} % af 100 %",
+      "noShares": "Giv nogen en andel",
+      "adjustOver": "Justeringerne er større end regningen",
+      "nobody": "Vælg, hvem den deles med",
+      "nobodyElse": "Ingen andre har tilsluttet sig endnu. Del invitationslinket fra Personer."
+    },
+    "settle": {
+      "payTitle": "Betal {name}",
+      "receivedTitle": "{name} betalte dig",
+      "othersTitle": "Registrer en betaling",
+      "amount": "Betalt beløb",
+      "owed": "Skyldes: {amount}",
+      "record": "Registrer betaling",
+      "recorded": "Registreret: {from} betalte {to} {amount}",
+      "note": "Dette registrerer kun betalingen. Send pengene, som du plejer.",
+      "othersNote": "Registrer kun dette, hvis {from} faktisk har betalt {to}."
+    },
+    "balances": {
+      "youOwe": "Du skylder",
+      "youAreOwed": "Du har til gode",
+      "settled": "Du er helt afregnet",
+      "emptyTitle": "Ingen saldi endnu",
+      "emptyBody": "Tilføj en regning, så ser du her, hvem der skylder hvem.",
+      "whoOwesWhom": "Hvem skylder hvem",
+      "youOweName": "Du skylder {name}",
+      "owesYou": "{name} skylder dig",
+      "owes": "{from} skylder {to}",
+      "settledUp": "Afregnet",
+      "groupSpending": "Gruppens forbrug",
+      "total": "I alt",
+      "youPaid": "Du betalte",
+      "yourShare": "Din andel"
+    },
+    "breakdown": {
+      "showing": "Viser",
+      "everyone": "Alle",
+      "total": "I alt",
+      "bills": "{count, plural, one {# regning} other {# regninger}}",
+      "emptyTitle": "Intet at fordele endnu"
+    },
+    "activity": {
+      "showAll": "Vis alle {count}",
+      "showLess": "Vis færre"
+    },
+    "errors": {
+      "generic": "Noget gik galt. Prøv igen.",
+      "network": "Kan ikke nå Money2Time. Tjek din forbindelse, og prøv igen.",
+      "networkTitle": "Du ser ud til at være offline",
+      "rateLimited": "For mange forsøg. Vent et minut, og prøv igen.",
+      "captcha": "Vi kunne ikke bekræfte anmodningen. Genindlæs siden, og prøv igen.",
+      "signedOut": "Log ind igen for at ændre albummet.",
+      "notMember": "Du er ikke længere med i albummet, så du kan ikke ændre det.",
+      "busy": "En anden ændrer albummet lige nu. Prøv igen om lidt.",
+      "saveFailed": "Ændringen i albummet kunne ikke gemmes. Prøv igen."
     }
   }
 }

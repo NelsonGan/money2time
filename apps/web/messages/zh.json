@@ -50,6 +50,10 @@
     "dashboard": {
       "title": "网页看板 - Money2Time",
       "description": "用手机扫码，在大屏幕上查看你的 Money2Time 数据：支出、净资产、预算，以及每笔购买背后的小时数。端到端加密，线上不存储任何内容。"
+    },
+    "album": {
+      "title": "加入我的共享相册 · Money2Time",
+      "description": "一起分摊旅行账单，看看谁欠谁。免费，直接在浏览器里用，无需应用。"
     }
   },
   "common": {
@@ -2216,6 +2220,226 @@
     "dropdown": {
       "search": "搜索",
       "noMatch": "没有匹配项"
+    }
+  },
+  "album": {
+    "untitled": "共享相册",
+    "someone": "某人",
+    "cancel": "取消",
+    "save": "保存",
+    "undo": "撤销",
+    "retry": "重试",
+    "today": "今天",
+    "signOut": "退出登录",
+    "tabs": {
+      "transactions": "交易",
+      "breakdown": "分类",
+      "balances": "结余"
+    },
+    "categories": {
+      "food": "餐饮",
+      "groceries": "日用品",
+      "transport": "交通",
+      "housing": "住房",
+      "bills": "账单",
+      "healthcare": "医疗",
+      "shopping": "购物",
+      "other": "其他"
+    },
+    "signIn": {
+      "email": "通过邮箱继续",
+      "emailLabel": "邮箱地址",
+      "emailPlaceholder": "you@example.com",
+      "badEmail": "请输入有效的邮箱地址。",
+      "sendCode": "发送验证码",
+      "codeSent": "请输入我们发送至 <strong>{email}</strong> 的 6 位验证码。",
+      "codeLabel": "登录验证码",
+      "verify": "登录",
+      "resend": "重新发送验证码",
+      "otherEmail": "使用其他邮箱",
+      "otherWays": "其他登录方式",
+      "wrongCode": "验证码无效。请检查一下，或重新发送。"
+    },
+    "home": {
+      "title": "你的共享相册",
+      "landingTitle": "和朋友分摊旅行账单",
+      "landingBody": "记下你付的钱，看看谁欠谁，然后结清。免费，直接在浏览器里用。",
+      "emptyTitle": "还没有共享相册",
+      "emptyBody": "打开朋友发给你的邀请链接，即可加入对方的相册。相册需在 Money2Time 应用中创建。",
+      "yours": "你的"
+    },
+    "join": {
+      "eyebrow": "共享相册",
+      "invitedBy": "{name} 邀请你一起分账",
+      "signInTitle": "登录后加入",
+      "signInBody": "免费，无需应用：在这里就能用。",
+      "nameLabel": "你在此相册中的名字",
+      "join": "加入相册",
+      "signedInAs": "已登录为 {email}。",
+      "haveApp": "已有 Money2Time 应用？",
+      "openInApp": "在应用中打开",
+      "expiredTitle": "此邀请链接已过期",
+      "expiredBody": "邀请链接 24 小时内有效。请让 {name} 重新发送一个。",
+      "ledgerTitle": "此链接属于共享账本",
+      "ledgerBody": "共享账本仅在 Money2Time 应用中提供。请在应用中打开链接加入。",
+      "full": "此相册已满。请相册所有者腾出位置。"
+    },
+    "joined": {
+      "eyebrow": "已加入",
+      "title": "欢迎加入 {name}",
+      "body": "记下你付的钱，看看谁欠谁。你可以继续在这里使用，也可以随时换到应用。",
+      "web": "继续使用网页版"
+    },
+    "app": {
+      "title": "下载 Money2Time 应用",
+      "body": "用同一个账号登录，你的共享相册都会同步过去，包括你在这里添加的所有内容。"
+    },
+    "banner": {
+      "title": "用应用更方便",
+      "body": "同一账号，同样的相册",
+      "get": "下载",
+      "dismiss": "暂不"
+    },
+    "album": {
+      "sections": "相册栏目",
+      "signInTitle": "登录后查看此相册",
+      "signInBody": "请使用你加入时的账号。",
+      "goneTitle": "你不在此相册中",
+      "goneBody": "相册可能已被删除，或你已退出或被移出。请索取新的邀请链接重新加入。"
+    },
+    "people": {
+      "title": "成员",
+      "count": "{count, plural, other {# 人}}",
+      "you": "你",
+      "joined": "已加入",
+      "left": "已退出",
+      "unnamed": "朋友",
+      "rename": "重命名",
+      "yourName": "你的名字",
+      "nameTaken": "这里已经有人叫这个名字了。",
+      "invite": "邀请链接",
+      "inviteInfo": "拿到此链接的人都可以加入相册。链接 24 小时内有效；点“新链接”会立即让旧链接失效。",
+      "inviteShareTitle": "加入我的共享相册",
+      "share": "分享",
+      "copy": "复制",
+      "copied": "已复制",
+      "newLink": "新链接",
+      "simplify": "简化群组欠款",
+      "simplifyInfo": "合并群组内的欠款，减少需要付款的次数。每个人应付或应收的总额不变。",
+      "leave": "退出相册",
+      "leaveTitle": "退出 {name}？",
+      "leaveBody": "你的账单会留在相册里供其他人查看，但你将无法再修改此相册。",
+      "remove": "移除",
+      "removeTitle": "将 {name} 移出相册？",
+      "removeBody": "对方将不再收到此相册的账单。包含对方的账单会保留。"
+    },
+    "bill": {
+      "add": "添加账单",
+      "new": "新账单",
+      "edit": "编辑账单",
+      "view": "账单",
+      "amount": "金额",
+      "currency": "币种",
+      "inThisAlbum": "此相册中",
+      "allCurrencies": "所有币种",
+      "note": "这笔花在哪？",
+      "notePlaceholder": "这笔花在哪？",
+      "category": "分类",
+      "ownCategory": "归入 {name}",
+      "date": "日期",
+      "paidBy": "付款人",
+      "save": "保存",
+      "saved": "账单已保存",
+      "added": "账单已添加",
+      "deleted": "账单已删除",
+      "delete": "删除",
+      "deleteTitle": "删除这笔账单？",
+      "deleteBody": "相册里所有人那里都会移除。",
+      "deleteBodyPaid": "相册里所有人那里都会移除。付款记录会保留，已付的金额需要退还。",
+      "paidEditTitle": "这笔账单已有付款",
+      "paidEditBody": "付款记录会保留。如果某人的份额低于已付金额，差额需要退还。",
+      "payments": "付款",
+      "paymentLine": "{from} 付给 {to} {amount}",
+      "shared": "共享相册",
+      "untitled": "账单",
+      "youPaid": "你付款",
+      "youLent": "你付款 · 你垫付了 {amount}",
+      "theyPaidYourShare": "{name} 付款 · 你的份额 {amount}",
+      "notInvolved": "{name} 付款 · 与你无关",
+      "emptyTitle": "还没有账单",
+      "emptyBody": "添加第一笔：花了多少、谁付的、和谁分摊。"
+    },
+    "split": {
+      "evenly": "平均分摊",
+      "by": "分摊方式",
+      "amount": "金额",
+      "amountHint": "输入每人支付的金额",
+      "percentHint": "为每人分配账单的百分比",
+      "shares": "份数",
+      "sharesHint": "2 份支付的是 1 份的两倍",
+      "adjustHint": "先平均分摊，再为某人增减",
+      "valueFor": "{name} 的部分",
+      "enterAmount": "输入金额",
+      "youOwe": "你欠 {name} {amount}",
+      "youLent": "你垫付了 {amount}",
+      "justYou": "只有你自己的份额",
+      "notYou": "由其他人分摊；{name} 付款",
+      "left": "还剩 {amount} 待分摊",
+      "over": "超出 {amount}",
+      "percent": "{given}% / 100%",
+      "noShares": "请给某人分配份数",
+      "adjustOver": "调整金额超过了账单",
+      "nobody": "选择和谁分摊",
+      "nobodyElse": "还没有其他人加入。在“成员”中分享邀请链接。"
+    },
+    "settle": {
+      "payTitle": "付给 {name}",
+      "receivedTitle": "{name} 付给了你",
+      "othersTitle": "记录一笔付款",
+      "amount": "付款金额",
+      "owed": "欠款：{amount}",
+      "record": "记录付款",
+      "recorded": "已记录：{from} 付给 {to} {amount}",
+      "note": "这里只记录付款。请照常转账。",
+      "othersNote": "只有在 {from} 确实已付给 {to} 时才记录。"
+    },
+    "balances": {
+      "youOwe": "你欠",
+      "youAreOwed": "别人欠你",
+      "settled": "已全部结清",
+      "emptyTitle": "暂无余额",
+      "emptyBody": "添加一笔账单，就能在这里看到谁欠谁。",
+      "whoOwesWhom": "谁欠谁",
+      "youOweName": "你欠 {name}",
+      "owesYou": "{name} 欠你",
+      "owes": "{from} 欠 {to}",
+      "settledUp": "已结清",
+      "groupSpending": "群组支出",
+      "total": "总计",
+      "youPaid": "你付款",
+      "yourShare": "你的份额"
+    },
+    "breakdown": {
+      "showing": "显示",
+      "everyone": "所有人",
+      "total": "总计",
+      "bills": "{count, plural, other {# 笔账单}}",
+      "emptyTitle": "还没有可以分类的内容"
+    },
+    "activity": {
+      "showAll": "显示全部 {count} 条",
+      "showLess": "收起"
+    },
+    "errors": {
+      "generic": "出了点问题，请重试。",
+      "network": "无法连接 Money2Time。请检查网络后重试。",
+      "networkTitle": "你好像离线了",
+      "rateLimited": "尝试次数过多。请等一分钟后重试。",
+      "captcha": "无法验证此请求。请刷新页面后重试。",
+      "signedOut": "请重新登录以修改此相册。",
+      "notMember": "你已不在此相册中，无法修改。",
+      "busy": "其他人正在修改此相册。请稍后重试。",
+      "saveFailed": "无法保存对此相册的修改。请重试。"
     }
   }
 }

@@ -50,6 +50,10 @@
     "dashboard": {
       "title": "Web-Dashboard - Money2Time",
       "description": "Scanne mit deinem Handy und sieh deine Money2Time-Daten auf dem großen Bildschirm: Ausgaben, Vermögen, Budgets und die Stunden hinter jedem Kauf. Ende-zu-Ende-verschlüsselt, online wird nichts gespeichert."
+    },
+    "album": {
+      "title": "Tritt meinem geteilten Album bei · Money2Time",
+      "description": "Teile Reisekosten mit Freunden und sieh, wer wem etwas schuldet. Kostenlos, direkt im Browser, ohne App."
     }
   },
   "common": {
@@ -2216,6 +2220,226 @@
     "dropdown": {
       "search": "Suchen",
       "noMatch": "Keine Treffer"
+    }
+  },
+  "album": {
+    "untitled": "Geteiltes Album",
+    "someone": "Jemand",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "undo": "Rückgängig",
+    "retry": "Erneut versuchen",
+    "today": "Heute",
+    "signOut": "Abmelden",
+    "tabs": {
+      "transactions": "Transaktionen",
+      "breakdown": "Aufschlüsselung",
+      "balances": "Salden"
+    },
+    "categories": {
+      "food": "Essen",
+      "groceries": "Lebensmittel",
+      "transport": "Verkehr",
+      "housing": "Wohnen",
+      "bills": "Rechnungen",
+      "healthcare": "Gesundheit",
+      "shopping": "Einkaufen",
+      "other": "Sonstiges"
+    },
+    "signIn": {
+      "email": "Mit E-Mail fortfahren",
+      "emailLabel": "E-Mail-Adresse",
+      "emailPlaceholder": "du@beispiel.de",
+      "badEmail": "Gib eine gültige E-Mail-Adresse ein.",
+      "sendCode": "Code senden",
+      "codeSent": "Gib den 6-stelligen Code ein, den wir an <strong>{email}</strong> gesendet haben.",
+      "codeLabel": "Anmeldecode",
+      "verify": "Anmelden",
+      "resend": "Neuen Code senden",
+      "otherEmail": "Andere E-Mail verwenden",
+      "otherWays": "Andere Anmeldeoptionen",
+      "wrongCode": "Der Code hat nicht funktioniert. Prüfe ihn oder lass dir einen neuen senden."
+    },
+    "home": {
+      "title": "Deine geteilten Alben",
+      "landingTitle": "Reisekosten mit Freunden teilen",
+      "landingBody": "Trag ein, was du bezahlt hast, sieh, wer wem etwas schuldet, und begleiche es. Kostenlos, direkt hier im Browser.",
+      "emptyTitle": "Noch keine geteilten Alben",
+      "emptyBody": "Öffne den Einladungslink, den dir ein Freund geschickt hat, um seinem Album beizutreten. Alben werden in der Money2Time-App erstellt.",
+      "yours": "Deins"
+    },
+    "join": {
+      "eyebrow": "Geteiltes Album",
+      "invitedBy": "{name} lädt dich ein, Rechnungen zu teilen",
+      "signInTitle": "Zum Beitreten anmelden",
+      "signInBody": "Kostenlos und ohne App: Alles funktioniert direkt hier.",
+      "nameLabel": "Dein Name in diesem Album",
+      "join": "Album beitreten",
+      "signedInAs": "Angemeldet als {email}.",
+      "haveApp": "Du hast die Money2Time-App?",
+      "openInApp": "In der App öffnen",
+      "expiredTitle": "Dieser Einladungslink ist abgelaufen",
+      "expiredBody": "Einladungslinks gelten 24 Stunden. Bitte {name}, dir einen neuen zu schicken.",
+      "ledgerTitle": "Dieser Link ist für ein geteiltes Buch",
+      "ledgerBody": "Geteilte Bücher gibt es nur in der Money2Time-App. Öffne den Link dort, um beizutreten.",
+      "full": "Dieses Album ist voll. Bitte den Besitzer, Platz zu schaffen."
+    },
+    "joined": {
+      "eyebrow": "Du bist dabei",
+      "title": "Willkommen bei {name}",
+      "body": "Trag ein, was du bezahlt hast, und sieh, wer wem etwas schuldet. Du kannst hier weitermachen oder jederzeit zur App wechseln.",
+      "web": "Im Web weiter"
+    },
+    "app": {
+      "title": "Hol dir die Money2Time-App",
+      "body": "Melde dich mit demselben Konto an, und deine geteilten Alben kommen mit, inklusive allem, was du hier eingetragen hast."
+    },
+    "banner": {
+      "title": "Einfacher in der App",
+      "body": "Gleiches Konto, gleiche Alben",
+      "get": "Laden",
+      "dismiss": "Jetzt nicht"
+    },
+    "album": {
+      "sections": "Albumbereiche",
+      "signInTitle": "Melde dich an, um dieses Album zu sehen",
+      "signInBody": "Nutze das Konto, mit dem du beigetreten bist.",
+      "goneTitle": "Du bist nicht in diesem Album",
+      "goneBody": "Es wurde vielleicht gelöscht, oder du hast es verlassen oder wurdest entfernt. Bitte um einen neuen Einladungslink, um wieder beizutreten."
+    },
+    "people": {
+      "title": "Personen",
+      "count": "{count, plural, one {# Person} other {# Personen}}",
+      "you": "Du",
+      "joined": "Beigetreten",
+      "left": "Ausgetreten",
+      "unnamed": "Freund",
+      "rename": "Umbenennen",
+      "yourName": "Dein Name",
+      "nameTaken": "Jemand hier hat bereits diesen Namen.",
+      "invite": "Einladungslink",
+      "inviteInfo": "Jeder mit diesem Link kann dem Album beitreten. Er gilt 24 Stunden; „Neuer Link“ macht den alten sofort ungültig.",
+      "inviteShareTitle": "Tritt meinem geteilten Album bei",
+      "share": "Teilen",
+      "copy": "Kopieren",
+      "copied": "Kopiert",
+      "newLink": "Neuer Link",
+      "simplify": "Gruppenschulden vereinfachen",
+      "simplifyInfo": "Fasst Schulden in der Gruppe zusammen, damit weniger Zahlungen nötig sind. Insgesamt zahlt oder bekommt niemand mehr.",
+      "leave": "Album verlassen",
+      "leaveTitle": "{name} verlassen?",
+      "leaveBody": "Deine Rechnungen bleiben für die anderen im Album, und du kannst es nicht mehr ändern.",
+      "remove": "Entfernen",
+      "removeTitle": "{name} aus dem Album entfernen?",
+      "removeBody": "Die Person erhält keine Rechnungen dieses Albums mehr. Rechnungen, auf denen sie steht, bleiben."
+    },
+    "bill": {
+      "add": "Rechnung hinzufügen",
+      "new": "Neue Rechnung",
+      "edit": "Rechnung bearbeiten",
+      "view": "Rechnung",
+      "amount": "Betrag",
+      "currency": "Währung",
+      "inThisAlbum": "In diesem Album",
+      "allCurrencies": "Alle Währungen",
+      "note": "Wofür war es?",
+      "notePlaceholder": "Wofür war es?",
+      "category": "Kategorie",
+      "ownCategory": "Unter {name}",
+      "date": "Datum",
+      "paidBy": "Bezahlt von",
+      "save": "Speichern",
+      "saved": "Rechnung gespeichert",
+      "added": "Rechnung hinzugefügt",
+      "deleted": "Rechnung gelöscht",
+      "delete": "Löschen",
+      "deleteTitle": "Diese Rechnung löschen?",
+      "deleteBody": "Sie wird für alle im Album entfernt.",
+      "deleteBodyPaid": "Sie wird für alle im Album entfernt. Die Zahlungen darauf bleiben, und bereits Gezahltes muss zurückgezahlt werden.",
+      "paidEditTitle": "Diese Rechnung hat Zahlungen",
+      "paidEditBody": "Die Zahlungen bleiben. Fällt ein Anteil unter den bereits gezahlten Betrag, muss die Differenz zurückgezahlt werden.",
+      "payments": "Zahlungen",
+      "paymentLine": "{from} hat {to} {amount} gezahlt",
+      "shared": "Geteiltes Album",
+      "untitled": "Rechnung",
+      "youPaid": "Du hast bezahlt",
+      "youLent": "Du hast bezahlt · du hast {amount} ausgelegt",
+      "theyPaidYourShare": "{name} hat bezahlt · dein Anteil {amount}",
+      "notInvolved": "{name} hat bezahlt · nicht deine Rechnung",
+      "emptyTitle": "Noch keine Rechnungen",
+      "emptyBody": "Füge die erste hinzu: was sie gekostet hat, wer bezahlt hat und mit wem sie geteilt wird."
+    },
+    "split": {
+      "evenly": "Gleichmäßig aufteilen",
+      "by": "Aufteilen nach",
+      "amount": "Betrag",
+      "amountHint": "Gib ein, was jede Person zahlt",
+      "percentHint": "Gib jeder Person einen Prozentanteil der Rechnung",
+      "shares": "Anteile",
+      "sharesHint": "2 Anteile zahlen doppelt so viel wie 1",
+      "adjustHint": "Gleichmäßig aufteilen, dann für jemanden etwas dazu oder weg",
+      "valueFor": "Teil von {name}",
+      "enterAmount": "Gib den Betrag ein",
+      "youOwe": "Du schuldest {name} {amount}",
+      "youLent": "Du hast {amount} ausgelegt",
+      "justYou": "Nur dein eigener Anteil",
+      "notYou": "Unter den anderen; {name} hat bezahlt",
+      "left": "{amount} noch aufzuteilen",
+      "over": "Um {amount} überschritten",
+      "percent": "{given} % von 100 %",
+      "noShares": "Gib jemandem einen Anteil",
+      "adjustOver": "Die Anpassungen sind höher als die Rechnung",
+      "nobody": "Wähle, mit wem geteilt wird",
+      "nobodyElse": "Noch niemand sonst ist beigetreten. Teile den Einladungslink unter „Personen“."
+    },
+    "settle": {
+      "payTitle": "{name} bezahlen",
+      "receivedTitle": "{name} hat dich bezahlt",
+      "othersTitle": "Zahlung erfassen",
+      "amount": "Gezahlter Betrag",
+      "owed": "Offen: {amount}",
+      "record": "Zahlung erfassen",
+      "recorded": "Erfasst: {from} hat {to} {amount} gezahlt",
+      "note": "Hier wird die Zahlung nur erfasst. Überweise das Geld wie gewohnt.",
+      "othersNote": "Erfasse das nur, wenn {from} wirklich an {to} gezahlt hat."
+    },
+    "balances": {
+      "youOwe": "Du schuldest",
+      "youAreOwed": "Du bekommst",
+      "settled": "Bei dir ist alles beglichen",
+      "emptyTitle": "Noch keine Salden",
+      "emptyBody": "Füge eine Rechnung hinzu, dann siehst du hier, wer wem etwas schuldet.",
+      "whoOwesWhom": "Wer schuldet wem",
+      "youOweName": "Du schuldest {name}",
+      "owesYou": "{name} schuldet dir",
+      "owes": "{from} schuldet {to}",
+      "settledUp": "Beglichen",
+      "groupSpending": "Ausgaben der Gruppe",
+      "total": "Gesamt",
+      "youPaid": "Du hast bezahlt",
+      "yourShare": "Dein Anteil"
+    },
+    "breakdown": {
+      "showing": "Anzeige",
+      "everyone": "Alle",
+      "total": "Gesamt",
+      "bills": "{count, plural, one {# Rechnung} other {# Rechnungen}}",
+      "emptyTitle": "Noch nichts aufzuschlüsseln"
+    },
+    "activity": {
+      "showAll": "Alle {count} anzeigen",
+      "showLess": "Weniger anzeigen"
+    },
+    "errors": {
+      "generic": "Etwas ist schiefgelaufen. Versuche es erneut.",
+      "network": "Money2Time ist nicht erreichbar. Prüfe deine Verbindung und versuche es erneut.",
+      "networkTitle": "Du scheinst offline zu sein",
+      "rateLimited": "Zu viele Versuche. Warte eine Minute und versuche es erneut.",
+      "captcha": "Wir konnten die Anfrage nicht prüfen. Lade die Seite neu und versuche es erneut.",
+      "signedOut": "Melde dich erneut an, um dieses Album zu ändern.",
+      "notMember": "Du bist nicht mehr in diesem Album und kannst es daher nicht ändern.",
+      "busy": "Jemand anderes ändert gerade dieses Album. Versuche es gleich noch einmal.",
+      "saveFailed": "Die Änderung an diesem Album konnte nicht gespeichert werden. Versuche es erneut."
     }
   }
 }

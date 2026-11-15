@@ -50,6 +50,10 @@
     "dashboard": {
       "title": "웹 대시보드 - Money2Time",
       "description": "휴대폰으로 스캔하면 Money2Time 데이터를 큰 화면에서 볼 수 있어요. 지출, 순자산, 예산, 그리고 모든 구매 뒤에 숨은 시간까지. 종단 간 암호화되며 온라인에는 아무것도 저장되지 않아요."
+    },
+    "album": {
+      "title": "내 공유 앨범에 참여해 줘 · Money2Time",
+      "description": "여행 비용을 함께 나누고 누가 누구에게 얼마를 줘야 하는지 확인하세요. 무료이고, 앱 없이 브라우저에서 바로 쓸 수 있어요."
     }
   },
   "common": {
@@ -2216,6 +2220,226 @@
     "dropdown": {
       "search": "검색",
       "noMatch": "일치하는 항목 없음"
+    }
+  },
+  "album": {
+    "untitled": "공유 앨범",
+    "someone": "이름 없음",
+    "cancel": "취소",
+    "save": "저장",
+    "undo": "되돌리기",
+    "retry": "다시 시도",
+    "today": "오늘",
+    "signOut": "로그아웃",
+    "tabs": {
+      "transactions": "거래",
+      "breakdown": "분석",
+      "balances": "정산 현황"
+    },
+    "categories": {
+      "food": "식비",
+      "groceries": "식료품",
+      "transport": "교통",
+      "housing": "주거",
+      "bills": "공과금",
+      "healthcare": "의료",
+      "shopping": "쇼핑",
+      "other": "기타"
+    },
+    "signIn": {
+      "email": "이메일로 계속하기",
+      "emailLabel": "이메일 주소",
+      "emailPlaceholder": "you@example.com",
+      "badEmail": "올바른 이메일 주소를 입력하세요.",
+      "sendCode": "코드 보내기",
+      "codeSent": "<strong>{email}</strong>(으)로 보낸 6자리 코드를 입력하세요.",
+      "codeLabel": "로그인 코드",
+      "verify": "로그인",
+      "resend": "새 코드 보내기",
+      "otherEmail": "다른 이메일 사용",
+      "otherWays": "다른 로그인 방법",
+      "wrongCode": "코드가 맞지 않아요. 확인하거나 새 코드를 받으세요."
+    },
+    "home": {
+      "title": "내 공유 앨범",
+      "landingTitle": "친구와 여행 비용 나누기",
+      "landingBody": "낸 돈을 추가하고, 누가 누구에게 얼마를 줘야 하는지 보고, 정산하세요. 무료이고, 브라우저에서 바로 쓸 수 있어요.",
+      "emptyTitle": "아직 공유 앨범이 없어요",
+      "emptyBody": "친구가 보낸 초대 링크를 열면 친구의 앨범에 참여할 수 있어요. 앨범은 Money2Time 앱에서 만들어요.",
+      "yours": "내 앨범"
+    },
+    "join": {
+      "eyebrow": "공유 앨범",
+      "invitedBy": "{name} 님이 비용을 함께 나누자고 초대했어요",
+      "signInTitle": "로그인하고 참여하기",
+      "signInBody": "무료이고 앱도 필요 없어요. 여기서 모든 기능을 쓸 수 있어요.",
+      "nameLabel": "이 앨범에서 쓸 이름",
+      "join": "앨범 참여",
+      "signedInAs": "{email}(으)로 로그인됨.",
+      "haveApp": "Money2Time 앱이 있나요?",
+      "openInApp": "앱에서 열기",
+      "expiredTitle": "초대 링크가 만료됐어요",
+      "expiredBody": "초대 링크는 24시간 동안 유효해요. {name} 님에게 새 링크를 요청하세요.",
+      "ledgerTitle": "공유 장부 링크예요",
+      "ledgerBody": "공유 장부는 Money2Time 앱에서만 쓸 수 있어요. 앱에서 링크를 열어 참여하세요.",
+      "full": "이 앨범은 가득 찼습니다. 소유자에게 자리를 만들어 달라고 요청하세요."
+    },
+    "joined": {
+      "eyebrow": "참여 완료",
+      "title": "{name}에 오신 걸 환영해요",
+      "body": "낸 돈을 추가하고 누가 누구에게 얼마를 줘야 하는지 확인하세요. 여기서 계속 써도 되고, 언제든 앱으로 옮겨도 돼요.",
+      "web": "웹에서 계속하기"
+    },
+    "app": {
+      "title": "Money2Time 앱 받기",
+      "body": "같은 계정으로 로그인하면 여기서 추가한 내용까지 공유 앨범이 그대로 따라와요."
+    },
+    "banner": {
+      "title": "앱에서 더 편하게",
+      "body": "같은 계정, 같은 앨범",
+      "get": "받기",
+      "dismiss": "나중에"
+    },
+    "album": {
+      "sections": "앨범 섹션",
+      "signInTitle": "로그인하고 앨범 보기",
+      "signInBody": "참여할 때 쓴 계정을 사용하세요.",
+      "goneTitle": "이 앨범의 멤버가 아니에요",
+      "goneBody": "앨범이 삭제됐거나, 직접 나갔거나 내보내졌을 수 있어요. 다시 참여하려면 새 초대 링크를 요청하세요."
+    },
+    "people": {
+      "title": "사람",
+      "count": "{count, plural, other {#명}}",
+      "you": "나",
+      "joined": "참여함",
+      "left": "나감",
+      "unnamed": "친구",
+      "rename": "이름 변경",
+      "yourName": "내 이름",
+      "nameTaken": "이미 같은 이름을 쓰는 사람이 있어요.",
+      "invite": "초대 링크",
+      "inviteInfo": "이 링크가 있으면 누구나 앨범에 참여할 수 있어요. 24시간 동안 유효하며, 새 링크를 만들면 이전 링크는 바로 사용할 수 없어요.",
+      "inviteShareTitle": "내 공유 앨범에 참여해 줘",
+      "share": "공유",
+      "copy": "복사",
+      "copied": "복사됨",
+      "newLink": "새 링크",
+      "simplify": "그룹 정산 간단히",
+      "simplifyInfo": "그룹 안의 빚을 합쳐 송금 횟수를 줄여요. 각자 내거나 받는 총액은 그대로예요.",
+      "leave": "앨범 나가기",
+      "leaveTitle": "{name}에서 나갈까요?",
+      "leaveBody": "내 청구는 다른 사람들을 위해 앨범에 남고, 나는 더 이상 앨범을 바꿀 수 없어요.",
+      "remove": "내보내기",
+      "removeTitle": "{name} 님을 앨범에서 내보낼까요?",
+      "removeBody": "이 사람은 이 앨범의 청구를 더 이상 받지 않아요. 포함된 청구는 그대로 남아요."
+    },
+    "bill": {
+      "add": "청구 추가",
+      "new": "새 청구",
+      "edit": "청구 편집",
+      "view": "청구",
+      "amount": "금액",
+      "currency": "통화",
+      "inThisAlbum": "이 앨범",
+      "allCurrencies": "모든 통화",
+      "note": "어디에 쓴 돈인가요?",
+      "notePlaceholder": "어디에 쓴 돈인가요?",
+      "category": "카테고리",
+      "ownCategory": "{name}에 분류됨",
+      "date": "날짜",
+      "paidBy": "결제한 사람",
+      "save": "저장",
+      "saved": "청구를 저장했어요",
+      "added": "청구를 추가했어요",
+      "deleted": "청구를 삭제했어요",
+      "delete": "삭제",
+      "deleteTitle": "이 청구를 삭제할까요?",
+      "deleteBody": "앨범의 모든 사람에게서 사라져요.",
+      "deleteBodyPaid": "앨범의 모든 사람에게서 사라져요. 결제 기록은 남고, 이미 낸 금액은 다시 돌려줘야 해요.",
+      "paidEditTitle": "이 청구에는 결제 기록이 있어요",
+      "paidEditBody": "결제 기록은 남아요. 몫이 이미 낸 금액보다 작아지면 차액을 돌려줘야 해요.",
+      "payments": "결제 기록",
+      "paymentLine": "{from} 님이 {to} 님에게 {amount} 지급",
+      "shared": "공유 앨범",
+      "untitled": "청구",
+      "youPaid": "내가 결제",
+      "youLent": "내가 결제 · {amount} 받을 돈",
+      "theyPaidYourShare": "{name} 님이 결제 · 내 몫 {amount}",
+      "notInvolved": "{name} 님이 결제 · 내 청구 아님",
+      "emptyTitle": "아직 청구가 없어요",
+      "emptyBody": "첫 청구를 추가하세요. 금액, 결제한 사람, 함께 나눌 사람을 입력하면 돼요."
+    },
+    "split": {
+      "evenly": "균등 분할",
+      "by": "분할 방식",
+      "amount": "금액",
+      "amountHint": "각자 낼 금액 입력",
+      "percentHint": "각자에게 청구액의 비율 지정",
+      "shares": "지분",
+      "sharesHint": "2지분은 1지분의 두 배를 냄",
+      "adjustHint": "균등하게 나눈 뒤 누군가의 몫을 더하거나 빼기",
+      "valueFor": "{name} 님의 몫",
+      "enterAmount": "금액을 입력하세요",
+      "youOwe": "{name} 님에게 {amount} 줄 돈",
+      "youLent": "{amount} 받을 돈",
+      "justYou": "내 몫만 있음",
+      "notYou": "다른 사람들끼리 나눔, {name} 님이 결제",
+      "left": "{amount} 더 나눠야 해요",
+      "over": "{amount} 초과",
+      "percent": "100% 중 {given}%",
+      "noShares": "누군가에게 지분을 주세요",
+      "adjustOver": "조정액이 청구액보다 큽니다",
+      "nobody": "함께 나눌 사람을 고르세요",
+      "nobodyElse": "아직 아무도 참여하지 않았어요. 사람 탭에서 초대 링크를 공유하세요."
+    },
+    "settle": {
+      "payTitle": "{name} 님에게 보내기",
+      "receivedTitle": "{name} 님에게 받음",
+      "othersTitle": "정산 기록",
+      "amount": "보낸 금액",
+      "owed": "남은 금액: {amount}",
+      "record": "정산 기록",
+      "recorded": "기록함: {from} 님이 {to} 님에게 {amount} 지급",
+      "note": "여기서는 정산만 기록돼요. 돈은 평소처럼 보내세요.",
+      "othersNote": "{from} 님이 실제로 {to} 님에게 보냈을 때만 기록하세요."
+    },
+    "balances": {
+      "youOwe": "줄 돈",
+      "youAreOwed": "받을 돈",
+      "settled": "모두 정산 완료",
+      "emptyTitle": "아직 정산 내역이 없어요",
+      "emptyBody": "청구를 추가하면 누가 누구에게 얼마를 줘야 하는지 여기에 표시돼요.",
+      "whoOwesWhom": "누가 누구에게",
+      "youOweName": "{name} 님에게 줄 돈",
+      "owesYou": "{name} 님이 나에게 줄 돈",
+      "owes": "{from} 님 → {to} 님",
+      "settledUp": "정산 완료",
+      "groupSpending": "그룹 지출",
+      "total": "합계",
+      "youPaid": "내가 결제",
+      "yourShare": "내 몫"
+    },
+    "breakdown": {
+      "showing": "표시",
+      "everyone": "모두",
+      "total": "합계",
+      "bills": "{count, plural, other {청구 #건}}",
+      "emptyTitle": "아직 분석할 내용이 없어요"
+    },
+    "activity": {
+      "showAll": "{count}개 모두 보기",
+      "showLess": "간단히 보기"
+    },
+    "errors": {
+      "generic": "문제가 발생했어요. 다시 시도하세요.",
+      "network": "Money2Time에 연결할 수 없어요. 연결 상태를 확인하고 다시 시도하세요.",
+      "networkTitle": "오프라인 상태인 것 같아요",
+      "rateLimited": "시도가 너무 많아요. 1분 정도 기다린 뒤 다시 시도하세요.",
+      "captcha": "요청을 확인하지 못했어요. 페이지를 새로고침하고 다시 시도하세요.",
+      "signedOut": "이 앨범을 바꾸려면 다시 로그인하세요.",
+      "notMember": "더 이상 이 앨범의 멤버가 아니라서 바꿀 수 없어요.",
+      "busy": "다른 사람이 이 앨범을 바꾸고 있어요. 잠시 후 다시 시도하세요.",
+      "saveFailed": "이 앨범의 변경 사항을 저장하지 못했어요. 다시 시도하세요."
     }
   }
 }

@@ -3,7 +3,7 @@
 import { isLocale, type Locale } from "@/i18n/routing";
 import type { CountryCode } from "@/lib/countries";
 import { POSTHOG_HOST, POSTHOG_PROJECT_TOKEN } from "@/lib/analytics-config";
-import { isAppHost, isProductionHost, type DownloadTarget } from "@/lib/platform";
+import { isAlbumHost, isAppHost, isProductionHost, type DownloadTarget } from "@/lib/platform";
 
 /**
  * The website's product-analytics contract, fanned out to PostHog and GA4.
@@ -18,6 +18,11 @@ import { isAppHost, isProductionHost, type DownloadTarget } from "@/lib/platform
 const GA_MEASUREMENT_ID = "G-CV6GQ43B16";
 
 export const EVENTS = {
+  albumEdited: "Album Edited",
+  albumJoined: "Album Joined",
+  albumOpenInApp: "Album Open In App",
+  albumSignedIn: "Album Signed In",
+  albumViewed: "Album Viewed",
   appDownloadClicked: "App Download Clicked",
   carouselSlideChanged: "Carousel Slide Changed",
   contactFormResult: "Contact Form Submitted",
@@ -40,12 +45,16 @@ export const EVENTS = {
 export type AnalyticsEvent = (typeof EVENTS)[keyof typeof EVENTS];
 
 export type DownloadPlacement =
+  | "album_home"
+  | "album_joined"
+  | "album_sheet"
   | "footer"
   | "header_desktop"
   | "header_mobile"
   | "home_hero";
 
 type PageType =
+  | "album"
   | "contact"
   | "cost_in_hours"
   | "dashboard"
@@ -119,7 +128,20 @@ type DashboardView =
   | "splits"
   | "mood";
 
+/**
+ * Shared albums on the web (album.money2time.com) describe what a visitor did,
+ * never what is in the album: no names, amounts, titles, invite codes or
+ * album ids.
+ */
+export type AlbumEditAction = "bill_add" | "bill_edit" | "bill_delete" | "payment_record" | "payment_undo" | "rename" | "simplify";
+type AlbumTab = "transactions" | "breakdown" | "balances";
+
 type AnalyticsPlan = {
+  [EVENTS.albumEdited]: { action: AlbumEditAction; result: "saved" | "offline" | "not_member" | "failed" };
+  [EVENTS.albumJoined]: { result: "joined" | "full" | "expired" | "failed" };
+  [EVENTS.albumOpenInApp]: { placement: "join_page" | "joined" };
+  [EVENTS.albumSignedIn]: { method: "google" | "email"; context: "join" | "home" | "album" };
+  [EVENTS.albumViewed]: { tab: AlbumTab };
   [EVENTS.appDownloadClicked]: {
     placement: DownloadPlacement;
     target: DownloadTarget;
@@ -206,6 +228,8 @@ const POSTHOG_URL_PROPERTIES = [
   "$initial_current_url",
   "$session_entry_url",
 ] as const;
+/** PostHog's bare path properties: kept, but never an album's invite code or id (`publicPath`). */
+const POSTHOG_PATH_PROPERTIES = ["$pathname", "$initial_pathname", "$session_entry_pathname", "$prev_pageview_pathname"] as const;
 /** PostHog's referrer properties, reduced like GA4's referrer. */
 const POSTHOG_REFERRER_PROPERTIES = [
   "$referrer",
@@ -285,6 +309,23 @@ function campaignContext(): GtagParameters {
   return context;
 }
 
+/**
+ * A path as analytics may see it. On the album host an invite code is a key
+ * (anyone holding it joins) and an album's id is private, so neither is ever
+ * sent: `/join/:code`, `/a/:album`, and `/` for anything else there.
+ */
+function publicPath(pathname: string, hostname: string): string {
+  if (!isAlbumHost(hostname)) return pathname;
+  if (pathname.startsWith("/join/")) return "/join/:code";
+  if (pathname.startsWith("/a/")) return "/a/:album";
+  return "/";
+}
+
+/** This page's origin and path, as analytics may see them. */
+function currentPage(): string {
+  return `${window.location.origin}${publicPath(window.location.pathname, window.location.hostname)}`;
+}
+
 function safeDocumentReferrer(): string | undefined {
   if (typeof document === "undefined" || !document.referrer) return undefined;
 
@@ -293,7 +334,7 @@ function safeDocumentReferrer(): string | undefined {
     if (!["http:", "https:"].includes(referrer.protocol)) return undefined;
 
     return isProductionHost(referrer.hostname)
-      ? `${referrer.origin}${referrer.pathname}`
+      ? `${referrer.origin}${publicPath(referrer.pathname, referrer.hostname)}`
       : referrer.origin;
   } catch {
     return undefined;
@@ -306,7 +347,7 @@ function originAndPath(value: unknown): string | undefined {
   try {
     const url = new URL(value);
     if (!["http:", "https:"].includes(url.protocol)) return undefined;
-    return `${url.origin}${url.pathname}`;
+    return `${url.origin}${publicPath(url.pathname, url.hostname)}`;
   } catch {
     return undefined;
   }
@@ -320,7 +361,7 @@ function safeReferrer(value: unknown): string | undefined {
     const referrer = new URL(value);
     if (!["http:", "https:"].includes(referrer.protocol)) return undefined;
     return isProductionHost(referrer.hostname)
-      ? `${referrer.origin}${referrer.pathname}`
+      ? `${referrer.origin}${publicPath(referrer.pathname, referrer.hostname)}`
       : referrer.origin;
   } catch {
     return undefined;
@@ -334,34 +375,32 @@ function safeReferrer(value: unknown): string | undefined {
  */
 function sanitizePostHogEvent<T extends PostHogCapture>(event: T | null): T | null {
   if (!event?.properties) return event;
-  const properties: Record<string, unknown> = { ...event.properties };
-  for (const key of POSTHOG_URL_PROPERTIES) {
-    if (key in properties) properties[key] = originAndPath(properties[key]);
-  }
-  for (const key of POSTHOG_REFERRER_PROPERTIES) {
-    if (key in properties) properties[key] = safeReferrer(properties[key]);
-  }
-  for (const parameter of CLICK_ID_PARAMETERS) {
-    delete properties[parameter];
-    delete properties[`$initial_${parameter}`];
-  }
+  const properties = cleanPostHogProperties(event.properties);
   for (const setKey of ["$set", "$set_once"] as const) {
     const set = properties[setKey];
-    if (!set || typeof set !== "object") continue;
-    const cleaned: Record<string, unknown> = { ...(set as Record<string, unknown>) };
-    for (const key of POSTHOG_URL_PROPERTIES) {
-      if (key in cleaned) cleaned[key] = originAndPath(cleaned[key]);
-    }
-    for (const key of POSTHOG_REFERRER_PROPERTIES) {
-      if (key in cleaned) cleaned[key] = safeReferrer(cleaned[key]);
-    }
-    for (const parameter of CLICK_ID_PARAMETERS) {
-      delete cleaned[parameter];
-      delete cleaned[`$initial_${parameter}`];
-    }
-    properties[setKey] = cleaned;
+    if (set && typeof set === "object") properties[setKey] = cleanPostHogProperties(set as Record<string, unknown>);
   }
   return { ...event, properties };
+}
+
+/** One level of an event's properties (or its `$set`/`$set_once`), cleaned as `sanitizePostHogEvent` says. */
+function cleanPostHogProperties(source: Record<string, unknown>): Record<string, unknown> {
+  const cleaned: Record<string, unknown> = { ...source };
+  for (const key of POSTHOG_URL_PROPERTIES) {
+    if (key in cleaned) cleaned[key] = originAndPath(cleaned[key]);
+  }
+  for (const key of POSTHOG_PATH_PROPERTIES) {
+    const value = cleaned[key];
+    if (typeof value === "string") cleaned[key] = publicPath(value, window.location.hostname);
+  }
+  for (const key of POSTHOG_REFERRER_PROPERTIES) {
+    if (key in cleaned) cleaned[key] = safeReferrer(cleaned[key]);
+  }
+  for (const parameter of CLICK_ID_PARAMETERS) {
+    delete cleaned[parameter];
+    delete cleaned[`$initial_${parameter}`];
+  }
+  return cleaned;
 }
 
 /** The retired Mixpanel client left its state in `mp_*` storage keys. */
@@ -481,7 +520,7 @@ function startGoogleAnalytics(): void {
     ...(isPrivatePage() ? { cookie_domain: "none" } : {}),
     ...(isPrivatePage() && dashboardUserId ? { user_id: dashboardUserId } : {}),
     cookie_flags: "SameSite=Lax;Secure",
-    page_location: `${window.location.origin}${window.location.pathname}`,
+    page_location: currentPage(),
     ...(referrer ? { page_referrer: referrer } : {}),
     ...campaignContext(),
     send_page_view: false,
@@ -533,6 +572,16 @@ function googleEvent(call: AnalyticsCall): {
         },
       };
     }
+    case EVENTS.albumEdited:
+      return { name: "m2t_album_web_edited", parameters: { action: call.properties.action, result: call.properties.result } };
+    case EVENTS.albumJoined:
+      return { name: "m2t_album_web_joined", parameters: { result: call.properties.result } };
+    case EVENTS.albumOpenInApp:
+      return { name: "m2t_album_web_open_in_app", parameters: { placement: call.properties.placement } };
+    case EVENTS.albumSignedIn:
+      return { name: "m2t_album_web_signed_in", parameters: { method: call.properties.method, context: call.properties.context } };
+    case EVENTS.albumViewed:
+      return { name: "m2t_album_web_viewed", parameters: { tab: call.properties.tab } };
     case EVENTS.appDownloadClicked:
       return {
         // A desktop /download CTA returns to the home page instead of opening
@@ -641,6 +690,16 @@ function postHogEvent(call: AnalyticsCall): {
   switch (call.event) {
     case EVENTS.viewPage:
       return null;
+    case EVENTS.albumEdited:
+      return { name: call.event, properties: { action: call.properties.action, result: call.properties.result } };
+    case EVENTS.albumJoined:
+      return { name: call.event, properties: { result: call.properties.result } };
+    case EVENTS.albumOpenInApp:
+      return { name: call.event, properties: { placement: call.properties.placement } };
+    case EVENTS.albumSignedIn:
+      return { name: call.event, properties: { method: call.properties.method, context: call.properties.context } };
+    case EVENTS.albumViewed:
+      return { name: call.event, properties: { tab: call.properties.tab } };
     case EVENTS.appDownloadClicked:
       return {
         name: call.event,
@@ -721,9 +780,7 @@ function sendGoogle(call: AnalyticsCall): void {
   const event = googleEvent(call);
 
   gtag("event", event.name, {
-    page_location:
-      previousGooglePage ??
-      `${window.location.origin}${window.location.pathname}`,
+    page_location: previousGooglePage ?? currentPage(),
     send_to: GA_MEASUREMENT_ID,
     ...event.parameters,
   });
@@ -734,9 +791,7 @@ function sendGoogle(call: AnalyticsCall): void {
   ) {
     gtag("event", "generate_lead", {
       lead_source: "contact_form",
-      page_location:
-        previousGooglePage ??
-        `${window.location.origin}${window.location.pathname}`,
+      page_location: previousGooglePage ?? currentPage(),
       send_to: GA_MEASUREMENT_ID,
     });
   }
@@ -832,6 +887,7 @@ export function track<Event extends AnalyticsEvent>(
 
   if (event === EVENTS.viewPage) {
     const page = properties as AnalyticsPlan[typeof EVENTS.viewPage];
+    page.path = publicPath(page.path, window.location.hostname);
     if (page.path === lastPageViewPath) return;
     lastPageViewPath = page.path;
   }
@@ -878,17 +934,20 @@ export function trackLeaving<Event extends AnalyticsEvent>(
 }
 
 /**
- * Pages that render a visitor's own data. The dashboard draws balances,
- * transactions and notes from the visitor's backup, so session replay must
- * never capture it.
+ * Pages that render a visitor's own data: the Web Dashboard (balances,
+ * transactions and notes from the visitor's backup) and shared albums. No
+ * session recording or error capture there, and their analytics state stays
+ * on their own host.
  */
 function isPrivatePage(): boolean {
-  return pageTypeOf(window.location.pathname, window.location.hostname) === "dashboard";
+  const type = pageTypeOf(window.location.pathname, window.location.hostname);
+  return type === "dashboard" || type === "album";
 }
 
 export function pageTypeOf(pathname: string, hostname?: string): PageType {
-  // Every path on the app host is the dashboard (see src/proxy.ts).
+  // Every path on the app host is the dashboard, and on the album host an album (see src/proxy.ts).
   if (hostname && isAppHost(hostname)) return "dashboard";
+  if (hostname && isAlbumHost(hostname)) return "album";
   // Decoded, as the router does, so an escaped `/%64ashboard` still counts.
   let decoded = pathname;
   try {

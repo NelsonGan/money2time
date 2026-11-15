@@ -251,8 +251,25 @@ export interface Plan {
 interface PlanContext {
   groupId: string;
   userId: string;
+  /** `web`: the writer is on the website (album.money2time.com), not a phone. */
+  via?: 'web';
   now: string;
   newId: () => string;
+}
+
+/** The prefix of `created_by` on a row written on the website. */
+export const WEB_AUTHOR_PREFIX = 'web:';
+
+/**
+ * Who a bill or payment says wrote it last (`created_by`): the writer's
+ * account, or `web:<account>` when they wrote it on the website. A phone puts
+ * a bill on the user's default account only when they wrote it themselves on
+ * one of their phones (the app's albumGroupSync.ts compares `created_by` with
+ * the user's account), so a bill or payment entered on the website, where
+ * nobody has accounts, lands with no account in the app, to be chosen there.
+ */
+export function authorStamp(ctx: Pick<PlanContext, 'userId' | 'via'>): string {
+  return ctx.via === 'web' ? `${WEB_AUTHOR_PREFIX}${ctx.userId}` : ctx.userId;
 }
 
 function activityRow(
@@ -417,7 +434,7 @@ export function planLeave(state: GroupState, ctx: PlanContext, leaverUserId: str
  *   the group, or undoes one. A payment is never changed otherwise.
  * - Members: the writer renames themselves, to a name nobody else has.
  * - Settings: Simplify and the cover.
- * - `created_by` is always the writer.
+ * - `created_by` is always the writer (`authorStamp`).
  */
 export function planWrite(
   state: GroupState,
@@ -470,7 +487,7 @@ export function planWrite(
           ...before,
           deleted_at: ctx.now,
           updated_at: ctx.now,
-          created_by: ctx.userId,
+          created_by: authorStamp(ctx),
         });
         activities.push({
           kind: 'bill_deleted',
@@ -516,7 +533,7 @@ export function planWrite(
         category_icon: cleanText(row.category_icon, MAX_LABEL),
         paid_by: paidBy,
         shares_json: JSON.stringify(shares),
-        created_by: ctx.userId,
+        created_by: authorStamp(ctx),
         created_at: isText(before?.created_at) ? before.created_at : ctx.now,
         updated_at: ctx.now,
         deleted_at: null,
@@ -592,7 +609,7 @@ export function planWrite(
         amount: money(row.amount),
         currency,
         date,
-        created_by: ctx.userId,
+        created_by: authorStamp(ctx),
         created_at: ctx.now,
         updated_at: ctx.now,
         deleted_at: null,
@@ -762,6 +779,64 @@ export async function loadState(db: GroupDb, request: WriteRequest | null): Prom
     }
   }
   return { members, rows };
+}
+
+/** The newest log entries the website is sent; older ones stay in the database. */
+export const MAX_READ_ACTIVITY = 1000;
+/** Bills and payments the website is sent at most: far past any trip. */
+const MAX_READ_ROWS = 20000;
+
+/** One stored row of a group, as the website reads it. */
+export interface GroupRow {
+  table: GroupTable;
+  id: string;
+  data: Row;
+}
+
+/**
+ * The whole group for the website (GET /v1/ledgers/<id>/album): its members,
+ * bills (deleted ones too, whose payments still count), payments, settings,
+ * and the newest log entries. The website checks every row again, as a phone
+ * does (`toAlbumMember` and the rest): a member can write anything the rules
+ * allow, so nothing here is trusted for more than its shape.
+ */
+export async function readGroup(db: GroupDb): Promise<GroupRow[]> {
+  const [rows, activity] = await Promise.all([
+    // People and settings first, then bills before payments: past the cap
+    // (far beyond any trip) the newest payments go, never a member.
+    db.query({
+      sql: `SELECT table_name, row_id, data FROM sync_rows
+            WHERE table_name IN ('album_members', 'album_expenses', 'album_settlements', 'album_groups')
+            ORDER BY CASE table_name WHEN 'album_members' THEN 0 WHEN 'album_groups' THEN 1
+              WHEN 'album_expenses' THEN 2 ELSE 3 END, updated_at
+            LIMIT ${MAX_READ_ROWS}`,
+      args: [],
+    }),
+    db.query({
+      sql: `SELECT table_name, row_id, data FROM sync_rows WHERE table_name = 'album_activity'
+            ORDER BY updated_at DESC, row_id DESC LIMIT ${MAX_READ_ACTIVITY}`,
+      args: [],
+    }),
+  ]);
+  const out: GroupRow[] = [];
+  for (const raw of [...rows, ...activity]) {
+    const table = String(raw.table_name) as GroupTable;
+    if (!(GROUP_TABLES as readonly string[]).includes(table)) continue;
+    try {
+      const data = JSON.parse(String(raw.data)) as unknown;
+      if (data && typeof data === 'object' && !Array.isArray(data)) {
+        out.push({ table, id: String(raw.row_id), data: data as Row });
+      }
+    } catch {
+      // A row that is not JSON is passed over, as a phone passes it over.
+    }
+  }
+  return out;
+}
+
+/** The name the account goes by in the group, while it is in it; null when it is not. */
+export async function readOwnerName(db: GroupDb, userId: string): Promise<string | null> {
+  return selfOf(membersOf(await loadState(db, null)), userId)?.name ?? null;
 }
 
 /** A revision of the Worker's, in the app's shape (`<time>.<counter>.<origin>`). */

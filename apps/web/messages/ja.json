@@ -50,6 +50,10 @@
     "dashboard": {
       "title": "Webダッシュボード - Money2Time",
       "description": "スマホでコードを読み取ると、Money2Timeのデータを大きな画面で確認できます。支出、純資産、予算、そしてあらゆる購入の裏にある時間まで。エンドツーエンドで暗号化され、オンラインには何も保存されません。"
+    },
+    "album": {
+      "title": "共有アルバムに参加してね · Money2Time",
+      "description": "旅行の費用をみんなで割り勘して、誰が誰にいくら払うかを確認。無料で、アプリ不要、ブラウザだけで使えます。"
     }
   },
   "common": {
@@ -2216,6 +2220,226 @@
     "dropdown": {
       "search": "検索",
       "noMatch": "一致する項目がありません"
+    }
+  },
+  "album": {
+    "untitled": "共有アルバム",
+    "someone": "名前なし",
+    "cancel": "キャンセル",
+    "save": "保存",
+    "undo": "取り消し",
+    "retry": "再試行",
+    "today": "今日",
+    "signOut": "サインアウト",
+    "tabs": {
+      "transactions": "取引",
+      "breakdown": "内訳",
+      "balances": "残高"
+    },
+    "categories": {
+      "food": "食費",
+      "groceries": "日用品",
+      "transport": "交通",
+      "housing": "住居",
+      "bills": "公共料金",
+      "healthcare": "医療",
+      "shopping": "ショッピング",
+      "other": "その他"
+    },
+    "signIn": {
+      "email": "メールで続ける",
+      "emailLabel": "メールアドレス",
+      "emailPlaceholder": "you@example.com",
+      "badEmail": "正しいメールアドレスを入力してください。",
+      "sendCode": "コードを送信",
+      "codeSent": "<strong>{email}</strong> に送信した6桁のコードを入力してください。",
+      "codeLabel": "サインインコード",
+      "verify": "サインイン",
+      "resend": "新しいコードを送信",
+      "otherEmail": "別のメールを使う",
+      "otherWays": "他の方法でサインイン",
+      "wrongCode": "コードが正しくありません。確認するか、新しいコードを送信してください。"
+    },
+    "home": {
+      "title": "あなたの共有アルバム",
+      "landingTitle": "旅行の費用を友だちと割り勘",
+      "landingBody": "払った分を追加して、誰が誰にいくら払うかを確認し、精算。無料で、このブラウザだけで使えます。",
+      "emptyTitle": "共有アルバムはまだありません",
+      "emptyBody": "友だちから届いた招待リンクを開くと、そのアルバムに参加できます。アルバムはMoney2Timeアプリで作成します。",
+      "yours": "自分"
+    },
+    "join": {
+      "eyebrow": "共有アルバム",
+      "invitedBy": "{name}さんから割り勘に招待されました",
+      "signInTitle": "サインインして参加",
+      "signInBody": "無料で、アプリも不要。すべてここで使えます。",
+      "nameLabel": "このアルバムでの名前",
+      "join": "アルバムに参加",
+      "signedInAs": "{email} でサインイン中。",
+      "haveApp": "Money2Timeアプリをお持ちですか？",
+      "openInApp": "アプリで開く",
+      "expiredTitle": "この招待リンクは期限切れです",
+      "expiredBody": "招待リンクの有効期間は24時間です。{name}さんに新しいリンクを送ってもらってください。",
+      "ledgerTitle": "これは共有台帳へのリンクです",
+      "ledgerBody": "共有台帳はMoney2Timeアプリでのみ使えます。アプリでリンクを開いて参加してください。",
+      "full": "このアルバムは満員です。オーナーに空きを作ってもらってください。"
+    },
+    "joined": {
+      "eyebrow": "参加しました",
+      "title": "{name}へようこそ",
+      "body": "払った分を追加して、誰が誰にいくら払うかを確認しましょう。このままここで使うことも、いつでもアプリに移ることもできます。",
+      "web": "ウェブで続ける"
+    },
+    "app": {
+      "title": "Money2Timeアプリを入手",
+      "body": "同じアカウントでサインインすれば、ここで追加した内容も含めて共有アルバムがそのまま使えます。"
+    },
+    "banner": {
+      "title": "アプリならもっと簡単",
+      "body": "同じアカウント、同じアルバム",
+      "get": "入手",
+      "dismiss": "後で"
+    },
+    "album": {
+      "sections": "アルバムのセクション",
+      "signInTitle": "サインインしてアルバムを表示",
+      "signInBody": "参加したときのアカウントを使ってください。",
+      "goneTitle": "このアルバムのメンバーではありません",
+      "goneBody": "削除されたか、退出したか、外された可能性があります。もう一度参加するには、新しい招待リンクをもらってください。"
+    },
+    "people": {
+      "title": "メンバー",
+      "count": "{count, plural, other {#人}}",
+      "you": "あなた",
+      "joined": "参加済み",
+      "left": "退出済み",
+      "unnamed": "友だち",
+      "rename": "名前を変更",
+      "yourName": "あなたの名前",
+      "nameTaken": "同じ名前の人がすでにいます。",
+      "invite": "招待リンク",
+      "inviteInfo": "このリンクを知っている人は誰でもアルバムに参加できます。有効期間は24時間です。「新しいリンク」を押すと古いリンクはすぐに使えなくなります。",
+      "inviteShareTitle": "共有アルバムに参加してね",
+      "share": "共有",
+      "copy": "コピー",
+      "copied": "コピー済み",
+      "newLink": "新しいリンク",
+      "simplify": "グループの貸し借りをまとめる",
+      "simplifyInfo": "グループ内の貸し借りをまとめて、支払いの回数を減らします。合計で払う額やもらう額は変わりません。",
+      "leave": "アルバムから退出",
+      "leaveTitle": "{name}から退出しますか？",
+      "leaveBody": "あなたの会計は他のメンバーのためにアルバムに残り、あなたは変更できなくなります。",
+      "remove": "外す",
+      "removeTitle": "{name}をアルバムから外しますか？",
+      "removeBody": "この人にはこのアルバムの会計が届かなくなります。この人が含まれる会計は残ります。"
+    },
+    "bill": {
+      "add": "会計を追加",
+      "new": "新しい会計",
+      "edit": "会計を編集",
+      "view": "会計",
+      "amount": "金額",
+      "currency": "通貨",
+      "inThisAlbum": "このアルバム",
+      "allCurrencies": "すべての通貨",
+      "note": "何の支払い？",
+      "notePlaceholder": "何の支払い？",
+      "category": "カテゴリ",
+      "ownCategory": "{name}に分類",
+      "date": "日付",
+      "paidBy": "支払った人",
+      "save": "保存",
+      "saved": "会計を保存しました",
+      "added": "会計を追加しました",
+      "deleted": "会計を削除しました",
+      "delete": "削除",
+      "deleteTitle": "この会計を削除しますか？",
+      "deleteBody": "アルバムの全員から削除されます。",
+      "deleteBodyPaid": "アルバムの全員から削除されます。支払いは残り、すでに支払われた分は返金が必要になります。",
+      "paidEditTitle": "この会計には支払いがあります",
+      "paidEditBody": "支払いは残ります。負担額がすでに支払われた額を下回ると、差額の返金が必要になります。",
+      "payments": "支払い",
+      "paymentLine": "{from}さんが{to}さんに{amount}を支払い",
+      "shared": "共有アルバム",
+      "untitled": "会計",
+      "youPaid": "自分が支払い",
+      "youLent": "自分が支払い · {amount}を立て替え",
+      "theyPaidYourShare": "{name}さんが支払い · 自分の負担 {amount}",
+      "notInvolved": "{name}さんが支払い · 自分は対象外",
+      "emptyTitle": "会計はまだありません",
+      "emptyBody": "最初の会計を追加しましょう。金額、払った人、割り勘する相手を入力します。"
+    },
+    "split": {
+      "evenly": "均等に割り勘",
+      "by": "分け方",
+      "amount": "金額",
+      "amountHint": "各自の支払額を入力",
+      "percentHint": "各自に請求額の割合を割り当てる",
+      "shares": "口数",
+      "sharesHint": "2口は1口の2倍を支払う",
+      "adjustHint": "均等に分けてから、誰かの分を増減する",
+      "valueFor": "{name}さんの分",
+      "enterAmount": "金額を入力してください",
+      "youOwe": "{name}に{amount}を返す",
+      "youLent": "{amount}を立て替え",
+      "justYou": "自分の負担分のみ",
+      "notYou": "他のメンバー間の割り勘。{name}さんが支払い",
+      "left": "あと{amount}を割り当て",
+      "over": "{amount} 超過",
+      "percent": "{given}% / 100%",
+      "noShares": "誰かに口数を割り当ててください",
+      "adjustOver": "調整額が請求額を超えています",
+      "nobody": "割り勘する相手を選んでください",
+      "nobodyElse": "まだ誰も参加していません。「メンバー」から招待リンクを共有してください。"
+    },
+    "settle": {
+      "payTitle": "{name}さんに支払う",
+      "receivedTitle": "{name}さんから受け取った",
+      "othersTitle": "支払いを記録",
+      "amount": "支払額",
+      "owed": "未払い：{amount}",
+      "record": "支払いを記録",
+      "recorded": "記録しました：{from}さんが{to}さんに{amount}を支払い",
+      "note": "ここでは支払いを記録するだけです。お金はいつもの方法で送ってください。",
+      "othersNote": "{from}さんが実際に{to}さんに支払った場合のみ記録してください。"
+    },
+    "balances": {
+      "youOwe": "返す分",
+      "youAreOwed": "受け取り予定",
+      "settled": "すべて精算済みです",
+      "emptyTitle": "まだ残高はありません",
+      "emptyBody": "会計を追加すると、誰が誰にいくら払うかがここに表示されます。",
+      "whoOwesWhom": "誰が誰にいくら",
+      "youOweName": "{name}に返す",
+      "owesYou": "{name}さんからもらう",
+      "owes": "{from}さん → {to}さん",
+      "settledUp": "精算済み",
+      "groupSpending": "グループの支出",
+      "total": "合計",
+      "youPaid": "自分が支払い",
+      "yourShare": "あなたの負担"
+    },
+    "breakdown": {
+      "showing": "表示",
+      "everyone": "全員",
+      "total": "合計",
+      "bills": "{count, plural, other {#件の会計}}",
+      "emptyTitle": "まだ内訳はありません"
+    },
+    "activity": {
+      "showAll": "すべて表示（{count}件）",
+      "showLess": "表示を減らす"
+    },
+    "errors": {
+      "generic": "問題が発生しました。もう一度お試しください。",
+      "network": "Money2Timeに接続できません。接続を確認して、もう一度お試しください。",
+      "networkTitle": "オフラインのようです",
+      "rateLimited": "試行回数が多すぎます。1分ほど待ってから、もう一度お試しください。",
+      "captcha": "リクエストを確認できませんでした。ページを再読み込みして、もう一度お試しください。",
+      "signedOut": "このアルバムを変更するには、もう一度サインインしてください。",
+      "notMember": "このアルバムのメンバーではなくなったため、変更できません。",
+      "busy": "他の人がこのアルバムを変更中です。少し待ってからもう一度お試しください。",
+      "saveFailed": "このアルバムへの変更を保存できませんでした。もう一度お試しください。"
     }
   }
 }

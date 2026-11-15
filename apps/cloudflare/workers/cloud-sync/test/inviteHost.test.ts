@@ -18,17 +18,13 @@ test('the ledger host opens invite links', async () => {
   assert.ok((await res.text()).includes(`money2time://join/${code}`));
 });
 
-test('the album host opens invite links, worded as an album', async () => {
+test("the album host is the website's: this Worker opens no invite there", async () => {
   const res = await worker.fetch(new Request(`https://album.money2time.com/join/${code}`), env);
-  assert.equal(res.status, 200);
-  const html = await res.text();
-  assert.ok(html.includes(`money2time://join/${code}`));
-  assert.ok(html.includes('shared album'));
-  assert.ok(!html.includes('shared ledger'));
+  assert.equal(res.status, 404);
 });
 
-test('the invite hosts serve neither sign-in nor the API', async () => {
-  for (const host of ['ledger.money2time.com', 'album.money2time.com']) {
+test('the invite host serves neither sign-in nor the API', async () => {
+  for (const host of ['ledger.money2time.com']) {
     for (const [method, path] of [
       ['POST', '/api/auth/sign-in/social'],
       ['GET', '/api/auth/ok'],

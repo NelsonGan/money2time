@@ -50,6 +50,10 @@
     "dashboard": {
       "title": "Bảng điều khiển web - Money2Time",
       "description": "Quét bằng điện thoại để xem dữ liệu Money2Time trên màn hình lớn: chi tiêu, tài sản ròng, ngân sách và số giờ đằng sau mỗi lần mua. Mã hóa đầu cuối, không lưu gì trực tuyến."
+    },
+    "album": {
+      "title": "Tham gia album chung của mình · Money2Time",
+      "description": "Cùng chia hóa đơn chuyến đi và xem ai nợ ai. Miễn phí, ngay trên trình duyệt, không cần ứng dụng."
     }
   },
   "common": {
@@ -2216,6 +2220,226 @@
     "dropdown": {
       "search": "Tìm kiếm",
       "noMatch": "Không có kết quả"
+    }
+  },
+  "album": {
+    "untitled": "Album chung",
+    "someone": "Ai đó",
+    "cancel": "Hủy",
+    "save": "Lưu",
+    "undo": "Hoàn tác",
+    "retry": "Thử lại",
+    "today": "Hôm nay",
+    "signOut": "Đăng xuất",
+    "tabs": {
+      "transactions": "Giao dịch",
+      "breakdown": "Phân tích",
+      "balances": "Số dư"
+    },
+    "categories": {
+      "food": "Ăn uống",
+      "groceries": "Hàng tạp hóa",
+      "transport": "Di chuyển",
+      "housing": "Nhà ở",
+      "bills": "Hóa đơn",
+      "healthcare": "Sức khỏe",
+      "shopping": "Mua sắm",
+      "other": "Khác"
+    },
+    "signIn": {
+      "email": "Tiếp tục với email",
+      "emailLabel": "Địa chỉ email",
+      "emailPlaceholder": "ban@example.com",
+      "badEmail": "Hãy nhập địa chỉ email hợp lệ.",
+      "sendCode": "Gửi mã",
+      "codeSent": "Nhập mã 6 chữ số chúng tôi đã gửi đến <strong>{email}</strong>.",
+      "codeLabel": "Mã đăng nhập",
+      "verify": "Đăng nhập",
+      "resend": "Gửi mã mới",
+      "otherEmail": "Dùng email khác",
+      "otherWays": "Cách đăng nhập khác",
+      "wrongCode": "Mã đó không đúng. Hãy kiểm tra lại hoặc gửi mã mới."
+    },
+    "home": {
+      "title": "Album chung của bạn",
+      "landingTitle": "Chia hóa đơn chuyến đi với bạn bè",
+      "landingBody": "Thêm khoản bạn đã trả, xem ai nợ ai và thanh toán. Miễn phí, ngay trên trình duyệt.",
+      "emptyTitle": "Chưa có album chung nào",
+      "emptyBody": "Mở liên kết mời bạn bè gửi để tham gia album của họ. Album được tạo trong ứng dụng Money2Time.",
+      "yours": "Của bạn"
+    },
+    "join": {
+      "eyebrow": "Album chung",
+      "invitedBy": "{name} mời bạn cùng chia hóa đơn",
+      "signInTitle": "Đăng nhập để tham gia",
+      "signInBody": "Miễn phí, không cần ứng dụng: mọi thứ hoạt động ngay tại đây.",
+      "nameLabel": "Tên của bạn trong album này",
+      "join": "Tham gia album",
+      "signedInAs": "Đã đăng nhập: {email}.",
+      "haveApp": "Bạn có ứng dụng Money2Time?",
+      "openInApp": "Mở trong ứng dụng",
+      "expiredTitle": "Liên kết mời này đã hết hạn",
+      "expiredBody": "Liên kết mời có hiệu lực 24 giờ. Hãy nhờ {name} gửi liên kết mới.",
+      "ledgerTitle": "Liên kết này dành cho sổ dùng chung",
+      "ledgerBody": "Sổ dùng chung chỉ có trong ứng dụng Money2Time. Hãy mở liên kết ở đó để tham gia.",
+      "full": "Album này đã đầy. Hãy nhờ chủ album nhường chỗ."
+    },
+    "joined": {
+      "eyebrow": "Bạn đã tham gia",
+      "title": "Chào mừng đến với {name}",
+      "body": "Thêm khoản bạn đã trả và xem ai nợ ai. Bạn có thể tiếp tục dùng ở đây, hoặc chuyển sang ứng dụng bất cứ lúc nào.",
+      "web": "Tiếp tục trên web"
+    },
+    "app": {
+      "title": "Tải ứng dụng Money2Time",
+      "body": "Đăng nhập bằng cùng tài khoản và các album chung sẽ đi cùng bạn, gồm cả mọi thứ bạn đã thêm ở đây."
+    },
+    "banner": {
+      "title": "Dễ hơn trên ứng dụng",
+      "body": "Cùng tài khoản, cùng album",
+      "get": "Tải",
+      "dismiss": "Để sau"
+    },
+    "album": {
+      "sections": "Các mục của album",
+      "signInTitle": "Đăng nhập để xem album này",
+      "signInBody": "Dùng tài khoản bạn đã dùng để tham gia.",
+      "goneTitle": "Bạn không có trong album này",
+      "goneBody": "Album có thể đã bị xóa, hoặc bạn đã rời hay bị gỡ khỏi album. Hãy xin liên kết mời mới để tham gia lại."
+    },
+    "people": {
+      "title": "Mọi người",
+      "count": "{count, plural, other {# người}}",
+      "you": "Bạn",
+      "joined": "Đã tham gia",
+      "left": "Đã rời",
+      "unnamed": "Bạn bè",
+      "rename": "Đổi tên",
+      "yourName": "Tên của bạn",
+      "nameTaken": "Ở đây đã có người mang tên đó.",
+      "invite": "Liên kết mời",
+      "inviteInfo": "Ai có liên kết này đều có thể tham gia album. Liên kết có hiệu lực 24 giờ; Liên kết mới sẽ vô hiệu hóa liên kết cũ ngay lập tức.",
+      "inviteShareTitle": "Tham gia album chung của mình",
+      "share": "Chia sẻ",
+      "copy": "Sao chép",
+      "copied": "Đã sao chép",
+      "newLink": "Liên kết mới",
+      "simplify": "Đơn giản hóa nợ nhóm",
+      "simplifyInfo": "Gộp các khoản nợ trong nhóm để phải trả ít lần hơn. Tổng số mỗi người trả hoặc nhận vẫn như cũ.",
+      "leave": "Rời album",
+      "leaveTitle": "Rời {name}?",
+      "leaveBody": "Hóa đơn của bạn vẫn ở lại trong album cho những người khác, và bạn không thể thay đổi album nữa.",
+      "remove": "Gỡ",
+      "removeTitle": "Xóa {name} khỏi album?",
+      "removeBody": "Họ sẽ không còn nhận hóa đơn của album này. Các hóa đơn có họ vẫn được giữ."
+    },
+    "bill": {
+      "add": "Thêm hóa đơn",
+      "new": "Hóa đơn mới",
+      "edit": "Sửa hóa đơn",
+      "view": "Hóa đơn",
+      "amount": "Số tiền",
+      "currency": "Tiền tệ",
+      "inThisAlbum": "Trong album này",
+      "allCurrencies": "Tất cả tiền tệ",
+      "note": "Khoản này để làm gì?",
+      "notePlaceholder": "Khoản này để làm gì?",
+      "category": "Danh mục",
+      "ownCategory": "Thuộc {name}",
+      "date": "Ngày",
+      "paidBy": "Người trả",
+      "save": "Lưu",
+      "saved": "Đã lưu hóa đơn",
+      "added": "Đã thêm hóa đơn",
+      "deleted": "Đã xóa hóa đơn",
+      "delete": "Xóa",
+      "deleteTitle": "Xóa hóa đơn này?",
+      "deleteBody": "Hóa đơn sẽ bị gỡ khỏi mọi người trong album.",
+      "deleteBodyPaid": "Hóa đơn sẽ bị gỡ khỏi mọi người trong album. Các khoản thanh toán vẫn giữ nguyên, và số tiền đã trả sẽ phải được hoàn lại.",
+      "paidEditTitle": "Hóa đơn này đã có thanh toán",
+      "paidEditBody": "Các khoản thanh toán vẫn giữ nguyên. Nếu một phần giảm xuống dưới số đã trả, phần chênh lệch sẽ phải được hoàn lại.",
+      "payments": "Thanh toán",
+      "paymentLine": "{from} đã trả {to} {amount}",
+      "shared": "Album chung",
+      "untitled": "Hóa đơn",
+      "youPaid": "Bạn đã trả",
+      "youLent": "Bạn đã trả · bạn cho mượn {amount}",
+      "theyPaidYourShare": "{name} đã trả · phần của bạn {amount}",
+      "notInvolved": "{name} đã trả · không phải hóa đơn của bạn",
+      "emptyTitle": "Chưa có hóa đơn nào",
+      "emptyBody": "Thêm hóa đơn đầu tiên: giá bao nhiêu, ai trả và chia với ai."
+    },
+    "split": {
+      "evenly": "Chia đều",
+      "by": "Chia theo",
+      "amount": "Số tiền",
+      "amountHint": "Nhập số tiền mỗi người trả",
+      "percentHint": "Gán cho mỗi người một phần trăm hóa đơn",
+      "shares": "Phần",
+      "sharesHint": "2 phần trả gấp đôi 1 phần",
+      "adjustHint": "Chia đều, rồi cộng hoặc trừ cho ai đó",
+      "valueFor": "Phần của {name}",
+      "enterAmount": "Nhập số tiền",
+      "youOwe": "Bạn nợ {name} {amount}",
+      "youLent": "Bạn cho mượn {amount}",
+      "justYou": "Chỉ phần của riêng bạn",
+      "notYou": "Giữa những người khác; {name} đã trả",
+      "left": "Còn {amount} chưa chia",
+      "over": "Vượt {amount}",
+      "percent": "{given}% trên 100%",
+      "noShares": "Hãy chia cho ai đó một phần",
+      "adjustOver": "Khoản điều chỉnh vượt quá hóa đơn",
+      "nobody": "Chọn người cùng chia",
+      "nobodyElse": "Chưa có ai khác tham gia. Hãy chia sẻ liên kết mời từ Mọi người."
+    },
+    "settle": {
+      "payTitle": "Trả {name}",
+      "receivedTitle": "{name} đã trả bạn",
+      "othersTitle": "Ghi lại khoản thanh toán",
+      "amount": "Số tiền đã trả",
+      "owed": "Đang nợ: {amount}",
+      "record": "Ghi lại thanh toán",
+      "recorded": "Đã ghi: {from} đã trả {to} {amount}",
+      "note": "Thao tác này chỉ ghi lại khoản thanh toán. Hãy chuyển tiền như bạn vẫn làm.",
+      "othersNote": "Chỉ ghi lại nếu {from} thật sự đã trả {to}."
+    },
+    "balances": {
+      "youOwe": "Bạn nợ",
+      "youAreOwed": "Bạn được nhận",
+      "settled": "Bạn đã thanh toán hết",
+      "emptyTitle": "Chưa có số dư nào",
+      "emptyBody": "Thêm một hóa đơn và bạn sẽ thấy ai nợ ai ở đây.",
+      "whoOwesWhom": "Ai nợ ai",
+      "youOweName": "Bạn nợ {name}",
+      "owesYou": "{name} nợ bạn",
+      "owes": "{from} nợ {to}",
+      "settledUp": "Đã thanh toán",
+      "groupSpending": "Chi tiêu của nhóm",
+      "total": "Tổng",
+      "youPaid": "Bạn đã trả",
+      "yourShare": "Phần của bạn"
+    },
+    "breakdown": {
+      "showing": "Đang xem",
+      "everyone": "Mọi người",
+      "total": "Tổng",
+      "bills": "{count, plural, other {# hóa đơn}}",
+      "emptyTitle": "Chưa có gì để phân tích"
+    },
+    "activity": {
+      "showAll": "Hiện tất cả {count}",
+      "showLess": "Thu gọn"
+    },
+    "errors": {
+      "generic": "Đã xảy ra lỗi. Hãy thử lại.",
+      "network": "Không kết nối được Money2Time. Hãy kiểm tra kết nối và thử lại.",
+      "networkTitle": "Có vẻ bạn đang ngoại tuyến",
+      "rateLimited": "Thử quá nhiều lần. Hãy đợi một phút rồi thử lại.",
+      "captcha": "Chúng tôi không thể kiểm tra yêu cầu này. Hãy tải lại trang và thử lại.",
+      "signedOut": "Hãy đăng nhập lại để thay đổi album này.",
+      "notMember": "Bạn không còn trong album này nên không thể thay đổi nó.",
+      "busy": "Có người khác đang thay đổi album này. Hãy thử lại sau giây lát.",
+      "saveFailed": "Không thể lưu thay đổi cho album này. Hãy thử lại."
     }
   }
 }

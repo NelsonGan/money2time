@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 import { isLocale, routing, type Locale } from "./i18n/routing";
-import { APP_ORIGIN, isAppHost, isProductionHost } from "./lib/platform";
+import { ALBUM_ORIGIN, APP_ORIGIN, isAlbumHost, isAppHost, isProductionHost } from "./lib/platform";
 
 /*
  * next-intl is typed against the `next` package it lists as a peer, which npm
@@ -155,6 +155,8 @@ function internalLocalizedPathname(pathname: string, locale: Locale) {
 
 /** `/dashboard` or `/<locale>/dashboard` on the marketing host. */
 const DASHBOARD_PATH = /^\/(?:([a-z]{2,3}(?:-[a-z]{2})?)\/)?dashboard\/?$/;
+/** `/album` or `/<locale>/album` on the marketing host, where its `/api` answers nothing. */
+const ALBUM_PATH = /^\/(?:[a-z]{2,3}(?:-[a-z]{2})?\/)?album\/?$/;
 
 /**
  * The path as the router will see it. Routing decodes percent escapes, so
@@ -170,11 +172,11 @@ export function decodedPath(pathname: string): string {
 }
 
 /**
- * app.money2time.com serves only the dashboard, at whatever path, in the
- * visitor's language: a locale in the path, then their saved choice, then
- * the same browser-and-country guess the marketing site makes.
+ * The language of a one-page host (the dashboard's, the albums'): a locale in
+ * the path, then the visitor's saved choice, then the same
+ * browser-and-country guess the marketing site makes.
  */
-function appHostResponse(request: NextRequest) {
+function hostLocale(request: NextRequest): Locale {
   const { pathname } = request.nextUrl;
   const saved = request.cookies.get("NEXT_LOCALE")?.value;
   const country = countryFromRequest(request);
@@ -184,8 +186,25 @@ function appHostResponse(request: NextRequest) {
     (country ? englishFirstCountries[country] : undefined) ??
     preferredLocale(localeFromAcceptLanguage(request), country ? countryLocaleMap[country] : undefined) ??
     routing.defaultLocale;
+  return locale;
+}
+
+/** app.money2time.com serves only the dashboard, at whatever path. */
+function appHostResponse(request: NextRequest) {
   const nextUrl = request.nextUrl.clone();
-  nextUrl.pathname = `/${locale}/dashboard`;
+  nextUrl.pathname = `/${hostLocale(request)}/dashboard`;
+  return NextResponse.rewrite(nextUrl);
+}
+
+/**
+ * album.money2time.com is one page in the visitor's language: an invite
+ * (`/join/<code>`), the albums list (`/`) or an album (`/a/<share>`), which
+ * the page reads from the address itself. Unlike the dashboard host it keeps
+ * a locale prefix out of the path, since an invite link is shared as it is.
+ */
+function albumHostResponse(request: NextRequest) {
+  const nextUrl = request.nextUrl.clone();
+  nextUrl.pathname = `/${hostLocale(request)}/album`;
   return NextResponse.rewrite(nextUrl);
 }
 
@@ -217,6 +236,14 @@ export default function proxy(request: NextRequest) {
     if (pathname === "/sitemap.xml") return new NextResponse("Not found", { status: 404 });
     return appHostResponse(request);
   }
+  if (isAlbumHost(host)) {
+    // Invites and albums are private: nothing on this host is for an index.
+    if (pathname === "/robots.txt") {
+      return new NextResponse("User-agent: *\nDisallow: /\n", { headers: { "Content-Type": "text/plain" } });
+    }
+    if (pathname === "/sitemap.xml") return new NextResponse("Not found", { status: 404 });
+    return albumHostResponse(request);
+  }
   if (pathname === "/robots.txt" || pathname === "/sitemap.xml") return NextResponse.next();
 
   // The dashboard is served only on its own host; send it there.
@@ -225,6 +252,11 @@ export default function proxy(request: NextRequest) {
     const locale = dashboard[1] && isLocale(dashboard[1]) ? dashboard[1] : undefined;
     const target = new URL(locale && locale !== routing.defaultLocale ? `/${locale}` : "/", APP_ORIGIN);
     return NextResponse.redirect(target, 308);
+  }
+  // Shared albums likewise live on their own host only, which keeps the
+  // locale out of its paths and picks it itself.
+  if (ALBUM_PATH.test(decodedPath(pathname)) && isProductionHost(host)) {
+    return NextResponse.redirect(new URL("/", ALBUM_ORIGIN), 308);
   }
 
   if (pathnameLocale(pathname) || request.cookies.has("NEXT_LOCALE")) {
