@@ -1,4 +1,5 @@
 import type {
+  AlbumBudgetSpend,
   BudgetCategoryProgress,
   BudgetPeriod,
   BudgetSummary,
@@ -36,7 +37,10 @@ import {
  * subcategory activity up. Lines on subcategories render as children of their
  * root line with that category's own spend (no roll-up). Whether unbudgeted
  * spend counts toward the period total follows the frozen `countUnbudgeted`
- * flag. Returns null when there is no budget.
+ * flag. An expense in an album (`albumIdOf`) counts toward the period total
+ * always, and toward no category's line: the category lists show it under
+ * its album (README: Key patterns > Albums). Returns null when there is no
+ * budget.
  */
 export function buildBudgetSummary({
   budget,
@@ -44,6 +48,7 @@ export function buildBudgetSummary({
   categories,
   monthCycle = 1,
   rateTable,
+  albumIdOf,
 }: {
   budget: PeriodBudget | null;
   transactions: TransactionWithRelations[];
@@ -51,6 +56,8 @@ export function buildBudgetSummary({
   monthCycle?: MonthCycleInput;
   /** The latest rates, for a budget in another currency made with no rate. */
   rateTable?: RateTable | null;
+  /** The album an entry is in, if any. */
+  albumIdOf?: (transactionId: string) => string | null;
 }): BudgetSummary | null {
   if (!budget) return null;
   const range = budgetPeriodRange(budget.period, budget.periodKey, monthCycle);
@@ -80,18 +87,26 @@ export function buildBudgetSummary({
 
   const spentByRoot = new Map<string, number>();
   const spentByCategory = new Map<string, number>();
+  const spentByAlbum = new Map<string, number>();
   let uncategorizedSpent = 0;
   let unconvertedCount = 0;
   for (const transaction of transactions) {
     if (transaction.deletedAt) continue;
     if (transaction.type !== 'expense') continue;
     if (!isIsoInBudgetRange(transaction.date, range)) continue;
+    const albumId = albumIdOf?.(transaction.id) ?? null;
     const categoryId = transaction.categoryId;
     const rootId = categoryId ? (rootById.get(categoryId) ?? categoryId) : null;
     const value = budgetSpendValue(transaction, budget.currency, rate);
     if (value == null) {
       // Only spending that would count toward this budget is worth a mention.
-      if ((rootId && rootLineIds.has(rootId)) || budget.countUnbudgeted) unconvertedCount += 1;
+      if (albumId || (rootId && rootLineIds.has(rootId)) || budget.countUnbudgeted) {
+        unconvertedCount += 1;
+      }
+      continue;
+    }
+    if (albumId) {
+      spentByAlbum.set(albumId, (spentByAlbum.get(albumId) ?? 0) + value);
       continue;
     }
     if (!categoryId || !rootId) {
@@ -149,11 +164,23 @@ export function buildBudgetSummary({
   }
   unbudgeted.sort((a, b) => b.spent - a.spent);
 
+  let albumSpent = 0;
+  const albums: AlbumBudgetSpend[] = [];
+  for (const [albumId, spent] of spentByAlbum) {
+    const normalized = normalizeMoneyAmount(spent);
+    albumSpent += normalized;
+    albums.push({ albumId, spent: normalized });
+  }
+  albums.sort((a, b) => b.spent - a.spent);
+
   budgetedSpent = normalizeMoneyAmount(budgetedSpent);
   unbudgetedSpent = normalizeMoneyAmount(unbudgetedSpent);
+  albumSpent = normalizeMoneyAmount(albumSpent);
   const countUnbudgeted = budget.countUnbudgeted;
   const totalBudget = normalizeMoneyAmount(budget.totalAmount);
-  const totalSpent = normalizeMoneyAmount(budgetedSpent + (countUnbudgeted ? unbudgetedSpent : 0));
+  const totalSpent = normalizeMoneyAmount(
+    budgetedSpent + albumSpent + (countUnbudgeted ? unbudgetedSpent : 0),
+  );
   const remaining = normalizeMoneyAmount(totalBudget - totalSpent);
 
   return {
@@ -161,12 +188,14 @@ export function buildBudgetSummary({
     totalSpent,
     budgetedSpent,
     unbudgetedSpent,
+    albumSpent,
     countUnbudgeted,
     remaining,
     exceededBy: remaining < 0 ? Math.abs(remaining) : 0,
     usageRatio: totalBudget > 0 ? totalSpent / totalBudget : 0,
     categories: progress,
     unbudgeted,
+    albums,
     unconvertedCount,
   };
 }

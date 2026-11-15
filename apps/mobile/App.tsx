@@ -1642,11 +1642,13 @@ function PaymentAlertsSetupRouteScreen({
 function WidgetSnapshotSync() {
   const {
     settings,
+    albums,
     categories,
     periodBudgets,
     rateTable,
     insightsPreferencesJson,
     getTrueHourlyRateForDate,
+    getAlbumIdByTransaction,
   } = useApp();
   const { transactions } = useTransactions();
   const isPro = useIsPro();
@@ -1675,6 +1677,7 @@ function WidgetSnapshotSync() {
           categories,
           periodBudgets,
           rateTable,
+          albumIdByTransaction: getAlbumIdByTransaction(),
           excludedSavingsIncomeCategoryIds: savingsExclusions.income,
           excludedSavingsExpenseCategoryIds: savingsExclusions.expense,
           savingsIncomeMode: savingsExclusions.incomeMode,
@@ -1693,7 +1696,9 @@ function WidgetSnapshotSync() {
       handle?.cancel();
     };
   }, [
+    albums,
     categories,
+    getAlbumIdByTransaction,
     getTrueHourlyRateForDate,
     insightsPreferencesJson,
     isPro,

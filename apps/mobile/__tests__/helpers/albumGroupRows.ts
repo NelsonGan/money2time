@@ -3,6 +3,7 @@
 // put them straight into the app database, since the phone itself never
 // writes the group.
 
+import type { AlbumCategoryKey } from '~/features/albums/lib/albumCategories';
 import { getSQLite } from '~/lib/db/client';
 import type { AlbumShare } from '~/types';
 import { newId } from '~/utils/id';
@@ -56,18 +57,18 @@ export const groupRows = {
     note: string | null;
     amount: number;
     currency: string;
-    categoryName: string | null;
-    categoryIcon: string | null;
+    category?: AlbumCategoryKey;
     paidBy: string;
     shares: AlbumShare[];
     createdBy: string | null;
   }) {
     run(
-      `INSERT INTO album_expenses (id, ledger_id, date, note, amount, currency, category_name,
-         category_icon, paid_by, shares_json, created_by, created_at, updated_at, deleted_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)
+      `INSERT INTO album_expenses (id, ledger_id, date, note, amount, currency, category_key,
+         paid_by, shares_json, created_by, created_at, updated_at, deleted_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)
        ON CONFLICT(id) DO UPDATE SET date = excluded.date, note = excluded.note,
-         amount = excluded.amount, currency = excluded.currency, paid_by = excluded.paid_by,
+         amount = excluded.amount, currency = excluded.currency,
+         category_key = excluded.category_key, paid_by = excluded.paid_by,
          shares_json = excluded.shares_json, created_by = excluded.created_by,
          updated_at = excluded.updated_at, deleted_at = NULL`,
       [
@@ -77,8 +78,7 @@ export const groupRows = {
         input.note,
         input.amount,
         input.currency,
-        input.categoryName,
-        input.categoryIcon,
+        input.category ?? null,
         input.paidBy,
         JSON.stringify(input.shares),
         input.createdBy,

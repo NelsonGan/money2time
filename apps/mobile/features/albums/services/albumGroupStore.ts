@@ -190,15 +190,16 @@ export function ensureLocalAlbum(share: { ledgerId: string; name: string | null 
         ]);
         // Its entries come back with it (deleting the album stamped their
         // links with the same time), so the group's bills find the user's
-        // own entries again rather than leaving them outside the album.
+        // own entries again rather than leaving them outside the album. One
+        // put in another album since stays there (an entry is in one album);
+        // a bill of the group comes back as the group is projected.
         db.runSync(
           `UPDATE album_transactions SET deleted_at = NULL, updated_at = ?
            WHERE album_id = ? AND deleted_at = ?
              AND transaction_id NOT IN (
-               SELECT transaction_id FROM album_transactions
-               WHERE album_id = ? AND deleted_at IS NULL
+               SELECT transaction_id FROM album_transactions WHERE deleted_at IS NULL
              )`,
-          [now, share.ledgerId, existing.deleted_at, share.ledgerId],
+          [now, share.ledgerId, existing.deleted_at],
         );
       });
     }

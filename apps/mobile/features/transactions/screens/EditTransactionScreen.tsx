@@ -11,8 +11,12 @@ import {
 } from '~/context/AppContext';
 import { albumBillRows, useAlbumBillTarget } from '~/features/albums/hooks/useAlbumBillTarget';
 import { useGroupBillOrigin, useGroupOthers } from '~/features/albums/hooks/useGroupBillOrigin';
+import { albumCategoryForCategory, albumCategoryId } from '~/features/albums/lib/albumCategories';
 import { billHasPayments } from '~/features/albums/lib/groupRules';
-import { listGroupSettlements } from '~/features/albums/services/albumGroupStore';
+import {
+  listGroupExpenses,
+  listGroupSettlements,
+} from '~/features/albums/services/albumGroupStore';
 import type { InstalmentChoice } from '~/features/instalments/components/InstalmentSheet';
 import { useCanStartInstalmentPlan } from '~/features/instalments/hooks/useCanStartInstalmentPlan';
 import {
@@ -95,6 +99,8 @@ function TransactionEditor({
     saveAlbumBill,
     detachAlbumBill,
     saveAlbumBillOwnFields,
+    categories,
+    quickEntryPrefs,
   } = useApp();
   const { transactions } = useTransactions();
   // A shared album's bill is saved through its group (README: Album members
@@ -127,6 +133,27 @@ function TransactionEditor({
       ),
     [transaction.id, transactions],
   );
+  // A shared album's expense is filed under one of the album's categories,
+  // the same for everyone: the bill's own, or the one the user's category
+  // reads as on an entry of theirs not split yet.
+  const initialCategoryId = useMemo(() => {
+    if (!albumGroupId || transaction.type !== 'expense') return transaction.categoryId;
+    const bill = transaction.albumGroupId
+      ? listGroupExpenses(albumGroupId).find((item) => item.id === transaction.id)
+      : undefined;
+    return albumCategoryId(
+      bill?.category ??
+        albumCategoryForCategory(transaction.categoryId, categories, quickEntryPrefs.categoryMap),
+    );
+  }, [
+    albumGroupId,
+    categories,
+    quickEntryPrefs.categoryMap,
+    transaction.albumGroupId,
+    transaction.categoryId,
+    transaction.id,
+    transaction.type,
+  ]);
   const canStartPlan = useCanStartInstalmentPlan();
   // The fee this transfer was charged, edited with it.
   const feeLink = useTransferFeeIndex().byTransferId.get(transaction.id) ?? null;
@@ -445,11 +472,10 @@ function TransactionEditor({
     ): Promise<boolean> => {
       const isGroupBill = !!albumGroupId && !!transaction.albumGroupId;
       if (albumGroupId && splits.some((row) => !row.isSelf)) {
-        // Only the user's own fields changed (category, account, longer note,
-        // receipt, mood): saved here alone, with nothing sent or logged.
+        // Only the user's own fields changed (account, longer note, receipt,
+        // mood): saved here alone, with nothing sent or logged.
         if (isGroupBill && billSignature(input, splits) === openedBillRef.current) {
           saveAlbumBillOwnFields(transaction.id, {
-            categoryId: input.categoryId ?? transaction.categoryId,
             details: input.details ?? null,
             receiptUri: input.receiptUri ?? null,
             sentiment: input.sentiment ?? 'neutral',
@@ -483,7 +509,6 @@ function TransactionEditor({
       saveOwnSplits,
       transaction.accountId,
       transaction.albumGroupId,
-      transaction.categoryId,
       transaction.date,
       transaction.id,
     ],
@@ -570,7 +595,12 @@ function TransactionEditor({
   }, [transaction.splits]);
   openedSplitsRef.current ??= splitsSignature(initialSplits);
   openedBillRef.current ??= billSignature(
-    { date: transaction.date, note: transaction.note, currency: transaction.currency },
+    {
+      date: transaction.date,
+      note: transaction.note,
+      currency: transaction.currency,
+      categoryId: initialCategoryId,
+    },
     initialSplits,
   );
 
@@ -617,7 +647,7 @@ function TransactionEditor({
         reportingCurrency: transaction.reportingCurrency,
         reportingAmount: transaction.reportingAmount,
         fxRate: transaction.fxRate,
-        categoryId: transaction.categoryId,
+        categoryId: initialCategoryId,
         note: transaction.note ?? '',
         details: transaction.details ?? '',
         receiptUri: transaction.receiptUri ?? null,
@@ -632,15 +662,16 @@ function TransactionEditor({
   );
 }
 
-/** A shared album's bill as the group holds it (its day, title and split), as a string. */
+/** A shared album's bill as the group holds it (its day, title, category and split), as a string. */
 function billSignature(
-  input: Partial<Pick<CreateTransactionInput, 'date' | 'note' | 'currency'>>,
+  input: Partial<Pick<CreateTransactionInput, 'date' | 'note' | 'currency' | 'categoryId'>>,
   splits?: readonly SplitDraft[],
 ): string {
   return JSON.stringify([
     input.date !== undefined ? dayKeyFromIsoLocal(input.date) : null,
     (input.note ?? '').trim(),
     input.currency ?? null,
+    input.categoryId ?? null,
     splitsSignature(splits),
   ]);
 }

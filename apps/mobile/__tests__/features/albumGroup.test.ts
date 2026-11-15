@@ -18,8 +18,7 @@ function bill(overrides: Partial<AlbumExpense> = {}): AlbumExpense {
     note: 'Dinner',
     amount: 90,
     currency: 'MYR',
-    categoryName: 'Food',
-    categoryIcon: '🍽️',
+    category: 'food',
     paidBy: 'me',
     shares: [
       { memberId: 'me', amount: 30 },

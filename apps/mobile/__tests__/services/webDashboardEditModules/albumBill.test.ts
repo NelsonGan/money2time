@@ -71,6 +71,7 @@ function extra(patch: Partial<AlbumBillExtra['groups'][number]> = {}): AlbumBill
             date: '2026-10-01',
             note: 'Dinner',
             currency: 'MYR',
+            category: 'food',
             paidBy: 'me',
             shares: [
               { memberId: 'me', amount: 15 },
@@ -83,6 +84,7 @@ function extra(patch: Partial<AlbumBillExtra['groups'][number]> = {}): AlbumBill
             date: '2026-10-01',
             note: 'Taxi',
             currency: 'MYR',
+            category: 'food',
             paidBy: 'tess',
             shares: [
               { memberId: 'me', amount: 5 },
@@ -95,6 +97,7 @@ function extra(patch: Partial<AlbumBillExtra['groups'][number]> = {}): AlbumBill
             date: '2026-09-30',
             note: 'Snacks',
             currency: 'MYR',
+            category: 'food',
             paidBy: 'me',
             shares: [{ memberId: 'tess', amount: 4 }],
             deleted: true,
@@ -209,6 +212,7 @@ describe('module:albumbill update', () => {
           date: null,
           note: 'Big dinner',
           currency: 'MYR',
+          category: 'food',
           rows: [
             { personName: null, amount: 10, isSelf: true, isPayer: false, albumMemberId: null },
             {
@@ -242,21 +246,32 @@ describe('module:albumbill update', () => {
 
   it('saves only the user own fields on their entry when nothing of the group changed', () => {
     const result = plan([
-      {
-        op: 'update',
-        id: 'b1',
-        at: AT,
-        set: { categoryId: 'food', details: 'Ramen', accountId: 'myr' },
-      },
+      { op: 'update', id: 'b1', at: AT, set: { details: 'Ramen', accountId: 'myr' } },
     ]);
     expect(steps(result)).toEqual([
       {
         kind: 'module',
         entity: ENTITY,
         action: 'own',
-        payload: { id: 'b1', own: { categoryId: 'food', details: 'Ramen', accountId: 'myr' } },
+        payload: { id: 'b1', own: { details: 'Ramen', accountId: 'myr' } },
       },
     ]);
+  });
+
+  it('sends a new category to the group, for everyone: an album category, or an older page’s own one', () => {
+    const [byKey] = steps(
+      plan([{ op: 'update', id: 'b1', at: AT, set: { category: 'transport' } }]),
+    );
+    expect(byKey.kind === 'module' && byKey.action).toBe('save');
+    expect(byKey.kind === 'module' && byKey.payload).toMatchObject({ category: 'transport' });
+    // An older page names one of the user's categories: the album category it reads as.
+    const [byOwn] = steps(plan([{ op: 'update', id: 'b1', at: AT, set: { categoryId: 'food' } }]));
+    expect(byOwn.kind === 'module' && byOwn.payload).toMatchObject({ category: 'food' });
+    // Not one of the album's categories: not read at all.
+    expect(plan([{ op: 'update', id: 'b1', at: AT, set: { category: 'pets' } }])).toEqual({
+      ok: false,
+      error: 'unread',
+    });
   });
 
   it('refuses who cannot be on the bill, a bill nobody else shares and the wrong category', () => {

@@ -80,6 +80,13 @@ import { getSubscriptionLogoMeta, suggestSubscriptionLogo } from '~/constants/su
 import { useApp, useTransferFeeIndex } from '~/context/AppContext';
 import { useSetSplitBillSession } from '~/context/SplitBillSession';
 import {
+  albumCategoryForCategory,
+  albumCategoryForText,
+  albumCategoryId,
+  albumCategoryKeyOfId,
+  albumCategoryPickerList,
+} from '~/features/albums/lib/albumCategories';
+import {
   describeInstalmentChoice,
   type InstalmentChoice,
   InstalmentSheet,
@@ -882,6 +889,27 @@ export function TransactionEditorScreen({
   const [transferFxModalVisible, setTransferFxModalVisible] = useState(false);
   const [categoryId, setCategoryId] = useState<string | null>(initialCategorySelectionId);
   const [note, setNote] = useState(initialValues?.note ?? '');
+  // A shared album's expense is filed under the album's categories, the same
+  // for everyone (README: Album members and shared albums > Categories), not
+  // the user's own: those are worked out from it when it is saved. A new
+  // bill's title picks one by Quick Entry's keywords ("Lunch" → Food) until
+  // the user picks one themselves.
+  const groupCategories = useMemo(
+    () => (groupBill ? albumCategoryPickerList() : null),
+    [groupBill],
+  );
+  const categoryPickedRef = useRef(mode !== 'create');
+  const autoAlbumCategoryRef = useRef(false);
+  autoAlbumCategoryRef.current = !!groupCategories && type === 'expense';
+  useEffect(() => {
+    if (!groupCategories || type !== 'expense' || !categoryId) return;
+    if (albumCategoryKeyOfId(categoryId)) return;
+    setCategoryId(
+      albumCategoryId(
+        albumCategoryForCategory(categoryId, categories, quickEntryPrefs.categoryMap),
+      ),
+    );
+  }, [categories, categoryId, groupCategories, quickEntryPrefs.categoryMap, type]);
   // The longer note, kept apart from the one-line note so that one can stay the
   // row's title. Its box in the options panel expands in place for typing.
   const [details, setDetails] = useState(initialValues?.details ?? '');
@@ -1490,7 +1518,7 @@ export function TransactionEditorScreen({
       };
     }
 
-    categories.forEach((category) => {
+    (type === 'expense' && groupCategories ? groupCategories : categories).forEach((category) => {
       if (category.type !== type) return;
       if (!category.parentId) {
         topLevel.push(category);
@@ -1511,7 +1539,7 @@ export function TransactionEditorScreen({
       topLevelCategoryById: topLevelById,
       childCategoriesByParent: childrenByParent,
     };
-  }, [categories, hideSubcategories, type]);
+  }, [categories, groupCategories, hideSubcategories, type]);
 
   const categoryPreviewById = useMemo(() => {
     const previews = new Map<string, { icon: string; name: string }>();
@@ -2957,7 +2985,7 @@ export function TransactionEditorScreen({
   const allCategoryPreviewById = useMemo(() => {
     const byId = new Map(categories.map((c) => [c.id, c]));
     const previews = new Map<string, { icon: string; name: string }>();
-    categories.forEach((category) => {
+    [...categories, ...(groupCategories ?? [])].forEach((category) => {
       const parent = category.parentId ? byId.get(category.parentId) : null;
       previews.set(category.id, {
         icon: resolveCategoryIcon(category.icon, parent?.icon ?? null),
@@ -2965,7 +2993,7 @@ export function TransactionEditorScreen({
       });
     });
     return previews;
-  }, [categories]);
+  }, [categories, groupCategories]);
   const transferCategoryPreview = useMemo(
     () =>
       transferCountsAsExpense && transferCategoryId
@@ -3310,6 +3338,10 @@ export function TransactionEditorScreen({
       return;
     }
     setNote(nextNote);
+    if (autoAlbumCategoryRef.current && !categoryPickedRef.current) {
+      const key = albumCategoryForText(nextNote);
+      if (key) setCategoryId(albumCategoryId(key));
+    }
     if (noteSuggestionsTimerRef.current) clearTimeout(noteSuggestionsTimerRef.current);
     if (!nextNote.trim()) {
       setNoteSuggestions([]);
@@ -3367,6 +3399,7 @@ export function TransactionEditorScreen({
   const handleCategorySelect = useCallback(
     (nextCategoryId: string) => {
       setCategoryId(nextCategoryId);
+      categoryPickedRef.current = true;
       if (mode === 'create') {
         autoNoteFromCategoryRef.current = categoryNoteLabel(nextCategoryId);
       }
@@ -3436,6 +3469,20 @@ export function TransactionEditorScreen({
     };
     return { expense: build('expense'), income: build('income') };
   }, [categories, hideSubcategories]);
+  const groupCategoryData = useMemo(
+    () =>
+      groupCategories
+        ? {
+            parents: groupCategories.map((category) => ({
+              id: category.id,
+              name: category.name,
+              icon: resolveCategoryIcon(category.icon),
+            })),
+            childByParent: new Map<string, { id: string; name: string; icon: string }[]>(),
+          }
+        : null,
+    [groupCategories],
+  );
 
   const renderToolPanel = () => {
     switch (activeField) {
@@ -3642,7 +3689,10 @@ export function TransactionEditorScreen({
       : fieldSelectionsByTypeRef.current[pageType];
 
     if (pageType === 'expense' || pageType === 'income') {
-      const data = categoryDataByType[pageType];
+      const data =
+        pageType === 'expense' && groupCategoryData
+          ? groupCategoryData
+          : categoryDataByType[pageType];
       return (
         <CategoryGrid
           className="flex-1"

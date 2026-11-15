@@ -3,15 +3,23 @@ import React from 'react';
 import { Pressable, ScrollView, StyleSheet } from 'react-native';
 
 import { CategoryEmoji, Text } from '~/components/ui';
+import { AlbumLineIcon } from '~/features/albums/components/AlbumLineIcon';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
+import type { Album } from '~/types';
 import { withColorAlpha } from '~/utils/color';
 
-export type CategoryTrendChipOption = { id: string; label: string; emoji: string };
+export type CategoryTrendChipOption = {
+  id: string;
+  label: string;
+  emoji: string;
+  /** An album's own line (README: Key patterns > Albums). */
+  album?: Album;
+};
 
 /**
- * The Category trend's picker: every expense category as a chip, biggest
- * spend first. Tapping a chip charts it. The leading "Compare" chip arms the
+ * The Category trend's picker: every expense category and album as a chip,
+ * biggest spend first. Tapping a chip charts it. The leading "Compare" chip arms the
  * next tap to add a second line instead; the compared chip carries an × to
  * drop it. The two picks wear their line colours, so the chips double as the
  * chart's legend.
@@ -114,7 +122,11 @@ export const CategoryTrendChips = React.memo(function CategoryTrendChipsImpl({
                   },
             ]}
           >
-            <CategoryEmoji icon={option.emoji} size={16} />
+            {option.album ? (
+              <AlbumLineIcon album={option.album} size={16} />
+            ) : (
+              <CategoryEmoji icon={option.emoji} size={16} />
+            )}
             <Text
               variant="caption"
               numberOfLines={1}

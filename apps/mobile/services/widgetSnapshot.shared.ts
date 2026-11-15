@@ -769,6 +769,7 @@ function buildBudgetWidgetSnapshots(
   categories: Pick<Category, 'id' | 'parentId' | 'name' | 'icon'>[],
   now: Date,
   rateTable: RateTable | null,
+  albumIdByTransaction?: ReadonlyMap<string, string>,
 ): { budgetRing: BudgetRingSnapshot; budgetBreakdown: BudgetBreakdownSnapshot } {
   const monthCycle = monthCycleOf(settings);
   const budget = runningWidgetBudget(periodBudgets, dayKeyFromDateLocal(now), monthCycle);
@@ -781,7 +782,15 @@ function buildBudgetWidgetSnapshots(
     period === 'month'
       ? getMonthLabelFormatter(settings.locale).format(periodStart)
       : budgetPeriodLabel(period, monthKey, settings.locale, monthCycle);
-  const summary = buildBudgetSummary({ budget, transactions, categories, monthCycle, rateTable });
+  const summary = buildBudgetSummary({
+    budget,
+    transactions,
+    categories,
+    monthCycle,
+    rateTable,
+    // Album spending counts toward the total, as on the budget page.
+    albumIdOf: albumIdByTransaction ? (id) => albumIdByTransaction.get(id) ?? null : undefined,
+  });
   // A budget in another currency reads in its own.
   const currencySymbol = withBudgetCurrency(settings, budget?.currency).currencySymbol;
 
@@ -899,6 +908,7 @@ export function buildMoney2TimeWidgetSnapshot({
   savingsIncomeMode = DEFAULT_SELECTION_FILTER_MODE,
   savingsExpenseMode = DEFAULT_SELECTION_FILTER_MODE,
   rateTable = null,
+  albumIdByTransaction,
 }: {
   transactions: TransactionWithRelations[];
   settings: UserSettings;
@@ -917,6 +927,8 @@ export function buildMoney2TimeWidgetSnapshot({
   savingsExpenseMode?: SelectionFilterMode;
   /** The latest rates, for a budget in another currency made with no rate. */
   rateTable?: RateTable | null;
+  /** The album each entry is in: its spending counts toward a budget's total, on no line. */
+  albumIdByTransaction?: ReadonlyMap<string, string>;
 }): Money2TimeWidgetSnapshot {
   const now = new Date();
   const monthCycle = monthCycleOf(settings);
@@ -956,6 +968,7 @@ export function buildMoney2TimeWidgetSnapshot({
     categories,
     now,
     rateTable,
+    albumIdByTransaction,
   );
 
   return {

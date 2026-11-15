@@ -121,8 +121,7 @@ function addBill(
     note: 'Dinner',
     amount,
     currency: 'MYR',
-    categoryName: 'Food',
-    categoryIcon: '🍽️',
+    category: 'food',
     paidBy,
     shares: ['me', 'aisha', 'ben'].map((memberId) => ({ memberId, amount: amount / 3 })),
     createdBy: by,
@@ -377,14 +376,52 @@ describe('a bill the user paid', () => {
   });
 });
 
+describe('one album per entry', () => {
+  it('takes a group’s bill back from another album it was put in, and files it by the bill', () => {
+    app.connection.exec(`
+      INSERT INTO albums (id, ledger_id, name, sort_order, created_at, updated_at)
+        VALUES ('tokyo', 'default', 'Tokyo', 1, '${NOW}', '${NOW}');
+    `);
+    groupRows.upsertExpense({
+      id: 'taxi',
+      groupId: GROUP,
+      date: '2026-11-12',
+      note: 'Taxi',
+      amount: 30,
+      currency: 'MYR',
+      category: 'transport',
+      paidBy: 'aisha',
+      shares: [
+        { memberId: 'me', amount: 15 },
+        { memberId: 'aisha', amount: 15 },
+      ],
+      createdBy: 'u-aisha',
+    });
+    const categoryFor = jest.fn((category: string) => `mine-${category}`);
+    projectGroup(GROUP, { ...env, categoryIdFor: categoryFor });
+    expect(tx('taxi')).toMatchObject({ category_id: 'mine-transport' });
+    // Another phone of the user's (an older app) put it in Tokyo too.
+    app.connection.exec(`
+      UPDATE album_transactions SET deleted_at = '${NOW}' WHERE transaction_id = 'taxi';
+      INSERT INTO album_transactions (id, album_id, transaction_id, sort_order, created_at, updated_at)
+        VALUES ('x', 'tokyo', 'taxi', 0, '${NOW}', '${NOW}');
+    `);
+    projectGroup(GROUP, { ...env, categoryIdFor: categoryFor });
+    expect(albumsRepository.getAllTransactionIdsByAlbum().get(GROUP)).toContain('taxi');
+    expect(albumsRepository.getAllTransactionIdsByAlbum().get('tokyo')).toBeUndefined();
+  });
+});
+
 describe('changes to a bill', () => {
-  it('follows an edit, keeps the user’s own category, and goes with the bill', () => {
+  it('follows an edit and the bill’s album category, and goes with the bill', () => {
     addBill('dinner', 'aisha');
     projectGroup(GROUP, env);
+    // The category is the group's: the entry is filed under the user's own
+    // category for it, whatever was put on the entry here.
     transactionsRepository.update('dinner', { categoryId: 'drinks' });
     addBill('dinner', 'aisha', 120);
     projectGroup(GROUP, env);
-    expect(tx('dinner')).toMatchObject({ amount: 40, category_id: 'drinks' });
+    expect(tx('dinner')).toMatchObject({ amount: 40, category_id: 'food' });
 
     // Now the user paid it (saved in the editor, which names the account):
     // the same entry becomes the whole bill.
@@ -476,8 +513,7 @@ describe('changes to a bill', () => {
       note: 'Massage',
       amount: 80,
       currency: 'MYR',
-      categoryName: null,
-      categoryIcon: null,
+      category: 'other',
       paidBy: 'aisha',
       shares: [
         { memberId: 'aisha', amount: 40 },
@@ -669,8 +705,7 @@ describe('simplify group debts', () => {
         note: id,
         amount: Object.values(owes).reduce((sum, value) => sum + value, 0),
         currency: 'MYR',
-        categoryName: null,
-        categoryIcon: null,
+        category: 'other',
         paidBy,
         shares: shares(owes),
         createdBy: 'u-me',
@@ -709,8 +744,7 @@ describe('payments recorded as one act', () => {
       note: id,
       amount: Object.values(owes).reduce((sum, value) => sum + value, 0),
       currency: 'MYR',
-      categoryName: null,
-      categoryIcon: null,
+      category: 'other',
       paidBy,
       shares: Object.entries(owes).map(([memberId, amount]) => ({ memberId, amount })),
       createdBy: 'u-me',

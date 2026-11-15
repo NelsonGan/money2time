@@ -724,7 +724,17 @@ export function applyBackupData(
     insertRows(sqlite, 'recurring_rules', backup.tables.recurring_rules, skip);
     // Albums before their join rows, both after transactions (join references both).
     insertRows(sqlite, 'albums', backup.tables.albums, skip);
-    insertRows(sqlite, 'album_transactions', backup.tables.album_transactions, skip);
+    // An entry is in one album: an older backup's second link to the same
+    // entry gives way (INSERT OR REPLACE) to the lower id, inserted last, as
+    // on every phone (migration 094).
+    insertRows(
+      sqlite,
+      'album_transactions',
+      [...(backup.tables.album_transactions ?? [])].sort((a, b) =>
+        String(a.id) < String(b.id) ? 1 : String(a.id) > String(b.id) ? -1 : 0,
+      ),
+      skip,
+    );
     // Items are standalone (no FK dependencies).
     insertRows(sqlite, 'items', backup.tables.items, skip);
     // Budgets after categories (allocation lines reference category ids);

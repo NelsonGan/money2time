@@ -30,12 +30,60 @@ export const GROUP_COVER_PATH = /^album-covers\/[A-Za-z0-9_-]{1,64}\.[A-Za-z0-9]
 const MAX_AMOUNT = 1e12;
 const MAX_NAME = 40;
 const MAX_NOTE = 500;
-const MAX_LABEL = 80;
 const MAX_SHARES = 64;
 /** More rows than any one act writes (Settle up across every bill of an album, say). */
 export const MAX_WRITE_ROWS = 400;
 /** Far more member rows than an album ever has (20 people, and those who left). */
 export const MAX_MEMBER_ROWS = 200;
+
+/**
+ * The categories a shared album's bills are filed under, the same for everyone
+ * in it: the app's eight default expense categories. The key never changes; a
+ * bill also keeps the English name and icon, which older apps match against
+ * their own categories (by name, then icon).
+ */
+export const ALBUM_CATEGORIES = [
+  { key: 'food', name: 'Food', icon: 'meal' },
+  { key: 'groceries', name: 'Groceries', icon: 'grocery-basket' },
+  { key: 'transport', name: 'Transport', icon: 'car' },
+  { key: 'housing', name: 'Housing', icon: 'house' },
+  { key: 'bills', name: 'Bills', icon: 'light-bulb' },
+  { key: 'healthcare', name: 'Healthcare', icon: 'medicine' },
+  { key: 'shopping', name: 'Shopping', icon: 'shopping-bag' },
+  { key: 'other', name: 'Other', icon: 'invoice' },
+] as const;
+export type AlbumCategoryKey = (typeof ALBUM_CATEGORIES)[number]['key'];
+export const ALBUM_CATEGORY_OTHER: AlbumCategoryKey = 'other';
+
+export function isAlbumCategoryKey(value: unknown): value is AlbumCategoryKey {
+  return ALBUM_CATEGORIES.some((category) => category.key === value);
+}
+
+/**
+ * A bill's category: its key, else (a row an older app or the website wrote)
+ * the fixed category with its icon, then its English name, else Other.
+ */
+export function albumCategoryOf(row: Row): AlbumCategoryKey {
+  if (isAlbumCategoryKey(row.category_key)) return row.category_key;
+  const icon = row.category_icon;
+  const byIcon = ALBUM_CATEGORIES.find((category) => category.icon === icon);
+  if (byIcon) return byIcon.key;
+  const name = isText(row.category_name) ? row.category_name.trim().toLowerCase() : '';
+  const byName = ALBUM_CATEGORIES.find((category) => category.name.toLowerCase() === name);
+  return byName ? byName.key : ALBUM_CATEGORY_OTHER;
+}
+
+/** The columns a bill is written with for a category. */
+export function albumCategoryColumns(key: AlbumCategoryKey): Row {
+  const category =
+    ALBUM_CATEGORIES.find((entry) => entry.key === key) ??
+    ALBUM_CATEGORIES[ALBUM_CATEGORIES.length - 1];
+  return {
+    category_key: category.key,
+    category_name: category.name,
+    category_icon: category.icon,
+  };
+}
 
 export const GROUP_TABLES = [
   'album_members',
@@ -177,10 +225,12 @@ interface BillFields {
   date: string;
   paidBy: string;
   shares: Share[];
+  category: AlbumCategoryKey;
 }
 
 function billFields(row: Row): BillFields {
   return {
+    category: albumCategoryOf(row),
     note: isText(row.note) ? row.note : null,
     amount: typeof row.amount === 'number' ? row.amount : 0,
     currency: isText(row.currency) ? row.currency : '',
@@ -202,6 +252,7 @@ function sameBill(a: BillFields, b: BillFields): boolean {
     a.currency === b.currency &&
     a.date === b.date &&
     a.paidBy === b.paidBy &&
+    a.category === b.category &&
     sharesKey(a.shares) === sharesKey(b.shares)
   );
 }
@@ -543,8 +594,7 @@ export function planWrite(
         note: cleanText(row.note, MAX_NOTE),
         amount,
         currency,
-        category_name: cleanText(row.category_name, MAX_LABEL),
-        category_icon: cleanText(row.category_icon, MAX_LABEL),
+        ...albumCategoryColumns(albumCategoryOf(row)),
         paid_by: paidBy,
         shares_json: JSON.stringify(shares),
         created_by: authorStamp(ctx),
@@ -567,10 +617,7 @@ export function planWrite(
           expenseId: id,
           data: { before: beforeFields, after },
         });
-      } else if (
-        data.category_name === before.category_name &&
-        data.category_icon === before.category_icon
-      ) {
+      } else if (before.category_key === data.category_key) {
         continue; // Nothing of the group's changed.
       }
       put(table, id, data);

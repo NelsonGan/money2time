@@ -241,6 +241,40 @@ export function resolveBucketCategoryIds(
   return result;
 }
 
+/** The best score of a bucket's keywords in a text (0: none matched), beating `floor`. */
+function bucketScore(
+  compiled: CompiledKeyword[] | undefined,
+  text: string,
+  textLower: string,
+  floor = 0,
+): number {
+  let best = 0;
+  for (const item of compiled ?? []) {
+    // Sorted longest first: nothing after a keyword shorter than what we have can win.
+    if (item.length <= Math.max(best, floor)) break;
+    const score = compiledKeywordScore(text, textLower, item);
+    if (score > best) best = score;
+  }
+  return best;
+}
+
+/**
+ * The keyword bucket a text reads as ("Lunch" → `food`), the longest keyword
+ * winning, in the app's language; null when no keyword is in it.
+ */
+export function matchKeywordBucket(text: string): KeywordCategoryKey | null {
+  const normalized = text.trim();
+  if (!normalized) return null;
+  const textLower = normalized.toLowerCase();
+  const compiledBuckets = getCompiledBuckets(I18n.locale ?? 'en');
+  let best: { bucket: KeywordCategoryKey; score: number } | null = null;
+  (Object.keys(compiledBuckets) as KeywordCategoryKey[]).forEach((bucket) => {
+    const score = bucketScore(compiledBuckets[bucket], normalized, textLower, best?.score);
+    if (score > 0 && (!best || score > best.score)) best = { bucket, score };
+  });
+  return (best as { bucket: KeywordCategoryKey } | null)?.bucket ?? null;
+}
+
 export function matchCategoryByKeywords(
   text: string,
   categories: Category[],
@@ -258,18 +292,9 @@ export function matchCategoryByKeywords(
   const compiledBuckets = getCompiledBuckets(I18n.locale ?? 'en');
 
   bucketToCategoryId.forEach((categoryId, bucket) => {
-    const compiled = compiledBuckets[bucket];
-    if (!compiled) return;
-    let bestScoreForBucket = 0;
-    for (const item of compiled) {
-      // Quick prune: if this keyword can't possibly beat what we already have,
-      // skip the regex/includes test.
-      if (item.length <= bestScoreForBucket) continue;
-      const score = compiledKeywordScore(normalized, textLower, item);
-      if (score > bestScoreForBucket) bestScoreForBucket = score;
-    }
-    if (bestScoreForBucket > 0 && (!best || bestScoreForBucket > best.score)) {
-      best = { categoryId, score: bestScoreForBucket };
+    const score = bucketScore(compiledBuckets[bucket], normalized, textLower, best?.score);
+    if (score > 0 && (!best || score > best.score)) {
+      best = { categoryId, score };
     }
   });
 

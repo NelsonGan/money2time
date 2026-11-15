@@ -8,6 +8,8 @@ import type { AlbumSettlement, AlbumShare } from '~/types';
 import { normalizeMoneyAmount } from '~/utils/formatters';
 import { newId } from '~/utils/id';
 
+import type { AlbumCategoryKey } from './groupPlan';
+
 /** One row of a change: the table and the row as the app stores it. */
 export interface GroupRowWrite {
   table: 'album_members' | 'album_expenses' | 'album_settlements' | 'album_groups';
@@ -20,8 +22,7 @@ export function billRow(bill: {
   date: string;
   note: string | null;
   currency: string;
-  categoryName: string | null;
-  categoryIcon: string | null;
+  category: AlbumCategoryKey;
   paidBy: string;
   shares: readonly AlbumShare[];
 }): GroupRowWrite {
@@ -32,8 +33,7 @@ export function billRow(bill: {
       date: bill.date.slice(0, 10),
       note: bill.note,
       currency: bill.currency,
-      category_name: bill.categoryName,
-      category_icon: bill.categoryIcon,
+      category_key: bill.category,
       paid_by: bill.paidBy,
       shares_json: JSON.stringify(
         bill.shares.map((share) => ({

@@ -119,6 +119,8 @@ interface BulkEditTransactionsSheetProps {
   categoryTypes: CategoryType[];
   /** A shared album's selection: its bills can be put on one of the user's accounts. */
   offerAccount?: boolean;
+  /** The expense categories to offer instead of the user's (a shared album's own). */
+  expenseCategories?: Category[];
   onClose: () => void;
   onApply: (changes: BulkTransactionChanges) => void;
 }
@@ -133,6 +135,7 @@ export function BulkEditTransactionsSheet({
   selectedCount,
   categoryTypes,
   offerAccount = false,
+  expenseCategories,
   onClose,
   onApply,
 }: BulkEditTransactionsSheetProps) {
@@ -152,9 +155,9 @@ export function BulkEditTransactionsSheet({
   const categoryData = useMemo(
     () => ({
       income: buildCategoryPickerData(categories, 'income'),
-      expense: buildCategoryPickerData(categories, 'expense'),
+      expense: buildCategoryPickerData(expenseCategories ?? categories, 'expense'),
     }),
-    [categories],
+    [categories, expenseCategories],
   );
 
   // Reset the draft each time the sheet opens.

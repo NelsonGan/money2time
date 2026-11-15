@@ -411,7 +411,10 @@ export const albumExpensesTable = sqliteTable('album_expenses', {
   note: text('note'),
   amount: real('amount').notNull(),
   currency: text('currency').notNull(),
-  // The payer's own category, as a hint for the other phones.
+  // Its album category (`ALBUM_CATEGORIES` in features/albums/lib/
+  // groupPlan.ts), with that category's English name and icon, which older
+  // apps match against their own categories.
+  categoryKey: text('category_key'),
   categoryName: text('category_name'),
   categoryIcon: text('category_icon'),
   // The member who paid, and `[{ memberId, amount }]` for each share.

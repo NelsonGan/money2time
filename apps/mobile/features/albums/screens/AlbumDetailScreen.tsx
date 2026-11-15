@@ -40,7 +40,7 @@ import { chartCategoryColor } from '~/constants/chartColors';
 import { spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { useCloudSync } from '~/features/cloudSync/CloudSyncContext';
-import { type BreakdownChartRow, CategoryBreakdownChart } from '~/features/insights/components';
+import { CategoryBreakdownChart } from '~/features/insights/components';
 import type { InsightsDrilldownPayload } from '~/features/insights/screens';
 import { countsTowardSpending } from '~/features/reimbursements/lib/reimbursementMath';
 import { sharingErrorMessage } from '~/features/sharedLedgers/lib/sharing';
@@ -79,6 +79,9 @@ import {
   BreakdownMemberSheet,
 } from '../components/BreakdownMemberSheet';
 import { useAlbumGroup } from '../hooks/useAlbumGroup';
+import { useAlbumGroupCategories } from '../hooks/useAlbumGroupCategories';
+import { albumCategoryRows } from '../lib/albumBreakdown';
+import { albumCategoryKeyOfId, albumCategoryPickerList } from '../lib/albumCategories';
 import { breakdownMemberOptions, memberShare } from '../lib/memberShare';
 import { listGroupActivity } from '../services/albumGroupStore';
 import { formatAlbumDateRange } from '../utils';
@@ -135,6 +138,8 @@ export function AlbumDetailScreen({
     settings,
     getAlbumStats,
     getAlbumTransactions,
+    categories,
+    quickEntryPrefs,
     getCategoryById,
     getDisplayValueForTransaction,
     getTrueHourlyRateForDate,
@@ -418,45 +423,45 @@ export function AlbumDetailScreen({
   const breakdownMember =
     memberOptions.find((option) => option.key === breakdownMemberKey)?.member ?? null;
 
-  // Expense-only breakdown grouped by root category, mirroring the insights
-  // breakdown; for one person, each bill counts by their share of it.
-  const { breakdownRows, breakdownTransactionsByRoot } = useMemo(() => {
-    const totals = new Map<string, BreakdownChartRow>();
-    const byRoot = new Map<string, TransactionWithRelations[]>();
-    breakdownCandidates.forEach((t) => {
-      const cat = t.categoryId ? getCategoryById(t.categoryId) : undefined;
-      if (!cat) return;
-      let amount = displayValue(t);
-      if (breakdownMember) {
-        // The share is in the bill's currency: scaled by the entry's own rate.
-        const share = memberShare(t, breakdownMember);
-        if (share <= 0 || t.amount <= 0) return;
-        amount = (amount * share) / t.amount;
-      }
-      const root = cat.parentId ? getCategoryById(cat.parentId) : cat;
-      const id = root?.id ?? cat.id;
-      const existing = totals.get(id);
-      if (existing) {
-        existing.amount += amount;
-        existing.count += 1;
-      } else {
-        totals.set(id, {
-          id,
-          label: root?.name ?? cat.name,
-          emoji: root?.icon ?? cat.icon,
-          amount,
-          count: 1,
-        });
-      }
-      const list = byRoot.get(id);
-      if (list) list.push(t);
-      else byRoot.set(id, [t]);
-    });
-    return {
-      breakdownRows: [...totals.values()].sort((a, b) => b.amount - a.amount),
-      breakdownTransactionsByRoot: byRoot,
-    };
-  }, [breakdownCandidates, breakdownMember, displayValue, getCategoryById]);
+  // Expense-only breakdown, mirroring the insights breakdown: a shared
+  // album by its own categories, the same for everyone in it; an album of
+  // the user's own by their root categories. For one person, each bill
+  // counts by their share of it.
+  const groupCategories = useAlbumGroupCategories(albumId, albumTransactions);
+  // A shared album's entries are filed under its own categories.
+  const albumCategoryOptions = useMemo(
+    () => (group.share ? albumCategoryPickerList() : undefined),
+    [group.share],
+  );
+  const categoryById = useMemo(
+    () => new Map(categories.map((category) => [category.id, category])),
+    [categories],
+  );
+  const breakdownRows = useMemo(
+    () =>
+      albumCategoryRows(breakdownCandidates, {
+        valueOf: (t) => {
+          const amount = displayValue(t);
+          if (!breakdownMember) return amount;
+          // The share is in the bill's currency: scaled by the entry's own rate.
+          const share = memberShare(t, breakdownMember);
+          return share > 0 && t.amount > 0 ? (amount * share) / t.amount : null;
+        },
+        categories,
+        categoryById,
+        categoryMap: quickEntryPrefs.categoryMap,
+        groupCategories,
+      }),
+    [
+      breakdownCandidates,
+      breakdownMember,
+      categories,
+      categoryById,
+      displayValue,
+      groupCategories,
+      quickEntryPrefs.categoryMap,
+    ],
+  );
 
   // Drill into a breakdown category exactly like the insights expense breakdown:
   // parents open their subcategories, leaves open their transactions.
@@ -465,19 +470,18 @@ export function AlbumDetailScreen({
       const index = breakdownRows.findIndex((row) => row.id === rowId);
       if (index === -1) return;
       const row = breakdownRows[index];
-      const rowTransactions = breakdownTransactionsByRoot.get(rowId) ?? [];
-      const rootCategory = getCategoryById(rowId);
+      const rootCategory = row.categoryRootId ? getCategoryById(row.categoryRootId) : undefined;
       onOpenBreakdown({
         label: row.label,
-        transactionIds: rowTransactions.map((t) => t.id),
+        transactionIds: row.transactions.map((t) => t.id),
         categoryRootId: rootCategory?.id,
         categoryRootLabel: rootCategory?.name ?? row.label,
-        categoryRootEmoji: rootCategory?.icon ?? row.emoji ?? undefined,
+        categoryRootEmoji: rootCategory?.icon ?? row.emoji,
         categoryRootColor: chartCategoryColor(index),
         albumId,
       });
     },
-    [albumId, breakdownRows, breakdownTransactionsByRoot, getCategoryById, onOpenBreakdown],
+    [albumId, breakdownRows, getCategoryById, onOpenBreakdown],
   );
 
   const openPersonHere = useCallback(
@@ -646,22 +650,20 @@ export function AlbumDetailScreen({
     (changes: BulkTransactionChanges) => {
       if (selectedTransactionIds.length === 0) return;
       // A shared album's bills: their account is the user's own, on this phone;
-      // their day and title are the group's, changed for everyone; their
-      // category is the user's own, as on any entry.
+      // their day, title and category (one of the album's) are the group's,
+      // changed for everyone.
       const { accountId, ...rest } = changes;
       if (accountId) setGroupEntriesAccount(selectedTransactionIds, accountId);
       const { bills: groupBills } = editGroupBills(selectedTransactionIds, {
         date: rest.date,
         note: rest.note,
+        category: albumCategoryKeyOfId(rest.expenseCategoryId) ?? undefined,
       });
       const updates = buildBulkUpdateInputs(
         selectedTransactionIds,
         rest,
         (id) => transactionById.get(id)?.type,
-      ).flatMap(({ id, input }) => {
-        if (!groupBills.has(id)) return [{ id, input }];
-        return input.categoryId ? [{ id, input: { categoryId: input.categoryId } }] : [];
-      });
+      ).filter(({ id }) => !groupBills.has(id));
       if (updates.length > 0) updateTransactionsBulk(updates);
       void triggerHaptic('success');
       setShowBulkUpdate(false);
@@ -1000,6 +1002,7 @@ export function AlbumDetailScreen({
             group.share !== null &&
             selectedTransactionIds.every((id) => !!transactionById.get(id)?.albumGroupId)
           }
+          expenseCategories={albumCategoryOptions}
           onClose={() => setShowBulkUpdate(false)}
           onApply={handleApplyBulkUpdate}
         />

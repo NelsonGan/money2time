@@ -208,6 +208,12 @@ class AlbumsRepository {
     return byAlbum;
   }
 
+  /**
+   * Puts entries in an album. An entry is in one album at most
+   * (`idx_album_transactions_one_album`), so one in another album moves here,
+   * on its own link row (one row changing albums, which syncs as any edit
+   * does), except a shared album's bill, which stays in its album.
+   */
   addTransactions(albumId: string, transactionIds: string[]) {
     if (transactionIds.length === 0) return;
 
@@ -215,7 +221,28 @@ class AlbumsRepository {
     const sqlite = getSQLite();
     const now = nowIso();
     const existing = new Set(this.getTransactionIds(albumId));
-    const toAdd = transactionIds.filter((id) => !existing.has(id));
+    const wanted = [...new Set(transactionIds)].filter((id) => !existing.has(id));
+    if (wanted.length === 0) return;
+    const marks = wanted.map(() => '?').join(',');
+    const groupBills = new Set(
+      sqlite
+        .getAllSync<{ id: string }>(
+          `SELECT id FROM transactions
+           WHERE album_group_id IS NOT NULL AND album_group_id <> ? AND id IN (${marks})`,
+          [albumId, ...wanted],
+        )
+        .map((row) => row.id),
+    );
+    const linkByTransaction = new Map(
+      sqlite
+        .getAllSync<{ id: string; transactionId: string }>(
+          `SELECT id, transaction_id AS transactionId FROM album_transactions
+           WHERE deleted_at IS NULL AND transaction_id IN (${marks})`,
+          wanted,
+        )
+        .map((row) => [row.transactionId, row.id]),
+    );
+    const toAdd = wanted.filter((id) => !groupBills.has(id));
     if (toAdd.length === 0) return;
 
     const baseSort = existing.size;
@@ -223,12 +250,21 @@ class AlbumsRepository {
     sqlite.execSync('BEGIN');
     try {
       toAdd.forEach((transactionId, index) => {
+        const sortOrder = baseSort + index;
+        const linkId = linkByTransaction.get(transactionId);
+        if (linkId) {
+          db.update(albumTransactionsTable)
+            .set({ albumId, sortOrder, updatedAt: now })
+            .where(eq(albumTransactionsTable.id, linkId))
+            .run();
+          return;
+        }
         db.insert(albumTransactionsTable)
           .values({
             id: newId(),
             albumId,
             transactionId,
-            sortOrder: baseSort + index,
+            sortOrder,
             createdAt: now,
             updatedAt: now,
             deletedAt: null,

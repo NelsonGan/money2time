@@ -1,9 +1,11 @@
 import { DEFAULT_APP_ICON_ID, isAppIconId } from '~/constants/appIcons';
 import {
+  albumCategoryOf,
   GROUP_BILL_ID,
   GROUP_CURRENCY,
   GROUP_ROW_ID,
   GROUP_SETTLEMENT_ID,
+  isAlbumCategoryKey,
 } from '~/features/albums/lib/groupPlan';
 import { DEFAULT_LEDGER_ID } from '~/lib/db/ledgerScope';
 import type {
@@ -324,7 +326,6 @@ const GROUP_DAY = /^(\d{4})-(\d{2})-(\d{2})(T[0-9:.Z+-]{1,30})?$/;
 const MAX_GROUP_AMOUNT = 1e12;
 const MAX_GROUP_NAME = 40;
 const MAX_GROUP_NOTE = 500;
-const MAX_GROUP_LABEL = 80;
 /** More shares than an album can have people (20 and the user), with room for people since removed. */
 const MAX_GROUP_SHARES = 64;
 
@@ -418,8 +419,11 @@ export function toAlbumExpense(row: AlbumExpenseRow): AlbumExpense | null {
     note: clip(row.note, MAX_GROUP_NOTE),
     amount: row.amount,
     currency: row.currency,
-    categoryName: clip(row.categoryName, MAX_GROUP_LABEL),
-    categoryIcon: clip(row.categoryIcon, MAX_GROUP_LABEL),
+    category: albumCategoryOf({
+      category_key: row.categoryKey,
+      category_name: row.categoryName,
+      category_icon: row.categoryIcon,
+    }),
     paidBy: row.paidBy,
     shares,
     createdBy: row.createdBy ?? null,
@@ -492,6 +496,7 @@ function billSnapshot(value: unknown): AlbumBillSnapshot | null {
   }
   return {
     note: clip(typeof raw.note === 'string' ? raw.note : null, MAX_GROUP_NOTE),
+    category: isAlbumCategoryKey(raw.category) ? raw.category : null,
     amount: raw.amount,
     currency: raw.currency,
     date,

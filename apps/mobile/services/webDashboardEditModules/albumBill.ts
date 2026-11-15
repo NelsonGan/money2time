@@ -8,11 +8,16 @@
  * a change reaches everyone in the album.
  *
  *   update  { id, at, set }        one bill: the group's fields (day, title,
- *                                  currency, payer, shares) and the user's own
- *                                  (category, longer note, account, mood,
+ *                                  currency, category, payer, shares) and the
+ *                                  user's own (longer note, account, mood,
  *                                  reimbursable)
- *   bulk    { rows, set }          the album's bulk Edit: day and title for
- *                                  everyone, category and account the user's own
+ *   bulk    { rows, set }          the album's bulk Edit: day, title and
+ *                                  category for everyone, account the user's own
+ *
+ * `set.category` is one of the album's categories (`ALBUM_CATEGORIES`), the
+ * same for everyone; a page that knows them names it only to a phone naming
+ * `album-categories`. An older page names `categoryId`, one of the user's
+ * own categories, which is taken as the album category it reads as.
  *   delete  { rows }               deletes bills for everyone (payments stay)
  *
  * `set.shares` is the whole bill, one row per member with their share
@@ -25,6 +30,11 @@
  * `meta.features` takes this module; an older one refuses it as unknown.
  */
 
+import {
+  albumCategoryForCategory,
+  type AlbumCategoryKey,
+  isAlbumCategoryKey,
+} from '~/features/albums/lib/albumCategories';
 import type { TransactionWithRelations } from '~/types';
 
 import type { EditModule, EditRow, EditStep, ModuleOp, PlanTools } from '../webDashboardEdits';
@@ -55,6 +65,7 @@ export type AlbumBillRecord = {
   date: string;
   note: string | null;
   currency: string;
+  category: AlbumCategoryKey;
   paidBy: string;
   shares: { memberId: string; amount: number }[];
   deleted: boolean;
@@ -82,6 +93,7 @@ export type AlbumBillFields = {
   currency?: string;
   paidBy?: string;
   shares?: Share[];
+  category?: AlbumCategoryKey;
   categoryId?: string | null;
   details?: string;
   accountId?: string | null;
@@ -89,7 +101,13 @@ export type AlbumBillFields = {
   reimbursable?: boolean;
 };
 
-type BulkFields = { date?: string; note?: string; categoryId?: string; accountId?: string };
+type BulkFields = {
+  date?: string;
+  note?: string;
+  category?: AlbumCategoryKey;
+  categoryId?: string;
+  accountId?: string;
+};
 
 type AlbumBillOp =
   | {
@@ -106,8 +124,16 @@ type AlbumBillOp =
 const MAX_SHARES = 21;
 const MAX_DETAILS = 2000;
 /** The group's fields: naming any of them sends the bill to the group. */
-const GROUP_KEYS = ['date', 'note', 'currency', 'paidBy', 'shares'] as const;
-const OWN_KEYS = ['categoryId', 'details', 'accountId', 'sentiment', 'reimbursable'] as const;
+const GROUP_KEYS = [
+  'date',
+  'note',
+  'currency',
+  'category',
+  'categoryId',
+  'paidBy',
+  'shares',
+] as const;
+const OWN_KEYS = ['details', 'accountId', 'sentiment', 'reimbursable'] as const;
 
 function readShares(value: unknown): Share[] | null {
   if (!Array.isArray(value) || value.length === 0 || value.length > MAX_SHARES) return null;
@@ -129,6 +155,7 @@ const FIELD_KEYS: Checks = {
   currency: isCurrency,
   paidBy: isId,
   shares: (v) => readShares(v) !== null,
+  category: isAlbumCategoryKey,
   categoryId: (v) => v === null || isId(v),
   details: (v) => isText(v, MAX_DETAILS),
   accountId: (v) => v === null || isId(v),
@@ -139,6 +166,7 @@ const FIELD_KEYS: Checks = {
 const BULK_KEYS: Checks = {
   date: isDayKey,
   note: (v) => isText(v, MAX_NOTE),
+  category: isAlbumCategoryKey,
   categoryId: isId,
   accountId: isId,
 };
@@ -212,6 +240,22 @@ function takesAccount(tx: TransactionWithRelations): boolean {
   return !payer || !!payer.paidAt;
 }
 
+/**
+ * The album category a save names: `category`, else (an older page) the one
+ * the user's own `categoryId` reads as, else the bill's; null when the
+ * category named is not an expense category of the user's.
+ */
+function billCategoryOf(
+  tools: PlanTools,
+  set: { category?: AlbumCategoryKey; categoryId?: string | null },
+  current: AlbumCategoryKey,
+): AlbumCategoryKey | null {
+  if (set.category) return set.category;
+  if (!set.categoryId) return current;
+  if (tools.findCategory(set.categoryId)?.type !== 'expense') return null;
+  return albumCategoryForCategory(set.categoryId, tools.lookup.categories);
+}
+
 function planUpdate(
   tools: PlanTools,
   op: Extract<AlbumBillOp, { op: 'update' }>,
@@ -222,11 +266,8 @@ function planUpdate(
   if (!found.ok) return tools.refuse(found.error);
   const { tx, group, bill } = found;
   const { set } = op;
-  // The user's own fields, as the app's editor checks them.
-  if ('categoryId' in set) {
-    const category = set.categoryId ? tools.findCategory(set.categoryId) : null;
-    if (set.categoryId && category?.type !== 'expense') return tools.refuse('invalid');
-  }
+  const category = billCategoryOf(tools, set, bill.category);
+  if (!category) return tools.refuse('invalid');
   if (set.accountId != null && !tools.findAccount(set.accountId)) return tools.refuse('invalid');
   const own: Record<string, unknown> = {};
   for (const key of OWN_KEYS) if (key in set) own[key] = set[key];
@@ -275,6 +316,7 @@ function planUpdate(
       date: set.date ?? null,
       note: 'note' in set ? (set.note ?? '').trim() : (bill.note ?? ''),
       currency,
+      category,
       // The split editor's rows for the whole bill, as `saveAlbumBill` takes them.
       rows: [
         ...shares.map((share) => ({
@@ -310,9 +352,8 @@ function planBulk(
   steps: EditStep[],
 ) {
   const { set } = op;
-  if (set.categoryId && tools.findCategory(set.categoryId)?.type !== 'expense') {
-    return tools.refuse('invalid');
-  }
+  const category = set.category || set.categoryId ? billCategoryOf(tools, set, 'other') : undefined;
+  if (category === null) return tools.refuse('invalid');
   if (set.accountId && !tools.findAccount(set.accountId)) return tools.refuse('invalid');
   const ids: string[] = [];
   for (const row of op.rows) {
@@ -326,7 +367,13 @@ function planBulk(
     kind: 'module',
     entity: 'module:albumbill',
     action: 'bulk',
-    payload: { ids, ...set, ...(set.note !== undefined ? { note: set.note.trim() } : {}) },
+    payload: {
+      ids,
+      date: set.date,
+      note: set.note?.trim(),
+      category,
+      accountId: set.accountId,
+    },
   });
   return tools.ok(ids.length);
 }
