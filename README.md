@@ -2136,14 +2136,14 @@ Splitwise with the user's own accounts kept in step: anyone in it adds,
 changes and deletes its bills and payments, every change is logged, and each
 person's own side lands in their own ledger, on their own account. The app
 side is `features/albums/` (`lib/albumPeople.ts`, `lib/albumGroup.ts`,
-`lib/groupRules.ts`, `lib/groupRows.ts`, `lib/groupDebts.ts`,
-`lib/activityLines.ts`, `lib/memberShare.ts`, `services/albumGroupStore.ts`,
-`services/albumGroupSync.ts`, `services/albumGroupWrites.ts`,
-`screens/AlbumPeopleScreen.tsx`, `components/AlbumBalances.tsx`,
-`components/AlbumActivity.tsx`, `components/SplitWithCard.tsx`,
-`components/AlbumSharingCard.tsx`); the Worker side is the cloud-sync
-Worker's `src/albumGroups.ts`; its tables come from migrations `090` to
-`093`.
+`lib/groupRules.ts`, `lib/groupPlan.ts`, `lib/groupRows.ts`,
+`lib/groupDebts.ts`, `lib/activityLines.ts`, `lib/memberShare.ts`,
+`services/albumGroupStore.ts`, `services/albumGroupSync.ts`,
+`services/albumGroupWrites.ts`, `screens/AlbumPeopleScreen.tsx`,
+`components/AlbumBalances.tsx`, `components/AlbumActivity.tsx`,
+`components/SplitWithCard.tsx`, `components/AlbumSharingCard.tsx`); the
+Worker side is the cloud-sync Worker's `src/albumGroups.ts`, with a copy of
+`lib/groupPlan.ts`; its tables come from migrations `090` to `093`.
 
 **What the user sees**
 
@@ -2250,10 +2250,10 @@ Worker's `src/albumGroups.ts`; its tables come from migrations `090` to
   ledger, their own currency totals and their own category (matched by name,
   then icon, else Other). A payment recorded on one phone (paying a member
   back, a part, Settle up) is applied on the other person's phone too, and an
-  undo undoes it there. A change needs a connection: saving waits for the
-  Worker (Save shows it is busy) and, when it cannot go (offline, signed out,
-  no longer in the album), says why and keeps the editor open with every edit
-  (`groupWriteMessage`). Editing a bill changes it for everyone; deleting one
+  undo undoes it there. A change saves offline, like any entry, and reaches
+  everyone once the phone is back online. When the album's rules refuse it
+  (signed out, no longer in the album), the app says why and keeps the
+  editor open with every edit (`groupWriteMessage`). Editing a bill changes it for everyone; deleting one
   asks first ("…removes it for everyone"), and so does taking one out of the
   album or removing everyone from its split (asked while the editor is still
   open, so Cancel keeps every edit): the bill then leaves the group, for
@@ -2276,8 +2276,8 @@ Worker's `src/albumGroups.ts`; its tables come from migrations `090` to
   entry of the user's own already split with others (typed names, a friend
   who paid, paybacks, items) keeps its own split, since the group could not
   take those names and its paybacks would count twice.
-- **Anyone in it can change it** (`lib/groupRules.ts`, and the Worker keeps
-  the same rules for every write). Everyone still in the album adds, edits
+- **Anyone in it can change it** (`lib/groupRules.ts`, and the planner keeps
+  the same rules for every write, on a phone or in the Worker). Everyone still in the album adds, edits
   (amount, day, title, payer, shares) and deletes any bill, and records or
   undoes a payment between any two members. There are no locks, badges or
   read-only editors.
@@ -2472,7 +2472,7 @@ their own.
     (`getLedgerMembers`) to say Joined or Left.
   - `album_expenses`: one row per bill: who paid (`paid_by`), each member's
     share (`shares_json`) and its last writer (`created_by`, deletes
-    included, stamped by the Worker). A deleted bill keeps its last fields.
+    included, stamped by the planner). A deleted bill keeps its last fields.
   - `album_settlements`: a payment from one member to another for one bill,
     stamped with who recorded it. Rows are only added, or deleted when the
     payment is undone; deleting a bill leaves them.
@@ -2493,16 +2493,16 @@ their own.
     every sync) puts it on the phone's own album; while it is NULL, the
     owner's phone publishes the cover its album has. Any other value reads as
     unset.
-- **Its own database, written by the Worker.** The five tables
+- **Its own database, synced both ways.** The five tables
   carry the group's id in `ledger_id`, the column Cloud Sync routes a row by
   (`LEDGER_ROOT_SYNC_TABLES`), and a shared album is kept in `shared_ledgers`
   with `kind` `'album'`. So what a shared ledger has applies: a channel and
   replica per share, the list from `GET /v1/ledgers`, invite links, live
   nudges, tokens and their revocation, leaving and stopping (not the Pro
-  rule). Unlike a ledger's, an album's phones only read it: the Worker hands
-  them a read-only token (`credentials`), their sync of that channel only
-  pulls (`runPullOnly`), and the group tables have no capture triggers
-  (`CAPTURE_VERSION` 3). The two kinds of share never cross (`channelOfRow`):
+  rule). As in a ledger, each phone holds a full token (`credentials`), the
+  group tables have capture triggers (`CAPTURE_VERSION` 4), and a change made
+  on a phone goes up on the album's channel and comes down on the others',
+  last writer wins per row. The two kinds of share never cross (`channelOfRow`):
   an album's channel carries the group tables and nothing else, and a
   ledger's
   carries none of them, so the user's own copy never holds a group's rows
@@ -2543,18 +2543,28 @@ their own.
   it, `recordedBy`). Money received lands where the user's payback account
   says, as always. An entry already on the phone never falls back to the
   default account: one the user's other phone gave it is on its way.
-- **Every change goes through the Worker.** Saving a split bill
+- **Every change goes through one planner.** Saving a split bill
   (`saveAlbumBill`), recording a payment (`markSplitPaid`,
   `recordSplitPayment`, `payBackPayer`, `recordPayBack` and Settle up all
   route there), undoing one, deleting or restoring a bill, a bulk day or
   title (`editGroupBills`), a rename, Simplify and the cover each build the
-  rows the change asks for (`lib/groupRows.ts`) and send them with
-  `writeGroup` (`POST /v1/ledgers/<id>/album`). The Worker checks them,
-  stamps them and writes them with their log entries in one transaction,
-  and answers with what it wrote, which the phone applies at once
-  (`applyServerRows`, in the queue syncs take turns on, with the revisions
-  recorded so the next pull changes nothing); then the user's own entries
-  follow (`projectGroup`). A payment is cut to what is still owed as stored,
+  rows the change asks for (`lib/groupRows.ts`) and hand them to
+  `writeGroup` (`services/albumGroupWrites.ts`). It reads what the change
+  needs from the phone's copy of the group, plans it by the album's rules
+  (`planWrite` in `lib/groupPlan.ts`: checked, stamped, with its log
+  entries) and writes the plan in one SQLite transaction; the capture
+  triggers queue it and the album's channel sends it, within a second when
+  online, or later. Then the user's own entries follow (`projectGroup`). It
+  is the only code that writes the group's tables
+  (`__tests__/features/albumGroupWriter.test.ts` fails on any other write),
+  so no change skips the log. The Worker writes the group only for what
+  happens there, by the same planner (a copy, `src/groupPlan.generated.ts`,
+  written by `npm run sync:group-plan` in `apps/mobile`;
+  `__tests__/scripts/syncGroupPlan.test.ts` fails while the two differ):
+  someone joining (`planJoin`, from a phone or the website, so two people
+  joining at once never take one name, and the first in turns Simplify on),
+  someone leaving or taken out (`planLeave`), and changes made on the website
+  (`via: "web"`). A payment is cut to what is still owed as stored,
   so a second tap never pays a share twice. The group is never derived from
   the user's entries: an album is shared before it has any, and an entry of
   the user's own added later stays theirs.
@@ -2593,9 +2603,13 @@ their own.
   (`preload`), and a pass that finds nothing to change writes nothing.
   Payments recorded together (Settle up with a person, across all their
   bills) are one write and one refresh (`recordGroupPayment`).
-- **Trust: the Worker is the only writer, and every row is still checked
-  where it is read.** Anyone in a shared album is anyone who was given its
-  link, and what they may do is what the album offers. So:
+- **Trust: every writer plans by the album's rules, and every row is still
+  checked where it is read.** Anyone in a shared album is anyone who was
+  given its link, and the people in one are expected to trust each other.
+  The rules hold for every app and the website, but each phone holds a full
+  token, so a modified app could write anything; what protects the user's
+  own money is that a bill or payment someone else wrote lands on no account
+  until the user picks one (see Which account). So:
   - **Only the group's tables come from it.** Whatever `ledger_id` a row
     claims, an album's channel never delivers a ledger, an entry, an account
     or a category (`channelOfRow`, and `remoteChanges` does not even fetch
@@ -2623,29 +2637,27 @@ their own.
   - **A row the phone cannot store is passed over**, not retried: it is
     never a sync error that stays up, nor a reason the owner cannot stop
     sharing or delete their account.
-  - **The author is the writer's sign-in.** The Worker (`albumGroups.ts`)
-    takes a change only from someone in the share whose member row still has
-    their account (`not_member` otherwise), and checks every row:
-    `planWrite` allows bills paid by and shared with the group's members (no
-    one who left newly put on one), payments between members on a bill of
-    the group and only ever undone, a rename of the writer's own row to a
-    name nobody else has (`name_taken`), and the group's settings; anything
-    else is refused. It overwrites `created_by` with the writer, works a
-    bill's total out from its shares, and writes the log itself: the log
-    cannot be written, changed or skipped from a phone. Each row is written
-    only if it still has the revision it was read at (`commitPlan`'s guard,
-    in one Hrana batch with `BEGIN IMMEDIATE`), so two writes at once are
-    planned again rather than lost.
-  - **Read-only tokens.** A phone's token for an album's database is
-    read-only, so a modified app cannot write there; leaving or being taken
-    out rotates the database's tokens as for a ledger, and the Worker mints
-    its own full one again (`writerToken`).
+  - **The author is the writer's account.** `planWrite` takes a change only
+    from someone whose member row still has their account (`not_member`
+    otherwise), and checks every row: bills paid by and shared with the
+    group's members (no one who left newly put on one), payments between
+    members on a bill of the group and only ever undone, a rename of the
+    writer's own row to a name nobody else has (`name_taken`), and the
+    group's settings; anything else is refused. It sets `created_by` to the
+    writer (`web:<account>` on the website), works a bill's total out from
+    its shares, and writes the log entries in the same transaction as the
+    change.
+  - **Two phones changing one bill offline.** Both changes are logged, and
+    the one pushed last stands whole (last writer wins per row, as for any
+    synced row), so the log can show an edit the bill no longer has.
+  - **Leaving.** Leaving or being taken out rotates the database's tokens as
+    for a ledger, so a phone out of the album can no longer reach it.
 
 **Limits.** Split by Item bills are not shared (they have no Paid by). A
 member without Pro adds bills in a shared album whatever their count of
 unsettled split bills, and a shared album's bills are left out of that count
-everywhere (`countUnpaidSplitBills`). Changes to a shared album need a
-connection (the Worker writes them); only each person's own fields save
+everywhere (`countUnpaidSplitBills`). Joining a shared album needs a
+connection (the Worker writes the new member); every other change saves
 offline. Money owed back on a deleted or lowered bill shows in the album's
 own Balances, not on the main Balances page (which reads the user's
 entries). Names and photos from Cloud Sync profiles are not used: a person goes by
@@ -5074,11 +5086,11 @@ Shared ledgers ([Shared ledgers](#shared-ledgers)):
 | `POST /v1/ledgers`                         | `{ledgerId, name, emoji}` → shares a ledger: Pro, at most 2 per owner; makes its Turso database                                                                                                                                                                                                                                                                            |
 | `DELETE /v1/ledgers/<id>`                  | Stop sharing (owner): deletes its database and images; members and the link cascade; everyone is nudged                                                                                                                                                                                                                                                                    |
 | `POST /v1/ledgers/<id>/leave`              | Revokes this ledger's tokens, then a member leaves                                                                                                                                                                                                                                                                                                                         |
-| `POST /v1/ledgers/<id>/credentials`        | Its Turso URL and a 1-day token, for the owner or a member, while anyone in it is Pro (403 `ledger_paused`); read-only for a shared album                                                                                                                                                                                                                                  |
+| `POST /v1/ledgers/<id>/credentials`        | Its Turso URL and a 1-day token, for the owner or a member, while anyone in it is Pro (403 `ledger_paused`); a shared album's is always active                                                                                                                                                                                                                             |
 | `GET /v1/ledgers/<id>/members`             | Owner and members (addresses for the owner only)                                                                                                                                                                                                                                                                                                                           |
 | `DELETE /v1/ledgers/<id>/members/<userId>` | Owner revokes this ledger's tokens, then removes the member and retires the invite; all affected users are nudged (403 for another member, 404 without access)                                                                                                                                                                                                             |
 | `POST /v1/ledgers/<id>/invites`            | Owner gets the ledger's link: the open one, or a new one valid a day (always new with `rotate: true`, killing the old); two phones asking at once get the same one                                                                                                                                                                                                         |
-| `POST /v1/ledgers/<id>/album`              | A shared album's change, which only the Worker writes (`src/albumGroups.ts`): `{action: "join", name}` or `{action: "write", rows}`; checked, stamped with the writer and logged in `album_activity`, in one transaction; answers with the rows written; 403 `not_member`, 409 `name_taken`. `via: "web"` (the website sends it) stamps `created_by` as `web:<account>`    |
+| `POST /v1/ledgers/<id>/album`              | Joining a shared album, or a change from the website (`src/albumGroups.ts`, by the app's planner): `{action: "join", name}` or `{action: "write", rows}`; checked, stamped with the writer and logged in `album_activity`, in one transaction; answers with the rows written; 403 `not_member`, 409 `name_taken`. `via: "web"` stamps `created_by` as `web:<account>`      |
 | `GET /v1/ledgers/<id>/album`               | A shared album's whole group for the website, read with the Worker's own token: `{album, userId, rows}`, the members, bills (deleted ones too), payments, settings and the newest 1,000 log entries, and its change `stamp`; members only (404 otherwise). `?since=<stamp>` answers `{unchanged: true, stamp}` while nothing changed, without opening the group's database |
 | `/v1/ledgers/<id>/media/…`                 | Like `/v1/media`, under `l/<id>/` with its own quota; writing needs the ledger active                                                                                                                                                                                                                                                                                      |
 | `GET /v1/invites/<code>`                   | No sign-in: the app's ledger id, name, owner, member count, `full` and `active`; rate limited per IP. An album's owner is named as they are in the album (their member row), not by a masked address                                                                                                                                                                       |
@@ -5776,8 +5788,8 @@ it: the usual case is someone with Money2Time sharing a trip album with
 friends who have never installed it, and who do not care about accounts or
 budgets. It is the same album, with the same rules, as in the app
 ([Album members and shared albums](#album-members-and-shared-albums)): the
-website only reads the group and asks the cloud-sync Worker to write it, as a
-phone does. The code is `src/components/album/` (the page), `src/lib/album/`
+website reads the group from the cloud-sync Worker and asks it to write each
+change, which it plans by the same rules a phone does. The code is `src/components/album/` (the page), `src/lib/album/`
 (the rules and the API) and `src/app/api/[...path]/route.ts`.
 
 **What the visitor sees.** One page, mobile-first and laid out as the app's
