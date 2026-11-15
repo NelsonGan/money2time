@@ -88,8 +88,10 @@ class AlbumsRepository {
 
   update(id: string, input: Partial<CreateAlbumInput>) {
     const db = getDb();
+    // A cleared icon ('') is stored as none, as `create` stores it.
+    const values = input.icon === '' ? { ...input, icon: null } : input;
     db.update(albumsTable)
-      .set({ ...input, updatedAt: nowIso() })
+      .set({ ...values, updatedAt: nowIso() })
       .where(and(eq(albumsTable.id, id), isNull(albumsTable.deletedAt)))
       .run();
   }

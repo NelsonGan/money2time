@@ -3140,9 +3140,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     ) => {
       // '' (the icon field cleared) is stored as none.
       const icon = updates.icon === undefined ? undefined : updates.icon || null;
-      const iconChanged =
-        icon !== undefined && icon !== (albumsRepository.getById(id)?.icon ?? null);
+      const iconBefore = icon === undefined ? null : (albumsRepository.getById(id)?.icon ?? null);
+      const iconChanged = icon !== undefined && icon !== iconBefore;
       albumsRepository.update(id, icon === undefined ? updates : { ...updates, icon });
+      // An uploaded icon is shared with categories, goals and templates: the
+      // reference-aware sweep reclaims it only once nothing uses it.
+      if (iconChanged) sweepIfCustomAssetDropped(iconBefore, icon);
       // A shared album's cover is everyone's: the group's changes with it
       // (the image goes up on the album's next sync).
       const cover = updates.coverPhotoUri;
@@ -3180,7 +3183,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (sharedAlbumFor(id) || albumsRepository.isFrozen(id)) return;
       // An album's cover is uniquely owned (each pick writes a fresh file), so
       // it can be deleted outright — no other album references it.
-      const cover = albumsRepository.getById(id)?.coverPhotoUri;
+      const album = albumsRepository.getById(id);
+      const cover = album?.coverPhotoUri;
+      // Its icon is not: an upload can be shared, so the sweep decides.
+      const hadCustomIcon = isCustomLogoId(album?.icon);
       runMutation(
         () => {
           albumsRepository.softDelete(id);
@@ -3188,6 +3194,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         { refresh: refreshAlbums },
       );
       if (cover) deleteAlbumCover(cover);
+      if (hadCustomIcon) runDeferredWrite(() => runUserAssetGc());
       void trackEvent(AnalyticsEvents.ALBUM_DELETED);
     },
     [refreshAlbums, runMutation],

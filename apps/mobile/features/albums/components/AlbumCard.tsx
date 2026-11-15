@@ -19,6 +19,7 @@ import type { Album } from '~/types';
 import { formatAmount, formatHours } from '~/utils/formatters';
 
 import { useAlbumGroup } from '../hooks/useAlbumGroup';
+import { albumInitial } from '../lib/albumLines';
 import { formatAlbumDateRange } from '../utils';
 import { AlbumActiveDot } from './AlbumActiveDot';
 import { AlbumLineIcon } from './AlbumLineIcon';
@@ -130,7 +131,7 @@ export const AlbumCard = memo(function AlbumCardImpl({
           <View className="flex-1 items-center justify-center bg-primary/15">
             {album.icon ? null : (
               <Text variant="display" tone="muted">
-                {album.name.slice(0, 1).toUpperCase()}
+                {albumInitial(album.name)}
               </Text>
             )}
           </View>
