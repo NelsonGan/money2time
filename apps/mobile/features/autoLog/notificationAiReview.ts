@@ -246,6 +246,7 @@ async function reviewOnce(deps: NotificationAiReviewDeps) {
         accounts: live.accounts,
         categories: live.categories,
         quickEntryPrefs: live.quickEntryPrefs,
+        paymentAlertPrefs: live.prefs,
         createTransaction: live.createTransaction,
       };
     },

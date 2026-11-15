@@ -97,7 +97,7 @@ export function NotificationReviewBanner() {
       getCurrent: () => ({ ...live.current, appUserId: live.current.settings.appUserId }),
     })
       .catch(() => {
-        // Ignore stops at a capture it cannot find: show what is left and say so.
+        // A storage failure stops the ignore: show what is left and say so.
         setDismissed(null);
         Alert.alert(
           I18n.t('payment_alerts.history_title'),

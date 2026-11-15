@@ -213,6 +213,38 @@ describe('applyNotificationAiResults', () => {
     );
   });
 
+  it("logs into the Android app's account set after the notification arrived", async () => {
+    jest.mocked(readNotificationScanHistory).mockResolvedValue([pending({ accountId: null })]);
+    jest.mocked(paymentAlertCapturesRepository.getById).mockReturnValue({
+      id: 'one',
+      status: 'pending',
+      transactionId: null,
+      sourceKey: 'com.maybank',
+    } as never);
+    const live = deps();
+    const summary = await applyNotificationAiResults(
+      [{ id: 'one', decision: 'expense', amount: 14.5, currency: 'MYR' }],
+      'both',
+      {
+        ...live,
+        getCurrent: () => ({
+          ...live.getCurrent(),
+          paymentAlertPrefs: {
+            sources: {
+              'android_notification:com.maybank': { accountId: 'a1' },
+            },
+          } as never,
+        }),
+      },
+      () => NOW,
+    );
+    expect(summary.expense).toBe(1);
+    expect(create).toHaveBeenCalledWith(
+      expect.objectContaining({ accountId: 'a1', amount: 14.5 }),
+      expect.anything(),
+    );
+  });
+
   it('still ignores a clear non-payment that has no account', async () => {
     jest.mocked(readNotificationScanHistory).mockResolvedValue([pending({ accountId: null })]);
     const summary = await applyNotificationAiResults(
