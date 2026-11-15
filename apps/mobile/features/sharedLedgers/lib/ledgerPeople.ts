@@ -136,11 +136,25 @@ function ownName(own: OwnProfile): string | null {
 }
 
 /**
- * What this phone's person goes by to others: the Settings name, else the
- * sign-in name, else the masked address. Null when signed out with no name.
+ * An address's first part as a name ("tess.lim@x.com" → "Tess lim"), as the
+ * website names a new album member who has no other name.
  */
-export function ownDisplayName(): string | null {
-  return ownName(readOwnProfile());
+export function nameFromEmail(email: string | null | undefined): string | null {
+  const local = email
+    ?.split('@')[0]
+    ?.replace(/[._-]+/g, ' ')
+    .trim();
+  return local ? local.charAt(0).toLocaleUpperCase() + local.slice(1) : null;
+}
+
+/**
+ * What the user starts as in a shared album, the same on the app and the
+ * website: the Settings name, else the sign-in name, else the address's first
+ * part (`nameFromEmail`). Null when signed out with no name.
+ */
+export function ownAlbumName(): string | null {
+  const user = getCachedSessionUser();
+  return readOwnProfile().name ?? (user?.name.trim() || nameFromEmail(user?.email));
 }
 
 type AvatarResolver = (path: string | null) => string | null;

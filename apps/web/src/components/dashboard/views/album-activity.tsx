@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
-import { albumGroupOf, describeActivity, groupActivityByDay } from "@/lib/backup/album-group";
+import { albumGroupOf, describeActivity, groupActivityByDay, MINE_CHIP_CLASS } from "@/lib/backup/album-group";
 import { dayKeyOf, parseLocalDate } from "@/lib/backup/dates";
 
 import { useDashboard, useFormat } from "../state";
@@ -72,14 +72,13 @@ export function AlbumActivity({ albumId }: { albumId: string }) {
                   const actor = line.actorId === group.selfId ? ts("me") : (group.members.find((member) => member.id === line.actorId)?.name ?? ts("someone"));
                   const at = parseLocalDate(line.createdAt);
                   return (
-                    <li key={line.id} className="relative flex items-center gap-2.5 py-2 pl-3 pr-1">
-                      {line.mine !== null ? <span aria-hidden="true" className="absolute inset-y-2 left-0 w-[3px] rounded-r-full bg-primary" /> : null}
+                    <li key={line.id} className="flex items-center gap-2.5 py-2 pl-1 pr-1">
                       <span aria-hidden="true" className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-background-subtle text-[11px] font-extrabold text-foreground-soft">
                         {actor.slice(0, 1).toUpperCase()}
                       </span>
                       <span className="min-w-0 flex-1">
                         <span className="block text-[13.5px] text-foreground">{line.text}</span>
-                        {line.mine ? <span className="block truncate text-[12px] font-semibold text-primary">{line.mine}</span> : null}
+                        {line.mine ? <span className={`mt-0.5 inline-block max-w-full rounded-xl px-2 py-0.5 align-top text-[12px] font-semibold ${MINE_CHIP_CLASS[line.tone]}`}>{line.mine}</span> : null}
                       </span>
                       {at ? (
                         <span className="shrink-0 text-[12px] text-foreground-muted">{f.time(at)}</span>

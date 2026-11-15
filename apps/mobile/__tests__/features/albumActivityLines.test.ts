@@ -60,6 +60,11 @@ describe('the activity log, one line each', () => {
     const line = describeActivity(entry({ bill: { before: dinner(90), after: dinner(120) } }), ctx);
     expect(line.text).toBe('Tess changed Dinner: RM90 → RM120');
     expect(line.mine).toBe('Your share RM30 → RM40');
+    // A bigger share costs the user more; a smaller one gives back.
+    expect(line.tone).toBe('out');
+    expect(
+      describeActivity(entry({ bill: { before: dinner(120), after: dinner(90) } }), ctx).tone,
+    ).toBe('in');
   });
 
   it('never highlights the user’s own change', () => {
@@ -127,9 +132,11 @@ describe('the activity log, one line each', () => {
         even: false,
       },
     });
+    // The user's money, signed and tinted, and who recorded it.
     expect(describeActivity(mine, ctx)).toMatchObject({
       text: 'You paid Ben RM10',
-      mine: 'Recorded by Tess',
+      mine: '−RM10 · Recorded by Tess',
+      tone: 'out',
     });
     // The payer's own word needs no "Recorded by": the line already names them.
     const toMe = entry({
@@ -145,7 +152,11 @@ describe('the activity log, one line each', () => {
         even: false,
       },
     });
-    expect(describeActivity(toMe, ctx)).toMatchObject({ text: 'Tess paid you RM10', mine: null });
+    expect(describeActivity(toMe, ctx)).toMatchObject({
+      text: 'Tess paid you RM10',
+      mine: '+RM10',
+      tone: 'in',
+    });
     // Paying a simplified debt along the user's bills: they only passed it on.
     const along = entry({
       kind: 'payment_recorded',
@@ -162,15 +173,20 @@ describe('the activity log, one line each', () => {
     });
     expect(describeActivity(along, ctx)).toMatchObject({
       text: 'Ben paid Tess RM40',
-      mine: 'Passed along through you · you stay even',
+      mine: 'Via you · you stay even',
+      tone: 'neutral',
     });
     // Undone by the payer: "Tess undid paying you", not "Tess undid Tess paying you".
-    expect(describeActivity({ ...toMe, kind: 'payment_undone' }, ctx).text).toBe(
-      'Tess undid paying you RM10',
-    );
+    // An undo moves the money back the other way.
+    expect(describeActivity({ ...toMe, kind: 'payment_undone' }, ctx)).toMatchObject({
+      text: 'Tess undid paying you RM10',
+      mine: '−RM10',
+      tone: 'out',
+    });
     expect(describeActivity({ ...mine, kind: 'payment_undone' }, ctx)).toMatchObject({
       text: 'Tess undid you paying Ben RM10',
-      mine: 'Recorded by Tess',
+      mine: '+RM10 · Recorded by Tess',
+      tone: 'in',
     });
     expect(
       describeActivity(entry({ kind: 'member_joined', memberId: 'ben', expenseId: null }), ctx)

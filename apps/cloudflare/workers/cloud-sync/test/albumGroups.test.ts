@@ -117,6 +117,27 @@ test('joining puts each person on the list once, under a name nobody else has', 
   );
 });
 
+test('joining on the website names someone already in as they asked', async () => {
+  const { group, rows } = database();
+  await join(group, 'owner', 'Nelson');
+  // The app put Tess in first, under its default name.
+  await join(group, 'tess', 'Tess.lim');
+  const web = (userId: string, name: string) =>
+    joinGroup(group, { ...ctx(userId), via: 'web' }, name);
+  await web('tess', 'Tess');
+  assert.deepEqual(
+    rows('album_members').map((m) => m.name),
+    ['Nelson', 'Tess'],
+  );
+  // The app joining again changes nothing, nor does a name someone else has.
+  assert.deepEqual(await join(group, 'tess', 'T'), []);
+  assert.deepEqual(await web('tess', 'nelson'), []);
+  assert.deepEqual(
+    rows('album_activity').map((a) => a.kind),
+    ['member_joined', 'member_joined', 'member_renamed'],
+  );
+});
+
 test("one person's rows in two albums never share an id", async () => {
   // A phone keeps every album's members in one table, keyed by id alone.
   const bali = memberRowId('814391bf-69f9-40fc-8657-b6c0277cba51', 'owner');

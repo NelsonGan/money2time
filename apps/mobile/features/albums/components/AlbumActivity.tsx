@@ -16,11 +16,23 @@ import {
 } from '~/utils/formatters';
 
 import type { AlbumGroup } from '../hooks/useAlbumGroup';
-import { type ActivityLine, describeActivity, groupActivityByDay } from '../lib/activityLines';
+import {
+  type ActivityLine,
+  describeActivity,
+  groupActivityByDay,
+  type MineTone,
+} from '../lib/activityLines';
 import { listGroupActivity, subscribeAlbumGroups } from '../services/albumGroupStore';
 
 /** The newest this many changes show until the user asks for all of them. */
 const COLLAPSED_ROWS = 5;
+
+/** The note of how a change moved the user's money: green in, rose out, grey neither. */
+const MINE_CHIP: Record<MineTone, { chip: string; text: string }> = {
+  in: { chip: 'bg-success/10', text: 'text-success' },
+  out: { chip: 'bg-primary/10', text: 'text-primary' },
+  neutral: { chip: 'bg-muted', text: 'text-muted-foreground' },
+};
 
 interface AlbumActivityProps {
   group: AlbumGroup;
@@ -30,10 +42,10 @@ interface AlbumActivityProps {
  * A shared album's activity log, under its Balances: every change anyone made
  * to it, newest first, by day, one line each, in one card (the newest five
  * until Show all). Plain history for reference, nothing to tap. A change
- * someone else made to the user's own money has an accent bar and a second
- * line saying how. The log is written with each change, in the same write,
- * and syncs with the group, so it is the same on every phone (README: Album members and shared albums >
- * Activity).
+ * someone else made to the user's own money carries a small chip under its
+ * line saying how, tinted by which way the money went. The log is written
+ * with each change, in the same write, and syncs with the group, so it is the
+ * same on every phone (README: Album members and shared albums > Activity).
  */
 export function AlbumActivity({ group }: AlbumActivityProps) {
   const me = useSelfPerson();
@@ -78,10 +90,6 @@ export function AlbumActivity({ group }: AlbumActivityProps) {
         testID={`album-activity-${line.id}`}
         className="flex-row items-center gap-2.5 px-4 py-2.5"
       >
-        {/* A change someone else made to the user's own money. */}
-        {line.mine ? (
-          <View className="absolute bottom-2 left-0 top-2 w-[3px] rounded-r-full bg-primary" />
-        ) : null}
         {first ? null : <View className="absolute left-[50px] right-4 top-0 h-px bg-border/20" />}
         <PersonAvatar
           name={isSelf ? me.name : actorName}
@@ -95,9 +103,15 @@ export function AlbumActivity({ group }: AlbumActivityProps) {
             {lead ? line.text.slice(lead.length) : line.text}
           </Text>
           {line.mine ? (
-            <Text variant="caption" className="text-primary" numberOfLines={1}>
-              {line.mine}
-            </Text>
+            <View className={`mt-1 self-start rounded-xl px-2 py-0.5 ${MINE_CHIP[line.tone].chip}`}>
+              <Text
+                variant="caption"
+                className={`font-semibold ${MINE_CHIP[line.tone].text}`}
+                numberOfLines={2}
+              >
+                {line.mine}
+              </Text>
+            </View>
           ) : null}
         </View>
         <Text variant="caption" tone="muted">

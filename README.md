@@ -2340,10 +2340,15 @@ Worker side is the cloud-sync Worker's `src/albumGroups.ts`, with a copy of
   `started`), people joining, leaving and renaming themselves, Simplify
   switched, the cover changed. It shows the newest five, then **Show all**.
   It is history for reference only: nothing on it is tapped or undone from
-  there. A change someone else made to the user's own money has a rose bar
-  and a second line saying how ("Your share RM30 → RM40", "Your share RM15";
-  "Recorded by Tess" when Tess recorded someone else paying, never under
-  "Tess paid you").
+  there. A change someone else made to the user's own money carries a small
+  chip under its line saying how, tinted by which way the money went
+  (`tone`): green when it came to the user ("+RM45.00", a smaller share),
+  rose when it cost them ("Your share RM15", "Your share RM30 → RM40",
+  "−RM10.00 · Recorded by Tess" when Tess recorded the user paying), grey
+  when neither ("Via you · you stay even", who paid). A payment names who
+  recorded it only when that was not the payer ("Tess paid you" gets just
+  "+RM45.00"); an undo moves the money back the other way. The website draws
+  the same chips (`MINE_CHIP_CLASS`).
 - **A shared album's balances are its own.** A bill in a shared album is
   settled in that album and nowhere else: its Balances tab and its people's
   pages cover the bills in it, and the Balances page covers every other split
@@ -2487,8 +2492,7 @@ their own.
     one act; one entry in all when the act comes down to one person paying
     another, as paying a simplified debt along several bills does: "Ben paid
     you RM150", not the four moves it took; those it passed through, who come
-    out even, are in its `via` and see "Passed along through you · you stay
-    even" under it). An undo by the payer reads "Ben undid paying you". Only ever added; nothing personal (account, category, notes,
+    out even, are in its `via` and see "Via you · you stay even" under it). An undo by the payer reads "Ben undid paying you". Only ever added; nothing personal (account, category, notes,
     receipt, mood) is in it. Read through `toAlbumActivity`.
   - `album_groups` (migration `091`): the group's settings, one row:
     `simplify_debts`, and `cover_photo_uri` (migration `092`). The row is
@@ -5703,7 +5707,8 @@ app's `services/webDashboardLink.ts`, `webDashboardCrypto.ts`,
   transactions (`views/album-activity.tsx`), as the app's Activity card:
   newest first, by the phone's day, one line each, worded with the app's
   rules (`describeActivity`, mirroring `activityLines.ts`), a change someone
-  else made to the user's money marked with a second line saying how. It is
+  else made to the user's money marked with the app's tinted chip saying
+  how. It is
   history only, with nothing to tap. Nothing shows for an album the phone sent no group for.
 - **Split bills a friend paid** (app migration 089, see Paid by and Balances):
   the payer's row carries `is_payer`, the friends' rows hold their share in

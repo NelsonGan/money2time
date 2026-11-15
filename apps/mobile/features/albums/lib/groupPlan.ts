@@ -324,14 +324,42 @@ export function memberRowId(groupId: string, userId: string): string {
 /**
  * The user joining (or the owner starting) the album: their own member row,
  * under an id made from the album and their account (`memberRowId`).
- * Joined again after leaving, the row they left takes them back. Nothing is
- * written when they are already in. The owner starting it also writes its
+ * Joined again after leaving, the row they left takes them back. Someone
+ * already in keeps their row; on the website, where joining is where someone
+ * says what to call them, they take the name they gave (the app may have put
+ * them in first under its default), unless someone else has it. The owner
+ * starting it also writes its
  * settings row, with Simplify group debts on: an album starts simplified.
  * `state` must hold that row if it exists (`joinGroup` loads it).
  */
 export function planJoin(state: GroupState, ctx: PlanContext, name: string): Plan {
   const members = membersOf(state);
-  if (selfOf(members, ctx.userId)) return { writes: [] };
+  const already = selfOf(members, ctx.userId);
+  if (already) {
+    const wanted = ctx.via === 'web' ? cleanMemberName(name) : null;
+    const row = state.members.find((stored) => stored.id === already.id);
+    if (!wanted || !row || wanted === already.name) return { writes: [] };
+    if (uniqueName(wanted, members, already.id) !== wanted) return { writes: [] };
+    return {
+      writes: [
+        {
+          table: 'album_members',
+          id: already.id,
+          data: { ...row.data, name: wanted, updated_at: ctx.now },
+        },
+        activityRow(
+          ctx,
+          already,
+          {
+            kind: 'member_renamed',
+            memberId: already.id,
+            data: { before: { name: already.name }, after: { name: wanted } },
+          },
+          0,
+        ),
+      ],
+    };
+  }
   const id = memberRowId(ctx.groupId, ctx.userId);
   const stored = state.members.find((row) => row.id === id);
   const sortOrder = state.members.length;

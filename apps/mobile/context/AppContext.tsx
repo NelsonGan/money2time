@@ -101,7 +101,7 @@ import {
   NO_REIMBURSEMENT,
 } from '~/features/reimbursements/lib/reimbursementMath';
 import { withEntryStamp } from '~/features/sharedLedgers/lib/entryStamp';
-import { invalidateLedgerPeople, ownDisplayName } from '~/features/sharedLedgers/lib/ledgerPeople';
+import { invalidateLedgerPeople, ownAlbumName } from '~/features/sharedLedgers/lib/ledgerPeople';
 import { countAccountsTowardFreeLimit } from '~/features/transactions/lib/accountEntryGate';
 import {
   findFallbackCategory,
@@ -4126,7 +4126,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         ) {
           joiningGroupsRef.current.add(groupId);
           void sharedLedgerSync
-            .joinAlbumGroup(groupId, ownDisplayName() ?? I18n.t('albums.people.unnamed'))
+            .joinAlbumGroup(groupId, ownAlbumName() ?? I18n.t('albums.people.unnamed'))
             .then(() => {
               projectGroup(groupId, env);
               afterGroupWrite();

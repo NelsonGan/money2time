@@ -3092,7 +3092,7 @@ const en = {
       undid_payment: '{{actor}} undid {{from}} paying {{to}} {{money}}',
       undid_own_payment: '{{actor}} undid paying {{to}} {{money}}',
       recorded_by: 'Recorded by {{actor}}',
-      passed_through: 'Passed along through you · you stay even',
+      passed_through: 'Via you · you stay even',
       joined: '{{name}} joined the album',
       started: '{{name}} started the album',
       left: '{{name}} left the album',

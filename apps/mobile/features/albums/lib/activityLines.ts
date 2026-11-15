@@ -1,9 +1,10 @@
 /**
  * A shared album's activity log as its Activity card shows it: one line per
  * entry ("Tess changed Dinner: RM100 → RM120"), and, when the change moved the
- * user's own money and someone else made it, a second line saying how ("Your
- * share RM30 → RM40"). Pure: the screen passes names, money and what this
- * phone knows. See README.md > Album members and shared albums > Activity.
+ * user's own money and someone else made it, a short note of how ("Your share
+ * RM30 → RM40", "+RM45.00"), with whether the money came to the user, cost
+ * them, or neither. Pure: the screen passes names, money and what this phone
+ * knows. See README.md > Album members and shared albums > Activity.
  */
 
 import { I18n } from '~/lib/i18n';
@@ -22,6 +23,9 @@ export interface ActivityContext {
   day: (date: string) => string;
 }
 
+/** How a change moved the user's money: to them, out of their pocket, or neither. */
+export type MineTone = 'in' | 'out' | 'neutral';
+
 export interface ActivityLine {
   id: string;
   /** Who made the change. */
@@ -30,6 +34,8 @@ export interface ActivityLine {
   text: string;
   /** How it moved the user's own money, when someone else did it; null otherwise. */
   mine: string | null;
+  /** Which way that money went (meaningless while `mine` is null). */
+  tone: MineTone;
   createdAt: string;
 }
 
@@ -63,12 +69,17 @@ export function describeActivity(entry: AlbumActivity, ctx: ActivityContext): Ac
   const actor = who(entry.actorMemberId);
   const bill = entry.bill?.after ?? entry.bill?.before ?? null;
   const title = bill?.note?.trim() || t('untitled');
-  const line = (text: string, mine: string | null = null): ActivityLine => ({
+  const line = (
+    text: string,
+    mine: string | null = null,
+    tone: MineTone = 'neutral',
+  ): ActivityLine => ({
     id: entry.id,
     actorId: entry.actorMemberId,
     text,
     // Only someone else's change is news about the user's money.
     mine: byMe ? null : mine,
+    tone,
     createdAt: entry.createdAt,
   });
 
@@ -84,11 +95,13 @@ export function describeActivity(entry: AlbumActivity, ctx: ActivityContext): Ac
         return line(
           t(entry.kind === 'bill_added' ? 'said_you_paid' : 'restored', { actor, title, money }),
           t('your_share', { money: ctx.money(mine.share, after.currency) }),
+          'out',
         );
       }
       return line(
         t(entry.kind === 'bill_added' ? 'added' : 'restored', { actor, title, money }),
         mine.share > 0 ? t('your_share', { money: ctx.money(mine.share, after.currency) }) : null,
+        'out',
       );
     }
     case 'bill_deleted': {
@@ -100,6 +113,7 @@ export function describeActivity(entry: AlbumActivity, ctx: ActivityContext): Ac
         before && (mine.share > 0 || mine.paid)
           ? t('your_share_gone', { money: ctx.money(mine.share, before.currency) })
           : null,
+        'in',
       );
     }
     case 'bill_edited': {
@@ -139,17 +153,19 @@ export function describeActivity(entry: AlbumActivity, ctx: ActivityContext): Ac
       const was = myPart(before, ctx.selfId);
       const now = myPart(after, ctx.selfId);
       let mine: string | null = null;
+      let tone: MineTone = 'neutral';
       if (!was.paid && now.paid) {
         mine = t('you_paid');
       } else if (was.paid && !now.paid) {
         mine = t('they_paid', { name: who(after.paidBy) });
       } else if (cents(was.share) !== cents(now.share)) {
+        tone = now.share > was.share ? 'out' : 'in';
         mine =
           now.share > 0
             ? t('your_share_change', { before: fmt(was.share), after: fmt(now.share) })
             : t('your_share_gone', { money: fmt(was.share) });
       }
-      return line(text, mine);
+      return line(text, mine, tone);
     }
     case 'payment_recorded':
     case 'payment_undone': {
@@ -161,26 +177,32 @@ export function describeActivity(entry: AlbumActivity, ctx: ActivityContext): Ac
         to: who(payment.to, false),
         money: ctx.money(payment.amount, payment.currency),
       };
-      // Who recorded it, when it moved the user's money and was not the
-      // payer's own word ("Tess paid you" needs no "Recorded by Tess").
-      // One it only passed through ("Ben paid Ann" along the user's bills)
-      // says so: their own payments moved, and they came out even.
-      const recordedBy =
-        !!ctx.selfId && payment.via.includes(ctx.selfId)
-          ? t('passed_through')
-          : (payment.from === ctx.selfId || payment.to === ctx.selfId) &&
-              entry.actorMemberId !== payment.from
-            ? t('recorded_by', { actor })
-            : null;
-      if (entry.kind === 'payment_undone') {
+      // The user's money: what came to them or left them ("+RM45.00"; an
+      // undo the other way round), and who recorded it when it was not the
+      // payer's own word. One it only passed through ("Ben paid Ann" along
+      // the user's bills) says so: they came out even.
+      const undone = entry.kind === 'payment_undone';
+      let mine: string | null = null;
+      let tone: MineTone = 'neutral';
+      if (ctx.selfId && payment.via.includes(ctx.selfId)) {
+        mine = t('passed_through');
+      } else if (payment.from === ctx.selfId || payment.to === ctx.selfId) {
+        tone = (payment.to === ctx.selfId) !== undone ? 'in' : 'out';
+        const signed = `${tone === 'in' ? '+' : '−'}${values.money}`;
+        mine =
+          entry.actorMemberId === payment.from
+            ? signed
+            : `${signed} · ${t('recorded_by', { actor })}`;
+      }
+      if (undone) {
         // "Ben undid paying you", or "Tess undid you paying Ben": the payer
         // is mid-sentence here.
         if (entry.actorMemberId === payment.from) {
-          return line(t('undid_own_payment', values), recordedBy);
+          return line(t('undid_own_payment', values), mine, tone);
         }
-        return line(t('undid_payment', { ...values, from: who(payment.from, false) }), recordedBy);
+        return line(t('undid_payment', { ...values, from: who(payment.from, false) }), mine, tone);
       }
-      return line(t(payment.even ? 'paid_even' : 'paid', values), recordedBy);
+      return line(t(payment.even ? 'paid_even' : 'paid', values), mine, tone);
     }
     case 'member_joined':
       return line(t(entry.started ? 'started' : 'joined', { name: who(entry.memberId) }));
