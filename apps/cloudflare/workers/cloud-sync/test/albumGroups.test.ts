@@ -7,14 +7,16 @@ import {
   type GroupDb,
   GroupWriteError,
   joinGroup,
-  memberRowId,
   planLeave,
   planWrite,
   readGroup,
   readOwnerName,
+  type WriteBase,
   type WriteRequest,
   writeGroup,
 } from '../src/albumGroups.ts';
+import { memberRowId } from '../src/groupPlan.generated.ts';
+import { writeBaseOf } from '../src/ledgers.ts';
 
 // What the Worker writes to a shared album's group (someone joining or
 // leaving, the website's changes): real SQL against the cloud copy's schema
@@ -25,9 +27,14 @@ function database() {
   const db = new DatabaseSync(':memory:');
   for (const sql of CLOUD_SCHEMA_SQL) db.exec(sql);
   let beforeCommit: (() => void) | null = null;
+  /** Round trips to the database for reads. */
+  let trips = 0;
   const group: GroupDb = {
-    async query({ sql, args }) {
-      return db.prepare(sql).all(...args) as Record<string, unknown>[];
+    async queryAll(statements) {
+      trips += 1;
+      return statements.map(
+        ({ sql, args }) => db.prepare(sql).all(...args) as Record<string, unknown>[],
+      );
     },
     async transaction(statements) {
       // Another write landing between the read and this one.
@@ -55,7 +62,14 @@ function database() {
     db
       .prepare('SELECT data, rev FROM sync_rows WHERE table_name = ? AND row_id = ?')
       .get(table, id) as { data: string; rev: string } | undefined;
-  return { db, group, rows, raw, interleave: (fn: () => void) => (beforeCommit = fn) };
+  return {
+    db,
+    group,
+    rows,
+    raw,
+    interleave: (fn: () => void) => (beforeCommit = fn),
+    trips: () => trips,
+  };
 }
 
 let ids = 0;
@@ -320,17 +334,17 @@ test('payments of one act are one line per pair, and are only ever undone', asyn
   await write(group, 'ben', {
     rows: [pay('b.0', 'u-bali-tess', 10), pay('b.1', 'u-bali-tess', 5)],
   });
-  // A payment in another currency than its bill's would count nowhere.
-  await assert.rejects(
-    write(group, 'ben', {
-      rows: [
-        {
-          ...pay('usd', 'u-bali-tess', 5),
-          row: { ...pay('usd', 'u-bali-tess', 5).row, currency: 'USD' },
-        },
-      ],
-    }),
-  );
+  // A payment in another currency than its bill's (one changed since) is
+  // taken: it is owed back in its own currency.
+  await write(group, 'ben', {
+    rows: [
+      {
+        ...pay('usd', 'u-bali-tess', 5),
+        row: { ...pay('usd', 'u-bali-tess', 5).row, currency: 'USD' },
+      },
+    ],
+  });
+  assert.equal(rows('album_settlements').find((row) => row.id === 'usd')?.currency, 'USD');
   // Changing a recorded payment's amount is not a thing; undoing it is.
   await write(group, 'ben', { rows: [pay('b.0', 'u-bali-tess', 99)] });
   assert.equal(rows('album_settlements')[0].amount, 10);
@@ -343,6 +357,7 @@ test('payments of one act are one line per pair, and are only ever undone', asyn
   const payments = rows('album_activity').filter((a) => a.kind.startsWith('payment_'));
   assert.deepEqual(payments.map((a) => [a.kind, JSON.parse(a.data_json).amount]).sort(), [
     ['payment_recorded', 15],
+    ['payment_recorded', 5],
     ['payment_undone', 15],
   ]);
 });
@@ -512,7 +527,9 @@ test('the website reads the whole group, the newest log entries first', async ()
   await write(group, 'tess', {
     rows: [bill('u-bali-tess', { 'u-bali-tess': 50, 'u-bali-owner': 50 })],
   });
-  const read = await readGroup(group);
+  const { rows: read, moneyRev } = await readGroup(group);
+  assert.match(moneyRev, /^[0-9a-f]{32}$/);
+  assert.ok(read.every((row) => typeof row.rev === 'string' && row.rev.length > 0));
   const count = (table: string) => read.filter((row) => row.table === table).length;
   assert.equal(count('album_members'), 3);
   assert.equal(count('album_expenses'), 1);
@@ -575,4 +592,180 @@ test("a bill's category is one of the album's, the same for everyone, and changi
       ['food', 'transport'],
     ],
   );
+});
+
+test('the website reads the group in one round trip, and a write reads what it needs in one', async () => {
+  const fixture = await trip();
+  const before = fixture.trips();
+  await readGroup(fixture.group);
+  assert.equal(fixture.trips() - before, 1);
+  await write(fixture.group, 'tess', {
+    rows: [bill('u-bali-tess', { 'u-bali-tess': 50, 'u-bali-owner': 50 })],
+  });
+  assert.equal(fixture.trips() - before, 2);
+});
+
+/** A website write, with what the page read: the rows' revisions and the money stamp. */
+async function webWrite(
+  group: GroupDb,
+  userId: string,
+  rows: { table: string; row: Record<string, unknown>; base?: string | null }[],
+  moneyBase?: string,
+) {
+  const request: WriteRequest = { rows };
+  const base: WriteBase = writeBaseOf(rows, moneyBase);
+  return writeGroup(
+    group,
+    request,
+    (state) => planWrite(state, { ...ctx(userId), via: 'web' }, request, 'owner'),
+    base,
+  );
+}
+
+const stale = (error: unknown) => {
+  assert.ok(error instanceof GroupWriteError);
+  assert.equal(error.code, 'stale');
+  assert.equal(error.status, 409);
+  return true;
+};
+
+test("a website change made on a bill a phone changed since is refused as stale, never written over it", async () => {
+  const { db, group, rows, raw } = await trip();
+  // Added on the website: a new bill's base is null, it was not there.
+  await webWrite(group, 'tess', [
+    { ...bill('u-bali-tess', { 'u-bali-tess': 30, 'u-bali-ben': 30 }), base: null },
+  ]);
+  const read = raw('album_expenses', 'dinner')!.rev;
+  // A phone edits it, then the page (still on its read) edits it too.
+  db.prepare(
+    "UPDATE sync_rows SET rev = 'phone.1', data = json_set(data, '$.note', 'Phone') WHERE row_id = 'dinner'",
+  ).run();
+  await assert.rejects(
+    webWrite(group, 'tess', [
+      { ...bill('u-bali-tess', { 'u-bali-tess': 40, 'u-bali-ben': 40 }), base: read },
+    ]),
+    stale,
+  );
+  assert.equal(rows('album_expenses')[0].note, 'Phone');
+  // A phone deletes it: the page's edit is not a restore.
+  db.prepare(
+    "UPDATE sync_rows SET rev = 'phone.2', data = json_set(data, '$.deleted_at', 'x') WHERE row_id = 'dinner'",
+  ).run();
+  await assert.rejects(
+    webWrite(group, 'tess', [
+      { ...bill('u-bali-tess', { 'u-bali-tess': 40, 'u-bali-ben': 40 }), base: 'phone.1' },
+    ]),
+    stale,
+  );
+  await assert.rejects(
+    webWrite(group, 'tess', [
+      { table: 'album_expenses', row: { id: 'dinner', deleted_at: 'x' }, base: 'phone.1' },
+    ]),
+    stale,
+  );
+  assert.ok(!rows('album_activity').some((a) => a.kind === 'bill_restored'));
+  // Read again, the same change goes.
+  await webWrite(group, 'tess', [
+    { ...bill('u-bali-tess', { 'u-bali-tess': 40, 'u-bali-ben': 40 }), base: 'phone.2' },
+  ]);
+  assert.equal(rows('album_expenses')[0].amount, 80);
+  // A bill id someone else took meanwhile is no new bill.
+  await assert.rejects(
+    webWrite(group, 'tess', [
+      { ...bill('u-bali-tess', { 'u-bali-tess': 1, 'u-bali-ben': 1 }), base: null },
+    ]),
+    stale,
+  );
+});
+
+test("a website payment is refused as stale once any bill or payment changed since the page read", async () => {
+  const fixture = await trip();
+  const { group, rows } = fixture;
+  await write(group, 'owner', {
+    rows: [bill('u-bali-owner', { 'u-bali-owner': 30, 'u-bali-tess': 30 })],
+  });
+  const pay = (id: string) => ({
+    table: 'album_settlements',
+    row: {
+      id,
+      expense_id: 'dinner',
+      from_member: 'u-bali-tess',
+      to_member: 'u-bali-owner',
+      amount: 30,
+      currency: 'MYR',
+      date: '2026-11-14',
+    },
+  });
+  const { moneyRev } = await readGroup(group);
+  // Tess's phone records her payment; the page, on its read, records it again.
+  await write(group, 'tess', { rows: [pay('phone.0')] });
+  await assert.rejects(webWrite(group, 'owner', [pay('web.0')], moneyRev), stale);
+  assert.equal(rows('album_settlements').length, 1);
+  // Read again, a payment goes (and the page's own debts say none is owed now).
+  const fresh = await readGroup(group);
+  assert.notEqual(fresh.moneyRev, moneyRev);
+  await webWrite(group, 'owner', [pay('web.1')], fresh.moneyRev);
+  assert.equal(rows('album_settlements').length, 2);
+});
+
+test("a payment landing between the website's check and its write still makes it stale", async () => {
+  const { db, group, rows, interleave } = await trip();
+  await write(group, 'owner', {
+    rows: [bill('u-bali-owner', { 'u-bali-owner': 30, 'u-bali-tess': 30 })],
+  });
+  const { moneyRev } = await readGroup(group);
+  interleave(() => {
+    db.prepare('INSERT INTO sync_rows VALUES (?, ?, ?, ?, ?, ?)').run(
+      'album_settlements',
+      'phone',
+      JSON.stringify({ id: 'phone', ledger_id: 'bali', expense_id: 'dinner' }),
+      'phone.1',
+      'phone',
+      1,
+    );
+  });
+  await assert.rejects(
+    webWrite(
+      group,
+      'owner',
+      [
+        {
+          table: 'album_settlements',
+          row: {
+            id: 'web',
+            expense_id: 'dinner',
+            from_member: 'u-bali-tess',
+            to_member: 'u-bali-owner',
+            amount: 30,
+            currency: 'MYR',
+            date: '2026-11-14',
+          },
+        },
+      ],
+      moneyRev,
+    ),
+    stale,
+  );
+  assert.deepEqual(
+    rows('album_settlements').map((row) => row.id),
+    ['phone'],
+  );
+});
+
+test("the website's Simplify switch is refused as stale when a phone switched it since", async () => {
+  const { db, group, rows, raw } = await trip();
+  const read = raw('album_groups', 'bali')!.rev;
+  db.prepare(
+    "UPDATE sync_rows SET rev = 'phone.1', data = json_set(data, '$.simplify_debts', 0) WHERE table_name = 'album_groups'",
+  ).run();
+  await assert.rejects(
+    webWrite(group, 'tess', [
+      { table: 'album_groups', row: { id: 'bali', simplify_debts: 0 }, base: read },
+    ]),
+    stale,
+  );
+  assert.equal(rows('album_groups')[0].simplify_debts, 0);
+  // A row without a base (an older page) is not checked.
+  await webWrite(group, 'tess', [{ table: 'album_groups', row: { id: 'bali', simplify_debts: 1 } }]);
+  assert.equal(rows('album_groups')[0].simplify_debts, 1);
 });

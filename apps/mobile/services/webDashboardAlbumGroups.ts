@@ -1,10 +1,10 @@
 import type { BackupData } from '~/services/dataManagementService';
-import type { AlbumActivity, AlbumExpense, AlbumMember } from '~/types';
+import type { AlbumActivity, AlbumExpense, AlbumMember, AlbumSettlement } from '~/types';
 
 /**
  * A shared album's group as this phone holds it, read for the Web Dashboard:
- * its live members, every bill (deleted ones too, which the Activity tab can
- * restore) and its activity log, newest first.
+ * its live members, every bill (deleted ones too, whose payments still count),
+ * the payments that stand and its activity log, newest first.
  */
 export type WebAlbumGroup = {
   /** The group's id, which is its album's. */
@@ -13,6 +13,8 @@ export type WebAlbumGroup = {
   selfId: string | null;
   members: readonly AlbumMember[];
   bills: readonly AlbumExpense[];
+  /** The payments that stand (undone ones left out). */
+  settlements: readonly AlbumSettlement[];
   activity: readonly AlbumActivity[];
 };
 
@@ -30,6 +32,8 @@ export type WebAlbumGroup = {
  *   web_album_bills     { id, album_id, date, note, amount, currency, category,
  *                         paid_by, shares: [{ memberId, amount }], deleted,
  *                         updated_at }   (category: the album's, `ALBUM_CATEGORIES`)
+ *   web_album_settlements { id, album_id, expense_id, from_member, to_member,
+ *                         amount, currency }   (the payments that stand)
  *   web_album_activity  { id, album_id, kind, actor_member_id, expense_id,
  *                         member_id, bill, rename, payment, simplify,
  *                         started, sort_order, created_at }  (newest first)
@@ -44,6 +48,7 @@ export function withWebDashboardAlbumGroups(
   const shown = groups.filter((group) => albums.has(group.albumId));
   const members: Record<string, unknown>[] = [];
   const bills: Record<string, unknown>[] = [];
+  const settlements: Record<string, unknown>[] = [];
   const activity: Record<string, unknown>[] = [];
   for (const group of shown) {
     for (const member of group.members) {
@@ -73,6 +78,18 @@ export function withWebDashboardAlbumGroups(
         updated_at: bill.updatedAt,
       });
     }
+    for (const payment of group.settlements) {
+      if (payment.deletedAt) continue;
+      settlements.push({
+        id: payment.id,
+        album_id: group.albumId,
+        expense_id: payment.expenseId,
+        from_member: payment.fromMember,
+        to_member: payment.toMember,
+        amount: payment.amount,
+        currency: payment.currency,
+      });
+    }
     for (const entry of group.activity) {
       activity.push({
         id: entry.id,
@@ -97,6 +114,7 @@ export function withWebDashboardAlbumGroups(
       ...data.tables,
       web_album_members: members,
       web_album_bills: bills,
+      web_album_settlements: settlements,
       web_album_activity: activity,
     },
   };

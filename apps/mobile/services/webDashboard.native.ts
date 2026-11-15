@@ -32,6 +32,7 @@ import {
   listGroupActivity,
   listGroupBills,
   listGroupMembers,
+  listGroupSettlements,
 } from '~/features/albums/services/albumGroupStore';
 import { listAlbumShares } from '~/features/cloudSync/services/sharedLedgerStore';
 import { transactionsRepository } from '~/lib/repositories/transactionsRepository';
@@ -415,6 +416,7 @@ function readAlbumGroups(): WebAlbumGroup[] {
       selfId: selfMember(members, share.userId)?.id ?? null,
       members,
       bills: listGroupBills(share.ledgerId),
+      settlements: listGroupSettlements(share.ledgerId),
       activity: listGroupActivity(share.ledgerId),
     };
   });

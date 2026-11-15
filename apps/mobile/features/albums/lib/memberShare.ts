@@ -37,7 +37,7 @@ interface ShareEntry {
 }
 
 /** Whether a bill is split with anyone but the user. */
-export function isSplitWithOthers(entry: ShareEntry): boolean {
+function isSplitWithOthers(entry: ShareEntry): boolean {
   return !!entry.splits?.some((split) => !split.isSelf);
 }
 

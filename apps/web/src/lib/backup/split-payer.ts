@@ -125,7 +125,15 @@ export type CurrencyAmount = { currency: string; amount: number };
  * in the main currency, `netByCurrency` in each currency, never converted,
  * which is what the album shows.
  */
-type AlbumBalance = { id: string; name: string; net: number; netByCurrency: CurrencyAmount[]; people: PersonBalance[] };
+type AlbumBalance = {
+  id: string;
+  name: string;
+  net: number;
+  netByCurrency: CurrencyAmount[];
+  people: PersonBalance[];
+  /** How many open shares the user has there, from the group's debts; absent when read from the entries (count `people`). */
+  open?: number;
+};
 
 /**
  * What the user is owed less what they owe, per currency and never converted
@@ -172,6 +180,12 @@ export function balancesByAlbum(
   allAlbums: readonly { id: string; name: string; txIds: readonly string[] }[],
   shared: ReadonlySet<string>,
   mainCurrency?: string,
+  /**
+   * A shared album's net from its group's debts (`albumGroupNet`), the
+   * figure the app shows, when the phone sent the group's payments; else
+   * null, and the album's entries say it.
+   */
+  groupNet?: (albumId: string) => { netByCurrency: CurrencyAmount[]; count: number } | null,
 ): { people: PersonBalance[]; albums: AlbumBalance[] } {
   const albums = allAlbums.filter((album) => shared.has(album.id));
   const inAlbums = new Set(albums.flatMap((album) => album.txIds));
@@ -184,8 +198,16 @@ export function balancesByAlbum(
       const owes = owesYou.filter(inAlbum);
       const owe = youOwe.filter(inAlbum);
       const people = netByPerson(owes, owe);
-      if (people.length === 0) return [];
       const net = Math.round(people.reduce((sum, person) => sum + person.net, 0) * 100) / 100;
+      const group = groupNet?.(album.id);
+      if (group) {
+        // Listed while the user owes or is owed anything in it, even when it
+        // comes to nothing; the bar's main-currency net is the group's too.
+        if (group.count === 0) return [];
+        const main = group.netByCurrency.find((entry) => entry.currency === mainCurrency);
+        return [{ id: album.id, name: album.name, net: main ? main.amount : net, netByCurrency: group.netByCurrency, people, open: group.count }];
+      }
+      if (people.length === 0) return [];
       return [{ id: album.id, name: album.name, net, netByCurrency: netByCurrency(owes, owe, mainCurrency), people }];
     }),
   };

@@ -27,8 +27,24 @@ const NO_MEMBERS: AlbumMember[] = [];
 const NO_EXPENSES: AlbumExpense[] = [];
 const NO_SETTLEMENTS: AlbumSettlement[] = [];
 const NO_ACTIVITY: AlbumActivity[] = [];
+/** What each reader last handed out, kept across `notifyAlbumGroups`. */
+const handedOut = new Map<string, { rows: unknown[]; json: string }>();
 
-/** A group's rows changed (a sync, an edit, a share or its end): readers look again. */
+/**
+ * The array a reader handed out last time when the rows read now are the
+ * same: every sync asks readers to look again, and a screen re-renders only
+ * when its group's rows really changed (`useSyncExternalStore` compares by
+ * identity).
+ */
+function unchanged<T>(key: string, rows: T[]): T[] {
+  const json = JSON.stringify(rows);
+  const last = handedOut.get(key);
+  if (last && last.json === json) return last.rows as T[];
+  handedOut.set(key, { rows, json });
+  return rows;
+}
+
+/** A group's rows may have changed (a sync, an edit, a share or its end): readers look again. */
 export function notifyAlbumGroups(): void {
   cache.clear();
   expenseCache.clear();
@@ -49,32 +65,20 @@ export function listGroupMembers(groupId: string | null): AlbumMember[] {
   if (!groupId) return NO_MEMBERS;
   const known = cache.get(groupId);
   if (known) return known;
-  let members: AlbumMember[];
-  try {
-    members = albumGroupsRepository.listMembers(groupId);
-  } catch {
-    // Before migration 090 has run.
-    members = NO_MEMBERS;
-  }
+  const members = unchanged(`members:${groupId}`, albumGroupsRepository.listMembers(groupId));
   cache.set(groupId, members);
   return members;
 }
 
 /**
  * Every bill of a group, deleted ones too: a deleted bill's payments still
- * count in Balances (owed back), and the Activity tab restores it. The same
- * array until something changes.
+ * count in Balances (owed back). The same array until something changes.
  */
 export function listGroupBills(groupId: string | null): AlbumExpense[] {
   if (!groupId) return NO_EXPENSES;
   const known = allBillsCache.get(groupId);
   if (known) return known;
-  let bills: AlbumExpense[];
-  try {
-    bills = albumGroupsRepository.listExpenses(groupId);
-  } catch {
-    bills = NO_EXPENSES;
-  }
+  const bills = unchanged(`bills:${groupId}`, albumGroupsRepository.listExpenses(groupId));
   allBillsCache.set(groupId, bills);
   return bills;
 }
@@ -84,7 +88,10 @@ export function listGroupExpenses(groupId: string | null): AlbumExpense[] {
   if (!groupId) return NO_EXPENSES;
   const known = expenseCache.get(groupId);
   if (known) return known;
-  const expenses = listGroupBills(groupId).filter((item) => !item.deletedAt);
+  const expenses = unchanged(
+    `expenses:${groupId}`,
+    listGroupBills(groupId).filter((item) => !item.deletedAt),
+  );
   expenseCache.set(groupId, expenses);
   return expenses;
 }
@@ -94,12 +101,10 @@ export function listGroupSettlements(groupId: string | null): AlbumSettlement[] 
   if (!groupId) return NO_SETTLEMENTS;
   const known = settlementCache.get(groupId);
   if (known) return known;
-  let settlements: AlbumSettlement[];
-  try {
-    settlements = albumGroupsRepository.listSettlements(groupId).filter((item) => !item.deletedAt);
-  } catch {
-    settlements = NO_SETTLEMENTS;
-  }
+  const settlements = unchanged(
+    `settlements:${groupId}`,
+    albumGroupsRepository.listSettlements(groupId).filter((item) => !item.deletedAt),
+  );
   settlementCache.set(groupId, settlements);
   return settlements;
 }
@@ -109,13 +114,7 @@ export function listGroupActivity(groupId: string | null): AlbumActivity[] {
   if (!groupId) return NO_ACTIVITY;
   const known = activityCache.get(groupId);
   if (known) return known;
-  let activity: AlbumActivity[];
-  try {
-    activity = albumGroupsRepository.listActivity(groupId);
-  } catch {
-    // Before migration 093 has run.
-    activity = NO_ACTIVITY;
-  }
+  const activity = unchanged(`activity:${groupId}`, albumGroupsRepository.listActivity(groupId));
   activityCache.set(groupId, activity);
   return activity;
 }
@@ -124,13 +123,7 @@ export function listGroupActivity(groupId: string | null): AlbumActivity[] {
 export function groupSimplifiesDebts(groupId: string): boolean {
   const known = simplifyCache.get(groupId);
   if (known !== undefined) return known;
-  let simplifies: boolean;
-  try {
-    simplifies = albumGroupsRepository.simplifiesDebts(groupId);
-  } catch {
-    // Before migration 091 has run.
-    simplifies = false;
-  }
+  const simplifies = albumGroupsRepository.simplifiesDebts(groupId);
   simplifyCache.set(groupId, simplifies);
   return simplifies;
 }
@@ -291,12 +284,20 @@ export function releaseAlbumGroup(groupId: string): void {
   );
   // Kept as it was, archived and read-only, never deleted: its entries keep
   // their album categories (README: Album members and shared albums >
-  // Leaving and stopping). Being back in it undoes this (`ensureLocalAlbum`).
+  // Leaving and stopping). Being back in it undoes this (`ensureLocalAlbum`),
+  // which tells an archive made here (`archived_at` = `share_ended_at`) from
+  // the user's own; one the user made this same millisecond ends a
+  // millisecond later, so it is never taken for this one.
+  const archivedAt = db.getFirstSync<{ archived_at: string | null }>(
+    'SELECT archived_at FROM albums WHERE id = ?',
+    [groupId],
+  )?.archived_at;
+  const endedAt = archivedAt === now ? new Date(Date.parse(now) + 1).toISOString() : now;
   db.runSync(
     `UPDATE albums SET share_ended_at = ?, archived_at = COALESCE(archived_at, ?),
        is_active = 0, updated_at = ?
      WHERE id = ? AND deleted_at IS NULL AND share_ended_at IS NULL`,
-    [now, now, now, groupId],
+    [endedAt, endedAt, now, groupId],
   );
   deleteGroupRowsLocally(groupId);
   notifyAlbumGroups();

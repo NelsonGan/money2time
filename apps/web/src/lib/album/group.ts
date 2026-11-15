@@ -10,6 +10,8 @@
 
 import type { WebAlbumActivityRow, WebAlbumBillSnapshot, WebAlbumShare } from "@/lib/backup/types";
 
+import { peopleForBill } from "../backup/album-group.ts";
+
 import { albumCategoryOf, isAlbumCategoryKey, type AlbumCategoryKey } from "./categories.ts";
 
 const GROUP_ROW_ID = /^[A-Za-z0-9_-]{1,64}$/;
@@ -67,6 +69,12 @@ export type Bill = {
   createdAt: string;
   updatedAt: string | null;
   deleted: boolean;
+  /**
+   * The revision it was read at: a change to it is sent with it (`base`), so
+   * the Worker refuses it as `stale` once a phone changed it since. Null from
+   * a Worker that does not say.
+   */
+  rev: string | null;
 };
 
 export type Payment = {
@@ -94,6 +102,16 @@ export type Group = {
   bills: Bill[];
   payments: Payment[];
   simplify: boolean;
+  /**
+   * The settings row's revision as stored, deleted or not (as `Bill.rev`):
+   * null while there is no row, undefined when the Worker does not say.
+   */
+  settingsRev: string | null | undefined;
+  /**
+   * The stamp of every bill and payment as read: a payment is sent with it
+   * (`moneyBase`), so it is refused as `stale` once what is owed changed.
+   */
+  moneyRev: string | null;
   /** `album-covers/<id>.<ext>`, or null while there is none. */
   cover: string | null;
   /** Newest first, in the shape the dashboard's activity lines read (`describeActivity`). */
@@ -101,7 +119,9 @@ export type Group = {
 };
 
 type Row = Record<string, unknown>;
-type RawRow = { table?: unknown; id?: unknown; data?: unknown };
+type RawRow = { table?: unknown; id?: unknown; data?: unknown; rev?: unknown };
+/** A revision as the Worker sends it; anything else is no revision. */
+const revOf = (value: unknown): string | null => (isText(value) && value.length > 0 && value.length <= 120 ? value : null);
 
 const isText = (value: unknown): value is string => typeof value === "string";
 const isAmount = (value: unknown): value is number =>
@@ -161,7 +181,7 @@ function toMember(row: Row): Member | null {
   };
 }
 
-function toBill(row: Row): Bill | null {
+function toBill(row: Row, rev: string | null): Bill | null {
   const shares = parseShares(row.shares_json);
   const date = groupDay(row.date);
   if (
@@ -191,6 +211,7 @@ function toBill(row: Row): Bill | null {
     createdAt: row.created_at,
     updatedAt: isText(row.updated_at) ? row.updated_at : null,
     deleted: row.deleted_at != null,
+    rev,
   };
 }
 
@@ -321,6 +342,11 @@ function toView(value: unknown): AlbumView | null {
   };
 }
 
+function settingsRevOf(row: Row | undefined, revs: Map<Row, string | null>): string | null | undefined {
+  if (!row) return null;
+  return revs.get(row) ?? undefined;
+}
+
 /** The share list's albums (`GET /v1/ledgers?albums=1`), shared ledgers left out. */
 export function albumsOf(body: unknown): AlbumView[] {
   const list = (body as { ledgers?: unknown } | null)?.ledgers;
@@ -334,11 +360,12 @@ export function albumsOf(body: unknown): AlbumView[] {
 
 /** The group from the Worker's answer; null when the answer is not one. */
 export function parseGroup(body: unknown): Group | null {
-  const raw = body as { album?: unknown; userId?: unknown; rows?: unknown } | null;
+  const raw = body as { album?: unknown; userId?: unknown; rows?: unknown; moneyRev?: unknown } | null;
   const album = toView(raw?.album);
   if (!album || !isText(raw?.userId) || !Array.isArray(raw.rows)) return null;
   const groupId = album.ledgerId;
   const byTable = new Map<string, Row[]>();
+  const revs = new Map<Row, string | null>();
   for (const item of raw.rows as RawRow[]) {
     const data = item?.data as Row | null;
     if (!isText(item?.table) || !data || typeof data !== "object") continue;
@@ -347,6 +374,7 @@ export function parseGroup(body: unknown): Group | null {
     const list = byTable.get(item.table) ?? [];
     list.push(data);
     byTable.set(item.table, list);
+    revs.set(data, revOf(item.rev));
   }
   const rows = (table: string) => byTable.get(table) ?? [];
 
@@ -358,7 +386,7 @@ export function parseGroup(body: unknown): Group | null {
   const memberIds = new Set(members.map((member) => member.id));
   // Paid by, shared with and paid between the group's members only.
   const bills = rows("album_expenses")
-    .map(toBill)
+    .map((row) => toBill(row, revs.get(row) ?? null))
     .filter((bill): bill is Bill => !!bill && memberIds.has(bill.paidBy) && bill.shares.every((share) => memberIds.has(share.memberId)));
   const payments = rows("album_settlements")
     .map(toPayment)
@@ -378,21 +406,20 @@ export function parseGroup(body: unknown): Group | null {
     bills,
     payments,
     simplify: settings ? settings.simplify_debts === 1 || settings.simplify_debts === true : false,
+    settingsRev: settingsRevOf(rows("album_groups").find((row) => row.id === groupId), revs),
+    moneyRev: isText(raw.moneyRev) && /^[0-9a-f]{32}$/.test(raw.moneyRev) ? raw.moneyRev : null,
     cover,
     activity,
   };
 }
 
-/** Whether a member is still in the album (the app's `isCurrentMember`). */
-const isCurrent = (member: Member | undefined | null): boolean => !!member?.userId;
-
 /**
- * The people a bill can be paid by or split with: everyone still in the album,
- * and anyone who left but is already on the bill (the app's `billPeople`).
+ * The people a bill can be paid by or split with: everyone still in the album
+ * (whose row still names their account), and anyone who left but is already
+ * on the bill (the app's `billPeople`).
  */
 export function billPeople(members: readonly Member[], bill: Bill | null): Member[] {
-  const keep = new Set(bill ? [bill.paidBy, ...bill.shares.map((share) => share.memberId)] : []);
-  return members.filter((member) => isCurrent(member) || keep.has(member.id));
+  return peopleForBill(members, bill, (member) => !!member.userId);
 }
 
 /** Whether any payment still stands on a bill: changing or deleting it then asks first. */

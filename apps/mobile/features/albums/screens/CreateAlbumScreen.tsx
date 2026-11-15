@@ -41,11 +41,12 @@ export function CreateAlbumScreen({
   const sync = useCloudSync();
   // Sharing is free and needs only an account: asked for under the switch.
   const signedIn = useSignedIn();
-  const { canSplit, canShare } = useAlbumScope();
+  // `canShare` holds `canSplit`: only a ledger an album can be split in shares one.
+  const { canShare } = useAlbumScope();
   // Split with friends is offered only to users on the shared-albums rollout;
   // anyone can still join a shared album from a link.
   const rolledOut = useSharedAlbumsAllowed();
-  const shareOffered = canSplit && canShare && rolledOut;
+  const shareOffered = canShare && rolledOut;
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
 
@@ -193,7 +194,7 @@ export function CreateAlbumScreen({
           ref={scrollRef}
           className="flex-1"
           contentContainerStyle={{ paddingBottom: 24 }}
-          // The add-person field keeps the keyboard up; a scroll puts it away.
+          // The name field keeps the keyboard up; a scroll puts it away.
           keyboardDismissMode="on-drag"
         >
           {/* Full-bleed cover picker */}
@@ -266,24 +267,22 @@ export function CreateAlbumScreen({
             )}
 
             {shareOffered ? (
-              <>
-                <View className="mt-5 gap-4">
-                  <AlbumSharingCard
-                    share={{ value: share, onChange: toggleShare, signIn: signInOpen }}
-                    simplify={
-                      share
-                        ? {
-                            value: simplify,
-                            onChange: (next) => {
-                              void triggerHaptic('selection');
-                              setSimplify(next);
-                            },
-                          }
-                        : null
-                    }
-                  />
-                </View>
-              </>
+              <View className="mt-5">
+                <AlbumSharingCard
+                  share={{ value: share, onChange: toggleShare, signIn: signInOpen }}
+                  simplify={
+                    share
+                      ? {
+                          value: simplify,
+                          onChange: (next) => {
+                            void triggerHaptic('selection');
+                            setSimplify(next);
+                          },
+                        }
+                      : null
+                  }
+                />
+              </View>
             ) : null}
           </View>
         </FormScrollView>

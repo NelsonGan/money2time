@@ -2613,6 +2613,7 @@
       "signedOut": "Hãy đăng nhập lại để thay đổi album này.",
       "notMember": "Bạn không còn trong album này nên không thể thay đổi nó.",
       "busy": "Có người khác đang thay đổi album này. Hãy thử lại sau giây lát.",
+      "stale": "Có người đã thay đổi album này khi bạn đang mở. Hãy xem lại ngay và thử lại.",
       "saveFailed": "Không thể lưu thay đổi cho album này. Hãy thử lại."
     }
   }

@@ -434,10 +434,10 @@ export function SettleUpPersonScreen({
             onClose={() => setSettleVisible(false)}
             onConfirm={(accountId, amount) => {
               setSettleVisible(false);
-              // In a shared album nobody records the other side's payments
-              // (README: Who can change what), so when shares go both ways
-              // the user pays the net, onto their oldest open bills, and the
-              // offsetting shares stay as they are.
+              // In a shared album, when shares go both ways, Settle up pays
+              // only the net, onto the user's oldest open bills, and the
+              // shares the other way stay open (README: Album members and
+              // shared albums > Anyone in it can change it > Paying).
               const netOnly =
                 inSharedAlbum && person.totalReporting > 0 && person.owedReporting > 0;
               if (amount === null && !netOnly) {

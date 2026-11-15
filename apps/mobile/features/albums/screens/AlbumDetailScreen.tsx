@@ -62,7 +62,6 @@ import { PersonAvatar } from '~/features/transactions/components/PersonAvatar';
 import { TransactionSelectionActions } from '~/features/transactions/components/TransactionSelectionToolbar';
 import { debtPartyKey } from '~/features/transactions/lib/debtParty';
 import { selectDuplicableTransactions } from '~/features/transactions/lib/duplicateTransaction';
-import { useSettleUpSummary } from '~/features/transactions/lib/useSettleUpSummary';
 import { useSelfPerson } from '~/hooks/useSelfPerson';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { useWideTabColumns } from '~/hooks/useWideTabColumns';
@@ -85,6 +84,7 @@ import {
   BreakdownMemberSheet,
 } from '../components/BreakdownMemberSheet';
 import { useAlbumGroup } from '../hooks/useAlbumGroup';
+import { useRemoveFromAlbum } from '../hooks/useRemoveFromAlbum';
 import { albumCategoryRows } from '../lib/albumBreakdown';
 import { albumCategoryKeyOfId, albumCategoryPickerList } from '../lib/albumCategories';
 import { breakdownMemberOptions, memberShare } from '../lib/memberShare';
@@ -154,7 +154,6 @@ export function AlbumDetailScreen({
     updateTransactionsBulk,
     setGroupEntriesAccount,
     editGroupBills,
-    removeTransactionsFromAlbum,
     addTransactionsToAlbum,
   } = useApp();
   const { transactions } = useTransactions();
@@ -169,14 +168,11 @@ export function AlbumDetailScreen({
     (Math.min(windowWidth, wideColumns.maxWidth ?? windowWidth) - SPLIT_PADDING * 2 - SPLIT_GAP) /
     2;
   const album = albums.find((a) => a.id === albumId);
-  // Who the album is split with. With people, once shared, or with a split
-  // bill in it, the page has a Balances tab.
+  // Who the album is split with. A shared album has a Balances tab: it
+  // answers for its own bills (an album of the user's own settles its split
+  // bills on the Balances page).
   const group = useAlbumGroup(album);
-  // An album answers for its own bills.
-  const balances = useSettleUpSummary(albumId);
-  const showBalances =
-    group.available &&
-    (group.others.length > 0 || group.share !== null || balances.people.length > 0);
+  const showBalances = group.available;
   const tabs = useMemo<DetailTab[]>(
     () =>
       showBalances ? ['transactions', 'breakdown', 'balances'] : ['transactions', 'breakdown'],
@@ -426,6 +422,42 @@ export function AlbumDetailScreen({
   );
   const breakdownMember =
     memberOptions.find((option) => option.key === breakdownMemberKey)?.member ?? null;
+  // Whose spending the Breakdown shows, once a bill in it is split: one line
+  // that opens a sheet of the choices, however many people the album has.
+  const memberChoices = useMemo<BreakdownMemberChoice[]>(
+    () =>
+      memberOptions.length === 0
+        ? []
+        : [
+            {
+              key: EVERYONE,
+              name: I18n.t('albums.breakdown_everyone'),
+              icon: (
+                <View className="h-7 w-7 items-center justify-center rounded-full bg-primary/15">
+                  <Users size={15} color={themeColors.primary} />
+                </View>
+              ),
+            },
+            ...memberOptions.map((option) => ({
+              key: option.key,
+              name: option.name,
+              icon: (
+                <PersonAvatar
+                  name={option.name}
+                  partyKey={option.member.kind === 'self' ? null : debtPartyKey(option.name)}
+                  size={28}
+                  imageUri={option.member.kind === 'self' ? me.avatarUri : null}
+                />
+              ),
+            })),
+          ],
+    [me.avatarUri, memberOptions, themeColors.primary],
+  );
+  const selectBreakdownMember = useCallback((key: string) => {
+    setBreakdownMemberKey(key);
+    setShowMemberSheet(false);
+  }, []);
+  const closeMemberSheet = useCallback(() => setShowMemberSheet(false), []);
 
   // Expense-only breakdown, mirroring the insights breakdown: a shared
   // album by its own categories, the same for everyone in it; an album of
@@ -579,8 +611,8 @@ export function AlbumDetailScreen({
   const addsExisting = takesExisting && !isArchived;
   const duplicableSelectedTransactions = useMemo(
     () =>
-      takesExisting ? selectDuplicableTransactions(albumTransactions, selectedTransactionIds) : [],
-    [albumTransactions, selectedTransactionIds, takesExisting],
+      addsExisting ? selectDuplicableTransactions(albumTransactions, selectedTransactionIds) : [],
+    [addsExisting, albumTransactions, selectedTransactionIds],
   );
   // `createTransaction` files a new row into the *active* album, which is not
   // necessarily the one being viewed, so the copies are added here explicitly.
@@ -688,28 +720,15 @@ export function AlbumDetailScreen({
       updateTransactionsBulk,
     ],
   );
+  // Asked first, whoever's entries they are: a shared album's bill leaves its
+  // group with it, for everyone.
+  const removeFromAlbum = useRemoveFromAlbum(albumId, { confirm: true });
   const handleRemoveSelected = useCallback(() => {
     if (selectedTransactionIds.length === 0) return;
-    const idsToRemove = [...selectedTransactionIds];
-    // A shared album's bill leaves its group with it, for everyone.
-    const shared = idsToRemove.some((id) => transactionById.get(id)?.albumGroupId === albumId);
-    Alert.alert(
-      I18n.t('albums.remove_from_album'),
-      shared
-        ? I18n.t('albums.bill.remove_shared')
-        : I18n.t('albums.remove_selected_body', { count: idsToRemove.length }),
-      [
-        { text: I18n.t('common.cancel'), style: 'cancel' },
-        {
-          text: I18n.t('common.remove'),
-          onPress: () => {
-            removeTransactionsFromAlbum(albumId, idsToRemove);
-            setSelectedTransactionIds([]);
-          },
-        },
-      ],
-    );
-  }, [albumId, removeTransactionsFromAlbum, selectedTransactionIds, transactionById]);
+    removeFromAlbum([...selectedTransactionIds], clearSelection);
+  }, [clearSelection, removeFromAlbum, selectedTransactionIds]);
+  const openDuplicatePicker = useCallback(() => setShowDuplicatePicker(true), []);
+  const openBulkUpdate = useCallback(() => setShowBulkUpdate(true), []);
 
   // Tap a tab → line the tabs up under the header, then animate the pager to
   // that page (swipe is handled by the pager).
@@ -897,35 +916,6 @@ export function AlbumDetailScreen({
     </>
   );
 
-  // Whose spending the Breakdown shows, once a bill in it is split: one line
-  // that opens a sheet of the choices, however many people the album has.
-  const memberChoices: BreakdownMemberChoice[] =
-    memberOptions.length === 0
-      ? []
-      : [
-          {
-            key: EVERYONE,
-            name: I18n.t('albums.breakdown_everyone'),
-            icon: (
-              <View className="h-7 w-7 items-center justify-center rounded-full bg-primary/15">
-                <Users size={15} color={themeColors.primary} />
-              </View>
-            ),
-          },
-          ...memberOptions.map((option) => ({
-            key: option.key,
-            name: option.name,
-            icon: (
-              <PersonAvatar
-                name={option.name}
-                partyKey={option.member.kind === 'self' ? null : debtPartyKey(option.name)}
-                size={28}
-                imageUri={option.member.kind === 'self' ? me.avatarUri : null}
-              />
-            ),
-          })),
-        ];
-
   const shownChoice =
     memberChoices.find((choice) => choice.key === breakdownMemberKey) ?? memberChoices[0];
   const memberFilter = shownChoice ? (
@@ -975,27 +965,25 @@ export function AlbumDetailScreen({
   // A shared album's activity log follows its balances: who changed what.
   const balancesBody = (
     <>
-      <MemoAlbumBalances summary={balances} group={group} onOpenPerson={openPersonHere} />
+      <MemoAlbumBalances albumId={albumId} group={group} onOpenPerson={openPersonHere} />
       {showActivity ? <MemoAlbumActivity group={group} /> : null}
     </>
   );
 
-  const selectionActions = (
-    <TransactionSelectionActions
-      selectedCount={selectedTransactionCount}
-      totalNode={
-        <Text variant="label" className="text-foreground">
-          {formatValue(selectedTotal)}
-        </Text>
-      }
-      onCancel={clearSelection}
-      onDuplicate={
-        duplicableSelectedTransactions.length > 0 ? () => setShowDuplicatePicker(true) : undefined
-      }
-      onEdit={() => setShowBulkUpdate(true)}
-      onDelete={handleRemoveSelected}
-    />
-  );
+  // The selection's controls: in the tab bar on a phone, a toolbar under
+  // the list in two panes.
+  const selectionProps = {
+    selectedCount: selectedTransactionCount,
+    totalNode: (
+      <Text variant="label" className="text-foreground">
+        {formatValue(selectedTotal)}
+      </Text>
+    ),
+    onCancel: clearSelection,
+    onDuplicate: duplicableSelectedTransactions.length > 0 ? openDuplicatePicker : undefined,
+    onEdit: openBulkUpdate,
+    onDelete: handleRemoveSelected,
+  };
 
   const transactionList = (paddingTop: number, phone: boolean) => (
     <ActivityTransactionList
@@ -1049,15 +1037,12 @@ export function AlbumDetailScreen({
   const sheets = (
     <>
       {memberChoices.length > 0 ? (
-        <BreakdownMemberSheet
+        <MemoBreakdownMemberSheet
           visible={showMemberSheet}
           choices={memberChoices}
           selectedKey={shownChoice?.key ?? EVERYONE}
-          onSelect={(key) => {
-            setBreakdownMemberKey(key);
-            setShowMemberSheet(false);
-          }}
-          onClose={() => setShowMemberSheet(false)}
+          onSelect={selectBreakdownMember}
+          onClose={closeMemberSheet}
         />
       ) : null}
       {showBulkUpdate || bulkSheetUsed ? (
@@ -1193,24 +1178,7 @@ export function AlbumDetailScreen({
                 </Text>
                 <View style={styles.flexOne}>
                   {transactionList(4, false)}
-                  {isSelectionMode ? (
-                    <TransactionSelectionToolbar
-                      selectedCount={selectedTransactionCount}
-                      totalNode={
-                        <Text variant="label" className="text-foreground">
-                          {formatValue(selectedTotal)}
-                        </Text>
-                      }
-                      onCancel={clearSelection}
-                      onDuplicate={
-                        duplicableSelectedTransactions.length > 0
-                          ? () => setShowDuplicatePicker(true)
-                          : undefined
-                      }
-                      onEdit={() => setShowBulkUpdate(true)}
-                      onDelete={handleRemoveSelected}
-                    />
-                  ) : null}
+                  {isSelectionMode ? <TransactionSelectionToolbar {...selectionProps} /> : null}
                 </View>
               </ContentFrameProvider>
             </View>
@@ -1350,7 +1318,7 @@ export function AlbumDetailScreen({
               // bar (as the calendar's header does), clear of the rows being
               // picked and docked with the header as it scrolls.
               <View className="flex-1 flex-row items-center px-4" testID="album-selection-toolbar">
-                {selectionActions}
+                <TransactionSelectionActions {...selectionProps} />
               </View>
             ) : (
               <View className="flex-1 flex-row px-5">
@@ -1479,9 +1447,10 @@ export function AlbumDetailScreen({
   );
 }
 
-// The page re-renders on every selection, tab and mount; these two keep
-// their own work for when their props change.
+// The page re-renders on every selection, tab and mount; these keep their
+// own work for when their props change.
 const MemoBreakdownChart = memo(CategoryBreakdownChart);
+const MemoBreakdownMemberSheet = memo(BreakdownMemberSheet);
 const MemoAlbumBalances = memo(AlbumBalances);
 const MemoAlbumActivity = memo(AlbumActivity);
 

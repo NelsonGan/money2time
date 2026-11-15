@@ -2613,6 +2613,7 @@
       "signedOut": "Logga in igen för att ändra albumet.",
       "notMember": "Du är inte längre med i albumet, så du kan inte ändra det.",
       "busy": "Någon annan ändrar albumet just nu. Försök igen om en stund.",
+      "stale": "Någon ändrade albumet medan du var här. Titta igenom det nu och försök igen.",
       "saveFailed": "Det gick inte att spara ändringen i albumet. Försök igen."
     }
   }

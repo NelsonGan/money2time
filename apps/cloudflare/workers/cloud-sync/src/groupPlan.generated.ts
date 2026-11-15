@@ -32,7 +32,7 @@ const MAX_NAME = 40;
 const MAX_NOTE = 500;
 const MAX_SHARES = 64;
 /** More rows than any one act writes (Settle up across every bill of an album, say). */
-export const MAX_WRITE_ROWS = 400;
+const MAX_WRITE_ROWS = 400;
 /** Far more member rows than an album ever has (20 people, and those who left). */
 export const MAX_MEMBER_ROWS = 200;
 
@@ -118,7 +118,7 @@ export interface Member {
 }
 
 /** One logged change, as `album_activity.kind` names it. */
-export type ActivityKind =
+type ActivityKind =
   | 'bill_added'
   | 'bill_edited'
   | 'bill_deleted'
@@ -156,7 +156,7 @@ function cleanText(value: unknown, max: number): string | null {
   return trimmed || null;
 }
 
-export function cleanMemberName(value: unknown): string | null {
+function cleanMemberName(value: unknown): string | null {
   return isText(value) ? value.replace(/\s+/g, ' ').trim().slice(0, MAX_NAME) || null : null;
 }
 
@@ -312,7 +312,7 @@ export interface PlanContext {
 }
 
 /** The prefix of `created_by` on a row written on the website. */
-export const WEB_AUTHOR_PREFIX = 'web:';
+const WEB_AUTHOR_PREFIX = 'web:';
 
 /**
  * Who a bill or payment says wrote it last (`created_by`): the writer's
@@ -503,7 +503,9 @@ export function planLeave(state: GroupState, ctx: PlanContext, leaverUserId: str
  *   someone who has left stays on the bills they were on, but is never put
  *   on one. Deleting a bill leaves its payments standing.
  * - Payments: anyone in it records one between any two members, on a bill of
- *   the group, or undoes one. A payment is never changed otherwise.
+ *   the group, or undoes one. A payment is never changed otherwise. One in
+ *   another currency than its bill's (the bill's currency changed after it)
+ *   is owed back in its own (`openShares`), and paid back the same way.
  * - Members: the writer renames themselves, to a name nobody else has.
  * - Settings: Simplify and the cover.
  * - `created_by` is always the writer (`authorStamp`).
@@ -652,8 +654,6 @@ export function planWrite(
       if (
         !isText(expenseId) ||
         !bill ||
-        // A payment is in its bill's currency, or it would count nowhere.
-        currency !== bill.currency ||
         !isText(from) ||
         !isText(to) ||
         from === to ||

@@ -86,11 +86,11 @@ export async function notifyUsers(
 /**
  * A shared album's change stamp (`ledger_changes`), bumped with every notice
  * its phones get: after a push, a Worker write, or someone joining or
- * leaving. The album website, which has no socket, sends it back to ask
+ * leaving, and when its owner's phone renames it (`inviteLink`). The album website, which has no socket, sends it back to ask
  * whether anything changed. It only ever goes up. Plain shared ledgers have
  * no reader of it, so they get none; one that is gone is passed over.
  */
-async function markLedgerChanged(env: Env, ledgerId: string): Promise<void> {
+export async function markLedgerChanged(env: Env, ledgerId: string): Promise<void> {
   await env.AUTH_DB.prepare(
     `INSERT INTO ledger_changes (ledger_id, changed_at)
        SELECT ?1, ?2 WHERE EXISTS (SELECT 1 FROM shared_albums WHERE ledger_id = ?1)
@@ -100,19 +100,6 @@ async function markLedgerChanged(env: Env, ledgerId: string): Promise<void> {
     .bind(ledgerId, Date.now())
     .run()
     .catch(() => undefined);
-}
-
-/**
- * The album's change stamp, read before its data so a change landing in
- * between is seen next time; `0` before its first change.
- */
-export async function ledgerStamp(env: Env, ledgerId: string): Promise<string> {
-  const row = await env.AUTH_DB.prepare(
-    'SELECT changed_at FROM ledger_changes WHERE ledger_id = ?1',
-  )
-    .bind(ledgerId)
-    .first<{ changed_at: number }>();
-  return String(row?.changed_at ?? 0);
 }
 
 export class SyncHub implements DurableObject {

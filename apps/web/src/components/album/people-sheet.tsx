@@ -24,6 +24,15 @@ export function PeopleSheet({ group, actions, onClose, onLeft }: { group: Group;
   const others = group.members.filter((member) => member.id !== group.selfId).sort((a, b) => Number(!!b.userId) - Number(!!a.userId));
   const [confirm, setConfirm] = useState<{ kind: "leave" } | { kind: "remove"; member: Member } | null>(null);
   const [busy, setBusy] = useState(false);
+  // Off while it saves: a second tap would be planned from the same read and refused as stale.
+  async function toggleSimplify(on: boolean) {
+    setBusy(true);
+    try {
+      await actions.write([simplifyRow(group, on)], "simplify");
+    } finally {
+      setBusy(false);
+    }
+  }
   const [error, setError] = useState<string | null>(null);
 
   const leave = async () => {
@@ -104,7 +113,7 @@ export function PeopleSheet({ group, actions, onClose, onLeft }: { group: Group;
             {t("people.simplify")}
             <InfoTip label={t("people.simplify")} text={t("people.simplifyInfo")} />
           </span>
-          <Switch checked={group.simplify} disabled={!group.selfId || busy} label={t("people.simplify")} onChange={(on) => void actions.write([simplifyRow(group.album.ledgerId, on)], "simplify")} />
+          <Switch checked={group.simplify} disabled={!group.selfId || busy} label={t("people.simplify")} onChange={(on) => void toggleSimplify(on)} />
         </div>
 
         {!owner && group.selfId ? (

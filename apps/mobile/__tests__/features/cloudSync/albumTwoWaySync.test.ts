@@ -273,7 +273,7 @@ it('brings both people down to both phones', () => {
 
 it('saves a change offline, stamped and logged, and sends only that when back online', async () => {
   on(phones.a);
-  await writeGroup(GROUP, [dinner({ a: 30, b: 30 })]);
+  writeGroup(GROUP, [dinner({ a: 30, b: 30 })]);
   // Saved on the phone at once, with nothing sent yet.
   const [bill] = rows(phones.a, 'album_expenses');
   expect(bill).toMatchObject({ amount: 60, created_by: 'u-a', paid_by: A });
@@ -297,15 +297,15 @@ it('saves a change offline, stamped and logged, and sends only that when back on
 
 it('logs both edits when two phones change one bill offline, and keeps the later push', async () => {
   on(phones.a);
-  await writeGroup(GROUP, [dinner({ a: 30, b: 30 })]);
+  writeGroup(GROUP, [dinner({ a: 30, b: 30 })]);
   await sync(phones.a);
   await sync(phones.b);
 
   // Both offline: Ann changes the note, Ben the amounts.
   on(phones.a);
-  await writeGroup(GROUP, [dinner({ a: 30, b: 30 }, 'Dinner at Locavore')]);
+  writeGroup(GROUP, [dinner({ a: 30, b: 30 }, 'Dinner at Locavore')]);
   on(phones.b);
-  await writeGroup(GROUP, [dinner({ a: 40, b: 40 })]);
+  writeGroup(GROUP, [dinner({ a: 40, b: 40 })]);
 
   await sync(phones.a);
   await sync(phones.b);
@@ -334,12 +334,12 @@ it('logs both edits when two phones change one bill offline, and keeps the later
 
 it('syncs payments, a delete and a rename both ways', async () => {
   on(phones.a);
-  await writeGroup(GROUP, [dinner({ a: 30, b: 30 })]);
+  writeGroup(GROUP, [dinner({ a: 30, b: 30 })]);
   await sync(phones.a);
   await sync(phones.b);
 
   on(phones.b);
-  await writeGroup(GROUP, [
+  writeGroup(GROUP, [
     paymentRow({
       id: 'pay-1',
       expenseId: 'dinner',
@@ -350,7 +350,7 @@ it('syncs payments, a delete and a rename both ways', async () => {
       date: '2026-11-15',
     }),
   ]);
-  await writeGroup(GROUP, [renameRow(B, 'Benny')]);
+  writeGroup(GROUP, [renameRow(B, 'Benny')]);
   await sync(phones.b);
   await sync(phones.a);
   expect(rows(phones.a, 'album_settlements')[0]).toMatchObject({
@@ -361,7 +361,7 @@ it('syncs payments, a delete and a rename both ways', async () => {
   expect(rows(phones.a, 'album_members').map((row) => row.name)).toEqual(['Ann', 'Benny']);
 
   on(phones.a);
-  await writeGroup(GROUP, [deletedBillRow('dinner')]);
+  writeGroup(GROUP, [deletedBillRow('dinner')]);
   await sync(phones.a);
   await sync(phones.b);
   expect(rows(phones.b, 'album_expenses')[0].deleted_at).not.toBeNull();
@@ -382,7 +382,7 @@ it('refuses a change from someone who is not in the album, and writes nothing', 
   phones.a.app.exec(
     `UPDATE album_members SET user_id = NULL WHERE id = '${A}'; DELETE FROM sync_outbox;`,
   );
-  await expect(writeGroup(GROUP, [dinner({ a: 30, b: 30 })])).rejects.toEqual(
+  expect(() => writeGroup(GROUP, [dinner({ a: 30, b: 30 })])).toThrow(
     new GroupWriteError('not_member', 403),
   );
   expect(rows(phones.a, 'album_expenses')).toEqual([]);
@@ -397,7 +397,7 @@ it("never takes over another album's row through an id it chose, and logs nothin
      DELETE FROM sync_outbox;`,
   );
   const logged = kinds(phones.a);
-  await expect(writeGroup(GROUP, [dinner({ a: 30, b: 30 })])).rejects.toEqual(
+  expect(() => writeGroup(GROUP, [dinner({ a: 30, b: 30 })])).toThrow(
     new GroupWriteError('bad_row'),
   );
   expect(

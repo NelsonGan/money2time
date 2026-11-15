@@ -7,7 +7,7 @@ import type { Env } from '../src/env.ts';
 import { createHash } from 'node:crypto';
 
 import { ledgerForMedia, previewInvite, routeLedgers } from '../src/ledgers.ts';
-import { ledgerStamp, notifyUsers } from '../src/live.ts';
+import { notifyUsers } from '../src/live.ts';
 
 /**
  * Real SQL against the D1 schema. Every database call takes one tick of a
@@ -44,6 +44,8 @@ function fixture(t: TestContext, proUsers: string[]) {
   const batch = (statements: { run: () => Promise<unknown> }[]) =>
     Promise.all(statements.map((statement) => statement.run()));
   const env = {
+    BETTER_AUTH_SECRET: 'test-secret',
+    BETTER_AUTH_URL: 'https://worker.example',
     AUTH_DB: { prepare, batch },
     SYNC_HUB: { idFromName: (name: string) => name, get: () => hub },
   } as unknown as Env;
@@ -120,8 +122,19 @@ function fixture(t: TestContext, proUsers: string[]) {
     const response = await routeLedgers(request, url, env, session(user));
     return { status: response?.status, body: (await response?.json()) as Record<string, unknown> };
   };
+  /** An album's change stamp, as `access` reads it. */
+  const stamp = (id: string) =>
+    String(
+      (
+        db.prepare('SELECT changed_at FROM ledger_changes WHERE ledger_id = ?').get(id) as
+          | { changed_at: number }
+          | undefined
+      )?.changed_at ?? 0,
+    );
   return {
+    db,
     env,
+    stamp,
     list,
     addAlbum,
     accept,
@@ -295,7 +308,7 @@ test('an account starts sharing only so many albums in a day', async (t) => {
 });
 
 test('an album read answers "unchanged" from its change stamp, without opening its database', async (t) => {
-  const { env, addAlbum } = fixture(t, []);
+  const { env, addAlbum, stamp: ledgerStamp } = fixture(t, []);
   addAlbum();
   const read = async (since: string) => {
     const url = new URL(`https://worker.example/v1/ledgers/trip/album?since=${since}`);
@@ -311,9 +324,9 @@ test('an album read answers "unchanged" from its change stamp, without opening i
 
   // Every notice to its phones moves it on, even two in the same millisecond.
   await notifyUsers(env, ['owner'], 'trip', null);
-  const first = await ledgerStamp(env, 'trip');
+  const first = ledgerStamp('trip');
   await notifyUsers(env, ['owner'], 'trip', null, 'access');
-  const second = await ledgerStamp(env, 'trip');
+  const second = ledgerStamp('trip');
   assert.ok(Number(first) > 0 && Number(second) > Number(first));
   assert.deepEqual(await read(String(second)), {
     status: 200,
@@ -324,7 +337,63 @@ test('an album read answers "unchanged" from its change stamp, without opening i
   await notifyUsers(env, ['owner'], 'personal', null);
   await notifyUsers(env, ['owner'], 'share', null);
   await notifyUsers(env, ['owner'], 'gone', null);
-  assert.equal(await ledgerStamp(env, 'share'), '0');
-  assert.equal(await ledgerStamp(env, 'gone'), '0');
-  assert.equal(await ledgerStamp(env, 'trip'), second);
+  assert.equal(ledgerStamp('share'), '0');
+  assert.equal(ledgerStamp('gone'), '0');
+  assert.equal(ledgerStamp('trip'), second);
+});
+
+const OWNER = { id: 'owner', email: 'owner@example.test', name: 'Mei' };
+
+test("renaming an album from its owner's phone moves its change stamp, so the website reads it", async (t) => {
+  const { env, addAlbum, stamp } = fixture(t, []);
+  addAlbum();
+  const invite = async (body: unknown) => {
+    const url = new URL('https://worker.example/v1/ledgers/trip/invites');
+    const request = new Request(url, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const response = await routeLedgers(request, url, env, OWNER);
+    return response?.status;
+  };
+  assert.equal(await invite({ name: 'Bali trip' }), 200);
+  // The name it had: nothing changed, nothing to read again.
+  assert.equal(stamp('trip'), '0');
+  assert.equal(await invite({ name: 'Bali 2026' }), 200);
+  const moved = stamp('trip');
+  assert.ok(Number(moved) > 0);
+  assert.equal(await invite({ name: 'Bali 2026' }), 200);
+  assert.equal(stamp('trip'), moved);
+});
+
+test("an album's write is the website's only, and a token being revoked is busy, not an error", async (t) => {
+  const { db, env, addAlbum } = fixture(t, []);
+  addAlbum();
+  const post = async (environment: Env, body: unknown) => {
+    const url = new URL('https://worker.example/v1/ledgers/trip/album');
+    const request = new Request(url, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const response = await routeLedgers(request, url, environment, OWNER);
+    return { status: response?.status, body: await response?.json() };
+  };
+  // A write not from the website (the removed path phones once took) is refused.
+  const local = { ...env, LOCAL_SYNC_URL: 'http://127.0.0.1:1' } as Env;
+  assert.deepEqual(await post(local, { action: 'write', rows: [] }), {
+    status: 400,
+    body: { error: 'bad_request' },
+  });
+  // While someone's access changes, the album's token is fenced: try again.
+  db.prepare('UPDATE shared_ledgers SET token = ?, token_expires_at = ? WHERE id = ?').run(
+    'revoking:abc',
+    Date.now() + 60_000,
+    'trip',
+  );
+  assert.deepEqual(await post(env, { action: 'join', name: 'Mei' }), {
+    status: 409,
+    body: { error: 'busy' },
+  });
 });

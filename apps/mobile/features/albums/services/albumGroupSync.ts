@@ -35,7 +35,7 @@ import type { AlbumCategoryKey } from '../lib/albumCategories';
 import { localBill, type LocalPayment, settlementsByBill } from '../lib/albumGroup';
 import { selfMember } from '../lib/albumPeople';
 import { openShares, simplifyDebts } from '../lib/groupDebts';
-import { batchPaymentIds, type GroupRowWrite, paymentRow } from '../lib/groupRows';
+import { type GroupRowWrite, paymentRow } from '../lib/groupRows';
 
 /** What the open ledger and the user's settings give the group's entries. */
 export interface GroupEnv {
@@ -442,9 +442,7 @@ function projectExpense(
 
   if (!bill) {
     // Not the user's bill (any more): their side of it goes. Only an entry
-    // the group has marked as its own is touched. A bill with payments on it
-    // cannot be deleted or changed, so no money that moved goes with it
-    // (README: Who can change what).
+    // the group has marked as its own is touched.
     if (!live || live.album_group_id !== groupId) return false;
     removeLocalBill(live, splits);
     return true;
@@ -740,8 +738,8 @@ function projectExpense(
 /**
  * Brings the user's entries in step with one group, or with one bill of it.
  * Nothing happens while this phone has no member of its own in the group
- * (joined, not yet said who they are), or while the album is in another
- * ledger than the open one. Returns whether anything was written.
+ * (joined, not yet on its list; or no longer in it), or while the album is in
+ * another ledger than the open one. Returns whether anything was written.
  */
 export function projectGroup(
   groupId: string,
@@ -775,6 +773,19 @@ export function projectGroup(
   return changed;
 }
 
+/** A short id-safe hash (FNV-1a, two seeds) of a group's state. */
+function stateHash(groupId: string, parts: readonly string[]): string {
+  const text = [groupId, ...parts].join('\n');
+  let a = 0x811c9dc5;
+  let b = 0x01000193 ^ 0x5bd1e995;
+  for (let index = 0; index < text.length; index += 1) {
+    const code = text.charCodeAt(index);
+    a = Math.imul(a ^ code, 0x01000193) >>> 0;
+    b = Math.imul(b ^ code, 0x5bd1e995) >>> 0;
+  }
+  return a.toString(36) + b.toString(36);
+}
+
 /**
  * With "Simplify group debts" on, a group where nobody owes anything on
  * balance has nothing left to pay: whatever is still open on its bills goes
@@ -791,7 +802,15 @@ export function evenGroupPayments(groupId: string): GroupRowWrite[] {
     albumGroupsRepository.listSettlements(groupId, memberIds),
   );
   if (open.length === 0 || simplifyDebts(open).length > 0) return [];
-  const ids = batchPaymentIds(open.length);
+  // Named after what they close: two phones closing the same even group
+  // write the same rows, so the group is never paid twice.
+  const batch = `even-${stateHash(
+    groupId,
+    open.map(
+      (share) => `${share.expenseId}|${share.from}|${share.to}|${share.currency}|${share.amount}`,
+    ),
+  )}`;
+  const ids = open.map((_, index) => `${batch}.${index}`);
   const today = dayKeyFromDateLocal(new Date());
   return open.map((share, index) =>
     paymentRow({

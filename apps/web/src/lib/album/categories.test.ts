@@ -23,7 +23,7 @@ test("a bill's category is its key, else its icon, then its English name, else O
 });
 
 test("a bill is written with its key and that category's English name and icon", () => {
-  const { row } = billRow({ id: "b1", date: "2026-11-14", note: "Taxi", currency: "MYR", category: "transport", paidBy: "me", shares: [{ memberId: "me", amount: 5 }] });
+  const { row } = billRow({ id: "b1", date: "2026-11-14", note: "Taxi", currency: "MYR", category: "transport", paidBy: "me", shares: [{ memberId: "me", amount: 5 }] }, null);
   assert.deepEqual([row.category_key, row.category_name, row.category_icon], ["transport", "Transport", "car"]);
 });
 

@@ -134,3 +134,32 @@ test("an album read passes on the stamp of the last one, and nothing else", asyn
     ["/v1/ledgers/abcdef123456/album?since=1763190000123", "/v1/ledgers/abcdef123456/album", "/v1/ledgers/abcdef123456/album"],
   );
 });
+
+test("a write passes on each row's base and a payment's money stamp, and only a stamp of its shape", async () => {
+  const { calls, upstream } = worker();
+  const rows = [{ table: "album_expenses", row: { id: "b1" }, base: "abc.1.dev" }];
+  const moneyBase = "0123456789abcdef0123456789abcdef";
+  await handleAlbumApi(request("/api/albums/abcdef123456/write", { method: "POST", body: { rows, moneyBase } }), upstream);
+  await handleAlbumApi(request("/api/albums/abcdef123456/write", { method: "POST", body: { rows, moneyBase: "x" } }), upstream);
+  assert.deepEqual(calls[0].body, { action: "write", rows, moneyBase, via: "web" });
+  assert.deepEqual(calls[1].body, { action: "write", rows, via: "web" });
+});
+
+test("the page putting the user back on the list joins as the app does, so nobody already on it is renamed", async () => {
+  const { calls, upstream } = worker();
+  await handleAlbumApi(request("/api/albums/abcdef123456/join", { method: "POST", body: { name: "Tess.lim" } }), upstream);
+  assert.deepEqual(calls[0].body, { action: "join", name: "Tess.lim" });
+});
+
+test("an album read is passed through as the Worker sent it; a refusal is still read", async () => {
+  const text = '{"album":{"id":"abcdef123456"},"rows":[],"stamp":"5"}';
+  const { upstream } = worker(() => new Response(text, { headers: { "Content-Type": "application/json" } }));
+  const res = await handleAlbumApi(request("/api/albums/abcdef123456"), upstream);
+  assert.equal(res.status, 200);
+  assert.equal(res.headers.get("cache-control"), "no-store");
+  assert.equal(await res.text(), text);
+  const busy = worker(() => Response.json({ error: "busy", secret: "x" }, { status: 409 }));
+  const refused = await handleAlbumApi(request("/api/albums/abcdef123456"), busy.upstream);
+  assert.equal(refused.status, 409);
+  assert.deepEqual(await refused.json(), { error: "busy" });
+});

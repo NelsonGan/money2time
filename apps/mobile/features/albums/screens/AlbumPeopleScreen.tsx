@@ -69,13 +69,20 @@ export function AlbumPeopleScreen({ albumId, onBack }: AlbumPeopleScreenProps) {
   // keeps their row and name, and reads as not joined again.
   const [joinedIds, setJoinedIds] = useState<Set<string> | null>(null);
 
-  // The album was deleted: nothing to show. Once.
+  // Back once, whatever asks first: leaving ends the share too, so the
+  // effect below and the Leave that ended it both go back.
   const goneRef = useRef(false);
-  useEffect(() => {
-    if (album || goneRef.current) return;
+  const goBack = useCallback(() => {
+    if (goneRef.current) return;
     goneRef.current = true;
     onBack();
-  }, [album, onBack]);
+  }, [onBack]);
+  // The album was deleted, or stopped being shared while this was open (it
+  // is kept frozen and archived, with no people page): nothing to show.
+  const gone = !album || !share;
+  useEffect(() => {
+    if (gone) goBack();
+  }, [gone, goBack]);
 
   const { getSessionToken } = sync;
   const ownerUserId = share?.ownerUserId ?? null;
@@ -147,7 +154,7 @@ export function AlbumPeopleScreen({ albumId, onBack }: AlbumPeopleScreenProps) {
     [],
   );
 
-  if (!album) return <SettingsPageLayout>{null}</SettingsPageLayout>;
+  if (!album || !share) return <SettingsPageLayout>{null}</SettingsPageLayout>;
 
   const showEditError = (error: PeopleEditError | null) => {
     const message = error ? peopleEditMessage(error) : null;
@@ -161,7 +168,7 @@ export function AlbumPeopleScreen({ albumId, onBack }: AlbumPeopleScreenProps) {
   };
 
   const isJoined = (person: AlbumGroupPerson) => {
-    if (!share || !person.joined) return false;
+    if (!person.joined) return false;
     const member = group.members.find((item) => item.id === person.id);
     return joinedIds && member?.userId ? joinedIds.has(member.userId) : person.joined;
   };
@@ -206,9 +213,9 @@ export function AlbumPeopleScreen({ albumId, onBack }: AlbumPeopleScreenProps) {
           style: 'destructive',
           onPress: () =>
             void run('leave', async () => {
-              // Left, the album is the user's own: it has no people page.
+              // Left, the album is kept frozen and archived: it has no people page.
               if (await leaveAskingFirst((opts) => sync.leaveLedger(album.id, opts), album.name)) {
-                onBack();
+                goBack();
               }
             }),
         },
@@ -231,7 +238,7 @@ export function AlbumPeopleScreen({ albumId, onBack }: AlbumPeopleScreenProps) {
           onPress: () =>
             void run('leave', async () => {
               await sync.stopSharingLedger(album.id, { whenUnreachable: 'local' });
-              onBack();
+              goBack();
             }),
         },
       ],
@@ -308,9 +315,8 @@ export function AlbumPeopleScreen({ albumId, onBack }: AlbumPeopleScreenProps) {
         </View>
 
         <AlbumSharingCard
-          share={null}
           simplify={
-            share && group.self
+            group.self
               ? {
                   value: simplifies,
                   onChange: (next) => {
@@ -335,20 +341,18 @@ export function AlbumPeopleScreen({ albumId, onBack }: AlbumPeopleScreenProps) {
           }
         />
 
-        {share ? (
-          <Button
-            variant="secondary"
-            onPress={isOwner ? confirmEnd : confirmLeave}
-            disabled={busy !== null}
-          >
-            <View className="flex-row items-center gap-2">
-              <LogOut size={16} color={colors.error} />
-              <Text className="text-destructive">
-                {I18n.t(isOwner ? 'albums.share.end' : 'albums.share.leave')}
-              </Text>
-            </View>
-          </Button>
-        ) : null}
+        <Button
+          variant="secondary"
+          onPress={isOwner ? confirmEnd : confirmLeave}
+          disabled={busy !== null}
+        >
+          <View className="flex-row items-center gap-2">
+            <LogOut size={16} color={colors.error} />
+            <Text className="text-destructive">
+              {I18n.t(isOwner ? 'albums.share.end' : 'albums.share.leave')}
+            </Text>
+          </View>
+        </Button>
       </FormScrollView>
     </SettingsPageLayout>
   );

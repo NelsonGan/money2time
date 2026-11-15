@@ -53,9 +53,12 @@ export function AlbumActivity({ group }: AlbumActivityProps) {
   const [expanded, setExpanded] = useState(false);
   const selfId = group.self?.id ?? null;
 
+  const names = useMemo(
+    () => new Map(group.members.map((member) => [member.id, member.name])),
+    [group.members],
+  );
   const lines = useMemo(() => {
     if (!groupId) return [];
-    const names = new Map(group.members.map((member) => [member.id, member.name]));
     return activity.map((entry) =>
       describeActivity(entry, {
         selfId,
@@ -65,16 +68,20 @@ export function AlbumActivity({ group }: AlbumActivityProps) {
         day: (date) => formatRelativeDate(date),
       }),
     );
-  }, [activity, group.members, groupId, selfId]);
+  }, [activity, groupId, names, selfId]);
+  const days = useMemo(
+    () =>
+      groupActivityByDay(expanded ? lines : lines.slice(0, COLLAPSED_ROWS), (iso) =>
+        dayKeyFromDateLocal(new Date(iso)),
+      ),
+    [expanded, lines],
+  );
 
   // Nothing has happened yet only before anyone joined: the card waits.
   if (!lines.length) return null;
 
-  const shown = expanded ? lines : lines.slice(0, COLLAPSED_ROWS);
-  const days = groupActivityByDay(shown, (iso) => dayKeyFromDateLocal(new Date(iso)));
-
   const row = (line: ActivityLine, first: boolean) => {
-    const actorName = group.members.find((member) => member.id === line.actorId)?.name ?? null;
+    const actorName = (line.actorId ? names.get(line.actorId) : null) ?? null;
     const isSelf = !!selfId && line.actorId === selfId;
     const time = new Date(line.createdAt);
     // Who did it reads first, in bold, when the sentence starts with them.

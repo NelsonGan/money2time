@@ -91,6 +91,23 @@ describe('who owes whom', () => {
   });
 });
 
+describe('a bill whose currency changed after a payment', () => {
+  it('keeps the payment, owed back in its own currency, and settles when paid back', () => {
+    // Ben paid Nelson MYR 30 on dinner; then dinner was changed to USD.
+    const dinner = bill('dinner', 'nelson', { nelson: 10, ben: 10 }, { currency: 'USD' });
+    const paid = payment('s1', 'dinner', 'ben', 'nelson', 30);
+    expect(openShares([dinner], [paid])).toEqual([
+      { expenseId: 'dinner', from: 'ben', to: 'nelson', currency: 'USD', amount: 10 },
+      { expenseId: 'dinner', from: 'nelson', to: 'ben', currency: 'MYR', amount: 30 },
+    ]);
+    // Paying the ringgit back on the bill closes that side.
+    const back = { ...payment('s2', 'dinner', 'nelson', 'ben', 30) };
+    expect(openShares([dinner], [paid, back])).toEqual([
+      { expenseId: 'dinner', from: 'ben', to: 'nelson', currency: 'USD', amount: 10 },
+    ]);
+  });
+});
+
 describe('simplify group debts', () => {
   it('passes a debt along a chain', () => {
     // Anna owes Bob, Bob owes Charlie: Anna pays Charlie.

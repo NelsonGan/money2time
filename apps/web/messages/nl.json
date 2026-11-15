@@ -2613,6 +2613,7 @@
       "signedOut": "Log opnieuw in om dit album te wijzigen.",
       "notMember": "Je zit niet meer in dit album, dus je kunt het niet wijzigen.",
       "busy": "Iemand anders wijzigt dit album. Probeer het zo opnieuw.",
+      "stale": "Iemand heeft dit album intussen gewijzigd. Bekijk het nu en probeer het opnieuw.",
       "saveFailed": "De wijziging in dit album kon niet worden opgeslagen. Probeer het opnieuw."
     }
   }

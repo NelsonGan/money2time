@@ -13,11 +13,12 @@ import {
 } from '~/features/transactions/components/SettleUpConfirmSheet';
 import { debtPartyKey } from '~/features/transactions/lib/debtParty';
 import { currencyOrder } from '~/features/transactions/lib/settleUp';
+import { useSettleUpSummary } from '~/features/transactions/lib/useSettleUpSummary';
 import { useSelfPerson } from '~/hooks/useSelfPerson';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import type { PersonDebt, SettleUpSummary } from '~/types';
+import type { PersonDebt } from '~/types';
 import { cn } from '~/utils';
 import { currencySymbolForCode } from '~/utils/currency';
 import { formatCurrency } from '~/utils/formatters';
@@ -25,10 +26,11 @@ import { formatCurrency } from '~/utils/formatters';
 import type { AlbumGroup } from '../hooks/useAlbumGroup';
 import { useGroupDebts } from '../hooks/useGroupDebts';
 import type { GroupDebt } from '../lib/groupDebts';
+import { selfNet } from '../lib/selfNet';
 
 interface AlbumBalancesProps {
-  /** The roll-up of the album's own bills (`useSettleUpSummary(albumId)`). */
-  summary: SettleUpSummary;
+  albumId: string;
+  /** The album's group: this mounts only for a shared album (`group.available`). */
   group: AlbumGroup;
   /**
    * Opens the person's page, with only this album's bills: only those in
@@ -60,178 +62,162 @@ interface DebtRow {
   amountText: string;
   /** The debt's currency: the rows are grouped by it. */
   currency: string;
-  onPress?: () => void;
+  onPress: () => void;
 }
 
+// Money, whatever the display mode: a balance is what changes hands, in the
+// currency it is owed in.
+const formatIn = (amount: number, currency: string) =>
+  formatCurrency(amount, currencySymbolForCode(currency));
+
+const rankOf = (row: Pick<DebtRow, 'mine'>) => ['owed', 'owe', null].indexOf(row.mine);
+
 /**
- * An album's Balances: what the user is owed or owes across the album's
- * bills, then who owes whom. An album that is not shared lists the user's own
- * balance with each person; a shared one lists the whole group's debts
- * (simplified when the group has that on) and what the group spent. Nothing
- * here is converted: every figure is in its bills' own currency, each
- * currency apart.
+ * A shared album's Balances: what the user is owed or owes across the
+ * album's bills, then the whole group's debts (simplified when the group has
+ * that on) and what the group spent. Nothing here is converted: every figure
+ * is in its bills' own currency, each currency apart.
  */
-export function AlbumBalances({ summary, group, onOpenPerson }: AlbumBalancesProps) {
+export function AlbumBalances({ albumId, group, onOpenPerson }: AlbumBalancesProps) {
   const { settleGroupDebt } = useApp();
   const colors = useThemeColors();
   const me = useSelfPerson();
+  // The roll-up of the album's own bills: who has a page here, and who is
+  // settled. Only a shared album's page has this tab, so only it pays for it.
+  const summary = useSettleUpSummary(albumId);
   const groupId = group.share?.ledgerId ?? null;
   const selfId = group.self?.id ?? null;
   const shared = useGroupDebts(groupId, selfId);
   /** The simplified debt being settled, while its sheet is open. */
   const [settling, setSettling] = useState<GroupDebt | null>(null);
 
-  // Money, whatever the display mode: a balance is what changes hands, in the
-  // currency it is owed in.
-  const formatIn = (amount: number, currency: string) =>
-    formatCurrency(amount, currencySymbolForCode(currency));
+  const view = useMemo(() => {
+    if (!shared) return null;
+    // Debts, spending and the user's net never add across currencies: with
+    // more than one, each currency is its own section under a chip, so a
+    // dollar debt is not read as ringgit beside it. The reporting currency
+    // comes first.
+    const currencies = [
+      ...new Set([
+        ...shared.debts.map((debt) => debt.currency),
+        ...shared.spending.keys(),
+        ...summary.people.flatMap((person) => person.netByCurrency.map((entry) => entry.currency)),
+      ]),
+    ].sort(currencyOrder(summary.reportingCurrency));
+    const byCurrency = currencies.length > 1;
+    // The user's net in each currency, in the sections' order: the group's,
+    // what the user owes or is owed there, payments past a share and on
+    // deleted bills included (`openShares`). The Balances page lists the
+    // album with the same figure.
+    const nets = selfNet(shared.debts, selfId, summary.reportingCurrency).byCurrency;
+    // A line of one currency of several opens the person's page on that
+    // currency's bills alone, so its total is the line's.
+    const openPerson = (personKey: string, currency: string) =>
+      onOpenPerson(personKey, byCurrency ? currency : undefined);
+    const names = new Map(group.members.map((member) => [member.id, member.name]));
+    const nameOf = (memberId: string) => names.get(memberId) ?? null;
 
-  // Debts, spending and the user's net never add across currencies: with
-  // more than one, each currency is its own section under a chip, so a dollar
-  // debt is not read as ringgit beside it. The reporting currency comes first.
-  const currencies = [
-    ...new Set([
-      ...(shared?.debts.map((debt) => debt.currency) ?? []),
-      ...(shared ? [...shared.spending.keys()] : []),
-      ...summary.people.flatMap((person) => person.netByCurrency.map((entry) => entry.currency)),
-    ]),
-  ].sort(currencyOrder(summary.reportingCurrency));
-  const byCurrency = currencies.length > 1;
-  // The user's net in each currency, already in the sections' order. In a
-  // shared album it is the group's: what the user owes or is owed there,
-  // payments past a share and on deleted bills included (`openShares`).
-  const nets = shared
-    ? currencies.flatMap((currency) => {
-        const amount = shared.debts
-          .filter((debt) => debt.currency === currency)
-          .reduce(
-            (sum, debt) =>
-              sum + (debt.to === selfId ? debt.amount : debt.from === selfId ? -debt.amount : 0),
-            0,
-          );
-        return Math.abs(amount) >= 0.005 ? [{ currency, amount }] : [];
-      })
-    : summary.netByCurrency;
-  const open = summary.billCount > 0 || nets.length > 0;
-  // A line of one currency of several opens the person's page on that
-  // currency's bills alone, so its total is the line's.
-  const openPerson = (personKey: string, currency: string) =>
-    onOpenPerson(personKey, byCurrency ? currency : undefined);
-
-  const nameOf = (memberId: string) =>
-    group.members.find((member) => member.id === memberId)?.name ?? null;
-
-  // Two other people's debt: recorded as it stands, through no account of
-  // the user's, after a yes.
-  const confirmOthersPaid = (debt: GroupDebt, fromName: string | null, toName: string | null) => {
-    void triggerHaptic('selection');
-    const someone = I18n.t('transactions.settleUp.someone');
-    Alert.alert(
-      I18n.t('albums.balances.record_others_title'),
-      I18n.t('albums.balances.record_others_body', {
-        from: fromName ?? someone,
-        to: toName ?? someone,
-        amount: formatIn(debt.amount, debt.currency),
-      }),
-      [
-        { text: I18n.t('common.cancel'), style: 'cancel' },
-        {
-          text: I18n.t('albums.balances.record_others_confirm'),
-          onPress: () => {
-            if (groupId) void settleGroupDebt(groupId, debt, null);
+    // Two other people's debt: recorded as it stands, through no account of
+    // the user's, after a yes.
+    const confirmOthersPaid = (debt: GroupDebt, fromName: string | null, toName: string | null) => {
+      void triggerHaptic('selection');
+      const someone = I18n.t('transactions.settleUp.someone');
+      Alert.alert(
+        I18n.t('albums.balances.record_others_title'),
+        I18n.t('albums.balances.record_others_body', {
+          from: fromName ?? someone,
+          to: toName ?? someone,
+          amount: formatIn(debt.amount, debt.currency),
+        }),
+        [
+          { text: I18n.t('common.cancel'), style: 'cancel' },
+          {
+            text: I18n.t('albums.balances.record_others_confirm'),
+            onPress: () => {
+              if (groupId) void settleGroupDebt(groupId, debt, null);
+            },
           },
-        },
-      ],
-    );
-  };
+        ],
+      );
+    };
 
-  const mineOf = (debt: GroupDebt) =>
-    debt.to === selfId ? 'owed' : debt.from === selfId ? 'owe' : null;
-  const rankOf = (row: Pick<DebtRow, 'mine'>) => ['owed', 'owe', null].indexOf(row.mine);
-  // Who has a page here, in which currency: the album's bills with them.
-  const pages = new Set(
-    summary.people.flatMap((person) =>
-      person.bills.map((bill) => `${person.key}:${bill.currency}`),
-    ),
-  );
-  const rows: DebtRow[] = (
-    shared
-      ? shared.debts.map((debt): DebtRow => {
-          const mine = mineOf(debt);
-          const fromName = nameOf(debt.from);
-          const toName = nameOf(debt.to);
-          const personKey = debtPartyKey(mine === 'owed' ? fromName : toName);
-          // The person's page lists this album's bills with them in the
-          // debt's currency; a member with none here yet (renamed since, or
-          // nameless) is settled as the debt stands instead of opening a page
-          // that would find nobody.
-          const hasPage = pages.has(`${personKey}:${debt.currency}`);
-          return {
-            key: `${debt.currency}:${debt.from}:${debt.to}`,
-            mine,
-            fromName,
-            toName,
-            amount: debt.amount,
-            amountText: formatIn(debt.amount, debt.currency),
-            currency: debt.currency,
-            // Anyone in the album records a payment (README: Anyone in it can
-            // change it). The user's own: a simplified debt is settled as it
-            // stands, a pair's own on the person's page, beside its bills.
-            // Between two others: recorded as it stands, through no account.
-            onPress: !group.self
-              ? undefined
-              : !mine
-                ? () => confirmOthersPaid(debt, fromName, toName)
-                : shared.simplified || !hasPage
-                  ? () => setSettling(debt)
-                  : () => openPerson(personKey, debt.currency),
-          };
-        })
-      : // The user's own balance with each person, a line per currency.
-        summary.people.flatMap((person) =>
-          person.netByCurrency.map(
-            ({ currency, amount }): DebtRow => ({
-              key: `${currency}:${person.key}`,
-              mine: amount > 0 ? 'owed' : 'owe',
-              fromName: person.name,
-              toName: person.name,
-              amount: Math.abs(amount),
-              amountText: formatIn(Math.abs(amount), currency),
-              currency,
-              onPress: () => openPerson(person.key, currency),
-            }),
-          ),
-        )
-  )
-    // The user's own first (what they are owed, then what they owe), the
-    // larger first within each, and someone unnamed last on a tie.
-    .sort(
-      (a, b) =>
-        rankOf(a) - rankOf(b) ||
-        b.amount - a.amount ||
-        Number(!a.fromName || !a.toName) - Number(!b.fromName || !b.toName),
+    // Who has a page here, in which currency: the album's bills with them.
+    const pages = new Set(
+      summary.people.flatMap((person) =>
+        person.bills.map((bill) => `${person.key}:${bill.currency}`),
+      ),
     );
+    const rows = shared.debts
+      .map((debt): DebtRow => {
+        const mine = debt.to === selfId ? 'owed' : debt.from === selfId ? 'owe' : null;
+        const fromName = nameOf(debt.from);
+        const toName = nameOf(debt.to);
+        const personKey = debtPartyKey(mine === 'owed' ? fromName : toName);
+        // The person's page lists this album's bills with them in the debt's
+        // currency; a member with none here yet (renamed since, or nameless)
+        // is settled as the debt stands instead of opening a page that would
+        // find nobody.
+        const hasPage = pages.has(`${personKey}:${debt.currency}`);
+        return {
+          key: `${debt.currency}:${debt.from}:${debt.to}`,
+          mine,
+          fromName,
+          toName,
+          amount: debt.amount,
+          amountText: formatIn(debt.amount, debt.currency),
+          currency: debt.currency,
+          // Anyone in the album records a payment (README: Anyone in it can
+          // change it). The user's own: a simplified debt is settled as it
+          // stands, a pair's own on the person's page, beside its bills.
+          // Between two others: recorded as it stands, through no account.
+          onPress: !mine
+            ? () => confirmOthersPaid(debt, fromName, toName)
+            : shared.simplified || !hasPage
+              ? () => setSettling(debt)
+              : () => openPerson(personKey, debt.currency),
+        };
+      })
+      // The user's own first (what they are owed, then what they owe), the
+      // larger first within each, and someone unnamed last on a tie.
+      .sort(
+        (a, b) =>
+          rankOf(a) - rankOf(b) ||
+          b.amount - a.amount ||
+          Number(!a.fromName || !a.toName) - Number(!b.fromName || !b.toName),
+      );
 
-  // What is settled or level with each person (nothing to pay either way):
-  // their bills in the album are reached from here. With several currencies
-  // it goes per currency, as the lines above do, so a person who still owes
-  // in one currency is found here for the others.
-  const settledRows: SettledRow[] = summary.people.flatMap((person): SettledRow[] => {
-    if (!byCurrency) {
-      return person.netByCurrency.length === 0
-        ? [{ key: person.key, person, even: person.unpaidBillCount > 0 }]
-        : [];
-    }
-    const owing = new Set(person.netByCurrency.map((entry) => entry.currency));
-    return [...new Set(person.bills.map((bill) => bill.currency))]
-      .filter((currency) => !owing.has(currency))
-      .map((currency) => ({
-        key: `${currency}:${person.key}`,
-        person,
-        currency,
-        even: person.bills.some((bill) => bill.currency === currency && !bill.paidAt),
-      }));
-  });
+    // What is settled or level with each person (nothing to pay either way):
+    // their bills in the album are reached from here. With several currencies
+    // it goes per currency, as the lines above do, so a person who still owes
+    // in one currency is found here for the others.
+    const settledRows = summary.people.flatMap((person): SettledRow[] => {
+      if (!byCurrency) {
+        return person.netByCurrency.length === 0
+          ? [{ key: person.key, person, even: person.unpaidBillCount > 0 }]
+          : [];
+      }
+      const owing = new Set(person.netByCurrency.map((entry) => entry.currency));
+      return [...new Set(person.bills.map((bill) => bill.currency))]
+        .filter((currency) => !owing.has(currency))
+        .map((currency) => ({
+          key: `${currency}:${person.key}`,
+          person,
+          currency,
+          even: person.bills.some((bill) => bill.currency === currency && !bill.paidAt),
+        }));
+    });
+
+    return {
+      currencies,
+      byCurrency,
+      nets,
+      open: summary.billCount > 0 || nets.length > 0,
+      rows,
+      settledRows,
+      // Before the album's first split bill there is no balance to state.
+      empty: rows.length === 0 && summary.people.length === 0 && shared.spending.size === 0,
+    };
+  }, [group.members, groupId, onOpenPerson, selfId, settleGroupDebt, shared, summary]);
 
   const settleContent = useMemo<SettleUpConfirmContent | null>(() => {
     if (!settling) return null;
@@ -256,13 +242,14 @@ export function AlbumBalances({ summary, group, onOpenPerson }: AlbumBalancesPro
 
   // Joined, and not on the album's list yet: they are being added as
   // themselves (`syncAlbumGroups`).
-  if (group.share && !group.self) {
+  if (!group.self || !shared || !view) {
     return (
       <View className="items-center px-5 pt-8">
         <LoadingDots />
       </View>
     );
   }
+  const { currencies, byCurrency, nets, open, rows, settledRows, empty } = view;
 
   const avatar = (name: string | null, isSelf: boolean) => (
     <PersonAvatar
@@ -287,12 +274,11 @@ export function AlbumBalances({ summary, group, onOpenPerson }: AlbumBalancesPro
     return (
       <Pressable
         key={row.key}
-        disabled={!row.onPress}
         onPress={() => {
           void triggerHaptic('selection');
-          row.onPress?.();
+          row.onPress();
         }}
-        accessibilityRole={row.onPress ? 'button' : 'text'}
+        accessibilityRole="button"
         accessibilityLabel={`${sentence}, ${row.amountText}`}
         className={cn(
           'flex-row items-center gap-2.5 px-4 py-3 active:opacity-70',
@@ -325,10 +311,7 @@ export function AlbumBalances({ summary, group, onOpenPerson }: AlbumBalancesPro
         >
           {row.amountText}
         </Text>
-        {/* Kept as a gap on rows that open nothing, so the amounts line up. */}
-        <View className="w-4">
-          {row.onPress ? <ChevronRight size={16} color={colors.textMuted} /> : null}
-        </View>
+        <ChevronRight size={16} color={colors.textMuted} />
       </Pressable>
     );
   };
@@ -383,9 +366,8 @@ export function AlbumBalances({ summary, group, onOpenPerson }: AlbumBalancesPro
     </View>
   );
 
-  // Before the album's first split bill there is no balance to state: an
-  // empty placeholder instead of "All settled up".
-  const empty = rows.length === 0 && summary.people.length === 0 && !shared?.spending.size;
+  // Before the album's first split bill: an empty placeholder instead of
+  // "All settled up".
   if (empty) {
     return (
       <EmptyState
@@ -482,7 +464,7 @@ export function AlbumBalances({ summary, group, onOpenPerson }: AlbumBalancesPro
         </View>
       ) : null}
 
-      {shared && shared.spending.size > 0 ? (
+      {shared.spending.size > 0 ? (
         <View className="gap-2.5 rounded-2xl border border-border/30 bg-card px-4 py-3.5">
           <Text variant="bodyStrong">{I18n.t('albums.balances.group_spending')}</Text>
           {currencies.map((currency) => {
