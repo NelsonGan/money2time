@@ -22,7 +22,7 @@ import {
   isAlbumCategoryKey,
 } from './groupPlan';
 
-export { ALBUM_CATEGORIES, ALBUM_CATEGORY_OTHER, type AlbumCategoryKey, isAlbumCategoryKey };
+export { type AlbumCategoryKey, isAlbumCategoryKey };
 
 /** The quick-entry bucket → category overrides (`quickEntryPrefs.categoryMap`). */
 export type CategoryMap = Partial<Record<string, string>>;

@@ -19,7 +19,7 @@ import {
 } from './albumCategories';
 
 /** The row of an album's entries with no category. */
-export const UNCATEGORIZED_ROW = '__uncategorized__';
+const UNCATEGORIZED_ROW = '__uncategorized__';
 
 export interface AlbumCategoryRow {
   id: string;
