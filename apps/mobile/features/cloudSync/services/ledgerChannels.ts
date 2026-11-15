@@ -55,7 +55,7 @@ function channelOfLedger(ledgerId: string | null): string {
 
 /**
  * The channel a row syncs on. The two kinds of share never cross: a shared
- * album's database carries its group's four tables and nothing else, and a
+ * album's database carries its group's tables and nothing else, and a
  * shared ledger's carries none of them. So whoever can write to an album's
  * database (anyone in it) cannot send a ledger, an entry or an account into
  * this phone, whatever `ledger_id` the row claims.

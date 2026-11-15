@@ -10,12 +10,12 @@
 
 import { CloudSyncApiError } from '~/features/cloudSync/services/cloudSyncApi';
 import { sharedAlbumFor } from '~/features/cloudSync/services/sharedLedgerStore';
-import { sharedLedgerSync } from '~/features/cloudSync/services/sharedLedgerSync';
 import { getSQLite } from '~/lib/db/client';
 import { I18n } from '~/lib/i18n';
 import { newId, nowIso } from '~/utils/id';
 
 import {
+  GROUP_TABLES,
   type GroupState,
   GroupWriteError,
   MAX_MEMBER_ROWS,
@@ -29,7 +29,8 @@ import {
 } from '../lib/groupPlan';
 import type { GroupRowWrite } from '../lib/groupRows';
 
-const SAFE_TABLE = /^album_(members|expenses|settlements|groups|activity)$/;
+/** The group's tables: the only ones a change names, checked before any SQL names one. */
+const SAFE_TABLE = new Set<string>(GROUP_TABLES);
 
 const columnCache = new Map<string, Set<string>>();
 
@@ -52,7 +53,7 @@ function columnsOf(table: string): Set<string> {
  * for). Only the group's own rows: an id is the group's to choose, so a row
  * of another group is never reached through it.
  */
-export function loadGroupState(groupId: string, request: WriteRequest): GroupState {
+function loadGroupState(groupId: string, request: WriteRequest): GroupState {
   const db = getSQLite();
   const members: StoredRow[] = db
     .getAllSync<Row>(`SELECT * FROM album_members WHERE ledger_id = ? LIMIT ${MAX_MEMBER_ROWS}`, [
@@ -63,7 +64,7 @@ export function loadGroupState(groupId: string, request: WriteRequest): GroupSta
   for (const row of members) rows.set(rowKey(row.table, row.id), row);
   const wanted = new Map<string, Set<string>>();
   const want = (table: unknown, id: unknown) => {
-    if (typeof table !== 'string' || typeof id !== 'string' || !SAFE_TABLE.test(table)) return;
+    if (typeof table !== 'string' || typeof id !== 'string' || !SAFE_TABLE.has(table)) return;
     if (!wanted.has(table)) wanted.set(table, new Set());
     wanted.get(table)!.add(id);
   };
@@ -102,7 +103,7 @@ function toValue(value: unknown): Value {
  * Cloud Sync sends them. A row id held by another group's row is never taken
  * over: the whole change is refused (`bad_row`), log entries included.
  */
-export function applyPlanLocally(groupId: string, plan: Plan): void {
+function applyPlanLocally(groupId: string, plan: Plan): void {
   if (!plan.writes.length) return;
   const db = getSQLite();
   db.withTransactionSync(() => {
@@ -112,7 +113,7 @@ export function applyPlanLocally(groupId: string, plan: Plan): void {
 
 function writeRow(groupId: string, write: PlannedWrite): void {
   const columns = columnsOf(write.table);
-  if (!SAFE_TABLE.test(write.table) || !columns.size) throw new GroupWriteError('bad_row');
+  if (!SAFE_TABLE.has(write.table) || !columns.size) throw new GroupWriteError('bad_row');
   const data: Row = { ...write.data, id: write.id, ledger_id: groupId };
   const names = Object.keys(data).filter((name) => columns.has(name));
   const updates = names.filter((name) => name !== 'id');
@@ -153,16 +154,6 @@ export async function writeGroup(
   applyPlanLocally(groupId, plan);
 }
 
-/**
- * Puts the user on the album's list as themselves (joining, or starting it).
- * Written by the Worker, as for someone joining on the website, so two people
- * joining at once never take one name; the album's channel then brings it
- * down. Needs a connection, as joining does.
- */
-export async function joinGroup(groupId: string, name: string): Promise<void> {
-  await sharedLedgerSync.joinAlbumGroup(groupId, name);
-}
-
 /** Why a change to a shared album did not go, in words. */
 export function groupWriteMessage(error: unknown): string {
   if (error instanceof GroupWriteError && error.code === 'not_member') {
@@ -181,6 +172,6 @@ export function isExpectedGroupWriteError(error: unknown): boolean {
   }
   return (
     error instanceof CloudSyncApiError &&
-    ['network', 'not_member', 'not_found', 'unauthorized', 'name_taken'].includes(error.code)
+    ['network', 'not_found', 'unauthorized'].includes(error.code)
   );
 }

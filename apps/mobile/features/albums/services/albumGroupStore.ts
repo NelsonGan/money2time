@@ -8,12 +8,13 @@ import { sharedLedgerFor } from '~/features/cloudSync/services/sharedLedgerStore
 import { getSQLite } from '~/lib/db/client';
 import { DEFAULT_LEDGER_ID } from '~/lib/db/ledgerScope';
 import { I18n } from '~/lib/i18n';
-import { albumGroupsRepository, GROUP_COVER_PATH } from '~/lib/repositories/albumGroupsRepository';
+import { albumGroupsRepository } from '~/lib/repositories/albumGroupsRepository';
 import { getAlbumCoverUri } from '~/services/userAssets';
 import type { AlbumActivity, AlbumExpense, AlbumMember, AlbumSettlement } from '~/types';
 import { nowIso } from '~/utils/id';
 
 import { cleanPersonName } from '../lib/albumPeople';
+import { GROUP_COVER_PATH } from '../lib/groupPlan';
 
 const cache = new Map<string, AlbumMember[]>();
 const expenseCache = new Map<string, AlbumExpense[]>();
@@ -138,14 +139,13 @@ interface AlbumRow {
   id: string;
   ledger_id: string;
   name: string;
-  split_with_json: string | null;
   cover_photo_uri: string | null;
   deleted_at: string | null;
 }
 
 function albumRow(albumId: string): AlbumRow | null {
   return getSQLite().getFirstSync<AlbumRow>(
-    'SELECT id, ledger_id, name, split_with_json, cover_photo_uri, deleted_at FROM albums WHERE id = ?',
+    'SELECT id, ledger_id, name, cover_photo_uri, deleted_at FROM albums WHERE id = ?',
     [albumId],
   );
 }
@@ -174,7 +174,8 @@ export function mainLedgerTakesSharedAlbums(): boolean {
  * The album a group this phone joined shows as: made here, with the group's
  * id, in the user's main ledger (`mainLedgerTakesSharedAlbums`). Left alone
  * when it is already here, so two phones of one person agree on it once their
- * own data syncs; one deleted here and then joined again comes back.
+ * own data syncs; one deleted here and then joined again comes back, with the
+ * entries it held.
  */
 export function ensureLocalAlbum(share: { ledgerId: string; name: string | null }): void {
   const now = nowIso();
@@ -182,10 +183,20 @@ export function ensureLocalAlbum(share: { ledgerId: string; name: string | null 
   const existing = albumRow(share.ledgerId);
   if (existing) {
     if (existing.deleted_at) {
-      db.runSync('UPDATE albums SET deleted_at = NULL, updated_at = ? WHERE id = ?', [
-        now,
-        share.ledgerId,
-      ]);
+      db.withTransactionSync(() => {
+        db.runSync('UPDATE albums SET deleted_at = NULL, updated_at = ? WHERE id = ?', [
+          now,
+          share.ledgerId,
+        ]);
+        // Its entries come back with it (deleting the album stamped their
+        // links with the same time), so the group's bills find the user's
+        // own entries again rather than leaving them outside the album.
+        db.runSync(
+          `UPDATE album_transactions SET deleted_at = NULL, updated_at = ?
+           WHERE album_id = ? AND deleted_at = ?`,
+          [now, share.ledgerId, existing.deleted_at],
+        );
+      });
     }
     return;
   }

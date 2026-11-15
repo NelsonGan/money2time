@@ -850,8 +850,6 @@ export interface AlbumStats {
   endDate: string | null;
 }
 
-export interface AlbumWithStats extends Album, AlbumStats {}
-
 /**
  * A tracked possession whose effective daily cost (price ÷ days owned) shrinks
  * the longer it is kept. Standalone — items never create transactions.

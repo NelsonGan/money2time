@@ -3073,6 +3073,8 @@ const de = {
       leave_title: '{{name}} verlassen?',
       leave_message:
         'Du behältst das Album mit deinen eigenen Einträgen, aber es wird nicht mehr aktualisiert.',
+      delete_leave_message:
+        'Du verlässt es damit auch. Die anderen behalten das Album und seine Rechnungen.',
       limit: 'Du kannst bis zu {{max}} Alben gleichzeitig teilen.',
       full: 'Bis zu {{max}} Personen können einem Album beitreten.',
       sign_in: 'Melde dich an, um dieses Album zu teilen.',
@@ -3143,6 +3145,7 @@ const de = {
       paid: '{{from}} → {{to}}: {{money}} gezahlt',
       paid_even: '{{from}} → {{to}}: {{money}} zum Ausgleich gezahlt',
       undid_payment: '{{actor}}: Zahlung {{from}} → {{to}} über {{money}} rückgängig gemacht',
+      undid_own_payment: '{{actor}}: Zahlung an {{to}} über {{money}} rückgängig gemacht',
       recorded_by: 'Erfasst von {{actor}}',
       joined: '{{name}}: dem Album beigetreten',
       started: '{{name}} hat das Album erstellt',

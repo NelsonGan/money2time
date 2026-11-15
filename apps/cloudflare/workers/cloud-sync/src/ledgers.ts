@@ -832,9 +832,9 @@ async function albumRead(
  * by the Worker (src/albumGroups.ts) by the app's rules. `{action: 'join',
  * name}` puts the user on the album's list as themselves (from the app or the
  * website); `{action: 'write', rows}` writes bills, payments, a rename or the
- * settings, for the website (`via: 'web'`): phones write their changes
- * through Cloud Sync. Answers with the rows written; everyone's phones are
- * told to sync.
+ * settings, for the website (`via: 'web'`) and app versions from before
+ * phones wrote their album through Cloud Sync. Answers with the rows written
+ * (those versions apply them at once); everyone's phones are told to sync.
  */
 async function albumWrite(
   env: Env,

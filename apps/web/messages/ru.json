@@ -1369,6 +1369,7 @@
         "paid": "{from} → {to}: оплачено {money}",
         "paid_even": "{from} → {to}: оплачено {money} для выравнивания",
         "undid_payment": "{actor}: отменён платёж {from} → {to} на {money}",
+        "undid_own_payment": "{actor}: отменён платёж → {to} · {money}",
         "recorded_by": "Записал(а): {actor}",
         "joined": "{name}: вступление в альбом",
         "started": "{name}: создание альбома",

@@ -1369,6 +1369,7 @@
         "paid": "{from} จ่าย {to} {money}",
         "paid_even": "{from} จ่าย {to} {money} เพื่อให้เท่ากัน",
         "undid_payment": "{actor} ยกเลิกการจ่ายจาก {from} ถึง {to} {money}",
+        "undid_own_payment": "{actor} ยกเลิกการจ่าย {money} ให้ {to}",
         "recorded_by": "บันทึกโดย {actor}",
         "joined": "{name} เข้าร่วมอัลบั้ม",
         "started": "{name} สร้างอัลบั้ม",

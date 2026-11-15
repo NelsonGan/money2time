@@ -208,7 +208,7 @@ export function describeActivity(entry: WebAlbumActivityRow, ctx: ActivityContex
       const values = { actor, from: who(payment.from), to: who(payment.to, false), money: ctx.money(payment.amount, payment.currency) };
       // Who recorded it, when it moved the user's money and was not the payer's own word.
       const recordedBy = (payment.from === ctx.selfId || payment.to === ctx.selfId) && actorId !== payment.from ? t("recorded_by", { actor }) : null;
-      if (entry.kind === "payment_undone") return line(t("undid_payment", values), recordedBy);
+      if (entry.kind === "payment_undone") return line(t(actorId === payment.from ? "undid_own_payment" : "undid_payment", values), recordedBy);
       return line(t(payment.even ? "paid_even" : "paid", values), recordedBy);
     }
     case "member_joined":

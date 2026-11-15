@@ -64,7 +64,6 @@ import {
 import {
   groupWriteMessage,
   isExpectedGroupWriteError,
-  joinGroup,
   writeGroup,
 } from '~/features/albums/services/albumGroupWrites';
 import { parsePaymentAlertPrefs, serializePaymentAlertPrefs } from '~/features/autoLog/lib/prefs';
@@ -86,6 +85,7 @@ import {
   sharedAlbumFor,
   sharedLedgerFor,
 } from '~/features/cloudSync/services/sharedLedgerStore';
+import { sharedLedgerSync } from '~/features/cloudSync/services/sharedLedgerSync';
 import {
   buildInstalmentPlans,
   frequencyOfSchedule,
@@ -4125,7 +4125,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           !joiningGroupsRef.current.has(groupId)
         ) {
           joiningGroupsRef.current.add(groupId);
-          void joinGroup(groupId, ownDisplayName() ?? I18n.t('albums.people.unnamed'))
+          void sharedLedgerSync
+            .joinAlbumGroup(groupId, ownDisplayName() ?? I18n.t('albums.people.unnamed'))
             .then(() => {
               projectGroup(groupId, env);
               afterGroupWrite();
@@ -4264,7 +4265,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       rows: AlbumBillRowInput[],
       existingId?: string,
     ): Promise<{ id: string; mine: boolean } | null> => {
-      // What stops a save before it is sent says so, as the Worker's refusals do.
+      // What stops a save before it is written says so, as the album's rules do.
       const refuse = (message: string) => {
         Alert.alert(message);
         return null;

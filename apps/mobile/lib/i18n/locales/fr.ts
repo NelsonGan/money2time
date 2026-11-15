@@ -3068,6 +3068,7 @@ const fr = {
       leave_title: 'Quitter {{name}} ?',
       leave_message:
         "Vous gardez l'album avec vos propres écritures, mais il ne se met plus à jour.",
+      delete_leave_message: 'Vous le quittez aussi. Les autres gardent l’album et ses dépenses.',
       limit: "Vous pouvez partager jusqu'à {{max}} albums à la fois.",
       full: "Jusqu'à {{max}} personnes peuvent rejoindre un album.",
       sign_in: 'Connectez-vous pour partager cet album.',
@@ -3139,6 +3140,7 @@ const fr = {
       paid: '{{from}} → {{to}} : paiement de {{money}}',
       paid_even: '{{from}} → {{to}} : paiement de {{money}} pour équilibrer',
       undid_payment: '{{actor}} : paiement {{from}} → {{to}} de {{money}} annulé',
+      undid_own_payment: '{{actor}} : paiement à {{to}} de {{money}} annulé',
       recorded_by: 'Enregistré par {{actor}}',
       joined: '{{name}} : arrivée dans l’album',
       started: "{{name}} a créé l'album",

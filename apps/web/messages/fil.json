@@ -1369,6 +1369,7 @@
         "paid": "{from} → {to}: nagbayad ng {money}",
         "paid_even": "{from} → {to}: nagbayad ng {money} para pantay",
         "undid_payment": "{actor}: in-undo ang bayad {from} → {to} na {money}",
+        "undid_own_payment": "{actor} ay nag-undo ng sariling bayad na {money} (→ {to})",
         "recorded_by": "Itinala ni {actor}",
         "joined": "Sumali si {name} sa album",
         "started": "Sinimulan ni {name} ang album",

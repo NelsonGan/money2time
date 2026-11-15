@@ -14,12 +14,16 @@
 // ---------------------------------------------------------------------------
 // Shapes (the app reads them back through lib/repositories/mappers.ts)
 
-const GROUP_ROW_ID = /^[A-Za-z0-9_-]{1,64}$/;
-const GROUP_BILL_ID = /^[A-Za-z0-9_:.-]{1,120}$/;
-const GROUP_SETTLEMENT_ID = /^[A-Za-z0-9_-]{1,64}(\.\d{1,4})?$/;
-const GROUP_CURRENCY = /^[A-Z][A-Z0-9]{1,9}$/;
+/** A member's id, and the account id of someone who joined. */
+export const GROUP_ROW_ID = /^[A-Za-z0-9_-]{1,64}$/;
+/** A bill's id is its payer's entry id, which may be a recurring run's (`rr:<rule>:<day>`). */
+export const GROUP_BILL_ID = /^[A-Za-z0-9_:.-]{1,120}$/;
+/** A settlement's id: a plain id, or one of a batch recorded together (`<batch>.<n>`). */
+export const GROUP_SETTLEMENT_ID = /^[A-Za-z0-9_-]{1,64}(\.\d{1,4})?$/;
+export const GROUP_CURRENCY = /^[A-Z][A-Z0-9]{1,9}$/;
 const GROUP_DAY = /^(\d{4})-(\d{2})-(\d{2})$/;
-const GROUP_COVER_PATH = /^album-covers\/[A-Za-z0-9_-]{1,64}\.[A-Za-z0-9]{1,5}$/;
+/** A cover image of the album-cover store: `album-covers/<id>.<ext>`. */
+export const GROUP_COVER_PATH = /^album-covers\/[A-Za-z0-9_-]{1,64}\.[A-Za-z0-9]{1,5}$/;
 const MAX_AMOUNT = 1e12;
 const MAX_NAME = 40;
 const MAX_NOTE = 500;
@@ -384,7 +388,7 @@ export function planJoin(state: GroupState, ctx: PlanContext, name: string): Pla
 
 /**
  * Someone out of the album (they left, or the owner took them out): their
- * row stays, with its bills, but names no account. `actorUserId`: who did it.
+ * row stays, with its bills, but names no account. `ctx.userId`: who did it.
  */
 export function planLeave(state: GroupState, ctx: PlanContext, leaverUserId: string): Plan {
   const members = membersOf(state);
@@ -655,28 +659,47 @@ export function planWrite(
     if (changed || !before) put('album_groups', ctx.groupId, data);
   }
 
-  // Payments of one act read as one line per pair: "Ben paid Tess RM45".
+  // Payments of one act read as one line per pair: "Ben paid Tess RM45". An
+  // act whose payments (in one currency) come down to one person paying
+  // another, however many bills they run along (paying a simplified debt),
+  // reads as that one payment: "Ben paid Ann RM150", not the four moves it
+  // took between three people.
   const paymentLines = (rows: Row[], kind: ActivityKind) => {
-    const lines = new Map<
-      string,
-      { from: string; to: string; currency: string; amount: number; bills: string[] }
-    >();
+    type Line = { from: string; to: string; currency: string; amount: number; bills: string[] };
+    const byCurrency = new Map<string, Row[]>();
     for (const row of rows) {
-      const key = `${row.from_member}\u0000${row.to_member}\u0000${row.currency}`;
-      const line = lines.get(key) ?? {
-        from: row.from_member as string,
-        to: row.to_member as string,
-        currency: row.currency as string,
-        amount: 0,
-        bills: [],
-      };
-      line.amount += cents(row.amount as number);
-      if (isText(row.expense_id) && !line.bills.includes(row.expense_id)) {
-        line.bills.push(row.expense_id);
-      }
-      lines.set(key, line);
+      const currency = row.currency as string;
+      byCurrency.set(currency, [...(byCurrency.get(currency) ?? []), row]);
     }
-    for (const line of lines.values()) {
+    const lines: Line[] = [];
+    for (const [currency, payments] of byCurrency) {
+      const bills: string[] = [];
+      const net = new Map<string, number>();
+      const pairs = new Map<string, Line>();
+      for (const row of payments) {
+        const from = row.from_member as string;
+        const to = row.to_member as string;
+        const amount = cents(row.amount as number);
+        net.set(from, (net.get(from) ?? 0) - amount);
+        net.set(to, (net.get(to) ?? 0) + amount);
+        const key = `${from}\u0000${to}`;
+        const line = pairs.get(key) ?? { from, to, currency, amount: 0, bills: [] };
+        line.amount += amount;
+        if (isText(row.expense_id) && !line.bills.includes(row.expense_id)) {
+          line.bills.push(row.expense_id);
+        }
+        pairs.set(key, line);
+        if (isText(row.expense_id) && !bills.includes(row.expense_id)) bills.push(row.expense_id);
+      }
+      const payers = [...net].filter(([, amount]) => amount < 0);
+      const payees = [...net].filter(([, amount]) => amount > 0);
+      if (pairs.size > 1 && payers.length === 1 && payees.length === 1) {
+        lines.push({ from: payers[0][0], to: payees[0][0], currency, amount: payees[0][1], bills });
+      } else {
+        lines.push(...pairs.values());
+      }
+    }
+    for (const line of lines) {
       activities.push({
         kind,
         expenseId: line.bills.length === 1 ? line.bills[0] : null,

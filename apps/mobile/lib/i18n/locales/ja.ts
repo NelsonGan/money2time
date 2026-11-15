@@ -3010,6 +3010,8 @@ const ja = {
       leave: 'アルバムから退出',
       leave_title: '{{name}}から退出しますか？',
       leave_message: '自分の記録とともにアルバムは残りますが、更新されなくなります。',
+      delete_leave_message:
+        'あなたはこのアルバムからも抜けます。ほかの人にはアルバムと請求が残ります。',
       limit: '同時に共有できるアルバムは{{max}}件までです。',
       full: '1つのアルバムに参加できるのは{{max}}人までです。',
       sign_in: 'このアルバムを共有するにはサインインしてください。',
@@ -3078,6 +3080,7 @@ const ja = {
       paid: '{{from}}が{{to}}に{{money}}を支払い',
       paid_even: '{{from}}が{{to}}に{{money}}を支払って精算',
       undid_payment: '{{actor}}が{{from}}から{{to}}への{{money}}の支払いを取り消し',
+      undid_own_payment: '{{actor}}が{{to}}への{{money}}の支払いを取り消し',
       recorded_by: '{{actor}}が記録',
       joined: '{{name}}がアルバムに参加',
       started: '{{name}}がアルバムを作成',

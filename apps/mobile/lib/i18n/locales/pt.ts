@@ -3049,6 +3049,7 @@ const pt = {
       leave_title: 'Sair de {{name}}?',
       leave_message:
         'Você fica com o álbum e seus próprios lançamentos, mas ele não é mais atualizado.',
+      delete_leave_message: 'Você também sai dele. Os outros mantêm o álbum e as contas.',
       limit: 'Você pode compartilhar até {{max}} álbuns por vez.',
       full: 'Até {{max}} pessoas podem entrar em um álbum.',
       sign_in: 'Entre para compartilhar este álbum.',
@@ -3119,6 +3120,7 @@ const pt = {
       paid: '{{from}} pagou {{money}} a {{to}}',
       paid_even: '{{from}} pagou {{money}} a {{to}} para acertar',
       undid_payment: '{{actor}} desfez o pagamento de {{money}} de {{from}} a {{to}}',
+      undid_own_payment: '{{actor}} desfez o pagamento de {{money}} a {{to}}',
       recorded_by: 'Registrado por {{actor}}',
       joined: '{{name}} entrou no álbum',
       started: '{{name}} criou o álbum',

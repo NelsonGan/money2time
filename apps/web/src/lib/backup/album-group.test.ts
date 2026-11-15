@@ -67,6 +67,8 @@ const WORDS: Record<string, string> = {
   your_share_gone: "Your share of {money} is gone",
   they_paid: "{name} paid it now",
   paid: "{from} paid {to} {money}",
+  undid_payment: "{actor} undid {from} paying {to} {money}",
+  undid_own_payment: "{actor} undid paying {to} {money}",
   recorded_by: "Recorded by {actor}",
   joined: "{name} joined the album",
   started: "{name} started the album",
@@ -136,6 +138,8 @@ test("describeActivity words payments, members and kinds from a later app", () =
   assert.equal(paid.mine, "Recorded by Tess");
   // The payer's own word needs no "Recorded by".
   assert.equal(describeActivity(entry({ kind: "payment_recorded", payment: { from: "tess", to: "me", currency: "MYR", amount: 15 } }), ctx()).mine, null);
+  // Undone by the payer: "Tess undid paying you", not "Tess undid Tess paying you".
+  assert.equal(describeActivity(entry({ kind: "payment_undone", payment: { from: "tess", to: "me", currency: "MYR", amount: 15 } }), ctx()).text, "Tess undid paying you RM15");
   assert.equal(describeActivity(entry({ kind: "member_joined", member_id: "tess" }), ctx()).text, "Tess joined the album");
   assert.equal(describeActivity(entry({ kind: "member_joined", member_id: "tess", started: true }), ctx()).text, "Tess started the album");
   assert.equal(describeActivity(entry({ kind: "from_the_future" }), ctx()).text, "Tess changed the album");

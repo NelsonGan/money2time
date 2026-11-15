@@ -1369,6 +1369,7 @@
         "paid": "{from} 付给 {to} {money}",
         "paid_even": "{from} 付给 {to} {money} 以结清",
         "undid_payment": "{actor} 撤销了 {from} 付给 {to} 的 {money}",
+        "undid_own_payment": "{actor} 撤销了付给 {to} 的 {money}",
         "recorded_by": "由 {actor} 记录",
         "joined": "{name} 加入了相册",
         "started": "{name} 创建了相册",

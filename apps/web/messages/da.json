@@ -1369,6 +1369,7 @@
         "paid": "{from} betalte {to} {money}",
         "paid_even": "{from} betalte {to} {money} for at udligne",
         "undid_payment": "{actor} fortrød, at {from} betalte {to} {money}",
+        "undid_own_payment": "{actor} fortrød sin betaling til {to} på {money}",
         "recorded_by": "Registreret af {actor}",
         "joined": "{name} kom med i albummet",
         "started": "{name} oprettede albummet",

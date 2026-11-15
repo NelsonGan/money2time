@@ -169,7 +169,11 @@ export function describeActivity(entry: AlbumActivity, ctx: ActivityContext): Ac
           ? t('recorded_by', { actor })
           : null;
       if (entry.kind === 'payment_undone') {
-        // "Tess undid you paying Ben": the payer is mid-sentence here.
+        // "Ben undid paying you", or "Tess undid you paying Ben": the payer
+        // is mid-sentence here.
+        if (entry.actorMemberId === payment.from) {
+          return line(t('undid_own_payment', values), recordedBy);
+        }
         return line(t('undid_payment', { ...values, from: who(payment.from, false) }), recordedBy);
       }
       return line(t(payment.even ? 'paid_even' : 'paid', values), recordedBy);

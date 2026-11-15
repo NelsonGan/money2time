@@ -33,31 +33,17 @@ import {
 import { json } from './http';
 
 export {
-  authorStamp,
-  cleanMemberName,
-  GROUP_TABLES,
   GroupWriteError,
-  MAX_WRITE_ROWS,
   memberRowId,
-  planJoin,
   planLeave,
   planWrite,
-  rowKey,
-  WEB_AUTHOR_PREFIX,
-} from './groupPlan.generated';
-export type {
-  ActivityKind,
-  GroupState,
-  Member,
-  Plan,
-  PlannedWrite,
-  WriteRequest,
+  type WriteRequest,
 } from './groupPlan.generated';
 
 // ---------------------------------------------------------------------------
 // The group's database
 
-export interface Statement {
+interface Statement {
   sql: string;
   args: (string | number | null)[];
 }
@@ -70,7 +56,7 @@ export interface GroupDb {
 }
 
 /** What the Worker read, with each row's revision (`rowKey` to `rev`) for its guard. */
-export interface LoadedState extends GroupState {
+interface LoadedState extends GroupState {
   revs: Map<string, string>;
   /** Every member row and its revision, as read: a join elsewhere changes it. */
   membersStamp: string;
@@ -81,7 +67,7 @@ const MEMBERS_STAMP_SQL = `COALESCE((SELECT group_concat(row_id || ':' || rev, '
   (SELECT row_id, rev FROM sync_rows WHERE table_name = 'album_members' ORDER BY row_id)), '')`;
 
 /** Reads the group's members and the rows a write names (with the bills its payments are for). */
-export async function loadState(db: GroupDb, request: WriteRequest | null): Promise<LoadedState> {
+async function loadState(db: GroupDb, request: WriteRequest | null): Promise<LoadedState> {
   const keys: { table: string; id: string }[] = [];
   for (const item of request?.rows ?? []) {
     const id = item?.row?.id;
@@ -131,12 +117,12 @@ export async function loadState(db: GroupDb, request: WriteRequest | null): Prom
 }
 
 /** The newest log entries the website is sent; older ones stay in the database. */
-export const MAX_READ_ACTIVITY = 1000;
+const MAX_READ_ACTIVITY = 1000;
 /** Bills and payments the website is sent at most: far past any trip. */
 const MAX_READ_ROWS = 20000;
 
 /** One stored row of a group, as the website reads it. */
-export interface GroupRow {
+interface GroupRow {
   table: GroupTable;
   id: string;
   data: Row;
@@ -200,7 +186,7 @@ function workerRev(index: number, nowMs: number, salt: string): string {
  * time would otherwise take the same name), so a change that landed meanwhile
  * is never overwritten or planned past. Null when one had.
  */
-export async function commitPlan(
+async function commitPlan(
   db: GroupDb,
   plan: Plan,
   read: Pick<LoadedState, 'revs' | 'membersStamp'>,

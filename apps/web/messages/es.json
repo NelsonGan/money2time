@@ -1369,6 +1369,7 @@
         "paid": "{from} → {to}: {money} pagado",
         "paid_even": "{from} → {to}: {money} pagado para igualar",
         "undid_payment": "{actor}: deshizo el pago {from} → {to} de {money}",
+        "undid_own_payment": "{actor}: pago a {to} de {money} deshecho",
         "recorded_by": "Registrado por {actor}",
         "joined": "{name} se unió al álbum",
         "started": "{name} creó el álbum",

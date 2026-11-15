@@ -2225,8 +2225,10 @@ Worker side is the cloud-sync Worker's `src/albumGroups.ts`, with a copy of
   already an album of another ledger is refused. The joiner is put on the
   list under their own name (a number added if it is taken: "Ben 2") as soon
   as the group's people have come down (`syncAlbumGroups` asks the Worker,
-  `joinGroup`), and the log says they joined. An album deleted here and
-  joined again comes back.
+  `joinAlbumGroup`), and the log says they joined. An album deleted here and
+  joined again comes back with the entries it held (`ensureLocalAlbum`
+  restores the links its delete stamped), so the group's bills find the
+  user's own entries again.
 - **A new bill starts split.** In a shared album a new expense opens split
   evenly between the user and everyone who joined, paid by the user. Split
   Bill's **Paid by** row lists the user and everyone in the album: anyone of
@@ -2403,7 +2405,8 @@ Worker side is the cloud-sync Worker's `src/albumGroups.ts`, with a copy of
   had until the new image has downloaded. The album's name stays each
   person's own.
 - **Leaving and stopping.** A member leaves from the People page (which then
-  closes, back to the album) or by deleting the album; the owner can take
+  closes, back to the album) or by deleting the album (its confirmation says
+  so: "You leave it too. The others keep the album and its bills."); the owner can take
   them out of the share. **Their row and their bills stay in the group**, so
   nobody else's bills or balances change; they read as Left, new bills leave
   them out, and anyone still in the album records a payment from them. The
@@ -2481,7 +2484,10 @@ their own.
     member it is about, and `data_json` with the before and after of what
     changed (a bill's amount, day, title, currency, payer and shares; a name;
     Simplify) or the payments recorded (one entry per pair and currency of
-    one act). Only ever added; nothing personal (account, category, notes,
+    one act; one entry in all when the act comes down to one person paying
+    another, as paying a simplified debt along several bills does: "Ben paid
+    you RM150", not the four moves it took). An undo by the payer reads "Ben
+    undid paying you". Only ever added; nothing personal (account, category, notes,
     receipt, mood) is in it. Read through `toAlbumActivity`.
   - `album_groups` (migration `091`): the group's settings, one row:
     `simplify_debts`, and `cover_photo_uri` (migration `092`). The row is

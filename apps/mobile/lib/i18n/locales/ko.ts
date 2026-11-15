@@ -2989,6 +2989,8 @@ const ko = {
       leave: '앨범 나가기',
       leave_title: '{{name}}에서 나갈까요?',
       leave_message: '내 내역과 함께 앨범은 남지만 더 이상 업데이트되지 않아요.',
+      delete_leave_message:
+        '앨범에서도 나가게 돼요. 다른 사람들에게는 앨범과 청구 내역이 그대로 남아요.',
       limit: '한 번에 최대 {{max}}개의 앨범을 공유할 수 있어요.',
       full: '앨범 하나에는 최대 {{max}}명이 참여할 수 있어요.',
       sign_in: '이 앨범을 공유하려면 로그인하세요.',
@@ -3056,6 +3058,7 @@ const ko = {
       paid: '{{from}} → {{to}} {{money}} 정산',
       paid_even: '{{from}} → {{to}} {{money}} 정산 (잔액 맞춤)',
       undid_payment: '{{actor}}: {{from}} → {{to}} {{money}} 정산 취소',
+      undid_own_payment: '{{actor}}: {{to}}에게 보낸 {{money}} 정산 취소',
       recorded_by: '{{actor}} 님이 기록',
       joined: '{{name}}: 앨범에 참여',
       started: '{{name}} 님이 앨범을 만듦',

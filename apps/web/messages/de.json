@@ -1369,6 +1369,7 @@
         "paid": "{from} → {to}: {money} bezahlt",
         "paid_even": "{from} → {to}: {money} zum Ausgleich bezahlt",
         "undid_payment": "{actor}: Zahlung {from} → {to} über {money} rückgängig gemacht",
+        "undid_own_payment": "{actor}: Zahlung an {to} über {money} rückgängig gemacht",
         "recorded_by": "Erfasst von {actor}",
         "joined": "{name} ist dem Album beigetreten",
         "started": "{name} hat das Album erstellt",

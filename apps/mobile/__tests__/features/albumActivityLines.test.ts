@@ -129,6 +129,14 @@ describe('the activity log, one line each', () => {
       payment: { from: 'tess', to: 'me', currency: 'MYR', amount: 10, bills: [], even: false },
     });
     expect(describeActivity(toMe, ctx)).toMatchObject({ text: 'Tess paid you RM10', mine: null });
+    // Undone by the payer: "Tess undid paying you", not "Tess undid Tess paying you".
+    expect(describeActivity({ ...toMe, kind: 'payment_undone' }, ctx).text).toBe(
+      'Tess undid paying you RM10',
+    );
+    expect(describeActivity({ ...mine, kind: 'payment_undone' }, ctx)).toMatchObject({
+      text: 'Tess undid you paying Ben RM10',
+      mine: 'Recorded by Tess',
+    });
     expect(
       describeActivity(entry({ kind: 'member_joined', memberId: 'ben', expenseId: null }), ctx)
         .text,

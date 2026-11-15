@@ -497,10 +497,13 @@ export function AlbumDetailScreen({
 
   const handleDelete = useCallback(() => {
     void triggerHaptic('warning');
-    const body =
-      group.share?.role === 'owner'
-        ? `${I18n.t('albums.delete_body')} ${I18n.t('albums.share.stop_message')}`
-        : I18n.t('albums.delete_body');
+    // Deleting a shared album ends it for the owner, and takes a member out.
+    const role = group.share?.role;
+    const body = role
+      ? `${I18n.t('albums.delete_body')} ${I18n.t(
+          role === 'owner' ? 'albums.share.stop_message' : 'albums.share.delete_leave_message',
+        )}`
+      : I18n.t('albums.delete_body');
     Alert.alert(I18n.t('albums.delete_title'), body, [
       { text: I18n.t('common.cancel'), style: 'cancel' },
       {

@@ -1369,6 +1369,7 @@
         "paid": "{from} → {to}: {money} चुकाए",
         "paid_even": "{from} → {to}: बराबर करने के लिए {money} चुकाए",
         "undid_payment": "{actor}: {from} → {to} {money} का भुगतान वापस लिया",
+        "undid_own_payment": "{actor} ने {to} को किया {money} का भुगतान वापस लिया",
         "recorded_by": "दर्ज किया: {actor}",
         "joined": "{name} एल्बम में जुड़े",
         "started": "{name} ने एल्बम शुरू किया",

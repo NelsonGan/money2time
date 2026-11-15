@@ -326,6 +326,55 @@ test('payments of one act are one line per pair, and are only ever undone', asyn
   ]);
 });
 
+test('a simplified debt paid along several bills reads as one payment', async () => {
+  const { group, rows } = await trip();
+  const twoBills = [
+    bill('u-bali-owner', { 'u-bali-owner': 30, 'u-bali-ben': 30, 'u-bali-tess': 10 }),
+    {
+      ...bill('u-bali-tess', { 'u-bali-tess': 10, 'u-bali-ben': 10 }),
+      row: { ...bill('u-bali-tess', { 'u-bali-tess': 10, 'u-bali-ben': 10 }).row, id: 'taxi' },
+    },
+  ];
+  await write(group, 'owner', { rows: twoBills });
+  const pay = (id: string, bill: string, from: string, to: string, amount: number) => ({
+    table: 'album_settlements',
+    row: {
+      id,
+      expense_id: bill,
+      from_member: from,
+      to_member: to,
+      amount,
+      currency: 'MYR',
+      date: '2026-11-14',
+    },
+  });
+  const payments = () =>
+    rows('album_activity')
+      .filter((a) => a.kind === 'payment_recorded')
+      .map((a) => JSON.parse(a.data_json));
+  // Ben pays Nelson 40, simplified: 30 on the dinner, 10 to Tess on the taxi,
+  // and Tess's 10 on the dinner passed on to Nelson. Tess comes out even.
+  await write(group, 'ben', {
+    rows: [
+      pay('s.0', 'dinner', 'u-bali-ben', 'u-bali-owner', 30),
+      pay('s.1', 'dinner', 'u-bali-tess', 'u-bali-owner', 10),
+      pay('s.2', 'taxi', 'u-bali-ben', 'u-bali-tess', 10),
+    ],
+  });
+  assert.deepEqual(
+    payments().map((p) => [p.from, p.to, p.amount, p.bills]),
+    [['u-bali-ben', 'u-bali-owner', 40, ['dinner', 'taxi']]],
+  );
+  // Payments that leave more than one person paid stay one line per pair.
+  await write(group, 'tess', {
+    rows: [
+      pay('t.0', 'dinner', 'u-bali-ben', 'u-bali-owner', 5),
+      pay('t.1', 'taxi', 'u-bali-ben', 'u-bali-tess', 5),
+    ],
+  });
+  assert.equal(payments().length, 3);
+});
+
 test('someone who left changes nothing and is put on no new bill, but stays on old ones', async () => {
   const { group, rows } = await trip();
   await write(group, 'owner', {

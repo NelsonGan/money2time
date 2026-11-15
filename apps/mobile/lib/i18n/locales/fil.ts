@@ -3072,6 +3072,7 @@ const fil = {
       leave_title: 'Umalis sa {{name}}?',
       leave_message:
         'Mananatili sa iyo ang album kasama ang sarili mong mga entry, pero hindi na ito mag-a-update.',
+      delete_leave_message: 'Aalis ka rin dito. Mananatili sa iba ang album at ang mga bill nito.',
       limit: 'Hanggang {{max}} album ang puwede mong ibahagi nang sabay.',
       full: 'Hanggang {{max}} tao ang puwedeng sumali sa isang album.',
       sign_in: 'Mag-sign in para i-share ang album na ito.',
@@ -3143,6 +3144,7 @@ const fil = {
       paid: '{{from}} → {{to}}: nagbayad ng {{money}}',
       paid_even: '{{from}} → {{to}}: nagbayad ng {{money}} para pantay na',
       undid_payment: '{{actor}} ay nag-undo ng bayad na {{money}} ({{from}} → {{to}})',
+      undid_own_payment: '{{actor}} ay nag-undo ng sariling bayad na {{money}} (→ {{to}})',
       recorded_by: 'Ni-record ni {{actor}}',
       joined: '{{name}} ay sumali sa album',
       started: 'Sinimulan ni {{name}} ang album',

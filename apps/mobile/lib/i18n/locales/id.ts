@@ -3044,6 +3044,8 @@ const id = {
       leave_title: 'Keluar dari {{name}}?',
       leave_message:
         'Kamu tetap memiliki album dengan catatanmu sendiri, tetapi tidak lagi diperbarui.',
+      delete_leave_message:
+        'Kamu juga keluar dari album ini. Yang lain tetap memiliki album dan tagihannya.',
       limit: 'Kamu bisa membagikan hingga {{max}} album sekaligus.',
       full: 'Hingga {{max}} orang bisa bergabung ke satu album.',
       sign_in: 'Masuk untuk membagikan album ini.',
@@ -3114,6 +3116,7 @@ const id = {
       paid: '{{from}} membayar {{to}} {{money}}',
       paid_even: '{{from}} membayar {{to}} {{money}} untuk melunasi',
       undid_payment: '{{actor}} membatalkan pembayaran {{money}} dari {{from}} ke {{to}}',
+      undid_own_payment: '{{actor}} membatalkan pembayaran {{money}} ke {{to}}',
       recorded_by: 'Dicatat oleh {{actor}}',
       joined: '{{name}} bergabung ke album',
       started: '{{name}} membuat album',

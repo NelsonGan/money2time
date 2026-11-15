@@ -1,4 +1,10 @@
 import { DEFAULT_APP_ICON_ID, isAppIconId } from '~/constants/appIcons';
+import {
+  GROUP_BILL_ID,
+  GROUP_CURRENCY,
+  GROUP_ROW_ID,
+  GROUP_SETTLEMENT_ID,
+} from '~/features/albums/lib/groupPlan';
 import { DEFAULT_LEDGER_ID } from '~/lib/db/ledgerScope';
 import type {
   AccountGroupRow,
@@ -314,13 +320,6 @@ export function toAlbum(row: AlbumRow): Album {
 // not what this app would have written maps to null and is left out, as if it
 // were not there: nothing downstream has to doubt an id, an amount or a date.
 
-/** A member's id, and the account id of someone who joined. */
-const GROUP_ROW_ID = /^[A-Za-z0-9_-]{1,64}$/;
-/** A bill's id is its payer's entry id, which may be a recurring run's (`rr:<rule>:<day>`). */
-const GROUP_BILL_ID = /^[A-Za-z0-9_:.-]{1,120}$/;
-/** A settlement's id: a plain id, or one of a batch recorded together (`<batch>.<n>`). */
-const GROUP_SETTLEMENT_ID = /^[A-Za-z0-9_-]{1,64}(\.\d{1,4})?$/;
-const GROUP_CURRENCY = /^[A-Z][A-Z0-9]{1,9}$/;
 const GROUP_DAY = /^(\d{4})-(\d{2})-(\d{2})(T[0-9:.Z+-]{1,30})?$/;
 const MAX_GROUP_AMOUNT = 1e12;
 const MAX_GROUP_NAME = 40;
@@ -501,7 +500,7 @@ function billSnapshot(value: unknown): AlbumBillSnapshot | null {
   };
 }
 
-/** An activity entry, as the Worker wrote it; null when it is not one this app can show. */
+/** An activity entry, as its writer stored it; null when it is not one this app can show. */
 export function toAlbumActivity(row: AlbumActivityRow): AlbumActivity | null {
   if (!GROUP_ROW_ID.test(row.id) || !ACTIVITY_KINDS.has(row.kind)) return null;
   if (!isGroupTimestamp(row.createdAt)) return null;
