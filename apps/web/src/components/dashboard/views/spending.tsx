@@ -3,16 +3,17 @@
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
+import { lineOf } from "@/lib/backup/album-lines";
 import { dayRange, daysBetween } from "@/lib/backup/dates";
 import type { Tx } from "@/lib/backup/model";
 
-import { breakdown, merchants, monthlyFlows, totals, weekdayIndex, weekdayLabels, type Slice } from "../aggregate";
+import { breakdown, merchants, monthlyFlows, totals, weekdayIndex, weekdayLabels } from "../aggregate";
 import { BarChart } from "../charts/bar-chart";
 import { Donut } from "../charts/donut";
 import { EXPENSE_COLOR, OTHER_COLOR } from "../charts/scale";
 import { Legend } from "../charts/tooltip";
 import { ZERO, addAmt, useDashboard, useFormat, useMonthLabels, usePeriodTxs, type Amt } from "../state";
-import { Card, CategoryGlyph, Delta, Empty, Kpi, RankRow } from "../ui";
+import { Card, CategoryGlyph, Delta, Empty, Kpi, RankRow, SliceGlyph, useSliceName } from "../ui";
 import { TxList } from "./transactions";
 
 export function SpendingView() {
@@ -51,7 +52,7 @@ export function BreakdownView({ kind }: { kind: "spending" | "earning" }) {
   const single = resolved.months.length === 1;
   const { labels, titles } = useMonthLabels(resolved.months);
 
-  // Stacked bars: the six biggest top-level categories, the rest as "Other".
+  // Stacked bars: the six biggest lines (albums and top-level categories), the rest as "Other".
   const stack = useMemo(() => {
     const top = parents.slice(0, 6).map((p) => p.id);
     const buckets = single
@@ -62,7 +63,8 @@ export function BreakdownView({ kind }: { kind: "spending" | "earning" }) {
     for (const tx of rows) {
       const i = index.get(single ? tx.dayKey : tx.month);
       if (i === undefined) continue;
-      const key = top.includes(tx.parentId ?? "__none") ? (tx.parentId ?? "__none") : "__other";
+      const line = lineOf(tx);
+      const key = top.includes(line) ? line : "__other";
       const list = series.get(key)!;
       list[i] = addAmt(list[i], { money: tx.amount, hours: tx.hours });
     }
@@ -82,11 +84,12 @@ export function BreakdownView({ kind }: { kind: "spending" | "earning" }) {
   const flows = useMemo(() => monthlyFlows(rows, resolved.months), [rows, resolved.months]);
 
   const filteredTxs = useMemo<Tx[]>(
-    () => (parentId ? rows.filter((tx) => (tx.parentId ?? "__none") === parentId) : rows),
+    () => (parentId ? rows.filter((tx) => lineOf(tx) === parentId) : rows),
     [rows, parentId],
   );
 
-  const sliceName = (slice: Slice) => slice.name || tc("uncategorized");
+  const sliceName = useSliceName();
+  const sliceOf = (id: string) => parents.find((p) => p.id === id);
   const isSpending = kind === "spending";
 
   return (
@@ -114,7 +117,7 @@ export function BreakdownView({ kind }: { kind: "spending" | "earning" }) {
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.25fr)]">
         <Card
           title={selected ? sliceName(selected) : t("byCategory")}
-          subtitle={selected ? t("subcategories") : t("clickToDrill")}
+          subtitle={selected ? (selected.trip ? t("byCategory") : t("subcategories")) : t("clickToDrill")}
           action={
             selected ? (
               <button type="button" onClick={() => setParentId(null)} className="rounded-full border border-border px-3 py-1 text-[13px] font-bold text-foreground-soft hover:bg-background-subtle">
@@ -154,7 +157,7 @@ export function BreakdownView({ kind }: { kind: "spending" | "earning" }) {
                     key={slice.id}
                     active={hover === slice.id}
                     onClick={selected ? undefined : () => setParentId(slice.id)}
-                    icon={<CategoryGlyph icon={slice.icon} name={sliceName(slice)} color={slice.color} size={28} />}
+                    icon={<SliceGlyph slice={slice} name={sliceName(slice)} size={28} />}
                     name={sliceName(slice)}
                     meta={`${f.percent(shownTotal.money ? slice.amt.money / shownTotal.money : 0)} · ${tc("transactions", { count: slice.count })}`}
                     value={f.value(slice.amt)}
@@ -174,8 +177,8 @@ export function BreakdownView({ kind }: { kind: "spending" | "earning" }) {
             <Legend
               items={[
                 ...stack.top.map((id) => {
-                  const category = model.categories.get(id);
-                  return { label: category?.name ?? tc("uncategorized"), color: category?.color ?? OTHER_COLOR };
+                  const slice = sliceOf(id);
+                  return { label: slice ? sliceName(slice) : tc("uncategorized"), color: slice?.color ?? OTHER_COLOR };
                 }),
                 ...(parents.length > 6 ? [{ label: tc("other"), color: OTHER_COLOR }] : []),
               ]}
@@ -189,11 +192,11 @@ export function BreakdownView({ kind }: { kind: "spending" | "earning" }) {
             labels={single ? stack.buckets.map((d) => String(Number(d.slice(8)))) : labels}
             titles={single ? stack.buckets.map((d) => f.day(d, "long")) : titles}
             series={[...stack.top, ...(parents.length > 6 ? ["__other"] : [])].map((id) => {
-              const category = model.categories.get(id);
+              const slice = sliceOf(id);
               return {
                 key: id,
-                label: id === "__other" ? tc("other") : (category?.name ?? tc("uncategorized")),
-                color: id === "__other" ? OTHER_COLOR : (category?.color ?? OTHER_COLOR),
+                label: id === "__other" ? tc("other") : slice ? sliceName(slice) : tc("uncategorized"),
+                color: id === "__other" ? OTHER_COLOR : (slice?.color ?? OTHER_COLOR),
                 values: stack.series.get(id)!.map((a) => f.pick(a)),
               };
             })}

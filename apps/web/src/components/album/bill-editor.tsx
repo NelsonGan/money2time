@@ -1,16 +1,18 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { useId, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useId, useMemo, useRef, useState, type FormEvent } from "react";
 
 import { cents } from "@/lib/backup/album-group";
+import { ALBUM_CATEGORIES, albumCategoryForText, type AlbumCategoryKey } from "@/lib/album/categories";
 import { billHasPayments, billPeople, MAX_NOTE, type Bill, type Group } from "@/lib/album/group";
 import { balanceSelf, methodOf, readValue, splitCents, splitShares, trimNumber, valuesFor, type SplitInput, type SplitMethod, type SplitProblem } from "@/lib/album/split";
+import { loadKeywords } from "@/lib/album/keywords";
 import { billRow, deletedBillRow, newId, undonePaymentRows } from "@/lib/album/writes";
 import { marketFor } from "@/lib/money";
 
 import type { AlbumActions } from "./album-screen";
-import { Avatar, BILL_CATEGORIES, Button, CategoryIcon, Confirm, Icon, InfoTip, Segmented, Sheet, Switch, currencySymbol, currencyOrder, personColor, today, useCategoryLabel, useDay, useMoney } from "./ui";
+import { Avatar, Button, CategoryIcon, Confirm, Icon, InfoTip, Segmented, Sheet, Switch, currencySymbol, currencyOrder, personColor, today, useCategoryLabel, useDay, useMoney } from "./ui";
 
 const MAX_AMOUNT = 1e12;
 /** Currencies offered when the browser cannot list them. */
@@ -23,8 +25,6 @@ function allCurrencies(): string[] {
     return FALLBACK_CURRENCIES;
   }
 }
-
-type Category = { name: string | null; icon: string | null };
 
 /**
  * A bill of the album, new or changed, as the app's editor and Split Bill
@@ -56,7 +56,29 @@ export function BillEditor({ group, bill, actions, onClose, onSaved }: { group: 
   const [amountText, setAmountText] = useState(bill ? trimNumber(bill.amount) : "");
   const [currency, setCurrency] = useState(bill?.currency ?? latest?.currency ?? marketFor(locale).currency);
   const [note, setNote] = useState(bill?.note ?? "");
-  const [category, setCategory] = useState<Category>(bill ? { name: bill.categoryName, icon: bill.categoryIcon } : { name: "Food", icon: "meal" });
+  const [category, setCategory] = useState<AlbumCategoryKey>(bill?.category ?? "food");
+  // A new bill's title picks its category by the app's keywords ("Lunch" →
+  // Food) until one is picked by hand.
+  const picked = useRef(!!bill);
+  const keywords = useRef<Awaited<ReturnType<typeof loadKeywords>> | null>(null);
+  useEffect(() => {
+    if (bill) return;
+    let live = true;
+    loadKeywords(locale)
+      .then((loaded) => {
+        if (live) keywords.current = loaded;
+      })
+      .catch(() => undefined);
+    return () => {
+      live = false;
+    };
+  }, [bill, locale]);
+  const typeNote = (text: string) => {
+    setNote(text.slice(0, MAX_NOTE));
+    if (picked.current || !keywords.current) return;
+    const tagged = albumCategoryForText(text, keywords.current);
+    if (tagged) setCategory(tagged);
+  };
   const [date, setDate] = useState(bill?.date ?? today());
   const [paidBy, setPaidBy] = useState(bill?.paidBy ?? selfId ?? ordered[0]?.id ?? "");
   const [onBill, setOnBill] = useState<string[]>(() => (bill ? ordered.filter((member) => bill.shares.some((share) => share.memberId === member.id)).map((member) => member.id) : ordered.filter((member) => member.userId).map((member) => member.id)));
@@ -104,7 +126,7 @@ export function BillEditor({ group, bill, actions, onClose, onSaved }: { group: 
     setValues((current) => balanceSelf({ ...input, values: { ...current, [id]: cleaned } }, id));
   };
 
-  const groupChanged = !bill || cents(bill.amount) !== totalCents || bill.currency !== currency || bill.date !== date || bill.paidBy !== paidBy || (bill.note ?? "") !== note.trim() || JSON.stringify(bill.shares.map((s) => [s.memberId, cents(s.amount)]).sort()) !== JSON.stringify(shares.map((s) => [s.memberId, cents(s.amount)]).sort());
+  const groupChanged = !bill || bill.category !== category || cents(bill.amount) !== totalCents || bill.currency !== currency || bill.date !== date || bill.paidBy !== paidBy || (bill.note ?? "") !== note.trim() || JSON.stringify(bill.shares.map((s) => [s.memberId, cents(s.amount)]).sort()) !== JSON.stringify(shares.map((s) => [s.memberId, cents(s.amount)]).sort());
 
   const save = async (event?: FormEvent, confirmed = false) => {
     event?.preventDefault();
@@ -115,7 +137,7 @@ export function BillEditor({ group, bill, actions, onClose, onSaved }: { group: 
       return;
     }
     setBusy(true);
-    const row = billRow({ id: bill?.id ?? newId(), date, note: note.trim() || null, currency, categoryName: category.name, categoryIcon: category.icon, paidBy, shares });
+    const row = billRow({ id: bill?.id ?? newId(), date, note: note.trim() || null, currency, category, paidBy, shares });
     const ok = await actions.write([row], bill ? "bill_edit" : "bill_add");
     setBusy(false);
     if (ok) {
@@ -275,39 +297,36 @@ export function BillEditor({ group, bill, actions, onClose, onSaved }: { group: 
             </div>
             <input
               value={note}
-              onChange={(event) => setNote(event.target.value.slice(0, MAX_NOTE))}
+              onChange={(event) => typeNote(event.target.value)}
               placeholder={t("bill.notePlaceholder")}
               aria-label={t("bill.note")}
               className="mt-1 w-full border-t border-border bg-transparent pt-3 text-[16px] font-semibold text-foreground outline-none placeholder:font-normal placeholder:text-foreground-muted"
             />
           </div>
 
-          {/* Category: the app's defaults; a bill filed under someone's own category keeps it until changed. */}
+          {/* Category: the album's own, the same for everyone in it. */}
           <div>
             <p className="mb-2 px-1 text-[13px] font-bold text-foreground-soft">{t("bill.category")}</p>
             <div className="grid grid-cols-4 gap-2">
-              {BILL_CATEGORIES.map((option) => {
-                const active = category.name === option.name || (!category.name && category.icon === option.icon);
+              {ALBUM_CATEGORIES.map((option) => {
+                const active = category === option.key;
                 return (
                   <button
                     key={option.key}
                     type="button"
                     aria-pressed={active}
-                    onClick={() => setCategory({ name: option.name, icon: option.icon })}
+                    onClick={() => {
+                      picked.current = true;
+                      setCategory(option.key);
+                    }}
                     className={`flex flex-col items-center gap-0.5 rounded-[16px] border px-1 py-1.5 text-[11.5px] font-bold transition-colors ${active ? "border-primary-muted bg-primary-soft text-primary" : "border-transparent bg-background-subtle text-foreground-soft hover:text-foreground"}`}
                   >
                     <CategoryIcon icon={option.icon} name={option.name} size={26} />
-                    <span className="max-w-full truncate">{categoryLabel(option.name, option.icon)}</span>
+                    <span className="max-w-full truncate">{categoryLabel(option.key)}</span>
                   </button>
                 );
               })}
             </div>
-            {category.name && !BILL_CATEGORIES.some((option) => option.name === category.name) ? (
-              <p className="mt-2 flex items-center gap-2 px-1 text-[13px] text-foreground-soft">
-                <CategoryIcon icon={category.icon} name={category.name} size={20} />
-                {t("bill.ownCategory", { name: category.name })}
-              </p>
-            ) : null}
           </div>
 
           {/* The day: one chip, as in the app; the browser's own date picker opens from it. */}

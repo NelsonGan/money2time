@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useId, useState, type ButtonHTMLAttributes, type ReactNode } from "react";
 
 import { CATEGORY_ICON_IDS } from "@/lib/backup/assets.generated";
+import type { AlbumCategoryKey } from "@/lib/album/categories";
 import type { Member } from "@/lib/album/group";
 import { media } from "@/lib/media";
 
@@ -128,32 +129,10 @@ export function AvatarStack({ people, size = 30 }: { people: { id: string; name:
 
 // ------------------------------------------------------------- categories --
 
-/**
- * The app's default expense categories, which a bill made here carries by
- * name and icon: each phone files it under its own category of that name
- * (else that icon, else Other), as it does every shared bill.
- */
-export const BILL_CATEGORIES = [
-  { key: "food", name: "Food", icon: "meal" },
-  { key: "groceries", name: "Groceries", icon: "grocery-basket" },
-  { key: "transport", name: "Transport", icon: "car" },
-  { key: "housing", name: "Housing", icon: "house" },
-  { key: "bills", name: "Bills", icon: "light-bulb" },
-  { key: "healthcare", name: "Healthcare", icon: "medicine" },
-  { key: "shopping", name: "Shopping", icon: "shopping-bag" },
-  { key: "other", name: "Other", icon: "invoice" },
-] as const;
-
-/** A bill's category as words: a default one in the page's language, anyone's own as they named it. */
+/** An album category's name in the page's language (`ALBUM_CATEGORIES`, the same for everyone in the album). */
 export function useCategoryLabel() {
   const t = useTranslations("album.categories");
-  return useCallback(
-    (name: string | null, icon: string | null) => {
-      const known = BILL_CATEGORIES.find((category) => category.name === name || (!name && category.icon === icon));
-      return known ? t(known.key) : (name?.trim() ?? "");
-    },
-    [t],
-  );
+  return useCallback((key: AlbumCategoryKey) => t(key), [t]);
 }
 
 /** A category's clay icon, as the app draws it; its initial when this site has no such icon. */

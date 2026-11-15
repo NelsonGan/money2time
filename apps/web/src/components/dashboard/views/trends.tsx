@@ -3,13 +3,14 @@
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
+import { albumIdOfLine, lineOf } from "@/lib/backup/album-lines";
 import { monthRange, shiftMonthKey } from "@/lib/backup/dates";
 
 import { breakdown } from "../aggregate";
 import { LineChart } from "../charts/line-chart";
 import { HEAT_RAMP } from "../charts/calendar-heatmap";
 import { useDashboard, useFormat, useMonthLabels, usePeriodTxs, ZERO, addAmt, type Amt } from "../state";
-import { Card, CategoryGlyph, Empty, Pill } from "../ui";
+import { Card, Empty, Pill, SliceGlyph, useSliceName } from "../ui";
 
 export function TrendsView() {
   const t = useTranslations("dashboard.trends");
@@ -31,7 +32,8 @@ export function TrendsView() {
     for (const tx of model.txs) {
       const i = tx.spending ? column.get(tx.month) : undefined;
       if (i === undefined) continue;
-      const key = tx.parentId ?? "__none";
+      // An album's spending is its own row, not its categories'.
+      const key = lineOf(tx);
       let row = rows.get(key);
       if (!row) {
         row = months.map(() => ZERO);
@@ -47,7 +49,14 @@ export function TrendsView() {
   const [selected, setSelected] = useState<string | null>(null);
   const focus = (selected && grid.some((row) => row.id === selected) ? selected : null) ?? grid[0]?.id ?? null;
   const focusRow = grid.find((row) => row.id === focus);
-  const focusCategory = focus ? model.categories.get(focus) : null;
+  const sliceName = useSliceName();
+  // A row's name, colour and icon: an album's, else its top-level category's.
+  const lineSlice = (id: string) => {
+    const trip = model.trips.find((item) => item.id === albumIdOfLine(id));
+    const category = trip ? null : model.categories.get(id);
+    return { name: trip?.name ?? category?.name ?? "", icon: category?.icon ?? null, color: trip?.color ?? category?.color ?? "#B1525F", trip };
+  };
+  const focusLine = focus ? lineSlice(focus) : null;
   const elapsed = months.filter((m) => m <= model.currentMonth).length || 1;
   const average = focusRow ? focusRow.values.reduce((s, v) => s + f.pick(v), 0) / elapsed : 0;
 
@@ -67,7 +76,6 @@ export function TrendsView() {
       .slice(0, 8);
   }, [current, previous, model]);
 
-  const name = (id: string) => model.categories.get(id)?.name ?? tc("uncategorized");
 
   return (
     <div className="space-y-5">
@@ -90,15 +98,15 @@ export function TrendsView() {
               </thead>
               <tbody>
                 {grid.map((row) => {
-                  const category = model.categories.get(row.id);
+                  const line = lineSlice(row.id);
                   const max = Math.max(...row.values.map((v) => v.money), 1);
                   const avg = { money: row.values.reduce((s, v) => s + v.money, 0) / elapsed, hours: row.values.reduce((s, v) => s + v.hours, 0) / elapsed };
                   return (
                     <tr key={row.id} className={`cursor-pointer ${focus === row.id ? "outline outline-2 outline-primary/40" : ""}`} onClick={() => setSelected(row.id)}>
                       <td className="sticky left-0 z-10 bg-card pr-2">
                         <span className="flex items-center gap-2 font-bold text-foreground">
-                          <CategoryGlyph icon={category?.icon} name={name(row.id)} color={category?.color} size={22} />
-                          <span className="truncate">{name(row.id)}</span>
+                          <SliceGlyph slice={line} name={sliceName(line)} size={22} />
+                          <span className="truncate">{sliceName(line)}</span>
                         </span>
                       </td>
                       {row.values.map((value, i) => {
@@ -127,9 +135,9 @@ export function TrendsView() {
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
         <Card
-          title={focusCategory?.name ?? tc("uncategorized")}
+          title={focusLine ? sliceName(focusLine) : tc("uncategorized")}
           subtitle={t("lineSubtitle", { amount: f.plain(average) })}
-          action={focusCategory ? <CategoryGlyph icon={focusCategory.icon} name={focusCategory.name} color={focusCategory.color} size={32} /> : null}
+          action={focusLine ? <SliceGlyph slice={focusLine} name={sliceName(focusLine)} size={32} /> : null}
         >
           {focusRow ? (
             <LineChart
@@ -137,7 +145,7 @@ export function TrendsView() {
               titles={titles}
               series={[
                 { key: "avg", label: tc("average"), color: "#94A39F", dashed: true, values: months.map(() => average) },
-                { key: "v", label: focusCategory?.name ?? tc("uncategorized"), color: focusCategory?.color ?? "#B1525F", area: true, values: focusRow.values.map((v) => f.pick(v)) },
+                { key: "v", label: focusLine ? sliceName(focusLine) : tc("uncategorized"), color: focusLine?.color ?? "#B1525F", area: true, values: focusRow.values.map((v) => f.pick(v)) },
               ]}
               format={(v) => f.plain(v)}
               formatAxis={f.axis}
@@ -155,9 +163,9 @@ export function TrendsView() {
             <ul className="space-y-1">
               {movers.map((m) => (
                 <li key={m.id} className="flex items-center gap-3 rounded-2xl px-2 py-2">
-                  <CategoryGlyph icon={m.slice.icon} name={m.slice.name || "?"} color={m.slice.color} size={28} />
+                  <SliceGlyph slice={m.slice} name={m.slice.name || "?"} size={28} />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-[14px] font-bold text-foreground">{m.slice.name || tc("uncategorized")}</p>
+                    <p className="truncate text-[14px] font-bold text-foreground">{sliceName(m.slice)}</p>
                     <p className="tabular text-[12px] text-foreground-soft">
                       {f.value(m.before)} → {f.value(m.now)}
                     </p>

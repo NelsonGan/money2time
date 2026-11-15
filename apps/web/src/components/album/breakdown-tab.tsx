@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 
 import { Donut } from "@/components/dashboard/charts/donut";
 import { cents } from "@/lib/backup/album-group";
+import { albumCategory } from "@/lib/album/categories";
 import type { Group } from "@/lib/album/group";
 
 import { CategoryIcon, Mascot, currencyOrder, useCategoryLabel, useMoney } from "./ui";
@@ -32,10 +33,10 @@ export function BreakdownTab({ group }: { group: Group }) {
       if (bill.deleted) continue;
       const value = person === EVERYONE ? cents(bill.amount) : bill.shares.filter((share) => share.memberId === person).reduce((sum, share) => sum + cents(share.amount), 0);
       if (value <= 0) continue;
-      const name = label(bill.categoryName, bill.categoryIcon) || t("bill.untitled");
-      const key = `${name}\u0000${bill.categoryIcon ?? ""}`;
+      // By the album's categories: the same for everyone in it.
+      const key = bill.category;
       const categories = byCurrency.get(bill.currency) ?? new Map();
-      const entry = categories.get(key) ?? { name, icon: bill.categoryIcon, cents: 0, count: 0 };
+      const entry = categories.get(key) ?? { name: label(key), icon: albumCategory(key).icon, cents: 0, count: 0 };
       entry.cents += value;
       entry.count += 1;
       categories.set(key, entry);
@@ -46,7 +47,7 @@ export function BreakdownTab({ group }: { group: Group }) {
       const list = [...byCurrency.get(currency)!.entries()].map(([key, entry]) => ({ key, ...entry })).sort((a, b) => b.cents - a.cents);
       return { currency, list, total: list.reduce((sum, entry) => sum + entry.cents, 0) };
     });
-  }, [group.bills, label, person, t]);
+  }, [group.bills, label, person]);
 
   const people = group.members.filter((member) => member.userId || group.bills.some((bill) => !bill.deleted && bill.shares.some((share) => share.memberId === member.id)));
 

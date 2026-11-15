@@ -28,6 +28,7 @@ export function AlbumActivity({ albumId }: { albumId: string }) {
   const f = useFormat();
   const [expanded, setExpanded] = useState(false);
   const tc = useTranslations("dashboard.common");
+  const tcat = useTranslations("album.categories");
   const group = useMemo(() => albumGroupOf(model.raw, albumId), [model, albumId]);
 
   const days = useMemo(() => {
@@ -40,13 +41,14 @@ export function AlbumActivity({ albumId }: { albumId: string }) {
         nameOf: (id) => (id ? names.get(id) : null) || ts("someone"),
         money: (amount, currency) => f.moneyIn(amount, currency),
         day: (date) => f.day(date, "medium"),
+        category: (key) => tcat(key),
       }),
     );
     return groupActivityByDay(lines, (iso) => {
       const date = parseLocalDate(iso);
       return date ? dayKeyOf(date) : iso.slice(0, 10);
     });
-  }, [group, f, t, ts]);
+  }, [group, f, t, tcat, ts]);
 
   if (!group) return null;
   // The newest few until the user asks for all, as the app's card does.

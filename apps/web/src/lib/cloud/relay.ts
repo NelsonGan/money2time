@@ -49,8 +49,11 @@ const PROTOCOL = "m2t-v1";
  * - `budget-currencies`: monthly budgets in another currency than the main one.
  * - `shared-albums`: each shared album's members, bills and activity log
  *   (the `web_album_*` tables, `src/lib/backup/album-group.ts`).
+ * - `album-categories`: changes nothing sent; a phone naming it in
+ *   `meta.features` takes a shared bill's album category (`category` in
+ *   `module:albumbill`), the same for everyone in the album.
  */
-const WANT_FEATURES = ["budget-currencies", "shared-albums"];
+const WANT_FEATURES = ["album-categories", "budget-currencies", "shared-albums"];
 
 /** A QR code is good for this long before a fresh one replaces it. */
 const OFFER_TTL_MS = 2 * 60 * 1000;
@@ -119,6 +122,11 @@ export function phoneTakesCreditDueDaysAfter(meta: { features?: unknown } | null
 /** Whether the phone that sent `meta` takes a shared album's bills edited from here (`module:albumbill`). */
 export function phoneTakesSharedAlbums(meta: { features?: unknown } | null | undefined): boolean {
   return Array.isArray(meta?.features) && meta.features.includes("shared-albums");
+}
+
+/** Whether the phone that sent `meta` takes a shared bill's album category in an edit (`module:albumbill`). */
+export function phoneTakesAlbumCategories(meta: { features?: unknown } | null | undefined): boolean {
+  return Array.isArray(meta?.features) && meta.features.includes("album-categories");
 }
 
 /** Whether the phone that sent `meta` takes a budget's currency in an edit. */

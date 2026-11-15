@@ -297,6 +297,8 @@ export type WebAlbumBillRow = {
   note?: string | null;
   amount: number;
   currency: string;
+  /** Its album category (`ALBUM_CATEGORIES`); absent from older apps. */
+  category?: string | null;
   paid_by: string;
   shares: WebAlbumShare[];
   deleted?: number | null;
@@ -306,6 +308,8 @@ export type WebAlbumBillRow = {
 /** A bill's fields as the activity log keeps them, before or after a change (the app's `AlbumBillSnapshot`). */
 export type WebAlbumBillSnapshot = {
   note: string | null;
+  /** Its album category; absent from older apps and from entries logged before bills had one. */
+  category?: string | null;
   amount: number;
   currency: string;
   date: string;

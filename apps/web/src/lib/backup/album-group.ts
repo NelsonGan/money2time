@@ -6,9 +6,10 @@
  * (a transaction with `album_group_id`); these say who is in the album, who
  * paid each bill and how it is split between them, and what everyone did.
  * An older app sends none of it: `albumGroupOf` is then null and the album
- * reads as before. Only type imports, so the tests can load it.
+ * reads as before. Its imports end in `.ts`, so the tests can load it.
  */
 
+import { isAlbumCategoryKey, type AlbumCategoryKey } from "../album/categories.ts";
 import type { WebAlbumActivityRow, WebAlbumBillRow, WebAlbumBillSnapshot, WebAlbumMemberRow, WebAlbumShare } from "./types";
 
 export type AlbumGroupMember = {
@@ -25,6 +26,8 @@ export type AlbumGroupBill = {
   note: string | null;
   amount: number;
   currency: string;
+  /** Its album category, the same for everyone; null from an older app, which does not send it. */
+  category: AlbumCategoryKey | null;
   paidBy: string;
   shares: WebAlbumShare[];
   deleted: boolean;
@@ -63,6 +66,7 @@ export function albumGroupOf(tables: GroupTables, albumId: string): AlbumGroup |
       note: row.note ?? null,
       amount: row.amount,
       currency: row.currency,
+      category: isAlbumCategoryKey(row.category) ? row.category : null,
       paidBy: row.paid_by,
       shares: row.shares,
       deleted: !!row.deleted,
@@ -97,6 +101,8 @@ export type ActivityContext = {
   nameOf: (memberId: string | null | undefined) => string;
   money: (amount: number, currency: string) => string;
   day: (date: string) => string;
+  /** An album category's name in the page's language. */
+  category: (key: AlbumCategoryKey) => string;
 };
 
 /** How a change moved the user's share: less to pay (`in`) or more (`out`). */
@@ -198,6 +204,8 @@ export function describeActivity(entry: WebAlbumActivityRow, ctx: ActivityContex
         text = t("renamed_bill", { actor, before: before.note?.trim() || t("untitled"), after: title });
       } else if (before.date !== after.date) {
         text = t("moved_bill", { actor, title, day: ctx.day(after.date) });
+      } else if (isAlbumCategoryKey(after.category) && before.category !== after.category) {
+        text = t("recategorized_bill", { actor, title, category: ctx.category(after.category) });
       } else {
         text = t("changed_bill", { actor, title });
       }

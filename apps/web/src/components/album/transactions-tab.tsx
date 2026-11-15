@@ -4,6 +4,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useMemo } from "react";
 
 import { cents } from "@/lib/backup/album-group";
+import { albumCategory } from "@/lib/album/categories";
 import type { Bill, Group } from "@/lib/album/group";
 
 import { Button, CategoryIcon, Icon, Mascot, useCategoryLabel, useDay, useMoney } from "./ui";
@@ -80,7 +81,7 @@ export function TransactionsTab({ group, onOpen, onAdd }: { group: Group; onOpen
           <ul className="flex flex-col gap-2">
             {bills.map((bill) => {
               const sub = line(bill);
-              const category = label(bill.categoryName, bill.categoryIcon);
+              const category = label(bill.category);
               const title = bill.note?.trim() || category || t("bill.untitled");
               return (
                 <li key={bill.id}>
@@ -89,7 +90,7 @@ export function TransactionsTab({ group, onOpen, onAdd }: { group: Group; onOpen
                     onClick={() => onOpen(bill)}
                     className="flex w-full items-center gap-3 rounded-[20px] border border-border bg-card px-3.5 py-3 text-left shadow-[var(--shadow-soft)] transition-transform hover:bg-[#FFFDFB] active:scale-[0.99]"
                   >
-                    <CategoryIcon icon={bill.categoryIcon} name={category} size={40} />
+                    <CategoryIcon icon={albumCategory(bill.category).icon} name={category} size={40} />
                     <span className="min-w-0 flex-1">
                       <span className="flex items-center gap-1.5">
                         <span className="truncate text-[15.5px] font-bold">{title}</span>

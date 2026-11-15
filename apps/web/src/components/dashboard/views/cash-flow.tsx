@@ -12,7 +12,7 @@ import { Sankey } from "../charts/sankey";
 import { EXPENSE_COLOR, INCOME_COLOR, NET_COLOR, OTHER_COLOR } from "../charts/scale";
 import { Legend } from "../charts/tooltip";
 import { useDashboard, useFormat, useMonthLabels, usePeriodTxs } from "../state";
-import { Card, Delta, Empty, Kpi } from "../ui";
+import { Card, Delta, Empty, Kpi, useSliceName } from "../ui";
 
 export function CashFlowView() {
   const t = useTranslations("dashboard.cashFlow");
@@ -38,13 +38,14 @@ export function CashFlowView() {
 
   const income = useMemo(() => breakdown(current, model, "earning"), [current, model]);
   const spend = useMemo(() => breakdown(current, model, "spending"), [current, model]);
+  const sliceName = useSliceName();
 
   const sankey = useMemo(() => {
     const top = (slices: typeof spend, limit: number) => {
       const head = slices.slice(0, limit);
       const rest = slices.slice(limit);
       const restSum = rest.reduce((s, x) => s + f.pick(x.amt), 0);
-      const nodes = head.map((s) => ({ key: s.id, label: s.name || tc("uncategorized"), value: f.pick(s.amt), color: s.color }));
+      const nodes = head.map((s) => ({ key: s.id, label: sliceName(s), value: f.pick(s.amt), color: s.color }));
       if (restSum > 0) nodes.push({ key: "__rest", label: tc("other"), value: restSum, color: OTHER_COLOR });
       return nodes;
     };
@@ -55,7 +56,7 @@ export function CashFlowView() {
     if (inSum > outSum) targets.push({ key: "__saved", label: tc("saved"), value: inSum - outSum, color: INCOME_COLOR });
     else if (outSum > inSum) sources.push({ key: "__savings", label: t("fromSavings"), value: outSum - inSum, color: "#94A39F" });
     return { sources, targets };
-  }, [income, spend, f, t, tc]);
+  }, [income, spend, f, sliceName, t, tc]);
 
   const savingsSeries = flows.map((m) => (m.income.money > 0 ? Math.max(-1, m.net.money / m.income.money) * 100 : null));
 

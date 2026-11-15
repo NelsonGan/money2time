@@ -21,6 +21,7 @@ import {
   setPhoneTimeZone,
   type MonthCycle,
 } from "./dates";
+import { albumOfEntries } from "./album-lines";
 import { storedBudgetCurrency, storedBudgetRate } from "./budget-currency";
 import { monthlyBudgetRows } from "./budget-period";
 import { paidWithoutTransfer, paybackNote } from "./paybacks";
@@ -112,6 +113,12 @@ export type Tx = {
    * so it is changed, settled, deleted and taken out of the album in the app.
    */
   albumGroupId?: string;
+  /**
+   * The album the entry is in (one at most, `albumOfEntries`): spending there
+   * counts under the album's own line in the category lists, not under its
+   * category (`lineOf`, README: Key patterns > Albums).
+   */
+  albumId?: string;
   /** Made by an ordinary recurring rule (`isRecurringRun`), tinted in the lists while `Model.highlightRecurring`. */
   recurring?: boolean;
 };
@@ -239,6 +246,8 @@ export type Trip = {
   end: Date | null;
   active: boolean;
   txIds: string[];
+  /** Its fixed chart colour as a line in the category lists. */
+  color: string;
 };
 
 export type Item = {
@@ -504,6 +513,8 @@ export function buildModel(backup: BackupFile, opts: { timeZone?: string | null 
 
   // --------------------------------------------------------- transactions --
   const txRows = live(t.transactions);
+  const albumIds = new Set(live(t.albums).map((row) => row.id));
+  const albumByTx = albumOfEntries(live(t.album_transactions).filter((link) => albumIds.has(link.album_id)));
   // Instalment plans, whose payments are runs but not tinted (`isRecurringRun`).
   const planRuleIds = planRuleIdsOf(t.recurring_rules);
   const txs: Tx[] = [];
@@ -567,6 +578,7 @@ export function buildModel(backup: BackupFile, opts: { timeZone?: string | null 
       toAmount: row.to_amount ?? null,
       recurring: isRecurringRun(row, planRuleIds),
       ...(row.album_group_id ? { albumGroupId: row.album_group_id } : null),
+      ...(albumByTx.has(row.id) ? { albumId: albumByTx.get(row.id) } : null),
     });
   }
   txs.sort((a, b) => b.date.getTime() - a.date.getTime());
@@ -838,9 +850,13 @@ export function buildModel(backup: BackupFile, opts: { timeZone?: string | null 
     .sort((a, b) => (a.month < b.month ? -1 : 1));
 
   // ---------------------------------------------------------------- trips --
+  // An entry is in one album: an older app's second link is passed over.
   const albumTx = new Map<string, string[]>();
+  const placed = new Set<string>();
   for (const link of live(t.album_transactions)) {
-    if (!txById.has(link.transaction_id)) continue;
+    if (!txById.has(link.transaction_id) || albumByTx.get(link.transaction_id) !== link.album_id) continue;
+    if (placed.has(link.transaction_id)) continue;
+    placed.add(link.transaction_id);
     const list = albumTx.get(link.album_id);
     if (list) list.push(link.transaction_id);
     else albumTx.set(link.album_id, [link.transaction_id]);
@@ -859,9 +875,15 @@ export function buildModel(backup: BackupFile, opts: { timeZone?: string | null 
         end: parseLocalDate(row.end_date ?? null) ?? (dates.length ? new Date(Math.max(...dates)) : null),
         active: row.is_active === 1,
         txIds: ids,
+        color: OTHER_COLOR,
       };
     })
     .sort((a, b) => (b.start?.getTime() ?? 0) - (a.start?.getTime() ?? 0));
+  // Albums take the chart colours from the far end, so the newest sit apart
+  // from the biggest categories.
+  trips.forEach((trip, index) => {
+    trip.color = SERIES_COLORS[SERIES_COLORS.length - 1 - (index % SERIES_COLORS.length)] ?? OTHER_COLOR;
+  });
 
   // ---------------------------------------------------------------- items --
   const items: Item[] = live(t.items).map((row: ItemRow) => {
