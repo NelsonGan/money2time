@@ -133,26 +133,26 @@ function TransactionEditor({
       ),
     [transaction.id, transactions],
   );
-  // A shared album's expense is filed under one of the album's categories,
-  // the same for everyone: the bill's own, or the one the user's category
-  // reads as on an entry of theirs not split yet.
+  // A shared album's bill is filed under one of the album's categories, the
+  // same for everyone. An entry of the user's own there, not split yet, keeps
+  // its own category (split later, it goes to the group as the album
+  // category it reads as).
+  const albumCategories =
+    !!albumGroupId && transaction.albumGroupId === albumGroupId && transaction.type === 'expense';
   const initialCategoryId = useMemo(() => {
-    if (!albumGroupId || transaction.type !== 'expense') return transaction.categoryId;
-    const bill = transaction.albumGroupId
-      ? listGroupExpenses(albumGroupId).find((item) => item.id === transaction.id)
-      : undefined;
+    if (!albumCategories || !albumGroupId) return transaction.categoryId;
+    const bill = listGroupExpenses(albumGroupId).find((item) => item.id === transaction.id);
     return albumCategoryId(
       bill?.category ??
         albumCategoryForCategory(transaction.categoryId, categories, quickEntryPrefs.categoryMap),
     );
   }, [
+    albumCategories,
     albumGroupId,
     categories,
     quickEntryPrefs.categoryMap,
-    transaction.albumGroupId,
     transaction.categoryId,
     transaction.id,
-    transaction.type,
   ]);
   const canStartPlan = useCanStartInstalmentPlan();
   // The fee this transfer was charged, edited with it.
@@ -618,6 +618,7 @@ function TransactionEditor({
       hideSplitMode={isInstalmentPayment || isGroupPayment}
       initialSplits={initialSplits}
       groupBill={albumGroupId !== null}
+      albumCategories={albumCategories}
       awaitSplitSubmit={albumGroupId !== null}
       initialTransferFee={initialTransferFee}
       openSplitBillOnMount={openSplitBillOnMount}

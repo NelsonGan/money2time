@@ -7,7 +7,12 @@ import {
   albumCategoryKeyOfId,
   personalCategoryFor,
 } from '~/features/albums/lib/albumCategories';
-import { albumIdOfLine, albumInitial, albumLineId } from '~/features/albums/lib/albumLines';
+import {
+  albumIdOfLine,
+  albumInitial,
+  albumLineId,
+  oneLinkPerEntry,
+} from '~/features/albums/lib/albumLines';
 import { albumCategoryColumns, albumCategoryOf } from '~/features/albums/lib/groupPlan';
 import { buildBudgetSummary } from '~/features/budget/lib/budgetMath';
 import { NO_REIMBURSEMENT } from '~/features/reimbursements/lib/reimbursementMath';
@@ -120,6 +125,39 @@ describe('album lines', () => {
   });
 });
 
+describe('a restored backup’s album links', () => {
+  it('keep one live link per entry: its shared album’s, else the lowest id, never a deleted album’s', () => {
+    const link = (id: string, album: string, entry: string, deleted: string | null = null) => ({
+      id,
+      album_id: album,
+      transaction_id: entry,
+      deleted_at: deleted,
+    });
+    const links = [
+      link('b', 'bali', 't1'),
+      link('a', 'tokyo', 't1'),
+      link('a2', 'gone', 't2'),
+      link('c', 'bali', 't2'),
+      link('d', 'bali', 't3'),
+      link('e', 'ski', 't3'),
+      link('f', 'bali', 't4', 'then'),
+    ];
+    const out = oneLinkPerEntry(
+      links,
+      new Set(['bali', 'tokyo', 'ski']),
+      new Map([['t3', 'ski']]),
+      'now',
+    );
+    expect(out.filter((row) => row.deleted_at == null).map((row) => row.id)).toEqual([
+      'a',
+      'c',
+      'e',
+    ]);
+    expect(out.find((row) => row.id === 'f')?.deleted_at).toBe('then');
+    expect(out.find((row) => row.id === 'b')?.deleted_at).toBe('now');
+  });
+});
+
 describe('a shared album’s categories', () => {
   it('file a bill under the user’s matching category, else their Other', () => {
     // Renamed "Makan", still the meal icon: Food.
@@ -215,6 +253,7 @@ describe('an album’s breakdown', () => {
     }),
     tx('part1', 5, 'other'),
     tx('own', 12, 'lunch'),
+    tx('none', 7, null),
   ];
 
   it('groups an album of the user’s own by their root categories', () => {
@@ -224,9 +263,11 @@ describe('an album’s breakdown', () => {
       categoryById: BY_ID,
       groupCategories: null,
     });
+    // An entry with no category has a row too, so the rows add up to the album's line.
     expect(rows.map((row) => [row.id, row.label, row.amount, row.count])).toEqual([
       ['food', 'Makan', 42, 2],
       ['transport', 'Transport', 20, 1],
+      ['__uncategorized__', 'Uncategorized', 7, 1],
       ['other', 'Other', 5, 1],
     ]);
     expect(rows[0].categoryRootId).toBe('food');
@@ -250,6 +291,7 @@ describe('an album’s breakdown', () => {
     expect(rows.map((row) => [row.id, row.label, row.amount, row.categoryRootId])).toEqual([
       [albumCategoryId('transport'), 'Transport', 25, null],
       [albumCategoryId('food'), 'Food', 12, null],
+      [albumCategoryId('other'), 'Other', 7, null],
     ]);
   });
 });

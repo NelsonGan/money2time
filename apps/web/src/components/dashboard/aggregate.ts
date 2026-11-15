@@ -117,13 +117,23 @@ export function breakdown(
 export function albumBreakdown(txs: Tx[], model: Model, albumId: string): Slice[] {
   const group = albumGroupOf(model.raw, albumId);
   const shared = !!group && [...group.bills.values()].some((bill) => bill.category);
+  // A bill's category, for its entry and the entries its paid parts made.
+  const categoryOf = new Map<string, AlbumCategoryKey>();
+  if (shared) {
+    for (const bill of group!.bills.values()) if (bill.category) categoryOf.set(bill.id, bill.category);
+    for (const split of model.splits) {
+      const category = categoryOf.get(split.transaction_id);
+      if (category && split.paid_transaction_id) categoryOf.set(split.paid_transaction_id, category);
+    }
+  }
   const map = new Map<string, Slice>();
   for (const tx of txs) {
     let key: string;
     let slice: Slice | undefined;
     if (shared) {
+      // Else (an entry of the user's own there): its category's icon, then name, else Other.
       const root = tx.parentId ? model.categories.get(tx.parentId) : null;
-      const category = group!.bills.get(tx.id)?.category ?? albumCategoryOf({ category_name: root?.name, category_icon: root?.icon });
+      const category = categoryOf.get(tx.id) ?? albumCategoryOf({ category_name: root?.name, category_icon: root?.icon });
       key = category;
       slice = map.get(key) ?? {
         id: key,

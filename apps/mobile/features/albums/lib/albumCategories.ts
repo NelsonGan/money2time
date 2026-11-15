@@ -26,6 +26,8 @@ export { ALBUM_CATEGORIES, ALBUM_CATEGORY_OTHER, type AlbumCategoryKey, isAlbumC
 
 /** The quick-entry bucket → category overrides (`quickEntryPrefs.categoryMap`). */
 export type CategoryMap = Partial<Record<string, string>>;
+/** One empty map for callers with none, so the per-list cache below still hits. */
+const NO_CATEGORY_MAP: CategoryMap = {};
 
 const ID_PREFIX = 'album-category:';
 
@@ -116,7 +118,7 @@ function personalCategories(
 export function personalCategoryFor(
   key: AlbumCategoryKey,
   categories: readonly Category[],
-  categoryMap: CategoryMap = {},
+  categoryMap: CategoryMap = NO_CATEGORY_MAP,
 ): string | null {
   const personal = personalCategories(categories, categoryMap);
   return personal.matched.get(key) ?? personal.fallback;
@@ -130,7 +132,7 @@ export function personalCategoryFor(
 export function albumCategoryForCategory(
   categoryId: string | null | undefined,
   categories: readonly Category[],
-  categoryMap: CategoryMap = {},
+  categoryMap: CategoryMap = NO_CATEGORY_MAP,
 ): AlbumCategoryKey {
   if (!categoryId) return ALBUM_CATEGORY_OTHER;
   const category = categories.find((item) => item.id === categoryId);

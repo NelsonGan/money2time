@@ -409,6 +409,14 @@ describe('one album per entry', () => {
     projectGroup(GROUP, { ...env, categoryIdFor: categoryFor });
     expect(albumsRepository.getAllTransactionIdsByAlbum().get(GROUP)).toContain('taxi');
     expect(albumsRepository.getAllTransactionIdsByAlbum().get('tokyo')).toBeUndefined();
+    // Its own link row moved to another album: taken back, and then left alone.
+    app.connection.exec(
+      `UPDATE album_transactions SET album_id = 'tokyo' WHERE id = '${GROUP}:taxi'`,
+    );
+    projectGroup(GROUP, { ...env, categoryIdFor: categoryFor });
+    expect(albumsRepository.getAllTransactionIdsByAlbum().get(GROUP)).toContain('taxi');
+    expect(albumsRepository.getAllTransactionIdsByAlbum().get('tokyo')).toBeUndefined();
+    expect(projectGroup(GROUP, { ...env, categoryIdFor: categoryFor })).toBe(false);
   });
 });
 

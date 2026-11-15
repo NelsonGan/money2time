@@ -591,7 +591,13 @@ export function planWrite(
         note: cleanText(row.note, MAX_NOTE),
         amount,
         currency,
-        ...albumCategoryColumns(albumCategoryOf(row)),
+        // A row with no key comes from an older app, which sends its own
+        // category: the bill keeps the album category it has.
+        ...albumCategoryColumns(
+          !isAlbumCategoryKey(row.category_key) && before && isAlbumCategoryKey(before.category_key)
+            ? before.category_key
+            : albumCategoryOf(row),
+        ),
         paid_by: paidBy,
         shares_json: JSON.stringify(shares),
         created_by: authorStamp(ctx),

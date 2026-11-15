@@ -529,6 +529,14 @@ test('an invite names its owner as the album knows them', async () => {
 
 test("a bill's category is one of the album's, the same for everyone, and changing it is logged", async () => {
   const { group, rows } = await trip();
+  // A bill an older app wrote is read by its icon, else its English name, else Other.
+  assert.equal(
+    (await import('../src/groupPlan.generated.ts')).albumCategoryOf({
+      category_name: 'Makan',
+      category_icon: 'car',
+    }),
+    'transport',
+  );
   // The website writes the key; the bill keeps that category's English name
   // and icon too, which older apps match against their own categories.
   await write(group, 'tess', {
@@ -538,22 +546,24 @@ test("a bill's category is one of the album's, the same for everyone, and changi
     rows('album_expenses').map((row) => [row.category_key, row.category_name, row.category_icon]),
     [['food', 'Food', 'meal']],
   );
-  // An older app writes its own category's name and icon: read by its icon.
+  // An older app sends its own category's name and icon, never a key: its
+  // edit keeps the bill's album category.
   await write(group, 'ben', {
     rows: [
       bill(
         'u-bali-tess',
         { 'u-bali-tess': 30, 'u-bali-ben': 30 },
-        { category_name: 'Makan', category_icon: 'car' },
+        { note: 'Dinner out', category_name: 'Makan', category_icon: 'car' },
       ),
     ],
   });
-  assert.equal(rows('album_expenses')[0].category_key, 'transport');
-  // Anything else is Other, never a key the album does not have.
-  await write(group, 'ben', {
-    rows: [bill('u-bali-tess', { 'u-bali-tess': 30, 'u-bali-ben': 30 }, { category_key: 'pets' })],
+  assert.equal(rows('album_expenses')[0].category_key, 'food');
+  await write(group, 'tess', {
+    rows: [
+      bill('u-bali-tess', { 'u-bali-tess': 30, 'u-bali-ben': 30 }, { category_key: 'transport' }),
+    ],
   });
-  assert.equal(rows('album_expenses')[0].category_key, 'other');
+  assert.equal(rows('album_expenses')[0].category_key, 'transport');
   const edits = rows('album_activity').filter((entry) => entry.kind === 'bill_edited');
   assert.deepEqual(
     edits.map((entry) => {
@@ -561,8 +571,8 @@ test("a bill's category is one of the album's, the same for everyone, and changi
       return [data.before.category, data.after.category];
     }),
     [
+      ['food', 'food'],
       ['food', 'transport'],
-      ['transport', 'other'],
     ],
   );
 });

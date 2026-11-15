@@ -6,6 +6,7 @@
  * categories. Pure.
  */
 
+import { I18n } from '~/lib/i18n';
 import type { AlbumExpense, Category, TransactionWithRelations } from '~/types';
 
 import {
@@ -16,6 +17,9 @@ import {
   albumCategoryLabel,
   type CategoryMap,
 } from './albumCategories';
+
+/** The row of an album's entries with no category. */
+export const UNCATEGORIZED_ROW = '__uncategorized__';
 
 export interface AlbumCategoryRow {
   id: string;
@@ -94,7 +98,11 @@ export function albumCategoryRows(
       continue;
     }
     const category = tx.categoryId ? categoryById.get(tx.categoryId) : undefined;
-    if (!category) continue;
+    if (!category) {
+      // Counted in the album's line, so it has a row here too.
+      add(UNCATEGORIZED_ROW, I18n.t('common.uncategorized'), '', null, tx, amount);
+      continue;
+    }
     const root = (category.parentId ? categoryById.get(category.parentId) : null) ?? category;
     add(root.id, root.name, root.icon, root.id, tx, amount);
   }

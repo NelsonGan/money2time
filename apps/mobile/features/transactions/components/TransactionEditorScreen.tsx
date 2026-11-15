@@ -464,6 +464,11 @@ interface TransactionEditorScreenProps {
    * staged here, and it counts toward no free limit.
    */
   groupBill?: boolean;
+  /**
+   * A shared album's bill: its expense categories are the album's own, the
+   * same for everyone (README: Album members and shared albums > Categories).
+   */
+  albumCategories?: boolean;
   titleOverride?: string;
   subtitleOverride?: string;
   submitLabelOverride?: string;
@@ -746,6 +751,7 @@ export function TransactionEditorScreen({
   initialSplits,
   defaultSplitWith,
   groupBill = false,
+  albumCategories = false,
   titleOverride,
   subtitleOverride,
   submitLabelOverride,
@@ -895,8 +901,8 @@ export function TransactionEditorScreen({
   // bill's title picks one by Quick Entry's keywords ("Lunch" → Food) until
   // the user picks one themselves.
   const groupCategories = useMemo(
-    () => (groupBill ? albumCategoryPickerList() : null),
-    [groupBill],
+    () => (albumCategories ? albumCategoryPickerList() : null),
+    [albumCategories],
   );
   const categoryPickedRef = useRef(mode !== 'create');
   const autoAlbumCategoryRef = useRef(false);

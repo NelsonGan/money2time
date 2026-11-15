@@ -237,7 +237,8 @@ function ensureInAlbum(albumId: string, transactionId: string): boolean {
   db.runSync(
     `INSERT INTO album_transactions (id, album_id, transaction_id, sort_order, created_at, updated_at, deleted_at)
      VALUES (?, ?, ?, 0, ?, ?, NULL)
-     ON CONFLICT(id) DO UPDATE SET deleted_at = NULL, updated_at = excluded.updated_at`,
+     ON CONFLICT(id) DO UPDATE SET album_id = excluded.album_id, deleted_at = NULL,
+       updated_at = excluded.updated_at`,
     [`${albumId}:${transactionId}`, albumId, transactionId, now, now],
   );
   return true;

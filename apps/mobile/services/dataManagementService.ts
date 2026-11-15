@@ -2,6 +2,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import { File, Paths } from 'expo-file-system/next';
 import * as Sharing from 'expo-sharing';
 
+import { oneLinkPerEntry } from '~/features/albums/lib/albumLines';
 import {
   inLedgersSql,
   isLedgerScoped,
@@ -724,14 +725,24 @@ export function applyBackupData(
     insertRows(sqlite, 'recurring_rules', backup.tables.recurring_rules, skip);
     // Albums before their join rows, both after transactions (join references both).
     insertRows(sqlite, 'albums', backup.tables.albums, skip);
-    // An entry is in one album: an older backup's second link to the same
-    // entry gives way (INSERT OR REPLACE) to the lower id, inserted last, as
-    // on every phone (migration 094).
+    // An entry is in one album: an older backup's other links are kept as
+    // deleted ones, as every phone keeps them (migration 094).
     insertRows(
       sqlite,
       'album_transactions',
-      [...(backup.tables.album_transactions ?? [])].sort((a, b) =>
-        String(a.id) < String(b.id) ? 1 : String(a.id) > String(b.id) ? -1 : 0,
+      oneLinkPerEntry(
+        backup.tables.album_transactions ?? [],
+        new Set(
+          (backup.tables.albums ?? [])
+            .filter((row) => row.deleted_at == null)
+            .map((row) => String(row.id)),
+        ),
+        new Map(
+          (backup.tables.transactions ?? [])
+            .filter((row) => typeof row.album_group_id === 'string')
+            .map((row) => [String(row.id), String(row.album_group_id)]),
+        ),
+        nowIso(),
       ),
       skip,
     );

@@ -403,14 +403,13 @@ export function AlbumDetailScreen({
     [getDisplayValueForTransaction, isTimeMode],
   );
 
-  // The entries the Breakdown counts: expenses with a category, as spending.
+  // The entries the Breakdown counts: expenses, as spending (those with no
+  // category on a row of their own), as the album's line in Insights.
   const breakdownCandidates = useMemo(
     () =>
       albumTransactions.filter(
         (t) =>
-          countsAsExpenseRow(t) &&
-          !!t.categoryId &&
-          countsTowardSpending(t, settings.reimbursementsCountAsExpense),
+          countsAsExpenseRow(t) && countsTowardSpending(t, settings.reimbursementsCountAsExpense),
       ),
     [albumTransactions, settings.reimbursementsCountAsExpense],
   );

@@ -516,11 +516,6 @@ export function categoryLabel(model: Model, id: string | null | undefined): stri
   return parent ? `${parent.name} / ${category.name}` : category.name;
 }
 
-/**
- * The app's category grid: two columns of parents, a subcategory panel that
- * opens under a parent with children, and a tap on an open parent picking the
- * parent itself.
- */
 /** A shared album's categories, the same for everyone in it (`ALBUM_CATEGORIES`), as two columns like `CategoryGrid`. */
 export function AlbumCategoryGrid({ value, onChange }: { value: AlbumCategoryKey; onChange: (key: AlbumCategoryKey) => void }) {
   const t = useTranslations("album.categories");
@@ -548,6 +543,11 @@ export function AlbumCategoryGrid({ value, onChange }: { value: AlbumCategoryKey
   );
 }
 
+/**
+ * The app's category grid: two columns of parents, a subcategory panel that
+ * opens under a parent with children, and a tap on an open parent picking the
+ * parent itself.
+ */
 export function CategoryGrid({ type, value, onChange, keep }: { type: "expense" | "income"; value: string | null; onChange: (id: string) => void; keep?: string | null }) {
   const t = useTranslations("dashboard.edit");
   const { fullModel: model } = useDashboard();

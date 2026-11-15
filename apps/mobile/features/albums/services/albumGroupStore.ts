@@ -193,11 +193,18 @@ export function ensureLocalAlbum(share: { ledgerId: string; name: string | null 
         // own entries again rather than leaving them outside the album. One
         // put in another album since stays there (an entry is in one album);
         // a bill of the group comes back as the group is projected.
+        // One link per entry, the lowest id where an older version left two.
         db.runSync(
           `UPDATE album_transactions SET deleted_at = NULL, updated_at = ?
            WHERE album_id = ? AND deleted_at = ?
              AND transaction_id NOT IN (
                SELECT transaction_id FROM album_transactions WHERE deleted_at IS NULL
+             )
+             AND id = (
+               SELECT MIN(o.id) FROM album_transactions o
+               WHERE o.transaction_id = album_transactions.transaction_id
+                 AND o.album_id = album_transactions.album_id
+                 AND o.deleted_at = album_transactions.deleted_at
              )`,
           [now, share.ledgerId, existing.deleted_at],
         );
