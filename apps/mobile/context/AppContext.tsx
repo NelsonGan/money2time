@@ -27,6 +27,12 @@ import {
   ONBOARDING_MINIMAL_INCOME_CATEGORIES,
 } from '~/constants/appDefaults';
 import { PRO_LIMITS } from '~/constants/proLimits';
+import {
+  albumCategoryForCategory,
+  type AlbumCategoryKey,
+  albumCategoryKeyOfId,
+  personalCategoryFor,
+} from '~/features/albums/lib/albumCategories';
 import { billFromRows, type GroupBillRow } from '~/features/albums/lib/albumGroup';
 import {
   cleanPersonName,
@@ -54,7 +60,11 @@ import {
   undonePaymentRows,
 } from '~/features/albums/lib/groupRows';
 import { billHasPayments, billPeople, canEditGroup } from '~/features/albums/lib/groupRules';
-import { notifyAlbumGroups, syncAlbumCover } from '~/features/albums/services/albumGroupStore';
+import {
+  listGroupExpenses,
+  notifyAlbumGroups,
+  syncAlbumCover,
+} from '~/features/albums/services/albumGroupStore';
 import {
   evenGroupPayments,
   type GroupEnv,
@@ -110,7 +120,6 @@ import {
 } from '~/features/sharedLedgers/lib/ledgerPeople';
 import { countAccountsTowardFreeLimit } from '~/features/transactions/lib/accountEntryGate';
 import {
-  findFallbackCategory,
   pickDefaultAccountId,
   pickPaybackAccountId,
 } from '~/features/transactions/lib/entryDefaults';
@@ -610,6 +619,8 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   /** Sets or clears an album's real-world location. */
   setAlbumLocation: (id: string, location: AlbumLocation | null) => void;
   deleteAlbum: (id: string) => void;
+  /** Archives an album or brings it back (README: Key patterns > Albums). */
+  archiveAlbum: (id: string, archived: boolean) => void;
   reorderAlbums: (ids: string[]) => void;
   setActiveAlbum: (albumId: string | null) => void;
   /**
@@ -653,7 +664,7 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
     transactionId: string,
     fields: Pick<
       CreateTransactionInput,
-      'categoryId' | 'details' | 'receiptUri' | 'sentiment' | 'reimbursable' | 'accountId'
+      'details' | 'receiptUri' | 'sentiment' | 'reimbursable' | 'accountId'
     >,
   ) => void;
   /** Puts shared albums' entries on an account, on this phone only. Returns how many took it. */
@@ -665,7 +676,7 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
    */
   editGroupBills: (
     transactionIds: readonly string[],
-    changes: { date?: string; note?: string | null },
+    changes: { date?: string; note?: string | null; category?: AlbumCategoryKey },
   ) => { bills: Set<string>; done: Promise<boolean> };
   /** Deletes shared albums' bills for everyone (their payments stay); resolves false when it did not go. */
   deleteGroupBills: (transactionIds: readonly string[]) => Promise<boolean>;
@@ -681,6 +692,12 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   getAlbumOwnedTransactionIds: () => ReadonlySet<string>;
   /** The entries of every album of the open ledger, by album; one read per change of `albums`. */
   getAlbumEntryIds: () => ReadonlyMap<string, readonly string[]>;
+  /**
+   * The album each entry of the open ledger is in (one at most): an expense
+   * there counts under the album's own line in the category lists, not under
+   * its category (README: Key patterns > Albums).
+   */
+  getAlbumIdByTransaction: () => ReadonlyMap<string, string>;
   getAlbumTransactions: (albumId: string) => TransactionWithRelations[];
   getAlbumStats: (albumId: string) => AlbumStats;
 
@@ -1091,6 +1108,7 @@ function optimisticPaybackTransfer(input: {
     // The repayment belongs to whoever the split expense does.
     ...withEntryStamp({ memberId: parent.memberId }, getActiveLedgerId()),
     albumGroupId: null,
+    albumCategory: null,
     recurrencePattern: 'none',
     recurrenceInterval: 1,
     recurrenceEndDate: null,
@@ -1947,6 +1965,34 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [quickEntryPrefs, setQuickEntryPrefs] =
     useState<QuickEntryPrefs>(DEFAULT_QUICK_ENTRY_PREFS);
   const quickEntryPrefsRef = useRef(quickEntryPrefs);
+  const categoriesRef = useRef<Category[]>(categories);
+  categoriesRef.current = categories;
+  /** `editGroupBills`, for the writes defined before it. */
+  const editGroupBillsRef = useRef<AppContextValue['editGroupBills'] | null>(null);
+  /**
+   * An entry whose category is one of a shared album's (the editor offers
+   * those for a shared album's bill, and for an entry of an album no longer
+   * shared) keeps that album category, and is filed under the user's own
+   * matching one too.
+   */
+  const withOwnCategory = useCallback(
+    <T extends { categoryId?: string | null; albumCategory?: AlbumCategoryKey | null }>(
+      input: T,
+    ): T => {
+      const key = albumCategoryKeyOfId(input.categoryId);
+      if (!key) return input;
+      return {
+        ...input,
+        albumCategory: key,
+        categoryId: personalCategoryFor(
+          key,
+          categoriesRef.current,
+          quickEntryPrefsRef.current.categoryMap,
+        ),
+      };
+    },
+    [],
+  );
   const [paymentAlertPrefs, setPaymentAlertPrefs] = useState<PaymentAlertPrefs>(() =>
     parsePaymentAlertPrefs(null),
   );
@@ -3115,6 +3161,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const deleteAlbum = useCallback(
     (id: string) => {
+      // A shared album, or one the user is no longer in, is archived, never
+      // deleted (README: Leaving and stopping): its cover stays too.
+      if (sharedAlbumFor(id) || albumsRepository.isFrozen(id)) return;
       // An album's cover is uniquely owned (each pick writes a fresh file), so
       // it can be deleted outright — no other album references it.
       const cover = albumsRepository.getById(id)?.coverPhotoUri;
@@ -3126,6 +3175,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       );
       if (cover) deleteAlbumCover(cover);
       void trackEvent(AnalyticsEvents.ALBUM_DELETED);
+    },
+    [refreshAlbums, runMutation],
+  );
+
+  const archiveAlbum = useCallback(
+    (id: string, archived: boolean) => {
+      runMutation(
+        () => {
+          albumsRepository.setArchived(id, archived);
+        },
+        { refresh: refreshAlbums },
+      );
+      void trackEvent(AnalyticsEvents.ALBUM_ARCHIVED, {
+        archived,
+        shared: !!sharedAlbumFor(id),
+      });
     },
     [refreshAlbums, runMutation],
   );
@@ -3202,6 +3267,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
      * albums stay the same).
      */
     owned: { shares: string; ids: ReadonlySet<string> } | null;
+    /** The reverse of `transactionIdsByAlbum`, made the first time it is asked for. */
+    albumByTransaction: Map<string, string> | null;
   } | null>(null);
   const getAlbumEntryIds = useCallback((): ReadonlyMap<string, readonly string[]> => {
     const current = albumsRef.current;
@@ -3214,11 +3281,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             ? albumsRepository.getAllTransactionIdsByAlbum()
             : new Map<string, string[]>(),
         owned: null,
+        albumByTransaction: null,
       };
       albumMembershipRef.current = membership;
     }
     return membership.transactionIdsByAlbum;
   }, []);
+
+  const getAlbumIdByTransaction = useCallback((): ReadonlyMap<string, string> => {
+    const entryIds = getAlbumEntryIds();
+    const membership = albumMembershipRef.current!;
+    if (!membership.albumByTransaction) {
+      const byTransaction = new Map<string, string>();
+      for (const [albumId, ids] of entryIds) {
+        for (const id of ids) if (!byTransaction.has(id)) byTransaction.set(id, albumId);
+      }
+      membership.albumByTransaction = byTransaction;
+    }
+    return membership.albumByTransaction;
+  }, [getAlbumEntryIds]);
 
   const getAlbumOwnedTransactionIds = useCallback((): ReadonlySet<string> => {
     if (sharedLedgerFor(getActiveLedgerId())) return NO_ENTRY_IDS;
@@ -3444,6 +3525,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         createdBy: normalizedInput.createdBy,
         memberId: normalizedInput.memberId,
         albumGroupId: null,
+        albumCategory: normalizedInput.albumCategory ?? null,
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,
@@ -3486,7 +3568,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   );
 
   const createTransaction = useCallback(
-    (input: CreateTransactionInput, meta?: CreateTransactionMeta) => {
+    (requestedInput: CreateTransactionInput, meta?: CreateTransactionMeta) => {
+      const input = withOwnCategory(requestedInput);
       const claimFirstEntry = prepareFirstEntry(input.type);
       // Local review validates currency precision before this synchronous save.
       const normalizedAmount =
@@ -3561,6 +3644,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         createdBy: normalizedInput.createdBy,
         memberId: normalizedInput.memberId,
         albumGroupId: null,
+        albumCategory: normalizedInput.albumCategory ?? null,
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,
@@ -3697,6 +3781,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       return id;
     },
     [
+      withOwnCategory,
       accountCurrencyOf,
       accounts,
       buildSnapshot,
@@ -3732,7 +3817,50 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // Dashboard), a drag or a new account on the fee's side moves the fee
       // with it, unless the same call moves the fee itself.
       const feeByTransferId = indexTransferFees(transactionsRef.current);
-      const updates = [...requested];
+      // A shared album's bill is filed under one of the album's categories,
+      // the group's for everyone: a new category on one (a bulk edit) goes
+      // to its group, and the entry follows from there.
+      const groupCategories = new Map<AlbumCategoryKey, string[]>();
+      const updates = requested.map((update): (typeof requested)[number] => {
+        const groupId = transactionById.get(update.id)?.albumGroupId;
+        const { categoryId, ...rest } = update.input;
+        if (
+          !groupId ||
+          !categoryId ||
+          !listGroupExpenses(groupId).some((bill) => bill.id === update.id)
+        ) {
+          // An entry of an album no longer shared keeps showing an album
+          // category: a category of the user's own picked for it (a bulk
+          // edit) is shown as the album category it reads as.
+          const albumCategory = transactionById.get(update.id)?.albumCategory;
+          if (albumCategory && categoryId && !albumCategoryKeyOfId(categoryId)) {
+            return {
+              ...update,
+              input: {
+                ...update.input,
+                albumCategory: albumCategoryForCategory(
+                  categoryId,
+                  categoriesRef.current,
+                  quickEntryPrefsRef.current.categoryMap,
+                ),
+              },
+            };
+          }
+          return { ...update, input: withOwnCategory(update.input) };
+        }
+        const key =
+          albumCategoryKeyOfId(categoryId) ??
+          albumCategoryForCategory(
+            categoryId,
+            categoriesRef.current,
+            quickEntryPrefsRef.current.categoryMap,
+          );
+        groupCategories.set(key, [...(groupCategories.get(key) ?? []), update.id]);
+        return { ...update, input: rest };
+      });
+      for (const [category, ids] of groupCategories) {
+        editGroupBillsRef.current?.(ids, { category });
+      }
       if (feeByTransferId.size > 0) {
         const requestedIds = new Set(requested.map((update) => update.id));
         requested.forEach(({ id, input }) => {
@@ -4006,6 +4134,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       });
     },
     [
+      withOwnCategory,
       accountCurrencyOf,
       accounts,
       buildSnapshot,
@@ -4023,9 +4152,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // (features/albums/services/albumGroupSync.ts). So everything here writes
   // the group's rows and then lets the entries follow.
 
-  const categoriesRef = useRef<Category[]>(categories);
-  categoriesRef.current = categories;
-
   /** What the open ledger gives a group's entries, or null when the album is not shared here. */
   const groupEnvFor = useCallback(
     (groupId: string): GroupEnv | null => {
@@ -4042,16 +4168,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           accountsRef.current,
           settingsRef.current?.defaultPaybackAccountId,
         ),
-        // Another phone's category by name, then by icon, else the user's "Other".
-        categoryIdFor: (name, icon) => {
-          const expense = categoriesRef.current.filter((category) => category.type === 'expense');
-          const key = name?.trim().toLowerCase();
-          const match =
-            (key ? expense.find((category) => category.name.trim().toLowerCase() === key) : null) ??
-            (icon ? expense.find((category) => category.icon === icon) : null) ??
-            findFallbackCategory(categoriesRef.current, 'expense');
-          return match?.id ?? null;
-        },
+        // The user's category matching the bill's album category, else their "Other".
+        categoryIdFor: (category) =>
+          personalCategoryFor(
+            category,
+            categoriesRef.current,
+            quickEntryPrefsRef.current.categoryMap,
+          ),
       };
     },
     [accountCurrencyOf],
@@ -4305,17 +4428,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const built = billFromRows(billRows, self.id);
       if (!built) return refuse(I18n.t('errors.generic_operation_failed'));
       const id = existingId ?? newId();
-      const category = input.categoryId
-        ? categoriesRef.current.find((item) => item.id === input.categoryId)
-        : null;
       const sent = await sendGroupWrite(groupId, [
         billRow({
           id,
           date: existingId ? input.date : dateForNewTransaction(input.date, new Date()),
           note: input.note?.trim() || null,
           currency: input.currency,
-          categoryName: category?.name ?? null,
-          categoryIcon: category?.icon ?? null,
+          // The editor's pick from the album's categories, else (Quick Add,
+          // an older Web Dashboard) the one the user's own category reads as.
+          category:
+            albumCategoryKeyOfId(input.categoryId) ??
+            albumCategoryForCategory(
+              input.categoryId,
+              categoriesRef.current,
+              quickEntryPrefsRef.current.categoryMap,
+            ),
           paidBy: built.paidBy,
           shares: built.shares,
         }),
@@ -4329,7 +4456,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         // someone else paid is their share owed to them, on no account).
         const entry = {
           accountId: input.accountId ?? null,
-          categoryId: input.categoryId ?? null,
           details: input.details ?? null,
           receiptUri: input.receiptUri ?? null,
           sentiment: input.sentiment ?? 'neutral',
@@ -4340,7 +4466,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           // have. Its account comes from the projection below, which works
           // out its account amount for it.
           transactionsRepository.update(existingId, {
-            categoryId: entry.categoryId,
             details: entry.details,
             receiptUri: entry.receiptUri,
             sentiment: entry.sentiment,
@@ -4415,8 +4540,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   );
 
   /**
-   * The fields of a group's bill that are the user's own (its category,
-   * longer note, receipt, mood, and its account), saved on their entry alone:
+   * The fields of a group's bill that are the user's own (its longer note,
+   * receipt, mood, and its account), saved on their entry alone:
    * nothing goes to the group, so it works offline and is not logged.
    */
   const saveAlbumBillOwnFields = useCallback(
@@ -4424,14 +4549,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       transactionId: string,
       fields: Pick<
         CreateTransactionInput,
-        'categoryId' | 'details' | 'receiptUri' | 'sentiment' | 'reimbursable' | 'accountId'
+        'details' | 'receiptUri' | 'sentiment' | 'reimbursable' | 'accountId'
       >,
     ) => {
       const tx = transactionsRef.current.find((item) => item.id === transactionId);
       if (!tx?.albumGroupId) return;
       try {
         transactionsRepository.update(transactionId, {
-          categoryId: fields.categoryId ?? null,
           details: fields.details ?? null,
           receiptUri: fields.receiptUri ?? null,
           sentiment: fields.sentiment ?? 'neutral',
@@ -4463,7 +4587,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   );
 
   const editGroupBills = useCallback(
-    (transactionIds: readonly string[], changes: { date?: string; note?: string | null }) => {
+    (
+      transactionIds: readonly string[],
+      changes: { date?: string; note?: string | null; category?: AlbumCategoryKey },
+    ) => {
       const taken = new Set<string>();
       const byGroup = new Map<string, string[]>();
       for (const id of transactionIds) {
@@ -4472,7 +4599,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         taken.add(id);
         byGroup.set(groupId, [...(byGroup.get(groupId) ?? []), id]);
       }
-      if (changes.date === undefined && changes.note === undefined) {
+      if (
+        changes.date === undefined &&
+        changes.note === undefined &&
+        changes.category === undefined
+      ) {
         return { bills: taken, done: Promise.resolve(true) };
       }
       const writes: Promise<boolean>[] = [];
@@ -4488,6 +4619,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               ...bill,
               date: changes.date ?? bill.date,
               note: changes.note !== undefined ? changes.note : bill.note,
+              category: changes.category ?? bill.category,
             }),
           );
         writes.push(
@@ -4505,6 +4637,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     },
     [afterGroupWrite, groupEnvFor, sendGroupWrite],
   );
+  editGroupBillsRef.current = editGroupBills;
 
   /** A group's bill that is no longer split: it leaves the group, for everyone, and stays the user's own entry. */
   const detachAlbumBill = useCallback(
@@ -5272,6 +5405,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         createdBy: refundInput.createdBy,
         memberId: refundInput.memberId,
         albumGroupId: null,
+        albumCategory: null,
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,
@@ -5369,11 +5503,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const createTransactionWithSplits = useCallback(
     (
-      input: CreateTransactionInput,
+      requestedInput: CreateTransactionInput,
       splits: SplitDraftInput[],
       receiptSplit?: ReceiptSplitDraftInput,
       meta?: { source?: 'web_dashboard' },
     ): string => {
+      const input = withOwnCategory(requestedInput);
       const claimFirstEntry = prepareFirstEntry(input.type);
       const source = meta?.source ?? (receiptSplit ? 'receipt_split' : 'split');
       const parentSnapshot = buildSnapshot(
@@ -5470,6 +5605,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         createdBy: normalizedInput.createdBy,
         memberId: normalizedInput.memberId,
         albumGroupId: null,
+        albumCategory: normalizedInput.albumCategory ?? null,
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,
@@ -5579,6 +5715,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       return txId;
     },
     [
+      withOwnCategory,
       accountCurrencyOf,
       buildSnapshot,
       prepareFirstEntry,
@@ -8136,6 +8273,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             updateAlbum,
             setAlbumLocation,
             deleteAlbum,
+            archiveAlbum,
             reorderAlbums,
             setActiveAlbum,
             syncAlbumGroups,
@@ -8153,6 +8291,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             getAlbumTransactionIds,
             getAlbumOwnedTransactionIds,
             getAlbumEntryIds,
+            getAlbumIdByTransaction,
             getAlbumTransactions,
             getAlbumStats,
             items: itemsWithStats,
@@ -8290,6 +8429,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       updateAlbum,
       setAlbumLocation,
       deleteAlbum,
+      archiveAlbum,
       reorderAlbums,
       setActiveAlbum,
       syncAlbumGroups,
@@ -8307,6 +8447,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       getAlbumTransactionIds,
       getAlbumOwnedTransactionIds,
       getAlbumEntryIds,
+      getAlbumIdByTransaction,
       getAlbumTransactions,
       getAlbumStats,
       itemsWithStats,

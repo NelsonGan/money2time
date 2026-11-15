@@ -10,6 +10,7 @@ import {
   yearMonthFromKey,
   yearMonthToKey,
 } from '~/components/datePicker/monthJump';
+import { albumLineId } from '~/features/albums/lib/albumLines';
 import { UNCATEGORIZED_ID } from '~/features/review/lib/reviewMath';
 import type { Category, MonthCycleInput, TransactionWithRelations } from '~/types';
 import { financialMonthKeyForIso } from '~/utils/financialMonth';
@@ -159,7 +160,7 @@ export function householdPagerMonths(
 }
 
 export interface HouseholdCategory {
-  /** The root category's id, or Review's `UNCATEGORIZED_ID`. */
+  /** The root category's id, Review's `UNCATEGORIZED_ID`, or an album's line (`albumLineId`). */
   id: string;
   amount: number;
   /** Each person's part, in the page's order of people, people with none left out. */
@@ -213,6 +214,7 @@ export function buildHouseholdMonth({
   isRunning = false,
   peopleOrder,
   categoriesById,
+  albumIdOf,
 }: {
   index: HouseholdIndex;
   monthKey: string;
@@ -220,6 +222,8 @@ export function buildHouseholdMonth({
   isRunning?: boolean;
   peopleOrder: readonly string[];
   categoriesById: ReadonlyMap<string, Pick<Category, 'parentId'>>;
+  /** The album an entry is in: an expense there counts under the album's own line. */
+  albumIdOf?: (transactionId: string) => string | null;
 }): HouseholdMonth {
   const bucket = index.months.get(monthKey);
   const rows = bucket?.rows ?? [];
@@ -246,7 +250,8 @@ export function buildHouseholdMonth({
   >();
   const transactionIdsByPerson = new Map<string, string[]>();
   for (const { row, personKey: key, value } of rows) {
-    const rootId = rootOf(row.categoryId);
+    const albumId = albumIdOf?.(row.id) ?? null;
+    const rootId = albumId ? albumLineId(albumId) : rootOf(row.categoryId);
     let categoryBucket = categoryBuckets.get(rootId);
     if (!categoryBucket) {
       categoryBucket = { amount: 0, byPerson: new Map(), ids: [] };

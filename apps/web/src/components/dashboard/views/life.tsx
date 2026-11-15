@@ -12,7 +12,7 @@ import { balancesByAlbum, sharedAlbumIds, type PayerSplit } from "@/lib/backup/s
 
 import type { ItemRow } from "@/lib/backup/types";
 
-import { breakdown, monthlyFlows, weekdayIndex, weekdayLabels, workdayLength, workedHours } from "../aggregate";
+import { albumBreakdown, breakdown, monthlyFlows, weekdayIndex, weekdayLabels, workdayLength, workedHours } from "../aggregate";
 import { AlbumActions, AlbumEditor, AlbumToolbar } from "../edit/album-editor";
 import { ItemEditor, ItemToolbar, itemRows } from "../edit/item-editor";
 import { WageCard } from "../edit/wage-editor";
@@ -23,7 +23,7 @@ import { LineChart } from "../charts/line-chart";
 import { EXPENSE_COLOR, NET_COLOR } from "../charts/scale";
 import { Legend } from "../charts/tooltip";
 import { offersEdits, addAmt, sumAmt, useDashboard, useFormat, useMonthLabels, usePeriodTxs, ZERO } from "../state";
-import { Card, CategoryGlyph, ClayImg, Empty, ItemArt, Kpi, Pill, Progress, RankRow } from "../ui";
+import { Card, CategoryGlyph, ClayImg, Empty, ItemArt, Kpi, Pill, Progress, RankRow, SliceGlyph, useSliceName } from "../ui";
 import { splitShareKey } from "../edit/split-ops";
 import { SplitShares } from "../edit/split-shares";
 import { AlbumActivity } from "./album-activity";
@@ -55,6 +55,7 @@ export function TimeView() {
   const flows = useMemo(() => monthlyFlows(model.txs, months), [model.txs, months]);
 
   const slices = useMemo(() => breakdown(current, model, "spending").slice(0, 8), [current, model]);
+  const sliceName = useSliceName();
   const regret = useMemo(() => current.filter((tx) => tx.spending && tx.sentiment === "sad").sort((a, b) => b.hours - a.hours), [current]);
   const regretHours = regret.reduce((s, tx) => s + tx.hours, 0);
   const biggest = useMemo(() => current.filter((tx) => tx.spending).sort((a, b) => b.hours - a.hours).slice(0, 5), [current]);
@@ -109,8 +110,8 @@ export function TimeView() {
               {slices.map((slice) => (
                 <RankRow
                   key={slice.id}
-                  icon={<CategoryGlyph icon={slice.icon} name={slice.name || "?"} color={slice.color} size={28} />}
-                  name={slice.name || tc("uncategorized")}
+                  icon={<SliceGlyph slice={slice} name={slice.name || "?"} size={28} />}
+                  name={sliceName(slice)}
                   meta={f.money(slice.amt.money)}
                   value={t("workdaysValue", { count: Math.round((slice.amt.hours / workday) * 10) / 10 })}
                   other={f.hours(slice.amt.hours)}
@@ -201,6 +202,7 @@ export function TripsView() {
   );
   const albumEditor = creating ? <AlbumEditor trip={null} onClose={() => setCreating(false)} /> : null;
   const f = useFormat();
+  const sliceName = useSliceName();
   const workday = workdayLength(model);
 
   const trips = useMemo(
@@ -284,9 +286,9 @@ export function TripsView() {
             >
               <div className="relative h-36 bg-gradient-to-br from-sky/40 via-primary-soft to-accent-soft">
                 {cover ? <img src={cover} alt="" className="h-full w-full object-cover" /> : <ClayImg name="money-time/coins-stack" size={56} className="absolute bottom-4 right-4" />}
-                {trip.active ? (
+                {trip.active || trip.archived ? (
                   <span className="absolute left-3 top-3">
-                    <Pill tone="brand">{t("current")}</Pill>
+                    {trip.active ? <Pill tone="brand">{t("current")}</Pill> : <Pill>{t(trip.ended ? "ended" : "archived")}</Pill>}
                   </span>
                 ) : null}
               </div>
@@ -335,11 +337,15 @@ export function TripsView() {
               </div>
             ) : null}
             <div className="space-y-0.5">
-              {breakdown(breakdownTxs, model, "spending").map((slice) => (
+              {albumBreakdown(
+                breakdownTxs.filter((tx) => tx.spending),
+                model,
+                selected.trip.id,
+              ).map((slice) => (
                 <RankRow
                   key={slice.id}
-                  icon={<CategoryGlyph icon={slice.icon} name={slice.name || "?"} color={slice.color} size={28} />}
-                  name={slice.name || tc("uncategorized")}
+                  icon={<CategoryGlyph icon={slice.icon} name={sliceName(slice)} color={slice.color} size={28} />}
+                  name={sliceName(slice)}
                   meta={f.percent(breakdownSpend.money ? slice.amt.money / breakdownSpend.money : 0)}
                   value={f.value(slice.amt)}
                   other={f.other(slice.amt)}

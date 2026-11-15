@@ -78,6 +78,9 @@ import { UTILITY_ICON_SOURCES } from '~/constants/utilityIcons';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { useIsPro } from '~/context/ProContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
+import { AlbumLineIcon } from '~/features/albums/components/AlbumLineIcon';
+import { useAlbumLines } from '~/features/albums/hooks/useAlbumLines';
+import { albumLineId } from '~/features/albums/lib/albumLines';
 import { BudgetPagerView } from '~/features/budget/screens';
 import { dayKeyToUtcDate } from '~/features/calendar/lib/calendarBuild';
 import {
@@ -94,7 +97,10 @@ import {
   toggleAssetHistoryAccount,
 } from '~/features/insights/assetHistory';
 import { buildInsightsCategoryPickerData } from '~/features/insights/categoryPickerData';
-import { CategoryTrendChips } from '~/features/insights/components/CategoryTrendChips';
+import {
+  type CategoryTrendChipOption,
+  CategoryTrendChips,
+} from '~/features/insights/components/CategoryTrendChips';
 import {
   InsightPaneSlotProvider,
   InsightPaneSplit,
@@ -170,8 +176,9 @@ import {
   consumePendingFocusInsight,
   subscribeFocusInsightRequest,
 } from '~/services/insightsNavigation';
-import { getCustomLogoUri } from '~/services/userAssets';
+import { getAlbumCoverUri, getCustomLogoUri } from '~/services/userAssets';
 import type {
+  Album,
   BudgetPeriod,
   Category,
   CategoryType,
@@ -733,6 +740,8 @@ type InsightCategoryRow = {
   amount: number;
   count: number;
   emoji: string;
+  /** An album's own line: its expenses, whatever their category. */
+  album?: Album;
 };
 
 type InsightBasePageData = {
@@ -809,11 +818,7 @@ type ExpenseTrendPageData = InsightBasePageData & {
   monthRows: ExpenseTrendMonthRow[];
 };
 
-type CategoryTrendCategoryOption = {
-  id: string;
-  label: string;
-  emoji: string;
-};
+type CategoryTrendCategoryOption = CategoryTrendChipOption;
 
 type CategoryTrendPageData = InsightBasePageData & {
   kind: 'category_trend';
@@ -2244,6 +2249,12 @@ function pieLabelIconSource(value?: string | null): PieLabelIconSource | null {
   return null;
 }
 
+/** An album's pie label shows its cover; one without a cover, its name alone. */
+function albumPieLabelIconSource(album: Album): PieLabelIconSource | null {
+  const uri = getAlbumCoverUri(album.coverPhotoUri);
+  return uri ? { kind: 'image', source: { uri } } : null;
+}
+
 function InsightTypeMenuPopover({
   visible,
   anchorRect,
@@ -2552,6 +2563,8 @@ export function InsightsScreen({
     rateTable,
   } = useApp();
   const { transactions: rawTransactions } = useTransactions();
+  // An expense in an album counts under the album's line, not its category.
+  const albumLines = useAlbumLines();
   const isPro = useIsPro();
   const proTrendTypeSet = useMemo(() => new Set<string>(PRO_TREND_TYPES), []);
 
@@ -3144,31 +3157,49 @@ export function InsightsScreen({
     () => new Map(categories.map((category) => [category.id, category])),
     [categories],
   );
+  // Every root expense category, then every album (whose expenses count
+  // under its own line, not their categories).
   const categoryTrendCategoryOptions = useMemo<CategoryTrendCategoryOption[]>(
-    () =>
-      categories
+    () => [
+      ...categories
         .filter((category) => category.type === 'expense' && category.parentId === null)
         .map((category) => ({
           id: category.id,
           label: category.name,
           emoji: resolveCategoryIcon(category.icon),
         })),
-    [categories],
+      ...[...albumLines.albumById.values()].map((album) => ({
+        id: albumLineId(album.id),
+        label: album.name,
+        emoji: '',
+        album,
+      })),
+    ],
+    [albumLines, categories],
+  );
+  /** The line an expense counts under in the category trend: its album's, else its root category. */
+  const categoryTrendLineOf = useCallback(
+    (tx: TransactionWithRelations): string | null => {
+      const album = albumLines.albumOf(tx.id);
+      if (album) return albumLineId(album.id);
+      if (!tx.categoryId) return null;
+      return categoryById.get(tx.categoryId)?.parentId ?? tx.categoryId;
+    },
+    [albumLines, categoryById],
   );
   // The category chips, biggest spend first; the first is the default chart.
   const categoryTrendChipOptions = useMemo<CategoryTrendCategoryOption[]>(() => {
     if (categoryTrendCategoryOptions.length === 0) return [];
     const totalsByRootId = new Map<string, number>();
     allTransactions.forEach((tx) => {
-      if (!countsAsExpenseRow(tx) || !tx.categoryId) return;
+      if (!countsAsExpenseRow(tx)) return;
       if (!countsTowardSpending(tx, settings.reimbursementsCountAsExpense)) return;
       // Compare categories in the reporting currency; ranking raw entered
       // amounts lets a small foreign-currency category outrank a bigger one.
       const value = tx.reportingAmount ?? tx.amount;
       if (!Number.isFinite(value) || value <= 0) return;
-      const category = categoryById.get(tx.categoryId);
-      const rootId = category?.parentId ?? tx.categoryId;
-      totalsByRootId.set(rootId, (totalsByRootId.get(rootId) ?? 0) + value);
+      const lineId = categoryTrendLineOf(tx);
+      if (lineId) totalsByRootId.set(lineId, (totalsByRootId.get(lineId) ?? 0) + value);
     });
     return categoryTrendCategoryOptions
       .map((option, index) => ({ option, index, total: totalsByRootId.get(option.id) ?? 0 }))
@@ -3176,8 +3207,8 @@ export function InsightsScreen({
       .map((entry) => entry.option);
   }, [
     allTransactions,
-    categoryById,
     categoryTrendCategoryOptions,
+    categoryTrendLineOf,
     settings.reimbursementsCountAsExpense,
   ]);
   const defaultCategoryTrendCategoryId = categoryTrendChipOptions[0]?.id ?? null;
@@ -3745,14 +3776,14 @@ export function InsightsScreen({
 
         const accountMode = filterModeOf(insightsFilterModes, 'categoryTrendAccounts');
         inRangeTransactions.forEach((tx) => {
-          if (tx.type !== 'expense' || !tx.categoryId || !selectedCategoryId) return;
+          if (tx.type !== 'expense' || !selectedCategoryId) return;
           if (
             !passesSelectionFilter(accountMode, excludedCategoryTrendAccountSet, [tx.accountId])
           ) {
             return;
           }
-          const category = categoryById.get(tx.categoryId);
-          const rootCategoryId = category?.parentId ?? tx.categoryId;
+          const rootCategoryId = categoryTrendLineOf(tx);
+          if (!rootCategoryId) return;
           const isCompare = compareRowByKey !== null && rootCategoryId === compareCategoryId;
           if (rootCategoryId !== selectedCategoryId && !isCompare) return;
           const rowByKey = isCompare && compareRowByKey ? compareRowByKey : monthRowByKey;
@@ -4092,30 +4123,47 @@ export function InsightsScreen({
           ? getDisplayValueForTransaction(tx)
           : (tx.reportingAmount ?? tx.amount);
       const filteredForRange: TransactionWithRelations[] = [];
-      const breakdownTotals = new Map<
-        string,
-        { id: string; label: string; amount: number; count: number; emoji: string }
-      >();
+      const breakdownTotals = new Map<string, InsightCategoryRow>();
       const breakdownTransactionsById = new Map<string, TransactionWithRelations[]>();
       inRangeTransactions.forEach((tx) => {
         if (!passesBreakdownFilter(tx)) return;
         filteredForRange.push(tx);
 
-        const id = resolveBreakdownRootId(tx, categoryById);
-        const category = tx.categoryId ? categoryById.get(tx.categoryId) : null;
-        const root = category?.parentId ? categoryById.get(category.parentId) : category;
-        const fallbackRootLabel = tx.categoryParentName ?? tx.categoryName ?? null;
-        const label = String(root?.name ?? fallbackRootLabel ?? I18n.t('common.uncategorized'));
-        const emoji = root?.icon ?? tx.categoryIcon ?? '•';
         const value = breakdownValueOf(tx);
-
-        const current = breakdownTotals.get(id);
-        if (current) {
-          current.amount += value;
-          current.count += 1;
-          if (!current.emoji && emoji) current.emoji = emoji;
+        const album = tx.type === 'expense' ? albumLines.albumOf(tx.id) : null;
+        let id: string;
+        if (album) {
+          id = albumLineId(album.id);
+          const current = breakdownTotals.get(id);
+          if (current) {
+            current.amount += value;
+            current.count += 1;
+          } else {
+            breakdownTotals.set(id, {
+              id,
+              label: album.name,
+              amount: value,
+              count: 1,
+              emoji: '',
+              album,
+            });
+          }
         } else {
-          breakdownTotals.set(id, { id, label, amount: value, count: 1, emoji });
+          id = resolveBreakdownRootId(tx, categoryById);
+          const category = tx.categoryId ? categoryById.get(tx.categoryId) : null;
+          const root = category?.parentId ? categoryById.get(category.parentId) : category;
+          const fallbackRootLabel = tx.categoryParentName ?? tx.categoryName ?? null;
+          const label = String(root?.name ?? fallbackRootLabel ?? I18n.t('common.uncategorized'));
+          const emoji = root?.icon ?? tx.categoryIcon ?? '•';
+
+          const current = breakdownTotals.get(id);
+          if (current) {
+            current.amount += value;
+            current.count += 1;
+            if (!current.emoji && emoji) current.emoji = emoji;
+          } else {
+            breakdownTotals.set(id, { id, label, amount: value, count: 1, emoji });
+          }
         }
 
         const existingRows = breakdownTransactionsById.get(id);
@@ -4138,7 +4186,9 @@ export function InsightsScreen({
     },
     [
       accountScopedNonTransferEntries,
+      albumLines,
       assetHistoryLedger,
+      categoryTrendLineOf,
       categoryById,
       categoryTrendCategoryOptions,
       effectiveCategoryTrendCategoryId,
@@ -4618,6 +4668,7 @@ export function InsightsScreen({
       amount: number;
       value: number;
       emoji: string;
+      album?: Album;
       pct: number;
       color: string;
     };
@@ -4642,7 +4693,8 @@ export function InsightsScreen({
       name: row.label,
       amount: row.amount,
       value: row.amount,
-      emoji: row.emoji || categoryById.get(row.id)?.icon || '•',
+      emoji: row.album ? '' : row.emoji || categoryById.get(row.id)?.icon || '•',
+      album: row.album,
       pct: pageTotalAmount > 0 ? (row.amount / pageTotalAmount) * 100 : 0,
       color: chartCategoryColor(i),
     })) satisfies BreakdownPieSlice[];
@@ -4695,7 +4747,9 @@ export function InsightsScreen({
         item.name.length <= pieLabelMaxChars
           ? item.name
           : `${item.name.slice(0, Math.max(1, pieLabelMaxChars - 3)).trimEnd()}...`;
-      const labelIconSource = pieLabelIconSource(item.emoji);
+      const labelIconSource = item.album
+        ? albumPieLabelIconSource(item.album)
+        : pieLabelIconSource(item.emoji);
       const sliceColor =
         hasSelection && !isSelected ? withColorAlpha(item.color, 0.28) : item.color;
       const labelStroke = isSelected
@@ -4933,6 +4987,17 @@ export function InsightsScreen({
                   onPress={() => {
                     setActiveBreakdownSlice(null, false);
                     const rowTransactions = pageData.breakdownTransactionsById.get(item.id) ?? [];
+                    if (item.album) {
+                      // The album's own breakdown by category, for the same period.
+                      openDrilldown({
+                        label: item.name,
+                        transactions: rowTransactions,
+                        albumId: item.album.id,
+                        albumCategories: true,
+                        triggerSelectionHaptic: true,
+                      });
+                      return;
+                    }
                     const rootCategory = categoryById.get(item.id) ?? null;
                     openDrilldown({
                       label: item.name,
@@ -4945,7 +5010,11 @@ export function InsightsScreen({
                     });
                   }}
                   accessibilityRole="button"
-                  accessibilityLabel={`${categoryIconToEmoji(item.emoji)} ${item.name}`.trim()}
+                  accessibilityLabel={
+                    item.album
+                      ? I18n.t('albums.line_label', { name: item.name })
+                      : `${categoryIconToEmoji(item.emoji)} ${item.name}`.trim()
+                  }
                   // iPad: roomier rows, to fill the pane beside the pie.
                   className={cn(
                     'rounded-xl active:opacity-85 border',
@@ -4959,7 +5028,11 @@ export function InsightsScreen({
                 >
                   <View className="flex-row items-center justify-between gap-2">
                     <View className="flex-1 flex-row items-center gap-1.5 pr-2">
-                      <CategoryEmoji icon={item.emoji} size={wideTabs ? 22 : 16} />
+                      {item.album ? (
+                        <AlbumLineIcon album={item.album} size={wideTabs ? 22 : 16} />
+                      ) : (
+                        <CategoryEmoji icon={item.emoji} size={wideTabs ? 22 : 16} />
+                      )}
                       <Text
                         variant={wideTabs ? 'body' : 'caption'}
                         className="flex-1"
@@ -6734,6 +6807,8 @@ export function InsightsScreen({
       categoryRootLabel?: string;
       categoryRootEmoji?: string;
       categoryRootColor?: string;
+      albumId?: string;
+      albumCategories?: boolean;
       triggerSelectionHaptic?: boolean;
     }) => {
       const sourceTransactions = nextState.scopeMatcher
@@ -6750,6 +6825,8 @@ export function InsightsScreen({
         categoryRootLabel: nextState.categoryRootLabel,
         categoryRootEmoji: nextState.categoryRootEmoji,
         categoryRootColor: nextState.categoryRootColor,
+        albumId: nextState.albumId,
+        albumCategories: nextState.albumCategories,
       });
     },
     [onOpenDrilldown],

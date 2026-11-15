@@ -236,8 +236,7 @@ const dinner = (amounts: { a: number; b: number }, note = 'Dinner') =>
     date: '2026-11-15',
     note,
     currency: 'MYR',
-    categoryName: 'Food',
-    categoryIcon: 'food',
+    category: 'food',
     paidBy: A,
     shares: [
       { memberId: A, amount: amounts.a },

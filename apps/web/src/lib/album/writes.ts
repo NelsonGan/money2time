@@ -9,6 +9,7 @@
 
 import { cents } from "../backup/album-group.ts";
 import { openShares, pairwiseDebts, settleDebt, simplifyDebts, type GroupDebt, type OpenShare } from "./debts.ts";
+import { albumCategory, type AlbumCategoryKey } from "./categories.ts";
 import type { Group, Payment, Share } from "./group";
 
 export type GroupRowWrite = {
@@ -29,11 +30,11 @@ export function billRow(bill: {
   date: string;
   note: string | null;
   currency: string;
-  categoryName: string | null;
-  categoryIcon: string | null;
+  category: AlbumCategoryKey;
   paidBy: string;
   shares: readonly Share[];
 }): GroupRowWrite {
+  const category = albumCategory(bill.category);
   return {
     table: "album_expenses",
     row: {
@@ -41,8 +42,10 @@ export function billRow(bill: {
       date: bill.date.slice(0, 10),
       note: bill.note,
       currency: bill.currency,
-      category_name: bill.categoryName,
-      category_icon: bill.categoryIcon,
+      // The key, and its English name and icon, which older apps match.
+      category_key: category.key,
+      category_name: category.name,
+      category_icon: category.icon,
       paid_by: bill.paidBy,
       shares_json: JSON.stringify(bill.shares.map((share) => ({ memberId: share.memberId, amount: money(share.amount) }))),
     },

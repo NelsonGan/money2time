@@ -12,7 +12,7 @@ import { LineChart } from "../charts/line-chart";
 import { EXPENSE_COLOR, INCOME_COLOR, NET_COLOR, OTHER_COLOR } from "../charts/scale";
 import { Legend } from "../charts/tooltip";
 import { useDashboard, useFormat, useMonthLabels, usePeriodTxs, hoursAt } from "../state";
-import { AccountLogo, Card, CategoryGlyph, ClayImg, Delta, Empty, Kpi, RankRow, SubscriptionLogo, useAccountTypeLabel } from "../ui";
+import { AccountLogo, Card, CategoryGlyph, ClayImg, Delta, Empty, Kpi, RankRow, SliceGlyph, SubscriptionLogo, useAccountTypeLabel, useSliceName } from "../ui";
 
 export function OverviewView() {
   const t = useTranslations("dashboard.overview");
@@ -33,6 +33,7 @@ export function OverviewView() {
   const { labels, titles } = useMonthLabels(flowMonths);
 
   const allSlices = useMemo(() => breakdown(current, model, "spending"), [current, model]);
+  const sliceName = useSliceName();
   const slices = allSlices.slice(0, 6);
   // The donut is whole: the rest of the spending is one "Other" slice, so the
   // shares on hover add up with the list's.
@@ -130,7 +131,7 @@ export function OverviewView() {
                 size={176}
                 thickness={26}
                 slices={[
-                  ...slices.map((s) => ({ key: s.id, label: s.name || tc("uncategorized"), value: f.pick(s.amt), color: s.color })),
+                  ...slices.map((s) => ({ key: s.id, label: sliceName(s), value: f.pick(s.amt), color: s.color })),
                   ...(otherSpend > 0 ? [{ key: "__other", label: tc("other"), value: otherSpend, color: OTHER_COLOR }] : []),
                 ]}
                 percent={f.percent}
@@ -149,8 +150,8 @@ export function OverviewView() {
                   <RankRow
                     key={slice.id}
                     active={activeSlice === slice.id}
-                    icon={<CategoryGlyph icon={slice.icon} name={slice.name || "?"} color={slice.color} size={26} />}
-                    name={slice.name || tc("uncategorized")}
+                    icon={<SliceGlyph slice={slice} name={slice.name || "?"} size={26} />}
+                    name={sliceName(slice)}
                     value={f.value(slice.amt)}
                     meta={f.percent(totalSpend.money ? slice.amt.money / totalSpend.money : 0)}
                     other={f.other(slice.amt)}

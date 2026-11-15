@@ -1,4 +1,5 @@
 import type { AlbumBillRowInput } from '~/context/AppContext';
+import { albumCategoryId, type AlbumCategoryKey } from '~/features/albums/lib/albumCategories';
 import { selfMember } from '~/features/albums/lib/albumPeople';
 import { isCurrentMember } from '~/features/albums/lib/groupRules';
 import { listGroupBills, listGroupMembers } from '~/features/albums/services/albumGroupStore';
@@ -12,7 +13,6 @@ import { nowIso } from '~/utils/id';
 import type { ApplyModule, ApplyTrack } from './types';
 
 type OwnFields = {
-  categoryId?: string | null;
   details?: string;
   accountId?: string | null;
   sentiment?: 'happy' | 'neutral' | 'sad';
@@ -24,7 +24,6 @@ function ownFieldsOf(id: string, own: OwnFields) {
   const tx = transactionsRepository.getById(id);
   if (!tx) return null;
   return {
-    categoryId: own.categoryId !== undefined ? own.categoryId : tx.categoryId,
     details: own.details !== undefined ? own.details.trim() || null : (tx.details ?? null),
     receiptUri: tx.receiptUri ?? null,
     sentiment: own.sentiment ?? tx.sentiment ?? 'neutral',
@@ -71,6 +70,7 @@ export const albumBillApply: ApplyModule = {
           date: bill.date,
           note: bill.note,
           currency: bill.currency,
+          category: bill.category,
           paidBy: bill.paidBy,
           shares: bill.shares,
           deleted: !!bill.deletedAt,
@@ -106,6 +106,8 @@ export const albumBillApply: ApplyModule = {
           currency: p.currency as string,
           date: dateKeepingTimeOfDay(day, tx.date),
           note: p.note as string,
+          // The bill's album category, the same for everyone.
+          categoryId: albumCategoryId(p.category as AlbumCategoryKey),
           ...own,
         } as CreateTransactionInput;
         track.pending.push(
@@ -115,25 +117,19 @@ export const albumBillApply: ApplyModule = {
       }
       case 'bulk': {
         // AlbumDetailScreen.handleApplyBulkUpdate: the account is the user's
-        // own, on this phone; the day and title the group's, for everyone;
-        // the category the user's own, as on any entry.
+        // own, on this phone; the day, title and category the group's, for
+        // everyone.
         const ids = p.ids as string[];
         const date = p.date as string | undefined;
         const note = p.note as string | undefined;
+        const category = p.category as AlbumCategoryKey | undefined;
         if (typeof p.accountId === 'string') {
           const accountId = p.accountId;
           const applied = app.setGroupEntriesAccount(ids, accountId);
           track.checks.push(() => applied === ids.length);
         }
-        if (date !== undefined || note !== undefined) {
-          track.pending.push(app.editGroupBills(ids, { date, note }).done);
-        }
-        if (typeof p.categoryId === 'string') {
-          const startedAt = nowIso();
-          app.updateTransactionsBulk(
-            ids.map((id) => ({ id, input: { categoryId: p.categoryId as string } })),
-          );
-          writtenSince(ids, startedAt, track);
+        if (date !== undefined || note !== undefined || category !== undefined) {
+          track.pending.push(app.editGroupBills(ids, { date, note, category }).done);
         }
         return;
       }

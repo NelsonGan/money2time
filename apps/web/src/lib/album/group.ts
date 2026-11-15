@@ -10,6 +10,8 @@
 
 import type { WebAlbumActivityRow, WebAlbumBillSnapshot, WebAlbumShare } from "@/lib/backup/types";
 
+import { albumCategoryOf, isAlbumCategoryKey, type AlbumCategoryKey } from "./categories.ts";
+
 const GROUP_ROW_ID = /^[A-Za-z0-9_-]{1,64}$/;
 /** A bill's id: the payer's entry id, which may be a recurring run's (`rr:<rule>:<day>`). */
 const GROUP_BILL_ID = /^[A-Za-z0-9_:.-]{1,120}$/;
@@ -20,7 +22,6 @@ const GROUP_DAY = /^(\d{4})-(\d{2})-(\d{2})(T[0-9:.Z+-]{1,30})?$/;
 const MAX_AMOUNT = 1e12;
 export const MAX_NAME = 40;
 export const MAX_NOTE = 500;
-const MAX_LABEL = 80;
 const MAX_SHARES = 64;
 /** A cover picture's path in the album's media (`album-covers/<id>.<ext>`). */
 export const COVER_PATH = /^album-covers\/[A-Za-z0-9_-]{1,64}\.[A-Za-z0-9]{1,5}$/;
@@ -58,8 +59,8 @@ export type Bill = {
   note: string | null;
   amount: number;
   currency: string;
-  categoryName: string | null;
-  categoryIcon: string | null;
+  /** Its album category, the same for everyone (`ALBUM_CATEGORIES`). */
+  category: AlbumCategoryKey;
   paidBy: string;
   shares: Share[];
   createdBy: string | null;
@@ -183,8 +184,7 @@ function toBill(row: Row): Bill | null {
     note: clip(row.note, MAX_NOTE),
     amount: row.amount,
     currency: row.currency,
-    categoryName: clip(row.category_name, MAX_LABEL),
-    categoryIcon: clip(row.category_icon, MAX_LABEL),
+    category: albumCategoryOf(row),
     paidBy: row.paid_by,
     shares,
     createdBy: isText(row.created_by) ? row.created_by : null,
@@ -249,7 +249,7 @@ function snapshot(value: unknown): WebAlbumBillSnapshot | null {
   if (!shares || !date || !isAmount(raw.amount) || !isText(raw.currency) || !GROUP_CURRENCY.test(raw.currency) || !isText(raw.paidBy) || !GROUP_ROW_ID.test(raw.paidBy)) {
     return null;
   }
-  return { note: clip(raw.note, MAX_NOTE), amount: raw.amount, currency: raw.currency, date, paidBy: raw.paidBy, shares };
+  return { note: clip(raw.note, MAX_NOTE), category: isAlbumCategoryKey(raw.category) ? raw.category : null, amount: raw.amount, currency: raw.currency, date, paidBy: raw.paidBy, shares };
 }
 
 /** A log entry as the dashboard's activity lines read it; null when it is not one this page can show. */

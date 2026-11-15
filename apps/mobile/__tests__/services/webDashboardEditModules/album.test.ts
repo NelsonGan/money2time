@@ -20,6 +20,8 @@ const album = (id: string, patch: Partial<Album> = {}): Album => ({
   latitude: null,
   longitude: null,
   placeId: null,
+  archivedAt: null,
+  shareEndedAt: null,
   placeName: null,
   placeAdmin: null,
   countryCode: null,
@@ -29,11 +31,17 @@ const album = (id: string, patch: Partial<Album> = {}): Album => ({
   ...patch,
 });
 
-const tx = (id: string, type = 'expense', albumGroupId: string | null = null) =>
+const tx = (
+  id: string,
+  type = 'expense',
+  albumGroupId: string | null = null,
+  albumCategory: string | null = null,
+) =>
   ({
     id,
     type,
     albumGroupId,
+    albumCategory,
     updatedAt: AT,
     deletedAt: null,
   }) as unknown as TransactionWithRelations;
@@ -41,7 +49,14 @@ const tx = (id: string, type = 'expense', albumGroupId: string | null = null) =>
 function lookup(albums: Album[], isPro = false, sharedAlbumIds: string[] = []): EditLookup {
   const extra: AlbumExtra = { albums, sharedAlbumIds };
   return {
-    transactions: [tx('t1'), tx('t2'), tx('in1', 'income'), tx('bill', 'expense', 'shared')],
+    transactions: [
+      tx('t1'),
+      tx('t2'),
+      tx('in1', 'income'),
+      tx('bill', 'expense', 'shared'),
+      // A bill of an album the user is no longer in.
+      tx('kept', 'expense', null, 'food'),
+    ],
     accounts: [],
     accountGroups: [],
     categories: [],
@@ -228,6 +243,33 @@ describe('module:album planning', () => {
         shared,
       ),
     ).toMatchObject({ error: 'invalid' });
+  });
+});
+
+describe('module:album archived and no longer shared', () => {
+  const ended = album('ended', { archivedAt: AT, shareEndedAt: AT });
+  it('leaves an album no longer shared as it was: no edit, delete or entries in or out', () => {
+    for (const op of [
+      { op: 'update', id: 'ended', at: AT, album: details() },
+      { op: 'delete', id: 'ended', at: AT },
+      { op: 'transactions', id: 'ended', at: AT, add: ['t1'], remove: [] },
+      { op: 'transactions', id: 'ended', at: AT, add: [], remove: ['kept'] },
+    ]) {
+      expect(plan([op], [ended])).toMatchObject({ error: 'invalid' });
+    }
+    // Its bills stay in it: not put in another album.
+    expect(
+      plan([{ op: 'transactions', id: 'a1', at: AT, add: ['kept'], remove: [] }], [album('a1')]),
+    ).toMatchObject({ error: 'invalid' });
+  });
+
+  it('leaves archived albums out of the free plan’s count and the active album', () => {
+    const create = { op: 'create', album: { ...details(), transactionIds: [] } };
+    const albums = [album('a'), album('b'), album('old', { archivedAt: AT }), ended];
+    expect(plan([create], albums)).toMatchObject({ ok: true });
+    expect(plan([{ op: 'active', id: 'old' }], albums)).toMatchObject({ error: 'conflict' });
+    // An archived album of the user's own is still edited and deleted as any.
+    expect(plan([{ op: 'delete', id: 'old', at: AT }], albums)).toMatchObject({ ok: true });
   });
 });
 

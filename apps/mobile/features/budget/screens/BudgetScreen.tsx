@@ -21,6 +21,8 @@ import {
 import type { ColorPalette } from '~/constants/designSystem';
 import { spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
+import { AlbumLineIcon } from '~/features/albums/components/AlbumLineIcon';
+import { useAlbumLines } from '~/features/albums/hooks/useAlbumLines';
 import { CreateBudgetRow, WeekChips } from '~/features/budget/components/BudgetPeriodRows';
 import {
   type BudgetRing,
@@ -65,6 +67,8 @@ import { useWideTabColumns } from '~/hooks/useWideTabColumns';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type {
+  Album,
+  AlbumBudgetSpend,
   BudgetCategoryProgress,
   BudgetPeriod,
   BudgetSummary,
@@ -346,6 +350,53 @@ function UnbudgetedGroup({
   );
 }
 
+/**
+ * Spending in albums: it counts toward the budget's total and toward no
+ * category's line (README: Key patterns > Albums), so each album is its own
+ * row, with no bar; tapping one opens its spending by category.
+ */
+function BudgetAlbumRows({
+  entries,
+  albumById,
+  settings,
+  onPressAlbum,
+}: {
+  entries: AlbumBudgetSpend[];
+  albumById: ReadonlyMap<string, Album>;
+  settings: UserSettings;
+  onPressAlbum: (albumId: string) => void;
+}) {
+  const rows = entries.filter((entry) => albumById.has(entry.albumId));
+  if (rows.length === 0) return null;
+  return (
+    <View className="mt-3 overflow-hidden rounded-2xl border border-border/45 bg-card">
+      <Text variant="body" tone="muted" numberOfLines={1} className="px-4 pb-1 pt-3">
+        {I18n.t('budget.albums_section')}
+      </Text>
+      {rows.map((entry) => {
+        const album = albumById.get(entry.albumId)!;
+        return (
+          <Pressable
+            key={entry.albumId}
+            onPress={() => onPressAlbum(entry.albumId)}
+            accessibilityRole="button"
+            accessibilityLabel={`${I18n.t('albums.line_label', { name: album.name })}, ${money(entry.spent, settings)}`}
+            className="flex-row items-center gap-2.5 px-4 py-2.5 active:bg-secondary/20"
+          >
+            <AlbumLineIcon album={album} size={18} />
+            <Text variant="body" numberOfLines={1} className="flex-1">
+              {album.name}
+            </Text>
+            <Text variant="caption" tone="muted" numberOfLines={1}>
+              {money(entry.spent, settings)}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
 interface BudgetPagerViewProps {
   onOpenTemplateEditor: (params?: {
     templateId?: string;
@@ -405,6 +456,12 @@ export const BudgetPagerView = forwardRef<MonthPagerHandle, BudgetPagerViewProps
       createPeriodBudget,
       deletePeriodBudget,
     } = useApp();
+    // An expense in an album counts toward the total, on the album's row.
+    const albumLines = useAlbumLines();
+    const albumIdOf = useCallback(
+      (transactionId: string) => albumLines.albumOf(transactionId)?.id ?? null,
+      [albumLines],
+    );
     const clock = useMemo(
       () => ({ weekStartsOn: settings.weekStartsOn, monthCycle: monthCycleOf(settings) }),
       [settings],
@@ -501,11 +558,12 @@ export const BudgetPagerView = forwardRef<MonthPagerHandle, BudgetPagerViewProps
           categories,
           monthCycle,
           rateTable,
+          albumIdOf,
         });
         if (summary) map.set(budget.id, { summary, range });
       }
       return map;
-    }, [categories, expensesInRange, monthCycle, periodBudgets, rateTable]);
+    }, [albumIdOf, categories, expensesInRange, monthCycle, periodBudgets, rateTable]);
 
     const pageByMonth = useMemo(
       () =>
@@ -534,6 +592,8 @@ export const BudgetPagerView = forwardRef<MonthPagerHandle, BudgetPagerViewProps
       (range: BudgetPeriodRange, categoryId: string | null, includeChildren: boolean) => {
         const transactionIds = expensesInRange(range)
           .filter((transaction) => {
+            // An album's expenses are on its own row, not their category's.
+            if (albumIdOf(transaction.id)) return false;
             if (categoryId === null) return !transaction.categoryId;
             if (!transaction.categoryId) return false;
             if (!includeChildren) return transaction.categoryId === categoryId;
@@ -559,7 +619,23 @@ export const BudgetPagerView = forwardRef<MonthPagerHandle, BudgetPagerViewProps
             : {}),
         });
       },
-      [categoriesById, expensesInRange, onOpenDrilldown],
+      [albumIdOf, categoriesById, expensesInRange, onOpenDrilldown],
+    );
+    const openAlbumDrilldown = useCallback(
+      (range: BudgetPeriodRange, albumId: string) => {
+        const transactionIds = expensesInRange(range)
+          .filter((transaction) => albumIdOf(transaction.id) === albumId)
+          .map((transaction) => transaction.id);
+        void triggerHaptic('selection');
+        onOpenDrilldown({
+          label: albumLines.albumById.get(albumId)?.name ?? '',
+          transactionIds,
+          showTypeFilter: false,
+          albumId,
+          albumCategories: true,
+        });
+      },
+      [albumIdOf, albumLines, expensesInRange, onOpenDrilldown],
     );
 
     const monthLabel = monthKeyLabel(activeMonth, settings.locale);
@@ -936,6 +1012,15 @@ export const BudgetPagerView = forwardRef<MonthPagerHandle, BudgetPagerViewProps
               </View>
             ) : null}
 
+            {focusModel ? (
+              <BudgetAlbumRows
+                entries={focusModel.summary.albums}
+                albumById={albumLines.albumById}
+                settings={focusSettings}
+                onPressAlbum={(albumId) => openAlbumDrilldown(focusModel.range, albumId)}
+              />
+            ) : null}
+
             {focusModel?.summary.countUnbudgeted && focusModel.summary.unbudgeted.length > 0 ? (
               <UnbudgetedGroup
                 entries={focusModel.summary.unbudgeted}
@@ -981,6 +1066,8 @@ export const BudgetPagerView = forwardRef<MonthPagerHandle, BudgetPagerViewProps
         );
       },
       [
+        albumLines,
+        openAlbumDrilldown,
         budgetTemplates.length,
         isWide,
         wideColumns.maxWidth,

@@ -1,3 +1,5 @@
+import type { AlbumCategoryKey } from '~/features/albums/lib/groupPlan';
+
 export type DisplayMode = 'money' | 'time';
 export type ThemeMode = 'system' | 'light' | 'dark';
 export type ThemeColor =
@@ -691,6 +693,13 @@ export interface Album {
   placeAdmin: string | null;
   /** ISO 3166-1 alpha-2 country code, e.g. "JP". */
   countryCode: string | null;
+  /** Archived: out of the Albums page's list, still a line in the category lists. */
+  archivedAt: string | null;
+  /**
+   * A shared album the user is no longer in (left, taken out, ended, signed
+   * out): kept as it was, archived and read-only, until they are back in it.
+   */
+  shareEndedAt: string | null;
   sortOrder?: number;
   createdAt: string;
   updatedAt: string;
@@ -726,9 +735,8 @@ export interface AlbumExpense {
   note: string | null;
   amount: number;
   currency: string;
-  /** The category on the phone that wrote it, as a hint for the others. */
-  categoryName: string | null;
-  categoryIcon: string | null;
+  /** Its album category, the same for everyone (`ALBUM_CATEGORIES`). */
+  category: AlbumCategoryKey;
   /** The member who paid. */
   paidBy: string;
   shares: AlbumShare[];
@@ -772,6 +780,8 @@ export type AlbumActivityKind =
 /** A bill's fields as the activity log keeps them, before or after a change. */
 export interface AlbumBillSnapshot {
   note: string | null;
+  /** Its album category; none in an entry logged before bills had one. */
+  category?: AlbumCategoryKey | null;
   amount: number;
   currency: string;
   date: string;
@@ -994,15 +1004,23 @@ export interface UnbudgetedCategorySpend {
 }
 
 /** Everything the budget page / widgets need for one period, computed in one pass. */
+/** An album's spending in a budget's period: it counts toward the total, never a category's line. */
+export interface AlbumBudgetSpend {
+  albumId: string;
+  spent: number;
+}
+
 export interface BudgetSummary {
   totalBudget: number;
   /**
-   * Spend counted against the budget: budgeted + unbudgeted when the budget
-   * counts unbudgeted spend, budgeted only otherwise.
+   * Spend counted against the budget: budgeted + albums' + unbudgeted when
+   * the budget counts unbudgeted spend, budgeted + albums' otherwise.
    */
   totalSpent: number;
   budgetedSpent: number;
   unbudgetedSpent: number;
+  /** Spending in albums, which always counts toward the total. */
+  albumSpent: number;
   /** Frozen from the template: whether unbudgetedSpent is part of totalSpent. */
   countUnbudgeted: boolean;
   /** totalBudget − totalSpent; negative when the period is over budget. */
@@ -1013,6 +1031,8 @@ export interface BudgetSummary {
   usageRatio: number;
   categories: BudgetCategoryProgress[];
   unbudgeted: UnbudgetedCategorySpend[];
+  /** Each album's spending, biggest first. */
+  albums: AlbumBudgetSpend[];
   /**
    * Expenses left out because they are in another currency than the budget's
    * and no exchange rate was known to convert them. 0 for a main-currency budget.
@@ -1126,6 +1146,12 @@ export interface Transaction {
    * (the group's expense has this entry's id). Null on every other entry.
    */
   albumGroupId: string | null;
+  /**
+   * A shared album's category of the bill this entry is the user's side of
+   * (or of the bill a payment of theirs was for); kept once the album is no
+   * longer shared. Shown in place of the entry's own category.
+   */
+  albumCategory: AlbumCategoryKey | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;

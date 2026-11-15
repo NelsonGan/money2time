@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { useId, useMemo, useState, type FormEvent } from "react";
 
 import { albumGroupOf, billPeople, cents, type AlbumGroup, type AlbumGroupBill } from "@/lib/backup/album-group";
+import type { AlbumCategoryKey } from "@/lib/album/categories";
 import type { Model, Tx } from "@/lib/backup/model";
 import type { EditOp, Sentiment } from "@/lib/cloud/edits";
 
@@ -12,6 +13,7 @@ import { NoAccountMark, Select } from "../ui";
 import {
   AccountChip,
   AccountPickerSheet,
+  AlbumCategoryGrid,
   CategoryGrid,
   Confirm,
   DAY_MAX,
@@ -48,8 +50,10 @@ export function editableGroupBill(model: Model, sharedAlbums: boolean, tx: Tx | 
 /**
  * A shared album's bill, as the app's editor changes one (anyone in the album
  * can): its day, title, currency, who paid and how it is split are the
- * group's, saved for everyone (`module:albumbill` update); its category,
- * longer note, mood and account are the user's own and stay on their phone.
+ * group's, saved for everyone (`module:albumbill` update), and so is its
+ * category, one of the album's own (to a phone naming `album-categories`;
+ * an older one keeps each person's category their own); its longer note,
+ * mood and account are the user's own and stay on their phone.
  * The account is offered only when the user paid it, as a bill someone else
  * paid is their share owed, on no account until they pay it back.
  */
@@ -57,8 +61,11 @@ export function GroupBillForm({ tx, group, bill, onClose }: { tx: Tx; group: Alb
   const t = useTranslations("dashboard.edit");
   const ts = useTranslations("dashboard.edit.split");
   const tg = useTranslations("dashboard.edit.sharedBill");
-  const { fullModel: model } = useDashboard();
+  const { fullModel: model, link } = useDashboard();
   const f = useFormat();
+  // The album's categories, which the phone saves for everyone; an older
+  // phone, the user's own category, kept on their entry.
+  const albumCategories = link.albumCategories && !!bill.category;
   const { run, busy, error, ready, clear, reload } = useEditRun();
   const formId = useId();
   const selfId = group.selfId!;
@@ -85,6 +92,7 @@ export function GroupBillForm({ tx, group, bill, onClose }: { tx: Tx; group: Alb
   const [included, setIncluded] = useState<ReadonlySet<string>>(() => new Set([...initialShares].filter(([, amount]) => amount > 0).map(([id]) => id)));
   const [amounts, setAmounts] = useState<Record<string, string>>(() => Object.fromEntries(people.map((member) => [member.id, formatAmountInput(initialShares.get(member.id) ?? 0, f.locale)])));
   const [categoryId, setCategoryId] = useState(tx.categoryId);
+  const [albumCategory, setAlbumCategory] = useState<AlbumCategoryKey>(bill.category ?? "other");
   const [details, setDetails] = useState(tx.details);
   const [sentiment, setSentiment] = useState<Sentiment>(tx.sentiment);
   const [accountId, setAccountId] = useState(tx.accountId);
@@ -110,7 +118,7 @@ export function GroupBillForm({ tx, group, bill, onClose }: { tx: Tx; group: Alb
     amount: !(sum > 0) || (evenly && (typedTotal === null || typedTotal < 0)),
     // Split with nobody else, it would no longer be the album's.
     nobody: userPays && shares.every((share) => share.memberId === selfId || !share.amount),
-    category: !categoryId,
+    category: !albumCategories && !categoryId,
     date: !isDayKey(date),
   };
   const invalid = Object.values(missing).some(Boolean);
@@ -132,7 +140,11 @@ export function GroupBillForm({ tx, group, bill, onClose }: { tx: Tx; group: Alb
       set.paidBy = paidBy;
       set.shares = shares.filter((share) => cents(share.amount) > 0).map((share) => ({ memberId: share.memberId, amount: cents(share.amount) / 100 }));
     }
-    if (categoryId !== tx.categoryId) set.categoryId = categoryId;
+    if (albumCategories) {
+      if (albumCategory !== bill.category) set.category = albumCategory;
+    } else if (categoryId !== tx.categoryId) {
+      set.categoryId = categoryId;
+    }
     if (details.trim() !== tx.details.trim()) set.details = details.trim();
     if (sentiment !== tx.sentiment) set.sentiment = sentiment;
     if (userPays && accountId !== tx.accountId) set.accountId = accountId;
@@ -177,8 +189,12 @@ export function GroupBillForm({ tx, group, bill, onClose }: { tx: Tx; group: Alb
               ]}
             />
           ) : null}
-          <p className="rounded-2xl bg-primary-soft/50 px-4 py-2.5 text-[12.5px] leading-snug text-foreground-soft">{tg("intro", { album })}</p>
-          <CategoryGrid type="expense" value={categoryId} keep={tx.categoryId} onChange={touch(setCategoryId)} />
+          <p className="rounded-2xl bg-primary-soft/50 px-4 py-2.5 text-[12.5px] leading-snug text-foreground-soft">{tg(albumCategories ? "introCategories" : "intro", { album })}</p>
+          {albumCategories ? (
+            <AlbumCategoryGrid value={albumCategory} onChange={touch(setAlbumCategory)} />
+          ) : (
+            <CategoryGrid type="expense" value={categoryId} keep={tx.categoryId} onChange={touch(setCategoryId)} />
+          )}
           {touched && missing.category ? <p className="px-1 text-[12px] font-semibold text-error">{t("required")}</p> : null}
         </div>
 

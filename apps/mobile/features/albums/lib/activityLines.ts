@@ -10,6 +10,7 @@
 import { I18n } from '~/lib/i18n';
 import type { AlbumActivity, AlbumBillSnapshot } from '~/types';
 
+import { albumCategoryLabel } from './albumCategories';
 import { cents } from './albumGroup';
 
 export interface ActivityContext {
@@ -144,6 +145,12 @@ export function describeActivity(entry: AlbumActivity, ctx: ActivityContext): Ac
         });
       } else if (before.date !== after.date) {
         text = t('moved_bill', { actor, title, day: ctx.day(after.date) });
+      } else if (after.category && before.category !== after.category) {
+        text = t('recategorized_bill', {
+          actor,
+          title,
+          category: albumCategoryLabel(after.category),
+        });
       } else {
         text = t('changed_bill', { actor, title });
       }

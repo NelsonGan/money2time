@@ -21,6 +21,7 @@ function makeTx(overrides: Partial<TransactionWithRelations>): TransactionWithRe
     createdBy: null,
     memberId: null,
     albumGroupId: null,
+    albumCategory: null,
     reportingCurrency: 'USD',
     reportingAmount: overrides.amount ?? 0,
     fxRate: 1,

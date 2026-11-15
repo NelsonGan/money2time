@@ -187,6 +187,8 @@ export type LinkState = {
   creditDueDaysAfter: boolean;
   /** The phone saves a shared album's bills from here (`phoneTakesSharedAlbums`). */
   sharedAlbums: boolean;
+  /** The phone takes a shared bill's album category from here (`phoneTakesAlbumCategories`). */
+  albumCategories: boolean;
   /** The last transfer that failed, if the latest one did. */
   error: string | null;
   /** Refresh was pressed with no phone around: show how to bring it. */

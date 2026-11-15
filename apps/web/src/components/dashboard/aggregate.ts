@@ -1,5 +1,8 @@
 import { dayRange } from "@/lib/backup/dates";
-import { OTHER_COLOR, type Category, type Model, type RecurringRule, type Tx } from "@/lib/backup/model";
+import { ALBUM_CATEGORIES, albumCategory, albumCategoryOf, type AlbumCategoryKey } from "@/lib/album/categories";
+import { albumGroupOf } from "@/lib/backup/album-group";
+import { albumIdOfLine, lineOf } from "@/lib/backup/album-lines";
+import { OTHER_COLOR, SERIES_COLORS, type Category, type Model, type RecurringRule, type Trip, type Tx } from "@/lib/backup/model";
 
 import { addAmt, ZERO, type Amt } from "./state";
 
@@ -47,43 +50,111 @@ export type Slice = {
   amt: Amt;
   count: number;
   category: Category | null;
+  /** An album's own line (README: Key patterns > Albums): its spending, whatever the category. */
+  trip?: Trip;
+  /** A shared album's category, in an album's own breakdown (`ALBUM_CATEGORIES`). */
+  albumCategory?: AlbumCategoryKey;
 };
 
 const UNCATEGORIZED = "__none";
 
-/** Totals per top-level category (or per child of `parentId`). */
+/**
+ * Totals per line of a category list: each album (its spending, whatever the
+ * category, counted there alone) and each top-level category. With
+ * `parentId`, that category's children; with an album's line, the album's
+ * own breakdown (`albumBreakdown`).
+ */
 export function breakdown(
   txs: Tx[],
   model: Model,
   kind: "spending" | "earning",
   parentId?: string | null,
 ): Slice[] {
+  const albumId = albumIdOfLine(parentId);
+  if (albumId) return albumBreakdown(txs.filter((tx) => tx[kind] && tx.albumId === albumId), model, albumId);
+  const trips = new Map(model.trips.map((trip) => [trip.id, trip]));
   const map = new Map<string, Slice>();
   for (const tx of txs) {
     if (!tx[kind]) continue;
+    const line = lineOf(tx);
     let key: string;
     if (parentId) {
-      if (tx.parentId !== parentId) continue;
+      // An album's spending is on the album's line, not its category's.
+      if (line !== parentId) continue;
       key = tx.categoryId ?? UNCATEGORIZED;
     } else {
-      key = tx.parentId ?? UNCATEGORIZED;
+      key = line;
     }
     let slice = map.get(key);
     if (!slice) {
-      const category = key === UNCATEGORIZED ? null : (model.categories.get(key) ?? null);
+      const trip = parentId ? undefined : trips.get(albumIdOfLine(key) ?? "");
+      const category = trip || key === UNCATEGORIZED ? null : (model.categories.get(key) ?? null);
       slice = {
         id: key,
-        name: category?.name ?? "",
+        name: trip?.name ?? category?.name ?? "",
         icon: category?.icon ?? null,
-        color: category?.color ?? OTHER_COLOR,
+        color: trip?.color ?? category?.color ?? OTHER_COLOR,
         amt: ZERO,
         count: 0,
         category,
+        ...(trip ? { trip } : null),
       };
       map.set(key, slice);
     }
     slice.amt = addAmt(slice.amt, { money: tx.amount, hours: tx.hours });
     slice.count += 1;
+  }
+  return [...map.values()].sort((a, b) => b.amt.money - a.amt.money);
+}
+
+/**
+ * An album's spending by category, as the app's album Breakdown has it
+ * (features/albums/lib/albumBreakdown.ts): a shared album, or one the user is
+ * no longer in, by its own categories, the same for everyone (each entry's
+ * `albumCategory`, else a bill's, else what the entry's own category reads
+ * as); an album of the user's own by top-level category.
+ */
+export function albumBreakdown(txs: Tx[], model: Model, albumId: string): Slice[] {
+  const group = albumGroupOf(model.raw, albumId);
+  const ended = model.trips.find((trip) => trip.id === albumId)?.ended ?? false;
+  const byAlbumCategory = ended || txs.some((tx) => tx.albumCategory) || (!!group && [...group.bills.values()].some((bill) => bill.category));
+  // A bill's category, for an entry the phone has not stamped yet, and for
+  // the entries its paid parts made.
+  const categoryOf = new Map<string, AlbumCategoryKey>();
+  if (byAlbumCategory && group) {
+    for (const bill of group.bills.values()) if (bill.category) categoryOf.set(bill.id, bill.category);
+    for (const split of model.splits) {
+      const category = categoryOf.get(split.transaction_id);
+      if (category && split.paid_transaction_id) categoryOf.set(split.paid_transaction_id, category);
+    }
+  }
+  const map = new Map<string, Slice>();
+  for (const tx of txs) {
+    let key: string;
+    let slice: Slice | undefined;
+    if (byAlbumCategory) {
+      // Else (an entry of the user's own there): its category's icon, then name, else Other.
+      const root = tx.parentId ? model.categories.get(tx.parentId) : null;
+      const category = tx.albumCategory ?? categoryOf.get(tx.id) ?? albumCategoryOf({ category_name: root?.name, category_icon: root?.icon });
+      key = category;
+      slice = map.get(key) ?? {
+        id: key,
+        name: albumCategory(category).name,
+        icon: albumCategory(category).icon,
+        color: SERIES_COLORS[ALBUM_CATEGORIES.findIndex((entry) => entry.key === category)] ?? OTHER_COLOR,
+        amt: ZERO,
+        count: 0,
+        category: null,
+        albumCategory: category,
+      };
+    } else {
+      key = tx.parentId ?? UNCATEGORIZED;
+      const category = key === UNCATEGORIZED ? null : (model.categories.get(key) ?? null);
+      slice = map.get(key) ?? { id: key, name: category?.name ?? "", icon: category?.icon ?? null, color: category?.color ?? OTHER_COLOR, amt: ZERO, count: 0, category };
+    }
+    slice.amt = addAmt(slice.amt, { money: tx.amount, hours: tx.hours });
+    slice.count += 1;
+    map.set(key, slice);
   }
   return [...map.values()].sort((a, b) => b.amt.money - a.amt.money);
 }

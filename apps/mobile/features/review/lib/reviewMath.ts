@@ -1,4 +1,5 @@
-import type { Category, TransactionSentiment, TransactionWithRelations } from '~/types';
+import { albumLineId } from '~/features/albums/lib/albumLines';
+import type { Album, Category, TransactionSentiment, TransactionWithRelations } from '~/types';
 import { dateFromDayKeyLocal, dayKeyFromDateLocal, dayKeyFromIsoLocal } from '~/utils/formatters';
 
 import { periodContains, type ReviewPeriod } from './reviewPeriods';
@@ -41,6 +42,8 @@ export interface ReviewCategory {
   label: string;
   /** Tagged icon value (see `constants/categoryIcons.ts`), or null. */
   icon: string | null;
+  /** An album's own line: its expenses, whatever their category. */
+  album?: ReviewAlbum;
   amount: number;
   /** Share of the period's total expense, 0..1. */
   share: number;
@@ -102,6 +105,8 @@ export interface ReviewSummary {
   /** True when the period holds no income and no expense at all. */
   isEmpty: boolean;
 }
+
+export type ReviewAlbum = Pick<Album, 'id' | 'name' | 'coverPhotoUri'>;
 
 /** Sentinel root id for expenses with no category, so they still get a row. */
 export const UNCATEGORIZED_ID = '__uncategorized__';
@@ -268,13 +273,22 @@ function buildCategories(
   expenses: TransactionWithRelations[],
   totalExpense: number,
   categories: Pick<Category, 'id' | 'parentId' | 'name' | 'icon'>[],
+  albumOf?: (transactionId: string) => ReviewAlbum | null,
 ): ReviewCategory[] {
   const byId = new Map(categories.map((category) => [category.id, category]));
   const rootIdOf = (categoryId: string) => byId.get(categoryId)?.parentId ?? categoryId;
 
+  // An expense in an album counts under the album's line, not its category.
+  const albums = new Map<string, ReviewAlbum>();
   const groups = new Map<string, { amount: number; rows: TransactionWithRelations[] }>();
   for (const transaction of expenses) {
-    const rootId = transaction.categoryId ? rootIdOf(transaction.categoryId) : UNCATEGORIZED_ID;
+    const album = albumOf?.(transaction.id) ?? null;
+    if (album) albums.set(albumLineId(album.id), album);
+    const rootId = album
+      ? albumLineId(album.id)
+      : transaction.categoryId
+        ? rootIdOf(transaction.categoryId)
+        : UNCATEGORIZED_ID;
     const group = groups.get(rootId) ?? { amount: 0, rows: [] };
     group.amount += valueOf(transaction);
     group.rows.push(transaction);
@@ -287,7 +301,8 @@ function buildCategories(
   const largest = ordered[0]?.[1].amount ?? 0;
 
   return ordered.map(([rootId, group]) => {
-    const category = byId.get(rootId);
+    const album = albums.get(rootId);
+    const category = album ? undefined : byId.get(rootId);
     const rows = [...group.rows].sort((a, b) => valueOf(b) - valueOf(a));
     const items = rows.slice(0, MAX_CATEGORY_ITEMS).map((transaction) => ({
       id: transaction.id,
@@ -300,8 +315,9 @@ function buildCategories(
 
     return {
       id: rootId,
-      label: category?.name ?? '',
+      label: album?.name ?? category?.name ?? '',
       icon: category?.icon ?? null,
+      ...(album ? { album } : null),
       amount: group.amount,
       share: totalExpense > 0 ? group.amount / totalExpense : 0,
       barRatio: largest > 0 ? group.amount / largest : 0,
@@ -426,10 +442,13 @@ export function buildReviewSummary({
   hourlyRate,
   budgetTotal = null,
   previousExpenses = [],
+  albumOf,
 }: {
   period: ReviewPeriod;
   transactions: TransactionWithRelations[];
   categories: Pick<Category, 'id' | 'parentId' | 'name' | 'icon'>[];
+  /** The album an entry is in: its expenses count under the album's own line. */
+  albumOf?: (transactionId: string) => ReviewAlbum | null;
   hourlyRate: number;
   budgetTotal?: number | null;
   previousExpenses?: number[];
@@ -469,7 +488,7 @@ export function buildReviewSummary({
     hourlyRate,
     bars,
     barAverage: averagePerBar(period, bars, expense),
-    categories: buildCategories(expenses, expense, categories),
+    categories: buildCategories(expenses, expense, categories, albumOf),
     sentiment: buildSentiment(expenses),
     standouts: buildStandouts(period, inPeriod, expenses),
     pace: buildPace({ zoom: period.zoom, spent: expense, budgetTotal, previousExpenses }),

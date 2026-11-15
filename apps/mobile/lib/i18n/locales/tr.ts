@@ -3014,7 +3014,8 @@ const tr = {
     no_transactions_title: 'İşlem yok',
     no_transactions_message: 'Bu albüme işlem ekleyince burada görünür.',
     delete_title: 'Albüm silinsin mi?',
-    delete_body: 'Bu, albümü kaldırır. İşlemleriniz silinmez.',
+    delete_body:
+      'İşlemlerin korunur ve kendi kategorilerine geri döner. Albümü olduğu gibi tutmak için bunun yerine arşivle.',
     cover_permission_title: 'Fotoğraf erişimi gerekli',
     cover_permission_body: 'Kapak resmi seçmek için fotoğraf erişimine izin verin.',
     people: {
@@ -3033,14 +3034,31 @@ const tr = {
       row: 'Arkadaşlarla böl',
       caption: 'Herkes hesapları ve kimin kime borçlu olduğunu görür.',
       link_note: '24 saat geçerlidir. Bağlantıya sahip herkes katılabilir.',
-      stop_message: 'Herkes albümü kendi kayıtlarıyla saklar, ancak artık aranızda güncellenmez.',
       leave: 'Albümden ayrıl',
       leave_title: '{{name}} albümünden ayrılınsın mı?',
-      leave_message: 'Albümü kendi kayıtlarınızla saklarsınız, ancak artık güncellenmez.',
-      delete_leave_message: 'Albümden de ayrılırsın. Diğerleri albümü ve faturalarını korur.',
+      leave_message:
+        "Arşivlenenler'e taşınır ve artık güncellenmez. İşlemlerin sende kalır, diğerleri de albümü ve faturalarını tutar.",
+      end: 'Albümü sonlandır',
+      end_title: '{{name}} herkes için sonlandırılsın mı?',
+      end_message:
+        "Artık kimse faturalarını ekleyemez veya değiştiremez. Herkes albümü, işlemleri ve bakiyeleri olduğu gibi Arşivlenenler'de tutar.",
       limit: 'Aynı anda en fazla {{max}} albüm paylaşabilirsiniz.',
       full: 'Bir albüme en fazla {{max}} kişi katılabilir.',
       sign_in: 'Bu albümü paylaşmak için giriş yapın.',
+    },
+    archive: {
+      action: 'Arşivle',
+      unarchive: 'Arşivden çıkar',
+      label: 'Arşivlendi',
+      section: 'Arşivlenenler ({{count}})',
+      confirm_title: '{{name}} arşivlensin mi?',
+      confirm_shared:
+        "Albümler sayfasında Arşivlenenler bölümüne taşınır. Albümde kalırsın, faturaları güncellenmeye devam eder ve Analizler'de sayılmaya devam eder. İstediğin zaman arşivden çıkarabilirsin.",
+    },
+    ended: {
+      label: 'Artık paylaşılmıyor',
+      title: 'Artık paylaşılmıyor',
+      body: 'Bu albümden ayrıldın, paylaşım sona erdi veya oturumu kapattın. Albüm, işlemlerinle birlikte olduğu gibi korunur ve artık güncellenmez. Geri getirmek için yeniden oturum aç veya yeniden katıl.',
     },
     balances: {
       tab: 'Bakiyeler',
@@ -3081,6 +3099,17 @@ const tr = {
       signed_out: 'Bu albümü değiştirmek için yeniden giriş yapın.',
       failed: 'Bu albümdeki değişiklik kaydedilemedi. Tekrar deneyin.',
     },
+    line_label: '{{name}}, albüm',
+    categories: {
+      food: 'Yeme & İçme',
+      groceries: 'Market',
+      transport: 'Ulaşım',
+      housing: 'Konut',
+      bills: 'Faturalar',
+      healthcare: 'Sağlık',
+      shopping: 'Alışveriş',
+      other: 'Diğer',
+    },
     activity: {
       tab: 'Etkinlik',
       show_all: 'Tümünü göster ({{count}})',
@@ -3098,6 +3127,7 @@ const tr = {
       renamed_bill: '{{actor}}: hesap adı değiştirildi, {{before}} → {{after}}',
       moved_bill: '{{actor}}: {{title}} için tarih {{day}} olarak değiştirildi',
       changed_bill: '{{actor}}: {{title}} değiştirildi',
+      recategorized_bill: '{{actor}}, {{title}} kaydını {{category}} kategorisine taşıdı',
       your_share: 'Sizin payınız {{money}}',
       your_share_change: 'Sizin payınız {{before}} → {{after}}',
       your_share_gone: '{{money}} tutarındaki payınız kaldırıldı',
@@ -3200,6 +3230,7 @@ const tr = {
     delete_budget_message_month: 'Bu ay için otomatik olarak yeniden oluşturulmaz.',
     delete_budget_message_year: 'Bu yıl için otomatik olarak yeniden oluşturulmaz.',
     unbudgeted_section: 'Bütçelenmemiş harcamalar',
+    albums_section: 'Albümler',
     left: '{{amount}} kaldı',
     over: '{{amount}} aşım',
     name_label: 'Ad',

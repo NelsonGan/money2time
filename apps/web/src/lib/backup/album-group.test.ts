@@ -71,6 +71,8 @@ const WORDS: Record<string, string> = {
   joined: "{name} joined the album",
   started: "{name} started the album",
   changed_album: "{actor} changed the album",
+  changed_bill: "{actor} changed {title}",
+  recategorized_bill: "{actor} filed {title} under {category}",
 };
 
 const ctx = (patch: Partial<ActivityContext> = {}): ActivityContext => ({
@@ -79,6 +81,7 @@ const ctx = (patch: Partial<ActivityContext> = {}): ActivityContext => ({
   nameOf: (id) => (id === "tess" ? "Tess" : "Someone"),
   money: (amount) => `RM${amount}`,
   day: (date) => date,
+  category: (key) => key.charAt(0).toUpperCase() + key.slice(1),
   ...patch,
 });
 
@@ -156,4 +159,12 @@ test("groupActivityByDay keeps the order and starts a group per day", () => {
       ["2026-10-01", 1],
     ],
   );
+});
+
+test("a change of a bill's album category says what it is filed under now", () => {
+  const line = describeActivity(entry({ kind: "bill_edited", bill: { before: snap({ category: "food" }), after: snap({ category: "transport" }) } }), ctx());
+  assert.equal(line.text, WORDS.recategorized_bill.replace("{actor}", "Tess").replace("{title}", "Dinner").replace("{category}", "Transport"));
+  // An entry logged before bills had one says only that the bill changed.
+  const older = describeActivity(entry({ kind: "bill_edited", bill: { before: snap(), after: snap() } }), ctx());
+  assert.equal(older.text, WORDS.changed_bill.replace("{actor}", "Tess").replace("{title}", "Dinner"));
 });

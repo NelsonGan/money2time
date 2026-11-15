@@ -1,9 +1,12 @@
 import { DEFAULT_APP_ICON_ID, isAppIconId } from '~/constants/appIcons';
+import { albumCategoryIcon, albumCategoryLabel } from '~/features/albums/lib/albumCategoryName';
 import {
+  albumCategoryOf,
   GROUP_BILL_ID,
   GROUP_CURRENCY,
   GROUP_ROW_ID,
   GROUP_SETTLEMENT_ID,
+  isAlbumCategoryKey,
 } from '~/features/albums/lib/groupPlan';
 import { DEFAULT_LEDGER_ID } from '~/lib/db/ledgerScope';
 import type {
@@ -307,6 +310,8 @@ export function toAlbum(row: AlbumRow): Album {
     placeName: row.placeName ?? null,
     placeAdmin: row.placeAdmin ?? null,
     countryCode: row.countryCode ?? null,
+    archivedAt: row.archivedAt ?? null,
+    shareEndedAt: row.shareEndedAt ?? null,
     sortOrder: row.sortOrder ?? 0,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
@@ -324,7 +329,6 @@ const GROUP_DAY = /^(\d{4})-(\d{2})-(\d{2})(T[0-9:.Z+-]{1,30})?$/;
 const MAX_GROUP_AMOUNT = 1e12;
 const MAX_GROUP_NAME = 40;
 const MAX_GROUP_NOTE = 500;
-const MAX_GROUP_LABEL = 80;
 /** More shares than an album can have people (20 and the user), with room for people since removed. */
 const MAX_GROUP_SHARES = 64;
 
@@ -418,8 +422,11 @@ export function toAlbumExpense(row: AlbumExpenseRow): AlbumExpense | null {
     note: clip(row.note, MAX_GROUP_NOTE),
     amount: row.amount,
     currency: row.currency,
-    categoryName: clip(row.categoryName, MAX_GROUP_LABEL),
-    categoryIcon: clip(row.categoryIcon, MAX_GROUP_LABEL),
+    category: albumCategoryOf({
+      category_key: row.categoryKey,
+      category_name: row.categoryName,
+      category_icon: row.categoryIcon,
+    }),
     paidBy: row.paidBy,
     shares,
     createdBy: row.createdBy ?? null,
@@ -492,6 +499,7 @@ function billSnapshot(value: unknown): AlbumBillSnapshot | null {
   }
   return {
     note: clip(typeof raw.note === 'string' ? raw.note : null, MAX_GROUP_NOTE),
+    category: isAlbumCategoryKey(raw.category) ? raw.category : null,
     amount: raw.amount,
     currency: raw.currency,
     date,
@@ -719,6 +727,7 @@ export function toTransaction(row: TransactionRow): Transaction {
     createdBy: row.createdBy ?? null,
     memberId: row.memberId ?? null,
     albumGroupId: row.albumGroupId ?? null,
+    albumCategory: isAlbumCategoryKey(row.albumCategory) ? row.albumCategory : null,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     deletedAt: row.deletedAt,
@@ -745,7 +754,7 @@ export const TRANSACTION_RAW_COLUMNS_SQL = `
   t.reimbursement_account_id, t.reimbursement_transaction_id, t.reimbursement_of_id,
   t.counts_as_expense, t.day_order, t.created_at, t.updated_at, t.deleted_at, t.details,
   t.instalment_rule_id, t.instalment_number, t.created_by, t.member_id, t.fee_of_id,
-  t.album_group_id`;
+  t.album_group_id, t.album_category`;
 
 type RawValue = string | number | null;
 
@@ -798,14 +807,38 @@ export function toTransactionWithRelationsFromRaw(
     memberId: (values[35] as string | null) ?? null,
     feeOfId: (values[36] as string | null) ?? null,
     albumGroupId: (values[37] as string | null) ?? null,
-    accountName: (values[38] as string | null) ?? null,
-    fromAccountName: (values[39] as string | null) ?? null,
-    toAccountName: (values[40] as string | null) ?? null,
-    categoryName: (values[41] as string | null) ?? null,
-    categoryParentId: (values[43] as string | null) ?? null,
-    categoryParentName: (values[44] as string | null) ?? null,
-    categoryIcon: (values[42] as string | null) ?? null,
-    instalmentCount: (values[45] as number | null) ?? null,
+    albumCategory: isAlbumCategoryKey(values[38]) ? values[38] : null,
+    accountName: (values[39] as string | null) ?? null,
+    fromAccountName: (values[40] as string | null) ?? null,
+    toAccountName: (values[41] as string | null) ?? null,
+    ...withAlbumCategory(values[38], {
+      categoryName: (values[42] as string | null) ?? null,
+      categoryParentId: (values[44] as string | null) ?? null,
+      categoryParentName: (values[45] as string | null) ?? null,
+      categoryIcon: (values[43] as string | null) ?? null,
+    }),
+    instalmentCount: (values[46] as number | null) ?? null,
+  };
+}
+
+type CategoryRelations = Required<
+  Pick<
+    TransactionWithRelations,
+    'categoryName' | 'categoryIcon' | 'categoryParentId' | 'categoryParentName'
+  >
+>;
+
+/**
+ * A shared album's entry shows the album's category in every list, in place
+ * of the user's own (README: Album members and shared albums > Categories).
+ */
+function withAlbumCategory(albumCategory: unknown, own: CategoryRelations): CategoryRelations {
+  if (!isAlbumCategoryKey(albumCategory)) return own;
+  return {
+    categoryName: albumCategoryLabel(albumCategory),
+    categoryIcon: albumCategoryIcon(albumCategory),
+    categoryParentId: null,
+    categoryParentName: null,
   };
 }
 
@@ -849,6 +882,7 @@ const TRANSACTION_SPARSE_DEFAULTS: Readonly<Record<string, RawValue>> = {
   member_id: null,
   fee_of_id: null,
   album_group_id: null,
+  album_category: null,
 };
 
 const SPARSE_COLUMNS = TRANSACTION_RAW_COLUMNS.filter(
@@ -915,7 +949,8 @@ export function transactionRelations(
   transaction: Pick<
     Transaction,
     'accountId' | 'fromAccountId' | 'toAccountId' | 'categoryId' | 'instalmentRuleId'
-  >,
+  > &
+    Partial<Pick<Transaction, 'albumCategory'>>,
   lookups: TransactionRelationLookups,
 ): TransactionRelations {
   const { accountNames, categories, instalmentCounts } = lookups;
@@ -926,10 +961,12 @@ export function transactionRelations(
     accountName: nameOf(transaction.accountId),
     fromAccountName: nameOf(transaction.fromAccountId),
     toAccountName: nameOf(transaction.toAccountId),
-    categoryName: category?.name ?? null,
-    categoryIcon: category?.icon ?? null,
-    categoryParentId: category?.parentId ?? null,
-    categoryParentName: category?.parentName ?? null,
+    ...withAlbumCategory(transaction.albumCategory, {
+      categoryName: category?.name ?? null,
+      categoryIcon: category?.icon ?? null,
+      categoryParentId: category?.parentId ?? null,
+      categoryParentName: category?.parentName ?? null,
+    }),
     instalmentCount: transaction.instalmentRuleId
       ? (instalmentCounts.get(transaction.instalmentRuleId) ?? null)
       : null,
@@ -1034,6 +1071,7 @@ export function createTransactionAssembler(
       memberId: null,
       feeOfId: null,
       albumGroupId: null,
+      albumCategory: null,
       accountName: nameOf(common[8]),
       fromAccountName: nameOf(common[9]),
       toAccountName: nameOf(common[10]),

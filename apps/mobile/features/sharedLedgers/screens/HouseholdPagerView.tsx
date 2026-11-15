@@ -16,6 +16,9 @@ import {
 import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
+import { AlbumLineIcon } from '~/features/albums/components/AlbumLineIcon';
+import { useAlbumLines } from '~/features/albums/hooks/useAlbumLines';
+import { albumIdOfLine } from '~/features/albums/lib/albumLines';
 import { monthKeyLabel, monthNameLabel } from '~/features/budget/lib/format';
 import { InsightCard, SpendDeltaPill } from '~/features/insights/components/InsightCard';
 import type { InsightsDrilldownPayload } from '~/features/insights/screens/InsightsDrilldownScreen';
@@ -30,7 +33,7 @@ import {
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import type { Category, TransactionWithRelations, UserSettings } from '~/types';
+import type { Album, Category, TransactionWithRelations, UserSettings } from '~/types';
 import { withColorAlpha } from '~/utils/color';
 import { financialMonthKeyForDate, monthCycleOf } from '~/utils/financialMonth';
 import { toSpendingRows } from '~/utils/spending';
@@ -131,6 +134,8 @@ export const HouseholdPagerView = forwardRef<MonthPagerHandle, HouseholdPagerVie
       () => new Map(categories.map((category) => [category.id, category])),
       [categories],
     );
+    // An expense in an album counts under the album's line, not its category.
+    const albumLines = useAlbumLines();
     const transactionsById = useMemo(
       () => new Map(transactions.map((transaction) => [transaction.id, transaction])),
       [transactions],
@@ -149,12 +154,13 @@ export const HouseholdPagerView = forwardRef<MonthPagerHandle, HouseholdPagerVie
             isRunning: monthKey === currentMonthKey,
             peopleOrder,
             categoriesById,
+            albumIdOf: (id) => albumLines.albumOf(id)?.id ?? null,
           });
           built.set(monthKey, month);
         }
         return month;
       };
-    }, [categoriesById, currentMonthKey, index, peopleOrder]);
+    }, [albumLines, categoriesById, currentMonthKey, index, peopleOrder]);
 
     // A tap on another month's bar in the trend opens that month's page.
     const selectMonth = useCallback(
@@ -213,16 +219,29 @@ export const HouseholdPagerView = forwardRef<MonthPagerHandle, HouseholdPagerVie
                     <CoversCard
                       categories={month.categories}
                       categoriesById={categoriesById}
+                      albumById={albumLines.albumById}
                       transactionsById={transactionsById}
                       styleByKey={styleByKey}
                       settings={settings}
-                      onOpenCategory={(category, name) =>
+                      onOpenCategory={(category, name) => {
+                        const albumId = albumIdOfLine(category.id);
+                        if (albumId) {
+                          // The album's own breakdown by category, for the month.
+                          void triggerHaptic('selection');
+                          onOpenDrilldown({
+                            label: I18n.t('household.person_month', { name, month: label }),
+                            transactionIds: category.transactionIds,
+                            albumId,
+                            albumCategories: true,
+                          });
+                          return;
+                        }
                         // The month too, as on a person's entries: the list holds only its entries.
                         openIds(
                           I18n.t('household.person_month', { name, month: label }),
                           category.transactionIds,
-                        )
-                      }
+                        );
+                      }}
                     />
                     <TrendCard
                       month={month}
@@ -246,6 +265,7 @@ export const HouseholdPagerView = forwardRef<MonthPagerHandle, HouseholdPagerVie
         );
       },
       [
+        albumLines,
         categoriesById,
         listNavInset,
         monthFor,
@@ -463,6 +483,7 @@ function nameFromEntries(
 function CoversCard({
   categories,
   categoriesById,
+  albumById,
   transactionsById,
   styleByKey,
   settings,
@@ -470,6 +491,7 @@ function CoversCard({
 }: {
   categories: HouseholdCategory[];
   categoriesById: Map<string, Category>;
+  albumById: ReadonlyMap<string, Album>;
   transactionsById: Map<string, TransactionWithRelations>;
   styleByKey: Map<string, PersonStyle>;
   settings: UserSettings;
@@ -483,8 +505,11 @@ function CoversCard({
       <View className="gap-3.5">
         {categories.map((category) => {
           const isUncategorized = category.id === UNCATEGORIZED_ID;
-          const record = isUncategorized ? undefined : categoriesById.get(category.id);
+          const albumId = albumIdOfLine(category.id);
+          const album = albumId ? albumById.get(albumId) : undefined;
+          const record = isUncategorized || albumId ? undefined : categoriesById.get(category.id);
           const name =
+            album?.name ??
             record?.name ??
             (isUncategorized ? null : nameFromEntries(category, transactionsById)) ??
             String(I18n.t('common.uncategorized'));
@@ -505,7 +530,13 @@ function CoversCard({
               accessibilityLabel={`${name}, ${money(category.amount, settings)}. ${parts}`}
               className="flex-row items-center gap-3 active:opacity-70"
             >
-              <CategoryTile category={record} />
+              {album ? (
+                <View className="h-9 w-9 items-center justify-center rounded-2xl bg-surface-muted/70">
+                  <AlbumLineIcon album={album} size={26} />
+                </View>
+              ) : (
+                <CategoryTile category={record} />
+              )}
               <View className="min-w-0 flex-1">
                 <View className="flex-row items-baseline gap-2">
                   <Text variant="body" numberOfLines={1} className="min-w-0 flex-1">

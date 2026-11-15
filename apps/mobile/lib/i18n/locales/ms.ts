@@ -3023,7 +3023,8 @@ const ms = {
     no_transactions_title: 'Tiada transaksi',
     no_transactions_message: 'Tambah transaksi ke album ini untuk melihatnya di sini.',
     delete_title: 'Padam album?',
-    delete_body: 'Ini mengeluarkan album. Transaksi anda tidak dipadam.',
+    delete_body:
+      'Transaksi anda dikekalkan dan kembali ke kategori masing-masing. Untuk mengekalkan album seperti sedia ada, arkibkannya sahaja.',
     cover_permission_title: 'Akses foto diperlukan',
     cover_permission_body: 'Benarkan akses foto untuk memilih imej kulit.',
     people: {
@@ -3041,17 +3042,31 @@ const ms = {
       row: 'Kongsi dengan rakan',
       caption: 'Semua orang nampak bil dan siapa berhutang kepada siapa.',
       link_note: 'Sah selama 24 jam. Sesiapa yang ada pautan ini boleh sertai.',
-      stop_message:
-        'Semua orang kekal dengan album dan catatan masing-masing, tetapi ia tidak lagi dikemas kini antara anda.',
       leave: 'Keluar album',
       leave_title: 'Keluar daripada {{name}}?',
       leave_message:
-        'Anda kekal dengan album dan catatan anda sendiri, tetapi ia tidak lagi dikemas kini.',
-      delete_leave_message:
-        'Anda juga keluar daripada album ini. Yang lain kekal dengan album dan bilnya.',
+        'Album dipindahkan ke Diarkibkan dan tidak lagi dikemas kini. Anda menyimpan transaksi anda, dan yang lain menyimpan album dan bilnya.',
+      end: 'Tamatkan album',
+      end_title: 'Tamatkan {{name}} untuk semua orang?',
+      end_message:
+        'Tiada sesiapa boleh menambah atau mengubah bilnya lagi. Semua orang menyimpan album dalam Diarkibkan, dengan transaksi dan baki mereka seperti sedia ada.',
       limit: 'Anda boleh kongsi sehingga {{max}} album pada satu masa.',
       full: 'Sehingga {{max}} orang boleh sertai satu album.',
       sign_in: 'Log masuk untuk berkongsi album ini.',
+    },
+    archive: {
+      action: 'Arkibkan',
+      unarchive: 'Nyaharkib',
+      label: 'Diarkibkan',
+      section: 'Diarkibkan ({{count}})',
+      confirm_title: 'Arkibkan {{name}}?',
+      confirm_shared:
+        'Album dipindahkan ke Diarkibkan di halaman Album. Anda kekal di dalamnya, bilnya terus dikemas kini dan ia masih dikira dalam Wawasan. Anda boleh menyaharkibnya pada bila-bila masa.',
+    },
+    ended: {
+      label: 'Tidak dikongsi lagi',
+      title: 'Tidak dikongsi lagi',
+      body: 'Anda telah keluar dari album ini, perkongsian telah tamat atau anda telah log keluar. Ia dikekalkan seperti sedia ada, bersama transaksi anda, dan tidak lagi dikemas kini. Log masuk semula atau sertai semula untuk mengembalikannya.',
     },
     balances: {
       tab: 'Baki',
@@ -3093,6 +3108,17 @@ const ms = {
       signed_out: 'Log masuk semula untuk mengubah album ini.',
       failed: 'Tidak dapat menyimpan perubahan pada album ini. Cuba lagi.',
     },
+    line_label: '{{name}}, album',
+    categories: {
+      food: 'Makanan',
+      groceries: 'Barangan Runcit',
+      transport: 'Pengangkutan',
+      housing: 'Perumahan',
+      bills: 'Bil',
+      healthcare: 'Kesihatan',
+      shopping: 'Membeli-belah',
+      other: 'Lain-lain',
+    },
     activity: {
       tab: 'Aktiviti',
       show_all: 'Tunjukkan semua {{count}}',
@@ -3110,6 +3136,7 @@ const ms = {
       renamed_bill: '{{actor}} menukar nama {{before}} kepada {{after}}',
       moved_bill: '{{actor}} memindahkan {{title}} ke {{day}}',
       changed_bill: '{{actor}} mengubah {{title}}',
+      recategorized_bill: '{{actor}} memindahkan {{title}} ke {{category}}',
       your_share: 'Bahagian anda {{money}}',
       your_share_change: 'Bahagian anda {{before}} → {{after}}',
       your_share_gone: 'Bahagian anda sebanyak {{money}} sudah tiada',
@@ -3212,6 +3239,7 @@ const ms = {
     delete_budget_message_month: 'Ia tidak akan dicipta semula secara automatik untuk bulan ini.',
     delete_budget_message_year: 'Ia tidak akan dicipta semula secara automatik untuk tahun ini.',
     unbudgeted_section: 'Perbelanjaan luar bajet',
+    albums_section: 'Album',
     left: 'Baki {{amount}}',
     over: 'Lebih {{amount}}',
     name_label: 'Nama',

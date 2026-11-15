@@ -407,8 +407,8 @@ export function AlbumActions({ trip }: { trip: Trip }) {
   const { fullModel: model } = useDashboard();
   const { run, busy, error, ready } = useEditRun();
   const [open, setOpen] = useState<"details" | "transactions" | "delete" | null>(null);
-  // A shared album stops being shared (or is left) in the app before it is
-  // deleted. One with no bills yet still offers it, and the phone says no.
+  // A shared album is archived in the app, never deleted. One with no bills
+  // yet still offers it, and the phone says no.
   const shared = useMemo(() => albumGroupBillIds(model, trip.id).size > 0, [model, trip.id]);
 
   const remove = async () => {
@@ -431,11 +431,15 @@ export function AlbumActions({ trip }: { trip: Trip }) {
     </button>
   );
 
+  // No longer shared: kept as it was, read-only (README: Album members and
+  // shared albums > Leaving and stopping).
+  if (trip.ended) return <p className="text-right text-[12.5px] text-foreground-soft">{t("endedNote")}</p>;
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap items-center justify-end gap-1.5">
         {button("details", "ui/pencil", t("editTitle"))}
-        {button("transactions", "ui/checklist", t("editTransactions"))}
+        {/* Archived: entries are added once it is back (the app's album page). */}
+        {trip.archived ? null : button("transactions", "ui/checklist", t("editTransactions"))}
         {shared ? null : button("delete", "ui/trash", te("delete"))}
       </div>
       {open === "delete" ? (
@@ -465,6 +469,12 @@ export function AlbumBulkMenu({ selected, onDone }: { selected: Tx[]; onDone: ()
   const { run, busy, error, ready } = useEditRun();
   const expenses = selected.filter((tx) => tx.type === "expense");
   const left = selected.length - expenses.length;
+  // The albums that take entries made elsewhere: not a shared one (only its
+  // own bills), an archived one or one no longer shared.
+  const trips = useMemo(
+    () => model.trips.filter((trip) => !trip.archived && !trip.ended && albumGroupBillIds(model, trip.id).size === 0),
+    [model],
+  );
 
   const add = async (trip: Trip) => {
     if (!ready || busy) return;
@@ -484,13 +494,13 @@ export function AlbumBulkMenu({ selected, onDone }: { selected: Tx[]; onDone: ()
       <p className="border-b border-border px-3.5 py-2.5 text-[12.5px] leading-snug text-foreground-soft">
         {left > 0 ? t("expensesLeftOut", { count: left }) : t("expensesCount", { count: expenses.length })}
       </p>
-      {model.trips.length === 0 ? (
+      {trips.length === 0 ? (
         <p className="px-3.5 py-6 text-center text-[13px] text-foreground-muted">{t("noAlbums")}</p>
       ) : (
         <OptionMenu
           label={t("addToAlbum")}
-          searchable={model.trips.length > 6}
-          options={model.trips.map((trip) => ({
+          searchable={trips.length > 6}
+          options={trips.map((trip) => ({
             value: trip.id,
             label: trip.name,
             icon: <ClayImg name="settings/albums" size={20} />,
@@ -498,7 +508,7 @@ export function AlbumBulkMenu({ selected, onDone }: { selected: Tx[]; onDone: ()
             disabled: busy || !ready,
           }))}
           onSelect={(id) => {
-            const trip = model.trips.find((item) => item.id === id);
+            const trip = trips.find((item) => item.id === id);
             if (trip) void add(trip);
           }}
         />
@@ -525,10 +535,13 @@ export function AlbumToolbar({ onCreate }: { onCreate: () => void }) {
   const { run, busy, error, ready } = useEditRun();
   const [ordering, setOrdering] = useState(false);
   const rows = useMemo(() => albumRows(model), [model]);
-  const activeId = rows.find((row) => row.is_active === 1)?.id ?? "";
+  // Archived albums are out of the free-plan count and the active-album
+  // picker, as on the app's Albums page.
+  const current = useMemo(() => rows.filter((row) => !row.archived_at), [rows]);
+  const activeId = current.find((row) => row.is_active === 1)?.id ?? "";
 
   const create = () => {
-    if (!link.pro && rows.length >= FREE_MAX_ALBUMS) {
+    if (!link.pro && current.length >= FREE_MAX_ALBUMS) {
       paywall("albums");
       return;
     }
@@ -548,12 +561,12 @@ export function AlbumToolbar({ onCreate }: { onCreate: () => void }) {
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap items-center justify-end gap-2">
-        {rows.length ? (
+        {current.length ? (
           <label className="mr-auto flex min-w-0 items-center gap-2 text-[13px] font-semibold text-foreground-soft">
             <span className="truncate">{t("activeLabel")}</span>
             <Select value={activeId} onChange={(event) => setActive(event.target.value)} disabled={!ready || busy} aria-label={t("activeTitle")}>
               <option value="">{t("activeNone")}</option>
-              {rows.map((row) => (
+              {current.map((row) => (
                 <option key={row.id} value={row.id}>
                   {row.name}
                 </option>

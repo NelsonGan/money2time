@@ -4,10 +4,12 @@
    static files or in-memory object URLs; next/image adds nothing for either. */
 
 import { useTranslations } from "next-intl";
-import type { KeyboardEvent, ReactNode, SelectHTMLAttributes } from "react";
+import { useCallback, type KeyboardEvent, type ReactNode, type SelectHTMLAttributes } from "react";
 
 import { ACCOUNT_LOGOS, CATEGORY_ICON_IDS, ITEM_ICONS, SUBSCRIPTION_LOGOS } from "@/lib/backup/assets.generated";
+import type { Trip } from "@/lib/backup/model";
 
+import type { Slice } from "./aggregate";
 import { useDashboard } from "./state";
 import { media } from "@/lib/media";
 
@@ -271,6 +273,26 @@ function Lettermark({ text, size, color = "#B1525F" }: { text: string; size: num
       {letter}
     </span>
   );
+}
+
+/** An album's icon where a category's would be (its line in a category list): its cover, else its name's first letter. */
+export function AlbumGlyph({ trip, size = 28 }: { trip: Pick<Trip, "name" | "coverUri" | "color">; size?: number }) {
+  const { asset } = useDashboard();
+  const url = asset(trip.coverUri);
+  if (url) return <img src={url} alt="" width={size} height={size} className="shrink-0 rounded-[30%] object-cover" style={{ width: size, height: size }} />;
+  return <Lettermark text={trip.name} size={size} color={trip.color} />;
+}
+
+/** A line of a category list's icon: an album's, else its category's. */
+export function SliceGlyph({ slice, name, size = 28 }: { slice: Pick<Slice, "trip" | "icon" | "color">; name: string; size?: number }) {
+  return slice.trip ? <AlbumGlyph trip={slice.trip} size={size} /> : <CategoryGlyph icon={slice.icon} name={name} color={slice.color} size={size} />;
+}
+
+/** A line of a category list's name: an album's, a shared album's category in the page's language, else its category's. */
+export function useSliceName() {
+  const tc = useTranslations("dashboard.common");
+  const tcat = useTranslations("album.categories");
+  return useCallback((slice: Pick<Slice, "name" | "albumCategory">) => (slice.albumCategory ? tcat(slice.albumCategory) : slice.name || tc("uncategorized")), [tc, tcat]);
 }
 
 /**

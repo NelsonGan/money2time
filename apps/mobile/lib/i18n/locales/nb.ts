@@ -3008,7 +3008,8 @@ const nb = {
     no_transactions_title: 'Ingen transaksjoner',
     no_transactions_message: 'Legg til transaksjoner i dette albumet for å se dem her.',
     delete_title: 'Slette album?',
-    delete_body: 'Dette fjerner albumet. Transaksjonene dine slettes ikke.',
+    delete_body:
+      'Transaksjonene dine beholdes og går tilbake til sine egne kategorier. Vil du beholde albumet som det er, kan du arkivere det i stedet.',
     cover_permission_title: 'Trenger tilgang til bilder',
     cover_permission_body: 'Gi tilgang til bilder for å velge et omslagsbilde.',
     people: {
@@ -3027,15 +3028,31 @@ const nb = {
       row: 'Del med venner',
       caption: 'Alle ser regningene og hvem som skylder hvem.',
       link_note: 'Virker i 24 timer. Alle som har lenken, kan bli med.',
-      stop_message:
-        'Alle beholder albumet med sine egne poster, men det oppdateres ikke lenger mellom dere.',
       leave: 'Forlat album',
       leave_title: 'Forlate {{name}}?',
-      leave_message: 'Du beholder albumet med dine egne poster, men det oppdateres ikke lenger.',
-      delete_leave_message: 'Du forlater det også. De andre beholder albumet og regningene.',
+      leave_message:
+        'Det flyttes til Arkivert og oppdateres ikke lenger. Du beholder transaksjonene dine, og de andre beholder albumet og regningene.',
+      end: 'Avslutt album',
+      end_title: 'Avslutte {{name}} for alle?',
+      end_message:
+        'Ingen kan legge til eller endre regningene lenger. Alle beholder albumet under Arkivert, med transaksjonene og saldoene sine som de er.',
       limit: 'Du kan dele opptil {{max}} album om gangen.',
       full: 'Opptil {{max}} personer kan bli med i et album.',
       sign_in: 'Logg inn for å dele dette albumet.',
+    },
+    archive: {
+      action: 'Arkiver',
+      unarchive: 'Hent fra arkivet',
+      label: 'Arkivert',
+      section: 'Arkivert ({{count}})',
+      confirm_title: 'Arkivere {{name}}?',
+      confirm_shared:
+        'Det flyttes til Arkivert på Album-siden. Du er fortsatt med, regningene oppdateres fortsatt, og det teller fortsatt i Innsikt. Du kan hente det fra arkivet når som helst.',
+    },
+    ended: {
+      label: 'Ikke lenger delt',
+      title: 'Ikke lenger delt',
+      body: 'Du forlot albumet, delingen ble avsluttet, eller du logget ut. Det beholdes som det var, med transaksjonene dine, og oppdateres ikke lenger. Logg inn igjen eller bli med på nytt for å få det tilbake.',
     },
     balances: {
       tab: 'Saldoer',
@@ -3076,6 +3093,17 @@ const nb = {
       signed_out: 'Logg på igjen for å endre albumet.',
       failed: 'Kunne ikke lagre endringen i albumet. Prøv igjen.',
     },
+    line_label: '{{name}}, album',
+    categories: {
+      food: 'Mat',
+      groceries: 'Dagligvarer',
+      transport: 'Transport',
+      housing: 'Bolig',
+      bills: 'Regninger',
+      healthcare: 'Helse',
+      shopping: 'Shopping',
+      other: 'Annet',
+    },
     activity: {
       tab: 'Aktivitet',
       show_all: 'Vis alle {{count}}',
@@ -3093,6 +3121,7 @@ const nb = {
       renamed_bill: '{{actor}} ga {{before}} nytt navn: {{after}}',
       moved_bill: '{{actor}} flyttet {{title}} til {{day}}',
       changed_bill: '{{actor}} endret {{title}}',
+      recategorized_bill: '{{actor}} flyttet {{title}} til {{category}}',
       your_share: 'Din andel {{money}}',
       your_share_change: 'Din andel {{before}} → {{after}}',
       your_share_gone: 'Din andel på {{money}} er borte',
@@ -3195,6 +3224,7 @@ const nb = {
     delete_budget_message_month: 'Det gjenopprettes ikke automatisk for denne måneden.',
     delete_budget_message_year: 'Det gjenopprettes ikke automatisk for dette året.',
     unbudgeted_section: 'Ikke-budsjettert forbruk',
+    albums_section: 'Album',
     left: '{{amount}} igjen',
     over: '{{amount}} over',
     name_label: 'Navn',

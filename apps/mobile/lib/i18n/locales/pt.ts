@@ -3024,7 +3024,8 @@ const pt = {
     no_transactions_title: 'Sem transações',
     no_transactions_message: 'Adicione transações a este álbum para vê-las aqui.',
     delete_title: 'Excluir álbum?',
-    delete_body: 'Isto remove o álbum. As suas transações não são excluídas.',
+    delete_body:
+      'Suas transações são mantidas e voltam para as próprias categorias. Para manter o álbum como está, arquive-o.',
     cover_permission_title: 'Acesso a fotos necessário',
     cover_permission_body: 'Permita o acesso a fotos para escolher uma imagem de capa.',
     people: {
@@ -3043,16 +3044,31 @@ const pt = {
       row: 'Dividir com amigos',
       caption: 'Todos veem as contas e quem deve a quem.',
       link_note: 'Vale por 24 horas. Qualquer pessoa com ele pode entrar.',
-      stop_message:
-        'Todos ficam com o álbum e seus próprios lançamentos, mas ele não é mais atualizado entre vocês.',
       leave: 'Sair do álbum',
       leave_title: 'Sair de {{name}}?',
       leave_message:
-        'Você fica com o álbum e seus próprios lançamentos, mas ele não é mais atualizado.',
-      delete_leave_message: 'Você também sai dele. Os outros mantêm o álbum e as contas.',
+        'Ele vai para Arquivados e deixa de atualizar. Você mantém suas transações, e os outros mantêm o álbum e as contas.',
+      end: 'Encerrar álbum',
+      end_title: 'Encerrar {{name}} para todos?',
+      end_message:
+        'Ninguém poderá mais adicionar ou alterar as contas. Todos mantêm o álbum em Arquivados, com suas transações e saldos como estão.',
       limit: 'Você pode compartilhar até {{max}} álbuns por vez.',
       full: 'Até {{max}} pessoas podem entrar em um álbum.',
       sign_in: 'Entre para compartilhar este álbum.',
+    },
+    archive: {
+      action: 'Arquivar',
+      unarchive: 'Desarquivar',
+      label: 'Arquivado',
+      section: 'Arquivados ({{count}})',
+      confirm_title: 'Arquivar {{name}}?',
+      confirm_shared:
+        'Ele vai para Arquivados na página Álbuns. Você continua nele, as contas continuam atualizando e ele continua contando em Análises. Você pode desarquivá-lo quando quiser.',
+    },
+    ended: {
+      label: 'Não compartilhado mais',
+      title: 'Não está mais compartilhado',
+      body: 'Você saiu deste álbum, o compartilhamento terminou ou você saiu da conta. Ele fica como estava, com suas transações, e não é mais atualizado. Entre de novo ou participe de novo para recuperá-lo.',
     },
     balances: {
       tab: 'Saldos',
@@ -3095,6 +3111,17 @@ const pt = {
       signed_out: 'Entre de novo para alterar este álbum.',
       failed: 'Não foi possível salvar a alteração neste álbum. Tente de novo.',
     },
+    line_label: '{{name}}, álbum',
+    categories: {
+      food: 'Alimentação',
+      groceries: 'Mercado',
+      transport: 'Transporte',
+      housing: 'Moradia',
+      bills: 'Contas',
+      healthcare: 'Saúde',
+      shopping: 'Compras',
+      other: 'Outros',
+    },
     activity: {
       tab: 'Atividade',
       show_all: 'Mostrar todas ({{count}})',
@@ -3112,6 +3139,7 @@ const pt = {
       renamed_bill: '{{actor}} renomeou {{before}} para {{after}}',
       moved_bill: '{{actor}} moveu {{title}} para {{day}}',
       changed_bill: '{{actor}} alterou {{title}}',
+      recategorized_bill: '{{actor}} moveu {{title}} para {{category}}',
       your_share: 'Sua parte {{money}}',
       your_share_change: 'Sua parte {{before}} → {{after}}',
       your_share_gone: 'Sua parte de {{money}} foi removida',
@@ -3214,6 +3242,7 @@ const pt = {
     delete_budget_message_month: 'Não será recriado automaticamente para este mês.',
     delete_budget_message_year: 'Não será recriado automaticamente para este ano.',
     unbudgeted_section: 'Gastos fora do orçamento',
+    albums_section: 'Álbuns',
     left: '{{amount}} restante',
     over: '{{amount}} a mais',
     name_label: 'Nome',

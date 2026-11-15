@@ -2986,7 +2986,8 @@ const ja = {
     no_transactions_title: '取引がありません',
     no_transactions_message: 'このアルバムに取引を追加すると表示されます。',
     delete_title: 'アルバムを削除しますか？',
-    delete_body: 'アルバムを削除します。取引は削除されません。',
+    delete_body:
+      '取引は残り、それぞれのカテゴリに戻ります。アルバムをそのまま残したい場合は、代わりにアーカイブしてください。',
     cover_permission_title: '写真へのアクセスが必要',
     cover_permission_body: 'カバー画像を選ぶには写真へのアクセスを許可してください。',
     people: {
@@ -3005,16 +3006,31 @@ const ja = {
       row: '友だちと割り勘',
       caption: '全員が会計と、誰が誰にいくら払うかを見られます。',
       link_note: '24時間有効です。リンクを知っている人は誰でも参加できます。',
-      stop_message:
-        '全員が自分の記録とともにアルバムを持ち続けますが、互いに更新されなくなります。',
       leave: 'アルバムから退出',
       leave_title: '{{name}}から退出しますか？',
-      leave_message: '自分の記録とともにアルバムは残りますが、更新されなくなります。',
-      delete_leave_message:
-        'あなたはこのアルバムからも抜けます。ほかの人にはアルバムと請求が残ります。',
+      leave_message:
+        '「アーカイブ済み」に移動し、更新されなくなります。あなたの取引は残り、ほかの人にはアルバムと会計が残ります。',
+      end: 'アルバムを終了',
+      end_title: '{{name}}を全員に対して終了しますか？',
+      end_message:
+        '誰も会計を追加・変更できなくなります。全員のアルバムは「アーカイブ済み」に残り、取引と残高はそのままです。',
       limit: '同時に共有できるアルバムは{{max}}件までです。',
       full: '1つのアルバムに参加できるのは{{max}}人までです。',
       sign_in: 'このアルバムを共有するにはサインインしてください。',
+    },
+    archive: {
+      action: 'アーカイブ',
+      unarchive: 'アーカイブを解除',
+      label: 'アーカイブ済み',
+      section: 'アーカイブ済み（{{count}}）',
+      confirm_title: '{{name}}をアーカイブしますか？',
+      confirm_shared:
+        'アルバムページの「アーカイブ済み」に移動します。参加したままで、会計は引き続き更新され、インサイトにも含まれます。いつでもアーカイブを解除できます。',
+    },
+    ended: {
+      label: '共有終了',
+      title: '共有は終了しました',
+      body: 'このアルバムから退出したか、共有が終了したか、サインアウトしました。取引とともにそのままの状態で残りますが、更新はされません。再度サインインするか、もう一度参加すると元に戻ります。',
     },
     balances: {
       tab: '残高',
@@ -3055,6 +3071,17 @@ const ja = {
       signed_out: 'このアルバムを変更するには、もう一度サインインしてください。',
       failed: 'このアルバムへの変更を保存できませんでした。もう一度お試しください。',
     },
+    line_label: '{{name}}（アルバム）',
+    categories: {
+      food: '食費',
+      groceries: '日用品',
+      transport: '交通',
+      housing: '住居',
+      bills: '公共料金',
+      healthcare: '医療',
+      shopping: 'ショッピング',
+      other: 'その他',
+    },
     activity: {
       tab: 'アクティビティ',
       show_all: 'すべて表示（{{count}}件）',
@@ -3072,6 +3099,7 @@ const ja = {
       renamed_bill: '{{actor}}が{{before}}の名前を{{after}}に変更',
       moved_bill: '{{actor}}が{{title}}を{{day}}に移動',
       changed_bill: '{{actor}}が{{title}}を変更',
+      recategorized_bill: '{{actor}}が{{title}}を{{category}}に分類しました',
       your_share: 'あなたの負担 {{money}}',
       your_share_change: 'あなたの負担 {{before}} → {{after}}',
       your_share_gone: 'あなたの負担 {{money}} はなくなりました',
@@ -3174,6 +3202,7 @@ const ja = {
     delete_budget_message_month: '今月分は自動では再作成されません。',
     delete_budget_message_year: '今年分は自動では再作成されません。',
     unbudgeted_section: '予算外の支出',
+    albums_section: 'アルバム',
     left: '残り{{amount}}',
     over: '{{amount}}超過',
     name_label: '名前',

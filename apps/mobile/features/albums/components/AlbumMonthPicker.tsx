@@ -6,6 +6,7 @@ import { monthsBetween, shiftYearMonth, yearMonthFromKey } from '~/components/da
 import { useContentFrame } from '~/components/layout/ContentFrame';
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
 import { useApp, useTransactions } from '~/context/AppContext';
+import { useSharedAlbums } from '~/features/sharedLedgers/hooks/useSharedLedgers';
 import { MonthPagerPage } from '~/features/transactions/components';
 import {
   MONTH_PAGER_CENTER_INDEX,
@@ -41,7 +42,13 @@ interface AlbumMonthPickerProps {
  * tap toggles album membership.
  */
 export function AlbumMonthPicker({ selectedIds, onChange }: AlbumMonthPickerProps) {
-  const { settings, getDisplayValueForTransaction, getTrueHourlyRateForDate } = useApp();
+  const {
+    settings,
+    getDisplayValueForTransaction,
+    getTrueHourlyRateForDate,
+    getAlbumIdByTransaction,
+    albums,
+  } = useApp();
   const monthCycle = monthCycleOf(settings);
   const { transactions } = useTransactions();
   const { width } = useContentFrame();
@@ -73,11 +80,22 @@ export function AlbumMonthPicker({ selectedIds, onChange }: AlbumMonthPickerProp
     (transaction: TransactionWithRelations) => getDisplayValueForTransaction(transaction),
     [getDisplayValueForTransaction],
   );
-  // Albums track spending, so only expenses are pickable.
-  const expenseTransactions = useMemo(
-    () => transactions.filter((transaction) => transaction.type === 'expense'),
-    [transactions],
-  );
+  // Albums track spending, so only expenses are pickable. An entry is in one
+  // album, and picking one in another album moves it here, except what is in
+  // a shared album (its bills and the entries their payments made), or in
+  // one the user is no longer in, which stays there.
+  const sharedAlbums = useSharedAlbums();
+  const albumIdByTransaction = getAlbumIdByTransaction();
+  const expenseTransactions = useMemo(() => {
+    const kept = new Set(sharedAlbums.map((share) => share.ledgerId));
+    for (const album of albums) if (album.shareEndedAt) kept.add(album.id);
+    return transactions.filter((transaction) => {
+      if (transaction.type !== 'expense' || transaction.albumGroupId) return false;
+      if (transaction.albumCategory) return false;
+      const albumId = albumIdByTransaction.get(transaction.id);
+      return !albumId || !kept.has(albumId);
+    });
+  }, [albumIdByTransaction, albums, sharedAlbums, transactions]);
   const monthBuckets = useMemo(
     () => bucketTransactionsByMonth(expenseTransactions, resolveValue, monthCycle),
     [expenseTransactions, resolveValue, monthCycle],

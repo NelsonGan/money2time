@@ -3040,7 +3040,8 @@ const nl = {
     no_transactions_title: 'Geen transacties',
     no_transactions_message: 'Voeg transacties aan dit album toe om ze hier te zien.',
     delete_title: 'Album verwijderen?',
-    delete_body: 'Hiermee wordt het album verwijderd. Je transacties worden niet verwijderd.',
+    delete_body:
+      'Je transacties blijven bewaard en gaan terug naar hun eigen categorieën. Wil je het album houden zoals het is, archiveer het dan.',
     cover_permission_title: "Toegang tot foto's nodig",
     cover_permission_body: "Geef toegang tot foto's om een omslagafbeelding te kiezen.",
     people: {
@@ -3059,15 +3060,31 @@ const nl = {
       row: 'Delen met vrienden',
       caption: 'Iedereen ziet de rekeningen en wie wat aan wie verschuldigd is.',
       link_note: '24 uur geldig. Iedereen met de link kan meedoen.',
-      stop_message:
-        'Iedereen houdt het album met de eigen posten, maar het wordt niet meer onderling bijgewerkt.',
       leave: 'Album verlaten',
       leave_title: '{{name}} verlaten?',
-      leave_message: 'Je houdt het album met je eigen posten, maar het wordt niet meer bijgewerkt.',
-      delete_leave_message: 'Je verlaat het dan ook. De anderen houden het album en de rekeningen.',
+      leave_message:
+        'Het gaat naar Gearchiveerd en wordt niet meer bijgewerkt. Jij houdt je transacties, en de anderen houden het album en de rekeningen.',
+      end: 'Album beëindigen',
+      end_title: '{{name}} voor iedereen beëindigen?',
+      end_message:
+        'Niemand kan nog rekeningen toevoegen of wijzigen. Iedereen houdt het album onder Gearchiveerd, met hun transacties en saldi zoals ze zijn.',
       limit: 'Je kunt maximaal {{max}} albums tegelijk delen.',
       full: 'Maximaal {{max}} personen kunnen aan een album meedoen.',
       sign_in: 'Meld je aan om dit album te delen.',
+    },
+    archive: {
+      action: 'Archiveren',
+      unarchive: 'Uit archief halen',
+      label: 'Gearchiveerd',
+      section: 'Gearchiveerd ({{count}})',
+      confirm_title: '{{name}} archiveren?',
+      confirm_shared:
+        'Het gaat naar Gearchiveerd op de pagina Albums. Je blijft erin, de rekeningen blijven bijwerken en het telt nog mee in Inzichten. Je kunt het altijd weer uit het archief halen.',
+    },
+    ended: {
+      label: 'Niet meer gedeeld',
+      title: 'Niet meer gedeeld',
+      body: 'Je hebt dit album verlaten, het delen is gestopt of je bent uitgelogd. Het blijft zoals het was, met je transacties, en wordt niet meer bijgewerkt. Log opnieuw in of doe opnieuw mee om het terug te krijgen.',
     },
     balances: {
       tab: "Saldo's",
@@ -3109,6 +3126,17 @@ const nl = {
       signed_out: 'Log opnieuw in om dit album te wijzigen.',
       failed: 'De wijziging in dit album kon niet worden opgeslagen. Probeer het opnieuw.',
     },
+    line_label: '{{name}}, album',
+    categories: {
+      food: 'Eten',
+      groceries: 'Boodschappen',
+      transport: 'Transport',
+      housing: 'Wonen',
+      bills: 'Rekeningen',
+      healthcare: 'Zorg',
+      shopping: 'Winkelen',
+      other: 'Overig',
+    },
     activity: {
       tab: 'Activiteit',
       show_all: 'Alle {{count}} tonen',
@@ -3126,6 +3154,7 @@ const nl = {
       renamed_bill: '{{actor}} hernoemde {{before}} naar {{after}}',
       moved_bill: '{{actor}} verplaatste {{title}} naar {{day}}',
       changed_bill: '{{actor}} wijzigde {{title}}',
+      recategorized_bill: '{{actor}} heeft {{title}} onder {{category}} gezet',
       your_share: 'Jouw deel {{money}}',
       your_share_change: 'Jouw deel {{before}} → {{after}}',
       your_share_gone: 'Jouw deel van {{money}} is weg',
@@ -3228,6 +3257,7 @@ const nl = {
     delete_budget_message_month: 'Het wordt voor deze maand niet automatisch opnieuw aangemaakt.',
     delete_budget_message_year: 'Het wordt voor dit jaar niet automatisch opnieuw aangemaakt.',
     unbudgeted_section: 'Niet-gebudgetteerde uitgaven',
+    albums_section: 'Albums',
     left: '{{amount}} over',
     over: '{{amount}} erover',
     name_label: 'Naam',

@@ -216,6 +216,28 @@ export function AlbumPeopleScreen({ albumId, onBack }: AlbumPeopleScreenProps) {
     );
   };
 
+  // The owner ends the album for everyone: each person keeps it as it is
+  // now, archived and read-only (README: Leaving and stopping).
+  const confirmEnd = () => {
+    void triggerHaptic('warning');
+    Alert.alert(
+      I18n.t('albums.share.end_title', { name: album.name }),
+      I18n.t('albums.share.end_message'),
+      [
+        { text: I18n.t('common.cancel'), style: 'cancel' },
+        {
+          text: I18n.t('albums.share.end'),
+          style: 'destructive',
+          onPress: () =>
+            void run('leave', async () => {
+              await sync.stopSharingLedger(album.id, { whenUnreachable: 'local' });
+              onBack();
+            }),
+        },
+      ],
+    );
+  };
+
   const copyLink = async () => {
     if (!link) return;
     await Clipboard.setStringAsync(link.url);
@@ -313,11 +335,17 @@ export function AlbumPeopleScreen({ albumId, onBack }: AlbumPeopleScreenProps) {
           }
         />
 
-        {share && !isOwner ? (
-          <Button variant="secondary" onPress={confirmLeave} disabled={busy !== null}>
+        {share ? (
+          <Button
+            variant="secondary"
+            onPress={isOwner ? confirmEnd : confirmLeave}
+            disabled={busy !== null}
+          >
             <View className="flex-row items-center gap-2">
               <LogOut size={16} color={colors.error} />
-              <Text className="text-destructive">{I18n.t('albums.share.leave')}</Text>
+              <Text className="text-destructive">
+                {I18n.t(isOwner ? 'albums.share.end' : 'albums.share.leave')}
+              </Text>
             </View>
           </Button>
         ) : null}

@@ -1,4 +1,4 @@
-import { Sparkles } from 'lucide-react-native';
+import { Archive, ChevronDown, ChevronRight, Sparkles } from 'lucide-react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   type NativeScrollEvent,
@@ -27,6 +27,7 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { useWideTabColumns } from '~/hooks/useWideTabColumns';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
+import type { Album } from '~/types';
 import { cn } from '~/utils';
 
 import { AlbumCard } from '../components/AlbumCard';
@@ -87,12 +88,23 @@ export function AlbumsScreen({
   const isTwoColumn = wideColumns.columns > 1;
   const cardWidth = (contentWidth - GRID_GAP * (wideColumns.columns - 1)) / wideColumns.columns;
 
+  // Archived albums sit in their own section below the others, out of the
+  // reorderable list, the free-plan count and the active-album picker
+  // (README: Key patterns > Albums).
+  const { current, archived } = useMemo(() => {
+    const currentAlbums: Album[] = [];
+    const archivedAlbums: Album[] = [];
+    for (const album of albums) (album.archivedAt ? archivedAlbums : currentAlbums).push(album);
+    return { current: currentAlbums, archived: archivedAlbums };
+  }, [albums]);
+  const [showArchived, setShowArchived] = useState(false);
+
   const activeOptions = useMemo(
     () => [
       { value: '', label: I18n.t('albums.active_none') },
-      ...albums.map((a) => ({ value: a.id, label: a.name })),
+      ...current.map((a) => ({ value: a.id, label: a.name })),
     ],
-    [albums],
+    [current],
   );
 
   // Tap a tab → animate the pager to that page (swipe is handled by the pager).
@@ -173,7 +185,7 @@ export function AlbumsScreen({
       </ScrollView>
       <AddIconButton
         onPress={() => {
-          if (!checkLimit('albums', albums.length)) return;
+          if (!checkLimit('albums', current.length)) return;
           onOpenCreateAlbum();
         }}
         accessibilityLabel={I18n.t('albums.create')}
@@ -231,6 +243,13 @@ export function AlbumsScreen({
                       nestedScrollEnabled
                       showsVerticalScrollIndicator={false}
                     >
+                      {current.length === 0 ? (
+                        <EmptyState
+                          title={I18n.t('albums.empty_title')}
+                          message={I18n.t('albums.empty_message')}
+                          mascotMood="curious"
+                        />
+                      ) : null}
                       <Sortable.Flex
                         activeItemScale={1.02}
                         activeItemShadowOpacity={0.12}
@@ -242,13 +261,13 @@ export function AlbumsScreen({
                         inactiveItemOpacity={1}
                         onDragEnd={({ fromIndex, order, toIndex }) => {
                           if (fromIndex === toIndex) return;
-                          reorderAlbums(order(albums).map((album) => album.id));
+                          reorderAlbums(order(current).map((album) => album.id));
                           void triggerHaptic('selection');
                         }}
                         scrollableRef={scrollRef}
                         width="fill"
                       >
-                        {albums.map((album) => (
+                        {current.map((album) => (
                           <AlbumCard
                             key={album.id}
                             album={album}
@@ -259,6 +278,52 @@ export function AlbumsScreen({
                           />
                         ))}
                       </Sortable.Flex>
+                      {archived.length > 0 ? (
+                        <View style={{ marginTop: current.length > 0 ? 22 : 0 }}>
+                          <Pressable
+                            testID="albums-archived-toggle"
+                            onPress={() => {
+                              void triggerHaptic('selection');
+                              setShowArchived((open) => !open);
+                            }}
+                            accessibilityRole="button"
+                            accessibilityState={{ expanded: showArchived }}
+                            className="flex-row items-center gap-2 py-2"
+                          >
+                            <Archive size={16} color={themeColors.textMuted} />
+                            <Text variant="label" tone="muted" className="flex-1">
+                              {I18n.t('albums.archive.section', { count: archived.length })}
+                            </Text>
+                            {showArchived ? (
+                              <ChevronDown size={18} color={themeColors.textMuted} />
+                            ) : (
+                              <ChevronRight size={18} color={themeColors.textMuted} />
+                            )}
+                          </Pressable>
+                          {showArchived ? (
+                            <View
+                              className="mt-2"
+                              style={{
+                                flexDirection: isTwoColumn ? 'row' : 'column',
+                                flexWrap: isTwoColumn ? 'wrap' : 'nowrap',
+                                gap: GRID_GAP,
+                              }}
+                            >
+                              {archived.map((album) => (
+                                <AlbumCard
+                                  key={album.id}
+                                  album={album}
+                                  width={cardWidth}
+                                  isActive={false}
+                                  onPress={onOpenAlbumDetail}
+                                  statsVersion={statsVersion}
+                                  sortable={false}
+                                />
+                              ))}
+                            </View>
+                          ) : null}
+                        </View>
+                      ) : null}
                     </Animated.ScrollView>
 
                     {/* Two columns: the label over the left column and the

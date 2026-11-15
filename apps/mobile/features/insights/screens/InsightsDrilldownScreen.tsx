@@ -20,6 +20,7 @@ import { chartCategoryColor } from '~/constants/chartColors';
 import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
+import { albumCategoryRows } from '~/features/albums/lib/albumBreakdown';
 import {
   BREAKDOWN_PIE_LABEL_HEIGHT,
   BREAKDOWN_PIE_LABEL_LINE_LENGTH,
@@ -31,6 +32,7 @@ import {
   BREAKDOWN_PIE_MIN_RADIUS,
   layoutBreakdownPieLabels,
 } from '~/features/insights/breakdownPieLayout';
+import { useSharedAlbum } from '~/features/sharedLedgers/hooks/useSharedLedgers';
 import {
   ActivityTransactionList,
   buildBulkUpdateInputs,
@@ -122,6 +124,8 @@ interface DrilldownSubcategoryRow {
   sharePct: number;
   count: number;
   transactions: TransactionWithRelations[];
+  /** An album's category row: the user's root category it is, if any (opens its subcategories). */
+  categoryRootId?: string | null;
 }
 
 function FilterPill({
@@ -169,6 +173,11 @@ export interface InsightsDrilldownPayload {
    * subcategory drilldowns carry the same album context.
    */
   albumId?: string;
+  /**
+   * An album's line in a category list: the album's entries open on its own
+   * breakdown by category (a shared album's categories, else the user's).
+   */
+  albumCategories?: boolean;
 }
 
 interface InsightsDrilldownScreenProps {
@@ -201,6 +210,7 @@ export function InsightsDrilldownScreen({
   const {
     albums,
     categories,
+    quickEntryPrefs,
     settings,
     updateTransactionsBulk,
     deleteTransactionsBulk,
@@ -350,7 +360,45 @@ export function InsightsDrilldownScreen({
     sortTransactions,
     transactions,
   ]);
+  // A shared album, or one the user is no longer in, by its own categories.
+  const albumShare = useSharedAlbum(payload.albumId);
+  const byAlbumCategory =
+    !!albumShare || !!albums.find((album) => album.id === payload.albumId)?.shareEndedAt;
+  const albumRows = useMemo<DrilldownSubcategoryRow[] | null>(() => {
+    if (!payload.albumCategories) return null;
+    const rows = albumCategoryRows(resolvedTransactions, {
+      valueOf: (transaction) =>
+        settings.displayMode === 'time'
+          ? getDisplayValueForTransaction(transaction)
+          : (transaction.reportingAmount ?? transaction.amount),
+      categories,
+      categoryById,
+      categoryMap: quickEntryPrefs.categoryMap,
+      byAlbumCategory,
+    });
+    const total = rows.reduce((sum, row) => sum + Math.abs(row.amount), 0);
+    return rows.map((row) => ({
+      id: row.id,
+      label: row.label,
+      emoji: row.emoji,
+      totalValue: row.amount,
+      sharePct: total > 0 ? (Math.abs(row.amount) / total) * 100 : 0,
+      count: row.count,
+      transactions: row.transactions,
+      categoryRootId: row.categoryRootId,
+    }));
+  }, [
+    byAlbumCategory,
+    categories,
+    categoryById,
+    getDisplayValueForTransaction,
+    payload.albumCategories,
+    quickEntryPrefs.categoryMap,
+    resolvedTransactions,
+    settings.displayMode,
+  ]);
   const subcategoryRows = useMemo<DrilldownSubcategoryRow[]>(() => {
+    if (albumRows) return albumRows;
     if (!rootCategoryId || !hasRootChildCategories) return [];
 
     const rowsById = new Map<string, DrilldownSubcategoryRow>();
@@ -450,6 +498,7 @@ export function InsightsDrilldownScreen({
       sharePct: totalAbs > 0 ? (Math.abs(row.totalValue) / totalAbs) * 100 : 0,
     }));
   }, [
+    albumRows,
     categoryById,
     getDisplayValueForTransaction,
     hasRootChildCategories,
@@ -462,7 +511,8 @@ export function InsightsDrilldownScreen({
     rootChildCategoryIdSet,
     settings.displayMode,
   ]);
-  const hasSubcategorySelectionStage = hasRootChildCategories && subcategoryRows.length > 0;
+  const hasSubcategorySelectionStage =
+    (!!albumRows || hasRootChildCategories) && subcategoryRows.length > 0;
   const shouldShowSubcategoryList =
     (payload.showSubcategorySelection ?? true) && hasSubcategorySelectionStage;
   const scopedTransactions = useMemo(
@@ -564,6 +614,22 @@ export function InsightsDrilldownScreen({
     (row: DrilldownSubcategoryRow) => {
       if (!onOpenSubcategoryDrilldown) return;
       void triggerHaptic('selection');
+      if (payload.albumCategories) {
+        // One of the album's categories: its entries, by subcategory when
+        // it is a root category of the user's with some.
+        const rootId = row.categoryRootId ?? undefined;
+        onOpenSubcategoryDrilldown({
+          ...payload,
+          label: `${categoryIconToEmoji(row.emoji)} ${row.label}`.trim(),
+          transactionIds: row.transactions.map((transaction) => transaction.id),
+          albumCategories: false,
+          categoryRootId: rootId,
+          categoryRootLabel: rootId ? row.label : undefined,
+          categoryRootEmoji: rootId ? row.emoji : undefined,
+          showSubcategorySelection: !!rootId,
+        });
+        return;
+      }
       onOpenSubcategoryDrilldown({
         ...payload,
         label: `${categoryIconToEmoji(row.emoji)} ${row.label}`.trim(),
@@ -1126,7 +1192,7 @@ export function InsightsDrilldownScreen({
                     }}
                     disabled={!onOpenSubcategoryDrilldown}
                     accessibilityRole="button"
-                    accessibilityLabel={`${item.emoji} ${item.name}`}
+                    accessibilityLabel={`${categoryIconToEmoji(item.emoji)} ${item.name}`.trim()}
                     accessibilityState={{ disabled: !onOpenSubcategoryDrilldown }}
                     className="rounded-xl px-2.5 py-1.5 active:opacity-85 border"
                     style={[

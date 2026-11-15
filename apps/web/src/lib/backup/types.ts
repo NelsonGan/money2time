@@ -102,6 +102,12 @@ export type TransactionRow = Row & {
    * from an app that predates shared albums.
    */
   album_group_id?: string | null;
+  /**
+   * The shared album's category the entry is under (the app's migration 094,
+   * `ALBUM_CATEGORIES`): a bill's, kept after the user leaves the album.
+   * Absent from an older app.
+   */
+  album_category?: string | null;
 };
 
 export type TransactionSplitRow = Row & {
@@ -205,6 +211,10 @@ export type AlbumRow = Row & {
   place_name?: string | null;
   place_admin?: string | null;
   country_code?: string | null;
+  /** Hidden in Archived on the Albums page (the app's migration 094); absent from an older app. */
+  archived_at?: string | null;
+  /** A shared album the user is no longer in: kept read-only on the phone (migration 094). */
+  share_ended_at?: string | null;
 };
 
 export type AlbumTransactionRow = Row & {
@@ -297,6 +307,8 @@ export type WebAlbumBillRow = {
   note?: string | null;
   amount: number;
   currency: string;
+  /** Its album category (`ALBUM_CATEGORIES`); absent from older apps. */
+  category?: string | null;
   paid_by: string;
   shares: WebAlbumShare[];
   deleted?: number | null;
@@ -306,6 +318,8 @@ export type WebAlbumBillRow = {
 /** A bill's fields as the activity log keeps them, before or after a change (the app's `AlbumBillSnapshot`). */
 export type WebAlbumBillSnapshot = {
   note: string | null;
+  /** Its album category; absent from older apps and from entries logged before bills had one. */
+  category?: string | null;
   amount: number;
   currency: string;
   date: string;

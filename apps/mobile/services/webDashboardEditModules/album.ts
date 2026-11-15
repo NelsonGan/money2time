@@ -13,7 +13,9 @@
  * The cover photo and the location stay on the phone: the web has no photo
  * upload and no offline place search, so a new album gets neither and an edit
  * leaves both as they are. The app's picker offers expenses only, so only
- * expenses can be added.
+ * expenses can be added. Archiving stays in the app. An album the user is no
+ * longer sharing (`shareEndedAt`) is read-only, from the browser as on the
+ * phone (README: Album members and shared albums > Leaving and stopping).
  */
 
 import { PRO_LIMITS } from '~/constants/proLimits';
@@ -142,9 +144,11 @@ export const albumModule: EditModule = {
     if (op.op === 'create') {
       const details = checkDetails(op.album);
       if (!details) return tools.refuse('invalid');
-      // AlbumsScreen's checkLimit('albums', albums.length) before the create screen opens.
+      // AlbumsScreen's checkLimit('albums', …) before the create screen
+      // opens, which leaves archived albums out.
       const made = tools.created.albums ?? 0;
-      if (!tools.lookup.isPro && live.length + made >= PRO_LIMITS.FREE_MAX_ALBUMS) {
+      const current = live.filter((album) => !album.archivedAt).length;
+      if (!tools.lookup.isPro && current + made >= PRO_LIMITS.FREE_MAX_ALBUMS) {
         return tools.refuse('pro_required', 'albums');
       }
       const checked = checkExpenses(tools, op.album.transactionIds);
@@ -179,7 +183,8 @@ export const albumModule: EditModule = {
       if (!tools.claim('albums:active')) return tools.refuse('invalid');
       // The album is read as it is now: the same batch must not also change it.
       if (op.id !== null && !tools.claim(`album:${op.id}`)) return tools.refuse('invalid');
-      if (op.id !== null && !live.some((album) => album.id === op.id)) {
+      // An archived album is not offered there.
+      if (op.id !== null && !live.some((album) => album.id === op.id && !album.archivedAt)) {
         return tools.refuse('conflict');
       }
       steps.push({
@@ -195,10 +200,11 @@ export const albumModule: EditModule = {
     const current = live.find((album) => album.id === op.id);
     // Gone on the phone, or changed there since the browser's copy.
     if (!current || current.updatedAt !== op.at) return tools.refuse('conflict');
+    // No longer shared: kept as it was, read-only, never deleted.
+    if (current.shareEndedAt) return tools.refuse('invalid');
 
     if (op.op === 'delete') {
-      // A shared album stops being shared (or is left) before it is deleted,
-      // which the app asks about. Not from the browser.
+      // A shared album is archived, never deleted (AlbumDetailScreen).
       if (extra.sharedAlbumIds.includes(op.id)) return tools.refuse('invalid');
       steps.push({
         kind: 'module',
@@ -226,6 +232,16 @@ export const albumModule: EditModule = {
     }
     const checked = checkExpenses(tools, op.add);
     if (!checked.ok) return checked;
+    // A bill of a shared album, or of one the user is no longer in, stays in
+    // its album (albumsRepository.addTransactions passes it over).
+    const adding = new Set(op.add);
+    if (
+      tools.lookup.transactions.some(
+        (tx) => adding.has(tx.id) && (tx.albumGroupId || tx.albumCategory),
+      )
+    ) {
+      return tools.refuse('invalid');
+    }
     // A shared album's bill taken out of it is removed for everyone in the
     // album, which the app asks about first. Not from the browser.
     const removing = new Set(op.remove);

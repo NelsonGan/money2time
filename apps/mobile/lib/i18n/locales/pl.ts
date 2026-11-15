@@ -3017,7 +3017,8 @@ const pl = {
     no_transactions_title: 'Brak transakcji',
     no_transactions_message: 'Dodaj transakcje do tego albumu, aby je tu zobaczyć.',
     delete_title: 'Usunąć album?',
-    delete_body: 'To usuwa album. Twoje transakcje nie zostają usunięte.',
+    delete_body:
+      'Twoje transakcje zostaną zachowane i wrócą do swoich kategorii. Aby zachować album bez zmian, zarchiwizuj go zamiast tego.',
     cover_permission_title: 'Wymagany dostęp do zdjęć',
     cover_permission_body: 'Zezwól na dostęp do zdjęć, aby wybrać okładkę.',
     people: {
@@ -3036,15 +3037,31 @@ const pl = {
       row: 'Dziel ze znajomymi',
       caption: 'Wszyscy widzą rachunki i kto komu jest winien.',
       link_note: 'Działa przez 24 godziny. Każdy, kto go ma, może dołączyć.',
-      stop_message:
-        'Każdy zachowuje album ze swoimi wpisami, ale nie będzie się on już aktualizował między wami.',
       leave: 'Opuść album',
       leave_title: 'Opuścić {{name}}?',
-      leave_message: 'Zachowujesz album ze swoimi wpisami, ale nie będzie się już aktualizował.',
-      delete_leave_message: 'Opuścisz go też. Pozostali zachowają album i jego rachunki.',
+      leave_message:
+        'Album trafi do sekcji Zarchiwizowane i przestanie się aktualizować. Zachowujesz swoje transakcje, a pozostali zachowują album i jego rachunki.',
+      end: 'Zakończ album',
+      end_title: 'Zakończyć {{name}} dla wszystkich?',
+      end_message:
+        'Nikt nie będzie mógł już dodawać ani zmieniać rachunków. Każdy zachowa album w sekcji Zarchiwizowane, z transakcjami i saldami bez zmian.',
       limit: 'Możesz udostępniać do {{max}} albumów naraz.',
       full: 'Do albumu może dołączyć maksymalnie {{max}} osób.',
       sign_in: 'Zaloguj się, aby udostępnić ten album.',
+    },
+    archive: {
+      action: 'Archiwizuj',
+      unarchive: 'Przywróć z archiwum',
+      label: 'Zarchiwizowany',
+      section: 'Zarchiwizowane ({{count}})',
+      confirm_title: 'Zarchiwizować {{name}}?',
+      confirm_shared:
+        'Album trafi do sekcji Zarchiwizowane na stronie Albumy. Nadal w nim jesteś, jego rachunki nadal się aktualizują i nadal liczy się w Analizach. Możesz go przywrócić w dowolnym momencie.',
+    },
+    ended: {
+      label: 'Już nieudostępniany',
+      title: 'Już nieudostępniany',
+      body: 'Opuszczono ten album, udostępnianie zostało zakończone lub wylogowano się. Album zostaje taki, jaki był, z Twoimi transakcjami, i nie jest już aktualizowany. Zaloguj się ponownie lub dołącz ponownie, aby go przywrócić.',
     },
     balances: {
       tab: 'Salda',
@@ -3087,6 +3104,17 @@ const pl = {
       signed_out: 'Zaloguj się ponownie, aby zmienić ten album.',
       failed: 'Nie udało się zapisać zmiany w albumie. Spróbuj ponownie.',
     },
+    line_label: '{{name}}, album',
+    categories: {
+      food: 'Jedzenie',
+      groceries: 'Zakupy spożywcze',
+      transport: 'Transport',
+      housing: 'Mieszkanie',
+      bills: 'Rachunki',
+      healthcare: 'Zdrowie',
+      shopping: 'Zakupy',
+      other: 'Inne',
+    },
     activity: {
       tab: 'Aktywność',
       show_all: 'Pokaż wszystkie ({{count}})',
@@ -3104,6 +3132,7 @@ const pl = {
       renamed_bill: '{{actor}}: zmieniono nazwę rachunku „{{before}}” na „{{after}}”',
       moved_bill: '{{actor}}: przeniesiono rachunek „{{title}}” na {{day}}',
       changed_bill: '{{actor}}: zmieniono rachunek „{{title}}”',
+      recategorized_bill: '{{actor}} przeniósł(a) {{title}} do kategorii {{category}}',
       your_share: 'Twój udział {{money}}',
       your_share_change: 'Twój udział {{before}} → {{after}}',
       your_share_gone: 'Twojego udziału {{money}} już nie ma',
@@ -3206,6 +3235,7 @@ const pl = {
     delete_budget_message_month: 'Nie zostanie automatycznie utworzony ponownie dla tego miesiąca.',
     delete_budget_message_year: 'Nie zostanie automatycznie utworzony ponownie dla tego roku.',
     unbudgeted_section: 'Wydatki poza budżetem',
+    albums_section: 'Albumy',
     left: 'Pozostało {{amount}}',
     over: '{{amount}} ponad',
     name_label: 'Nazwa',

@@ -2,6 +2,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import { File, Paths } from 'expo-file-system/next';
 import * as Sharing from 'expo-sharing';
 
+import { oneLinkPerEntry } from '~/features/albums/lib/albumLines';
 import {
   inLedgersSql,
   isLedgerScoped,
@@ -724,7 +725,27 @@ export function applyBackupData(
     insertRows(sqlite, 'recurring_rules', backup.tables.recurring_rules, skip);
     // Albums before their join rows, both after transactions (join references both).
     insertRows(sqlite, 'albums', backup.tables.albums, skip);
-    insertRows(sqlite, 'album_transactions', backup.tables.album_transactions, skip);
+    // An entry is in one album: an older backup's other links are kept as
+    // deleted ones, as every phone keeps them (migration 094).
+    insertRows(
+      sqlite,
+      'album_transactions',
+      oneLinkPerEntry(
+        backup.tables.album_transactions ?? [],
+        new Set(
+          (backup.tables.albums ?? [])
+            .filter((row) => row.deleted_at == null)
+            .map((row) => String(row.id)),
+        ),
+        new Map(
+          (backup.tables.transactions ?? [])
+            .filter((row) => typeof row.album_group_id === 'string')
+            .map((row) => [String(row.id), String(row.album_group_id)]),
+        ),
+        nowIso(),
+      ),
+      skip,
+    );
     // Items are standalone (no FK dependencies).
     insertRows(sqlite, 'items', backup.tables.items, skip);
     // Budgets after categories (allocation lines reference category ids);

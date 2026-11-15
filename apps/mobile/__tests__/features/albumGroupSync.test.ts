@@ -121,8 +121,7 @@ function addBill(
     note: 'Dinner',
     amount,
     currency: 'MYR',
-    categoryName: 'Food',
-    categoryIcon: '🍽️',
+    category: 'food',
     paidBy,
     shares: ['me', 'aisha', 'ben'].map((memberId) => ({ memberId, amount: amount / 3 })),
     createdBy: by,
@@ -377,14 +376,60 @@ describe('a bill the user paid', () => {
   });
 });
 
+describe('one album per entry', () => {
+  it('takes a group’s bill back from another album it was put in, and files it by the bill', () => {
+    app.connection.exec(`
+      INSERT INTO albums (id, ledger_id, name, sort_order, created_at, updated_at)
+        VALUES ('tokyo', 'default', 'Tokyo', 1, '${NOW}', '${NOW}');
+    `);
+    groupRows.upsertExpense({
+      id: 'taxi',
+      groupId: GROUP,
+      date: '2026-11-12',
+      note: 'Taxi',
+      amount: 30,
+      currency: 'MYR',
+      category: 'transport',
+      paidBy: 'aisha',
+      shares: [
+        { memberId: 'me', amount: 15 },
+        { memberId: 'aisha', amount: 15 },
+      ],
+      createdBy: 'u-aisha',
+    });
+    const categoryFor = jest.fn((category: string) => `mine-${category}`);
+    projectGroup(GROUP, { ...env, categoryIdFor: categoryFor });
+    expect(tx('taxi')).toMatchObject({ category_id: 'mine-transport' });
+    // Another phone of the user's (an older app) put it in Tokyo too.
+    app.connection.exec(`
+      UPDATE album_transactions SET deleted_at = '${NOW}' WHERE transaction_id = 'taxi';
+      INSERT INTO album_transactions (id, album_id, transaction_id, sort_order, created_at, updated_at)
+        VALUES ('x', 'tokyo', 'taxi', 0, '${NOW}', '${NOW}');
+    `);
+    projectGroup(GROUP, { ...env, categoryIdFor: categoryFor });
+    expect(albumsRepository.getAllTransactionIdsByAlbum().get(GROUP)).toContain('taxi');
+    expect(albumsRepository.getAllTransactionIdsByAlbum().get('tokyo')).toBeUndefined();
+    // Its own link row moved to another album: taken back, and then left alone.
+    app.connection.exec(
+      `UPDATE album_transactions SET album_id = 'tokyo' WHERE id = '${GROUP}:taxi'`,
+    );
+    projectGroup(GROUP, { ...env, categoryIdFor: categoryFor });
+    expect(albumsRepository.getAllTransactionIdsByAlbum().get(GROUP)).toContain('taxi');
+    expect(albumsRepository.getAllTransactionIdsByAlbum().get('tokyo')).toBeUndefined();
+    expect(projectGroup(GROUP, { ...env, categoryIdFor: categoryFor })).toBe(false);
+  });
+});
+
 describe('changes to a bill', () => {
-  it('follows an edit, keeps the user’s own category, and goes with the bill', () => {
+  it('follows an edit and the bill’s album category, and goes with the bill', () => {
     addBill('dinner', 'aisha');
     projectGroup(GROUP, env);
+    // The category is the group's: the entry is filed under the user's own
+    // category for it, whatever was put on the entry here.
     transactionsRepository.update('dinner', { categoryId: 'drinks' });
     addBill('dinner', 'aisha', 120);
     projectGroup(GROUP, env);
-    expect(tx('dinner')).toMatchObject({ amount: 40, category_id: 'drinks' });
+    expect(tx('dinner')).toMatchObject({ amount: 40, category_id: 'food' });
 
     // Now the user paid it (saved in the editor, which names the account):
     // the same entry becomes the whole bill.
@@ -476,8 +521,7 @@ describe('changes to a bill', () => {
       note: 'Massage',
       amount: 80,
       currency: 'MYR',
-      categoryName: null,
-      categoryIcon: null,
+      category: 'other',
       paidBy: 'aisha',
       shares: [
         { memberId: 'aisha', amount: 40 },
@@ -669,8 +713,7 @@ describe('simplify group debts', () => {
         note: id,
         amount: Object.values(owes).reduce((sum, value) => sum + value, 0),
         currency: 'MYR',
-        categoryName: null,
-        categoryIcon: null,
+        category: 'other',
         paidBy,
         shares: shares(owes),
         createdBy: 'u-me',
@@ -709,8 +752,7 @@ describe('payments recorded as one act', () => {
       note: id,
       amount: Object.values(owes).reduce((sum, value) => sum + value, 0),
       currency: 'MYR',
-      categoryName: null,
-      categoryIcon: null,
+      category: 'other',
       paidBy,
       shares: Object.entries(owes).map(([memberId, amount]) => ({ memberId, amount })),
       createdBy: 'u-me',
@@ -810,13 +852,89 @@ describe('sharing and its end', () => {
     expect(balances()).toEqual({ Aisha: 30, Ben: 30 });
   });
 
-  it('takes the user’s entries back into the album when they delete it and join again', () => {
-    addBill('dinner', 'me');
+  it('keeps the album, archived and read-only, when sharing ends, until the user is back in it', () => {
+    addBill('dinner', 'aisha');
     projectGroup(GROUP, env);
-    // Deleting a shared album as a member: they leave, and the album goes.
+    expect(app.all('SELECT album_category FROM transactions WHERE id = ?', 'dinner')).toEqual([
+      { album_category: 'food' },
+    ]);
     removeSharedLedger(GROUP);
     releaseAlbumGroup(GROUP);
+    const album = () => albumsRepository.getById(GROUP)!;
+    expect(album()).toMatchObject({ isActive: false, deletedAt: null });
+    expect(album().shareEndedAt).toBeTruthy();
+    expect(album().archivedAt).toBe(album().shareEndedAt);
+    // The entry keeps its album category, so the album's breakdown stays as it was.
+    expect(app.all('SELECT album_category FROM transactions WHERE id = ?', 'dinner')).toEqual([
+      { album_category: 'food' },
+    ]);
+    // Read-only: nothing is deleted, added, taken out, unarchived or made active.
+    expect(albumsRepository.isFrozen(GROUP)).toBe(true);
+    transactionsRepository.create({
+      id: 'mine',
+      type: 'expense',
+      amount: 5,
+      currency: 'MYR',
+      date: '2026-11-12',
+      accountId: 'cash',
+    } as Parameters<typeof transactionsRepository.create>[0]);
+    albumsRepository.addTransactions(GROUP, ['mine']);
+    albumsRepository.removeTransactions(GROUP, ['dinner']);
     albumsRepository.softDelete(GROUP);
+    albumsRepository.setArchived(GROUP, false);
+    albumsRepository.setActive(GROUP);
+    expect(album()).toMatchObject({ deletedAt: null, isActive: false });
+    expect(album().archivedAt).toBeTruthy();
+    expect(albumsRepository.getTransactionIds(GROUP)).toEqual(['dinner']);
+    // Its bills stay where they are: not put in another album either.
+    app.connection.exec(`
+      INSERT INTO albums (id, ledger_id, name, sort_order, created_at, updated_at)
+        VALUES ('tokyo', 'default', 'Tokyo', 1, '${NOW}', '${NOW}');
+    `);
+    albumsRepository.addTransactions('tokyo', ['dinner']);
+    expect(albumsRepository.getTransactionIds('tokyo')).toEqual([]);
+
+    // Back in it (signed in or joined again): no longer frozen, out of Archived.
+    saveAlbumShare();
+    ensureLocalAlbum({ ledgerId: GROUP, name: 'Bali trip' });
+    expect(album()).toMatchObject({ shareEndedAt: null, archivedAt: null });
+    expect(albumsRepository.isFrozen(GROUP)).toBe(false);
+  });
+
+  it('leaves an album the user archived themselves in Archived when they are back in it', () => {
+    albumsRepository.setArchived(GROUP, true);
+    const archivedAt = albumsRepository.getById(GROUP)!.archivedAt;
+    expect(archivedAt).toBeTruthy();
+    removeSharedLedger(GROUP);
+    releaseAlbumGroup(GROUP);
+    expect(albumsRepository.getById(GROUP)!.archivedAt).toBe(archivedAt);
+    saveAlbumShare();
+    ensureLocalAlbum({ ledgerId: GROUP, name: 'Bali trip' });
+    expect(albumsRepository.getById(GROUP)).toMatchObject({ shareEndedAt: null, archivedAt });
+  });
+
+  it('archives and unarchives an album; an archived one is never the active album', () => {
+    expect(albumsRepository.getById(GROUP)!.isActive).toBe(true);
+    albumsRepository.setArchived(GROUP, true);
+    expect(albumsRepository.getById(GROUP)!.isActive).toBe(false);
+    albumsRepository.setActive(GROUP);
+    expect(albumsRepository.getActiveId()).toBeNull();
+    albumsRepository.setArchived(GROUP, false);
+    expect(albumsRepository.getById(GROUP)!.archivedAt).toBeNull();
+    albumsRepository.setActive(GROUP);
+    expect(albumsRepository.getActiveId()).toBe(GROUP);
+  });
+
+  it('takes the user’s entries back into the album when an older app deleted it and they join again', () => {
+    addBill('dinner', 'me');
+    projectGroup(GROUP, env);
+    removeSharedLedger(GROUP);
+    releaseAlbumGroup(GROUP);
+    // An older app of the user's deleted it, with its links, at one time.
+    app.connection.exec(`
+      UPDATE albums SET deleted_at = '${NOW}' WHERE id = '${GROUP}';
+      UPDATE album_transactions SET deleted_at = '${NOW}' WHERE album_id = '${GROUP}';
+    `);
     // Joined again: the group's rows come back with the share.
     saveAlbumShare();
     addBill('dinner', 'me');

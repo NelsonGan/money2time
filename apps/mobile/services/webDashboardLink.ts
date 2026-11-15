@@ -402,8 +402,14 @@ type SessionEvents = {
  *   has no use for; named in the phone's `meta.features` so a page offers
  *   editing a shared album's bills (`module:albumbill`) and Restore only to a
  *   phone that takes them (an older app refuses the module).
+ * - `album-categories`: changes nothing in what is sent (a shared album's
+ *   bills carry their album `category` for any page naming `shared-albums`);
+ *   named so the phone's `meta.features` tells a page that a bill's category
+ *   is the group's, picked from the album's categories (`category` in
+ *   `module:albumbill`), which an older app refuses as unknown.
  */
 export const WANT_FEATURES = [
+  'album-categories',
   'budget-currencies',
   'credit-due-days-after',
   'shared-albums',

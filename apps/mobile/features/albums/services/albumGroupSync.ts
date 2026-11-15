@@ -31,6 +31,7 @@ import { convert } from '~/utils/currency';
 import { dayKeyFromDateLocal, normalizeMoneyAmount } from '~/utils/formatters';
 import { nowIso } from '~/utils/id';
 
+import type { AlbumCategoryKey } from '../lib/albumCategories';
 import { localBill, type LocalPayment, settlementsByBill } from '../lib/albumGroup';
 import { selfMember } from '../lib/albumPeople';
 import { openShares, simplifyDebts } from '../lib/groupDebts';
@@ -49,8 +50,8 @@ export interface GroupEnv {
   defaultAccountId: string | null;
   /** The account money paid back lands in, or null to use the bill's own. */
   defaultPaybackAccountId: string | null;
-  /** The user's own expense category for another phone's (by name, then icon), or a fallback. */
-  categoryIdFor: (name: string | null, icon: string | null) => string | null;
+  /** The user's own expense category for an album category: their matching one, else Other. */
+  categoryIdFor: (category: AlbumCategoryKey) => string | null;
 }
 
 /** What only this phone knows about a write it is about to project. */
@@ -58,7 +59,7 @@ export interface ProjectHints {
   /** A bill the editor is saving: the fields that are the user's own. */
   entry?: Pick<
     CreateTransactionInput,
-    'accountId' | 'categoryId' | 'details' | 'receiptUri' | 'sentiment' | 'reimbursable'
+    'accountId' | 'details' | 'receiptUri' | 'sentiment' | 'reimbursable'
   >;
   /** The account a settlement just recorded here moved through, by settlement id. */
   accounts?: ReadonlyMap<string, string | null>;
@@ -82,11 +83,12 @@ interface TxRow {
   category_id: string | null;
   note: string | null;
   album_group_id: string | null;
+  album_category: string | null;
   deleted_at: string | null;
 }
 
 const TX_COLUMNS =
-  'id, ledger_id, type, amount, currency, reporting_currency, reporting_amount, fx_rate, to_amount, account_amount, date, account_id, from_account_id, to_account_id, category_id, note, album_group_id, deleted_at';
+  'id, ledger_id, type, amount, currency, reporting_currency, reporting_amount, fx_rate, to_amount, account_amount, date, account_id, from_account_id, to_account_id, category_id, note, album_group_id, album_category, deleted_at';
 
 function readTx(id: string): TxRow | null {
   return getSQLite().getFirstSync<TxRow>(`SELECT ${TX_COLUMNS} FROM transactions WHERE id = ?`, [
@@ -226,11 +228,18 @@ function ensureInAlbum(albumId: string, transactionId: string): boolean {
   const db = getSQLite();
   if (isInAlbum(albumId, transactionId)) return false;
   const now = nowIso();
+  // An entry is in one album: a group's bill leaves any other album it was put in.
+  db.runSync(
+    `UPDATE album_transactions SET deleted_at = ?, updated_at = ?
+     WHERE transaction_id = ? AND album_id <> ? AND deleted_at IS NULL`,
+    [now, now, transactionId, albumId],
+  );
   // One id per album and entry, so two phones add the same row.
   db.runSync(
     `INSERT INTO album_transactions (id, album_id, transaction_id, sort_order, created_at, updated_at, deleted_at)
      VALUES (?, ?, ?, 0, ?, ?, NULL)
-     ON CONFLICT(id) DO UPDATE SET deleted_at = NULL, updated_at = excluded.updated_at`,
+     ON CONFLICT(id) DO UPDATE SET album_id = excluded.album_id, deleted_at = NULL,
+       updated_at = excluded.updated_at`,
     [`${albumId}:${transactionId}`, albumId, transactionId, now, now],
   );
   return true;
@@ -314,7 +323,8 @@ function writeExpense(
     (existing.account_id ?? null) !== (input.accountId ?? null) ||
     (existing.category_id ?? null) !== (input.categoryId ?? null) ||
     (existing.note ?? null) !== (input.note ?? null) ||
-    (existing.album_group_id ?? null) !== (input.albumGroupId ?? null);
+    (existing.album_group_id ?? null) !== (input.albumGroupId ?? null) ||
+    (existing.album_category ?? null) !== (input.albumCategory ?? null);
   if (changed) transactionsRepository.update(id, input);
   return changed;
 }
@@ -483,10 +493,8 @@ function projectExpense(
       : finalPayment
         ? sentAccount(finalPayment)
         : null;
-  const categoryId =
-    hints.entry?.categoryId ??
-    remembered?.category_id ??
-    env.categoryIdFor(expense.categoryName, expense.categoryIcon);
+  // The bill's category is the group's: the user's entry follows it.
+  const categoryId = env.categoryIdFor(expense.category);
   const amounts = expenseAmounts(env, live, bill.amount, expense.currency, accountId);
   const wrote = writeExpense(expense.id, existing, {
     type: 'expense',
@@ -495,6 +503,9 @@ function projectExpense(
     date: expense.date,
     accountId,
     categoryId,
+    // Kept once the album is no longer shared: the entry never needs one of
+    // the user's categories to show what it was.
+    albumCategory: expense.category,
     note: expense.note,
     ...(live
       ? null
@@ -704,7 +715,8 @@ function projectExpense(
           currency: expense.currency,
           date: expense.date,
           accountId: entry.accountId,
-          categoryId: before?.category_id ?? tx.category_id,
+          categoryId: env.categoryIdFor(expense.category),
+          albumCategory: expense.category,
           note: expense.note,
           albumGroupId: null,
         }) || changed;

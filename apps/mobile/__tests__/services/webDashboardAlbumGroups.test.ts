@@ -34,8 +34,7 @@ const bill: AlbumExpense = {
   note: 'Dinner',
   amount: 30,
   currency: 'MYR',
-  categoryName: 'Food',
-  categoryIcon: 'meal',
+  category: 'food',
   paidBy: 'me',
   shares: [
     { memberId: 'me', amount: 15 },
@@ -102,6 +101,7 @@ describe('withWebDashboardAlbumGroups', () => {
         note: 'Dinner',
         amount: 30,
         currency: 'MYR',
+        category: 'food',
         paid_by: 'me',
         shares: bill.shares,
         deleted: 1,

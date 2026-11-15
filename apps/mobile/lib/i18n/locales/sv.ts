@@ -3006,7 +3006,8 @@ const sv = {
     no_transactions_title: 'Inga transaktioner',
     no_transactions_message: 'Lägg till transaktioner i det här albumet för att se dem här.',
     delete_title: 'Radera album?',
-    delete_body: 'Detta tar bort albumet. Dina transaktioner raderas inte.',
+    delete_body:
+      'Dina transaktioner sparas och går tillbaka till sina egna kategorier. Vill du behålla albumet som det är kan du arkivera det i stället.',
     cover_permission_title: 'Åtkomst till foton krävs',
     cover_permission_body: 'Tillåt åtkomst till foton för att välja en omslagsbild.',
     people: {
@@ -3024,15 +3025,31 @@ const sv = {
       row: 'Dela med vänner',
       caption: 'Alla ser notorna och vem som är skyldig vem.',
       link_note: 'Gäller i 24 timmar. Alla som har länken kan gå med.',
-      stop_message:
-        'Alla behåller albumet med sina egna poster, men det uppdateras inte längre mellan er.',
       leave: 'Lämna album',
       leave_title: 'Lämna {{name}}?',
-      leave_message: 'Du behåller albumet med dina egna poster, men det uppdateras inte längre.',
-      delete_leave_message: 'Du lämnar det också. De andra behåller albumet och dess räkningar.',
+      leave_message:
+        'Det flyttas till Arkiverade och uppdateras inte längre. Du behåller dina transaktioner, och de andra behåller albumet och räkningarna.',
+      end: 'Avsluta album',
+      end_title: 'Avsluta {{name}} för alla?',
+      end_message:
+        'Ingen kan längre lägga till eller ändra räkningarna. Alla behåller albumet under Arkiverade, med sina transaktioner och saldon som de är.',
       limit: 'Du kan dela upp till {{max}} album åt gången.',
       full: 'Upp till {{max}} personer kan gå med i ett album.',
       sign_in: 'Logga in för att dela det här albumet.',
+    },
+    archive: {
+      action: 'Arkivera',
+      unarchive: 'Ta fram ur arkivet',
+      label: 'Arkiverat',
+      section: 'Arkiverade ({{count}})',
+      confirm_title: 'Arkivera {{name}}?',
+      confirm_shared:
+        'Det flyttas till Arkiverade på sidan Album. Du är kvar i det, räkningarna fortsätter uppdateras och det räknas fortfarande i Insikter. Du kan ta fram det ur arkivet när som helst.',
+    },
+    ended: {
+      label: 'Delas inte längre',
+      title: 'Delas inte längre',
+      body: 'Du lämnade albumet, delningen avslutades eller du loggade ut. Det sparas som det var, med dina transaktioner, och uppdateras inte längre. Logga in igen eller gå med igen för att få tillbaka det.',
     },
     balances: {
       tab: 'Saldon',
@@ -3073,6 +3090,17 @@ const sv = {
       signed_out: 'Logga in igen för att ändra albumet.',
       failed: 'Det gick inte att spara ändringen i albumet. Försök igen.',
     },
+    line_label: '{{name}}, album',
+    categories: {
+      food: 'Mat',
+      groceries: 'Matvaror',
+      transport: 'Transport',
+      housing: 'Boende',
+      bills: 'Räkningar',
+      healthcare: 'Hälsovård',
+      shopping: 'Shopping',
+      other: 'Övrigt',
+    },
     activity: {
       tab: 'Aktivitet',
       show_all: 'Visa alla {{count}}',
@@ -3090,6 +3118,7 @@ const sv = {
       renamed_bill: '{{actor}} döpte om {{before}} till {{after}}',
       moved_bill: '{{actor}} flyttade {{title}} till {{day}}',
       changed_bill: '{{actor}} ändrade {{title}}',
+      recategorized_bill: '{{actor}} flyttade {{title}} till {{category}}',
       your_share: 'Din andel {{money}}',
       your_share_change: 'Din andel {{before}} → {{after}}',
       your_share_gone: 'Din andel på {{money}} är borta',
@@ -3192,6 +3221,7 @@ const sv = {
     delete_budget_message_month: 'Den återskapas inte automatiskt för den här månaden.',
     delete_budget_message_year: 'Den återskapas inte automatiskt för det här året.',
     unbudgeted_section: 'Obudgeterade utgifter',
+    albums_section: 'Album',
     left: '{{amount}} kvar',
     over: '{{amount}} över',
     name_label: 'Namn',

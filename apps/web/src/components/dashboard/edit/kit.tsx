@@ -14,6 +14,7 @@ import { FREE_MAX_ACCOUNTS, FREE_MAX_LOANS, FREE_MAX_SAVINGS_GOALS } from "../pr
 import { useDashboard, useFormat } from "../state";
 import { usePaywall } from "../paywall";
 import { AccountLogo, CategoryGlyph, ClayImg } from "../ui";
+import { ALBUM_CATEGORIES, type AlbumCategoryKey } from "@/lib/album/categories";
 
 /*
  * The pieces every editor on the dashboard shares, drawn after the app's own:
@@ -513,6 +514,33 @@ export function categoryLabel(model: Model, id: string | null | undefined): stri
   if (!category) return null;
   const parent = category.parentId ? model.categories.get(category.parentId) : null;
   return parent ? `${parent.name} / ${category.name}` : category.name;
+}
+
+/** A shared album's categories, the same for everyone in it (`ALBUM_CATEGORIES`), as two columns like `CategoryGrid`. */
+export function AlbumCategoryGrid({ value, onChange }: { value: AlbumCategoryKey; onChange: (key: AlbumCategoryKey) => void }) {
+  const t = useTranslations("album.categories");
+  return (
+    <div className="grid grid-cols-2 gap-2">
+      {ALBUM_CATEGORIES.map((category) => {
+        const active = value === category.key;
+        return (
+          <button
+            key={category.key}
+            type="button"
+            aria-pressed={active}
+            onClick={() => onChange(category.key)}
+            className={`flex min-w-0 items-center gap-2.5 rounded-2xl border px-3 py-3 text-left text-[14px] font-bold transition-colors ${
+              active ? "border-primary/30 bg-primary/15 text-primary-dark" : "border-transparent bg-background-subtle/70 text-foreground hover:bg-background-subtle"
+            }`}
+          >
+            <CategoryGlyph icon={category.icon} name={t(category.key)} size={22} />
+            <span className="min-w-0 flex-1 truncate">{t(category.key)}</span>
+            {active ? <Check /> : null}
+          </button>
+        );
+      })}
+    </div>
+  );
 }
 
 /**

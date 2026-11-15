@@ -27,8 +27,9 @@ export type WebAlbumGroup = {
  * album (`current`), and an activity entry only which member made it.
  *
  *   web_album_members   { id, album_id, name, is_self, current, sort_order }
- *   web_album_bills     { id, album_id, date, note, amount, currency, paid_by,
- *                         shares: [{ memberId, amount }], deleted, updated_at }
+ *   web_album_bills     { id, album_id, date, note, amount, currency, category,
+ *                         paid_by, shares: [{ memberId, amount }], deleted,
+ *                         updated_at }   (category: the album's, `ALBUM_CATEGORIES`)
  *   web_album_activity  { id, album_id, kind, actor_member_id, expense_id,
  *                         member_id, bill, rename, payment, simplify,
  *                         started, sort_order, created_at }  (newest first)
@@ -65,6 +66,7 @@ export function withWebDashboardAlbumGroups(
         note: bill.note,
         amount: bill.amount,
         currency: bill.currency,
+        category: bill.category,
         paid_by: bill.paidBy,
         shares: bill.shares.map((share) => ({ memberId: share.memberId, amount: share.amount })),
         deleted: bill.deletedAt ? 1 : 0,

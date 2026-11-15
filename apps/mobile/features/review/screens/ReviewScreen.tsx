@@ -25,6 +25,8 @@ import { CategoryEmoji, ClayIcon, Text } from '~/components/ui';
 import { SentimentIcon } from '~/components/ui/SentimentIcons';
 import { spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
+import { AlbumLineIcon } from '~/features/albums/components/AlbumLineIcon';
+import { useAlbumLines } from '~/features/albums/hooks/useAlbumLines';
 import { budgetTotalInMainCurrency } from '~/features/budget/lib/budgetCurrency';
 import { budgetCoveringDay } from '~/features/budget/lib/budgetPeriods';
 import { useGoals } from '~/features/goals/useGoals';
@@ -112,6 +114,7 @@ export const ReviewPagerView = forwardRef<ReviewPagerViewHandle, ReviewPagerView
     ref,
   ) {
     const { settings, categories, periodBudgets, rateTable, getTrueHourlyRateForDate } = useApp();
+    const albumLines = useAlbumLines();
     // iPad and the open Duo: two columns of cards across the wide page.
     const wideColumns = useWideTabColumns();
     const isWide = wideColumns.columns > 1;
@@ -244,8 +247,10 @@ export const ReviewPagerView = forwardRef<ReviewPagerViewHandle, ReviewPagerView
         // currency is compared through its frozen rate.
         budgetTotal: budget ? budgetTotalInMainCurrency(budget, rateTable) : null,
         previousExpenses,
+        albumOf: albumLines.albumOf,
       });
     }, [
+      albumLines,
       categories,
       getTrueHourlyRateForDate,
       period,
@@ -778,7 +783,9 @@ function CategoryRow({
         className="flex-row items-center gap-3"
       >
         <View className="h-9 w-9 items-center justify-center rounded-2xl bg-surface-muted/70">
-          {category.id === UNCATEGORIZED_ID ? (
+          {category.album ? (
+            <AlbumLineIcon album={category.album} size={22} />
+          ) : category.id === UNCATEGORIZED_ID ? (
             <ClayIcon name="money-time/invoice" size={22} />
           ) : (
             <CategoryEmoji icon={category.icon} size={22} />

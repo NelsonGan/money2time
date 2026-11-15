@@ -51,6 +51,7 @@ function makeTx(overrides: Partial<TransactionWithRelations>): TransactionWithRe
     createdBy: null,
     memberId: null,
     albumGroupId: null,
+    albumCategory: null,
     reportingCurrency: 'USD',
     reportingAmount: 100,
     fxRate: 1,

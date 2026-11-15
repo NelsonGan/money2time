@@ -145,6 +145,7 @@ export function buildPaybackRows(
         instalmentRuleId: null,
         instalmentNumber: null,
         dayOrder: null,
+        albumCategory: null,
         type: 'transfer',
         ...paybackRowAmount(bill, split.amount, currencyOf, rateTable),
         reportingCurrency: null,
