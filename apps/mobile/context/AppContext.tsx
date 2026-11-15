@@ -62,6 +62,7 @@ import {
   type ProjectHints,
 } from '~/features/albums/services/albumGroupSync';
 import {
+  followProfileName,
   groupWriteMessage,
   isExpectedGroupWriteError,
   writeGroup,
@@ -101,7 +102,12 @@ import {
   NO_REIMBURSEMENT,
 } from '~/features/reimbursements/lib/reimbursementMath';
 import { withEntryStamp } from '~/features/sharedLedgers/lib/entryStamp';
-import { invalidateLedgerPeople, ownAlbumName } from '~/features/sharedLedgers/lib/ledgerPeople';
+import {
+  albumNamesFor,
+  invalidateLedgerPeople,
+  ownAlbumName,
+  ownProfileName,
+} from '~/features/sharedLedgers/lib/ledgerPeople';
 import { countAccountsTowardFreeLimit } from '~/features/transactions/lib/accountEntryGate';
 import {
   findFallbackCategory,
@@ -6630,6 +6636,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (nextUpdates.displayMode === 'time' && !canUseTimeDisplayMode) {
         nextUpdates.displayMode = 'money';
       }
+      // The names the user went by in shared albums before this change.
+      const albumNamesBefore =
+        'profileName' in nextUpdates ? albumNamesFor(ownProfileName()) : null;
       runMutation(
         () => {
           settingsRepository.updateSettings(nextUpdates);
@@ -6646,6 +6655,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             // from Settings, signed in or not.
             if ('profileName' in nextUpdates || 'profileAvatarUri' in nextUpdates) {
               invalidateLedgerPeople();
+            }
+            // A new Settings name reaches the shared albums where the user
+            // still goes by a name they never picked there.
+            const albumName = albumNamesBefore ? ownAlbumName() : null;
+            if (albumNamesBefore && albumName) {
+              try {
+                if (followProfileName(albumNamesBefore, albumName) > 0) notifyAlbumGroups();
+              } catch (error) {
+                reportError(error, { scope: 'album_group_write' });
+              }
             }
             // A reporting-currency change re-bases the FX rate table.
             if (nextUpdates.currencyCode) reloadRateTable(next.currencyCode);

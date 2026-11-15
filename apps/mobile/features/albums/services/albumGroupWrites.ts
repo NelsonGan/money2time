@@ -9,11 +9,16 @@
 // (`projectGroup`). See README.md > Album members and shared albums.
 
 import { CloudSyncApiError } from '~/features/cloudSync/services/cloudSyncApi';
-import { sharedAlbumFor } from '~/features/cloudSync/services/sharedLedgerStore';
+import {
+  listAlbumShares,
+  sharedAlbumFor,
+  type SharedLedger,
+} from '~/features/cloudSync/services/sharedLedgerStore';
 import { getSQLite } from '~/lib/db/client';
 import { I18n } from '~/lib/i18n';
 import { newId, nowIso } from '~/utils/id';
 
+import { personNameKey } from '../lib/albumPeople';
 import {
   GROUP_TABLES,
   type GroupState,
@@ -27,7 +32,7 @@ import {
   type StoredRow,
   type WriteRequest,
 } from '../lib/groupPlan';
-import type { GroupRowWrite } from '../lib/groupRows';
+import { type GroupRowWrite, renameRow } from '../lib/groupRows';
 
 /** The group's tables: the only ones a change names, checked before any SQL names one. */
 const SAFE_TABLE = new Set<string>(GROUP_TABLES);
@@ -144,14 +149,53 @@ export async function writeGroup(
   if (!rows.length) return;
   const share = sharedAlbumFor(groupId);
   if (!share?.userId) throw new CloudSyncApiError('not_found', 404);
-  const request: WriteRequest = { rows: [...rows], reason: opts.reason };
+  planAndWrite(groupId, share, rows, opts.reason);
+}
+
+/** Plans a change as the account the user is in the album as, and writes it. */
+function planAndWrite(
+  groupId: string,
+  share: SharedLedger,
+  rows: readonly GroupRowWrite[],
+  reason?: 'close_even',
+): void {
+  const request: WriteRequest = { rows: [...rows], reason };
   const plan = planWrite(
     loadGroupState(groupId, request),
-    { groupId, userId: share.userId, now: nowIso(), newId },
+    { groupId, userId: share.userId ?? '', now: nowIso(), newId },
     request,
-    share.ownerUserId ?? (share.role === 'owner' ? share.userId : ''),
+    share.ownerUserId ?? (share.role === 'owner' ? (share.userId ?? '') : ''),
   );
   applyPlanLocally(groupId, plan);
+}
+
+/**
+ * The user's Settings name changed: they take it in each shared album where
+ * they still go by a name they never picked there (`was`: the old Settings
+ * name, the sign-in name, the address's first part). An album where they
+ * chose another name keeps it, and so does one where someone else already has
+ * the new name. Each rename is logged like any other, and goes up with Cloud
+ * Sync. Returns how many albums changed.
+ */
+export function followProfileName(was: readonly string[], name: string): number {
+  const automatic = new Set(was.map(personNameKey));
+  let renamed = 0;
+  for (const share of listAlbumShares()) {
+    if (!share.userId) continue;
+    const self = getSQLite().getFirstSync<{ id: string; name: string }>(
+      'SELECT id, name FROM album_members WHERE ledger_id = ? AND user_id = ? AND deleted_at IS NULL',
+      [share.ledgerId, share.userId],
+    );
+    if (!self || !automatic.has(personNameKey(self.name))) continue;
+    if (personNameKey(self.name) === personNameKey(name)) continue;
+    try {
+      planAndWrite(share.ledgerId, share, [renameRow(self.id, name)]);
+      renamed += 1;
+    } catch (error) {
+      if (!(error instanceof GroupWriteError)) throw error;
+    }
+  }
+  return renamed;
 }
 
 /** Why a change to a shared album did not go, in words. */

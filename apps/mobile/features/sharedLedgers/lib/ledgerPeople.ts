@@ -153,8 +153,24 @@ export function nameFromEmail(email: string | null | undefined): string | null {
  * part (`nameFromEmail`). Null when signed out with no name.
  */
 export function ownAlbumName(): string | null {
+  return albumNamesFor(readOwnProfile().name)[0] ?? null;
+}
+
+/**
+ * Every name the user goes by in an album without having picked one there:
+ * the Settings name (`profileName`, as it is or was), the sign-in name, the
+ * address's first part. The first is the one a new album gets.
+ */
+export function albumNamesFor(profileName: string | null): string[] {
   const user = getCachedSessionUser();
-  return readOwnProfile().name ?? (user?.name.trim() || nameFromEmail(user?.email));
+  return [profileName?.trim(), user?.name.trim(), nameFromEmail(user?.email)].filter(
+    (name): name is string => !!name,
+  );
+}
+
+/** The Settings name as it is now, before a change is saved. */
+export function ownProfileName(): string | null {
+  return readOwnProfile().name;
 }
 
 type AvatarResolver = (path: string | null) => string | null;

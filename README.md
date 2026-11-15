@@ -2223,7 +2223,9 @@ Worker side is the cloud-sync Worker's `src/albumGroups.ts`, with a copy of
   which opens with it, and joining opens the album itself. Someone whose main
   ledger is shared is told it cannot hold one, and a link whose album id is
   already an album of another ledger is refused. The joiner is put on the
-  list under their own name (a number added if it is taken: "Ben 2") as soon
+  list under their own name (`ownAlbumName`: their Settings name, else their
+  sign-in name, else their address's first part, "Nelson", as the website
+  names a new member; a number added if it is taken: "Ben 2") as soon
   as the group's people have come down (`syncAlbumGroups` asks the Worker,
   `joinAlbumGroup`), and the log says they joined. An album deleted here and
   joined again comes back with the entries it held (`ensureLocalAlbum`
@@ -2674,8 +2676,14 @@ everywhere (`countUnpaidSplitBills`). Joining a shared album needs a
 connection (the Worker writes the new member); every other change saves
 offline. Money owed back on a deleted or lowered bill shows in the album's
 own Balances, not on the main Balances page (which reads the user's
-entries). Names and photos from Cloud Sync profiles are not used: a person goes by
-the name on their member row. `albums.split_with_json` (migration `090`) is
+entries). A person goes by the name on their member row, the same on every
+phone and the website. A name typed when joining on the website is the one
+used, even when the app had put them in first (`planJoin` renames someone
+already in for a `via: "web"` join). Changing the Settings name renames the
+user in each shared album where they still go by a name they never picked
+there (the old Settings name, the sign-in name or the address's first part;
+`followProfileName`), unless someone else has the new name; a name picked in
+one album stays. Cloud Sync profile photos are not used. `albums.split_with_json` (migration `090`) is
 an unused column.
 
 ## Analytics

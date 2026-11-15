@@ -6,7 +6,7 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 
 import { GroupWriteError, memberRowId, planJoin } from '~/features/albums/lib/groupPlan';
 import { billRow, deletedBillRow, paymentRow, renameRow } from '~/features/albums/lib/groupRows';
-import { writeGroup } from '~/features/albums/services/albumGroupWrites';
+import { followProfileName, writeGroup } from '~/features/albums/services/albumGroupWrites';
 import { saveSharedLedger } from '~/features/cloudSync/services/sharedLedgerStore';
 import { enableCapture, SyncEngine } from '~/features/cloudSync/services/syncEngine';
 import { getSQLite } from '~/lib/db/client';
@@ -407,4 +407,20 @@ it("never takes over another album's row through an id it chose, and logs nothin
   // The whole change is refused: no log entry for a bill that is not there.
   expect(kinds(phones.a)).toEqual(logged);
   expect(outbox(phones.a)).toEqual([]);
+});
+
+it("follows the user's new Settings name where they still go by an automatic one", async () => {
+  on(phones.a);
+  // Ann never picked a name in the album: her new Settings name reaches it.
+  expect(followProfileName(['Ann'], 'Annabel')).toBe(1);
+  expect(rows(phones.a, 'album_members').map((row) => row.name)).toEqual(['Annabel', 'Ben']);
+  expect(kinds(phones.a)).toContain('member_renamed:u-a');
+  // A name she picked there stays; so does one someone else already has.
+  expect(followProfileName(['Ann'], 'Ann Lee')).toBe(0);
+  expect(followProfileName(['Annabel'], 'Ben')).toBe(0);
+  expect(rows(phones.a, 'album_members').map((row) => row.name)).toEqual(['Annabel', 'Ben']);
+  // It goes up like any change.
+  await sync(phones.a);
+  await sync(phones.b);
+  expect(rows(phones.b, 'album_members').map((row) => row.name)).toEqual(['Annabel', 'Ben']);
 });
