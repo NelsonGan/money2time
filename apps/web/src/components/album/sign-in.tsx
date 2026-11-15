@@ -3,6 +3,7 @@
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 
+import { AppleIcon } from "@/components/icons";
 import { EVENTS, track } from "@/lib/analytics";
 
 import { AlbumApiError, api, type SessionUser } from "./api";
@@ -10,12 +11,51 @@ import { Button, Icon } from "./ui";
 
 /**
  * Signing in on the website, with the same account the app uses (the
- * cloud-sync Worker's): Google, or a code sent by email. Signing in later in
- * the app with the same Google account or address brings the albums along.
+ * cloud-sync Worker's): Google, Apple, or a code sent by email. Signing in
+ * later in the app with the same Google or Apple account, or address, brings
+ * the albums along.
  */
 
 /** The Google OAuth client the Worker accepts web ID tokens from (also Android's `webClientId`). */
 const GOOGLE_CLIENT_ID = "229377044166-862vte0l859hsifla83k0q1rhjtcs9h0.apps.googleusercontent.com";
+/**
+ * The Services ID the Worker accepts Apple's web ID tokens from. Its only
+ * domain and return URL are album.money2time.com's, so Apple refuses every
+ * other host and the button shows there only.
+ */
+const APPLE_SERVICES_ID = "com.nelsongan.money2time.web";
+const APPLE_HOST = "album.money2time.com";
+/**
+ * Apple's script comes in one build per language, which is the language of
+ * its popup; a website locale Apple has no build for gets the US English one.
+ */
+const APPLE_LOCALES: Record<string, string> = {
+  da: "da_DK",
+  de: "de_DE",
+  "en-au": "en_GB",
+  "en-gb": "en_GB",
+  "en-nz": "en_GB",
+  es: "es_ES",
+  fr: "fr_FR",
+  hi: "hi_IN",
+  id: "id_ID",
+  it: "it_IT",
+  ja: "ja_JP",
+  ko: "ko_KR",
+  ms: "ms_MY",
+  nb: "no_NO",
+  nl: "nl_NL",
+  pl: "pl_PL",
+  pt: "pt_BR",
+  ru: "ru_RU",
+  sv: "sv_SE",
+  th: "th_TH",
+  tr: "tr_TR",
+  uk: "uk_UA",
+  vi: "vi_VN",
+  zh: "zh_CN",
+};
+const appleScript = (locale: string) => `https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/${APPLE_LOCALES[locale] ?? "en_US"}/appleid.auth.js`;
 /** The Turnstile widget the app's email sign-in uses; its domain covers album.money2time.com. */
 const TURNSTILE_SITE_KEY = "0x4AAAAAAFqdQg_MRfc4cWPB";
 /** Cloudflare's test key that always passes, for `*.localhost` (the local Worker skips the check). */
@@ -32,9 +72,16 @@ type Turnstile = {
   reset: (widget: string) => void;
   remove: (widget: string) => void;
 };
+type AppleId = {
+  auth: {
+    init: (options: Record<string, unknown>) => void;
+    signIn: () => Promise<{ authorization?: { id_token?: string }; user?: { name?: { firstName?: string; lastName?: string } } }>;
+  };
+};
 declare global {
   interface Window {
     google?: { accounts?: { id?: GoogleId } };
+    AppleID?: AppleId;
     turnstile?: Turnstile;
   }
 }
@@ -73,7 +120,7 @@ export function SignIn({ onSignedIn, context }: { onSignedIn: (user: SessionUser
   const [mode, setMode] = useState<"choose" | "email">("choose");
   const [error, setError] = useState<string | null>(null);
 
-  const done = (user: SessionUser, method: "google" | "email") => {
+  const done = (user: SessionUser, method: "google" | "apple" | "email") => {
     track(EVENTS.albumSignedIn, { method, context });
     onSignedIn(user);
   };
@@ -83,6 +130,13 @@ export function SignIn({ onSignedIn, context }: { onSignedIn: (user: SessionUser
       {mode === "choose" ? (
         <>
           <GoogleButton onToken={(token) => api.signInWithGoogle(token).then((user) => done(user, "google"), (err: unknown) => setError(t(signInErrorKey(err))))} />
+          <AppleButton
+            onCredential={(credential) => {
+              setError(null);
+              return api.signInWithApple(credential).then((user) => done(user, "apple"), (err: unknown) => setError(t(signInErrorKey(err))));
+            }}
+            onError={() => setError(t("errors.generic"))}
+          />
           <Button tone="plain" className="h-11 w-full !text-[15px] !font-semibold" onClick={() => setMode("email")}>
             <span className="text-primary">
               <Icon name="mail" />
@@ -143,6 +197,87 @@ function GoogleButton({ onToken }: { onToken: (idToken: string) => void }) {
   }, [locale]);
   if (failed) return null;
   return <div ref={ref} className="flex min-h-[44px] w-full justify-center [color-scheme:light]" />;
+}
+
+async function sha256Hex(value: string): Promise<string> {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
+  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+type AppleCredential = { idToken: string; nonce: string; firstName?: string; lastName?: string };
+
+/** Points Apple's script at a fresh nonce for the next sign-in; returns the raw nonce. */
+async function prepareApple(): Promise<string> {
+  const raw = crypto.randomUUID();
+  window.AppleID?.auth.init({ clientId: APPLE_SERVICES_ID, scope: "name email", redirectURI: `${window.location.origin}/`, nonce: await sha256Hex(raw), usePopup: true });
+  return raw;
+}
+
+/**
+ * Sign in with Apple in Apple's popup, drawn like Google's outline button
+ * beside it. Apple puts the SHA-256 of a fresh nonce in its ID token and the
+ * Worker gets the raw one, as in the app. The nonce is ready before the click,
+ * because a popup opened after an await is blocked.
+ */
+function AppleButton({ onCredential, onError }: { onCredential: (credential: AppleCredential) => Promise<void>; onError: () => void }) {
+  const t = useTranslations("album");
+  const locale = useLocale();
+  const [ready, setReady] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const nonce = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (window.location.hostname !== APPLE_HOST) return;
+    let live = true;
+    // The page's language, else English: a missing build must not hide the button.
+    loadScript(appleScript(locale))
+      .catch(() => loadScript(appleScript("en")))
+      .then(prepareApple)
+      .then((raw) => {
+        nonce.current = raw;
+        if (live) setReady(true);
+      })
+      .catch(() => undefined);
+    return () => {
+      live = false;
+    };
+  }, [locale]);
+
+  if (!ready) return null;
+
+  const signIn = async () => {
+    const raw = nonce.current;
+    const apple = window.AppleID;
+    if (!raw || !apple || busy) return;
+    setBusy(true);
+    nonce.current = null;
+    try {
+      const response = await apple.auth.signIn();
+      const idToken = response.authorization?.id_token;
+      if (!idToken) throw new Error("no token");
+      const name = response.user?.name;
+      await onCredential({ idToken, nonce: raw, firstName: name?.firstName || undefined, lastName: name?.lastName || undefined });
+    } catch (err) {
+      // Closing Apple's popup or pressing Cancel there is not an error.
+      const code = (err as { error?: unknown } | null)?.error;
+      if (code !== "popup_closed_by_user" && code !== "user_cancelled_authorize") onError();
+    } finally {
+      nonce.current = await prepareApple().catch(() => null);
+      setBusy(false);
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={() => void signIn()}
+      disabled={busy}
+      className="mx-auto flex h-10 w-full max-w-[400px] items-center justify-center gap-2 rounded-full border border-[#dadce0] bg-white px-3 text-[14px] font-medium text-[#1f1f1f] [color-scheme:light] transition-colors hover:bg-[#f7f8f8] disabled:opacity-60"
+    >
+      <AppleIcon className="h-[18px] w-[18px] shrink-0" />
+      {t("signIn.apple")}
+    </button>
+  );
 }
 
 function EmailSignIn({ onSignedIn, onBack }: { onSignedIn: (user: SessionUser) => void; onBack: () => void }) {

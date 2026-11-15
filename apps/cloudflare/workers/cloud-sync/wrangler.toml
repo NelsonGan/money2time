@@ -80,7 +80,9 @@ ALBUM_INVITE_URL = "https://album.money2time.com"
 # Google Sign-In ID-token audiences: the iOS client (iOS tokens) and the web
 # client (Android tokens, which are issued for the webClientId).
 GOOGLE_CLIENT_IDS = "229377044166-7hkgkf8se5duonne5tgbph71ld6to3pg.apps.googleusercontent.com,229377044166-862vte0l859hsifla83k0q1rhjtcs9h0.apps.googleusercontent.com"
-APPLE_CLIENT_IDS = "com.nelsongan.money2time"
+# Sign in with Apple ID-token audiences: the app (its bundle id) and the
+# website's Services ID "Money2Time Web" (album.money2time.com).
+APPLE_CLIENT_IDS = "com.nelsongan.money2time,com.nelsongan.money2time.web"
 APPLE_APP_BUNDLE_IDENTIFIER = "com.nelsongan.money2time"
 # Sign in with Apple key "Money2Time Cloud Sync" (token revocation on account
 # deletion). Its .p8 is the secret APPLE_PRIVATE_KEY.

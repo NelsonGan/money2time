@@ -2422,6 +2422,7 @@
       "other": "Altro"
     },
     "signIn": {
+      "apple": "Continua con Apple",
       "email": "Continua con email",
       "emailLabel": "Indirizzo email",
       "emailPlaceholder": "tu@esempio.it",

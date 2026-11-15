@@ -140,7 +140,7 @@ type AnalyticsPlan = {
   [EVENTS.albumEdited]: { action: AlbumEditAction; result: "saved" | "offline" | "not_member" | "failed" };
   [EVENTS.albumJoined]: { result: "joined" | "full" | "expired" | "failed" };
   [EVENTS.albumOpenInApp]: { placement: "join_page" | "joined" };
-  [EVENTS.albumSignedIn]: { method: "google" | "email"; context: "join" | "home" | "album" };
+  [EVENTS.albumSignedIn]: { method: "google" | "apple" | "email"; context: "join" | "home" | "album" };
   [EVENTS.albumViewed]: { tab: AlbumTab };
   [EVENTS.appDownloadClicked]: {
     placement: DownloadPlacement;

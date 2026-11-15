@@ -2422,6 +2422,7 @@
       "other": "अन्य"
     },
     "signIn": {
+      "apple": "Apple के साथ जारी रखें",
       "email": "ईमेल से जारी रखें",
       "emailLabel": "ईमेल पता",
       "emailPlaceholder": "you@example.com",

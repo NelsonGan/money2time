@@ -2422,6 +2422,7 @@
       "other": "อื่น ๆ"
     },
     "signIn": {
+      "apple": "ดำเนินการต่อด้วย Apple",
       "email": "ดำเนินการต่อด้วยอีเมล",
       "emailLabel": "อีเมล",
       "emailPlaceholder": "you@example.com",

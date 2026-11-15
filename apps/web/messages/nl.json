@@ -2422,6 +2422,7 @@
       "other": "Overig"
     },
     "signIn": {
+      "apple": "Doorgaan met Apple",
       "email": "Doorgaan met e-mail",
       "emailLabel": "E-mailadres",
       "emailPlaceholder": "jij@voorbeeld.nl",

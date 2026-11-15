@@ -2422,6 +2422,7 @@
       "other": "Khác"
     },
     "signIn": {
+      "apple": "Tiếp tục với Apple",
       "email": "Tiếp tục với email",
       "emailLabel": "Địa chỉ email",
       "emailPlaceholder": "ban@example.com",

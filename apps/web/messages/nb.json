@@ -2422,6 +2422,7 @@
       "other": "Annet"
     },
     "signIn": {
+      "apple": "Fortsett med Apple",
       "email": "Fortsett med e-post",
       "emailLabel": "E-postadresse",
       "emailPlaceholder": "deg@eksempel.no",
