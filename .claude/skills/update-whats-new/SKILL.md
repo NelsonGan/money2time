@@ -128,6 +128,7 @@ A budget is telling your money where to go instead of wondering where it went.
 A little planning today saves time and money tomorrow.
 A penny saved is a penny earned.
 An investment in knowledge pays the best interest.
+Before borrowing money from a friend, decide which you need most.
 Beware of little expenses; a small leak will sink a great ship.
 Do not save what is left after spending, but spend what is left after saving.
 Frugal living isn't about choosing poverty; it's about choosing to spend your life energy on what truly matters to you.
