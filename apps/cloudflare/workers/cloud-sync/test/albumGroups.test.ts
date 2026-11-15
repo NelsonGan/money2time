@@ -37,8 +37,10 @@ function database() {
       try {
         for (const { sql, args } of statements) db.prepare(sql).all(...args);
         db.exec('COMMIT');
+        return true;
       } catch (error) {
         db.exec('ROLLBACK');
+        if (/overflow/i.test(String(error))) return false;
         throw error;
       }
     },
@@ -351,12 +353,12 @@ test('someone who left changes nothing and is put on no new bill, but stays on o
   );
 });
 
-test('a write is last-writer-wins, as a phone\'s is, and its log entry stays', async () => {
-  const { db, group, rows, raw, interleave } = await trip();
+test("two writes at once never lose one another, a phone's push included", async () => {
+  const { db, group, rows, interleave } = await trip();
   await write(group, 'owner', {
     rows: [bill('u-bali-owner', { 'u-bali-owner': 30, 'u-bali-tess': 30 })],
   });
-  // A phone's change lands while Ben's is between its read and its own.
+  // A phone's push lands while Ben's is between its read and its own.
   interleave(() => {
     const dinner = { ...rows('album_expenses')[0], amount: 100 };
     db.prepare(
@@ -366,10 +368,39 @@ test('a write is last-writer-wins, as a phone\'s is, and its log entry stays', a
   await write(group, 'ben', {
     rows: [bill('u-bali-owner', { 'u-bali-owner': 70, 'u-bali-tess': 70 })],
   });
-  // Ben's, the later write, stands whole, with a revision of the Worker's.
+  // Ben's was planned again on what landed first.
+  const edit = rows('album_activity').find((a) => a.kind === 'bill_edited');
+  assert.equal(JSON.parse(edit.data_json).before.amount, 100);
   assert.equal(rows('album_expenses')[0].amount, 140);
-  assert.match(raw('album_expenses', 'dinner')!.rev, /\.w/);
   assert.equal(rows('album_activity').filter((a) => a.kind === 'bill_edited').length, 1);
+});
+
+test('two people joining at once never take one name', async () => {
+  const { db, group, rows, interleave } = await trip();
+  // Another "Ben" joins while this one is being planned.
+  interleave(() => {
+    db.prepare('INSERT INTO sync_rows VALUES (?, ?, ?, ?, ?, ?)').run(
+      'album_members',
+      'u-bali-ben2',
+      JSON.stringify({
+        id: 'u-bali-ben2',
+        ledger_id: 'bali',
+        name: 'Zed',
+        user_id: 'zed',
+        sort_order: 9,
+        created_at: 'x',
+        updated_at: 'x',
+        deleted_at: null,
+      }),
+      'other',
+      'worker',
+      1,
+    );
+  });
+  await join(group, 'zed-two', 'Zed');
+  const names = rows('album_members').map((m) => m.name);
+  assert.equal(names.filter((n) => n === 'Zed').length, 1);
+  assert.ok(names.includes('Zed 2'));
 });
 
 test('a bill or payment written on the website names its writer as web:<account>', async () => {
@@ -420,7 +451,7 @@ test('the website reads the whole group, the newest log entries first', async ()
   assert.equal(read.find((row) => row.table === 'album_expenses')?.data.note, 'Dinner');
 });
 
-test("an invite names its owner as the album knows them", async () => {
+test('an invite names its owner as the album knows them', async () => {
   const { group } = await trip();
   assert.equal(await readOwnerName(group, 'owner'), 'Nelson');
   assert.equal(await readOwnerName(group, 'nobody'), null);

@@ -636,9 +636,10 @@ class SharedLedgerSync {
 
   /**
    * Puts the user on a shared album's list as themselves, which the Worker
-   * writes (as for someone joining on the website, so two people joining at
-   * once never take one name), then brings the album down so the user is in
-   * it here. Throws when the Worker cannot be reached or refuses.
+   * writes (as for someone joining on the website; it plans joins one at a
+   * time, so two people joining at once never take one name), then brings the
+   * album down so the user is in it here. Throws only when the join itself
+   * did not go: a sync that fails after it is retried like any other.
    */
   async joinAlbumGroup(groupId: string, name: string): Promise<void> {
     const share = sharedAlbumFor(groupId);
@@ -650,7 +651,15 @@ class SharedLedgerSync {
       name,
       session.liveDeviceId ?? '',
     );
-    await (await this.engineFor(share)).syncNow();
+    try {
+      const engine = await this.engineFor(share);
+      // A round already running may have pulled before the join was written:
+      // let it finish, then pull again.
+      if (engine.isSyncing()) await engine.syncNow().catch(() => undefined);
+      await engine.syncNow();
+    } catch {
+      // The album is joined; the next sync brings the user down.
+    }
   }
 
   /**

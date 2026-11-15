@@ -5,8 +5,9 @@ import path from 'node:path';
 // features/albums/services/albumGroupWrites.ts, which plans every change by
 // the album's rules and logs it (README: Album members and shared albums).
 // Writing a group table anywhere else would skip the rules and the activity
-// log, so no app code names one in a write. (Cloud Sync applies pulled rows
-// and drops a group's rows by table list, never by name.)
+// log, so no app code names one in a write (a write whose table name is
+// built at run time is not caught: Cloud Sync applies pulled rows and drops
+// a group's rows that way, by table list).
 
 const ROOT = path.resolve(__dirname, '../..');
 const SOURCES = [

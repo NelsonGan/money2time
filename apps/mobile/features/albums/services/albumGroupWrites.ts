@@ -4,8 +4,8 @@
 // group in one transaction; Cloud Sync's triggers queue it, and the album's
 // channel sends it to the album's database like any shared row. So a change
 // saves offline and goes up when the phone is back online. This is the only
-// code that writes the group's tables (a test keeps it so), so no change
-// skips the log. The caller then brings the user's own entries in step
+// code that writes the group's tables (a test refuses any other write that
+// names one), so no change skips the log. The caller then brings the user's own entries in step
 // (`projectGroup`). See README.md > Album members and shared albums.
 
 import { CloudSyncApiError } from '~/features/cloudSync/services/cloudSyncApi';
@@ -99,8 +99,8 @@ function toValue(value: unknown): Value {
 
 /**
  * Writes a plan's rows whole, in one transaction, with the triggers on so
- * Cloud Sync sends them. A row id held by another group's row is left alone
- * (the update's guard), never taken over.
+ * Cloud Sync sends them. A row id held by another group's row is never taken
+ * over: the whole change is refused (`bad_row`), log entries included.
  */
 export function applyPlanLocally(groupId: string, plan: Plan): void {
   if (!plan.writes.length) return;
@@ -112,17 +112,19 @@ export function applyPlanLocally(groupId: string, plan: Plan): void {
 
 function writeRow(groupId: string, write: PlannedWrite): void {
   const columns = columnsOf(write.table);
-  if (!SAFE_TABLE.test(write.table) || !columns.size) return;
+  if (!SAFE_TABLE.test(write.table) || !columns.size) throw new GroupWriteError('bad_row');
   const data: Row = { ...write.data, id: write.id, ledger_id: groupId };
   const names = Object.keys(data).filter((name) => columns.has(name));
   const updates = names.filter((name) => name !== 'id');
-  getSQLite().runSync(
+  const result = getSQLite().runSync(
     `INSERT INTO "${write.table}" (${names.map((name) => `"${name}"`).join(', ')})
      VALUES (${names.map(() => '?').join(', ')})
      ON CONFLICT (id) DO UPDATE SET ${updates.map((name) => `"${name}" = excluded."${name}"`).join(', ')}
      WHERE "${write.table}".ledger_id = excluded.ledger_id`,
     names.map((name) => toValue(data[name])),
   );
+  // The guard skipped it: the id is another group's.
+  if (!result.changes) throw new GroupWriteError('bad_row');
 }
 
 /**

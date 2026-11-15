@@ -9,7 +9,9 @@
 //
 // Rows are stored as the app stores them (`sync_rows`: table, id, JSON, a
 // revision), so phones apply what the Worker wrote like any other synced row.
-// Every row is last-writer-wins.
+// The Worker writes a row only if it still has the revision it was read at,
+// and plans again otherwise, so it never overwrites a change (a phone's push,
+// another join) that landed while it planned.
 
 import {
   type GroupState,
@@ -63,12 +65,23 @@ export interface Statement {
 /** What the Worker needs of an album's database. */
 export interface GroupDb {
   query(statement: Statement): Promise<Row[]>;
-  /** Runs the statements as one transaction; throws when one fails (nothing is written then). */
-  transaction(statements: Statement[]): Promise<void>;
+  /** Runs the statements as one transaction; false when one failed (another write won). */
+  transaction(statements: Statement[]): Promise<boolean>;
 }
 
+/** What the Worker read, with each row's revision (`rowKey` to `rev`) for its guard. */
+export interface LoadedState extends GroupState {
+  revs: Map<string, string>;
+  /** Every member row and its revision, as read: a join elsewhere changes it. */
+  membersStamp: string;
+}
+
+/** The member rows and their revisions, in one value, so a write can tell they changed. */
+const MEMBERS_STAMP_SQL = `COALESCE((SELECT group_concat(row_id || ':' || rev, ',') FROM
+  (SELECT row_id, rev FROM sync_rows WHERE table_name = 'album_members' ORDER BY row_id)), '')`;
+
 /** Reads the group's members and the rows a write names (with the bills its payments are for). */
-export async function loadState(db: GroupDb, request: WriteRequest | null): Promise<GroupState> {
+export async function loadState(db: GroupDb, request: WriteRequest | null): Promise<LoadedState> {
   const keys: { table: string; id: string }[] = [];
   for (const item of request?.rows ?? []) {
     const id = item?.row?.id;
@@ -78,30 +91,33 @@ export async function loadState(db: GroupDb, request: WriteRequest | null): Prom
       keys.push({ table: 'album_expenses', id: item.row.expense_id });
     }
   }
+  const revs = new Map<string, string>();
   const parse = (raw: Row): StoredRow | null => {
     try {
       const data = JSON.parse(String(raw.data)) as Row;
       if (!data || typeof data !== 'object') return null;
-      return { table: String(raw.table_name), id: String(raw.row_id), data };
+      const row = { table: String(raw.table_name), id: String(raw.row_id), data };
+      revs.set(rowKey(row.table, row.id), String(raw.rev));
+      return row;
     } catch {
       return null;
     }
   };
-  const members = (
-    await db.query({
-      sql: `SELECT table_name, row_id, data FROM sync_rows WHERE table_name = 'album_members' LIMIT ${MAX_MEMBER_ROWS}`,
+  const [stamp, memberRows] = await Promise.all([
+    db.query({ sql: `SELECT ${MEMBERS_STAMP_SQL} AS stamp`, args: [] }),
+    db.query({
+      sql: `SELECT table_name, row_id, data, rev FROM sync_rows WHERE table_name = 'album_members' LIMIT ${MAX_MEMBER_ROWS}`,
       args: [],
-    })
-  )
-    .map(parse)
-    .filter((row): row is StoredRow => row !== null);
+    }),
+  ]);
+  const members = memberRows.map(parse).filter((row): row is StoredRow => row !== null);
   const rows = new Map<string, StoredRow>();
   for (const row of members) rows.set(rowKey(row.table, row.id), row);
   const wanted = keys.filter((key) => !rows.has(rowKey(key.table, key.id)));
   for (let start = 0; start < wanted.length; start += 100) {
     const part = wanted.slice(start, start + 100);
     const found = await db.query({
-      sql: `SELECT table_name, row_id, data FROM sync_rows WHERE ${part
+      sql: `SELECT table_name, row_id, data, rev FROM sync_rows WHERE ${part
         .map(() => '(table_name = ? AND row_id = ?)')
         .join(' OR ')}`,
       args: part.flatMap((key) => [key.table, key.id]),
@@ -111,7 +127,7 @@ export async function loadState(db: GroupDb, request: WriteRequest | null): Prom
       if (row) rows.set(rowKey(row.table, row.id), row);
     }
   }
-  return { members, rows };
+  return { members, rows, revs, membersStamp: String(stamp[0]?.stamp ?? '') };
 }
 
 /** The newest log entries the website is sent; older ones stay in the database. */
@@ -178,14 +194,18 @@ function workerRev(index: number, nowMs: number, salt: string): string {
 }
 
 /**
- * Writes a plan as one transaction, each row whole and last-writer-wins, as
- * a phone's rows are. Returns the rows written.
+ * Writes a plan as one transaction. Each row is written only if it still has
+ * the revision it was read at (`revs`; a row not read must not exist), and
+ * only while the members are as they were read (a join planned at the same
+ * time would otherwise take the same name), so a change that landed meanwhile
+ * is never overwritten or planned past. Null when one had.
  */
 export async function commitPlan(
   db: GroupDb,
   plan: Plan,
+  read: Pick<LoadedState, 'revs' | 'membersStamp'>,
   nowMs = Date.now(),
-): Promise<{ table: string; id: string; data: string; rev: string }[]> {
+): Promise<{ table: string; id: string; data: string; rev: string }[] | null> {
   if (!plan.writes.length) return [];
   const salt = crypto.getRandomValues(new Uint32Array(1))[0].toString(36);
   const written = plan.writes.map((write, index) => ({
@@ -193,27 +213,54 @@ export async function commitPlan(
     id: write.id,
     data: JSON.stringify(write.data),
     rev: workerRev(index, nowMs, salt),
+    expect: read.revs.get(rowKey(write.table, write.id)) ?? null,
   }));
-  await db.transaction(
-    written.map(({ table, id, data, rev }) => ({
-      sql: `INSERT INTO sync_rows (table_name, row_id, data, rev, origin, updated_at)
-            VALUES (?, ?, ?, ?, 'worker', ?)
-            ON CONFLICT (table_name, row_id) DO UPDATE SET
-              data = excluded.data, rev = excluded.rev, origin = excluded.origin,
-              updated_at = excluded.updated_at`,
-      args: [table, id, data, rev, nowMs],
-    })),
-  );
-  return written;
+  // Each check fails (integer overflow) unless what it reads is as it was read.
+  const statements: Statement[] = [
+    {
+      sql: `SELECT CASE WHEN ${MEMBERS_STAMP_SQL} IS ? THEN 1 ELSE abs(-9223372036854775807 - 1) END`,
+      args: [read.membersStamp],
+    },
+  ];
+  for (const { table, id, data, rev, expect } of written) {
+    statements.push({
+      sql: `SELECT CASE WHEN (SELECT rev FROM sync_rows WHERE table_name = ? AND row_id = ?) IS ?
+             THEN 1 ELSE abs(-9223372036854775807 - 1) END`,
+      args: [table, id, expect],
+    });
+    statements.push(
+      expect === null
+        ? {
+            sql: `INSERT INTO sync_rows (table_name, row_id, data, rev, origin, updated_at)
+                  VALUES (?, ?, ?, ?, 'worker', ?)`,
+            args: [table, id, data, rev, nowMs],
+          }
+        : {
+            sql: `UPDATE sync_rows SET data = ?, rev = ?, origin = 'worker', updated_at = ?
+                  WHERE table_name = ? AND row_id = ?`,
+            args: [data, rev, nowMs, table, id],
+          },
+    );
+  }
+  if (!(await db.transaction(statements))) return null;
+  return written.map(({ table, id, data, rev }) => ({ table, id, data, rev }));
 }
 
-/** Reads what a change needs, plans it and writes it. Returns the rows written. */
+/**
+ * Reads what a change needs, plans it and writes it, planning again on what
+ * landed if another write came first. Returns the rows written.
+ */
 export async function writeGroup(
   db: GroupDb,
   request: WriteRequest | null,
   plan: (state: GroupState) => Plan,
 ): Promise<{ table: string; id: string; data: string; rev: string }[]> {
-  return commitPlan(db, plan(await loadState(db, request)));
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    const state = await loadState(db, request);
+    const written = await commitPlan(db, plan(state), state);
+    if (written) return written;
+  }
+  throw new GroupWriteError('busy', 409);
 }
 
 /** `planJoin`, written, with the album's settings row read first. */
@@ -315,10 +362,15 @@ export function hranaDb(url: string, token: string): GroupDb {
       const outcome = (
         result.response as { result: { step_results: unknown[]; step_errors: unknown[] } }
       ).result;
-      if (outcome.step_results[commit] != null) return;
+      if (outcome.step_results[commit] != null) return true;
+      // A failed check is another write that landed first; anything else is not.
       const failed = outcome.step_errors.find((error) => error != null) as
-        { message?: string } | undefined;
-      throw new Error(`turso_write_failed: ${failed?.message ?? ''}`);
+        | { message?: string }
+        | undefined;
+      if (failed && !/overflow/i.test(failed.message ?? '')) {
+        throw new Error(`turso_write_failed: ${failed.message ?? ''}`);
+      }
+      return false;
     },
   };
 }

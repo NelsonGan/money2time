@@ -2556,15 +2556,19 @@ their own.
   triggers queue it and the album's channel sends it, within a second when
   online, or later. Then the user's own entries follow (`projectGroup`). It
   is the only code that writes the group's tables
-  (`__tests__/features/albumGroupWriter.test.ts` fails on any other write),
+  (`__tests__/features/albumGroupWriter.test.ts` fails on any other write
+  that names one),
   so no change skips the log. The Worker writes the group only for what
   happens there, by the same planner (a copy, `src/groupPlan.generated.ts`,
   written by `npm run sync:group-plan` in `apps/mobile`;
   `__tests__/scripts/syncGroupPlan.test.ts` fails while the two differ):
-  someone joining (`planJoin`, from a phone or the website, so two people
-  joining at once never take one name, and the first in turns Simplify on),
-  someone leaving or taken out (`planLeave`), and changes made on the website
-  (`via: "web"`). A payment is cut to what is still owed as stored,
+  someone joining (`planJoin`, from a phone or the website; the first in
+  turns Simplify on), someone leaving or taken out (`planLeave`), and changes
+  made on the website (`via: "web"`). The Worker writes a row only if it
+  still has the revision it read, and only while the member list is as it
+  read it (`commitPlan`'s guards, in one Hrana batch with `BEGIN IMMEDIATE`),
+  else plans again: two people joining at once never take one name, and a
+  website change never overwrites a phone's push that landed meanwhile. A payment is cut to what is still owed as stored,
   so a second tap never pays a share twice. The group is never derived from
   the user's entries: an album is shared before it has any, and an entry of
   the user's own added later stays theirs.
@@ -2607,9 +2611,11 @@ their own.
   checked where it is read.** Anyone in a shared album is anyone who was
   given its link, and the people in one are expected to trust each other.
   The rules hold for every app and the website, but each phone holds a full
-  token, so a modified app could write anything; what protects the user's
-  own money is that a bill or payment someone else wrote lands on no account
-  until the user picks one (see Which account). So:
+  token to its album's database, so a modified app could write anything,
+  including a `created_by` naming someone else (which would put a bill on
+  that person's default account on their phone) or a changed log. That is
+  accepted: the album is among friends, and nothing reaches beyond the
+  group's own tables. So:
   - **Only the group's tables come from it.** Whatever `ledger_id` a row
     claims, an album's channel never delivers a ledger, an entry, an account
     or a category (`channelOfRow`, and `remoteChanges` does not even fetch
@@ -2651,7 +2657,9 @@ their own.
     the one pushed last stands whole (last writer wins per row, as for any
     synced row), so the log can show an edit the bill no longer has.
   - **Leaving.** Leaving or being taken out rotates the database's tokens as
-    for a ledger, so a phone out of the album can no longer reach it.
+    for a ledger, so a phone out of the album can no longer reach it. A
+    change made offline on a phone already out of the album never goes up:
+    the user's own entry for it stays, as an ordinary split bill.
 
 **Limits.** Split by Item bills are not shared (they have no Paid by). A
 member without Pro adds bills in a shared album whatever their count of
@@ -5045,22 +5053,24 @@ the website's ([Shared albums on the web](#shared-albums-on-the-web)), which
 reaches this Worker over the `CLOUD_SYNC` service binding. Links on any other host (older ones were made on
 `shared-ledgers.money2time.com` and the API host) no longer open.
 
-| File            | What it holds                                              |
-| --------------- | ---------------------------------------------------------- |
-| `index.ts`      | Routing, rate limits, the daily cleanup                    |
-| `auth.ts`       | Better Auth (one instance per isolate), sending the code   |
-| `email.ts`      | The sign-in code email: subject, plain text and HTML       |
-| `turnstile.ts`  | Turnstile check in front of sending a code                 |
-| `pages.ts`      | The HTML pages: the invite page and the broken-link page   |
-| `brand.ts`      | money2time.com's colours, font, icon and store links       |
-| `revenuecat.ts` | Linking App User IDs and the account-level Pro check       |
-| `turso.ts`      | Per-user databases and tokens; `CLOUD_SCHEMA_SQL`          |
-| `media.ts`      | Images in R2 and the per-user quota                        |
-| `apple.ts`      | Apple refresh tokens and their revocation                  |
-| `ledgers.ts`    | Shared ledgers: sharing, members, invites, the invite page |
-| `live.ts`       | Live updates: the `SyncHub` Durable Object and notify      |
-| `secretBox.ts`  | AES-GCM sealing for tokens stored in D1                    |
-| `http.ts`       | JSON responses and size-capped JSON bodies (8 KB)          |
+| File                     | What it holds                                               |
+| ------------------------ | ----------------------------------------------------------- |
+| `index.ts`               | Routing, rate limits, the daily cleanup                     |
+| `auth.ts`                | Better Auth (one instance per isolate), sending the code    |
+| `email.ts`               | The sign-in code email: subject, plain text and HTML        |
+| `turnstile.ts`           | Turnstile check in front of sending a code                  |
+| `pages.ts`               | The HTML pages: the invite page and the broken-link page    |
+| `brand.ts`               | money2time.com's colours, font, icon and store links        |
+| `revenuecat.ts`          | Linking App User IDs and the account-level Pro check        |
+| `turso.ts`               | Per-user databases and tokens; `CLOUD_SCHEMA_SQL`           |
+| `media.ts`               | Images in R2 and the per-user quota                         |
+| `apple.ts`               | Apple refresh tokens and their revocation                   |
+| `ledgers.ts`             | Shared ledgers: sharing, members, invites, the invite page  |
+| `albumGroups.ts`         | A shared album's database as the Worker reads and writes it |
+| `groupPlan.generated.ts` | Copy of the app's album planner (`npm run sync:group-plan`) |
+| `live.ts`                | Live updates: the `SyncHub` Durable Object and notify       |
+| `secretBox.ts`           | AES-GCM sealing for tokens stored in D1                     |
+| `http.ts`                | JSON responses and size-capped JSON bodies (8 KB)           |
 
 #### Endpoints
 

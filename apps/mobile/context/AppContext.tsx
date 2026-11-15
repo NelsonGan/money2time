@@ -4068,7 +4068,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     async (
       groupId: string,
       rows: readonly GroupRowWrite[],
-      opts?: { reason?: 'close_even'; media?: string[] },
+      opts?: { reason?: 'close_even' },
     ): Promise<boolean> => {
       try {
         await writeGroup(groupId, rows, opts);

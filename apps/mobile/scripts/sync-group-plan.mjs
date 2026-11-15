@@ -7,7 +7,7 @@
  *
  * The app's file is the source; never edit the Worker's copy. The Worker's CI
  * checks out apps/cloudflare alone, hence a copy rather than an import.
- * `__tests__/features/groupPlanCopy.test.ts` fails while the two differ.
+ * `__tests__/scripts/syncGroupPlan.test.ts` fails while the two differ.
  *
  *   npm run sync:group-plan
  */

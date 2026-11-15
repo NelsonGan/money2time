@@ -1044,6 +1044,11 @@ export class SyncEngine {
     });
   }
 
+  /** Whether a sync is running now (a call to `syncNow` would share it). */
+  isSyncing(): boolean {
+    return this.running !== null;
+  }
+
   /** Flush, push, pull and apply. Concurrent calls share one run. */
   syncNow(): Promise<SyncOutcome> {
     if (this.running) return this.running;

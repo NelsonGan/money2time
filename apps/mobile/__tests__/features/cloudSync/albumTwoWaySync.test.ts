@@ -390,14 +390,21 @@ it('refuses a change from someone who is not in the album, and writes nothing', 
   expect(outbox(phones.a)).toEqual([]);
 });
 
-it("never takes over another album's row through an id it chose", async () => {
+it("never takes over another album's row through an id it chose, and logs nothing", async () => {
   on(phones.a);
   phones.a.app.exec(
     `INSERT INTO album_expenses (id, ledger_id, date, note, amount, currency, paid_by, shares_json, created_at, updated_at)
-     VALUES ('dinner', 'other-album', '2026-11-01', 'Theirs', 5, 'MYR', 'x', '[]', '${NOW}', '${NOW}');`,
+     VALUES ('dinner', 'other-album', '2026-11-01', 'Theirs', 5, 'MYR', 'x', '[]', '${NOW}', '${NOW}');
+     DELETE FROM sync_outbox;`,
   );
-  await writeGroup(GROUP, [dinner({ a: 30, b: 30 })]);
+  const logged = kinds(phones.a);
+  await expect(writeGroup(GROUP, [dinner({ a: 30, b: 30 })])).rejects.toEqual(
+    new GroupWriteError('bad_row'),
+  );
   expect(
     phones.a.app.prepare("SELECT ledger_id, note FROM album_expenses WHERE id = 'dinner'").all(),
   ).toEqual([{ ledger_id: 'other-album', note: 'Theirs' }]);
+  // The whole change is refused: no log entry for a bill that is not there.
+  expect(kinds(phones.a)).toEqual(logged);
+  expect(outbox(phones.a)).toEqual([]);
 });
