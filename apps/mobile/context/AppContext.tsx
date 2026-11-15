@@ -603,6 +603,7 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   createAlbum: (input: {
     name: string;
     coverPhotoUri?: string | null;
+    icon?: string | null;
     startDate?: string | null;
     endDate?: string | null;
     transactionIds?: string[];
@@ -613,6 +614,7 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
     updates: {
       name?: string;
       coverPhotoUri?: string | null;
+      icon?: string | null;
       startDate?: string | null;
       endDate?: string | null;
     },
@@ -3084,6 +3086,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     (input: {
       name: string;
       coverPhotoUri?: string | null;
+      icon?: string | null;
       startDate?: string | null;
       endDate?: string | null;
       transactionIds?: string[];
@@ -3094,6 +3097,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           const albumId = albumsRepository.create({
             name: input.name,
             coverPhotoUri: input.coverPhotoUri ?? null,
+            icon: input.icon ?? null,
             startDate: input.startDate ?? null,
             endDate: input.endDate ?? null,
             latitude: input.location?.latitude ?? null,
@@ -3112,6 +3116,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       );
       void trackEvent(AnalyticsEvents.ALBUM_CREATED, {
         transactionCount: input.transactionIds?.length ?? 0,
+        hasIcon: !!input.icon,
       });
       return id;
     },
@@ -3128,11 +3133,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       updates: {
         name?: string;
         coverPhotoUri?: string | null;
+        icon?: string | null;
         startDate?: string | null;
         endDate?: string | null;
       },
     ) => {
-      albumsRepository.update(id, updates);
+      // '' (the icon field cleared) is stored as none.
+      const icon = updates.icon === undefined ? undefined : updates.icon || null;
+      const iconChanged =
+        icon !== undefined && icon !== (albumsRepository.getById(id)?.icon ?? null);
+      albumsRepository.update(id, icon === undefined ? updates : { ...updates, icon });
       // A shared album's cover is everyone's: the group's changes with it
       // (the image goes up on the album's next sync).
       const cover = updates.coverPhotoUri;
@@ -3145,7 +3155,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
       }
       setAlbums(albumsRepository.list());
-      void trackEvent(AnalyticsEvents.ALBUM_UPDATED);
+      void trackEvent(AnalyticsEvents.ALBUM_UPDATED, { iconChanged });
     },
     [],
   );

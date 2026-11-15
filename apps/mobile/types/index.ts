@@ -677,6 +677,11 @@ export interface Album {
   id: string;
   name: string;
   coverPhotoUri: string | null;
+  /**
+   * The album's icon, a category icon value (constants/categoryIcons.ts): its
+   * line in the category lists and its card show it. Null is none.
+   */
+  icon: string | null;
   isActive: boolean;
   /** Manual start-date override (YYYY-MM-DD); null falls back to first transaction. */
   startDate: string | null;

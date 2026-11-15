@@ -14,6 +14,7 @@ const album = (id: string, patch: Partial<Album> = {}): Album => ({
   id,
   name: id,
   coverPhotoUri: null,
+  icon: null,
   isActive: false,
   startDate: null,
   endDate: null,

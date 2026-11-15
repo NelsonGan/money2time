@@ -24,7 +24,7 @@ import { LineChart } from "../charts/line-chart";
 import { EXPENSE_COLOR, NET_COLOR } from "../charts/scale";
 import { Legend } from "../charts/tooltip";
 import { offersEdits, addAmt, sumAmt, useDashboard, useFormat, useMonthLabels, usePeriodTxs, ZERO } from "../state";
-import { Card, CategoryGlyph, ClayImg, Empty, ItemArt, Kpi, Pill, Progress, RankRow, SliceGlyph, useSliceName } from "../ui";
+import { AlbumGlyph, Card, CategoryGlyph, ClayImg, Empty, ItemArt, Kpi, Pill, Progress, RankRow, SliceGlyph, useSliceName } from "../ui";
 import { splitShareKey } from "../edit/split-ops";
 import { SplitShares } from "../edit/split-shares";
 import { AlbumActivity } from "./album-activity";
@@ -294,7 +294,11 @@ export function TripsView() {
                 ) : null}
               </div>
               <div className="p-4">
-                <h3 className="truncate text-[15.5px] font-extrabold text-foreground">{trip.name}</h3>
+                <div className="flex items-center gap-2">
+                  {/* Its own icon, as on the phone's Albums page and its line in the category lists. */}
+                  {trip.icon ? <AlbumGlyph trip={trip} size={22} /> : null}
+                  <h3 className="min-w-0 flex-1 truncate text-[15.5px] font-extrabold text-foreground">{trip.name}</h3>
+                </div>
                 <p className="truncate text-[12.5px] text-foreground-soft">
                   {[trip.place, trip.start && trip.end ? `${f.date(trip.start, "short")} – ${f.date(trip.end)}` : null].filter(Boolean).join(" · ")}
                 </p>

@@ -243,6 +243,8 @@ export type Trip = {
   id: string;
   name: string;
   coverUri: string | null;
+  /** Its own icon (a category icon value), or null: its line and card show it. */
+  icon: string | null;
   place: string | null;
   countryCode: string | null;
   start: Date | null;
@@ -877,6 +879,7 @@ export function buildModel(backup: BackupFile, opts: { timeZone?: string | null 
         id: row.id,
         name: row.name,
         coverUri: row.cover_photo_uri ?? null,
+        icon: row.icon || null,
         place: [row.place_name, row.place_admin].filter(Boolean).join(", ") || null,
         countryCode: row.country_code ?? null,
         start: parseLocalDate(row.start_date ?? null) ?? (dates.length ? new Date(Math.min(...dates)) : null),

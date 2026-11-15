@@ -12,7 +12,7 @@ export function albumIdOfLine(id: string | null | undefined): string | null {
   return id?.startsWith(LINE_PREFIX) ? id.slice(LINE_PREFIX.length) : null;
 }
 
-/** The first letter of an album's name, its icon while it has no cover. */
+/** The first letter of an album's name, its icon while it has none of its own. */
 export function albumInitial(name: string): string {
   return Array.from(name.trim())[0]?.toUpperCase() ?? '•';
 }

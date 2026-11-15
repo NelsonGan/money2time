@@ -369,7 +369,7 @@ describe('album lines in Review and Household', () => {
       weekStartsOn: 1,
       monthCycle: 1,
     });
-    const album = { id: 'bali', name: 'Bali', coverPhotoUri: null };
+    const album = { id: 'bali', name: 'Bali', icon: 'emoji:🏝️' };
     const summary = buildReviewSummary({
       period,
       transactions: [

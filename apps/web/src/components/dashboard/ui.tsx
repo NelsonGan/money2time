@@ -275,11 +275,9 @@ function Lettermark({ text, size, color = "#B1525F" }: { text: string; size: num
   );
 }
 
-/** An album's icon where a category's would be (its line in a category list): its cover, else its name's first letter. */
-export function AlbumGlyph({ trip, size = 28 }: { trip: Pick<Trip, "name" | "coverUri" | "color">; size?: number }) {
-  const { asset } = useDashboard();
-  const url = asset(trip.coverUri);
-  if (url) return <img src={url} alt="" width={size} height={size} className="shrink-0 rounded-[30%] object-cover" style={{ width: size, height: size }} />;
+/** An album's icon where a category's would be (its line in a category list): its own icon, else its name's first letter (the app's `AlbumLineIcon`). */
+export function AlbumGlyph({ trip, size = 28 }: { trip: Pick<Trip, "name" | "icon" | "color">; size?: number }) {
+  if (trip.icon) return <CategoryGlyph icon={trip.icon} name={trip.name} color={trip.color} size={size} />;
   return <Lettermark text={trip.name} size={size} color={trip.color} />;
 }
 

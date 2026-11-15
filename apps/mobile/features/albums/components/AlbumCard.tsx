@@ -21,6 +21,7 @@ import { formatAmount, formatHours } from '~/utils/formatters';
 import { useAlbumGroup } from '../hooks/useAlbumGroup';
 import { formatAlbumDateRange } from '../utils';
 import { AlbumActiveDot } from './AlbumActiveDot';
+import { AlbumLineIcon } from './AlbumLineIcon';
 
 /** The people a shared album's card shows before "+N". */
 const SHARED_AVATARS = 3;
@@ -124,48 +125,63 @@ export const AlbumCard = memo(function AlbumCardImpl({
             onError={() => setBrokenUri(effectiveCoverUri)}
           />
         ) : (
+          // No cover: a tint, with the name's first letter while the album has
+          // no icon either (an icon sits in the scrim below).
           <View className="flex-1 items-center justify-center bg-primary/15">
-            <Text variant="display" tone="muted">
-              {album.name.slice(0, 1).toUpperCase()}
-            </Text>
+            {album.icon ? null : (
+              <Text variant="display" tone="muted">
+                {album.name.slice(0, 1).toUpperCase()}
+              </Text>
+            )}
           </View>
         )}
 
         {/* Bottom scrim with title + amount + meta overlaid on the cover. */}
         <View
-          className="absolute inset-x-0 bottom-0 px-4 pb-3 pt-5"
+          className="absolute inset-x-0 bottom-0 flex-row items-center gap-3 px-4 pb-3 pt-5"
           style={{ backgroundColor: 'rgba(0,0,0,0.52)' }}
         >
-          <View className="flex-row items-center gap-2">
-            <Text variant="caption" numberOfLines={1} className="flex-1 text-white/80">
-              {album.name}
-            </Text>
-            {sharedAvatars}
-          </View>
-          {/* Time mode renders a View (icon + text) which has no text baseline,
-              so bottom-align it; money mode keeps baseline alignment. */}
-          <View
-            className={`mt-0.5 flex-row justify-between gap-2 ${
-              isTimeMode ? 'items-end' : 'items-baseline'
-            }`}
-          >
-            {isTimeMode ? (
-              <TimeValueInline
-                value={formatHours(stats.totalSpent, settings)}
-                variant="subheading"
-                textClassName="text-white"
-                iconColor="#fff"
-                iconSize={16}
-                numberOfLines={1}
-              />
-            ) : (
-              <Text variant="subheading" numberOfLines={1} className="text-white">
-                {formatAmount(stats.totalSpent, settings, { showSign: false })}
+          {/* The album's icon, the one its line shows in the category lists. */}
+          {album.icon ? (
+            <View
+              testID="album-card-icon"
+              className="h-12 w-12 items-center justify-center rounded-2xl bg-white/90"
+            >
+              <AlbumLineIcon album={album} size={30} />
+            </View>
+          ) : null}
+          <View className="flex-1">
+            <View className="flex-row items-center gap-2">
+              <Text variant="caption" numberOfLines={1} className="flex-1 text-white/80">
+                {album.name}
               </Text>
-            )}
-            <Text variant="label" numberOfLines={1} className="shrink text-white/70">
-              {metaLabel}
-            </Text>
+              {sharedAvatars}
+            </View>
+            {/* Time mode renders a View (icon + text) which has no text baseline,
+              so bottom-align it; money mode keeps baseline alignment. */}
+            <View
+              className={`mt-0.5 flex-row justify-between gap-2 ${
+                isTimeMode ? 'items-end' : 'items-baseline'
+              }`}
+            >
+              {isTimeMode ? (
+                <TimeValueInline
+                  value={formatHours(stats.totalSpent, settings)}
+                  variant="subheading"
+                  textClassName="text-white"
+                  iconColor="#fff"
+                  iconSize={16}
+                  numberOfLines={1}
+                />
+              ) : (
+                <Text variant="subheading" numberOfLines={1} className="text-white">
+                  {formatAmount(stats.totalSpent, settings, { showSign: false })}
+                </Text>
+              )}
+              <Text variant="label" numberOfLines={1} className="shrink text-white/70">
+                {metaLabel}
+              </Text>
+            </View>
           </View>
         </View>
       </Pressable>

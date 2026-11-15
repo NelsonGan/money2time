@@ -176,7 +176,7 @@ import {
   consumePendingFocusInsight,
   subscribeFocusInsightRequest,
 } from '~/services/insightsNavigation';
-import { getAlbumCoverUri, getCustomLogoUri } from '~/services/userAssets';
+import { getCustomLogoUri } from '~/services/userAssets';
 import type {
   Album,
   BudgetPeriod,
@@ -2247,12 +2247,6 @@ function pieLabelIconSource(value?: string | null): PieLabelIconSource | null {
     return uri ? { kind: 'image', source: { uri } } : null;
   }
   return null;
-}
-
-/** An album's pie label shows its cover; one without a cover, its name alone. */
-function albumPieLabelIconSource(album: Album): PieLabelIconSource | null {
-  const uri = getAlbumCoverUri(album.coverPhotoUri);
-  return uri ? { kind: 'image', source: { uri } } : null;
 }
 
 function InsightTypeMenuPopover({
@@ -4693,7 +4687,10 @@ export function InsightsScreen({
       name: row.label,
       amount: row.amount,
       value: row.amount,
-      emoji: row.album ? '' : row.emoji || categoryById.get(row.id)?.icon || '•',
+      // An album's pie label shows its own icon; one without, its name alone.
+      emoji: row.album
+        ? (row.album.icon ?? '')
+        : row.emoji || categoryById.get(row.id)?.icon || '•',
       album: row.album,
       pct: pageTotalAmount > 0 ? (row.amount / pageTotalAmount) * 100 : 0,
       color: chartCategoryColor(i),
@@ -4747,9 +4744,7 @@ export function InsightsScreen({
         item.name.length <= pieLabelMaxChars
           ? item.name
           : `${item.name.slice(0, Math.max(1, pieLabelMaxChars - 3)).trimEnd()}...`;
-      const labelIconSource = item.album
-        ? albumPieLabelIconSource(item.album)
-        : pieLabelIconSource(item.emoji);
+      const labelIconSource = pieLabelIconSource(item.emoji);
       const sliceColor =
         hasSelection && !isSelected ? withColorAlpha(item.color, 0.28) : item.color;
       const labelStroke = isSelected

@@ -371,6 +371,9 @@ export const albumsTable = sqliteTable('albums', {
   ledgerId: text('ledger_id').notNull(),
   name: text('name').notNull(),
   coverPhotoUri: text('cover_photo_uri'),
+  // Migration 095: the album's icon, a category icon value
+  // (constants/categoryIcons.ts); NULL or '' is none.
+  icon: text('icon'),
   isActive: integer('is_active', { mode: 'boolean' }).notNull().default(false),
   // Optional manual overrides; when null the range falls back to the first/last
   // transaction date in the album.

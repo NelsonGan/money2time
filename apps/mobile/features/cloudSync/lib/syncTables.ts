@@ -149,7 +149,7 @@ export function isSyncedRow(table: string, row: Row): boolean {
 export const ASSET_COLUMNS: Readonly<Partial<Record<SyncTable, readonly string[]>>> = {
   transactions: ['receipt_uri'],
   receipt_splits: ['receipt_image_uri'],
-  albums: ['cover_photo_uri'],
+  albums: ['cover_photo_uri', 'icon'],
   accounts: ['logo_id', 'card_design', 'goal_cover_uri', 'goal_emoji'],
   categories: ['icon'],
   budget_templates: ['emoji'],

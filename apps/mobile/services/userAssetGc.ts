@@ -14,6 +14,7 @@ const BACKFILL_DONE_KEY = 'userAssetGc.backfillDone.v1';
  *   - `transactions.receipt_uri`          → `receipts/…`
  *   - `receipt_splits.receipt_image_uri`  → `receipts/…`
  *   - `albums.cover_photo_uri`            → `album-covers/…`
+ *   - `albums.icon`                       → `custom:category-icons/…`
  *   - `accounts.goal_cover_uri`           → `goal-covers/…`
  *   - `accounts.logo_id`                  → `custom:account-logos/…`
  *   - `accounts.card_design`              → `custom:card-designs/…`
@@ -26,7 +27,7 @@ const BACKFILL_DONE_KEY = 'userAssetGc.backfillDone.v1';
  *   - `settings.payment_qr_uri`           → `payment-qr/…`
  *   - `ledger_profiles.avatar_uri`        → `avatars/…` (shared ledgers' people)
  *
- * The four icon columns hold a tagged value (see constants/categoryIcons.ts):
+ * The five icon columns hold a tagged value (see constants/categoryIcons.ts):
  * a bundled id, an `emoji:` glyph, or a `custom:` upload. Only the last names a
  * file; the others normalize to paths that match nothing on disk, which is
  * harmless. A month's frozen `template_emoji` can point at the same file as its
@@ -57,6 +58,7 @@ export function collectReferencedAssetPaths(): Set<string> {
   collect(
     `SELECT cover_photo_uri AS v FROM albums WHERE deleted_at IS NULL AND cover_photo_uri IS NOT NULL`,
   );
+  collect(`SELECT icon AS v FROM albums WHERE deleted_at IS NULL AND icon IS NOT NULL`);
   collect(`SELECT logo_id AS v FROM accounts WHERE deleted_at IS NULL AND logo_id IS NOT NULL`);
   collect(
     `SELECT card_design AS v FROM accounts WHERE deleted_at IS NULL AND card_design IS NOT NULL`,

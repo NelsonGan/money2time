@@ -83,6 +83,9 @@ describe('collectReferencedAssetPaths', () => {
       // The icon columns are a mixed namespace: only the `custom:` value names
       // a file, but a bundled id and an `emoji:` glyph must survive the pass
       // without throwing or matching anything real.
+      // An album's own icon (migration 095), picked like a category's.
+      if (sql.includes('icon AS v FROM albums'))
+        return [{ v: 'custom:category-icons/album.png' }, { v: 'emoji:🏝️' }];
       if (sql.includes('FROM categories'))
         return [{ v: 'custom:category-icons/cat.png' }, { v: 'meal' }, { v: 'emoji:🎌' }];
       if (sql.includes('FROM budget_templates')) return [{ v: 'custom:category-icons/tpl.png' }];
@@ -105,6 +108,8 @@ describe('collectReferencedAssetPaths', () => {
         'dbs',
         'category-icons/goal.png',
         'category-icons/cat.png',
+        'category-icons/album.png',
+        'emoji:🏝️',
         // A template and the months frozen from it share one file; the set
         // dedupes, and the sweep stays reference-counted rather than unlinking.
         'category-icons/tpl.png',
