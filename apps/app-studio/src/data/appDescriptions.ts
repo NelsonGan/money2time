@@ -26,13 +26,13 @@ Hopefully you'll always have control of your money and your life.
 Terms of Use: https://money2time.com/terms
 Privacy Policy: https://money2time.com/privacy
 Contact: https://www.money2time.com/contact`,
-    whatsNew: `- Added the ability to turn a saved expense into instalments
-- Added fees for recurring transfers
-- Added the option to review notifications later
-- Fixed slowness with a long history
-- Fixed the app freezing after saving from the widget
+    whatsNew: `- Added the ability to split a bill a friend paid
+- Added more ways to split a bill
+- Added albums to spending breakdowns
+- Added icons and emoji for albums
+- Fixed backups without Google Drive access
 
-Slow and steady wins the race.`,
+Before borrowing money from a friend, decide which you need most.`,
   },
 
   zh: {
@@ -49,13 +49,13 @@ Slow and steady wins the race.`,
 使用条款：https://money2time.com/terms
 隐私政策：https://money2time.com/privacy
 联系我们：https://www.money2time.com/contact`,
-    whatsNew: `- 新增了将已保存的支出转为分期的功能
-- 新增了定期转账的手续费
-- 新增了稍后审核通知的选项
-- 修复了记录较多时的卡顿问题
-- 修复了从小组件保存后应用卡住的问题
+    whatsNew: `- 新增了分摊朋友付款账单的功能
+- 新增了更多分摊账单的方式
+- 新增了在支出分类中显示相册
+- 新增了相册的图标和表情符号
+- 修复了没有 Google 云端硬盘权限时无法备份的问题
 
-欲速则不达。`,
+向朋友借钱之前，先想清楚你更需要钱还是朋友。`,
   },
 
   de: {
@@ -72,13 +72,13 @@ Ich hoffe, du hast immer die Kontrolle über dein Geld – und dein Leben.
 Nutzungsbedingungen: https://money2time.com/terms
 Datenschutzrichtlinie: https://money2time.com/privacy
 Kontakt: https://www.money2time.com/contact`,
-    whatsNew: `- Umwandeln gespeicherter Ausgaben in Raten hinzugefügt
-- Gebühren für wiederkehrende Überweisungen hinzugefügt
-- Option hinzugefügt, Benachrichtigungen später zu prüfen
-- Langsamkeit bei langem Verlauf behoben
-- Hängen der App nach dem Speichern im Widget behoben
+    whatsNew: `- Teilen einer von Freunden bezahlten Rechnung hinzugefügt
+- Weitere Möglichkeiten zum Teilen einer Rechnung hinzugefügt
+- Alben in der Ausgabenaufschlüsselung hinzugefügt
+- Symbole und Emojis für Alben hinzugefügt
+- Backups ohne Google-Drive-Zugriff behoben
 
-Gut Ding will Weile haben.`,
+Beim Geld hört die Freundschaft auf.`,
   },
 
   fr: {
@@ -95,13 +95,13 @@ J'espère que vous aurez toujours le contrôle de votre argent et de votre vie.
 Conditions d'utilisation : https://money2time.com/terms
 Politique de confidentialité : https://money2time.com/privacy
 Contact : https://www.money2time.com/contact`,
-    whatsNew: `- Ajout de la conversion d'une dépense enregistrée en paiements échelonnés
-- Ajout des frais sur les virements récurrents
-- Ajout de l'option de vérifier les notifications plus tard
-- Correction de la lenteur avec un long historique
-- Correction du blocage de l'application après un ajout depuis le widget
+    whatsNew: `- Ajout du partage d'une facture payée par un ami
+- Ajout de nouvelles façons de partager une facture
+- Ajout des albums dans la répartition des dépenses
+- Ajout d'icônes et d'emoji pour les albums
+- Correction des sauvegardes sans accès à Google Drive
 
-Rien ne sert de courir, il faut partir à point.`,
+Avant d'emprunter de l'argent à un ami, demandez-vous lequel des deux vous est le plus nécessaire.`,
   },
 
   es: {
@@ -118,13 +118,13 @@ Ojalá siempre tengas el control de tu dinero y de tu vida.
 Condiciones de uso: https://money2time.com/terms
 Política de privacidad: https://money2time.com/privacy
 Contacto: https://www.money2time.com/contact`,
-    whatsNew: `- Se añadió la posibilidad de convertir un gasto guardado en cuotas
-- Se añadieron comisiones en transferencias recurrentes
-- Se añadió la opción de revisar las notificaciones más tarde
-- Se corrigió la lentitud con un historial largo
-- Se corrigió el bloqueo de la app al guardar desde el widget
+    whatsNew: `- Se añadió la posibilidad de dividir un gasto que pagó un amigo
+- Se añadieron más formas de dividir un gasto
+- Se añadieron los álbumes al desglose de gastos
+- Se añadieron iconos y emojis para los álbumes
+- Se corrigieron las copias de seguridad sin acceso a Google Drive
 
-Despacio se llega lejos.`,
+Antes de pedirle dinero prestado a un amigo, decide cuál de los dos necesitas más.`,
   },
 
   pt: {
@@ -141,13 +141,13 @@ Que você sempre tenha controle do seu dinheiro e da sua vida.
 Termos de Uso: https://money2time.com/terms
 Política de Privacidade: https://money2time.com/privacy
 Contato: https://www.money2time.com/contact`,
-    whatsNew: `- Adicionada a possibilidade de transformar uma despesa salva em parcelas
-- Adicionadas taxas em transferências recorrentes
-- Adicionada a opção de revisar notificações depois
-- Corrigida a lentidão com um histórico longo
-- Corrigido o travamento do app ao salvar pelo widget
+    whatsNew: `- Adicionada a possibilidade de dividir uma conta paga por um amigo
+- Adicionadas mais formas de dividir uma conta
+- Adicionados os álbuns ao detalhamento de gastos
+- Adicionados ícones e emojis para álbuns
+- Corrigido o backup sem acesso ao Google Drive
 
-Devagar se vai ao longe.`,
+Antes de pedir dinheiro emprestado a um amigo, decida de qual dos dois você precisa mais.`,
   },
 
   it: {
@@ -164,13 +164,13 @@ Speriamo che tu possa sempre avere il controllo del tuo denaro e della tua vita.
 Termini di utilizzo: https://money2time.com/terms
 Informativa sulla privacy: https://money2time.com/privacy
 Contatto: https://www.money2time.com/contact`,
-    whatsNew: `- Aggiunta la possibilità di trasformare una spesa salvata in rate
-- Aggiunte le commissioni sui trasferimenti ricorrenti
-- Aggiunta l'opzione di rivedere le notifiche più tardi
-- Risolta la lentezza con una cronologia lunga
-- Risolto il blocco dell'app dopo il salvataggio dal widget
+    whatsNew: `- Aggiunta la possibilità di dividere un conto pagato da un amico
+- Aggiunti altri modi per dividere un conto
+- Aggiunti gli album nella ripartizione delle spese
+- Aggiunte icone ed emoji per gli album
+- Risolto il backup senza accesso a Google Drive
 
-Chi va piano va sano e va lontano.`,
+Prima di chiedere soldi in prestito a un amico, decidi di quale dei due hai più bisogno.`,
   },
 
   nl: {
@@ -187,13 +187,13 @@ Hopelijk heb je altijd de controle over je geld en je leven.
 Gebruiksvoorwaarden: https://money2time.com/terms
 Privacybeleid: https://money2time.com/privacy
 Contact: https://www.money2time.com/contact`,
-    whatsNew: `- Mogelijkheid toegevoegd om een opgeslagen uitgave in termijnen te splitsen
-- Kosten voor terugkerende overboekingen toegevoegd
-- Optie toegevoegd om meldingen later te bekijken
-- Traagheid bij een lange geschiedenis opgelost
-- Vastlopen van de app na opslaan via de widget opgelost
+    whatsNew: `- Mogelijkheid toegevoegd om een door een vriend betaalde rekening te splitsen
+- Meer manieren toegevoegd om een rekening te splitsen
+- Albums toegevoegd aan het uitgavenoverzicht
+- Pictogrammen en emoji voor albums toegevoegd
+- Back-ups zonder toegang tot Google Drive opgelost
 
-Haastige spoed is zelden goed.`,
+Bij geld houdt de vriendschap op.`,
   },
 
   ru: {
@@ -210,13 +210,13 @@ Haastige spoed is zelden goed.`,
 Условия использования: https://money2time.com/terms
 Политика конфиденциальности: https://money2time.com/privacy
 Контакты: https://www.money2time.com/contact`,
-    whatsNew: `- Добавлена возможность превратить сохранённый расход в рассрочку
-- Добавлены комиссии для регулярных переводов
-- Добавлена возможность просмотреть уведомления позже
-- Исправлены замедления при длинной истории
-- Исправлено зависание приложения после сохранения из виджета
+    whatsNew: `- Добавлена возможность разделить оплаченный другом счёт
+- Добавлены новые способы разделить счёт
+- Добавлены альбомы в разбивку расходов
+- Добавлены значки и эмодзи для альбомов
+- Исправлено резервное копирование без доступа к Google Диску
 
-Тише едешь, дальше будешь.`,
+Дружба дружбой, а денежки врозь.`,
   },
 
   ja: {
@@ -233,13 +233,13 @@ Haastige spoed is zelden goed.`,
 利用規約: https://money2time.com/terms
 プライバシーポリシー: https://money2time.com/privacy
 お問い合わせ: https://www.money2time.com/contact`,
-    whatsNew: `- 保存済みの支出を分割払いにできる機能を追加しました
-- 定期振替の手数料を追加しました
-- 通知を後で確認できるオプションを追加しました
-- 記録が多いときの動作の遅さを修正しました
-- ウィジェットから保存した後にアプリが固まる問題を修正しました
+    whatsNew: `- 友達が支払った請求を割り勘する機能を追加しました
+- 割り勘の方法を追加しました
+- 支出の内訳にアルバムを追加しました
+- アルバムのアイコンと絵文字を追加しました
+- Google ドライブへのアクセスがない場合のバックアップを修正しました
 
-急がば回れ。`,
+友人から金を借りる前に、金と友人のどちらが必要かを決めよ。`,
   },
 
   ko: {
@@ -256,13 +256,13 @@ Haastige spoed is zelden goed.`,
 이용 약관: https://money2time.com/terms
 개인정보 처리방침: https://money2time.com/privacy
 문의: https://www.money2time.com/contact`,
-    whatsNew: `- 저장한 지출을 할부로 바꾸는 기능을 추가했습니다
-- 반복 이체 수수료를 추가했습니다
-- 알림을 나중에 검토하는 옵션을 추가했습니다
-- 내역이 많을 때 느려지는 현상을 수정했습니다
-- 위젯에서 저장한 뒤 앱이 멈추는 문제를 수정했습니다
+    whatsNew: `- 친구가 결제한 금액을 더치페이하는 기능을 추가했습니다
+- 더치페이 방식을 더 추가했습니다
+- 지출 분석에 앨범을 추가했습니다
+- 앨범 아이콘과 이모지를 추가했습니다
+- Google 드라이브 권한이 없을 때의 백업 문제를 수정했습니다
 
-급할수록 돌아가라.`,
+친구에게 돈을 빌리기 전에 돈과 친구 중 무엇이 더 필요한지 정하라.`,
   },
 
   hi: {
@@ -279,13 +279,13 @@ Haastige spoed is zelden goed.`,
 उपयोग की शर्तें: https://money2time.com/terms
 गोपनीयता नीति: https://money2time.com/privacy
 संपर्क: https://www.money2time.com/contact`,
-    whatsNew: `- सहेजे गए खर्च को किस्तों में बदलने की सुविधा जोड़ी गई
-- आवर्ती ट्रांसफ़र पर शुल्क जोड़ा गया
-- सूचनाओं की बाद में समीक्षा करने का विकल्प जोड़ा गया
-- लंबे इतिहास में धीमेपन की समस्या ठीक की
-- विजेट से सहेजने के बाद ऐप अटकने की समस्या ठीक की
+    whatsNew: `- दोस्त द्वारा चुकाए गए बिल को बांटने की सुविधा जोड़ी गई
+- बिल बांटने के और तरीके जोड़े गए
+- खर्च के ब्योरे में एल्बम जोड़े गए
+- एल्बम के लिए आइकन और इमोजी जोड़े गए
+- Google Drive की अनुमति न होने पर बैकअप की समस्या ठीक की
 
-धीरे-धीरे रे मना, धीरे सब कुछ होय।`,
+दोस्त से उधार लेने से पहले तय कर लें कि आपको दोनों में से किसकी ज़्यादा ज़रूरत है।`,
   },
 
   id: {
@@ -302,13 +302,13 @@ Semoga Anda selalu punya kendali atas uang dan hidup Anda.
 Syarat Penggunaan: https://money2time.com/terms
 Kebijakan Privasi: https://money2time.com/privacy
 Kontak: https://www.money2time.com/contact`,
-    whatsNew: `- Menambahkan kemampuan mengubah pengeluaran tersimpan menjadi cicilan
-- Menambahkan biaya untuk transfer berulang
-- Menambahkan opsi meninjau notifikasi nanti
-- Memperbaiki kelambatan pada riwayat yang panjang
-- Memperbaiki aplikasi macet setelah menyimpan dari widget
+    whatsNew: `- Menambahkan kemampuan membagi tagihan yang dibayar teman
+- Menambahkan lebih banyak cara membagi tagihan
+- Menambahkan album ke rincian pengeluaran
+- Menambahkan ikon dan emoji untuk album
+- Memperbaiki pencadangan tanpa akses Google Drive
 
-Biar lambat asal selamat.`,
+Sebelum meminjam uang dari teman, putuskan mana yang lebih kamu butuhkan.`,
   },
 
   tr: {
@@ -325,13 +325,13 @@ Umarım paranızın ve hayatınızın kontrolü her zaman sizde olur.
 Kullanım Koşulları: https://money2time.com/terms
 Gizlilik Politikası: https://money2time.com/privacy
 İletişim: https://www.money2time.com/contact`,
-    whatsNew: `- Kayıtlı bir harcamayı taksite çevirme özelliği eklendi
-- Tekrarlayan transferlere ücret eklendi
-- Bildirimleri daha sonra inceleme seçeneği eklendi
-- Uzun geçmişteki yavaşlık giderildi
-- Widget'tan kaydettikten sonra uygulamanın donması giderildi
+    whatsNew: `- Bir arkadaşın ödediği hesabı bölme özelliği eklendi
+- Hesap bölmenin daha fazla yolu eklendi
+- Harcama dökümüne albümler eklendi
+- Albümler için simge ve emoji eklendi
+- Google Drive erişimi olmadan yedekleme sorunu giderildi
 
-Acele işe şeytan karışır.`,
+Bir arkadaştan borç almadan önce hangisine daha çok ihtiyacın olduğuna karar ver.`,
   },
 
   vi: {
@@ -348,13 +348,13 @@ Hy vọng bạn luôn làm chủ được tiền bạc và cuộc sống của m
 Điều khoản sử dụng: https://money2time.com/terms
 Chính sách bảo mật: https://money2time.com/privacy
 Liên hệ: https://www.money2time.com/contact`,
-    whatsNew: `- Thêm khả năng đổi khoản chi đã lưu thành trả góp
-- Thêm phí cho chuyển khoản định kỳ
-- Thêm tùy chọn xem lại thông báo sau
-- Khắc phục tình trạng chậm khi lịch sử dài
-- Khắc phục lỗi ứng dụng bị treo sau khi lưu từ tiện ích
+    whatsNew: `- Thêm khả năng chia hóa đơn do bạn bè trả
+- Thêm nhiều cách chia hóa đơn hơn
+- Thêm album vào phần phân tích chi tiêu
+- Thêm biểu tượng và emoji cho album
+- Khắc phục lỗi sao lưu khi không có quyền truy cập Google Drive
 
-Chậm mà chắc.`,
+Trước khi vay tiền bạn bè, hãy nghĩ xem bạn cần tiền hay cần bạn hơn.`,
   },
 
   th: {
@@ -371,13 +371,13 @@ Chậm mà chắc.`,
 เงื่อนไขการใช้งาน: https://money2time.com/terms
 นโยบายความเป็นส่วนตัว: https://money2time.com/privacy
 ติดต่อ: https://www.money2time.com/contact`,
-    whatsNew: `- เพิ่มความสามารถในการเปลี่ยนรายจ่ายที่บันทึกแล้วเป็นการผ่อนชำระ
-- เพิ่มค่าธรรมเนียมสำหรับการโอนประจำ
-- เพิ่มตัวเลือกตรวจสอบการแจ้งเตือนภายหลัง
-- แก้ไขปัญหาความช้าเมื่อมีประวัติยาว
-- แก้ไขปัญหาแอปค้างหลังบันทึกจากวิดเจ็ต
+    whatsNew: `- เพิ่มความสามารถในการแบ่งบิลที่เพื่อนจ่าย
+- เพิ่มวิธีแบ่งบิลให้มากขึ้น
+- เพิ่มอัลบั้มในรายละเอียดรายจ่าย
+- เพิ่มไอคอนและอีโมจิสำหรับอัลบั้ม
+- แก้ไขปัญหาการสำรองข้อมูลเมื่อไม่ได้ให้สิทธิ์ Google Drive
 
-ช้าๆ ได้พร้าเล่มงาม`,
+ก่อนยืมเงินเพื่อน ให้คิดก่อนว่าคุณต้องการเงินหรือเพื่อนมากกว่า`,
   },
 
   pl: {
@@ -394,13 +394,13 @@ Mam nadzieję, że zawsze będziesz mieć kontrolę nad swoimi pieniędzmi i swo
 Warunki korzystania: https://money2time.com/terms
 Polityka prywatności: https://money2time.com/privacy
 Kontakt: https://www.money2time.com/contact`,
-    whatsNew: `- Dodano możliwość zamiany zapisanego wydatku na raty
-- Dodano opłaty za przelewy cykliczne
-- Dodano opcję przejrzenia powiadomień później
-- Naprawiono spowolnienia przy długiej historii
-- Naprawiono zawieszanie się aplikacji po zapisie z widżetu
+    whatsNew: `- Dodano możliwość podziału rachunku opłaconego przez znajomego
+- Dodano więcej sposobów podziału rachunku
+- Dodano albumy do zestawienia wydatków
+- Dodano ikony i emoji dla albumów
+- Naprawiono kopie zapasowe bez dostępu do Dysku Google
 
-Spiesz się powoli.`,
+Zanim pożyczysz pieniądze od przyjaciela, zdecyduj, czego potrzebujesz bardziej.`,
   },
 
   uk: {
@@ -417,13 +417,13 @@ Spiesz się powoli.`,
 Умови використання: https://money2time.com/terms
 Політика конфіденційності: https://money2time.com/privacy
 Контакт: https://www.money2time.com/contact`,
-    whatsNew: `- Додано можливість перетворити збережену витрату на розстрочку
-- Додано комісії для регулярних переказів
-- Додано можливість переглянути сповіщення пізніше
-- Виправлено сповільнення при довгій історії
-- Виправлено зависання застосунку після збереження з віджета
+    whatsNew: `- Додано можливість розділити оплачений другом рахунок
+- Додано нові способи розділити рахунок
+- Додано альбоми до розподілу витрат
+- Додано значки та емодзі для альбомів
+- Виправлено резервне копіювання без доступу до Google Диска
 
-Тихіше їдеш, далі будеш.`,
+Дружба дружбою, а гроші нарізно.`,
   },
 
   sv: {
@@ -440,13 +440,13 @@ Förhoppningsvis har du alltid kontroll över dina pengar och ditt liv.
 Användarvillkor: https://money2time.com/terms
 Integritetspolicy: https://money2time.com/privacy
 Kontakt: https://www.money2time.com/contact`,
-    whatsNew: `- Lade till möjligheten att göra om en sparad utgift till delbetalningar
-- Lade till avgifter för återkommande överföringar
-- Lade till möjligheten att granska aviseringar senare
-- Åtgärdade långsamhet med lång historik
-- Åtgärdade att appen hängde sig efter sparande från widgeten
+    whatsNew: `- Lade till möjligheten att dela en nota som en vän betalat
+- Lade till fler sätt att dela notan
+- Lade till album i utgiftsfördelningen
+- Lade till ikoner och emoji för album
+- Åtgärdade säkerhetskopiering utan åtkomst till Google Drive
 
-Skynda långsamt.`,
+Innan du lånar pengar av en vän, bestäm dig för vilket du behöver mest.`,
   },
 
   nb: {
@@ -463,13 +463,13 @@ Forhåpentligvis vil du alltid ha kontroll over pengene dine – og livet ditt.
 Vilkår for bruk: https://money2time.com/terms
 Personvernerklæring: https://money2time.com/privacy
 Kontakt: https://www.money2time.com/contact`,
-    whatsNew: `- La til mulighet for å gjøre en lagret utgift om til avdrag
-- La til gebyrer for faste overføringer
-- La til mulighet for å se gjennom varsler senere
-- Rettet treghet med lang historikk
-- Rettet at appen hang seg etter lagring fra widgeten
+    whatsNew: `- La til mulighet for å dele en regning en venn har betalt
+- La til flere måter å dele en regning på
+- La til album i utgiftsfordelingen
+- La til ikoner og emoji for album
+- Rettet sikkerhetskopiering uten tilgang til Google Disk
 
-Hastverk er lastverk.`,
+Før du låner penger av en venn, bør du bestemme deg for hva du trenger mest.`,
   },
 
   da: {
@@ -486,13 +486,13 @@ Forhåbentlig har du altid kontrol over dine penge og dit liv.
 Brugsbetingelser: https://money2time.com/terms
 Privatlivspolitik: https://money2time.com/privacy
 Kontakt: https://www.money2time.com/contact`,
-    whatsNew: `- Tilføjede mulighed for at gøre en gemt udgift til afdrag
-- Tilføjede gebyrer for tilbagevendende overførsler
-- Tilføjede mulighed for at gennemgå notifikationer senere
-- Rettede langsommelighed med lang historik
-- Rettede at appen frøs efter gemning fra widgetten
+    whatsNew: `- Tilføjede mulighed for at dele en regning en ven har betalt
+- Tilføjede flere måder at dele en regning på
+- Tilføjede album i udgiftsfordelingen
+- Tilføjede ikoner og emoji til album
+- Rettede sikkerhedskopiering uden adgang til Google Drev
 
-Hastværk er lastværk.`,
+Før du låner penge af en ven, så beslut dig for, hvad du har mest brug for.`,
   },
 
   ms: {
@@ -509,13 +509,13 @@ Semoga anda sentiasa memiliki kawalan ke atas wang dan kehidupan anda.
 Terma Penggunaan: https://money2time.com/terms
 Dasar Privasi: https://money2time.com/privacy
 Hubungi Kami: https://www.money2time.com/contact`,
-    whatsNew: `- Menambah keupayaan menukar perbelanjaan tersimpan kepada ansuran
-- Menambah caj untuk pindahan berulang
-- Menambah pilihan menyemak pemberitahuan kemudian
-- Membaiki kelambatan pada sejarah yang panjang
-- Membaiki aplikasi tergantung selepas menyimpan dari widget
+    whatsNew: `- Menambah keupayaan membahagi bil yang dibayar oleh kawan
+- Menambah lebih banyak cara membahagi bil
+- Menambah album ke dalam pecahan perbelanjaan
+- Menambah ikon dan emoji untuk album
+- Membaiki sandaran tanpa akses Google Drive
 
-Biar lambat asalkan selamat.`,
+Sebelum meminjam wang daripada kawan, tentukan mana yang lebih anda perlukan.`,
   },
 
   fil: {
@@ -530,13 +530,13 @@ Sana lagi kang may kontrol sa iyong pera at sa iyong buhay.
 Mga Tuntunin ng Paggamit: https://money2time.com/terms
 Patakaran sa Privacy: https://money2time.com/privacy
 Makipag-ugnayan: https://www.money2time.com/contact`,
-    whatsNew: `- Nagdagdag ng kakayahang gawing hulugan ang naka-save na gastos
-- Nagdagdag ng bayad sa paulit-ulit na transfer
-- Nagdagdag ng opsyong suriin ang mga notification mamaya
-- Inayos ang pagbagal kapag mahaba ang history
-- Inayos ang pag-freeze ng app pagkatapos mag-save mula sa widget
+    whatsNew: `- Nagdagdag ng kakayahang hatiin ang bill na binayaran ng kaibigan
+- Nagdagdag ng mas maraming paraan para hatiin ang bill
+- Nagdagdag ng mga album sa breakdown ng gastos
+- Nagdagdag ng mga icon at emoji para sa mga album
+- Inayos ang backup kapag walang access sa Google Drive
 
-Kapag may tiyaga, may nilaga.`,
+Bago manghiram ng pera sa kaibigan, pagpasyahan kung alin ang mas kailangan mo.`,
   },
 
 };
