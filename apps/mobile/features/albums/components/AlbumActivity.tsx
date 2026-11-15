@@ -27,11 +27,10 @@ import { listGroupActivity, subscribeAlbumGroups } from '../services/albumGroupS
 /** The newest this many changes show until the user asks for all of them. */
 const COLLAPSED_ROWS = 5;
 
-/** The note of how a change moved the user's money: green in, rose out, grey neither. */
+/** The note of how a change moved the user's share: green for less, rose for more. */
 const MINE_CHIP: Record<MineTone, { chip: string; text: string }> = {
   in: { chip: 'bg-success/10', text: 'text-success' },
   out: { chip: 'bg-primary/10', text: 'text-primary' },
-  neutral: { chip: 'bg-muted', text: 'text-muted-foreground' },
 };
 
 interface AlbumActivityProps {
@@ -42,8 +41,8 @@ interface AlbumActivityProps {
  * A shared album's activity log, under its Balances: every change anyone made
  * to it, newest first, by day, one line each, in one card (the newest five
  * until Show all). Plain history for reference, nothing to tap. A change
- * someone else made to the user's own money carries a small chip under its
- * line saying how, tinted by which way the money went. The log is written
+ * someone else made to a bill that moved the user's share carries a small
+ * chip under its line saying how, tinted by which way it moved. The log is written
  * with each change, in the same write, and syncs with the group, so it is the
  * same on every phone (README: Album members and shared albums > Activity).
  */

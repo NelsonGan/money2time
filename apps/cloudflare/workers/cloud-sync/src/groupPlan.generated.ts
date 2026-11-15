@@ -694,8 +694,7 @@ export function planWrite(
   // act whose payments (in one currency) come down to one person paying
   // another, however many bills they run along (paying a simplified debt),
   // reads as that one payment: "Ben paid Ann RM150", not the four moves it
-  // took between three people. Those it passed through, who come out even,
-  // are named on it (`via`), so they can see why money moved in their name.
+  // took between three people.
   const paymentLines = (rows: Row[], kind: ActivityKind) => {
     type Line = { from: string; to: string; currency: string; amount: number; bills: string[] };
     const byCurrency = new Map<string, Row[]>();
@@ -724,7 +723,7 @@ export function planWrite(
       }
       const payers = [...net].filter(([, amount]) => amount < 0);
       const payees = [...net].filter(([, amount]) => amount > 0);
-      const lines: (Line & { via?: string[] })[] =
+      const lines: Line[] =
         pairs.size > 1 && payers.length === 1 && payees.length === 1
           ? [
               {
@@ -733,7 +732,6 @@ export function planWrite(
                 currency,
                 amount: payees[0][1],
                 bills: [...new Set([...pairs.values()].flatMap((line) => line.bills))],
-                via: [...net].filter(([, amount]) => amount === 0).map(([member]) => member),
               },
             ]
           : [...pairs.values()];
@@ -747,7 +745,6 @@ export function planWrite(
             currency: line.currency,
             amount: line.amount / 100,
             bills: line.bills,
-            ...(line.via?.length ? { via: line.via } : null),
             ...(request.reason === 'close_even' ? { even: true } : null),
           },
         });

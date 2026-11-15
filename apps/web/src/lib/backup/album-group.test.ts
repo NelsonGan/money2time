@@ -65,12 +65,9 @@ const WORDS: Record<string, string> = {
   your_share: "Your share {money}",
   your_share_change: "Your share {before} → {after}",
   your_share_gone: "Your share of {money} is gone",
-  they_paid: "{name} paid it now",
   paid: "{from} paid {to} {money}",
   undid_payment: "{actor} undid {from} paying {to} {money}",
   undid_own_payment: "{actor} undid paying {to} {money}",
-  passed_through: "Via you · you stay even",
-  recorded_by: "Recorded by {actor}",
   joined: "{name} joined the album",
   started: "{name} started the album",
   changed_album: "{actor} changed the album",
@@ -122,7 +119,8 @@ test("describeActivity words each change as the app does, with the user's money 
   assert.equal(edited.mine, "Your share RM15 → RM20");
   const payer = describeActivity(entry({ kind: "bill_edited", bill: { before: snap({ paidBy: "me" }), after: snap() } }), ctx());
   assert.equal(payer.text, "Tess changed who paid Dinner: you → Tess");
-  assert.equal(payer.mine, "Tess paid it now");
+  // Only a share that moved gets a note; who paid is in the line itself.
+  assert.equal(payer.mine, null);
   // The user's own change is no news to them.
   assert.equal(describeActivity(entry({ actor_member_id: "me", bill: { before: null, after: snap() } }), ctx()).mine, null);
 });
@@ -136,16 +134,13 @@ test("describeActivity says what a delete took from the user", () => {
 test("describeActivity words payments, members and kinds from a later app", () => {
   const paid = describeActivity(entry({ kind: "payment_recorded", payment: { from: "me", to: "tess", currency: "MYR", amount: 15 } }), ctx());
   assert.equal(paid.text, "You paid Tess RM15");
-  assert.equal(paid.mine, "−RM15 · Recorded by Tess");
-  assert.equal(paid.tone, "out");
-  // The payer's own word needs no "Recorded by".
-  assert.equal(describeActivity(entry({ kind: "payment_recorded", payment: { from: "tess", to: "me", currency: "MYR", amount: 15 } }), ctx()).mine, "+RM15");
+  // Payments carry no note: the line says who paid whom.
+  assert.equal(paid.mine, null);
+  assert.equal(describeActivity(entry({ kind: "payment_recorded", payment: { from: "tess", to: "me", currency: "MYR", amount: 15 } }), ctx()).mine, null);
   // Undone by the payer: "Tess undid paying you", not "Tess undid Tess paying you".
   assert.equal(describeActivity(entry({ kind: "payment_undone", payment: { from: "tess", to: "me", currency: "MYR", amount: 15 } }), ctx()).text, "Tess undid paying you RM15");
   // Someone else's undo: the payer is mid-sentence, so "you", not "You".
   assert.equal(describeActivity(entry({ kind: "payment_undone", actor_member_id: "tess", payment: { from: "me", to: "ben", currency: "MYR", amount: 15 } }), ctx()).text, "Tess undid you paying Someone RM15");
-  // A simplified debt paid along the user's bills: they only passed it on.
-  assert.equal(describeActivity(entry({ kind: "payment_recorded", payment: { from: "tess", to: "ben", currency: "MYR", amount: 40, via: ["me"] } }), ctx()).mine, "Via you · you stay even");
   assert.equal(describeActivity(entry({ kind: "member_joined", member_id: "tess" }), ctx()).text, "Tess joined the album");
   assert.equal(describeActivity(entry({ kind: "member_joined", member_id: "tess", started: true }), ctx()).text, "Tess started the album");
   assert.equal(describeActivity(entry({ kind: "from_the_future" }), ctx()).text, "Tess changed the album");

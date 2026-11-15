@@ -323,7 +323,7 @@ export type WebAlbumActivityRow = {
   member_id?: string | null;
   bill?: { before: WebAlbumBillSnapshot | null; after: WebAlbumBillSnapshot | null } | null;
   rename?: { before: string; after: string } | null;
-  payment?: { from: string; to: string; currency: string; amount: number; bills?: string[]; via?: string[]; even?: boolean } | null;
+  payment?: { from: string; to: string; currency: string; amount: number; bills?: string[]; even?: boolean } | null;
   simplify?: boolean | null;
   /** A join that started the album (the owner's); absent from older apps. */
   started?: boolean | null;

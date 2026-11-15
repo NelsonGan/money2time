@@ -800,8 +800,6 @@ export interface AlbumActivity {
     currency: string;
     amount: number;
     bills: string[];
-    /** Members the payment passed through on its way, who came out even (a simplified debt). */
-    via: string[];
     /** Recorded by the app to close an even group (Simplify). */
     even: boolean;
   } | null;

@@ -383,8 +383,8 @@ test('a simplified debt paid along several bills reads as one payment', async ()
     ],
   });
   assert.deepEqual(
-    payments().map((p) => [p.from, p.to, p.amount, p.bills, p.via]),
-    [['u-bali-ben', 'u-bali-owner', 40, ['dinner', 'taxi'], ['u-bali-tess']]],
+    payments().map((p) => [p.from, p.to, p.amount, p.bills]),
+    [['u-bali-ben', 'u-bali-owner', 40, ['dinner', 'taxi']]],
   );
   // Payments that leave more than one person paid stay one line per pair.
   await write(group, 'tess', {

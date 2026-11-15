@@ -90,9 +90,10 @@ describe('the activity log, one line each', () => {
       actorMemberId: 'ben',
       bill: { before: dinner(60), after: dinner(60, 'me') },
     });
+    // Who paid is in the line; only a share that moved gets a note.
     expect(describeActivity(changed, ctx)).toMatchObject({
       text: 'Ben changed who paid Dinner: Tess → you',
-      mine: 'Says you paid',
+      mine: null,
     });
   });
 
@@ -114,7 +115,6 @@ describe('the activity log, one line each', () => {
         currency: 'MYR',
         amount: 45,
         bills: ['dinner'],
-        via: [],
         even: false,
       },
     });
@@ -128,17 +128,11 @@ describe('the activity log, one line each', () => {
         currency: 'MYR',
         amount: 10,
         bills: [],
-        via: [],
         even: false,
       },
     });
-    // The user's money, signed and tinted, and who recorded it.
-    expect(describeActivity(mine, ctx)).toMatchObject({
-      text: 'You paid Ben RM10',
-      mine: '−RM10 · Recorded by Tess',
-      tone: 'out',
-    });
-    // The payer's own word needs no "Recorded by": the line already names them.
+    // Payments carry no note: the line says who paid whom.
+    expect(describeActivity(mine, ctx)).toMatchObject({ text: 'You paid Ben RM10', mine: null });
     const toMe = entry({
       kind: 'payment_recorded',
       actorMemberId: 'tess',
@@ -148,46 +142,17 @@ describe('the activity log, one line each', () => {
         currency: 'MYR',
         amount: 10,
         bills: [],
-        via: [],
         even: false,
       },
     });
-    expect(describeActivity(toMe, ctx)).toMatchObject({
-      text: 'Tess paid you RM10',
-      mine: '+RM10',
-      tone: 'in',
-    });
-    // Paying a simplified debt along the user's bills: they only passed it on.
-    const along = entry({
-      kind: 'payment_recorded',
-      actorMemberId: 'ben',
-      payment: {
-        from: 'ben',
-        to: 'tess',
-        currency: 'MYR',
-        amount: 40,
-        bills: [],
-        via: ['me'],
-        even: false,
-      },
-    });
-    expect(describeActivity(along, ctx)).toMatchObject({
-      text: 'Ben paid Tess RM40',
-      mine: 'Via you · you stay even',
-      tone: 'neutral',
-    });
+    expect(describeActivity(toMe, ctx)).toMatchObject({ text: 'Tess paid you RM10', mine: null });
     // Undone by the payer: "Tess undid paying you", not "Tess undid Tess paying you".
-    // An undo moves the money back the other way.
-    expect(describeActivity({ ...toMe, kind: 'payment_undone' }, ctx)).toMatchObject({
-      text: 'Tess undid paying you RM10',
-      mine: '−RM10',
-      tone: 'out',
-    });
-    expect(describeActivity({ ...mine, kind: 'payment_undone' }, ctx)).toMatchObject({
-      text: 'Tess undid you paying Ben RM10',
-      mine: '+RM10 · Recorded by Tess',
-      tone: 'in',
-    });
+    expect(describeActivity({ ...toMe, kind: 'payment_undone' }, ctx).text).toBe(
+      'Tess undid paying you RM10',
+    );
+    expect(describeActivity({ ...mine, kind: 'payment_undone' }, ctx).text).toBe(
+      'Tess undid you paying Ben RM10',
+    );
     expect(
       describeActivity(entry({ kind: 'member_joined', memberId: 'ben', expenseId: null }), ctx)
         .text,
