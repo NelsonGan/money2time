@@ -191,8 +191,9 @@ jobs:
       run:
         working-directory: apps/mobile
     steps:
-      # Only what the checks read: the app, the Workers its tests import, and
-      # .github/ plus the root files (README.md and the other docs prettier
+      # Only what the checks read: the app, the Workers its tests import, the
+      # website's copy of the category keywords (syncCategoryKeywords.test.ts),
+      # and .github/ plus the root files (README.md and the other docs prettier
       # and the analytics test read, which a sparse checkout always includes).
       # A test that starts reading another app fails here with a missing file:
       # add that directory to the list.
@@ -203,6 +204,7 @@ jobs:
             .github
             apps/cloudflare
             apps/mobile
+            apps/web/src/lib/album/keywords
 
       - name: Set up dependencies
         uses: ./.github/actions/node-deps
