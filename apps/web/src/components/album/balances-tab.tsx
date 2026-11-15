@@ -3,7 +3,7 @@
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
-import { describeActivity, groupActivityByDay } from "@/lib/backup/album-group";
+import { describeActivity, groupActivityByDay, MINE_CHIP_CLASS } from "@/lib/backup/album-group";
 import { groupTotals, type GroupDebt } from "@/lib/album/debts";
 import { cents } from "@/lib/backup/album-group";
 import type { Group } from "@/lib/album/group";
@@ -226,8 +226,7 @@ function Activity({ group }: { group: Group }) {
           <p className="mb-1 mt-3 text-[13.5px] font-semibold text-foreground-soft">{group_.day}</p>
           <ul>
             {group_.lines.map((line) => (
-              <li key={line.id} className={`relative flex items-start gap-3 border-b border-border py-2.5 last:border-b-0 ${line.mine ? "pl-2" : ""}`}>
-                {line.mine ? <span className="absolute -left-2 top-2 bottom-2 w-[3px] rounded-full bg-primary" /> : null}
+              <li key={line.id} className="flex items-start gap-3 border-b border-border py-2.5 last:border-b-0">
                 <Avatar
                   name={group.members.find((member) => member.id === line.actorId)?.name ?? "?"}
                   color={line.actorId ? personColor(group.members, line.actorId, group.selfId) : "#94A39F"}
@@ -237,7 +236,7 @@ function Activity({ group }: { group: Group }) {
                   <span className="block text-[14.5px] leading-snug [overflow-wrap:anywhere]">
                     <BoldLead text={line.text} lead={line.actorId === group.selfId ? t("you") : (group.members.find((member) => member.id === line.actorId)?.name ?? null)} />
                   </span>
-                  {line.mine ? <span className="mt-0.5 block text-[13px] font-bold text-primary">{line.mine}</span> : null}
+                  {line.mine ? <span className={`mt-1 inline-block max-w-full rounded-xl px-2 py-0.5 align-top text-[12.5px] font-bold ${MINE_CHIP_CLASS[line.tone]}`}>{line.mine}</span> : null}
                 </span>
                 <span className="shrink-0 pt-0.5 text-[12.5px] font-semibold text-foreground-muted">{time.format(new Date(line.createdAt))}</span>
               </li>

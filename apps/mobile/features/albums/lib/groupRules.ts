@@ -1,8 +1,8 @@
 /**
  * Who may do what in a shared album. Pure, so the screens, the writes in
  * AppContext and the tests read one set of rules (README: Album members and
- * shared albums > Anyone in it can change it). The Worker keeps the same
- * rules for every write (apps/cloudflare/workers/cloud-sync/src/albumGroups.ts).
+ * shared albums > Anyone in it can change it). Every write is planned by the
+ * same rules (groupPlan.ts), on the phone and in the Worker.
  *
  * - **Anyone in the album changes anything of the group's**: adds, edits
  *   (amount, day, title, payer, shares) and deletes any bill, restores a

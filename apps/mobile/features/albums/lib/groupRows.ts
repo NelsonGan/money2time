@@ -1,6 +1,7 @@
-// The rows a change to a shared album's group asks the Worker to write
-// (features/albums/services/albumGroupWrites.ts sends them). Pure: the Worker
-// checks each row, works out a bill's total and stamps who made it and when.
+// The rows a change to a shared album's group asks for (features/albums/
+// services/albumGroupWrites.ts writes them). Pure: the album's planner
+// (groupPlan.ts) checks each row, works out a bill's total and stamps who
+// made it and when.
 // See README.md > Album members and shared albums.
 
 import type { AlbumSettlement, AlbumShare } from '~/types';
@@ -13,7 +14,7 @@ export interface GroupRowWrite {
   row: Record<string, unknown>;
 }
 
-/** A bill as a change writes it: the Worker works out its total and stamps the rest. */
+/** A bill as a change writes it: the planner works out its total and stamps the rest. */
 export function billRow(bill: {
   id: string;
   date: string;

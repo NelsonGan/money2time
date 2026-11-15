@@ -92,41 +92,21 @@ export function getLedgerCredentials(
   });
 }
 
-/** A row the Worker wrote to a shared album's database, as `sync_rows` holds it. */
-export interface WrittenGroupRow {
-  table: string;
-  id: string;
-  data: string;
-  rev: string;
-}
-
-/** A change to a shared album's group, in the shape `albumGroupWrites` sends it. */
-export type AlbumGroupWrite =
-  | { action: 'join'; name: string }
-  | {
-      action: 'write';
-      rows: { table: string; row: Record<string, unknown> }[];
-      reason?: 'close_even';
-    };
-
 /**
- * Writes to a shared album's group. Its phones only read its database: the
- * Worker checks the change, stamps it with this account and logs it, then
- * answers with the rows it wrote. `device` keeps this phone from being told
- * to sync for its own change.
+ * Puts the user on a shared album's list as themselves. The Worker writes it
+ * to the album's database; the phone's next pull brings it down. `device`
+ * keeps this phone from being told to sync for its own change.
  */
-export async function writeAlbumGroup(
+export async function joinAlbum(
   token: string,
   shareId: string,
-  change: AlbumGroupWrite,
+  name: string,
   device: string,
-): Promise<WrittenGroupRow[]> {
-  return (
-    await request<{ rows: WrittenGroupRow[] }>(path(shareId, '/album'), {
-      body: { ...change, device },
-      token,
-    })
-  ).rows;
+): Promise<void> {
+  await request<unknown>(path(shareId, '/album'), {
+    body: { action: 'join', name, device },
+    token,
+  });
 }
 
 export function getLedgerMembers(token: string, shareId: string): Promise<LedgerMembers> {

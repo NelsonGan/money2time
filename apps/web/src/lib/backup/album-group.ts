@@ -99,12 +99,23 @@ export type ActivityContext = {
   day: (date: string) => string;
 };
 
+/** How a change moved the user's share: less to pay (`in`) or more (`out`). */
+export type MineTone = "in" | "out";
+
+/** The chip a `mine` note sits in, as the app draws it: green for a smaller share, rose for a bigger one. */
+export const MINE_CHIP_CLASS: Record<MineTone, string> = {
+  in: "bg-success-soft text-success",
+  out: "bg-primary-soft text-primary",
+};
+
 export type ActivityLine = {
   id: string;
   actorId: string | null;
   text: string;
-  /** How it moved the user's own money, when someone else did it; null otherwise. */
+  /** How it moved the user's share, when someone else did it; null otherwise. */
   mine: string | null;
+  /** Which way the share moved (meaningless while `mine` is null). */
+  tone: MineTone;
   createdAt: string;
 };
 
@@ -128,7 +139,8 @@ function myPart(bill: WebAlbumBillSnapshot | null, selfId: string | null) {
  * One activity entry as a line, worded as the app's Activity tab words it
  * (features/albums/lib/activityLines.ts `describeActivity`, the same rules
  * and the same message names): a change someone else made to the user's own
- * money gets a second line saying how.
+ * share gets a short note of how ("Your share RM30 → RM40"), with which way
+ * it moved.
  */
 export function describeActivity(entry: WebAlbumActivityRow, ctx: ActivityContext): ActivityLine {
   const { t } = ctx;
@@ -138,12 +150,13 @@ export function describeActivity(entry: WebAlbumActivityRow, ctx: ActivityContex
   const actor = who(actorId);
   const bill = entry.bill?.after ?? entry.bill?.before ?? null;
   const title = bill?.note?.trim() || t("untitled");
-  const line = (text: string, mine: string | null = null): ActivityLine => ({
+  const line = (text: string, mine: string | null = null, tone: MineTone = "out"): ActivityLine => ({
     id: entry.id,
     actorId,
     text,
     // Only someone else's change is news about the user's money.
     mine: byMe ? null : mine,
+    tone,
     createdAt: entry.created_at,
   });
 
@@ -167,7 +180,7 @@ export function describeActivity(entry: WebAlbumActivityRow, ctx: ActivityContex
       const before = entry.bill?.before ?? null;
       const money = before ? ctx.money(before.amount, before.currency) : "";
       const mine = myPart(before, ctx.selfId);
-      return line(t("deleted", { actor, title, money }), before && (mine.share > 0 || mine.paid) ? t("your_share_gone", { money: ctx.money(mine.share, before.currency) }) : null);
+      return line(t("deleted", { actor, title, money }), before && (mine.share > 0 || mine.paid) ? t("your_share_gone", { money: ctx.money(mine.share, before.currency) }) : null, "in");
     }
     case "bill_edited": {
       const before = entry.bill?.before ?? null;
@@ -188,28 +201,22 @@ export function describeActivity(entry: WebAlbumActivityRow, ctx: ActivityContex
       } else {
         text = t("changed_bill", { actor, title });
       }
-      // How it moved the user's money: who paid first, then their share.
-      const was = myPart(before, ctx.selfId);
-      const now = myPart(after, ctx.selfId);
-      let mine: string | null = null;
-      if (!was.paid && now.paid) {
-        mine = t("you_paid");
-      } else if (was.paid && !now.paid) {
-        mine = t("they_paid", { name: who(after.paidBy) });
-      } else if (cents(was.share) !== cents(now.share)) {
-        mine = now.share > 0 ? t("your_share_change", { before: fmt(was.share), after: fmt(now.share) }) : t("your_share_gone", { money: fmt(was.share) });
-      }
-      return line(text, mine);
+      // How it moved the user's share.
+      const was = shareOf(before, ctx.selfId);
+      const now = shareOf(after, ctx.selfId);
+      if (cents(was) === cents(now)) return line(text);
+      return line(text, now > 0 ? t("your_share_change", { before: fmt(was), after: fmt(now) }) : t("your_share_gone", { money: fmt(was) }), now > was ? "out" : "in");
     }
     case "payment_recorded":
     case "payment_undone": {
       const payment = entry.payment;
       if (!payment) return line(t("changed_bill", { actor, title }));
       const values = { actor, from: who(payment.from), to: who(payment.to, false), money: ctx.money(payment.amount, payment.currency) };
-      // Who recorded it, when it moved the user's money and was not the payer's own word.
-      const recordedBy = (payment.from === ctx.selfId || payment.to === ctx.selfId) && actorId !== payment.from ? t("recorded_by", { actor }) : null;
-      if (entry.kind === "payment_undone") return line(t("undid_payment", values), recordedBy);
-      return line(t(payment.even ? "paid_even" : "paid", values), recordedBy);
+      if (entry.kind === "payment_undone") {
+        // The payer is mid-sentence here: "Tess undid you paying Ben".
+        return line(actorId === payment.from ? t("undid_own_payment", values) : t("undid_payment", { ...values, from: who(payment.from, false) }));
+      }
+      return line(t(payment.even ? "paid_even" : "paid", values));
     }
     case "member_joined":
       return line(t(entry.started ? "started" : "joined", { name: who(entry.member_id) }));

@@ -3073,6 +3073,8 @@ const de = {
       leave_title: '{{name}} verlassen?',
       leave_message:
         'Du behältst das Album mit deinen eigenen Einträgen, aber es wird nicht mehr aktualisiert.',
+      delete_leave_message:
+        'Du verlässt es damit auch. Die anderen behalten das Album und seine Rechnungen.',
       limit: 'Du kannst bis zu {{max}} Alben gleichzeitig teilen.',
       full: 'Bis zu {{max}} Personen können einem Album beitreten.',
       sign_in: 'Melde dich an, um dieses Album zu teilen.',
@@ -3114,7 +3116,6 @@ const de = {
         'Die Zahlungen bleiben. Fällt ein Anteil unter den bereits gezahlten Betrag, muss die Differenz zurückgezahlt werden.',
     },
     write: {
-      offline: 'Du bist offline. Änderungen an einem geteilten Album brauchen eine Verbindung.',
       not_member: 'Du bist nicht mehr in diesem Album und kannst es daher nicht ändern.',
       signed_out: 'Melde dich erneut an, um dieses Album zu ändern.',
       failed: 'Die Änderung an diesem Album konnte nicht gespeichert werden. Versuche es erneut.',
@@ -3139,12 +3140,10 @@ const de = {
       your_share: 'Dein Anteil {{money}}',
       your_share_change: 'Dein Anteil {{before}} → {{after}}',
       your_share_gone: 'Dein Anteil von {{money}} entfällt',
-      you_paid: 'Laut Angabe hast du bezahlt',
-      they_paid: 'Jetzt bezahlt von {{name}}',
       paid: '{{from}} → {{to}}: {{money}} gezahlt',
       paid_even: '{{from}} → {{to}}: {{money}} zum Ausgleich gezahlt',
       undid_payment: '{{actor}}: Zahlung {{from}} → {{to}} über {{money}} rückgängig gemacht',
-      recorded_by: 'Erfasst von {{actor}}',
+      undid_own_payment: '{{actor}}: Zahlung an {{to}} über {{money}} rückgängig gemacht',
       joined: '{{name}}: dem Album beigetreten',
       started: '{{name}} hat das Album erstellt',
       left: '{{name}}: Album verlassen',

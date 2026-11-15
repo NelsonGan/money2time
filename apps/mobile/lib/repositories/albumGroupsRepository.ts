@@ -1,11 +1,12 @@
 // A shared album's group: its members, bills, settlements, settings and
-// activity log (migrations 090-093). These rows come from the group's own
-// cloud database, which only the Worker writes (features/albums/services/
-// albumGroupWrites.ts sends it the changes): on the phone they are only read.
+// activity log (migrations 090-093). These rows sync with the group's own
+// cloud database; on the phone they are only read here, and written by
+// features/albums/services/albumGroupWrites.ts alone.
 // Their `ledger_id` is the group's id (features/cloudSync/lib/ledgerRows.ts).
 
 import { and, desc, eq, isNull } from 'drizzle-orm';
 
+import { GROUP_COVER_PATH, MAX_MEMBER_ROWS } from '~/features/albums/lib/groupPlan';
 import { getDb } from '~/lib/db/client';
 import {
   albumActivityTable,
@@ -17,13 +18,6 @@ import {
 import type { AlbumActivity, AlbumExpense, AlbumMember, AlbumSettlement } from '~/types';
 
 import { toAlbumActivity, toAlbumExpense, toAlbumMember, toAlbumSettlement } from './mappers';
-
-/**
- * Far more member rows than a group ever has (20 people and the user, and
- * the ones since removed). A group is read no further than this, so nobody
- * in it can make every phone work through thousands of made-up people.
- */
-const MAX_MEMBER_ROWS = 200;
 
 /** The newest this many entries of an album's log are read; older ones stay in its database. */
 const MAX_ACTIVITY_ROWS = 1000;
@@ -161,8 +155,8 @@ class AlbumGroupsRepository {
   // Activity
 
   /**
-   * The group's activity log, newest first: one entry per change the Worker
-   * wrote, the entries of one change in the order it wrote them.
+   * The group's activity log, newest first: one entry per change, the
+   * entries of one change in the order it wrote them.
    */
   listActivity(groupId: string): AlbumActivity[] {
     return getDb()
@@ -176,8 +170,5 @@ class AlbumGroupsRepository {
       .filter(present);
   }
 }
-
-/** The paths `saveAlbumCover` makes: `album-covers/<id>.<ext>`. */
-export const GROUP_COVER_PATH = /^album-covers\/[A-Za-z0-9_-]{1,64}\.[A-Za-z0-9]{1,5}$/;
 
 export const albumGroupsRepository = new AlbumGroupsRepository();

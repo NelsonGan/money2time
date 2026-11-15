@@ -3044,6 +3044,8 @@ const id = {
       leave_title: 'Keluar dari {{name}}?',
       leave_message:
         'Kamu tetap memiliki album dengan catatanmu sendiri, tetapi tidak lagi diperbarui.',
+      delete_leave_message:
+        'Kamu juga keluar dari album ini. Yang lain tetap memiliki album dan tagihannya.',
       limit: 'Kamu bisa membagikan hingga {{max}} album sekaligus.',
       full: 'Hingga {{max}} orang bisa bergabung ke satu album.',
       sign_in: 'Masuk untuk membagikan album ini.',
@@ -3085,7 +3087,6 @@ const id = {
         'Pembayarannya tetap ada. Jika suatu bagian jadi lebih kecil dari yang sudah dibayar, selisihnya harus dikembalikan.',
     },
     write: {
-      offline: 'Kamu sedang offline. Perubahan pada album bersama butuh koneksi.',
       not_member: 'Kamu sudah tidak ada di album ini, jadi tidak bisa mengubahnya.',
       signed_out: 'Masuk lagi untuk mengubah album ini.',
       failed: 'Perubahan pada album ini gagal disimpan. Coba lagi.',
@@ -3110,12 +3111,10 @@ const id = {
       your_share: 'Bagianmu {{money}}',
       your_share_change: 'Bagianmu {{before}} → {{after}}',
       your_share_gone: 'Bagianmu sebesar {{money}} sudah tidak ada',
-      you_paid: 'Kamu dicatat membayar',
-      they_paid: 'Sekarang dibayar oleh {{name}}',
       paid: '{{from}} membayar {{to}} {{money}}',
       paid_even: '{{from}} membayar {{to}} {{money}} untuk melunasi',
       undid_payment: '{{actor}} membatalkan pembayaran {{money}} dari {{from}} ke {{to}}',
-      recorded_by: 'Dicatat oleh {{actor}}',
+      undid_own_payment: '{{actor}} membatalkan pembayaran {{money}} ke {{to}}',
       joined: '{{name}} bergabung ke album',
       started: '{{name}} membuat album',
       left: '{{name}} keluar dari album',

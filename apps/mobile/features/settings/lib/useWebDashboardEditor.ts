@@ -78,8 +78,8 @@ export function useWebDashboardEditor(onApplied: (count: number) => void): WebDa
       const went: boolean[] = [];
       for (const step of plan.steps) {
         applyStep(latest.current.app, step, track);
-        // A shared album's write goes through the Worker: the next step waits
-        // for it, as the app's own screens do one change after another.
+        // A shared album's write can be refused by its rules: the next step
+        // waits for it, as the app's own screens do one change after another.
         if (track.pending.length) went.push(...(await Promise.all(track.pending.splice(0))));
       }
       // The browser's fresh copy is built from the database.

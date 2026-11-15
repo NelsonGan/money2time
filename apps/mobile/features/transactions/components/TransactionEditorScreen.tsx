@@ -422,8 +422,8 @@ interface TransactionEditorScreenProps {
     extras?: TransactionEditorSubmitExtras,
   ) => void | Promise<boolean>;
   /**
-   * A save through `onSubmitWithSplits` that has to reach a server first (a
-   * shared album's bill, which the Worker writes): the editor waits for it,
+   * A save through `onSubmitWithSplits` that the album's rules may refuse (a
+   * shared album's bill): the editor waits for it,
    * Save showing it is busy, and closes only once it went. False keeps the
    * editor open with every edit in it (the user was told why).
    */

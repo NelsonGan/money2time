@@ -3047,6 +3047,8 @@ const ms = {
       leave_title: 'Keluar daripada {{name}}?',
       leave_message:
         'Anda kekal dengan album dan catatan anda sendiri, tetapi ia tidak lagi dikemas kini.',
+      delete_leave_message:
+        'Anda juga keluar daripada album ini. Yang lain kekal dengan album dan bilnya.',
       limit: 'Anda boleh kongsi sehingga {{max}} album pada satu masa.',
       full: 'Sehingga {{max}} orang boleh sertai satu album.',
       sign_in: 'Log masuk untuk berkongsi album ini.',
@@ -3087,7 +3089,6 @@ const ms = {
         'Bayaran kekal. Jika sesuatu bahagian menjadi kurang daripada jumlah yang sudah dibayar, bezanya perlu dipulangkan.',
     },
     write: {
-      offline: 'Anda di luar talian. Perubahan pada album kongsi memerlukan sambungan.',
       not_member: 'Anda tidak lagi dalam album ini, jadi anda tidak boleh mengubahnya.',
       signed_out: 'Log masuk semula untuk mengubah album ini.',
       failed: 'Tidak dapat menyimpan perubahan pada album ini. Cuba lagi.',
@@ -3112,12 +3113,10 @@ const ms = {
       your_share: 'Bahagian anda {{money}}',
       your_share_change: 'Bahagian anda {{before}} → {{after}}',
       your_share_gone: 'Bahagian anda sebanyak {{money}} sudah tiada',
-      you_paid: 'Anda direkod sebagai pembayar',
-      they_paid: 'Kini dibayar oleh {{name}}',
       paid: '{{from}} membayar {{to}} {{money}}',
       paid_even: '{{from}} membayar {{to}} {{money}} untuk menyelesaikan baki',
       undid_payment: '{{actor}} membatalkan bayaran {{money}} daripada {{from}} kepada {{to}}',
-      recorded_by: 'Direkod oleh {{actor}}',
+      undid_own_payment: '{{actor}} membatalkan bayaran {{money}} kepada {{to}}',
       joined: '{{name}} menyertai album',
       started: '{{name}} memulakan album',
       left: '{{name}} meninggalkan album',

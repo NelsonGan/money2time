@@ -16,8 +16,10 @@ import {
   writeGroup,
 } from '../src/albumGroups.ts';
 
-// A shared album's group written by the Worker alone: real SQL against the
-// cloud copy's schema (`sync_rows`), as Turso would run it.
+// What the Worker writes to a shared album's group (someone joining or
+// leaving, the website's changes): real SQL against the cloud copy's schema
+// (`sync_rows`), as Turso would run it. The rules themselves are the app's
+// (groupPlan.generated.ts), tested here through the Worker's writes.
 
 function database() {
   const db = new DatabaseSync(':memory:');
@@ -112,6 +114,27 @@ test('joining puts each person on the list once, under a name nobody else has', 
       ['member_joined', 'owner', 'u-bali-owner'],
       ['member_joined', 'tess', 'u-bali-tess'],
     ],
+  );
+});
+
+test('joining on the website names someone already in as they asked', async () => {
+  const { group, rows } = database();
+  await join(group, 'owner', 'Nelson');
+  // The app put Tess in first, under its default name.
+  await join(group, 'tess', 'Tess.lim');
+  const web = (userId: string, name: string) =>
+    joinGroup(group, { ...ctx(userId), via: 'web' }, name);
+  await web('tess', 'Tess');
+  assert.deepEqual(
+    rows('album_members').map((m) => m.name),
+    ['Nelson', 'Tess'],
+  );
+  // The app joining again changes nothing, nor does a name someone else has.
+  assert.deepEqual(await join(group, 'tess', 'T'), []);
+  assert.deepEqual(await web('tess', 'nelson'), []);
+  assert.deepEqual(
+    rows('album_activity').map((a) => a.kind),
+    ['member_joined', 'member_joined', 'member_renamed'],
   );
 });
 
@@ -324,6 +347,55 @@ test('payments of one act are one line per pair, and are only ever undone', asyn
   ]);
 });
 
+test('a simplified debt paid along several bills reads as one payment', async () => {
+  const { group, rows } = await trip();
+  const twoBills = [
+    bill('u-bali-owner', { 'u-bali-owner': 30, 'u-bali-ben': 30, 'u-bali-tess': 10 }),
+    {
+      ...bill('u-bali-tess', { 'u-bali-tess': 10, 'u-bali-ben': 10 }),
+      row: { ...bill('u-bali-tess', { 'u-bali-tess': 10, 'u-bali-ben': 10 }).row, id: 'taxi' },
+    },
+  ];
+  await write(group, 'owner', { rows: twoBills });
+  const pay = (id: string, bill: string, from: string, to: string, amount: number) => ({
+    table: 'album_settlements',
+    row: {
+      id,
+      expense_id: bill,
+      from_member: from,
+      to_member: to,
+      amount,
+      currency: 'MYR',
+      date: '2026-11-14',
+    },
+  });
+  const payments = () =>
+    rows('album_activity')
+      .filter((a) => a.kind === 'payment_recorded')
+      .map((a) => JSON.parse(a.data_json));
+  // Ben pays Nelson 40, simplified: 30 on the dinner, 10 to Tess on the taxi,
+  // and Tess's 10 on the dinner passed on to Nelson. Tess comes out even.
+  await write(group, 'ben', {
+    rows: [
+      pay('s.0', 'dinner', 'u-bali-ben', 'u-bali-owner', 30),
+      pay('s.1', 'dinner', 'u-bali-tess', 'u-bali-owner', 10),
+      pay('s.2', 'taxi', 'u-bali-ben', 'u-bali-tess', 10),
+    ],
+  });
+  assert.deepEqual(
+    payments().map((p) => [p.from, p.to, p.amount, p.bills]),
+    [['u-bali-ben', 'u-bali-owner', 40, ['dinner', 'taxi']]],
+  );
+  // Payments that leave more than one person paid stay one line per pair.
+  await write(group, 'tess', {
+    rows: [
+      pay('t.0', 'dinner', 'u-bali-ben', 'u-bali-owner', 5),
+      pay('t.1', 'taxi', 'u-bali-ben', 'u-bali-tess', 5),
+    ],
+  });
+  assert.equal(payments().length, 3);
+});
+
 test('someone who left changes nothing and is put on no new bill, but stays on old ones', async () => {
   const { group, rows } = await trip();
   await write(group, 'owner', {
@@ -351,12 +423,12 @@ test('someone who left changes nothing and is put on no new bill, but stays on o
   );
 });
 
-test('two writes at once never lose one another', async () => {
+test("two writes at once never lose one another, a phone's push included", async () => {
   const { db, group, rows, interleave } = await trip();
   await write(group, 'owner', {
     rows: [bill('u-bali-owner', { 'u-bali-owner': 30, 'u-bali-tess': 30 })],
   });
-  // Another write lands while Ben's is between its read and its own.
+  // A phone's push lands while Ben's is between its read and its own.
   interleave(() => {
     const dinner = { ...rows('album_expenses')[0], amount: 100 };
     db.prepare(
@@ -371,6 +443,34 @@ test('two writes at once never lose one another', async () => {
   assert.equal(JSON.parse(edit.data_json).before.amount, 100);
   assert.equal(rows('album_expenses')[0].amount, 140);
   assert.equal(rows('album_activity').filter((a) => a.kind === 'bill_edited').length, 1);
+});
+
+test('two people joining at once never take one name', async () => {
+  const { db, group, rows, interleave } = await trip();
+  // Another "Ben" joins while this one is being planned.
+  interleave(() => {
+    db.prepare('INSERT INTO sync_rows VALUES (?, ?, ?, ?, ?, ?)').run(
+      'album_members',
+      'u-bali-ben2',
+      JSON.stringify({
+        id: 'u-bali-ben2',
+        ledger_id: 'bali',
+        name: 'Zed',
+        user_id: 'zed',
+        sort_order: 9,
+        created_at: 'x',
+        updated_at: 'x',
+        deleted_at: null,
+      }),
+      'other',
+      'worker',
+      1,
+    );
+  });
+  await join(group, 'zed-two', 'Zed');
+  const names = rows('album_members').map((m) => m.name);
+  assert.equal(names.filter((n) => n === 'Zed').length, 1);
+  assert.ok(names.includes('Zed 2'));
 });
 
 test('a bill or payment written on the website names its writer as web:<account>', async () => {
@@ -421,7 +521,7 @@ test('the website reads the whole group, the newest log entries first', async ()
   assert.equal(read.find((row) => row.table === 'album_expenses')?.data.note, 'Dinner');
 });
 
-test("an invite names its owner as the album knows them", async () => {
+test('an invite names its owner as the album knows them', async () => {
   const { group } = await trip();
   assert.equal(await readOwnerName(group, 'owner'), 'Nelson');
   assert.equal(await readOwnerName(group, 'nobody'), null);

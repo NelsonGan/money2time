@@ -42,6 +42,7 @@ import {
   settleDebt,
   simplifyDebts,
 } from '~/features/albums/lib/groupDebts';
+import { GroupWriteError } from '~/features/albums/lib/groupPlan';
 import {
   batchPaymentIds,
   billRow,
@@ -61,9 +62,9 @@ import {
   type ProjectHints,
 } from '~/features/albums/services/albumGroupSync';
 import {
+  followProfileName,
   groupWriteMessage,
   isExpectedGroupWriteError,
-  joinGroup,
   writeGroup,
 } from '~/features/albums/services/albumGroupWrites';
 import { parsePaymentAlertPrefs, serializePaymentAlertPrefs } from '~/features/autoLog/lib/prefs';
@@ -77,7 +78,6 @@ import {
   budgetWeekOverlaps,
   isBudgetPeriodKey,
 } from '~/features/budget/lib/budgetPeriods';
-import { CloudSyncApiError } from '~/features/cloudSync/services/cloudSyncApi';
 import { forgetPreviousInstallSession } from '~/features/cloudSync/services/cloudSyncSession';
 import { deletePersonalLedgerRows } from '~/features/cloudSync/services/ledgerChannels';
 import {
@@ -86,6 +86,7 @@ import {
   sharedAlbumFor,
   sharedLedgerFor,
 } from '~/features/cloudSync/services/sharedLedgerStore';
+import { sharedLedgerSync } from '~/features/cloudSync/services/sharedLedgerSync';
 import {
   buildInstalmentPlans,
   frequencyOfSchedule,
@@ -101,7 +102,12 @@ import {
   NO_REIMBURSEMENT,
 } from '~/features/reimbursements/lib/reimbursementMath';
 import { withEntryStamp } from '~/features/sharedLedgers/lib/entryStamp';
-import { invalidateLedgerPeople, ownDisplayName } from '~/features/sharedLedgers/lib/ledgerPeople';
+import {
+  albumNamesFor,
+  invalidateLedgerPeople,
+  ownAlbumName,
+  ownProfileName,
+} from '~/features/sharedLedgers/lib/ledgerPeople';
 import { countAccountsTowardFreeLimit } from '~/features/transactions/lib/accountEntryGate';
 import {
   findFallbackCategory,
@@ -628,8 +634,8 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
    */
   settleGroupDebt: (groupId: string, debt: GroupDebt, accountId: string | null) => Promise<void>;
   /**
-   * Saves a split bill of a shared album, through the Worker: the group's
-   * bill is written, and the user's own entry follows from it. `rows` are the
+   * Saves a split bill of a shared album: the group's bill is written on
+   * this phone (Cloud Sync sends it), and the user's own entry follows from it. `rows` are the
    * split editor's, for the whole bill. Null when it did not go (the user is
    * told why); `mine` false when the user has no part in the bill, which is
    * then not in their ledger.
@@ -3083,9 +3089,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // (the image goes up on the album's next sync).
       const cover = updates.coverPhotoUri;
       if (cover !== undefined && sharedAlbumFor(id)) {
-        void writeGroup(id, [settingsRow(id, { coverPhotoUri: cover })], {
-          media: cover ? [cover] : [],
-        }).catch((error: unknown) => {
+        void writeGroup(id, [settingsRow(id, { coverPhotoUri: cover })]).catch((error: unknown) => {
           if (!isExpectedGroupWriteError(error)) reportError(error, { scope: 'album_group_write' });
           Alert.alert(groupWriteMessage(error));
         });
@@ -4061,15 +4065,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [scheduleRefreshTransactions]);
 
   /**
-   * Sends a change to a shared album's group, which only the Worker writes
-   * (README: Album members and shared albums), and tells the user why when it
-   * did not go: nothing changed then. True when it went.
+   * Makes a change to a shared album's group on this phone, which Cloud Sync
+   * then sends (README: Album members and shared albums), and tells the user
+   * why when the album's rules refused it: nothing changed then. True when it
+   * was made.
    */
   const sendGroupWrite = useCallback(
     async (
       groupId: string,
       rows: readonly GroupRowWrite[],
-      opts?: { reason?: 'close_even'; media?: string[] },
+      opts?: { reason?: 'close_even' },
     ): Promise<boolean> => {
       try {
         await writeGroup(groupId, rows, opts);
@@ -4126,7 +4131,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           !joiningGroupsRef.current.has(groupId)
         ) {
           joiningGroupsRef.current.add(groupId);
-          void joinGroup(groupId, ownDisplayName() ?? I18n.t('albums.people.unnamed'))
+          void sharedLedgerSync
+            .joinAlbumGroup(groupId, ownAlbumName() ?? I18n.t('albums.people.unnamed'))
             .then(() => {
               projectGroup(groupId, env);
               afterGroupWrite();
@@ -4161,7 +4167,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       try {
         await writeGroup(groupId, [renameRow(memberId, cleaned)]);
       } catch (error) {
-        if (error instanceof CloudSyncApiError && error.code === 'name_taken') return 'taken';
+        if (error instanceof GroupWriteError && error.code === 'name_taken') return 'taken';
         if (!isExpectedGroupWriteError(error)) reportError(error, { scope: 'album_group_write' });
         Alert.alert(groupWriteMessage(error));
         return null;
@@ -4265,7 +4271,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       rows: AlbumBillRowInput[],
       existingId?: string,
     ): Promise<{ id: string; mine: boolean } | null> => {
-      // What stops a save before it is sent says so, as the Worker's refusals do.
+      // What stops a save before it is written says so, as the album's rules do.
       const refuse = (message: string) => {
         Alert.alert(message);
         return null;
@@ -4664,7 +4670,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
    * still count in Balances), and deleting the entry one of its payments made
    * (the expense of a part the user paid, the transfer of a payback) undoes
    * that payment. Returns the ids it took: the entries themselves then go as
-   * the group's rows say, once the Worker has written them.
+   * the group's rows say, once they are written.
    */
   const deleteGroupEntries = useCallback(
     (ids: readonly string[]): { taken: Set<string>; done: Promise<boolean> } => {
@@ -6630,6 +6636,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (nextUpdates.displayMode === 'time' && !canUseTimeDisplayMode) {
         nextUpdates.displayMode = 'money';
       }
+      // The names the user went by in shared albums before this change.
+      const albumNamesBefore =
+        'profileName' in nextUpdates ? albumNamesFor(ownProfileName()) : null;
       runMutation(
         () => {
           settingsRepository.updateSettings(nextUpdates);
@@ -6646,6 +6655,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             // from Settings, signed in or not.
             if ('profileName' in nextUpdates || 'profileAvatarUri' in nextUpdates) {
               invalidateLedgerPeople();
+            }
+            // A new Settings name reaches the shared albums where the user
+            // still goes by a name they never picked there.
+            const albumName = albumNamesBefore ? ownAlbumName() : null;
+            if (albumNamesBefore && albumName) {
+              try {
+                if (followProfileName(albumNamesBefore, albumName) > 0) notifyAlbumGroups();
+              } catch (error) {
+                reportError(error, { scope: 'album_group_write' });
+              }
             }
             // A reporting-currency change re-bases the FX rate table.
             if (nextUpdates.currencyCode) reloadRateTable(next.currencyCode);

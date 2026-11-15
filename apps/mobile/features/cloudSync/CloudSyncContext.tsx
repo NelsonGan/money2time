@@ -23,7 +23,10 @@ import { AppState } from 'react-native';
 
 import { useApp } from '~/context/AppContext';
 import { usePro } from '~/context/ProContext';
-import { ownDisplayName, writeOwnLedgerProfiles } from '~/features/sharedLedgers/lib/ledgerPeople';
+import { settingsRow } from '~/features/albums/lib/groupRows';
+import { albumCoverPath } from '~/features/albums/services/albumGroupStore';
+import { writeGroup } from '~/features/albums/services/albumGroupWrites';
+import { ownAlbumName, writeOwnLedgerProfiles } from '~/features/sharedLedgers/lib/ledgerPeople';
 import { DEFAULT_LEDGER_ID, getActiveLedgerId } from '~/lib/db/ledgerScope';
 import { I18n } from '~/lib/i18n';
 import { ledgersRepository } from '~/lib/repositories/ledgersRepository';
@@ -1363,8 +1366,16 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
     async (album: { id: string; name: string }) => {
       const shared = await sharedLedgerSync.shareAlbum(
         album,
-        ownDisplayName() ?? I18n.t('albums.people.unnamed'),
+        ownAlbumName() ?? I18n.t('albums.people.unnamed'),
       );
+      // Its cover is the group's from the start, so everyone who joins gets
+      // it (the image goes up with the row).
+      const cover = albumCoverPath(album.id);
+      if (cover) {
+        await writeGroup(album.id, [settingsRow(album.id, { coverPhotoUri: cover })]).catch(
+          (error: unknown) => reportError(error, { scope: 'album_group_write' }),
+        );
+      }
       void trackEvent(AnalyticsEvents.ALBUM_SHARED);
       reloadAfterApply();
       return shared;

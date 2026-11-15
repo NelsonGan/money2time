@@ -6,7 +6,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {
-  albumCoverPath,
   albumLedgerId,
   ensureLocalAlbum,
   isAlbumDeleted,
@@ -32,15 +31,14 @@ import {
 } from './ledgerChannels';
 import {
   acceptInvite,
-  type AlbumGroupWrite,
   getLedgerCredentials,
+  joinAlbum,
   leaveLedger,
   listSharedLedgers as fetchSharedLedgers,
   previewInvite,
   type RemoteSharedLedger,
   shareLedger,
   stopSharing,
-  writeAlbumGroup,
 } from './sharedLedgersApi';
 import {
   addPendingLedgerAction,
@@ -59,7 +57,6 @@ import {
   sharedLedgerFor,
 } from './sharedLedgerStore';
 import {
-  applyServerRows,
   deleteReplicaFiles,
   dropPersonalOutbox,
   hasUnpushedChanges,
@@ -617,8 +614,8 @@ class SharedLedgerSync {
 
   /**
    * Shares one of the user's albums, as it is made: its group gets a
-   * database of its own, starting with the user (`selfName`) and the album's
-   * cover. Everyone else joins with its link.
+   * database of its own, starting with the user (`selfName`), who is in it
+   * once this returns. Everyone else joins with its link.
    */
   async shareAlbum(album: { id: string; name: string }, selfName: string): Promise<SharedLedger> {
     const session = this.requireSession();
@@ -633,49 +630,35 @@ class SharedLedgerSync {
       kind: 'album',
     });
     saveSharedLedger(fromRemote(remote, session.userId));
-    await this.writeAlbumGroup(album.id, { action: 'join', name: selfName });
-    // Its cover is the group's from the start, so everyone who joins gets it.
-    const cover = albumCoverPath(album.id);
-    if (cover) {
-      await this.writeAlbumGroup(
-        album.id,
-        {
-          action: 'write',
-          rows: [{ table: 'album_groups', row: { id: album.id, cover_photo_uri: cover } }],
-        },
-        [cover],
-      );
-    }
-    await this.syncAll().catch(() => undefined);
+    await this.joinAlbumGroup(album.id, selfName);
     return sharedLedgerFor(album.id) ?? fromRemote(remote, session.userId);
   }
 
   /**
-   * A change to a shared album's group, which only the Worker writes
-   * (README: Album members and shared albums): sent, then the rows it wrote
-   * are applied here at once. `media`: images the rows name (a new cover),
-   * uploaded on the album's next sync, which starts now. Throws when the
-   * Worker cannot be reached or refuses it; nothing changes here then.
+   * Puts the user on a shared album's list as themselves, which the Worker
+   * writes (as for someone joining on the website; it plans joins one at a
+   * time, so two people joining at once never take one name), then brings the
+   * album down so the user is in it here. Throws only when the join itself
+   * did not go: a sync that fails after it is retried like any other.
    */
-  async writeAlbumGroup(
-    groupId: string,
-    change: AlbumGroupWrite,
-    media: string[] = [],
-  ): Promise<void> {
+  async joinAlbumGroup(groupId: string, name: string): Promise<void> {
     const share = sharedAlbumFor(groupId);
     if (!share) throw new CloudSyncApiError('not_found', 404);
     const session = this.requireSession();
-    const rows = await writeAlbumGroup(
+    await joinAlbum(
       await session.getSessionToken(),
       share.shareId,
-      change,
+      name,
       session.liveDeviceId ?? '',
     );
-    await applyServerRows(share.shareId, rows, media);
-    if (media.length) {
-      void this.engineFor(share)
-        .then((engine) => engine.syncNow())
-        .catch(() => undefined);
+    try {
+      const engine = await this.engineFor(share);
+      // A round already running may have pulled before the join was written:
+      // let it finish, then pull again.
+      if (engine.isSyncing()) await engine.syncNow().catch(() => undefined);
+      await engine.syncNow();
+    } catch {
+      // The album is joined; the next sync brings the user down.
     }
   }
 

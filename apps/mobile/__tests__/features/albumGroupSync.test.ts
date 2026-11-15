@@ -26,6 +26,7 @@ import { owedToPayer } from '~/features/transactions/lib/splitPayer';
 import { getDb, getSQLite } from '~/lib/db/client';
 import { DEFAULT_LEDGER_ID, setActiveLedgerId } from '~/lib/db/ledgerScope';
 import { albumGroupsRepository } from '~/lib/repositories/albumGroupsRepository';
+import { albumsRepository } from '~/lib/repositories/albumsRepository';
 import { transactionSplitsRepository } from '~/lib/repositories/transactionSplitsRepository';
 import { transactionsRepository } from '~/lib/repositories/transactionsRepository';
 
@@ -78,6 +79,11 @@ beforeEach(() => {
     INSERT INTO albums (id, ledger_id, name, is_active, sort_order, created_at, updated_at)
       VALUES ('${GROUP}', 'default', 'Bali trip', 1, 0, '${NOW}', '${NOW}');
   `);
+  saveAlbumShare();
+});
+
+/** The album shared, with the user, Aisha and Ben in its group. */
+function saveAlbumShare() {
   saveSharedLedger({
     ledgerId: GROUP,
     shareId: 'share-bali',
@@ -93,7 +99,7 @@ beforeEach(() => {
   groupRows.createMember(GROUP, { id: 'me', name: 'Nelson', userId: 'u-me' });
   groupRows.createMember(GROUP, { id: 'aisha', name: 'Aisha', userId: 'u-aisha' });
   groupRows.createMember(GROUP, { id: 'ben', name: 'Ben' });
-});
+}
 
 afterEach(() => {
   removeSharedLedger(GROUP);
@@ -802,6 +808,28 @@ describe('sharing and its end', () => {
     expect(tx('dinner').album_group_id).toBeNull();
     // The entries stay, as ordinary split bills.
     expect(balances()).toEqual({ Aisha: 30, Ben: 30 });
+  });
+
+  it('takes the user’s entries back into the album when they delete it and join again', () => {
+    addBill('dinner', 'me');
+    projectGroup(GROUP, env);
+    // Deleting a shared album as a member: they leave, and the album goes.
+    removeSharedLedger(GROUP);
+    releaseAlbumGroup(GROUP);
+    albumsRepository.softDelete(GROUP);
+    // Joined again: the group's rows come back with the share.
+    saveAlbumShare();
+    addBill('dinner', 'me');
+    ensureLocalAlbum({ ledgerId: GROUP, name: 'Bali trip' });
+    projectGroup(GROUP, env);
+    expect(tx('dinner')).toMatchObject({ album_group_id: GROUP, deleted_at: null });
+    expect(
+      app.all(
+        'SELECT COUNT(*) AS n FROM album_transactions WHERE album_id = ? AND transaction_id = ? AND deleted_at IS NULL',
+        GROUP,
+        'dinner',
+      )[0].n,
+    ).toBe(1);
   });
 });
 

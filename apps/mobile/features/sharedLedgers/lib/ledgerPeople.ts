@@ -136,11 +136,45 @@ function ownName(own: OwnProfile): string | null {
 }
 
 /**
- * What this phone's person goes by to others: the Settings name, else the
- * sign-in name, else the masked address. Null when signed out with no name.
+ * An address's first part as a name ("tess.lim@x.com" → "Tess lim"), as the
+ * website names a new album member who has no other name.
  */
-export function ownDisplayName(): string | null {
-  return ownName(readOwnProfile());
+export function nameFromEmail(email: string | null | undefined): string | null {
+  const local = email
+    ?.split('@')[0]
+    ?.replace(/[._-]+/g, ' ')
+    .trim();
+  return local ? local.charAt(0).toLocaleUpperCase() + local.slice(1) : null;
+}
+
+/**
+ * What the user starts as in a shared album, the same on the app and the
+ * website: the Settings name, else the sign-in name, else the address's first
+ * part (`nameFromEmail`). Null when signed out with no name.
+ */
+export function ownAlbumName(): string | null {
+  return albumNamesFor(readOwnProfile().name)[0] ?? null;
+}
+
+/**
+ * Every name the user goes by in an album without having picked one there:
+ * the Settings name (`profileName`, as it is or was), the sign-in name, the
+ * address's first part, and the masked address apps before it gave a new
+ * member. The first is the one a new album gets.
+ */
+export function albumNamesFor(profileName: string | null): string[] {
+  const user = getCachedSessionUser();
+  return [
+    profileName?.trim(),
+    user?.name.trim(),
+    nameFromEmail(user?.email),
+    maskEmail(user?.email),
+  ].filter((name): name is string => !!name);
+}
+
+/** The Settings name as it is now, before a change is saved. */
+export function ownProfileName(): string | null {
+  return readOwnProfile().name;
 }
 
 type AvatarResolver = (path: string | null) => string | null;
