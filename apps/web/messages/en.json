@@ -387,14 +387,10 @@
   "privacy": {
     "title": "Privacy Policy",
     "lastUpdated": "Last updated: November 15, 2026",
-    "websiteAnalytics": {
-      "title": "Website Usage Analytics",
-      "paragraphs": [
-        "On money2time.com, we use PostHog and Google Analytics to measure pseudonymous page views and a limited set of interactions, such as app download clicks, tutorial selection, and contact-form outcomes. These services may use browser storage or cookies and process technical information including approximate region, device and browser type, and referring site. Google Analytics user and event data is retained for up to 14 months.",
-        "On the Web Dashboard (app.money2time.com), the same services measure which dashboard pages you open, when a browser is linked or unlinked, whether transfers from your phone and changes you make succeed, and when a Pro feature is offered. Once your phone has sent its data, these events are linked to that phone's random app identifier, so your dashboard and app usage count as one pseudonymous user until you unlink the browser. The dashboard keeps this separate from the rest of money2time.com, so your visits to other pages are not linked to it. Dashboard events never include your financial data, and dashboard visits are never recorded as session replays.",
-        "PostHog may also record a small sample of website visits as session replays with every form field masked, and receives a report when a page error occurs.",
-        "We do not send contact-form contents, tutorial search text, financial data, email addresses, full URL query strings, or data for advertising or personalization. The /download redirect does not add your IP address or user-agent string to its analytics event. Website analytics does not load when your browser's Do Not Track setting is enabled."
-      ]
+    "links": {
+      "userDataPolicy": "Google API Services User Data Policy",
+      "googlePermissions": "myaccount.google.com/permissions",
+      "dataDeletion": "data deletion page"
     },
     "sections": [
       {
@@ -446,7 +442,7 @@
           {
             "title": "Shared Ledgers and Albums",
             "paragraphs": [
-              "If you create or join a shared ledger or shared album, the data you add to it is stored on our servers and is visible to everyone in it: member names, bills (title, amount, date, currency, who paid and how it is split), payments, settings, the cover photo, and an activity log of who changed what. Your own account, category, note, receipt photo, and mood for a bill are never shared with the group. Your display name in a group is the name you set, or else your sign-in name. The owner of a shared ledger can see members' email addresses. Anyone with an invite link can see the group's name, its owner's name, and how many members it has.",
+              "If you create or join a shared ledger or shared album, the data you add to it is stored on our servers and is visible to everyone in it: member names, bills (title, amount, date, currency, who paid and how it is split), payments, settings, the cover photo, and an activity log of who changed what. Your own account, category, note, receipt photo, and mood for a bill are never shared with the group. Your display name in a group is the name you set, or else your sign-in name; if you have neither, it is a partly hidden form of your email address, such as ne***@gmail.com. The owner of a shared ledger can see members' email addresses. Anyone with an invite link can see the group's name, its owner's display name, and how many members it has.",
               "Bills and changes you add stay with the group as part of its shared record, including after you leave."
             ]
           },
@@ -459,7 +455,7 @@
           {
             "title": "Live Earnings (iOS)",
             "paragraphs": [
-              "If you turn on live earnings on the Lock Screen, the App sends your hourly rate, currency symbol, shift schedule, time zone, random app identifier, and the Live Activity push token Apple provides to our server, which updates the Live Activity through Apple Push Notification service while it runs."
+              "If you turn on live earnings on the Lock Screen, the App sends your hourly rate, currency symbol, shift schedule, time zone, random app identifier, and the Live Activity push token Apple provides to our server, which updates the Live Activity through Apple Push Notification service while it runs. A running Live Activity's data is deleted when it ends. A schedule for starting live earnings automatically is deleted when you turn automatic start off or clear your wage, and otherwise 45 days after the App last confirms it. Live earnings data is not linked to an account."
             ]
           },
           {
@@ -482,6 +478,16 @@
                 "Platform such as iOS or Android"
               ]
             ]
+          },
+          {
+            "title": "Website Usage Analytics",
+            "paragraphs": [
+              "On money2time.com, we use PostHog and Google Analytics to measure pseudonymous page views and a limited set of interactions, such as app download clicks, tutorial selection, and contact-form outcomes. These services may use browser storage or cookies and process technical information including approximate region, device and browser type, and referring site. Google Analytics user and event data is retained for up to 14 months.",
+              "On the Web Dashboard (app.money2time.com), the same services measure which dashboard pages you open, when a browser is linked or unlinked, whether transfers from your phone and changes you make succeed, and when a Pro feature is offered. Once your phone has sent its data, these events are linked to that phone's random app identifier, so your dashboard and app usage count as one pseudonymous user until you unlink the browser. The dashboard keeps this separate from the rest of money2time.com, so your visits to other pages are not linked to it. Dashboard events never include your financial data, and dashboard visits are never recorded as session replays.",
+              "On shared albums on the web (album.money2time.com), the same services measure page views, sign-ins and the sign-in method used, joining an album, edits, and opening an album in the App. These events never include your name, email address, or what is in your albums, and album visits are never recorded as session replays.",
+              "PostHog may also record a small sample of website visits as session replays with every form field masked, and receives a report when a page error occurs.",
+              "We do not send contact-form contents, tutorial search text, financial data, email addresses, full URL query strings, or data for advertising or personalization. The /download redirect does not add your IP address or user-agent string to its analytics event. Website analytics does not load when your browser's Do Not Track setting is enabled."
+            ]
           }
         ]
       },
@@ -489,7 +495,7 @@
         "title": "3. Google User Data",
         "paragraphs": [
           "This section explains how the App and our websites access, use, store, and share data received from Google APIs.",
-          "Money2Time's use and transfer of information received from Google APIs to any other app will adhere to the Google API Services User Data Policy, including the Limited Use requirements."
+          "Money2Time's use and transfer of information received from Google APIs to any other app will adhere to the {userDataPolicy}, including the Limited Use requirements."
         ],
         "subsections": [
           {
@@ -497,21 +503,21 @@
             "lists": [
               [
                 "Google Sign-In (in the App and on album.money2time.com): your Google account ID, email address and whether it is verified, name, and profile picture address, through the openid, email, and profile scopes.",
-                "Google Drive (only if you choose Google Drive for backups): access limited to the drive.file scope, which lets the App see and manage only the backup files it creates. The App cannot see any other file in your Drive."
+                "Google Drive (only if you choose Google Drive for backups): connecting Google Drive signs you in to Google in the App with the same openid, email, and profile scopes, so the App can show which Google account your backups go to, and adds the drive.file scope, which lets the App see and manage only the backup files it creates. The App cannot see any other file in your Drive. This profile data stays on your device unless you also use it to sign in to a Money2Time account."
               ]
             ]
           },
           {
             "title": "How We Use It",
             "paragraphs": [
-              "We use your Google profile data only to create and sign in to your Money2Time account, to connect it to other sign-in methods with the same verified email address, and to show your name to the people in ledgers and albums you share. We use Google Drive access only to save, list, and restore your Money2Time backup files. We do not use Google user data for advertising, we do not sell it, and we do not use it to train AI models."
+              "We use your Google profile data only to create and sign in to your Money2Time account, to connect it to other sign-in methods with the same verified email address, to show your name to the people in ledgers and albums you share (and your email address to the owner of a shared ledger you join), and to show which Google account your backups go to. We use Google Drive access only to save, list, and restore your Money2Time backup files. We do not use Google user data for advertising, we do not sell it, and we do not use it to train AI models."
             ]
           },
           {
             "title": "How We Store and Share It",
             "paragraphs": [
-              "Your Google profile data is stored in our account database on Cloudflare and kept until you delete your account. Your Drive backups are written directly from your phone to your Google Drive; they never pass through or are stored on our servers, and you can delete them in Google Drive at any time. We share Google user data only with the members of ledgers and albums you choose to share (your name), and with the service providers that host our servers (Cloudflare and Turso) under their data processing terms. We never send it to our analytics providers or AI providers.",
-              "You can remove Money2Time's access to your Google Account at any time at myaccount.google.com/permissions, and you can delete your account in the App as described in section 9."
+              "Your Google profile data is stored in our account database on Cloudflare and kept until you delete your account. Your Drive backups are written directly from your phone to your Google Drive; they never pass through or are stored on our servers, and you can delete them in Google Drive at any time. We share Google user data only in these ways: your name, or a partly hidden form of your email address if you have no name, with the members of ledgers and albums you join and with anyone holding their invite links; your email address with the owner of a shared ledger you join; and all of it with the service providers that host our servers (Cloudflare and Turso), under their data processing terms. We never send it to our analytics providers or AI providers.",
+              "You can remove Money2Time's access to your Google Account at any time at {googlePermissions}, and you can delete your account in the App as described in section 9."
             ]
           }
         ]
@@ -564,7 +570,7 @@
       {
         "title": "8. Data Retention",
         "paragraphs": [
-          "Data on your device stays until you delete it or uninstall the App. Account information, your Cloud Sync copy, and your images on our servers are kept until you delete your account. Shared ledger and album data is kept while the group exists. Sign-in sessions last up to one year and renew while you use them. Receipt and notification texts sent for AI processing are not stored by us. Analytics data is kept for up to 14 months in Google Analytics and according to our retention settings in PostHog. Connection details such as IP addresses are kept briefly in our service providers' logs."
+          "Data on your device stays until you delete it or uninstall the App. Account information, your Cloud Sync copy, and your images on our servers are kept until you delete your account. Shared ledger and album data is kept while the group exists. Live earnings data is deleted when you turn it off, and at the latest 45 days after the App last confirms it. Sign-in sessions last up to one year and renew while you use them. Receipt and notification texts sent for AI processing are not stored by us. Analytics data is kept for up to 14 months in Google Analytics and according to our retention settings in PostHog. Connection details such as IP addresses are kept briefly in our service providers' logs."
         ]
       },
       {
@@ -572,7 +578,7 @@
         "paragraphs": [
           "You have full control over your data. Reset Data in Settings permanently deletes your accounts, categories, and transactions from your device, and from your Cloud Sync copy if Cloud Sync is on. Uninstalling the App removes the local database from your device, but not your backups in Google Drive or iCloud, or your account.",
           "To delete your account, open the App's Account page and choose Delete account. This permanently deletes your account information, your Cloud Sync copy, every image you stored with us, and the shared ledgers and albums you own, and revokes the App's Apple sign-in. Unlinking a browser from the Web Dashboard deletes the copy it keeps: right away when you unlink in the browser, and the next time it connects when you unlink from the App.",
-          "Deleting your data does not delete your subscription records held by Apple or Google, or analytics data previously sent to PostHog and Google Analytics for Firebase. To request deletion of analytics data, contact us at the email below. Our data deletion page has the full steps."
+          "Deleting your data does not delete your subscription records held by Apple or Google, or analytics data previously sent to PostHog and Google Analytics for Firebase. To request deletion of analytics data, contact us at the email below. Our {dataDeletion} has the full steps."
         ]
       },
       {
@@ -664,7 +670,7 @@
   },
   "terms": {
     "title": "Terms of Use",
-    "lastUpdated": "Last updated: March 25, 2026",
+    "lastUpdated": "Last updated: November 15, 2026",
     "privacyPolicyLabel": "Privacy Policy",
     "sections": [
       {
@@ -735,7 +741,7 @@
       {
         "title": "5. Your Data",
         "paragraphs": [
-          "All financial data you enter, including transactions, accounts, categories, wage settings, and preferences, is stored locally on your device. We do not have access to your financial data and do not store it on any server.",
+          "All financial data you enter, including transactions, accounts, categories, wage settings, and preferences, is stored locally on your device. If you use optional features such as Cloud Sync, shared ledgers and albums, or receipt scanning, the data they need is sent to our servers as described in the Privacy Policy.",
           "You are solely responsible for maintaining backups of your data. Use the built-in export feature to create a backup. We are not liable for any data loss resulting from app deletion, device failure, or accidental reset.",
           "For full details on data handling, see our {privacyPolicy}."
         ]
@@ -780,7 +786,7 @@
       {
         "title": "10. Termination",
         "paragraphs": [
-          "We may suspend or terminate your access to the App at any time, with or without cause, and with or without notice. Upon termination, your right to use the App ceases immediately. As your data is stored locally, it will remain on your device until you uninstall the App or reset it manually.",
+          "We may suspend or terminate your access to the App at any time, with or without cause, and with or without notice. Upon termination, your right to use the App ceases immediately. Data on your device remains there until you uninstall the App or reset it manually, and you can delete your account and the data on our servers as described in the Privacy Policy.",
           "You may stop using the App at any time by uninstalling it."
         ]
       },
@@ -805,7 +811,10 @@
   "dataDeletion": {
     "title": "Data Deletion Request",
     "lastUpdated": "Last updated: November 15, 2026",
-    "intro": "Money2Time is a local-first app: your financial data is stored on your device, and it is stored on our servers only if you sign in and use Cloud Sync or shared ledgers and albums. This page explains how to delete the data associated with the Money2Time app, which types of data are deleted or kept, and any retention periods.",
+    "intro": "Money2Time is a local-first app: your financial data is stored on your device, and it is stored on our servers only if you sign in and use Cloud Sync or shared ledgers and albums. If you turn on live earnings on iOS, your hourly rate and shift schedule are also kept on our servers while it runs. This page explains how to delete the data associated with the Money2Time app, which types of data are deleted or kept, and any retention periods.",
+    "links": {
+      "googlePermissions": "myaccount.google.com/permissions"
+    },
     "sections": [
       {
         "title": "How to Request Data Deletion",
@@ -839,7 +848,7 @@
           {
             "title": "Delete your backups",
             "paragraphs": [
-              "Backups you made to Google Drive or iCloud are stored in your own account, not on our servers. Delete them in Google Drive (the Money2Time folder) or in your iCloud storage settings. You can also remove Money2Time's access to your Google Account at myaccount.google.com/permissions."
+              "Backups you made to Google Drive or iCloud are stored in your own account, not on our servers. Delete them in Google Drive (the Money2Time folder) or in your iCloud storage settings. You can also remove Money2Time's access to your Google Account at {googlePermissions}."
             ]
           },
           {
@@ -921,6 +930,11 @@
               "Receipt images and notification texts sent for scanning",
               "Not stored",
               "Processed to return a result and not stored by us. Only usage counts are kept, for plan limits."
+            ],
+            [
+              "Live earnings data on iOS (hourly rate, shift schedule, time zone, Live Activity push token)",
+              "Deleted",
+              "Removed when a Live Activity ends, or when you turn automatic start off or clear your wage, and otherwise 45 days after the App last confirms it."
             ],
             [
               "Pseudonymous analytics data (PostHog and Google Analytics for Firebase)",

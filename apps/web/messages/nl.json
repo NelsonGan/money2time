@@ -387,14 +387,10 @@
   "privacy": {
     "title": "Privacybeleid",
     "lastUpdated": "Laatst bijgewerkt: 15 november 2026",
-    "websiteAnalytics": {
-      "title": "Gebruiksanalyse van de website",
-      "paragraphs": [
-        "Op money2time.com gebruiken we PostHog en Google Analytics om pseudonieme paginaweergaven en een beperkte reeks interacties te meten, zoals klikken op appdownloads, tutorialselecties en resultaten van het contactformulier. Deze diensten kunnen browseropslag of cookies gebruiken en technische informatie verwerken, waaronder de globale regio, het type apparaat en browser en de verwijzende site. Gebruikers- en gebeurtenisgegevens in Google Analytics worden maximaal 14 maanden bewaard.",
-        "Op het Webdashboard (app.money2time.com) meten dezelfde diensten welke dashboardpagina's je opent, wanneer een browser wordt gekoppeld of ontkoppeld, of overdrachten vanaf je telefoon en wijzigingen die je maakt slagen, en wanneer een Pro-functie wordt aangeboden. Zodra je telefoon zijn gegevens heeft verstuurd, worden deze gebeurtenissen gekoppeld aan de willekeurige app-ID van die telefoon, zodat je gebruik van het dashboard en de app telt als één pseudonieme gebruiker totdat je de browser ontkoppelt. Het dashboard houdt dit gescheiden van de rest van money2time.com, zodat je bezoeken aan andere pagina's er niet aan worden gekoppeld. Dashboardgebeurtenissen bevatten nooit je financiële gegevens, en bezoeken aan het dashboard worden nooit vastgelegd als sessieherhalingen.",
-        "PostHog kan ook een kleine steekproef van websitebezoeken vastleggen als sessieherhalingen waarin elk formulierveld is afgeschermd, en ontvangt een rapport wanneer er op een pagina een fout optreedt.",
-        "We versturen geen inhoud van het contactformulier, zoektekst uit tutorials, financiële gegevens, e-mailadressen, volledige URL-querystrings of gegevens voor advertenties of personalisatie. De omleiding /download voegt je IP-adres of user-agent-string niet toe aan de analysegebeurtenis. Websiteanalyse wordt niet geladen als Do Not Track in je browser is ingeschakeld."
-      ]
+    "links": {
+      "userDataPolicy": "Google API Services User Data Policy",
+      "googlePermissions": "myaccount.google.com/permissions",
+      "dataDeletion": "pagina over het verwijderen van gegevens"
     },
     "sections": [
       {
@@ -446,7 +442,7 @@
           {
             "title": "Gedeelde boeken en albums",
             "paragraphs": [
-              "Als je een gedeeld boek of gedeeld album aanmaakt of eraan deelneemt, worden de gegevens die je eraan toevoegt op onze servers opgeslagen en zijn ze zichtbaar voor iedereen die erin zit: namen van leden, rekeningen (titel, bedrag, datum, valuta, wie heeft betaald en hoe het wordt verdeeld), betalingen, instellingen, de omslagfoto en een activiteitenlogboek van wie wat heeft gewijzigd. De eigen rekening, categorie, notitie, bonnetjesfoto en stemming die je bij een gedeelde uitgave vastlegt, worden nooit met de groep gedeeld. Je weergavenaam in een groep is de naam die je instelt, of anders je inlognaam. De eigenaar van een gedeeld boek kan de e-mailadressen van leden zien. Iedereen met een uitnodigingslink kan de naam van de groep, de naam van de eigenaar en het aantal leden zien.",
+              "Als je een gedeeld boek of gedeeld album aanmaakt of eraan deelneemt, worden de gegevens die je eraan toevoegt op onze servers opgeslagen en zijn ze zichtbaar voor iedereen die erin zit: namen van leden, rekeningen (titel, bedrag, datum, valuta, wie heeft betaald en hoe het wordt verdeeld), betalingen, instellingen, de omslagfoto en een activiteitenlogboek van wie wat heeft gewijzigd. De eigen rekening, categorie, notitie, bonnetjesfoto en stemming die je bij een gedeelde uitgave vastlegt, worden nooit met de groep gedeeld. Je weergavenaam in een groep is de naam die je instelt, of anders je inlognaam; als je geen van beide hebt, is het een deels verborgen vorm van je e-mailadres, zoals ne***@gmail.com. De eigenaar van een gedeeld boek kan de e-mailadressen van leden zien. Iedereen met een uitnodigingslink kan de naam van de groep, de weergavenaam van de eigenaar en het aantal leden zien.",
               "Rekeningen en wijzigingen die je toevoegt, blijven als onderdeel van het gedeelde overzicht bij de groep, ook nadat je die verlaat."
             ]
           },
@@ -459,7 +455,7 @@
           {
             "title": "Live verdiensten (iOS)",
             "paragraphs": [
-              "Als je Live verdiensten op het vergrendelscherm inschakelt, stuurt de App je uurtarief, valutasymbool, dienstrooster, tijdzone, willekeurige app-ID en het pushtoken voor de Live Activity dat Apple verstrekt naar onze server, die de Live Activity via de Apple Push Notification service bijwerkt zolang die loopt."
+              "Als je Live verdiensten op het vergrendelscherm inschakelt, stuurt de App je uurtarief, valutasymbool, dienstrooster, tijdzone, willekeurige app-ID en het pushtoken voor de Live Activity dat Apple verstrekt naar onze server, die de Live Activity via de Apple Push Notification service bijwerkt zolang die loopt. De gegevens van een lopende Live Activity worden verwijderd wanneer die eindigt. Een schema om Live verdiensten automatisch te starten wordt verwijderd wanneer je automatisch starten uitschakelt of je loon wist, en anders 45 dagen nadat de App het voor het laatst heeft bevestigd. Gegevens van Live verdiensten worden niet aan een account gekoppeld."
             ]
           },
           {
@@ -482,6 +478,16 @@
                 "Platform, zoals iOS of Android"
               ]
             ]
+          },
+          {
+            "title": "Gebruiksanalyse van de website",
+            "paragraphs": [
+              "Op money2time.com gebruiken we PostHog en Google Analytics om pseudonieme paginaweergaven en een beperkte reeks interacties te meten, zoals klikken op appdownloads, tutorialselecties en resultaten van het contactformulier. Deze diensten kunnen browseropslag of cookies gebruiken en technische informatie verwerken, waaronder de globale regio, het type apparaat en browser en de verwijzende site. Gebruikers- en gebeurtenisgegevens in Google Analytics worden maximaal 14 maanden bewaard.",
+              "Op het Webdashboard (app.money2time.com) meten dezelfde diensten welke dashboardpagina's je opent, wanneer een browser wordt gekoppeld of ontkoppeld, of overdrachten vanaf je telefoon en wijzigingen die je maakt slagen, en wanneer een Pro-functie wordt aangeboden. Zodra je telefoon zijn gegevens heeft verstuurd, worden deze gebeurtenissen gekoppeld aan de willekeurige app-ID van die telefoon, zodat je gebruik van het dashboard en de app telt als één pseudonieme gebruiker totdat je de browser ontkoppelt. Het dashboard houdt dit gescheiden van de rest van money2time.com, zodat je bezoeken aan andere pagina's er niet aan worden gekoppeld. Dashboardgebeurtenissen bevatten nooit je financiële gegevens, en bezoeken aan het dashboard worden nooit vastgelegd als sessieherhalingen.",
+              "Op gedeelde albums op het web (album.money2time.com) meten dezelfde diensten paginaweergaven, inlogacties en de gebruikte inlogmethode, deelname aan een album, bewerkingen en het openen van een album in de App. Deze gebeurtenissen bevatten nooit je naam, je e-mailadres of de inhoud van je albums, en bezoeken aan albums worden nooit vastgelegd als sessieherhalingen.",
+              "PostHog kan ook een kleine steekproef van websitebezoeken vastleggen als sessieherhalingen waarin elk formulierveld is afgeschermd, en ontvangt een rapport wanneer er op een pagina een fout optreedt.",
+              "We versturen geen inhoud van het contactformulier, zoektekst uit tutorials, financiële gegevens, e-mailadressen, volledige URL-querystrings of gegevens voor advertenties of personalisatie. De omleiding /download voegt je IP-adres of user-agent-string niet toe aan de analysegebeurtenis. Websiteanalyse wordt niet geladen als Do Not Track in je browser is ingeschakeld."
+            ]
           }
         ]
       },
@@ -489,7 +495,7 @@
         "title": "3. Google-gebruikersgegevens",
         "paragraphs": [
           "In deze sectie wordt uitgelegd hoe de App en onze websites gegevens die van Google API's worden ontvangen openen, gebruiken, opslaan en delen.",
-          "Het gebruik en de overdracht door Money2Time van informatie die van Google API's is ontvangen naar een andere app, zal voldoen aan de Google API Services User Data Policy (beleid voor gebruikersgegevens van Google API-services), inclusief de vereisten voor Limited Use (beperkt gebruik)."
+          "Het gebruik en de overdracht door Money2Time van informatie die van Google API's is ontvangen naar een andere app, zal voldoen aan de {userDataPolicy} (beleid voor gebruikersgegevens van Google API-services), inclusief de vereisten voor Limited Use (beperkt gebruik)."
         ],
         "subsections": [
           {
@@ -497,21 +503,21 @@
             "lists": [
               [
                 "Google Sign-In (in de App en op album.money2time.com): je Google-account-ID, e-mailadres en of het is geverifieerd, naam en het adres van je profielfoto, via de scopes openid, email en profile.",
-                "Google Drive (alleen als je Google Drive kiest voor back-ups): toegang beperkt tot de scope drive.file, waarmee de App alleen de back-upbestanden die hij zelf aanmaakt kan zien en beheren. De App kan geen andere bestanden in je Drive zien."
+                "Google Drive (alleen als je Google Drive kiest voor back-ups): als je Google Drive koppelt, log je in de App in bij Google met dezelfde scopes openid, email en profile, zodat de App kan tonen naar welk Google-account je back-ups gaan, en wordt de scope drive.file toegevoegd, waarmee de App alleen de back-upbestanden die hij zelf aanmaakt kan zien en beheren. De App kan geen andere bestanden in je Drive zien. Deze profielgegevens blijven op je apparaat, tenzij je ze ook gebruikt om in te loggen bij een Money2Time-account."
               ]
             ]
           },
           {
             "title": "Hoe we ze gebruiken",
             "paragraphs": [
-              "We gebruiken je Google-profielgegevens alleen om je Money2Time-account aan te maken en je erbij in te loggen, om het te koppelen aan andere inlogmethoden met hetzelfde geverifieerde e-mailadres en om je naam te tonen aan de mensen in boeken en albums die je deelt. We gebruiken de toegang tot Google Drive alleen om je Money2Time-back-upbestanden op te slaan, weer te geven en terug te zetten. We gebruiken Google-gebruikersgegevens niet voor advertenties, we verkopen ze niet en we gebruiken ze niet om AI-modellen te trainen."
+              "We gebruiken je Google-profielgegevens alleen om je Money2Time-account aan te maken en je erbij in te loggen, om het te koppelen aan andere inlogmethoden met hetzelfde geverifieerde e-mailadres, om je naam te tonen aan de mensen in boeken en albums die je deelt (en je e-mailadres aan de eigenaar van een gedeeld boek waaraan je deelneemt), en om te tonen naar welk Google-account je back-ups gaan. We gebruiken de toegang tot Google Drive alleen om je Money2Time-back-upbestanden op te slaan, weer te geven en terug te zetten. We gebruiken Google-gebruikersgegevens niet voor advertenties, we verkopen ze niet en we gebruiken ze niet om AI-modellen te trainen."
             ]
           },
           {
             "title": "Hoe we ze opslaan en delen",
             "paragraphs": [
-              "Je Google-profielgegevens worden opgeslagen in onze accountdatabase bij Cloudflare en bewaard totdat je je account verwijdert. Je Drive-back-ups worden rechtstreeks vanaf je telefoon naar je Google Drive geschreven; ze gaan nooit via onze servers en worden daar nooit opgeslagen, en je kunt ze op elk moment in Google Drive verwijderen. We delen Google-gebruikersgegevens alleen met de leden van boeken en albums die je zelf kiest te delen (je naam) en met de dienstverleners die onze servers hosten (Cloudflare en Turso), onder hun voorwaarden voor gegevensverwerking. We sturen ze nooit naar onze analyseaanbieders of AI-aanbieders.",
-              "Je kunt de toegang van Money2Time tot je Google-account op elk moment intrekken via myaccount.google.com/permissions, en je kunt je account in de App verwijderen zoals beschreven in sectie 9."
+              "Je Google-profielgegevens worden opgeslagen in onze accountdatabase bij Cloudflare en bewaard totdat je je account verwijdert. Je Drive-back-ups worden rechtstreeks vanaf je telefoon naar je Google Drive geschreven; ze gaan nooit via onze servers en worden daar nooit opgeslagen, en je kunt ze op elk moment in Google Drive verwijderen. We delen Google-gebruikersgegevens alleen op deze manieren: je naam, of een deels verborgen vorm van je e-mailadres als je geen naam hebt, met de leden van boeken en albums waaraan je deelneemt en met iedereen die hun uitnodigingslinks heeft; je e-mailadres met de eigenaar van een gedeeld boek waaraan je deelneemt; en alles met de dienstverleners die onze servers hosten (Cloudflare en Turso), onder hun voorwaarden voor gegevensverwerking. We sturen ze nooit naar onze analyseaanbieders of AI-aanbieders.",
+              "Je kunt de toegang van Money2Time tot je Google-account op elk moment intrekken via {googlePermissions}, en je kunt je account in de App verwijderen zoals beschreven in sectie 9."
             ]
           }
         ]
@@ -564,7 +570,7 @@
       {
         "title": "8. Bewaartermijnen",
         "paragraphs": [
-          "Gegevens op je apparaat blijven daar totdat je ze verwijdert of de App verwijdert. Accountgegevens, je Cloud Sync-kopie en je afbeeldingen op onze servers worden bewaard totdat je je account verwijdert. Gegevens van gedeelde boeken en albums worden bewaard zolang de groep bestaat. Inlogsessies duren maximaal een jaar en worden verlengd zolang je ze gebruikt. Teksten van bonnetjes en meldingen die voor AI-verwerking worden verstuurd, worden niet door ons bewaard. Analysegegevens worden maximaal 14 maanden bewaard in Google Analytics en volgens onze bewaarinstellingen in PostHog. Verbindingsgegevens zoals IP-adressen worden kort bewaard in de logs van onze dienstverleners."
+          "Gegevens op je apparaat blijven daar totdat je ze verwijdert of de App verwijdert. Accountgegevens, je Cloud Sync-kopie en je afbeeldingen op onze servers worden bewaard totdat je je account verwijdert. Gegevens van gedeelde boeken en albums worden bewaard zolang de groep bestaat. Gegevens van Live verdiensten worden verwijderd wanneer je de functie uitschakelt, en uiterlijk 45 dagen nadat de App ze voor het laatst heeft bevestigd. Inlogsessies duren maximaal een jaar en worden verlengd zolang je ze gebruikt. Teksten van bonnetjes en meldingen die voor AI-verwerking worden verstuurd, worden niet door ons bewaard. Analysegegevens worden maximaal 14 maanden bewaard in Google Analytics en volgens onze bewaarinstellingen in PostHog. Verbindingsgegevens zoals IP-adressen worden kort bewaard in de logs van onze dienstverleners."
         ]
       },
       {
@@ -572,7 +578,7 @@
         "paragraphs": [
           "Je hebt volledige controle over je gegevens. Gegevens resetten in Instellingen verwijdert je rekeningen, categorieën en transacties permanent van je apparaat, en uit je Cloud Sync-kopie als Cloud Sync aan staat. Als je de App verwijdert, wordt de lokale database van je apparaat verwijderd, maar niet je back-ups in Google Drive of iCloud, en ook niet je account.",
           "Om je account te verwijderen, open je de pagina Account in de App en kies je Account verwijderen. Hiermee worden je accountgegevens, je Cloud Sync-kopie, elke afbeelding die je bij ons hebt opgeslagen en de gedeelde boeken en albums waarvan je eigenaar bent permanent verwijderd, en wordt de inlog met Apple voor de App ingetrokken. Een browser ontkoppelen van het Webdashboard verwijdert de kopie die hij bewaart: meteen als je in de browser ontkoppelt en de eerstvolgende keer dat hij verbinding maakt als je vanuit de App ontkoppelt.",
-          "Het verwijderen van je gegevens verwijdert niet je abonnementsgegevens die door Apple of Google worden bewaard, en ook niet analysegegevens die eerder naar PostHog en Google Analytics for Firebase zijn verzonden. Neem contact met ons op via het onderstaande e-mailadres om verwijdering van analysegegevens aan te vragen. Op onze pagina over het verwijderen van gegevens staan alle stappen."
+          "Het verwijderen van je gegevens verwijdert niet je abonnementsgegevens die door Apple of Google worden bewaard, en ook niet analysegegevens die eerder naar PostHog en Google Analytics for Firebase zijn verzonden. Neem contact met ons op via het onderstaande e-mailadres om verwijdering van analysegegevens aan te vragen. Op onze {dataDeletion} staan alle stappen."
         ]
       },
       {
@@ -664,7 +670,7 @@
   },
   "terms": {
     "title": "Gebruiksvoorwaarden",
-    "lastUpdated": "Laatst bijgewerkt: 25 maart 2026",
+    "lastUpdated": "Laatst bijgewerkt: 15 november 2026",
     "privacyPolicyLabel": "Privacybeleid",
     "sections": [
       {
@@ -735,7 +741,7 @@
       {
         "title": "5. Je gegevens",
         "paragraphs": [
-          "Alle financiële gegevens die je invoert, waaronder transacties, rekeningen, categorieën, looninstellingen en voorkeuren, worden lokaal op je apparaat opgeslagen. Wij hebben geen toegang tot je financiële gegevens en slaan ze niet op een server op.",
+          "Alle financiële gegevens die je invoert, waaronder transacties, rekeningen, categorieën, looninstellingen en voorkeuren, worden lokaal op je apparaat opgeslagen. Als je optionele functies gebruikt, zoals Cloud Sync, gedeelde boeken en albums of het scannen van bonnetjes, worden de gegevens die daarvoor nodig zijn naar onze servers verstuurd, zoals beschreven in het Privacybeleid.",
           "Je bent zelf verantwoordelijk voor het maken en bewaren van back-ups van je gegevens. Gebruik de ingebouwde exportfunctie om een back-up te maken. Wij zijn niet aansprakelijk voor gegevensverlies als gevolg van verwijdering van de app, apparaatstoringen of per ongeluk resetten.",
           "Zie ons {privacyPolicy} voor volledige details over gegevensverwerking."
         ]
@@ -780,7 +786,7 @@
       {
         "title": "10. Beeindiging",
         "paragraphs": [
-          "Wij kunnen je toegang tot de App op elk moment opschorten of beëindigen, met of zonder reden en met of zonder kennisgeving. Bij beëindiging eindigt je recht om de App te gebruiken onmiddellijk. Omdat je gegevens lokaal worden opgeslagen, blijven ze op je apparaat staan totdat je de App verwijdert of handmatig reset.",
+          "Wij kunnen je toegang tot de App op elk moment opschorten of beëindigen, met of zonder reden en met of zonder kennisgeving. Bij beëindiging eindigt je recht om de App te gebruiken onmiddellijk. Gegevens op je apparaat blijven daar staan totdat je de App verwijdert of handmatig reset, en je kunt je account en de gegevens op onze servers verwijderen zoals beschreven in het Privacybeleid.",
           "Je kunt op elk moment stoppen met het gebruik van de App door hem te verwijderen."
         ]
       },
@@ -805,7 +811,10 @@
   "dataDeletion": {
     "title": "Verzoek om gegevensverwijdering",
     "lastUpdated": "Laatst bijgewerkt: 15 november 2026",
-    "intro": "Money2Time is een local-first app: je financiële gegevens worden op je apparaat opgeslagen, en alleen op onze servers als je inlogt en Cloud Sync of gedeelde boeken en albums gebruikt. Deze pagina legt uit hoe je de gegevens verwijdert die aan de Money2Time-app zijn gekoppeld, welke soorten gegevens worden verwijderd of bewaard, en welke bewaartermijnen er gelden.",
+    "intro": "Money2Time is een local-first app: je financiële gegevens worden op je apparaat opgeslagen, en alleen op onze servers als je inlogt en Cloud Sync of gedeelde boeken en albums gebruikt. Als je Live verdiensten op iOS inschakelt, worden je uurtarief en dienstrooster ook op onze servers bewaard zolang de functie loopt. Deze pagina legt uit hoe je de gegevens verwijdert die aan de Money2Time-app zijn gekoppeld, welke soorten gegevens worden verwijderd of bewaard, en welke bewaartermijnen er gelden.",
+    "links": {
+      "googlePermissions": "myaccount.google.com/permissions"
+    },
     "sections": [
       {
         "title": "Hoe je gegevensverwijdering aanvraagt",
@@ -839,7 +848,7 @@
           {
             "title": "Verwijder je back-ups",
             "paragraphs": [
-              "Back-ups die je naar Google Drive of iCloud hebt gemaakt, worden in je eigen account opgeslagen, niet op onze servers. Verwijder ze in Google Drive (de map Money2Time) of in de opslaginstellingen van iCloud. Je kunt ook de toegang van Money2Time tot je Google-account intrekken via myaccount.google.com/permissions."
+              "Back-ups die je naar Google Drive of iCloud hebt gemaakt, worden in je eigen account opgeslagen, niet op onze servers. Verwijder ze in Google Drive (de map Money2Time) of in de opslaginstellingen van iCloud. Je kunt ook de toegang van Money2Time tot je Google-account intrekken via {googlePermissions}."
             ]
           },
           {
@@ -921,6 +930,11 @@
               "Afbeeldingen van bonnetjes en teksten van meldingen die voor scannen worden verstuurd",
               "Niet opgeslagen",
               "Verwerkt om een resultaat terug te geven en niet door ons bewaard. Alleen gebruiksaantallen worden bijgehouden, voor de limieten van je abonnement."
+            ],
+            [
+              "Gegevens van Live verdiensten op iOS (uurtarief, dienstrooster, tijdzone, pushtoken voor de Live Activity)",
+              "Verwijderd",
+              "Gewist wanneer een Live Activity eindigt, of wanneer je automatisch starten uitschakelt of je loon wist, en anders 45 dagen nadat de App ze voor het laatst heeft bevestigd."
             ],
             [
               "Gepseudonimiseerde analysegegevens (PostHog / Google Analytics for Firebase)",

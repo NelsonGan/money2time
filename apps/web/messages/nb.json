@@ -387,14 +387,10 @@
   "privacy": {
     "title": "Personvernerklæring",
     "lastUpdated": "Sist oppdatert: 15. november 2026",
-    "websiteAnalytics": {
-      "title": "Analyse av bruk av nettstedet",
-      "paragraphs": [
-        "På money2time.com bruker vi PostHog og Google Analytics til å måle pseudonyme sidevisninger og et begrenset sett med interaksjoner, for eksempel klikk på appnedlasting, valg av veiledning og resultat fra kontaktskjemaet. Tjenestene kan bruke nettleserlagring eller informasjonskapsler og behandle teknisk informasjon, inkludert omtrentlig region, enhets- og nettlesertype og henvisende nettsted. Bruker- og hendelsesdata i Google Analytics lagres i opptil 14 måneder.",
-        "På Web-dashbordet (app.money2time.com) måler de samme tjenestene hvilke dashbordsider du åpner, når en nettleser kobles til eller fra, om overføringer fra telefonen din og endringer du gjør, lykkes, og når en Pro-funksjon tilbys. Når telefonen din har sendt dataene sine, knyttes disse hendelsene til den tilfeldige app-identifikatoren til denne telefonen, slik at bruken din av dashbordet og appen telles som én pseudonym bruker til du kobler fra nettleseren. Dashbordet holder dette atskilt fra resten av money2time.com, slik at besøkene dine på andre sider ikke knyttes til det. Hendelser fra dashbordet inneholder aldri de økonomiske dataene dine, og besøk på dashbordet tas aldri opp som øktavspillinger.",
-        "PostHog kan også ta opp et lite utvalg av besøk på nettstedet som øktavspillinger der alle skjemafelt er skjult, og mottar en rapport når det oppstår en feil på en side.",
-        "Vi sender ikke innhold fra kontaktskjemaet, søketekst i veiledninger, økonomiske data, e-postadresser, fullstendige URL-spørringsstrenger eller data til annonsering eller personalisering. Omdirigeringen /download legger ikke IP-adressen eller user-agent-strengen din til analysehendelsen. Nettstedsanalyse lastes ikke når Do Not Track er aktivert i nettleseren."
-      ]
+    "links": {
+      "userDataPolicy": "Google API Services User Data Policy",
+      "googlePermissions": "myaccount.google.com/permissions",
+      "dataDeletion": "siden om sletting av data"
     },
     "sections": [
       {
@@ -446,7 +442,7 @@
           {
             "title": "Delte regnskap og album",
             "paragraphs": [
-              "Hvis du oppretter eller blir med i et delt regnskap eller et delt album, lagres dataene du legger til i det, på serverne våre og er synlige for alle i det: medlemsnavn, regninger (tittel, beløp, dato, valuta, hvem som betalte og hvordan den er fordelt), betalinger, innstillinger, forsidebildet og en aktivitetslogg over hvem som endret hva. Din egen konto, kategori, notat, kvitteringsbilde og humør for en regning deles aldri med gruppen. Visningsnavnet ditt i en gruppe er navnet du angir, eller ellers innloggingsnavnet ditt. Eieren av et delt regnskap kan se medlemmenes e-postadresser. Alle med en invitasjonslenke kan se gruppens navn, eierens navn og hvor mange medlemmer den har.",
+              "Hvis du oppretter eller blir med i et delt regnskap eller et delt album, lagres dataene du legger til i det, på serverne våre og er synlige for alle i det: medlemsnavn, regninger (tittel, beløp, dato, valuta, hvem som betalte og hvordan den er fordelt), betalinger, innstillinger, forsidebildet og en aktivitetslogg over hvem som endret hva. Din egen konto, kategori, notat, kvitteringsbilde og humør for en regning deles aldri med gruppen. Visningsnavnet ditt i en gruppe er navnet du angir, eller ellers innloggingsnavnet ditt; hvis du ikke har noen av delene, er det en delvis skjult form av e-postadressen din, for eksempel ne***@gmail.com. Eieren av et delt regnskap kan se medlemmenes e-postadresser. Alle med en invitasjonslenke kan se gruppens navn, eierens visningsnavn og hvor mange medlemmer den har.",
               "Regninger og endringer du legger til, blir værende i gruppen som en del av dens felles historikk, også etter at du forlater den."
             ]
           },
@@ -459,7 +455,7 @@
           {
             "title": "Live inntjening (iOS)",
             "paragraphs": [
-              "Hvis du slår på live inntjening på låseskjermen, sender appen timelønnen din, valutasymbolet, vaktplanen, tidssonen, den tilfeldige app-identifikatoren og push-tokenet for Live Activity som Apple oppgir, til serveren vår, som oppdaterer Live Activity via Apple Push Notification service mens den kjører."
+              "Hvis du slår på live inntjening på låseskjermen, sender appen timelønnen din, valutasymbolet, vaktplanen, tidssonen, den tilfeldige app-identifikatoren og push-tokenet for Live Activity som Apple oppgir, til serveren vår, som oppdaterer Live Activity via Apple Push Notification service mens den kjører. Dataene til en Live Activity som kjører, slettes når den avsluttes. En tidsplan for å starte live inntjening automatisk slettes når du slår av automatisk start eller fjerner lønnen din, og ellers 45 dager etter at appen sist bekreftet den. Data for live inntjening er ikke knyttet til en konto."
             ]
           },
           {
@@ -482,6 +478,16 @@
                 "Plattform, for eksempel iOS eller Android"
               ]
             ]
+          },
+          {
+            "title": "Analyse av bruk av nettstedet",
+            "paragraphs": [
+              "På money2time.com bruker vi PostHog og Google Analytics til å måle pseudonyme sidevisninger og et begrenset sett med interaksjoner, for eksempel klikk på appnedlasting, valg av veiledning og resultat fra kontaktskjemaet. Tjenestene kan bruke nettleserlagring eller informasjonskapsler og behandle teknisk informasjon, inkludert omtrentlig region, enhets- og nettlesertype og henvisende nettsted. Bruker- og hendelsesdata i Google Analytics lagres i opptil 14 måneder.",
+              "På Web-dashbordet (app.money2time.com) måler de samme tjenestene hvilke dashbordsider du åpner, når en nettleser kobles til eller fra, om overføringer fra telefonen din og endringer du gjør, lykkes, og når en Pro-funksjon tilbys. Når telefonen din har sendt dataene sine, knyttes disse hendelsene til den tilfeldige app-identifikatoren til denne telefonen, slik at bruken din av dashbordet og appen telles som én pseudonym bruker til du kobler fra nettleseren. Dashbordet holder dette atskilt fra resten av money2time.com, slik at besøkene dine på andre sider ikke knyttes til det. Hendelser fra dashbordet inneholder aldri de økonomiske dataene dine, og besøk på dashbordet tas aldri opp som øktavspillinger.",
+              "På delte album på nettet (album.money2time.com) måler de samme tjenestene sidevisninger, pålogginger og innloggingsmetoden som brukes, når noen blir med i et album, endringer og når et album åpnes i appen. Disse hendelsene inneholder aldri navnet ditt, e-postadressen din eller innholdet i albumene dine, og besøk på album tas aldri opp som øktavspillinger.",
+              "PostHog kan også ta opp et lite utvalg av besøk på nettstedet som øktavspillinger der alle skjemafelt er skjult, og mottar en rapport når det oppstår en feil på en side.",
+              "Vi sender ikke innhold fra kontaktskjemaet, søketekst i veiledninger, økonomiske data, e-postadresser, fullstendige URL-spørringsstrenger eller data til annonsering eller personalisering. Omdirigeringen /download legger ikke IP-adressen eller user-agent-strengen din til analysehendelsen. Nettstedsanalyse lastes ikke når Do Not Track er aktivert i nettleseren."
+            ]
           }
         ]
       },
@@ -489,7 +495,7 @@
         "title": "3. Google-brukerdata",
         "paragraphs": [
           "Dette avsnittet forklarer hvordan appen og nettstedene våre får tilgang til, bruker, lagrer og deler data mottatt fra Google API-er.",
-          "Money2Times bruk og overføring til andre apper av informasjon mottatt fra Google API-er vil overholde Google API Services User Data Policy (retningslinjene for brukerdata i Google API-tjenester), inkludert kravene om Limited Use (begrenset bruk)."
+          "Money2Times bruk og overføring til andre apper av informasjon mottatt fra Google API-er vil overholde {userDataPolicy} (retningslinjene for brukerdata i Google API-tjenester), inkludert kravene om Limited Use (begrenset bruk)."
         ],
         "subsections": [
           {
@@ -497,21 +503,21 @@
             "lists": [
               [
                 "Google-pålogging (i appen og på album.money2time.com): Google-konto-ID-en din, e-postadressen din og om den er bekreftet, navnet ditt og adressen til profilbildet ditt, via omfangene openid, email og profile.",
-                "Google Drive (bare hvis du velger Google Drive for sikkerhetskopier): tilgang begrenset til omfanget drive.file, som lar appen se og administrere bare sikkerhetskopifilene den selv oppretter. Appen kan ikke se noen andre filer i Drive."
+                "Google Drive (bare hvis du velger Google Drive for sikkerhetskopier): når du kobler til Google Drive, logger du på Google i appen med de samme omfangene openid, email og profile, slik at appen kan vise hvilken Google-konto sikkerhetskopiene dine går til, og omfanget drive.file legges til, som lar appen se og administrere bare sikkerhetskopifilene den selv oppretter. Appen kan ikke se noen andre filer i Drive. Disse profildataene blir værende på enheten din med mindre du også bruker dem til å logge på en Money2Time-konto."
               ]
             ]
           },
           {
             "title": "Slik bruker vi dem",
             "paragraphs": [
-              "Vi bruker Google-profildataene dine bare til å opprette og logge på Money2Time-kontoen din, til å koble den til andre innloggingsmetoder med samme bekreftede e-postadresse og til å vise navnet ditt til personene i regnskap og album du deler. Vi bruker tilgangen til Google Drive bare til å lagre, vise og gjenopprette Money2Time-sikkerhetskopifilene dine. Vi bruker ikke Google-brukerdata til annonsering, vi selger dem ikke, og vi bruker dem ikke til å trene AI-modeller."
+              "Vi bruker Google-profildataene dine bare til å opprette og logge på Money2Time-kontoen din, til å koble den til andre innloggingsmetoder med samme bekreftede e-postadresse, til å vise navnet ditt til personene i regnskap og album du deler (og e-postadressen din til eieren av et delt regnskap du blir med i), og til å vise hvilken Google-konto sikkerhetskopiene dine går til. Vi bruker tilgangen til Google Drive bare til å lagre, vise og gjenopprette Money2Time-sikkerhetskopifilene dine. Vi bruker ikke Google-brukerdata til annonsering, vi selger dem ikke, og vi bruker dem ikke til å trene AI-modeller."
             ]
           },
           {
             "title": "Slik lagrer og deler vi dem",
             "paragraphs": [
-              "Google-profildataene dine lagres i kontodatabasen vår på Cloudflare og beholdes til du sletter kontoen din. Drive-sikkerhetskopiene dine skrives direkte fra telefonen din til Google Drive; de går aldri via eller lagres på serverne våre, og du kan når som helst slette dem i Google Drive. Vi deler Google-brukerdata bare med medlemmene av regnskap og album du velger å dele (navnet ditt), og med tjenesteleverandørene som drifter serverne våre (Cloudflare og Turso), i henhold til deres vilkår for databehandling. Vi sender dem aldri til analyseleverandørene eller AI-leverandørene våre.",
-              "Du kan når som helst fjerne Money2Times tilgang til Google-kontoen din på myaccount.google.com/permissions, og du kan slette kontoen din i appen som beskrevet i avsnitt 9."
+              "Google-profildataene dine lagres i kontodatabasen vår på Cloudflare og beholdes til du sletter kontoen din. Drive-sikkerhetskopiene dine skrives direkte fra telefonen din til Google Drive; de går aldri via eller lagres på serverne våre, og du kan når som helst slette dem i Google Drive. Vi deler Google-brukerdata bare på disse måtene: navnet ditt, eller en delvis skjult form av e-postadressen din hvis du ikke har et navn, med medlemmene av regnskap og album du blir med i og med alle som har invitasjonslenkene deres; e-postadressen din med eieren av et delt regnskap du blir med i; og alt sammen med tjenesteleverandørene som drifter serverne våre (Cloudflare og Turso), i henhold til deres vilkår for databehandling. Vi sender dem aldri til analyseleverandørene eller AI-leverandørene våre.",
+              "Du kan når som helst fjerne Money2Times tilgang til Google-kontoen din på {googlePermissions}, og du kan slette kontoen din i appen som beskrevet i avsnitt 9."
             ]
           }
         ]
@@ -564,7 +570,7 @@
       {
         "title": "8. Oppbevaring av data",
         "paragraphs": [
-          "Data på enheten din blir værende til du sletter dem eller avinstallerer appen. Kontoinformasjon, Cloud Sync-kopien din og bildene dine på serverne våre beholdes til du sletter kontoen din. Data for delte regnskap og album beholdes så lenge gruppen finnes. Innloggingsøkter varer i opptil ett år og fornyes mens du bruker dem. Kvitterings- og varseltekster som sendes til AI-behandling, lagres ikke av oss. Analysedata beholdes i opptil 14 måneder i Google Analytics og i henhold til innstillingene våre for oppbevaring i PostHog. Tilkoblingsopplysninger som IP-adresser beholdes en kort stund i loggene til tjenesteleverandørene våre."
+          "Data på enheten din blir værende til du sletter dem eller avinstallerer appen. Kontoinformasjon, Cloud Sync-kopien din og bildene dine på serverne våre beholdes til du sletter kontoen din. Data for delte regnskap og album beholdes så lenge gruppen finnes. Data for live inntjening slettes når du slår funksjonen av, og senest 45 dager etter at appen sist bekreftet dem. Innloggingsøkter varer i opptil ett år og fornyes mens du bruker dem. Kvitterings- og varseltekster som sendes til AI-behandling, lagres ikke av oss. Analysedata beholdes i opptil 14 måneder i Google Analytics og i henhold til innstillingene våre for oppbevaring i PostHog. Tilkoblingsopplysninger som IP-adresser beholdes en kort stund i loggene til tjenesteleverandørene våre."
         ]
       },
       {
@@ -572,7 +578,7 @@
         "paragraphs": [
           "Du har full kontroll over dataene dine. Tilbakestill data i Innstillinger sletter permanent kontoene, kategoriene og transaksjonene dine fra enheten din, og fra Cloud Sync-kopien din hvis Cloud Sync er på. Avinstallering av appen fjerner den lokale databasen fra enheten din, men ikke sikkerhetskopiene dine i Google Drive eller iCloud, eller kontoen din.",
           "For å slette kontoen din åpner du Konto-siden i appen og velger Slett konto. Dette sletter permanent kontoinformasjonen din, Cloud Sync-kopien din, alle bildene du har lagret hos oss og de delte regnskapene og albumene du eier, og tilbakekaller appens Apple-pålogging. Når du kobler en nettleser fra Web-dashbordet, slettes kopien den har lagret: umiddelbart hvis du kobler fra i nettleseren, og neste gang den kobler til hvis du kobler fra i appen.",
-          "Sletting av dataene dine sletter ikke abonnementsopplysningene dine hos Apple eller Google, eller analysedata som tidligere er sendt til PostHog og Google Analytics for Firebase. For å be om sletting av analysedata kan du kontakte oss på e-postadressen nedenfor. Siden vår om sletting av data har alle trinnene."
+          "Sletting av dataene dine sletter ikke abonnementsopplysningene dine hos Apple eller Google, eller analysedata som tidligere er sendt til PostHog og Google Analytics for Firebase. For å be om sletting av analysedata kan du kontakte oss på e-postadressen nedenfor. Du finner alle trinnene på {dataDeletion}."
         ]
       },
       {
@@ -664,7 +670,7 @@
   },
   "terms": {
     "title": "Bruksvilkår",
-    "lastUpdated": "Sist oppdatert: 25. mars 2026",
+    "lastUpdated": "Sist oppdatert: 15. november 2026",
     "privacyPolicyLabel": "Personvernerklæring",
     "sections": [
       {
@@ -735,7 +741,7 @@
       {
         "title": "5. Dine data",
         "paragraphs": [
-          "Alle økonomiske data du legger inn, inkludert transaksjoner, kontoer, kategorier, lønnsinnstillinger og preferanser, lagres lokalt på enheten din. Vi har ikke tilgang til dine økonomiske data og lagrer dem ikke på noen server.",
+          "Alle økonomiske data du legger inn, inkludert transaksjoner, kontoer, kategorier, lønnsinnstillinger og preferanser, lagres lokalt på enheten din. Hvis du bruker valgfrie funksjoner som Cloud Sync, delte regnskap og album eller kvitteringsskanning, sendes dataene de trenger, til serverne våre som beskrevet i personvernerklæringen.",
           "Du er selv ansvarlig for å vedlikeholde sikkerhetskopier av dataene dine. Bruk den innebygde eksportfunksjonen for å opprette en sikkerhetskopi. Vi er ikke ansvarlige for tap av data som følge av sletting av appen, enhetsfeil eller utilsiktet tilbakestilling.",
           "Se vår {privacyPolicy} for fullstendige detaljer om databehandling."
         ]
@@ -780,7 +786,7 @@
       {
         "title": "10. Opphør",
         "paragraphs": [
-          "Vi kan suspendere eller avslutte tilgangen din til appen når som helst, med eller uten grunn, og med eller uten varsel. Ved opphør opphører retten din til å bruke appen umiddelbart. Siden dataene dine lagres lokalt, blir de værende på enheten din til du avinstallerer appen eller tilbakestiller den manuelt.",
+          "Vi kan suspendere eller avslutte tilgangen din til appen når som helst, med eller uten grunn, og med eller uten varsel. Ved opphør opphører retten din til å bruke appen umiddelbart. Data på enheten din blir værende der til du avinstallerer appen eller tilbakestiller den manuelt, og du kan slette kontoen din og dataene på serverne våre som beskrevet i personvernerklæringen.",
           "Du kan slutte å bruke appen når som helst ved å avinstallere den."
         ]
       },
@@ -805,7 +811,10 @@
   "dataDeletion": {
     "title": "Forespørsel om sletting av data",
     "lastUpdated": "Sist oppdatert: 15. november 2026",
-    "intro": "Money2Time er en local-first-app: de økonomiske dataene dine lagres på enheten din, og de lagres bare på serverne våre hvis du logger på og bruker Cloud Sync eller delte regnskap og album. Denne siden forklarer hvordan du sletter dataene knyttet til Money2Time-appen, hvilke typer data som slettes eller beholdes, og eventuelle oppbevaringsperioder.",
+    "intro": "Money2Time er en local-first-app: de økonomiske dataene dine lagres på enheten din, og de lagres bare på serverne våre hvis du logger på og bruker Cloud Sync eller delte regnskap og album. Hvis du slår på live inntjening på iOS, lagres også timelønnen og vaktplanen din på serverne våre mens den kjører. Denne siden forklarer hvordan du sletter dataene knyttet til Money2Time-appen, hvilke typer data som slettes eller beholdes, og eventuelle oppbevaringsperioder.",
+    "links": {
+      "googlePermissions": "myaccount.google.com/permissions"
+    },
     "sections": [
       {
         "title": "Slik ber du om sletting av data",
@@ -839,7 +848,7 @@
           {
             "title": "Slett sikkerhetskopiene dine",
             "paragraphs": [
-              "Sikkerhetskopier du har laget til Google Drive eller iCloud, lagres i din egen konto, ikke på serverne våre. Slett dem i Google Drive (Money2Time-mappen) eller i lagringsinnstillingene for iCloud. Du kan også fjerne Money2Times tilgang til Google-kontoen din på myaccount.google.com/permissions."
+              "Sikkerhetskopier du har laget til Google Drive eller iCloud, lagres i din egen konto, ikke på serverne våre. Slett dem i Google Drive (Money2Time-mappen) eller i lagringsinnstillingene for iCloud. Du kan også fjerne Money2Times tilgang til Google-kontoen din på {googlePermissions}."
             ]
           },
           {
@@ -921,6 +930,11 @@
               "Kvitteringsbilder og varseltekster som sendes til skanning",
               "Lagres ikke",
               "Behandles for å returnere et resultat og lagres ikke av oss. Bare antall bruk beholdes, for grensene i abonnementet."
+            ],
+            [
+              "Data for live inntjening på iOS (timelønn, vaktplan, tidssone, push-token for Live Activity)",
+              "Slettet",
+              "Fjernes når en Live Activity avsluttes, eller når du slår av automatisk start eller fjerner lønnen din, og ellers 45 dager etter at appen sist bekreftet dem."
             ],
             [
               "Pseudonyme analysedata (PostHog og Google Analytics for Firebase)",

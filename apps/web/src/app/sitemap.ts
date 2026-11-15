@@ -69,7 +69,7 @@ const routes: Route[] = [
   {
     path: "/terms",
     changeFrequency: "yearly",
-    lastModified: "2026-06-03",
+    lastModified: "2026-11-15",
     priority: 0.3,
   },
   {

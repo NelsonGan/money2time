@@ -387,14 +387,10 @@
   "privacy": {
     "title": "Chính sách quyền riêng tư",
     "lastUpdated": "Cập nhật lần cuối: ngày 15 tháng 11 năm 2026",
-    "websiteAnalytics": {
-      "title": "Phân tích việc sử dụng trang web",
-      "paragraphs": [
-        "Trên money2time.com, chúng tôi dùng PostHog và Google Analytics để đo lượt xem trang dưới dạng bút danh và một số tương tác giới hạn, chẳng hạn lượt nhấp tải ứng dụng, chọn bài hướng dẫn và kết quả của biểu mẫu liên hệ. Các dịch vụ này có thể dùng bộ nhớ trình duyệt hoặc cookie và xử lý thông tin kỹ thuật gồm khu vực gần đúng, loại thiết bị và trình duyệt, cùng trang giới thiệu. Dữ liệu người dùng và sự kiện trong Google Analytics được lưu giữ tối đa 14 tháng.",
-        "Trên Bảng điều khiển web (app.money2time.com), chính các dịch vụ này đo những trang bảng điều khiển bạn mở, thời điểm một trình duyệt được liên kết hoặc hủy liên kết, việc truyền dữ liệu từ điện thoại cũng như các thay đổi bạn thực hiện có thành công hay không, và thời điểm một tính năng Pro được giới thiệu. Sau khi điện thoại của bạn đã gửi dữ liệu, các sự kiện này được liên kết với mã định danh ứng dụng ngẫu nhiên của điện thoại đó, nên việc bạn dùng bảng điều khiển và ứng dụng được tính là một người dùng dưới dạng bút danh cho đến khi bạn hủy liên kết trình duyệt. Bảng điều khiển tách riêng dữ liệu này khỏi phần còn lại của money2time.com, nên các lượt truy cập của bạn vào những trang khác không được liên kết với nó. Sự kiện của bảng điều khiển không bao giờ chứa dữ liệu tài chính của bạn, và các lượt truy cập bảng điều khiển không bao giờ được ghi lại dưới dạng bản phát lại phiên.",
-        "PostHog cũng có thể ghi lại một mẫu nhỏ các lượt truy cập trang web dưới dạng bản phát lại phiên với mọi ô biểu mẫu đều bị che, và nhận báo cáo khi một trang gặp lỗi.",
-        "Chúng tôi không gửi nội dung biểu mẫu liên hệ, văn bản tìm kiếm bài hướng dẫn, dữ liệu tài chính, địa chỉ email, toàn bộ chuỗi truy vấn URL hoặc dữ liệu dùng cho quảng cáo hay cá nhân hóa. Chuyển hướng /download không thêm địa chỉ IP hoặc chuỗi user-agent của bạn vào sự kiện phân tích. Phân tích trang web không tải khi cài đặt Do Not Track của trình duyệt được bật."
-      ]
+    "links": {
+      "userDataPolicy": "Google API Services User Data Policy",
+      "googlePermissions": "myaccount.google.com/permissions",
+      "dataDeletion": "trang xóa dữ liệu"
     },
     "sections": [
       {
@@ -446,7 +442,7 @@
           {
             "title": "Sổ và album chia sẻ",
             "paragraphs": [
-              "Nếu bạn tạo hoặc tham gia một sổ chia sẻ hoặc album chung, dữ liệu bạn thêm vào được lưu trên máy chủ của chúng tôi và mọi người trong đó đều nhìn thấy: tên thành viên, hóa đơn (tiêu đề, số tiền, ngày, tiền tệ, ai đã trả và cách chia), các khoản thanh toán, cài đặt, ảnh bìa và nhật ký hoạt động ghi lại ai đã thay đổi gì. Tài khoản, danh mục, ghi chú, ảnh hóa đơn và tâm trạng của riêng bạn đối với một hóa đơn không bao giờ được chia sẻ với nhóm. Tên hiển thị của bạn trong nhóm là tên bạn đặt, nếu không thì là tên đăng nhập của bạn. Chủ sở hữu sổ chia sẻ có thể thấy địa chỉ email của các thành viên. Bất kỳ ai có liên kết mời đều có thể thấy tên nhóm, tên chủ sở hữu và số lượng thành viên.",
+              "Nếu bạn tạo hoặc tham gia một sổ chia sẻ hoặc album chung, dữ liệu bạn thêm vào được lưu trên máy chủ của chúng tôi và mọi người trong đó đều nhìn thấy: tên thành viên, hóa đơn (tiêu đề, số tiền, ngày, tiền tệ, ai đã trả và cách chia), các khoản thanh toán, cài đặt, ảnh bìa và nhật ký hoạt động ghi lại ai đã thay đổi gì. Tài khoản, danh mục, ghi chú, ảnh hóa đơn và tâm trạng của riêng bạn đối với một hóa đơn không bao giờ được chia sẻ với nhóm. Tên hiển thị của bạn trong nhóm là tên bạn đặt, nếu không thì là tên đăng nhập của bạn; nếu không có cả hai, đó là địa chỉ email của bạn được ẩn một phần, chẳng hạn ne***@gmail.com. Chủ sở hữu sổ chia sẻ có thể thấy địa chỉ email của các thành viên. Bất kỳ ai có liên kết mời đều có thể thấy tên nhóm, tên hiển thị của chủ sở hữu và số lượng thành viên.",
               "Các hóa đơn và thay đổi bạn thêm vẫn ở lại với nhóm như một phần của hồ sơ chung, kể cả sau khi bạn rời nhóm."
             ]
           },
@@ -459,7 +455,7 @@
           {
             "title": "Thu nhập trực tiếp (iOS)",
             "paragraphs": [
-              "Nếu bạn bật thu nhập trực tiếp trên Màn hình khóa, Ứng dụng gửi mức lương theo giờ, ký hiệu tiền tệ, lịch ca làm, múi giờ, mã định danh ứng dụng ngẫu nhiên của bạn và mã thông báo đẩy Live Activity do Apple cung cấp đến máy chủ của chúng tôi; máy chủ cập nhật Live Activity thông qua Apple Push Notification service trong khi Live Activity đang chạy."
+              "Nếu bạn bật thu nhập trực tiếp trên Màn hình khóa, Ứng dụng gửi mức lương theo giờ, ký hiệu tiền tệ, lịch ca làm, múi giờ, mã định danh ứng dụng ngẫu nhiên của bạn và mã thông báo đẩy Live Activity do Apple cung cấp đến máy chủ của chúng tôi; máy chủ cập nhật Live Activity thông qua Apple Push Notification service trong khi Live Activity đang chạy. Dữ liệu của một Live Activity đang chạy sẽ bị xóa khi Live Activity kết thúc. Lịch tự động bắt đầu thu nhập trực tiếp sẽ bị xóa khi bạn tắt tự động bắt đầu hoặc xóa mức lương của mình, nếu không thì sau 45 ngày kể từ lần cuối Ứng dụng xác nhận lịch đó. Dữ liệu thu nhập trực tiếp không được liên kết với tài khoản."
             ]
           },
           {
@@ -482,6 +478,16 @@
                 "Nền tảng như iOS hoặc Android"
               ]
             ]
+          },
+          {
+            "title": "Phân tích việc sử dụng trang web",
+            "paragraphs": [
+              "Trên money2time.com, chúng tôi dùng PostHog và Google Analytics để đo lượt xem trang dưới dạng bút danh và một số tương tác giới hạn, chẳng hạn lượt nhấp tải ứng dụng, chọn bài hướng dẫn và kết quả của biểu mẫu liên hệ. Các dịch vụ này có thể dùng bộ nhớ trình duyệt hoặc cookie và xử lý thông tin kỹ thuật gồm khu vực gần đúng, loại thiết bị và trình duyệt, cùng trang giới thiệu. Dữ liệu người dùng và sự kiện trong Google Analytics được lưu giữ tối đa 14 tháng.",
+              "Trên Bảng điều khiển web (app.money2time.com), chính các dịch vụ này đo những trang bảng điều khiển bạn mở, thời điểm một trình duyệt được liên kết hoặc hủy liên kết, việc truyền dữ liệu từ điện thoại cũng như các thay đổi bạn thực hiện có thành công hay không, và thời điểm một tính năng Pro được giới thiệu. Sau khi điện thoại của bạn đã gửi dữ liệu, các sự kiện này được liên kết với mã định danh ứng dụng ngẫu nhiên của điện thoại đó, nên việc bạn dùng bảng điều khiển và ứng dụng được tính là một người dùng dưới dạng bút danh cho đến khi bạn hủy liên kết trình duyệt. Bảng điều khiển tách riêng dữ liệu này khỏi phần còn lại của money2time.com, nên các lượt truy cập của bạn vào những trang khác không được liên kết với nó. Sự kiện của bảng điều khiển không bao giờ chứa dữ liệu tài chính của bạn, và các lượt truy cập bảng điều khiển không bao giờ được ghi lại dưới dạng bản phát lại phiên.",
+              "Trên các album chia sẻ trên web (album.money2time.com), chính các dịch vụ này đo lượt xem trang, lượt đăng nhập và phương thức đăng nhập được dùng, việc tham gia album, các chỉnh sửa và việc mở album trong Ứng dụng. Các sự kiện này không bao giờ chứa tên, địa chỉ email của bạn hay nội dung trong album của bạn, và các lượt truy cập album không bao giờ được ghi lại dưới dạng bản phát lại phiên.",
+              "PostHog cũng có thể ghi lại một mẫu nhỏ các lượt truy cập trang web dưới dạng bản phát lại phiên với mọi ô biểu mẫu đều bị che, và nhận báo cáo khi một trang gặp lỗi.",
+              "Chúng tôi không gửi nội dung biểu mẫu liên hệ, văn bản tìm kiếm bài hướng dẫn, dữ liệu tài chính, địa chỉ email, toàn bộ chuỗi truy vấn URL hoặc dữ liệu dùng cho quảng cáo hay cá nhân hóa. Chuyển hướng /download không thêm địa chỉ IP hoặc chuỗi user-agent của bạn vào sự kiện phân tích. Phân tích trang web không tải khi cài đặt Do Not Track của trình duyệt được bật."
+            ]
           }
         ]
       },
@@ -489,7 +495,7 @@
         "title": "3. Dữ liệu người dùng Google",
         "paragraphs": [
           "Mục này giải thích cách Ứng dụng và các trang web của chúng tôi truy cập, sử dụng, lưu trữ và chia sẻ dữ liệu nhận được từ API của Google.",
-          "Việc Money2Time sử dụng và chuyển giao thông tin nhận được từ API của Google sang bất kỳ ứng dụng nào khác sẽ tuân thủ Google API Services User Data Policy (Chính sách dữ liệu người dùng của dịch vụ API của Google), bao gồm các yêu cầu Limited Use (Sử dụng giới hạn)."
+          "Việc Money2Time sử dụng và chuyển giao thông tin nhận được từ API của Google sang bất kỳ ứng dụng nào khác sẽ tuân thủ {userDataPolicy} (Chính sách dữ liệu người dùng của dịch vụ API của Google), bao gồm các yêu cầu Limited Use (Sử dụng giới hạn)."
         ],
         "subsections": [
           {
@@ -497,21 +503,21 @@
             "lists": [
               [
                 "Google Sign-In (trong Ứng dụng và trên album.money2time.com): ID tài khoản Google, địa chỉ email và trạng thái đã xác minh hay chưa, tên và địa chỉ ảnh hồ sơ của bạn, thông qua các phạm vi openid, email và profile.",
-                "Google Drive (chỉ khi bạn chọn Google Drive để sao lưu): quyền truy cập giới hạn ở phạm vi drive.file, cho phép Ứng dụng chỉ xem và quản lý các tệp sao lưu do chính Ứng dụng tạo. Ứng dụng không thể xem bất kỳ tệp nào khác trong Drive của bạn."
+                "Google Drive (chỉ khi bạn chọn Google Drive để sao lưu): việc kết nối Google Drive sẽ đăng nhập bạn vào Google trong Ứng dụng với cùng các phạm vi openid, email và profile, để Ứng dụng có thể cho biết bản sao lưu của bạn được lưu vào tài khoản Google nào, đồng thời thêm phạm vi drive.file, cho phép Ứng dụng chỉ xem và quản lý các tệp sao lưu do chính Ứng dụng tạo. Ứng dụng không thể xem bất kỳ tệp nào khác trong Drive của bạn. Dữ liệu hồ sơ này chỉ ở trên thiết bị của bạn, trừ khi bạn cũng dùng nó để đăng nhập vào tài khoản Money2Time."
               ]
             ]
           },
           {
             "title": "Cách chúng tôi sử dụng",
             "paragraphs": [
-              "Chúng tôi chỉ dùng dữ liệu hồ sơ Google của bạn để tạo và đăng nhập vào tài khoản Money2Time của bạn, để kết nối tài khoản đó với các phương thức đăng nhập khác có cùng địa chỉ email đã xác minh, và để hiển thị tên của bạn cho những người trong các sổ và album bạn chia sẻ. Chúng tôi chỉ dùng quyền truy cập Google Drive để lưu, liệt kê và khôi phục các tệp sao lưu Money2Time của bạn. Chúng tôi không dùng dữ liệu người dùng Google cho quảng cáo, không bán dữ liệu đó và không dùng dữ liệu đó để huấn luyện mô hình AI."
+              "Chúng tôi chỉ dùng dữ liệu hồ sơ Google của bạn để tạo và đăng nhập vào tài khoản Money2Time của bạn, để kết nối tài khoản đó với các phương thức đăng nhập khác có cùng địa chỉ email đã xác minh, để hiển thị tên của bạn cho những người trong các sổ và album bạn chia sẻ (và địa chỉ email của bạn cho chủ sở hữu của sổ chia sẻ mà bạn tham gia), và để cho biết bản sao lưu của bạn được lưu vào tài khoản Google nào. Chúng tôi chỉ dùng quyền truy cập Google Drive để lưu, liệt kê và khôi phục các tệp sao lưu Money2Time của bạn. Chúng tôi không dùng dữ liệu người dùng Google cho quảng cáo, không bán dữ liệu đó và không dùng dữ liệu đó để huấn luyện mô hình AI."
             ]
           },
           {
             "title": "Cách chúng tôi lưu trữ và chia sẻ",
             "paragraphs": [
-              "Dữ liệu hồ sơ Google của bạn được lưu trong cơ sở dữ liệu tài khoản của chúng tôi trên Cloudflare và được giữ cho đến khi bạn xóa tài khoản. Các bản sao lưu Drive của bạn được ghi trực tiếp từ điện thoại vào Google Drive của bạn; chúng không bao giờ đi qua hoặc được lưu trên máy chủ của chúng tôi, và bạn có thể xóa chúng trong Google Drive bất cứ lúc nào. Chúng tôi chỉ chia sẻ dữ liệu người dùng Google với các thành viên của những sổ và album bạn chọn chia sẻ (tên của bạn), và với các nhà cung cấp dịch vụ lưu trữ máy chủ của chúng tôi (Cloudflare và Turso) theo điều khoản xử lý dữ liệu của họ. Chúng tôi không bao giờ gửi dữ liệu này cho các nhà cung cấp dịch vụ phân tích hoặc nhà cung cấp AI của chúng tôi.",
-              "Bạn có thể thu hồi quyền truy cập của Money2Time vào Tài khoản Google của mình bất cứ lúc nào tại myaccount.google.com/permissions, và bạn có thể xóa tài khoản của mình trong Ứng dụng như mô tả ở mục 9."
+              "Dữ liệu hồ sơ Google của bạn được lưu trong cơ sở dữ liệu tài khoản của chúng tôi trên Cloudflare và được giữ cho đến khi bạn xóa tài khoản. Các bản sao lưu Drive của bạn được ghi trực tiếp từ điện thoại vào Google Drive của bạn; chúng không bao giờ đi qua hoặc được lưu trên máy chủ của chúng tôi, và bạn có thể xóa chúng trong Google Drive bất cứ lúc nào. Chúng tôi chỉ chia sẻ dữ liệu người dùng Google theo những cách sau: tên của bạn, hoặc địa chỉ email của bạn được ẩn một phần nếu bạn không có tên, với các thành viên của những sổ và album bạn tham gia và với bất kỳ ai có liên kết mời của chúng; địa chỉ email của bạn với chủ sở hữu của sổ chia sẻ mà bạn tham gia; và toàn bộ dữ liệu đó với các nhà cung cấp dịch vụ lưu trữ máy chủ của chúng tôi (Cloudflare và Turso), theo điều khoản xử lý dữ liệu của họ. Chúng tôi không bao giờ gửi dữ liệu này cho các nhà cung cấp dịch vụ phân tích hoặc nhà cung cấp AI của chúng tôi.",
+              "Bạn có thể thu hồi quyền truy cập của Money2Time vào Tài khoản Google của mình bất cứ lúc nào tại {googlePermissions}, và bạn có thể xóa tài khoản của mình trong Ứng dụng như mô tả ở mục 9."
             ]
           }
         ]
@@ -564,7 +570,7 @@
       {
         "title": "8. Lưu giữ dữ liệu",
         "paragraphs": [
-          "Dữ liệu trên thiết bị của bạn được giữ cho đến khi bạn xóa hoặc gỡ cài đặt Ứng dụng. Thông tin tài khoản, bản sao Cloud Sync và hình ảnh của bạn trên máy chủ của chúng tôi được giữ cho đến khi bạn xóa tài khoản. Dữ liệu sổ và album chia sẻ được giữ trong thời gian nhóm còn tồn tại. Phiên đăng nhập kéo dài tối đa một năm và được gia hạn khi bạn sử dụng. Chúng tôi không lưu nội dung hóa đơn và thông báo được gửi để xử lý bằng AI. Dữ liệu phân tích được giữ tối đa 14 tháng trong Google Analytics và theo cài đặt lưu giữ của chúng tôi trong PostHog. Thông tin kết nối như địa chỉ IP được lưu ngắn hạn trong nhật ký của các nhà cung cấp dịch vụ của chúng tôi."
+          "Dữ liệu trên thiết bị của bạn được giữ cho đến khi bạn xóa hoặc gỡ cài đặt Ứng dụng. Thông tin tài khoản, bản sao Cloud Sync và hình ảnh của bạn trên máy chủ của chúng tôi được giữ cho đến khi bạn xóa tài khoản. Dữ liệu sổ và album chia sẻ được giữ trong thời gian nhóm còn tồn tại. Dữ liệu thu nhập trực tiếp bị xóa khi bạn tắt tính năng này, và muộn nhất là 45 ngày sau lần cuối Ứng dụng xác nhận dữ liệu đó. Phiên đăng nhập kéo dài tối đa một năm và được gia hạn khi bạn sử dụng. Chúng tôi không lưu nội dung hóa đơn và thông báo được gửi để xử lý bằng AI. Dữ liệu phân tích được giữ tối đa 14 tháng trong Google Analytics và theo cài đặt lưu giữ của chúng tôi trong PostHog. Thông tin kết nối như địa chỉ IP được lưu ngắn hạn trong nhật ký của các nhà cung cấp dịch vụ của chúng tôi."
         ]
       },
       {
@@ -572,7 +578,7 @@
         "paragraphs": [
           "Bạn có toàn quyền kiểm soát dữ liệu của mình. \"Đặt lại dữ liệu\" trong Cài đặt xóa vĩnh viễn tài khoản, danh mục và giao dịch của bạn khỏi thiết bị, và khỏi bản sao Cloud Sync nếu Cloud Sync đang bật. Gỡ cài đặt Ứng dụng sẽ xóa cơ sở dữ liệu cục bộ khỏi thiết bị, nhưng không xóa bản sao lưu của bạn trong Google Drive hoặc iCloud, hay tài khoản của bạn.",
           "Để xóa tài khoản, hãy mở trang \"Tài khoản\" của Ứng dụng và chọn \"Xóa tài khoản\". Thao tác này xóa vĩnh viễn thông tin tài khoản, bản sao Cloud Sync, mọi hình ảnh bạn lưu trên hệ thống của chúng tôi, cùng các sổ và album chia sẻ mà bạn sở hữu, đồng thời thu hồi quyền đăng nhập bằng Apple của Ứng dụng. Hủy liên kết một trình duyệt khỏi Bảng điều khiển web sẽ xóa bản sao mà trình duyệt đó giữ: ngay lập tức nếu bạn hủy liên kết trong trình duyệt, và vào lần kết nối tiếp theo của trình duyệt nếu bạn hủy liên kết từ Ứng dụng.",
-          "Việc xóa dữ liệu không xóa hồ sơ đăng ký do Apple hoặc Google nắm giữ, hoặc dữ liệu phân tích đã gửi trước đó tới PostHog và Google Analytics for Firebase. Để yêu cầu xóa dữ liệu phân tích, hãy liên hệ với chúng tôi qua email bên dưới. Trang xóa dữ liệu của chúng tôi có đầy đủ các bước."
+          "Việc xóa dữ liệu không xóa hồ sơ đăng ký do Apple hoặc Google nắm giữ, hoặc dữ liệu phân tích đã gửi trước đó tới PostHog và Google Analytics for Firebase. Để yêu cầu xóa dữ liệu phân tích, hãy liên hệ với chúng tôi qua email bên dưới. Bạn có thể xem đầy đủ các bước trên {dataDeletion} của chúng tôi."
         ]
       },
       {
@@ -664,7 +670,7 @@
   },
   "terms": {
     "title": "Điều khoản sử dụng",
-    "lastUpdated": "Cập nhật lần cuối: ngày 25 tháng 3 năm 2026",
+    "lastUpdated": "Cập nhật lần cuối: ngày 15 tháng 11 năm 2026",
     "privacyPolicyLabel": "Chính sách quyền riêng tư",
     "sections": [
       {
@@ -735,7 +741,7 @@
       {
         "title": "5. Dữ liệu của bạn",
         "paragraphs": [
-          "Tất cả dữ liệu tài chính bạn nhập, bao gồm giao dịch, tài khoản, danh mục, cài đặt lương và tùy chọn, được lưu trữ cục bộ trên thiết bị của bạn. Chúng tôi không có quyền truy cập vào dữ liệu tài chính của bạn và không lưu trữ dữ liệu đó trên bất kỳ máy chủ nào.",
+          "Tất cả dữ liệu tài chính bạn nhập, bao gồm giao dịch, tài khoản, danh mục, cài đặt lương và tùy chọn, được lưu trữ cục bộ trên thiết bị của bạn. Nếu bạn dùng các tính năng tùy chọn như Cloud Sync, sổ và album chia sẻ hoặc quét hóa đơn, dữ liệu mà các tính năng đó cần sẽ được gửi đến máy chủ của chúng tôi như mô tả trong Chính sách quyền riêng tư.",
           "Bạn hoàn toàn chịu trách nhiệm duy trì bản sao lưu dữ liệu của mình. Hãy dùng tính năng xuất tích hợp để tạo bản sao lưu. Chúng tôi không chịu trách nhiệm đối với bất kỳ mất mát dữ liệu nào do xóa ứng dụng, thiết bị hỏng hoặc đặt lại ngoài ý muốn.",
           "Để biết đầy đủ chi tiết về cách xử lý dữ liệu, hãy xem {privacyPolicy} của chúng tôi."
         ]
@@ -780,7 +786,7 @@
       {
         "title": "10. Chấm dứt",
         "paragraphs": [
-          "Chúng tôi có thể đình chỉ hoặc chấm dứt quyền truy cập của bạn vào Ứng dụng bất cứ lúc nào, có hoặc không có lý do, và có hoặc không có thông báo. Khi chấm dứt, quyền sử dụng Ứng dụng của bạn sẽ dừng ngay lập tức. Vì dữ liệu của bạn được lưu trữ cục bộ, dữ liệu sẽ vẫn ở trên thiết bị của bạn cho đến khi bạn gỡ cài đặt Ứng dụng hoặc tự đặt lại dữ liệu.",
+          "Chúng tôi có thể đình chỉ hoặc chấm dứt quyền truy cập của bạn vào Ứng dụng bất cứ lúc nào, có hoặc không có lý do, và có hoặc không có thông báo. Khi chấm dứt, quyền sử dụng Ứng dụng của bạn sẽ dừng ngay lập tức. Dữ liệu trên thiết bị của bạn vẫn ở đó cho đến khi bạn gỡ cài đặt Ứng dụng hoặc tự đặt lại dữ liệu, và bạn có thể xóa tài khoản cùng dữ liệu trên máy chủ của chúng tôi như mô tả trong Chính sách quyền riêng tư.",
           "Bạn có thể ngừng sử dụng Ứng dụng bất cứ lúc nào bằng cách gỡ cài đặt."
         ]
       },
@@ -805,7 +811,10 @@
   "dataDeletion": {
     "title": "Yêu cầu xóa dữ liệu",
     "lastUpdated": "Cập nhật lần cuối: ngày 15 tháng 11 năm 2026",
-    "intro": "Money2Time là ứng dụng local-first: dữ liệu tài chính của bạn được lưu trên thiết bị của bạn, và chỉ được lưu trên máy chủ của chúng tôi nếu bạn đăng nhập và dùng Cloud Sync hoặc sổ và album chia sẻ. Trang này giải thích cách xóa dữ liệu liên quan đến ứng dụng Money2Time, những loại dữ liệu nào bị xóa hoặc được giữ lại, cùng với mọi thời gian lưu giữ.",
+    "intro": "Money2Time là ứng dụng local-first: dữ liệu tài chính của bạn được lưu trên thiết bị của bạn, và chỉ được lưu trên máy chủ của chúng tôi nếu bạn đăng nhập và dùng Cloud Sync hoặc sổ và album chia sẻ. Nếu bạn bật thu nhập trực tiếp trên iOS, mức lương theo giờ và lịch ca làm của bạn cũng được lưu trên máy chủ của chúng tôi trong khi tính năng này đang chạy. Trang này giải thích cách xóa dữ liệu liên quan đến ứng dụng Money2Time, những loại dữ liệu nào bị xóa hoặc được giữ lại, cùng với mọi thời gian lưu giữ.",
+    "links": {
+      "googlePermissions": "myaccount.google.com/permissions"
+    },
     "sections": [
       {
         "title": "Cách yêu cầu xóa dữ liệu",
@@ -839,7 +848,7 @@
           {
             "title": "Xóa bản sao lưu của bạn",
             "paragraphs": [
-              "Các bản sao lưu bạn tạo trên Google Drive hoặc iCloud được lưu trong tài khoản của chính bạn, không phải trên máy chủ của chúng tôi. Hãy xóa chúng trong Google Drive (thư mục Money2Time) hoặc trong cài đặt bộ nhớ iCloud của bạn. Bạn cũng có thể thu hồi quyền truy cập của Money2Time vào Tài khoản Google của mình tại myaccount.google.com/permissions."
+              "Các bản sao lưu bạn tạo trên Google Drive hoặc iCloud được lưu trong tài khoản của chính bạn, không phải trên máy chủ của chúng tôi. Hãy xóa chúng trong Google Drive (thư mục Money2Time) hoặc trong cài đặt bộ nhớ iCloud của bạn. Bạn cũng có thể thu hồi quyền truy cập của Money2Time vào Tài khoản Google của mình tại {googlePermissions}."
             ]
           },
           {
@@ -921,6 +930,11 @@
               "Ảnh hóa đơn và nội dung thông báo được gửi để quét",
               "Không lưu trữ",
               "Được xử lý để trả về kết quả và không được chúng tôi lưu trữ. Chỉ số lần sử dụng được giữ lại để áp dụng giới hạn của gói."
+            ],
+            [
+              "Dữ liệu thu nhập trực tiếp trên iOS (mức lương theo giờ, lịch ca làm, múi giờ, mã thông báo đẩy Live Activity)",
+              "Đã xóa",
+              "Bị xóa khi một Live Activity kết thúc, hoặc khi bạn tắt tự động bắt đầu hay xóa mức lương của mình, nếu không thì sau 45 ngày kể từ lần cuối Ứng dụng xác nhận dữ liệu đó."
             ],
             [
               "Dữ liệu phân tích bằng mã giả (PostHog / Google Analytics for Firebase)",

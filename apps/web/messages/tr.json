@@ -387,14 +387,10 @@
   "privacy": {
     "title": "Gizlilik Politikası",
     "lastUpdated": "Son güncelleme: 15 Kasım 2026",
-    "websiteAnalytics": {
-      "title": "Web Sitesi Kullanım Analizi",
-      "paragraphs": [
-        "money2time.com'da, takma adlı sayfa görüntülemelerini ve uygulama indirme tıklamaları, eğitim seçimi ve iletişim formu sonuçları gibi sınırlı sayıdaki etkileşimi ölçmek için PostHog ve Google Analytics kullanırız. Bu hizmetler tarayıcı depolamasını veya çerezleri kullanabilir ve yaklaşık bölge, cihaz ve tarayıcı türü ile yönlendiren site gibi teknik bilgileri işleyebilir. Google Analytics kullanıcı ve etkinlik verileri en fazla 14 ay saklanır.",
-        "Web Gösterge Paneli'nde (app.money2time.com) aynı hizmetler hangi pano sayfalarını açtığınızı, bir tarayıcının ne zaman bağlandığını veya bağlantısının kaldırıldığını, telefonunuzdan yapılan aktarımlar ile yaptığınız değişikliklerin başarılı olup olmadığını ve bir Pro özelliğinin ne zaman sunulduğunu ölçer. Telefonunuz verilerini gönderdikten sonra bu etkinlikler o telefonun rastgele uygulama tanımlayıcısıyla ilişkilendirilir; böylece pano ve uygulama kullanımınız, tarayıcının bağlantısını kaldırana kadar tek bir takma adlı kullanıcı olarak sayılır. Pano bunu money2time.com'un geri kalanından ayrı tutar; bu nedenle diğer sayfalara yaptığınız ziyaretler onunla ilişkilendirilmez. Pano etkinlikleri finansal verilerinizi asla içermez ve pano ziyaretleri asla oturum tekrarı olarak kaydedilmez.",
-        "PostHog ayrıca web sitesi ziyaretlerinin küçük bir örneğini her form alanı gizlenmiş oturum tekrarları olarak kaydedebilir ve bir sayfada hata oluştuğunda rapor alır.",
-        "İletişim formu içeriğini, eğitim arama metnini, finansal verileri, e-posta adreslerini, tam URL sorgu dizelerini veya reklam ya da kişiselleştirme amaçlı verileri göndermeyiz. /download yönlendirmesi IP adresinizi veya user-agent dizenizi analiz etkinliğine eklemez. Tarayıcınızın Do Not Track ayarı etkin olduğunda web sitesi analizi yüklenmez."
-      ]
+    "links": {
+      "userDataPolicy": "Google API Services User Data Policy",
+      "googlePermissions": "myaccount.google.com/permissions",
+      "dataDeletion": "veri silme sayfamızda"
     },
     "sections": [
       {
@@ -446,7 +442,7 @@
           {
             "title": "Paylaşılan Defterler ve Albümler",
             "paragraphs": [
-              "Paylaşılan bir defter veya paylaşılan bir albüm oluşturur ya da bunlara katılırsanız, eklediğiniz veriler sunucularımızda saklanır ve içindeki herkes tarafından görülebilir: üye adları, faturalar (başlık, tutar, tarih, para birimi, kimin ödediği ve nasıl bölündüğü), ödemeler, ayarlar, kapak fotoğrafı ve kimin neyi değiştirdiğini gösteren bir etkinlik kaydı. Bir faturaya ait kendi hesabınız, kategoriniz, notunuz, fiş fotoğrafınız ve ruh haliniz grupla asla paylaşılmaz. Bir gruptaki görünen adınız, belirlediğiniz addır; belirlemediyseniz giriş adınızdır. Paylaşılan bir defterin sahibi üyelerin e-posta adreslerini görebilir. Davet bağlantısına sahip herkes grubun adını, sahibinin adını ve kaç üyesi olduğunu görebilir.",
+              "Paylaşılan bir defter veya paylaşılan bir albüm oluşturur ya da bunlara katılırsanız, eklediğiniz veriler sunucularımızda saklanır ve içindeki herkes tarafından görülebilir: üye adları, faturalar (başlık, tutar, tarih, para birimi, kimin ödediği ve nasıl bölündüğü), ödemeler, ayarlar, kapak fotoğrafı ve kimin neyi değiştirdiğini gösteren bir etkinlik kaydı. Bir faturaya ait kendi hesabınız, kategoriniz, notunuz, fiş fotoğrafınız ve ruh haliniz grupla asla paylaşılmaz. Bir gruptaki görünen adınız, belirlediğiniz addır; belirlemediyseniz giriş adınızdır; ikisi de yoksa e-posta adresinizin ne***@gmail.com gibi kısmen gizlenmiş bir biçimidir. Paylaşılan bir defterin sahibi üyelerin e-posta adreslerini görebilir. Davet bağlantısına sahip herkes grubun adını, sahibinin görünen adını ve kaç üyesi olduğunu görebilir.",
               "Eklediğiniz faturalar ve değişiklikler, siz ayrıldıktan sonra da dahil olmak üzere grubun paylaşılan kaydının bir parçası olarak grupta kalır."
             ]
           },
@@ -459,7 +455,7 @@
           {
             "title": "Canlı Kazanç (iOS)",
             "paragraphs": [
-              "Kilit Ekranında canlı kazancı açarsanız Uygulama; saatlik ücretinizi, para birimi simgenizi, vardiya programınızı, saat diliminizi, rastgele uygulama tanımlayıcınızı ve Apple'ın sağladığı Live Activity anlık bildirim belirtecini sunucumuza gönderir; sunucumuz Live Activity çalıştığı sürece onu Apple Push Notification service aracılığıyla günceller."
+              "Kilit Ekranında canlı kazancı açarsanız Uygulama; saatlik ücretinizi, para birimi simgenizi, vardiya programınızı, saat diliminizi, rastgele uygulama tanımlayıcınızı ve Apple'ın sağladığı Live Activity anlık bildirim belirtecini sunucumuza gönderir; sunucumuz Live Activity çalıştığı sürece onu Apple Push Notification service aracılığıyla günceller. Çalışan bir Live Activity'nin verileri, Live Activity sona erdiğinde silinir. Canlı kazancı otomatik olarak başlatmaya yönelik bir program, otomatik başlatmayı kapattığınızda veya ücretinizi temizlediğinizde, aksi takdirde Uygulamanın onu son kez onaylamasından 45 gün sonra silinir. Canlı kazanç verileri bir hesapla ilişkilendirilmez."
             ]
           },
           {
@@ -482,6 +478,16 @@
                 "iOS veya Android gibi platform"
               ]
             ]
+          },
+          {
+            "title": "Web Sitesi Kullanım Analizi",
+            "paragraphs": [
+              "money2time.com'da, takma adlı sayfa görüntülemelerini ve uygulama indirme tıklamaları, eğitim seçimi ve iletişim formu sonuçları gibi sınırlı sayıdaki etkileşimi ölçmek için PostHog ve Google Analytics kullanırız. Bu hizmetler tarayıcı depolamasını veya çerezleri kullanabilir ve yaklaşık bölge, cihaz ve tarayıcı türü ile yönlendiren site gibi teknik bilgileri işleyebilir. Google Analytics kullanıcı ve etkinlik verileri en fazla 14 ay saklanır.",
+              "Web Gösterge Paneli'nde (app.money2time.com) aynı hizmetler hangi pano sayfalarını açtığınızı, bir tarayıcının ne zaman bağlandığını veya bağlantısının kaldırıldığını, telefonunuzdan yapılan aktarımlar ile yaptığınız değişikliklerin başarılı olup olmadığını ve bir Pro özelliğinin ne zaman sunulduğunu ölçer. Telefonunuz verilerini gönderdikten sonra bu etkinlikler o telefonun rastgele uygulama tanımlayıcısıyla ilişkilendirilir; böylece pano ve uygulama kullanımınız, tarayıcının bağlantısını kaldırana kadar tek bir takma adlı kullanıcı olarak sayılır. Pano bunu money2time.com'un geri kalanından ayrı tutar; bu nedenle diğer sayfalara yaptığınız ziyaretler onunla ilişkilendirilmez. Pano etkinlikleri finansal verilerinizi asla içermez ve pano ziyaretleri asla oturum tekrarı olarak kaydedilmez.",
+              "Web'deki paylaşılan albümlerde (album.money2time.com) aynı hizmetler sayfa görüntülemelerini, girişleri ve kullanılan giriş yöntemini, bir albüme katılmayı, düzenlemeleri ve bir albümün Uygulamada açılmasını ölçer. Bu etkinlikler adınızı, e-posta adresinizi veya albümlerinizin içeriğini asla içermez ve albüm ziyaretleri asla oturum tekrarı olarak kaydedilmez.",
+              "PostHog ayrıca web sitesi ziyaretlerinin küçük bir örneğini her form alanı gizlenmiş oturum tekrarları olarak kaydedebilir ve bir sayfada hata oluştuğunda rapor alır.",
+              "İletişim formu içeriğini, eğitim arama metnini, finansal verileri, e-posta adreslerini, tam URL sorgu dizelerini veya reklam ya da kişiselleştirme amaçlı verileri göndermeyiz. /download yönlendirmesi IP adresinizi veya user-agent dizenizi analiz etkinliğine eklemez. Tarayıcınızın Do Not Track ayarı etkin olduğunda web sitesi analizi yüklenmez."
+            ]
           }
         ]
       },
@@ -489,7 +495,7 @@
         "title": "3. Google Kullanıcı Verileri",
         "paragraphs": [
           "Bu bölüm, Uygulamanın ve web sitelerimizin Google API'lerinden alınan verilere nasıl eriştiğini, bunları nasıl kullandığını, sakladığını ve paylaştığını açıklar.",
-          "Money2Time'ın Google API'lerinden alınan bilgileri kullanması ve başka herhangi bir uygulamaya aktarması, Limited Use (Sınırlı Kullanım) gereklilikleri dahil olmak üzere Google API Services User Data Policy'ye (Google API Hizmetleri Kullanıcı Verileri Politikası) uygun olacaktır."
+          "Money2Time'ın Google API'lerinden alınan bilgileri kullanması ve başka herhangi bir uygulamaya aktarması, Limited Use (Sınırlı Kullanım) gereklilikleri dahil olmak üzere {userDataPolicy} (Google API Hizmetleri Kullanıcı Verileri Politikası) ile uyumlu olacaktır."
         ],
         "subsections": [
           {
@@ -497,21 +503,21 @@
             "lists": [
               [
                 "Google ile Giriş (Uygulamada ve album.money2time.com'da): openid, email ve profile kapsamları aracılığıyla Google hesap kimliğiniz, e-posta adresiniz ve doğrulanıp doğrulanmadığı, adınız ve profil fotoğrafı adresiniz.",
-                "Google Drive (yalnızca yedekler için Google Drive'ı seçerseniz): erişim, Uygulamanın yalnızca kendi oluşturduğu yedek dosyalarını görmesine ve yönetmesine izin veren drive.file kapsamıyla sınırlıdır. Uygulama, Drive'ınızdaki başka hiçbir dosyayı göremez."
+                "Google Drive (yalnızca yedekler için Google Drive'ı seçerseniz): Google Drive'ı bağladığınızda, Uygulamanın yedeklerinizin hangi Google hesabına gittiğini gösterebilmesi için Uygulamada aynı openid, email ve profile kapsamlarıyla Google'a giriş yaparsınız; ayrıca Uygulamanın yalnızca kendi oluşturduğu yedek dosyalarını görmesine ve yönetmesine izin veren drive.file kapsamı eklenir. Uygulama, Drive'ınızdaki başka hiçbir dosyayı göremez. Bu profil verileri, bunları bir Money2Time hesabına giriş yapmak için de kullanmadığınız sürece cihazınızda kalır."
               ]
             ]
           },
           {
             "title": "Nasıl Kullanırız",
             "paragraphs": [
-              "Google profil verilerinizi yalnızca Money2Time hesabınızı oluşturmak ve hesabınıza giriş yapmak, hesabınızı aynı doğrulanmış e-posta adresine sahip diğer giriş yöntemlerine bağlamak ve adınızı paylaştığınız defterlerdeki ve albümlerdeki kişilere göstermek için kullanırız. Google Drive erişimini yalnızca Money2Time yedek dosyalarınızı kaydetmek, listelemek ve geri yüklemek için kullanırız. Google kullanıcı verilerini reklam için kullanmayız, satmayız ve yapay zekâ modellerini eğitmek için kullanmayız."
+              "Google profil verilerinizi yalnızca Money2Time hesabınızı oluşturmak ve hesabınıza giriş yapmak, hesabınızı aynı doğrulanmış e-posta adresine sahip diğer giriş yöntemlerine bağlamak, adınızı paylaştığınız defterlerdeki ve albümlerdeki kişilere (ve e-posta adresinizi katıldığınız paylaşılan bir defterin sahibine) göstermek ve yedeklerinizin hangi Google hesabına gittiğini göstermek için kullanırız. Google Drive erişimini yalnızca Money2Time yedek dosyalarınızı kaydetmek, listelemek ve geri yüklemek için kullanırız. Google kullanıcı verilerini reklam için kullanmayız, satmayız ve yapay zekâ modellerini eğitmek için kullanmayız."
             ]
           },
           {
             "title": "Nasıl Saklar ve Paylaşırız",
             "paragraphs": [
-              "Google profil verileriniz, Cloudflare üzerindeki hesap veritabanımızda saklanır ve hesabınızı silene kadar tutulur. Drive yedekleriniz doğrudan telefonunuzdan Google Drive'ınıza yazılır; hiçbir zaman sunucularımızdan geçmez veya sunucularımızda saklanmaz ve bunları istediğiniz zaman Google Drive'da silebilirsiniz. Google kullanıcı verilerini yalnızca paylaşmayı seçtiğiniz defterlerin ve albümlerin üyeleriyle (adınız) ve sunucularımızı barındıran hizmet sağlayıcılarla (Cloudflare ve Turso) onların veri işleme koşulları kapsamında paylaşırız. Bunları asla analiz sağlayıcılarımıza veya yapay zekâ sağlayıcılarımıza göndermeyiz.",
-              "Money2Time'ın Google Hesabınıza erişimini istediğiniz zaman myaccount.google.com/permissions adresinden kaldırabilir ve hesabınızı 9. bölümde açıklandığı şekilde Uygulamada silebilirsiniz."
+              "Google profil verileriniz, Cloudflare üzerindeki hesap veritabanımızda saklanır ve hesabınızı silene kadar tutulur. Drive yedekleriniz doğrudan telefonunuzdan Google Drive'ınıza yazılır; hiçbir zaman sunucularımızdan geçmez veya sunucularımızda saklanmaz ve bunları istediğiniz zaman Google Drive'da silebilirsiniz. Google kullanıcı verilerini yalnızca şu şekillerde paylaşırız: adınızı veya adınız yoksa e-posta adresinizin kısmen gizlenmiş bir biçimini, katıldığınız defterlerin ve albümlerin üyeleriyle ve bunların davet bağlantılarına sahip herkesle; e-posta adresinizi, katıldığınız paylaşılan bir defterin sahibiyle; ve bu verilerin tamamını, sunucularımızı barındıran hizmet sağlayıcılarla (Cloudflare ve Turso) onların veri işleme koşulları kapsamında. Bunları asla analiz sağlayıcılarımıza veya yapay zekâ sağlayıcılarımıza göndermeyiz.",
+              "Money2Time'ın Google Hesabınıza erişimini istediğiniz zaman {googlePermissions} adresinden kaldırabilir ve hesabınızı 9. bölümde açıklandığı şekilde Uygulamada silebilirsiniz."
             ]
           }
         ]
@@ -564,7 +570,7 @@
       {
         "title": "8. Veri Saklama",
         "paragraphs": [
-          "Cihazınızdaki veriler, siz silene veya Uygulamayı kaldırana kadar kalır. Hesap bilgileri, Cloud Sync kopyanız ve sunucularımızdaki görselleriniz, hesabınızı silene kadar saklanır. Paylaşılan defter ve albüm verileri, grup var olduğu sürece saklanır. Giriş oturumları en fazla bir yıl sürer ve siz kullandıkça yenilenir. Yapay zekâ ile işlenmek üzere gönderilen fiş ve bildirim metinleri tarafımızdan saklanmaz. Analiz verileri Google Analytics'te en fazla 14 ay ve PostHog'da saklama ayarlarımıza göre tutulur. IP adresleri gibi bağlantı ayrıntıları, hizmet sağlayıcılarımızın günlüklerinde kısa süre tutulur."
+          "Cihazınızdaki veriler, siz silene veya Uygulamayı kaldırana kadar kalır. Hesap bilgileri, Cloud Sync kopyanız ve sunucularımızdaki görselleriniz, hesabınızı silene kadar saklanır. Paylaşılan defter ve albüm verileri, grup var olduğu sürece saklanır. Canlı kazanç verileri, bu özelliği kapattığınızda ve en geç Uygulamanın bunları son kez onaylamasından 45 gün sonra silinir. Giriş oturumları en fazla bir yıl sürer ve siz kullandıkça yenilenir. Yapay zekâ ile işlenmek üzere gönderilen fiş ve bildirim metinleri tarafımızdan saklanmaz. Analiz verileri Google Analytics'te en fazla 14 ay ve PostHog'da saklama ayarlarımıza göre tutulur. IP adresleri gibi bağlantı ayrıntıları, hizmet sağlayıcılarımızın günlüklerinde kısa süre tutulur."
         ]
       },
       {
@@ -572,7 +578,7 @@
         "paragraphs": [
           "Verileriniz üzerinde tam kontrole sahipsiniz. Ayarlar'daki Verileri Sıfırla; hesaplarınızı, kategorilerinizi ve işlemlerinizi cihazınızdan ve Cloud Sync açıksa Cloud Sync kopyanızdan kalıcı olarak siler. Uygulamayı kaldırmak yerel veritabanını cihazınızdan kaldırır, ancak Google Drive veya iCloud'daki yedeklerinizi ya da hesabınızı silmez.",
           "Hesabınızı silmek için Uygulamanın Hesap sayfasını açın ve Hesabı sil'i seçin. Bu işlem hesap bilgilerinizi, Cloud Sync kopyanızı, bizde sakladığınız her görseli ve sahibi olduğunuz paylaşılan defterleri ve albümleri kalıcı olarak siler ve Uygulamanın Apple ile giriş yetkisini iptal eder. Bir tarayıcının Web Gösterge Paneli bağlantısını kaldırmak, onun tuttuğu kopyayı siler: bağlantıyı tarayıcıda kaldırırsanız hemen, Uygulamadan kaldırırsanız tarayıcı bir sonraki bağlandığında.",
-          "Verilerinizi silmek, Apple veya Google tarafından tutulan abonelik kayıtlarınızı ya da daha önce PostHog ve Google Analytics for Firebase'e gönderilmiş analitik verileri silmez. Analitik verilerin silinmesini talep etmek için aşağıdaki e-posta adresinden bizimle iletişime geçin. Veri silme sayfamızda tüm adımlar yer alır."
+          "Verilerinizi silmek, Apple veya Google tarafından tutulan abonelik kayıtlarınızı ya da daha önce PostHog ve Google Analytics for Firebase'e gönderilmiş analitik verileri silmez. Analitik verilerin silinmesini talep etmek için aşağıdaki e-posta adresinden bizimle iletişime geçin. Tüm adımlar {dataDeletion} yer alır."
         ]
       },
       {
@@ -664,7 +670,7 @@
   },
   "terms": {
     "title": "Kullanım Şartları",
-    "lastUpdated": "Son güncelleme: 25 Mart 2026",
+    "lastUpdated": "Son güncelleme: 15 Kasım 2026",
     "privacyPolicyLabel": "Gizlilik Politikası",
     "sections": [
       {
@@ -735,7 +741,7 @@
       {
         "title": "5. Verileriniz",
         "paragraphs": [
-          "İşlemler, hesaplar, kategoriler, ücret ayarları ve tercihler dahil girdiğiniz tüm finansal veriler cihazınızda yerel olarak saklanır. Finansal verilerinize erişimimiz yoktur ve bunları herhangi bir sunucuda saklamayız.",
+          "İşlemler, hesaplar, kategoriler, ücret ayarları ve tercihler dahil girdiğiniz tüm finansal veriler cihazınızda yerel olarak saklanır. Cloud Sync, paylaşılan defterler ve albümler veya fiş tarama gibi isteğe bağlı özellikleri kullanırsanız, bu özelliklerin ihtiyaç duyduğu veriler Gizlilik Politikası'nda açıklandığı şekilde sunucularımıza gönderilir.",
           "Verilerinizin yedeklerini tutmaktan yalnızca siz sorumlusunuz. Yedek oluşturmak için yerleşik dışa aktarma özelliğini kullanın. Uygulamanın silinmesi, cihaz arızası veya yanlışlıkla sıfırlama sonucu oluşabilecek veri kayıplarından sorumlu değiliz.",
           "Verilerin işlenmesine ilişkin tüm ayrıntılar için {privacyPolicy} bölümümüze bakın."
         ]
@@ -780,7 +786,7 @@
       {
         "title": "10. Fesih",
         "paragraphs": [
-          "Uygulamaya erişiminizi herhangi bir zamanda, gerekçeli veya gerekçesiz ve bildirimli veya bildirimsiz olarak askıya alabilir veya sonlandırabiliriz. Fesih üzerine Uygulamayı kullanma hakkınız derhal sona erer. Verileriniz yerel olarak saklandığından, Uygulamayı kaldırana veya manuel olarak sıfırlayana kadar cihazınızda kalır.",
+          "Uygulamaya erişiminizi herhangi bir zamanda, gerekçeli veya gerekçesiz ve bildirimli veya bildirimsiz olarak askıya alabilir veya sonlandırabiliriz. Fesih üzerine Uygulamayı kullanma hakkınız derhal sona erer. Cihazınızdaki veriler, Uygulamayı kaldırana veya manuel olarak sıfırlayana kadar orada kalır; hesabınızı ve sunucularımızdaki verileri de Gizlilik Politikası'nda açıklandığı şekilde silebilirsiniz.",
           "Uygulamayı kaldırarak kullanmayı istediğiniz zaman bırakabilirsiniz."
         ]
       },
@@ -805,7 +811,10 @@
   "dataDeletion": {
     "title": "Veri Silme Talebi",
     "lastUpdated": "Son güncelleme: 15 Kasım 2026",
-    "intro": "Money2Time yerel öncelikli (local-first) bir uygulamadır: finansal verileriniz cihazınızda saklanır ve yalnızca giriş yapıp Cloud Sync'i veya paylaşılan defterleri ve albümleri kullanırsanız sunucularımızda saklanır. Bu sayfa, Money2Time uygulamasıyla ilişkili verileri nasıl sileceğinizi, hangi tür verilerin silindiğini veya saklandığını ve saklama sürelerini açıklar.",
+    "intro": "Money2Time yerel öncelikli (local-first) bir uygulamadır: finansal verileriniz cihazınızda saklanır ve yalnızca giriş yapıp Cloud Sync'i veya paylaşılan defterleri ve albümleri kullanırsanız sunucularımızda saklanır. iOS'ta canlı kazancı açarsanız, saatlik ücretiniz ve vardiya programınız da bu özellik çalıştığı sürece sunucularımızda tutulur. Bu sayfa, Money2Time uygulamasıyla ilişkili verileri nasıl sileceğinizi, hangi tür verilerin silindiğini veya saklandığını ve saklama sürelerini açıklar.",
+    "links": {
+      "googlePermissions": "myaccount.google.com/permissions"
+    },
     "sections": [
       {
         "title": "Veri Silme Nasıl Talep Edilir",
@@ -839,7 +848,7 @@
           {
             "title": "Yedeklerinizi silin",
             "paragraphs": [
-              "Google Drive'a veya iCloud'a aldığınız yedekler sunucularımızda değil, kendi hesabınızda saklanır. Bunları Google Drive'da (Money2Time klasörü) veya iCloud depolama ayarlarınızda silin. Ayrıca Money2Time'ın Google Hesabınıza erişimini myaccount.google.com/permissions adresinden kaldırabilirsiniz."
+              "Google Drive'a veya iCloud'a aldığınız yedekler sunucularımızda değil, kendi hesabınızda saklanır. Bunları Google Drive'da (Money2Time klasörü) veya iCloud depolama ayarlarınızda silin. Ayrıca Money2Time'ın Google Hesabınıza erişimini {googlePermissions} adresinden kaldırabilirsiniz."
             ]
           },
           {
@@ -921,6 +930,11 @@
               "Tarama için gönderilen fiş görselleri ve bildirim metinleri",
               "Saklanmaz",
               "Bir sonuç döndürmek için işlenir ve tarafımızdan saklanmaz. Plan sınırları için yalnızca kullanım sayıları tutulur."
+            ],
+            [
+              "iOS'taki canlı kazanç verileri (saatlik ücret, vardiya programı, saat dilimi, Live Activity anlık bildirim belirteci)",
+              "Silindi",
+              "Bir Live Activity sona erdiğinde veya otomatik başlatmayı kapattığınızda ya da ücretinizi temizlediğinizde, aksi takdirde Uygulamanın bunları son kez onaylamasından 45 gün sonra kaldırılır."
             ],
             [
               "Takma adlı analiz verileri (PostHog ve Google Analytics for Firebase)",

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { LegalText } from "@/components/legal-text";
 import { Footer, Header } from "@/components/site-chrome";
 import { Link } from "@/i18n/navigation";
 import { isLocale } from "@/i18n/routing";
@@ -68,6 +69,7 @@ export default async function DataDeletion({
   setRequestLocale(locale);
   const t = await getTranslations("dataDeletion");
   const sections = t.raw("sections") as DeletionSection[];
+  const links = t.raw("links") as Record<string, string>;
 
   return (
     <>
@@ -85,7 +87,7 @@ export default async function DataDeletion({
           <p>{t("intro")}</p>
 
           {sections.map((section) => (
-            <Section key={section.title} section={section} />
+            <Section key={section.title} section={section} links={links} />
           ))}
 
           <section>
@@ -122,7 +124,13 @@ export default async function DataDeletion({
   );
 }
 
-function Section({ section }: { section: DeletionSection }) {
+function Section({
+  section,
+  links,
+}: {
+  section: DeletionSection;
+  links: Record<string, string>;
+}) {
   return (
     <section>
       <h2 className="text-xl font-bold text-foreground mb-3">
@@ -130,7 +138,9 @@ function Section({ section }: { section: DeletionSection }) {
       </h2>
       <div className="space-y-3">
         {section.paragraphs?.map((paragraph) => (
-          <p key={paragraph}>{paragraph}</p>
+          <p key={paragraph}>
+            <LegalText text={paragraph} labels={links} />
+          </p>
         ))}
         {section.lists?.map((items) => (
           <ol
@@ -139,7 +149,7 @@ function Section({ section }: { section: DeletionSection }) {
           >
             {items.map((item) => (
               <li key={item} className="pl-1">
-                {item}
+                <LegalText text={item} labels={links} />
               </li>
             ))}
           </ol>
@@ -151,7 +161,9 @@ function Section({ section }: { section: DeletionSection }) {
             </h3>
             <div className="space-y-2">
               {subsection.paragraphs?.map((paragraph) => (
-                <p key={paragraph}>{paragraph}</p>
+                <p key={paragraph}>
+                  <LegalText text={paragraph} labels={links} />
+                </p>
               ))}
               {subsection.lists?.map((items) => (
                 <ol
@@ -160,7 +172,7 @@ function Section({ section }: { section: DeletionSection }) {
                 >
                   {items.map((item) => (
                     <li key={item} className="pl-1">
-                      {item}
+                      <LegalText text={item} labels={links} />
                     </li>
                   ))}
                 </ol>

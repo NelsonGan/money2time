@@ -387,14 +387,10 @@
   "privacy": {
     "title": "Kebijakan Privasi",
     "lastUpdated": "Terakhir diperbarui: 15 November 2026",
-    "websiteAnalytics": {
-      "title": "Analitik Penggunaan Situs Web",
-      "paragraphs": [
-        "Di money2time.com, kami menggunakan PostHog dan Google Analytics untuk mengukur tayangan halaman pseudonim serta sejumlah interaksi terbatas, seperti klik unduhan aplikasi, pemilihan tutorial, dan hasil formulir kontak. Layanan ini dapat menggunakan penyimpanan browser atau cookie dan memproses informasi teknis termasuk perkiraan wilayah, jenis perangkat dan browser, serta situs perujuk. Data pengguna dan peristiwa Google Analytics disimpan hingga 14 bulan.",
-        "Di Dasbor Web (app.money2time.com), layanan yang sama mengukur halaman dasbor mana yang Anda buka, kapan browser ditautkan atau diputuskan tautannya, apakah transfer dari ponsel Anda dan perubahan yang Anda buat berhasil, serta kapan fitur Pro ditawarkan. Setelah ponsel Anda mengirimkan datanya, peristiwa ini ditautkan ke pengidentifikasi aplikasi acak milik ponsel tersebut, sehingga penggunaan dasbor dan aplikasi Anda dihitung sebagai satu pengguna pseudonim hingga Anda memutuskan tautan browser. Dasbor memisahkan hal ini dari bagian lain money2time.com, sehingga kunjungan Anda ke halaman lain tidak ditautkan dengannya. Peristiwa dasbor tidak pernah menyertakan data keuangan Anda, dan kunjungan ke dasbor tidak pernah direkam sebagai rekaman ulang sesi.",
-        "PostHog juga dapat merekam sebagian kecil kunjungan situs web sebagai rekaman ulang sesi dengan setiap kolom formulir disamarkan, dan menerima laporan saat terjadi error di sebuah halaman.",
-        "Kami tidak mengirim isi formulir kontak, teks pencarian tutorial, data keuangan, alamat email, string kueri URL lengkap, atau data untuk iklan maupun personalisasi. Pengalihan /download tidak menambahkan alamat IP atau string user-agent Anda ke peristiwa analitiknya. Analitik situs web tidak dimuat saat pengaturan Do Not Track di browser Anda diaktifkan."
-      ]
+    "links": {
+      "userDataPolicy": "Google API Services User Data Policy",
+      "googlePermissions": "myaccount.google.com/permissions",
+      "dataDeletion": "halaman penghapusan data"
     },
     "sections": [
       {
@@ -446,7 +442,7 @@
           {
             "title": "Buku dan Album Bersama",
             "paragraphs": [
-              "Jika Anda membuat atau bergabung dengan buku bersama atau album bersama, data yang Anda tambahkan ke dalamnya disimpan di server kami dan dapat dilihat oleh semua orang di dalamnya: nama anggota, tagihan (judul, jumlah, tanggal, mata uang, siapa yang membayar dan bagaimana pembagiannya), pembayaran, pengaturan, foto sampul, dan log aktivitas tentang siapa mengubah apa. Akun, kategori, catatan, foto struk, dan suasana hati Anda sendiri untuk suatu tagihan tidak pernah dibagikan kepada grup. Nama tampilan Anda dalam grup adalah nama yang Anda tetapkan, atau jika tidak ada, nama masuk Anda. Pemilik buku bersama dapat melihat alamat email anggota. Siapa pun yang memiliki tautan undangan dapat melihat nama grup, nama pemiliknya, dan jumlah anggotanya.",
+              "Jika Anda membuat atau bergabung dengan buku bersama atau album bersama, data yang Anda tambahkan ke dalamnya disimpan di server kami dan dapat dilihat oleh semua orang di dalamnya: nama anggota, tagihan (judul, jumlah, tanggal, mata uang, siapa yang membayar dan bagaimana pembagiannya), pembayaran, pengaturan, foto sampul, dan log aktivitas tentang siapa mengubah apa. Akun, kategori, catatan, foto struk, dan suasana hati Anda sendiri untuk suatu tagihan tidak pernah dibagikan kepada grup. Nama tampilan Anda dalam grup adalah nama yang Anda tetapkan, atau jika tidak ada, nama masuk Anda; jika Anda tidak memiliki keduanya, nama tampilan Anda adalah bentuk alamat email Anda yang sebagian disembunyikan, seperti ne***@gmail.com. Pemilik buku bersama dapat melihat alamat email anggota. Siapa pun yang memiliki tautan undangan dapat melihat nama grup, nama tampilan pemiliknya, dan jumlah anggotanya.",
               "Tagihan dan perubahan yang Anda tambahkan tetap berada di grup sebagai bagian dari catatan bersamanya, termasuk setelah Anda keluar."
             ]
           },
@@ -459,7 +455,7 @@
           {
             "title": "Penghasilan Langsung (iOS)",
             "paragraphs": [
-              "Jika Anda mengaktifkan penghasilan langsung di Layar Terkunci, Aplikasi mengirimkan tarif per jam, simbol mata uang, jadwal shift, zona waktu, pengidentifikasi aplikasi acak, dan token push Live Activity yang diberikan Apple ke server kami, yang memperbarui Live Activity melalui Apple Push Notification service selama berjalan."
+              "Jika Anda mengaktifkan penghasilan langsung di Layar Terkunci, Aplikasi mengirimkan tarif per jam, simbol mata uang, jadwal shift, zona waktu, pengidentifikasi aplikasi acak, dan token push Live Activity yang diberikan Apple ke server kami, yang memperbarui Live Activity melalui Apple Push Notification service selama berjalan. Data Live Activity yang sedang berjalan dihapus saat Live Activity tersebut berakhir. Jadwal untuk memulai penghasilan langsung secara otomatis dihapus saat Anda menonaktifkan mulai otomatis atau menghapus upah Anda, dan jika tidak, 45 hari setelah Aplikasi terakhir kali mengonfirmasinya. Data penghasilan langsung tidak ditautkan ke akun."
             ]
           },
           {
@@ -482,6 +478,16 @@
                 "Platform seperti iOS atau Android"
               ]
             ]
+          },
+          {
+            "title": "Analitik Penggunaan Situs Web",
+            "paragraphs": [
+              "Di money2time.com, kami menggunakan PostHog dan Google Analytics untuk mengukur tayangan halaman pseudonim serta sejumlah interaksi terbatas, seperti klik unduhan aplikasi, pemilihan tutorial, dan hasil formulir kontak. Layanan ini dapat menggunakan penyimpanan browser atau cookie dan memproses informasi teknis termasuk perkiraan wilayah, jenis perangkat dan browser, serta situs perujuk. Data pengguna dan peristiwa Google Analytics disimpan hingga 14 bulan.",
+              "Di Dasbor Web (app.money2time.com), layanan yang sama mengukur halaman dasbor mana yang Anda buka, kapan browser ditautkan atau diputuskan tautannya, apakah transfer dari ponsel Anda dan perubahan yang Anda buat berhasil, serta kapan fitur Pro ditawarkan. Setelah ponsel Anda mengirimkan datanya, peristiwa ini ditautkan ke pengidentifikasi aplikasi acak milik ponsel tersebut, sehingga penggunaan dasbor dan aplikasi Anda dihitung sebagai satu pengguna pseudonim hingga Anda memutuskan tautan browser. Dasbor memisahkan hal ini dari bagian lain money2time.com, sehingga kunjungan Anda ke halaman lain tidak ditautkan dengannya. Peristiwa dasbor tidak pernah menyertakan data keuangan Anda, dan kunjungan ke dasbor tidak pernah direkam sebagai rekaman ulang sesi.",
+              "Di album bersama di web (album.money2time.com), layanan yang sama mengukur tayangan halaman, proses masuk dan metode masuk yang digunakan, bergabung dengan album, pengeditan, dan membuka album di Aplikasi. Peristiwa ini tidak pernah menyertakan nama, alamat email, atau isi album Anda, dan kunjungan ke album tidak pernah direkam sebagai rekaman ulang sesi.",
+              "PostHog juga dapat merekam sebagian kecil kunjungan situs web sebagai rekaman ulang sesi dengan setiap kolom formulir disamarkan, dan menerima laporan saat terjadi error di sebuah halaman.",
+              "Kami tidak mengirim isi formulir kontak, teks pencarian tutorial, data keuangan, alamat email, string kueri URL lengkap, atau data untuk iklan maupun personalisasi. Pengalihan /download tidak menambahkan alamat IP atau string user-agent Anda ke peristiwa analitiknya. Analitik situs web tidak dimuat saat pengaturan Do Not Track di browser Anda diaktifkan."
+            ]
           }
         ]
       },
@@ -489,7 +495,7 @@
         "title": "3. Data Pengguna Google",
         "paragraphs": [
           "Bagian ini menjelaskan bagaimana Aplikasi dan situs web kami mengakses, menggunakan, menyimpan, dan membagikan data yang diterima dari Google API.",
-          "Penggunaan dan transfer informasi yang diterima dari Google API oleh Money2Time ke aplikasi lain mana pun akan mematuhi Google API Services User Data Policy (Kebijakan Data Pengguna Layanan Google API), termasuk persyaratan Limited Use (Penggunaan Terbatas)."
+          "Penggunaan dan transfer informasi yang diterima dari Google API oleh Money2Time ke aplikasi lain mana pun akan mematuhi {userDataPolicy} (Kebijakan Data Pengguna Layanan Google API), termasuk persyaratan Limited Use (Penggunaan Terbatas)."
         ],
         "subsections": [
           {
@@ -497,21 +503,21 @@
             "lists": [
               [
                 "Google Sign-In (di Aplikasi dan di album.money2time.com): ID akun Google Anda, alamat email dan apakah alamat tersebut terverifikasi, nama, dan alamat foto profil, melalui cakupan openid, email, dan profile.",
-                "Google Drive (hanya jika Anda memilih Google Drive untuk pencadangan): akses terbatas pada cakupan drive.file, yang memungkinkan Aplikasi melihat dan mengelola hanya file cadangan yang dibuatnya. Aplikasi tidak dapat melihat file lain apa pun di Drive Anda."
+                "Google Drive (hanya jika Anda memilih Google Drive untuk pencadangan): menghubungkan Google Drive akan memasukkan Anda ke Google di Aplikasi dengan cakupan openid, email, dan profile yang sama, sehingga Aplikasi dapat menampilkan akun Google tujuan pencadangan Anda, dan menambahkan cakupan drive.file, yang memungkinkan Aplikasi melihat dan mengelola hanya file cadangan yang dibuatnya. Aplikasi tidak dapat melihat file lain apa pun di Drive Anda. Data profil ini tetap berada di perangkat Anda kecuali Anda juga menggunakannya untuk masuk ke akun Money2Time."
               ]
             ]
           },
           {
             "title": "Cara Kami Menggunakannya",
             "paragraphs": [
-              "Kami menggunakan data profil Google Anda hanya untuk membuat dan memasukkan Anda ke akun Money2Time Anda, menghubungkannya dengan metode masuk lain yang memiliki alamat email terverifikasi yang sama, dan menampilkan nama Anda kepada orang-orang di buku dan album yang Anda bagikan. Kami menggunakan akses Google Drive hanya untuk menyimpan, mencantumkan, dan memulihkan file cadangan Money2Time Anda. Kami tidak menggunakan data pengguna Google untuk periklanan, kami tidak menjualnya, dan kami tidak menggunakannya untuk melatih model AI."
+              "Kami menggunakan data profil Google Anda hanya untuk membuat dan memasukkan Anda ke akun Money2Time Anda, menghubungkannya dengan metode masuk lain yang memiliki alamat email terverifikasi yang sama, menampilkan nama Anda kepada orang-orang di buku dan album yang Anda bagikan (dan alamat email Anda kepada pemilik buku bersama yang Anda ikuti), serta menampilkan akun Google tujuan pencadangan Anda. Kami menggunakan akses Google Drive hanya untuk menyimpan, mencantumkan, dan memulihkan file cadangan Money2Time Anda. Kami tidak menggunakan data pengguna Google untuk periklanan, kami tidak menjualnya, dan kami tidak menggunakannya untuk melatih model AI."
             ]
           },
           {
             "title": "Cara Kami Menyimpan dan Membagikannya",
             "paragraphs": [
-              "Data profil Google Anda disimpan dalam basis data akun kami di Cloudflare dan disimpan hingga Anda menghapus akun Anda. Cadangan Drive Anda ditulis langsung dari ponsel Anda ke Google Drive Anda; cadangan tersebut tidak pernah melewati atau disimpan di server kami, dan Anda dapat menghapusnya di Google Drive kapan saja. Kami membagikan data pengguna Google hanya kepada anggota buku dan album yang Anda pilih untuk dibagikan (nama Anda), dan kepada penyedia layanan yang meng-hosting server kami (Cloudflare dan Turso) berdasarkan ketentuan pemrosesan data mereka. Kami tidak pernah mengirimkannya ke penyedia analitik atau penyedia AI kami.",
-              "Anda dapat mencabut akses Money2Time ke Akun Google Anda kapan saja di myaccount.google.com/permissions, dan Anda dapat menghapus akun Anda di Aplikasi seperti dijelaskan di bagian 9."
+              "Data profil Google Anda disimpan dalam basis data akun kami di Cloudflare dan disimpan hingga Anda menghapus akun Anda. Cadangan Drive Anda ditulis langsung dari ponsel Anda ke Google Drive Anda; cadangan tersebut tidak pernah melewati atau disimpan di server kami, dan Anda dapat menghapusnya di Google Drive kapan saja. Kami membagikan data pengguna Google hanya dengan cara berikut: nama Anda, atau bentuk alamat email Anda yang sebagian disembunyikan jika Anda tidak memiliki nama, kepada anggota buku dan album yang Anda ikuti serta kepada siapa pun yang memegang tautan undangannya; alamat email Anda kepada pemilik buku bersama yang Anda ikuti; dan seluruhnya kepada penyedia layanan yang meng-hosting server kami (Cloudflare dan Turso), berdasarkan ketentuan pemrosesan data mereka. Kami tidak pernah mengirimkannya ke penyedia analitik atau penyedia AI kami.",
+              "Anda dapat mencabut akses Money2Time ke Akun Google Anda kapan saja di {googlePermissions}, dan Anda dapat menghapus akun Anda di Aplikasi seperti dijelaskan di bagian 9."
             ]
           }
         ]
@@ -564,7 +570,7 @@
       {
         "title": "8. Penyimpanan Data",
         "paragraphs": [
-          "Data di perangkat Anda tetap ada hingga Anda menghapusnya atau menghapus instalasi Aplikasi. Informasi akun, salinan Cloud Sync Anda, dan gambar Anda di server kami disimpan hingga Anda menghapus akun Anda. Data buku dan album bersama disimpan selama grup tersebut ada. Sesi masuk berlaku hingga satu tahun dan diperpanjang selama Anda menggunakannya. Teks struk dan notifikasi yang dikirim untuk pemrosesan AI tidak kami simpan. Data analitik disimpan hingga 14 bulan di Google Analytics dan sesuai dengan pengaturan penyimpanan kami di PostHog. Detail koneksi seperti alamat IP disimpan sebentar di log penyedia layanan kami."
+          "Data di perangkat Anda tetap ada hingga Anda menghapusnya atau menghapus instalasi Aplikasi. Informasi akun, salinan Cloud Sync Anda, dan gambar Anda di server kami disimpan hingga Anda menghapus akun Anda. Data buku dan album bersama disimpan selama grup tersebut ada. Data penghasilan langsung dihapus saat Anda menonaktifkannya, dan paling lambat 45 hari setelah Aplikasi terakhir kali mengonfirmasinya. Sesi masuk berlaku hingga satu tahun dan diperpanjang selama Anda menggunakannya. Teks struk dan notifikasi yang dikirim untuk pemrosesan AI tidak kami simpan. Data analitik disimpan hingga 14 bulan di Google Analytics dan sesuai dengan pengaturan penyimpanan kami di PostHog. Detail koneksi seperti alamat IP disimpan sebentar di log penyedia layanan kami."
         ]
       },
       {
@@ -572,7 +578,7 @@
         "paragraphs": [
           "Anda memiliki kendali penuh atas data Anda. Atur Ulang Data di Pengaturan menghapus secara permanen akun, kategori, dan transaksi Anda dari perangkat Anda, dan dari salinan Cloud Sync Anda jika Cloud Sync aktif. Menghapus instalasi Aplikasi akan menghapus basis data lokal dari perangkat Anda, tetapi tidak menghapus cadangan Anda di Google Drive atau iCloud, maupun akun Anda.",
           "Untuk menghapus akun Anda, buka halaman Akun di Aplikasi dan pilih Hapus akun. Tindakan ini menghapus secara permanen informasi akun Anda, salinan Cloud Sync Anda, setiap gambar yang Anda simpan pada kami, serta buku dan album bersama yang Anda miliki, dan mencabut akses masuk Apple untuk Aplikasi. Memutuskan tautan browser dari Dasbor Web menghapus salinan yang disimpannya: langsung saat Anda memutuskan tautan di browser, dan saat berikutnya browser terhubung bila Anda memutuskan tautan dari Aplikasi.",
-          "Menghapus data Anda tidak menghapus catatan langganan Anda yang disimpan oleh Apple atau Google, maupun data analitik yang sebelumnya dikirim ke PostHog dan Google Analytics for Firebase. Untuk meminta penghapusan data analitik, hubungi kami melalui email di bawah. Halaman penghapusan data kami memuat langkah-langkah lengkapnya."
+          "Menghapus data Anda tidak menghapus catatan langganan Anda yang disimpan oleh Apple atau Google, maupun data analitik yang sebelumnya dikirim ke PostHog dan Google Analytics for Firebase. Untuk meminta penghapusan data analitik, hubungi kami melalui email di bawah. Langkah-langkah lengkapnya tersedia di {dataDeletion} kami."
         ]
       },
       {
@@ -664,7 +670,7 @@
   },
   "terms": {
     "title": "Ketentuan Penggunaan",
-    "lastUpdated": "Terakhir diperbarui: 25 Maret 2026",
+    "lastUpdated": "Terakhir diperbarui: 15 November 2026",
     "privacyPolicyLabel": "Kebijakan Privasi",
     "sections": [
       {
@@ -735,7 +741,7 @@
       {
         "title": "5. Data Anda",
         "paragraphs": [
-          "Semua data keuangan yang Anda masukkan, termasuk transaksi, akun, kategori, pengaturan upah, dan preferensi, disimpan secara lokal di perangkat Anda. Kami tidak memiliki akses ke data keuangan Anda dan tidak menyimpannya di server mana pun.",
+          "Semua data keuangan yang Anda masukkan, termasuk transaksi, akun, kategori, pengaturan upah, dan preferensi, disimpan secara lokal di perangkat Anda. Jika Anda menggunakan fitur opsional seperti Cloud Sync, buku dan album bersama, atau pemindaian struk, data yang diperlukan fitur tersebut dikirim ke server kami sebagaimana dijelaskan dalam Kebijakan Privasi.",
           "Anda sepenuhnya bertanggung jawab untuk menjaga cadangan data Anda. Gunakan fitur ekspor bawaan untuk membuat cadangan. Kami tidak bertanggung jawab atas kehilangan data apa pun akibat penghapusan aplikasi, kegagalan perangkat, atau reset yang tidak disengaja.",
           "Untuk detail lengkap tentang penanganan data, lihat {privacyPolicy} kami."
         ]
@@ -780,7 +786,7 @@
       {
         "title": "10. Pengakhiran",
         "paragraphs": [
-          "Kami dapat menangguhkan atau mengakhiri akses Anda ke Aplikasi kapan saja, dengan atau tanpa alasan, dan dengan atau tanpa pemberitahuan. Setelah pengakhiran, hak Anda untuk menggunakan Aplikasi berhenti segera. Karena data Anda disimpan secara lokal, data tersebut akan tetap berada di perangkat Anda sampai Anda menghapus instalasi Aplikasi atau meresetnya secara manual.",
+          "Kami dapat menangguhkan atau mengakhiri akses Anda ke Aplikasi kapan saja, dengan atau tanpa alasan, dan dengan atau tanpa pemberitahuan. Setelah pengakhiran, hak Anda untuk menggunakan Aplikasi berhenti segera. Data di perangkat Anda tetap berada di sana sampai Anda menghapus instalasi Aplikasi atau meresetnya secara manual, dan Anda dapat menghapus akun Anda serta data di server kami sebagaimana dijelaskan dalam Kebijakan Privasi.",
           "Anda dapat berhenti menggunakan Aplikasi kapan saja dengan menghapus instalasinya."
         ]
       },
@@ -805,7 +811,10 @@
   "dataDeletion": {
     "title": "Permintaan Penghapusan Data",
     "lastUpdated": "Terakhir diperbarui: 15 November 2026",
-    "intro": "Money2Time adalah aplikasi local-first: data keuangan Anda disimpan di perangkat Anda, dan hanya disimpan di server kami jika Anda masuk dan menggunakan Cloud Sync atau buku dan album bersama. Halaman ini menjelaskan cara menghapus data yang terkait dengan aplikasi Money2Time, jenis data mana yang dihapus atau disimpan, serta periode penyimpanannya.",
+    "intro": "Money2Time adalah aplikasi local-first: data keuangan Anda disimpan di perangkat Anda, dan hanya disimpan di server kami jika Anda masuk dan menggunakan Cloud Sync atau buku dan album bersama. Jika Anda mengaktifkan penghasilan langsung di iOS, tarif per jam dan jadwal shift Anda juga disimpan di server kami selama fitur tersebut berjalan. Halaman ini menjelaskan cara menghapus data yang terkait dengan aplikasi Money2Time, jenis data mana yang dihapus atau disimpan, serta periode penyimpanannya.",
+    "links": {
+      "googlePermissions": "myaccount.google.com/permissions"
+    },
     "sections": [
       {
         "title": "Cara Meminta Penghapusan Data",
@@ -839,7 +848,7 @@
           {
             "title": "Hapus cadangan Anda",
             "paragraphs": [
-              "Cadangan yang Anda buat ke Google Drive atau iCloud disimpan di akun Anda sendiri, bukan di server kami. Hapus cadangan tersebut di Google Drive (folder Money2Time) atau di pengaturan penyimpanan iCloud Anda. Anda juga dapat mencabut akses Money2Time ke Akun Google Anda di myaccount.google.com/permissions."
+              "Cadangan yang Anda buat ke Google Drive atau iCloud disimpan di akun Anda sendiri, bukan di server kami. Hapus cadangan tersebut di Google Drive (folder Money2Time) atau di pengaturan penyimpanan iCloud Anda. Anda juga dapat mencabut akses Money2Time ke Akun Google Anda di {googlePermissions}."
             ]
           },
           {
@@ -921,6 +930,11 @@
               "Gambar struk dan teks notifikasi yang dikirim untuk pemindaian",
               "Tidak disimpan",
               "Diproses untuk mengembalikan hasil dan tidak kami simpan. Hanya jumlah penggunaan yang disimpan, untuk batas paket."
+            ],
+            [
+              "Data penghasilan langsung di iOS (tarif per jam, jadwal shift, zona waktu, token push Live Activity)",
+              "Dihapus",
+              "Dihapus saat Live Activity berakhir, atau saat Anda menonaktifkan mulai otomatis atau menghapus upah Anda, dan jika tidak, 45 hari setelah Aplikasi terakhir kali mengonfirmasinya."
             ],
             [
               "Data analitik berpseudonim (PostHog dan Google Analytics for Firebase)",

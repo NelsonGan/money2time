@@ -387,14 +387,10 @@
   "privacy": {
     "title": "Polityka prywatności",
     "lastUpdated": "Ostatnia aktualizacja: 15 listopada 2026 r.",
-    "websiteAnalytics": {
-      "title": "Analityka korzystania ze strony",
-      "paragraphs": [
-        "W serwisie money2time.com używamy PostHog i Google Analytics do pomiaru pseudonimowych odsłon oraz ograniczonego zestawu interakcji, takich jak kliknięcia pobierania aplikacji, wybór samouczka i wynik formularza kontaktowego. Usługi te mogą korzystać z pamięci przeglądarki lub plików cookie i przetwarzać informacje techniczne, w tym przybliżony region, typ urządzenia i przeglądarki oraz stronę odsyłającą. Dane użytkowników i zdarzeń Google Analytics są przechowywane przez maksymalnie 14 miesięcy.",
-        "W Panelu webowym (app.money2time.com) te same usługi mierzą, które strony panelu otwierasz, kiedy przeglądarka zostaje połączona lub odłączona, czy przesyłanie danych z telefonu i wprowadzane przez Ciebie zmiany się udają oraz kiedy proponowana jest funkcja Pro. Gdy telefon wyśle swoje dane, te zdarzenia zostają powiązane z losowym identyfikatorem Aplikacji tego telefonu, więc korzystanie z panelu i aplikacji liczy się jako jeden pseudonimowy użytkownik, dopóki nie odłączysz przeglądarki. Panel oddziela to od reszty serwisu money2time.com, więc Twoje wizyty na innych stronach nie są z nim wiązane. Zdarzenia panelu nigdy nie zawierają Twoich danych finansowych, a wizyty w panelu nigdy nie są nagrywane jako odtworzenia sesji.",
-        "PostHog może też nagrywać niewielką próbkę wizyt w serwisie jako odtworzenia sesji z zamaskowanymi wszystkimi polami formularzy oraz otrzymuje raport, gdy na stronie wystąpi błąd.",
-        "Nie przesyłamy treści formularza kontaktowego, tekstu wyszukiwania samouczków, danych finansowych, adresów e-mail, pełnych ciągów zapytań URL ani danych do reklam lub personalizacji. Przekierowanie /download nie dodaje adresu IP ani ciągu user-agent do zdarzenia analitycznego. Analityka strony nie jest ładowana, gdy w przeglądarce włączono Do Not Track."
-      ]
+    "links": {
+      "userDataPolicy": "Google API Services User Data Policy",
+      "googlePermissions": "myaccount.google.com/permissions",
+      "dataDeletion": "stronie dotyczącej usuwania danych"
     },
     "sections": [
       {
@@ -446,7 +442,7 @@
           {
             "title": "Wspólne księgi i udostępnione albumy",
             "paragraphs": [
-              "Jeśli utworzysz wspólną księgę lub udostępniony album albo do nich dołączysz, dodawane przez Ciebie dane są przechowywane na naszych serwerach i widoczne dla wszystkich ich uczestników: imiona członków, rachunki (tytuł, kwota, data, waluta, kto zapłacił i jak rachunek jest podzielony), płatności, ustawienia, zdjęcie okładki oraz dziennik aktywności pokazujący, kto co zmienił. Wybrane przez Ciebie konto, kategoria, notatka, zdjęcie paragonu i nastrój przy rachunku nigdy nie są udostępniane grupie. Twoja nazwa wyświetlana w grupie to nazwa, którą ustawisz, a w przeciwnym razie imię z logowania. Właściciel wspólnej księgi widzi adresy e-mail członków. Każdy, kto ma link z zaproszeniem, widzi nazwę grupy, imię jej właściciela i liczbę członków.",
+              "Jeśli utworzysz wspólną księgę lub udostępniony album albo do nich dołączysz, dodawane przez Ciebie dane są przechowywane na naszych serwerach i widoczne dla wszystkich ich uczestników: imiona członków, rachunki (tytuł, kwota, data, waluta, kto zapłacił i jak rachunek jest podzielony), płatności, ustawienia, zdjęcie okładki oraz dziennik aktywności pokazujący, kto co zmienił. Wybrane przez Ciebie konto, kategoria, notatka, zdjęcie paragonu i nastrój przy rachunku nigdy nie są udostępniane grupie. Twoja nazwa wyświetlana w grupie to nazwa, którą ustawisz, a w przeciwnym razie imię z logowania; jeśli nie masz żadnej z nich, jest to częściowo ukryta forma Twojego adresu e-mail, np. ne***@gmail.com. Właściciel wspólnej księgi widzi adresy e-mail członków. Każdy, kto ma link z zaproszeniem, widzi nazwę grupy, nazwę wyświetlaną jej właściciela i liczbę członków.",
               "Dodane przez Ciebie rachunki i zmiany pozostają w grupie jako część jej wspólnego zapisu, także po Twoim odejściu z grupy."
             ]
           },
@@ -459,7 +455,7 @@
           {
             "title": "Zarobki na żywo (iOS)",
             "paragraphs": [
-              "Jeśli włączysz Zarobki na żywo na ekranie blokady, Aplikacja wysyła na nasz serwer Twoją stawkę godzinową, symbol waluty, harmonogram zmian, strefę czasową, losowy identyfikator Aplikacji oraz token push Live Activity przekazany przez Apple, a serwer aktualizuje Live Activity przez Apple Push Notification service, dopóki jest ona aktywna."
+              "Jeśli włączysz Zarobki na żywo na ekranie blokady, Aplikacja wysyła na nasz serwer Twoją stawkę godzinową, symbol waluty, harmonogram zmian, strefę czasową, losowy identyfikator Aplikacji oraz token push Live Activity przekazany przez Apple, a serwer aktualizuje Live Activity przez Apple Push Notification service, dopóki jest ona aktywna. Dane aktywnej Live Activity są usuwane po jej zakończeniu. Harmonogram automatycznego uruchamiania Zarobków na żywo jest usuwany, gdy wyłączysz automatyczne uruchamianie lub wyczyścisz swoje wynagrodzenie, a w przeciwnym razie po 45 dniach od ostatniego potwierdzenia go przez Aplikację. Dane Zarobków na żywo nie są powiązane z kontem."
             ]
           },
           {
@@ -482,6 +478,16 @@
                 "Platforma, taka jak iOS lub Android"
               ]
             ]
+          },
+          {
+            "title": "Analityka korzystania ze strony",
+            "paragraphs": [
+              "W serwisie money2time.com używamy PostHog i Google Analytics do pomiaru pseudonimowych odsłon oraz ograniczonego zestawu interakcji, takich jak kliknięcia pobierania aplikacji, wybór samouczka i wynik formularza kontaktowego. Usługi te mogą korzystać z pamięci przeglądarki lub plików cookie i przetwarzać informacje techniczne, w tym przybliżony region, typ urządzenia i przeglądarki oraz stronę odsyłającą. Dane użytkowników i zdarzeń Google Analytics są przechowywane przez maksymalnie 14 miesięcy.",
+              "W Panelu webowym (app.money2time.com) te same usługi mierzą, które strony panelu otwierasz, kiedy przeglądarka zostaje połączona lub odłączona, czy przesyłanie danych z telefonu i wprowadzane przez Ciebie zmiany się udają oraz kiedy proponowana jest funkcja Pro. Gdy telefon wyśle swoje dane, te zdarzenia zostają powiązane z losowym identyfikatorem Aplikacji tego telefonu, więc korzystanie z panelu i aplikacji liczy się jako jeden pseudonimowy użytkownik, dopóki nie odłączysz przeglądarki. Panel oddziela to od reszty serwisu money2time.com, więc Twoje wizyty na innych stronach nie są z nim wiązane. Zdarzenia panelu nigdy nie zawierają Twoich danych finansowych, a wizyty w panelu nigdy nie są nagrywane jako odtworzenia sesji.",
+              "W udostępnionych albumach w sieci (album.money2time.com) te same usługi mierzą odsłony stron, logowania i użytą metodę logowania, dołączanie do albumu, edycje oraz otwieranie albumu w Aplikacji. Te zdarzenia nigdy nie zawierają Twojego imienia, adresu e-mail ani zawartości Twoich albumów, a wizyty w albumach nigdy nie są nagrywane jako odtworzenia sesji.",
+              "PostHog może też nagrywać niewielką próbkę wizyt w serwisie jako odtworzenia sesji z zamaskowanymi wszystkimi polami formularzy oraz otrzymuje raport, gdy na stronie wystąpi błąd.",
+              "Nie przesyłamy treści formularza kontaktowego, tekstu wyszukiwania samouczków, danych finansowych, adresów e-mail, pełnych ciągów zapytań URL ani danych do reklam lub personalizacji. Przekierowanie /download nie dodaje adresu IP ani ciągu user-agent do zdarzenia analitycznego. Analityka strony nie jest ładowana, gdy w przeglądarce włączono Do Not Track."
+            ]
           }
         ]
       },
@@ -489,7 +495,7 @@
         "title": "3. Dane użytkownika Google",
         "paragraphs": [
           "Ta sekcja wyjaśnia, w jaki sposób Aplikacja i nasze strony internetowe uzyskują dostęp do danych otrzymanych z interfejsów API Google, wykorzystują je, przechowują i udostępniają.",
-          "Wykorzystywanie i przekazywanie przez Money2Time do jakiejkolwiek innej aplikacji informacji otrzymanych z interfejsów API Google będzie zgodne z Google API Services User Data Policy (Zasadami dotyczącymi danych użytkownika w usługach Google API), w tym z wymaganiami Limited Use (ograniczonego użytkowania)."
+          "Wykorzystywanie i przekazywanie przez Money2Time do jakiejkolwiek innej aplikacji informacji otrzymanych z interfejsów API Google będzie zgodne z {userDataPolicy} (Zasadami dotyczącymi danych użytkownika w usługach Google API), w tym z wymaganiami Limited Use (ograniczonego użytkowania)."
         ],
         "subsections": [
           {
@@ -497,21 +503,21 @@
             "lists": [
               [
                 "Google Sign-In (w Aplikacji i na album.money2time.com): identyfikator Twojego konta Google, adres e-mail i informacja, czy jest zweryfikowany, imię i nazwisko oraz adres zdjęcia profilowego, za pośrednictwem zakresów openid, email i profile.",
-                "Google Drive (tylko jeśli wybierzesz Google Drive do kopii zapasowych): dostęp ograniczony do zakresu drive.file, który pozwala Aplikacji widzieć tylko utworzone przez nią pliki kopii zapasowych i nimi zarządzać. Aplikacja nie widzi żadnych innych plików w Twoim Google Drive."
+                "Google Drive (tylko jeśli wybierzesz Google Drive do kopii zapasowych): połączenie z Google Drive loguje Cię do Google w Aplikacji z tymi samymi zakresami openid, email i profile, aby Aplikacja mogła pokazać, na które konto Google trafiają Twoje kopie zapasowe, oraz dodaje zakres drive.file, który pozwala Aplikacji widzieć tylko utworzone przez nią pliki kopii zapasowych i nimi zarządzać. Aplikacja nie widzi żadnych innych plików w Twoim Google Drive. Te dane profilu pozostają na Twoim urządzeniu, chyba że użyjesz ich również do zalogowania się na konto Money2Time."
               ]
             ]
           },
           {
             "title": "Jak je wykorzystujemy",
             "paragraphs": [
-              "Danych z Twojego profilu Google używamy wyłącznie do utworzenia Twojego konta Money2Time i logowania do niego, do powiązania go z innymi metodami logowania z tym samym zweryfikowanym adresem e-mail oraz do pokazywania Twojego imienia osobom w udostępnianych przez Ciebie księgach i albumach. Dostępu do Google Drive używamy wyłącznie do zapisywania, wyświetlania listy i przywracania plików kopii zapasowych Money2Time. Nie wykorzystujemy danych użytkownika Google do celów reklamowych, nie sprzedajemy ich i nie używamy ich do trenowania modeli AI."
+              "Danych z Twojego profilu Google używamy wyłącznie do utworzenia Twojego konta Money2Time i logowania do niego, do powiązania go z innymi metodami logowania z tym samym zweryfikowanym adresem e-mail, do pokazywania Twojego imienia osobom w udostępnianych przez Ciebie księgach i albumach (a Twojego adresu e-mail właścicielowi wspólnej księgi, do której dołączysz) oraz do pokazywania, na które konto Google trafiają Twoje kopie zapasowe. Dostępu do Google Drive używamy wyłącznie do zapisywania, wyświetlania listy i przywracania plików kopii zapasowych Money2Time. Nie wykorzystujemy danych użytkownika Google do celów reklamowych, nie sprzedajemy ich i nie używamy ich do trenowania modeli AI."
             ]
           },
           {
             "title": "Jak je przechowujemy i udostępniamy",
             "paragraphs": [
-              "Dane z Twojego profilu Google są przechowywane w naszej bazie danych kont w Cloudflare do czasu usunięcia Twojego konta. Kopie zapasowe w Google Drive są zapisywane bezpośrednio z Twojego telefonu w Twoim Google Drive; nigdy nie przechodzą przez nasze serwery ani nie są na nich przechowywane, a w każdej chwili możesz je usunąć w Google Drive. Dane użytkownika Google udostępniamy wyłącznie członkom ksiąg i albumów, które zdecydujesz się udostępnić (Twoje imię), oraz dostawcom usług hostującym nasze serwery (Cloudflare i Turso) na podstawie ich warunków przetwarzania danych. Nigdy nie wysyłamy ich naszym dostawcom analityki ani dostawcom AI.",
-              "W każdej chwili możesz odebrać Money2Time dostęp do swojego konta Google na stronie myaccount.google.com/permissions, a swoje konto możesz usunąć w Aplikacji w sposób opisany w sekcji 9."
+              "Dane z Twojego profilu Google są przechowywane w naszej bazie danych kont w Cloudflare do czasu usunięcia Twojego konta. Kopie zapasowe w Google Drive są zapisywane bezpośrednio z Twojego telefonu w Twoim Google Drive; nigdy nie przechodzą przez nasze serwery ani nie są na nich przechowywane, a w każdej chwili możesz je usunąć w Google Drive. Dane użytkownika Google udostępniamy wyłącznie w następujący sposób: Twoje imię, a jeśli go nie masz, częściowo ukrytą formę Twojego adresu e-mail – członkom ksiąg i albumów, do których dołączysz, oraz każdemu, kto ma ich linki z zaproszeniem; Twój adres e-mail – właścicielowi wspólnej księgi, do której dołączysz; a wszystkie te dane – dostawcom usług hostującym nasze serwery (Cloudflare i Turso) na podstawie ich warunków przetwarzania danych. Nigdy nie wysyłamy ich naszym dostawcom analityki ani dostawcom AI.",
+              "W każdej chwili możesz odebrać Money2Time dostęp do swojego konta Google na stronie {googlePermissions}, a swoje konto możesz usunąć w Aplikacji w sposób opisany w sekcji 9."
             ]
           }
         ]
@@ -564,7 +570,7 @@
       {
         "title": "8. Przechowywanie danych",
         "paragraphs": [
-          "Dane na Twoim urządzeniu pozostają na nim, dopóki ich nie usuniesz lub nie odinstalujesz Aplikacji. Informacje o koncie, Twoja kopia Cloud Sync i Twoje obrazy na naszych serwerach są przechowywane do czasu usunięcia Twojego konta. Dane wspólnych ksiąg i udostępnionych albumów są przechowywane, dopóki istnieje grupa. Sesje logowania trwają maksymalnie rok i są odnawiane, dopóki z nich korzystasz. Nie przechowujemy treści paragonów ani powiadomień wysyłanych do przetwarzania przez AI. Dane analityczne są przechowywane przez maksymalnie 14 miesięcy w Google Analytics oraz zgodnie z naszymi ustawieniami przechowywania w PostHog. Dane połączenia, takie jak adresy IP, są przechowywane krótko w logach naszych dostawców usług."
+          "Dane na Twoim urządzeniu pozostają na nim, dopóki ich nie usuniesz lub nie odinstalujesz Aplikacji. Informacje o koncie, Twoja kopia Cloud Sync i Twoje obrazy na naszych serwerach są przechowywane do czasu usunięcia Twojego konta. Dane wspólnych ksiąg i udostępnionych albumów są przechowywane, dopóki istnieje grupa. Dane Zarobków na żywo są usuwane, gdy wyłączysz tę funkcję, a najpóźniej po 45 dniach od ostatniego potwierdzenia ich przez Aplikację. Sesje logowania trwają maksymalnie rok i są odnawiane, dopóki z nich korzystasz. Nie przechowujemy treści paragonów ani powiadomień wysyłanych do przetwarzania przez AI. Dane analityczne są przechowywane przez maksymalnie 14 miesięcy w Google Analytics oraz zgodnie z naszymi ustawieniami przechowywania w PostHog. Dane połączenia, takie jak adresy IP, są przechowywane krótko w logach naszych dostawców usług."
         ]
       },
       {
@@ -572,7 +578,7 @@
         "paragraphs": [
           "Masz pełną kontrolę nad swoimi danymi. Opcja Zresetuj dane w Ustawieniach trwale usuwa Twoje konta, kategorie i transakcje z urządzenia oraz z Twojej kopii Cloud Sync, jeśli Cloud Sync jest włączony. Odinstalowanie Aplikacji usuwa lokalną bazę danych z urządzenia, ale nie usuwa Twoich kopii zapasowych na Google Drive lub w iCloud ani Twojego konta.",
           "Aby usunąć konto, otwórz w Aplikacji stronę Konto i wybierz Usuń konto. Spowoduje to trwałe usunięcie informacji o Twoim koncie, Twojej kopii Cloud Sync, wszystkich obrazów przechowywanych u nas oraz wspólnych ksiąg i udostępnionych albumów, których jesteś właścicielem, a także cofnięcie logowania przez Apple w Aplikacji. Odłączenie przeglądarki od Panelu webowego usuwa kopię, którą ona przechowuje: od razu, gdy odłączasz ją w przeglądarce, a przy następnym połączeniu, gdy odłączasz ją w Aplikacji.",
-          "Usunięcie danych nie usuwa zapisów subskrypcji przechowywanych przez Apple lub Google ani danych analitycznych wcześniej wysłanych do PostHog i Google Analytics for Firebase. Aby poprosić o usunięcie danych analitycznych, skontaktuj się z nami pod adresem e-mail podanym poniżej. Pełny opis kroków znajdziesz na naszej stronie dotyczącej usuwania danych."
+          "Usunięcie danych nie usuwa zapisów subskrypcji przechowywanych przez Apple lub Google ani danych analitycznych wcześniej wysłanych do PostHog i Google Analytics for Firebase. Aby poprosić o usunięcie danych analitycznych, skontaktuj się z nami pod adresem e-mail podanym poniżej. Pełny opis kroków znajdziesz na naszej {dataDeletion}."
         ]
       },
       {
@@ -664,7 +670,7 @@
   },
   "terms": {
     "title": "Warunki korzystania",
-    "lastUpdated": "Ostatnia aktualizacja: 25 marca 2026 r.",
+    "lastUpdated": "Ostatnia aktualizacja: 15 listopada 2026 r.",
     "privacyPolicyLabel": "Polityka prywatności",
     "sections": [
       {
@@ -735,7 +741,7 @@
       {
         "title": "5. Twoje dane",
         "paragraphs": [
-          "Wszystkie dane finansowe, które wprowadzasz, w tym transakcje, konta, kategorie, ustawienia wynagrodzenia i preferencje, są przechowywane lokalnie na Twoim urządzeniu. Nie mamy dostępu do Twoich danych finansowych i nie przechowujemy ich na żadnym serwerze.",
+          "Wszystkie dane finansowe, które wprowadzasz, w tym transakcje, konta, kategorie, ustawienia wynagrodzenia i preferencje, są przechowywane lokalnie na Twoim urządzeniu. Jeśli korzystasz z funkcji opcjonalnych, takich jak Cloud Sync, wspólne księgi i udostępnione albumy lub skanowanie paragonów, potrzebne do nich dane są wysyłane na nasze serwery zgodnie z opisem w Polityce prywatności.",
           "Ponosisz wyłączną odpowiedzialność za utrzymywanie kopii zapasowych swoich danych. Użyj wbudowanej funkcji eksportu, aby utworzyć kopię zapasową. Nie ponosimy odpowiedzialności za utratę danych wynikającą z usunięcia aplikacji, awarii urządzenia lub przypadkowego resetu.",
           "Pełne informacje o przetwarzaniu danych znajdziesz w naszej {privacyPolicy}."
         ]
@@ -780,7 +786,7 @@
       {
         "title": "10. Rozwiązanie",
         "paragraphs": [
-          "Możemy zawiesić lub zakończyć Twój dostęp do Aplikacji w dowolnym momencie, z przyczyną lub bez, z powiadomieniem lub bez. Po zakończeniu Twoje prawo do korzystania z Aplikacji wygasa natychmiast. Ponieważ Twoje dane są przechowywane lokalnie, pozostaną na Twoim urządzeniu, dopóki nie odinstalujesz Aplikacji lub nie zresetujesz jej ręcznie.",
+          "Możemy zawiesić lub zakończyć Twój dostęp do Aplikacji w dowolnym momencie, z przyczyną lub bez, z powiadomieniem lub bez. Po zakończeniu Twoje prawo do korzystania z Aplikacji wygasa natychmiast. Dane na Twoim urządzeniu pozostaną na nim, dopóki nie odinstalujesz Aplikacji lub nie zresetujesz jej ręcznie, a swoje konto i dane na naszych serwerach możesz usunąć w sposób opisany w Polityce prywatności.",
           "Możesz przestać korzystać z Aplikacji w dowolnym momencie, odinstalowując ją."
         ]
       },
@@ -805,7 +811,10 @@
   "dataDeletion": {
     "title": "Prośba o usunięcie danych",
     "lastUpdated": "Ostatnia aktualizacja: 15 listopada 2026 r.",
-    "intro": "Money2Time to aplikacja local-first: Twoje dane finansowe są przechowywane na Twoim urządzeniu, a na naszych serwerach tylko wtedy, gdy się zalogujesz i korzystasz z Cloud Sync lub wspólnych ksiąg i udostępnionych albumów. Ta strona wyjaśnia, jak usunąć dane powiązane z aplikacją Money2Time, które rodzaje danych są usuwane lub przechowywane, oraz jakie obowiązują okresy przechowywania.",
+    "intro": "Money2Time to aplikacja local-first: Twoje dane finansowe są przechowywane na Twoim urządzeniu, a na naszych serwerach tylko wtedy, gdy się zalogujesz i korzystasz z Cloud Sync lub wspólnych ksiąg i udostępnionych albumów. Jeśli włączysz Zarobki na żywo w iOS, Twoja stawka godzinowa i harmonogram zmian są również przechowywane na naszych serwerach, dopóki funkcja działa. Ta strona wyjaśnia, jak usunąć dane powiązane z aplikacją Money2Time, które rodzaje danych są usuwane lub przechowywane, oraz jakie obowiązują okresy przechowywania.",
+    "links": {
+      "googlePermissions": "myaccount.google.com/permissions"
+    },
     "sections": [
       {
         "title": "Jak poprosić o usunięcie danych",
@@ -839,7 +848,7 @@
           {
             "title": "Usuń kopie zapasowe",
             "paragraphs": [
-              "Kopie zapasowe utworzone na Google Drive lub w iCloud są przechowywane na Twoim własnym koncie, a nie na naszych serwerach. Usuń je w Google Drive (folder Money2Time) lub w ustawieniach pamięci iCloud. Możesz też odebrać Money2Time dostęp do swojego konta Google na stronie myaccount.google.com/permissions."
+              "Kopie zapasowe utworzone na Google Drive lub w iCloud są przechowywane na Twoim własnym koncie, a nie na naszych serwerach. Usuń je w Google Drive (folder Money2Time) lub w ustawieniach pamięci iCloud. Możesz też odebrać Money2Time dostęp do swojego konta Google na stronie {googlePermissions}."
             ]
           },
           {
@@ -921,6 +930,11 @@
               "Obrazy paragonów i teksty powiadomień wysyłane do skanowania",
               "Nieprzechowywane",
               "Przetwarzane w celu zwrócenia wyniku i nieprzechowywane przez nas. Zachowujemy jedynie liczniki użycia na potrzeby limitów planu."
+            ],
+            [
+              "Dane Zarobków na żywo w iOS (stawka godzinowa, harmonogram zmian, strefa czasowa, token push Live Activity)",
+              "Usunięte",
+              "Usuwane po zakończeniu Live Activity lub gdy wyłączysz automatyczne uruchamianie albo wyczyścisz swoje wynagrodzenie, a w przeciwnym razie po 45 dniach od ostatniego potwierdzenia ich przez Aplikację."
             ],
             [
               "Pseudonimizowane dane analityczne (PostHog / Google Analytics for Firebase)",
