@@ -44,7 +44,7 @@ import {
 } from './albumGroups';
 import { csv, type Env } from './env';
 import { json, readJson } from './http';
-import { isValidDeviceId, notifyUsers } from './live';
+import { isValidDeviceId, ledgerStamp, notifyUsers } from './live';
 import { deleteAllMedia, ledgerSpace } from './media';
 import { isAccountPro } from './revenuecat';
 import { brokenInvitePageHtml, invitePageHtml } from './pages';
@@ -483,7 +483,7 @@ export async function routeLedgers(
   }
   if (action === 'album' && parts.length === 4 && method === 'GET') {
     if (kindOf(ledger) !== 'album') return json({ error: 'not_found' }, 404);
-    return albumRead(env, ledger, role, user);
+    return albumRead(env, ledger, role, user, url.searchParams.get('since'));
   }
   if (action === 'invites' && parts.length === 4 && method === 'POST') {
     if (role !== 'owner') return json({ error: 'forbidden' }, 403);
@@ -808,18 +808,24 @@ function groupContext(ledger: SharedLedgerRow, userId: string, via?: 'web') {
  * GET /v1/ledgers/<id>/album: a shared album's whole group (its people,
  * bills, payments, settings and newest activity), read with the Worker's own
  * token. The website reads it this way: a browser holds no database token,
- * and only the album's members get here (`access`).
+ * and only the album's members get here (`access`). `?since=<stamp>` with the
+ * stamp of the last answer gets `{unchanged: true}` while nothing changed,
+ * without touching the group's database.
  */
 async function albumRead(
   env: Env,
   ledger: SharedLedgerRow,
   role: Role,
   user: SessionUser,
+  since: string | null,
 ): Promise<Response> {
+  // Read first, so a change committed while the group is read is seen next time.
+  const stamp = await ledgerStamp(env, ledger.id);
+  if (stamp !== null && since === stamp) return json({ unchanged: true, stamp });
   try {
     const db = hranaDb(ledger.db_url, await writerToken(env, ledger));
     const [album, rows] = await Promise.all([view(env, ledger, role), readGroup(db)]);
-    return json({ album, userId: user.id, rows });
+    return json({ album, userId: user.id, rows, stamp: stamp ?? undefined });
   } catch (error) {
     if (error instanceof Error && error.message.startsWith('ledger_access_chang')) {
       return json({ error: 'busy' }, 409);

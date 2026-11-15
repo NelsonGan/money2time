@@ -123,3 +123,14 @@ test("a session cookie that cannot be decoded is no session", async () => {
   assert.equal(res.status, 401);
   assert.equal(calls.length, 0);
 });
+
+test("an album read passes on the stamp of the last one, and nothing else", async () => {
+  const { calls, upstream } = worker();
+  await handleAlbumApi(request("/api/albums/abcdef123456?since=1763190000123"), upstream);
+  await handleAlbumApi(request("/api/albums/abcdef123456?since=1;drop"), upstream);
+  await handleAlbumApi(request("/api/albums/abcdef123456"), upstream);
+  assert.deepEqual(
+    calls.map((call) => call.path),
+    ["/v1/ledgers/abcdef123456/album?since=1763190000123", "/v1/ledgers/abcdef123456/album", "/v1/ledgers/abcdef123456/album"],
+  );
+});

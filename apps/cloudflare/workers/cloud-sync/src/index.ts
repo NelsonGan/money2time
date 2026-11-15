@@ -26,7 +26,7 @@
 //   POST|PUT|GET /v1/ledgers/<id>/media/…    its images, like /v1/media
 //   GET    /v1/invites/<code>                what an invite opens (no sign-in needed)
 //   POST   /v1/invites/<code>/accept         join (any signed-in user, no Pro needed; at most 5)
-//   GET    /v1/ledgers/<id>/album            a shared album's group, read for the website (album.money2time.com)
+//   GET    /v1/ledgers/<id>/album?since=     a shared album's group, read for the website (album.money2time.com); unchanged since a stamp
 //   GET    /join/<code>                      the page a shared ledger's invite link opens; hands it to the app
 //
 // Everything else under /v1 needs a session token (`Authorization: Bearer …`).

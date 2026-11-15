@@ -60,10 +60,16 @@ export const api = {
   invite: (code: string) => call<InvitePreview>(`/invites/${code}`),
   join: (code: string, name: string) => call<{ album: { id: string } }>(`/invites/${code}/join`, { method: "POST", body: { name } }).then((body) => body.album.id),
   albums: async (): Promise<AlbumView[]> => albumsOf(await call("/albums")),
-  group: async (shareId: string): Promise<Group> => {
-    const group = parseGroup(await call(`/albums/${shareId}`));
+  /**
+   * The album's group and its change stamp; with `since` (the stamp of the
+   * last read), null while nothing changed since.
+   */
+  group: async (shareId: string, since?: string): Promise<{ group: Group; stamp: string | null } | null> => {
+    const body = await call<{ unchanged?: unknown; stamp?: unknown }>(`/albums/${shareId}${since ? `?since=${encodeURIComponent(since)}` : ""}`);
+    if (since && body?.unchanged === true) return null;
+    const group = parseGroup(body);
     if (!group) throw new AlbumApiError("server_error", 502);
-    return group;
+    return { group, stamp: typeof body.stamp === "string" ? body.stamp : null };
   },
   write: (shareId: string, rows: GroupRowWrite[], reason?: "close_even") => call(`/albums/${shareId}/write`, { method: "POST", body: { rows, reason } }),
   rejoin: (shareId: string, name: string) => call(`/albums/${shareId}/join`, { method: "POST", body: { name } }),

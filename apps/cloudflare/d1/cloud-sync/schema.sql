@@ -138,6 +138,15 @@ CREATE TABLE IF NOT EXISTS shared_albums (
   ledger_id TEXT NOT NULL PRIMARY KEY REFERENCES shared_ledgers ("id") ON DELETE CASCADE
 );
 
+-- When each shared ledger last changed: bumped with every notice its phones
+-- get (src/live.ts), so a reader with no socket (the album website) asks
+-- whether anything changed instead of reading the whole group again. A table
+-- of its own for the same reason as shared_albums.
+CREATE TABLE IF NOT EXISTS ledger_changes (
+  ledger_id TEXT NOT NULL PRIMARY KEY REFERENCES shared_ledgers ("id") ON DELETE CASCADE,
+  changed_at INTEGER NOT NULL
+);
+
 -- People who joined a shared ledger with an invite. The owner is not listed.
 CREATE TABLE IF NOT EXISTS ledger_members (
   ledger_id TEXT NOT NULL REFERENCES shared_ledgers ("id") ON DELETE CASCADE,

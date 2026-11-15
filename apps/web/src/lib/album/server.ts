@@ -39,6 +39,9 @@ function json(body: unknown, status = 200, headers: HeadersInit = {}): Response 
   });
 }
 
+/** A ledger's change stamp (the Worker's `ledgerStamp`): a count of milliseconds. */
+const STAMP = /^\d{1,20}$/;
+
 function readCookie(request: Request, name: string): string | null {
   const header = request.headers.get("cookie") ?? "";
   for (const part of header.split(";")) {
@@ -218,7 +221,11 @@ export async function handleAlbumApi(request: Request, upstream: Upstream): Prom
     const id = parts[1];
     if (!id || !SHARE_ID.test(id)) return json({ error: "not_found" }, 404);
     const action = parts[2];
-    if (parts.length === 2 && method === "GET") return authed(`/v1/ledgers/${id}/album`);
+    if (parts.length === 2 && method === "GET") {
+      // The stamp of the last read: the Worker then answers `unchanged` while nothing changed.
+      const since = url.searchParams.get("since");
+      return authed(`/v1/ledgers/${id}/album${since && STAMP.test(since) ? `?since=${since}` : ""}`);
+    }
     if (parts.length === 3 && method === "POST") {
       const body = await readBody(request);
       if (!body) return json({ error: "bad_request" }, 400);

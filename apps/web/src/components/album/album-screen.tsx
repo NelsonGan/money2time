@@ -23,6 +23,12 @@ import { AvatarStack, Button, Icon, Mascot, Sheet, Spinner, personColor, today, 
 
 /** How often an open album asks for what others changed, while the page is in view. */
 const POLL_MS = 20_000;
+/**
+ * A background read asks only whether anything changed (the Worker's change
+ * stamp), and reads everything at least this often anyway, in case a phone's
+ * notice of its changes never reached the Worker.
+ */
+const FULL_READ_MS = 5 * 60_000;
 
 export type AlbumActions = {
   /** Sends rows to the Worker; true when written. Says why on the page when not. */
@@ -37,7 +43,8 @@ export type AlbumAction = AlbumEditAction;
 /**
  * The album, read now and kept current: every 20 seconds while the page is in
  * view and whenever it comes back. A background read joins one already on
- * its way; `fresh` (after a change) always starts its own, so it never hands
+ * its way and, between full reads, only asks whether anything changed;
+ * `fresh` (after a change) always reads everything itself, so it never hands
  * back what was read before the change. Only the newest read's answer is kept.
  */
 function useAlbum(shareId: string) {
@@ -45,18 +52,27 @@ function useAlbum(shareId: string) {
   const [error, setError] = useState<AlbumApiError | null>(null);
   const loading = useRef<Promise<Group | null> | null>(null);
   const latest = useRef(0);
+  const current = useRef<{ group: Group; stamp: string | null; at: number } | null>(null);
 
   const load = useCallback(
     (options: { fresh?: boolean } = {}): Promise<Group | null> => {
       if (loading.current && !options.fresh) return loading.current;
       const seq = ++latest.current;
-      const request = api.group(shareId).then(
-        (next) => {
+      const last = current.current;
+      const since = !options.fresh && last?.stamp && Date.now() - last.at < FULL_READ_MS ? last.stamp : undefined;
+      const request = api.group(shareId, since).then(
+        (answer) => {
+          // null: nothing changed since the last read, which stays.
+          if (!answer) {
+            if (seq === latest.current) setError(null);
+            return current.current?.group ?? null;
+          }
           if (seq === latest.current) {
-            setGroup(next);
+            current.current = { ...answer, at: Date.now() };
+            setGroup(answer.group);
             setError(null);
           }
-          return next;
+          return answer.group;
         },
         (err: unknown) => {
           if (seq === latest.current) setError(err instanceof AlbumApiError ? err : new AlbumApiError("server_error", 500));
