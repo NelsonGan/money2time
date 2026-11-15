@@ -55,6 +55,8 @@ export const api = {
   session: () => call<{ user: SessionUser | null }>("/session").then((body) => body.user),
   signOut: () => call("/session", { method: "DELETE" }),
   signInWithGoogle: (idToken: string) => call<{ user: SessionUser }>("/session/google", { method: "POST", body: { idToken } }).then((body) => body.user),
+  signInWithApple: (apple: { idToken: string; nonce: string; firstName?: string; lastName?: string }) =>
+    call<{ user: SessionUser }>("/session/apple", { method: "POST", body: apple }).then((body) => body.user),
   sendEmailCode: (email: string, captcha: string | null) => call("/session/email-code", { method: "POST", body: { email, captcha } }),
   signInWithEmail: (email: string, otp: string) => call<{ user: SessionUser }>("/session/email", { method: "POST", body: { email, otp } }).then((body) => body.user),
   invite: (code: string) => call<InvitePreview>(`/invites/${code}`),

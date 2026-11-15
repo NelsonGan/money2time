@@ -2422,6 +2422,7 @@
       "other": "Inne"
     },
     "signIn": {
+      "apple": "Kontynuuj z Apple",
       "email": "Kontynuuj z e-mailem",
       "emailLabel": "Adres e-mail",
       "emailPlaceholder": "ty@przyklad.pl",

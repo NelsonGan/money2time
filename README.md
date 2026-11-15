@@ -1712,8 +1712,8 @@ Google via the Google Sign-In SDK shared with Drive backup: it reuses a Drive
 session when there is one (and stops with an error, rather than signing Drive
 out, when that session cannot be restored); otherwise it signs in once without
 the Drive scope and signs out again, so Drive backup keeps asking for its own
-access. Apple sign-in on Android is not offered (it would need an Apple
-Services ID and a web flow). Apple asks apps that offer Sign in with Apple to
+access. Apple sign-in on Android is not offered (it would need a web flow
+in the app; the Services ID that the album website uses exists). Apple asks apps that offer Sign in with Apple to
 revoke the user's Apple tokens when they delete their account: right after an
 Apple sign-in the app posts Apple's one-time authorization code, which the
 Worker trades for a refresh token and revokes in `DELETE /v1/account`.
@@ -3773,7 +3773,7 @@ catalog, or country/locale codes; none passes arbitrary visitor text.
 | `m2t_dashboard_pro_prompt_viewed` | `Dashboard Pro Prompt Viewed`           | The Pro paywall opens: a free account picks a period only Pro shows (12M, YTD, Year or All), reaches a free-plan limit, or the phone refuses a change for one | `feature` (`period`, or the limit: `accounts`, `categories`, `recurring`, `reimbursements`, `goals`, `loans`, `items`, `albums`, `budget_templates`, `split_bills`, `subcurrencies`, `wage_entries`; `other` when the phone names none)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | `m2t_dashboard_view_opened`       | `Dashboard View Opened`                 | A dashboard page is shown, including the one a refresh lands on                                                                                               | `view`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | `m2t_dashboard_unlinked`          | `Dashboard Unlinked`                    | The browser is unlinked and forgets its key and copy                                                                                                          | `by` (`browser`/`phone`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `m2t_album_web_signed_in`         | `Album Signed In`                       | Sign-in finishes on album.money2time.com                                                                                                                      | `method` (`google`, `email`), `context` (`join`, `home`, `album`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `m2t_album_web_signed_in`         | `Album Signed In`                       | Sign-in finishes on album.money2time.com                                                                                                                      | `method` (`google`, `apple`, `email`), `context` (`join`, `home`, `album`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | `m2t_album_web_joined`            | `Album Joined`                          | Join album on an invite answers                                                                                                                               | `result` (`joined`, `full`, `expired`, `failed`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | `m2t_album_web_viewed`            | `Album Viewed`                          | An album or one of its tabs is shown                                                                                                                          | `tab` (`transactions`, `breakdown`, `balances`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | `m2t_album_web_edited`            | `Album Edited`                          | A change sent to the Worker is written or refused                                                                                                             | `action` (`bill_add`, `bill_edit`, `bill_delete`, `payment_record`, `payment_undo`, `rename`, `simplify`), `result` (`saved`, `offline`, `not_member`, `failed`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
@@ -5275,7 +5275,8 @@ email codes, expired invite links and rate-limit rows older than a day.
   delete-user endpoint is off: only `DELETE /v1/account` also removes the
   Turso database and images.
 - **Sign-in.** Apple and Google tokens are verified against Apple's and
-  Google's keys and the audiences in `APPLE_CLIENT_IDS` (the bundle id) and
+  Google's keys and the audiences in `APPLE_CLIENT_IDS` (the bundle id, and
+  the website's Services ID `com.nelsongan.money2time.web`) and
   `GOOGLE_CLIENT_IDS` (iOS client, and the web client that Android tokens are
   issued for); no client secrets are needed. Email codes are 6 digits, valid
   10 minutes, five attempts, stored hashed, and sent with Email Service from
@@ -5456,22 +5457,23 @@ invite link per ledger: code hash and sealed code), `ledger_media_usage`,
 
 Made for this feature on 2026-10-28, all new (nothing existing is shared):
 
-| Resource                 | Name / id                                                                                                                          | Remove with                                                                                 |
-| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| Worker + custom domains  | `money2time-workers-cloud-sync`, `workers-cloud-sync` + `ledger` .money2time.com, cron `17 3 * * *` (`album` is now the website's) | `npx wrangler delete` in `workers/cloud-sync` (removes the domain route and cron too)       |
-| D1 database              | `money2time-cloud-sync-auth`, `2154e310-6fce-49eb-aa4b-565e343c9eb7`                                                               | `npx wrangler d1 delete money2time-cloud-sync-auth`                                         |
-| R2 bucket (private)      | `money2time-cloud-sync-media-apac` (APAC, added 2026-11-10)                                                                        | empty it, then `npx wrangler r2 bucket delete money2time-cloud-sync-media-apac`             |
-| Rate limit namespaces    | `2402` (`AUTH_LIMITER`), `2403` (`OTP_LIMITER`)                                                                                    | go with the Worker                                                                          |
-| Worker secrets           | `BETTER_AUTH_SECRET`, `TURSO_API_TOKEN`, `APPLE_PRIVATE_KEY`                                                                       | go with the Worker                                                                          |
-| Apple App ID capability  | Sign in with Apple (`APPLE_ID_AUTH`, primary) on `com.nelsongan.money2time`                                                        | `asc bundle-ids capabilities remove --id 2ASN39AS8V_APPLE_ID_AUTH --confirm` (then rebuild) |
-| Sign in with Apple key   | `Money2Time Cloud Sync`, key id `F5629ZF4G6` (.p8 in `~/.config/money2time/` and the Worker secret `APPLE_PRIVATE_KEY`)            | revoke it in the Apple Developer portal, Keys                                               |
-| Turso group              | `m2t-sync` (aws-ap-southeast-1), organization `nelsongan`                                                                          | delete its databases, then the group, in the Turso dashboard                                |
-| Turso databases          | `m2t-sync-*`, one per user, in group `m2t-sync`                                                                                    | `turso db destroy <name>`, or the Turso dashboard                                           |
-| Turso databases (shared) | `m2t-ledger-*`, one per shared ledger, in group `m2t-sync` (added 2026-10-28)                                                      | `turso db destroy <name>`, or the Turso dashboard                                           |
-| D1 tables (shared)       | `shared_ledgers`, `ledger_members`, `ledger_links`, `ledger_media_usage` in `money2time-cloud-sync-auth`                           | go with the D1 database                                                                     |
-| Durable Object class     | `SyncHub` (live updates, one per user, SQLite-backed, added 2026-10-28)                                                            | goes with the Worker                                                                        |
-| Turso Platform API token | the Worker secret `TURSO_API_TOKEN` (copy in `~/.config/money2time/turso-api-token`)                                               | revoke it in the Turso dashboard, Settings > API Tokens                                     |
-| PostHog feature flag     | `cloud_sync`, the retired allow list for the Cloud Sync UI (no longer read, see [Availability](#availability))                     | archive or delete in PostHog                                                                |
+| Resource                 | Name / id                                                                                                                                                                                                          | Remove with                                                                                      |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ |
+| Worker + custom domains  | `money2time-workers-cloud-sync`, `workers-cloud-sync` + `ledger` .money2time.com, cron `17 3 * * *` (`album` is now the website's)                                                                                 | `npx wrangler delete` in `workers/cloud-sync` (removes the domain route and cron too)            |
+| D1 database              | `money2time-cloud-sync-auth`, `2154e310-6fce-49eb-aa4b-565e343c9eb7`                                                                                                                                               | `npx wrangler d1 delete money2time-cloud-sync-auth`                                              |
+| R2 bucket (private)      | `money2time-cloud-sync-media-apac` (APAC, added 2026-11-10)                                                                                                                                                        | empty it, then `npx wrangler r2 bucket delete money2time-cloud-sync-media-apac`                  |
+| Rate limit namespaces    | `2402` (`AUTH_LIMITER`), `2403` (`OTP_LIMITER`)                                                                                                                                                                    | go with the Worker                                                                               |
+| Worker secrets           | `BETTER_AUTH_SECRET`, `TURSO_API_TOKEN`, `APPLE_PRIVATE_KEY`                                                                                                                                                       | go with the Worker                                                                               |
+| Apple App ID capability  | Sign in with Apple (`APPLE_ID_AUTH`, primary) on `com.nelsongan.money2time`                                                                                                                                        | `asc bundle-ids capabilities remove --id 2ASN39AS8V_APPLE_ID_AUTH --confirm` (then rebuild)      |
+| Apple Services ID        | `Money2Time Web`, `com.nelsongan.money2time.web` (id `5HFWSSDNU7`, added 2026-11-15): Sign in with Apple grouped under the app's App ID, domain `album.money2time.com`, return URL `https://album.money2time.com/` | remove it in the Apple Developer portal, Identifiers > Services IDs, and from `APPLE_CLIENT_IDS` |
+| Sign in with Apple key   | `Money2Time Cloud Sync`, key id `F5629ZF4G6` (.p8 in `~/.config/money2time/` and the Worker secret `APPLE_PRIVATE_KEY`)                                                                                            | revoke it in the Apple Developer portal, Keys                                                    |
+| Turso group              | `m2t-sync` (aws-ap-southeast-1), organization `nelsongan`                                                                                                                                                          | delete its databases, then the group, in the Turso dashboard                                     |
+| Turso databases          | `m2t-sync-*`, one per user, in group `m2t-sync`                                                                                                                                                                    | `turso db destroy <name>`, or the Turso dashboard                                                |
+| Turso databases (shared) | `m2t-ledger-*`, one per shared ledger, in group `m2t-sync` (added 2026-10-28)                                                                                                                                      | `turso db destroy <name>`, or the Turso dashboard                                                |
+| D1 tables (shared)       | `shared_ledgers`, `ledger_members`, `ledger_links`, `ledger_media_usage` in `money2time-cloud-sync-auth`                                                                                                           | go with the D1 database                                                                          |
+| Durable Object class     | `SyncHub` (live updates, one per user, SQLite-backed, added 2026-10-28)                                                                                                                                            | goes with the Worker                                                                             |
+| Turso Platform API token | the Worker secret `TURSO_API_TOKEN` (copy in `~/.config/money2time/turso-api-token`)                                                                                                                               | revoke it in the Turso dashboard, Settings > API Tokens                                          |
+| PostHog feature flag     | `cloud_sync`, the retired allow list for the Cloud Sync UI (no longer read, see [Availability](#availability))                                                                                                     | archive or delete in PostHog                                                                     |
 
 Teardown order: delete the Worker first (nothing can make new databases), then
 the Turso databases listed in D1 (`SELECT db_name FROM sync_databases` and
@@ -5978,7 +5980,8 @@ visitor's language, and the page reads where it is from the address
 - **`/join/<code>`, the invite.** The album's name, who invited them and how
   many people are in it (`GET /v1/invites/<code>`, the owner named as the
   album knows them). Signed out: **Continue with Google** (Google's own
-  button) or **Continue with email** (a 6-digit code, behind the same
+  button), **Continue with Apple** (on album.money2time.com only) or
+  **Continue with email** (a 6-digit code, behind the same
   Turnstile widget the app uses). Signed in: **Your name in this album**
   (their account's name, else their address's first part, capitalised), then
   **Join album**, which accepts the invite and puts them on the album's list
@@ -6050,7 +6053,8 @@ An open album whose user is somehow not on its list joins again as the app
 does (no `via: "web"`), so it never renames them; only the join screen's
 **Your name in this album** does.
 
-**Moving to the app.** The same account (the same Google account or address)
+**Moving to the app.** The same account (the same Google or Apple account, or
+address)
 signed in to the app brings the album along, with everything added on the
 web: the app lists the user's shared albums at sign-in and makes each one it
 does not have yet. What they paid on the web lands with **no account** (the
@@ -6067,7 +6071,7 @@ the app, one bill at a time or several at once.
   `SameSite=Lax`, `Secure` cookie (`m2t_album_session`, a year, the session's
   own length), and every call turns it back into `Authorization: Bearer …`.
   Only these pass, each with only the fields it needs: the session (`GET`,
-  `DELETE`, Google ID token, email code and its check), an invite's preview
+  `DELETE`, Google or Apple ID token, email code and its check), an invite's preview
   and join (accept, then the album's `join` under the chosen name; a ledger's
   link is refused), the album list, an album (`GET /v1/ledgers/<id>/album`),
   its writes (always sent `via: 'web'`), invite link, leave, removing a
@@ -6097,14 +6101,24 @@ the app, one bill at a time or several at once.
   the origin is not allowed. Email: the Turnstile site key the app uses (its
   domain `money2time.com` covers the album host; the Worker's
   `TURNSTILE_HOSTNAMES` lists `album.money2time.com`), Cloudflare's always-pass
-  test key on `*.localhost`. Sign in with Apple on the web would need a
-  Services ID with this domain and its return URL, added to the Worker's
-  `APPLE_CLIENT_IDS`; it is not offered yet.
+  test key on `*.localhost`. Apple: Apple's JS (`appleid.auth.js`) in its
+  popup mode, with the Services ID `com.nelsongan.money2time.web`, grouped
+  under the app's App ID so a person gets the same Apple user id, and so the
+  same account, as in the app. Its only domain is `album.money2time.com` and
+  its only return URL `https://album.money2time.com/`, so the button shows on
+  that host alone (Apple refuses `*.localhost`; test it in production). The
+  page hashes a fresh nonce into Apple's request and posts the ID token, the
+  raw nonce and, on a person's first Apple sign-in only, their name to
+  `/api/session/apple`; the Worker checks the token against
+  `APPLE_CLIENT_IDS`. No authorization code is kept, so the Worker holds no
+  Apple refresh token for a website-only Apple sign-in to revoke.
 - **Headers.** The album host's CSP (`next.config.ts`, `albumPolicy`) allows
-  this site's scripts, Google's sign-in script and frame, Turnstile's script
+  this site's scripts, Google's sign-in script and frame, Apple's sign-in
+  script (`appleid.cdn-apple.com`; its page is a popup), Turnstile's script
   and frame, and GA4; it connects only to itself, Google's sign-in, PostHog
   and GA4; pictures from itself and the media bucket; no framing. It sends
-  `Cross-Origin-Opener-Policy: same-origin-allow-popups` (Google's popup) and
+  `Cross-Origin-Opener-Policy: same-origin-allow-popups` (Google's and
+  Apple's popups) and
   `Referrer-Policy: strict-origin-when-cross-origin` (Google checks the
   origin). Every page and the API are `noindex`, `robots.txt` disallows
   everything, and there is no sitemap: invites and albums are private.

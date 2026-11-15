@@ -2422,6 +2422,7 @@
       "other": "Другое"
     },
     "signIn": {
+      "apple": "Продолжить с Apple",
       "email": "Продолжить по email",
       "emailLabel": "Адрес email",
       "emailPlaceholder": "you@example.com",

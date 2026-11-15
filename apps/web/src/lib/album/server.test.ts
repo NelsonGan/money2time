@@ -54,6 +54,21 @@ test("signing in keeps the Worker's token in an HttpOnly cookie, never in the an
   assert.equal(calls[0].auth, null);
 });
 
+test("Apple sign-in hands the Worker the ID token, the raw nonce and a first sign-in's name", async () => {
+  const { calls, upstream } = worker(() => Response.json({ token: "t", user: { id: "u1", email: "x@privaterelay.appleid.com", name: "Ann Lee" } }));
+  const res = await handleAlbumApi(request("/api/session/apple", { method: "POST", body: { idToken: "jwt", nonce: "n1", firstName: "Ann", lastName: "Lee" }, cookie: null }), upstream);
+  assert.equal(res.status, 200);
+  assert.equal(calls[0].path, "/api/auth/sign-in/social");
+  assert.deepEqual(calls[0].body, { provider: "apple", idToken: { token: "jwt", nonce: "n1", user: { name: { firstName: "Ann", lastName: "Lee" } } } });
+
+  await handleAlbumApi(request("/api/session/apple", { method: "POST", body: { idToken: "jwt", nonce: "n2" }, cookie: null }), upstream);
+  assert.deepEqual(calls[1].body, { provider: "apple", idToken: { token: "jwt", nonce: "n2" } });
+
+  const noNonce = await handleAlbumApi(request("/api/session/apple", { method: "POST", body: { idToken: "jwt" }, cookie: null }), upstream);
+  assert.equal(noNonce.status, 400);
+  assert.equal(calls.length, 2);
+});
+
 test("calls carry the cookie's session as a bearer token, and writes are stamped as the website's", async () => {
   const { calls, upstream } = worker();
   await handleAlbumApi(request("/api/albums/abcdef123456/write", { method: "POST", body: { rows: [{ table: "album_expenses", row: {} }], via: "phone", action: "join" } }), upstream);

@@ -2422,6 +2422,7 @@
       "other": "其他"
     },
     "signIn": {
+      "apple": "通过 Apple 继续",
       "email": "通过邮箱继续",
       "emailLabel": "邮箱地址",
       "emailPlaceholder": "you@example.com",

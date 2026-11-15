@@ -176,6 +176,17 @@ export async function handleAlbumApi(request: Request, upstream: Upstream): Prom
       if (!idToken) return json({ error: "bad_request" }, 400);
       return signIn(await call("/api/auth/sign-in/social", { method: "POST", auth: false, body: { provider: "google", idToken: { token: idToken } } }));
     }
+    if (parts[1] === "apple") {
+      // Apple's ID token for the website's Services ID, with the raw nonce the
+      // page hashed into it; the name comes only on the first Apple sign-in.
+      const idToken = text(body.idToken, 4096);
+      const nonce = text(body.nonce, 128);
+      if (!idToken || !nonce) return json({ error: "bad_request" }, 400);
+      const firstName = text(body.firstName, 80) ?? "";
+      const lastName = text(body.lastName, 80) ?? "";
+      const user = firstName || lastName ? { name: { firstName, lastName } } : undefined;
+      return signIn(await call("/api/auth/sign-in/social", { method: "POST", auth: false, body: { provider: "apple", idToken: { token: idToken, nonce, ...(user ? { user } : {}) } } }));
+    }
     if (parts[1] === "email-code") {
       const email = text(body.email, 254);
       const captcha = text(body.captcha, 2048);

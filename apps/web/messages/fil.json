@@ -2422,6 +2422,7 @@
       "other": "Iba pa"
     },
     "signIn": {
+      "apple": "Magpatuloy gamit ang Apple",
       "email": "Magpatuloy gamit ang email",
       "emailLabel": "Email address",
       "emailPlaceholder": "ikaw@example.com",

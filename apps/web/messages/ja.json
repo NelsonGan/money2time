@@ -2422,6 +2422,7 @@
       "other": "その他"
     },
     "signIn": {
+      "apple": "Appleで続ける",
       "email": "メールで続ける",
       "emailLabel": "メールアドレス",
       "emailPlaceholder": "you@example.com",

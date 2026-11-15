@@ -41,9 +41,11 @@ const dashboardPolicy = [
  */
 const googleSignIn = "https://accounts.google.com/gsi/";
 const turnstile = "https://challenges.cloudflare.com";
+/** Sign in with Apple's script; its sign-in page opens in a popup, which CSP does not cover. */
+const appleSignIn = "https://appleid.cdn-apple.com";
 const albumPolicy = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline' ${googleSignIn}client ${turnstile} ${googleTag}`,
+  `script-src 'self' 'unsafe-inline' ${googleSignIn}client ${turnstile} ${appleSignIn} ${googleTag}`,
   `style-src 'self' 'unsafe-inline' ${googleSignIn}style`,
   `img-src 'self' blob: data: ${MEDIA_ORIGIN} ${googleAnalytics}`,
   "font-src 'self'",

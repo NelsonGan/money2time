@@ -2422,6 +2422,7 @@
       "other": "Andet"
     },
     "signIn": {
+      "apple": "Fortsæt med Apple",
       "email": "Fortsæt med e-mail",
       "emailLabel": "E-mailadresse",
       "emailPlaceholder": "dig@eksempel.dk",

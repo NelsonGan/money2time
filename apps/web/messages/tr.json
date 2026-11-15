@@ -2422,6 +2422,7 @@
       "other": "Diğer"
     },
     "signIn": {
+      "apple": "Apple ile devam et",
       "email": "E-posta ile devam et",
       "emailLabel": "E-posta adresi",
       "emailPlaceholder": "siz@ornek.com",

@@ -2422,6 +2422,7 @@
       "other": "Lainnya"
     },
     "signIn": {
+      "apple": "Lanjutkan dengan Apple",
       "email": "Lanjutkan dengan email",
       "emailLabel": "Alamat email",
       "emailPlaceholder": "kamu@contoh.com",
