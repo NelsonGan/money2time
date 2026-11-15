@@ -2486,8 +2486,9 @@ their own.
     Simplify) or the payments recorded (one entry per pair and currency of
     one act; one entry in all when the act comes down to one person paying
     another, as paying a simplified debt along several bills does: "Ben paid
-    you RM150", not the four moves it took). An undo by the payer reads "Ben
-    undid paying you". Only ever added; nothing personal (account, category, notes,
+    you RM150", not the four moves it took; those it passed through, who come
+    out even, are in its `via` and see "Passed along through you · you stay
+    even" under it). An undo by the payer reads "Ben undid paying you". Only ever added; nothing personal (account, category, notes,
     receipt, mood) is in it. Read through `toAlbumActivity`.
   - `album_groups` (migration `091`): the group's settings, one row:
     `simplify_debts`, and `cover_photo_uri` (migration `092`). The row is

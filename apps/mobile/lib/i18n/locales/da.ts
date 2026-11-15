@@ -3100,6 +3100,7 @@ const da = {
       undid_payment: '{{actor}} fortrød, at {{from}} betalte {{to}} {{money}}',
       undid_own_payment: '{{actor}} fortrød sin betaling til {{to}} på {{money}}',
       recorded_by: 'Registreret af {{actor}}',
+      passed_through: 'Det gik videre gennem dig · du står lige',
       joined: '{{name}} kom med i albummet',
       started: '{{name}} oprettede albummet',
       left: '{{name}} forlod albummet',

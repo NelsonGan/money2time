@@ -109,6 +109,7 @@ describe('the activity log, one line each', () => {
         currency: 'MYR',
         amount: 45,
         bills: ['dinner'],
+        via: [],
         even: false,
       },
     });
@@ -116,7 +117,15 @@ describe('the activity log, one line each', () => {
     const mine = entry({
       kind: 'payment_recorded',
       actorMemberId: 'tess',
-      payment: { from: 'me', to: 'ben', currency: 'MYR', amount: 10, bills: [], even: false },
+      payment: {
+        from: 'me',
+        to: 'ben',
+        currency: 'MYR',
+        amount: 10,
+        bills: [],
+        via: [],
+        even: false,
+      },
     });
     expect(describeActivity(mine, ctx)).toMatchObject({
       text: 'You paid Ben RM10',
@@ -126,9 +135,35 @@ describe('the activity log, one line each', () => {
     const toMe = entry({
       kind: 'payment_recorded',
       actorMemberId: 'tess',
-      payment: { from: 'tess', to: 'me', currency: 'MYR', amount: 10, bills: [], even: false },
+      payment: {
+        from: 'tess',
+        to: 'me',
+        currency: 'MYR',
+        amount: 10,
+        bills: [],
+        via: [],
+        even: false,
+      },
     });
     expect(describeActivity(toMe, ctx)).toMatchObject({ text: 'Tess paid you RM10', mine: null });
+    // Paying a simplified debt along the user's bills: they only passed it on.
+    const along = entry({
+      kind: 'payment_recorded',
+      actorMemberId: 'ben',
+      payment: {
+        from: 'ben',
+        to: 'tess',
+        currency: 'MYR',
+        amount: 40,
+        bills: [],
+        via: ['me'],
+        even: false,
+      },
+    });
+    expect(describeActivity(along, ctx)).toMatchObject({
+      text: 'Ben paid Tess RM40',
+      mine: 'Passed along through you · you stay even',
+    });
     // Undone by the payer: "Tess undid paying you", not "Tess undid Tess paying you".
     expect(describeActivity({ ...toMe, kind: 'payment_undone' }, ctx).text).toBe(
       'Tess undid paying you RM10',

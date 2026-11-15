@@ -3147,6 +3147,7 @@ const de = {
       undid_payment: '{{actor}}: Zahlung {{from}} → {{to}} über {{money}} rückgängig gemacht',
       undid_own_payment: '{{actor}}: Zahlung an {{to}} über {{money}} rückgängig gemacht',
       recorded_by: 'Erfasst von {{actor}}',
+      passed_through: 'Lief über dich weiter · bei dir gleicht es sich aus',
       joined: '{{name}}: dem Album beigetreten',
       started: '{{name}} hat das Album erstellt',
       left: '{{name}}: Album verlassen',

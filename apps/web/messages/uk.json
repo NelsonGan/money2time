@@ -1371,6 +1371,7 @@
         "undid_payment": "{actor}: скасовано платіж {from} → {to} на {money}",
         "undid_own_payment": "{actor}: скасовано платіж → {to} · {money}",
         "recorded_by": "Записав(ла): {actor}",
+        "passed_through": "Пройшло через вас · ваш баланс не змінився",
         "joined": "{name}: приєднання до альбому",
         "started": "{name}: створення альбому",
         "left": "{name}: вихід з альбому",

@@ -3120,6 +3120,7 @@ const ms = {
       undid_payment: '{{actor}} membatalkan bayaran {{money}} daripada {{from}} kepada {{to}}',
       undid_own_payment: '{{actor}} membatalkan bayaran {{money}} kepada {{to}}',
       recorded_by: 'Direkod oleh {{actor}}',
+      passed_through: 'Diteruskan melalui anda · baki anda kekal sama',
       joined: '{{name}} menyertai album',
       started: '{{name}} memulakan album',
       left: '{{name}} meninggalkan album',

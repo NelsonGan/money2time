@@ -3146,6 +3146,7 @@ const fil = {
       undid_payment: '{{actor}} ay nag-undo ng bayad na {{money}} ({{from}} → {{to}})',
       undid_own_payment: '{{actor}} ay nag-undo ng sariling bayad na {{money}} (→ {{to}})',
       recorded_by: 'Ni-record ni {{actor}}',
+      passed_through: 'Dumaan sa iyo · walang nagbago sa balanse mo',
       joined: '{{name}} ay sumali sa album',
       started: 'Sinimulan ni {{name}} ang album',
       left: '{{name}} ay umalis sa album',

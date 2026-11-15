@@ -1371,6 +1371,7 @@
         "undid_payment": "{actor} membatalkan bayaran {from} kepada {to} {money}",
         "undid_own_payment": "{actor} membatalkan bayaran {money} kepada {to}",
         "recorded_by": "Direkod oleh {actor}",
+        "passed_through": "Diteruskan melalui anda · baki anda kekal sama",
         "joined": "{name} menyertai album",
         "started": "{name} memulakan album",
         "left": "{name} keluar dari album",

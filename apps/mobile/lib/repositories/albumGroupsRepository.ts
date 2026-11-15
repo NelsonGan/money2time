@@ -171,6 +171,4 @@ class AlbumGroupsRepository {
   }
 }
 
-/** The paths `saveAlbumCover` makes: `album-covers/<id>.<ext>`. */
-
 export const albumGroupsRepository = new AlbumGroupsRepository();

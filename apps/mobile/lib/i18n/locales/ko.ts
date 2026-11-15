@@ -3060,6 +3060,7 @@ const ko = {
       undid_payment: '{{actor}}: {{from}} → {{to}} {{money}} 정산 취소',
       undid_own_payment: '{{actor}}: {{to}}에게 보낸 {{money}} 정산 취소',
       recorded_by: '{{actor}} 님이 기록',
+      passed_through: '나를 거쳐 전달됨 · 내 잔액은 그대로예요',
       joined: '{{name}}: 앨범에 참여',
       started: '{{name}} 님이 앨범을 만듦',
       left: '{{name}}: 앨범에서 나감',

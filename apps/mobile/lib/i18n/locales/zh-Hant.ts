@@ -2977,6 +2977,7 @@ const zhHant = {
       undid_payment: '{{actor}} 撤銷了 {{from}} 付給 {{to}} 的 {{money}}',
       undid_own_payment: '{{actor}} 撤銷了付給 {{to}} 的 {{money}}',
       recorded_by: '由 {{actor}} 記錄',
+      passed_through: '經你轉交 · 你的帳目不變',
       joined: '{{name}} 加入了相簿',
       started: '{{name}} 建立了相簿',
       left: '{{name}} 離開了相簿',

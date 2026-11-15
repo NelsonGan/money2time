@@ -3118,6 +3118,7 @@ const id = {
       undid_payment: '{{actor}} membatalkan pembayaran {{money}} dari {{from}} ke {{to}}',
       undid_own_payment: '{{actor}} membatalkan pembayaran {{money}} ke {{to}}',
       recorded_by: 'Dicatat oleh {{actor}}',
+      passed_through: 'Diteruskan lewat kamu · saldomu tetap impas',
       joined: '{{name}} bergabung ke album',
       started: '{{name}} membuat album',
       left: '{{name}} keluar dari album',

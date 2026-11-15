@@ -163,11 +163,15 @@ export function describeActivity(entry: AlbumActivity, ctx: ActivityContext): Ac
       };
       // Who recorded it, when it moved the user's money and was not the
       // payer's own word ("Tess paid you" needs no "Recorded by Tess").
+      // One it only passed through ("Ben paid Ann" along the user's bills)
+      // says so: their own payments moved, and they came out even.
       const recordedBy =
-        (payment.from === ctx.selfId || payment.to === ctx.selfId) &&
-        entry.actorMemberId !== payment.from
-          ? t('recorded_by', { actor })
-          : null;
+        !!ctx.selfId && payment.via.includes(ctx.selfId)
+          ? t('passed_through')
+          : (payment.from === ctx.selfId || payment.to === ctx.selfId) &&
+              entry.actorMemberId !== payment.from
+            ? t('recorded_by', { actor })
+            : null;
       if (entry.kind === 'payment_undone') {
         // "Ben undid paying you", or "Tess undid you paying Ben": the payer
         // is mid-sentence here.

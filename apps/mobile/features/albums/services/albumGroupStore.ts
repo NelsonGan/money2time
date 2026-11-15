@@ -193,8 +193,12 @@ export function ensureLocalAlbum(share: { ledgerId: string; name: string | null 
         // own entries again rather than leaving them outside the album.
         db.runSync(
           `UPDATE album_transactions SET deleted_at = NULL, updated_at = ?
-           WHERE album_id = ? AND deleted_at = ?`,
-          [now, share.ledgerId, existing.deleted_at],
+           WHERE album_id = ? AND deleted_at = ?
+             AND transaction_id NOT IN (
+               SELECT transaction_id FROM album_transactions
+               WHERE album_id = ? AND deleted_at IS NULL
+             )`,
+          [now, share.ledgerId, existing.deleted_at, share.ledgerId],
         );
       });
     }

@@ -206,9 +206,14 @@ export function describeActivity(entry: WebAlbumActivityRow, ctx: ActivityContex
       const payment = entry.payment;
       if (!payment) return line(t("changed_bill", { actor, title }));
       const values = { actor, from: who(payment.from), to: who(payment.to, false), money: ctx.money(payment.amount, payment.currency) };
-      // Who recorded it, when it moved the user's money and was not the payer's own word.
-      const recordedBy = (payment.from === ctx.selfId || payment.to === ctx.selfId) && actorId !== payment.from ? t("recorded_by", { actor }) : null;
-      if (entry.kind === "payment_undone") return line(t(actorId === payment.from ? "undid_own_payment" : "undid_payment", values), recordedBy);
+      // Who recorded it, when it moved the user's money and was not the payer's
+      // own word; one it only passed through says so (they came out even).
+      const passedThrough = !!ctx.selfId && (payment.via ?? []).includes(ctx.selfId);
+      const recordedBy = passedThrough ? t("passed_through") : (payment.from === ctx.selfId || payment.to === ctx.selfId) && actorId !== payment.from ? t("recorded_by", { actor }) : null;
+      if (entry.kind === "payment_undone") {
+        // The payer is mid-sentence here: "Tess undid you paying Ben".
+        return line(actorId === payment.from ? t("undid_own_payment", values) : t("undid_payment", { ...values, from: who(payment.from, false) }), recordedBy);
+      }
       return line(t(payment.even ? "paid_even" : "paid", values), recordedBy);
     }
     case "member_joined":

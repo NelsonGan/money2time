@@ -3114,6 +3114,7 @@ const pl = {
       undid_payment: '{{actor}}: cofnięto płatność {{from}} → {{to}} · {{money}}',
       undid_own_payment: '{{actor}}: cofnięto płatność → {{to}} · {{money}}',
       recorded_by: 'Zapisał(a): {{actor}}',
+      passed_through: 'Przeszło przez ciebie · jesteś na zero',
       joined: '{{name}}: teraz w albumie',
       started: '{{name}}: utworzenie albumu',
       left: '{{name}}: już poza albumem',

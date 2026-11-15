@@ -3107,6 +3107,7 @@ const ru = {
       undid_payment: '{{actor}}: отменён платёж {{from}} → {{to}} · {{money}}',
       undid_own_payment: '{{actor}}: отменён платёж → {{to}} · {{money}}',
       recorded_by: 'Записал(а): {{actor}}',
+      passed_through: 'Прошло через вас · ваш баланс не изменился',
       joined: '{{name}}: теперь в альбоме',
       started: '{{name}}: создание альбома',
       left: '{{name}}: больше не в альбоме',

@@ -3119,6 +3119,7 @@ const es = {
       undid_payment: '{{actor}}: pago {{from}} → {{to}} de {{money}} deshecho',
       undid_own_payment: '{{actor}}: pago a {{to}} de {{money}} deshecho',
       recorded_by: 'Registrado por {{actor}}',
+      passed_through: 'Pasó a través de ti · quedas igual',
       joined: '{{name}}: ahora en el álbum',
       started: '{{name}} creó el álbum',
       left: '{{name}}: ya fuera del álbum',

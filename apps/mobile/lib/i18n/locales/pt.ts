@@ -3122,6 +3122,7 @@ const pt = {
       undid_payment: '{{actor}} desfez o pagamento de {{money}} de {{from}} a {{to}}',
       undid_own_payment: '{{actor}} desfez o pagamento de {{money}} a {{to}}',
       recorded_by: 'Registrado por {{actor}}',
+      passed_through: 'Passou por você · você fica quite',
       joined: '{{name}} entrou no álbum',
       started: '{{name}} criou o álbum',
       left: '{{name}} saiu do álbum',

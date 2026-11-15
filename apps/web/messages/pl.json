@@ -1371,6 +1371,7 @@
         "undid_payment": "{actor}: cofnięto płatność {from} → {to} na {money}",
         "undid_own_payment": "{actor}: cofnięto płatność → {to} · {money}",
         "recorded_by": "Zapisane przez: {actor}",
+        "passed_through": "Przeszło przez ciebie · jesteś na zero",
         "joined": "{name}: dołączenie do albumu",
         "started": "{name}: utworzenie albumu",
         "left": "{name}: opuszczenie albumu",

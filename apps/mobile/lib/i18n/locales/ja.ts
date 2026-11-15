@@ -3082,6 +3082,7 @@ const ja = {
       undid_payment: '{{actor}}が{{from}}から{{to}}への{{money}}の支払いを取り消し',
       undid_own_payment: '{{actor}}が{{to}}への{{money}}の支払いを取り消し',
       recorded_by: '{{actor}}が記録',
+      passed_through: 'あなたを経由しました · あなたの差し引きは0です',
       joined: '{{name}}がアルバムに参加',
       started: '{{name}}がアルバムを作成',
       left: '{{name}}がアルバムから退出',

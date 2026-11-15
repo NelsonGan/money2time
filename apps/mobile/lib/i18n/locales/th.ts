@@ -3044,6 +3044,7 @@ const th = {
       undid_payment: '{{actor}} ยกเลิกการจ่าย {{money}} จาก {{from}} ให้ {{to}}',
       undid_own_payment: '{{actor}} ยกเลิกการจ่าย {{money}} ให้ {{to}}',
       recorded_by: 'บันทึกโดย {{actor}}',
+      passed_through: 'ส่งต่อผ่านคุณ · ยอดของคุณยังเท่าเดิม',
       joined: '{{name}} เข้าร่วมอัลบั้ม',
       started: '{{name}} สร้างอัลบั้ม',
       left: '{{name}} ออกจากอัลบั้ม',

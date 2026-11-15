@@ -1371,6 +1371,7 @@
         "undid_payment": "{actor}: in-undo ang bayad {from} → {to} na {money}",
         "undid_own_payment": "{actor} ay nag-undo ng sariling bayad na {money} (→ {to})",
         "recorded_by": "Itinala ni {actor}",
+        "passed_through": "Dumaan sa iyo · walang nagbago sa balanse mo",
         "joined": "Sumali si {name} sa album",
         "started": "Sinimulan ni {name} ang album",
         "left": "Umalis si {name} sa album",

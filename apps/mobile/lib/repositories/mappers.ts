@@ -548,6 +548,9 @@ export function toAlbumActivity(row: AlbumActivityRow): AlbumActivity | null {
       bills: Array.isArray(data.bills)
         ? data.bills.filter((id): id is string => typeof id === 'string' && GROUP_BILL_ID.test(id))
         : [],
+      via: Array.isArray(data.via)
+        ? data.via.filter((id): id is string => typeof id === 'string' && GROUP_ROW_ID.test(id))
+        : [],
       even: data.even === true,
     };
   }

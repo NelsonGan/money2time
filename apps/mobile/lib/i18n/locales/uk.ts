@@ -3102,6 +3102,7 @@ const uk = {
       undid_payment: '{{actor}}: скасовано платіж {{from}} → {{to}} · {{money}}',
       undid_own_payment: '{{actor}}: скасовано платіж → {{to}} · {{money}}',
       recorded_by: 'Записав(ла): {{actor}}',
+      passed_through: 'Пройшло через вас · ваш баланс не змінився',
       joined: '{{name}}: тепер в альбомі',
       started: '{{name}}: створення альбому',
       left: '{{name}}: більше не в альбомі',

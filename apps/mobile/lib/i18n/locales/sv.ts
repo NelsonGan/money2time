@@ -3100,6 +3100,7 @@ const sv = {
       undid_payment: '{{actor}} ångrade att {{from}} betalade {{to}} {{money}}',
       undid_own_payment: '{{actor}} ångrade sin betalning till {{to}} på {{money}}',
       recorded_by: 'Registrerad av {{actor}}',
+      passed_through: 'Gick vidare via dig · du går jämnt ut',
       joined: '{{name}} gick med i albumet',
       started: '{{name}} skapade albumet',
       left: '{{name}} lämnade albumet',

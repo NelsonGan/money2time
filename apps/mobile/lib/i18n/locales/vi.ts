@@ -3080,6 +3080,7 @@ const vi = {
       undid_payment: '{{actor}} đã hoàn tác khoản {{from}} trả {{to}} {{money}}',
       undid_own_payment: '{{actor}} đã hoàn tác khoản trả {{to}} {{money}}',
       recorded_by: 'Do {{actor}} ghi lại',
+      passed_through: 'Được chuyển qua bạn · số dư của bạn không đổi',
       joined: '{{name}} đã tham gia album',
       started: '{{name}} đã tạo album',
       left: '{{name}} đã rời album',

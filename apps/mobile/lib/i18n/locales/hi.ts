@@ -3087,6 +3087,7 @@ const hi = {
       undid_payment: '{{actor}} ने {{from}} से {{to}} को हुआ {{money}} का भुगतान वापस लिया',
       undid_own_payment: '{{actor}} ने {{to}} को किया {{money}} का भुगतान वापस लिया',
       recorded_by: '{{actor}} ने दर्ज किया',
+      passed_through: 'आपके ज़रिए आगे गया · आपका हिसाब बराबर रहा',
       joined: '{{name}} एल्बम में शामिल हुए',
       started: '{{name}} ने एल्बम शुरू किया',
       left: '{{name}} ने एल्बम छोड़ा',

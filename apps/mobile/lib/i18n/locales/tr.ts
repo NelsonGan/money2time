@@ -3108,6 +3108,7 @@ const tr = {
       undid_payment: '{{actor}}: {{from}} → {{to}} {{money}} ödemesi geri alındı',
       undid_own_payment: '{{actor}}: → {{to}} {{money}} ödemesi geri alındı',
       recorded_by: 'Kaydeden: {{actor}}',
+      passed_through: 'Senin üzerinden aktarıldı · bakiyen değişmedi',
       joined: '{{name}}: artık albümde',
       started: '{{name}} albümü oluşturdu',
       left: '{{name}}: artık albümde değil',

@@ -3116,6 +3116,7 @@ const it = {
       undid_payment: '{{actor}}: pagamento {{from}} → {{to}} di {{money}} annullato',
       undid_own_payment: '{{actor}}: pagamento a {{to}} di {{money}} annullato',
       recorded_by: 'Registrato da {{actor}}',
+      passed_through: 'Passato attraverso di te · resti in pari',
       joined: "{{name}}: ingresso nell'album",
       started: "{{name}} ha creato l'album",
       left: "{{name}}: uscita dall'album",

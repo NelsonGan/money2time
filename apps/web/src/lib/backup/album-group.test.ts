@@ -69,6 +69,7 @@ const WORDS: Record<string, string> = {
   paid: "{from} paid {to} {money}",
   undid_payment: "{actor} undid {from} paying {to} {money}",
   undid_own_payment: "{actor} undid paying {to} {money}",
+  passed_through: "Passed along through you · you stay even",
   recorded_by: "Recorded by {actor}",
   joined: "{name} joined the album",
   started: "{name} started the album",
@@ -140,6 +141,10 @@ test("describeActivity words payments, members and kinds from a later app", () =
   assert.equal(describeActivity(entry({ kind: "payment_recorded", payment: { from: "tess", to: "me", currency: "MYR", amount: 15 } }), ctx()).mine, null);
   // Undone by the payer: "Tess undid paying you", not "Tess undid Tess paying you".
   assert.equal(describeActivity(entry({ kind: "payment_undone", payment: { from: "tess", to: "me", currency: "MYR", amount: 15 } }), ctx()).text, "Tess undid paying you RM15");
+  // Someone else's undo: the payer is mid-sentence, so "you", not "You".
+  assert.equal(describeActivity(entry({ kind: "payment_undone", actor_member_id: "tess", payment: { from: "me", to: "ben", currency: "MYR", amount: 15 } }), ctx()).text, "Tess undid you paying Someone RM15");
+  // A simplified debt paid along the user's bills: they only passed it on.
+  assert.equal(describeActivity(entry({ kind: "payment_recorded", payment: { from: "tess", to: "ben", currency: "MYR", amount: 40, via: ["me"] } }), ctx()).mine, "Passed along through you · you stay even");
   assert.equal(describeActivity(entry({ kind: "member_joined", member_id: "tess" }), ctx()).text, "Tess joined the album");
   assert.equal(describeActivity(entry({ kind: "member_joined", member_id: "tess", started: true }), ctx()).text, "Tess started the album");
   assert.equal(describeActivity(entry({ kind: "from_the_future" }), ctx()).text, "Tess changed the album");

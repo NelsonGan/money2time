@@ -3136,6 +3136,7 @@ const nl = {
       undid_payment: '{{actor}} maakte ongedaan dat {{from}} {{to}} {{money}} betaalde',
       undid_own_payment: '{{actor}} maakte de betaling van {{money}} aan {{to}} ongedaan',
       recorded_by: 'Vastgelegd door {{actor}}',
+      passed_through: 'Via jou doorgegeven · jij blijft quitte',
       joined: '{{name}} kwam bij het album',
       started: '{{name}} heeft het album gemaakt',
       left: '{{name}} verliet het album',

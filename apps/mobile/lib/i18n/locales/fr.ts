@@ -3142,6 +3142,7 @@ const fr = {
       undid_payment: '{{actor}} : paiement {{from}} → {{to}} de {{money}} annulé',
       undid_own_payment: '{{actor}} : paiement à {{to}} de {{money}} annulé',
       recorded_by: 'Enregistré par {{actor}}',
+      passed_through: 'Passé par vous · vous restez à égalité',
       joined: '{{name}} : arrivée dans l’album',
       started: "{{name}} a créé l'album",
       left: '{{name}} : départ de l’album',

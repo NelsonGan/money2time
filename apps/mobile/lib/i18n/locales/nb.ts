@@ -3103,6 +3103,7 @@ const nb = {
       undid_payment: '{{actor}} angret at {{from}} betalte {{to}} {{money}}',
       undid_own_payment: '{{actor}} angret betalingen til {{to}} på {{money}}',
       recorded_by: 'Registrert av {{actor}}',
+      passed_through: 'Gikk videre gjennom deg · du går i null',
       joined: '{{name}} ble med i albumet',
       started: '{{name}} opprettet albumet',
       left: '{{name}} forlot albumet',

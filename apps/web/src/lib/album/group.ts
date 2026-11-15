@@ -295,6 +295,7 @@ function toActivity(row: Row, albumId: string): WebAlbumActivityRow | null {
       currency,
       amount,
       bills: Array.isArray(data.bills) ? data.bills.filter((id): id is string => isText(id) && GROUP_BILL_ID.test(id)) : [],
+      via: Array.isArray(data.via) ? data.via.filter((id): id is string => isText(id) && GROUP_ROW_ID.test(id)) : [],
       even: data.even === true,
     };
   } else if (kind === "simplify_changed") {

@@ -666,17 +666,18 @@ export function planWrite(
   // act whose payments (in one currency) come down to one person paying
   // another, however many bills they run along (paying a simplified debt),
   // reads as that one payment: "Ben paid Ann RM150", not the four moves it
-  // took between three people.
+  // took between three people. Those it passed through, who come out even,
+  // are named on it (`via`), so they can see why money moved in their name.
   const paymentLines = (rows: Row[], kind: ActivityKind) => {
     type Line = { from: string; to: string; currency: string; amount: number; bills: string[] };
     const byCurrency = new Map<string, Row[]>();
     for (const row of rows) {
       const currency = row.currency as string;
-      byCurrency.set(currency, [...(byCurrency.get(currency) ?? []), row]);
+      const list = byCurrency.get(currency);
+      if (list) list.push(row);
+      else byCurrency.set(currency, [row]);
     }
-    const lines: Line[] = [];
     for (const [currency, payments] of byCurrency) {
-      const bills: string[] = [];
       const net = new Map<string, number>();
       const pairs = new Map<string, Line>();
       for (const row of payments) {
@@ -692,29 +693,37 @@ export function planWrite(
           line.bills.push(row.expense_id);
         }
         pairs.set(key, line);
-        if (isText(row.expense_id) && !bills.includes(row.expense_id)) bills.push(row.expense_id);
       }
       const payers = [...net].filter(([, amount]) => amount < 0);
       const payees = [...net].filter(([, amount]) => amount > 0);
-      if (pairs.size > 1 && payers.length === 1 && payees.length === 1) {
-        lines.push({ from: payers[0][0], to: payees[0][0], currency, amount: payees[0][1], bills });
-      } else {
-        lines.push(...pairs.values());
+      const lines: (Line & { via?: string[] })[] =
+        pairs.size > 1 && payers.length === 1 && payees.length === 1
+          ? [
+              {
+                from: payers[0][0],
+                to: payees[0][0],
+                currency,
+                amount: payees[0][1],
+                bills: [...new Set([...pairs.values()].flatMap((line) => line.bills))],
+                via: [...net].filter(([, amount]) => amount === 0).map(([member]) => member),
+              },
+            ]
+          : [...pairs.values()];
+      for (const line of lines) {
+        activities.push({
+          kind,
+          expenseId: line.bills.length === 1 ? line.bills[0] : null,
+          data: {
+            from: line.from,
+            to: line.to,
+            currency: line.currency,
+            amount: line.amount / 100,
+            bills: line.bills,
+            ...(line.via?.length ? { via: line.via } : null),
+            ...(request.reason === 'close_even' ? { even: true } : null),
+          },
+        });
       }
-    }
-    for (const line of lines) {
-      activities.push({
-        kind,
-        expenseId: line.bills.length === 1 ? line.bills[0] : null,
-        data: {
-          from: line.from,
-          to: line.to,
-          currency: line.currency,
-          amount: line.amount / 100,
-          bills: line.bills,
-          ...(request.reason === 'close_even' ? { even: true } : null),
-        },
-      });
     }
   };
   paymentLines(recorded, 'payment_recorded');

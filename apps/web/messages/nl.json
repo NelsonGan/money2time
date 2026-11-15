@@ -1371,6 +1371,7 @@
         "undid_payment": "{actor}: betaling {from} → {to} van {money} ongedaan gemaakt",
         "undid_own_payment": "{actor} maakte de betaling van {money} aan {to} ongedaan",
         "recorded_by": "Vastgelegd door {actor}",
+        "passed_through": "Via jou doorgegeven · jij blijft quitte",
         "joined": "{name} doet mee met het album",
         "started": "{name} heeft het album gemaakt",
         "left": "{name} heeft het album verlaten",
