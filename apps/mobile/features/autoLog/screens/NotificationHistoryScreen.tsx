@@ -127,13 +127,13 @@ export function NotificationHistoryScreen({ onBack }: { onBack: () => void }) {
     const ids: Record<string, string | null> = {};
     for (const entry of history) {
       if (entry.result !== 'pending') continue;
-      ids[entry.id] =
-        reviewAccountFor(
-          entry,
-          paymentAlertCapturesRepository.getStored(entry.id)?.sourceKey,
-          accounts,
-          paymentAlertPrefs,
-        )?.id ?? null;
+      // Only an Android notification can fall back to its app's account: read
+      // the app from storage just for those.
+      const sourceKey =
+        entry.channel === 'android_notification'
+          ? paymentAlertCapturesRepository.getStored(entry.id)?.sourceKey
+          : null;
+      ids[entry.id] = reviewAccountFor(entry, sourceKey, accounts, paymentAlertPrefs)?.id ?? null;
     }
     return ids;
   }, [history, accounts, paymentAlertPrefs]);
