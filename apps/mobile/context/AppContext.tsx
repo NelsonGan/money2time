@@ -3161,6 +3161,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const deleteAlbum = useCallback(
     (id: string) => {
+      // A shared album, or one the user is no longer in, is archived, never
+      // deleted (README: Leaving and stopping): its cover stays too.
+      if (sharedAlbumFor(id) || albumsRepository.isFrozen(id)) return;
       // An album's cover is uniquely owned (each pick writes a fresh file), so
       // it can be deleted outright — no other album references it.
       const cover = albumsRepository.getById(id)?.coverPhotoUri;
