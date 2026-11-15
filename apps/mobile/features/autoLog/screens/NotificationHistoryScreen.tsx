@@ -9,7 +9,7 @@ import {
   Pencil,
   Undo2,
 } from 'lucide-react-native';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, type AlertButton, Platform, Pressable, View } from 'react-native';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
@@ -35,6 +35,7 @@ import { triggerHaptic } from '~/services/haptics';
 import {
   type NotificationReviewSelection,
   resolveNotificationReviews,
+  reviewAccountFor,
   suggestNotificationCategory,
   undoNotificationAiReview,
 } from '~/services/notificationReview';
@@ -118,6 +119,24 @@ export function NotificationHistoryScreen({ onBack }: { onBack: () => void }) {
   }, [settings.appUserId, retry]);
   const pending = history.filter((entry) => entry.result === 'pending');
   const pendingKey = pending.map((entry) => entry.id).join('|');
+  // The account each pending card logs into in the open ledger: the captured
+  // one, or the one its app is set to now (captured with none, or in another
+  // ledger). Saving resolves it the same way.
+  const { accounts, paymentAlertPrefs } = app;
+  const reviewAccountIds = useMemo(() => {
+    const ids: Record<string, string | null> = {};
+    for (const entry of history) {
+      if (entry.result !== 'pending') continue;
+      ids[entry.id] =
+        reviewAccountFor(
+          entry,
+          paymentAlertCapturesRepository.getStored(entry.id)?.sourceKey,
+          accounts,
+          paymentAlertPrefs,
+        )?.id ?? null;
+    }
+    return ids;
+  }, [history, accounts, paymentAlertPrefs]);
   useEffect(() => {
     if (loading) return;
     rememberReviewSelections(
@@ -416,6 +435,7 @@ export function NotificationHistoryScreen({ onBack }: { onBack: () => void }) {
               <NotificationReviewCard
                 key={row.entry.id}
                 entry={row.entry}
+                accountId={reviewAccountIds[row.entry.id] ?? null}
                 selection={selections[row.entry.id]}
                 busy={busy}
                 money={money}
@@ -448,7 +468,9 @@ export function NotificationHistoryScreen({ onBack }: { onBack: () => void }) {
                       type,
                       amount: amount ? String(amount.amount) : '',
                       currency: amount?.currency,
-                      accountId: entry.accountId,
+                      accountId: selected
+                        ? selected.accountId
+                        : (reviewAccountIds[entry.id] ?? null),
                       categoryId: suggestNotificationCategory(
                         entry,
                         type,
@@ -615,6 +637,7 @@ function BulkReviewSheet({
 
 function NotificationReviewCard({
   entry,
+  accountId,
   selection,
   busy,
   money,
@@ -625,6 +648,8 @@ function NotificationReviewCard({
   onUndo,
 }: {
   entry: NotificationScanHistoryEntry;
+  /** The payable account this notification logs into, resolved by the screen. */
+  accountId: string | null;
   selection?: NotificationReviewSelection;
   busy: boolean;
   money: (amount: number, currency: string) => string;
@@ -638,7 +663,7 @@ function NotificationReviewCard({
   const colors = useThemeColors();
   const initialAmount =
     entry.selectedAmount ?? (entry.amounts?.length === 1 ? entry.amounts[0] : null);
-  const selected = selection ?? { amount: initialAmount, accountId: entry.accountId ?? null };
+  const selected = selection ?? { amount: initialAmount, accountId };
   const [expanded, setExpanded] = useState(false);
   const pending = entry.result === 'pending';
   const account = accounts.find((item) => item.id === selected.accountId && isPayableAccount(item));

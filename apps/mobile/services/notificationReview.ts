@@ -1,13 +1,21 @@
 import type { CreateTransactionMeta } from '~/context/AppContext';
 import { isPayableAccount } from '~/features/autoLog/lib/binding';
 import { resolveAlertCategory } from '~/features/autoLog/lib/categorize';
+import { findAlertSource } from '~/features/autoLog/lib/prefs';
 import { matchCategoryByKeywords } from '~/features/transactions/utils/categoryKeywords';
+import { getActiveLedgerId } from '~/lib/db/ledgerScope';
 import { paymentAlertCapturesRepository } from '~/lib/repositories/paymentAlertCapturesRepository';
 import {
   type CreateTransactionInput,
   transactionsRepository,
 } from '~/lib/repositories/transactionsRepository';
-import type { Account, Category, NotificationAiLogTypes, QuickEntryPrefs } from '~/types';
+import type {
+  Account,
+  Category,
+  NotificationAiLogTypes,
+  PaymentAlertPrefs,
+  QuickEntryPrefs,
+} from '~/types';
 import type { NotificationAmount } from '~/utils/notificationAmounts';
 import { isValidNotificationAmount } from '~/utils/notificationAmounts';
 
@@ -32,9 +40,35 @@ export interface NotificationReviewDeps {
     accounts: readonly Account[];
     categories: readonly Category[];
     quickEntryPrefs: QuickEntryPrefs;
+    /** The open ledger's watched apps, for the account each one logs into now. */
+    paymentAlertPrefs?: PaymentAlertPrefs;
     createTransaction: (input: CreateTransactionInput, meta?: CreateTransactionMeta) => string;
   };
 }
+
+/**
+ * The account a pending notification logs into, in the open ledger: the one
+ * bound when it was captured, else the one its Android app logs into now. A
+ * notification captured with no account, or in another ledger (To review
+ * lists every ledger's), takes the app's account once one is set, as the
+ * card's warning promises. An iOS notification's account came from its
+ * Shortcut and has no setting to fall back on.
+ */
+export function reviewAccountFor(
+  entry: Pick<NotificationScanHistoryEntry, 'accountId' | 'channel'>,
+  sourceKey: string | null | undefined,
+  accounts: readonly Account[],
+  prefs: PaymentAlertPrefs | null | undefined,
+): Account | null {
+  const payable = (id: string | null | undefined) =>
+    id ? (accounts.find((item) => item.id === id && isPayableAccount(item)) ?? null) : null;
+  const captured = payable(entry.accountId);
+  if (captured || entry.channel !== 'android_notification' || !sourceKey || !prefs) {
+    return captured;
+  }
+  return payable(findAlertSource(prefs, 'android_notification', sourceKey)?.accountId);
+}
+
 let decisions: Promise<unknown> = Promise.resolve();
 
 /** Serialize decisions; a committed capture is the durable idempotency guard. */
@@ -57,11 +91,27 @@ export function resolveNotificationReviews(
       if (!isCurrent()) break;
       const entry = rows.find((row) => row.id === id && row.result === 'pending');
       if (!entry) continue;
-      const stored = paymentAlertCapturesRepository.getById(id);
-      // History is written before acknowledging the native queue. If the DB
-      // write was interrupted, let the queue retry before resolving this item:
-      // a missing capture cannot provide the durable guard against duplicates.
-      if (!stored) throw new Error('notification_review_capture_missing');
+      // To review lists every ledger's notifications, so look in every ledger:
+      // one captured while another ledger was open is still decided here.
+      const stored = paymentAlertCapturesRepository.getStored(id);
+      if (!stored) {
+        // Ignoring writes no money, so it needs no capture: one lost with a
+        // deleted or left ledger can still be cleared. A queue retry never
+        // reopens a finished review.
+        if (action === 'none') {
+          await recordNotificationScan(
+            deps.appUserId,
+            { ...entry, result: 'none' },
+            deps.generation,
+          );
+          result.completed++;
+          continue;
+        }
+        // History is written before acknowledging the native queue. If the DB
+        // write was interrupted, let the queue retry before saving this item:
+        // a missing capture cannot provide the durable guard against duplicates.
+        throw new Error('notification_review_capture_missing');
+      }
       // The expense and capture link are committed together before history.
       // Repair a storage failure/relaunch without writing the money twice.
       if (stored?.status === 'logged' && stored.transactionId) {
@@ -107,9 +157,10 @@ export function resolveNotificationReviews(
       const amount = selected
         ? selected.amount
         : (entry.selectedAmount ?? (entry.amounts?.length === 1 ? entry.amounts[0] : null));
-      const accountId = selected ? selected.accountId : entry.accountId;
       const live = current();
-      const account = live.accounts.find((item) => item.id === accountId && isPayableAccount(item));
+      const account = selected
+        ? live.accounts.find((item) => item.id === selected.accountId && isPayableAccount(item))
+        : reviewAccountFor(entry, stored.sourceKey, live.accounts, live.paymentAlertPrefs);
       if (!isValidNotificationAmount(amount) || !account) {
         result.unfinished.push(id);
         continue;
@@ -150,6 +201,8 @@ export function resolveNotificationReviews(
               status: 'logged',
               reason: action === 'income' ? 'income' : 'user',
               transactionId: persistedId,
+              // It now belongs with its transaction, in the open ledger.
+              ledgerId: getActiveLedgerId(),
               title: null,
               body: null,
             }),
@@ -308,8 +361,11 @@ export function applyNotificationAiResults(
         await keep(amount, named?.id);
         continue;
       }
-      const account = live.accounts.find(
-        (item) => item.id === entry.accountId && isPayableAccount(item),
+      const account = reviewAccountFor(
+        entry,
+        stored.sourceKey,
+        live.accounts,
+        live.paymentAlertPrefs,
       );
       if (!amount || !account) {
         // No linked account (or no amount to trust): never guessed. The user

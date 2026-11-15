@@ -1,14 +1,15 @@
 import { PRO_LIMITS } from '~/constants/proLimits';
 import type { CreateTransactionMeta } from '~/context/AppContext';
+import { setActiveLedgerId } from '~/lib/db/ledgerScope';
 import { paymentAlertCapturesRepository } from '~/lib/repositories/paymentAlertCapturesRepository';
 import { transactionsRepository } from '~/lib/repositories/transactionsRepository';
-import { resolveNotificationReviews } from '~/services/notificationReview';
+import { resolveNotificationReviews, reviewAccountFor } from '~/services/notificationReview';
 import {
   getNotificationScanHistoryGeneration,
   readNotificationScanHistory,
   recordNotificationScan,
 } from '~/services/notificationScanHistory';
-import type { QuickEntryPrefs } from '~/types';
+import type { PaymentAlertPrefs, QuickEntryPrefs } from '~/types';
 
 import { account, category } from '../features/autoLog/helpers';
 
@@ -18,7 +19,7 @@ jest.mock('~/services/notificationScanHistory', () => ({
   getNotificationScanHistoryGeneration: jest.fn(() => 0),
 }));
 jest.mock('~/lib/repositories/paymentAlertCapturesRepository', () => ({
-  paymentAlertCapturesRepository: { getById: jest.fn(), update: jest.fn() },
+  paymentAlertCapturesRepository: { getStored: jest.fn(), update: jest.fn() },
 }));
 jest.mock('~/lib/repositories/transactionsRepository', () => ({
   transactionsRepository: { getById: jest.fn(() => null) },
@@ -59,7 +60,7 @@ beforeEach(() => {
   jest.mocked(readNotificationScanHistory).mockResolvedValue(rows);
   jest.mocked(getNotificationScanHistoryGeneration).mockReturnValue(0);
   jest
-    .mocked(paymentAlertCapturesRepository.getById)
+    .mocked(paymentAlertCapturesRepository.getStored)
     .mockReturnValue({ id: 'one', status: 'pending' } as never);
 });
 it('creates exactly the user-selected type with the captured date and correct type category', async () => {
@@ -97,8 +98,21 @@ it('ignores a notification without needing an amount or account', async () => {
     0,
   );
 });
+it('ignores a notification whose capture is gone (a deleted or left ledger)', async () => {
+  jest.mocked(paymentAlertCapturesRepository.getStored).mockReturnValue(null);
+  await expect(resolveNotificationReviews(['one'], 'none', setup())).resolves.toEqual({
+    completed: 1,
+    unfinished: [],
+  });
+  expect(paymentAlertCapturesRepository.update).not.toHaveBeenCalled();
+  expect(recordNotificationScan).toHaveBeenCalledWith(
+    'user',
+    expect.objectContaining({ result: 'none' }),
+    0,
+  );
+});
 it('does not save money without a durable capture after an interrupted queue write', async () => {
-  jest.mocked(paymentAlertCapturesRepository.getById).mockReturnValue(null);
+  jest.mocked(paymentAlertCapturesRepository.getStored).mockReturnValue(null);
   await expect(resolveNotificationReviews(['one'], 'expense', setup())).rejects.toThrow(
     'notification_review_capture_missing',
   );
@@ -128,7 +142,7 @@ it('keeps a failed transaction pending and allows a later retry', async () => {
 });
 it('repairs history after a committed save without creating another transaction', async () => {
   jest
-    .mocked(paymentAlertCapturesRepository.getById)
+    .mocked(paymentAlertCapturesRepository.getStored)
     .mockReturnValue({ status: 'logged', transactionId: 'tx', reason: 'income' } as never);
   await resolveNotificationReviews(['one'], 'expense', setup());
   expect(create).not.toHaveBeenCalled();
@@ -183,7 +197,7 @@ it('requires a currently payable account even when a captured account has been d
 it('serializes repeated concurrent taps and repairs a history failure after the commit', async () => {
   let committed = false;
   jest
-    .mocked(paymentAlertCapturesRepository.getById)
+    .mocked(paymentAlertCapturesRepository.getStored)
     .mockImplementation(
       () =>
         (committed
@@ -254,7 +268,7 @@ it('bulk income and expense save every valid item but leave invalid entries pend
 
 it('repairs the saved amount and account after a history failure instead of showing stale edits', async () => {
   jest
-    .mocked(paymentAlertCapturesRepository.getById)
+    .mocked(paymentAlertCapturesRepository.getStored)
     .mockReturnValue({ status: 'logged', transactionId: 'tx', reason: 'income' } as never);
   jest.mocked(transactionsRepository.getById).mockReturnValue({
     type: 'income',
@@ -373,4 +387,72 @@ it('suggests an income category without choosing an expense category with matchi
     expect.objectContaining({ type: 'income', categoryId: 'salary' }),
     expect.anything(),
   );
+});
+
+const alertPrefs = (accountId: string | null) =>
+  ({
+    alertsEnabled: true,
+    sources: {
+      'android_notification:com.bank': {
+        channel: 'android_notification',
+        key: 'com.bank',
+        enabled: true,
+        accountId,
+      },
+    },
+  }) as unknown as PaymentAlertPrefs;
+const androidRow = { ...rows[0], channel: 'android_notification' as const, accountId: null };
+
+it('logs a notification captured with no account into the account its app is set to now', async () => {
+  jest.mocked(readNotificationScanHistory).mockResolvedValue([androidRow]);
+  jest
+    .mocked(paymentAlertCapturesRepository.getStored)
+    .mockReturnValue({ id: 'one', status: 'pending', sourceKey: 'com.bank' } as never);
+  const deps = setup();
+  deps.getCurrent = () => ({ ...setup().getCurrent(), paymentAlertPrefs: alertPrefs('a1') });
+  setActiveLedgerId('ledger-b');
+  try {
+    await expect(resolveNotificationReviews(['one'], 'expense', deps)).resolves.toEqual({
+      completed: 1,
+      unfinished: [],
+    });
+  } finally {
+    setActiveLedgerId(null);
+  }
+  expect(create).toHaveBeenCalledWith(
+    expect.objectContaining({ type: 'expense', accountId: 'a1' }),
+    expect.anything(),
+  );
+  // The capture moves to the ledger its transaction was saved in.
+  expect(paymentAlertCapturesRepository.update).toHaveBeenCalledWith(
+    'one',
+    expect.objectContaining({ status: 'logged', ledgerId: 'ledger-b' }),
+  );
+});
+describe('reviewAccountFor', () => {
+  const accounts = [account(), account({ id: 'a2' })];
+  it('keeps the captured account while it is payable in the open ledger', () => {
+    expect(
+      reviewAccountFor({ ...androidRow, accountId: 'a2' }, 'com.bank', accounts, alertPrefs('a1'))
+        ?.id,
+    ).toBe('a2');
+  });
+  it("falls back to the Android app's current account", () => {
+    expect(reviewAccountFor(androidRow, 'com.bank', accounts, alertPrefs('a1'))?.id).toBe('a1');
+    expect(
+      reviewAccountFor(
+        { ...androidRow, accountId: 'other-ledger' },
+        'com.bank',
+        accounts,
+        alertPrefs('a1'),
+      )?.id,
+    ).toBe('a1');
+  });
+  it('finds nothing when the app has no account, or for an iOS Shortcut', () => {
+    expect(reviewAccountFor(androidRow, 'com.bank', accounts, alertPrefs(null))).toBeNull();
+    expect(reviewAccountFor(androidRow, 'com.other', accounts, alertPrefs('a1'))).toBeNull();
+    expect(
+      reviewAccountFor({ ...rows[0], accountId: null }, 'com.bank', accounts, alertPrefs('a1')),
+    ).toBeNull();
+  });
 });

@@ -144,6 +144,8 @@ class PaymentAlertCapturesRepository {
       duplicateOf: string | null;
       resolution: PaymentAlertResolution | null;
       parserVersion: number;
+      /** Move it to another ledger: a review logged into the open one. */
+      ledgerId: string;
     }>,
   ) {
     const db = getDb();
