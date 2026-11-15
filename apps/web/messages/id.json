@@ -11,7 +11,7 @@
     },
     "privacy": {
       "title": "Kebijakan Privasi - Money2Time",
-      "description": "Cara Money2Time menangani data Anda: penyimpanan lokal, analitik produk dengan ID Aplikasi acak, dan tidak menjual data pribadi atau keuangan."
+      "description": "Cara Money2Time menangani data Anda: penyimpanan lokal-dahulu, akun dan Cloud Sync opsional, cara kami menggunakan data pengguna Google, dan tidak menjual data pribadi atau keuangan."
     },
     "terms": {
       "title": "Ketentuan Penggunaan - Money2Time",
@@ -386,59 +386,93 @@
   },
   "privacy": {
     "title": "Kebijakan Privasi",
-    "lastUpdated": "Terakhir diperbarui: 22 Oktober 2026",
+    "lastUpdated": "Terakhir diperbarui: 15 November 2026",
     "websiteAnalytics": {
       "title": "Analitik Penggunaan Situs Web",
       "paragraphs": [
         "Di money2time.com, kami menggunakan PostHog dan Google Analytics untuk mengukur tayangan halaman pseudonim serta sejumlah interaksi terbatas, seperti klik unduhan aplikasi, pemilihan tutorial, dan hasil formulir kontak. Layanan ini dapat menggunakan penyimpanan browser atau cookie dan memproses informasi teknis termasuk perkiraan wilayah, jenis perangkat dan browser, serta situs perujuk. Data pengguna dan peristiwa Google Analytics disimpan hingga 14 bulan.",
         "Di Dasbor Web (app.money2time.com), layanan yang sama mengukur halaman dasbor mana yang Anda buka, kapan browser ditautkan atau diputuskan tautannya, apakah transfer dari ponsel Anda dan perubahan yang Anda buat berhasil, serta kapan fitur Pro ditawarkan. Setelah ponsel Anda mengirimkan datanya, peristiwa ini ditautkan ke pengidentifikasi aplikasi acak milik ponsel tersebut, sehingga penggunaan dasbor dan aplikasi Anda dihitung sebagai satu pengguna pseudonim hingga Anda memutuskan tautan browser. Dasbor memisahkan hal ini dari bagian lain money2time.com, sehingga kunjungan Anda ke halaman lain tidak ditautkan dengannya. Peristiwa dasbor tidak pernah menyertakan data keuangan Anda, dan kunjungan ke dasbor tidak pernah direkam sebagai rekaman ulang sesi.",
         "PostHog juga dapat merekam sebagian kecil kunjungan situs web sebagai rekaman ulang sesi dengan setiap kolom formulir disamarkan, dan menerima laporan saat terjadi error di sebuah halaman.",
-        "Kami tidak mengirim isi formulir kontak, teks pencarian tutorial, data keuangan, pengenal akun, string kueri URL lengkap, atau data untuk iklan maupun personalisasi. Pengalihan /download tidak menambahkan alamat IP atau string user-agent Anda ke peristiwa analitiknya. Analitik situs web tidak dimuat saat pengaturan Do Not Track di browser Anda diaktifkan."
+        "Kami tidak mengirim isi formulir kontak, teks pencarian tutorial, data keuangan, alamat email, string kueri URL lengkap, atau data untuk iklan maupun personalisasi. Pengalihan /download tidak menambahkan alamat IP atau string user-agent Anda ke peristiwa analitiknya. Analitik situs web tidak dimuat saat pengaturan Do Not Track di browser Anda diaktifkan."
       ]
     },
     "sections": [
       {
         "title": "Ikhtisar",
         "paragraphs": [
-          "Money2Time (Aplikasi) adalah aplikasi keuangan pribadi yang mengonversi pengeluaran Anda menjadi padanan waktu berdasarkan upah per jam Anda. Privasi Anda penting bagi kami. Kebijakan ini menjelaskan data apa yang dikumpulkan Aplikasi, bagaimana data tersebut digunakan, dan hak Anda terkait data tersebut."
+          "Money2Time (Aplikasi) adalah aplikasi keuangan pribadi yang mengonversi pengeluaran Anda menjadi padanan waktu berdasarkan upah per jam Anda. Aplikasi ini dijalankan oleh tim Money2Time (kami). Kebijakan ini menjelaskan data apa yang dikumpulkan oleh Aplikasi, money2time.com, Dasbor Web (app.money2time.com), dan album bersama di web (album.money2time.com), bagaimana data tersebut digunakan, disimpan, dan dibagikan, serta pilihan dan hak Anda terkait data tersebut.",
+          "Kami tidak menjual data pribadi atau keuangan Anda, kami tidak menampilkan iklan, dan kami tidak menggunakan data Anda untuk periklanan."
         ]
       },
       {
-        "title": "1. Penyimpanan Data & Desain Lokal-Dahulu",
+        "title": "1. Desain Lokal-Dahulu",
         "paragraphs": [
-          "Semua data keuangan Anda, termasuk transaksi, akun, kategori, aturan berulang, dan pengaturan upah, disimpan secara lokal di perangkat Anda menggunakan basis data di perangkat (SQLite). Kami tidak mengoperasikan server yang menyimpan informasi keuangan pribadi Anda, dan Aplikasi tidak pernah menyinkronkan data Anda atau mencadangkannya ke server kami. Jika Anda menggunakan Dasbor Web yang bersifat opsional (bagian 6), ponsel Anda mengirim salinan langsung ke browser yang Anda tautkan, dengan enkripsi end-to-end; server kami meneruskannya tanpa menyimpannya dan tidak dapat membacanya.",
-          "Jika Anda menghapus instalasi Aplikasi, semua data yang tersimpan secara lokal akan dihapus secara permanen."
+          "Anda dapat menggunakan Aplikasi tanpa akun. Secara default, data keuangan Anda, termasuk transaksi, akun, kategori, anggaran, aturan berulang, dan pengaturan upah, hanya disimpan di perangkat Anda dalam basis data di perangkat (SQLite).",
+          "Data Anda hanya meninggalkan perangkat Anda untuk fitur opsional yang Anda pilih untuk digunakan, yang masing-masing dijelaskan di bawah: masuk ke akun, Cloud Sync, buku dan album bersama, pemindaian struk dan fitur AI lainnya, pencadangan ke Google Drive atau iCloud, Dasbor Web, dan penghasilan langsung di iOS."
         ]
       },
       {
         "title": "2. Informasi yang Kami Kumpulkan",
         "subsections": [
           {
-            "title": "Data Keuangan (Hanya Disimpan Secara Lokal)",
+            "title": "Data di Perangkat Anda",
             "lists": [
               [
-                "Jumlah transaksi, tanggal, kategori, catatan, dan tag sentimen",
-                "Nama akun, jenis, dan saldo",
+                "Jumlah transaksi, tanggal, judul, kategori, catatan, tag sentimen, dan foto struk",
+                "Nama akun, jenis, saldo, logo, dan kode QR pembayaran yang Anda tambahkan",
                 "Informasi upah dan tarif per jam",
-                "Aturan transaksi berulang",
-                "Nama dan pengaturan kategori"
+                "Anggaran, tujuan, aturan berulang, album, dan nama kategori",
+                "Notifikasi pembayaran yang dibaca Aplikasi untuk mencatat transaksi, jika Anda mengaktifkan pencatatan dari notifikasi"
               ]
             ],
             "paragraphs": [
-              "Data ini tidak pernah meninggalkan perangkat Anda kecuali Anda secara eksplisit memilih untuk mengekspornya, atau mengirimkannya ke browser yang Anda tautkan dengan Dasbor Web."
+              "Kecuali Anda menggunakan salah satu fitur opsional di bawah, data ini tetap berada di perangkat Anda."
+            ]
+          },
+          {
+            "title": "Informasi Akun",
+            "paragraphs": [
+              "Akun bersifat opsional. Anda dapat masuk dengan Google, dengan Apple (di iOS), atau dengan kode sekali pakai yang dikirim ke alamat email Anda. Saat Anda masuk, kami menyimpan alamat email Anda, nama Anda sebagaimana diberikan oleh Google atau Apple (atau sebagaimana Anda memasukkannya), alamat foto profil yang diberikan Google, ID pengguna yang diberikan Google atau Apple kepada Anda untuk Aplikasi ini, dan token masuk yang mereka terbitkan. Untuk setiap ponsel yang masuk, kami juga menyimpan pengidentifikasi aplikasi acaknya, agar langganan Pro Anda berfungsi di setiap ponsel tempat Anda masuk. Untuk sesi Anda, kami menyimpan token sesi, alamat IP, dan user agent perangkat. Permintaan masuk melalui email diperiksa dengan Cloudflare Turnstile untuk memblokir penyalahgunaan otomatis.",
+              "Kami menggunakan informasi akun hanya untuk memasukkan Anda, menjaga Anda tetap masuk, menghubungkan metode masuk Anda yang memiliki alamat email terverifikasi yang sama, memberikan manfaat Pro Anda di semua ponsel Anda, dan menampilkan nama Anda kepada orang-orang yang berbagi buku atau album dengan Anda."
+            ]
+          },
+          {
+            "title": "Cloud Sync",
+            "paragraphs": [
+              "Cloud Sync bersifat opsional dan nonaktif hingga Anda mengaktifkannya. Saat aktif, Aplikasi menyimpan salinan data Money2Time Anda (data yang sama dengan cadangan, termasuk gambar yang Anda tambahkan, seperti foto struk, sampul, logo, dan kode QR pembayaran) di server kami agar tetap sama di semua perangkat Anda yang telah masuk. Data Anda disimpan dalam basis data khusus untuk akun Anda, yang di-hosting oleh Turso, dan gambar Anda disimpan secara privat di Cloudflare R2. Data dikirim melalui HTTPS tetapi tidak dienkripsi end-to-end, yang berarti sistem kami dapat membacanya untuk menyinkronkannya. Notifikasi yang ditangkap untuk pencatatan dan pembelajaran merchant tidak disinkronkan.",
+              "Keluar dari akun menghentikan sinkronisasi. Salinan cloud disimpan hingga Anda menghapus akun Anda."
+            ]
+          },
+          {
+            "title": "Buku dan Album Bersama",
+            "paragraphs": [
+              "Jika Anda membuat atau bergabung dengan buku bersama atau album bersama, data yang Anda tambahkan ke dalamnya disimpan di server kami dan dapat dilihat oleh semua orang di dalamnya: nama anggota, tagihan (judul, jumlah, tanggal, mata uang, siapa yang membayar dan bagaimana pembagiannya), pembayaran, pengaturan, foto sampul, dan log aktivitas tentang siapa mengubah apa. Akun, kategori, catatan, foto struk, dan suasana hati Anda sendiri untuk suatu tagihan tidak pernah dibagikan kepada grup. Nama tampilan Anda dalam grup adalah nama yang Anda tetapkan, atau jika tidak ada, nama masuk Anda. Pemilik buku bersama dapat melihat alamat email anggota. Siapa pun yang memiliki tautan undangan dapat melihat nama grup, nama pemiliknya, dan jumlah anggotanya.",
+              "Tagihan dan perubahan yang Anda tambahkan tetap berada di grup sebagai bagian dari catatan bersamanya, termasuk setelah Anda keluar."
+            ]
+          },
+          {
+            "title": "Pemindaian Struk dan Fitur AI",
+            "paragraphs": [
+              "Saat Anda memindai struk atau tangkapan layar, Aplikasi mengirimkan gambar tersebut, beserta mata uang serta nama kategori dan akun Anda, ke layanan pemindaian kami, yang menggunakan model AI dari Anthropic dan penyedia model lainnya, yang diakses melalui OpenRouter, untuk membaca detailnya. Jika Anda mengaktifkan tinjauan otomatis notifikasi pembayaran, teks notifikasi dan nama kategori Anda dikirim dengan cara yang sama. Kami tidak menyimpan gambar atau teks ini; kami hanya menyimpan jumlah penggunaan untuk menerapkan batas paket. Penyedia AI memprosesnya untuk mengembalikan hasil."
+            ]
+          },
+          {
+            "title": "Penghasilan Langsung (iOS)",
+            "paragraphs": [
+              "Jika Anda mengaktifkan penghasilan langsung di Layar Terkunci, Aplikasi mengirimkan tarif per jam, simbol mata uang, jadwal shift, zona waktu, pengidentifikasi aplikasi acak, dan token push Live Activity yang diberikan Apple ke server kami, yang memperbarui Live Activity melalui Apple Push Notification service selama berjalan."
             ]
           },
           {
             "title": "Pengidentifikasi Aplikasi Acak",
             "paragraphs": [
-              "Saat pertama kali diluncurkan, Aplikasi membuat pengidentifikasi unik acak yang diawali dengan m2t_ dan tidak ditautkan ke nama, email, Apple ID, atau identitas pribadi apa pun. Pengidentifikasi yang sama dibagikan kepada PostHog, Google Analytics for Firebase, dan RevenueCat untuk analitik produk dan pengelolaan langganan, serta kepada setiap browser yang Anda tautkan dengan Dasbor Web, yang analitik penggunaannya (PostHog dan Google Analytics) juga menggunakannya."
+              "Saat pertama kali diluncurkan, Aplikasi membuat pengidentifikasi unik acak yang diawali dengan m2t_. Pengidentifikasi ini dibagikan kepada PostHog, Google Analytics for Firebase, dan RevenueCat untuk analitik produk dan pengelolaan langganan, serta kepada setiap browser yang Anda tautkan dengan Dasbor Web, yang analitik penggunaannya juga menggunakannya. Jika Anda masuk, kami menautkannya ke akun Anda di server kami; kami tidak mengirimkan nama atau alamat email Anda ke penyedia analitik kami."
             ]
           },
           {
             "title": "Analitik Penggunaan",
             "paragraphs": [
-              "Kami menggunakan PostHog dan Google Analytics for Firebase untuk mengumpulkan data penggunaan berpseudonim yang ditautkan ke pengidentifikasi Aplikasi acak ini dan meningkatkan Aplikasi. Data ini tidak mencakup jumlah, detail transaksi, saldo, catatan, struk, cadangan, atau informasi yang dapat mengidentifikasi Anda.",
-              "PostHog juga menerima laporan crash dan error, serta merekam sebagian kecil sesi aplikasi sebagai rekaman layar agar kami dapat menemukan dan memperbaiki masalah. Dalam rekaman itu, semua hal yang menampilkan informasi Anda disamarkan: teks, angka, kolom input, grafik, dan foto apa pun yang Anda tambahkan. Hanya desain milik aplikasi, seperti ikon, ilustrasi, dan label tombolnya, yang tetap terlihat. Rekaman ini tidak pernah menampilkan data keuangan Anda."
+              "Kami menggunakan PostHog dan Google Analytics for Firebase untuk mengumpulkan data penggunaan berpseudonim yang ditautkan ke pengidentifikasi aplikasi acak agar kami dapat memahami cara Aplikasi digunakan dan meningkatkan pengalaman penggunaan. Analitik tidak mencakup jumlah keuangan, detail transaksi, saldo akun, catatan, struk, cadangan, nama, atau alamat email.",
+              "PostHog juga menerima laporan crash dan error, mencatat model, jumlah token, dan biaya setiap permintaan AI (tidak pernah gambar atau teksnya), serta merekam sebagian kecil sesi aplikasi sebagai rekaman layar agar kami dapat menemukan dan memperbaiki masalah. Dalam rekaman itu, semua hal yang menampilkan informasi Anda disamarkan: teks, angka, kolom input, grafik, dan foto apa pun yang Anda tambahkan. Hanya desain milik aplikasi, seperti ikon, ilustrasi, dan label tombolnya, yang tetap terlihat. Rekaman ini tidak pernah menampilkan data keuangan Anda."
             ],
             "lists": [
               [
@@ -452,16 +486,47 @@
         ]
       },
       {
-        "title": "3. Pembelian Dalam Aplikasi & Langganan",
+        "title": "3. Data Pengguna Google",
         "paragraphs": [
-          "Aplikasi menawarkan langganan premium opsional (Pro) yang dikelola melalui RevenueCat. Pembayaran diproses oleh Apple atau Google. Kami tidak pernah menerima atau menyimpan informasi pembayaran, detail kartu kredit, atau kredensial Apple ID/Google Account Anda.",
-          "RevenueCat menerima status langganan, pengidentifikasi produk, dan tanggal kedaluwarsa Anda untuk mengelola hak akses Anda. Informasi ini ditautkan ke pengidentifikasi Aplikasi acak, bukan identitas pribadi Anda."
+          "Bagian ini menjelaskan bagaimana Aplikasi dan situs web kami mengakses, menggunakan, menyimpan, dan membagikan data yang diterima dari Google API.",
+          "Penggunaan dan transfer informasi yang diterima dari Google API oleh Money2Time ke aplikasi lain mana pun akan mematuhi Google API Services User Data Policy (Kebijakan Data Pengguna Layanan Google API), termasuk persyaratan Limited Use (Penggunaan Terbatas)."
+        ],
+        "subsections": [
+          {
+            "title": "Data yang Kami Akses",
+            "lists": [
+              [
+                "Google Sign-In (di Aplikasi dan di album.money2time.com): ID akun Google Anda, alamat email dan apakah alamat tersebut terverifikasi, nama, dan alamat foto profil, melalui cakupan openid, email, dan profile.",
+                "Google Drive (hanya jika Anda memilih Google Drive untuk pencadangan): akses terbatas pada cakupan drive.file, yang memungkinkan Aplikasi melihat dan mengelola hanya file cadangan yang dibuatnya. Aplikasi tidak dapat melihat file lain apa pun di Drive Anda."
+              ]
+            ]
+          },
+          {
+            "title": "Cara Kami Menggunakannya",
+            "paragraphs": [
+              "Kami menggunakan data profil Google Anda hanya untuk membuat dan memasukkan Anda ke akun Money2Time Anda, menghubungkannya dengan metode masuk lain yang memiliki alamat email terverifikasi yang sama, dan menampilkan nama Anda kepada orang-orang di buku dan album yang Anda bagikan. Kami menggunakan akses Google Drive hanya untuk menyimpan, mencantumkan, dan memulihkan file cadangan Money2Time Anda. Kami tidak menggunakan data pengguna Google untuk periklanan, kami tidak menjualnya, dan kami tidak menggunakannya untuk melatih model AI."
+            ]
+          },
+          {
+            "title": "Cara Kami Menyimpan dan Membagikannya",
+            "paragraphs": [
+              "Data profil Google Anda disimpan dalam basis data akun kami di Cloudflare dan disimpan hingga Anda menghapus akun Anda. Cadangan Drive Anda ditulis langsung dari ponsel Anda ke Google Drive Anda; cadangan tersebut tidak pernah melewati atau disimpan di server kami, dan Anda dapat menghapusnya di Google Drive kapan saja. Kami membagikan data pengguna Google hanya kepada anggota buku dan album yang Anda pilih untuk dibagikan (nama Anda), dan kepada penyedia layanan yang meng-hosting server kami (Cloudflare dan Turso) berdasarkan ketentuan pemrosesan data mereka. Kami tidak pernah mengirimkannya ke penyedia analitik atau penyedia AI kami.",
+              "Anda dapat mencabut akses Money2Time ke Akun Google Anda kapan saja di myaccount.google.com/permissions, dan Anda dapat menghapus akun Anda di Aplikasi seperti dijelaskan di bagian 9."
+            ]
+          }
         ]
       },
       {
-        "title": "4. Notifikasi",
+        "title": "4. Pembelian Dalam Aplikasi & Langganan",
         "paragraphs": [
-          "Aplikasi dapat meminta izin untuk mengirim notifikasi. Semua notifikasi dijadwalkan secara lokal di perangkat Anda. Tidak ada notifikasi push yang dikirim dari server eksternal. Anda dapat menolak izin notifikasi atau menonaktifkan notifikasi kapan saja di Pengaturan perangkat Anda."
+          "Aplikasi menawarkan langganan premium opsional (Pro) yang dikelola melalui RevenueCat. Pembayaran diproses oleh Apple atau Google. Kami tidak pernah menerima atau menyimpan informasi pembayaran, detail kartu kredit, atau kata sandi Apple ID/Akun Google Anda.",
+          "RevenueCat menerima status langganan, pengidentifikasi produk, dan tanggal kedaluwarsa Anda untuk mengelola hak akses Anda, yang ditautkan ke pengidentifikasi aplikasi acak. Jika Anda masuk, server kami memeriksa status Pro Anda dengan RevenueCat agar berlaku di semua ponsel Anda yang telah masuk."
+        ]
+      },
+      {
+        "title": "5. Notifikasi",
+        "paragraphs": [
+          "Aplikasi dapat meminta izin untuk mengirim notifikasi. Pengingat dan ringkasan dijadwalkan secara lokal di perangkat Anda. Anda dapat menolak izin notifikasi atau menonaktifkan notifikasi kapan saja di Pengaturan perangkat Anda."
         ],
         "lists": [
           [
@@ -472,31 +537,48 @@
         ]
       },
       {
-        "title": "5. Izin Perangkat",
+        "title": "6. Izin Perangkat",
         "paragraphs": [
-          "Aplikasi hanya meminta izin notifikasi untuk menjadwalkan pengingat dan ringkasan lokal. Aplikasi tidak mengakses kamera, mikrofon, perpustakaan foto, kontak, kalender, pesan, lokasi, data kesehatan, data kebugaran, aplikasi lain, atau riwayat penelusuran Anda."
+          "Aplikasi meminta setiap izin hanya saat Anda menggunakan fitur yang memerlukannya, dan Anda dapat menonaktifkan izin mana pun di Pengaturan perangkat Anda."
+        ],
+        "lists": [
+          [
+            "Kamera: untuk memotret struk dan memindai kode yang menautkan Dasbor Web.",
+            "Perpustakaan foto: untuk melampirkan atau memindai foto yang Anda pilih, dan untuk menyimpan gambar yang Anda ekspor.",
+            "Mikrofon dan pengenalan ucapan: untuk menambahkan transaksi dengan suara. Ucapan Anda diubah menjadi teks oleh layanan pengenalan ucapan Apple atau Google, yang dapat memprosesnya di server mereka.",
+            "Face ID atau sidik jari: untuk membuka Aplikasi jika Anda mengaktifkan Kunci Aplikasi. Aplikasi tidak pernah menerima data biometrik Anda.",
+            "Akses notifikasi (Android): untuk mencatat transaksi dari notifikasi pembayaran aplikasi yang Anda pilih, jika Anda mengaktifkan pencatatan dari notifikasi. Notifikasi lain diabaikan.",
+            "Notifikasi: untuk pengingat dan ringkasan lokal."
+          ]
         ]
       },
       {
-        "title": "6. Ekspor, Impor Data & Dasbor Web",
+        "title": "7. Cadangan, Ekspor, Impor & Dasbor Web",
         "paragraphs": [
-          "Anda dapat mengekspor semua data keuangan Anda sebagai file JSON kapan saja melalui Pengaturan Aplikasi. File yang diekspor dibagikan menggunakan fungsi berbagi bawaan perangkat Anda. Kami tidak menerima atau memproses data yang Anda ekspor.",
-          "Anda juga dapat mengimpor data dari cadangan Money2Time sebelumnya atau bermigrasi dari aplikasi Money Manager. Mengimpor akan menggantikan semua data yang ada di perangkat Anda.",
-          "Dasbor Web bersifat opsional. Untuk menggunakannya, Anda membuka app.money2time.com di komputer dan memindai kode yang ditampilkannya dengan Aplikasi. Ponsel Anda dan browser tersebut kemudian menyepakati kunci enkripsi yang hanya dipegang oleh keduanya. Selama layar Dasbor Web di Aplikasi dan browser sama-sama terbuka, Aplikasi mengirimkan salinan data Anda ke browser (data yang sama dengan ekspor, dengan logo, ikon, dan foto sampul yang kamu tambahkan, tetapi tanpa foto struk atau kode QR pembayaran), dienkripsi end-to-end dengan AES-256-GCM. Data ini melewati server yang kami jalankan di Cloudflare, yang meneruskan data terenkripsi tersebut saat diterima dan tidak menyimpannya. Kami tidak dapat membacanya.",
-          "Browser menyimpan salinan terakhir yang diterimanya, tetap dalam keadaan terenkripsi, di penyimpanannya sendiri bersama kuncinya, sampai Anda memutuskan tautannya di browser atau di Aplikasi. Perubahan yang Anda buat di dasbor dikirim kembali ke ponsel Anda, dienkripsi dengan cara yang sama, dan Aplikasi hanya menyimpannya selama layar Dasbor Web-nya terbuka dan hanya dari browser yang Anda izinkan untuk membuat perubahan. Ponsel Anda juga memberi tahu browser apakah Anda memiliki Money2Time Pro, agar dasbor Pro dapat dibuka, serta pengidentifikasi aplikasi acaknya, untuk analitik penggunaan dasbor. Tidak ada akun: kami tidak menyimpan alamat email, dan server yang meneruskan data Anda tidak mencatat ponsel maupun browser mana yang tertaut."
+          "Anda dapat mencadangkan data Anda ke Google Drive atau iCloud, secara manual atau otomatis setiap hari. Cadangan disimpan dari ponsel Anda langsung ke akun Google Drive atau iCloud Anda sendiri, dan kami tidak pernah menerimanya. Anda juga dapat mengekspor semua data Anda sebagai file JSON kapan saja, yang dibagikan menggunakan fungsi berbagi bawaan perangkat Anda, dan mengimpor cadangan Money2Time sebelumnya atau data dari aplikasi Money Manager. Mengimpor akan menggantikan semua data yang ada di perangkat Anda.",
+          "Dasbor Web bersifat opsional. Untuk menggunakannya, Anda membuka app.money2time.com di komputer dan memindai kode yang ditampilkannya dengan Aplikasi. Ponsel Anda dan browser tersebut kemudian menyepakati kunci enkripsi yang hanya dipegang oleh keduanya. Selama layar Dasbor Web di Aplikasi dan browser sama-sama terbuka, Aplikasi mengirimkan salinan data Anda ke browser (data yang sama dengan ekspor, dengan logo, ikon, dan foto sampul yang Anda tambahkan, tetapi tanpa foto struk atau kode QR pembayaran), dienkripsi end-to-end dengan AES-256-GCM. Data ini melewati server yang kami jalankan di Cloudflare, yang meneruskan data terenkripsi tersebut saat diterima dan tidak menyimpannya. Kami tidak dapat membacanya.",
+          "Browser menyimpan salinan terakhir yang diterimanya, tetap dalam keadaan terenkripsi, di penyimpanannya sendiri bersama kuncinya, sampai Anda memutuskan tautannya di browser atau di Aplikasi. Perubahan yang Anda buat di dasbor dikirim kembali ke ponsel Anda, dienkripsi dengan cara yang sama, dan Aplikasi hanya menyimpannya selama layar Dasbor Web-nya terbuka dan hanya dari browser yang Anda izinkan untuk membuat perubahan. Ponsel Anda juga memberi tahu browser apakah Anda memiliki Money2Time Pro, agar dasbor Pro dapat dibuka, serta pengidentifikasi aplikasi acaknya, untuk analitik penggunaan dasbor. Dasbor Web tidak memerlukan akun, dan server yang meneruskan data Anda tidak mencatat ponsel maupun browser mana yang tertaut.",
+          "Di album.money2time.com, Anda dapat masuk dengan Google atau kode email untuk melihat dan mengedit album bersama yang Anda ikuti. Situs ini menjaga Anda tetap masuk dengan cookie aman hingga satu tahun."
         ]
       },
       {
-        "title": "7. Penghapusan Data",
+        "title": "8. Penyimpanan Data",
         "paragraphs": [
-          "Anda memiliki kendali penuh atas data Anda setiap saat. Reset All Data menghapus secara permanen semua transaksi, akun, kategori, aturan berulang, dan pengaturan upah dari perangkat Anda. Reset Transactions Only menghapus riwayat transaksi Anda sambil mempertahankan akun dan kategori. Menghapus instalasi Aplikasi akan menghapus basis data lokal dan seluruh data yang tersimpan sepenuhnya. Memutuskan tautan browser dari Dasbor Web menghapus salinan yang disimpannya: langsung saat Anda memutuskan tautan di browser, dan saat berikutnya browser terhubung bila Anda memutuskan tautan dari Aplikasi. Menghapus data situs browser tersebut juga menghapusnya.",
-          "Mereset data di dalam Aplikasi tidak menghapus status langganan Anda yang disimpan oleh Apple/Google atau data analitik yang sebelumnya dikirim ke PostHog / Google Analytics for Firebase. Untuk meminta penghapusan data analitik, hubungi kami melalui email di bawah."
+          "Data di perangkat Anda tetap ada hingga Anda menghapusnya atau menghapus instalasi Aplikasi. Informasi akun, salinan Cloud Sync Anda, dan gambar Anda di server kami disimpan hingga Anda menghapus akun Anda. Data buku dan album bersama disimpan selama grup tersebut ada. Sesi masuk berlaku hingga satu tahun dan diperpanjang selama Anda menggunakannya. Teks struk dan notifikasi yang dikirim untuk pemrosesan AI tidak kami simpan. Data analitik disimpan hingga 14 bulan di Google Analytics dan sesuai dengan pengaturan penyimpanan kami di PostHog. Detail koneksi seperti alamat IP disimpan sebentar di log penyedia layanan kami."
         ]
       },
       {
-        "title": "8. Layanan Pihak Ketiga",
+        "title": "9. Penghapusan Data",
         "paragraphs": [
-          "Aplikasi tidak menampilkan iklan atau menggunakan SDK periklanan."
+          "Anda memiliki kendali penuh atas data Anda. Atur Ulang Data di Pengaturan menghapus secara permanen akun, kategori, dan transaksi Anda dari perangkat Anda, dan dari salinan Cloud Sync Anda jika Cloud Sync aktif. Menghapus instalasi Aplikasi akan menghapus basis data lokal dari perangkat Anda, tetapi tidak menghapus cadangan Anda di Google Drive atau iCloud, maupun akun Anda.",
+          "Untuk menghapus akun Anda, buka halaman Akun di Aplikasi dan pilih Hapus akun. Tindakan ini menghapus secara permanen informasi akun Anda, salinan Cloud Sync Anda, setiap gambar yang Anda simpan pada kami, serta buku dan album bersama yang Anda miliki, dan mencabut akses masuk Apple untuk Aplikasi. Memutuskan tautan browser dari Dasbor Web menghapus salinan yang disimpannya: langsung saat Anda memutuskan tautan di browser, dan saat berikutnya browser terhubung bila Anda memutuskan tautan dari Aplikasi.",
+          "Menghapus data Anda tidak menghapus catatan langganan Anda yang disimpan oleh Apple atau Google, maupun data analitik yang sebelumnya dikirim ke PostHog dan Google Analytics for Firebase. Untuk meminta penghapusan data analitik, hubungi kami melalui email di bawah. Halaman penghapusan data kami memuat langkah-langkah lengkapnya."
+        ]
+      },
+      {
+        "title": "10. Layanan Pihak Ketiga",
+        "paragraphs": [
+          "Kami menggunakan penyedia layanan berikut. Masing-masing hanya menerima data yang diperlukan untuk tujuannya."
         ],
         "table": {
           "headers": [
@@ -506,19 +588,44 @@
           ],
           "rows": [
             [
-              "PostHog / Google Analytics for Firebase",
-              "Analitik penggunaan berpseudonim",
-              "ID Aplikasi acak, peristiwa penggunaan fitur, preferensi"
+              "PostHog dan Google Analytics for Firebase",
+              "Analitik penggunaan berpseudonim, laporan error, rekaman sesi",
+              "ID aplikasi acak, peristiwa penggunaan fitur, preferensi, rekaman yang disamarkan"
             ],
             [
               "RevenueCat",
               "Pengelolaan langganan",
-              "ID Aplikasi acak, status langganan"
+              "ID aplikasi acak, status langganan"
             ],
             [
-              "Cloudflare (Workers, Durable Objects)",
-              "Koneksi Dasbor Web, hanya jika Anda menggunakannya",
-              "Data Anda, terenkripsi end-to-end dan hanya saat dalam perjalanan; detail koneksi seperti alamat IP, disimpan sebentar di log Cloudflare"
+              "Cloudflare (Workers, D1, R2, Durable Objects, Email, Turnstile)",
+              "Hosting server kami, akun, gambar Cloud Sync, album bersama, email masuk, koneksi Dasbor Web",
+              "Informasi akun, gambar yang disinkronkan, data grup bersama, data Dasbor Web terenkripsi end-to-end saat dalam perjalanan, detail koneksi seperti alamat IP"
+            ],
+            [
+              "Turso",
+              "Hosting basis data untuk Cloud Sync serta buku dan album bersama",
+              "Data Money2Time Anda yang disinkronkan dan data grup bersama"
+            ],
+            [
+              "OpenRouter, Anthropic, dan penyedia model AI lainnya",
+              "Membaca struk dan meninjau notifikasi pembayaran",
+              "Gambar struk atau teks notifikasi, mata uang, nama kategori dan akun"
+            ],
+            [
+              "Google (Sign-In, Drive)",
+              "Masuk dan pencadangan, jika Anda menggunakannya",
+              "Permintaan masuk; file cadangan Anda masuk ke Drive Anda sendiri"
+            ],
+            [
+              "Apple (Sign in with Apple, iCloud, Push Notification service)",
+              "Masuk, pencadangan, dan pembaruan penghasilan langsung, jika Anda menggunakannya",
+              "Permintaan masuk; file cadangan Anda masuk ke iCloud Anda sendiri; pembaruan Live Activity"
+            ],
+            [
+              "Frankfurter",
+              "Kurs mata uang",
+              "Kode mata uang dan detail koneksi seperti alamat IP"
             ],
             [
               "Apple App Store / Google Play",
@@ -529,27 +636,27 @@
         }
       },
       {
-        "title": "9. Keamanan Data",
+        "title": "11. Keamanan Data",
         "paragraphs": [
-          "Data keuangan Anda disimpan dalam basis data lokal yang tidak terenkripsi dan dilindungi oleh keamanan bawaan perangkat Anda. Saat Anda menggunakan Dasbor Web, data tersebut dienkripsi di ponsel Anda dengan AES-256-GCM, menggunakan kunci yang disepakati ponsel dan browser Anda melalui pertukaran kunci P-256, dan dikirim melalui HTTPS; server kami tidak pernah memiliki kuncinya. Aplikasi hanya menggunakan algoritma enkripsi standar yang dipublikasikan."
+          "Data di perangkat Anda dilindungi oleh keamanan bawaan perangkat Anda. Semua yang dikirim Aplikasi ke server kami dikirim melalui HTTPS, dan akses ke server serta basis data kami dibatasi. Token masuk dari Apple dan kredensial untuk setiap basis data Cloud Sync disimpan dalam keadaan terenkripsi. Data Dasbor Web dienkripsi end-to-end di ponsel Anda dengan AES-256-GCM, menggunakan kunci yang disepakati ponsel dan browser Anda melalui pertukaran kunci P-256; server kami tidak pernah memiliki kuncinya. Data Cloud Sync serta buku dan album bersama tidak dienkripsi end-to-end. Aplikasi hanya menggunakan algoritma enkripsi standar yang dipublikasikan."
         ]
       },
       {
-        "title": "10. Privasi Anak",
+        "title": "12. Privasi Anak",
         "paragraphs": [
           "Aplikasi tidak ditujukan untuk anak-anak di bawah usia 13 tahun. Kami tidak dengan sengaja mengumpulkan informasi pribadi dari anak-anak di bawah 13 tahun. Jika Anda meyakini seorang anak telah memberikan data melalui Aplikasi, harap hubungi kami dan kami akan mengambil langkah untuk menghapus informasi tersebut."
         ]
       },
       {
-        "title": "11. Perubahan pada Kebijakan Ini",
+        "title": "13. Perubahan pada Kebijakan Ini",
         "paragraphs": [
           "Kami dapat memperbarui Kebijakan Privasi ini dari waktu ke waktu. Perubahan akan ditampilkan di halaman ini dengan tanggal Terakhir diperbarui yang baru. Penggunaan Aplikasi secara berkelanjutan setelah perubahan berarti Anda menerima kebijakan yang diperbarui."
         ]
       }
     ],
     "contact": {
-      "title": "12. Hubungi Kami",
-      "body": "Jika Anda memiliki pertanyaan tentang Kebijakan Privasi ini, membutuhkan dukungan, atau ingin meminta penghapusan data analitik, silakan hubungi kami di:",
+      "title": "14. Hubungi Kami",
+      "body": "Jika Anda memiliki pertanyaan tentang Kebijakan Privasi ini, membutuhkan dukungan, atau ingin meminta penghapusan data Anda, silakan hubungi kami di:",
       "formPrefix": "Anda juga dapat menggunakan",
       "formLink": "formulir kontak",
       "formSuffix": "di situs ini."
@@ -697,23 +804,42 @@
   },
   "dataDeletion": {
     "title": "Permintaan Penghapusan Data",
-    "lastUpdated": "Terakhir diperbarui: 20 Oktober 2026",
-    "intro": "Money2Time adalah aplikasi local-first: semua data keuangan Anda hanya disimpan di perangkat Anda dan tidak pernah disimpan di server kami. Halaman ini menjelaskan cara meminta penghapusan data yang terkait dengan aplikasi Money2Time, termasuk langkah-langkah untuk meminta penghapusan dan jenis data mana yang dihapus atau disimpan, beserta periode penyimpanannya.",
+    "lastUpdated": "Terakhir diperbarui: 15 November 2026",
+    "intro": "Money2Time adalah aplikasi local-first: data keuangan Anda disimpan di perangkat Anda, dan hanya disimpan di server kami jika Anda masuk dan menggunakan Cloud Sync atau buku dan album bersama. Halaman ini menjelaskan cara menghapus data yang terkait dengan aplikasi Money2Time, jenis data mana yang dihapus atau disimpan, serta periode penyimpanannya.",
     "sections": [
       {
         "title": "Cara Meminta Penghapusan Data",
         "subsections": [
           {
-            "title": "Hapus data yang tersimpan di perangkat Anda",
+            "title": "Hapus akun dan data cloud Anda",
             "paragraphs": [
-              "Hampir semua data Anda, termasuk semua data keuangan Anda, hanya tersimpan di perangkat Anda. Anda dapat menghapusnya sendiri kapan saja:"
+              "Jika Anda telah masuk, Anda dapat menghapus sendiri akun Anda dan semua yang tersimpan bersamanya di server kami:"
             ],
             "lists": [
               [
-                "Buka aplikasi Money2Time dan buka Setelan.",
-                "Ketuk \"Reset All Data\" untuk menghapus secara permanen semua transaksi, akun, kategori, aturan berulang, dan setelan upah.",
-                "Sebagai alternatif, hapus instalan aplikasi untuk menghapus sepenuhnya basis data lokal dan semua data yang tersimpan."
+                "Buka aplikasi Money2Time dan buka halaman Akun Anda.",
+                "Ketuk \"Hapus akun\" lalu konfirmasi.",
+                "Informasi akun Anda (nama, alamat email, detail masuk), salinan Cloud Sync Anda, setiap gambar yang Anda simpan pada kami, serta buku dan album bersama yang Anda miliki langsung dihapus. Data di ponsel Anda tetap ada hingga Anda menghapusnya di sana."
               ]
+            ]
+          },
+          {
+            "title": "Hapus data yang tersimpan di perangkat Anda",
+            "paragraphs": [
+              "Anda dapat menghapus data di perangkat Anda kapan saja:"
+            ],
+            "lists": [
+              [
+                "Buka aplikasi Money2Time dan buka Pengaturan.",
+                "Ketuk \"Atur Ulang Data\" untuk menghapus secara permanen akun, kategori, dan transaksi Anda. Jika Cloud Sync aktif, tindakan ini juga menghapus salinan cloud Anda.",
+                "Sebagai alternatif, hapus instalasi aplikasi untuk menghapus basis data lokal dari perangkat Anda."
+              ]
+            ]
+          },
+          {
+            "title": "Hapus cadangan Anda",
+            "paragraphs": [
+              "Cadangan yang Anda buat ke Google Drive atau iCloud disimpan di akun Anda sendiri, bukan di server kami. Hapus cadangan tersebut di Google Drive (folder Money2Time) atau di pengaturan penyimpanan iCloud Anda. Anda juga dapat mencabut akses Money2Time ke Akun Google Anda di myaccount.google.com/permissions."
             ]
           },
           {
@@ -730,14 +856,14 @@
             ]
           },
           {
-            "title": "Minta penghapusan data analitik dan langganan",
+            "title": "Minta penghapusan data analitik dan data lainnya",
             "paragraphs": [
-              "Untuk meminta penghapusan data analitik atau langganan yang terkait dengan pengidentifikasi Aplikasi acak Anda, hubungi kami:"
+              "Untuk meminta penghapusan data analitik atau langganan yang terkait dengan pengidentifikasi aplikasi acak Anda, atau data lainnya jika Anda tidak dapat menggunakan aplikasi, hubungi kami:"
             ],
             "lists": [
               [
                 "Kirim email kepada kami ke alamat di bawah dengan subjek \"Data Deletion Request\", atau gunakan formulir kontak di situs ini.",
-                "Gunakan tombol salin di samping ID Pengguna di Settings > Display dan sertakan ID lengkap agar kami dapat menemukan data yang terkait dengan Aplikasi Anda.",
+                "Gunakan tombol salin di samping ID Pengguna di Pengaturan > Tampilan dan sertakan ID lengkapnya, serta alamat email akun Anda jika Anda telah masuk, agar kami dapat menemukan data Anda.",
                 "Kami akan memproses permintaan Anda dan mengonfirmasi penyelesaiannya dalam waktu 30 hari."
               ]
             ]
@@ -757,17 +883,47 @@
           ],
           "rows": [
             [
-              "Data keuangan di perangkat (transaksi, akun, kategori, aturan berulang, setelan upah)",
+              "Data keuangan di perangkat (transaksi, akun, kategori, anggaran, aturan berulang, pengaturan upah)",
               "Dihapus",
-              "Dihapus segera saat Anda mereset data atau menghapus instalan aplikasi. Kami tidak menyimpan apa pun."
+              "Dihapus segera saat Anda mengatur ulang data atau menghapus instalasi aplikasi."
+            ],
+            [
+              "Informasi akun (nama, alamat email, ID pengguna Google atau Apple, sesi masuk)",
+              "Dihapus",
+              "Dihapus segera saat Anda menghapus akun Anda."
+            ],
+            [
+              "Salinan Cloud Sync dan gambar yang Anda simpan pada kami",
+              "Dihapus",
+              "Dihapus segera saat Anda menghapus akun Anda."
+            ],
+            [
+              "Buku dan album bersama yang Anda miliki",
+              "Dihapus",
+              "Dihapus untuk setiap anggota saat Anda menghapus akun Anda."
+            ],
+            [
+              "Tagihan dan perubahan yang Anda tambahkan ke grup milik orang lain",
+              "Disimpan",
+              "Disimpan sebagai bagian dari catatan bersama grup tersebut selama grup itu ada."
+            ],
+            [
+              "Cadangan di Google Drive atau iCloud Anda",
+              "Di bawah kendali Anda",
+              "Disimpan di akun Anda sendiri hingga Anda menghapusnya di sana."
             ],
             [
               "Salinan Dasbor Web di browser yang Anda tautkan",
               "Dihapus",
-              "Dihapus dari browser tersebut saat Anda memutuskan tautannya atau menghapus data situsnya. Server kami tidak pernah menyimpannya, jadi tidak ada yang kami simpan."
+              "Dihapus dari browser tersebut saat Anda memutuskan tautannya atau menghapus data situsnya. Server kami tidak pernah menyimpannya."
             ],
             [
-              "Data analitik berpseudonim (PostHog / Google Analytics for Firebase)",
+              "Gambar struk dan teks notifikasi yang dikirim untuk pemindaian",
+              "Tidak disimpan",
+              "Diproses untuk mengembalikan hasil dan tidak kami simpan. Hanya jumlah penggunaan yang disimpan, untuk batas paket."
+            ],
+            [
+              "Data analitik berpseudonim (PostHog dan Google Analytics for Firebase)",
               "Dihapus atas permintaan",
               "Dihapus dalam waktu 30 hari sejak permintaan Anda."
             ],
@@ -782,14 +938,14 @@
       {
         "title": "Data yang Tidak Kami Simpan",
         "paragraphs": [
-          "Money2Time tidak memerlukan akun dan tidak menyimpan nama, email, Apple ID, Akun Google, atau detail pembayaran Anda di server kami. Karena data keuangan Anda tidak pernah disimpan di server kami, termasuk saat Anda menggunakan Dasbor Web, kami tidak dapat mengaksesnya atau menghapusnya untuk Anda.",
+          "Kami tidak pernah menyimpan detail pembayaran, nomor kartu, atau kata sandi Apple ID maupun Akun Google Anda. Kami tidak menyimpan cadangan Google Drive atau iCloud Anda, dan kami tidak dapat membaca data Dasbor Web Anda, yang dienkripsi end-to-end.",
           "Catatan langganan dan pembayaran yang disimpan oleh Apple atau Google berada di luar kendali kami dan dikelola langsung melalui akun Apple atau Google Anda."
         ]
       }
     ],
     "contact": {
       "title": "Hubungi Kami",
-      "body": "Untuk meminta penghapusan data analitik atau langganan, atau jika Anda memiliki pertanyaan, hubungi kami di:",
+      "body": "Untuk meminta penghapusan data Anda, atau jika Anda memiliki pertanyaan, hubungi kami di:",
       "formPrefix": "Anda juga dapat menggunakan",
       "formLink": "formulir kontak",
       "formSuffix": "di situs ini."

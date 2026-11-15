@@ -3541,6 +3541,20 @@ The measurement ID is public routing metadata and is deliberately checked into
 only on `money2time.com`, `www.money2time.com` or `app.money2time.com`, and do
 not start when the browser advertises Do Not Track.
 
+#### Google sign-in branding
+
+The name and logo on Google's sign-in and consent screens (in the app and on
+`album.money2time.com`) come from Google Auth Platform > Branding in the
+`money2time-expo` Cloud project, not from the app: the logo there is the
+`classic` app icon (`apps/mobile/assets/app-icons/classic/icon-light.png`)
+resized to 120 × 120. The app is in production, so any branding change needs
+brand verification, and until it passes Google keeps showing the last verified
+branding. Verification reads `/privacy`: it must describe what the app does
+with Google user data (sign-in profile, `drive.file` Drive backups) and carry
+the Google API Services User Data Policy / Limited Use statement. A brand
+change after a new feature that sends data off the phone needs the privacy
+policy updated first, or verification fails with "insufficient content".
+
 #### Website GA4 property configuration
 
 - Property timezone is Malaysia and currency is MYR.

@@ -11,7 +11,7 @@
     },
     "privacy": {
       "title": "Gizlilik Politikası - Money2Time",
-      "description": "Money2Time verilerinizi nasıl işler: yerel depolama, rastgele bir Uygulama kimliği kullanan ürün analizi ve kişisel veya finansal verilerin satılmaması."
+      "description": "Money2Time verilerinizi nasıl işler: yerel depolama, isteğe bağlı hesap ve Cloud Sync, Google kullanıcı verilerini nasıl kullandığımız ve kişisel veya finansal verilerin satılmaması."
     },
     "terms": {
       "title": "Kullanım Şartları - Money2Time",
@@ -386,59 +386,93 @@
   },
   "privacy": {
     "title": "Gizlilik Politikası",
-    "lastUpdated": "Son güncelleme: 22 Ekim 2026",
+    "lastUpdated": "Son güncelleme: 15 Kasım 2026",
     "websiteAnalytics": {
       "title": "Web Sitesi Kullanım Analizi",
       "paragraphs": [
         "money2time.com'da, takma adlı sayfa görüntülemelerini ve uygulama indirme tıklamaları, eğitim seçimi ve iletişim formu sonuçları gibi sınırlı sayıdaki etkileşimi ölçmek için PostHog ve Google Analytics kullanırız. Bu hizmetler tarayıcı depolamasını veya çerezleri kullanabilir ve yaklaşık bölge, cihaz ve tarayıcı türü ile yönlendiren site gibi teknik bilgileri işleyebilir. Google Analytics kullanıcı ve etkinlik verileri en fazla 14 ay saklanır.",
         "Web Gösterge Paneli'nde (app.money2time.com) aynı hizmetler hangi pano sayfalarını açtığınızı, bir tarayıcının ne zaman bağlandığını veya bağlantısının kaldırıldığını, telefonunuzdan yapılan aktarımlar ile yaptığınız değişikliklerin başarılı olup olmadığını ve bir Pro özelliğinin ne zaman sunulduğunu ölçer. Telefonunuz verilerini gönderdikten sonra bu etkinlikler o telefonun rastgele uygulama tanımlayıcısıyla ilişkilendirilir; böylece pano ve uygulama kullanımınız, tarayıcının bağlantısını kaldırana kadar tek bir takma adlı kullanıcı olarak sayılır. Pano bunu money2time.com'un geri kalanından ayrı tutar; bu nedenle diğer sayfalara yaptığınız ziyaretler onunla ilişkilendirilmez. Pano etkinlikleri finansal verilerinizi asla içermez ve pano ziyaretleri asla oturum tekrarı olarak kaydedilmez.",
         "PostHog ayrıca web sitesi ziyaretlerinin küçük bir örneğini her form alanı gizlenmiş oturum tekrarları olarak kaydedebilir ve bir sayfada hata oluştuğunda rapor alır.",
-        "İletişim formu içeriğini, eğitim arama metnini, finansal verileri, hesap tanımlayıcılarını, tam URL sorgu dizelerini veya reklam ya da kişiselleştirme amaçlı verileri göndermeyiz. /download yönlendirmesi IP adresinizi veya user-agent dizenizi analiz etkinliğine eklemez. Tarayıcınızın Do Not Track ayarı etkin olduğunda web sitesi analizi yüklenmez."
+        "İletişim formu içeriğini, eğitim arama metnini, finansal verileri, e-posta adreslerini, tam URL sorgu dizelerini veya reklam ya da kişiselleştirme amaçlı verileri göndermeyiz. /download yönlendirmesi IP adresinizi veya user-agent dizenizi analiz etkinliğine eklemez. Tarayıcınızın Do Not Track ayarı etkin olduğunda web sitesi analizi yüklenmez."
       ]
     },
     "sections": [
       {
         "title": "Genel Bakış",
         "paragraphs": [
-          "Money2Time (Uygulama), harcamalarınızı saatlik ücretinize göre zaman karşılıklarına dönüştüren bir kişisel finans uygulamasıdır. Gizliliğiniz bizim için önemlidir. Bu politika, Uygulamanın hangi verileri topladığını, bunların nasıl kullanıldığını ve bu verilerle ilgili haklarınızı açıklar."
+          "Money2Time (Uygulama), harcamalarınızı saatlik ücretinize göre zaman karşılıklarına dönüştüren bir kişisel finans uygulamasıdır. Uygulama Money2Time ekibi (biz) tarafından işletilir. Bu politika; Uygulamanın, money2time.com'un, Web Gösterge Paneli'nin (app.money2time.com) ve web'deki paylaşılan albümlerin (album.money2time.com) hangi verileri topladığını, bu verilerin nasıl kullanıldığını, saklandığını ve paylaşıldığını, ayrıca bu verilerle ilgili seçeneklerinizi ve haklarınızı açıklar.",
+          "Kişisel veya finansal verilerinizi satmayız, reklam göstermeyiz ve verilerinizi reklam amacıyla kullanmayız."
         ]
       },
       {
-        "title": "1. Veri Saklama ve Yerel Öncelikli Tasarım",
+        "title": "1. Yerel Öncelikli Tasarım",
         "paragraphs": [
-          "İşlemler, hesaplar, kategoriler, düzenli işlem kuralları ve ücret ayarları dahil tüm finansal verileriniz, cihaz üzerindeki bir veritabanı (SQLite) kullanılarak yerel olarak cihazınızda saklanır. Kişisel finansal bilgilerinizi saklayan sunucular işletmiyoruz ve Uygulama verilerinizi hiçbir zaman bizim bir sunucumuza eşitlemez veya yedeklemez. İsteğe bağlı Web Gösterge Paneli'ni (bölüm 6) kullanırsanız telefonunuz, bağladığınız bir tarayıcıya doğrudan, uçtan uca şifreli bir kopya gönderir; sunucumuz bunu saklamadan iletir ve okuyamaz.",
-          "Uygulamayı kaldırırsanız, yerel olarak saklanan tüm veriler kalıcı olarak silinir."
+          "Uygulamayı bir hesap olmadan kullanabilirsiniz. Varsayılan olarak işlemler, hesaplar, kategoriler, bütçeler, düzenli işlem kuralları ve ücret ayarları dahil finansal verileriniz yalnızca cihazınızda, cihaz üzerindeki bir veritabanında (SQLite) saklanır.",
+          "Verileriniz cihazınızdan yalnızca kullanmayı seçtiğiniz isteğe bağlı özellikler için ayrılır; bunların her biri aşağıda açıklanmıştır: bir hesapla giriş yapmak, Cloud Sync, paylaşılan defterler ve albümler, fiş tarama ve diğer yapay zekâ özellikleri, Google Drive veya iCloud'a yedeklemeler, Web Gösterge Paneli ve iOS'ta canlı kazanç."
         ]
       },
       {
         "title": "2. Topladığımız Bilgiler",
         "subsections": [
           {
-            "title": "Finansal Veriler (Yalnızca Yerel Olarak Saklanır)",
+            "title": "Cihazınızdaki Veriler",
             "lists": [
               [
-                "İşlem tutarları, tarihleri, kategorileri, notları ve duygu etiketleri",
-                "Hesap adları, türleri ve bakiyeleri",
+                "İşlem tutarları, tarihleri, başlıkları, kategorileri, notları, duygu etiketleri ve fiş fotoğrafları",
+                "Eklediğiniz hesap adları, türleri, bakiyeleri, logoları ve ödeme QR kodları",
                 "Ücret ve saatlik ücret bilgileri",
-                "Düzenli işlem kuralları",
-                "Kategori adları ve düzeni"
+                "Bütçeler, hedefler, düzenli işlem kuralları, albümler ve kategori adları",
+                "\"Bildirimlerden kaydet\" özelliğini açarsanız, Uygulamanın işlemleri kaydetmek için okuduğu ödeme bildirimleri"
               ]
             ],
             "paragraphs": [
-              "Bu veriler, açıkça dışa aktarmayı ya da Web Gösterge Paneli ile bağladığınız bir tarayıcıya göndermeyi seçmediğiniz sürece cihazınızdan ayrılmaz."
+              "Aşağıdaki isteğe bağlı özelliklerden birini kullanmadığınız sürece bu veriler cihazınızda kalır."
+            ]
+          },
+          {
+            "title": "Hesap Bilgileri",
+            "paragraphs": [
+              "Hesap isteğe bağlıdır. Google ile, Apple ile (iOS'ta) veya e-posta adresinize gönderilen tek kullanımlık bir kodla giriş yapabilirsiniz. Giriş yaptığınızda e-posta adresinizi, Google veya Apple tarafından sağlanan (ya da sizin girdiğiniz) adınızı, Google'ın sağladığı profil fotoğrafı adresini, Google veya Apple'ın bu Uygulama için size atadığı kullanıcı kimliğini ve bu hizmetlerin verdiği giriş belirtecini saklarız. Giriş yapılmış her telefon için o telefonun rastgele uygulama tanımlayıcısını da saklarız; böylece Pro aboneliğiniz giriş yaptığınız her telefonda çalışır. Oturumunuz için bir oturum belirteci, IP adresi ve cihazın kullanıcı aracısını (user agent) saklarız. E-posta ile giriş istekleri, otomatik kötüye kullanımı engellemek için Cloudflare Turnstile ile kontrol edilir.",
+              "Hesap bilgilerini yalnızca sizi giriş yaptırmak, oturumunuzu açık tutmak, aynı doğrulanmış e-posta adresini paylaşan giriş yöntemlerinizi birbirine bağlamak, Pro avantajlarınızı tüm telefonlarınızda sunmak ve adınızı bir defteri veya albümü paylaştığınız kişilere göstermek için kullanırız."
+            ]
+          },
+          {
+            "title": "Cloud Sync",
+            "paragraphs": [
+              "Cloud Sync isteğe bağlıdır ve siz açana kadar kapalıdır. Açık olduğunda Uygulama, Money2Time verilerinizin bir kopyasını (yedekle aynı veriler; fiş fotoğrafları, kapaklar, logolar ve ödeme QR kodları gibi eklediğiniz görseller dahil) sunucularımızda tutar; böylece veriler giriş yaptığınız tüm cihazlarda aynı kalır. Verileriniz yalnızca hesabınıza ait, Turso tarafından barındırılan bir veritabanında saklanır; görselleriniz ise Cloudflare R2'de özel olarak saklanır. Veriler HTTPS üzerinden gönderilir ancak uçtan uca şifrelenmez; bu, sistemlerimizin eşitleme yapabilmek için verileri okuyabileceği anlamına gelir. Kayıt ve satıcı öğrenimi için yakalanan bildirimler eşitlenmez.",
+              "Oturumu kapatmak eşitlemeyi durdurur. Buluttaki kopya, hesabınızı silene kadar saklanır."
+            ]
+          },
+          {
+            "title": "Paylaşılan Defterler ve Albümler",
+            "paragraphs": [
+              "Paylaşılan bir defter veya paylaşılan bir albüm oluşturur ya da bunlara katılırsanız, eklediğiniz veriler sunucularımızda saklanır ve içindeki herkes tarafından görülebilir: üye adları, faturalar (başlık, tutar, tarih, para birimi, kimin ödediği ve nasıl bölündüğü), ödemeler, ayarlar, kapak fotoğrafı ve kimin neyi değiştirdiğini gösteren bir etkinlik kaydı. Bir faturaya ait kendi hesabınız, kategoriniz, notunuz, fiş fotoğrafınız ve ruh haliniz grupla asla paylaşılmaz. Bir gruptaki görünen adınız, belirlediğiniz addır; belirlemediyseniz giriş adınızdır. Paylaşılan bir defterin sahibi üyelerin e-posta adreslerini görebilir. Davet bağlantısına sahip herkes grubun adını, sahibinin adını ve kaç üyesi olduğunu görebilir.",
+              "Eklediğiniz faturalar ve değişiklikler, siz ayrıldıktan sonra da dahil olmak üzere grubun paylaşılan kaydının bir parçası olarak grupta kalır."
+            ]
+          },
+          {
+            "title": "Fiş Tarama ve Yapay Zekâ Özellikleri",
+            "paragraphs": [
+              "Bir fişi veya ekran görüntüsünü taradığınızda Uygulama, görseli para biriminiz ve kategori ile hesap adlarınızla birlikte tarama hizmetimize gönderir; bu hizmet ayrıntıları okumak için OpenRouter üzerinden erişilen Anthropic ve diğer model sağlayıcılarının yapay zekâ modellerini kullanır. Ödeme bildirimlerinin otomatik incelemesini açarsanız, bildirim metni ve kategori adlarınız aynı şekilde gönderilir. Bu görselleri veya metinleri saklamayız; plan sınırlarını uygulamak için yalnızca kullanım sayılarını tutarız. Yapay zekâ sağlayıcıları bir sonuç döndürmek için bunları işler."
+            ]
+          },
+          {
+            "title": "Canlı Kazanç (iOS)",
+            "paragraphs": [
+              "Kilit Ekranında canlı kazancı açarsanız Uygulama; saatlik ücretinizi, para birimi simgenizi, vardiya programınızı, saat diliminizi, rastgele uygulama tanımlayıcınızı ve Apple'ın sağladığı Live Activity anlık bildirim belirtecini sunucumuza gönderir; sunucumuz Live Activity çalıştığı sürece onu Apple Push Notification service aracılığıyla günceller."
             ]
           },
           {
             "title": "Rastgele Uygulama Tanımlayıcısı",
             "paragraphs": [
-              "İlk açılışta Uygulama; m2t_ ile başlayan ve adınız, e-posta adresiniz, Apple ID'niz veya herhangi bir kişisel kimliğinizle bağlantılı olmayan rastgele ve benzersiz bir tanımlayıcı oluşturur. Aynı tanımlayıcı ürün analizi ve abonelik yönetimi için PostHog, Google Analytics for Firebase ve RevenueCat ile paylaşılır; ayrıca Web Gösterge Paneli ile bağladığınız her tarayıcıyla da paylaşılır ve bu tarayıcının kullanım analizi (PostHog ve Google Analytics) de onu kullanır."
+              "İlk açılışta Uygulama, m2t_ ile başlayan rastgele ve benzersiz bir tanımlayıcı oluşturur. Bu tanımlayıcı ürün analizi ve abonelik yönetimi için PostHog, Google Analytics for Firebase ve RevenueCat ile paylaşılır; ayrıca Web Gösterge Paneli ile bağladığınız her tarayıcıyla da paylaşılır ve bu tarayıcının kullanım analizi de onu kullanır. Giriş yaparsanız, onu sunucularımızda hesabınıza bağlarız; adınızı veya e-posta adresinizi analiz sağlayıcılarımıza göndermeyiz."
             ]
           },
           {
             "title": "Kullanım Analitiği",
             "paragraphs": [
-              "Bu rastgele Uygulama tanımlayıcısına bağlı takma adlı kullanım verilerini toplamak ve Uygulamayı geliştirmek için PostHog ile Google Analytics for Firebase kullanırız. Analiz; tutarları, işlem ayrıntılarını, bakiyeleri, notları, makbuzları, yedekleri veya sizi tanımlayan bilgileri içermez.",
-              "PostHog ayrıca çökme ve hata raporlarını alır ve sorunları bulup düzeltebilmemiz için uygulama oturumlarının küçük bir örneğini ekran kaydı olarak kaydeder. Bu kayıtlarda bilgilerinizi gösteren her şey gizlenir: metinler, sayılar, giriş alanları, grafikler ve eklediğiniz her fotoğraf. Yalnızca uygulamanın kendi tasarımı, yani simgeleri, çizimleri ve düğme etiketleri görünür kalır. Bu kayıtlar finansal verilerinizi asla göstermez."
+              "Uygulamanın nasıl kullanıldığını anlayıp deneyimi geliştirebilmek için rastgele uygulama tanımlayıcısına bağlı takma adlı kullanım verilerini toplamak amacıyla PostHog ile Google Analytics for Firebase kullanırız. Analiz; tutarları, işlem ayrıntılarını, bakiyeleri, notları, fişleri, yedekleri, adları veya e-posta adreslerini içermez.",
+              "PostHog ayrıca çökme ve hata raporlarını alır, her yapay zekâ isteğinin modelini, belirteç sayısını ve maliyetini kaydeder (görseli veya metni asla kaydetmez) ve sorunları bulup düzeltebilmemiz için uygulama oturumlarının küçük bir örneğini ekran kaydı olarak kaydeder. Bu kayıtlarda bilgilerinizi gösteren her şey gizlenir: metinler, sayılar, giriş alanları, grafikler ve eklediğiniz her fotoğraf. Yalnızca uygulamanın kendi tasarımı, yani simgeleri, çizimleri ve düğme etiketleri görünür kalır. Bu kayıtlar finansal verilerinizi asla göstermez."
             ],
             "lists": [
               [
@@ -452,16 +486,47 @@
         ]
       },
       {
-        "title": "3. Uygulama İçi Satın Almalar ve Abonelikler",
+        "title": "3. Google Kullanıcı Verileri",
         "paragraphs": [
-          "Uygulama, RevenueCat üzerinden yönetilen isteğe bağlı bir premium abonelik (Pro) sunar. Ödeme Apple veya Google tarafından işlenir. Ödeme bilgilerinizi, kredi kartı ayrıntılarınızı veya Apple ID/Google Hesabı kimlik bilgilerinizi hiçbir zaman almayız veya saklamayız.",
-          "RevenueCat, haklarınızı yönetmek için abonelik durumunuzu, ürün tanımlayıcınızı ve son kullanma tarihinizi alır. Bu bilgiler kişisel kimliğinize değil, rastgele Uygulama tanımlayıcısına bağlanır."
+          "Bu bölüm, Uygulamanın ve web sitelerimizin Google API'lerinden alınan verilere nasıl eriştiğini, bunları nasıl kullandığını, sakladığını ve paylaştığını açıklar.",
+          "Money2Time'ın Google API'lerinden alınan bilgileri kullanması ve başka herhangi bir uygulamaya aktarması, Limited Use (Sınırlı Kullanım) gereklilikleri dahil olmak üzere Google API Services User Data Policy'ye (Google API Hizmetleri Kullanıcı Verileri Politikası) uygun olacaktır."
+        ],
+        "subsections": [
+          {
+            "title": "Eriştiğimiz Veriler",
+            "lists": [
+              [
+                "Google ile Giriş (Uygulamada ve album.money2time.com'da): openid, email ve profile kapsamları aracılığıyla Google hesap kimliğiniz, e-posta adresiniz ve doğrulanıp doğrulanmadığı, adınız ve profil fotoğrafı adresiniz.",
+                "Google Drive (yalnızca yedekler için Google Drive'ı seçerseniz): erişim, Uygulamanın yalnızca kendi oluşturduğu yedek dosyalarını görmesine ve yönetmesine izin veren drive.file kapsamıyla sınırlıdır. Uygulama, Drive'ınızdaki başka hiçbir dosyayı göremez."
+              ]
+            ]
+          },
+          {
+            "title": "Nasıl Kullanırız",
+            "paragraphs": [
+              "Google profil verilerinizi yalnızca Money2Time hesabınızı oluşturmak ve hesabınıza giriş yapmak, hesabınızı aynı doğrulanmış e-posta adresine sahip diğer giriş yöntemlerine bağlamak ve adınızı paylaştığınız defterlerdeki ve albümlerdeki kişilere göstermek için kullanırız. Google Drive erişimini yalnızca Money2Time yedek dosyalarınızı kaydetmek, listelemek ve geri yüklemek için kullanırız. Google kullanıcı verilerini reklam için kullanmayız, satmayız ve yapay zekâ modellerini eğitmek için kullanmayız."
+            ]
+          },
+          {
+            "title": "Nasıl Saklar ve Paylaşırız",
+            "paragraphs": [
+              "Google profil verileriniz, Cloudflare üzerindeki hesap veritabanımızda saklanır ve hesabınızı silene kadar tutulur. Drive yedekleriniz doğrudan telefonunuzdan Google Drive'ınıza yazılır; hiçbir zaman sunucularımızdan geçmez veya sunucularımızda saklanmaz ve bunları istediğiniz zaman Google Drive'da silebilirsiniz. Google kullanıcı verilerini yalnızca paylaşmayı seçtiğiniz defterlerin ve albümlerin üyeleriyle (adınız) ve sunucularımızı barındıran hizmet sağlayıcılarla (Cloudflare ve Turso) onların veri işleme koşulları kapsamında paylaşırız. Bunları asla analiz sağlayıcılarımıza veya yapay zekâ sağlayıcılarımıza göndermeyiz.",
+              "Money2Time'ın Google Hesabınıza erişimini istediğiniz zaman myaccount.google.com/permissions adresinden kaldırabilir ve hesabınızı 9. bölümde açıklandığı şekilde Uygulamada silebilirsiniz."
+            ]
+          }
         ]
       },
       {
-        "title": "4. Bildirimler",
+        "title": "4. Uygulama İçi Satın Almalar ve Abonelikler",
         "paragraphs": [
-          "Uygulama bildirim göndermek için izin isteyebilir. Tüm bildirimler cihazınızda yerel olarak zamanlanır. Harici sunuculardan anlık bildirim gönderilmez. Bildirim iznini reddedebilir veya cihazınızın Ayarlar bölümünden bildirimleri istediğiniz zaman devre dışı bırakabilirsiniz."
+          "Uygulama, RevenueCat üzerinden yönetilen isteğe bağlı bir premium abonelik (Pro) sunar. Ödeme Apple veya Google tarafından işlenir. Ödeme bilgilerinizi, kredi kartı ayrıntılarınızı veya Apple ID/Google Hesabı parolalarınızı hiçbir zaman almayız veya saklamayız.",
+          "RevenueCat, haklarınızı yönetmek için abonelik durumunuzu, ürün tanımlayıcınızı ve son kullanma tarihinizi rastgele uygulama tanımlayıcısına bağlı olarak alır. Giriş yaparsanız sunucularımız, Pro durumunuzun giriş yaptığınız tüm telefonlarda geçerli olması için bunu RevenueCat ile kontrol eder."
+        ]
+      },
+      {
+        "title": "5. Bildirimler",
+        "paragraphs": [
+          "Uygulama bildirim göndermek için izin isteyebilir. Hatırlatmalar ve özetler cihazınızda yerel olarak zamanlanır. Bildirim iznini reddedebilir veya cihazınızın Ayarlar bölümünden bildirimleri istediğiniz zaman devre dışı bırakabilirsiniz."
         ],
         "lists": [
           [
@@ -472,31 +537,48 @@
         ]
       },
       {
-        "title": "5. Cihaz İzinleri",
+        "title": "6. Cihaz İzinleri",
         "paragraphs": [
-          "Uygulama, yerel hatırlatmalar ve özetler zamanlamak için yalnızca bildirim izni ister. Uygulama kameranıza, mikrofonunuza, fotoğraf arşivinize, kişilerinize, takviminize, mesajlarınıza, konumunuza, sağlık verilerinize, fitness verilerinize, diğer uygulamalara veya tarama geçmişinize erişmez."
+          "Uygulama her izni yalnızca o izne ihtiyaç duyan özelliği kullandığınızda ister ve bunların herhangi birini cihazınızın Ayarlar bölümünden kapatabilirsiniz."
+        ],
+        "lists": [
+          [
+            "Kamera: fişlerin fotoğrafını çekmek ve Web Gösterge Paneli'ni bağlayan kodu taramak için.",
+            "Fotoğraf arşivi: seçtiğiniz fotoğrafları eklemek veya taramak ve dışa aktardığınız görselleri kaydetmek için.",
+            "Mikrofon ve konuşma tanıma: sesle işlem eklemek için. Konuşmanız Apple'ın veya Google'ın konuşma tanıma hizmeti tarafından metne dönüştürülür ve bu hizmet onu kendi sunucularında işleyebilir.",
+            "Face ID veya parmak izi: Uygulama Kilidi'ni açarsanız Uygulamanın kilidini açmak için. Uygulama biyometrik verilerinizi asla almaz.",
+            "Bildirim erişimi (Android): \"Bildirimlerden kaydet\" özelliğini açarsanız, seçtiğiniz uygulamaların ödeme bildirimlerinden işlem kaydetmek için. Diğer bildirimler yok sayılır.",
+            "Bildirimler: yerel hatırlatmalar ve özetler için."
+          ]
         ]
       },
       {
-        "title": "6. Veri Dışa Aktarma, İçe Aktarma ve Web Gösterge Paneli",
+        "title": "7. Yedekler, Dışa Aktarma, İçe Aktarma ve Web Gösterge Paneli",
         "paragraphs": [
-          "Tüm finansal verilerinizi istediğiniz zaman Uygulamanın Ayarlar bölümünden JSON dosyası olarak dışa aktarabilirsiniz. Dışa aktarılan dosya, cihazınızın yerel paylaşım işlevi kullanılarak paylaşılır. Dışa aktardığınız verileri almayız veya işlemeyiz.",
-          "Önceki bir Money2Time yedeğinden veri içe aktarabilir veya Money Manager uygulamasından geçiş yapabilirsiniz. İçe aktarma, cihazınızdaki mevcut tüm verilerin yerini alır.",
+          "Verilerinizi elle veya her gün otomatik olarak Google Drive'a ya da iCloud'a yedekleyebilirsiniz. Yedekler telefonunuzdan doğrudan kendi Google Drive veya iCloud hesabınıza kaydedilir ve bunları hiçbir zaman almayız. Ayrıca tüm verilerinizi istediğiniz zaman, cihazınızın yerel paylaşım işlevi kullanılarak paylaşılan bir JSON dosyası olarak dışa aktarabilir; önceki bir Money2Time yedeğini veya Money Manager uygulamasındaki verileri içe aktarabilirsiniz. İçe aktarma, cihazınızdaki mevcut tüm verilerin yerini alır.",
           "Web Gösterge Paneli isteğe bağlıdır. Kullanmak için bir bilgisayarda app.money2time.com adresini açar ve gösterdiği kodu Uygulama ile tararsınız. Ardından telefonunuz ve o tarayıcı, yalnızca ikisinin sahip olduğu bir şifreleme anahtarı üzerinde anlaşır. Uygulamanın Web Gösterge Paneli ekranı ve tarayıcı birlikte açıkken Uygulama, tarayıcıya verilerinizin bir kopyasını (dışa aktarımla aynı veriler; eklediğiniz logolar, simgeler ve kapak fotoğrafları dahil, ancak fiş fotoğrafları ve ödeme QR kodları hariç) AES-256-GCM ile uçtan uca şifrelenmiş olarak gönderir. Veriler, Cloudflare üzerinde işlettiğimiz bir sunucudan geçer; sunucu şifreli veriyi geldiği gibi iletir ve saklamaz. Verileri okuyamayız.",
-          "Tarayıcı, aldığı son kopyayı hâlâ şifreli olarak, anahtarla birlikte kendi depolama alanında; siz tarayıcıda veya Uygulamada bağlantısını kaldırana kadar tutar. Panoda yaptığınız değişiklikler aynı şekilde şifrelenerek telefonunuza geri gönderilir; Uygulama bunları yalnızca Web Gösterge Paneli ekranı açıkken ve yalnızca değişiklik yapmasına izin verdiğiniz bir tarayıcıdan geldiğinde kaydeder. Telefonunuz ayrıca tarayıcıya, Pro panoların kilidi açılabilsin diye Money2Time Pro'ya sahip olup olmadığınızı ve panonun kullanım analizi için rastgele uygulama tanımlayıcısını bildirir. Hesap yoktur: e-posta adresi tutmayız ve verilerinizi ileten sunucu, hangi telefonların ve tarayıcıların bağlı olduğuna dair hiçbir kayıt tutmaz."
+          "Tarayıcı, aldığı son kopyayı hâlâ şifreli olarak, anahtarla birlikte kendi depolama alanında; siz tarayıcıda veya Uygulamada bağlantısını kaldırana kadar tutar. Panoda yaptığınız değişiklikler aynı şekilde şifrelenerek telefonunuza geri gönderilir; Uygulama bunları yalnızca Web Gösterge Paneli ekranı açıkken ve yalnızca değişiklik yapmasına izin verdiğiniz bir tarayıcıdan geldiğinde kaydeder. Telefonunuz ayrıca tarayıcıya, Pro panoların kilidi açılabilsin diye Money2Time Pro'ya sahip olup olmadığınızı ve panonun kullanım analizi için rastgele uygulama tanımlayıcısını bildirir. Web Gösterge Paneli hesap gerektirmez ve verilerinizi ileten sunucu, hangi telefonların ve tarayıcıların bağlı olduğuna dair hiçbir kayıt tutmaz.",
+          "album.money2time.com'da, üyesi olduğunuz paylaşılan albümleri görüntülemek ve düzenlemek için Google ile veya bir e-posta koduyla giriş yapabilirsiniz. Site, güvenli bir çerezle oturumunuzu en fazla bir yıl açık tutar."
         ]
       },
       {
-        "title": "7. Veri Silme",
+        "title": "8. Veri Saklama",
         "paragraphs": [
-          "Verileriniz üzerinde her zaman tam kontrole sahipsiniz. Tüm Verileri Sıfırla, cihazınızdaki tüm işlemleri, hesapları, kategorileri, düzenli işlem kurallarını ve ücret ayarlarını kalıcı olarak siler. Yalnızca İşlemleri Sıfırla, hesapları ve kategorileri korurken işlem geçmişinizi temizler. Uygulamayı kaldırmak, yerel veritabanını ve saklanan tüm verileri tamamen siler. Bir tarayıcının Web Gösterge Paneli bağlantısını kaldırmak, onun tuttuğu kopyayı siler: bağlantıyı tarayıcıda kaldırırsanız hemen, Uygulamadan kaldırırsanız tarayıcı bir sonraki bağlandığında. O tarayıcının site verilerini temizlemek de kopyayı siler.",
-          "Uygulama içinde verileri sıfırlamak, Apple/Google tarafından tutulan abonelik durumunuzu veya daha önce PostHog / Google Analytics for Firebase'e gönderilmiş analitik verileri silmez. Analitik verilerin silinmesini talep etmek için aşağıdaki e-posta adresinden bizimle iletişime geçin."
+          "Cihazınızdaki veriler, siz silene veya Uygulamayı kaldırana kadar kalır. Hesap bilgileri, Cloud Sync kopyanız ve sunucularımızdaki görselleriniz, hesabınızı silene kadar saklanır. Paylaşılan defter ve albüm verileri, grup var olduğu sürece saklanır. Giriş oturumları en fazla bir yıl sürer ve siz kullandıkça yenilenir. Yapay zekâ ile işlenmek üzere gönderilen fiş ve bildirim metinleri tarafımızdan saklanmaz. Analiz verileri Google Analytics'te en fazla 14 ay ve PostHog'da saklama ayarlarımıza göre tutulur. IP adresleri gibi bağlantı ayrıntıları, hizmet sağlayıcılarımızın günlüklerinde kısa süre tutulur."
         ]
       },
       {
-        "title": "8. Üçüncü Taraf Hizmetleri",
+        "title": "9. Veri Silme",
         "paragraphs": [
-          "Uygulama reklam göstermez veya reklam SDK'ları kullanmaz."
+          "Verileriniz üzerinde tam kontrole sahipsiniz. Ayarlar'daki Verileri Sıfırla; hesaplarınızı, kategorilerinizi ve işlemlerinizi cihazınızdan ve Cloud Sync açıksa Cloud Sync kopyanızdan kalıcı olarak siler. Uygulamayı kaldırmak yerel veritabanını cihazınızdan kaldırır, ancak Google Drive veya iCloud'daki yedeklerinizi ya da hesabınızı silmez.",
+          "Hesabınızı silmek için Uygulamanın Hesap sayfasını açın ve Hesabı sil'i seçin. Bu işlem hesap bilgilerinizi, Cloud Sync kopyanızı, bizde sakladığınız her görseli ve sahibi olduğunuz paylaşılan defterleri ve albümleri kalıcı olarak siler ve Uygulamanın Apple ile giriş yetkisini iptal eder. Bir tarayıcının Web Gösterge Paneli bağlantısını kaldırmak, onun tuttuğu kopyayı siler: bağlantıyı tarayıcıda kaldırırsanız hemen, Uygulamadan kaldırırsanız tarayıcı bir sonraki bağlandığında.",
+          "Verilerinizi silmek, Apple veya Google tarafından tutulan abonelik kayıtlarınızı ya da daha önce PostHog ve Google Analytics for Firebase'e gönderilmiş analitik verileri silmez. Analitik verilerin silinmesini talep etmek için aşağıdaki e-posta adresinden bizimle iletişime geçin. Veri silme sayfamızda tüm adımlar yer alır."
+        ]
+      },
+      {
+        "title": "10. Üçüncü Taraf Hizmetleri",
+        "paragraphs": [
+          "Aşağıdaki hizmet sağlayıcıları kullanırız. Her biri yalnızca amacı için ihtiyaç duyduğu verileri alır."
         ],
         "table": {
           "headers": [
@@ -506,9 +588,9 @@
           ],
           "rows": [
             [
-              "PostHog / Google Analytics for Firebase",
-              "Takma adlı kullanım analitiği",
-              "Rastgele Uygulama kimliği, özellik kullanım etkinlikleri, tercihler"
+              "PostHog ve Google Analytics for Firebase",
+              "Takma adlı kullanım analitiği, hata raporları, oturum kayıtları",
+              "Rastgele Uygulama kimliği, özellik kullanım etkinlikleri, tercihler, gizlenmiş kayıtlar"
             ],
             [
               "RevenueCat",
@@ -516,9 +598,34 @@
               "Rastgele Uygulama kimliği, abonelik durumu"
             ],
             [
-              "Cloudflare (Workers, Durable Objects)",
-              "Web Gösterge Paneli bağlantısı, yalnızca kullanırsanız",
-              "Verileriniz, uçtan uca şifreli ve yalnızca aktarım sırasında; IP adresi gibi bağlantı ayrıntıları, Cloudflare'in günlüklerinde kısa süre tutulur"
+              "Cloudflare (Workers, D1, R2, Durable Objects, Email, Turnstile)",
+              "Sunucularımızın, hesapların, Cloud Sync görsellerinin, paylaşılan albümlerin, giriş e-postalarının ve Web Gösterge Paneli bağlantısının barındırılması",
+              "Hesap bilgileri, eşitlenen görseller, paylaşılan grup verileri, aktarım sırasında uçtan uca şifreli Web Gösterge Paneli verileri, IP adresi gibi bağlantı ayrıntıları"
+            ],
+            [
+              "Turso",
+              "Cloud Sync ile paylaşılan defterler ve albümler için veritabanı barındırma",
+              "Eşitlenen Money2Time verileriniz ve paylaşılan grup verileri"
+            ],
+            [
+              "OpenRouter, Anthropic ve diğer yapay zekâ modeli sağlayıcıları",
+              "Fişleri okuma ve ödeme bildirimlerini inceleme",
+              "Fiş görselleri veya bildirim metni, para birimi, kategori ve hesap adları"
+            ],
+            [
+              "Google (Sign-In, Drive)",
+              "Kullanırsanız giriş ve yedekleme",
+              "Giriş istekleri; yedek dosyalarınız kendi Drive'ınıza gider"
+            ],
+            [
+              "Apple (Sign in with Apple, iCloud, Push Notification service)",
+              "Kullanırsanız giriş, yedekleme ve canlı kazanç güncellemeleri",
+              "Giriş istekleri; yedek dosyalarınız kendi iCloud'unuza gider; Live Activity güncellemeleri"
+            ],
+            [
+              "Frankfurter",
+              "Döviz kurları",
+              "Para birimi kodları ve IP adresi gibi bağlantı ayrıntıları"
             ],
             [
               "Apple App Store / Google Play",
@@ -529,27 +636,27 @@
         }
       },
       {
-        "title": "9. Veri Güvenliği",
+        "title": "11. Veri Güvenliği",
         "paragraphs": [
-          "Finansal verileriniz, cihazınızın yerleşik güvenliğiyle korunan şifrelenmemiş bir yerel veritabanında saklanır. Web Gösterge Paneli'ni kullandığınızda veriler telefonunuzda AES-256-GCM ile şifrelenir, telefonunuz ile tarayıcının P-256 anahtar değişimiyle üzerinde anlaştığı bir anahtar kullanılır ve HTTPS üzerinden gönderilir; sunucumuzda anahtar hiçbir zaman bulunmaz. Uygulama yalnızca standart, yayımlanmış şifreleme algoritmaları kullanır."
+          "Cihazınızdaki veriler, cihazınızın yerleşik güvenliğiyle korunur. Uygulamanın sunucularımıza gönderdiği her şey HTTPS üzerinden iletilir ve sunucularımıza ve veritabanlarımıza erişim kısıtlıdır. Apple'dan gelen giriş belirteçleri ve her Cloud Sync veritabanının kimlik bilgileri şifreli olarak saklanır. Web Gösterge Paneli verileri telefonunuzda, telefonunuz ile tarayıcınızın P-256 anahtar değişimiyle üzerinde anlaştığı bir anahtar kullanılarak AES-256-GCM ile uçtan uca şifrelenir; sunucumuzda anahtar hiçbir zaman bulunmaz. Cloud Sync ile paylaşılan defter ve albüm verileri uçtan uca şifreli değildir. Uygulama yalnızca standart, yayımlanmış şifreleme algoritmaları kullanır."
         ]
       },
       {
-        "title": "10. Çocukların Gizliliği",
+        "title": "12. Çocukların Gizliliği",
         "paragraphs": [
           "Uygulama 13 yaşın altındaki çocuklara yönelik değildir. 13 yaşın altındaki çocuklardan bilerek kişisel bilgi toplamıyoruz. Bir çocuğun Uygulama aracılığıyla veri sağladığını düşünüyorsanız lütfen bizimle iletişime geçin; bu bilgileri kaldırmak için gerekli adımları atacağız."
         ]
       },
       {
-        "title": "11. Bu Politikadaki Değişiklikler",
+        "title": "13. Bu Politikadaki Değişiklikler",
         "paragraphs": [
           "Bu Gizlilik Politikasını zaman zaman güncelleyebiliriz. Değişiklikler, güncellenmiş Son güncelleme tarihiyle bu sayfaya yansıtılacaktır. Değişikliklerden sonra Uygulamayı kullanmaya devam etmeniz, güncellenmiş politikayı kabul ettiğiniz anlamına gelir."
         ]
       }
     ],
     "contact": {
-      "title": "12. Bize Ulaşın",
-      "body": "Bu Gizlilik Politikası hakkında sorularınız varsa, desteğe ihtiyacınız varsa veya analitik verilerin silinmesini talep etmek istiyorsanız lütfen bizimle şu adresten iletişime geçin:",
+      "title": "14. Bize Ulaşın",
+      "body": "Bu Gizlilik Politikası hakkında sorularınız varsa, desteğe ihtiyacınız varsa veya verilerinizin silinmesini talep etmek istiyorsanız lütfen bizimle şu adresten iletişime geçin:",
       "formPrefix": "Bu sitedeki",
       "formLink": "iletişim formunu",
       "formSuffix": "da kullanabilirsiniz."
@@ -697,23 +804,42 @@
   },
   "dataDeletion": {
     "title": "Veri Silme Talebi",
-    "lastUpdated": "Son güncelleme: 20 Ekim 2026",
-    "intro": "Money2Time yerel öncelikli (local-first) bir uygulamadır: tüm finansal verileriniz yalnızca cihazınızda saklanır ve sunucularımızda hiçbir zaman saklanmaz. Bu sayfa, Money2Time uygulamasıyla ilişkili verilerin silinmesini nasıl talep edeceğinizi; silme talebinde bulunma adımlarını, hangi tür verilerin silindiğini veya saklandığını ve saklama sürelerini açıklar.",
+    "lastUpdated": "Son güncelleme: 15 Kasım 2026",
+    "intro": "Money2Time yerel öncelikli (local-first) bir uygulamadır: finansal verileriniz cihazınızda saklanır ve yalnızca giriş yapıp Cloud Sync'i veya paylaşılan defterleri ve albümleri kullanırsanız sunucularımızda saklanır. Bu sayfa, Money2Time uygulamasıyla ilişkili verileri nasıl sileceğinizi, hangi tür verilerin silindiğini veya saklandığını ve saklama sürelerini açıklar.",
     "sections": [
       {
         "title": "Veri Silme Nasıl Talep Edilir",
         "subsections": [
           {
+            "title": "Hesabınızı ve bulut verilerinizi silin",
+            "paragraphs": [
+              "Giriş yaptıysanız, hesabınızı ve sunucularımızda onunla birlikte saklanan her şeyi kendiniz silebilirsiniz:"
+            ],
+            "lists": [
+              [
+                "Money2Time uygulamasını açın ve Hesap sayfanıza gidin.",
+                "\"Hesabı sil\"e dokunun ve onaylayın.",
+                "Hesap bilgileriniz (ad, e-posta adresi, giriş ayrıntıları), Cloud Sync kopyanız, bizde sakladığınız her görsel ve sahibi olduğunuz paylaşılan defterler ve albümler hemen silinir. Telefonunuzdaki veriler, siz orada silene kadar kalır."
+              ]
+            ]
+          },
+          {
             "title": "Cihazınızda saklanan verileri silin",
             "paragraphs": [
-              "Tüm finansal verileriniz dahil olmak üzere verilerinizin neredeyse tamamı yalnızca cihazınızda saklanır. İstediğiniz zaman kendiniz silebilirsiniz:"
+              "Cihazınızdaki verileri istediğiniz zaman silebilirsiniz:"
             ],
             "lists": [
               [
                 "Money2Time uygulamasını açın ve Ayarlar'a gidin.",
-                "Tüm işlemleri, hesapları, kategorileri, yinelenen kuralları ve ücret ayarlarını kalıcı olarak silmek için \"Tüm Verileri Sıfırla\"ya dokunun.",
-                "Alternatif olarak, yerel veritabanını ve saklanan tüm verileri tamamen kaldırmak için uygulamayı kaldırın."
+                "Hesaplarınızı, kategorilerinizi ve işlemlerinizi kalıcı olarak silmek için \"Verileri Sıfırla\"ya dokunun. Cloud Sync açıksa bu, buluttaki kopyanızı da siler.",
+                "Alternatif olarak, yerel veritabanını cihazınızdan kaldırmak için uygulamayı kaldırın."
               ]
+            ]
+          },
+          {
+            "title": "Yedeklerinizi silin",
+            "paragraphs": [
+              "Google Drive'a veya iCloud'a aldığınız yedekler sunucularımızda değil, kendi hesabınızda saklanır. Bunları Google Drive'da (Money2Time klasörü) veya iCloud depolama ayarlarınızda silin. Ayrıca Money2Time'ın Google Hesabınıza erişimini myaccount.google.com/permissions adresinden kaldırabilirsiniz."
             ]
           },
           {
@@ -730,14 +856,14 @@
             ]
           },
           {
-            "title": "Analiz ve abonelik verilerinin silinmesini talep edin",
+            "title": "Analiz ve diğer verilerin silinmesini talep edin",
             "paragraphs": [
-              "Rastgele Uygulama tanımlayıcınızla ilişkili analiz veya abonelik verilerinin silinmesini talep etmek için bizimle iletişime geçin:"
+              "Rastgele uygulama tanımlayıcınızla ilişkili analiz veya abonelik verilerinin ya da uygulamayı kullanamıyorsanız diğer verilerin silinmesini talep etmek için bizimle iletişime geçin:"
             ],
             "lists": [
               [
                 "Aşağıdaki adrese \"Data Deletion Request\" konusuyla e-posta gönderin veya bu sitedeki iletişim formunu kullanın.",
-                "Settings > Display bölümünde Kullanıcı Kimliği yanındaki kopyalama düğmesini kullanın ve Uygulamanızla ilişkili verileri bulabilmemiz için kimliğin tamamını ekleyin.",
+                "Verilerinizi bulabilmemiz için Ayarlar > Görünüm bölümünde Kullanıcı ID yanındaki kopyalama düğmesini kullanın ve kimliğin tamamını, giriş yaptıysanız hesabınızın e-posta adresiyle birlikte ekleyin.",
                 "Talebinizi işleme alır ve tamamlandığını 30 gün içinde onaylarız."
               ]
             ]
@@ -757,17 +883,47 @@
           ],
           "rows": [
             [
-              "Cihazdaki finansal veriler (işlemler, hesaplar, kategoriler, yinelenen kurallar, ücret ayarları)",
+              "Cihazdaki finansal veriler (işlemler, hesaplar, kategoriler, bütçeler, yinelenen kurallar, ücret ayarları)",
               "Silindi",
-              "Verileri sıfırladığınızda veya uygulamayı kaldırdığınızda anında kaldırılır. Bizde hiçbir şey saklanmaz."
+              "Verileri sıfırladığınızda veya uygulamayı kaldırdığınızda anında kaldırılır."
+            ],
+            [
+              "Hesap bilgileri (ad, e-posta adresi, Google veya Apple kullanıcı kimliği, giriş oturumları)",
+              "Silindi",
+              "Hesabınızı sildiğinizde anında kaldırılır."
+            ],
+            [
+              "Cloud Sync kopyası ve bizde sakladığınız görseller",
+              "Silindi",
+              "Hesabınızı sildiğinizde anında kaldırılır."
+            ],
+            [
+              "Sahibi olduğunuz paylaşılan defterler ve albümler",
+              "Silindi",
+              "Hesabınızı sildiğinizde tüm üyeler için kaldırılır."
+            ],
+            [
+              "Başkalarının sahibi olduğu gruplara eklediğiniz faturalar ve değişiklikler",
+              "Saklanır",
+              "Grup var olduğu sürece o grubun paylaşılan kaydının bir parçası olarak saklanır."
+            ],
+            [
+              "Google Drive veya iCloud'daki yedekleriniz",
+              "Sizin kontrolünüzde",
+              "Siz orada silene kadar kendi hesabınızda saklanır."
             ],
             [
               "Bağladığınız bir tarayıcıdaki Web Gösterge Paneli kopyası",
               "Silindi",
-              "Bağlantısını kaldırdığınızda veya site verilerini temizlediğinizde o tarayıcıdan kaldırılır. Sunucularımız bunu hiçbir zaman saklamaz, dolayısıyla bizde hiçbir şey tutulmaz."
+              "Bağlantısını kaldırdığınızda veya site verilerini temizlediğinizde o tarayıcıdan kaldırılır. Sunucularımız bunu hiçbir zaman saklamaz."
             ],
             [
-              "Takma adlı analiz verileri (PostHog / Google Analytics for Firebase)",
+              "Tarama için gönderilen fiş görselleri ve bildirim metinleri",
+              "Saklanmaz",
+              "Bir sonuç döndürmek için işlenir ve tarafımızdan saklanmaz. Plan sınırları için yalnızca kullanım sayıları tutulur."
+            ],
+            [
+              "Takma adlı analiz verileri (PostHog ve Google Analytics for Firebase)",
               "Talep üzerine silinir",
               "Talebinizden itibaren 30 gün içinde silinir."
             ],
@@ -782,14 +938,14 @@
       {
         "title": "Saklamadığımız Veriler",
         "paragraphs": [
-          "Money2Time hesap gerektirmez ve adınızı, e-postanızı, Apple Kimliğinizi, Google Hesabınızı veya ödeme bilgilerinizi sunucularımızda saklamaz. Finansal verileriniz, Web Gösterge Paneli'ni kullandığınızda da dahil olmak üzere sunucularımızda hiçbir zaman saklanmadığı için, sizin adınıza bunlara erişemez veya bunları silemeyiz.",
+          "Ödeme bilgilerinizi, kart numaralarınızı veya Apple ID ya da Google Hesabı parolalarınızı asla saklamayız. Google Drive veya iCloud yedeklerinizi saklamayız ve uçtan uca şifreli olan Web Gösterge Paneli verilerinizi okuyamayız.",
           "Apple veya Google tarafından tutulan abonelik ve ödeme kayıtları bizim kontrolümüz dışındadır ve doğrudan Apple veya Google hesabınız aracılığıyla yönetilir."
         ]
       }
     ],
     "contact": {
       "title": "Bize Ulaşın",
-      "body": "Analiz veya abonelik verilerinin silinmesini talep etmek için veya sorularınız varsa bizimle şu adresten iletişime geçin:",
+      "body": "Verilerinizin silinmesini talep etmek için veya sorularınız varsa bizimle şu adresten iletişime geçin:",
       "formPrefix": "Bu sitedeki",
       "formLink": "iletişim formunu",
       "formSuffix": "da kullanabilirsiniz."

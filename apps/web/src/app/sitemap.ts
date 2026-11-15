@@ -63,7 +63,7 @@ const routes: Route[] = [
   {
     path: "/privacy",
     changeFrequency: "yearly",
-    lastModified: "2026-10-22",
+    lastModified: "2026-11-15",
     priority: 0.3,
   },
   {
@@ -75,7 +75,7 @@ const routes: Route[] = [
   {
     path: "/data-deletion",
     changeFrequency: "yearly",
-    lastModified: "2026-10-20",
+    lastModified: "2026-11-15",
     priority: 0.3,
   },
 ];

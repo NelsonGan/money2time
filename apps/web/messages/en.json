@@ -11,7 +11,7 @@
     },
     "privacy": {
       "title": "Privacy Policy - Money2Time",
-      "description": "How Money2Time handles your data: local-first storage, product analytics using a random app ID, and no sale of personal or financial data."
+      "description": "How Money2Time handles your data: local-first storage, optional account and Cloud Sync, how we use Google user data, and no sale of personal or financial data."
     },
     "terms": {
       "title": "Terms of Use - Money2Time",
@@ -386,59 +386,93 @@
   },
   "privacy": {
     "title": "Privacy Policy",
-    "lastUpdated": "Last updated: October 22, 2026",
+    "lastUpdated": "Last updated: November 15, 2026",
     "websiteAnalytics": {
       "title": "Website Usage Analytics",
       "paragraphs": [
         "On money2time.com, we use PostHog and Google Analytics to measure pseudonymous page views and a limited set of interactions, such as app download clicks, tutorial selection, and contact-form outcomes. These services may use browser storage or cookies and process technical information including approximate region, device and browser type, and referring site. Google Analytics user and event data is retained for up to 14 months.",
         "On the Web Dashboard (app.money2time.com), the same services measure which dashboard pages you open, when a browser is linked or unlinked, whether transfers from your phone and changes you make succeed, and when a Pro feature is offered. Once your phone has sent its data, these events are linked to that phone's random app identifier, so your dashboard and app usage count as one pseudonymous user until you unlink the browser. The dashboard keeps this separate from the rest of money2time.com, so your visits to other pages are not linked to it. Dashboard events never include your financial data, and dashboard visits are never recorded as session replays.",
         "PostHog may also record a small sample of website visits as session replays with every form field masked, and receives a report when a page error occurs.",
-        "We do not send contact-form contents, tutorial search text, financial data, account identifiers, full URL query strings, or data for advertising or personalization. The /download redirect does not add your IP address or user-agent string to its analytics event. Website analytics does not load when your browser's Do Not Track setting is enabled."
+        "We do not send contact-form contents, tutorial search text, financial data, email addresses, full URL query strings, or data for advertising or personalization. The /download redirect does not add your IP address or user-agent string to its analytics event. Website analytics does not load when your browser's Do Not Track setting is enabled."
       ]
     },
     "sections": [
       {
         "title": "Overview",
         "paragraphs": [
-          "Money2Time (the App) is a personal finance app that converts your spending into time equivalents based on your hourly wage. Your privacy is important to us. This policy explains what data the App collects, how it is used, and your rights regarding that data."
+          "Money2Time (the App) is a personal finance app that converts your spending into time equivalents based on your hourly wage. It is run by the Money2Time team (we, us). This policy explains what data the App, money2time.com, the Web Dashboard (app.money2time.com) and shared albums on the web (album.money2time.com) collect, how it is used, stored and shared, and your choices and rights regarding that data.",
+          "We do not sell your personal or financial data, we do not show advertisements, and we do not use your data for advertising."
         ]
       },
       {
-        "title": "1. Data Storage & Local-First Design",
+        "title": "1. Local-First Design",
         "paragraphs": [
-          "All your financial data, including transactions, accounts, categories, recurring rules, and wage settings, is stored locally on your device using an on-device database (SQLite). We do not operate servers that store your personal financial information, and the App never syncs your data or backs it up to a server of ours. If you use the optional Web Dashboard (section 6), your phone sends a copy straight to a browser you linked, end-to-end encrypted; our server passes it along without storing it and cannot read it.",
-          "If you uninstall the App, all locally stored data is permanently deleted."
+          "You can use the App without an account. By default, your financial data, including transactions, accounts, categories, budgets, recurring rules, and wage settings, is stored only on your device in an on-device database (SQLite).",
+          "Your data leaves your device only for the optional features you choose to use, each described below: signing in to an account, Cloud Sync, shared ledgers and albums, receipt scanning and other AI features, backups to Google Drive or iCloud, the Web Dashboard, and live earnings on iOS."
         ]
       },
       {
         "title": "2. Information We Collect",
         "subsections": [
           {
-            "title": "Financial Data (Stored Locally Only)",
+            "title": "Data on Your Device",
             "lists": [
               [
-                "Transaction amounts, dates, categories, notes, and sentiment tags",
-                "Account names, types, and balances",
+                "Transaction amounts, dates, titles, categories, notes, sentiment tags, and receipt photos",
+                "Account names, types, balances, logos, and payment QR codes you add",
                 "Wage and hourly rate information",
-                "Recurring transaction rules",
-                "Category names and organization"
+                "Budgets, goals, recurring rules, albums, and category names",
+                "Payment notifications the App reads to log transactions, if you turn on logging from notifications"
               ]
             ],
             "paragraphs": [
-              "This data never leaves your device unless you explicitly choose to export it, or to send it to a browser you linked with the Web Dashboard."
+              "Unless you use one of the optional features below, this data stays on your device."
+            ]
+          },
+          {
+            "title": "Account Information",
+            "paragraphs": [
+              "An account is optional. You can sign in with Google, with Apple (on iOS), or with a one-time code sent to your email address. When you sign in, we store your email address, your name as provided by Google or Apple (or as you enter it), the profile picture address Google provides, the user ID Google or Apple assigns to you for this App, and the sign-in token they issue. For each signed-in phone we also store its random app identifier, so your Pro subscription works on every phone you sign in on. For your session we store a session token, the IP address and the device's user agent. Email sign-in requests are checked with Cloudflare Turnstile to block automated abuse.",
+              "We use account information only to sign you in, keep you signed in, connect your sign-in methods that share a verified email address, give you your Pro benefits on all your phones, and show your name to the people you share a ledger or album with."
+            ]
+          },
+          {
+            "title": "Cloud Sync",
+            "paragraphs": [
+              "Cloud Sync is optional and off until you turn it on. When it is on, the App keeps a copy of your Money2Time data (the same data as a backup, including the images you add, such as receipt photos, covers, logos, and payment QR codes) on our servers so it stays the same on all your signed-in devices. Your data is stored in a database for your account only, hosted by Turso, and your images are stored privately on Cloudflare R2. It is sent over HTTPS but is not end-to-end encrypted, which means our systems can read it in order to sync it. Notifications captured for logging and merchant learning are not synced.",
+              "Signing out stops syncing. The cloud copy is kept until you delete your account."
+            ]
+          },
+          {
+            "title": "Shared Ledgers and Albums",
+            "paragraphs": [
+              "If you create or join a shared ledger or shared album, the data you add to it is stored on our servers and is visible to everyone in it: member names, bills (title, amount, date, currency, who paid and how it is split), payments, settings, the cover photo, and an activity log of who changed what. Your own account, category, note, receipt photo, and mood for a bill are never shared with the group. Your display name in a group is the name you set, or else your sign-in name. The owner of a shared ledger can see members' email addresses. Anyone with an invite link can see the group's name, its owner's name, and how many members it has.",
+              "Bills and changes you add stay with the group as part of its shared record, including after you leave."
+            ]
+          },
+          {
+            "title": "Receipt Scanning and AI Features",
+            "paragraphs": [
+              "When you scan a receipt or screenshot, the App sends the image, along with your currency and your category and account names, to our scanning service, which uses AI models from Anthropic and other model providers, reached through OpenRouter, to read the details. If you turn on automatic review of payment notifications, the notification text and your category names are sent the same way. We do not store these images or texts; we keep only usage counts to apply plan limits. The AI providers process them to return a result."
+            ]
+          },
+          {
+            "title": "Live Earnings (iOS)",
+            "paragraphs": [
+              "If you turn on live earnings on the Lock Screen, the App sends your hourly rate, currency symbol, shift schedule, time zone, random app identifier, and the Live Activity push token Apple provides to our server, which updates the Live Activity through Apple Push Notification service while it runs."
             ]
           },
           {
             "title": "Random App Identifier",
             "paragraphs": [
-              "On first launch, the App generates a random unique identifier beginning with m2t_ that is not linked to your name, email, Apple ID, or any personal identity. The same identifier is shared with PostHog, Google Analytics for Firebase, and RevenueCat for product analytics and subscription management, and with any browser you link with the Web Dashboard, whose usage analytics (PostHog and Google Analytics) use it too."
+              "On first launch, the App generates a random unique identifier beginning with m2t_. It is shared with PostHog, Google Analytics for Firebase, and RevenueCat for product analytics and subscription management, and with any browser you link with the Web Dashboard, whose usage analytics use it too. If you sign in, we link it to your account on our servers; we do not send your name or email address to our analytics providers."
             ]
           },
           {
             "title": "Usage Analytics",
             "paragraphs": [
-              "We use PostHog and Google Analytics for Firebase to collect pseudonymous usage data linked to this random app identifier so we can understand how the App is used and improve the experience. Analytics does not include financial amounts, transaction details, account balances, notes, receipts, backups, or personally identifiable information.",
-              "PostHog also receives crash and error reports, and records a small sample of app sessions as screen recordings so we can find and fix problems. In those recordings everything that shows your information is masked: text, numbers, input fields, charts and any photo you add. Only the app's own design, such as its icons, illustrations and button labels, stays visible. These recordings never show your financial data."
+              "We use PostHog and Google Analytics for Firebase to collect pseudonymous usage data linked to the random app identifier so we can understand how the App is used and improve the experience. Analytics does not include financial amounts, transaction details, account balances, notes, receipts, backups, names, or email addresses.",
+              "PostHog also receives crash and error reports, records the model, token count and cost of each AI request (never the image or text), and records a small sample of app sessions as screen recordings so we can find and fix problems. In those recordings everything that shows your information is masked: text, numbers, input fields, charts and any photo you add. Only the app's own design, such as its icons, illustrations and button labels, stays visible. These recordings never show your financial data."
             ],
             "lists": [
               [
@@ -452,16 +486,47 @@
         ]
       },
       {
-        "title": "3. In-App Purchases & Subscriptions",
+        "title": "3. Google User Data",
         "paragraphs": [
-          "The App offers an optional premium subscription (Pro) managed through RevenueCat. Payment is processed by Apple or Google. We never receive or store your payment information, credit card details, or Apple ID/Google Account credentials.",
-          "RevenueCat receives your subscription status, product identifier, and expiration date to manage your entitlements. This is linked to the random app identifier, not your personal identity."
+          "This section explains how the App and our websites access, use, store, and share data received from Google APIs.",
+          "Money2Time's use and transfer of information received from Google APIs to any other app will adhere to the Google API Services User Data Policy, including the Limited Use requirements."
+        ],
+        "subsections": [
+          {
+            "title": "Data We Access",
+            "lists": [
+              [
+                "Google Sign-In (in the App and on album.money2time.com): your Google account ID, email address and whether it is verified, name, and profile picture address, through the openid, email, and profile scopes.",
+                "Google Drive (only if you choose Google Drive for backups): access limited to the drive.file scope, which lets the App see and manage only the backup files it creates. The App cannot see any other file in your Drive."
+              ]
+            ]
+          },
+          {
+            "title": "How We Use It",
+            "paragraphs": [
+              "We use your Google profile data only to create and sign in to your Money2Time account, to connect it to other sign-in methods with the same verified email address, and to show your name to the people in ledgers and albums you share. We use Google Drive access only to save, list, and restore your Money2Time backup files. We do not use Google user data for advertising, we do not sell it, and we do not use it to train AI models."
+            ]
+          },
+          {
+            "title": "How We Store and Share It",
+            "paragraphs": [
+              "Your Google profile data is stored in our account database on Cloudflare and kept until you delete your account. Your Drive backups are written directly from your phone to your Google Drive; they never pass through or are stored on our servers, and you can delete them in Google Drive at any time. We share Google user data only with the members of ledgers and albums you choose to share (your name), and with the service providers that host our servers (Cloudflare and Turso) under their data processing terms. We never send it to our analytics providers or AI providers.",
+              "You can remove Money2Time's access to your Google Account at any time at myaccount.google.com/permissions, and you can delete your account in the App as described in section 9."
+            ]
+          }
         ]
       },
       {
-        "title": "4. Notifications",
+        "title": "4. In-App Purchases & Subscriptions",
         "paragraphs": [
-          "The App may request permission to send notifications. All notifications are scheduled locally on your device. No push notifications are sent from external servers. You can deny notification permission or disable notifications at any time in your device Settings."
+          "The App offers an optional premium subscription (Pro) managed through RevenueCat. Payment is processed by Apple or Google. We never receive or store your payment information, credit card details, or Apple ID/Google Account passwords.",
+          "RevenueCat receives your subscription status, product identifier, and expiration date to manage your entitlements, linked to the random app identifier. If you sign in, our servers check your Pro status with RevenueCat so it applies to all your signed-in phones."
+        ]
+      },
+      {
+        "title": "5. Notifications",
+        "paragraphs": [
+          "The App may request permission to send notifications. Reminders and summaries are scheduled locally on your device. You can deny notification permission or disable notifications at any time in your device Settings."
         ],
         "lists": [
           [
@@ -472,31 +537,48 @@
         ]
       },
       {
-        "title": "5. Device Permissions",
+        "title": "6. Device Permissions",
         "paragraphs": [
-          "The App requests only notification permission to schedule local reminders and summaries. The App does not access your camera, microphone, photo library, contacts, calendar, messages, location, health data, fitness data, other apps, or browsing history."
+          "The App asks for each permission only when you use the feature that needs it, and you can turn any of them off in your device Settings."
+        ],
+        "lists": [
+          [
+            "Camera: to photograph receipts and to scan the code that links the Web Dashboard.",
+            "Photo library: to attach or scan photos you choose, and to save images you export.",
+            "Microphone and speech recognition: to add transactions by voice. Your speech is converted to text by Apple's or Google's speech recognition service, which may process it on their servers.",
+            "Face ID or fingerprint: to unlock the App if you turn on App Lock. The App never receives your biometric data.",
+            "Notification access (Android): to log transactions from the payment notifications of the apps you choose, if you turn on logging from notifications. Other notifications are ignored.",
+            "Notifications: for local reminders and summaries."
+          ]
         ]
       },
       {
-        "title": "6. Data Export, Import & Web Dashboard",
+        "title": "7. Backups, Export, Import & Web Dashboard",
         "paragraphs": [
-          "You can export all your financial data as a JSON file at any time via the App's Settings. The exported file is shared using your device's native sharing functionality. We do not receive or process your exported data.",
-          "You can also import data from a previous Money2Time backup or migrate from the Money Manager app. Importing replaces all existing data on your device.",
+          "You can back up your data to Google Drive or iCloud, manually or automatically each day. Backups are saved from your phone directly to your own Google Drive or iCloud account, and we never receive them. You can also export all your data as a JSON file at any time, shared using your device's native sharing functionality, and import a previous Money2Time backup or data from the Money Manager app. Importing replaces all existing data on your device.",
           "The Web Dashboard is optional. To use it, you open app.money2time.com on a computer and scan the code it shows with the App. Your phone and that browser then agree on an encryption key that only the two of them hold. While the App's Web Dashboard screen and the browser are both open, the App sends the browser a copy of your data (the same data as an export, with the logos, icons and cover photos you added, but not receipt photos or payment QR codes), encrypted end to end with AES-256-GCM. It travels through a server we run on Cloudflare, which passes the encrypted data along as it arrives and does not store it. We cannot read it.",
-          "The browser keeps the last copy it received, still encrypted, in its own storage together with the key, until you unlink it in the browser or in the App. Changes you make in the dashboard travel back to your phone, encrypted the same way, and the App saves them only while its Web Dashboard screen is open and only from a browser you allowed to make changes. Your phone also tells the browser whether you have Money2Time Pro, so it can unlock Pro dashboards, and its random app identifier, for the dashboard's usage analytics. There is no account: we keep no email address, and the server that passes your data along keeps no record of which phones and browsers are linked."
+          "The browser keeps the last copy it received, still encrypted, in its own storage together with the key, until you unlink it in the browser or in the App. Changes you make in the dashboard travel back to your phone, encrypted the same way, and the App saves them only while its Web Dashboard screen is open and only from a browser you allowed to make changes. Your phone also tells the browser whether you have Money2Time Pro, so it can unlock Pro dashboards, and its random app identifier, for the dashboard's usage analytics. The Web Dashboard needs no account, and the server that passes your data along keeps no record of which phones and browsers are linked.",
+          "On album.money2time.com, you can sign in with Google or an email code to view and edit the shared albums you belong to. The site keeps you signed in with a secure cookie for up to one year."
         ]
       },
       {
-        "title": "7. Data Deletion",
+        "title": "8. Data Retention",
         "paragraphs": [
-          "You have full control over your data at all times. Reset All Data permanently deletes all transactions, accounts, categories, recurring rules, and wage settings from your device. Reset Transactions Only clears your transaction history while preserving accounts and categories. Uninstalling the App removes the local database and all stored data entirely. Unlinking a browser from the Web Dashboard deletes the copy it keeps: right away when you unlink in the browser, and the next time it connects when you unlink from the App. Clearing that browser's site data deletes it too.",
-          "Resetting data within the App does not delete your subscription status held by Apple/Google or analytics data previously sent to PostHog and Google Analytics for Firebase. To request deletion of analytics data, contact us at the email below."
+          "Data on your device stays until you delete it or uninstall the App. Account information, your Cloud Sync copy, and your images on our servers are kept until you delete your account. Shared ledger and album data is kept while the group exists. Sign-in sessions last up to one year and renew while you use them. Receipt and notification texts sent for AI processing are not stored by us. Analytics data is kept for up to 14 months in Google Analytics and according to our retention settings in PostHog. Connection details such as IP addresses are kept briefly in our service providers' logs."
         ]
       },
       {
-        "title": "8. Third-Party Services",
+        "title": "9. Data Deletion",
         "paragraphs": [
-          "The App does not display advertisements or use advertising SDKs."
+          "You have full control over your data. Reset Data in Settings permanently deletes your accounts, categories, and transactions from your device, and from your Cloud Sync copy if Cloud Sync is on. Uninstalling the App removes the local database from your device, but not your backups in Google Drive or iCloud, or your account.",
+          "To delete your account, open the App's Account page and choose Delete account. This permanently deletes your account information, your Cloud Sync copy, every image you stored with us, and the shared ledgers and albums you own, and revokes the App's Apple sign-in. Unlinking a browser from the Web Dashboard deletes the copy it keeps: right away when you unlink in the browser, and the next time it connects when you unlink from the App.",
+          "Deleting your data does not delete your subscription records held by Apple or Google, or analytics data previously sent to PostHog and Google Analytics for Firebase. To request deletion of analytics data, contact us at the email below. Our data deletion page has the full steps."
+        ]
+      },
+      {
+        "title": "10. Third-Party Services",
+        "paragraphs": [
+          "We use the following service providers. Each receives only the data it needs for its purpose."
         ],
         "table": {
           "headers": [
@@ -507,8 +589,8 @@
           "rows": [
             [
               "PostHog and Google Analytics for Firebase",
-              "Pseudonymous usage analytics",
-              "Random app ID, feature usage events, preferences"
+              "Pseudonymous usage analytics, error reports, session recordings",
+              "Random app ID, feature usage events, preferences, masked recordings"
             ],
             [
               "RevenueCat",
@@ -516,9 +598,34 @@
               "Random app ID, subscription status"
             ],
             [
-              "Cloudflare (Workers, Durable Objects)",
-              "Web Dashboard connection, only if you use it",
-              "Your data, end-to-end encrypted and only in transit; connection details such as IP address, kept briefly in Cloudflare's logs"
+              "Cloudflare (Workers, D1, R2, Durable Objects, Email, Turnstile)",
+              "Hosting our servers, accounts, Cloud Sync images, shared albums, sign-in emails, the Web Dashboard connection",
+              "Account information, synced images, shared group data, end-to-end encrypted Web Dashboard data in transit, connection details such as IP address"
+            ],
+            [
+              "Turso",
+              "Database hosting for Cloud Sync and shared ledgers and albums",
+              "Your synced Money2Time data and shared group data"
+            ],
+            [
+              "OpenRouter, Anthropic and other AI model providers",
+              "Reading receipts and reviewing payment notifications",
+              "Receipt images or notification text, currency, category and account names"
+            ],
+            [
+              "Google (Sign-In, Drive)",
+              "Signing in and backups, if you use them",
+              "Sign-in requests; your backup files go to your own Drive"
+            ],
+            [
+              "Apple (Sign in with Apple, iCloud, Push Notification service)",
+              "Signing in, backups, and live earnings updates, if you use them",
+              "Sign-in requests; your backup files go to your own iCloud; Live Activity updates"
+            ],
+            [
+              "Frankfurter",
+              "Currency exchange rates",
+              "Currency codes and connection details such as IP address"
             ],
             [
               "Apple App Store / Google Play",
@@ -529,27 +636,27 @@
         }
       },
       {
-        "title": "9. Data Security",
+        "title": "11. Data Security",
         "paragraphs": [
-          "Your financial data is stored in an unencrypted local database protected by your device's built-in security. When you use the Web Dashboard, it is encrypted on your phone with AES-256-GCM, using a key your phone and browser agree on with P-256 key exchange, and sent over HTTPS; our server never has the key. The App uses only standard, published encryption algorithms."
+          "Data on your device is protected by your device's built-in security. Everything the App sends to our servers travels over HTTPS, and access to our servers and databases is restricted. Sign-in tokens from Apple and the credentials for each Cloud Sync database are stored encrypted. Web Dashboard data is end-to-end encrypted on your phone with AES-256-GCM, using a key your phone and browser agree on with P-256 key exchange; our server never has the key. Cloud Sync and shared ledger and album data are not end-to-end encrypted. The App uses only standard, published encryption algorithms."
         ]
       },
       {
-        "title": "10. Children's Privacy",
+        "title": "12. Children's Privacy",
         "paragraphs": [
           "The App is not directed at children under the age of 13. We do not knowingly collect personal information from children under 13. If you believe a child has provided data through the App, please contact us and we will take steps to remove such information."
         ]
       },
       {
-        "title": "11. Changes to This Policy",
+        "title": "13. Changes to This Policy",
         "paragraphs": [
           "We may update this Privacy Policy from time to time. Changes will be reflected on this page with an updated Last updated date. Continued use of the App after changes constitutes acceptance of the updated policy."
         ]
       }
     ],
     "contact": {
-      "title": "12. Contact Us",
-      "body": "If you have any questions about this Privacy Policy, need support, or want to request deletion of analytics data, please contact us at:",
+      "title": "14. Contact Us",
+      "body": "If you have any questions about this Privacy Policy, need support, or want to request deletion of your data, please contact us at:",
       "formPrefix": "You can also use the",
       "formLink": "contact form",
       "formSuffix": "on this site."
@@ -697,23 +804,42 @@
   },
   "dataDeletion": {
     "title": "Data Deletion Request",
-    "lastUpdated": "Last updated: October 20, 2026",
-    "intro": "Money2Time is a local-first app: all of your financial data is stored only on your device and is never stored on our servers. This page explains how to request deletion of the data associated with the Money2Time app, including the steps to request deletion and which types of data are deleted or kept, along with any retention periods.",
+    "lastUpdated": "Last updated: November 15, 2026",
+    "intro": "Money2Time is a local-first app: your financial data is stored on your device, and it is stored on our servers only if you sign in and use Cloud Sync or shared ledgers and albums. This page explains how to delete the data associated with the Money2Time app, which types of data are deleted or kept, and any retention periods.",
     "sections": [
       {
         "title": "How to Request Data Deletion",
         "subsections": [
           {
+            "title": "Delete your account and cloud data",
+            "paragraphs": [
+              "If you signed in, you can delete your account and everything stored with it on our servers yourself:"
+            ],
+            "lists": [
+              [
+                "Open the Money2Time app and go to your Account page.",
+                "Tap \"Delete account\" and confirm.",
+                "Your account information (name, email address, sign-in details), your Cloud Sync copy, every image you stored with us, and the shared ledgers and albums you own are deleted at once. The data on your phone stays until you delete it there."
+              ]
+            ]
+          },
+          {
             "title": "Delete data stored on your device",
             "paragraphs": [
-              "Almost all of your data, including all of your financial data, is stored only on your device. You can delete it yourself at any time:"
+              "You can delete the data on your device at any time:"
             ],
             "lists": [
               [
                 "Open the Money2Time app and go to Settings.",
-                "Tap \"Reset All Data\" to permanently delete all transactions, accounts, categories, recurring rules, and wage settings.",
-                "Alternatively, uninstall the app to remove the local database and all stored data entirely."
+                "Tap \"Reset Data\" to permanently delete your accounts, categories, and transactions. If Cloud Sync is on, this also erases your cloud copy.",
+                "Alternatively, uninstall the app to remove the local database from your device."
               ]
+            ]
+          },
+          {
+            "title": "Delete your backups",
+            "paragraphs": [
+              "Backups you made to Google Drive or iCloud are stored in your own account, not on our servers. Delete them in Google Drive (the Money2Time folder) or in your iCloud storage settings. You can also remove Money2Time's access to your Google Account at myaccount.google.com/permissions."
             ]
           },
           {
@@ -730,14 +856,14 @@
             ]
           },
           {
-            "title": "Request deletion of analytics and subscription data",
+            "title": "Request deletion of analytics and other data",
             "paragraphs": [
-              "To request deletion of analytics or subscription data associated with your random app identifier, contact us:"
+              "To request deletion of analytics or subscription data associated with your random app identifier, or of any other data if you cannot use the app, contact us:"
             ],
             "lists": [
               [
                 "Email us at the address below with the subject \"Data Deletion Request\", or use the contact form on this site.",
-                "Use the copy button beside User ID in Settings > Display and include the complete ID so we can locate the data associated with your app.",
+                "Use the copy button beside User ID in Settings > Display and include the complete ID, and the email address of your account if you signed in, so we can locate your data.",
                 "We will process your request and confirm completion within 30 days."
               ]
             ]
@@ -757,14 +883,44 @@
           ],
           "rows": [
             [
-              "On-device financial data (transactions, accounts, categories, recurring rules, wage settings)",
+              "On-device financial data (transactions, accounts, categories, budgets, recurring rules, wage settings)",
               "Deleted",
-              "Removed immediately when you reset data or uninstall the app. Nothing is retained by us."
+              "Removed immediately when you reset data or uninstall the app."
+            ],
+            [
+              "Account information (name, email address, Google or Apple user ID, sign-in sessions)",
+              "Deleted",
+              "Removed immediately when you delete your account."
+            ],
+            [
+              "Cloud Sync copy and the images you stored with us",
+              "Deleted",
+              "Removed immediately when you delete your account."
+            ],
+            [
+              "Shared ledgers and albums you own",
+              "Deleted",
+              "Removed for every member when you delete your account."
+            ],
+            [
+              "Bills and changes you added to groups others own",
+              "Kept",
+              "Kept as part of that group's shared record while the group exists."
+            ],
+            [
+              "Backups in your Google Drive or iCloud",
+              "Under your control",
+              "Kept in your own account until you delete them there."
             ],
             [
               "Web Dashboard copy in a browser you linked",
               "Deleted",
-              "Removed from that browser when you unlink it or clear its site data. Our servers never store it, so nothing is retained by us."
+              "Removed from that browser when you unlink it or clear its site data. Our servers never store it."
+            ],
+            [
+              "Receipt images and notification texts sent for scanning",
+              "Not stored",
+              "Processed to return a result and not stored by us. Only usage counts are kept, for plan limits."
             ],
             [
               "Pseudonymous analytics data (PostHog and Google Analytics for Firebase)",
@@ -782,14 +938,14 @@
       {
         "title": "Data We Do Not Store",
         "paragraphs": [
-          "Money2Time does not require an account and does not store your name, email, Apple ID, Google Account, or payment details on our servers. Because your financial data is never stored on our servers, including when you use the Web Dashboard, we cannot access or delete it for you.",
+          "We never store your payment details, card numbers, or Apple ID or Google Account passwords. We do not store your Google Drive or iCloud backups, and we cannot read your Web Dashboard data, which is end-to-end encrypted.",
           "Subscription and payment records held by Apple or Google are outside our control and are managed directly through your Apple or Google account."
         ]
       }
     ],
     "contact": {
       "title": "Contact Us",
-      "body": "To request deletion of analytics or subscription data, or if you have any questions, contact us at:",
+      "body": "To request deletion of your data, or if you have any questions, contact us at:",
       "formPrefix": "You can also use the",
       "formLink": "contact form",
       "formSuffix": "on this site."
