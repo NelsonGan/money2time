@@ -2681,8 +2681,8 @@ phone and the website. A name typed when joining on the website is the one
 used, even when the app had put them in first (`planJoin` renames someone
 already in for a `via: "web"` join). Changing the Settings name renames the
 user in each shared album where they still go by a name they never picked
-there (the old Settings name, the sign-in name or the address's first part;
-`followProfileName`), unless someone else has the new name; a name picked in
+there (the old Settings name, the sign-in name, the address's first part, or
+the masked address older versions gave; `followProfileName`), unless someone else has the new name; a name picked in
 one album stays. Cloud Sync profile photos are not used. `albums.split_with_json` (migration `090`) is
 an unused column.
 

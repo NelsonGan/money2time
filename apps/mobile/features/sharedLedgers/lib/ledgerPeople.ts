@@ -159,13 +159,17 @@ export function ownAlbumName(): string | null {
 /**
  * Every name the user goes by in an album without having picked one there:
  * the Settings name (`profileName`, as it is or was), the sign-in name, the
- * address's first part. The first is the one a new album gets.
+ * address's first part, and the masked address apps before it gave a new
+ * member. The first is the one a new album gets.
  */
 export function albumNamesFor(profileName: string | null): string[] {
   const user = getCachedSessionUser();
-  return [profileName?.trim(), user?.name.trim(), nameFromEmail(user?.email)].filter(
-    (name): name is string => !!name,
-  );
+  return [
+    profileName?.trim(),
+    user?.name.trim(),
+    nameFromEmail(user?.email),
+    maskEmail(user?.email),
+  ].filter((name): name is string => !!name);
 }
 
 /** The Settings name as it is now, before a change is saved. */
