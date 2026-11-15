@@ -2266,6 +2266,7 @@
       "notePlaceholder": "Nowa notatka. Zostaw puste, aby ją usunąć.",
       "sharedBill": {
         "intro": "W udostępnionym albumie {album}: każdy w nim może zmienić ten rachunek. Kategoria, konto, szczegóły i nastrój pozostają Twoje.",
+        "introCategories": "W udostępnionym albumie {album}: każdy w nim może zmienić ten rachunek, także jego kategorię. Konto, szczegóły i nastrój pozostają Twoje.",
         "paidBy": "Zapłacił(a)",
         "splitBetween": "Podzielone między",
         "nobodyElse": "Podziel go z kimś innym z albumu albo niech zapłaci ktoś inny.",

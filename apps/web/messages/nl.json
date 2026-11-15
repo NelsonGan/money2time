@@ -2266,6 +2266,7 @@
       "notePlaceholder": "Nieuwe notitie. Laat leeg om hem te wissen.",
       "sharedBill": {
         "intro": "In het gedeelde album {album}: iedereen erin kan deze uitgave wijzigen. De categorie, rekening, details en stemming blijven van jou.",
+        "introCategories": "In het gedeelde album {album}: iedereen erin kan deze uitgave wijzigen, ook de categorie. De rekening, details en stemming blijven van jou.",
         "paidBy": "Betaald door",
         "splitBetween": "Verdeeld over",
         "nobodyElse": "Deel hem met iemand anders in het album, of laat iemand anders betalen.",

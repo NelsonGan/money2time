@@ -2266,6 +2266,7 @@
       "notePlaceholder": "Nova nota. Deixe em branco para apagá-la.",
       "sharedBill": {
         "intro": "No álbum partilhado {album}: qualquer pessoa pode alterar esta despesa. A categoria, a conta, os detalhes e o humor continuam a ser seus.",
+        "introCategories": "No álbum partilhado {album}: qualquer pessoa pode alterar esta despesa, incluindo a categoria. A conta, os detalhes e o humor continuam a ser seus.",
         "paidBy": "Pago por",
         "splitBetween": "Dividido entre",
         "nobodyElse": "Divida com outra pessoa do álbum, ou faça outra pessoa pagar.",

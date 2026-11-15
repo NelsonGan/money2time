@@ -73,9 +73,14 @@ export function AlbumMonthPicker({ selectedIds, onChange }: AlbumMonthPickerProp
     (transaction: TransactionWithRelations) => getDisplayValueForTransaction(transaction),
     [getDisplayValueForTransaction],
   );
-  // Albums track spending, so only expenses are pickable.
+  // Albums track spending, so only expenses are pickable; a shared album's
+  // bill stays in its album (an entry is in one album, and picking another
+  // entry moves it here).
   const expenseTransactions = useMemo(
-    () => transactions.filter((transaction) => transaction.type === 'expense'),
+    () =>
+      transactions.filter(
+        (transaction) => transaction.type === 'expense' && !transaction.albumGroupId,
+      ),
     [transactions],
   );
   const monthBuckets = useMemo(

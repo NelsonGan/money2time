@@ -2266,6 +2266,7 @@
       "notePlaceholder": "Yeni not. Silmek için boş bırakın.",
       "sharedBill": {
         "intro": "Paylaşılan albüm {album}: içindeki herkes bu faturayı değiştirebilir. Kategorisi, hesabı, ayrıntıları ve ruh hâli sizde kalır.",
+        "introCategories": "Paylaşılan albüm {album}: içindeki herkes bu faturayı, kategorisi dahil, değiştirebilir. Hesabı, ayrıntıları ve ruh hâli sizde kalır.",
         "paidBy": "Ödeyen",
         "splitBetween": "Paylaşılanlar",
         "nobodyElse": "Albümdeki başka biriyle paylaşın ya da başkası ödesin.",

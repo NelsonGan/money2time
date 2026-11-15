@@ -1192,7 +1192,7 @@ export function InsightsDrilldownScreen({
                     }}
                     disabled={!onOpenSubcategoryDrilldown}
                     accessibilityRole="button"
-                    accessibilityLabel={`${item.emoji} ${item.name}`}
+                    accessibilityLabel={`${categoryIconToEmoji(item.emoji)} ${item.name}`.trim()}
                     accessibilityState={{ disabled: !onOpenSubcategoryDrilldown }}
                     className="rounded-xl px-2.5 py-1.5 active:opacity-85 border"
                     style={[

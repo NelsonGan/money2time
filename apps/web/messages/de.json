@@ -2266,6 +2266,7 @@
       "notePlaceholder": "Neue Notiz. Leer lassen, um sie zu löschen.",
       "sharedBill": {
         "intro": "Im geteilten Album {album}: Alle darin können diese Rechnung ändern. Kategorie, Konto, Details und Stimmung bleiben deine.",
+        "introCategories": "Im geteilten Album {album}: Alle darin können diese Rechnung ändern, auch die Kategorie. Konto, Details und Stimmung bleiben deine.",
         "paidBy": "Bezahlt von",
         "splitBetween": "Aufgeteilt auf",
         "nobodyElse": "Teile sie mit jemand anderem im Album oder lass jemand anderen zahlen.",

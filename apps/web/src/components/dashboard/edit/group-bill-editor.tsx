@@ -189,7 +189,7 @@ export function GroupBillForm({ tx, group, bill, onClose }: { tx: Tx; group: Alb
               ]}
             />
           ) : null}
-          <p className="rounded-2xl bg-primary-soft/50 px-4 py-2.5 text-[12.5px] leading-snug text-foreground-soft">{tg("intro", { album })}</p>
+          <p className="rounded-2xl bg-primary-soft/50 px-4 py-2.5 text-[12.5px] leading-snug text-foreground-soft">{tg(albumCategories ? "introCategories" : "intro", { album })}</p>
           {albumCategories ? (
             <AlbumCategoryGrid value={albumCategory} onChange={touch(setAlbumCategory)} />
           ) : (

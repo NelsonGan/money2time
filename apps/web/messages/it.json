@@ -2266,6 +2266,7 @@
       "notePlaceholder": "Nuova nota. Lascia vuoto per cancellarla.",
       "sharedBill": {
         "intro": "Nell'album condiviso {album}: chiunque può modificare questa spesa. Categoria, conto, dettagli e umore restano tuoi.",
+        "introCategories": "Nell'album condiviso {album}: chiunque può modificare questa spesa, anche la categoria. Conto, dettagli e umore restano tuoi.",
         "paidBy": "Pagato da",
         "splitBetween": "Diviso tra",
         "nobodyElse": "Dividila con qualcun altro dell'album, o falla pagare a qualcun altro.",

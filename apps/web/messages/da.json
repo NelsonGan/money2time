@@ -2266,6 +2266,7 @@
       "notePlaceholder": "Ny note. Lad feltet stå tomt for at rydde den.",
       "sharedBill": {
         "intro": "I det delte album {album}: alle i det kan ændre denne regning. Kategori, konto, detaljer og humør forbliver dine.",
+        "introCategories": "I det delte album {album}: alle i det kan ændre denne regning, også kategorien. Konto, detaljer og humør forbliver dine.",
         "paidBy": "Betalt af",
         "splitBetween": "Delt mellem",
         "nobodyElse": "Del den med en anden i albummet, eller lad en anden betale.",

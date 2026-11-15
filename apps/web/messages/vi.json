@@ -2266,6 +2266,7 @@
       "notePlaceholder": "Ghi chú mới. Để trống để xóa ghi chú.",
       "sharedBill": {
         "intro": "Trong album chia sẻ {album}: bất kỳ ai trong album đều có thể sửa hóa đơn này. Danh mục, tài khoản, chi tiết và tâm trạng vẫn là của bạn.",
+        "introCategories": "Trong album chia sẻ {album}: bất kỳ ai trong album đều có thể sửa hóa đơn này, cả danh mục. Tài khoản, chi tiết và tâm trạng vẫn là của bạn.",
         "paidBy": "Người trả",
         "splitBetween": "Chia cho",
         "nobodyElse": "Chia với người khác trong album, hoặc để người khác trả.",

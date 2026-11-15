@@ -2266,6 +2266,7 @@
       "notePlaceholder": "New note. Leave empty to clear it.",
       "sharedBill": {
         "intro": "In the shared album {album}: anyone in it can change this bill. Its category, account, details and mood stay yours.",
+        "introCategories": "In the shared album {album}: anyone in it can change this bill, its category too. Its account, details and mood stay yours.",
         "paidBy": "Paid by",
         "splitBetween": "Split between",
         "nobodyElse": "Split it with someone else in the album, or have them pay it.",

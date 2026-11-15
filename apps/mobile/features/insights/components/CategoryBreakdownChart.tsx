@@ -225,7 +225,7 @@ export function CategoryBreakdownChart({
                   : undefined
               }
               accessibilityRole={onSelectRow ? 'button' : undefined}
-              accessibilityLabel={`${item.emoji ?? ''} ${item.label}`.trim()}
+              accessibilityLabel={`${categoryIconToEmoji(item.emoji)} ${item.label}`.trim()}
               className={
                 onSelectRow
                   ? 'rounded-xl border px-2.5 py-2 active:opacity-85'

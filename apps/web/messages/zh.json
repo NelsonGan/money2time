@@ -2266,6 +2266,7 @@
       "notePlaceholder": "新备注。留空即可清除。",
       "sharedBill": {
         "intro": "在共享相册“{album}”中：其中任何人都可以修改这笔账单。它的分类、账户、详情和心情仍属于你。",
+        "introCategories": "在共享相册“{album}”中：其中任何人都可以修改这笔账单，包括分类。它的账户、详情和心情仍属于你。",
         "paidBy": "付款人",
         "splitBetween": "分摊给",
         "nobodyElse": "与相册中的其他人分摊，或让其他人付款。",

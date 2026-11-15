@@ -2266,6 +2266,7 @@
       "notePlaceholder": "Bagong note. Iwanang blangko para burahin ito.",
       "sharedBill": {
         "intro": "Sa shared album na {album}: kahit sino rito ay puwedeng magbago ng bill na ito. Sa iyo pa rin ang category, account, detalye at mood nito.",
+        "introCategories": "Sa shared album na {album}: kahit sino rito ay puwedeng magbago ng bill na ito, pati ang category nito. Sa iyo pa rin ang account, detalye at mood nito.",
         "paidBy": "Binayaran ni",
         "splitBetween": "Hinati sa",
         "nobodyElse": "Hatiin ito sa iba pang nasa album, o ipabayad sa iba.",

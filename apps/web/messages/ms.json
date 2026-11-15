@@ -2266,6 +2266,7 @@
       "notePlaceholder": "Nota baharu. Biarkan kosong untuk mengosongkannya.",
       "sharedBill": {
         "intro": "Dalam album kongsi {album}: sesiapa di dalamnya boleh menukar bil ini. Kategori, akaun, butiran dan moodnya kekal milik anda.",
+        "introCategories": "Dalam album kongsi {album}: sesiapa di dalamnya boleh menukar bil ini, termasuk kategorinya. Akaun, butiran dan moodnya kekal milik anda.",
         "paidBy": "Dibayar oleh",
         "splitBetween": "Dibahagi dengan",
         "nobodyElse": "Bahagikan dengan orang lain dalam album, atau biar orang lain membayarnya.",
