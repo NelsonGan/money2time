@@ -2497,9 +2497,9 @@ their own.
     removed it, else an `album-covers/<id>.<ext>` path, an image column
     (`ASSET_COLUMNS`) synced on the album's channel. `updateAlbum` writes it
     for a shared album, and `syncAlbumCover` (from `syncAlbumGroups`, after
-    every sync) puts it on the phone's own album; while it is NULL, the
-    owner's phone publishes the cover its album has. Any other value reads as
-    unset.
+    every sync) puts it on the phone's own album. Sharing an album writes
+    its cover into the group (`shareAlbum` in `CloudSyncContext`), so
+    everyone who joins gets it. Any other value reads as unset.
 - **Its own database, synced both ways.** The five tables
   carry the group's id in `ledger_id`, the column Cloud Sync routes a row by
   (`LEDGER_ROOT_SYNC_TABLES`), and a shared album is kept in `shared_ledgers`
@@ -2507,12 +2507,11 @@ their own.
   replica per share, the list from `GET /v1/ledgers`, invite links, live
   nudges, tokens and their revocation, leaving and stopping (not the Pro
   rule). As in a ledger, each phone holds a full token (`credentials`), the
-  group tables have capture triggers (`CAPTURE_VERSION` 4), and a change made
-  on a phone goes up on the album's channel and comes down on the others',
-  last writer wins per row. The two kinds of share never cross (`channelOfRow`):
-  an album's channel carries the group tables and nothing else, and a
-  ledger's
-  carries none of them, so the user's own copy never holds a group's rows
+  group tables have capture triggers, and a change made on a phone goes up
+  on the album's channel and comes down on the others', last writer wins per
+  row. The two kinds of share never cross (`channelOfRow`): an album's
+  channel carries the group tables and nothing else, and a ledger's carries
+  none of them, so the user's own copy never holds a group's rows
   and a group's rows with no share to go to go nowhere. The screens read the
   two kinds apart (`listLedgerShares`, `listAlbumShares`). A backup leaves
   the group tables out (`GROUP_SYNC_TABLES`): the group is not the user's
@@ -2564,8 +2563,7 @@ their own.
   online, or later. Then the user's own entries follow (`projectGroup`). It
   is the only code that writes the group's tables
   (`__tests__/features/albumGroupWriter.test.ts` fails on any other write
-  that names one),
-  so no change skips the log. The Worker writes the group only for what
+  that names one), so no change skips the log. The Worker writes the group only for what
   happens there, by the same planner (a copy, `src/groupPlan.generated.ts`,
   written by `npm run sync:group-plan` in `apps/mobile`;
   `__tests__/scripts/syncGroupPlan.test.ts` fails while the two differ):
@@ -2575,8 +2573,9 @@ their own.
   still has the revision it read, and only while the member list is as it
   read it (`commitPlan`'s guards, in one Hrana batch with `BEGIN IMMEDIATE`),
   else plans again: two people joining at once never take one name, and a
-  website change never overwrites a phone's push that landed meanwhile. A payment is cut to what is still owed as stored,
-  so a second tap never pays a share twice. The group is never derived from
+  website change never overwrites a phone's push that landed meanwhile.
+  A payment is cut to what is still owed as stored, so a second tap never
+  pays a share twice. The group is never derived from
   the user's entries: an album is shared before it has any, and an entry of
   the user's own added later stays theirs.
 - **Who owes whom.** `lib/groupDebts.ts` (pure) derives it from the group's
@@ -2630,8 +2629,8 @@ their own.
   - **A group is never one of the phone's ledgers.** A share's id is whatever
     its owner sent, so joining an album whose id is a ledger here is refused
     before a seat is taken (`assertNotLedger`), a group only ever writes into
-    an album of the main ledger, and letting a group go deletes its four
-    tables by the group's id and nothing else (`deleteGroupRowsLocally`,
+    an album of the main ledger, and letting a group go deletes its tables
+    by the group's id and nothing else (`deleteGroupRowsLocally`,
     never the ledger delete).
   - **Rows are checked where they are read** (`toAlbumMember`,
     `toAlbumExpense`, `toAlbumSettlement` in `lib/repositories/mappers.ts`):
