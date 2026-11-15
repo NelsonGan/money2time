@@ -47,6 +47,7 @@ export function AlbumMonthPicker({ selectedIds, onChange }: AlbumMonthPickerProp
     getDisplayValueForTransaction,
     getTrueHourlyRateForDate,
     getAlbumIdByTransaction,
+    albums,
   } = useApp();
   const monthCycle = monthCycleOf(settings);
   const { transactions } = useTransactions();
@@ -81,18 +82,20 @@ export function AlbumMonthPicker({ selectedIds, onChange }: AlbumMonthPickerProp
   );
   // Albums track spending, so only expenses are pickable. An entry is in one
   // album, and picking one in another album moves it here, except what is in
-  // a shared album (its bills and the entries their payments made), which
-  // stays there.
+  // a shared album (its bills and the entries their payments made), or in
+  // one the user is no longer in, which stays there.
   const sharedAlbums = useSharedAlbums();
   const albumIdByTransaction = getAlbumIdByTransaction();
   const expenseTransactions = useMemo(() => {
-    const shared = new Set(sharedAlbums.map((share) => share.ledgerId));
+    const kept = new Set(sharedAlbums.map((share) => share.ledgerId));
+    for (const album of albums) if (album.shareEndedAt) kept.add(album.id);
     return transactions.filter((transaction) => {
       if (transaction.type !== 'expense' || transaction.albumGroupId) return false;
+      if (transaction.albumCategory) return false;
       const albumId = albumIdByTransaction.get(transaction.id);
-      return !albumId || !shared.has(albumId);
+      return !albumId || !kept.has(albumId);
     });
-  }, [albumIdByTransaction, sharedAlbums, transactions]);
+  }, [albumIdByTransaction, albums, sharedAlbums, transactions]);
   const monthBuckets = useMemo(
     () => bucketTransactionsByMonth(expenseTransactions, resolveValue, monthCycle),
     [expenseTransactions, resolveValue, monthCycle],

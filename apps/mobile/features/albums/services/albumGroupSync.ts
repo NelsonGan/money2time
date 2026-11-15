@@ -83,11 +83,12 @@ interface TxRow {
   category_id: string | null;
   note: string | null;
   album_group_id: string | null;
+  album_category: string | null;
   deleted_at: string | null;
 }
 
 const TX_COLUMNS =
-  'id, ledger_id, type, amount, currency, reporting_currency, reporting_amount, fx_rate, to_amount, account_amount, date, account_id, from_account_id, to_account_id, category_id, note, album_group_id, deleted_at';
+  'id, ledger_id, type, amount, currency, reporting_currency, reporting_amount, fx_rate, to_amount, account_amount, date, account_id, from_account_id, to_account_id, category_id, note, album_group_id, album_category, deleted_at';
 
 function readTx(id: string): TxRow | null {
   return getSQLite().getFirstSync<TxRow>(`SELECT ${TX_COLUMNS} FROM transactions WHERE id = ?`, [
@@ -322,7 +323,8 @@ function writeExpense(
     (existing.account_id ?? null) !== (input.accountId ?? null) ||
     (existing.category_id ?? null) !== (input.categoryId ?? null) ||
     (existing.note ?? null) !== (input.note ?? null) ||
-    (existing.album_group_id ?? null) !== (input.albumGroupId ?? null);
+    (existing.album_group_id ?? null) !== (input.albumGroupId ?? null) ||
+    (existing.album_category ?? null) !== (input.albumCategory ?? null);
   if (changed) transactionsRepository.update(id, input);
   return changed;
 }
@@ -501,6 +503,9 @@ function projectExpense(
     date: expense.date,
     accountId,
     categoryId,
+    // Kept once the album is no longer shared: the entry never needs one of
+    // the user's categories to show what it was.
+    albumCategory: expense.category,
     note: expense.note,
     ...(live
       ? null
@@ -711,6 +716,7 @@ function projectExpense(
           date: expense.date,
           accountId: entry.accountId,
           categoryId: env.categoryIdFor(expense.category),
+          albumCategory: expense.category,
           note: expense.note,
           albumGroupId: null,
         }) || changed;

@@ -3019,7 +3019,8 @@ const id = {
     no_transactions_title: 'Tidak ada transaksi',
     no_transactions_message: 'Tambahkan transaksi ke album ini untuk melihatnya di sini.',
     delete_title: 'Hapus album?',
-    delete_body: 'Ini menghapus album. Transaksi Anda tidak dihapus.',
+    delete_body:
+      'Transaksimu tetap disimpan dan kembali ke kategorinya masing-masing. Untuk menyimpan album apa adanya, arsipkan saja.',
     cover_permission_title: 'Perlu akses foto',
     cover_permission_body: 'Izinkan akses foto untuk memilih gambar sampul.',
     people: {
@@ -3038,17 +3039,31 @@ const id = {
       row: 'Bagi dengan teman',
       caption: 'Semua orang melihat tagihan dan siapa berutang kepada siapa.',
       link_note: 'Berlaku 24 jam. Siapa pun yang memilikinya bisa bergabung.',
-      stop_message:
-        'Semua orang tetap memiliki album dengan catatannya sendiri, tetapi tidak lagi diperbarui di antara kalian.',
       leave: 'Keluar dari album',
       leave_title: 'Keluar dari {{name}}?',
       leave_message:
-        'Kamu tetap memiliki album dengan catatanmu sendiri, tetapi tidak lagi diperbarui.',
-      delete_leave_message:
-        'Kamu juga keluar dari album ini. Yang lain tetap memiliki album dan tagihannya.',
+        'Album pindah ke Diarsipkan dan tidak diperbarui lagi. Kamu tetap punya transaksimu, dan yang lain tetap punya album dan tagihannya.',
+      end: 'Akhiri album',
+      end_title: 'Akhiri {{name}} untuk semua orang?',
+      end_message:
+        'Tidak ada yang bisa menambah atau mengubah tagihannya lagi. Semua orang tetap punya album ini di Diarsipkan, dengan transaksi dan saldo mereka apa adanya.',
       limit: 'Kamu bisa membagikan hingga {{max}} album sekaligus.',
       full: 'Hingga {{max}} orang bisa bergabung ke satu album.',
       sign_in: 'Masuk untuk membagikan album ini.',
+    },
+    archive: {
+      action: 'Arsipkan',
+      unarchive: 'Batalkan arsip',
+      label: 'Diarsipkan',
+      section: 'Diarsipkan ({{count}})',
+      confirm_title: 'Arsipkan {{name}}?',
+      confirm_shared:
+        'Album pindah ke Diarsipkan di halaman Album. Kamu tetap di dalamnya, tagihannya tetap diperbarui, dan tetap dihitung di Wawasan. Kamu bisa membatalkan arsipnya kapan saja.',
+    },
+    ended: {
+      label: 'Tidak dibagikan lagi',
+      title: 'Tidak dibagikan lagi',
+      body: 'Kamu keluar dari album ini, berbagi dihentikan, atau kamu keluar dari akun. Album disimpan seperti semula, beserta transaksimu, dan tidak diperbarui lagi. Masuk lagi atau bergabung lagi untuk mengembalikannya.',
     },
     balances: {
       tab: 'Saldo',

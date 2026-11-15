@@ -21,6 +21,7 @@ import {
   setPhoneTimeZone,
   type MonthCycle,
 } from "./dates";
+import { isAlbumCategoryKey, type AlbumCategoryKey } from "../album/categories.ts";
 import { albumOfEntries } from "./album-lines";
 import { storedBudgetCurrency, storedBudgetRate } from "./budget-currency";
 import { monthlyBudgetRows } from "./budget-period";
@@ -119,6 +120,8 @@ export type Tx = {
    * category (`lineOf`, README: Key patterns > Albums).
    */
   albumId?: string;
+  /** A shared album's category the entry is under (`album_category`), else absent. */
+  albumCategory?: AlbumCategoryKey;
   /** Made by an ordinary recurring rule (`isRecurringRun`), tinted in the lists while `Model.highlightRecurring`. */
   recurring?: boolean;
 };
@@ -245,6 +248,10 @@ export type Trip = {
   start: Date | null;
   end: Date | null;
   active: boolean;
+  /** In Archived on the Albums page: still a line in the category lists. */
+  archived: boolean;
+  /** A shared album the user is no longer in: read-only, by its own categories. */
+  ended: boolean;
   txIds: string[];
   /** Its fixed chart colour as a line in the category lists. */
   color: string;
@@ -579,6 +586,7 @@ export function buildModel(backup: BackupFile, opts: { timeZone?: string | null 
       recurring: isRecurringRun(row, planRuleIds),
       ...(row.album_group_id ? { albumGroupId: row.album_group_id } : null),
       ...(albumByTx.has(row.id) ? { albumId: albumByTx.get(row.id) } : null),
+      ...(isAlbumCategoryKey(row.album_category) ? { albumCategory: row.album_category } : null),
     });
   }
   txs.sort((a, b) => b.date.getTime() - a.date.getTime());
@@ -873,7 +881,9 @@ export function buildModel(backup: BackupFile, opts: { timeZone?: string | null 
         countryCode: row.country_code ?? null,
         start: parseLocalDate(row.start_date ?? null) ?? (dates.length ? new Date(Math.min(...dates)) : null),
         end: parseLocalDate(row.end_date ?? null) ?? (dates.length ? new Date(Math.max(...dates)) : null),
-        active: row.is_active === 1,
+        active: row.is_active === 1 && !row.archived_at,
+        archived: !!row.archived_at,
+        ended: !!row.share_ended_at,
         txIds: ids,
         color: OTHER_COLOR,
       };

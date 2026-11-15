@@ -168,6 +168,9 @@ export const transactionsTable = sqliteTable('transactions', {
   // Shared albums (migration 090): the group whose bill this entry is the
   // user's side of; the bill is the album_expenses row with this entry's id.
   albumGroupId: text('album_group_id'),
+  // Migration 094: a shared album's category of the bill this entry is the
+  // user's side of, kept once the album is no longer shared.
+  albumCategory: text('album_category'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
   deletedAt: text('deleted_at'),
@@ -383,6 +386,10 @@ export const albumsTable = sqliteTable('albums', {
   // Migration 090. `[{ id, name }]`: the people an album that is not shared
   // is split with.
   splitWithJson: text('split_with_json'),
+  // Migration 094: archived (out of the Albums page's list), and a shared
+  // album the user is no longer in, kept as it was (read-only).
+  archivedAt: text('archived_at'),
+  shareEndedAt: text('share_ended_at'),
   sortOrder: integer('sort_order').notNull().default(0),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),

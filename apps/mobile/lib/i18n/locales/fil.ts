@@ -3047,7 +3047,8 @@ const fil = {
     no_transactions_title: 'Walang transaksyon',
     no_transactions_message: 'Magdagdag ng transaksyon sa album na ito para makita dito.',
     delete_title: 'Tanggalin ang album?',
-    delete_body: 'Tatanggalin nito ang album. Hindi binubura ang iyong mga transaksyon.',
+    delete_body:
+      'Mananatili ang mga transaksyon mo at babalik sa sarili nilang mga kategorya. Para panatilihin ang album kung ano ito, i-archive na lang ito.',
     cover_permission_title: 'Kailangan ng access sa photos',
     cover_permission_body: 'Payagan ang access sa photos para pumili ng cover image.',
     people: {
@@ -3066,16 +3067,31 @@ const fil = {
       row: 'Hatiin sa mga kaibigan',
       caption: 'Nakikita ng lahat ang mga bill at kung sino ang may utang kanino.',
       link_note: 'Gumagana nang 24 oras. Makakasali ang sinumang may link.',
-      stop_message:
-        'Mananatili sa lahat ang album kasama ang sarili nilang mga entry, pero hindi na ito mag-a-update sa pagitan ninyo.',
       leave: 'Umalis sa album',
       leave_title: 'Umalis sa {{name}}?',
       leave_message:
-        'Mananatili sa iyo ang album kasama ang sarili mong mga entry, pero hindi na ito mag-a-update.',
-      delete_leave_message: 'Aalis ka rin dito. Mananatili sa iba ang album at ang mga bill nito.',
+        'Malilipat ito sa Naka-archive at hindi na mag-a-update. Mananatili sa iyo ang mga transaksyon mo, at mananatili sa iba ang album at ang mga bill nito.',
+      end: 'Tapusin ang album',
+      end_title: 'Tapusin ang {{name}} para sa lahat?',
+      end_message:
+        'Wala nang makakapagdagdag o makakapagbago ng mga bill nito. Mananatili sa lahat ang album sa Naka-archive, kasama ang kanilang mga transaksyon at balanse kung ano ito.',
       limit: 'Hanggang {{max}} album ang puwede mong ibahagi nang sabay.',
       full: 'Hanggang {{max}} tao ang puwedeng sumali sa isang album.',
       sign_in: 'Mag-sign in para i-share ang album na ito.',
+    },
+    archive: {
+      action: 'I-archive',
+      unarchive: 'Alisin sa archive',
+      label: 'Naka-archive',
+      section: 'Naka-archive ({{count}})',
+      confirm_title: 'I-archive ang {{name}}?',
+      confirm_shared:
+        'Malilipat ito sa Naka-archive sa page na Mga Album. Mananatili ka rito, patuloy na mag-a-update ang mga bill nito, at kasama pa rin ito sa Insights. Puwede mo itong alisin sa archive anumang oras.',
+    },
+    ended: {
+      label: 'Hindi na shared',
+      title: 'Hindi na shared',
+      body: 'Umalis ka sa album na ito, natapos ang pag-share, o nag-sign out ka. Nananatili ito kung ano ito noon, kasama ang mga transaksyon mo, at hindi na nag-a-update. Mag-sign in ulit o sumali ulit para maibalik ito.',
     },
     balances: {
       tab: 'Mga balanse',

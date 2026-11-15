@@ -141,11 +141,12 @@ interface AlbumRow {
   name: string;
   cover_photo_uri: string | null;
   deleted_at: string | null;
+  share_ended_at: string | null;
 }
 
 function albumRow(albumId: string): AlbumRow | null {
   return getSQLite().getFirstSync<AlbumRow>(
-    'SELECT id, ledger_id, name, cover_photo_uri, deleted_at FROM albums WHERE id = ?',
+    'SELECT id, ledger_id, name, cover_photo_uri, deleted_at, share_ended_at FROM albums WHERE id = ?',
     [albumId],
   );
 }
@@ -182,6 +183,17 @@ export function ensureLocalAlbum(share: { ledgerId: string; name: string | null 
   const db = getSQLite();
   const existing = albumRow(share.ledgerId);
   if (existing) {
+    // Back in it (signed in again, joined again): no longer frozen, and out
+    // of Archived unless the user had archived it themselves.
+    if (existing.share_ended_at) {
+      db.runSync(
+        `UPDATE albums SET share_ended_at = NULL,
+           archived_at = CASE WHEN archived_at = share_ended_at THEN NULL ELSE archived_at END,
+           updated_at = ?
+         WHERE id = ?`,
+        [now, share.ledgerId],
+      );
+    }
     if (existing.deleted_at) {
       db.withTransactionSync(() => {
         db.runSync('UPDATE albums SET deleted_at = NULL, updated_at = ? WHERE id = ?', [
@@ -263,12 +275,12 @@ export function syncAlbumCover(groupId: string): boolean {
 
 /**
  * An album that is no longer shared on this phone (sharing stopped, the user
- * left or was removed, or signed out): it goes on as an album of the user's
- * own. The group's rows leave the phone without recording deletions, since
- * the group is not this phone's to delete, and the group keeps everything the
- * user wrote, so nobody else's bills or balances change; the user's own
- * entries for its bills stay, as ordinary split bills (settled on the
- * Balances page).
+ * left or was removed, or signed out): it is kept as it was, archived and
+ * read-only. The group's rows leave the phone without recording deletions,
+ * since the group is not this phone's to delete, and the group keeps
+ * everything the user wrote, so nobody else's bills or balances change; the
+ * user's own entries for its bills stay, as ordinary split bills (settled on
+ * the Balances page), with their album categories.
  */
 export function releaseAlbumGroup(groupId: string): void {
   const db = getSQLite();
@@ -276,6 +288,15 @@ export function releaseAlbumGroup(groupId: string): void {
   db.runSync(
     'UPDATE transactions SET album_group_id = NULL, updated_at = ? WHERE album_group_id = ?',
     [now, groupId],
+  );
+  // Kept as it was, archived and read-only, never deleted: its entries keep
+  // their album categories (README: Album members and shared albums >
+  // Leaving and stopping). Being back in it undoes this (`ensureLocalAlbum`).
+  db.runSync(
+    `UPDATE albums SET share_ended_at = ?, archived_at = COALESCE(archived_at, ?),
+       is_active = 0, updated_at = ?
+     WHERE id = ? AND deleted_at IS NULL AND share_ended_at IS NULL`,
+    [now, now, now, groupId],
   );
   deleteGroupRowsLocally(groupId);
   notifyAlbumGroups();

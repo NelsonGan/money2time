@@ -1,5 +1,6 @@
 import { and, eq, gte, inArray, isNull, lte, or, sql } from 'drizzle-orm';
 
+import type { AlbumCategoryKey } from '~/features/albums/lib/groupPlan';
 import { withEntryStamp } from '~/features/sharedLedgers/lib/entryStamp';
 import { owedToPayer } from '~/features/transactions/lib/splitPayer';
 import { getDb, getSQLite } from '~/lib/db/client';
@@ -114,6 +115,8 @@ export interface CreateTransactionInput {
   memberId?: string | null;
   /** Shared albums: the group whose bill this entry is the user's side of. */
   albumGroupId?: string | null;
+  /** Shared albums: the album category of that bill, kept once the album is no longer shared. */
+  albumCategory?: AlbumCategoryKey | null;
 }
 
 /** Ids per `IN (…)` lookup, under SQLite's bound-parameter limit. */
@@ -677,6 +680,7 @@ class TransactionsRepository {
         createdBy: normalizedInput.createdBy,
         memberId: normalizedInput.memberId,
         albumGroupId: normalizedInput.albumGroupId ?? null,
+        albumCategory: normalizedInput.albumCategory ?? null,
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,

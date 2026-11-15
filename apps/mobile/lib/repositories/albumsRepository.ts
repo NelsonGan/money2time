@@ -129,11 +129,51 @@ class AlbumsRepository {
       )
       .run();
     if (id) {
+      // An archived album takes no new entries.
       db.update(albumsTable)
         .set({ isActive: true, updatedAt: now })
-        .where(and(eq(albumsTable.id, id), isNull(albumsTable.deletedAt)))
+        .where(
+          and(
+            eq(albumsTable.id, id),
+            isNull(albumsTable.deletedAt),
+            isNull(albumsTable.archivedAt),
+          ),
+        )
         .run();
     }
+  }
+
+  /**
+   * Archives an album (out of the Albums page's list, still a line in the
+   * category lists; never the active album) or brings it back. A shared
+   * album the user is no longer in stays archived (`shareEndedAt`).
+   */
+  setArchived(id: string, archived: boolean) {
+    const now = nowIso();
+    getDb()
+      .update(albumsTable)
+      .set(
+        archived
+          ? { archivedAt: now, isActive: false, updatedAt: now }
+          : { archivedAt: null, updatedAt: now },
+      )
+      .where(
+        and(
+          eq(albumsTable.id, id),
+          isNull(albumsTable.deletedAt),
+          ...(archived ? [] : [isNull(albumsTable.shareEndedAt)]),
+        ),
+      )
+      .run();
+  }
+
+  /** Whether an album is a shared album the user is no longer in: read-only. */
+  isFrozen(id: string): boolean {
+    const row = getSQLite().getFirstSync<{ ended: string | null }>(
+      'SELECT share_ended_at AS ended FROM albums WHERE id = ?',
+      [id],
+    );
+    return !!row?.ended;
   }
 
   getActiveId(): string | null {
@@ -156,6 +196,8 @@ class AlbumsRepository {
     const db = getDb();
     const now = nowIso();
 
+    // A shared album the user is no longer in is kept, never deleted.
+    if (this.isFrozen(id)) return;
     db.update(albumsTable)
       .set({ deletedAt: now, updatedAt: now })
       .where(and(eq(albumsTable.id, id), isNull(albumsTable.deletedAt)))
@@ -212,10 +254,12 @@ class AlbumsRepository {
    * Puts entries in an album. An entry is in one album at most
    * (`idx_album_transactions_one_album`), so one in another album moves here,
    * on its own link row (one row changing albums, which syncs as any edit
-   * does), except a shared album's bill, which stays in its album.
+   * does), except what belongs to a shared album, live or no longer shared
+   * (its bills, the entries their payments made, and anything in one the
+   * user is no longer in), which stays. An album no longer shared takes none.
    */
   addTransactions(albumId: string, transactionIds: string[]) {
-    if (transactionIds.length === 0) return;
+    if (transactionIds.length === 0 || this.isFrozen(albumId)) return;
 
     const db = getDb();
     const sqlite = getSQLite();
@@ -227,9 +271,16 @@ class AlbumsRepository {
     const groupBills = new Set(
       sqlite
         .getAllSync<{ id: string }>(
-          `SELECT id FROM transactions
-           WHERE album_group_id IS NOT NULL AND album_group_id <> ? AND id IN (${marks})`,
-          [albumId, ...wanted],
+          `SELECT t.id FROM transactions t
+           WHERE t.id IN (${marks})
+             AND ((t.album_group_id IS NOT NULL AND t.album_group_id <> ?)
+               OR (t.album_category IS NOT NULL AND t.album_group_id IS NULL)
+               OR EXISTS (
+                 SELECT 1 FROM album_transactions l JOIN albums a ON a.id = l.album_id
+                 WHERE l.transaction_id = t.id AND l.deleted_at IS NULL
+                   AND a.share_ended_at IS NOT NULL
+               ))`,
+          [...wanted, albumId],
         )
         .map((row) => row.id),
     );
@@ -278,8 +329,9 @@ class AlbumsRepository {
     }
   }
 
+  /** Takes entries out of an album; an album no longer shared keeps them. */
   removeTransactions(albumId: string, transactionIds: string[]) {
-    if (transactionIds.length === 0) return;
+    if (transactionIds.length === 0 || this.isFrozen(albumId)) return;
 
     const db = getDb();
     const now = nowIso();

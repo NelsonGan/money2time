@@ -12,9 +12,16 @@ import type { DbMigration } from './types';
 // - album_expenses.category_key: a shared album's bill is filed under one of
 //   the fixed album categories (`food`, `transport`…), the same for everyone
 //   in it (`features/albums/lib/albumCategories.ts`).
-export const migration094OneAlbumPerEntry: DbMigration = {
+// - transactions.album_category: that key on the user's own entry for the
+//   bill (and the entries its payments made), which it keeps once the album
+//   is no longer shared, so it never needs one of the user's categories.
+// - albums.archived_at: archived (out of the Albums page's list, still a line
+//   in the category lists); albums.share_ended_at: a shared album the user is
+//   no longer in (left, taken out, ended, signed out), kept as it was,
+//   archived and read-only until they are back in it.
+export const migration094AlbumLines: DbMigration = {
   version: 94,
-  name: '094_one_album_per_entry',
+  name: '094_album_lines',
   up(db) {
     const now = new Date().toISOString();
     db.runSync(
@@ -52,7 +59,10 @@ export const migration094OneAlbumPerEntry: DbMigration = {
         WHERE deleted_at IS NULL;
     `);
     addColumnIfMissing(db, 'album_expenses', 'category_key', 'TEXT');
+    addColumnIfMissing(db, 'transactions', 'album_category', 'TEXT');
+    addColumnIfMissing(db, 'albums', 'archived_at', 'TEXT');
+    addColumnIfMissing(db, 'albums', 'share_ended_at', 'TEXT');
   },
 };
 
-export default migration094OneAlbumPerEntry;
+export default migration094AlbumLines;

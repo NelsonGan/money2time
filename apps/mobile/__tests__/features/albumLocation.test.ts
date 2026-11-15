@@ -20,6 +20,8 @@ function makeAlbum(overrides: Partial<Album>): Album {
     latitude: null,
     longitude: null,
     placeId: null,
+    archivedAt: null,
+    shareEndedAt: null,
     placeName: null,
     placeAdmin: null,
     countryCode: null,

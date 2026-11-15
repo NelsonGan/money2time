@@ -12,9 +12,9 @@ import {
   matchKeywordBucket,
   resolveBucketCategoryIds,
 } from '~/features/transactions/utils/categoryKeywords';
-import { I18n } from '~/lib/i18n';
 import type { Category } from '~/types';
 
+import { albumCategoryIcon, albumCategoryLabel } from './albumCategoryName';
 import {
   ALBUM_CATEGORIES,
   ALBUM_CATEGORY_OTHER,
@@ -44,14 +44,7 @@ export function albumCategoryKeyOfId(id: string | null | undefined): AlbumCatego
   return isAlbumCategoryKey(key) ? key : null;
 }
 
-export const albumCategoryLabel = (key: AlbumCategoryKey) =>
-  I18n.t(`albums.categories.${key}`, { defaultValue: categoryOf(key).name });
-
-export const albumCategoryIcon = (key: AlbumCategoryKey) => categoryOf(key).icon;
-
-function categoryOf(key: AlbumCategoryKey) {
-  return ALBUM_CATEGORIES.find((category) => category.key === key) ?? ALBUM_CATEGORIES[7];
-}
+export { albumCategoryIcon, albumCategoryLabel };
 
 /** The fixed list as categories, for the editor's pickers, in their own order. */
 export function albumCategoryPickerList(): Category[] {

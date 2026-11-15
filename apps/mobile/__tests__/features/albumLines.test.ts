@@ -1,5 +1,5 @@
 import { describeActivity } from '~/features/albums/lib/activityLines';
-import { albumCategoryRows, groupEntryCategories } from '~/features/albums/lib/albumBreakdown';
+import { albumCategoryRows } from '~/features/albums/lib/albumBreakdown';
 import {
   albumCategoryForCategory,
   albumCategoryForText,
@@ -23,13 +23,7 @@ import {
   buildHouseholdMonth,
   OWNER_KEY,
 } from '~/features/sharedLedgers/lib/householdMath';
-import type {
-  AlbumActivity,
-  AlbumExpense,
-  Category,
-  PeriodBudget,
-  TransactionWithRelations,
-} from '~/types';
+import type { AlbumActivity, Category, PeriodBudget, TransactionWithRelations } from '~/types';
 
 // Albums as their own line in the category lists, and a shared album's fixed
 // categories (README: Key patterns > Albums; Album members and shared albums >
@@ -261,7 +255,7 @@ describe('an album’s breakdown', () => {
       valueOf: (item) => item.amount,
       categories: CATEGORIES,
       categoryById: BY_ID,
-      groupCategories: null,
+      byAlbumCategory: false,
     });
     // An entry with no category has a row too, so the rows add up to the album's line.
     expect(rows.map((row) => [row.id, row.label, row.amount, row.count])).toEqual([
@@ -273,18 +267,21 @@ describe('an album’s breakdown', () => {
     expect(rows[0].categoryRootId).toBe('food');
   });
 
-  it('groups a shared album by its own categories: a bill’s, its paid parts’ too', () => {
-    const bills = [
-      { id: 'b1', category: 'groceries' },
-      { id: 'b2', category: 'transport' },
-    ] as AlbumExpense[];
-    const groupCategories = groupEntryCategories(bills, entries);
-    expect(groupCategories.get('part1')).toBe('transport');
-    const rows = albumCategoryRows(entries, {
+  it('groups a shared album, or one no longer shared, by the album category each entry keeps', () => {
+    // A bill's entries (and the entries its paid parts made) carry the
+    // bill's category, and keep it after the user leaves the album.
+    const stamped = entries.map((item) =>
+      item.id === 'b1'
+        ? { ...item, albumCategory: 'groceries' as const }
+        : item.id === 'b2' || item.id === 'part1'
+          ? { ...item, albumCategory: 'transport' as const }
+          : item,
+    );
+    const rows = albumCategoryRows(stamped, {
       valueOf: (item) => (item.id === 'b1' ? null : item.amount),
       categories: CATEGORIES,
       categoryById: BY_ID,
-      groupCategories,
+      byAlbumCategory: true,
     });
     // b1 is left out (one person's breakdown with no share in it); the user's
     // own entry reads as the album category its category stands for.
@@ -293,6 +290,14 @@ describe('an album’s breakdown', () => {
       [albumCategoryId('food'), 'Food', 12, null],
       [albumCategoryId('other'), 'Other', 7, null],
     ]);
+    // Everyone's: the bill's own category, whatever the user's says.
+    const everyone = albumCategoryRows(stamped, {
+      valueOf: (item) => item.amount,
+      categories: CATEGORIES,
+      categoryById: BY_ID,
+      byAlbumCategory: true,
+    });
+    expect(everyone.find((row) => row.id === albumCategoryId('groceries'))?.amount).toBe(30);
   });
 });
 

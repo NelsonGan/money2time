@@ -3048,7 +3048,8 @@ const de = {
     no_transactions_title: 'Keine Transaktionen',
     no_transactions_message: 'Füge diesem Album Transaktionen hinzu, um sie hier zu sehen.',
     delete_title: 'Album löschen?',
-    delete_body: 'Damit wird das Album entfernt. Deine Transaktionen werden nicht gelöscht.',
+    delete_body:
+      'Deine Transaktionen bleiben erhalten und kommen zurück in ihre eigenen Kategorien. Um das Album so zu behalten, wie es ist, archiviere es stattdessen.',
     cover_permission_title: 'Fotozugriff erforderlich',
     cover_permission_body: 'Erlaube den Fotozugriff, um ein Titelbild auszuwählen.',
     people: {
@@ -3067,17 +3068,31 @@ const de = {
       row: 'Mit Freunden teilen',
       caption: 'Alle sehen die Rechnungen und wer wem etwas schuldet.',
       link_note: 'Gilt 24 Stunden. Jeder mit dem Link kann beitreten.',
-      stop_message:
-        'Alle behalten das Album mit ihren eigenen Einträgen, aber es wird nicht mehr untereinander aktualisiert.',
       leave: 'Album verlassen',
       leave_title: '{{name}} verlassen?',
       leave_message:
-        'Du behältst das Album mit deinen eigenen Einträgen, aber es wird nicht mehr aktualisiert.',
-      delete_leave_message:
-        'Du verlässt es damit auch. Die anderen behalten das Album und seine Rechnungen.',
+        'Es kommt unter „Archiviert“ und wird nicht mehr aktualisiert. Du behältst deine Transaktionen, und die anderen behalten das Album und seine Rechnungen.',
+      end: 'Album beenden',
+      end_title: '{{name}} für alle beenden?',
+      end_message:
+        'Niemand kann mehr Rechnungen hinzufügen oder ändern. Alle behalten das Album unter „Archiviert“, mit ihren Transaktionen und Salden, wie sie sind.',
       limit: 'Du kannst bis zu {{max}} Alben gleichzeitig teilen.',
       full: 'Bis zu {{max}} Personen können einem Album beitreten.',
       sign_in: 'Melde dich an, um dieses Album zu teilen.',
+    },
+    archive: {
+      action: 'Archivieren',
+      unarchive: 'Aus Archiv holen',
+      label: 'Archiviert',
+      section: 'Archiviert ({{count}})',
+      confirm_title: '{{name}} archivieren?',
+      confirm_shared:
+        'Es kommt unter „Archiviert“ auf der Seite „Alben“. Du bleibst darin, seine Rechnungen werden weiter aktualisiert und es zählt weiter in den Einblicken. Du kannst es jederzeit wieder aus dem Archiv holen.',
+    },
+    ended: {
+      label: 'Nicht mehr geteilt',
+      title: 'Nicht mehr geteilt',
+      body: 'Du hast dieses Album verlassen, das Teilen wurde beendet oder du hast dich abgemeldet. Es bleibt so, wie es war, mit deinen Transaktionen, und wird nicht mehr aktualisiert. Melde dich wieder an oder tritt erneut bei, um es zurückzuholen.',
     },
     balances: {
       tab: 'Salden',

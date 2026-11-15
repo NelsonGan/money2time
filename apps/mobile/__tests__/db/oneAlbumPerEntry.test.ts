@@ -1,5 +1,5 @@
 import { getDb, getSQLite } from '~/lib/db/client';
-import migration094 from '~/lib/db/migrations/094_one_album_per_entry';
+import migration094 from '~/lib/db/migrations/094_album_lines';
 import { albumsRepository } from '~/lib/repositories/albumsRepository';
 
 import { openAppDatabase } from '../helpers/appDatabase';
@@ -88,11 +88,14 @@ describe('migration 094', () => {
     expect(liveLinks()).toHaveLength(3);
   });
 
-  it('gives a shared album’s bill a category key column', () => {
-    const columns = app.connection.prepare('PRAGMA table_info(album_expenses)').all() as {
-      name: string;
-    }[];
-    expect(columns.map((column) => column.name)).toContain('category_key');
+  it('adds the album category, archive and share-ended columns', () => {
+    const columns = (table: string) =>
+      (app.connection.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[]).map(
+        (column) => column.name,
+      );
+    expect(columns('album_expenses')).toContain('category_key');
+    expect(columns('transactions')).toContain('album_category');
+    expect(columns('albums')).toEqual(expect.arrayContaining(['archived_at', 'share_ended_at']));
   });
 });
 

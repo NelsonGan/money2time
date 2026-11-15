@@ -3043,7 +3043,8 @@ const fr = {
     no_transactions_title: 'Aucune transaction',
     no_transactions_message: 'Ajoutez des transactions à cet album pour les voir ici.',
     delete_title: "Supprimer l'album ?",
-    delete_body: "Cela supprime l'album. Vos transactions ne sont pas supprimées.",
+    delete_body:
+      'Vos transactions sont conservées et retournent dans leurs propres catégories. Pour garder l’album tel quel, archivez-le plutôt.',
     cover_permission_title: 'Accès aux photos requis',
     cover_permission_body: "Autorisez l'accès aux photos pour choisir une image de couverture.",
     people: {
@@ -3062,16 +3063,31 @@ const fr = {
       row: 'Partager avec des amis',
       caption: 'Tout le monde voit les notes et qui doit quoi à qui.',
       link_note: "Valable 24 heures. Toute personne qui l'a peut rejoindre.",
-      stop_message:
-        "Chacun garde l'album avec ses propres écritures, mais il ne se met plus à jour entre vous.",
       leave: "Quitter l'album",
       leave_title: 'Quitter {{name}} ?',
       leave_message:
-        "Vous gardez l'album avec vos propres écritures, mais il ne se met plus à jour.",
-      delete_leave_message: 'Vous le quittez aussi. Les autres gardent l’album et ses dépenses.',
+        'Il passe dans Archivés et ne se met plus à jour. Vous gardez vos transactions, et les autres gardent l’album et ses dépenses.',
+      end: 'Terminer l’album',
+      end_title: 'Terminer {{name}} pour tout le monde ?',
+      end_message:
+        'Plus personne ne peut ajouter ni modifier ses dépenses. Chacun garde l’album dans Archivés, avec ses transactions et ses soldes tels quels.',
       limit: "Vous pouvez partager jusqu'à {{max}} albums à la fois.",
       full: "Jusqu'à {{max}} personnes peuvent rejoindre un album.",
       sign_in: 'Connectez-vous pour partager cet album.',
+    },
+    archive: {
+      action: 'Archiver',
+      unarchive: 'Désarchiver',
+      label: 'Archivé',
+      section: 'Archivés ({{count}})',
+      confirm_title: 'Archiver {{name}} ?',
+      confirm_shared:
+        'Il passe dans Archivés sur la page Albums. Vous y restez, ses dépenses continuent de se mettre à jour et il compte toujours dans les Analyses. Vous pouvez le désarchiver à tout moment.',
+    },
+    ended: {
+      label: 'Plus partagé',
+      title: 'Plus partagé',
+      body: 'Vous avez quitté cet album, le partage a pris fin ou vous vous êtes déconnecté. Il est conservé tel quel, avec vos transactions, et ne se met plus à jour. Reconnectez-vous ou rejoignez-le à nouveau pour le retrouver.',
     },
     balances: {
       tab: 'Soldes',

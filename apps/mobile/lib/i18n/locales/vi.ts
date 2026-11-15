@@ -2985,7 +2985,8 @@ const vi = {
     no_transactions_title: 'Không có giao dịch',
     no_transactions_message: 'Thêm giao dịch vào album này để xem tại đây.',
     delete_title: 'Xóa album?',
-    delete_body: 'Thao tác này xóa album. Giao dịch của bạn không bị xóa.',
+    delete_body:
+      'Giao dịch của bạn được giữ lại và trở về danh mục của chúng. Để giữ nguyên album, hãy lưu trữ thay vì xóa.',
     cover_permission_title: 'Cần quyền truy cập ảnh',
     cover_permission_body: 'Cho phép truy cập ảnh để chọn ảnh bìa.',
     people: {
@@ -3004,15 +3005,31 @@ const vi = {
       row: 'Chia với bạn bè',
       caption: 'Mọi người đều thấy các hóa đơn và ai nợ ai.',
       link_note: 'Có hiệu lực 24 giờ. Ai có liên kết đều tham gia được.',
-      stop_message:
-        'Mọi người vẫn giữ album cùng các mục của riêng mình, nhưng nó không còn cập nhật giữa các bạn.',
       leave: 'Rời album',
       leave_title: 'Rời {{name}}?',
-      leave_message: 'Bạn vẫn giữ album cùng các mục của riêng mình, nhưng nó không còn cập nhật.',
-      delete_leave_message: 'Bạn cũng sẽ rời album. Những người khác vẫn giữ album và các hóa đơn.',
+      leave_message:
+        'Album sẽ chuyển vào mục Đã lưu trữ và ngừng cập nhật. Bạn giữ giao dịch của mình, còn những người khác giữ album và các hóa đơn.',
+      end: 'Kết thúc album',
+      end_title: 'Kết thúc {{name}} cho mọi người?',
+      end_message:
+        'Không ai có thể thêm hoặc sửa hóa đơn nữa. Mọi người vẫn giữ album trong mục Đã lưu trữ, cùng giao dịch và số dư như hiện tại.',
       limit: 'Bạn có thể chia sẻ tối đa {{max}} album cùng lúc.',
       full: 'Tối đa {{max}} người có thể tham gia một album.',
       sign_in: 'Đăng nhập để chia sẻ album này.',
+    },
+    archive: {
+      action: 'Lưu trữ',
+      unarchive: 'Bỏ lưu trữ',
+      label: 'Đã lưu trữ',
+      section: 'Đã lưu trữ ({{count}})',
+      confirm_title: 'Lưu trữ {{name}}?',
+      confirm_shared:
+        'Album sẽ chuyển vào mục Đã lưu trữ trên trang Album. Bạn vẫn ở trong album, các hóa đơn vẫn được cập nhật và album vẫn được tính trong Thống kê. Bạn có thể bỏ lưu trữ bất cứ lúc nào.',
+    },
+    ended: {
+      label: 'Không còn chia sẻ',
+      title: 'Không còn chia sẻ',
+      body: 'Bạn đã rời album này, việc chia sẻ đã kết thúc hoặc bạn đã đăng xuất. Album được giữ nguyên như cũ, cùng các giao dịch của bạn, và không còn cập nhật. Đăng nhập lại hoặc tham gia lại để lấy lại album.',
     },
     balances: {
       tab: 'Số dư',

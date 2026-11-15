@@ -251,6 +251,7 @@ export const GA4_ONLY_EVENTS = {
   ALBUM_CREATED: 'Album Created',
   ALBUM_UPDATED: 'Album Updated',
   ALBUM_DELETED: 'Album Deleted',
+  ALBUM_ARCHIVED: 'Album Archived',
   ALBUM_LOCATION_SET: 'Album Location Set',
   ALBUM_LOCATIONS_OPENED: 'Album Locations Opened',
   // Album members and shared albums

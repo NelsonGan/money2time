@@ -693,6 +693,13 @@ export interface Album {
   placeAdmin: string | null;
   /** ISO 3166-1 alpha-2 country code, e.g. "JP". */
   countryCode: string | null;
+  /** Archived: out of the Albums page's list, still a line in the category lists. */
+  archivedAt: string | null;
+  /**
+   * A shared album the user is no longer in (left, taken out, ended, signed
+   * out): kept as it was, archived and read-only, until they are back in it.
+   */
+  shareEndedAt: string | null;
   sortOrder?: number;
   createdAt: string;
   updatedAt: string;
@@ -1139,6 +1146,12 @@ export interface Transaction {
    * (the group's expense has this entry's id). Null on every other entry.
    */
   albumGroupId: string | null;
+  /**
+   * A shared album's category of the bill this entry is the user's side of
+   * (or of the bill a payment of theirs was for); kept once the album is no
+   * longer shared. Shown in place of the entry's own category.
+   */
+  albumCategory: AlbumCategoryKey | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;

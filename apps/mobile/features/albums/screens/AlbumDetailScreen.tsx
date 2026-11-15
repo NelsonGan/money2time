@@ -3,9 +3,12 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
+  Archive,
+  ArchiveRestore,
   Camera,
   ChevronDown,
   ChevronLeft,
+  Info,
   Pencil,
   Plus,
   Trash2,
@@ -13,7 +16,12 @@ import {
   Users,
 } from 'lucide-react-native';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { NativeScrollEvent, NativeSyntheticEvent, ScrollViewInstance } from 'react-native';
+import type {
+  AlertButton,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  ScrollViewInstance,
+} from 'react-native';
 import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, {
   Extrapolation,
@@ -39,11 +47,9 @@ import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { chartCategoryColor } from '~/constants/chartColors';
 import { spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
-import { useCloudSync } from '~/features/cloudSync/CloudSyncContext';
 import { CategoryBreakdownChart } from '~/features/insights/components';
 import type { InsightsDrilldownPayload } from '~/features/insights/screens';
 import { countsTowardSpending } from '~/features/reimbursements/lib/reimbursementMath';
-import { sharingErrorMessage } from '~/features/sharedLedgers/lib/sharing';
 import {
   buildBulkUpdateInputs,
   BulkEditTransactionsSheet,
@@ -79,7 +85,6 @@ import {
   BreakdownMemberSheet,
 } from '../components/BreakdownMemberSheet';
 import { useAlbumGroup } from '../hooks/useAlbumGroup';
-import { useAlbumGroupCategories } from '../hooks/useAlbumGroupCategories';
 import { albumCategoryRows } from '../lib/albumBreakdown';
 import { albumCategoryKeyOfId, albumCategoryPickerList } from '../lib/albumCategories';
 import { breakdownMemberOptions, memberShare } from '../lib/memberShare';
@@ -144,6 +149,7 @@ export function AlbumDetailScreen({
     getDisplayValueForTransaction,
     getTrueHourlyRateForDate,
     deleteAlbum,
+    archiveAlbum,
     updateAlbum,
     updateTransactionsBulk,
     setGroupEntriesAccount,
@@ -152,7 +158,6 @@ export function AlbumDetailScreen({
     addTransactionsToAlbum,
   } = useApp();
   const { transactions } = useTransactions();
-  const sync = useCloudSync();
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
   const me = useSelfPerson();
@@ -426,7 +431,8 @@ export function AlbumDetailScreen({
   // album by its own categories, the same for everyone in it; an album of
   // the user's own by their root categories. For one person, each bill
   // counts by their share of it.
-  const groupCategories = useAlbumGroupCategories(albumId, albumTransactions);
+  // A shared album, or one the user is no longer in, by its own categories.
+  const byAlbumCategory = group.share !== null || !!album?.shareEndedAt;
   // A shared album's entries are filed under its own categories.
   const albumCategoryOptions = useMemo(
     () => (group.share ? albumCategoryPickerList() : undefined),
@@ -449,7 +455,7 @@ export function AlbumDetailScreen({
         categories,
         categoryById,
         categoryMap: quickEntryPrefs.categoryMap,
-        groupCategories,
+        byAlbumCategory,
       }),
     [
       breakdownCandidates,
@@ -457,7 +463,7 @@ export function AlbumDetailScreen({
       categories,
       categoryById,
       displayValue,
-      groupCategories,
+      byAlbumCategory,
       quickEntryPrefs.categoryMap,
     ],
   );
@@ -498,44 +504,43 @@ export function AlbumDetailScreen({
 
   const dateRange = formatAlbumDateRange(stats.startDate, stats.endDate);
 
+  // An album of the user's own: deleting it keeps its entries, back under
+  // their own categories, and archiving is offered beside it.
   const handleDelete = useCallback(() => {
     void triggerHaptic('warning');
-    // Deleting a shared album ends it for the owner, and takes a member out.
-    const role = group.share?.role;
-    const body = role
-      ? `${I18n.t('albums.delete_body')} ${I18n.t(
-          role === 'owner' ? 'albums.share.stop_message' : 'albums.share.delete_leave_message',
-        )}`
-      : I18n.t('albums.delete_body');
-    Alert.alert(I18n.t('albums.delete_title'), body, [
-      { text: I18n.t('common.cancel'), style: 'cancel' },
-      {
-        text: I18n.t('common.delete'),
-        style: 'destructive',
-        onPress: () => {
-          const share = group.share;
-          if (!share) {
-            deleteAlbum(albumId);
-            onDeleted();
-            return;
-          }
-          // A shared album stops being shared with it: the owner stops it for
-          // everyone, a member leaves. Told to the Worker now, or after the
-          // next sign-in when it cannot be reached.
-          const ending =
-            share.role === 'owner'
-              ? sync.stopSharingLedger(albumId, { whenUnreachable: 'local' })
-              : sync.leaveLedger(albumId, { force: true });
-          ending
-            .then(() => {
-              deleteAlbum(albumId);
-              onDeleted();
-            })
-            .catch((error: unknown) => Alert.alert(sharingErrorMessage(error)));
-        },
+    const buttons: AlertButton[] = [{ text: I18n.t('common.cancel'), style: 'cancel' }];
+    if (!album?.archivedAt) {
+      buttons.push({
+        text: I18n.t('albums.archive.action'),
+        onPress: () => archiveAlbum(albumId, true),
+      });
+    }
+    buttons.push({
+      text: I18n.t('common.delete'),
+      style: 'destructive',
+      onPress: () => {
+        deleteAlbum(albumId);
+        onDeleted();
       },
-    ]);
-  }, [albumId, deleteAlbum, group.share, onDeleted, sync]);
+    });
+    Alert.alert(I18n.t('albums.delete_title'), I18n.t('albums.delete_body'), buttons);
+  }, [album?.archivedAt, albumId, archiveAlbum, deleteAlbum, onDeleted]);
+
+  // A shared album is archived, never deleted: the user stays in it.
+  const handleArchiveShared = useCallback(() => {
+    void triggerHaptic('selection');
+    Alert.alert(
+      I18n.t('albums.archive.confirm_title', { name: album?.name ?? '' }),
+      I18n.t('albums.archive.confirm_shared'),
+      [
+        { text: I18n.t('common.cancel'), style: 'cancel' },
+        {
+          text: I18n.t('albums.archive.action'),
+          onPress: () => archiveAlbum(albumId, true),
+        },
+      ],
+    );
+  }, [album?.name, albumId, archiveAlbum]);
 
   const changeCover = useCallback(async () => {
     void triggerHaptic('selection');
@@ -566,7 +571,12 @@ export function AlbumDetailScreen({
   // A shared album takes no entries made elsewhere: only bills made in it,
   // split with its members (README: Album members and shared albums). So no
   // picking existing transactions, and no copies of its bills.
-  const takesExisting = group.share === null;
+  // A shared album the user is no longer in is kept as it was: read-only.
+  const isFrozen = !!album?.shareEndedAt;
+  const isArchived = !!album?.archivedAt;
+  const takesExisting = group.share === null && !isFrozen;
+  // Archived: entries are added once it is back (Unarchive), as with its +.
+  const addsExisting = takesExisting && !isArchived;
   const duplicableSelectedTransactions = useMemo(
     () =>
       takesExisting ? selectDuplicableTransactions(albumTransactions, selectedTransactionIds) : [],
@@ -615,6 +625,8 @@ export function AlbumDetailScreen({
   );
   const handleTransactionLongPress = useCallback(
     (transaction: TransactionWithRelations) => {
+      // Nothing in an album no longer shared is taken out or changed together.
+      if (isFrozen) return;
       if (isSelectionMode) {
         toggleSelection(transaction.id);
         return;
@@ -622,7 +634,7 @@ export function AlbumDetailScreen({
       void triggerHaptic('selection');
       setSelectedTransactionIds([transaction.id]);
     },
-    [isSelectionMode, toggleSelection],
+    [isFrozen, isSelectionMode, toggleSelection],
   );
   const selectionCategoryTypes = useMemo<CategoryType[]>(() => {
     let hasIncome = false;
@@ -800,6 +812,61 @@ export function AlbumDetailScreen({
     </Pressable>
   ) : null;
 
+  // What state the album is in, beside its people: no longer shared (what
+  // that means, on a tap), or archived (bring it back).
+  const statePill = isFrozen ? (
+    <Pressable
+      onPress={() => {
+        void triggerHaptic('selection');
+        Alert.alert(I18n.t('albums.ended.title'), I18n.t('albums.ended.body'));
+      }}
+      accessibilityRole="button"
+      accessibilityLabel={I18n.t('albums.ended.title')}
+      hitSlop={8}
+      className="flex-row items-center gap-1.5 rounded-full bg-black/45 py-1.5 pl-2 pr-2.5"
+    >
+      <Info size={14} color="#ffffff" />
+      <Text variant="label" className="text-white">
+        {I18n.t('albums.ended.label')}
+      </Text>
+    </Pressable>
+  ) : isArchived ? (
+    <Pressable
+      onPress={() => {
+        void triggerHaptic('success');
+        archiveAlbum(albumId, false);
+      }}
+      accessibilityRole="button"
+      accessibilityLabel={I18n.t('albums.archive.unarchive')}
+      hitSlop={8}
+      className="flex-row items-center gap-1.5 rounded-full bg-black/45 py-1.5 pl-2 pr-2.5"
+    >
+      <ArchiveRestore size={14} color="#ffffff" />
+      <Text variant="label" className="text-white">
+        {I18n.t('albums.archive.unarchive')}
+      </Text>
+    </Pressable>
+  ) : null;
+  const coverPills =
+    statePill || peoplePill ? (
+      <View className="flex-row items-center gap-2">
+        {statePill}
+        {peoplePill}
+      </View>
+    ) : null;
+  // The last header button: an album of the user's own is deleted (archive
+  // offered beside it); a shared album is archived, never deleted; one the
+  // user is no longer in has neither.
+  const trailingAction: 'delete' | 'archive' | null = isFrozen
+    ? null
+    : group.share
+      ? isArchived
+        ? null
+        : 'archive'
+      : 'delete';
+  // An album no longer shared says so on its pill alone.
+  const statusLabel = isArchived && !isFrozen ? I18n.t('albums.archive.label') : null;
+
   const coverImage = effectiveCoverUri ? (
     <Image
       {...REPLAY_PRIVATE}
@@ -822,9 +889,9 @@ export function AlbumDetailScreen({
       <Text variant="bodyStrong" numberOfLines={1} className="text-white">
         {album.name}
       </Text>
-      {dateRange ? (
+      {dateRange || statusLabel ? (
         <Text variant="caption" numberOfLines={1} className="mt-0.5 text-white/75">
-          {dateRange}
+          {[dateRange, statusLabel].filter(Boolean).join(' · ')}
         </Text>
       ) : null}
     </>
@@ -966,14 +1033,16 @@ export function AlbumDetailScreen({
         ? I18n.t('albums.tab_breakdown')
         : I18n.t('albums.tab_transactions');
 
-  const fab = isSelectionMode ? null : (
-    <View pointerEvents="box-none" style={[styles.fab, { bottom: fabBottom }]}>
-      <AddFabButton
-        onPress={() => onAddExpense(albumId)}
-        accessibilityLabel={I18n.t('onboarding.bootstrap.add_transaction')}
-      />
-    </View>
-  );
+  // An archived album takes no new entries until it is brought back.
+  const fab =
+    isSelectionMode || isArchived || isFrozen ? null : (
+      <View pointerEvents="box-none" style={[styles.fab, { bottom: fabBottom }]}>
+        <AddFabButton
+          onPress={() => onAddExpense(albumId)}
+          accessibilityLabel={I18n.t('onboarding.bootstrap.add_transaction')}
+        />
+      </View>
+    );
 
   // Mounted once first opened (and kept, so they animate closed), not with
   // the page: nobody needs them on the way in.
@@ -1041,20 +1110,24 @@ export function AlbumDetailScreen({
                 <ChevronLeft size={20} color={themeColors.textMuted} />,
               )}
               <View className="flex-row items-center gap-2">
-                {splitIconButton(
-                  () => void changeCover(),
-                  I18n.t('albums.change_cover'),
-                  <Camera size={17} color={themeColors.textMuted} />,
-                )}
-                {splitIconButton(
-                  () => {
-                    void triggerHaptic('selection');
-                    onEditDetails(albumId);
-                  },
-                  I18n.t('albums.edit_details_title'),
-                  <Pencil size={17} color={themeColors.textMuted} />,
-                )}
-                {takesExisting
+                {isFrozen
+                  ? null
+                  : splitIconButton(
+                      () => void changeCover(),
+                      I18n.t('albums.change_cover'),
+                      <Camera size={17} color={themeColors.textMuted} />,
+                    )}
+                {isFrozen
+                  ? null
+                  : splitIconButton(
+                      () => {
+                        void triggerHaptic('selection');
+                        onEditDetails(albumId);
+                      },
+                      I18n.t('albums.edit_details_title'),
+                      <Pencil size={17} color={themeColors.textMuted} />,
+                    )}
+                {addsExisting
                   ? splitIconButton(
                       () => {
                         void triggerHaptic('selection');
@@ -1064,11 +1137,19 @@ export function AlbumDetailScreen({
                       <Plus size={19} color={themeColors.textMuted} />,
                     )
                   : null}
-                {splitIconButton(
-                  handleDelete,
-                  I18n.t('common.delete'),
-                  <Trash2 size={18} color={themeColors.error} />,
-                )}
+                {trailingAction === 'delete'
+                  ? splitIconButton(
+                      handleDelete,
+                      I18n.t('common.delete'),
+                      <Trash2 size={18} color={themeColors.error} />,
+                    )
+                  : trailingAction === 'archive'
+                    ? splitIconButton(
+                        handleArchiveShared,
+                        I18n.t('albums.archive.action'),
+                        <Archive size={18} color={themeColors.textMuted} />,
+                      )
+                    : null}
               </View>
             </View>
           </View>
@@ -1087,7 +1168,7 @@ export function AlbumDetailScreen({
                     >
                       {titleBlock}
                     </LinearGradient>
-                    {peoplePill ? <View style={styles.splitPeople}>{peoplePill}</View> : null}
+                    {coverPills ? <View style={styles.splitPeople}>{coverPills}</View> : null}
                   </View>
                   <Text variant="label" tone="muted" style={styles.splitHeading}>
                     {I18n.t('albums.tab_breakdown')}
@@ -1255,8 +1336,8 @@ export function AlbumDetailScreen({
                 {titleBlock}
               </LinearGradient>
             </Animated.View>
-            {peoplePill ? (
-              <View style={[styles.coverPeople, { bottom: SHEET_OVERLAP + 12 }]}>{peoplePill}</View>
+            {coverPills ? (
+              <View style={[styles.coverPeople, { bottom: SHEET_OVERLAP + 12 }]}>{coverPills}</View>
             ) : null}
           </View>
 
@@ -1328,28 +1409,32 @@ export function AlbumDetailScreen({
             )}
           />
           <View className="flex-row items-center gap-2">
-            <HeroHeaderButton
-              onPress={() => void changeCover()}
-              accessibilityLabel={I18n.t('albums.change_cover')}
-              floatingStyle={floatingChromeStyle}
-              solidStyle={solidHeaderStyle}
-              renderIcon={(overPhoto) => (
-                <Camera size={17} color={overPhoto ? '#ffffff' : themeColors.textMuted} />
-              )}
-            />
-            <HeroHeaderButton
-              onPress={() => {
-                void triggerHaptic('selection');
-                onEditDetails(albumId);
-              }}
-              accessibilityLabel={I18n.t('albums.edit_details_title')}
-              floatingStyle={floatingChromeStyle}
-              solidStyle={solidHeaderStyle}
-              renderIcon={(overPhoto) => (
-                <Pencil size={17} color={overPhoto ? '#ffffff' : themeColors.textMuted} />
-              )}
-            />
-            {takesExisting ? (
+            {isFrozen ? null : (
+              <HeroHeaderButton
+                onPress={() => void changeCover()}
+                accessibilityLabel={I18n.t('albums.change_cover')}
+                floatingStyle={floatingChromeStyle}
+                solidStyle={solidHeaderStyle}
+                renderIcon={(overPhoto) => (
+                  <Camera size={17} color={overPhoto ? '#ffffff' : themeColors.textMuted} />
+                )}
+              />
+            )}
+            {isFrozen ? null : (
+              <HeroHeaderButton
+                onPress={() => {
+                  void triggerHaptic('selection');
+                  onEditDetails(albumId);
+                }}
+                accessibilityLabel={I18n.t('albums.edit_details_title')}
+                floatingStyle={floatingChromeStyle}
+                solidStyle={solidHeaderStyle}
+                renderIcon={(overPhoto) => (
+                  <Pencil size={17} color={overPhoto ? '#ffffff' : themeColors.textMuted} />
+                )}
+              />
+            )}
+            {addsExisting ? (
               <HeroHeaderButton
                 onPress={() => {
                   void triggerHaptic('selection');
@@ -1363,15 +1448,27 @@ export function AlbumDetailScreen({
                 )}
               />
             ) : null}
-            <HeroHeaderButton
-              onPress={handleDelete}
-              accessibilityLabel={I18n.t('common.delete')}
-              floatingStyle={floatingChromeStyle}
-              solidStyle={solidHeaderStyle}
-              renderIcon={(overPhoto) => (
-                <Trash2 size={18} color={overPhoto ? '#ffffff' : themeColors.error} />
-              )}
-            />
+            {trailingAction === 'delete' ? (
+              <HeroHeaderButton
+                onPress={handleDelete}
+                accessibilityLabel={I18n.t('common.delete')}
+                floatingStyle={floatingChromeStyle}
+                solidStyle={solidHeaderStyle}
+                renderIcon={(overPhoto) => (
+                  <Trash2 size={18} color={overPhoto ? '#ffffff' : themeColors.error} />
+                )}
+              />
+            ) : trailingAction === 'archive' ? (
+              <HeroHeaderButton
+                onPress={handleArchiveShared}
+                accessibilityLabel={I18n.t('albums.archive.action')}
+                floatingStyle={floatingChromeStyle}
+                solidStyle={solidHeaderStyle}
+                renderIcon={(overPhoto) => (
+                  <Archive size={18} color={overPhoto ? '#ffffff' : themeColors.textMuted} />
+                )}
+              />
+            ) : null}
           </View>
         </View>
 

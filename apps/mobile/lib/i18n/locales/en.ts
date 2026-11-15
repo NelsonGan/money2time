@@ -2987,7 +2987,8 @@ const en = {
     no_transactions_title: 'No transactions',
     no_transactions_message: 'Add transactions to this album to see them here.',
     delete_title: 'Delete album?',
-    delete_body: 'This removes the album. Your transactions are not deleted.',
+    delete_body:
+      'Your transactions are kept and go back under their own categories. To keep the album as it is, archive it instead.',
     cover_permission_title: 'Photo access needed',
     cover_permission_body: 'Allow photo access to choose a cover image.',
     location: {
@@ -3016,15 +3017,31 @@ const en = {
       row: 'Split with friends',
       caption: 'Everyone sees the bills and who owes whom.',
       link_note: 'Works for 24 hours. Anyone with it can join.',
-      stop_message:
-        'Everyone keeps the album with their own entries, but it no longer updates between you.',
       leave: 'Leave album',
       leave_title: 'Leave {{name}}?',
-      leave_message: 'You keep the album with your own entries, but it no longer updates.',
-      delete_leave_message: 'You leave it too. The others keep the album and its bills.',
+      leave_message:
+        'It moves to Archived and stops updating. You keep your transactions, and the others keep the album and its bills.',
+      end: 'End album',
+      end_title: 'End {{name}} for everyone?',
+      end_message:
+        'Nobody can add or change its bills anymore. Everyone keeps the album in Archived, with their transactions and balances as they are.',
       limit: 'You can share up to {{max}} albums at a time.',
       full: 'Up to {{max}} people can join an album.',
       sign_in: 'Sign in to share this album.',
+    },
+    archive: {
+      action: 'Archive',
+      unarchive: 'Unarchive',
+      label: 'Archived',
+      section: 'Archived ({{count}})',
+      confirm_title: 'Archive {{name}}?',
+      confirm_shared:
+        'It moves to Archived on the Albums page. You stay in it, its bills keep updating, and it still counts in Insights. You can unarchive it anytime.',
+    },
+    ended: {
+      label: 'No longer shared',
+      title: 'No longer shared',
+      body: 'You left this album, sharing ended, or you signed out. It is kept as it was, with your transactions, and no longer updates. Sign in again or rejoin to bring it back.',
     },
     balances: {
       tab: 'Balances',

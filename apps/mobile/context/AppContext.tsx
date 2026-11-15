@@ -619,6 +619,8 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   /** Sets or clears an album's real-world location. */
   setAlbumLocation: (id: string, location: AlbumLocation | null) => void;
   deleteAlbum: (id: string) => void;
+  /** Archives an album or brings it back (README: Key patterns > Albums). */
+  archiveAlbum: (id: string, archived: boolean) => void;
   reorderAlbums: (ids: string[]) => void;
   setActiveAlbum: (albumId: string | null) => void;
   /**
@@ -1106,6 +1108,7 @@ function optimisticPaybackTransfer(input: {
     // The repayment belongs to whoever the split expense does.
     ...withEntryStamp({ memberId: parent.memberId }, getActiveLedgerId()),
     albumGroupId: null,
+    albumCategory: null,
     recurrencePattern: 'none',
     recurrenceInterval: 1,
     recurrenceEndDate: null,
@@ -1968,20 +1971,28 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const editGroupBillsRef = useRef<AppContextValue['editGroupBills'] | null>(null);
   /**
    * An entry whose category is one of a shared album's (the editor offers
-   * those for an expense there) is saved under the user's own matching one.
+   * those for a shared album's bill, and for an entry of an album no longer
+   * shared) keeps that album category, and is filed under the user's own
+   * matching one too.
    */
-  const withOwnCategory = useCallback(<T extends { categoryId?: string | null }>(input: T): T => {
-    const key = albumCategoryKeyOfId(input.categoryId);
-    if (!key) return input;
-    return {
-      ...input,
-      categoryId: personalCategoryFor(
-        key,
-        categoriesRef.current,
-        quickEntryPrefsRef.current.categoryMap,
-      ),
-    };
-  }, []);
+  const withOwnCategory = useCallback(
+    <T extends { categoryId?: string | null; albumCategory?: AlbumCategoryKey | null }>(
+      input: T,
+    ): T => {
+      const key = albumCategoryKeyOfId(input.categoryId);
+      if (!key) return input;
+      return {
+        ...input,
+        albumCategory: key,
+        categoryId: personalCategoryFor(
+          key,
+          categoriesRef.current,
+          quickEntryPrefsRef.current.categoryMap,
+        ),
+      };
+    },
+    [],
+  );
   const [paymentAlertPrefs, setPaymentAlertPrefs] = useState<PaymentAlertPrefs>(() =>
     parsePaymentAlertPrefs(null),
   );
@@ -3165,6 +3176,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [refreshAlbums, runMutation],
   );
 
+  const archiveAlbum = useCallback(
+    (id: string, archived: boolean) => {
+      runMutation(
+        () => {
+          albumsRepository.setArchived(id, archived);
+        },
+        { refresh: refreshAlbums },
+      );
+      void trackEvent(AnalyticsEvents.ALBUM_ARCHIVED, {
+        archived,
+        shared: !!sharedAlbumFor(id),
+      });
+    },
+    [refreshAlbums, runMutation],
+  );
+
   const setActiveAlbum = useCallback(
     (albumId: string | null) => {
       runMutation(
@@ -3495,6 +3522,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         createdBy: normalizedInput.createdBy,
         memberId: normalizedInput.memberId,
         albumGroupId: null,
+        albumCategory: normalizedInput.albumCategory ?? null,
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,
@@ -3613,6 +3641,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         createdBy: normalizedInput.createdBy,
         memberId: normalizedInput.memberId,
         albumGroupId: null,
+        albumCategory: normalizedInput.albumCategory ?? null,
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,
@@ -3797,6 +3826,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           !categoryId ||
           !listGroupExpenses(groupId).some((bill) => bill.id === update.id)
         ) {
+          // An entry of an album no longer shared keeps showing an album
+          // category: a category of the user's own picked for it (a bulk
+          // edit) is shown as the album category it reads as.
+          const albumCategory = transactionById.get(update.id)?.albumCategory;
+          if (albumCategory && categoryId && !albumCategoryKeyOfId(categoryId)) {
+            return {
+              ...update,
+              input: {
+                ...update.input,
+                albumCategory: albumCategoryForCategory(
+                  categoryId,
+                  categoriesRef.current,
+                  quickEntryPrefsRef.current.categoryMap,
+                ),
+              },
+            };
+          }
           return { ...update, input: withOwnCategory(update.input) };
         }
         const key =
@@ -5356,6 +5402,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         createdBy: refundInput.createdBy,
         memberId: refundInput.memberId,
         albumGroupId: null,
+        albumCategory: null,
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,
@@ -5555,6 +5602,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         createdBy: normalizedInput.createdBy,
         memberId: normalizedInput.memberId,
         albumGroupId: null,
+        albumCategory: normalizedInput.albumCategory ?? null,
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,
@@ -8222,6 +8270,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             updateAlbum,
             setAlbumLocation,
             deleteAlbum,
+            archiveAlbum,
             reorderAlbums,
             setActiveAlbum,
             syncAlbumGroups,
@@ -8377,6 +8426,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       updateAlbum,
       setAlbumLocation,
       deleteAlbum,
+      archiveAlbum,
       reorderAlbums,
       setActiveAlbum,
       syncAlbumGroups,

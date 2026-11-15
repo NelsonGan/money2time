@@ -36,6 +36,8 @@ interface AlbumCardProps {
    * identity, so this is what re-renders the memoized card with fresh totals.
    */
   statsVersion: unknown;
+  /** Dragged to reorder (the current albums); an archived album's card is not. */
+  sortable?: boolean;
 }
 
 export const AlbumCard = memo(function AlbumCardImpl({
@@ -43,6 +45,7 @@ export const AlbumCard = memo(function AlbumCardImpl({
   width,
   isActive,
   onPress,
+  sortable = true,
 }: AlbumCardProps) {
   const { settings, getAlbumStats } = useApp();
   const { animatedStyle, handlePressIn, handlePressOut } = usePressScale({ depth: 0.96 });
@@ -177,19 +180,21 @@ export const AlbumCard = memo(function AlbumCardImpl({
       {/* Handle must be a sibling of the Pressable — nesting it inside lets the
           Pressable swallow the touch so the drag gesture never activates. The
           absolute wrapper pins it inside the card's top-left corner. */}
-      <View className="absolute left-3 top-3" pointerEvents="box-none">
-        <Sortable.Handle>
-          <View
-            accessible
-            accessibilityRole="button"
-            accessibilityLabel={`${I18n.t('common.reorder')} ${album.name}`}
-            className="h-8 w-8 items-center justify-center rounded-full"
-            style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
-          >
-            <Menu size={16} color="#fff" />
-          </View>
-        </Sortable.Handle>
-      </View>
+      {sortable ? (
+        <View className="absolute left-3 top-3" pointerEvents="box-none">
+          <Sortable.Handle>
+            <View
+              accessible
+              accessibilityRole="button"
+              accessibilityLabel={`${I18n.t('common.reorder')} ${album.name}`}
+              className="h-8 w-8 items-center justify-center rounded-full"
+              style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
+            >
+              <Menu size={16} color="#fff" />
+            </View>
+          </Sortable.Handle>
+        </View>
+      ) : null}
     </Animated.View>
   );
 });

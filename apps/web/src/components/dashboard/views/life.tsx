@@ -286,9 +286,9 @@ export function TripsView() {
             >
               <div className="relative h-36 bg-gradient-to-br from-sky/40 via-primary-soft to-accent-soft">
                 {cover ? <img src={cover} alt="" className="h-full w-full object-cover" /> : <ClayImg name="money-time/coins-stack" size={56} className="absolute bottom-4 right-4" />}
-                {trip.active ? (
+                {trip.active || trip.archived ? (
                   <span className="absolute left-3 top-3">
-                    <Pill tone="brand">{t("current")}</Pill>
+                    {trip.active ? <Pill tone="brand">{t("current")}</Pill> : <Pill>{t(trip.ended ? "ended" : "archived")}</Pill>}
                   </span>
                 ) : null}
               </div>

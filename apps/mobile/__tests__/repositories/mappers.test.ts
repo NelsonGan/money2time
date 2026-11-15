@@ -1030,6 +1030,7 @@ describe('toTransactionWithRelationsFromRaw', () => {
       createdBy: 'user-mei',
       memberId: 'user-nelson',
       albumGroupId: null,
+      albumCategory: null,
       feeOfId: 't7',
       ...STAMPS,
     };
@@ -1075,6 +1076,7 @@ describe('toTransactionWithRelationsFromRaw', () => {
       createdBy: null,
       memberId: null,
       albumGroupId: null,
+      albumCategory: null,
       feeOfId: null,
       ...STAMPS,
     };
@@ -1234,6 +1236,7 @@ describe('createTransactionAssembler', () => {
       member_id: 'user-nelson',
       fee_of_id: 't7',
       album_group_id: 'album-1',
+      album_category: 'food',
     };
     expect(Object.keys(sparse)).toEqual(sparseColumns);
     const sparseById = new Map([['t1', ['t1', ...sparseColumns.map((column) => sparse[column])]]]);
@@ -1241,6 +1244,12 @@ describe('createTransactionAssembler', () => {
     const built = assemble(commonRow(common));
     expect(built).toEqual(toTransactionWithRelationsFromRaw(fullRow({ ...sparse, ...common })));
     expect(built.instalmentCount).toBe(12);
+    // A shared album's bill reads under its album category, kept after leaving it.
+    expect(built).toMatchObject({
+      albumCategory: 'food',
+      categoryName: 'albums.categories.food',
+      categoryParentId: null,
+    });
     expect(built.sentiment).toBe('happy');
     // The row after a sparse one starts clean.
     const plain = assemble(commonRow({ ...common, id: 't3' }));

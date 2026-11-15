@@ -3005,7 +3005,8 @@ const da = {
     no_transactions_title: 'Ingen transaktioner',
     no_transactions_message: 'Tilføj transaktioner til dette album for at se dem her.',
     delete_title: 'Slet album?',
-    delete_body: 'Dette fjerner albummet. Dine transaktioner slettes ikke.',
+    delete_body:
+      'Dine transaktioner bevares og kommer tilbage under deres egne kategorier. Arkivér albummet i stedet, hvis du vil beholde det, som det er.',
     cover_permission_title: 'Adgang til fotos kræves',
     cover_permission_body: 'Tillad adgang til fotos for at vælge et coverbillede.',
     people: {
@@ -3024,15 +3025,31 @@ const da = {
       row: 'Del med venner',
       caption: 'Alle ser regningerne, og hvem der skylder hvem.',
       link_note: 'Virker i 24 timer. Alle med linket kan deltage.',
-      stop_message:
-        'Alle beholder albummet med deres egne poster, men det opdateres ikke længere mellem jer.',
       leave: 'Forlad album',
       leave_title: 'Forlad {{name}}?',
-      leave_message: 'Du beholder albummet med dine egne poster, men det opdateres ikke længere.',
-      delete_leave_message: 'Du forlader det også. De andre beholder albummet og dets regninger.',
+      leave_message:
+        'Det flyttes til Arkiveret og opdateres ikke længere. Du beholder dine transaktioner, og de andre beholder albummet og regningerne.',
+      end: 'Afslut album',
+      end_title: 'Afslut {{name}} for alle?',
+      end_message:
+        'Ingen kan længere tilføje eller ændre regningerne. Alle beholder albummet under Arkiveret med deres transaktioner og saldi, som de er.',
       limit: 'Du kan dele op til {{max}} album ad gangen.',
       full: 'Op til {{max}} personer kan deltage i et album.',
       sign_in: 'Log ind for at dele dette album.',
+    },
+    archive: {
+      action: 'Arkivér',
+      unarchive: 'Fjern fra arkiv',
+      label: 'Arkiveret',
+      section: 'Arkiveret ({{count}})',
+      confirm_title: 'Arkivér {{name}}?',
+      confirm_shared:
+        'Det flyttes til Arkiveret på siden Album. Du forbliver i det, dets regninger opdateres stadig, og det tæller stadig med i Indsigt. Du kan fjerne det fra arkivet når som helst.',
+    },
+    ended: {
+      label: 'Ikke længere delt',
+      title: 'Ikke længere delt',
+      body: 'Du forlod albummet, delingen sluttede, eller du loggede ud. Det bevares, som det var, med dine transaktioner, og opdateres ikke længere. Log ind igen eller deltag igen for at få det tilbage.',
     },
     balances: {
       tab: 'Saldi',

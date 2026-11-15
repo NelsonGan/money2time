@@ -7,13 +7,12 @@
  */
 
 import { I18n } from '~/lib/i18n';
-import type { AlbumExpense, Category, TransactionWithRelations } from '~/types';
+import type { Category, TransactionWithRelations } from '~/types';
 
 import {
   albumCategoryForCategory,
   albumCategoryIcon,
   albumCategoryId,
-  type AlbumCategoryKey,
   albumCategoryLabel,
   type CategoryMap,
 } from './albumCategories';
@@ -33,34 +32,18 @@ export interface AlbumCategoryRow {
   transactions: TransactionWithRelations[];
 }
 
-/**
- * The group's category of each of the user's entries in a shared album: a
- * bill's own entry, and the entries its paid parts made.
- */
-export function groupEntryCategories(
-  bills: readonly AlbumExpense[],
-  entries: readonly TransactionWithRelations[],
-): Map<string, AlbumCategoryKey> {
-  const byEntry = new Map<string, AlbumCategoryKey>();
-  for (const bill of bills) byEntry.set(bill.id, bill.category);
-  for (const entry of entries) {
-    const category = byEntry.get(entry.id);
-    if (!category || !entry.splits) continue;
-    for (const split of entry.splits) {
-      if (split.paidTransactionId) byEntry.set(split.paidTransactionId, category);
-    }
-  }
-  return byEntry;
-}
-
 export interface AlbumBreakdownOptions {
   /** An entry's value on the page, or null to leave it out (one person's breakdown). */
   valueOf: (tx: TransactionWithRelations) => number | null;
   categories: readonly Category[];
   categoryById: ReadonlyMap<string, Category>;
   categoryMap?: CategoryMap;
-  /** A shared album's categories by entry (`groupEntryCategories`); null for an album of the user's own. */
-  groupCategories: ReadonlyMap<string, AlbumCategoryKey> | null;
+  /**
+   * A shared album, or one the user is no longer in: by its own categories
+   * (each entry's `albumCategory`, else what its own category reads as).
+   * Otherwise by the user's root categories.
+   */
+  byAlbumCategory: boolean;
 }
 
 /** The rows, biggest first. */
@@ -68,7 +51,7 @@ export function albumCategoryRows(
   entries: readonly TransactionWithRelations[],
   options: AlbumBreakdownOptions,
 ): AlbumCategoryRow[] {
-  const { valueOf, categories, categoryById, categoryMap, groupCategories } = options;
+  const { valueOf, categories, categoryById, categoryMap, byAlbumCategory } = options;
   const rows = new Map<string, AlbumCategoryRow>();
   const add = (
     id: string,
@@ -90,10 +73,9 @@ export function albumCategoryRows(
   for (const tx of entries) {
     const amount = valueOf(tx);
     if (amount === null) continue;
-    if (groupCategories) {
+    if (byAlbumCategory) {
       const key =
-        groupCategories.get(tx.id) ??
-        albumCategoryForCategory(tx.categoryId, categories, categoryMap);
+        tx.albumCategory ?? albumCategoryForCategory(tx.categoryId, categories, categoryMap);
       add(albumCategoryId(key), albumCategoryLabel(key), albumCategoryIcon(key), null, tx, amount);
       continue;
     }

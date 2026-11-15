@@ -137,13 +137,18 @@ function TransactionEditor({
   // same for everyone. An entry of the user's own there, not split yet, keeps
   // its own category (split later, it goes to the group as the album
   // category it reads as).
+  // An entry of an album no longer shared keeps its album category too.
   const albumCategories =
-    !!albumGroupId && transaction.albumGroupId === albumGroupId && transaction.type === 'expense';
+    transaction.type === 'expense' &&
+    ((!!albumGroupId && transaction.albumGroupId === albumGroupId) || !!transaction.albumCategory);
   const initialCategoryId = useMemo(() => {
-    if (!albumCategories || !albumGroupId) return transaction.categoryId;
-    const bill = listGroupExpenses(albumGroupId).find((item) => item.id === transaction.id);
+    if (!albumCategories) return transaction.categoryId;
+    const bill = albumGroupId
+      ? listGroupExpenses(albumGroupId).find((item) => item.id === transaction.id)
+      : undefined;
     return albumCategoryId(
       bill?.category ??
+        transaction.albumCategory ??
         albumCategoryForCategory(transaction.categoryId, categories, quickEntryPrefs.categoryMap),
     );
   }, [
@@ -151,6 +156,7 @@ function TransactionEditor({
     albumGroupId,
     categories,
     quickEntryPrefs.categoryMap,
+    transaction.albumCategory,
     transaction.categoryId,
     transaction.id,
   ]);
