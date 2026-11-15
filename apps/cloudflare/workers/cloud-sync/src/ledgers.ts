@@ -111,7 +111,7 @@ interface SharedLedgerRow {
 }
 
 type Role = 'owner' | 'member';
-export type Kind = 'ledger' | 'album';
+type Kind = 'ledger' | 'album';
 
 /** Whether shared ledger `l` is an album's group: it has a row in `shared_albums`. */
 const IS_ALBUM_SQL = 'EXISTS (SELECT 1 FROM shared_albums a WHERE a.ledger_id = l.id)';
@@ -821,11 +821,11 @@ async function albumRead(
 ): Promise<Response> {
   // Read first, so a change committed while the group is read is seen next time.
   const stamp = await ledgerStamp(env, ledger.id);
-  if (stamp !== null && since === stamp) return json({ unchanged: true, stamp });
+  if (since === stamp) return json({ unchanged: true, stamp });
   try {
     const db = hranaDb(ledger.db_url, await writerToken(env, ledger));
     const [album, rows] = await Promise.all([view(env, ledger, role), readGroup(db)]);
-    return json({ album, userId: user.id, rows, stamp: stamp ?? undefined });
+    return json({ album, userId: user.id, rows, stamp });
   } catch (error) {
     if (error instanceof Error && error.message.startsWith('ledger_access_chang')) {
       return json({ error: 'busy' }, 409);
@@ -1033,7 +1033,10 @@ export async function previewInvite(env: Env, code: string): Promise<Response> {
  */
 async function albumOwnerName(env: Env, ledger: SharedLedgerRow): Promise<string | null> {
   try {
-    return await readOwnerName(hranaDb(ledger.db_url, await writerToken(env, ledger)), ledger.owner_user_id);
+    return await readOwnerName(
+      hranaDb(ledger.db_url, await writerToken(env, ledger)),
+      ledger.owner_user_id,
+    );
   } catch {
     return null;
   }

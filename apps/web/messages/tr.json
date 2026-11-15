@@ -2413,8 +2413,6 @@
       "youOweName": "{name} kişisine borcunuz var",
       "owesYou": "{name} size borçlu",
       "owes": "{from}, {to} kişisine borçlu",
-      "settleUp": "Ödeş",
-      "record": "Kaydet",
       "settledUp": "Ödeşildi",
       "groupSpending": "Grup harcaması",
       "total": "Toplam",

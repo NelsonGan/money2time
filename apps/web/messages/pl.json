@@ -2413,8 +2413,6 @@
       "youOweName": "Jesteś winien: {name}",
       "owesYou": "{name} jest Ci winien(-na)",
       "owes": "{from} → {to}",
-      "settleUp": "Rozlicz",
-      "record": "Zapisz",
       "settledUp": "Rozliczone",
       "groupSpending": "Wydatki grupy",
       "total": "Razem",

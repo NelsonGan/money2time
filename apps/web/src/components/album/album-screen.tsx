@@ -32,13 +32,10 @@ const FULL_READ_MS = 5 * 60_000;
 
 export type AlbumActions = {
   /** Sends rows to the Worker; true when written. Says why on the page when not. */
-  write: (rows: GroupRowWrite[], action: AlbumAction) => Promise<boolean>;
+  write: (rows: GroupRowWrite[], action: AlbumEditAction) => Promise<boolean>;
   /** Reads the album again, after a change made outside its rows (someone taken out). */
   reload: () => Promise<unknown>;
 };
-
-/** What a change did, for analytics: `bill_add`, `payment_record`, … */
-export type AlbumAction = AlbumEditAction;
 
 /**
  * The album, read now and kept current: every 20 seconds while the page is in
@@ -176,12 +173,14 @@ function AlbumView({ shareId, tab }: { shareId: string; tab: Tab }) {
   }, [toast]);
 
   const write = useCallback(
-    async (rows: GroupRowWrite[], action: AlbumAction): Promise<boolean> => {
+    async (rows: GroupRowWrite[], action: AlbumEditAction): Promise<boolean> => {
       try {
         await api.write(shareId, rows);
         track(EVENTS.albumEdited, { action, result: "saved" });
       } catch (err) {
-        track(EVENTS.albumEdited, { action, result: err instanceof AlbumApiError ? (err.code === "network" ? "offline" : err.code === "not_member" ? "not_member" : "failed") : "failed" });
+        // As `writeErrorKey` reads it: a 404 is someone no longer in the album too.
+        const code = err instanceof AlbumApiError ? err.code : "";
+        track(EVENTS.albumEdited, { action, result: code === "network" ? "offline" : code === "not_member" || code === "not_found" ? "not_member" : "failed" });
         if (err instanceof AlbumApiError && err.code === "unauthorized") setUser(null);
         setToast({ text: t(writeErrorKey(err)) });
         return false;

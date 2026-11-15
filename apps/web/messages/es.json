@@ -2413,8 +2413,6 @@
       "youOweName": "Le debes a {name}",
       "owesYou": "{name} te debe",
       "owes": "{from} debe a {to}",
-      "settleUp": "Saldar",
-      "record": "Registrar",
       "settledUp": "Saldado",
       "groupSpending": "Gasto del grupo",
       "total": "Total",

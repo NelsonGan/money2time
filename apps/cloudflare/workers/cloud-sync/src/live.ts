@@ -84,15 +84,16 @@ export async function notifyUsers(
 }
 
 /**
- * A shared ledger's change stamp (`ledger_changes`), bumped with every notice
+ * A shared album's change stamp (`ledger_changes`), bumped with every notice
  * its phones get: after a push, a Worker write, or someone joining or
- * leaving. Readers without a socket (the album website) send it back to ask
- * whether anything changed. It only ever goes up. Best effort: a ledger that
- * is gone, or a database without the table yet, is passed over.
+ * leaving. The album website, which has no socket, sends it back to ask
+ * whether anything changed. It only ever goes up. Plain shared ledgers have
+ * no reader of it, so they get none; one that is gone is passed over.
  */
 async function markLedgerChanged(env: Env, ledgerId: string): Promise<void> {
   await env.AUTH_DB.prepare(
-    `INSERT INTO ledger_changes (ledger_id, changed_at) VALUES (?1, ?2)
+    `INSERT INTO ledger_changes (ledger_id, changed_at)
+       SELECT ?1, ?2 WHERE EXISTS (SELECT 1 FROM shared_albums WHERE ledger_id = ?1)
      ON CONFLICT (ledger_id) DO UPDATE SET
        changed_at = max(ledger_changes.changed_at + 1, excluded.changed_at)`,
   )
@@ -102,21 +103,16 @@ async function markLedgerChanged(env: Env, ledgerId: string): Promise<void> {
 }
 
 /**
- * The ledger's change stamp, read before its data so a change landing in
- * between is seen next time; `0` before its first change, null when it
- * cannot be read (then nothing counts as unchanged).
+ * The album's change stamp, read before its data so a change landing in
+ * between is seen next time; `0` before its first change.
  */
-export async function ledgerStamp(env: Env, ledgerId: string): Promise<string | null> {
-  try {
-    const row = await env.AUTH_DB.prepare(
-      'SELECT changed_at FROM ledger_changes WHERE ledger_id = ?1',
-    )
-      .bind(ledgerId)
-      .first<{ changed_at: number }>();
-    return String(row?.changed_at ?? 0);
-  } catch {
-    return null;
-  }
+export async function ledgerStamp(env: Env, ledgerId: string): Promise<string> {
+  const row = await env.AUTH_DB.prepare(
+    'SELECT changed_at FROM ledger_changes WHERE ledger_id = ?1',
+  )
+    .bind(ledgerId)
+    .first<{ changed_at: number }>();
+  return String(row?.changed_at ?? 0);
 }
 
 export class SyncHub implements DurableObject {

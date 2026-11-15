@@ -3,7 +3,7 @@
 import { useLocale, useTranslations } from "next-intl";
 import { useState, type FormEvent } from "react";
 
-import { cents } from "@/lib/album/debts";
+import { cents } from "@/lib/backup/album-group";
 import type { Group } from "@/lib/album/group";
 import { readValue, trimNumber } from "@/lib/album/split";
 import { settleRows, type GroupRowWrite } from "@/lib/album/writes";

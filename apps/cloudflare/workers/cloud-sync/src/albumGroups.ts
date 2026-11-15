@@ -836,19 +836,7 @@ export async function readGroup(db: GroupDb): Promise<GroupRow[]> {
 
 /** The name the account goes by in the group, while it is in it; null when it is not. */
 export async function readOwnerName(db: GroupDb, userId: string): Promise<string | null> {
-  const rows = await db.query({
-    sql: `SELECT data FROM sync_rows WHERE table_name = 'album_members' LIMIT ${MAX_MEMBER_ROWS}`,
-    args: [],
-  });
-  for (const raw of rows) {
-    try {
-      const member = toMember(JSON.parse(String(raw.data)) as Row);
-      if (member && member.userId === userId && !member.deletedAt) return member.name;
-    } catch {
-      // Not a row: passed over.
-    }
-  }
-  return null;
+  return selfOf(membersOf(await loadState(db, null)), userId)?.name ?? null;
 }
 
 /** A revision of the Worker's, in the app's shape (`<time>.<counter>.<origin>`). */

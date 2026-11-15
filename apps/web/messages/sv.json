@@ -2413,8 +2413,6 @@
       "youOweName": "Du är skyldig {name}",
       "owesYou": "{name} är skyldig dig",
       "owes": "{from} är skyldig {to}",
-      "settleUp": "Gör upp",
-      "record": "Registrera",
       "settledUp": "Reglerat",
       "groupSpending": "Gruppens utgifter",
       "total": "Totalt",

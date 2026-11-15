@@ -320,9 +320,11 @@ test('an album read answers "unchanged" from its change stamp, without opening i
     body: { unchanged: true, stamp: second },
   });
 
-  // The personal channel and a ledger that is gone are passed over.
+  // The personal channel, a plain shared ledger and one that is gone are passed over.
   await notifyUsers(env, ['owner'], 'personal', null);
+  await notifyUsers(env, ['owner'], 'share', null);
   await notifyUsers(env, ['owner'], 'gone', null);
+  assert.equal(await ledgerStamp(env, 'share'), '0');
   assert.equal(await ledgerStamp(env, 'gone'), '0');
   assert.equal(await ledgerStamp(env, 'trip'), second);
 });

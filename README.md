@@ -5052,19 +5052,19 @@ reaches this Worker over the `CLOUD_SYNC` service binding. Links on any other ho
 
 #### Endpoints
 
-| Route                                   | What it does                                                                                                                                                                                                                                                                                                                                                                              |
-| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/auth/*`                           | Better Auth, only these routes (everything else it mounts answers 404): `POST sign-in/social` (Apple / Google ID token), `POST email-otp/send-verification-otp` (type `sign-in` only, [Turnstile](#turnstile)), `POST sign-in/email-otp`, `POST sign-out`, `GET ok`                                                                                                                       |
-| `GET /v1/account`                       | The signed-in user and whether the account is Pro                                                                                                                                                                                                                                                                                                                                         |
-| `DELETE /v1/account/install`            | `{appUserId}` → sign-out: this install no longer counts toward the account's Pro                                                                                                                                                                                                                                                                                                          |
-| `POST /v1/account/status`               | `{appUserId}` → `{isPro, limited}` for this phone; links the App User ID if it is Pro and records the phone. The account's Pro reaches the first 5 phones to join (a place frees on sign-out or after 30 days unused)                                                                                                                                                                     |
-| `GET /v1/live?device=…`                 | WebSocket upgrade; the user's `SyncHub` keeps it and sends `{type: 'changed', channel, reason}`. The app pings every 25 s (answered without waking the hub)                                                                                                                                                                                                                               |
-| `POST /v1/sync/notify`                  | `{channel, device, reason?}` → tells the user's other phones (`personal`) or everyone in a shared ledger the user is in; 404 for a ledger that is not theirs. `reason: 'pro'` (personal only) is passed on; anything else is a `data` change. Every notice about a shared ledger (this one, the Worker's own writes, joins and leaves) also moves its change stamp in `ledger_changes` on |
-| `POST /v1/sync/credentials`             | `{appUserId}` → the user's Turso URL and a 7-day token; links the App User ID if it is Pro; makes the database on first use; 403 `not_pro`                                                                                                                                                                                                                                                |
-| `POST /v1/media/exists`                 | Which of up to 100 image paths are stored                                                                                                                                                                                                                                                                                                                                                 |
-| `PUT` / `GET /v1/media/<folder>/<file>` | Store / read one image (15 MB cap, image types only, one folder level)                                                                                                                                                                                                                                                                                                                    |
-| `POST /v1/apple/authorization`          | `{code}` → trades Apple's one-time authorization code for a refresh token, stored sealed, if the code belongs to this user's Apple account                                                                                                                                                                                                                                                |
-| `DELETE /v1/account`                    | Revokes the user's Apple tokens, deletes the Turso database and every image under `u/<userId>/`, then the user (every other row cascades) and any pending email code                                                                                                                                                                                                                      |
+| Route                                   | What it does                                                                                                                                                                                                                                                                                                                                                                             |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/auth/*`                           | Better Auth, only these routes (everything else it mounts answers 404): `POST sign-in/social` (Apple / Google ID token), `POST email-otp/send-verification-otp` (type `sign-in` only, [Turnstile](#turnstile)), `POST sign-in/email-otp`, `POST sign-out`, `GET ok`                                                                                                                      |
+| `GET /v1/account`                       | The signed-in user and whether the account is Pro                                                                                                                                                                                                                                                                                                                                        |
+| `DELETE /v1/account/install`            | `{appUserId}` → sign-out: this install no longer counts toward the account's Pro                                                                                                                                                                                                                                                                                                         |
+| `POST /v1/account/status`               | `{appUserId}` → `{isPro, limited}` for this phone; links the App User ID if it is Pro and records the phone. The account's Pro reaches the first 5 phones to join (a place frees on sign-out or after 30 days unused)                                                                                                                                                                    |
+| `GET /v1/live?device=…`                 | WebSocket upgrade; the user's `SyncHub` keeps it and sends `{type: 'changed', channel, reason}`. The app pings every 25 s (answered without waking the hub)                                                                                                                                                                                                                              |
+| `POST /v1/sync/notify`                  | `{channel, device, reason?}` → tells the user's other phones (`personal`) or everyone in a shared ledger the user is in; 404 for a ledger that is not theirs. `reason: 'pro'` (personal only) is passed on; anything else is a `data` change. Every notice about a shared album (this one, the Worker's own writes, joins and leaves) also moves its change stamp in `ledger_changes` on |
+| `POST /v1/sync/credentials`             | `{appUserId}` → the user's Turso URL and a 7-day token; links the App User ID if it is Pro; makes the database on first use; 403 `not_pro`                                                                                                                                                                                                                                               |
+| `POST /v1/media/exists`                 | Which of up to 100 image paths are stored                                                                                                                                                                                                                                                                                                                                                |
+| `PUT` / `GET /v1/media/<folder>/<file>` | Store / read one image (15 MB cap, image types only, one folder level)                                                                                                                                                                                                                                                                                                                   |
+| `POST /v1/apple/authorization`          | `{code}` → trades Apple's one-time authorization code for a refresh token, stored sealed, if the code belongs to this user's Apple account                                                                                                                                                                                                                                               |
+| `DELETE /v1/account`                    | Revokes the user's Apple tokens, deletes the Turso database and every image under `u/<userId>/`, then the user (every other row cascades) and any pending email code                                                                                                                                                                                                                     |
 
 Shared ledgers ([Shared ledgers](#shared-ledgers)):
 
@@ -5315,7 +5315,7 @@ Better Auth's `user`, `session`, `account`, `verification`, `rateLimit`, plus
 `media_usage`, `apple_tokens`, and for shared ledgers `shared_ledgers` (its
 Turso database and sealed token), `ledger_members`, `ledger_links` (one
 invite link per ledger: code hash and sealed code), `ledger_media_usage`,
-`shared_albums` and `ledger_changes` (each ledger's change stamp), each deleted with its user or ledger by `ON DELETE CASCADE`. The schema drops
+`shared_albums` and `ledger_changes` (each shared album's change stamp), each deleted with its user or ledger by `ON DELETE CASCADE`. The schema drops
 `ledger_invites`, the single-use invites from before release.
 
 #### Resources
@@ -5841,8 +5841,8 @@ one that cannot go says why in a toast and keeps the editor open. With
 Simplify on, a change that leaves the group even closes its circle
 (`evenGroupRows`, the app's `evenGroupPayments`). An open album asks again every 20 seconds while the page is in view and
 whenever it comes back to it, so others' changes arrive without a reload. It
-sends the change stamp of its last read: every notice the Worker sends a
-shared ledger's phones moves that stamp on (`ledger_changes`), and while it
+sends the change stamp of its last read: every notice the Worker sends an
+album's phones moves that stamp on (`ledger_changes`), and while it
 has not moved the Worker answers `unchanged` from D1 alone. The whole group
 is read anyway every 5 minutes, and after every change of the user's, in
 case a phone's notice never arrived.
@@ -5927,11 +5927,11 @@ this one. A custom domain belongs to one Worker at a time, and the website's
 deploy takes it over by itself: `cf workers triggers deploy` (vinext's deploy
 step) runs without a terminal in CI, and then reassigns a domain another
 Worker holds (`override_existing_origin`) instead of asking, so there is no
-gap and nothing to detach by hand. The change stamp needs `ledger_changes` in
-D1 (the schema file; applied to production on 2026-11-15); without it the
-Worker reads the whole group every time, as before. Google's button needs
-`https://album.money2time.com` among the OAuth web client's Authorized
-JavaScript origins.
+gap and nothing to detach by hand. The change stamp lives in `ledger_changes` in
+D1 (the schema file; in production since 2026-11-15). Google's button needs
+`https://album.money2time.com` among the Authorized JavaScript origins of
+the OAuth web client "Money2Time Web" (project `money2time-expo`; added
+2026-11-15).
 
 ### Website localization
 

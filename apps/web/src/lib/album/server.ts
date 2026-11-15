@@ -14,6 +14,7 @@
  */
 
 import { CSRF_HEADER } from "./csrf.ts";
+import { COVER_PATH } from "./group.ts";
 
 /** How this server reaches the Worker: a service binding in production. */
 export type Upstream = (path: string, init: RequestInit) => Promise<Response>;
@@ -26,8 +27,7 @@ const MAX_BODY_BYTES = 256 * 1024;
 const INVITE_CODE = /^[A-Za-z0-9_-]{20,64}$/;
 const SHARE_ID = /^[A-Za-z0-9-]{8,64}$/;
 const USER_ID = /^[A-Za-z0-9_-]{1,64}$/;
-const MEDIA_PATH = /^album-covers\/[A-Za-z0-9_-]{1,64}\.[A-Za-z0-9]{1,5}$/;
-/** A cover's type by its extension, when the stored one says nothing. Never SVG, which can run script. */
+/** A cover's type by its extension, the only types it is served as. Never SVG, which can run script. */
 const IMAGE_TYPES: Record<string, string> = { jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", webp: "image/webp", heic: "image/heic", gif: "image/gif" };
 
 type Json = Record<string, unknown>;
@@ -250,12 +250,12 @@ export async function handleAlbumApi(request: Request, upstream: Upstream): Prom
       } catch {
         // A malformed escape names no picture.
       }
-      if (!MEDIA_PATH.test(path) || !token) return new Response(null, { status: 404 });
+      if (!COVER_PATH.test(path) || !token) return new Response(null, { status: 404 });
       const response = await call(`/v1/ledgers/${id}/media/${path.split("/").map(encodeURIComponent).join("/")}`);
       if (!response.ok) return new Response(null, { status: response.status === 401 ? 401 : 404 });
-      // Served only as a picture: a phone may have stored it untyped.
-      const stored = response.headers.get("content-type") ?? "";
-      const type = stored.startsWith("image/") && stored !== "image/svg+xml" ? stored : IMAGE_TYPES[path.split(".").pop()!.toLowerCase()];
+      // Served only as one of these pictures, by its extension (as the Worker
+      // stores it), whatever type the stored copy claims.
+      const type = IMAGE_TYPES[path.split(".").pop()!.toLowerCase()];
       if (!type) return new Response(null, { status: 404 });
       return new Response(response.body, {
         headers: {

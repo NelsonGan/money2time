@@ -2413,8 +2413,6 @@
       "youOweName": "Kamu berutang ke {name}",
       "owesYou": "{name} berutang kepadamu",
       "owes": "{from} berutang kepada {to}",
-      "settleUp": "Lunasi",
-      "record": "Catat",
       "settledUp": "Lunas",
       "groupSpending": "Pengeluaran grup",
       "total": "Total",

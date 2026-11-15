@@ -2413,8 +2413,6 @@
       "youOweName": "Вы должны: {name}",
       "owesYou": "{name} должен(-на) вам",
       "owes": "{from} → {to}",
-      "settleUp": "Рассчитаться",
-      "record": "Записать",
       "settledUp": "В расчёте",
       "groupSpending": "Расходы группы",
       "total": "Итого",

@@ -14,11 +14,8 @@
 import { cents } from "../backup/album-group.ts";
 import type { Bill, Payment } from "./group";
 
-/** Amounts in whole cents, which is what the sums are done in (the dashboard's helper). */
-export { cents };
-
 /** A group's live payments by the bill they are for. */
-export function settlementsByBill<T extends Pick<Payment, "expenseId" | "deleted">>(payments: readonly T[]): Map<string, T[]> {
+function settlementsByBill<T extends Pick<Payment, "expenseId" | "deleted">>(payments: readonly T[]): Map<string, T[]> {
   const byBill = new Map<string, T[]>();
   for (const item of payments) {
     if (item.deleted || !item.expenseId) continue;
@@ -30,7 +27,7 @@ export function settlementsByBill<T extends Pick<Payment, "expenseId" | "deleted
 }
 
 /** A group's spending in one currency, and one member's part in it. */
-export type GroupSpending = { total: number; selfPaid: number; selfShare: number };
+type GroupSpending = { total: number; selfPaid: number; selfShare: number };
 
 /** What the group spent, and what one member paid and their share of it, per currency. */
 export function groupTotals(bills: readonly Bill[], selfId: string | null): Map<string, GroupSpending> {

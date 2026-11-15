@@ -59,7 +59,7 @@ function loadScript(src: string): Promise<void> {
   return loading;
 }
 
-export function signInErrorKey(error: unknown): string {
+function signInErrorKey(error: unknown): string {
   const code = error instanceof AlbumApiError ? error.code : "";
   if (code === "network") return "errors.network";
   if (code === "rate_limited") return "errors.rateLimited";

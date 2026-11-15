@@ -61,6 +61,7 @@ export function JoinScreen({ code }: { code: string }) {
                 defaultName={defaultMemberName(user)}
                 email={user.email}
                 onSignOut={() => void signOut()}
+                onSignedOut={() => setUser(null)}
                 onJoined={(shareId) => setJoinedId(shareId)}
                 onOpen={(shareId) => go({ name: "album", shareId, tab: "transactions" }, { replace: true })}
               />
@@ -137,6 +138,7 @@ function JoinForm({
   defaultName,
   email,
   onSignOut,
+  onSignedOut,
   onJoined,
   onOpen,
 }: {
@@ -145,6 +147,7 @@ function JoinForm({
   defaultName: string;
   email: string;
   onSignOut: () => void;
+  onSignedOut: () => void;
   onJoined: (shareId: string) => void;
   onOpen: (shareId: string) => void;
 }) {
@@ -174,16 +177,19 @@ function JoinForm({
         }
       }
       track(EVENTS.albumJoined, { result: code === "full" ? "full" : code === "invite_not_found" ? "expired" : "failed" });
+      // A session the Worker no longer knows (the server has cleared its cookie): sign in again.
+      if (code === "unauthorized") {
+        onSignedOut();
+        return;
+      }
       setError(
         code === "full"
           ? t("join.full")
           : code === "invite_not_found"
             ? t("join.expiredBody", { name: preview.ownerName || t("someone") })
-            : code === "unauthorized"
-              ? t("errors.signedOut")
-              : code === "network"
-                ? t("errors.network")
-                : t("errors.generic"),
+            : code === "network"
+              ? t("errors.network")
+              : t("errors.generic"),
       );
       setBusy(false);
     }

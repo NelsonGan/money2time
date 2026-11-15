@@ -138,10 +138,10 @@ CREATE TABLE IF NOT EXISTS shared_albums (
   ledger_id TEXT NOT NULL PRIMARY KEY REFERENCES shared_ledgers ("id") ON DELETE CASCADE
 );
 
--- When each shared ledger last changed: bumped with every notice its phones
--- get (src/live.ts), so a reader with no socket (the album website) asks
--- whether anything changed instead of reading the whole group again. A table
--- of its own for the same reason as shared_albums.
+-- When each shared album last changed: bumped with every notice its phones
+-- get (src/live.ts), so the album website, which has no socket, asks whether
+-- anything changed instead of reading the whole group again. A table of its
+-- own for the same reason as shared_albums.
 CREATE TABLE IF NOT EXISTS ledger_changes (
   ledger_id TEXT NOT NULL PRIMARY KEY REFERENCES shared_ledgers ("id") ON DELETE CASCADE,
   changed_at INTEGER NOT NULL

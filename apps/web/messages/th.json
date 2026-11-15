@@ -2413,8 +2413,6 @@
       "youOweName": "คุณติดเงิน {name}",
       "owesYou": "{name} ค้างคุณ",
       "owes": "{from} ค้าง {to}",
-      "settleUp": "เคลียร์ยอด",
-      "record": "บันทึก",
       "settledUp": "เคลียร์แล้ว",
       "groupSpending": "ค่าใช้จ่ายของกลุ่ม",
       "total": "รวม",

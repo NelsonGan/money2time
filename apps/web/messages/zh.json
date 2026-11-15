@@ -2413,8 +2413,6 @@
       "youOweName": "你欠 {name}",
       "owesYou": "{name} 欠你",
       "owes": "{from} 欠 {to}",
-      "settleUp": "结清",
-      "record": "记录",
       "settledUp": "已结清",
       "groupSpending": "群组支出",
       "total": "总计",

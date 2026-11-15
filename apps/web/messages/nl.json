@@ -2413,8 +2413,6 @@
       "youOweName": "Je bent {name} schuldig",
       "owesYou": "{name} is jou schuldig",
       "owes": "{from} is {to} schuldig",
-      "settleUp": "Verrekenen",
-      "record": "Vastleggen",
       "settledUp": "Verrekend",
       "groupSpending": "Uitgaven van de groep",
       "total": "Totaal",

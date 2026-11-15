@@ -314,7 +314,7 @@ function campaignContext(): GtagParameters {
  * (anyone holding it joins) and an album's id is private, so neither is ever
  * sent: `/join/:code`, `/a/:album`, and `/` for anything else there.
  */
-export function publicPath(pathname: string, hostname: string): string {
+function publicPath(pathname: string, hostname: string): string {
   if (!isAlbumHost(hostname)) return pathname;
   if (pathname.startsWith("/join/")) return "/join/:code";
   if (pathname.startsWith("/a/")) return "/a/:album";
@@ -375,42 +375,32 @@ function safeReferrer(value: unknown): string | undefined {
  */
 function sanitizePostHogEvent<T extends PostHogCapture>(event: T | null): T | null {
   if (!event?.properties) return event;
-  const properties: Record<string, unknown> = { ...event.properties };
-  for (const key of POSTHOG_URL_PROPERTIES) {
-    if (key in properties) properties[key] = originAndPath(properties[key]);
-  }
-  for (const key of POSTHOG_PATH_PROPERTIES) {
-    const value = properties[key];
-    if (typeof value === "string") properties[key] = publicPath(value, window.location.hostname);
-  }
-  for (const key of POSTHOG_REFERRER_PROPERTIES) {
-    if (key in properties) properties[key] = safeReferrer(properties[key]);
-  }
-  for (const parameter of CLICK_ID_PARAMETERS) {
-    delete properties[parameter];
-    delete properties[`$initial_${parameter}`];
-  }
+  const properties = cleanPostHogProperties(event.properties);
   for (const setKey of ["$set", "$set_once"] as const) {
     const set = properties[setKey];
-    if (!set || typeof set !== "object") continue;
-    const cleaned: Record<string, unknown> = { ...(set as Record<string, unknown>) };
-    for (const key of POSTHOG_URL_PROPERTIES) {
-      if (key in cleaned) cleaned[key] = originAndPath(cleaned[key]);
-    }
-    for (const key of POSTHOG_PATH_PROPERTIES) {
-      const value = cleaned[key];
-      if (typeof value === "string") cleaned[key] = publicPath(value, window.location.hostname);
-    }
-    for (const key of POSTHOG_REFERRER_PROPERTIES) {
-      if (key in cleaned) cleaned[key] = safeReferrer(cleaned[key]);
-    }
-    for (const parameter of CLICK_ID_PARAMETERS) {
-      delete cleaned[parameter];
-      delete cleaned[`$initial_${parameter}`];
-    }
-    properties[setKey] = cleaned;
+    if (set && typeof set === "object") properties[setKey] = cleanPostHogProperties(set as Record<string, unknown>);
   }
   return { ...event, properties };
+}
+
+/** One level of an event's properties (or its `$set`/`$set_once`), cleaned as `sanitizePostHogEvent` says. */
+function cleanPostHogProperties(source: Record<string, unknown>): Record<string, unknown> {
+  const cleaned: Record<string, unknown> = { ...source };
+  for (const key of POSTHOG_URL_PROPERTIES) {
+    if (key in cleaned) cleaned[key] = originAndPath(cleaned[key]);
+  }
+  for (const key of POSTHOG_PATH_PROPERTIES) {
+    const value = cleaned[key];
+    if (typeof value === "string") cleaned[key] = publicPath(value, window.location.hostname);
+  }
+  for (const key of POSTHOG_REFERRER_PROPERTIES) {
+    if (key in cleaned) cleaned[key] = safeReferrer(cleaned[key]);
+  }
+  for (const parameter of CLICK_ID_PARAMETERS) {
+    delete cleaned[parameter];
+    delete cleaned[`$initial_${parameter}`];
+  }
+  return cleaned;
 }
 
 /** The retired Mixpanel client left its state in `mp_*` storage keys. */

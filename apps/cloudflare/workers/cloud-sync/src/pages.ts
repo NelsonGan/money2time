@@ -129,14 +129,16 @@ function headers(nonce?: string): HeadersInit {
  * (ledgers.ts); it is escaped regardless. Shows nothing about the ledger, so
  * it needs no database read: the app looks the invite up itself.
  */
-export function invitePageHtml(code: string, nonce: string): { html: string; headers: HeadersInit } {
-  const copy = INVITE_COPY;
+export function invitePageHtml(
+  code: string,
+  nonce: string,
+): { html: string; headers: HeadersInit } {
   const deepLink = `money2time://join/${encodeURIComponent(code)}`;
   const body = `<section class="card">
   <div class="mascot"><img src="${MASCOT_URL}" alt="" width="116" height="116"></div>
-  <p class="eyebrow">${copy.eyebrow}</p>
-  <h1>${copy.heading}</h1>
-  <p class="lede">${copy.lede}</p>
+  <p class="eyebrow">${INVITE_COPY.eyebrow}</p>
+  <h1>${INVITE_COPY.heading}</h1>
+  <p class="lede">${INVITE_COPY.lede}</p>
   <a class="button" href="${escapeHtml(deepLink)}">Open in Money2Time</a>
   <div class="divider">Don't have the app yet?</div>
   <div class="stores">
@@ -149,7 +151,7 @@ export function invitePageHtml(code: string, nonce: string): { html: string; hea
   const redirect = `setTimeout(function(){location.href=${JSON.stringify(deepLink).replace(/</g, '\\u003c')}},300);`;
   return {
     html: shell({
-      title: copy.title,
+      title: INVITE_COPY.title,
       body,
       script: { nonce, code: redirect },
     }),

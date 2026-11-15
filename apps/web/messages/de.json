@@ -2413,8 +2413,6 @@
       "youOweName": "Du schuldest {name}",
       "owesYou": "{name} schuldet dir",
       "owes": "{from} schuldet {to}",
-      "settleUp": "Begleichen",
-      "record": "Erfassen",
       "settledUp": "Beglichen",
       "groupSpending": "Ausgaben der Gruppe",
       "total": "Gesamt",

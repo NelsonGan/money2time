@@ -2413,8 +2413,6 @@
       "youOweName": "{name} 님에게 줄 돈",
       "owesYou": "{name} 님이 나에게 줄 돈",
       "owes": "{from} 님 → {to} 님",
-      "settleUp": "정산하기",
-      "record": "기록",
       "settledUp": "정산 완료",
       "groupSpending": "그룹 지출",
       "total": "합계",

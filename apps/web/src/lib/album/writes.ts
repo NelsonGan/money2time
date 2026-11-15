@@ -7,7 +7,8 @@
  * when. Pure.
  */
 
-import { cents, openShares, pairwiseDebts, settleDebt, simplifyDebts, type GroupDebt, type OpenShare } from "./debts.ts";
+import { cents } from "../backup/album-group.ts";
+import { openShares, pairwiseDebts, settleDebt, simplifyDebts, type GroupDebt, type OpenShare } from "./debts.ts";
 import type { Group, Payment, Share } from "./group";
 
 export type GroupRowWrite = {
@@ -54,13 +55,13 @@ export function deletedBillRow(id: string): GroupRowWrite {
 }
 
 /** Ids for payments recorded as one act: `<batch>.<n>`, so undoing one undoes them all. */
-export function batchPaymentIds(count: number): string[] {
+function batchPaymentIds(count: number): string[] {
   const batch = newId();
   return Array.from({ length: count }, (_, index) => `${batch}.${index}`);
 }
 
 /** Payments on bills, as rows, recorded as one act on `date`. */
-export function paymentRows(payments: readonly { expenseId: string; from: string; to: string; amount: number }[], currency: string, date: string): GroupRowWrite[] {
+function paymentRows(payments: readonly { expenseId: string; from: string; to: string; amount: number }[], currency: string, date: string): GroupRowWrite[] {
   const ids = batchPaymentIds(payments.length);
   return payments.map((payment, index) => ({
     table: "album_settlements",

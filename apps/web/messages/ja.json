@@ -2413,8 +2413,6 @@
       "youOweName": "{name}に返す",
       "owesYou": "{name}さんからもらう",
       "owes": "{from}さん → {to}さん",
-      "settleUp": "精算する",
-      "record": "記録",
       "settledUp": "精算済み",
       "groupSpending": "グループの支出",
       "total": "合計",

@@ -2413,8 +2413,6 @@
       "youOweName": "Ви винні: {name}",
       "owesYou": "{name} винен(-на) вам",
       "owes": "{from} → {to}",
-      "settleUp": "Розрахуватися",
-      "record": "Записати",
       "settledUp": "У розрахунку",
       "groupSpending": "Витрати групи",
       "total": "Разом",

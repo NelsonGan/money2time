@@ -3,13 +3,13 @@
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo } from "react";
 
-import { cents } from "@/lib/album/debts";
+import { cents } from "@/lib/backup/album-group";
 import type { Bill, Group } from "@/lib/album/group";
 
 import { Button, CategoryIcon, Icon, Mascot, useCategoryLabel, useDay, useMoney } from "./ui";
 
 /** A bill's line under its title, as the user's own part of it reads. */
-export function useBillLine(group: Group) {
+function useBillLine(group: Group) {
   const t = useTranslations("album");
   const money = useMoney();
   return (bill: Bill): { text: string; tone: "lent" | "owe" | "none" } => {

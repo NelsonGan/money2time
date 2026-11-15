@@ -4,7 +4,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
 import { Donut } from "@/components/dashboard/charts/donut";
-import { cents } from "@/lib/album/debts";
+import { cents } from "@/lib/backup/album-group";
 import type { Group } from "@/lib/album/group";
 
 import { CategoryIcon, Mascot, currencyOrder, useCategoryLabel, useMoney } from "./ui";

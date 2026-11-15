@@ -3,7 +3,7 @@ import { test } from "node:test";
 
 import { groupTotals, openShares, pairwiseDebts, simplifyDebts } from "./debts.ts";
 import { albumsOf, billPeople, parseGroup, type Bill, type Payment } from "./group.ts";
-import { balanceSelf, splitShares, valuesFor, type SplitInput } from "./split.ts";
+import { balanceSelf, readValue, splitShares, valuesFor, type SplitInput } from "./split.ts";
 import { evenGroupRows, settleRows, undonePaymentRows } from "./writes.ts";
 
 const T = "2026-11-14T10:00:00.000Z";
@@ -206,4 +206,11 @@ test("each split method fills in amounts that add up to the bill", () => {
   // Switching method keeps the split.
   assert.deepEqual(valuesFor("percent", base), { me: "33.34", tess: "33.33", ben: "33.33" });
   assert.deepEqual(valuesFor("adjust", base), { me: "0", tess: "0", ben: "0" });
+});
+
+test("a typed amount reads with either decimal mark", () => {
+  assert.equal(readValue("12,50"), 12.5);
+  assert.equal(readValue("1,234.50"), 1234.5);
+  assert.equal(readValue("1.234,50"), 1234.5);
+  assert.equal(readValue(""), 0);
 });

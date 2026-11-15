@@ -18,7 +18,7 @@ export { Confirm, Sheet } from "@/components/dashboard/edit/kit";
  * symbol right against the number when it comes first ("RM48.00", "$12.50";
  * "48,00 €" keeps its space).
  */
-export function formatMoney(locale: string, amount: number, currency: string): string {
+function formatMoney(locale: string, amount: number, currency: string): string {
   try {
     const parts = new Intl.NumberFormat(locale, { style: "currency", currency, currencyDisplay: "narrowSymbol" }).formatToParts(amount);
     const symbolFirst = parts.findIndex((part) => part.type === "currency") < parts.findIndex((part) => part.type === "integer");
@@ -143,8 +143,6 @@ export const BILL_CATEGORIES = [
   { key: "shopping", name: "Shopping", icon: "shopping-bag" },
   { key: "other", name: "Other", icon: "invoice" },
 ] as const;
-
-export type BillCategoryKey = (typeof BILL_CATEGORIES)[number]["key"];
 
 /** A bill's category as words: a default one in the page's language, anyone's own as they named it. */
 export function useCategoryLabel() {

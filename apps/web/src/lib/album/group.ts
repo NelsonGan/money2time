@@ -22,10 +22,12 @@ export const MAX_NAME = 40;
 export const MAX_NOTE = 500;
 const MAX_LABEL = 80;
 const MAX_SHARES = 64;
+/** A cover picture's path in the album's media (`album-covers/<id>.<ext>`). */
+export const COVER_PATH = /^album-covers\/[A-Za-z0-9_-]{1,64}\.[A-Za-z0-9]{1,5}$/;
 /** A group is read no further than this many member rows, as on a phone. */
 const MAX_MEMBER_ROWS = 200;
 
-export type Role = "owner" | "member";
+type Role = "owner" | "member";
 
 /** The share as the Worker describes it (its `LedgerView`). */
 export type AlbumView = {
@@ -362,7 +364,7 @@ export function parseGroup(body: unknown): Group | null {
     .map(toPayment)
     .filter((payment): payment is Payment => !!payment && memberIds.has(payment.fromMember) && memberIds.has(payment.toMember));
   const settings = rows("album_groups").find((row) => row.id === groupId && row.deleted_at == null) ?? null;
-  const cover = settings && isText(settings.cover_photo_uri) && /^album-covers\/[A-Za-z0-9_-]{1,64}\.[A-Za-z0-9]{1,5}$/.test(settings.cover_photo_uri) ? settings.cover_photo_uri : null;
+  const cover = settings && isText(settings.cover_photo_uri) && COVER_PATH.test(settings.cover_photo_uri) ? settings.cover_photo_uri : null;
   const activity = rows("album_activity")
     .map((row) => toActivity(row, groupId))
     .filter((entry): entry is WebAlbumActivityRow => entry !== null)
@@ -382,7 +384,7 @@ export function parseGroup(body: unknown): Group | null {
 }
 
 /** Whether a member is still in the album (the app's `isCurrentMember`). */
-export const isCurrent = (member: Member | undefined | null): boolean => !!member?.userId;
+const isCurrent = (member: Member | undefined | null): boolean => !!member?.userId;
 
 /**
  * The people a bill can be paid by or split with: everyone still in the album,

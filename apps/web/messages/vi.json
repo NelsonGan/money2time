@@ -2413,8 +2413,6 @@
       "youOweName": "Bạn nợ {name}",
       "owesYou": "{name} nợ bạn",
       "owes": "{from} nợ {to}",
-      "settleUp": "Thanh toán",
-      "record": "Ghi lại",
       "settledUp": "Đã thanh toán",
       "groupSpending": "Chi tiêu của nhóm",
       "total": "Tổng",

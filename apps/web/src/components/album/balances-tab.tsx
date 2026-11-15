@@ -4,7 +4,8 @@ import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
 import { describeActivity, groupActivityByDay } from "@/lib/backup/album-group";
-import { cents, groupTotals, type GroupDebt } from "@/lib/album/debts";
+import { groupTotals, type GroupDebt } from "@/lib/album/debts";
+import { cents } from "@/lib/backup/album-group";
 import type { Group } from "@/lib/album/group";
 import { groupDebts } from "@/lib/album/writes";
 

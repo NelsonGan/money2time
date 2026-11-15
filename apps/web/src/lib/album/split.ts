@@ -10,17 +10,19 @@ import type { Share } from "./group";
 
 export type SplitMethod = "even" | "amount" | "percent" | "shares" | "adjust";
 
-export const SPLIT_METHODS: readonly SplitMethod[] = ["even", "amount", "percent", "shares", "adjust"];
-
 const toCents = (value: number): number => (Number.isFinite(value) ? Math.round(value * 100) : 0);
 
 /**
  * The number a typed value reads as; blank or invalid is 0. A lone `,` is a
- * decimal mark ("12,50"); beside a `.` it groups thousands ("1,234.50").
+ * decimal mark ("12,50"). With both marks, the last one is the decimal mark
+ * and the other groups thousands ("1,234.50", "1.234,50").
  */
 export function readValue(value: string | undefined): number {
   const text = (value ?? "").trim();
-  const parsed = Number(text.includes(".") ? text.replace(/,/g, "") : text.replace(",", "."));
+  const dot = text.lastIndexOf(".");
+  const comma = text.lastIndexOf(",");
+  const normalized = dot >= 0 && comma >= 0 ? (comma > dot ? text.replace(/\./g, "").replace(",", ".") : text.replace(/,/g, "")) : text.replace(",", ".");
+  const parsed = Number(normalized);
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
@@ -31,7 +33,7 @@ export function trimNumber(value: number): string {
 }
 
 /** `cents` over `count` people as evenly as cents allow, the odd cents starting at `prefer`. */
-export function evenCents(cents: number, count: number, prefer = 0): number[] {
+function evenCents(cents: number, count: number, prefer = 0): number[] {
   if (count <= 0) return [];
   const sign = cents < 0 ? -1 : 1;
   const abs = Math.abs(cents);
@@ -52,7 +54,7 @@ export function evenCents(cents: number, count: number, prefer = 0): number[] {
  * the largest remainders (ties to `prefer`, then the lower index). All zero
  * splits the target evenly (the app's `scaleToTarget`).
  */
-export function scaleCents(weights: readonly number[], targetCents: number, prefer = 0): number[] {
+function scaleCents(weights: readonly number[], targetCents: number, prefer = 0): number[] {
   if (targetCents < 0 || weights.length === 0) return weights.map(() => 0);
   const units = weights.map((value) => Math.max(0, toCents(value)));
   const sum = units.reduce((acc, value) => acc + value, 0);

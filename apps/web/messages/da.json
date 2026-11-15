@@ -2413,8 +2413,6 @@
       "youOweName": "Du skylder {name}",
       "owesYou": "{name} skylder dig",
       "owes": "{from} skylder {to}",
-      "settleUp": "Afregn",
-      "record": "Registrer",
       "settledUp": "Afregnet",
       "groupSpending": "Gruppens forbrug",
       "total": "I alt",
