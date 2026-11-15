@@ -14,6 +14,7 @@ function makeAlbum(overrides: Partial<Album>): Album {
     id: 'al1',
     name: 'Trip',
     coverPhotoUri: null,
+    icon: null,
     isActive: false,
     startDate: null,
     endDate: null,
@@ -30,6 +31,23 @@ function makeAlbum(overrides: Partial<Album>): Album {
     ...overrides,
   };
 }
+
+describe('toAlbum icon mapping', () => {
+  const row = (icon: string | null | undefined) =>
+    toAlbum({ id: 'al1', name: 'Tokyo', coverPhotoUri: null, icon, ...STAMPS } as any);
+
+  it('keeps the icon the user picked, in any of its forms', () => {
+    expect(row('flight').icon).toBe('flight');
+    expect(row('emoji:🏝️').icon).toBe('emoji:🏝️');
+    expect(row('custom:category-icons/a.png').icon).toBe('custom:category-icons/a.png');
+  });
+
+  it('reads none as null: an older row without the column, or a cleared one', () => {
+    expect(row(undefined).icon).toBeNull();
+    expect(row(null).icon).toBeNull();
+    expect(row('').icon).toBeNull();
+  });
+});
 
 describe('toAlbum location mapping', () => {
   it('maps location columns through', () => {

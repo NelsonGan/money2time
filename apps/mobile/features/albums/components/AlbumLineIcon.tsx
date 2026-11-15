@@ -1,45 +1,28 @@
-import { Image } from 'expo-image';
-import { memo, useMemo, useState } from 'react';
+import { memo } from 'react';
 import { View } from 'react-native';
 
-import { Text } from '~/components/ui';
-import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
-import { getAlbumCoverUri } from '~/services/userAssets';
+import { CategoryEmoji, Text } from '~/components/ui';
 import type { Album } from '~/types';
 
 import { albumInitial } from '../lib/albumLines';
 
 interface AlbumLineIconProps {
-  album: Pick<Album, 'name' | 'coverPhotoUri'>;
+  album: Pick<Album, 'name' | 'icon'>;
   /** Width and height in px, as `CategoryEmoji`'s. Defaults to 20. */
   size?: number;
 }
 
 /**
  * An album's icon where a category's would be (its line in the category
- * lists): its cover, rounded, else the first letter of its name.
+ * lists, its card): the icon the user picked for it, else the first letter of
+ * its name on a tinted tile.
  */
 export const AlbumLineIcon = memo(function AlbumLineIconImpl({
   album,
   size = 20,
 }: AlbumLineIconProps) {
-  const coverUri = useMemo(() => getAlbumCoverUri(album.coverPhotoUri), [album.coverPhotoUri]);
-  // Skip a uri that failed to load natively; see CategoryEmoji for why.
-  const [brokenUri, setBrokenUri] = useState<string | null>(null);
-  const uri = coverUri !== brokenUri ? coverUri : null;
+  if (album.icon) return <CategoryEmoji icon={album.icon} size={size} />;
   const radius = Math.round(size * 0.28);
-  if (uri) {
-    return (
-      <Image
-        {...REPLAY_PRIVATE}
-        source={{ uri }}
-        style={{ width: size, height: size, borderRadius: radius }}
-        contentFit="cover"
-        onError={() => setBrokenUri(uri)}
-        accessibilityIgnoresInvertColors
-      />
-    );
-  }
   return (
     <View
       className="items-center justify-center bg-primary/15"

@@ -2445,6 +2445,10 @@ function CreateAlbumRouteScreen({ route, navigation }: RootStackRouteProps<'Crea
     <CreateAlbumScreen
       initialTransactionIds={route.params?.initialTransactionIds}
       onClose={() => navigation.goBack()}
+      onOpenIconPicker={(session) => {
+        setPendingCategoryIconPicker(session);
+        navigation.navigate('CategoryIconPicker');
+      }}
       onCreated={(albumId) => navigation.replace('AlbumDetail', { albumId })}
     />
   );
@@ -2486,6 +2490,10 @@ function EditAlbumDetailsRouteScreen({
     <EditAlbumDetailsScreen
       albumId={route.params.albumId}
       onClose={() => navigation.goBack()}
+      onOpenIconPicker={(session) => {
+        setPendingCategoryIconPicker(session);
+        navigation.navigate('CategoryIconPicker');
+      }}
       onEditTransactions={(albumId) => navigation.navigate('EditAlbumTransactions', { albumId })}
     />
   );

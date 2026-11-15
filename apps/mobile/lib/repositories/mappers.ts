@@ -301,6 +301,7 @@ export function toAlbum(row: AlbumRow): Album {
     id: row.id,
     name: row.name,
     coverPhotoUri: row.coverPhotoUri ?? null,
+    icon: row.icon || null,
     isActive: row.isActive ?? false,
     startDate: row.startDate ?? null,
     endDate: row.endDate ?? null,

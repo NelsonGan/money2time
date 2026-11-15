@@ -6,10 +6,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { FatButton, FormScrollView, Input, SettingsHeader, Text } from '~/components/ui';
+import { CategoryIconField } from '~/components/ui/CategoryIconField';
 import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { useApp } from '~/context/AppContext';
 import { useCloudSync } from '~/features/cloudSync/CloudSyncContext';
 import { useSignedIn } from '~/features/cloudSync/components/SignInGate';
+import type { CategoryIconPickerSession } from '~/features/settings/lib/categoryIconPickerBridge';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -30,12 +32,14 @@ interface CreateAlbumScreenProps {
   initialTransactionIds?: string[];
   onClose: () => void;
   onCreated: (albumId: string) => void;
+  onOpenIconPicker: (session: CategoryIconPickerSession) => void;
 }
 
 export function CreateAlbumScreen({
   initialTransactionIds,
   onClose,
   onCreated,
+  onOpenIconPicker,
 }: CreateAlbumScreenProps) {
   const { createAlbum, setAlbumSimplifyDebts, addTransactionsToAlbum } = useApp();
   const sync = useCloudSync();
@@ -51,6 +55,7 @@ export function CreateAlbumScreen({
   const insets = useSafeAreaInsets();
 
   const [name, setName] = useState('');
+  const [icon, setIcon] = useState('');
   const [coverPath, setCoverPath] = useState<string | null>(null);
   const [startDate, setStartDate] = useState<string | null>(null);
   const [endDate, setEndDate] = useState<string | null>(null);
@@ -108,6 +113,7 @@ export function CreateAlbumScreen({
       albumId = createAlbum({
         name: name.trim(),
         coverPhotoUri: coverPath,
+        icon: icon || null,
         startDate,
         endDate,
         // A shared album only holds bills made in it (README: Album members
@@ -225,13 +231,25 @@ export function CreateAlbumScreen({
           </Pressable>
 
           <View className="px-5 pt-5">
-            <Input
-              label={I18n.t('albums.name_label')}
-              placeholder={I18n.t('albums.name_placeholder')}
-              value={name}
-              onChangeText={setName}
-              style={{ height: 'auto' }}
-            />
+            {/* Icon and name share a row, as in the category and goal
+                editors: the icon is the album's line in the category lists. */}
+            <View className="flex-row items-end gap-3">
+              <CategoryIconField
+                label={null}
+                value={icon}
+                onChange={setIcon}
+                onOpenIconPicker={onOpenIconPicker}
+              />
+              <View className="flex-1">
+                <Input
+                  label={I18n.t('albums.name_label')}
+                  placeholder={I18n.t('albums.name_placeholder')}
+                  value={name}
+                  onChangeText={setName}
+                  style={{ height: 'auto' }}
+                />
+              </View>
+            </View>
 
             <Text variant="label" tone="muted" className="mb-2 mt-5 px-1">
               {I18n.t('albums.dates_optional')}

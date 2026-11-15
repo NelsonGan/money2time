@@ -603,6 +603,7 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   createAlbum: (input: {
     name: string;
     coverPhotoUri?: string | null;
+    icon?: string | null;
     startDate?: string | null;
     endDate?: string | null;
     transactionIds?: string[];
@@ -613,6 +614,7 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
     updates: {
       name?: string;
       coverPhotoUri?: string | null;
+      icon?: string | null;
       startDate?: string | null;
       endDate?: string | null;
     },
@@ -3084,6 +3086,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     (input: {
       name: string;
       coverPhotoUri?: string | null;
+      icon?: string | null;
       startDate?: string | null;
       endDate?: string | null;
       transactionIds?: string[];
@@ -3094,6 +3097,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           const albumId = albumsRepository.create({
             name: input.name,
             coverPhotoUri: input.coverPhotoUri ?? null,
+            icon: input.icon ?? null,
             startDate: input.startDate ?? null,
             endDate: input.endDate ?? null,
             latitude: input.location?.latitude ?? null,
@@ -3112,6 +3116,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       );
       void trackEvent(AnalyticsEvents.ALBUM_CREATED, {
         transactionCount: input.transactionIds?.length ?? 0,
+        hasIcon: !!input.icon,
       });
       return id;
     },
@@ -3128,11 +3133,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       updates: {
         name?: string;
         coverPhotoUri?: string | null;
+        icon?: string | null;
         startDate?: string | null;
         endDate?: string | null;
       },
     ) => {
-      albumsRepository.update(id, updates);
+      // '' (the icon field cleared) is stored as none.
+      const icon = updates.icon === undefined ? undefined : updates.icon || null;
+      const iconBefore = icon === undefined ? null : (albumsRepository.getById(id)?.icon ?? null);
+      const iconChanged = icon !== undefined && icon !== iconBefore;
+      albumsRepository.update(id, icon === undefined ? updates : { ...updates, icon });
+      // An uploaded icon is shared with categories, goals and templates: the
+      // reference-aware sweep reclaims it only once nothing uses it.
+      if (iconChanged) sweepIfCustomAssetDropped(iconBefore, icon);
       // A shared album's cover is everyone's: the group's changes with it
       // (the image goes up on the album's next sync).
       const cover = updates.coverPhotoUri;
@@ -3145,7 +3158,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
       }
       setAlbums(albumsRepository.list());
-      void trackEvent(AnalyticsEvents.ALBUM_UPDATED);
+      void trackEvent(AnalyticsEvents.ALBUM_UPDATED, { iconChanged });
     },
     [],
   );
@@ -3170,7 +3183,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (sharedAlbumFor(id) || albumsRepository.isFrozen(id)) return;
       // An album's cover is uniquely owned (each pick writes a fresh file), so
       // it can be deleted outright — no other album references it.
-      const cover = albumsRepository.getById(id)?.coverPhotoUri;
+      const album = albumsRepository.getById(id);
+      const cover = album?.coverPhotoUri;
+      // Its icon is not: an upload can be shared, so the sweep decides.
+      const hadCustomIcon = isCustomLogoId(album?.icon);
       runMutation(
         () => {
           albumsRepository.softDelete(id);
@@ -3178,6 +3194,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         { refresh: refreshAlbums },
       );
       if (cover) deleteAlbumCover(cover);
+      if (hadCustomIcon) runDeferredWrite(() => runUserAssetGc());
       void trackEvent(AnalyticsEvents.ALBUM_DELETED);
     },
     [refreshAlbums, runMutation],

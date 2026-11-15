@@ -106,7 +106,7 @@ export interface ReviewSummary {
   isEmpty: boolean;
 }
 
-export type ReviewAlbum = Pick<Album, 'id' | 'name' | 'coverPhotoUri'>;
+export type ReviewAlbum = Pick<Album, 'id' | 'name' | 'icon'>;
 
 /** Sentinel root id for expenses with no category, so they still get a row. */
 export const UNCATEGORIZED_ID = '__uncategorized__';

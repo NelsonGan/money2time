@@ -15,7 +15,8 @@ import { newId } from '~/utils/id';
  *     goal-covers/<id>.<ext>     ← accounts.goal_cover_uri
  *     category-icons/<id>.<ext>  ← categories.icon, accounts.goal_emoji,
  *                                  budget_templates.emoji,
- *                                  monthly_budgets.template_emoji
+ *                                  monthly_budgets.template_emoji,
+ *                                  albums.icon
  *     item-icons/<id>.<ext>      ← items.icon_id
  *     payment-qr/<id>.<ext>      ← settings.payment_qr_uri
  *     receipts/<id>.<ext>        ← transactions.receipt_uri,
@@ -419,8 +420,8 @@ export function saveCustomItemIcon(sourceUri: string): string {
 
 /**
  * Copies a picked image into the category-icon store, returning a `custom:` id
- * (e.g. `custom:category-icons/9f3c.png`). Shared by categories, savings goals
- * and budget templates, which all draw from one uploaded-icon library.
+ * (e.g. `custom:category-icons/9f3c.png`). Shared by categories, savings goals,
+ * budget templates and albums, which all draw from one uploaded-icon library.
  */
 export function saveCustomCategoryIcon(sourceUri: string): string {
   ensureDir(kindDir(CATEGORY_ICONS_KIND));

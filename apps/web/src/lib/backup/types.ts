@@ -204,6 +204,8 @@ export type WageSettingRow = Row & {
 export type AlbumRow = Row & {
   name: string;
   cover_photo_uri?: string | null;
+  /** Its own icon, a category icon value (the app's migration 095); absent from an older app. */
+  icon?: string | null;
   sort_order?: number | null;
   is_active?: number | null;
   start_date?: string | null;

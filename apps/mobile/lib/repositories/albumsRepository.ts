@@ -11,6 +11,7 @@ import { toAlbum } from './mappers';
 interface CreateAlbumInput {
   name: string;
   coverPhotoUri?: string | null;
+  icon?: string | null;
   startDate?: string | null;
   endDate?: string | null;
   latitude?: number | null;
@@ -66,6 +67,7 @@ class AlbumsRepository {
         ledgerId: getActiveLedgerId(),
         name: input.name,
         coverPhotoUri: input.coverPhotoUri ?? null,
+        icon: input.icon || null,
         startDate: input.startDate ?? null,
         endDate: input.endDate ?? null,
         latitude: input.latitude ?? null,
@@ -86,8 +88,10 @@ class AlbumsRepository {
 
   update(id: string, input: Partial<CreateAlbumInput>) {
     const db = getDb();
+    // A cleared icon ('') is stored as none, as `create` stores it.
+    const values = input.icon === '' ? { ...input, icon: null } : input;
     db.update(albumsTable)
-      .set({ ...input, updatedAt: nowIso() })
+      .set({ ...values, updatedAt: nowIso() })
       .where(and(eq(albumsTable.id, id), isNull(albumsTable.deletedAt)))
       .run();
   }

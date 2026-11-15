@@ -32,7 +32,7 @@ test("spending in an album counts under the album's line; income and the rest un
 const category = (id: string, parentId: string | null = null): Category => ({ id, name: id, type: "expense", parentId, icon: null, sortOrder: 0, color: "#000", children: [], updatedAt: null });
 const tx = (id: string, amount: number, categoryId: string, albumId?: string) =>
   ({ id, type: "expense", amount, originalAmount: amount, currency: "MYR", categoryId, parentId: categoryId, spending: true, month: "2026-07", ...(albumId ? { albumId } : null) }) as unknown as Tx;
-const trip = { id: "bali", name: "Bali", coverUri: null, place: null, countryCode: null, start: null, end: null, active: false, txIds: ["b", "c"], color: "#3A4FA0" } as Trip;
+const trip = { id: "bali", name: "Bali", coverUri: null, icon: null, place: null, countryCode: null, start: null, end: null, active: false, txIds: ["b", "c"], color: "#3A4FA0" } as Trip;
 const model = {
   categories: new Map([["food", category("food")], ["coffee", category("coffee")], ["transport", category("transport")]]),
   currency: "MYR",
