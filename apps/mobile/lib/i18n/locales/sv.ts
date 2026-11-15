@@ -3068,7 +3068,6 @@ const sv = {
         'Betalningarna finns kvar. Blir en andel mindre än det som redan har betalats ska skillnaden betalas tillbaka.',
     },
     write: {
-      offline: 'Du är offline. Ändringar i ett delat album kräver anslutning.',
       not_member: 'Du är inte längre med i albumet, så du kan inte ändra det.',
       signed_out: 'Logga in igen för att ändra albumet.',
       failed: 'Det gick inte att spara ändringen i albumet. Försök igen.',

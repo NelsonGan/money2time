@@ -3068,7 +3068,6 @@ const da = {
         'Betalingerne bliver stående. Bliver en andel mindre end det, der allerede er betalt, skal forskellen betales tilbage.',
     },
     write: {
-      offline: 'Du er offline. Ændringer i et delt album kræver forbindelse.',
       not_member: 'Du er ikke længere med i albummet, så du kan ikke ændre det.',
       signed_out: 'Log ind igen for at ændre albummet.',
       failed: 'Ændringen i albummet kunne ikke gemmes. Prøv igen.',

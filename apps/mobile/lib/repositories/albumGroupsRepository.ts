@@ -1,7 +1,7 @@
 // A shared album's group: its members, bills, settlements, settings and
-// activity log (migrations 090-093). These rows come from the group's own
-// cloud database, which only the Worker writes (features/albums/services/
-// albumGroupWrites.ts sends it the changes): on the phone they are only read.
+// activity log (migrations 090-093). These rows sync with the group's own
+// cloud database; on the phone they are only read here, and written by
+// features/albums/services/albumGroupWrites.ts alone.
 // Their `ledger_id` is the group's id (features/cloudSync/lib/ledgerRows.ts).
 
 import { and, desc, eq, isNull } from 'drizzle-orm';
@@ -161,8 +161,8 @@ class AlbumGroupsRepository {
   // Activity
 
   /**
-   * The group's activity log, newest first: one entry per change the Worker
-   * wrote, the entries of one change in the order it wrote them.
+   * The group's activity log, newest first: one entry per change, the
+   * entries of one change in the order it wrote them.
    */
   listActivity(groupId: string): AlbumActivity[] {
     return getDb()

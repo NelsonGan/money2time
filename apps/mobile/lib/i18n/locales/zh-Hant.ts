@@ -2945,7 +2945,6 @@ const zhHant = {
       edit_paid_message: '付款紀錄會保留。如果某人的份額低於已付金額，差額需要退還。',
     },
     write: {
-      offline: '你已離線。修改共享相簿需要連網。',
       not_member: '你已不在此相簿中，無法修改。',
       signed_out: '請重新登入以修改此相簿。',
       failed: '無法儲存對此相簿的修改。請再試一次。',

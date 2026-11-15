@@ -3087,7 +3087,6 @@ const ms = {
         'Bayaran kekal. Jika sesuatu bahagian menjadi kurang daripada jumlah yang sudah dibayar, bezanya perlu dipulangkan.',
     },
     write: {
-      offline: 'Anda di luar talian. Perubahan pada album kongsi memerlukan sambungan.',
       not_member: 'Anda tidak lagi dalam album ini, jadi anda tidak boleh mengubahnya.',
       signed_out: 'Log masuk semula untuk mengubah album ini.',
       failed: 'Tidak dapat menyimpan perubahan pada album ini. Cuba lagi.',

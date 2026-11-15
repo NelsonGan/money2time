@@ -3113,7 +3113,6 @@ const fil = {
         'Mananatili ang mga bayad. Kapag bumaba ang isang parte sa nabayaran na, kailangang ibalik ang diperensya.',
     },
     write: {
-      offline: 'Offline ka. Kailangan ng koneksyon para mabago ang shared na album.',
       not_member: 'Wala ka na sa album na ito, kaya hindi mo na ito mababago.',
       signed_out: 'Mag-sign in ulit para mabago ang album na ito.',
       failed: 'Hindi na-save ang pagbabago sa album na ito. Subukan ulit.',

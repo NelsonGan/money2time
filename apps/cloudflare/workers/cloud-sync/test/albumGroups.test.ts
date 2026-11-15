@@ -16,8 +16,10 @@ import {
   writeGroup,
 } from '../src/albumGroups.ts';
 
-// A shared album's group written by the Worker alone: real SQL against the
-// cloud copy's schema (`sync_rows`), as Turso would run it.
+// What the Worker writes to a shared album's group (someone joining or
+// leaving, the website's changes): real SQL against the cloud copy's schema
+// (`sync_rows`), as Turso would run it. The rules themselves are the app's
+// (groupPlan.generated.ts), tested here through the Worker's writes.
 
 function database() {
   const db = new DatabaseSync(':memory:');
@@ -35,10 +37,8 @@ function database() {
       try {
         for (const { sql, args } of statements) db.prepare(sql).all(...args);
         db.exec('COMMIT');
-        return true;
       } catch (error) {
         db.exec('ROLLBACK');
-        if (/overflow/i.test(String(error))) return false;
         throw error;
       }
     },
@@ -351,12 +351,12 @@ test('someone who left changes nothing and is put on no new bill, but stays on o
   );
 });
 
-test('two writes at once never lose one another', async () => {
-  const { db, group, rows, interleave } = await trip();
+test('a write is last-writer-wins, as a phone\'s is, and its log entry stays', async () => {
+  const { db, group, rows, raw, interleave } = await trip();
   await write(group, 'owner', {
     rows: [bill('u-bali-owner', { 'u-bali-owner': 30, 'u-bali-tess': 30 })],
   });
-  // Another write lands while Ben's is between its read and its own.
+  // A phone's change lands while Ben's is between its read and its own.
   interleave(() => {
     const dinner = { ...rows('album_expenses')[0], amount: 100 };
     db.prepare(
@@ -366,10 +366,9 @@ test('two writes at once never lose one another', async () => {
   await write(group, 'ben', {
     rows: [bill('u-bali-owner', { 'u-bali-owner': 70, 'u-bali-tess': 70 })],
   });
-  // Ben's was planned again on what landed first.
-  const edit = rows('album_activity').find((a) => a.kind === 'bill_edited');
-  assert.equal(JSON.parse(edit.data_json).before.amount, 100);
+  // Ben's, the later write, stands whole, with a revision of the Worker's.
   assert.equal(rows('album_expenses')[0].amount, 140);
+  assert.match(raw('album_expenses', 'dinner')!.rev, /\.w/);
   assert.equal(rows('album_activity').filter((a) => a.kind === 'bill_edited').length, 1);
 });
 

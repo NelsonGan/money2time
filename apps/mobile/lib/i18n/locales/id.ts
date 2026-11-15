@@ -3085,7 +3085,6 @@ const id = {
         'Pembayarannya tetap ada. Jika suatu bagian jadi lebih kecil dari yang sudah dibayar, selisihnya harus dikembalikan.',
     },
     write: {
-      offline: 'Kamu sedang offline. Perubahan pada album bersama butuh koneksi.',
       not_member: 'Kamu sudah tidak ada di album ini, jadi tidak bisa mengubahnya.',
       signed_out: 'Masuk lagi untuk mengubah album ini.',
       failed: 'Perubahan pada album ini gagal disimpan. Coba lagi.',

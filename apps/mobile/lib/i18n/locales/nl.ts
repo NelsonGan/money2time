@@ -3104,7 +3104,6 @@ const nl = {
         'De betalingen blijven staan. Als een deel lager wordt dan wat al betaald is, moet het verschil worden terugbetaald.',
     },
     write: {
-      offline: 'Je bent offline. Voor wijzigingen in een gedeeld album heb je verbinding nodig.',
       not_member: 'Je zit niet meer in dit album, dus je kunt het niet wijzigen.',
       signed_out: 'Log opnieuw in om dit album te wijzigen.',
       failed: 'De wijziging in dit album kon niet worden opgeslagen. Probeer het opnieuw.',

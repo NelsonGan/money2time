@@ -3087,7 +3087,6 @@ const es = {
         'Los pagos se mantienen. Si una parte queda por debajo de lo ya pagado, habrá que devolver la diferencia.',
     },
     write: {
-      offline: 'Estás sin conexión. Para cambiar un álbum compartido necesitas conexión.',
       not_member: 'Ya no estás en este álbum, así que no puedes cambiarlo.',
       signed_out: 'Vuelve a iniciar sesión para cambiar este álbum.',
       failed: 'No se pudo guardar el cambio en este álbum. Inténtalo de nuevo.',

@@ -3084,7 +3084,6 @@ const it = {
         'I pagamenti restano. Se una quota scende sotto quanto già pagato, la differenza andrà restituita.',
     },
     write: {
-      offline: 'Sei offline. Per modificare un album condiviso serve una connessione.',
       not_member: 'Non fai più parte di questo album, quindi non puoi modificarlo.',
       signed_out: 'Accedi di nuovo per modificare questo album.',
       failed: 'Impossibile salvare la modifica a questo album. Riprova.',

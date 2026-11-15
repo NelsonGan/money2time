@@ -13,7 +13,7 @@ export type ApplyTrack = {
   /** Checks that the step's change is in the database; any false fails the save. */
   checks: (() => boolean)[];
   /**
-   * Writes still on their way (a shared album's, through the Worker): each
+   * Writes still on their way (a shared album's, checked by its rules): each
    * resolves whether it went, and the save waits for them before its checks.
    * Any false fails the save.
    */

@@ -47,8 +47,8 @@ function writtenSince(ids: readonly string[], startedAt: string, track: ApplyTra
  * Saves the `module:albumbill` steps planned in
  * services/webDashboardEditModules/albumBill.ts, with the calls
  * EditTransactionScreen, the album's bulk Edit and its Activity tab make.
- * A change of the group's goes through the Worker: the save waits for it
- * (`track.pending`) and fails when it did not go.
+ * A change of the group's can be refused by the album's rules: the save
+ * waits for it (`track.pending`) and fails when it did not go.
  */
 export const albumBillApply: ApplyModule = {
   select: (): AlbumBillExtra => ({

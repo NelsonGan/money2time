@@ -27,9 +27,10 @@
 // ceilings against misuse, since a share is a database (MAX_OWNED_ALBUMS,
 // MAX_ALBUM_MEMBERS). An app from before albums could be shared never sees
 // one: the list leaves them out unless asked, and joining one must say the
-// app knows them. And its phones only read: their token is read-only, and
-// every change goes through POST /v1/ledgers/<id>/album (src/albumGroups.ts),
-// which writes it, stamped with its author, beside the album's activity log.
+// app knows them. Its phones write its database through Cloud Sync, as a
+// ledger's do, by the app's rules for an album; the Worker writes it by the
+// same rules (src/albumGroups.ts) only for someone joining or leaving and for
+// the website (POST /v1/ledgers/<id>/album).
 
 import {
   groupWriteErrorResponse,
@@ -708,14 +709,6 @@ async function credentials(
     await confirmAccess();
     return json({ url: ledger.db_url, authToken: 'local', expiresAt: now + DAY_MS });
   }
-  if (kindOf(ledger) === 'album') {
-    // An album's phones only pull: the Worker writes its rows (albumWrite).
-    // `token` is the Worker's own writer token there, which a write may
-    // replace meanwhile, so only the access itself is checked again.
-    const token = await createToken(env, ledger.db_name, TOKEN_TTL_DAYS, 'read-only');
-    if (!(await access(env, ledger.id, userId))) throw new Error('ledger_access_changed');
-    return json({ url: ledger.db_url, authToken: token, expiresAt: now + TOKEN_TTL_DAYS * DAY_MS });
-  }
   if (ledger.token && (ledger.token_expires_at ?? 0) - now > TOKEN_REUSE_MARGIN_MS) {
     const token = await open(env, 'turso-token', ledger.token);
     if (token) {
@@ -759,9 +752,9 @@ async function listMembers(env: Env, ledger: SharedLedgerRow, role: Role): Promi
 }
 
 /**
- * The Worker's own full-access token for an album's database, the only one
- * that writes it. Cached sealed in `shared_ledgers.token` (phones of an album
- * get read-only tokens of their own), and minted again after a revocation.
+ * A full-access token for an album's database, for the Worker's own reads
+ * and writes: the one its phones get (`credentials`), cached sealed in
+ * `shared_ledgers.token`, and minted again after a revocation.
  */
 async function writerToken(env: Env, ledger: SharedLedgerRow): Promise<string> {
   if (env.LOCAL_SYNC_URL) return 'local';
@@ -836,11 +829,12 @@ async function albumRead(
 
 /**
  * POST /v1/ledgers/<id>/album: a change to a shared album's group, written
- * by the Worker (src/albumGroups.ts). `{action: 'join', name}` puts the user
- * on the album's list as themselves; `{action: 'write', rows}` writes bills,
- * payments, a rename or the settings. `via: 'web'` says the website sent it.
- * Answers with the rows written, which the phone applies at once; everyone
- * else's phones are told to sync.
+ * by the Worker (src/albumGroups.ts) by the app's rules. `{action: 'join',
+ * name}` puts the user on the album's list as themselves (from the app or the
+ * website); `{action: 'write', rows}` writes bills, payments, a rename or the
+ * settings, for the website (`via: 'web'`): phones write their changes
+ * through Cloud Sync. Answers with the rows written; everyone's phones are
+ * told to sync.
  */
 async function albumWrite(
   env: Env,

@@ -779,7 +779,7 @@ export interface AlbumBillSnapshot {
   shares: AlbumShare[];
 }
 
-/** One entry of a shared album's activity log, written by the Worker with the change it records. */
+/** One entry of a shared album's activity log, written with the change it records. */
 export interface AlbumActivity {
   id: string;
   groupId: string;

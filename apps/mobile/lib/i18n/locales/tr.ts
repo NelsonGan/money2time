@@ -3076,7 +3076,6 @@ const tr = {
         'Ödemeler kalır. Bir pay zaten ödenen tutarın altına düşerse aradaki fark geri ödenmelidir.',
     },
     write: {
-      offline: 'Çevrimdışısınız. Paylaşılan bir albümde değişiklik yapmak için bağlantı gerekir.',
       not_member: 'Artık bu albümde değilsiniz, bu yüzden albümü değiştiremezsiniz.',
       signed_out: 'Bu albümü değiştirmek için yeniden giriş yapın.',
       failed: 'Bu albümdeki değişiklik kaydedilemedi. Tekrar deneyin.',

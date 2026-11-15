@@ -3048,7 +3048,6 @@ const vi = {
         'Các khoản thanh toán vẫn giữ nguyên. Nếu một phần giảm xuống dưới số đã trả, phần chênh lệch sẽ phải được hoàn lại.',
     },
     write: {
-      offline: 'Bạn đang ngoại tuyến. Cần có kết nối để thay đổi album chung.',
       not_member: 'Bạn không còn trong album này nên không thể thay đổi nó.',
       signed_out: 'Hãy đăng nhập lại để thay đổi album này.',
       failed: 'Không thể lưu thay đổi cho album này. Hãy thử lại.',

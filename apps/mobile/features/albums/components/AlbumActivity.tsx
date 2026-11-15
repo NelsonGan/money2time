@@ -31,8 +31,8 @@ interface AlbumActivityProps {
  * to it, newest first, by day, one line each, in one card (the newest five
  * until Show all). Plain history for reference, nothing to tap. A change
  * someone else made to the user's own money has an accent bar and a second
- * line saying how. The log is written by the Worker with each change, so it
- * is the same on every phone (README: Album members and shared albums >
+ * line saying how. The log is written with each change, in the same write,
+ * and syncs with the group, so it is the same on every phone (README: Album members and shared albums >
  * Activity).
  */
 export function AlbumActivity({ group }: AlbumActivityProps) {

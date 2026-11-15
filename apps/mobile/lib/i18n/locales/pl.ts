@@ -3082,7 +3082,6 @@ const pl = {
         'Płatności zostaną. Jeśli udział spadnie poniżej tego, co już zapłacono, różnicę trzeba będzie oddać.',
     },
     write: {
-      offline: 'Jesteś offline. Zmiany w udostępnionym albumie wymagają połączenia.',
       not_member: 'Nie należysz już do tego albumu, więc nie możesz go zmieniać.',
       signed_out: 'Zaloguj się ponownie, aby zmienić ten album.',
       failed: 'Nie udało się zapisać zmiany w albumie. Spróbuj ponownie.',

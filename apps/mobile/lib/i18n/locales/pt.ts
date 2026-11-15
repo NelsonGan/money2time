@@ -3090,7 +3090,6 @@ const pt = {
         'Os pagamentos ficam. Se uma parte ficar abaixo do que já foi pago, a diferença precisa ser devolvida.',
     },
     write: {
-      offline: 'Você está offline. Alterações em um álbum compartilhado precisam de conexão.',
       not_member: 'Você não está mais neste álbum, então não pode alterá-lo.',
       signed_out: 'Entre de novo para alterar este álbum.',
       failed: 'Não foi possível salvar a alteração neste álbum. Tente de novo.',

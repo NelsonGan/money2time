@@ -3060,7 +3060,6 @@ const en = {
         'The payments stay. If a share drops below what was already paid, the difference is owed back.',
     },
     write: {
-      offline: "You're offline. Changes to a shared album need a connection.",
       not_member: "You're no longer in this album, so you can't change it.",
       signed_out: 'Sign in again to change this album.',
       failed: "Couldn't save the change to this album. Try again.",

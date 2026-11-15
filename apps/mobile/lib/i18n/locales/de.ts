@@ -3114,7 +3114,6 @@ const de = {
         'Die Zahlungen bleiben. Fällt ein Anteil unter den bereits gezahlten Betrag, muss die Differenz zurückgezahlt werden.',
     },
     write: {
-      offline: 'Du bist offline. Änderungen an einem geteilten Album brauchen eine Verbindung.',
       not_member: 'Du bist nicht mehr in diesem Album und kannst es daher nicht ändern.',
       signed_out: 'Melde dich erneut an, um dieses Album zu ändern.',
       failed: 'Die Änderung an diesem Album konnte nicht gespeichert werden. Versuche es erneut.',

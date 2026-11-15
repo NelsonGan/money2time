@@ -8,6 +8,7 @@
     "ios": "npm run sync:icons && expo run:ios",
     "web": "expo start --web",
     "sync:icons": "node ./scripts/sync-icons.mjs",
+    "sync:group-plan": "node ./scripts/sync-group-plan.mjs",
     "optimize:assets": "node ./scripts/optimize-assets.mjs --write",
     "lint": "eslint . --cache --cache-location .expo/cache/eslint/",
     "lint:fix": "eslint . --fix --cache --cache-location .expo/cache/eslint/",

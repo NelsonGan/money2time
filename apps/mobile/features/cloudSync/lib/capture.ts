@@ -24,9 +24,9 @@ function enqueue(table: string, idExpr: string): string {
  * made with an earlier version (`CREATE TRIGGER IF NOT EXISTS` would keep
  * them). 2: rows that stay on the phone are not queued, nor settings updates
  * that only touched device-local settings. 3: a shared album's group tables
- * have none (the Worker writes them).
+ * had none. 4: they have them again (phones write their album's group).
  */
-export const CAPTURE_VERSION = '3';
+export const CAPTURE_VERSION = '4';
 
 /**
  * What the triggers depend on: their version and the settings columns they

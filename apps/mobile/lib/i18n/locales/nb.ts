@@ -3071,7 +3071,6 @@ const nb = {
         'Betalingene blir stående. Blir en andel mindre enn det som allerede er betalt, skal differansen betales tilbake.',
     },
     write: {
-      offline: 'Du er frakoblet. Endringer i et delt album krever tilkobling.',
       not_member: 'Du er ikke lenger med i albumet, så du kan ikke endre det.',
       signed_out: 'Logg på igjen for å endre albumet.',
       failed: 'Kunne ikke lagre endringen i albumet. Prøv igjen.',

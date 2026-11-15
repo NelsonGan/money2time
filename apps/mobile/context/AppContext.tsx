@@ -42,6 +42,7 @@ import {
   settleDebt,
   simplifyDebts,
 } from '~/features/albums/lib/groupDebts';
+import { GroupWriteError } from '~/features/albums/lib/groupPlan';
 import {
   batchPaymentIds,
   billRow,
@@ -77,7 +78,6 @@ import {
   budgetWeekOverlaps,
   isBudgetPeriodKey,
 } from '~/features/budget/lib/budgetPeriods';
-import { CloudSyncApiError } from '~/features/cloudSync/services/cloudSyncApi';
 import { forgetPreviousInstallSession } from '~/features/cloudSync/services/cloudSyncSession';
 import { deletePersonalLedgerRows } from '~/features/cloudSync/services/ledgerChannels';
 import {
@@ -628,8 +628,8 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
    */
   settleGroupDebt: (groupId: string, debt: GroupDebt, accountId: string | null) => Promise<void>;
   /**
-   * Saves a split bill of a shared album, through the Worker: the group's
-   * bill is written, and the user's own entry follows from it. `rows` are the
+   * Saves a split bill of a shared album: the group's bill is written on
+   * this phone (Cloud Sync sends it), and the user's own entry follows from it. `rows` are the
    * split editor's, for the whole bill. Null when it did not go (the user is
    * told why); `mine` false when the user has no part in the bill, which is
    * then not in their ledger.
@@ -3083,9 +3083,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // (the image goes up on the album's next sync).
       const cover = updates.coverPhotoUri;
       if (cover !== undefined && sharedAlbumFor(id)) {
-        void writeGroup(id, [settingsRow(id, { coverPhotoUri: cover })], {
-          media: cover ? [cover] : [],
-        }).catch((error: unknown) => {
+        void writeGroup(id, [settingsRow(id, { coverPhotoUri: cover })]).catch((error: unknown) => {
           if (!isExpectedGroupWriteError(error)) reportError(error, { scope: 'album_group_write' });
           Alert.alert(groupWriteMessage(error));
         });
@@ -4061,9 +4059,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [scheduleRefreshTransactions]);
 
   /**
-   * Sends a change to a shared album's group, which only the Worker writes
-   * (README: Album members and shared albums), and tells the user why when it
-   * did not go: nothing changed then. True when it went.
+   * Makes a change to a shared album's group on this phone, which Cloud Sync
+   * then sends (README: Album members and shared albums), and tells the user
+   * why when the album's rules refused it: nothing changed then. True when it
+   * was made.
    */
   const sendGroupWrite = useCallback(
     async (
@@ -4161,7 +4160,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       try {
         await writeGroup(groupId, [renameRow(memberId, cleaned)]);
       } catch (error) {
-        if (error instanceof CloudSyncApiError && error.code === 'name_taken') return 'taken';
+        if (error instanceof GroupWriteError && error.code === 'name_taken') return 'taken';
         if (!isExpectedGroupWriteError(error)) reportError(error, { scope: 'album_group_write' });
         Alert.alert(groupWriteMessage(error));
         return null;
@@ -4664,7 +4663,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
    * still count in Balances), and deleting the entry one of its payments made
    * (the expense of a part the user paid, the transfer of a payback) undoes
    * that payment. Returns the ids it took: the entries themselves then go as
-   * the group's rows say, once the Worker has written them.
+   * the group's rows say, once they are written.
    */
   const deleteGroupEntries = useCallback(
     (ids: readonly string[]): { taken: Set<string>; done: Promise<boolean> } => {

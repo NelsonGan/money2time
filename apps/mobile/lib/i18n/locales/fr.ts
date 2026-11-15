@@ -3110,7 +3110,6 @@ const fr = {
         'Les paiements restent. Si une part passe sous ce qui a déjà été payé, la différence devra être remboursée.',
     },
     write: {
-      offline: 'Vous êtes hors ligne. Modifier un album partagé nécessite une connexion.',
       not_member: 'Vous ne faites plus partie de cet album et ne pouvez donc plus le modifier.',
       signed_out: 'Reconnectez-vous pour modifier cet album.',
       failed: 'Impossible d’enregistrer la modification de cet album. Réessayez.',
