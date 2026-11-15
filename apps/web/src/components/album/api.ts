@@ -71,7 +71,14 @@ export const api = {
     if (!group) throw new AlbumApiError("server_error", 502);
     return { group, stamp: typeof body.stamp === "string" ? body.stamp : null };
   },
-  write: (shareId: string, rows: GroupRowWrite[], reason?: "close_even") => call(`/albums/${shareId}/write`, { method: "POST", body: { rows, reason } }),
+  /**
+   * A change to the group. Its rows carry the `base` they were planned from,
+   * and a change that records a payment the read's `moneyRev` (`moneyBase`):
+   * `stale` (409) when the album changed since.
+   */
+  write: (shareId: string, rows: GroupRowWrite[], options: { reason?: "close_even"; moneyBase?: string | null } = {}) =>
+    call(`/albums/${shareId}/write`, { method: "POST", body: { rows, reason: options.reason, moneyBase: options.moneyBase ?? undefined } }),
+  /** Puts the user on the album's list when the join's second step did not; never renames someone already on it. */
   rejoin: (shareId: string, name: string) => call(`/albums/${shareId}/join`, { method: "POST", body: { name } }),
   inviteLink: (shareId: string, rotate = false) => call<{ url: string; expiresAt: number }>(`/albums/${shareId}/invite`, { method: "POST", body: { rotate } }),
   leave: (shareId: string) => call(`/albums/${shareId}/leave`, { method: "POST", body: {} }),

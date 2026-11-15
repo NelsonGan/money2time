@@ -6,9 +6,11 @@ import { I18n } from '~/lib/i18n';
 
 /**
  * Takes entries out of an album, then runs `after`. A shared album's bill
- * leaves its group with it, for everyone, so that is asked first.
+ * leaves its group with it, for everyone, so that is asked first; with
+ * `confirm`, entries of the user's own are asked about too (the album page's
+ * selection, where nothing else said what Remove does).
  */
-export function useRemoveFromAlbum(albumId: string) {
+export function useRemoveFromAlbum(albumId: string, { confirm = false } = {}) {
   const { getAlbumTransactions, removeTransactionsFromAlbum } = useApp();
   return useCallback(
     (ids: string[], after: () => void) => {
@@ -20,15 +22,21 @@ export function useRemoveFromAlbum(albumId: string) {
       const shared = getAlbumTransactions(albumId).some(
         (tx) => tx.albumGroupId === albumId && taken.has(tx.id),
       );
-      if (!shared) {
+      if (!shared && !confirm) {
         remove();
         return;
       }
-      Alert.alert(I18n.t('albums.remove_from_album'), I18n.t('albums.bill.remove_shared'), [
-        { text: I18n.t('common.cancel'), style: 'cancel' },
-        { text: I18n.t('common.remove'), style: 'destructive', onPress: remove },
-      ]);
+      Alert.alert(
+        I18n.t('albums.remove_from_album'),
+        shared
+          ? I18n.t('albums.bill.remove_shared')
+          : I18n.t('albums.remove_selected_body', { count: ids.length }),
+        [
+          { text: I18n.t('common.cancel'), style: 'cancel' },
+          { text: I18n.t('common.remove'), style: 'destructive', onPress: remove },
+        ],
+      );
     },
-    [albumId, getAlbumTransactions, removeTransactionsFromAlbum],
+    [albumId, confirm, getAlbumTransactions, removeTransactionsFromAlbum],
   );
 }

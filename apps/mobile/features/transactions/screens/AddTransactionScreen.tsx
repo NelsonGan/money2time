@@ -1,8 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
 
-import { PRO_LIMITS } from '~/constants/proLimits';
 import { useApp } from '~/context/AppContext';
-import { useIsPro } from '~/context/ProContext';
 import { albumBillRows, useAlbumBillTarget } from '~/features/albums/hooks/useAlbumBillTarget';
 import { useAlbumGroup } from '~/features/albums/hooks/useAlbumGroup';
 import { useGroupOthers } from '~/features/albums/hooks/useGroupBillOrigin';
@@ -55,7 +53,6 @@ export function AddTransactionScreen({
     activeAlbumId,
     addTransactionsToAlbum,
     saveAlbumBill,
-    getUnpaidSplitBillCount,
   } = useApp();
   // The people of the album the entry goes into (the one it was opened from,
   // else the active one): a new expense starts split with them. In a shared
@@ -80,20 +77,16 @@ export function AddTransactionScreen({
   const groupBill = albumGroupId !== null;
   // A shared album's bill is split only between people who joined it.
   const groupMembers = useGroupOthers(albumGroupId);
-  const isPro = useIsPro();
-  const withinSplitLimit =
-    isPro || groupBill || getUnpaidSplitBillCount() < PRO_LIMITS.FREE_MAX_UNSETTLED_SPLIT_BILLS;
-  // The instalment plans page's add button: a plan's payments are the user's
-  // own, so the form does not start split with the album's people.
+  // Only a shared album starts a bill split (it counts toward no free
+  // limit), once this phone is on its list. The instalment plans page's add
+  // button: a plan's payments are the user's own, so the form does not start
+  // split with the album's people.
   const splitWith = useMemo(
     () =>
-      !startInstalmentPlan &&
-      albumGroup.available &&
-      withinSplitLimit &&
-      (!albumGroup.share || albumGroup.self)
+      !startInstalmentPlan && albumGroup.available && albumGroup.self
         ? splitWithPeople(albumGroup.people)
         : [],
-    [albumGroup, startInstalmentPlan, withinSplitLimit],
+    [albumGroup, startInstalmentPlan],
   );
   const { blocked, activeAccountCount } = useNewTransactionGate();
   const canStartPlan = useCanStartInstalmentPlan();
@@ -243,7 +236,6 @@ export function AddTransactionScreen({
       confirmSplitBeforeAdd={splitWith.length > 0}
       groupBill={groupBill}
       albumCategories={groupBill}
-      awaitSplitSubmit={groupBill}
       groupMembers={groupBill ? groupMembers : undefined}
     />
   );

@@ -170,6 +170,12 @@ class SharedLedgerSync {
   private opening = new Map<string, Promise<SyncEngine>>();
   private listedAt = 0;
   private running: Promise<SharedSyncOutcome> | null = null;
+  /**
+   * Brings the user's own entries up to a shared album's group as it stands
+   * on this phone, just before the group's rows go (set by Cloud Sync): bills
+   * the last download brought are then not lost with them.
+   */
+  beforeAlbumRelease: ((groupId: string) => void) | null = null;
   /** Asked again while a round ran: run one more (see syncAll). */
   private again = false;
   private againForceList = false;
@@ -349,6 +355,13 @@ class SharedLedgerSync {
     // Between replica operations: never under an engine mid-sync.
     return runExclusive(() => {
       this.closeEngine(ledger.shareId);
+      if (ledger.kind === 'album') {
+        try {
+          this.beforeAlbumRelease?.(ledger.ledgerId);
+        } catch (error) {
+          console.warn('[cloudSync] could not apply a shared album before letting it go', error);
+        }
+      }
       removeSharedLedger(ledger.ledgerId);
       forgetChannel(ledger.shareId);
       if (ledger.kind === 'album') {
@@ -746,11 +759,17 @@ class SharedLedgerSync {
    * yet go up first; when they cannot (offline, or the ledger is paused), it
    * refuses with `unsent_changes` unless `force` (the user chose to lose
    * them). Otherwise, signed out or offline, it still leaves here and tells
-   * the Worker after the next sign-in.
+   * the Worker after the next sign-in. A shared album, which the phone keeps
+   * as it was, takes the group's latest first, when it can.
    */
   async leave(ledgerId: string, opts: { force?: boolean } = {}): Promise<void> {
     const ledger = sharedLedgerFor(ledgerId);
     if (!ledger || ledger.role !== 'member') return;
+    if (ledger.kind === 'album' && !this.hasUnsent(ledger) && ledger.active && this.session) {
+      await this.engineFor(ledger)
+        .then((engine) => engine.syncNow())
+        .catch(() => undefined);
+    }
     if (!opts.force && this.hasUnsent(ledger)) {
       if (ledger.active && this.session) {
         await this.engineFor(ledger)

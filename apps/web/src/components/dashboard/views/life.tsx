@@ -8,6 +8,7 @@ import { useMemo, useState } from "react";
 import { DAYS_PER_MONTH, daysBetween, monthRange, shiftMonthKey } from "@/lib/backup/dates";
 import type { Tx } from "@/lib/backup/model";
 import { memberShare, type TripMember, tripPeople } from "@/lib/backup/member-share";
+import { albumGroupNet, groupAlbumIds } from "@/lib/backup/album-group-net";
 import { balancesByAlbum, sharedAlbumIds, type PayerSplit } from "@/lib/backup/split-payer";
 
 import type { ItemRow } from "@/lib/backup/types";
@@ -463,8 +464,17 @@ export function SplitsView() {
   // under it, and the people are every other bill (an album of the user's own
   // is settled here like any bill).
   const { people, albums } = useMemo(
-    () => balancesByAlbum(model.splitDebts, model.splitOwed, model.trips, sharedAlbumIds(model.txs), model.currency),
-    [model.splitDebts, model.splitOwed, model.trips, model.txs, model.currency],
+    () =>
+      balancesByAlbum(
+        model.splitDebts,
+        model.splitOwed,
+        model.trips,
+        // Shared: its group's bills are in the data, or the phone sent its group.
+        new Set([...sharedAlbumIds(model.txs), ...groupAlbumIds(model.raw)]),
+        model.currency,
+        (albumId) => albumGroupNet(model.raw, albumId, model.currency),
+      ),
+    [model.splitDebts, model.splitOwed, model.trips, model.txs, model.currency, model.raw],
   );
   // The totals are every open share, each once (a bill can be in two albums).
   const owed = model.splitDebts.reduce((s, debt) => s + debt.amountBase, 0);
@@ -517,7 +527,7 @@ export function SplitsView() {
                 // As the app's Balances: an album's balance is never
                 // converted, one figure per currency, each signed when there
                 // are several. The bar still compares the main-currency net.
-                const open = t("open", { count: album.people.reduce((n, p) => n + p.count, 0) });
+                const open = t("open", { count: album.open ?? album.people.reduce((n, p) => n + p.count, 0) });
                 const [only] = album.netByCurrency;
                 const several = album.netByCurrency.length > 1;
                 // Every currency nets to nothing: level, so no direction and a plain zero.

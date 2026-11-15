@@ -41,11 +41,12 @@ import {
   planLeave,
   planWrite,
   type WriteRequest,
+  type WriteBase,
   writeGroup,
 } from './albumGroups';
 import { csv, type Env } from './env';
 import { json, readJson } from './http';
-import { isValidDeviceId, ledgerStamp, notifyUsers } from './live';
+import { isValidDeviceId, markLedgerChanged, notifyUsers } from './live';
 import { deleteAllMedia, ledgerSpace } from './media';
 import { isAccountPro } from './revenuecat';
 import { brokenInvitePageHtml, invitePageHtml } from './pages';
@@ -109,6 +110,8 @@ interface SharedLedgerRow {
   created_at: number;
   /** 1 when the share carries an album's group (a row in `shared_albums`). */
   is_album?: number;
+  /** Its change stamp (`ledger_changes`), as `access` reads it with the ledger; null before the first. */
+  changed_at?: number | null;
 }
 
 type Role = 'owner' | 'member';
@@ -205,10 +208,13 @@ async function access(
 ): Promise<{ ledger: SharedLedgerRow; role: Role } | null> {
   // One read for the ledger and whether the user is in it: every ledger
   // route, image and notify starts here, and a member used to wait for two.
+  // With its change stamp, so the website's poll of an album that has not
+  // changed reads nothing else (`albumRead`).
   const row = await env.AUTH_DB.prepare(
     `SELECT ${LEDGER_COLUMNS}, EXISTS (
        SELECT 1 FROM ledger_members m WHERE m.ledger_id = l.id AND m.user_id = ?2
-     ) AS is_member
+     ) AS is_member,
+     (SELECT c.changed_at FROM ledger_changes c WHERE c.ledger_id = l.id) AS changed_at
      FROM shared_ledgers l WHERE l.id = ?1`,
   )
     .bind(id, userId)
@@ -576,8 +582,8 @@ async function shareLedger(env: Env, user: SessionUser, request: Request): Promi
   const url = local ?? `libsql://${await createDatabase(env, dbName)}`;
   let inserted = false;
   try {
-    // A local server too: phones never write an album's tables, so nothing
-    // else would create them before the Worker's first write.
+    // A local server too: the Worker may write the album's database (the
+    // owner's own join) before any phone has synced it, which creates it.
     await applyCloudSchema(url, local ? 'local' : await createToken(env, dbName, TOKEN_TTL_DAYS));
     // The limit and the insert are one statement, so two shares at once
     // cannot pass the limit of their kind. A second tap on the same ledger
@@ -799,7 +805,8 @@ function groupContext(ledger: SharedLedgerRow, userId: string, via?: 'web') {
 
 /**
  * GET /v1/ledgers/<id>/album: a shared album's whole group (its people,
- * bills, payments, settings and newest activity), read with the Worker's own
+ * bills, payments, settings and newest activity, each row with its `rev`, and
+ * the `moneyRev` of its bills and payments), read with the Worker's own
  * token. The website reads it this way: a browser holds no database token,
  * and only the album's members get here (`access`). `?since=<stamp>` with the
  * stamp of the last answer gets `{unchanged: true}` while nothing changed,
@@ -812,13 +819,17 @@ async function albumRead(
   user: SessionUser,
   since: string | null,
 ): Promise<Response> {
-  // Read first, so a change committed while the group is read is seen next time.
-  const stamp = await ledgerStamp(env, ledger.id);
+  // Read with the ledger (`access`), before the group, so a change committed
+  // while the group is read is seen next time.
+  const stamp = String(ledger.changed_at ?? 0);
   if (since === stamp) return json({ unchanged: true, stamp });
   try {
     const db = hranaDb(ledger.db_url, await writerToken(env, ledger));
-    const [album, rows] = await Promise.all([view(env, ledger, role), readGroup(db)]);
-    return json({ album, userId: user.id, rows, stamp });
+    const [album, { rows, moneyRev }] = await Promise.all([
+      view(env, ledger, role),
+      readGroup(db),
+    ]);
+    return json({ album, userId: user.id, rows, moneyRev, stamp });
   } catch (error) {
     if (error instanceof Error && error.message.startsWith('ledger_access_chang')) {
       return json({ error: 'busy' }, 409);
@@ -831,10 +842,13 @@ async function albumRead(
  * POST /v1/ledgers/<id>/album: a change to a shared album's group, written
  * by the Worker (src/albumGroups.ts) by the app's rules. `{action: 'join',
  * name}` puts the user on the album's list as themselves (from the app or the
- * website); `{action: 'write', rows}` writes bills, payments, a rename or the
- * settings, for the website (`via: 'web'`) and app versions from before
- * phones wrote their album through Cloud Sync. Answers with the rows written
- * (those versions apply them at once); everyone's phones are told to sync.
+ * website); with `via: 'web'` (the website's join screen, where someone says
+ * what to call them) someone already in takes that name. `{action: 'write',
+ * rows, via: 'web'}` writes bills, payments, a rename or the settings, for
+ * the website only (phones write their album through Cloud Sync), each row
+ * with the `base` revision it was planned from and payments with the
+ * `moneyBase` (`WriteBase`): `409 stale` when the album changed since.
+ * Answers `{ok: true}`; everyone's phones are told to sync.
  */
 async function albumWrite(
   env: Env,
@@ -849,22 +863,26 @@ async function albumWrite(
     reason: unknown;
     device: unknown;
     via: unknown;
+    moneyBase: unknown;
   }>(request, 512 * 1024);
   if (!body) return json({ error: 'bad_request' }, 400);
   const via = body.via === 'web' ? 'web' : undefined;
-  const db = hranaDb(ledger.db_url, await writerToken(env, ledger));
   try {
+    const db = hranaDb(ledger.db_url, await writerToken(env, ledger));
     let rows;
     if (body.action === 'join') {
       const name = typeof body.name === 'string' ? body.name : '';
       rows = await joinGroup(db, groupContext(ledger, user.id, via), name);
-    } else if (body.action === 'write' && Array.isArray(body.rows)) {
+    } else if (body.action === 'write' && via === 'web' && Array.isArray(body.rows)) {
       const write: WriteRequest = {
         rows: body.rows as WriteRequest['rows'],
         reason: body.reason === 'close_even' ? 'close_even' : undefined,
       };
-      rows = await writeGroup(db, write, (state) =>
-        planWrite(state, groupContext(ledger, user.id, via), write, ledger.owner_user_id),
+      rows = await writeGroup(
+        db,
+        write,
+        (state) => planWrite(state, groupContext(ledger, user.id, via), write, ledger.owner_user_id),
+        writeBaseOf(body.rows, body.moneyBase),
       );
     } else {
       return json({ error: 'bad_request' }, 400);
@@ -873,16 +891,37 @@ async function albumWrite(
       const device = isValidDeviceId(body.device) ? body.device : null;
       await notifyUsers(env, await ledgerAudience(env, ledger), ledger.id, device);
     }
-    return json({ rows });
+    return json({ ok: true });
   } catch (error) {
     const refused = groupWriteErrorResponse(error);
     if (refused) return refused;
-    // Someone's access is being changed right now: the phone tries again.
+    // Someone's access is being changed right now: the caller tries again.
     if (error instanceof Error && error.message.startsWith('ledger_access_chang')) {
       return json({ error: 'busy' }, 409);
     }
     throw error;
   }
+}
+
+/** The money stamp's shape (`moneyRevOf`). */
+const MONEY_REV = /^[0-9a-f]{32}$/;
+
+/**
+ * What a website write says it was planned from: each row's `base` (a
+ * revision, or null for a row the page did not have; a row without one is
+ * not checked) and the `moneyBase`.
+ */
+export function writeBaseOf(rows: unknown[], moneyBase: unknown): WriteBase {
+  const base: WriteBase = { rows: [] };
+  for (const item of rows) {
+    const entry = item as { table?: unknown; row?: { id?: unknown }; base?: unknown } | null;
+    if (!entry || typeof entry !== 'object' || !('base' in entry)) continue;
+    if (typeof entry.table !== 'string' || typeof entry.row?.id !== 'string') continue;
+    if (entry.base !== null && (typeof entry.base !== 'string' || entry.base.length > 120)) continue;
+    base.rows.push({ table: entry.table, id: entry.row.id, base: entry.base });
+  }
+  if (typeof moneyBase === 'string' && MONEY_REV.test(moneyBase)) base.moneyBase = moneyBase;
+  return base;
 }
 
 /**
@@ -929,9 +968,16 @@ async function inviteLink(env: Env, ledger: SharedLedgerRow, request: Request): 
   const rotate = body?.rotate === true;
   const name = cleanName(body?.name);
   if (name) {
-    await env.AUTH_DB.prepare('UPDATE shared_ledgers SET name = ?2, emoji = ?3 WHERE id = ?1')
+    const renamed = await env.AUTH_DB.prepare(
+      `UPDATE shared_ledgers SET name = ?2, emoji = ?3
+       WHERE id = ?1 AND (name IS NOT ?2 OR emoji IS NOT ?3)`,
+    )
       .bind(ledger.id, name, cleanEmoji(body?.emoji))
       .run();
+    // The album website shows the name: its next poll reads it at once.
+    if (renamed.meta.changes > 0 && kindOf(ledger) === 'album') {
+      await markLedgerChanged(env, ledger.id);
+    }
   }
   if ((await memberCount(env, ledger.id)) >= maxMembersOf(ledger))
     return json({ error: 'full' }, 409);

@@ -8,7 +8,7 @@ import { ALBUM_CATEGORIES, albumCategoryForText, type AlbumCategoryKey } from "@
 import { billHasPayments, billPeople, MAX_NOTE, type Bill, type Group } from "@/lib/album/group";
 import { balanceSelf, methodOf, readValue, splitCents, splitShares, trimNumber, valuesFor, type SplitInput, type SplitMethod, type SplitProblem } from "@/lib/album/split";
 import { loadKeywords } from "@/lib/album/keywords";
-import { billRow, deletedBillRow, newId, undonePaymentRows } from "@/lib/album/writes";
+import { billBase, billRow, deletedBillRow, newId, undonePaymentRows } from "@/lib/album/writes";
 import { marketFor } from "@/lib/money";
 
 import type { AlbumActions } from "./album-screen";
@@ -31,7 +31,8 @@ function allCurrencies(): string[] {
  * make one: its amount and currency, what it was for, its category, the day,
  * who paid, and how it is split (evenly, or by amount, percentage, shares or
  * adjustment). Anyone in the album changes any bill; saving needs a
- * connection, and a failed save keeps every edit.
+ * connection, and a failed save keeps every edit, unless the bill changed
+ * meanwhile (`stale`): the page then closes the editor on what is there now.
  */
 export function BillEditor({ group, bill, actions, onClose, onSaved }: { group: Group; bill: Bill | null; actions: AlbumActions; onClose: () => void; onSaved: (text: string) => void }) {
   const t = useTranslations("album");
@@ -137,7 +138,8 @@ export function BillEditor({ group, bill, actions, onClose, onSaved }: { group: 
       return;
     }
     setBusy(true);
-    const row = billRow({ id: bill?.id ?? newId(), date, note: note.trim() || null, currency, category, paidBy, shares });
+    // Sent with the bill as this editor opened it: a phone's change since makes it stale.
+    const row = billRow({ id: bill?.id ?? newId(), date, note: note.trim() || null, currency, category, paidBy, shares }, billBase(bill));
     const ok = await actions.write([row], bill ? "bill_edit" : "bill_add");
     setBusy(false);
     if (ok) {
@@ -149,7 +151,7 @@ export function BillEditor({ group, bill, actions, onClose, onSaved }: { group: 
   const remove = async () => {
     if (!bill || busy) return;
     setBusy(true);
-    const ok = await actions.write([deletedBillRow(bill.id)], "bill_delete");
+    const ok = await actions.write([deletedBillRow(bill)], "bill_delete");
     setBusy(false);
     if (ok) {
       onSaved(t("bill.deleted"));

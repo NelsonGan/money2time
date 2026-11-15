@@ -4,7 +4,7 @@ import { test } from "node:test";
 import { groupTotals, openShares, pairwiseDebts, simplifyDebts } from "./debts.ts";
 import { albumsOf, billPeople, parseGroup, type Bill, type Payment } from "./group.ts";
 import { balanceSelf, readValue, splitShares, valuesFor, type SplitInput } from "./split.ts";
-import { evenGroupRows, settleRows, undonePaymentRows } from "./writes.ts";
+import { billBase, billRow, deletedBillRow, evenGroupRows, recordsPayment, settleRows, simplifyRow, undonePaymentRows } from "./writes.ts";
 
 const T = "2026-11-14T10:00:00.000Z";
 const album = { id: "share1", ledgerId: "bali", name: "Bali", role: "member", ownerId: "owner", ownerName: "Nelson", memberCount: 2, kind: "album" };
@@ -46,6 +46,7 @@ const bill = (id: string, paidBy: string, shares: Record<string, number>, extra:
   createdAt: T,
   updatedAt: T,
   deleted: false,
+  rev: null,
   ...extra,
 });
 const pay = (id: string, expenseId: string, from: string, to: string, amount: number): Payment => ({
@@ -160,8 +161,34 @@ test("settling a debt writes payments on its bills, never more than is owed", ()
 
 test("an even group with Simplify on closes its circle; off, it does not", () => {
   const circle = [bill("1", "a", { a: 10, b: 10 }), bill("2", "b", { b: 10, c: 10 }), bill("3", "c", { c: 10, a: 10 })];
-  assert.equal(evenGroupRows({ bills: circle, payments: [], simplify: true }, "2026-11-15").length, 3);
-  assert.equal(evenGroupRows({ bills: circle, payments: [], simplify: false }, "2026-11-15").length, 0);
+  const even = evenGroupRows({ album, bills: circle, payments: [], simplify: true }, "2026-11-15");
+  assert.equal(even.length, 3);
+  assert.equal(evenGroupRows({ album, bills: circle, payments: [], simplify: false }, "2026-11-15").length, 0);
+  // Named after what they close, as the app names them: two writers closing
+  // the same group write the same rows.
+  const again = evenGroupRows({ album, bills: circle, payments: [], simplify: true }, "2026-11-16");
+  assert.deepEqual(
+    again.map((row) => row.row.id),
+    even.map((row) => row.row.id),
+  );
+  assert.match(String(even[0].row.id), /^even-[0-9a-z]+\.0$/);
+  assert.notDeepEqual(
+    evenGroupRows({ album: { ledgerId: "tioman" }, bills: circle, payments: [], simplify: true }, "2026-11-15").map((row) => row.row.id),
+    even.map((row) => row.row.id),
+  );
+});
+
+test("a bill whose currency changed after a payment keeps it, owed back in its own currency", () => {
+  // Ben paid Nelson MYR 30 on dinner; then dinner was changed to USD.
+  const dinner = bill("dinner", "nelson", { nelson: 10, ben: 10 }, { currency: "USD" });
+  const paid = pay("s1", "dinner", "ben", "nelson", 30);
+  assert.deepEqual(openShares([dinner], [paid]), [
+    { expenseId: "dinner", from: "ben", to: "nelson", currency: "USD", amount: 10 },
+    { expenseId: "dinner", from: "nelson", to: "ben", currency: "MYR", amount: 30 },
+  ]);
+  // Paying the ringgit back on the bill closes that side.
+  const back = pay("s2", "dinner", "nelson", "ben", 30);
+  assert.deepEqual(openShares([dinner], [paid, back]), [{ expenseId: "dinner", from: "ben", to: "nelson", currency: "USD", amount: 10 }]);
 });
 
 test("undoing a payment undoes its whole act, by exact prefix", () => {
@@ -212,4 +239,42 @@ test("a typed amount reads with either decimal mark", () => {
   assert.equal(readValue("1,234.50"), 1234.5);
   assert.equal(readValue("1.234,50"), 1234.5);
   assert.equal(readValue(""), 0);
+});
+
+test("a change names the revisions it was planned from, so the Worker can refuse it as stale", () => {
+  const moneyRev = "0123456789abcdef0123456789abcdef";
+  const group = parseGroup({
+    album,
+    userId: "tess",
+    moneyRev,
+    rows: [
+      member("m-owner", "Nelson", "owner", 0),
+      member("m-tess", "Tess", "tess", 1),
+      { ...billData("dinner", "m-owner", { "m-owner": 50, "m-tess": 50 }), rev: "phone.1" },
+      { table: "album_groups", id: "bali", data: { id: "bali", ledger_id: "bali", simplify_debts: 1, created_at: T }, rev: "w.2" },
+    ],
+  });
+  assert.ok(group);
+  assert.equal(group.moneyRev, moneyRev);
+  assert.equal(group.settingsRev, "w.2");
+  const dinner = group.bills[0];
+  assert.equal(dinner.rev, "phone.1");
+  // An edit and a delete carry the bill as read; a new bill says it was not there.
+  assert.equal(billRow({ ...dinner, note: "Dinner" }, billBase(dinner)).base, "phone.1");
+  assert.equal(deletedBillRow(dinner).base, "phone.1");
+  assert.equal(billRow({ ...dinner, id: "new" }, billBase(null)).base, null);
+  assert.equal(simplifyRow(group, false).base, "w.2");
+  // From a Worker that sends no revisions, nothing is checked.
+  const older = parseGroup({ album, userId: "tess", rows: [member("m-owner", "Nelson", "owner"), billData("dinner", "m-owner", { "m-owner": 5 }), { table: "album_groups", id: "bali", data: { id: "bali", ledger_id: "bali", created_at: T } }] });
+  assert.ok(older);
+  assert.equal(older.moneyRev, null);
+  assert.ok(!("base" in deletedBillRow(older.bills[0])));
+  assert.ok(!("base" in simplifyRow(older, true)));
+  // No settings row yet: the switch writes a new one.
+  assert.equal(simplifyRow({ ...older, settingsRev: null }, true).base, null);
+  // Payments go with the money stamp; undoing one does not need it.
+  const payments = settleRows(group, { from: "m-tess", to: "m-owner", currency: "MYR", amount: 50 }, "2026-11-15");
+  assert.equal(recordsPayment(payments), true);
+  assert.equal(recordsPayment(undonePaymentRows(String(payments[0].row.id), [])), false);
+  assert.equal(recordsPayment([{ table: "album_settlements", row: { id: "p", deleted_at: "undone" } }]), false);
 });

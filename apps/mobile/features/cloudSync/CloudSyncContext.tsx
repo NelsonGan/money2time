@@ -324,6 +324,16 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
   switchLedgerRef.current = switchLedger;
   const syncAlbumGroupsRef = useRef(syncAlbumGroups);
   syncAlbumGroupsRef.current = syncAlbumGroups;
+  useEffect(() => {
+    // Ending, leaving or losing a shared album keeps the user's own entries
+    // for the bills its last download brought.
+    sharedLedgerSync.beforeAlbumRelease = (groupId) => {
+      syncAlbumGroupsRef.current(groupId);
+    };
+    return () => {
+      sharedLedgerSync.beforeAlbumRelease = null;
+    };
+  }, []);
 
   /**
    * Reloads the app after rows came from the cloud. If the ledger open on this
@@ -1372,9 +1382,11 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       // it (the image goes up with the row).
       const cover = albumCoverPath(album.id);
       if (cover) {
-        await writeGroup(album.id, [settingsRow(album.id, { coverPhotoUri: cover })]).catch(
-          (error: unknown) => reportError(error, { scope: 'album_group_write' }),
-        );
+        try {
+          writeGroup(album.id, [settingsRow(album.id, { coverPhotoUri: cover })]);
+        } catch (error) {
+          reportError(error, { scope: 'album_group_write' });
+        }
       }
       void trackEvent(AnalyticsEvents.ALBUM_SHARED);
       reloadAfterApply();

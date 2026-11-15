@@ -28,7 +28,7 @@ interface MemberPickerSheetProps {
   visible: boolean;
   /** Everyone in the album besides the user. */
   members: readonly PickerMember[];
-  /** The members on the bill now. */
+  /** The members on the bill now, someone who has left the album included. */
   selectedIds: ReadonlySet<string>;
   onToggle: (member: PickerMember, on: boolean) => void;
   onClose: () => void;
@@ -58,7 +58,13 @@ export function MemberPickerSheet({
     const key = query.trim().toLowerCase();
     return key ? members.filter((member) => member.name.toLowerCase().includes(key)) : members;
   }, [members, query]);
-  const onBill = members.filter((member) => selectedIds.has(member.id)).length + 1;
+  // Counted from the bill: someone who has left is still on it (and not in
+  // `members`, so not in the list to tick), and counts on both sides.
+  const { onBill, total } = useMemo(() => {
+    const inAlbum = new Set(members.map((member) => member.id));
+    const leftOnBill = [...selectedIds].filter((id) => !inAlbum.has(id)).length;
+    return { onBill: selectedIds.size + 1, total: members.length + leftOnBill + 1 };
+  }, [members, selectedIds]);
 
   const close = () => {
     setQuery('');
@@ -97,7 +103,7 @@ export function MemberPickerSheet({
         <Text variant="caption" tone="muted" className="mt-0.5">
           {I18n.t('transactions.editor.split.members_on_bill', {
             count: onBill,
-            total: members.length + 1,
+            total,
           })}
         </Text>
       </View>

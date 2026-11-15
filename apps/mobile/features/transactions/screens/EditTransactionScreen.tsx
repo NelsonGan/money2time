@@ -123,7 +123,9 @@ function TransactionEditor({
       ? albumTarget
       : null;
   // The expense a part payment on a group's bill made follows that payment:
-  // split, it would become a bill of its own under the payment's id.
+  // split, it would become a bill of its own under the payment's id. Looked
+  // up once per entry, not on every write while the editor is open: an entry
+  // is a payment's from when the payment makes it.
   const isGroupPayment = useMemo(
     () =>
       transactions.some(
@@ -131,7 +133,8 @@ function TransactionEditor({
           !!tx.albumGroupId &&
           !!tx.splits?.some((split) => split.paidTransactionId === transaction.id),
       ),
-    [transaction.id, transactions],
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- see above
+    [transaction.id],
   );
   // A shared album's bill is filed under one of the album's categories, the
   // same for everyone. An entry of the user's own there, not split yet, keeps
@@ -625,7 +628,6 @@ function TransactionEditor({
       initialSplits={initialSplits}
       groupBill={albumGroupId !== null}
       albumCategories={albumCategories}
-      awaitSplitSubmit={albumGroupId !== null}
       initialTransferFee={initialTransferFee}
       openSplitBillOnMount={openSplitBillOnMount}
       headerNotice={headerNotice}

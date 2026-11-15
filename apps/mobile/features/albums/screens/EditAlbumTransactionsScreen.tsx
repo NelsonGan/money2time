@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { FatButton, SettingsHeader } from '~/components/ui';
-import { useApp } from '~/context/AppContext';
+import { useApp, useTransactions } from '~/context/AppContext';
 import { ActivityTransactionList } from '~/features/transactions/components/ActivityTransactionList';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -23,18 +23,24 @@ export function EditAlbumTransactionsScreen({
   onClose,
 }: EditAlbumTransactionsScreenProps) {
   const {
+    albums,
     settings,
     getAlbumTransactions,
     getDisplayValueForTransaction,
     getTrueHourlyRateForDate,
   } = useApp();
+  const { transactions } = useTransactions();
   const removeFromAlbum = useRemoveFromAlbum(albumId);
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
 
+  // `getAlbumTransactions` keeps one identity, so `albums` (which entries are
+  // in it) and `transactions` (the rows themselves) are what tell this memo
+  // that the list changed while the page is open (as on the album's page).
   const albumTransactions = useMemo(
     () => getAlbumTransactions(albumId),
-    [albumId, getAlbumTransactions],
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- see above
+    [getAlbumTransactions, albumId, albums, transactions],
   );
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 

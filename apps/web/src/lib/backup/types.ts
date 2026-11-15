@@ -280,7 +280,19 @@ export type BackupTables = {
    */
   web_album_members?: WebAlbumMemberRow[];
   web_album_bills?: WebAlbumBillRow[];
+  web_album_settlements?: WebAlbumSettlementRow[];
   web_album_activity?: WebAlbumActivityRow[];
+};
+
+/** A payment that stands in a shared album's group, from one member to another for one bill. */
+export type WebAlbumSettlementRow = {
+  id: string;
+  album_id: string;
+  expense_id: string | null;
+  from_member: string;
+  to_member: string;
+  amount: number;
+  currency: string;
 };
 
 /** A member of a shared album's group. No Cloud Sync account is named. */

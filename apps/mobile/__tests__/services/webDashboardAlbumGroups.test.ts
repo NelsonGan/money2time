@@ -73,7 +73,7 @@ const entry: AlbumActivity = {
 };
 
 describe('withWebDashboardAlbumGroups', () => {
-  it('adds each shared album of the data with its members, bills and activity, and no accounts', () => {
+  it('adds each shared album of the data with its members, bills, payments and activity, and no accounts', () => {
     const out = withWebDashboardAlbumGroups(data([{ id: 'bali' }]), [
       {
         albumId: 'bali',
@@ -85,6 +85,36 @@ describe('withWebDashboardAlbumGroups', () => {
           member('gone', 'x', { deletedAt: AT }),
         ],
         bills: [bill],
+        settlements: [
+          {
+            id: 'p1',
+            groupId: 'bali',
+            expenseId: 'b1',
+            fromMember: 'tess',
+            toMember: 'me',
+            amount: 15,
+            currency: 'MYR',
+            date: '2026-10-02',
+            createdBy: 'user-tess',
+            createdAt: AT,
+            updatedAt: AT,
+            deletedAt: null,
+          },
+          {
+            id: 'p2',
+            groupId: 'bali',
+            expenseId: 'b1',
+            fromMember: 'tess',
+            toMember: 'me',
+            amount: 5,
+            currency: 'MYR',
+            date: '2026-10-02',
+            createdBy: 'user-tess',
+            createdAt: AT,
+            updatedAt: AT,
+            deletedAt: AT,
+          },
+        ],
         activity: [entry],
       },
     ]);
@@ -108,6 +138,18 @@ describe('withWebDashboardAlbumGroups', () => {
         updated_at: AT,
       },
     ]);
+    // Only the payments that stand, with no account.
+    expect(out.tables.web_album_settlements).toEqual([
+      {
+        id: 'p1',
+        album_id: 'bali',
+        expense_id: 'b1',
+        from_member: 'tess',
+        to_member: 'me',
+        amount: 15,
+        currency: 'MYR',
+      },
+    ]);
     expect(out.tables.web_album_activity).toEqual([
       expect.objectContaining({
         id: 'a1',
@@ -127,10 +169,12 @@ describe('withWebDashboardAlbumGroups', () => {
         selfId: null,
         members: [member('me', 'u')],
         bills: [bill],
+        settlements: [],
         activity: [entry],
       },
     ]);
     expect(out.tables.web_album_members).toEqual([]);
+    expect(out.tables.web_album_settlements).toEqual([]);
     expect(out.tables.web_album_bills).toEqual([]);
     expect(out.tables.web_album_activity).toEqual([]);
   });

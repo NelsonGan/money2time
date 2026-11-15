@@ -2137,13 +2137,16 @@ changes and deletes its bills and payments, every change is logged, and each
 person's own side lands in their own ledger, on their own account. The app
 side is `features/albums/` (`lib/albumPeople.ts`, `lib/albumGroup.ts`,
 `lib/groupRules.ts`, `lib/groupPlan.ts`, `lib/groupRows.ts`,
-`lib/groupDebts.ts`, `lib/activityLines.ts`, `lib/memberShare.ts`,
+`lib/groupDebts.ts`, `lib/selfNet.ts`, `lib/activityLines.ts`,
+`lib/memberShare.ts`, `lib/albumCategories.ts`,
 `services/albumGroupStore.ts`, `services/albumGroupSync.ts`,
 `services/albumGroupWrites.ts`, `screens/AlbumPeopleScreen.tsx`,
 `components/AlbumBalances.tsx`, `components/AlbumActivity.tsx`,
 `components/SplitWithCard.tsx`, `components/AlbumSharingCard.tsx`); the
 Worker side is the cloud-sync Worker's `src/albumGroups.ts`, with a copy of
-`lib/groupPlan.ts`; its tables come from migrations `090` to `093`.
+`lib/groupPlan.ts`, and the website's is
+[Shared albums on the web](#shared-albums-on-the-web). Its tables come from
+migrations `090` to `094`.
 
 **What the user sees**
 
@@ -2320,8 +2323,7 @@ Worker side is the cloud-sync Worker's `src/albumGroups.ts`, with a copy of
     Worker with `created_by` `web:<account>` (`authorStamp`), so no phone
     takes it for one of the user's own phones' writes: it lands with **no
     account** too, never on the default account, and the user picks one when
-    they move to the app. This needs no app change: an older app compares
-    `created_by` with the user's account as well.
+    they move to the app.
   - Someone else's edit never changes the account the user chose. When someone changes the payer
     away from the user, the user's side becomes their share owed to the new
     payer, with no account, as any bill a friend paid; a bill the user adds
@@ -2354,9 +2356,13 @@ Worker side is the cloud-sync Worker's `src/albumGroups.ts`, with a copy of
   pages cover the bills in it, and the Balances page covers every other split
   bill, in an album of the user's own or in none
   (`getAlbumOwnedTransactionIds`, `useSettleUpSummary`,
-  `settleUpWithPerson`). The Balances page lists each shared album with
-  something still owed first, with the user's net there, and the row opens
-  the album (`useAlbumBalances`). That net is never converted: in one
+  `settleUpWithPerson`). The Balances page lists each shared album where the
+  user still owes or is owed anything first, with the user's net there, and
+  the row opens the album (`useAlbumBalances`). That net is the album
+  Balances tab's own, worked out from the group's debts (`lib/selfNet.ts`,
+  `hooks/useSharedAlbumNets.ts`, recomputed only when a group's bills,
+  payments or members change), so money owed back on a deleted or lowered
+  bill counts there too, and an album whose debts cancel out reads as even. That net is never converted: in one
   currency it reads as the album's own figure ("You owe $20.00"), and in
   several each currency is its own signed line ("+RM1.50", "−$20.00"), the
   reporting currency first (`currencyOrder`). A bill's own page and the Settings badge
@@ -2621,25 +2627,39 @@ their own.
   online, or later. Then the user's own entries follow (`projectGroup`). It
   is the only code that writes the group's tables
   (`__tests__/features/albumGroupWriter.test.ts` fails on any other write
-  that names one), so no change skips the log. The Worker writes the group only for what
-  happens there, by the same planner (a copy, `src/groupPlan.generated.ts`,
-  written by `npm run sync:group-plan` in `apps/mobile`;
-  `__tests__/scripts/syncGroupPlan.test.ts` fails while the two differ):
-  someone joining (`planJoin`, from a phone or the website; the first in
-  turns Simplify on), someone leaving or taken out (`planLeave`), and changes
-  made on the website (`via: "web"`). The Worker writes a row only if it
-  still has the revision it read, and only while the member list is as it
-  read it (`commitPlan`'s guards, in one Hrana batch with `BEGIN IMMEDIATE`),
-  else plans again: two people joining at once never take one name, and a
-  website change never overwrites a phone's push that landed meanwhile.
-  A payment is cut to what is still owed as stored, so a second tap never
-  pays a share twice. The group is never derived from
-  the user's entries: an album is shared before it has any, and an entry of
-  the user's own added later stays theirs.
+  that names one), so no change skips the log. A payment recorded on a
+  phone is cut to what is still owed as stored (`recordGroupPayment`), so a
+  second tap never pays a share twice.
+  - **The Worker writes only three things**, by the same planner (a copy,
+    `src/groupPlan.generated.ts`, written by `npm run sync:group-plan` in
+    `apps/mobile`; `__tests__/scripts/syncGroupPlan.test.ts` fails while the
+    two differ): someone joining (`planJoin`, from a phone or the website;
+    the first in turns Simplify on), someone leaving or taken out
+    (`planLeave`), and changes made on the website (`via: "web"`; a `write`
+    without it is refused). It writes a row only if it still has the
+    revision it read, and only while the member list is as it read it
+    (`commitPlan`'s guards, in one Hrana batch with `BEGIN IMMEDIATE`), else
+    plans again: two people joining at once never take one name.
+  - **A website change is checked against what the page read.** The page
+    read each row with its revision (`rev`) and the group's bills and
+    payments with one stamp (`moneyRev`); it sends each row it changes with
+    the revision it was edited from (`base`, null for a new one) and a new
+    payment with that stamp (`moneyBase`). When a phone's push changed any
+    of them meanwhile, the Worker refuses the whole change (409 `stale`,
+    `assertBase`, checked again inside the commit), and the page reloads and
+    says so: a website edit never overwrites a phone's newer edit, never
+    brings back a bill a phone deleted, and never pays a debt that was just
+    settled.
+  - The group is never derived from
+    the user's entries: an album is shared before it has any, and an entry of
+    the user's own added later stays theirs.
 - **Who owes whom.** `lib/groupDebts.ts` (pure) derives it from the group's
   bills and payments: `openShares` (per bill, each share owed to its payer
   set off against the payments made on it, so a payment past what was owed
-  is owed back; a deleted bill counts only its payments), `pairwiseDebts` (each pair's net, per currency) and `simplifyDebts`:
+  is owed back; a deleted bill counts only its payments; a payment in another
+  currency than its bill's, left by a change of the bill's currency, sets
+  nothing off and is owed back in its own currency), `pairwiseDebts` (each
+  pair's net, per currency) and `simplifyDebts`:
   the fewest payments that settle everyone's net (whoever owes most pays
   whoever is owed most), when each of them can be paid along the group's bills
   as they stand; else the debts passed along (while someone both owes and is
@@ -2662,7 +2682,10 @@ their own.
     (debts that only go round in a circle, with no line to tap) has every
     open share closed after the change that made it so (`evenGroupPayments`
     after a bill saved, a payment, a delete, or the switch itself, on the
-    phone that made it; logged as payments "to even up").
+    phone that made it; logged as payments "to even up"). Their ids are made
+    from what they close (`even-<hash>.<n>`), so two phones, or a phone and
+    the website, closing the same even group write the same rows and never
+    pay it twice; a closing that was undone is not made again.
 - **When it runs.** After every sync that applied rows (`reloadAfterApply`),
   at launch and when a ledger opens. A group's album is in the main ledger,
   so while another ledger is open it waits: the entries land on its accounts
@@ -2670,7 +2693,17 @@ their own.
   its payments made and the album's contents in a few batched statements
   (`preload`), and a pass that finds nothing to change writes nothing.
   Payments recorded together (Settle up with a person, across all their
-  bills) are one write and one refresh (`recordGroupPayment`).
+  bills) are one write and one refresh (`recordGroupPayment`). An album that
+  stops being shared on the phone (the owner ends it, the user leaves or is
+  taken out) is brought in step one last time, from the rows its last
+  download brought, before the group's rows go (`beforeAlbumRelease`); a
+  member leaving takes the group's latest first when online.
+  - **Screens re-render only on a real change.** Every sync asks the group's
+    readers to look again (`notifyAlbumGroups`), but each reader
+    (`listGroupMembers`, `listGroupBills`, `listGroupSettlements`,
+    `listGroupActivity`) hands back the same array while the rows read the
+    same, so a sync that changed nothing in an album re-renders none of its
+    screens.
 - **Trust: every writer plans by the album's rules, and every row is still
   checked where it is read.** Anyone in a shared album is anyone who was
   given its link, and the people in one are expected to trust each other.
@@ -2730,9 +2763,7 @@ member without Pro adds bills in a shared album whatever their count of
 unsettled split bills, and a shared album's bills are left out of that count
 everywhere (`countUnpaidSplitBills`). Joining a shared album needs a
 connection (the Worker writes the new member); every other change saves
-offline. Money owed back on a deleted or lowered bill shows in the album's
-own Balances, not on the main Balances page (which reads the user's
-entries). A person goes by the name on their member row, the same on every
+offline. A person goes by the name on their member row, the same on every
 phone and the website. A name typed when joining on the website is the one
 used, even when the app had put them in first (`planJoin` renames someone
 already in for a `via: "web"` join). Changing the Settings name renames the
@@ -4750,7 +4781,9 @@ database, no bucket, no account and no secrets. Served at
   `web_album_members` (`id`, `album_id`, `name`, `is_self`, `current`,
   `sort_order`), `web_album_bills` (`id`, `album_id`, `date`, `note`,
   `amount`, `currency`, `paid_by`, `shares` as `[{ memberId, amount }]`,
-  `deleted`, `updated_at`, deleted bills included) and `web_album_activity`
+  `deleted`, `updated_at`, deleted bills included), `web_album_settlements`
+  (the payments that stand: `id`, `album_id`, `expense_id`, `from_member`,
+  `to_member`, `amount`, `currency`) and `web_album_activity`
   (the app's `AlbumActivity` entries: `kind`, `actor_member_id`,
   `expense_id`, `member_id`, `bill`, `rename`, `payment`, `simplify`,
   `sort_order`, `created_at`). Only albums of the open ledger, and no Cloud
@@ -5169,22 +5202,22 @@ reaches this Worker over the `CLOUD_SYNC` service binding. Links on any other ho
 
 Shared ledgers ([Shared ledgers](#shared-ledgers)):
 
-| Route                                      | What it does                                                                                                                                                                                                                                                                                                                                                               |
-| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET /v1/ledgers`                          | The user's shared ledgers, owned and joined, with role, owner name and account id, member count and `active` (anyone in it Pro)                                                                                                                                                                                                                                            |
-| `POST /v1/ledgers`                         | `{ledgerId, name, emoji}` → shares a ledger: Pro, at most 2 per owner; makes its Turso database                                                                                                                                                                                                                                                                            |
-| `DELETE /v1/ledgers/<id>`                  | Stop sharing (owner): deletes its database and images; members and the link cascade; everyone is nudged                                                                                                                                                                                                                                                                    |
-| `POST /v1/ledgers/<id>/leave`              | Revokes this ledger's tokens, then a member leaves                                                                                                                                                                                                                                                                                                                         |
-| `POST /v1/ledgers/<id>/credentials`        | Its Turso URL and a 1-day token, for the owner or a member, while anyone in it is Pro (403 `ledger_paused`); a shared album's is always active                                                                                                                                                                                                                             |
-| `GET /v1/ledgers/<id>/members`             | Owner and members (addresses for the owner only)                                                                                                                                                                                                                                                                                                                           |
-| `DELETE /v1/ledgers/<id>/members/<userId>` | Owner revokes this ledger's tokens, then removes the member and retires the invite; all affected users are nudged (403 for another member, 404 without access)                                                                                                                                                                                                             |
-| `POST /v1/ledgers/<id>/invites`            | Owner gets the ledger's link: the open one, or a new one valid a day (always new with `rotate: true`, killing the old); two phones asking at once get the same one                                                                                                                                                                                                         |
-| `POST /v1/ledgers/<id>/album`              | Joining a shared album, or a change from the website (`src/albumGroups.ts`, by the app's planner): `{action: "join", name}` or `{action: "write", rows}`; checked, stamped with the writer and logged in `album_activity`, in one transaction; answers with the rows written; 403 `not_member`, 409 `name_taken`. `via: "web"` stamps `created_by` as `web:<account>`      |
-| `GET /v1/ledgers/<id>/album`               | A shared album's whole group for the website, read with the Worker's own token: `{album, userId, rows}`, the members, bills (deleted ones too), payments, settings and the newest 1,000 log entries, and its change `stamp`; members only (404 otherwise). `?since=<stamp>` answers `{unchanged: true, stamp}` while nothing changed, without opening the group's database |
-| `/v1/ledgers/<id>/media/…`                 | Like `/v1/media`, under `l/<id>/` with its own quota; writing needs the ledger active                                                                                                                                                                                                                                                                                      |
-| `GET /v1/invites/<code>`                   | No sign-in: the app's ledger id, name, owner, member count, `full` and `active`; rate limited per IP. An album's owner is named as they are in the album (their member row), not by a masked address                                                                                                                                                                       |
-| `POST /v1/invites/<code>/accept`           | Joins (any signed-in user, no Pro) while active, with a place and the link not retired, in one statement                                                                                                                                                                                                                                                                   |
-| `GET /join/<code>`                         | On `ledger.money2time.com` only: the page a shared ledger's invite link opens, which hands `money2time://join/<code>` to the app or links the stores. Static: no names; a code that cannot be one gets a 404 page. A shared album's links open on the website                                                                                                              |
+| Route                                      | What it does                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET /v1/ledgers`                          | The user's shared ledgers, owned and joined, with role, owner name and account id, member count and `active` (anyone in it Pro)                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `POST /v1/ledgers`                         | `{ledgerId, name, emoji}` → shares a ledger: Pro, at most 2 per owner; makes its Turso database                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `DELETE /v1/ledgers/<id>`                  | Stop sharing (owner): deletes its database and images; members and the link cascade; everyone is nudged                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `POST /v1/ledgers/<id>/leave`              | Revokes this ledger's tokens, then a member leaves                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `POST /v1/ledgers/<id>/credentials`        | Its Turso URL and a 1-day token, for the owner or a member, while anyone in it is Pro (403 `ledger_paused`); a shared album's is always active                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `GET /v1/ledgers/<id>/members`             | Owner and members (addresses for the owner only)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `DELETE /v1/ledgers/<id>/members/<userId>` | Owner revokes this ledger's tokens, then removes the member and retires the invite; all affected users are nudged (403 for another member, 404 without access)                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `POST /v1/ledgers/<id>/invites`            | Owner gets the ledger's link: the open one, or a new one valid a day (always new with `rotate: true`, killing the old); two phones asking at once get the same one                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `POST /v1/ledgers/<id>/album`              | Joining a shared album (`{action: "join", name}`; with `via: "web"`, someone already in takes that name), or a change from the website (`{action: "write", rows, via: "web", moneyBase}`, each row with its `base` revision; phones write through Cloud Sync, so a `write` without `via: "web"` is 400). By the app's planner (`src/albumGroups.ts`): checked, stamped with the writer (`web:<account>` for the website) and logged in `album_activity`, in one transaction; answers `{ok: true}`; 403 `not_member`, 409 `name_taken`, `stale` (changed since the page read it) or `busy` |
+| `GET /v1/ledgers/<id>/album`               | A shared album's whole group for the website, read with the Worker's own token in one Hrana request: `{album, userId, rows, moneyRev, stamp}`, the members, bills (deleted ones too), payments, settings and the newest 1,000 log entries, each row with its `rev`; members only (404 otherwise). `?since=<stamp>` answers `{unchanged: true, stamp}` while nothing changed, from the one D1 read that checks access (`access` reads the stamp), without opening the group's database                                                                                                     |
+| `/v1/ledgers/<id>/media/…`                 | Like `/v1/media`, under `l/<id>/` with its own quota; writing needs the ledger active                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `GET /v1/invites/<code>`                   | No sign-in: the app's ledger id, name, owner, member count, `full` and `active`; rate limited per IP. An album's owner is named as they are in the album (their member row), not by a masked address                                                                                                                                                                                                                                                                                                                                                                                      |
+| `POST /v1/invites/<code>/accept`           | Joins (any signed-in user, no Pro) while active, with a place and the link not retired, in one statement                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `GET /join/<code>`                         | On `ledger.money2time.com` only: the page a shared ledger's invite link opens, which hands `money2time://join/<code>` to the app or links the stores. Static: no names; a code that cannot be one gets a 404 page. A shared album's links open on the website                                                                                                                                                                                                                                                                                                                             |
 
 A share can carry an album's group instead of a ledger
 ([Album members and shared albums](#album-members-and-shared-albums)): `POST
@@ -5739,15 +5772,18 @@ app's `services/webDashboardLink.ts`, `webDashboardCrypto.ts`,
   do, and the split view counts settled shares, not rows. Rows from a phone that
   predates part payments carry no `part_of_split_id` and behave as before.
 - **Balances per album** (see Album members and shared albums): as in the
-  app, each shared album with something still owed is listed above the
-  people with the user's net there, never converted: one figure in the
-  album's one currency, else a signed line per currency, the main currency
-  first (`netByCurrency`, from each open share's own `amount` and
-  `currency`; the bar still compares main-currency nets), and the people are netted over every
+  app, each shared album where the user still owes or is owed anything is
+  listed above the people with the user's net there, never converted: one
+  figure in the album's one currency, else a signed line per currency, the
+  main currency first; the bar still compares main-currency nets. The net is
+  the group's, as the app's (`albumGroupNet` in
+  `src/lib/backup/album-group-net.ts`: the website's `openShares` over
+  `web_album_bills` and `web_album_settlements`, so money owed back on a
+  deleted, lowered or re-priced bill counts); from a phone that sends no
+  payments it is read from the user's entries (`netByCurrency`, each open
+  share's own `amount` and `currency`). The people are netted over every
   other bill, in an album of the user's own or in none (`balancesByAlbum` in
-  `src/lib/backup/split-payer.ts`, built from `album_transactions`). An album
-  counts as shared when the data holds its group's bills (`sharedAlbumIds`:
-  an entry whose `album_group_id` is the album's id). The totals at the top
+  `src/lib/backup/split-payer.ts`, built from `album_transactions`). An album counts as shared when the data holds its group's bills (`sharedAlbumIds`: an entry whose `album_group_id` is the album's id) or the phone sent its group (`groupAlbumIds`), so an album where the user has no entry left but is still owed money is listed too. The totals at the top
   add every open share once, in an album or not.
 - **Albums in the category lists** (Key patterns > Albums): an entry is in
   one album (`albumOfEntries` in `src/lib/backup/album-lines.ts`: an older
@@ -5993,15 +6029,25 @@ visitor's language, and the page reads where it is from the address
   the site is for and the way to sign in. Albums are started in the app.
 
 Every change is saved by the Worker before it shows (Save is busy until then);
-one that cannot go says why in a toast and keeps the editor open. With
+one that cannot go says why in a toast and keeps the editor open. One made
+from a read that a phone has since changed (an edit of a bill someone just
+changed or deleted, a payment on a debt just settled) is refused as `stale`:
+the page closes the editor, reads the album again and says someone changed it
+meanwhile (see Every change goes through one planner, in
+[Album members and shared albums](#album-members-and-shared-albums)). With
 Simplify on, a change that leaves the group even closes its circle
 (`evenGroupRows`, the app's `evenGroupPayments`). An open album asks again every 20 seconds while the page is in view and
 whenever it comes back to it, so others' changes arrive without a reload. It
 sends the change stamp of its last read: every notice the Worker sends an
-album's phones moves that stamp on (`ledger_changes`), and while it
-has not moved the Worker answers `unchanged` from D1 alone. The whole group
-is read anyway every 5 minutes, and after every change of the user's, in
-case a phone's notice never arrived.
+album's phones moves that stamp on (`ledger_changes`, also moved when the
+owner renames the album), and while it has not moved the Worker answers
+`unchanged` from the one D1 read that checks access. The whole group is read
+anyway every 5 minutes (a read that comes back the same re-renders nothing),
+and after every change of the user's, in case a phone's notice never arrived.
+The API front passes a successful album read through without parsing it.
+An open album whose user is somehow not on its list joins again as the app
+does (no `via: "web"`), so it never renames them; only the join screen's
+**Your name in this album** does.
 
 **Moving to the app.** The same account (the same Google account or address)
 signed in to the app brings the album along, with everything added on the
@@ -6078,16 +6124,17 @@ the album, as in the Worker's own Local notes), put
 log. Google's button needs the origin added to the OAuth client, so test
 sign-in with email locally.
 
-**Shipping it.** `album.money2time.com` moved from the cloud-sync Worker to
-this one. A custom domain belongs to one Worker at a time, and the website's
-deploy takes it over by itself: `cf workers triggers deploy` (vinext's deploy
-step) runs without a terminal in CI, and then reassigns a domain another
-Worker holds (`override_existing_origin`) instead of asking, so there is no
-gap and nothing to detach by hand. The change stamp lives in `ledger_changes` in
-D1 (the schema file; in production since 2026-11-15). Google's button needs
-`https://album.money2time.com` among the Authorized JavaScript origins of
-the OAuth web client "Money2Time Web" (project `money2time-expo`; added
-2026-11-15).
+**Shipping it.** `album.money2time.com` is a custom domain of this Worker
+and ships with the website: a website change and a cloud-sync Worker change
+deploy separately, so a contract between them (the album routes, `rev`,
+`base`, `stale`) changes the Worker first. A custom domain belongs to one
+Worker at a time, and the website's deploy (`cf workers triggers deploy`,
+vinext's deploy step, without a terminal in CI) claims it from any other
+Worker (`override_existing_origin`) instead of asking. The change stamp is
+`ledger_changes` in the cloud-sync D1 (`apps/cloudflare/d1/cloud-sync/schema.sql`).
+Google's button needs `https://album.money2time.com` among the Authorized
+JavaScript origins of the OAuth web client "Money2Time Web" (project
+`money2time-expo`).
 
 ### Website localization
 

@@ -10,7 +10,7 @@
  */
 
 import { isAlbumCategoryKey, type AlbumCategoryKey } from "../album/categories.ts";
-import type { WebAlbumActivityRow, WebAlbumBillRow, WebAlbumBillSnapshot, WebAlbumMemberRow, WebAlbumShare } from "./types";
+import type { WebAlbumActivityRow, WebAlbumBillRow, WebAlbumBillSnapshot, WebAlbumMemberRow, WebAlbumSettlementRow, WebAlbumShare } from "./types";
 
 export type AlbumGroupMember = {
   id: string;
@@ -33,6 +33,16 @@ export type AlbumGroupBill = {
   deleted: boolean;
 };
 
+export type AlbumGroupPayment = {
+  id: string;
+  expenseId: string | null;
+  fromMember: string;
+  toMember: string;
+  amount: number;
+  currency: string;
+  deleted: false;
+};
+
 export type AlbumGroup = {
   albumId: string;
   /** The user's own member, or null until they are on its list. */
@@ -40,6 +50,8 @@ export type AlbumGroup = {
   /** The live members, the user first, then as the group lists them. */
   members: AlbumGroupMember[];
   bills: Map<string, AlbumGroupBill>;
+  /** The payments that stand; null when the phone sent none (an older app). */
+  settlements: AlbumGroupPayment[] | null;
   /** Newest first, as the app's `listActivity` orders it. */
   activity: WebAlbumActivityRow[];
 };
@@ -47,6 +59,7 @@ export type AlbumGroup = {
 type GroupTables = {
   web_album_members?: WebAlbumMemberRow[];
   web_album_bills?: WebAlbumBillRow[];
+  web_album_settlements?: WebAlbumSettlementRow[];
   web_album_activity?: WebAlbumActivityRow[];
 };
 
@@ -76,16 +89,35 @@ export function albumGroupOf(tables: GroupTables, albumId: string): AlbumGroup |
   const activity = (tables.web_album_activity ?? [])
     .filter((row) => row && row.album_id === albumId && typeof row.created_at === "string")
     .sort((a, b) => (a.created_at !== b.created_at ? (a.created_at < b.created_at ? 1 : -1) : (b.sort_order ?? 0) - (a.sort_order ?? 0)));
-  return { albumId, selfId: members.find((member) => member.isSelf)?.id ?? null, members, bills, activity };
+  const settlements = tables.web_album_settlements
+    ? tables.web_album_settlements
+        .filter((row) => row && row.album_id === albumId && Number.isFinite(row.amount))
+        .map((row): AlbumGroupPayment => ({
+          id: row.id,
+          expenseId: row.expense_id ?? null,
+          fromMember: row.from_member,
+          toMember: row.to_member,
+          amount: row.amount,
+          currency: row.currency,
+          deleted: false,
+        }))
+    : null;
+  return { albumId, selfId: members.find((member) => member.isSelf)?.id ?? null, members, bills, settlements, activity };
 }
 
 /**
  * The people a bill can be paid by or split with: everyone still in the
- * album, and anyone who left but is already on the bill (the app's `billPeople`).
+ * album, and anyone who left but is already on the bill (the app's
+ * `billPeople`). For the dashboard's members and the album website's alike.
  */
-export function billPeople(group: AlbumGroup, bill: AlbumGroupBill | null): AlbumGroupMember[] {
+export function peopleForBill<M extends { id: string }>(members: readonly M[], bill: Pick<AlbumGroupBill, "paidBy" | "shares"> | null, isCurrent: (member: M) => boolean): M[] {
   const keep = new Set(bill ? [bill.paidBy, ...bill.shares.map((share) => share.memberId)] : []);
-  return group.members.filter((member) => member.current || keep.has(member.id));
+  return members.filter((member) => isCurrent(member) || keep.has(member.id));
+}
+
+/** `peopleForBill` of the dashboard's group. */
+export function billPeople(group: AlbumGroup, bill: AlbumGroupBill | null): AlbumGroupMember[] {
+  return peopleForBill(group.members, bill, (member) => member.current);
 }
 
 /** An amount in whole cents, which is what the sums are done in. */

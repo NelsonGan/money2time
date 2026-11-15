@@ -8,17 +8,19 @@ import { useApp } from '~/context/AppContext';
 import { I18n } from '~/lib/i18n';
 
 import { AlbumMonthPicker } from '../components/AlbumMonthPicker';
-import { useRemoveFromAlbum } from '../hooks/useRemoveFromAlbum';
 
 interface AddAlbumTransactionsScreenProps {
   albumId: string;
   onClose: () => void;
 }
 
-/** General month-pager picker for adding (or removing) transactions to an album. */
+/**
+ * General month-pager picker for adding (or removing) transactions to an
+ * album. Only an album of the user's own opens it: a shared album takes no
+ * entries made elsewhere.
+ */
 export function AddAlbumTransactionsScreen({ albumId, onClose }: AddAlbumTransactionsScreenProps) {
-  const { getAlbumTransactionIds, addTransactionsToAlbum } = useApp();
-  const removeFromAlbum = useRemoveFromAlbum(albumId);
+  const { getAlbumTransactionIds, addTransactionsToAlbum, removeTransactionsFromAlbum } = useApp();
   const insets = useSafeAreaInsets();
 
   const initialIds = useMemo(
@@ -32,15 +34,17 @@ export function AddAlbumTransactionsScreen({ albumId, onClose }: AddAlbumTransac
     const after = new Set(selectedIds);
     const toAdd = selectedIds.filter((id) => !before.has(id));
     const toRemove = initialIds.filter((id) => !after.has(id));
-    const save = () => {
-      if (toAdd.length > 0) addTransactionsToAlbum(albumId, toAdd);
-      onClose();
-    };
-    // Removing a shared album's bill is asked first; the additions wait for
-    // that answer, so Cancel leaves the album exactly as it was.
-    if (toRemove.length > 0) removeFromAlbum(toRemove, save);
-    else save();
-  }, [albumId, addTransactionsToAlbum, initialIds, onClose, removeFromAlbum, selectedIds]);
+    if (toAdd.length > 0) addTransactionsToAlbum(albumId, toAdd);
+    if (toRemove.length > 0) removeTransactionsFromAlbum(albumId, toRemove);
+    onClose();
+  }, [
+    albumId,
+    addTransactionsToAlbum,
+    initialIds,
+    onClose,
+    removeTransactionsFromAlbum,
+    selectedIds,
+  ]);
 
   return (
     <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>

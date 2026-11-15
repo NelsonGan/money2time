@@ -2613,6 +2613,7 @@
       "signedOut": "Bu albümü değiştirmek için yeniden giriş yapın.",
       "notMember": "Artık bu albümde değilsiniz, bu yüzden albümü değiştiremezsiniz.",
       "busy": "Bu albümü şu anda başka biri değiştiriyor. Biraz sonra tekrar deneyin.",
+      "stale": "Siz buradayken biri bu albümü değiştirdi. Şimdi bir göz atın ve yeniden deneyin.",
       "saveFailed": "Bu albümdeki değişiklik kaydedilemedi. Tekrar deneyin."
     }
   }

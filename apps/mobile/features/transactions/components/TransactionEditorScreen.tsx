@@ -428,13 +428,6 @@ interface TransactionEditorScreenProps {
     splits: SplitDraft[],
     extras?: TransactionEditorSubmitExtras,
   ) => void | Promise<boolean>;
-  /**
-   * A save through `onSubmitWithSplits` that the album's rules may refuse (a
-   * shared album's bill): the editor waits for it,
-   * Save showing it is busy, and closes only once it went. False keeps the
-   * editor open with every edit in it (the user was told why).
-   */
-  awaitSplitSubmit?: boolean;
   onSubmitReady?: (input: CreateTransactionInput) => void;
   /**
    * Asked before a save through `onSubmitWithSplits` closes the editor, with
@@ -461,7 +454,11 @@ interface TransactionEditorScreenProps {
    * The expense is in a shared album, so a split of it is the group's: a bill
    * of the group already, or an entry of the user's own there that becomes
    * one once split. Its payments are recorded on its page in Balances, not
-   * staged here, and it counts toward no free limit.
+   * staged here, and it counts toward no free limit. Its save through
+   * `onSubmitWithSplits` is one the album's rules may refuse: the editor
+   * waits for it, Save showing it is busy, and closes (or, adding several,
+   * clears for the next) only once it went. False keeps every edit in it
+   * (the user was told why).
    */
   groupBill?: boolean;
   /**
@@ -515,8 +512,8 @@ interface TransactionEditorScreenProps {
   albumNote?: { albumName: string; onOpenAlbum: () => void };
   /**
    * A shared album's bill: the people it can be split with (README: Album
-   * members and shared albums). Split Bill adds only these, and the user is
-   * always the payer.
+   * members and shared albums). Split Bill adds only these; any of them, or
+   * the user, can be the one who paid.
    */
   groupMembers?: readonly { id: string; name: string }[];
   /** The fee a transfer being edited already has. */
@@ -742,7 +739,6 @@ export function TransactionEditorScreen({
   onSubmit,
   onSubmitConfirmed,
   onSubmitWithSplits,
-  awaitSplitSubmit = false,
   confirmSplitSubmit,
   confirmSplitBeforeAdd = false,
   onSubmitReady,
@@ -2747,29 +2743,36 @@ export function TransactionEditorScreen({
         const capturedPayload = submitPayload;
         const capturedSplits = useSplitsPath ? splits : [];
         if (confirmSplitSubmit && !(await confirmSplitSubmit(capturedSplits))) return;
-        if (awaitSplitSubmit && !bulk) {
+        if (groupBill) {
+          // Waited for, adding several too: a refused save keeps this draft.
           confirmedSubmitRef.current = true;
           setConfirmedSaving(true);
+          let saved: boolean | void;
           try {
-            const saved = await onSubmitWithSplits(capturedPayload, capturedSplits, capturedExtras);
-            if (saved === false) {
-              // Not saved: the receipt still belongs to this unsaved entry.
-              receiptCommittedRef.current = false;
-              return;
-            }
-            settlePagerNow();
-            requestAnimationFrame(() => {
-              if (editorMountedRef.current) onClose();
-            });
+            saved = await onSubmitWithSplits(capturedPayload, capturedSplits, capturedExtras);
           } finally {
             confirmedSubmitRef.current = false;
             if (editorMountedRef.current) setConfirmedSaving(false);
           }
-          return;
+          if (saved === false) {
+            // Not saved: the receipt still belongs to this unsaved entry.
+            receiptCommittedRef.current = false;
+            return;
+          }
+          if (!bulk) {
+            settlePagerNow();
+            requestAnimationFrame(() => {
+              if (editorMountedRef.current) onClose();
+            });
+            return;
+          }
+          // Saved: the bulk reset below clears the form, with nothing left to submit.
+          if (!editorMountedRef.current) return;
+        } else {
+          deferredSubmit = () => {
+            void onSubmitWithSplits(capturedPayload, capturedSplits, capturedExtras);
+          };
         }
-        deferredSubmit = () => {
-          void onSubmitWithSplits(capturedPayload, capturedSplits, capturedExtras);
-        };
       } else if (submitPayload) {
         const capturedPayload = submitPayload;
         deferredSubmit = () => onSubmit(capturedPayload, capturedExtras);

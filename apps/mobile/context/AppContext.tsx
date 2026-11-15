@@ -280,6 +280,7 @@ import {
   type Album,
   type AlbumLocation,
   type AlbumMember,
+  type AlbumSettlement,
   type AlbumStats,
   type AppState,
   type BudgetPeriod,
@@ -625,10 +626,11 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   setActiveAlbum: (albumId: string | null) => void;
   /**
    * Shared albums (README: Album members and shared albums). Brings the
-   * user's entries in step with every shared album's group; true when
-   * anything was written (the caller then reloads).
+   * user's entries in step with every shared album's group (or only the
+   * one named, which joins nobody); true when anything was written (the
+   * caller then reloads).
    */
-  syncAlbumGroups: () => boolean;
+  syncAlbumGroups: (only?: string) => boolean;
   /** Renames the user's own member in a shared album, or says why not. */
   renameAlbumMember: (
     groupId: string,
@@ -3135,10 +3137,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // (the image goes up on the album's next sync).
       const cover = updates.coverPhotoUri;
       if (cover !== undefined && sharedAlbumFor(id)) {
-        void writeGroup(id, [settingsRow(id, { coverPhotoUri: cover })]).catch((error: unknown) => {
+        try {
+          writeGroup(id, [settingsRow(id, { coverPhotoUri: cover })]);
+        } catch (error) {
           if (!isExpectedGroupWriteError(error)) reportError(error, { scope: 'album_group_write' });
           Alert.alert(groupWriteMessage(error));
-        });
+        }
       }
       setAlbums(albumsRepository.list());
       void trackEvent(AnalyticsEvents.ALBUM_UPDATED);
@@ -4200,7 +4204,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       opts?: { reason?: 'close_even' },
     ): Promise<boolean> => {
       try {
-        await writeGroup(groupId, rows, opts);
+        writeGroup(groupId, rows, opts);
         return true;
       } catch (error) {
         if (!isExpectedGroupWriteError(error)) reportError(error, { scope: 'album_group_write' });
@@ -4226,7 +4230,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const rows = evenGroupPayments(groupId);
     if (!rows.length) return;
     try {
-      await writeGroup(groupId, rows, { reason: 'close_even' });
+      writeGroup(groupId, rows, { reason: 'close_even' });
       projectGroup(groupId, env);
     } catch (error) {
       if (!isExpectedGroupWriteError(error)) reportError(error, { scope: 'album_group_payment' });
@@ -4236,47 +4240,52 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   /** Albums this phone is putting the user on the list of right now. */
   const joiningGroupsRef = useRef(new Set<string>());
 
-  const syncAlbumGroups = useCallback((): boolean => {
-    let changed = false;
-    let coverChanged = false;
-    for (const share of listAlbumShares()) {
-      const env = groupEnvFor(share.ledgerId);
-      if (!env) continue;
-      try {
-        // Joined: the user goes on the album's list as themselves (the Worker
-        // writes it), once the group's people have come down. The owner, who
-        // was put on it as the album was shared, again if that did not go.
-        const members = albumGroupsRepository.listAllMembers(share.ledgerId);
-        const groupId = share.ledgerId;
-        if (
-          (members.length > 0 || share.role === 'owner') &&
-          !selfMember(members, env.userId) &&
-          !joiningGroupsRef.current.has(groupId)
-        ) {
-          joiningGroupsRef.current.add(groupId);
-          void sharedLedgerSync
-            .joinAlbumGroup(groupId, ownAlbumName() ?? I18n.t('albums.people.unnamed'))
-            .then(() => {
-              projectGroup(groupId, env);
-              afterGroupWrite();
-            })
-            .catch((error: unknown) => {
-              if (!isExpectedGroupWriteError(error)) {
-                reportError(error, { scope: 'album_group_join' });
-              }
-            })
-            .finally(() => joiningGroupsRef.current.delete(groupId));
+  const syncAlbumGroups = useCallback(
+    (only?: string): boolean => {
+      let changed = false;
+      let coverChanged = false;
+      for (const share of listAlbumShares()) {
+        if (only !== undefined && share.ledgerId !== only) continue;
+        const env = groupEnvFor(share.ledgerId);
+        if (!env) continue;
+        try {
+          // Joined: the user goes on the album's list as themselves (the Worker
+          // writes it), once the group's people have come down. The owner, who
+          // was put on it as the album was shared, again if that did not go.
+          const members = albumGroupsRepository.listAllMembers(share.ledgerId);
+          const groupId = share.ledgerId;
+          if (
+            only === undefined &&
+            (members.length > 0 || share.role === 'owner') &&
+            !selfMember(members, env.userId) &&
+            !joiningGroupsRef.current.has(groupId)
+          ) {
+            joiningGroupsRef.current.add(groupId);
+            void sharedLedgerSync
+              .joinAlbumGroup(groupId, ownAlbumName() ?? I18n.t('albums.people.unnamed'))
+              .then(() => {
+                projectGroup(groupId, env);
+                afterGroupWrite();
+              })
+              .catch((error: unknown) => {
+                if (!isExpectedGroupWriteError(error)) {
+                  reportError(error, { scope: 'album_group_join' });
+                }
+              })
+              .finally(() => joiningGroupsRef.current.delete(groupId));
+          }
+          changed = projectGroup(groupId, env) || changed;
+          if (syncAlbumCover(groupId)) coverChanged = true;
+        } catch (error) {
+          reportError(error, { scope: 'album_group_project' });
         }
-        changed = projectGroup(groupId, env) || changed;
-        if (syncAlbumCover(groupId)) coverChanged = true;
-      } catch (error) {
-        reportError(error, { scope: 'album_group_project' });
       }
-    }
-    if (coverChanged) setAlbums(albumsRepository.list());
-    notifyAlbumGroups();
-    return changed || coverChanged;
-  }, [afterGroupWrite, groupEnvFor]);
+      if (coverChanged) setAlbums(albumsRepository.list());
+      notifyAlbumGroups();
+      return changed || coverChanged;
+    },
+    [afterGroupWrite, groupEnvFor],
+  );
 
   const renameAlbumMember = useCallback(
     async (groupId: string, memberId: string, name: string): Promise<PeopleEditError | null> => {
@@ -4288,7 +4297,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         return 'taken';
       }
       try {
-        await writeGroup(groupId, [renameRow(memberId, cleaned)]);
+        writeGroup(groupId, [renameRow(memberId, cleaned)]);
       } catch (error) {
         if (error instanceof GroupWriteError && error.code === 'name_taken') return 'taken';
         if (!isExpectedGroupWriteError(error)) reportError(error, { scope: 'album_group_write' });
@@ -4461,10 +4470,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           sentiment: input.sentiment ?? 'neutral',
           reimbursable: input.reimbursable ?? false,
         };
-        if (existingId) {
+        const current = existingId
+          ? transactionsRef.current.find((tx) => tx.id === existingId)
+          : undefined;
+        if (
+          existingId &&
+          (!current ||
+            (current.details ?? null) !== entry.details ||
+            (current.receiptUri ?? null) !== entry.receiptUri ||
+            (current.sentiment ?? 'neutral') !== entry.sentiment ||
+            (current.reimbursable ?? false) !== entry.reimbursable)
+        ) {
           // The fields that are the user's own, on the entry they already
-          // have. Its account comes from the projection below, which works
-          // out its account amount for it.
+          // have, when they changed (every write is a row Cloud Sync sends).
+          // Its account comes from the projection below, which works out its
+          // account amount for it.
           transactionsRepository.update(existingId, {
             details: entry.details,
             receiptUri: entry.receiptUri,
@@ -4593,8 +4613,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     ) => {
       const taken = new Set<string>();
       const byGroup = new Map<string, string[]>();
+      const wantedIds = new Set(transactionIds);
+      const groupOf = new Map(
+        transactionsRef.current
+          .filter((tx) => tx.albumGroupId && wantedIds.has(tx.id))
+          .map((tx) => [tx.id, tx.albumGroupId]),
+      );
       for (const id of transactionIds) {
-        const groupId = transactionsRef.current.find((tx) => tx.id === id)?.albumGroupId;
+        const groupId = groupOf.get(id);
         if (!groupId || !sharedAlbumFor(groupId)) continue;
         taken.add(id);
         byGroup.set(groupId, [...(byGroup.get(groupId) ?? []), id]);
@@ -4709,6 +4735,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               // What this batch has already paid on each share: the stored
               // rows only move once the group is projected after the write.
               const paidInBatch = new Map<string, number>();
+              const storedSplits = transactionSplitsRepository.listByTransactionIds([
+                ...new Set(
+                  payments
+                    .filter((payment) => payment.bill.groupId === groupId)
+                    .map((payment) => payment.bill.tx.id),
+                ),
+              ]);
               for (const payment of payments) {
                 const { tx, split } = payment.bill;
                 if (payment.bill.groupId !== groupId) continue;
@@ -4717,7 +4750,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 if (!other) continue;
                 // What is still owed now, as stored: a second tap, or a
                 // payment that landed meanwhile, never pays a share twice.
-                const stored = transactionSplitsRepository.listByTransactionId(tx.id);
+                const stored = storedSplits.get(tx.id) ?? [];
                 const shareKey = payer ? tx.id : `${tx.id}:${split.id}`;
                 const left =
                   (payer
@@ -4827,6 +4860,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
       }
       const rowsByGroup = new Map<string, GroupRowWrite[]>();
+      const settlementsOf = new Map<string, AlbumSettlement[]>();
       const add = (groupId: string, rows: GroupRowWrite[]) =>
         rowsByGroup.set(groupId, [...(rowsByGroup.get(groupId) ?? []), ...rows]);
       for (const id of ids) {
@@ -4838,13 +4872,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
         const payment = payments.get(id);
         if (payment) {
-          add(
-            payment.groupId,
-            undonePaymentRows(
-              payment.settlementId,
-              albumGroupsRepository.listSettlements(payment.groupId),
-            ),
-          );
+          let settlements = settlementsOf.get(payment.groupId);
+          if (!settlements) {
+            settlements = albumGroupsRepository.listSettlements(payment.groupId);
+            settlementsOf.set(payment.groupId, settlements);
+          }
+          add(payment.groupId, undonePaymentRows(payment.settlementId, settlements));
           taken.add(id);
         }
       }

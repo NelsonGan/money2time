@@ -2613,6 +2613,7 @@
       "signedOut": "Mag-sign in ulit para mabago ang album na ito.",
       "notMember": "Wala ka na sa album na ito, kaya hindi mo na ito mababago.",
       "busy": "May ibang nagbabago ng album na ito. Subukan ulit maya-maya.",
+      "stale": "May nagbago ng album na ito habang nandito ka. Tingnan ito ngayon at subukan ulit.",
       "saveFailed": "Hindi na-save ang pagbabago sa album na ito. Subukan ulit."
     }
   }

@@ -77,20 +77,39 @@ export function openShares(
     .filter((bill) => !bill.deletedAt || paid.has(bill.id))
     .sort((a, b) => (a.date !== b.date ? (a.date < b.date ? -1 : 1) : a.id < b.id ? -1 : 1));
   for (const bill of bills) {
-    const graph: Graph = new Map();
+    // The bill's own currency first; a payment in another one (the bill's
+    // currency was changed after it) sets nothing off and is owed back in its
+    // own, as on a deleted bill.
+    const graphs = new Map<string, Graph>([[bill.currency, new Map()]]);
+    const graphOf = (currency: string): Graph => {
+      const known = graphs.get(currency);
+      if (known) return known;
+      const graph: Graph = new Map();
+      graphs.set(currency, graph);
+      return graph;
+    };
     if (!bill.deletedAt) {
       for (const share of bill.shares) {
         if (share.memberId === bill.paidBy) continue;
-        addNet(graph, share.memberId, bill.paidBy, cents(share.amount));
+        addNet(graphOf(bill.currency), share.memberId, bill.paidBy, cents(share.amount));
       }
     }
     for (const payment of paid.get(bill.id) ?? []) {
-      // A payment in another currency than its bill's is not a payment on it.
-      if (payment.currency && payment.currency !== bill.currency) continue;
-      addNet(graph, payment.toMember, payment.fromMember, Math.max(0, cents(payment.amount)));
+      addNet(
+        graphOf(payment.currency || bill.currency),
+        payment.toMember,
+        payment.fromMember,
+        Math.max(0, cents(payment.amount)),
+      );
     }
-    for (const debt of debtsOf(graph, bill.currency)) {
-      open.push({ expenseId: bill.id, ...debt });
+    const currencies = [
+      bill.currency,
+      ...[...graphs.keys()].filter((c) => c !== bill.currency).sort(),
+    ];
+    for (const currency of currencies) {
+      for (const debt of debtsOf(graphs.get(currency)!, currency)) {
+        open.push({ expenseId: bill.id, ...debt });
+      }
     }
   }
   return open;

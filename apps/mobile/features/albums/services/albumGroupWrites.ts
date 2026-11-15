@@ -138,17 +138,17 @@ function writeRow(groupId: string, write: PlannedWrite): void {
  * album's rules as the account the user is in it as, then written to the
  * phone's copy, which Cloud Sync sends up. `reason: 'close_even'` marks
  * payments the app records by itself to close an even group, so the log
- * says so. Throws `GroupWriteError` for a change the album does not allow,
- * and `not_found` when the album is not shared here. Works offline.
+ * says so. Throws `GroupWriteError` for a change the album does not allow
+ * (`not_member` when the album is not shared here). Works offline.
  */
-export async function writeGroup(
+export function writeGroup(
   groupId: string,
   rows: readonly GroupRowWrite[],
   opts: { reason?: 'close_even' } = {},
-): Promise<void> {
+): void {
   if (!rows.length) return;
   const share = sharedAlbumFor(groupId);
-  if (!share?.userId) throw new CloudSyncApiError('not_found', 404);
+  if (!share?.userId) throw new GroupWriteError('not_member', 403);
   planAndWrite(groupId, share, rows, opts.reason);
 }
 
@@ -201,9 +201,6 @@ export function followProfileName(was: readonly string[], name: string): number 
 /** Why a change to a shared album did not go, in words. */
 export function groupWriteMessage(error: unknown): string {
   if (error instanceof GroupWriteError && error.code === 'not_member') {
-    return I18n.t('albums.write.not_member');
-  }
-  if (error instanceof CloudSyncApiError && error.code === 'not_found') {
     return I18n.t('albums.write.not_member');
   }
   return I18n.t('albums.write.failed');

@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { evenGroupRows, type GroupRowWrite } from "@/lib/album/writes";
+import { evenGroupRows, recordsPayment, type GroupRowWrite } from "@/lib/album/writes";
 import type { Bill, Group } from "@/lib/album/group";
 import { EVENTS, track, type AlbumEditAction } from "@/lib/analytics";
 import { media } from "@/lib/media";
@@ -65,9 +65,14 @@ function useAlbum(shareId: string) {
             return current.current?.group ?? null;
           }
           if (seq === latest.current) {
-            current.current = { ...answer, at: Date.now() };
-            setGroup(answer.group);
+            // The forced full read of an album that did not change: the page
+            // keeps what it shows rather than drawing it all again.
+            const same = !!last && last.stamp === answer.stamp && JSON.stringify(last.group) === JSON.stringify(answer.group);
+            const group = same && last ? last.group : answer.group;
+            current.current = { group, stamp: answer.stamp, at: Date.now() };
+            if (!same) setGroup(group);
             setError(null);
+            return group;
           }
           return answer.group;
         },
@@ -110,6 +115,7 @@ export function writeErrorKey(error: unknown): string {
   if (code === "unauthorized") return "errors.signedOut";
   if (code === "name_taken") return "people.nameTaken";
   if (code === "busy") return "errors.busy";
+  if (code === "stale") return "errors.stale";
   return "errors.saveFailed";
 }
 
@@ -172,10 +178,14 @@ function AlbumView({ shareId, tab }: { shareId: string; tab: Tab }) {
     return () => window.clearTimeout(timer);
   }, [toast]);
 
+  // Rows are planned from the group this page shows (a bill from the one its
+  // editor opened with): a payment goes with that read's money stamp, and the
+  // Worker refuses the change as `stale` once the album moved on since.
+  const moneyRev = group?.moneyRev ?? null;
   const write = useCallback(
     async (rows: GroupRowWrite[], action: AlbumEditAction): Promise<boolean> => {
       try {
-        await api.write(shareId, rows);
+        await api.write(shareId, rows, { moneyBase: recordsPayment(rows) ? moneyRev : undefined });
         track(EVENTS.albumEdited, { action, result: "saved" });
       } catch (err) {
         // As `writeErrorKey` reads it: a 404 is someone no longer in the album too.
@@ -183,17 +193,22 @@ function AlbumView({ shareId, tab }: { shareId: string; tab: Tab }) {
         track(EVENTS.albumEdited, { action, result: code === "network" ? "offline" : code === "not_member" || code === "not_found" ? "not_member" : "failed" });
         if (err instanceof AlbumApiError && err.code === "unauthorized") setUser(null);
         setToast({ text: t(writeErrorKey(err)) });
+        if (code === "stale") {
+          // Someone changed it meanwhile: show what is there now, for the user to look again.
+          setSheet(null);
+          void load({ fresh: true });
+        }
         return false;
       }
       const fresh = await load({ fresh: true });
       // With Simplify on, a group that came out even has its circle closed (the app's `evenGroupPayments`).
       const even = fresh ? evenGroupRows(fresh, today()) : [];
       if (even.length) {
-        await api.write(shareId, even, "close_even").then(() => load({ fresh: true }), () => undefined);
+        await api.write(shareId, even, { reason: "close_even", moneyBase: fresh?.moneyRev }).then(() => load({ fresh: true }), () => undefined);
       }
       return true;
     },
-    [load, setUser, shareId, t],
+    [load, moneyRev, setUser, shareId, t],
   );
 
   if (!group) {

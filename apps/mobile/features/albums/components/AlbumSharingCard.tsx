@@ -15,11 +15,11 @@ interface Toggle {
 
 interface AlbumSharingCardProps {
   /**
-   * "Share this album"; null where it is not offered (someone who joined).
-   * `signIn`: it was turned on with no account signed in, so the sign-in
-   * shows under it.
+   * "Share this album", offered only as the album is made (it is never
+   * shared later). `signIn`: it was turned on with no account signed in, so
+   * the sign-in shows under it.
    */
-  share: (Toggle & { busy?: boolean; signIn?: boolean }) | null;
+  share?: (Toggle & { signIn?: boolean }) | null;
   /** "Simplify group debts"; null while the album is not shared. */
   simplify: Toggle | null;
   /** The invite link, for the owner of a shared album; `url` null while it loads. */
@@ -47,7 +47,7 @@ export function AlbumSharingCard({ share, simplify, link }: AlbumSharingCardProp
     key: string,
     title: string,
     info: string,
-    toggle: Toggle & { busy?: boolean; signIn?: boolean },
+    toggle: Toggle & { signIn?: boolean },
     testID: string,
   ) => (
     <View key={key}>
@@ -56,16 +56,12 @@ export function AlbumSharingCard({ share, simplify, link }: AlbumSharingCardProp
           <Text variant="bodyStrong">{title}</Text>
           <InfoTooltipButton title={title} infoTooltip={info} />
         </View>
-        {toggle.busy ? (
-          <LoadingDots size="small" />
-        ) : (
-          <Switch
-            testID={testID}
-            value={toggle.value}
-            onValueChange={toggle.onChange}
-            trackColor={{ false: undefined, true: colors.primary }}
-          />
-        )}
+        <Switch
+          testID={testID}
+          value={toggle.value}
+          onValueChange={toggle.onChange}
+          trackColor={{ false: undefined, true: colors.primary }}
+        />
       </View>
       {toggle.signIn ? (
         <View className="px-4 pb-4">

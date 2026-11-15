@@ -11,7 +11,9 @@
 // revision), so phones apply what the Worker wrote like any other synced row.
 // The Worker writes a row only if it still has the revision it was read at,
 // and plans again otherwise, so it never overwrites a change (a phone's push,
-// another join) that landed while it planned.
+// another join) that landed while it planned. A website change also names
+// the revisions it was planned from on the page (`WriteBase`), and is refused
+// as `stale` when they moved since, since the page's read may be minutes old.
 
 import {
   type GroupState,
@@ -32,13 +34,7 @@ import {
 } from './groupPlan.generated';
 import { json } from './http';
 
-export {
-  GroupWriteError,
-  memberRowId,
-  planLeave,
-  planWrite,
-  type WriteRequest,
-} from './groupPlan.generated';
+export { GroupWriteError, planLeave, planWrite, type WriteRequest } from './groupPlan.generated';
 
 // ---------------------------------------------------------------------------
 // The group's database
@@ -50,7 +46,8 @@ interface Statement {
 
 /** What the Worker needs of an album's database. */
 export interface GroupDb {
-  query(statement: Statement): Promise<Row[]>;
+  /** Runs the statements in order, in one round trip, and returns each one's rows. */
+  queryAll(statements: Statement[]): Promise<Row[][]>;
   /** Runs the statements as one transaction; false when one failed (another write won). */
   transaction(statements: Statement[]): Promise<boolean>;
 }
@@ -60,14 +57,63 @@ interface LoadedState extends GroupState {
   revs: Map<string, string>;
   /** Every member row and its revision, as read: a join elsewhere changes it. */
   membersStamp: string;
+  /** Every bill and payment and its revision, as read, when the write records payments. */
+  moneyStamp?: string;
 }
 
 /** The member rows and their revisions, in one value, so a write can tell they changed. */
 const MEMBERS_STAMP_SQL = `COALESCE((SELECT group_concat(row_id || ':' || rev, ',') FROM
   (SELECT row_id, rev FROM sync_rows WHERE table_name = 'album_members' ORDER BY row_id)), '')`;
 
-/** Reads the group's members and the rows a write names (with the bills its payments are for). */
-async function loadState(db: GroupDb, request: WriteRequest | null): Promise<LoadedState> {
+/**
+ * Every bill and payment and its revision, in one value: what is owed is
+ * worked out from all of them, so a payment the website planned is written
+ * only while none of them changed (`moneyRev`).
+ */
+const MONEY_STAMP_SQL = `COALESCE((SELECT group_concat(table_name || ':' || row_id || ':' || rev, ',') FROM
+  (SELECT table_name, row_id, rev FROM sync_rows
+   WHERE table_name IN ('album_expenses', 'album_settlements') ORDER BY table_name, row_id)), '')`;
+
+/**
+ * The money stamp as the website is given it and sends it back (`moneyRev`,
+ * `moneyBase`): a hash, since the stamp itself grows with the album.
+ */
+export async function moneyRevOf(stamp: string): Promise<string> {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(stamp));
+  return [...new Uint8Array(digest)]
+    .slice(0, 16)
+    .map((byte) => byte.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+const MEMBER_ROWS_SQL = `SELECT table_name, row_id, data, rev FROM sync_rows
+  WHERE table_name = 'album_members' LIMIT ${MAX_MEMBER_ROWS}`;
+
+/** A stored row read with its revision; null when it is not JSON. */
+function parseStored(raw: Row, revs: Map<string, string>): StoredRow | null {
+  try {
+    const data = JSON.parse(String(raw.data)) as Row;
+    if (!data || typeof data !== 'object') return null;
+    const row = { table: String(raw.table_name), id: String(raw.row_id), data };
+    revs.set(rowKey(row.table, row.id), String(raw.rev));
+    return row;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Reads the group's members and the rows a write names (with the bills its
+ * payments are for), in one round trip; with `money`, the money stamp too.
+ * The stamps are read before the rows, so a change landing in between makes
+ * the write's guard fail (and plan again) rather than pass on rows older than
+ * the stamp.
+ */
+async function loadState(
+  db: GroupDb,
+  request: WriteRequest | null,
+  money = false,
+): Promise<LoadedState> {
   const keys: { table: string; id: string }[] = [];
   for (const item of request?.rows ?? []) {
     const id = item?.row?.id;
@@ -77,43 +123,40 @@ async function loadState(db: GroupDb, request: WriteRequest | null): Promise<Loa
       keys.push({ table: 'album_expenses', id: item.row.expense_id });
     }
   }
-  const revs = new Map<string, string>();
-  const parse = (raw: Row): StoredRow | null => {
-    try {
-      const data = JSON.parse(String(raw.data)) as Row;
-      if (!data || typeof data !== 'object') return null;
-      const row = { table: String(raw.table_name), id: String(raw.row_id), data };
-      revs.set(rowKey(row.table, row.id), String(raw.rev));
-      return row;
-    } catch {
-      return null;
-    }
-  };
-  const [stamp, memberRows] = await Promise.all([
-    db.query({ sql: `SELECT ${MEMBERS_STAMP_SQL} AS stamp`, args: [] }),
-    db.query({
-      sql: `SELECT table_name, row_id, data, rev FROM sync_rows WHERE table_name = 'album_members' LIMIT ${MAX_MEMBER_ROWS}`,
+  const statements: Statement[] = [
+    {
+      sql: `SELECT ${MEMBERS_STAMP_SQL} AS stamp${money ? `, ${MONEY_STAMP_SQL} AS money` : ''}`,
       args: [],
-    }),
-  ]);
-  const members = memberRows.map(parse).filter((row): row is StoredRow => row !== null);
-  const rows = new Map<string, StoredRow>();
-  for (const row of members) rows.set(rowKey(row.table, row.id), row);
-  const wanted = keys.filter((key) => !rows.has(rowKey(key.table, key.id)));
-  for (let start = 0; start < wanted.length; start += 100) {
-    const part = wanted.slice(start, start + 100);
-    const found = await db.query({
+    },
+    { sql: MEMBER_ROWS_SQL, args: [] },
+  ];
+  for (let start = 0; start < keys.length; start += 100) {
+    const part = keys.slice(start, start + 100);
+    statements.push({
       sql: `SELECT table_name, row_id, data, rev FROM sync_rows WHERE ${part
         .map(() => '(table_name = ? AND row_id = ?)')
         .join(' OR ')}`,
       args: part.flatMap((key) => [key.table, key.id]),
     });
-    for (const raw of found) {
-      const row = parse(raw);
-      if (row) rows.set(rowKey(row.table, row.id), row);
-    }
   }
-  return { members, rows, revs, membersStamp: String(stamp[0]?.stamp ?? '') };
+  const [stamps, memberRows, ...found] = await db.queryAll(statements);
+  const revs = new Map<string, string>();
+  const members = memberRows
+    .map((raw) => parseStored(raw, revs))
+    .filter((row): row is StoredRow => row !== null);
+  const rows = new Map<string, StoredRow>();
+  for (const row of members) rows.set(rowKey(row.table, row.id), row);
+  for (const raw of found.flat()) {
+    const row = parseStored(raw, revs);
+    if (row) rows.set(rowKey(row.table, row.id), row);
+  }
+  return {
+    members,
+    rows,
+    revs,
+    membersStamp: String(stamps[0]?.stamp ?? ''),
+    ...(money ? { moneyStamp: String(stamps[0]?.money ?? '') } : null),
+  };
 }
 
 /** The newest log entries the website is sent; older ones stay in the database. */
@@ -121,37 +164,43 @@ const MAX_READ_ACTIVITY = 1000;
 /** Bills and payments the website is sent at most: far past any trip. */
 const MAX_READ_ROWS = 20000;
 
-/** One stored row of a group, as the website reads it. */
+/** One stored row of a group, as the website reads it, with its revision. */
 interface GroupRow {
   table: GroupTable;
   id: string;
   data: Row;
+  /** What a website write names as its `base`, so it never overwrites a newer change. */
+  rev: string;
 }
 
 /**
  * The whole group for the website (GET /v1/ledgers/<id>/album): its members,
  * bills (deleted ones too, whose payments still count), payments, settings,
- * and the newest log entries. The website checks every row again, as a phone
- * does (`toAlbumMember` and the rest): a member can write anything the rules
+ * and the newest log entries, each with its revision, and the money stamp
+ * (`moneyRev`) a payment planned from them is sent back with. One round trip,
+ * the stamp read first (a change landing meanwhile makes a payment stale,
+ * never let through). The website checks every row again, as a phone does
+ * (`toAlbumMember` and the rest): a member can write anything the rules
  * allow, so nothing here is trusted for more than its shape.
  */
-export async function readGroup(db: GroupDb): Promise<GroupRow[]> {
-  const [rows, activity] = await Promise.all([
+export async function readGroup(db: GroupDb): Promise<{ rows: GroupRow[]; moneyRev: string }> {
+  const [stamp, rows, activity] = await db.queryAll([
+    { sql: `SELECT ${MONEY_STAMP_SQL} AS money`, args: [] },
     // People and settings first, then bills before payments: past the cap
     // (far beyond any trip) the newest payments go, never a member.
-    db.query({
-      sql: `SELECT table_name, row_id, data FROM sync_rows
+    {
+      sql: `SELECT table_name, row_id, data, rev FROM sync_rows
             WHERE table_name IN ('album_members', 'album_expenses', 'album_settlements', 'album_groups')
             ORDER BY CASE table_name WHEN 'album_members' THEN 0 WHEN 'album_groups' THEN 1
               WHEN 'album_expenses' THEN 2 ELSE 3 END, updated_at
             LIMIT ${MAX_READ_ROWS}`,
       args: [],
-    }),
-    db.query({
-      sql: `SELECT table_name, row_id, data FROM sync_rows WHERE table_name = 'album_activity'
+    },
+    {
+      sql: `SELECT table_name, row_id, data, rev FROM sync_rows WHERE table_name = 'album_activity'
             ORDER BY updated_at DESC, row_id DESC LIMIT ${MAX_READ_ACTIVITY}`,
       args: [],
-    }),
+    },
   ]);
   const out: GroupRow[] = [];
   for (const raw of [...rows, ...activity]) {
@@ -160,18 +209,22 @@ export async function readGroup(db: GroupDb): Promise<GroupRow[]> {
     try {
       const data = JSON.parse(String(raw.data)) as unknown;
       if (data && typeof data === 'object' && !Array.isArray(data)) {
-        out.push({ table, id: String(raw.row_id), data: data as Row });
+        out.push({ table, id: String(raw.row_id), data: data as Row, rev: String(raw.rev) });
       }
     } catch {
       // A row that is not JSON is passed over, as a phone passes it over.
     }
   }
-  return out;
+  return { rows: out, moneyRev: await moneyRevOf(String(stamp[0]?.money ?? '')) };
 }
 
 /** The name the account goes by in the group, while it is in it; null when it is not. */
 export async function readOwnerName(db: GroupDb, userId: string): Promise<string | null> {
-  return selfOf(membersOf(await loadState(db, null)), userId)?.name ?? null;
+  const [rows] = await db.queryAll([{ sql: MEMBER_ROWS_SQL, args: [] }]);
+  const members = rows
+    .map((raw) => parseStored(raw, new Map()))
+    .filter((row): row is StoredRow => row !== null);
+  return selfOf(membersOf({ members, rows: new Map() }), userId)?.name ?? null;
 }
 
 /** A revision of the Worker's, in the app's shape (`<time>.<counter>.<origin>`). */
@@ -183,13 +236,14 @@ function workerRev(index: number, nowMs: number, salt: string): string {
  * Writes a plan as one transaction. Each row is written only if it still has
  * the revision it was read at (`revs`; a row not read must not exist), and
  * only while the members are as they were read (a join planned at the same
- * time would otherwise take the same name), so a change that landed meanwhile
- * is never overwritten or planned past. Null when one had.
+ * time would otherwise take the same name), and, for a website payment,
+ * while every bill and payment is (`moneyStamp`), so a change that landed
+ * meanwhile is never overwritten or planned past. Null when one had.
  */
 async function commitPlan(
   db: GroupDb,
   plan: Plan,
-  read: Pick<LoadedState, 'revs' | 'membersStamp'>,
+  read: Pick<LoadedState, 'revs' | 'membersStamp' | 'moneyStamp'>,
   nowMs = Date.now(),
 ): Promise<{ table: string; id: string; data: string; rev: string }[] | null> {
   if (!plan.writes.length) return [];
@@ -208,6 +262,12 @@ async function commitPlan(
       args: [read.membersStamp],
     },
   ];
+  if (read.moneyStamp !== undefined) {
+    statements.push({
+      sql: `SELECT CASE WHEN ${MONEY_STAMP_SQL} IS ? THEN 1 ELSE abs(-9223372036854775807 - 1) END`,
+      args: [read.moneyStamp],
+    });
+  }
   for (const { table, id, data, rev, expect } of written) {
     statements.push({
       sql: `SELECT CASE WHEN (SELECT rev FROM sync_rows WHERE table_name = ? AND row_id = ?) IS ?
@@ -233,20 +293,51 @@ async function commitPlan(
 }
 
 /**
+ * What a website write was planned from (`via: 'web'`): the revision each row
+ * it changes had on the page (`base`, null for a row the page did not have),
+ * and for payments the money stamp (`moneyBase`, the read's `moneyRev`). The
+ * page plans from its last read, which may be minutes old, so a row changed
+ * since (a phone's edit or delete) or any bill or payment changed since (a
+ * payment recorded on a phone) makes the write `stale`: refused, not planned
+ * again, for the page to read the album again and the user to look.
+ */
+export interface WriteBase {
+  rows: { table: string; id: string; base: string | null }[];
+  moneyBase?: string;
+}
+
+/**
  * Reads what a change needs, plans it and writes it, planning again on what
- * landed if another write came first. Returns the rows written.
+ * landed if another write came first (unless `base` says the change was
+ * planned from what is no longer there). Returns the rows written.
  */
 export async function writeGroup(
   db: GroupDb,
   request: WriteRequest | null,
   plan: (state: GroupState) => Plan,
+  base?: WriteBase,
 ): Promise<{ table: string; id: string; data: string; rev: string }[]> {
   for (let attempt = 0; attempt < 4; attempt += 1) {
-    const state = await loadState(db, request);
+    const state = await loadState(db, request, base?.moneyBase !== undefined);
+    if (base) await assertBase(state, base);
     const written = await commitPlan(db, plan(state), state);
     if (written) return written;
   }
   throw new GroupWriteError('busy', 409);
+}
+
+async function assertBase(state: LoadedState, base: WriteBase): Promise<void> {
+  for (const row of base.rows) {
+    if ((state.revs.get(rowKey(row.table, row.id)) ?? null) !== row.base) {
+      throw new GroupWriteError('stale', 409);
+    }
+  }
+  if (
+    base.moneyBase !== undefined &&
+    (await moneyRevOf(state.moneyStamp ?? '')) !== base.moneyBase
+  ) {
+    throw new GroupWriteError('stale', 409);
+  }
 }
 
 /** `planJoin`, written, with the album's settings row read first. */
@@ -318,15 +409,21 @@ export function hranaDb(url: string, token: string): GroupDb {
     args: statement.args.map(toHrana),
   });
   return {
-    async query(statement) {
-      const [result] = await post([{ type: 'execute', stmt: stmt(statement) }]);
-      if (result?.type !== 'ok') throw new Error('turso_query_failed');
-      const { cols, rows } = (result.response as { result: HranaResult }).result;
-      return rows.map((values) =>
-        Object.fromEntries(
-          values.map((value, i) => [cols[i]?.name ?? String(i), fromHrana(value)]),
-        ),
+    async queryAll(statements) {
+      if (!statements.length) return [];
+      const results = await post(
+        statements.map((statement) => ({ type: 'execute', stmt: stmt(statement) })),
       );
+      return statements.map((_, index) => {
+        const result = results[index];
+        if (result?.type !== 'ok') throw new Error('turso_query_failed');
+        const { cols, rows } = (result.response as { result: HranaResult }).result;
+        return rows.map((values) =>
+          Object.fromEntries(
+            values.map((value, i) => [cols[i]?.name ?? String(i), fromHrana(value)]),
+          ),
+        );
+      });
     },
     async transaction(statements) {
       // BEGIN, each statement only if everything before it went, COMMIT only

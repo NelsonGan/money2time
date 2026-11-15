@@ -39,8 +39,10 @@ function json(body: unknown, status = 200, headers: HeadersInit = {}): Response 
   });
 }
 
-/** A ledger's change stamp (the Worker's `ledgerStamp`): a count of milliseconds. */
+/** A ledger's change stamp (the Worker's `ledger_changes`): a count of milliseconds. */
 const STAMP = /^\d{1,20}$/;
+/** The money stamp a payment is sent back with (the Worker's `moneyRev`). */
+const MONEY_REV = /^[0-9a-f]{32}$/;
 
 function readCookie(request: Request, name: string): string | null {
   const header = request.headers.get("cookie") ?? "";
@@ -78,6 +80,15 @@ async function readBody(request: Request): Promise<Json | null> {
 }
 
 const text = (value: unknown, max: number): string | null => (typeof value === "string" && value.length <= max ? value : null);
+
+/**
+ * A successful answer of the Worker's passed through as it came, without
+ * reading it here (a whole album's group); a failed one as `relay` says.
+ */
+function pass(response: Response): Promise<Response> | Response {
+  if (!response.ok) return relay(response);
+  return new Response(response.body, { status: 200, headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
+}
 
 /** The Worker's JSON answer, passed on with its status; anything else is a server error. */
 async function relay(response: Response, headers: HeadersInit = {}): Promise<Response> {
@@ -128,10 +139,10 @@ export async function handleAlbumApi(request: Request, upstream: Upstream): Prom
     });
   const signedOut = () => json({ error: "unauthorized" }, 401, { "Set-Cookie": sessionCookie(request, null) });
   /** An authorized call; a session the Worker no longer knows clears the cookie. */
-  const authed = async (path: string, init: Parameters<typeof call>[1] = {}) => {
+  const authed = async (path: string, init: Parameters<typeof call>[1] = {}, answer: (response: Response) => Promise<Response> | Response = relay) => {
     if (!token) return signedOut();
     const response = await call(path, init);
-    return response.status === 401 ? signedOut() : relay(response);
+    return response.status === 401 ? signedOut() : answer(response);
   };
   /** Signing in: the token goes into the cookie, the user to the page. */
   const signIn = async (response: Response) => {
@@ -224,7 +235,7 @@ export async function handleAlbumApi(request: Request, upstream: Upstream): Prom
     if (parts.length === 2 && method === "GET") {
       // The stamp of the last read: the Worker then answers `unchanged` while nothing changed.
       const since = url.searchParams.get("since");
-      return authed(`/v1/ledgers/${id}/album${since && STAMP.test(since) ? `?since=${since}` : ""}`);
+      return authed(`/v1/ledgers/${id}/album${since && STAMP.test(since) ? `?since=${since}` : ""}`, {}, pass);
     }
     if (parts.length === 3 && method === "POST") {
       const body = await readBody(request);
@@ -232,10 +243,17 @@ export async function handleAlbumApi(request: Request, upstream: Upstream): Prom
       if (action === "write") {
         if (!Array.isArray(body.rows)) return json({ error: "bad_request" }, 400);
         const reason = body.reason === "close_even" ? "close_even" : undefined;
-        return authed(`/v1/ledgers/${id}/album`, { method: "POST", body: { action: "write", rows: body.rows, reason, via: "web" } });
+        // Each row's `base` goes with it, and a payment's money stamp: the
+        // Worker refuses the change as `stale` once the album moved on.
+        const moneyBase = typeof body.moneyBase === "string" && MONEY_REV.test(body.moneyBase) ? body.moneyBase : undefined;
+        return authed(`/v1/ledgers/${id}/album`, { method: "POST", body: { action: "write", rows: body.rows, reason, moneyBase, via: "web" } });
       }
       if (action === "join") {
-        return authed(`/v1/ledgers/${id}/album`, { method: "POST", body: { action: "join", name: text(body.name, 80) ?? "", via: "web" } });
+        // The page putting someone on the list after a join that did not
+        // finish: a join as the app makes it, under this name only if they
+        // are not on it yet. Without `via: 'web'`, someone already on it
+        // keeps their name (only the join screen's typed name renames).
+        return authed(`/v1/ledgers/${id}/album`, { method: "POST", body: { action: "join", name: text(body.name, 80) ?? "" } });
       }
       if (action === "invite") return authed(`/v1/ledgers/${id}/invites`, { method: "POST", body: { rotate: body.rotate === true } });
       if (action === "leave") return authed(`/v1/ledgers/${id}/leave`, { method: "POST", body: {} });

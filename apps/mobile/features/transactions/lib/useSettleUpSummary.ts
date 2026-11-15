@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from 'react';
 
 import { useApp, useTransactions } from '~/context/AppContext';
+import { useSharedAlbumNets } from '~/features/albums/hooks/useSharedAlbumNets';
 import type { Album, SettleUpByTransactionSummary, SettleUpSummary } from '~/types';
 import { convert } from '~/utils/currency';
 
@@ -82,44 +83,29 @@ export function useSettleUpByTransaction(
   );
 }
 
-/** An album with something still owed in it, and the user's net there. */
+/** A shared album with something still owed in it, and the user's net there. */
 export interface AlbumBalance {
   album: Album;
-  /** In each currency, never converted (`SettleUpSummary.netByCurrency`). */
+  /** In each currency, never converted, the reporting currency first. */
   netByCurrency: SettleUpSummary['netByCurrency'];
 }
 
-/** The albums that still have open bills, for the Balances page: each is settled in the album. */
+/**
+ * The shared albums where the user still owes or is owed something, for the
+ * Balances page: each is settled in the album. The net is the group's, the
+ * one the album's Balances tab opens on (`useSharedAlbumNets`), so money
+ * owed back on a deleted or lowered bill counts here too.
+ */
 export function useAlbumBalances(): AlbumBalance[] {
-  const { settings, rateTable, albums, getAlbumEntryIds, getAlbumOwnedTransactionIds } = useApp();
-  const { transactions } = useTransactions();
-  const reportingCurrency = settings.currencyCode;
+  const { settings, albums } = useApp();
+  const nets = useSharedAlbumNets(settings.currencyCode);
   return useMemo(() => {
-    if (getAlbumOwnedTransactionIds().size === 0) return [];
-    const rateToReporting = (currency: string) =>
-      convert(1, currency, reportingCurrency, rateTable).rateUsed;
-    const entryIds = getAlbumEntryIds();
-    // Only split bills can be owed on: found once, not once per album.
-    const bills = transactions.filter((transaction) => transaction.splits?.length);
-    const owned = getAlbumOwnedTransactionIds();
+    if (nets.size === 0) return [];
     return albums.flatMap((album) => {
-      // Only a shared album settles its own bills.
-      const ids = new Set((entryIds.get(album.id) ?? []).filter((id) => owned.has(id)));
-      if (ids.size === 0) return [];
-      const summary = aggregateSettleUpByPerson(
-        bills.filter((transaction) => ids.has(transaction.id)),
-        { reportingCurrency, rateToReporting },
-      );
-      return summary.billCount > 0 ? [{ album, netByCurrency: summary.netByCurrency }] : [];
+      const net = nets.get(album.id);
+      return net ? [{ album, netByCurrency: net.byCurrency }] : [];
     });
-  }, [
-    albums,
-    getAlbumEntryIds,
-    getAlbumOwnedTransactionIds,
-    rateTable,
-    reportingCurrency,
-    transactions,
-  ]);
+  }, [albums, nets]);
 }
 
 /**

@@ -2613,6 +2613,7 @@
       "signedOut": "Masuk lagi untuk mengubah album ini.",
       "notMember": "Kamu sudah tidak ada di album ini, jadi tidak bisa mengubahnya.",
       "busy": "Orang lain sedang mengubah album ini. Coba lagi sebentar lagi.",
+      "stale": "Seseorang mengubah album ini saat kamu membukanya. Lihat dulu sekarang, lalu coba lagi.",
       "saveFailed": "Perubahan pada album ini gagal disimpan. Coba lagi."
     }
   }
