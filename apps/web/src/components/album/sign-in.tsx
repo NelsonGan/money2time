@@ -25,7 +25,37 @@ const GOOGLE_CLIENT_ID = "229377044166-862vte0l859hsifla83k0q1rhjtcs9h0.apps.goo
  */
 const APPLE_SERVICES_ID = "com.nelsongan.money2time.web";
 const APPLE_HOST = "album.money2time.com";
-const APPLE_SCRIPT = "https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js";
+/**
+ * Apple's script comes in one build per language, which is the language of
+ * its popup; a website locale Apple has no build for gets the US English one.
+ */
+const APPLE_LOCALES: Record<string, string> = {
+  da: "da_DK",
+  de: "de_DE",
+  "en-au": "en_GB",
+  "en-gb": "en_GB",
+  "en-nz": "en_GB",
+  es: "es_ES",
+  fr: "fr_FR",
+  hi: "hi_IN",
+  id: "id_ID",
+  it: "it_IT",
+  ja: "ja_JP",
+  ko: "ko_KR",
+  ms: "ms_MY",
+  nb: "no_NO",
+  nl: "nl_NL",
+  pl: "pl_PL",
+  pt: "pt_BR",
+  ru: "ru_RU",
+  sv: "sv_SE",
+  th: "th_TH",
+  tr: "tr_TR",
+  uk: "uk_UA",
+  vi: "vi_VN",
+  zh: "zh_CN",
+};
+const appleScript = (locale: string) => `https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/${APPLE_LOCALES[locale] ?? "en_US"}/appleid.auth.js`;
 /** The Turnstile widget the app's email sign-in uses; its domain covers album.money2time.com. */
 const TURNSTILE_SITE_KEY = "0x4AAAAAAFqdQg_MRfc4cWPB";
 /** Cloudflare's test key that always passes, for `*.localhost` (the local Worker skips the check). */
@@ -191,6 +221,7 @@ async function prepareApple(): Promise<string> {
  */
 function AppleButton({ onCredential, onError }: { onCredential: (credential: AppleCredential) => Promise<void>; onError: () => void }) {
   const t = useTranslations("album");
+  const locale = useLocale();
   const [ready, setReady] = useState(false);
   const [busy, setBusy] = useState(false);
   const nonce = useRef<string | null>(null);
@@ -198,7 +229,9 @@ function AppleButton({ onCredential, onError }: { onCredential: (credential: App
   useEffect(() => {
     if (window.location.hostname !== APPLE_HOST) return;
     let live = true;
-    loadScript(APPLE_SCRIPT)
+    // The page's language, else English: a missing build must not hide the button.
+    loadScript(appleScript(locale))
+      .catch(() => loadScript(appleScript("en")))
       .then(prepareApple)
       .then((raw) => {
         nonce.current = raw;
@@ -208,7 +241,7 @@ function AppleButton({ onCredential, onError }: { onCredential: (credential: App
     return () => {
       live = false;
     };
-  }, []);
+  }, [locale]);
 
   if (!ready) return null;
 

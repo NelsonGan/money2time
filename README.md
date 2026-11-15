@@ -6101,7 +6101,8 @@ the app, one bill at a time or several at once.
   the origin is not allowed. Email: the Turnstile site key the app uses (its
   domain `money2time.com` covers the album host; the Worker's
   `TURNSTILE_HOSTNAMES` lists `album.money2time.com`), Cloudflare's always-pass
-  test key on `*.localhost`. Apple: Apple's JS (`appleid.auth.js`) in its
+  test key on `*.localhost`. Apple: Apple's JS (`appleid.auth.js`, the build in the page's language,
+  else US English) in its
   popup mode, with the Services ID `com.nelsongan.money2time.web`, grouped
   under the app's App ID so a person gets the same Apple user id, and so the
   same account, as in the app. Its only domain is `album.money2time.com` and
