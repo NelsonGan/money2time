@@ -5602,6 +5602,27 @@ the sitemap. `album.money2time.com` is shared albums
 `/album` on the marketing host `308`s there; `noindex` too, and out of the
 sitemap.
 
+#### Legal pages and Google sign-in branding
+
+`/privacy`, `/terms` and `/data-deletion` render their copy from
+`messages/<locale>.json` (`privacy`, `terms`, `dataDeletion`). A `{token}` in a
+paragraph becomes a link: `{privacyPolicy}` on the terms page, and on the other
+two the tokens in `src/components/legal-text.tsx`, labelled by the page's
+`links` messages. `validate-messages.mjs` checks every locale keeps the same
+tokens. When a feature changes what leaves the phone, what the servers keep, or
+what the app reads from Google, update all three pages in every locale.
+
+The name and logo on Google's sign-in and consent screens (in the app and on
+`album.money2time.com`) come from Google Auth Platform > Branding in the
+`money2time-expo` Cloud project, not from the app: the logo there is the
+`classic` app icon (`apps/mobile/assets/app-icons/classic/icon-light.png`)
+resized to 120 × 120. The app is in production, so any branding change needs
+brand verification, and until it passes Google keeps showing the last verified
+branding. Verification reads `/privacy`: it must describe what the app does
+with Google user data (sign-in profile, `drive.file` Drive backups) and carry
+the Google API Services User Data Policy / Limited Use statement. If the policy
+has fallen behind the app, verification fails with "insufficient content".
+
 ### Web Dashboard in the browser
 
 There is no account and nothing is stored online: the browser shows a QR code,

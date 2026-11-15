@@ -11,7 +11,7 @@
     },
     "privacy": {
       "title": "Patakaran sa Privacy - Money2Time",
-      "description": "Paano pinangangasiwaan ng Money2Time ang data mo: local-first storage, product analytics gamit ang random app ID, at walang pagbebenta ng personal o financial data."
+      "description": "Paano pinangangasiwaan ng Money2Time ang data mo: local-first storage, opsyonal na account at Cloud Sync, kung paano namin ginagamit ang Google user data, at walang pagbebenta ng personal o financial data."
     },
     "terms": {
       "title": "Mga Tuntunin ng Paggamit - Money2Time",
@@ -386,59 +386,89 @@
   },
   "privacy": {
     "title": "Patakaran sa Privacy",
-    "lastUpdated": "Huling na-update: Oktubre 22, 2026",
-    "websiteAnalytics": {
-      "title": "Analytics ng Paggamit ng Website",
-      "paragraphs": [
-        "Sa money2time.com, ginagamit namin ang PostHog at Google Analytics upang sukatin ang mga pseudonymous na page view at limitadong hanay ng mga interaction, gaya ng pag-click sa pag-download ng app, pagpili ng tutorial, at resulta ng contact form. Maaaring gumamit ang mga serbisyong ito ng browser storage o cookies at magproseso ng teknikal na impormasyon kabilang ang tinatayang rehiyon, uri ng device at browser, at referring site. Pinapanatili nang hanggang 14 na buwan ang user at event data sa Google Analytics.",
-        "Sa Web Dashboard (app.money2time.com), sinusukat ng parehong mga serbisyo kung aling mga pahina ng dashboard ang binubuksan mo, kung kailan na-link o na-unlink ang isang browser, kung nagtatagumpay ang mga paglipat mula sa iyong telepono at ang mga pagbabagong ginagawa mo, at kung kailan inaalok ang isang Pro feature. Kapag naipadala na ng iyong telepono ang data nito, naka-link ang mga event na ito sa random na app identifier ng teleponong iyon, kaya ang paggamit mo ng dashboard at ng app ay binibilang bilang iisang pseudonymous na user hanggang i-unlink mo ang browser. Pinananatiling hiwalay ito ng dashboard sa iba pang bahagi ng money2time.com, kaya hindi naka-link dito ang mga pagbisita mo sa ibang mga pahina. Hindi kailanman kasama sa mga event ng dashboard ang iyong financial data, at ang mga pagbisita sa dashboard ay hindi kailanman nire-record bilang session replay.",
-        "Maaari ding i-record ng PostHog ang maliit na sample ng mga pagbisita sa website bilang session replay na nakatago ang bawat form field, at tumatanggap ito ng ulat kapag may error sa isang page.",
-        "Hindi namin ipinapadala ang nilalaman ng contact form, tekstong hinanap sa tutorial, financial data, account identifier, buong URL query string, o data para sa advertising o personalization. Hindi idinaragdag ng /download redirect ang iyong IP address o user-agent string sa analytics event nito. Hindi nilo-load ang website analytics kapag naka-enable ang Do Not Track ng iyong browser."
-      ]
+    "lastUpdated": "Huling na-update: Nobyembre 15, 2026",
+    "links": {
+      "userDataPolicy": "Google API Services User Data Policy",
+      "googlePermissions": "myaccount.google.com/permissions",
+      "dataDeletion": "page sa pagbura ng data"
     },
     "sections": [
       {
         "title": "Pangkalahatang-ideya",
         "paragraphs": [
-          "Ang Money2Time (ang App) ay isang personal finance app na ginagawang katumbas na oras ang iyong paggastos batay sa iyong hourly wage. Mahalaga sa amin ang iyong privacy. Ipinapaliwanag ng patakarang ito kung anong data ang kinokolekta ng App, paano ito ginagamit, at ang iyong mga karapatan kaugnay ng data na iyon."
+          "Ang Money2Time (ang App) ay isang personal finance app na ginagawang katumbas na oras ang iyong paggastos batay sa iyong hourly wage. Pinapatakbo ito ng Money2Time team (kami). Ipinapaliwanag ng patakarang ito kung anong data ang kinokolekta ng App, ng money2time.com, ng Web Dashboard (app.money2time.com) at ng mga shared na album sa web (album.money2time.com), kung paano ito ginagamit, iniimbak at ibinabahagi, at ang iyong mga pagpipilian at karapatan kaugnay ng data na iyon.",
+          "Hindi namin ibinebenta ang iyong personal o financial data, hindi kami nagpapakita ng advertisement, at hindi namin ginagamit ang iyong data para sa advertising."
         ]
       },
       {
-        "title": "1. Pag-iimbak ng Data at Local-First na Disenyo",
+        "title": "1. Local-First na Disenyo",
         "paragraphs": [
-          "Lahat ng iyong financial data, kabilang ang mga transaksyon, account, kategorya, recurring rules, at wage settings, ay nakaimbak nang lokal sa iyong device gamit ang on-device database (SQLite). Hindi kami nagpapatakbo ng mga server na nag-iimbak ng iyong personal na impormasyong pinansyal, at hindi kailanman sina-sync o bina-back up ng App ang iyong data sa isang server namin. Kung gagamitin mo ang opsyonal na Web Dashboard (seksyon 6), direktang nagpapadala ang iyong telepono ng kopya sa browser na na-link mo, may end-to-end encryption; ipinapasa ito ng aming server nang hindi iniimbak at hindi nito ito mababasa.",
-          "Kung i-uninstall mo ang App, permanenteng mabubura ang lahat ng lokal na nakaimbak na data."
+          "Magagamit mo ang App nang walang account. Bilang default, ang iyong financial data, kabilang ang mga transaksyon, account, kategorya, budget, recurring rules, at wage settings, ay nakaimbak lang sa iyong device sa isang on-device database (SQLite).",
+          "Umaalis lang ang iyong data sa iyong device para sa mga opsyonal na feature na pinili mong gamitin, na bawat isa ay inilalarawan sa ibaba: pag-sign in sa isang account, Cloud Sync, mga shared ledger at album, pag-scan ng resibo at iba pang AI feature, mga backup sa Google Drive o iCloud, ang Web Dashboard, at live na kita sa iOS."
         ]
       },
       {
         "title": "2. Impormasyong Kinokolekta Namin",
         "subsections": [
           {
-            "title": "Financial Data (Lokal Lang Iniimbak)",
+            "title": "Data sa Iyong Device",
             "lists": [
               [
-                "Mga halaga ng transaksyon, petsa, kategorya, tala, at sentiment tags",
-                "Mga pangalan, uri, at balanse ng account",
+                "Mga halaga ng transaksyon, petsa, pamagat, kategorya, tala, sentiment tags, at larawan ng resibo",
+                "Mga pangalan, uri, balanse, at logo ng account, at mga QR code sa pagbabayad na idinagdag mo",
                 "Impormasyon sa sahod at hourly rate",
-                "Mga recurring transaction rule",
-                "Mga pangalan at organisasyon ng kategorya"
+                "Mga budget, goal, recurring rule, album, at pangalan ng kategorya",
+                "Mga notification ng pagbabayad na binabasa ng App para itala ang mga transaksyon, kung i-on mo ang pagtatala mula sa mga notification"
               ]
             ],
             "paragraphs": [
-              "Hindi umaalis ang data na ito sa iyong device maliban kung malinaw mong piniling i-export ito, o ipadala ito sa browser na na-link mo gamit ang Web Dashboard."
+              "Maliban kung gagamitin mo ang isa sa mga opsyonal na feature sa ibaba, nananatili ang data na ito sa iyong device."
+            ]
+          },
+          {
+            "title": "Impormasyon ng Account",
+            "paragraphs": [
+              "Opsyonal ang account. Maaari kang mag-sign in gamit ang Google, gamit ang Apple (sa iOS), o gamit ang one-time code na ipinapadala sa iyong email address. Kapag nag-sign in ka, iniimbak namin ang iyong email address, ang iyong pangalan ayon sa ibinigay ng Google o Apple (o ayon sa inilagay mo), ang address ng profile picture na ibinibigay ng Google, ang user ID na itinatalaga sa iyo ng Google o Apple para sa App na ito, at ang sign-in token na ibinibigay nila. Para sa bawat teleponong naka-sign in, iniimbak din namin ang random na app identifier nito, para gumana ang iyong Pro subscription sa bawat teleponong pinag-sign in-an mo. Para sa iyong session, iniimbak namin ang isang session token, ang IP address at ang user agent ng device. Sinusuri ang mga kahilingan sa pag-sign in gamit ang email sa pamamagitan ng Cloudflare Turnstile para harangin ang awtomatikong pang-aabuso.",
+              "Ginagamit lang namin ang impormasyon ng account para i-sign in ka, panatilihin kang naka-sign in, ikonekta ang iyong mga paraan ng pag-sign in na may parehong verified na email address, ibigay ang iyong mga Pro benefit sa lahat ng iyong telepono, at ipakita ang iyong pangalan sa mga taong kabahagi mo sa isang ledger o album."
+            ]
+          },
+          {
+            "title": "Cloud Sync",
+            "paragraphs": [
+              "Opsyonal ang Cloud Sync at naka-off ito hanggang i-on mo. Kapag naka-on ito, nagtatago ang App ng kopya ng iyong Money2Time data (ang parehong data ng isang backup, kasama ang mga larawang idinagdag mo, gaya ng mga larawan ng resibo, cover, logo, at QR code sa pagbabayad) sa aming mga server para manatili itong pareho sa lahat ng iyong naka-sign in na device. Iniimbak ang iyong data sa isang database para lang sa iyong account, na naka-host sa Turso, at pribadong iniimbak ang iyong mga larawan sa Cloudflare R2. Ipinapadala ito sa HTTPS pero walang end-to-end encryption, kaya nababasa ito ng aming mga system para ma-sync ito. Hindi sina-sync ang mga notification na nakuha para sa pagtatala at sa pag-aaral ng merchant.",
+              "Humihinto ang pag-sync kapag nag-sign out ka. Itinatago ang cloud copy hanggang burahin mo ang iyong account."
+            ]
+          },
+          {
+            "title": "Mga Shared Ledger at Album",
+            "paragraphs": [
+              "Kung gagawa ka o sasali sa isang shared ledger o shared na album, iniimbak sa aming mga server ang data na idinadagdag mo rito at nakikita ito ng lahat ng kasali: mga pangalan ng miyembro, mga bill (pamagat, halaga, petsa, currency, kung sino ang nagbayad at kung paano ito hinati), mga bayad, settings, ang cover photo, at isang activity log kung sino ang nagbago ng ano. Hindi kailanman ibinabahagi sa grupo ang sarili mong account, kategorya, tala, larawan ng resibo, at mood para sa isang bill. Ang iyong display name sa isang grupo ay ang pangalang itinakda mo, o kung wala, ang pangalan mo sa pag-sign in; kung wala kang alinman sa dalawa, ito ay isang bahagyang nakatagong anyo ng iyong email address, gaya ng ne***@gmail.com. Nakikita ng may-ari ng isang shared ledger ang mga email address ng mga miyembro. Ang sinumang may invite link ay makakakita ng pangalan ng grupo, display name ng may-ari nito, at kung ilan ang miyembro nito.",
+              "Nananatili sa grupo ang mga bill at pagbabagong idinagdag mo bilang bahagi ng shared na rekord nito, kahit pagkatapos mong umalis."
+            ]
+          },
+          {
+            "title": "Pag-scan ng Resibo at mga AI Feature",
+            "paragraphs": [
+              "Kapag nag-scan ka ng resibo o screenshot, ipinapadala ng App ang larawan, kasama ang iyong currency at ang mga pangalan ng iyong kategorya at account, sa aming scanning service, na gumagamit ng mga AI model mula sa Anthropic at iba pang model provider, na naaabot sa pamamagitan ng OpenRouter, para basahin ang mga detalye. Kung i-on mo ang awtomatikong pagsusuri ng mga notification ng pagbabayad, ipinapadala sa parehong paraan ang teksto ng notification at ang mga pangalan ng iyong kategorya. Hindi namin iniimbak ang mga larawan o tekstong ito; bilang ng paggamit lang ang itinatago namin para ipatupad ang mga limitasyon ng plan. Pinoproseso ito ng mga AI provider para magbalik ng resulta."
+            ]
+          },
+          {
+            "title": "Live na Kita (iOS)",
+            "paragraphs": [
+              "Kung i-on mo ang live na kita sa Lock Screen, ipinapadala ng App ang iyong hourly rate, simbolo ng currency, iskedyul ng shift, time zone, random na app identifier, at ang Live Activity push token na ibinibigay ng Apple sa aming server, na nag-a-update sa Live Activity sa pamamagitan ng Apple Push Notification service habang tumatakbo ito. Binubura ang data ng isang tumatakbong Live Activity kapag natapos ito. Binubura ang iskedyul para sa awtomatikong pagsisimula ng live na kita kapag in-off mo ang awtomatikong pagsisimula o inalis ang iyong sahod, at kung hindi, 45 araw matapos itong huling kumpirmahin ng App. Hindi naka-link sa isang account ang data ng live na kita."
             ]
           },
           {
             "title": "Random App Identifier",
             "paragraphs": [
-              "Sa unang pagbukas, gumagawa ang App ng random na unique identifier na nagsisimula sa m2t_ at hindi naka-link sa iyong pangalan, email, Apple ID, o anumang personal na pagkakakilanlan. Ibinabahagi ang parehong identifier sa PostHog, Google Analytics for Firebase, at RevenueCat para sa product analytics at pamamahala ng subscription, at sa anumang browser na ili-link mo gamit ang Web Dashboard, na ginagamit din ito para sa usage analytics nito (PostHog at Google Analytics)."
+              "Sa unang pagbukas, gumagawa ang App ng random na unique identifier na nagsisimula sa m2t_. Ibinabahagi ito sa PostHog, Google Analytics for Firebase, at RevenueCat para sa product analytics at pamamahala ng subscription, at sa anumang browser na ili-link mo gamit ang Web Dashboard, na ginagamit din ito para sa usage analytics nito. Kung mag-sign in ka, ili-link namin ito sa iyong account sa aming mga server; hindi namin ipinapadala ang iyong pangalan o email address sa aming mga analytics provider."
             ]
           },
           {
             "title": "Usage Analytics",
             "paragraphs": [
-              "Ginagamit namin ang PostHog at Google Analytics for Firebase upang mangolekta ng pseudonymous usage data na naka-link sa random app identifier na ito at mapaganda ang App. Hindi kasama rito ang halaga, detalye ng transaksyon, balanse, notes, resibo, backups, o impormasyon na makakakilala sa iyo.",
-              "Tumatanggap din ang PostHog ng mga ulat ng crash at error, at nire-record nito ang maliit na sample ng mga session ng app bilang screen recording para mahanap at maayos namin ang mga problema. Sa mga recording na iyon, nakatago ang lahat ng nagpapakita ng iyong impormasyon: teksto, numero, input field, chart at anumang larawang idinagdag mo. Ang sariling disenyo lang ng app, gaya ng mga icon, ilustrasyon at label ng button, ang nakikita. Hindi kailanman ipinapakita ng mga recording na ito ang iyong financial data."
+              "Ginagamit namin ang PostHog at Google Analytics for Firebase upang mangolekta ng pseudonymous usage data na naka-link sa random app identifier para maunawaan namin kung paano ginagamit ang App at mapaganda ang karanasan. Hindi kasama sa analytics ang mga halagang pinansyal, detalye ng transaksyon, balanse ng account, tala, resibo, backup, pangalan, o email address.",
+              "Tumatanggap din ang PostHog ng mga ulat ng crash at error, nire-record nito ang model, bilang ng token at gastos ng bawat AI request (hindi kailanman ang larawan o teksto), at nire-record nito ang maliit na sample ng mga session ng app bilang screen recording para mahanap at maayos namin ang mga problema. Sa mga recording na iyon, nakatago ang lahat ng nagpapakita ng iyong impormasyon: teksto, numero, input field, chart at anumang larawang idinagdag mo. Ang sariling disenyo lang ng app, gaya ng mga icon, ilustrasyon at label ng button, ang nakikita. Hindi kailanman ipinapakita ng mga recording na ito ang iyong financial data."
             ],
             "lists": [
               [
@@ -448,20 +478,61 @@
                 "Platform tulad ng iOS o Android"
               ]
             ]
+          },
+          {
+            "title": "Analytics ng Paggamit ng Website",
+            "paragraphs": [
+              "Sa money2time.com, ginagamit namin ang PostHog at Google Analytics upang sukatin ang mga pseudonymous na page view at limitadong hanay ng mga interaction, gaya ng pag-click sa pag-download ng app, pagpili ng tutorial, at resulta ng contact form. Maaaring gumamit ang mga serbisyong ito ng browser storage o cookies at magproseso ng teknikal na impormasyon kabilang ang tinatayang rehiyon, uri ng device at browser, at referring site. Pinapanatili nang hanggang 14 na buwan ang user at event data sa Google Analytics.",
+              "Sa Web Dashboard (app.money2time.com), sinusukat ng parehong mga serbisyo kung aling mga pahina ng dashboard ang binubuksan mo, kung kailan na-link o na-unlink ang isang browser, kung nagtatagumpay ang mga paglipat mula sa iyong telepono at ang mga pagbabagong ginagawa mo, at kung kailan inaalok ang isang Pro feature. Kapag naipadala na ng iyong telepono ang data nito, naka-link ang mga event na ito sa random na app identifier ng teleponong iyon, kaya ang paggamit mo ng dashboard at ng app ay binibilang bilang iisang pseudonymous na user hanggang i-unlink mo ang browser. Pinananatiling hiwalay ito ng dashboard sa iba pang bahagi ng money2time.com, kaya hindi naka-link dito ang mga pagbisita mo sa ibang mga pahina. Hindi kailanman kasama sa mga event ng dashboard ang iyong financial data, at ang mga pagbisita sa dashboard ay hindi kailanman nire-record bilang session replay.",
+              "Sa mga shared na album sa web (album.money2time.com), sinusukat ng parehong mga serbisyo ang mga page view, ang mga pag-sign in at ang paraan ng pag-sign in na ginamit, ang pagsali sa isang album, ang mga pag-edit, at ang pagbukas ng isang album sa App. Hindi kailanman kasama sa mga event na ito ang iyong pangalan, email address, o kung ano ang nasa iyong mga album, at ang mga pagbisita sa album ay hindi kailanman nire-record bilang session replay.",
+              "Maaari ding i-record ng PostHog ang maliit na sample ng mga pagbisita sa website bilang session replay na nakatago ang bawat form field, at tumatanggap ito ng ulat kapag may error sa isang page.",
+              "Hindi namin ipinapadala ang nilalaman ng contact form, tekstong hinanap sa tutorial, financial data, email address, buong URL query string, o data para sa advertising o personalization. Hindi idinaragdag ng /download redirect ang iyong IP address o user-agent string sa analytics event nito. Hindi nilo-load ang website analytics kapag naka-enable ang Do Not Track ng iyong browser."
+            ]
           }
         ]
       },
       {
-        "title": "3. In-App Purchases at Subscriptions",
+        "title": "3. Google User Data",
         "paragraphs": [
-          "Nag-aalok ang App ng opsyonal na premium subscription (Pro) na pinamamahalaan sa pamamagitan ng RevenueCat. Pinoproseso ng Apple o Google ang bayad. Hindi namin kailanman natatanggap o iniimbak ang iyong payment information, detalye ng credit card, o Apple ID/Google Account credentials.",
-          "Natatanggap ng RevenueCat ang iyong subscription status, product identifier, at expiration date para pamahalaan ang iyong entitlements. Naka-link ito sa random app identifier, hindi sa iyong personal na pagkakakilanlan."
+          "Ipinapaliwanag ng seksyong ito kung paano ina-access, ginagamit, iniimbak, at ibinabahagi ng App at ng aming mga website ang data na natanggap mula sa mga Google API.",
+          "Ang paggamit at paglilipat ng Money2Time sa anumang ibang app ng impormasyong natanggap mula sa mga Google API ay susunod sa {userDataPolicy}, kabilang ang mga kinakailangan ng Limited Use (Limitadong Paggamit)."
+        ],
+        "subsections": [
+          {
+            "title": "Data na Ina-access Namin",
+            "lists": [
+              [
+                "Google Sign-In (sa App at sa album.money2time.com): ang iyong Google account ID, email address at kung verified ito, pangalan, at address ng profile picture, sa pamamagitan ng mga scope na openid, email, at profile.",
+                "Google Drive (kung pipiliin mo lang ang Google Drive para sa mga backup): kapag ikinonekta mo ang Google Drive, nagsa-sign in ka sa Google sa App gamit ang parehong mga scope na openid, email, at profile, para maipakita ng App kung saang Google account napupunta ang iyong mga backup, at idinadagdag ang scope na drive.file, na nagpapahintulot sa App na makita at pamahalaan lang ang mga backup file na ginagawa nito. Hindi nakikita ng App ang anumang ibang file sa iyong Drive. Nananatili sa iyong device ang profile data na ito maliban kung gagamitin mo rin ito para mag-sign in sa isang Money2Time account."
+              ]
+            ]
+          },
+          {
+            "title": "Paano Namin Ito Ginagamit",
+            "paragraphs": [
+              "Ginagamit lang namin ang iyong Google profile data para gumawa at mag-sign in sa iyong Money2Time account, para ikonekta ito sa iba pang paraan ng pag-sign in na may parehong verified na email address, para ipakita ang iyong pangalan sa mga tao sa mga ledger at album na ibinabahagi mo (at ang iyong email address sa may-ari ng shared ledger na sinalihan mo), at para ipakita kung saang Google account napupunta ang iyong mga backup. Ginagamit lang namin ang access sa Google Drive para i-save, ilista, at i-restore ang iyong mga Money2Time backup file. Hindi namin ginagamit ang Google user data para sa advertising, hindi namin ito ibinebenta, at hindi namin ito ginagamit para mag-train ng mga AI model."
+            ]
+          },
+          {
+            "title": "Paano Namin Ito Iniimbak at Ibinabahagi",
+            "paragraphs": [
+              "Iniimbak ang iyong Google profile data sa aming account database sa Cloudflare at itinatago hanggang burahin mo ang iyong account. Direktang isinusulat ang iyong mga Drive backup mula sa iyong telepono papunta sa iyong Google Drive; hindi kailanman dumadaan o iniimbak ang mga ito sa aming mga server, at maaari mong burahin ang mga ito sa Google Drive anumang oras. Ibinabahagi lang namin ang Google user data sa mga paraang ito: ang iyong pangalan, o isang bahagyang nakatagong anyo ng iyong email address kung wala kang pangalan, sa mga miyembro ng mga ledger at album na sinalihan mo at sa sinumang may hawak ng kanilang mga invite link; ang iyong email address sa may-ari ng shared ledger na sinalihan mo; at lahat ng ito sa mga service provider na nagho-host ng aming mga server (Cloudflare at Turso), sa ilalim ng kanilang mga tuntunin sa pagproseso ng data. Hindi namin kailanman ito ipinapadala sa aming mga analytics provider o AI provider.",
+              "Maaari mong alisin ang access ng Money2Time sa iyong Google Account anumang oras sa {googlePermissions}, at maaari mong burahin ang iyong account sa App gaya ng inilalarawan sa seksyon 9."
+            ]
+          }
         ]
       },
       {
-        "title": "4. Mga Notification",
+        "title": "4. In-App Purchases at Subscriptions",
         "paragraphs": [
-          "Maaaring humingi ng pahintulot ang App na magpadala ng mga notification. Lahat ng notification ay lokal na iniiskedyul sa iyong device. Walang push notification na ipinapadala mula sa external servers. Maaari mong tanggihan ang notification permission o i-disable ang notifications anumang oras sa Settings ng iyong device."
+          "Nag-aalok ang App ng opsyonal na premium subscription (Pro) na pinamamahalaan sa pamamagitan ng RevenueCat. Pinoproseso ng Apple o Google ang bayad. Hindi namin kailanman natatanggap o iniimbak ang iyong payment information, detalye ng credit card, o mga password ng Apple ID/Google Account.",
+          "Natatanggap ng RevenueCat ang iyong subscription status, product identifier, at expiration date para pamahalaan ang iyong entitlements, na naka-link sa random app identifier. Kung mag-sign in ka, sinusuri ng aming mga server ang iyong Pro status sa RevenueCat para mailapat ito sa lahat ng iyong naka-sign in na telepono."
+        ]
+      },
+      {
+        "title": "5. Mga Notification",
+        "paragraphs": [
+          "Maaaring humingi ng pahintulot ang App na magpadala ng mga notification. Lokal na iniiskedyul sa iyong device ang mga reminder at summary. Maaari mong tanggihan ang notification permission o i-disable ang notifications anumang oras sa Settings ng iyong device."
         ],
         "lists": [
           [
@@ -472,31 +543,48 @@
         ]
       },
       {
-        "title": "5. Mga Pahintulot ng Device",
+        "title": "6. Mga Pahintulot ng Device",
         "paragraphs": [
-          "Notification permission lang ang hinihingi ng App upang mag-iskedyul ng lokal na reminders at summaries. Hindi ina-access ng App ang iyong camera, microphone, photo library, contacts, calendar, messages, location, health data, fitness data, ibang apps, o browsing history."
+          "Hinihingi lang ng App ang bawat pahintulot kapag ginamit mo ang feature na nangangailangan nito, at maaari mong i-off ang alinman sa mga ito sa Settings ng iyong device."
+        ],
+        "lists": [
+          [
+            "Camera: para kunan ng larawan ang mga resibo at para i-scan ang code na nagli-link sa Web Dashboard.",
+            "Photo library: para mag-attach o mag-scan ng mga larawang pinili mo, at para i-save ang mga larawang ine-export mo.",
+            "Microphone at speech recognition: para magdagdag ng mga transaksyon gamit ang boses. Ginagawang teksto ang iyong pananalita ng speech recognition service ng Apple o Google, na maaaring magproseso nito sa kanilang mga server.",
+            "Face ID o fingerprint: para i-unlock ang App kung i-on mo ang Lock ng App. Hindi kailanman natatanggap ng App ang iyong biometric data.",
+            "Notification access (Android): para itala ang mga transaksyon mula sa mga notification ng pagbabayad ng mga app na pinili mo, kung i-on mo ang pagtatala mula sa mga notification. Binabalewala ang ibang mga notification.",
+            "Mga notification: para sa mga lokal na reminder at summary."
+          ]
         ]
       },
       {
-        "title": "6. Data Export, Import at Web Dashboard",
+        "title": "7. Mga Backup, Export, Import at Web Dashboard",
         "paragraphs": [
-          "Maaari mong i-export ang lahat ng iyong financial data bilang JSON file anumang oras sa pamamagitan ng Settings ng App. Ibinabahagi ang exported file gamit ang native sharing functionality ng iyong device. Hindi namin natatanggap o pinoproseso ang iyong exported data.",
-          "Maaari ka ring mag-import ng data mula sa dating Money2Time backup o mag-migrate mula sa Money Manager app. Pinapalitan ng pag-import ang lahat ng umiiral na data sa iyong device.",
+          "Maaari mong i-back up ang iyong data sa Google Drive o iCloud, nang manual o awtomatiko araw-araw. Direktang sine-save ang mga backup mula sa iyong telepono papunta sa sarili mong Google Drive o iCloud account, at hindi namin kailanman natatanggap ang mga ito. Maaari mo ring i-export ang lahat ng iyong data bilang JSON file anumang oras, na ibinabahagi gamit ang native sharing functionality ng iyong device, at mag-import ng dating Money2Time backup o ng data mula sa Money Manager app. Pinapalitan ng pag-import ang lahat ng umiiral na data sa iyong device.",
           "Opsyonal ang Web Dashboard. Para magamit ito, bubuksan mo ang app.money2time.com sa isang computer at i-scan ang code na ipinapakita nito gamit ang App. Pagkatapos, magkakasundo ang iyong telepono at ang browser na iyon sa isang encryption key na silang dalawa lang ang may hawak. Habang parehong bukas ang Web Dashboard screen ng App at ang browser, nagpapadala ang App sa browser ng kopya ng iyong data (ang parehong data ng isang export, kasama ang mga logo, icon at cover photo na idinagdag mo, pero hindi ang mga larawan ng resibo o mga QR code sa pagbabayad), naka-encrypt nang end-to-end gamit ang AES-256-GCM. Dumadaan ito sa isang server na pinapatakbo namin sa Cloudflare, na ipinapasa ang naka-encrypt na data habang dumarating ito at hindi ito iniimbak. Hindi namin ito mababasa.",
-          "Itinatago ng browser ang huling kopyang natanggap nito, naka-encrypt pa rin, sa sarili nitong storage kasama ang key, hanggang i-unlink mo ito sa browser o sa App. Bumabalik sa iyong telepono ang mga pagbabagong ginagawa mo sa dashboard, naka-encrypt sa parehong paraan, at sine-save lang ito ng App habang bukas ang Web Dashboard screen nito at mula lang sa browser na pinayagan mong gumawa ng mga pagbabago. Sinasabi rin ng iyong telepono sa browser kung mayroon kang Money2Time Pro, para mabuksan nito ang mga Pro dashboard, at ang random na app identifier nito, para sa usage analytics ng dashboard. Walang account: hindi kami nag-iimbak ng email address, at ang server na nagpapasa ng iyong data ay walang talaan kung aling mga telepono at browser ang naka-link."
+          "Itinatago ng browser ang huling kopyang natanggap nito, naka-encrypt pa rin, sa sarili nitong storage kasama ang key, hanggang i-unlink mo ito sa browser o sa App. Bumabalik sa iyong telepono ang mga pagbabagong ginagawa mo sa dashboard, naka-encrypt sa parehong paraan, at sine-save lang ito ng App habang bukas ang Web Dashboard screen nito at mula lang sa browser na pinayagan mong gumawa ng mga pagbabago. Sinasabi rin ng iyong telepono sa browser kung mayroon kang Money2Time Pro, para mabuksan nito ang mga Pro dashboard, at ang random na app identifier nito, para sa usage analytics ng dashboard. Hindi nangangailangan ng account ang Web Dashboard, at ang server na nagpapasa ng iyong data ay walang talaan kung aling mga telepono at browser ang naka-link.",
+          "Sa album.money2time.com, maaari kang mag-sign in gamit ang Google o isang email code para tingnan at i-edit ang mga shared na album na kinabibilangan mo. Pinapanatili kang naka-sign in ng site gamit ang isang secure na cookie nang hanggang isang taon."
         ]
       },
       {
-        "title": "7. Pagbura ng Data",
+        "title": "8. Pagpapanatili ng Data",
         "paragraphs": [
-          "May ganap kang kontrol sa iyong data sa lahat ng oras. Permanenteng binubura ng Reset All Data ang lahat ng transaksyon, account, kategorya, recurring rules, at wage settings mula sa iyong device. Nililinis ng Reset Transactions Only ang iyong transaction history habang pinananatili ang accounts at categories. Kapag in-uninstall ang App, ganap na inaalis ang lokal na database at lahat ng nakaimbak na data. Kapag in-unlink ang isang browser mula sa Web Dashboard, binubura ang kopyang itinatago nito: agad kapag nag-unlink ka sa browser, at sa susunod na pagkonekta nito kapag nag-unlink ka mula sa App. Binubura rin ito kapag nilinis ang site data ng browser na iyon.",
-          "Ang pag-reset ng data sa loob ng App ay hindi nagbubura ng iyong subscription status na hawak ng Apple/Google o ng analytics data na dati nang naipadala sa PostHog / Google Analytics for Firebase. Para humiling ng pagbura ng analytics data, makipag-ugnayan sa amin sa email sa ibaba."
+          "Nananatili ang data sa iyong device hanggang burahin mo ito o i-uninstall ang App. Itinatago ang impormasyon ng account, ang iyong Cloud Sync copy, at ang iyong mga larawan sa aming mga server hanggang burahin mo ang iyong account. Itinatago ang data ng shared ledger at album habang umiiral ang grupo. Binubura ang data ng live na kita kapag in-off mo ito, at hindi lalampas sa 45 araw matapos itong huling kumpirmahin ng App. Tumatagal nang hanggang isang taon ang mga sign-in session at nire-renew habang ginagamit mo ang mga ito. Hindi namin iniimbak ang mga resibo at teksto ng notification na ipinadala para sa AI processing. Itinatago ang analytics data nang hanggang 14 na buwan sa Google Analytics at ayon sa aming mga retention setting sa PostHog. Saglit na itinatago sa mga log ng aming mga service provider ang mga detalye ng koneksyon gaya ng mga IP address."
         ]
       },
       {
-        "title": "8. Mga Third-Party Service",
+        "title": "9. Pagbura ng Data",
         "paragraphs": [
-          "Hindi nagpapakita ng advertisement ang App at hindi gumagamit ng advertising SDKs."
+          "May ganap kang kontrol sa iyong data. Permanenteng binubura ng I-reset ang Data sa Mga setting ang iyong mga account, kategorya, at transaksyon mula sa iyong device, at mula sa iyong Cloud Sync copy kung naka-on ang Cloud Sync. Kapag in-uninstall ang App, inaalis ang lokal na database mula sa iyong device, pero hindi ang iyong mga backup sa Google Drive o iCloud, o ang iyong account.",
+          "Para burahin ang iyong account, buksan ang Account page ng App at piliin ang Burahin ang account. Permanenteng binubura nito ang impormasyon ng iyong account, ang iyong Cloud Sync copy, ang bawat larawang iniimbak mo sa amin, at ang mga shared ledger at album na pagmamay-ari mo, at binabawi nito ang Apple sign-in ng App. Kapag in-unlink ang isang browser mula sa Web Dashboard, binubura ang kopyang itinatago nito: agad kapag nag-unlink ka sa browser, at sa susunod na pagkonekta nito kapag nag-unlink ka mula sa App.",
+          "Hindi binubura ng pagbura ng iyong data ang mga rekord ng iyong subscription na hawak ng Apple o Google, o ang analytics data na dati nang naipadala sa PostHog at Google Analytics for Firebase. Para humiling ng pagbura ng analytics data, makipag-ugnayan sa amin sa email sa ibaba. Nasa aming {dataDeletion} ang kumpletong mga hakbang."
+        ]
+      },
+      {
+        "title": "10. Mga Third-Party Service",
+        "paragraphs": [
+          "Ginagamit namin ang mga sumusunod na service provider. Ang bawat isa ay tumatanggap lang ng data na kailangan nito para sa layunin nito."
         ],
         "table": {
           "headers": [
@@ -507,8 +595,8 @@
           "rows": [
             [
               "PostHog / Google Analytics for Firebase",
-              "Pseudonymous na usage analytics",
-              "Random app ID, mga event sa paggamit ng feature, preferences"
+              "Pseudonymous na usage analytics, mga ulat ng error, mga session recording",
+              "Random app ID, mga event sa paggamit ng feature, preferences, mga nakatagong recording"
             ],
             [
               "RevenueCat",
@@ -516,9 +604,34 @@
               "Random na app ID, status ng subscription"
             ],
             [
-              "Cloudflare (Workers, Durable Objects)",
-              "Koneksyon ng Web Dashboard, kung gagamitin mo lang ito",
-              "Ang iyong data, may end-to-end encryption at habang nasa biyahe lang; mga detalye ng koneksyon tulad ng IP address, saglit na itinatago sa mga log ng Cloudflare"
+              "Cloudflare (Workers, D1, R2, Durable Objects, Email, Turnstile)",
+              "Pagho-host ng aming mga server, account, mga larawan ng Cloud Sync, mga shared na album, mga email sa pag-sign in, ang koneksyon ng Web Dashboard",
+              "Impormasyon ng account, mga na-sync na larawan, shared na data ng grupo, data ng Web Dashboard na may end-to-end encryption habang nasa biyahe, mga detalye ng koneksyon tulad ng IP address"
+            ],
+            [
+              "Turso",
+              "Database hosting para sa Cloud Sync at mga shared ledger at album",
+              "Ang iyong na-sync na Money2Time data at shared na data ng grupo"
+            ],
+            [
+              "OpenRouter, Anthropic at iba pang AI model provider",
+              "Pagbasa ng mga resibo at pagsusuri ng mga notification ng pagbabayad",
+              "Mga larawan ng resibo o teksto ng notification, currency, mga pangalan ng kategorya at account"
+            ],
+            [
+              "Google (Sign-In, Drive)",
+              "Pag-sign in at mga backup, kung ginagamit mo ang mga ito",
+              "Mga kahilingan sa pag-sign in; napupunta ang iyong mga backup file sa sarili mong Drive"
+            ],
+            [
+              "Apple (Sign in with Apple, iCloud, Push Notification service)",
+              "Pag-sign in, mga backup, at mga update ng live na kita, kung ginagamit mo ang mga ito",
+              "Mga kahilingan sa pag-sign in; napupunta ang iyong mga backup file sa sarili mong iCloud; mga update ng Live Activity"
+            ],
+            [
+              "Frankfurter",
+              "Mga exchange rate ng currency",
+              "Mga currency code at mga detalye ng koneksyon tulad ng IP address"
             ],
             [
               "Apple App Store / Google Play",
@@ -529,27 +642,27 @@
         }
       },
       {
-        "title": "9. Seguridad ng Data",
+        "title": "11. Seguridad ng Data",
         "paragraphs": [
-          "Ang iyong financial data ay nakaimbak sa isang hindi naka-encrypt na lokal na database na protektado ng built-in security ng iyong device. Kapag ginamit mo ang Web Dashboard, ine-encrypt ito sa iyong telepono gamit ang AES-256-GCM, na may key na pinagkasunduan ng iyong telepono at browser sa pamamagitan ng P-256 key exchange, at ipinapadala sa HTTPS; hindi kailanman hawak ng aming server ang key. Standard at nailathalang encryption algorithm lang ang ginagamit ng App."
+          "Protektado ng built-in security ng iyong device ang data sa iyong device. Lahat ng ipinapadala ng App sa aming mga server ay dumadaan sa HTTPS, at limitado ang access sa aming mga server at database. Naka-encrypt na iniimbak ang mga sign-in token mula sa Apple at ang mga credential para sa bawat Cloud Sync database. Ang data ng Web Dashboard ay naka-encrypt nang end-to-end sa iyong telepono gamit ang AES-256-GCM, na may key na pinagkasunduan ng iyong telepono at browser sa pamamagitan ng P-256 key exchange; hindi kailanman hawak ng aming server ang key. Walang end-to-end encryption ang data ng Cloud Sync at ng shared ledger at album. Standard at nailathalang encryption algorithm lang ang ginagamit ng App."
         ]
       },
       {
-        "title": "10. Privacy ng mga Bata",
+        "title": "12. Privacy ng mga Bata",
         "paragraphs": [
           "Hindi nakatuon ang App sa mga batang wala pang 13 taong gulang. Hindi kami sadyang nangongolekta ng personal information mula sa mga batang wala pang 13. Kung naniniwala kang may batang nagbigay ng data sa pamamagitan ng App, makipag-ugnayan sa amin at gagawa kami ng hakbang para alisin ang naturang impormasyon."
         ]
       },
       {
-        "title": "11. Mga Pagbabago sa Patakarang Ito",
+        "title": "13. Mga Pagbabago sa Patakarang Ito",
         "paragraphs": [
           "Maaari naming i-update ang Privacy Policy na ito paminsan-minsan. Makikita ang mga pagbabago sa page na ito kasama ang na-update na Huling na-update na petsa. Ang patuloy na paggamit ng App pagkatapos ng mga pagbabago ay nangangahulugan ng pagtanggap sa na-update na patakaran."
         ]
       }
     ],
     "contact": {
-      "title": "12. Makipag-ugnayan sa Amin",
-      "body": "Kung mayroon kang anumang tanong tungkol sa Privacy Policy na ito, kailangan ng suporta, o gustong humiling ng pagbura ng analytics data, makipag-ugnayan sa amin sa:",
+      "title": "14. Makipag-ugnayan sa Amin",
+      "body": "Kung mayroon kang anumang tanong tungkol sa Privacy Policy na ito, kailangan ng suporta, o gustong humiling ng pagbura ng iyong data, makipag-ugnayan sa amin sa:",
       "formPrefix": "Maaari mo ring gamitin ang",
       "formLink": "contact form",
       "formSuffix": "sa site na ito."
@@ -557,7 +670,7 @@
   },
   "terms": {
     "title": "Mga Tuntunin ng Paggamit",
-    "lastUpdated": "Huling na-update: Marso 25, 2026",
+    "lastUpdated": "Huling na-update: Nobyembre 15, 2026",
     "privacyPolicyLabel": "Patakaran sa Privacy",
     "sections": [
       {
@@ -628,7 +741,7 @@
       {
         "title": "5. Iyong Data",
         "paragraphs": [
-          "Lahat ng financial data na inilalagay mo, kabilang ang mga transaksyon, account, kategorya, wage settings, at preferences, ay nakaimbak nang lokal sa iyong device. Wala kaming access sa iyong financial data at hindi namin ito iniimbak sa anumang server.",
+          "Lahat ng financial data na inilalagay mo, kabilang ang mga transaksyon, account, kategorya, wage settings, at preferences, ay nakaimbak nang lokal sa iyong device. Kung gagamit ka ng mga opsyonal na feature gaya ng Cloud Sync, mga shared ledger at album, o pag-scan ng resibo, ipinapadala sa aming mga server ang data na kailangan ng mga ito gaya ng inilalarawan sa Patakaran sa Privacy.",
           "Ikaw lamang ang responsable sa pagpapanatili ng backups ng iyong data. Gamitin ang built-in export feature para gumawa ng backup. Hindi kami mananagot sa anumang pagkawala ng data na dulot ng pagbura ng app, pagkasira ng device, o aksidenteng reset.",
           "Para sa kumpletong detalye tungkol sa paghawak ng data, tingnan ang aming {privacyPolicy}."
         ]
@@ -673,7 +786,7 @@
       {
         "title": "10. Pagwawakas",
         "paragraphs": [
-          "Maaari naming suspindihin o wakasan ang iyong access sa App anumang oras, may dahilan man o wala, at may abiso man o wala. Sa pagwawakas, agad na matatapos ang iyong karapatang gamitin ang App. Dahil lokal na nakaimbak ang iyong data, mananatili ito sa iyong device hanggang i-uninstall mo ang App o manu-mano mo itong i-reset.",
+          "Maaari naming suspindihin o wakasan ang iyong access sa App anumang oras, may dahilan man o wala, at may abiso man o wala. Sa pagwawakas, agad na matatapos ang iyong karapatang gamitin ang App. Mananatili ang data sa iyong device hanggang i-uninstall mo ang App o manu-mano mo itong i-reset, at maaari mong burahin ang iyong account at ang data sa aming mga server gaya ng inilalarawan sa Patakaran sa Privacy.",
           "Maaari mong ihinto ang paggamit ng App anumang oras sa pamamagitan ng pag-uninstall nito."
         ]
       },
@@ -697,23 +810,45 @@
   },
   "dataDeletion": {
     "title": "Kahilingan sa Pagtanggal ng Data",
-    "lastUpdated": "Huling na-update: Oktubre 20, 2026",
-    "intro": "Ang Money2Time ay isang local-first na app: lahat ng iyong financial data ay nakaimbak lamang sa iyong device at hindi kailanman iniimbak sa aming mga server. Ipinapaliwanag ng page na ito kung paano humiling na tanggalin ang data na nauugnay sa Money2Time app, kasama ang mga hakbang para humiling ng pagtanggal at kung aling mga uri ng data ang tinatanggal o itinatago, kasama ang anumang panahon ng pag-iimbak.",
+    "lastUpdated": "Huling na-update: Nobyembre 15, 2026",
+    "intro": "Ang Money2Time ay isang local-first na app: nakaimbak ang iyong financial data sa iyong device, at iniimbak lang ito sa aming mga server kung mag-sign in ka at gagamit ng Cloud Sync o mga shared ledger at album. Kung i-on mo ang live na kita sa iOS, itinatago rin sa aming mga server ang iyong hourly rate at iskedyul ng shift habang tumatakbo ito. Ipinapaliwanag ng page na ito kung paano tanggalin ang data na nauugnay sa Money2Time app, kung aling mga uri ng data ang tinatanggal o itinatago, at ang anumang panahon ng pag-iimbak.",
+    "links": {
+      "googlePermissions": "myaccount.google.com/permissions"
+    },
     "sections": [
       {
         "title": "Paano Humiling ng Pagtanggal ng Data",
         "subsections": [
           {
+            "title": "Tanggalin ang iyong account at cloud data",
+            "paragraphs": [
+              "Kung nag-sign in ka, ikaw mismo ang makakapagtanggal ng iyong account at ng lahat ng nakaimbak kasama nito sa aming mga server:"
+            ],
+            "lists": [
+              [
+                "Buksan ang Money2Time app at pumunta sa iyong Account page.",
+                "I-tap ang \"Burahin ang account\" at kumpirmahin.",
+                "Agad na tinatanggal ang impormasyon ng iyong account (pangalan, email address, mga detalye ng pag-sign in), ang iyong Cloud Sync copy, ang bawat larawang iniimbak mo sa amin, at ang mga shared ledger at album na pagmamay-ari mo. Nananatili ang data sa iyong telepono hanggang tanggalin mo ito roon."
+              ]
+            ]
+          },
+          {
             "title": "Tanggalin ang data na nakaimbak sa iyong device",
             "paragraphs": [
-              "Halos lahat ng iyong data, kasama ang lahat ng iyong financial data, ay nakaimbak lamang sa iyong device. Maaari mo itong tanggalin anumang oras:"
+              "Maaari mong tanggalin ang data sa iyong device anumang oras:"
             ],
             "lists": [
               [
                 "Buksan ang Money2Time app at pumunta sa Settings.",
-                "I-tap ang \"Reset All Data\" para permanenteng tanggalin ang lahat ng transaksyon, account, kategorya, recurring rule, at setting ng sahod.",
-                "Bilang alternatibo, i-uninstall ang app para tuluyang alisin ang lokal na database at lahat ng nakaimbak na data."
+                "I-tap ang \"I-reset ang Data\" para permanenteng tanggalin ang iyong mga account, kategorya, at transaksyon. Kung naka-on ang Cloud Sync, binubura rin nito ang iyong cloud copy.",
+                "Bilang alternatibo, i-uninstall ang app para alisin ang lokal na database mula sa iyong device."
               ]
+            ]
+          },
+          {
+            "title": "Tanggalin ang iyong mga backup",
+            "paragraphs": [
+              "Ang mga backup na ginawa mo sa Google Drive o iCloud ay nakaimbak sa sarili mong account, hindi sa aming mga server. Tanggalin ang mga ito sa Google Drive (ang folder na Money2Time) o sa mga setting ng iyong iCloud storage. Maaari mo ring alisin ang access ng Money2Time sa iyong Google Account sa {googlePermissions}."
             ]
           },
           {
@@ -730,14 +865,14 @@
             ]
           },
           {
-            "title": "Humiling ng pagtanggal ng analytics at subscription data",
+            "title": "Humiling ng pagtanggal ng analytics at iba pang data",
             "paragraphs": [
-              "Para humiling na tanggalin ang analytics o subscription data na nauugnay sa iyong random app identifier, makipag-ugnayan sa amin:"
+              "Para humiling na tanggalin ang analytics o subscription data na nauugnay sa iyong random app identifier, o ang anumang iba pang data kung hindi mo magamit ang app, makipag-ugnayan sa amin:"
             ],
             "lists": [
               [
                 "Mag-email sa amin sa address sa ibaba na may paksang \"Data Deletion Request\", o gamitin ang contact form sa site na ito.",
-                "Gamitin ang copy button sa tabi ng User ID sa Settings > Display at isama ang buong ID para mahanap namin ang data na nauugnay sa iyong App.",
+                "Gamitin ang copy button sa tabi ng User ID sa Mga setting > Display at isama ang buong ID, at ang email address ng iyong account kung nag-sign in ka, para mahanap namin ang iyong data.",
                 "Ipoproseso namin ang iyong kahilingan at kukumpirmahin ang pagkumpleto sa loob ng 30 araw."
               ]
             ]
@@ -757,14 +892,49 @@
           ],
           "rows": [
             [
-              "Financial data sa device (mga transaksyon, account, kategorya, recurring rule, setting ng sahod)",
+              "Financial data sa device (mga transaksyon, account, kategorya, budget, recurring rule, setting ng sahod)",
               "Tinanggal",
-              "Agad na inaalis kapag ni-reset mo ang data o na-uninstall ang app. Wala kaming itinatago."
+              "Agad na inaalis kapag ni-reset mo ang data o na-uninstall ang app."
+            ],
+            [
+              "Impormasyon ng account (pangalan, email address, Google o Apple user ID, mga sign-in session)",
+              "Tinanggal",
+              "Agad na inaalis kapag tinanggal mo ang iyong account."
+            ],
+            [
+              "Cloud Sync copy at ang mga larawang iniimbak mo sa amin",
+              "Tinanggal",
+              "Agad na inaalis kapag tinanggal mo ang iyong account."
+            ],
+            [
+              "Mga shared ledger at album na pagmamay-ari mo",
+              "Tinanggal",
+              "Inaalis para sa bawat miyembro kapag tinanggal mo ang iyong account."
+            ],
+            [
+              "Mga bill at pagbabagong idinagdag mo sa mga grupong pagmamay-ari ng iba",
+              "Itinatago",
+              "Itinatago bilang bahagi ng shared na rekord ng grupong iyon habang umiiral ang grupo."
+            ],
+            [
+              "Mga backup sa iyong Google Drive o iCloud",
+              "Nasa iyong kontrol",
+              "Itinatago sa sarili mong account hanggang tanggalin mo ang mga ito roon."
             ],
             [
               "Kopya ng Web Dashboard sa browser na na-link mo",
               "Tinanggal",
-              "Inaalis sa browser na iyon kapag in-unlink mo ito o nilinis ang site data nito. Hindi ito kailanman iniimbak ng aming server, kaya wala kaming itinatago."
+              "Inaalis sa browser na iyon kapag in-unlink mo ito o nilinis ang site data nito. Hindi ito kailanman iniimbak ng aming mga server."
+            ],
+            [
+              "Mga larawan ng resibo at teksto ng notification na ipinadala para sa pag-scan",
+              "Hindi iniimbak",
+              "Pinoproseso para magbalik ng resulta at hindi namin iniimbak. Bilang ng paggamit lang ang itinatago, para sa mga limitasyon ng plan."
+            ],
+            [
+              "Data ng live na kita sa iOS (hourly rate, iskedyul ng shift, time zone, Live Activity push token)",
+              "Tinanggal",
+              "Inaalis kapag natapos ang isang Live Activity, o kapag in-off mo ang awtomatikong pagsisimula o inalis ang iyong sahod, at kung hindi, 45 araw matapos itong huling kumpirmahin ng App."
             ],
             [
               "Pseudonymous na analytics data (PostHog / Google Analytics for Firebase)",
@@ -782,14 +952,14 @@
       {
         "title": "Data na Hindi Namin Iniimbak",
         "paragraphs": [
-          "Ang Money2Time ay hindi nangangailangan ng account at hindi nag-iimbak ng iyong pangalan, email, Apple ID, Google Account, o mga detalye ng pagbabayad sa aming mga server. Dahil ang iyong financial data ay hindi kailanman iniimbak sa aming mga server, kahit kapag ginamit mo ang Web Dashboard, hindi namin ito maa-access o matatanggal para sa iyo.",
+          "Hindi namin kailanman iniimbak ang iyong mga detalye ng pagbabayad, numero ng card, o mga password ng Apple ID o Google Account. Hindi namin iniimbak ang iyong mga backup sa Google Drive o iCloud, at hindi namin mababasa ang iyong data sa Web Dashboard, na naka-encrypt nang end-to-end.",
           "Ang mga rekord ng subscription at pagbabayad na hawak ng Apple o Google ay wala sa aming kontrol at direktang pinamamahalaan sa pamamagitan ng iyong Apple o Google account."
         ]
       }
     ],
     "contact": {
       "title": "Makipag-ugnayan sa Amin",
-      "body": "Para humiling ng pagtanggal ng analytics o subscription data, o kung may mga tanong ka, makipag-ugnayan sa amin sa:",
+      "body": "Para humiling ng pagtanggal ng iyong data, o kung may mga tanong ka, makipag-ugnayan sa amin sa:",
       "formPrefix": "Maaari mo ring gamitin ang",
       "formLink": "contact form",
       "formSuffix": "sa site na ito."

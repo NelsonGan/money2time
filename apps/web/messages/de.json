@@ -11,7 +11,7 @@
     },
     "privacy": {
       "title": "Datenschutzerklärung - Money2Time",
-      "description": "Wie Money2Time mit deinen Daten umgeht: lokale Speicherung, Produktanalyse mit einer zufälligen App-ID und kein Verkauf persönlicher oder finanzieller Daten."
+      "description": "Wie Money2Time mit deinen Daten umgeht: lokale Speicherung, optionales Konto und Cloud Sync, wie wir Google-Nutzerdaten verwenden und kein Verkauf persönlicher oder finanzieller Daten."
     },
     "terms": {
       "title": "Nutzungsbedingungen - Money2Time",
@@ -386,59 +386,89 @@
   },
   "privacy": {
     "title": "Datenschutzerklärung",
-    "lastUpdated": "Letzte Aktualisierung: 22. Oktober 2026",
-    "websiteAnalytics": {
-      "title": "Nutzungsanalyse der Website",
-      "paragraphs": [
-        "Auf money2time.com verwenden wir PostHog und Google Analytics, um pseudonyme Seitenaufrufe und eine begrenzte Auswahl an Interaktionen zu messen, etwa Klicks auf App-Downloads, die Auswahl von Anleitungen und Ergebnisse des Kontaktformulars. Diese Dienste können Browserspeicher oder Cookies verwenden und technische Informationen wie ungefähre Region, Geräte- und Browsertyp sowie die verweisende Website verarbeiten. Nutzer- und Ereignisdaten in Google Analytics werden bis zu 14 Monate gespeichert.",
-        "Im Web-Dashboard (app.money2time.com) messen dieselben Dienste, welche Dashboard-Seiten du öffnest, wann ein Browser verknüpft oder seine Verknüpfung aufgehoben wird, ob Übertragungen von deinem Handy und deine Änderungen gelingen und wann eine Pro-Funktion angeboten wird. Sobald dein Handy seine Daten gesendet hat, werden diese Ereignisse mit der zufälligen App-Kennung dieses Handys verbunden, sodass deine Nutzung von Dashboard und App als ein pseudonymer Nutzer zählt, bis du die Verknüpfung mit dem Browser aufhebst. Das Dashboard hält dies vom Rest von money2time.com getrennt, sodass deine Besuche auf anderen Seiten nicht damit verbunden werden. Dashboard-Ereignisse enthalten nie deine Finanzdaten, und Dashboard-Besuche werden nie als Sitzungsaufzeichnungen erfasst.",
-        "PostHog kann außerdem eine kleine Stichprobe von Website-Besuchen als Sitzungsaufzeichnungen erfassen, in denen jedes Formularfeld unkenntlich gemacht ist, und erhält einen Bericht, wenn auf einer Seite ein Fehler auftritt.",
-        "Wir übermitteln keine Inhalte des Kontaktformulars, Suchtexte aus den Anleitungen, Finanzdaten, Konto-IDs, vollständigen URL-Abfragezeichenfolgen oder Daten für Werbung oder Personalisierung. Die Weiterleitung /download fügt ihrer Analyse keine IP-Adresse oder User-Agent-Zeichenfolge hinzu. Website-Analysen werden nicht geladen, wenn Do Not Track in deinem Browser aktiviert ist."
-      ]
+    "lastUpdated": "Letzte Aktualisierung: 15. November 2026",
+    "links": {
+      "userDataPolicy": "Google API Services User Data Policy",
+      "googlePermissions": "myaccount.google.com/permissions",
+      "dataDeletion": "Seite zur Datenlöschung"
     },
     "sections": [
       {
         "title": "Überblick",
         "paragraphs": [
-          "Money2Time (die App) ist eine persönliche Finanz-App, die deine Ausgaben auf Basis deines Stundenlohns in Zeitäquivalente umrechnet. Deine Privatsphäre ist uns wichtig. Diese Erklärung erläutert, welche Daten die App erhebt, wie sie verwendet werden und welche Rechte du in Bezug auf diese Daten hast."
+          "Money2Time (die App) ist eine persönliche Finanz-App, die deine Ausgaben auf Basis deines Stundenlohns in Zeitäquivalente umrechnet. Sie wird vom Money2Time-Team (wir, uns) betrieben. Diese Erklärung erläutert, welche Daten die App, money2time.com, das Web-Dashboard (app.money2time.com) und geteilte Alben im Web (album.money2time.com) erheben, wie sie verwendet, gespeichert und weitergegeben werden und welche Wahlmöglichkeiten und Rechte du in Bezug auf diese Daten hast.",
+          "Wir verkaufen deine personenbezogenen Daten und Finanzdaten nicht, wir zeigen keine Werbung an und wir verwenden deine Daten nicht für Werbezwecke."
         ]
       },
       {
-        "title": "1. Datenspeicherung & Local-First-Design",
+        "title": "1. Local-First-Design",
         "paragraphs": [
-          "Alle deine Finanzdaten, einschließlich Transaktionen, Konten, Kategorien, wiederkehrender Regeln und Lohneinstellungen, werden lokal auf deinem Gerät in einer geräteinternen Datenbank (SQLite) gespeichert. Wir betreiben keine Server, die deine persönlichen Finanzinformationen speichern, und die App synchronisiert deine Daten nie mit einem unserer Server und sichert sie dort auch nicht. Wenn du das optionale Web-Dashboard nutzt (Abschnitt 6), sendet dein Handy eine Kopie direkt an einen von dir verknüpften Browser, Ende-zu-Ende-verschlüsselt; unser Server leitet sie weiter, ohne sie zu speichern, und kann sie nicht lesen.",
-          "Wenn du die App deinstallierst, werden alle lokal gespeicherten Daten dauerhaft gelöscht."
+          "Du kannst die App ohne Konto nutzen. Standardmäßig werden deine Finanzdaten, einschließlich Transaktionen, Konten, Kategorien, Budgets, wiederkehrender Regeln und Lohneinstellungen, nur auf deinem Gerät in einer geräteinternen Datenbank (SQLite) gespeichert.",
+          "Deine Daten verlassen dein Gerät nur für die optionalen Funktionen, die du nutzen möchtest und die jeweils unten beschrieben sind: die Anmeldung bei einem Konto, Cloud Sync, geteilte Bücher und Alben, das Scannen von Belegen und andere KI-Funktionen, Backups in Google Drive oder iCloud, das Web-Dashboard und den Live-Verdienst unter iOS."
         ]
       },
       {
         "title": "2. Informationen, die wir erheben",
         "subsections": [
           {
-            "title": "Finanzdaten (nur lokal gespeichert)",
+            "title": "Daten auf deinem Gerät",
             "lists": [
               [
-                "Transaktionsbeträge, Daten, Kategorien, Notizen und Stimmungstags",
-                "Kontonamen, Kontotypen und Salden",
+                "Transaktionsbeträge, Daten, Titel, Kategorien, Notizen, Stimmungstags und Belegfotos",
+                "Kontonamen, Kontotypen, Salden, Logos und von dir hinzugefügte Zahlungs-QR-Codes",
                 "Informationen zu Lohn und Stundenlohn",
-                "Regeln für wiederkehrende Transaktionen",
-                "Kategorienamen und Organisation"
+                "Budgets, Ziele, wiederkehrende Regeln, Alben und Kategorienamen",
+                "Zahlungsbenachrichtigungen, die die App liest, um Transaktionen zu erfassen, wenn du „Aus Benachrichtigungen erfassen“ aktivierst"
               ]
             ],
             "paragraphs": [
-              "Diese Daten verlassen dein Gerät nie, es sei denn, du entscheidest dich ausdrücklich für den Export oder dafür, sie an einen mit dem Web-Dashboard verknüpften Browser zu senden."
+              "Sofern du keine der unten beschriebenen optionalen Funktionen nutzt, bleiben diese Daten auf deinem Gerät."
+            ]
+          },
+          {
+            "title": "Kontoinformationen",
+            "paragraphs": [
+              "Ein Konto ist optional. Du kannst dich mit Google, mit Apple (unter iOS) oder mit einem Einmalcode anmelden, der an deine E-Mail-Adresse gesendet wird. Wenn du dich anmeldest, speichern wir deine E-Mail-Adresse, deinen Namen, wie er von Google oder Apple bereitgestellt (oder von dir eingegeben) wird, die von Google bereitgestellte Adresse deines Profilbilds, die Nutzer-ID, die Google oder Apple dir für diese App zuweist, und das von ihnen ausgestellte Anmeldetoken. Für jedes angemeldete Handy speichern wir außerdem dessen zufällige App-ID, damit dein Pro-Abonnement auf jedem Handy funktioniert, auf dem du dich anmeldest. Für deine Sitzung speichern wir ein Sitzungstoken, die IP-Adresse und den User-Agent des Geräts. Anfragen zur Anmeldung per E-Mail werden mit Cloudflare Turnstile geprüft, um automatisierten Missbrauch zu verhindern.",
+              "Wir verwenden Kontoinformationen nur, um dich anzumelden, dich angemeldet zu halten, deine Anmeldemethoden mit derselben bestätigten E-Mail-Adresse miteinander zu verbinden, dir deine Pro-Vorteile auf all deinen Handys bereitzustellen und den Personen, mit denen du ein Buch oder Album teilst, deinen Namen anzuzeigen."
+            ]
+          },
+          {
+            "title": "Cloud Sync",
+            "paragraphs": [
+              "Cloud Sync ist optional und bleibt deaktiviert, bis du es aktivierst. Wenn es aktiviert ist, speichert die App eine Kopie deiner Money2Time-Daten (dieselben Daten wie bei einem Backup, einschließlich der von dir hinzugefügten Bilder wie Belegfotos, Titelfotos, Logos und Zahlungs-QR-Codes) auf unseren Servern, damit sie auf all deinen angemeldeten Geräten gleich bleiben. Deine Daten werden in einer Datenbank ausschließlich für dein Konto gespeichert, die von Turso gehostet wird, und deine Bilder werden privat auf Cloudflare R2 gespeichert. Sie werden über HTTPS übertragen, sind aber nicht Ende-zu-Ende-verschlüsselt; das bedeutet, dass unsere Systeme sie lesen können, um sie zu synchronisieren. Benachrichtigungen, die für die Erfassung und das Lernen von Händlern aufgezeichnet werden, werden nicht synchronisiert.",
+              "Die Abmeldung beendet die Synchronisierung. Die Cloud-Kopie wird aufbewahrt, bis du dein Konto löschst."
+            ]
+          },
+          {
+            "title": "Geteilte Bücher und Alben",
+            "paragraphs": [
+              "Wenn du ein geteiltes Buch oder ein geteiltes Album erstellst oder ihm beitrittst, werden die Daten, die du hinzufügst, auf unseren Servern gespeichert und sind für alle Mitglieder sichtbar: Namen der Mitglieder, Rechnungen (Titel, Betrag, Datum, Währung, wer bezahlt hat und wie sie aufgeteilt wird), Zahlungen, Einstellungen, das Titelfoto und ein Aktivitätsprotokoll darüber, wer was geändert hat. Dein eigenes Konto, deine Kategorie, deine Notiz, dein Belegfoto und deine Stimmung zu einer Rechnung werden nie mit der Gruppe geteilt. Dein Anzeigename in einer Gruppe ist der Name, den du festlegst, andernfalls dein Anmeldename; hast du keinen von beiden, ist es eine teilweise verborgene Form deiner E-Mail-Adresse, etwa ne***@gmail.com. Der Eigentümer eines geteilten Buchs kann die E-Mail-Adressen der Mitglieder sehen. Jeder mit einem Einladungslink kann den Namen der Gruppe, den Anzeigenamen ihres Eigentümers und die Anzahl ihrer Mitglieder sehen.",
+              "Rechnungen und Änderungen, die du hinzufügst, verbleiben als Teil ihres gemeinsamen Datenbestands bei der Gruppe, auch nachdem du sie verlassen hast."
+            ]
+          },
+          {
+            "title": "Belegscan und KI-Funktionen",
+            "paragraphs": [
+              "Wenn du einen Beleg oder einen Screenshot scannst, sendet die App das Bild zusammen mit deiner Währung sowie deinen Kategorie- und Kontonamen an unseren Scandienst, der KI-Modelle von Anthropic und anderen Modellanbietern verwendet, die über OpenRouter angebunden sind, um die Details auszulesen. Wenn du die automatische Prüfung von Zahlungsbenachrichtigungen aktivierst, werden der Benachrichtigungstext und deine Kategorienamen auf dieselbe Weise gesendet. Wir speichern diese Bilder und Texte nicht; wir speichern nur Nutzungszähler, um die Limits deines Tarifs anzuwenden. Die KI-Anbieter verarbeiten sie, um ein Ergebnis zurückzugeben."
+            ]
+          },
+          {
+            "title": "Live-Verdienst (iOS)",
+            "paragraphs": [
+              "Wenn du den Live-Verdienst auf dem Sperrbildschirm aktivierst, sendet die App deinen Stundenlohn, dein Währungssymbol, deinen Schichtplan, deine Zeitzone, deine zufällige App-ID und das von Apple bereitgestellte Push-Token für die Live-Aktivität an unseren Server, der die Live-Aktivität während ihrer Laufzeit über den Apple Push Notification service aktualisiert. Die Daten einer laufenden Live-Aktivität werden gelöscht, wenn sie endet. Ein Zeitplan für den automatischen Start des Live-Verdiensts wird gelöscht, wenn du den automatischen Start ausschaltest oder deinen Lohn entfernst, und andernfalls 45 Tage nachdem die App ihn zuletzt bestätigt hat. Daten zum Live-Verdienst sind nicht mit einem Konto verknüpft."
             ]
           },
           {
             "title": "Zufällige App-ID",
             "paragraphs": [
-              "Beim ersten Start erzeugt die App eine zufällige eindeutige Kennung, die mit m2t_ beginnt und nicht mit deinem Namen, deiner E-Mail-Adresse, deiner Apple ID oder einer persönlichen Identität verknüpft ist. Dieselbe Kennung wird für Produktanalysen und die Abonnementverwaltung an PostHog, Google Analytics for Firebase und RevenueCat übermittelt sowie an jeden Browser, den du mit dem Web-Dashboard verknüpfst und dessen Nutzungsanalyse (PostHog und Google Analytics) sie ebenfalls verwendet."
+              "Beim ersten Start erzeugt die App eine zufällige eindeutige Kennung, die mit m2t_ beginnt. Sie wird für Produktanalysen und die Abonnementverwaltung an PostHog, Google Analytics for Firebase und RevenueCat übermittelt sowie an jeden Browser, den du mit dem Web-Dashboard verknüpfst und dessen Nutzungsanalyse sie ebenfalls verwendet. Wenn du dich anmeldest, verknüpfen wir sie auf unseren Servern mit deinem Konto; deinen Namen und deine E-Mail-Adresse senden wir nicht an unsere Analyseanbieter."
             ]
           },
           {
             "title": "Nutzungsanalysen",
             "paragraphs": [
-              "Wir verwenden PostHog und Google Analytics for Firebase, um pseudonyme Nutzungsdaten zu erfassen, die mit dieser zufälligen App-ID verknüpft sind, und die App zu verbessern. Die Analyse enthält keine Finanzbeträge, Transaktionsdetails, Kontostände, Notizen, Belege, Backups oder personenbezogenen Informationen.",
-              "PostHog erhält außerdem Absturz- und Fehlerberichte und zeichnet eine kleine Stichprobe von App-Sitzungen als Bildschirmaufnahmen auf, damit wir Probleme finden und beheben können. In diesen Aufnahmen ist alles unkenntlich gemacht, was deine Informationen zeigt: Texte, Zahlen, Eingabefelder, Diagramme und jedes Foto, das du hinzufügst. Sichtbar bleibt nur das eigene Design der App, etwa Symbole, Illustrationen und Schaltflächenbeschriftungen. Diese Aufnahmen zeigen niemals deine Finanzdaten."
+              "Wir verwenden PostHog und Google Analytics for Firebase, um pseudonyme Nutzungsdaten zu erfassen, die mit der zufälligen App-ID verknüpft sind, damit wir verstehen, wie die App genutzt wird, und sie verbessern können. Die Analyse enthält keine Finanzbeträge, Transaktionsdetails, Kontostände, Notizen, Belege, Backups, Namen oder E-Mail-Adressen.",
+              "PostHog erhält außerdem Absturz- und Fehlerberichte, erfasst für jede KI-Anfrage das Modell, die Tokenanzahl und die Kosten (nie das Bild oder den Text) und zeichnet eine kleine Stichprobe von App-Sitzungen als Bildschirmaufnahmen auf, damit wir Probleme finden und beheben können. In diesen Aufnahmen ist alles unkenntlich gemacht, was deine Informationen zeigt: Texte, Zahlen, Eingabefelder, Diagramme und jedes Foto, das du hinzufügst. Sichtbar bleibt nur das eigene Design der App, etwa Symbole, Illustrationen und Schaltflächenbeschriftungen. Diese Aufnahmen zeigen niemals deine Finanzdaten."
             ],
             "lists": [
               [
@@ -448,20 +478,61 @@
                 "Plattform wie iOS oder Android"
               ]
             ]
+          },
+          {
+            "title": "Nutzungsanalyse der Website",
+            "paragraphs": [
+              "Auf money2time.com verwenden wir PostHog und Google Analytics, um pseudonyme Seitenaufrufe und eine begrenzte Auswahl an Interaktionen zu messen, etwa Klicks auf App-Downloads, die Auswahl von Anleitungen und Ergebnisse des Kontaktformulars. Diese Dienste können Browserspeicher oder Cookies verwenden und technische Informationen wie ungefähre Region, Geräte- und Browsertyp sowie die verweisende Website verarbeiten. Nutzer- und Ereignisdaten in Google Analytics werden bis zu 14 Monate gespeichert.",
+              "Im Web-Dashboard (app.money2time.com) messen dieselben Dienste, welche Dashboard-Seiten du öffnest, wann ein Browser verknüpft oder seine Verknüpfung aufgehoben wird, ob Übertragungen von deinem Handy und deine Änderungen gelingen und wann eine Pro-Funktion angeboten wird. Sobald dein Handy seine Daten gesendet hat, werden diese Ereignisse mit der zufälligen App-Kennung dieses Handys verbunden, sodass deine Nutzung von Dashboard und App als ein pseudonymer Nutzer zählt, bis du die Verknüpfung mit dem Browser aufhebst. Das Dashboard hält dies vom Rest von money2time.com getrennt, sodass deine Besuche auf anderen Seiten nicht damit verbunden werden. Dashboard-Ereignisse enthalten nie deine Finanzdaten, und Dashboard-Besuche werden nie als Sitzungsaufzeichnungen erfasst.",
+              "Bei geteilten Alben im Web (album.money2time.com) messen dieselben Dienste Seitenaufrufe, Anmeldungen und die verwendete Anmeldemethode, den Beitritt zu einem Album, Bearbeitungen und das Öffnen eines Albums in der App. Diese Ereignisse enthalten nie deinen Namen, deine E-Mail-Adresse oder den Inhalt deiner Alben, und Album-Besuche werden nie als Sitzungsaufzeichnungen erfasst.",
+              "PostHog kann außerdem eine kleine Stichprobe von Website-Besuchen als Sitzungsaufzeichnungen erfassen, in denen jedes Formularfeld unkenntlich gemacht ist, und erhält einen Bericht, wenn auf einer Seite ein Fehler auftritt.",
+              "Wir übermitteln keine Inhalte des Kontaktformulars, Suchtexte aus den Anleitungen, Finanzdaten, E-Mail-Adressen, vollständigen URL-Abfragezeichenfolgen oder Daten für Werbung oder Personalisierung. Die Weiterleitung /download fügt ihrer Analyse keine IP-Adresse oder User-Agent-Zeichenfolge hinzu. Website-Analysen werden nicht geladen, wenn Do Not Track in deinem Browser aktiviert ist."
+            ]
           }
         ]
       },
       {
-        "title": "3. In-App-Käufe & Abonnements",
+        "title": "3. Google-Nutzerdaten",
         "paragraphs": [
-          "Die App bietet ein optionales Premium-Abonnement (Pro), das über RevenueCat verwaltet wird. Die Zahlung wird von Apple oder Google verarbeitet. Wir erhalten oder speichern niemals deine Zahlungsinformationen, Kreditkartendaten oder Zugangsdaten zu Apple ID/Google-Konto.",
-          "RevenueCat erhält deinen Abonnementstatus, die Produktkennung und das Ablaufdatum, um deine Berechtigungen zu verwalten. Dies ist mit der zufälligen App-ID verknüpft, nicht mit deiner persönlichen Identität."
+          "Dieser Abschnitt erläutert, wie die App und unsere Websites auf Daten zugreifen, die sie von Google-APIs erhalten, und wie sie diese verwenden, speichern und weitergeben.",
+          "Die Verwendung und Übertragung von Informationen, die Money2Time von Google-APIs erhält, an eine andere App erfolgen im Einklang mit der {userDataPolicy} (Richtlinie zu Nutzerdaten für Google API-Dienste), einschließlich der Anforderungen zu Limited Use (eingeschränkte Nutzung)."
+        ],
+        "subsections": [
+          {
+            "title": "Daten, auf die wir zugreifen",
+            "lists": [
+              [
+                "Google Sign-In (in der App und auf album.money2time.com): deine Google-Konto-ID, deine E-Mail-Adresse und ob sie bestätigt ist, dein Name und die Adresse deines Profilbilds, über die Bereiche openid, email und profile.",
+                "Google Drive (nur wenn du Google Drive für Backups wählst): Wenn du Google Drive verbindest, meldest du dich in der App mit denselben Bereichen openid, email und profile bei Google an, damit die App anzeigen kann, in welches Google-Konto deine Backups gehen, und zusätzlich wird der Bereich drive.file angefordert, mit dem die App nur die von ihr erstellten Backup-Dateien sehen und verwalten kann. Die App kann keine anderen Dateien in deinem Drive sehen. Diese Profildaten bleiben auf deinem Gerät, es sei denn, du verwendest sie auch, um dich bei einem Money2Time-Konto anzumelden."
+              ]
+            ]
+          },
+          {
+            "title": "Wie wir sie verwenden",
+            "paragraphs": [
+              "Wir verwenden deine Google-Profildaten nur, um dein Money2Time-Konto zu erstellen und dich dort anzumelden, um es mit anderen Anmeldemethoden mit derselben bestätigten E-Mail-Adresse zu verbinden, um den Personen in Büchern und Alben, die du teilst, deinen Namen anzuzeigen (und dem Eigentümer eines geteilten Buchs, dem du beitrittst, deine E-Mail-Adresse) und um anzuzeigen, in welches Google-Konto deine Backups gehen. Den Zugriff auf Google Drive verwenden wir nur, um deine Money2Time-Backup-Dateien zu speichern, aufzulisten und wiederherzustellen. Wir verwenden Google-Nutzerdaten nicht für Werbung, wir verkaufen sie nicht und wir verwenden sie nicht zum Trainieren von KI-Modellen."
+            ]
+          },
+          {
+            "title": "Wie wir sie speichern und weitergeben",
+            "paragraphs": [
+              "Deine Google-Profildaten werden in unserer Kontodatenbank bei Cloudflare gespeichert und aufbewahrt, bis du dein Konto löschst. Deine Drive-Backups werden direkt von deinem Handy in dein Google Drive geschrieben; sie laufen nie über unsere Server und werden dort nie gespeichert, und du kannst sie jederzeit in Google Drive löschen. Wir geben Google-Nutzerdaten nur auf folgende Weise weiter: deinen Namen, oder eine teilweise verborgene Form deiner E-Mail-Adresse, wenn du keinen Namen hast, an die Mitglieder der Bücher und Alben, denen du beitrittst, und an alle, die deren Einladungslinks haben; deine E-Mail-Adresse an den Eigentümer eines geteilten Buchs, dem du beitrittst; und all diese Daten an die Dienstleister, die unsere Server hosten (Cloudflare und Turso), gemäß deren Bedingungen zur Datenverarbeitung. Wir senden sie nie an unsere Analyseanbieter oder KI-Anbieter.",
+              "Du kannst den Zugriff von Money2Time auf dein Google-Konto jederzeit unter {googlePermissions} entfernen, und du kannst dein Konto in der App löschen, wie in Abschnitt 9 beschrieben."
+            ]
+          }
         ]
       },
       {
-        "title": "4. Benachrichtigungen",
+        "title": "4. In-App-Käufe & Abonnements",
         "paragraphs": [
-          "Die App kann um Erlaubnis bitten, Benachrichtigungen zu senden. Alle Benachrichtigungen werden lokal auf deinem Gerät geplant. Von externen Servern werden keine Push-Benachrichtigungen gesendet. Du kannst die Benachrichtigungsberechtigung verweigern oder Benachrichtigungen jederzeit in den Einstellungen deines Geräts deaktivieren."
+          "Die App bietet ein optionales Premium-Abonnement (Pro), das über RevenueCat verwaltet wird. Die Zahlung wird von Apple oder Google verarbeitet. Wir erhalten oder speichern niemals deine Zahlungsinformationen, Kreditkartendaten oder Passwörter für Apple ID/Google-Konto.",
+          "RevenueCat erhält deinen Abonnementstatus, die Produktkennung und das Ablaufdatum, um deine Berechtigungen zu verwalten, verknüpft mit der zufälligen App-ID. Wenn du dich anmeldest, prüfen unsere Server deinen Pro-Status bei RevenueCat, damit er auf all deinen angemeldeten Handys gilt."
+        ]
+      },
+      {
+        "title": "5. Benachrichtigungen",
+        "paragraphs": [
+          "Die App kann um Erlaubnis bitten, Benachrichtigungen zu senden. Erinnerungen und Zusammenfassungen werden lokal auf deinem Gerät geplant. Du kannst die Benachrichtigungsberechtigung verweigern oder Benachrichtigungen jederzeit in den Einstellungen deines Geräts deaktivieren."
         ],
         "lists": [
           [
@@ -472,31 +543,48 @@
         ]
       },
       {
-        "title": "5. Geräteberechtigungen",
+        "title": "6. Geräteberechtigungen",
         "paragraphs": [
-          "Die App fordert nur die Benachrichtigungsberechtigung an, um lokale Erinnerungen und Zusammenfassungen zu planen. Die App greift nicht auf deine Kamera, dein Mikrofon, deine Fotomediathek, Kontakte, Kalender, Nachrichten, deinen Standort, Gesundheitsdaten, Fitnessdaten, andere Apps oder deinen Browserverlauf zu."
+          "Die App fragt jede Berechtigung erst an, wenn du die Funktion nutzt, die sie benötigt, und du kannst jede davon in den Einstellungen deines Geräts deaktivieren."
+        ],
+        "lists": [
+          [
+            "Kamera: zum Fotografieren von Belegen und zum Scannen des Codes, mit dem das Web-Dashboard verknüpft wird.",
+            "Fotomediathek: zum Anhängen oder Scannen von Fotos, die du auswählst, und zum Speichern von Bildern, die du exportierst.",
+            "Mikrofon und Spracherkennung: zum Hinzufügen von Transaktionen per Sprache. Deine Sprache wird vom Spracherkennungsdienst von Apple oder Google in Text umgewandelt, der sie auf deren Servern verarbeiten kann.",
+            "Face ID oder Fingerabdruck: zum Entsperren der App, wenn du die App-Sperre aktivierst. Die App erhält niemals deine biometrischen Daten.",
+            "Benachrichtigungszugriff (Android): zum Erfassen von Transaktionen aus den Zahlungsbenachrichtigungen der von dir ausgewählten Apps, wenn du „Aus Benachrichtigungen erfassen“ aktivierst. Andere Benachrichtigungen werden ignoriert.",
+            "Benachrichtigungen: für lokale Erinnerungen und Zusammenfassungen."
+          ]
         ]
       },
       {
-        "title": "6. Datenexport, Import & Web-Dashboard",
+        "title": "7. Backups, Export, Import & Web-Dashboard",
         "paragraphs": [
-          "Du kannst jederzeit über die Einstellungen der App alle deine Finanzdaten als JSON-Datei exportieren. Die exportierte Datei wird über die native Teilen-Funktion deines Geräts geteilt. Wir erhalten oder verarbeiten deine exportierten Daten nicht.",
-          "Du kannst auch Daten aus einem früheren Money2Time-Backup importieren oder von der Money Manager-App migrieren. Beim Import werden alle vorhandenen Daten auf deinem Gerät ersetzt.",
+          "Du kannst deine Daten manuell oder automatisch jeden Tag in Google Drive oder iCloud sichern. Backups werden von deinem Handy direkt in deinem eigenen Google-Drive- oder iCloud-Konto gespeichert, und wir erhalten sie nie. Du kannst außerdem jederzeit alle deine Daten als JSON-Datei exportieren, die über die native Teilen-Funktion deines Geräts geteilt wird, und ein früheres Money2Time-Backup oder Daten aus der Money Manager-App importieren. Beim Import werden alle vorhandenen Daten auf deinem Gerät ersetzt.",
           "Das Web-Dashboard ist optional. Um es zu nutzen, öffnest du app.money2time.com auf einem Computer und scannst den dort angezeigten Code mit der App. Dein Handy und dieser Browser vereinbaren dann einen Verschlüsselungsschlüssel, den nur die beiden kennen. Solange der Bildschirm „Web-Dashboard“ der App und der Browser beide geöffnet sind, sendet die App dem Browser eine Kopie deiner Daten (dieselben Daten wie bei einem Export, mit den von dir hinzugefügten Logos, Symbolen und Titelfotos, aber ohne Belegfotos und Zahlungs-QR-Codes), Ende-zu-Ende-verschlüsselt mit AES-256-GCM. Sie läuft über einen Server, den wir auf Cloudflare betreiben; es leitet die verschlüsselten Daten beim Eintreffen weiter und speichert sie nicht. Wir können sie nicht lesen.",
-          "Der Browser behält die zuletzt empfangene Kopie, weiterhin verschlüsselt, zusammen mit dem Schlüssel in seinem eigenen Speicher, bis du die Verknüpfung im Browser oder in der App aufhebst. Änderungen, die du im Dashboard vornimmst, gelangen auf dieselbe Weise verschlüsselt zurück auf dein Handy, und die App speichert sie nur, solange ihr Bildschirm „Web-Dashboard“ geöffnet ist, und nur von einem Browser, dem du Änderungen erlaubt hast. Dein Handy teilt dem Browser außerdem mit, ob du Money2Time Pro hast, damit er die Pro-Dashboards freischalten kann, sowie seine zufällige App-Kennung für die Nutzungsanalyse des Dashboards. Es gibt kein Konto: Wir speichern keine E-Mail-Adresse, und der Server, der deine Daten weiterleitet, speichert keine Aufzeichnung darüber, welche Handys und Browser verknüpft sind."
+          "Der Browser behält die zuletzt empfangene Kopie, weiterhin verschlüsselt, zusammen mit dem Schlüssel in seinem eigenen Speicher, bis du die Verknüpfung im Browser oder in der App aufhebst. Änderungen, die du im Dashboard vornimmst, gelangen auf dieselbe Weise verschlüsselt zurück auf dein Handy, und die App speichert sie nur, solange ihr Bildschirm „Web-Dashboard“ geöffnet ist, und nur von einem Browser, dem du Änderungen erlaubt hast. Dein Handy teilt dem Browser außerdem mit, ob du Money2Time Pro hast, damit er die Pro-Dashboards freischalten kann, sowie seine zufällige App-Kennung für die Nutzungsanalyse des Dashboards. Das Web-Dashboard benötigt kein Konto, und der Server, der deine Daten weiterleitet, speichert keine Aufzeichnung darüber, welche Handys und Browser verknüpft sind.",
+          "Auf album.money2time.com kannst du dich mit Google oder einem E-Mail-Code anmelden, um die geteilten Alben, denen du angehörst, anzusehen und zu bearbeiten. Die Website hält dich mit einem sicheren Cookie bis zu ein Jahr lang angemeldet."
         ]
       },
       {
-        "title": "7. Datenlöschung",
+        "title": "8. Datenaufbewahrung",
         "paragraphs": [
-          "Du hast jederzeit die volle Kontrolle über deine Daten. Alle Daten zurücksetzen löscht dauerhaft alle Transaktionen, Konten, Kategorien, wiederkehrenden Regeln und Lohneinstellungen von deinem Gerät. Nur Transaktionen zurücksetzen löscht deinen Transaktionsverlauf, behält aber Konten und Kategorien bei. Durch das Deinstallieren der App werden die lokale Datenbank und alle gespeicherten Daten vollständig entfernt. Wenn du die Verknüpfung eines Browsers mit dem Web-Dashboard aufhebst, wird die Kopie gelöscht, die er speichert: sofort, wenn du die Verknüpfung im Browser aufhebst, und beim nächsten Verbindungsaufbau, wenn du sie in der App aufhebst. Auch das Löschen der Websitedaten dieses Browsers löscht sie.",
-          "Das Zurücksetzen von Daten innerhalb der App löscht nicht deinen bei Apple/Google gespeicherten Abonnementstatus oder Analysedaten, die zuvor an PostHog / Google Analytics for Firebase gesendet wurden. Um die Löschung von Analysedaten zu beantragen, kontaktiere uns unter der unten angegebenen E-Mail-Adresse."
+          "Daten auf deinem Gerät bleiben erhalten, bis du sie löschst oder die App deinstallierst. Kontoinformationen, deine Cloud-Sync-Kopie und deine Bilder auf unseren Servern werden aufbewahrt, bis du dein Konto löschst. Daten geteilter Bücher und Alben werden aufbewahrt, solange die Gruppe besteht. Daten zum Live-Verdienst werden gelöscht, wenn du ihn ausschaltest, spätestens aber 45 Tage nachdem die App sie zuletzt bestätigt hat. Anmeldesitzungen gelten bis zu ein Jahr und verlängern sich, während du sie nutzt. Beleg- und Benachrichtigungstexte, die zur KI-Verarbeitung gesendet werden, werden von uns nicht gespeichert. Analysedaten werden in Google Analytics bis zu 14 Monate und in PostHog gemäß unseren Aufbewahrungseinstellungen aufbewahrt. Verbindungsdaten wie IP-Adressen werden kurzzeitig in den Protokollen unserer Dienstleister gespeichert."
         ]
       },
       {
-        "title": "8. Drittanbieterdienste",
+        "title": "9. Datenlöschung",
         "paragraphs": [
-          "Die App zeigt keine Werbung an und verwendet keine Werbe-SDKs."
+          "Du hast die volle Kontrolle über deine Daten. „Daten zurücksetzen“ in den Einstellungen löscht deine Konten, Kategorien und Transaktionen dauerhaft von deinem Gerät und, wenn Cloud Sync aktiviert ist, auch aus deiner Cloud-Sync-Kopie. Durch das Deinstallieren der App wird die lokale Datenbank von deinem Gerät entfernt, nicht aber deine Backups in Google Drive oder iCloud oder dein Konto.",
+          "Um dein Konto zu löschen, öffne in der App die Seite „Konto“ und wähle „Konto löschen“. Dadurch werden deine Kontoinformationen, deine Cloud-Sync-Kopie, alle Bilder, die du bei uns gespeichert hast, sowie die geteilten Bücher und Alben, deren Eigentümer du bist, dauerhaft gelöscht, und die Anmeldung mit Apple für die App wird widerrufen. Wenn du die Verknüpfung eines Browsers mit dem Web-Dashboard aufhebst, wird die Kopie gelöscht, die er speichert: sofort, wenn du die Verknüpfung im Browser aufhebst, und beim nächsten Verbindungsaufbau, wenn du sie in der App aufhebst.",
+          "Das Löschen deiner Daten löscht weder deine bei Apple oder Google gespeicherten Abonnementdaten noch Analysedaten, die zuvor an PostHog und Google Analytics for Firebase gesendet wurden. Um die Löschung von Analysedaten zu beantragen, kontaktiere uns unter der unten angegebenen E-Mail-Adresse. Auf unserer {dataDeletion} findest du alle Schritte."
+        ]
+      },
+      {
+        "title": "10. Drittanbieterdienste",
+        "paragraphs": [
+          "Wir nutzen die folgenden Dienstleister. Jeder erhält nur die Daten, die er für seinen Zweck benötigt."
         ],
         "table": {
           "headers": [
@@ -507,8 +595,8 @@
           "rows": [
             [
               "PostHog / Google Analytics for Firebase",
-              "Pseudonyme Nutzungsanalysen",
-              "Zufällige App-ID, Ereignisse zur Funktionsnutzung, Einstellungen"
+              "Pseudonyme Nutzungsanalysen, Fehlerberichte, Sitzungsaufzeichnungen",
+              "Zufällige App-ID, Ereignisse zur Funktionsnutzung, Einstellungen, unkenntlich gemachte Aufzeichnungen"
             ],
             [
               "RevenueCat",
@@ -516,9 +604,34 @@
               "Zufällige App-ID, Abonnementstatus"
             ],
             [
-              "Cloudflare (Workers, Durable Objects)",
-              "Verbindung für das Web-Dashboard, nur wenn du es nutzt",
-              "Deine Daten, Ende-zu-Ende-verschlüsselt und nur während der Übertragung; Verbindungsdaten wie die IP-Adresse, kurzzeitig in den Protokollen von Cloudflare gespeichert"
+              "Cloudflare (Workers, D1, R2, Durable Objects, Email, Turnstile)",
+              "Hosting unserer Server, Konten, Bilder für Cloud Sync, geteilte Alben, Anmelde-E-Mails, die Verbindung für das Web-Dashboard",
+              "Kontoinformationen, synchronisierte Bilder, Daten geteilter Gruppen, Ende-zu-Ende-verschlüsselte Web-Dashboard-Daten während der Übertragung, Verbindungsdaten wie die IP-Adresse"
+            ],
+            [
+              "Turso",
+              "Datenbank-Hosting für Cloud Sync sowie geteilte Bücher und Alben",
+              "Deine synchronisierten Money2Time-Daten und Daten geteilter Gruppen"
+            ],
+            [
+              "OpenRouter, Anthropic und andere KI-Modellanbieter",
+              "Auslesen von Belegen und Prüfen von Zahlungsbenachrichtigungen",
+              "Belegbilder oder Benachrichtigungstext, Währung, Kategorie- und Kontonamen"
+            ],
+            [
+              "Google (Sign-In, Drive)",
+              "Anmeldung und Backups, wenn du sie nutzt",
+              "Anmeldeanfragen; deine Backup-Dateien gehen in dein eigenes Drive"
+            ],
+            [
+              "Apple (Mit Apple anmelden, iCloud, Push Notification service)",
+              "Anmeldung, Backups und Aktualisierungen des Live-Verdiensts, wenn du sie nutzt",
+              "Anmeldeanfragen; deine Backup-Dateien gehen in deine eigene iCloud; Aktualisierungen der Live-Aktivität"
+            ],
+            [
+              "Frankfurter",
+              "Wechselkurse",
+              "Währungscodes und Verbindungsdaten wie die IP-Adresse"
             ],
             [
               "Apple App Store / Google Play",
@@ -529,27 +642,27 @@
         }
       },
       {
-        "title": "9. Datensicherheit",
+        "title": "11. Datensicherheit",
         "paragraphs": [
-          "Deine Finanzdaten werden in einer unverschlüsselten lokalen Datenbank gespeichert, die durch die integrierte Sicherheit deines Geräts geschützt ist. Wenn du das Web-Dashboard nutzt, werden sie auf deinem Handy mit AES-256-GCM verschlüsselt, mit einem Schlüssel, den dein Handy und der Browser per P-256-Schlüsselaustausch vereinbaren, und über HTTPS gesendet; unser Server hat den Schlüssel nie. Die App verwendet ausschließlich standardisierte, veröffentlichte Verschlüsselungsalgorithmen."
+          "Daten auf deinem Gerät sind durch die integrierte Sicherheit deines Geräts geschützt. Alles, was die App an unsere Server sendet, wird über HTTPS übertragen, und der Zugriff auf unsere Server und Datenbanken ist eingeschränkt. Anmeldetokens von Apple und die Zugangsdaten für jede Cloud-Sync-Datenbank werden verschlüsselt gespeichert. Web-Dashboard-Daten werden auf deinem Handy mit AES-256-GCM Ende-zu-Ende-verschlüsselt, mit einem Schlüssel, den dein Handy und dein Browser per P-256-Schlüsselaustausch vereinbaren; unser Server hat den Schlüssel nie. Daten von Cloud Sync sowie von geteilten Büchern und Alben sind nicht Ende-zu-Ende-verschlüsselt. Die App verwendet ausschließlich standardisierte, veröffentlichte Verschlüsselungsalgorithmen."
         ]
       },
       {
-        "title": "10. Datenschutz von Kindern",
+        "title": "12. Datenschutz von Kindern",
         "paragraphs": [
           "Die App richtet sich nicht an Kinder unter 13 Jahren. Wir erheben wissentlich keine personenbezogenen Daten von Kindern unter 13 Jahren. Wenn du glaubst, dass ein Kind über die App Daten bereitgestellt hat, kontaktiere uns bitte, und wir werden Schritte unternehmen, um diese Informationen zu entfernen."
         ]
       },
       {
-        "title": "11. Änderungen an dieser Erklärung",
+        "title": "13. Änderungen an dieser Erklärung",
         "paragraphs": [
           "Wir können diese Datenschutzerklärung von Zeit zu Zeit aktualisieren. Änderungen werden auf dieser Seite mit einem aktualisierten Datum der letzten Aktualisierung wiedergegeben. Die fortgesetzte Nutzung der App nach Änderungen gilt als Zustimmung zur aktualisierten Erklärung."
         ]
       }
     ],
     "contact": {
-      "title": "12. Kontakt",
-      "body": "Wenn du Fragen zu dieser Datenschutzerklärung hast, Support benötigst oder die Löschung von Analysedaten beantragen möchtest, kontaktiere uns bitte unter:",
+      "title": "14. Kontakt",
+      "body": "Wenn du Fragen zu dieser Datenschutzerklärung hast, Support benötigst oder die Löschung deiner Daten beantragen möchtest, kontaktiere uns bitte unter:",
       "formPrefix": "Du kannst auch das",
       "formLink": "Kontaktformular",
       "formSuffix": "auf dieser Website verwenden."
@@ -557,7 +670,7 @@
   },
   "terms": {
     "title": "Nutzungsbedingungen",
-    "lastUpdated": "Letzte Aktualisierung: 25. März 2026",
+    "lastUpdated": "Letzte Aktualisierung: 15. November 2026",
     "privacyPolicyLabel": "Datenschutzerklärung",
     "sections": [
       {
@@ -628,7 +741,7 @@
       {
         "title": "5. Deine Daten",
         "paragraphs": [
-          "Alle von dir eingegebenen Finanzdaten, einschließlich Transaktionen, Konten, Kategorien, Lohneinstellungen und Einstellungen, werden lokal auf deinem Gerät gespeichert. Wir haben keinen Zugriff auf deine Finanzdaten und speichern sie auf keinem Server.",
+          "Alle von dir eingegebenen Finanzdaten, einschließlich Transaktionen, Konten, Kategorien, Lohneinstellungen und Einstellungen, werden lokal auf deinem Gerät gespeichert. Wenn du optionale Funktionen wie Cloud Sync, geteilte Bücher und Alben oder den Belegscan nutzt, werden die dafür benötigten Daten an unsere Server gesendet, wie in der Datenschutzerklärung beschrieben.",
           "Du bist allein dafür verantwortlich, Sicherungskopien deiner Daten zu pflegen. Nutze die integrierte Exportfunktion, um ein Backup zu erstellen. Wir haften nicht für Datenverluste, die durch App-Löschung, Geräteausfall oder versehentliches Zurücksetzen entstehen.",
           "Vollständige Details zum Umgang mit Daten findest du in unserer {privacyPolicy}."
         ]
@@ -673,7 +786,7 @@
       {
         "title": "10. Beendigung",
         "paragraphs": [
-          "Wir können deinen Zugriff auf die App jederzeit mit oder ohne Grund und mit oder ohne Vorankündigung aussetzen oder beenden. Bei Beendigung endet dein Recht zur Nutzung der App sofort. Da deine Daten lokal gespeichert werden, bleiben sie auf deinem Gerät, bis du die App deinstallierst oder sie manuell zurücksetzt.",
+          "Wir können deinen Zugriff auf die App jederzeit mit oder ohne Grund und mit oder ohne Vorankündigung aussetzen oder beenden. Bei Beendigung endet dein Recht zur Nutzung der App sofort. Daten auf deinem Gerät bleiben dort, bis du die App deinstallierst oder sie manuell zurücksetzt, und du kannst dein Konto und die Daten auf unseren Servern löschen, wie in der Datenschutzerklärung beschrieben.",
           "Du kannst die Nutzung der App jederzeit beenden, indem du sie deinstallierst."
         ]
       },
@@ -697,23 +810,45 @@
   },
   "dataDeletion": {
     "title": "Antrag auf Datenlöschung",
-    "lastUpdated": "Letzte Aktualisierung: 20. Oktober 2026",
-    "intro": "Money2Time ist eine local-first-App: Alle deine Finanzdaten werden nur auf deinem Gerät gespeichert und niemals auf unseren Servern gespeichert. Auf dieser Seite wird erklärt, wie du die Löschung der mit der Money2Time-App verknüpften Daten beantragst, einschließlich der Schritte zur Beantragung der Löschung und welche Datenarten gelöscht oder aufbewahrt werden, sowie etwaiger Aufbewahrungsfristen.",
+    "lastUpdated": "Letzte Aktualisierung: 15. November 2026",
+    "intro": "Money2Time ist eine local-first-App: Deine Finanzdaten werden auf deinem Gerät gespeichert und nur dann auf unseren Servern, wenn du dich anmeldest und Cloud Sync oder geteilte Bücher und Alben nutzt. Wenn du den Live-Verdienst unter iOS aktivierst, werden außerdem dein Stundenlohn und dein Schichtplan auf unseren Servern gespeichert, solange er läuft. Auf dieser Seite wird erklärt, wie du die mit der Money2Time-App verknüpften Daten löschst, welche Datenarten gelöscht oder aufbewahrt werden und welche Aufbewahrungsfristen gelten.",
+    "links": {
+      "googlePermissions": "myaccount.google.com/permissions"
+    },
     "sections": [
       {
         "title": "So beantragst du die Datenlöschung",
         "subsections": [
           {
+            "title": "Dein Konto und deine Cloud-Daten löschen",
+            "paragraphs": [
+              "Wenn du dich angemeldet hast, kannst du dein Konto und alles, was damit auf unseren Servern gespeichert ist, selbst löschen:"
+            ],
+            "lists": [
+              [
+                "Öffne die Money2Time-App und gehe zu deiner Seite „Konto“.",
+                "Tippe auf „Konto löschen“ und bestätige.",
+                "Deine Kontoinformationen (Name, E-Mail-Adresse, Anmeldedaten), deine Cloud-Sync-Kopie, alle Bilder, die du bei uns gespeichert hast, sowie die geteilten Bücher und Alben, deren Eigentümer du bist, werden sofort gelöscht. Die Daten auf deinem Handy bleiben erhalten, bis du sie dort löschst."
+              ]
+            ]
+          },
+          {
             "title": "Auf deinem Gerät gespeicherte Daten löschen",
             "paragraphs": [
-              "Fast alle deine Daten, einschließlich all deiner Finanzdaten, werden nur auf deinem Gerät gespeichert. Du kannst sie jederzeit selbst löschen:"
+              "Du kannst die Daten auf deinem Gerät jederzeit löschen:"
             ],
             "lists": [
               [
                 "Öffne die Money2Time-App und gehe zu den Einstellungen.",
-                "Tippe auf \"Alle Daten zurücksetzen\", um alle Transaktionen, Konten, Kategorien, wiederkehrenden Regeln und Lohneinstellungen dauerhaft zu löschen.",
-                "Alternativ kannst du die App deinstallieren, um die lokale Datenbank und alle gespeicherten Daten vollständig zu entfernen."
+                "Tippe auf „Daten zurücksetzen“, um deine Konten, Kategorien und Transaktionen dauerhaft zu löschen. Wenn Cloud Sync aktiviert ist, wird dadurch auch deine Cloud-Kopie gelöscht.",
+                "Alternativ kannst du die App deinstallieren, um die lokale Datenbank von deinem Gerät zu entfernen."
               ]
+            ]
+          },
+          {
+            "title": "Deine Backups löschen",
+            "paragraphs": [
+              "Backups, die du in Google Drive oder iCloud erstellt hast, werden in deinem eigenen Konto gespeichert, nicht auf unseren Servern. Lösche sie in Google Drive (im Ordner Money2Time) oder in den Speichereinstellungen deiner iCloud. Du kannst außerdem den Zugriff von Money2Time auf dein Google-Konto unter {googlePermissions} entfernen."
             ]
           },
           {
@@ -730,14 +865,14 @@
             ]
           },
           {
-            "title": "Löschung von Analyse- und Abonnementdaten beantragen",
+            "title": "Löschung von Analyse- und anderen Daten beantragen",
             "paragraphs": [
-              "Um die Löschung der mit deiner zufälligen App-ID verknüpften Analyse- oder Abonnementdaten zu beantragen, kontaktiere uns:"
+              "Um die Löschung von Analyse- oder Abonnementdaten, die mit deiner zufälligen App-ID verknüpft sind, oder – falls du die App nicht nutzen kannst – von anderen Daten zu beantragen, kontaktiere uns:"
             ],
             "lists": [
               [
                 "Sende uns eine E-Mail an die untenstehende Adresse mit dem Betreff \"Data Deletion Request\" oder verwende das Kontaktformular auf dieser Website.",
-                "Verwende die Kopierschaltfläche neben Benutzer-ID unter Settings > Display und gib die vollständige ID an, damit wir die mit deiner App verknüpften Daten finden können.",
+                "Verwende die Kopieren-Schaltfläche neben „Benutzer-ID“ unter Einstellungen > Anzeige und gib die vollständige ID sowie, falls du angemeldet bist, die E-Mail-Adresse deines Kontos an, damit wir deine Daten finden können.",
                 "Wir bearbeiten deine Anfrage und bestätigen den Abschluss innerhalb von 30 Tagen."
               ]
             ]
@@ -757,14 +892,49 @@
           ],
           "rows": [
             [
-              "Finanzdaten auf dem Gerät (Transaktionen, Konten, Kategorien, wiederkehrende Regeln, Lohneinstellungen)",
+              "Finanzdaten auf dem Gerät (Transaktionen, Konten, Kategorien, Budgets, wiederkehrende Regeln, Lohneinstellungen)",
               "Gelöscht",
-              "Wird sofort entfernt, wenn du die Daten zurücksetzt oder die App deinstallierst. Wir bewahren nichts auf."
+              "Wird sofort entfernt, wenn du die Daten zurücksetzt oder die App deinstallierst."
+            ],
+            [
+              "Kontoinformationen (Name, E-Mail-Adresse, Nutzer-ID von Google oder Apple, Anmeldesitzungen)",
+              "Gelöscht",
+              "Wird sofort entfernt, wenn du dein Konto löschst."
+            ],
+            [
+              "Cloud-Sync-Kopie und die Bilder, die du bei uns gespeichert hast",
+              "Gelöscht",
+              "Wird sofort entfernt, wenn du dein Konto löschst."
+            ],
+            [
+              "Geteilte Bücher und Alben, deren Eigentümer du bist",
+              "Gelöscht",
+              "Wird für alle Mitglieder entfernt, wenn du dein Konto löschst."
+            ],
+            [
+              "Rechnungen und Änderungen, die du zu Gruppen anderer Eigentümer hinzugefügt hast",
+              "Aufbewahrt",
+              "Wird als Teil des gemeinsamen Datenbestands dieser Gruppe aufbewahrt, solange die Gruppe besteht."
+            ],
+            [
+              "Backups in deinem Google Drive oder iCloud",
+              "Unter deiner Kontrolle",
+              "Werden in deinem eigenen Konto aufbewahrt, bis du sie dort löschst."
             ],
             [
               "Web-Dashboard-Kopie in einem von dir verknüpften Browser",
               "Gelöscht",
-              "Wird aus diesem Browser entfernt, wenn du die Verknüpfung aufhebst oder seine Websitedaten löschst. Unsere Server speichern sie nie, daher behalten wir nichts."
+              "Wird aus diesem Browser entfernt, wenn du die Verknüpfung aufhebst oder seine Websitedaten löschst. Unsere Server speichern sie nie."
+            ],
+            [
+              "Belegbilder und Benachrichtigungstexte, die zum Scannen gesendet werden",
+              "Nicht gespeichert",
+              "Werden verarbeitet, um ein Ergebnis zurückzugeben, und von uns nicht gespeichert. Nur Nutzungszähler werden für Tariflimits aufbewahrt."
+            ],
+            [
+              "Live-Verdienst-Daten unter iOS (Stundenlohn, Schichtplan, Zeitzone, Push-Token der Live-Aktivität)",
+              "Gelöscht",
+              "Werden entfernt, wenn eine Live-Aktivität endet oder wenn du den automatischen Start ausschaltest oder deinen Lohn entfernst, und andernfalls 45 Tage nachdem die App sie zuletzt bestätigt hat."
             ],
             [
               "Pseudonyme Analysedaten (PostHog / Google Analytics for Firebase)",
@@ -782,14 +952,14 @@
       {
         "title": "Daten, die wir nicht speichern",
         "paragraphs": [
-          "Money2Time erfordert kein Konto und speichert weder deinen Namen, deine E-Mail-Adresse, deine Apple-ID, dein Google-Konto noch deine Zahlungsdaten auf unseren Servern. Da deine Finanzdaten nie auf unseren Servern gespeichert werden, auch nicht, wenn du das Web-Dashboard nutzt, können wir sie nicht für dich einsehen oder löschen.",
+          "Wir speichern niemals deine Zahlungsdaten, Kartennummern oder Passwörter für Apple ID oder Google-Konto. Wir speichern deine Google-Drive- oder iCloud-Backups nicht, und wir können deine Web-Dashboard-Daten nicht lesen, da sie Ende-zu-Ende-verschlüsselt sind.",
           "Abonnement- und Zahlungsdaten, die von Apple oder Google aufbewahrt werden, liegen außerhalb unserer Kontrolle und werden direkt über dein Apple- oder Google-Konto verwaltet."
         ]
       }
     ],
     "contact": {
       "title": "Kontakt",
-      "body": "Um die Löschung von Analyse- oder Abonnementdaten zu beantragen oder bei Fragen kontaktiere uns unter:",
+      "body": "Um die Löschung deiner Daten zu beantragen oder bei Fragen kontaktiere uns unter:",
       "formPrefix": "Du kannst auch das",
       "formLink": "Kontaktformular",
       "formSuffix": "auf dieser Website verwenden."

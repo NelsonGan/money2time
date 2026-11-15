@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { LegalText } from "@/components/legal-text";
 import { Footer, Header } from "@/components/site-chrome";
 import { Link } from "@/i18n/navigation";
 import { isLocale } from "@/i18n/routing";
@@ -63,7 +64,7 @@ export default async function PrivacyPolicy({
   setRequestLocale(locale);
   const t = await getTranslations("privacy");
   const sections = t.raw("sections") as LegalSection[];
-  const websiteAnalytics = t.raw("websiteAnalytics") as LegalSubsection;
+  const links = t.raw("links") as Record<string, string>;
 
   return (
     <>
@@ -78,12 +79,8 @@ export default async function PrivacyPolicy({
         </p>
 
         <div className="prose-m2t space-y-10 text-foreground-soft text-[15px] leading-relaxed">
-          {sections.map((section, index) => (
-            <Section
-              key={section.title}
-              section={section}
-              extraSubsection={index === 2 ? websiteAnalytics : undefined}
-            />
+          {sections.map((section) => (
+            <Section key={section.title} section={section} links={links} />
           ))}
 
           <section>
@@ -122,16 +119,11 @@ export default async function PrivacyPolicy({
 
 function Section({
   section,
-  extraSubsection,
+  links,
 }: {
   section: LegalSection;
-  extraSubsection?: LegalSubsection;
+  links: Record<string, string>;
 }) {
-  const subsections = [
-    ...(section.subsections ?? []),
-    ...(extraSubsection ? [extraSubsection] : []),
-  ];
-
   return (
     <section>
       <h2 className="text-xl font-bold text-foreground mb-3">
@@ -139,28 +131,36 @@ function Section({
       </h2>
       <div className="space-y-3">
         {section.paragraphs?.map((paragraph) => (
-          <p key={paragraph}>{paragraph}</p>
+          <p key={paragraph}>
+            <LegalText text={paragraph} labels={links} />
+          </p>
         ))}
         {section.lists?.map((items) => (
           <ul key={items.join("|")}>
             {items.map((item) => (
-              <li key={item}>{item}</li>
+              <li key={item}>
+                <LegalText text={item} labels={links} />
+              </li>
             ))}
           </ul>
         ))}
-        {subsections.map((subsection) => (
+        {section.subsections?.map((subsection) => (
           <div key={subsection.title} className="mt-4">
             <h3 className="text-base font-semibold text-foreground mb-2">
               {subsection.title}
             </h3>
             <div className="space-y-2">
               {subsection.paragraphs?.map((paragraph) => (
-                <p key={paragraph}>{paragraph}</p>
+                <p key={paragraph}>
+                  <LegalText text={paragraph} labels={links} />
+                </p>
               ))}
               {subsection.lists?.map((items) => (
                 <ul key={items.join("|")}>
                   {items.map((item) => (
-                    <li key={item}>{item}</li>
+                    <li key={item}>
+                      <LegalText text={item} labels={links} />
+                    </li>
                   ))}
                 </ul>
               ))}
