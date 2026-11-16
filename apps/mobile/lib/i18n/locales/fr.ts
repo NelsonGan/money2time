@@ -171,6 +171,21 @@ const fr = {
     reset_action: 'Supprimer et changer',
   },
   news: {
+    split_bills_album_icons: {
+      title: 'Partagez les factures à votre façon',
+      friendPaid: {
+        title: 'Partager une facture payée par un ami',
+        body: "Dans Partager la facture, touchez Payé par et choisissez l'ami qui a payé. Seule votre part compte comme dépense, et Soldes indique ce que vous lui devez. Remboursez en une fois ou en plusieurs parts, puis réglez tout d'un toucher.",
+      },
+      splitMethods: {
+        title: 'Plus de façons de partager',
+        body: "Sous le montant dans Partager la facture, choisissez Montant, %, Parts ou +/−. Donnez un pourcentage à chacun, 2 parts à quelqu'un pour qu'il paie le double, ou partagez à parts égales en ajoutant ou retirant un montant pour une personne. Ce que chacun paie s'affiche sous son nom.",
+      },
+      albumIcons: {
+        title: 'Des icônes pour les albums',
+        body: "Donnez à un album une icône ou n'importe quel emoji : touchez la case à côté de son nom en créant ou modifiant un album. L'icône repère l'album sur sa carte et dans vos répartitions de dépenses, à la place de sa photo de couverture. Importer votre propre image fait partie de Pro.",
+      },
+    },
     budgets_splits_scans_archive: {
       title: 'Budgets, remboursements et plus',
       budgets: {
@@ -485,6 +500,7 @@ const fr = {
       open_budget: 'Ouvrir Budget',
       open_settle_up: 'Ouvrir Soldes',
       open_scan_receipt: 'Scanner des reçus',
+      open_albums: 'Ouvrir Albums',
       open_share_earn: 'Obtenir Pro gratuitement',
       open_quick_entry_settings: 'Ouvrir les réglages de la Saisie rapide',
       open_auto_log: 'Configurer les automatisations',

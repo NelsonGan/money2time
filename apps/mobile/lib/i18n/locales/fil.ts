@@ -171,6 +171,21 @@ const fil = {
     reset_action: 'Burahin at palitan',
   },
   news: {
+    split_bills_album_icons: {
+      title: 'Hatiin ang bill sa paraang gusto mo',
+      friendPaid: {
+        title: 'Hatiin ang bill na binayaran ng kaibigan',
+        body: 'Sa Split Bill, i-tap ang Binayaran ni at piliin ang kaibigang nagbayad. Ang bahagi mo lang ang bibilangin bilang gastos, at makikita sa Mga Balanse kung magkano ang utang mo. Bayaran siya nang buo o paunti-unti, at mag-settle up sa isang tap.',
+      },
+      splitMethods: {
+        title: 'Mas maraming paraan ng paghahati',
+        body: 'Sa ilalim ng halaga sa Split Bill, piliin ang Halaga, %, Bahagi o +/−. Bigyan ng porsyento ang bawat isa, bigyan ng 2 bahagi ang isang tao para doble ang bayad niya, o hatiin nang pantay at magdagdag o magbawas para sa isang tao. Makikita sa ilalim ng pangalan kung magkano ang babayaran ng bawat isa.',
+      },
+      albumIcons: {
+        title: 'Mga icon para sa album',
+        body: 'Lagyan ng icon o kahit anong emoji ang album: i-tap ang kahon sa tabi ng pangalan nito kapag gumagawa o nag-e-edit ng album. Ipapakita ng icon ang album sa card nito at sa breakdown ng gastos mo, kapalit ng cover photo. Bahagi ng Pro ang pag-upload ng sarili mong larawan.',
+      },
+    },
     budgets_splits_scans_archive: {
       title: 'Mga badyet, bayad-utang at iba pa',
       budgets: {
@@ -485,6 +500,7 @@ const fil = {
       open_budget: 'Buksan ang Badyet',
       open_settle_up: 'Buksan ang Mga Balanse',
       open_scan_receipt: 'Mag-scan ng mga resibo',
+      open_albums: 'Buksan ang Mga album',
       open_share_earn: 'Kunin ang Pro nang libre',
       open_quick_entry_settings: 'Buksan ang Quick Entry settings',
       open_auto_log: 'I-set up ang mga automation',

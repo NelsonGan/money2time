@@ -171,6 +171,21 @@ const vi = {
     reset_action: 'Xóa và chuyển',
   },
   news: {
+    split_bills_album_icons: {
+      title: 'Chia hóa đơn theo cách của bạn',
+      friendPaid: {
+        title: 'Chia hóa đơn do bạn bè trả',
+        body: 'Trong Chia hóa đơn, chạm Người trả và chọn người bạn đã trả. Chỉ phần của bạn được tính là chi tiêu, và Công nợ cho biết bạn còn nợ bao nhiêu. Trả lại một lần hoặc từng phần, rồi thanh toán chỉ với một chạm.',
+      },
+      splitMethods: {
+        title: 'Thêm cách chia',
+        body: 'Bên dưới số tiền trong Chia hóa đơn, chọn Số tiền, %, Phần hoặc +/−. Đặt phần trăm cho mỗi người, cho ai đó 2 phần để trả gấp đôi, hoặc chia đều rồi cộng thêm hay bớt đi cho một người. Số tiền mỗi người trả hiện dưới tên họ.',
+      },
+      albumIcons: {
+        title: 'Biểu tượng cho album',
+        body: 'Đặt cho album một biểu tượng hoặc emoji bất kỳ: chạm vào ô cạnh tên khi tạo hoặc sửa album. Biểu tượng đánh dấu album trên thẻ của nó và trong phần phân tích chi tiêu, thay cho ảnh bìa. Tải lên ảnh của riêng bạn là một phần của Pro.',
+      },
+    },
     budgets_splits_scans_archive: {
       title: 'Ngân sách, trả nợ từng phần và hơn thế nữa',
       budgets: {
@@ -485,6 +500,7 @@ const vi = {
       open_budget: 'Mở Ngân sách',
       open_settle_up: 'Mở Công nợ',
       open_scan_receipt: 'Quét hóa đơn',
+      open_albums: 'Mở Album',
       open_share_earn: 'Nhận Pro miễn phí',
       open_quick_entry_settings: 'Mở cài đặt Nhập nhanh',
       open_auto_log: 'Thiết lập tự động hóa',

@@ -96,6 +96,11 @@ import { RedesignShowcase } from './RedesignShowcase';
 import { ReviewShowcase } from './ReviewShowcase';
 import { RiceCalShowcase } from './RiceCalShowcase';
 import { ShareEarnShowcase } from './ShareEarnShowcase';
+import {
+  AlbumIconsShowcase,
+  SplitFriendPaidShowcase,
+  SplitMethodsShowcase,
+} from './SplitBillsAlbumIconsShowcases';
 import { AndroidStoreIcon, AppleStoreIcon } from './StorePlatformIcons';
 import { SubscriptionLogoShowcase } from './SubscriptionLogoShowcase';
 import { TransactionFxShowcase } from './TransactionFxShowcase';
@@ -313,6 +318,8 @@ export function FeatureAnnouncementModal({
       requestOpenTab('calendar');
       requestRunAddAction('scan');
     },
+    // Albums is a tab, switched to through its bridge from every caller.
+    openAlbums: () => requestOpenTab('albums'),
     // The review page is a root route, reached through its bridge from every
     // caller; without notification logging the button opens its setup instead.
     openNotificationReview: () => {
@@ -446,7 +453,13 @@ export function FeatureAnnouncementModal({
               </View>
             ) : null}
             <View style={styles.showcaseSlot}>
-              {page.visual === 'periodBudgets' ? (
+              {page.visual === 'splitFriendPaid' ? (
+                <SplitFriendPaidShowcase width={Math.round(showcaseWidth * 0.92)} />
+              ) : page.visual === 'splitMethods' ? (
+                <SplitMethodsShowcase width={Math.round(showcaseWidth * 0.92)} />
+              ) : page.visual === 'albumIcons' ? (
+                <AlbumIconsShowcase width={Math.round(showcaseWidth * 0.92)} />
+              ) : page.visual === 'periodBudgets' ? (
                 <PeriodBudgetsShowcase width={Math.round(showcaseWidth * 0.92)} />
               ) : page.visual === 'splitPartPayments' ? (
                 <SplitPartPaymentsShowcase width={Math.round(showcaseWidth * 0.92)} />

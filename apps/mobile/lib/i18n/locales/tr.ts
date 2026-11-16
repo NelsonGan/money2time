@@ -171,6 +171,21 @@ const tr = {
     reset_action: 'Sil ve değiştir',
   },
   news: {
+    split_bills_album_icons: {
+      title: 'Hesapları istediğin gibi böl',
+      friendPaid: {
+        title: 'Bir arkadaşın ödediği hesabı böl',
+        body: "Hesabı Böl'de Ödeyen'e dokun ve ödeyen arkadaşını seç. Harcama olarak yalnızca senin payın sayılır, ne kadar borçlu olduğunu Bakiyeler'de görürsün. Borcunu tek seferde ya da parça parça öde, tek dokunuşla ödeş.",
+      },
+      splitMethods: {
+        title: 'Bölmenin daha fazla yolu',
+        body: "Hesabı Böl'de tutarın altında Tutar, %, Pay veya +/− seç. Herkese bir yüzde ver, birine 2 pay vererek iki katını ödemesini sağla ya da eşit böl ve bir kişiye ekle veya çıkar. Herkesin ödeyeceği tutar adının altında görünür.",
+      },
+      albumIcons: {
+        title: 'Albümler için simgeler',
+        body: "Bir albüme simge ya da istediğin bir emoji ver: albüm oluştururken veya düzenlerken adının yanındaki kutuya dokun. Simge, kapak fotoğrafı yerine albümü kartında ve harcama dağılımlarında gösterir. Kendi görselini yüklemek Pro'nun bir parçasıdır.",
+      },
+    },
     budgets_splits_scans_archive: {
       title: 'Bütçeler, geri ödemeler ve daha fazlası',
       budgets: {
@@ -485,6 +500,7 @@ const tr = {
       open_budget: 'Bütçeyi aç',
       open_settle_up: 'Bakiyeler sayfasını aç',
       open_scan_receipt: 'Fişleri tara',
+      open_albums: 'Albümleri aç',
       open_share_earn: 'Pro’yu ücretsiz al',
       open_quick_entry_settings: 'Hızlı Giriş ayarlarını aç',
       open_auto_log: 'Otomasyonları kur',

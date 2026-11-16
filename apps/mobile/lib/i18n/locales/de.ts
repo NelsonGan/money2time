@@ -171,6 +171,21 @@ const de = {
     reset_action: 'Löschen & wechseln',
   },
   news: {
+    split_bills_album_icons: {
+      title: 'Rechnungen teilen, wie du willst',
+      friendPaid: {
+        title: 'Rechnung teilen, die ein Freund bezahlt hat',
+        body: 'Tippe in Rechnung teilen auf Bezahlt von und wähle, wer bezahlt hat. Nur dein Anteil zählt als Ausgabe, und Salden zeigt, was du schuldest. Zahl alles auf einmal oder in Teilen zurück und begleiche es mit einem Tipp.',
+      },
+      splitMethods: {
+        title: 'Mehr Arten zu teilen',
+        body: 'Wähle unter dem Betrag in Rechnung teilen Betrag, %, Anteile oder +/−. Gib jeder Person einen Prozentsatz, gib jemandem 2 Anteile, damit er doppelt zahlt, oder teile gleichmäßig und rechne für eine Person etwas dazu oder ab. Was jede Person zahlt, steht unter ihrem Namen.',
+      },
+      albumIcons: {
+        title: 'Symbole für Alben',
+        body: 'Gib einem Album ein Symbol oder ein beliebiges Emoji: Tippe beim Erstellen oder Bearbeiten auf das Feld neben dem Namen. Das Symbol zeigt das Album auf seiner Karte und in deinen Ausgabenübersichten, statt des Titelbilds. Ein eigenes Bild hochzuladen ist Teil von Pro.',
+      },
+    },
     budgets_splits_scans_archive: {
       title: 'Budgets, Rückzahlungen und mehr',
       budgets: {
@@ -485,6 +500,7 @@ const de = {
       open_budget: 'Budget öffnen',
       open_settle_up: 'Salden öffnen',
       open_scan_receipt: 'Belege scannen',
+      open_albums: 'Alben öffnen',
       open_share_earn: 'Pro gratis sichern',
       open_quick_entry_settings: 'Schnelleingabe-Einstellungen öffnen',
       open_auto_log: 'Automatisierungen einrichten',

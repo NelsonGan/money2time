@@ -23,6 +23,7 @@ import { cloudSyncLedgersAnnouncement } from './022_cloud_sync_ledgers';
 import { autoReviewInsightsInstalmentsAnnouncement } from './023_auto_review_insights_instalments';
 import { cloudSyncSharedLedgersAnnouncement } from './024_cloud_sync_shared_ledgers';
 import { budgetsSplitsScansArchiveAnnouncement } from './025_budgets_splits_scans_archive';
+import { splitBillsAlbumIconsAnnouncement } from './026_split_bills_album_icons';
 
 export const FEATURE_ANNOUNCEMENTS = [
   homeWidgetsAnnouncement,
@@ -50,4 +51,5 @@ export const FEATURE_ANNOUNCEMENTS = [
   autoReviewInsightsInstalmentsAnnouncement,
   cloudSyncSharedLedgersAnnouncement,
   budgetsSplitsScansArchiveAnnouncement,
+  splitBillsAlbumIconsAnnouncement,
 ] as const;

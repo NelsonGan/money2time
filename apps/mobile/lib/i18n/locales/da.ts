@@ -171,6 +171,21 @@ const da = {
     reset_action: 'Slet og skift',
   },
   news: {
+    split_bills_album_icons: {
+      title: 'Del regninger på din måde',
+      friendPaid: {
+        title: 'Del en regning, en ven betalte',
+        body: 'Tryk på Betalt af i Del regning, og vælg den ven, der betalte. Kun din andel tæller som forbrug, og Mellemværender viser, hvad du skylder. Betal tilbage på én gang eller i dele, og gør op med ét tryk.',
+      },
+      splitMethods: {
+        title: 'Flere måder at dele på',
+        body: 'Under beløbet i Del regning vælger du Beløb, %, Andele eller +/−. Giv hver person en procentdel, giv én 2 andele, så de betaler dobbelt, eller del ligeligt og læg til eller træk fra for én person. Det, hver person betaler, står under navnet.',
+      },
+      albumIcons: {
+        title: 'Ikoner til album',
+        body: 'Giv et album et ikon eller en hvilken som helst emoji: tryk på feltet ved siden af navnet, når du opretter eller redigerer et album. Ikonet viser albummet på dets kort og i dine forbrugsoversigter i stedet for forsidebilledet. At uploade dit eget billede er en del af Pro.',
+      },
+    },
     budgets_splits_scans_archive: {
       title: 'Budgetter, tilbagebetalinger og mere',
       budgets: {
@@ -485,6 +500,7 @@ const da = {
       open_budget: 'Åbn Budget',
       open_settle_up: 'Åbn Mellemværender',
       open_scan_receipt: 'Scan kvitteringer',
+      open_albums: 'Åbn Album',
       open_share_earn: 'Få Pro gratis',
       open_quick_entry_settings: 'Åbn indstillinger for Hurtig registrering',
       open_auto_log: 'Opsæt automatiseringer',

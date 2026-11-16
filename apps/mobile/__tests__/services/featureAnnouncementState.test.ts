@@ -52,8 +52,42 @@ describe('feature announcement state', () => {
     );
   });
 
-  it('announces period budgets, part paybacks, batch scans and archiving on both platforms', () => {
+  it('announces bills a friend paid, split methods and album icons on both platforms', () => {
     const latest = getLatestFeatureAnnouncement()!;
+    expect(latest).toMatchObject({
+      id: 'split_bills_album_icons_2026_11',
+      announcementNumber: 26,
+      pages: [
+        { key: 'friendPaid', visual: 'splitFriendPaid', cta: 'openSettleUp' },
+        { key: 'splitMethods', visual: 'splitMethods', cta: 'openAddTransaction' },
+        { key: 'albumIcons', visual: 'albumIcons', cta: 'openAlbums' },
+      ],
+    });
+    expect(latest.requiresCapability).toBeUndefined();
+    expect(announcementPagesForPlatform(latest, 'ios')).toHaveLength(3);
+    expect(announcementPagesForPlatform(latest, 'android')).toHaveLength(3);
+  });
+
+  it('names the real Split Bill, Paid by, Balances and method labels, in every language', () => {
+    for (const locale of SUPPORTED_LOCALE_FILES) {
+      const strings = loadLocale(locale);
+      const split = strings.transactions.editor.split;
+      const news = strings.news.split_bills_album_icons;
+      const friendPaid: string = news.friendPaid.body;
+      const methods: string = news.splitMethods.body;
+      for (const name of [split.button_label, split.paid_by_label, strings.nav.tab_settle_up]) {
+        expect([locale, friendPaid]).toEqual([locale, expect.stringContaining(name)]);
+      }
+      // The control's own labels: the two words, and % and +/− as it draws them.
+      for (const name of [split.method_amount, split.method_shares, '%', '+/−']) {
+        expect([locale, methods]).toEqual([locale, expect.stringContaining(name)]);
+      }
+      expect([locale, JSON.stringify(news)]).toEqual([locale, expect.not.stringMatching(/[–—]/)]);
+    }
+  });
+
+  it('announces period budgets, part paybacks, batch scans and archiving on both platforms', () => {
+    const latest = getFeatureAnnouncementById('budgets_splits_scans_archive_2026_11')!;
     expect(latest).toMatchObject({
       id: 'budgets_splits_scans_archive_2026_11',
       announcementNumber: 25,

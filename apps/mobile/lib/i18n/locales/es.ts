@@ -171,6 +171,21 @@ const es = {
     reset_action: 'Eliminar y cambiar',
   },
   news: {
+    split_bills_album_icons: {
+      title: 'Divide gastos a tu manera',
+      friendPaid: {
+        title: 'Divide un gasto que pagó un amigo',
+        body: 'En Dividir gasto, toca Pagado por y elige al amigo que pagó. Solo tu parte cuenta como gasto, y Saldos muestra lo que le debes. Devuélveselo de una vez o por partes, y salda todo con un toque.',
+      },
+      splitMethods: {
+        title: 'Más formas de dividir',
+        body: 'Bajo el importe en Dividir gasto, elige Importe, %, Partes o +/−. Da a cada persona un porcentaje, da 2 partes a alguien para que pague el doble, o divide a partes iguales y suma o resta a una persona. Lo que paga cada uno aparece bajo su nombre.',
+      },
+      albumIcons: {
+        title: 'Iconos para álbumes',
+        body: 'Ponle a un álbum un icono o cualquier emoji: toca el recuadro junto a su nombre al crear o editar un álbum. El icono marca el álbum en su tarjeta y en tus desgloses de gastos, en lugar de su foto de portada. Subir tu propia imagen es parte de Pro.',
+      },
+    },
     budgets_splits_scans_archive: {
       title: 'Presupuestos, devoluciones y más',
       budgets: {
@@ -485,6 +500,7 @@ const es = {
       open_budget: 'Abrir Presupuesto',
       open_settle_up: 'Abrir Saldos',
       open_scan_receipt: 'Escanear recibos',
+      open_albums: 'Abrir Álbumes',
       open_share_earn: 'Consigue Pro gratis',
       open_quick_entry_settings: 'Abrir ajustes de Entrada rápida',
       open_auto_log: 'Configurar automatizaciones',

@@ -171,6 +171,21 @@ const nl = {
     reset_action: 'Verwijderen en wisselen',
   },
   news: {
+    split_bills_album_icons: {
+      title: 'Rekeningen splitsen zoals jij wilt',
+      friendPaid: {
+        title: 'Een rekening splitsen die een vriend betaalde',
+        body: 'Tik in Rekening splitsen op Betaald door en kies de vriend die betaalde. Alleen jouw deel telt als uitgave, en Saldi laat zien wat je nog schuldig bent. Betaal in één keer of in delen terug, en verreken alles met één tik.',
+      },
+      splitMethods: {
+        title: 'Meer manieren om te splitsen',
+        body: 'Kies onder het bedrag in Rekening splitsen voor Bedrag, %, Delen of +/−. Geef iedereen een percentage, geef iemand 2 delen zodat die het dubbele betaalt, of splits gelijk en tel voor één persoon iets op of af. Wat iedereen betaalt, staat onder de naam.',
+      },
+      albumIcons: {
+        title: 'Pictogrammen voor albums',
+        body: 'Geef een album een pictogram of een emoji naar keuze: tik op het vakje naast de naam als je een album maakt of bewerkt. Het pictogram markeert het album op de kaart en in je uitgavenoverzichten, in plaats van de omslagfoto. Een eigen afbeelding uploaden hoort bij Pro.',
+      },
+    },
     budgets_splits_scans_archive: {
       title: 'Budgetten, terugbetalingen en meer',
       budgets: {
@@ -485,6 +500,7 @@ const nl = {
       open_budget: 'Budget openen',
       open_settle_up: 'Saldi openen',
       open_scan_receipt: 'Bonnen scannen',
+      open_albums: 'Albums openen',
       open_share_earn: 'Pro gratis krijgen',
       open_quick_entry_settings: 'Instellingen voor Snelle invoer openen',
       open_auto_log: 'Automatiseringen instellen',

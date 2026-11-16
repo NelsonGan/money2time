@@ -171,6 +171,21 @@ const id = {
     reset_action: 'Hapus & ganti',
   },
   news: {
+    split_bills_album_icons: {
+      title: 'Bagi tagihan sesukamu',
+      friendPaid: {
+        title: 'Bagi tagihan yang dibayar teman',
+        body: 'Di Bagi Tagihan, ketuk Dibayar oleh dan pilih teman yang membayar. Hanya bagianmu yang dihitung sebagai pengeluaran, dan Utang piutang menunjukkan berapa utangmu. Bayar kembali sekaligus atau sedikit demi sedikit, lalu lunasi dengan sekali ketuk.',
+      },
+      splitMethods: {
+        title: 'Lebih banyak cara membagi',
+        body: 'Di bawah jumlah di Bagi Tagihan, pilih Jumlah, %, Bagian, atau +/−. Beri setiap orang persentase, beri seseorang 2 bagian agar membayar dua kali lipat, atau bagi rata lalu tambah atau kurangi untuk satu orang. Yang dibayar setiap orang tampil di bawah namanya.',
+      },
+      albumIcons: {
+        title: 'Ikon untuk album',
+        body: 'Beri album sebuah ikon atau emoji apa pun: ketuk kotak di samping namanya saat membuat atau mengedit album. Ikon menandai album di kartunya dan di rincian pengeluaranmu, menggantikan foto sampulnya. Mengunggah gambar sendiri adalah bagian dari Pro.',
+      },
+    },
     budgets_splits_scans_archive: {
       title: 'Anggaran, pembayaran kembali, dan lainnya',
       budgets: {
@@ -485,6 +500,7 @@ const id = {
       open_budget: 'Buka Anggaran',
       open_settle_up: 'Buka Utang piutang',
       open_scan_receipt: 'Pindai struk',
+      open_albums: 'Buka Album',
       open_share_earn: 'Dapatkan Pro gratis',
       open_quick_entry_settings: 'Buka pengaturan Entri Cepat',
       open_auto_log: 'Atur otomatisasi',
