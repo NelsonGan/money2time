@@ -171,6 +171,21 @@ const it = {
     reset_action: 'Elimina e cambia',
   },
   news: {
+    split_bills_album_icons: {
+      title: 'Dividi i conti a modo tuo',
+      friendPaid: {
+        title: 'Dividi un conto pagato da un amico',
+        body: "In Dividi conto, tocca Pagato da e scegli l'amico che ha pagato. Solo la tua quota conta come spesa, e Saldi mostra quanto gli devi. Restituisci tutto in una volta o a rate, poi salda con un tocco.",
+      },
+      splitMethods: {
+        title: 'Più modi per dividere',
+        body: "Sotto l'importo in Dividi conto, scegli Importo, %, Quote o +/−. Dai a ognuno una percentuale, dai 2 quote a qualcuno perché paghi il doppio, oppure dividi in parti uguali e aggiungi o togli qualcosa a una persona. Quanto paga ognuno appare sotto il suo nome.",
+      },
+      albumIcons: {
+        title: 'Icone per gli album',
+        body: "Dai a un album un'icona o un emoji qualsiasi: tocca il riquadro accanto al nome quando crei o modifichi un album. L'icona indica l'album sulla sua scheda e nelle ripartizioni delle spese, al posto della foto di copertina. Caricare una tua immagine fa parte di Pro.",
+      },
+    },
     budgets_splits_scans_archive: {
       title: 'Budget, rimborsi e altro',
       budgets: {
@@ -485,6 +500,7 @@ const it = {
       open_budget: 'Apri Budget',
       open_settle_up: 'Apri Saldi',
       open_scan_receipt: 'Scansiona ricevute',
+      open_albums: 'Apri Album',
       open_share_earn: 'Ottieni Pro gratis',
       open_quick_entry_settings: 'Apri le impostazioni di Inserimento rapido',
       open_auto_log: 'Configura le automazioni',

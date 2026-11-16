@@ -171,6 +171,21 @@ const ms = {
     reset_action: 'Padam & tukar',
   },
   news: {
+    split_bills_album_icons: {
+      title: 'Bahagi bil ikut cara anda',
+      friendPaid: {
+        title: 'Bahagi bil yang dibayar kawan',
+        body: 'Dalam Bahagi Bil, ketik Dibayar oleh dan pilih kawan yang membayar. Hanya bahagian anda dikira sebagai perbelanjaan, dan Hutang piutang menunjukkan berapa hutang anda. Bayar balik sekali gus atau sedikit demi sedikit, kemudian selesaikan dengan satu ketikan.',
+      },
+      splitMethods: {
+        title: 'Lebih banyak cara membahagi',
+        body: 'Di bawah jumlah dalam Bahagi Bil, pilih Jumlah, %, Bahagian atau +/−. Beri setiap orang peratusan, beri seseorang 2 bahagian supaya dia bayar dua kali ganda, atau bahagi sama rata dan tambah atau tolak untuk seorang. Jumlah yang dibayar setiap orang tertera di bawah namanya.',
+      },
+      albumIcons: {
+        title: 'Ikon untuk album',
+        body: 'Beri album satu ikon atau mana-mana emoji: ketik petak di sebelah namanya semasa mencipta atau mengedit album. Ikon itu menandakan album pada kadnya dan dalam pecahan perbelanjaan anda, menggantikan foto mukanya. Memuat naik imej sendiri ialah sebahagian daripada Pro.',
+      },
+    },
     budgets_splits_scans_archive: {
       title: 'Bajet, bayaran balik dan banyak lagi',
       budgets: {
@@ -485,6 +500,7 @@ const ms = {
       open_budget: 'Buka Bajet',
       open_settle_up: 'Buka Hutang piutang',
       open_scan_receipt: 'Imbas resit',
+      open_albums: 'Buka Album',
       open_share_earn: 'Dapatkan Pro percuma',
       open_quick_entry_settings: 'Buka tetapan Kemasukan Pantas',
       open_auto_log: 'Sediakan automasi',

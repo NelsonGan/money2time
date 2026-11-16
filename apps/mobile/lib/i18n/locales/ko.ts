@@ -170,6 +170,21 @@ const ko = {
     reset_action: '삭제 후 전환',
   },
   news: {
+    split_bills_album_icons: {
+      title: '더치페이, 원하는 방식대로',
+      friendPaid: {
+        title: '친구가 결제한 금액도 더치페이',
+        body: '더치페이에서 결제한 사람을 탭하고 결제한 친구를 고르세요. 내 몫만 지출로 잡히고, 갚을 금액은 주고받을 돈에서 볼 수 있어요. 한 번에 또는 나눠서 갚고, 탭 한 번으로 정산하세요.',
+      },
+      splitMethods: {
+        title: '더 다양한 나누기 방식',
+        body: '더치페이의 금액 아래에서 금액, %, 지분, +/− 중에 고르세요. 사람마다 비율을 정하거나, 한 사람에게 지분 2를 줘서 두 배를 내게 하거나, 똑같이 나눈 뒤 한 사람만 더하거나 뺄 수 있어요. 각자 낼 금액은 이름 아래에 표시돼요.',
+      },
+      albumIcons: {
+        title: '앨범 아이콘',
+        body: '앨범에 아이콘이나 원하는 이모지를 넣으세요. 앨범을 만들거나 편집할 때 이름 옆 칸을 탭하면 돼요. 아이콘은 커버 사진 대신 앨범 카드와 지출 내역에 표시돼요. 직접 이미지를 올리는 건 Pro 기능이에요.',
+      },
+    },
     budgets_splits_scans_archive: {
       title: '예산, 나눠 받기 외 새 기능',
       budgets: {
@@ -484,6 +499,7 @@ const ko = {
       open_budget: '예산 열기',
       open_settle_up: '주고받을 돈 열기',
       open_scan_receipt: '영수증 스캔',
+      open_albums: '앨범 열기',
       open_share_earn: 'Pro 무료로 받기',
       open_quick_entry_settings: '빠른 입력 설정 열기',
       open_auto_log: '자동화 설정하기',

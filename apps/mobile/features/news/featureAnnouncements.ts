@@ -73,7 +73,10 @@ export interface FeatureAnnouncementPage {
     | 'periodBudgets'
     | 'splitPartPayments'
     | 'batchScan'
-    | 'archiveAccounts';
+    | 'archiveAccounts'
+    | 'splitFriendPaid'
+    | 'splitMethods'
+    | 'albumIcons';
   /**
    * Optional call-to-action for this page. On the last page it replaces the
    * primary button; on earlier pages it sits above the Back/Next row so the
@@ -106,7 +109,8 @@ export interface FeatureAnnouncementPage {
     | 'openInstalments'
     | 'openBudget'
     | 'openSettleUp'
-    | 'openScanReceipt';
+    | 'openScanReceipt'
+    | 'openAlbums';
   /** Mark sponsored or promotional content clearly in the announcement panel. */
   badge?: 'ad';
   /**
@@ -279,6 +283,8 @@ export function announcementCtaLabel(cta: NonNullable<FeatureAnnouncementPage['c
       return I18n.t('news.cta.open_settle_up');
     case 'openScanReceipt':
       return I18n.t('news.cta.open_scan_receipt');
+    case 'openAlbums':
+      return I18n.t('news.cta.open_albums');
     case 'openShareEarn':
     default:
       return I18n.t('news.cta.open_share_earn');

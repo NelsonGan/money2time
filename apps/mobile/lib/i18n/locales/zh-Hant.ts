@@ -144,6 +144,21 @@ const zhHant = {
     },
   },
   news: {
+    split_bills_album_icons: {
+      title: '分攤帳單，隨你分',
+      friendPaid: {
+        title: '分攤朋友付的帳單',
+        body: '在分攤帳單點「付款人」，選擇付錢的朋友。只有你的那份算作支出，欠款往來會顯示你欠多少。可以一次還清或分次還款，再一鍵結清。',
+      },
+      splitMethods: {
+        title: '更多分攤方式',
+        body: '在分攤帳單的金額下方選擇金額、%、份數或 +/−。可以給每人一個百分比，給某人 2 份讓他付雙倍，或先平均分攤再為某人加減金額。每人要付的金額會顯示在名字下方。',
+      },
+      albumIcons: {
+        title: '相簿圖示',
+        body: '為相簿選一個圖示或任何表情符號：建立或編輯相簿時，點名稱旁的方框。圖示會取代封面照片，顯示在相簿卡片和支出明細中。上傳自己的圖片是 Pro 功能。',
+      },
+    },
     budgets_splits_scans_archive: {
       title: '預算、分次還款等新功能',
       budgets: {
@@ -458,6 +473,7 @@ const zhHant = {
       open_budget: '開啟預算',
       open_settle_up: '開啟欠款往來',
       open_scan_receipt: '掃描收據',
+      open_albums: '開啟相簿',
       open_share_earn: '免費獲取 Pro',
       open_quick_entry_settings: '開啟快速記帳設定',
       open_auto_log: '設定自動化',

@@ -171,6 +171,21 @@ const ja = {
     reset_action: '削除して切り替え',
   },
   news: {
+    split_bills_album_icons: {
+      title: '割り勘がもっと自由に',
+      friendPaid: {
+        title: '友達が払った分も割り勘',
+        body: '割り勘で「支払った人」をタップし、払ってくれた友達を選びます。支出になるのは自分の分だけで、いくら借りているかは貸し借りで確認できます。一度にでも少しずつでも返せて、精算はワンタップです。',
+      },
+      splitMethods: {
+        title: '割り方が増えました',
+        body: '割り勘の金額の下で、金額・%・口数・+/− から選べます。人ごとに割合を決めたり、2口にして倍払ってもらったり、均等に分けてから一人だけ足したり引いたりできます。各自の支払額は名前の下に表示されます。',
+      },
+      albumIcons: {
+        title: 'アルバムにアイコン',
+        body: 'アルバムにアイコンや好きな絵文字を付けられます。作成・編集画面で名前の横の枠をタップしてください。アイコンはカバー写真の代わりに、アルバムのカードと支出の内訳に表示されます。自分の画像のアップロードはProの機能です。',
+      },
+    },
     budgets_splits_scans_archive: {
       title: '予算、少しずつ返済ほか',
       budgets: {
@@ -485,6 +500,7 @@ const ja = {
       open_budget: '予算を開く',
       open_settle_up: '貸し借りを開く',
       open_scan_receipt: 'レシートをスキャン',
+      open_albums: 'アルバムを開く',
       open_share_earn: 'Proを無料で手に入れる',
       open_quick_entry_settings: 'クイック入力の設定を開く',
       open_auto_log: '自動化を設定',

@@ -146,6 +146,21 @@ const en = {
     },
   },
   news: {
+    split_bills_album_icons: {
+      title: 'Split bills, your way',
+      friendPaid: {
+        title: 'Split a bill a friend paid',
+        body: 'On Split Bill, tap Paid by and pick the friend who paid. Only your share counts as spending, and Balances shows what you owe them. Pay them back in one go or in parts, then settle up in one tap.',
+      },
+      splitMethods: {
+        title: 'More ways to split',
+        body: 'Under the amount on Split Bill, choose Amount, %, Shares or +/−. Give each person a percentage, give someone 2 shares to pay double, or split evenly and add or take off for one person. What each person pays shows under their name.',
+      },
+      albumIcons: {
+        title: 'Icons for albums',
+        body: 'Give an album an icon or any emoji: tap the tile beside its name when you make or edit an album. The icon marks the album on its card and in your spending breakdowns, in place of its cover photo. Uploading your own image is part of Pro.',
+      },
+    },
     budgets_splits_scans_archive: {
       title: 'Budgets, paybacks and more',
       budgets: {
@@ -470,6 +485,7 @@ const en = {
       open_budget: 'Open Budget',
       open_settle_up: 'Open Balances',
       open_scan_receipt: 'Scan receipts',
+      open_albums: 'Open Albums',
     },
     showcase: {
       synced_devices: 'All your phones are up to date',

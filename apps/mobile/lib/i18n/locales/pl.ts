@@ -171,6 +171,21 @@ const pl = {
     reset_action: 'Usuń i zmień',
   },
   news: {
+    split_bills_album_icons: {
+      title: 'Dziel rachunki po swojemu',
+      friendPaid: {
+        title: 'Podziel rachunek zapłacony przez znajomego',
+        body: 'W Podziel rachunek dotknij Zapłacone przez i wybierz znajomego, który zapłacił. Jako wydatek liczy się tylko Twoja część, a Rozliczenia pokazują, ile jesteś winien. Oddaj wszystko naraz lub w częściach i rozlicz się jednym dotknięciem.',
+      },
+      splitMethods: {
+        title: 'Więcej sposobów dzielenia',
+        body: 'Pod kwotą w Podziel rachunek wybierz Kwota, %, Udziały lub +/−. Daj każdemu procent, daj komuś 2 udziały, żeby zapłacił podwójnie, albo podziel po równo i dodaj lub odejmij jednej osobie. To, ile płaci każdy, widać pod jego imieniem.',
+      },
+      albumIcons: {
+        title: 'Ikony albumów',
+        body: 'Nadaj albumowi ikonę lub dowolne emoji: dotknij pola obok nazwy, gdy tworzysz lub edytujesz album. Ikona oznacza album na jego karcie i w zestawieniach wydatków, zamiast zdjęcia okładki. Przesłanie własnego obrazu jest częścią Pro.',
+      },
+    },
     budgets_splits_scans_archive: {
       title: 'Budżety, zwroty i nie tylko',
       budgets: {
@@ -485,6 +500,7 @@ const pl = {
       open_budget: 'Otwórz Budżet',
       open_settle_up: 'Otwórz Rozliczenia',
       open_scan_receipt: 'Skanuj paragony',
+      open_albums: 'Otwórz Albumy',
       open_share_earn: 'Zdobądź Pro za darmo',
       open_quick_entry_settings: 'Otwórz ustawienia Szybkiego dodawania',
       open_auto_log: 'Skonfiguruj automatyzacje',

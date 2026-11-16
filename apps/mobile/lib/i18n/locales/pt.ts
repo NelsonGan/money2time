@@ -171,6 +171,21 @@ const pt = {
     reset_action: 'Excluir e trocar',
   },
   news: {
+    split_bills_album_icons: {
+      title: 'Divida contas do seu jeito',
+      friendPaid: {
+        title: 'Divida uma conta que um amigo pagou',
+        body: 'Em Dividir conta, toque em Pago por e escolha o amigo que pagou. Só a sua parte conta como gasto, e Saldos mostra quanto você deve. Devolva tudo de uma vez ou em partes, e acerte com um toque.',
+      },
+      splitMethods: {
+        title: 'Mais formas de dividir',
+        body: 'Abaixo do valor em Dividir conta, escolha Valor, %, Partes ou +/−. Dê uma porcentagem a cada pessoa, dê 2 partes a alguém para que pague o dobro, ou divida igualmente e some ou tire um valor para uma pessoa. O que cada um paga aparece abaixo do nome.',
+      },
+      albumIcons: {
+        title: 'Ícones para álbuns',
+        body: 'Dê a um álbum um ícone ou qualquer emoji: toque no quadro ao lado do nome ao criar ou editar um álbum. O ícone marca o álbum no cartão dele e nos seus detalhamentos de gastos, no lugar da foto de capa. Enviar sua própria imagem faz parte do Pro.',
+      },
+    },
     budgets_splits_scans_archive: {
       title: 'Orçamentos, devoluções e mais',
       budgets: {
@@ -485,6 +500,7 @@ const pt = {
       open_budget: 'Abrir Orçamento',
       open_settle_up: 'Abrir Saldos',
       open_scan_receipt: 'Digitalizar recibos',
+      open_albums: 'Abrir Álbuns',
       open_share_earn: 'Ganhe o Pro grátis',
       open_quick_entry_settings: 'Abrir configurações de Lançamento rápido',
       open_auto_log: 'Configurar automações',

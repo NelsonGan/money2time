@@ -171,6 +171,21 @@ const sv = {
     reset_action: 'Radera och byt',
   },
   news: {
+    split_bills_album_icons: {
+      title: 'Dela notor som du vill',
+      friendPaid: {
+        title: 'Dela en nota som en vän betalade',
+        body: 'Tryck på Betalt av i Dela notan och välj vännen som betalade. Bara din andel räknas som utgift, och Mellanhavanden visar vad du är skyldig. Betala tillbaka allt på en gång eller i delar, och gör upp med ett tryck.',
+      },
+      splitMethods: {
+        title: 'Fler sätt att dela',
+        body: 'Under beloppet i Dela notan väljer du Belopp, %, Andelar eller +/−. Ge varje person en procentsats, ge någon 2 andelar så att hen betalar dubbelt, eller dela lika och lägg till eller dra av för en person. Det varje person betalar visas under namnet.',
+      },
+      albumIcons: {
+        title: 'Ikoner för album',
+        body: 'Ge ett album en ikon eller valfri emoji: tryck på rutan bredvid namnet när du skapar eller redigerar ett album. Ikonen visar albumet på dess kort och i dina utgiftsöversikter, i stället för omslagsbilden. Att ladda upp en egen bild ingår i Pro.',
+      },
+    },
     budgets_splits_scans_archive: {
       title: 'Budgetar, återbetalningar och mer',
       budgets: {
@@ -485,6 +500,7 @@ const sv = {
       open_budget: 'Öppna Budget',
       open_settle_up: 'Öppna Mellanhavanden',
       open_scan_receipt: 'Skanna kvitton',
+      open_albums: 'Öppna Album',
       open_share_earn: 'Få Pro gratis',
       open_quick_entry_settings: 'Öppna inställningar för Snabbregistrering',
       open_auto_log: 'Ställ in automatiseringar',

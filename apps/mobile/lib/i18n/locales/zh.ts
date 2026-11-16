@@ -144,6 +144,21 @@ const zh = {
     },
   },
   news: {
+    split_bills_album_icons: {
+      title: '分摊账单，随你分',
+      friendPaid: {
+        title: '分摊朋友付的账单',
+        body: '在分摊账单点“付款人”，选择付钱的朋友。只有你的那份算作支出，欠款往来会显示你欠多少。可以一次还清或分次还款，再一键结清。',
+      },
+      splitMethods: {
+        title: '更多分摊方式',
+        body: '在分摊账单的金额下方选择金额、%、份数或 +/−。可以给每人一个百分比，给某人 2 份让他付双倍，或先平均分摊再为某人加减金额。每人要付的金额会显示在名字下方。',
+      },
+      albumIcons: {
+        title: '相册图标',
+        body: '为相册选一个图标或任何表情：创建或编辑相册时，点名称旁的方框。图标会取代封面照片，显示在相册卡片和支出明细中。上传自己的图片是 Pro 功能。',
+      },
+    },
     budgets_splits_scans_archive: {
       title: '预算、分次还款等新功能',
       budgets: {
@@ -458,6 +473,7 @@ const zh = {
       open_budget: '打开预算',
       open_settle_up: '打开欠款往来',
       open_scan_receipt: '扫描收据',
+      open_albums: '打开相册',
       open_share_earn: '免费获取 Pro',
       open_quick_entry_settings: '打开快速记账设置',
       open_auto_log: '设置自动化',
