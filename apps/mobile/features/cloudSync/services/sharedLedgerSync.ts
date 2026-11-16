@@ -159,6 +159,16 @@ function isUnreachable(error: unknown): boolean {
   return isCode(error, 'unauthorized', 'network');
 }
 
+/**
+ * Turso refused the ledger's token. A member who leaves or is removed makes
+ * the Worker rotate the database's tokens, so every other phone's cached one
+ * stops working ("role was invalidated after token was issued").
+ */
+function isRefusedTokenError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  return message.includes('remote server returned an error: status=401');
+}
+
 class SharedLedgerSync {
   private session: SharedSyncSession | null = null;
   /** The last signed-in user, whose replica files a later let-go removes. */
@@ -511,7 +521,7 @@ class SharedLedgerSync {
       }
       try {
         const engine = await this.engineFor(ledger);
-        const result = await engine.syncNow();
+        const result = await this.syncLedger(engine, ledger.shareId);
         outcome.appliedRows += result.appliedRows;
         outcome.error ??= result.applyError;
         if (result.pushed) session.announce?.(ledger.shareId);
@@ -538,6 +548,21 @@ class SharedLedgerSync {
     }
     this.retry = outcome.error !== null;
     return outcome;
+  }
+
+  /**
+   * One sync of a shared ledger. A token Turso refuses was revoked by a
+   * member leaving: the engine asks for its token on every request, so
+   * forgetting the cached one and syncing again uses a new one at once.
+   */
+  private async syncLedger(engine: SyncEngine, shareId: string) {
+    try {
+      return await engine.syncNow();
+    } catch (error) {
+      if (!isRefusedTokenError(error)) throw error;
+      this.credentials.delete(shareId);
+      return engine.syncNow();
+    }
   }
 
   /** A live nudge says this user left `shareId` themselves, on another phone. */
