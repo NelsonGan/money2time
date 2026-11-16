@@ -411,6 +411,66 @@ test('a simplified debt paid along several bills reads as one payment', async ()
   assert.equal(payments().length, 3);
 });
 
+test('joining again after leaving takes the row they left back', async () => {
+  const { group, rows } = await trip();
+  await write(group, 'owner', {
+    rows: [bill('u-bali-ben', { 'u-bali-ben': 30, 'u-bali-owner': 30 })],
+  });
+  await writeGroup(group, null, (state) => planLeave(state, ctx('ben'), 'ben'));
+  await join(group, 'ben', 'Benjamin');
+  const members = rows('album_members');
+  assert.deepEqual(
+    members.map((m) => [m.id, m.name, m.user_id]),
+    [
+      ['u-bali-ben', 'Ben', 'ben'],
+      ['u-bali-owner', 'Nelson', 'owner'],
+      ['u-bali-tess', 'Tess', 'tess'],
+    ],
+  );
+  const joined = rows('album_activity').filter((a) => a.kind === 'member_joined');
+  assert.equal(joined.at(-1).member_id, 'u-bali-ben');
+});
+
+test('someone who joined before album-scoped ids takes their old row back', async () => {
+  // Albums shared before PR #749 named a member `u-<account>`.
+  const { db, group, rows } = database();
+  await join(group, 'owner', 'Nelson');
+  const legacy = (id: string, name: string) =>
+    db
+      .prepare(
+        `INSERT INTO sync_rows (table_name, row_id, data, rev, origin, updated_at)
+         VALUES ('album_members', ?, ?, ?, 'worker', 1)`,
+      )
+      .run(
+        id,
+        JSON.stringify({
+          id,
+          ledger_id: 'bali',
+          name,
+          user_id: null,
+          sort_order: 1,
+          created_at: '2026-11-13T10:00:00.000Z',
+          updated_at: '2026-11-13T10:00:00.000Z',
+          deleted_at: null,
+        }),
+        `r-${id}`,
+      );
+  legacy('u-ben', 'Ben');
+  await join(group, 'ben', 'Benjamin');
+  assert.deepEqual(
+    rows('album_members').map((m) => [m.id, m.name, m.user_id]),
+    [
+      ['u-bali-owner', 'Nelson', 'owner'],
+      ['u-ben', 'Ben', 'ben'],
+    ],
+  );
+  // Another account's old row is never taken: Tess joins as herself.
+  legacy('u-tessa', 'Tessa');
+  await join(group, 'tess', 'Tess');
+  assert.equal(rows('album_members').find((m) => m.id === 'u-tessa').user_id, null);
+  assert.equal(rows('album_members').find((m) => m.id === 'u-bali-tess').user_id, 'tess');
+});
+
 test('someone who left changes nothing and is put on no new bill, but stays on old ones', async () => {
   const { group, rows } = await trip();
   await write(group, 'owner', {

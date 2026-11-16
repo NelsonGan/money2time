@@ -2534,7 +2534,13 @@ their own.
     share an id (a phone keeps every album's members in one table).
     Nobody's row is ever deleted: leaving, or the owner taking someone out,
     clears its `user_id` on the Worker (`planLeave`), so the bills that name
-    them stay whole, and joining again takes the row back.
+    them stay whole, and joining again with the same account takes the row
+    back (`planJoin`), so they come back as the same person with their
+    bills. Albums shared before row ids named the album (until 2026-11-14)
+    gave a member `u-<userId>`; that row is taken back too, when no
+    `u-<album>-<userId>` row is free. Another account is another person:
+    the same verified email reaches one account by Apple, Google or an email
+    code, but an Apple private-relay address never matches.
     The People page reads who is still in the share from the Worker's list
     (`getLedgerMembers`) to say Joined or Left.
   - `album_expenses`: one row per bill: who paid (`paid_by`), each member's

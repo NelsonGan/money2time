@@ -416,10 +416,16 @@ export function planJoin(state: GroupState, ctx: PlanContext, name: string): Pla
   }
   const id = memberRowId(ctx.groupId, ctx.userId);
   const stored = state.members.find((row) => row.id === id);
+  // Albums shared before ids named the album (PR #749) gave the member
+  // `u-<account>`: someone from then who left takes that row back too.
+  const legacy = state.members.find((row) => row.id === `u-${ctx.userId}`);
+  const free = (row: StoredRow | undefined): row is StoredRow =>
+    !!row && row.data.user_id == null && row.data.deleted_at == null;
+  const back = free(stored) ? stored : free(legacy) ? legacy : null;
   const sortOrder = state.members.length;
   let data: Row;
-  if (stored && stored.data.user_id == null && stored.data.deleted_at == null) {
-    data = { ...stored.data, user_id: ctx.userId, updated_at: ctx.now };
+  if (back) {
+    data = { ...back.data, user_id: ctx.userId, updated_at: ctx.now };
   } else {
     const rowId = stored ? ctx.newId() : id;
     data = {
