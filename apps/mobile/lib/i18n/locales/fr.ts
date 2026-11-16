@@ -172,7 +172,11 @@ const fr = {
   },
   news: {
     split_bills_album_icons: {
-      title: 'Partagez les factures à votre façon',
+      title: 'Albums partagés et factures partagées',
+      sharedAlbums: {
+        title: 'Partagez un album de voyage avec vos amis',
+        body: "Vous partez en voyage ? Dans Nouvel album, activez Partager avec des amis, puis envoyez le lien d'invitation depuis Personnes. Chacun ajoute des dépenses, chacune est d'abord partagée à parts égales, et Soldes indique qui doit quoi à qui. Les amis sans l'app peuvent rejoindre l'album et ajouter des dépenses sur album.money2time.com.",
+      },
       friendPaid: {
         title: 'Partager une facture payée par un ami',
         body: "Dans Partager la facture, touchez Payé par et choisissez l'ami qui a payé. Seule votre part compte comme dépense, et Soldes indique ce que vous lui devez. Remboursez en une fois ou en plusieurs parts, puis réglez tout d'un toucher.",

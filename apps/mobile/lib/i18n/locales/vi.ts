@@ -172,7 +172,11 @@ const vi = {
   },
   news: {
     split_bills_album_icons: {
-      title: 'Chia hóa đơn theo cách của bạn',
+      title: 'Album chung và chia hóa đơn',
+      sharedAlbums: {
+        title: 'Chia sẻ album chuyến đi với bạn bè',
+        body: 'Sắp đi du lịch? Trong Album mới, bật Chia với bạn bè, rồi gửi liên kết mời từ Mọi người. Ai cũng có thể thêm hóa đơn, mỗi hóa đơn được chia đều ngay từ đầu, và Công nợ cho biết ai nợ ai. Bạn bè không có ứng dụng vẫn có thể tham gia và thêm hóa đơn tại album.money2time.com.',
+      },
       friendPaid: {
         title: 'Chia hóa đơn do bạn bè trả',
         body: 'Trong Chia hóa đơn, chạm Người trả và chọn người bạn đã trả. Chỉ phần của bạn được tính là chi tiêu, và Công nợ cho biết bạn còn nợ bao nhiêu. Trả lại một lần hoặc từng phần, rồi thanh toán chỉ với một chạm.',

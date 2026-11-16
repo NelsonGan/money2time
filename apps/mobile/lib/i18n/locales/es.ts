@@ -172,7 +172,11 @@ const es = {
   },
   news: {
     split_bills_album_icons: {
-      title: 'Divide gastos a tu manera',
+      title: 'Álbumes compartidos y gastos divididos',
+      sharedAlbums: {
+        title: 'Comparte un álbum de viaje con amigos',
+        body: '¿Te vas de viaje? En Nuevo álbum, activa Dividir con amigos y envía el enlace de invitación desde Personas. Todos pueden añadir gastos, cada uno empieza dividido a partes iguales y Saldos muestra quién debe a quién. Los amigos sin la app pueden unirse y añadir gastos en album.money2time.com.',
+      },
       friendPaid: {
         title: 'Divide un gasto que pagó un amigo',
         body: 'En Dividir gasto, toca Pagado por y elige al amigo que pagó. Solo tu parte cuenta como gasto, y Saldos muestra lo que le debes. Devuélveselo de una vez o por partes, y salda todo con un toque.',

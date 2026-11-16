@@ -147,7 +147,11 @@ const en = {
   },
   news: {
     split_bills_album_icons: {
-      title: 'Split bills, your way',
+      title: 'Shared albums and split bills',
+      sharedAlbums: {
+        title: 'Share a trip album with friends',
+        body: 'Going on a trip? In New Album, turn on Split with friends, then send the invite link from People. Everyone adds bills, each one starts split evenly, and Balances shows who owes whom. Friends without the app can join and add bills at album.money2time.com.',
+      },
       friendPaid: {
         title: 'Split a bill a friend paid',
         body: 'On Split Bill, tap Paid by and pick the friend who paid. Only your share counts as spending, and Balances shows what you owe them. Pay them back in one go or in parts, then settle up in one tap.',

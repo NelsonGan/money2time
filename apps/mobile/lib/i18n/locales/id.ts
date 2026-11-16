@@ -172,7 +172,11 @@ const id = {
   },
   news: {
     split_bills_album_icons: {
-      title: 'Bagi tagihan sesukamu',
+      title: 'Album bersama dan bagi tagihan',
+      sharedAlbums: {
+        title: 'Bagikan album perjalanan dengan teman',
+        body: 'Mau jalan-jalan? Di Album Baru, nyalakan Bagi dengan teman, lalu kirim tautan undangan dari Orang. Semua orang bisa menambah tagihan, setiap tagihan langsung dibagi rata, dan Utang piutang menunjukkan siapa berutang kepada siapa. Teman tanpa aplikasi bisa bergabung dan menambah tagihan di album.money2time.com.',
+      },
       friendPaid: {
         title: 'Bagi tagihan yang dibayar teman',
         body: 'Di Bagi Tagihan, ketuk Dibayar oleh dan pilih teman yang membayar. Hanya bagianmu yang dihitung sebagai pengeluaran, dan Utang piutang menunjukkan berapa utangmu. Bayar kembali sekaligus atau sedikit demi sedikit, lalu lunasi dengan sekali ketuk.',

@@ -172,7 +172,11 @@ const sv = {
   },
   news: {
     split_bills_album_icons: {
-      title: 'Dela notor som du vill',
+      title: 'Delade album och delade notor',
+      sharedAlbums: {
+        title: 'Dela ett resealbum med vänner',
+        body: 'Ska ni ut och resa? Slå på Dela med vänner i Nytt album och skicka inbjudningslänken från Personer. Alla kan lägga till notor, varje nota delas lika från början och Mellanhavanden visar vem som är skyldig vem. Vänner utan appen kan gå med och lägga till notor på album.money2time.com.',
+      },
       friendPaid: {
         title: 'Dela en nota som en vän betalade',
         body: 'Tryck på Betalt av i Dela notan och välj vännen som betalade. Bara din andel räknas som utgift, och Mellanhavanden visar vad du är skyldig. Betala tillbaka allt på en gång eller i delar, och gör upp med ett tryck.',

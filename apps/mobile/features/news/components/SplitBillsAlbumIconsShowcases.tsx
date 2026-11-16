@@ -1,4 +1,4 @@
-import { ChevronRight, Minus, Plus } from 'lucide-react-native';
+import { ChevronRight, Globe, Link2, Minus, Plus } from 'lucide-react-native';
 import React from 'react';
 import { View } from 'react-native';
 
@@ -344,6 +344,154 @@ export function AlbumIconsShowcase({ width }: ShowcaseProps) {
             </View>
           );
         })}
+      </View>
+    </View>
+  );
+}
+
+/** A switch drawn, not wired: the showcase is a picture of the setting. */
+function DrawnSwitch({ on }: { on: boolean }) {
+  const colors = useThemeColors();
+  return (
+    <View
+      className="h-6 w-10 justify-center rounded-full px-0.5"
+      style={{ backgroundColor: on ? colors.primary : withColorAlpha(colors.border, 0.5) }}
+    >
+      <View className={`h-5 w-5 rounded-full bg-white ${on ? 'self-end' : 'self-start'}`} />
+    </View>
+  );
+}
+
+/** The people who joined the sample album, after the user. */
+const ALBUM_FRIENDS = ['Aisha', 'Ben', 'Chen'] as const;
+/** A sample invite link, shaped as the real ones are. */
+const SAMPLE_INVITE = 'album.money2time.com/join/8KQ2MX';
+const SAMPLE_BILL = { emoji: '🏝️', title: 'Villa', amount: 480, payer: 'Aisha' } as const;
+
+/** A trip album shared with friends: its people on the card, Split with
+ *  friends turned on with the invite link, and a friend's bill as
+ *  album.money2time.com shows it to someone without the app. */
+export function SharedAlbumsShowcase({ width }: ShowcaseProps) {
+  const colors = useThemeColors();
+  const { settings } = useApp();
+  const me = useSelfPerson();
+  const amount = (value: number) => money(value, settings);
+  const tripName = I18n.t('news.showcase.album_trip');
+  // Everyone's even part of the sample bill, the user included.
+  const share = SAMPLE_BILL.amount / (ALBUM_FRIENDS.length + 1);
+  return (
+    <View className="gap-1.5" style={{ width }}>
+      {/* The shared album card's strip: its people at the end of the name's
+          line. Only the strip, so the page fits under longer languages. */}
+      <View
+        className="overflow-hidden rounded-2xl border border-border/40"
+        style={{ backgroundColor: withColorAlpha(colors.sky, 0.25) }}
+      >
+        <View
+          className="flex-row items-center gap-3 px-3.5 py-2.5"
+          style={{ backgroundColor: 'rgba(0,0,0,0.52)' }}
+        >
+          <View className="h-10 w-10 items-center justify-center rounded-2xl bg-white/90">
+            <AlbumLineIcon album={{ name: tripName, icon: 'plane' }} size={26} />
+          </View>
+          <View className="min-w-0 flex-1">
+            <View className="flex-row items-center gap-2">
+              <Text variant="caption" numberOfLines={1} className="flex-1 text-white/80">
+                {tripName}
+              </Text>
+              <View className="flex-row items-center">
+                {[null, ...ALBUM_FRIENDS].map((name, index) => (
+                  <View
+                    key={name ?? 'me'}
+                    style={{ marginLeft: index === 0 ? 0 : -6 }}
+                    className="rounded-full border-2 border-black/40 bg-card"
+                  >
+                    {name === null ? (
+                      me.avatarUri ? (
+                        <PersonAvatar
+                          name={me.name}
+                          partyKey={null}
+                          size={20}
+                          imageUri={me.avatarUri}
+                        />
+                      ) : (
+                        <View className="h-5 w-5 items-center justify-center rounded-full bg-primary/15">
+                          <Text className="text-[10px] font-semibold text-primary">
+                            {Array.from(me.name)[0]?.toUpperCase()}
+                          </Text>
+                        </View>
+                      )
+                    ) : (
+                      <PersonAvatar name={name} partyKey={debtPartyKey(name)} size={20} />
+                    )}
+                  </View>
+                ))}
+              </View>
+            </View>
+            <Text variant="bodyStrong" numberOfLines={1} className="mt-0.5 text-white">
+              {amount(SAMPLE_BILL.amount)}
+            </Text>
+          </View>
+        </View>
+      </View>
+
+      {/* New Album's switch, turned on, and the link the People page shares. */}
+      <View className="rounded-[18px] border border-border/30 bg-card px-3.5 py-2.5">
+        <View className="flex-row items-center justify-between gap-2">
+          <Text variant="body" numberOfLines={1} className="shrink">
+            {I18n.t('albums.share.row')}
+          </Text>
+          <DrawnSwitch on />
+        </View>
+        <View className="my-2 h-px bg-border/40" />
+        <View
+          className="flex-row items-center gap-2"
+          accessibilityLabel={I18n.t('shared_ledgers.invite_link')}
+        >
+          <Link2 size={14} color={colors.textMuted} />
+          <Text
+            variant="caption"
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            className="flex-1 text-[12px] text-foreground"
+          >
+            {SAMPLE_INVITE}
+          </Text>
+          <View className="rounded-full bg-primary/15 px-2.5 py-1">
+            <Text variant="caption" className="font-medium text-primary">
+              {I18n.t('common.copy')}
+            </Text>
+          </View>
+        </View>
+      </View>
+
+      {/* The album on the website, where a friend without the app adds bills. */}
+      <View className="overflow-hidden rounded-[18px] border border-border/30 bg-card">
+        <View className="flex-row items-center justify-center gap-1.5 bg-secondary/50 py-1.5">
+          <Globe size={12} color={colors.textMuted} />
+          <Text variant="caption" tone="muted" className="text-[11px]">
+            album.money2time.com
+          </Text>
+        </View>
+        <View className="flex-row items-center gap-2.5 px-3.5 py-2">
+          <View className="h-6 w-6 items-center justify-center">
+            <CategoryEmoji icon={SAMPLE_BILL.emoji} size={22} />
+          </View>
+          <View className="min-w-0 flex-1">
+            <Text variant="body" numberOfLines={1}>
+              {SAMPLE_BILL.title}
+            </Text>
+            <Text variant="caption" tone="muted" numberOfLines={1}>
+              {I18n.t('transactions.settleUp.person_paid', { name: SAMPLE_BILL.payer })}
+            </Text>
+          </View>
+          <View className="items-end">
+            <Text variant="bodyStrong">{amount(SAMPLE_BILL.amount)}</Text>
+            <Text variant="caption" tone="muted" numberOfLines={1}>
+              {I18n.t('transactions.editor.split.your_share_label')} {amount(share)}
+            </Text>
+          </View>
+        </View>
       </View>
     </View>
   );

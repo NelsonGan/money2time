@@ -172,7 +172,11 @@ const ms = {
   },
   news: {
     split_bills_album_icons: {
-      title: 'Bahagi bil ikut cara anda',
+      title: 'Album dikongsi dan bil dibahagi',
+      sharedAlbums: {
+        title: 'Kongsi album percutian dengan rakan',
+        body: 'Nak bercuti? Dalam Album Baharu, hidupkan Kongsi dengan rakan, kemudian hantar pautan jemputan dari Orang. Semua orang boleh menambah bil, setiap bil dibahagi sama rata dari awal, dan Hutang piutang menunjukkan siapa berhutang dengan siapa. Rakan tanpa aplikasi boleh menyertai dan menambah bil di album.money2time.com.',
+      },
       friendPaid: {
         title: 'Bahagi bil yang dibayar kawan',
         body: 'Dalam Bahagi Bil, ketik Dibayar oleh dan pilih kawan yang membayar. Hanya bahagian anda dikira sebagai perbelanjaan, dan Hutang piutang menunjukkan berapa hutang anda. Bayar balik sekali gus atau sedikit demi sedikit, kemudian selesaikan dengan satu ketikan.',

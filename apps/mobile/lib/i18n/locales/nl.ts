@@ -172,7 +172,11 @@ const nl = {
   },
   news: {
     split_bills_album_icons: {
-      title: 'Rekeningen splitsen zoals jij wilt',
+      title: 'Gedeelde albums en gesplitste rekeningen',
+      sharedAlbums: {
+        title: 'Deel een reisalbum met vrienden',
+        body: 'Op reis? Zet in Nieuw album Delen met vrienden aan en stuur de uitnodigingslink vanuit Personen. Iedereen kan rekeningen toevoegen, elke rekening wordt eerst gelijk verdeeld en Saldi laat zien wie wie wat schuldig is. Vrienden zonder de app kunnen meedoen en rekeningen toevoegen op album.money2time.com.',
+      },
       friendPaid: {
         title: 'Een rekening splitsen die een vriend betaalde',
         body: 'Tik in Rekening splitsen op Betaald door en kies de vriend die betaalde. Alleen jouw deel telt als uitgave, en Saldi laat zien wat je nog schuldig bent. Betaal in één keer of in delen terug, en verreken alles met één tik.',
