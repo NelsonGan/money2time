@@ -2065,8 +2065,14 @@ how the household is spending, and who is covering what.
   Removing a member, leaving, or deleting a member's account first revokes
   **that ledger database's tokens**, then ends the membership. A saved token
   therefore stops working before removal succeeds; other databases in the
-  group keep their tokens. Remaining members are nudged and fetch fresh
-  credentials after their next sync rejects the old token. Previously
+  group keep their tokens. The phone that removed someone forgets its own
+  cached token at once; remaining members are nudged. Whenever Turso refuses
+  a token (HTTP 401, "role was invalidated after token was issued"), every
+  sync of a shared ledger (a round, leaving, stopping sharing, joining, a
+  restore) drops it, asks the Worker for a fresh one (once more after about
+  two seconds if the Worker is busy minting it for another phone) and syncs
+  again (`syncLedger` in `sharedLedgerSync.ts`), so a removal shows no failed
+  sync. Previously
   downloaded data cannot be remotely erased from a modified app.
   Token issuance is fenced during revocation: unique `revoking:` / `revoked:`
   markers in the existing `shared_ledgers.token` field prevent an in-flight

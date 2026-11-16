@@ -28,6 +28,12 @@ jest.mock('~/features/cloudSync/services/ledgerChannels', () => ({
 }));
 jest.mock('~/features/cloudSync/services/sharedLedgersApi', () => ({
   listSharedLedgers: jest.fn(),
+  // Every shared sync has the ledger's token ready first.
+  getLedgerCredentials: jest.fn(async () => ({
+    url: 'libsql://family.example',
+    authToken: 'token',
+    expiresAt: Date.now() + 24 * 60 * 60 * 1000,
+  })),
 }));
 jest.mock('~/features/cloudSync/services/syncEngine', () => ({
   runExclusive: (fn: () => unknown) => fn(),

@@ -26,6 +26,7 @@ import {
   removeMember,
 } from '~/features/cloudSync/services/sharedLedgersApi';
 import { listAlbumShares } from '~/features/cloudSync/services/sharedLedgerStore';
+import { sharedLedgerSync } from '~/features/cloudSync/services/sharedLedgerSync';
 import { ledgerDisplayName, ledgerIcon } from '~/features/ledgers/lib/ledgerDisplay';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { DEFAULT_LEDGER_ID } from '~/lib/db/ledgerScope';
@@ -190,6 +191,8 @@ export function LedgerSharingScreen({
             void run(`remove:${member.id}`, async () => {
               if (!shareId) return;
               await removeMember(await sync.getSessionToken(), shareId, member.id);
+              // Removing someone rotated the ledger's tokens: this phone's too.
+              sharedLedgerSync.forgetCredentials(shareId);
               // The Worker retired the link: never show the dead one.
               setLink(null);
               void trackEvent(AnalyticsEvents.SHARED_LEDGER_MEMBER_REMOVED);

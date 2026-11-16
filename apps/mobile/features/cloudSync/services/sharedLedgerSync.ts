@@ -65,6 +65,7 @@ import {
   type RestoreSnapshot,
   runExclusive,
   SyncEngine,
+  type SyncOutcome,
 } from './syncEngine';
 
 /**
@@ -78,6 +79,12 @@ const LIST_EVERY_MS_NONE = 15 * 60_000;
 const LAST_USER_KEY = 'm2t.sharedLedgers.lastUserId';
 /** A ledger token is reused until it has this long left (they last a day). */
 const TOKEN_REFRESH_MARGIN_MS = 6 * 60 * 60 * 1000;
+/**
+ * After a token is revoked, phones nudged together ask for a new one at once
+ * and the Worker turns all but the first away (500): ask again after this,
+ * plus up to a second of jitter, when its token is cached.
+ */
+const CREDENTIALS_RETRY_MS = 1_500;
 
 export interface SharedSyncSession {
   userId: string;
@@ -159,6 +166,25 @@ function isUnreachable(error: unknown): boolean {
   return isCode(error, 'unauthorized', 'network');
 }
 
+/**
+ * Turso refused the ledger's token. A member who leaves or is removed makes
+ * the Worker rotate the database's tokens, so every other phone's cached one
+ * stops working ("role was invalidated after token was issued").
+ */
+function isRefusedTokenError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  return message.includes('remote server returned an error: status=401');
+}
+
+/**
+ * The Worker's answer to a credentials request that lost a race to mint the
+ * same ledger's new token (its catch-all 500), worth asking again shortly.
+ * Not a 502/503: an outage should fail at once.
+ */
+function isBusyMinting(error: unknown): boolean {
+  return error instanceof CloudSyncApiError && error.code === 'server' && error.status === 500;
+}
+
 class SharedLedgerSync {
   private session: SharedSyncSession | null = null;
   /** The last signed-in user, whose replica files a later let-go removes. */
@@ -167,6 +193,10 @@ class SharedLedgerSync {
   private leftByUser = new Set<string>();
   private engines = new Map<string, SyncEngine>();
   private credentials = new Map<string, SyncCredentials>();
+  /** Credentials requests in flight, so an engine's parallel requests share one. */
+  private credentialFetches = new Map<string, Promise<SyncCredentials>>();
+  /** Bumped whenever credentials are dropped: a fetch begun before is not kept. */
+  private credentialsEpoch = 0;
   /** Engines being opened, so two callers never open one replica twice. */
   private opening = new Map<string, Promise<SyncEngine>>();
   private listedAt = 0;
@@ -208,6 +238,8 @@ class SharedLedgerSync {
     for (const engine of this.engines.values()) engine.close();
     this.engines.clear();
     this.credentials.clear();
+    this.credentialFetches.clear();
+    this.credentialsEpoch += 1;
     this.opening.clear();
   }
 
@@ -396,7 +428,7 @@ class SharedLedgerSync {
   private closeEngine(shareId: string): void {
     this.engines.get(shareId)?.close();
     this.engines.delete(shareId);
-    this.credentials.delete(shareId);
+    this.forgetCredentials(shareId);
   }
 
   // -------------------------------------------------------------------------
@@ -405,9 +437,57 @@ class SharedLedgerSync {
   private async credentialsFor(shareId: string): Promise<SyncCredentials> {
     const current = this.credentials.get(shareId);
     if (current && current.expiresAt - Date.now() > TOKEN_REFRESH_MARGIN_MS) return current;
-    const next = await getLedgerCredentials(await this.token(), shareId);
+    const epoch = this.credentialsEpoch;
+    let fetching = this.credentialFetches.get(shareId);
+    if (!fetching) {
+      const started = (async () => getLedgerCredentials(await this.token(), shareId))();
+      fetching = started;
+      this.credentialFetches.set(shareId, started);
+      started
+        .finally(() => {
+          if (this.credentialFetches.get(shareId) === started) {
+            this.credentialFetches.delete(shareId);
+          }
+        })
+        .catch(() => undefined);
+    }
+    const next = await fetching;
+    // Dropped meanwhile (a removal, a sign-out): it may predate a rotation.
+    if (epoch !== this.credentialsEpoch) return this.credentialsFor(shareId);
     this.credentials.set(shareId, next);
     return next;
+  }
+
+  /**
+   * Drops a ledger's token, and any request for one in flight. Also called
+   * by the screens right after this phone removes someone, which rotated
+   * the database's tokens: the cached one would only be refused.
+   */
+  forgetCredentials(shareId: string): void {
+    this.credentials.delete(shareId);
+    this.credentialFetches.delete(shareId);
+    this.credentialsEpoch += 1;
+  }
+
+  /**
+   * Has the ledger's token ready before the engine asks for it. Fetched
+   * here, a Worker refusal keeps its code (`not_found`, `ledger_paused`); the
+   * engine turns its token callback's errors into plain messages. Phones
+   * nudged together after a removal ask at once and the Worker turns all but
+   * the first away: ask again shortly, by when the new token is cached.
+   */
+  private async readyCredentials(shareId: string): Promise<void> {
+    const session = this.session;
+    try {
+      await this.credentialsFor(shareId);
+    } catch (error) {
+      if (!isBusyMinting(error)) throw error;
+      await new Promise((resolve) =>
+        setTimeout(resolve, CREDENTIALS_RETRY_MS + Math.random() * 1_000),
+      );
+      if (this.session !== session) throw new Error('signed_out');
+      await this.credentialsFor(shareId);
+    }
   }
 
   private engineFor(ledger: SharedLedger): Promise<SyncEngine> {
@@ -511,13 +591,13 @@ class SharedLedgerSync {
       }
       try {
         const engine = await this.engineFor(ledger);
-        const result = await engine.syncNow();
+        const result = await this.syncLedger(engine, ledger.shareId);
         outcome.appliedRows += result.appliedRows;
         outcome.error ??= result.applyError;
         if (result.pushed) session.announce?.(ledger.shareId);
       } catch (error) {
         // A token may have been revoked (a member was removed): ask again.
-        this.credentials.delete(ledger.shareId);
+        this.forgetCredentials(ledger.shareId);
         // Paused or gone is the ledger's new state, not a failure to show.
         if (isCode(error, 'ledger_paused')) {
           this.closeEngine(ledger.shareId);
@@ -538,6 +618,24 @@ class SharedLedgerSync {
     }
     this.retry = outcome.error !== null;
     return outcome;
+  }
+
+  /**
+   * One sync of a shared ledger, which every sync of one goes through. A
+   * token Turso refuses was revoked by a member leaving: it is dropped, a new
+   * one made ready, and the engine, which asks for its token on every
+   * request, syncs once more.
+   */
+  private async syncLedger(engine: SyncEngine, shareId: string): Promise<SyncOutcome> {
+    await this.readyCredentials(shareId);
+    try {
+      return await engine.syncNow();
+    } catch (error) {
+      if (!isRefusedTokenError(error)) throw error;
+      this.forgetCredentials(shareId);
+      await this.readyCredentials(shareId);
+      return engine.syncNow();
+    }
   }
 
   /** A live nudge says this user left `shareId` themselves, on another phone. */
@@ -581,9 +679,9 @@ class SharedLedgerSync {
       authorize();
       for (const id of selected) {
         const ledger = sharedLedgerFor(id)!;
-        this.credentials.delete(ledger.shareId);
+        this.forgetCredentials(ledger.shareId);
         const engine = await this.engineFor(ledger);
-        const result = await engine.syncNow();
+        const result = await this.syncLedger(engine, ledger.shareId);
         if (result.applyError) throw result.applyError;
         engines.push({ engine, snapshot: await engine.prepareSnapshotRestore() });
       }
@@ -606,7 +704,7 @@ class SharedLedgerSync {
     if (!result.success) return result;
     for (const entry of engines) {
       try {
-        const synced = await entry.engine.syncNow();
+        const synced = await this.syncLedger(entry.engine, entry.snapshot.channel);
         if (synced.applyError) throw synced.applyError;
         session?.announce?.(entry.snapshot.channel);
       } catch {
@@ -683,7 +781,7 @@ class SharedLedgerSync {
       // A round already running may have pulled before the join was written:
       // let it finish, then pull again.
       if (engine.isSyncing()) await engine.syncNow().catch(() => undefined);
-      await engine.syncNow();
+      await this.syncLedger(engine, share.shareId);
     } catch {
       // The album is joined; the next sync brings the user down.
     }
@@ -738,7 +836,9 @@ class SharedLedgerSync {
    */
   private async takeLatest(ledger: SharedLedger): Promise<Error | null> {
     const download = async (paused: boolean): Promise<Error | null> => {
-      if (!paused) return (await (await this.engineFor(ledger)).syncNow()).applyError;
+      if (!paused) {
+        return (await this.syncLedger(await this.engineFor(ledger), ledger.shareId)).applyError;
+      }
       // One connection per replica file: the read-only one replaces any kept.
       this.closeEngine(ledger.shareId);
       const engine = await this.openEngine(ledger, true);
@@ -781,13 +881,13 @@ class SharedLedgerSync {
     if (!ledger || ledger.role !== 'member') return;
     if (ledger.kind === 'album' && !this.hasUnsent(ledger) && ledger.active && this.session) {
       await this.engineFor(ledger)
-        .then((engine) => engine.syncNow())
+        .then((engine) => this.syncLedger(engine, ledger.shareId))
         .catch(() => undefined);
     }
     if (!opts.force && this.hasUnsent(ledger)) {
       if (ledger.active && this.session) {
         await this.engineFor(ledger)
-          .then((engine) => engine.syncNow())
+          .then((engine) => this.syncLedger(engine, ledger.shareId))
           .catch(() => undefined);
       }
       if (this.hasUnsent(ledger)) throw new CloudSyncApiError('unsent_changes', 0);
@@ -841,7 +941,7 @@ class SharedLedgerSync {
     const shared = fromRemote(remote, this.requireSession().userId);
     saveSharedLedger(shared);
     try {
-      await (await this.engineFor(shared)).syncNow();
+      await this.syncLedger(await this.engineFor(shared), shared.shareId);
     } catch (error) {
       // Joined, but nothing has come down yet. The screen says so and Join
       // again retries (the Worker answers a member with the same share).
@@ -863,7 +963,7 @@ class SharedLedgerSync {
       ensureLocalAlbum({ ledgerId: shared.ledgerId, name: shared.name });
     });
     try {
-      await (await this.engineFor(shared)).syncNow();
+      await this.syncLedger(await this.engineFor(shared), shared.shareId);
     } catch (error) {
       this.retry = true;
       throw error;
