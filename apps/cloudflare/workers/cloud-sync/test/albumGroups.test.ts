@@ -411,6 +411,26 @@ test('a simplified debt paid along several bills reads as one payment', async ()
   assert.equal(payments().length, 3);
 });
 
+test('joining again after leaving takes the row they left back', async () => {
+  const { group, rows } = await trip();
+  await write(group, 'owner', {
+    rows: [bill('u-bali-ben', { 'u-bali-ben': 30, 'u-bali-owner': 30 })],
+  });
+  await writeGroup(group, null, (state) => planLeave(state, ctx('ben'), 'ben'));
+  await join(group, 'ben', 'Benjamin');
+  const members = rows('album_members');
+  assert.deepEqual(
+    members.map((m) => [m.id, m.name, m.user_id]),
+    [
+      ['u-bali-ben', 'Ben', 'ben'],
+      ['u-bali-owner', 'Nelson', 'owner'],
+      ['u-bali-tess', 'Tess', 'tess'],
+    ],
+  );
+  const joined = rows('album_activity').filter((a) => a.kind === 'member_joined');
+  assert.equal(joined.at(-1).member_id, 'u-bali-ben');
+});
+
 test('someone who left changes nothing and is put on no new bill, but stays on old ones', async () => {
   const { group, rows } = await trip();
   await write(group, 'owner', {
