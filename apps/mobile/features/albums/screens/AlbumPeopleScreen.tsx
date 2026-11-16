@@ -20,6 +20,7 @@ import {
   type InviteLink,
   removeMember,
 } from '~/features/cloudSync/services/sharedLedgersApi';
+import { sharedLedgerSync } from '~/features/cloudSync/services/sharedLedgerSync';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
@@ -191,6 +192,8 @@ export function AlbumPeopleScreen({ albumId, onBack }: AlbumPeopleScreenProps) {
               if (!shareId || !member.userId) return;
               // The Worker marks them as left in the group, and logs it.
               await removeMember(await getSessionToken(), shareId, member.userId);
+              // Removing someone rotated the album's tokens: this phone's too.
+              sharedLedgerSync.forgetCredentials(shareId);
               setLink(null);
               void trackEvent(AnalyticsEvents.ALBUM_MEMBER_REMOVED);
               await loadJoined();

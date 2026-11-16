@@ -1,3 +1,4 @@
+import { CloudSyncApiError } from '~/features/cloudSync/services/cloudSyncApi';
 import type { RemoteSharedLedger } from '~/features/cloudSync/services/sharedLedgersApi';
 import {
   getLedgerCredentials,
@@ -59,10 +60,13 @@ jest.mock('~/features/cloudSync/services/syncEngine', () => ({
     open = jest.fn(async () => undefined);
     close = jest.fn();
     waitIdle = jest.fn(async () => undefined);
-    // Like the Turso engine: every request asks for the token again.
+    // Like the Turso engine: every request asks for the token again, and an
+    // error from that callback comes back as a plain message (`poison`).
     syncNow = jest.fn(async () => {
       mockSyncNow();
-      const token = await this.config.getTursoToken();
+      const token = await this.config.getTursoToken().catch((error: Error) => {
+        throw new Error(error.message);
+      });
       if (token !== mockValidToken) throw new Error(ROTATED);
       return { appliedRows: 1, pushed: false, applyError: null };
     });
@@ -138,4 +142,44 @@ it('does not retry other failures within the round', async () => {
 
   expect(outcome.error).toBeInstanceOf(Error);
   expect(mockSyncNow).toHaveBeenCalledTimes(1);
+});
+
+it('keeps a Worker refusal during the retry as what it is, not a sync failure', async () => {
+  (getLedgerCredentials as jest.Mock)
+    .mockResolvedValueOnce(credentials('first'))
+    .mockRejectedValueOnce(new CloudSyncApiError('not_found', 404));
+  mockValidToken = 'first';
+  await sharedLedgerSync.syncAll();
+  const listsBefore = (listSharedLedgers as jest.Mock).mock.calls.length;
+
+  // Removed from the album: the token is refused and the Worker says so.
+  mockValidToken = 'fresh';
+  const outcome = await sharedLedgerSync.syncAll();
+
+  // The list is read again to learn why, as for any `not_found`; nothing is reported.
+  expect(outcome.error).toBeNull();
+  expect((listSharedLedgers as jest.Mock).mock.calls.length).toBeGreaterThan(listsBefore);
+  expect(mockSyncNow).toHaveBeenCalledTimes(2);
+});
+
+it('asks again shortly when the Worker is busy minting the new token for another phone', async () => {
+  jest.useFakeTimers();
+  try {
+    (getLedgerCredentials as jest.Mock)
+      .mockResolvedValueOnce(credentials('first'))
+      .mockRejectedValueOnce(new CloudSyncApiError('server', 500))
+      .mockResolvedValueOnce(credentials('fresh'));
+    mockValidToken = 'first';
+    await sharedLedgerSync.syncAll();
+
+    mockValidToken = 'fresh';
+    const round = sharedLedgerSync.syncAll();
+    await jest.advanceTimersByTimeAsync(3_000);
+    const outcome = await round;
+
+    expect(outcome.error).toBeNull();
+    expect(getLedgerCredentials).toHaveBeenCalledTimes(3);
+  } finally {
+    jest.useRealTimers();
+  }
 });
