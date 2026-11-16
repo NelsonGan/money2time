@@ -1798,6 +1798,7 @@
         "next": "Suivant",
         "deleteTitle": "Supprimer l'album ?",
         "deleteBody": "Vos transactions sont conservées et retournent dans leurs propres catégories. Pour garder l’album tel quel, archivez-le plutôt dans l’app.",
+        "deleteEndedBody": "Il est supprimé de votre téléphone, et vos transactions retournent dans leurs propres catégories. Les autres gardent l’album.",
         "endedNote": "Plus partagé : conservé tel quel, il ne peut plus être modifié.",
         "noAlbums": "Aucun album pour l'instant",
         "appOnlyHint": "Ajoutez une photo de couverture ou un lieu dans l'app.",

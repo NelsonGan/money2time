@@ -1798,6 +1798,7 @@
         "next": "Susunod",
         "deleteTitle": "Tanggalin ang album?",
         "deleteBody": "Mananatili ang mga transaksyon mo at babalik sa sarili nilang mga kategorya. Para panatilihin ang album kung ano ito, i-archive na lang ito sa app.",
+        "deleteEndedBody": "Mabubura ito sa phone mo, at babalik ang mga transaksyon mo sa sarili nilang mga kategorya. Mananatili sa iba ang album.",
         "endedNote": "Hindi na shared: nananatili kung ano ito at hindi na mababago.",
         "noAlbums": "Wala pang album",
         "appOnlyHint": "Magdagdag ng cover photo o lokasyon sa app.",

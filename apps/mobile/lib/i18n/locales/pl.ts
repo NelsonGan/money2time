@@ -3019,6 +3019,13 @@ const pl = {
     delete_title: 'Usunąć album?',
     delete_body:
       'Twoje transakcje zostaną zachowane i wrócą do swoich kategorii. Aby zachować album bez zmian, zarchiwizuj go zamiast tego.',
+    delete_body_member:
+      'Opuszczasz album i zostanie on usunięty z tego telefonu. Twoje transakcje zostaną zachowane w Twoich kategoriach, a pozostali zachowują album i jego rachunki. Aby w nim zostać, zarchiwizuj go zamiast tego.',
+    delete_body_owner:
+      'To zakończy album także dla wszystkich: pozostali zachowają go w sekcji Zarchiwizowane w obecnym stanie i nikt nie będzie mógł zmieniać rachunków. Twoje transakcje zostaną zachowane w Twoich kategoriach. Aby album trwał dalej, zarchiwizuj go zamiast tego.',
+    delete_body_ended:
+      'Album zostanie usunięty z tego telefonu, a Twoje transakcje wrócą do swoich kategorii. Pozostali zachowują album.',
+    deleting: 'Usuwanie albumu…',
     cover_permission_title: 'Wymagany dostęp do zdjęć',
     cover_permission_body: 'Zezwól na dostęp do zdjęć, aby wybrać okładkę.',
     people: {
@@ -3054,9 +3061,6 @@ const pl = {
       unarchive: 'Przywróć z archiwum',
       label: 'Zarchiwizowany',
       section: 'Zarchiwizowane ({{count}})',
-      confirm_title: 'Zarchiwizować {{name}}?',
-      confirm_shared:
-        'Album trafi do sekcji Zarchiwizowane na stronie Albumy. Nadal w nim jesteś, jego rachunki nadal się aktualizują i nadal liczy się w Analizach. Możesz go przywrócić w dowolnym momencie.',
     },
     ended: {
       label: 'Już nieudostępniany',

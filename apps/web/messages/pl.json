@@ -1798,6 +1798,7 @@
         "next": "Następny",
         "deleteTitle": "Usunąć album?",
         "deleteBody": "Twoje transakcje zostaną zachowane i wrócą do swoich kategorii. Aby zachować album bez zmian, zarchiwizuj go zamiast tego w aplikacji.",
+        "deleteEndedBody": "Album zostanie usunięty z Twojego telefonu, a Twoje transakcje wrócą do swoich kategorii. Pozostali zachowują album.",
         "endedNote": "Już nieudostępniany: zostaje taki, jaki był, i nie można go zmienić.",
         "noAlbums": "Brak albumów",
         "appOnlyHint": "Dodaj zdjęcie okładki lub lokalizację w aplikacji.",

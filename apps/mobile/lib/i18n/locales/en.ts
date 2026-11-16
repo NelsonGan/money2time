@@ -2989,6 +2989,13 @@ const en = {
     delete_title: 'Delete album?',
     delete_body:
       'Your transactions are kept and go back under their own categories. To keep the album as it is, archive it instead.',
+    delete_body_member:
+      "You leave the album and it's deleted from this phone. Your transactions are kept, under your own categories, and the others keep the album and its bills. To stay in it, archive it instead.",
+    delete_body_owner:
+      'This ends it for everyone too: the others keep it in Archived as it is now, and nobody can change its bills. Your transactions are kept, under your own categories. To keep it going, archive it instead.',
+    delete_body_ended:
+      "It's deleted from this phone, and your transactions go back under their own categories. The others keep the album.",
+    deleting: 'Deleting album…',
     cover_permission_title: 'Photo access needed',
     cover_permission_body: 'Allow photo access to choose a cover image.',
     location: {
@@ -3034,9 +3041,6 @@ const en = {
       unarchive: 'Unarchive',
       label: 'Archived',
       section: 'Archived ({{count}})',
-      confirm_title: 'Archive {{name}}?',
-      confirm_shared:
-        'It moves to Archived on the Albums page. You stay in it, its bills keep updating, and it still counts in Insights. You can unarchive it anytime.',
     },
     ended: {
       label: 'No longer shared',

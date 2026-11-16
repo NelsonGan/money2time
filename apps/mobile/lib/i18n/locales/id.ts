@@ -3021,6 +3021,13 @@ const id = {
     delete_title: 'Hapus album?',
     delete_body:
       'Transaksimu tetap disimpan dan kembali ke kategorinya masing-masing. Untuk menyimpan album apa adanya, arsipkan saja.',
+    delete_body_member:
+      'Kamu keluar dari album dan album dihapus dari ponsel ini. Transaksimu tetap disimpan di kategorimu sendiri, dan yang lain tetap punya album dan tagihannya. Untuk tetap di dalamnya, arsipkan saja.',
+    delete_body_owner:
+      'Album juga berakhir untuk semua orang: yang lain tetap punya album ini di Diarsipkan seperti sekarang, dan tidak ada yang bisa mengubah tagihannya. Transaksimu tetap disimpan di kategorimu sendiri. Agar tetap berjalan, arsipkan saja.',
+    delete_body_ended:
+      'Album dihapus dari ponsel ini, dan transaksimu kembali ke kategorinya masing-masing. Yang lain tetap punya album ini.',
+    deleting: 'Menghapus album…',
     cover_permission_title: 'Perlu akses foto',
     cover_permission_body: 'Izinkan akses foto untuk memilih gambar sampul.',
     people: {
@@ -3056,9 +3063,6 @@ const id = {
       unarchive: 'Batalkan arsip',
       label: 'Diarsipkan',
       section: 'Diarsipkan ({{count}})',
-      confirm_title: 'Arsipkan {{name}}?',
-      confirm_shared:
-        'Album pindah ke Diarsipkan di halaman Album. Kamu tetap di dalamnya, tagihannya tetap diperbarui, dan tetap dihitung di Wawasan. Kamu bisa membatalkan arsipnya kapan saja.',
     },
     ended: {
       label: 'Tidak dibagikan lagi',

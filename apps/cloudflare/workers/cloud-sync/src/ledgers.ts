@@ -148,6 +148,14 @@ interface LedgerView {
   active: boolean;
   /** What the share carries: a ledger, or an album's group. */
   kind: Kind;
+  /**
+   * When this account came into the share, in the list only (ms): a member's
+   * latest join (`ledger_members.joined_at`, new again after leaving and
+   * joining back), the owner's sharing it (`created_at`). The app tells by it
+   * an album deleted on the phone since (finish the deletion: leave or stop)
+   * from one joined again after deleting it (bring it back).
+   */
+  joinedAt?: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -529,16 +537,21 @@ async function listLedgers(env: Env, user: SessionUser, withAlbums: boolean): Pr
       .bind(user.id)
       .all<ListedLedgerRow>(),
     env.AUTH_DB.prepare(
-      `SELECT ${LISTED_COLUMNS} FROM ${LISTED_FROM} JOIN ledger_members m ON m.ledger_id = l.id
+      `SELECT ${LISTED_COLUMNS}, m.joined_at AS joined_at FROM ${LISTED_FROM}
+       JOIN ledger_members m ON m.ledger_id = l.id
        WHERE m.user_id = ?1`,
     )
       .bind(user.id)
-      .all<ListedLedgerRow>(),
+      .all<ListedLedgerRow & { joined_at: number }>(),
   ]);
   const shown = (row: SharedLedgerRow) => withAlbums || kindOf(row) === 'ledger';
   const ledgers = await Promise.all([
-    ...owned.results.filter(shown).map((row) => view(env, row, 'owner')),
-    ...joined.results.filter(shown).map((row) => view(env, row, 'member')),
+    ...owned.results
+      .filter(shown)
+      .map(async (row) => ({ ...(await view(env, row, 'owner')), joinedAt: row.created_at })),
+    ...joined.results
+      .filter(shown)
+      .map(async (row) => ({ ...(await view(env, row, 'member')), joinedAt: row.joined_at })),
   ]);
   return json({ ledgers });
 }
@@ -825,10 +838,7 @@ async function albumRead(
   if (since === stamp) return json({ unchanged: true, stamp });
   try {
     const db = hranaDb(ledger.db_url, await writerToken(env, ledger));
-    const [album, { rows, moneyRev }] = await Promise.all([
-      view(env, ledger, role),
-      readGroup(db),
-    ]);
+    const [album, { rows, moneyRev }] = await Promise.all([view(env, ledger, role), readGroup(db)]);
     return json({ album, userId: user.id, rows, moneyRev, stamp });
   } catch (error) {
     if (error instanceof Error && error.message.startsWith('ledger_access_chang')) {
@@ -881,7 +891,8 @@ async function albumWrite(
       rows = await writeGroup(
         db,
         write,
-        (state) => planWrite(state, groupContext(ledger, user.id, via), write, ledger.owner_user_id),
+        (state) =>
+          planWrite(state, groupContext(ledger, user.id, via), write, ledger.owner_user_id),
         writeBaseOf(body.rows, body.moneyBase),
       );
     } else {
@@ -917,7 +928,8 @@ export function writeBaseOf(rows: unknown[], moneyBase: unknown): WriteBase {
     const entry = item as { table?: unknown; row?: { id?: unknown }; base?: unknown } | null;
     if (!entry || typeof entry !== 'object' || !('base' in entry)) continue;
     if (typeof entry.table !== 'string' || typeof entry.row?.id !== 'string') continue;
-    if (entry.base !== null && (typeof entry.base !== 'string' || entry.base.length > 120)) continue;
+    if (entry.base !== null && (typeof entry.base !== 'string' || entry.base.length > 120))
+      continue;
     base.rows.push({ table: entry.table, id: entry.row.id, base: entry.base });
   }
   if (typeof moneyBase === 'string' && MONEY_REV.test(moneyBase)) base.moneyBase = moneyBase;

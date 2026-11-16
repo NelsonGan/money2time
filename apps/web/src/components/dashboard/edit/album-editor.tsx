@@ -404,11 +404,12 @@ function AlbumTransactionsForm({ trip: shown, onClose }: { trip: Trip; onClose: 
 export function AlbumActions({ trip }: { trip: Trip }) {
   const t = useTranslations("dashboard.edit.album");
   const te = useTranslations("dashboard.edit");
-  const { fullModel: model } = useDashboard();
+  const { fullModel: model, link } = useDashboard();
   const { run, busy, error, ready } = useEditRun();
   const [open, setOpen] = useState<"details" | "transactions" | "delete" | null>(null);
-  // A shared album is archived in the app, never deleted. One with no bills
-  // yet still offers it, and the phone says no.
+  // A shared album the user is still in is deleted in the app, which leaves
+  // it (or ends it for everyone) first. One with no bills yet still offers
+  // it, and the phone says no.
   const shared = useMemo(() => albumGroupBillIds(model, trip.id).size > 0, [model, trip.id]);
 
   const remove = async () => {
@@ -431,9 +432,37 @@ export function AlbumActions({ trip }: { trip: Trip }) {
     </button>
   );
 
-  // No longer shared: kept as it was, read-only (README: Album members and
-  // shared albums > Leaving and stopping).
-  if (trip.ended) return <p className="text-right text-[12.5px] text-foreground-soft">{t("endedNote")}</p>;
+  const confirmDelete =
+    open === "delete" ? (
+      <Confirm
+        title={t("deleteTitle")}
+        body={trip.ended ? t("deleteEndedBody") : t("deleteBody")}
+        actions={[
+          { label: te("cancel"), onClick: () => setOpen(null) },
+          { label: te("delete"), tone: "danger", onClick: () => void remove(), disabled: !ready || busy },
+        ]}
+      />
+    ) : null;
+
+  // No longer shared: kept as it was, read-only, except that a phone that
+  // takes it deletes it (README: Album members and shared albums >
+  // Deleting). Its card already says "No longer shared"; the note saying it
+  // can't be changed stands in for Delete with an older phone.
+  if (trip.ended) {
+    return (
+      <div className="space-y-2">
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          {link.endedAlbumDelete ? (
+            button("delete", "ui/trash", te("delete"))
+          ) : (
+            <p className="text-right text-[12.5px] text-foreground-soft">{t("endedNote")}</p>
+          )}
+        </div>
+        {confirmDelete}
+        <EditError message={error} />
+      </div>
+    );
+  }
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap items-center justify-end gap-1.5">
@@ -442,16 +471,7 @@ export function AlbumActions({ trip }: { trip: Trip }) {
         {trip.archived ? null : button("transactions", "ui/checklist", t("editTransactions"))}
         {shared ? null : button("delete", "ui/trash", te("delete"))}
       </div>
-      {open === "delete" ? (
-        <Confirm
-          title={t("deleteTitle")}
-          body={t("deleteBody")}
-          actions={[
-            { label: te("cancel"), onClick: () => setOpen(null) },
-            { label: te("delete"), tone: "danger", onClick: () => void remove(), disabled: !ready || busy },
-          ]}
-        />
-      ) : null}
+      {confirmDelete}
       <EditError message={error} />
       {open === "details" ? <AlbumEditor trip={trip} onClose={() => setOpen(null)} /> : null}
       {open === "transactions" ? <AlbumTransactionsEditor trip={trip} onClose={() => setOpen(null)} /> : null}

@@ -20,6 +20,11 @@ export interface RemoteSharedLedger {
   active: boolean;
   /** 'album' for a shared album's group; absent (a ledger) from an older Worker. */
   kind?: ShareKind;
+  /**
+   * In the list: when this account came into the share (ms), a member's latest
+   * join or the owner's sharing it. Absent from an older Worker.
+   */
+  joinedAt?: number;
 }
 
 export interface LedgerPerson {

@@ -1798,6 +1798,7 @@
         "next": "Volgende",
         "deleteTitle": "Album verwijderen?",
         "deleteBody": "Je transacties blijven bewaard en gaan terug naar hun eigen categorieën. Wil je het album houden zoals het is, archiveer het dan in de app.",
+        "deleteEndedBody": "Het wordt van je telefoon verwijderd, en je transacties gaan terug naar hun eigen categorieën. De anderen houden het album.",
         "endedNote": "Niet meer gedeeld: blijft zoals het was en kan niet worden gewijzigd.",
         "noAlbums": "Nog geen albums",
         "appOnlyHint": "Voeg een omslagfoto of locatie toe in de app.",

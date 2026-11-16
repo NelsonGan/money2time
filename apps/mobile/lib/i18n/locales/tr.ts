@@ -3016,6 +3016,13 @@ const tr = {
     delete_title: 'Albüm silinsin mi?',
     delete_body:
       'İşlemlerin korunur ve kendi kategorilerine geri döner. Albümü olduğu gibi tutmak için bunun yerine arşivle.',
+    delete_body_member:
+      'Albümden ayrılırsın ve albüm bu telefondan silinir. İşlemlerin kendi kategorilerinde korunur, diğerleri de albümü ve faturalarını tutar. Albümde kalmak için bunun yerine arşivle.',
+    delete_body_owner:
+      "Bu, albümü herkes için de bitirir: diğerleri albümü şu anki haliyle Arşivlenenler'de tutar ve kimse faturalarını değiştiremez. İşlemlerin kendi kategorilerinde korunur. Devam etmesi için bunun yerine arşivle.",
+    delete_body_ended:
+      'Bu telefondan silinir ve işlemlerin kendi kategorilerine geri döner. Diğerleri albümü tutar.',
+    deleting: 'Albüm siliniyor…',
     cover_permission_title: 'Fotoğraf erişimi gerekli',
     cover_permission_body: 'Kapak resmi seçmek için fotoğraf erişimine izin verin.',
     people: {
@@ -3051,9 +3058,6 @@ const tr = {
       unarchive: 'Arşivden çıkar',
       label: 'Arşivlendi',
       section: 'Arşivlenenler ({{count}})',
-      confirm_title: '{{name}} arşivlensin mi?',
-      confirm_shared:
-        "Albümler sayfasında Arşivlenenler bölümüne taşınır. Albümde kalırsın, faturaları güncellenmeye devam eder ve Analizler'de sayılmaya devam eder. İstediğin zaman arşivden çıkarabilirsin.",
     },
     ended: {
       label: 'Artık paylaşılmıyor',

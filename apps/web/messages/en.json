@@ -1798,6 +1798,7 @@
         "next": "Next",
         "deleteTitle": "Delete album?",
         "deleteBody": "Your transactions are kept and go back under their own categories. To keep the album as it is, archive it in the app instead.",
+        "deleteEndedBody": "It’s deleted from your phone, and your transactions go back under their own categories. The others keep the album.",
         "endedNote": "No longer shared: kept as it was, and it can’t be changed.",
         "noAlbums": "No albums yet",
         "appOnlyHint": "Add a cover photo or a location in the app.",

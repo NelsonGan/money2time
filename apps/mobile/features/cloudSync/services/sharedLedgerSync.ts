@@ -6,9 +6,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {
+  albumDeletedAt,
   albumLedgerId,
   ensureLocalAlbum,
-  isAlbumDeleted,
   mainLedgerTakesSharedAlbums,
   releaseAlbumGroup,
 } from '~/features/albums/services/albumGroupStore';
@@ -22,6 +22,7 @@ import {
 } from '~/services/dataManagementService';
 import { restoreLedgerChoices } from '~/utils/backupLedgerPolicy';
 
+import { albumListing } from '../lib/albumListing';
 import { CloudSyncApiError, ledgerMediaPath, type SyncCredentials } from './cloudSyncApi';
 import {
   deleteLedgerLocally,
@@ -261,14 +262,27 @@ class SharedLedgerSync {
       }
       const known = sharedLedgerFor(item.ledgerId);
       if (item.kind === 'album') {
-        if (known && known.shareId !== item.id) continue;
-        // Never a group named after one of this phone's ledgers, or after an
-        // album of a ledger other than the main one (`assertNotLedger`).
-        if (!known && (ledgerExists(item.ledgerId) || albumOutsideMain(item.ledgerId))) continue;
-        if (item.role === 'owner' && !known && isAlbumDeleted(item.ledgerId)) {
-          // The album was deleted on this phone while signed out: sharing
-          // ends with it.
-          await this.finishPending(token, item.id, 'stop');
+        const step = albumListing({
+          role: item.role,
+          known: known ? (known.shareId === item.id ? 'this_share' : 'other_share') : null,
+          // Never a group named after one of this phone's ledgers, or after an
+          // album of a ledger other than the main one (`assertNotLedger`).
+          foreignId: ledgerExists(item.ledgerId) || albumOutsideMain(item.ledgerId),
+          deletedAt: albumDeletedAt(item.ledgerId),
+          joinedAt: item.joinedAt,
+        });
+        if (step === 'skip') continue;
+        if (step === 'stop' || step === 'leave') {
+          // Deleted since the user came into it, while the Worker could not
+          // be told: the deletion is finished, and the album, not seen, is
+          // let go below. Queued first, so a failed call is tried again at
+          // the next read.
+          await addPendingLedgerAction({
+            shareId: item.id,
+            action: step,
+            userId: session.userId,
+          });
+          await this.finishPending(token, item.id, step);
           continue;
         }
         seen.add(item.ledgerId);

@@ -3050,6 +3050,13 @@ const de = {
     delete_title: 'Album löschen?',
     delete_body:
       'Deine Transaktionen bleiben erhalten und kommen zurück in ihre eigenen Kategorien. Um das Album so zu behalten, wie es ist, archiviere es stattdessen.',
+    delete_body_member:
+      'Du verlässt das Album, und es wird von diesem Telefon gelöscht. Deine Transaktionen bleiben in deinen eigenen Kategorien erhalten, und die anderen behalten das Album und seine Rechnungen. Um dabeizubleiben, archiviere es stattdessen.',
+    delete_body_owner:
+      'Damit endet es auch für alle: Die anderen behalten es unter „Archiviert“, so wie es jetzt ist, und niemand kann seine Rechnungen ändern. Deine Transaktionen bleiben in deinen eigenen Kategorien erhalten. Damit es weitergeht, archiviere es stattdessen.',
+    delete_body_ended:
+      'Es wird von diesem Telefon gelöscht, und deine Transaktionen kommen zurück in ihre eigenen Kategorien. Die anderen behalten das Album.',
+    deleting: 'Album wird gelöscht…',
     cover_permission_title: 'Fotozugriff erforderlich',
     cover_permission_body: 'Erlaube den Fotozugriff, um ein Titelbild auszuwählen.',
     people: {
@@ -3085,9 +3092,6 @@ const de = {
       unarchive: 'Aus Archiv holen',
       label: 'Archiviert',
       section: 'Archiviert ({{count}})',
-      confirm_title: '{{name}} archivieren?',
-      confirm_shared:
-        'Es kommt unter „Archiviert“ auf der Seite „Alben“. Du bleibst darin, seine Rechnungen werden weiter aktualisiert und es zählt weiter in den Einblicken. Du kannst es jederzeit wieder aus dem Archiv holen.',
     },
     ended: {
       label: 'Nicht mehr geteilt',

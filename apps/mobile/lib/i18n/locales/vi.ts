@@ -2987,6 +2987,13 @@ const vi = {
     delete_title: 'Xóa album?',
     delete_body:
       'Giao dịch của bạn được giữ lại và trở về danh mục của chúng. Để giữ nguyên album, hãy lưu trữ thay vì xóa.',
+    delete_body_member:
+      'Bạn sẽ rời album và album bị xóa khỏi điện thoại này. Giao dịch của bạn được giữ lại trong danh mục của bạn, còn những người khác giữ album và các hóa đơn. Để ở lại, hãy lưu trữ thay vì xóa.',
+    delete_body_owner:
+      'Album cũng kết thúc với mọi người: những người khác giữ album trong mục Đã lưu trữ như hiện tại, và không ai sửa được hóa đơn nữa. Giao dịch của bạn được giữ lại trong danh mục của bạn. Để album tiếp tục, hãy lưu trữ thay vì xóa.',
+    delete_body_ended:
+      'Album bị xóa khỏi điện thoại này, và giao dịch của bạn trở về danh mục của chúng. Những người khác vẫn giữ album.',
+    deleting: 'Đang xóa album…',
     cover_permission_title: 'Cần quyền truy cập ảnh',
     cover_permission_body: 'Cho phép truy cập ảnh để chọn ảnh bìa.',
     people: {
@@ -3022,9 +3029,6 @@ const vi = {
       unarchive: 'Bỏ lưu trữ',
       label: 'Đã lưu trữ',
       section: 'Đã lưu trữ ({{count}})',
-      confirm_title: 'Lưu trữ {{name}}?',
-      confirm_shared:
-        'Album sẽ chuyển vào mục Đã lưu trữ trên trang Album. Bạn vẫn ở trong album, các hóa đơn vẫn được cập nhật và album vẫn được tính trong Thống kê. Bạn có thể bỏ lưu trữ bất cứ lúc nào.',
     },
     ended: {
       label: 'Không còn chia sẻ',

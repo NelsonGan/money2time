@@ -1798,6 +1798,7 @@
         "next": "Næste",
         "deleteTitle": "Slet album?",
         "deleteBody": "Dine transaktioner bevares og kommer tilbage under deres egne kategorier. Arkivér albummet i appen i stedet, hvis du vil beholde det, som det er.",
+        "deleteEndedBody": "Det slettes fra din telefon, og dine transaktioner kommer tilbage under deres egne kategorier. De andre beholder albummet.",
         "endedNote": "Ikke længere delt: bevaret, som det var, og kan ikke ændres.",
         "noAlbums": "Ingen album endnu",
         "appOnlyHint": "Tilføj et coverbillede eller en placering i appen.",

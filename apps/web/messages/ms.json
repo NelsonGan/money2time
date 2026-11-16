@@ -1798,6 +1798,7 @@
         "next": "Seterusnya",
         "deleteTitle": "Padam album?",
         "deleteBody": "Transaksi anda dikekalkan dan kembali ke kategori masing-masing. Untuk mengekalkan album seperti sedia ada, arkibkannya dalam apl sahaja.",
+        "deleteEndedBody": "Ia dipadamkan daripada telefon anda, dan transaksi anda kembali ke kategori masing-masing. Yang lain menyimpan album ini.",
         "endedNote": "Tidak dikongsi lagi: dikekalkan seperti sedia ada dan tidak boleh diubah.",
         "noAlbums": "Belum ada album",
         "appOnlyHint": "Tambah foto muka depan atau lokasi dalam apl.",

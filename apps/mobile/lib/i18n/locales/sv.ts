@@ -3008,6 +3008,13 @@ const sv = {
     delete_title: 'Radera album?',
     delete_body:
       'Dina transaktioner sparas och går tillbaka till sina egna kategorier. Vill du behålla albumet som det är kan du arkivera det i stället.',
+    delete_body_member:
+      'Du lämnar albumet och det raderas från den här telefonen. Dina transaktioner sparas under dina egna kategorier, och de andra behåller albumet och räkningarna. Vill du stanna kvar kan du arkivera det i stället.',
+    delete_body_owner:
+      'Det avslutar också albumet för alla: de andra behåller det under Arkiverade som det är nu, och ingen kan ändra räkningarna. Dina transaktioner sparas under dina egna kategorier. Ska det fortsätta kan du arkivera det i stället.',
+    delete_body_ended:
+      'Det raderas från den här telefonen, och dina transaktioner går tillbaka till sina egna kategorier. De andra behåller albumet.',
+    deleting: 'Raderar album…',
     cover_permission_title: 'Åtkomst till foton krävs',
     cover_permission_body: 'Tillåt åtkomst till foton för att välja en omslagsbild.',
     people: {
@@ -3042,9 +3049,6 @@ const sv = {
       unarchive: 'Ta fram ur arkivet',
       label: 'Arkiverat',
       section: 'Arkiverade ({{count}})',
-      confirm_title: 'Arkivera {{name}}?',
-      confirm_shared:
-        'Det flyttas till Arkiverade på sidan Album. Du är kvar i det, räkningarna fortsätter uppdateras och det räknas fortfarande i Insikter. Du kan ta fram det ur arkivet när som helst.',
     },
     ended: {
       label: 'Delas inte längre',

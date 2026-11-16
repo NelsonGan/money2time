@@ -140,7 +140,7 @@ export type CloudSyncErrorKind = 'offline' | 'session_expired' | 'server' | 'unk
 
 type LinkMode = 'uploaded' | 'downloaded' | 'kept_cloud' | 'kept_phone';
 
-interface CloudSyncContextValue {
+export interface CloudSyncContextValue {
   status: CloudSyncStatus;
   user: CloudUser | null;
   isSyncing: boolean;

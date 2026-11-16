@@ -189,6 +189,8 @@ export type LinkState = {
   sharedAlbums: boolean;
   /** The phone takes a shared bill's album category from here (`phoneTakesAlbumCategories`). */
   albumCategories: boolean;
+  /** The phone deletes an album the user is no longer sharing (`phoneTakesEndedAlbumDelete`). */
+  endedAlbumDelete: boolean;
   /** The last transfer that failed, if the latest one did. */
   error: string | null;
   /** Refresh was pressed with no phone around: show how to bring it. */

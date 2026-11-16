@@ -1798,6 +1798,7 @@
         "next": "Tiếp",
         "deleteTitle": "Xóa album?",
         "deleteBody": "Giao dịch của bạn được giữ lại và trở về danh mục của chúng. Để giữ nguyên album, hãy lưu trữ trong ứng dụng thay vì xóa.",
+        "deleteEndedBody": "Album bị xóa khỏi điện thoại của bạn, và giao dịch của bạn trở về danh mục của chúng. Những người khác vẫn giữ album.",
         "endedNote": "Không còn chia sẻ: được giữ nguyên như cũ và không thể thay đổi.",
         "noAlbums": "Chưa có album",
         "appOnlyHint": "Thêm ảnh bìa hoặc vị trí trong ứng dụng.",

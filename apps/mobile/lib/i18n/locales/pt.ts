@@ -3026,6 +3026,13 @@ const pt = {
     delete_title: 'Excluir álbum?',
     delete_body:
       'Suas transações são mantidas e voltam para as próprias categorias. Para manter o álbum como está, arquive-o.',
+    delete_body_member:
+      'Você sai do álbum e ele é excluído deste celular. Suas transações são mantidas nas suas próprias categorias, e os outros mantêm o álbum e as contas. Para continuar nele, arquive-o.',
+    delete_body_owner:
+      'Isso também encerra o álbum para todos: os outros o mantêm em Arquivados como está agora, e ninguém pode alterar as contas. Suas transações são mantidas nas suas próprias categorias. Para que continue, arquive-o.',
+    delete_body_ended:
+      'Ele é excluído deste celular, e suas transações voltam para as próprias categorias. Os outros mantêm o álbum.',
+    deleting: 'Excluindo álbum…',
     cover_permission_title: 'Acesso a fotos necessário',
     cover_permission_body: 'Permita o acesso a fotos para escolher uma imagem de capa.',
     people: {
@@ -3061,9 +3068,6 @@ const pt = {
       unarchive: 'Desarquivar',
       label: 'Arquivado',
       section: 'Arquivados ({{count}})',
-      confirm_title: 'Arquivar {{name}}?',
-      confirm_shared:
-        'Ele vai para Arquivados na página Álbuns. Você continua nele, as contas continuam atualizando e ele continua contando em Análises. Você pode desarquivá-lo quando quiser.',
     },
     ended: {
       label: 'Não compartilhado mais',

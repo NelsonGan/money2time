@@ -3049,6 +3049,13 @@ const fil = {
     delete_title: 'Tanggalin ang album?',
     delete_body:
       'Mananatili ang mga transaksyon mo at babalik sa sarili nilang mga kategorya. Para panatilihin ang album kung ano ito, i-archive na lang ito.',
+    delete_body_member:
+      'Aalis ka sa album at mabubura ito sa phone na ito. Mananatili ang mga transaksyon mo sa sarili mong mga kategorya, at mananatili sa iba ang album at ang mga bill nito. Para manatili rito, i-archive na lang ito.',
+    delete_body_owner:
+      'Matatapos din ito para sa lahat: mananatili ito sa iba sa Naka-archive kung ano ito ngayon, at wala nang makakapagbago ng mga bill nito. Mananatili ang mga transaksyon mo sa sarili mong mga kategorya. Para magpatuloy ito, i-archive na lang ito.',
+    delete_body_ended:
+      'Mabubura ito sa phone na ito, at babalik ang mga transaksyon mo sa sarili nilang mga kategorya. Mananatili sa iba ang album.',
+    deleting: 'Binubura ang album…',
     cover_permission_title: 'Kailangan ng access sa photos',
     cover_permission_body: 'Payagan ang access sa photos para pumili ng cover image.',
     people: {
@@ -3084,9 +3091,6 @@ const fil = {
       unarchive: 'Alisin sa archive',
       label: 'Naka-archive',
       section: 'Naka-archive ({{count}})',
-      confirm_title: 'I-archive ang {{name}}?',
-      confirm_shared:
-        'Malilipat ito sa Naka-archive sa page na Mga Album. Mananatili ka rito, patuloy na mag-a-update ang mga bill nito, at kasama pa rin ito sa Insights. Puwede mo itong alisin sa archive anumang oras.',
     },
     ended: {
       label: 'Hindi na shared',

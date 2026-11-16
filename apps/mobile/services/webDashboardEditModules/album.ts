@@ -15,7 +15,10 @@
  * leaves both as they are. The app's picker offers expenses only, so only
  * expenses can be added. Archiving stays in the app. An album the user is no
  * longer sharing (`shareEndedAt`) is read-only, from the browser as on the
- * phone (README: Album members and shared albums > Leaving and stopping).
+ * phone, except that it can be deleted (README: Album members and shared
+ * albums > Deleting). A shared album the user is still in is deleted in the
+ * app only: that leaves it, or ends it for everyone, and may first ask about
+ * bills not sent yet.
  */
 
 import { PRO_LIMITS } from '~/constants/proLimits';
@@ -200,11 +203,8 @@ export const albumModule: EditModule = {
     const current = live.find((album) => album.id === op.id);
     // Gone on the phone, or changed there since the browser's copy.
     if (!current || current.updatedAt !== op.at) return tools.refuse('conflict');
-    // No longer shared: kept as it was, read-only, never deleted.
-    if (current.shareEndedAt) return tools.refuse('invalid');
-
     if (op.op === 'delete') {
-      // A shared album is archived, never deleted (AlbumDetailScreen).
+      // Still shared: deleting it leaves it (or ends it), in the app.
       if (extra.sharedAlbumIds.includes(op.id)) return tools.refuse('invalid');
       steps.push({
         kind: 'module',
@@ -214,6 +214,8 @@ export const albumModule: EditModule = {
       });
       return tools.ok(1);
     }
+    // No longer shared: kept as it was, read-only.
+    if (current.shareEndedAt) return tools.refuse('invalid');
     if (op.op === 'update') {
       const details = checkDetails(op.album);
       if (!details) return tools.refuse('invalid');

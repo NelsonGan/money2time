@@ -24,7 +24,7 @@ import {
 import { browserSupported, gunzipText, sealForCache } from "@/lib/cloud/crypto";
 import { editCount, type EditOp, type EditResult } from "@/lib/cloud/edits";
 import { applyPatch } from "@/lib/cloud/patch";
-import { BrowserSession, CHUNK_BYTES, phoneTakesAlbumCategories, phoneTakesBudgetCurrencies, phoneTakesCreditDueDaysAfter, phoneTakesSharedAlbums, reopen, type BrowserState, type LinkedPhone, type Received } from "@/lib/cloud/relay";
+import { BrowserSession, CHUNK_BYTES, phoneTakesAlbumCategories, phoneTakesBudgetCurrencies, phoneTakesCreditDueDaysAfter, phoneTakesEndedAlbumDelete, phoneTakesSharedAlbums, reopen, type BrowserState, type LinkedPhone, type Received } from "@/lib/cloud/relay";
 
 import { LinkScreen } from "./link-screen";
 import { isViewId, type ViewId } from "./nav";
@@ -715,6 +715,7 @@ export function DashboardApp() {
       creditDueDaysAfter: phoneTakesCreditDueDaysAfter(cached.meta),
       sharedAlbums: phoneTakesSharedAlbums(cached.meta),
       albumCategories: phoneTakesAlbumCategories(cached.meta),
+      endedAlbumDelete: phoneTakesEndedAlbumDelete(cached.meta),
       error,
       needsPhone,
       refresh,

@@ -3007,6 +3007,13 @@ const da = {
     delete_title: 'Slet album?',
     delete_body:
       'Dine transaktioner bevares og kommer tilbage under deres egne kategorier. Arkivér albummet i stedet, hvis du vil beholde det, som det er.',
+    delete_body_member:
+      'Du forlader albummet, og det slettes fra denne telefon. Dine transaktioner bevares under dine egne kategorier, og de andre beholder albummet og regningerne. Arkivér det i stedet, hvis du vil blive i det.',
+    delete_body_owner:
+      'Det afslutter også albummet for alle: De andre beholder det under Arkiveret, som det er nu, og ingen kan ændre regningerne. Dine transaktioner bevares under dine egne kategorier. Arkivér det i stedet, hvis det skal fortsætte.',
+    delete_body_ended:
+      'Det slettes fra denne telefon, og dine transaktioner kommer tilbage under deres egne kategorier. De andre beholder albummet.',
+    deleting: 'Sletter album…',
     cover_permission_title: 'Adgang til fotos kræves',
     cover_permission_body: 'Tillad adgang til fotos for at vælge et coverbillede.',
     people: {
@@ -3042,9 +3049,6 @@ const da = {
       unarchive: 'Fjern fra arkiv',
       label: 'Arkiveret',
       section: 'Arkiveret ({{count}})',
-      confirm_title: 'Arkivér {{name}}?',
-      confirm_shared:
-        'Det flyttes til Arkiveret på siden Album. Du forbliver i det, dets regninger opdateres stadig, og det tæller stadig med i Indsigt. Du kan fjerne det fra arkivet når som helst.',
     },
     ended: {
       label: 'Ikke længere delt',

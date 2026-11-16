@@ -105,11 +105,13 @@ export type TransferMeta = {
    * `WANT_FEATURES`): `budget-currencies` means a budget edit may name its
    * currency; `credit-due-days-after` that an account edit may set
    * `creditDueDaysAfterStatement`; `shared-albums` that it takes
-   * `module:albumbill` edits (a shared album's bills, and Restore). Absent
+   * `module:albumbill` edits (a shared album's bills, and Restore);
+   * `ended-album-delete` that it deletes an album no longer shared. Absent
    * from an older app, which refuses a field or module it does not know.
    *
-   * This page does not name `credit-due-days-after` in its `want`: it changes
-   * nothing in what the phone sends, only what the phone takes.
+   * This page does not name `credit-due-days-after` or `ended-album-delete`
+   * in its `want`: they change nothing in what the phone sends, only what the
+   * phone takes.
    */
   features?: unknown;
 };
@@ -127,6 +129,11 @@ export function phoneTakesSharedAlbums(meta: { features?: unknown } | null | und
 /** Whether the phone that sent `meta` takes a shared bill's album category in an edit (`module:albumbill`). */
 export function phoneTakesAlbumCategories(meta: { features?: unknown } | null | undefined): boolean {
   return Array.isArray(meta?.features) && meta.features.includes("album-categories");
+}
+
+/** Whether the phone that sent `meta` deletes an album the user is no longer sharing (`module:album` delete). */
+export function phoneTakesEndedAlbumDelete(meta: { features?: unknown } | null | undefined): boolean {
+  return Array.isArray(meta?.features) && meta.features.includes("ended-album-delete");
 }
 
 /** Whether the phone that sent `meta` takes a budget's currency in an edit. */

@@ -2886,6 +2886,12 @@ const zhHant = {
     no_transactions_message: '向此相簿新增交易後會顯示在這裡。',
     delete_title: '刪除相簿？',
     delete_body: '你的交易會保留，並回到各自的類別。若想保留相簿原樣，請改為封存。',
+    delete_body_member:
+      '你會退出相簿，並從這支手機刪除它。你的交易會保留在你自己的類別下，其他人會保留相簿和帳單。若想留在相簿中，請改為封存。',
+    delete_body_owner:
+      '這也會為所有人結束相簿：其他人會把它依現狀留在「已封存」，且沒有人能再修改帳單。你的交易會保留在你自己的類別下。若想讓它繼續，請改為封存。',
+    delete_body_ended: '它會從這支手機刪除，你的交易會回到各自的類別。其他人會保留相簿。',
+    deleting: '正在刪除相簿…',
     cover_permission_title: '需要照片權限',
     cover_permission_body: '允許存取照片以選擇封面圖片。',
     people: {
@@ -2918,9 +2924,6 @@ const zhHant = {
       unarchive: '取消封存',
       label: '已封存',
       section: '已封存（{{count}}）',
-      confirm_title: '要封存「{{name}}」嗎？',
-      confirm_shared:
-        '相簿會移到相簿頁面的「已封存」。你仍在其中，帳單會繼續更新，也仍會計入洞察。你隨時可以取消封存。',
     },
     ended: {
       label: '已停止共享',

@@ -120,7 +120,8 @@ type TransferMeta = {
    * page offers only what the phone can save: `budget-currencies`, that a web
    * edit may name a budget's currency; `credit-due-days-after`, that an
    * account edit may set `creditDueDaysAfterStatement`; `shared-albums`, that
-   * it takes `module:albumbill` edits. Absent from an older app.
+   * it takes `module:albumbill` edits; `ended-album-delete`, that it deletes
+   * an album no longer shared. Absent from an older app.
    */
   features?: WantFeature[];
   /**
@@ -407,11 +408,15 @@ type SessionEvents = {
  *   named so the phone's `meta.features` tells a page that a bill's category
  *   is the group's, picked from the album's categories (`category` in
  *   `module:albumbill`), which an older app refuses as unknown.
+ * - `ended-album-delete`: changes nothing in what is sent; named so the
+ *   phone's `meta.features` tells a page it deletes an album the user is no
+ *   longer sharing (`module:album` delete), which an older app refuses.
  */
 export const WANT_FEATURES = [
   'album-categories',
   'budget-currencies',
   'credit-due-days-after',
+  'ended-album-delete',
   'shared-albums',
 ] as const;
 export type WantFeature = (typeof WANT_FEATURES)[number];

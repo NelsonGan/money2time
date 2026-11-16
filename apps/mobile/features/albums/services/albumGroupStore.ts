@@ -9,6 +9,7 @@ import { getSQLite } from '~/lib/db/client';
 import { DEFAULT_LEDGER_ID } from '~/lib/db/ledgerScope';
 import { I18n } from '~/lib/i18n';
 import { albumGroupsRepository } from '~/lib/repositories/albumGroupsRepository';
+import { albumsRepository } from '~/lib/repositories/albumsRepository';
 import { getAlbumCoverUri } from '~/services/userAssets';
 import type { AlbumActivity, AlbumExpense, AlbumMember, AlbumSettlement } from '~/types';
 import { nowIso } from '~/utils/id';
@@ -147,6 +148,11 @@ function albumRow(albumId: string): AlbumRow | null {
 /** Whether the album was deleted on this phone (in any ledger). */
 export function isAlbumDeleted(albumId: string): boolean {
   return !!albumRow(albumId)?.deleted_at;
+}
+
+/** When the album was deleted on this phone, or null. */
+export function albumDeletedAt(albumId: string): string | null {
+  return albumRow(albumId)?.deleted_at ?? null;
 }
 
 /** The ledger an album is in, whichever one is open. */
@@ -299,6 +305,10 @@ export function releaseAlbumGroup(groupId: string): void {
      WHERE id = ? AND deleted_at IS NULL AND share_ended_at IS NULL`,
     [endedAt, endedAt, now, groupId],
   );
+  // Deleted (on another phone of the user's, whose deletion came down
+  // first): its entries go back under the user's own categories, as the
+  // deleting phone's did.
+  if (isAlbumDeleted(groupId)) albumsRepository.clearAlbumCategories(groupId);
   deleteGroupRowsLocally(groupId);
   notifyAlbumGroups();
 }

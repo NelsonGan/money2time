@@ -1798,6 +1798,7 @@
         "next": "Nästa",
         "deleteTitle": "Radera album?",
         "deleteBody": "Dina transaktioner sparas och går tillbaka till sina egna kategorier. Vill du behålla albumet som det är kan du arkivera det i appen i stället.",
+        "deleteEndedBody": "Det raderas från din telefon, och dina transaktioner går tillbaka till sina egna kategorier. De andra behåller albumet.",
         "endedNote": "Delas inte längre: sparat som det var och kan inte ändras.",
         "noAlbums": "Inga album än",
         "appOnlyHint": "Lägg till ett omslagsfoto eller en plats i appen.",

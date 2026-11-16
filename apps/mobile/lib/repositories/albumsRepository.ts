@@ -196,12 +196,18 @@ class AlbumsRepository {
     return row?.id ?? null;
   }
 
+  /**
+   * Deletes an album: its entries stay, back under their own categories. A
+   * shared album is let go first (left, or ended by its owner; README: Album
+   * members and shared albums > Deleting), so here it is one the user is no
+   * longer in, deleted like any other. Its links are stamped with the
+   * album's own time, which is how joining it again brings them back
+   * (`ensureLocalAlbum`).
+   */
   softDelete(id: string) {
     const db = getDb();
     const now = nowIso();
 
-    // A shared album the user is no longer in is kept, never deleted.
-    if (this.isFrozen(id)) return;
     db.update(albumsTable)
       .set({ deletedAt: now, updatedAt: now })
       .where(and(eq(albumsTable.id, id), isNull(albumsTable.deletedAt)))
@@ -211,6 +217,25 @@ class AlbumsRepository {
       .set({ deletedAt: now, updatedAt: now })
       .where(and(eq(albumTransactionsTable.albumId, id), isNull(albumTransactionsTable.deletedAt)))
       .run();
+    this.clearAlbumCategories(id);
+  }
+
+  /**
+   * A deleted album's entries go back under the user's own categories: a
+   * shared album's bills and the parts paid on them drop the album category
+   * they kept (`transactions.album_category`), which otherwise names them in
+   * every list and keeps them out of other albums. The user's own category
+   * is already on each (`personalCategoryFor`). Joining the album again
+   * writes the album category back as the group is projected.
+   */
+  clearAlbumCategories(albumId: string) {
+    getSQLite().runSync(
+      `UPDATE transactions SET album_category = NULL, updated_at = ?
+       WHERE album_category IS NOT NULL
+         AND id IN (SELECT transaction_id FROM album_transactions WHERE album_id = ?)
+         AND id NOT IN (SELECT transaction_id FROM album_transactions WHERE deleted_at IS NULL)`,
+      [nowIso(), albumId],
+    );
   }
 
   getTransactionIds(albumId: string): string[] {
