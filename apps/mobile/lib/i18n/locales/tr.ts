@@ -3022,6 +3022,7 @@ const tr = {
       "Bu, albümü herkes için de bitirir: diğerleri albümü şu anki haliyle Arşivlenenler'de tutar ve kimse faturalarını değiştiremez. İşlemlerin kendi kategorilerinde korunur. Devam etmesi için bunun yerine arşivle.",
     delete_body_ended:
       'Bu telefondan silinir ve işlemlerin kendi kategorilerine geri döner. Diğerleri albümü tutar.',
+    deleting: 'Albüm siliniyor…',
     cover_permission_title: 'Fotoğraf erişimi gerekli',
     cover_permission_body: 'Kapak resmi seçmek için fotoğraf erişimine izin verin.',
     people: {

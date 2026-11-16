@@ -3014,6 +3014,7 @@ const sv = {
       'Det avslutar också albumet för alla: de andra behåller det under Arkiverade som det är nu, och ingen kan ändra räkningarna. Dina transaktioner sparas under dina egna kategorier. Ska det fortsätta kan du arkivera det i stället.',
     delete_body_ended:
       'Det raderas från den här telefonen, och dina transaktioner går tillbaka till sina egna kategorier. De andra behåller albumet.',
+    deleting: 'Raderar album…',
     cover_permission_title: 'Åtkomst till foton krävs',
     cover_permission_body: 'Tillåt åtkomst till foton för att välja en omslagsbild.',
     people: {

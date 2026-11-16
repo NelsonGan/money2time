@@ -3051,6 +3051,7 @@ const fr = {
       'L’album prend aussi fin pour tout le monde : les autres le gardent dans Archivés tel qu’il est, et plus personne ne peut modifier ses dépenses. Vos transactions sont conservées, dans vos propres catégories. Pour qu’il continue, archivez-le plutôt.',
     delete_body_ended:
       'Il est supprimé de ce téléphone, et vos transactions retournent dans leurs propres catégories. Les autres gardent l’album.',
+    deleting: 'Suppression de l’album…',
     cover_permission_title: 'Accès aux photos requis',
     cover_permission_body: "Autorisez l'accès aux photos pour choisir une image de couverture.",
     people: {

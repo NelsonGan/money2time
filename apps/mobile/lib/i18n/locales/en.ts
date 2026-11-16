@@ -2995,6 +2995,7 @@ const en = {
       'This ends it for everyone too: the others keep it in Archived as it is now, and nobody can change its bills. Your transactions are kept, under your own categories. To keep it going, archive it instead.',
     delete_body_ended:
       "It's deleted from this phone, and your transactions go back under their own categories. The others keep the album.",
+    deleting: 'Deleting album…',
     cover_permission_title: 'Photo access needed',
     cover_permission_body: 'Allow photo access to choose a cover image.',
     location: {

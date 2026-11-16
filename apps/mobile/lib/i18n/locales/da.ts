@@ -3013,6 +3013,7 @@ const da = {
       'Det afslutter også albummet for alle: De andre beholder det under Arkiveret, som det er nu, og ingen kan ændre regningerne. Dine transaktioner bevares under dine egne kategorier. Arkivér det i stedet, hvis det skal fortsætte.',
     delete_body_ended:
       'Det slettes fra denne telefon, og dine transaktioner kommer tilbage under deres egne kategorier. De andre beholder albummet.',
+    deleting: 'Sletter album…',
     cover_permission_title: 'Adgang til fotos kræves',
     cover_permission_body: 'Tillad adgang til fotos for at vælge et coverbillede.',
     people: {

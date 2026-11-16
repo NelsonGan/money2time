@@ -9,6 +9,10 @@ import { createHash } from 'node:crypto';
 import { ledgerForMedia, previewInvite, routeLedgers } from '../src/ledgers.ts';
 import { notifyUsers } from '../src/live.ts';
 
+/** When the fixture's ledger was shared, and when its members joined it. */
+const SHARED_AT = 1_700_000_000_000;
+const JOINED_AT = 1_700_000_100_000;
+
 /**
  * Real SQL against the D1 schema. Every database call takes one tick of a
  * logical clock, and calls started together share their tick, so `waited()`
@@ -65,10 +69,10 @@ function fixture(t: TestContext, proUsers: string[]) {
     'Household',
     'ledger-database',
     'libsql://test.example',
-    Date.now(),
+    SHARED_AT,
   );
   for (const id of ['member', 'second']) {
-    db.prepare('INSERT INTO ledger_members VALUES (?, ?, ?)').run('share', id, Date.now());
+    db.prepare('INSERT INTO ledger_members VALUES (?, ?, ?)').run('share', id, JOINED_AT);
   }
   // A cached Pro answer, so RevenueCat is never asked.
   for (const id of proUsers) {
@@ -127,8 +131,7 @@ function fixture(t: TestContext, proUsers: string[]) {
     String(
       (
         db.prepare('SELECT changed_at FROM ledger_changes WHERE ledger_id = ?').get(id) as
-          | { changed_at: number }
-          | undefined
+          { changed_at: number } | undefined
       )?.changed_at ?? 0,
     );
   return {
@@ -160,10 +163,14 @@ const HOUSEHOLD = {
 
 test('the owner and a member each see the ledger with their role', async (t) => {
   const { list, waited } = fixture(t, ['owner']);
-  assert.deepEqual(await list('owner'), [{ ...HOUSEHOLD, role: 'owner', active: true }]);
+  assert.deepEqual(await list('owner'), [
+    { ...HOUSEHOLD, role: 'owner', active: true, joinedAt: SHARED_AT },
+  ]);
   // Was 3 one after another: owned ledgers, joined ledgers, then each view.
   assert.equal(waited(), 2);
-  assert.deepEqual(await list('member'), [{ ...HOUSEHOLD, role: 'member', active: true }]);
+  assert.deepEqual(await list('member'), [
+    { ...HOUSEHOLD, role: 'member', active: true, joinedAt: JOINED_AT },
+  ]);
   assert.equal(waited(), 2);
   assert.deepEqual(await list('outsider'), []);
 });
@@ -171,12 +178,14 @@ test('the owner and a member each see the ledger with their role', async (t) => 
 test('a ledger stays active while a member is Pro, and stops when nobody is', async (t) => {
   const memberPro = fixture(t, ['second']);
   assert.deepEqual(await memberPro.list('member'), [
-    { ...HOUSEHOLD, role: 'member', active: true },
+    { ...HOUSEHOLD, role: 'member', active: true, joinedAt: JOINED_AT },
   ]);
   // Was 5: owned, joined, the owner's Pro, the members, the members' Pro.
   assert.equal(memberPro.waited(), 3);
   const nobody = fixture(t, []);
-  assert.deepEqual(await nobody.list('owner'), [{ ...HOUSEHOLD, role: 'owner', active: false }]);
+  assert.deepEqual(await nobody.list('owner'), [
+    { ...HOUSEHOLD, role: 'owner', active: false, joinedAt: SHARED_AT },
+  ]);
 });
 
 test('only the owner and members reach a ledger, in one read', async (t) => {
@@ -196,7 +205,9 @@ test('only the owner and members reach a ledger, in one read', async (t) => {
 test('a shared album is listed only for an app that asks for albums', async (t) => {
   const { list, addAlbum } = fixture(t, ['owner']);
   addAlbum();
-  assert.deepEqual(await list('owner'), [{ ...HOUSEHOLD, role: 'owner', active: true }]);
+  assert.deepEqual(await list('owner'), [
+    { ...HOUSEHOLD, role: 'owner', active: true, joinedAt: SHARED_AT },
+  ]);
   const all = await list('owner', '?albums=1');
   assert.deepEqual(all.map((item) => [item.id, item.ledgerId, item.kind, item.role]).sort(), [
     ['share', 'ledger-123', 'ledger', 'owner'],
@@ -396,4 +407,17 @@ test("an album's write is the website's only, and a token being revoked is busy,
     status: 409,
     body: { error: 'busy' },
   });
+});
+
+test('the list says when each account came into a share, new again after leaving and joining back', async (t) => {
+  const { db, list } = fixture(t, ['owner']);
+  assert.equal((await list('owner'))[0].joinedAt, SHARED_AT);
+  assert.equal((await list('member'))[0].joinedAt, JOINED_AT);
+  // Left, then joined again: the latest join is the one told.
+  db.prepare('DELETE FROM ledger_members WHERE ledger_id = ? AND user_id = ?').run(
+    'share',
+    'member',
+  );
+  db.prepare('INSERT INTO ledger_members VALUES (?, ?, ?)').run('share', 'member', JOINED_AT + 5);
+  assert.equal((await list('member'))[0].joinedAt, JOINED_AT + 5);
 });

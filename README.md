@@ -2493,15 +2493,24 @@ migrations `090` to `094`.
     other person keeps it frozen, as End album leaves it; the alert says so
     once someone else has joined. Offline it still ends here, and the Worker
     is told after the next sign-in.
+  - Both go through `letGoOfSharedAlbum`, as the People page's Leave album
+    and End album do, while the page shows "Deleting album…"; the album is
+    deleted only once it is let go (`deleteAlbum` with `leftShare`).
   - **An album the user is no longer in** is only deleted here.
-  - **It stays deleted.** A list read never brings a deleted album back
-    (`albumListing`): one still synced whose deletion came down from another
-    phone of the user's, or that its owner deleted while signed out, is left
-    (or ended) there instead. A member's album frozen by signing out is held
-    in a short list (`rememberSignedOutAlbums`); deleting it queues a leave
-    (`albumDeletedHere`), which the next sign-in sends before the list read
-    could bring it back. Joining it again with a link (in the app or on the
-    website) brings it back with its entries, as above.
+  - **It stays deleted, until the user joins again.** The Worker's list says
+    when the user came into each share (`joinedAt`: a member's latest join,
+    new again after leaving and joining back; the owner's sharing it). A
+    list read that finds the album deleted here since then finishes the
+    deletion instead of bringing it back (`albumListing`): it leaves (or, for
+    the owner, ends) the album, queued like an offline leave so a failed call
+    is tried again. That covers a deletion made offline, while signed out,
+    or on another phone of the user's whose deletion came down first. An
+    album deleted before the user's latest join was joined again (in the app
+    or on the website), and comes back with its entries, as above. Times are
+    the phone's deletion against the Worker's join, so a delete and a rejoin
+    within a clock's drift of each other could be read the wrong way round.
+    With a Worker from before `joinedAt`, only an album still synced here,
+    or one its owner deleted, is finished.
   - **The Web Dashboard** deletes only an album the user is no longer in
     (to a phone naming `ended-album-delete`): one still shared is deleted in
     the app, which may need to ask about unsent entries.
@@ -5233,7 +5242,7 @@ Shared ledgers ([Shared ledgers](#shared-ledgers)):
 
 | Route                                      | What it does                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET /v1/ledgers`                          | The user's shared ledgers, owned and joined, with role, owner name and account id, member count and `active` (anyone in it Pro)                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `GET /v1/ledgers`                          | The user's shared ledgers, owned and joined, with role, owner name and account id, member count, `active` (anyone in it Pro) and `joinedAt` (when the user came into it)                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | `POST /v1/ledgers`                         | `{ledgerId, name, emoji}` → shares a ledger: Pro, at most 2 per owner; makes its Turso database                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | `DELETE /v1/ledgers/<id>`                  | Stop sharing (owner): deletes its database and images; members and the link cascade; everyone is nudged                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | `POST /v1/ledgers/<id>/leave`              | Revokes this ledger's tokens, then a member leaves                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |

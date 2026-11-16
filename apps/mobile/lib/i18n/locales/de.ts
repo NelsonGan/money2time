@@ -3056,6 +3056,7 @@ const de = {
       'Damit endet es auch für alle: Die anderen behalten es unter „Archiviert“, so wie es jetzt ist, und niemand kann seine Rechnungen ändern. Deine Transaktionen bleiben in deinen eigenen Kategorien erhalten. Damit es weitergeht, archiviere es stattdessen.',
     delete_body_ended:
       'Es wird von diesem Telefon gelöscht, und deine Transaktionen kommen zurück in ihre eigenen Kategorien. Die anderen behalten das Album.',
+    deleting: 'Album wird gelöscht…',
     cover_permission_title: 'Fotozugriff erforderlich',
     cover_permission_body: 'Erlaube den Fotozugriff, um ein Titelbild auszuwählen.',
     people: {

@@ -444,15 +444,19 @@ export function AlbumActions({ trip }: { trip: Trip }) {
       />
     ) : null;
 
-  // No longer shared: kept as it was, read-only, except that it can be
-  // deleted, by a phone that takes it (README: Album members and shared
-  // albums > Deleting).
+  // No longer shared: kept as it was, read-only, except that a phone that
+  // takes it deletes it (README: Album members and shared albums >
+  // Deleting). Its card already says "No longer shared"; the note saying it
+  // can't be changed stands in for Delete with an older phone.
   if (trip.ended) {
     return (
       <div className="space-y-2">
         <div className="flex flex-wrap items-center justify-end gap-2">
-          <p className="text-right text-[12.5px] text-foreground-soft">{t("endedNote")}</p>
-          {link.endedAlbumDelete ? button("delete", "ui/trash", te("delete")) : null}
+          {link.endedAlbumDelete ? (
+            button("delete", "ui/trash", te("delete"))
+          ) : (
+            <p className="text-right text-[12.5px] text-foreground-soft">{t("endedNote")}</p>
+          )}
         </div>
         {confirmDelete}
         <EditError message={error} />

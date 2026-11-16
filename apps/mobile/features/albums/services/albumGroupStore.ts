@@ -150,6 +150,11 @@ export function isAlbumDeleted(albumId: string): boolean {
   return !!albumRow(albumId)?.deleted_at;
 }
 
+/** When the album was deleted on this phone, or null. */
+export function albumDeletedAt(albumId: string): string | null {
+  return albumRow(albumId)?.deleted_at ?? null;
+}
+
 /** The ledger an album is in, whichever one is open. */
 export function albumLedgerId(albumId: string): string | null {
   return albumRow(albumId)?.ledger_id ?? null;

@@ -2891,6 +2891,7 @@ const zhHant = {
     delete_body_owner:
       '這也會為所有人結束相簿：其他人會把它依現狀留在「已封存」，且沒有人能再修改帳單。你的交易會保留在你自己的類別下。若想讓它繼續，請改為封存。',
     delete_body_ended: '它會從這支手機刪除，你的交易會回到各自的類別。其他人會保留相簿。',
+    deleting: '正在刪除相簿…',
     cover_permission_title: '需要照片權限',
     cover_permission_body: '允許存取照片以選擇封面圖片。',
     people: {

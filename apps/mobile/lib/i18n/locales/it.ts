@@ -3029,6 +3029,7 @@ const it = {
       'L’album finisce anche per tutti: gli altri lo tengono in Archiviati così com’è ora, e nessuno può più modificarne le spese. Le tue transazioni restano, nelle tue categorie. Per farlo continuare, archivialo invece.',
     delete_body_ended:
       'Viene eliminato da questo telefono e le tue transazioni tornano nelle loro categorie. Gli altri tengono l’album.',
+    deleting: 'Eliminazione dell’album…',
     cover_permission_title: 'Accesso alle foto necessario',
     cover_permission_body: "Consenti l'accesso alle foto per scegliere un'immagine di copertina.",
     people: {

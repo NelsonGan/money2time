@@ -20,7 +20,6 @@ import {
   type InviteLink,
   removeMember,
 } from '~/features/cloudSync/services/sharedLedgersApi';
-import { leaveAskingFirst } from '~/features/sharedLedgers/lib/confirmLeave';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
@@ -32,6 +31,7 @@ import { useAlbumGroup } from '../hooks/useAlbumGroup';
 import { albumSharingMessage, peopleEditMessage } from '../lib/albumMessages';
 import { type AlbumGroupPerson, type PeopleEditError } from '../lib/albumPeople';
 import { groupSimplifiesDebts, subscribeAlbumGroups } from '../services/albumGroupStore';
+import { letGoOfSharedAlbum } from '../services/letGoOfSharedAlbum';
 
 interface AlbumPeopleScreenProps {
   albumId: string;
@@ -214,9 +214,7 @@ export function AlbumPeopleScreen({ albumId, onBack }: AlbumPeopleScreenProps) {
           onPress: () =>
             void run('leave', async () => {
               // Left, the album is kept frozen and archived: it has no people page.
-              if (await leaveAskingFirst((opts) => sync.leaveLedger(album.id, opts), album.name)) {
-                goBack();
-              }
+              if (await letGoOfSharedAlbum(sync, album, 'member')) goBack();
             }),
         },
       ],
@@ -237,7 +235,7 @@ export function AlbumPeopleScreen({ albumId, onBack }: AlbumPeopleScreenProps) {
           style: 'destructive',
           onPress: () =>
             void run('leave', async () => {
-              await sync.stopSharingLedger(album.id, { whenUnreachable: 'local' });
+              await letGoOfSharedAlbum(sync, album, 'owner');
               goBack();
             }),
         },

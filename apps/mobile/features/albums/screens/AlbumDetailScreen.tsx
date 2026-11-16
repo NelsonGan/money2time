@@ -37,6 +37,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { scheduleOnRN } from 'react-native-worklets';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
+import { ImportingOverlay } from '~/components/feedback/ImportingOverlay';
 import { ContentFrameProvider, useContentFrame } from '~/components/layout/ContentFrame';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { ADD_FAB_SIZE, AddFabButton } from '~/components/navigation/AddFab';
@@ -50,7 +51,6 @@ import { useCloudSync } from '~/features/cloudSync/CloudSyncContext';
 import { CategoryBreakdownChart } from '~/features/insights/components';
 import type { InsightsDrilldownPayload } from '~/features/insights/screens';
 import { countsTowardSpending } from '~/features/reimbursements/lib/reimbursementMath';
-import { leaveAskingFirst } from '~/features/sharedLedgers/lib/confirmLeave';
 import {
   buildBulkUpdateInputs,
   BulkEditTransactionsSheet,
@@ -91,6 +91,7 @@ import { albumCategoryKeyOfId, albumCategoryPickerList } from '../lib/albumCateg
 import { albumSharingMessage } from '../lib/albumMessages';
 import { breakdownMemberOptions, memberShare } from '../lib/memberShare';
 import { listGroupActivity } from '../services/albumGroupStore';
+import { letGoOfSharedAlbum } from '../services/letGoOfSharedAlbum';
 import { formatAlbumDateRange } from '../utils';
 
 type DetailTab = 'balances' | 'breakdown' | 'transactions';
@@ -545,25 +546,25 @@ export function AlbumDetailScreen({
   // others keep it. One the user is no longer in only goes from here.
   const share = group.share;
   const othersJoined = group.people.some((person) => !person.isSelf && person.joined);
+  // Leaving or ending can take a few seconds (the group's latest comes down
+  // first): the page says so and takes no second delete meanwhile.
+  const [deleting, setDeleting] = useState(false);
   const deletingRef = useRef(false);
   const deleteShared = useCallback(async () => {
     if (!share || deletingRef.current) return;
     deletingRef.current = true;
+    setDeleting(true);
     try {
-      if (share.role === 'owner') {
-        // Offline, it ends here and the Worker is told later.
-        await sync.stopSharingLedger(albumId, { whenUnreachable: 'local' });
-      } else if (
-        !(await leaveAskingFirst((opts) => sync.leaveLedger(albumId, opts), album?.name ?? ''))
-      ) {
+      if (!(await letGoOfSharedAlbum(sync, { id: albumId, name: album?.name ?? '' }, share.role))) {
         return;
       }
-      deleteAlbum(albumId);
-      onDeleted();
+      // Let go, whatever a list read in flight saved again since.
+      if (deleteAlbum(albumId, { leftShare: true })) onDeleted();
     } catch (error) {
       Alert.alert(albumSharingMessage(error));
     } finally {
       deletingRef.current = false;
+      setDeleting(false);
     }
   }, [album?.name, albumId, deleteAlbum, onDeleted, share, sync]);
 
@@ -594,8 +595,7 @@ export function AlbumDetailScreen({
           void deleteShared();
           return;
         }
-        deleteAlbum(albumId);
-        onDeleted();
+        if (deleteAlbum(albumId)) onDeleted();
       },
     });
     Alert.alert(I18n.t('albums.delete_title'), body, buttons);
@@ -1095,6 +1095,7 @@ export function AlbumDetailScreen({
           onDuplicated={handleDuplicated}
         />
       ) : null}
+      <ImportingOverlay visible={deleting} title={I18n.t('albums.deleting')} mascot="thinking" />
     </>
   );
 

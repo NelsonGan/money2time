@@ -3025,6 +3025,7 @@ const pl = {
       'To zakończy album także dla wszystkich: pozostali zachowają go w sekcji Zarchiwizowane w obecnym stanie i nikt nie będzie mógł zmieniać rachunków. Twoje transakcje zostaną zachowane w Twoich kategoriach. Aby album trwał dalej, zarchiwizuj go zamiast tego.',
     delete_body_ended:
       'Album zostanie usunięty z tego telefonu, a Twoje transakcje wrócą do swoich kategorii. Pozostali zachowują album.',
+    deleting: 'Usuwanie albumu…',
     cover_permission_title: 'Wymagany dostęp do zdjęć',
     cover_permission_body: 'Zezwól na dostęp do zdjęć, aby wybrać okładkę.',
     people: {

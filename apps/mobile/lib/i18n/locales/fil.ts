@@ -3055,6 +3055,7 @@ const fil = {
       'Matatapos din ito para sa lahat: mananatili ito sa iba sa Naka-archive kung ano ito ngayon, at wala nang makakapagbago ng mga bill nito. Mananatili ang mga transaksyon mo sa sarili mong mga kategorya. Para magpatuloy ito, i-archive na lang ito.',
     delete_body_ended:
       'Mabubura ito sa phone na ito, at babalik ang mga transaksyon mo sa sarili nilang mga kategorya. Mananatili sa iba ang album.',
+    deleting: 'Binubura ang album…',
     cover_permission_title: 'Kailangan ng access sa photos',
     cover_permission_body: 'Payagan ang access sa photos para pumili ng cover image.',
     people: {

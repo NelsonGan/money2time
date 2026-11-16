@@ -2993,6 +2993,7 @@ const vi = {
       'Album cũng kết thúc với mọi người: những người khác giữ album trong mục Đã lưu trữ như hiện tại, và không ai sửa được hóa đơn nữa. Giao dịch của bạn được giữ lại trong danh mục của bạn. Để album tiếp tục, hãy lưu trữ thay vì xóa.',
     delete_body_ended:
       'Album bị xóa khỏi điện thoại này, và giao dịch của bạn trở về danh mục của chúng. Những người khác vẫn giữ album.',
+    deleting: 'Đang xóa album…',
     cover_permission_title: 'Cần quyền truy cập ảnh',
     cover_permission_body: 'Cho phép truy cập ảnh để chọn ảnh bìa.',
     people: {

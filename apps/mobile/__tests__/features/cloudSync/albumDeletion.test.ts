@@ -1,45 +1,20 @@
 import { albumListing } from '~/features/cloudSync/lib/albumListing';
-import {
-  forgetSignedOutAlbums,
-  listPendingLedgerActions,
-  rememberSignedOutAlbums,
-  takeSignedOutAlbum,
-} from '~/features/cloudSync/services/sharedLedgerStore';
-import { sharedLedgerSync } from '~/features/cloudSync/services/sharedLedgerSync';
 
 // Deleting a shared album (README: Album members and shared albums >
-// Deleting): a deleted album never comes back from the Worker's list, unless
-// the user joins it again.
+// Deleting): a list read finishes a deletion the Worker was not told about,
+// and never brings a deleted album back unless the user joined it again.
 
-jest.mock('@react-native-async-storage/async-storage', () =>
-  require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
-);
-jest.mock('~/lib/db/client', () => ({ getSQLite: jest.fn() }));
-jest.mock('expo-document-picker', () => ({}));
-jest.mock('expo-file-system/next', () => ({}));
-jest.mock('expo-sharing', () => ({}));
-jest.mock('~/services/resetAutomationCaptureData', () => ({
-  resetAutomationCaptureData: jest.fn(),
-}));
-jest.mock('expo-file-system', () => ({
-  Paths: { document: {} },
-  File: class {},
-  Directory: class {},
-}));
-jest.mock('~/services/userAssets', () => ({
-  assetRelativePathFromRef: () => null,
-  invalidateCustomUriCache: jest.fn(),
-}));
-jest.mock('~/services/userAssetGc', () => ({ collectReferencedAssetPaths: () => new Set() }));
-
-const AsyncStorage = jest.requireMock('@react-native-async-storage/async-storage');
-
-beforeEach(async () => {
-  await AsyncStorage.clear();
-});
+const JOINED = Date.parse('2026-11-10T00:00:00.000Z');
+const BEFORE = '2026-11-01T00:00:00.000Z';
+const AFTER = '2026-11-12T00:00:00.000Z';
 
 describe('a list read', () => {
-  const base = { known: 'this_share', foreignId: false, deleted: false } as const;
+  const base = {
+    known: 'this_share',
+    foreignId: false,
+    deletedAt: null,
+    joinedAt: JOINED,
+  } as const;
 
   it('keeps an album the user is in, made here when it is new', () => {
     expect(albumListing({ ...base, role: 'member' })).toBe('keep');
@@ -51,67 +26,31 @@ describe('a list read', () => {
     expect(albumListing({ ...base, role: 'member', known: null, foreignId: true })).toBe('skip');
   });
 
-  it('finishes a deletion from another phone of the user’s, never bringing the album back', () => {
-    expect(albumListing({ ...base, role: 'member', deleted: true })).toBe('leave');
-    expect(albumListing({ ...base, role: 'owner', deleted: true })).toBe('stop');
+  it('finishes a deletion made since the user came in: offline, signed out or on another phone', () => {
+    // Still synced here (another phone's deletion came down first).
+    expect(albumListing({ ...base, role: 'member', deletedAt: AFTER })).toBe('leave');
+    expect(albumListing({ ...base, role: 'owner', deletedAt: AFTER })).toBe('stop');
+    // Not synced here: deleted while signed out, or on a phone that signed in since.
+    expect(albumListing({ ...base, role: 'member', known: null, deletedAt: AFTER })).toBe('leave');
+    expect(albumListing({ ...base, role: 'owner', known: null, deletedAt: AFTER })).toBe('stop');
   });
 
-  it('ends an album its owner deleted while signed out', () => {
-    expect(albumListing({ ...base, role: 'owner', known: null, deleted: true })).toBe('stop');
+  it('brings back an album the user joined again after deleting it', () => {
+    // On the website, say, while this phone still held the share or did not.
+    expect(albumListing({ ...base, role: 'member', deletedAt: BEFORE })).toBe('keep');
+    expect(albumListing({ ...base, role: 'member', known: null, deletedAt: BEFORE })).toBe('keep');
   });
 
-  it('brings back an album a member deleted and then joined again (on the website, say)', () => {
-    // A member who deleted it while signed out is left by the pending action
-    // that deletion queued, which the list read finishes first.
-    expect(albumListing({ ...base, role: 'member', known: null, deleted: true })).toBe('keep');
-  });
-});
-
-describe('an album frozen by signing out', () => {
-  const trip = { ledgerId: 'trip', shareId: 'share-trip', role: 'member', userId: 'u-me' } as const;
-
-  it('is held until it is deleted, then forgotten', async () => {
-    await rememberSignedOutAlbums([trip, { ...trip, ledgerId: 'ski', shareId: 'share-ski' }]);
-    await expect(takeSignedOutAlbum('trip')).resolves.toEqual(trip);
-    await expect(takeSignedOutAlbum('trip')).resolves.toBeNull();
-    await expect(takeSignedOutAlbum('ski')).resolves.toMatchObject({ shareId: 'share-ski' });
+  it('with an older Worker, finishes only what it can tell', () => {
+    const older = { ...base, joinedAt: undefined, deletedAt: AFTER };
+    expect(albumListing({ ...older, role: 'member' })).toBe('leave');
+    expect(albumListing({ ...older, role: 'owner', known: null })).toBe('stop');
+    // A member's album not synced here may have been joined again: kept.
+    expect(albumListing({ ...older, role: 'member', known: null })).toBe('keep');
   });
 
-  it('is forgotten by the account’s next list read, and only that account’s', async () => {
-    await rememberSignedOutAlbums([trip, { ...trip, ledgerId: 'ski', userId: 'u-other' }]);
-    await forgetSignedOutAlbums('u-me');
-    await expect(takeSignedOutAlbum('trip')).resolves.toBeNull();
-    await expect(takeSignedOutAlbum('ski')).resolves.toMatchObject({ userId: 'u-other' });
-  });
-
-  it('signed out again, the album is held once, as it is now', async () => {
-    await rememberSignedOutAlbums([trip]);
-    await rememberSignedOutAlbums([{ ...trip, role: 'owner' }]);
-    await expect(takeSignedOutAlbum('trip')).resolves.toMatchObject({ role: 'owner' });
-    await expect(takeSignedOutAlbum('trip')).resolves.toBeNull();
-  });
-
-  it('reads nothing it did not write', async () => {
-    await AsyncStorage.setItem(
-      'm2t.sharedLedgers.signedOutAlbums',
-      JSON.stringify([{ ledgerId: 'trip' }, 'junk', { ...trip, role: 'admin' }]),
-    );
-    await expect(takeSignedOutAlbum('trip')).resolves.toBeNull();
-  });
-
-  it('turns into a pending leave once deleted, as an offline leave is, and its owner’s into a stop', async () => {
-    await rememberSignedOutAlbums([
-      trip,
-      { ledgerId: 'ski', shareId: 'share-ski', role: 'owner', userId: 'u-me' },
-    ]);
-    await sharedLedgerSync.albumDeletedHere('trip');
-    await sharedLedgerSync.albumDeletedHere('ski');
-    // An album never frozen by signing out queues nothing.
-    await sharedLedgerSync.albumDeletedHere('own');
-    await expect(listPendingLedgerActions()).resolves.toEqual([
-      { shareId: 'share-trip', action: 'leave', userId: 'u-me' },
-      { shareId: 'share-ski', action: 'stop', userId: 'u-me' },
-    ]);
-    await expect(takeSignedOutAlbum('trip')).resolves.toBeNull();
+  it('reads a deletion time it cannot parse as the older Worker would', () => {
+    expect(albumListing({ ...base, role: 'member', known: null, deletedAt: 'junk' })).toBe('keep');
+    expect(albumListing({ ...base, role: 'member', deletedAt: 'junk' })).toBe('leave');
   });
 });

@@ -3048,6 +3048,7 @@ const nl = {
       'Daarmee stopt het ook voor iedereen: de anderen houden het onder Gearchiveerd zoals het nu is, en niemand kan de rekeningen nog wijzigen. Je transacties blijven bewaard onder je eigen categorieën. Wil je het laten doorgaan, archiveer het dan.',
     delete_body_ended:
       'Het wordt van deze telefoon verwijderd, en je transacties gaan terug naar hun eigen categorieën. De anderen houden het album.',
+    deleting: 'Album verwijderen…',
     cover_permission_title: "Toegang tot foto's nodig",
     cover_permission_body: "Geef toegang tot foto's om een omslagafbeelding te kiezen.",
     people: {

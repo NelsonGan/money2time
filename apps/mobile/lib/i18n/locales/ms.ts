@@ -3031,6 +3031,7 @@ const ms = {
       'Album ini juga tamat untuk semua orang: yang lain menyimpannya dalam Diarkibkan seperti sekarang, dan tiada sesiapa boleh mengubah bilnya. Transaksi anda dikekalkan dalam kategori anda sendiri. Untuk meneruskannya, arkibkannya sahaja.',
     delete_body_ended:
       'Ia dipadamkan daripada telefon ini, dan transaksi anda kembali ke kategori masing-masing. Yang lain menyimpan album ini.',
+    deleting: 'Memadamkan album…',
     cover_permission_title: 'Akses foto diperlukan',
     cover_permission_body: 'Benarkan akses foto untuk memilih imej kulit.',
     people: {

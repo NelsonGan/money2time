@@ -3030,6 +3030,7 @@ const es = {
       'Esto también lo termina para todos: los demás lo conservan en Archivados tal como está ahora, y nadie puede cambiar sus cuentas. Tus transacciones se conservan en tus propias categorías. Para que siga, archívalo en su lugar.',
     delete_body_ended:
       'Se elimina de este teléfono y tus transacciones vuelven a sus propias categorías. Los demás conservan el álbum.',
+    deleting: 'Eliminando álbum…',
     cover_permission_title: 'Se necesita acceso a fotos',
     cover_permission_body: 'Permite el acceso a fotos para elegir una imagen de portada.',
     people: {

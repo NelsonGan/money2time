@@ -3027,6 +3027,7 @@ const id = {
       'Album juga berakhir untuk semua orang: yang lain tetap punya album ini di Diarsipkan seperti sekarang, dan tidak ada yang bisa mengubah tagihannya. Transaksimu tetap disimpan di kategorimu sendiri. Agar tetap berjalan, arsipkan saja.',
     delete_body_ended:
       'Album dihapus dari ponsel ini, dan transaksimu kembali ke kategorinya masing-masing. Yang lain tetap punya album ini.',
+    deleting: 'Menghapus album…',
     cover_permission_title: 'Perlu akses foto',
     cover_permission_body: 'Izinkan akses foto untuk memilih gambar sampul.',
     people: {

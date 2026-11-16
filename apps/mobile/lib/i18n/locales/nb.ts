@@ -3016,6 +3016,7 @@ const nb = {
       'Det avslutter også albumet for alle: De andre beholder det under Arkivert slik det er nå, og ingen kan endre regningene. Transaksjonene dine beholdes under dine egne kategorier. Skal det fortsette, kan du arkivere det i stedet.',
     delete_body_ended:
       'Det slettes fra denne telefonen, og transaksjonene dine går tilbake til sine egne kategorier. De andre beholder albumet.',
+    deleting: 'Sletter album…',
     cover_permission_title: 'Trenger tilgang til bilder',
     cover_permission_body: 'Gi tilgang til bilder for å velge et omslagsbilde.',
     people: {

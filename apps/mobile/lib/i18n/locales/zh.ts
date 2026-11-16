@@ -2891,6 +2891,7 @@ const zh = {
     delete_body_owner:
       '这也会为所有人结束相册：其他人会把它按现状留在“已归档”，且没有人能再修改账单。你的交易会保留在你自己的分类下。若想让它继续，请改为归档。',
     delete_body_ended: '它会从这台手机上删除，你的交易会回到各自的分类。其他人会保留相册。',
+    deleting: '正在删除相册…',
     cover_permission_title: '需要照片权限',
     cover_permission_body: '允许访问照片以选择封面图片。',
     people: {

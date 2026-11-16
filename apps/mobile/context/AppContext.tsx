@@ -621,7 +621,12 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   ) => void;
   /** Sets or clears an album's real-world location. */
   setAlbumLocation: (id: string, location: AlbumLocation | null) => void;
-  deleteAlbum: (id: string) => void;
+  /**
+   * Deletes an album; returns whether it did. A shared album is let go first
+   * (`letGoOfSharedAlbum`), then deleted with `leftShare`; without it, one
+   * still shared is left alone.
+   */
+  deleteAlbum: (id: string, opts?: { leftShare?: boolean }) => boolean;
   /** Archives an album or brings it back (README: Key patterns > Albums). */
   archiveAlbum: (id: string, archived: boolean) => void;
   reorderAlbums: (ids: string[]) => void;
@@ -3177,14 +3182,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const deleteAlbum = useCallback(
-    (id: string) => {
+    (id: string, opts?: { leftShare?: boolean }) => {
       // A shared album is let go first: left, or ended by its owner
       // (AlbumDetailScreen; README: Album members and shared albums >
-      // Deleting). Until then it is not deleted.
-      if (sharedAlbumFor(id)) return;
+      // Deleting). Until then it is not deleted. Once it is, a list read in
+      // flight may have saved its share again: the next read lets it go.
+      if (sharedAlbumFor(id) && !opts?.leftShare) return false;
       // One the user is no longer in: a shared album's, which keeps its cover
       // until it goes, and whose entries go back under their own categories.
-      const wasShared = albumsRepository.isFrozen(id);
+      const wasShared = albumsRepository.isFrozen(id) || !!opts?.leftShare;
       // An album's cover is uniquely owned (each pick writes a fresh file), so
       // it can be deleted outright — no other album references it. A shared
       // album's cover is the group's image, and the group has gone from here.
@@ -3206,9 +3212,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       );
       if (cover) deleteAlbumCover(cover);
       if (hadCustomIcon) runDeferredWrite(() => runUserAssetGc());
-      // Frozen by signing out, the user is still in it: left at the next sign-in.
-      if (wasShared) void sharedLedgerSync.albumDeletedHere(id).catch(() => undefined);
       void trackEvent(AnalyticsEvents.ALBUM_DELETED, { shared: wasShared });
+      return true;
     },
     [refreshAlbums, runMutation, scheduleRefreshTransactions],
   );
