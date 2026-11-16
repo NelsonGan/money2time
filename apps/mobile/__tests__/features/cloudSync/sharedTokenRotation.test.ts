@@ -183,3 +183,67 @@ it('asks again shortly when the Worker is busy minting the new token for another
     jest.useRealTimers();
   }
 });
+
+it('gets the remover a new token even when the Worker is busy minting it', async () => {
+  jest.useFakeTimers();
+  try {
+    (getLedgerCredentials as jest.Mock)
+      .mockResolvedValueOnce(credentials('first'))
+      .mockRejectedValueOnce(new CloudSyncApiError('server', 500))
+      .mockResolvedValueOnce(credentials('fresh'));
+    mockValidToken = 'first';
+    await sharedLedgerSync.syncAll();
+
+    // People screen: this phone removed someone, which rotated the tokens.
+    sharedLedgerSync.forgetCredentials(remote.id);
+    mockValidToken = 'fresh';
+    const round = sharedLedgerSync.syncAll();
+    await jest.advanceTimersByTimeAsync(3_000);
+    const outcome = await round;
+
+    expect(outcome.error).toBeNull();
+    // Never sent the revoked token: one sync, after the new one came.
+    expect(mockSyncNow).toHaveBeenCalledTimes(2);
+  } finally {
+    jest.useRealTimers();
+  }
+});
+
+it('does not keep a token whose request began before it was dropped', async () => {
+  let resolveStale: (value: unknown) => void = () => undefined;
+  (getLedgerCredentials as jest.Mock)
+    .mockImplementationOnce(() => new Promise((resolve) => (resolveStale = resolve)))
+    .mockResolvedValueOnce(credentials('fresh'));
+  mockValidToken = 'fresh';
+  const round = sharedLedgerSync.syncAll();
+  await new Promise((resolve) => setImmediate(resolve));
+
+  // The removal rotates the tokens while the first request is out.
+  sharedLedgerSync.forgetCredentials(remote.id);
+  resolveStale(credentials('minted-before-rotation'));
+  const outcome = await round;
+
+  expect(outcome.error).toBeNull();
+  expect(getLedgerCredentials).toHaveBeenCalledTimes(2);
+  expect(mockSyncNow).toHaveBeenCalledTimes(1);
+});
+
+it('keeps a Worker refusal typed when the token was dropped after an earlier failure', async () => {
+  (getLedgerCredentials as jest.Mock)
+    .mockResolvedValueOnce(credentials('first'))
+    .mockRejectedValueOnce(new CloudSyncApiError('not_found', 404));
+  mockValidToken = 'first';
+  await sharedLedgerSync.syncAll();
+  // Some other failure: the round drops the token.
+  mockSyncNow.mockImplementationOnce(() => {
+    throw new Error('sync engine operation failed: database sync engine error: status=500');
+  });
+  expect((await sharedLedgerSync.syncAll()).error).toBeInstanceOf(Error);
+  const listsBefore = (listSharedLedgers as jest.Mock).mock.calls.length;
+
+  // Removed meanwhile: the next round learns it from the Worker, not as a failure.
+  const outcome = await sharedLedgerSync.syncAll();
+
+  expect(outcome.error).toBeNull();
+  expect((listSharedLedgers as jest.Mock).mock.calls.length).toBeGreaterThan(listsBefore);
+});

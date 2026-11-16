@@ -176,6 +176,15 @@ function isRefusedTokenError(error: unknown): boolean {
   return message.includes('remote server returned an error: status=401');
 }
 
+/**
+ * The Worker's answer to a credentials request that lost a race to mint the
+ * same ledger's new token (its catch-all 500), worth asking again shortly.
+ * Not a 502/503: an outage should fail at once.
+ */
+function isBusyMinting(error: unknown): boolean {
+  return error instanceof CloudSyncApiError && error.code === 'server' && error.status === 500;
+}
+
 class SharedLedgerSync {
   private session: SharedSyncSession | null = null;
   /** The last signed-in user, whose replica files a later let-go removes. */
@@ -186,6 +195,8 @@ class SharedLedgerSync {
   private credentials = new Map<string, SyncCredentials>();
   /** Credentials requests in flight, so an engine's parallel requests share one. */
   private credentialFetches = new Map<string, Promise<SyncCredentials>>();
+  /** Bumped whenever credentials are dropped: a fetch begun before is not kept. */
+  private credentialsEpoch = 0;
   /** Engines being opened, so two callers never open one replica twice. */
   private opening = new Map<string, Promise<SyncEngine>>();
   private listedAt = 0;
@@ -228,6 +239,7 @@ class SharedLedgerSync {
     this.engines.clear();
     this.credentials.clear();
     this.credentialFetches.clear();
+    this.credentialsEpoch += 1;
     this.opening.clear();
   }
 
@@ -416,7 +428,7 @@ class SharedLedgerSync {
   private closeEngine(shareId: string): void {
     this.engines.get(shareId)?.close();
     this.engines.delete(shareId);
-    this.credentials.delete(shareId);
+    this.forgetCredentials(shareId);
   }
 
   // -------------------------------------------------------------------------
@@ -425,24 +437,57 @@ class SharedLedgerSync {
   private async credentialsFor(shareId: string): Promise<SyncCredentials> {
     const current = this.credentials.get(shareId);
     if (current && current.expiresAt - Date.now() > TOKEN_REFRESH_MARGIN_MS) return current;
+    const epoch = this.credentialsEpoch;
     let fetching = this.credentialFetches.get(shareId);
     if (!fetching) {
-      fetching = (async () => getLedgerCredentials(await this.token(), shareId))().finally(() =>
-        this.credentialFetches.delete(shareId),
-      );
-      this.credentialFetches.set(shareId, fetching);
+      const started = (async () => getLedgerCredentials(await this.token(), shareId))();
+      fetching = started;
+      this.credentialFetches.set(shareId, started);
+      started
+        .finally(() => {
+          if (this.credentialFetches.get(shareId) === started) {
+            this.credentialFetches.delete(shareId);
+          }
+        })
+        .catch(() => undefined);
     }
     const next = await fetching;
+    // Dropped meanwhile (a removal, a sign-out): it may predate a rotation.
+    if (epoch !== this.credentialsEpoch) return this.credentialsFor(shareId);
     this.credentials.set(shareId, next);
     return next;
   }
 
   /**
-   * This phone just removed someone, so the Worker rotated the database's
-   * tokens: the cached one would only be refused.
+   * Drops a ledger's token, and any request for one in flight. Also called
+   * by the screens right after this phone removes someone, which rotated
+   * the database's tokens: the cached one would only be refused.
    */
   forgetCredentials(shareId: string): void {
     this.credentials.delete(shareId);
+    this.credentialFetches.delete(shareId);
+    this.credentialsEpoch += 1;
+  }
+
+  /**
+   * Has the ledger's token ready before the engine asks for it. Fetched
+   * here, a Worker refusal keeps its code (`not_found`, `ledger_paused`); the
+   * engine turns its token callback's errors into plain messages. Phones
+   * nudged together after a removal ask at once and the Worker turns all but
+   * the first away: ask again shortly, by when the new token is cached.
+   */
+  private async readyCredentials(shareId: string): Promise<void> {
+    const session = this.session;
+    try {
+      await this.credentialsFor(shareId);
+    } catch (error) {
+      if (!isBusyMinting(error)) throw error;
+      await new Promise((resolve) =>
+        setTimeout(resolve, CREDENTIALS_RETRY_MS + Math.random() * 1_000),
+      );
+      if (this.session !== session) throw new Error('signed_out');
+      await this.credentialsFor(shareId);
+    }
   }
 
   private engineFor(ledger: SharedLedger): Promise<SyncEngine> {
@@ -552,7 +597,7 @@ class SharedLedgerSync {
         if (result.pushed) session.announce?.(ledger.shareId);
       } catch (error) {
         // A token may have been revoked (a member was removed): ask again.
-        this.credentials.delete(ledger.shareId);
+        this.forgetCredentials(ledger.shareId);
         // Paused or gone is the ledger's new state, not a failure to show.
         if (isCode(error, 'ledger_paused')) {
           this.closeEngine(ledger.shareId);
@@ -577,24 +622,18 @@ class SharedLedgerSync {
 
   /**
    * One sync of a shared ledger, which every sync of one goes through. A
-   * token Turso refuses was revoked by a member leaving: the new one is asked
-   * for here, outside the engine, so a Worker refusal keeps its code (the
-   * engine turns its token callback's errors into plain messages), and the
-   * engine, which asks for its token on every request, syncs once more.
+   * token Turso refuses was revoked by a member leaving: it is dropped, a new
+   * one made ready, and the engine, which asks for its token on every
+   * request, syncs once more.
    */
   private async syncLedger(engine: SyncEngine, shareId: string): Promise<SyncOutcome> {
+    await this.readyCredentials(shareId);
     try {
       return await engine.syncNow();
     } catch (error) {
       if (!isRefusedTokenError(error)) throw error;
-      this.credentials.delete(shareId);
-      await this.credentialsFor(shareId).catch(async (fetchError: unknown) => {
-        if (!isCode(fetchError, 'server')) throw fetchError;
-        await new Promise((resolve) =>
-          setTimeout(resolve, CREDENTIALS_RETRY_MS + Math.random() * 1_000),
-        );
-        return this.credentialsFor(shareId);
-      });
+      this.forgetCredentials(shareId);
+      await this.readyCredentials(shareId);
       return engine.syncNow();
     }
   }
@@ -640,7 +679,7 @@ class SharedLedgerSync {
       authorize();
       for (const id of selected) {
         const ledger = sharedLedgerFor(id)!;
-        this.credentials.delete(ledger.shareId);
+        this.forgetCredentials(ledger.shareId);
         const engine = await this.engineFor(ledger);
         const result = await this.syncLedger(engine, ledger.shareId);
         if (result.applyError) throw result.applyError;
