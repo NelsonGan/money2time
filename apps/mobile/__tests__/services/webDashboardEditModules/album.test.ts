@@ -249,10 +249,9 @@ describe('module:album planning', () => {
 
 describe('module:album archived and no longer shared', () => {
   const ended = album('ended', { archivedAt: AT, shareEndedAt: AT });
-  it('leaves an album no longer shared as it was: no edit, delete or entries in or out', () => {
+  it('leaves an album no longer shared as it was: no edit or entries in or out', () => {
     for (const op of [
       { op: 'update', id: 'ended', at: AT, album: details() },
-      { op: 'delete', id: 'ended', at: AT },
       { op: 'transactions', id: 'ended', at: AT, add: ['t1'], remove: [] },
       { op: 'transactions', id: 'ended', at: AT, add: [], remove: ['kept'] },
     ]) {
@@ -262,6 +261,17 @@ describe('module:album archived and no longer shared', () => {
     expect(
       plan([{ op: 'transactions', id: 'a1', at: AT, add: ['kept'], remove: [] }], [album('a1')]),
     ).toMatchObject({ error: 'invalid' });
+  });
+
+  it('deletes an album no longer shared, as the app does', () => {
+    expect(plan([{ op: 'delete', id: 'ended', at: AT }], [ended])).toMatchObject({
+      ok: true,
+      plan: { steps: [{ action: 'delete', payload: { id: 'ended' } }] },
+    });
+    // Changed on the phone since: refused, as any album.
+    expect(plan([{ op: 'delete', id: 'ended', at: 'old' }], [ended])).toMatchObject({
+      error: 'conflict',
+    });
   });
 
   it('leaves archived albums out of the free plan’s count and the active album', () => {

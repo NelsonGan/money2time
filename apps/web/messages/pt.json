@@ -1798,6 +1798,7 @@
         "next": "Próximo",
         "deleteTitle": "Excluir álbum?",
         "deleteBody": "Suas transações são mantidas e voltam para as próprias categorias. Para manter o álbum como está, arquive-o no app.",
+        "deleteEndedBody": "Ele é excluído do seu celular, e suas transações voltam para as próprias categorias. Os outros mantêm o álbum.",
         "endedNote": "Não está mais compartilhado: fica como estava e não pode ser alterado.",
         "noAlbums": "Ainda sem álbuns",
         "appOnlyHint": "Adicione uma foto de capa ou um local no app.",

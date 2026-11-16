@@ -1798,6 +1798,7 @@
         "next": "Siguiente",
         "deleteTitle": "¿Eliminar álbum?",
         "deleteBody": "Tus transacciones se conservan y vuelven a sus propias categorías. Para conservar el álbum tal como está, archívalo en la app en su lugar.",
+        "deleteEndedBody": "Se elimina de tu teléfono y tus transacciones vuelven a sus propias categorías. Los demás conservan el álbum.",
         "endedNote": "Ya no se comparte: se conserva tal como estaba y no se puede cambiar.",
         "noAlbums": "Aún no hay álbumes",
         "appOnlyHint": "Añade una foto de portada o una ubicación en la app.",

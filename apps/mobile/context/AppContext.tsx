@@ -3178,11 +3178,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const deleteAlbum = useCallback(
     (id: string) => {
-      // A shared album, or one the user is no longer in, is archived, never
-      // deleted (README: Leaving and stopping): its cover stays too.
-      if (sharedAlbumFor(id) || albumsRepository.isFrozen(id)) return;
+      // A shared album is let go first: left, or ended by its owner
+      // (AlbumDetailScreen; README: Album members and shared albums >
+      // Deleting). Until then it is not deleted.
+      if (sharedAlbumFor(id)) return;
+      // One the user is no longer in: a shared album's, which keeps its cover
+      // until it goes, and whose entries go back under their own categories.
+      const wasShared = albumsRepository.isFrozen(id);
       // An album's cover is uniquely owned (each pick writes a fresh file), so
-      // it can be deleted outright — no other album references it.
+      // it can be deleted outright — no other album references it. A shared
+      // album's cover is the group's image, and the group has gone from here.
       const album = albumsRepository.getById(id);
       const cover = album?.coverPhotoUri;
       // Its icon is not: an upload can be shared, so the sweep decides.
@@ -3191,13 +3196,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         () => {
           albumsRepository.softDelete(id);
         },
-        { refresh: refreshAlbums },
+        {
+          refresh: () => {
+            refreshAlbums();
+            // Its entries' album categories went.
+            if (wasShared) scheduleRefreshTransactions();
+          },
+        },
       );
       if (cover) deleteAlbumCover(cover);
       if (hadCustomIcon) runDeferredWrite(() => runUserAssetGc());
-      void trackEvent(AnalyticsEvents.ALBUM_DELETED);
+      // Frozen by signing out, the user is still in it: left at the next sign-in.
+      if (wasShared) void sharedLedgerSync.albumDeletedHere(id).catch(() => undefined);
+      void trackEvent(AnalyticsEvents.ALBUM_DELETED, { shared: wasShared });
     },
-    [refreshAlbums, runMutation],
+    [refreshAlbums, runMutation, scheduleRefreshTransactions],
   );
 
   const archiveAlbum = useCallback(

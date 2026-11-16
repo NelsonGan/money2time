@@ -290,3 +290,65 @@ export async function removePendingLedgerAction(shareId: string): Promise<void> 
   const current = await listPendingLedgerActions();
   await writePending(current.filter((item) => item.shareId !== shareId));
 }
+
+// ---------------------------------------------------------------------------
+// The shared albums this phone held when it signed out. Each stays on the
+// phone, frozen, while the user is still in it on the Worker, which the album
+// itself no longer records. Deleted before the next sign-in, it becomes a
+// pending leave (or, for its owner, a stop), so that sign-in does not bring it
+// back. Forgotten once a list read has the account's albums again.
+
+const SIGNED_OUT_ALBUMS_KEY = 'm2t.sharedLedgers.signedOutAlbums';
+
+export interface SignedOutAlbum {
+  ledgerId: string;
+  shareId: string;
+  role: 'owner' | 'member';
+  userId: string | null;
+}
+
+async function listSignedOutAlbums(): Promise<SignedOutAlbum[]> {
+  try {
+    const raw = await AsyncStorage.getItem(SIGNED_OUT_ALBUMS_KEY);
+    const parsed: unknown = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed)
+      ? parsed.filter(
+          (item): item is SignedOutAlbum =>
+            !!item &&
+            typeof item.ledgerId === 'string' &&
+            typeof item.shareId === 'string' &&
+            (item.role === 'owner' || item.role === 'member') &&
+            (item.userId === null || typeof item.userId === 'string'),
+        )
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+async function writeSignedOutAlbums(albums: SignedOutAlbum[]): Promise<void> {
+  await AsyncStorage.setItem(SIGNED_OUT_ALBUMS_KEY, JSON.stringify(albums)).catch(() => undefined);
+}
+
+/** Sign-out: the shared albums it leaves frozen on the phone. */
+export async function rememberSignedOutAlbums(albums: SignedOutAlbum[]): Promise<void> {
+  if (!albums.length) return;
+  const ids = new Set(albums.map((album) => album.ledgerId));
+  const kept = (await listSignedOutAlbums()).filter((album) => !ids.has(album.ledgerId));
+  await writeSignedOutAlbums([...kept, ...albums]);
+}
+
+/** The album deleted while signed out, if it was one the user was still in; forgotten here. */
+export async function takeSignedOutAlbum(ledgerId: string): Promise<SignedOutAlbum | null> {
+  const current = await listSignedOutAlbums();
+  const found = current.find((album) => album.ledgerId === ledgerId) ?? null;
+  if (found) await writeSignedOutAlbums(current.filter((album) => album !== found));
+  return found;
+}
+
+/** A list read for `userId`: its albums are known again, from the Worker. */
+export async function forgetSignedOutAlbums(userId: string): Promise<void> {
+  const current = await listSignedOutAlbums();
+  const kept = current.filter((album) => album.userId !== userId);
+  if (kept.length !== current.length) await writeSignedOutAlbums(kept);
+}

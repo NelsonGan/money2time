@@ -3,7 +3,6 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
-  Archive,
   ArchiveRestore,
   Camera,
   ChevronDown,
@@ -47,9 +46,11 @@ import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { chartCategoryColor } from '~/constants/chartColors';
 import { spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
+import { useCloudSync } from '~/features/cloudSync/CloudSyncContext';
 import { CategoryBreakdownChart } from '~/features/insights/components';
 import type { InsightsDrilldownPayload } from '~/features/insights/screens';
 import { countsTowardSpending } from '~/features/reimbursements/lib/reimbursementMath';
+import { leaveAskingFirst } from '~/features/sharedLedgers/lib/confirmLeave';
 import {
   buildBulkUpdateInputs,
   BulkEditTransactionsSheet,
@@ -87,6 +88,7 @@ import { useAlbumGroup } from '../hooks/useAlbumGroup';
 import { useRemoveFromAlbum } from '../hooks/useRemoveFromAlbum';
 import { albumCategoryRows } from '../lib/albumBreakdown';
 import { albumCategoryKeyOfId, albumCategoryPickerList } from '../lib/albumCategories';
+import { albumSharingMessage } from '../lib/albumMessages';
 import { breakdownMemberOptions, memberShare } from '../lib/memberShare';
 import { listGroupActivity } from '../services/albumGroupStore';
 import { formatAlbumDateRange } from '../utils';
@@ -157,6 +159,7 @@ export function AlbumDetailScreen({
     addTransactionsToAlbum,
   } = useApp();
   const { transactions } = useTransactions();
+  const sync = useCloudSync();
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
   const me = useSelfPerson();
@@ -536,11 +539,47 @@ export function AlbumDetailScreen({
 
   const dateRange = formatAlbumDateRange(stats.startDate, stats.endDate);
 
-  // An album of the user's own: deleting it keeps its entries, back under
-  // their own categories, and archiving is offered beside it.
+  // Deleting keeps the album's entries, back under their own categories
+  // (README: Album members and shared albums > Deleting). A shared album is
+  // let go first: a member leaves it, its owner ends it for everyone, and the
+  // others keep it. One the user is no longer in only goes from here.
+  const share = group.share;
+  const othersJoined = group.people.some((person) => !person.isSelf && person.joined);
+  const deletingRef = useRef(false);
+  const deleteShared = useCallback(async () => {
+    if (!share || deletingRef.current) return;
+    deletingRef.current = true;
+    try {
+      if (share.role === 'owner') {
+        // Offline, it ends here and the Worker is told later.
+        await sync.stopSharingLedger(albumId, { whenUnreachable: 'local' });
+      } else if (
+        !(await leaveAskingFirst((opts) => sync.leaveLedger(albumId, opts), album?.name ?? ''))
+      ) {
+        return;
+      }
+      deleteAlbum(albumId);
+      onDeleted();
+    } catch (error) {
+      Alert.alert(albumSharingMessage(error));
+    } finally {
+      deletingRef.current = false;
+    }
+  }, [album?.name, albumId, deleteAlbum, onDeleted, share, sync]);
+
   const handleDelete = useCallback(() => {
     void triggerHaptic('warning');
+    const body = share
+      ? share.role === 'member'
+        ? I18n.t('albums.delete_body_member')
+        : othersJoined
+          ? I18n.t('albums.delete_body_owner')
+          : I18n.t('albums.delete_body')
+      : album?.shareEndedAt
+        ? I18n.t('albums.delete_body_ended')
+        : I18n.t('albums.delete_body');
     const buttons: AlertButton[] = [{ text: I18n.t('common.cancel'), style: 'cancel' }];
+    // Archived already (as an album the user is no longer in always is).
     if (!album?.archivedAt) {
       buttons.push({
         text: I18n.t('albums.archive.action'),
@@ -551,28 +590,26 @@ export function AlbumDetailScreen({
       text: I18n.t('common.delete'),
       style: 'destructive',
       onPress: () => {
+        if (share) {
+          void deleteShared();
+          return;
+        }
         deleteAlbum(albumId);
         onDeleted();
       },
     });
-    Alert.alert(I18n.t('albums.delete_title'), I18n.t('albums.delete_body'), buttons);
-  }, [album?.archivedAt, albumId, archiveAlbum, deleteAlbum, onDeleted]);
-
-  // A shared album is archived, never deleted: the user stays in it.
-  const handleArchiveShared = useCallback(() => {
-    void triggerHaptic('selection');
-    Alert.alert(
-      I18n.t('albums.archive.confirm_title', { name: album?.name ?? '' }),
-      I18n.t('albums.archive.confirm_shared'),
-      [
-        { text: I18n.t('common.cancel'), style: 'cancel' },
-        {
-          text: I18n.t('albums.archive.action'),
-          onPress: () => archiveAlbum(albumId, true),
-        },
-      ],
-    );
-  }, [album?.name, albumId, archiveAlbum]);
+    Alert.alert(I18n.t('albums.delete_title'), body, buttons);
+  }, [
+    album?.archivedAt,
+    album?.shareEndedAt,
+    albumId,
+    archiveAlbum,
+    deleteAlbum,
+    deleteShared,
+    onDeleted,
+    othersJoined,
+    share,
+  ]);
 
   const changeCover = useCallback(async () => {
     void triggerHaptic('selection');
@@ -873,16 +910,6 @@ export function AlbumDetailScreen({
         {peoplePill}
       </View>
     ) : null;
-  // The last header button: an album of the user's own is deleted (archive
-  // offered beside it); a shared album is archived, never deleted; one the
-  // user is no longer in has neither.
-  const trailingAction: 'delete' | 'archive' | null = isFrozen
-    ? null
-    : group.share
-      ? isArchived
-        ? null
-        : 'archive'
-      : 'delete';
   // An album no longer shared says so on its pill alone.
   const statusLabel = isArchived && !isFrozen ? I18n.t('albums.archive.label') : null;
 
@@ -1122,19 +1149,13 @@ export function AlbumDetailScreen({
                       <Plus size={19} color={themeColors.textMuted} />,
                     )
                   : null}
-                {trailingAction === 'delete'
-                  ? splitIconButton(
-                      handleDelete,
-                      I18n.t('common.delete'),
-                      <Trash2 size={18} color={themeColors.error} />,
-                    )
-                  : trailingAction === 'archive'
-                    ? splitIconButton(
-                        handleArchiveShared,
-                        I18n.t('albums.archive.action'),
-                        <Archive size={18} color={themeColors.textMuted} />,
-                      )
-                    : null}
+                {/* The last header button: every album is deleted from here,
+                    with Archive offered beside Delete. */}
+                {splitIconButton(
+                  handleDelete,
+                  I18n.t('common.delete'),
+                  <Trash2 size={18} color={themeColors.error} />,
+                )}
               </View>
             </View>
           </View>
@@ -1416,27 +1437,15 @@ export function AlbumDetailScreen({
                 )}
               />
             ) : null}
-            {trailingAction === 'delete' ? (
-              <HeroHeaderButton
-                onPress={handleDelete}
-                accessibilityLabel={I18n.t('common.delete')}
-                floatingStyle={floatingChromeStyle}
-                solidStyle={solidHeaderStyle}
-                renderIcon={(overPhoto) => (
-                  <Trash2 size={18} color={overPhoto ? '#ffffff' : themeColors.error} />
-                )}
-              />
-            ) : trailingAction === 'archive' ? (
-              <HeroHeaderButton
-                onPress={handleArchiveShared}
-                accessibilityLabel={I18n.t('albums.archive.action')}
-                floatingStyle={floatingChromeStyle}
-                solidStyle={solidHeaderStyle}
-                renderIcon={(overPhoto) => (
-                  <Archive size={18} color={overPhoto ? '#ffffff' : themeColors.textMuted} />
-                )}
-              />
-            ) : null}
+            <HeroHeaderButton
+              onPress={handleDelete}
+              accessibilityLabel={I18n.t('common.delete')}
+              floatingStyle={floatingChromeStyle}
+              solidStyle={solidHeaderStyle}
+              renderIcon={(overPhoto) => (
+                <Trash2 size={18} color={overPhoto ? '#ffffff' : themeColors.error} />
+              )}
+            />
           </View>
         </View>
 

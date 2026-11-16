@@ -3042,6 +3042,12 @@ const nl = {
     delete_title: 'Album verwijderen?',
     delete_body:
       'Je transacties blijven bewaard en gaan terug naar hun eigen categorieën. Wil je het album houden zoals het is, archiveer het dan.',
+    delete_body_member:
+      'Je verlaat het album en het wordt van deze telefoon verwijderd. Je transacties blijven bewaard onder je eigen categorieën, en de anderen houden het album en de rekeningen. Wil je erin blijven, archiveer het dan.',
+    delete_body_owner:
+      'Daarmee stopt het ook voor iedereen: de anderen houden het onder Gearchiveerd zoals het nu is, en niemand kan de rekeningen nog wijzigen. Je transacties blijven bewaard onder je eigen categorieën. Wil je het laten doorgaan, archiveer het dan.',
+    delete_body_ended:
+      'Het wordt van deze telefoon verwijderd, en je transacties gaan terug naar hun eigen categorieën. De anderen houden het album.',
     cover_permission_title: "Toegang tot foto's nodig",
     cover_permission_body: "Geef toegang tot foto's om een omslagafbeelding te kiezen.",
     people: {
@@ -3077,9 +3083,6 @@ const nl = {
       unarchive: 'Uit archief halen',
       label: 'Gearchiveerd',
       section: 'Gearchiveerd ({{count}})',
-      confirm_title: '{{name}} archiveren?',
-      confirm_shared:
-        'Het gaat naar Gearchiveerd op de pagina Albums. Je blijft erin, de rekeningen blijven bijwerken en het telt nog mee in Inzichten. Je kunt het altijd weer uit het archief halen.',
     },
     ended: {
       label: 'Niet meer gedeeld',

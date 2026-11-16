@@ -3025,6 +3025,12 @@ const ms = {
     delete_title: 'Padam album?',
     delete_body:
       'Transaksi anda dikekalkan dan kembali ke kategori masing-masing. Untuk mengekalkan album seperti sedia ada, arkibkannya sahaja.',
+    delete_body_member:
+      'Anda keluar daripada album dan ia dipadamkan daripada telefon ini. Transaksi anda dikekalkan dalam kategori anda sendiri, dan yang lain menyimpan album dan bilnya. Untuk kekal di dalamnya, arkibkannya sahaja.',
+    delete_body_owner:
+      'Album ini juga tamat untuk semua orang: yang lain menyimpannya dalam Diarkibkan seperti sekarang, dan tiada sesiapa boleh mengubah bilnya. Transaksi anda dikekalkan dalam kategori anda sendiri. Untuk meneruskannya, arkibkannya sahaja.',
+    delete_body_ended:
+      'Ia dipadamkan daripada telefon ini, dan transaksi anda kembali ke kategori masing-masing. Yang lain menyimpan album ini.',
     cover_permission_title: 'Akses foto diperlukan',
     cover_permission_body: 'Benarkan akses foto untuk memilih imej kulit.',
     people: {
@@ -3059,9 +3065,6 @@ const ms = {
       unarchive: 'Nyaharkib',
       label: 'Diarkibkan',
       section: 'Diarkibkan ({{count}})',
-      confirm_title: 'Arkibkan {{name}}?',
-      confirm_shared:
-        'Album dipindahkan ke Diarkibkan di halaman Album. Anda kekal di dalamnya, bilnya terus dikemas kini dan ia masih dikira dalam Wawasan. Anda boleh menyaharkibnya pada bila-bila masa.',
     },
     ended: {
       label: 'Tidak dikongsi lagi',

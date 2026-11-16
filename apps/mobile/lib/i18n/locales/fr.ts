@@ -3045,6 +3045,12 @@ const fr = {
     delete_title: "Supprimer l'album ?",
     delete_body:
       'Vos transactions sont conservées et retournent dans leurs propres catégories. Pour garder l’album tel quel, archivez-le plutôt.',
+    delete_body_member:
+      'Vous quittez l’album et il est supprimé de ce téléphone. Vos transactions sont conservées, dans vos propres catégories, et les autres gardent l’album et ses dépenses. Pour y rester, archivez-le plutôt.',
+    delete_body_owner:
+      'L’album prend aussi fin pour tout le monde : les autres le gardent dans Archivés tel qu’il est, et plus personne ne peut modifier ses dépenses. Vos transactions sont conservées, dans vos propres catégories. Pour qu’il continue, archivez-le plutôt.',
+    delete_body_ended:
+      'Il est supprimé de ce téléphone, et vos transactions retournent dans leurs propres catégories. Les autres gardent l’album.',
     cover_permission_title: 'Accès aux photos requis',
     cover_permission_body: "Autorisez l'accès aux photos pour choisir une image de couverture.",
     people: {
@@ -3080,9 +3086,6 @@ const fr = {
       unarchive: 'Désarchiver',
       label: 'Archivé',
       section: 'Archivés ({{count}})',
-      confirm_title: 'Archiver {{name}} ?',
-      confirm_shared:
-        'Il passe dans Archivés sur la page Albums. Vous y restez, ses dépenses continuent de se mettre à jour et il compte toujours dans les Analyses. Vous pouvez le désarchiver à tout moment.',
     },
     ended: {
       label: 'Plus partagé',

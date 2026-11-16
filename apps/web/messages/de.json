@@ -1798,6 +1798,7 @@
         "next": "Weiter",
         "deleteTitle": "Album löschen?",
         "deleteBody": "Deine Transaktionen bleiben erhalten und kommen zurück in ihre eigenen Kategorien. Um das Album so zu behalten, wie es ist, archiviere es stattdessen in der App.",
+        "deleteEndedBody": "Es wird von deinem Telefon gelöscht, und deine Transaktionen kommen zurück in ihre eigenen Kategorien. Die anderen behalten das Album.",
         "endedNote": "Nicht mehr geteilt: bleibt, wie es war, und kann nicht geändert werden.",
         "noAlbums": "Noch keine Alben",
         "appOnlyHint": "Füge in der App ein Titelbild oder einen Ort hinzu.",

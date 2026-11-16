@@ -3024,6 +3024,12 @@ const es = {
     delete_title: '¿Eliminar álbum?',
     delete_body:
       'Tus transacciones se conservan y vuelven a sus propias categorías. Para conservar el álbum tal como está, archívalo en su lugar.',
+    delete_body_member:
+      'Sales del álbum y se elimina de este teléfono. Tus transacciones se conservan en tus propias categorías, y los demás conservan el álbum y sus cuentas. Para seguir en él, archívalo en su lugar.',
+    delete_body_owner:
+      'Esto también lo termina para todos: los demás lo conservan en Archivados tal como está ahora, y nadie puede cambiar sus cuentas. Tus transacciones se conservan en tus propias categorías. Para que siga, archívalo en su lugar.',
+    delete_body_ended:
+      'Se elimina de este teléfono y tus transacciones vuelven a sus propias categorías. Los demás conservan el álbum.',
     cover_permission_title: 'Se necesita acceso a fotos',
     cover_permission_body: 'Permite el acceso a fotos para elegir una imagen de portada.',
     people: {
@@ -3059,9 +3065,6 @@ const es = {
       unarchive: 'Desarchivar',
       label: 'Archivado',
       section: 'Archivados ({{count}})',
-      confirm_title: '¿Archivar {{name}}?',
-      confirm_shared:
-        'Pasa a Archivados en la página Álbumes. Sigues en él, sus cuentas se siguen actualizando y sigue contando en Análisis. Puedes desarchivarlo cuando quieras.',
     },
     ended: {
       label: 'Ya no se comparte',

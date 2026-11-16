@@ -22,6 +22,7 @@ import {
 } from '~/services/dataManagementService';
 import { restoreLedgerChoices } from '~/utils/backupLedgerPolicy';
 
+import { albumListing } from '../lib/albumListing';
 import { CloudSyncApiError, ledgerMediaPath, type SyncCredentials } from './cloudSyncApi';
 import {
   deleteLedgerLocally,
@@ -44,17 +45,20 @@ import {
   addPendingLedgerAction,
   clearDeferredLedgerDeletes,
   deferLedgerDelete,
+  forgetSignedOutAlbums,
   getDeferredLedgerDeletes,
   listAlbumShares,
   listPendingLedgerActions,
   listSharedLedgers,
   noteRemovedLedgers,
+  rememberSignedOutAlbums,
   removePendingLedgerAction,
   removeSharedLedger,
   saveSharedLedger,
   sharedAlbumFor,
   type SharedLedger,
   sharedLedgerFor,
+  takeSignedOutAlbum,
 } from './sharedLedgerStore';
 import {
   deleteReplicaFiles,
@@ -261,14 +265,25 @@ class SharedLedgerSync {
       }
       const known = sharedLedgerFor(item.ledgerId);
       if (item.kind === 'album') {
-        if (known && known.shareId !== item.id) continue;
-        // Never a group named after one of this phone's ledgers, or after an
-        // album of a ledger other than the main one (`assertNotLedger`).
-        if (!known && (ledgerExists(item.ledgerId) || albumOutsideMain(item.ledgerId))) continue;
-        if (item.role === 'owner' && !known && isAlbumDeleted(item.ledgerId)) {
-          // The album was deleted on this phone while signed out: sharing
-          // ends with it.
-          await this.finishPending(token, item.id, 'stop');
+        const step = albumListing({
+          role: item.role,
+          known: known ? (known.shareId === item.id ? 'this_share' : 'other_share') : null,
+          // Never a group named after one of this phone's ledgers, or after an
+          // album of a ledger other than the main one (`assertNotLedger`).
+          foreignId: ledgerExists(item.ledgerId) || albumOutsideMain(item.ledgerId),
+          deleted: isAlbumDeleted(item.ledgerId),
+        });
+        if (step === 'skip') continue;
+        if (step === 'stop' || step === 'leave') {
+          // Deleted while the Worker could not be told: the deletion is
+          // finished, and the album, not seen, is let go below. Queued
+          // first, so a failed call is tried again at the next read.
+          await addPendingLedgerAction({
+            shareId: item.id,
+            action: step,
+            userId: session.userId,
+          });
+          await this.finishPending(token, item.id, step);
           continue;
         }
         seen.add(item.ledgerId);
@@ -308,6 +323,8 @@ class SharedLedgerSync {
         await removePendingLedgerAction(item.shareId);
       }
     }
+    // The albums frozen at sign-out are this list's again (or no longer the user's).
+    await forgetSignedOutAlbums(session.userId);
     if (opts.letGo === false || this.session !== session) return 0;
     const gone = listSharedLedgers().filter((local) => !seen.has(local.ledgerId));
     // A shared album stays on the phone as the user's own album, so there is
@@ -794,6 +811,22 @@ class SharedLedgerSync {
   }
 
   /**
+   * An album the user is no longer in was deleted on this phone. When it was
+   * frozen by signing out, the user is still in it on the Worker: it is left
+   * (or ended, for its owner) at the next sign-in, rather than that sign-in
+   * bringing it back.
+   */
+  async albumDeletedHere(albumId: string): Promise<void> {
+    const held = await takeSignedOutAlbum(albumId);
+    if (!held) return;
+    await addPendingLedgerAction({
+      shareId: held.shareId,
+      action: held.role === 'owner' ? 'stop' : 'leave',
+      userId: held.userId,
+    });
+  }
+
+  /**
    * Whether entries made on this phone have not all reached a ledger's
    * database, paused or not: still queued, or flushed into its replica by a
    * sync whose push failed (recorded, so it holds across a restart).
@@ -900,6 +933,15 @@ class SharedLedgerSync {
    */
   forgetAll(userId: string | undefined): void {
     this.closeAll();
+    // Its albums stay, frozen, with the user still in them on the Worker.
+    void rememberSignedOutAlbums(
+      listAlbumShares().map((share) => ({
+        ledgerId: share.ledgerId,
+        shareId: share.shareId,
+        role: share.role,
+        userId: share.userId ?? userId ?? null,
+      })),
+    );
     for (const ledger of listSharedLedgers()) {
       removeSharedLedger(ledger.ledgerId);
       forgetChannel(ledger.shareId);

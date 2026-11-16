@@ -1798,6 +1798,7 @@
         "next": "İleri",
         "deleteTitle": "Albüm silinsin mi?",
         "deleteBody": "İşlemlerin korunur ve kendi kategorilerine geri döner. Albümü olduğu gibi tutmak için bunun yerine uygulamada arşivle.",
+        "deleteEndedBody": "Telefonundan silinir ve işlemlerin kendi kategorilerine geri döner. Diğerleri albümü tutar.",
         "endedNote": "Artık paylaşılmıyor: olduğu gibi korunur ve değiştirilemez.",
         "noAlbums": "Henüz albüm yok",
         "appOnlyHint": "Uygulamada kapak fotoğrafı veya konum ekleyin.",

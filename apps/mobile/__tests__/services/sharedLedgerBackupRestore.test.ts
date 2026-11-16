@@ -19,6 +19,7 @@ jest.mock('~/features/cloudSync/services/sharedLedgerStore', () => ({
     mockShares = mockShares.filter((share) => share.ledgerId !== id);
   },
   listPendingLedgerActions: async () => [],
+  forgetSignedOutAlbums: async () => undefined,
   getDeferredLedgerDeletes: () => [],
   noteRemovedLedgers: jest.fn(),
 }));

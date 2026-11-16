@@ -2886,6 +2886,11 @@ const zh = {
     no_transactions_message: '向此相册添加交易后会显示在这里。',
     delete_title: '删除相册？',
     delete_body: '你的交易会保留，并回到各自的分类。若想保留相册原样，请改为归档。',
+    delete_body_member:
+      '你会退出相册，并从这台手机上删除它。你的交易会保留在你自己的分类下，其他人会保留相册和账单。若想留在相册中，请改为归档。',
+    delete_body_owner:
+      '这也会为所有人结束相册：其他人会把它按现状留在“已归档”，且没有人能再修改账单。你的交易会保留在你自己的分类下。若想让它继续，请改为归档。',
+    delete_body_ended: '它会从这台手机上删除，你的交易会回到各自的分类。其他人会保留相册。',
     cover_permission_title: '需要照片权限',
     cover_permission_body: '允许访问照片以选择封面图片。',
     people: {
@@ -2918,9 +2923,6 @@ const zh = {
       unarchive: '取消归档',
       label: '已归档',
       section: '已归档（{{count}}）',
-      confirm_title: '要归档“{{name}}”吗？',
-      confirm_shared:
-        '相册会移到相册页面的“已归档”。你仍在其中，账单会继续更新，也仍会计入洞察。你随时可以取消归档。',
     },
     ended: {
       label: '已停止共享',

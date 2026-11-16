@@ -3010,6 +3010,12 @@ const nb = {
     delete_title: 'Slette album?',
     delete_body:
       'Transaksjonene dine beholdes og går tilbake til sine egne kategorier. Vil du beholde albumet som det er, kan du arkivere det i stedet.',
+    delete_body_member:
+      'Du forlater albumet, og det slettes fra denne telefonen. Transaksjonene dine beholdes under dine egne kategorier, og de andre beholder albumet og regningene. Vil du bli i det, kan du arkivere det i stedet.',
+    delete_body_owner:
+      'Det avslutter også albumet for alle: De andre beholder det under Arkivert slik det er nå, og ingen kan endre regningene. Transaksjonene dine beholdes under dine egne kategorier. Skal det fortsette, kan du arkivere det i stedet.',
+    delete_body_ended:
+      'Det slettes fra denne telefonen, og transaksjonene dine går tilbake til sine egne kategorier. De andre beholder albumet.',
     cover_permission_title: 'Trenger tilgang til bilder',
     cover_permission_body: 'Gi tilgang til bilder for å velge et omslagsbilde.',
     people: {
@@ -3045,9 +3051,6 @@ const nb = {
       unarchive: 'Hent fra arkivet',
       label: 'Arkivert',
       section: 'Arkivert ({{count}})',
-      confirm_title: 'Arkivere {{name}}?',
-      confirm_shared:
-        'Det flyttes til Arkivert på Album-siden. Du er fortsatt med, regningene oppdateres fortsatt, og det teller fortsatt i Innsikt. Du kan hente det fra arkivet når som helst.',
     },
     ended: {
       label: 'Ikke lenger delt',

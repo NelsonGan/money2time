@@ -868,7 +868,7 @@ describe('sharing and its end', () => {
     expect(app.all('SELECT album_category FROM transactions WHERE id = ?', 'dinner')).toEqual([
       { album_category: 'food' },
     ]);
-    // Read-only: nothing is deleted, added, taken out, unarchived or made active.
+    // Read-only: nothing is added, taken out, unarchived or made active.
     expect(albumsRepository.isFrozen(GROUP)).toBe(true);
     transactionsRepository.create({
       id: 'mine',
@@ -880,7 +880,6 @@ describe('sharing and its end', () => {
     } as Parameters<typeof transactionsRepository.create>[0]);
     albumsRepository.addTransactions(GROUP, ['mine']);
     albumsRepository.removeTransactions(GROUP, ['dinner']);
-    albumsRepository.softDelete(GROUP);
     albumsRepository.setArchived(GROUP, false);
     albumsRepository.setActive(GROUP);
     expect(album()).toMatchObject({ deletedAt: null, isActive: false });
@@ -899,6 +898,94 @@ describe('sharing and its end', () => {
     ensureLocalAlbum({ ledgerId: GROUP, name: 'Bali trip' });
     expect(album()).toMatchObject({ shareEndedAt: null, archivedAt: null });
     expect(albumsRepository.isFrozen(GROUP)).toBe(false);
+  });
+
+  it('deletes an album the user is no longer in: its entries go back under their own categories', () => {
+    addBill('dinner', 'aisha');
+    projectGroup(GROUP, env);
+    removeSharedLedger(GROUP);
+    releaseAlbumGroup(GROUP);
+    const albumCategory = (id: string) =>
+      app.all('SELECT album_category FROM transactions WHERE id = ?', id)[0].album_category;
+    expect(albumCategory('dinner')).toBe('food');
+    albumsRepository.softDelete(GROUP);
+    expect(isAlbumDeleted(GROUP)).toBe(true);
+    // The entry stays, under the user's own category, in no album: it can
+    // go in another album now, and its debt is settled on the Balances page.
+    expect(tx('dinner')).toMatchObject({ deleted_at: null, category_id: 'food' });
+    expect(albumCategory('dinner')).toBeNull();
+    expect(balances()).toEqual({ Aisha: -30 });
+    app.connection.exec(`
+      INSERT INTO albums (id, ledger_id, name, sort_order, created_at, updated_at)
+        VALUES ('tokyo', 'default', 'Tokyo', 1, '${NOW}', '${NOW}');
+    `);
+    albumsRepository.addTransactions('tokyo', ['dinner']);
+    expect(albumsRepository.getTransactionIds('tokyo')).toEqual(['dinner']);
+    albumsRepository.removeTransactions('tokyo', ['dinner']);
+
+    // Joined again: the album comes back with its entry, under the album category.
+    saveAlbumShare();
+    addBill('dinner', 'aisha');
+    ensureLocalAlbum({ ledgerId: GROUP, name: 'Bali trip' });
+    projectGroup(GROUP, env);
+    expect(albumsRepository.getById(GROUP)).toMatchObject({
+      deletedAt: null,
+      shareEndedAt: null,
+      archivedAt: null,
+    });
+    expect(albumsRepository.getTransactionIds(GROUP)).toEqual(['dinner']);
+    expect(albumCategory('dinner')).toBe('food');
+  });
+
+  it('keeps an entry another album holds when the album it came from is deleted', () => {
+    addBill('dinner', 'me');
+    projectGroup(GROUP, env);
+    transactionsRepository.createWithId('taxi', {
+      type: 'expense',
+      amount: 5,
+      currency: 'MYR',
+      date: '2026-11-12',
+      accountId: 'cash',
+    } as Parameters<typeof transactionsRepository.create>[0]);
+    app.connection.exec(`
+      UPDATE transactions SET album_category = 'transport' WHERE id = 'taxi';
+      INSERT INTO albums (id, ledger_id, name, sort_order, created_at, updated_at)
+        VALUES ('tokyo', 'default', 'Tokyo', 1, '${NOW}', '${NOW}');
+      INSERT INTO album_transactions (id, album_id, transaction_id, sort_order, created_at, updated_at, deleted_at)
+        VALUES ('old-link', '${GROUP}', 'taxi', 0, '${NOW}', '${NOW}', '${NOW}'),
+               ('tokyo-link', 'tokyo', 'taxi', 0, '${NOW}', '${NOW}', NULL);
+    `);
+    removeSharedLedger(GROUP);
+    releaseAlbumGroup(GROUP);
+    albumsRepository.softDelete(GROUP);
+    // Only the entries the deleted album held lose their album category.
+    expect(app.all("SELECT album_category FROM transactions WHERE id = 'dinner'")).toEqual([
+      { album_category: null },
+    ]);
+    expect(app.all("SELECT album_category FROM transactions WHERE id = 'taxi'")).toEqual([
+      { album_category: 'transport' },
+    ]);
+  });
+
+  it('lets go of an album deleted on another phone of the user’s, under their own categories', () => {
+    addBill('dinner', 'aisha');
+    projectGroup(GROUP, env);
+    // The other phone's deletion came down before this phone let the group go.
+    app.connection.exec(`
+      UPDATE albums SET deleted_at = '${NOW}' WHERE id = '${GROUP}';
+      UPDATE album_transactions SET deleted_at = '${NOW}' WHERE album_id = '${GROUP}';
+    `);
+    removeSharedLedger(GROUP);
+    releaseAlbumGroup(GROUP);
+    // Deleted, it is not frozen as well.
+    expect(app.all('SELECT share_ended_at FROM albums WHERE id = ?', GROUP)).toEqual([
+      { share_ended_at: null },
+    ]);
+    expect(tx('dinner')).toMatchObject({ album_group_id: null, deleted_at: null });
+    expect(app.all("SELECT album_category FROM transactions WHERE id = 'dinner'")).toEqual([
+      { album_category: null },
+    ]);
+    expect(app.all('SELECT COUNT(*) AS n FROM album_expenses')[0].n).toBe(0);
   });
 
   it('leaves an album the user archived themselves in Archived when they are back in it', () => {

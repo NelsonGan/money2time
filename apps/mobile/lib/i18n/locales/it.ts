@@ -3023,6 +3023,12 @@ const it = {
     delete_title: "Eliminare l'album?",
     delete_body:
       'Le tue transazioni restano e tornano nelle loro categorie. Per tenere l’album così com’è, archivialo invece.',
+    delete_body_member:
+      'Esci dall’album e viene eliminato da questo telefono. Le tue transazioni restano, nelle tue categorie, e gli altri tengono l’album e le sue spese. Per restarci, archivialo invece.',
+    delete_body_owner:
+      'L’album finisce anche per tutti: gli altri lo tengono in Archiviati così com’è ora, e nessuno può più modificarne le spese. Le tue transazioni restano, nelle tue categorie. Per farlo continuare, archivialo invece.',
+    delete_body_ended:
+      'Viene eliminato da questo telefono e le tue transazioni tornano nelle loro categorie. Gli altri tengono l’album.',
     cover_permission_title: 'Accesso alle foto necessario',
     cover_permission_body: "Consenti l'accesso alle foto per scegliere un'immagine di copertina.",
     people: {
@@ -3058,9 +3064,6 @@ const it = {
       unarchive: 'Rimuovi dall’archivio',
       label: 'Archiviato',
       section: 'Archiviati ({{count}})',
-      confirm_title: 'Archiviare {{name}}?',
-      confirm_shared:
-        'Passa in Archiviati nella pagina Album. Ne resti membro, le sue spese continuano ad aggiornarsi e conta ancora nelle Analisi. Puoi rimuoverlo dall’archivio quando vuoi.',
     },
     ended: {
       label: 'Non più condiviso',
