@@ -172,7 +172,11 @@ const de = {
   },
   news: {
     split_bills_album_icons: {
-      title: 'Rechnungen teilen, wie du willst',
+      title: 'Geteilte Alben und Rechnungen',
+      sharedAlbums: {
+        title: 'Ein Reisealbum mit Freunden teilen',
+        body: "Geht's auf Reisen? Schalte in Neues Album Mit Freunden teilen ein und schick den Einladungslink unter Personen. Alle können Rechnungen hinzufügen, jede wird erst einmal gleichmäßig geteilt, und Salden zeigt, wer wem was schuldet. Freunde ohne die App können auf album.money2time.com beitreten und Rechnungen hinzufügen.",
+      },
       friendPaid: {
         title: 'Rechnung teilen, die ein Freund bezahlt hat',
         body: 'Tippe in Rechnung teilen auf Bezahlt von und wähle, wer bezahlt hat. Nur dein Anteil zählt als Ausgabe, und Salden zeigt, was du schuldest. Zahl alles auf einmal oder in Teilen zurück und begleiche es mit einem Tipp.',

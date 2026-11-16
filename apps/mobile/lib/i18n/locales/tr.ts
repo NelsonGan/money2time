@@ -172,7 +172,11 @@ const tr = {
   },
   news: {
     split_bills_album_icons: {
-      title: 'Hesapları istediğin gibi böl',
+      title: 'Paylaşılan albümler ve bölünen hesaplar',
+      sharedAlbums: {
+        title: 'Seyahat albümünü arkadaşlarınla paylaş',
+        body: "Seyahate mi çıkıyorsun? Yeni Albüm'de Arkadaşlarla böl'ü aç, ardından davet bağlantısını Kişiler'den gönder. Herkes hesap ekleyebilir, her hesap başta eşit bölünür ve kimin kime borçlu olduğunu Bakiyeler'de görürsün. Uygulaması olmayan arkadaşlar album.money2time.com'da katılıp hesap ekleyebilir.",
+      },
       friendPaid: {
         title: 'Bir arkadaşın ödediği hesabı böl',
         body: "Hesabı Böl'de Ödeyen'e dokun ve ödeyen arkadaşını seç. Harcama olarak yalnızca senin payın sayılır, ne kadar borçlu olduğunu Bakiyeler'de görürsün. Borcunu tek seferde ya da parça parça öde, tek dokunuşla ödeş.",

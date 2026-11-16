@@ -172,7 +172,11 @@ const pt = {
   },
   news: {
     split_bills_album_icons: {
-      title: 'Divida contas do seu jeito',
+      title: 'Álbuns compartilhados e contas divididas',
+      sharedAlbums: {
+        title: 'Compartilhe um álbum de viagem com amigos',
+        body: 'Vai viajar? Em Novo álbum, ative Dividir com amigos e envie o link de convite em Pessoas. Todos podem adicionar contas, cada uma começa dividida igualmente, e Saldos mostra quem deve a quem. Amigos sem o app podem entrar e adicionar contas em album.money2time.com.',
+      },
       friendPaid: {
         title: 'Divida uma conta que um amigo pagou',
         body: 'Em Dividir conta, toque em Pago por e escolha o amigo que pagou. Só a sua parte conta como gasto, e Saldos mostra quanto você deve. Devolva tudo de uma vez ou em partes, e acerte com um toque.',

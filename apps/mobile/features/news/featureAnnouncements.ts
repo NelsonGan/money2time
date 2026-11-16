@@ -76,7 +76,8 @@ export interface FeatureAnnouncementPage {
     | 'archiveAccounts'
     | 'splitFriendPaid'
     | 'splitMethods'
-    | 'albumIcons';
+    | 'albumIcons'
+    | 'sharedAlbums';
   /**
    * Optional call-to-action for this page. On the last page it replaces the
    * primary button; on earlier pages it sits above the Back/Next row so the

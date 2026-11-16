@@ -172,7 +172,11 @@ const fil = {
   },
   news: {
     split_bills_album_icons: {
-      title: 'Hatiin ang bill sa paraang gusto mo',
+      title: 'Shared album at hatian ng bill',
+      sharedAlbums: {
+        title: 'Ibahagi ang trip album sa mga kaibigan',
+        body: 'May biyahe ba kayo? Sa Bagong Album, i-on ang Hatiin sa mga kaibigan, saka ipadala ang invite link mula sa Mga tao. Lahat ay puwedeng magdagdag ng bill, pantay na hati ang bawat isa sa simula, at makikita sa Mga Balanse kung sino ang may utang kanino. Puwedeng sumali at magdagdag ng bill ang mga kaibigang walang app sa album.money2time.com.',
+      },
       friendPaid: {
         title: 'Hatiin ang bill na binayaran ng kaibigan',
         body: 'Sa Split Bill, i-tap ang Binayaran ni at piliin ang kaibigang nagbayad. Ang bahagi mo lang ang bibilangin bilang gastos, at makikita sa Mga Balanse kung magkano ang utang mo. Bayaran siya nang buo o paunti-unti, at mag-settle up sa isang tap.',

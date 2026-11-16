@@ -172,7 +172,11 @@ const pl = {
   },
   news: {
     split_bills_album_icons: {
-      title: 'Dziel rachunki po swojemu',
+      title: 'Wspólne albumy i dzielenie rachunków',
+      sharedAlbums: {
+        title: 'Udostępnij album z podróży znajomym',
+        body: 'Jedziecie na wyjazd? W „Nowy album” włącz „Dziel ze znajomymi” i wyślij link z zaproszeniem z ekranu „Osoby”. Każdy może dodawać rachunki, każdy z nich jest od razu dzielony po równo, a „Rozliczenia” pokazują, kto ile komu jest winien. Znajomi bez aplikacji mogą dołączyć i dodawać rachunki na album.money2time.com.',
+      },
       friendPaid: {
         title: 'Podziel rachunek zapłacony przez znajomego',
         body: 'W Podziel rachunek dotknij Zapłacone przez i wybierz znajomego, który zapłacił. Jako wydatek liczy się tylko Twoja część, a Rozliczenia pokazują, ile jesteś winien. Oddaj wszystko naraz lub w częściach i rozlicz się jednym dotknięciem.',

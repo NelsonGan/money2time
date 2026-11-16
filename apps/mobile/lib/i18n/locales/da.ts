@@ -172,7 +172,11 @@ const da = {
   },
   news: {
     split_bills_album_icons: {
-      title: 'Del regninger på din måde',
+      title: 'Delte album og delte regninger',
+      sharedAlbums: {
+        title: 'Del et rejsealbum med venner',
+        body: 'Skal I ud at rejse? Slå Del med venner til i Nyt album, og send invitationslinket fra Personer. Alle kan tilføje regninger, hver regning deles ligeligt fra start, og Mellemværender viser, hvem der skylder hvem. Venner uden appen kan deltage og tilføje regninger på album.money2time.com.',
+      },
       friendPaid: {
         title: 'Del en regning, en ven betalte',
         body: 'Tryk på Betalt af i Del regning, og vælg den ven, der betalte. Kun din andel tæller som forbrug, og Mellemværender viser, hvad du skylder. Betal tilbage på én gang eller i dele, og gør op med ét tryk.',

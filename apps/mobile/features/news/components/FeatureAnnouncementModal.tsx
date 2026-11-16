@@ -98,6 +98,7 @@ import { RiceCalShowcase } from './RiceCalShowcase';
 import { ShareEarnShowcase } from './ShareEarnShowcase';
 import {
   AlbumIconsShowcase,
+  SharedAlbumsShowcase,
   SplitFriendPaidShowcase,
   SplitMethodsShowcase,
 } from './SplitBillsAlbumIconsShowcases';
@@ -453,7 +454,9 @@ export function FeatureAnnouncementModal({
               </View>
             ) : null}
             <View style={styles.showcaseSlot}>
-              {page.visual === 'splitFriendPaid' ? (
+              {page.visual === 'sharedAlbums' ? (
+                <SharedAlbumsShowcase width={Math.round(showcaseWidth * 0.92)} />
+              ) : page.visual === 'splitFriendPaid' ? (
                 <SplitFriendPaidShowcase width={Math.round(showcaseWidth * 0.92)} />
               ) : page.visual === 'splitMethods' ? (
                 <SplitMethodsShowcase width={Math.round(showcaseWidth * 0.92)} />

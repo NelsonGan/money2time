@@ -52,20 +52,36 @@ describe('feature announcement state', () => {
     );
   });
 
-  it('announces bills a friend paid, split methods and album icons on both platforms', () => {
+  it('announces shared albums, bills a friend paid, split methods and album icons', () => {
     const latest = getLatestFeatureAnnouncement()!;
     expect(latest).toMatchObject({
       id: 'split_bills_album_icons_2026_11',
       announcementNumber: 26,
       pages: [
+        { key: 'sharedAlbums', visual: 'sharedAlbums', cta: 'openAlbums' },
         { key: 'friendPaid', visual: 'splitFriendPaid', cta: 'openSettleUp' },
         { key: 'splitMethods', visual: 'splitMethods', cta: 'openAddTransaction' },
         { key: 'albumIcons', visual: 'albumIcons', cta: 'openAlbums' },
       ],
     });
     expect(latest.requiresCapability).toBeUndefined();
-    expect(announcementPagesForPlatform(latest, 'ios')).toHaveLength(3);
-    expect(announcementPagesForPlatform(latest, 'android')).toHaveLength(3);
+    expect(announcementPagesForPlatform(latest, 'ios')).toHaveLength(4);
+    expect(announcementPagesForPlatform(latest, 'android')).toHaveLength(4);
+  });
+
+  it('names the real New Album, Split with friends and People, and the website, in every language', () => {
+    for (const locale of SUPPORTED_LOCALE_FILES) {
+      const strings = loadLocale(locale);
+      const body: string = strings.news.split_bills_album_icons.sharedAlbums.body;
+      for (const name of [
+        strings.albums.create_title,
+        strings.albums.share.row,
+        strings.albums.people.title,
+        'album.money2time.com',
+      ]) {
+        expect([locale, body]).toEqual([locale, expect.stringContaining(name)]);
+      }
+    }
   });
 
   it('names the real Split Bill, Paid by, Balances and method labels, in every language', () => {
