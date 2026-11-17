@@ -3141,6 +3141,11 @@ const nl = {
         'Deze rekening staat in een gedeeld album en heeft betalingen. Als je hem verwijdert, verdwijnt hij voor iedereen. De betalingen blijven staan, en wat al betaald is, moet worden terugbetaald.',
       remove_shared: 'Deze rekening staat in een gedeeld album. Hij verdwijnt voor alle anderen.',
       shared_album: 'Gedeeld album',
+      paid_total: '{{name}} betaalde {{amount}}',
+      you_paid_total: 'Je betaalde {{amount}}',
+      borrowed_tag: 'Je leende',
+      lent_tag: 'Je leende uit',
+      not_involved_tag: 'Niet betrokken',
       edit_paid_title: 'Deze rekening heeft betalingen',
       edit_paid_message:
         'De betalingen blijven staan. Als een deel lager wordt dan wat al betaald is, moet het verschil worden terugbetaald.',

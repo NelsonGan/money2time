@@ -5,24 +5,30 @@ import { useMemo } from "react";
 
 import { cents } from "@/lib/backup/album-group";
 import { albumCategory } from "@/lib/album/categories";
+import { billEffect } from "@/lib/album/debts";
 import type { Bill, Group } from "@/lib/album/group";
 
 import { Button, CategoryIcon, Icon, Mascot, useCategoryLabel, useDay, useMoney } from "./ui";
 
-/** A bill's line under its title, as the user's own part of it reads. */
-function useBillLine(group: Group) {
+/**
+ * A bill's row beside its title: who paid the whole bill under it, and on the
+ * right what it is to the user (README: Shared albums on the web > Transactions).
+ */
+function useBillSides(group: Group) {
   const t = useTranslations("album");
   const money = useMoney();
-  return (bill: Bill): { text: string; tone: "lent" | "owe" | "none" } => {
+  return (bill: Bill) => {
     const self = group.selfId;
-    const mine = bill.shares.filter((share) => share.memberId === self).reduce((sum, share) => sum + cents(share.amount), 0);
-    const payer = group.members.find((member) => member.id === bill.paidBy)?.name ?? t("someone");
-    if (bill.paidBy === self) {
-      const lent = cents(bill.amount) - mine;
-      return lent > 0 ? { text: t("bill.youLent", { amount: money(lent / 100, bill.currency) }), tone: "lent" } : { text: t("bill.youPaid"), tone: "none" };
-    }
-    if (mine > 0) return { text: t("bill.theyPaidYourShare", { name: payer, amount: money(mine / 100, bill.currency) }), tone: "owe" };
-    return { text: t("bill.notInvolved", { name: payer }), tone: "none" };
+    const total = money(bill.amount, bill.currency);
+    const payer = group.members.find((member) => member.id === bill.paidBy)?.name.trim() || t("someone");
+    const paid = bill.paidBy === self ? t("bill.youPaidTotal", { amount: total }) : t("bill.paidTotal", { name: payer, amount: total });
+    const effect = billEffect(bill, self);
+    return {
+      paid,
+      tag: effect.kind === "borrowed" ? t("bill.borrowedTag") : effect.kind === "lent" ? t("bill.lentTag") : effect.kind === "none" ? t("bill.notInvolvedTag") : null,
+      amount: effect.kind === "none" ? null : money(effect.amount, bill.currency),
+      tone: effect.kind === "lent" ? "text-success" : effect.kind === "none" ? "text-foreground-muted" : "text-error",
+    };
   };
 }
 
@@ -33,7 +39,7 @@ export function TransactionsTab({ group, onOpen, onAdd }: { group: Group; onOpen
   const money = useMoney();
   const day = useDay();
   const label = useCategoryLabel();
-  const line = useBillLine(group);
+  const sides = useBillSides(group);
   const days = useMemo(() => {
     const live = group.bills.filter((bill) => !bill.deleted).sort((a, b) => (a.date !== b.date ? (a.date < b.date ? 1 : -1) : a.createdAt < b.createdAt ? 1 : -1));
     const out: { date: string; bills: Bill[]; totals: Map<string, number> }[] = [];
@@ -80,7 +86,7 @@ export function TransactionsTab({ group, onOpen, onAdd }: { group: Group; onOpen
           </header>
           <ul className="flex flex-col gap-2">
             {bills.map((bill) => {
-              const sub = line(bill);
+              const side = sides(bill);
               const category = label(bill.category);
               const title = bill.note?.trim() || category || t("bill.untitled");
               return (
@@ -98,10 +104,12 @@ export function TransactionsTab({ group, onOpen, onAdd }: { group: Group; onOpen
                           <Icon name="people" size={15} />
                         </span>
                       </span>
-                      {bill.note?.trim() && category ? <span className="block truncate text-[13px] text-foreground-soft">{category}</span> : null}
-                      <span className={`block text-[13px] font-semibold leading-snug ${sub.tone === "lent" ? "text-success" : sub.tone === "owe" ? "text-primary" : "text-foreground-muted"}`}>{sub.text}</span>
+                      <span className="block truncate text-[13px] text-foreground-soft">{side.paid}</span>
                     </span>
-                    <span className="shrink-0 text-right text-[15.5px] font-extrabold text-error tabular">{money(bill.amount, bill.currency)}</span>
+                    <span className={`flex shrink-0 flex-col items-end text-right ${side.tone}`}>
+                      {side.tag ? <span className="text-[12px] font-semibold leading-tight">{side.tag}</span> : null}
+                      {side.amount ? <span className="text-[15.5px] font-extrabold leading-snug tabular">{side.amount}</span> : null}
+                    </span>
                   </button>
                 </li>
               );

@@ -3126,6 +3126,11 @@ const pt = {
       remove_shared:
         'Esta conta está em um álbum compartilhado. Ela será removida para todos os outros.',
       shared_album: 'Álbum compartilhado',
+      paid_total: '{{name}} pagou {{amount}}',
+      you_paid_total: 'Você pagou {{amount}}',
+      borrowed_tag: 'Pegou emprestado',
+      lent_tag: 'Você emprestou',
+      not_involved_tag: 'Não participa',
       edit_paid_title: 'Esta conta tem pagamentos',
       edit_paid_message:
         'Os pagamentos ficam. Se uma parte ficar abaixo do que já foi pago, a diferença precisa ser devolvida.',

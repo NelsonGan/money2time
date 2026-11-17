@@ -3097,6 +3097,11 @@ const en = {
         'This bill is in a shared album and has payments. Deleting it removes it for everyone. The payments stay, and anything already paid is owed back.',
       remove_shared: 'This bill is in a shared album. It will be removed for everyone else.',
       shared_album: 'Shared album',
+      paid_total: '{{name}} paid {{amount}}',
+      you_paid_total: 'You paid {{amount}}',
+      borrowed_tag: 'You borrowed',
+      lent_tag: 'You lent',
+      not_involved_tag: 'Not involved',
       edit_paid_title: 'This bill has payments',
       edit_paid_message:
         'The payments stay. If a share drops below what was already paid, the difference is owed back.',

@@ -2178,6 +2178,19 @@ migrations `090` to `094`.
     loading state); the other tabs (the breakdown donut, the balances) mount
     one at a time once the native stack says the transition ended (or after
     450 ms), and a swipe mounts any still waiting.
+  - **A shared album's Transactions tab** reads each bill from the group
+    (`AlbumBillSidesContext`, `features/albums/lib/albumBillSides.ts`), as
+    album.money2time.com does: under the title who paid the whole bill
+    ("Daniel paid RM132.40", "You paid RM180.00"; the icon already says the
+    category), and on the right what it is to the user (`billEffect`): **You
+    borrowed** and the user's share in red when someone else paid, **You
+    lent** and the others' shares in green when the user paid, or just the
+    bill in red when it was theirs alone. It is the bill as split, not what is
+    still owed (Balances says that). The pill names the account the money
+    moved from, never the friend who paid, and is left out while a bill
+    someone else paid is not paid back. Every other list (Transactions, a
+    plain album) shows the user's own entry as before. The day's total is
+    still the user's entries.
   - **Scrolling re-renders almost nothing.** The header's collapsed state
     lives in the small bar it controls (`SolidHeaderBar`), so crossing the
     collapse point re-renders that bar alone. The header moves on the UI
@@ -6060,8 +6073,12 @@ again when that column changes width.
   name and the days its bills span; the tabs resting on the cover's rounded
   edge as in the app; a slim **Easier in the app** banner (Get opens the
   stores; put away for a week); then, as in the app, the bills by day, each
-  with its category, who paid and the user's part ("Tess paid · your share
-  RM60.00", "You paid · you lent RM100.00"). Amounts are written as the app
+  as the app's shared album rows read (`billEffect` in
+  `src/lib/album/debts.ts`): who paid the whole bill under its title ("Tess
+  paid RM120.00"), and on the right what it is to the user, **You borrowed**
+  their share, **You lent** the others' shares, the bill alone when it was
+  theirs, or **Not involved** with no amount. The day's total is its bills'
+  totals. Amounts are written as the app
   writes them ("RM48.00", `formatMoney`). The app's clay **+** adds a bill.
   On a wide screen the cover becomes a card over the same column, and
   Breakdown puts each ring beside its list.

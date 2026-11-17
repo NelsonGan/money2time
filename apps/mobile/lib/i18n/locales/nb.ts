@@ -3108,6 +3108,11 @@ const nb = {
         'Regningen er i et delt album og har betalinger. Sletter du den, fjernes den for alle. Betalingene blir stående, og det som allerede er betalt, skal betales tilbake.',
       remove_shared: 'Regningen er i et delt album. Den fjernes for alle andre.',
       shared_album: 'Delt album',
+      paid_total: '{{name}} betalte {{amount}}',
+      you_paid_total: 'Du betalte {{amount}}',
+      borrowed_tag: 'Du lånte',
+      lent_tag: 'Du lånte ut',
+      not_involved_tag: 'Ikke med',
       edit_paid_title: 'Regningen har betalinger',
       edit_paid_message:
         'Betalingene blir stående. Blir en andel mindre enn det som allerede er betalt, skal differansen betales tilbake.',

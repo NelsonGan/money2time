@@ -3149,6 +3149,11 @@ const fil = {
         'Nasa shared na album ang bill na ito at may mga bayad na. Kapag binura mo, mawawala ito para sa lahat. Mananatili ang mga bayad, at kailangang ibalik ang anumang nabayaran na.',
       remove_shared: 'Nasa shared na album ang bill na ito. Mawawala ito para sa lahat ng iba.',
       shared_album: 'Shared na album',
+      paid_total: 'Nagbayad si {{name}} ng {{amount}}',
+      you_paid_total: 'Nagbayad ka ng {{amount}}',
+      borrowed_tag: 'Hiniram mo',
+      lent_tag: 'Ipinahiram mo',
+      not_involved_tag: 'Hindi kasali',
       edit_paid_title: 'May mga bayad ang bill na ito',
       edit_paid_message:
         'Mananatili ang mga bayad. Kapag bumaba ang isang parte sa nabayaran na, kailangang ibalik ang diperensya.',

@@ -3146,6 +3146,11 @@ const fr = {
       remove_shared:
         'Cette note est dans un album partagé. Elle sera retirée pour tous les autres.',
       shared_album: 'Album partagé',
+      paid_total: '{{name}} a payé {{amount}}',
+      you_paid_total: 'Vous avez payé {{amount}}',
+      borrowed_tag: 'Vous avez emprunté',
+      lent_tag: 'Vous avez prêté',
+      not_involved_tag: 'Non concerné',
       edit_paid_title: 'Cette note a des paiements',
       edit_paid_message:
         'Les paiements restent. Si une part passe sous ce qui a déjà été payé, la différence devra être remboursée.',

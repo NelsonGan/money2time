@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { groupTotals, openShares, pairwiseDebts, simplifyDebts } from "./debts.ts";
+import { billEffect, groupTotals, openShares, pairwiseDebts, simplifyDebts } from "./debts.ts";
 import { albumsOf, billPeople, parseGroup, type Bill, type Payment } from "./group.ts";
 import { balanceSelf, readValue, splitShares, valuesFor, type SplitInput } from "./split.ts";
 import { billBase, billRow, deletedBillRow, evenGroupRows, recordsPayment, settleRows, simplifyRow, undonePaymentRows } from "./writes.ts";
@@ -277,4 +277,21 @@ test("a change names the revisions it was planned from, so the Worker can refuse
   assert.equal(recordsPayment(payments), true);
   assert.equal(recordsPayment(undonePaymentRows(String(payments[0].row.id), [])), false);
   assert.equal(recordsPayment([{ table: "album_settlements", row: { id: "p", deleted_at: "undone" } }]), false);
+});
+
+test("a bill's row says what it is to the viewer", () => {
+  const shares = (entries: Record<string, number>) => Object.entries(entries).map(([memberId, amount]) => ({ memberId, amount }));
+  // Someone else paid: the viewer borrowed their share.
+  assert.deepEqual(billEffect({ amount: 132.4, paidBy: "dan", shares: shares({ dan: 33.1, me: 33.1, aisha: 66.2 }) }, "me"), { kind: "borrowed", amount: 33.1 });
+  // The viewer paid: they lent the others' shares.
+  assert.deepEqual(billEffect({ amount: 180, paidBy: "me", shares: shares({ me: 45, dan: 67.5, aisha: 67.5 }) }, "me"), { kind: "lent", amount: 135 });
+  // Paid for others only: all of it was lent.
+  assert.deepEqual(billEffect({ amount: 20, paidBy: "me", shares: shares({ dan: 20 }) }, "me"), { kind: "lent", amount: 20 });
+  // Paid and theirs alone: the whole bill.
+  assert.deepEqual(billEffect({ amount: 24.4, paidBy: "me", shares: shares({ me: 24.4 }) }, "me"), { kind: "paid", amount: 24.4 });
+  // Not on it, or not a member.
+  assert.deepEqual(billEffect({ amount: 20, paidBy: "aisha", shares: shares({ aisha: 10, dan: 10 }) }, "me"), { kind: "none" });
+  assert.deepEqual(billEffect({ amount: 20, paidBy: "aisha", shares: shares({ aisha: 20 }) }, null), { kind: "none" });
+  // Shares in cents add up without float drift.
+  assert.deepEqual(billEffect({ amount: 0.3, paidBy: "me", shares: shares({ me: 0.1, dan: 0.1, aisha: 0.1 }) }, "me"), { kind: "lent", amount: 0.2 });
 });

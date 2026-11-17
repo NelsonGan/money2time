@@ -3124,6 +3124,11 @@ const es = {
         'Esta cuenta está en un álbum compartido y tiene pagos. Si la eliminas, se quita para todos. Los pagos se mantienen y lo que ya se pagó habrá que devolverlo.',
       remove_shared: 'Esta cuenta está en un álbum compartido. Se quitará para todos los demás.',
       shared_album: 'Álbum compartido',
+      paid_total: '{{name}} pagó {{amount}}',
+      you_paid_total: 'Pagaste {{amount}}',
+      borrowed_tag: 'Te prestaron',
+      lent_tag: 'Prestaste',
+      not_involved_tag: 'No participas',
       edit_paid_title: 'Esta cuenta tiene pagos',
       edit_paid_message:
         'Los pagos se mantienen. Si una parte queda por debajo de lo ya pagado, habrá que devolver la diferencia.',
