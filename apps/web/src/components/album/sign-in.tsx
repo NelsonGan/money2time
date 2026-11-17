@@ -248,7 +248,7 @@ function GoogleButton({ onToken }: { onToken: (idToken: string) => void }) {
     };
   }, [locale]);
   if (failed) return null;
-  return <div ref={ref} className="flex min-h-10 w-full justify-center [color-scheme:light]" />;
+  return <div ref={ref} className="flex min-h-[44px] w-full justify-center [color-scheme:light]" />;
 }
 
 async function sha256Hex(value: string): Promise<string> {

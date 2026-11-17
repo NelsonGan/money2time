@@ -6027,14 +6027,17 @@ change, which it plans by the same rules a phone does. The code is `src/componen
 album page, so moving to the app later needs no relearning. `src/proxy.ts`
 rewrites every page on an `album.` host to `/[locale]/album`, in the
 visitor's language, and the page reads where it is from the address
-(`site.tsx`, moving with `history.pushState`). On a computer (from 1024
-pixels wide) it uses the room instead of a phone's column: the sign-in pages
-put what the site is for beside the sign-in buttons, on a card, the invite
-puts the album beside the way in, the album list is a grid (two across from
-640 pixels, three from 1024), and Get the app puts the stores beside its text
-when its card is wide enough. The three sign-in buttons (Google's own,
-Apple's and email's) share one outline, one height and one column at most
-400 pixels wide, and Google's is drawn again when that column changes width.
+(`site.tsx`, moving with `history.pushState`). The wordmark stays in one
+place on every page, and a page keeps a phone's column until it has a use for
+more room (`Page`'s `wide`). From 1024 pixels wide the sign-in pages put what
+the site is for beside the sign-in buttons, on a card (an album's sign-in
+looks like the home page's on a phone too), and the invite puts the album
+beside the way in. The album list is a grid, two across from 640 pixels and
+three from 1024, while no albums yet or a failed read stay in the column. Get
+the app puts the stores beside its text when its card is wide enough. The
+three sign-in buttons (Google's own, Apple's and email's) share one outline,
+one height and one column at most 400 pixels wide, and Google's is drawn
+again when that column changes width.
 
 - **`/join/<code>`, the invite.** The album's name, who invited them and how
   many people are in it (`GET /v1/invites/<code>`, the owner named as the

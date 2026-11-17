@@ -134,7 +134,7 @@ export function AlbumScreen({ shareId, tab }: { shareId: string; tab: Tab }) {
   const { user, setUser } = useSite();
   if (!user) {
     return (
-      <Page wide>
+      <Page wide="lg">
         <SignInHero pose="waving" title={t("album.signInTitle")} body={t("album.signInBody")} context="album" onSignedIn={setUser} />
       </Page>
     );

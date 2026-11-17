@@ -22,17 +22,24 @@ export function HomeScreen() {
   const { user, setUser, signOut } = useSite();
   if (!user) {
     return (
-      <Page wide>
+      <Page wide="lg">
         <SignInHero pose="presenting" title={t("home.landingTitle")} body={t("home.landingBody")} context="home" onSignedIn={setUser} />
       </Page>
     );
   }
+  return <SignedInHome email={user.email} onSignOut={() => void signOut()} />;
+}
+
+/** The albums as a grid from a tablet's width; no albums yet, or none read, stays in the phone's column. */
+function SignedInHome({ email, onSignOut }: { email: string; onSignOut: () => void }) {
+  const t = useTranslations("album");
+  const [albums, setAlbums] = useState<AlbumView[] | null>(null);
   return (
-    <Page wide>
-      <AlbumList />
+    <Page wide={albums?.length ? "sm" : undefined}>
+      <AlbumList albums={albums} setAlbums={setAlbums} />
       <p className="mt-6 text-center text-[13px] text-foreground-muted">
-        {t("join.signedInAs", { email: user.email })}{" "}
-        <button type="button" onClick={() => void signOut()} className="font-semibold text-foreground-soft hover:underline">
+        {t("join.signedInAs", { email })}{" "}
+        <button type="button" onClick={onSignOut} className="font-semibold text-foreground-soft hover:underline">
           {t("signOut")}
         </button>
       </p>
@@ -40,10 +47,9 @@ export function HomeScreen() {
   );
 }
 
-function AlbumList() {
+function AlbumList({ albums, setAlbums }: { albums: AlbumView[] | null; setAlbums: (albums: AlbumView[]) => void }) {
   const t = useTranslations("album");
   const { go, setUser } = useSite();
-  const [albums, setAlbums] = useState<AlbumView[] | null>(null);
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
@@ -60,7 +66,7 @@ function AlbumList() {
     return () => {
       live = false;
     };
-  }, [setUser]);
+  }, [setAlbums, setUser]);
 
   return (
     <>

@@ -38,7 +38,7 @@ function StoreButton({ target, placement }: { target: Exclude<DownloadTarget, "n
       target="_blank"
       rel="noopener noreferrer"
       onClick={() => trackLeaving(EVENTS.appDownloadClicked, { placement, target })}
-      className="inline-flex min-w-0 flex-1 items-center justify-center gap-2.5 rounded-[16px] bg-foreground px-4 py-2.5 text-card transition-transform active:scale-[0.98]"
+      className="inline-flex min-w-0 flex-1 items-center justify-center gap-2.5 rounded-[16px] bg-foreground px-4 py-2.5 text-card transition-transform active:scale-[0.98] @2xl:min-w-[172px] @2xl:flex-none @2xl:px-5"
     >
       {apple ? <AppleIcon className="h-[22px] w-[22px] shrink-0" /> : <PlayIcon className="h-[22px] w-[22px] shrink-0" />}
       <span className="flex flex-col items-start leading-tight">
@@ -67,7 +67,7 @@ export function GetTheApp({ code, placement }: { code?: string; placement: Extra
             <p className="mt-0.5 text-[13.5px] leading-snug text-foreground-soft">{t("app.body")}</p>
           </div>
         </div>
-        <div className={`mt-4 flex gap-2.5 @2xl:mt-0 @2xl:shrink-0 ${stores.length > 1 ? "@2xl:w-[380px]" : "@2xl:w-[190px]"}`}>
+        <div className="mt-4 flex gap-2.5 @2xl:mt-0 @2xl:shrink-0">
           {stores.map((target) => (
             <StoreButton key={target} target={target as Exclude<DownloadTarget, "none">} placement={placement} />
           ))}

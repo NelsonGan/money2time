@@ -44,11 +44,9 @@ export function JoinScreen({ code }: { code: string }) {
 
   // On a computer the invite and the way in sit side by side.
   return (
-    <Page wide>
+    <Page wide={problem ? undefined : "lg"}>
       {problem ? (
-        <div className="mx-auto w-full max-w-[428px]">
-          <InviteProblem problem={problem} code={code} ownerName={preview?.ownerName ?? null} />
-        </div>
+        <InviteProblem problem={problem} code={code} ownerName={preview?.ownerName ?? null} />
       ) : !preview ? (
         <div className="flex justify-center py-24 text-primary">
           <Spinner size={28} />
@@ -93,12 +91,16 @@ export function defaultMemberName(user: { name: string; email: string }): string
   return cleanName(user.name) ?? (fromEmail ? fromEmail.charAt(0).toLocaleUpperCase() + fromEmail.slice(1) : "");
 }
 
+/** From which width a page leaves the phone's column: a tablet's (640 pixels) or a computer's (1024). */
+const WIDE_FROM = { sm: "sm:max-w-none", lg: "lg:max-w-none" } as const;
+
 /**
  * A page under the wordmark, which stays in one place on every page: the
  * wordmark spans a computer's window (up to 1120 pixels), and the page below
- * keeps a phone's column unless it is `wide` (laid out in columns there).
+ * keeps a phone's column, up to the width given as `wide`, from which it lays
+ * out in columns.
  */
-export function Page({ children, action, wide = false }: { children: ReactNode; action?: ReactNode; wide?: boolean }) {
+export function Page({ children, action, wide }: { children: ReactNode; action?: ReactNode; wide?: keyof typeof WIDE_FROM }) {
   const t = useTranslations("album");
   const { go } = useSite();
   return (
@@ -109,7 +111,7 @@ export function Page({ children, action, wide = false }: { children: ReactNode; 
         </button>
         {action}
       </header>
-      <div className={`flex w-full flex-1 flex-col ${wide ? "" : "mx-auto max-w-[428px]"}`}>{children}</div>
+      <div className={`mx-auto flex w-full max-w-[428px] flex-1 flex-col ${wide ? WIDE_FROM[wide] : ""}`}>{children}</div>
     </div>
   );
 }
@@ -244,7 +246,7 @@ function AppCallout({ code }: { code: string }) {
     <a
       href={appInviteLink(code)}
       onClick={() => track(EVENTS.albumOpenInApp, { placement: "join_page" })}
-      className="mt-8 flex items-center justify-between gap-3 rounded-[22px] lg:mt-5 border border-border bg-card px-5 py-4 text-[14.5px] font-semibold shadow-[var(--shadow-soft)] hover:bg-background-subtle"
+      className="mt-8 lg:mt-5 flex items-center justify-between gap-3 rounded-[22px] border border-border bg-card px-5 py-4 text-[14.5px] font-semibold shadow-[var(--shadow-soft)] hover:bg-background-subtle"
     >
       <span>{t("join.haveApp")}</span>
       <span className="shrink-0 rounded-full bg-primary-soft px-3.5 py-1.5 text-[13px] font-bold text-primary">{t("join.openInApp")}</span>
