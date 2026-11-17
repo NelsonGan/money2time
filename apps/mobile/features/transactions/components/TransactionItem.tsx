@@ -48,6 +48,12 @@ type TransactionDisplaySettings = Pick<
   'currencySymbol' | 'displayMode' | 'workdayDisplayEnabled' | 'workingHoursPerDay'
 >;
 
+const BILL_TONE_CLASS = {
+  success: 'text-success',
+  muted: 'text-muted-foreground',
+  error: 'text-destructive',
+} as const;
+
 // Peak opacity of the post-create highlight tint before it fades back out.
 const HIGHLIGHT_PEAK_OPACITY = 0.28;
 
@@ -413,14 +419,19 @@ const TransactionItemBody = memo(
     const rate =
       !isTransfer && !isBalanceAdjustment ? getTrueHourlyRateForDate(transaction.date) : 0;
     const hasCategoryRef = Boolean(transaction.categoryIcon || transaction.categoryName);
+    // A shared album's bill: green for what the user lent, grey when they are
+    // not on it, else red.
+    const billTone = billSide
+      ? billSide.kind === 'lent'
+        ? 'success'
+        : billSide.kind === 'none'
+          ? 'muted'
+          : 'error'
+      : null;
     const amountToneClass = isTransfer
       ? 'text-muted-foreground'
-      : billSide
-        ? billSide.kind === 'lent'
-          ? 'text-success'
-          : billSide.kind === 'none'
-            ? 'text-muted-foreground'
-            : 'text-destructive'
+      : billTone
+        ? BILL_TONE_CLASS[billTone]
         : isBalanceAdjustment
           ? transaction.amount > 0
             ? 'text-success'
@@ -475,12 +486,8 @@ const TransactionItemBody = memo(
     const titleSizeClass = compact ? 'text-[13px] leading-[16px]' : 'text-[15px] leading-[20px]';
     const amountToneColor = isTransfer
       ? themeColors.textMuted
-      : billSide
-        ? billSide.kind === 'lent'
-          ? themeColors.success
-          : billSide.kind === 'none'
-            ? themeColors.textMuted
-            : themeColors.error
+      : billTone
+        ? themeColors[billTone === 'muted' ? 'textMuted' : billTone]
         : isBalanceAdjustment
           ? transaction.amount > 0
             ? themeColors.success

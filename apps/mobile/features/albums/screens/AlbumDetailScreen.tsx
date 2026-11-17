@@ -75,6 +75,7 @@ import { useSelfPerson } from '~/hooks/useSelfPerson';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { useWideTabColumns } from '~/hooks/useWideTabColumns';
 import { I18n } from '~/lib/i18n';
+import { albumGroupsRepository } from '~/lib/repositories/albumGroupsRepository';
 import type { RootStackParamList } from '~/navigation/rootStack';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
@@ -202,9 +203,21 @@ export function AlbumDetailScreen({
   const sharedBills = useSyncExternalStore(subscribeAlbumGroups, () =>
     listGroupExpenses(group.share ? group.share.ledgerId : null),
   );
+  // Only once the user is on its list: before that every bill would read "Not
+  // involved". Names come from every member row, so a bill keeps the name of
+  // someone who left.
   const billSides = useMemo(
-    () => (group.share ? albumBillSides(sharedBills, group.members, group.self?.id ?? null) : null),
-    [group.share, group.members, group.self, sharedBills],
+    () =>
+      group.share && group.self
+        ? albumBillSides(
+            sharedBills,
+            albumGroupsRepository.listAllMembers(group.share.ledgerId),
+            group.self.id,
+          )
+        : null,
+    // The members and the language: the rows are written out in it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [group.share, group.members, group.self, sharedBills, I18n.locale],
   );
   const [tab, setTab] = useState<DetailTab>('transactions');
   // The Balances tab going (the last person removed) leaves the page on a tab it still has.

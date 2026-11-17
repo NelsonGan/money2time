@@ -20,7 +20,7 @@ function useBillSides(group: Group) {
   return (bill: Bill) => {
     const self = group.selfId;
     const total = money(bill.amount, bill.currency);
-    const payer = group.members.find((member) => member.id === bill.paidBy)?.name ?? t("someone");
+    const payer = group.members.find((member) => member.id === bill.paidBy)?.name.trim() || t("someone");
     const paid = bill.paidBy === self ? t("bill.youPaidTotal", { amount: total }) : t("bill.paidTotal", { name: payer, amount: total });
     const effect = billEffect(bill, self);
     return {

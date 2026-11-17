@@ -11,23 +11,20 @@
 
 import type { AlbumExpense } from '~/types';
 
-import { cents } from './albumGroup';
+import { cents, ownSide } from './albumGroup';
 
 export type BillEffect = { kind: 'borrowed' | 'lent' | 'paid'; amount: number } | { kind: 'none' };
 
+/** Read off `ownSide`, the same split the user's own entry is made from. */
 export function billEffect(
-  bill: Pick<AlbumExpense, 'amount' | 'paidBy' | 'shares'>,
+  bill: Pick<AlbumExpense, 'id' | 'amount' | 'paidBy' | 'shares'>,
   selfId: string | null,
 ): BillEffect {
-  if (!selfId) return { kind: 'none' };
-  const mine = bill.shares
-    .filter((share) => share.memberId === selfId)
-    .reduce((sum, share) => sum + cents(share.amount), 0);
-  if (bill.paidBy === selfId) {
-    const lent = cents(bill.amount) - mine;
-    return lent > 0
-      ? { kind: 'lent', amount: lent / 100 }
-      : { kind: 'paid', amount: cents(bill.amount) / 100 };
+  const side = ownSide(bill, selfId);
+  if (side.kind === 'paid') {
+    const lent = cents(side.total) - cents(side.selfShare);
+    return lent > 0 ? { kind: 'lent', amount: lent / 100 } : { kind: 'paid', amount: side.total };
   }
-  return mine > 0 ? { kind: 'borrowed', amount: mine / 100 } : { kind: 'none' };
+  if (side.kind === 'owes') return { kind: 'borrowed', amount: side.selfShare };
+  return { kind: 'none' };
 }
