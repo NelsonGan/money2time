@@ -1,4 +1,5 @@
 import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Menu } from 'lucide-react-native';
 import { memo, useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
@@ -7,6 +8,7 @@ import Sortable from 'react-native-sortables';
 
 import { Text, TimeValueInline } from '~/components/ui';
 import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
+import { classifyCategoryIcon } from '~/constants/categoryIcons';
 import { useApp } from '~/context/AppContext';
 import { PersonAvatar } from '~/features/transactions/components/PersonAvatar';
 import { debtPartyKey } from '~/features/transactions/lib/debtParty';
@@ -20,12 +22,71 @@ import { formatAmount, formatHours } from '~/utils/formatters';
 
 import { useAlbumGroup } from '../hooks/useAlbumGroup';
 import { albumInitial } from '../lib/albumLines';
+import { isFlagEmoji } from '../lib/flagEmoji';
 import { formatAlbumDateRange } from '../utils';
 import { AlbumActiveDot } from './AlbumActiveDot';
 import { AlbumLineIcon } from './AlbumLineIcon';
 
 /** The people a shared album's card shows before "+N". */
 const SHARED_AVATARS = 3;
+
+/** The round icon badge's diameter, its thin white ring included. */
+const BADGE_SIZE = 28;
+/** The ring's width; the glyph centres in the circle inside it. */
+const BADGE_RING = 1.5;
+/** The circle inside the ring. */
+const BADGE_INNER = BADGE_SIZE - BADGE_RING * 2;
+
+/**
+ * A flag's font size in the badge: a flag's glyph is a wide rectangle, so it
+ * is drawn well past the circle for its height to fill it (its sides are
+ * cropped, as a round flag's are).
+ */
+const BADGE_EMOJI_SIZE = 44;
+/**
+ * How far right the glyph is moved: a flag's emblem is mostly at its hoist
+ * (the left), like the US stars, China's stars or Singapore's crescent.
+ */
+const BADGE_HOIST_SHIFT = 5;
+/** The glyph's box: wide and tall enough that the glyph itself is never clipped. */
+const BADGE_GLYPH_BOX = Math.ceil(BADGE_EMOJI_SIZE * 1.4);
+
+/**
+ * An album's icon on its card: a round badge with a thin white ring. A flag
+ * emoji is drawn larger than the badge and cropped by it, so it fills the
+ * circle like a round flag; any other emoji, a hand-drawn or an uploaded icon
+ * sits whole inside it (cropped, it would be an unreadable fragment).
+ */
+function AlbumIconBadge({ album }: { album: Pick<Album, 'name' | 'icon'> }) {
+  const classified = classifyCategoryIcon(album.icon);
+  return (
+    <View
+      testID="album-card-icon"
+      className="items-center justify-center overflow-hidden rounded-full border-white/80 bg-white/20"
+      style={{ width: BADGE_SIZE, height: BADGE_SIZE, borderWidth: BADGE_RING }}
+    >
+      {classified.kind === 'emoji' && isFlagEmoji(classified.glyph) ? (
+        <Text
+          allowFontScaling={false}
+          style={{
+            position: 'absolute',
+            width: BADGE_GLYPH_BOX,
+            height: BADGE_GLYPH_BOX,
+            left: (BADGE_INNER - BADGE_GLYPH_BOX) / 2 + BADGE_HOIST_SHIFT,
+            top: (BADGE_INNER - BADGE_GLYPH_BOX) / 2,
+            fontSize: BADGE_EMOJI_SIZE,
+            lineHeight: BADGE_GLYPH_BOX,
+            textAlign: 'center',
+          }}
+        >
+          {classified.glyph}
+        </Text>
+      ) : (
+        <AlbumLineIcon album={album} size={BADGE_SIZE - 9} />
+      )}
+    </View>
+  );
+}
 
 interface AlbumCardProps {
   album: Album;
@@ -137,59 +198,49 @@ export const AlbumCard = memo(function AlbumCardImpl({
           </View>
         )}
 
-        {/* Bottom scrim with title + amount + meta overlaid on the cover. */}
-        <View
-          className="absolute inset-x-0 bottom-0 px-4 pb-3 pt-5"
-          style={{ backgroundColor: 'rgba(0,0,0,0.52)' }}
+        {/* Bottom scrim with title + amount + meta overlaid on the cover: a
+            gradient, so the photo fades into it rather than meeting a band. */}
+        <LinearGradient
+          colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.45)', 'rgba(0,0,0,0.7)']}
+          locations={[0, 0.4, 1]}
+          style={{
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            bottom: 0,
+            paddingHorizontal: 16,
+            paddingTop: 32,
+            paddingBottom: 12,
+          }}
         >
           <View className="flex-row items-center gap-2">
-            {/* The album's name on a frosted chip, led by its icon (the one
-                its line shows in the category lists) when it has one: small
-                and inline, so it reads as part of the title rather than a
-                tile pasted over the photo. */}
-            <View
-              className={`shrink flex-row items-center gap-1.5 rounded-full border border-white/20 bg-white/15 py-1 pr-2.5 ${
-                album.icon ? 'pl-1.5' : 'pl-2.5'
-              }`}
-            >
-              {album.icon ? (
-                <View testID="album-card-icon">
-                  <AlbumLineIcon album={album} size={20} />
-                </View>
-              ) : null}
-              <Text variant="caption" numberOfLines={1} className="shrink text-white">
-                {album.name}
-              </Text>
-            </View>
+            {/* The album's icon (the one its line shows in the category lists)
+                as a round badge leading its name. */}
+            {album.icon ? <AlbumIconBadge album={album} /> : null}
+            <Text variant="bodyStrong" numberOfLines={1} className="shrink text-white">
+              {album.name}
+            </Text>
             <View className="flex-1" />
             {sharedAvatars}
           </View>
-          {/* Time mode renders a View (icon + text) which has no text baseline,
-              so bottom-align it; money mode keeps baseline alignment. */}
-          <View
-            className={`mt-0.5 flex-row justify-between gap-2 ${
-              isTimeMode ? 'items-end' : 'items-baseline'
-            }`}
-          >
-            {isTimeMode ? (
-              <TimeValueInline
-                value={formatHours(stats.totalSpent, settings)}
-                variant="subheading"
-                textClassName="text-white"
-                iconColor="#fff"
-                iconSize={16}
-                numberOfLines={1}
-              />
-            ) : (
-              <Text variant="subheading" numberOfLines={1} className="text-white">
-                {formatAmount(stats.totalSpent, settings, { showSign: false })}
-              </Text>
-            )}
-            <Text variant="label" numberOfLines={1} className="shrink text-white/70">
-              {metaLabel}
+          {isTimeMode ? (
+            <TimeValueInline
+              value={formatHours(stats.totalSpent, settings)}
+              variant="headingSm"
+              textClassName="text-white"
+              iconColor="#fff"
+              iconSize={18}
+              numberOfLines={1}
+            />
+          ) : (
+            <Text variant="headingSm" numberOfLines={1} className="mt-1 text-white">
+              {formatAmount(stats.totalSpent, settings, { showSign: false })}
             </Text>
-          </View>
-        </View>
+          )}
+          <Text variant="label" numberOfLines={1} className="mt-0.5 text-white/75">
+            {metaLabel}
+          </Text>
+        </LinearGradient>
       </Pressable>
 
       {/* Active marker — small blinking green dot pinned to the top-right. */}

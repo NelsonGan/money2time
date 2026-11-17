@@ -14,6 +14,7 @@ import type { AlbumLocation } from '~/types';
 
 import { AlbumDateRangeFields } from '../components/AlbumDateRangeFields';
 import { AlbumLocationField } from '../components/AlbumLocationField';
+import { albumIconAfterLocationChange } from '../lib/flagEmoji';
 
 interface EditAlbumDetailsScreenProps {
   albumId: string;
@@ -54,16 +55,24 @@ export function EditAlbumDetailsScreen({
   // analytics event) when the location was never touched.
   const [locationDirty, setLocationDirty] = useState(false);
 
-  const handleChangeLocation = useCallback((next: AlbumLocation | null) => {
-    setLocation(next);
-    setLocationDirty(true);
-  }, []);
+  // A new place gives the album its country's flag as its icon when it has
+  // none or had the old place's flag; an icon the user picked stays.
+  const handleChangeLocation = useCallback(
+    (next: AlbumLocation | null) => {
+      setIcon((current) =>
+        albumIconAfterLocationChange(current, location?.countryCode, next?.countryCode),
+      );
+      setLocation(next);
+      setLocationDirty(true);
+    },
+    [location],
+  );
 
   const canSave = name.trim().length > 0;
 
   const handleSave = useCallback(() => {
     if (!canSave) return;
-    updateAlbum(albumId, { name: name.trim(), icon: icon || null, startDate, endDate });
+    updateAlbum(albumId, { name: name.trim(), icon, startDate, endDate });
     if (locationDirty) setAlbumLocation(albumId, location);
     onClose();
   }, [

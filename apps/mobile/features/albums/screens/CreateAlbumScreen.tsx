@@ -27,6 +27,7 @@ import { AlbumSharingCard } from '../components/AlbumSharingCard';
 import { useAlbumScope } from '../hooks/useAlbumGroup';
 import { useSharedAlbumsAllowed } from '../hooks/useSharedAlbumsAllowed';
 import { albumSharingMessage } from '../lib/albumMessages';
+import { albumIconAfterLocationChange } from '../lib/flagEmoji';
 
 interface CreateAlbumScreenProps {
   initialTransactionIds?: string[];
@@ -61,6 +62,17 @@ export function CreateAlbumScreen({
   const [endDate, setEndDate] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>(initialTransactionIds ?? []);
   const [location, setLocation] = useState<AlbumLocation | null>(null);
+  // A place gives the album its country's flag as its icon, unless the user
+  // picked another; it stays removable with the icon field's ×.
+  const handleChangeLocation = useCallback(
+    (next: AlbumLocation | null) => {
+      setIcon((current) =>
+        albumIconAfterLocationChange(current, location?.countryCode, next?.countryCode),
+      );
+      setLocation(next);
+    },
+    [location],
+  );
   const [pickerOpen, setPickerOpen] = useState(false);
   // Whether it is split with friends: a shared album, chosen here and never
   // later (README: Album members and shared albums). It is shared only once
@@ -113,7 +125,8 @@ export function CreateAlbumScreen({
       albumId = createAlbum({
         name: name.trim(),
         coverPhotoUri: coverPath,
-        icon: icon || null,
+        // '' (none) is kept: a flag the user removed is not filled in again.
+        icon,
         startDate,
         endDate,
         // A shared album only holds bills made in it (README: Album members
@@ -261,7 +274,7 @@ export function CreateAlbumScreen({
               onChangeEnd={setEndDate}
             />
 
-            <AlbumLocationField location={location} onChange={setLocation} />
+            <AlbumLocationField location={location} onChange={handleChangeLocation} />
 
             {/* Split with friends, it starts empty: a shared album only
                 holds bills made in it. */}

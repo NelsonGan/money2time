@@ -3143,10 +3143,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         endDate?: string | null;
       },
     ) => {
-      // '' (the icon field cleared) is stored as none.
-      const icon = updates.icon === undefined ? undefined : updates.icon || null;
+      // '' (the icon field cleared) is kept as '': no icon, like NULL, but
+      // one the user removed, which migration 096's flag backfill leaves.
+      const icon = updates.icon;
       const iconBefore = icon === undefined ? null : (albumsRepository.getById(id)?.icon ?? null);
-      const iconChanged = icon !== undefined && icon !== iconBefore;
+      const iconChanged = icon !== undefined && (icon || null) !== (iconBefore || null);
       albumsRepository.update(id, icon === undefined ? updates : { ...updates, icon });
       // An uploaded icon is shared with categories, goals and templates: the
       // reference-aware sweep reclaims it only once nothing uses it.
