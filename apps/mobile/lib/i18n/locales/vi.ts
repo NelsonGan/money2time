@@ -3085,6 +3085,11 @@ const vi = {
         'Hóa đơn này nằm trong album chung và đã có thanh toán. Xóa nó sẽ gỡ khỏi mọi người. Các khoản thanh toán vẫn giữ nguyên, và số tiền đã trả sẽ phải được hoàn lại.',
       remove_shared: 'Hóa đơn này nằm trong album chung. Nó sẽ bị gỡ khỏi mọi người khác.',
       shared_album: 'Album chung',
+      paid_total: '{{name}} đã trả {{amount}}',
+      you_paid_total: 'Bạn đã trả {{amount}}',
+      borrowed_tag: 'Bạn mượn',
+      lent_tag: 'Bạn cho mượn',
+      not_involved_tag: 'Không tham gia',
       edit_paid_title: 'Hóa đơn này đã có thanh toán',
       edit_paid_message:
         'Các khoản thanh toán vẫn giữ nguyên. Nếu một phần giảm xuống dưới số đã trả, phần chênh lệch sẽ phải được hoàn lại.',

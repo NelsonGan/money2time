@@ -15,6 +15,7 @@ import { AccountLogo, CategoryEmoji, Text, TimeValueInline } from '~/components/
 import { motionDurations } from '~/constants/motion';
 import { useApp } from '~/context/AppContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
+import { useAlbumBillSide } from '~/features/albums/lib/albumBillSides';
 import { PersonAvatar } from '~/features/sharedLedgers/components/PersonAvatar';
 import { shortName, useOpenLedgerPeople } from '~/features/sharedLedgers/lib/ledgerPeople';
 import { PersonAvatar as InitialAvatar } from '~/features/transactions/components/PersonAvatar';
@@ -346,8 +347,13 @@ const TransactionItemBody = memo(
       transaction.splitsSummary?.youOwe && !transaction.accountId
         ? billPayer(transaction.splits)
         : null;
+    // A shared album's bill in that album's Transactions tab: who paid the
+    // whole bill goes under the title, and the right side says what it is to
+    // the user (README: Shared albums > Transactions tab). Its pill then only
+    // names an account the money moved from, never the friend who paid.
+    const billSide = useAlbumBillSide(transaction.id);
     const accountSubtitleLabel =
-      !isTransfer && appSettings.showTransactionAccount
+      !isTransfer && appSettings.showTransactionAccount && !(billSide && friendPayer)
         ? (transaction.accountName ??
           (friendPayer
             ? I18n.t('transactions.settleUp.person_paid', {
@@ -400,25 +406,41 @@ const TransactionItemBody = memo(
             : null;
     const subtitlePrimary = person
       ? joinSubtitleParts(subtitleBase, shortName(person.name))
-      : subtitleBase;
+      : billSide
+        ? // The icon already says the category.
+          joinSubtitleParts(showDateInSubtitle ? dateLabel : null, billSide.paid)
+        : subtitleBase;
     const rate =
       !isTransfer && !isBalanceAdjustment ? getTrueHourlyRateForDate(transaction.date) : 0;
     const hasCategoryRef = Boolean(transaction.categoryIcon || transaction.categoryName);
     const amountToneClass = isTransfer
       ? 'text-muted-foreground'
-      : isBalanceAdjustment
-        ? transaction.amount > 0
+      : billSide
+        ? billSide.kind === 'lent'
           ? 'text-success'
-          : transaction.amount < 0
-            ? 'text-destructive'
-            : 'text-muted-foreground'
-        : isIncome
-          ? 'text-success'
-          : 'text-destructive';
+          : billSide.kind === 'none'
+            ? 'text-muted-foreground'
+            : 'text-destructive'
+        : isBalanceAdjustment
+          ? transaction.amount > 0
+            ? 'text-success'
+            : transaction.amount < 0
+              ? 'text-destructive'
+              : 'text-muted-foreground'
+          : isIncome
+            ? 'text-success'
+            : 'text-destructive';
     // Time-mode conversions use the frozen reporting-currency snapshot (so a
     // foreign transaction converts correctly via the reporting hourly rate);
     // money mode shows the native amount with its own currency symbol.
-    const reportingAmount = transaction.reportingAmount ?? transaction.amount;
+    // A shared album's bill shows the user's part of it (`billSide`), with its
+    // frozen main-currency figure scaled to match.
+    const shownAmount = billSide?.amount ?? transaction.amount;
+    const reportingAmount =
+      billSide?.amount != null && transaction.amount !== 0
+        ? ((transaction.reportingAmount ?? transaction.amount) * billSide.amount) /
+          transaction.amount
+        : (transaction.reportingAmount ?? transaction.amount);
     const nativeSymbol = currencySymbolForCode(transaction.currency);
     // A transaction is "foreign" when it was recorded in a subcurrency — its
     // frozen snapshot currency differs from the amount's own currency.
@@ -427,7 +449,7 @@ const TransactionItemBody = memo(
       !isBalanceAdjustment &&
       transaction.reportingCurrency != null &&
       transaction.reportingCurrency !== transaction.currency;
-    const primaryValue = formatAmount(isTimeMode ? reportingAmount : transaction.amount, settings, {
+    const primaryValue = formatAmount(isTimeMode ? reportingAmount : shownAmount, settings, {
       showSign: isBalanceAdjustment,
       neutralSign: isTransfer,
       trueHourlyRate: isTransfer || isBalanceAdjustment ? 0 : rate,
@@ -436,11 +458,11 @@ const TransactionItemBody = memo(
     // Money mode: show the main-currency equivalent (snapshot rate) beneath a
     // foreign amount; otherwise fall back to the time equivalent.
     const secondaryValue =
-      isTransfer || isBalanceAdjustment
+      isTransfer || isBalanceAdjustment || billSide?.amount === null
         ? null
         : isTimeMode
           ? rate > 0
-            ? formatCurrency(transaction.amount, nativeSymbol)
+            ? formatCurrency(shownAmount, nativeSymbol)
             : null
           : isForeign
             ? formatCurrency(reportingAmount, currencySymbolForCode(transaction.reportingCurrency!))
@@ -453,15 +475,21 @@ const TransactionItemBody = memo(
     const titleSizeClass = compact ? 'text-[13px] leading-[16px]' : 'text-[15px] leading-[20px]';
     const amountToneColor = isTransfer
       ? themeColors.textMuted
-      : isBalanceAdjustment
-        ? transaction.amount > 0
+      : billSide
+        ? billSide.kind === 'lent'
           ? themeColors.success
-          : transaction.amount < 0
-            ? themeColors.error
-            : themeColors.textMuted
-        : isIncome
-          ? themeColors.success
-          : themeColors.error;
+          : billSide.kind === 'none'
+            ? themeColors.textMuted
+            : themeColors.error
+        : isBalanceAdjustment
+          ? transaction.amount > 0
+            ? themeColors.success
+            : transaction.amount < 0
+              ? themeColors.error
+              : themeColors.textMuted
+          : isIncome
+            ? themeColors.success
+            : themeColors.error;
 
     return (
       <>
@@ -634,8 +662,21 @@ const TransactionItemBody = memo(
         </View>
 
         <View className={cn('shrink-0 self-center items-end', valueColumnClassName)}>
+          {billSide?.tag ? (
+            <Text
+              variant="caption"
+              className={cn(
+                'font-semibold',
+                compact ? 'text-[10px] leading-[12px]' : 'text-[11px] leading-[14px]',
+                amountToneClass,
+              )}
+              numberOfLines={1}
+            >
+              {billSide.tag}
+            </Text>
+          ) : null}
           <View className="flex-row items-center justify-end gap-1">
-            {showsPrimaryTime ? (
+            {billSide?.amount === null ? null : showsPrimaryTime ? (
               <TimeValueInline
                 value={primaryValue}
                 variant="mono"

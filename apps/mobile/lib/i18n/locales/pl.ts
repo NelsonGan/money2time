@@ -3119,6 +3119,11 @@ const pl = {
       remove_shared:
         'Ten rachunek jest w udostępnionym albumie. Zostanie usunięty u wszystkich pozostałych.',
       shared_album: 'Udostępniony album',
+      paid_total: 'Zapłacił(a) {{name}}: {{amount}}',
+      you_paid_total: 'Zapłacono przez Ciebie: {{amount}}',
+      borrowed_tag: 'Do oddania',
+      lent_tag: 'Do odebrania',
+      not_involved_tag: 'Nie dotyczy',
       edit_paid_title: 'Ten rachunek ma płatności',
       edit_paid_message:
         'Płatności zostaną. Jeśli udział spadnie poniżej tego, co już zapłacono, różnicę trzeba będzie oddać.',

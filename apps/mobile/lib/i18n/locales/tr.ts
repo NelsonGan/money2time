@@ -3114,6 +3114,11 @@ const tr = {
         'Bu hesap paylaşılan bir albümde ve ödemeleri var. Silerseniz herkes için kaldırılır. Ödemeler kalır ve zaten ödenmiş tutar geri ödenmelidir.',
       remove_shared: 'Bu hesap paylaşılan bir albümde. Diğer herkes için kaldırılır.',
       shared_album: 'Paylaşılan albüm',
+      paid_total: 'Ödeyen {{name}}: {{amount}}',
+      you_paid_total: 'Ödeyen siz: {{amount}}',
+      borrowed_tag: 'Borç aldınız',
+      lent_tag: 'Borç verdiniz',
+      not_involved_tag: 'Dahil değilsiniz',
       edit_paid_title: 'Bu hesapta ödemeler var',
       edit_paid_message:
         'Ödemeler kalır. Bir pay zaten ödenen tutarın altına düşerse aradaki fark geri ödenmelidir.',

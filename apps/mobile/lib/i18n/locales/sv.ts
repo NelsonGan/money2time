@@ -3105,6 +3105,11 @@ const sv = {
         'Notan finns i ett delat album och har betalningar. Om du raderar den försvinner den för alla. Betalningarna finns kvar, och det som redan har betalats ska betalas tillbaka.',
       remove_shared: 'Notan finns i ett delat album. Den försvinner för alla andra.',
       shared_album: 'Delat album',
+      paid_total: '{{name}} betalade {{amount}}',
+      you_paid_total: 'Du betalade {{amount}}',
+      borrowed_tag: 'Du lånade',
+      lent_tag: 'Du lånade ut',
+      not_involved_tag: 'Inte med',
       edit_paid_title: 'Notan har betalningar',
       edit_paid_message:
         'Betalningarna finns kvar. Blir en andel mindre än det som redan har betalats ska skillnaden betalas tillbaka.',

@@ -3121,6 +3121,11 @@ const id = {
       remove_shared:
         'Tagihan ini ada di album bersama. Tagihan akan dihapus untuk semua orang lain.',
       shared_album: 'Album bersama',
+      paid_total: '{{name}} membayar {{amount}}',
+      you_paid_total: 'Kamu membayar {{amount}}',
+      borrowed_tag: 'Kamu meminjam',
+      lent_tag: 'Kamu meminjamkan',
+      not_involved_tag: 'Tidak ikut',
       edit_paid_title: 'Tagihan ini sudah ada pembayaran',
       edit_paid_message:
         'Pembayarannya tetap ada. Jika suatu bagian jadi lebih kecil dari yang sudah dibayar, selisihnya harus dikembalikan.',

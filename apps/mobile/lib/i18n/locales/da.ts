@@ -3105,6 +3105,11 @@ const da = {
         'Regningen er i et delt album og har betalinger. Sletter du den, fjernes den for alle. Betalingerne bliver stående, og det, der allerede er betalt, skal betales tilbage.',
       remove_shared: 'Regningen er i et delt album. Den fjernes for alle andre.',
       shared_album: 'Delt album',
+      paid_total: '{{name}} betalte {{amount}}',
+      you_paid_total: 'Du betalte {{amount}}',
+      borrowed_tag: 'Du lånte',
+      lent_tag: 'Du lånte ud',
+      not_involved_tag: 'Ikke med',
       edit_paid_title: 'Regningen har betalinger',
       edit_paid_message:
         'Betalingerne bliver stående. Bliver en andel mindre end det, der allerede er betalt, skal forskellen betales tilbage.',

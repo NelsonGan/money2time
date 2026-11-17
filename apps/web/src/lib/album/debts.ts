@@ -43,6 +43,25 @@ export function groupTotals(bills: readonly Bill[], selfId: string | null): Map<
   return new Map([...totals].map(([currency, entry]) => [currency, { total: entry.total / 100, selfPaid: entry.selfPaid / 100, selfShare: entry.selfShare / 100 }]));
 }
 
+/**
+ * What one bill is to one member, as a bill's row shows it beside who paid: the
+ * share they borrowed when someone else paid, what they lent the others when
+ * they paid, the whole bill when it was theirs alone, or nothing when they are
+ * not on it. The bill as split, not what is still owed: payments do not change it.
+ * The app's `features/albums/lib/billEffect.ts`, the same rules.
+ */
+export type BillEffect = { kind: "borrowed" | "lent" | "paid"; amount: number } | { kind: "none" };
+
+export function billEffect(bill: Pick<Bill, "amount" | "paidBy" | "shares">, selfId: string | null): BillEffect {
+  if (!selfId) return { kind: "none" };
+  const mine = bill.shares.filter((share) => share.memberId === selfId).reduce((sum, share) => sum + cents(share.amount), 0);
+  if (bill.paidBy === selfId) {
+    const lent = cents(bill.amount) - mine;
+    return lent > 0 ? { kind: "lent", amount: lent / 100 } : { kind: "paid", amount: cents(bill.amount) / 100 };
+  }
+  return mine > 0 ? { kind: "borrowed", amount: mine / 100 } : { kind: "none" };
+}
+
 type DebtBill = Pick<Bill, "id" | "date" | "amount" | "currency" | "paidBy" | "shares" | "deleted">;
 type DebtPayment = Pick<Payment, "id" | "expenseId" | "fromMember" | "toMember" | "amount" | "currency" | "deleted">;
 

@@ -3123,6 +3123,11 @@ const ms = {
         'Bil ini berada dalam album kongsi dan ada bayaran. Memadamnya akan membuangnya untuk semua orang. Bayaran kekal, dan apa-apa yang sudah dibayar perlu dipulangkan.',
       remove_shared: 'Bil ini berada dalam album kongsi. Ia akan dibuang untuk semua orang lain.',
       shared_album: 'Album kongsi',
+      paid_total: '{{name}} membayar {{amount}}',
+      you_paid_total: 'Anda membayar {{amount}}',
+      borrowed_tag: 'Anda meminjam',
+      lent_tag: 'Anda meminjamkan',
+      not_involved_tag: 'Tidak terlibat',
       edit_paid_title: 'Bil ini ada bayaran',
       edit_paid_message:
         'Bayaran kekal. Jika sesuatu bahagian menjadi kurang daripada jumlah yang sudah dibayar, bezanya perlu dipulangkan.',

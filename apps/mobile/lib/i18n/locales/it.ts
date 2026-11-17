@@ -3122,6 +3122,11 @@ const it = {
         'Questo conto è in un album condiviso e ha dei pagamenti. Eliminandolo viene rimosso per tutti. I pagamenti restano, e quanto già pagato andrà restituito.',
       remove_shared: 'Questo conto è in un album condiviso. Verrà rimosso per tutti gli altri.',
       shared_album: 'Album condiviso',
+      paid_total: '{{name}} ha pagato {{amount}}',
+      you_paid_total: 'Hai pagato {{amount}}',
+      borrowed_tag: 'Hai preso in prestito',
+      lent_tag: 'Hai prestato',
+      not_involved_tag: 'Non coinvolto',
       edit_paid_title: 'Questo conto ha dei pagamenti',
       edit_paid_message:
         'I pagamenti restano. Se una quota scende sotto quanto già pagato, la differenza andrà restituita.',

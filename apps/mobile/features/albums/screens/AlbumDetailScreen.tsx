@@ -14,7 +14,15 @@ import {
   UserPlus,
   Users,
 } from 'lucide-react-native';
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react';
 import type {
   AlertButton,
   NativeScrollEvent,
@@ -86,11 +94,16 @@ import {
 } from '../components/BreakdownMemberSheet';
 import { useAlbumGroup } from '../hooks/useAlbumGroup';
 import { useRemoveFromAlbum } from '../hooks/useRemoveFromAlbum';
+import { albumBillSides, AlbumBillSidesContext } from '../lib/albumBillSides';
 import { albumCategoryRows } from '../lib/albumBreakdown';
 import { albumCategoryKeyOfId, albumCategoryPickerList } from '../lib/albumCategories';
 import { albumSharingMessage } from '../lib/albumMessages';
 import { breakdownMemberOptions, memberShare } from '../lib/memberShare';
-import { listGroupActivity } from '../services/albumGroupStore';
+import {
+  listGroupActivity,
+  listGroupExpenses,
+  subscribeAlbumGroups,
+} from '../services/albumGroupStore';
 import { letGoOfSharedAlbum } from '../services/letGoOfSharedAlbum';
 import { formatAlbumDateRange } from '../utils';
 
@@ -184,6 +197,15 @@ export function AlbumDetailScreen({
   );
   // A shared album's activity log sits under its Balances.
   const showActivity = group.share !== null;
+  // A shared album's bills, for its Transactions tab's rows: who paid each
+  // and what it is to the user (README: Shared albums > Transactions tab).
+  const sharedBills = useSyncExternalStore(subscribeAlbumGroups, () =>
+    listGroupExpenses(group.share ? group.share.ledgerId : null),
+  );
+  const billSides = useMemo(
+    () => (group.share ? albumBillSides(sharedBills, group.members, group.self?.id ?? null) : null),
+    [group.share, group.members, group.self, sharedBills],
+  );
   const [tab, setTab] = useState<DetailTab>('transactions');
   // The Balances tab going (the last person removed) leaves the page on a tab it still has.
   const shownTab = tabs.includes(tab) ? tab : tabs[0];
@@ -1013,32 +1035,34 @@ export function AlbumDetailScreen({
   };
 
   const transactionList = (paddingTop: number, phone: boolean) => (
-    <ActivityTransactionList
-      transactions={albumTransactions}
-      displaySettings={settings}
-      getDisplayValueForTransaction={getDisplayValueForTransaction}
-      getTrueHourlyRateForDate={getTrueHourlyRateForDate}
-      reimbursementsCountAsExpense={settings.reimbursementsCountAsExpense}
-      onTransactionPress={handleTransactionPress}
-      onTransactionLongPress={handleTransactionLongPress}
-      onToggleDaySelection={toggleDaySelection}
-      selectedTransactionIds={selectedTransactionIds}
-      selectionMode={isSelectionMode}
-      emptyTitle={I18n.t('albums.no_transactions_title')}
-      emptyMessage={I18n.t('albums.no_transactions_message')}
-      contentPaddingTop={paddingTop}
-      contentPaddingBottom={listBottomPadding}
-      disableItemAnimations
-      compactItems
-      {...(phone
-        ? {
-            scrollOffset: transactionsY,
-            scrollToOffsetRef: transactionsScrollToRef,
-            minContentHeight,
-            scrollIndicatorInsets: transactionsIndicatorInsets,
-          }
-        : null)}
-    />
+    <AlbumBillSidesContext.Provider value={billSides}>
+      <ActivityTransactionList
+        transactions={albumTransactions}
+        displaySettings={settings}
+        getDisplayValueForTransaction={getDisplayValueForTransaction}
+        getTrueHourlyRateForDate={getTrueHourlyRateForDate}
+        reimbursementsCountAsExpense={settings.reimbursementsCountAsExpense}
+        onTransactionPress={handleTransactionPress}
+        onTransactionLongPress={handleTransactionLongPress}
+        onToggleDaySelection={toggleDaySelection}
+        selectedTransactionIds={selectedTransactionIds}
+        selectionMode={isSelectionMode}
+        emptyTitle={I18n.t('albums.no_transactions_title')}
+        emptyMessage={I18n.t('albums.no_transactions_message')}
+        contentPaddingTop={paddingTop}
+        contentPaddingBottom={listBottomPadding}
+        disableItemAnimations
+        compactItems
+        {...(phone
+          ? {
+              scrollOffset: transactionsY,
+              scrollToOffsetRef: transactionsScrollToRef,
+              minContentHeight,
+              scrollIndicatorInsets: transactionsIndicatorInsets,
+            }
+          : null)}
+      />
+    </AlbumBillSidesContext.Provider>
   );
 
   const tabLabel = (value: DetailTab) =>

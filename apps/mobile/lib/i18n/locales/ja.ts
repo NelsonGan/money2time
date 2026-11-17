@@ -3086,6 +3086,11 @@ const ja = {
         'この会計は共有アルバムにあり、支払いもあります。削除すると全員の分が消えます。支払いは残り、すでに支払われた分は返金が必要になります。',
       remove_shared: 'この会計は共有アルバムにあります。ほかの全員の分も消えます。',
       shared_album: '共有アルバム',
+      paid_total: '{{name}}さんが{{amount}}を支払い',
+      you_paid_total: '自分が{{amount}}を支払い',
+      borrowed_tag: '借りた',
+      lent_tag: '貸した',
+      not_involved_tag: '対象外',
       edit_paid_title: 'この会計には支払いがあります',
       edit_paid_message:
         '支払いは残ります。負担額がすでに支払われた額を下回ると、差額の返金が必要になります。',

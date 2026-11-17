@@ -3150,6 +3150,11 @@ const de = {
       remove_shared:
         'Diese Rechnung ist in einem geteilten Album. Sie wird für alle anderen entfernt.',
       shared_album: 'Geteiltes Album',
+      paid_total: '{{name}} hat {{amount}} bezahlt',
+      you_paid_total: 'Du hast {{amount}} bezahlt',
+      borrowed_tag: 'Du hast geliehen',
+      lent_tag: 'Du hast verliehen',
+      not_involved_tag: 'Nicht dabei',
       edit_paid_title: 'Diese Rechnung hat Zahlungen',
       edit_paid_message:
         'Die Zahlungen bleiben. Fällt ein Anteil unter den bereits gezahlten Betrag, muss die Differenz zurückgezahlt werden.',
