@@ -52,6 +52,15 @@ describe('albumIconAfterLocationChange', () => {
     expect(albumIconAfterLocationChange('', null, 'JP')).toBe('emoji:🇯🇵');
   });
 
+  it('leaves a removed flag removed while the place stays in the same country', () => {
+    expect(albumIconAfterLocationChange('', 'JP', 'JP')).toBe('');
+    expect(albumIconAfterLocationChange('', 'jp', 'JP')).toBe('');
+  });
+
+  it('gives an empty icon the flag of a new country', () => {
+    expect(albumIconAfterLocationChange('', 'JP', 'MY')).toBe('emoji:🇲🇾');
+  });
+
   it('moves a flag that came from the old place to the new one', () => {
     expect(albumIconAfterLocationChange('emoji:🇯🇵', 'JP', 'MY')).toBe('emoji:🇲🇾');
   });

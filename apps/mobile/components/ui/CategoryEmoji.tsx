@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { TextProps } from 'react-native';
-import { Image, Platform, View } from 'react-native';
+import { Image, Platform, StyleSheet, View } from 'react-native';
 
 import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { Text } from '~/components/ui/text';
@@ -103,6 +103,24 @@ export function CategoryEmoji({
         </Text>
       );
     }
+    // A caller that sets its own font size (the category editor's rows, the
+    // quick-add summary) sizes the glyph itself, as before the box below:
+    // only the line height is set alongside, from the size.
+    if (StyleSheet.flatten(style)?.fontSize != null) {
+      return (
+        <Text
+          {...textProps}
+          className={className}
+          style={[
+            { fontSize: size, lineHeight: Math.ceil(size * 1.25) },
+            Platform.OS === 'android' ? { includeFontPadding: false } : null,
+            style,
+          ]}
+        >
+          {classified.glyph}
+        </Text>
+      );
+    }
     // Sized: take the image branch's exact footprint, a size x size box, so a
     // list mixing PNGs and emoji lines up (the same width before every name,
     // the same row height). An emoji glyph is wider and taller than its font
@@ -115,7 +133,7 @@ export function CategoryEmoji({
     // clipped. 1.25 em (the box's height) clears the tallest glyphs. Android
     // additionally reserves font padding that offsets the glyph inside that
     // box, so drop it. Font scaling is off as for the images: a larger text
-    // size would grow the glyph out of its box. An explicit `style` still wins.
+    // size would grow the glyph out of its box.
     const fontSize = Math.round(size * EMOJI_GLYPH_SCALE);
     return (
       <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
@@ -126,7 +144,7 @@ export function CategoryEmoji({
           style={[
             {
               fontSize,
-              lineHeight: Math.max(size, Math.ceil(fontSize * 1.25)),
+              lineHeight: size,
               textAlign: 'center',
             },
             Platform.OS === 'android' ? { includeFontPadding: false } : null,

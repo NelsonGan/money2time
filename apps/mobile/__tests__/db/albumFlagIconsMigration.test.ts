@@ -1,3 +1,4 @@
+import { captureTriggersSql } from '~/features/cloudSync/lib/capture';
 import migration096 from '~/lib/db/migrations/096_album_flag_icons';
 
 import { openAppDatabase } from '../helpers/appDatabase';
@@ -40,6 +41,14 @@ function rows(app: ReturnType<typeof openAppDatabase>) {
   );
 }
 
+function outbox(app: ReturnType<typeof openAppDatabase>) {
+  return (
+    app.db.getFirstSync<{ n: number }>(
+      "SELECT COUNT(*) AS n FROM sync_outbox WHERE table_name = 'albums'",
+    )?.n ?? 0
+  );
+}
+
 describe('album flag icons migration', () => {
   it('gives an album with a country and no icon its flag, and leaves the rest', () => {
     const app = openAppDatabase();
@@ -61,8 +70,28 @@ describe('album flag icons migration', () => {
     expect(after.nowhere?.icon).toBeNull();
     expect(after.odd?.icon).toBeNull();
     expect(after.gone?.icon).toBeNull();
-    // Each phone fills its own: no newer stamp to win over a synced removal.
+    // Each phone fills its own: no newer stamp, nothing to push.
     expect(after.japan?.updated_at).toBe(NOW);
+  });
+
+  it('keeps the fill on this phone: Cloud Sync queues nothing', () => {
+    const app = openAppDatabase();
+    album(app, 'japan', null, 'JP');
+    // Cloud Sync is on: its capture triggers are installed.
+    app.db.execSync(captureTriggersSql('albums'));
+    app.db.runSync("UPDATE albums SET name = 'Japan trip' WHERE id = 'japan'");
+    expect(outbox(app)).toBe(1); // the triggers do capture an ordinary edit
+    app.db.runSync('DELETE FROM sync_outbox');
+
+    migration096.up(app.db);
+
+    expect(rows(app).japan?.icon).toBe('emoji:🇯🇵');
+    expect(outbox(app)).toBe(0);
+    // Capture is back on afterwards.
+    expect(
+      app.db.getFirstSync<{ value: string }>("SELECT value FROM sync_state WHERE key = 'applying'")
+        ?.value,
+    ).toBe('0');
   });
 
   it('is a no-op when replayed', () => {

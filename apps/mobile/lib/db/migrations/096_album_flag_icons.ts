@@ -16,9 +16,13 @@ function flagIcon(countryCode: string): string | null {
 // patterns > Albums, An album's icon): the forms fill it in when a place is
 // picked, and this gives the albums placed before that their flag once. Only
 // an icon that was never set (NULL) is filled: '' is one the user removed.
-// `updated_at` is left alone on purpose. Every phone of the account runs this
-// itself with the same result, and a newer `updated_at` here would let this
-// fill win over a removal another phone synced before this one upgraded.
+//
+// The fill stays on this phone: Cloud Sync's capture triggers are kept quiet
+// (sync_state.applying, as while pulled rows are applied), so no row is
+// queued and `updated_at` is left alone. Every phone of the account runs this
+// itself with the same result; a queued row would win over the copy pulled
+// from the cloud, so a phone upgrading late would push its whole stale row
+// back over another phone's newer edit (a removed flag, a renamed album).
 export const migration096AlbumFlagIcons: DbMigration = {
   version: 96,
   name: '096_album_flag_icons',
@@ -27,10 +31,23 @@ export const migration096AlbumFlagIcons: DbMigration = {
       `SELECT id, country_code FROM albums
        WHERE icon IS NULL AND country_code IS NOT NULL AND deleted_at IS NULL`,
     );
-    for (const row of rows) {
-      const icon = flagIcon(row.country_code);
-      if (icon)
-        db.runSync('UPDATE albums SET icon = ? WHERE id = ? AND icon IS NULL', [icon, row.id]);
+    if (rows.length === 0) return;
+    const applying =
+      db.getFirstSync<{ value: string | null }>(
+        `SELECT value FROM sync_state WHERE key = 'applying'`,
+      )?.value ?? '0';
+    db.runSync(`INSERT OR REPLACE INTO sync_state (key, value) VALUES ('applying', '1')`);
+    try {
+      for (const row of rows) {
+        const icon = flagIcon(row.country_code);
+        if (icon) {
+          db.runSync('UPDATE albums SET icon = ? WHERE id = ? AND icon IS NULL', [icon, row.id]);
+        }
+      }
+    } finally {
+      db.runSync(`INSERT OR REPLACE INTO sync_state (key, value) VALUES ('applying', ?)`, [
+        applying,
+      ]);
     }
   },
 };

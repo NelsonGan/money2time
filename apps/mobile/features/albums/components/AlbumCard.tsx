@@ -77,6 +77,8 @@ function AlbumIconBadge({ album }: { album: Pick<Album, 'name' | 'icon'> }) {
             fontSize: BADGE_EMOJI_SIZE,
             lineHeight: BADGE_GLYPH_BOX,
             textAlign: 'center',
+            // Android's font padding would push the glyph off centre.
+            includeFontPadding: false,
           }}
         >
           {classified.glyph}
@@ -227,6 +229,7 @@ export const AlbumCard = memo(function AlbumCardImpl({
             <TimeValueInline
               value={formatHours(stats.totalSpent, settings)}
               variant="headingSm"
+              containerClassName="mt-1"
               textClassName="text-white"
               iconColor="#fff"
               iconSize={18}

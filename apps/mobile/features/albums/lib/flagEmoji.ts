@@ -37,10 +37,12 @@ export function flagIconForCountry(countryCode: string | null | undefined): stri
 
 /**
  * An album form's icon after its location changes from one country to another
- * (README: Key patterns > Albums, An album's icon): the new country's flag
- * fills an empty icon, and replaces the old country's flag, so a flag follows
- * the place; an icon the user picked stays. Clearing the location takes away
- * its flag. `''` is no icon, as in the forms. Pure.
+ * (README: Key patterns > Albums, An album's icon): the old country's flag
+ * becomes the new one's, so a flag follows the place, and an empty icon takes
+ * the new country's flag when the country changes (a first place included);
+ * an icon the user picked stays. Moving within a country leaves an empty icon
+ * empty, so a flag removed with × stays removed. Clearing the location takes
+ * away its flag. `''` is no icon, as in the forms. Pure.
  */
 export function albumIconAfterLocationChange(
   icon: string,
@@ -49,6 +51,7 @@ export function albumIconAfterLocationChange(
 ): string {
   const previousFlag = flagIconForCountry(previousCountryCode);
   const nextFlag = flagIconForCountry(nextCountryCode);
-  if (icon === '' || (previousFlag !== null && icon === previousFlag)) return nextFlag ?? '';
+  if (previousFlag !== null && icon === previousFlag) return nextFlag ?? '';
+  if (icon === '' && nextFlag !== previousFlag) return nextFlag ?? '';
   return icon;
 }
