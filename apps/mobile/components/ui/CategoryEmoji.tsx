@@ -19,6 +19,9 @@ interface CategoryEmojiProps extends Omit<TextProps, 'children'> {
   hidePlaceholder?: boolean;
 }
 
+/** A sized emoji's font size, as a share of its box (see the emoji branch). */
+const EMOJI_GLYPH_SCALE = 0.8;
+
 function normalize(value?: string | null) {
   const trimmed = value?.trim() ?? '';
   return trimmed.length > 0 ? trimmed : null;
@@ -93,26 +96,46 @@ export function CategoryEmoji({
   }
 
   if (classified.kind === 'emoji') {
-    // Match the image branch's footprint when the caller sized us, so a grid
-    // mixing PNGs and emoji lines up. An explicit `style` still wins.
+    if (!size) {
+      return (
+        <Text {...textProps} className={className} style={style}>
+          {classified.glyph}
+        </Text>
+      );
+    }
+    // Sized: take the image branch's exact footprint, a size x size box, so a
+    // list mixing PNGs and emoji lines up (the same width before every name,
+    // the same row height). An emoji glyph is wider and taller than its font
+    // size (a flag at 16px drew ~20px wide and pushed its name to the right),
+    // so the glyph is drawn smaller, EMOJI_GLYPH_SCALE of the box, which also
+    // matches the visible size of the hand-drawn icons' art in their cell.
     //
     // lineHeight has to be set alongside fontSize: an emoji glyph overflows the
     // em box, so at the platform default line height its top and bottom get
-    // clipped (visible wherever we size one into a fixed tile, e.g. the editor
-    // icon rows). 1.25 clears the tallest glyphs. Android additionally reserves
-    // font padding that offsets the glyph inside that box, so drop it.
+    // clipped. 1.25 em (the box's height) clears the tallest glyphs. Android
+    // additionally reserves font padding that offsets the glyph inside that
+    // box, so drop it. Font scaling is off as for the images: a larger text
+    // size would grow the glyph out of its box. An explicit `style` still wins.
+    const fontSize = Math.round(size * EMOJI_GLYPH_SCALE);
     return (
-      <Text
-        {...textProps}
-        className={className}
-        style={[
-          size ? { fontSize: size, lineHeight: Math.ceil(size * 1.25) } : null,
-          size && Platform.OS === 'android' ? { includeFontPadding: false } : null,
-          style,
-        ]}
-      >
-        {classified.glyph}
-      </Text>
+      <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
+        <Text
+          allowFontScaling={false}
+          {...textProps}
+          className={className}
+          style={[
+            {
+              fontSize,
+              lineHeight: Math.max(size, Math.ceil(fontSize * 1.25)),
+              textAlign: 'center',
+            },
+            Platform.OS === 'android' ? { includeFontPadding: false } : null,
+            style,
+          ]}
+        >
+          {classified.glyph}
+        </Text>
+      </View>
     );
   }
 

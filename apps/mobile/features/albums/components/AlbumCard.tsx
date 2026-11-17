@@ -139,50 +139,55 @@ export const AlbumCard = memo(function AlbumCardImpl({
 
         {/* Bottom scrim with title + amount + meta overlaid on the cover. */}
         <View
-          className="absolute inset-x-0 bottom-0 flex-row items-center gap-3 px-4 pb-3 pt-5"
+          className="absolute inset-x-0 bottom-0 px-4 pb-3 pt-5"
           style={{ backgroundColor: 'rgba(0,0,0,0.52)' }}
         >
-          {/* The album's icon, the one its line shows in the category lists. */}
-          {album.icon ? (
+          <View className="flex-row items-center gap-2">
+            {/* The album's name on a frosted chip, led by its icon (the one
+                its line shows in the category lists) when it has one: small
+                and inline, so it reads as part of the title rather than a
+                tile pasted over the photo. */}
             <View
-              testID="album-card-icon"
-              className="h-12 w-12 items-center justify-center rounded-2xl bg-white/90"
-            >
-              <AlbumLineIcon album={album} size={30} />
-            </View>
-          ) : null}
-          <View className="flex-1">
-            <View className="flex-row items-center gap-2">
-              <Text variant="caption" numberOfLines={1} className="flex-1 text-white/80">
-                {album.name}
-              </Text>
-              {sharedAvatars}
-            </View>
-            {/* Time mode renders a View (icon + text) which has no text baseline,
-              so bottom-align it; money mode keeps baseline alignment. */}
-            <View
-              className={`mt-0.5 flex-row justify-between gap-2 ${
-                isTimeMode ? 'items-end' : 'items-baseline'
+              className={`shrink flex-row items-center gap-1.5 rounded-full border border-white/20 bg-white/15 py-1 pr-2.5 ${
+                album.icon ? 'pl-1.5' : 'pl-2.5'
               }`}
             >
-              {isTimeMode ? (
-                <TimeValueInline
-                  value={formatHours(stats.totalSpent, settings)}
-                  variant="subheading"
-                  textClassName="text-white"
-                  iconColor="#fff"
-                  iconSize={16}
-                  numberOfLines={1}
-                />
-              ) : (
-                <Text variant="subheading" numberOfLines={1} className="text-white">
-                  {formatAmount(stats.totalSpent, settings, { showSign: false })}
-                </Text>
-              )}
-              <Text variant="label" numberOfLines={1} className="shrink text-white/70">
-                {metaLabel}
+              {album.icon ? (
+                <View testID="album-card-icon">
+                  <AlbumLineIcon album={album} size={20} />
+                </View>
+              ) : null}
+              <Text variant="caption" numberOfLines={1} className="shrink text-white">
+                {album.name}
               </Text>
             </View>
+            <View className="flex-1" />
+            {sharedAvatars}
+          </View>
+          {/* Time mode renders a View (icon + text) which has no text baseline,
+              so bottom-align it; money mode keeps baseline alignment. */}
+          <View
+            className={`mt-0.5 flex-row justify-between gap-2 ${
+              isTimeMode ? 'items-end' : 'items-baseline'
+            }`}
+          >
+            {isTimeMode ? (
+              <TimeValueInline
+                value={formatHours(stats.totalSpent, settings)}
+                variant="subheading"
+                textClassName="text-white"
+                iconColor="#fff"
+                iconSize={16}
+                numberOfLines={1}
+              />
+            ) : (
+              <Text variant="subheading" numberOfLines={1} className="text-white">
+                {formatAmount(stats.totalSpent, settings, { showSign: false })}
+              </Text>
+            )}
+            <Text variant="label" numberOfLines={1} className="shrink text-white/70">
+              {metaLabel}
+            </Text>
           </View>
         </View>
       </Pressable>
