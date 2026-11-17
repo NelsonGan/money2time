@@ -6027,7 +6027,14 @@ change, which it plans by the same rules a phone does. The code is `src/componen
 album page, so moving to the app later needs no relearning. `src/proxy.ts`
 rewrites every page on an `album.` host to `/[locale]/album`, in the
 visitor's language, and the page reads where it is from the address
-(`site.tsx`, moving with `history.pushState`):
+(`site.tsx`, moving with `history.pushState`). On a computer (from 1024
+pixels wide) it uses the room instead of a phone's column: the sign-in pages
+put what the site is for beside the sign-in buttons, on a card, the invite
+puts the album beside the way in, the album list is a grid (two across from
+640 pixels, three from 1024), and Get the app puts the stores beside its text
+when its card is wide enough. The three sign-in buttons (Google's own,
+Apple's and email's) share one outline, one height and one column at most
+400 pixels wide, and Google's is drawn again when that column changes width.
 
 - **`/join/<code>`, the invite.** The album's name, who invited them and how
   many people are in it (`GET /v1/invites/<code>`, the owner named as the
@@ -6053,7 +6060,8 @@ visitor's language, and the page reads where it is from the address
   with its category, who paid and the user's part ("Tess paid · your share
   RM60.00", "You paid · you lent RM100.00"). Amounts are written as the app
   writes them ("RM48.00", `formatMoney`). The app's clay **+** adds a bill.
-  On a wide screen the cover becomes a card over the same column.
+  On a wide screen the cover becomes a card over the same column, and
+  Breakdown puts each ring beside its list.
   - **A bill** (new or tapped) as the app's editor and Split Bill: amount and
     currency (the album's currencies first), what it was for, one of the
     album's eight categories (`src/lib/album/categories.ts`, the app's

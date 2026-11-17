@@ -75,38 +75,41 @@ export function BreakdownTab({ group }: { group: Group }) {
         </section>
       ) : (
         sections.map(({ currency, list, total }) => (
-          <section key={currency} className="rounded-[24px] border border-border bg-card px-5 py-5 shadow-[var(--shadow-soft)]">
-            <div className="flex justify-center">
-              <Donut
-                size={210}
-                thickness={28}
-                percent={percent}
-                format={(value) => money(value / 100, currency)}
-                slices={list.map((entry, index) => ({ key: entry.key, label: entry.name, value: entry.cents, color: SLICE_COLORS[index % SLICE_COLORS.length] }))}
-                center={
-                  <span className="flex flex-col items-center">
-                    <span className="text-[12.5px] font-semibold text-foreground-soft">{t("breakdown.total")}</span>
-                    <span className="text-[19px] font-extrabold tracking-[-0.02em] tabular">{money(total / 100, currency)}</span>
-                  </span>
-                }
-              />
+          // With room (a computer's column), the ring beside its list.
+          <section key={currency} className="@container rounded-[24px] border border-border bg-card px-5 py-5 shadow-[var(--shadow-soft)]">
+            <div className="flex flex-col @xl:flex-row @xl:items-center @xl:gap-8">
+              <div className="flex shrink-0 justify-center">
+                <Donut
+                  size={210}
+                  thickness={28}
+                  percent={percent}
+                  format={(value) => money(value / 100, currency)}
+                  slices={list.map((entry, index) => ({ key: entry.key, label: entry.name, value: entry.cents, color: SLICE_COLORS[index % SLICE_COLORS.length] }))}
+                  center={
+                    <span className="flex flex-col items-center">
+                      <span className="text-[12.5px] font-semibold text-foreground-soft">{t("breakdown.total")}</span>
+                      <span className="text-[19px] font-extrabold tracking-[-0.02em] tabular">{money(total / 100, currency)}</span>
+                    </span>
+                  }
+                />
+              </div>
+              <ul className="mt-4 @xl:mt-0 @xl:min-w-0 @xl:flex-1">
+                {list.map((entry, index) => (
+                  <li key={entry.key} className="flex items-center gap-3 border-b border-border py-2.5 last:border-b-0">
+                    <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: SLICE_COLORS[index % SLICE_COLORS.length] }} />
+                    <CategoryIcon icon={entry.icon} name={entry.name} size={30} />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-[15px] font-semibold">{entry.name}</span>
+                      <span className="text-[12.5px] text-foreground-muted">{t("breakdown.bills", { count: entry.count })}</span>
+                    </span>
+                    <span className="text-right">
+                      <span className="block text-[15px] font-extrabold tabular">{money(entry.cents / 100, currency)}</span>
+                      <span className="text-[12.5px] font-semibold text-foreground-muted">{percent(total ? entry.cents / total : 0)}</span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
             </div>
-            <ul className="mt-4">
-              {list.map((entry, index) => (
-                <li key={entry.key} className="flex items-center gap-3 border-b border-border py-2.5 last:border-b-0">
-                  <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: SLICE_COLORS[index % SLICE_COLORS.length] }} />
-                  <CategoryIcon icon={entry.icon} name={entry.name} size={30} />
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[15px] font-semibold">{entry.name}</span>
-                    <span className="text-[12.5px] text-foreground-muted">{t("breakdown.bills", { count: entry.count })}</span>
-                  </span>
-                  <span className="text-right">
-                    <span className="block text-[15px] font-extrabold tabular">{money(entry.cents / 100, currency)}</span>
-                    <span className="text-[12.5px] font-semibold text-foreground-muted">{percent(total ? entry.cents / total : 0)}</span>
-                  </span>
-                </li>
-              ))}
-            </ul>
           </section>
         ))
       )}

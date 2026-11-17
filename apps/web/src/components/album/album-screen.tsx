@@ -17,7 +17,7 @@ import { AppBanner, GetTheApp } from "./get-app";
 import { defaultMemberName, Page } from "./join-screen";
 import { PeopleSheet } from "./people-sheet";
 import { SettleSheet } from "./settle-sheet";
-import { SignIn } from "./sign-in";
+import { SignInHero } from "./sign-in";
 import { TransactionsTab } from "./transactions-tab";
 import { AvatarStack, Button, Icon, Mascot, Sheet, Spinner, personColor, today, useDay } from "./ui";
 
@@ -134,13 +134,8 @@ export function AlbumScreen({ shareId, tab }: { shareId: string; tab: Tab }) {
   const { user, setUser } = useSite();
   if (!user) {
     return (
-      <Page>
-        <section className="flex flex-col items-center pt-4 text-center">
-          <Mascot pose="waving" size={120} />
-          <h1 className="mt-3 text-[24px] font-extrabold tracking-[-0.03em]">{t("album.signInTitle")}</h1>
-          <p className="mb-6 mt-1.5 max-w-[320px] text-[14.5px] text-foreground-soft">{t("album.signInBody")}</p>
-        </section>
-        <SignIn context="album" onSignedIn={setUser} />
+      <Page wide>
+        <SignInHero pose="waving" title={t("album.signInTitle")} body={t("album.signInBody")} context="album" onSignedIn={setUser} />
       </Page>
     );
   }

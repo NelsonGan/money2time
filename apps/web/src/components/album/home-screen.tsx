@@ -9,7 +9,7 @@ import { useSite } from "./site";
 import { AlbumApiError, api } from "./api";
 import { GetTheApp } from "./get-app";
 import { Page } from "./join-screen";
-import { SignIn } from "./sign-in";
+import { SignInHero } from "./sign-in";
 import { Icon, Mascot, Spinner } from "./ui";
 
 /**
@@ -22,20 +22,13 @@ export function HomeScreen() {
   const { user, setUser, signOut } = useSite();
   if (!user) {
     return (
-      <Page>
-        <section className="flex flex-col items-center px-2 pt-4 text-center">
-          <Mascot pose="presenting" size={140} />
-          <h1 className="mt-3 text-[30px] font-extrabold leading-[1.1] tracking-[-0.035em] text-balance">{t("home.landingTitle")}</h1>
-          <p className="mt-2.5 max-w-[340px] text-[15px] text-foreground-soft text-pretty">{t("home.landingBody")}</p>
-        </section>
-        <section className="mt-7">
-          <SignIn context="home" onSignedIn={setUser} />
-        </section>
+      <Page wide>
+        <SignInHero pose="presenting" title={t("home.landingTitle")} body={t("home.landingBody")} context="home" onSignedIn={setUser} />
       </Page>
     );
   }
   return (
-    <Page>
+    <Page wide>
       <AlbumList />
       <p className="mt-6 text-center text-[13px] text-foreground-muted">
         {t("join.signedInAs", { email: user.email })}{" "}
@@ -87,7 +80,7 @@ function AlbumList() {
           <p className="mt-1 max-w-[320px] text-[14px] text-foreground-soft">{t("home.emptyBody")}</p>
         </section>
       ) : (
-        <ul className="flex flex-col gap-3">
+        <ul className="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
           {albums.map((album) => (
             <li key={album.id}>
               <button

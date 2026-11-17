@@ -42,18 +42,23 @@ export function JoinScreen({ code }: { code: string }) {
 
   if (joinedId && preview) return <Joined preview={preview} onWeb={() => go({ name: "album", shareId: joinedId, tab: "transactions" }, { replace: true })} code={code} />;
 
+  // On a computer the invite and the way in sit side by side.
   return (
-    <Page>
+    <Page wide>
       {problem ? (
-        <InviteProblem problem={problem} code={code} ownerName={preview?.ownerName ?? null} />
+        <div className="mx-auto w-full max-w-[428px]">
+          <InviteProblem problem={problem} code={code} ownerName={preview?.ownerName ?? null} />
+        </div>
       ) : !preview ? (
         <div className="flex justify-center py-24 text-primary">
           <Spinner size={28} />
         </div>
       ) : (
-        <>
-          <InviteCard preview={preview} />
-          <section className="mt-7">
+        <div className="flex flex-col lg:my-auto lg:grid lg:grid-cols-[minmax(0,1fr)_440px] lg:grid-rows-[auto_1fr] lg:items-start lg:gap-x-12 lg:pb-12">
+          <div className="lg:col-start-1 lg:row-start-1">
+            <InviteCard preview={preview} />
+          </div>
+          <section className="mt-7 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mt-0 lg:rounded-[28px] lg:border lg:border-border lg:bg-card lg:px-8 lg:py-8 lg:shadow-[var(--shadow-soft)]">
             {user ? (
               <JoinForm
                 code={code}
@@ -73,8 +78,10 @@ export function JoinScreen({ code }: { code: string }) {
               </>
             )}
           </section>
-          <AppCallout code={code} />
-        </>
+          <div className="lg:col-start-1 lg:row-start-2">
+            <AppCallout code={code} />
+          </div>
+        </div>
       )}
     </Page>
   );
@@ -86,18 +93,23 @@ export function defaultMemberName(user: { name: string; email: string }): string
   return cleanName(user.name) ?? (fromEmail ? fromEmail.charAt(0).toLocaleUpperCase() + fromEmail.slice(1) : "");
 }
 
-export function Page({ children, action }: { children: ReactNode; action?: ReactNode }) {
+/**
+ * A page under the wordmark, which stays in one place on every page: the
+ * wordmark spans a computer's window (up to 1120 pixels), and the page below
+ * keeps a phone's column unless it is `wide` (laid out in columns there).
+ */
+export function Page({ children, action, wide = false }: { children: ReactNode; action?: ReactNode; wide?: boolean }) {
   const t = useTranslations("album");
   const { go } = useSite();
   return (
-    <div className="mx-auto flex w-full max-w-[460px] flex-1 flex-col px-4 pb-10 pt-5">
+    <div className="mx-auto flex w-full max-w-[1120px] flex-1 flex-col px-4 pb-10 pt-5 sm:px-6 lg:px-10 lg:pt-7">
       <header className="mb-5 flex items-center justify-between gap-3">
         <button type="button" onClick={() => go({ name: "home" })} aria-label={t("home.title")}>
           <Wordmark />
         </button>
         {action}
       </header>
-      {children}
+      <div className={`flex w-full flex-1 flex-col ${wide ? "" : "mx-auto max-w-[428px]"}`}>{children}</div>
     </div>
   );
 }
@@ -232,7 +244,7 @@ function AppCallout({ code }: { code: string }) {
     <a
       href={appInviteLink(code)}
       onClick={() => track(EVENTS.albumOpenInApp, { placement: "join_page" })}
-      className="mt-8 flex items-center justify-between gap-3 rounded-[22px] border border-border bg-card px-5 py-4 text-[14.5px] font-semibold shadow-[var(--shadow-soft)] hover:bg-background-subtle"
+      className="mt-8 flex items-center justify-between gap-3 rounded-[22px] lg:mt-5 border border-border bg-card px-5 py-4 text-[14.5px] font-semibold shadow-[var(--shadow-soft)] hover:bg-background-subtle"
     >
       <span>{t("join.haveApp")}</span>
       <span className="shrink-0 rounded-full bg-primary-soft px-3.5 py-1.5 text-[13px] font-bold text-primary">{t("join.openInApp")}</span>
