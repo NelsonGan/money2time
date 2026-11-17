@@ -67,7 +67,7 @@ class AlbumsRepository {
         ledgerId: getActiveLedgerId(),
         name: input.name,
         coverPhotoUri: input.coverPhotoUri ?? null,
-        icon: input.icon || null,
+        icon: input.icon ?? null,
         startDate: input.startDate ?? null,
         endDate: input.endDate ?? null,
         latitude: input.latitude ?? null,
@@ -88,10 +88,10 @@ class AlbumsRepository {
 
   update(id: string, input: Partial<CreateAlbumInput>) {
     const db = getDb();
-    // A cleared icon ('') is stored as none, as `create` stores it.
-    const values = input.icon === '' ? { ...input, icon: null } : input;
+    // A cleared icon is kept as '' (none, but one the user removed, which
+    // migration 096's flag backfill leaves), as `create` keeps it.
     db.update(albumsTable)
-      .set({ ...values, updatedAt: nowIso() })
+      .set({ ...input, updatedAt: nowIso() })
       .where(and(eq(albumsTable.id, id), isNull(albumsTable.deletedAt)))
       .run();
   }
