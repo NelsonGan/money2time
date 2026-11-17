@@ -38,7 +38,7 @@ function StoreButton({ target, placement }: { target: Exclude<DownloadTarget, "n
       target="_blank"
       rel="noopener noreferrer"
       onClick={() => trackLeaving(EVENTS.appDownloadClicked, { placement, target })}
-      className="inline-flex min-w-0 flex-1 items-center justify-center gap-2.5 rounded-[16px] bg-foreground px-4 py-2.5 text-card transition-transform active:scale-[0.98]"
+      className="inline-flex min-w-0 flex-1 items-center justify-center gap-2.5 rounded-[16px] bg-foreground px-4 py-2.5 text-card transition-transform active:scale-[0.98] @2xl:min-w-[172px] @2xl:flex-none @2xl:px-5"
     >
       {apple ? <AppleIcon className="h-[22px] w-[22px] shrink-0" /> : <PlayIcon className="h-[22px] w-[22px] shrink-0" />}
       <span className="flex flex-col items-start leading-tight">
@@ -57,18 +57,21 @@ export function GetTheApp({ code, placement }: { code?: string; placement: Extra
   const t = useTranslations("album");
   const stores = useStores();
   return (
-    <section className="mt-5 rounded-[24px] border border-border bg-card p-5 shadow-[var(--shadow-soft)]">
-      <div className="flex items-center gap-3.5">
-        <img src={media("/icon.png")} alt="" width={52} height={52} className="h-[52px] w-[52px] shrink-0 rounded-[28%] shadow-sm" />
-        <div className="min-w-0">
-          <h2 className="text-[17px] font-extrabold tracking-[-0.01em]">{t("app.title")}</h2>
-          <p className="mt-0.5 text-[13.5px] leading-snug text-foreground-soft">{t("app.body")}</p>
+    // Its own width decides the layout (a page's foot, or a sheet): the stores beside the text when there is room.
+    <section className="@container mt-5 rounded-[24px] border border-border bg-card p-5 shadow-[var(--shadow-soft)]">
+      <div className="flex flex-col @2xl:flex-row @2xl:items-center @2xl:gap-8">
+        <div className="flex items-center gap-3.5 @2xl:min-w-0 @2xl:flex-1">
+          <img src={media("/icon.png")} alt="" width={52} height={52} className="h-[52px] w-[52px] shrink-0 rounded-[28%] shadow-sm" />
+          <div className="min-w-0">
+            <h2 className="text-[17px] font-extrabold tracking-[-0.01em]">{t("app.title")}</h2>
+            <p className="mt-0.5 text-[13.5px] leading-snug text-foreground-soft">{t("app.body")}</p>
+          </div>
         </div>
-      </div>
-      <div className="mt-4 flex gap-2.5">
-        {stores.map((target) => (
-          <StoreButton key={target} target={target as Exclude<DownloadTarget, "none">} placement={placement} />
-        ))}
+        <div className="mt-4 flex gap-2.5 @2xl:mt-0 @2xl:shrink-0">
+          {stores.map((target) => (
+            <StoreButton key={target} target={target as Exclude<DownloadTarget, "none">} placement={placement} />
+          ))}
+        </div>
       </div>
       {code ? (
         <a href={appInviteLink(code)} onClick={() => track(EVENTS.albumOpenInApp, { placement: "joined" })} className="mt-3 flex items-center justify-center gap-1 text-[13.5px] font-bold text-primary hover:underline">

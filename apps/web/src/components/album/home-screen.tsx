@@ -9,7 +9,7 @@ import { useSite } from "./site";
 import { AlbumApiError, api } from "./api";
 import { GetTheApp } from "./get-app";
 import { Page } from "./join-screen";
-import { SignIn } from "./sign-in";
+import { SignInHero } from "./sign-in";
 import { Icon, Mascot, Spinner } from "./ui";
 
 /**
@@ -22,24 +22,24 @@ export function HomeScreen() {
   const { user, setUser, signOut } = useSite();
   if (!user) {
     return (
-      <Page>
-        <section className="flex flex-col items-center px-2 pt-4 text-center">
-          <Mascot pose="presenting" size={140} />
-          <h1 className="mt-3 text-[30px] font-extrabold leading-[1.1] tracking-[-0.035em] text-balance">{t("home.landingTitle")}</h1>
-          <p className="mt-2.5 max-w-[340px] text-[15px] text-foreground-soft text-pretty">{t("home.landingBody")}</p>
-        </section>
-        <section className="mt-7">
-          <SignIn context="home" onSignedIn={setUser} />
-        </section>
+      <Page wide="lg">
+        <SignInHero pose="presenting" title={t("home.landingTitle")} body={t("home.landingBody")} context="home" onSignedIn={setUser} />
       </Page>
     );
   }
+  return <SignedInHome email={user.email} onSignOut={() => void signOut()} />;
+}
+
+/** The albums as a grid from a tablet's width; no albums yet, or none read, stays in the phone's column. */
+function SignedInHome({ email, onSignOut }: { email: string; onSignOut: () => void }) {
+  const t = useTranslations("album");
+  const [albums, setAlbums] = useState<AlbumView[] | null>(null);
   return (
-    <Page>
-      <AlbumList />
+    <Page wide={albums?.length ? "sm" : undefined}>
+      <AlbumList albums={albums} setAlbums={setAlbums} />
       <p className="mt-6 text-center text-[13px] text-foreground-muted">
-        {t("join.signedInAs", { email: user.email })}{" "}
-        <button type="button" onClick={() => void signOut()} className="font-semibold text-foreground-soft hover:underline">
+        {t("join.signedInAs", { email })}{" "}
+        <button type="button" onClick={onSignOut} className="font-semibold text-foreground-soft hover:underline">
           {t("signOut")}
         </button>
       </p>
@@ -47,10 +47,9 @@ export function HomeScreen() {
   );
 }
 
-function AlbumList() {
+function AlbumList({ albums, setAlbums }: { albums: AlbumView[] | null; setAlbums: (albums: AlbumView[]) => void }) {
   const t = useTranslations("album");
   const { go, setUser } = useSite();
-  const [albums, setAlbums] = useState<AlbumView[] | null>(null);
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
@@ -67,7 +66,7 @@ function AlbumList() {
     return () => {
       live = false;
     };
-  }, [setUser]);
+  }, [setAlbums, setUser]);
 
   return (
     <>
@@ -87,7 +86,7 @@ function AlbumList() {
           <p className="mt-1 max-w-[320px] text-[14px] text-foreground-soft">{t("home.emptyBody")}</p>
         </section>
       ) : (
-        <ul className="flex flex-col gap-3">
+        <ul className="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
           {albums.map((album) => (
             <li key={album.id}>
               <button

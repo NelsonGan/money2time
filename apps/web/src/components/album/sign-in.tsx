@@ -7,7 +7,7 @@ import { AppleIcon } from "@/components/icons";
 import { EVENTS, track } from "@/lib/analytics";
 
 import { AlbumApiError, api, type SessionUser } from "./api";
-import { Button, Icon } from "./ui";
+import { Button, Icon, Mascot } from "./ui";
 
 /**
  * Signing in on the website, with the same account the app uses (the
@@ -115,6 +115,44 @@ function signInErrorKey(error: unknown): string {
   return "errors.generic";
 }
 
+/**
+ * The way in, with what it is for beside it: stacked and centred on a phone,
+ * side by side on a computer, the buttons on a card of their own.
+ */
+export function SignInHero({
+  pose,
+  title,
+  body,
+  context,
+  onSignedIn,
+}: {
+  pose: "presenting" | "waving";
+  title: string;
+  body: string;
+  context: "home" | "album";
+  onSignedIn: (user: SessionUser) => void;
+}) {
+  return (
+    <div className="flex flex-col lg:my-auto lg:grid lg:grid-cols-[minmax(0,1fr)_420px] lg:items-center lg:gap-16 lg:pb-16">
+      <section className="flex flex-col items-center px-2 pt-4 text-center lg:items-start lg:px-0 lg:pt-0 lg:text-left">
+        <Mascot pose={pose} size={140} className="lg:!h-[200px] lg:!w-[200px]" />
+        <h1 className="mt-3 text-[30px] font-extrabold leading-[1.1] tracking-[-0.035em] text-balance lg:mt-5 lg:text-[52px] lg:leading-[1.04]">{title}</h1>
+        <p className="mt-2.5 max-w-[340px] text-[15px] text-foreground-soft text-pretty lg:mt-4 lg:max-w-[480px] lg:text-[18px]">{body}</p>
+      </section>
+      <section className="mt-7 lg:mt-0 lg:rounded-[28px] lg:border lg:border-border lg:bg-card lg:px-8 lg:py-9 lg:shadow-[var(--shadow-soft)]">
+        <SignIn context={context} onSignedIn={onSignedIn} />
+      </section>
+    </div>
+  );
+}
+
+/**
+ * The three providers' buttons share one outline and one height, so Google's
+ * own button, Apple's and email's line up as a set.
+ */
+const PROVIDER_BUTTON =
+  "flex h-10 w-full items-center justify-center gap-2 rounded-full border border-[#dadce0] bg-white px-3 text-[14px] font-medium text-[#1f1f1f] [color-scheme:light] transition-colors hover:bg-[#f7f8f8] disabled:opacity-60";
+
 export function SignIn({ onSignedIn, context }: { onSignedIn: (user: SessionUser) => void; context: "join" | "home" | "album" }) {
   const t = useTranslations("album");
   const [mode, setMode] = useState<"choose" | "email">("choose");
@@ -125,8 +163,9 @@ export function SignIn({ onSignedIn, context }: { onSignedIn: (user: SessionUser
     onSignedIn(user);
   };
 
+  // One column, no wider than Google draws its button, for every step.
   return (
-    <div className="flex flex-col gap-3">
+    <div className="mx-auto flex w-full max-w-[400px] flex-col gap-3">
       {mode === "choose" ? (
         <>
           <GoogleButton onToken={(token) => api.signInWithGoogle(token).then((user) => done(user, "google"), (err: unknown) => setError(t(signInErrorKey(err))))} />
@@ -137,12 +176,12 @@ export function SignIn({ onSignedIn, context }: { onSignedIn: (user: SessionUser
             }}
             onError={() => setError(t("errors.generic"))}
           />
-          <Button tone="plain" className="h-11 w-full !text-[15px] !font-semibold" onClick={() => setMode("email")}>
+          <button type="button" className={PROVIDER_BUTTON} onClick={() => setMode("email")}>
             <span className="text-primary">
-              <Icon name="mail" />
+              <Icon name="mail" size={18} />
             </span>
             {t("signIn.email")}
-          </Button>
+          </button>
           {error ? (
             <p role="alert" className="text-center text-[13.5px] font-semibold text-error">
               {error}
@@ -156,7 +195,11 @@ export function SignIn({ onSignedIn, context }: { onSignedIn: (user: SessionUser
   );
 }
 
-/** Google's own button (Google Identity Services), in the page's language, the width of the column. */
+/**
+ * Google's own button (Google Identity Services), in the page's language, the
+ * width of the column: drawn again when the column changes width (a phone
+ * turned, a window resized), since Google draws it at a fixed width.
+ */
 function GoogleButton({ onToken }: { onToken: (idToken: string) => void }) {
   const locale = useLocale();
   const ref = useRef<HTMLDivElement>(null);
@@ -167,6 +210,8 @@ function GoogleButton({ onToken }: { onToken: (idToken: string) => void }) {
   });
   useEffect(() => {
     let live = true;
+    let observer: ResizeObserver | null = null;
+    let timer = 0;
     loadScript("https://accounts.google.com/gsi/client")
       .then(() => {
         const id = window.google?.accounts?.id;
@@ -179,20 +224,27 @@ function GoogleButton({ onToken }: { onToken: (idToken: string) => void }) {
           auto_select: false,
           use_fedcm_for_button: true,
         });
-        id.renderButton(element, {
-          type: "standard",
-          theme: "outline",
-          size: "large",
-          shape: "pill",
-          text: "continue_with",
-          logo_alignment: "center",
-          width: Math.min(400, Math.max(240, Math.round(element.getBoundingClientRect().width))),
-          locale,
+        let drawn = 0;
+        const draw = () => {
+          // Google draws 200 to 400 pixels wide; the column's layout width, whatever transform it is under.
+          const width = Math.min(400, Math.max(200, element.clientWidth));
+          if (width === drawn) return;
+          drawn = width;
+          id.renderButton(element, { type: "standard", theme: "outline", size: "large", shape: "pill", text: "continue_with", logo_alignment: "center", width, locale });
+        };
+        draw();
+        // Each draw loads Google's frame again: once the resize has settled, not on every step of it.
+        observer = new ResizeObserver(() => {
+          window.clearTimeout(timer);
+          timer = window.setTimeout(draw, 150);
         });
+        observer.observe(element);
       })
       .catch(() => live && setFailed(true));
     return () => {
       live = false;
+      observer?.disconnect();
+      window.clearTimeout(timer);
     };
   }, [locale]);
   if (failed) return null;
@@ -268,12 +320,7 @@ function AppleButton({ onCredential, onError }: { onCredential: (credential: App
   };
 
   return (
-    <button
-      type="button"
-      onClick={() => void signIn()}
-      disabled={busy}
-      className="mx-auto flex h-10 w-full max-w-[400px] items-center justify-center gap-2 rounded-full border border-[#dadce0] bg-white px-3 text-[14px] font-medium text-[#1f1f1f] [color-scheme:light] transition-colors hover:bg-[#f7f8f8] disabled:opacity-60"
-    >
+    <button type="button" onClick={() => void signIn()} disabled={busy} className={PROVIDER_BUTTON}>
       <AppleIcon className="h-[18px] w-[18px] shrink-0" />
       {t("signIn.apple")}
     </button>
