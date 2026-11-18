@@ -44,6 +44,12 @@ function createAuth(env: Env) {
       // Rate limits key on the real client address. Without this Better Auth
       // reads X-Forwarded-For, which a client can stuff to share one bucket.
       ipAddress: { ipAddressHeaders: ['cf-connecting-ip'] },
+      // No schema check at runtime: the D1 schema is ours
+      // (apps/cloudflare/d1/cloud-sync/schema.sql). The check is one promise
+      // per isolate that every request waits on, so when the request that
+      // started it is cancelled (the phone gave up), Cloudflare never settles
+      // it and every later request in that isolate fails with server_error.
+      database: { validateSchema: false },
     },
     session: {
       // A phone stays signed in; each use within the update window extends it.
