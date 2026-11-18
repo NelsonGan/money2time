@@ -5515,6 +5515,16 @@ invite link per ledger: code hash and sealed code), `ledger_media_usage`,
 `shared_albums` and `ledger_changes` (each shared album's change stamp), each deleted with its user or ledger by `ON DELETE CASCADE`. The schema drops
 `ledger_invites`, the single-use invites from before release.
 
+Better Auth's own runtime schema check is off (`validateSchema: false` in
+`auth.ts`); instead the Worker test `test/authSchemaCheck.test.ts` runs the
+same check against this file, so a Better Auth upgrade that needs a new
+table or column fails CI. The runtime check read `sqlite_master` and
+every table's `pragma_table_info` once per isolate, as one promise every
+request waited on. When the request that started it was cancelled (the phone
+gave up), the promise never settled, and every later request in that isolate
+failed with `server_error` ("This promise was created by a request that has
+since ended").
+
 #### Resources
 
 Made for this feature on 2026-10-28, all new (nothing existing is shared):

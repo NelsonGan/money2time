@@ -44,6 +44,9 @@ function createAuth(env: Env) {
       // Rate limits key on the real client address. Without this Better Auth
       // reads X-Forwarded-For, which a client can stuff to share one bucket.
       ipAddress: { ipAddressHeaders: ['cf-connecting-ip'] },
+      // No runtime schema check; why, and what checks schema.sql instead:
+      // README "Cloud-sync Worker", Storage (D1).
+      database: { validateSchema: false },
     },
     session: {
       // A phone stays signed in; each use within the update window extends it.
