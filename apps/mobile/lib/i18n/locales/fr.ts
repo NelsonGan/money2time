@@ -2413,6 +2413,8 @@ const fr = {
       "Les packs d'icônes supplémentaires sont une fonction Pro. Passez à Pro pour tous les utiliser.",
     limit_live_earnings_auto_start:
       "Démarrer l'horloge selon une programmation est une fonctionnalité Pro. Passez à Pro et votre service commence tout seul. Le démarrage manuel reste toujours gratuit.",
+    limit_album_categories:
+      "Modifier les catégories d'un album partagé est une fonction Pro. Passez à Pro pour les renommer, en ajouter ou en supprimer pour tous les membres de l'album.",
     limit_reimbursements:
       'Le suivi des remboursements est une fonctionnalité Pro. Passez à Pro pour marquer les dépenses que vous allez récupérer.',
     upgrade: 'Passer à Pro',
@@ -3161,6 +3163,13 @@ const fr = {
       failed: 'Impossible d’enregistrer la modification de cet album. Réessayez.',
     },
     line_label: '{{name}}, album',
+    category_list: {
+      title: 'Catégories',
+      edit: 'Modifier les catégories',
+      info: "Tous les membres de cet album classent leurs dépenses dans ces catégories, dans l'app et sur le web. Une modification faite ici s'applique à tous. Si vous en supprimez une, ses dépenses passent dans {{other}}.",
+      limit: "Un album peut avoir jusqu'à {{count}} catégories.",
+      remove_body: 'Ses dépenses passent dans {{other}} pour tous les membres de cet album.',
+    },
     categories: {
       food: 'Alimentation',
       groceries: 'Courses',
@@ -3203,6 +3212,10 @@ const fr = {
       simplify_on: '{{actor}} : « Simplifier les dettes du groupe » activé',
       simplify_off: '{{actor}} : « Simplifier les dettes du groupe » désactivé',
       cover: '{{actor}} : couverture modifiée',
+      category_added: '{{actor}} a ajouté la catégorie {{name}}',
+      category_removed: '{{actor}} a supprimé la catégorie {{name}}',
+      category_renamed: '{{actor}} a renommé la catégorie {{before}} en {{after}}',
+      category_icon: "{{actor}} a changé l'icône de {{name}}",
     },
   },
   assets: {

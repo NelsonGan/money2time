@@ -2402,6 +2402,8 @@ const ms = {
     limit_icon_packs: 'Pek ikon tambahan ialah ciri Pro. Naik taraf untuk guna semua pek.',
     limit_live_earnings_auto_start:
       'Memulakan jam mengikut jadual ialah ciri Pro. Naik taraf dan syif anda bermula dengan sendirinya. Memulakan secara manual sentiasa percuma.',
+    limit_album_categories:
+      'Menukar kategori album dikongsi ialah ciri Pro. Naik taraf untuk menukar nama, menambah atau membuangnya bagi semua orang dalam album.',
     limit_reimbursements:
       'Penjejakan bayaran balik ialah ciri Pro. Naik taraf untuk menanda perbelanjaan yang akan anda dapat semula.',
     limit_subcurrencies:
@@ -3138,6 +3140,13 @@ const ms = {
       failed: 'Tidak dapat menyimpan perubahan pada album ini. Cuba lagi.',
     },
     line_label: '{{name}}, album',
+    category_list: {
+      title: 'Kategori',
+      edit: 'Edit kategori',
+      info: 'Semua orang dalam album ini memfailkan bil mereka di bawah kategori ini, dalam aplikasi dan di web. Perubahan yang anda buat di sini sampai kepada semua. Jika anda membuang satu, bilnya berpindah ke {{other}}.',
+      limit: 'Satu album boleh ada sehingga {{count}} kategori.',
+      remove_body: 'Bilnya berpindah ke {{other}} untuk semua orang dalam album ini.',
+    },
     categories: {
       food: 'Makanan',
       groceries: 'Barangan Runcit',
@@ -3180,6 +3189,10 @@ const ms = {
       simplify_on: '{{actor}} menghidupkan Ringkaskan hutang kumpulan',
       simplify_off: '{{actor}} mematikan Ringkaskan hutang kumpulan',
       cover: '{{actor}} menukar kulit',
+      category_added: '{{actor}} menambah kategori {{name}}',
+      category_removed: '{{actor}} membuang kategori {{name}}',
+      category_renamed: '{{actor}} menukar nama kategori {{before}} kepada {{after}}',
+      category_icon: '{{actor}} menukar ikon {{name}}',
     },
   },
   assets: {

@@ -1,5 +1,5 @@
 import { dayRange } from "@/lib/backup/dates";
-import { ALBUM_CATEGORIES, albumCategory, albumCategoryOf, type AlbumCategoryKey } from "@/lib/album/categories";
+import { albumCategory, albumCategoryForOwn, albumCategoryIconOf, DEFAULT_ALBUM_CATEGORY_LIST, type AlbumCategoryKey } from "@/lib/album/categories";
 import { albumGroupOf } from "@/lib/backup/album-group";
 import { albumIdOfLine, lineOf } from "@/lib/backup/album-lines";
 import { OTHER_COLOR, SERIES_COLORS, type Category, type Model, type RecurringRule, type Trip, type Tx } from "@/lib/backup/model";
@@ -52,8 +52,10 @@ export type Slice = {
   category: Category | null;
   /** An album's own line (README: Key patterns > Albums): its spending, whatever the category. */
   trip?: Trip;
-  /** A shared album's category, in an album's own breakdown (`ALBUM_CATEGORIES`). */
+  /** A shared album's category, in an album's own breakdown (one of the album's). */
   albumCategory?: AlbumCategoryKey;
+  /** The name the album gave that category; absent or null for a default's own, read in the page's language. */
+  albumCategoryName?: string | null;
 };
 
 const UNCATEGORIZED = "__none";
@@ -120,6 +122,7 @@ export function albumBreakdown(txs: Tx[], model: Model, albumId: string): Slice[
   const byAlbumCategory = ended || txs.some((tx) => tx.albumCategory) || (!!group && [...group.bills.values()].some((bill) => bill.category));
   // A bill's category, for an entry the phone has not stamped yet, and for
   // the entries its paid parts made.
+  const categories = group?.categories ?? DEFAULT_ALBUM_CATEGORY_LIST;
   const categoryOf = new Map<string, AlbumCategoryKey>();
   if (byAlbumCategory && group) {
     for (const bill of group.bills.values()) if (bill.category) categoryOf.set(bill.id, bill.category);
@@ -133,19 +136,27 @@ export function albumBreakdown(txs: Tx[], model: Model, albumId: string): Slice[
     let key: string;
     let slice: Slice | undefined;
     if (byAlbumCategory) {
-      // Else (an entry of the user's own there): its category's icon, then name, else Other.
+      // Else (an entry of the user's own there): what its own category reads as.
       const root = tx.parentId ? model.categories.get(tx.parentId) : null;
-      const category = tx.albumCategory ?? categoryOf.get(tx.id) ?? albumCategoryOf({ category_name: root?.name, category_icon: root?.icon });
-      key = category;
+      const picked = tx.albumCategory ?? categoryOf.get(tx.id) ?? albumCategoryForOwn(root, categories);
+      const known = categories.find((entry) => entry.key === picked);
+      // With no list for the album (one no longer shared), or a category it
+      // has no longer: the name and icon the entry keeps, else Other. A
+      // renamed default keeps its new name too.
+      const kept = (!known || !group) && picked === tx.albumCategory && !!(tx.albumCategoryName || tx.albumCategoryIcon);
+      const category = kept ? null : (known ?? categories.find((entry) => entry.key === "other") ?? DEFAULT_ALBUM_CATEGORY_LIST[DEFAULT_ALBUM_CATEGORY_LIST.length - 1]);
+      key = category?.key ?? picked;
+      const index = categories.findIndex((entry) => entry.key === key);
       slice = map.get(key) ?? {
         id: key,
-        name: albumCategory(category).name,
-        icon: albumCategory(category).icon,
-        color: SERIES_COLORS[ALBUM_CATEGORIES.findIndex((entry) => entry.key === category)] ?? OTHER_COLOR,
+        name: category ? (category.name ?? albumCategory(key).name) : (tx.albumCategoryName ?? albumCategory(key).name),
+        icon: category ? albumCategoryIconOf(category) : (tx.albumCategoryIcon ?? albumCategory(key).icon),
+        color: (index >= 0 ? SERIES_COLORS[index] : undefined) ?? OTHER_COLOR,
         amt: ZERO,
         count: 0,
         category: null,
-        albumCategory: category,
+        albumCategory: key,
+        albumCategoryName: category ? category.name : (tx.albumCategoryName ?? null),
       };
     } else {
       key = tx.parentId ?? UNCATEGORIZED;

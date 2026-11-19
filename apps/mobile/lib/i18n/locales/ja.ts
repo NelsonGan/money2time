@@ -2372,6 +2372,8 @@ const ja = {
     limit_icon_packs: '追加のアイコンパックはPro機能です。アップグレードで全パックを使えます。',
     limit_live_earnings_auto_start:
       'スケジュールに合わせて自動で計測を始めるのはPro機能です。アップグレードすると勤務が自動で始まります。手動での開始はいつでも無料です。',
+    limit_album_categories:
+      '共有アルバムのカテゴリの変更はPro機能です。アップグレードすると、アルバムの全員に向けて名前の変更、追加、削除ができます。',
     limit_reimbursements:
       '立て替えの管理は Pro の機能です。あとで戻ってくる支出に印を付けるにはアップグレードしてください。',
     limit_subcurrencies:
@@ -3101,6 +3103,13 @@ const ja = {
       failed: 'このアルバムへの変更を保存できませんでした。もう一度お試しください。',
     },
     line_label: '{{name}}（アルバム）',
+    category_list: {
+      title: 'カテゴリ',
+      edit: 'カテゴリを編集',
+      info: 'このアルバムの全員が、アプリでもウェブでも、支払いをこれらのカテゴリに分類します。ここでの変更は全員に反映されます。カテゴリを削除すると、その支払いは「{{other}}」に移ります。',
+      limit: '1つのアルバムに登録できるカテゴリは最大{{count}}個です。',
+      remove_body: 'このアルバムの全員について、その支払いは「{{other}}」に移ります。',
+    },
     categories: {
       food: '食費',
       groceries: '日用品',
@@ -3143,6 +3152,10 @@ const ja = {
       simplify_on: '{{actor}}が「グループの貸し借りをまとめる」をオン',
       simplify_off: '{{actor}}が「グループの貸し借りをまとめる」をオフ',
       cover: '{{actor}}がカバーを変更',
+      category_added: '{{actor}}さんがカテゴリ「{{name}}」を追加しました',
+      category_removed: '{{actor}}さんがカテゴリ「{{name}}」を削除しました',
+      category_renamed: '{{actor}}さんがカテゴリ「{{before}}」の名前を「{{after}}」に変更しました',
+      category_icon: '{{actor}}さんが「{{name}}」のアイコンを変更しました',
     },
   },
   assets: {

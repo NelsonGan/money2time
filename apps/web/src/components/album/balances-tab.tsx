@@ -9,7 +9,7 @@ import { cents } from "@/lib/backup/album-group";
 import type { Group } from "@/lib/album/group";
 import { groupDebts } from "@/lib/album/writes";
 
-import { Avatar, Icon, Mascot, currencyOrder, currencySymbol, personColor, useCategoryLabel, useDay, useMoney } from "./ui";
+import { Avatar, Icon, Mascot, currencyOrder, currencySymbol, personColor, useCategoryLabel, useDay, useDefaultCategoryLabel, useMoney } from "./ui";
 
 export type SettleTarget = GroupDebt;
 
@@ -200,15 +200,16 @@ function CurrencyChip({ currency }: { currency: string }) {
 function Activity({ group }: { group: Group }) {
   const t = useTranslations("dashboard.trips.activity");
   const ta = useTranslations("album");
-  const category = useCategoryLabel();
+  const category = useCategoryLabel(group.categories);
+  const defaultCategory = useDefaultCategoryLabel();
   const locale = useLocale();
   const money = useMoney();
   const day = useDay();
   const [all, setAll] = useState(false);
   const lines = useMemo(() => {
     const nameOf = (id: string | null | undefined) => group.members.find((member) => member.id === id)?.name ?? ta("someone");
-    return group.activity.map((entry) => describeActivity(entry, { t: (key, values) => t(key, values), selfId: group.selfId, nameOf, money, day: (date) => day(date), category }));
-  }, [category, day, group, money, t, ta]);
+    return group.activity.map((entry) => describeActivity(entry, { t: (key, values) => t(key, values), selfId: group.selfId, nameOf, money, day: (date) => day(date), category, defaultCategory }));
+  }, [category, day, defaultCategory, group, money, t, ta]);
   if (!lines.length) return null;
   const shown = all ? lines : lines.slice(0, ACTIVITY_SHOWN);
   const dayOf = (iso: string) => {

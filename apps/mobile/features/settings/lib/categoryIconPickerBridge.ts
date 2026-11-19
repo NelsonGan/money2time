@@ -15,6 +15,11 @@ export interface CategoryIconPickerSession {
   onSelect: (value: string | null) => void;
   /** Optional header title override (defaults to the generic "Choose icon"). */
   title?: string;
+  /**
+   * No Uploads tab: for an icon every phone must draw (a shared album's
+   * category), which an image on this phone is not.
+   */
+  noUploads?: boolean;
 }
 
 let pending: CategoryIconPickerSession | null = null;

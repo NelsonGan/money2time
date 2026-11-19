@@ -80,6 +80,7 @@ import { getSubscriptionLogoMeta, suggestSubscriptionLogo } from '~/constants/su
 import { useApp, useTransferFeeIndex } from '~/context/AppContext';
 import { useSetSplitBillSession } from '~/context/SplitBillSession';
 import {
+  type AlbumCategoryDef,
   albumCategoryForCategory,
   albumCategoryForText,
   albumCategoryId,
@@ -465,7 +466,7 @@ interface TransactionEditorScreenProps {
    * A shared album's bill: its expense categories are the album's own, the
    * same for everyone (README: Album members and shared albums > Categories).
    */
-  albumCategories?: boolean;
+  albumCategories?: readonly AlbumCategoryDef[] | null;
   titleOverride?: string;
   subtitleOverride?: string;
   submitLabelOverride?: string;
@@ -747,7 +748,7 @@ export function TransactionEditorScreen({
   initialSplits,
   defaultSplitWith,
   groupBill = false,
-  albumCategories = false,
+  albumCategories = null,
   titleOverride,
   subtitleOverride,
   submitLabelOverride,
@@ -897,10 +898,12 @@ export function TransactionEditorScreen({
   // bill's title picks one by Quick Entry's keywords ("Lunch" → Food) until
   // the user picks one themselves.
   const groupCategories = useMemo(
-    () => (albumCategories ? albumCategoryPickerList() : null),
+    () => (albumCategories ? albumCategoryPickerList(albumCategories) : null),
     [albumCategories],
   );
   const categoryPickedRef = useRef(mode !== 'create');
+  const albumCategoriesRef = useRef(albumCategories);
+  albumCategoriesRef.current = albumCategories;
   const autoAlbumCategoryRef = useRef(false);
   autoAlbumCategoryRef.current = !!groupCategories && type === 'expense';
   useEffect(() => {
@@ -908,10 +911,15 @@ export function TransactionEditorScreen({
     if (albumCategoryKeyOfId(categoryId)) return;
     setCategoryId(
       albumCategoryId(
-        albumCategoryForCategory(categoryId, categories, quickEntryPrefs.categoryMap),
+        albumCategoryForCategory(
+          categoryId,
+          categories,
+          quickEntryPrefs.categoryMap,
+          albumCategories ?? undefined,
+        ),
       ),
     );
-  }, [categories, categoryId, groupCategories, quickEntryPrefs.categoryMap, type]);
+  }, [albumCategories, categories, categoryId, groupCategories, quickEntryPrefs.categoryMap, type]);
   // The longer note, kept apart from the one-line note so that one can stay the
   // row's title. Its box in the options panel expands in place for typing.
   const [details, setDetails] = useState(initialValues?.details ?? '');
@@ -3348,7 +3356,7 @@ export function TransactionEditorScreen({
     }
     setNote(nextNote);
     if (autoAlbumCategoryRef.current && !categoryPickedRef.current) {
-      const key = albumCategoryForText(nextNote);
+      const key = albumCategoryForText(nextNote, albumCategoriesRef.current ?? undefined);
       if (key) setCategoryId(albumCategoryId(key));
     }
     if (noteSuggestionsTimerRef.current) clearTimeout(noteSuggestionsTimerRef.current);

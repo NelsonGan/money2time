@@ -34,10 +34,10 @@ const MAX_WRITE_ROWS = 400;
 export const MAX_MEMBER_ROWS = 200;
 
 /**
- * The categories a shared album's bills are filed under, the same for everyone
- * in it: the app's eight default expense categories. The key never changes; a
- * bill also keeps the English name and icon, which older apps match against
- * their own categories (by name, then icon).
+ * The categories every shared album starts with: the app's eight default
+ * expense categories. The key never changes; a bill also keeps its
+ * category's English name and icon, which older apps match against their own
+ * categories (by name, then icon). An album can change them (`album_categories`).
  */
 export const ALBUM_CATEGORIES = [
   { key: 'food', name: 'Food', icon: 'meal' },
@@ -49,11 +49,30 @@ export const ALBUM_CATEGORIES = [
   { key: 'shopping', name: 'Shopping', icon: 'shopping-bag' },
   { key: 'other', name: 'Other', icon: 'invoice' },
 ] as const;
-export type AlbumCategoryKey = (typeof ALBUM_CATEGORIES)[number]['key'];
-export const ALBUM_CATEGORY_OTHER: AlbumCategoryKey = 'other';
+export type DefaultAlbumCategoryKey = (typeof ALBUM_CATEGORIES)[number]['key'];
+/** A default category's key, or one an album added (`c-<id>`). */
+export type AlbumCategoryKey = string;
+export const ALBUM_CATEGORY_OTHER: DefaultAlbumCategoryKey = 'other';
+/** The key of a category an album added: `c-` and a random id. */
+export const CUSTOM_ALBUM_CATEGORY_KEY = /^c-[A-Za-z0-9]{6,32}$/;
+/** More categories than an album needs (the app offers at most 30). */
+export const MAX_ALBUM_CATEGORIES = 30;
+const MAX_CATEGORY_NAME = 40;
+/**
+ * A category's icon as every phone can draw it: a bundled icon's id, or an
+ * emoji (`emoji:X`). An uploaded image (`custom:…`) lives on one phone only.
+ */
+export const ALBUM_CATEGORY_ICON = /^(?:[a-z0-9][a-z0-9-]{0,47}|emoji:[^\s/\\]{1,24})$/u;
 
-export function isAlbumCategoryKey(value: unknown): value is AlbumCategoryKey {
+export function isDefaultAlbumCategoryKey(value: unknown): value is DefaultAlbumCategoryKey {
   return ALBUM_CATEGORIES.some((category) => category.key === value);
+}
+
+/** A default category's key, or one an album added. */
+export function isAlbumCategoryKey(value: unknown): value is AlbumCategoryKey {
+  return (
+    isDefaultAlbumCategoryKey(value) || (isText(value) && CUSTOM_ALBUM_CATEGORY_KEY.test(value))
+  );
 }
 
 /**
@@ -70,16 +89,88 @@ export function albumCategoryOf(row: Row): AlbumCategoryKey {
   return byName ? byName.key : ALBUM_CATEGORY_OTHER;
 }
 
-/** The columns a bill is written with for a category. */
-export function albumCategoryColumns(key: AlbumCategoryKey): Row {
-  const category =
-    ALBUM_CATEGORIES.find((entry) => entry.key === key) ??
-    ALBUM_CATEGORIES[ALBUM_CATEGORIES.length - 1];
+/**
+ * The columns a bill is written with for a category: a default's English
+ * name and icon, or an added one's, from `row` (what the writer sent).
+ */
+export function albumCategoryColumns(key: AlbumCategoryKey, row: Row = {}): Row {
+  const fixed = ALBUM_CATEGORIES.find((entry) => entry.key === key);
+  if (fixed || !CUSTOM_ALBUM_CATEGORY_KEY.test(key)) {
+    const category = fixed ?? ALBUM_CATEGORIES[ALBUM_CATEGORIES.length - 1];
+    return {
+      category_key: category.key,
+      category_name: category.name,
+      category_icon: category.icon,
+    };
+  }
+  const icon = row.category_icon;
   return {
-    category_key: category.key,
-    category_name: category.name,
-    category_icon: category.icon,
+    category_key: key,
+    category_name: cleanCategoryName(row.category_name) ?? 'Other',
+    category_icon: isText(icon) && ALBUM_CATEGORY_ICON.test(icon) ? icon : 'invoice',
   };
+}
+
+function cleanCategoryName(value: unknown): string | null {
+  return isText(value)
+    ? value.replace(/\s+/g, ' ').trim().slice(0, MAX_CATEGORY_NAME) || null
+    : null;
+}
+
+/**
+ * A category's row in the group: one per album and key, so two phones
+ * editing the same category write one row (a phone keeps every album's
+ * categories in one table).
+ */
+export function categoryRowId(groupId: string, key: AlbumCategoryKey): string {
+  const album = groupId.replace(/[^A-Za-z0-9]/g, '').slice(0, 12);
+  return `ac-${album}-${key}`.slice(0, 64);
+}
+
+/** One of an album's categories, as its row (or a default with none) says. */
+export interface AlbumCategoryDef {
+  key: AlbumCategoryKey;
+  /** The name the album gave it; null for a default's own (shown translated). */
+  name: string | null;
+  /** The icon the album gave it; null for a default's own. */
+  icon: string | null;
+  sortOrder: number;
+}
+
+/**
+ * An album's categories, in order: the eight defaults, as the album changed
+ * them, and the ones it added. Rows that are not a category (another album's,
+ * a bad key) are passed over; Other is always there, whatever a row says.
+ */
+export function albumCategoryList(rows: readonly Row[]): AlbumCategoryDef[] {
+  const byKey = new Map<string, Row>();
+  for (const row of rows) {
+    if (isAlbumCategoryKey(row.key)) byKey.set(row.key, row);
+  }
+  const defs: AlbumCategoryDef[] = [];
+  const add = (key: AlbumCategoryKey, index: number, isDefault: boolean) => {
+    const row = byKey.get(key);
+    if (row && row.deleted_at != null && key !== ALBUM_CATEGORY_OTHER) return;
+    if (!row && !isDefault) return;
+    const icon = row?.icon;
+    const name = cleanCategoryName(row?.name);
+    if (!isDefault && !name) return;
+    const order = row?.sort_order;
+    defs.push({
+      key,
+      name,
+      icon: isText(icon) && ALBUM_CATEGORY_ICON.test(icon) ? icon : null,
+      sortOrder:
+        typeof order === 'number' && Number.isFinite(order) ? order : isDefault ? index : 1000,
+    });
+  };
+  ALBUM_CATEGORIES.forEach((category, index) => add(category.key, index, true));
+  for (const key of byKey.keys()) {
+    if (!isDefaultAlbumCategoryKey(key)) add(key, ALBUM_CATEGORIES.length, false);
+  }
+  return defs
+    .slice(0, MAX_ALBUM_CATEGORIES + ALBUM_CATEGORIES.length)
+    .sort((a, b) => a.sortOrder - b.sortOrder || a.key.localeCompare(b.key));
 }
 
 export const GROUP_TABLES = [
@@ -88,6 +179,7 @@ export const GROUP_TABLES = [
   'album_settlements',
   'album_groups',
   'album_activity',
+  'album_categories',
 ] as const;
 export type GroupTable = (typeof GROUP_TABLES)[number];
 /** What a change may ask to write: everything but the log, which a plan writes itself. */
@@ -96,6 +188,7 @@ const WRITABLE = new Set<string>([
   'album_expenses',
   'album_settlements',
   'album_groups',
+  'album_categories',
 ]);
 
 export type Row = Record<string, unknown>;
@@ -126,7 +219,8 @@ type ActivityKind =
   | 'member_left'
   | 'member_renamed'
   | 'simplify_changed'
-  | 'cover_changed';
+  | 'cover_changed'
+  | 'category_changed';
 
 /** A row a change writes, whole: it replaces the row with that id, if there is one. */
 export interface PlannedWrite {
@@ -595,11 +689,11 @@ export function planWrite(
         currency,
         // A row with no key comes from an older app, which sends its own
         // category: the bill keeps the album category it has.
-        ...albumCategoryColumns(
-          !isAlbumCategoryKey(row.category_key) && before && isAlbumCategoryKey(before.category_key)
-            ? before.category_key
-            : albumCategoryOf(row),
-        ),
+        ...(!isAlbumCategoryKey(row.category_key) &&
+        before &&
+        isAlbumCategoryKey(before.category_key)
+          ? albumCategoryColumns(before.category_key, before)
+          : albumCategoryColumns(albumCategoryOf(row), row)),
         paid_by: paidBy,
         shares_json: JSON.stringify(shares),
         created_by: authorStamp(ctx),
@@ -697,6 +791,67 @@ export function planWrite(
         memberId: self.id,
         data: { before: { name: self.name }, after: { name } },
       });
+      continue;
+    }
+
+    if (table === 'album_categories') {
+      // One of the album's categories: changed, added or removed. Other is
+      // never removed: a bill whose category goes reads as Other.
+      const key = row.key;
+      if (!isAlbumCategoryKey(key) || row.id !== categoryRowId(ctx.groupId, key)) {
+        throw new GroupWriteError('bad_row');
+      }
+      const isDefault = isDefaultAlbumCategoryKey(key);
+      const before = now(table, row.id);
+      const wasLive = isDefault ? !before || before.deleted_at == null : live(before);
+      const look = (data: Row | undefined) => ({
+        name: cleanCategoryName(data?.name),
+        icon: isText(data?.icon) && ALBUM_CATEGORY_ICON.test(data.icon) ? data.icon : null,
+      });
+      const was = wasLive ? look(before) : null;
+      const removing = row.deleted_at != null;
+      if (removing && key === ALBUM_CATEGORY_OTHER) throw new GroupWriteError('forbidden', 403);
+      // A field left out keeps what the category has (a move in the list
+      // sends neither name nor icon), so a phone that has not yet seen
+      // another's rename or removal neither undoes it nor brings one back.
+      if (!removing && !wasLive && !('name' in row) && !('icon' in row)) continue;
+      const name = 'name' in row ? cleanCategoryName(row.name) : (was?.name ?? null);
+      const icon = 'icon' in row ? row.icon : (was?.icon ?? null);
+      if (
+        (!removing && !isDefault && !name) ||
+        (icon != null && !(isText(icon) && ALBUM_CATEGORY_ICON.test(icon)))
+      ) {
+        throw new GroupWriteError('bad_row');
+      }
+      const order = row.sort_order;
+      const defaultIndex = ALBUM_CATEGORIES.findIndex((category) => category.key === key);
+      const sortOrder =
+        typeof order === 'number' && Number.isInteger(order) && order >= 0 && order <= 1000
+          ? order
+          : typeof before?.sort_order === 'number'
+            ? before.sort_order
+            : defaultIndex >= 0
+              ? defaultIndex
+              : 1000;
+      const data: Row = {
+        id: row.id,
+        ledger_id: ctx.groupId,
+        key,
+        name: removing ? cleanCategoryName(before?.name) : name,
+        icon: removing ? look(before).icon : ((icon as string | null) ?? null),
+        sort_order: sortOrder,
+        created_by: authorStamp(ctx),
+        created_at: isText(before?.created_at) ? before.created_at : ctx.now,
+        updated_at: ctx.now,
+        deleted_at: removing ? (before?.deleted_at ?? ctx.now) : null,
+      };
+      const after = removing ? null : look(data);
+      if (removing && !wasLive) continue;
+      const same = !!was && !!after && was.name === after.name && was.icon === after.icon;
+      if (same && before?.sort_order === sortOrder) continue;
+      put(table, row.id, data);
+      // A move in the list is not news; a change of what it is called is.
+      if (!same) activities.push({ kind: 'category_changed', data: { key, before: was, after } });
       continue;
     }
 

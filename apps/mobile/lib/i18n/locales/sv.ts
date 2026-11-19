@@ -2389,6 +2389,8 @@ const sv = {
     limit_icon_packs: 'Fler ikonpaket är en Pro-funktion. Uppgradera för att använda alla paket.',
     limit_live_earnings_auto_start:
       'Att starta klockan enligt ett schema är en Pro-funktion. Uppgradera så startar ditt pass av sig själv. Att starta för hand är alltid gratis.',
+    limit_album_categories:
+      'Att ändra ett delat albums kategorier är en Pro-funktion. Uppgradera för att byta namn på, lägga till eller ta bort dem för alla i albumet.',
     limit_reimbursements:
       'Att spåra ersättningar är en Pro-funktion. Uppgradera för att markera utgifter du får tillbaka.',
     limit_subcurrencies:
@@ -3120,6 +3122,13 @@ const sv = {
       failed: 'Det gick inte att spara ändringen i albumet. Försök igen.',
     },
     line_label: '{{name}}, album',
+    category_list: {
+      title: 'Kategorier',
+      edit: 'Redigera kategorier',
+      info: 'Alla i det här albumet lägger sina räkningar under de här kategorierna, i appen och på webben. En ändring du gör här gäller för alla. Tar du bort en flyttas dess räkningar till {{other}}.',
+      limit: 'Ett album kan ha upp till {{count}} kategorier.',
+      remove_body: 'Dess räkningar flyttas till {{other}} för alla i det här albumet.',
+    },
     categories: {
       food: 'Mat',
       groceries: 'Matvaror',
@@ -3162,6 +3171,10 @@ const sv = {
       simplify_on: '{{actor}} slog på Förenkla gruppens skulder',
       simplify_off: '{{actor}} stängde av Förenkla gruppens skulder',
       cover: '{{actor}} bytte omslag',
+      category_added: '{{actor}} lade till kategorin {{name}}',
+      category_removed: '{{actor}} tog bort kategorin {{name}}',
+      category_renamed: '{{actor}} döpte om kategorin {{before}} till {{after}}',
+      category_icon: '{{actor}} ändrade ikonen för {{name}}',
     },
   },
   assets: {

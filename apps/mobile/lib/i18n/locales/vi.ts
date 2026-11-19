@@ -2374,6 +2374,8 @@ const vi = {
     limit_icon_packs: 'Các bộ biểu tượng thêm là tính năng Pro. Nâng cấp để dùng mọi bộ.',
     limit_live_earnings_auto_start:
       'Tự động bắt đầu tính giờ theo lịch là tính năng Pro. Nâng cấp để ca làm của bạn tự bắt đầu. Bắt đầu thủ công luôn miễn phí.',
+    limit_album_categories:
+      'Thay đổi danh mục của album chia sẻ là tính năng Pro. Nâng cấp để đổi tên, thêm hoặc xóa danh mục cho mọi người trong album.',
     limit_reimbursements:
       'Theo dõi hoàn tiền là tính năng Pro. Nâng cấp để đánh dấu những khoản chi bạn sẽ nhận lại.',
     limit_subcurrencies:
@@ -3100,6 +3102,13 @@ const vi = {
       failed: 'Không thể lưu thay đổi cho album này. Hãy thử lại.',
     },
     line_label: '{{name}}, album',
+    category_list: {
+      title: 'Danh mục',
+      edit: 'Sửa danh mục',
+      info: 'Mọi người trong album này xếp hóa đơn vào các danh mục này, trong ứng dụng và trên web. Thay đổi bạn thực hiện ở đây áp dụng cho tất cả. Nếu xóa một danh mục, các hóa đơn của nó sẽ chuyển sang {{other}}.',
+      limit: 'Một album có thể có tối đa {{count}} danh mục.',
+      remove_body: 'Các hóa đơn của nó sẽ chuyển sang {{other}} cho mọi người trong album này.',
+    },
     categories: {
       food: 'Ăn uống',
       groceries: 'Hàng tạp hóa',
@@ -3142,6 +3151,10 @@ const vi = {
       simplify_on: '{{actor}} đã bật Đơn giản hóa nợ nhóm',
       simplify_off: '{{actor}} đã tắt Đơn giản hóa nợ nhóm',
       cover: '{{actor}} đã đổi ảnh bìa',
+      category_added: '{{actor}} đã thêm danh mục {{name}}',
+      category_removed: '{{actor}} đã xóa danh mục {{name}}',
+      category_renamed: '{{actor}} đã đổi tên danh mục {{before}} thành {{after}}',
+      category_icon: '{{actor}} đã đổi biểu tượng của {{name}}',
     },
   },
   assets: {

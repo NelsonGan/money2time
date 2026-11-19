@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { albumGroupOf, billPeople, describeActivity, groupActivityByDay, type ActivityContext } from "./album-group.ts";
+import { albumCategoriesOf, albumGroupOf, billPeople, describeActivity, groupActivityByDay, type ActivityContext } from "./album-group.ts";
 import type { WebAlbumActivityRow, WebAlbumBillSnapshot } from "./types";
 
 const tables = {
@@ -73,6 +73,10 @@ const WORDS: Record<string, string> = {
   changed_album: "{actor} changed the album",
   changed_bill: "{actor} changed {title}",
   recategorized_bill: "{actor} filed {title} under {category}",
+  category_added: "{actor} added the category {name}",
+  category_removed: "{actor} removed the category {name}",
+  category_renamed: "{actor} renamed the category {before} to {after}",
+  category_icon: "{actor} changed the icon of {name}",
 };
 
 const ctx = (patch: Partial<ActivityContext> = {}): ActivityContext => ({
@@ -167,4 +171,47 @@ test("a change of a bill's album category says what it is filed under now", () =
   // An entry logged before bills had one says only that the bill changed.
   const older = describeActivity(entry({ kind: "bill_edited", bill: { before: snap(), after: snap() } }), ctx());
   assert.equal(older.text, WORDS.changed_bill.replace("{actor}", "Tess").replace("{title}", "Dinner"));
+});
+
+test("a change to the album's categories says what was added, renamed, re-iconed or removed", () => {
+  const change = (before: { name: string | null; icon: string | null } | null, after: { name: string | null; icon: string | null } | null, key = "food") =>
+    describeActivity(entry({ kind: "category_changed", expense_id: null, category: { key, before, after } }), ctx({ category: () => "Meals", defaultCategory: (k) => (k === "food" ? "Food" : "Other") })).text;
+  assert.equal(change(null, { name: "Tickets", icon: "emoji:🎟️" }, "c-tickets1"), "Tess added the category Tickets");
+  assert.equal(change({ name: "Tickets", icon: "emoji:🎟️" }, null, "c-tickets1"), "Tess removed the category Tickets");
+  // A name left null is the default's own, not what the album calls it now.
+  assert.equal(change({ name: null, icon: null }, { name: "Meals", icon: null }), "Tess renamed the category Food to Meals");
+  assert.equal(change({ name: "Meals", icon: null }, { name: "Meals", icon: "emoji:🍜" }), "Tess changed the icon of Meals");
+  assert.equal(change({ name: null, icon: null }, { name: null, icon: "pizza" }), "Tess changed the icon of Food");
+});
+
+test("an album's categories come from the phone, and a bill of one it no longer has reads as Other", () => {
+  const withCategories = {
+    ...tables,
+    web_album_categories: [
+      { id: "bali:food", album_id: "bali", key: "food", name: "Meals", icon: null, sort_order: 0 },
+      { id: "bali:c-tickets1", album_id: "bali", key: "c-tickets1", name: "Tickets", icon: "emoji:🎟️", sort_order: 1 },
+      { id: "bali:other", album_id: "bali", key: "other", name: null, icon: null, sort_order: 2 },
+    ],
+    web_album_bills: [
+      { id: "b1", album_id: "bali", date: "2026-10-01", amount: 30, currency: "MYR", category: "c-tickets1", paid_by: "me", shares: [{ memberId: "me", amount: 30 }] },
+      { id: "b2", album_id: "bali", date: "2026-10-01", amount: 4, currency: "MYR", category: "c-gone0001", paid_by: "me", shares: [{ memberId: "me", amount: 4 }] },
+      { id: "b3", album_id: "bali", date: "2026-10-01", amount: 4, currency: "MYR", category: "transport", paid_by: "me", shares: [{ memberId: "me", amount: 4 }] },
+    ],
+  };
+  const group = albumGroupOf(withCategories, "bali");
+  assert.ok(group);
+  assert.deepEqual(
+    group.categories.map((category) => [category.key, category.name]),
+    [
+      ["food", "Meals"],
+      ["c-tickets1", "Tickets"],
+      ["other", null],
+    ],
+  );
+  assert.equal(group.bills.get("b1")?.category, "c-tickets1");
+  assert.equal(group.bills.get("b2")?.category, "other");
+  // The phone's list left Transport out: removed, so its bills read as Other.
+  assert.equal(group.bills.get("b3")?.category, "other");
+  // An older phone sends none: the eight defaults.
+  assert.equal(albumCategoriesOf({}, "bali").length, 8);
 });

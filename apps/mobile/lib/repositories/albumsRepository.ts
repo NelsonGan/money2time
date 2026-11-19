@@ -230,7 +230,9 @@ class AlbumsRepository {
    */
   clearAlbumCategories(albumId: string) {
     getSQLite().runSync(
-      `UPDATE transactions SET album_category = NULL, updated_at = ?
+      `UPDATE transactions
+       SET album_category = NULL, album_category_name = NULL, album_category_icon = NULL,
+         updated_at = ?
        WHERE album_category IS NOT NULL
          AND id IN (SELECT transaction_id FROM album_transactions WHERE album_id = ?)
          AND id NOT IN (SELECT transaction_id FROM album_transactions WHERE deleted_at IS NULL)`,

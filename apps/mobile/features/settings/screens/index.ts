@@ -8,7 +8,7 @@ export {
 export { AppIconScreen } from './AppIconScreen';
 export { AutoBackupScreen } from './AutoBackupScreen';
 export { CardDesignPickerScreen } from './CardDesignPickerScreen';
-export { CategoriesScreen, CategoryEditorScreen } from './CategoriesScreen';
+export { CategoriesScreen, CategoryEditor, CategoryEditorScreen } from './CategoriesScreen';
 export { DataManagementScreen } from './DataManagementScreen';
 export { DisplaySettingsScreen } from './DisplaySettingsScreen';
 export { ExchangeRatesScreen } from './ExchangeRatesScreen';

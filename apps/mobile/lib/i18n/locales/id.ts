@@ -2401,6 +2401,8 @@ const id = {
     limit_icon_packs: 'Paket ikon tambahan adalah fitur Pro. Tingkatkan untuk memakai semua paket.',
     limit_live_earnings_auto_start:
       'Memulai jam sesuai jadwal adalah fitur Pro. Tingkatkan dan shift Anda dimulai sendiri. Memulai secara manual selalu gratis.',
+    limit_album_categories:
+      'Mengubah kategori album bersama adalah fitur Pro. Upgrade untuk mengganti nama, menambah, atau menghapusnya bagi semua orang di album.',
     limit_reimbursements:
       'Pelacakan penggantian adalah fitur Pro. Tingkatkan untuk menandai pengeluaran yang akan kembali kepadamu.',
     limit_subcurrencies:
@@ -3136,6 +3138,13 @@ const id = {
       failed: 'Perubahan pada album ini gagal disimpan. Coba lagi.',
     },
     line_label: '{{name}}, album',
+    category_list: {
+      title: 'Kategori',
+      edit: 'Edit kategori',
+      info: 'Semua orang di album ini mencatat tagihannya di kategori ini, di aplikasi maupun di web. Perubahan yang kamu buat di sini berlaku untuk semuanya. Jika kamu menghapus satu kategori, tagihannya pindah ke {{other}}.',
+      limit: 'Satu album bisa punya hingga {{count}} kategori.',
+      remove_body: 'Tagihannya pindah ke {{other}} untuk semua orang di album ini.',
+    },
     categories: {
       food: 'Makanan',
       groceries: 'Belanja Harian',
@@ -3178,6 +3187,10 @@ const id = {
       simplify_on: '{{actor}} menyalakan Sederhanakan utang grup',
       simplify_off: '{{actor}} mematikan Sederhanakan utang grup',
       cover: '{{actor}} mengganti sampul',
+      category_added: '{{actor}} menambahkan kategori {{name}}',
+      category_removed: '{{actor}} menghapus kategori {{name}}',
+      category_renamed: '{{actor}} mengganti nama kategori {{before}} menjadi {{after}}',
+      category_icon: '{{actor}} mengganti ikon {{name}}',
     },
   },
   assets: {

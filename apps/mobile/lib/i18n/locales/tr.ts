@@ -2398,6 +2398,8 @@ const tr = {
     limit_icon_packs: 'Ek simge paketleri bir Pro özelliğidir. Tümünü kullanmak için yükseltin.',
     limit_live_earnings_auto_start:
       'Sayacı programa göre başlatmak bir Pro özelliğidir. Pro’ya geçin, vardiyanız kendi kendine başlasın. Elle başlatmak her zaman ücretsizdir.',
+    limit_album_categories:
+      'Paylaşılan bir albümün kategorilerini değiştirmek bir Pro özelliğidir. Albümdeki herkes için yeniden adlandırmak, eklemek veya kaldırmak için yükselt.',
     limit_reimbursements:
       'Geri ödeme takibi bir Pro özelliğidir. Geri alacağınız harcamaları işaretlemek için yükseltin.',
     limit_subcurrencies:
@@ -3129,6 +3131,13 @@ const tr = {
       failed: 'Bu albümdeki değişiklik kaydedilemedi. Tekrar deneyin.',
     },
     line_label: '{{name}}, albüm',
+    category_list: {
+      title: 'Kategoriler',
+      edit: 'Kategorileri düzenle',
+      info: 'Bu albümdeki herkes harcamalarını uygulamada ve webde bu kategorilere göre kaydeder. Burada yaptığın bir değişiklik herkese ulaşır. Bir kategoriyi kaldırırsan harcamaları {{other}} kategorisine taşınır.',
+      limit: 'Bir albümde en fazla {{count}} kategori olabilir.',
+      remove_body: 'Bu albümdeki herkes için harcamaları {{other}} kategorisine taşınır.',
+    },
     categories: {
       food: 'Yeme & İçme',
       groceries: 'Market',
@@ -3171,6 +3180,10 @@ const tr = {
       simplify_on: '{{actor}}: Grup borçlarını sadeleştir açıldı',
       simplify_off: '{{actor}}: Grup borçlarını sadeleştir kapatıldı',
       cover: '{{actor}}: kapak değiştirildi',
+      category_added: '{{actor}}, {{name}} kategorisini ekledi',
+      category_removed: '{{actor}}, {{name}} kategorisini kaldırdı',
+      category_renamed: '{{actor}}, {{before}} kategorisinin adını {{after}} olarak değiştirdi',
+      category_icon: '{{actor}}, {{name}} simgesini değiştirdi',
     },
   },
   assets: {

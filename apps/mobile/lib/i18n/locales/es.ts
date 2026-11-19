@@ -2398,6 +2398,8 @@ const es = {
       'Los paquetes extra de iconos son una función Pro. Mejora tu plan para usarlos todos.',
     limit_live_earnings_auto_start:
       'Iniciar el reloj según un horario es una función Pro. Mejora y tu turno empezará solo. Iniciarlo a mano siempre es gratis.',
+    limit_album_categories:
+      'Cambiar las categorías de un álbum compartido es una función Pro. Mejora para renombrarlas, añadirlas o quitarlas para todos en el álbum.',
     limit_reimbursements:
       'El seguimiento de reembolsos es una función Pro. Mejora tu plan para marcar gastos que vas a recuperar.',
     limit_subcurrencies:
@@ -3139,6 +3141,13 @@ const es = {
       failed: 'No se pudo guardar el cambio en este álbum. Inténtalo de nuevo.',
     },
     line_label: '{{name}}, álbum',
+    category_list: {
+      title: 'Categorías',
+      edit: 'Editar categorías',
+      info: 'Todos en este álbum clasifican sus gastos en estas categorías, en la app y en la web. Un cambio que hagas aquí les llega a todos. Si quitas una, sus gastos pasan a {{other}}.',
+      limit: 'Un álbum puede tener hasta {{count}} categorías.',
+      remove_body: 'Sus gastos pasan a {{other}} para todos en este álbum.',
+    },
     categories: {
       food: 'Comida',
       groceries: 'Supermercado',
@@ -3181,6 +3190,10 @@ const es = {
       simplify_on: '{{actor}}: Simplificar deudas del grupo activado',
       simplify_off: '{{actor}}: Simplificar deudas del grupo desactivado',
       cover: '{{actor}}: portada cambiada',
+      category_added: '{{actor}} añadió la categoría {{name}}',
+      category_removed: '{{actor}} quitó la categoría {{name}}',
+      category_renamed: '{{actor}} cambió el nombre de la categoría {{before}} a {{after}}',
+      category_icon: '{{actor}} cambió el icono de {{name}}',
     },
   },
   assets: {

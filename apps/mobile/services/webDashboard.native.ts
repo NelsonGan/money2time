@@ -31,6 +31,7 @@ import { selfMember } from '~/features/albums/lib/albumPeople';
 import {
   listGroupActivity,
   listGroupBills,
+  listGroupCategories,
   listGroupMembers,
   listGroupSettlements,
 } from '~/features/albums/services/albumGroupStore';
@@ -418,6 +419,7 @@ function readAlbumGroups(): WebAlbumGroup[] {
       bills: listGroupBills(share.ledgerId),
       settlements: listGroupSettlements(share.ledgerId),
       activity: listGroupActivity(share.ledgerId),
+      categories: listGroupCategories(share.ledgerId),
     };
   });
 }

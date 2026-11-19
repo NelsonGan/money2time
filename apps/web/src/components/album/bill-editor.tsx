@@ -4,7 +4,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useId, useMemo, useRef, useState, type FormEvent } from "react";
 
 import { cents } from "@/lib/backup/album-group";
-import { ALBUM_CATEGORIES, albumCategoryForText, type AlbumCategoryKey } from "@/lib/album/categories";
+import { albumCategoryForText, albumCategoryIconOf, type AlbumCategoryKey } from "@/lib/album/categories";
 import { billHasPayments, billPeople, MAX_NOTE, type Bill, type Group } from "@/lib/album/group";
 import { balanceSelf, methodOf, readValue, splitCents, splitShares, trimNumber, valuesFor, type SplitInput, type SplitMethod, type SplitProblem } from "@/lib/album/split";
 import { loadKeywords } from "@/lib/album/keywords";
@@ -39,7 +39,7 @@ export function BillEditor({ group, bill, actions, onClose, onSaved }: { group: 
   const locale = useLocale();
   const money = useMoney();
   const day = useDay();
-  const categoryLabel = useCategoryLabel();
+  const categoryLabel = useCategoryLabel(group.categories);
   const formId = useId();
   const selfId = group.selfId;
   const readOnly = !selfId;
@@ -57,7 +57,8 @@ export function BillEditor({ group, bill, actions, onClose, onSaved }: { group: 
   const [amountText, setAmountText] = useState(bill ? trimNumber(bill.amount) : "");
   const [currency, setCurrency] = useState(bill?.currency ?? latest?.currency ?? marketFor(locale).currency);
   const [note, setNote] = useState(bill?.note ?? "");
-  const [category, setCategory] = useState<AlbumCategoryKey>(bill?.category ?? "food");
+  // A new bill starts on Food while the album has it, else on Other.
+  const [category, setCategory] = useState<AlbumCategoryKey>(bill?.category ?? (group.categories.some((option) => option.key === "food") ? "food" : "other"));
   // A new bill's title picks its category by the app's keywords ("Lunch" →
   // Food) until one is picked by hand.
   const picked = useRef(!!bill);
@@ -77,7 +78,7 @@ export function BillEditor({ group, bill, actions, onClose, onSaved }: { group: 
   const typeNote = (text: string) => {
     setNote(text.slice(0, MAX_NOTE));
     if (picked.current || !keywords.current) return;
-    const tagged = albumCategoryForText(text, keywords.current);
+    const tagged = albumCategoryForText(text, keywords.current, group.categories);
     if (tagged) setCategory(tagged);
   };
   const [date, setDate] = useState(bill?.date ?? today());
@@ -139,7 +140,7 @@ export function BillEditor({ group, bill, actions, onClose, onSaved }: { group: 
     }
     setBusy(true);
     // Sent with the bill as this editor opened it: a phone's change since makes it stale.
-    const row = billRow({ id: bill?.id ?? newId(), date, note: note.trim() || null, currency, category, paidBy, shares }, billBase(bill));
+    const row = billRow({ id: bill?.id ?? newId(), date, note: note.trim() || null, currency, category, paidBy, shares }, billBase(bill), group.categories);
     const ok = await actions.write([row], bill ? "bill_edit" : "bill_add");
     setBusy(false);
     if (ok) {
@@ -310,7 +311,7 @@ export function BillEditor({ group, bill, actions, onClose, onSaved }: { group: 
           <div>
             <p className="mb-2 px-1 text-[13px] font-bold text-foreground-soft">{t("bill.category")}</p>
             <div className="grid grid-cols-4 gap-2">
-              {ALBUM_CATEGORIES.map((option) => {
+              {group.categories.map((option) => {
                 const active = category === option.key;
                 return (
                   <button
@@ -323,7 +324,7 @@ export function BillEditor({ group, bill, actions, onClose, onSaved }: { group: 
                     }}
                     className={`flex flex-col items-center gap-0.5 rounded-[16px] border px-1 py-1.5 text-[11.5px] font-bold transition-colors ${active ? "border-primary-muted bg-primary-soft text-primary" : "border-transparent bg-background-subtle text-foreground-soft hover:text-foreground"}`}
                   >
-                    <CategoryIcon icon={option.icon} name={option.name} size={26} />
+                    <CategoryIcon icon={albumCategoryIconOf(option)} name={categoryLabel(option.key)} size={26} />
                     <span className="max-w-full truncate">{categoryLabel(option.key)}</span>
                   </button>
                 );

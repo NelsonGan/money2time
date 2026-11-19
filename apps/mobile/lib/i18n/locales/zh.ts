@@ -2283,6 +2283,8 @@ const zh = {
     limit_icon_packs: '额外图标包为 Pro 功能。升级后可使用所有图标包。',
     limit_live_earnings_auto_start:
       '按计划自动开始计时是 Pro 功能。升级后你的班次会自动开始，手动开始始终免费。',
+    limit_album_categories:
+      '更改共享相册的类别是 Pro 功能。升级后即可为相册里的所有人重命名、添加或移除类别。',
     limit_reimbursements: '报销跟踪是 Pro 功能。升级后即可标记那些会退回给你的支出。',
     limit_subcurrencies: '免费版可添加 {{count}} 个子货币。升级到 Pro 即可无限使用多币种追踪。',
     upgrade: '升级到 Pro',
@@ -2994,6 +2996,13 @@ const zh = {
       failed: '无法保存对此相册的修改。请重试。',
     },
     line_label: '{{name}}，相册',
+    category_list: {
+      title: '类别',
+      edit: '编辑类别',
+      info: '这个相册里的所有人都会把账单归到这些类别，无论在 App 还是网页上。你在这里做的更改会应用到所有人。移除一个类别后，它的账单会移到“{{other}}”。',
+      limit: '一个相册最多可以有 {{count}} 个类别。',
+      remove_body: '对这个相册里的所有人，它的账单都会移到“{{other}}”。',
+    },
     categories: {
       food: '餐饮',
       groceries: '日用品',
@@ -3036,6 +3045,10 @@ const zh = {
       simplify_on: '{{actor}} 开启了“简化群组欠款”',
       simplify_off: '{{actor}} 关闭了“简化群组欠款”',
       cover: '{{actor}} 更换了封面',
+      category_added: '{{actor}} 添加了类别“{{name}}”',
+      category_removed: '{{actor}} 移除了类别“{{name}}”',
+      category_renamed: '{{actor}} 把类别“{{before}}”重命名为“{{after}}”',
+      category_icon: '{{actor}} 更换了“{{name}}”的图标',
     },
   },
   assets: {

@@ -14,8 +14,9 @@ import { getAlbumCoverUri } from '~/services/userAssets';
 import type { AlbumActivity, AlbumExpense, AlbumMember, AlbumSettlement } from '~/types';
 import { nowIso } from '~/utils/id';
 
+import { DEFAULT_ALBUM_CATEGORY_LIST } from '../lib/albumCategories';
 import { cleanPersonName } from '../lib/albumPeople';
-import { GROUP_COVER_PATH } from '../lib/groupPlan';
+import { type AlbumCategoryDef, GROUP_COVER_PATH } from '../lib/groupPlan';
 
 const cache = new Map<string, AlbumMember[]>();
 const expenseCache = new Map<string, AlbumExpense[]>();
@@ -23,6 +24,7 @@ const allBillsCache = new Map<string, AlbumExpense[]>();
 const settlementCache = new Map<string, AlbumSettlement[]>();
 const simplifyCache = new Map<string, boolean>();
 const activityCache = new Map<string, AlbumActivity[]>();
+const categoryCache = new Map<string, AlbumCategoryDef[]>();
 const listeners = new Set<() => void>();
 const NO_MEMBERS: AlbumMember[] = [];
 const NO_EXPENSES: AlbumExpense[] = [];
@@ -53,6 +55,7 @@ export function notifyAlbumGroups(): void {
   settlementCache.clear();
   simplifyCache.clear();
   activityCache.clear();
+  categoryCache.clear();
   for (const listener of listeners) listener();
 }
 
@@ -118,6 +121,23 @@ export function listGroupActivity(groupId: string | null): AlbumActivity[] {
   const activity = unchanged(`activity:${groupId}`, albumGroupsRepository.listActivity(groupId));
   activityCache.set(groupId, activity);
   return activity;
+}
+
+/**
+ * A group's categories, in order (README: Album members and shared albums >
+ * Categories): the defaults with no group. The same array until something
+ * changes.
+ */
+export function listGroupCategories(groupId: string | null): readonly AlbumCategoryDef[] {
+  if (!groupId) return DEFAULT_ALBUM_CATEGORY_LIST;
+  const known = categoryCache.get(groupId);
+  if (known) return known;
+  const categories = unchanged(
+    `categories:${groupId}`,
+    albumGroupsRepository.listCategories(groupId),
+  );
+  categoryCache.set(groupId, categories);
+  return categories;
 }
 
 /** Whether the group has "Simplify group debts" on. */

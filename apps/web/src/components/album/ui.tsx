@@ -6,7 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useId, useState, type ButtonHTMLAttributes, type ReactNode } from "react";
 
 import { CATEGORY_ICON_IDS } from "@/lib/backup/assets.generated";
-import type { AlbumCategoryKey } from "@/lib/album/categories";
+import { albumCategoryIn, DEFAULT_ALBUM_CATEGORY_LIST, isDefaultAlbumCategoryKey, type AlbumCategoryDef, type AlbumCategoryKey } from "@/lib/album/categories";
 import type { Member } from "@/lib/album/group";
 import { media } from "@/lib/media";
 
@@ -129,10 +129,26 @@ export function AvatarStack({ people, size = 30 }: { people: { id: string; name:
 
 // ------------------------------------------------------------- categories --
 
-/** An album category's name in the page's language (`ALBUM_CATEGORIES`, the same for everyone in the album). */
-export function useCategoryLabel() {
+/** A default category's own name in the page's language (Other's for any other key). */
+export function useDefaultCategoryLabel() {
   const t = useTranslations("album.categories");
-  return useCallback((key: AlbumCategoryKey) => t(key), [t]);
+  return useCallback((key: AlbumCategoryKey) => t(isDefaultAlbumCategoryKey(key) ? key : "other"), [t]);
+}
+
+/**
+ * An album category's name as the album shows it, the same for everyone in it:
+ * the name it gave the category, else a default's in the page's language; a
+ * key it no longer has reads as its Other.
+ */
+export function useCategoryLabel(categories: readonly AlbumCategoryDef[] = DEFAULT_ALBUM_CATEGORY_LIST) {
+  const label = useDefaultCategoryLabel();
+  return useCallback(
+    (key: AlbumCategoryKey) => {
+      const category = albumCategoryIn(categories, key);
+      return category.name ?? label(category.key);
+    },
+    [categories, label],
+  );
 }
 
 /** A category's clay icon, as the app draws it; its initial when this site has no such icon. */

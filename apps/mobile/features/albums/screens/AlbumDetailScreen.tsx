@@ -93,6 +93,7 @@ import {
   type BreakdownMemberChoice,
   BreakdownMemberSheet,
 } from '../components/BreakdownMemberSheet';
+import { useAlbumCategories } from '../hooks/useAlbumCategories';
 import { useAlbumGroup } from '../hooks/useAlbumGroup';
 import { useRemoveFromAlbum } from '../hooks/useRemoveFromAlbum';
 import { albumBillSides, AlbumBillSidesContext } from '../lib/albumBillSides';
@@ -505,9 +506,10 @@ export function AlbumDetailScreen({
   // A shared album, or one the user is no longer in, by its own categories.
   const byAlbumCategory = group.share !== null || !!album?.shareEndedAt;
   // A shared album's entries are filed under its own categories.
+  const groupCategories = useAlbumCategories(group.share ? albumId : null);
   const albumCategoryOptions = useMemo(
-    () => (group.share ? albumCategoryPickerList() : undefined),
-    [group.share],
+    () => (group.share ? albumCategoryPickerList(groupCategories) : undefined),
+    [group.share, groupCategories],
   );
   const categoryById = useMemo(
     () => new Map(categories.map((category) => [category.id, category])),
@@ -527,6 +529,7 @@ export function AlbumDetailScreen({
         categoryById,
         categoryMap: quickEntryPrefs.categoryMap,
         byAlbumCategory,
+        albumCategories: group.share ? groupCategories : undefined,
       }),
     [
       breakdownCandidates,
@@ -535,6 +538,8 @@ export function AlbumDetailScreen({
       categoryById,
       displayValue,
       byAlbumCategory,
+      group.share,
+      groupCategories,
       quickEntryPrefs.categoryMap,
     ],
   );

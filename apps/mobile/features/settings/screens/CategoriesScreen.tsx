@@ -204,7 +204,12 @@ function isCategoryType(value: string): value is CategoryType {
 
 const EMPTY_CHILD_MAP: Map<string, CategoryPickerOption[]> = new Map();
 
-function CategoryEditor({
+/**
+ * The category editor: icon and name, the parent (unless `disableParentSelect`)
+ * and delete. Also a shared album's category editor
+ * (features/albums/screens/AlbumCategoryEditorScreen.tsx), with no parent.
+ */
+export function CategoryEditor({
   mode,
   topLevel,
   initial,
@@ -216,6 +221,7 @@ function CategoryEditor({
   onSubmit,
   onDelete,
   onOpenIconPicker,
+  deleteConfirmBody,
 }: {
   mode: 'create' | 'edit';
   topLevel: Category[];
@@ -232,6 +238,8 @@ function CategoryEditor({
   onSubmit: (input: { name: string; icon: string; parentId: string | null }) => void;
   onDelete?: (reassignToCategoryId?: string) => void;
   onOpenIconPicker: (session: CategoryIconPickerSession) => void;
+  /** What deleting it does, in place of the plain "Delete this category?". */
+  deleteConfirmBody?: string;
 }) {
   const themeColors = useThemeColors();
   const initialIcon = initial?.icon ?? (initial?.parentId ? '' : DEFAULT_CATEGORY_ICONS[0]);
@@ -322,7 +330,7 @@ function CategoryEditor({
       );
       return;
     }
-    Alert.alert(I18n.t('common.delete'), I18n.t('categories.delete_confirm'), [
+    Alert.alert(I18n.t('common.delete'), deleteConfirmBody ?? I18n.t('categories.delete_confirm'), [
       { text: I18n.t('common.cancel'), style: 'cancel' },
       {
         text: I18n.t('common.delete'),

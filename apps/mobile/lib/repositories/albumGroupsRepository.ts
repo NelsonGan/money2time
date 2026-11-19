@@ -1,15 +1,25 @@
 // A shared album's group: its members, bills, settlements, settings and
-// activity log (migrations 090-093). These rows sync with the group's own
+// activity log and categories (migrations 090-093, 097). These rows sync with the group's own
 // cloud database; on the phone they are only read here, and written by
 // features/albums/services/albumGroupWrites.ts alone.
 // Their `ledger_id` is the group's id (features/cloudSync/lib/ledgerRows.ts).
 
-import { and, desc, eq, isNull } from 'drizzle-orm';
+import { and, desc, eq, isNull, sql } from 'drizzle-orm';
 
-import { GROUP_COVER_PATH, MAX_MEMBER_ROWS } from '~/features/albums/lib/groupPlan';
+import {
+  ALBUM_CATEGORIES,
+  ALBUM_CATEGORY_OTHER,
+  type AlbumCategoryDef,
+  albumCategoryList,
+  categoryRowId,
+  GROUP_COVER_PATH,
+  MAX_ALBUM_CATEGORIES,
+  MAX_MEMBER_ROWS,
+} from '~/features/albums/lib/groupPlan';
 import { getDb } from '~/lib/db/client';
 import {
   albumActivityTable,
+  albumCategoriesTable,
   albumExpensesTable,
   albumGroupsTable,
   albumMembersTable,
@@ -65,7 +75,13 @@ class AlbumGroupsRepository {
    * of those). A bill counts only between the group's own members: one paid
    * by nobody in it is left out, and so is a share of nobody's.
    */
-  listExpenses(groupId: string, members = this.memberIds(groupId)): AlbumExpense[] {
+  listExpenses(
+    groupId: string,
+    members = this.memberIds(groupId),
+    categories: readonly AlbumCategoryDef[] = this.listCategories(groupId),
+  ): AlbumExpense[] {
+    // A bill of a category the album no longer has is filed under Other.
+    const keys = new Set(categories.map((category) => category.key));
     return getDb()
       .select()
       .from(albumExpensesTable)
@@ -74,11 +90,40 @@ class AlbumGroupsRepository {
       .map(toAlbumExpense)
       .filter(present)
       .filter((bill) => members.has(bill.paidBy))
+      .map((bill) => (keys.has(bill.category) ? bill : { ...bill, category: ALBUM_CATEGORY_OTHER }))
       .map((bill) =>
         bill.shares.every((share) => members.has(share.memberId))
           ? bill
           : { ...bill, shares: bill.shares.filter((share) => members.has(share.memberId)) },
       );
+  }
+
+  // -------------------------------------------------------------------------
+  // Categories
+
+  /**
+   * The album's categories, in order: the defaults as it changed them and
+   * the ones it added (`albumCategoryList`). A row counts only under the id
+   * its album and key make, so one key has one row.
+   */
+  listCategories(groupId: string): AlbumCategoryDef[] {
+    const rows = getDb()
+      .select()
+      .from(albumCategoriesTable)
+      .where(eq(albumCategoriesTable.ledgerId, groupId))
+      // Live rows first: removed ones pile up and must not push them past the limit.
+      .orderBy(sql`${albumCategoriesTable.deletedAt} IS NOT NULL`)
+      .limit(MAX_ALBUM_CATEGORIES * 4 + ALBUM_CATEGORIES.length)
+      .all()
+      .filter((row) => row.id === categoryRowId(groupId, row.key))
+      .map((row) => ({
+        key: row.key,
+        name: row.name,
+        icon: row.icon,
+        sort_order: row.sortOrder,
+        deleted_at: row.deletedAt,
+      }));
+    return albumCategoryList(rows);
   }
 
   // -------------------------------------------------------------------------

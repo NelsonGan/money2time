@@ -15,6 +15,7 @@ import {
   formatTimeOfDay,
 } from '~/utils/formatters';
 
+import { useAlbumCategories } from '../hooks/useAlbumCategories';
 import type { AlbumGroup } from '../hooks/useAlbumGroup';
 import {
   type ActivityLine,
@@ -22,6 +23,7 @@ import {
   groupActivityByDay,
   type MineTone,
 } from '../lib/activityLines';
+import { albumCategoryIn, albumCategoryNameOf } from '../lib/albumCategories';
 import { listGroupActivity, subscribeAlbumGroups } from '../services/albumGroupStore';
 
 /** The newest this many changes show until the user asks for all of them. */
@@ -52,6 +54,7 @@ export function AlbumActivity({ group }: AlbumActivityProps) {
   const activity = useSyncExternalStore(subscribeAlbumGroups, () => listGroupActivity(groupId));
   const [expanded, setExpanded] = useState(false);
   const selfId = group.self?.id ?? null;
+  const categories = useAlbumCategories(groupId);
 
   const names = useMemo(
     () => new Map(group.members.map((member) => [member.id, member.name])),
@@ -66,9 +69,10 @@ export function AlbumActivity({ group }: AlbumActivityProps) {
           (memberId ? names.get(memberId) : null) ?? I18n.t('transactions.settleUp.someone'),
         money: (amount, currency) => formatCurrency(amount, currencySymbolForCode(currency)),
         day: (date) => formatRelativeDate(date),
+        categoryName: (key) => albumCategoryNameOf(albumCategoryIn(categories, key)),
       }),
     );
-  }, [activity, groupId, names, selfId]);
+  }, [activity, categories, groupId, names, selfId]);
   const days = useMemo(
     () =>
       groupActivityByDay(expanded ? lines : lines.slice(0, COLLAPSED_ROWS), (iso) =>

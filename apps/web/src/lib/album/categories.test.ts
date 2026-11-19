@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
 
-import { albumCategoryForText, albumCategoryOf, compileKeywords, type KeywordTable } from "./categories.ts";
+import { albumCategoryForOwn, albumCategoryForText, albumCategoryList, albumCategoryOf, categoryRowId, compileKeywords, DEFAULT_ALBUM_CATEGORY_LIST, type KeywordTable } from "./categories.ts";
 import { parseGroup } from "./group.ts";
 import { billRow } from "./writes.ts";
 
@@ -65,6 +65,105 @@ test("the group's bills are read with their album category", () => {
     [
       ["a", "shopping"],
       ["b", "groceries"],
+    ],
+  );
+});
+
+test("an album's list is the defaults as it changed them, with the ones it added, in order", () => {
+  assert.deepEqual(
+    DEFAULT_ALBUM_CATEGORY_LIST.map((category) => category.key),
+    ["food", "groceries", "transport", "housing", "bills", "healthcare", "shopping", "other"],
+  );
+  const list = albumCategoryList([
+    { key: "food", name: "  Meals  ", icon: "emoji:🍜", sort_order: 5 },
+    { key: "housing", deleted_at: "2026-11-19T00:00:00.000Z" },
+    // Other is never removed.
+    { key: "other", name: "Misc", deleted_at: "2026-11-19T00:00:00.000Z", sort_order: 9 },
+    { key: "c-tickets1", name: "Tickets", icon: "custom:category-icons/x.png", sort_order: 1 },
+    // An added one needs a name; a bad key is not a category.
+    { key: "c-noname01", name: "  " },
+    { key: "pets", name: "Pets" },
+  ]);
+  assert.deepEqual(
+    list.map((category) => [category.key, category.name, category.icon]),
+    // By place, a tie by key (as the app sorts); an uploaded icon is dropped.
+    [
+      ["c-tickets1", "Tickets", null],
+      ["groceries", null, null],
+      ["transport", null, null],
+      ["bills", null, null],
+      ["food", "Meals", "emoji:🍜"],
+      ["healthcare", null, null],
+      ["shopping", null, null],
+      ["other", "Misc", null],
+    ],
+  );
+  assert.equal(categoryRowId("bali-trip-2026-xyz", "food"), "ac-balitrip2026-food");
+});
+
+test("a title picks only a default the album has as it is", () => {
+  const renamed = albumCategoryList([{ key: "food", name: "Meals" }]);
+  assert.equal(albumCategoryForText("Lunch", english, renamed), null);
+  const removed = albumCategoryList([{ key: "transport", deleted_at: "x" }]);
+  assert.equal(albumCategoryForText("Grab to the airport", english, removed), null);
+  assert.equal(albumCategoryForText("Lunch", english, removed), "food");
+  assert.equal(albumCategoryForText("Cinema", english, renamed), "other");
+});
+
+test("a bill of an added category is written with its key, name and icon", () => {
+  const list = albumCategoryList([{ key: "c-tickets1", name: "Tickets", icon: "emoji:🎟️", sort_order: 1 }]);
+  const { row } = billRow({ id: "b1", date: "2026-11-14", note: "Museum", currency: "MYR", category: "c-tickets1", paidBy: "me", shares: [{ memberId: "me", amount: 5 }] }, null, list);
+  assert.deepEqual([row.category_key, row.category_name, row.category_icon], ["c-tickets1", "Tickets", "emoji:🎟️"]);
+  // A renamed default is still written as the default, which older apps match.
+  const renamed = billRow({ id: "b2", date: "2026-11-14", note: "Lunch", currency: "MYR", category: "food", paidBy: "me", shares: [{ memberId: "me", amount: 5 }] }, null, albumCategoryList([{ key: "food", name: "Meals" }])).row;
+  assert.deepEqual([renamed.category_key, renamed.category_name, renamed.category_icon], ["food", "Food", "meal"]);
+});
+
+test("an entry of the user's own reads as the album category of its name, then its icon", () => {
+  const list = albumCategoryList([
+    { key: "food", name: "Meals", icon: null },
+    { key: "c-tickets1", name: "Tickets", icon: "emoji:🎟️", sort_order: 1 },
+  ]);
+  assert.equal(albumCategoryForOwn({ name: "tickets", icon: "ticket" }, list), "c-tickets1");
+  // Renamed Food keeps its icon: the user's Food is matched by it.
+  assert.equal(albumCategoryForOwn({ name: "Food", icon: "meal" }, list), "food");
+  assert.equal(albumCategoryForOwn({ name: "Transport", icon: "car" }, list), "transport");
+  assert.equal(albumCategoryForOwn({ name: "Coffee", icon: "coffee" }, list), "other");
+  assert.equal(albumCategoryForOwn({ name: "Transport", icon: "car" }, albumCategoryList([{ key: "transport", deleted_at: "x" }])), "other");
+});
+
+test("the group reads its categories, and a bill of one it no longer has as Other", () => {
+  const T = "2026-11-14T10:00:00.000Z";
+  const member = { table: "album_members", id: "me", data: { id: "me", ledger_id: "bali", name: "me", user_id: "u-me", sort_order: 0, created_at: T, updated_at: T, deleted_at: null } };
+  const expense = (id: string, key: string) => ({
+    table: "album_expenses",
+    id,
+    data: { id, ledger_id: "bali", date: "2026-11-14", note: id, amount: 10, currency: "MYR", category_key: key, paid_by: "me", shares_json: JSON.stringify([{ memberId: "me", amount: 10 }]), created_by: "me", created_at: T, updated_at: T, deleted_at: null },
+  });
+  const category = (key: string, extra: Record<string, unknown>, id = categoryRowId("bali", key)) => ({ table: "album_categories", id, data: { id, ledger_id: "bali", key, sort_order: 0, created_at: T, updated_at: T, deleted_at: null, ...extra } });
+  const group = parseGroup({
+    album: { id: "share1", ledgerId: "bali", name: "Bali", role: "member", ownerId: "owner", ownerName: "Nelson", memberCount: 1, kind: "album" },
+    userId: "u-me",
+    rows: [
+      member,
+      category("c-tickets1", { name: "Tickets", icon: "emoji:🎟️", sort_order: 1 }),
+      category("transport", { deleted_at: T }),
+      // Under another id than its album and key make: not counted.
+      category("c-sneaky01", { name: "Sneaky" }, "ac-bali-other"),
+      expense("a", "c-tickets1"),
+      expense("b", "transport"),
+      expense("c", "c-sneaky01"),
+    ],
+  });
+  assert.ok(group);
+  assert.ok(group.categories.some((entry) => entry.key === "c-tickets1"));
+  assert.ok(!group.categories.some((entry) => entry.key === "transport" || entry.key === "c-sneaky01"));
+  assert.deepEqual(
+    group.bills.map((bill) => [bill.id, bill.category]),
+    [
+      ["a", "c-tickets1"],
+      ["b", "other"],
+      ["c", "other"],
     ],
   );
 });

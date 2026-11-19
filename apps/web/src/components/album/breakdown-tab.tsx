@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 
 import { Donut } from "@/components/dashboard/charts/donut";
 import { cents } from "@/lib/backup/album-group";
-import { albumCategory } from "@/lib/album/categories";
+import { albumCategoryIconOf, albumCategoryIn } from "@/lib/album/categories";
 import type { Group } from "@/lib/album/group";
 
 import { CategoryIcon, Mascot, currencyOrder, useCategoryLabel, useMoney } from "./ui";
@@ -22,7 +22,7 @@ export function BreakdownTab({ group }: { group: Group }) {
   const t = useTranslations("album");
   const locale = useLocale();
   const money = useMoney();
-  const label = useCategoryLabel();
+  const label = useCategoryLabel(group.categories);
   const [person, setPerson] = useState<string>(EVERYONE);
   const percent = (ratio: number) => new Intl.NumberFormat(locale, { style: "percent", maximumFractionDigits: 0 }).format(ratio);
 
@@ -36,7 +36,7 @@ export function BreakdownTab({ group }: { group: Group }) {
       // By the album's categories: the same for everyone in it.
       const key = bill.category;
       const categories = byCurrency.get(bill.currency) ?? new Map();
-      const entry = categories.get(key) ?? { name: label(key), icon: albumCategory(key).icon, cents: 0, count: 0 };
+      const entry = categories.get(key) ?? { name: label(key), icon: albumCategoryIconOf(albumCategoryIn(group.categories, key)), cents: 0, count: 0 };
       entry.cents += value;
       entry.count += 1;
       categories.set(key, entry);
@@ -47,7 +47,7 @@ export function BreakdownTab({ group }: { group: Group }) {
       const list = [...byCurrency.get(currency)!.entries()].map(([key, entry]) => ({ key, ...entry })).sort((a, b) => b.cents - a.cents);
       return { currency, list, total: list.reduce((sum, entry) => sum + entry.cents, 0) };
     });
-  }, [group.bills, label, person]);
+  }, [group.bills, group.categories, label, person]);
 
   const people = group.members.filter((member) => member.userId || group.bills.some((bill) => !bill.deleted && bill.shares.some((share) => share.memberId === member.id)));
 

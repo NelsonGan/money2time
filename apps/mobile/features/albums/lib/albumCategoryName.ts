@@ -14,7 +14,10 @@ const categoryOf = (key: AlbumCategoryKey) =>
   ALBUM_CATEGORIES.find((entry) => entry.key === key) ??
   ALBUM_CATEGORIES[ALBUM_CATEGORIES.length - 1];
 
-export const albumCategoryLabel = (key: AlbumCategoryKey): string =>
-  I18n.t(`albums.categories.${key}`, { defaultValue: categoryOf(key).name });
+/** A default category's name in the app's language (Other's for any other key). */
+export const albumCategoryLabel = (key: AlbumCategoryKey): string => {
+  const category = categoryOf(key);
+  return I18n.t(`albums.categories.${category.key}`, { defaultValue: category.name });
+};
 
 export const albumCategoryIcon = (key: AlbumCategoryKey): string => categoryOf(key).icon;

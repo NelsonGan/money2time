@@ -31,6 +31,8 @@ import {
   albumCategoryForCategory,
   type AlbumCategoryKey,
   albumCategoryKeyOfId,
+  DEFAULT_ALBUM_CATEGORY_LIST,
+  keptAlbumCategoryList,
   personalCategoryFor,
 } from '~/features/albums/lib/albumCategories';
 import { billFromRows, type GroupBillRow } from '~/features/albums/lib/albumGroup';
@@ -48,10 +50,11 @@ import {
   settleDebt,
   simplifyDebts,
 } from '~/features/albums/lib/groupDebts';
-import { GroupWriteError } from '~/features/albums/lib/groupPlan';
+import { GroupWriteError, isDefaultAlbumCategoryKey } from '~/features/albums/lib/groupPlan';
 import {
   batchPaymentIds,
   billRow,
+  categoryRow,
   deletedBillRow,
   type GroupRowWrite,
   paymentRow,
@@ -61,6 +64,7 @@ import {
 } from '~/features/albums/lib/groupRows';
 import { billHasPayments, billPeople, canEditGroup } from '~/features/albums/lib/groupRules';
 import {
+  listGroupCategories,
   listGroupExpenses,
   notifyAlbumGroups,
   syncAlbumCover,
@@ -647,6 +651,25 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   /** Turns "Simplify group debts" on or off for everyone in a shared album. */
   setAlbumSimplifyDebts: (groupId: string, simplify: boolean) => Promise<void>;
   /**
+   * Changes a shared album's categories for everyone in it (README: Album
+   * members and shared albums > Categories): a category's new name or icon,
+   * one added or removed, or the list's order (`categories`, each with its
+   * place). A field left out keeps what the category has (`categoryRow`).
+   * Its bills' entries follow on every phone. False when the album's rules
+   * refused it (the user was told why).
+   */
+  changeAlbumCategories: (
+    groupId: string,
+    action: 'added' | 'edited' | 'removed' | 'reordered',
+    categories: readonly {
+      key: AlbumCategoryKey;
+      name?: string | null;
+      icon?: string | null;
+      sortOrder?: number;
+      removed?: boolean;
+    }[],
+  ) => Promise<boolean>;
+  /**
    * Records a debt the album's Balances shows between two members as paid
    * (anyone in the album may), through `accountId` here when the user is one
    * of them. The payment is written onto the bills between the two (see
@@ -1118,6 +1141,8 @@ function optimisticPaybackTransfer(input: {
     ...withEntryStamp({ memberId: parent.memberId }, getActiveLedgerId()),
     albumGroupId: null,
     albumCategory: null,
+    albumCategoryName: null,
+    albumCategoryIcon: null,
     recurrencePattern: 'none',
     recurrenceInterval: 1,
     recurrenceEndDate: null,
@@ -1985,18 +2010,36 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
    * matching one too.
    */
   const withOwnCategory = useCallback(
-    <T extends { categoryId?: string | null; albumCategory?: AlbumCategoryKey | null }>(
+    <
+      T extends {
+        categoryId?: string | null;
+        albumCategory?: AlbumCategoryKey | null;
+        albumCategoryName?: string | null;
+        albumCategoryIcon?: string | null;
+      },
+    >(
       input: T,
+      existing?: Pick<
+        TransactionWithRelations,
+        'albumCategory' | 'albumCategoryName' | 'albumCategoryIcon'
+      > | null,
     ): T => {
       const key = albumCategoryKeyOfId(input.categoryId);
       if (!key) return input;
+      // The category the entry already has keeps the name and icon its album
+      // gave it; another one is a default, as it is.
+      const kept = !!existing && existing.albumCategory === key;
+      const album = existing ? keptAlbumCategoryList(existing) : DEFAULT_ALBUM_CATEGORY_LIST;
       return {
         ...input,
         albumCategory: key,
+        albumCategoryName: kept ? existing.albumCategoryName : null,
+        albumCategoryIcon: kept ? existing.albumCategoryIcon : null,
         categoryId: personalCategoryFor(
           key,
           categoriesRef.current,
           quickEntryPrefsRef.current.categoryMap,
+          album,
         ),
       };
     },
@@ -3566,6 +3609,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         memberId: normalizedInput.memberId,
         albumGroupId: null,
         albumCategory: normalizedInput.albumCategory ?? null,
+        albumCategoryName: normalizedInput.albumCategoryName ?? null,
+        albumCategoryIcon: normalizedInput.albumCategoryIcon ?? null,
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,
@@ -3685,6 +3730,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         memberId: normalizedInput.memberId,
         albumGroupId: null,
         albumCategory: normalizedInput.albumCategory ?? null,
+        albumCategoryName: normalizedInput.albumCategoryName ?? null,
+        albumCategoryIcon: normalizedInput.albumCategoryIcon ?? null,
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,
@@ -3872,21 +3919,32 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           // An entry of an album no longer shared keeps showing an album
           // category: a category of the user's own picked for it (a bulk
           // edit) is shown as the album category it reads as.
-          const albumCategory = transactionById.get(update.id)?.albumCategory;
+          const existing = transactionById.get(update.id);
+          const albumCategory = existing?.albumCategory;
           if (albumCategory && categoryId && !albumCategoryKeyOfId(categoryId)) {
+            // Read against the category the entry keeps too: the user's
+            // category matching an added or renamed one stays under it.
+            const key = albumCategoryForCategory(
+              categoryId,
+              categoriesRef.current,
+              quickEntryPrefsRef.current.categoryMap,
+              keptAlbumCategoryList(existing ?? {}),
+            );
+            const kept = key === albumCategory;
             return {
               ...update,
               input: {
                 ...update.input,
-                albumCategory: albumCategoryForCategory(
-                  categoryId,
-                  categoriesRef.current,
-                  quickEntryPrefsRef.current.categoryMap,
-                ),
+                albumCategory: key,
+                albumCategoryName: kept ? (existing?.albumCategoryName ?? null) : null,
+                albumCategoryIcon: kept ? (existing?.albumCategoryIcon ?? null) : null,
               },
             };
           }
-          return { ...update, input: withOwnCategory(update.input) };
+          return {
+            ...update,
+            input: withOwnCategory(update.input, transactionById.get(update.id)),
+          };
         }
         const key =
           albumCategoryKeyOfId(categoryId) ??
@@ -3894,6 +3952,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             categoryId,
             categoriesRef.current,
             quickEntryPrefsRef.current.categoryMap,
+            listGroupCategories(groupId),
           );
         groupCategories.set(key, [...(groupCategories.get(key) ?? []), update.id]);
         return { ...update, input: rest };
@@ -4197,6 +4256,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     (groupId: string): GroupEnv | null => {
       const userId = sharedAlbumFor(groupId)?.userId;
       if (!userId) return null;
+      const groupCategories = albumGroupsRepository.listCategories(groupId);
       return {
         userId,
         meLabel: I18n.t('transactions.editor.split.me_label'),
@@ -4208,13 +4268,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           accountsRef.current,
           settingsRef.current?.defaultPaybackAccountId,
         ),
-        // The user's category matching the bill's album category, else their "Other".
+        // The user's category matching the bill's album category, else their
+        // "Other". Read fresh: a sync may have just brought new ones down.
         categoryIdFor: (category) =>
           personalCategoryFor(
             category,
             categoriesRef.current,
             quickEntryPrefsRef.current.categoryMap,
+            groupCategories,
           ),
+        categories: groupCategories,
       };
     },
     [accountCurrencyOf],
@@ -4364,6 +4427,28 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [afterGroupWrite, groupEnvFor, sendGroupWrite, settleEvenGroup],
   );
 
+  const changeAlbumCategories = useCallback<AppContextValue['changeAlbumCategories']>(
+    async (groupId, action, changes) => {
+      const env = groupEnvFor(groupId);
+      if (!env || !changes.length) return false;
+      const sent = await sendGroupWrite(
+        groupId,
+        changes.map((category) => categoryRow(groupId, category)),
+      );
+      if (sent) {
+        // The entries of its bills take the new name, icon or category.
+        projectGroup(groupId, groupEnvFor(groupId) ?? env);
+        void trackEvent(AnalyticsEvents.ALBUM_CATEGORY_CHANGED, {
+          action,
+          is_default: changes.length === 1 && isDefaultAlbumCategoryKey(changes[0].key),
+        });
+      }
+      afterGroupWrite();
+      return sent;
+    },
+    [afterGroupWrite, groupEnvFor, sendGroupWrite],
+  );
+
   const settleGroupDebt = useCallback(
     async (groupId: string, debt: GroupDebt, accountId: string | null) => {
       const env = groupEnvFor(groupId);
@@ -4487,7 +4572,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               input.categoryId,
               categoriesRef.current,
               quickEntryPrefsRef.current.categoryMap,
+              listGroupCategories(groupId),
             ),
+          categories: listGroupCategories(groupId),
           paidBy: built.paidBy,
           shares: built.shares,
         }),
@@ -4682,6 +4769,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               date: changes.date ?? bill.date,
               note: changes.note !== undefined ? changes.note : bill.note,
               category: changes.category ?? bill.category,
+              categories: listGroupCategories(groupId),
             }),
           );
         writes.push(
@@ -5475,6 +5563,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         memberId: refundInput.memberId,
         albumGroupId: null,
         albumCategory: null,
+        albumCategoryName: null,
+        albumCategoryIcon: null,
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,
@@ -5675,6 +5765,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         memberId: normalizedInput.memberId,
         albumGroupId: null,
         albumCategory: normalizedInput.albumCategory ?? null,
+        albumCategoryName: normalizedInput.albumCategoryName ?? null,
+        albumCategoryIcon: normalizedInput.albumCategoryIcon ?? null,
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,
@@ -8348,6 +8440,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             syncAlbumGroups,
             renameAlbumMember,
             setAlbumSimplifyDebts,
+            changeAlbumCategories,
             settleGroupDebt,
             saveAlbumBill,
             detachAlbumBill,
@@ -8504,6 +8597,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       syncAlbumGroups,
       renameAlbumMember,
       setAlbumSimplifyDebts,
+      changeAlbumCategories,
       settleGroupDebt,
       saveAlbumBill,
       detachAlbumBill,

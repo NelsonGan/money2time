@@ -1,3 +1,4 @@
+import type { AlbumCategoryDef } from '~/features/albums/lib/groupPlan';
 import type { BackupData } from '~/services/dataManagementService';
 import type { AlbumActivity, AlbumExpense, AlbumMember, AlbumSettlement } from '~/types';
 
@@ -16,6 +17,8 @@ export type WebAlbumGroup = {
   /** The payments that stand (undone ones left out). */
   settlements: readonly AlbumSettlement[];
   activity: readonly AlbumActivity[];
+  /** Its categories, in order (`listGroupCategories`). */
+  categories: readonly AlbumCategoryDef[];
 };
 
 /**
@@ -31,12 +34,15 @@ export type WebAlbumGroup = {
  *   web_album_members   { id, album_id, name, is_self, current, sort_order }
  *   web_album_bills     { id, album_id, date, note, amount, currency, category,
  *                         paid_by, shares: [{ memberId, amount }], deleted,
- *                         updated_at }   (category: the album's, `ALBUM_CATEGORIES`)
+ *                         updated_at }   (category: one of the album's)
  *   web_album_settlements { id, album_id, expense_id, from_member, to_member,
  *                         amount, currency }   (the payments that stand)
  *   web_album_activity  { id, album_id, kind, actor_member_id, expense_id,
  *                         member_id, bill, rename, payment, simplify,
- *                         started, sort_order, created_at }  (newest first)
+ *                         started, category, sort_order, created_at }  (newest first)
+ *   web_album_categories { id, album_id, key, name, icon, sort_order }
+ *                         (the album's list, in order; name and icon null for a
+ *                         default as it is, read in the page's language)
  */
 export function withWebDashboardAlbumGroups(
   data: BackupData,
@@ -50,7 +56,18 @@ export function withWebDashboardAlbumGroups(
   const bills: Record<string, unknown>[] = [];
   const settlements: Record<string, unknown>[] = [];
   const activity: Record<string, unknown>[] = [];
+  const categories: Record<string, unknown>[] = [];
   for (const group of shown) {
+    for (const category of group.categories) {
+      categories.push({
+        id: `${group.albumId}:${category.key}`,
+        album_id: group.albumId,
+        key: category.key,
+        name: category.name,
+        icon: category.icon,
+        sort_order: category.sortOrder,
+      });
+    }
     for (const member of group.members) {
       if (member.deletedAt) continue;
       members.push({
@@ -103,6 +120,7 @@ export function withWebDashboardAlbumGroups(
         payment: entry.payment,
         simplify: entry.simplify,
         started: entry.started,
+        category: entry.category,
         sort_order: entry.sortOrder,
         created_at: entry.createdAt,
       });
@@ -116,6 +134,7 @@ export function withWebDashboardAlbumGroups(
       web_album_bills: bills,
       web_album_settlements: settlements,
       web_album_activity: activity,
+      web_album_categories: categories,
     },
   };
 }

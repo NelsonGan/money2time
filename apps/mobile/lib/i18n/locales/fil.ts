@@ -2418,6 +2418,8 @@ const fil = {
     limit_icon_packs: 'Pro feature ang dagdag na icon pack. Mag-upgrade para magamit lahat.',
     limit_live_earnings_auto_start:
       'Ang awtomatikong pagsisimula ng orasan ayon sa iskedyul ay Pro feature. Mag-upgrade para kusang magsimula ang shift mo. Libre pa rin ang manu-manong pagsisimula.',
+    limit_album_categories:
+      'Pro feature ang pagbago sa mga kategorya ng shared album. Mag-upgrade para mapalitan ang pangalan, makapagdagdag o makapag-alis ng mga ito para sa lahat ng nasa album.',
     limit_reimbursements:
       'Pro feature ang pagsubaybay sa reimbursement. Mag-upgrade para markahan ang mga gastos na makukuha mo pabalik.',
     limit_subcurrencies:
@@ -3164,6 +3166,14 @@ const fil = {
       failed: 'Hindi na-save ang pagbabago sa album na ito. Subukan ulit.',
     },
     line_label: '{{name}}, album',
+    category_list: {
+      title: 'Mga kategorya',
+      edit: 'I-edit ang mga kategorya',
+      info: 'Lahat ng nasa album na ito ay naglalagay ng kanilang mga bayarin sa mga kategoryang ito, sa app at sa web. Ang pagbabagong gagawin mo rito ay aabot sa kanilang lahat. Kapag nag-alis ka ng isa, mapupunta ang mga bayarin nito sa {{other}}.',
+      limit: 'Hanggang {{count}} kategorya ang puwede sa isang album.',
+      remove_body:
+        'Mapupunta ang mga bayarin nito sa {{other}} para sa lahat ng nasa album na ito.',
+    },
     categories: {
       food: 'Pagkain',
       groceries: 'Grocery',
@@ -3207,6 +3217,11 @@ const fil = {
       simplify_on: '{{actor}} ay nag-on ng Pasimplehin ang utang ng grupo',
       simplify_off: '{{actor}} ay nag-off ng Pasimplehin ang utang ng grupo',
       cover: '{{actor}} ay nagpalit ng cover',
+      category_added: 'Idinagdag ni {{actor}} ang kategoryang {{name}}',
+      category_removed: 'Inalis ni {{actor}} ang kategoryang {{name}}',
+      category_renamed:
+        'Pinalitan ni {{actor}} ang pangalan ng kategoryang {{before}} ng {{after}}',
+      category_icon: 'Binago ni {{actor}} ang icon ng {{name}}',
     },
   },
   assets: {

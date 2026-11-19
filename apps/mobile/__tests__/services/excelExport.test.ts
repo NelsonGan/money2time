@@ -36,6 +36,8 @@ function transaction(overrides: Partial<TransactionWithRelations> = {}): Transac
     memberId: null,
     albumGroupId: null,
     albumCategory: null,
+    albumCategoryName: null,
+    albumCategoryIcon: null,
     reportingCurrency: 'MYR',
     reportingAmount: 12.5,
     fxRate: 1,

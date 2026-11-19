@@ -2400,6 +2400,8 @@ const pt = {
     limit_icon_packs: 'Pacotes de ícones extra são um recurso Pro. Faça upgrade para usar todos.',
     limit_live_earnings_auto_start:
       'Iniciar o relógio conforme uma programação é um recurso Pro. Faça upgrade e seu turno começa sozinho. Iniciar manualmente é sempre grátis.',
+    limit_album_categories:
+      'Alterar as categorias de um álbum compartilhado é um recurso Pro. Faça upgrade para renomear, adicionar ou remover categorias para todos no álbum.',
     limit_reimbursements:
       'O acompanhamento de reembolsos é uma funcionalidade Pro. Faça upgrade para marcar despesas que vai recuperar.',
     limit_subcurrencies:
@@ -3141,6 +3143,13 @@ const pt = {
       failed: 'Não foi possível salvar a alteração neste álbum. Tente de novo.',
     },
     line_label: '{{name}}, álbum',
+    category_list: {
+      title: 'Categorias',
+      edit: 'Editar categorias',
+      info: 'Todos neste álbum classificam as despesas nestas categorias, no app e na web. Uma alteração feita aqui vale para todos. Se remover uma, as despesas dela passam para {{other}}.',
+      limit: 'Um álbum pode ter até {{count}} categorias.',
+      remove_body: 'As despesas dela passam para {{other}} para todos neste álbum.',
+    },
     categories: {
       food: 'Alimentação',
       groceries: 'Mercado',
@@ -3183,6 +3192,10 @@ const pt = {
       simplify_on: '{{actor}} ativou Simplificar dívidas do grupo',
       simplify_off: '{{actor}} desativou Simplificar dívidas do grupo',
       cover: '{{actor}} alterou a capa',
+      category_added: '{{actor}} adicionou a categoria {{name}}',
+      category_removed: '{{actor}} removeu a categoria {{name}}',
+      category_renamed: '{{actor}} renomeou a categoria {{before}} para {{after}}',
+      category_icon: '{{actor}} mudou o ícone de {{name}}',
     },
   },
   assets: {

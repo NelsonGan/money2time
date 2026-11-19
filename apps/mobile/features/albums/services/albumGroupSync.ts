@@ -31,7 +31,12 @@ import { convert } from '~/utils/currency';
 import { dayKeyFromDateLocal, normalizeMoneyAmount } from '~/utils/formatters';
 import { nowIso } from '~/utils/id';
 
-import type { AlbumCategoryKey } from '../lib/albumCategories';
+import {
+  type AlbumCategoryDef,
+  albumCategoryIn,
+  type AlbumCategoryKey,
+  albumCategoryLook,
+} from '../lib/albumCategories';
 import { localBill, type LocalPayment, settlementsByBill } from '../lib/albumGroup';
 import { selfMember } from '../lib/albumPeople';
 import { openShares, simplifyDebts } from '../lib/groupDebts';
@@ -52,6 +57,8 @@ export interface GroupEnv {
   defaultPaybackAccountId: string | null;
   /** The user's own expense category for an album category: their matching one, else Other. */
   categoryIdFor: (category: AlbumCategoryKey) => string | null;
+  /** The group's categories (`listGroupCategories`). */
+  categories: readonly AlbumCategoryDef[];
 }
 
 /** What only this phone knows about a write it is about to project. */
@@ -84,11 +91,13 @@ interface TxRow {
   note: string | null;
   album_group_id: string | null;
   album_category: string | null;
+  album_category_name: string | null;
+  album_category_icon: string | null;
   deleted_at: string | null;
 }
 
 const TX_COLUMNS =
-  'id, ledger_id, type, amount, currency, reporting_currency, reporting_amount, fx_rate, to_amount, account_amount, date, account_id, from_account_id, to_account_id, category_id, note, album_group_id, album_category, deleted_at';
+  'id, ledger_id, type, amount, currency, reporting_currency, reporting_amount, fx_rate, to_amount, account_amount, date, account_id, from_account_id, to_account_id, category_id, note, album_group_id, album_category, album_category_name, album_category_icon, deleted_at';
 
 function readTx(id: string): TxRow | null {
   return getSQLite().getFirstSync<TxRow>(`SELECT ${TX_COLUMNS} FROM transactions WHERE id = ?`, [
@@ -324,7 +333,9 @@ function writeExpense(
     (existing.category_id ?? null) !== (input.categoryId ?? null) ||
     (existing.note ?? null) !== (input.note ?? null) ||
     (existing.album_group_id ?? null) !== (input.albumGroupId ?? null) ||
-    (existing.album_category ?? null) !== (input.albumCategory ?? null);
+    (existing.album_category ?? null) !== (input.albumCategory ?? null) ||
+    (existing.album_category_name ?? null) !== (input.albumCategoryName ?? null) ||
+    (existing.album_category_icon ?? null) !== (input.albumCategoryIcon ?? null);
   if (changed) transactionsRepository.update(id, input);
   return changed;
 }
@@ -493,6 +504,7 @@ function projectExpense(
         : null;
   // The bill's category is the group's: the user's entry follows it.
   const categoryId = env.categoryIdFor(expense.category);
+  const look = albumCategoryLook(albumCategoryIn(env.categories, expense.category));
   const amounts = expenseAmounts(env, live, bill.amount, expense.currency, accountId);
   const wrote = writeExpense(expense.id, existing, {
     type: 'expense',
@@ -504,6 +516,8 @@ function projectExpense(
     // Kept once the album is no longer shared: the entry never needs one of
     // the user's categories to show what it was.
     albumCategory: expense.category,
+    albumCategoryName: look.name,
+    albumCategoryIcon: look.icon,
     note: expense.note,
     ...(live
       ? null
@@ -715,6 +729,8 @@ function projectExpense(
           accountId: entry.accountId,
           categoryId: env.categoryIdFor(expense.category),
           albumCategory: expense.category,
+          albumCategoryName: look.name,
+          albumCategoryIcon: look.icon,
           note: expense.note,
           albumGroupId: null,
         }) || changed;
@@ -752,7 +768,7 @@ export function projectGroup(
   const memberIds = new Set(members.map((member) => member.id));
   const paid = settlementsByBill(albumGroupsRepository.listSettlements(groupId, memberIds));
   const expenses = albumGroupsRepository
-    .listExpenses(groupId, memberIds)
+    .listExpenses(groupId, memberIds, env.categories)
     .filter((expense) => !options.expenseId || expense.id === options.expenseId);
   let changed = false;
   getSQLite().withTransactionSync(() => {

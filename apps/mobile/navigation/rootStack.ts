@@ -121,6 +121,10 @@ export type RootStackParamList = {
   EditAlbumDetails: { albumId: string };
   /** Who an album is split with, and its sharing. */
   AlbumPeople: { albumId: string };
+  /** A shared album's categories, the same for everyone in it. */
+  AlbumCategories: { albumId: string };
+  /** One of a shared album's categories, or (no key) a new one. */
+  AlbumCategoryEditor: { albumId: string; categoryKey?: string };
   ItemEditor: { itemId?: string } | undefined;
   // Full-page item icon picker. Its selected id + onSelect callback ride a
   // module bridge (itemIconPickerBridge) rather than params, so the route stays

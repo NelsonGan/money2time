@@ -649,7 +649,7 @@ const stale = (error: unknown) => {
   return true;
 };
 
-test("a website change made on a bill a phone changed since is refused as stale, never written over it", async () => {
+test('a website change made on a bill a phone changed since is refused as stale, never written over it', async () => {
   const { db, group, rows, raw } = await trip();
   // Added on the website: a new bill's base is null, it was not there.
   await webWrite(group, 'tess', [
@@ -698,7 +698,7 @@ test("a website change made on a bill a phone changed since is refused as stale,
   );
 });
 
-test("a website payment is refused as stale once any bill or payment changed since the page read", async () => {
+test('a website payment is refused as stale once any bill or payment changed since the page read', async () => {
   const fixture = await trip();
   const { group, rows } = fixture;
   await write(group, 'owner', {
@@ -786,6 +786,161 @@ test("the website's Simplify switch is refused as stale when a phone switched it
   );
   assert.equal(rows('album_groups')[0].simplify_debts, 0);
   // A row without a base (an older page) is not checked.
-  await webWrite(group, 'tess', [{ table: 'album_groups', row: { id: 'bali', simplify_debts: 1 } }]);
+  await webWrite(group, 'tess', [
+    { table: 'album_groups', row: { id: 'bali', simplify_debts: 1 } },
+  ]);
   assert.equal(rows('album_groups')[0].simplify_debts, 1);
+});
+
+test("an album's own categories: changed, added, removed and reordered for everyone, and logged", async () => {
+  const plan = await import('../src/groupPlan.generated.ts');
+  const { group, rows } = await trip();
+  const category = (key: string, extra: Record<string, unknown> = {}) => ({
+    table: 'album_categories',
+    row: { id: plan.categoryRowId('bali', key), key, name: null, icon: null, ...extra },
+  });
+  // Food renamed (its icon kept), Tickets added.
+  await write(group, 'tess', {
+    rows: [
+      category('food', { name: 'Meals', sort_order: 0 }),
+      category('c-tickets01', { name: 'Tickets', icon: 'emoji:🎟️', sort_order: 8 }),
+    ],
+  });
+  const list = () => plan.albumCategoryList(rows('album_categories'));
+  assert.deepEqual(
+    list().map((entry) => [entry.key, entry.name, entry.icon]),
+    [
+      ['food', 'Meals', null],
+      ['groceries', null, null],
+      ['transport', null, null],
+      ['housing', null, null],
+      ['bills', null, null],
+      ['healthcare', null, null],
+      ['shopping', null, null],
+      ['other', null, null],
+      ['c-tickets01', 'Tickets', 'emoji:🎟️'],
+    ],
+  );
+  assert.ok(rows('album_categories').every((row) => row.created_by === 'tess'));
+  // A bill under the added one keeps its key, name and icon for older apps.
+  await write(group, 'tess', {
+    rows: [
+      bill(
+        'u-bali-tess',
+        { 'u-bali-tess': 30, 'u-bali-ben': 30 },
+        { category_key: 'c-tickets01', category_name: 'Tickets', category_icon: 'emoji:🎟️' },
+      ),
+    ],
+  });
+  assert.deepEqual(
+    rows('album_expenses').map((row) => [row.category_key, row.category_name, row.category_icon]),
+    [['c-tickets01', 'Tickets', 'emoji:🎟️']],
+  );
+  // An older app's edit (no key) keeps the added category.
+  await write(group, 'ben', {
+    rows: [
+      bill(
+        'u-bali-tess',
+        { 'u-bali-tess': 30, 'u-bali-ben': 30 },
+        { note: 'Show', category_name: 'Other', category_icon: 'invoice' },
+      ),
+    ],
+  });
+  assert.equal(rows('album_expenses')[0].category_key, 'c-tickets01');
+  assert.equal(rows('album_expenses')[0].category_name, 'Tickets');
+  // A move in the list is written but not logged; Groceries removed.
+  await write(group, 'ben', {
+    rows: [
+      category('c-tickets01', { name: 'Tickets', icon: 'emoji:🎟️', sort_order: 1 }),
+      category('groceries', { sort_order: 2, deleted_at: 'removed' }),
+    ],
+  });
+  assert.deepEqual(
+    list().map((entry) => entry.key),
+    ['food', 'c-tickets01', 'transport', 'housing', 'bills', 'healthcare', 'shopping', 'other'],
+  );
+  const logged = rows('album_activity')
+    .filter((entry) => entry.kind === 'category_changed')
+    .map((entry) => JSON.parse(entry.data_json));
+  assert.deepEqual(logged, [
+    { key: 'food', before: { name: null, icon: null }, after: { name: 'Meals', icon: null } },
+    { key: 'c-tickets01', before: null, after: { name: 'Tickets', icon: 'emoji:🎟️' } },
+    { key: 'groceries', before: { name: null, icon: null }, after: null },
+  ]);
+});
+
+test("a move in an album's category list keeps a rename and a removal it has not seen", async () => {
+  const plan = await import('../src/groupPlan.generated.ts');
+  const { group, rows } = await trip();
+  const row = (key: string, extra: Record<string, unknown>) => ({
+    table: 'album_categories',
+    row: { id: plan.categoryRowId('bali', key), key, ...extra },
+  });
+  await write(group, 'tess', {
+    rows: [
+      row('food', { name: 'Meals', icon: null, sort_order: 0 }),
+      row('c-tickets01', { name: 'Tickets', icon: 'emoji:🎟️', sort_order: 8 }),
+    ],
+  });
+  await write(group, 'tess', { rows: [row('c-tickets01', { deleted_at: 'removed' })] });
+  const logged = () => rows('album_activity').filter((entry) => entry.kind === 'category_changed');
+  const before = logged().length;
+  // Ben's phone, which has not seen either yet, moves them: places only.
+  await write(group, 'ben', {
+    rows: [row('c-tickets01', { sort_order: 0 }), row('food', { sort_order: 1 })],
+  });
+  const list = plan.albumCategoryList(rows('album_categories'));
+  assert.equal(list.find((entry) => entry.key === 'food')?.name, 'Meals');
+  assert.equal(list.find((entry) => entry.key === 'food')?.sortOrder, 1);
+  assert.equal(
+    list.some((entry) => entry.key === 'c-tickets01'),
+    false,
+  );
+  // Not news: nothing renamed or added back.
+  assert.equal(logged().length, before);
+  // An icon alone keeps the name, and a default with no row keeps its place.
+  await write(group, 'ben', {
+    rows: [row('food', { icon: 'cup' }), row('bills', { icon: 'cup' })],
+  });
+  const after = plan.albumCategoryList(rows('album_categories'));
+  assert.deepEqual(
+    [after.find((entry) => entry.key === 'food'), after.find((entry) => entry.key === 'bills')].map(
+      (entry) => [entry?.name, entry?.icon, entry?.sortOrder],
+    ),
+    [
+      ['Meals', 'cup', 1],
+      [null, 'cup', 4],
+    ],
+  );
+});
+
+test("an album's categories refuse what the rules do not allow", async () => {
+  const plan = await import('../src/groupPlan.generated.ts');
+  const { group, rows } = await trip();
+  const refused = async (row: Record<string, unknown>, code: string) =>
+    assert.rejects(
+      write(group, 'tess', { rows: [{ table: 'album_categories', row }] }),
+      (error: unknown) => error instanceof GroupWriteError && error.code === code,
+    );
+  const id = (key: string) => plan.categoryRowId('bali', key);
+  // Other is always there.
+  await refused({ id: id('other'), key: 'other', deleted_at: 'x' }, 'forbidden');
+  // One row per album and key.
+  await refused({ id: 'elsewhere', key: 'food', name: 'Meals' }, 'bad_row');
+  // An added one has a name; an icon is a bundled one or an emoji, never an upload.
+  await refused({ id: id('c-abcdef12'), key: 'c-abcdef12', icon: 'meal' }, 'bad_row');
+  await refused({ id: id('food'), key: 'food', icon: 'custom:category-icons/x.png' }, 'bad_row');
+  await refused({ id: id('c-'), key: 'c-', name: 'x' }, 'bad_row');
+  assert.equal(rows('album_categories').length, 0);
+  // Another album's row or a bad key is never a category of this one.
+  assert.deepEqual(
+    plan
+      .albumCategoryList([
+        { key: 'nope', name: 'x' },
+        { key: 'other', deleted_at: 'x', name: 'Misc' },
+      ])
+      .map((entry) => [entry.key, entry.name])
+      .slice(-1),
+    [['other', 'Misc']],
+  );
 });

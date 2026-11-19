@@ -2153,7 +2153,7 @@ side is `features/albums/` (`lib/albumPeople.ts`, `lib/albumGroup.ts`,
 Worker side is the cloud-sync Worker's `src/albumGroups.ts`, with a copy of
 `lib/groupPlan.ts`, and the website's is
 [Shared albums on the web](#shared-albums-on-the-web). Its tables come from
-migrations `090` to `094`.
+migrations `090` to `094` and `097`.
 
 **What the user sees**
 
@@ -2363,7 +2363,9 @@ migrations `090` to `094`.
   edited and deleted, payments recorded and undone, the owner starting the
   album ("Nelson started the album", the Worker's first join, marked
   `started`), people joining, leaving and renaming themselves, Simplify
-  switched, the cover changed. It shows the newest five, then **Show all**.
+  switched, the cover changed, a category added, renamed, given another
+  icon or removed (a reorder is not logged). It shows the newest five, then
+  **Show all**.
   It is history for reference only: nothing on it is tapped or undone from
   there. A change someone else made to a bill that moves the user's share
   carries a small chip under its line saying how, rose when it costs them
@@ -2429,54 +2431,99 @@ migrations `090` to `094`.
   by their share of it (`lib/memberShare.ts`, turned into the entry's
   displayed value by its own rate). A category opens the bills that person
   has a share in.
-- **Categories: one fixed list, the same for everyone**
-  (`ALBUM_CATEGORIES` in `lib/groupPlan.ts`, `lib/albumCategories.ts`). A
-  shared album's bills are filed under the app's eight default expense
-  categories (Food, Groceries, Transport, Housing, Bills, Healthcare,
-  Shopping, Other), each under a key that never changes (`food`,
+- **Categories: the album's own list, the same for everyone**
+  (`ALBUM_CATEGORIES` and `albumCategoryList` in `lib/groupPlan.ts`,
+  `lib/albumCategories.ts`). Every shared album starts with the app's eight
+  default expense categories (Food, Groceries, Transport, Housing, Bills,
+  Healthcare, Shopping, Other), each under a key that never changes (`food`,
   `transport`…) and read in each person's language (`albums.categories.*`).
-  - **The pickers offer only those**: the editor of a shared album's bill
-    (`TransactionEditorScreen`'s `albumCategories`, picker ids
-    `album-category:<key>` that are never a categories row), the album's
-    bulk Edit, the Web Dashboard's shared-bill editor and album.money2time.com.
-    A new bill's title picks one by Quick Entry's keywords ("Lunch" → Food,
-    `albumCategoryForText`, `matchKeywordBucket`) until the user picks one; a
+  - **A Pro member can change them, for everyone** (`AlbumCategoriesScreen`,
+    `AlbumCategoryEditorScreen`): the album's Edit page has a Categories row
+    (shared albums only; a free user gets the paywall, source
+    `album_categories`, and a lock in place of the chevron). The page is the
+    category list of Settings > Categories without subcategories: drag to
+    reorder, tap an icon to change it, tap a name for the app's category
+    editor with no parent field (`CategoryEditor`), + for a new one (at most
+    30, `MAX_ALBUM_CATEGORIES`). The icon picker has no Uploads
+    (`noUploads`): an uploaded image lives on one phone and no other could
+    draw it, so an album's icon is a bundled one or an emoji
+    (`ALBUM_CATEGORY_ICON`). Delete asks first ("Its bills move to Other for
+    everyone in this album") and is never offered for Other. Members without
+    Pro still see and pick the album's categories everywhere; only changing
+    the list is Pro. The website shows and picks them but does not change the
+    list. Every change goes to the group (`changeAlbumCategories` →
+    `categoryRow`) and is logged, except a reorder: "Ben renamed the category
+    Food to Meals", "… added the category Tickets", "… removed …", "… changed
+    the icon of …" (`category_changed`, `category_*` lines). A change sends
+    only what it changes (a reorder only the places, an icon pick only the
+    icon); a field left out keeps what the row has, so a phone that has not
+    yet seen another's rename or removal neither undoes it nor brings a
+    removed category back.
+  - **Stored as the defaults' changes** (`album_categories`, migration `097`,
+    one row per album and key, id `ac-<album>-<key>`, `categoryRowId`): a row
+    for a default key gives it another name or icon (null keeps the
+    default's own, so an unrenamed default still reads in each person's
+    language), its place (`sort_order`) or removes it (`deleted_at`); a row
+    with a new key (`c-<12 hex>`, `CUSTOM_ALBUM_CATEGORY_KEY`) adds one, with
+    its name and icon. With no rows the album has the eight defaults. Other
+    can be renamed but is always there. A bill whose category the album no
+    longer has (removed, or a key it never had) reads as Other everywhere
+    (`albumGroupsRepository.listExpenses`), so removing one changes no bill
+    row; editing such a bill later files it under Other for real.
+  - **The pickers offer the album's list**: the editor of a shared album's bill
+    (`TransactionEditorScreen`'s `albumCategories`, the list from
+    `useAlbumCategories`, picker ids `album-category:<key>` that are never a
+    categories row), the album's bulk Edit, the Web Dashboard's shared-bill
+    editor and album.money2time.com. A new bill's title picks one by Quick
+    Entry's keywords ("Lunch" → Food, `albumCategoryForText`,
+    `matchKeywordBucket`) until the user picks one, but only a default the
+    album left as it is (a renamed or removed Food no longer means food); a
     title whose keywords are of another kind (a movie) is Other. The website
     has the same keywords, copied (`npm run sync:category-keywords` in
     `apps/mobile`, `__tests__/scripts/syncCategoryKeywords.test.ts`).
   - **The bill saves the key to the group** (`album_expenses.category_key`,
-    migration `094`), with that category's English name and icon, which
-    older apps match against their own categories (by name, then icon). A
-    bill an older app wrote is read by its icon, then its English name, else
-    Other (`albumCategoryOf`, also how the planner cleans every write); an
-    older app's edit of a bill that has a key (it sends its own category, never
-    a key) keeps the bill's album category.
+    migration `094`), with that category's English name and icon for a
+    default, or an added one's own name and icon, which older apps match
+    against their own categories (by name, then icon). A bill an older app
+    wrote is read by its icon, then its English name, else Other
+    (`albumCategoryOf`, also how the planner cleans every write); an older
+    app's edit of a bill that has a key (it sends its own category, never a
+    key) keeps the bill's album category, an added one's name and icon too.
+    An older app shows an added category by that match (often Other) and a
+    renamed default under the default's name, until it is updated.
     Changing it is a change of the group's, for everyone, and is logged ("Ben
-    filed Taxi under Transport", `recategorized_bill`). A bulk category edit
-    of a shared bill from any list goes to its group too
-    (`updateTransactionsBulk` → `editGroupBills`).
+    filed Taxi under Transport", `recategorized_bill`, named as the album
+    names it). A bulk category edit of a shared bill from any list goes to
+    its group too (`updateTransactionsBulk` → `editGroupBills`).
   - **The user's own entry gets a category of theirs in the background**
-    (`personalCategoryFor`, `GroupEnv.categoryIdFor`): the one Quick Entry
-    files that keyword bucket under (their own pick in Quick Entry settings,
-    else by name), else their category with the default's icon, else their
-    Other; worked out again whenever the bill's category changes. Every save
-    path turns a picker id into it first (`withOwnCategory` in
+    (`personalCategoryFor`, `GroupEnv.categoryIdFor`): for a default the
+    album left as it is, the one Quick Entry files that keyword bucket under
+    (their own pick in Quick Entry settings, else by name), else their
+    category with the default's icon; for one the album renamed, re-iconed
+    or added, their category of that name, else of that icon; else their
+    Other. Worked out again whenever the bill's category or the album's list
+    changes (the projection reads the list fresh each pass). Every save path
+    turns a picker id into it first (`withOwnCategory` in
     `createTransaction`, `createTransactionWithSplits`,
     `updateTransactionsBulk`).
   - **The entry also keeps the album category itself**
-    (`transactions.album_category`, migration `094`, written by the
-    projection on the entry and its paid parts): lists, search and the
-    entry's editor show a shared bill under the album category, not the
-    user's own one, and the album keeps its categories after the user is no
-    longer in it. There the entry's editor still offers the eight categories
-    and saves the key on the entry alone; a bulk edit with one of the user's
-    own categories saves the album category it reads as.
-  - **Breakdown**: a shared album's is by these categories, the same totals
-    on every phone and the website; an entry of the user's own in it (split
-    with nobody, which keeps the user's own categories in its editor) counts
-    under the category its own reads as (`albumCategoryForCategory`; on the
-    website, by its icon, then its English name). It stays by these
-    categories after the user is no longer in the album.
+    (`transactions.album_category`, migration `094`, and for a renamed,
+    re-iconed or added one its name and icon, `album_category_name` and
+    `album_category_icon`, migration `097`, all written by the projection on
+    the entry and its paid parts): lists, search and the entry's editor show
+    a shared bill under the album category, not the user's own one, and the
+    album keeps its categories, names included, after the user is no longer
+    in it (the group's rows then leave the phone). There the entry's editor
+    offers the eight defaults and the one the entry has, and saves the key
+    on the entry alone; a bulk edit with one of the user's own categories
+    saves the album category it reads as.
+  - **Breakdown**: a shared album's is by its categories, in their names,
+    the same totals on every phone and the website; an entry of the user's
+    own in it (split with nobody, which keeps the user's own categories in
+    its editor) counts under the category its own reads as
+    (`albumCategoryForCategory` with the album's list; on the website, by
+    name, then icon). It stays by these categories after the user is no
+    longer in the album, named as each entry keeps them.
 - **The cover is everyone's; the name is each person's.** Whoever changes a
   shared album's cover (Change cover, Edit) changes it on every phone, and
   someone who joins gets it. The image goes up to the group's image space
@@ -2847,9 +2894,9 @@ Two providers, two jobs:
 
 | Coverage                                               | Definitions | Meaning                                                                                                 |
 | ------------------------------------------------------ | ----------- | ------------------------------------------------------------------------------------------------------- |
-| All custom events                                      | 170         | Every event in the custom-event tables goes to GA4.                                                     |
+| All custom events                                      | 171         | Every event in the custom-event tables goes to GA4.                                                     |
 | PostHog + GA4 custom events                            | 71          | Install, activation, daily engagement, adoption milestones, the Pro funnel and low-volume moments.      |
-| GA4-only custom events                                 | 99          | Frequent per-use telemetry and data maintenance; PostHog sees these uses only through `Feature Used`.   |
+| GA4-only custom events                                 | 100         | Frequent per-use telemetry and data maintenance; PostHog sees these uses only through `Feature Used`.   |
 | Feature first-use definitions                          | 20          | One adoption event per qualifying feature on eligible installs.                                         |
 | Transaction milestone thresholds                       | 6           | One event at each documented logged-transaction count.                                                  |
 | Maximum adoption/milestone events per eligible install | 26          | Feature first uses plus transaction milestones, with working persistent storage; not a total event cap. |
@@ -3096,6 +3143,7 @@ Bank and wallet notifications (Android listener) and the Log Notification Shortc
 | `ALBUM_BILL_SAVED`              | `Album Bill Saved`              | `m2t_album_bill_saved`              | No      | A split bill is saved in a shared album (the group's bill written on the phone), its album category included (a change of category alone is a save of the group's now); each save from the entry editor.                                    | `edit`, `paid_by` (`me` when the user is the payer, `friend` when another member is), `people`, `has_payments`                                                                                                                                                                                                                                   | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
 | `ALBUM_PAYMENT_RECORDED`        | `Album Payment Recorded`        | `m2t_album_payment_recorded`        | No      | A payment is recorded on a shared album's bill (Mark paid, a part payment, paying a member back, or each bill of a Settle up), or a debt is settled from the album's Balances, the user's own or between two others; each payment recorded. | `direction` (`paid`, `received`, `between_others`), `via` (`bill` or `group_debt`)                                                                                                                                                                                                                                                               | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
 | `ALBUM_SIMPLIFY_DEBTS_SET`      | `Album Simplify Debts Set`      | `m2t_album_simplify_debts_set`      | No      | Simplify group debts is turned on or off on a shared album's People page, or off with a shared album made on New Album (it starts on); each change.                                                                                         | `on`                                                                                                                                                                                                                                                                                                                                             | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
+| `ALBUM_CATEGORY_CHANGED`        | `Album Category Changed`        | `m2t_album_category_changed`        | No      | A Pro user changes a shared album's categories for everyone in it (Album categories page or its editor); each change: one category added, renamed or given another icon, removed, or the list reordered.                                    | `action` (`added`, `edited`, `removed`, `reordered`), `is_default` (the one category changed is one of the eight defaults)                                                                                                                                                                                                                       | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
 | `ALBUM_PAYMENT_UNDONE`          | `Album Payment Undone`          | `m2t_album_payment_undone`          | No      | Someone in a shared album undoes a payment on one of its bills (including its whole simplified batch); each undo made.                                                                                                                      | None                                                                                                                                                                                                                                                                                                                                             | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
 | `ALBUM_BILL_ACCOUNT_SET`        | `Album Bill Account Set`        | `m2t_album_bill_account_set`        | No      | Shared albums' bills are put on an account with the album's bulk Edit > Account (on the phone only); each bulk change that applied.                                                                                                         | `count`, `bulk`                                                                                                                                                                                                                                                                                                                                  | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                               |
 | `ALBUM_ACTIVITY_OPENED`         | `Album Activity Opened`         | `m2t_album_activity_opened`         | No      | A shared album's Balances tab, which holds its Activity, is first shown on a visit to the album.                                                                                                                                            | `entries`                                                                                                                                                                                                                                                                                                                                        | [features/albums/screens/AlbumDetailScreen.tsx](apps/mobile/features/albums/screens/AlbumDetailScreen.tsx)                 |
@@ -3435,7 +3483,7 @@ Every paywall entry point must pass its own source. Sources segment `Pro Paywall
 | `accounts`, `categories`, `recurring`, `wage_entries`, `custom_logos`, `custom_item_images`, `subcurrencies`, `albums`, `items`, `budget_templates`, `receipts`, `split_bills`, `goals`, `loans`, `instalments` | Count-based free-tier gates in `useProGate`.                                                                                                                                |
 | `receipt_scan`, `voice`                                                                                                                                                                                         | Receipt-scan or voice-use limits.                                                                                                                                           |
 | `notification_ai`                                                                                                                                                                                               | AI auto-review on the notification review page: Upgrade once the 40 free reviews are used, turning the switch on with none left, or Get unlimited with Pro in its settings. |
-| `app_icon`, `custom_card_designs`, `custom_category_icons`, `custom_subscription_logos`, `icon_packs`, `live_earnings_auto_start`, `reimbursements`                                                             | Pro-only feature gates.                                                                                                                                                     |
+| `album_categories`, `app_icon`, `custom_card_designs`, `custom_category_icons`, `custom_subscription_logos`, `icon_packs`, `live_earnings_auto_start`, `reimbursements`                                         | Pro-only feature gates (`album_categories`: a free user taps a shared album's Categories row, or an edit on its Categories page).                                           |
 | `ledgers_create`, `ledgers_switch`                                                                                                                                                                              | Ledger switcher or Manage ledgers: a free user taps New ledger, or a ledger locked since Pro ended.                                                                         |
 | `ledgers_pro_ended`                                                                                                                                                                                             | Renew Pro on the notice shown when Pro ends while a ledger other than the default one is open.                                                                              |
 | `ledger_share`                                                                                                                                                                                                  | A free user turns on sharing for a ledger (its Sharing page).                                                                                                               |
@@ -4848,7 +4896,10 @@ database, no bucket, no account and no secrets. Served at
   `to_member`, `amount`, `currency`) and `web_album_activity`
   (the app's `AlbumActivity` entries: `kind`, `actor_member_id`,
   `expense_id`, `member_id`, `bill`, `rename`, `payment`, `simplify`,
-  `sort_order`, `created_at`). Only albums of the open ledger, and no Cloud
+  `category`, `sort_order`, `created_at`) and `web_album_categories` (the
+  album's list in order: `id` `<album>:<key>`, `album_id`, `key`, `name`,
+  `icon`, `sort_order`, name and icon null for a default as it is; absent
+  from older apps, when the page uses the eight defaults). Only albums of the open ledger, and no Cloud
   Sync account is named in them. Each row has a unique `id`, so a patch
   carries only what changed. A phone that names it in `meta.features` takes
   `module:albumbill` (below); an older app refuses the module as unknown and
@@ -5873,7 +5924,9 @@ app's `services/webDashboardLink.ts`, `webDashboardCrypto.ts`,
   shows its breakdown by category for the same period (`albumBreakdown`,
   as on the album page): a shared album, or one the user is no longer in,
   by its own categories (each entry's `album_category`, `tx.albumCategory`,
-  else its bill's `web_album_bills.category`), else by top-level category.
+  else its bill's `web_album_bills.category`), named by the album's
+  `web_album_categories`, else by the entry's `album_category_name` and
+  `album_category_icon`, else by top-level category.
   **Archived albums** (`albums.archived_at`, `Trip.archived`) stay lines and
   show an Archived pill on the Albums page; they are left out of New Album's
   free-plan count, the active-album picker and Add to album (as are shared
@@ -6095,9 +6148,12 @@ again when that column changes width.
   Breakdown puts each ring beside its list.
   - **A bill** (new or tapped) as the app's editor and Split Bill: amount and
     currency (the album's currencies first), what it was for, one of the
-    album's eight categories (`src/lib/album/categories.ts`, the app's
-    `ALBUM_CATEGORIES`; the bill saves its key, with its English name and
-    icon), which a new bill's title picks by the app's keywords until one is
+    album's categories (`src/lib/album/categories.ts`, the app's
+    `ALBUM_CATEGORIES` as the album's `album_categories` rows change them;
+    the bill saves its key, with a default's English name and icon or an
+    added one's own; the page shows and picks them but never changes the
+    list, which is the app's, for Pro), which a new bill's title picks by the
+    app's keywords, onto a default the album left as it is, until one is
     tapped (`albumCategoryForText`, with `src/lib/album/keywords/*.json`
     loaded for the page's language on first use, `keywords.ts`), and the day; then Split Bill's own layout: the
     method (Amount, %, Shares, +/−, explained behind its ⓘ), one card with
@@ -6108,8 +6164,8 @@ again when that column changes width.
     means for the user ("You owe Tess RM60.00") or what is wrong. Delete asks
     first, and so does changing a bill with payments on it; a bill's payments
     are listed under it with **Undo** (the whole act, `undonePaymentRows`).
-  - **Breakdown**: by the album's categories per currency, the same as on
-    every phone, for Everyone or one person (each bill by their share), with
+  - **Breakdown**: by the album's categories per currency (a removed one's
+    bills under Other), the same as on every phone, for Everyone or one person (each bill by their share), with
     the dashboard's donut.
   - **Balances**: the user's net per currency, centred as in the app; **Who
     owes whom**, each line opening the payment for it (Pay, Paid you, or

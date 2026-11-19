@@ -14,7 +14,7 @@ import { FREE_MAX_ACCOUNTS, FREE_MAX_LOANS, FREE_MAX_SAVINGS_GOALS } from "../pr
 import { useDashboard, useFormat } from "../state";
 import { usePaywall } from "../paywall";
 import { AccountLogo, CategoryGlyph, ClayImg } from "../ui";
-import { ALBUM_CATEGORIES, type AlbumCategoryKey } from "@/lib/album/categories";
+import { albumCategoryIconOf, DEFAULT_ALBUM_CATEGORY_LIST, isDefaultAlbumCategoryKey, type AlbumCategoryDef, type AlbumCategoryKey } from "@/lib/album/categories";
 
 /*
  * The pieces every editor on the dashboard shares, drawn after the app's own:
@@ -516,13 +516,14 @@ export function categoryLabel(model: Model, id: string | null | undefined): stri
   return parent ? `${parent.name} / ${category.name}` : category.name;
 }
 
-/** A shared album's categories, the same for everyone in it (`ALBUM_CATEGORIES`), as two columns like `CategoryGrid`. */
-export function AlbumCategoryGrid({ value, onChange }: { value: AlbumCategoryKey; onChange: (key: AlbumCategoryKey) => void }) {
+/** A shared album's categories, the same for everyone in it (the album's own list, the defaults from an older phone), as two columns like `CategoryGrid`. */
+export function AlbumCategoryGrid({ value, onChange, categories = DEFAULT_ALBUM_CATEGORY_LIST }: { value: AlbumCategoryKey; onChange: (key: AlbumCategoryKey) => void; categories?: readonly AlbumCategoryDef[] }) {
   const t = useTranslations("album.categories");
   return (
     <div className="grid grid-cols-2 gap-2">
-      {ALBUM_CATEGORIES.map((category) => {
+      {categories.map((category) => {
         const active = value === category.key;
+        const name = category.name ?? t(isDefaultAlbumCategoryKey(category.key) ? category.key : "other");
         return (
           <button
             key={category.key}
@@ -533,8 +534,8 @@ export function AlbumCategoryGrid({ value, onChange }: { value: AlbumCategoryKey
               active ? "border-primary/30 bg-primary/15 text-primary-dark" : "border-transparent bg-background-subtle/70 text-foreground hover:bg-background-subtle"
             }`}
           >
-            <CategoryGlyph icon={category.icon} name={t(category.key)} size={22} />
-            <span className="min-w-0 flex-1 truncate">{t(category.key)}</span>
+            <CategoryGlyph icon={albumCategoryIconOf(category)} name={name} size={22} />
+            <span className="min-w-0 flex-1 truncate">{name}</span>
             {active ? <Check /> : null}
           </button>
         );

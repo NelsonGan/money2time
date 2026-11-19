@@ -780,7 +780,14 @@ export type AlbumActivityKind =
   | 'member_left'
   | 'member_renamed'
   | 'simplify_changed'
-  | 'cover_changed';
+  | 'cover_changed'
+  | 'category_changed';
+
+/** How one of an album's categories looked, before or after a change (null name/icon: a default's own). */
+export interface AlbumCategoryLook {
+  name: string | null;
+  icon: string | null;
+}
 
 /** A bill's fields as the activity log keeps them, before or after a change. */
 export interface AlbumBillSnapshot {
@@ -817,6 +824,12 @@ export interface AlbumActivity {
     bills: string[];
     /** Recorded by the app to close an even group (Simplify). */
     even: boolean;
+  } | null;
+  /** One of the album's categories added (no before), changed, or removed (no after). */
+  category: {
+    key: AlbumCategoryKey;
+    before: AlbumCategoryLook | null;
+    after: AlbumCategoryLook | null;
   } | null;
   /** Simplify group debts, as it was switched. */
   simplify: boolean | null;
@@ -1157,6 +1170,12 @@ export interface Transaction {
    * longer shared. Shown in place of the entry's own category.
    */
   albumCategory: AlbumCategoryKey | null;
+  /**
+   * That category's name and icon when the album added or changed it; null
+   * for a default as it is (its name then reads in the user's language).
+   */
+  albumCategoryName: string | null;
+  albumCategoryIcon: string | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;

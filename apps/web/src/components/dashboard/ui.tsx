@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { useCallback, type KeyboardEvent, type ReactNode, type SelectHTMLAttributes } from "react";
 
 import { ACCOUNT_LOGOS, CATEGORY_ICON_IDS, ITEM_ICONS, SUBSCRIPTION_LOGOS } from "@/lib/backup/assets.generated";
+import { isDefaultAlbumCategoryKey } from "@/lib/album/categories";
 import type { Trip } from "@/lib/backup/model";
 
 import type { Slice } from "./aggregate";
@@ -290,7 +291,11 @@ export function SliceGlyph({ slice, name, size = 28 }: { slice: Pick<Slice, "tri
 export function useSliceName() {
   const tc = useTranslations("dashboard.common");
   const tcat = useTranslations("album.categories");
-  return useCallback((slice: Pick<Slice, "name" | "albumCategory">) => (slice.albumCategory ? tcat(slice.albumCategory) : slice.name || tc("uncategorized")), [tc, tcat]);
+  return useCallback(
+    (slice: Pick<Slice, "name" | "albumCategory" | "albumCategoryName">) =>
+      slice.albumCategory ? slice.albumCategoryName || tcat(isDefaultAlbumCategoryKey(slice.albumCategory) ? slice.albumCategory : "other") : slice.name || tc("uncategorized"),
+    [tc, tcat],
+  );
 }
 
 /**
