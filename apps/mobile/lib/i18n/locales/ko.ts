@@ -2359,6 +2359,8 @@ const ko = {
     limit_icon_packs: '추가 아이콘 팩은 Pro 기능입니다. 업그레이드하면 모든 팩을 쓸 수 있습니다.',
     limit_live_earnings_auto_start:
       '일정에 맞춰 시계를 자동으로 시작하는 것은 Pro 기능입니다. 업그레이드하면 근무가 알아서 시작됩니다. 직접 시작하는 것은 언제나 무료입니다.',
+    limit_album_categories:
+      '공유 앨범의 카테고리 변경은 Pro 기능이에요. 업그레이드하면 앨범의 모든 사람을 위해 이름을 바꾸거나 추가하거나 삭제할 수 있어요.',
     limit_reimbursements:
       '환급 추적은 Pro 기능입니다. 돌려받을 지출을 표시하려면 업그레이드하세요.',
     limit_subcurrencies:
@@ -3080,6 +3082,13 @@ const ko = {
       failed: '이 앨범의 변경 사항을 저장하지 못했어요. 다시 시도하세요.',
     },
     line_label: '{{name}}, 앨범',
+    category_list: {
+      title: '카테고리',
+      edit: '카테고리 편집',
+      info: '이 앨범의 모든 사람이 앱과 웹에서 이 카테고리로 지출을 분류해요. 여기서 바꾼 내용은 모두에게 적용돼요. 카테고리를 삭제하면 해당 지출은 {{other}}로 옮겨져요.',
+      limit: '앨범 하나에 카테고리는 최대 {{count}}개까지 만들 수 있어요.',
+      remove_body: '이 앨범의 모든 사람에게 해당 지출이 {{other}}로 옮겨져요.',
+    },
     categories: {
       food: '식비',
       groceries: '식료품',
@@ -3122,6 +3131,10 @@ const ko = {
       simplify_on: '{{actor}}: 그룹 정산 간단히 켬',
       simplify_off: '{{actor}}: 그룹 정산 간단히 끔',
       cover: '{{actor}}: 커버 변경',
+      category_added: '{{actor}} 님이 {{name}} 카테고리를 추가했어요',
+      category_removed: '{{actor}} 님이 {{name}} 카테고리를 삭제했어요',
+      category_renamed: '{{actor}} 님이 {{before}} 카테고리 이름을 {{after}}(으)로 바꿨어요',
+      category_icon: '{{actor}} 님이 {{name}} 아이콘을 바꿨어요',
     },
   },
   assets: {

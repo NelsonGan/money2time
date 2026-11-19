@@ -2389,6 +2389,8 @@ const nb = {
     limit_icon_packs: 'Flere ikonpakker er en Pro-funksjon. Oppgrader for å bruke alle pakkene.',
     limit_live_earnings_auto_start:
       'Å starte klokken etter en tidsplan er en Pro-funksjon. Oppgrader, så starter vakten din av seg selv. Å starte den manuelt er alltid gratis.',
+    limit_album_categories:
+      'Å endre kategoriene i et delt album er en Pro-funksjon. Oppgrader for å gi dem nytt navn, legge til eller fjerne dem for alle i albumet.',
     limit_reimbursements:
       'Refusjonssporing er en Pro-funksjon. Oppgrader for å merke utgifter du får tilbake.',
     limit_subcurrencies:
@@ -3123,6 +3125,13 @@ const nb = {
       failed: 'Kunne ikke lagre endringen i albumet. Prøv igjen.',
     },
     line_label: '{{name}}, album',
+    category_list: {
+      title: 'Kategorier',
+      edit: 'Rediger kategorier',
+      info: 'Alle i dette albumet fører regningene sine under disse kategoriene, i appen og på nettet. En endring du gjør her, gjelder for alle. Fjerner du én, flyttes regningene til {{other}}.',
+      limit: 'Et album kan ha opptil {{count}} kategorier.',
+      remove_body: 'Regningene flyttes til {{other}} for alle i dette albumet.',
+    },
     categories: {
       food: 'Mat',
       groceries: 'Dagligvarer',
@@ -3165,6 +3174,10 @@ const nb = {
       simplify_on: '{{actor}} slo på Forenkle gruppens gjeld',
       simplify_off: '{{actor}} slo av Forenkle gruppens gjeld',
       cover: '{{actor}} endret forsiden',
+      category_added: '{{actor}} la til kategorien {{name}}',
+      category_removed: '{{actor}} fjernet kategorien {{name}}',
+      category_renamed: '{{actor}} endret navnet på kategorien {{before}} til {{after}}',
+      category_icon: '{{actor}} endret ikonet for {{name}}',
     },
   },
   assets: {

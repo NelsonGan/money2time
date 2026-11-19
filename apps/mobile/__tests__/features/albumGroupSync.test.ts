@@ -1,9 +1,11 @@
+import { DEFAULT_ALBUM_CATEGORY_LIST } from '~/features/albums/lib/albumCategories';
 import {
   openShares,
   pairwiseDebts,
   settleDebt,
   simplifyDebts,
 } from '~/features/albums/lib/groupDebts';
+import { categoryRowId } from '~/features/albums/lib/groupPlan';
 import {
   albumLedgerId,
   ensureLocalAlbum,
@@ -67,6 +69,7 @@ const env: GroupEnv = {
   defaultAccountId: 'cash',
   defaultPaybackAccountId: 'bank',
   categoryIdFor: () => 'food',
+  categories: DEFAULT_ALBUM_CATEGORY_LIST,
 };
 
 let app: ReturnType<typeof openAppDatabase>;
@@ -1232,5 +1235,63 @@ describe('the album cover', () => {
     }
     groupRows.setGroupCover(GROUP, '../escape.jpg');
     expect(albumGroupsRepository.groupCover(GROUP)).toBeUndefined();
+  });
+});
+
+describe('an album’s own categories', () => {
+  const setCategory = (key: string, data: { name?: string | null; deleted?: boolean }) =>
+    app.db.runSync(
+      `INSERT OR REPLACE INTO album_categories
+         (id, ledger_id, key, name, icon, sort_order, created_at, updated_at, deleted_at)
+       VALUES (?, ?, ?, ?, NULL, 0, ?, ?, ?)`,
+      [
+        categoryRowId(GROUP, key),
+        GROUP,
+        key,
+        data.name ?? null,
+        NOW,
+        NOW,
+        data.deleted ? NOW : null,
+      ],
+    );
+  const look = (id: string) =>
+    app.all(
+      'SELECT album_category, album_category_name, album_category_icon FROM transactions WHERE id = ?',
+      id,
+    )[0];
+  const envNow = (): GroupEnv => ({
+    ...env,
+    categories: albumGroupsRepository.listCategories(GROUP),
+  });
+
+  it('name the user’s entry as the album names it, and a removed one’s bills read as Other', () => {
+    addBill('dinner', 'aisha');
+    projectGroup(GROUP, envNow());
+    expect(look('dinner')).toMatchObject({
+      album_category: 'food',
+      album_category_name: null,
+      album_category_icon: null,
+    });
+    // Renamed on another phone: the entry follows on the next pass.
+    setCategory('food', { name: 'Meals' });
+    expect(projectGroup(GROUP, envNow())).toBe(true);
+    expect(look('dinner')).toMatchObject({ album_category: 'food', album_category_name: 'Meals' });
+    // A row under another album's id is never this album's.
+    app.db.runSync(
+      `INSERT INTO album_categories (id, ledger_id, key, name, sort_order, created_at, updated_at)
+       VALUES ('stray', ?, 'transport', 'Stray', 0, ?, ?)`,
+      [GROUP, NOW, NOW],
+    );
+    expect(
+      albumGroupsRepository.listCategories(GROUP).find((c) => c.key === 'transport')?.name,
+    ).toBeNull();
+    // Removed: its bills read as Other, the bill row untouched.
+    setCategory('food', { deleted: true });
+    expect(albumGroupsRepository.listExpenses(GROUP)[0].category).toBe('other');
+    projectGroup(GROUP, envNow());
+    expect(look('dinner')).toMatchObject({ album_category: 'other', album_category_name: null });
+    expect(app.all('SELECT category_key FROM album_expenses WHERE id = ?', 'dinner')).toEqual([
+      { category_key: 'food' },
+    ]);
   });
 });

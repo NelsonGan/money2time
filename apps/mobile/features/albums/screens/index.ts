@@ -1,4 +1,6 @@
 export { AddAlbumTransactionsScreen } from './AddAlbumTransactionsScreen';
+export { AlbumCategoriesScreen } from './AlbumCategoriesScreen';
+export { AlbumCategoryEditorScreen } from './AlbumCategoryEditorScreen';
 export { AlbumDetailScreen } from './AlbumDetailScreen';
 export { AlbumPeopleScreen } from './AlbumPeopleScreen';
 export { AlbumsScreen } from './AlbumsScreen';

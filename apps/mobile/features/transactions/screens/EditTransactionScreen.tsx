@@ -10,8 +10,14 @@ import {
   useTransferFeeIndex,
 } from '~/context/AppContext';
 import { albumBillRows, useAlbumBillTarget } from '~/features/albums/hooks/useAlbumBillTarget';
+import { useAlbumCategories } from '~/features/albums/hooks/useAlbumCategories';
 import { useGroupBillOrigin, useGroupOthers } from '~/features/albums/hooks/useGroupBillOrigin';
-import { albumCategoryForCategory, albumCategoryId } from '~/features/albums/lib/albumCategories';
+import {
+  type AlbumCategoryDef,
+  albumCategoryForCategory,
+  albumCategoryId,
+  DEFAULT_ALBUM_CATEGORY_LIST,
+} from '~/features/albums/lib/albumCategories';
 import { billHasPayments } from '~/features/albums/lib/groupRules';
 import {
   listGroupExpenses,
@@ -141,9 +147,36 @@ function TransactionEditor({
   // its own category (split later, it goes to the group as the album
   // category it reads as).
   // An entry of an album no longer shared keeps its album category too.
-  const albumCategories =
-    transaction.type === 'expense' &&
-    ((!!albumGroupId && transaction.albumGroupId === albumGroupId) || !!transaction.albumCategory);
+  const groupBillHere = !!albumGroupId && transaction.albumGroupId === albumGroupId;
+  const usesAlbumCategories =
+    transaction.type === 'expense' && (groupBillHere || !!transaction.albumCategory);
+  const groupCategoryList = useAlbumCategories(groupBillHere ? albumGroupId : null);
+  // The album's categories; for an album no longer shared, the defaults and
+  // the one the entry keeps (an added or renamed one, by its own name).
+  const albumCategories = useMemo<readonly AlbumCategoryDef[] | null>(() => {
+    if (!usesAlbumCategories) return null;
+    if (groupBillHere) return groupCategoryList;
+    const key = transaction.albumCategory;
+    if (!key || (!transaction.albumCategoryName && !transaction.albumCategoryIcon)) {
+      return DEFAULT_ALBUM_CATEGORY_LIST;
+    }
+    const own: AlbumCategoryDef = {
+      key,
+      name: transaction.albumCategoryName,
+      icon: transaction.albumCategoryIcon,
+      sortOrder: DEFAULT_ALBUM_CATEGORY_LIST.find((entry) => entry.key === key)?.sortOrder ?? 999,
+    };
+    return [...DEFAULT_ALBUM_CATEGORY_LIST.filter((entry) => entry.key !== key), own].sort(
+      (a, b) => a.sortOrder - b.sortOrder,
+    );
+  }, [
+    groupBillHere,
+    groupCategoryList,
+    transaction.albumCategory,
+    transaction.albumCategoryIcon,
+    transaction.albumCategoryName,
+    usesAlbumCategories,
+  ]);
   const initialCategoryId = useMemo(() => {
     if (!albumCategories) return transaction.categoryId;
     const bill = albumGroupId
@@ -152,7 +185,12 @@ function TransactionEditor({
     return albumCategoryId(
       bill?.category ??
         transaction.albumCategory ??
-        albumCategoryForCategory(transaction.categoryId, categories, quickEntryPrefs.categoryMap),
+        albumCategoryForCategory(
+          transaction.categoryId,
+          categories,
+          quickEntryPrefs.categoryMap,
+          albumCategories,
+        ),
     );
   }, [
     albumCategories,

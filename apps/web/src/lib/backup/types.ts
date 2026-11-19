@@ -108,6 +108,12 @@ export type TransactionRow = Row & {
    * Absent from an older app.
    */
   album_category?: string | null;
+  /**
+   * That category's name and icon when the album added or changed it (the
+   * app's migration 097); null for a default as it is, absent from an older app.
+   */
+  album_category_name?: string | null;
+  album_category_icon?: string | null;
 };
 
 export type TransactionSplitRow = Row & {
@@ -284,7 +290,25 @@ export type BackupTables = {
   web_album_bills?: WebAlbumBillRow[];
   web_album_settlements?: WebAlbumSettlementRow[];
   web_album_activity?: WebAlbumActivityRow[];
+  /** The album's categories, in order; absent from an older app (the eight defaults). */
+  web_album_categories?: WebAlbumCategoryRow[];
 };
+
+/** One of a shared album's categories, as the album has it now (the app's `AlbumCategoryDef`). */
+export type WebAlbumCategoryRow = {
+  /** `<albumId>:<key>`. */
+  id: string;
+  album_id: string;
+  key: string;
+  /** Null for a default's own name, read in the page's language. */
+  name?: string | null;
+  /** Null for a default's own icon. */
+  icon?: string | null;
+  sort_order?: number | null;
+};
+
+/** How one of an album's categories looked, before or after a change (null name/icon: a default's own). */
+export type WebAlbumCategoryLook = { name: string | null; icon: string | null };
 
 /** A payment that stands in a shared album's group, from one member to another for one bill. */
 export type WebAlbumSettlementRow = {
@@ -321,7 +345,7 @@ export type WebAlbumBillRow = {
   note?: string | null;
   amount: number;
   currency: string;
-  /** Its album category (`ALBUM_CATEGORIES`); absent from older apps. */
+  /** Its album category, one of the album's (`web_album_categories`); absent from older apps. */
   category?: string | null;
   paid_by: string;
   shares: WebAlbumShare[];
@@ -353,6 +377,8 @@ export type WebAlbumActivityRow = {
   rename?: { before: string; after: string } | null;
   payment?: { from: string; to: string; currency: string; amount: number; bills?: string[]; even?: boolean } | null;
   simplify?: boolean | null;
+  /** One of the album's categories added (no before), changed, or removed (no after); absent from older apps. */
+  category?: { key: string; before: WebAlbumCategoryLook | null; after: WebAlbumCategoryLook | null } | null;
   /** A join that started the album (the owner's); absent from older apps. */
   started?: boolean | null;
   sort_order?: number | null;

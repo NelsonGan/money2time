@@ -20,6 +20,7 @@ import { chartCategoryColor } from '~/constants/chartColors';
 import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
+import { useAlbumCategories } from '~/features/albums/hooks/useAlbumCategories';
 import { albumCategoryRows } from '~/features/albums/lib/albumBreakdown';
 import {
   BREAKDOWN_PIE_LABEL_HEIGHT,
@@ -362,6 +363,7 @@ export function InsightsDrilldownScreen({
   ]);
   // A shared album, or one the user is no longer in, by its own categories.
   const albumShare = useSharedAlbum(payload.albumId);
+  const groupCategories = useAlbumCategories(albumShare ? (payload.albumId ?? null) : null);
   const byAlbumCategory =
     !!albumShare || !!albums.find((album) => album.id === payload.albumId)?.shareEndedAt;
   const albumRows = useMemo<DrilldownSubcategoryRow[] | null>(() => {
@@ -375,6 +377,7 @@ export function InsightsDrilldownScreen({
       categoryById,
       categoryMap: quickEntryPrefs.categoryMap,
       byAlbumCategory,
+      albumCategories: groupCategories,
     });
     const total = rows.reduce((sum, row) => sum + Math.abs(row.amount), 0);
     return rows.map((row) => ({
@@ -392,6 +395,7 @@ export function InsightsDrilldownScreen({
     categories,
     categoryById,
     getDisplayValueForTransaction,
+    groupCategories,
     payload.albumCategories,
     quickEntryPrefs.categoryMap,
     resolvedTransactions,

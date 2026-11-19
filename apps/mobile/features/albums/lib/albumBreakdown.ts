@@ -10,11 +10,14 @@ import { I18n } from '~/lib/i18n';
 import type { Category, TransactionWithRelations } from '~/types';
 
 import {
+  type AlbumCategoryDef,
   albumCategoryForCategory,
-  albumCategoryIcon,
+  albumCategoryIconOf,
   albumCategoryId,
-  albumCategoryLabel,
+  albumCategoryIn,
+  albumCategoryNameOf,
   type CategoryMap,
+  DEFAULT_ALBUM_CATEGORY_LIST,
 } from './albumCategories';
 
 /** The row of an album's entries with no category. */
@@ -44,6 +47,8 @@ export interface AlbumBreakdownOptions {
    * Otherwise by the user's root categories.
    */
   byAlbumCategory: boolean;
+  /** The shared album's categories (the defaults for one no longer shared). */
+  albumCategories?: readonly AlbumCategoryDef[];
 }
 
 /** The rows, biggest first. */
@@ -52,6 +57,7 @@ export function albumCategoryRows(
   options: AlbumBreakdownOptions,
 ): AlbumCategoryRow[] {
   const { valueOf, categories, categoryById, categoryMap, byAlbumCategory } = options;
+  const album = options.albumCategories ?? DEFAULT_ALBUM_CATEGORY_LIST;
   const rows = new Map<string, AlbumCategoryRow>();
   const add = (
     id: string,
@@ -74,9 +80,32 @@ export function albumCategoryRows(
     const amount = valueOf(tx);
     if (amount === null) continue;
     if (byAlbumCategory) {
-      const key =
-        tx.albumCategory ?? albumCategoryForCategory(tx.categoryId, categories, categoryMap);
-      add(albumCategoryId(key), albumCategoryLabel(key), albumCategoryIcon(key), null, tx, amount);
+      if (tx.albumCategory) {
+        // The album's name and icon for it, else (an album no longer shared)
+        // the ones the entry keeps, as every list shows it.
+        const category = album.find((entry) => entry.key === tx.albumCategory);
+        add(
+          albumCategoryId(tx.albumCategory),
+          category ? albumCategoryNameOf(category) : (tx.categoryName ?? ''),
+          category ? albumCategoryIconOf(category) : (tx.categoryIcon ?? ''),
+          null,
+          tx,
+          amount,
+        );
+        continue;
+      }
+      const category = albumCategoryIn(
+        album,
+        albumCategoryForCategory(tx.categoryId, categories, categoryMap, album),
+      );
+      add(
+        albumCategoryId(category.key),
+        albumCategoryNameOf(category),
+        albumCategoryIconOf(category),
+        null,
+        tx,
+        amount,
+      );
       continue;
     }
     const category = tx.categoryId ? categoryById.get(tx.categoryId) : undefined;

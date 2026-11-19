@@ -2397,6 +2397,8 @@ const pl = {
     limit_icon_packs: 'Dodatkowe pakiety ikon to funkcja Pro. Ulepsz plan, aby użyć wszystkich.',
     limit_live_earnings_auto_start:
       'Uruchamianie zegara według harmonogramu to funkcja Pro. Przejdź na Pro, a zmiana zacznie się sama. Ręczne uruchomienie zawsze jest darmowe.',
+    limit_album_categories:
+      'Zmiana kategorii udostępnionego albumu to funkcja Pro. Przejdź na Pro, aby zmieniać ich nazwy, dodawać je lub usuwać dla wszystkich w albumie.',
     limit_reimbursements:
       'Śledzenie zwrotów to funkcja Pro. Przejdź na Pro, aby oznaczać wydatki, które odzyskasz.',
     limit_subcurrencies:
@@ -3134,6 +3136,13 @@ const pl = {
       failed: 'Nie udało się zapisać zmiany w albumie. Spróbuj ponownie.',
     },
     line_label: '{{name}}, album',
+    category_list: {
+      title: 'Kategorie',
+      edit: 'Edytuj kategorie',
+      info: 'Wszyscy w tym albumie przypisują swoje rachunki do tych kategorii, w aplikacji i w sieci. Zmiana wprowadzona tutaj dotyczy wszystkich. Gdy usuniesz kategorię, jej rachunki trafią do kategorii {{other}}.',
+      limit: 'Album może mieć maksymalnie {{count}} kategorii.',
+      remove_body: 'Jej rachunki trafią do kategorii {{other}} dla wszystkich w tym albumie.',
+    },
     categories: {
       food: 'Jedzenie',
       groceries: 'Zakupy spożywcze',
@@ -3176,6 +3185,10 @@ const pl = {
       simplify_on: '{{actor}}: włączono „Uprość długi grupy”',
       simplify_off: '{{actor}}: wyłączono „Uprość długi grupy”',
       cover: '{{actor}}: zmieniono okładkę',
+      category_added: '{{actor}} dodaje kategorię {{name}}',
+      category_removed: '{{actor}} usuwa kategorię {{name}}',
+      category_renamed: '{{actor}} zmienia nazwę kategorii {{before}} na {{after}}',
+      category_icon: '{{actor}} zmienia ikonę kategorii {{name}}',
     },
   },
   assets: {

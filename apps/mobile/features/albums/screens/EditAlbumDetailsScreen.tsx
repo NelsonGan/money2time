@@ -1,19 +1,23 @@
-import { ChevronRight, Pencil } from 'lucide-react-native';
+import { ChevronRight, Lock, Pencil } from 'lucide-react-native';
 import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
-import { FatButton, Input, SettingsHeader, Text } from '~/components/ui';
+import { CategoryEmoji, FatButton, Input, SettingsHeader, Text } from '~/components/ui';
 import { CategoryIconField } from '~/components/ui/CategoryIconField';
 import { useApp } from '~/context/AppContext';
 import type { CategoryIconPickerSession } from '~/features/settings/lib/categoryIconPickerBridge';
+import { useSharedAlbum } from '~/features/sharedLedgers/hooks/useSharedLedgers';
+import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import type { AlbumLocation } from '~/types';
 
 import { AlbumDateRangeFields } from '../components/AlbumDateRangeFields';
 import { AlbumLocationField } from '../components/AlbumLocationField';
+import { useAlbumCategories } from '../hooks/useAlbumCategories';
+import { albumCategoryIconOf } from '../lib/albumCategories';
 import { albumIconAfterLocationChange } from '../lib/flagEmoji';
 
 interface EditAlbumDetailsScreenProps {
@@ -21,6 +25,8 @@ interface EditAlbumDetailsScreenProps {
   onClose: () => void;
   onEditTransactions: (albumId: string) => void;
   onOpenIconPicker: (session: CategoryIconPickerSession) => void;
+  /** A shared album's categories, the same for everyone in it. */
+  onOpenCategories: (albumId: string) => void;
 }
 
 export function EditAlbumDetailsScreen({
@@ -28,8 +34,13 @@ export function EditAlbumDetailsScreen({
   onClose,
   onEditTransactions,
   onOpenIconPicker,
+  onOpenCategories,
 }: EditAlbumDetailsScreenProps) {
   const { albums, updateAlbum, setAlbumLocation } = useApp();
+  const { isPro, requirePro } = useProGate();
+  // A shared album's categories are everyone's: changing them is Pro.
+  const shared = useSharedAlbum(albumId) !== null;
+  const groupCategories = useAlbumCategories(shared ? albumId : null);
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
 
@@ -151,6 +162,43 @@ export function EditAlbumDetailsScreen({
             </Text>
             <ChevronRight size={18} color={themeColors.textMuted} />
           </Pressable>
+
+          {shared ? (
+            <>
+              <Text variant="label" tone="muted" className="mb-2 mt-5 px-1">
+                {I18n.t('albums.category_list.title')}
+              </Text>
+              <Pressable
+                onPress={() => {
+                  if (!requirePro('album_categories')) return;
+                  onOpenCategories(albumId);
+                }}
+                accessibilityRole="button"
+                accessibilityLabel={I18n.t('albums.category_list.edit')}
+                style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+                className="flex-row items-center gap-3 rounded-2xl border border-border/30 bg-card px-4 py-3.5"
+              >
+                <View className="flex-row">
+                  {groupCategories.slice(0, 4).map((category) => (
+                    <CategoryEmoji
+                      key={category.key}
+                      icon={albumCategoryIconOf(category)}
+                      size={18}
+                      style={{ marginRight: 2 }}
+                    />
+                  ))}
+                </View>
+                <Text variant="body" numberOfLines={1} className="flex-1">
+                  {I18n.t('albums.category_list.edit')}
+                </Text>
+                {isPro ? (
+                  <ChevronRight size={18} color={themeColors.textMuted} />
+                ) : (
+                  <Lock size={16} color={themeColors.primary} />
+                )}
+              </Pressable>
+            </>
+          ) : null}
         </ScrollView>
 
         <View

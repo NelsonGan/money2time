@@ -68,6 +68,8 @@ import { SplitBillSessionProvider } from '~/context/SplitBillSession';
 import { ThemeProvider, useResolvedTheme } from '~/context/ThemeContext';
 import {
   AddAlbumTransactionsScreen,
+  AlbumCategoriesScreen,
+  AlbumCategoryEditorScreen,
   AlbumDetailScreen,
   AlbumPeopleScreen,
   AlbumsScreen,
@@ -2251,6 +2253,7 @@ function CategoryIconPickerRouteScreen({ navigation }: RootStackRouteProps<'Cate
       selectedValue={session.selectedValue}
       onSelect={session.onSelect}
       title={session.title}
+      noUploads={session.noUploads}
       onClose={() => navigation.goBack()}
     />
   );
@@ -2495,6 +2498,43 @@ function EditAlbumDetailsRouteScreen({
         navigation.navigate('CategoryIconPicker');
       }}
       onEditTransactions={(albumId) => navigation.navigate('EditAlbumTransactions', { albumId })}
+      onOpenCategories={(albumId) => navigation.navigate('AlbumCategories', { albumId })}
+    />
+  );
+}
+
+function AlbumCategoriesRouteScreen({ route, navigation }: RootStackRouteProps<'AlbumCategories'>) {
+  return (
+    <AlbumCategoriesScreen
+      albumId={route.params.albumId}
+      onBack={() => navigation.goBack()}
+      onOpenEditor={(categoryKey) =>
+        navigation.navigate('AlbumCategoryEditor', {
+          albumId: route.params.albumId,
+          categoryKey,
+        })
+      }
+      onOpenIconPicker={(session) => {
+        setPendingCategoryIconPicker(session);
+        navigation.navigate('CategoryIconPicker');
+      }}
+    />
+  );
+}
+
+function AlbumCategoryEditorRouteScreen({
+  route,
+  navigation,
+}: RootStackRouteProps<'AlbumCategoryEditor'>) {
+  return (
+    <AlbumCategoryEditorScreen
+      albumId={route.params.albumId}
+      categoryKey={route.params.categoryKey}
+      onClose={() => navigation.goBack()}
+      onOpenIconPicker={(session) => {
+        setPendingCategoryIconPicker(session);
+        navigation.navigate('CategoryIconPicker');
+      }}
     />
   );
 }
@@ -3428,6 +3468,11 @@ function AppContent() {
             />
             <RootStack.Screen name="EditAlbumDetails" component={EditAlbumDetailsRouteScreen} />
             <RootStack.Screen name="AlbumPeople" component={AlbumPeopleRouteScreen} />
+            <RootStack.Screen name="AlbumCategories" component={AlbumCategoriesRouteScreen} />
+            <RootStack.Screen
+              name="AlbumCategoryEditor"
+              component={AlbumCategoryEditorRouteScreen}
+            />
             <RootStack.Screen name="InsightsDrilldown" component={InsightsDrilldownRouteScreen} />
             <RootStack.Screen name="RecurringEditor" component={RecurringEditorRouteScreen} />
             <RootStack.Screen name="ProPaywall" component={ProPaywallRouteScreen} />

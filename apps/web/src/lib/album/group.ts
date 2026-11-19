@@ -1,7 +1,7 @@
 /**
  * A shared album's group as the website reads it (`GET /v1/ledgers/<id>/album`
  * on the cloud-sync Worker, through `/api/album`): its people, bills, payments,
- * settings and activity. Every row is checked here exactly as a phone checks it
+ * settings, categories and activity. Every row is checked here exactly as a phone checks it
  * (the app's `lib/repositories/mappers.ts`, `toAlbumMember` and the rest, and
  * `albumGroupsRepository`'s filter to the group's own members): anyone given the
  * link can write what the rules allow, so nothing is trusted past its shape.
@@ -12,7 +12,7 @@ import type { WebAlbumActivityRow, WebAlbumBillSnapshot, WebAlbumShare } from "@
 
 import { peopleForBill } from "../backup/album-group.ts";
 
-import { albumCategoryOf, isAlbumCategoryKey, type AlbumCategoryKey } from "./categories.ts";
+import { ALBUM_CATEGORY_ICON, albumCategoryList, albumCategoryOf, categoryRowId, isAlbumCategoryKey, type AlbumCategoryDef, type AlbumCategoryKey } from "./categories.ts";
 
 const GROUP_ROW_ID = /^[A-Za-z0-9_-]{1,64}$/;
 /** A bill's id: the payer's entry id, which may be a recurring run's (`rr:<rule>:<day>`). */
@@ -61,7 +61,7 @@ export type Bill = {
   note: string | null;
   amount: number;
   currency: string;
-  /** Its album category, the same for everyone (`ALBUM_CATEGORIES`). */
+  /** Its album category, the same for everyone: one of the album's (`Group.categories`), Other for one it no longer has. */
   category: AlbumCategoryKey;
   paidBy: string;
   shares: Share[];
@@ -116,6 +116,8 @@ export type Group = {
   cover: string | null;
   /** Newest first, in the shape the dashboard's activity lines read (`describeActivity`). */
   activity: WebAlbumActivityRow[];
+  /** The album's categories, in order: the defaults as it changed them, and the ones it added. */
+  categories: AlbumCategoryDef[];
 };
 
 type Row = Record<string, unknown>;
@@ -260,6 +262,7 @@ const ACTIVITY_KINDS = new Set([
   "member_renamed",
   "simplify_changed",
   "cover_changed",
+  "category_changed",
 ]);
 
 function snapshot(value: unknown): WebAlbumBillSnapshot | null {
@@ -298,7 +301,17 @@ function toActivity(row: Row, albumId: string): WebAlbumActivityRow | null {
     sort_order: typeof row.sort_order === "number" ? row.sort_order : 0,
     created_at: row.created_at,
   };
-  if (kind.startsWith("bill_")) {
+  if (kind === "category_changed") {
+    const look = (value: unknown) => {
+      const raw = value as Row | null;
+      if (!raw || typeof raw !== "object") return null;
+      return { name: isText(raw.name) ? raw.name.slice(0, MAX_NAME) : null, icon: isText(raw.icon) && ALBUM_CATEGORY_ICON.test(raw.icon) ? raw.icon : null };
+    };
+    if (!isAlbumCategoryKey(data.key)) return null;
+    const category = { key: data.key, before: look(data.before), after: look(data.after) };
+    if (!category.before && !category.after) return null;
+    entry.category = category;
+  } else if (kind.startsWith("bill_")) {
     const bill = { before: snapshot(data.before), after: snapshot(data.after) };
     if (!bill.before && !bill.after) return null;
     entry.bill = bill;
@@ -384,10 +397,15 @@ export function parseGroup(body: unknown): Group | null {
     .filter((member): member is Member => member !== null)
     .sort((a, b) => a.sortOrder - b.sortOrder || (a.id < b.id ? -1 : 1));
   const memberIds = new Set(members.map((member) => member.id));
-  // Paid by, shared with and paid between the group's members only.
+  // A category counts only under the id its album and key make, so one key has one row.
+  const categories = albumCategoryList(rows("album_categories").filter((row) => isAlbumCategoryKey(row.key) && row.id === categoryRowId(groupId, row.key)));
+  const categoryKeys = new Set(categories.map((category) => category.key));
+  // Paid by, shared with and paid between the group's members only; a bill
+  // of a category the album no longer has is filed under Other.
   const bills = rows("album_expenses")
     .map((row) => toBill(row, revs.get(row) ?? null))
-    .filter((bill): bill is Bill => !!bill && memberIds.has(bill.paidBy) && bill.shares.every((share) => memberIds.has(share.memberId)));
+    .filter((bill): bill is Bill => !!bill && memberIds.has(bill.paidBy) && bill.shares.every((share) => memberIds.has(share.memberId)))
+    .map((bill) => (categoryKeys.has(bill.category) ? bill : { ...bill, category: "other" }));
   const payments = rows("album_settlements")
     .map(toPayment)
     .filter((payment): payment is Payment => !!payment && memberIds.has(payment.fromMember) && memberIds.has(payment.toMember));
@@ -410,6 +428,7 @@ export function parseGroup(body: unknown): Group | null {
     moneyRev: isText(raw.moneyRev) && /^[0-9a-f]{32}$/.test(raw.moneyRev) ? raw.moneyRev : null,
     cover,
     activity,
+    categories,
   };
 }
 

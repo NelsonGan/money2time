@@ -171,6 +171,10 @@ export const transactionsTable = sqliteTable('transactions', {
   // Migration 094: a shared album's category of the bill this entry is the
   // user's side of, kept once the album is no longer shared.
   albumCategory: text('album_category'),
+  // Migration 097: that category's name and icon when the album added or
+  // changed it (NULL for a default as it is), kept with the key.
+  albumCategoryName: text('album_category_name'),
+  albumCategoryIcon: text('album_category_icon'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
   deletedAt: text('deleted_at'),
@@ -481,6 +485,21 @@ export const albumActivityTable = sqliteTable('album_activity', {
   deletedAt: text('deleted_at'),
 });
 
+// A shared album's categories (migration 097): a default changed, removed or
+// moved, or one the album added. With none, the album has the eight defaults.
+export const albumCategoriesTable = sqliteTable('album_categories', {
+  id: text('id').primaryKey(),
+  ledgerId: text('ledger_id').notNull(),
+  key: text('key').notNull(),
+  name: text('name'),
+  icon: text('icon'),
+  sortOrder: integer('sort_order').notNull().default(0),
+  createdBy: text('created_by'),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+  deletedAt: text('deleted_at'),
+});
+
 export const albumTransactionsTable = sqliteTable('album_transactions', {
   id: text('id').primaryKey(),
   albumId: text('album_id').notNull(),
@@ -686,6 +705,7 @@ export type AlbumMemberRow = typeof albumMembersTable.$inferSelect;
 export type AlbumExpenseRow = typeof albumExpensesTable.$inferSelect;
 export type AlbumSettlementRow = typeof albumSettlementsTable.$inferSelect;
 export type AlbumActivityRow = typeof albumActivityTable.$inferSelect;
+export type AlbumCategoryRow = typeof albumCategoriesTable.$inferSelect;
 export type ItemRow = typeof itemsTable.$inferSelect;
 export type BudgetTemplateRow = typeof budgetTemplatesTable.$inferSelect;
 export type BudgetTemplateCategoryRow = typeof budgetTemplateCategoriesTable.$inferSelect;

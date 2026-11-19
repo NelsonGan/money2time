@@ -42,6 +42,8 @@ interface CategoryIconPickerSheetProps {
   /** Receives the new value, or null when the user clears the icon. */
   onSelect: (value: string | null) => void;
   title?: string;
+  /** No Uploads tab (`CategoryIconPickerSession.noUploads`). */
+  noUploads?: boolean;
 }
 
 type PickerTab = 'icons' | 'emoji' | 'uploads';
@@ -187,6 +189,7 @@ export function CategoryIconPickerSheet({
   selectedValue,
   onSelect,
   title,
+  noUploads = false,
 }: CategoryIconPickerSheetProps) {
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
@@ -424,7 +427,9 @@ export function CategoryIconPickerSheet({
           options={[
             { value: 'icons', label: I18n.t('category_icon.tab_icons') },
             { value: 'emoji', label: I18n.t('category_icon.tab_emoji') },
-            { value: 'uploads', label: I18n.t('category_icon.tab_uploads') },
+            ...(noUploads
+              ? []
+              : [{ value: 'uploads' as const, label: I18n.t('category_icon.tab_uploads') }]),
           ]}
           value={tab}
           onChange={(next) => {

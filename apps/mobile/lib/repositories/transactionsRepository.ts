@@ -117,6 +117,9 @@ export interface CreateTransactionInput {
   albumGroupId?: string | null;
   /** Shared albums: the album category of that bill, kept once the album is no longer shared. */
   albumCategory?: AlbumCategoryKey | null;
+  /** That category's name and icon when the album added or changed it (null: a default's own). */
+  albumCategoryName?: string | null;
+  albumCategoryIcon?: string | null;
 }
 
 /** Ids per `IN (…)` lookup, under SQLite's bound-parameter limit. */
@@ -681,6 +684,8 @@ class TransactionsRepository {
         memberId: normalizedInput.memberId,
         albumGroupId: normalizedInput.albumGroupId ?? null,
         albumCategory: normalizedInput.albumCategory ?? null,
+        albumCategoryName: normalizedInput.albumCategoryName ?? null,
+        albumCategoryIcon: normalizedInput.albumCategoryIcon ?? null,
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,

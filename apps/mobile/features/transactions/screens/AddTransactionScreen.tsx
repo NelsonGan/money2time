@@ -2,6 +2,7 @@ import React, { useCallback, useMemo } from 'react';
 
 import { useApp } from '~/context/AppContext';
 import { albumBillRows, useAlbumBillTarget } from '~/features/albums/hooks/useAlbumBillTarget';
+import { useAlbumCategories } from '~/features/albums/hooks/useAlbumCategories';
 import { useAlbumGroup } from '~/features/albums/hooks/useAlbumGroup';
 import { useGroupOthers } from '~/features/albums/hooks/useGroupBillOrigin';
 import { splitWithPeople } from '~/features/albums/lib/albumPeople';
@@ -77,6 +78,7 @@ export function AddTransactionScreen({
   const groupBill = albumGroupId !== null;
   // A shared album's bill is split only between people who joined it.
   const groupMembers = useGroupOthers(albumGroupId);
+  const groupCategories = useAlbumCategories(albumGroupId);
   // Only a shared album starts a bill split (it counts toward no free
   // limit), once this phone is on its list. The instalment plans page's add
   // button: a plan's payments are the user's own, so the form does not start
@@ -235,7 +237,7 @@ export function AddTransactionScreen({
       // Split with the album's people: Add shows the split before it saves.
       confirmSplitBeforeAdd={splitWith.length > 0}
       groupBill={groupBill}
-      albumCategories={groupBill}
+      albumCategories={groupBill ? groupCategories : null}
       groupMembers={groupBill ? groupMembers : undefined}
     />
   );

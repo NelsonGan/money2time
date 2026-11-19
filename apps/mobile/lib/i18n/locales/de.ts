@@ -2419,6 +2419,8 @@ const de = {
     limit_icon_packs: 'Weitere Symbolpakete sind eine Pro-Funktion. Upgrade für alle Pakete.',
     limit_live_earnings_auto_start:
       'Die Uhr nach Zeitplan zu starten ist eine Pro-Funktion. Mit einem Upgrade beginnt Ihre Schicht von selbst. Der manuelle Start bleibt immer kostenlos.',
+    limit_album_categories:
+      'Die Kategorien eines geteilten Albums zu ändern ist eine Pro-Funktion. Mit Pro kannst du sie für alle im Album umbenennen, hinzufügen oder entfernen.',
     limit_reimbursements:
       'Die Erstattungsverfolgung ist eine Pro-Funktion. Führe ein Upgrade durch, um Ausgaben zu markieren, die du zurückbekommst.',
     limit_subcurrencies:
@@ -3165,6 +3167,13 @@ const de = {
       failed: 'Die Änderung an diesem Album konnte nicht gespeichert werden. Versuche es erneut.',
     },
     line_label: '{{name}}, Album',
+    category_list: {
+      title: 'Kategorien',
+      edit: 'Kategorien bearbeiten',
+      info: 'Alle in diesem Album ordnen ihre Rechnungen diesen Kategorien zu, in der App und im Web. Eine Änderung hier gilt für alle. Wenn du eine entfernst, wandern ihre Rechnungen zu {{other}}.',
+      limit: 'Ein Album kann bis zu {{count}} Kategorien haben.',
+      remove_body: 'Ihre Rechnungen wandern für alle in diesem Album zu {{other}}.',
+    },
     categories: {
       food: 'Essen',
       groceries: 'Lebensmittel',
@@ -3207,6 +3216,10 @@ const de = {
       simplify_on: '{{actor}}: „Gruppenschulden vereinfachen“ aktiviert',
       simplify_off: '{{actor}}: „Gruppenschulden vereinfachen“ deaktiviert',
       cover: '{{actor}}: Titelbild geändert',
+      category_added: '{{actor}} hat die Kategorie {{name}} hinzugefügt',
+      category_removed: '{{actor}} hat die Kategorie {{name}} entfernt',
+      category_renamed: '{{actor}} hat die Kategorie {{before}} in {{after}} umbenannt',
+      category_icon: '{{actor}} hat das Symbol von {{name}} geändert',
     },
   },
   assets: {

@@ -47,6 +47,7 @@ function entry(partial: Partial<AlbumActivity>): AlbumActivity {
     bill: null,
     rename: null,
     payment: null,
+    category: null,
     simplify: null,
     started: false,
     sortOrder: 0,

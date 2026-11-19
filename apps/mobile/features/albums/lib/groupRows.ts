@@ -8,11 +8,21 @@ import type { AlbumSettlement, AlbumShare } from '~/types';
 import { normalizeMoneyAmount } from '~/utils/formatters';
 import { newId } from '~/utils/id';
 
-import type { AlbumCategoryKey } from './groupPlan';
+import {
+  type AlbumCategoryDef,
+  type AlbumCategoryKey,
+  categoryRowId,
+  isDefaultAlbumCategoryKey,
+} from './groupPlan';
 
 /** One row of a change: the table and the row as the app stores it. */
 export interface GroupRowWrite {
-  table: 'album_members' | 'album_expenses' | 'album_settlements' | 'album_groups';
+  table:
+    | 'album_members'
+    | 'album_expenses'
+    | 'album_settlements'
+    | 'album_groups'
+    | 'album_categories';
   row: Record<string, unknown>;
 }
 
@@ -25,7 +35,12 @@ export function billRow(bill: {
   category: AlbumCategoryKey;
   paidBy: string;
   shares: readonly AlbumShare[];
+  /** The album's categories: an added one's name and icon go with the bill. */
+  categories?: readonly AlbumCategoryDef[];
 }): GroupRowWrite {
+  const added = isDefaultAlbumCategoryKey(bill.category)
+    ? null
+    : bill.categories?.find((category) => category.key === bill.category);
   return {
     table: 'album_expenses',
     row: {
@@ -34,6 +49,7 @@ export function billRow(bill: {
       note: bill.note,
       currency: bill.currency,
       category_key: bill.category,
+      ...(added ? { category_name: added.name, category_icon: added.icon } : null),
       paid_by: bill.paidBy,
       shares_json: JSON.stringify(
         bill.shares.map((share) => ({
@@ -116,4 +132,32 @@ export function settingsRow(
   if (settings.simplifyDebts !== undefined) row.simplify_debts = settings.simplifyDebts ? 1 : 0;
   if (settings.coverPhotoUri !== undefined) row.cover_photo_uri = settings.coverPhotoUri ?? '';
   return { table: 'album_groups', row };
+}
+
+/**
+ * One of the album's categories as it should be: a default's new name or icon
+ * (null keeps the default's own), an added one, or (`removed`) gone, its
+ * bills then read as Other.
+ */
+export function categoryRow(
+  groupId: string,
+  category: {
+    key: AlbumCategoryKey;
+    name: string | null;
+    icon: string | null;
+    sortOrder: number;
+    removed?: boolean;
+  },
+): GroupRowWrite {
+  return {
+    table: 'album_categories',
+    row: {
+      id: categoryRowId(groupId, category.key),
+      key: category.key,
+      name: category.name,
+      icon: category.icon,
+      sort_order: category.sortOrder,
+      ...(category.removed ? { deleted_at: 'removed' } : null),
+    },
+  };
 }

@@ -1,10 +1,13 @@
 import { describeActivity } from '~/features/albums/lib/activityLines';
 import { albumCategoryRows } from '~/features/albums/lib/albumBreakdown';
 import {
+  type AlbumCategoryDef,
   albumCategoryForCategory,
   albumCategoryForText,
   albumCategoryId,
   albumCategoryKeyOfId,
+  albumCategoryLook,
+  albumCategoryPickerList,
   personalCategoryFor,
 } from '~/features/albums/lib/albumCategories';
 import {
@@ -13,7 +16,11 @@ import {
   albumLineId,
   oneLinkPerEntry,
 } from '~/features/albums/lib/albumLines';
-import { albumCategoryColumns, albumCategoryOf } from '~/features/albums/lib/groupPlan';
+import {
+  albumCategoryColumns,
+  albumCategoryList,
+  albumCategoryOf,
+} from '~/features/albums/lib/groupPlan';
 import { buildBudgetSummary } from '~/features/budget/lib/budgetMath';
 import { NO_REIMBURSEMENT } from '~/features/reimbursements/lib/reimbursementMath';
 import { buildReviewSummary } from '~/features/review/lib/reviewMath';
@@ -236,6 +243,141 @@ describe('a shared album’s categories', () => {
       day: (date) => date,
     });
     expect(line.text).toBe('Tess filed Dinner under Transport');
+  });
+});
+
+describe('an album’s own categories', () => {
+  // Food renamed Meals (its icon kept), Groceries removed, Tickets and
+  // Coffee added, Other renamed Misc.
+  const ALBUM: AlbumCategoryDef[] = albumCategoryList([
+    { key: 'food', name: 'Meals', sort_order: 0 },
+    { key: 'groceries', deleted_at: '2026-11-19T00:00:00.000Z' },
+    { key: 'c-tickets01', name: 'Tickets', icon: 'emoji:🎟️', sort_order: 1 },
+    { key: 'c-coffee001', name: 'coffee', icon: 'cup', sort_order: 2 },
+    { key: 'other', name: 'Misc' },
+  ]);
+
+  it('list the defaults as the album changed them, then the ones it added', () => {
+    expect(albumCategoryPickerList(ALBUM).map((item) => [item.id, item.name, item.icon])).toEqual([
+      [albumCategoryId('food'), 'Meals', 'meal'],
+      [albumCategoryId('c-tickets01'), 'Tickets', 'emoji:🎟️'],
+      [albumCategoryId('c-coffee001'), 'coffee', 'cup'],
+      [albumCategoryId('transport'), 'Transport', 'car'],
+      [albumCategoryId('housing'), 'Housing', 'house'],
+      [albumCategoryId('bills'), 'Bills', 'light-bulb'],
+      [albumCategoryId('healthcare'), 'Healthcare', 'medicine'],
+      [albumCategoryId('shopping'), 'Shopping', 'shopping-bag'],
+      [albumCategoryId('other'), 'Misc', 'invoice'],
+    ]);
+    expect(albumCategoryKeyOfId(albumCategoryId('c-tickets01'))).toBe('c-tickets01');
+  });
+
+  it('file a bill under the user’s category of that name, else of that icon, else Other', () => {
+    const own = (key: string) => personalCategoryFor(key, CATEGORIES, {}, ALBUM);
+    // Meals keeps Food’s icon: the user’s category with it.
+    expect(own('food')).toBe('food');
+    // An added one, by name (any case), else nothing of the user’s: Other.
+    expect(own('c-coffee001')).toBe('coffee');
+    expect(own('c-tickets01')).toBe('other');
+    // A default the album left as it is goes by Quick Entry, as before.
+    expect(own('transport')).toBe('transport');
+    // And back: the user’s Coffee reads as the album’s coffee.
+    expect(albumCategoryForCategory('coffee', CATEGORIES, {}, ALBUM)).toBe('c-coffee001');
+  });
+
+  it('are picked from a title only onto a default the album left as it is', () => {
+    expect(albumCategoryForText('Grab to airport', ALBUM)).toBe('transport');
+    // Food is now Meals: its keywords no longer say what it means.
+    expect(albumCategoryForText('Lunch', ALBUM)).toBeNull();
+    expect(albumCategoryForText('Lunch')).toBe('food');
+  });
+
+  it('keep an added or changed category’s name and icon on the user’s entry', () => {
+    const def = (key: string) => ALBUM.find((item) => item.key === key)!;
+    expect(albumCategoryLook(def('c-tickets01'))).toEqual({ name: 'Tickets', icon: 'emoji:🎟️' });
+    expect(albumCategoryLook(def('food'))).toEqual({ name: 'Meals', icon: null });
+    expect(albumCategoryLook(def('transport'))).toEqual({ name: null, icon: null });
+  });
+
+  it('send an added one’s name and icon with the bill', () => {
+    expect(
+      albumCategoryColumns('c-tickets01', {
+        category_name: '  Tickets ',
+        category_icon: 'emoji:🎟️',
+      }),
+    ).toEqual({ category_key: 'c-tickets01', category_name: 'Tickets', category_icon: 'emoji:🎟️' });
+    // No upload: another phone could not draw it.
+    expect(
+      albumCategoryColumns('c-tickets01', {
+        category_name: 'Tickets',
+        category_icon: 'custom:category-icons/x.png',
+      }).category_icon,
+    ).toBe('invoice');
+    // A key of neither kind is Other.
+    expect(albumCategoryColumns('nope').category_key).toBe('other');
+  });
+
+  it('log what changed, by name', () => {
+    const line = (change: AlbumActivity['category']) =>
+      describeActivity(
+        {
+          id: 'a1',
+          groupId: 'bali',
+          kind: 'category_changed',
+          actorMemberId: 'tess',
+          expenseId: null,
+          memberId: null,
+          bill: null,
+          rename: null,
+          payment: null,
+          category: change,
+          simplify: null,
+          started: false,
+          sortOrder: 0,
+          createdAt: '2026-11-19T10:00:00.000Z',
+        },
+        { selfId: 'me', nameOf: () => 'Tess', money: String, day: String },
+      ).text;
+    const none = { name: null, icon: null };
+    expect(line({ key: 'food', before: none, after: { name: 'Meals', icon: null } })).toBe(
+      'Tess renamed the category Food to Meals',
+    );
+    expect(line({ key: 'c-t', before: null, after: { name: 'Tickets', icon: 'cup' } })).toBe(
+      'Tess added the category Tickets',
+    );
+    expect(line({ key: 'groceries', before: none, after: null })).toBe(
+      'Tess removed the category Groceries',
+    );
+    expect(line({ key: 'food', before: none, after: { name: null, icon: 'cup' } })).toBe(
+      'Tess changed the icon of Food',
+    );
+  });
+
+  it('group a breakdown under the album’s names', () => {
+    const rows = albumCategoryRows(
+      [
+        tx('b1', 30, 'food', { albumCategory: 'food' }),
+        tx('b2', 20, 'other', { albumCategory: 'c-tickets01' }),
+        // An album no longer shared: the name and icon the entry keeps.
+        tx('b3', 5, 'other', {
+          albumCategory: 'c-gone0001',
+          categoryName: 'Snorkel',
+          categoryIcon: 'emoji:🤿',
+        }),
+      ],
+      {
+        valueOf: (item) => item.amount,
+        categories: CATEGORIES,
+        categoryById: BY_ID,
+        byAlbumCategory: true,
+        albumCategories: ALBUM,
+      },
+    );
+    expect(rows.map((row) => [row.label, row.emoji, row.amount])).toEqual([
+      ['Meals', 'meal', 30],
+      ['Tickets', 'emoji:🎟️', 20],
+      ['Snorkel', 'emoji:🤿', 5],
+    ]);
   });
 });
 

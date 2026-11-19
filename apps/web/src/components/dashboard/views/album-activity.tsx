@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
+import { albumCategoryIn, isDefaultAlbumCategoryKey } from "@/lib/album/categories";
 import { albumGroupOf, describeActivity, groupActivityByDay, MINE_CHIP_CLASS } from "@/lib/backup/album-group";
 import { dayKeyOf, parseLocalDate } from "@/lib/backup/dates";
 
@@ -41,7 +42,11 @@ export function AlbumActivity({ albumId }: { albumId: string }) {
         nameOf: (id) => (id ? names.get(id) : null) || ts("someone"),
         money: (amount, currency) => f.moneyIn(amount, currency),
         day: (date) => f.day(date, "medium"),
-        category: (key) => tcat(key),
+        category: (key) => {
+          const category = albumCategoryIn(group.categories, key);
+          return category.name ?? tcat(isDefaultAlbumCategoryKey(category.key) ? category.key : "other");
+        },
+        defaultCategory: (key) => tcat(isDefaultAlbumCategoryKey(key) ? key : "other"),
       }),
     );
     return groupActivityByDay(lines, (iso) => {

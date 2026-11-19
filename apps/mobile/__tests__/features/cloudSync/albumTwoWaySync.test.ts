@@ -4,8 +4,19 @@ import { DatabaseSync } from 'node:sqlite';
 
 import type { SQLiteDatabase } from 'expo-sqlite';
 
-import { GroupWriteError, memberRowId, planJoin } from '~/features/albums/lib/groupPlan';
-import { billRow, deletedBillRow, paymentRow, renameRow } from '~/features/albums/lib/groupRows';
+import {
+  albumCategoryList,
+  GroupWriteError,
+  memberRowId,
+  planJoin,
+} from '~/features/albums/lib/groupPlan';
+import {
+  billRow,
+  categoryRow,
+  deletedBillRow,
+  paymentRow,
+  renameRow,
+} from '~/features/albums/lib/groupRows';
 import { followProfileName, writeGroup } from '~/features/albums/services/albumGroupWrites';
 import { saveSharedLedger } from '~/features/cloudSync/services/sharedLedgerStore';
 import { enableCapture, SyncEngine } from '~/features/cloudSync/services/syncEngine';
@@ -422,4 +433,57 @@ it("follows the user's new Settings name where they still go by an automatic one
   await sync(phones.a);
   await sync(phones.b);
   expect(rows(phones.b, 'album_members').map((row) => row.name)).toEqual(['Annabel', 'Ben']);
+});
+
+it("brings one person's change to the album's categories to the other phone, logged", async () => {
+  on(phones.a);
+  writeGroup(GROUP, [
+    categoryRow(GROUP, { key: 'food', name: 'Meals', icon: null, sortOrder: 0 }),
+    categoryRow(GROUP, { key: 'c-tickets01', name: 'Tickets', icon: 'emoji:🎟️', sortOrder: 1 }),
+    categoryRow(GROUP, {
+      key: 'groceries',
+      name: null,
+      icon: null,
+      sortOrder: 2,
+      removed: true,
+    }),
+  ]);
+  writeGroup(GROUP, [
+    billRow({
+      id: 'show',
+      date: '2026-11-15',
+      note: 'Show',
+      currency: 'MYR',
+      category: 'c-tickets01',
+      categories: albumCategoryList([{ key: 'c-tickets01', name: 'Tickets', icon: 'emoji:🎟️' }]),
+      paidBy: A,
+      shares: [
+        { memberId: A, amount: 20 },
+        { memberId: B, amount: 20 },
+      ],
+    }),
+  ]);
+  await sync(phones.a);
+  await sync(phones.b);
+  const list = albumCategoryList(rows(phones.b, 'album_categories'));
+  expect(list.map((category) => [category.key, category.name])).toEqual([
+    ['food', 'Meals'],
+    ['c-tickets01', 'Tickets'],
+    ['transport', null],
+    ['housing', null],
+    ['bills', null],
+    ['healthcare', null],
+    ['shopping', null],
+    ['other', null],
+  ]);
+  expect(rows(phones.b, 'album_expenses')[0]).toMatchObject({
+    category_key: 'c-tickets01',
+    category_name: 'Tickets',
+    category_icon: 'emoji:🎟️',
+  });
+  expect(kinds(phones.b).filter((kind) => kind.startsWith('category_changed'))).toEqual([
+    'category_changed:u-a',
+    'category_changed:u-a',
+    'category_changed:u-a',
+  ]);
 });

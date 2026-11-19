@@ -22,6 +22,8 @@ export interface ActivityContext {
   money: (amount: number, currency: string) => string;
   /** A bill's day, for a bill moved to another one. */
   day: (date: string) => string;
+  /** A category's name as the album shows it now (`albumCategoryNameOf`); a default's without. */
+  categoryName?: (key: string) => string;
 }
 
 /** How a change moved the user's share: less to pay (`in`) or more (`out`). */
@@ -149,7 +151,7 @@ export function describeActivity(entry: AlbumActivity, ctx: ActivityContext): Ac
         text = t('recategorized_bill', {
           actor,
           title,
-          category: albumCategoryLabel(after.category),
+          category: (ctx.categoryName ?? albumCategoryLabel)(after.category),
         });
       } else {
         text = t('changed_bill', { actor, title });
@@ -199,6 +201,21 @@ export function describeActivity(entry: AlbumActivity, ctx: ActivityContext): Ac
       return line(t(entry.simplify ? 'simplify_on' : 'simplify_off', { actor }));
     case 'cover_changed':
       return line(t('cover', { actor }));
+    case 'category_changed': {
+      const change = entry.category;
+      const nameOf = (look: { name: string | null } | null) =>
+        look?.name ?? (change ? albumCategoryLabel(change.key) : '');
+      if (!change?.before)
+        return line(t('category_added', { actor, name: nameOf(change?.after ?? null) }));
+      if (!change.after) return line(t('category_removed', { actor, name: nameOf(change.before) }));
+      const before = nameOf(change.before);
+      const after = nameOf(change.after);
+      return line(
+        before === after
+          ? t('category_icon', { actor, name: after })
+          : t('category_renamed', { actor, before, after }),
+      );
+    }
   }
 }
 

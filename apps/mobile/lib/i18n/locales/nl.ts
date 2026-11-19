@@ -2412,6 +2412,8 @@ const nl = {
       'Extra pictogrampakketten zijn een Pro-functie. Upgrade om ze allemaal te gebruiken.',
     limit_live_earnings_auto_start:
       'De klok volgens een schema starten is een Pro-functie. Upgrade en je dienst begint vanzelf. Handmatig starten blijft altijd gratis.',
+    limit_album_categories:
+      'De categorieën van een gedeeld album wijzigen is een Pro-functie. Upgrade om ze voor iedereen in het album te hernoemen, toe te voegen of te verwijderen.',
     limit_reimbursements:
       'Vergoedingen bijhouden is een Pro-functie. Upgrade om uitgaven te markeren die je terugkrijgt.',
     limit_subcurrencies:
@@ -3156,6 +3158,13 @@ const nl = {
       failed: 'De wijziging in dit album kon niet worden opgeslagen. Probeer het opnieuw.',
     },
     line_label: '{{name}}, album',
+    category_list: {
+      title: 'Categorieën',
+      edit: 'Categorieën bewerken',
+      info: 'Iedereen in dit album zet zijn uitgaven onder deze categorieën, in de app en op het web. Een wijziging die je hier maakt, geldt voor iedereen. Verwijder je er een, dan gaan de uitgaven ervan naar {{other}}.',
+      limit: 'Een album kan tot {{count}} categorieën hebben.',
+      remove_body: 'De uitgaven ervan gaan naar {{other}} voor iedereen in dit album.',
+    },
     categories: {
       food: 'Eten',
       groceries: 'Boodschappen',
@@ -3198,6 +3207,10 @@ const nl = {
       simplify_on: '{{actor}} zette Groepsschulden vereenvoudigen aan',
       simplify_off: '{{actor}} zette Groepsschulden vereenvoudigen uit',
       cover: '{{actor}} wijzigde het omslag',
+      category_added: '{{actor}} heeft de categorie {{name}} toegevoegd',
+      category_removed: '{{actor}} heeft de categorie {{name}} verwijderd',
+      category_renamed: '{{actor}} heeft de categorie {{before}} hernoemd naar {{after}}',
+      category_icon: '{{actor}} heeft het pictogram van {{name}} gewijzigd',
     },
   },
   assets: {

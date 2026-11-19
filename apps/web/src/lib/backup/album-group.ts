@@ -9,8 +9,8 @@
  * reads as before. Its imports end in `.ts`, so the tests can load it.
  */
 
-import { isAlbumCategoryKey, type AlbumCategoryKey } from "../album/categories.ts";
-import type { WebAlbumActivityRow, WebAlbumBillRow, WebAlbumBillSnapshot, WebAlbumMemberRow, WebAlbumSettlementRow, WebAlbumShare } from "./types";
+import { ALBUM_CATEGORY_ICON, DEFAULT_ALBUM_CATEGORY_LIST, isAlbumCategoryKey, isDefaultAlbumCategoryKey, type AlbumCategoryDef, type AlbumCategoryKey } from "../album/categories.ts";
+import type { WebAlbumActivityRow, WebAlbumBillRow, WebAlbumBillSnapshot, WebAlbumCategoryRow, WebAlbumMemberRow, WebAlbumSettlementRow, WebAlbumShare } from "./types";
 
 export type AlbumGroupMember = {
   id: string;
@@ -26,7 +26,7 @@ export type AlbumGroupBill = {
   note: string | null;
   amount: number;
   currency: string;
-  /** Its album category, the same for everyone; null from an older app, which does not send it. */
+  /** Its album category, the same for everyone (Other for one the album no longer has); null from an older app, which does not send it. */
   category: AlbumCategoryKey | null;
   paidBy: string;
   shares: WebAlbumShare[];
@@ -54,6 +54,8 @@ export type AlbumGroup = {
   settlements: AlbumGroupPayment[] | null;
   /** Newest first, as the app's `listActivity` orders it. */
   activity: WebAlbumActivityRow[];
+  /** The album's categories, in order; the eight defaults from an older app, which does not send them. */
+  categories: AlbumCategoryDef[];
 };
 
 type GroupTables = {
@@ -61,7 +63,36 @@ type GroupTables = {
   web_album_bills?: WebAlbumBillRow[];
   web_album_settlements?: WebAlbumSettlementRow[];
   web_album_activity?: WebAlbumActivityRow[];
+  web_album_categories?: WebAlbumCategoryRow[];
 };
+
+/**
+ * An album's categories as the phone sent them, in order: the list it worked
+ * out (`listGroupCategories`, a removed default already left out), each row
+ * checked again as anything of a group is, with Other always there. The
+ * eight defaults when it sent none (an older app).
+ */
+export function albumCategoriesOf(tables: Pick<GroupTables, "web_album_categories">, albumId: string): AlbumCategoryDef[] {
+  if (!tables.web_album_categories) return [...DEFAULT_ALBUM_CATEGORY_LIST];
+  const seen = new Set<string>();
+  const list: AlbumCategoryDef[] = [];
+  for (const row of tables.web_album_categories) {
+    if (!row || row.album_id !== albumId || !isAlbumCategoryKey(row.key) || seen.has(row.key)) continue;
+    const name = typeof row.name === "string" ? row.name.replace(/\s+/g, " ").trim().slice(0, 40) || null : null;
+    if (!name && !isDefaultAlbumCategoryKey(row.key)) continue;
+    seen.add(row.key);
+    list.push({
+      key: row.key,
+      name,
+      icon: typeof row.icon === "string" && ALBUM_CATEGORY_ICON.test(row.icon) ? row.icon : null,
+      sortOrder: typeof row.sort_order === "number" && Number.isFinite(row.sort_order) ? row.sort_order : list.length,
+    });
+  }
+  // A phone that holds no album's list for this one (not shared there): the defaults.
+  if (!list.length) return [...DEFAULT_ALBUM_CATEGORY_LIST];
+  if (!seen.has("other")) list.push({ ...DEFAULT_ALBUM_CATEGORY_LIST[DEFAULT_ALBUM_CATEGORY_LIST.length - 1], sortOrder: Number.MAX_SAFE_INTEGER });
+  return list.sort((a, b) => a.sortOrder - b.sortOrder);
+}
 
 /** An album's group, or null when the phone sent none for it (an older app, or not shared). */
 export function albumGroupOf(tables: GroupTables, albumId: string): AlbumGroup | null {
@@ -70,6 +101,8 @@ export function albumGroupOf(tables: GroupTables, albumId: string): AlbumGroup |
   const members: AlbumGroupMember[] = [...rows]
     .sort((a, b) => Number(!!b.is_self) - Number(!!a.is_self) || (a.sort_order ?? 0) - (b.sort_order ?? 0))
     .map((row) => ({ id: row.id, name: row.name ?? "", isSelf: !!row.is_self, current: !!row.current }));
+  const categories = albumCategoriesOf(tables, albumId);
+  const keys = new Set(categories.map((category) => category.key));
   const bills = new Map<string, AlbumGroupBill>();
   for (const row of tables.web_album_bills ?? []) {
     if (!row || row.album_id !== albumId || !Array.isArray(row.shares)) continue;
@@ -79,7 +112,7 @@ export function albumGroupOf(tables: GroupTables, albumId: string): AlbumGroup |
       note: row.note ?? null,
       amount: row.amount,
       currency: row.currency,
-      category: isAlbumCategoryKey(row.category) ? row.category : null,
+      category: isAlbumCategoryKey(row.category) ? (keys.has(row.category) ? row.category : "other") : null,
       paidBy: row.paid_by,
       shares: row.shares,
       deleted: !!row.deleted,
@@ -102,7 +135,7 @@ export function albumGroupOf(tables: GroupTables, albumId: string): AlbumGroup |
           deleted: false,
         }))
     : null;
-  return { albumId, selfId: members.find((member) => member.isSelf)?.id ?? null, members, bills, settlements, activity };
+  return { albumId, selfId: members.find((member) => member.isSelf)?.id ?? null, members, bills, settlements, activity, categories };
 }
 
 /**
@@ -133,8 +166,10 @@ export type ActivityContext = {
   nameOf: (memberId: string | null | undefined) => string;
   money: (amount: number, currency: string) => string;
   day: (date: string) => string;
-  /** An album category's name in the page's language. */
+  /** An album category's name as the album shows it now (a default's in the page's language). */
   category: (key: AlbumCategoryKey) => string;
+  /** A default category's own name in the page's language (Other's for any other key); `category` without. */
+  defaultCategory?: (key: AlbumCategoryKey) => string;
 };
 
 /** How a change moved the user's share: less to pay (`in`) or more (`out`). */
@@ -268,6 +303,17 @@ export function describeActivity(entry: WebAlbumActivityRow, ctx: ActivityContex
       return line(t(entry.simplify ? "simplify_on" : "simplify_off", { actor }));
     case "cover_changed":
       return line(t("cover", { actor }));
+    case "category_changed": {
+      const change = entry.category;
+      if (!change) return line(t("changed_album", { actor }));
+      // A name left null is a default's own.
+      const nameOf = (look: { name: string | null } | null) => look?.name ?? (ctx.defaultCategory ?? ctx.category)(change.key);
+      if (!change.before) return line(t("category_added", { actor, name: nameOf(change.after) }));
+      if (!change.after) return line(t("category_removed", { actor, name: nameOf(change.before) }));
+      const before = nameOf(change.before);
+      const after = nameOf(change.after);
+      return line(before === after ? t("category_icon", { actor, name: after }) : t("category_renamed", { actor, before, after }));
+    }
     default:
       // A kind from a later app: said plainly rather than left out.
       return line(t("changed_album", { actor }));

@@ -21,7 +21,7 @@ import {
   setPhoneTimeZone,
   type MonthCycle,
 } from "./dates";
-import { isAlbumCategoryKey, type AlbumCategoryKey } from "../album/categories.ts";
+import { ALBUM_CATEGORY_ICON, isAlbumCategoryKey, type AlbumCategoryKey } from "../album/categories.ts";
 import { albumOfEntries } from "./album-lines";
 import { storedBudgetCurrency, storedBudgetRate } from "./budget-currency";
 import { monthlyBudgetRows } from "./budget-period";
@@ -122,6 +122,9 @@ export type Tx = {
   albumId?: string;
   /** A shared album's category the entry is under (`album_category`), else absent. */
   albumCategory?: AlbumCategoryKey;
+  /** That category's name and icon when the album added or changed it (`album_category_name`, `album_category_icon`), else absent. */
+  albumCategoryName?: string;
+  albumCategoryIcon?: string;
   /** Made by an ordinary recurring rule (`isRecurringRun`), tinted in the lists while `Model.highlightRecurring`. */
   recurring?: boolean;
 };
@@ -589,6 +592,8 @@ export function buildModel(backup: BackupFile, opts: { timeZone?: string | null 
       ...(row.album_group_id ? { albumGroupId: row.album_group_id } : null),
       ...(albumByTx.has(row.id) ? { albumId: albumByTx.get(row.id) } : null),
       ...(isAlbumCategoryKey(row.album_category) ? { albumCategory: row.album_category } : null),
+      ...(isAlbumCategoryKey(row.album_category) && typeof row.album_category_name === "string" && row.album_category_name.trim() ? { albumCategoryName: row.album_category_name.slice(0, 64) } : null),
+      ...(isAlbumCategoryKey(row.album_category) && typeof row.album_category_icon === "string" && ALBUM_CATEGORY_ICON.test(row.album_category_icon) ? { albumCategoryIcon: row.album_category_icon } : null),
     });
   }
   txs.sort((a, b) => b.date.getTime() - a.date.getTime());

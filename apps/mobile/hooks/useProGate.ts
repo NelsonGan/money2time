@@ -46,6 +46,7 @@ const LIMIT_MAP: Record<LimitType, number> = {
  * number to put in LIMIT_MAP: zero is not a limit the user can approach.
  */
 type ProOnlyFeature =
+  | 'album_categories'
   | 'app_icon'
   | 'custom_card_designs'
   | 'custom_category_icons'

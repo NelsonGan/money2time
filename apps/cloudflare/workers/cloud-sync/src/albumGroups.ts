@@ -176,7 +176,7 @@ interface GroupRow {
 /**
  * The whole group for the website (GET /v1/ledgers/<id>/album): its members,
  * bills (deleted ones too, whose payments still count), payments, settings,
- * and the newest log entries, each with its revision, and the money stamp
+ * categories, and the newest log entries, each with its revision, and the money stamp
  * (`moneyRev`) a payment planned from them is sent back with. One round trip,
  * the stamp read first (a change landing meanwhile makes a payment stale,
  * never let through). The website checks every row again, as a phone does
@@ -190,9 +190,10 @@ export async function readGroup(db: GroupDb): Promise<{ rows: GroupRow[]; moneyR
     // (far beyond any trip) the newest payments go, never a member.
     {
       sql: `SELECT table_name, row_id, data, rev FROM sync_rows
-            WHERE table_name IN ('album_members', 'album_expenses', 'album_settlements', 'album_groups')
+            WHERE table_name IN ('album_members', 'album_expenses', 'album_settlements', 'album_groups',
+              'album_categories')
             ORDER BY CASE table_name WHEN 'album_members' THEN 0 WHEN 'album_groups' THEN 1
-              WHEN 'album_expenses' THEN 2 ELSE 3 END, updated_at
+              WHEN 'album_categories' THEN 1 WHEN 'album_expenses' THEN 2 ELSE 3 END, updated_at
             LIMIT ${MAX_READ_ROWS}`,
       args: [],
     },

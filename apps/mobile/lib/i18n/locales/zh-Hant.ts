@@ -2283,6 +2283,8 @@ const zhHant = {
     limit_icon_packs: '額外圖示包為 Pro 功能。升級後可使用所有圖示包。',
     limit_live_earnings_auto_start:
       '按計劃自動開始計時是 Pro 功能。升級後你的班次會自動開始，手動開始始終免費。',
+    limit_album_categories:
+      '變更共享相簿的類別是 Pro 功能。升級後即可為相簿裡的所有人重新命名、新增或移除類別。',
     limit_reimbursements: '報銷跟蹤是 Pro 功能。升級後即可標記那些會退回給你的支出。',
     limit_subcurrencies: '免費版可新增 {{count}} 個子貨幣。升級到 Pro 即可無限使用多幣種追蹤。',
     upgrade: '升級到 Pro',
@@ -2994,6 +2996,13 @@ const zhHant = {
       failed: '無法儲存對此相簿的修改。請再試一次。',
     },
     line_label: '{{name}}，相簿',
+    category_list: {
+      title: '類別',
+      edit: '編輯類別',
+      info: '這本相簿的所有人都會把帳單歸到這些類別，無論在 App 還是網頁上。你在這裡做的變更會套用到所有人。移除一個類別後，它的帳單會移到「{{other}}」。',
+      limit: '一本相簿最多可以有 {{count}} 個類別。',
+      remove_body: '這本相簿的所有人都會看到它的帳單移到「{{other}}」。',
+    },
     categories: {
       food: '餐飲',
       groceries: '雜貨',
@@ -3036,6 +3045,10 @@ const zhHant = {
       simplify_on: '{{actor}} 開啟了「簡化群組欠款」',
       simplify_off: '{{actor}} 關閉了「簡化群組欠款」',
       cover: '{{actor}} 更換了封面',
+      category_added: '{{actor}} 新增了類別「{{name}}」',
+      category_removed: '{{actor}} 移除了類別「{{name}}」',
+      category_renamed: '{{actor}} 把類別「{{before}}」改名為「{{after}}」',
+      category_icon: '{{actor}} 更換了「{{name}}」的圖示',
     },
   },
   assets: {

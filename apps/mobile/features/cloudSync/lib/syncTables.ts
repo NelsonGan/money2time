@@ -36,13 +36,14 @@ export const SYNC_TABLES = [
   'album_settlements',
   'album_groups',
   'album_activity',
+  'album_categories',
 ] as const;
 
 export type SyncTable = (typeof SYNC_TABLES)[number];
 
 /**
- * A shared album's group (migrations 090, 091 and 093): its members, bills,
- * settlements, settings and activity log. They sync both ways with the
+ * A shared album's group (migrations 090, 091, 093 and 097): its members,
+ * bills, settlements, settings, activity log and categories. They sync both ways with the
  * group's own cloud database (every phone in the album writes it, and the
  * Worker for joins, leaves and the website), but are not the user's data:
  * a backup leaves them out, and what the user keeps of a group is their own
@@ -54,6 +55,7 @@ export const GROUP_SYNC_TABLES: readonly SyncTable[] = [
   'album_settlements',
   'album_groups',
   'album_activity',
+  'album_categories',
 ];
 
 const GROUP_TABLES: ReadonlySet<string> = new Set(GROUP_SYNC_TABLES);

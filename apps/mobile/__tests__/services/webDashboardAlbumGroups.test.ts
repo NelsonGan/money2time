@@ -66,6 +66,7 @@ const entry: AlbumActivity = {
   },
   rename: null,
   payment: null,
+  category: null,
   simplify: null,
   started: false,
   sortOrder: 0,
@@ -116,6 +117,21 @@ describe('withWebDashboardAlbumGroups', () => {
           },
         ],
         activity: [entry],
+        categories: [
+          { key: 'food', name: 'Meals', icon: null, sortOrder: 0 },
+          { key: 'c-tickets1', name: 'Tickets', icon: 'emoji:🎟️', sortOrder: 1 },
+        ],
+      },
+    ]);
+    expect(out.tables.web_album_categories).toEqual([
+      { id: 'bali:food', album_id: 'bali', key: 'food', name: 'Meals', icon: null, sort_order: 0 },
+      {
+        id: 'bali:c-tickets1',
+        album_id: 'bali',
+        key: 'c-tickets1',
+        name: 'Tickets',
+        icon: 'emoji:🎟️',
+        sort_order: 1,
       },
     ]);
     expect(out.tables.web_album_members).toEqual([
@@ -171,6 +187,7 @@ describe('withWebDashboardAlbumGroups', () => {
         bills: [bill],
         settlements: [],
         activity: [entry],
+        categories: [],
       },
     ]);
     expect(out.tables.web_album_members).toEqual([]);

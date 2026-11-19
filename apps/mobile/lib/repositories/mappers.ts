@@ -1,6 +1,7 @@
 import { DEFAULT_APP_ICON_ID, isAppIconId } from '~/constants/appIcons';
 import { albumCategoryIcon, albumCategoryLabel } from '~/features/albums/lib/albumCategoryName';
 import {
+  ALBUM_CATEGORY_ICON,
   albumCategoryOf,
   GROUP_BILL_ID,
   GROUP_CURRENCY,
@@ -480,6 +481,7 @@ const ACTIVITY_KINDS: ReadonlySet<string> = new Set<AlbumActivityKind>([
   'member_renamed',
   'simplify_changed',
   'cover_changed',
+  'category_changed',
 ]);
 
 function billSnapshot(value: unknown): AlbumBillSnapshot | null {
@@ -530,7 +532,20 @@ export function toAlbumActivity(row: AlbumActivityRow): AlbumActivity | null {
   let bill: AlbumActivity['bill'] = null;
   let rename: AlbumActivity['rename'] = null;
   let payment: AlbumActivity['payment'] = null;
-  if (kind.startsWith('bill_')) {
+  let category: AlbumActivity['category'] = null;
+  if (kind === 'category_changed') {
+    const look = (value: unknown) => {
+      const raw = value as { name?: unknown; icon?: unknown } | null;
+      if (!raw || typeof raw !== 'object') return null;
+      return {
+        name: typeof raw.name === 'string' ? raw.name.slice(0, MAX_GROUP_NAME) : null,
+        icon: typeof raw.icon === 'string' && ALBUM_CATEGORY_ICON.test(raw.icon) ? raw.icon : null,
+      };
+    };
+    if (!isAlbumCategoryKey(data.key)) return null;
+    category = { key: data.key, before: look(data.before), after: look(data.after) };
+    if (!category.before && !category.after) return null;
+  } else if (kind.startsWith('bill_')) {
     bill = { before: billSnapshot(data.before), after: billSnapshot(data.after) };
     if (!bill.before && !bill.after) return null;
   } else if (kind === 'member_renamed') {
@@ -571,6 +586,7 @@ export function toAlbumActivity(row: AlbumActivityRow): AlbumActivity | null {
     bill,
     rename,
     payment,
+    category,
     simplify: kind === 'simplify_changed' ? after?.on === true : null,
     started: kind === 'member_joined' && data.started === true,
     sortOrder: Number.isFinite(row.sortOrder) ? row.sortOrder : 0,
@@ -729,6 +745,8 @@ export function toTransaction(row: TransactionRow): Transaction {
     memberId: row.memberId ?? null,
     albumGroupId: row.albumGroupId ?? null,
     albumCategory: isAlbumCategoryKey(row.albumCategory) ? row.albumCategory : null,
+    albumCategoryName: albumCategoryKeyed(row.albumCategory, row.albumCategoryName),
+    albumCategoryIcon: albumCategoryKeyed(row.albumCategory, row.albumCategoryIcon),
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     deletedAt: row.deletedAt,
@@ -755,7 +773,7 @@ export const TRANSACTION_RAW_COLUMNS_SQL = `
   t.reimbursement_account_id, t.reimbursement_transaction_id, t.reimbursement_of_id,
   t.counts_as_expense, t.day_order, t.created_at, t.updated_at, t.deleted_at, t.details,
   t.instalment_rule_id, t.instalment_number, t.created_by, t.member_id, t.fee_of_id,
-  t.album_group_id, t.album_category`;
+  t.album_group_id, t.album_category, t.album_category_name, t.album_category_icon`;
 
 type RawValue = string | number | null;
 
@@ -809,16 +827,18 @@ export function toTransactionWithRelationsFromRaw(
     feeOfId: (values[36] as string | null) ?? null,
     albumGroupId: (values[37] as string | null) ?? null,
     albumCategory: isAlbumCategoryKey(values[38]) ? values[38] : null,
-    accountName: (values[39] as string | null) ?? null,
-    fromAccountName: (values[40] as string | null) ?? null,
-    toAccountName: (values[41] as string | null) ?? null,
-    ...withAlbumCategory(values[38], {
-      categoryName: (values[42] as string | null) ?? null,
-      categoryParentId: (values[44] as string | null) ?? null,
-      categoryParentName: (values[45] as string | null) ?? null,
-      categoryIcon: (values[43] as string | null) ?? null,
+    albumCategoryName: albumCategoryKeyed(values[38], values[39]),
+    albumCategoryIcon: albumCategoryKeyed(values[38], values[40]),
+    accountName: (values[41] as string | null) ?? null,
+    fromAccountName: (values[42] as string | null) ?? null,
+    toAccountName: (values[43] as string | null) ?? null,
+    ...withAlbumCategory(values[38], values[39], values[40], {
+      categoryName: (values[44] as string | null) ?? null,
+      categoryParentId: (values[46] as string | null) ?? null,
+      categoryParentName: (values[47] as string | null) ?? null,
+      categoryIcon: (values[45] as string | null) ?? null,
     }),
-    instalmentCount: (values[46] as number | null) ?? null,
+    instalmentCount: (values[48] as number | null) ?? null,
   };
 }
 
@@ -829,15 +849,28 @@ type CategoryRelations = Required<
   >
 >;
 
+/** An album category's own name or icon, kept only beside its key. */
+function albumCategoryKeyed(albumCategory: unknown, value: unknown): string | null {
+  return isAlbumCategoryKey(albumCategory) && typeof value === 'string' && value.trim()
+    ? value.slice(0, 64)
+    : null;
+}
+
 /**
  * A shared album's entry shows the album's category in every list, in place
- * of the user's own (README: Album members and shared albums > Categories).
+ * of the user's own (README: Album members and shared albums > Categories):
+ * the name and icon the album gave it, else a default's own.
  */
-function withAlbumCategory(albumCategory: unknown, own: CategoryRelations): CategoryRelations {
+function withAlbumCategory(
+  albumCategory: unknown,
+  name: unknown,
+  icon: unknown,
+  own: CategoryRelations,
+): CategoryRelations {
   if (!isAlbumCategoryKey(albumCategory)) return own;
   return {
-    categoryName: albumCategoryLabel(albumCategory),
-    categoryIcon: albumCategoryIcon(albumCategory),
+    categoryName: albumCategoryKeyed(albumCategory, name) ?? albumCategoryLabel(albumCategory),
+    categoryIcon: albumCategoryKeyed(albumCategory, icon) ?? albumCategoryIcon(albumCategory),
     categoryParentId: null,
     categoryParentName: null,
   };
@@ -884,6 +917,8 @@ const TRANSACTION_SPARSE_DEFAULTS: Readonly<Record<string, RawValue>> = {
   fee_of_id: null,
   album_group_id: null,
   album_category: null,
+  album_category_name: null,
+  album_category_icon: null,
 };
 
 const SPARSE_COLUMNS = TRANSACTION_RAW_COLUMNS.filter(
@@ -951,7 +986,7 @@ export function transactionRelations(
     Transaction,
     'accountId' | 'fromAccountId' | 'toAccountId' | 'categoryId' | 'instalmentRuleId'
   > &
-    Partial<Pick<Transaction, 'albumCategory'>>,
+    Partial<Pick<Transaction, 'albumCategory' | 'albumCategoryName' | 'albumCategoryIcon'>>,
   lookups: TransactionRelationLookups,
 ): TransactionRelations {
   const { accountNames, categories, instalmentCounts } = lookups;
@@ -962,12 +997,17 @@ export function transactionRelations(
     accountName: nameOf(transaction.accountId),
     fromAccountName: nameOf(transaction.fromAccountId),
     toAccountName: nameOf(transaction.toAccountId),
-    ...withAlbumCategory(transaction.albumCategory, {
-      categoryName: category?.name ?? null,
-      categoryIcon: category?.icon ?? null,
-      categoryParentId: category?.parentId ?? null,
-      categoryParentName: category?.parentName ?? null,
-    }),
+    ...withAlbumCategory(
+      transaction.albumCategory,
+      transaction.albumCategoryName,
+      transaction.albumCategoryIcon,
+      {
+        categoryName: category?.name ?? null,
+        categoryIcon: category?.icon ?? null,
+        categoryParentId: category?.parentId ?? null,
+        categoryParentName: category?.parentName ?? null,
+      },
+    ),
     instalmentCount: transaction.instalmentRuleId
       ? (instalmentCounts.get(transaction.instalmentRuleId) ?? null)
       : null,
@@ -989,7 +1029,7 @@ const RELATIONS_POSITION = TRANSACTION_RAW_COLUMNS.length;
  * A row with sparse values is laid out as the full raw row it stands for and
  * handed to {@link toTransactionWithRelationsFromRaw}. A row without them,
  * which is most rows, is built directly with the defaults written in: filling
- * that 45-value row first cost four times the mapping itself. The mapper test
+ * that 47-value row first cost four times the mapping itself. The mapper test
  * holds the two paths to the same result, field for field.
  */
 export function createTransactionAssembler(
@@ -1073,6 +1113,8 @@ export function createTransactionAssembler(
       feeOfId: null,
       albumGroupId: null,
       albumCategory: null,
+      albumCategoryName: null,
+      albumCategoryIcon: null,
       accountName: nameOf(common[8]),
       fromAccountName: nameOf(common[9]),
       toAccountName: nameOf(common[10]),

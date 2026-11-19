@@ -2358,6 +2358,8 @@ const en = {
     limit_icon_packs: 'Extra icon packs are a Pro feature. Upgrade to use every pack.',
     limit_live_earnings_auto_start:
       'Starting the clock on a schedule is a Pro feature. Upgrade and your shift begins on its own. Starting it by hand is always free.',
+    limit_album_categories:
+      "Changing a shared album's categories is a Pro feature. Upgrade to rename, add or remove them for everyone in the album.",
     limit_reimbursements:
       'Reimbursement tracking is a Pro feature. Upgrade to mark expenses you will get back.',
     limit_subcurrencies:
@@ -3112,6 +3114,13 @@ const en = {
       failed: "Couldn't save the change to this album. Try again.",
     },
     line_label: '{{name}}, album',
+    category_list: {
+      title: 'Categories',
+      edit: 'Edit categories',
+      info: 'Everyone in this album files its bills under these categories, in the app and on the web. A change you make here reaches all of them. Removing one moves its bills to {{other}}.',
+      limit: 'An album can have up to {{count}} categories.',
+      remove_body: 'Its bills move to {{other}} for everyone in this album.',
+    },
     categories: {
       food: 'Food',
       groceries: 'Groceries',
@@ -3154,6 +3163,10 @@ const en = {
       simplify_on: '{{actor}} turned on Simplify group debts',
       simplify_off: '{{actor}} turned off Simplify group debts',
       cover: '{{actor}} changed the cover',
+      category_added: '{{actor}} added the category {{name}}',
+      category_removed: '{{actor}} removed the category {{name}}',
+      category_renamed: '{{actor}} renamed the category {{before}} to {{after}}',
+      category_icon: '{{actor}} changed the icon of {{name}}',
     },
   },
   assets: {
