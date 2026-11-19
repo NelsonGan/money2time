@@ -175,6 +175,17 @@ function randomHex(bytes: number): string {
     .join('');
 }
 
+/**
+ * The Turso database name for a new share: `m2t-album-<id>` for an album's
+ * group, `m2t-ledger-<id>` for a shared ledger. The prefix only tells them
+ * apart in Turso; nothing reads it back (the row's `db_name` is the name).
+ * Albums shared before 2026-11-19 keep `m2t-ledger-`, since Turso cannot
+ * rename a database.
+ */
+export function sharedDatabaseName(kind: Kind, id: string): string {
+  return `m2t-${kind}-${id}`;
+}
+
 async function hashCode(code: string): Promise<string> {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(code));
   return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
@@ -589,7 +600,7 @@ async function shareLedger(env: Env, user: SessionUser, request: Request): Promi
   }
 
   const id = randomHex(12);
-  const dbName = `m2t-ledger-${id}`;
+  const dbName = sharedDatabaseName(album ? 'album' : 'ledger', id);
   const local = env.LOCAL_SYNC_URL ? await freeLocalServer(env) : null;
   if (env.LOCAL_SYNC_URL && !local) return json({ error: 'not_available_locally' }, 501);
   const url = local ?? `libsql://${await createDatabase(env, dbName)}`;
