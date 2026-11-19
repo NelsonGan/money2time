@@ -16,7 +16,7 @@ import {
   type AlbumCategoryDef,
   albumCategoryForCategory,
   albumCategoryId,
-  DEFAULT_ALBUM_CATEGORY_LIST,
+  keptAlbumCategoryList,
 } from '~/features/albums/lib/albumCategories';
 import { billHasPayments } from '~/features/albums/lib/groupRules';
 import {
@@ -156,19 +156,11 @@ function TransactionEditor({
   const albumCategories = useMemo<readonly AlbumCategoryDef[] | null>(() => {
     if (!usesAlbumCategories) return null;
     if (groupBillHere) return groupCategoryList;
-    const key = transaction.albumCategory;
-    if (!key || (!transaction.albumCategoryName && !transaction.albumCategoryIcon)) {
-      return DEFAULT_ALBUM_CATEGORY_LIST;
-    }
-    const own: AlbumCategoryDef = {
-      key,
-      name: transaction.albumCategoryName,
-      icon: transaction.albumCategoryIcon,
-      sortOrder: DEFAULT_ALBUM_CATEGORY_LIST.find((entry) => entry.key === key)?.sortOrder ?? 999,
-    };
-    return [...DEFAULT_ALBUM_CATEGORY_LIST.filter((entry) => entry.key !== key), own].sort(
-      (a, b) => a.sortOrder - b.sortOrder,
-    );
+    return keptAlbumCategoryList({
+      albumCategory: transaction.albumCategory,
+      albumCategoryName: transaction.albumCategoryName,
+      albumCategoryIcon: transaction.albumCategoryIcon,
+    });
   }, [
     groupBillHere,
     groupCategoryList,

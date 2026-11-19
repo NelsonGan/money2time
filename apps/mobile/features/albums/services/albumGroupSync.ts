@@ -768,7 +768,7 @@ export function projectGroup(
   const memberIds = new Set(members.map((member) => member.id));
   const paid = settlementsByBill(albumGroupsRepository.listSettlements(groupId, memberIds));
   const expenses = albumGroupsRepository
-    .listExpenses(groupId, memberIds)
+    .listExpenses(groupId, memberIds, env.categories)
     .filter((expense) => !options.expenseId || expense.id === options.expenseId);
   let changed = false;
   getSQLite().withTransactionSync(() => {

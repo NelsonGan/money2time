@@ -869,6 +869,51 @@ test("an album's own categories: changed, added, removed and reordered for every
   ]);
 });
 
+test("a move in an album's category list keeps a rename and a removal it has not seen", async () => {
+  const plan = await import('../src/groupPlan.generated.ts');
+  const { group, rows } = await trip();
+  const row = (key: string, extra: Record<string, unknown>) => ({
+    table: 'album_categories',
+    row: { id: plan.categoryRowId('bali', key), key, ...extra },
+  });
+  await write(group, 'tess', {
+    rows: [
+      row('food', { name: 'Meals', icon: null, sort_order: 0 }),
+      row('c-tickets01', { name: 'Tickets', icon: 'emoji:🎟️', sort_order: 8 }),
+    ],
+  });
+  await write(group, 'tess', { rows: [row('c-tickets01', { deleted_at: 'removed' })] });
+  const logged = () => rows('album_activity').filter((entry) => entry.kind === 'category_changed');
+  const before = logged().length;
+  // Ben's phone, which has not seen either yet, moves them: places only.
+  await write(group, 'ben', {
+    rows: [row('c-tickets01', { sort_order: 0 }), row('food', { sort_order: 1 })],
+  });
+  const list = plan.albumCategoryList(rows('album_categories'));
+  assert.equal(list.find((entry) => entry.key === 'food')?.name, 'Meals');
+  assert.equal(list.find((entry) => entry.key === 'food')?.sortOrder, 1);
+  assert.equal(
+    list.some((entry) => entry.key === 'c-tickets01'),
+    false,
+  );
+  // Not news: nothing renamed or added back.
+  assert.equal(logged().length, before);
+  // An icon alone keeps the name, and a default with no row keeps its place.
+  await write(group, 'ben', {
+    rows: [row('food', { icon: 'cup' }), row('bills', { icon: 'cup' })],
+  });
+  const after = plan.albumCategoryList(rows('album_categories'));
+  assert.deepEqual(
+    [after.find((entry) => entry.key === 'food'), after.find((entry) => entry.key === 'bills')].map(
+      (entry) => [entry?.name, entry?.icon, entry?.sortOrder],
+    ),
+    [
+      ['Meals', 'cup', 1],
+      [null, 'cup', 4],
+    ],
+  );
+});
+
 test("an album's categories refuse what the rules do not allow", async () => {
   const plan = await import('../src/groupPlan.generated.ts');
   const { group, rows } = await trip();

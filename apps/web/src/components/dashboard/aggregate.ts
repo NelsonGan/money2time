@@ -140,10 +140,11 @@ export function albumBreakdown(txs: Tx[], model: Model, albumId: string): Slice[
       const root = tx.parentId ? model.categories.get(tx.parentId) : null;
       const picked = tx.albumCategory ?? categoryOf.get(tx.id) ?? albumCategoryForOwn(root, categories);
       const known = categories.find((entry) => entry.key === picked);
-      // A category the page has no list for (an album no longer shared): the
-      // name and icon the entry keeps, else Other.
-      const kept = !known && picked === tx.albumCategory && (tx.albumCategoryName || tx.albumCategoryIcon);
-      const category = known ?? (kept ? null : (categories.find((entry) => entry.key === "other") ?? DEFAULT_ALBUM_CATEGORY_LIST[DEFAULT_ALBUM_CATEGORY_LIST.length - 1]));
+      // With no list for the album (one no longer shared), or a category it
+      // has no longer: the name and icon the entry keeps, else Other. A
+      // renamed default keeps its new name too.
+      const kept = (!known || !group) && picked === tx.albumCategory && !!(tx.albumCategoryName || tx.albumCategoryIcon);
+      const category = kept ? null : (known ?? categories.find((entry) => entry.key === "other") ?? DEFAULT_ALBUM_CATEGORY_LIST[DEFAULT_ALBUM_CATEGORY_LIST.length - 1]);
       key = category?.key ?? picked;
       const index = categories.findIndex((entry) => entry.key === key);
       slice = map.get(key) ?? {

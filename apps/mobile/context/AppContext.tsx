@@ -28,11 +28,11 @@ import {
 } from '~/constants/appDefaults';
 import { PRO_LIMITS } from '~/constants/proLimits';
 import {
-  type AlbumCategoryDef,
   albumCategoryForCategory,
   type AlbumCategoryKey,
   albumCategoryKeyOfId,
   DEFAULT_ALBUM_CATEGORY_LIST,
+  keptAlbumCategoryList,
   personalCategoryFor,
 } from '~/features/albums/lib/albumCategories';
 import { billFromRows, type GroupBillRow } from '~/features/albums/lib/albumGroup';
@@ -654,17 +654,18 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
    * Changes a shared album's categories for everyone in it (README: Album
    * members and shared albums > Categories): a category's new name or icon,
    * one added or removed, or the list's order (`categories`, each with its
-   * place). Its bills' entries follow on every phone. False when the album's
-   * rules refused it (the user was told why).
+   * place). A field left out keeps what the category has (`categoryRow`).
+   * Its bills' entries follow on every phone. False when the album's rules
+   * refused it (the user was told why).
    */
   changeAlbumCategories: (
     groupId: string,
     action: 'added' | 'edited' | 'removed' | 'reordered',
     categories: readonly {
       key: AlbumCategoryKey;
-      name: string | null;
-      icon: string | null;
-      sortOrder: number;
+      name?: string | null;
+      icon?: string | null;
+      sortOrder?: number;
       removed?: boolean;
     }[],
   ) => Promise<boolean>;
@@ -2028,17 +2029,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // The category the entry already has keeps the name and icon its album
       // gave it; another one is a default, as it is.
       const kept = !!existing && existing.albumCategory === key;
-      const album: readonly AlbumCategoryDef[] =
-        kept && (existing.albumCategoryName || existing.albumCategoryIcon)
-          ? [
-              {
-                key,
-                name: existing.albumCategoryName,
-                icon: existing.albumCategoryIcon,
-                sortOrder: 0,
-              },
-            ]
-          : DEFAULT_ALBUM_CATEGORY_LIST;
+      const album = existing ? keptAlbumCategoryList(existing) : DEFAULT_ALBUM_CATEGORY_LIST;
       return {
         ...input,
         albumCategory: key,
@@ -3931,10 +3922,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           const existing = transactionById.get(update.id);
           const albumCategory = existing?.albumCategory;
           if (albumCategory && categoryId && !albumCategoryKeyOfId(categoryId)) {
+            // Read against the category the entry keeps too: the user's
+            // category matching an added or renamed one stays under it.
             const key = albumCategoryForCategory(
               categoryId,
               categoriesRef.current,
               quickEntryPrefsRef.current.categoryMap,
+              keptAlbumCategoryList(existing ?? {}),
             );
             const kept = key === albumCategory;
             return {

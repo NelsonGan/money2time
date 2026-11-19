@@ -8,6 +8,7 @@ import {
   albumCategoryKeyOfId,
   albumCategoryLook,
   albumCategoryPickerList,
+  keptAlbumCategoryList,
   personalCategoryFor,
 } from '~/features/albums/lib/albumCategories';
 import {
@@ -20,7 +21,9 @@ import {
   albumCategoryColumns,
   albumCategoryList,
   albumCategoryOf,
+  categoryRowId,
 } from '~/features/albums/lib/groupPlan';
+import { categoryRow } from '~/features/albums/lib/groupRows';
 import { buildBudgetSummary } from '~/features/budget/lib/budgetMath';
 import { NO_REIMBURSEMENT } from '~/features/reimbursements/lib/reimbursementMath';
 import { buildReviewSummary } from '~/features/review/lib/reviewMath';
@@ -351,6 +354,42 @@ describe('an album’s own categories', () => {
     expect(line({ key: 'food', before: none, after: { name: null, icon: 'cup' } })).toBe(
       'Tess changed the icon of Food',
     );
+  });
+
+  it('show an album no longer shared under the names its entries keep, a renamed default too', () => {
+    const rows = albumCategoryRows(
+      [
+        tx('b1', 30, 'food', {
+          albumCategory: 'food',
+          categoryName: 'Meals',
+          categoryIcon: 'meal',
+        }),
+      ],
+      {
+        valueOf: (item) => item.amount,
+        categories: CATEGORIES,
+        categoryById: BY_ID,
+        byAlbumCategory: true,
+      },
+    );
+    expect(rows.map((row) => row.label)).toEqual(['Meals']);
+    expect(
+      keptAlbumCategoryList({
+        albumCategory: 'c-snack001',
+        albumCategoryName: 'Snacks',
+        albumCategoryIcon: 'cookie',
+      })
+        .map((item) => item.key)
+        .slice(-1),
+    ).toEqual(['c-snack001']);
+  });
+
+  it('send only what changes, so a move never undoes another phone’s rename', () => {
+    expect(categoryRow('bali', { key: 'food', sortOrder: 3 }).row).toEqual({
+      id: categoryRowId('bali', 'food'),
+      key: 'food',
+      sort_order: 3,
+    });
   });
 
   it('group a breakdown under the album’s names', () => {

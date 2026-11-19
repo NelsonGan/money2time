@@ -9,7 +9,7 @@
  * reads as before. Its imports end in `.ts`, so the tests can load it.
  */
 
-import { ALBUM_CATEGORY_ICON, DEFAULT_ALBUM_CATEGORY_LIST, isAlbumCategoryKey, isDefaultAlbumCategoryKey, type AlbumCategoryDef, type AlbumCategoryKey } from "../album/categories.ts";
+import { ALBUM_CATEGORY_ICON, cleanCategoryName, DEFAULT_ALBUM_CATEGORY_LIST, isAlbumCategoryKey, isDefaultAlbumCategoryKey, type AlbumCategoryDef, type AlbumCategoryKey } from "../album/categories.ts";
 import type { WebAlbumActivityRow, WebAlbumBillRow, WebAlbumBillSnapshot, WebAlbumCategoryRow, WebAlbumMemberRow, WebAlbumSettlementRow, WebAlbumShare } from "./types";
 
 export type AlbumGroupMember = {
@@ -78,7 +78,7 @@ export function albumCategoriesOf(tables: Pick<GroupTables, "web_album_categorie
   const list: AlbumCategoryDef[] = [];
   for (const row of tables.web_album_categories) {
     if (!row || row.album_id !== albumId || !isAlbumCategoryKey(row.key) || seen.has(row.key)) continue;
-    const name = typeof row.name === "string" ? row.name.replace(/\s+/g, " ").trim().slice(0, 40) || null : null;
+    const name = cleanCategoryName(row.name);
     if (!name && !isDefaultAlbumCategoryKey(row.key)) continue;
     seen.add(row.key);
     list.push({

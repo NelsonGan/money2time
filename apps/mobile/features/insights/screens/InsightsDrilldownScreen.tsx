@@ -377,7 +377,7 @@ export function InsightsDrilldownScreen({
       categoryById,
       categoryMap: quickEntryPrefs.categoryMap,
       byAlbumCategory,
-      albumCategories: groupCategories,
+      albumCategories: albumShare ? groupCategories : undefined,
     });
     const total = rows.reduce((sum, row) => sum + Math.abs(row.amount), 0);
     return rows.map((row) => ({
@@ -391,6 +391,7 @@ export function InsightsDrilldownScreen({
       categoryRootId: row.categoryRootId,
     }));
   }, [
+    albumShare,
     byAlbumCategory,
     categories,
     categoryById,

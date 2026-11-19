@@ -811,8 +811,12 @@ export function planWrite(
       const was = wasLive ? look(before) : null;
       const removing = row.deleted_at != null;
       if (removing && key === ALBUM_CATEGORY_OTHER) throw new GroupWriteError('forbidden', 403);
-      const name = cleanCategoryName(row.name);
-      const icon = row.icon;
+      // A field left out keeps what the category has (a move in the list
+      // sends neither name nor icon), so a phone that has not yet seen
+      // another's rename or removal neither undoes it nor brings one back.
+      if (!removing && !wasLive && !('name' in row) && !('icon' in row)) continue;
+      const name = 'name' in row ? cleanCategoryName(row.name) : (was?.name ?? null);
+      const icon = 'icon' in row ? row.icon : (was?.icon ?? null);
       if (
         (!removing && !isDefault && !name) ||
         (icon != null && !(isText(icon) && ALBUM_CATEGORY_ICON.test(icon)))
@@ -820,12 +824,15 @@ export function planWrite(
         throw new GroupWriteError('bad_row');
       }
       const order = row.sort_order;
+      const defaultIndex = ALBUM_CATEGORIES.findIndex((category) => category.key === key);
       const sortOrder =
         typeof order === 'number' && Number.isInteger(order) && order >= 0 && order <= 1000
           ? order
           : typeof before?.sort_order === 'number'
             ? before.sort_order
-            : 1000;
+            : defaultIndex >= 0
+              ? defaultIndex
+              : 1000;
       const data: Row = {
         id: row.id,
         ledger_id: ctx.groupId,

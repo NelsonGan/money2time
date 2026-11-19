@@ -4,7 +4,7 @@
 // features/albums/services/albumGroupWrites.ts alone.
 // Their `ledger_id` is the group's id (features/cloudSync/lib/ledgerRows.ts).
 
-import { and, desc, eq, isNull } from 'drizzle-orm';
+import { and, desc, eq, isNull, sql } from 'drizzle-orm';
 
 import {
   ALBUM_CATEGORIES,
@@ -75,9 +75,13 @@ class AlbumGroupsRepository {
    * of those). A bill counts only between the group's own members: one paid
    * by nobody in it is left out, and so is a share of nobody's.
    */
-  listExpenses(groupId: string, members = this.memberIds(groupId)): AlbumExpense[] {
+  listExpenses(
+    groupId: string,
+    members = this.memberIds(groupId),
+    categories: readonly AlbumCategoryDef[] = this.listCategories(groupId),
+  ): AlbumExpense[] {
     // A bill of a category the album no longer has is filed under Other.
-    const keys = new Set(this.listCategories(groupId).map((category) => category.key));
+    const keys = new Set(categories.map((category) => category.key));
     return getDb()
       .select()
       .from(albumExpensesTable)
@@ -107,6 +111,8 @@ class AlbumGroupsRepository {
       .select()
       .from(albumCategoriesTable)
       .where(eq(albumCategoriesTable.ledgerId, groupId))
+      // Live rows first: removed ones pile up and must not push them past the limit.
+      .orderBy(sql`${albumCategoriesTable.deletedAt} IS NOT NULL`)
       .limit(MAX_ALBUM_CATEGORIES * 4 + ALBUM_CATEGORIES.length)
       .all()
       .filter((row) => row.id === categoryRowId(groupId, row.key))

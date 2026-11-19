@@ -57,7 +57,7 @@ export function AlbumCategoryEditorScreen({
 
   return (
     <CategoryEditor
-      mode={editing ? 'edit' : 'create'}
+      mode={categoryKey ? 'edit' : 'create'}
       topLevel={[]}
       initial={initial}
       disableParentSelect
@@ -67,6 +67,11 @@ export function AlbumCategoryEditorScreen({
         other: albumCategoryNameOf(albumCategoryIn(categories, ALBUM_CATEGORY_OTHER)),
       })}
       onSubmit={({ name, icon }) => {
+        // Removed meanwhile (another phone): nothing to change, and never a new one.
+        if (categoryKey && !editing) {
+          onClose();
+          return;
+        }
         if (editing) {
           // A default keeps its own name (read in each person's language)
           // and icon unless they were changed.

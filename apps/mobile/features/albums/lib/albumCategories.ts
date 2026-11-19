@@ -43,6 +43,32 @@ export function albumCategoryIn(
   );
 }
 
+/**
+ * The categories an entry of an album no longer shared reads against: the
+ * defaults, with the one it keeps (an added or changed one, by the name and
+ * icon the entry kept) in its place.
+ */
+export function keptAlbumCategoryList(entry: {
+  albumCategory?: AlbumCategoryKey | null;
+  albumCategoryName?: string | null;
+  albumCategoryIcon?: string | null;
+}): readonly AlbumCategoryDef[] {
+  const key = entry.albumCategory;
+  if (!key || (!entry.albumCategoryName && !entry.albumCategoryIcon)) {
+    return DEFAULT_ALBUM_CATEGORY_LIST;
+  }
+  const own: AlbumCategoryDef = {
+    key,
+    name: entry.albumCategoryName ?? null,
+    icon: entry.albumCategoryIcon ?? null,
+    sortOrder:
+      DEFAULT_ALBUM_CATEGORY_LIST.find((category) => category.key === key)?.sortOrder ?? 999,
+  };
+  return [...DEFAULT_ALBUM_CATEGORY_LIST.filter((category) => category.key !== key), own].sort(
+    (a, b) => a.sortOrder - b.sortOrder,
+  );
+}
+
 /** Whether the album gave a category its own name or icon, or added it. */
 export function isChangedAlbumCategory(category: AlbumCategoryDef): boolean {
   return category.name != null || category.icon != null || !isDefaultAlbumCategoryKey(category.key);

@@ -58,7 +58,8 @@ export type AlbumCategoryDef = {
   sortOrder: number;
 };
 
-const cleanCategoryName = (value: unknown): string | null =>
+/** A category's name as every writer keeps it: one line, trimmed, at most 40 characters; null for none. */
+export const cleanCategoryName = (value: unknown): string | null =>
   typeof value === "string" ? value.replace(/\s+/g, " ").trim().slice(0, MAX_CATEGORY_NAME) || null : null;
 
 /** A category's row id in the group: one per album and key (the app's `categoryRowId`). */

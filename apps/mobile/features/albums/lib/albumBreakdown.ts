@@ -12,9 +12,11 @@ import type { Category, TransactionWithRelations } from '~/types';
 import {
   type AlbumCategoryDef,
   albumCategoryForCategory,
+  albumCategoryIcon,
   albumCategoryIconOf,
   albumCategoryId,
   albumCategoryIn,
+  albumCategoryLabel,
   albumCategoryNameOf,
   type CategoryMap,
   DEFAULT_ALBUM_CATEGORY_LIST,
@@ -47,7 +49,10 @@ export interface AlbumBreakdownOptions {
    * Otherwise by the user's root categories.
    */
   byAlbumCategory: boolean;
-  /** The shared album's categories (the defaults for one no longer shared). */
+  /**
+   * The shared album's categories. Left out for one no longer shared: an
+   * entry then shows the name and icon it keeps, the defaults otherwise.
+   */
   albumCategories?: readonly AlbumCategoryDef[];
 }
 
@@ -83,11 +88,15 @@ export function albumCategoryRows(
       if (tx.albumCategory) {
         // The album's name and icon for it, else (an album no longer shared)
         // the ones the entry keeps, as every list shows it.
-        const category = album.find((entry) => entry.key === tx.albumCategory);
+        const category = options.albumCategories?.find((entry) => entry.key === tx.albumCategory);
         add(
           albumCategoryId(tx.albumCategory),
-          category ? albumCategoryNameOf(category) : (tx.categoryName ?? ''),
-          category ? albumCategoryIconOf(category) : (tx.categoryIcon ?? ''),
+          category
+            ? albumCategoryNameOf(category)
+            : tx.categoryName || albumCategoryLabel(tx.albumCategory),
+          category
+            ? albumCategoryIconOf(category)
+            : tx.categoryIcon || albumCategoryIcon(tx.albumCategory),
           null,
           tx,
           amount,

@@ -2454,7 +2454,11 @@ migrations `090` to `094` and `097`.
     list. Every change goes to the group (`changeAlbumCategories` →
     `categoryRow`) and is logged, except a reorder: "Ben renamed the category
     Food to Meals", "… added the category Tickets", "… removed …", "… changed
-    the icon of …" (`category_changed`, `category_*` lines).
+    the icon of …" (`category_changed`, `category_*` lines). A change sends
+    only what it changes (a reorder only the places, an icon pick only the
+    icon); a field left out keeps what the row has, so a phone that has not
+    yet seen another's rename or removal neither undoes it nor brings a
+    removed category back.
   - **Stored as the defaults' changes** (`album_categories`, migration `097`,
     one row per album and key, id `ac-<album>-<key>`, `categoryRowId`): a row
     for a default key gives it another name or icon (null keeps the

@@ -1,5 +1,5 @@
 import { GripVertical } from 'lucide-react-native';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -84,6 +84,10 @@ export function AlbumCategoriesScreen({
   const { contentWidth } = useDeviceLayout();
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const categories = useAlbumCategories(albumId);
+  // Bumped when a drag is not saved (no Pro, or the album refused it): the
+  // list draws again from the saved order instead of keeping the moved row.
+  const [listVersion, setListVersion] = useState(0);
+  const resetList = useCallback(() => setListVersion((version) => version + 1), []);
   const rowWidth = Math.max(Math.min(contentWidth, 720) - SETTINGS_HORIZONTAL_PADDING * 2, 0);
   const colors = useMemo(
     () => ({
@@ -123,9 +127,10 @@ export function AlbumCategoriesScreen({
         onSelect: (next) => {
           const isDefault = isDefaultAlbumCategoryKey(category.key);
           const icon = next || (isDefault ? null : albumCategoryIcon('other'));
+          // Only the icon: a rename made meanwhile on another phone stays.
           void changeAlbumCategories(albumId, 'edited', [
             {
-              ...category,
+              key: category.key,
               icon: isDefault && icon === albumCategoryIcon(category.key) ? null : icon,
             },
           ]);
@@ -140,10 +145,13 @@ export function AlbumCategoriesScreen({
       void changeAlbumCategories(
         albumId,
         'reordered',
-        ordered.map((category, index) => ({ ...category, sortOrder: index })),
-      );
+        // Only the places: a move never undoes another phone's rename or removal.
+        ordered.map((category, index) => ({ key: category.key, sortOrder: index })),
+      ).then((saved) => {
+        if (!saved) resetList();
+      });
     },
-    [albumId, changeAlbumCategories],
+    [albumId, changeAlbumCategories, resetList],
   );
 
   return (
@@ -180,6 +188,7 @@ export function AlbumCategoriesScreen({
           }}
         >
           <Sortable.Flex
+            key={listVersion}
             activeItemScale={1.02}
             activeItemShadowOpacity={0.08}
             customHandle
@@ -190,7 +199,10 @@ export function AlbumCategoriesScreen({
             inactiveItemOpacity={1}
             onDragEnd={({ fromIndex, order, toIndex }) => {
               if (fromIndex === toIndex) return;
-              if (!requirePro('album_categories')) return;
+              if (!requirePro('album_categories')) {
+                resetList();
+                return;
+              }
               handleReorder(order([...categories]));
               void triggerHaptic('selection');
             }}

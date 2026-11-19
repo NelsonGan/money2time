@@ -529,7 +529,7 @@ export function AlbumDetailScreen({
         categoryById,
         categoryMap: quickEntryPrefs.categoryMap,
         byAlbumCategory,
-        albumCategories: groupCategories,
+        albumCategories: group.share ? groupCategories : undefined,
       }),
     [
       breakdownCandidates,
@@ -538,6 +538,7 @@ export function AlbumDetailScreen({
       categoryById,
       displayValue,
       byAlbumCategory,
+      group.share,
       groupCategories,
       quickEntryPrefs.categoryMap,
     ],

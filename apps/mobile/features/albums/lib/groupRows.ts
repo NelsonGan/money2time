@@ -137,15 +137,16 @@ export function settingsRow(
 /**
  * One of the album's categories as it should be: a default's new name or icon
  * (null keeps the default's own), an added one, or (`removed`) gone, its
- * bills then read as Other.
+ * bills then read as Other. A field left out (undefined) keeps what the
+ * category has: a move in the list sends only its place.
  */
 export function categoryRow(
   groupId: string,
   category: {
     key: AlbumCategoryKey;
-    name: string | null;
-    icon: string | null;
-    sortOrder: number;
+    name?: string | null;
+    icon?: string | null;
+    sortOrder?: number;
     removed?: boolean;
   },
 ): GroupRowWrite {
@@ -154,9 +155,9 @@ export function categoryRow(
     row: {
       id: categoryRowId(groupId, category.key),
       key: category.key,
-      name: category.name,
-      icon: category.icon,
-      sort_order: category.sortOrder,
+      ...(category.name !== undefined ? { name: category.name } : null),
+      ...(category.icon !== undefined ? { icon: category.icon } : null),
+      ...(category.sortOrder !== undefined ? { sort_order: category.sortOrder } : null),
       ...(category.removed ? { deleted_at: 'removed' } : null),
     },
   };
