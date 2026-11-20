@@ -1,9 +1,12 @@
-import { CalendarCheck, RefreshCw, TrendingUp } from 'lucide-react-native';
 import React from 'react';
 
 import { OnboardingFeatureListStep } from '~/features/onboarding/components/OnboardingFeatureListStep';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
+
+const DAILY = require('~/assets/illustrations/onboarding-notifications-daily.webp');
+const RECURRING = require('~/assets/illustrations/onboarding-notifications-recurring.webp');
+const WEEKLY = require('~/assets/illustrations/onboarding-notifications-weekly.webp');
 
 interface OnboardingNotificationsStepProps {
   onEnable: () => void;
@@ -19,22 +22,23 @@ export function OnboardingNotificationsStep({
   return (
     <OnboardingFeatureListStep
       title={I18n.t('onboarding.notifications.title')}
+      subtitle={I18n.t('onboarding.notifications.subtitle')}
       mascot="excited"
       features={[
         {
-          icon: CalendarCheck,
-          title: I18n.t('onboarding.notifications.bullet_daily_title'),
-          subtitle: I18n.t('onboarding.notifications.bullet_daily_subtitle'),
+          image: DAILY,
+          title: I18n.t('onboarding.notifications.daily_title'),
+          subtitle: I18n.t('onboarding.notifications.daily_subtitle'),
         },
         {
-          icon: RefreshCw,
-          title: I18n.t('onboarding.notifications.bullet_recurring_title'),
-          subtitle: I18n.t('onboarding.notifications.bullet_recurring_subtitle'),
+          image: RECURRING,
+          title: I18n.t('onboarding.notifications.recurring_title'),
+          subtitle: I18n.t('onboarding.notifications.recurring_subtitle'),
         },
         {
-          icon: TrendingUp,
-          title: I18n.t('onboarding.notifications.bullet_weekly_title'),
-          subtitle: I18n.t('onboarding.notifications.bullet_weekly_subtitle'),
+          image: WEEKLY,
+          title: I18n.t('onboarding.notifications.weekly_title'),
+          subtitle: I18n.t('onboarding.notifications.weekly_subtitle'),
         },
       ]}
       onBack={onBack}
@@ -43,7 +47,7 @@ export function OnboardingNotificationsStep({
         void triggerHaptic('medium');
         onEnable();
       }}
-      skip={{
+      secondary={{
         label: I18n.t('onboarding.notifications.not_now'),
         onPress: () => {
           void triggerHaptic('selection');
