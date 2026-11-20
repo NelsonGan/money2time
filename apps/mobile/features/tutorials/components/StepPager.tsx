@@ -97,9 +97,8 @@ export function StepPager({
 
       {children}
 
-      {/* Mirrors OnboardingActionBar (ghost back at flex-1, primary at
-          flex-[2]) rather than reusing it. The page pads the bottom safe area,
-          so the row only adds a little breathing room. */}
+      {/* A ghost back at flex-1 and the primary at flex-[2]. The page pads the
+          bottom safe area, so the row only adds a little breathing room. */}
       <View style={styles.nav} className="border-t border-border/15">
         <Button variant="ghost" className="flex-1" haptic="none" onPress={onBack}>
           <Text>{I18n.t('common.back')}</Text>

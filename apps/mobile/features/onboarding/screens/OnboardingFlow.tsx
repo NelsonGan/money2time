@@ -1,14 +1,14 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Alert, Platform, StyleSheet, View } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
-import { Text, ThemeModal } from '~/components/ui';
+import { ThemeModal } from '~/components/ui';
 import { DEFAULT_WAGE_CONFIG } from '~/constants/appDefaults';
 import { useApp } from '~/context/AppContext';
+import { OnboardingTopBar } from '~/features/onboarding/components/OnboardingTopBar';
 import { WageCalculatorFlowScreen } from '~/features/settings/screens';
-import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n, setAppLocale } from '~/lib/i18n';
 import { AnalyticsEvents, setUserProperties, trackEvent } from '~/services/analytics';
 import {
@@ -20,26 +20,30 @@ import {
 import { triggerHaptic } from '~/services/haptics';
 import { requestPermissions } from '~/services/notifications';
 import { type WageConfig } from '~/types';
-import { withColorAlpha } from '~/utils/color';
 import { getErrorMessage } from '~/utils/errorHandling';
 import { monthKeyFromDateLocal } from '~/utils/formatters';
 
+import { OnboardingAutomationsStep } from './OnboardingAutomationsStep';
 import { OnboardingBackupStep } from './OnboardingBackupStep';
-import { OnboardingFeaturesStep } from './OnboardingFeaturesStep';
+import { OnboardingIncomeStep } from './OnboardingIncomeStep';
 import { OnboardingNotificationsStep } from './OnboardingNotificationsStep';
 import { OnboardingPreferencesStep } from './OnboardingPreferencesStep';
 import { type AcquisitionSource, OnboardingSourceStep } from './OnboardingSourceStep';
-import { OnboardingValuePropStep } from './OnboardingValuePropStep';
-import { OnboardingWageStep } from './OnboardingWageStep';
+import { OnboardingTryItStep } from './OnboardingTryItStep';
+import { OnboardingWelcomeStep } from './OnboardingWelcomeStep';
 
-type OnboardingStepId =
-  | 'welcome'
-  | 'basics'
-  | 'wage'
-  | 'backup'
-  | 'source'
-  | 'notifications'
-  | 'features';
+const STEP_ORDER = [
+  'welcome',
+  'basics',
+  'wage',
+  'try_it',
+  'automations',
+  'backup',
+  'source',
+  'notifications',
+] as const;
+
+type OnboardingStepId = (typeof STEP_ORDER)[number];
 
 interface OnboardingFlowProps {
   onComplete: () => void;
@@ -55,29 +59,15 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     updateSettings,
     updateWageConfigForMonth,
   } = useApp();
-  const themeColors = useThemeColors();
 
   const [step, setStep] = useState<OnboardingStepId>('welcome');
   const [acquisitionSource, setAcquisitionSource] = useState<AcquisitionSource | null>(null);
   const [showWageCalculator, setShowWageCalculator] = useState(false);
-
-  const wageIsSet = (currentMonthWage?.wageAmount ?? 0) > 0;
-
   const currentMonth = useMemo(() => monthKeyFromDateLocal(new Date()), []);
 
-  const stepOrder: OnboardingStepId[] = [
-    'welcome',
-    'basics',
-    'wage',
-    'backup',
-    'source',
-    'notifications',
-    'features',
-  ];
-  const visualStep = Math.max(1, stepOrder.indexOf(step) + 1);
-  const totalVisualSteps = stepOrder.length;
-
-  const prefillConfig: WageConfig =
+  // The income step edits a draft; it is saved when the user continues (or
+  // finishes the full calculator), never on each keystroke.
+  const [wageDraft, setWageDraft] = useState<WageConfig>(() =>
     currentMonthWage && currentMonthWage.wageAmount > 0
       ? {
           wageType: currentMonthWage.wageType,
@@ -86,9 +76,16 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           workdaysPerWeek: currentMonthWage.workdaysPerWeek,
           commuteMinutesPerWorkday: currentMonthWage.commuteMinutesPerWorkday,
         }
-      : {
-          ...DEFAULT_WAGE_CONFIG,
-        };
+      : { ...DEFAULT_WAGE_CONFIG },
+  );
+  const savedHourlyRate = currentMonthWage?.trueHourlyRate ?? 0;
+
+  // The welcome page has no top bar, so the bar counts the steps after it.
+  const stepIndex = STEP_ORDER.indexOf(step);
+  const goBack = useCallback(() => {
+    const previous = STEP_ORDER[STEP_ORDER.indexOf(step) - 1];
+    if (previous) setStep(previous);
+  }, [step]);
 
   const handleEnableBackup = useCallback(async () => {
     const target = Platform.OS === 'ios' ? 'icloud' : 'googleDrive';
@@ -187,57 +184,25 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     }
   }, [accounts.length, categories.length, completeOnboarding, onComplete]);
 
-  const renderProgressHeader = () => (
-    <View
-      className="px-5 pt-3 pb-2"
-      accessibilityLabel={I18n.t('onboarding.flow.step_a11y', {
-        step: visualStep,
-        total: totalVisualSteps,
-      })}
-      accessibilityRole="header"
-    >
-      <Text variant="caption" tone="muted" className="text-center">
-        {I18n.t('onboarding.progress_step_of', { step: visualStep, total: totalVisualSteps })}
-      </Text>
-      <View className="mt-1.5 flex-row items-center gap-2">
-        {Array.from({ length: totalVisualSteps }, (_, index) => index + 1).map((i) => (
-          <View
-            key={i}
-            className="flex-1 rounded-full"
-            style={[
-              styles.progressSegment,
-              {
-                backgroundColor:
-                  visualStep >= i
-                    ? themeColors.primary
-                    : withColorAlpha(themeColors.backgroundSubtle, 0.45),
-              },
-            ]}
-          />
-        ))}
-      </View>
-    </View>
-  );
-
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
       <TabletContentContainer style={{ flex: 1 }}>
-        {renderProgressHeader()}
+        {step !== 'welcome' ? (
+          <OnboardingTopBar step={stepIndex} total={STEP_ORDER.length - 1} onBack={goBack} />
+        ) : null}
 
-        {step === 'welcome' && (
-          <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-welcome">
-            <OnboardingValuePropStep
+        <Animated.View entering={FadeIn.duration(300)} className="flex-1" key={`step-${step}`}>
+          {step === 'welcome' && (
+            <OnboardingWelcomeStep
               currencySymbol={settings.currencySymbol}
               onGetStarted={() => {
                 void trackEvent(AnalyticsEvents.ONBOARDING_STARTED);
                 setStep('basics');
               }}
             />
-          </Animated.View>
-        )}
+          )}
 
-        {step === 'basics' && (
-          <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-basics">
+          {step === 'basics' && (
             <OnboardingPreferencesStep
               locale={settings.locale}
               currencyCode={settings.currencyCode}
@@ -253,7 +218,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
               onThemeColorChange={(themeColor) => {
                 updateSettings({ themeColor });
               }}
-              onBack={() => setStep('welcome')}
+              onBack={goBack}
               onContinue={() => {
                 void trackEvent(AnalyticsEvents.ONBOARDING_STEP_COMPLETED, {
                   step: 'basics',
@@ -262,86 +227,97 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                 setStep('wage');
               }}
             />
-          </Animated.View>
-        )}
+          )}
 
-        {step === 'wage' && (
-          <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-wage">
-            <OnboardingWageStep
-              settings={settings}
-              currentMonthWage={currentMonthWage}
-              wageIsSet={wageIsSet}
-              onBack={() => setStep('basics')}
+          {step === 'wage' && (
+            <OnboardingIncomeStep
+              config={wageDraft}
+              currencySymbol={settings.currencySymbol}
+              onChange={setWageDraft}
+              onBack={goBack}
+              onFineTune={() => setShowWageCalculator(true)}
               onContinue={() => {
+                updateWageConfigForMonth(currentMonth, wageDraft);
                 void trackEvent(AnalyticsEvents.ONBOARDING_STEP_COMPLETED, {
                   step: 'wage',
-                  wage_set: wageIsSet,
+                  wage_set: true,
+                  wage_type: wageDraft.wageType,
+                });
+                setStep('try_it');
+              }}
+              onSkip={() => {
+                void trackEvent(AnalyticsEvents.ONBOARDING_STEP_COMPLETED, {
+                  step: 'wage',
+                  wage_set: savedHourlyRate > 0,
+                });
+                setStep('try_it');
+              }}
+            />
+          )}
+
+          {step === 'try_it' && (
+            <OnboardingTryItStep
+              hourlyRate={savedHourlyRate}
+              currencySymbol={settings.currencySymbol}
+              onBack={goBack}
+              onContinue={(samplesAdded) => {
+                void trackEvent(AnalyticsEvents.ONBOARDING_STEP_COMPLETED, {
+                  step: 'try_it',
+                  samples_added: samplesAdded,
+                });
+                setStep('automations');
+              }}
+            />
+          )}
+
+          {step === 'automations' && (
+            <OnboardingAutomationsStep
+              onBack={goBack}
+              onContinue={() => {
+                void trackEvent(AnalyticsEvents.ONBOARDING_STEP_COMPLETED, {
+                  step: 'automations',
                 });
                 setStep('backup');
               }}
-              onOpenWageCalculator={() => {
-                void triggerHaptic('selection');
-                setShowWageCalculator(true);
-              }}
-              wageCalculatorOpen={showWageCalculator}
             />
-          </Animated.View>
-        )}
+          )}
 
-        {step === 'backup' && (
-          <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-backup">
+          {step === 'backup' && (
             <OnboardingBackupStep
               onEnable={() => {
                 void handleEnableBackup();
               }}
               onSkip={handleSkipBackup}
-              onBack={() => setStep('wage')}
+              onBack={goBack}
             />
-          </Animated.View>
-        )}
+          )}
 
-        {step === 'source' && (
-          <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-source">
+          {step === 'source' && (
             <OnboardingSourceStep
               selected={acquisitionSource}
               onSelect={setAcquisitionSource}
-              onBack={() => setStep('backup')}
+              onBack={goBack}
               onContinue={handleSourceContinue}
             />
-          </Animated.View>
-        )}
+          )}
 
-        {step === 'notifications' && (
-          <Animated.View
-            entering={FadeIn.duration(350)}
-            className="flex-1"
-            key="step-notifications"
-          >
+          {step === 'notifications' && (
             <OnboardingNotificationsStep
               onEnable={async () => {
                 // Tapping enable is not a grant: the OS prompt that follows can
                 // still be declined, and only the answer says who can be reached.
                 const permission = await requestPermissions().catch(() => 'error' as const);
                 void trackEvent(AnalyticsEvents.ONBOARDING_NOTIFICATIONS_ENABLED, { permission });
-                setStep('features');
+                handleFinish();
               }}
               onSkip={() => {
                 void trackEvent(AnalyticsEvents.ONBOARDING_NOTIFICATIONS_SKIPPED);
-                setStep('features');
+                handleFinish();
               }}
-              onBack={() => setStep('source')}
+              onBack={goBack}
             />
-          </Animated.View>
-        )}
-
-        {step === 'features' && (
-          <Animated.View entering={FadeIn.duration(350)} className="flex-1" key="step-features">
-            <OnboardingFeaturesStep
-              onBack={() => setStep('notifications')}
-              onFinish={handleFinish}
-            />
-          </Animated.View>
-        )}
+          )}
+        </Animated.View>
 
         {/* Wage Calculator Modal */}
         <ThemeModal
@@ -351,11 +327,12 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           onRequestClose={() => setShowWageCalculator(false)}
         >
           <WageCalculatorFlowScreen
-            initialConfig={prefillConfig}
+            initialConfig={wageDraft}
             settings={settings}
             monthLabel={currentMonth}
             onCancel={() => setShowWageCalculator(false)}
             onComplete={(config) => {
+              setWageDraft(config);
               updateWageConfigForMonth(currentMonth, config);
               setShowWageCalculator(false);
               void triggerHaptic('success');
@@ -366,9 +343,3 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  progressSegment: {
-    height: 6,
-  },
-});

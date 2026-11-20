@@ -1,4 +1,4 @@
-import { CloudUpload, RotateCcw, WifiOff } from 'lucide-react-native';
+import { CloudUpload, Lock, RotateCcw } from 'lucide-react-native';
 import React from 'react';
 import { Alert, Platform } from 'react-native';
 
@@ -20,19 +20,19 @@ export function OnboardingBackupStep({ onEnable, onSkip, onBack }: OnboardingBac
 
   const features = [
     {
-      icon: WifiOff,
-      title: I18n.t('onboarding.backup.bullet_offline_title'),
-      subtitle: I18n.t('onboarding.backup.bullet_offline_subtitle'),
+      icon: CloudUpload,
+      title: I18n.t('onboarding.backup.automatic_title'),
+      subtitle: I18n.t('onboarding.backup.automatic_subtitle', { provider }),
     },
     {
-      icon: CloudUpload,
-      title: I18n.t('onboarding.backup.bullet_automatic_title'),
-      subtitle: I18n.t('onboarding.backup.bullet_automatic_subtitle', { provider }),
+      icon: Lock,
+      title: I18n.t('onboarding.backup.private_title'),
+      subtitle: I18n.t('onboarding.backup.private_subtitle'),
     },
     {
       icon: RotateCcw,
-      title: I18n.t('onboarding.backup.bullet_restore_title'),
-      subtitle: I18n.t('onboarding.backup.bullet_restore_subtitle'),
+      title: I18n.t('onboarding.backup.restore_title'),
+      subtitle: I18n.t('onboarding.backup.restore_subtitle'),
     },
   ];
 
@@ -69,14 +69,15 @@ export function OnboardingBackupStep({ onEnable, onSkip, onBack }: OnboardingBac
   return (
     <OnboardingFeatureListStep
       title={I18n.t('onboarding.backup.title')}
-      mascot="phone-check"
+      subtitle={I18n.t('onboarding.backup.subtitle')}
+      mascot="relaxing"
       features={features}
       onBack={onBack}
       primaryLabel={I18n.t(
         isIos ? 'onboarding.backup.enable_icloud' : 'onboarding.backup.enable_google',
       )}
       onPrimary={handleEnable}
-      skip={{ label: I18n.t('onboarding.backup.not_now'), onPress: handleSkip }}
+      secondary={{ label: I18n.t('onboarding.backup.not_now'), onPress: handleSkip }}
     />
   );
 }

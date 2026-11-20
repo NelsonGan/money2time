@@ -23,18 +23,18 @@ export function OnboardingNotificationsStep({
       features={[
         {
           icon: CalendarCheck,
-          title: I18n.t('onboarding.notifications.bullet_daily_title'),
-          subtitle: I18n.t('onboarding.notifications.bullet_daily_subtitle'),
+          title: I18n.t('onboarding.notifications.daily_title'),
+          subtitle: I18n.t('onboarding.notifications.daily_subtitle'),
         },
         {
           icon: RefreshCw,
-          title: I18n.t('onboarding.notifications.bullet_recurring_title'),
-          subtitle: I18n.t('onboarding.notifications.bullet_recurring_subtitle'),
+          title: I18n.t('onboarding.notifications.recurring_title'),
+          subtitle: I18n.t('onboarding.notifications.recurring_subtitle'),
         },
         {
           icon: TrendingUp,
-          title: I18n.t('onboarding.notifications.bullet_weekly_title'),
-          subtitle: I18n.t('onboarding.notifications.bullet_weekly_subtitle'),
+          title: I18n.t('onboarding.notifications.weekly_title'),
+          subtitle: I18n.t('onboarding.notifications.weekly_subtitle'),
         },
       ]}
       onBack={onBack}
@@ -43,7 +43,7 @@ export function OnboardingNotificationsStep({
         void triggerHaptic('medium');
         onEnable();
       }}
-      skip={{
+      secondary={{
         label: I18n.t('onboarding.notifications.not_now'),
         onPress: () => {
           void triggerHaptic('selection');
