@@ -8,7 +8,7 @@
  *   on it; a payment past what was owed is owed back.
  * - `pairwiseDebts`: each pair's net. `simplifyDebts`: the same nets with
  *   fewer payments (Simplify group debts), nobody in the middle; paying one
- *   leaves the others as they were (but for a rare switch to each pair's own).
+ *   leaves the others as they were.
  * - `settleDebt`: a payment between two members as payments on bills.
  * - `evenPayments`: what closes a group that came out even.
  */
@@ -364,33 +364,16 @@ function fixedOrderPlan(onBills: Graph): DebtPlan {
   return { debts, circles: room };
 }
 
-/** Each pair's own net as the debts, paid along the pair's own bills. */
-function pairPlan(onBills: Graph): DebtPlan {
-  const pairs: Graph = new Map();
-  for (const [from, to] of edgesOf(onBills)) addNet(pairs, from, to, owed(onBills, from, to));
-  const circles = copyGraph(onBills);
-  const debts = edgesOf(pairs).map(([from, to]): PlannedDebt => {
-    const amount = owed(pairs, from, to);
-    const route: Graph = new Map();
-    setOwed(route, from, to, amount);
-    setOwed(circles, from, to, owed(circles, from, to) - amount);
-    return { from, to, amount, route };
-  });
-  return { debts, circles };
-}
-
 /**
- * A currency's simplified debts (`fixedOrderPlan`), or each pair's own in
- * the rare group where those are fewer: Simplify never lists more payments
- * than it would off. Not always the fewest there could be (finding those is
- * a far harder problem, and they would change under every payment).
+ * A currency's simplified debts (`fixedOrderPlan`). Usually as few as, or
+ * fewer than, each pair's own; in a rare sparse group a line or two more,
+ * since keeping every other line still and nobody in the middle come first
+ * (a switch to each pair's own debts would break both). Not always the fewest
+ * there could be: that is a far harder problem, and its answer would change
+ * under every payment.
  */
 function planDebts(shares: readonly OpenShare[]): DebtPlan {
-  const onBills = owedOnBills(shares);
-  const pairs = pairPlan(onBills);
-  const plan = fixedOrderPlan(onBills);
-  const settled = [...netsOf(plan.circles).values()].every((value) => value === 0);
-  return settled && plan.debts.length <= pairs.debts.length ? plan : pairs;
+  return fixedOrderPlan(owedOnBills(shares));
 }
 
 /**

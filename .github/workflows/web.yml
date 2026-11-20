@@ -5,9 +5,10 @@ name: Web
 # deploying it, and deploys `main` to the money2time-workers-web Worker.
 # README: *Website*.
 #
-# The checkout is shallow and holds only apps/web (and .github/, for the
-# action that sets up dependencies): the repository's history is mostly old
-# screenshots, and the mobile app's artwork is hundreds of MB.
+# The checkout is shallow and holds only apps/web (with .github/, for the
+# action that sets up dependencies, and the app's album rules, for one test):
+# the repository's history is mostly old screenshots, and the mobile app's
+# artwork is hundreds of MB.
 run-name: >-
   ${{ github.event_name == 'pull_request' && format('Web · PR #{0}', github.event.number)
    || github.ref == 'refs/heads/main' && 'Web · Production deploy'
@@ -59,9 +60,12 @@ jobs:
         uses: actions/checkout@v5
         with:
           fetch-depth: 1
+          # The app's album rules too (a few small files): the website's copy
+          # of the debt plan is tested against them (`src/lib/album/album.test.ts`).
           sparse-checkout: |
             .github
             apps/web
+            apps/mobile/features/albums/lib
 
       - name: Set up dependencies
         uses: ./.github/actions/node-deps

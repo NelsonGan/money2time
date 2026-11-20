@@ -2420,10 +2420,8 @@ migrations `090` to `094` and `097`.
   on as the owner starts the album; New Album can turn it off as the album
   is made), that anyone in the album can turn on or off, for everyone. On, Who owes whom shows the same balances with fewer payments,
   and nobody in the middle: when Anna owes Bob and Bob owes Charlie, Anna
-  owes Charlie. Nobody pays or gets back more in total, it never lists more
-  payments than it would off, and paying one line, or part of it, leaves
-  every other line as it was (except, rarely, when the list switches to
-  each pair's own debts). A line where the user pays then opens a
+  owes Charlie. Nobody pays or gets back more in total, and paying one line,
+  or part of it, leaves every other line as it was. A line where the user pays then opens a
   Settle up sheet for that one payment, where a smaller amount can be typed
   to pay part of it. A line whose debt changed while the sheet was open
   (someone else's payment landed) records nothing and says so.
@@ -2781,14 +2779,16 @@ their own.
     on how much anyone owes**, which is what keeps the list still: paying a
     line, or part of it, along its own route leaves every other line exactly
     as it was, so people paying outside the app by the list are never left
-    with a line that moved (the one exception is the switch to each pair's
-    own debts, next). The plan before this one (biggest payer to
+    with a line that moved, and a debt paid in parts (below) is still
+    there for the next part. The plan before this one (biggest payer to
     biggest payee, else debts passed along a chain) listed about as many
     lines, but about one payment in five or six moved someone else's line.
-  - **Never more than Simplify off.** In the rare group where each pair's own
-    nets are fewer (sparse bills, under 1% of groups in tests) the list is
-    those instead. Neither is always the fewest there could be: that is a
-    much harder problem, and its answer would change under every payment.
+  - **Not always the fewest.** In a rare sparse group (under 1% of groups in
+    tests) it lists a line or two more than each pair's own debts would.
+    Switching to those there was tried and dropped: they can put someone in
+    the middle, and the switch itself moved other people's lines and lost
+    track of a debt being paid in parts. The true fewest is a much harder
+    problem, and its answer would change under every payment.
     `__tests__/features/groupDebts.test.ts` checks the rules over 600 seeded
     groups (nets kept, nobody in the middle, every line paid in full, other
     lines unmoved, every bill closed at the end).

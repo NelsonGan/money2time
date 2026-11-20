@@ -5,12 +5,21 @@ import { DatabaseSync } from 'node:sqlite';
 import type { SQLiteDatabase } from 'expo-sqlite';
 
 import {
+  evenPayments,
+  openShares,
+  paidFrom,
+  settleDebt,
+  simplifyDebts,
+} from '~/features/albums/lib/groupDebts';
+import {
   albumCategoryList,
   GroupWriteError,
+  MAX_WRITE_ROWS,
   memberRowId,
   planJoin,
 } from '~/features/albums/lib/groupPlan';
 import {
+  batchPaymentIds,
   billRow,
   categoryRow,
   deletedBillRow,
@@ -486,4 +495,171 @@ it("brings one person's change to the album's categories to the other phone, log
     'category_changed:u-a',
     'category_changed:u-a',
   ]);
+});
+
+// A big album (README: A big act goes in parts): a debt across more bills than one
+// change takes, and a big even group, each written in parts that sync whole.
+/** The group as a phone holds it, read straight from its tables. */
+function groupOn(phone: Phone) {
+  const bills = rows(phone, 'album_expenses').map((r) => ({
+    id: String(r.id),
+    date: String(r.date),
+    amount: Number(r.amount),
+    currency: String(r.currency),
+    paidBy: String(r.paid_by),
+    shares: JSON.parse(String(r.shares_json)),
+    deletedAt: (r.deleted_at as string | null) ?? null,
+  }));
+  const payments = rows(phone, 'album_settlements').map((r) => ({
+    id: String(r.id),
+    expenseId: String(r.expense_id),
+    fromMember: String(r.from_member),
+    toMember: String(r.to_member),
+    amount: Number(r.amount),
+    currency: String(r.currency),
+    date: String(r.date),
+    createdAt: String(r.created_at),
+    deletedAt: (r.deleted_at as string | null) ?? null,
+  }));
+  return openShares(bills, payments);
+}
+
+function addBills(count: number, owes: (n: number) => { paidBy: string; other: string }) {
+  for (let start = 0; start < count; start += 500) {
+    writeGroup(
+      GROUP,
+      Array.from({ length: Math.min(500, count - start) }, (_, k) => {
+        const n = start + k;
+        const { paidBy, other } = owes(n);
+        return billRow({
+          id: `bill-${n}`,
+          date: `2026-${String(1 + (n % 12)).padStart(2, '0')}-${String(1 + (n % 28)).padStart(2, '0')}`,
+          note: 'Bill',
+          currency: 'MYR',
+          category: 'food',
+          paidBy,
+          shares: [
+            { memberId: paidBy, amount: 10 },
+            { memberId: other, amount: 10 },
+          ],
+        });
+      }),
+    );
+  }
+}
+
+/** What `settleGroupDebt` does: parts of at most MAX_WRITE_ROWS, until all of it is paid. */
+function settleAll(phone: Phone) {
+  on(phone);
+  const [debt] = simplifyDebts(groupOn(phone));
+  let left = Math.round(debt.amount * 100);
+  const parts: number[] = [];
+  while (left > 0) {
+    const open = groupOn(phone);
+    const current = simplifyDebts(open).find((d) => d.from === debt.from && d.to === debt.to)!;
+    const payments = settleDebt(
+      open,
+      { ...debt, amount: Math.min(left / 100, current.amount) },
+      { maxRows: MAX_WRITE_ROWS },
+    );
+    const ids = batchPaymentIds(payments.length);
+    writeGroup(
+      GROUP,
+      payments.map((p, i) =>
+        paymentRow({
+          id: ids[i],
+          expenseId: p.expenseId,
+          from: p.from,
+          to: p.to,
+          amount: p.amount,
+          currency: 'MYR',
+          date: '2026-11-20',
+        }),
+      ),
+    );
+    parts.push(payments.length);
+    left -= Math.round(paidFrom(payments, debt.from) * 100);
+  }
+  return { debt, parts };
+}
+
+it('a debt across 2500 bills is paid in two acts that reach the other phone settled', async () => {
+  on(phones.a);
+  addBills(2500, () => ({ paidBy: A, other: B }));
+  await sync(phones.a);
+  await sync(phones.b);
+  expect(groupOn(phones.b)).toHaveLength(2500);
+  // One act this big is refused by the planner.
+  on(phones.b);
+  const open = groupOn(phones.b);
+  const [debt] = simplifyDebts(open);
+  expect(debt).toMatchObject({ from: B, to: A, amount: 25000 });
+  const all = settleDebt(open, debt);
+  expect(all).toHaveLength(2500);
+  const ids = batchPaymentIds(all.length);
+  expect(() =>
+    writeGroup(
+      GROUP,
+      all.map((p, i) =>
+        paymentRow({
+          id: ids[i],
+          expenseId: p.expenseId,
+          from: p.from,
+          to: p.to,
+          amount: p.amount,
+          currency: 'MYR',
+          date: '2026-11-20',
+        }),
+      ),
+    ),
+  ).toThrow(GroupWriteError);
+  // In parts, Ben pays it all.
+  const { parts } = settleAll(phones.b);
+  expect(parts).toEqual([2000, 500]);
+  const activity = rows(phones.b, 'album_activity').filter((r) => r.kind === 'payment_recorded');
+  expect(activity.map((r) => JSON.parse(String(r.data_json)).amount).sort((x, y) => x - y)).toEqual(
+    [5000, 20000],
+  );
+  await sync(phones.b);
+  await sync(phones.a);
+  expect(groupOn(phones.a)).toEqual([]);
+  expect(simplifyDebts(groupOn(phones.a))).toEqual([]);
+});
+
+it('a big even group closes in parts on one phone, and the other sees it closed', async () => {
+  on(phones.a);
+  // Ann and Ben pay each other's bills in turn: even, with 2400 shares open.
+  addBills(2400, (n) => (n % 2 ? { paidBy: A, other: B } : { paidBy: B, other: A }));
+  expect(simplifyDebts(groupOn(phones.a))).toEqual([]);
+  let acts = 0;
+  let last = '';
+  for (let part = 0; part < 20; part += 1) {
+    const closing = evenPayments(groupOn(phones.a), MAX_WRITE_ROWS);
+    if (!closing.length) break;
+    const id = `even-${part}`;
+    expect(id).not.toBe(last);
+    last = id;
+    expect(closing.length).toBeLessThanOrEqual(MAX_WRITE_ROWS);
+    writeGroup(
+      GROUP,
+      closing.map((s, i) =>
+        paymentRow({
+          id: `${id}.${i}`,
+          expenseId: s.expenseId,
+          from: s.from,
+          to: s.to,
+          amount: s.amount,
+          currency: s.currency,
+          date: '2026-11-20',
+        }),
+      ),
+      { reason: 'close_even' },
+    );
+    acts += 1;
+    expect(simplifyDebts(groupOn(phones.a))).toEqual([]);
+  }
+  expect(acts).toBe(2);
+  await sync(phones.a);
+  await sync(phones.b);
+  expect(groupOn(phones.b)).toEqual([]);
 });

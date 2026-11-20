@@ -443,13 +443,12 @@ const moved = (payments: { from: string; to: string; amount: number }[]) => {
 describe('simplified debts, on many groups', () => {
   const groups = randomGroups(600, 7);
 
-  it('keep everyone’s net, with nobody in the middle and never more payments than each pair’s own', () => {
+  it('keep everyone’s net, with nobody in the middle', () => {
     for (const expenses of groups) {
       const open = openShares(expenses, []);
       const simple = simplifyDebts(open);
       const pairs = pairwiseDebts(open);
       expect(netsOf(simple)).toEqual(netsOf(pairs));
-      expect(simple.length).toBeLessThanOrEqual(pairs.length);
       for (const currency of new Set(simple.map((debt) => debt.currency))) {
         const owing = new Set(
           simple.filter((debt) => debt.currency === currency).map((debt) => debt.from),
@@ -464,8 +463,6 @@ describe('simplified debts, on many groups', () => {
     for (const expenses of groups) {
       const open = openShares(expenses, []);
       const simple = simplifyDebts(open);
-      // The rare group listed as each pair's own (`planDebts`) can change shape once paid.
-      const pairList = text(pairwiseDebts(open)).sort().join();
       for (const debt of simple) {
         for (const amount of [debt.amount, Math.max(0.01, Math.floor(debt.amount * 33) / 100)]) {
           const payments = settleDebt(open, { ...debt, amount });
@@ -479,11 +476,6 @@ describe('simplified debts, on many groups', () => {
           expect(paidFrom(payments, debt.from)).toBe(cents / 100);
           const now = openShares(expenses, recordedRows(payments, debt.currency, 0));
           const left = simplifyDebts(now);
-          if (
-            text(simple).sort().join() === pairList ||
-            text(left).sort().join() === text(pairwiseDebts(now)).sort().join()
-          )
-            continue;
           const expected = simple
             .map((item) =>
               item === debt
@@ -496,7 +488,7 @@ describe('simplified debts, on many groups', () => {
         }
       }
     }
-    expect(checked).toBeGreaterThan(1000);
+    expect(checked).toBeGreaterThan(3000);
   });
 
   it('settle every bill once each is paid and the circles left are closed', () => {
@@ -603,6 +595,59 @@ describe('paying one simplified debt', () => {
     const now = simplifyDebts(openShares(expenses, recordedRows(part, 'MYR', 0)));
     expect(text(now.filter((debt) => debt.from !== first.from))).toEqual(
       text(before.filter((debt) => debt.from !== first.from)),
+    );
+  });
+});
+
+describe('cases a review found', () => {
+  it('keeps nobody in the middle where each pair’s own debts would put D there', () => {
+    // D paid with A owing 10 and B 30; A paid with C owing 30 and D 20.
+    const expenses = [bill('one', 'd', { a: 10, b: 30 }), bill('two', 'a', { c: 30, d: 20 })];
+    const open = openShares(expenses, []);
+    const simple = simplifyDebts(open);
+    const owing = new Set(simple.map((debt) => debt.from));
+    expect(simple.some((debt) => owing.has(debt.to))).toBe(false);
+    // And paying any one, in full or half, leaves the others as they were.
+    for (const debt of simple) {
+      for (const amount of [debt.amount, debt.amount / 2]) {
+        const paid = settleDebt(open, { ...debt, amount });
+        const left = simplifyDebts(openShares(expenses, recordedRows(paid, 'MYR', 0)));
+        expect(text(left.filter((item) => item.from !== debt.from || item.to !== debt.to))).toEqual(
+          text(simple.filter((item) => item !== debt)),
+        );
+      }
+    }
+  });
+
+  it('pays all of a debt spread over more bills than one act takes, part by part', () => {
+    // 2500 bills D paid (A owes 10, B 30 on each), and one A paid (C owes 75,000, D 50,000).
+    const expenses = [
+      ...Array.from({ length: 2500 }, (_, n) => bill(`d${n}`, 'd', { a: 10, b: 30 })),
+      bill('big', 'a', { c: 75000, d: 50000 }),
+    ];
+    let settlements: AlbumSettlement[] = [];
+    const [debt] = simplifyDebts(openShares(expenses, [])).filter((item) => item.from === 'b');
+    let left = Math.round(debt.amount * 100);
+    for (let part = 0; left > 0; part += 1) {
+      expect(part).toBeLessThan(5);
+      const open = openShares(expenses, settlements);
+      const current = simplifyDebts(open).find(
+        (item) => item.from === debt.from && item.to === debt.to,
+      );
+      expect(current).toBeDefined();
+      const payments = settleDebt(
+        open,
+        { ...debt, amount: Math.min(left / 100, current!.amount) },
+        { maxRows: 2000 },
+      );
+      expect(payments.length).toBeLessThanOrEqual(2000);
+      left -= Math.round(paidFrom(payments, debt.from) * 100);
+      settlements = settlements.concat(recordedRows(payments, 'MYR', settlements.length));
+    }
+    // All of it paid: B's line to them is gone, every other line as it was.
+    const before = simplifyDebts(openShares(expenses, []));
+    expect(text(simplifyDebts(openShares(expenses, settlements)))).toEqual(
+      text(before.filter((item) => item.from !== debt.from || item.to !== debt.to)),
     );
   });
 });

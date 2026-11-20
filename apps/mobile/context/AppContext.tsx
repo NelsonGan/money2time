@@ -4462,7 +4462,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [afterGroupWrite, groupEnvFor, sendGroupWrite],
   );
 
-  /** Debts being paid right now: a second tap waits for nothing and says nothing. */
+  /**
+   * Debts being paid right now, or just paid: a second tap (the sheet's button
+   * tapped again as it closes) records nothing and says nothing.
+   */
   const settlingDebtsRef = useRef(new Set<string>());
   const settleGroupDebt = useCallback(
     async (groupId: string, debt: GroupDebt, accountId: string | null) => {
@@ -4543,7 +4546,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       } catch (error) {
         reportError(error, { scope: 'album_group_payment' });
       } finally {
-        settlingDebtsRef.current.delete(settling);
+        setTimeout(() => settlingDebtsRef.current.delete(settling), 2000);
         afterGroupWrite();
       }
     },
