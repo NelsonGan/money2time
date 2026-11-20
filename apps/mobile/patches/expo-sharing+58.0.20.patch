@@ -1,5 +1,5 @@
 diff --git a/node_modules/expo-sharing/ios/SharingModule.swift b/node_modules/expo-sharing/ios/SharingModule.swift
-index fafe4da..79809d7 100644
+index fafe4da..869d299 100644
 --- a/node_modules/expo-sharing/ios/SharingModule.swift
 +++ b/node_modules/expo-sharing/ios/SharingModule.swift
 @@ -99,18 +99,30 @@ public final class SharingModule: Module {
@@ -8,13 +8,13 @@ index fafe4da..79809d7 100644
    ) {
 -    // Popovers are a regular-width behavior, not an iPad one.
 -    guard viewController.traitCollection.horizontalSizeClass == .regular else {
-+    // Popovers are a regular-width behavior, not an iPad one. But a view
-+    // controller in an iPad form sheet reports a compact width while the
-+    // window stays regular, and on iPad UIActivityViewController still shows
-+    // as a popover there (the .pageSheet below does not change that), which
-+    // throws without a sourceView. So anchor on iPad and whenever the view
-+    // controller or its window is regular; anchoring is harmless when the
-+    // popover adapts into a sheet.
++    // Anchor on every iPad, and wherever the width is regular (a resizable
++    // iPhone window). Judging by the view controller's size class alone is not
++    // enough: in an iPad form sheet it reports compact while the window stays
++    // regular, UIActivityViewController still shows as a popover there (the
++    // .pageSheet below did not change that on iPadOS 27), and a popover
++    // without a sourceView throws. Anchoring is harmless when the popover
++    // adapts into a sheet.
 +    let isPad = UIDevice.current.userInterfaceIdiom == .pad
 +    guard isPad
 +      || viewController.traitCollection.horizontalSizeClass == .regular

@@ -31,6 +31,7 @@ function popoverHelperCode(): string {
   if (start === -1) throw new Error('configurePopoverIfNeeded not found in SharingModule.swift');
   return source
     .slice(start, end === -1 ? undefined : end)
+    .replace(/\/\*[\s\S]*?\*\//g, '')
     .replace(/\/\/.*$/gm, '')
     .replace(/\s+/g, ' ');
 }
@@ -39,12 +40,17 @@ describe('expo-sharing iOS share popover', () => {
   const code = popoverHelperCode();
 
   it("anchors the popover on iPad and when the window is regular, not only on the view controller's width", () => {
-    expect(code).toContain('UIDevice.current.userInterfaceIdiom == .pad');
-    expect(code).toContain(
+    const guard = code.match(/guard (.*?) else \{/)?.[1] ?? '';
+    expect(code).toContain('let isPad = UIDevice.current.userInterfaceIdiom == .pad');
+    expect(guard).toMatch(/^isPad \|\|/);
+    expect(guard).toContain(
       'viewController.view.window?.traitCollection.horizontalSizeClass == .regular',
     );
-    expect(code).not.toContain(
-      'guard viewController.traitCollection.horizontalSizeClass == .regular else',
+  });
+
+  it('anchors to the presenting view', () => {
+    expect(code).toMatch(
+      /SceneGeometry\.anchorPopover\( of: activityController, to: viewController\.view, rect:/,
     );
   });
 
