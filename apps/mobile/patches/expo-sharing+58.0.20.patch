@@ -1,0 +1,40 @@
+diff --git a/node_modules/expo-sharing/ios/SharingModule.swift b/node_modules/expo-sharing/ios/SharingModule.swift
+index fafe4da..869d299 100644
+--- a/node_modules/expo-sharing/ios/SharingModule.swift
++++ b/node_modules/expo-sharing/ios/SharingModule.swift
+@@ -99,18 +99,30 @@ public final class SharingModule: Module {
+     from viewController: UIViewController,
+     anchor: SharingOptions.Rect?
+   ) {
+-    // Popovers are a regular-width behavior, not an iPad one.
+-    guard viewController.traitCollection.horizontalSizeClass == .regular else {
++    // Anchor on every iPad, and wherever the width is regular (a resizable
++    // iPhone window). Judging by the view controller's size class alone is not
++    // enough: in an iPad form sheet it reports compact while the window stays
++    // regular, UIActivityViewController still shows as a popover there (the
++    // .pageSheet below did not change that on iPadOS 27), and a popover
++    // without a sourceView throws. Anchoring is harmless when the popover
++    // adapts into a sheet.
++    let isPad = UIDevice.current.userInterfaceIdiom == .pad
++    guard isPad
++      || viewController.traitCollection.horizontalSizeClass == .regular
++      || viewController.view.window?.traitCollection.horizontalSizeClass == .regular
++    else {
+       return
+     }
+ 
+-    let viewFrame = viewController.view.frame
++    // The rect is in sourceView's own coordinates, so take its bounds, not
++    // its frame (a form sheet's frame starts away from the origin).
++    let viewBounds = viewController.view.bounds
+     SceneGeometry.anchorPopover(
+       of: activityController,
+       to: viewController.view,
+       rect: CGRect(
+-        x: anchor?.x ?? viewFrame.midX,
+-        y: anchor?.y ?? viewFrame.maxY,
++        x: anchor?.x ?? viewBounds.midX,
++        y: anchor?.y ?? viewBounds.maxY,
+         width: anchor?.width ?? 0,
+         height: anchor?.height ?? 0
+       )
