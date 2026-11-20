@@ -1,13 +1,13 @@
 /**
  * Web Dashboard edits: Hourly value: monthly wage entries (HourlyValueScreen
- * and its wage calculator). Planned on the phone like the app's own editor;
+ * and its one-page editor, WageEditorScreen). Planned on the phone like the app's own editor;
  * applied by features/settings/lib/webDashboardApply/wage.ts.
  *
  *   module:wage  create { month, config }   update { month, at, config }   delete { month, at }
  *
  * `month` is `YYYY-MM`, the key the app files an entry under; `at` is that
- * entry's `updated_at` in the browser's copy. `config` is the calculator's
- * answers: { wageType, wageAmount, hoursWorkedPerWeek, workdaysPerWeek,
+ * entry's `updated_at` in the browser's copy. `config` is the editor's
+ * fields: { wageType, wageAmount, hoursWorkedPerWeek, workdaysPerWeek,
  * commuteMinutesPerWorkday }.
  */
 

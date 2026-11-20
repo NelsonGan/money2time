@@ -5,13 +5,7 @@ import {
 } from '@react-navigation/native-stack';
 
 import type { InsightsDrilldownPayload } from '~/features/insights/screens';
-import type {
-  BudgetPeriod,
-  CategoryType,
-  TransactionSentiment,
-  TransactionType,
-  WageConfig,
-} from '~/types';
+import type { BudgetPeriod, CategoryType, TransactionSentiment, TransactionType } from '~/types';
 
 export interface AddTransactionInitialValues {
   type?: TransactionType;
@@ -107,11 +101,11 @@ export type RootStackParamList = {
   /** `kind`: what the invite page said the link joins, shown until the invite is read. */
   JoinLedger: { code: string; kind?: 'album' };
   SettingsTimeDisplay: undefined;
-  AddWageMonth: undefined;
   SettingsQuickEntry: undefined;
   SettingsMultiCurrency: undefined;
   SettingsAutoBackup: undefined;
-  SettingsWageCalculator: { monthKey: string; initialConfig: WageConfig };
+  /** No month: add one, picked on the page. */
+  SettingsWageEditor: { monthKey?: string } | undefined;
   ShareAndEarn: undefined;
   ProPaywall: { source?: string; flashMessage?: string } | undefined;
   CreateAlbum: { initialTransactionIds?: string[] } | undefined;
