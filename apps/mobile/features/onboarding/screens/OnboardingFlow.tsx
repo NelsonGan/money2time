@@ -1,5 +1,5 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { Alert, Platform, View } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Alert, BackHandler, Platform, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -96,6 +96,18 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     const previous = STEP_ORDER[STEP_ORDER.indexOf(step) - 1];
     if (previous) setStep(previous);
   }, [step]);
+
+  // Android's back button and back gesture go to the previous step, as the
+  // chevron does; they used to close the app mid-setup. On the welcome page
+  // they still leave the app, and the calculator sheet handles its own.
+  useEffect(() => {
+    if (step === 'welcome' || showWageCalculator) return undefined;
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+      goBack();
+      return true;
+    });
+    return () => subscription.remove();
+  }, [goBack, showWageCalculator, step]);
 
   const handleEnableBackup = useCallback(async () => {
     const target = Platform.OS === 'ios' ? 'icloud' : 'googleDrive';
