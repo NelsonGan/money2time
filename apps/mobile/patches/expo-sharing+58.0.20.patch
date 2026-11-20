@@ -1,0 +1,22 @@
+diff --git a/node_modules/expo-sharing/ios/SharingModule.swift b/node_modules/expo-sharing/ios/SharingModule.swift
+index fafe4da..745d272 100644
+--- a/node_modules/expo-sharing/ios/SharingModule.swift
++++ b/node_modules/expo-sharing/ios/SharingModule.swift
+@@ -99,8 +99,15 @@ public final class SharingModule: Module {
+     from viewController: UIViewController,
+     anchor: SharingOptions.Rect?
+   ) {
+-    // Popovers are a regular-width behavior, not an iPad one.
+-    guard viewController.traitCollection.horizontalSizeClass == .regular else {
++    // Popovers are a regular-width behavior, not an iPad one. But a view
++    // controller in an iPad form sheet reports a compact width while the
++    // window, which decides whether the popover adapts into a sheet, stays
++    // regular: UIKit then still presents a popover and throws without a
++    // sourceView. Anchor whenever either one is regular; it is harmless when
++    // the popover adapts anyway.
++    let isRegular = [viewController.traitCollection, viewController.view.window?.traitCollection]
++      .contains { $0?.horizontalSizeClass == .regular }
++    guard isRegular else {
+       return
+     }
+ 
