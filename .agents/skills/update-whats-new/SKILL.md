@@ -149,6 +149,7 @@ Slow and steady wins the race.
 Take care of the pennies and the pounds will take care of themselves.
 The art is not in making money, but in keeping it.
 The greatest wealth is to live content with little.
+The price of anything is the amount of life you exchange for it.
 Time is money.
 Time is more valuable than money; you can get more money, but you cannot get more time.
 Time is the coin of your life. Only you can determine how it will be spent.

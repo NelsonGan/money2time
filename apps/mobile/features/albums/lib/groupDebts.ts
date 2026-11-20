@@ -105,7 +105,7 @@ export function openShares(
     }
     const currencies = [
       bill.currency,
-      ...[...graphs.keys()].filter((c) => c !== bill.currency).sort(),
+      ...[...graphs.keys()].filter((currency) => currency !== bill.currency).sort(),
     ];
     for (const currency of currencies) {
       for (const debt of debtsOf(graphs.get(currency)!, currency)) {

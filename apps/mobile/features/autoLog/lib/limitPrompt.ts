@@ -44,7 +44,10 @@ export function parseAutoLogLimitBlockedJson(
 export type AutoLogLimitPromptDecision =
   /** Nothing was refused: nothing to do. */
   | 'none'
-  /** Pro now (bought elsewhere, restored): the record is stale, drop it. */
+  /**
+   * Pro now (bought elsewhere, restored), or automatic logs are allowed again
+   * (accounts archived under the free limit): the record is stale, drop it.
+   */
   | 'clear'
   /** Shown too recently: keep the record for a later foreground. */
   | 'wait'
@@ -53,13 +56,18 @@ export type AutoLogLimitPromptDecision =
 
 export function decideAutoLogLimitPrompt(input: {
   isPro: boolean;
+  /**
+   * Whether a payment would be refused right now: no automatic logs left, or
+   * the free account limit blocks it. Omitted counts as still blocked.
+   */
+  stillBlocked?: boolean;
   blocked: AutoLogLimitBlocked | null;
   /** Epoch-ms the paywall last opened for this reason, or null if never. */
   lastPromptAt: number | null;
   now: number;
 }): AutoLogLimitPromptDecision {
   if (!input.blocked) return 'none';
-  if (input.isPro) return 'clear';
+  if (input.isPro || input.stillBlocked === false) return 'clear';
   if (
     input.lastPromptAt !== null &&
     input.now >= input.lastPromptAt &&

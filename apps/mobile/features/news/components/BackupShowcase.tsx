@@ -40,7 +40,7 @@ export function BackupShowcase({ width }: BackupShowcaseProps) {
           {I18n.t('onboarding.backup.provider_google')}
         </Text>
         <Text variant="caption" tone="muted" numberOfLines={1} className="mt-0.5">
-          {I18n.t('onboarding.backup.bullet_automatic_title')}
+          {I18n.t('onboarding.backup.automatic_title')}
         </Text>
       </View>
 

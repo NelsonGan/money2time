@@ -74,11 +74,6 @@ export function decideCapture(input: DecisionInput): CaptureDecision {
 }
 
 /**
- * Automatic logs the free tier has left; null when unlimited (Pro). A free
- * account over its account limit cannot add transactions by hand, so alerts do
- * not add them either. The existing automatic-log cap still applies.
- */
-/**
  * Whether the free account limit is what stops automatic logs: a free account
  * over the limit cannot add transactions, by hand or automatically, whatever
  * automatic logs it has left. The limit message and paywall follow this, not
@@ -95,6 +90,11 @@ export function autoLogBlockedByAccounts(input: {
   );
 }
 
+/**
+ * Automatic logs the free tier has left; null when unlimited (Pro). A free
+ * account over its account limit cannot add transactions by hand, so alerts do
+ * not add them either. The existing automatic-log cap still applies.
+ */
 export function autoLogAllowance(input: {
   isPro: boolean;
   accounts: readonly Account[];

@@ -329,6 +329,10 @@ export function AutoBackupScreen({ onBack }: AutoBackupScreenProps) {
             },
           ],
         );
+      } else if (result.savedOnDeviceAfterFailure) {
+        // Drive answered but refused the upload (full, no access): the copy is
+        // on the phone, and the error says what to fix on Drive's side.
+        Alert.alert(I18n.t('auto_backup.fallback_local_title'), result.errors.join('\n'));
       } else if (result.errors.length > 0) {
         Alert.alert(I18n.t('auto_backup.backup_partial_title'), result.errors.join('\n'));
       } else if (!result.skipped && result.written.length > 0) {
