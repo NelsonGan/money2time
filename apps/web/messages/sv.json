@@ -68,7 +68,8 @@
       "copyright": "© {year} Money2Time. Alla rättigheter förbehållna.",
       "costInHours": "Pris i timmar",
       "tutorials": "Guider",
-      "dashboard": "Webbpanel"
+      "dashboard": "Webbpanel",
+      "albums": "Album"
     }
   },
   "storeButtons": {
@@ -93,7 +94,6 @@
   },
   "home": {
     "nav": {
-      "howItWorks": "Så funkar det",
       "logging": "Registrering",
       "features": "Funktioner",
       "privacy": "Integritet",
@@ -129,35 +129,6 @@
       "rent": "Hyra",
       "flight": "Flyg hem",
       "iceCream": "Glass"
-    },
-    "howItWorks": {
-      "eyebrow": "Så funkar det",
-      "title": "Ett tryck gör pengar till tid.",
-      "body": "Din timpeng bygger på det som faktiskt landar på kontot. Efter skatt, fördelat på de dagar du jobbar, inklusive pendlingen du aldrig får betalt för.",
-      "coffee": {
-        "title": "Kaffet",
-        "note": "En kort promenad i arbete. Du ville ha det kaffet."
-      },
-      "impulse": {
-        "title": "Impulsköpet",
-        "note": "Nästan två arbetsdagar. Värt att sova på saken."
-      },
-      "rate": {
-        "title": "Din riktiga timpeng",
-        "perHour": "/tim",
-        "takeHome": {
-          "label": "Lön efter skatt",
-          "value": "{value} i månaden"
-        },
-        "daysWorked": {
-          "label": "Dagar du jobbar",
-          "value": "{value} i veckan"
-        },
-        "commute": {
-          "label": "Pendling, obetald",
-          "value": "{value} min om dagen"
-        }
-      }
     },
     "logging": {
       "eyebrow": "Registrering",
@@ -326,17 +297,6 @@
     "community": {
       "body": "Få kontakt med andra användare, dela feedback och få tips på vår Discord-server.",
       "cta": "Gå med i Communityn"
-    },
-    "dashboardEntry": {
-      "eyebrow": "Nytt · Webbpanel",
-      "title": "Din Money2Time-data på en stor skärm",
-      "body": "Skanna en kod på app.money2time.com med telefonen och se kassaflöde, utgifter, förmögenhet, budgetar, resor och timmarna bakom varje köp. Lägg till och redigera transaktioner från datorn medan telefonen är ansluten. End-to-end-krypterat.",
-      "cta": "Öppna webbpanelen",
-      "points": {
-        "private": "End-to-end-krypterat",
-        "charts": "17 paneler",
-        "edits": "Redigera från datorn"
-      }
     }
   },
   "contact": {

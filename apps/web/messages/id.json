@@ -68,7 +68,8 @@
       "copyright": "© {year} Money2Time. Semua hak dilindungi.",
       "costInHours": "Harga dalam jam",
       "tutorials": "Tutorial",
-      "dashboard": "Dasbor web"
+      "dashboard": "Dasbor web",
+      "albums": "Album"
     }
   },
   "storeButtons": {
@@ -93,7 +94,6 @@
   },
   "home": {
     "nav": {
-      "howItWorks": "Cara kerjanya",
       "logging": "Pencatatan",
       "features": "Fitur",
       "privacy": "Privasi",
@@ -129,35 +129,6 @@
       "rent": "Sewa",
       "flight": "Tiket pulang",
       "iceCream": "Es krim"
-    },
-    "howItWorks": {
-      "eyebrow": "Cara kerjanya",
-      "title": "Satu ketukan mengubah uang jadi waktu.",
-      "body": "Tarif per jammu dihitung dari uang yang benar-benar masuk ke rekeningmu. Setelah pajak, dibagi hari-hari kamu bekerja, termasuk perjalanan yang tak pernah dibayar.",
-      "coffee": {
-        "title": "Secangkir kopi",
-        "note": "Setara jalan kaki sebentar. Kopi itu memang kamu mau."
-      },
-      "impulse": {
-        "title": "Belanja impulsif",
-        "note": "Hampir dua hari kerja. Layak dipikirkan semalam dulu."
-      },
-      "rate": {
-        "title": "Tarif aslimu",
-        "perHour": "/jam",
-        "takeHome": {
-          "label": "Gaji bersih",
-          "value": "{value} per bulan"
-        },
-        "daysWorked": {
-          "label": "Hari kerja",
-          "value": "{value} per minggu"
-        },
-        "commute": {
-          "label": "Perjalanan, tak dibayar",
-          "value": "{value} mnt per hari"
-        }
-      }
     },
     "logging": {
       "eyebrow": "Pencatatan",
@@ -326,17 +297,6 @@
     "community": {
       "body": "Terhubung dengan pengguna lain, bagikan masukan, dan dapatkan tips di server Discord kami.",
       "cta": "Gabung Komunitas"
-    },
-    "dashboardEntry": {
-      "eyebrow": "Baru · Dasbor Web",
-      "title": "Data Money2Time-mu, di layar besar",
-      "body": "Pindai kode di app.money2time.com dengan ponselmu untuk melihat arus kas, pengeluaran, kekayaan bersih, anggaran, perjalanan, dan jam di balik setiap pembelian. Tambah dan ubah transaksi dari komputermu selama ponselmu tersambung. Terenkripsi end-to-end.",
-      "cta": "Buka dasbor web",
-      "points": {
-        "private": "Terenkripsi end-to-end",
-        "charts": "17 dasbor",
-        "edits": "Ubah dari komputermu"
-      }
     }
   },
   "contact": {

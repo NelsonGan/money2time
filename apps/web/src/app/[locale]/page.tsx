@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
-import { DashboardEntry } from "@/components/home/dashboard-entry";
 import { DeveloperSection } from "@/components/home/developer-section";
 import { FeatureGrid } from "@/components/home/feature-grid";
 import { Hero } from "@/components/home/hero";
-import { HowItWorks } from "@/components/home/how-it-works";
 import { Logging } from "@/components/home/logging";
 import { PriceTicker } from "@/components/home/price-ticker";
 import { Testimonials } from "@/components/home/testimonials";
@@ -126,9 +124,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
       <Header withSectionLinks />
       <main>
         <Hero locale={locale as Locale} />
-        <DashboardEntry />
         <PriceTicker />
-        <HowItWorks />
         <Logging />
         <FeatureGrid />
         <Testimonials />

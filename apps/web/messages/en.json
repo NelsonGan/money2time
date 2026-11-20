@@ -68,7 +68,8 @@
       "copyright": "© {year} Money2Time. All rights reserved.",
       "costInHours": "Cost in hours",
       "tutorials": "Tutorials",
-      "dashboard": "Web dashboard"
+      "dashboard": "Web Dashboard",
+      "albums": "Albums"
     }
   },
   "storeButtons": {
@@ -93,7 +94,6 @@
   },
   "home": {
     "nav": {
-      "howItWorks": "How it works",
       "logging": "Logging",
       "features": "Features",
       "privacy": "Privacy",
@@ -129,35 +129,6 @@
       "rent": "Rent",
       "flight": "Flight home",
       "iceCream": "Ice cream"
-    },
-    "howItWorks": {
-      "eyebrow": "How it works",
-      "title": "One tap turns money into time.",
-      "body": "Your rate comes from what actually lands in your account. After tax, across the days you work, including the commute you never get paid for.",
-      "coffee": {
-        "title": "The coffee",
-        "note": "Small enough to ignore. You wanted the coffee anyway."
-      },
-      "impulse": {
-        "title": "The impulse buy",
-        "note": "Almost two work days. Worth sleeping on."
-      },
-      "rate": {
-        "title": "Your true rate",
-        "perHour": "/hr",
-        "takeHome": {
-          "label": "Take-home pay",
-          "value": "{value} a month"
-        },
-        "daysWorked": {
-          "label": "Days you work",
-          "value": "{value} a week"
-        },
-        "commute": {
-          "label": "Commute, unpaid",
-          "value": "{value} min a day"
-        }
-      }
     },
     "logging": {
       "eyebrow": "Logging",
@@ -326,17 +297,6 @@
     "community": {
       "body": "Connect with other users, share feedback and get tips on our Discord server.",
       "cta": "Join our Discord"
-    },
-    "dashboardEntry": {
-      "eyebrow": "New · Web Dashboard",
-      "title": "Your Money2Time data, on a big screen",
-      "body": "Scan a code on app.money2time.com with your phone to see cash flow, spending, net worth, budgets, trips and the hours behind every purchase. Add and edit entries from your computer while your phone is connected. End-to-end encrypted.",
-      "cta": "Open the web dashboard",
-      "points": {
-        "private": "End-to-end encrypted",
-        "charts": "17 dashboards",
-        "edits": "Edit from your computer"
-      }
     }
   },
   "contact": {

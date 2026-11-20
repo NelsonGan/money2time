@@ -68,7 +68,8 @@
       "copyright": "© {year} Money2Time. All rights reserved.",
       "costInHours": "時間で見る価格",
       "tutorials": "使い方ガイド",
-      "dashboard": "Webダッシュボード"
+      "dashboard": "Webダッシュボード",
+      "albums": "アルバム"
     }
   },
   "storeButtons": {
@@ -93,7 +94,6 @@
   },
   "home": {
     "nav": {
-      "howItWorks": "仕組み",
       "logging": "記録",
       "features": "機能",
       "privacy": "プライバシー",
@@ -129,35 +129,6 @@
       "rent": "家賃",
       "flight": "帰省の航空券",
       "iceCream": "アイスクリーム"
-    },
-    "howItWorks": {
-      "eyebrow": "仕組み",
-      "title": "ワンタップで、お金が時間に変わる。",
-      "body": "時給は、実際に口座に入ってくる金額から計算します。税引き後、働く日数で割り、給料の出ない通勤時間も含めて。",
-      "coffee": {
-        "title": "コーヒー",
-        "note": "ちょっとした散歩ぶんの労働。そのコーヒーは飲みたかったはず。"
-      },
-      "impulse": {
-        "title": "衝動買い",
-        "note": "ほぼ2労働日。一晩考える価値があります。"
-      },
-      "rate": {
-        "title": "本当の時給",
-        "perHour": "/時",
-        "takeHome": {
-          "label": "手取り",
-          "value": "月{value}"
-        },
-        "daysWorked": {
-          "label": "働く日数",
-          "value": "週{value}日"
-        },
-        "commute": {
-          "label": "通勤（無給）",
-          "value": "1日{value}分"
-        }
-      }
     },
     "logging": {
       "eyebrow": "記録",
@@ -326,17 +297,6 @@
     "community": {
       "body": "他のユーザーとつながり、フィードバックを共有し、Discordサーバーでヒントを得られます。",
       "cta": "コミュニティに参加"
-    },
-    "dashboardEntry": {
-      "eyebrow": "新機能 · Webダッシュボード",
-      "title": "Money2Timeのデータを、大きな画面で",
-      "body": "スマホでapp.money2time.comのコードをスキャンすると、収支、支出、純資産、予算、旅行、そして買い物ごとの労働時間を確認できます。スマホが接続されている間は、パソコンから取引の追加や編集もできます。エンドツーエンド暗号化。",
-      "cta": "Webダッシュボードを開く",
-      "points": {
-        "private": "エンドツーエンド暗号化",
-        "charts": "17種類のダッシュボード",
-        "edits": "パソコンから編集"
-      }
     }
   },
   "contact": {

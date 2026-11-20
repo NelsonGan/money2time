@@ -118,10 +118,9 @@ export default async function Image({
           </div>
 
           {/*
-            The conversion card from `components/home/how-it-works.tsx`, set
-            upright rather than side by side: at the size a link preview is
-            actually shown, one number under another is the only way both stay
-            readable.
+            A price and its hours, one under the other rather than side by
+            side: at the size a link preview is actually shown, that is the
+            only way both numbers stay readable.
           */}
           <div
             style={{

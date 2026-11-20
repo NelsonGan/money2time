@@ -68,7 +68,8 @@
       "copyright": "© {year} Money2Time. Tüm hakları saklıdır.",
       "costInHours": "Saat cinsinden fiyat",
       "tutorials": "Kılavuzlar",
-      "dashboard": "Web panosu"
+      "dashboard": "Web panosu",
+      "albums": "Albümler"
     }
   },
   "storeButtons": {
@@ -93,7 +94,6 @@
   },
   "home": {
     "nav": {
-      "howItWorks": "Nasıl çalışır",
       "logging": "Kayıt",
       "features": "Özellikler",
       "privacy": "Gizlilik",
@@ -129,35 +129,6 @@
       "rent": "Kira",
       "flight": "Eve uçuş",
       "iceCream": "Dondurma"
-    },
-    "howItWorks": {
-      "eyebrow": "Nasıl çalışır",
-      "title": "Tek dokunuş parayı zamana çevirir.",
-      "body": "Saat ücretin, hesabına gerçekten geçen tutardan hesaplanır. Vergiden sonra, çalıştığın günlere bölünerek, hiç ödenmeyen yol süresi de dahil.",
-      "coffee": {
-        "title": "Kahve",
-        "note": "Kısa bir yürüyüş kadar çalışma. O kahveyi zaten istiyordun."
-      },
-      "impulse": {
-        "title": "Ani alışveriş",
-        "note": "Neredeyse iki iş günü. Bir gece düşünmeye değer."
-      },
-      "rate": {
-        "title": "Gerçek saat ücretin",
-        "perHour": "/sa",
-        "takeHome": {
-          "label": "Net maaş",
-          "value": "ayda {value}"
-        },
-        "daysWorked": {
-          "label": "Çalıştığın günler",
-          "value": "haftada {value}"
-        },
-        "commute": {
-          "label": "Yol, ödenmeyen",
-          "value": "günde {value} dk"
-        }
-      }
     },
     "logging": {
       "eyebrow": "Kayıt",
@@ -326,17 +297,6 @@
     "community": {
       "body": "Diğer kullanıcılarla bağlantı kurun, geri bildirim paylaşın ve Discord sunucumuzda ipuçları alın.",
       "cta": "Topluluğa Katıl"
-    },
-    "dashboardEntry": {
-      "eyebrow": "Yeni · Web Panosu",
-      "title": "Money2Time verileriniz büyük ekranda",
-      "body": "Telefonunuzla app.money2time.com'daki kodu tarayın; nakit akışını, harcamaları, net varlığı, bütçeleri, seyahatleri ve her alışverişin ardındaki saatleri görün. Telefonunuz bağlıyken bilgisayarınızdan işlem ekleyip düzenleyin. Uçtan uca şifreli.",
-      "cta": "Web panosunu aç",
-      "points": {
-        "private": "Uçtan uca şifreli",
-        "charts": "17 pano",
-        "edits": "Bilgisayarınızdan düzenleyin"
-      }
     }
   },
   "contact": {

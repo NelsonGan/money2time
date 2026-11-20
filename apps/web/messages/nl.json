@@ -68,7 +68,8 @@
       "copyright": "© {year} Money2Time. Alle rechten voorbehouden.",
       "costInHours": "Prijs in uren",
       "tutorials": "Handleidingen",
-      "dashboard": "Webdashboard"
+      "dashboard": "Webdashboard",
+      "albums": "Albums"
     }
   },
   "storeButtons": {
@@ -93,7 +94,6 @@
   },
   "home": {
     "nav": {
-      "howItWorks": "Hoe het werkt",
       "logging": "Vastleggen",
       "features": "Functies",
       "privacy": "Privacy",
@@ -129,35 +129,6 @@
       "rent": "Huur",
       "flight": "Vlucht naar huis",
       "iceCream": "IJsje"
-    },
-    "howItWorks": {
-      "eyebrow": "Hoe het werkt",
-      "title": "Eén tik maakt van geld tijd.",
-      "body": "Je uurwaarde komt uit wat er echt op je rekening belandt. Na belasting, verdeeld over de dagen dat je werkt, inclusief de reistijd waar je nooit voor betaald wordt.",
-      "coffee": {
-        "title": "De koffie",
-        "note": "Een korte wandeling aan werk. Je wilde die koffie."
-      },
-      "impulse": {
-        "title": "De impulsaankoop",
-        "note": "Bijna twee werkdagen. Daar slaap je beter een nachtje over."
-      },
-      "rate": {
-        "title": "Je echte uurwaarde",
-        "perHour": "/uur",
-        "takeHome": {
-          "label": "Nettoloon",
-          "value": "{value} per maand"
-        },
-        "daysWorked": {
-          "label": "Werkdagen",
-          "value": "{value} per week"
-        },
-        "commute": {
-          "label": "Reistijd, onbetaald",
-          "value": "{value} min per dag"
-        }
-      }
     },
     "logging": {
       "eyebrow": "Vastleggen",
@@ -326,17 +297,6 @@
     "community": {
       "body": "Maak contact met andere gebruikers, deel feedback en krijg tips op onze Discord-server.",
       "cta": "Word Lid van de Community"
-    },
-    "dashboardEntry": {
-      "eyebrow": "Nieuw · Webdashboard",
-      "title": "Je Money2Time-gegevens, op een groot scherm",
-      "body": "Scan een code op app.money2time.com met je telefoon en zie cashflow, uitgaven, vermogen, budgetten, reizen en de uren achter elke aankoop. Voeg transacties toe en bewerk ze vanaf je computer zolang je telefoon verbonden is. End-to-end versleuteld.",
-      "cta": "Open het webdashboard",
-      "points": {
-        "private": "End-to-end versleuteld",
-        "charts": "17 dashboards",
-        "edits": "Bewerk vanaf je computer"
-      }
     }
   },
   "contact": {

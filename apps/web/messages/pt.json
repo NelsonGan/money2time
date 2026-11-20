@@ -68,7 +68,8 @@
       "copyright": "© {year} Money2Time. Todos os direitos reservados.",
       "costInHours": "Preço em horas",
       "tutorials": "Tutoriais",
-      "dashboard": "Painel web"
+      "dashboard": "Painel web",
+      "albums": "Álbuns"
     }
   },
   "storeButtons": {
@@ -93,7 +94,6 @@
   },
   "home": {
     "nav": {
-      "howItWorks": "Como funciona",
       "logging": "Registro",
       "features": "Recursos",
       "privacy": "Privacidade",
@@ -129,35 +129,6 @@
       "rent": "Aluguel",
       "flight": "Voo para casa",
       "iceCream": "Sorvete"
-    },
-    "howItWorks": {
-      "eyebrow": "Como funciona",
-      "title": "Um toque transforma dinheiro em tempo.",
-      "body": "Seu valor por hora vem do que realmente entra na sua conta. Depois dos impostos, ao longo dos dias em que você trabalha, incluindo o trajeto que nunca é pago.",
-      "coffee": {
-        "title": "O café",
-        "note": "Pequeno o suficiente para ignorar. Você queria o café mesmo."
-      },
-      "impulse": {
-        "title": "A compra por impulso",
-        "note": "Quase dois dias de trabalho. Vale a pena dormir sobre isso."
-      },
-      "rate": {
-        "title": "Seu valor real",
-        "perHour": "/h",
-        "takeHome": {
-          "label": "Salário líquido",
-          "value": "{value} por mês"
-        },
-        "daysWorked": {
-          "label": "Dias que você trabalha",
-          "value": "{value} por semana"
-        },
-        "commute": {
-          "label": "Trajeto, não pago",
-          "value": "{value} min por dia"
-        }
-      }
     },
     "logging": {
       "eyebrow": "Registro",
@@ -326,17 +297,6 @@
     "community": {
       "body": "Conecte-se com outros usuários, compartilhe feedback e receba dicas no nosso servidor do Discord.",
       "cta": "Entrar no nosso Discord"
-    },
-    "dashboardEntry": {
-      "eyebrow": "Novo · Painel web",
-      "title": "Seus dados do Money2Time, numa tela grande",
-      "body": "Escaneie um código em app.money2time.com com o celular para ver fluxo de caixa, gastos, patrimônio, orçamentos, viagens e as horas por trás de cada compra. Adicione e edite transações pelo computador enquanto o celular estiver conectado. Criptografia de ponta a ponta.",
-      "cta": "Abrir o painel web",
-      "points": {
-        "private": "Criptografia de ponta a ponta",
-        "charts": "17 painéis",
-        "edits": "Edite pelo computador"
-      }
     }
   },
   "contact": {

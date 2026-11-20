@@ -68,7 +68,8 @@
       "copyright": "© {year} Money2Time. Wszelkie prawa zastrzeżone.",
       "costInHours": "Cena w godzinach",
       "tutorials": "Poradniki",
-      "dashboard": "Panel WWW"
+      "dashboard": "Panel WWW",
+      "albums": "Albumy"
     }
   },
   "storeButtons": {
@@ -93,7 +94,6 @@
   },
   "home": {
     "nav": {
-      "howItWorks": "Jak to działa",
       "logging": "Zapisywanie",
       "features": "Funkcje",
       "privacy": "Prywatność",
@@ -129,35 +129,6 @@
       "rent": "Czynsz",
       "flight": "Lot do domu",
       "iceCream": "Lody"
-    },
-    "howItWorks": {
-      "eyebrow": "Jak to działa",
-      "title": "Jedno dotknięcie zamienia pieniądze w czas.",
-      "body": "Twoja stawka bierze się z tego, co naprawdę wpływa na konto. Po podatkach, w przeliczeniu na dni, w które pracujesz, razem z dojazdem, za który nikt ci nie płaci.",
-      "coffee": {
-        "title": "Kawa",
-        "note": "Tyle pracy co krótki spacer. Chciałeś tej kawy."
-      },
-      "impulse": {
-        "title": "Zakup pod wpływem impulsu",
-        "note": "Prawie dwa dni pracy. Warto się przespać z tą decyzją."
-      },
-      "rate": {
-        "title": "Twoja prawdziwa stawka",
-        "perHour": "/godz.",
-        "takeHome": {
-          "label": "Wynagrodzenie netto",
-          "value": "{value} miesięcznie"
-        },
-        "daysWorked": {
-          "label": "Dni pracy",
-          "value": "{value} w tygodniu"
-        },
-        "commute": {
-          "label": "Dojazd, niepłatny",
-          "value": "{value} min dziennie"
-        }
-      }
     },
     "logging": {
       "eyebrow": "Zapisywanie",
@@ -326,17 +297,6 @@
     "community": {
       "body": "Nawiąż kontakt z innymi użytkownikami, podziel się opinią i uzyskaj wskazówki na naszym serwerze Discord.",
       "cta": "Dołącz do Społeczności"
-    },
-    "dashboardEntry": {
-      "eyebrow": "Nowość · Panel webowy",
-      "title": "Twoje dane z Money2Time na dużym ekranie",
-      "body": "Zeskanuj telefonem kod na app.money2time.com, aby zobaczyć przepływy, wydatki, majątek, budżety, podróże i godziny pracy stojące za każdym zakupem. Dodawaj i edytuj transakcje z komputera, gdy telefon jest połączony. Szyfrowanie end-to-end.",
-      "cta": "Otwórz panel WWW",
-      "points": {
-        "private": "Szyfrowanie end-to-end",
-        "charts": "17 paneli",
-        "edits": "Edycja z komputera"
-      }
     }
   },
   "contact": {

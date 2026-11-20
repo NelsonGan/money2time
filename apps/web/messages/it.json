@@ -68,7 +68,8 @@
       "copyright": "© {year} Money2Time. Tutti i diritti riservati.",
       "costInHours": "Prezzo in ore",
       "tutorials": "Tutorial",
-      "dashboard": "Dashboard web"
+      "dashboard": "Dashboard web",
+      "albums": "Album"
     }
   },
   "storeButtons": {
@@ -93,7 +94,6 @@
   },
   "home": {
     "nav": {
-      "howItWorks": "Come funziona",
       "logging": "Registrazione",
       "features": "Funzioni",
       "privacy": "Privacy",
@@ -129,35 +129,6 @@
       "rent": "Affitto",
       "flight": "Volo per casa",
       "iceCream": "Gelato"
-    },
-    "howItWorks": {
-      "eyebrow": "Come funziona",
-      "title": "Un tocco trasforma il denaro in tempo.",
-      "body": "Il tuo valore orario nasce da ciò che arriva davvero sul conto. Al netto delle tasse, sui giorni in cui lavori, tragitto non pagato compreso.",
-      "coffee": {
-        "title": "Il caffè",
-        "note": "Quanto si lavora in una breve passeggiata. Quel caffè lo volevi."
-      },
-      "impulse": {
-        "title": "L'acquisto d'impulso",
-        "note": "Quasi due giorni di lavoro. Meglio dormirci sopra."
-      },
-      "rate": {
-        "title": "Il tuo valore orario reale",
-        "perHour": "/h",
-        "takeHome": {
-          "label": "Stipendio netto",
-          "value": "{value} al mese"
-        },
-        "daysWorked": {
-          "label": "Giorni di lavoro",
-          "value": "{value} a settimana"
-        },
-        "commute": {
-          "label": "Tragitto, non pagato",
-          "value": "{value} min al giorno"
-        }
-      }
     },
     "logging": {
       "eyebrow": "Registrazione",
@@ -326,17 +297,6 @@
     "community": {
       "body": "Connettiti con altri utenti, condividi feedback e ricevi consigli sul nostro server Discord.",
       "cta": "Unisciti alla Community"
-    },
-    "dashboardEntry": {
-      "eyebrow": "Novità · Dashboard web",
-      "title": "I tuoi dati di Money2Time, su uno schermo grande",
-      "body": "Scansiona un codice su app.money2time.com con il telefono per vedere flusso di cassa, spese, patrimonio, budget, viaggi e le ore dietro ogni acquisto. Aggiungi e modifica transazioni dal computer finché il telefono è connesso. Crittografia end-to-end.",
-      "cta": "Apri la dashboard web",
-      "points": {
-        "private": "Crittografia end-to-end",
-        "charts": "17 dashboard",
-        "edits": "Modifica dal computer"
-      }
     }
   },
   "contact": {

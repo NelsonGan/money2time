@@ -68,7 +68,8 @@
       "copyright": "© {year} Money2Time. Nakalaan ang lahat ng karapatan.",
       "costInHours": "Presyo sa oras",
       "tutorials": "Mga tutorial",
-      "dashboard": "Web dashboard"
+      "dashboard": "Web dashboard",
+      "albums": "Mga album"
     }
   },
   "storeButtons": {
@@ -93,7 +94,6 @@
   },
   "home": {
     "nav": {
-      "howItWorks": "Paano ito gumagana",
       "logging": "Pagtatala",
       "features": "Mga feature",
       "privacy": "Privacy",
@@ -129,35 +129,6 @@
       "rent": "Upa",
       "flight": "Pamasahe pauwi",
       "iceCream": "Ice cream"
-    },
-    "howItWorks": {
-      "eyebrow": "Paano ito gumagana",
-      "title": "Isang tap, nagiging oras ang pera.",
-      "body": "Ang rate mo kada oras ay galing sa perang talagang pumapasok sa account mo. Pagkatapos ng buwis, hinati sa mga araw na nagtatrabaho ka, kasama ang biyahe na hindi naman binabayaran.",
-      "coffee": {
-        "title": "Ang kape",
-        "note": "Maliit lang kaya madaling palampasin. Gusto mo naman talaga ang kapeng iyon."
-      },
-      "impulse": {
-        "title": "Ang biglaang bili",
-        "note": "Halos dalawang araw ng trabaho. Sulit tulugan muna."
-      },
-      "rate": {
-        "title": "Ang totoo mong rate",
-        "perHour": "/oras",
-        "takeHome": {
-          "label": "Take-home pay",
-          "value": "{value} kada buwan"
-        },
-        "daysWorked": {
-          "label": "Araw na nagtatrabaho ka",
-          "value": "{value} kada linggo"
-        },
-        "commute": {
-          "label": "Biyahe, walang bayad",
-          "value": "{value} min kada araw"
-        }
-      }
     },
     "logging": {
       "eyebrow": "Pagtatala",
@@ -326,17 +297,6 @@
     "community": {
       "body": "Kumonekta sa ibang users, magbahagi ng feedback, at kumuha ng mga tip sa aming Discord server.",
       "cta": "Sumali sa Komunidad"
-    },
-    "dashboardEntry": {
-      "eyebrow": "Bago · Web Dashboard",
-      "title": "Ang Money2Time data mo, sa malaking screen",
-      "body": "Mag-scan ng code sa app.money2time.com gamit ang telepono mo para makita ang cash flow, gastos, net worth, budget, biyahe at ang mga oras sa likod ng bawat binili. Magdagdag at mag-edit ng mga transaksyon mula sa computer mo habang nakakonekta ang telepono mo. End-to-end encrypted.",
-      "cta": "Buksan ang web dashboard",
-      "points": {
-        "private": "May end-to-end encryption",
-        "charts": "17 dashboard",
-        "edits": "Mag-edit mula sa computer mo"
-      }
     }
   },
   "contact": {

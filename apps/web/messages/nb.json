@@ -68,7 +68,8 @@
       "copyright": "© {year} Money2Time. Alle rettigheter forbeholdt.",
       "costInHours": "Pris i timer",
       "tutorials": "Veiledninger",
-      "dashboard": "Nettdashbord"
+      "dashboard": "Nettdashbord",
+      "albums": "Album"
     }
   },
   "storeButtons": {
@@ -93,7 +94,6 @@
   },
   "home": {
     "nav": {
-      "howItWorks": "Slik virker det",
       "logging": "Registrering",
       "features": "Funksjoner",
       "privacy": "Personvern",
@@ -129,35 +129,6 @@
       "rent": "Husleie",
       "flight": "Fly hjem",
       "iceCream": "Is"
-    },
-    "howItWorks": {
-      "eyebrow": "Slik virker det",
-      "title": "Ett trykk gjør penger om til tid.",
-      "body": "Timeprisen din kommer fra det som faktisk lander på kontoen. Etter skatt, fordelt på dagene du jobber, inkludert reisen du aldri får betalt for.",
-      "coffee": {
-        "title": "Kaffen",
-        "note": "En kort spasertur med arbeid. Du ville ha den kaffen."
-      },
-      "impulse": {
-        "title": "Impulskjøpet",
-        "note": "Nesten to arbeidsdager. Verdt å sove på."
-      },
-      "rate": {
-        "title": "Den ekte timeprisen din",
-        "perHour": "/t",
-        "takeHome": {
-          "label": "Lønn etter skatt",
-          "value": "{value} i måneden"
-        },
-        "daysWorked": {
-          "label": "Dager du jobber",
-          "value": "{value} i uken"
-        },
-        "commute": {
-          "label": "Reisevei, ubetalt",
-          "value": "{value} min om dagen"
-        }
-      }
     },
     "logging": {
       "eyebrow": "Registrering",
@@ -326,17 +297,6 @@
     "community": {
       "body": "Få kontakt med andre brukere, del tilbakemeldinger, og få tips på Discord-serveren vår.",
       "cta": "Bli med i Fellesskapet"
-    },
-    "dashboardEntry": {
-      "eyebrow": "Nytt · Web-dashbord",
-      "title": "Money2Time-dataene dine, på en stor skjerm",
-      "body": "Skann en kode på app.money2time.com med telefonen for å se kontantstrøm, forbruk, formue, budsjetter, reiser og timene bak hvert kjøp. Legg til og rediger transaksjoner fra datamaskinen mens telefonen er tilkoblet. Ende-til-ende-kryptert.",
-      "cta": "Åpne nettdashbordet",
-      "points": {
-        "private": "Ende-til-ende-kryptert",
-        "charts": "17 dashbord",
-        "edits": "Rediger fra datamaskinen"
-      }
     }
   },
   "contact": {

@@ -25,7 +25,7 @@ const routes: Route[] = [
   {
     path: "",
     changeFrequency: "monthly",
-    lastModified: "2026-11-14",
+    lastModified: "2026-11-20",
     priority: 1,
   },
   {

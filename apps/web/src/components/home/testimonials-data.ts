@@ -121,9 +121,9 @@ export const TESTIMONIALS: Testimonial[] = [
 
 /**
  * The award laurels beside the section heading. `users` is a raw count so it
- * formats per locale (50K, 5万, 50 mil); set either to `null` to hide it.
+ * formats per locale (70K, 7万, 70 mil); set either to `null` to hide it.
  */
 export const SOCIAL_PROOF: { users: number | null; rating: number | null } = {
-  users: 50_000,
+  users: 70_000,
   rating: 4.9,
 };
