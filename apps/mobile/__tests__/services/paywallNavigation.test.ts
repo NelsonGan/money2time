@@ -26,4 +26,11 @@ describe('paywallNavigation pub/sub', () => {
     requestOpenPaywall('anywhere');
     expect(listener).not.toHaveBeenCalled();
   });
+
+  it('reports whether anything was listening', () => {
+    expect(requestOpenPaywall('nobody')).toBe(false);
+    const unsub = subscribeOpenPaywallRequest(jest.fn());
+    expect(requestOpenPaywall('somebody')).toBe(true);
+    unsub();
+  });
 });

@@ -2388,7 +2388,9 @@ const nl = {
   },
   pro: {
     limit_receipt_scans:
-      'Het gratis abonnement bevat in totaal {{count}} bonscans. Upgrade naar Pro voor onbeperkt scannen.',
+      'Het gratis abonnement bevat {{count}} bonscans per maand. Upgrade naar Pro voor onbeperkt scannen.',
+    limit_autolog:
+      'Je hebt alle {{count}} gratis Apple Pay-automatiseringen gebruikt, dus je laatste betalingen zijn niet vastgelegd. Upgrade naar Pro voor onbeperkt gebruik.',
     custom_logos_label: 'Aangepaste rekeninglogo’s',
     items_label: 'Items',
     budget_templates_label: 'Budgetsjablonen',
@@ -2731,6 +2733,8 @@ const nl = {
         'Er kwam geen betaling mee met deze uitvoering, wat normaal is bij een test. Heb je net betaald, open dan Money2Time om hem toe te voegen.',
       autolog_test_alert_body:
         'Er kwam geen meldingstekst mee met deze uitvoering, wat normaal is bij een test. Bankmeldingen verschijnen in Money2Time om na te kijken.',
+      autolog_limit_body:
+        'Je hebt alle {{count}} gratis automatiseringen gebruikt. Upgrade in Money2Time naar Pro voor onbeperkt gebruik.',
       daily_title: 'Hoe was je dag?',
       daily_body: 'Neem 30 seconden om de uitgaven van vandaag vast te leggen nu ze nog vers zijn.',
       recurring_title: '{{name}} · {{amount}}',

@@ -2351,7 +2351,9 @@ const vi = {
   },
   pro: {
     limit_receipt_scans:
-      'Gói miễn phí bao gồm tổng cộng {{count}} lần quét hóa đơn. Nâng cấp lên Pro để quét không giới hạn.',
+      'Gói miễn phí bao gồm {{count}} lần quét hóa đơn mỗi tháng. Nâng cấp lên Pro để quét không giới hạn.',
+    limit_autolog:
+      'Bạn đã dùng hết {{count}} lần tự động hóa Apple Pay miễn phí, nên các khoản thanh toán gần đây chưa được ghi lại. Nâng cấp lên Pro để dùng không giới hạn.',
     custom_logos_label: 'Logo tài khoản tùy chỉnh',
     items_label: 'Vật dụng',
     budget_templates_label: 'Mẫu ngân sách',
@@ -2684,6 +2686,8 @@ const vi = {
         'Lần chạy này không kèm khoản thanh toán nào, điều này bình thường khi thử nghiệm. Nếu bạn vừa thanh toán, hãy mở Money2Time để thêm.',
       autolog_test_alert_body:
         'Lần chạy này không kèm nội dung thông báo, điều này bình thường khi thử nghiệm. Thông báo ngân hàng sẽ hiện trong Money2Time để bạn xem lại.',
+      autolog_limit_body:
+        'Bạn đã dùng hết {{count}} lần tự động hóa miễn phí. Nâng cấp lên Pro trong Money2Time để dùng không giới hạn.',
       daily_title: 'Hôm nay của bạn thế nào?',
       daily_body: 'Dành 30 giây ghi lại chi tiêu hôm nay khi còn nhớ rõ.',
       recurring_title: '{{name}} · {{amount}}',

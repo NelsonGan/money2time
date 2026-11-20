@@ -124,7 +124,7 @@ export const LOGGING_TUTORIALS: Tutorial[] = [
       {
         image: 'scan-a-receipt-1',
         title: 'Choose Scan receipt',
-        body: 'From the plus menu. The free plan includes 20 scans.',
+        body: 'From the plus menu. The free plan includes 20 scans a month.',
       },
       {
         image: 'scan-a-receipt-2',

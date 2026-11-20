@@ -401,3 +401,42 @@ describe('Drive access left out at sign-in', () => {
     expect(googleSignin.addScopes).not.toHaveBeenCalled();
   });
 });
+
+/**
+ * Since Drive access is checked, a Drive that cannot be reached is reported as
+ * `unavailable` once a day, and analytics could not tell a person who never
+ * granted Drive (they must reconnect) from a session that failed to restore.
+ */
+describe('getGoogleDriveSessionState', () => {
+  it('reports a phone that never signed in to Google as signed out', async () => {
+    const auth = loadAuth();
+
+    await expect(auth.getGoogleDriveSessionState()).resolves.toBe('signed_out');
+  });
+
+  it('reports a remembered account whose session cannot be restored', async () => {
+    googleSignin.hasPreviousSignIn.mockReturnValue(true);
+    googleSignin.signInSilently.mockRejectedValue(new Error('network error'));
+    const auth = loadAuth();
+
+    await expect(auth.getGoogleDriveSessionState()).resolves.toBe('session_unavailable');
+  });
+
+  it('reports an account that never granted Drive access', async () => {
+    googleSignin.hasPreviousSignIn.mockReturnValue(true);
+    googleSignin.getCurrentUser.mockReturnValue({
+      user: { email: 'someone@example.com' },
+      scopes: ['openid', 'https://www.googleapis.com/auth/userinfo.email'],
+    });
+    const auth = loadAuth();
+
+    await expect(auth.getGoogleDriveSessionState()).resolves.toBe('no_drive_access');
+  });
+
+  it('reports a restored session with Drive access as connected', async () => {
+    coldLaunchWithRememberedAccount();
+    const auth = loadAuth();
+
+    await expect(auth.getGoogleDriveSessionState()).resolves.toBe('connected');
+  });
+});

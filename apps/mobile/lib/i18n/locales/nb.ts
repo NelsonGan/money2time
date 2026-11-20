@@ -2367,7 +2367,9 @@ const nb = {
   },
   pro: {
     limit_receipt_scans:
-      'Gratisplanen inkluderer totalt {{count}} kvitteringsskanninger. Oppgrader til Pro for ubegrenset skanning.',
+      'Gratisplanen inkluderer {{count}} kvitteringsskanninger i måneden. Oppgrader til Pro for ubegrenset skanning.',
+    limit_autolog:
+      'Du har brukt alle {{count}} gratis Apple Pay-automatiseringer, så de siste betalingene dine ble ikke registrert. Oppgrader til Pro for ubegrenset bruk.',
     custom_logos_label: 'Egendefinerte kontologoer',
     items_label: 'Gjenstander',
     budget_templates_label: 'Budsjettmaler',
@@ -2701,6 +2703,8 @@ const nb = {
         'Ingen betaling fulgte med denne kjøringen, noe som er normalt for en test. Har du nettopp betalt, åpner du Money2Time og legger den til.',
       autolog_test_alert_body:
         'Ingen varseltekst fulgte med denne kjøringen, noe som er normalt for en test. Bankvarsler vises i Money2Time for gjennomgang.',
+      autolog_limit_body:
+        'Du har brukt alle {{count}} gratis automatiseringer. Oppgrader til Pro i Money2Time for ubegrenset bruk.',
       daily_title: 'Hvordan gikk dagen?',
       daily_body: 'Bruk 30 sekunder på å logge dagens forbruk mens du husker det.',
       recurring_title: '{{name}} · {{amount}}',

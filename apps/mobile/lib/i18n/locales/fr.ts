@@ -2386,7 +2386,9 @@ const fr = {
   },
   pro: {
     limit_receipt_scans:
-      'Le forfait gratuit inclut {{count}} scans de reçus au total. Passez à Pro pour des scans illimités.',
+      'Le forfait gratuit inclut {{count}} scans de reçus par mois. Passez à Pro pour des scans illimités.',
+    limit_autolog:
+      "Vous avez utilisé les {{count}} automatisations Apple Pay gratuites, vos derniers paiements n'ont donc pas été enregistrés. Passez à Pro pour un usage illimité.",
     custom_logos_label: 'Logos de compte personnalisés',
     items_label: 'Objets',
     budget_templates_label: 'Modèles de budget',
@@ -2729,6 +2731,8 @@ const fr = {
         "Aucun paiement n'accompagnait cette exécution, ce qui est normal pour un test. Si vous venez de payer, ouvrez Money2Time pour l'ajouter.",
       autolog_test_alert_body:
         "Aucun texte de notification n'accompagnait cette exécution, ce qui est normal pour un test. Les notifications bancaires apparaîtront dans Money2Time pour vérification.",
+      autolog_limit_body:
+        'Vous avez utilisé les {{count}} automatisations gratuites. Passez à Pro dans Money2Time pour un usage illimité.',
       daily_title: "Comment s'est passée votre journée ?",
       daily_body:
         "Prenez 30 secondes pour noter les dépenses du jour pendant qu'elles sont fraîches.",

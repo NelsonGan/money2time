@@ -80,6 +80,12 @@ export interface AutoLogCatalog {
   testNotificationTitle: string;
   testCardPaymentBody: string;
   testNotificationAlertBody: string;
+  /**
+   * The error Log Card Payment throws when the free automatic logs are used up,
+   * which Shortcuts shows to the user. Localized here for the same reason as
+   * {@link notificationTitle}; the intent falls back to English without it.
+   */
+  limitReachedMessage: string;
   /** Whether the Category picker should offer subcategories as well as roots. */
   includeSubcategories: boolean;
   /**
@@ -118,6 +124,7 @@ export interface BuildAutoLogCatalogInput {
   testNotificationTitle: string;
   testCardPaymentBody: string;
   testNotificationAlertBody: string;
+  limitReachedMessage: string;
   reportingCurrency: string;
   generatedAt: string;
 }
@@ -174,6 +181,7 @@ export function buildAutoLogCatalog(input: BuildAutoLogCatalogInput): AutoLogCat
     testNotificationTitle: input.testNotificationTitle,
     testCardPaymentBody: input.testCardPaymentBody,
     testNotificationAlertBody: input.testNotificationAlertBody,
+    limitReachedMessage: input.limitReachedMessage,
     includeSubcategories: input.includeSubcategories,
     autoCategorizeByMerchant: input.autoCategorizeByMerchant,
     accounts: visibleAccounts.map((account) => ({

@@ -17,6 +17,7 @@ const TUTORIAL_UPDATED_DATES: Record<string, string> = {
   accounts: "2026-10-02",
   review: "2026-10-02",
   recurring: "2026-11-09",
+  "scan-a-receipt": "2026-11-20",
   "split-a-bill": "2026-10-08",
   widgets: "2026-10-02",
 };

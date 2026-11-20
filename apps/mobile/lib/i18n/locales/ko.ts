@@ -2337,7 +2337,9 @@ const ko = {
   },
   pro: {
     limit_receipt_scans:
-      '무료 플랜은 총 {{count}}회 영수증 스캔을 포함합니다. 무제한 스캔을 위해 Pro로 업그레이드하세요.',
+      '무료 플랜은 매월 {{count}}회 영수증 스캔을 포함합니다. 무제한 스캔을 위해 Pro로 업그레이드하세요.',
+    limit_autolog:
+      '무료 Apple Pay 자동화 {{count}}회를 모두 사용해서 최근 결제가 기록되지 않았습니다. Pro로 업그레이드하면 무제한으로 사용할 수 있습니다.',
     custom_logos_label: '사용자 지정 계정 로고',
     items_label: '물건',
     budget_templates_label: '예산 템플릿',
@@ -2666,6 +2668,8 @@ const ko = {
         '이번 실행에는 결제 정보가 없었어요. 테스트에서는 정상이에요. 방금 결제했다면 Money2Time을 열어 직접 추가하세요.',
       autolog_test_alert_body:
         '이번 실행에는 알림 내용이 없었어요. 테스트에서는 정상이에요. 은행 알림은 Money2Time에 표시되어 검토할 수 있어요.',
+      autolog_limit_body:
+        '무료 자동화 {{count}}회를 모두 사용했습니다. Money2Time에서 Pro로 업그레이드하면 무제한으로 사용할 수 있습니다.',
       daily_title: '오늘 하루 어떠셨나요?',
       daily_body: '기억이 생생할 때 30초만 들여 오늘 지출을 기록해 보세요.',
       recurring_title: '{{name}} · {{amount}}',

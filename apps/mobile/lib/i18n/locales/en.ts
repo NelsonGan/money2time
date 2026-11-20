@@ -2337,7 +2337,9 @@ const en = {
   },
   pro: {
     limit_receipt_scans:
-      'Free plan includes {{count}} receipt scans in total. Upgrade to Pro for unlimited scanning.',
+      'Free plan includes {{count}} receipt scans a month. Upgrade to Pro for unlimited scanning.',
+    limit_autolog:
+      "You've used all {{count}} free Apple Pay automations, so your latest payments weren't logged. Upgrade to Pro for unlimited.",
     custom_logos_label: 'Custom account logos',
     items_label: 'Items',
     budget_templates_label: 'Budget templates',
@@ -2674,6 +2676,8 @@ const en = {
         'No payment came with this run, which is normal for a test. If you just paid, open Money2Time to add it.',
       autolog_test_alert_body:
         'No notification text came with this run, which is normal for a test. Bank notifications will show up in Money2Time for review.',
+      autolog_limit_body:
+        'You have used all {{count}} free automations. Upgrade to Pro in Money2Time for unlimited.',
       daily_title: 'How did today go?',
       daily_body: "Take 30 seconds to log today's spending while it's still fresh.",
       recurring_title: '{{name}} · {{amount}}',

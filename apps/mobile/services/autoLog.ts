@@ -3,6 +3,10 @@ import { NativeModules, Platform } from 'react-native';
 
 import { type CaptureInput, parseIosPendingAlertsJson } from '~/features/autoLog/lib/captureQueue';
 import {
+  type AutoLogLimitBlocked,
+  parseAutoLogLimitBlockedJson,
+} from '~/features/autoLog/lib/limitPrompt';
+import {
   type AutoLogPendingEntry,
   type AutoLogPendingScan,
   parseAutoLogPendingJson,
@@ -30,6 +34,9 @@ interface NativeAutoLogModule {
   /** Log Notification queue (bank and wallet app notifications via Shortcuts). */
   readPendingAlerts?: () => Promise<string | null>;
   clearPendingAlerts?: (ids: string[]) => Promise<void>;
+  /** Payments Log Card Payment refused at the free limit (see `limitPrompt.ts`). */
+  readLimitBlocked?: () => Promise<string | null>;
+  clearLimitBlocked?: () => Promise<void>;
   /** Debug builds only. See `enqueueTestAutoLogTap`. */
   enqueueTestTap?: (amountRaw: string, merchant: string, card: string) => Promise<string>;
   /** Debug builds only. See `enqueueTestAutoLogAlert`. */
@@ -50,6 +57,20 @@ export function isAutoLogSupported(): boolean {
 export async function writeAutoLogCatalog(catalog: AutoLogCatalog): Promise<void> {
   if (!isAutoLogSupported() || !nativeAutoLogModule?.writeCatalog) return;
   await nativeAutoLogModule.writeCatalog(JSON.stringify(catalog));
+}
+
+/**
+ * Payments the automation refused because the free automatic logs were used
+ * up, or null. Also null on a build whose native module predates the record.
+ */
+export async function readAutoLogLimitBlocked(): Promise<AutoLogLimitBlocked | null> {
+  if (!isAutoLogSupported() || !nativeAutoLogModule?.readLimitBlocked) return null;
+  return parseAutoLogLimitBlockedJson(await nativeAutoLogModule.readLimitBlocked());
+}
+
+export async function clearAutoLogLimitBlocked(): Promise<void> {
+  if (!isAutoLogSupported() || !nativeAutoLogModule?.clearLimitBlocked) return;
+  await nativeAutoLogModule.clearLimitBlocked();
 }
 
 export async function readAutoLogPending(): Promise<AutoLogPendingEntry[]> {

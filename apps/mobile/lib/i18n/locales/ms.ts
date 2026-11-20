@@ -2379,7 +2379,9 @@ const ms = {
   },
   pro: {
     limit_receipt_scans:
-      'Pelan percuma termasuk {{count}} imbasan resit secara keseluruhan. Naik taraf ke Pro untuk imbasan tanpa had.',
+      'Pelan percuma termasuk {{count}} imbasan resit sebulan. Naik taraf ke Pro untuk imbasan tanpa had.',
+    limit_autolog:
+      'Anda telah menggunakan kesemua {{count}} automasi Apple Pay percuma, jadi pembayaran terkini anda tidak direkodkan. Naik taraf ke Pro untuk tanpa had.',
     custom_logos_label: 'Logo akaun tersuai',
     items_label: 'Item',
     budget_templates_label: 'Templat belanjawan',
@@ -2717,6 +2719,8 @@ const ms = {
         'Tiada pembayaran disertakan dalam larian ini, perkara biasa untuk ujian. Jika anda baru membayar, buka Money2Time untuk menambahnya.',
       autolog_test_alert_body:
         'Tiada teks pemberitahuan disertakan dalam larian ini, perkara biasa untuk ujian. Pemberitahuan bank akan muncul dalam Money2Time untuk disemak.',
+      autolog_limit_body:
+        'Anda telah menggunakan kesemua {{count}} automasi percuma. Naik taraf ke Pro dalam Money2Time untuk tanpa had.',
       daily_title: 'Bagaimana hari anda?',
       daily_body: 'Luangkan 30 saat untuk rekod perbelanjaan hari ini selagi masih segar.',
       recurring_title: '{{name}} · {{amount}}',

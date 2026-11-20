@@ -65,6 +65,8 @@ export async function signOutFromGoogle(): Promise<void> {
 interface Provider {
   target: BackupTarget;
   isAvailable(): Promise<boolean>;
+  /** Why the target cannot take a backup now (null when it can), for analytics. */
+  unavailableReason?(): Promise<string | null>;
   upload(name: string, json: string): Promise<BackupRecord>;
   list(): Promise<BackupRecord[]>;
   download(record: BackupRecord): Promise<string>;
@@ -119,16 +121,22 @@ export async function runAutoBackupIfDue(opts?: { force?: boolean }): Promise<Ba
     // Writing the file is the third long step after reading and serializing.
     await yieldToEventLoop();
 
-    const { targets, fellBackToLocalFrom } = await pickActiveTargets(settings.autoBackupTarget);
+    const { targets, fellBackToLocalFrom, unavailableReason } = await pickActiveTargets(
+      settings.autoBackupTarget,
+    );
     const written: BackupRecord[] = [];
     const errors: string[] = [];
     // Machine-readable reason for each entry in `errors`, for analytics.
     const errorKinds: string[] = [];
     // HTTP status and Drive reason of the last provider failure, for analytics.
+    // For an unreachable Drive, the reason says why (signed out, no access).
     let lastFailure: ReturnType<typeof driveFailureDetails> = {
       httpStatus: null,
-      driveReason: null,
+      driveReason: unavailableReason ?? null,
     };
+    // The cloud target was reached but refused or dropped the upload, and the
+    // backup went to the phone instead.
+    let savedOnDeviceAfterFailure = false;
 
     if (fellBackToLocalFrom) {
       errors.push(
@@ -143,10 +151,34 @@ export async function runAutoBackupIfDue(opts?: { force?: boolean }): Promise<Ba
         const record = await provider.upload(name, json);
         written.push(record);
         await rotate(provider);
+        continue;
       } catch (e) {
         errors.push(describeBackupError(target, e));
         errorKinds.push(backupErrorKind(e));
-        lastFailure = driveFailureDetails(e);
+        // The phone write after an unreachable cloud target keeps the reason
+        // that target gave (signed out, no Drive access) rather than its own.
+        if (target !== 'local' || lastFailure.driveReason === null) {
+          lastFailure = driveFailureDetails(e);
+        }
+      }
+      if (target === 'local') continue;
+      // A failure that usually passes (offline, timeout, rate limit, server,
+      // aborted) writes nothing, as before: the run stays due and the six-hour
+      // backoff tries the cloud again later today.
+      if (TRANSIENT_BACKUP_ERROR_KINDS.has(errorKinds[errorKinds.length - 1])) continue;
+      // A Drive that is full, refuses this account or rejects the upload used to
+      // leave nothing written anywhere, so the backup stayed due and every
+      // automatic run six hours later failed and reported the same way again.
+      // Keep the day's copy on the phone, as an unreachable target does. The
+      // cloud failure stays the reported one (`error_kind` is the first kind),
+      // even if this write fails too.
+      try {
+        written.push(await localProvider.upload(name, json));
+        savedOnDeviceAfterFailure = true;
+        await rotate(localProvider);
+      } catch (e) {
+        errors.push(describeBackupError('local', e));
+        errorKinds.push(backupErrorKind(e));
       }
     }
 
@@ -164,9 +196,12 @@ export async function runAutoBackupIfDue(opts?: { force?: boolean }): Promise<Ba
     if (errors.length > 0) {
       void trackEvent(AnalyticsEvents.AUTO_BACKUP_FAILED, {
         target: settings.autoBackupTarget,
+        trigger: opts?.force ? 'manual' : 'automatic',
         error_count: errors.length,
-        error_kind: errorKinds[errorKinds.length - 1] ?? 'unknown',
-        fell_back_to_local: Boolean(fellBackToLocalFrom),
+        // The first kind is the cause: the cloud target's, not the phone
+        // write's that followed it.
+        error_kind: errorKinds[0] ?? 'unknown',
+        fell_back_to_local: Boolean(fellBackToLocalFrom) || savedOnDeviceAfterFailure,
         http_status: lastFailure.httpStatus,
         drive_reason: lastFailure.driveReason,
       });
@@ -188,18 +223,25 @@ export async function runAutoBackupIfDue(opts?: { force?: boolean }): Promise<Ba
 interface ActiveTargets {
   targets: BackupTarget[];
   fellBackToLocalFrom?: BackupTarget;
+  /** Why `fellBackToLocalFrom` was unreachable, when the provider can say. */
+  unavailableReason?: string | null;
 }
 
 async function pickActiveTargets(preferred: BackupTarget): Promise<ActiveTargets> {
   if (preferred === 'local') return { targets: ['local'] };
   const provider = getProvider(preferred);
-  const available = await provider.isAvailable();
-  if (available) return { targets: [preferred] };
+  let unavailableReason: string | null = null;
+  if (provider.unavailableReason) {
+    unavailableReason = await provider.unavailableReason();
+    if (unavailableReason === null) return { targets: [preferred] };
+  } else if (await provider.isAvailable()) {
+    return { targets: [preferred] };
+  }
   // Cloud target chosen but currently unavailable (offline, signed out,
   // iCloud disabled). Fall back to local so the daily backup window isn't
   // silently lost, and report which target we couldn't reach so the caller can
   // tell the user why their backup landed on the device.
-  return { targets: ['local'], fellBackToLocalFrom: preferred };
+  return { targets: ['local'], fellBackToLocalFrom: preferred, unavailableReason };
 }
 
 /**
@@ -219,6 +261,15 @@ function describeBackupError(target: BackupTarget, error: unknown): string {
  * A short reason for analytics: the Drive error kind, `aborted` for a cancelled
  * request, `unknown` otherwise. Never the message, which can carry a file path.
  */
+/** Cloud failures that usually pass on their own; they get no phone copy. */
+const TRANSIENT_BACKUP_ERROR_KINDS: ReadonlySet<string> = new Set([
+  'offline',
+  'timeout',
+  'rate_limited',
+  'server',
+  'aborted',
+]);
+
 function backupErrorKind(error: unknown): string {
   if (error instanceof DriveError) return error.kind;
   if (error instanceof Error && error.name === 'AbortError') return 'aborted';

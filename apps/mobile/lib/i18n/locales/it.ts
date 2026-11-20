@@ -2370,7 +2370,9 @@ const it = {
   },
   pro: {
     limit_receipt_scans:
-      'Il piano gratuito include {{count}} scansioni di scontrini in totale. Passa a Pro per scansioni illimitate.',
+      'Il piano gratuito include {{count}} scansioni di scontrini al mese. Passa a Pro per scansioni illimitate.',
+    limit_autolog:
+      'Hai usato tutte le {{count}} automazioni Apple Pay gratuite, quindi gli ultimi pagamenti non sono stati registrati. Passa a Pro per usarle senza limiti.',
     custom_logos_label: 'Logo conto personalizzati',
     items_label: 'Oggetti',
     budget_templates_label: 'Modelli di budget',
@@ -2711,6 +2713,8 @@ const it = {
         'Questa esecuzione non conteneva alcun pagamento, è normale in un test. Se hai appena pagato, apri Money2Time per aggiungerlo.',
       autolog_test_alert_body:
         'Questa esecuzione non conteneva testo di notifica, è normale in un test. Le notifiche bancarie compariranno in Money2Time da controllare.',
+      autolog_limit_body:
+        'Hai usato tutte le {{count}} automazioni gratuite. Passa a Pro in Money2Time per usarle senza limiti.',
       daily_title: "Com'è andata oggi?",
       daily_body: 'Dedica 30 secondi a registrare le spese di oggi finché sono fresche.',
       recurring_title: '{{name}} · {{amount}}',

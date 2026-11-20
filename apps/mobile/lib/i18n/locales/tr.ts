@@ -2376,7 +2376,9 @@ const tr = {
   },
   pro: {
     limit_receipt_scans:
-      'Ücretsiz plan toplam {{count}} fiş taraması içerir. Sınırsız tarama için Pro’ya yükseltin.',
+      'Ücretsiz plan ayda {{count}} fiş taraması içerir. Sınırsız tarama için Pro’ya yükseltin.',
+    limit_autolog:
+      "Ücretsiz {{count}} Apple Pay otomasyonunun hepsini kullandınız, bu yüzden son ödemeleriniz kaydedilmedi. Sınırsız kullanım için Pro'ya yükseltin.",
     custom_logos_label: 'Özel hesap logoları',
     items_label: 'Eşyalar',
     budget_templates_label: 'Bütçe şablonları',
@@ -2710,6 +2712,8 @@ const tr = {
         "Bu çalıştırmayla bir ödeme gelmedi, bu bir test için normaldir. Az önce ödeme yaptıysanız eklemek için Money2Time'ı açın.",
       autolog_test_alert_body:
         "Bu çalıştırmayla bildirim metni gelmedi, bu bir test için normaldir. Banka bildirimleri incelemeniz için Money2Time'da görünecek.",
+      autolog_limit_body:
+        "Ücretsiz {{count}} otomasyonun hepsini kullandınız. Sınırsız kullanım için Money2Time'da Pro'ya yükseltin.",
       daily_title: 'Bugün nasıl geçti?',
       daily_body: 'Hazır tazeyken bugünün harcamalarını kaydetmek için 30 saniye ayırın.',
       recurring_title: '{{name}} · {{amount}}',

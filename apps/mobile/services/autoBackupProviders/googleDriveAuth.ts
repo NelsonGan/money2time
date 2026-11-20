@@ -65,10 +65,28 @@ function hasDriveAccess(user: { scopes?: string[] } | null): boolean {
   return DRIVE_SCOPES_THAT_COVER_BACKUP.some((scope) => scopes.includes(scope));
 }
 
+/**
+ * Why Drive cannot take a backup right now, for analytics: no Google account
+ * at all, a remembered account whose session could not be restored (offline,
+ * revoked, expired), or an account that never granted Drive access. The first
+ * and last are states only the person can change (they need to reconnect);
+ * the middle one usually passes on its own.
+ */
+export type GoogleDriveUnavailableReason = 'signed_out' | 'session_unavailable' | 'no_drive_access';
+
+/** Whether the Google session can reach Drive, and if not, why. */
+export async function getGoogleDriveSessionState(opts?: {
+  force?: boolean;
+}): Promise<'connected' | GoogleDriveUnavailableReason> {
+  const restored = await restoreGoogleSession(opts);
+  if (restored === 'signed_out') return 'signed_out';
+  if (restored === 'failed') return 'session_unavailable';
+  return hasDriveAccess(GoogleSignin.getCurrentUser()) ? 'connected' : 'no_drive_access';
+}
+
 /** A usable Google session for Drive: restored, and allowed to reach Drive. */
 export async function ensureGoogleSession(opts?: { force?: boolean }): Promise<boolean> {
-  if (!(await restoreGoogleSession(opts))) return false;
-  return hasDriveAccess(GoogleSignin.getCurrentUser());
+  return (await getGoogleDriveSessionState(opts)) === 'connected';
 }
 
 /**
@@ -78,10 +96,10 @@ export async function ensureGoogleSession(opts?: { force?: boolean }): Promise<b
 async function restoreGoogleSession(opts?: {
   force?: boolean;
   purpose?: 'drive' | 'sign_in';
-}): Promise<boolean> {
+}): Promise<'restored' | 'signed_out' | 'failed'> {
   configureOnce(opts?.purpose);
-  if (!opts?.force && GoogleSignin.getCurrentUser()) return true;
-  if (!GoogleSignin.hasPreviousSignIn()) return false;
+  if (!opts?.force && GoogleSignin.getCurrentUser()) return 'restored';
+  if (!GoogleSignin.hasPreviousSignIn()) return 'signed_out';
 
   // Dedupe concurrent restores — the settings screen, `listAllBackups` and a
   // backup run can all ask at the same time, and each `signInSilently()` is a
@@ -102,7 +120,7 @@ async function restoreGoogleSession(opts?: {
       if (restorePromise === promise) restorePromise = null;
     });
   }
-  return restorePromise;
+  return (await restorePromise) ? 'restored' : 'failed';
 }
 
 export async function getGoogleAccountEmail(): Promise<string | null> {
@@ -219,7 +237,7 @@ export async function getGoogleIdToken(): Promise<GoogleIdTokenResult> {
   // account's scopes before the restore; on iOS `getCurrentUser()` is empty
   // until then, and its restore does not depend on the configured scopes.
   const purpose = hasDriveAccess(GoogleSignin.getCurrentUser()) ? 'drive' : 'sign_in';
-  if (await restoreGoogleSession({ force: true, purpose })) {
+  if ((await restoreGoogleSession({ force: true, purpose })) === 'restored') {
     try {
       const tokens = await GoogleSignin.getTokens();
       if (tokens.idToken) return { ok: true, idToken: tokens.idToken };

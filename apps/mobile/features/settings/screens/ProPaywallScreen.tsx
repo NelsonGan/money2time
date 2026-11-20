@@ -515,10 +515,10 @@ function useCompareRows(voiceSupported: boolean): CompareRow[] {
         pro: UNLIMITED,
       },
       {
-        // Free scans are a lifetime total (like voice); Pro is advertised as
+        // Free scans reset each calendar month ("20/mo"); Pro is advertised as
         // unlimited (the server-side fair-use cap stays out of the paywall).
         label: I18n.t('pro.receipt_scans_label'),
-        free: I18n.t('pro.compare_limited'),
+        free: `${PRO_LIMITS.FREE_MAX_RECEIPT_SCANS}${I18n.t('pro.per_month_short')}`,
         pro: UNLIMITED,
       },
       {

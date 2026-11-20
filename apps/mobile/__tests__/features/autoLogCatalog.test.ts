@@ -60,6 +60,7 @@ function input(overrides: Partial<BuildAutoLogCatalogInput> = {}): BuildAutoLogC
     testCardPaymentBody: 'No payment came with this run, which is normal for a test.',
     testNotificationAlertBody:
       'No notification text came with this run, which is normal for a test.',
+    limitReachedMessage: 'You have used all 100 free automations.',
     reportingCurrency: 'USD',
     generatedAt: '2026-07-15T10:30:00.000Z',
     ...overrides,
@@ -154,6 +155,13 @@ describe('buildAutoLogCatalog', () => {
     expect(catalog.testNotificationTitle).toBe('Working');
     expect(catalog.testCardPaymentBody).toBe('Next tap logs');
     expect(catalog.testNotificationAlertBody).toBe('Alerts land for review');
+  });
+
+  it('carries the localized error the Shortcut shows at the free limit', () => {
+    const catalog = buildAutoLogCatalog(
+      input({ limitReachedMessage: 'Plus de journaux gratuits' }),
+    );
+    expect(catalog.limitReachedMessage).toBe('Plus de journaux gratuits');
   });
 
   describe('accounts', () => {

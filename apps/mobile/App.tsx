@@ -78,7 +78,9 @@ import {
   EditAlbumTransactionsScreen,
 } from '~/features/albums/screens';
 import { checkApplePayTap, recordApplePayTap } from '~/features/autoLog/applePayTaps';
+import { AutoLogLimitPrompt } from '~/features/autoLog/components/AutoLogLimitPrompt';
 import { PaymentAlertSync } from '~/features/autoLog/components/PaymentAlertSync';
+import { autoLogBlockedByAccounts } from '~/features/autoLog/lib/decide';
 import { AutoLogLimitError } from '~/features/autoLog/persistTransaction';
 import { NotificationHistoryScreen } from '~/features/autoLog/screens/NotificationHistoryScreen';
 import { NotificationReviewEditorScreen } from '~/features/autoLog/screens/NotificationReviewEditorScreen';
@@ -1748,6 +1750,13 @@ function AutoLogSync() {
   const testNotificationTitle = I18n.t('notifications.content.autolog_test_title');
   const testCardPaymentBody = I18n.t('notifications.content.autolog_test_card_body');
   const testNotificationAlertBody = I18n.t('notifications.content.autolog_test_alert_body');
+  // The error a refused tap shows: the account limit when that is what blocks,
+  // otherwise used-up automatic logs (including taps queued while closed).
+  const limitReachedMessage = autoLogBlockedByAccounts({ accounts, inSharedLedger })
+    ? I18n.t('pro.limit_accounts', { count: PRO_LIMITS.FREE_MAX_ACCOUNTS })
+    : I18n.t('notifications.content.autolog_limit_body', {
+        count: PRO_LIMITS.FREE_MAX_AUTO_LOGS,
+      });
 
   // Guards against overlapping drains; see `drain` below.
   const stateRef = useRef({
@@ -1798,6 +1807,7 @@ function AutoLogSync() {
           testNotificationTitle,
           testCardPaymentBody,
           testNotificationAlertBody,
+          limitReachedMessage,
           reportingCurrency: settings.currencyCode,
           generatedAt: new Date().toISOString(),
         }),
@@ -1815,6 +1825,7 @@ function AutoLogSync() {
     inSharedLedger,
     isPro,
     isStatusKnown,
+    limitReachedMessage,
     notificationTitle,
     quickEntryPrefs.autoLogAutoCategorize,
     quickEntryPrefs.autoLogIncludeSubcategories,
@@ -3070,6 +3081,9 @@ function AppContent() {
   const rootScreenListeners = useMemo(() => createNativeStackSwipeHapticListeners(), []);
   const checkedFeatureAnnouncementUserRef = useRef<string | null>(null);
 
+  // Whether the NavigationContainer has reported ready, for a prompt that
+  // pushes a route on its own (AutoLogLimitPrompt) rather than showing a Modal.
+  const [navigationReady, setNavigationReady] = useState(false);
   const syncRootActiveScreen = useCallback(() => {
     const rootState = navigationRef.getRootState();
     const nextScreen = (rootState?.routes[rootState.index]?.name ??
@@ -3077,6 +3091,10 @@ function AppContent() {
 
     setRootActiveScreen((previous) => (previous === nextScreen ? previous : nextScreen));
   }, [navigationRef]);
+  const handleNavigationReady = useCallback(() => {
+    setNavigationReady(true);
+    syncRootActiveScreen();
+  }, [syncRootActiveScreen]);
 
   const visibleScreen = introPaywallPending
     ? 'onboarding_paywall'
@@ -3325,7 +3343,7 @@ function AppContent() {
       <NavigationContainer
         key={`locale:${navigationLocaleKey}`}
         ref={navigationRef}
-        onReady={syncRootActiveScreen}
+        onReady={handleNavigationReady}
         onStateChange={syncRootActiveScreen}
       >
         <SplitBillSessionProvider>
@@ -3555,6 +3573,15 @@ function AppContent() {
         onTurnOn={handleTurnOnCloudSync}
       />
       <ReviewPrePromptSheet allowed={!biometricLocked && rootPromptsAllowed} />
+      <AutoLogLimitPrompt
+        allowed={
+          navigationReady &&
+          !biometricLocked &&
+          rootPromptsAllowed &&
+          !featureAnnouncementVisible &&
+          !cloudBackupPromptVisible
+        }
+      />
       <LedgerProGuard
         canSwitch={rootPromptsAllowed}
         suppressed={
