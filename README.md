@@ -600,10 +600,12 @@ locations** is off for everyone until they turn it on. The code lives in
   - **Remove location** when the entry has one.
 - **Auto-tag**: with both switches on, a new expense opened in the full
   editor starts tagged with where the phone is, from the phone alone (no
-  network call when the phone's geocoder can name the spot). The tag is kept
-  only while the entry is still an expense dated today: one backdated or
-  switched to income drops it at save, since it was not bought here. A place
-  the user picked or removed is never overwritten. One fix is reused for 90
+  network call when the phone's geocoder can name the spot). The tag shows
+  only while the entry is an expense dated today: backdating it or switching
+  it to income takes the tag off the chip (it was not bought here), and going
+  back puts it on again. A place the user picked or removed is never touched.
+  `Transaction Location Set` is sent only once the save goes through. One fix
+  is reused for 90
   seconds (`useCurrentPlace`), so logging several things in a row asks the GPS
   once. Quick entry, scans, voice and automations never tag.
 - **Rows** show the place last on their subtitle (`TransactionItem`).
@@ -616,8 +618,10 @@ locations** is off for everyone until they turn it on. The code lives in
   frozen at save for a foreign entry, or hours in time mode; an income-only
   place shows its income in green). Places that crowd at the current zoom
   merge into a bubble with their entry count and total (`placeClusters.ts`,
-  Supercluster); tapping a bubble zooms in while it can still split, then
-  lists its places. Tapping a place opens a panel with its visits, total and
+  Supercluster); tapping a bubble zooms in to where it splits. Places at one
+  point (two shops in one building) never split, so past the clustering zoom
+  they stay one bubble (`mergeSamePoint`) that lists them when tapped. An
+  income-only bubble shows its income. Tapping a place opens a panel with its visits, total and
   hours of work, and its transactions (`ActivityTransactionList`), each
   opening the editor. With nothing selected the panel lists the period's
   places, busiest first. With no tagged entries it explains how to start, with
@@ -635,7 +639,9 @@ locations** is off for everyone until they turn it on. The code lives in
   a name (its address, else its coordinates). The repository normalizes any
   input that touches one of the six fields (`withNormalizedLocation`); an input
   that touches none leaves the location alone, so an edit that changes the
-  amount keeps it. The editor sends the location on an edit only once the user
+  amount keeps it. Only an expense or income has a place: an entry made, or
+  changed into, a transfer or balance adjustment loses it, from any editor
+  (the app's, or the Web Dashboard's through the phone). The editor sends the location on an edit only once the user
   changed it.
 - **Where it travels.** The columns are part of the row, so Cloud Sync, backups,
   the Export Database JSON and the Web Dashboard carry them with no change
@@ -656,13 +662,16 @@ locations** is off for everyone until they turn it on. The code lives in
   The Android key comes from `GOOGLE_MAPS_ANDROID_API_KEY` at build time
   (`app.config.ts` passes it to the `react-native-maps` config plugin; an EAS
   environment variable for every profile, `apps/mobile/.env` or the root
-  `.env` locally), so the public repository never holds it. It is the key
+  `.env` locally), so the public repository never holds it. The Maps SDK
+  crashes on a missing key, so a build without one gets a placeholder (a blank
+  Android map) and a production Android build on EAS refuses to start without
+  it. It is the key
   "Money2Time Maps SDK for Android" in the `money2time-expo` Cloud project,
   restricted to the Maps SDK for Android, which is free with no usage limit
   but needs billing on the project (linked 2026-11-21, with an RM5 budget alert
-  "money2time-expo maps guard"). Without the key the Android map is blank and
-  the rest works. Markers are react views; Google draws them as snapshots, so
-  they track view changes only briefly after their label or cover changes.
+  "money2time-expo maps guard"). Markers are react views; Google draws them as
+  snapshots, so they track view changes only briefly, again each time their
+  label, cover or the theme changes.
   Both `expo-location` and react-native-maps are native modules: adding them
   needs a dev-client rebuild, and the map screens lazy-load them behind an
   error boundary.

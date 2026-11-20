@@ -969,14 +969,21 @@ export function TransactionEditorScreen({
     appUserId: settings.appUserId,
     locale: I18n.locale,
   });
+  // The automatic tag shows only while the entry is an expense dated today (it
+  // was bought here, now), and comes back if it becomes one again. A place the
+  // user picked or removed is never touched.
+  const autoTagApplies = type === 'expense' && date === toDateInput(new Date());
   useEffect(() => {
-    if (!autoTagEligible || autoTag.status !== 'ready' || !autoTag.place) return;
-    // Never over a place the user picked or removed.
-    if (locationSource !== null) return;
-    setLocation(toTransactionLocation(autoTag.place));
-    setLocationSource('auto');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoTagEligible, autoTag.status, autoTag.place]);
+    if (!autoTagEligible) return;
+    if (locationSource !== null && locationSource !== 'auto') return;
+    if (autoTagApplies && autoTag.status === 'ready' && autoTag.place) {
+      setLocation(toTransactionLocation(autoTag.place));
+      setLocationSource('auto');
+    } else if (!autoTagApplies && locationSource === 'auto') {
+      setLocation(null);
+      setLocationSource(null);
+    }
+  }, [autoTagEligible, autoTagApplies, autoTag.status, autoTag.place, locationSource]);
   // "To be reimbursed", plus whether it has already been paid back. A settled
   // reimbursement is shown read-only here: undoing it has to remove the
   // money-in entry too, which is the Reimbursements page's job.
@@ -2417,6 +2424,7 @@ export function TransactionEditorScreen({
   const locationPayload = (txDate: string) => {
     locationEventRef.current = null;
     let saved = location;
+    // The effect above drops it on screen; this holds at save time too.
     if (locationSource === 'auto' && (type !== 'expense' || !isTodayLocal(txDate))) saved = null;
     if (mode === 'edit' && locationSource === null) return {};
     if (!saved) return mode === 'edit' ? NO_TRANSACTION_LOCATION : {};
