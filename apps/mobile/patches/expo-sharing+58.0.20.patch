@@ -1,8 +1,8 @@
 diff --git a/node_modules/expo-sharing/ios/SharingModule.swift b/node_modules/expo-sharing/ios/SharingModule.swift
-index fafe4da..745d272 100644
+index fafe4da..79809d7 100644
 --- a/node_modules/expo-sharing/ios/SharingModule.swift
 +++ b/node_modules/expo-sharing/ios/SharingModule.swift
-@@ -99,8 +99,15 @@ public final class SharingModule: Module {
+@@ -99,18 +99,30 @@ public final class SharingModule: Module {
      from viewController: UIViewController,
      anchor: SharingOptions.Rect?
    ) {
@@ -10,13 +10,31 @@ index fafe4da..745d272 100644
 -    guard viewController.traitCollection.horizontalSizeClass == .regular else {
 +    // Popovers are a regular-width behavior, not an iPad one. But a view
 +    // controller in an iPad form sheet reports a compact width while the
-+    // window, which decides whether the popover adapts into a sheet, stays
-+    // regular: UIKit then still presents a popover and throws without a
-+    // sourceView. Anchor whenever either one is regular; it is harmless when
-+    // the popover adapts anyway.
-+    let isRegular = [viewController.traitCollection, viewController.view.window?.traitCollection]
-+      .contains { $0?.horizontalSizeClass == .regular }
-+    guard isRegular else {
++    // window stays regular, and on iPad UIActivityViewController still shows
++    // as a popover there (the .pageSheet below does not change that), which
++    // throws without a sourceView. So anchor on iPad and whenever the view
++    // controller or its window is regular; anchoring is harmless when the
++    // popover adapts into a sheet.
++    let isPad = UIDevice.current.userInterfaceIdiom == .pad
++    guard isPad
++      || viewController.traitCollection.horizontalSizeClass == .regular
++      || viewController.view.window?.traitCollection.horizontalSizeClass == .regular
++    else {
        return
      }
  
+-    let viewFrame = viewController.view.frame
++    // The rect is in sourceView's own coordinates, so take its bounds, not
++    // its frame (a form sheet's frame starts away from the origin).
++    let viewBounds = viewController.view.bounds
+     SceneGeometry.anchorPopover(
+       of: activityController,
+       to: viewController.view,
+       rect: CGRect(
+-        x: anchor?.x ?? viewFrame.midX,
+-        y: anchor?.y ?? viewFrame.maxY,
++        x: anchor?.x ?? viewBounds.midX,
++        y: anchor?.y ?? viewBounds.maxY,
+         width: anchor?.width ?? 0,
+         height: anchor?.height ?? 0
+       )
