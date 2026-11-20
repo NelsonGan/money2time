@@ -1,8 +1,9 @@
-import React from 'react';
-import { ScrollView, View } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { Keyboard, ScrollView, type ScrollViewInstance, View } from 'react-native';
 import { GestureDetector } from 'react-native-gesture-handler';
-import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import { useReanimatedKeyboardAnimation } from 'react-native-keyboard-controller';
+import Animated, { FadeIn, useAnimatedStyle } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import type { MascotName } from '~/components/feedback/Mascot';
 import { useEdgeSwipeBack } from '~/hooks/useEdgeSwipeBack';
@@ -20,6 +21,8 @@ interface OnboardingStepLayoutProps {
   onPrimary: () => void;
   primaryDisabled?: boolean;
   secondary?: OnboardingSecondaryAction;
+  /** Scroll to the end when the keyboard opens, so what a field changes stays in view. */
+  scrollToEndOnKeyboard?: boolean;
   children: React.ReactNode;
 }
 
@@ -36,17 +39,36 @@ export function OnboardingStepLayout({
   onPrimary,
   primaryDisabled,
   secondary,
+  scrollToEndOnKeyboard = false,
   children,
 }: OnboardingStepLayoutProps) {
   const swipeBackGesture = useEdgeSwipeBack(onBack);
+  const scrollRef = useRef<ScrollViewInstance>(null);
+  // The button bar rides on the keyboard. Its own bottom padding already covers
+  // the home indicator, so the keyboard only adds what is left above that.
+  const keyboard = useReanimatedKeyboardAnimation();
+  const { bottom: bottomInset } = useSafeAreaInsets();
+  const barStyle = useAnimatedStyle(() => ({
+    paddingBottom: Math.max(0, -keyboard.height.value - bottomInset),
+  }));
+
+  useEffect(() => {
+    if (!scrollToEndOnKeyboard) return undefined;
+    const subscription = Keyboard.addListener('keyboardDidShow', () => {
+      scrollRef.current?.scrollToEnd({ animated: true });
+    });
+    return () => subscription.remove();
+  }, [scrollToEndOnKeyboard]);
 
   return (
     <GestureDetector gesture={swipeBackGesture}>
-      <KeyboardAvoidingView behavior="padding" className="flex-1">
+      <View className="flex-1">
         <ScrollView
+          ref={scrollRef}
           className="flex-1"
           contentContainerClassName="px-5 pb-6"
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
           showsVerticalScrollIndicator={false}
         >
           <OnboardingStepHeader title={title} subtitle={subtitle} mascot={mascot} />
@@ -54,15 +76,15 @@ export function OnboardingStepLayout({
             {children}
           </Animated.View>
         </ScrollView>
-        <View>
+        <Animated.View style={barStyle}>
           <OnboardingActionBar
             onPrimary={onPrimary}
             primaryLabel={primaryLabel}
             primaryDisabled={primaryDisabled}
             secondary={secondary}
           />
-        </View>
-      </KeyboardAvoidingView>
+        </Animated.View>
+      </View>
     </GestureDetector>
   );
 }

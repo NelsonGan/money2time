@@ -75,6 +75,7 @@ export function OnboardingIncomeStep({
       subtitle={I18n.t('onboarding.income.subtitle')}
       mascot="thinking"
       onBack={onBack}
+      scrollToEndOnKeyboard
       primaryLabel={I18n.t('common.continue')}
       primaryDisabled={!hasRate}
       onPrimary={() => {
@@ -110,7 +111,10 @@ export function OnboardingIncomeStep({
               >
                 <Text
                   variant="caption"
-                  className={cn('text-[14px]', active ? 'text-white' : 'text-foreground')}
+                  className={cn(
+                    'text-[14px]',
+                    active ? 'text-primary-foreground' : 'text-foreground',
+                  )}
                 >
                   {I18n.t(`wage.type.${type}`)}
                 </Text>
@@ -139,13 +143,12 @@ export function OnboardingIncomeStep({
               placeholder="0"
               placeholderTextColor={`${themeColors.textMuted}66`}
               keyboardType="decimal-pad"
-              autoFocus={config.wageAmount <= 0}
               selectionColor={themeColors.primary}
               accessibilityLabel={I18n.t('onboarding.income.pay_label')}
               className="ml-1 flex-1 text-foreground"
               style={[
                 SINGLE_LINE_TEXT_INPUT_STYLE,
-                { fontFamily: FONT.extrabold, fontSize: 38, height: 48 },
+                { fontFamily: FONT.extrabold, fontWeight: '800', fontSize: 38, height: 48 },
               ]}
             />
           </View>

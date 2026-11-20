@@ -19,7 +19,7 @@ const SAMPLES = [
   { id: 'coffee', icon: 'coffee', hours: 0.25 },
   { id: 'lunch', icon: 'ramen', hours: 0.6 },
   { id: 'taxi', icon: 'taxi', hours: 0.9 },
-  { id: 'movie', icon: 'popcorn', hours: 1.2 },
+  { id: 'movie', icon: 'cinema', hours: 1.2 },
   { id: 'groceries', icon: 'grocery-basket', hours: 3 },
 ] as const;
 
