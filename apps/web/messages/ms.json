@@ -68,7 +68,8 @@
       "copyright": "© {year} Money2Time. Hak cipta terpelihara.",
       "costInHours": "Harga dalam jam",
       "tutorials": "Tutorial",
-      "dashboard": "Papan pemuka web"
+      "dashboard": "Papan pemuka web",
+      "albums": "Album"
     }
   },
   "storeButtons": {
@@ -326,17 +327,6 @@
     "community": {
       "body": "Berhubung dengan pengguna lain, kongsi maklum balas, dan dapatkan tip di pelayan Discord kami.",
       "cta": "Sertai Komuniti"
-    },
-    "dashboardEntry": {
-      "eyebrow": "Baharu · Papan Pemuka Web",
-      "title": "Data Money2Time anda, di skrin besar",
-      "body": "Imbas kod di app.money2time.com dengan telefon anda untuk melihat aliran tunai, perbelanjaan, nilai bersih, bajet, perjalanan dan jam di sebalik setiap pembelian. Tambah dan edit transaksi daripada komputer anda semasa telefon anda disambungkan. Disulitkan hujung ke hujung.",
-      "cta": "Buka papan pemuka web",
-      "points": {
-        "private": "Disulitkan hujung ke hujung",
-        "charts": "17 papan pemuka",
-        "edits": "Edit daripada komputer anda"
-      }
     }
   },
   "contact": {

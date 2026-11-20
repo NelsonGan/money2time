@@ -68,7 +68,8 @@
       "copyright": "© {year} Money2Time. Wszelkie prawa zastrzeżone.",
       "costInHours": "Cena w godzinach",
       "tutorials": "Poradniki",
-      "dashboard": "Panel WWW"
+      "dashboard": "Panel WWW",
+      "albums": "Albumy"
     }
   },
   "storeButtons": {
@@ -326,17 +327,6 @@
     "community": {
       "body": "Nawiąż kontakt z innymi użytkownikami, podziel się opinią i uzyskaj wskazówki na naszym serwerze Discord.",
       "cta": "Dołącz do Społeczności"
-    },
-    "dashboardEntry": {
-      "eyebrow": "Nowość · Panel webowy",
-      "title": "Twoje dane z Money2Time na dużym ekranie",
-      "body": "Zeskanuj telefonem kod na app.money2time.com, aby zobaczyć przepływy, wydatki, majątek, budżety, podróże i godziny pracy stojące za każdym zakupem. Dodawaj i edytuj transakcje z komputera, gdy telefon jest połączony. Szyfrowanie end-to-end.",
-      "cta": "Otwórz panel WWW",
-      "points": {
-        "private": "Szyfrowanie end-to-end",
-        "charts": "17 paneli",
-        "edits": "Edycja z komputera"
-      }
     }
   },
   "contact": {

@@ -68,7 +68,8 @@
       "copyright": "© {year} Money2Time. Alle rechten voorbehouden.",
       "costInHours": "Prijs in uren",
       "tutorials": "Handleidingen",
-      "dashboard": "Webdashboard"
+      "dashboard": "Webdashboard",
+      "albums": "Albums"
     }
   },
   "storeButtons": {
@@ -326,17 +327,6 @@
     "community": {
       "body": "Maak contact met andere gebruikers, deel feedback en krijg tips op onze Discord-server.",
       "cta": "Word Lid van de Community"
-    },
-    "dashboardEntry": {
-      "eyebrow": "Nieuw · Webdashboard",
-      "title": "Je Money2Time-gegevens, op een groot scherm",
-      "body": "Scan een code op app.money2time.com met je telefoon en zie cashflow, uitgaven, vermogen, budgetten, reizen en de uren achter elke aankoop. Voeg transacties toe en bewerk ze vanaf je computer zolang je telefoon verbonden is. End-to-end versleuteld.",
-      "cta": "Open het webdashboard",
-      "points": {
-        "private": "End-to-end versleuteld",
-        "charts": "17 dashboards",
-        "edits": "Bewerk vanaf je computer"
-      }
     }
   },
   "contact": {

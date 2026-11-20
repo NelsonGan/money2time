@@ -68,7 +68,8 @@
       "copyright": "© {year} Money2Time. Tous droits réservés.",
       "costInHours": "Prix en heures",
       "tutorials": "Tutoriels",
-      "dashboard": "Tableau de bord web"
+      "dashboard": "Tableau de bord web",
+      "albums": "Albums"
     }
   },
   "storeButtons": {
@@ -326,17 +327,6 @@
     "community": {
       "body": "Échangez avec d'autres utilisateurs, partagez vos retours et obtenez des astuces sur notre serveur Discord.",
       "cta": "Rejoindre la Communauté"
-    },
-    "dashboardEntry": {
-      "eyebrow": "Nouveau · Tableau de bord web",
-      "title": "Vos données Money2Time, sur grand écran",
-      "body": "Scannez un code sur app.money2time.com avec votre téléphone pour voir flux de trésorerie, dépenses, patrimoine, budgets, voyages et les heures derrière chaque achat. Ajoutez et modifiez des transactions depuis votre ordinateur tant que votre téléphone est connecté. Chiffré de bout en bout.",
-      "cta": "Ouvrir le tableau de bord web",
-      "points": {
-        "private": "Chiffré de bout en bout",
-        "charts": "17 tableaux de bord",
-        "edits": "Modifiez depuis votre ordinateur"
-      }
     }
   },
   "contact": {

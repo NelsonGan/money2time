@@ -68,7 +68,8 @@
       "copyright": "© {year} Money2Time. Alla rättigheter förbehållna.",
       "costInHours": "Pris i timmar",
       "tutorials": "Guider",
-      "dashboard": "Webbpanel"
+      "dashboard": "Webbpanel",
+      "albums": "Album"
     }
   },
   "storeButtons": {
@@ -326,17 +327,6 @@
     "community": {
       "body": "Få kontakt med andra användare, dela feedback och få tips på vår Discord-server.",
       "cta": "Gå med i Communityn"
-    },
-    "dashboardEntry": {
-      "eyebrow": "Nytt · Webbpanel",
-      "title": "Din Money2Time-data på en stor skärm",
-      "body": "Skanna en kod på app.money2time.com med telefonen och se kassaflöde, utgifter, förmögenhet, budgetar, resor och timmarna bakom varje köp. Lägg till och redigera transaktioner från datorn medan telefonen är ansluten. End-to-end-krypterat.",
-      "cta": "Öppna webbpanelen",
-      "points": {
-        "private": "End-to-end-krypterat",
-        "charts": "17 paneler",
-        "edits": "Redigera från datorn"
-      }
     }
   },
   "contact": {

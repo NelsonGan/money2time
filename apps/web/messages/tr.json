@@ -68,7 +68,8 @@
       "copyright": "© {year} Money2Time. Tüm hakları saklıdır.",
       "costInHours": "Saat cinsinden fiyat",
       "tutorials": "Kılavuzlar",
-      "dashboard": "Web panosu"
+      "dashboard": "Web panosu",
+      "albums": "Albümler"
     }
   },
   "storeButtons": {
@@ -326,17 +327,6 @@
     "community": {
       "body": "Diğer kullanıcılarla bağlantı kurun, geri bildirim paylaşın ve Discord sunucumuzda ipuçları alın.",
       "cta": "Topluluğa Katıl"
-    },
-    "dashboardEntry": {
-      "eyebrow": "Yeni · Web Panosu",
-      "title": "Money2Time verileriniz büyük ekranda",
-      "body": "Telefonunuzla app.money2time.com'daki kodu tarayın; nakit akışını, harcamaları, net varlığı, bütçeleri, seyahatleri ve her alışverişin ardındaki saatleri görün. Telefonunuz bağlıyken bilgisayarınızdan işlem ekleyip düzenleyin. Uçtan uca şifreli.",
-      "cta": "Web panosunu aç",
-      "points": {
-        "private": "Uçtan uca şifreli",
-        "charts": "17 pano",
-        "edits": "Bilgisayarınızdan düzenleyin"
-      }
     }
   },
   "contact": {

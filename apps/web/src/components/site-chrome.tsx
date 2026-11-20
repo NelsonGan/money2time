@@ -3,7 +3,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { StoreLinks } from "@/app/store-buttons";
 import { Wordmark } from "@/components/brand";
 import { Link } from "@/i18n/navigation";
-import { appUrl } from "@/lib/platform";
+import { ALBUM_ORIGIN, appUrl } from "@/lib/platform";
 
 export { Header } from "./site-header";
 
@@ -14,6 +14,7 @@ export async function Footer({ includeTerms = true }: { includeTerms?: boolean }
   const links = [
     { href: "/tutorials", label: t("tutorials") },
     { href: appUrl(locale), label: t("dashboard") },
+    { href: ALBUM_ORIGIN, label: t("albums") },
     { href: "/cost-in-hours", label: t("costInHours") },
     { href: "/contact", label: t("contact") },
     { href: "/privacy", label: t("privacy") },
@@ -31,7 +32,7 @@ export async function Footer({ includeTerms = true }: { includeTerms?: boolean }
 
           <nav className="flex basis-full flex-wrap items-center gap-x-7 gap-y-3 sm:flex-1 sm:basis-auto">
             {links.map((link) =>
-              // The dashboard is on its own host: a plain link, not a localised one.
+              // The dashboard and albums are on their own hosts: plain links, not localised ones.
               link.href.startsWith("https://") ? (
                 <a
                   key={link.href}

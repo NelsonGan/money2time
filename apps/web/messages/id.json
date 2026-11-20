@@ -68,7 +68,8 @@
       "copyright": "© {year} Money2Time. Semua hak dilindungi.",
       "costInHours": "Harga dalam jam",
       "tutorials": "Tutorial",
-      "dashboard": "Dasbor web"
+      "dashboard": "Dasbor web",
+      "albums": "Album"
     }
   },
   "storeButtons": {
@@ -326,17 +327,6 @@
     "community": {
       "body": "Terhubung dengan pengguna lain, bagikan masukan, dan dapatkan tips di server Discord kami.",
       "cta": "Gabung Komunitas"
-    },
-    "dashboardEntry": {
-      "eyebrow": "Baru · Dasbor Web",
-      "title": "Data Money2Time-mu, di layar besar",
-      "body": "Pindai kode di app.money2time.com dengan ponselmu untuk melihat arus kas, pengeluaran, kekayaan bersih, anggaran, perjalanan, dan jam di balik setiap pembelian. Tambah dan ubah transaksi dari komputermu selama ponselmu tersambung. Terenkripsi end-to-end.",
-      "cta": "Buka dasbor web",
-      "points": {
-        "private": "Terenkripsi end-to-end",
-        "charts": "17 dasbor",
-        "edits": "Ubah dari komputermu"
-      }
     }
   },
   "contact": {

@@ -68,7 +68,8 @@
       "copyright": "© {year} Money2Time. Alle Rechte vorbehalten.",
       "costInHours": "Preis in Stunden",
       "tutorials": "Anleitungen",
-      "dashboard": "Web-Dashboard"
+      "dashboard": "Web-Dashboard",
+      "albums": "Alben"
     }
   },
   "storeButtons": {
@@ -326,17 +327,6 @@
     "community": {
       "body": "Vernetze dich mit anderen Nutzern, teile Feedback und erhalte Tipps auf unserem Discord-Server.",
       "cta": "Community Beitreten"
-    },
-    "dashboardEntry": {
-      "eyebrow": "Neu · Web-Dashboard",
-      "title": "Deine Money2Time-Daten auf dem großen Bildschirm",
-      "body": "Scanne einen Code auf app.money2time.com mit deinem Handy und sieh Cashflow, Ausgaben, Vermögen, Budgets, Reisen und die Stunden hinter jedem Kauf. Füge Transaktionen am Computer hinzu und bearbeite sie, solange dein Handy verbunden ist. Ende-zu-Ende-verschlüsselt.",
-      "cta": "Web-Dashboard öffnen",
-      "points": {
-        "private": "Ende-zu-Ende-verschlüsselt",
-        "charts": "17 Dashboards",
-        "edits": "Am Computer bearbeiten"
-      }
     }
   },
   "contact": {

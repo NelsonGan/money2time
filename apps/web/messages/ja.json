@@ -68,7 +68,8 @@
       "copyright": "© {year} Money2Time. All rights reserved.",
       "costInHours": "時間で見る価格",
       "tutorials": "使い方ガイド",
-      "dashboard": "Webダッシュボード"
+      "dashboard": "Webダッシュボード",
+      "albums": "アルバム"
     }
   },
   "storeButtons": {
@@ -326,17 +327,6 @@
     "community": {
       "body": "他のユーザーとつながり、フィードバックを共有し、Discordサーバーでヒントを得られます。",
       "cta": "コミュニティに参加"
-    },
-    "dashboardEntry": {
-      "eyebrow": "新機能 · Webダッシュボード",
-      "title": "Money2Timeのデータを、大きな画面で",
-      "body": "スマホでapp.money2time.comのコードをスキャンすると、収支、支出、純資産、予算、旅行、そして買い物ごとの労働時間を確認できます。スマホが接続されている間は、パソコンから取引の追加や編集もできます。エンドツーエンド暗号化。",
-      "cta": "Webダッシュボードを開く",
-      "points": {
-        "private": "エンドツーエンド暗号化",
-        "charts": "17種類のダッシュボード",
-        "edits": "パソコンから編集"
-      }
     }
   },
   "contact": {

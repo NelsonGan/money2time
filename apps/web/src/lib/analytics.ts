@@ -29,7 +29,6 @@ export const EVENTS = {
   costComparisonChanged: "Cost Comparison Changed",
   dashboardDataReceived: "Dashboard Data Received",
   dashboardEdited: "Dashboard Edited",
-  dashboardEntryClicked: "Dashboard Entry Clicked",
   dashboardLinked: "Dashboard Linked",
   dashboardProPromptViewed: "Dashboard Pro Prompt Viewed",
   dashboardUnlinked: "Dashboard Unlinked",
@@ -161,7 +160,6 @@ type AnalyticsPlan = {
   };
   [EVENTS.dashboardDataReceived]: { result: DashboardLoadResult };
   [EVENTS.dashboardEdited]: { action: DashboardEditAction; result: DashboardEditResult; count: number };
-  [EVENTS.dashboardEntryClicked]: { placement: "home_section" };
   [EVENTS.dashboardLinked]: Record<string, never>;
   [EVENTS.dashboardProPromptViewed]: { feature: DashboardProFeature };
   [EVENTS.dashboardUnlinked]: { by: "browser" | "phone" };
@@ -629,11 +627,6 @@ function googleEvent(call: AnalyticsCall): {
         name: "m2t_dashboard_edited",
         parameters: { action: call.properties.action, result: call.properties.result, count: call.properties.count },
       };
-    case EVENTS.dashboardEntryClicked:
-      return {
-        name: "m2t_dashboard_entry_clicked",
-        parameters: { placement: call.properties.placement },
-      };
     case EVENTS.dashboardLinked:
       return { name: "m2t_dashboard_linked", parameters: {} };
     case EVENTS.dashboardProPromptViewed:
@@ -735,8 +728,6 @@ function postHogEvent(call: AnalyticsCall): {
         name: call.event,
         properties: { action: call.properties.action, result: call.properties.result, count: call.properties.count },
       };
-    case EVENTS.dashboardEntryClicked:
-      return { name: call.event, properties: { placement: call.properties.placement } };
     case EVENTS.dashboardLinked:
       return { name: call.event, properties: {} };
     case EVENTS.dashboardProPromptViewed:

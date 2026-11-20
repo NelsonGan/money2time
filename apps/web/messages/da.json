@@ -68,7 +68,8 @@
       "copyright": "© {year} Money2Time. Alle rettigheder forbeholdes.",
       "costInHours": "Pris i timer",
       "tutorials": "Vejledninger",
-      "dashboard": "Webdashboard"
+      "dashboard": "Webdashboard",
+      "albums": "Album"
     }
   },
   "storeButtons": {
@@ -326,17 +327,6 @@
     "community": {
       "body": "Få kontakt med andre brugere, del feedback, og få tips på vores Discord-server.",
       "cta": "Deltag i Fællesskabet"
-    },
-    "dashboardEntry": {
-      "eyebrow": "Nyt · Webdashboard",
-      "title": "Dine Money2Time-data på en stor skærm",
-      "body": "Scan en kode på app.money2time.com med din telefon for at se pengestrømme, forbrug, nettoformue, budgetter, rejser og timerne bag hvert køb. Tilføj og redigér transaktioner fra din computer, mens din telefon er forbundet. End-to-end-krypteret.",
-      "cta": "Åbn webdashboardet",
-      "points": {
-        "private": "End-to-end-krypteret",
-        "charts": "17 dashboards",
-        "edits": "Redigér fra din computer"
-      }
     }
   },
   "contact": {

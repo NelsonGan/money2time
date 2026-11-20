@@ -68,7 +68,8 @@
       "copyright": "© {year} Money2Time. Todos los derechos reservados.",
       "costInHours": "Precio en horas",
       "tutorials": "Tutoriales",
-      "dashboard": "Panel web"
+      "dashboard": "Panel web",
+      "albums": "Álbumes"
     }
   },
   "storeButtons": {
@@ -326,17 +327,6 @@
     "community": {
       "body": "Conecta con otros usuarios, comparte comentarios y obtén consejos en nuestro servidor de Discord.",
       "cta": "Unirse a la Comunidad"
-    },
-    "dashboardEntry": {
-      "eyebrow": "Novedad · Panel web",
-      "title": "Tus datos de Money2Time, en una pantalla grande",
-      "body": "Escanea un código en app.money2time.com con tu móvil para ver flujo de caja, gastos, patrimonio, presupuestos, viajes y las horas detrás de cada compra. Añade y edita transacciones desde tu ordenador mientras tu móvil esté conectado. Cifrado de extremo a extremo.",
-      "cta": "Abrir el panel web",
-      "points": {
-        "private": "Cifrado de extremo a extremo",
-        "charts": "17 paneles",
-        "edits": "Edita desde tu ordenador"
-      }
     }
   },
   "contact": {

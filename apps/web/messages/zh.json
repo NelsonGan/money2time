@@ -68,7 +68,8 @@
       "copyright": "© {year} Money2Time。保留所有权利。",
       "costInHours": "用小时看价格",
       "tutorials": "使用教程",
-      "dashboard": "网页看板"
+      "dashboard": "网页看板",
+      "albums": "相册"
     }
   },
   "storeButtons": {
@@ -326,17 +327,6 @@
     "community": {
       "body": "与其他用户交流，分享反馈，并在我们的 Discord 服务器上获取小贴士。",
       "cta": "加入社区"
-    },
-    "dashboardEntry": {
-      "eyebrow": "新功能 · 网页看板",
-      "title": "在大屏幕上查看你的 Money2Time 数据",
-      "body": "用手机扫描 app.money2time.com 上的代码，查看现金流、支出、净资产、预算、旅行，以及每笔消费背后的工作时长。手机连接期间，可在电脑上添加和编辑交易。端到端加密。",
-      "cta": "打开网页看板",
-      "points": {
-        "private": "端到端加密",
-        "charts": "17 个看板",
-        "edits": "在电脑上编辑"
-      }
     }
   },
   "contact": {

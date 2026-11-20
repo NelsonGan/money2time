@@ -68,7 +68,8 @@
       "copyright": "© {year} Money2Time. Bảo lưu mọi quyền.",
       "costInHours": "Giá tính bằng giờ",
       "tutorials": "Hướng dẫn",
-      "dashboard": "Bảng điều khiển web"
+      "dashboard": "Bảng điều khiển web",
+      "albums": "Album"
     }
   },
   "storeButtons": {
@@ -326,17 +327,6 @@
     "community": {
       "body": "Kết nối với người dùng khác, chia sẻ phản hồi và nhận mẹo trên máy chủ Discord của chúng tôi.",
       "cta": "Tham gia Cộng đồng"
-    },
-    "dashboardEntry": {
-      "eyebrow": "Mới · Bảng điều khiển web",
-      "title": "Dữ liệu Money2Time của bạn trên màn hình lớn",
-      "body": "Quét mã trên app.money2time.com bằng điện thoại để xem dòng tiền, chi tiêu, tài sản ròng, ngân sách, chuyến đi và số giờ đằng sau mỗi lần mua. Thêm và sửa giao dịch từ máy tính khi điện thoại đang kết nối. Mã hóa đầu cuối.",
-      "cta": "Mở bảng điều khiển web",
-      "points": {
-        "private": "Mã hóa đầu cuối",
-        "charts": "17 bảng điều khiển",
-        "edits": "Sửa từ máy tính"
-      }
     }
   },
   "contact": {
