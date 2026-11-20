@@ -15,6 +15,7 @@ import { useSheetColumnStyle } from '~/hooks/useSheetColumnStyle';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
+import { runAfterInteractions } from '~/utils/interactions';
 
 import type { AlbumPin } from '../utils';
 import { ALBUM_MARKER_SIZE, AlbumMapMarker } from './AlbumMapMarker';
@@ -43,15 +44,26 @@ const WORLD_REGION = { latitude: 20, longitude: 0, latitudeDelta: 120, longitude
 
 /**
  * Google Maps draws a marker's view as a snapshot, so a marker tracks view
- * changes only until its covers have loaded (or 1.5 s, for albums without one).
+ * changes only until its covers have loaded (or 1.5 s, for albums without
+ * one), and again whenever what it shows changes (`key`: its labels, covers
+ * and the theme).
  */
-function useCoverTracking(): [boolean, () => void] {
+function useCoverTracking(key: string): [boolean, () => void] {
   const [tracking, setTracking] = useState(true);
   useEffect(() => {
+    setTracking(true);
     const timer = setTimeout(() => setTracking(false), 1500);
     return () => clearTimeout(timer);
-  }, []);
+  }, [key]);
   return [tracking, () => setTracking(false)];
+}
+
+/** What a card shows, for re-tracking when it changes. */
+function pinContentKey(pins: readonly AlbumPin[], theme: string): string {
+  return pins
+    .map((pin) => [pin.name, pin.spendLabel, pin.monthLabel, pin.coverUri].join('|'))
+    .concat(theme)
+    .join('||');
 }
 
 /** One album on its own: its card, the tail on the point. */
@@ -62,7 +74,8 @@ const AlbumMarker = memo(function AlbumMarkerImpl({
   pin: AlbumPin;
   onPress: (pin: AlbumPin) => void;
 }) {
-  const [tracking, stopTracking] = useCoverTracking();
+  const themeColors = useThemeColors();
+  const [tracking, stopTracking] = useCoverTracking(pinContentKey([pin], themeColors.card));
   return (
     <Marker
       identifier={pin.albumId}
@@ -100,7 +113,8 @@ const AlbumStackMarker = memo(function AlbumStackMarkerImpl({
   pins: AlbumPin[];
   onPress: (pins: AlbumPin[]) => void;
 }) {
-  const [tracking, stopTracking] = useCoverTracking();
+  const themeColors = useThemeColors();
+  const [tracking, stopTracking] = useCoverTracking(pinContentKey(pins, themeColors.card));
   const shown = pins.slice(0, MAX_STACK_CARDS);
   const behind = shown.length - 1;
   const width = ALBUM_MARKER_SIZE.width + behind * STACK_SHIFT_X;
@@ -190,7 +204,8 @@ function AlbumStackSheet({
                   onPress={() => {
                     void triggerHaptic('selection');
                     onClose();
-                    onSelect(pin.albumId);
+                    // Open the album once the sheet has gone, not while it fades.
+                    runAfterInteractions(() => onSelect(pin.albumId));
                   }}
                   accessibilityRole="button"
                   accessibilityLabel={pin.name}

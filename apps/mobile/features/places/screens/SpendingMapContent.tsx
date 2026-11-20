@@ -31,10 +31,12 @@ import {
   shiftPeriod,
 } from '../lib/mapPeriod';
 import {
+  CLUSTER_MAX_ZOOM,
   createPlaceClusterer,
   longitudeDeltaForZoom,
   type MapRegion,
   type PlaceMarker,
+  zoomForRegion,
 } from '../lib/placeClusters';
 import { placeCategoryIcon } from '../lib/placeIcons';
 import { groupByPlace, type PlaceGroup, regionFor } from '../lib/placeLocation';
@@ -185,11 +187,14 @@ export function SpendingMapContent({
         setSelection({ kind: 'place', key: marker.key });
         return;
       }
-      // A bubble zooms in while it can still split; past that, it lists its places.
-      const currentZoom = Math.log2((360 * (width / 256)) / Math.max(1e-6, region.longitudeDelta));
-      if (marker.expansionZoom > currentZoom + 0.5 && marker.expansionZoom < 18) {
+      // A bubble zooms in to where it splits; places at one point never split
+      // (Supercluster answers past its maxZoom), so those list instead.
+      if (marker.expansionZoom <= CLUSTER_MAX_ZOOM) {
         // A level past where it splits, so rounding never leaves it merged.
-        const delta = longitudeDeltaForZoom(marker.expansionZoom + 1, width);
+        const delta = longitudeDeltaForZoom(
+          Math.max(marker.expansionZoom + 1, zoomForRegion(region, width) + 1),
+          width,
+        );
         mapRef.current?.animateToRegion(
           {
             latitude: marker.latitude,
@@ -203,7 +208,7 @@ export function SpendingMapContent({
       }
       setSelection({ kind: 'cluster', keys: marker.groups.map((g) => g.key) });
     },
-    [region.longitudeDelta, width],
+    [region, width],
   );
 
   const selectPlace = useCallback(
@@ -435,10 +440,11 @@ export function SpendingMapContent({
                 longitude={marker.longitude}
                 count={marker.count}
                 label={(() => {
-                  const total = marker.groups.reduce(
-                    (sum, g) => sum + (totalsByKey.get(g.key)?.spent ?? 0),
-                    0,
-                  );
+                  // What was spent there, or the income of an income-only bubble.
+                  const sum = (field: 'spent' | 'earned') =>
+                    marker.groups.reduce((n, g) => n + (totalsByKey.get(g.key)?.[field] ?? 0), 0);
+                  const spent = sum('spent');
+                  const total = spent > 0 ? spent : sum('earned');
                   return formatValue(total, total >= 1000);
                 })()}
                 selected={

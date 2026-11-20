@@ -244,7 +244,6 @@ type Selection = {
   enabled: boolean;
 };
 
-/** A paged list of transactions, grouped by day; with `selection`, rows can be ticked and opened to edit. */
 /** Where it happened, before the place's name (the app's map pin). */
 function PinMark() {
   return (
@@ -255,6 +254,7 @@ function PinMark() {
   );
 }
 
+/** A paged list of transactions, grouped by day; with `selection`, rows can be ticked and opened to edit. */
 export function TxList({ txs, pageSize = 30, selection, onPage }: { txs: Tx[]; pageSize?: number; selection?: Selection; onPage?: (rows: Tx[]) => void }) {
   const t = useTranslations("dashboard.transactions");
   const te = useTranslations("dashboard.edit");

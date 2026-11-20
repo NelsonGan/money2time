@@ -6,14 +6,15 @@ import { owedToPayer } from '~/features/transactions/lib/splitPayer';
 import { getDb, getSQLite } from '~/lib/db/client';
 import { getActiveLedgerId, inActiveLedger } from '~/lib/db/ledgerScope';
 import { transactionsTable } from '~/lib/db/schema';
-import type {
-  Transaction,
-  TransactionFilters,
-  TransactionSentiment,
-  TransactionSplit,
-  TransactionSplitsSummary,
-  TransactionType,
-  TransactionWithRelations,
+import {
+  NO_TRANSACTION_LOCATION,
+  type Transaction,
+  type TransactionFilters,
+  type TransactionSentiment,
+  type TransactionSplit,
+  type TransactionSplitsSummary,
+  type TransactionType,
+  type TransactionWithRelations,
 } from '~/types';
 import { normalizeMoneyAmount } from '~/utils/formatters';
 import { newId, nowIso } from '~/utils/id';
@@ -144,12 +145,18 @@ const LOCATION_KEYS = [
 ] as const;
 
 /**
- * An input that touches the location gets all six fields, validated together
+ * An input that changes the type to one without a place clears it. An input
+ * that touches the location gets all six fields, validated together
  * (`transactionLocationFields`): a missing or out-of-range point clears the
  * location. An input that does not touch it is left alone, so an edit that
  * changes the amount keeps the location.
  */
 function withNormalizedLocation<T extends Partial<CreateTransactionInput>>(input: T): T {
+  // Only an expense or income has a place: an entry made, or changed into, a
+  // transfer or balance adjustment loses it, whichever editor did it.
+  if (input.type === 'transfer' || input.type === 'balance_adjustment') {
+    return { ...input, ...NO_TRANSACTION_LOCATION };
+  }
   if (!LOCATION_KEYS.some((key) => key in input)) return input;
   return {
     ...input,

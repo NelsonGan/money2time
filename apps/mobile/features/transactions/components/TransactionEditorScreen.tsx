@@ -2411,19 +2411,23 @@ export function TransactionEditorScreen({
       when.getDate() === now.getDate()
     );
   };
+  // How the place this save writes was chosen, for `Transaction Location Set`,
+  // which is sent only once the save goes through.
+  const locationEventRef = useRef<PlaceSource | 'auto' | null>(null);
   const locationPayload = (txDate: string) => {
+    locationEventRef.current = null;
     let saved = location;
     if (locationSource === 'auto' && (type !== 'expense' || !isTodayLocal(txDate))) saved = null;
     if (mode === 'edit' && locationSource === null) return {};
     if (!saved) return mode === 'edit' ? NO_TRANSACTION_LOCATION : {};
-    if (locationSource && locationSource !== 'removed') {
-      void trackEvent(AnalyticsEvents.TRANSACTION_LOCATION_SET, { source: locationSource });
-    }
+    if (locationSource && locationSource !== 'removed') locationEventRef.current = locationSource;
     return saved;
   };
 
   const handleSubmit = async (bulkOverride?: boolean) => {
     if (confirmedSubmitRef.current) return;
+    // A save that never reaches the payload (a transfer, an early check) sends no location event.
+    locationEventRef.current = null;
     // Whether this save is the one a split confirmation just let through.
     const splitConfirmed = splitConfirmedRef.current;
     splitConfirmedRef.current = false;
@@ -2783,6 +2787,12 @@ export function TransactionEditorScreen({
       }
 
       void triggerHaptic('success');
+      if (locationEventRef.current) {
+        void trackEvent(AnalyticsEvents.TRANSACTION_LOCATION_SET, {
+          source: locationEventRef.current,
+        });
+        locationEventRef.current = null;
+      }
       perfInteraction(
         mode === 'edit' ? 'editor_update' : bulk ? 'editor_bulk_save' : 'editor_save',
       );

@@ -80,6 +80,7 @@ import type {
   UserSettings,
   WeekStartsOn,
 } from '~/types';
+import { NO_TRANSACTION_LOCATION } from '~/types';
 import { clampFirstDayOfMonth } from '~/utils/financialMonth';
 import { isAnchorDay } from '~/utils/recurringRules';
 
@@ -766,15 +767,6 @@ type TransactionLocationFields = Pick<
   'latitude' | 'longitude' | 'placeName' | 'placeAddress' | 'placeId' | 'placeCategory'
 >;
 
-const NO_LOCATION_FIELDS: TransactionLocationFields = {
-  latitude: null,
-  longitude: null,
-  placeName: null,
-  placeAddress: null,
-  placeId: null,
-  placeCategory: null,
-};
-
 function textOrNull(value: unknown, max: number): string | null {
   return typeof value === 'string' && value.trim() ? value.trim().slice(0, max) : null;
 }
@@ -799,7 +791,7 @@ export function transactionLocationFields(
     Math.abs(latitude) > 90 ||
     Math.abs(longitude) > 180
   ) {
-    return NO_LOCATION_FIELDS;
+    return NO_TRANSACTION_LOCATION;
   }
   const address = textOrNull(placeAddress, 300);
   return {
@@ -1191,12 +1183,7 @@ export function createTransactionAssembler(
       albumCategory: null,
       albumCategoryName: null,
       albumCategoryIcon: null,
-      latitude: null,
-      longitude: null,
-      placeName: null,
-      placeAddress: null,
-      placeId: null,
-      placeCategory: null,
+      ...NO_TRANSACTION_LOCATION,
       accountName: nameOf(common[8]),
       fromAccountName: nameOf(common[9]),
       toAccountName: nameOf(common[10]),

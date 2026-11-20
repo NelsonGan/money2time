@@ -60,10 +60,13 @@ function bboxForRegion(region: MapRegion): [number, number, number, number] {
   return [west, south, east, north];
 }
 
+/** Past this zoom places no longer merge; a bubble there shares one point. */
+export const CLUSTER_MAX_ZOOM = 17;
+
 export function createPlaceClusterer<T extends Transaction>(groups: readonly PlaceGroup<T>[]) {
   const index = new Supercluster<PointProps, { count: number }>({
     radius: 64,
-    maxZoom: 17,
+    maxZoom: CLUSTER_MAX_ZOOM,
     map: (props) => ({ count: props.count }),
     reduce: (acc, props) => {
       acc.count += props.count;
@@ -79,31 +82,69 @@ export function createPlaceClusterer<T extends Transaction>(groups: readonly Pla
 
   return (region: MapRegion, widthPoints: number): PlaceMarker<T>[] => {
     const zoom = Math.floor(zoomForRegion(region, widthPoints));
-    return index.getClusters(bboxForRegion(region), zoom).map((feature) => {
-      const [longitude, latitude] = feature.geometry.coordinates as [number, number];
-      const props = feature.properties as Partial<PointProps> & {
-        cluster?: boolean;
-        cluster_id?: number;
-        point_count?: number;
-        count?: number;
-      };
-      if (props.cluster && typeof props.cluster_id === 'number') {
-        const leaves = index.getLeaves(props.cluster_id, Infinity);
-        const clusterGroups = leaves
-          .map((leaf) => groups[(leaf.properties as PointProps).index])
-          .filter((group): group is PlaceGroup<T> => Boolean(group));
-        return {
-          kind: 'cluster',
-          key: `cluster:${props.cluster_id}`,
-          latitude,
-          longitude,
-          groups: clusterGroups,
-          count: props.count ?? clusterGroups.reduce((n, g) => n + g.transactions.length, 0),
-          expansionZoom: Math.min(20, index.getClusterExpansionZoom(props.cluster_id)),
+    const markers = index
+      .getClusters(bboxForRegion(region), zoom)
+      .map((feature): PlaceMarker<T> => {
+        const [longitude, latitude] = feature.geometry.coordinates as [number, number];
+        const props = feature.properties as Partial<PointProps> & {
+          cluster?: boolean;
+          cluster_id?: number;
+          count?: number;
         };
-      }
-      const group = groups[props.index as number] as PlaceGroup<T>;
-      return { kind: 'place', key: group.key, latitude, longitude, group };
-    });
+        if (props.cluster && typeof props.cluster_id === 'number') {
+          const leaves = index.getLeaves(props.cluster_id, Infinity);
+          const clusterGroups = leaves
+            .map((leaf) => groups[(leaf.properties as PointProps).index])
+            .filter((group): group is PlaceGroup<T> => Boolean(group));
+          return {
+            kind: 'cluster',
+            key: `cluster:${props.cluster_id}`,
+            latitude,
+            longitude,
+            groups: clusterGroups,
+            count: props.count ?? clusterGroups.reduce((n, g) => n + g.transactions.length, 0),
+            expansionZoom: index.getClusterExpansionZoom(props.cluster_id),
+          };
+        }
+        const group = groups[props.index as number] as PlaceGroup<T>;
+        return { kind: 'place', key: group.key, latitude, longitude, group };
+      });
+    return mergeSamePoint(markers);
   };
+}
+
+/**
+ * Past the clustering zoom every place comes back on its own, and places at
+ * one point (two shops in one building, say) would draw as one pin with the
+ * others unreachable under it. They become a bubble that lists them instead.
+ */
+function mergeSamePoint<T extends Transaction>(markers: PlaceMarker<T>[]): PlaceMarker<T>[] {
+  const byPoint = new Map<string, PlaceMarker<T>[]>();
+  for (const marker of markers) {
+    const point = `${marker.latitude.toFixed(5)},${marker.longitude.toFixed(5)}`;
+    const list = byPoint.get(point);
+    if (list) list.push(marker);
+    else byPoint.set(point, [marker]);
+  }
+  const out: PlaceMarker<T>[] = [];
+  for (const [point, list] of byPoint) {
+    if (list.length === 1) {
+      out.push(list[0] as PlaceMarker<T>);
+      continue;
+    }
+    const groups = list.flatMap((marker) =>
+      marker.kind === 'place' ? [marker.group] : marker.groups,
+    );
+    out.push({
+      kind: 'cluster',
+      key: `point:${point}`,
+      latitude: (list[0] as PlaceMarker<T>).latitude,
+      longitude: (list[0] as PlaceMarker<T>).longitude,
+      groups,
+      count: groups.reduce((n, g) => n + g.transactions.length, 0),
+      // They never split, however far in.
+      expansionZoom: CLUSTER_MAX_ZOOM + 1,
+    });
+  }
+  return out;
 }

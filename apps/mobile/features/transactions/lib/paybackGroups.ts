@@ -14,7 +14,12 @@ import {
   frozenAccountRate,
   paybackTransferAmounts,
 } from '~/features/transactions/lib/splitPayments';
-import type { RateTable, TransactionSplit, TransactionWithRelations } from '~/types';
+import {
+  NO_TRANSACTION_LOCATION,
+  type RateTable,
+  type TransactionSplit,
+  type TransactionWithRelations,
+} from '~/types';
 import { normalizeMoneyAmount } from '~/utils/formatters';
 import { compareTransactionsByDateDesc } from '~/utils/transactionSorting';
 
@@ -148,12 +153,7 @@ export function buildPaybackRows(
         albumCategory: null,
         albumCategoryName: null,
         albumCategoryIcon: null,
-        latitude: null,
-        longitude: null,
-        placeName: null,
-        placeAddress: null,
-        placeId: null,
-        placeCategory: null,
+        ...NO_TRANSACTION_LOCATION,
         type: 'transfer',
         ...paybackRowAmount(bill, split.amount, currencyOf, rateTable),
         reportingCurrency: null,

@@ -1,4 +1,5 @@
 import {
+  CLUSTER_MAX_ZOOM,
   createPlaceClusterer,
   longitudeDeltaForZoom,
   zoomForRegion,
@@ -80,5 +81,17 @@ describe('spending map clusters', () => {
       m.kind === 'place' ? [m.key] : m.groups.map((g) => g.key),
     );
     expect(keys.sort()).toEqual(['fiji', 'samoa']);
+  });
+
+  it('marks a bubble of places at one point as one that never splits', () => {
+    const same = createPlaceClusterer([group('a', 3.15, 101.71), group('b', 3.15, 101.71)]);
+    const markers = same(
+      { latitude: 3.15, longitude: 101.71, latitudeDelta: 0.001, longitudeDelta: 0.001 },
+      WIDTH,
+    );
+    expect(markers).toHaveLength(1);
+    const [bubble] = markers;
+    expect(bubble?.kind).toBe('cluster');
+    if (bubble?.kind === 'cluster') expect(bubble.expansionZoom).toBeGreaterThan(CLUSTER_MAX_ZOOM);
   });
 });

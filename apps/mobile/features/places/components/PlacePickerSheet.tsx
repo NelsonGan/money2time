@@ -92,6 +92,10 @@ export function PlacePickerSheet({
 
   const here = useCurrentPlace({ active: visible, appUserId: settings.appUserId, locale });
   const near = here.coordinate;
+  // Read when a search fires, so a fix that lands while the user types still
+  // ranks the results; a new fix alone does not search again.
+  const nearRef = useRef(near);
+  nearRef.current = near;
 
   const recents = useMemo(
     () => (visible ? recentPlaces(transactions, { near, limit: 8 }) : []),
@@ -109,7 +113,7 @@ export function PlacePickerSheet({
     setSearch({ kind: 'searching' });
     const id = ++requestId.current;
     const handle = setTimeout(() => {
-      searchPlaces({ appUserId: settings.appUserId, query: trimmed, near, locale })
+      searchPlaces({ appUserId: settings.appUserId, query: trimmed, near: nearRef.current, locale })
         .then((results) => {
           if (id === requestId.current) setSearch({ kind: 'done', results });
         })
@@ -119,8 +123,6 @@ export function PlacePickerSheet({
         });
     }, SEARCH_DEBOUNCE_MS);
     return () => clearTimeout(handle);
-    // `near` is read when the search fires; a new fix does not re-run a search.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [trimmed, visible, searchAvailable, settings.appUserId, locale]);
 
   const handleClose = () => {
