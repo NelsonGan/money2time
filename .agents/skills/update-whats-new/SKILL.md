@@ -139,6 +139,7 @@ I have learned to seek my happiness by limiting my desires, rather than in attem
 I'm not really frugal or thrifty. I just don't waste money on little things that don't matter, but spend on big things that do.
 Little by little, a little becomes a lot.
 Lost time is never found again.
+Many hands make light work.
 Money is a good servant but a bad master.
 Never spend your money before you have it.
 Rather go to bed without supper than rise in debt.
