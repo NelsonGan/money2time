@@ -29,6 +29,7 @@ import {
   canConvertToInstalmentPlan,
   scheduleOfFrequency,
 } from '~/features/instalments/lib/instalmentPlan';
+import { locationOfTransaction } from '~/features/places/lib/placeLocation';
 import { TransactionEditorScreen } from '~/features/transactions/components';
 import { type SplitDraft, splitsHelpers } from '~/features/transactions/components/editor';
 import type { TransactionEditorSubmitExtras } from '~/features/transactions/components/TransactionEditorScreen';
@@ -696,6 +697,7 @@ function TransactionEditor({
         countsAsExpense: transaction.countsAsExpense,
         createdBy: transaction.createdBy,
         memberId: transaction.memberId,
+        location: locationOfTransaction(transaction),
       }}
     />
   );

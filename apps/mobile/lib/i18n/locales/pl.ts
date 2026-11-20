@@ -2986,6 +2986,7 @@ const pl = {
   albums: {
     untitled: 'Album',
     location: {
+      stack_title: 'Albumy w tym miejscu',
       label: 'Lokalizacja',
       add: 'Dodaj lokalizację',
       clear: 'Wyczyść lokalizację',
@@ -3727,6 +3728,54 @@ const pl = {
     source_remove_title: 'Usunąć %{app}?',
     source_remove_body_android:
       'Money2Time przestanie odczytywać jego powiadomienia. Zapisane już płatności pozostaną.',
+  },
+  locations: {
+    settings_title: 'Zapisuj miejsca',
+    settings_help:
+      'Oznaczaj wydatki miejscem, w którym się wydarzyły, i oglądaj swoje wydatki na mapie. Miejsce zostaje przy transakcji, więc synchronizuje się z Twoimi innymi urządzeniami, z osobami, z którymi dzielisz księgę, i z panelem webowym. Wyszukiwanie miejsc korzysta z Map Apple.',
+    auto_tag: 'Oznaczaj nowe wydatki moją lokalizacją',
+    auto_tag_help:
+      'Nowy wydatek z dzisiejszą datą od razu dostaje Twoją bieżącą lokalizację. Stuknij miejsce, aby je zmienić lub usunąć.',
+    permission_off: 'Dostęp do lokalizacji jest wyłączony. Nadal możesz wyszukiwać miejsca.',
+    permission_allow: 'Zezwól na dostęp do lokalizacji',
+    permission_blocked: 'Dostęp do lokalizacji jest wyłączony. Włącz go w Ustawieniach.',
+    services_off: 'Usługi lokalizacji są wyłączone. Włącz je w Ustawieniach.',
+    open_settings: 'Otwórz Ustawienia',
+    add: 'Dodaj miejsce',
+    picker_title: 'Miejsce',
+    search_placeholder: 'Szukaj miejsc',
+    current_location: 'Bieżąca lokalizacja',
+    current_locating: 'Szukam Twojej lokalizacji…',
+    current_unavailable:
+      'Nie udało się ustalić Twojej lokalizacji. Stuknij, aby spróbować ponownie.',
+    recent_places: 'Ostatnie miejsca',
+    no_results: 'Nie znaleziono miejsc',
+    search_error: 'Nie udało się wyszukać miejsc. Sprawdź połączenie i spróbuj ponownie.',
+    search_limit: 'Wykorzystano dzisiejsze wyszukiwania miejsc. Spróbuj jutro.',
+    search_busy: 'Wyszukiwanie miejsc jest zajęte. Spróbuj za chwilę.',
+    search_unavailable: 'Wyszukiwanie miejsc jest teraz niedostępne.',
+    remove: 'Usuń miejsce',
+    pinned_location: 'Przypięte miejsce',
+    attribution: 'Wyniki z Map Apple',
+    map_title: 'Mapa wydatków',
+    map_fit: 'Pokaż wszystkie miejsca',
+    map_visits_one: '{{count}} wizyta',
+    map_visits_other: '{{count}} wizyt',
+    map_of_work: '{{time}} pracy',
+    map_all_time: 'Cały okres',
+    map_empty_title: 'Brak miejsc',
+    map_empty_period_title: 'Brak miejsc w tym okresie',
+    map_empty_message: 'Oznacz wydatek miejscem, a pojawi się tutaj.',
+    map_disabled_message:
+      'Włącz Zapisuj miejsca, aby oznaczać wydatki miejscem, w którym się wydarzyły.',
+    map_turn_on: 'Włącz Zapisuj miejsca',
+    map_places_one: '{{count}} miejsce',
+    map_places_other: '{{count}} miejsc',
+    map_previous: 'Poprzedni',
+    map_next: 'Następny',
+    map_period_month: 'Miesiąc',
+    map_period_year: 'Rok',
+    map_period_all: 'Wszystko',
   },
 };
 

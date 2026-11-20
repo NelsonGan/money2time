@@ -148,6 +148,8 @@ class SettingsRepository {
         | 'workdayDisplayEnabled'
         | 'workingHoursPerDay'
         | 'hapticsEnabled'
+        | 'transactionLocationsEnabled'
+        | 'transactionLocationAutoTag'
         | 'themeMode'
         | 'themeColor'
         | 'iconStyle'
@@ -442,6 +444,8 @@ class SettingsRepository {
         workdayDisplayEnabled: false,
         workingHoursPerDay: 8,
         hapticsEnabled: true,
+        transactionLocationsEnabled: false,
+        transactionLocationAutoTag: true,
         themeMode: 'system',
         themeColor: 'rosewood',
         iconStyle: 'clay',

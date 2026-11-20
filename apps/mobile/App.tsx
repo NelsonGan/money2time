@@ -122,6 +122,7 @@ import { loanRepaymentReporting } from '~/features/loans/lib/loanMath';
 import { FeatureAnnouncementModal } from '~/features/news/components/FeatureAnnouncementModal';
 import type { FeatureAnnouncement } from '~/features/news/featureAnnouncements';
 import { OnboardingFlow } from '~/features/onboarding/screens';
+import { SpendingMapScreen } from '~/features/places';
 import { ReimbursementsScreen } from '~/features/reimbursements/screens/ReimbursementsScreen';
 import { ReviewPrePromptSheet } from '~/features/reviewPrompt/components/ReviewPrePromptSheet';
 import { BiometricLockGate } from '~/features/settings/components/BiometricLockGate';
@@ -2350,6 +2351,22 @@ function TutorialsRouteScreen({ navigation }: RootStackRouteProps<'Tutorials'>) 
   );
 }
 
+function SpendingMapRouteScreen({ navigation }: RootStackRouteProps<'SpendingMap'>) {
+  return (
+    <SpendingMapScreen
+      onBack={() => navigation.goBack()}
+      onOpenTransaction={(transaction) =>
+        navigation.navigate('EditTransaction', { transactionId: transaction.id })
+      }
+      onOpenLocationSettings={() => {
+        navigation.goBack();
+        requestOpenTab('settings');
+        requestOpenSettingsScreen('AccountSettings');
+      }}
+    />
+  );
+}
+
 function TutorialDetailRouteScreen({ route, navigation }: RootStackRouteProps<'TutorialDetail'>) {
   return <TutorialDetailScreen id={route.params.id} onBack={() => navigation.goBack()} />;
 }
@@ -3430,6 +3447,7 @@ function AppContent() {
             <RootStack.Screen name="SettingsWageEditor" component={SettingsWageEditorRouteScreen} />
             <RootStack.Screen name="Tutorials" component={TutorialsRouteScreen} />
             <RootStack.Screen name="TutorialDetail" component={TutorialDetailRouteScreen} />
+            <RootStack.Screen name="SpendingMap" component={SpendingMapRouteScreen} />
             <RootStack.Screen
               name="NotificationHistory"
               component={NotificationHistoryRouteScreen}

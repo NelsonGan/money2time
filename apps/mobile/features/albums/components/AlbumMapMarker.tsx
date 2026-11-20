@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { memo } from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 
 import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { Text } from '~/components/ui/text';
@@ -9,6 +9,9 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 const CARD_WIDTH = 92;
 const IMAGE_HEIGHT = 62;
 
+/** The card's footprint with its tail, for offsetting stacked markers. */
+export const ALBUM_MARKER_SIZE = { width: CARD_WIDTH, height: 122 } as const;
+
 interface AlbumMapMarkerProps {
   name: string;
   coverUri: string | null;
@@ -16,7 +19,8 @@ interface AlbumMapMarkerProps {
   spendLabel: string;
   /** "Jun 2026" badge shown between the cover and the title; hidden when null. */
   monthLabel: string | null;
-  onPress: () => void;
+  /** The cover finished loading (the map can stop redrawing the marker). */
+  onLoad?: () => void;
 }
 
 export const AlbumMapMarker = memo(function AlbumMapMarkerImpl({
@@ -24,16 +28,12 @@ export const AlbumMapMarker = memo(function AlbumMapMarkerImpl({
   coverUri,
   spendLabel,
   monthLabel,
-  onPress,
+  onLoad,
 }: AlbumMapMarkerProps) {
   const themeColors = useThemeColors();
   return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={name}
-      className="items-center"
-    >
+    // The map's marker takes the tap (react-native-maps), so this is a plain view.
+    <View className="items-center">
       <View
         className="overflow-hidden rounded-2xl border border-border/50 bg-card shadow-soft"
         style={{ width: CARD_WIDTH }}
@@ -45,9 +45,11 @@ export const AlbumMapMarker = memo(function AlbumMapMarkerImpl({
             source={{ uri: coverUri }}
             style={{ width: '100%', height: IMAGE_HEIGHT }}
             contentFit="cover"
-            // Keep the decoded image cached so MapLibre re-rendering the marker
+            // Keep the decoded image cached so the map redrawing the marker
             // during pan/zoom never blanks it (the "flashing pin" fix).
             cachePolicy="memory-disk"
+            onLoad={onLoad}
+            onError={onLoad}
             recyclingKey={coverUri}
             transition={0}
           />
@@ -103,6 +105,6 @@ export const AlbumMapMarker = memo(function AlbumMapMarkerImpl({
           borderTopColor: themeColors.card,
         }}
       />
-    </Pressable>
+    </View>
   );
 });

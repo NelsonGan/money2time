@@ -19,6 +19,19 @@ import {
   stringList,
   type NotificationReviewRequest,
 } from './notifications';
+import {
+  appleGet,
+  parseReverseRequest,
+  parseSearchRequest,
+  type PlaceResult,
+  PlacesError,
+  type PlacesEnv,
+  readCachedPlaces,
+  reversePath,
+  searchPath,
+  toPlaceResults,
+  writeCachedPlaces,
+} from './places';
 import { checkQuota, consumeQuota } from './ratelimit';
 import { getEntitlement } from './revenuecat';
 import {
@@ -30,7 +43,7 @@ import {
   type ScannedReceiptDetail,
 } from './scanModes';
 
-export interface Env extends PostHogEnv, PromptEnv {
+export interface Env extends PostHogEnv, PromptEnv, PlacesEnv {
   // Rate-limit counters + entitlement cache (schema in apps/cloudflare/d1/receipt-scanner/schema.sql).
   MONEY2TIME_D1_RECEIPT_SCANNER: D1Database;
   OPENROUTER_API_KEY: string;
@@ -66,6 +79,11 @@ export interface Env extends PostHogEnv, PromptEnv {
   // Optional so tests and local runs without the binding still work.
   SCAN_LIMITER?: RateLimit;
   NOTIFICATION_LIMITER?: RateLimit;
+  // Requests per client IP per minute on /places/* (wrangler.toml).
+  PLACES_LIMITER?: RateLimit;
+  // Place searches per user per window (default 200 a day), all tiers.
+  PLACES_LIMIT?: string;
+  PLACES_INTERVAL?: string;
   // Optional OpenAI-style image_url.detail hint ("low" | "high" | "auto").
   // "low" downsamples to cut input tokens at some OCR-accuracy risk; unset omits it.
   IMAGE_DETAIL?: string;
@@ -197,6 +215,13 @@ export default {
       return new Response(null, { status: 204, headers: CORS_HEADERS });
     }
     const url = new URL(request.url);
+    if (
+      request.method === 'POST' &&
+      (url.pathname === '/places/search' || url.pathname === '/places/reverse')
+    ) {
+      if (await overLimit(env.PLACES_LIMITER, request)) return json({ error: 'rate_limited' }, 429);
+      return handlePlaces(request, env, ctx, url.pathname === '/places/search' ? 'search' : 'reverse');
+    }
     if (request.method === 'POST' && url.pathname === '/notifications') {
       if (await overLimit(env.NOTIFICATION_LIMITER, request)) return json({ error: 'rate_limited' }, 429);
       return handleNotifications(request, env, ctx, false);
@@ -364,6 +389,67 @@ export default {
     ctx.waitUntil(pruneExpired(env));
   },
 };
+
+/**
+ * POST /places/search and /places/reverse: Apple Maps place search for tagging
+ * a transaction (see places.ts). Works signed out, like scanning: the request
+ * is signed with the app's shared key. An edge-cache hit answers without
+ * touching the user's daily allowance or Apple; a miss checks the allowance,
+ * asks Apple, then counts one use and caches the answer.
+ */
+async function handlePlaces(
+  request: Request,
+  env: Env,
+  ctx: ExecutionContext,
+  kind: 'search' | 'reverse',
+): Promise<Response> {
+  const reqId = crypto.randomUUID();
+  let raw: unknown;
+  try {
+    raw = await request.json();
+  } catch {
+    return json({ error: 'invalid_json' }, 400);
+  }
+  const parsed = kind === 'search' ? parseSearchRequest(raw) : parseReverseRequest(raw);
+  if ('error' in parsed) {
+    logError('bad_request', { reqId, route: `places_${kind}`, error: parsed.error });
+    return json({ error: parsed.error }, 400);
+  }
+  if (!(await verifySignature(request, { appUserId: parsed.appUserId } as ScanRequest, env))) {
+    logError('bad_signature', { reqId, appUserId: parsed.appUserId });
+    return json({ error: 'unauthorized' }, 401);
+  }
+  const path =
+    kind === 'search'
+      ? searchPath(parsed as Parameters<typeof searchPath>[0])
+      : reversePath(parsed as Parameters<typeof reversePath>[0]);
+  const cached = await readCachedPlaces(path);
+  if (cached) return json({ places: cached }, 200);
+
+  const now = new Date();
+  const quota = await checkQuota(parsed.appUserId, false, env, now, 'places');
+  if (!quota.allowed) {
+    log('places_limit_reached', { reqId, appUserId: parsed.appUserId, used: quota.used });
+    return json({ error: 'limit_reached' }, 429);
+  }
+  let places: PlaceResult[];
+  try {
+    places = toPlaceResults(await appleGet(env, path, now.getTime()));
+  } catch (err) {
+    const error = err instanceof PlacesError ? err : new PlacesError('upstream', 502);
+    // The query and coordinates stay out of the logs: they say where someone is.
+    logError('places_failed', { reqId, kind, error: error.code });
+    return json({ error: error.code }, error.status);
+  }
+  ctx.waitUntil(
+    Promise.all([
+      consumeQuota(parsed.appUserId, false, env, now, 'places').catch(() => undefined),
+      writeCachedPlaces(path, places),
+    ]),
+  );
+  log('places_ok', { reqId, kind, results: places.length });
+  return json({ places }, 200);
+}
 
 // Wall clock for one notification batch; the app's own timeout sits above it.
 const NOTIFICATION_BUDGET_MS = 50000;
@@ -571,6 +657,7 @@ async function pruneExpired(env: Env): Promise<void> {
       db.prepare('DELETE FROM entitlement_cache WHERE expires_at <= ?1').bind(now),
       db.prepare('DELETE FROM notification_review_usage WHERE expires_at <= ?1').bind(now),
       db.prepare('DELETE FROM notification_review_charged WHERE expires_at <= ?1').bind(now),
+      db.prepare('DELETE FROM place_search_usage WHERE expires_at <= ?1').bind(now),
     ]);
     log('prune_expired', { now });
   } catch (err) {

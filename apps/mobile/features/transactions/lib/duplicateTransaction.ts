@@ -69,6 +69,18 @@ export function buildDuplicateInput(
     // Shared ledgers: the copy is still that person's entry; whoever made the
     // copy is stamped as having added it.
     memberId: transaction.memberId ?? null,
+    // The same purchase again is usually at the same place (README:
+    // Transaction locations); the repository drops a half location.
+    ...(typeof transaction.latitude === 'number' && typeof transaction.longitude === 'number'
+      ? {
+          latitude: transaction.latitude,
+          longitude: transaction.longitude,
+          placeName: transaction.placeName,
+          placeAddress: transaction.placeAddress,
+          placeId: transaction.placeId,
+          placeCategory: transaction.placeCategory,
+        }
+      : {}),
   };
 }
 

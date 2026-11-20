@@ -70,6 +70,23 @@ function applyPostHogSymbolUpload(cfg: ExpoConfig): ExpoConfig {
   };
 }
 
+// Google Maps draws the maps on Android (react-native-maps; iOS uses Apple
+// Maps, which needs no key). The key is restricted to the Maps SDK for Android
+// in the money2time-expo Cloud project and comes from the environment (EAS env
+// var for store builds, apps/mobile/.env locally), so the public repository
+// never holds it. Without it the Android map shows Google's blank "for
+// development purposes" grid and everything else works.
+function applyGoogleMapsKey(cfg: ExpoConfig): ExpoConfig {
+  const apiKey = process.env.GOOGLE_MAPS_ANDROID_API_KEY?.trim();
+  return {
+    ...cfg,
+    plugins: [
+      ...(cfg.plugins ?? []),
+      ['react-native-maps', apiKey ? { androidGoogleMapsApiKey: apiKey } : {}],
+    ],
+  };
+}
+
 export default ({ config }: ConfigContext): ExpoConfig => {
   const merged: ExpoConfig = {
     ...baseConfig,
@@ -83,5 +100,5 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     },
   };
 
-  return applyPostHogSymbolUpload(applyUpdatesPolicy(merged));
+  return applyPostHogSymbolUpload(applyUpdatesPolicy(applyGoogleMapsKey(merged)));
 };

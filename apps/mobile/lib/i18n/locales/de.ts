@@ -3014,6 +3014,7 @@ const de = {
   albums: {
     untitled: 'Album',
     location: {
+      stack_title: 'Alben hier',
       label: 'Ort',
       add: 'Ort hinzufügen',
       clear: 'Ort entfernen',
@@ -3765,6 +3766,54 @@ const de = {
     source_remove_title: '%{app} entfernen?',
     source_remove_body_android:
       'Money2Time liest ihre Benachrichtigungen nicht mehr. Bereits erfasste Zahlungen bleiben erhalten.',
+  },
+  locations: {
+    settings_title: 'Orte speichern',
+    settings_help:
+      'Versieh Ausgaben mit dem Ort, an dem sie entstanden sind, und sieh deine Ausgaben auf einer Karte. Ein Ort bleibt bei seiner Transaktion und wird daher mit deinen anderen Geräten, mit Personen, mit denen du ein Kassenbuch teilst, und mit dem Web-Dashboard synchronisiert. Die Ortssuche nutzt Apple Karten.',
+    auto_tag: 'Neue Ausgaben mit meinem Standort versehen',
+    auto_tag_help:
+      'Eine neue Ausgabe mit heutigem Datum bekommt automatisch deinen aktuellen Standort. Tippe auf den Ort, um ihn zu ändern oder zu entfernen.',
+    permission_off: 'Der Standortzugriff ist aus. Du kannst trotzdem nach Orten suchen.',
+    permission_allow: 'Standortzugriff erlauben',
+    permission_blocked: 'Der Standortzugriff ist aus. Schalte ihn in den Einstellungen ein.',
+    services_off: 'Die Ortungsdienste sind aus. Schalte sie in den Einstellungen ein.',
+    open_settings: 'Einstellungen öffnen',
+    add: 'Ort hinzufügen',
+    picker_title: 'Ort',
+    search_placeholder: 'Orte suchen',
+    current_location: 'Aktueller Standort',
+    current_locating: 'Standort wird ermittelt…',
+    current_unavailable:
+      'Standort konnte nicht ermittelt werden. Tippe, um es erneut zu versuchen.',
+    recent_places: 'Letzte Orte',
+    no_results: 'Keine Orte gefunden',
+    search_error:
+      'Orte konnten nicht gesucht werden. Prüfe deine Verbindung und versuche es erneut.',
+    search_limit: 'Du hast die Ortssuchen für heute aufgebraucht. Versuche es morgen wieder.',
+    search_busy: 'Die Ortssuche ist ausgelastet. Versuche es gleich noch einmal.',
+    search_unavailable: 'Die Ortssuche ist gerade nicht verfügbar.',
+    remove: 'Ort entfernen',
+    pinned_location: 'Markierter Ort',
+    attribution: 'Ergebnisse von Apple Karten',
+    map_title: 'Ausgabenkarte',
+    map_fit: 'Alle Orte zeigen',
+    map_visits_one: '{{count}} Besuch',
+    map_visits_other: '{{count}} Besuche',
+    map_of_work: '{{time}} Arbeit',
+    map_all_time: 'Gesamter Zeitraum',
+    map_empty_title: 'Noch keine Orte',
+    map_empty_period_title: 'Keine Orte in diesem Zeitraum',
+    map_empty_message: 'Versieh eine Ausgabe mit einem Ort, dann erscheint sie hier.',
+    map_disabled_message: 'Schalte Orte speichern ein, um Ausgaben mit ihrem Ort zu versehen.',
+    map_turn_on: 'Orte speichern einschalten',
+    map_places_one: '{{count}} Ort',
+    map_places_other: '{{count}} Orte',
+    map_previous: 'Zurück',
+    map_next: 'Weiter',
+    map_period_month: 'Monat',
+    map_period_year: 'Jahr',
+    map_period_all: 'Alle',
   },
 };
 

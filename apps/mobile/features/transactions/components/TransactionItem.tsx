@@ -410,12 +410,17 @@ const TransactionItemBody = memo(
           : transaction.note
             ? categoryInline
             : null;
-    const subtitlePrimary = person
+    const subtitleWithoutPlace = person
       ? joinSubtitleParts(subtitleBase, shortName(person.name))
       : billSide
         ? // The icon already says the category.
           joinSubtitleParts(showDateInSubtitle ? dateLabel : null, billSide.paid)
         : subtitleBase;
+    // Where it happened, last on the line (README: Transaction locations).
+    const subtitlePrimary =
+      !isTransfer && transaction.placeName
+        ? joinSubtitleParts(subtitleWithoutPlace, transaction.placeName)
+        : subtitleWithoutPlace;
     const rate =
       !isTransfer && !isBalanceAdjustment ? getTrueHourlyRateForDate(transaction.date) : 0;
     const hasCategoryRef = Boolean(transaction.categoryIcon || transaction.categoryName);
@@ -1151,6 +1156,7 @@ export const TransactionItem = memo(
     prev.transaction.amount === next.transaction.amount &&
     prev.transaction.currency === next.transaction.currency &&
     prev.transaction.note === next.transaction.note &&
+    prev.transaction.placeName === next.transaction.placeName &&
     // A plan's payment count arrives by join, like the relation names below.
     prev.transaction.instalmentNumber === next.transaction.instalmentNumber &&
     prev.transaction.instalmentCount === next.transaction.instalmentCount &&

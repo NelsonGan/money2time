@@ -3,7 +3,7 @@
  *
  * An archive strips the app's own executable, but not the dynamic frameworks
  * CocoaPods copies into `Frameworks/`: pod targets are never "installed", and
- * prebuilt ones (React, Hermes, Turso, MapLibre) are copied as shipped. In the
+ * prebuilt ones (React, Hermes, Turso) are copied as shipped. In the
  * 1.7.4 archive those 21 frameworks took 61.2 MB, 19.6 MB of it symbol tables.
  *
  * `strip -x -S` removes only local and debug symbols. Exported symbols stay, so

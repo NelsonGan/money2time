@@ -27,6 +27,7 @@ import {
   TRANSACTION_COMMON_COLUMNS_SQL,
   TRANSACTION_SPARSE_COLUMNS_SQL,
   TRANSACTION_SPARSE_FILTER_SQL,
+  transactionLocationFields,
   type TransactionRelationLookups,
   transactionRelations,
 } from './mappers';
@@ -120,6 +121,47 @@ export interface CreateTransactionInput {
   /** That category's name and icon when the album added or changed it (null: a default's own). */
   albumCategoryName?: string | null;
   albumCategoryIcon?: string | null;
+  /**
+   * Where it happened (README: Transaction locations). Written and cleared
+   * together: an input carrying any of them is normalized as a whole
+   * (`withNormalizedLocation`), so a half location never reaches the row.
+   */
+  latitude?: number | null;
+  longitude?: number | null;
+  placeName?: string | null;
+  placeAddress?: string | null;
+  placeId?: string | null;
+  placeCategory?: string | null;
+}
+
+const LOCATION_KEYS = [
+  'latitude',
+  'longitude',
+  'placeName',
+  'placeAddress',
+  'placeId',
+  'placeCategory',
+] as const;
+
+/**
+ * An input that touches the location gets all six fields, validated together
+ * (`transactionLocationFields`): a missing or out-of-range point clears the
+ * location. An input that does not touch it is left alone, so an edit that
+ * changes the amount keeps the location.
+ */
+function withNormalizedLocation<T extends Partial<CreateTransactionInput>>(input: T): T {
+  if (!LOCATION_KEYS.some((key) => key in input)) return input;
+  return {
+    ...input,
+    ...transactionLocationFields(
+      input.latitude,
+      input.longitude,
+      input.placeName,
+      input.placeAddress,
+      input.placeId,
+      input.placeCategory,
+    ),
+  };
 }
 
 /** Ids per `IN (…)` lookup, under SQLite's bound-parameter limit. */
@@ -153,10 +195,11 @@ function normalizeTransactionFilters(
 }
 
 function normalizeTransactionInput<T extends Partial<CreateTransactionInput>>(input: T): T {
-  if (input.amount === undefined) return input;
+  const located = withNormalizedLocation(input);
+  if (located.amount === undefined) return located;
   return {
-    ...input,
-    amount: normalizeMoneyAmount(input.amount),
+    ...located,
+    amount: normalizeMoneyAmount(located.amount),
   };
 }
 
@@ -686,6 +729,12 @@ class TransactionsRepository {
         albumCategory: normalizedInput.albumCategory ?? null,
         albumCategoryName: normalizedInput.albumCategoryName ?? null,
         albumCategoryIcon: normalizedInput.albumCategoryIcon ?? null,
+        latitude: normalizedInput.latitude ?? null,
+        longitude: normalizedInput.longitude ?? null,
+        placeName: normalizedInput.placeName ?? null,
+        placeAddress: normalizedInput.placeAddress ?? null,
+        placeId: normalizedInput.placeId ?? null,
+        placeCategory: normalizedInput.placeCategory ?? null,
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,

@@ -254,6 +254,11 @@ export const GA4_ONLY_EVENTS = {
   ALBUM_ARCHIVED: 'Album Archived',
   ALBUM_LOCATION_SET: 'Album Location Set',
   ALBUM_LOCATIONS_OPENED: 'Album Locations Opened',
+  // Transaction locations. `source` is how the place was chosen:
+  // current | search | recent | auto (a new expense tagged on open).
+  TRANSACTION_LOCATION_SET: 'Transaction Location Set',
+  TRANSACTION_LOCATIONS_TOGGLED: 'Transaction Locations Toggled',
+  SPENDING_MAP_OPENED: 'Spending Map Opened',
   // Album members and shared albums
   ALBUM_SHARED: 'Album Shared',
   ALBUM_SHARE_STOPPED: 'Album Share Stopped',
@@ -391,6 +396,7 @@ const FEATURE_BY_EVENT = {
   [GA4_ONLY_EVENTS.ALBUM_CREATED]: 'albums',
   [GA4_ONLY_EVENTS.ITEM_CREATED]: 'items',
   [GA4_ONLY_EVENTS.LEDGER_CREATED]: 'ledgers',
+  [GA4_ONLY_EVENTS.TRANSACTION_LOCATION_SET]: 'locations',
 } as const satisfies Partial<Record<AnalyticsEventName, string>>;
 
 export type ProductFeature = (typeof FEATURE_BY_EVENT)[keyof typeof FEATURE_BY_EVENT];

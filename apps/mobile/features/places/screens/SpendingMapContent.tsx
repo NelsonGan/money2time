@@ -1,0 +1,566 @@
+import { ChevronLeft, ChevronRight, Maximize2, X } from 'lucide-react-native';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
+import type MapView from 'react-native-maps';
+import type { Region } from 'react-native-maps';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import { EmptyState } from '~/components/feedback/EmptyState';
+import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
+import { Text } from '~/components/ui/text';
+import { useApp, useTransactions } from '~/context/AppContext';
+import { ActivityTransactionList } from '~/features/transactions/components/ActivityTransactionList';
+import { useThemeColors } from '~/hooks/useThemeColors';
+import { I18n } from '~/lib/i18n';
+import { AnalyticsEvents, trackEvent } from '~/services/analytics';
+import { triggerHaptic } from '~/services/haptics';
+import type { TransactionWithRelations } from '~/types';
+import { cn } from '~/utils';
+import { formatAmount, formatHoursCompact } from '~/utils/formatters';
+
+import { AppMap } from '../components/AppMap';
+import { PlaceClusterPin, PlacePricePin } from '../components/SpendingMapPins';
+import {
+  inPeriod,
+  isLatestPeriod,
+  isMapTransaction,
+  type MapPeriod,
+  type MapPeriodKind,
+  periodLabel,
+  placeTotals,
+  shiftPeriod,
+} from '../lib/mapPeriod';
+import {
+  createPlaceClusterer,
+  longitudeDeltaForZoom,
+  type MapRegion,
+  type PlaceMarker,
+} from '../lib/placeClusters';
+import { placeCategoryIcon } from '../lib/placeIcons';
+import { groupByPlace, type PlaceGroup, regionFor } from '../lib/placeLocation';
+
+type Group = PlaceGroup<TransactionWithRelations>;
+
+type Selection = { kind: 'place'; key: string } | { kind: 'cluster'; keys: string[] } | null;
+
+const WORLD_REGION: MapRegion = {
+  latitude: 15,
+  longitude: 100,
+  latitudeDelta: 60,
+  longitudeDelta: 60,
+};
+
+interface SpendingMapContentProps {
+  onBack: () => void;
+  onOpenTransaction: (transaction: TransactionWithRelations) => void;
+  onOpenLocationSettings: () => void;
+}
+
+/**
+ * The spending map (README: Transaction locations): every tagged entry of a
+ * month, a year or all time, one price tag per place, merged into a bubble
+ * where places crowd at the current zoom. Tapping a place lists what was
+ * spent there; tapping a bubble zooms in, or lists its places once it cannot.
+ */
+export function SpendingMapContent({
+  onBack,
+  onOpenTransaction,
+  onOpenLocationSettings,
+}: SpendingMapContentProps) {
+  const { transactions } = useTransactions();
+  const { settings, getDisplayValueForTransaction, getTrueHourlyRateForDate } = useApp();
+  const themeColors = useThemeColors();
+  const insets = useSafeAreaInsets();
+  const { width, height } = useWindowDimensions();
+  const mapRef = useRef<MapView>(null);
+  const locale = I18n.locale;
+  const isTime = settings.displayMode === 'time';
+
+  const [period, setPeriod] = useState<MapPeriod>({ kind: 'month', anchor: new Date() });
+  const [selection, setSelection] = useState<Selection>(null);
+
+  const located = useMemo(
+    () => transactions.filter((tx) => isMapTransaction(tx) && tx.latitude !== null),
+    [transactions],
+  );
+  const groups = useMemo(
+    () => groupByPlace(located.filter((tx) => inPeriod(tx.date, period))),
+    [located, period],
+  );
+  const groupByKey = useMemo(() => new Map(groups.map((g) => [g.key, g])), [groups]);
+
+  // Money in the main currency (frozen at save for a foreign entry), or hours.
+  const valueOf = useCallback(
+    (tx: TransactionWithRelations) =>
+      isTime ? getDisplayValueForTransaction(tx) : (tx.reportingAmount ?? tx.amount),
+    [isTime, getDisplayValueForTransaction],
+  );
+  const hoursOf = useCallback(
+    (tx: TransactionWithRelations) => {
+      const rate = getTrueHourlyRateForDate(tx.date);
+      return rate > 0 ? Math.abs(tx.reportingAmount ?? tx.amount) / rate : 0;
+    },
+    [getTrueHourlyRateForDate],
+  );
+  const formatValue = useCallback(
+    (value: number, compact: boolean) =>
+      isTime
+        ? formatHoursCompact(value, settings)
+        : formatAmount(value, settings, { showSign: false, compact }),
+    [isTime, settings],
+  );
+
+  const totalsByKey = useMemo(() => {
+    const map = new Map<string, ReturnType<typeof placeTotals>>();
+    for (const group of groups) map.set(group.key, placeTotals(group.transactions, valueOf));
+    return map;
+  }, [groups, valueOf]);
+
+  const fitRegion = useMemo(
+    () => regionFor(groups, { padding: 1.5, minDelta: 0.02 }) ?? WORLD_REGION,
+    [groups],
+  );
+  const [region, setRegion] = useState<MapRegion>(fitRegion);
+  const clusterer = useMemo(() => createPlaceClusterer(groups), [groups]);
+  const markers = useMemo(() => clusterer(region, width), [clusterer, region, width]);
+
+  const panelHeight = Math.round(height * (selection ? 0.46 : 0.3));
+  const topInset = insets.top + 112;
+
+  const fitAll = useCallback(
+    (animated = true) => {
+      if (groups.length === 0) return;
+      if (groups.length === 1) {
+        const only = groups[0] as Group;
+        mapRef.current?.animateToRegion(
+          {
+            latitude: only.latitude,
+            longitude: only.longitude,
+            latitudeDelta: 0.02,
+            longitudeDelta: 0.02,
+          },
+          animated ? 350 : 0,
+        );
+        return;
+      }
+      mapRef.current?.fitToCoordinates(groups, {
+        edgePadding: { top: topInset + 24, right: 48, bottom: panelHeight + 24, left: 48 },
+        animated,
+      });
+    },
+    [groups, topInset, panelHeight],
+  );
+
+  // A new period re-frames the map around its places.
+  useEffect(() => {
+    setSelection(null);
+    fitAll(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [period]);
+
+  useEffect(() => {
+    void trackEvent(AnalyticsEvents.SPENDING_MAP_OPENED, { count: groups.length });
+    // Once per visit.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const selectedGroups: Group[] = useMemo(() => {
+    if (!selection) return [];
+    if (selection.kind === 'place') {
+      const group = groupByKey.get(selection.key);
+      return group ? [group] : [];
+    }
+    return selection.keys.map((key) => groupByKey.get(key)).filter((g): g is Group => Boolean(g));
+  }, [selection, groupByKey]);
+
+  // A place that left the period (or was deleted) closes its panel.
+  useEffect(() => {
+    if (selection && selectedGroups.length === 0) setSelection(null);
+  }, [selection, selectedGroups.length]);
+
+  const handleMarkerPress = useCallback(
+    (marker: PlaceMarker<TransactionWithRelations>) => {
+      void triggerHaptic('selection');
+      if (marker.kind === 'place') {
+        setSelection({ kind: 'place', key: marker.key });
+        return;
+      }
+      // A bubble zooms in while it can still split; past that, it lists its places.
+      const currentZoom = Math.log2((360 * (width / 256)) / Math.max(1e-6, region.longitudeDelta));
+      if (marker.expansionZoom > currentZoom + 0.5 && marker.expansionZoom < 18) {
+        // A level past where it splits, so rounding never leaves it merged.
+        const delta = longitudeDeltaForZoom(marker.expansionZoom + 1, width);
+        mapRef.current?.animateToRegion(
+          {
+            latitude: marker.latitude,
+            longitude: marker.longitude,
+            latitudeDelta: delta,
+            longitudeDelta: delta,
+          },
+          350,
+        );
+        return;
+      }
+      setSelection({ kind: 'cluster', keys: marker.groups.map((g) => g.key) });
+    },
+    [region.longitudeDelta, width],
+  );
+
+  const selectPlace = useCallback(
+    (group: Group) => {
+      void triggerHaptic('selection');
+      setSelection({ kind: 'place', key: group.key });
+      mapRef.current?.animateToRegion(
+        {
+          latitude: group.latitude,
+          longitude: group.longitude,
+          latitudeDelta: Math.min(region.latitudeDelta, 0.03),
+          longitudeDelta: Math.min(region.longitudeDelta, 0.03),
+        },
+        350,
+      );
+    },
+    [region.latitudeDelta, region.longitudeDelta],
+  );
+
+  const pinLabel = (key: string) => {
+    const totals = totalsByKey.get(key);
+    if (!totals) return '';
+    const value = totals.spent > 0 ? totals.spent : totals.earned;
+    // Short form only where it saves room: "RM18.50", but "RM1.2K".
+    return formatValue(value, value >= 1000);
+  };
+
+  const summaryLine = (txs: readonly TransactionWithRelations[]) => {
+    const totals = placeTotals(txs, valueOf);
+    const hours = txs.reduce((sum, tx) => sum + (tx.type === 'expense' ? hoursOf(tx) : 0), 0);
+    const visits = I18n.t(
+      totals.visits === 1 ? 'locations.map_visits_one' : 'locations.map_visits_other',
+      { count: totals.visits },
+    );
+    const parts = [visits];
+    if (totals.spent > 0) parts.push(formatValue(totals.spent, false));
+    if (!isTime && hours > 0)
+      parts.push(I18n.t('locations.map_of_work', { time: formatHoursCompact(hours, settings) }));
+    if (totals.earned > 0) parts.push(`+${formatValue(totals.earned, false)}`);
+    return parts.join(' · ');
+  };
+
+  const kinds: MapPeriodKind[] = ['month', 'year', 'all'];
+  const periodText = periodLabel(period, locale, I18n.t('locations.map_all_time'));
+  const latest = isLatestPeriod(period);
+  const anyLocated = located.length > 0;
+
+  const renderPlaceRow = (group: Group) => {
+    const Icon = placeCategoryIcon(group.category);
+    const totals = totalsByKey.get(group.key);
+    return (
+      <Pressable
+        key={group.key}
+        onPress={() => selectPlace(group)}
+        accessibilityRole="button"
+        accessibilityLabel={group.name}
+        className="flex-row items-center gap-3 rounded-2xl bg-secondary/40 px-3 py-2.5 active:opacity-70"
+      >
+        <View className="h-9 w-9 items-center justify-center rounded-full bg-card">
+          <Icon size={17} color={themeColors.primary} />
+        </View>
+        <View className="min-w-0 flex-1">
+          <Text variant="bodyStrong" numberOfLines={1}>
+            {group.name}
+          </Text>
+          <Text variant="caption" tone="muted" numberOfLines={1}>
+            {I18n.t(
+              group.transactions.length === 1
+                ? 'locations.map_visits_one'
+                : 'locations.map_visits_other',
+              { count: group.transactions.length },
+            )}
+            {group.address ? ` · ${group.address}` : ''}
+          </Text>
+        </View>
+        <Text variant="bodyStrong" tone={totals && totals.spent > 0 ? 'primary' : 'success'}>
+          {pinLabel(group.key)}
+        </Text>
+      </Pressable>
+    );
+  };
+
+  const panel = (() => {
+    if (selection && selectedGroups.length === 1) {
+      const group = selectedGroups[0] as Group;
+      return (
+        <View className="flex-1">
+          <View className="flex-row items-start gap-2 px-5 pb-2 pt-4">
+            <View className="min-w-0 flex-1">
+              <Text variant="heading" numberOfLines={1}>
+                {group.name}
+              </Text>
+              <Text variant="caption" tone="muted" numberOfLines={1}>
+                {summaryLine(group.transactions)}
+              </Text>
+              {group.address ? (
+                <Text variant="caption" tone="muted" numberOfLines={1}>
+                  {group.address}
+                </Text>
+              ) : null}
+            </View>
+            <Pressable
+              onPress={() => setSelection(null)}
+              accessibilityRole="button"
+              accessibilityLabel={I18n.t('common.close')}
+              hitSlop={8}
+              className="h-9 w-9 items-center justify-center rounded-full bg-secondary/60 active:opacity-70"
+            >
+              <X size={18} color={themeColors.textMuted} />
+            </Pressable>
+          </View>
+          <View className="flex-1">
+            <ActivityTransactionList
+              transactions={group.transactions}
+              displaySettings={settings}
+              getDisplayValueForTransaction={getDisplayValueForTransaction}
+              getTrueHourlyRateForDate={getTrueHourlyRateForDate}
+              reimbursementsCountAsExpense={settings.reimbursementsCountAsExpense}
+              onTransactionPress={onOpenTransaction}
+              emptyTitle={I18n.t('locations.map_empty_title')}
+              emptyMessage={I18n.t('locations.map_empty_message')}
+              contentPaddingTop={0}
+              contentPaddingBottom={insets.bottom + 16}
+              disableItemAnimations
+            />
+          </View>
+        </View>
+      );
+    }
+    const list = selection ? selectedGroups : groups;
+    if (list.length === 0) {
+      return (
+        <View className="flex-1 justify-center px-5">
+          <EmptyState
+            compact
+            title={I18n.t(
+              anyLocated ? 'locations.map_empty_period_title' : 'locations.map_empty_title',
+            )}
+            message={
+              settings.transactionLocationsEnabled
+                ? I18n.t('locations.map_empty_message')
+                : I18n.t('locations.map_disabled_message')
+            }
+            mascotMood="curious"
+            action={
+              settings.transactionLocationsEnabled
+                ? undefined
+                : { label: I18n.t('locations.map_turn_on'), onPress: onOpenLocationSettings }
+            }
+          />
+        </View>
+      );
+    }
+    const all = list.flatMap((g) => g.transactions);
+    return (
+      <View className="flex-1">
+        <View className="flex-row items-start gap-2 px-5 pb-2 pt-4">
+          <View className="min-w-0 flex-1">
+            <Text variant="subheading" numberOfLines={1}>
+              {I18n.t(
+                list.length === 1 ? 'locations.map_places_one' : 'locations.map_places_other',
+                {
+                  count: list.length,
+                },
+              )}
+            </Text>
+            <Text variant="caption" tone="muted" numberOfLines={1}>
+              {summaryLine(all)}
+            </Text>
+          </View>
+          {selection ? (
+            <Pressable
+              onPress={() => setSelection(null)}
+              accessibilityRole="button"
+              accessibilityLabel={I18n.t('common.close')}
+              hitSlop={8}
+              className="h-9 w-9 items-center justify-center rounded-full bg-secondary/60 active:opacity-70"
+            >
+              <X size={18} color={themeColors.textMuted} />
+            </Pressable>
+          ) : null}
+        </View>
+        <ScrollView
+          contentContainerStyle={{
+            paddingHorizontal: 16,
+            paddingBottom: insets.bottom + 16,
+            gap: 6,
+          }}
+          showsVerticalScrollIndicator={false}
+        >
+          {list.map(renderPlaceRow)}
+        </ScrollView>
+      </View>
+    );
+  })();
+
+  const selectedKeys = new Set(selectedGroups.map((g) => g.key));
+
+  return (
+    <View className="flex-1 bg-background">
+      {/* Where the user spends is their location history. */}
+      <View className="flex-1" {...REPLAY_PRIVATE}>
+        <AppMap
+          ref={mapRef}
+          initialRegion={fitRegion}
+          mapPadding={{ top: topInset, right: 0, bottom: panelHeight, left: 0 }}
+          onRegionChangeComplete={(next: Region) => setRegion(next)}
+          onPress={() => setSelection(null)}
+          onMapReady={() => fitAll(false)}
+        >
+          {markers.map((marker) =>
+            marker.kind === 'place' ? (
+              <PlacePricePin
+                key={marker.key}
+                id={marker.key}
+                latitude={marker.latitude}
+                longitude={marker.longitude}
+                label={pinLabel(marker.key)}
+                income={(totalsByKey.get(marker.key)?.spent ?? 0) === 0}
+                selected={selectedKeys.has(marker.key) && selection?.kind === 'place'}
+                accessibilityLabel={`${marker.group.name}, ${pinLabel(marker.key)}`}
+                onPress={() => handleMarkerPress(marker)}
+              />
+            ) : (
+              <PlaceClusterPin
+                key={marker.key}
+                id={marker.key}
+                latitude={marker.latitude}
+                longitude={marker.longitude}
+                count={marker.count}
+                label={(() => {
+                  const total = marker.groups.reduce(
+                    (sum, g) => sum + (totalsByKey.get(g.key)?.spent ?? 0),
+                    0,
+                  );
+                  return formatValue(total, total >= 1000);
+                })()}
+                selected={
+                  selection?.kind === 'cluster' &&
+                  marker.groups.some((g) => selectedKeys.has(g.key))
+                }
+                accessibilityLabel={I18n.t('locations.map_places_other', {
+                  count: marker.groups.length,
+                })}
+                onPress={() => handleMarkerPress(marker)}
+              />
+            ),
+          )}
+        </AppMap>
+      </View>
+
+      {/* Floating header: back, the period, and its length. */}
+      <View
+        pointerEvents="box-none"
+        className="absolute left-0 right-0 top-0 px-4"
+        style={{ paddingTop: insets.top + 8 }}
+      >
+        <View pointerEvents="box-none" className="flex-row items-center gap-2">
+          <Pressable
+            onPress={onBack}
+            accessibilityRole="button"
+            accessibilityLabel={I18n.t('common.back')}
+            className="h-11 w-11 items-center justify-center rounded-full border border-border/40 bg-card shadow-soft active:opacity-80"
+          >
+            <ChevronLeft size={20} color={themeColors.text} />
+          </Pressable>
+          <View className="h-11 flex-1 flex-row items-center justify-between rounded-full border border-border/40 bg-card px-1.5 shadow-soft">
+            <Pressable
+              onPress={() => setPeriod((p) => shiftPeriod(p, -1))}
+              disabled={period.kind === 'all'}
+              accessibilityRole="button"
+              accessibilityLabel={I18n.t('locations.map_previous')}
+              hitSlop={6}
+              className={cn(
+                'h-8 w-8 items-center justify-center rounded-full',
+                period.kind === 'all' && 'opacity-0',
+              )}
+            >
+              <ChevronLeft size={18} color={themeColors.textMuted} />
+            </Pressable>
+            <Text variant="bodyStrong" numberOfLines={1} className="shrink">
+              {periodText}
+            </Text>
+            <Pressable
+              onPress={() => setPeriod((p) => shiftPeriod(p, 1))}
+              disabled={latest}
+              accessibilityRole="button"
+              accessibilityLabel={I18n.t('locations.map_next')}
+              hitSlop={6}
+              className={cn(
+                'h-8 w-8 items-center justify-center rounded-full',
+                latest && 'opacity-0',
+              )}
+            >
+              <ChevronRight size={18} color={themeColors.textMuted} />
+            </Pressable>
+          </View>
+          <View className="w-11" />
+        </View>
+        <View pointerEvents="box-none" className="mt-2 items-center">
+          <View className="flex-row rounded-full border border-border/40 bg-card p-1 shadow-soft">
+            {kinds.map((kind) => {
+              const active = period.kind === kind;
+              return (
+                <Pressable
+                  key={kind}
+                  onPress={() => {
+                    if (active) return;
+                    void triggerHaptic('selection');
+                    setPeriod({ kind, anchor: new Date() });
+                  }}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: active }}
+                  className={cn('rounded-full px-4 py-1.5', active && 'bg-primary')}
+                >
+                  <Text
+                    variant="caption"
+                    className={cn(
+                      'font-semibold',
+                      active ? 'text-primary-foreground' : 'text-foreground',
+                    )}
+                  >
+                    {I18n.t(`locations.map_period_${kind}`)}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </View>
+      </View>
+
+      {groups.length > 0 ? (
+        <Pressable
+          onPress={() => {
+            void triggerHaptic('selection');
+            setSelection(null);
+            fitAll(true);
+          }}
+          accessibilityRole="button"
+          accessibilityLabel={I18n.t('locations.map_fit')}
+          className="absolute right-4 h-11 w-11 items-center justify-center rounded-full border border-border/40 bg-card shadow-soft active:opacity-80"
+          style={{ bottom: panelHeight + 12 }}
+        >
+          <Maximize2 size={18} color={themeColors.text} />
+        </Pressable>
+      ) : null}
+
+      <View
+        className="absolute bottom-0 left-0 right-0 rounded-t-[28px] border-t border-border/30 bg-card shadow-soft"
+        style={{ height: panelHeight }}
+        {...REPLAY_PRIVATE}
+      >
+        <View className="items-center pt-2">
+          <View className="h-1 w-10 rounded-full bg-border/70" />
+        </View>
+        {panel}
+      </View>
+    </View>
+  );
+}

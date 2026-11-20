@@ -651,3 +651,69 @@ describe('notification review data on backup restore', () => {
     expect(resetAutomationCaptureData).not.toHaveBeenCalled();
   });
 });
+
+describe('dataManagementService transaction location backup/restore', () => {
+  const LOCATED_COLUMNS = [
+    ...TX_COLUMNS,
+    'latitude',
+    'longitude',
+    'place_name',
+    'place_address',
+    'place_id',
+    'place_category',
+  ];
+  const locatedTx: Row = {
+    id: 'tx-loc',
+    type: 'expense',
+    amount: 18.5,
+    currency: 'MYR',
+    reporting_currency: null,
+    reporting_amount: null,
+    fx_rate: null,
+    to_amount: null,
+    account_amount: null,
+    date: '2026-11-20T04:00:00.000Z',
+    account_id: 'acc1',
+    category_id: 'cat1',
+    created_at: '2026-11-20T04:00:00.000Z',
+    updated_at: '2026-11-20T04:00:00.000Z',
+    deleted_at: null,
+    latitude: 3.1589569,
+    longitude: 101.7137273,
+    place_name: 'Starbucks',
+    place_address: '151, Jalan Ampang, 50450 Kuala Lumpur',
+    place_id: 'I88BAA55D81E8BF1',
+    place_category: 'Cafe',
+  };
+
+  it('carries the location columns through a backup and a restore', async () => {
+    const source = createFakeSqlite(
+      { transactions: [{ ...locatedTx }] },
+      { transactions: LOCATED_COLUMNS },
+    );
+    (getSQLite as jest.Mock).mockReturnValue(source);
+    const data = await buildBackupData();
+    expect(data.tables.transactions).toEqual([locatedTx]);
+
+    const fresh = createFakeSqlite({ transactions: [] }, { transactions: LOCATED_COLUMNS });
+    (getSQLite as jest.Mock).mockReturnValue(fresh);
+    expect(applyBackupData(data).success).toBe(true);
+    expect(fresh.tables.transactions).toEqual([locatedTx]);
+  });
+
+  it('restores a location backup into an older app without the columns', async () => {
+    const source = createFakeSqlite(
+      { transactions: [{ ...locatedTx }] },
+      { transactions: LOCATED_COLUMNS },
+    );
+    (getSQLite as jest.Mock).mockReturnValue(source);
+    const data = await buildBackupData();
+
+    const older = createFakeSqlite({ transactions: [] }, { transactions: TX_COLUMNS });
+    (getSQLite as jest.Mock).mockReturnValue(older);
+    expect(applyBackupData(data).success).toBe(true);
+    const restored = older.tables.transactions?.[0] as Row;
+    expect(restored.id).toBe('tx-loc');
+    expect('place_name' in restored).toBe(false);
+  });
+});

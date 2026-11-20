@@ -19,6 +19,7 @@ import {
   TRANSACTION_RAW_COLUMNS_SQL,
   TRANSACTION_SPARSE_COLUMNS_SQL,
   TRANSACTION_SPARSE_FILTER_SQL,
+  transactionLocationFields,
   type TransactionRelationLookups,
   transactionRelations,
 } from '~/lib/repositories/mappers';
@@ -1033,12 +1034,21 @@ describe('toTransactionWithRelationsFromRaw', () => {
       albumCategory: null,
       albumCategoryName: null,
       albumCategoryIcon: null,
+      latitude: 3.1589569,
+      longitude: 101.7137273,
+      placeName: 'Starbucks',
+      placeAddress: '151, Jalan Ampang, 50450 Kuala Lumpur',
+      placeId: 'I88BAA55D81E8BF1',
+      placeCategory: 'Cafe',
       feeOfId: 't7',
       ...STAMPS,
     };
-    expect(toTransactionWithRelationsFromRaw([...rawFor(row), ...relationValues])).toEqual({
-      ...toTransaction(row),
-      ...RELATIONS,
+    const built = toTransactionWithRelationsFromRaw([...rawFor(row), ...relationValues]);
+    expect(built).toEqual({ ...toTransaction(row), ...RELATIONS });
+    expect(built).toMatchObject({
+      latitude: 3.1589569,
+      placeName: 'Starbucks',
+      placeCategory: 'Cafe',
     });
   });
 
@@ -1081,10 +1091,18 @@ describe('toTransactionWithRelationsFromRaw', () => {
       albumCategory: null,
       albumCategoryName: null,
       albumCategoryIcon: null,
+      // Off the globe: the whole location reads as none.
+      latitude: 95,
+      longitude: 101.7,
+      placeName: 'Nowhere',
+      placeAddress: null,
+      placeId: null,
+      placeCategory: null,
       feeOfId: null,
       ...STAMPS,
     };
     const nullRelations = relationValues.map(() => null);
+    expect(toTransaction(row)).toMatchObject({ latitude: null, longitude: null, placeName: null });
     expect(toTransactionWithRelationsFromRaw([...rawFor(row), ...nullRelations])).toEqual({
       ...toTransaction(row),
       accountName: null,
@@ -1243,6 +1261,12 @@ describe('createTransactionAssembler', () => {
       album_category: 'food',
       album_category_name: 'Meals',
       album_category_icon: null,
+      latitude: 3.15,
+      longitude: 101.71,
+      place_name: 'Suria KLCC',
+      place_address: null,
+      place_id: null,
+      place_category: null,
     };
     expect(Object.keys(sparse)).toEqual(sparseColumns);
     const sparseById = new Map([['t1', ['t1', ...sparseColumns.map((column) => sparse[column])]]]);
@@ -1260,11 +1284,52 @@ describe('createTransactionAssembler', () => {
       categoryParentId: null,
     });
     expect(built.sentiment).toBe('happy');
+    expect(built).toMatchObject({ latitude: 3.15, longitude: 101.71, placeName: 'Suria KLCC' });
     // The row after a sparse one starts clean.
     const plain = assemble(commonRow({ ...common, id: 't3' }));
     expect(plain.sentiment).toBe('neutral');
     expect(plain.receiptUri).toBeNull();
     expect(plain.instalmentCount).toBeNull();
+    expect(plain.latitude).toBeNull();
+  });
+});
+
+describe('transactionLocationFields', () => {
+  it('keeps a full location and trims its text', () => {
+    expect(
+      transactionLocationFields(1.5, 103.8, ' Jewel ', ' Airport Blvd ', 'I1', 'Store'),
+    ).toEqual({
+      latitude: 1.5,
+      longitude: 103.8,
+      placeName: 'Jewel',
+      placeAddress: 'Airport Blvd',
+      placeId: 'I1',
+      placeCategory: 'Store',
+    });
+  });
+
+  it('names an unnamed spot by its address, else its coordinates', () => {
+    expect(transactionLocationFields(1.5, 103.8, '', 'Airport Blvd', null, null).placeName).toBe(
+      'Airport Blvd',
+    );
+    expect(transactionLocationFields(1.5, 103.8, null, null, null, null).placeName).toBe(
+      '1.5000, 103.8000',
+    );
+  });
+
+  it('drops half a point, a point off the globe and non-numbers whole', () => {
+    const none = {
+      latitude: null,
+      longitude: null,
+      placeName: null,
+      placeAddress: null,
+      placeId: null,
+      placeCategory: null,
+    };
+    expect(transactionLocationFields(1.5, null, 'A', null, null, null)).toEqual(none);
+    expect(transactionLocationFields(1.5, 181, 'A', null, null, null)).toEqual(none);
+    expect(transactionLocationFields('1.5', 103, 'A', null, null, null)).toEqual(none);
+    expect(transactionLocationFields(Number.NaN, 103, 'A', null, null, null)).toEqual(none);
   });
 });
 

@@ -248,6 +248,10 @@ export interface UserSettings {
   /** Number of working hours represented by one displayed working day. */
   workingHoursPerDay: number;
   hapticsEnabled: boolean;
+  /** Settings > Personalize > Save locations. Off by default; device-local. */
+  transactionLocationsEnabled: boolean;
+  /** With Save locations on, a new expense starts tagged with where you are. */
+  transactionLocationAutoTag: boolean;
   themeMode: ThemeMode;
   themeColor: ThemeColor;
   /** Clay illustrations (default) or the flat line icons, for the app's chrome. */
@@ -1176,10 +1180,41 @@ export interface Transaction {
    */
   albumCategoryName: string | null;
   albumCategoryIcon: string | null;
+  /** Where it happened (README: Transaction locations); null when untagged. */
+  latitude: number | null;
+  longitude: number | null;
+  /** The name rows and the map show: a place ("Starbucks") or a street. */
+  placeName: string | null;
+  /** The address under the name, one line, without the country. */
+  placeAddress: string | null;
+  /** Apple's place id for a searched place; null for a spot. */
+  placeId: string | null;
+  /** Apple's PoiCategory ("Cafe") for the place's icon; null if none. */
+  placeCategory: string | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
 }
+
+/** The location fields of a transaction, written and cleared together. */
+export interface TransactionLocation {
+  latitude: number;
+  longitude: number;
+  placeName: string;
+  placeAddress: string | null;
+  placeId: string | null;
+  placeCategory: string | null;
+}
+
+/** All-null location fields, for clearing a transaction's location. */
+export const NO_TRANSACTION_LOCATION = {
+  latitude: null,
+  longitude: null,
+  placeName: null,
+  placeAddress: null,
+  placeId: null,
+  placeCategory: null,
+} as const;
 
 export interface TransactionWithRelations extends Transaction {
   /** The live plan's number of payments, for the row's "4/12" pill. */

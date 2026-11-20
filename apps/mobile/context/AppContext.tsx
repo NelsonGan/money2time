@@ -223,6 +223,7 @@ import { categoriesRepository } from '~/lib/repositories/categoriesRepository';
 import { exchangeRatesRepository } from '~/lib/repositories/exchangeRatesRepository';
 import { itemsRepository } from '~/lib/repositories/itemsRepository';
 import { type LedgerInput, ledgersRepository } from '~/lib/repositories/ledgersRepository';
+import { transactionLocationFields } from '~/lib/repositories/mappers';
 import { monthlyWageRepository } from '~/lib/repositories/monthlyWageRepository';
 import { paymentAlertCapturesRepository } from '~/lib/repositories/paymentAlertCapturesRepository';
 import { periodBudgetsRepository } from '~/lib/repositories/periodBudgetsRepository';
@@ -304,6 +305,7 @@ import {
   type LocatedAlbum,
   type MonthCycleInput,
   type MonthlyWageSettings,
+  NO_TRANSACTION_LOCATION,
   type NotificationPreferences,
   type PaymentAlertChannel,
   type PaymentAlertPrefs,
@@ -880,6 +882,8 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
         | 'workdayDisplayEnabled'
         | 'workingHoursPerDay'
         | 'hapticsEnabled'
+        | 'transactionLocationsEnabled'
+        | 'transactionLocationAutoTag'
         | 'themeMode'
         | 'themeColor'
         | 'iconStyle'
@@ -1148,6 +1152,7 @@ function optimisticPaybackTransfer(input: {
     albumCategory: null,
     albumCategoryName: null,
     albumCategoryIcon: null,
+    ...NO_TRANSACTION_LOCATION,
     recurrencePattern: 'none',
     recurrenceInterval: 1,
     recurrenceEndDate: null,
@@ -3616,6 +3621,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         albumCategory: normalizedInput.albumCategory ?? null,
         albumCategoryName: normalizedInput.albumCategoryName ?? null,
         albumCategoryIcon: normalizedInput.albumCategoryIcon ?? null,
+        ...transactionLocationFields(
+          normalizedInput.latitude,
+          normalizedInput.longitude,
+          normalizedInput.placeName,
+          normalizedInput.placeAddress,
+          normalizedInput.placeId,
+          normalizedInput.placeCategory,
+        ),
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,
@@ -3737,6 +3750,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         albumCategory: normalizedInput.albumCategory ?? null,
         albumCategoryName: normalizedInput.albumCategoryName ?? null,
         albumCategoryIcon: normalizedInput.albumCategoryIcon ?? null,
+        ...transactionLocationFields(
+          normalizedInput.latitude,
+          normalizedInput.longitude,
+          normalizedInput.placeName,
+          normalizedInput.placeAddress,
+          normalizedInput.placeId,
+          normalizedInput.placeCategory,
+        ),
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,
@@ -5617,6 +5638,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         albumCategory: null,
         albumCategoryName: null,
         albumCategoryIcon: null,
+        ...NO_TRANSACTION_LOCATION,
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,
@@ -5819,6 +5841,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         albumCategory: normalizedInput.albumCategory ?? null,
         albumCategoryName: normalizedInput.albumCategoryName ?? null,
         albumCategoryIcon: normalizedInput.albumCategoryIcon ?? null,
+        ...transactionLocationFields(
+          normalizedInput.latitude,
+          normalizedInput.longitude,
+          normalizedInput.placeName,
+          normalizedInput.placeAddress,
+          normalizedInput.placeId,
+          normalizedInput.placeCategory,
+        ),
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,
@@ -6954,6 +6984,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           | 'workdayDisplayEnabled'
           | 'workingHoursPerDay'
           | 'hapticsEnabled'
+          | 'transactionLocationsEnabled'
+          | 'transactionLocationAutoTag'
           | 'themeMode'
           | 'themeColor'
           | 'iconStyle'
