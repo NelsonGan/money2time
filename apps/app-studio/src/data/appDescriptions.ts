@@ -26,13 +26,13 @@ Hopefully you'll always have control of your money and your life.
 Terms of Use: https://money2time.com/terms
 Privacy Policy: https://money2time.com/privacy
 Contact: https://www.money2time.com/contact`,
-    whatsNew: `- Added the ability to split a bill a friend paid
-- Added more ways to split a bill
-- Added albums to spending breakdowns
-- Added icons and emoji for albums
-- Fixed backups without Google Drive access
+    whatsNew: `- Added shared albums to split trip bills with friends
+- Added the ability to invite friends without the app
+- Added the ability to change a shared album's categories
+- Fixed syncing after someone leaves a shared ledger
+- Fixed ignoring notifications from another ledger
 
-Before borrowing money from a friend, decide which you need most.`,
+Many hands make light work.`,
   },
 
   zh: {
@@ -49,13 +49,13 @@ Before borrowing money from a friend, decide which you need most.`,
 使用条款：https://money2time.com/terms
 隐私政策：https://money2time.com/privacy
 联系我们：https://www.money2time.com/contact`,
-    whatsNew: `- 新增了分摊朋友付款账单的功能
-- 新增了更多分摊账单的方式
-- 新增了在支出分类中显示相册
-- 新增了相册的图标和表情符号
-- 修复了没有 Google 云端硬盘权限时无法备份的问题
+    whatsNew: `- 新增了共享相册，与朋友分摊旅行账单
+- 新增了邀请未安装应用的朋友的功能
+- 新增了修改共享相册分类的功能
+- 修复了有人离开共享账本后无法同步的问题
+- 修复了无法忽略其他账本通知的问题
 
-向朋友借钱之前，先想清楚你更需要钱还是朋友。`,
+众人拾柴火焰高。`,
   },
 
   de: {
@@ -72,13 +72,13 @@ Ich hoffe, du hast immer die Kontrolle über dein Geld – und dein Leben.
 Nutzungsbedingungen: https://money2time.com/terms
 Datenschutzrichtlinie: https://money2time.com/privacy
 Kontakt: https://www.money2time.com/contact`,
-    whatsNew: `- Teilen einer von Freunden bezahlten Rechnung hinzugefügt
-- Weitere Möglichkeiten zum Teilen einer Rechnung hinzugefügt
-- Alben in der Ausgabenaufschlüsselung hinzugefügt
-- Symbole und Emojis für Alben hinzugefügt
-- Backups ohne Google-Drive-Zugriff behoben
+    whatsNew: `- Geteilte Alben zum Teilen von Reisekosten mit Freunden hinzugefügt
+- Einladen von Freunden ohne die App hinzugefügt
+- Ändern der Kategorien eines geteilten Albums hinzugefügt
+- Synchronisierung nach dem Austritt aus einem geteilten Buch behoben
+- Ignorieren von Mitteilungen aus einem anderen Buch behoben
 
-Beim Geld hört die Freundschaft auf.`,
+Viele Hände machen schnell ein Ende.`,
   },
 
   fr: {
@@ -95,13 +95,13 @@ J'espère que vous aurez toujours le contrôle de votre argent et de votre vie.
 Conditions d'utilisation : https://money2time.com/terms
 Politique de confidentialité : https://money2time.com/privacy
 Contact : https://www.money2time.com/contact`,
-    whatsNew: `- Ajout du partage d'une facture payée par un ami
-- Ajout de nouvelles façons de partager une facture
-- Ajout des albums dans la répartition des dépenses
-- Ajout d'icônes et d'emoji pour les albums
-- Correction des sauvegardes sans accès à Google Drive
+    whatsNew: `- Ajout des albums partagés pour partager les frais de voyage entre amis
+- Ajout de l'invitation d'amis qui n'ont pas l'app
+- Ajout de la modification des catégories d'un album partagé
+- Correction de la synchronisation après le départ d'un membre d'un carnet partagé
+- Correction du bouton Ignorer pour les notifications d'un autre carnet
 
-Avant d'emprunter de l'argent à un ami, demandez-vous lequel des deux vous est le plus nécessaire.`,
+L'union fait la force.`,
   },
 
   es: {
@@ -118,13 +118,13 @@ Ojalá siempre tengas el control de tu dinero y de tu vida.
 Condiciones de uso: https://money2time.com/terms
 Política de privacidad: https://money2time.com/privacy
 Contacto: https://www.money2time.com/contact`,
-    whatsNew: `- Se añadió la posibilidad de dividir un gasto que pagó un amigo
-- Se añadieron más formas de dividir un gasto
-- Se añadieron los álbumes al desglose de gastos
-- Se añadieron iconos y emojis para los álbumes
-- Se corrigieron las copias de seguridad sin acceso a Google Drive
+    whatsNew: `- Se añadieron álbumes compartidos para dividir gastos de viaje con amigos
+- Se añadió la posibilidad de invitar a amigos sin la app
+- Se añadió la posibilidad de cambiar las categorías de un álbum compartido
+- Se corrigió la sincronización cuando alguien sale de un libro compartido
+- Se corrigió la opción de ignorar notificaciones de otro libro
 
-Antes de pedirle dinero prestado a un amigo, decide cuál de los dos necesitas más.`,
+La unión hace la fuerza.`,
   },
 
   pt: {
@@ -141,13 +141,13 @@ Que você sempre tenha controle do seu dinheiro e da sua vida.
 Termos de Uso: https://money2time.com/terms
 Política de Privacidade: https://money2time.com/privacy
 Contato: https://www.money2time.com/contact`,
-    whatsNew: `- Adicionada a possibilidade de dividir uma conta paga por um amigo
-- Adicionadas mais formas de dividir uma conta
-- Adicionados os álbuns ao detalhamento de gastos
-- Adicionados ícones e emojis para álbuns
-- Corrigido o backup sem acesso ao Google Drive
+    whatsNew: `- Adicionados álbuns compartilhados para dividir gastos de viagem com amigos
+- Adicionada a possibilidade de convidar amigos sem o app
+- Adicionada a possibilidade de alterar as categorias de um álbum compartilhado
+- Corrigida a sincronização quando alguém sai de um livro compartilhado
+- Corrigida a opção de ignorar notificações de outro livro
 
-Antes de pedir dinheiro emprestado a um amigo, decida de qual dos dois você precisa mais.`,
+A união faz a força.`,
   },
 
   it: {
@@ -164,13 +164,13 @@ Speriamo che tu possa sempre avere il controllo del tuo denaro e della tua vita.
 Termini di utilizzo: https://money2time.com/terms
 Informativa sulla privacy: https://money2time.com/privacy
 Contatto: https://www.money2time.com/contact`,
-    whatsNew: `- Aggiunta la possibilità di dividere un conto pagato da un amico
-- Aggiunti altri modi per dividere un conto
-- Aggiunti gli album nella ripartizione delle spese
-- Aggiunte icone ed emoji per gli album
-- Risolto il backup senza accesso a Google Drive
+    whatsNew: `- Aggiunti gli album condivisi per dividere le spese di viaggio con gli amici
+- Aggiunta la possibilità di invitare amici senza l'app
+- Aggiunta la possibilità di modificare le categorie di un album condiviso
+- Risolta la sincronizzazione quando qualcuno lascia un registro condiviso
+- Risolta l'opzione Ignora per le notifiche di un altro registro
 
-Prima di chiedere soldi in prestito a un amico, decidi di quale dei due hai più bisogno.`,
+L'unione fa la forza.`,
   },
 
   nl: {
@@ -187,13 +187,13 @@ Hopelijk heb je altijd de controle over je geld en je leven.
 Gebruiksvoorwaarden: https://money2time.com/terms
 Privacybeleid: https://money2time.com/privacy
 Contact: https://www.money2time.com/contact`,
-    whatsNew: `- Mogelijkheid toegevoegd om een door een vriend betaalde rekening te splitsen
-- Meer manieren toegevoegd om een rekening te splitsen
-- Albums toegevoegd aan het uitgavenoverzicht
-- Pictogrammen en emoji voor albums toegevoegd
-- Back-ups zonder toegang tot Google Drive opgelost
+    whatsNew: `- Gedeelde albums toegevoegd om reiskosten met vrienden te splitsen
+- Vrienden zonder de app uitnodigen toegevoegd
+- Categorieën van een gedeeld album wijzigen toegevoegd
+- Synchronisatie opgelost nadat iemand een gedeeld boek verlaat
+- Negeren van meldingen uit een ander boek opgelost
 
-Bij geld houdt de vriendschap op.`,
+Vele handen maken licht werk.`,
   },
 
   ru: {
@@ -210,13 +210,13 @@ Bij geld houdt de vriendschap op.`,
 Условия использования: https://money2time.com/terms
 Политика конфиденциальности: https://money2time.com/privacy
 Контакты: https://www.money2time.com/contact`,
-    whatsNew: `- Добавлена возможность разделить оплаченный другом счёт
-- Добавлены новые способы разделить счёт
-- Добавлены альбомы в разбивку расходов
-- Добавлены значки и эмодзи для альбомов
-- Исправлено резервное копирование без доступа к Google Диску
+    whatsNew: `- Добавлены общие альбомы, чтобы делить расходы на поездку с друзьями
+- Добавлена возможность приглашать друзей без приложения
+- Добавлена возможность менять категории общего альбома
+- Исправлена синхронизация после выхода участника из общей книги
+- Исправлено игнорирование уведомлений из другой книги
 
-Дружба дружбой, а денежки врозь.`,
+Берись дружно, не будет грузно.`,
   },
 
   ja: {
@@ -233,13 +233,13 @@ Bij geld houdt de vriendschap op.`,
 利用規約: https://money2time.com/terms
 プライバシーポリシー: https://money2time.com/privacy
 お問い合わせ: https://www.money2time.com/contact`,
-    whatsNew: `- 友達が支払った請求を割り勘する機能を追加しました
-- 割り勘の方法を追加しました
-- 支出の内訳にアルバムを追加しました
-- アルバムのアイコンと絵文字を追加しました
-- Google ドライブへのアクセスがない場合のバックアップを修正しました
+    whatsNew: `- 友達と旅行の費用を割り勘できる共有アルバムを追加しました
+- アプリを持っていない友達を招待する機能を追加しました
+- 共有アルバムのカテゴリを変更する機能を追加しました
+- 共有帳簿から誰かが抜けた後の同期を修正しました
+- 他の帳簿の通知を無視できない問題を修正しました
 
-友人から金を借りる前に、金と友人のどちらが必要かを決めよ。`,
+三人寄れば文殊の知恵。`,
   },
 
   ko: {
@@ -256,13 +256,13 @@ Bij geld houdt de vriendschap op.`,
 이용 약관: https://money2time.com/terms
 개인정보 처리방침: https://money2time.com/privacy
 문의: https://www.money2time.com/contact`,
-    whatsNew: `- 친구가 결제한 금액을 더치페이하는 기능을 추가했습니다
-- 더치페이 방식을 더 추가했습니다
-- 지출 분석에 앨범을 추가했습니다
-- 앨범 아이콘과 이모지를 추가했습니다
-- Google 드라이브 권한이 없을 때의 백업 문제를 수정했습니다
+    whatsNew: `- 친구와 여행 경비를 나누는 공유 앨범을 추가했습니다
+- 앱이 없는 친구를 초대하는 기능을 추가했습니다
+- 공유 앨범의 카테고리를 변경하는 기능을 추가했습니다
+- 누군가 공유 가계부를 나간 후의 동기화 문제를 수정했습니다
+- 다른 가계부의 알림을 무시하지 못하는 문제를 수정했습니다
 
-친구에게 돈을 빌리기 전에 돈과 친구 중 무엇이 더 필요한지 정하라.`,
+백지장도 맞들면 낫다.`,
   },
 
   hi: {
@@ -279,13 +279,13 @@ Bij geld houdt de vriendschap op.`,
 उपयोग की शर्तें: https://money2time.com/terms
 गोपनीयता नीति: https://money2time.com/privacy
 संपर्क: https://www.money2time.com/contact`,
-    whatsNew: `- दोस्त द्वारा चुकाए गए बिल को बांटने की सुविधा जोड़ी गई
-- बिल बांटने के और तरीके जोड़े गए
-- खर्च के ब्योरे में एल्बम जोड़े गए
-- एल्बम के लिए आइकन और इमोजी जोड़े गए
-- Google Drive की अनुमति न होने पर बैकअप की समस्या ठीक की
+    whatsNew: `- दोस्तों के साथ यात्रा के बिल बांटने के लिए साझा एल्बम जोड़े गए
+- बिना ऐप वाले दोस्तों को आमंत्रित करने की सुविधा जोड़ी गई
+- साझा एल्बम की श्रेणियां बदलने की सुविधा जोड़ी गई
+- किसी के साझा बही छोड़ने के बाद सिंक की समस्या ठीक की
+- दूसरी बही की सूचनाओं को अनदेखा करने की समस्या ठीक की
 
-दोस्त से उधार लेने से पहले तय कर लें कि आपको दोनों में से किसकी ज़्यादा ज़रूरत है।`,
+एक और एक ग्यारह होते हैं।`,
   },
 
   id: {
@@ -302,13 +302,13 @@ Semoga Anda selalu punya kendali atas uang dan hidup Anda.
 Syarat Penggunaan: https://money2time.com/terms
 Kebijakan Privasi: https://money2time.com/privacy
 Kontak: https://www.money2time.com/contact`,
-    whatsNew: `- Menambahkan kemampuan membagi tagihan yang dibayar teman
-- Menambahkan lebih banyak cara membagi tagihan
-- Menambahkan album ke rincian pengeluaran
-- Menambahkan ikon dan emoji untuk album
-- Memperbaiki pencadangan tanpa akses Google Drive
+    whatsNew: `- Menambahkan album bersama untuk membagi tagihan perjalanan dengan teman
+- Menambahkan kemampuan mengundang teman tanpa aplikasi
+- Menambahkan kemampuan mengubah kategori album bersama
+- Memperbaiki sinkronisasi setelah seseorang keluar dari buku bersama
+- Memperbaiki pengabaian notifikasi dari buku lain
 
-Sebelum meminjam uang dari teman, putuskan mana yang lebih kamu butuhkan.`,
+Berat sama dipikul, ringan sama dijinjing.`,
   },
 
   tr: {
@@ -325,13 +325,13 @@ Umarım paranızın ve hayatınızın kontrolü her zaman sizde olur.
 Kullanım Koşulları: https://money2time.com/terms
 Gizlilik Politikası: https://money2time.com/privacy
 İletişim: https://www.money2time.com/contact`,
-    whatsNew: `- Bir arkadaşın ödediği hesabı bölme özelliği eklendi
-- Hesap bölmenin daha fazla yolu eklendi
-- Harcama dökümüne albümler eklendi
-- Albümler için simge ve emoji eklendi
-- Google Drive erişimi olmadan yedekleme sorunu giderildi
+    whatsNew: `- Arkadaşlarla seyahat masraflarını bölmek için paylaşılan albümler eklendi
+- Uygulaması olmayan arkadaşları davet etme özelliği eklendi
+- Paylaşılan albümün kategorilerini değiştirme özelliği eklendi
+- Biri paylaşılan defterden ayrıldıktan sonraki senkronizasyon sorunu giderildi
+- Başka bir defterdeki bildirimleri yok sayma sorunu giderildi
 
-Bir arkadaştan borç almadan önce hangisine daha çok ihtiyacın olduğuna karar ver.`,
+Bir elin nesi var, iki elin sesi var.`,
   },
 
   vi: {
@@ -348,13 +348,13 @@ Hy vọng bạn luôn làm chủ được tiền bạc và cuộc sống của m
 Điều khoản sử dụng: https://money2time.com/terms
 Chính sách bảo mật: https://money2time.com/privacy
 Liên hệ: https://www.money2time.com/contact`,
-    whatsNew: `- Thêm khả năng chia hóa đơn do bạn bè trả
-- Thêm nhiều cách chia hóa đơn hơn
-- Thêm album vào phần phân tích chi tiêu
-- Thêm biểu tượng và emoji cho album
-- Khắc phục lỗi sao lưu khi không có quyền truy cập Google Drive
+    whatsNew: `- Thêm album chung để chia chi phí chuyến đi với bạn bè
+- Thêm khả năng mời bạn bè chưa có ứng dụng
+- Thêm khả năng thay đổi danh mục của album chung
+- Khắc phục lỗi đồng bộ sau khi có người rời sổ chung
+- Khắc phục lỗi bỏ qua thông báo từ sổ khác
 
-Trước khi vay tiền bạn bè, hãy nghĩ xem bạn cần tiền hay cần bạn hơn.`,
+Một cây làm chẳng nên non, ba cây chụm lại nên hòn núi cao.`,
   },
 
   th: {
@@ -371,13 +371,13 @@ Trước khi vay tiền bạn bè, hãy nghĩ xem bạn cần tiền hay cần b
 เงื่อนไขการใช้งาน: https://money2time.com/terms
 นโยบายความเป็นส่วนตัว: https://money2time.com/privacy
 ติดต่อ: https://www.money2time.com/contact`,
-    whatsNew: `- เพิ่มความสามารถในการแบ่งบิลที่เพื่อนจ่าย
-- เพิ่มวิธีแบ่งบิลให้มากขึ้น
-- เพิ่มอัลบั้มในรายละเอียดรายจ่าย
-- เพิ่มไอคอนและอีโมจิสำหรับอัลบั้ม
-- แก้ไขปัญหาการสำรองข้อมูลเมื่อไม่ได้ให้สิทธิ์ Google Drive
+    whatsNew: `- เพิ่มอัลบั้มที่แชร์เพื่อแบ่งค่าใช้จ่ายทริปกับเพื่อน
+- เพิ่มความสามารถในการเชิญเพื่อนที่ไม่มีแอป
+- เพิ่มความสามารถในการเปลี่ยนหมวดหมู่ของอัลบั้มที่แชร์
+- แก้ไขปัญหาการซิงค์หลังมีคนออกจากสมุดบัญชีที่แชร์
+- แก้ไขปัญหาการละเว้นการแจ้งเตือนจากสมุดบัญชีอื่น
 
-ก่อนยืมเงินเพื่อน ให้คิดก่อนว่าคุณต้องการเงินหรือเพื่อนมากกว่า`,
+สามัคคีคือพลัง`,
   },
 
   pl: {
@@ -394,13 +394,13 @@ Mam nadzieję, że zawsze będziesz mieć kontrolę nad swoimi pieniędzmi i swo
 Warunki korzystania: https://money2time.com/terms
 Polityka prywatności: https://money2time.com/privacy
 Kontakt: https://www.money2time.com/contact`,
-    whatsNew: `- Dodano możliwość podziału rachunku opłaconego przez znajomego
-- Dodano więcej sposobów podziału rachunku
-- Dodano albumy do zestawienia wydatków
-- Dodano ikony i emoji dla albumów
-- Naprawiono kopie zapasowe bez dostępu do Dysku Google
+    whatsNew: `- Dodano udostępnione albumy do dzielenia kosztów podróży ze znajomymi
+- Dodano możliwość zapraszania znajomych bez aplikacji
+- Dodano możliwość zmiany kategorii udostępnionego albumu
+- Naprawiono synchronizację po odejściu kogoś z udostępnionej księgi
+- Naprawiono ignorowanie powiadomień z innej księgi
 
-Zanim pożyczysz pieniądze od przyjaciela, zdecyduj, czego potrzebujesz bardziej.`,
+W jedności siła.`,
   },
 
   uk: {
@@ -417,13 +417,13 @@ Zanim pożyczysz pieniądze od przyjaciela, zdecyduj, czego potrzebujesz bardzie
 Умови використання: https://money2time.com/terms
 Політика конфіденційності: https://money2time.com/privacy
 Контакт: https://www.money2time.com/contact`,
-    whatsNew: `- Додано можливість розділити оплачений другом рахунок
-- Додано нові способи розділити рахунок
-- Додано альбоми до розподілу витрат
-- Додано значки та емодзі для альбомів
-- Виправлено резервне копіювання без доступу до Google Диска
+    whatsNew: `- Додано спільні альбоми, щоб ділити витрати на подорож із друзями
+- Додано можливість запрошувати друзів без застосунку
+- Додано можливість змінювати категорії спільного альбому
+- Виправлено синхронізацію після виходу учасника зі спільної книги
+- Виправлено ігнорування сповіщень з іншої книги
 
-Дружба дружбою, а гроші нарізно.`,
+У єдності сила.`,
   },
 
   sv: {
@@ -440,13 +440,13 @@ Förhoppningsvis har du alltid kontroll över dina pengar och ditt liv.
 Användarvillkor: https://money2time.com/terms
 Integritetspolicy: https://money2time.com/privacy
 Kontakt: https://www.money2time.com/contact`,
-    whatsNew: `- Lade till möjligheten att dela en nota som en vän betalat
-- Lade till fler sätt att dela notan
-- Lade till album i utgiftsfördelningen
-- Lade till ikoner och emoji för album
-- Åtgärdade säkerhetskopiering utan åtkomst till Google Drive
+    whatsNew: `- Lade till delade album för att dela resekostnader med vänner
+- Lade till möjligheten att bjuda in vänner utan appen
+- Lade till möjligheten att ändra kategorier i ett delat album
+- Åtgärdade synkning efter att någon lämnat en delad kassabok
+- Åtgärdade ignorering av aviseringar från en annan kassabok
 
-Innan du lånar pengar av en vän, bestäm dig för vilket du behöver mest.`,
+Många händer gör arbetet lätt.`,
   },
 
   nb: {
@@ -463,13 +463,13 @@ Forhåpentligvis vil du alltid ha kontroll over pengene dine – og livet ditt.
 Vilkår for bruk: https://money2time.com/terms
 Personvernerklæring: https://money2time.com/privacy
 Kontakt: https://www.money2time.com/contact`,
-    whatsNew: `- La til mulighet for å dele en regning en venn har betalt
-- La til flere måter å dele en regning på
-- La til album i utgiftsfordelingen
-- La til ikoner og emoji for album
-- Rettet sikkerhetskopiering uten tilgang til Google Disk
+    whatsNew: `- La til delte album for å dele reiseutgifter med venner
+- La til mulighet for å invitere venner uten appen
+- La til mulighet for å endre kategoriene i et delt album
+- Rettet synkronisering etter at noen forlater et delt regnskap
+- Rettet ignorering av varsler fra et annet regnskap
 
-Før du låner penger av en venn, bør du bestemme deg for hva du trenger mest.`,
+Mange hender gjør lett arbeid.`,
   },
 
   da: {
@@ -486,13 +486,13 @@ Forhåbentlig har du altid kontrol over dine penge og dit liv.
 Brugsbetingelser: https://money2time.com/terms
 Privatlivspolitik: https://money2time.com/privacy
 Kontakt: https://www.money2time.com/contact`,
-    whatsNew: `- Tilføjede mulighed for at dele en regning en ven har betalt
-- Tilføjede flere måder at dele en regning på
-- Tilføjede album i udgiftsfordelingen
-- Tilføjede ikoner og emoji til album
-- Rettede sikkerhedskopiering uden adgang til Google Drev
+    whatsNew: `- Tilføjede delte album til at dele rejseudgifter med venner
+- Tilføjede mulighed for at invitere venner uden appen
+- Tilføjede mulighed for at ændre kategorierne i et delt album
+- Rettede synkronisering efter at nogen forlader et delt regnskab
+- Rettede ignorering af notifikationer fra et andet regnskab
 
-Før du låner penge af en ven, så beslut dig for, hvad du har mest brug for.`,
+Mange hænder gør let arbejde.`,
   },
 
   ms: {
@@ -509,13 +509,13 @@ Semoga anda sentiasa memiliki kawalan ke atas wang dan kehidupan anda.
 Terma Penggunaan: https://money2time.com/terms
 Dasar Privasi: https://money2time.com/privacy
 Hubungi Kami: https://www.money2time.com/contact`,
-    whatsNew: `- Menambah keupayaan membahagi bil yang dibayar oleh kawan
-- Menambah lebih banyak cara membahagi bil
-- Menambah album ke dalam pecahan perbelanjaan
-- Menambah ikon dan emoji untuk album
-- Membaiki sandaran tanpa akses Google Drive
+    whatsNew: `- Menambah album kongsi untuk membahagi kos perjalanan dengan kawan
+- Menambah keupayaan menjemput kawan tanpa aplikasi
+- Menambah keupayaan menukar kategori album kongsi
+- Membaiki penyegerakan selepas seseorang keluar dari buku kongsi
+- Membaiki pengabaian pemberitahuan dari buku lain
 
-Sebelum meminjam wang daripada kawan, tentukan mana yang lebih anda perlukan.`,
+Bulat air kerana pembetung, bulat manusia kerana muafakat.`,
   },
 
   fil: {
@@ -530,13 +530,13 @@ Sana lagi kang may kontrol sa iyong pera at sa iyong buhay.
 Mga Tuntunin ng Paggamit: https://money2time.com/terms
 Patakaran sa Privacy: https://money2time.com/privacy
 Makipag-ugnayan: https://www.money2time.com/contact`,
-    whatsNew: `- Nagdagdag ng kakayahang hatiin ang bill na binayaran ng kaibigan
-- Nagdagdag ng mas maraming paraan para hatiin ang bill
-- Nagdagdag ng mga album sa breakdown ng gastos
-- Nagdagdag ng mga icon at emoji para sa mga album
-- Inayos ang backup kapag walang access sa Google Drive
+    whatsNew: `- Nagdagdag ng mga shared na album para hatiin ang gastos sa biyahe kasama ang mga kaibigan
+- Nagdagdag ng kakayahang mag-imbita ng mga kaibigang walang app
+- Nagdagdag ng kakayahang baguhin ang mga kategorya ng shared na album
+- Inayos ang sync pagkatapos umalis ang isang tao sa shared na ledger
+- Inayos ang pag-ignore ng mga notification mula sa ibang ledger
 
-Bago manghiram ng pera sa kaibigan, pagpasyahan kung alin ang mas kailangan mo.`,
+Kapag sama-sama, gumagaan ang trabaho.`,
   },
 
 };
