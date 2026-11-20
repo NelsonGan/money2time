@@ -279,7 +279,7 @@ De prijs van iets is de hoeveelheid leven die je ervoor ruilt.`,
 उपयोग की शर्तें: https://money2time.com/terms
 गोपनीयता नीति: https://money2time.com/privacy
 संपर्क: https://www.money2time.com/contact`,
-    whatsNew: `- कीमतों को काम के घंटों में दिखाने वाला नया शुरुआती सेटअप
+    whatsNew: `- कीमतों को काम के घंटों में दिखाने वाला शुरुआती सेटअप नया किया गया
 - हर महीने 20 मुफ़्त रसीद स्कैन जोड़े गए
 - एल्बम का एक कर्ज़ चुकाने पर बाकी कर्ज़ बदलने की समस्या ठीक की
 - बड़े साझा एल्बम में हिसाब चुकता न होने की समस्या ठीक की

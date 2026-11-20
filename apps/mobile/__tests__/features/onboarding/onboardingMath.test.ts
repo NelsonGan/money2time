@@ -1,4 +1,4 @@
-import { MAJOR_CURRENCIES } from '~/constants/appDefaults';
+import { ALL_CURRENCIES } from '~/constants/appDefaults';
 import {
   exampleHourlyRate,
   roundSampleAmount,
@@ -59,6 +59,13 @@ describe('sanitizeAmountInput with pasted grouping', () => {
     expect(sanitizeAmountInput('1.234,56')).toBe('1234.56');
     expect(sanitizeAmountInput('1,234,567.8')).toBe('1234567.8');
   });
+
+  it('drops a second mark typed after the decimal point instead of moving it', () => {
+    expect(sanitizeAmountInput('12.5,')).toBe('12.5');
+    expect(sanitizeAmountInput('12.50,')).toBe('12.50');
+    expect(sanitizeAmountInput('0.5,')).toBe('0.5');
+    expect(sanitizeAmountInput('12,5.')).toBe('12.5');
+  });
 });
 
 describe('exampleHourlyRate', () => {
@@ -73,6 +80,8 @@ describe('exampleHourlyRate', () => {
     expect(exampleHourlyRate('JPY')).toBe(1500);
     expect(exampleHourlyRate('krw')).toBe(15000);
     expect(exampleHourlyRate('VND')).toBe(50000);
+    expect(exampleHourlyRate('COP')).toBe(20000);
+    expect(exampleHourlyRate('HUF')).toBe(3000);
   });
 
   it('prices the welcome examples the way they read at RM15/hr', () => {
@@ -81,7 +90,7 @@ describe('exampleHourlyRate', () => {
   });
 
   it('gives every app currency a coffee that costs more than one unit', () => {
-    for (const { code } of MAJOR_CURRENCIES) {
+    for (const { code } of ALL_CURRENCIES) {
       expect(sampleAmountForHours(0.25, exampleHourlyRate(code))).toBeGreaterThanOrEqual(3);
     }
   });

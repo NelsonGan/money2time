@@ -4560,7 +4560,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       } catch (error) {
         reportError(error, { scope: 'album_group_payment' });
       } finally {
-        setTimeout(() => settlingDebtsRef.current.delete(settling), 2000);
+        // Long enough for a tap on the sheet's button as it closes, short
+        // enough that reopening it to pay the same part again goes through.
+        setTimeout(() => settlingDebtsRef.current.delete(settling), 700);
         afterGroupWrite();
       }
     },
