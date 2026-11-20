@@ -3138,6 +3138,8 @@ const it = {
       not_member: 'Non fai più parte di questo album, quindi non puoi modificarlo.',
       signed_out: 'Accedi di nuovo per modificare questo album.',
       failed: 'Impossibile salvare la modifica a questo album. Riprova.',
+      debt_changed:
+        'Questo debito è cambiato da quando l’hai aperto, quindi non è stato registrato nulla. Controllalo di nuovo.',
     },
     line_label: '{{name}}, album',
     category_list: {

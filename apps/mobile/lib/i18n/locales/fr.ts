@@ -3162,6 +3162,8 @@ const fr = {
       not_member: 'Vous ne faites plus partie de cet album et ne pouvez donc plus le modifier.',
       signed_out: 'Reconnectez-vous pour modifier cet album.',
       failed: 'Impossible d’enregistrer la modification de cet album. Réessayez.',
+      debt_changed:
+        'Cette dette a changé depuis que vous l’avez ouverte, rien n’a donc été enregistré. Regardez-la à nouveau.',
     },
     line_label: '{{name}}, album',
     category_list: {

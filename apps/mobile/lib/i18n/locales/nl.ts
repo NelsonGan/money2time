@@ -3158,6 +3158,8 @@ const nl = {
       not_member: 'Je zit niet meer in dit album, dus je kunt het niet wijzigen.',
       signed_out: 'Log opnieuw in om dit album te wijzigen.',
       failed: 'De wijziging in dit album kon niet worden opgeslagen. Probeer het opnieuw.',
+      debt_changed:
+        'Deze schuld is veranderd sinds je hem opende, dus er is niets vastgelegd. Bekijk hem opnieuw.',
     },
     line_label: '{{name}}, album',
     category_list: {

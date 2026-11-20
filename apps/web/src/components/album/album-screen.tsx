@@ -195,11 +195,20 @@ function AlbumView({ shareId, tab }: { shareId: string; tab: Tab }) {
         }
         return false;
       }
-      const fresh = await load({ fresh: true });
-      // With Simplify on, a group that came out even has its circle closed (the app's `evenGroupPayments`).
-      const even = fresh ? evenGroupRows(fresh, today()) : [];
-      if (even.length) {
-        await api.write(shareId, even, { reason: "close_even", moneyBase: fresh?.moneyRev }).then(() => load({ fresh: true }), () => undefined);
+      let fresh = await load({ fresh: true });
+      // With Simplify on, a group that came out even has its circle closed (the app's
+      // `evenGroupPayments`), a big one in parts that each fit in a change.
+      let last: unknown;
+      for (let part = 0; fresh && part < 20; part += 1) {
+        const even = evenGroupRows(fresh, today());
+        // The same rows again: they were written once and undone, and stay so.
+        if (!even.length || even[0].row.id === last) break;
+        last = even[0].row.id;
+        const moneyBase = fresh.moneyRev;
+        fresh = await api.write(shareId, even, { reason: "close_even", moneyBase }).then(
+          () => load({ fresh: true }),
+          () => null,
+        );
       }
       return true;
     },
@@ -300,6 +309,11 @@ function AlbumView({ shareId, tab }: { shareId: string; tab: Tab }) {
           actions={actions}
           onClose={() => setSheet(null)}
           onRecorded={(text, undo) => setToast({ text, undo: undo ? () => void write(undo, "payment_undo") : undefined })}
+          onStale={() => {
+            setSheet(null);
+            setToast({ text: t("errors.stale") });
+            void load({ fresh: true });
+          }}
         />
       ) : null}
       {sheet?.kind === "people" ? <PeopleSheet group={group} actions={actions} onClose={() => setSheet(null)} onLeft={() => go({ name: "home" }, { replace: true })} /> : null}

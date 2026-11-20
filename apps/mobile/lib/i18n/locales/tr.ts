@@ -3132,6 +3132,8 @@ const tr = {
       not_member: 'Artık bu albümde değilsiniz, bu yüzden albümü değiştiremezsiniz.',
       signed_out: 'Bu albümü değiştirmek için yeniden giriş yapın.',
       failed: 'Bu albümdeki değişiklik kaydedilemedi. Tekrar deneyin.',
+      debt_changed:
+        'Bu borç sen açtıktan sonra değişti, bu yüzden hiçbir şey kaydedilmedi. Tekrar bak.',
     },
     line_label: '{{name}}, albüm',
     category_list: {

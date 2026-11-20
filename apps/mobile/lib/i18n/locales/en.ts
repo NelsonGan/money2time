@@ -3116,6 +3116,8 @@ const en = {
       not_member: "You're no longer in this album, so you can't change it.",
       signed_out: 'Sign in again to change this album.',
       failed: "Couldn't save the change to this album. Try again.",
+      debt_changed:
+        'This debt changed since you opened it, so nothing was recorded. Look at it again.',
     },
     line_label: '{{name}}, album',
     category_list: {

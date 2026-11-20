@@ -3122,6 +3122,8 @@ const sv = {
       not_member: 'Du är inte längre med i albumet, så du kan inte ändra det.',
       signed_out: 'Logga in igen för att ändra albumet.',
       failed: 'Det gick inte att spara ändringen i albumet. Försök igen.',
+      debt_changed:
+        'Den här skulden har ändrats sedan du öppnade den, så inget registrerades. Titta på den igen.',
     },
     line_label: '{{name}}, album',
     category_list: {

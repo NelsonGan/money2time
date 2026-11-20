@@ -22,8 +22,11 @@ export type Upstream = (path: string, init: RequestInit) => Promise<Response>;
 export const SESSION_COOKIE = "m2t_album_session";
 /** As long as the Worker's session (a year), renewed with each sign-in. */
 const SESSION_MAX_AGE = 60 * 60 * 24 * 365;
-/** Request bodies here are a few fields, or a bill's rows (the Worker caps those at 512 KB). */
-const MAX_BODY_BYTES = 256 * 1024;
+/**
+ * Request bodies here are a few fields, or a change's rows: up to
+ * `MAX_WRITE_ROWS` payments of a big album's debt (the Worker caps those at 1 MB).
+ */
+const MAX_BODY_BYTES = 1024 * 1024;
 const INVITE_CODE = /^[A-Za-z0-9_-]{20,64}$/;
 const SHARE_ID = /^[A-Za-z0-9-]{8,64}$/;
 const USER_ID = /^[A-Za-z0-9_-]{1,64}$/;

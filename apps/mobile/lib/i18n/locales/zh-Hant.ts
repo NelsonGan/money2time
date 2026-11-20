@@ -3000,6 +3000,7 @@ const zhHant = {
       not_member: '你已不在此相簿中，無法修改。',
       signed_out: '請重新登入以修改此相簿。',
       failed: '無法儲存對此相簿的修改。請再試一次。',
+      debt_changed: '這筆欠款在你打開後已有變動，所以沒有記錄任何內容。請重新查看。',
     },
     line_label: '{{name}}，相簿',
     category_list: {

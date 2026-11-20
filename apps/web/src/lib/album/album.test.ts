@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { billEffect, groupTotals, openShares, pairwiseDebts, simplifyDebts } from "./debts.ts";
+import { billEffect, groupTotals, openShares, paidFrom, pairwiseDebts, simplifyDebts } from "./debts.ts";
 import { albumsOf, billPeople, parseGroup, type Bill, type Payment } from "./group.ts";
 import { balanceSelf, readValue, splitShares, valuesFor, type SplitInput } from "./split.ts";
 import { billBase, billRow, deletedBillRow, evenGroupRows, recordsPayment, settleRows, simplifyRow, undonePaymentRows } from "./writes.ts";
@@ -294,4 +294,55 @@ test("a bill's row says what it is to the viewer", () => {
   assert.deepEqual(billEffect({ amount: 20, paidBy: "aisha", shares: shares({ aisha: 20 }) }, null), { kind: "none" });
   // Shares in cents add up without float drift.
   assert.deepEqual(billEffect({ amount: 0.3, paidBy: "me", shares: shares({ me: 0.1, dan: 0.1, aisha: 0.1 }) }, "me"), { kind: "lent", amount: 0.2 });
+});
+
+test("paying one simplified debt, or part of it, leaves every other debt as it was, as in the app", () => {
+  // m0 and m2 owe on m4's bill, m0 and m1 on m2's.
+  const bills = [bill("rent", "m4", { m0: 20, m2: 30 }), bill("food", "m2", { m0: 10, m1: 30 })];
+  const group = { bills, payments: [] as Payment[], simplify: true };
+  const before = simplifyDebts(openShares(bills, []));
+  // Nobody in the middle: whoever owes only pays.
+  assert.ok(!before.some((debt) => before.some((other) => other.from === debt.to)));
+  for (const debt of before) {
+    for (const amount of [debt.amount, debt.amount / 2]) {
+      const rows = settleRows(group, { ...debt, amount }, "2026-11-15");
+      const paid = { ...group, payments: rows.map(({ row }, n) => pay(`r.${n}`, String(row.expense_id), String(row.from_member), String(row.to_member), Number(row.amount))) };
+      const after = simplifyDebts(openShares(bills, paid.payments));
+      const expected = before.map((item) => (item === debt ? { ...item, amount: item.amount - amount } : item)).filter((item) => item.amount > 0);
+      assert.deepEqual(after, expected);
+    }
+  }
+});
+
+test("a debt across more bills than one change takes is paid as far as fits", () => {
+  const bills = Array.from({ length: 2500 }, (_, n) => bill(`b${n}`, "a", { a: 1, b: 1 }));
+  const group = { bills, payments: [] as Payment[], simplify: true };
+  const rows = settleRows(group, { from: "b", to: "a", currency: "MYR", amount: 2500 }, "2026-11-15");
+  assert.equal(rows.length, 2000);
+  assert.equal(paidFrom(rows.map(({ row }) => ({ from: String(row.from_member), to: String(row.to_member), amount: Number(row.amount) })), "b"), 2000);
+});
+
+test("a big even group closes in parts of whole circles, staying even in between", () => {
+  const bills = Array.from({ length: 2400 }, (_, n) => bill(`b${n}`, ["a", "b", "c"][n % 3], { [["b", "c", "a"][n % 3]]: 1 }));
+  let payments: Payment[] = [];
+  for (let part = 0; part < 5; part += 1) {
+    const rows = evenGroupRows({ bills, payments, simplify: true, album: { ledgerId: "bali" } }, "2026-11-15");
+    if (!rows.length) break;
+    assert.ok(rows.length <= 2000);
+    payments = payments.concat(rows.map(({ row }) => pay(String(row.id), String(row.expense_id), String(row.from_member), String(row.to_member), Number(row.amount))));
+    assert.deepEqual(simplifyDebts(openShares(bills, payments)), []);
+  }
+  assert.deepEqual(openShares(bills, payments), []);
+});
+
+test("the debt plan is the app's, line for line, and so is the row limit", async () => {
+  // Phones and the website must list the same debts and close an even group with the same rows.
+  const { readFile } = await import("node:fs/promises");
+  const read = (path: string) => readFile(new URL(path, import.meta.url), "utf8");
+  const plan = (source: string) => source.slice(source.indexOf("/** A path of members from `from` to `to`"));
+  const [app, web] = await Promise.all([read("../../../../mobile/features/albums/lib/groupDebts.ts"), read("./debts.ts")]);
+  assert.equal(plan(web), plan(app));
+  const limit = (source: string) => source.match(/MAX_WRITE_ROWS = (\d+)/)?.[1];
+  const [appPlan, webWrites] = await Promise.all([read("../../../../mobile/features/albums/lib/groupPlan.ts"), read("./writes.ts")]);
+  assert.equal(limit(webWrites), limit(appPlan));
 });

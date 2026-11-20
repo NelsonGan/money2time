@@ -3165,6 +3165,8 @@ const fil = {
       not_member: 'Wala ka na sa album na ito, kaya hindi mo na ito mababago.',
       signed_out: 'Mag-sign in ulit para mabago ang album na ito.',
       failed: 'Hindi na-save ang pagbabago sa album na ito. Subukan ulit.',
+      debt_changed:
+        'Nagbago ang utang na ito mula nang buksan mo ito, kaya walang naitala. Tingnan ulit.',
     },
     line_label: '{{name}}, album',
     category_list: {

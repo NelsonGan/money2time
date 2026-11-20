@@ -15,7 +15,7 @@
  */
 
 import { cents } from "../backup/album-group.ts";
-import { openShares, pairwiseDebts, settleDebt, simplifyDebts, type GroupDebt, type OpenShare } from "./debts.ts";
+import { evenPayments, openShares, pairwiseDebts, settleDebt, simplifyDebts, type GroupDebt, type OpenShare } from "./debts.ts";
 import { albumCategoryColumns, type AlbumCategoryDef, type AlbumCategoryKey } from "./categories.ts";
 import type { Bill, Group, Payment, Share } from "./group";
 
@@ -38,6 +38,13 @@ export function newId(): string {
 }
 
 const money = (value: number) => cents(value) / 100;
+
+/**
+ * The most rows one change writes: the planner's `MAX_WRITE_ROWS` (the app's
+ * `features/albums/lib/groupPlan.ts`, the Worker's copy). A payment or an even
+ * group's closing that would take more is sent in parts, each its own act.
+ */
+export const MAX_WRITE_ROWS = 2000;
 
 /** A bill as a change writes it; `base`: what the bill was as read (`billBase`). */
 export function billRow(
@@ -135,13 +142,15 @@ export function groupDebts(group: Pick<Group, "bills" | "payments" | "simplify">
 /**
  * Paying `debt` (up to its amount) as payments on the group's bills, checked
  * against the debts as they stand now, so a second tap never pays it twice
- * (the app's `settleGroupDebt`). Empty when nothing of it is still owed.
+ * (the app's `settleGroupDebt`). Empty when nothing of it is still owed. A
+ * debt across more bills than one change takes is paid as far as fits
+ * (`MAX_WRITE_ROWS`): what the rows pay is `paidFrom(rows, debt.from)`.
  */
 export function settleRows(group: Pick<Group, "bills" | "payments" | "simplify">, debt: GroupDebt, date: string): GroupRowWrite[] {
   const open = openShares(group.bills, group.payments);
   const current = debtsOf(open, group.simplify).find((item) => item.from === debt.from && item.to === debt.to && item.currency === debt.currency);
   if (!current) return [];
-  const payments = settleDebt(open, { ...debt, amount: Math.min(debt.amount, current.amount) }, { simplified: group.simplify });
+  const payments = settleDebt(open, { ...debt, amount: Math.min(debt.amount, current.amount) }, { simplified: group.simplify, maxRows: MAX_WRITE_ROWS });
   return payments.length ? paymentRows(payments, debt.currency, date) : [];
 }
 
@@ -161,7 +170,9 @@ function stateHash(groupId: string, parts: readonly string[]): string {
 /**
  * With Simplify on, a group where nobody owes anything on balance has its
  * open shares closed as one act, after a change made here (the app's
- * `evenGroupPayments`, sent with `reason: 'close_even'`). None otherwise.
+ * `evenGroupPayments`, sent with `reason: 'close_even'`); a big one in parts
+ * of `MAX_WRITE_ROWS` rows, the next part asked for once this one is written.
+ * None otherwise.
  * Named after what they close, as on a phone: two writers closing the same
  * even group write the same rows, so the group is never paid twice.
  */
@@ -173,7 +184,8 @@ export function evenGroupRows(group: Pick<Group, "bills" | "payments" | "simplif
     group.album.ledgerId,
     open.map((share) => `${share.expenseId}|${share.from}|${share.to}|${share.currency}|${share.amount}`),
   )}`;
-  return open.map((share, index) => ({
+  // A big album closes in parts of whole circles, the rest by the next call.
+  return evenPayments(open, MAX_WRITE_ROWS).map((share, index) => ({
     table: "album_settlements",
     row: {
       id: `${batch}.${index}`,

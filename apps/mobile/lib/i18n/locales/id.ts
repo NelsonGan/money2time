@@ -3139,6 +3139,8 @@ const id = {
       not_member: 'Kamu sudah tidak ada di album ini, jadi tidak bisa mengubahnya.',
       signed_out: 'Masuk lagi untuk mengubah album ini.',
       failed: 'Perubahan pada album ini gagal disimpan. Coba lagi.',
+      debt_changed:
+        'Utang ini berubah sejak kamu membukanya, jadi tidak ada yang dicatat. Lihat lagi.',
     },
     line_label: '{{name}}, album',
     category_list: {

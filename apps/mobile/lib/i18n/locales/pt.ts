@@ -3142,6 +3142,8 @@ const pt = {
       not_member: 'Você não está mais neste álbum, então não pode alterá-lo.',
       signed_out: 'Entre de novo para alterar este álbum.',
       failed: 'Não foi possível salvar a alteração neste álbum. Tente de novo.',
+      debt_changed:
+        'Essa dívida mudou desde que você a abriu, então nada foi registrado. Confira de novo.',
     },
     line_label: '{{name}}, álbum',
     category_list: {

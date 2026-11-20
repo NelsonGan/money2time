@@ -1,6 +1,8 @@
 import {
+  evenPayments,
   type GroupDebt,
   openShares,
+  paidFrom,
   pairwiseDebts,
   settleDebt,
   simplifyDebts,
@@ -241,7 +243,11 @@ describe('settling a debt', () => {
     for (let round = 0; round < 10; round += 1) {
       const open = after(expenses, recorded);
       const [debt] = simplifyDebts(open);
-      if (!debt) break;
+      if (!debt) {
+        // Even now: what is left goes round in circles, and closes (as the app does next).
+        recorded.push(...evenPayments(open));
+        break;
+      }
       recorded.push(...settleDebt(open, debt));
     }
     expect(after(expenses, recorded)).toEqual([]);
@@ -363,5 +369,285 @@ describe('a bill changed or deleted after it was paid (README: Anyone in it can 
     expect(back).toEqual([{ expenseId: 'dinner', from: 'me', to: 'ben', amount: 10 }]);
     const settled = [...paid, payment('p2', 'dinner', 'me', 'ben', 10)];
     expect(openShares(edited, settled)).toEqual([]);
+  });
+});
+
+/** Groups made from a fixed seed, so every run checks the same ones. */
+function randomGroups(count: number, seed: number) {
+  let state = seed;
+  const random = () => {
+    state = (state * 1103515245 + 12345) & 0x7fffffff;
+    return state / 0x7fffffff;
+  };
+  const pick = (n: number) => Math.floor(random() * n);
+  const groups: AlbumExpense[][] = [];
+  for (let index = 0; index < count; index += 1) {
+    const people = Array.from({ length: 2 + pick(6) }, (_, i) => `m${i}`);
+    const kind = index % 3;
+    const expenses: AlbumExpense[] = [];
+    for (let b = 0, n = 1 + pick(10); b < n; b += 1) {
+      const on = people.filter(() => random() < 0.6);
+      if (!on.length) on.push(people[pick(people.length)]);
+      const total = [30, 60, 90, 45][pick(4)];
+      const owes = Object.fromEntries(
+        on.map((member) => [
+          member,
+          kind === 0
+            ? Math.round((total / on.length) * 100) / 100 // split evenly
+            : kind === 1
+              ? [10, 20, 30, 15, 7.77][pick(5)] // round amounts
+              : (1 + pick(5000)) / 100, // anything
+        ]),
+      );
+      expenses.push(
+        bill(`b${b}`, on[pick(on.length)], owes, { currency: random() < 0.1 ? 'USD' : 'MYR' }),
+      );
+    }
+    groups.push(expenses);
+  }
+  return groups;
+}
+
+const recordedRows = (
+  payments: { expenseId: string; from: string; to: string; amount: number }[],
+  currency: string,
+  offset: number,
+) =>
+  payments.map((item, index) => ({
+    ...payment(`r${offset + index}`, item.expenseId, item.from, item.to, item.amount),
+    currency,
+  }));
+
+/** Each member's net per currency in cents, from a list of debts. */
+const netsOf = (debts: GroupDebt[]) => {
+  const net = new Map<string, number>();
+  for (const debt of debts) {
+    const add = (member: string, value: number) =>
+      net.set(`${member} ${debt.currency}`, (net.get(`${member} ${debt.currency}`) ?? 0) + value);
+    add(debt.from, -Math.round(debt.amount * 100));
+    add(debt.to, Math.round(debt.amount * 100));
+  }
+  return [...net].filter(([, value]) => value !== 0).sort(([a], [b]) => (a < b ? -1 : 1));
+};
+
+/** How much each member's balance moves with these payments, in cents. */
+const moved = (payments: { from: string; to: string; amount: number }[]) => {
+  const change = new Map<string, number>();
+  for (const item of payments) {
+    change.set(item.from, (change.get(item.from) ?? 0) + Math.round(item.amount * 100));
+    change.set(item.to, (change.get(item.to) ?? 0) - Math.round(item.amount * 100));
+  }
+  return [...change].filter(([, value]) => value !== 0).sort(([a], [b]) => (a < b ? -1 : 1));
+};
+
+describe('simplified debts, on many groups', () => {
+  const groups = randomGroups(600, 7);
+
+  it('keep everyone’s net, with nobody in the middle', () => {
+    for (const expenses of groups) {
+      const open = openShares(expenses, []);
+      const simple = simplifyDebts(open);
+      const pairs = pairwiseDebts(open);
+      expect(netsOf(simple)).toEqual(netsOf(pairs));
+      for (const currency of new Set(simple.map((debt) => debt.currency))) {
+        const owing = new Set(
+          simple.filter((debt) => debt.currency === currency).map((debt) => debt.from),
+        );
+        expect(simple.some((debt) => debt.currency === currency && owing.has(debt.to))).toBe(false);
+      }
+    }
+  });
+
+  it('pay in full or in part between the two alone, and leave every other debt as it was', () => {
+    let checked = 0;
+    for (const expenses of groups) {
+      const open = openShares(expenses, []);
+      const simple = simplifyDebts(open);
+      for (const debt of simple) {
+        for (const amount of [debt.amount, Math.max(0.01, Math.floor(debt.amount * 33) / 100)]) {
+          const payments = settleDebt(open, { ...debt, amount });
+          const cents = Math.round(amount * 100);
+          expect(moved(payments)).toEqual(
+            [
+              [debt.from, cents],
+              [debt.to, -cents],
+            ].sort(([a], [b]) => (a < b ? -1 : 1)),
+          );
+          expect(paidFrom(payments, debt.from)).toBe(cents / 100);
+          const now = openShares(expenses, recordedRows(payments, debt.currency, 0));
+          const left = simplifyDebts(now);
+          const expected = simple
+            .map((item) =>
+              item === debt
+                ? { ...item, amount: Math.round((item.amount - amount) * 100) / 100 }
+                : item,
+            )
+            .filter((item) => item.amount > 0);
+          expect(text(left).sort()).toEqual(text(expected).sort());
+          checked += 1;
+        }
+      }
+    }
+    expect(checked).toBeGreaterThan(3000);
+  });
+
+  it('settle every bill once each is paid and the circles left are closed', () => {
+    for (const expenses of groups) {
+      let settlements: AlbumSettlement[] = [];
+      for (let round = 0; round < 40; round += 1) {
+        const open = openShares(expenses, settlements);
+        const [debt] = simplifyDebts(open);
+        if (!debt) {
+          settlements = settlements.concat(
+            evenPayments(open).flatMap((item, index) =>
+              recordedRows([item], item.currency, settlements.length + index),
+            ),
+          );
+          break;
+        }
+        const payments = settleDebt(open, debt);
+        expect(paidFrom(payments, debt.from)).toBe(debt.amount);
+        settlements = settlements.concat(recordedRows(payments, debt.currency, settlements.length));
+      }
+      expect(openShares(expenses, settlements)).toEqual([]);
+    }
+  });
+});
+
+describe('a big album', () => {
+  /** `people` sharing every bill evenly, each paid by one of them, nothing paid back yet. */
+  function household(people: number, bills: number) {
+    const members = Array.from({ length: people }, (_, i) => `m${i}`);
+    return Array.from({ length: bills }, (_, b) =>
+      bill(
+        `b${String(b).padStart(4, '0')}`,
+        members[(b * 7) % people],
+        Object.fromEntries(members.map((member) => [member, 10 + ((b * 13) % 40)])),
+      ),
+    );
+  }
+
+  it('pays a debt with only the bills on its way, not every bill in the album', () => {
+    const expenses = household(4, 200);
+    const open = openShares(expenses, []);
+    expect(open).toHaveLength(600);
+    for (const debt of simplifyDebts(open)) {
+      expect(settleDebt(open, debt).length).toBeLessThan(250);
+    }
+  });
+
+  it('splits a payment past the row limit into acts that fit, paying all of it', () => {
+    // One of two paid all 300 bills: the other's debt runs across every one.
+    const expenses = Array.from({ length: 300 }, (_, b) => bill(`b${b}`, 'a', { a: 10, b: 10 }));
+    let settlements: AlbumSettlement[] = [];
+    const [debt] = simplifyDebts(openShares(expenses, []));
+    let left = Math.round(debt.amount * 100);
+    let acts = 0;
+    while (left > 0) {
+      const open = openShares(expenses, settlements);
+      const payments = settleDebt(open, { ...debt, amount: left / 100 }, { maxRows: 100 });
+      expect(payments.length).toBeGreaterThan(0);
+      expect(payments.length).toBeLessThanOrEqual(100);
+      expect(moved(payments).map(([member]) => member)).toEqual([debt.from, debt.to].sort());
+      left -= Math.round(paidFrom(payments, debt.from) * 100);
+      settlements = settlements.concat(recordedRows(payments, 'MYR', settlements.length));
+      acts += 1;
+    }
+    expect(acts).toBe(3);
+    expect(openShares(expenses, settlements)).toEqual([]);
+  });
+
+  it('closes an even group in parts that fit, staying even in between', () => {
+    // Round in a circle, many bills each way: everyone is even.
+    const expenses = Array.from({ length: 90 }, (_, b) =>
+      bill(`b${b}`, ['a', 'b', 'c'][b % 3], { [['b', 'c', 'a'][b % 3]]: 10 }),
+    );
+    let settlements: AlbumSettlement[] = [];
+    expect(simplifyDebts(openShares(expenses, []))).toEqual([]);
+    for (let round = 0; round < 10; round += 1) {
+      const open = openShares(expenses, settlements);
+      const closing = evenPayments(open, 40);
+      if (!closing.length) break;
+      expect(closing.length).toBeLessThanOrEqual(40);
+      expect(moved(closing)).toEqual([]);
+      settlements = settlements.concat(
+        closing.flatMap((item, index) =>
+          recordedRows([item], item.currency, settlements.length + index),
+        ),
+      );
+      expect(simplifyDebts(openShares(expenses, settlements))).toEqual([]);
+    }
+    expect(openShares(expenses, settlements)).toEqual([]);
+  });
+});
+
+describe('paying one simplified debt', () => {
+  it('leaves another pair’s debt alone (a review case that used to move)', () => {
+    // m0 and m2 owe on m4's bill; m0 and m1 owe on m2's.
+    const expenses = [
+      bill('rent', 'm4', { m0: 20, m2: 30 }),
+      bill('food', 'm2', { m0: 10, m1: 30 }),
+    ];
+    const open = openShares(expenses, []);
+    const before = simplifyDebts(open);
+    const [first] = before;
+    const part = settleDebt(open, { ...first, amount: first.amount / 2 });
+    const now = simplifyDebts(openShares(expenses, recordedRows(part, 'MYR', 0)));
+    expect(text(now.filter((debt) => debt.from !== first.from))).toEqual(
+      text(before.filter((debt) => debt.from !== first.from)),
+    );
+  });
+});
+
+describe('cases a review found', () => {
+  it('keeps nobody in the middle where each pair’s own debts would put D there', () => {
+    // D paid with A owing 10 and B 30; A paid with C owing 30 and D 20.
+    const expenses = [bill('one', 'd', { a: 10, b: 30 }), bill('two', 'a', { c: 30, d: 20 })];
+    const open = openShares(expenses, []);
+    const simple = simplifyDebts(open);
+    const owing = new Set(simple.map((debt) => debt.from));
+    expect(simple.some((debt) => owing.has(debt.to))).toBe(false);
+    // And paying any one, in full or half, leaves the others as they were.
+    for (const debt of simple) {
+      for (const amount of [debt.amount, debt.amount / 2]) {
+        const paid = settleDebt(open, { ...debt, amount });
+        const left = simplifyDebts(openShares(expenses, recordedRows(paid, 'MYR', 0)));
+        expect(text(left.filter((item) => item.from !== debt.from || item.to !== debt.to))).toEqual(
+          text(simple.filter((item) => item !== debt)),
+        );
+      }
+    }
+  });
+
+  it('pays all of a debt spread over more bills than one act takes, part by part', () => {
+    // 2500 bills D paid (A owes 10, B 30 on each), and one A paid (C owes 75,000, D 50,000).
+    const expenses = [
+      ...Array.from({ length: 2500 }, (_, n) => bill(`d${n}`, 'd', { a: 10, b: 30 })),
+      bill('big', 'a', { c: 75000, d: 50000 }),
+    ];
+    let settlements: AlbumSettlement[] = [];
+    const [debt] = simplifyDebts(openShares(expenses, [])).filter((item) => item.from === 'b');
+    let left = Math.round(debt.amount * 100);
+    for (let part = 0; left > 0; part += 1) {
+      expect(part).toBeLessThan(5);
+      const open = openShares(expenses, settlements);
+      const current = simplifyDebts(open).find(
+        (item) => item.from === debt.from && item.to === debt.to,
+      );
+      expect(current).toBeDefined();
+      const payments = settleDebt(
+        open,
+        { ...debt, amount: Math.min(left / 100, current!.amount) },
+        { maxRows: 2000 },
+      );
+      expect(payments.length).toBeLessThanOrEqual(2000);
+      left -= Math.round(paidFrom(payments, debt.from) * 100);
+      settlements = settlements.concat(recordedRows(payments, 'MYR', settlements.length));
+    }
+    // All of it paid: B's line to them is gone, every other line as it was.
+    const before = simplifyDebts(openShares(expenses, []));
+    expect(text(simplifyDebts(openShares(expenses, settlements)))).toEqual(
+      text(before.filter((item) => item.from !== debt.from || item.to !== debt.to)),
+    );
   });
 });

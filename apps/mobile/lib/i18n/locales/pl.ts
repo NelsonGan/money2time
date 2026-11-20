@@ -3136,6 +3136,8 @@ const pl = {
       not_member: 'Nie należysz już do tego albumu, więc nie możesz go zmieniać.',
       signed_out: 'Zaloguj się ponownie, aby zmienić ten album.',
       failed: 'Nie udało się zapisać zmiany w albumie. Spróbuj ponownie.',
+      debt_changed:
+        'Ten dług zmienił się, odkąd go otworzono, więc nic nie zapisano. Sprawdź go jeszcze raz.',
     },
     line_label: '{{name}}, album',
     category_list: {

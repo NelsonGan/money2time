@@ -4,6 +4,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useState, type FormEvent } from "react";
 
 import { cents } from "@/lib/backup/album-group";
+import { paidFrom } from "@/lib/album/debts";
 import type { Group } from "@/lib/album/group";
 import { readValue, trimNumber } from "@/lib/album/split";
 import { settleRows, type GroupRowWrite } from "@/lib/album/writes";
@@ -24,12 +25,15 @@ export function SettleSheet({
   actions,
   onClose,
   onRecorded,
+  onStale,
 }: {
   group: Group;
   target: SettleTarget;
   actions: AlbumActions;
   onClose: () => void;
   onRecorded: (text: string, undo: GroupRowWrite[] | null) => void;
+  /** The debt changed since the sheet opened, so nothing was recorded. */
+  onStale: () => void;
 }) {
   const t = useTranslations("album");
   const locale = useLocale();
@@ -50,15 +54,21 @@ export function SettleSheet({
     setBusy(true);
     const rows = settleRows(group, { ...target, amount: amount / 100 }, today());
     if (!rows.length) {
+      // Someone's payment or change landed since this sheet opened: nothing is owed as it showed.
       setBusy(false);
-      onClose();
+      onStale();
       return;
     }
+    // All of it, unless it runs across more bills than one change takes (`MAX_WRITE_ROWS`).
+    const paid = paidFrom(
+      rows.map(({ row }) => ({ from: String(row.from_member), to: String(row.to_member), amount: Number(row.amount) })),
+      target.from,
+    );
     const ok = await actions.write(rows, "payment_record");
     setBusy(false);
     if (ok) {
       onRecorded(
-        t("settle.recorded", { from: nameOf(target.from), to: nameOf(target.to), amount: money(amount / 100, target.currency) }),
+        t("settle.recorded", { from: nameOf(target.from), to: nameOf(target.to), amount: money(paid, target.currency) }),
         rows.map((row) => ({ table: "album_settlements", row: { id: row.row.id, deleted_at: "undone" } })),
       );
       onClose();

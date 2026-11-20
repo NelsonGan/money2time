@@ -39,7 +39,8 @@ import {
 } from '../lib/albumCategories';
 import { localBill, type LocalPayment, settlementsByBill } from '../lib/albumGroup';
 import { selfMember } from '../lib/albumPeople';
-import { openShares, simplifyDebts } from '../lib/groupDebts';
+import { evenPayments, openShares, simplifyDebts } from '../lib/groupDebts';
+import { MAX_WRITE_ROWS } from '../lib/groupPlan';
 import { type GroupRowWrite, paymentRow } from '../lib/groupRows';
 
 /** What the open ledger and the user's settings give the group's entries. */
@@ -805,7 +806,9 @@ function stateHash(groupId: string, parts: readonly string[]): string {
 /**
  * With "Simplify group debts" on, a group where nobody owes anything on
  * balance has nothing left to pay: whatever is still open on its bills goes
- * round in a circle, so every open share is closed, as one act. Run after a
+ * round in a circle, so every open share is closed, as one act
+ * (`evenPayments`); past `MAX_WRITE_ROWS` rows, as many whole circles as fit,
+ * the rest by the next call (the group stays even in between). Run after a
  * change made on this phone (not after a sync, or every phone would record the
  * same payments). Returns the payments to record, none when there is nothing
  * to close.
@@ -826,9 +829,10 @@ export function evenGroupPayments(groupId: string): GroupRowWrite[] {
       (share) => `${share.expenseId}|${share.from}|${share.to}|${share.currency}|${share.amount}`,
     ),
   )}`;
-  const ids = open.map((_, index) => `${batch}.${index}`);
+  const closing = evenPayments(open, MAX_WRITE_ROWS);
+  const ids = closing.map((_, index) => `${batch}.${index}`);
   const today = dayKeyFromDateLocal(new Date());
-  return open.map((share, index) =>
+  return closing.map((share, index) =>
     paymentRow({
       id: ids[index],
       expenseId: share.expenseId,

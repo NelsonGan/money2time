@@ -7,8 +7,10 @@
  * - `openShares`: each share owed to its bill's payer, less the payments made
  *   on it; a payment past what was owed is owed back.
  * - `pairwiseDebts`: each pair's net. `simplifyDebts`: the same nets with
- *   fewer payments (Simplify group debts).
+ *   fewer payments (Simplify group debts), nobody in the middle; paying one
+ *   leaves the others as they were.
  * - `settleDebt`: a payment between two members as payments on bills.
+ * - `evenPayments`: what closes a group that came out even.
  */
 
 import { cents } from "../backup/album-group.ts";
@@ -222,6 +224,38 @@ function findCircle(graph: Graph): string[] | null {
   return null;
 }
 
+/** Each debt along `path` (members in order) changed by `amount` in `graph`. */
+function addAlong(graph: Graph, path: readonly string[], amount: number): void {
+  for (let i = 0; i + 1 < path.length; i += 1) {
+    setOwed(graph, path[i], path[i + 1], owed(graph, path[i], path[i + 1]) + amount);
+  }
+}
+
+/** The smallest debt along `path` (members in order). */
+const leastAlong = (graph: Graph, path: readonly string[]) =>
+  Math.min(...path.slice(0, -1).map((member, i) => owed(graph, member, path[i + 1])));
+
+const copyGraph = (graph: Graph): Graph =>
+  new Map([...graph].map(([from, row]) => [from, new Map(row)]));
+
+/** Every debt in a graph, as (who owes, whom), in an order every phone agrees on. */
+const edgesOf = (graph: Graph): [string, string][] =>
+  [...graph.keys()]
+    .sort()
+    .flatMap((from) =>
+      [...graph.get(from)!.keys()].sort().map((to): [string, string] => [from, to]),
+    );
+
+/** Each member's net in cents: what they are owed above zero, what they owe below. */
+function netsOf(graph: Graph): Map<string, number> {
+  const net = new Map<string, number>();
+  for (const [from, to] of edgesOf(graph)) {
+    net.set(from, (net.get(from) ?? 0) - owed(graph, from, to));
+    net.set(to, (net.get(to) ?? 0) + owed(graph, from, to));
+  }
+  return net;
+}
+
 /** What each member owes each other on the group's bills in one currency, before any netting. */
 function owedOnBills(shares: readonly OpenShare[]): Graph {
   const graph: Graph = new Map();
@@ -242,10 +276,7 @@ function moveAlong(room: Graph, from: string, to: string, limit: number): number
   while (left > 0) {
     const path = findPath(room, from, to);
     if (!path) break;
-    const amount = Math.min(
-      left,
-      ...path.slice(0, -1).map((member, i) => owed(room, member, path[i + 1])),
-    );
+    const amount = Math.min(left, leastAlong(room, path));
     for (let i = 0; i + 1 < path.length; i += 1) {
       setOwed(room, path[i], path[i + 1], owed(room, path[i], path[i + 1]) - amount);
       setOwed(room, path[i + 1], path[i], owed(room, path[i + 1], path[i]) + amount);
@@ -255,139 +286,158 @@ function moveAlong(room: Graph, from: string, to: string, limit: number): number
   return limit - left;
 }
 
-/** Moves up to `limit` straight from `from` to `to`, along their own debt only. Returns what moved. */
-function moveDirect(room: Graph, from: string, to: string, limit: number): number {
-  const amount = Math.min(limit, owed(room, from, to));
-  if (amount > 0) setOwed(room, from, to, owed(room, from, to) - amount);
-  return amount;
-}
-
-/** Debts passed along: while someone both owes and is owed, what they are owed goes to the one they owe. */
-function passedAlong(pairs: Graph): Graph {
-  const graph: Graph = new Map([...pairs].map(([from, row]) => [from, new Map(row)]));
-  for (;;) {
-    // Someone in the middle: owed by `from`, and owing `to`.
-    const middle = [...graph.keys()]
-      .sort()
-      .find((member) => [...graph.keys()].some((from) => owed(graph, from, member) > 0));
-    if (!middle) return graph;
-    const from = [...graph.keys()].sort().find((member) => owed(graph, member, middle) > 0)!;
-    const to = [...graph.get(middle)!.keys()].sort()[0];
-    const amount = Math.min(owed(graph, from, middle), owed(graph, middle, to));
-    setOwed(graph, from, middle, owed(graph, from, middle) - amount);
-    setOwed(graph, middle, to, owed(graph, middle, to) - amount);
-    // Set off against what `to` owes `from`: a circle of debts is simply gone.
-    addNet(graph, from, to, amount);
+/**
+ * Up to `limit` from `from` to `to` along the debts in `room` (left as it
+ * is): how much of each of those debts it takes. The money may go through
+ * members in between, whose own books come out even; none of it goes round
+ * in a circle.
+ */
+function flowAlong(
+  room: Graph,
+  from: string,
+  to: string,
+  limit: number,
+): { flow: Graph; amount: number } {
+  const left = copyGraph(room);
+  const amount = moveAlong(left, from, to, limit);
+  const flow: Graph = new Map();
+  for (const [a, b] of edgesOf(room)) {
+    const moved = owed(room, a, b) - owed(left, a, b);
+    if (moved > 0) setOwed(flow, a, b, moved);
   }
+  for (let circle = findCircle(flow); circle; circle = findCircle(flow)) {
+    addAlong(flow, circle, -leastAlong(flow, circle));
+  }
+  return { flow, amount };
 }
 
-/** The fewest payments that settle everyone's net: whoever owes most pays whoever is owed most. */
-function fewestPayments(pairs: Graph): Graph {
-  const net = new Map<string, number>();
-  for (const [from, row] of pairs) {
-    for (const [to, amount] of row) {
-      net.set(from, (net.get(from) ?? 0) - amount);
-      net.set(to, (net.get(to) ?? 0) + amount);
+/** A simplified debt, and what pays it: how much of each debt on the bills it takes. */
+interface PlannedDebt {
+  from: string;
+  to: string;
+  /** In cents. */
+  amount: number;
+  route: Graph;
+}
+
+/**
+ * A currency's simplified debts, and what is left on its bills once they are
+ * all paid: debts that only go round in circles, which nobody has to pay.
+ */
+interface DebtPlan {
+  debts: PlannedDebt[];
+  circles: Graph;
+}
+
+/**
+ * The simplified debts in a fixed order: each member who owes, by id, pays
+ * each member owed, by id, as much as the one still owes, the other is still
+ * owed, and the bills can carry from one to the other once the debts before
+ * it took their part. Nobody in the
+ * middle: whoever owes only pays, whoever is owed only gets paid. Whoever
+ * still owes can always reach someone still owed along what is left, so
+ * everyone's net is paid.
+ *
+ * The order never depends on how much anyone owes, so paying a debt, or part
+ * of it, along its own route leaves every other debt as it was: the debts
+ * before it are made from the same, and after it its two members have each
+ * that much less, as the debt between them does.
+ */
+function fixedOrderPlan(onBills: Graph): DebtPlan {
+  const room = copyGraph(onBills);
+  const net = netsOf(onBills);
+  const owing = [...net.keys()].filter((member) => net.get(member)! < 0).sort();
+  const owedTo = [...net.keys()].filter((member) => net.get(member)! > 0).sort();
+  const debts: PlannedDebt[] = [];
+  for (const from of owing) {
+    for (const to of owedTo) {
+      const want = Math.min(-net.get(from)!, net.get(to)!);
+      if (want <= 0) continue;
+      const { flow, amount } = flowAlong(room, from, to, want);
+      if (amount <= 0) continue;
+      for (const [a, b] of edgesOf(flow)) setOwed(room, a, b, owed(room, a, b) - owed(flow, a, b));
+      net.set(from, net.get(from)! + amount);
+      net.set(to, net.get(to)! - amount);
+      debts.push({ from, to, amount, route: flow });
     }
   }
-  const graph: Graph = new Map();
-  for (;;) {
-    // The largest first, then by id, so every phone picks the same.
-    const ranked = [...net].filter(([, value]) => value !== 0).sort(([a], [b]) => (a < b ? -1 : 1));
-    const payer = ranked.reduce<[string, number] | null>(
-      (best, item) => (item[1] < 0 && (!best || item[1] < best[1]) ? item : best),
-      null,
-    );
-    const payee = ranked.reduce<[string, number] | null>(
-      (best, item) => (item[1] > 0 && (!best || item[1] > best[1]) ? item : best),
-      null,
-    );
-    if (!payer || !payee) return graph;
-    const amount = Math.min(-payer[1], payee[1]);
-    setOwed(graph, payer[0], payee[0], amount);
-    net.set(payer[0], payer[1] + amount);
-    net.set(payee[0], payee[1] - amount);
-  }
+  return { debts, circles: room };
+}
+
+/**
+ * A currency's simplified debts (`fixedOrderPlan`). Usually as few as, or
+ * fewer than, each pair's own; in a rare sparse group a line or two more,
+ * since keeping every other line still and nobody in the middle come first
+ * (a switch to each pair's own debts would break both). Not always the fewest
+ * there could be: that is a far harder problem, and its answer would change
+ * under every payment.
+ */
+function planDebts(shares: readonly OpenShare[]): DebtPlan {
+  return fixedOrderPlan(owedOnBills(shares));
 }
 
 /**
  * The group's debts with fewer payments, for the same nets: nobody pays or
- * gets more in total. The fewest payments there can be, when each of them
- * can be paid along the group's bills as they stand (`settleDebt` records a
- * payment on the bills between the two); else the debts passed along, which
- * always can.
+ * gets more in total, and nobody both owes and is owed (`planDebts`).
  */
 export function simplifyDebts(open: readonly OpenShare[]): GroupDebt[] {
   return [...byCurrency(open)]
     .sort(([a], [b]) => (a < b ? -1 : 1))
     .flatMap(([currency, shares]) => {
-      const pairs: Graph = new Map();
-      for (const share of shares) addNet(pairs, share.from, share.to, cents(share.amount));
-      const chained = debtsOf(passedAlong(pairs), currency);
-      const fewest = debtsOf(fewestPayments(pairs), currency);
-      const payable = fewest.every(
-        (debt) =>
-          moveAlong(owedOnBills(shares), debt.from, debt.to, cents(debt.amount)) ===
-          cents(debt.amount),
-      );
-      return payable && fewest.length < chained.length ? fewest : chained;
+      const graph: Graph = new Map();
+      for (const debt of planDebts(shares).debts) setOwed(graph, debt.from, debt.to, debt.amount);
+      return debtsOf(graph, currency);
     });
 }
 
+/** `amount` of a route from `from` to `to`, taken path by path, shortest first. */
+function partOf(route: Graph, from: string, to: string, amount: number): Graph {
+  const left = copyGraph(route);
+  const part: Graph = new Map();
+  for (let rest = amount; rest > 0; ) {
+    const path = findPath(left, from, to);
+    if (!path) break;
+    const step = Math.min(rest, leastAlong(left, path));
+    addAlong(left, path, -step);
+    addAlong(part, path, step);
+    rest -= step;
+  }
+  return part;
+}
+
 /**
- * `debt.from` paying `debt.to` up to `debt.amount`, as payments on the
- * group's bills. The money follows the debts between the two (straight, or
- * through the members in between, whose own books come out even), never more
- * than those debts carry. Then every circle of debts left is closed, since
- * nobody has to pay it. Empty when nothing is owed along the way.
- *
- * With `simplified` off the album lists each pair's own net, so the money
- * moves only along the debts between the two, and only the two's debts to
- * each other are set off: nobody else's line changes.
+ * Closes, into `paid`, the circles of `circles` that run along a pair the
+ * money in `paid` moved between: what nobody has to pay on the bills just
+ * paid goes with it. Other circles are left for the group's last payment
+ * (`evenPayments`), so every act stays the size of what it pays.
  */
-export function settleDebt(
-  open: readonly OpenShare[],
-  debt: GroupDebt,
-  { simplified = true }: { simplified?: boolean } = {},
-): BillPayment[] {
-  const shares = open.filter((share) => share.currency === debt.currency);
-  // What the debts are to start with, and what can still move along each.
-  const before = owedOnBills(shares);
-  const room = owedOnBills(shares);
-  const sent = simplified
-    ? moveAlong(room, debt.from, debt.to, cents(debt.amount))
-    : moveDirect(room, debt.from, debt.to, cents(debt.amount));
-  if (sent === 0) return [];
-  // What moved along each debt, and what is still owed on it.
-  const paid: Graph = new Map();
-  const still: Graph = new Map();
-  for (const [from, row] of before) {
-    for (const [to, amount] of row) {
-      const moved = Math.max(0, amount - owed(room, from, to));
-      setOwed(paid, from, to, moved);
-      setOwed(still, from, to, amount - moved);
+function closeAlong(circles: Graph, paid: Graph): void {
+  const touched = new Set(edgesOf(paid).flatMap(([a, b]) => [`${a}>${b}`, `${b}>${a}`]));
+  for (;;) {
+    let circle: string[] | null = null;
+    for (const [a, b] of edgesOf(circles)) {
+      if (!touched.has(`${a}>${b}`)) continue;
+      const back = findPath(circles, b, a);
+      if (back) {
+        circle = [a, ...back];
+        break;
+      }
     }
+    if (!circle) return;
+    const amount = leastAlong(circles, circle);
+    addAlong(circles, circle, -amount);
+    addAlong(paid, circle, amount);
   }
-  const circleOf = simplified
-    ? findCircle
-    : (graph: Graph) =>
-        owed(graph, debt.from, debt.to) > 0 && owed(graph, debt.to, debt.from) > 0
-          ? [debt.from, debt.to, debt.from]
-          : null;
-  for (let circle = circleOf(still); circle; circle = circleOf(still)) {
-    const amount = Math.min(...circle.slice(0, -1).map((m, i) => owed(still, m, circle[i + 1])));
-    for (let i = 0; i + 1 < circle.length; i += 1) {
-      const [from, to] = [circle[i], circle[i + 1]];
-      setOwed(still, from, to, owed(still, from, to) - amount);
-      setOwed(paid, from, to, owed(paid, from, to) + amount);
-    }
-  }
-  // Each pair's payment goes onto their bills, the oldest first.
+}
+
+/** What moves along each debt (`paid`, in cents) as payments on the bills, the oldest first. */
+function onBillsOf(shares: readonly OpenShare[], paid: Graph): BillPayment[] {
+  const left = copyGraph(paid);
   const payments: BillPayment[] = [];
   for (const share of shares) {
-    const amount = Math.min(cents(share.amount), owed(paid, share.from, share.to));
+    const amount = Math.min(cents(share.amount), owed(left, share.from, share.to));
     if (amount <= 0) continue;
-    setOwed(paid, share.from, share.to, owed(paid, share.from, share.to) - amount);
+    setOwed(left, share.from, share.to, owed(left, share.from, share.to) - amount);
     payments.push({
       expenseId: share.expenseId,
       from: share.from,
@@ -396,4 +446,148 @@ export function settleDebt(
     });
   }
   return payments;
+}
+
+/** The payments for as much of `most` (in cents) as fit in `maxRows`: all of it when it fits. */
+function asMuchAsFits(
+  most: number,
+  paymentsFor: (amount: number) => BillPayment[],
+  maxRows: number,
+): BillPayment[] {
+  const all = paymentsFor(most);
+  if (all.length <= maxRows) return all;
+  // More money never takes fewer bills, so the most that fits is found by halving.
+  let fits: BillPayment[] = [];
+  for (let low = 0, high = most - 1; low < high; ) {
+    const middle = Math.ceil((low + high) / 2);
+    const payments = paymentsFor(middle);
+    if (payments.length <= maxRows) {
+      low = middle;
+      fits = payments;
+    } else {
+      high = middle - 1;
+    }
+  }
+  return fits;
+}
+
+/**
+ * `debt.from` paying `debt.to` up to `debt.amount`, as payments on the
+ * group's bills: along the bills its simplified debt was planned on
+ * (`planDebts`), through the members in between, whose own books come out
+ * even, and never more than that debt. Circles of what nobody has to pay that
+ * run along the bills just paid close with it (`closeAlong`). Empty when the
+ * two have no such debt.
+ *
+ * With `simplified` off the album lists each pair's own net, so the money
+ * moves only along the debts between the two, and only the two's debts to
+ * each other are set off: nobody else's line changes.
+ *
+ * At most `maxRows` payments: past that, as much of it as fits, and the rest
+ * is paid by another act (the planner takes `MAX_WRITE_ROWS` rows at once).
+ * What it pays is what the payer's payments come to (`paidFrom`).
+ */
+export function settleDebt(
+  open: readonly OpenShare[],
+  debt: GroupDebt,
+  { simplified = true, maxRows = Infinity }: { simplified?: boolean; maxRows?: number } = {},
+): BillPayment[] {
+  const shares = open.filter((share) => share.currency === debt.currency);
+  const want = cents(debt.amount);
+  if (!(want > 0)) return [];
+  if (simplified) {
+    const plan = planDebts(shares);
+    const planned = plan.debts.find((item) => item.from === debt.from && item.to === debt.to);
+    if (!planned) return [];
+    const paidFor = (amount: number, close: boolean) => {
+      const paid = partOf(planned.route, debt.from, debt.to, amount);
+      if (close) closeAlong(copyGraph(plan.circles), paid);
+      return onBillsOf(shares, paid);
+    };
+    const most = Math.min(want, planned.amount);
+    const closed = paidFor(most, true);
+    return closed.length <= maxRows
+      ? closed
+      : asMuchAsFits(most, (amount) => paidFor(amount, false), maxRows);
+  }
+  const onBills = owedOnBills(shares);
+  const most = Math.min(want, owed(onBills, debt.from, debt.to));
+  if (most <= 0) return [];
+  const paidFor = (amount: number, close: boolean) => {
+    const paid: Graph = new Map();
+    // The two's debts to each other set off: what is then owed both ways closes.
+    const back = close
+      ? Math.min(owed(onBills, debt.from, debt.to) - amount, owed(onBills, debt.to, debt.from))
+      : 0;
+    setOwed(paid, debt.from, debt.to, amount + back);
+    setOwed(paid, debt.to, debt.from, back);
+    return onBillsOf(shares, paid);
+  };
+  const closed = paidFor(most, true);
+  return closed.length <= maxRows
+    ? closed
+    : asMuchAsFits(most, (amount) => paidFor(amount, false), maxRows);
+}
+
+/** What `member` paid out, less what they got, over `payments`: what an act of theirs paid. */
+export function paidFrom(
+  payments: readonly { from: string; to: string; amount: number }[],
+  member: string,
+): number {
+  const total = payments.reduce(
+    (sum, payment) =>
+      sum +
+      (payment.from === member ? cents(payment.amount) : 0) -
+      (payment.to === member ? cents(payment.amount) : 0),
+    0,
+  );
+  return total / 100;
+}
+
+/**
+ * A group where nobody owes anything on balance (`simplifyDebts` lists
+ * nothing) has nothing left to pay: what is still open on its bills only goes
+ * round in circles. These close it: every open share, or, past `maxRows`, as
+ * many whole circles as fit (the rest closes with the next call, and the
+ * group stays even in between). Empty when nothing is open.
+ */
+export function evenPayments(open: readonly OpenShare[], maxRows = Infinity): OpenShare[] {
+  if (open.length <= maxRows) return open.map((share) => ({ ...share }));
+  const closing: OpenShare[] = [];
+  for (const [currency, shares] of [...byCurrency(open)].sort(([a], [b]) => (a < b ? -1 : 1))) {
+    const left = owedOnBills(shares);
+    let paid: Graph = new Map();
+    let payments: BillPayment[] = [];
+    let full = false;
+    for (let circle = findCircle(left); circle; circle = findCircle(left)) {
+      const amount = leastAlong(left, circle);
+      const next = copyGraph(paid);
+      addAlong(next, circle, amount);
+      const nextPayments = onBillsOf(shares, next);
+      if (closing.length + nextPayments.length > maxRows) {
+        if (!payments.length && !closing.length) {
+          // One circle alone is too long: as much of it as fits.
+          const base = paid;
+          const ring = circle;
+          payments = asMuchAsFits(
+            amount,
+            (part) => {
+              const some = copyGraph(base);
+              addAlong(some, ring, part);
+              return onBillsOf(shares, some);
+            },
+            maxRows,
+          );
+        }
+        full = true;
+        break;
+      }
+      paid = next;
+      payments = nextPayments;
+      addAlong(left, circle, -amount);
+    }
+    closing.push(...payments.map((payment) => ({ ...payment, currency })));
+    if (full) break;
+  }
+  return closing;
 }

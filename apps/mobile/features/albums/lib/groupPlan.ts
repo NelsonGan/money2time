@@ -28,8 +28,14 @@ const MAX_AMOUNT = 1e12;
 const MAX_NAME = 40;
 const MAX_NOTE = 500;
 const MAX_SHARES = 64;
-/** More rows than any one act writes (Settle up across every bill of an album, say). */
-const MAX_WRITE_ROWS = 400;
+/**
+ * The most rows one change writes. Paying a debt in a big album touches a row
+ * per bill share, so an act that would write more is split by its maker
+ * (`settleDebt`'s and `evenPayments`' `maxRows`): each part a payment of its
+ * own. A website change of this many rows stays well under the request limits
+ * (1 MB, `readJson` in the Worker's `ledgers.ts` and the website's `server.ts`).
+ */
+export const MAX_WRITE_ROWS = 2000;
 /** Far more member rows than an album ever has (20 people, and those who left). */
 export const MAX_MEMBER_ROWS = 200;
 
