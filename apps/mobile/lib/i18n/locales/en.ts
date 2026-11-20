@@ -667,6 +667,7 @@ const en = {
       get_started: 'Get started',
       sneakers: 'Sneakers',
       phone: 'New phone',
+      inspired_by: 'Inspired by {{book}}',
     },
     preferences: {
       title: 'Set the basics',

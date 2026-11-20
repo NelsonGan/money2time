@@ -691,6 +691,7 @@ const de = {
       get_started: "Los geht's",
       sneakers: 'Sneaker',
       phone: 'Neues Handy',
+      inspired_by: 'Inspiriert von {{book}}',
     },
     preferences: {
       title: 'Grundeinstellungen',

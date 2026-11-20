@@ -691,6 +691,7 @@ const id = {
       get_started: 'Mulai',
       sneakers: 'Sepatu sneakers',
       phone: 'Ponsel baru',
+      inspired_by: 'Terinspirasi dari {{book}}',
     },
     preferences: {
       title: 'Atur dasar-dasarnya',

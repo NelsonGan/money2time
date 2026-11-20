@@ -688,6 +688,7 @@ const ko = {
       get_started: '시작하기',
       sneakers: '운동화',
       phone: '새 휴대폰',
+      inspired_by: '{{book}}에서 영감을 받았어요',
     },
     preferences: {
       title: '기본 설정',

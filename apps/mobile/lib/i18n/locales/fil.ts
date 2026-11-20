@@ -690,6 +690,7 @@ const fil = {
       get_started: 'Magsimula',
       sneakers: 'Sneakers',
       phone: 'Bagong phone',
+      inspired_by: 'Hango sa {{book}}',
     },
     preferences: {
       title: 'I-set ang mga basic',

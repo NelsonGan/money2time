@@ -690,6 +690,7 @@ const uk = {
       get_started: 'Почати',
       sneakers: 'Кросівки',
       phone: 'Новий телефон',
+      inspired_by: 'За мотивами книги {{book}}',
     },
     preferences: {
       title: 'Базові налаштування',

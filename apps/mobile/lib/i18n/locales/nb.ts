@@ -690,6 +690,7 @@ const nb = {
       get_started: 'Kom i gang',
       sneakers: 'Joggesko',
       phone: 'Ny telefon',
+      inspired_by: 'Inspirert av {{book}}',
     },
     preferences: {
       title: 'Grunnleggende innstillinger',

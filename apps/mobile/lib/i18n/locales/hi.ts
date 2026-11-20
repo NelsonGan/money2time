@@ -689,6 +689,7 @@ const hi = {
       get_started: 'शुरू करें',
       sneakers: 'स्नीकर्स',
       phone: 'नया फ़ोन',
+      inspired_by: '{{book}} से प्रेरित',
     },
     preferences: {
       title: 'बुनियादी सेटिंग्स करें',

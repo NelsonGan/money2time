@@ -691,6 +691,7 @@ const ms = {
       get_started: 'Mulakan',
       sneakers: 'Kasut sneakers',
       phone: 'Telefon baharu',
+      inspired_by: 'Diilhamkan oleh {{book}}',
     },
     preferences: {
       title: 'Tetapkan asas',

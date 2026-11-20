@@ -689,6 +689,7 @@ const da = {
       get_started: 'Kom i gang',
       sneakers: 'Sneakers',
       phone: 'Ny telefon',
+      inspired_by: 'Inspireret af {{book}}',
     },
     preferences: {
       title: 'Sæt det grundlæggende op',

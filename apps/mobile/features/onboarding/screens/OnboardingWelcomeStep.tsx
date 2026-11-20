@@ -1,3 +1,4 @@
+import { Image } from 'expo-image';
 import React from 'react';
 import { View } from 'react-native';
 
@@ -9,6 +10,11 @@ import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
 import { formatCurrency, formatHours } from '~/utils/formatters';
+
+const BOOK_COVER = require('~/assets/illustrations/book-your-money-or-your-life.webp');
+/** A title and its authors, not copy: the same in every language. */
+const BOOK_TITLE = 'Your Money or Your Life';
+const BOOK_AUTHORS = 'Vicki Robin & Joe Dominguez';
 
 /** The examples on the first page are priced at this hourly rate. */
 const EXAMPLE_RATE = 15;
@@ -81,6 +87,29 @@ export function OnboardingWelcomeStep({
           rate: formatCurrency(EXAMPLE_RATE, currencySymbol),
         })}
       </Text>
+
+      {/* Where the idea comes from: the book that counts money in "life
+          energy", the hours a price costs you. */}
+      <View
+        className="mt-8 flex-row items-center gap-3 self-center"
+        accessible
+        accessibilityLabel={`${I18n.t('onboarding.welcome.inspired_by', { book: BOOK_TITLE })}, ${BOOK_AUTHORS}`}
+      >
+        <Image
+          source={BOOK_COVER}
+          style={{ width: 30, height: 47, borderRadius: 3 }}
+          contentFit="cover"
+          accessible={false}
+        />
+        <View>
+          <Text variant="caption" tone="muted">
+            {I18n.t('onboarding.welcome.inspired_by', { book: BOOK_TITLE })}
+          </Text>
+          <Text variant="caption" tone="muted" className="font-normal opacity-80">
+            {BOOK_AUTHORS}
+          </Text>
+        </View>
+      </View>
     </OnboardingStepLayout>
   );
 }

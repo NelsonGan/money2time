@@ -689,6 +689,7 @@ const sv = {
       get_started: 'Kom igång',
       sneakers: 'Sneakers',
       phone: 'Ny telefon',
+      inspired_by: 'Inspirerad av {{book}}',
     },
     preferences: {
       title: 'Grundinställningar',

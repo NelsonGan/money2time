@@ -690,6 +690,7 @@ const nl = {
       get_started: 'Aan de slag',
       sneakers: 'Sneakers',
       phone: 'Nieuwe telefoon',
+      inspired_by: 'Geïnspireerd door {{book}}',
     },
     preferences: {
       title: 'Stel de basis in',

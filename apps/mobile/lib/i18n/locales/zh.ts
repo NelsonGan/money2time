@@ -662,6 +662,7 @@ const zh = {
       get_started: '开始使用',
       sneakers: '运动鞋',
       phone: '新手机',
+      inspired_by: '灵感来自《{{book}}》',
     },
     preferences: {
       title: '设置基础选项',

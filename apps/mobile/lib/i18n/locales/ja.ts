@@ -690,6 +690,7 @@ const ja = {
       get_started: 'はじめる',
       sneakers: 'スニーカー',
       phone: '新しいスマホ',
+      inspired_by: '{{book}} に着想を得ました',
     },
     preferences: {
       title: '基本設定',

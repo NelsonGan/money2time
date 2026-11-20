@@ -689,6 +689,7 @@ const es = {
       get_started: 'Empezar',
       sneakers: 'Zapatillas',
       phone: 'Móvil nuevo',
+      inspired_by: 'Inspirado en {{book}}',
     },
     preferences: {
       title: 'Lo básico',

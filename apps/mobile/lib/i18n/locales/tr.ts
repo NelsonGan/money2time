@@ -689,6 +689,7 @@ const tr = {
       get_started: 'Başla',
       sneakers: 'Spor ayakkabı',
       phone: 'Yeni telefon',
+      inspired_by: '{{book}} kitabından ilham alındı',
     },
     preferences: {
       title: 'Temel ayarları yapın',

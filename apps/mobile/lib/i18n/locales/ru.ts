@@ -689,6 +689,7 @@ const ru = {
       get_started: 'Начать',
       sneakers: 'Кроссовки',
       phone: 'Новый телефон',
+      inspired_by: 'По мотивам книги {{book}}',
     },
     preferences: {
       title: 'Основные настройки',

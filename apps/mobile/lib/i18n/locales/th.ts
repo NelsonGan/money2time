@@ -688,6 +688,7 @@ const th = {
       get_started: 'เริ่มต้นใช้งาน',
       sneakers: 'รองเท้าผ้าใบ',
       phone: 'โทรศัพท์ใหม่',
+      inspired_by: 'ได้แรงบันดาลใจจาก {{book}}',
     },
     preferences: {
       title: 'ตั้งค่าพื้นฐาน',

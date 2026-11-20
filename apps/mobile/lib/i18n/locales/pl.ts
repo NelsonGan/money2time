@@ -690,6 +690,7 @@ const pl = {
       get_started: 'Zaczynamy',
       sneakers: 'Sneakersy',
       phone: 'Nowy telefon',
+      inspired_by: 'Inspirowane książką {{book}}',
     },
     preferences: {
       title: 'Ustaw podstawy',

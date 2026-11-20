@@ -689,6 +689,7 @@ const vi = {
       get_started: 'Bắt đầu',
       sneakers: 'Giày sneaker',
       phone: 'Điện thoại mới',
+      inspired_by: 'Lấy cảm hứng từ {{book}}',
     },
     preferences: {
       title: 'Thiết lập cơ bản',

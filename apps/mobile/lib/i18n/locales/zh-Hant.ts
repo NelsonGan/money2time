@@ -662,6 +662,7 @@ const zhHant = {
       get_started: '開始使用',
       sneakers: '運動鞋',
       phone: '新手機',
+      inspired_by: '靈感來自《{{book}}》',
     },
     preferences: {
       title: '設定基礎選項',
