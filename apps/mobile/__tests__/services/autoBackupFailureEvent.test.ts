@@ -210,3 +210,33 @@ it('keeps why Drive was unreachable when the phone write fails too', async () =>
     }),
   );
 });
+
+it('tells the caller a refused Drive upload was saved on the phone instead', async () => {
+  drive.upload.mockRejectedValue(
+    new DriveError('quota', 'storage full', 403, 'storageQuotaExceeded'),
+  );
+
+  const result = await runAutoBackupIfDue({ force: true });
+
+  expect(result.savedOnDeviceAfterFailure).toBe(true);
+  expect(result.fellBackToLocalFrom).toBeUndefined();
+});
+
+it('writes no phone copy when a reachable iCloud throws, so it is retried later today', async () => {
+  settings.autoBackupTarget = 'icloud';
+  const { iCloudProvider } = jest.requireMock('~/services/autoBackupProviders/icloud') as {
+    iCloudProvider: Record<string, unknown>;
+  };
+  iCloudProvider.isAvailable = jest.fn(async () => true);
+  iCloudProvider.upload = jest.fn(async () => {
+    throw new Error('container not synced yet');
+  });
+  iCloudProvider.list = jest.fn(async () => []);
+
+  const result = await runAutoBackupIfDue({ force: true });
+
+  expect(local.upload).not.toHaveBeenCalled();
+  expect(result.written).toEqual([]);
+  expect(result.savedOnDeviceAfterFailure).toBe(false);
+  expect(settings.lastAutoBackupAt).toBeNull();
+});

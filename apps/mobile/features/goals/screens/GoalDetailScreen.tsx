@@ -89,7 +89,7 @@ function labelForTransaction(tx: TransactionWithRelations): string {
     case 'transfer':
       return I18n.t('goals.activity_transfer');
     case 'balance_adjustment':
-      return I18n.t('transactions.balance_adjustment_transaction_note');
+      return I18n.t('accounts.balance_adjustment_transaction_note');
     case 'income':
       return I18n.t('nav.income');
     default:

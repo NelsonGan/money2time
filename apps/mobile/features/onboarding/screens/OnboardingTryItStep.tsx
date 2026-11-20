@@ -5,15 +5,12 @@ import Animated, { FadeIn, FadeInDown, FadeOut, LinearTransition } from 'react-n
 import { CategoryEmoji, Text, TimeValueInline } from '~/components/ui';
 import { OnboardingStepLayout } from '~/features/onboarding/components/OnboardingStepLayout';
 import { ONBOARDING_CARD, ONBOARDING_CARD_SELECTED } from '~/features/onboarding/constants/styles';
-import { sampleAmountForHours } from '~/features/onboarding/lib/onboardingMath';
+import { exampleHourlyRate, sampleAmountForHours } from '~/features/onboarding/lib/onboardingMath';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
 import { formatCurrency, formatHours } from '~/utils/formatters';
-
-/** The rate the samples use when the user skipped the income step. */
-const EXAMPLE_RATE = 15;
 
 /** Each sample costs about this many hours of the user's own pay. */
 const SAMPLES = [
@@ -29,6 +26,7 @@ type SampleId = (typeof SAMPLES)[number]['id'];
 interface OnboardingTryItStepProps {
   /** The user's true hourly rate, 0 when they skipped setting it. */
   hourlyRate: number;
+  currencyCode: string;
   currencySymbol: string;
   onBack: () => void;
   onContinue: (samplesAdded: number) => void;
@@ -40,13 +38,16 @@ interface OnboardingTryItStepProps {
  */
 export function OnboardingTryItStep({
   hourlyRate,
+  currencyCode,
   currencySymbol,
   onBack,
   onContinue,
 }: OnboardingTryItStepProps) {
   const themeColors = useThemeColors();
   const [added, setAdded] = useState<SampleId[]>([]);
-  const rate = hourlyRate > 0 ? hourlyRate : EXAMPLE_RATE;
+  // With no wage set, the samples use the currency's example rate and say so.
+  const exampleRate = exampleHourlyRate(currencyCode);
+  const rate = hourlyRate > 0 ? hourlyRate : exampleRate;
 
   const samples = useMemo(
     () =>
@@ -171,7 +172,7 @@ export function OnboardingTryItStep({
       {hourlyRate > 0 ? null : (
         <Text variant="caption" tone="muted" className="mt-3 text-center">
           {I18n.t('onboarding.try_it.example_rate', {
-            rate: formatCurrency(EXAMPLE_RATE, currencySymbol),
+            rate: formatCurrency(exampleRate, currencySymbol),
           })}
         </Text>
       )}

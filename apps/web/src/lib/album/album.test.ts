@@ -342,6 +342,19 @@ test("the debt plan is the app's, line for line, and so is the row limit", async
   const plan = (source: string) => source.slice(source.indexOf("/** A path of members from `from` to `to`"));
   const [app, web] = await Promise.all([read("../../../../mobile/features/albums/lib/groupDebts.ts"), read("./debts.ts")]);
   assert.equal(plan(web), plan(app));
+  // The open shares above it too, as code: each copy keeps its own comments,
+  // formatting and types, and the website's rows say `deleted` for `deletedAt`.
+  const code = (source: string) =>
+    source
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .replace(/\/\/.*$/gm, "")
+      .replace(/\s+/g, "")
+      .replace(/,([)\]}])/g, "$1")
+      .replace(/deletedAt/g, "deleted")
+      .replace(/'/g, '"');
+  const body = (source: string) => code(source).slice(code(source).indexOf("constopen:OpenShare[]=[];"));
+  assert.ok(body(app).length > 1000);
+  assert.equal(body(web), body(app));
   const limit = (source: string) => source.match(/MAX_WRITE_ROWS = (\d+)/)?.[1];
   const [appPlan, webWrites] = await Promise.all([read("../../../../mobile/features/albums/lib/groupPlan.ts"), read("./writes.ts")]);
   assert.equal(limit(webWrites), limit(appPlan));

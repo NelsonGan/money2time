@@ -110,3 +110,17 @@ describe('Log Card Payment at the free limit (withMoney2TimeAutoLog)', () => {
     }
   });
 });
+
+describe('decideAutoLogLimitPrompt when no longer blocked', () => {
+  it('drops the record instead of prompting', () => {
+    expect(
+      decideAutoLogLimitPrompt({
+        isPro: false,
+        stillBlocked: false,
+        blocked: { count: 1, lastAt: '2026-11-20T08:00:00.000Z' },
+        lastPromptAt: null,
+        now: Date.parse('2026-11-20T09:00:00.000Z'),
+      }),
+    ).toBe('clear');
+  });
+});

@@ -4331,9 +4331,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
    * follow.
    */
   const settleEvenGroup = useCallback(async (groupId: string, env: GroupEnv) => {
+    // A big album closes in parts (`MAX_WRITE_ROWS` rows each), each its own act.
+    let closed = false;
     try {
-      // A big album closes in parts (`MAX_WRITE_ROWS` rows each), each its own act.
-      let closed = false;
       let last: string | undefined;
       for (let part = 0; part < 20; part += 1) {
         const rows = evenGroupPayments(groupId);
@@ -4343,9 +4343,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         writeGroup(groupId, rows, { reason: 'close_even' });
         closed = true;
       }
-      if (closed) projectGroup(groupId, env);
     } catch (error) {
       if (!isExpectedGroupWriteError(error)) reportError(error, { scope: 'album_group_payment' });
+    }
+    // The parts written before a failure are recorded: the entries follow them.
+    if (!closed) return;
+    try {
+      projectGroup(groupId, env);
+    } catch (error) {
+      reportError(error, { scope: 'album_group_payment' });
     }
   }, []);
 
@@ -4473,20 +4479,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (!env) return;
       const self = groupSelf(groupId, env);
       if (!self) return;
-      const settling = `${groupId}|${debt.from}|${debt.to}|${debt.currency}`;
+      // The amount is in the key so a second, deliberate part payment on the
+      // same line right after the first one is not taken for a double tap.
+      const settling = `${groupId}|${debt.from}|${debt.to}|${debt.currency}|${Math.round(debt.amount * 100)}`;
       if (settlingDebtsRef.current.has(settling)) return;
       settlingDebtsRef.current.add(settling);
+      // Every payment of the user's own goes through the one account, so
+      // those that only pass a debt along leave it as it was.
+      const paidThrough = new Map<string, string | null>();
+      let recorded = false;
       try {
         const memberIds = albumGroupsRepository.memberIds(groupId);
         const simplified = albumGroupsRepository.simplifiesDebts(groupId);
         const today = dayKeyFromDateLocal(new Date());
-        // Every payment of the user's own goes through the one account, so
-        // those that only pass a debt along leave it as it was.
-        const paidThrough = new Map<string, string | null>();
         // A debt across more bills than one change takes (`MAX_WRITE_ROWS`)
         // is paid in parts, each its own act, until all of it is paid.
         let left = Math.round(debt.amount * 100);
-        let recorded = false;
         for (let part = 0; left > 0 && part < 20; part += 1) {
           const open = openShares(
             albumGroupsRepository.listExpenses(groupId, memberIds),
@@ -4535,6 +4543,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           });
           left -= Math.round(paidFrom(payments, debt.from) * 100);
         }
+      } catch (error) {
+        reportError(error, { scope: 'album_group_payment' });
+      }
+      try {
+        // Parts written before a later one failed are recorded all the same:
+        // their entries go on the chosen account, and the payment counts.
         if (!recorded) return;
         projectGroup(groupId, env, { hints: { accounts: paidThrough } });
         void trackEvent(AnalyticsEvents.ALBUM_PAYMENT_RECORDED, {
@@ -7000,8 +7014,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 reportError(error, { scope: 'album_group_write' });
               }
             }
-            // A reporting-currency change re-bases the FX rate table.
-            if (nextUpdates.currencyCode) reloadRateTable(next.currencyCode);
+            // A reporting-currency change re-bases the FX rate table, and the
+            // default ledger, which has no currency of its own until one is
+            // set, now reads in the new one. Its wage is kept in that
+            // currency, so a stale ledger here made a wage typed right after
+            // the change (onboarding: basics, then income) get converted
+            // from the old currency on save and read back unconverted later.
+            if (nextUpdates.currencyCode) {
+              reloadRateTable(next.currencyCode);
+              setLedgers(ledgersRepository.list());
+            }
           },
         },
       );

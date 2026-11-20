@@ -26,13 +26,13 @@ Hopefully you'll always have control of your money and your life.
 Terms of Use: https://money2time.com/terms
 Privacy Policy: https://money2time.com/privacy
 Contact: https://www.money2time.com/contact`,
-    whatsNew: `- Added shared albums to split trip bills with friends
-- Added the ability to invite friends without the app
-- Added the ability to change a shared album's categories
-- Fixed syncing after someone leaves a shared ledger
-- Fixed ignoring notifications from another ledger
+    whatsNew: `- Revamped onboarding to show prices in hours of work
+- Added 20 free receipt scans every month
+- Fixed paying one album debt changing the others
+- Fixed settling up in large shared albums
+- Fixed backups not saving when Google Drive is full
 
-Many hands make light work.`,
+The price of anything is the amount of life you exchange for it.`,
   },
 
   zh: {
@@ -49,13 +49,13 @@ Many hands make light work.`,
 使用条款：https://money2time.com/terms
 隐私政策：https://money2time.com/privacy
 联系我们：https://www.money2time.com/contact`,
-    whatsNew: `- 新增了共享相册，与朋友分摊旅行账单
-- 新增了邀请未安装应用的朋友的功能
-- 新增了修改共享相册分类的功能
-- 修复了有人离开共享账本后无法同步的问题
-- 修复了无法忽略其他账本通知的问题
+    whatsNew: `- 全新改版了以工作小时显示价格的新手引导
+- 新增了每月 20 次免费收据扫描
+- 修复了支付一笔相册欠款会改变其他欠款的问题
+- 修复了大型共享相册无法结清的问题
+- 修复了 Google Drive 空间已满时备份未保存的问题
 
-众人拾柴火焰高。`,
+任何东西的价格，都是你为它付出的生命。`,
   },
 
   de: {
@@ -72,13 +72,13 @@ Ich hoffe, du hast immer die Kontrolle über dein Geld – und dein Leben.
 Nutzungsbedingungen: https://money2time.com/terms
 Datenschutzrichtlinie: https://money2time.com/privacy
 Kontakt: https://www.money2time.com/contact`,
-    whatsNew: `- Geteilte Alben zum Teilen von Reisekosten mit Freunden hinzugefügt
-- Einladen von Freunden ohne die App hinzugefügt
-- Ändern der Kategorien eines geteilten Albums hinzugefügt
-- Synchronisierung nach dem Austritt aus einem geteilten Buch behoben
-- Ignorieren von Mitteilungen aus einem anderen Buch behoben
+    whatsNew: `- Einführung mit Preisen in Arbeitsstunden überarbeitet
+- 20 kostenlose Belegscans pro Monat hinzugefügt
+- Änderung anderer Albumschulden beim Begleichen einer Schuld behoben
+- Begleichen in großen geteilten Alben behoben
+- Nicht gespeicherte Backups bei vollem Google Drive behoben
 
-Viele Hände machen schnell ein Ende.`,
+Der Preis einer Sache ist die Menge an Leben, die man dafür eintauscht.`,
   },
 
   fr: {
@@ -95,13 +95,13 @@ J'espère que vous aurez toujours le contrôle de votre argent et de votre vie.
 Conditions d'utilisation : https://money2time.com/terms
 Politique de confidentialité : https://money2time.com/privacy
 Contact : https://www.money2time.com/contact`,
-    whatsNew: `- Ajout des albums partagés pour partager les frais de voyage entre amis
-- Ajout de l'invitation d'amis qui n'ont pas l'app
-- Ajout de la modification des catégories d'un album partagé
-- Correction de la synchronisation après le départ d'un membre d'un carnet partagé
-- Correction du bouton Ignorer pour les notifications d'un autre carnet
+    whatsNew: `- Refonte de l'accueil pour afficher les prix en heures de travail
+- Ajout de 20 scans de reçus gratuits chaque mois
+- Correction du paiement d'une dette d'album qui modifiait les autres
+- Correction du règlement dans les grands albums partagés
+- Correction des sauvegardes non enregistrées quand Google Drive est plein
 
-L'union fait la force.`,
+Le prix d'une chose est la quantité de vie qu'on échange contre elle.`,
   },
 
   es: {
@@ -118,13 +118,13 @@ Ojalá siempre tengas el control de tu dinero y de tu vida.
 Condiciones de uso: https://money2time.com/terms
 Política de privacidad: https://money2time.com/privacy
 Contacto: https://www.money2time.com/contact`,
-    whatsNew: `- Se añadieron álbumes compartidos para dividir gastos de viaje con amigos
-- Se añadió la posibilidad de invitar a amigos sin la app
-- Se añadió la posibilidad de cambiar las categorías de un álbum compartido
-- Se corrigió la sincronización cuando alguien sale de un libro compartido
-- Se corrigió la opción de ignorar notificaciones de otro libro
+    whatsNew: `- Se renovó la bienvenida para mostrar los precios en horas de trabajo
+- Se añadieron 20 escaneos de recibos gratis cada mes
+- Se corrigió que pagar una deuda del álbum cambiara las demás
+- Se corrigió saldar cuentas en álbumes compartidos grandes
+- Se corrigieron las copias que no se guardaban con Google Drive lleno
 
-La unión hace la fuerza.`,
+El precio de algo es la cantidad de vida que das a cambio.`,
   },
 
   pt: {
@@ -141,13 +141,13 @@ Que você sempre tenha controle do seu dinheiro e da sua vida.
 Termos de Uso: https://money2time.com/terms
 Política de Privacidade: https://money2time.com/privacy
 Contato: https://www.money2time.com/contact`,
-    whatsNew: `- Adicionados álbuns compartilhados para dividir gastos de viagem com amigos
-- Adicionada a possibilidade de convidar amigos sem o app
-- Adicionada a possibilidade de alterar as categorias de um álbum compartilhado
-- Corrigida a sincronização quando alguém sai de um livro compartilhado
-- Corrigida a opção de ignorar notificações de outro livro
+    whatsNew: `- Renovada a introdução para mostrar os preços em horas de trabalho
+- Adicionadas 20 digitalizações de recibos grátis por mês
+- Corrigido o pagamento de uma dívida do álbum que alterava as outras
+- Corrigido o acerto de contas em álbuns compartilhados grandes
+- Corrigidos backups não salvos com o Google Drive cheio
 
-A união faz a força.`,
+O preço de qualquer coisa é a quantidade de vida que você troca por ela.`,
   },
 
   it: {
@@ -164,13 +164,13 @@ Speriamo che tu possa sempre avere il controllo del tuo denaro e della tua vita.
 Termini di utilizzo: https://money2time.com/terms
 Informativa sulla privacy: https://money2time.com/privacy
 Contatto: https://www.money2time.com/contact`,
-    whatsNew: `- Aggiunti gli album condivisi per dividere le spese di viaggio con gli amici
-- Aggiunta la possibilità di invitare amici senza l'app
-- Aggiunta la possibilità di modificare le categorie di un album condiviso
-- Risolta la sincronizzazione quando qualcuno lascia un registro condiviso
-- Risolta l'opzione Ignora per le notifiche di un altro registro
+    whatsNew: `- Rinnovata l'introduzione per mostrare i prezzi in ore di lavoro
+- Aggiunte 20 scansioni di ricevute gratuite ogni mese
+- Risolto il pagamento di un debito dell'album che cambiava gli altri
+- Risolto il saldo negli album condivisi più grandi
+- Risolti i backup non salvati con Google Drive pieno
 
-L'unione fa la forza.`,
+Il prezzo di una cosa è la quantità di vita che dai in cambio.`,
   },
 
   nl: {
@@ -187,13 +187,13 @@ Hopelijk heb je altijd de controle over je geld en je leven.
 Gebruiksvoorwaarden: https://money2time.com/terms
 Privacybeleid: https://money2time.com/privacy
 Contact: https://www.money2time.com/contact`,
-    whatsNew: `- Gedeelde albums toegevoegd om reiskosten met vrienden te splitsen
-- Vrienden zonder de app uitnodigen toegevoegd
-- Categorieën van een gedeeld album wijzigen toegevoegd
-- Synchronisatie opgelost nadat iemand een gedeeld boek verlaat
-- Negeren van meldingen uit een ander boek opgelost
+    whatsNew: `- Introductie vernieuwd met prijzen in werkuren
+- 20 gratis bonnetjesscans per maand toegevoegd
+- Andere albumschulden die veranderden bij het betalen van één schuld opgelost
+- Verrekenen in grote gedeelde albums opgelost
+- Back-ups die niet werden opgeslagen bij een volle Google Drive opgelost
 
-Vele handen maken licht werk.`,
+De prijs van iets is de hoeveelheid leven die je ervoor ruilt.`,
   },
 
   ru: {
@@ -210,13 +210,13 @@ Vele handen maken licht werk.`,
 Условия использования: https://money2time.com/terms
 Политика конфиденциальности: https://money2time.com/privacy
 Контакты: https://www.money2time.com/contact`,
-    whatsNew: `- Добавлены общие альбомы, чтобы делить расходы на поездку с друзьями
-- Добавлена возможность приглашать друзей без приложения
-- Добавлена возможность менять категории общего альбома
-- Исправлена синхронизация после выхода участника из общей книги
-- Исправлено игнорирование уведомлений из другой книги
+    whatsNew: `- Обновлён первый запуск с ценами в часах работы
+- Добавлено 20 бесплатных сканирований чеков в месяц
+- Исправлено изменение других долгов альбома при оплате одного
+- Исправлены расчёты в больших общих альбомах
+- Исправлено несохранение резервных копий при заполненном Google Drive
 
-Берись дружно, не будет грузно.`,
+Цена вещи равна количеству жизни, которое ты за неё отдаёшь.`,
   },
 
   ja: {
@@ -233,13 +233,13 @@ Vele handen maken licht werk.`,
 利用規約: https://money2time.com/terms
 プライバシーポリシー: https://money2time.com/privacy
 お問い合わせ: https://www.money2time.com/contact`,
-    whatsNew: `- 友達と旅行の費用を割り勘できる共有アルバムを追加しました
-- アプリを持っていない友達を招待する機能を追加しました
-- 共有アルバムのカテゴリを変更する機能を追加しました
-- 共有帳簿から誰かが抜けた後の同期を修正しました
-- 他の帳簿の通知を無視できない問題を修正しました
+    whatsNew: `- 価格を働いた時間で表示する初回設定を一新しました
+- 毎月20回の無料レシートスキャンを追加しました
+- アルバムの借りを1件払うと他の借りが変わる問題を修正しました
+- 大きな共有アルバムで精算できない問題を修正しました
+- Google Driveの容量不足でバックアップが保存されない問題を修正しました
 
-三人寄れば文殊の知恵。`,
+物の値段とは、それと引き換えに差し出す命の量である。`,
   },
 
   ko: {
@@ -256,13 +256,13 @@ Vele handen maken licht werk.`,
 이용 약관: https://money2time.com/terms
 개인정보 처리방침: https://money2time.com/privacy
 문의: https://www.money2time.com/contact`,
-    whatsNew: `- 친구와 여행 경비를 나누는 공유 앨범을 추가했습니다
-- 앱이 없는 친구를 초대하는 기능을 추가했습니다
-- 공유 앨범의 카테고리를 변경하는 기능을 추가했습니다
-- 누군가 공유 가계부를 나간 후의 동기화 문제를 수정했습니다
-- 다른 가계부의 알림을 무시하지 못하는 문제를 수정했습니다
+    whatsNew: `- 가격을 근무 시간으로 보여주는 첫 설정을 새롭게 바꿨습니다
+- 매월 20회 무료 영수증 스캔을 추가했습니다
+- 앨범 빚 하나를 갚으면 다른 빚이 바뀌는 문제를 수정했습니다
+- 큰 공유 앨범에서 정산이 안 되는 문제를 수정했습니다
+- Google Drive 용량이 가득 찼을 때 백업이 저장되지 않는 문제를 수정했습니다
 
-백지장도 맞들면 낫다.`,
+물건의 값은 그것과 바꾸는 삶의 양이다.`,
   },
 
   hi: {
@@ -279,13 +279,13 @@ Vele handen maken licht werk.`,
 उपयोग की शर्तें: https://money2time.com/terms
 गोपनीयता नीति: https://money2time.com/privacy
 संपर्क: https://www.money2time.com/contact`,
-    whatsNew: `- दोस्तों के साथ यात्रा के बिल बांटने के लिए साझा एल्बम जोड़े गए
-- बिना ऐप वाले दोस्तों को आमंत्रित करने की सुविधा जोड़ी गई
-- साझा एल्बम की श्रेणियां बदलने की सुविधा जोड़ी गई
-- किसी के साझा बही छोड़ने के बाद सिंक की समस्या ठीक की
-- दूसरी बही की सूचनाओं को अनदेखा करने की समस्या ठीक की
+    whatsNew: `- कीमतों को काम के घंटों में दिखाने वाला नया शुरुआती सेटअप
+- हर महीने 20 मुफ़्त रसीद स्कैन जोड़े गए
+- एल्बम का एक कर्ज़ चुकाने पर बाकी कर्ज़ बदलने की समस्या ठीक की
+- बड़े साझा एल्बम में हिसाब चुकता न होने की समस्या ठीक की
+- Google Drive भरा होने पर बैकअप सेव न होने की समस्या ठीक की
 
-एक और एक ग्यारह होते हैं।`,
+किसी चीज़ की कीमत उतनी ज़िंदगी है जितनी आप उसके बदले देते हैं।`,
   },
 
   id: {
@@ -302,13 +302,13 @@ Semoga Anda selalu punya kendali atas uang dan hidup Anda.
 Syarat Penggunaan: https://money2time.com/terms
 Kebijakan Privasi: https://money2time.com/privacy
 Kontak: https://www.money2time.com/contact`,
-    whatsNew: `- Menambahkan album bersama untuk membagi tagihan perjalanan dengan teman
-- Menambahkan kemampuan mengundang teman tanpa aplikasi
-- Menambahkan kemampuan mengubah kategori album bersama
-- Memperbaiki sinkronisasi setelah seseorang keluar dari buku bersama
-- Memperbaiki pengabaian notifikasi dari buku lain
+    whatsNew: `- Memperbarui pengenalan aplikasi untuk menampilkan harga dalam jam kerja
+- Menambahkan 20 pindaian struk gratis setiap bulan
+- Memperbaiki pembayaran satu utang album yang mengubah utang lain
+- Memperbaiki pelunasan di album bersama yang besar
+- Memperbaiki cadangan yang tidak tersimpan saat Google Drive penuh
 
-Berat sama dipikul, ringan sama dijinjing.`,
+Harga sesuatu adalah seberapa banyak hidup yang kamu tukar untuknya.`,
   },
 
   tr: {
@@ -325,13 +325,13 @@ Umarım paranızın ve hayatınızın kontrolü her zaman sizde olur.
 Kullanım Koşulları: https://money2time.com/terms
 Gizlilik Politikası: https://money2time.com/privacy
 İletişim: https://www.money2time.com/contact`,
-    whatsNew: `- Arkadaşlarla seyahat masraflarını bölmek için paylaşılan albümler eklendi
-- Uygulaması olmayan arkadaşları davet etme özelliği eklendi
-- Paylaşılan albümün kategorilerini değiştirme özelliği eklendi
-- Biri paylaşılan defterden ayrıldıktan sonraki senkronizasyon sorunu giderildi
-- Başka bir defterdeki bildirimleri yok sayma sorunu giderildi
+    whatsNew: `- Fiyatları çalışma saati olarak gösteren tanıtım yenilendi
+- Her ay 20 ücretsiz fiş tarama eklendi
+- Bir albüm borcunu ödeyince diğerlerinin değişmesi sorunu giderildi
+- Büyük paylaşılan albümlerde hesaplaşma sorunu giderildi
+- Google Drive dolduğunda yedeklerin kaydedilmemesi sorunu giderildi
 
-Bir elin nesi var, iki elin sesi var.`,
+Bir şeyin bedeli, onun için verdiğin hayattır.`,
   },
 
   vi: {
@@ -348,13 +348,13 @@ Hy vọng bạn luôn làm chủ được tiền bạc và cuộc sống của m
 Điều khoản sử dụng: https://money2time.com/terms
 Chính sách bảo mật: https://money2time.com/privacy
 Liên hệ: https://www.money2time.com/contact`,
-    whatsNew: `- Thêm album chung để chia chi phí chuyến đi với bạn bè
-- Thêm khả năng mời bạn bè chưa có ứng dụng
-- Thêm khả năng thay đổi danh mục của album chung
-- Khắc phục lỗi đồng bộ sau khi có người rời sổ chung
-- Khắc phục lỗi bỏ qua thông báo từ sổ khác
+    whatsNew: `- Làm mới phần giới thiệu để hiển thị giá bằng giờ làm việc
+- Thêm 20 lượt quét hóa đơn miễn phí mỗi tháng
+- Khắc phục lỗi trả một khoản nợ album làm thay đổi các khoản khác
+- Khắc phục lỗi thanh toán trong album chung lớn
+- Khắc phục lỗi không lưu bản sao lưu khi Google Drive đầy
 
-Một cây làm chẳng nên non, ba cây chụm lại nên hòn núi cao.`,
+Giá của một thứ là phần đời bạn đánh đổi để có nó.`,
   },
 
   th: {
@@ -371,13 +371,13 @@ Một cây làm chẳng nên non, ba cây chụm lại nên hòn núi cao.`,
 เงื่อนไขการใช้งาน: https://money2time.com/terms
 นโยบายความเป็นส่วนตัว: https://money2time.com/privacy
 ติดต่อ: https://www.money2time.com/contact`,
-    whatsNew: `- เพิ่มอัลบั้มที่แชร์เพื่อแบ่งค่าใช้จ่ายทริปกับเพื่อน
-- เพิ่มความสามารถในการเชิญเพื่อนที่ไม่มีแอป
-- เพิ่มความสามารถในการเปลี่ยนหมวดหมู่ของอัลบั้มที่แชร์
-- แก้ไขปัญหาการซิงค์หลังมีคนออกจากสมุดบัญชีที่แชร์
-- แก้ไขปัญหาการละเว้นการแจ้งเตือนจากสมุดบัญชีอื่น
+    whatsNew: `- ปรับโฉมการเริ่มต้นใช้งานให้แสดงราคาเป็นชั่วโมงทำงาน
+- เพิ่มการสแกนใบเสร็จฟรี 20 ครั้งทุกเดือน
+- แก้ไขปัญหาการจ่ายหนี้อัลบั้มหนึ่งรายการแล้วรายการอื่นเปลี่ยน
+- แก้ไขปัญหาการเคลียร์ยอดในอัลบั้มที่แชร์ขนาดใหญ่
+- แก้ไขปัญหาข้อมูลสำรองไม่ถูกบันทึกเมื่อ Google Drive เต็ม
 
-สามัคคีคือพลัง`,
+ราคาของสิ่งใดคือชีวิตที่เราแลกไปกับมัน`,
   },
 
   pl: {
@@ -394,13 +394,13 @@ Mam nadzieję, że zawsze będziesz mieć kontrolę nad swoimi pieniędzmi i swo
 Warunki korzystania: https://money2time.com/terms
 Polityka prywatności: https://money2time.com/privacy
 Kontakt: https://www.money2time.com/contact`,
-    whatsNew: `- Dodano udostępnione albumy do dzielenia kosztów podróży ze znajomymi
-- Dodano możliwość zapraszania znajomych bez aplikacji
-- Dodano możliwość zmiany kategorii udostępnionego albumu
-- Naprawiono synchronizację po odejściu kogoś z udostępnionej księgi
-- Naprawiono ignorowanie powiadomień z innej księgi
+    whatsNew: `- Odnowiono wprowadzenie z cenami w godzinach pracy
+- Dodano 20 darmowych skanów paragonów co miesiąc
+- Naprawiono zmianę innych długów albumu po spłacie jednego
+- Naprawiono rozliczanie w dużych udostępnionych albumach
+- Naprawiono niezapisywanie kopii zapasowych przy pełnym Google Drive
 
-W jedności siła.`,
+Cena rzeczy to ilość życia, którą za nią oddajesz.`,
   },
 
   uk: {
@@ -417,13 +417,13 @@ W jedności siła.`,
 Умови використання: https://money2time.com/terms
 Політика конфіденційності: https://money2time.com/privacy
 Контакт: https://www.money2time.com/contact`,
-    whatsNew: `- Додано спільні альбоми, щоб ділити витрати на подорож із друзями
-- Додано можливість запрошувати друзів без застосунку
-- Додано можливість змінювати категорії спільного альбому
-- Виправлено синхронізацію після виходу учасника зі спільної книги
-- Виправлено ігнорування сповіщень з іншої книги
+    whatsNew: `- Оновлено перший запуск із цінами в годинах роботи
+- Додано 20 безкоштовних сканувань чеків щомісяця
+- Виправлено зміну інших боргів альбому після сплати одного
+- Виправлено розрахунки у великих спільних альбомах
+- Виправлено незбереження резервних копій при повному Google Drive
 
-У єдності сила.`,
+Ціна речі дорівнює кількості життя, яке ти за неї віддаєш.`,
   },
 
   sv: {
@@ -440,13 +440,13 @@ Förhoppningsvis har du alltid kontroll över dina pengar och ditt liv.
 Användarvillkor: https://money2time.com/terms
 Integritetspolicy: https://money2time.com/privacy
 Kontakt: https://www.money2time.com/contact`,
-    whatsNew: `- Lade till delade album för att dela resekostnader med vänner
-- Lade till möjligheten att bjuda in vänner utan appen
-- Lade till möjligheten att ändra kategorier i ett delat album
-- Åtgärdade synkning efter att någon lämnat en delad kassabok
-- Åtgärdade ignorering av aviseringar från en annan kassabok
+    whatsNew: `- Gjorde om introduktionen så att priser visas i arbetstimmar
+- Lade till 20 gratis kvittoskanningar varje månad
+- Åtgärdade att andra albumskulder ändrades när en betalades
+- Åtgärdade avräkning i stora delade album
+- Åtgärdade säkerhetskopior som inte sparades när Google Drive var fullt
 
-Många händer gör arbetet lätt.`,
+Priset på en sak är den mängd liv du byter mot den.`,
   },
 
   nb: {
@@ -463,13 +463,13 @@ Forhåpentligvis vil du alltid ha kontroll over pengene dine – og livet ditt.
 Vilkår for bruk: https://money2time.com/terms
 Personvernerklæring: https://money2time.com/privacy
 Kontakt: https://www.money2time.com/contact`,
-    whatsNew: `- La til delte album for å dele reiseutgifter med venner
-- La til mulighet for å invitere venner uten appen
-- La til mulighet for å endre kategoriene i et delt album
-- Rettet synkronisering etter at noen forlater et delt regnskap
-- Rettet ignorering av varsler fra et annet regnskap
+    whatsNew: `- Fornyet introduksjonen så priser vises i arbeidstimer
+- La til 20 gratis kvitteringsskanninger hver måned
+- Rettet at andre albumgjeld endret seg når én ble betalt
+- Rettet oppgjør i store delte album
+- Rettet sikkerhetskopier som ikke ble lagret når Google Drive var fullt
 
-Mange hender gjør lett arbeid.`,
+Prisen på en ting er mengden liv du bytter bort for den.`,
   },
 
   da: {
@@ -486,13 +486,13 @@ Forhåbentlig har du altid kontrol over dine penge og dit liv.
 Brugsbetingelser: https://money2time.com/terms
 Privatlivspolitik: https://money2time.com/privacy
 Kontakt: https://www.money2time.com/contact`,
-    whatsNew: `- Tilføjede delte album til at dele rejseudgifter med venner
-- Tilføjede mulighed for at invitere venner uden appen
-- Tilføjede mulighed for at ændre kategorierne i et delt album
-- Rettede synkronisering efter at nogen forlader et delt regnskab
-- Rettede ignorering af notifikationer fra et andet regnskab
+    whatsNew: `- Fornyede introduktionen så priser vises i arbejdstimer
+- Tilføjede 20 gratis kvitteringsscanninger hver måned
+- Rettede at anden albumgæld ændrede sig når én blev betalt
+- Rettede afregning i store delte album
+- Rettede sikkerhedskopier der ikke blev gemt når Google Drive var fuldt
 
-Mange hænder gør let arbejde.`,
+Prisen på en ting er den mængde liv, du bytter væk for den.`,
   },
 
   ms: {
@@ -509,13 +509,13 @@ Semoga anda sentiasa memiliki kawalan ke atas wang dan kehidupan anda.
 Terma Penggunaan: https://money2time.com/terms
 Dasar Privasi: https://money2time.com/privacy
 Hubungi Kami: https://www.money2time.com/contact`,
-    whatsNew: `- Menambah album kongsi untuk membahagi kos perjalanan dengan kawan
-- Menambah keupayaan menjemput kawan tanpa aplikasi
-- Menambah keupayaan menukar kategori album kongsi
-- Membaiki penyegerakan selepas seseorang keluar dari buku kongsi
-- Membaiki pengabaian pemberitahuan dari buku lain
+    whatsNew: `- Memperbaharui pengenalan aplikasi untuk menunjukkan harga dalam jam kerja
+- Menambah 20 imbasan resit percuma setiap bulan
+- Membaiki pembayaran satu hutang album yang mengubah hutang lain
+- Membaiki penyelesaian hutang dalam album kongsi yang besar
+- Membaiki sandaran yang tidak disimpan apabila Google Drive penuh
 
-Bulat air kerana pembetung, bulat manusia kerana muafakat.`,
+Harga sesuatu ialah sebanyak mana hidup yang anda tukar untuknya.`,
   },
 
   fil: {
@@ -530,13 +530,13 @@ Sana lagi kang may kontrol sa iyong pera at sa iyong buhay.
 Mga Tuntunin ng Paggamit: https://money2time.com/terms
 Patakaran sa Privacy: https://money2time.com/privacy
 Makipag-ugnayan: https://www.money2time.com/contact`,
-    whatsNew: `- Nagdagdag ng mga shared na album para hatiin ang gastos sa biyahe kasama ang mga kaibigan
-- Nagdagdag ng kakayahang mag-imbita ng mga kaibigang walang app
-- Nagdagdag ng kakayahang baguhin ang mga kategorya ng shared na album
-- Inayos ang sync pagkatapos umalis ang isang tao sa shared na ledger
-- Inayos ang pag-ignore ng mga notification mula sa ibang ledger
+    whatsNew: `- Binago ang onboarding para ipakita ang presyo sa oras ng trabaho
+- Nagdagdag ng 20 libreng receipt scan bawat buwan
+- Inayos ang pagbabayad ng isang utang sa album na nagbabago sa iba
+- Inayos ang pag-settle up sa malalaking shared na album
+- Inayos ang mga backup na hindi nase-save kapag puno ang Google Drive
 
-Kapag sama-sama, gumagaan ang trabaho.`,
+Ang presyo ng anumang bagay ay ang dami ng buhay na ipinagpapalit mo para dito.`,
   },
 
 };

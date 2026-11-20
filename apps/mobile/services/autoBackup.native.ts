@@ -161,7 +161,11 @@ export async function runAutoBackupIfDue(opts?: { force?: boolean }): Promise<Ba
           lastFailure = driveFailureDetails(e);
         }
       }
-      if (target === 'local') continue;
+      // Only Drive says why it failed. iCloud throws plain errors, often from a
+      // container that has not synced yet, which pass on their own: those keep
+      // the old behaviour and retry later today rather than end the day on the
+      // phone.
+      if (target !== 'googleDrive') continue;
       // A failure that usually passes (offline, timeout, rate limit, server,
       // aborted) writes nothing, as before: the run stays due and the six-hour
       // backoff tries the cloud again later today.
@@ -207,7 +211,7 @@ export async function runAutoBackupIfDue(opts?: { force?: boolean }): Promise<Ba
       });
     }
 
-    return { skipped: false, written, errors, fellBackToLocalFrom };
+    return { skipped: false, written, errors, fellBackToLocalFrom, savedOnDeviceAfterFailure };
   })();
 
   runningPromise = promise;
@@ -257,10 +261,6 @@ function describeBackupError(target: BackupTarget, error: unknown): string {
   return I18n.t('auto_backup.error.prefix', { target: targetLabel(target), reason });
 }
 
-/**
- * A short reason for analytics: the Drive error kind, `aborted` for a cancelled
- * request, `unknown` otherwise. Never the message, which can carry a file path.
- */
 /** Cloud failures that usually pass on their own; they get no phone copy. */
 const TRANSIENT_BACKUP_ERROR_KINDS: ReadonlySet<string> = new Set([
   'offline',
@@ -270,6 +270,10 @@ const TRANSIENT_BACKUP_ERROR_KINDS: ReadonlySet<string> = new Set([
   'aborted',
 ]);
 
+/**
+ * A short reason for analytics: the Drive error kind, `aborted` for a cancelled
+ * request, `unknown` otherwise. Never the message, which can carry a file path.
+ */
 function backupErrorKind(error: unknown): string {
   if (error instanceof DriveError) return error.kind;
   if (error instanceof Error && error.name === 'AbortError') return 'aborted';

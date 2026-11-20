@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Alert, Platform, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -21,7 +21,8 @@ import { triggerHaptic } from '~/services/haptics';
 import { requestPermissions } from '~/services/notifications';
 import { type WageConfig } from '~/types';
 import { getErrorMessage } from '~/utils/errorHandling';
-import { monthKeyFromDateLocal } from '~/utils/formatters';
+import { financialMonthKeyForDate, monthCycleOf } from '~/utils/financialMonth';
+import { normalizeMoneyAmount } from '~/utils/formatters';
 
 import { OnboardingAutomationsStep } from './OnboardingAutomationsStep';
 import { OnboardingBackupStep } from './OnboardingBackupStep';
@@ -63,7 +64,14 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const [step, setStep] = useState<OnboardingStepId>('welcome');
   const [acquisitionSource, setAcquisitionSource] = useState<AcquisitionSource | null>(null);
   const [showWageCalculator, setShowWageCalculator] = useState(false);
-  const currentMonth = useMemo(() => monthKeyFromDateLocal(new Date()), []);
+  // The financial month, the one `currentMonthWage` and Settings › Hourly
+  // value read: with a cycle starting on the 25th, the 20th belongs to the
+  // month before.
+  const monthCycle = monthCycleOf(settings);
+  const currentMonth = useMemo(
+    () => financialMonthKeyForDate(new Date(), monthCycle),
+    [monthCycle],
+  );
 
   // The income step edits a draft; it is saved when the user continues (or
   // finishes the full calculator), never on each keystroke.
@@ -71,7 +79,9 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     currentMonthWage && currentMonthWage.wageAmount > 0
       ? {
           wageType: currentMonthWage.wageType,
-          wageAmount: currentMonthWage.wageAmount,
+          // Rounded to cents: a wage read in another currency than it is kept
+          // in arrives converted (9015.251158712264) and would fill the field so.
+          wageAmount: normalizeMoneyAmount(currentMonthWage.wageAmount),
           hoursWorkedPerWeek: currentMonthWage.hoursWorkedPerWeek,
           workdaysPerWeek: currentMonthWage.workdaysPerWeek,
           commuteMinutesPerWorkday: currentMonthWage.commuteMinutesPerWorkday,
@@ -166,7 +176,13 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     setStep('notifications');
   }, [acquisitionSource]);
 
+  // Enable awaits the permission prompt, so a quick second tap would finish
+  // onboarding (and send its events) twice.
+  const enablingRef = useRef(false);
+  const finishingRef = useRef(false);
   const handleFinish = useCallback(() => {
+    if (finishingRef.current) return;
+    finishingRef.current = true;
     try {
       const result = completeOnboarding({
         seedDefaultAccounts: accounts.length === 0 && categories.length === 0,
@@ -179,6 +195,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       }
       onComplete();
     } catch (error) {
+      finishingRef.current = false;
       void triggerHaptic('error');
       Alert.alert(I18n.t('errors.generic_operation_failed'), getErrorMessage(error));
     }
@@ -198,6 +215,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         <Animated.View entering={FadeIn.duration(300)} className="flex-1" key={`step-${step}`}>
           {step === 'welcome' && (
             <OnboardingWelcomeStep
+              currencyCode={settings.currencyCode}
               currencySymbol={settings.currencySymbol}
               onGetStarted={() => {
                 void trackEvent(AnalyticsEvents.ONBOARDING_STARTED);
@@ -262,6 +280,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           {step === 'try_it' && (
             <OnboardingTryItStep
               hourlyRate={savedHourlyRate}
+              currencyCode={settings.currencyCode}
               currencySymbol={settings.currencySymbol}
               onBack={goBack}
               onContinue={(samplesAdded) => {
@@ -308,13 +327,17 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           {step === 'notifications' && (
             <OnboardingNotificationsStep
               onEnable={async () => {
+                if (enablingRef.current || finishingRef.current) return;
+                enablingRef.current = true;
                 // Tapping enable is not a grant: the OS prompt that follows can
                 // still be declined, and only the answer says who can be reached.
                 const permission = await requestPermissions().catch(() => 'error' as const);
                 void trackEvent(AnalyticsEvents.ONBOARDING_NOTIFICATIONS_ENABLED, { permission });
+                enablingRef.current = false;
                 handleFinish();
               }}
               onSkip={() => {
+                if (enablingRef.current || finishingRef.current) return;
                 void trackEvent(AnalyticsEvents.ONBOARDING_NOTIFICATIONS_SKIPPED);
                 handleFinish();
               }}

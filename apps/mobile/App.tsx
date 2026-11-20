@@ -3083,7 +3083,10 @@ function AppContent() {
 
   // Whether the NavigationContainer has reported ready, for a prompt that
   // pushes a route on its own (AutoLogLimitPrompt) rather than showing a Modal.
-  const [navigationReady, setNavigationReady] = useState(false);
+  // Kept per locale: the container is keyed by it, so a language change
+  // remounts it and it is not ready again until its new instance says so.
+  const [readyNavigationKey, setReadyNavigationKey] = useState<string | null>(null);
+  const navigationReady = readyNavigationKey === navigationLocaleKey;
   const syncRootActiveScreen = useCallback(() => {
     const rootState = navigationRef.getRootState();
     const nextScreen = (rootState?.routes[rootState.index]?.name ??
@@ -3092,9 +3095,9 @@ function AppContent() {
     setRootActiveScreen((previous) => (previous === nextScreen ? previous : nextScreen));
   }, [navigationRef]);
   const handleNavigationReady = useCallback(() => {
-    setNavigationReady(true);
+    setReadyNavigationKey(navigationLocaleKey);
     syncRootActiveScreen();
-  }, [syncRootActiveScreen]);
+  }, [navigationLocaleKey, syncRootActiveScreen]);
 
   const visibleScreen = introPaywallPending
     ? 'onboarding_paywall'

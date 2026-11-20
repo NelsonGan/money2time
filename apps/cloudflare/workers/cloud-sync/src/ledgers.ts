@@ -859,6 +859,9 @@ async function albumRead(
   }
 }
 
+/** Room for a website change of `MAX_WRITE_ROWS` rows (`groupPlan`), each with its `base`. */
+const MAX_WRITE_BYTES = 1024 * 1024;
+
 /**
  * POST /v1/ledgers/<id>/album: a change to a shared album's group, written
  * by the Worker (src/albumGroups.ts) by the app's rules. `{action: 'join',
@@ -871,9 +874,6 @@ async function albumRead(
  * `moneyBase` (`WriteBase`): `409 stale` when the album changed since.
  * Answers `{ok: true}`; everyone's phones are told to sync.
  */
-/** Room for a website change of `MAX_WRITE_ROWS` rows (`groupPlan`), each with its `base`. */
-const MAX_WRITE_BYTES = 1024 * 1024;
-
 async function albumWrite(
   env: Env,
   ledger: SharedLedgerRow,

@@ -8,7 +8,7 @@ import { isAutoLogSupported } from '~/services/autoLog';
 import { reportError } from '~/services/errorReporting';
 import { isAnyPromptVisible } from '~/services/globalPromptCoordinator';
 
-import { autoLogBlockedByAccounts } from '../lib/decide';
+import { autoLogAllowance, autoLogBlockedByAccounts } from '../lib/decide';
 import { promptForAutoLogLimit } from '../limitPaywall';
 
 /**
@@ -34,14 +34,22 @@ const PROMPT_DELAY_MS = 1500;
  * nothing.
  */
 export function AutoLogLimitPrompt({ allowed }: { allowed: boolean }) {
-  const { accounts } = useApp();
+  const { accounts, quickEntryPrefs } = useApp();
   const { isPro, isStatusKnown } = usePro();
   const inSharedLedger = useOpenLedgerSharedAndActive();
   const ready = allowed && isStatusKnown && isAutoLogSupported();
 
   const blockedByAccounts = autoLogBlockedByAccounts({ accounts, inSharedLedger });
-  const latest = useRef({ isPro, blockedByAccounts });
-  latest.current = { isPro, blockedByAccounts };
+  // A payment refused earlier says nothing about now: archiving accounts under
+  // the free limit allows automatic logs again, and then there is no paywall.
+  const autoLogsRemaining = autoLogAllowance({
+    isPro,
+    accounts,
+    usedAutoLogs: quickEntryPrefs.autoLogUsageCount,
+    inSharedLedger,
+  });
+  const latest = useRef({ isPro, blockedByAccounts, autoLogsRemaining });
+  latest.current = { isPro, blockedByAccounts, autoLogsRemaining };
   const runningRef = useRef(false);
 
   useEffect(() => {

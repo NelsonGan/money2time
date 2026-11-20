@@ -1,4 +1,6 @@
+import { MAJOR_CURRENCIES } from '~/constants/appDefaults';
 import {
+  exampleHourlyRate,
   roundSampleAmount,
   sampleAmountForHours,
   sanitizeAmountInput,
@@ -48,5 +50,39 @@ describe('sampleAmountForHours', () => {
   it('prices a sample at the hours it is meant to cost', () => {
     expect(sampleAmountForHours(0.25, 23.08)).toBe(6);
     expect(sampleAmountForHours(3, 2000)).toBe(6000);
+  });
+});
+
+describe('sanitizeAmountInput with pasted grouping', () => {
+  it('reads the last separator as the decimal point when both appear', () => {
+    expect(sanitizeAmountInput('1,234.56')).toBe('1234.56');
+    expect(sanitizeAmountInput('1.234,56')).toBe('1234.56');
+    expect(sanitizeAmountInput('1,234,567.8')).toBe('1234567.8');
+  });
+});
+
+describe('exampleHourlyRate', () => {
+  it('keeps 15 where it reads as an hourly pay', () => {
+    expect(exampleHourlyRate('MYR')).toBe(15);
+    expect(exampleHourlyRate('USD')).toBe(15);
+    expect(exampleHourlyRate('EUR')).toBe(15);
+    expect(exampleHourlyRate(undefined)).toBe(15);
+  });
+
+  it('scales currencies worth much less per unit', () => {
+    expect(exampleHourlyRate('JPY')).toBe(1500);
+    expect(exampleHourlyRate('krw')).toBe(15000);
+    expect(exampleHourlyRate('VND')).toBe(50000);
+  });
+
+  it('prices the welcome examples the way they read at RM15/hr', () => {
+    const rate = exampleHourlyRate('MYR');
+    expect([0.3, 3, 80].map((hours) => sampleAmountForHours(hours, rate))).toEqual([4.5, 45, 1200]);
+  });
+
+  it('gives every app currency a coffee that costs more than one unit', () => {
+    for (const { code } of MAJOR_CURRENCIES) {
+      expect(sampleAmountForHours(0.25, exampleHourlyRate(code))).toBeGreaterThanOrEqual(3);
+    }
   });
 });

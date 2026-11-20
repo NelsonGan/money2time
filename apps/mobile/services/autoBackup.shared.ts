@@ -34,6 +34,9 @@ export interface BackupRunResult {
   // to the device instead. Callers surface this — a silent local write looks
   // identical to a successful cloud backup otherwise.
   fellBackToLocalFrom?: BackupTarget;
+  // Set when Drive was reached but refused the upload (full, no access) and a
+  // copy was written to the device instead; `errors` says why Drive refused.
+  savedOnDeviceAfterFailure?: boolean;
 }
 
 export function buildAutoBackupName(now = new Date()): string {

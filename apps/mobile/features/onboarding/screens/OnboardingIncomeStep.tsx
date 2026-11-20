@@ -18,7 +18,7 @@ import { computeHourlyRates, formatCurrency } from '~/utils/formatters';
 const WAGE_TYPES: WageType[] = ['hourly', 'monthly', 'yearly'];
 const MIN_HOURS = 1;
 const MAX_HOURS = 100;
-const MAX_AMOUNT = 1_000_000_000;
+const MAX_AMOUNT = 1_000_000_000_000;
 
 function amountToText(amount: number): string {
   return amount > 0 ? String(amount) : '';

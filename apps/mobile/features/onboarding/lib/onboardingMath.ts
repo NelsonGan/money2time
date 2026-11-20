@@ -1,6 +1,15 @@
-/** Digits with at most one decimal point and two decimals; commas read as a point. */
+/**
+ * Digits with at most one decimal point and two decimals; a comma reads as a
+ * point. When a pasted amount has both (1,234.56 or 1.234,56), the last one is
+ * the decimal point and the others group thousands.
+ */
 export function sanitizeAmountInput(raw: string): string {
-  const normalized = raw.replace(/,/g, '.').replace(/[^0-9.]/g, '');
+  let text = raw;
+  if (text.includes('.') && text.includes(',')) {
+    const decimalAt = Math.max(text.lastIndexOf('.'), text.lastIndexOf(','));
+    text = `${text.slice(0, decimalAt).replace(/[.,]/g, '')}.${text.slice(decimalAt + 1)}`;
+  }
+  const normalized = text.replace(/,/g, '.').replace(/[^0-9.]/g, '');
   const [integer, ...rest] = normalized.split('.');
   if (rest.length === 0) return integer;
   return `${integer}.${rest.join('').slice(0, 2)}`;
@@ -24,4 +33,42 @@ export function roundSampleAmount(amount: number): number {
  */
 export function sampleAmountForHours(hours: number, hourlyRate: number): number {
   return roundSampleAmount(hours * hourlyRate);
+}
+
+/**
+ * The hourly rate the examples use when the user has not set their own: a
+ * modest, round hourly pay in their currency. 15 reads right for RM, $, € or £
+ * but would price a coffee at ¥4.50 or ₫4.50, so currencies worth much less
+ * per unit get their own.
+ */
+const EXAMPLE_HOURLY_RATES: Record<string, number> = {
+  AED: 30,
+  BDT: 200,
+  BRL: 30,
+  CHF: 25,
+  CNY: 30,
+  DKK: 150,
+  HKD: 80,
+  IDR: 50000,
+  INR: 200,
+  JPY: 1500,
+  KRW: 15000,
+  MOP: 80,
+  MXN: 100,
+  NOK: 200,
+  PHP: 100,
+  PKR: 500,
+  PLN: 40,
+  RUB: 400,
+  SEK: 150,
+  THB: 100,
+  TRY: 200,
+  TWD: 250,
+  UAH: 150,
+  VND: 50000,
+  ZAR: 50,
+};
+
+export function exampleHourlyRate(currencyCode: string | null | undefined): number {
+  return EXAMPLE_HOURLY_RATES[(currencyCode ?? '').toUpperCase()] ?? 15;
 }
