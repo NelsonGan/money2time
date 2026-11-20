@@ -683,14 +683,16 @@ const tr = {
       step_a11y: 'Adım {{step}} / {{total}}',
     },
     welcome: {
-      title: 'Fiyatları hayatınızdan saatler olarak görün',
+      title: 'Her fiyat, saat olarak',
       subtitle: 'Money2Time her harcamayı, onun için çalıştığınız süreye çevirir.',
-      hero_a11y: '{{amount}}, {{time}} çalışma demek',
       of_work: 'çalışma',
       get_started: 'Başla',
+      sneakers: 'Spor ayakkabı',
+      phone: 'Yeni telefon',
     },
     preferences: {
       title: 'Temel ayarları yapın',
+      subtitle: 'Bunları daha sonra değiştirebilirsiniz.',
       language_label: 'Dil',
       currency_label: 'Para Birimi',
     },
@@ -735,6 +737,7 @@ const tr = {
     },
     notifications: {
       title: 'Düzende kalın',
+      subtitle: 'Yalnızca birkaç faydalı hatırlatma.',
       enable: 'Bildirimleri Etkinleştir',
       not_now: 'Şimdi Değil',
       daily_title: 'Günlük kontrol',
@@ -768,7 +771,8 @@ const tr = {
         "iCloud'da oturum aç ve Ayarlar'dan iCloud Drive'ı aç — yedeklemen kullanılabilir olur olmaz otomatik olarak başlayacak.",
     },
     source: {
-      title: 'Bizi nereden duydunuz?',
+      title: 'Bizi nasıl buldunuz?',
+      subtitle: 'En uygun olanı seçin.',
       xiaohongshu: 'RedNote',
       reddit: 'Reddit',
       instagram: 'Instagram',

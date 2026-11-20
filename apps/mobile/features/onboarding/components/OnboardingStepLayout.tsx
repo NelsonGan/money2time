@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { Keyboard, ScrollView, type ScrollViewInstance, View } from 'react-native';
 import { GestureDetector } from 'react-native-gesture-handler';
 import { useReanimatedKeyboardAnimation } from 'react-native-keyboard-controller';
-import Animated, { FadeIn, useAnimatedStyle } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import type { MascotName } from '~/components/feedback/Mascot';
@@ -72,9 +72,7 @@ export function OnboardingStepLayout({
           showsVerticalScrollIndicator={false}
         >
           <OnboardingStepHeader title={title} subtitle={subtitle} mascot={mascot} />
-          <Animated.View entering={FadeIn.delay(120).duration(280)} className="mt-6">
-            {children}
-          </Animated.View>
+          <View className="mt-6">{children}</View>
         </ScrollView>
         <Animated.View style={barStyle}>
           <OnboardingActionBar

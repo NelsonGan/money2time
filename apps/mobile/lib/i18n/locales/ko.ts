@@ -682,14 +682,16 @@ const ko = {
       step_a11y: '{{step}} / {{total}} 단계',
     },
     welcome: {
-      title: '가격을 인생의 시간으로 보세요',
+      title: '모든 가격을 시간으로',
       subtitle: 'Money2Time은 모든 지출을 그만큼 일한 시간으로 바꿔 줍니다.',
-      hero_a11y: '{{amount}}은(는) {{time}} 근무',
       of_work: '근무',
       get_started: '시작하기',
+      sneakers: '운동화',
+      phone: '새 휴대폰',
     },
     preferences: {
       title: '기본 설정',
+      subtitle: '나중에 바꿀 수 있어요.',
       language_label: '언어',
       currency_label: '통화',
     },
@@ -734,6 +736,7 @@ const ko = {
     },
     notifications: {
       title: '꾸준히 유지하기',
+      subtitle: '꼭 필요한 알림만 보내요.',
       enable: '알림 허용',
       not_now: '나중에',
       daily_title: '매일 체크인',
@@ -767,7 +770,8 @@ const ko = {
         'iCloud에 로그인하고 설정에서 iCloud Drive를 켜세요 — 사용 가능해지는 즉시 백업이 자동으로 시작됩니다.',
     },
     source: {
-      title: '어디에서 저희를 알게 되셨나요?',
+      title: '어떻게 알게 되셨나요?',
+      subtitle: '가장 가까운 것을 골라 주세요.',
       xiaohongshu: 'RedNote',
       reddit: 'Reddit',
       instagram: 'Instagram',

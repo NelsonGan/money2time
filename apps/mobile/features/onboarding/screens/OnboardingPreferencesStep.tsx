@@ -6,6 +6,7 @@ import { MAJOR_CURRENCIES } from '~/constants/appDefaults';
 import { getThemeColorSwatch, THEME_COLOR_OPTIONS } from '~/constants/designSystem';
 import { useResolvedTheme } from '~/context/ThemeContext';
 import { OnboardingStepLayout } from '~/features/onboarding/components/OnboardingStepLayout';
+import { ONBOARDING_CARD } from '~/features/onboarding/constants/styles';
 import { getLocaleLabel, I18n, orderedLocales, SUPPORTED_LOCALES } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { ThemeColor } from '~/types';
@@ -85,6 +86,7 @@ export function OnboardingPreferencesStep({
   return (
     <OnboardingStepLayout
       title={I18n.t('onboarding.preferences.title')}
+      subtitle={I18n.t('onboarding.preferences.subtitle')}
       mascot="presenting"
       onBack={onBack}
       primaryLabel={I18n.t('common.continue')}
@@ -93,7 +95,7 @@ export function OnboardingPreferencesStep({
         onContinue();
       }}
     >
-      <View className="gap-4 rounded-[22px] border border-border/40 bg-card px-4 py-5">
+      <View className={`gap-4 px-4 py-5 ${ONBOARDING_CARD}`}>
         <SelectField
           label={I18n.t('onboarding.preferences.language_label')}
           value={selectedLocale}

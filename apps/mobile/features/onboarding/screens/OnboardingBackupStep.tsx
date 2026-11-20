@@ -1,10 +1,13 @@
-import { CloudUpload, Lock, RotateCcw } from 'lucide-react-native';
 import React from 'react';
 import { Alert, Platform } from 'react-native';
 
 import { OnboardingFeatureListStep } from '~/features/onboarding/components/OnboardingFeatureListStep';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
+
+const AUTOMATIC = require('~/assets/illustrations/onboarding-backup-auto.webp');
+const PRIVATE = require('~/assets/illustrations/onboarding-backup-private.webp');
+const RESTORE = require('~/assets/illustrations/onboarding-backup-restore.webp');
 
 interface OnboardingBackupStepProps {
   onEnable: () => void;
@@ -20,17 +23,17 @@ export function OnboardingBackupStep({ onEnable, onSkip, onBack }: OnboardingBac
 
   const features = [
     {
-      icon: CloudUpload,
+      image: AUTOMATIC,
       title: I18n.t('onboarding.backup.automatic_title'),
       subtitle: I18n.t('onboarding.backup.automatic_subtitle', { provider }),
     },
     {
-      icon: Lock,
+      image: PRIVATE,
       title: I18n.t('onboarding.backup.private_title'),
       subtitle: I18n.t('onboarding.backup.private_subtitle'),
     },
     {
-      icon: RotateCcw,
+      image: RESTORE,
       title: I18n.t('onboarding.backup.restore_title'),
       subtitle: I18n.t('onboarding.backup.restore_subtitle'),
     },

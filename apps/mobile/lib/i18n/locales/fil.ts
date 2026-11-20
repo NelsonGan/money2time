@@ -684,14 +684,16 @@ const fil = {
       step_a11y: 'Hakbang {{step}} ng {{total}}',
     },
     welcome: {
-      title: 'Tingnan ang presyo bilang oras ng buhay mo',
+      title: 'Bawat presyo, sa oras',
       subtitle: 'Ginagawang oras ng trabaho ng Money2Time ang bawat gastos.',
-      hero_a11y: '{{amount}} ay {{time}} ng trabaho',
       of_work: 'ng trabaho',
       get_started: 'Magsimula',
+      sneakers: 'Sneakers',
+      phone: 'Bagong phone',
     },
     preferences: {
       title: 'I-set ang mga basic',
+      subtitle: 'Puwede mo itong baguhin mamaya.',
       language_label: 'Wika',
       currency_label: 'Pera',
     },
@@ -736,6 +738,7 @@ const fil = {
     },
     notifications: {
       title: 'Manatiling updated',
+      subtitle: 'Ilang kapaki-pakinabang na paalala, iyon lang.',
       enable: 'I-enable ang Mga Notipikasyon',
       not_now: 'Hindi Ngayon',
       daily_title: 'Daily check-in',
@@ -769,7 +772,8 @@ const fil = {
         'Mag-sign in sa iCloud at i-on ang iCloud Drive sa Settings — awtomatikong magsisimula ang iyong backup sa sandaling available na ito.',
     },
     source: {
-      title: 'Saan mo kami nabalitaan?',
+      title: 'Paano mo kami nakilala?',
+      subtitle: 'Piliin ang pinakaangkop.',
       xiaohongshu: 'RedNote',
       reddit: 'Reddit',
       instagram: 'Instagram',

@@ -682,14 +682,16 @@ const th = {
       step_a11y: 'ขั้นตอน {{step}} จาก {{total}}',
     },
     welcome: {
-      title: 'มองราคาเป็นชั่วโมงในชีวิตคุณ',
+      title: 'ทุกราคา เป็นชั่วโมง',
       subtitle: 'Money2Time เปลี่ยนทุกค่าใช้จ่ายเป็นเวลาที่คุณทำงานแลกมา',
-      hero_a11y: '{{amount}} เท่ากับทำงาน {{time}}',
       of_work: 'ของการทำงาน',
       get_started: 'เริ่มต้นใช้งาน',
+      sneakers: 'รองเท้าผ้าใบ',
+      phone: 'โทรศัพท์ใหม่',
     },
     preferences: {
       title: 'ตั้งค่าพื้นฐาน',
+      subtitle: 'เปลี่ยนได้ภายหลัง',
       language_label: 'ภาษา',
       currency_label: 'สกุลเงิน',
     },
@@ -734,6 +736,7 @@ const th = {
     },
     notifications: {
       title: 'ติดตามได้เสมอ',
+      subtitle: 'แจ้งเตือนที่มีประโยชน์เท่านั้น',
       enable: 'เปิดการแจ้งเตือน',
       not_now: 'ไม่ตอนนี้',
       daily_title: 'เช็กอินรายวัน',
@@ -768,6 +771,7 @@ const th = {
     },
     source: {
       title: 'คุณรู้จักเราจากที่ไหน?',
+      subtitle: 'เลือกข้อที่ตรงที่สุด',
       xiaohongshu: 'RedNote',
       reddit: 'Reddit',
       instagram: 'Instagram',

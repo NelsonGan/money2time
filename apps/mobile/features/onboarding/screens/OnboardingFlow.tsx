@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Alert, Platform } from 'react-native';
+import { Alert, Platform, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -187,9 +187,13 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
       <TabletContentContainer style={{ flex: 1 }}>
-        {step !== 'welcome' ? (
+        {/* The welcome page keeps the bar's height empty, so its title sits
+            where every later step's does. */}
+        {step === 'welcome' ? (
+          <View className="h-12" />
+        ) : (
           <OnboardingTopBar step={stepIndex} total={STEP_ORDER.length - 1} onBack={goBack} />
-        ) : null}
+        )}
 
         <Animated.View entering={FadeIn.duration(300)} className="flex-1" key={`step-${step}`}>
           {step === 'welcome' && (

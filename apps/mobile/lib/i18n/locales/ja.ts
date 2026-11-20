@@ -684,14 +684,16 @@ const ja = {
       step_a11y: 'ステップ {{step}} / {{total}}',
     },
     welcome: {
-      title: '値段を、人生の時間で見よう',
+      title: 'すべての値段を、時間で',
       subtitle: 'Money2Timeは、すべての出費をそのために働いた時間に換算します。',
-      hero_a11y: '{{amount}}は{{time}}の労働',
       of_work: 'の労働',
       get_started: 'はじめる',
+      sneakers: 'スニーカー',
+      phone: '新しいスマホ',
     },
     preferences: {
       title: '基本設定',
+      subtitle: 'あとで変更できます。',
       language_label: '言語',
       currency_label: '通貨',
     },
@@ -736,6 +738,7 @@ const ja = {
     },
     notifications: {
       title: 'ペースを保つ',
+      subtitle: '役立つお知らせだけ届けます。',
       enable: '通知を有効にする',
       not_now: '後で',
       daily_title: 'デイリーチェックイン',
@@ -769,7 +772,8 @@ const ja = {
         'iCloudにサインインし、設定でiCloud Driveをオンにしてください。利用可能になり次第、バックアップが自動的に開始されます。',
     },
     source: {
-      title: 'どこで私たちを知りましたか？',
+      title: 'どこで知りましたか？',
+      subtitle: 'いちばん近いものを選んでください。',
       xiaohongshu: 'RedNote',
       reddit: 'Reddit',
       instagram: 'Instagram',

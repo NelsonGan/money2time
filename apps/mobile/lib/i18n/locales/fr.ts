@@ -685,14 +685,16 @@ const fr = {
       step_a11y: 'Étape {{step}} sur {{total}}',
     },
     welcome: {
-      title: 'Voyez les prix en heures de votre vie',
+      title: 'Chaque prix, en heures',
       subtitle: 'Money2Time convertit chaque dépense en temps de travail.',
-      hero_a11y: "{{amount}}, c'est {{time}} de travail",
       of_work: 'de travail',
       get_started: 'Commencer',
+      sneakers: 'Baskets',
+      phone: 'Nouveau téléphone',
     },
     preferences: {
       title: 'Les bases',
+      subtitle: 'Vous pourrez les modifier plus tard.',
       language_label: 'Langue',
       currency_label: 'Devise',
     },
@@ -737,6 +739,7 @@ const fr = {
     },
     notifications: {
       title: 'Restez sur la bonne voie',
+      subtitle: 'Quelques rappels utiles, rien de plus.',
       enable: 'Activer les notifications',
       not_now: 'Pas maintenant',
       daily_title: 'Check-in quotidien',
@@ -770,7 +773,8 @@ const fr = {
         "Connectez-vous à iCloud et activez iCloud Drive dans les Réglages — votre sauvegarde démarrera automatiquement dès qu'elle sera disponible.",
     },
     source: {
-      title: 'Où avez-vous entendu parler de nous ?',
+      title: 'Comment nous avez-vous connus ?',
+      subtitle: 'Choisissez ce qui correspond le mieux.',
       xiaohongshu: 'RedNote',
       reddit: 'Reddit',
       instagram: 'Instagram',

@@ -656,14 +656,16 @@ const zhHant = {
       step_a11y: '第 {{step}} 步，共 {{total}} 步',
     },
     welcome: {
-      title: '把價格看成你的人生時間',
+      title: '每個價格，都是工作時數',
       subtitle: 'Money2Time 將每筆支出換算成你為它工作的時間。',
-      hero_a11y: '{{amount}} 是 {{time}} 的工作',
       of_work: '的工作',
       get_started: '開始使用',
+      sneakers: '運動鞋',
+      phone: '新手機',
     },
     preferences: {
       title: '設定基礎選項',
+      subtitle: '之後可以隨時修改。',
       language_label: '語言',
       currency_label: '貨幣',
     },
@@ -708,6 +710,7 @@ const zhHant = {
     },
     notifications: {
       title: '保持節奏',
+      subtitle: '只發有用的提醒。',
       enable: '開啟通知',
       not_now: '暫不開啟',
       daily_title: '每日打卡',
@@ -741,7 +744,8 @@ const zhHant = {
         '登入 iCloud 並在“設定”中開啟 iCloud 雲盤。服務可用後，備份將自動開始。',
     },
     source: {
-      title: '你是從哪裡瞭解到我們的？',
+      title: '你是怎麼知道我們的？',
+      subtitle: '選最貼近的一項。',
       xiaohongshu: '小紅書',
       reddit: 'Reddit',
       instagram: 'Instagram',

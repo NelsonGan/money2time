@@ -4,6 +4,7 @@ import Animated, { FadeIn, FadeInDown, FadeOut, LinearTransition } from 'react-n
 
 import { CategoryEmoji, Text, TimeValueInline } from '~/components/ui';
 import { OnboardingStepLayout } from '~/features/onboarding/components/OnboardingStepLayout';
+import { ONBOARDING_CARD, ONBOARDING_CARD_SELECTED } from '~/features/onboarding/constants/styles';
 import { sampleAmountForHours } from '~/features/onboarding/lib/onboardingMath';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -87,8 +88,8 @@ export function OnboardingTryItStep({
               key={sample.id}
               onPress={() => toggle(sample.id)}
               className={cn(
-                'flex-row items-center gap-2 rounded-full border px-3 py-2',
-                selected ? 'border-primary/60 bg-primary/10' : 'border-border/40 bg-card',
+                'flex-row items-center gap-2 px-3 py-2',
+                selected ? ONBOARDING_CARD_SELECTED : ONBOARDING_CARD,
               )}
               accessibilityRole="button"
               accessibilityState={{ selected }}
@@ -104,7 +105,7 @@ export function OnboardingTryItStep({
 
       <Animated.View
         layout={LinearTransition.duration(220)}
-        className="mt-5 rounded-[22px] border border-border/40 bg-card px-4 pb-2 pt-4"
+        className={`mt-5 px-4 pb-2 pt-4 ${ONBOARDING_CARD}`}
       >
         <Text variant="bodyStrong" className="text-foreground">
           {I18n.t('onboarding.try_it.today')}

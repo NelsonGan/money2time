@@ -30,22 +30,27 @@ export function OnboardingActionBar({
 }: OnboardingActionBarProps) {
   return (
     <SafeAreaView edges={['bottom']} className="bg-background">
-      <View className="px-5 pt-3 pb-2">
+      <View className="px-5 pt-3">
         <Button haptic="none" disabled={primaryDisabled} onPress={onPrimary}>
           <Text>{primaryLabel}</Text>
         </Button>
-        {secondary ? (
-          <Pressable
-            onPress={secondary.onPress}
-            className="mt-1 items-center py-2.5"
-            accessibilityRole="button"
-            accessibilityLabel={secondary.label}
-          >
-            <Text variant="caption" tone="muted">
-              {secondary.label}
-            </Text>
-          </Pressable>
-        ) : null}
+        {/* The link row is always there, empty when a step has no link, so the
+            button sits at the same height on every step. */}
+        <View className="mt-1 h-10 items-center justify-center">
+          {secondary ? (
+            <Pressable
+              onPress={secondary.onPress}
+              hitSlop={8}
+              className="px-4 py-2"
+              accessibilityRole="button"
+              accessibilityLabel={secondary.label}
+            >
+              <Text variant="caption" tone="muted">
+                {secondary.label}
+              </Text>
+            </Pressable>
+          ) : null}
+        </View>
       </View>
     </SafeAreaView>
   );

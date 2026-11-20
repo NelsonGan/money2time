@@ -5,6 +5,7 @@ import { Pressable, TextInput, View } from 'react-native';
 import { Text } from '~/components/ui';
 import { SINGLE_LINE_TEXT_INPUT_STYLE } from '~/components/ui/textInputStyles';
 import { OnboardingStepLayout } from '~/features/onboarding/components/OnboardingStepLayout';
+import { ONBOARDING_CARD, ONBOARDING_CARD_SELECTED } from '~/features/onboarding/constants/styles';
 import { sanitizeAmountInput } from '~/features/onboarding/lib/onboardingMath';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -91,7 +92,7 @@ export function OnboardingIncomeStep({
       }}
     >
       <View className="gap-3">
-        <View className="flex-row rounded-full border border-border/40 bg-card p-1">
+        <View className={`flex-row p-1 ${ONBOARDING_CARD}`}>
           {WAGE_TYPES.map((type) => {
             const active = config.wageType === type;
             return (
@@ -103,7 +104,7 @@ export function OnboardingIncomeStep({
                   onChange({ ...config, wageType: type });
                 }}
                 className={cn(
-                  'h-10 flex-1 items-center justify-center rounded-full',
+                  'h-10 flex-1 items-center justify-center rounded-[18px]',
                   active && 'bg-primary',
                 )}
                 accessibilityRole="tab"
@@ -123,7 +124,7 @@ export function OnboardingIncomeStep({
           })}
         </View>
 
-        <View className="rounded-[22px] border border-border/40 bg-card px-4 pb-3 pt-4">
+        <View className={`px-4 pb-3 pt-4 ${ONBOARDING_CARD}`}>
           <Text variant="caption" tone="muted">
             {I18n.t('onboarding.income.pay_label')}
           </Text>
@@ -155,7 +156,7 @@ export function OnboardingIncomeStep({
         </View>
 
         {showHours ? (
-          <View className="flex-row items-center rounded-[22px] border border-border/40 bg-card px-4 py-3">
+          <View className={`flex-row items-center px-4 py-3 ${ONBOARDING_CARD}`}>
             <Text variant="bodyStrong" className="flex-1 text-foreground">
               {I18n.t('onboarding.income.hours_label')}
             </Text>
@@ -177,7 +178,7 @@ export function OnboardingIncomeStep({
           </View>
         ) : null}
 
-        <View className="rounded-[22px] border border-primary/25 bg-primary/10 px-4 py-4">
+        <View className={`px-4 py-4 ${ONBOARDING_CARD_SELECTED}`}>
           <Text variant="caption" tone="primary">
             {I18n.t('onboarding.income.rate_label')}
           </Text>

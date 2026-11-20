@@ -684,15 +684,17 @@ const id = {
       step_a11y: 'Langkah {{step}} dari {{total}}',
     },
     welcome: {
-      title: 'Lihat harga sebagai jam hidupmu',
+      title: 'Setiap harga, dalam jam',
       subtitle:
         'Money2Time mengubah setiap pengeluaran jadi waktu kerja yang kamu habiskan untuknya.',
-      hero_a11y: '{{amount}} sama dengan {{time}} kerja',
       of_work: 'kerja',
       get_started: 'Mulai',
+      sneakers: 'Sepatu sneakers',
+      phone: 'Ponsel baru',
     },
     preferences: {
       title: 'Atur dasar-dasarnya',
+      subtitle: 'Kamu bisa mengubahnya nanti.',
       language_label: 'Bahasa',
       currency_label: 'Mata Uang',
     },
@@ -737,6 +739,7 @@ const id = {
     },
     notifications: {
       title: 'Tetap on track',
+      subtitle: 'Beberapa pengingat yang berguna, itu saja.',
       enable: 'Aktifkan Notifikasi',
       not_now: 'Nanti Saja',
       daily_title: 'Check-in harian',
@@ -770,7 +773,8 @@ const id = {
         'Masuk ke iCloud dan aktifkan iCloud Drive di Pengaturan — pencadangan Anda akan dimulai otomatis begitu tersedia.',
     },
     source: {
-      title: 'Dari mana kamu tahu tentang kami?',
+      title: 'Dari mana kamu tahu kami?',
+      subtitle: 'Pilih yang paling sesuai.',
       xiaohongshu: 'RedNote',
       reddit: 'Reddit',
       instagram: 'Instagram',

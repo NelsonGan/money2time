@@ -683,14 +683,16 @@ const vi = {
       step_a11y: 'Bước {{step}} / {{total}}',
     },
     welcome: {
-      title: 'Xem giá cả bằng giờ trong đời bạn',
+      title: 'Mọi mức giá, tính bằng giờ',
       subtitle: 'Money2Time đổi mỗi khoản chi thành thời gian bạn đã làm việc để có nó.',
-      hero_a11y: '{{amount}} là {{time}} làm việc',
       of_work: 'làm việc',
       get_started: 'Bắt đầu',
+      sneakers: 'Giày sneaker',
+      phone: 'Điện thoại mới',
     },
     preferences: {
       title: 'Thiết lập cơ bản',
+      subtitle: 'Bạn có thể đổi sau.',
       language_label: 'Ngôn ngữ',
       currency_label: 'Tiền tệ',
     },
@@ -735,6 +737,7 @@ const vi = {
     },
     notifications: {
       title: 'Duy trì thói quen',
+      subtitle: 'Chỉ vài lời nhắc hữu ích.',
       enable: 'Bật thông báo',
       not_now: 'Để sau',
       daily_title: 'Nhắc hàng ngày',
@@ -768,7 +771,8 @@ const vi = {
         'Đăng nhập iCloud và bật iCloud Drive trong Cài đặt — bản sao lưu của bạn sẽ tự động bắt đầu ngay khi khả dụng.',
     },
     source: {
-      title: 'Bạn biết đến chúng tôi từ đâu?',
+      title: 'Bạn biết đến chúng tôi qua đâu?',
+      subtitle: 'Chọn mục phù hợp nhất.',
       xiaohongshu: 'RedNote',
       reddit: 'Reddit',
       instagram: 'Instagram',

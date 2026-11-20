@@ -684,14 +684,16 @@ const it = {
       step_a11y: 'Passo {{step}} di {{total}}',
     },
     welcome: {
-      title: 'Guarda i prezzi come ore della tua vita',
+      title: 'Ogni prezzo, in ore',
       subtitle: 'Money2Time trasforma ogni spesa nel tempo che hai lavorato per pagarla.',
-      hero_a11y: '{{amount}} sono {{time}} di lavoro',
       of_work: 'di lavoro',
       get_started: 'Inizia',
+      sneakers: 'Sneaker',
+      phone: 'Telefono nuovo',
     },
     preferences: {
       title: 'Impostazioni di base',
+      subtitle: 'Puoi cambiarle più tardi.',
       language_label: 'Lingua',
       currency_label: 'Valuta',
     },
@@ -736,6 +738,7 @@ const it = {
     },
     notifications: {
       title: 'Resta in carreggiata',
+      subtitle: 'Qualche promemoria utile, niente di più.',
       enable: 'Attiva notifiche',
       not_now: 'Non ora',
       daily_title: 'Check-in giornaliero',
@@ -769,7 +772,8 @@ const it = {
         'Accedi a iCloud e attiva iCloud Drive nelle Impostazioni: il backup partirà automaticamente non appena sarà disponibile.',
     },
     source: {
-      title: 'Dove hai sentito parlare di noi?',
+      title: 'Come ci hai trovato?',
+      subtitle: 'Scegli quella più adatta.',
       xiaohongshu: 'RedNote',
       reddit: 'Reddit',
       instagram: 'Instagram',

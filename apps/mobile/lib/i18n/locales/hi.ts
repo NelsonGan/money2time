@@ -683,14 +683,16 @@ const hi = {
       step_a11y: 'चरण {{step}} / {{total}}',
     },
     welcome: {
-      title: 'कीमतों को अपनी ज़िंदगी के घंटों में देखें',
+      title: 'हर कीमत, घंटों में',
       subtitle: 'Money2Time हर खर्च को उस समय में बदलता है जो आपने उसके लिए काम किया।',
-      hero_a11y: '{{amount}} यानी {{time}} का काम',
       of_work: 'काम',
       get_started: 'शुरू करें',
+      sneakers: 'स्नीकर्स',
+      phone: 'नया फ़ोन',
     },
     preferences: {
       title: 'बुनियादी सेटिंग्स करें',
+      subtitle: 'आप इन्हें बाद में बदल सकते हैं।',
       language_label: 'भाषा',
       currency_label: 'मुद्रा',
     },
@@ -735,6 +737,7 @@ const hi = {
     },
     notifications: {
       title: 'ट्रैक पर रहें',
+      subtitle: 'बस कुछ काम के रिमाइंडर।',
       enable: 'नोटिफिकेशन चालू करें',
       not_now: 'अभी नहीं',
       daily_title: 'दैनिक चेक-इन',
@@ -768,7 +771,8 @@ const hi = {
         'iCloud में साइन इन करें और सेटिंग्स में iCloud Drive चालू करें — उपलब्ध होते ही आपका बैकअप अपने-आप शुरू हो जाएगा।',
     },
     source: {
-      title: 'आपने हमारे बारे में कहाँ सुना?',
+      title: 'आपने हमें कैसे पाया?',
+      subtitle: 'जो सबसे सही हो, उसे चुनें।',
       xiaohongshu: 'RedNote',
       reddit: 'Reddit',
       instagram: 'Instagram',

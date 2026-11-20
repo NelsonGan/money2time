@@ -683,14 +683,16 @@ const ru = {
       step_a11y: 'Шаг {{step}} из {{total}}',
     },
     welcome: {
-      title: 'Смотрите на цены как на часы жизни',
+      title: 'Каждая цена — в часах',
       subtitle: 'Money2Time превращает каждую трату во время, которое вы на неё работали.',
-      hero_a11y: '{{amount}} — это {{time}} работы',
       of_work: 'работы',
       get_started: 'Начать',
+      sneakers: 'Кроссовки',
+      phone: 'Новый телефон',
     },
     preferences: {
       title: 'Основные настройки',
+      subtitle: 'Это можно изменить позже.',
       language_label: 'Язык',
       currency_label: 'Валюта',
     },
@@ -735,6 +737,7 @@ const ru = {
     },
     notifications: {
       title: 'Оставайтесь в ритме',
+      subtitle: 'Только полезные напоминания.',
       enable: 'Включить уведомления',
       not_now: 'Не сейчас',
       daily_title: 'Ежедневная отметка',
@@ -768,7 +771,8 @@ const ru = {
         'Войдите в iCloud и включите iCloud Drive в Настройках — резервное копирование начнётся автоматически, как только станет доступно.',
     },
     source: {
-      title: 'Откуда вы о нас узнали?',
+      title: 'Как вы о нас узнали?',
+      subtitle: 'Выберите самый подходящий вариант.',
       xiaohongshu: 'RedNote',
       reddit: 'Reddit',
       instagram: 'Instagram',

@@ -656,14 +656,16 @@ const zh = {
       step_a11y: '第 {{step}} 步，共 {{total}} 步',
     },
     welcome: {
-      title: '把价格看成你的生命时间',
+      title: '每个价格，都是工作时长',
       subtitle: 'Money2Time 把每笔支出换算成你为它工作的时间。',
-      hero_a11y: '{{amount}} 是 {{time}} 的工作',
       of_work: '的工作',
       get_started: '开始使用',
+      sneakers: '运动鞋',
+      phone: '新手机',
     },
     preferences: {
       title: '设置基础选项',
+      subtitle: '之后可以随时修改。',
       language_label: '语言',
       currency_label: '货币',
     },
@@ -708,6 +710,7 @@ const zh = {
     },
     notifications: {
       title: '保持节奏',
+      subtitle: '只发有用的提醒。',
       enable: '开启通知',
       not_now: '暂不开启',
       daily_title: '每日打卡',
@@ -741,7 +744,8 @@ const zh = {
         '登录 iCloud 并在“设置”中开启 iCloud 云盘 — 一旦可用，备份将自动开始。',
     },
     source: {
-      title: '你是从哪里了解到我们的？',
+      title: '你是怎么知道我们的？',
+      subtitle: '选最贴近的一项。',
       xiaohongshu: '小红书',
       reddit: 'Reddit',
       instagram: 'Instagram',

@@ -684,14 +684,16 @@ const uk = {
       step_a11y: 'Крок {{step}} з {{total}}',
     },
     welcome: {
-      title: 'Дивіться на ціни як на години життя',
+      title: 'Кожна ціна — в годинах',
       subtitle: 'Money2Time перетворює кожну витрату на час, який ви на неї працювали.',
-      hero_a11y: '{{amount}} — це {{time}} роботи',
       of_work: 'роботи',
       get_started: 'Почати',
+      sneakers: 'Кросівки',
+      phone: 'Новий телефон',
     },
     preferences: {
       title: 'Базові налаштування',
+      subtitle: 'Це можна змінити пізніше.',
       language_label: 'Мова',
       currency_label: 'Валюта',
     },
@@ -736,6 +738,7 @@ const uk = {
     },
     notifications: {
       title: 'Тримайте темп',
+      subtitle: 'Лише корисні нагадування.',
       enable: 'Увімкнути сповіщення',
       not_now: 'Не зараз',
       daily_title: 'Щоденний чекін',
@@ -769,7 +772,8 @@ const uk = {
         'Увійдіть в iCloud і ввімкніть iCloud Drive у Налаштуваннях — резервне копіювання розпочнеться автоматично, щойно стане доступним.',
     },
     source: {
-      title: 'Звідки ви про нас дізналися?',
+      title: 'Як ви про нас дізналися?',
+      subtitle: 'Виберіть найбільш відповідний варіант.',
       xiaohongshu: 'RedNote',
       reddit: 'Reddit',
       instagram: 'Instagram',

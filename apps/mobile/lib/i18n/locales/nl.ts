@@ -684,14 +684,16 @@ const nl = {
       step_a11y: 'Stap {{step}} van {{total}}',
     },
     welcome: {
-      title: 'Zie prijzen als uren van je leven',
+      title: 'Elke prijs, in uren',
       subtitle: 'Money2Time zet elke uitgave om in de tijd die je ervoor werkte.',
-      hero_a11y: '{{amount}} is {{time}} werk',
       of_work: 'werk',
       get_started: 'Aan de slag',
+      sneakers: 'Sneakers',
+      phone: 'Nieuwe telefoon',
     },
     preferences: {
       title: 'Stel de basis in',
+      subtitle: 'Je kunt dit later wijzigen.',
       language_label: 'Taal',
       currency_label: 'Valuta',
     },
@@ -736,6 +738,7 @@ const nl = {
     },
     notifications: {
       title: 'Blijf op koers',
+      subtitle: 'Een paar handige herinneringen, meer niet.',
       enable: 'Meldingen inschakelen',
       not_now: 'Niet nu',
       daily_title: 'Dagelijkse check-in',
@@ -769,7 +772,8 @@ const nl = {
         'Log in bij iCloud en schakel iCloud Drive in bij Instellingen — je back-up start automatisch zodra deze beschikbaar is.',
     },
     source: {
-      title: 'Waar heb je over ons gehoord?',
+      title: 'Hoe heb je ons gevonden?',
+      subtitle: 'Kies wat het best past.',
       xiaohongshu: 'RedNote',
       reddit: 'Reddit',
       instagram: 'Instagram',

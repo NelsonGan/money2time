@@ -1,21 +1,19 @@
 import { Image, type ImageSource } from 'expo-image';
-import type { LucideIcon } from 'lucide-react-native';
 import React from 'react';
 import { View } from 'react-native';
 
 import type { MascotName } from '~/components/feedback/Mascot';
 import { Text } from '~/components/ui';
-import { useThemeColors } from '~/hooks/useThemeColors';
 
+import { ONBOARDING_CARD } from '../constants/styles';
 import type { OnboardingSecondaryAction } from './OnboardingActionBar';
 import { OnboardingStepLayout } from './OnboardingStepLayout';
 
 export interface OnboardingFeature {
   title: string;
   subtitle: string;
-  /** A line icon in a tinted tile, or an illustration in its place. */
-  icon?: LucideIcon;
-  image?: ImageSource;
+  /** A crayon illustration in the mascot's style. */
+  image: ImageSource;
 }
 
 interface OnboardingFeatureListStepProps {
@@ -31,7 +29,7 @@ interface OnboardingFeatureListStepProps {
 
 /**
  * A step that pitches something as a short list of cards (automations, backup,
- * notifications), each a picture or icon, a title and one line.
+ * notifications), each a crayon picture, a title and one line.
  */
 export function OnboardingFeatureListStep({
   title,
@@ -43,8 +41,6 @@ export function OnboardingFeatureListStep({
   onPrimary,
   secondary,
 }: OnboardingFeatureListStepProps) {
-  const themeColors = useThemeColors();
-
   return (
     <OnboardingStepLayout
       title={title}
@@ -59,20 +55,14 @@ export function OnboardingFeatureListStep({
         {features.map((feature) => (
           <View
             key={feature.title}
-            className="flex-row items-center gap-4 rounded-[22px] border border-border/40 bg-card px-4 py-4"
+            className={`flex-row items-center gap-4 px-4 py-3 ${ONBOARDING_CARD}`}
           >
-            {feature.image ? (
-              <Image
-                source={feature.image}
-                style={{ width: 64, height: 64 }}
-                contentFit="contain"
-                accessible={false}
-              />
-            ) : feature.icon ? (
-              <View className="h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
-                <feature.icon size={22} color={themeColors.primary} />
-              </View>
-            ) : null}
+            <Image
+              source={feature.image}
+              style={{ width: 56, height: 56 }}
+              contentFit="contain"
+              accessible={false}
+            />
             <View className="flex-1">
               <Text variant="bodyStrong" className="text-foreground">
                 {feature.title}

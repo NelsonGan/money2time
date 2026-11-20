@@ -684,14 +684,16 @@ const nb = {
       step_a11y: 'Steg {{step}} av {{total}}',
     },
     welcome: {
-      title: 'Se priser som timer av livet ditt',
+      title: 'Hver pris, i timer',
       subtitle: 'Money2Time gjør hver utgift om til tiden du jobbet for den.',
-      hero_a11y: '{{amount}} er {{time}} arbeid',
       of_work: 'arbeid',
       get_started: 'Kom i gang',
+      sneakers: 'Joggesko',
+      phone: 'Ny telefon',
     },
     preferences: {
       title: 'Grunnleggende innstillinger',
+      subtitle: 'Du kan endre dette senere.',
       language_label: 'Språk',
       currency_label: 'Valuta',
     },
@@ -736,6 +738,7 @@ const nb = {
     },
     notifications: {
       title: 'Hold deg på sporet',
+      subtitle: 'Noen nyttige påminnelser, ikke mer.',
       enable: 'Aktiver varsler',
       not_now: 'Ikke nå',
       daily_title: 'Daglig sjekk',
@@ -769,7 +772,8 @@ const nb = {
         'Logg inn på iCloud og slå på iCloud Drive i Innstillinger — sikkerhetskopien starter automatisk så snart den er tilgjengelig.',
     },
     source: {
-      title: 'Hvor hørte du om oss?',
+      title: 'Hvordan fant du oss?',
+      subtitle: 'Velg det som passer best.',
       xiaohongshu: 'RedNote',
       reddit: 'Reddit',
       instagram: 'Instagram',

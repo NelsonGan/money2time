@@ -7,6 +7,7 @@ import { Text } from '~/components/ui';
 import { BRAND_LOGOS, type BrandLogoKey } from '~/constants/brandLogos';
 import { spacing } from '~/constants/designSystem';
 import { OnboardingStepLayout } from '~/features/onboarding/components/OnboardingStepLayout';
+import { ONBOARDING_CARD, ONBOARDING_CARD_SELECTED } from '~/features/onboarding/constants/styles';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -82,8 +83,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    borderRadius: 18,
-    borderWidth: 1,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
   },
@@ -117,6 +116,7 @@ export function OnboardingSourceStep({
   return (
     <OnboardingStepLayout
       title={I18n.t('onboarding.source.title')}
+      subtitle={I18n.t('onboarding.source.subtitle')}
       mascot="searching"
       onBack={onBack}
       primaryLabel={I18n.t('common.continue')}
@@ -139,13 +139,8 @@ export function OnboardingSourceStep({
                 void triggerHaptic('selection');
                 onSelect(option.id);
               }}
-              style={[
-                styles.option,
-                {
-                  backgroundColor: isSelected ? `${themeColors.primary}0A` : themeColors.card,
-                  borderColor: isSelected ? `${themeColors.primary}66` : `${themeColors.border}55`,
-                },
-              ]}
+              style={styles.option}
+              className={isSelected ? ONBOARDING_CARD_SELECTED : ONBOARDING_CARD}
             >
               {option.logo ? (
                 <Image

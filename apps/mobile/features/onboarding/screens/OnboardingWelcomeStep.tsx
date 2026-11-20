@@ -1,24 +1,24 @@
-import { Image } from 'expo-image';
-import { ArrowDown } from 'lucide-react-native';
 import React from 'react';
-import { useWindowDimensions, View } from 'react-native';
-import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
+import { View } from 'react-native';
 
-import { Mascot } from '~/components/feedback/Mascot';
-import { Text } from '~/components/ui';
-import { getThemeWordmarkPalette } from '~/constants/designSystem';
-import { useResolvedTheme, useThemeColor } from '~/context/ThemeContext';
-import { OnboardingActionBar } from '~/features/onboarding/components/OnboardingActionBar';
+import { CategoryEmoji, Text, TimeValueInline } from '~/components/ui';
+import { OnboardingStepLayout } from '~/features/onboarding/components/OnboardingStepLayout';
+import { ONBOARDING_CARD } from '~/features/onboarding/constants/styles';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
+import { cn } from '~/utils';
 import { formatCurrency, formatHours } from '~/utils/formatters';
 
-const SNEAKER = require('~/assets/illustrations/onboarding-sneaker.webp');
-
-/** The example on the first page: a 45 sneaker at 15 an hour is 3 hours. */
-const EXAMPLE_PRICE = 45;
+/** The examples on the first page are priced at this hourly rate. */
 const EXAMPLE_RATE = 15;
+
+/** Small to large, so the hours grow down the card. */
+const EXAMPLES = [
+  { key: 'onboarding.try_it.coffee', icon: 'coffee', amount: 4.5 },
+  { key: 'onboarding.welcome.sneakers', icon: 'sneaker', amount: 45 },
+  { key: 'onboarding.welcome.phone', icon: 'smartphone', amount: 1200 },
+] as const;
 
 interface OnboardingWelcomeStepProps {
   currencySymbol: string;
@@ -26,96 +26,61 @@ interface OnboardingWelcomeStepProps {
 }
 
 /**
- * The first page says what the app is in one picture: a price, and the hours
- * of work it costs.
+ * The first page says what the app is: every price, also shown as the hours
+ * of work it costs. It uses the same frame as every other step.
  */
 export function OnboardingWelcomeStep({
   currencySymbol,
   onGetStarted,
 }: OnboardingWelcomeStepProps) {
   const themeColors = useThemeColors();
-  const resolvedTheme = useResolvedTheme();
-  const wordmark = getThemeWordmarkPalette(useThemeColor(), resolvedTheme);
-  const { height } = useWindowDimensions();
-  const compact = height < 760;
-
-  const price = formatCurrency(EXAMPLE_PRICE, currencySymbol);
-  const time = formatHours(EXAMPLE_PRICE / EXAMPLE_RATE);
-  const mascotSize = compact ? 92 : 116;
-  const sneakerSize = compact ? 120 : 160;
 
   return (
-    <View className="flex-1">
-      <View className="flex-1 px-5">
-        {/* `app.name` is the same brand string in every locale. */}
-        <Text
-          variant="subheading"
-          className="pt-3"
-          accessibilityRole="header"
-          accessibilityLabel={I18n.t('app.name')}
-        >
-          <Text variant="subheading" style={{ color: wordmark.money }}>
-            Money
-          </Text>
-          <Text variant="subheading" style={{ color: wordmark.two }}>
-            2
-          </Text>
-          <Text variant="subheading" style={{ color: wordmark.time }}>
-            Time
-          </Text>
-        </Text>
-
-        <View className="flex-1 justify-center">
-          <Animated.View
-            entering={FadeIn.duration(320)}
-            style={{ paddingTop: mascotSize * 0.55 }}
-            accessible
-            accessibilityRole="image"
-            accessibilityLabel={I18n.t('onboarding.welcome.hero_a11y', { amount: price, time })}
+    <OnboardingStepLayout
+      title={I18n.t('onboarding.welcome.title')}
+      subtitle={I18n.t('onboarding.welcome.subtitle')}
+      mascot="happy"
+      primaryLabel={I18n.t('onboarding.welcome.get_started')}
+      onPrimary={() => {
+        void triggerHaptic('medium');
+        onGetStarted();
+      }}
+    >
+      <View className={`px-4 py-1 ${ONBOARDING_CARD}`}>
+        {EXAMPLES.map((example, index) => (
+          <View
+            key={example.key}
+            className={cn(
+              'flex-row items-center gap-3 py-3',
+              index < EXAMPLES.length - 1 && 'border-b border-border/25',
+            )}
           >
-            <View className="items-center rounded-[28px] border border-border/40 bg-card px-6 pb-6 pt-8">
-              <Image
-                source={SNEAKER}
-                style={{ width: sneakerSize, height: sneakerSize * 0.8 }}
-                contentFit="contain"
-                accessible={false}
-              />
-              <Text variant="display" className="mt-2 text-foreground">
-                {price}
+            <View className="h-10 w-10 items-center justify-center rounded-2xl bg-secondary/60">
+              <CategoryEmoji icon={example.icon} size={26} />
+            </View>
+            <Text variant="bodyStrong" className="flex-1 text-foreground">
+              {I18n.t(example.key)}
+            </Text>
+            <View className="items-end">
+              <Text variant="bodyStrong" className="text-foreground">
+                {formatCurrency(example.amount, currencySymbol)}
               </Text>
-              <Animated.View
-                entering={FadeInDown.delay(350).duration(300)}
-                className="items-center"
-              >
-                <ArrowDown size={22} color={themeColors.primary} strokeWidth={2.4} />
-                <Text variant="display" tone="primary" className="mt-1 text-center">
-                  {time} {I18n.t('onboarding.welcome.of_work')}
-                </Text>
-              </Animated.View>
+              <TimeValueInline
+                value={formatHours(example.amount / EXAMPLE_RATE)}
+                variant="bodyStrong"
+                textClassName="text-primary"
+                iconColor={themeColors.primary}
+                iconSize={13}
+              />
             </View>
-            <View className="absolute left-2 top-0">
-              <Mascot size={mascotSize} name="happy" animate={false} />
-            </View>
-          </Animated.View>
-        </View>
-
-        <View className={compact ? 'pb-2 pt-4' : 'pb-4 pt-8'}>
-          <Text variant="title" className="text-foreground">
-            {I18n.t('onboarding.welcome.title')}
-          </Text>
-          <Text variant="friendly" tone="muted" className="mt-2">
-            {I18n.t('onboarding.welcome.subtitle')}
-          </Text>
-        </View>
+          </View>
+        ))}
       </View>
-
-      <OnboardingActionBar
-        onPrimary={() => {
-          void triggerHaptic('medium');
-          onGetStarted();
-        }}
-        primaryLabel={I18n.t('onboarding.welcome.get_started')}
-      />
-    </View>
+      <Text variant="caption" tone="muted" className="mt-3 text-center">
+        {I18n.t('onboarding.try_it.example_rate', {
+          rate: formatCurrency(EXAMPLE_RATE, currencySymbol),
+        })}
+      </Text>
+    </OnboardingStepLayout>
   );
 }

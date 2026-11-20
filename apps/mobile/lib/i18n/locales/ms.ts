@@ -685,14 +685,16 @@ const ms = {
       step_a11y: 'Langkah {{step}} daripada {{total}}',
     },
     welcome: {
-      title: 'Lihat harga sebagai jam hidup anda',
+      title: 'Setiap harga, dalam jam',
       subtitle: 'Money2Time menukar setiap perbelanjaan kepada masa yang anda bekerja untuknya.',
-      hero_a11y: '{{amount}} ialah {{time}} kerja',
       of_work: 'kerja',
       get_started: 'Mulakan',
+      sneakers: 'Kasut sneakers',
+      phone: 'Telefon baharu',
     },
     preferences: {
       title: 'Tetapkan asas',
+      subtitle: 'Anda boleh ubah kemudian.',
       language_label: 'Bahasa',
       currency_label: 'Mata wang',
     },
@@ -737,6 +739,7 @@ const ms = {
     },
     notifications: {
       title: 'Kekal berjejak',
+      subtitle: 'Beberapa peringatan berguna, itu sahaja.',
       enable: 'Aktifkan Pemberitahuan',
       not_now: 'Bukan Sekarang',
       daily_title: 'Daftar masuk harian',
@@ -770,7 +773,8 @@ const ms = {
         'Log masuk ke iCloud dan hidupkan iCloud Drive dalam Tetapan — sandaran anda akan bermula secara automatik sebaik sahaja ia tersedia.',
     },
     source: {
-      title: 'Di mana anda mendengar tentang kami?',
+      title: 'Bagaimana anda kenal kami?',
+      subtitle: 'Pilih yang paling sesuai.',
       xiaohongshu: 'RedNote',
       reddit: 'Reddit',
       instagram: 'Instagram',

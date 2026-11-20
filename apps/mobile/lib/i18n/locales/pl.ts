@@ -684,14 +684,16 @@ const pl = {
       step_a11y: 'Krok {{step}} z {{total}}',
     },
     welcome: {
-      title: 'Zobacz ceny jako godziny swojego życia',
+      title: 'Każda cena w godzinach',
       subtitle: 'Money2Time zamienia każdy wydatek na czas, który na niego przepracowałeś.',
-      hero_a11y: '{{amount}} to {{time}} pracy',
       of_work: 'pracy',
       get_started: 'Zaczynamy',
+      sneakers: 'Sneakersy',
+      phone: 'Nowy telefon',
     },
     preferences: {
       title: 'Ustaw podstawy',
+      subtitle: 'Możesz to zmienić później.',
       language_label: 'Język',
       currency_label: 'Waluta',
     },
@@ -736,6 +738,7 @@ const pl = {
     },
     notifications: {
       title: 'Bądź na bieżąco',
+      subtitle: 'Kilka przydatnych przypomnień, nic więcej.',
       enable: 'Włącz powiadomienia',
       not_now: 'Nie teraz',
       daily_title: 'Codzienny meldunek',
@@ -770,6 +773,7 @@ const pl = {
     },
     source: {
       title: 'Skąd o nas wiesz?',
+      subtitle: 'Wybierz najlepiej pasującą opcję.',
       xiaohongshu: 'RedNote',
       reddit: 'Reddit',
       instagram: 'Instagram',
