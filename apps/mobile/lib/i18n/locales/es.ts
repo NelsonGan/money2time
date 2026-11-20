@@ -690,6 +690,7 @@ const es = {
       sneakers: 'Zapatillas',
       phone: 'Móvil nuevo',
       inspired_by: 'Inspirado en {{book}}',
+      rate_key: '1 hora = {{rate}}',
     },
     preferences: {
       title: 'Lo básico',

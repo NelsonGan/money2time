@@ -690,6 +690,7 @@ const da = {
       sneakers: 'Sneakers',
       phone: 'Ny telefon',
       inspired_by: 'Inspireret af {{book}}',
+      rate_key: '1 time = {{rate}}',
     },
     preferences: {
       title: 'Sæt det grundlæggende op',

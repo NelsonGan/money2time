@@ -689,6 +689,7 @@ const ko = {
       sneakers: '운동화',
       phone: '새 휴대폰',
       inspired_by: '{{book}}에서 영감을 받았어요',
+      rate_key: '1시간 = {{rate}}',
     },
     preferences: {
       title: '기본 설정',

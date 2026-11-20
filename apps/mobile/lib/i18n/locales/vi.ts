@@ -690,6 +690,7 @@ const vi = {
       sneakers: 'Giày sneaker',
       phone: 'Điện thoại mới',
       inspired_by: 'Lấy cảm hứng từ {{book}}',
+      rate_key: '1 giờ = {{rate}}',
     },
     preferences: {
       title: 'Thiết lập cơ bản',

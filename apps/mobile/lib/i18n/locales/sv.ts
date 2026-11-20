@@ -690,6 +690,7 @@ const sv = {
       sneakers: 'Sneakers',
       phone: 'Ny telefon',
       inspired_by: 'Inspirerad av {{book}}',
+      rate_key: '1 timme = {{rate}}',
     },
     preferences: {
       title: 'Grundinställningar',

@@ -663,6 +663,7 @@ const zh = {
       sneakers: '运动鞋',
       phone: '新手机',
       inspired_by: '灵感来自《{{book}}》',
+      rate_key: '1 小时 = {{rate}}',
     },
     preferences: {
       title: '设置基础选项',

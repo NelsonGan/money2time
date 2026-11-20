@@ -691,6 +691,7 @@ const nb = {
       sneakers: 'Joggesko',
       phone: 'Ny telefon',
       inspired_by: 'Inspirert av {{book}}',
+      rate_key: '1 time = {{rate}}',
     },
     preferences: {
       title: 'Grunnleggende innstillinger',

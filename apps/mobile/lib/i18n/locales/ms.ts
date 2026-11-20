@@ -692,6 +692,7 @@ const ms = {
       sneakers: 'Kasut sneakers',
       phone: 'Telefon baharu',
       inspired_by: 'Diilhamkan oleh {{book}}',
+      rate_key: '1 jam = {{rate}}',
     },
     preferences: {
       title: 'Tetapkan asas',

@@ -690,6 +690,7 @@ const tr = {
       sneakers: 'Spor ayakkabı',
       phone: 'Yeni telefon',
       inspired_by: '{{book}} kitabından ilham alındı',
+      rate_key: '1 saat = {{rate}}',
     },
     preferences: {
       title: 'Temel ayarları yapın',

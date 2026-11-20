@@ -690,6 +690,7 @@ const ru = {
       sneakers: 'Кроссовки',
       phone: 'Новый телефон',
       inspired_by: 'По мотивам книги {{book}}',
+      rate_key: '1 час = {{rate}}',
     },
     preferences: {
       title: 'Основные настройки',

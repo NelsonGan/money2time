@@ -691,6 +691,7 @@ const nl = {
       sneakers: 'Sneakers',
       phone: 'Nieuwe telefoon',
       inspired_by: 'Geïnspireerd door {{book}}',
+      rate_key: '1 uur = {{rate}}',
     },
     preferences: {
       title: 'Stel de basis in',

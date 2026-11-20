@@ -691,6 +691,7 @@ const ja = {
       sneakers: 'スニーカー',
       phone: '新しいスマホ',
       inspired_by: '{{book}} に着想を得ました',
+      rate_key: '1時間 = {{rate}}',
     },
     preferences: {
       title: '基本設定',

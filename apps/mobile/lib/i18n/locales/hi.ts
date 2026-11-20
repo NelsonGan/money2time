@@ -690,6 +690,7 @@ const hi = {
       sneakers: 'स्नीकर्स',
       phone: 'नया फ़ोन',
       inspired_by: '{{book}} से प्रेरित',
+      rate_key: '1 घंटा = {{rate}}',
     },
     preferences: {
       title: 'बुनियादी सेटिंग्स करें',

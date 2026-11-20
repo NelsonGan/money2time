@@ -691,6 +691,7 @@ const pl = {
       sneakers: 'Sneakersy',
       phone: 'Nowy telefon',
       inspired_by: 'Inspirowane książką {{book}}',
+      rate_key: '1 godzina = {{rate}}',
     },
     preferences: {
       title: 'Ustaw podstawy',

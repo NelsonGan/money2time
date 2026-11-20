@@ -690,6 +690,7 @@ const pt = {
       sneakers: 'Sapatilhas',
       phone: 'Telemóvel novo',
       inspired_by: 'Inspirado em {{book}}',
+      rate_key: '1 hora = {{rate}}',
     },
     preferences: {
       title: 'Configure o básico',

@@ -668,6 +668,7 @@ const en = {
       sneakers: 'Sneakers',
       phone: 'New phone',
       inspired_by: 'Inspired by {{book}}',
+      rate_key: '1 hour = {{rate}}',
     },
     preferences: {
       title: 'Set the basics',

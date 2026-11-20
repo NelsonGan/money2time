@@ -3,6 +3,7 @@ import React from 'react';
 import { View } from 'react-native';
 
 import { CategoryEmoji, Text, TimeValueInline } from '~/components/ui';
+import { TIME_VALUE_ICON } from '~/components/ui/time-value-inline';
 import { OnboardingStepLayout } from '~/features/onboarding/components/OnboardingStepLayout';
 import { ONBOARDING_CARD } from '~/features/onboarding/constants/styles';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -40,6 +41,9 @@ export function OnboardingWelcomeStep({
   onGetStarted,
 }: OnboardingWelcomeStepProps) {
   const themeColors = useThemeColors();
+  // "RM15", not "RM15.00": a round rate reads as a rule of thumb.
+  const rateLabel = formatCurrency(EXAMPLE_RATE, currencySymbol).replace(/\.00$/, '');
+  const rateKey = I18n.t('onboarding.welcome.rate_key', { rate: rateLabel });
 
   return (
     <OnboardingStepLayout
@@ -52,41 +56,54 @@ export function OnboardingWelcomeStep({
         onGetStarted();
       }}
     >
-      <View className={`px-4 py-1 ${ONBOARDING_CARD}`}>
-        {EXAMPLES.map((example, index) => (
-          <View
-            key={example.key}
-            className={cn(
-              'flex-row items-center gap-3 py-3',
-              index < EXAMPLES.length - 1 && 'border-b border-border/25',
-            )}
-          >
-            <View className="h-10 w-10 items-center justify-center rounded-2xl bg-secondary/60">
-              <CategoryEmoji icon={example.icon} size={26} />
-            </View>
-            <Text variant="bodyStrong" className="flex-1 text-foreground">
-              {I18n.t(example.key)}
-            </Text>
-            <View className="items-end">
-              <Text variant="bodyStrong" className="text-foreground">
-                {formatCurrency(example.amount, currencySymbol)}
+      {/* The rate sits on the card's top edge as its key: it is what turns
+          each price below into hours. */}
+      <View className="pt-4">
+        <View className={`px-4 pb-1 pt-4 ${ONBOARDING_CARD}`}>
+          {EXAMPLES.map((example, index) => (
+            <View
+              key={example.key}
+              className={cn(
+                'flex-row items-center gap-3 py-3',
+                index < EXAMPLES.length - 1 && 'border-b border-border/25',
+              )}
+            >
+              <View className="h-10 w-10 items-center justify-center rounded-2xl bg-secondary/60">
+                <CategoryEmoji icon={example.icon} size={26} />
+              </View>
+              <Text variant="bodyStrong" className="flex-1 text-foreground">
+                {I18n.t(example.key)}
               </Text>
-              <TimeValueInline
-                value={formatHours(example.amount / EXAMPLE_RATE)}
-                variant="bodyStrong"
-                textClassName="text-primary"
-                iconColor={themeColors.primary}
-                iconSize={13}
-              />
+              <View className="items-end">
+                <Text variant="bodyStrong" className="text-foreground">
+                  {formatCurrency(example.amount, currencySymbol)}
+                </Text>
+                <TimeValueInline
+                  value={formatHours(example.amount / EXAMPLE_RATE)}
+                  variant="bodyStrong"
+                  textClassName="text-primary"
+                  iconColor={themeColors.primary}
+                  iconSize={13}
+                />
+              </View>
+            </View>
+          ))}
+        </View>
+        <View
+          className="absolute left-0 right-0 top-0 items-center"
+          accessible
+          accessibilityLabel={rateKey}
+        >
+          <View className="rounded-full bg-background">
+            <View className="flex-row items-center gap-1.5 rounded-full border border-primary/25 bg-primary/10 px-3.5 py-1.5">
+              <TIME_VALUE_ICON size={14} color={themeColors.primary} strokeWidth={2.4} />
+              <Text variant="caption" tone="primary" className="text-[14px]">
+                {rateKey}
+              </Text>
             </View>
           </View>
-        ))}
+        </View>
       </View>
-      <Text variant="caption" tone="muted" className="mt-3 text-center">
-        {I18n.t('onboarding.try_it.example_rate', {
-          rate: formatCurrency(EXAMPLE_RATE, currencySymbol),
-        })}
-      </Text>
 
       {/* Where the idea comes from: the book that counts money in "life
           energy", the hours a price costs you. */}

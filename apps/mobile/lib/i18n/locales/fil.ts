@@ -691,6 +691,7 @@ const fil = {
       sneakers: 'Sneakers',
       phone: 'Bagong phone',
       inspired_by: 'Hango sa {{book}}',
+      rate_key: '1 oras = {{rate}}',
     },
     preferences: {
       title: 'I-set ang mga basic',

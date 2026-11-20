@@ -692,6 +692,7 @@ const id = {
       sneakers: 'Sepatu sneakers',
       phone: 'Ponsel baru',
       inspired_by: 'Terinspirasi dari {{book}}',
+      rate_key: '1 jam = {{rate}}',
     },
     preferences: {
       title: 'Atur dasar-dasarnya',

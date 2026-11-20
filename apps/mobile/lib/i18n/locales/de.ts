@@ -692,6 +692,7 @@ const de = {
       sneakers: 'Sneaker',
       phone: 'Neues Handy',
       inspired_by: 'Inspiriert von {{book}}',
+      rate_key: '1 Stunde = {{rate}}',
     },
     preferences: {
       title: 'Grundeinstellungen',

@@ -691,6 +691,7 @@ const uk = {
       sneakers: 'Кросівки',
       phone: 'Новий телефон',
       inspired_by: 'За мотивами книги {{book}}',
+      rate_key: '1 година = {{rate}}',
     },
     preferences: {
       title: 'Базові налаштування',

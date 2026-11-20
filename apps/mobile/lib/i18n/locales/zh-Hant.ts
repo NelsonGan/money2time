@@ -663,6 +663,7 @@ const zhHant = {
       sneakers: '運動鞋',
       phone: '新手機',
       inspired_by: '靈感來自《{{book}}》',
+      rate_key: '1 小時 = {{rate}}',
     },
     preferences: {
       title: '設定基礎選項',

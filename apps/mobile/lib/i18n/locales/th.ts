@@ -689,6 +689,7 @@ const th = {
       sneakers: 'รองเท้าผ้าใบ',
       phone: 'โทรศัพท์ใหม่',
       inspired_by: 'ได้แรงบันดาลใจจาก {{book}}',
+      rate_key: '1 ชั่วโมง = {{rate}}',
     },
     preferences: {
       title: 'ตั้งค่าพื้นฐาน',
