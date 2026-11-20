@@ -94,7 +94,6 @@
   },
   "home": {
     "nav": {
-      "howItWorks": "Comment ça marche",
       "logging": "Saisie",
       "features": "Fonctionnalités",
       "privacy": "Confidentialité",
@@ -130,35 +129,6 @@
       "rent": "Loyer",
       "flight": "Vol retour",
       "iceCream": "Glace"
-    },
-    "howItWorks": {
-      "eyebrow": "Comment ça marche",
-      "title": "Une touche transforme l'argent en temps.",
-      "body": "Votre taux vient de ce qui arrive vraiment sur votre compte. Après impôts, sur les jours où vous travaillez, trajet non payé compris.",
-      "coffee": {
-        "title": "Le café",
-        "note": "L'équivalent d'une courte marche de travail. Vous vouliez ce café."
-      },
-      "impulse": {
-        "title": "L'achat impulsif",
-        "note": "Presque deux jours de travail. Ça mérite une nuit de réflexion."
-      },
-      "rate": {
-        "title": "Votre vrai taux",
-        "perHour": "/h",
-        "takeHome": {
-          "label": "Salaire net",
-          "value": "{value} par mois"
-        },
-        "daysWorked": {
-          "label": "Jours travaillés",
-          "value": "{value} par semaine"
-        },
-        "commute": {
-          "label": "Trajet, non payé",
-          "value": "{value} min par jour"
-        }
-      }
     },
     "logging": {
       "eyebrow": "Saisie",

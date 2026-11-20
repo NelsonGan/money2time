@@ -94,7 +94,6 @@
   },
   "home": {
     "nav": {
-      "howItWorks": "Hoe het werkt",
       "logging": "Vastleggen",
       "features": "Functies",
       "privacy": "Privacy",
@@ -130,35 +129,6 @@
       "rent": "Huur",
       "flight": "Vlucht naar huis",
       "iceCream": "IJsje"
-    },
-    "howItWorks": {
-      "eyebrow": "Hoe het werkt",
-      "title": "Eén tik maakt van geld tijd.",
-      "body": "Je uurwaarde komt uit wat er echt op je rekening belandt. Na belasting, verdeeld over de dagen dat je werkt, inclusief de reistijd waar je nooit voor betaald wordt.",
-      "coffee": {
-        "title": "De koffie",
-        "note": "Een korte wandeling aan werk. Je wilde die koffie."
-      },
-      "impulse": {
-        "title": "De impulsaankoop",
-        "note": "Bijna twee werkdagen. Daar slaap je beter een nachtje over."
-      },
-      "rate": {
-        "title": "Je echte uurwaarde",
-        "perHour": "/uur",
-        "takeHome": {
-          "label": "Nettoloon",
-          "value": "{value} per maand"
-        },
-        "daysWorked": {
-          "label": "Werkdagen",
-          "value": "{value} per week"
-        },
-        "commute": {
-          "label": "Reistijd, onbetaald",
-          "value": "{value} min per dag"
-        }
-      }
     },
     "logging": {
       "eyebrow": "Vastleggen",

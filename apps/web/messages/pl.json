@@ -94,7 +94,6 @@
   },
   "home": {
     "nav": {
-      "howItWorks": "Jak to działa",
       "logging": "Zapisywanie",
       "features": "Funkcje",
       "privacy": "Prywatność",
@@ -130,35 +129,6 @@
       "rent": "Czynsz",
       "flight": "Lot do domu",
       "iceCream": "Lody"
-    },
-    "howItWorks": {
-      "eyebrow": "Jak to działa",
-      "title": "Jedno dotknięcie zamienia pieniądze w czas.",
-      "body": "Twoja stawka bierze się z tego, co naprawdę wpływa na konto. Po podatkach, w przeliczeniu na dni, w które pracujesz, razem z dojazdem, za który nikt ci nie płaci.",
-      "coffee": {
-        "title": "Kawa",
-        "note": "Tyle pracy co krótki spacer. Chciałeś tej kawy."
-      },
-      "impulse": {
-        "title": "Zakup pod wpływem impulsu",
-        "note": "Prawie dwa dni pracy. Warto się przespać z tą decyzją."
-      },
-      "rate": {
-        "title": "Twoja prawdziwa stawka",
-        "perHour": "/godz.",
-        "takeHome": {
-          "label": "Wynagrodzenie netto",
-          "value": "{value} miesięcznie"
-        },
-        "daysWorked": {
-          "label": "Dni pracy",
-          "value": "{value} w tygodniu"
-        },
-        "commute": {
-          "label": "Dojazd, niepłatny",
-          "value": "{value} min dziennie"
-        }
-      }
     },
     "logging": {
       "eyebrow": "Zapisywanie",

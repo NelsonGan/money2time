@@ -9,10 +9,9 @@ import { Link } from "@/i18n/navigation";
 import { EVENTS, trackLeaving } from "@/lib/analytics";
 import { downloadTargetFromUserAgent } from "@/lib/platform";
 
-const SECTIONS = ["howItWorks", "logging", "features"] as const;
+const SECTIONS = ["logging", "features"] as const;
 
 const HREFS: Record<(typeof SECTIONS)[number], string> = {
-  howItWorks: "#how-it-works",
   logging: "#logging",
   features: "#features",
 };

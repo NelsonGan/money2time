@@ -94,7 +94,6 @@
   },
   "home": {
     "nav": {
-      "howItWorks": "仕組み",
       "logging": "記録",
       "features": "機能",
       "privacy": "プライバシー",
@@ -130,35 +129,6 @@
       "rent": "家賃",
       "flight": "帰省の航空券",
       "iceCream": "アイスクリーム"
-    },
-    "howItWorks": {
-      "eyebrow": "仕組み",
-      "title": "ワンタップで、お金が時間に変わる。",
-      "body": "時給は、実際に口座に入ってくる金額から計算します。税引き後、働く日数で割り、給料の出ない通勤時間も含めて。",
-      "coffee": {
-        "title": "コーヒー",
-        "note": "ちょっとした散歩ぶんの労働。そのコーヒーは飲みたかったはず。"
-      },
-      "impulse": {
-        "title": "衝動買い",
-        "note": "ほぼ2労働日。一晩考える価値があります。"
-      },
-      "rate": {
-        "title": "本当の時給",
-        "perHour": "/時",
-        "takeHome": {
-          "label": "手取り",
-          "value": "月{value}"
-        },
-        "daysWorked": {
-          "label": "働く日数",
-          "value": "週{value}日"
-        },
-        "commute": {
-          "label": "通勤（無給）",
-          "value": "1日{value}分"
-        }
-      }
     },
     "logging": {
       "eyebrow": "記録",

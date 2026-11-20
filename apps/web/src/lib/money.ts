@@ -5,11 +5,11 @@ import type { Locale } from "@/i18n/routing";
 /**
  * A full-time month, at roughly 41 hours a week. Every "this costs you N
  * hours" figure on the page is derived from a price and this, so the demo
- * numbers stay consistent with the rate card in every market.
+ * numbers stay consistent with each other in every market.
  */
 export const WORK_HOURS_PER_MONTH = 178;
 
-/** The things the ticker and the conversion cards price up. */
+/** The things the price ticker prices up. */
 export type PriceKey =
   | "coffee"
   | "lunch"
@@ -24,8 +24,7 @@ export type PriceKey =
   | "gym"
   | "rent"
   | "flight"
-  | "iceCream"
-  | "impulse";
+  | "iceCream";
 
 /** The markets the site prices in, by ISO 3166-1 alpha-2 country code. */
 export type MarketCode =
@@ -81,7 +80,6 @@ const US: Market = {
     rent: 1850,
     flight: 318,
     iceCream: 6.2,
-    impulse: 349,
   },
   foreign: {
     currency: "AUD",
@@ -110,7 +108,6 @@ const GB: Market = {
     rent: 1250,
     flight: 180,
     iceCream: 4.2,
-    impulse: 199,
   },
   foreign: {
     currency: "EUR",
@@ -139,7 +136,6 @@ const AU: Market = {
     rent: 2200,
     flight: 320,
     iceCream: 7,
-    impulse: 389,
   },
   foreign: {
     currency: "THB",
@@ -168,7 +164,6 @@ const CA: Market = {
     rent: 2050,
     flight: 295,
     iceCream: 6.5,
-    impulse: 329,
   },
   foreign: {
     currency: "USD",
@@ -197,7 +192,6 @@ const IN: Market = {
     rent: 32000,
     flight: 6500,
     iceCream: 150,
-    impulse: 4999,
   },
   foreign: {
     currency: "AED",
@@ -226,7 +220,6 @@ const MY: Market = {
     rent: 1800,
     flight: 320,
     iceCream: 9.5,
-    impulse: 319,
   },
   foreign: {
     currency: "THB",
@@ -255,7 +248,6 @@ const NZ: Market = {
     rent: 2400,
     flight: 260,
     iceCream: 7.5,
-    impulse: 349,
   },
   foreign: {
     currency: "AUD",
@@ -284,7 +276,6 @@ const PH: Market = {
     rent: 15000,
     flight: 4500,
     iceCream: 120,
-    impulse: 2699,
   },
   foreign: {
     currency: "JPY",
@@ -313,7 +304,6 @@ const SG: Market = {
     rent: 2800,
     flight: 380,
     iceCream: 5,
-    impulse: 379,
   },
   foreign: {
     currency: "MYR",
@@ -342,7 +332,6 @@ const BR: Market = {
     rent: 1800,
     flight: 800,
     iceCream: 15,
-    impulse: 285,
   },
   foreign: {
     currency: "USD",
@@ -371,7 +360,6 @@ const ZA: Market = {
     rent: 9500,
     flight: 1800,
     iceCream: 60,
-    impulse: 2099,
   },
   foreign: {
     currency: "EUR",
@@ -541,13 +529,11 @@ export function useMoney() {
     foreignAmount,
     hoursFor,
     hoursLabel,
-    perHour,
     price,
     /** Time cost of one of the priced things. */
     priceDuration: (key: PriceKey) => duration(market.prices[key]),
     scene,
     /** A scene figure, formatted. */
     sceneAmount: (key: SceneKey) => amount(scene(key)),
-    takeHome: market.takeHome,
   };
 }

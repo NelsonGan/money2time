@@ -94,7 +94,6 @@
   },
   "home": {
     "nav": {
-      "howItWorks": "Nasıl çalışır",
       "logging": "Kayıt",
       "features": "Özellikler",
       "privacy": "Gizlilik",
@@ -130,35 +129,6 @@
       "rent": "Kira",
       "flight": "Eve uçuş",
       "iceCream": "Dondurma"
-    },
-    "howItWorks": {
-      "eyebrow": "Nasıl çalışır",
-      "title": "Tek dokunuş parayı zamana çevirir.",
-      "body": "Saat ücretin, hesabına gerçekten geçen tutardan hesaplanır. Vergiden sonra, çalıştığın günlere bölünerek, hiç ödenmeyen yol süresi de dahil.",
-      "coffee": {
-        "title": "Kahve",
-        "note": "Kısa bir yürüyüş kadar çalışma. O kahveyi zaten istiyordun."
-      },
-      "impulse": {
-        "title": "Ani alışveriş",
-        "note": "Neredeyse iki iş günü. Bir gece düşünmeye değer."
-      },
-      "rate": {
-        "title": "Gerçek saat ücretin",
-        "perHour": "/sa",
-        "takeHome": {
-          "label": "Net maaş",
-          "value": "ayda {value}"
-        },
-        "daysWorked": {
-          "label": "Çalıştığın günler",
-          "value": "haftada {value}"
-        },
-        "commute": {
-          "label": "Yol, ödenmeyen",
-          "value": "günde {value} dk"
-        }
-      }
     },
     "logging": {
       "eyebrow": "Kayıt",

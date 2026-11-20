@@ -94,7 +94,6 @@
   },
   "home": {
     "nav": {
-      "howItWorks": "Sådan virker det",
       "logging": "Registrering",
       "features": "Funktioner",
       "privacy": "Privatliv",
@@ -130,35 +129,6 @@
       "rent": "Husleje",
       "flight": "Fly hjem",
       "iceCream": "Is"
-    },
-    "howItWorks": {
-      "eyebrow": "Sådan virker det",
-      "title": "Ét tryk gør penge til tid.",
-      "body": "Din timepris kommer fra det, der faktisk lander på kontoen. Efter skat, fordelt på de dage du arbejder, inklusive transporten du aldrig får betaling for.",
-      "coffee": {
-        "title": "Kaffen",
-        "note": "En kort gåtur i arbejde. Du ville have den kaffe."
-      },
-      "impulse": {
-        "title": "Impulskøbet",
-        "note": "Næsten to arbejdsdage. Værd at sove på."
-      },
-      "rate": {
-        "title": "Din rigtige timepris",
-        "perHour": "/t",
-        "takeHome": {
-          "label": "Løn efter skat",
-          "value": "{value} om måneden"
-        },
-        "daysWorked": {
-          "label": "Dage du arbejder",
-          "value": "{value} om ugen"
-        },
-        "commute": {
-          "label": "Transport, ubetalt",
-          "value": "{value} min om dagen"
-        }
-      }
     },
     "logging": {
       "eyebrow": "Registrering",

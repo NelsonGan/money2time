@@ -94,7 +94,6 @@
   },
   "home": {
     "nav": {
-      "howItWorks": "Cách hoạt động",
       "logging": "Ghi chép",
       "features": "Tính năng",
       "privacy": "Riêng tư",
@@ -130,35 +129,6 @@
       "rent": "Tiền thuê nhà",
       "flight": "Vé máy bay về nhà",
       "iceCream": "Kem"
-    },
-    "howItWorks": {
-      "eyebrow": "Cách hoạt động",
-      "title": "Một chạm biến tiền thành thời gian.",
-      "body": "Mức lương giờ được tính từ số tiền thực sự về tài khoản bạn. Sau thuế, chia cho những ngày bạn đi làm, tính cả quãng đường đi lại không ai trả công.",
-      "coffee": {
-        "title": "Ly cà phê",
-        "note": "Bằng một quãng đi bộ ngắn. Ly cà phê đó bạn vẫn muốn mà."
-      },
-      "impulse": {
-        "title": "Món mua bốc đồng",
-        "note": "Gần hai ngày công. Đáng để ngủ một đêm rồi tính."
-      },
-      "rate": {
-        "title": "Mức lương giờ thật của bạn",
-        "perHour": "/giờ",
-        "takeHome": {
-          "label": "Lương thực nhận",
-          "value": "{value} mỗi tháng"
-        },
-        "daysWorked": {
-          "label": "Số ngày đi làm",
-          "value": "{value} ngày mỗi tuần"
-        },
-        "commute": {
-          "label": "Đi lại, không lương",
-          "value": "{value} phút mỗi ngày"
-        }
-      }
     },
     "logging": {
       "eyebrow": "Ghi chép",

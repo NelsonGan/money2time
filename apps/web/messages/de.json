@@ -94,7 +94,6 @@
   },
   "home": {
     "nav": {
-      "howItWorks": "So funktioniert es",
       "logging": "Erfassen",
       "features": "Funktionen",
       "privacy": "Datenschutz",
@@ -130,35 +129,6 @@
       "rent": "Miete",
       "flight": "Flug nach Hause",
       "iceCream": "Eis"
-    },
-    "howItWorks": {
-      "eyebrow": "So funktioniert es",
-      "title": "Ein Tippen macht aus Geld Zeit.",
-      "body": "Dein Stundenwert ergibt sich aus dem, was wirklich auf deinem Konto landet. Nach Steuern, über die Tage, an denen du arbeitest, samt Arbeitsweg, der nie bezahlt wird.",
-      "coffee": {
-        "title": "Der Kaffee",
-        "note": "Ein kurzer Spaziergang an Arbeit. Du wolltest den Kaffee."
-      },
-      "impulse": {
-        "title": "Der Impulskauf",
-        "note": "Fast zwei Arbeitstage. Da lohnt sich eine Nacht drüber schlafen."
-      },
-      "rate": {
-        "title": "Dein echter Stundenwert",
-        "perHour": "/Std.",
-        "takeHome": {
-          "label": "Nettoeinkommen",
-          "value": "{value} im Monat"
-        },
-        "daysWorked": {
-          "label": "Arbeitstage",
-          "value": "{value} pro Woche"
-        },
-        "commute": {
-          "label": "Arbeitsweg, unbezahlt",
-          "value": "{value} Min. am Tag"
-        }
-      }
     },
     "logging": {
       "eyebrow": "Erfassen",

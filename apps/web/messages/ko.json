@@ -94,7 +94,6 @@
   },
   "home": {
     "nav": {
-      "howItWorks": "작동 방식",
       "logging": "기록",
       "features": "기능",
       "privacy": "개인정보",
@@ -130,35 +129,6 @@
       "rent": "월세",
       "flight": "고향 가는 항공권",
       "iceCream": "아이스크림"
-    },
-    "howItWorks": {
-      "eyebrow": "작동 방식",
-      "title": "한 번 누르면 돈이 시간이 됩니다.",
-      "body": "시급은 실제로 통장에 들어오는 돈에서 계산합니다. 세후 금액을, 일하는 날수로 나누고, 돈을 받지 못하는 출퇴근 시간까지 포함해서요.",
-      "coffee": {
-        "title": "커피 한 잔",
-        "note": "짧은 산책만큼의 노동. 그 커피는 마시고 싶었잖아요."
-      },
-      "impulse": {
-        "title": "충동구매",
-        "note": "거의 이틀치 근무. 하룻밤 생각해볼 만합니다."
-      },
-      "rate": {
-        "title": "진짜 시급",
-        "perHour": "/시간",
-        "takeHome": {
-          "label": "실수령액",
-          "value": "월 {value}"
-        },
-        "daysWorked": {
-          "label": "근무 일수",
-          "value": "주 {value}일"
-        },
-        "commute": {
-          "label": "출퇴근, 무급",
-          "value": "하루 {value}분"
-        }
-      }
     },
     "logging": {
       "eyebrow": "기록",

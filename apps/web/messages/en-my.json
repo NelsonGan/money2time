@@ -5,9 +5,6 @@
       "cinema": "Cinema",
       "lunch": "Kopitiam lunch"
     },
-    "howItWorks": {
-      "body": "Your rate comes from what actually lands in your account. After tax, EPF and SOCSO, across the days you work, including the commute you never get paid for."
-    },
     "why": {
       "paragraph2": "So I built this app. It helps you see your spending in a different way: not just in currency, but in hours of your life. Because sometimes <cost>\"RM18\"</cost> doesn't feel like much, but <time>\"2 hours of my life\"</time> does. The goal is simple, to help you become more aware of where your money (or really, time) is going, so you can take back control of it."
     }

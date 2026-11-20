@@ -94,7 +94,6 @@
   },
   "home": {
     "nav": {
-      "howItWorks": "Cara ia berfungsi",
       "logging": "Merekod",
       "features": "Ciri",
       "privacy": "Privasi",
@@ -130,35 +129,6 @@
       "rent": "Sewa",
       "flight": "Tiket balik kampung",
       "iceCream": "Aiskrim"
-    },
-    "howItWorks": {
-      "eyebrow": "Cara ia berfungsi",
-      "title": "Satu ketikan menukar wang jadi masa.",
-      "body": "Kadar sejam anda dikira daripada wang yang benar-benar masuk ke akaun anda. Selepas cukai, dibahagi hari anda bekerja, termasuk perjalanan yang tidak pernah dibayar.",
-      "coffee": {
-        "title": "Secawan kopi",
-        "note": "Kecil sehingga mudah diabaikan. Kopi itu memang anda mahu."
-      },
-      "impulse": {
-        "title": "Beli ikut hati",
-        "note": "Hampir dua hari bekerja. Berbaloi tidur dulu sebelum putuskan."
-      },
-      "rate": {
-        "title": "Kadar sebenar anda",
-        "perHour": "/jam",
-        "takeHome": {
-          "label": "Gaji bersih",
-          "value": "{value} sebulan"
-        },
-        "daysWorked": {
-          "label": "Hari anda bekerja",
-          "value": "{value} seminggu"
-        },
-        "commute": {
-          "label": "Perjalanan, tidak dibayar",
-          "value": "{value} min sehari"
-        }
-      }
     },
     "logging": {
       "eyebrow": "Merekod",

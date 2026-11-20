@@ -94,7 +94,6 @@
   },
   "home": {
     "nav": {
-      "howItWorks": "Como funciona",
       "logging": "Registro",
       "features": "Recursos",
       "privacy": "Privacidade",
@@ -130,35 +129,6 @@
       "rent": "Aluguel",
       "flight": "Voo para casa",
       "iceCream": "Sorvete"
-    },
-    "howItWorks": {
-      "eyebrow": "Como funciona",
-      "title": "Um toque transforma dinheiro em tempo.",
-      "body": "Seu valor por hora vem do que realmente entra na sua conta. Depois dos impostos, ao longo dos dias em que você trabalha, incluindo o trajeto que nunca é pago.",
-      "coffee": {
-        "title": "O café",
-        "note": "Pequeno o suficiente para ignorar. Você queria o café mesmo."
-      },
-      "impulse": {
-        "title": "A compra por impulso",
-        "note": "Quase dois dias de trabalho. Vale a pena dormir sobre isso."
-      },
-      "rate": {
-        "title": "Seu valor real",
-        "perHour": "/h",
-        "takeHome": {
-          "label": "Salário líquido",
-          "value": "{value} por mês"
-        },
-        "daysWorked": {
-          "label": "Dias que você trabalha",
-          "value": "{value} por semana"
-        },
-        "commute": {
-          "label": "Trajeto, não pago",
-          "value": "{value} min por dia"
-        }
-      }
     },
     "logging": {
       "eyebrow": "Registro",

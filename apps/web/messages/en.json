@@ -94,7 +94,6 @@
   },
   "home": {
     "nav": {
-      "howItWorks": "How it works",
       "logging": "Logging",
       "features": "Features",
       "privacy": "Privacy",
@@ -130,35 +129,6 @@
       "rent": "Rent",
       "flight": "Flight home",
       "iceCream": "Ice cream"
-    },
-    "howItWorks": {
-      "eyebrow": "How it works",
-      "title": "One tap turns money into time.",
-      "body": "Your rate comes from what actually lands in your account. After tax, across the days you work, including the commute you never get paid for.",
-      "coffee": {
-        "title": "The coffee",
-        "note": "Small enough to ignore. You wanted the coffee anyway."
-      },
-      "impulse": {
-        "title": "The impulse buy",
-        "note": "Almost two work days. Worth sleeping on."
-      },
-      "rate": {
-        "title": "Your true rate",
-        "perHour": "/hr",
-        "takeHome": {
-          "label": "Take-home pay",
-          "value": "{value} a month"
-        },
-        "daysWorked": {
-          "label": "Days you work",
-          "value": "{value} a week"
-        },
-        "commute": {
-          "label": "Commute, unpaid",
-          "value": "{value} min a day"
-        }
-      }
     },
     "logging": {
       "eyebrow": "Logging",

@@ -94,7 +94,6 @@
   },
   "home": {
     "nav": {
-      "howItWorks": "Cómo funciona",
       "logging": "Registro",
       "features": "Funciones",
       "privacy": "Privacidad",
@@ -130,35 +129,6 @@
       "rent": "Alquiler",
       "flight": "Vuelo a casa",
       "iceCream": "Helado"
-    },
-    "howItWorks": {
-      "eyebrow": "Cómo funciona",
-      "title": "Un toque convierte el dinero en tiempo.",
-      "body": "Tu tarifa sale de lo que de verdad llega a tu cuenta. Después de impuestos, repartido entre los días que trabajas, incluyendo el trayecto que nunca te pagan.",
-      "coffee": {
-        "title": "El café",
-        "note": "Lo que se trabaja en un paseo corto. Querías ese café."
-      },
-      "impulse": {
-        "title": "La compra impulsiva",
-        "note": "Casi dos días de trabajo. Merece consultarlo con la almohada."
-      },
-      "rate": {
-        "title": "Tu tarifa real",
-        "perHour": "/h",
-        "takeHome": {
-          "label": "Sueldo neto",
-          "value": "{value} al mes"
-        },
-        "daysWorked": {
-          "label": "Días que trabajas",
-          "value": "{value} a la semana"
-        },
-        "commute": {
-          "label": "Trayecto, sin pagar",
-          "value": "{value} min al día"
-        }
-      }
     },
     "logging": {
       "eyebrow": "Registro",

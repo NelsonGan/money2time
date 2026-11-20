@@ -4,7 +4,6 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { DeveloperSection } from "@/components/home/developer-section";
 import { FeatureGrid } from "@/components/home/feature-grid";
 import { Hero } from "@/components/home/hero";
-import { HowItWorks } from "@/components/home/how-it-works";
 import { Logging } from "@/components/home/logging";
 import { PriceTicker } from "@/components/home/price-ticker";
 import { Testimonials } from "@/components/home/testimonials";
@@ -126,7 +125,6 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
       <main>
         <Hero locale={locale as Locale} />
         <PriceTicker />
-        <HowItWorks />
         <Logging />
         <FeatureGrid />
         <Testimonials />
