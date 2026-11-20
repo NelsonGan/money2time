@@ -34,11 +34,6 @@ interface Resolved {
 const REUSE_MS = 90 * 1000;
 let lastResolved: Resolved | null = null;
 
-/** Test hook. */
-export function resetCurrentPlaceCache(): void {
-  lastResolved = null;
-}
-
 /** A spot the geocoders could not name: kept, with a generic name. */
 function pinnedPlace(coordinate: Coordinate): PlaceResult {
   return {

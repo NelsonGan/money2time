@@ -359,7 +359,6 @@
         "assets/db/**/*",
         "assets/icon-atlases/**/*",
         "assets/items/**/*",
-        "assets/map/**/*",
         "assets/mascots/**/*",
         "node_modules/**/*"
       ]

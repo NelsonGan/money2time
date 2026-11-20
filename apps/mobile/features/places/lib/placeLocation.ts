@@ -53,7 +53,7 @@ export function locationOfTransaction(transaction: Transaction): TransactionLoca
 }
 
 /** A transaction's saved place, or null when it has none. */
-export function placeOfTransaction(transaction: Transaction): PlaceResult | null {
+function placeOfTransaction(transaction: Transaction): PlaceResult | null {
   if (!isLocatedTransaction(transaction)) return null;
   return {
     id: transaction.placeId,

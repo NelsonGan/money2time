@@ -11,8 +11,6 @@ import MapView, {
 
 import { useResolvedTheme } from '~/context/ThemeContext';
 
-export type AppMapRef = MapView;
-
 interface AppMapProps {
   initialRegion?: Region;
   mapPadding?: EdgePadding;

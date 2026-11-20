@@ -306,7 +306,7 @@ SQLite via `expo-sqlite` + Drizzle ORM. Schema is in `lib/db/schema.ts`. The DB 
 
 **Offline places DB (`lib/db/citiesDb.ts`).** A second, **read-only** SQLite connection holds GeoNames cities (used by `CityPickerSheet` to attach a location to an album). The prebuilt asset ships gzipped as `assets/db/cities.db.gz` (2.3 MB instead of 5.3 MB of app size, bundled via the `gz` entry added to metro `assetExts`) and is unpacked with fflate into the SQLite dir once on first run, guarded by `CITIES_DB_VERSION`, so the uncompressed file exists on the device only once. Regenerate it with `node scripts/build-cities-db.mjs` (downloads GeoNames `cities15000`, VACUUMs and gzips; `--empty` writes a schema-only placeholder). **Never** run the money2time migration runner against `cities.db` — it is pure reference data: not migrated, not backed up, not reset. On open the loader checks that the copy has a `cities` table and, if not, unpacks the asset again once: 1.6.1 and 1.6.2 opened the database before their un-awaited copy finished, which left an empty `cities.db` that the version marker called current. Failed opens close their connection where possible and disable further open attempts for the session. It degrades to empty results if the asset is missing/corrupt. `searchCities` is **fuzzy**: the FTS5 index covers city, admin1/state and country names so a query can resolve by any of them (e.g. `japan`, `california`), and results are ordered by match tier (city-name match > state > country) then population. Each table carries an `ascii_name` column for the diacritic-free LIKE checks that drive that tiering.
 
-**Album location map (`features/albums/`).** Albums with a location show on the Albums screen's Map tab (`AlbumMapPanel` → `components/AlbumMapView.tsx`): a photo card per album (`AlbumMapMarker`: cover, month badge, name, total spend) on the app's one map, `features/places/components/AppMap.tsx` (react-native-maps: **Apple Maps on iOS**, no key; **Google Maps on Android**, with the Maps SDK key, see [Transaction locations](#transaction-locations)). Albums in the same city share a point, so each card in a stack is its own marker moved off the point (`anchor` on Android, `centerOffset` on iOS): tapping a card behind brings it to the front, tapping the front one opens the album. A "show all" button fits every album. The map is a native module: `AlbumMapPanel` lazy-loads it only once the Map tab is first opened (keeping it off the cold-start path) behind an `AppErrorBoundary`, so a dev client built without it shows a message instead of crashing. Pins come from `AlbumPin[]` (built from `locatedAlbums` + `getAlbumStats`); `locatedAlbums` is a selector on `useApp()`. The map was MapLibre on a country-only demo basemap until the transaction-locations change replaced it; the MapLibre dependency, its config plugin and its bundled style are gone.
+**Album location map (`features/albums/`).** Albums with a location show on the Albums screen's Map tab (`AlbumMapPanel` → `components/AlbumMapView.tsx`): a photo card per album (`AlbumMapMarker`: cover, month badge, name, total spend) on the app's one map, `features/places/components/AppMap.tsx` (react-native-maps: **Apple Maps on iOS**, no key; **Google Maps on Android**, with the Maps SDK key, see [Transaction locations](#transaction-locations)). Albums in the same city share a point, so each card in a stack is its own marker moved off the point (`anchor` on Android, `centerOffset` on iOS): tapping a card behind brings it to the front, tapping the front one opens the album. A "show all" button fits every album. The map is a native module: `AlbumMapPanel` lazy-loads it only once the Map tab is first opened (keeping it off the cold-start path) behind an `AppErrorBoundary`, so a dev client built without it shows a message instead of crashing. Pins come from `AlbumPin[]` (built from `locatedAlbums` + `getAlbumStats`); `locatedAlbums` is a selector on `useApp()`.
 
 **Tables** (all use soft-deletes via `deletedAt`, except `exchange_rates` which is a cache). Each ledger's root tables also carry `ledgerId`; see [Ledgers](#ledgers):
 
@@ -4414,16 +4414,14 @@ On iOS (1.7.4 archive, before the second November pass) the app executable was
 alternate app icons, each stored losslessly as raw pixels in three appearances
 and twice, for iPhone and iPad), the Hermes bundle 17.6 MB and the bundled
 images and data 71.1 MB. The App Store drops the iPad copies for an iPhone.
-MapLibre is gone since the transaction-locations change (react-native-maps
-uses the system's MapKit on iOS, so about 7.5 MB less there).
+MapLibre has since been removed (the maps are react-native-maps, which uses
+the system's MapKit on iOS).
 
 Across all four APK architectures, native libraries occupy 189.34 MB. The
 largest are Skia (40.07 MB), MapLibre (39.54 MB), React Native (22.52 MB), and the
 barcode scanner (20.22 MB). They support existing charts, maps and scanning.
-Native library bytes and architecture support remain unchanged. Since the
-transaction-locations change the maps are Google Maps from Play services
-(react-native-maps), so MapLibre's 39.54 MB of native libraries are no longer
-in the APKs.
+Native library bytes and architecture support remain unchanged. MapLibre has
+since been removed: the Android maps are Google Maps from Play services.
 
 Every runtime dependency has an application import, native/config plugin,
 or required peer relationship. No runtime package was removed. In particular,
