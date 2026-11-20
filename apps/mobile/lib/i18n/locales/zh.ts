@@ -2994,6 +2994,7 @@ const zh = {
       not_member: '你已不在此相册中，无法修改。',
       signed_out: '请重新登录以修改此相册。',
       failed: '无法保存对此相册的修改。请重试。',
+      debt_changed: '这笔欠款在你打开后已有变动，所以没有记录任何内容。请重新查看。',
     },
     line_label: '{{name}}，相册',
     category_list: {

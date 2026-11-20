@@ -3080,6 +3080,7 @@ const ko = {
       not_member: '더 이상 이 앨범의 멤버가 아니라서 바꿀 수 없어요.',
       signed_out: '이 앨범을 바꾸려면 다시 로그인하세요.',
       failed: '이 앨범의 변경 사항을 저장하지 못했어요. 다시 시도하세요.',
+      debt_changed: '연 뒤에 이 빚이 바뀌어서 아무것도 기록되지 않았어요. 다시 확인해 주세요.',
     },
     line_label: '{{name}}, 앨범',
     category_list: {

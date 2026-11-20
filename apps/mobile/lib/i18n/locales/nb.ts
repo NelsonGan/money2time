@@ -3123,6 +3123,8 @@ const nb = {
       not_member: 'Du er ikke lenger med i albumet, så du kan ikke endre det.',
       signed_out: 'Logg på igjen for å endre albumet.',
       failed: 'Kunne ikke lagre endringen i albumet. Prøv igjen.',
+      debt_changed:
+        'Denne gjelden er endret siden du åpnet den, så ingenting ble registrert. Se på den igjen.',
     },
     line_label: '{{name}}, album',
     category_list: {

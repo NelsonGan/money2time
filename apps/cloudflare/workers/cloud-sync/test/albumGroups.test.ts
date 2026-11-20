@@ -15,7 +15,7 @@ import {
   type WriteRequest,
   writeGroup,
 } from '../src/albumGroups.ts';
-import { memberRowId } from '../src/groupPlan.generated.ts';
+import { MAX_WRITE_ROWS, memberRowId } from '../src/groupPlan.generated.ts';
 import { writeBaseOf } from '../src/ledgers.ts';
 
 // What the Worker writes to a shared album's group (someone joining or
@@ -360,6 +360,34 @@ test('payments of one act are one line per pair, and are only ever undone', asyn
     ['payment_recorded', 5],
     ['payment_undone', 15],
   ]);
+});
+
+test('one act takes as many rows as MAX_WRITE_ROWS, and no more', async () => {
+  const { group, rows } = await trip();
+  await write(group, 'owner', {
+    rows: [bill('u-bali-owner', { 'u-bali-tess': 30, 'u-bali-ben': 30 })],
+  });
+  const pay = (n: number) => ({
+    table: 'album_settlements',
+    row: {
+      id: `big.${n}`,
+      expense_id: 'dinner',
+      from_member: 'u-bali-tess',
+      to_member: 'u-bali-owner',
+      amount: 0.01,
+      currency: 'MYR',
+      date: '2026-11-14',
+    },
+  });
+  const many = (count: number) => Array.from({ length: count }, (_, n) => pay(n));
+  await assert.rejects(write(group, 'ben', { rows: many(MAX_WRITE_ROWS + 1) }), GroupWriteError);
+  await write(group, 'ben', { rows: many(MAX_WRITE_ROWS) });
+  assert.equal(rows('album_settlements').length, MAX_WRITE_ROWS);
+  const logged = rows('album_activity').filter((a) => a.kind === 'payment_recorded');
+  assert.deepEqual(
+    logged.map((a) => JSON.parse(a.data_json).amount),
+    [MAX_WRITE_ROWS / 100],
+  );
 });
 
 test('a simplified debt paid along several bills reads as one payment', async () => {

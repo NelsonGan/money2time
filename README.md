@@ -2418,11 +2418,15 @@ migrations `090` to `094` and `097`.
   bills are settled, and that line opens their dollar bills.
 - **Simplify group debts.** A switch, on to start with (the Worker writes it
   on as the owner starts the album; New Album can turn it off as the album
-  is made), that anyone in the album can turn on or off, for everyone. On, Who owes whom shows the same balances with as few payments as
-  it can: when Anna owes Bob and Bob owes Charlie, Anna owes Charlie. Nobody
-  pays or gets back more in total. A line where the user pays then opens a
+  is made), that anyone in the album can turn on or off, for everyone. On, Who owes whom shows the same balances with fewer payments,
+  and nobody in the middle: when Anna owes Bob and Bob owes Charlie, Anna
+  owes Charlie. Nobody pays or gets back more in total, it never lists more
+  payments than it would off, and paying one line, or part of it, leaves
+  every other line as it was (except, rarely, when the list switches to
+  each pair's own debts). A line where the user pays then opens a
   Settle up sheet for that one payment, where a smaller amount can be typed
-  to pay part of it.
+  to pay part of it. A line whose debt changed while the sheet was open
+  (someone else's payment landed) records nothing and says so.
 - **The Breakdown by person.** Once a bill in a shared album is split, the
   Breakdown opens with one line above its total, "Showing **Everyone** ⌄",
   which opens a sheet (`BreakdownMemberSheet`): **Everyone** (the album's
@@ -2765,30 +2769,63 @@ their own.
   is owed back; a deleted bill counts only its payments; a payment in another
   currency than its bill's, left by a change of the bill's currency, sets
   nothing off and is owed back in its own currency), `pairwiseDebts` (each
-  pair's net, per currency) and `simplifyDebts`:
-  the fewest payments that settle everyone's net (whoever owes most pays
-  whoever is owed most), when each of them can be paid along the group's bills
-  as they stand; else the debts passed along (while someone both owes and is
-  owed, the debt to them goes to the one they owe), which always can. Every
-  phone lists the result in the same order.
+  pair's net, per currency) and `simplifyDebts` (`planDebts`), which plans
+  each simplified debt together with the bills it is paid along:
+  - **A fixed order** (`fixedOrderPlan`). Each member who owes, by member
+    id, pays each member owed, by id, as much as the one still owes, the
+    other is still owed, and the bills can carry between them (a max flow
+    over what each member owes each other on the bills, the debts before it
+    having taken their part). Whoever owes only pays and whoever is owed only
+    gets paid, and someone who still owes can always reach someone still
+    owed along what is left, so every net is paid. **The order never depends
+    on how much anyone owes**, which is what keeps the list still: paying a
+    line, or part of it, along its own route leaves every other line exactly
+    as it was, so people paying outside the app by the list are never left
+    with a line that moved (the one exception is the switch to each pair's
+    own debts, next). The plan before this one (biggest payer to
+    biggest payee, else debts passed along a chain) listed about as many
+    lines, but about one payment in five or six moved someone else's line.
+  - **Never more than Simplify off.** In the rare group where each pair's own
+    nets are fewer (sparse bills, under 1% of groups in tests) the list is
+    those instead. Neither is always the fewest there could be: that is a
+    much harder problem, and its answer would change under every payment.
+    `__tests__/features/groupDebts.test.ts` checks the rules over 600 seeded
+    groups (nets kept, nobody in the middle, every line paid in full, other
+    lines unmoved, every bill closed at the end).
+  - Every phone lists the result in the same order.
   - **Paying a simplified debt.** It has no bill of its own, so paying one
-    (`settleGroupDebt`, `settleDebt`) writes payments onto the bills between
-    the two: the payer's share of the middle member's bill, the middle
-    member's share of the payee's. Circles of debts left over, which nobody
-    has to pay, are closed with it, so once every simplified debt is paid
-    every bill is settled on every phone. A member in the middle sees one
-    payment in and one out for the same amount; on the phone that records it
-    both go through the one account picked. With Simplify off, paying a debt
-    moves only that pair's own debt (their bills with each other, netted both
-    ways): nobody else's debts change.
+    (`settleGroupDebt`, `settleDebt`) writes payments onto the bills its
+    plan set aside for it: the payer's share of the middle member's bill,
+    the middle member's share of the payee's. Circles of debts that nobody
+    has to pay and that run along a pair the money just moved between close
+    with it (`closeAlong`), so the bills between those people are settled;
+    the other circles wait for the group's last payment (below), so an act
+    stays the size of what it pays rather than touching every bill in the
+    album. A member in the middle sees one payment in and one out for the
+    same amount; on the phone that records it both go through the one
+    account picked. With Simplify off, paying a debt moves only that pair's
+    own debt (their bills with each other, netted both ways): nobody else's
+    debts change.
+  - **A big act goes in parts.** One change writes at most `MAX_WRITE_ROWS`
+    (2000) rows (`lib/groupPlan.ts`, the Worker's copy, and the website's
+    `writes.ts`); a payment touches a row per bill share. A debt spread over
+    more bills than that is paid in parts (`settleDebt`'s `maxRows`, as much
+    as fits; `settleGroupDebt` repeats until all of it is paid, each part
+    its own act), and a big even group closes in parts of whole circles
+    (`evenPayments`), so it stays even in between. The website sends one
+    part per tap and says how much it recorded. The website's change of
+    2000 rows fits the 1 MB request limits of the website's `server.ts` and
+    the Worker's `albumWrite`.
   - **One act, one batch.** The payments of one act share an id
     (`<batch>.<n>`, `createSettlements`), and undoing any of them undoes them
     all, so nobody's total moves.
   - **Even groups close.** A group that comes out even with Simplify on
-    (debts that only go round in a circle, with no line to tap) has every
-    open share closed after the change that made it so (`evenGroupPayments`
-    after a bill saved, a payment, a delete, or the switch itself, on the
-    phone that made it; logged as payments "to even up"). Their ids are made
+    (debts that only go round in a circle, with no line to tap, as after the
+    last simplified debt is paid) has every open share closed after the
+    change that made it so (`evenGroupPayments` after a bill saved, a
+    payment, a delete, or the switch itself, on the phone that made it;
+    logged as payments "to even up"), so once every simplified debt is paid
+    every bill is settled on every phone. Their ids are made
     from what they close (`even-<hash>.<n>`), so two phones, or a phone and
     the website, closing the same even group write the same rows and never
     pay it twice; a closing that was undone is not made again.

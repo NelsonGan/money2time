@@ -3100,6 +3100,8 @@ const vi = {
       not_member: 'Bạn không còn trong album này nên không thể thay đổi nó.',
       signed_out: 'Hãy đăng nhập lại để thay đổi album này.',
       failed: 'Không thể lưu thay đổi cho album này. Hãy thử lại.',
+      debt_changed:
+        'Khoản nợ này đã thay đổi kể từ khi bạn mở, nên chưa có gì được ghi lại. Hãy xem lại.',
     },
     line_label: '{{name}}, album',
     category_list: {

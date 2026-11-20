@@ -3138,6 +3138,8 @@ const ms = {
       not_member: 'Anda tidak lagi dalam album ini, jadi anda tidak boleh mengubahnya.',
       signed_out: 'Log masuk semula untuk mengubah album ini.',
       failed: 'Tidak dapat menyimpan perubahan pada album ini. Cuba lagi.',
+      debt_changed:
+        'Hutang ini telah berubah sejak anda membukanya, jadi tiada apa yang direkodkan. Lihat semula.',
     },
     line_label: '{{name}}, album',
     category_list: {

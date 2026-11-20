@@ -25,6 +25,10 @@ on:
       - 'apps/web/**'
       - '.github/workflows/web.yml'
       - '.github/actions/node-deps/**'
+      # The website's copy of the album debt plan is checked against these
+      # (`src/lib/album/album.test.ts`), so a change to them runs its tests.
+      - 'apps/mobile/features/albums/lib/groupDebts.ts'
+      - 'apps/mobile/features/albums/lib/groupPlan.ts'
   workflow_dispatch:
 
 # A newer push to a pull request replaces its older run. Production deploys

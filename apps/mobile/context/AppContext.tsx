@@ -46,11 +46,16 @@ import {
 import {
   type GroupDebt,
   openShares,
+  paidFrom,
   pairwiseDebts,
   settleDebt,
   simplifyDebts,
 } from '~/features/albums/lib/groupDebts';
-import { GroupWriteError, isDefaultAlbumCategoryKey } from '~/features/albums/lib/groupPlan';
+import {
+  GroupWriteError,
+  isDefaultAlbumCategoryKey,
+  MAX_WRITE_ROWS,
+} from '~/features/albums/lib/groupPlan';
 import {
   batchPaymentIds,
   billRow,
@@ -4326,11 +4331,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
    * follow.
    */
   const settleEvenGroup = useCallback(async (groupId: string, env: GroupEnv) => {
-    const rows = evenGroupPayments(groupId);
-    if (!rows.length) return;
     try {
-      writeGroup(groupId, rows, { reason: 'close_even' });
-      projectGroup(groupId, env);
+      // A big album closes in parts (`MAX_WRITE_ROWS` rows each), each its own act.
+      let closed = false;
+      let last: string | undefined;
+      for (let part = 0; part < 20; part += 1) {
+        const rows = evenGroupPayments(groupId);
+        // The same rows again: they were written once and undone, and stay so.
+        if (!rows.length || rows[0].row.id === last) break;
+        last = String(rows[0].row.id);
+        writeGroup(groupId, rows, { reason: 'close_even' });
+        closed = true;
+      }
+      if (closed) projectGroup(groupId, env);
     } catch (error) {
       if (!isExpectedGroupWriteError(error)) reportError(error, { scope: 'album_group_payment' });
     }
@@ -4449,58 +4462,77 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [afterGroupWrite, groupEnvFor, sendGroupWrite],
   );
 
+  /** Debts being paid right now: a second tap waits for nothing and says nothing. */
+  const settlingDebtsRef = useRef(new Set<string>());
   const settleGroupDebt = useCallback(
     async (groupId: string, debt: GroupDebt, accountId: string | null) => {
       const env = groupEnvFor(groupId);
       if (!env) return;
       const self = groupSelf(groupId, env);
       if (!self) return;
+      const settling = `${groupId}|${debt.from}|${debt.to}|${debt.currency}`;
+      if (settlingDebtsRef.current.has(settling)) return;
+      settlingDebtsRef.current.add(settling);
       try {
         const memberIds = albumGroupsRepository.memberIds(groupId);
-        const open = openShares(
-          albumGroupsRepository.listExpenses(groupId, memberIds),
-          albumGroupsRepository.listSettlements(groupId, memberIds),
-        );
         const simplified = albumGroupsRepository.simplifiesDebts(groupId);
-        // The debt as the group holds it now: a second tap, or a payment
-        // that landed meanwhile, never pays it twice.
-        const current = (simplified ? simplifyDebts(open) : pairwiseDebts(open)).find(
-          (item) =>
-            item.from === debt.from && item.to === debt.to && item.currency === debt.currency,
-        );
-        if (!current) return;
-        // Simplify off, only the two people's own debt moves.
-        const payments = settleDebt(
-          open,
-          { ...debt, amount: Math.min(debt.amount, current.amount) },
-          { simplified },
-        );
-        if (payments.length === 0) return;
-        const ids = batchPaymentIds(payments.length);
         const today = dayKeyFromDateLocal(new Date());
-        const sent = await sendGroupWrite(
-          groupId,
-          payments.map((payment, index) =>
-            paymentRow({
-              id: ids[index],
-              expenseId: payment.expenseId,
-              from: payment.from,
-              to: payment.to,
-              amount: payment.amount,
-              currency: debt.currency,
-              date: today,
-            }),
-          ),
-        );
-        if (!sent) return;
         // Every payment of the user's own goes through the one account, so
         // those that only pass a debt along leave it as it was.
         const paidThrough = new Map<string, string | null>();
-        payments.forEach((payment, index) => {
-          if (payment.from === self.id || payment.to === self.id) {
-            paidThrough.set(ids[index], accountId);
+        // A debt across more bills than one change takes (`MAX_WRITE_ROWS`)
+        // is paid in parts, each its own act, until all of it is paid.
+        let left = Math.round(debt.amount * 100);
+        let recorded = false;
+        for (let part = 0; left > 0 && part < 20; part += 1) {
+          const open = openShares(
+            albumGroupsRepository.listExpenses(groupId, memberIds),
+            albumGroupsRepository.listSettlements(groupId, memberIds),
+          );
+          // The debt as the group holds it now: a second tap, or a payment
+          // that landed meanwhile, never pays it twice.
+          const current = (simplified ? simplifyDebts(open) : pairwiseDebts(open)).find(
+            (item) =>
+              item.from === debt.from && item.to === debt.to && item.currency === debt.currency,
+          );
+          if (!current) {
+            // Someone's payment or change landed since the sheet opened. As
+            // the message (a title is cut to two lines on Android).
+            if (part === 0) Alert.alert('', I18n.t('albums.write.debt_changed'));
+            break;
           }
-        });
+          // Simplify off, only the two people's own debt moves.
+          const payments = settleDebt(
+            open,
+            { ...debt, amount: Math.min(left / 100, current.amount) },
+            { simplified, maxRows: MAX_WRITE_ROWS },
+          );
+          if (payments.length === 0) break;
+          const ids = batchPaymentIds(payments.length);
+          const sent = await sendGroupWrite(
+            groupId,
+            payments.map((payment, index) =>
+              paymentRow({
+                id: ids[index],
+                expenseId: payment.expenseId,
+                from: payment.from,
+                to: payment.to,
+                amount: payment.amount,
+                currency: debt.currency,
+                date: today,
+              }),
+            ),
+          );
+          if (!sent) break;
+          recorded = true;
+          payments.forEach((payment, index) => {
+            if (payment.from === self.id || payment.to === self.id) {
+              paidThrough.set(ids[index], accountId);
+            }
+          });
+          left -= Math.round(paidFrom(payments, debt.from) * 100);
+        }
+        if (!recorded) return;
         projectGroup(groupId, env, { hints: { accounts: paidThrough } });
         void trackEvent(AnalyticsEvents.ALBUM_PAYMENT_RECORDED, {
           direction:
@@ -4511,6 +4543,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       } catch (error) {
         reportError(error, { scope: 'album_group_payment' });
       } finally {
+        settlingDebtsRef.current.delete(settling);
         afterGroupWrite();
       }
     },

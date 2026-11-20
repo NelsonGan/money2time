@@ -3120,6 +3120,8 @@ const da = {
       not_member: 'Du er ikke længere med i albummet, så du kan ikke ændre det.',
       signed_out: 'Log ind igen for at ændre albummet.',
       failed: 'Ændringen i albummet kunne ikke gemmes. Prøv igen.',
+      debt_changed:
+        'Denne gæld er ændret, siden du åbnede den, så intet blev registreret. Se på den igen.',
     },
     line_label: '{{name}}, album',
     category_list: {

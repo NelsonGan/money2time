@@ -871,6 +871,9 @@ async function albumRead(
  * `moneyBase` (`WriteBase`): `409 stale` when the album changed since.
  * Answers `{ok: true}`; everyone's phones are told to sync.
  */
+/** Room for a website change of `MAX_WRITE_ROWS` rows (`groupPlan`), each with its `base`. */
+const MAX_WRITE_BYTES = 1024 * 1024;
+
 async function albumWrite(
   env: Env,
   ledger: SharedLedgerRow,
@@ -885,7 +888,7 @@ async function albumWrite(
     device: unknown;
     via: unknown;
     moneyBase: unknown;
-  }>(request, 512 * 1024);
+  }>(request, MAX_WRITE_BYTES);
   if (!body) return json({ error: 'bad_request' }, 400);
   const via = body.via === 'web' ? 'web' : undefined;
   try {

@@ -3165,6 +3165,8 @@ const de = {
       not_member: 'Du bist nicht mehr in diesem Album und kannst es daher nicht ändern.',
       signed_out: 'Melde dich erneut an, um dieses Album zu ändern.',
       failed: 'Die Änderung an diesem Album konnte nicht gespeichert werden. Versuche es erneut.',
+      debt_changed:
+        'Diese Schuld hat sich geändert, seit du sie geöffnet hast. Es wurde nichts erfasst. Sieh sie dir noch einmal an.',
     },
     line_label: '{{name}}, Album',
     category_list: {
