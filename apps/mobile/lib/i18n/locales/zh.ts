@@ -2268,7 +2268,9 @@ const zh = {
     save_for_month: '保存至 {{month}}',
   },
   pro: {
-    limit_receipt_scans: '免费方案总共包含 {{count}} 次收据扫描。升级到 Pro 即可无限扫描。',
+    limit_receipt_scans: '免费方案每月包含 {{count}} 次收据扫描。升级到 Pro 即可无限扫描。',
+    limit_autolog:
+      '你已用完 {{count}} 次免费 Apple Pay 自动化，最近的付款没有被记录。升级到 Pro 即可无限使用。',
     custom_logos_label: '自定义账户标志',
     items_label: '物品',
     budget_templates_label: '预算模板',
@@ -2572,6 +2574,8 @@ const zh = {
         '这次运行没有收到付款信息，测试时属于正常。如果你刚付款，请打开 Money2Time 手动添加。',
       autolog_test_alert_body:
         '这次运行没有收到通知内容，测试时属于正常。银行通知会显示在 Money2Time 中供你查看。',
+      autolog_limit_body:
+        '你已用完 {{count}} 次免费自动化。在 Money2Time 升级到 Pro 即可无限使用。',
       daily_title: '今天过得怎么样？',
       daily_body: '趁记忆还新鲜，花 30 秒记录一下今天的支出吧。',
       recurring_title: '{{name}} · {{amount}}',

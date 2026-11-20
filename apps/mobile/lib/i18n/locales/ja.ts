@@ -2350,7 +2350,9 @@ const ja = {
   },
   pro: {
     limit_receipt_scans:
-      '無料プランには合計{{count}}回のレシートスキャンが含まれます。無制限にスキャンするにはProにアップグレードしてください。',
+      '無料プランには毎月{{count}}回のレシートスキャンが含まれます。無制限にスキャンするにはProにアップグレードしてください。',
+    limit_autolog:
+      '無料のApple Pay 自動化{{count}}回をすべて使ったため、最近の支払いは記録されませんでした。Proにアップグレードすると無制限に使えます。',
     custom_logos_label: 'カスタム口座ロゴ',
     items_label: 'アイテム',
     budget_templates_label: '予算テンプレート',
@@ -2683,6 +2685,8 @@ const ja = {
         '今回の実行には支払い情報がありませんでした。テストでは正常な動作です。支払ったばかりの場合は、Money2Time を開いて追加してください。',
       autolog_test_alert_body:
         '今回の実行には通知の本文がありませんでした。テストでは正常な動作です。銀行の通知は Money2Time に表示され、確認できます。',
+      autolog_limit_body:
+        '無料の自動化{{count}}回をすべて使いました。Money2TimeでProにアップグレードすると無制限に使えます。',
       daily_title: '今日はどんな一日でしたか？',
       daily_body: '記憶が新しいうちに、30秒だけ今日の支出を記録しましょう。',
       recurring_title: '{{name}} · {{amount}}',

@@ -2395,7 +2395,9 @@ const de = {
   },
   pro: {
     limit_receipt_scans:
-      'Der kostenlose Plan umfasst insgesamt {{count}} Belegscans. Upgrade auf Pro für unbegrenztes Scannen.',
+      'Der kostenlose Plan umfasst {{count}} Belegscans pro Monat. Upgrade auf Pro für unbegrenztes Scannen.',
+    limit_autolog:
+      'Du hast alle {{count}} kostenlosen Apple Pay-Automationen verbraucht, deshalb wurden deine letzten Zahlungen nicht erfasst. Upgrade auf Pro für unbegrenzte Nutzung.',
     custom_logos_label: 'Eigene Kontologos',
     items_label: 'Artikel',
     budget_templates_label: 'Budgetvorlagen',
@@ -2737,6 +2739,8 @@ const de = {
         'Bei diesem Durchlauf kam keine Zahlung mit, das ist bei einem Test normal. Hast du gerade bezahlt, öffne Money2Time und füge sie hinzu.',
       autolog_test_alert_body:
         'Bei diesem Durchlauf kam kein Mitteilungstext mit, das ist bei einem Test normal. Bankmitteilungen erscheinen zur Prüfung in Money2Time.',
+      autolog_limit_body:
+        'Du hast alle {{count}} kostenlosen Automationen verbraucht. Upgrade in Money2Time auf Pro für unbegrenzte Nutzung.',
       daily_title: 'Wie war dein Tag?',
       daily_body: 'Nimm dir 30 Sekunden, um die Ausgaben von heute festzuhalten.',
       recurring_title: '{{name}} · {{amount}}',

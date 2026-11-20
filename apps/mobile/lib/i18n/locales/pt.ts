@@ -2376,7 +2376,9 @@ const pt = {
   },
   pro: {
     limit_receipt_scans:
-      'O plano gratuito inclui {{count}} digitalizações de recibos no total. Faça upgrade para o Pro para digitalizações ilimitadas.',
+      'O plano gratuito inclui {{count}} digitalizações de recibos por mês. Faça upgrade para o Pro para digitalizações ilimitadas.',
+    limit_autolog:
+      'Você usou todas as {{count}} automações gratuitas do Apple Pay, por isso seus últimos pagamentos não foram registrados. Faça upgrade para o Pro para uso ilimitado.',
     custom_logos_label: 'Logos de conta personalizados',
     items_label: 'Itens',
     budget_templates_label: 'Modelos de orçamento',
@@ -2715,6 +2717,8 @@ const pt = {
         'Esta execução não trouxe nenhum pagamento, o que é normal em um teste. Se você acabou de pagar, abra o Money2Time para adicioná-lo.',
       autolog_test_alert_body:
         'Esta execução não trouxe texto de notificação, o que é normal em um teste. As notificações do banco aparecerão no Money2Time para revisão.',
+      autolog_limit_body:
+        'Você usou todas as {{count}} automações gratuitas. Faça upgrade para o Pro no Money2Time para uso ilimitado.',
       daily_title: 'Como foi o seu dia?',
       daily_body: 'Reserve 30 segundos para registrar os gastos de hoje enquanto estão frescos.',
       recurring_title: '{{name}} · {{amount}}',

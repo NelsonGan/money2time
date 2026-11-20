@@ -2394,7 +2394,9 @@ const fil = {
   },
   pro: {
     limit_receipt_scans:
-      'Kasama sa libreng plan ang kabuuang {{count}} pag-scan ng resibo. Mag-upgrade sa Pro para sa walang limitasyong pag-scan.',
+      'Kasama sa libreng plan ang {{count}} pag-scan ng resibo bawat buwan. Mag-upgrade sa Pro para sa walang limitasyong pag-scan.',
+    limit_autolog:
+      'Nagamit mo na ang lahat ng {{count}} libreng Apple Pay Automation, kaya hindi na-log ang mga huli mong bayad. Mag-upgrade sa Pro para sa walang limitasyon.',
     custom_logos_label: 'Custom na logo ng account',
     items_label: 'Mga item',
     budget_templates_label: 'Mga template ng budget',
@@ -2733,6 +2735,8 @@ const fil = {
         'Walang bayad na kasama sa run na ito, na normal sa test. Kung kababayad mo lang, buksan ang Money2Time para idagdag ito.',
       autolog_test_alert_body:
         'Walang text ng notification na kasama sa run na ito, na normal sa test. Lalabas sa Money2Time ang mga notification ng bangko para masuri.',
+      autolog_limit_body:
+        'Nagamit mo na ang lahat ng {{count}} libreng automation. Mag-upgrade sa Pro sa Money2Time para sa walang limitasyon.',
       daily_title: 'Kumusta ang araw mo?',
       daily_body: 'Maglaan ng 30 segundo para i-log ang gastos mo ngayon habang sariwa pa.',
       recurring_title: '{{name}} · {{amount}}',

@@ -2374,7 +2374,9 @@ const pl = {
   },
   pro: {
     limit_receipt_scans:
-      'Plan darmowy obejmuje łącznie {{count}} skanów paragonów. Przejdź na Pro, aby skanować bez ograniczeń.',
+      'Plan darmowy obejmuje {{count}} skanów paragonów miesięcznie. Przejdź na Pro, aby skanować bez ograniczeń.',
+    limit_autolog:
+      'Wykorzystano wszystkie {{count}} darmowych automatyzacji Apple Pay, więc ostatnie płatności nie zostały zapisane. Przejdź na Pro, aby korzystać bez ograniczeń.',
     custom_logos_label: 'Własne logo konta',
     items_label: 'Przedmioty',
     budget_templates_label: 'Szablony budżetu',
@@ -2712,6 +2714,8 @@ const pl = {
         'To uruchomienie nie zawierało płatności, co jest normalne podczas testu. Jeśli właśnie zapłacono, otwórz Money2Time i dodaj ją.',
       autolog_test_alert_body:
         'To uruchomienie nie zawierało tekstu powiadomienia, co jest normalne podczas testu. Powiadomienia z banku pojawią się w Money2Time do przejrzenia.',
+      autolog_limit_body:
+        'Wykorzystano wszystkie {{count}} darmowych automatyzacji. Przejdź na Pro w Money2Time, aby korzystać bez ograniczeń.',
       daily_title: 'Jak minął dzień?',
       daily_body: 'Poświęć 30 sekund, by zapisać dzisiejsze wydatki, póki są świeże.',
       recurring_title: '{{name}} · {{amount}}',

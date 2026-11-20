@@ -15,8 +15,9 @@ import {
   uploadJsonFile,
 } from './googleDriveApi';
 import {
-  ensureGoogleSession,
   getGoogleAccessToken,
+  getGoogleDriveSessionState,
+  type GoogleDriveUnavailableReason,
   isGoogleDriveConfigured,
 } from './googleDriveAuth';
 
@@ -69,12 +70,23 @@ export const googleDriveProvider = {
   target: 'googleDrive' as const,
 
   async isAvailable(): Promise<boolean> {
-    if (!isGoogleDriveConfigured()) return false;
+    return (await googleDriveProvider.unavailableReason()) === null;
+  },
+
+  /**
+   * Null when a backup can go to Drive now; otherwise why not, for analytics.
+   * `no_token` is a restored session whose access token could not be minted.
+   */
+  async unavailableReason(): Promise<
+    GoogleDriveUnavailableReason | 'not_configured' | 'no_token' | null
+  > {
+    if (!isGoogleDriveConfigured()) return 'not_configured';
     // Restores the native session first — after an app restart the account is
     // still remembered but the in-memory session (and therefore the token) is
     // not. See the note in googleDriveAuth.ts.
-    if (!(await ensureGoogleSession())) return false;
-    return Boolean(await getGoogleAccessToken());
+    const state = await getGoogleDriveSessionState();
+    if (state !== 'connected') return state;
+    return (await getGoogleAccessToken()) ? null : 'no_token';
   },
 
   async upload(name: string, json: string): Promise<BackupRecord> {

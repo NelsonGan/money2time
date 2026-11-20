@@ -30,11 +30,13 @@ jest.mock('~/services/autoBackupProviders/googleDriveApi', () => ({
   DriveError: MockDriveError,
 }));
 
-jest.mock('~/services/autoBackupProviders/googleDriveAuth', () => ({
-  ensureGoogleSession: jest.fn(async () => true),
-  getGoogleAccessToken: jest.fn(async () => 'token'),
+const auth = {
+  getGoogleDriveSessionState: jest.fn(async (): Promise<string> => 'connected'),
+  getGoogleAccessToken: jest.fn(async (): Promise<string | null> => 'token'),
   isGoogleDriveConfigured: jest.fn(() => true),
-}));
+};
+
+jest.mock('~/services/autoBackupProviders/googleDriveAuth', () => auth);
 
 import {
   googleDriveProvider,
@@ -183,5 +185,32 @@ describe('folder creation', () => {
       googleDriveProvider.upload('money2time_AUTO_2026-07-01T10-00-00.json', '{}'),
     ).rejects.toMatchObject({ kind: 'offline' });
     expect(api.uploadJsonFile).not.toHaveBeenCalled();
+  });
+});
+
+describe('availability', () => {
+  it('is available with a connected session and a token', async () => {
+    await expect(googleDriveProvider.unavailableReason()).resolves.toBeNull();
+    await expect(googleDriveProvider.isAvailable()).resolves.toBe(true);
+  });
+
+  it('says why the session cannot reach Drive', async () => {
+    auth.getGoogleDriveSessionState.mockResolvedValueOnce('no_drive_access');
+
+    await expect(googleDriveProvider.unavailableReason()).resolves.toBe('no_drive_access');
+    expect(auth.getGoogleAccessToken).not.toHaveBeenCalled();
+  });
+
+  it('reports a session that could not mint a token', async () => {
+    auth.getGoogleAccessToken.mockResolvedValueOnce(null);
+
+    await expect(googleDriveProvider.unavailableReason()).resolves.toBe('no_token');
+  });
+
+  it('reports a build without a Google client id', async () => {
+    auth.isGoogleDriveConfigured.mockReturnValueOnce(false).mockReturnValueOnce(false);
+
+    await expect(googleDriveProvider.unavailableReason()).resolves.toBe('not_configured');
+    await expect(googleDriveProvider.isAvailable()).resolves.toBe(false);
   });
 });

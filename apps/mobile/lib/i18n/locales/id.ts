@@ -2379,7 +2379,9 @@ const id = {
   },
   pro: {
     limit_receipt_scans:
-      'Paket gratis mencakup total {{count}} pemindaian struk. Tingkatkan ke Pro untuk pemindaian tanpa batas.',
+      'Paket gratis mencakup {{count}} pemindaian struk per bulan. Tingkatkan ke Pro untuk pemindaian tanpa batas.',
+    limit_autolog:
+      'Anda sudah memakai semua {{count}} otomatisasi Apple Pay gratis, jadi pembayaran terakhir Anda tidak tercatat. Tingkatkan ke Pro untuk tanpa batas.',
     custom_logos_label: 'Logo akun khusus',
     items_label: 'Barang',
     budget_templates_label: 'Templat anggaran',
@@ -2715,6 +2717,8 @@ const id = {
         'Tidak ada pembayaran dalam proses ini, hal yang wajar saat pengujian. Jika Anda baru saja membayar, buka Money2Time untuk menambahkannya.',
       autolog_test_alert_body:
         'Tidak ada teks notifikasi dalam proses ini, hal yang wajar saat pengujian. Notifikasi bank akan muncul di Money2Time untuk ditinjau.',
+      autolog_limit_body:
+        'Anda sudah memakai semua {{count}} otomatisasi gratis. Tingkatkan ke Pro di Money2Time untuk tanpa batas.',
       daily_title: 'Bagaimana harimu?',
       daily_body: 'Luangkan 30 detik untuk mencatat pengeluaran hari ini selagi masih ingat.',
       recurring_title: '{{name}} · {{amount}}',

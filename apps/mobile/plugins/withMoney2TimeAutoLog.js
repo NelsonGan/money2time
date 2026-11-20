@@ -44,6 +44,12 @@ const SCANS_DIR = 'autolog-scans';
  * logs spending to the account the user selected when the app next runs.
  */
 const PENDING_ALERTS_KEY = 'autolog_pending_alerts';
+/**
+ * Payments Log Card Payment refused because the free automatic logs were used
+ * up, as JSON `{ "count": n, "lastAt": iso }`. The app reads it on foreground
+ * to open the paywall (features/autoLog/lib/limitPrompt.ts), then clears it.
+ */
+const LIMIT_BLOCKED_KEY = 'autolog_limit_blocked';
 /** Alerts kept while the app stays closed; the oldest go first beyond this. */
 const MAX_PENDING_ALERTS = 200;
 /** Characters kept per field: an app notification is usually a sentence or two. */
@@ -170,6 +176,7 @@ enum AutoLogStore {
   static let pendingKey = "${PENDING_KEY}"
   static let pendingScansKey = "${PENDING_SCANS_KEY}"
   static let pendingAlertsKey = "${PENDING_ALERTS_KEY}"
+  static let limitBlockedKey = "${LIMIT_BLOCKED_KEY}"
   static let maxPendingAlerts = ${MAX_PENDING_ALERTS}
   static let maxAlertText = ${MAX_ALERT_TEXT}
   static let scansDirName = "${SCANS_DIR}"
@@ -219,6 +226,9 @@ enum AutoLogStore {
     let testNotificationTitle: String?
     let testCardPaymentBody: String?
     let testNotificationAlertBody: String?
+    /// Localized error for a tap past the free limit. Optional for the same
+    /// reason; \`AutoLogError.limitReached\` falls back to English without it.
+    let limitReachedMessage: String?
     /// Whether the Category picker offers subcategories. Optional for the same
     /// reason; nil means "no preference recorded", which shows everything.
     let includeSubcategories: Bool?
@@ -622,6 +632,39 @@ enum AutoLogStore {
     savePending(loadPending().filter { !removing.contains($0.id) })
   }
 
+  /// A payment refused at the free limit: how many so far, and the latest.
+  struct LimitBlocked: Codable {
+    let count: Int
+    let lastAt: String
+  }
+
+  /// Count a real payment the free limit turned away, so the app can open the
+  /// paywall the next time it comes to the foreground. Nothing else about the
+  /// payment is kept: the app never posts it, so it must not hold its details.
+  static func recordLimitBlocked() {
+    var count = 0
+    if let json = defaults?.string(forKey: limitBlockedKey),
+      let data = json.data(using: .utf8),
+      let previous = try? JSONDecoder().decode(LimitBlocked.self, from: data)
+    {
+      count = previous.count
+    }
+    let record = LimitBlocked(count: count + 1, lastAt: isoFormatter.string(from: Date()))
+    guard
+      let data = try? JSONEncoder().encode(record),
+      let json = String(data: data, encoding: .utf8)
+    else {
+      return
+    }
+    defaults?.set(json, forKey: limitBlockedKey)
+    defaults?.synchronize()
+  }
+
+  static func clearLimitBlocked() {
+    defaults?.removeObject(forKey: limitBlockedKey)
+    defaults?.synchronize()
+  }
+
   /// Post one local notification right away. Never asks for permission: the
   /// app owns that prompt, and if it was not granted iOS simply drops this.
   /// Deliberately fire-and-forget: a failed notification must never fail the
@@ -699,14 +742,19 @@ enum AutoLogStore {
 
 enum AutoLogError: Error, CustomLocalizedStringResourceConvertible {
   case notReady
-  case limitReached
+  /// Carries the catalog's localized message; nil falls back to English.
+  case limitReached(String?)
   case screenshotFailed
 
   var localizedStringResource: LocalizedStringResource {
     switch self {
     case .notReady:
       return "Open Money2Time once to finish setting up Automation."
-    case .limitReached:
+    case .limitReached(let message):
+      if let message = message, !message.isEmpty {
+        // Already translated by the app: shown as is (no table has this key).
+        return LocalizedStringResource(stringLiteral: message)
+      }
       return "You have used all your free automations. Upgrade to Pro in Money2Time for unlimited."
     case .screenshotFailed:
       return "Couldn't read that screenshot. Try sharing it to Money2Time again."
@@ -868,8 +916,9 @@ struct LogCardPaymentIntent: AppIntent {
       // the limit error a real tap would get. A tap that still names a merchant
       // or card is a real payment and keeps the failure alert below.
       if AutoLogStore.isTestRun(merchant, card) {
+        // A test is not a payment, so it is not counted as a refused one.
         if AutoLogStore.remaining(catalog: catalog) <= 0 {
-          throw AutoLogError.limitReached
+          throw AutoLogError.limitReached(catalog.limitReachedMessage)
         }
         AutoLogStore.notifyTestRun(
           catalog: catalog,
@@ -898,7 +947,10 @@ struct LogCardPaymentIntent: AppIntent {
     // answers the prompt on their last free auto-log, discarding their pick.
     let isRerun = mergeIntoId != nil
     if !isRerun, AutoLogStore.remaining(catalog: catalog) <= 0 {
-      throw AutoLogError.limitReached
+      // Record it before throwing: the intent cannot open the app, so this is
+      // how the app learns to offer Pro when it next comes to the foreground.
+      AutoLogStore.recordLimitBlocked()
+      throw AutoLogError.limitReached(catalog.limitReachedMessage)
     }
 
     // Queue first, ask second. This is what makes the tap survive an ignored
@@ -1228,6 +1280,28 @@ class Money2TimeAutoLog: NSObject {
     resolve(defaults.string(forKey: AutoLogStore.pendingKey))
   }
 
+  @objc(readLimitBlocked:rejecter:)
+  func readLimitBlocked(
+    _ resolve: RCTPromiseResolveBlock,
+    rejecter reject: RCTPromiseRejectBlock
+  ) {
+    guard let defaults = AutoLogStore.defaults else {
+      reject("autolog_app_group_unavailable", "Money2Time App Group is unavailable.", nil)
+      return
+    }
+
+    resolve(defaults.string(forKey: AutoLogStore.limitBlockedKey))
+  }
+
+  @objc(clearLimitBlocked:rejecter:)
+  func clearLimitBlocked(
+    _ resolve: RCTPromiseResolveBlock,
+    rejecter reject: RCTPromiseRejectBlock
+  ) {
+    AutoLogStore.clearLimitBlocked()
+    resolve(nil)
+  }
+
   @objc(clearPending:resolver:rejecter:)
   func clearPending(
     _ ids: [String],
@@ -1387,6 +1461,12 @@ RCT_EXTERN_METHOD(clearPending:(NSArray *)ids
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
+RCT_EXTERN_METHOD(readLimitBlocked:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(clearLimitBlocked:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
 RCT_EXTERN_METHOD(readPendingScans:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
@@ -1523,3 +1603,6 @@ module.exports.LOG_PAYMENT_ALERT_INTENT_SWIFT = LOG_PAYMENT_ALERT_INTENT_SWIFT;
 module.exports.AUTO_LOG_STORE_SWIFT = AUTO_LOG_STORE_SWIFT;
 module.exports.LOG_CARD_PAYMENT_INTENT_SWIFT = LOG_CARD_PAYMENT_INTENT_SWIFT;
 module.exports.AUTO_LOG_ENTITIES_SWIFT = AUTO_LOG_ENTITIES_SWIFT;
+module.exports.LIMIT_BLOCKED_KEY = LIMIT_BLOCKED_KEY;
+module.exports.AUTO_LOG_MODULE_SWIFT = AUTO_LOG_MODULE_SWIFT;
+module.exports.AUTO_LOG_MODULE_OBJC = AUTO_LOG_MODULE_OBJC;

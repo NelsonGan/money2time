@@ -31,7 +31,9 @@ const TABLES: Record<Meter, string> = {
   notification: 'notification_review_usage',
 };
 
-// Free is a lifetime allowance (100-year window reuses the 'year' unit).
+// Free scans are a monthly allowance; free notification reviews are a lifetime
+// one (a 100-year window reuses the 'year' unit).
+const FREE_SCAN_FALLBACK: Interval = { count: 1, unit: 'month' };
 const FREE_FALLBACK: Interval = { count: 100, unit: 'year' };
 // Pro monthly cap is a fair-use ceiling — the paywall advertises unlimited.
 const PRO_FALLBACK: Interval = { count: 1, unit: 'month' };
@@ -53,7 +55,10 @@ function tierConfig(isPro: boolean, env: Env, meter: Meter): TierConfig {
   if (isPro) {
     return { limit: Number(env.PRO_LIMIT) || 500, interval: toInterval(env.PRO_INTERVAL, PRO_FALLBACK) };
   }
-  return { limit: Number(env.FREE_LIMIT) || 20, interval: toInterval(env.FREE_INTERVAL, FREE_FALLBACK) };
+  return {
+    limit: Number(env.FREE_LIMIT) || 20,
+    interval: toInterval(env.FREE_INTERVAL, FREE_SCAN_FALLBACK),
+  };
 }
 
 // Whether a scan is allowed for this user right now, without consuming quota.

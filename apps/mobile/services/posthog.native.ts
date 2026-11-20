@@ -8,8 +8,10 @@
  * "PostHog event budget" assumes only the events the app sends deliberately.
  */
 
+import { getUtils } from '@react-native-firebase/app';
 import Constants from 'expo-constants';
 import { PostHog, type PostHogOptions } from 'posthog-react-native';
+import { Platform } from 'react-native';
 
 import { POSTHOG_HOST, POSTHOG_PROJECT_TOKEN } from '~/constants/posthog';
 
@@ -19,13 +21,30 @@ import { beforeSendException } from './errorReporting.shared';
 const IS_DEVELOPMENT = typeof __DEV__ !== 'undefined' && __DEV__;
 
 /**
- * `development`, `preview` or `production`, from the EAS build profile. A
- * development bundle always reports `development`: local Metro serves a
+ * Whether this run is a Firebase Test Lab device, which is what Google Play's
+ * pre-launch report runs every uploaded build on. Firebase reads the Android
+ * `firebase.test.lab` system setting; iOS always answers false. A failure to
+ * ask reads as a real device, so a broken check can never hide real users.
+ */
+function isRunningInTestLab(): boolean {
+  if (Platform.OS !== 'android') return false;
+  try {
+    return getUtils().isRunningInTestLab === true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * `development`, `preview` or `production`, from the EAS build profile, or
+ * `test_lab` for a store build Google Play runs on its pre-launch test devices.
+ * A development bundle always reports `development`: local Metro serves a
  * manifest evaluated without `APP_VARIANT`, which would otherwise read as
  * production and slip past the test-account filter.
  */
 export function getAppVariant(): string {
   if (IS_DEVELOPMENT) return 'development';
+  if (isRunningInTestLab()) return 'test_lab';
   const variant = Constants.expoConfig?.extra?.appVariant;
   return typeof variant === 'string' && variant ? variant : 'production';
 }
