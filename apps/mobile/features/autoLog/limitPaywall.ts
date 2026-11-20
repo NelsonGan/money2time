@@ -27,21 +27,21 @@ async function readLastPromptAt(): Promise<number | null> {
  * What a refused payment was refused for. The intent only knows it had nothing
  * `remaining`, which is also the case for a free member over the free account
  * limit (a lapsed Pro member): that one gets the accounts paywall, not a claim
- * that their automatic logs are used up.
+ * that their automatic logs are used up (see `autoLogBlockedByAccounts`).
  */
-export function autoLogLimitPaywall(usedAutoLogs: number): {
+export function autoLogLimitPaywall(blockedByAccounts: boolean): {
   source: string;
   message: string;
 } {
-  if (usedAutoLogs >= PRO_LIMITS.FREE_MAX_AUTO_LOGS) {
+  if (blockedByAccounts) {
     return {
-      source: AUTO_LOG_LIMIT_PAYWALL_SOURCE,
-      message: I18n.t('pro.limit_autolog', { count: PRO_LIMITS.FREE_MAX_AUTO_LOGS }),
+      source: 'accounts_transaction',
+      message: I18n.t('pro.limit_accounts', { count: PRO_LIMITS.FREE_MAX_ACCOUNTS }),
     };
   }
   return {
-    source: 'accounts_transaction',
-    message: I18n.t('pro.limit_accounts', { count: PRO_LIMITS.FREE_MAX_ACCOUNTS }),
+    source: AUTO_LOG_LIMIT_PAYWALL_SOURCE,
+    message: I18n.t('pro.limit_autolog', { count: PRO_LIMITS.FREE_MAX_AUTO_LOGS }),
   };
 }
 
@@ -53,7 +53,7 @@ export function autoLogLimitPaywall(usedAutoLogs: number): {
  * that races the navigator's mount tries again on the next one.
  */
 export async function promptForAutoLogLimit(
-  input: { isPro: boolean; usedAutoLogs: number },
+  input: { isPro: boolean; blockedByAccounts: boolean },
   now = Date.now(),
 ): Promise<void> {
   const blocked = await readAutoLogLimitBlocked();
@@ -70,7 +70,7 @@ export async function promptForAutoLogLimit(
   }
   if (decision !== 'prompt') return;
 
-  const { source, message } = autoLogLimitPaywall(input.usedAutoLogs);
+  const { source, message } = autoLogLimitPaywall(input.blockedByAccounts);
   if (!requestOpenPaywall(source, message)) return;
   await AsyncStorage.setItem(LAST_PROMPT_KEY, String(now)).catch(() => undefined);
   await clearAutoLogLimitBlocked();

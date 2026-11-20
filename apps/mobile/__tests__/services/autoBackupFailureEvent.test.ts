@@ -179,3 +179,34 @@ it('sends no reason for a target that cannot give one', async () => {
     expect.objectContaining({ error_kind: 'unavailable', drive_reason: null }),
   );
 });
+
+it('writes no phone copy for a failure that usually passes, so Drive is retried later', async () => {
+  drive.upload.mockRejectedValue(new DriveError('timeout', 'timed out', null, null));
+
+  // Manual, so the six-hour backoff an earlier case left behind does not skip it.
+  const result = await runAutoBackupIfDue({ force: true });
+
+  expect(local.upload).not.toHaveBeenCalled();
+  expect(result.written).toEqual([]);
+  expect(settings.lastAutoBackupAt).toBeNull();
+  expect(trackEvent).toHaveBeenCalledWith(
+    'Auto Backup Failed',
+    expect.objectContaining({ error_kind: 'timeout', fell_back_to_local: false }),
+  );
+});
+
+it('keeps why Drive was unreachable when the phone write fails too', async () => {
+  drive.unavailableReason.mockResolvedValue('signed_out');
+  local.upload.mockRejectedValue(new Error('disk full'));
+
+  await runAutoBackupIfDue({ force: true });
+
+  expect(trackEvent).toHaveBeenCalledWith(
+    'Auto Backup Failed',
+    expect.objectContaining({
+      error_count: 2,
+      error_kind: 'unavailable',
+      drive_reason: 'signed_out',
+    }),
+  );
+});

@@ -8,7 +8,6 @@
  * "PostHog event budget" assumes only the events the app sends deliberately.
  */
 
-import { getUtils } from '@react-native-firebase/app';
 import Constants from 'expo-constants';
 import { PostHog, type PostHogOptions } from 'posthog-react-native';
 import { Platform } from 'react-native';
@@ -29,7 +28,13 @@ const IS_DEVELOPMENT = typeof __DEV__ !== 'undefined' && __DEV__;
 function isRunningInTestLab(): boolean {
   if (Platform.OS !== 'android') return false;
   try {
-    return getUtils().isRunningInTestLab === true;
+    // Lazy, like the Firebase Analytics client: a bundle running without the
+    // native module (Expo Go, an older binary) must not fail at module load.
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const firebase = require('@react-native-firebase/app') as {
+      getUtils: () => { isRunningInTestLab?: boolean };
+    };
+    return firebase.getUtils().isRunningInTestLab === true;
   } catch {
     return false;
   }

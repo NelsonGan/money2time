@@ -1,6 +1,11 @@
 import { PRO_LIMITS } from '~/constants/proLimits';
 import { resolveAlertCategory } from '~/features/autoLog/lib/categorize';
-import { autoLogAllowance, decideCapture, type DecisionInput } from '~/features/autoLog/lib/decide';
+import {
+  autoLogAllowance,
+  autoLogBlockedByAccounts,
+  decideCapture,
+  type DecisionInput,
+} from '~/features/autoLog/lib/decide';
 import { alertDedupeKey, type CaptureRef, findDuplicate } from '~/features/autoLog/lib/dedupe';
 
 import { account, alertParse, category, source } from './helpers';
@@ -88,6 +93,24 @@ describe('decideCapture', () => {
         usedAutoLogs: 0,
       }),
     ).toBe(PRO_LIMITS.FREE_MAX_AUTO_LOGS);
+  });
+
+  it('says when the account limit, not the used count, is what blocks', () => {
+    const accounts = (count: number) =>
+      Array.from({ length: count }, (_, index) => account({ id: `a${index}` }));
+    expect(autoLogBlockedByAccounts({ accounts: accounts(PRO_LIMITS.FREE_MAX_ACCOUNTS) })).toBe(
+      false,
+    );
+    expect(autoLogBlockedByAccounts({ accounts: accounts(PRO_LIMITS.FREE_MAX_ACCOUNTS + 1) })).toBe(
+      true,
+    );
+    // A shared ledger's accounts do not count against the limit.
+    expect(
+      autoLogBlockedByAccounts({
+        accounts: accounts(PRO_LIMITS.FREE_MAX_ACCOUNTS + 1),
+        inSharedLedger: true,
+      }),
+    ).toBe(false);
   });
 
   it('ignores scanner discards and legacy non-transaction kinds', () => {

@@ -5,9 +5,9 @@
  * The App Intent runs in the background and cannot open the app, so it records
  * each refused payment in the App Group (`autolog_limit_blocked`, see
  * plugins/withMoney2TimeAutoLog.js) and throws the limit error the Shortcut
- * shows. The next time the app comes to the foreground, the auto-log drain
- * reads that record and opens the paywall (source `autolog`), at most once per
- * `AUTO_LOG_LIMIT_PROMPT_INTERVAL_MS`.
+ * shows. The next time the app comes to the foreground, `AutoLogLimitPrompt`
+ * (components/AutoLogLimitPrompt.tsx) reads that record and opens the paywall
+ * (source `autolog`), at most once per `AUTO_LOG_LIMIT_PROMPT_INTERVAL_MS`.
  */
 
 /** What the App Intent recorded: how many payments it refused, and the latest. */
@@ -17,7 +17,10 @@ export interface AutoLogLimitBlocked {
   lastAt: string;
 }
 
-/** The paywall shows at most once a day, however many payments were refused. */
+/**
+ * The paywall shows at most once every 20 hours, however many payments were
+ * refused: about once a day, without drifting later each day.
+ */
 export const AUTO_LOG_LIMIT_PROMPT_INTERVAL_MS = 20 * 60 * 60 * 1000;
 
 /** Parse the App Group record; anything unreadable counts as no record. */

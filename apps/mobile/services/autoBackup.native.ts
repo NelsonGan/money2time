@@ -155,20 +155,30 @@ export async function runAutoBackupIfDue(opts?: { force?: boolean }): Promise<Ba
       } catch (e) {
         errors.push(describeBackupError(target, e));
         errorKinds.push(backupErrorKind(e));
-        lastFailure = driveFailureDetails(e);
+        // The phone write after an unreachable cloud target keeps the reason
+        // that target gave (signed out, no Drive access) rather than its own.
+        if (target !== 'local' || lastFailure.driveReason === null) {
+          lastFailure = driveFailureDetails(e);
+        }
       }
       if (target === 'local') continue;
-      // A Drive that is full, refuses this account or drops the upload used to
+      // A failure that usually passes (offline, timeout, rate limit, server,
+      // aborted) writes nothing, as before: the run stays due and the six-hour
+      // backoff tries the cloud again later today.
+      if (TRANSIENT_BACKUP_ERROR_KINDS.has(errorKinds[errorKinds.length - 1])) continue;
+      // A Drive that is full, refuses this account or rejects the upload used to
       // leave nothing written anywhere, so the backup stayed due and every
       // automatic run six hours later failed and reported the same way again.
       // Keep the day's copy on the phone, as an unreachable target does. The
-      // cloud failure stays the reported one, even if this write fails too.
+      // cloud failure stays the reported one (`error_kind` is the first kind),
+      // even if this write fails too.
       try {
         written.push(await localProvider.upload(name, json));
         savedOnDeviceAfterFailure = true;
         await rotate(localProvider);
       } catch (e) {
         errors.push(describeBackupError('local', e));
+        errorKinds.push(backupErrorKind(e));
       }
     }
 
@@ -188,7 +198,9 @@ export async function runAutoBackupIfDue(opts?: { force?: boolean }): Promise<Ba
         target: settings.autoBackupTarget,
         trigger: opts?.force ? 'manual' : 'automatic',
         error_count: errors.length,
-        error_kind: errorKinds[errorKinds.length - 1] ?? 'unknown',
+        // The first kind is the cause: the cloud target's, not the phone
+        // write's that followed it.
+        error_kind: errorKinds[0] ?? 'unknown',
         fell_back_to_local: Boolean(fellBackToLocalFrom) || savedOnDeviceAfterFailure,
         http_status: lastFailure.httpStatus,
         drive_reason: lastFailure.driveReason,
@@ -249,6 +261,15 @@ function describeBackupError(target: BackupTarget, error: unknown): string {
  * A short reason for analytics: the Drive error kind, `aborted` for a cancelled
  * request, `unknown` otherwise. Never the message, which can carry a file path.
  */
+/** Cloud failures that usually pass on their own; they get no phone copy. */
+const TRANSIENT_BACKUP_ERROR_KINDS: ReadonlySet<string> = new Set([
+  'offline',
+  'timeout',
+  'rate_limited',
+  'server',
+  'aborted',
+]);
+
 function backupErrorKind(error: unknown): string {
   if (error instanceof DriveError) return error.kind;
   if (error instanceof Error && error.name === 'AbortError') return 'aborted';

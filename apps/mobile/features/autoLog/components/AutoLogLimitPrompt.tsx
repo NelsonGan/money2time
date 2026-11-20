@@ -3,9 +3,12 @@ import { AppState } from 'react-native';
 
 import { useApp } from '~/context/AppContext';
 import { usePro } from '~/context/ProContext';
+import { useOpenLedgerSharedAndActive } from '~/features/sharedLedgers/hooks/useSharedLedgers';
 import { isAutoLogSupported } from '~/services/autoLog';
 import { reportError } from '~/services/errorReporting';
+import { isAnyPromptVisible } from '~/services/globalPromptCoordinator';
 
+import { autoLogBlockedByAccounts } from '../lib/decide';
 import { promptForAutoLogLimit } from '../limitPaywall';
 
 /**
@@ -24,17 +27,21 @@ const PROMPT_DELAY_MS = 1500;
  * waits for the same gate: `allowed` is false behind the biometric lock, over a
  * modal route that is still presenting or dismissing, while another prompt
  * shows (stacking two native modals has frozen the app before) and until the
- * navigator is ready. It also waits for a confirmed Pro status, so the `false`
+ * navigator is ready. When the timer fires it also yields to any prompt the
+ * global prompt coordinator reports (the review pre-prompt, the Cloud Sync
+ * prompt), keeping the record for the next foreground. It also waits for a confirmed Pro status, so the `false`
  * placeholder RevenueCat starts with can never show it to a Pro member. Renders
  * nothing.
  */
 export function AutoLogLimitPrompt({ allowed }: { allowed: boolean }) {
-  const { quickEntryPrefs } = useApp();
+  const { accounts } = useApp();
   const { isPro, isStatusKnown } = usePro();
+  const inSharedLedger = useOpenLedgerSharedAndActive();
   const ready = allowed && isStatusKnown && isAutoLogSupported();
 
-  const latest = useRef({ isPro, usedAutoLogs: quickEntryPrefs.autoLogUsageCount });
-  latest.current = { isPro, usedAutoLogs: quickEntryPrefs.autoLogUsageCount };
+  const blockedByAccounts = autoLogBlockedByAccounts({ accounts, inSharedLedger });
+  const latest = useRef({ isPro, blockedByAccounts });
+  latest.current = { isPro, blockedByAccounts };
   const runningRef = useRef(false);
 
   useEffect(() => {
@@ -53,7 +60,7 @@ export function AutoLogLimitPrompt({ allowed }: { allowed: boolean }) {
       if (timer) clearTimeout(timer);
       timer = setTimeout(() => {
         timer = null;
-        if (AppState.currentState === 'active') check();
+        if (AppState.currentState === 'active' && !isAnyPromptVisible()) check();
       }, PROMPT_DELAY_MS);
     };
     // Once when the gate opens (launch, a closed modal), then on every

@@ -78,6 +78,23 @@ export function decideCapture(input: DecisionInput): CaptureDecision {
  * account over its account limit cannot add transactions by hand, so alerts do
  * not add them either. The existing automatic-log cap still applies.
  */
+/**
+ * Whether the free account limit is what stops automatic logs: a free account
+ * over the limit cannot add transactions, by hand or automatically, whatever
+ * automatic logs it has left. The limit message and paywall follow this, not
+ * the used count, which lags behind taps queued while the app was closed.
+ */
+export function autoLogBlockedByAccounts(input: {
+  accounts: readonly Account[];
+  inSharedLedger?: boolean;
+}): boolean {
+  return isNewTransactionBlockedByAccounts(
+    false,
+    countAccountsTowardFreeLimit(input.accounts),
+    input.inSharedLedger,
+  );
+}
+
 export function autoLogAllowance(input: {
   isPro: boolean;
   accounts: readonly Account[];
@@ -86,14 +103,6 @@ export function autoLogAllowance(input: {
   inSharedLedger?: boolean;
 }): number | null {
   if (input.isPro) return null;
-  if (
-    isNewTransactionBlockedByAccounts(
-      false,
-      countAccountsTowardFreeLimit(input.accounts),
-      input.inSharedLedger,
-    )
-  ) {
-    return 0;
-  }
+  if (autoLogBlockedByAccounts(input)) return 0;
   return Math.max(0, PRO_LIMITS.FREE_MAX_AUTO_LOGS - input.usedAutoLogs);
 }

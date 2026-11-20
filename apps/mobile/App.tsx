@@ -80,6 +80,7 @@ import {
 import { checkApplePayTap, recordApplePayTap } from '~/features/autoLog/applePayTaps';
 import { AutoLogLimitPrompt } from '~/features/autoLog/components/AutoLogLimitPrompt';
 import { PaymentAlertSync } from '~/features/autoLog/components/PaymentAlertSync';
+import { autoLogBlockedByAccounts } from '~/features/autoLog/lib/decide';
 import { AutoLogLimitError } from '~/features/autoLog/persistTransaction';
 import { NotificationHistoryScreen } from '~/features/autoLog/screens/NotificationHistoryScreen';
 import { NotificationReviewEditorScreen } from '~/features/autoLog/screens/NotificationReviewEditorScreen';
@@ -1749,14 +1750,13 @@ function AutoLogSync() {
   const testNotificationTitle = I18n.t('notifications.content.autolog_test_title');
   const testCardPaymentBody = I18n.t('notifications.content.autolog_test_card_body');
   const testNotificationAlertBody = I18n.t('notifications.content.autolog_test_alert_body');
-  // The error a refused tap shows. Nothing `remaining` with free auto-logs
-  // left means the free account limit is what blocks (see autoLogAllowance).
-  const limitReachedMessage =
-    quickEntryPrefs.autoLogUsageCount >= PRO_LIMITS.FREE_MAX_AUTO_LOGS
-      ? I18n.t('notifications.content.autolog_limit_body', {
-          count: PRO_LIMITS.FREE_MAX_AUTO_LOGS,
-        })
-      : I18n.t('pro.limit_accounts', { count: PRO_LIMITS.FREE_MAX_ACCOUNTS });
+  // The error a refused tap shows: the account limit when that is what blocks,
+  // otherwise used-up automatic logs (including taps queued while closed).
+  const limitReachedMessage = autoLogBlockedByAccounts({ accounts, inSharedLedger })
+    ? I18n.t('pro.limit_accounts', { count: PRO_LIMITS.FREE_MAX_ACCOUNTS })
+    : I18n.t('notifications.content.autolog_limit_body', {
+        count: PRO_LIMITS.FREE_MAX_AUTO_LOGS,
+      });
 
   // Guards against overlapping drains; see `drain` below.
   const stateRef = useRef({
