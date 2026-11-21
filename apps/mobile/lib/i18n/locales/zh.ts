@@ -144,6 +144,17 @@ const zh = {
     },
   },
   news: {
+    free_scans_locations: {
+      title: '更多免费扫描与位置标记',
+      freeScans: {
+        title: '每月 %{count} 次免费收据扫描',
+        body: '免费版用户现在每月享有 %{count} 次收据扫描，每月自动重置。点击扫描收据拍照或从相册选取收据，Money2Time 会自动填写商户、金额、日期和分类。Pro 版依然不限次数。',
+      },
+      locations: {
+        title: '为交易标记消费地点',
+        body: '在设置 > 个性化中开启位置，即可为支出和收入记录消费地点。新增支出时可自动标记当前位置，也可搜索或选择最近地点。在日历中打开消费地图，一眼看清钱都花在哪里。',
+      },
+    },
     split_bills_album_icons: {
       title: '共享相册与分摊账单',
       sharedAlbums: {

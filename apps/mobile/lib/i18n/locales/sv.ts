@@ -171,6 +171,17 @@ const sv = {
     reset_action: 'Radera och byt',
   },
   news: {
+    free_scans_locations: {
+      title: 'Fler gratisskanningar och platser',
+      freeScans: {
+        title: '%{count} gratis kvittoskanningar i månaden',
+        body: 'Alla med gratisplanen får nu %{count} kvittoskanningar varje månad, som fylls på månadsvis. Ta ett foto eller välj kvitton från ditt album under Skanna kvitto, så fyller Money2Time i butik, belopp, datum och kategori åt dig. Pro är fortsatt obegränsat.',
+      },
+      locations: {
+        title: 'Tagga transaktioner med platser',
+        body: 'Slå på Platser under Inställningar > Personalisering för att tagga utgifter och inkomster med var de skedde. Nya utgifter kan taggas automatiskt med din nuvarande plats, eller välj en plats via sökning eller senaste platser. Öppna Utgiftskarta från Kalendern för att se vart pengarna tar vägen.',
+      },
+    },
     split_bills_album_icons: {
       title: 'Delade album och delade notor',
       sharedAlbums: {

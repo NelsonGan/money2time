@@ -171,6 +171,17 @@ const ms = {
     reset_action: 'Padam & tukar',
   },
   news: {
+    free_scans_locations: {
+      title: 'Lebih imbasan percuma dan lokasi',
+      freeScans: {
+        title: '%{count} imbasan resit percuma sebulan',
+        body: 'Pengguna pelan percuma kini mendapat %{count} imbasan resit setiap bulan, diperbaharui setiap bulan. Ambil gambar atau pilih resit dari album melalui Imbas resit, dan Money2Time mengisi peniaga, jumlah, tarikh dan kategori untuk anda. Pro kekal tanpa had.',
+      },
+      locations: {
+        title: 'Tag transaksi dengan lokasi',
+        body: 'Hidupkan Lokasi di Tetapan > Penyesuaian untuk menambah tempat pada perbelanjaan dan pendapatan. Perbelanjaan baharu boleh menag lokasi semasa anda secara automatik, atau pilih tempat daripada carian dan lokasi terkini. Buka Peta perbelanjaan dari Kalendar untuk melihat ke mana wang anda dibelanjakan.',
+      },
+    },
     split_bills_album_icons: {
       title: 'Album dikongsi dan bil dibahagi',
       sharedAlbums: {

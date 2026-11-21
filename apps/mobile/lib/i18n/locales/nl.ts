@@ -171,6 +171,17 @@ const nl = {
     reset_action: 'Verwijderen en wisselen',
   },
   news: {
+    free_scans_locations: {
+      title: 'Meer gratis scans en locaties',
+      freeScans: {
+        title: '%{count} gratis bonscans per maand',
+        body: 'Met het gratis abonnement krijg je nu %{count} bonscans per maand, die elke maand worden vernieuwd. Maak een foto of kies bonnen uit je album via Bon scannen, en Money2Time vult winkel, bedrag, datum en categorie voor je in. Pro blijft onbeperkt.',
+      },
+      locations: {
+        title: 'Tag transacties met plaatsen',
+        body: 'Zet Locaties aan via Instellingen > Personalisatie om een plaats aan uitgaven en inkomsten toe te voegen. Nieuwe uitgaven kunnen automatisch je huidige locatie krijgen, of kies een plek via zoeken of recente plaatsen. Open de Uitgavenkaart vanuit de Kalender om te zien waar je geld naartoe gaat.',
+      },
+    },
     split_bills_album_icons: {
       title: 'Gedeelde albums en gesplitste rekeningen',
       sharedAlbums: {

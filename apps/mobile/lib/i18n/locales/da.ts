@@ -171,6 +171,17 @@ const da = {
     reset_action: 'Slet og skift',
   },
   news: {
+    free_scans_locations: {
+      title: 'Flere gratis scanninger og steder',
+      freeScans: {
+        title: '%{count} gratis kvitteringsscanninger om måneden',
+        body: 'Alle på den gratis plan får nu %{count} kvitteringsscanninger hver måned, som nulstilles hver måned. Tag et billede eller vælg kvitteringer fra dit album under Scan kvittering, så udfylder Money2Time forretning, beløb, dato og kategori for dig. Pro er fortsat ubegrænset.',
+      },
+      locations: {
+        title: 'Mærk transaktioner med steder',
+        body: 'Slå Steder til under Indstillinger > Personalisering for at mærke udgifter og indtægter med, hvor de fandt sted. Nye udgifter kan automatisk bruge din aktuelle placering, eller du kan søge eller vælge seneste steder. Åbn Forbrugskort fra Kalender for at se, hvor dine penge går hen.',
+      },
+    },
     split_bills_album_icons: {
       title: 'Delte album og delte regninger',
       sharedAlbums: {

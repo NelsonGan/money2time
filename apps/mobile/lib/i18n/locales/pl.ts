@@ -171,6 +171,17 @@ const pl = {
     reset_action: 'Usuń i zmień',
   },
   news: {
+    free_scans_locations: {
+      title: 'Więcej darmowych skanów i lokalizacje',
+      freeScans: {
+        title: '%{count} darmowych skanów paragonów miesięcznie',
+        body: 'W darmowym planie masz teraz %{count} skanów paragonów miesięcznie, odnawianych co miesiąc. Zrób zdjęcie lub wybierz paragony z albumu w Skanuj paragon, a Money2Time uzupełni sprzedawcę, kwotę, datę i kategorię za Ciebie. Pro pozostaje bez limitu.',
+      },
+      locations: {
+        title: 'Oznaczaj transakcje miejscami',
+        body: 'Włącz Lokalizacje w Ustawienia > Personalizacja, aby dodawać miejsca do wydatków i przychodów. Nowe wydatki mogą automatycznie zapisywać Twoją bieżącą lokalizację, możesz też wyszukać miejsce lub wybrać z ostatnich. Otwórz opcję Mapa wydatków w Kalendarzu, aby zobaczyć, gdzie wydajesz pieniądze.',
+      },
+    },
     split_bills_album_icons: {
       title: 'Wspólne albumy i dzielenie rachunków',
       sharedAlbums: {

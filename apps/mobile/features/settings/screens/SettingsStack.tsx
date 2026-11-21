@@ -423,6 +423,7 @@ export function SettingsStack({
               onOpenInsights={() => requestOpenTab('insights')}
               onOpenInstalments={onOpenInstalments}
               onOpenSettleUp={onOpenSettleUp}
+              onOpenLocations={() => props.navigation.navigate('AccountSettings')}
             />
           );
         }}

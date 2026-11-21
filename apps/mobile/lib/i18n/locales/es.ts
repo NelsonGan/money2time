@@ -171,6 +171,17 @@ const es = {
     reset_action: 'Eliminar y cambiar',
   },
   news: {
+    free_scans_locations: {
+      title: 'Más escaneos gratis y ubicaciones',
+      freeScans: {
+        title: '%{count} escaneos de recibos gratis al mes',
+        body: 'El plan gratuito incluye ahora %{count} escaneos de recibos al mes, que se renuevan cada mes. Haz una foto o elige recibos de tu álbum en Escanear recibo, y Money2Time rellena el comercio, el importe, la fecha y la categoría por ti. Pro sigue siendo ilimitado.',
+      },
+      locations: {
+        title: 'Etiqueta transacciones con lugares',
+        body: 'Activa Ubicaciones en Ajustes > Personalización para añadir el lugar a tus gastos e ingresos. Los gastos nuevos pueden etiquetar automáticamente tu ubicación actual, o puedes buscar o elegir lugares recientes. Abre el Mapa de gastos desde el Calendario para ver dónde gastas.',
+      },
+    },
     split_bills_album_icons: {
       title: 'Álbumes compartidos y gastos divididos',
       sharedAlbums: {

@@ -171,6 +171,17 @@ const it = {
     reset_action: 'Elimina e cambia',
   },
   news: {
+    free_scans_locations: {
+      title: 'Più scansioni gratis e luoghi',
+      freeScans: {
+        title: '%{count} scansioni di scontrini gratis al mese',
+        body: 'Il piano gratuito include ora %{count} scansioni di scontrini al mese, che si rinnovano ogni mese. Scatta una foto o scegli scontrini dal tuo album in Scansiona scontrino, e Money2Time compila negozio, importo, data e categoria per te. Pro resta illimitato.',
+      },
+      locations: {
+        title: 'Aggiungi un luogo alle transazioni',
+        body: 'Attiva Luoghi in Impostazioni > Personalizzazione per associare un luogo a spese ed entrate. Le nuove spese possono usare automaticamente la tua posizione attuale, oppure scegli un luogo dalla ricerca o dai luoghi recenti. Apri la Mappa delle spese dal Calendario per vedere dove spendi.',
+      },
+    },
     split_bills_album_icons: {
       title: 'Album condivisi e conti divisi',
       sharedAlbums: {

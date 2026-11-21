@@ -171,6 +171,17 @@ const pt = {
     reset_action: 'Excluir e trocar',
   },
   news: {
+    free_scans_locations: {
+      title: 'Mais digitalizações grátis e locais',
+      freeScans: {
+        title: '%{count} digitalizações de recibos grátis por mês',
+        body: 'O plano gratuito inclui agora %{count} digitalizações de recibos por mês, renovadas todos os meses. Tire uma foto ou escolha recibos do álbum em Digitalizar recibo, e o Money2Time preenche o comerciante, o valor, a data e a categoria por si. O Pro continua ilimitado.',
+      },
+      locations: {
+        title: 'Adicione locais às transações',
+        body: 'Ative Locais em Definições > Personalização para associar um local a despesas e receitas. As novas despesas podem marcar automaticamente a sua localização atual, ou escolha um local na pesquisa ou nos recentes. Abra o Mapa de gastos no Calendário para ver onde gasta o seu dinheiro.',
+      },
+    },
     split_bills_album_icons: {
       title: 'Álbuns compartilhados e contas divididas',
       sharedAlbums: {

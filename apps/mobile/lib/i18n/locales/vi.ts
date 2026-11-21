@@ -171,6 +171,17 @@ const vi = {
     reset_action: 'Xóa và chuyển',
   },
   news: {
+    free_scans_locations: {
+      title: 'Thêm lượt quét miễn phí và vị trí',
+      freeScans: {
+        title: '%{count} lượt quét hóa đơn miễn phí mỗi tháng',
+        body: 'Gói miễn phí nay có %{count} lượt quét hóa đơn mỗi tháng, tự làm mới hằng tháng. Chụp ảnh hoặc chọn hóa đơn từ album trong Quét hóa đơn, Money2Time sẽ điền sẵn cửa hàng, số tiền, ngày và danh mục cho bạn. Gói Pro vẫn không giới hạn.',
+      },
+      locations: {
+        title: 'Gắn địa điểm cho giao dịch',
+        body: 'Bật Vị trí trong Cài đặt > Cá nhân hóa để gắn nơi phát sinh chi tiêu và thu nhập. Chi tiêu mới có thể tự gắn vị trí hiện tại, hoặc chọn từ tìm kiếm và địa điểm gần đây. Mở Bản đồ chi tiêu từ Lịch để xem tiền của bạn đi đâu.',
+      },
+    },
     split_bills_album_icons: {
       title: 'Album chung và chia hóa đơn',
       sharedAlbums: {

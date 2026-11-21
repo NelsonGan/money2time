@@ -171,6 +171,17 @@ const fil = {
     reset_action: 'Burahin at palitan',
   },
   news: {
+    free_scans_locations: {
+      title: 'Mas maraming libreng scan at lokasyon',
+      freeScans: {
+        title: '%{count} libreng scan ng resibo bawat buwan',
+        body: 'May %{count} libreng scan ng resibo na bawat buwan ang libreng plano, na nagre-reset buwan-buwan. Kumuha ng larawan o pumili ng resibo sa album sa I-scan ang resibo, at pupunan ng Money2Time ang tindahan, halaga, petsa at kategorya para sa iyo. Walang limitasyon pa rin sa Pro.',
+      },
+      locations: {
+        title: 'I-tag ang mga transaksyon ng lugar',
+        body: 'I-on ang Mga lokasyon sa Mga setting > Personalisasyon para malagyan ng lugar ang mga gastos at kita. Puwedeng awtomatikong i-tag ang kasalukuyan mong lokasyon sa bagong gastos, o pumili sa paghahanap at mga kamakailang lugar. Buksan ang Mapa ng gastos sa Kalendaryo para makita kung saan napupunta ang pera mo.',
+      },
+    },
     split_bills_album_icons: {
       title: 'Shared album at hatian ng bill',
       sharedAlbums: {
