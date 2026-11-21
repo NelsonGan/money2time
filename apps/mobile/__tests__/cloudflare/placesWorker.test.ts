@@ -573,6 +573,7 @@ describe('POST /search and /reverse', () => {
     expect(ask('2a01:04f8:0c17:1a2b:dead:beef:0:7')).toBe('2a01:4f8:c17:1a2b::/64');
     expect(ask('2a01:4f8::1')).toBe('2a01:4f8:0:0::/64');
     expect(ask('203.0.113.9')).toBe('203.0.113.9');
+    expect(ask('::ffff:203.0.113.9')).toBe('203.0.113.9');
     const limiter = { limit: jest.fn(async () => ({ success: false })) };
     await post(
       '/search',

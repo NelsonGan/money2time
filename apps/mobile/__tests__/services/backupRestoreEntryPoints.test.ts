@@ -15,7 +15,11 @@ import { applyBackupData, buildBackupData } from '~/services/dataManagementServi
 
 jest.mock('expo-background-task', () => ({}));
 jest.mock('react-native', () => ({ Platform: { OS: 'ios' } }));
-jest.mock('~/lib/repositories/settingsRepository', () => ({}));
+jest.mock('~/lib/repositories/settingsRepository', () => ({
+  settingsRepository: {
+    get: jest.fn(() => ({ autoBackupEnabled: true, autoBackupTarget: 'googleDrive' })),
+  },
+}));
 jest.mock('~/services/analytics', () => ({
   trackEvent: jest.fn(),
   AnalyticsEvents: { AUTO_BACKUP_RESTORED: 'restored' },
@@ -211,6 +215,19 @@ describe('a picked backup file', () => {
     const stores = (resolveBackupPhotos as jest.Mock).mock.calls.at(-1)[1];
     expect(stores).toHaveLength(3);
     await expect(stores[2].listPhotos()).rejects.toThrow('Google Drive unavailable');
+  });
+
+  it('skips an unreachable Drive this phone does not back up to', async () => {
+    const { googleDriveProvider } = jest.requireMock('~/services/autoBackupProviders/googleDrive');
+    const { settingsRepository } = jest.requireMock('~/lib/repositories/settingsRepository');
+    googleDriveProvider.unavailableReason.mockResolvedValueOnce('no_token');
+    settingsRepository.get.mockReturnValueOnce({
+      autoBackupEnabled: true,
+      autoBackupTarget: 'icloud',
+    });
+    const restore = jest.fn(async () => ({ canceled: false, success: true }));
+    await restoreImportedBackup({ ...backup, photos } as never, restore);
+    expect((resolveBackupPhotos as jest.Mock).mock.calls.at(-1)[1]).toHaveLength(2);
   });
 
   it('uses a reachable Drive as a store', async () => {

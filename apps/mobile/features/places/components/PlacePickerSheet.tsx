@@ -495,15 +495,18 @@ export function PlacePickerSheet({
   const framedRef = useRef<string | null>(null);
   useEffect(() => {
     if (!mapReady || !mapOpen || pin.kind !== 'off') return;
-    // A nearby list that changes by itself after the user panned (a late
-    // fix) leaves the camera where they put it; "Search this area" stays.
-    if (mapMoved && !showingSearch) return;
+    // A nearby list that replaces another by itself after the user panned (a
+    // late fix) leaves the camera where they put it; "Search this area"
+    // stays. A first list, or one after a search, is still framed.
+    if (mapMoved && !showingSearch && framedRef.current?.startsWith('n:')) return;
     if (framedRef.current === mapPlacesSignature) return;
     const points: Coordinate[] = [...mapPlaces];
     if (!showingSearch && origin) points.push(origin);
     if (points.length === 0) return;
     framedRef.current = mapPlacesSignature;
     mapRef.current?.fitTo(points);
+    // The camera is back on the list, so there is no other area to search.
+    setMapMoved(false);
     // Only a new list moves the camera, not a re-render (one that arrived
     // while a pin was being dropped is framed once the pin is put away).
     // eslint-disable-next-line react-hooks/exhaustive-deps

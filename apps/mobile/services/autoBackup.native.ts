@@ -468,10 +468,14 @@ export async function restoreImportedBackup(
       .catch(() => 'session_unavailable' as const);
     if (driveReason === null) {
       stores.push(googleDriveProvider);
-    } else if (driveReason === 'session_unavailable' || driveReason === 'no_token') {
-      // Drive is connected but cannot be reached now (offline, a token that
-      // would not refresh): photos it has would count as gone, so the restore
-      // stops and asks to try again instead.
+    } else if (
+      (driveReason === 'session_unavailable' || driveReason === 'no_token') &&
+      backsUpToDrive()
+    ) {
+      // This phone backs up to Drive, which cannot be reached now (offline, a
+      // token that would not refresh): photos it has would count as gone, so
+      // the restore stops and asks to try again instead. Only then: a Drive
+      // this phone does not use would otherwise block the import for good.
       stores.push({
         ...googleDriveProvider,
         listPhotos: () => Promise.reject(new Error(`Google Drive unavailable: ${driveReason}`)),
@@ -479,6 +483,15 @@ export async function restoreImportedBackup(
     }
   }
   return withBackupPhotos(backup, stores, restore);
+}
+
+function backsUpToDrive(): boolean {
+  try {
+    const settings = settingsRepository.get();
+    return settings.autoBackupEnabled && settings.autoBackupTarget === 'googleDrive';
+  } catch {
+    return false;
+  }
 }
 
 /** Always local, never rotated here, and never overwrites the backup being restored. */

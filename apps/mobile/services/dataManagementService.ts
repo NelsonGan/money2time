@@ -137,7 +137,7 @@ function withPreservedDeviceSettings(
   return rows.map((row) => {
     const next: Record<string, unknown> = { ...row, app_user_id: appUserId };
     for (const column of RESTORE_KEEPS_DEVICE_SETTINGS) {
-      // This phone's value, else the column's default (off): never the backup's.
+      // This phone's value, else the column's default: never the backup's.
       if (current?.[column] !== undefined) next[column] = current[column];
       else delete next[column];
     }

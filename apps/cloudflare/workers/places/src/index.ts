@@ -191,6 +191,9 @@ async function handlePlaces(
 export function clientIp(request: Request): string {
   const ip = request.headers.get('cf-connecting-ip') ?? 'unknown';
   if (!ip.includes(':')) return ip;
+  // An IPv4 address written as IPv6 (`::ffff:203.0.113.9`) is that address.
+  const mapped = /^::ffff:(\d+\.\d+\.\d+\.\d+)$/i.exec(ip);
+  if (mapped) return mapped[1]!;
   // Addresses arrive compressed (`2a01:4f8::1`): expand `::` before taking
   // the first four groups, or every interface id would get its own key.
   const [head, tail = ''] = ip.split('::');

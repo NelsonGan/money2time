@@ -251,7 +251,12 @@ export interface PlaceGroup<T extends Transaction = Transaction> {
 export function groupByPlace<T extends Transaction>(transactions: readonly T[]): PlaceGroup<T>[] {
   const groups = new Map<string, PlaceGroup<T>>();
   const keyOf = placeKeyResolver();
-  for (const transaction of transactions) {
+  // Oldest first, so a merged spot keeps its first visit's key (an open panel
+  // stays open when a newer visit arrives).
+  const oldestFirst = [...transactions].sort((a, b) =>
+    a.date < b.date ? -1 : a.date > b.date ? 1 : 0,
+  );
+  for (const transaction of oldestFirst) {
     if (transaction.deletedAt || !isLocatedTransaction(transaction)) continue;
     const key = keyOf({
       id: transaction.placeId,
