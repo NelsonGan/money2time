@@ -3786,11 +3786,8 @@ const da = {
     map_period_month: 'Måned',
     map_period_year: 'År',
     map_period_all: 'Alle',
-    map_stat_visits_one: 'besøg',
-    map_stat_visits_other: 'besøg',
-    map_stat_spent: 'brugt',
-    map_stat_earned: 'tjent',
-    map_stat_work: 'arbejde',
+    map_summary_work: '{{time}} arbejde',
+    map_summary_earned: '{{amount}} tjent',
     offer_title: 'Husk, hvor du bruger penge?',
     offer_body:
       'Mærk udgifter med steder og se dit forbrug på et kort. Skift det når som helst i Indstillinger.',

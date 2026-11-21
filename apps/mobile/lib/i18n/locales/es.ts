@@ -3816,11 +3816,8 @@ const es = {
     map_period_month: 'Mes',
     map_period_year: 'Año',
     map_period_all: 'Todo',
-    map_stat_visits_one: 'visita',
-    map_stat_visits_other: 'visitas',
-    map_stat_spent: 'gastado',
-    map_stat_earned: 'ganado',
-    map_stat_work: 'de trabajo',
+    map_summary_work: '{{time}} de trabajo',
+    map_summary_earned: '{{amount}} ganado',
     offer_title: '¿Recordar dónde gastas?',
     offer_body:
       'Etiqueta tus gastos con lugares y mira tus gastos en un mapa. Cámbialo cuando quieras en Ajustes.',

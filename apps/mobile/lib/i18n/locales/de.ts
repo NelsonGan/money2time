@@ -3837,11 +3837,8 @@ const de = {
     map_period_month: 'Monat',
     map_period_year: 'Jahr',
     map_period_all: 'Alle',
-    map_stat_visits_one: 'Besuch',
-    map_stat_visits_other: 'Besuche',
-    map_stat_spent: 'ausgegeben',
-    map_stat_earned: 'verdient',
-    map_stat_work: 'Arbeit',
+    map_summary_work: '{{time}} Arbeit',
+    map_summary_earned: '{{amount}} verdient',
     offer_title: 'Merken, wo du Geld ausgibst?',
     offer_body:
       'Verorte Ausgaben und sieh deine Ausgaben auf einer Karte. Jederzeit in den Einstellungen änderbar.',

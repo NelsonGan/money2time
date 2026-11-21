@@ -3814,11 +3814,8 @@ const pt = {
     map_period_month: 'Mês',
     map_period_year: 'Ano',
     map_period_all: 'Tudo',
-    map_stat_visits_one: 'visita',
-    map_stat_visits_other: 'visitas',
-    map_stat_spent: 'gasto',
-    map_stat_earned: 'ganho',
-    map_stat_work: 'de trabalho',
+    map_summary_work: '{{time}} de trabalho',
+    map_summary_earned: '{{amount}} ganho',
     offer_title: 'Lembrar onde gasta?',
     offer_body:
       'Marque as despesas com locais e veja os seus gastos num mapa. Altere a qualquer momento nas Definições.',

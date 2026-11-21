@@ -3786,11 +3786,8 @@ const sv = {
     map_period_month: 'Månad',
     map_period_year: 'År',
     map_period_all: 'Alla',
-    map_stat_visits_one: 'besök',
-    map_stat_visits_other: 'besök',
-    map_stat_spent: 'spenderat',
-    map_stat_earned: 'tjänat',
-    map_stat_work: 'arbete',
+    map_summary_work: '{{time}} arbete',
+    map_summary_earned: '{{amount}} tjänat',
     offer_title: 'Kom ihåg var du handlar?',
     offer_body:
       'Tagga utgifter med platser och se ditt spenderande på en karta. Ändra när som helst i Inställningar.',

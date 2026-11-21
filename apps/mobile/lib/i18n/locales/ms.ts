@@ -3812,11 +3812,8 @@ const ms = {
     map_period_month: 'Bulan',
     map_period_year: 'Tahun',
     map_period_all: 'Semua',
-    map_stat_visits_one: 'lawatan',
-    map_stat_visits_other: 'lawatan',
-    map_stat_spent: 'dibelanjakan',
-    map_stat_earned: 'diperoleh',
-    map_stat_work: 'kerja',
+    map_summary_work: '{{time}} kerja',
+    map_summary_earned: '{{amount}} diperoleh',
     offer_title: 'Ingat di mana anda berbelanja?',
     offer_body:
       'Tag perbelanjaan dengan tempat dan lihat perbelanjaan anda pada peta. Tukar bila-bila masa dalam Tetapan.',

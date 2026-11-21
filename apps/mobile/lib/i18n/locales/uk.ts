@@ -3789,11 +3789,8 @@ const uk = {
     map_period_month: 'Місяць',
     map_period_year: 'Рік',
     map_period_all: 'Усе',
-    map_stat_visits_one: 'відвідування',
-    map_stat_visits_other: 'відвідувань',
-    map_stat_spent: 'витрачено',
-    map_stat_earned: 'отримано',
-    map_stat_work: 'роботи',
+    map_summary_work: '{{time}} роботи',
+    map_summary_earned: 'отримано {{amount}}',
     offer_title: 'Запам’ятовувати, де ви витрачаєте?',
     offer_body:
       'Позначайте місця витрат і дивіться їх на мапі. Змінити можна будь-коли в Параметрах.',

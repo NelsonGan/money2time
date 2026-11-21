@@ -3809,11 +3809,8 @@ const id = {
     map_period_month: 'Bulan',
     map_period_year: 'Tahun',
     map_period_all: 'Semua',
-    map_stat_visits_one: 'kunjungan',
-    map_stat_visits_other: 'kunjungan',
-    map_stat_spent: 'dibelanjakan',
-    map_stat_earned: 'diterima',
-    map_stat_work: 'kerja',
+    map_summary_work: '{{time}} kerja',
+    map_summary_earned: '{{amount}} diterima',
     offer_title: 'Ingat di mana Anda belanja?',
     offer_body:
       'Tandai pengeluaran dengan tempat dan lihat pengeluaran Anda di peta. Ubah kapan saja di Pengaturan.',

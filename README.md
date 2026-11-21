@@ -702,11 +702,14 @@ locations** is off for everyone until they turn it on. The code lives in
   point (two shops in one building) never split, so past the clustering zoom
   they stay one bubble (`mergeSamePoint`) that lists them when tapped. An
   income-only bubble shows its income. Tapping a place opens a panel with its
-  category icon and address, a strip of its visits, total and hours of work
-  (`PlaceStats`), and its transactions in the Calendar's own rows
-  (`ActivityTransactionList` with `compactItems`), each opening the editor.
-  With nothing selected the panel shows the period's totals in the same strip
-  and lists its places, busiest first. With no tagged entries it explains how
+  category icon and address, its figures (`PlaceSummary`: the money spent, or
+  earned where nothing was, as one large amount, and one muted line under it
+  with the hours of work, money in beside money out, and the visits), and its
+  transactions in the Calendar's own rows (`ActivityTransactionList` with
+  `compactItems`), each opening the editor. With nothing selected the panel
+  shows the period's figures the same way and lists its places, busiest
+  first, as plain rows split by hairlines: category icon, name, visits and
+  amount. With no tagged entries it explains how
   to start, with a button to Settings › Personalize when Locations is off.
 
 ### How it works

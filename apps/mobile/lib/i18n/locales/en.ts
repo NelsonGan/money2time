@@ -3776,11 +3776,8 @@ const en = {
     map_period_month: 'Month',
     map_period_year: 'Year',
     map_period_all: 'All',
-    map_stat_visits_one: 'visit',
-    map_stat_visits_other: 'visits',
-    map_stat_spent: 'spent',
-    map_stat_earned: 'earned',
-    map_stat_work: 'of work',
+    map_summary_work: '{{time}} of work',
+    map_summary_earned: '{{amount}} earned',
     offer_title: 'Remember where you spend?',
     offer_body:
       'Tag expenses with places and see your spending on a map. Change it anytime in Settings.',

@@ -3838,11 +3838,8 @@ const fr = {
     map_period_month: 'Mois',
     map_period_year: 'Année',
     map_period_all: 'Tout',
-    map_stat_visits_one: 'visite',
-    map_stat_visits_other: 'visites',
-    map_stat_spent: 'dépensé',
-    map_stat_earned: 'gagné',
-    map_stat_work: 'de travail',
+    map_summary_work: '{{time}} de travail',
+    map_summary_earned: '{{amount}} gagné',
     offer_title: 'Retenir où vous dépensez ?',
     offer_body:
       'Associez un lieu à vos dépenses et voyez-les sur une carte. Modifiable à tout moment dans Réglages.',

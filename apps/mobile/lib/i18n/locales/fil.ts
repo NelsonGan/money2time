@@ -3846,11 +3846,8 @@ const fil = {
     map_period_month: 'Buwan',
     map_period_year: 'Taon',
     map_period_all: 'Lahat',
-    map_stat_visits_one: 'pagbisita',
-    map_stat_visits_other: 'pagbisita',
-    map_stat_spent: 'nagastos',
-    map_stat_earned: 'kinita',
-    map_stat_work: 'ng trabaho',
+    map_summary_work: '{{time}} ng trabaho',
+    map_summary_earned: '{{amount}} kinita',
     offer_title: 'Tandaan kung saan ka gumagastos?',
     offer_body:
       'Lagyan ng lugar ang mga gastos at makita ang paggastos mo sa mapa. Mababago ito anumang oras sa Settings.',

@@ -3824,11 +3824,8 @@ const nl = {
     map_period_month: 'Maand',
     map_period_year: 'Jaar',
     map_period_all: 'Alles',
-    map_stat_visits_one: 'bezoek',
-    map_stat_visits_other: 'bezoeken',
-    map_stat_spent: 'uitgegeven',
-    map_stat_earned: 'verdiend',
-    map_stat_work: 'werk',
+    map_summary_work: '{{time}} werk',
+    map_summary_earned: '{{amount}} verdiend',
     offer_title: 'Onthouden waar je geld uitgeeft?',
     offer_body:
       'Tag uitgaven met plaatsen en zie je uitgaven op een kaart. Wijzig het altijd in Instellingen.',

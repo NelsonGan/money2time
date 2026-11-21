@@ -3810,11 +3810,8 @@ const it = {
     map_period_month: 'Mese',
     map_period_year: 'Anno',
     map_period_all: 'Tutto',
-    map_stat_visits_one: 'visita',
-    map_stat_visits_other: 'visite',
-    map_stat_spent: 'spesi',
-    map_stat_earned: 'guadagnati',
-    map_stat_work: 'di lavoro',
+    map_summary_work: '{{time}} di lavoro',
+    map_summary_earned: '{{amount}} guadagnati',
     offer_title: 'Ricordare dove spendi?',
     offer_body:
       'Associa un luogo alle spese e vedi le tue spese su una mappa. Puoi cambiarlo quando vuoi in Impostazioni.',

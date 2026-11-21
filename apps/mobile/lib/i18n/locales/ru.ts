@@ -3794,11 +3794,8 @@ const ru = {
     map_period_month: 'Месяц',
     map_period_year: 'Год',
     map_period_all: 'Всё',
-    map_stat_visits_one: 'посещение',
-    map_stat_visits_other: 'посещений',
-    map_stat_spent: 'потрачено',
-    map_stat_earned: 'получено',
-    map_stat_work: 'работы',
+    map_summary_work: '{{time}} работы',
+    map_summary_earned: 'получено {{amount}}',
     offer_title: 'Запоминать, где вы тратите?',
     offer_body:
       'Отмечайте места расходов и смотрите траты на карте. Изменить можно в любой момент в Настройках.',

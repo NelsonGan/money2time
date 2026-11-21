@@ -3799,11 +3799,8 @@ const pl = {
     map_period_month: 'Miesiąc',
     map_period_year: 'Rok',
     map_period_all: 'Wszystko',
-    map_stat_visits_one: 'wizyta',
-    map_stat_visits_other: 'wizyt',
-    map_stat_spent: 'wydano',
-    map_stat_earned: 'zarobiono',
-    map_stat_work: 'pracy',
+    map_summary_work: '{{time}} pracy',
+    map_summary_earned: 'zarobiono {{amount}}',
     offer_title: 'Zapamiętywać, gdzie wydajesz?',
     offer_body:
       'Oznaczaj wydatki miejscami i zobacz je na mapie. Zmienisz to w każdej chwili w Ustawieniach.',

@@ -3737,11 +3737,8 @@ const ko = {
     map_period_month: '월',
     map_period_year: '연도',
     map_period_all: '전체',
-    map_stat_visits_one: '회 방문',
-    map_stat_visits_other: '회 방문',
-    map_stat_spent: '지출',
-    map_stat_earned: '수입',
-    map_stat_work: '근무',
+    map_summary_work: '근무 {{time}}',
+    map_summary_earned: '수입 {{amount}}',
     offer_title: '어디서 썼는지 기록할까요?',
     offer_body:
       '지출에 장소를 기록하고 지도에서 지출을 확인하세요. 설정에서 언제든 바꿀 수 있어요.',

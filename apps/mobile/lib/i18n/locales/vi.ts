@@ -3764,11 +3764,8 @@ const vi = {
     map_period_month: 'Tháng',
     map_period_year: 'Năm',
     map_period_all: 'Tất cả',
-    map_stat_visits_one: 'lần',
-    map_stat_visits_other: 'lần',
-    map_stat_spent: 'đã chi',
-    map_stat_earned: 'đã nhận',
-    map_stat_work: 'làm việc',
+    map_summary_work: '{{time}} làm việc',
+    map_summary_earned: 'đã nhận {{amount}}',
     offer_title: 'Ghi nhớ nơi bạn chi tiêu?',
     offer_body:
       'Gắn địa điểm cho khoản chi và xem chi tiêu trên bản đồ. Có thể đổi bất cứ lúc nào trong Cài đặt.',

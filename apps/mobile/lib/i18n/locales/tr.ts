@@ -3798,11 +3798,8 @@ const tr = {
     map_period_month: 'Ay',
     map_period_year: 'Yıl',
     map_period_all: 'Tümü',
-    map_stat_visits_one: 'ziyaret',
-    map_stat_visits_other: 'ziyaret',
-    map_stat_spent: 'harcandı',
-    map_stat_earned: 'kazanıldı',
-    map_stat_work: 'çalışma',
+    map_summary_work: '{{time}} çalışma',
+    map_summary_earned: '{{amount}} kazanıldı',
     offer_title: 'Nerede harcadığını hatırlasın mı?',
     offer_body:
       'Harcamalarını yerlerle etiketle ve haritada gör. İstediğin zaman Ayarlar’dan değiştir.',

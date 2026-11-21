@@ -1,12 +1,4 @@
-import {
-  CalendarDays,
-  ChevronLeft,
-  ChevronRight,
-  Clock,
-  MapPin,
-  Maximize2,
-  X,
-} from 'lucide-react-native';
+import { ChevronLeft, ChevronRight, MapPin, Maximize2, X } from 'lucide-react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
 import type MapView from 'react-native-maps';
@@ -29,7 +21,7 @@ import { monthCycleOf } from '~/utils/financialMonth';
 import { formatAmount, formatHoursCompact } from '~/utils/formatters';
 
 import { AppMap } from '../components/AppMap';
-import { type PlaceStat, PlaceStats } from '../components/PlaceStats';
+import { PlaceSummary, type PlaceSummaryData } from '../components/PlaceSummary';
 import { PlaceClusterPin, PlacePricePin } from '../components/SpendingMapPins';
 import { fitMapToPoints } from '../lib/fitMap';
 import {
@@ -152,7 +144,7 @@ export function SpendingMapContent({
   const clusterer = useMemo(() => createPlaceClusterer(groups), [groups]);
   const markers = useMemo(() => clusterer(region, width), [clusterer, region, width]);
 
-  const panelHeight = Math.round(height * (selection ? 0.46 : 0.3));
+  const panelHeight = Math.round(height * (selection ? 0.46 : 0.34));
   // Below the floating header (back and Month / Year / All).
   const topInset = insets.top + 64;
 
@@ -278,46 +270,43 @@ export function SpendingMapContent({
     return formatValue(value, value >= 1000);
   };
 
-  // Visits, then the money (spent, or earned where nothing was spent), then
-  // the hours of work it cost; time mode already shows hours as the money.
-  const statsFor = (txs: readonly TransactionWithRelations[]): PlaceStat[] => {
+  // The money large (spent, or earned where nothing was spent), then one line:
+  // the hours of work it cost (time mode already shows hours as the money),
+  // money in beside money out, and the visits.
+  const summaryFor = (txs: readonly TransactionWithRelations[]): PlaceSummaryData => {
     const totals = placeTotals(txs, valueOf, countsAsMoney);
     const hours = txs.reduce(
       (sum, tx) => sum + (tx.type === 'expense' && countsAsMoney(tx) ? hoursOf(tx) : 0),
       0,
     );
-    const stats: PlaceStat[] = [
-      {
-        key: 'visits',
-        icon: CalendarDays,
-        value: String(totals.visits),
-        label: I18n.t(
-          totals.visits === 1 ? 'locations.map_stat_visits_one' : 'locations.map_stat_visits_other',
-        ),
-      },
-    ];
-    if (totals.spent > 0 || totals.earned === 0)
-      stats.push({
-        key: 'spent',
-        value: formatValue(totals.spent, totals.spent >= 100_000),
-        label: I18n.t('locations.map_stat_spent'),
-        tone: 'primary',
-      });
-    if (totals.earned > 0)
-      stats.push({
-        key: 'earned',
-        value: `+${formatValue(totals.earned, totals.earned >= 100_000)}`,
-        label: I18n.t('locations.map_stat_earned'),
-        tone: 'success',
-      });
+    const incomeOnly = totals.spent === 0 && totals.earned > 0;
+    const details: string[] = [];
     if (!isTime && hours > 0)
-      stats.push({
-        key: 'work',
-        icon: Clock,
-        value: formatHoursCompact(hours, settings),
-        label: I18n.t('locations.map_stat_work'),
-      });
-    return stats;
+      details.push(
+        I18n.t('locations.map_summary_work', { time: formatHoursCompact(hours, settings) }),
+      );
+    if (totals.spent > 0 && totals.earned > 0)
+      details.push(
+        I18n.t('locations.map_summary_earned', {
+          amount: `+${formatValue(totals.earned, totals.earned >= 100_000)}`,
+        }),
+      );
+    details.push(
+      I18n.t(totals.visits === 1 ? 'locations.map_visits_one' : 'locations.map_visits_other', {
+        count: totals.visits,
+      }),
+    );
+    if (incomeOnly)
+      return {
+        value: `+${formatValue(totals.earned, totals.earned >= 100_000)}`,
+        tone: 'success',
+        details,
+      };
+    return {
+      value: formatValue(totals.spent, totals.spent >= 100_000),
+      tone: totals.spent > 0 ? 'primary' : 'muted',
+      details,
+    };
   };
 
   const kinds: MapPeriodKind[] = ['month', 'year', 'all'];
@@ -325,7 +314,7 @@ export function SpendingMapContent({
   const latest = isLatestPeriod(period, monthCycle);
   const anyLocated = located.length > 0;
 
-  const renderPlaceRow = (group: Group) => {
+  const renderPlaceRow = (group: Group, index: number) => {
     const Icon = placeCategoryIcon(group.category);
     const totals = totalsByKey.get(group.key);
     return (
@@ -333,12 +322,13 @@ export function SpendingMapContent({
         key={group.key}
         onPress={() => selectPlace(group)}
         accessibilityRole="button"
-        accessibilityLabel={group.name}
-        className="flex-row items-center gap-3 rounded-2xl bg-secondary/40 px-3 py-2.5 active:opacity-70"
+        accessibilityLabel={`${group.name}, ${pinLabel(group.key)}`}
+        className={cn(
+          'flex-row items-center gap-3 py-3 active:opacity-70',
+          index > 0 && 'border-t border-border/40',
+        )}
       >
-        <View className="h-9 w-9 items-center justify-center rounded-full bg-card">
-          <Icon size={17} color={themeColors.primary} />
-        </View>
+        <Icon size={20} color={themeColors.primary} />
         <View className="min-w-0 flex-1">
           <Text variant="bodyStrong" numberOfLines={1}>
             {group.name}
@@ -350,7 +340,6 @@ export function SpendingMapContent({
                 : 'locations.map_visits_other',
               { count: group.transactions.length },
             )}
-            {group.address ? ` · ${group.address}` : ''}
           </Text>
         </View>
         <Text
@@ -396,8 +385,8 @@ export function SpendingMapContent({
               <X size={18} color={themeColors.textMuted} />
             </Pressable>
           </View>
-          <View className="px-4 pb-1 pt-3">
-            <PlaceStats stats={statsFor(group.transactions)} />
+          <View className="px-5 pb-2 pt-3">
+            <PlaceSummary {...summaryFor(group.transactions)} />
           </View>
           <View className="flex-1">
             <ActivityTransactionList
@@ -429,14 +418,6 @@ export function SpendingMapContent({
           <Text variant="headingSm" numberOfLines={1}>
             {periodText}
           </Text>
-          {list.length > 0 ? (
-            <Text variant="caption" tone="muted" numberOfLines={1}>
-              {I18n.t(
-                list.length === 1 ? 'locations.map_places_one' : 'locations.map_places_other',
-                { count: list.length },
-              )}
-            </Text>
-          ) : null}
         </View>
         {selection ? (
           <Pressable
@@ -513,14 +494,13 @@ export function SpendingMapContent({
     return (
       <View className="flex-1">
         {header}
-        <View className="px-4 pb-2">
-          <PlaceStats stats={statsFor(all)} />
+        <View className="px-5 pb-1">
+          <PlaceSummary {...summaryFor(all)} />
         </View>
         <ScrollView
           contentContainerStyle={{
-            paddingHorizontal: 16,
+            paddingHorizontal: 20,
             paddingBottom: insets.bottom + 16,
-            gap: 6,
           }}
           showsVerticalScrollIndicator={false}
         >

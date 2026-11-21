@@ -3788,11 +3788,8 @@ const nb = {
     map_period_month: 'Måned',
     map_period_year: 'År',
     map_period_all: 'Alle',
-    map_stat_visits_one: 'besøk',
-    map_stat_visits_other: 'besøk',
-    map_stat_spent: 'brukt',
-    map_stat_earned: 'tjent',
-    map_stat_work: 'arbeid',
+    map_summary_work: '{{time}} arbeid',
+    map_summary_earned: '{{amount}} tjent',
     offer_title: 'Husk hvor du bruker penger?',
     offer_body:
       'Merk utgifter med steder og se forbruket ditt på et kart. Endre det når som helst i Innstillinger.',
