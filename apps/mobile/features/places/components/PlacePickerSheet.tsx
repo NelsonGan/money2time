@@ -482,24 +482,24 @@ export function PlacePickerSheet({
     : `n:${nearby.kind}:${mapPlaces.map(placeKey).join('|')}`;
   const [mapReady, setMapReady] = useState(false);
   const handleMapReady = useCallback(() => setMapReady(true), []);
+  // Whether the map is at its full height: a fit measured while it folds
+  // away or opens again (the keyboard) zooms to street level on a sliver.
+  const [mapOpen, setMapOpen] = useState(false);
   // The list last framed: a list that arrives while the map is folded away
-  // (typing) is framed once it opens again, after its height has settled.
+  // (typing) is framed once it is fully open again.
   const framedRef = useRef<string | null>(null);
   useEffect(() => {
-    if (!mapReady || pin.kind !== 'off' || keyboardUp) return undefined;
-    if (framedRef.current === mapPlacesSignature) return undefined;
+    if (!mapReady || !mapOpen || pin.kind !== 'off') return;
+    if (framedRef.current === mapPlacesSignature) return;
     const points: Coordinate[] = [...mapPlaces];
     if (!showingSearch && origin) points.push(origin);
-    if (points.length === 0) return undefined;
-    const handle = setTimeout(() => {
-      framedRef.current = mapPlacesSignature;
-      mapRef.current?.fitTo(points);
-    }, motionDurations.normal);
-    return () => clearTimeout(handle);
+    if (points.length === 0) return;
+    framedRef.current = mapPlacesSignature;
+    mapRef.current?.fitTo(points);
     // Only a new list moves the camera, not a re-render (one that arrived
     // while a pin was being dropped is framed once the pin is put away).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mapReady, mapPlacesSignature, keyboardUp, pin.kind]);
+  }, [mapReady, mapOpen, mapPlacesSignature, pin.kind]);
   useEffect(() => {
     if (visible) return;
     setMapReady(false);
@@ -1025,7 +1025,11 @@ export function PlacePickerSheet({
               </ScrollView>
             ) : null}
 
-            <Animated.View className="mx-5" style={mapStyle}>
+            <Animated.View
+              className="mx-5"
+              style={mapStyle}
+              onLayout={(event) => setMapOpen(event.nativeEvent.layout.height >= MAP_HEIGHT - 1)}
+            >
               {mapCard}
             </Animated.View>
 
