@@ -22,13 +22,18 @@ import {
   paymentAlertsJsonForLedger,
   quickEntryJsonForLedger,
 } from '~/lib/repositories/ledgerPrefs';
+import { type BackupPhotoRef, decodeBackupFile, encodeBackupFile } from '~/services/backupFile';
+import { readBackupFile } from '~/services/backupFileRead';
+import { shrinkStoredPhotos } from '~/services/imageShrink';
 import { resetAutomationCaptureData } from '~/services/resetAutomationCaptureData';
 import { runUserAssetGc } from '~/services/userAssetGc';
 import {
   assetRelativePathFromRef,
   collectUserAssetsForBackup,
+  listUserAssetFilesForBackup,
   restoreUserAssetsFromBackup,
   type UserAssetBackupEntry,
+  type UserAssetFileEntry,
   type UserAssetReadCache,
 } from '~/services/userAssets';
 import type { ExchangeRate, LedgerPrefs } from '~/types';
@@ -43,11 +48,11 @@ import { newAppUserId, nowIso } from '~/utils/id';
 
 // Version 4 is a backup holding more than one ledger. It is written only then,
 // so an app from before ledgers refuses it instead of restoring every ledger's
-// rows into one book. A backup of the default ledger alone stays version 3,
-// which every app version reads.
+// rows into one book. A backup of the default ledger alone stays version 3.
+// Every file is now written in the compact format (version 6, services/
+// backupFile.ts), which carries this number as its `dataVersion`.
 const BACKUP_VERSION = 3;
 const MULTI_LEDGER_BACKUP_VERSION = 4;
-const SUPPORTED_BACKUP_VERSIONS = new Set([1, 2, 3, 4, 5]);
 
 interface BackupTables extends Record<string, Record<string, unknown>[] | undefined> {
   accounts: Record<string, unknown>[];
@@ -90,6 +95,16 @@ export interface BackupData {
   tables: BackupTables;
   /** User-uploaded assets (custom logos, …) embedded as base64. Added in v3. */
   userAssets?: UserAssetBackupEntry[];
+  /**
+   * Photos an automatic backup stores beside itself instead of embedding them
+   * (version 6, services/backupPhotos.ts). A restore downloads them first.
+   */
+  photos?: BackupPhotoRef[];
+  /**
+   * Never in a file. Building: the user-asset files to store beside the
+   * backup. Restoring: the photos `photos` named, downloaded to the cache.
+   */
+  assetFiles?: UserAssetFileEntry[];
   /** Owned shared snapshots. Descriptive only: live membership authorizes a restore. */
   sharedLedgers?: BackupSharedLedger[];
 }
@@ -120,15 +135,21 @@ function withPreservedAppUserId(
  * path under user-assets/ (the Web Dashboard leaves out receipts it never
  * shows). Every real backup includes them all. `assetCache` lets a caller
  * that exports repeatedly skip re-reading files that have not changed.
+ * `assetFiles` lists the files instead of reading them, for an automatic
+ * backup that stores its photos beside itself.
  */
 export async function buildBackupData(opts?: {
   includeAsset?: (path: string) => boolean;
   assetCache?: UserAssetReadCache;
+  assetFiles?: boolean;
   /** Keep only the open ledger's rows (the Web Dashboard shows one ledger). */
   openLedgerOnly?: boolean;
 }): Promise<BackupData> {
   const sqlite = getSQLite();
-  const userAssets = await collectUserAssetsForBackup(opts?.includeAsset, opts?.assetCache);
+  const assetFiles = opts?.assetFiles ? listUserAssetFilesForBackup(opts.includeAsset) : undefined;
+  const userAssets = assetFiles
+    ? undefined
+    : await collectUserAssetsForBackup(opts?.includeAsset, opts?.assetCache);
   // Keep ledger metadata and table rows in the same synchronous read after asset I/O.
   const now = nowIso();
   const ledgers = tryReadTable(sqlite, 'ledgers');
@@ -137,7 +158,7 @@ export async function buildBackupData(opts?: {
   const data: BackupData = {
     version: liveLedgerCount > 1 ? MULTI_LEDGER_BACKUP_VERSION : BACKUP_VERSION,
     exportedAt: now,
-    userAssets,
+    ...(assetFiles ? { assetFiles } : { userAssets }),
     tables: {
       accounts: sqlite.getAllSync('SELECT * FROM accounts') as Record<string, unknown>[],
       account_groups: sqlite.getAllSync('SELECT * FROM account_groups') as Record<
@@ -197,7 +218,11 @@ export async function buildBackupData(opts?: {
         ? MULTI_LEDGER_BACKUP_VERSION
         : BACKUP_VERSION;
   }
-  if (excluded.length) data.userAssets = referencedBackupAssets(data.tables, data.userAssets);
+  if (excluded.length) {
+    const paths = backupAssetPaths(data.tables);
+    if (data.userAssets) data.userAssets = data.userAssets.filter((asset) => paths.has(asset.path));
+    if (data.assetFiles) data.assetFiles = data.assetFiles.filter((file) => paths.has(file.path));
+  }
   return data;
 }
 
@@ -211,11 +236,6 @@ function backupAssetPaths(tables: Record<string, Record<string, unknown>[] | und
       }
   }
   return paths;
-}
-
-function referencedBackupAssets(tables: BackupTables, assets?: UserAssetBackupEntry[]) {
-  const paths = backupAssetPaths(tables);
-  return assets?.filter((asset) => paths.has(asset.path));
 }
 
 /**
@@ -303,6 +323,7 @@ function onlyOpenLedger(data: BackupData): BackupData {
     ...data,
     version: BACKUP_VERSION,
     userAssets: data.userAssets?.filter((asset) => referenced.has(asset.path)),
+    assetFiles: data.assetFiles?.filter((file) => referenced.has(file.path)),
     tables: filtered,
   };
 }
@@ -391,22 +412,19 @@ function tryReadTable(
   }
 }
 
-export async function buildBackupJson(opts?: {
-  pretty?: boolean;
-  includeAsset?: (path: string) => boolean;
-}): Promise<{ json: string; data: BackupData }> {
-  const data = await buildBackupData({ includeAsset: opts?.includeAsset });
-  // Reading every table and serializing the result each take a noticeable
-  // slice of the JS thread on a large database. Let a frame render between the
-  // two so the auto-backup reads as two short stalls rather than one long one.
+/**
+ * A backup file with its photos embedded: the export, which leaves the app on
+ * its own. Large stored photos are shrunk first (services/imageShrink).
+ */
+export async function buildEmbeddedBackupFile(): Promise<{ bytes: Uint8Array; data: BackupData }> {
+  await shrinkStoredPhotos();
+  const data = await buildBackupData();
+  // Reading every table and packing the result each take a noticeable slice
+  // of the JS thread on a large database. Let a frame render between the two.
   // (The table reads themselves stay back to back, so the backup is one
   // consistent snapshot.)
   await yieldToEventLoop();
-  // Auto-backups call with the default (compact) since they're machine-read
-  // only — pretty-printing roughly doubles file size and serialization cost.
-  // The user-facing export passes { pretty: true } so a curious user can
-  // open the file in a text editor.
-  return { json: JSON.stringify(data, null, opts?.pretty ? 2 : undefined), data };
+  return { bytes: await encodeBackupFile(data), data };
 }
 
 /** Resolve on a later macrotask, so pending frames and touches run first. */
@@ -414,38 +432,17 @@ export function yieldToEventLoop(): Promise<void> {
   return new Promise<void>((resolve) => setTimeout(resolve, 0));
 }
 
-export function parseBackupJson(json: string): BackupData {
-  const parsed = JSON.parse(json) as BackupData;
-  if (!parsed || typeof parsed.version !== 'number' || !parsed.tables) {
-    throw new Error('Invalid backup format');
-  }
-  if (!SUPPORTED_BACKUP_VERSIONS.has(parsed.version)) {
-    throw new Error(`Unsupported backup version: ${parsed.version}`);
-  }
-  if (
-    parsed.version === 5 &&
-    (!Array.isArray(parsed.sharedLedgers) ||
-      parsed.sharedLedgers.some(
-        (ledger) =>
-          !ledger || typeof ledger.ledgerId !== 'string' || typeof ledger.shareId !== 'string',
-      ))
-  ) {
-    throw new Error('Invalid shared ledger backup');
-  }
-  return parsed;
-}
-
 export async function exportDatabase(): Promise<void> {
-  const { json, data } = await buildBackupJson({ pretty: true });
-  const fileName = `money2time-backup-${data.exportedAt.replace(/[:.]/g, '-').slice(0, 19)}.json`;
+  const { bytes, data } = await buildEmbeddedBackupFile();
+  const fileName = `money2time-backup-${data.exportedAt.replace(/[:.]/g, '-').slice(0, 19)}.json.gz`;
   const file = new File(Paths.document, fileName);
-  await file.write(json);
+  await file.write(bytes);
 
   if (await Sharing.isAvailableAsync()) {
     await Sharing.shareAsync(file.uri, {
-      mimeType: 'application/json',
+      mimeType: 'application/gzip',
       dialogTitle: 'Export Money2Time Backup',
-      UTI: 'public.json',
+      UTI: 'org.gnu.gnu-zip-archive',
     });
   } else {
     file.delete();
@@ -457,6 +454,8 @@ export interface ImportResult {
   success?: boolean;
   error?: string;
   syncPending?: boolean;
+  /** Images a compact backup lists that no backup target still had. */
+  missingPhotos?: number;
 }
 
 function getTableColumnNames(
@@ -589,7 +588,8 @@ export function applyBackupData(
         : `NOT (${inLedgersSql(table, shared)})`;
   const keepShared = (table: string) => ` WHERE ${restoreWhere(table)}`;
   let assetsToRestore = backup.userAssets;
-  if (assetsToRestore?.length) {
+  let filesToRestore = backup.assetFiles;
+  if (assetsToRestore?.length || filesToRestore?.length) {
     const restoredTables = Object.fromEntries(
       Object.entries(backup.tables).filter(([table]) => restorePersonal || isLedgerScoped(table)),
     );
@@ -612,9 +612,9 @@ export function applyBackupData(
     }
     const restoredPaths = backupAssetPaths(restoredTables);
     const preservedPaths = backupAssetPaths(preservedTables);
-    assetsToRestore = assetsToRestore.filter(
-      (asset) => restoredPaths.has(asset.path) && !preservedPaths.has(asset.path),
-    );
+    const restores = (path: string) => restoredPaths.has(path) && !preservedPaths.has(path);
+    assetsToRestore = assetsToRestore?.filter((asset) => restores(asset.path));
+    filesToRestore = filesToRestore?.filter((file) => restores(file.path));
   }
   const prefs = [...selected]
     .map((id) =>
@@ -801,7 +801,7 @@ export function applyBackupData(
 
     // Restore user-uploaded assets (custom logos, …) outside the DB transaction.
     try {
-      restoreUserAssetsFromBackup(assetsToRestore);
+      restoreUserAssetsFromBackup(assetsToRestore, filesToRestore);
       // The restored DB replaced every reference, so any file left from the
       // device's prior state (not carried by this backup) is now an orphan.
       runUserAssetGc();
@@ -823,22 +823,21 @@ export function applyBackupData(
   }
 }
 
-export function applyBackupJson(json: string): ImportResult {
-  let backup: BackupData;
-  try {
-    backup = parseBackupJson(json);
-  } catch (e) {
-    return { canceled: false, success: false, error: getErrorMessage(e, 'Invalid JSON file') };
-  }
-  return applyBackupData(backup);
-}
-
-export async function pickAndImportDatabase(options?: {
+export async function pickAndImportDatabase(options: {
   onFilePicked?: () => void;
-  restore?: (backup: BackupData) => Promise<ImportResult>;
+  restore: (backup: BackupData) => Promise<ImportResult>;
 }): Promise<ImportResult> {
   const result = await DocumentPicker.getDocumentAsync({
-    type: ['application/json', 'text/plain', 'public.json'],
+    // Compact backups are gzip files; Android may report them as plain bytes.
+    type: [
+      'application/json',
+      'text/plain',
+      'public.json',
+      'application/gzip',
+      'application/x-gzip',
+      'org.gnu.gnu-zip-archive',
+      'application/octet-stream',
+    ],
     copyToCacheDirectory: true,
   });
 
@@ -853,26 +852,23 @@ export async function pickAndImportDatabase(options?: {
   // Used by callers to reveal the blocking "importing..." overlay only after
   // the picker is out of the way — on iOS, presenting a RN Modal while the
   // picker is trying to present prevents the picker from opening at all.
-  options?.onFilePicked?.();
+  options.onFilePicked?.();
   // Yield a frame so React actually paints the overlay before we block the
   // JS thread on the synchronous SQLite writes below. Without this, the
   // state update queued by `onFilePicked` gets batched with the `finally`
   // cleanup and the overlay never becomes visible.
   await new Promise<void>((resolve) => setTimeout(resolve, 50));
 
-  let json: string;
+  let payload: string | Uint8Array;
   try {
-    json = await new File(asset.uri).text();
+    payload = await readBackupFile(new File(asset.uri));
   } catch {
     return { canceled: false, success: false, error: 'Failed to read file' };
   }
 
-  if (options?.restore) {
-    try {
-      return await options.restore(parseBackupJson(json));
-    } catch (error) {
-      return { canceled: false, success: false, error: getErrorMessage(error, 'Invalid backup') };
-    }
+  try {
+    return await options.restore(await decodeBackupFile(payload));
+  } catch (error) {
+    return { canceled: false, success: false, error: getErrorMessage(error, 'Invalid backup') };
   }
-  return applyBackupJson(json);
 }

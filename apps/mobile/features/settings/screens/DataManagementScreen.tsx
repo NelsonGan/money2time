@@ -21,10 +21,13 @@ import { useBackupRestore } from '~/features/settings/hooks/useBackupRestore';
 import { useSharedLedgers } from '~/features/sharedLedgers/hooks/useSharedLedgers';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
+import { restoreImportedBackup } from '~/services/autoBackup';
 import { exportDatabase, pickAndImportDatabase } from '~/services/dataManagementService';
 import { exportExcel } from '~/services/excelExportService';
 import { triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
+
+import { restoreResultMessage } from '../lib/restoreResultMessage';
 
 interface DataManagementScreenProps {
   onBack: () => void;
@@ -156,7 +159,7 @@ export function DataManagementScreen({ onBack, onOpenAutoBackup }: DataManagemen
     try {
       const result = await pickAndImportDatabase({
         onFilePicked: () => setImportingSource('money2time'),
-        restore: chooseAndRestore,
+        restore: (backup) => restoreImportedBackup(backup, chooseAndRestore),
       });
       if (result.canceled) return;
 
@@ -164,11 +167,7 @@ export function DataManagementScreen({ onBack, onOpenAutoBackup }: DataManagemen
         refreshAll();
         Alert.alert(
           I18n.t('data_management.import_success_title'),
-          I18n.t(
-            result.syncPending
-              ? 'backup_restore.sync_pending'
-              : 'data_management.import_success_message',
-          ),
+          restoreResultMessage(result, 'data_management.import_success_message'),
         );
       } else {
         Alert.alert(

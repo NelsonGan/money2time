@@ -49,6 +49,18 @@ export interface UserAssetBackupEntry {
   base64: string;
 }
 
+/**
+ * A user-asset file by its location instead of its bytes: what an automatic
+ * backup stores beside itself (services/backupPhotos.ts), and a photo a
+ * restore has downloaded and copies into place.
+ */
+export interface UserAssetFileEntry {
+  /** Path relative to the user-assets root, e.g. `album-covers/9f3c.jpg`. */
+  path: string;
+  /** Where the file is now. */
+  uri: string;
+}
+
 function rootDir(): Directory {
   return new Directory(Paths.document, ROOT);
 }
@@ -538,6 +550,31 @@ export async function collectUserAssetsForBackup(
 }
 
 /**
+ * Lists every file under the user-assets root without reading it, for a backup
+ * that stores its photos beside itself. `include` works as in
+ * {@link collectUserAssetsForBackup}.
+ */
+export function listUserAssetFilesForBackup(
+  include?: (path: string) => boolean,
+): UserAssetFileEntry[] {
+  const root = rootDir();
+  if (!root.exists) return [];
+  const out: UserAssetFileEntry[] = [];
+  const walk = (dir: Directory, prefix: string) => {
+    for (const entry of dir.list()) {
+      if (entry instanceof Directory) {
+        const folder = `${prefix}${entry.name}/`;
+        if (!include || include(folder)) walk(entry, folder);
+      } else if (!include || include(`${prefix}${entry.name}`)) {
+        out.push({ path: `${prefix}${entry.name}`, uri: entry.uri });
+      }
+    }
+  };
+  walk(root, '');
+  return out;
+}
+
+/**
  * Deletes every file under the user-assets root whose relative path is not in
  * `referencedPaths`, reclaiming images orphaned by deleted transactions, data
  * resets, imports, and abandoned scans. This matters because
@@ -572,18 +609,40 @@ export function sweepOrphanUserAssets(referencedPaths: ReadonlySet<string>): num
   return removed;
 }
 
-/** Writes backed-up user assets back to disk (overwriting), creating dirs. */
-export function restoreUserAssetsFromBackup(assets?: UserAssetBackupEntry[]) {
-  if (!assets || assets.length === 0) return;
-  for (const asset of assets) {
-    const parts = asset.path.split('/').filter((part) => part && part !== '..');
-    if (parts.length === 0) continue;
-    const fileName = parts.pop() as string;
-    const dir = new Directory(Paths.document, ROOT, ...parts);
-    ensureDir(dir);
-    const file = new File(Paths.document, ROOT, ...parts, fileName);
+/** The file a backed-up path restores to, creating its folder; null for a bad path. */
+function restoreTarget(path: string): File | null {
+  const parts = path.split('/').filter((part) => part && part !== '..' && part !== '.');
+  if (parts.length === 0) return null;
+  const fileName = parts.pop() as string;
+  ensureDir(new Directory(Paths.document, ROOT, ...parts));
+  return new File(Paths.document, ROOT, ...parts, fileName);
+}
+
+/**
+ * Writes backed-up user assets back to disk (overwriting), creating dirs:
+ * `assets` embedded as base64, `files` copied from where a restore downloaded
+ * them. A file that fails to copy is skipped; the rest still land.
+ */
+export function restoreUserAssetsFromBackup(
+  assets?: UserAssetBackupEntry[],
+  files?: UserAssetFileEntry[],
+) {
+  if (!assets?.length && !files?.length) return;
+  for (const asset of assets ?? []) {
+    const file = restoreTarget(asset.path);
+    if (!file) continue;
     file.create({ overwrite: true });
     file.writeSync(asset.base64, { encoding: 'base64' });
+  }
+  for (const entry of files ?? []) {
+    const file = restoreTarget(entry.path);
+    if (!file) continue;
+    try {
+      if (file.exists) file.delete();
+      new File(entry.uri).copySync(file);
+    } catch (error) {
+      console.warn(`[userAssets] could not restore ${entry.path}`, error);
+    }
   }
   invalidateCustomUriCache();
 }

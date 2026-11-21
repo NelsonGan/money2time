@@ -72,7 +72,7 @@ export function SettleUpSettingsScreen({ onBack }: SettleUpSettingsScreenProps) 
         if (previous) deletePaymentQr(previous);
         trackEvent(AnalyticsEvents.SETTLE_UP_QR_SET);
       },
-      { aspect: [1, 1] },
+      { aspect: [1, 1], kind: 'qr' },
     );
   }, [settings.paymentQrUri, updateSettings]);
 

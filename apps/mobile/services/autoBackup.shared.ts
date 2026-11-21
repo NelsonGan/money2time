@@ -3,7 +3,11 @@ import type { BackupTarget } from '~/types';
 export const AUTO_BACKUP_TASK_ID = 'money2time-auto-backup';
 export const AUTO_BACKUP_PREFIX = 'money2time_AUTO_';
 export const RECOVERY_BACKUP_PREFIX = 'money2time_RECOVERY_';
-export const AUTO_BACKUP_EXTENSION = '.json';
+// Backups are gzipped JSON in the compact format (services/backupFile.ts).
+// Older apps wrote plain `.json` files, which are still listed and restored;
+// an older app lists only those, so it never offers a file it cannot read.
+export const AUTO_BACKUP_EXTENSION = '.json.gz';
+const BACKUP_EXTENSIONS = /\.json(\.gz)?$/;
 export const MAX_AUTO_BACKUPS = 10;
 export const BACKUP_STALENESS_HOURS = 24;
 export const BACKGROUND_INTERVAL_MINUTES = 60 * 12; // 12h hint to the OS scheduler
@@ -23,6 +27,21 @@ export interface BackupRecord {
   sizeBytes: number;
   // Local: absolute file URI. iCloud: container-relative path. Drive: file id.
   ref: string;
+}
+
+/** Whether a backup is in the compact format, the only one that lists stored photos. */
+export function isCompactBackupName(name: string): boolean {
+  return name.endsWith(AUTO_BACKUP_EXTENSION);
+}
+
+/** A photo stored beside a target's backups, shared by every backup listing it. */
+export interface BackupPhotoRecord {
+  /** `money2time_PHOTO_<md5>.<ext>`. */
+  name: string;
+  /** Local: absolute file URI. iCloud: container-relative path. Drive: file id. */
+  ref: string;
+  /** When it was stored, as epoch ms; null when the target cannot say. */
+  createdAt: number | null;
 }
 
 export interface BackupRunResult {
@@ -53,7 +72,8 @@ export function parseTimestampFromName(name: string): string | null {
     name.startsWith(value),
   );
   if (!prefix) return null;
-  const stem = name.slice(prefix.length).replace(AUTO_BACKUP_EXTENSION, '');
+  if (!BACKUP_EXTENSIONS.test(name)) return null;
+  const stem = name.slice(prefix.length).replace(BACKUP_EXTENSIONS, '');
   // Reverse of buildAutoBackupName: "2026-05-24T09-14-00" → "2026-05-24T09:14:00Z"
   const restored = stem.replace(/-(\d{2})-(\d{2})$/, ':$1:$2').replace('T', 'T') + 'Z';
   const t = Date.parse(restored);

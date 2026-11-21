@@ -15,6 +15,10 @@ const fil = {
       '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
     sync_pending: 'Restored here. Stay signed in to finish syncing.',
     failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+    photos_unavailable:
+      'Hindi ma-download ang mga larawan ng backup na ito. Tingnan ang iyong koneksyon at subukang muli.',
+    photos_missing:
+      'May mga larawan mula sa backup na ito na hindi nakita kaya hindi naibalik ({{count}}).',
   },
   common: {
     back: 'Bumalik',

@@ -15,6 +15,10 @@ const pt = {
       '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
     sync_pending: 'Restored here. Stay signed in to finish syncing.',
     failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+    photos_unavailable:
+      'Não foi possível baixar as fotos deste backup. Verifique sua conexão e tente novamente.',
+    photos_missing:
+      'Algumas fotos deste backup não foram encontradas e não foram restauradas ({{count}}).',
   },
   common: {
     back: 'Voltar',

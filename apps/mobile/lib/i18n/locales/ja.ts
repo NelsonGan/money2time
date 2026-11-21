@@ -15,6 +15,10 @@ const ja = {
       '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
     sync_pending: 'Restored here. Stay signed in to finish syncing.',
     failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+    photos_unavailable:
+      'このバックアップの写真をダウンロードできませんでした。接続を確認して、もう一度お試しください。',
+    photos_missing:
+      'このバックアップの写真 {{count}} 枚が見つからなかったため、復元されませんでした。',
   },
   common: {
     back: '戻る',

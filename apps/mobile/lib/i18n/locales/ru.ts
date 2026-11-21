@@ -15,6 +15,9 @@ const ru = {
       '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
     sync_pending: 'Restored here. Stay signed in to finish syncing.',
     failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+    photos_unavailable:
+      'Не удалось загрузить фото из этой резервной копии. Проверьте подключение и повторите попытку.',
+    photos_missing: 'Не найдено фото из этой копии: {{count}}. Они не восстановлены.',
   },
   common: {
     back: 'Назад',

@@ -24,6 +24,8 @@
  * Everything runs under the `drive.file` OAuth scope, which only ever sees
  * files this app created.
  */
+import { strToU8 } from 'fflate';
+
 import { getErrorMessage } from '~/utils/errorHandling';
 
 import { clearGoogleTokenCache, getGoogleAccessToken } from './googleDriveAuth';
@@ -206,7 +208,8 @@ async function driveErrorFromResponse(response: Response): Promise<DriveError> {
 interface DriveRequestOptions {
   method?: string;
   headers?: Record<string, string>;
-  body?: string;
+  /** Bytes go to native as they are (React Native's fetch sends a typed array whole). */
+  body?: string | Uint8Array;
   timeoutMs?: number;
   /**
    * Total tries, including the first. Pass 1 for requests whose retry has to be
@@ -242,7 +245,13 @@ export async function driveRequest(
     try {
       response = await fetchWithTimeout(
         url,
-        { method, headers: { ...headers, Authorization: `Bearer ${token}` }, body },
+        {
+          method,
+          headers: { ...headers, Authorization: `Bearer ${token}` },
+          // A typed array over any buffer is a valid body; the DOM typing
+          // only names one over an ArrayBuffer.
+          body: body as BodyInit | undefined,
+        },
         timeoutMs,
       );
     } catch (error) {
@@ -396,18 +405,20 @@ export async function listFolderChildren(folderId: string): Promise<DriveFile[]>
 }
 
 /**
- * Uploads a JSON backup via Drive's resumable protocol, which is the documented
- * path for large bodies over unreliable connections (multipart is only
- * recommended below 5MB, and a long-lived user's backup passes that).
+ * Uploads a file (a gzipped backup, a stored photo) via Drive's resumable
+ * protocol, which is the documented path for large bodies over unreliable
+ * connections (multipart is only recommended below 5MB, and an older
+ * long-lived user's backup passed that).
  *
  * An interrupted transfer restarts from a fresh session rather than re-sending
  * into the old one, so the two requests are made with retries disabled and the
  * whole operation is retried instead.
  */
-export async function uploadJsonFile(
+export async function uploadDriveFile(
   folderId: string,
   name: string,
-  json: string,
+  body: string | Uint8Array,
+  mimeType: string,
 ): Promise<string> {
   let lastError: DriveError | null = null;
   // The two upload requests run with retries disabled, so a 401 arrives here
@@ -418,7 +429,7 @@ export async function uploadJsonFile(
 
   for (let attempt = 1; attempt <= DEFAULT_ATTEMPTS; attempt++) {
     try {
-      return await uploadJsonFileOnce(folderId, name, json);
+      return await uploadDriveFileOnce(folderId, name, body, mimeType);
     } catch (error) {
       const driveError =
         error instanceof DriveError
@@ -445,7 +456,12 @@ export async function uploadJsonFile(
   throw lastError ?? new DriveError('client', 'Drive upload failed');
 }
 
-async function uploadJsonFileOnce(folderId: string, name: string, json: string): Promise<string> {
+async function uploadDriveFileOnce(
+  folderId: string,
+  name: string,
+  body: string | Uint8Array,
+  mimeType: string,
+): Promise<string> {
   const initUrl = `${DRIVE_UPLOAD_API}/files${encodeQuery({
     uploadType: 'resumable',
     fields: 'id',
@@ -455,9 +471,9 @@ async function uploadJsonFileOnce(folderId: string, name: string, json: string):
     method: 'POST',
     headers: {
       'Content-Type': `${JSON_MIME_TYPE}; charset=UTF-8`,
-      'X-Upload-Content-Type': JSON_MIME_TYPE,
+      'X-Upload-Content-Type': mimeType,
     },
-    body: JSON.stringify({ name, parents: [folderId], mimeType: JSON_MIME_TYPE }),
+    body: JSON.stringify({ name, parents: [folderId], mimeType }),
     attempts: 1,
   });
 
@@ -465,41 +481,56 @@ async function uploadJsonFileOnce(folderId: string, name: string, json: string):
   if (!sessionUri) {
     // Some proxies strip the Location header. Fall back to a single-shot
     // multipart upload rather than failing the backup outright.
-    return uploadJsonFileMultipart(folderId, name, json);
+    return uploadDriveFileMultipart(folderId, name, body, mimeType);
   }
 
   const uploadResponse = await driveRequest(sessionUri, {
     method: 'PUT',
-    headers: { 'Content-Type': JSON_MIME_TYPE },
-    body: json,
+    headers: { 'Content-Type': mimeType },
+    body,
     timeoutMs: TRANSFER_TIMEOUT_MS,
     attempts: 1,
   });
 
-  const body = (await uploadResponse.json()) as DriveFileResource;
-  if (!body.id)
+  const uploaded = (await uploadResponse.json()) as DriveFileResource;
+  if (!uploaded.id)
     throw new DriveError('client', 'Drive did not return a file id', null, 'missing_id');
-  return body.id;
+  return uploaded.id;
 }
 
 const MULTIPART_BOUNDARY = 'money2time-backup-boundary';
 
-async function uploadJsonFileMultipart(
+/** The bytes of `parts` one after another, text as UTF-8. */
+function joinBytes(parts: (string | Uint8Array)[]): Uint8Array {
+  const bytes = parts.map((part) => (typeof part === 'string' ? strToU8(part) : part));
+  const out = new Uint8Array(bytes.reduce((total, part) => total + part.length, 0));
+  let offset = 0;
+  for (const part of bytes) {
+    out.set(part, offset);
+    offset += part.length;
+  }
+  return out;
+}
+
+async function uploadDriveFileMultipart(
   folderId: string,
   name: string,
-  json: string,
+  content: string | Uint8Array,
+  mimeType: string,
 ): Promise<string> {
-  const metadata = JSON.stringify({ name, parents: [folderId], mimeType: JSON_MIME_TYPE });
+  const metadata = JSON.stringify({ name, parents: [folderId], mimeType });
   // Note the absent Content-Length: fetch computes it from the encoded bytes.
-  const body = [
+  const parts = [
     `--${MULTIPART_BOUNDARY}\r\n`,
     `Content-Type: ${JSON_MIME_TYPE}; charset=UTF-8\r\n\r\n`,
     `${metadata}\r\n`,
     `--${MULTIPART_BOUNDARY}\r\n`,
-    `Content-Type: ${JSON_MIME_TYPE}\r\n\r\n`,
-    `${json}\r\n`,
+    `Content-Type: ${mimeType}\r\n\r\n`,
+    content,
+    `\r\n`,
     `--${MULTIPART_BOUNDARY}--`,
-  ].join('');
+  ];
+  const body = typeof content === 'string' ? parts.join('') : joinBytes(parts);
 
   const url = `${DRIVE_UPLOAD_API}/files${encodeQuery({
     uploadType: 'multipart',
@@ -520,10 +551,18 @@ async function uploadJsonFileMultipart(
   return parsed.id;
 }
 
+function mediaUrl(fileId: string): string {
+  return `${DRIVE_API}/files/${encodeURIComponent(fileId)}${encodeQuery({ alt: 'media' })}`;
+}
+
 export async function downloadFileText(fileId: string): Promise<string> {
-  const url = `${DRIVE_API}/files/${encodeURIComponent(fileId)}${encodeQuery({ alt: 'media' })}`;
-  const response = await driveRequest(url, { timeoutMs: TRANSFER_TIMEOUT_MS });
+  const response = await driveRequest(mediaUrl(fileId), { timeoutMs: TRANSFER_TIMEOUT_MS });
   return response.text();
+}
+
+export async function downloadFileBytes(fileId: string): Promise<Uint8Array> {
+  const response = await driveRequest(mediaUrl(fileId), { timeoutMs: TRANSFER_TIMEOUT_MS });
+  return new Uint8Array(await response.arrayBuffer());
 }
 
 export async function deleteFile(fileId: string): Promise<void> {

@@ -929,7 +929,7 @@ describe('backup and restore across ledgers', () => {
       expect(
         applyBackupData(backup, { restorePersonal: false, sharedLedgerIds: ['work'] }).success,
       ).toBe(true);
-      expect(restoreAssets).toHaveBeenCalledWith([]);
+      expect(restoreAssets).toHaveBeenCalledWith([], undefined);
     } finally {
       removeSharedLedger('work');
     }
@@ -1048,7 +1048,7 @@ describe('backup and restore across ledgers', () => {
         .restoreUserAssetsFromBackup as jest.Mock;
       restoreAssets.mockClear();
       expect(applyBackupData(backup).success).toBe(true);
-      expect(restoreAssets).toHaveBeenCalledWith([]);
+      expect(restoreAssets).toHaveBeenCalledWith([], undefined);
     } finally {
       removeSharedLedger('work');
     }

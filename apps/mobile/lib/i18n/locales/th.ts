@@ -15,6 +15,8 @@ const th = {
       '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
     sync_pending: 'Restored here. Stay signed in to finish syncing.',
     failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+    photos_unavailable: 'ดาวน์โหลดรูปภาพของข้อมูลสำรองนี้ไม่ได้ ตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง',
+    photos_missing: 'ไม่พบรูปภาพ {{count}} รูปจากข้อมูลสำรองนี้ จึงไม่ได้กู้คืน',
   },
   common: {
     back: 'กลับ',

@@ -49,6 +49,8 @@ import { triggerHaptic } from '~/services/haptics';
 import type { BackupTarget } from '~/types';
 import { getErrorMessage } from '~/utils/errorHandling';
 
+import { restoreResultMessage } from '../lib/restoreResultMessage';
+
 interface AutoBackupScreenProps {
   onBack: () => void;
 }
@@ -426,11 +428,7 @@ export function AutoBackupScreen({ onBack }: AutoBackupScreenProps) {
         void triggerHaptic('success');
         Alert.alert(
           I18n.t('auto_backup.restore_success_title'),
-          I18n.t(
-            result.syncPending
-              ? 'backup_restore.sync_pending'
-              : 'auto_backup.restore_success_message',
-          ),
+          restoreResultMessage(result, 'auto_backup.restore_success_message'),
         );
       } else {
         Alert.alert(

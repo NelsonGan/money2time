@@ -46,8 +46,14 @@ jest.mock('~/services/autoBackupProviders/googleDrive', () => ({
 }));
 jest.mock('~/services/autoBackupProviders/googleDriveAuth', () => ({}));
 jest.mock('~/services/dataManagementService', () => ({
-  buildBackupJson: jest.fn(async () => ({ json: '{}' })),
+  buildBackupData: jest.fn(async () => ({ version: 3, exportedAt: '', tables: {} })),
   yieldToEventLoop: jest.fn(async () => undefined),
+}));
+jest.mock('~/services/backupPhotos', () => ({
+  describeBackupPhotos: jest.fn(async () => []),
+  uploadMissingPhotos: jest.fn(async () => undefined),
+  rememberBackupPhotos: jest.fn(),
+  pruneBackupPhotos: jest.fn(async () => 0),
 }));
 
 const drive = googleDriveProvider as unknown as Record<

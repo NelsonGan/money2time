@@ -15,6 +15,9 @@ const vi = {
       '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
     sync_pending: 'Restored here. Stay signed in to finish syncing.',
     failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+    photos_unavailable: 'Không thể tải ảnh của bản sao lưu này. Hãy kiểm tra kết nối và thử lại.',
+    photos_missing:
+      'Không tìm thấy {{count}} ảnh từ bản sao lưu này nên chúng chưa được khôi phục.',
   },
   common: {
     back: 'Quay lại',

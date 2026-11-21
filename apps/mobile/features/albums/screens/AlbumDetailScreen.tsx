@@ -662,6 +662,7 @@ export function AlbumDetailScreen({
       },
       {
         aspect: [3, 2],
+        kind: 'cover',
         permissionAlert: {
           title: I18n.t('albums.cover_permission_title'),
           message: I18n.t('albums.cover_permission_body'),

@@ -43,6 +43,7 @@ jest.mock('@react-native-google-signin/google-signin', () => ({
 import {
   createFolder,
   deleteFile,
+  downloadFileBytes,
   downloadFileText,
   DriveError,
   driveFailureDetails,
@@ -51,7 +52,7 @@ import {
   findFolderIds,
   isRetryableDriveError,
   listFolderChildren,
-  uploadJsonFile,
+  uploadDriveFile,
 } from '~/services/autoBackupProviders/googleDriveApi';
 
 type FetchMock = jest.Mock<Promise<Response>, [string, RequestInit]>;
@@ -224,7 +225,9 @@ describe('failure details for analytics', () => {
       .mockResolvedValueOnce(jsonResponse({}, { headers: { Location: sessionUri } }))
       .mockResolvedValueOnce(unreadable);
 
-    const error = await uploadJsonFile('folder-1', 'backup.json', '{}').catch((e: unknown) => e);
+    const error = await uploadDriveFile('folder-1', 'backup.json', '{}', 'application/json').catch(
+      (e: unknown) => e,
+    );
     expect(error).toMatchObject({ kind: 'client', status: null });
     expect(driveFailureDetails(error)).toEqual({ httpStatus: null, driveReason: 'js_SyntaxError' });
   });
@@ -420,7 +423,9 @@ describe('upload', () => {
 
   it('uses a resumable session and PUTs the body to it', async () => {
     mockResumableSession();
-    await expect(uploadJsonFile('folder-1', 'backup.json', '{"a":1}')).resolves.toBe('file-1');
+    await expect(
+      uploadDriveFile('folder-1', 'backup.json', '{"a":1}', 'application/json'),
+    ).resolves.toBe('file-1');
 
     const [initUrl, initInit] = fetchMock.mock.calls[0]!;
     expect(new URL(initUrl).searchParams.get('uploadType')).toBe('resumable');
@@ -440,7 +445,7 @@ describe('upload', () => {
     // 'emoji:🍔' is a real stored icon value, and its UTF-16 length is shorter
     // than its UTF-8 byte length. The old client declared the former and sent
     // the latter, so the request hung until it aborted.
-    await uploadJsonFile('folder-1', 'backup.json', '{"icon":"emoji:🍔"}');
+    await uploadDriveFile('folder-1', 'backup.json', '{"icon":"emoji:🍔"}', 'application/json');
 
     for (const [, init] of fetchMock.mock.calls) {
       const headers = (init.headers ?? {}) as Record<string, string>;
@@ -454,7 +459,9 @@ describe('upload', () => {
       .mockResolvedValueOnce(jsonResponse({}))
       .mockResolvedValueOnce(jsonResponse({ id: 'file-1' }));
 
-    await expect(uploadJsonFile('folder-1', 'backup.json', '{"a":1}')).resolves.toBe('file-1');
+    await expect(
+      uploadDriveFile('folder-1', 'backup.json', '{"a":1}', 'application/json'),
+    ).resolves.toBe('file-1');
 
     const [url, init] = fetchMock.mock.calls[1]!;
     expect(new URL(url).searchParams.get('uploadType')).toBe('multipart');
@@ -470,7 +477,9 @@ describe('upload', () => {
       .mockResolvedValueOnce(jsonResponse({}, { headers: { Location: RESUMABLE_URI } }))
       .mockResolvedValueOnce(jsonResponse({ id: 'file-1' }));
 
-    await expect(uploadJsonFile('folder-1', 'backup.json', '{"a":1}')).resolves.toBe('file-1');
+    await expect(
+      uploadDriveFile('folder-1', 'backup.json', '{"a":1}', 'application/json'),
+    ).resolves.toBe('file-1');
     // A new session is negotiated rather than re-PUTting into the dead one.
     expect(fetchMock).toHaveBeenCalledTimes(4);
   });
@@ -488,14 +497,18 @@ describe('upload', () => {
       .mockResolvedValueOnce(jsonResponse({}, { headers: { Location: RESUMABLE_URI } }))
       .mockResolvedValueOnce(jsonResponse({ id: 'file-1' }));
 
-    await expect(uploadJsonFile('folder-1', 'backup.json', '{}')).resolves.toBe('file-1');
+    await expect(
+      uploadDriveFile('folder-1', 'backup.json', '{}', 'application/json'),
+    ).resolves.toBe('file-1');
     expect(googleSignin.clearCachedAccessToken).toHaveBeenCalledWith('stale');
   });
 
   it('gives up rather than looping when the grant is genuinely revoked', async () => {
     fetchMock.mockResolvedValue(jsonResponse({ error: { message: 'revoked' } }, { status: 401 }));
 
-    await expect(uploadJsonFile('folder-1', 'backup.json', '{}')).rejects.toMatchObject({
+    await expect(
+      uploadDriveFile('folder-1', 'backup.json', '{}', 'application/json'),
+    ).rejects.toMatchObject({
       kind: 'auth',
     });
     // One initial try plus exactly one refreshed retry.
@@ -510,14 +523,62 @@ describe('upload', () => {
       ),
     );
 
-    await expect(uploadJsonFile('folder-1', 'backup.json', '{}')).rejects.toMatchObject({
+    await expect(
+      uploadDriveFile('folder-1', 'backup.json', '{}', 'application/json'),
+    ).rejects.toMatchObject({
       kind: 'quota',
     });
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });
 
+describe('binary upload', () => {
+  it('PUTs the bytes as they are, with their own content type', async () => {
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse({}, { headers: { Location: RESUMABLE_URI } }))
+      .mockResolvedValueOnce(jsonResponse({ id: 'file-1' }));
+    const bytes = new Uint8Array([0x1f, 0x8b, 8, 0]);
+
+    await expect(
+      uploadDriveFile('folder-1', 'backup.json.gz', bytes, 'application/gzip'),
+    ).resolves.toBe('file-1');
+
+    const [, initInit] = fetchMock.mock.calls[0]!;
+    expect((initInit.headers as Record<string, string>)['X-Upload-Content-Type']).toBe(
+      'application/gzip',
+    );
+    expect(JSON.parse(String(initInit.body))).toMatchObject({ mimeType: 'application/gzip' });
+    const [, uploadInit] = fetchMock.mock.calls[1]!;
+    expect(uploadInit.body).toBe(bytes);
+    expect((uploadInit.headers as Record<string, string>)['Content-Type']).toBe('application/gzip');
+  });
+
+  it('frames bytes in a multipart body when the session URI is stripped', async () => {
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse({}))
+      .mockResolvedValueOnce(jsonResponse({ id: 'file-1' }));
+    const bytes = new Uint8Array([0xff, 0xd8, 0xff, 0x00]);
+
+    await uploadDriveFile('folder-1', 'photo.jpg', bytes, 'image/jpeg');
+
+    const body = fetchMock.mock.calls[1]![1].body as Uint8Array;
+    expect(body).toBeInstanceOf(Uint8Array);
+    const text = Buffer.from(body).toString('latin1');
+    expect(text).toContain('Content-Type: image/jpeg\r\n\r\n\xff\xd8\xff\x00\r\n');
+    expect(text.endsWith('--money2time-backup-boundary--')).toBe(true);
+  });
+});
+
 describe('download and delete', () => {
+  it('downloads the raw file bytes', async () => {
+    const bytes = new Uint8Array([0x1f, 0x8b, 1]);
+    fetchMock.mockResolvedValue({
+      ...jsonResponse({}),
+      arrayBuffer: async () => bytes.buffer,
+    } as unknown as Response);
+    await expect(downloadFileBytes('file-1')).resolves.toEqual(bytes);
+  });
+
   it('downloads the raw file text', async () => {
     fetchMock.mockResolvedValue(jsonResponse('{"version":1}'));
     await expect(downloadFileText('file-1')).resolves.toBe('{"version":1}');

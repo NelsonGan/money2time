@@ -279,7 +279,7 @@ export function CategoryIconPickerSheet({
         saveCustomCategoryIcon(uri);
         refreshCustomIcons();
       },
-      { failureTitle: I18n.t('accounts.logo.upload_failed') },
+      { kind: 'icon', failureTitle: I18n.t('accounts.logo.upload_failed') },
     );
   }, [refreshCustomIcons, requirePro]);
 

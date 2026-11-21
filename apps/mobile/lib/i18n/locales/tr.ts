@@ -15,6 +15,9 @@ const tr = {
       '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
     sync_pending: 'Restored here. Stay signed in to finish syncing.',
     failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+    photos_unavailable:
+      'Bu yedeğin fotoğrafları indirilemedi. Bağlantını kontrol edip tekrar dene.',
+    photos_missing: 'Bu yedekteki {{count}} fotoğraf bulunamadığı için geri yüklenmedi.',
   },
   common: {
     back: 'Geri',

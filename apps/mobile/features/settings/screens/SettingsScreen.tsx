@@ -247,7 +247,7 @@ export function SettingsScreen({
         updateSettings({ profileAvatarUri: relativePath });
         if (previous) deleteProfileAvatar(previous);
       },
-      { aspect: [1, 1] },
+      { aspect: [1, 1], kind: 'avatar' },
     );
   }, [settings.profileAvatarUri, updateSettings]);
 

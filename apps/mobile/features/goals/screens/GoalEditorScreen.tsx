@@ -188,6 +188,7 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
       },
       {
         aspect: [3, 2],
+        kind: 'cover',
         permissionAlert: {
           title: I18n.t('goals.cover_permission_title'),
           message: I18n.t('goals.cover_permission_body'),

@@ -9,10 +9,11 @@
 const api = {
   createFolder: jest.fn<Promise<string>, [string]>(),
   deleteFile: jest.fn<Promise<void>, [string]>(),
+  downloadFileBytes: jest.fn<Promise<Uint8Array>, [string]>(),
   downloadFileText: jest.fn<Promise<string>, [string]>(),
   findFolderIds: jest.fn<Promise<string[]>, [string]>(),
   listFolderChildren: jest.fn<Promise<unknown[]>, [string]>(),
-  uploadJsonFile: jest.fn<Promise<string>, [string, string, string]>(),
+  uploadDriveFile: jest.fn<Promise<string>, [string, string, string | Uint8Array, string]>(),
 };
 
 class MockDriveError extends Error {
@@ -37,6 +38,17 @@ const auth = {
 };
 
 jest.mock('~/services/autoBackupProviders/googleDriveAuth', () => auth);
+jest.mock('expo-file-system/next', () => ({
+  File: class {
+    constructor(public uri: string) {}
+    async bytes() {
+      return new Uint8Array([1, 2, 3]);
+    }
+  },
+}));
+
+/** Stands in for a gzipped backup's bytes. */
+const BYTES = new Uint8Array([0x1f, 0x8b, 0]);
 
 import {
   googleDriveProvider,
@@ -96,12 +108,12 @@ describe('list', () => {
 describe('upload', () => {
   it('writes to the oldest folder and reuses it without re-querying', async () => {
     api.findFolderIds.mockResolvedValue(['folder-1', 'folder-2']);
-    api.uploadJsonFile.mockResolvedValue('file-a');
+    api.uploadDriveFile.mockResolvedValue('file-a');
 
-    await googleDriveProvider.upload('money2time_AUTO_2026-07-01T10-00-00.json', '{}');
-    await googleDriveProvider.upload('money2time_AUTO_2026-07-02T10-00-00.json', '{}');
+    await googleDriveProvider.upload('money2time_AUTO_2026-07-01T10-00-00.json.gz', BYTES);
+    await googleDriveProvider.upload('money2time_AUTO_2026-07-02T10-00-00.json.gz', BYTES);
 
-    expect(api.uploadJsonFile.mock.calls.map((c) => c[0])).toEqual(['folder-1', 'folder-1']);
+    expect(api.uploadDriveFile.mock.calls.map((c) => c[0])).toEqual(['folder-1', 'folder-1']);
     // Resolved once, then cached: a burst of backups can't race Drive's lagging
     // index into creating duplicate folders.
     expect(api.findFolderIds).toHaveBeenCalledTimes(1);
@@ -110,11 +122,11 @@ describe('upload', () => {
   it('creates the folder only when none exists', async () => {
     api.findFolderIds.mockResolvedValue([]);
     api.createFolder.mockResolvedValue('folder-new');
-    api.uploadJsonFile.mockResolvedValue('file-a');
+    api.uploadDriveFile.mockResolvedValue('file-a');
 
     const record = await googleDriveProvider.upload(
-      'money2time_AUTO_2026-07-01T10-00-00.json',
-      '{}',
+      'money2time_AUTO_2026-07-01T10-00-00.json.gz',
+      BYTES,
     );
     expect(api.createFolder).toHaveBeenCalledTimes(1);
     expect(record.ref).toBe('file-a');
@@ -124,39 +136,39 @@ describe('upload', () => {
   it('re-resolves and retries when the cached folder has been deleted', async () => {
     api.findFolderIds.mockResolvedValueOnce(['stale-folder']).mockResolvedValueOnce([]);
     api.createFolder.mockResolvedValue('folder-new');
-    api.uploadJsonFile
+    api.uploadDriveFile
       .mockRejectedValueOnce(new MockDriveError('client', 'File not found', 404))
       .mockResolvedValueOnce('file-a');
 
     const record = await googleDriveProvider.upload(
-      'money2time_AUTO_2026-07-01T10-00-00.json',
-      '{}',
+      'money2time_AUTO_2026-07-01T10-00-00.json.gz',
+      BYTES,
     );
     expect(record.ref).toBe('file-a');
-    expect(api.uploadJsonFile.mock.calls.map((c) => c[0])).toEqual(['stale-folder', 'folder-new']);
+    expect(api.uploadDriveFile.mock.calls.map((c) => c[0])).toEqual(['stale-folder', 'folder-new']);
   });
 
   it('propagates a failure that is not about a missing folder', async () => {
     api.findFolderIds.mockResolvedValue(['folder-1']);
-    api.uploadJsonFile.mockRejectedValue(new MockDriveError('quota', 'Drive is full', 403));
+    api.uploadDriveFile.mockRejectedValue(new MockDriveError('quota', 'Drive is full', 403));
 
     await expect(
-      googleDriveProvider.upload('money2time_AUTO_2026-07-01T10-00-00.json', '{}'),
+      googleDriveProvider.upload('money2time_AUTO_2026-07-01T10-00-00.json.gz', BYTES),
     ).rejects.toMatchObject({ kind: 'quota' });
-    expect(api.uploadJsonFile).toHaveBeenCalledTimes(1);
+    expect(api.uploadDriveFile).toHaveBeenCalledTimes(1);
   });
 
   it('does not treat an arbitrary 400 as a missing folder', async () => {
     // Clearing the cache and creating a replacement on any 4xx would re-create
     // the duplicate-folder problem. Only a 404 means the parent is gone.
     api.findFolderIds.mockResolvedValue(['folder-1']);
-    api.uploadJsonFile.mockRejectedValue(new MockDriveError('client', 'Bad request', 400));
+    api.uploadDriveFile.mockRejectedValue(new MockDriveError('client', 'Bad request', 400));
 
     await expect(
-      googleDriveProvider.upload('money2time_AUTO_2026-07-01T10-00-00.json', '{}'),
+      googleDriveProvider.upload('money2time_AUTO_2026-07-01T10-00-00.json.gz', BYTES),
     ).rejects.toMatchObject({ status: 400 });
     expect(api.createFolder).not.toHaveBeenCalled();
-    expect(api.uploadJsonFile).toHaveBeenCalledTimes(1);
+    expect(api.uploadDriveFile).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -166,14 +178,19 @@ describe('folder creation', () => {
       .mockResolvedValueOnce([]) // nothing yet
       .mockResolvedValueOnce(['folder-late']); // the create actually landed
     api.createFolder.mockRejectedValue(new MockDriveError('timeout', 'Timed out'));
-    api.uploadJsonFile.mockResolvedValue('file-a');
+    api.uploadDriveFile.mockResolvedValue('file-a');
 
     const record = await googleDriveProvider.upload(
-      'money2time_AUTO_2026-07-01T10-00-00.json',
-      '{}',
+      'money2time_AUTO_2026-07-01T10-00-00.json.gz',
+      BYTES,
     );
     expect(record.ref).toBe('file-a');
-    expect(api.uploadJsonFile).toHaveBeenCalledWith('folder-late', expect.anything(), '{}');
+    expect(api.uploadDriveFile).toHaveBeenCalledWith(
+      'folder-late',
+      expect.anything(),
+      BYTES,
+      'application/gzip',
+    );
     expect(api.createFolder).toHaveBeenCalledTimes(1);
   });
 
@@ -182,9 +199,9 @@ describe('folder creation', () => {
     api.createFolder.mockRejectedValue(new MockDriveError('offline', 'Network request failed'));
 
     await expect(
-      googleDriveProvider.upload('money2time_AUTO_2026-07-01T10-00-00.json', '{}'),
+      googleDriveProvider.upload('money2time_AUTO_2026-07-01T10-00-00.json.gz', BYTES),
     ).rejects.toMatchObject({ kind: 'offline' });
-    expect(api.uploadJsonFile).not.toHaveBeenCalled();
+    expect(api.uploadDriveFile).not.toHaveBeenCalled();
   });
 });
 
