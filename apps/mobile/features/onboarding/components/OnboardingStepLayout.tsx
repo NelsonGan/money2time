@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { Keyboard, ScrollView, type ScrollViewInstance, TextInput, View } from 'react-native';
 import { GestureDetector } from 'react-native-gesture-handler';
 import { useReanimatedKeyboardAnimation } from 'react-native-keyboard-controller';
@@ -60,34 +60,46 @@ export function OnboardingStepLayout({
   }));
 
   const contentHeight = useRef(0);
+  const keyboardOpen = useRef(false);
+
+  // The end, unless that would push the focused field off the top. The
+  // viewport is measured now, not taken from the last layout, since the
+  // button bar has only just ridden up with the keyboard.
+  const revealBelow = useCallback(() => {
+    const scroll = scrollRef.current;
+    const field = TextInput.State.currentlyFocusedInput();
+    const content = scroll?.getInnerViewRef();
+    if (!scroll || !field || !content) {
+      scroll?.scrollToEnd({ animated: true });
+      return;
+    }
+    scroll.measure((_x, _y, _width, viewportHeight) => {
+      const endY = Math.max(0, contentHeight.current - viewportHeight);
+      field.measureLayout(
+        content,
+        (_fieldX, fieldY) => {
+          const fieldTop = Math.max(0, fieldY - FOCUSED_FIELD_MARGIN);
+          scroll.scrollTo({ y: Math.min(endY, fieldTop), animated: true });
+        },
+        () => scroll.scrollToEnd({ animated: true }),
+      );
+    });
+  }, []);
 
   useEffect(() => {
     if (!revealBelowOnKeyboard) return undefined;
-    const subscription = Keyboard.addListener('keyboardDidShow', () => {
-      const scroll = scrollRef.current;
-      const field = TextInput.State.currentlyFocusedInput();
-      const content = scroll?.getInnerViewRef();
-      if (!scroll || !field || !content) {
-        scroll?.scrollToEnd({ animated: true });
-        return;
-      }
-      // The end, unless that would push the focused field off the top. The
-      // viewport is measured now, not taken from the last layout, since the
-      // button bar has only just ridden up with the keyboard.
-      scroll.measure((_x, _y, _width, viewportHeight) => {
-        const endY = Math.max(0, contentHeight.current - viewportHeight);
-        field.measureLayout(
-          content,
-          (_fieldX, fieldY) => {
-            const fieldTop = Math.max(0, fieldY - FOCUSED_FIELD_MARGIN);
-            scroll.scrollTo({ y: Math.min(endY, fieldTop), animated: true });
-          },
-          () => scroll.scrollToEnd({ animated: true }),
-        );
-      });
+    const shown = Keyboard.addListener('keyboardDidShow', () => {
+      keyboardOpen.current = true;
+      revealBelow();
     });
-    return () => subscription.remove();
-  }, [revealBelowOnKeyboard]);
+    const hidden = Keyboard.addListener('keyboardDidHide', () => {
+      keyboardOpen.current = false;
+    });
+    return () => {
+      shown.remove();
+      hidden.remove();
+    };
+  }, [revealBelowOnKeyboard, revealBelow]);
 
   return (
     <GestureDetector gesture={swipeBackGesture}>
@@ -100,7 +112,12 @@ export function OnboardingStepLayout({
           keyboardDismissMode="on-drag"
           showsVerticalScrollIndicator={false}
           onContentSizeChange={(_width, height) => {
+            const grew = height > contentHeight.current;
             contentHeight.current = height;
+            // What a field changes can grow while the keyboard is up (the
+            // hourly value's breakdown appears once extra time counts); keep
+            // it in view as the keyboard's own reveal did.
+            if (grew && revealBelowOnKeyboard && keyboardOpen.current) revealBelow();
           }}
         >
           {title ? (

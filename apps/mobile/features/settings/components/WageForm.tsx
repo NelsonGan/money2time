@@ -1,6 +1,6 @@
 import { Minus, Plus, SlidersHorizontal } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
-import { Pressable, TextInput, View } from 'react-native';
+import { Pressable, StyleSheet, Text as RNText, TextInput, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { InfoTooltipButton, Text } from '~/components/ui';
@@ -252,7 +252,9 @@ function HourlyResult({
   trueHoursPerWeek,
   showsExtraTime,
 }: HourlyResultProps) {
+  const { primary } = useThemeColors();
   const hasRate = trueHourlyRate > 0;
+  const unitColor = `${primary}${hasRate ? '99' : '4D'}`;
   const perHour = I18n.t('settings.hourly_suffix_hourly');
   const paidHours = config.hoursWorkedPerWeek;
   const extraHours = Math.max(0, trueHoursPerWeek - paidHours);
@@ -262,19 +264,15 @@ function HourlyResult({
       <Text variant="caption" tone="primary">
         {I18n.t('wage.rate_label')}
       </Text>
+      {/* One line of text, so the symbol, digits and unit share a baseline. */}
       <Text
         variant="display"
         numberOfLines={1}
-        adjustsFontSizeToFit
-        className={cn('mt-0.5', hasRate ? 'text-primary' : 'text-primary/30')}
+        className={cn('mt-1', hasRate ? 'text-primary' : 'text-primary/30')}
       >
-        <Text variant="subheading" className={hasRate ? 'text-primary/60' : 'text-primary/30'}>
-          {currencySymbol}
-        </Text>
+        <RNText style={[styles.unit, { color: unitColor }]}>{currencySymbol}</RNText>
         {formatCurrency(trueHourlyRate, '')}
-        <Text variant="subheading" className={hasRate ? 'text-primary/60' : 'text-primary/30'}>
-          {perHour}
-        </Text>
+        <RNText style={[styles.unit, { color: unitColor }]}>{perHour}</RNText>
       </Text>
       {showsExtraTime ? (
         <View className="mt-2 gap-2">
@@ -288,8 +286,10 @@ function HourlyResult({
             accessibilityElementsHidden
             importantForAccessibility="no-hide-descendants"
           >
-            <View className="rounded-full bg-primary/25" style={{ flex: paidHours }} />
-            <View className="rounded-full bg-primary" style={{ flex: extraHours, minWidth: 6 }} />
+            <View style={[styles.barPart, { flex: paidHours, backgroundColor: `${primary}40` }]} />
+            <View
+              style={[styles.barPart, { flex: extraHours, minWidth: 6, backgroundColor: primary }]}
+            />
           </View>
           <Text variant="caption" tone="muted">
             {I18n.t('wage.time_split', {
@@ -412,3 +412,10 @@ function StepperButton({
     </Pressable>
   );
 }
+
+const styles = StyleSheet.create({
+  // The currency and unit beside the hourly value: smaller and lighter, so the
+  // digits carry it.
+  unit: { fontFamily: FONT.bold, fontWeight: '700', fontSize: 22 },
+  barPart: { borderRadius: 999 },
+});
