@@ -21,10 +21,11 @@ import {
   ScrollView,
   StyleSheet,
   TextInput,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppErrorBoundary } from '~/components/feedback/AppErrorBoundary';
 import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
@@ -84,7 +85,10 @@ interface PlacePickerSheetProps {
 const MAX_QUERY_LENGTH = 120;
 const SEARCH_DEBOUNCE_MS = 350;
 const MIN_QUERY_LENGTH = 2;
-const MAP_HEIGHT = 248;
+// The map takes a good share of the page, so it is easy to pan and pinch.
+const MAP_HEIGHT_SHARE = 0.45;
+const MAP_MIN_HEIGHT = 248;
+const MAP_MAX_HEIGHT = 520;
 // Moving the map this far from where the list was found offers "Search this area".
 const AREA_MOVED_METERS = 250;
 // A dropped pin is named once the map has been still this long.
@@ -207,6 +211,10 @@ export function PlacePickerSheet({
   const themeColors = useThemeColors();
   const flatIcons = useIsFlatIcons();
   const insets = useSafeAreaInsets();
+  const { height: windowHeight } = useWindowDimensions();
+  const mapHeight = Math.round(
+    Math.min(MAP_MAX_HEIGHT, Math.max(MAP_MIN_HEIGHT, windowHeight * MAP_HEIGHT_SHARE)),
+  );
   const locale = I18n.locale;
   const appUserId = settings.appUserId;
   const [query, setQuery] = useState('');
@@ -592,14 +600,14 @@ export function PlacePickerSheet({
 
   const mapStyle = useAnimatedStyle(
     () => ({
-      height: withTiming(keyboardUp || !initialPoint ? 0 : MAP_HEIGHT, {
+      height: withTiming(keyboardUp || !initialPoint ? 0 : mapHeight, {
         duration: motionDurations.normal,
       }),
       marginBottom: withTiming(keyboardUp || !initialPoint ? 0 : 12, {
         duration: motionDurations.normal,
       }),
     }),
-    [keyboardUp, initialPoint],
+    [keyboardUp, initialPoint, mapHeight],
   );
   const showAreaButton =
     mapMoved &&
@@ -922,157 +930,156 @@ export function PlacePickerSheet({
   };
 
   return (
-    <ThemeModal visible={visible} transparent animationType="fade" onRequestClose={handleClose}>
-      <Pressable style={styles.backdrop} onPress={handleClose}>
-        <Pressable onPress={(e) => e.stopPropagation()} style={[styles.sheet, sheetColumnStyle]}>
-          <View
-            className="flex-1 rounded-t-[28px] bg-card"
-            style={{ paddingBottom: Math.max(insets.bottom, 16) }}
-          >
-            <View className="flex-row items-center gap-2 px-5 pb-3 pt-5">
-              <Text variant="subheading" numberOfLines={1} className="shrink">
-                {I18n.t('locations.picker_title')}
-              </Text>
-              <View className="flex-1" />
-              <Pressable
-                onPress={handleClose}
-                accessibilityRole="button"
-                accessibilityLabel={I18n.t('common.close')}
-                hitSlop={8}
-                className="h-9 w-9 items-center justify-center rounded-full bg-secondary/50 active:opacity-70"
-              >
-                <X size={18} color={themeColors.textMuted} />
-              </Pressable>
-            </View>
+    // A full page, not a sheet over a backdrop: the map has the room to pan
+    // and pinch, and no tap outside can close it (a backdrop Pressable around
+    // the sheet took the touch when a second finger landed on the map, so a
+    // pinch closed the picker).
+    <ThemeModal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="fullScreen"
+      onRequestClose={handleClose}
+    >
+      <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+        <View className="flex-1" style={sheetColumnStyle}>
+          <View className="flex-row items-center gap-2 px-5 pb-3 pt-3">
+            <Text variant="subheading" numberOfLines={1} className="shrink">
+              {I18n.t('locations.picker_title')}
+            </Text>
+            <View className="flex-1" />
+            <Pressable
+              onPress={handleClose}
+              accessibilityRole="button"
+              accessibilityLabel={I18n.t('common.close')}
+              hitSlop={8}
+              className="h-9 w-9 items-center justify-center rounded-full bg-secondary/50 active:opacity-70"
+            >
+              <X size={18} color={themeColors.textMuted} />
+            </Pressable>
+          </View>
 
-            <View className="px-5 pb-3">
-              <View
-                className="flex-row items-center gap-2 rounded-2xl bg-secondary/60 px-3"
-                style={{ height: 44 }}
-              >
-                <Search size={16} color={themeColors.textMuted} />
-                <TextInput
-                  value={query}
-                  onChangeText={(text) => {
-                    setQuery(text);
-                    setFocusedKey(null);
-                  }}
-                  placeholder={I18n.t('locations.search_placeholder')}
-                  // The Worker refuses a longer query (query_too_long).
-                  maxLength={MAX_QUERY_LENGTH}
-                  placeholderTextColor={themeColors.textMuted}
-                  autoCorrect={false}
-                  returnKeyType="search"
-                  allowFontScaling={false}
-                  accessibilityLabel={I18n.t('locations.search_placeholder')}
-                  style={{ flex: 1, color: themeColors.text, fontSize: 16 }}
-                  {...REPLAY_PRIVATE}
-                />
-                {query.length > 0 ? (
+          <View className="px-5 pb-3">
+            <View
+              className="flex-row items-center gap-2 rounded-2xl bg-secondary/60 px-3"
+              style={{ height: 44 }}
+            >
+              <Search size={16} color={themeColors.textMuted} />
+              <TextInput
+                value={query}
+                onChangeText={(text) => {
+                  setQuery(text);
+                  setFocusedKey(null);
+                }}
+                placeholder={I18n.t('locations.search_placeholder')}
+                // The Worker refuses a longer query (query_too_long).
+                maxLength={MAX_QUERY_LENGTH}
+                placeholderTextColor={themeColors.textMuted}
+                autoCorrect={false}
+                returnKeyType="search"
+                allowFontScaling={false}
+                accessibilityLabel={I18n.t('locations.search_placeholder')}
+                style={{ flex: 1, color: themeColors.text, fontSize: 16 }}
+                {...REPLAY_PRIVATE}
+              />
+              {query.length > 0 ? (
+                <Pressable
+                  onPress={() => setQuery('')}
+                  hitSlop={8}
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('common.clear')}
+                >
+                  <X size={16} color={themeColors.textMuted} />
+                </Pressable>
+              ) : null}
+            </View>
+          </View>
+
+          {!showingSearch && origin ? (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              className="mb-3"
+              // A horizontal ScrollView shrinks by default when the sheet overflows.
+              style={{ flexGrow: 0, flexShrink: 0 }}
+              contentContainerStyle={{ paddingHorizontal: 20, gap: 8 }}
+            >
+              {CATEGORY_CHIPS.map(([id, spec]) => {
+                const active = category === id;
+                return (
                   <Pressable
-                    onPress={() => setQuery('')}
-                    hitSlop={8}
+                    key={id}
+                    onPress={() => handleCategory(id)}
                     accessibilityRole="button"
-                    accessibilityLabel={I18n.t('common.clear')}
+                    accessibilityState={{ selected: active }}
+                    className={cn(
+                      'flex-row items-center gap-1.5 rounded-full border px-3 py-1.5 active:opacity-70',
+                      active ? 'border-primary bg-primary' : 'border-border/60 bg-card',
+                    )}
                   >
-                    <X size={16} color={themeColors.textMuted} />
-                  </Pressable>
-                ) : null}
-              </View>
-            </View>
-
-            {!showingSearch && origin ? (
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                keyboardShouldPersistTaps="handled"
-                className="mb-3"
-                // A horizontal ScrollView shrinks by default when the sheet overflows.
-                style={{ flexGrow: 0, flexShrink: 0 }}
-                contentContainerStyle={{ paddingHorizontal: 20, gap: 8 }}
-              >
-                {CATEGORY_CHIPS.map(([id, spec]) => {
-                  const active = category === id;
-                  return (
-                    <Pressable
-                      key={id}
-                      onPress={() => handleCategory(id)}
-                      accessibilityRole="button"
-                      accessibilityState={{ selected: active }}
+                    <PlaceIcon
+                      spec={spec}
+                      size={18}
+                      flatSize={14}
+                      color={active ? themeColors.card : themeColors.primary}
+                    />
+                    <Text
+                      variant="caption"
                       className={cn(
-                        'flex-row items-center gap-1.5 rounded-full border px-3 py-1.5 active:opacity-70',
-                        active ? 'border-primary bg-primary' : 'border-border/60 bg-card',
+                        'font-semibold',
+                        active ? 'text-primary-foreground' : 'text-foreground',
                       )}
                     >
-                      <PlaceIcon
-                        spec={spec}
-                        size={18}
-                        flatSize={14}
-                        color={active ? themeColors.card : themeColors.primary}
-                      />
-                      <Text
-                        variant="caption"
-                        className={cn(
-                          'font-semibold',
-                          active ? 'text-primary-foreground' : 'text-foreground',
-                        )}
-                      >
-                        {I18n.t(`locations.category_${id}`)}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-              </ScrollView>
-            ) : null}
-
-            <Animated.View
-              className="mx-5"
-              style={mapStyle}
-              onLayout={(event) => setMapOpen(event.nativeEvent.layout.height >= MAP_HEIGHT - 1)}
-            >
-              {mapCard}
-            </Animated.View>
-
-            <FlatList
-              data={rows}
-              keyExtractor={(item) => item.key}
-              keyboardShouldPersistTaps="handled"
-              keyboardDismissMode="on-drag"
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 16 }}
-              ListHeaderComponent={header}
-              renderItem={renderRow}
-              ListFooterComponent={
-                current ? (
-                  <Pressable
-                    onPress={handleRemove}
-                    accessibilityRole="button"
-                    className="mt-4 flex-row items-center justify-center gap-2 rounded-2xl border border-border/40 py-3 active:opacity-70"
-                  >
-                    <Trash2 size={16} color={themeColors.error} />
-                    <Text variant="body" className="text-destructive">
-                      {I18n.t('locations.remove')}
+                      {I18n.t(`locations.category_${id}`)}
                     </Text>
                   </Pressable>
-                ) : undefined
-              }
-            />
-          </View>
-        </Pressable>
-      </Pressable>
+                );
+              })}
+            </ScrollView>
+          ) : null}
+
+          <Animated.View
+            className="mx-5"
+            style={mapStyle}
+            onLayout={(event) => setMapOpen(event.nativeEvent.layout.height >= mapHeight - 1)}
+          >
+            {mapCard}
+          </Animated.View>
+
+          <FlatList
+            data={rows}
+            keyExtractor={(item) => item.key}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="on-drag"
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{
+              paddingHorizontal: 20,
+              paddingBottom: Math.max(insets.bottom, 16) + 8,
+            }}
+            ListHeaderComponent={header}
+            renderItem={renderRow}
+            ListFooterComponent={
+              current ? (
+                <Pressable
+                  onPress={handleRemove}
+                  accessibilityRole="button"
+                  className="mt-4 flex-row items-center justify-center gap-2 rounded-2xl border border-border/40 py-3 active:opacity-70"
+                >
+                  <Trash2 size={16} color={themeColors.error} />
+                  <Text variant="body" className="text-destructive">
+                    {I18n.t('locations.remove')}
+                  </Text>
+                </Pressable>
+              ) : undefined
+            }
+          />
+        </View>
+      </SafeAreaView>
     </ThemeModal>
   );
 }
 
 const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'flex-end',
-  },
-  sheet: {
-    height: '92%',
-  },
   // Lifts the map's buttons and cards off the tiles.
   floating: {
     shadowColor: '#000',

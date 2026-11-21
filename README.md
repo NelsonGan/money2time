@@ -612,7 +612,10 @@ locations** is off for everyone until they turn it on. The code lives in
   when set. A set place lights the gear like a note or a tick does. The row
   shows while Locations is on, and on any entry that already has a place even
   with it off, so a place can always be seen and removed. It opens
-  `PlacePickerSheet`, a tall sheet with a map in it (Apple Maps on iOS,
+  `PlacePickerSheet`, a full page (a full-screen modal with no backdrop, so
+  nothing outside it closes it, and a pinch on the map cannot land on a
+  dismissing backdrop) whose map takes 45% of the screen height (248 to
+  520 pt) to pan and pinch in (Apple Maps on iOS,
   Google Maps on Android, the app's one `AppMap`, lazy-loaded as
   `PlacePickerMap` behind an error boundary so a build without the native
   module keeps the list):
