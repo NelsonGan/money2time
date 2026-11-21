@@ -32,7 +32,7 @@ import {
 
 /*
  * The app's Hourly value screen on the web: one income rate per month, each
- * made with the wage calculator (what you earn, your work week, the extra time
+ * made with the wage editor (what you earn, your work week, the extra time
  * work takes) and saved through the phone as `module:wage` ops, which the
  * phone checks like its own screen (services/webDashboardEditModules/wage.ts).
  */
@@ -67,7 +67,7 @@ function periodValue(entry: WageEntry, period: Period): number {
 }
 
 const WAGE_TYPES: WageType[] = ["hourly", "monthly", "yearly"];
-/** As the app's calculator starts a new month (DEFAULT_WAGE_CONFIG). */
+/** As the app's editor starts a new month when there is none before it (DEFAULT_WAGE_CONFIG). */
 const DEFAULT_CONFIG: WageConfig = { wageType: "monthly", wageAmount: 0, hoursWorkedPerWeek: 40, workdaysPerWeek: 5, commuteMinutesPerWorkday: 0 };
 
 const num = (value: unknown, fallback: number) => (typeof value === "number" && Number.isFinite(value) ? value : fallback);
@@ -265,10 +265,10 @@ export function WageCard() {
 }
 
 /**
- * The app's add-a-month picker and wage calculator in one sheet: the month
- * (new entries only), what you earn, your work week and the extra time work
- * takes, then the true hourly rate they make. After a conflict it can start
- * over on the phone's newer copy of the month.
+ * The app's wage editor (WageEditorScreen) in one sheet: the month (new
+ * entries only), what you earn, your work week and the extra time work takes,
+ * then the true hourly rate they make. After a conflict it can start over on
+ * the phone's newer copy of the month.
  */
 function WageEditor({ entry, entries, onOpen, onClose }: { entry: WageEntry | null; entries: WageEntry[]; onOpen: (entry: WageEntry) => void; onClose: () => void }) {
   return (
@@ -286,7 +286,8 @@ function WageForm({ entry, entries, onOpen, onClose }: { entry: WageEntry | null
   const f = useFormat();
   const { run, busy, error, ready, clear, reload } = useEditRun();
   const formId = useId();
-  const initial = entry?.config ?? DEFAULT_CONFIG;
+  // As the app: a new month starts from the latest one (entries are newest first).
+  const initial = entry?.config ?? entries[0]?.config ?? DEFAULT_CONFIG;
   const [now] = useState(phoneNow);
   const [year, setYear] = useState(String(now.getFullYear()));
   const [monthNumber, setMonthNumber] = useState(String(now.getMonth() + 1).padStart(2, "0"));
@@ -335,6 +336,17 @@ function WageForm({ entry, entries, onOpen, onClose }: { entry: WageEntry | null
     if (invalid || existing || !ready || busy) return;
     const op: WageOp = entry ? { entity: "module:wage", op: "update", month: entry.month, at: entry.at, config } : { entity: "module:wage", op: "create", month, config };
     if (await run([op], entry ? "wage_update" : "wage_create")) onClose();
+  };
+
+  /**
+   * As the app's "Replace" on a month that already has a rate: an update of
+   * the copy this page has, so the phone refuses it if its own is newer.
+   */
+  const replace = async (target: WageEntry) => {
+    setTouched(true);
+    if (invalid || !ready || busy) return;
+    const op: WageOp = { entity: "module:wage", op: "update", month: target.month, at: target.at, config };
+    if (await run([op], "wage_update")) onClose();
   };
 
   const input = (label: string, value: string, set: (value: string) => void, problem: string | null, opts: { hint?: string; prefix?: string; placeholder: string }) => (
@@ -410,7 +422,10 @@ function WageForm({ entry, entries, onOpen, onClose }: { entry: WageEntry | null
             <Confirm
               title={t("existsTitle", { month: f.monthLong(existing.month) })}
               body={t("existsBody")}
-              actions={[{ label: te("editTitle"), tone: "primary", onClick: () => onOpen(existing) }]}
+              actions={[
+                { label: te("editTitle"), onClick: () => onOpen(existing) },
+                { label: t("replace"), tone: "primary", onClick: () => void replace(existing), disabled: !ready || busy },
+              ]}
             />
           ) : null}
           <p className="text-[14px] font-extrabold text-foreground">{t("step1")}</p>

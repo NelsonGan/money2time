@@ -2315,9 +2315,8 @@ const en = {
     decrease_minutes: 'Fewer minutes',
     increase_minutes: 'More minutes',
     rate_label: 'Your hour is worth',
-    rate_value: '{{rate}}/hr',
-    base_hourly_rate: 'Base hourly rate',
-    true_hours_per_week: 'Total time / week',
+    base_rate: 'Base rate {{rate}}',
+    time_split: '{{paid}} paid + {{extra}} extra = {{total}} a week',
     add_extra: 'Add commute and more',
   },
   pro: {

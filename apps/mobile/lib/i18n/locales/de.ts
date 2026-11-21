@@ -2372,9 +2372,8 @@ const de = {
     decrease_minutes: 'Weniger Minuten',
     increase_minutes: 'Mehr Minuten',
     rate_label: 'Wert deiner Stunde',
-    rate_value: '{{rate}}/Std.',
-    base_hourly_rate: 'Basis-Stundenlohn',
-    true_hours_per_week: 'Gesamtzeit / Woche',
+    base_rate: 'Grundsatz {{rate}}',
+    time_split: '{{paid}} bezahlt + {{extra}} extra = {{total}} pro Woche',
     add_extra: 'Pendeln und mehr hinzufügen',
   },
   pro: {

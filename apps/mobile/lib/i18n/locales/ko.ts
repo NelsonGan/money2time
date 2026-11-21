@@ -2315,9 +2315,8 @@ const ko = {
     decrease_minutes: '분 줄이기',
     increase_minutes: '분 늘리기',
     rate_label: '내 1시간의 가치',
-    rate_value: '{{rate}}/시간',
-    base_hourly_rate: '기본 시급',
-    true_hours_per_week: '주당 총 시간',
+    base_rate: '기본 시급 {{rate}}',
+    time_split: '근무 {{paid}} + 추가 {{extra}} = 주 {{total}}',
     add_extra: '출퇴근 시간 등 추가',
   },
   pro: {

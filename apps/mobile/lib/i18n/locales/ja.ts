@@ -2328,9 +2328,8 @@ const ja = {
     decrease_minutes: '分を減らす',
     increase_minutes: '分を増やす',
     rate_label: 'あなたの1時間の価値',
-    rate_value: '{{rate}}/時',
-    base_hourly_rate: '基本時給',
-    true_hours_per_week: '週総時間',
+    base_rate: '基本時給 {{rate}}',
+    time_split: '勤務 {{paid}} + 追加 {{extra}} = 週 {{total}}',
     add_extra: '通勤時間などを追加',
   },
   pro: {

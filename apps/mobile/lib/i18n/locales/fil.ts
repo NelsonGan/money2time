@@ -2372,9 +2372,8 @@ const fil = {
     decrease_minutes: 'Bawasan ang minuto',
     increase_minutes: 'Dagdagan ang minuto',
     rate_label: 'Halaga ng oras mo',
-    rate_value: '{{rate}}/oras',
-    base_hourly_rate: 'Base hourly rate',
-    true_hours_per_week: 'Kabuuang oras / linggo',
+    base_rate: 'Base rate {{rate}}',
+    time_split: '{{paid}} bayad + {{extra}} dagdag = {{total}} bawat linggo',
     add_extra: 'Idagdag ang biyahe at iba pa',
   },
   pro: {

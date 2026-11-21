@@ -2343,9 +2343,8 @@ const uk = {
     decrease_minutes: 'Менше хвилин',
     increase_minutes: 'Більше хвилин',
     rate_label: 'Ваша година коштує',
-    rate_value: '{{rate}}/год',
-    base_hourly_rate: 'Базова погодинна ставка',
-    true_hours_per_week: 'Загальний час / тиждень',
+    base_rate: 'Базова ставка {{rate}}',
+    time_split: '{{paid}} оплачено + {{extra}} додатково = {{total}} на тиждень',
     add_extra: 'Додати дорогу та інше',
   },
   pro: {

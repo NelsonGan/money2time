@@ -2309,9 +2309,8 @@ const th = {
     decrease_minutes: 'ลดนาที',
     increase_minutes: 'เพิ่มนาที',
     rate_label: 'ชั่วโมงของคุณมีค่า',
-    rate_value: '{{rate}}/ชม.',
-    base_hourly_rate: 'อัตราชั่วโมงฐาน',
-    true_hours_per_week: 'เวลารวม/สัปดาห์',
+    base_rate: 'อัตราฐาน {{rate}}',
+    time_split: 'ได้ค่าจ้าง {{paid}} + เพิ่ม {{extra}} = {{total}} ต่อสัปดาห์',
     add_extra: 'เพิ่มเวลาเดินทางและอื่นๆ',
   },
   pro: {

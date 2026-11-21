@@ -2352,9 +2352,8 @@ const pl = {
     decrease_minutes: 'Mniej minut',
     increase_minutes: 'Więcej minut',
     rate_label: 'Twoja godzina jest warta',
-    rate_value: '{{rate}}/godz.',
-    base_hourly_rate: 'Podstawowa stawka godzinowa',
-    true_hours_per_week: 'Łączny czas / tydzień',
+    base_rate: 'Stawka podstawowa {{rate}}',
+    time_split: '{{paid}} płatne + {{extra}} dodatkowo = {{total}} tygodniowo',
     add_extra: 'Dodaj dojazdy i więcej',
   },
   pro: {

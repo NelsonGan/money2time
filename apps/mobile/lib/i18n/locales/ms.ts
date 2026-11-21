@@ -2357,9 +2357,8 @@ const ms = {
     decrease_minutes: 'Kurangkan minit',
     increase_minutes: 'Tambah minit',
     rate_label: 'Nilai sejam anda',
-    rate_value: '{{rate}}/jam',
-    base_hourly_rate: 'Kadar jam asas',
-    true_hours_per_week: 'Jumlah masa / minggu',
+    base_rate: 'Kadar asas {{rate}}',
+    time_split: '{{paid}} berbayar + {{extra}} tambahan = {{total}} seminggu',
     add_extra: 'Tambah masa perjalanan dan lain-lain',
   },
   pro: {

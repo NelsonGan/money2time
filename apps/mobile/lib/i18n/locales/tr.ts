@@ -2354,9 +2354,8 @@ const tr = {
     decrease_minutes: 'Daha az dakika',
     increase_minutes: 'Daha fazla dakika',
     rate_label: 'Saatinizin değeri',
-    rate_value: '{{rate}}/saat',
-    base_hourly_rate: 'Temel saatlik oran',
-    true_hours_per_week: 'Toplam haftalık süre',
+    base_rate: 'Temel ücret {{rate}}',
+    time_split: '{{paid}} ücretli + {{extra}} ek = haftada {{total}}',
     add_extra: 'Yol süresi ve daha fazlası',
   },
   pro: {

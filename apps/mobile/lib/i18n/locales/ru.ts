@@ -2348,9 +2348,8 @@ const ru = {
     decrease_minutes: 'Меньше минут',
     increase_minutes: 'Больше минут',
     rate_label: 'Ваш час стоит',
-    rate_value: '{{rate}}/ч',
-    base_hourly_rate: 'Базовая почасовая ставка',
-    true_hours_per_week: 'Всего времени / нед.',
+    base_rate: 'Базовая ставка {{rate}}',
+    time_split: '{{paid}} оплачено + {{extra}} сверху = {{total}} в неделю',
     add_extra: 'Добавить дорогу и другое',
   },
   pro: {

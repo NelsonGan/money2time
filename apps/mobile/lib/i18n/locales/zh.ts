@@ -2247,9 +2247,8 @@ const zh = {
     decrease_minutes: '减少分钟',
     increase_minutes: '增加分钟',
     rate_label: '你的一小时值',
-    rate_value: '{{rate}}/小时',
-    base_hourly_rate: '基础时薪',
-    true_hours_per_week: '每周总时间',
+    base_rate: '基础时薪 {{rate}}',
+    time_split: '工作 {{paid}} + 额外 {{extra}} = 每周 {{total}}',
     add_extra: '添加通勤等时间',
   },
   pro: {

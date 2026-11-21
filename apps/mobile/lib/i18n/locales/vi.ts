@@ -2329,9 +2329,8 @@ const vi = {
     decrease_minutes: 'Bớt phút',
     increase_minutes: 'Thêm phút',
     rate_label: 'Một giờ của bạn đáng giá',
-    rate_value: '{{rate}}/giờ',
-    base_hourly_rate: 'Lương giờ cơ bản',
-    true_hours_per_week: 'Tổng thời gian / tuần',
+    base_rate: 'Lương cơ bản {{rate}}',
+    time_split: '{{paid}} có lương + {{extra}} thêm = {{total}} mỗi tuần',
     add_extra: 'Thêm thời gian đi lại và hơn nữa',
   },
   pro: {

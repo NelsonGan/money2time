@@ -2364,9 +2364,8 @@ const fr = {
     decrease_minutes: 'Moins de minutes',
     increase_minutes: 'Plus de minutes',
     rate_label: 'Votre heure vaut',
-    rate_value: '{{rate}}/h',
-    base_hourly_rate: 'Taux horaire de base',
-    true_hours_per_week: 'Temps total / semaine',
+    base_rate: 'Taux de base {{rate}}',
+    time_split: '{{paid}} payées + {{extra}} en plus = {{total}} par semaine',
     add_extra: 'Ajouter trajets et plus',
   },
   pro: {

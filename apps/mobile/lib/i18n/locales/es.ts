@@ -2352,9 +2352,8 @@ const es = {
     decrease_minutes: 'Menos minutos',
     increase_minutes: 'Más minutos',
     rate_label: 'Tu hora vale',
-    rate_value: '{{rate}}/h',
-    base_hourly_rate: 'Tarifa base por hora',
-    true_hours_per_week: 'Tiempo total / semana',
+    base_rate: 'Tarifa base {{rate}}',
+    time_split: '{{paid}} pagadas + {{extra}} extra = {{total}} a la semana',
     add_extra: 'Añadir trayectos y más',
   },
   pro: {

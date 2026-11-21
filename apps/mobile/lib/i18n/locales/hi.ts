@@ -2332,9 +2332,8 @@ const hi = {
     decrease_minutes: 'कम मिनट',
     increase_minutes: 'ज़्यादा मिनट',
     rate_label: 'आपके एक घंटे की कीमत',
-    rate_value: '{{rate}}/घंटा',
-    base_hourly_rate: 'आधार प्रति घंटा दर',
-    true_hours_per_week: 'कुल समय / सप्ताह',
+    base_rate: 'आधार दर {{rate}}',
+    time_split: '{{paid}} भुगतान + {{extra}} अतिरिक्त = {{total}} प्रति सप्ताह',
     add_extra: 'आने-जाने का समय और भी जोड़ें',
   },
   pro: {

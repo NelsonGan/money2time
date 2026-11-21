@@ -111,12 +111,12 @@ export const TUTORIALS: Tutorial[] = [
         {
           "image": "see-prices-in-hours-3",
           "title": "Enter what you earn",
-          "body": "Hourly, monthly, or yearly. Use your after-tax pay, the figure that really lands in your account."
+          "body": "Pick hourly, monthly, or yearly and type your after-tax pay, the figure that really lands in your account. Your hourly value updates as you type."
         },
         {
           "image": "see-prices-in-hours-4",
           "title": "Add the hidden hours",
-          "body": "Getting ready, commuting, parking, unpaid overtime. Counting them gives you a true hourly rate, which is usually lower than the one on your contract."
+          "body": "Tap Add commute and more for getting ready, commuting, parking and unpaid overtime. Counting them gives you a true hourly rate, which is usually lower than the one on your contract."
         },
         {
           "image": "see-prices-in-hours-5",
@@ -276,7 +276,7 @@ export const TUTORIALS: Tutorial[] = [
         {
           "image": "update-your-pay-3",
           "title": "Enter the new figure",
-          "body": "Same short flow as setup. From that month on, every amount converts at the new rate, and the timeline shows the jump."
+          "body": "One page, filled in from your latest month: change the pay and save. From that month on, every amount converts at the new rate, and the timeline shows the jump."
         }
       ]
     },

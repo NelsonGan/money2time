@@ -2357,9 +2357,8 @@ const id = {
     decrease_minutes: 'Kurangi menit',
     increase_minutes: 'Tambah menit',
     rate_label: 'Nilai satu jammu',
-    rate_value: '{{rate}}/jam',
-    base_hourly_rate: 'Tarif per jam dasar',
-    true_hours_per_week: 'Total waktu / minggu',
+    base_rate: 'Tarif dasar {{rate}}',
+    time_split: '{{paid}} dibayar + {{extra}} tambahan = {{total}} per minggu',
     add_extra: 'Tambah waktu perjalanan dll.',
   },
   pro: {

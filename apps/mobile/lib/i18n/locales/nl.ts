@@ -2365,9 +2365,8 @@ const nl = {
     decrease_minutes: 'Minder minuten',
     increase_minutes: 'Meer minuten',
     rate_label: 'Je uur is waard',
-    rate_value: '{{rate}}/u',
-    base_hourly_rate: 'Basis-uurtarief',
-    true_hours_per_week: 'Totale tijd / week',
+    base_rate: 'Basistarief {{rate}}',
+    time_split: '{{paid}} betaald + {{extra}} extra = {{total}} per week',
     add_extra: 'Reistijd en meer toevoegen',
   },
   pro: {

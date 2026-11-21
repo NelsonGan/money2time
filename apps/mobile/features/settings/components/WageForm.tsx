@@ -34,13 +34,14 @@ function roundTwo(value: number): number {
 
 /**
  * A field's text follows the number it shows, unless the text already says
- * that number (so "12." keeps its point while typing).
+ * that number (so "12." keeps its point while typing). An empty field says
+ * `emptyValue`, the number its placeholder shows.
  */
-function useNumberText(value: number) {
+function useNumberText(value: number, emptyValue = 0) {
   const [text, setText] = useState(() => numberToText(value));
   useEffect(() => {
-    setText((current) => (Number(current || 0) === value ? current : numberToText(value)));
-  }, [value]);
+    setText((current) => (Number(current || emptyValue) === value ? current : numberToText(value)));
+  }, [value, emptyValue]);
   return [text, setText] as const;
 }
 
@@ -196,31 +197,14 @@ export function WageForm({ config, currencySymbol, onChange }: WageFormProps) {
         </Animated.View>
       ) : null}
 
-      <View className={`px-4 py-4 ${ONBOARDING_CARD_SELECTED}`}>
-        <Text variant="caption" tone="primary">
-          {I18n.t('wage.rate_label')}
-        </Text>
-        <Text
-          variant="display"
-          className={cn('mt-1', hasRate ? 'text-primary' : 'text-primary/30')}
-        >
-          {I18n.t('wage.rate_value', { rate: formatCurrency(trueHourlyRate, currencySymbol) })}
-        </Text>
-        {countsExtraTime ? (
-          <View className="mt-3 gap-1.5 border-t border-primary/20 pt-3">
-            <BreakdownRow
-              label={I18n.t('wage.base_hourly_rate')}
-              value={I18n.t('wage.rate_value', {
-                rate: formatCurrency(baseHourlyRate, currencySymbol),
-              })}
-            />
-            <BreakdownRow
-              label={I18n.t('wage.true_hours_per_week')}
-              value={`${roundTwo(trueHoursPerWeek)}h`}
-            />
-          </View>
-        ) : null}
-      </View>
+      <HourlyResult
+        config={config}
+        currencySymbol={currencySymbol}
+        trueHourlyRate={trueHourlyRate}
+        baseHourlyRate={baseHourlyRate}
+        trueHoursPerWeek={trueHoursPerWeek}
+        showsExtraTime={countsExtraTime}
+      />
 
       {showExtras ? null : (
         <Pressable
@@ -241,15 +225,81 @@ export function WageForm({ config, currencySymbol, onChange }: WageFormProps) {
   );
 }
 
-function BreakdownRow({ label, value }: { label: string; value: string }) {
+function formatHours(hours: number): string {
+  return `${roundTwo(hours)}${I18n.t('common.hour_unit')}`;
+}
+
+interface HourlyResultProps {
+  config: WageConfig;
+  currencySymbol: string;
+  trueHourlyRate: number;
+  baseHourlyRate: number;
+  trueHoursPerWeek: number;
+  /** Whether extra time lowers the rate, which the card then explains. */
+  showsExtraTime: boolean;
+}
+
+/**
+ * The hourly value the form makes: the number large, its currency and unit
+ * small beside it, and, when extra time counts, the paid rate it came down
+ * from with a bar of paid against unpaid hours.
+ */
+function HourlyResult({
+  config,
+  currencySymbol,
+  trueHourlyRate,
+  baseHourlyRate,
+  trueHoursPerWeek,
+  showsExtraTime,
+}: HourlyResultProps) {
+  const hasRate = trueHourlyRate > 0;
+  const perHour = I18n.t('settings.hourly_suffix_hourly');
+  const paidHours = config.hoursWorkedPerWeek;
+  const extraHours = Math.max(0, trueHoursPerWeek - paidHours);
+
   return (
-    <View className="flex-row items-center justify-between gap-3">
-      <Text variant="caption" tone="muted" className="flex-1">
-        {label}
+    <View className={`px-4 pb-4 pt-3.5 ${ONBOARDING_CARD_SELECTED}`}>
+      <Text variant="caption" tone="primary">
+        {I18n.t('wage.rate_label')}
       </Text>
-      <Text variant="caption" className="text-foreground">
-        {value}
+      <Text
+        variant="display"
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        className={cn('mt-0.5', hasRate ? 'text-primary' : 'text-primary/30')}
+      >
+        <Text variant="subheading" className={hasRate ? 'text-primary/60' : 'text-primary/30'}>
+          {currencySymbol}
+        </Text>
+        {formatCurrency(trueHourlyRate, '')}
+        <Text variant="subheading" className={hasRate ? 'text-primary/60' : 'text-primary/30'}>
+          {perHour}
+        </Text>
       </Text>
+      {showsExtraTime ? (
+        <View className="mt-2 gap-2">
+          <Text variant="caption" tone="muted">
+            {I18n.t('wage.base_rate', {
+              rate: `${formatCurrency(baseHourlyRate, currencySymbol)}${perHour}`,
+            })}
+          </Text>
+          <View
+            className="h-2 flex-row gap-0.5"
+            accessibilityElementsHidden
+            importantForAccessibility="no-hide-descendants"
+          >
+            <View className="rounded-full bg-primary/25" style={{ flex: paidHours }} />
+            <View className="rounded-full bg-primary" style={{ flex: extraHours, minWidth: 6 }} />
+          </View>
+          <Text variant="caption" tone="muted">
+            {I18n.t('wage.time_split', {
+              paid: formatHours(paidHours),
+              extra: formatHours(extraHours),
+              total: formatHours(trueHoursPerWeek),
+            })}
+          </Text>
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -273,7 +323,7 @@ function StepperField({
   onChange,
 }: StepperFieldProps) {
   const themeColors = useThemeColors();
-  const [text, setText] = useNumberText(value);
+  const [text, setText] = useNumberText(value, range.min);
 
   const step = (direction: 1 | -1) => {
     const next = roundTwo(
@@ -305,9 +355,10 @@ function StepperField({
           if (!Number.isFinite(parsed) || parsed > range.max) return;
           setText(next);
           // Typing passes through values under the minimum ("" on the way to
-          // "40"); those stay in the field only, so the form never holds (or
-          // saves) one, even when Save is tapped without leaving the field.
-          if (parsed >= range.min) onChange(parsed);
+          // "40"). The form holds the minimum for them, the number the empty
+          // field's placeholder shows, so Save tapped before leaving the field
+          // never saves a leftover (the 4 of a backspaced 40) or a 0.
+          onChange(Math.max(range.min, parsed));
         }}
         onBlur={() => setText(numberToText(value))}
         placeholder={String(range.min)}

@@ -2348,9 +2348,8 @@ const it = {
     decrease_minutes: 'Meno minuti',
     increase_minutes: 'Più minuti',
     rate_label: 'La tua ora vale',
-    rate_value: '{{rate}}/ora',
-    base_hourly_rate: 'Tariffa oraria base',
-    true_hours_per_week: 'Tempo totale / settimana',
+    base_rate: 'Tariffa base {{rate}}',
+    time_split: '{{paid}} pagate + {{extra}} extra = {{total}} a settimana',
     add_extra: 'Aggiungi tragitti e altro',
   },
   pro: {

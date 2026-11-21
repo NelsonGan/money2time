@@ -2344,9 +2344,8 @@ const nb = {
     decrease_minutes: 'Færre minutter',
     increase_minutes: 'Flere minutter',
     rate_label: 'Timen din er verdt',
-    rate_value: '{{rate}}/t',
-    base_hourly_rate: 'Grunnleggende timesats',
-    true_hours_per_week: 'Total tid / uke',
+    base_rate: 'Grunnsats {{rate}}',
+    time_split: '{{paid}} betalt + {{extra}} ekstra = {{total}} i uken',
     add_extra: 'Legg til pendling og mer',
   },
   pro: {

@@ -2247,9 +2247,8 @@ const zhHant = {
     decrease_minutes: '減少分鐘',
     increase_minutes: '增加分鐘',
     rate_label: '你的一小時值',
-    rate_value: '{{rate}}/小時',
-    base_hourly_rate: '基礎時薪',
-    true_hours_per_week: '每週總時間',
+    base_rate: '基礎時薪 {{rate}}',
+    time_split: '工作 {{paid}} + 額外 {{extra}} = 每週 {{total}}',
     add_extra: '加入通勤等時間',
   },
   pro: {

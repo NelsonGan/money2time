@@ -13,7 +13,7 @@ export const wageApply: ApplyModule = {
       app.deleteWageConfigForMonth(month);
       return;
     }
-    // As the wage calculator's last step saves for its month.
+    // As the wage editor's Save (WageEditorScreen) saves for its month.
     app.updateWageConfigForMonth(month, step.payload.config as WageConfig);
   },
 };

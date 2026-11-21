@@ -2354,9 +2354,8 @@ const pt = {
     decrease_minutes: 'Menos minutos',
     increase_minutes: 'Mais minutos',
     rate_label: 'Sua hora vale',
-    rate_value: '{{rate}}/h',
-    base_hourly_rate: 'Taxa horária base',
-    true_hours_per_week: 'Total de horas / semana',
+    base_rate: 'Taxa base {{rate}}',
+    time_split: '{{paid}} pagas + {{extra}} extras = {{total}} por semana',
     add_extra: 'Adicionar deslocamento e mais',
   },
   pro: {

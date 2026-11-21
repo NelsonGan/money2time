@@ -2344,9 +2344,8 @@ const sv = {
     decrease_minutes: 'Färre minuter',
     increase_minutes: 'Fler minuter',
     rate_label: 'Din timme är värd',
-    rate_value: '{{rate}}/h',
-    base_hourly_rate: 'Bas-timlön',
-    true_hours_per_week: 'Total tid / vecka',
+    base_rate: 'Grundlön {{rate}}',
+    time_split: '{{paid}} betald + {{extra}} extra = {{total}} i veckan',
     add_extra: 'Lägg till pendling med mera',
   },
   pro: {
