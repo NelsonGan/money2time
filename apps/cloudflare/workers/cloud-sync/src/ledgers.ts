@@ -761,6 +761,7 @@ async function credentials(
     const current = await access(env, ledger.id, userId);
     const theirs = current ? await reusableToken(env, current.ledger, Date.now()) : null;
     if (!current || !theirs) throw new Error('ledger_access_changed');
+    await confirmAccess(current.ledger.token);
     return json({
       url: current.ledger.db_url,
       authToken: theirs,
