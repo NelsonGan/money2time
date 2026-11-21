@@ -93,10 +93,17 @@ export const localProvider = {
     if (file.exists) return;
     // Copied under another name and renamed, so a copy cut short (the app
     // killed mid-backup) never leaves a truncated photo under the real name.
-    const partial = new File(dir, `${name}.partial`);
-    if (partial.exists) partial.delete();
-    await new File(sourceUri).copy(partial);
-    partial.moveSync(file, { overwrite: true });
+    // The name is this copy's own: a recovery copy can run beside a backup.
+    const partial = new File(
+      dir,
+      `${name}.${Date.now()}-${Math.random().toString(36).slice(2)}.partial`,
+    );
+    try {
+      await new File(sourceUri).copy(partial);
+      partial.moveSync(file, { overwrite: true });
+    } finally {
+      if (partial.exists) partial.delete();
+    }
   },
 
   async downloadPhoto(photo: BackupPhotoRecord, destination: File): Promise<void> {

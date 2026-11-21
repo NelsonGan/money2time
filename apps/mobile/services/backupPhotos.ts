@@ -48,9 +48,11 @@ const RESOLVED_PHOTOS_FOLDER = 'backup-photos';
 const UPLOAD_CONCURRENCY = 3;
 const PHOTO_LISTS_KEY = 'backupPhotos.lists.v1';
 
+/** The stored copy's extension: the file's own, or `bin` when it has none usable. */
 function extensionOf(path: string): string {
   const name = path.slice(path.lastIndexOf('/') + 1);
-  return name.includes('.') ? name.slice(name.lastIndexOf('.') + 1).toLowerCase() : '';
+  const ext = name.includes('.') ? name.slice(name.lastIndexOf('.') + 1).toLowerCase() : '';
+  return /^[a-z0-9]{1,8}$/.test(ext) ? ext : 'bin';
 }
 
 /**
@@ -66,10 +68,7 @@ export async function describeBackupPhotos(
     try {
       const md5 = (await new File(file.uri).digest('MD5')).toLowerCase();
       const photo = `${BACKUP_PHOTO_PREFIX}${md5}.${extensionOf(file.path)}`;
-      if (!md5 || !isBackupPhotoName(photo)) {
-        console.warn(`[backupPhotos] cannot store ${file.path}`);
-        continue;
-      }
+      if (!isBackupPhotoName(photo)) throw new Error(`Unexpected digest for ${file.path}`);
       out.push({ path: file.path, photo, uri: file.uri });
     } catch (error) {
       console.warn(`[backupPhotos] skipping vanished backup file: ${file.path}`, error);
@@ -246,11 +245,11 @@ export function resetBackupPhotoMemory(): void {
 
 /**
  * Deletes the target's stored photos that none of `backups` (what rotation
- * kept) lists. `readPhotos` reads a backup the phone has not seen to learn what
- * it lists; if it fails for any backup, nothing is deleted. Nor is anything
- * when `backups` misses `written`, the backup this run just wrote: a listing
- * that cannot see it may be missing others too. Older backups embed their
- * photos and list none. Returns how many photos were deleted.
+ * kept) lists, nor `written`, the backup this run just wrote, which Drive's
+ * lagging listing may not show yet. `readPhotos` reads a backup the phone has
+ * not seen to learn what it lists; if it fails for any backup, nothing is
+ * deleted. A listing that failed throws before this is reached. Older backups
+ * embed their photos and list none. Returns how many photos were deleted.
  */
 export async function pruneBackupPhotos(
   store: BackupPhotoStore,
@@ -259,11 +258,13 @@ export async function pruneBackupPhotos(
   readPhotos: (record: BackupRecord) => Promise<readonly string[]>,
   now: number = Date.now(),
 ): Promise<number> {
-  if (!backups.some((backup) => backupKey(backup) === backupKey(written))) return 0;
+  const all = backups.some((backup) => backupKey(backup) === backupKey(written))
+    ? backups
+    : [...backups, written];
   await loadPhotoLists();
-  const kept = new Set(backups.map(backupKey));
+  const kept = new Set(all.map(backupKey));
   try {
-    return await prunePhotos(store, backups, readPhotos, now);
+    return await prunePhotos(store, all, readPhotos, now);
   } finally {
     await savePhotoLists(written.target, kept);
   }

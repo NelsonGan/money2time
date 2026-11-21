@@ -184,18 +184,19 @@ export const googleDriveProvider = {
   },
 
   async listPhotos(): Promise<BackupPhotoRecord[]> {
-    const photos = new Map<string, BackupPhotoRecord>();
+    // Every copy, duplicates too (two uploads racing, or two folders): any
+    // one serves a restore, and the cleanup must see them all to delete them.
+    const photos: BackupPhotoRecord[] = [];
     for (const file of await listBackupFolderFiles()) {
-      // The same photo in two folders holds the same bytes; either will do.
-      if (!isBackupPhotoName(file.name) || photos.has(file.name)) continue;
+      if (!isBackupPhotoName(file.name)) continue;
       const createdAt = file.createdTime ? Date.parse(file.createdTime) : NaN;
-      photos.set(file.name, {
+      photos.push({
         name: file.name,
         ref: file.id,
         createdAt: Number.isNaN(createdAt) ? null : createdAt,
       });
     }
-    return [...photos.values()];
+    return photos;
   },
 
   async uploadPhoto(name: string, sourceUri: string): Promise<void> {

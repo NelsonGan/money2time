@@ -142,6 +142,25 @@ describe('reading', () => {
     expect(parseBackupJson(JSON.stringify(v6)).assetFiles).toBeUndefined();
   });
 
+  it('calls a damaged or cut-short compact file an invalid backup', async () => {
+    const bytes = await encodeBackupFile(backup());
+    await expect(decodeBackupFile(bytes.subarray(0, bytes.length - 20))).rejects.toThrow(
+      'Invalid backup format',
+    );
+    const garbage = new Uint8Array([0x1f, 0x8b, 8, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    await expect(decodeBackupFile(garbage)).rejects.toThrow('Invalid backup format');
+    await expect(decodeBackupFile(new Uint8Array())).rejects.toThrow();
+  });
+
+  it('reads the oldest backups: version 1 without images or later tables', async () => {
+    const v1 = {
+      version: 1,
+      exportedAt: '2024-01-01T00:00:00.000Z',
+      tables: { accounts: [{ id: 'a' }], transactions: [], categories: [], settings: [] },
+    };
+    await expect(decodeBackupFile(JSON.stringify(v1))).resolves.toEqual(v1);
+  });
+
   it('ignores a photo list in an older backup', () => {
     const legacy = { ...backup(), photos: [{ path: 'avatars/me.jpg', photo: PHOTO }] };
     expect(parseBackupJson(JSON.stringify(legacy)).photos).toBeUndefined();

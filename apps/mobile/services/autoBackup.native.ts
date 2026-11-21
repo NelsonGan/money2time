@@ -351,10 +351,7 @@ async function readBackupPhotoNames(
   return (backup.photos ?? []).map((photo) => photo.photo);
 }
 
-/**
- * Deletes the oldest backups past the limit, then the photos none still lists
- * (only when the listing shows `written`, the backup this run wrote).
- */
+/** Deletes the oldest backups past the limit, then the photos none still lists. */
 async function rotate(provider: Provider, written: BackupRecord): Promise<void> {
   try {
     const all = await provider.list();

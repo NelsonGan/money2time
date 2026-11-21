@@ -134,13 +134,11 @@ export const iCloudProvider = {
 
   async list(): Promise<BackupRecord[]> {
     const storage = getInstance();
-    if (!(await safeExists(storage, FOLDER_PATH))) return [];
-    let entries: string[] = [];
-    try {
-      entries = await storage.readdir(FOLDER_PATH);
-    } catch {
-      return [];
-    }
+    // A folder that could not be read throws rather than reading as empty:
+    // rotation then leaves every backup and stored photo alone, and the
+    // Backups list (listAllBackups) shows none from iCloud, as before.
+    if (!(await storage.exists(FOLDER_PATH))) return [];
+    const entries = await storage.readdir(FOLDER_PATH);
 
     const results: BackupRecord[] = [];
     for (const name of entries.map(cloudFileName)) {

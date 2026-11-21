@@ -28,6 +28,9 @@ jest.mock('expo-file-system/next', () => ({
     get size() {
       return sizes.get(this.uri) ?? 0;
     }
+    get exists() {
+      return sizes.has(this.uri);
+    }
     delete() {
       sizes.delete(this.uri);
     }
@@ -36,6 +39,15 @@ jest.mock('expo-file-system/next', () => ({
       sizes.set(to.uri, sizes.get(this.uri) ?? 0);
       sizes.delete(this.uri);
     }
+  },
+}));
+
+let appState = 'active';
+jest.mock('react-native', () => ({
+  AppState: {
+    get currentState() {
+      return appState;
+    },
   },
 }));
 
@@ -82,6 +94,8 @@ jest.mock('expo-image-manipulator', () => {
 import { shrinkPickedImage, shrinkStoredPhotos } from '~/services/imageShrink.native';
 
 beforeEach(() => {
+  jest.restoreAllMocks();
+  appState = 'active';
   storage.clear();
   sizes.clear();
   moves.length = 0;
@@ -181,6 +195,45 @@ describe('shrinkStoredPhotos', () => {
 
     expect(saves).toEqual([]);
     expect(moves).toEqual([]);
+  });
+
+  it('does nothing in a background task', async () => {
+    appState = 'background';
+    listed.push({ path: 'album-covers/a.jpg', uri: 'doc/album-covers/a.jpg' });
+    sizes.set('doc/album-covers/a.jpg', 800_000);
+    await shrinkStoredPhotos();
+    expect(saves).toEqual([]);
+  });
+
+  it('leaves a file replaced while it was being re-encoded', async () => {
+    listed.push({ path: 'avatars/me.jpg', uri: 'me' });
+    sizes.set('me', 400_000);
+    dimensions.set('me', { width: 2000, height: 2000 });
+    savedSize = 50_000;
+    // The user picks a new avatar (a new size at the same path) mid-pass.
+    const original = dimensions.get.bind(dimensions);
+    jest.spyOn(dimensions, 'get').mockImplementation((uri: string) => {
+      if (uri === 'me') sizes.set('me', 123_456);
+      return original(uri);
+    });
+
+    await shrinkStoredPhotos();
+
+    expect(moves).toEqual([]);
+    expect(sizes.get('me')).toBe(123_456);
+  });
+
+  it('tries a file again after a failure instead of remembering it', async () => {
+    listed.push({ path: 'avatars/me.jpg', uri: 'me' });
+    sizes.set('me', 400_000);
+    jest.spyOn(dimensions, 'get').mockImplementationOnce(() => {
+      throw new Error('decode failed');
+    });
+    await shrinkStoredPhotos();
+    expect(saves).toHaveLength(0);
+    dimensions.set('me', { width: 2000, height: 2000 });
+    await shrinkStoredPhotos();
+    expect(saves).toHaveLength(1);
   });
 
   it('remembers a file that cannot get smaller and checks only its size next time', async () => {

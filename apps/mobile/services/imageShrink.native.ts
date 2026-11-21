@@ -5,6 +5,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { File } from 'expo-file-system/next';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
+import { AppState } from 'react-native';
 
 import {
   IMAGE_LIMITS,
@@ -75,9 +76,11 @@ async function shrinkStoredFile(path: string, file: File, kind: PickedImageKind)
     png ? { format: SaveFormat.PNG } : { compress: limit.compress, format: SaveFormat.JPEG },
   );
   const shrunk = new File(out.uri);
-  if (shrunk.size >= size * 0.9) {
+  // Not smaller, or the file was replaced or deleted while it was re-encoded
+  // (a new avatar picked meanwhile): leave what is there.
+  if (shrunk.size >= size * 0.9 || !file.exists || file.size !== size) {
     shrunk.delete();
-    return size;
+    return file.exists ? file.size : 0;
   }
   // The path stays, so every row naming it still does; only the bytes change.
   shrunk.moveSync(file, { overwrite: true });
@@ -104,6 +107,9 @@ let running: Promise<void> | null = null;
  * so later passes check only file sizes. Never throws.
  */
 export function shrinkStoredPhotos(): Promise<void> {
+  // Only in the foreground: a background task has little time, and a decode
+  // the system cuts short must not be remembered as a file that cannot shrink.
+  if (AppState.currentState === 'background') return Promise.resolve();
   running ??= (async () => {
     try {
       const memo = await readMemo();
@@ -119,7 +125,7 @@ export function shrinkStoredPhotos(): Promise<void> {
           const after = await shrinkStoredFile(entry.path, file, kind);
           if (after > IMAGE_LIMITS[kind].shrinkAboveBytes) next[entry.path] = after;
         } catch (error) {
-          next[entry.path] = size;
+          // Not remembered: the next foreground pass tries again.
           console.warn(`[imageShrink] could not shrink ${entry.path}`, error);
         }
       }

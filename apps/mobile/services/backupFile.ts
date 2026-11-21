@@ -23,7 +23,9 @@ export const BACKUP_FILE_VERSION = 6;
 const SUPPORTED_DATA_VERSIONS = new Set([1, 2, 3, 4, 5]);
 /** Stored photos are named `money2time_PHOTO_<md5>.<ext>` (see backupPhotos.ts). */
 export const BACKUP_PHOTO_PREFIX = 'money2time_PHOTO_';
-const BACKUP_PHOTO_NAME = /^money2time_PHOTO_[0-9a-f]{32}\.(png|jpg|jpeg|webp|heic)$/;
+// The extension only labels the stored copy; any short one is accepted so no
+// user file is ever left out of a backup for its name.
+const BACKUP_PHOTO_NAME = /^money2time_PHOTO_[0-9a-f]{32}\.[a-z0-9]{1,8}$/;
 
 /** A photo an automatic backup lists: where it goes, and the stored file holding it. */
 export interface BackupPhotoRef {
@@ -200,7 +202,17 @@ export function parseBackupJson(json: string): BackupData {
  */
 export async function decodeBackupFile(payload: string | Uint8Array): Promise<BackupData> {
   if (typeof payload === 'string') return parseBackupJson(payload);
-  if (isGzip(payload)) return parseBackupJson(await gunzipText(payload));
-  const { strFromU8 } = await import('fflate');
-  return parseBackupJson(strFromU8(payload));
+  let text: string;
+  try {
+    if (isGzip(payload)) {
+      text = await gunzipText(payload);
+    } else {
+      const { strFromU8 } = await import('fflate');
+      text = strFromU8(payload);
+    }
+  } catch {
+    // A truncated download or a damaged file: say so plainly, not in zlib's words.
+    throw new Error('Invalid backup format');
+  }
+  return parseBackupJson(text);
 }

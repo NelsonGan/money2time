@@ -117,13 +117,25 @@ describe('describeBackupPhotos', () => {
     ]);
   });
 
-  it('leaves out a file that vanished or cannot be stored', async () => {
-    files.set('gif', 'aaaa');
-    const photos = await describeBackupPhotos([
-      { path: 'album-covers/gone.jpg', uri: 'gone' },
-      { path: 'album-covers/x.gif', uri: 'gif' },
-    ]);
+  it('leaves out a file that vanished since the listing', async () => {
+    const photos = await describeBackupPhotos([{ path: 'album-covers/gone.jpg', uri: 'gone' }]);
     expect(photos).toEqual([]);
+  });
+
+  it('stores a file with any extension, or none, rather than leaving it out', async () => {
+    files.set('gif', 'aaaa');
+    files.set('bare', 'bbbb');
+    files.set('odd', 'aaaa');
+    const photos = await describeBackupPhotos([
+      { path: 'album-covers/x.gif', uri: 'gif' },
+      { path: 'receipts/no-extension', uri: 'bare' },
+      { path: 'receipts/x.not-an-ext!', uri: 'odd' },
+    ]);
+    expect(photos.map((photo) => photo.photo)).toEqual([
+      photoName(HASH_A, 'gif'),
+      photoName(HASH_B, 'bin'),
+      photoName(HASH_A, 'bin'),
+    ]);
   });
 });
 
@@ -321,13 +333,30 @@ describe('pruneBackupPhotos', () => {
     expect([...store.photos.keys()]).toEqual([photoName(HASH_A)]);
   });
 
-  it('deletes nothing when the listing misses the backup just written', async () => {
-    // An iCloud listing that failed, or has not caught up, sees no backups
-    // while the photos are there: every photo would look unlisted.
+  it('keeps what the backup just written lists when the listing lags behind it', async () => {
+    // Drive's listing can miss a file uploaded seconds ago.
     const store = memoryStore([stored(HASH_A), stored(HASH_B)]);
     const mine = backupRecord('money2time_AUTO_2026-11-20T00-00-00.json.gz');
+    const older = backupRecord('money2time_AUTO_2026-11-19T00-00-00.json.gz');
     rememberBackupPhotos(mine, [{ path: 'a.jpg', photo: photoName(HASH_A) }]);
-    await expect(pruneBackupPhotos(store, mine, [], jest.fn(), NOW)).resolves.toBe(0);
-    expect(store.deletePhoto).not.toHaveBeenCalled();
+    rememberBackupPhotos(older, []);
+    await expect(pruneBackupPhotos(store, mine, [older], jest.fn(), NOW)).resolves.toBe(1);
+    expect([...store.photos.keys()]).toEqual([photoName(HASH_A)]);
+  });
+
+  it('deletes every copy of an unlisted photo, duplicates too', async () => {
+    const store = memoryStore();
+    const copies = [
+      { name: photoName(HASH_B), ref: 'one', createdAt: OLD },
+      { name: photoName(HASH_B), ref: 'two', createdAt: OLD },
+    ];
+    (store.listPhotos as jest.Mock).mockResolvedValue(copies);
+    const mine = backupRecord('money2time_AUTO_2026-11-20T00-00-00.json.gz');
+    rememberBackupPhotos(mine, []);
+    await expect(pruneBackupPhotos(store, mine, [mine], jest.fn(), NOW)).resolves.toBe(2);
+    expect((store.deletePhoto as jest.Mock).mock.calls.map(([photo]) => photo.ref)).toEqual([
+      'one',
+      'two',
+    ]);
   });
 });

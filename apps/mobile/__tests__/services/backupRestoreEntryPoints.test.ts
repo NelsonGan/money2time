@@ -1,5 +1,9 @@
 import { trackEvent } from '~/services/analytics';
-import { restoreFromBackup, saveRestoreSafetyBackup } from '~/services/autoBackup.native';
+import {
+  restoreFromBackup,
+  restoreImportedBackup,
+  saveRestoreSafetyBackup,
+} from '~/services/autoBackup.native';
 import {
   type BackupRecord,
   buildAutoBackupName,
@@ -19,8 +23,12 @@ jest.mock('~/services/analytics', () => ({
 jest.mock('~/services/autoBackupProviders/local', () => ({
   localProvider: { download: jest.fn(), list: jest.fn(), upload: jest.fn() },
 }));
-jest.mock('~/services/autoBackupProviders/icloud', () => ({ iCloudProvider: {} }));
-jest.mock('~/services/autoBackupProviders/googleDrive', () => ({ googleDriveProvider: {} }));
+jest.mock('~/services/autoBackupProviders/icloud', () => ({
+  iCloudProvider: { isAvailable: jest.fn(async () => true) },
+}));
+jest.mock('~/services/autoBackupProviders/googleDrive', () => ({
+  googleDriveProvider: { isAvailable: jest.fn(async () => false) },
+}));
 jest.mock('~/services/autoBackupProviders/googleDriveAuth', () => ({}));
 jest.mock('~/services/dataManagementService', () => ({
   applyBackupData: jest.fn(),
@@ -166,4 +174,39 @@ it('downloads the photos a compact backup lists from its own target, then clears
   expect(restore).toHaveBeenCalledWith({ ...decoded, resolved: 1 });
   expect(clearResolvedBackupPhotos).toHaveBeenCalledTimes(1);
   expect(trackEvent).toHaveBeenCalledWith('restored', { target: 'local', missing_photos: 2 });
+});
+
+describe('a picked backup file', () => {
+  const photos = [{ path: 'avatars/a.jpg', photo: `money2time_PHOTO_${'a'.repeat(32)}.jpg` }];
+
+  it('looks for its stored photos on the phone, then in connected iCloud, skipping a signed-out Drive', async () => {
+    const { iCloudProvider } = jest.requireMock('~/services/autoBackupProviders/icloud');
+    const restore = jest.fn(async () => ({ canceled: false, success: true }));
+    const result = await restoreImportedBackup({ ...backup, photos } as never, restore);
+    expect(resolveBackupPhotos).toHaveBeenCalledWith({ ...backup, photos }, [
+      localProvider,
+      iCloudProvider,
+    ]);
+    expect(result).toEqual({ canceled: false, success: true, missingPhotos: 2 });
+    expect(clearResolvedBackupPhotos).toHaveBeenCalledTimes(1);
+  });
+
+  it('restores a file that embeds its photos without touching any target', async () => {
+    const { googleDriveProvider } = jest.requireMock('~/services/autoBackupProviders/googleDrive');
+    const restore = jest.fn(async () => ({ canceled: false, success: true }));
+    await restoreImportedBackup(backup as never, restore);
+    expect(restore).toHaveBeenCalledWith(backup);
+    expect(googleDriveProvider.isAvailable).not.toHaveBeenCalled();
+    expect(resolveBackupPhotos).not.toHaveBeenCalled();
+  });
+
+  it('restores nothing when the stored photos cannot be downloaded', async () => {
+    (resolveBackupPhotos as jest.Mock).mockRejectedValueOnce(new Error('offline'));
+    const restore = jest.fn();
+    await expect(restoreImportedBackup({ ...backup, photos } as never, restore)).rejects.toThrow(
+      'offline',
+    );
+    expect(restore).not.toHaveBeenCalled();
+    expect(clearResolvedBackupPhotos).toHaveBeenCalledTimes(1);
+  });
 });

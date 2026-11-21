@@ -231,3 +231,54 @@ describe('availability', () => {
     await expect(googleDriveProvider.isAvailable()).resolves.toBe(false);
   });
 });
+
+describe('stored photos', () => {
+  const PHOTO = `money2time_PHOTO_${'a'.repeat(32)}.jpg`;
+
+  it('lists every copy, so the cleanup can delete duplicates too', async () => {
+    api.findFolderIds.mockResolvedValue(['folder-1', 'folder-2']);
+    api.listFolderChildren.mockImplementation(async (folderId) => [
+      { id: `${folderId}-photo`, name: PHOTO, sizeBytes: 1, createdTime: '2026-11-01T00:00:00Z' },
+      driveFile('money2time_AUTO_2026-07-01T10-00-00.json.gz', `${folderId}-backup`),
+      driveFile('unrelated.jpg', `${folderId}-other`),
+    ]);
+
+    const photos = await googleDriveProvider.listPhotos();
+    expect(photos).toEqual([
+      { name: PHOTO, ref: 'folder-1-photo', createdAt: Date.parse('2026-11-01T00:00:00Z') },
+      { name: PHOTO, ref: 'folder-2-photo', createdAt: Date.parse('2026-11-01T00:00:00Z') },
+    ]);
+    // A stored photo is never taken for a backup.
+    const backups = await googleDriveProvider.list();
+    expect(backups.map((record) => record.id)).toEqual([
+      'money2time_AUTO_2026-07-01T10-00-00.json.gz',
+    ]);
+  });
+
+  it('uploads a photo as its bytes with an image type', async () => {
+    api.findFolderIds.mockResolvedValue(['folder-1']);
+    api.uploadDriveFile.mockResolvedValue('file-p');
+    await googleDriveProvider.uploadPhoto(PHOTO, 'file:///doc/user-assets/a.jpg');
+    expect(api.uploadDriveFile).toHaveBeenCalledWith(
+      'folder-1',
+      PHOTO,
+      new Uint8Array([1, 2, 3]),
+      'image/jpeg',
+    );
+  });
+
+  it('reads an older backup as text and a compact one as bytes', async () => {
+    api.downloadFileText.mockResolvedValue('{}');
+    api.downloadFileBytes.mockResolvedValue(new Uint8Array([0x1f, 0x8b]));
+    const record = { target: 'googleDrive' as const, createdAt: '', sizeBytes: 1, ref: 'id' };
+    await expect(
+      googleDriveProvider.download({ ...record, id: 'money2time_AUTO_2026-07-01T10-00-00.json' }),
+    ).resolves.toBe('{}');
+    await expect(
+      googleDriveProvider.download({
+        ...record,
+        id: 'money2time_AUTO_2026-07-01T10-00-00.json.gz',
+      }),
+    ).resolves.toEqual(new Uint8Array([0x1f, 0x8b]));
+  });
+});
