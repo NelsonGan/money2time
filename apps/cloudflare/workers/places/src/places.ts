@@ -1,15 +1,14 @@
-// Place search for tagging transactions with where they happened: POST
-// /places/search (text search biased toward the user) and POST /places/reverse
-// (coordinates to the place there), both proxied to the Apple Maps Server API.
+// Apple Maps Server API for place search: POST /search (text search biased
+// toward the user) and POST /reverse (coordinates to the place there), see
+// index.ts for the routes.
 //
 // The Apple key never leaves the Worker: it signs a short-lived Maps auth
 // token (ES256), trades it at /v1/token for a 30-minute access token, and
 // keeps that per isolate. Answers are cached at the edge by the normalized
 // request, with coordinates rounded first, so a repeated search is free and
 // Apple never sees the user's exact position from a search. Apple allows a
-// shared 25,000 calls a day, so each user also has a daily allowance (the
-// 'places' meter) and each address a per-minute limit; a cache hit uses
-// neither.
+// shared 25,000 calls a day, so each user also has a daily allowance
+// (quota.ts) and each address a per-minute limit; a cache hit uses neither.
 
 export interface PlacesEnv {
   // The .p8 of the "Money2Time Maps" key (Maps enabled), PEM text.

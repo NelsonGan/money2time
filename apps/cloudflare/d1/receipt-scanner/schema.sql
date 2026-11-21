@@ -85,20 +85,3 @@ CREATE TABLE IF NOT EXISTS notification_review_charged (
 
 CREATE INDEX IF NOT EXISTS idx_notification_review_charged_expires
   ON notification_review_charged (expires_at);
-
--- Place searches (POST /places/search and /places/reverse) per user per window,
--- the same shape as scan_usage. One row counts the Apple Maps calls a user's
--- searches made (edge-cache hits are free and not counted); PLACES_LIMIT and
--- PLACES_INTERVAL set the allowance, the same for every tier.
-CREATE TABLE IF NOT EXISTS place_search_usage (
-  app_user_id   TEXT    NOT NULL,
-  interval_unit TEXT    NOT NULL
-                CHECK (interval_unit IN ('day', 'week', 'month', 'year')),
-  window_start  INTEGER NOT NULL,
-  count         INTEGER NOT NULL DEFAULT 0,
-  expires_at    INTEGER NOT NULL,
-  PRIMARY KEY (app_user_id, interval_unit, window_start)
-);
-
-CREATE INDEX IF NOT EXISTS idx_place_search_usage_expires
-  ON place_search_usage (expires_at);

@@ -190,7 +190,9 @@ BRANDFETCH_API_KEY=
 The three Worker URLs point at the receipt-scan
 ([receipt-scanner](#receipt-scanner-worker)), live-earnings-push
 ([live-earnings](#live-earnings-worker)) and Web Dashboard relay
-([web-dashboard](#web-dashboard-worker)) Cloudflare Workers. Their
+([web-dashboard](#web-dashboard-worker)) Cloudflare Workers. Place search's
+[places Worker](#places-worker) needs no setting: unset, the app uses
+production. Their
 provider secrets (OpenRouter, APNs) live only in the Workers — never in the
 app; the relay has none.
 
@@ -653,9 +655,9 @@ locations** is off for everyone until they turn it on. The code lives in
   entry's place like its note. A shared album's bill does not carry it to the
   album's other members (`albumGroupSync`'s `TX_COLUMNS` leaves it out).
   Duplicating an entry keeps its place.
-- **Place search** goes through the receipt-scanner Worker's `/places/search`
-  and `/places/reverse` (see [Place search](#place-search)), which proxy the
-  Apple Maps Server API with the Apple key kept server-side. The app's client
+- **Place search** goes through its own Worker, `workers-places.money2time.com`
+  (`/search` and `/reverse`, see [Places Worker](#places-worker)), which proxies
+  the Apple Maps Server API with the Apple key kept server-side. The app's client
   is `services/placeSearch.ts`, signed like scanning so it works without an
   account. The phone's own location and geocoder (`services/deviceLocation.ts`,
   `expo-location`) cost nothing; the Worker's reverse lookup is only the
@@ -4852,7 +4854,6 @@ database (schema in `apps/cloudflare/d1/receipt-scanner/schema.sql`):
 | AI notification review counter       | `notification_review_usage`   | `(app_user_id, interval_unit, window_start)` | window end in `expires_at`; cron-pruned   |
 | AI notification ids charged recently | `notification_review_charged` | `(app_user_id, capture_id)`                  | one day in `expires_at`; cron-pruned      |
 | Entitlement cache                    | `entitlement_cache`           | `app_user_id`                                | `expires_at` checked on read; cron-pruned |
-| Place search counter                 | `place_search_usage`          | `(app_user_id, interval_unit, window_start)` | window end in `expires_at`; cron-pruned   |
 
 D1 has no native TTL, so every row carries an `expires_at` (epoch-ms) and the
 daily cron (`scheduled()`) prunes stale rows. `scan_usage` is one row per
@@ -4877,10 +4878,7 @@ as a "Secret" (encrypted): `OPENROUTER_API_KEY`, `REVENUECAT_SECRET_KEY`, and
 `MONEY2TIME_REQUEST_SIGNING_KEY` (the same value as the app's
 `EXPO_PUBLIC_REQUEST_SIGNING_KEY`; leave unset to accept unsigned requests),
 plus the optional `POSTHOG_PROMPTS_API_KEY` (a PostHog personal API key scoped to
-`llm_prompt:read` only; unset serves the bundled prompts) and
-`APPLE_MAPS_PRIVATE_KEY` (place search, see [Place search](#place-search); set
-2026-11-21 with `npx wrangler secret put APPLE_MAPS_PRIVATE_KEY <
-~/.config/money2time/AuthKey_566492L2DK.p8`; unset answers `not_configured`).
+`llm_prompt:read` only; unset serves the bundled prompts).
 Dashboard secrets survive every deploy, so they only need to be set once.
 (Equivalent CLI, if you prefer: `npx wrangler secret put <NAME>`. When the
 latest Worker version is an undeployed preview version, `secret put` refuses; use
@@ -4967,15 +4965,19 @@ typecheck when changing these routes. CI applies the schema (the new table is
 `CREATE TABLE IF NOT EXISTS`) and deploys the Worker on merge, before the app
 release that calls it.
 
-#### Place search
+### Places Worker
 
-[Transaction locations](#transaction-locations) search places through two
-routes here, signed like `/scan` (so signed-out users can use them):
+Place search for [Transaction locations](#transaction-locations), on its own
+Worker so the Apple key, its quota and its traffic stay apart from receipt
+scanning. `apps/cloudflare/workers/places` (`money2time-workers-places`),
+served at `workers-places.money2time.com`, with one D1 database
+(`money2time-d1-places`). Both routes are signed like `/scan` (the app's shared
+`MONEY2TIME_REQUEST_SIGNING_KEY`), so signed-out users can use them:
 
 ```jsonc
-// POST /places/search
+// POST /search
 { "appUserId": "m2t_…", "query": "starbucks", "latitude": 3.1579, "longitude": 101.7123, "language": "en" }
-// POST /places/reverse
+// POST /reverse
 { "appUserId": "m2t_…", "latitude": 3.1579, "longitude": 101.7123, "language": "en" }
 // 200, both
 { "places": [{ "id": "I88BAA55D81E8BF1", "name": "Starbucks", "address": "151, Jalan Ampang, 50450 Kuala Lumpur",
@@ -4990,29 +4992,42 @@ and `APPLE_TEAM_ID` are vars). The Worker signs a 10-minute ES256 Maps auth
 token (`scope: server_api`) with WebCrypto, trades it at `/v1/token` for a
 30-minute access token kept per isolate, and mints a new one once when Apple
 answers 401. Answers are normalized (one-line address without the name or
-country, Apple's id and `poiCategory`, at most 12 places).
+country, Apple's id and `poiCategory`, at most 12 places). `src/index.ts` holds
+the routes and the signature check; `src/quota.ts` the daily allowance.
 
 - **Cost.** Apple allows 25,000 calls a day for the whole team (shared with
   MapKit JS), free, and refuses past that with a 429 rather than billing.
   Every answer is kept in the edge cache (`caches.default`) for a day, keyed by
   the normalized request, and a cache hit uses neither Apple nor the user's
-  allowance. A miss checks the `places` meter (`PLACES_LIMIT` per
-  `PLACES_INTERVAL`, 200 a day for everyone), asks Apple, then counts one use.
+  allowance. A miss checks the user's count for the UTC day
+  (`PLACES_DAILY_LIMIT`, 200 for everyone), asks Apple, then counts one use.
   `PLACES_LIMITER` caps each address at 60 a minute.
+- **Storage.** One table, `search_usage` (`apps/cloudflare/d1/places/schema.sql`):
+  a count per `(app_user_id, day_start)` with `expires_at` at the day's end,
+  deleted by the daily cron. No query, place or coordinate is stored.
 - **Privacy.** A search's bias point is rounded to 2 decimals (about 1 km) and
   a reverse lookup's to 4 (about 11 m) before Apple or the cache sees it. Logs
   carry the outcome and result count, never a query or a point.
-- **Errors.** 400 for a bad body (`query_too_short` under two characters,
-  `invalid_location`), 401 bad signature, 429 `limit_reached` (the daily
-  allowance) or `rate_limited` (the address), 503 `not_configured` (no key) or
-  `capacity` (Apple's quota), 502 `upstream`. The app maps them in
-  `features/places/services/placeSearch.ts`.
+- **Errors.** 404 for any other route, 400 for a bad body (`query_too_short`
+  under two characters, `invalid_location`), 401 bad signature, 429
+  `limit_reached` (the daily allowance) or `rate_limited` (the address), 503
+  `not_configured` (no key) or `capacity` (Apple's quota), 502 `upstream`. The
+  app maps them in `features/places/services/placeSearch.ts`.
+- **Deploy.** CI applies the schema and deploys on merge like the other
+  Workers (the `places` entry in `.github/workflows/cloudflare.yml`). The two
+  secrets, `APPLE_MAPS_PRIVATE_KEY` and `MONEY2TIME_REQUEST_SIGNING_KEY` (the
+  app's `EXPO_PUBLIC_REQUEST_SIGNING_KEY`), were set 2026-11-21 with
+  `npx wrangler secret bulk` and survive every deploy; without the key the
+  routes answer `not_configured`.
+- **App.** `EXPO_PUBLIC_MONEY2TIME_WORKERS_PLACES` overrides the URL; unset uses
+  production, so release builds need no setting.
 - **Tests.** `__tests__/cloudflare/placesWorker.test.ts` signs a real token
   with a fresh P-256 key and drives the routes against a fake Apple.
 - **Local.** Put the key in a gitignored `.dev.vars`
   (`APPLE_MAPS_PRIVATE_KEY="<the PEM, newlines as \n>"`), apply the schema
-  locally, run `npx wrangler dev --port 8788`, and start the app with
-  `EXPO_PUBLIC_MONEY2TIME_WORKERS_RECEIPT_SCANNER=http://127.0.0.1:8788`.
+  with `npx wrangler d1 execute money2time-d1-places --local --file
+../../d1/places/schema.sql`, run `npx wrangler dev --port 8788`, and start the
+  app with `EXPO_PUBLIC_MONEY2TIME_WORKERS_PLACES=http://127.0.0.1:8788`.
 
 ### Web-dashboard Worker
 

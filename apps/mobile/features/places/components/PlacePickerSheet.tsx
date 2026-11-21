@@ -33,7 +33,7 @@ import {
 } from '../lib/placeLocation';
 import type { PlaceResult } from '../lib/placeTypes';
 import { openLocationSettings } from '../services/deviceLocation';
-import { isPlaceSearchAvailable, PlaceSearchError, searchPlaces } from '../services/placeSearch';
+import { PlaceSearchError, searchPlaces } from '../services/placeSearch';
 
 /** How a place was chosen, for analytics. */
 export type PlaceSource = 'current' | 'search' | 'recent';
@@ -88,7 +88,6 @@ export function PlacePickerSheet({
   const [query, setQuery] = useState('');
   const [search, setSearch] = useState<SearchState>({ kind: 'idle' });
   const requestId = useRef(0);
-  const searchAvailable = isPlaceSearchAvailable();
 
   const here = useCurrentPlace({ active: visible, appUserId: settings.appUserId, locale });
   const near = here.coordinate;
@@ -105,7 +104,7 @@ export function PlacePickerSheet({
   const trimmed = query.trim();
   useEffect(() => {
     if (!visible) return undefined;
-    if (trimmed.length < MIN_QUERY_LENGTH || !searchAvailable) {
+    if (trimmed.length < MIN_QUERY_LENGTH) {
       requestId.current += 1;
       setSearch({ kind: 'idle' });
       return undefined;
@@ -123,7 +122,7 @@ export function PlacePickerSheet({
         });
     }, SEARCH_DEBOUNCE_MS);
     return () => clearTimeout(handle);
-  }, [trimmed, visible, searchAvailable, settings.appUserId, locale]);
+  }, [trimmed, visible, settings.appUserId, locale]);
 
   const handleClose = () => {
     // Blur before the Modal tears down (Sentry MONEY2TIME-6, see CityPickerSheet).
@@ -175,7 +174,7 @@ export function PlacePickerSheet({
     }
   })();
 
-  const showingSearch = trimmed.length >= MIN_QUERY_LENGTH && searchAvailable;
+  const showingSearch = trimmed.length >= MIN_QUERY_LENGTH;
   const listData: PlaceResult[] = showingSearch
     ? search.kind === 'done'
       ? search.results
@@ -223,13 +222,7 @@ export function PlacePickerSheet({
   );
 
   const empty = (() => {
-    if (!showingSearch) {
-      return searchAvailable ? undefined : (
-        <Text variant="caption" tone="muted" className="px-1 py-4 text-center">
-          {I18n.t('locations.search_unavailable')}
-        </Text>
-      );
-    }
+    if (!showingSearch) return undefined;
     if (search.kind === 'searching' || search.kind === 'idle') {
       return (
         <View className="items-center py-8">
@@ -268,38 +261,36 @@ export function PlacePickerSheet({
               </Pressable>
             </View>
 
-            {searchAvailable ? (
-              <View className="px-5 pb-3">
-                <View
-                  className="flex-row items-center gap-2 rounded-2xl bg-secondary/60 px-3"
-                  style={{ height: 44 }}
-                >
-                  <Search size={16} color={themeColors.textMuted} />
-                  <TextInput
-                    value={query}
-                    onChangeText={setQuery}
-                    placeholder={I18n.t('locations.search_placeholder')}
-                    placeholderTextColor={themeColors.textMuted}
-                    autoCorrect={false}
-                    returnKeyType="search"
-                    allowFontScaling={false}
-                    accessibilityLabel={I18n.t('locations.search_placeholder')}
-                    style={{ flex: 1, color: themeColors.text, fontSize: 16 }}
-                    {...REPLAY_PRIVATE}
-                  />
-                  {query.length > 0 ? (
-                    <Pressable
-                      onPress={() => setQuery('')}
-                      hitSlop={8}
-                      accessibilityRole="button"
-                      accessibilityLabel={I18n.t('common.clear')}
-                    >
-                      <X size={16} color={themeColors.textMuted} />
-                    </Pressable>
-                  ) : null}
-                </View>
+            <View className="px-5 pb-3">
+              <View
+                className="flex-row items-center gap-2 rounded-2xl bg-secondary/60 px-3"
+                style={{ height: 44 }}
+              >
+                <Search size={16} color={themeColors.textMuted} />
+                <TextInput
+                  value={query}
+                  onChangeText={setQuery}
+                  placeholder={I18n.t('locations.search_placeholder')}
+                  placeholderTextColor={themeColors.textMuted}
+                  autoCorrect={false}
+                  returnKeyType="search"
+                  allowFontScaling={false}
+                  accessibilityLabel={I18n.t('locations.search_placeholder')}
+                  style={{ flex: 1, color: themeColors.text, fontSize: 16 }}
+                  {...REPLAY_PRIVATE}
+                />
+                {query.length > 0 ? (
+                  <Pressable
+                    onPress={() => setQuery('')}
+                    hitSlop={8}
+                    accessibilityRole="button"
+                    accessibilityLabel={I18n.t('common.clear')}
+                  >
+                    <X size={16} color={themeColors.textMuted} />
+                  </Pressable>
+                ) : null}
               </View>
-            ) : null}
+            </View>
 
             <FlatList
               data={listData}

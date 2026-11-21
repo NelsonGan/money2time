@@ -1,6 +1,6 @@
 /**
  * Place search for transaction locations (README: Transaction locations).
- * Calls the receipt-scanner Worker's /places routes, which proxy the Apple
+ * Calls the places Worker (README: Places Worker), which proxies the Apple
  * Maps Server API with the Apple key kept server-side. Signed the same way as
  * scanning, so it works without an account.
  */
@@ -32,14 +32,12 @@ export class PlaceSearchError extends Error {
 // user typing again rather than spin.
 const FETCH_TIMEOUT_MS = 10000;
 
-function apiBaseUrl(): string | null {
-  const raw = process.env.EXPO_PUBLIC_MONEY2TIME_WORKERS_RECEIPT_SCANNER?.trim();
-  return raw ? raw.replace(/\/+$/, '') : null;
-}
+const DEFAULT_BASE_URL = 'https://workers-places.money2time.com';
 
-/** Whether place search can be offered at all (the Worker URL is set). */
-export function isPlaceSearchAvailable(): boolean {
-  return apiBaseUrl() !== null;
+// `EXPO_PUBLIC_MONEY2TIME_WORKERS_PLACES` points a dev build at a local Worker.
+function apiBaseUrl(): string {
+  const raw = process.env.EXPO_PUBLIC_MONEY2TIME_WORKERS_PLACES?.trim() || DEFAULT_BASE_URL;
+  return raw.replace(/\/+$/, '');
 }
 
 // Apple takes BCP 47 tags; the app's locale ids are close, Chinese aside.
@@ -69,7 +67,6 @@ function isPlaceResult(value: unknown): value is PlaceResult {
 
 async function post(path: string, body: Record<string, unknown>): Promise<PlaceResult[]> {
   const base = apiBaseUrl();
-  if (!base) throw new PlaceSearchError('not_available', 'Place search is not configured.');
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   try {
@@ -129,7 +126,7 @@ export interface SearchPlacesArgs {
 }
 
 export function searchPlaces({ appUserId, query, near, locale }: SearchPlacesArgs) {
-  return post('/places/search', {
+  return post('/search', {
     appUserId,
     query: query.trim(),
     ...(near ? { latitude: near.latitude, longitude: near.longitude } : {}),
@@ -143,7 +140,7 @@ export async function reverseGeocodePlace(args: {
   longitude: number;
   locale?: string | null;
 }): Promise<PlaceResult | null> {
-  const places = await post('/places/reverse', {
+  const places = await post('/reverse', {
     appUserId: args.appUserId,
     latitude: args.latitude,
     longitude: args.longitude,

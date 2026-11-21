@@ -24,12 +24,11 @@ interface TierConfig {
  * What is metered. Receipt scans and AI notification reviews have their own
  * counters and limits; each meter's rows live in its own table.
  */
-export type Meter = 'scan' | 'notification' | 'places';
+export type Meter = 'scan' | 'notification';
 
 const TABLES: Record<Meter, string> = {
   scan: 'scan_usage',
   notification: 'notification_review_usage',
-  places: 'place_search_usage',
 };
 
 // Free scans are a monthly allowance; free notification reviews are a lifetime
@@ -39,17 +38,7 @@ const FREE_FALLBACK: Interval = { count: 100, unit: 'year' };
 // Pro monthly cap is a fair-use ceiling — the paywall advertises unlimited.
 const PRO_FALLBACK: Interval = { count: 1, unit: 'month' };
 
-// Place searches are free for everyone; the daily cap only stops one user (or
-// a script inventing user ids from one address) eating Apple's shared quota.
-const PLACES_FALLBACK: Interval = { count: 1, unit: 'day' };
-
 function tierConfig(isPro: boolean, env: Env, meter: Meter): TierConfig {
-  if (meter === 'places') {
-    return {
-      limit: Number(env.PLACES_LIMIT) || 200,
-      interval: toInterval(env.PLACES_INTERVAL, PLACES_FALLBACK),
-    };
-  }
   if (meter === 'notification') {
     // Free is a lifetime allowance of reviewed notifications; Pro's monthly cap
     // is fair use only (the paywall advertises it as unlimited).

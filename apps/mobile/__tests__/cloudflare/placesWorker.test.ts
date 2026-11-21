@@ -1,8 +1,11 @@
-const worker = require('../../../cloudflare/workers/receipt-scanner/src/index').default;
+const worker = require('../../../cloudflare/workers/places/src/index').default;
+// Required, not imported: the app's typecheck has no Workers types (D1Database).
 const {
   checkQuota,
   consumeQuota,
-} = require('../../../cloudflare/workers/receipt-scanner/src/ratelimit');
+  dailyLimit,
+  dayStart,
+} = require('../../../cloudflare/workers/places/src/quota');
 
 import {
   addressOf,
@@ -13,18 +16,16 @@ import {
   reversePath,
   searchPath,
   toPlaceResults,
-} from '../../../cloudflare/workers/receipt-scanner/src/places';
+} from '../../../cloudflare/workers/places/src/places';
 
-jest.mock('../../../cloudflare/workers/receipt-scanner/src/revenuecat', () => ({
-  getEntitlement: jest.fn(),
-}));
-jest.mock('../../../cloudflare/workers/receipt-scanner/src/ratelimit', () => ({
+jest.mock('../../../cloudflare/workers/places/src/quota', () => ({
+  ...jest.requireActual('../../../cloudflare/workers/places/src/quota'),
   checkQuota: jest.fn(),
   consumeQuota: jest.fn(async () => 1),
 }));
 
 /**
- * Place search on the receipt-scanner Worker (/places/*). The Apple key never
+ * The places Worker (POST /search and /reverse). The Apple key never
  * leaves the Worker, so the test signs a real ES256 Maps token with a fresh
  * P-256 key and verifies it, then drives the routes against a fake Apple.
  */
@@ -207,7 +208,7 @@ describe('the Maps auth token', () => {
   });
 });
 
-describe('POST /places/*', () => {
+describe('POST /search and /reverse', () => {
   let env: Record<string, unknown>;
   let waits: Promise<unknown>[];
   const ctx = { waitUntil: (p: Promise<unknown>) => waits.push(p) };
@@ -231,12 +232,7 @@ describe('POST /places/*', () => {
     jest.spyOn(console, 'log').mockImplementation(() => undefined);
     resetAppleTokenCache();
     waits = [];
-    (checkQuota as jest.Mock).mockResolvedValue({
-      allowed: true,
-      used: 0,
-      limit: 200,
-      interval: 'day',
-    });
+    (checkQuota as jest.Mock).mockResolvedValue({ allowed: true, used: 0, limit: 200 });
     fetchMock = jest.fn(async (url: unknown) => {
       const href = String(url);
       if (href.endsWith('/v1/token')) {
@@ -278,7 +274,7 @@ describe('POST /places/*', () => {
     headers = {},
   ) =>
     worker.fetch(
-      new Request(`https://scanner.test${path}`, {
+      new Request(`https://places.test${path}`, {
         method: 'POST',
         headers,
         body: JSON.stringify(body),
@@ -288,7 +284,7 @@ describe('POST /places/*', () => {
     );
 
   it('searches Apple with a signed token and counts one use', async () => {
-    const response = await post('/places/search', {
+    const response = await post('/search', {
       appUserId: 'm2t_a',
       query: 'Starbucks',
       latitude: 3.1579,
@@ -305,25 +301,13 @@ describe('POST /places/*', () => {
     );
     expect((searchCall?.[1] as RequestInit).headers).toEqual({ Authorization: 'Bearer access-1' });
     await Promise.all(waits);
-    expect(checkQuota).toHaveBeenCalledWith(
-      'm2t_a',
-      false,
-      expect.anything(),
-      expect.any(Date),
-      'places',
-    );
-    expect(consumeQuota).toHaveBeenCalledWith(
-      'm2t_a',
-      false,
-      expect.anything(),
-      expect.any(Date),
-      'places',
-    );
+    expect(checkQuota).toHaveBeenCalledWith('m2t_a', expect.anything(), expect.any(Date));
+    expect(consumeQuota).toHaveBeenCalledWith('m2t_a', expect.anything(), expect.any(Date));
   });
 
   it('keeps the access token between searches', async () => {
-    await post('/places/search', { appUserId: 'm2t_a', query: 'cafe' });
-    await post('/places/search', { appUserId: 'm2t_a', query: 'bakery' });
+    await post('/search', { appUserId: 'm2t_a', query: 'cafe' });
+    await post('/search', { appUserId: 'm2t_a', query: 'bakery' });
     expect(fetchMock.mock.calls.filter(([url]) => String(url).endsWith('/v1/token'))).toHaveLength(
       1,
     );
@@ -339,7 +323,7 @@ describe('POST /places/*', () => {
       }
       return base(url, init);
     });
-    const response = await post('/places/search', { appUserId: 'm2t_a', query: 'cafe' });
+    const response = await post('/search', { appUserId: 'm2t_a', query: 'cafe' });
     expect(response.status).toBe(200);
     expect(fetchMock.mock.calls.filter(([url]) => String(url).endsWith('/v1/token'))).toHaveLength(
       2,
@@ -347,7 +331,7 @@ describe('POST /places/*', () => {
   });
 
   it('resolves coordinates to the place there', async () => {
-    const response = await post('/places/reverse', {
+    const response = await post('/reverse', {
       appUserId: 'm2t_a',
       latitude: 3.15791,
       longitude: 101.71234,
@@ -365,13 +349,8 @@ describe('POST /places/*', () => {
   });
 
   it('stops at the daily allowance without calling Apple', async () => {
-    (checkQuota as jest.Mock).mockResolvedValue({
-      allowed: false,
-      used: 200,
-      limit: 200,
-      interval: 'day',
-    });
-    const response = await post('/places/search', { appUserId: 'm2t_a', query: 'cafe' });
+    (checkQuota as jest.Mock).mockResolvedValue({ allowed: false, used: 200, limit: 200 });
+    const response = await post('/search', { appUserId: 'm2t_a', query: 'cafe' });
     expect(response.status).toBe(429);
     expect(await response.json()).toEqual({ error: 'limit_reached' });
     expect(fetchMock).not.toHaveBeenCalled();
@@ -381,7 +360,7 @@ describe('POST /places/*', () => {
   it('refuses an address over its per-minute limit before any work', async () => {
     const blocked = { limit: jest.fn(async () => ({ success: false })) };
     const response = await post(
-      '/places/search',
+      '/search',
       { appUserId: 'm2t_a', query: 'cafe' },
       { PLACES_LIMITER: blocked },
       { 'cf-connecting-ip': '203.0.113.9' },
@@ -396,7 +375,7 @@ describe('POST /places/*', () => {
     const error = jest.spyOn(console, 'error').mockImplementation(() => undefined);
     try {
       const unconfigured = await post(
-        '/places/search',
+        '/search',
         { appUserId: 'm2t_a', query: 'cafe' },
         { APPLE_MAPS_PRIVATE_KEY: '' },
       );
@@ -408,7 +387,7 @@ describe('POST /places/*', () => {
           ? Response.json({ accessToken: 'access-1', expiresInSeconds: 1800 })
           : new Response('', { status: 429 }),
       );
-      const busy = await post('/places/search', { appUserId: 'm2t_a', query: 'cafe' });
+      const busy = await post('/search', { appUserId: 'm2t_a', query: 'cafe' });
       expect(busy.status).toBe(503);
       expect(await busy.json()).toEqual({ error: 'capacity' });
       expect(consumeQuota).not.toHaveBeenCalled();
@@ -423,7 +402,7 @@ describe('POST /places/*', () => {
     const error = jest.spyOn(console, 'error').mockImplementation(() => undefined);
     try {
       const response = await post(
-        '/places/search',
+        '/search',
         { appUserId: 'm2t_a', query: 'cafe' },
         { MONEY2TIME_REQUEST_SIGNING_KEY: 'secret' },
       );
@@ -437,12 +416,41 @@ describe('POST /places/*', () => {
   it('rejects a bad body with a 400 and no Apple call', async () => {
     const error = jest.spyOn(console, 'error').mockImplementation(() => undefined);
     try {
-      const response = await post('/places/search', { appUserId: 'm2t_a', query: 'a' });
+      const response = await post('/search', { appUserId: 'm2t_a', query: 'a' });
       expect(response.status).toBe(400);
       expect(await response.json()).toEqual({ error: 'query_too_short' });
       expect(fetchMock).not.toHaveBeenCalled();
     } finally {
       error.mockRestore();
     }
+  });
+});
+
+describe('routes and the daily allowance', () => {
+  it('answers 404 to anything but POST /search and /reverse', async () => {
+    const ctx = { waitUntil: () => undefined };
+    for (const [method, path] of [
+      ['GET', '/search'],
+      ['POST', '/places/search'],
+      ['POST', '/scan'],
+    ]) {
+      const response = await worker.fetch(
+        new Request(`https://places.test${path}`, {
+          method,
+          ...(method === 'POST' ? { body: '{}' } : {}),
+        }),
+        {},
+        ctx,
+      );
+      expect(response.status).toBe(404);
+    }
+  });
+
+  it('counts per UTC day, 200 unless configured', () => {
+    expect(dayStart(new Date('2026-11-21T23:59:59.999Z'))).toBe(Date.UTC(2026, 10, 21));
+    expect(dayStart(new Date('2026-11-22T00:00:00.000Z'))).toBe(Date.UTC(2026, 10, 22));
+    expect(dailyLimit({ PLACES_DAILY_LIMIT: '50' } as Record<string, string>)).toBe(50);
+    expect(dailyLimit({ PLACES_DAILY_LIMIT: 'lots' } as Record<string, string>)).toBe(200);
+    expect(dailyLimit({} as Record<string, string>)).toBe(200);
   });
 });

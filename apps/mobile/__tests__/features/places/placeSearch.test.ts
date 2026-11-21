@@ -1,6 +1,5 @@
 import {
   appleLanguage,
-  isPlaceSearchAvailable,
   PlaceSearchError,
   reverseGeocodePlace,
   searchPlaces,
@@ -12,18 +11,18 @@ jest.mock('~/services/requestSigning', () => ({
 
 describe('place search client', () => {
   const previousFetch = global.fetch;
-  const previousUrl = process.env.EXPO_PUBLIC_MONEY2TIME_WORKERS_RECEIPT_SCANNER;
+  const previousUrl = process.env.EXPO_PUBLIC_MONEY2TIME_WORKERS_PLACES;
   let fetchMock: jest.Mock;
 
   beforeEach(() => {
-    process.env.EXPO_PUBLIC_MONEY2TIME_WORKERS_RECEIPT_SCANNER = 'https://worker.test/';
+    process.env.EXPO_PUBLIC_MONEY2TIME_WORKERS_PLACES = 'https://worker.test/';
     fetchMock = jest.fn();
     global.fetch = fetchMock as unknown as typeof fetch;
   });
 
   afterAll(() => {
     global.fetch = previousFetch;
-    process.env.EXPO_PUBLIC_MONEY2TIME_WORKERS_RECEIPT_SCANNER = previousUrl;
+    process.env.EXPO_PUBLIC_MONEY2TIME_WORKERS_PLACES = previousUrl;
   });
 
   it('maps app locales to Apple language tags', () => {
@@ -69,7 +68,7 @@ describe('place search client', () => {
       },
     ]);
     const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
-    expect(url).toBe('https://worker.test/places/search');
+    expect(url).toBe('https://worker.test/search');
     expect(init.headers).toMatchObject({ 'X-Signature': 'sig' });
     expect(JSON.parse(String(init.body))).toEqual({
       appUserId: 'm2t_a',
@@ -83,6 +82,14 @@ describe('place search client', () => {
   it('returns the first reverse result or null', async () => {
     fetchMock.mockResolvedValueOnce(Response.json({ places: [] }));
     expect(await reverseGeocodePlace({ appUserId: 'm2t_a', latitude: 1, longitude: 2 })).toBeNull();
+    expect(fetchMock.mock.calls[0][0]).toBe('https://worker.test/reverse');
+  });
+
+  it('uses the production places Worker when no URL is set', async () => {
+    process.env.EXPO_PUBLIC_MONEY2TIME_WORKERS_PLACES = '';
+    fetchMock.mockResolvedValueOnce(Response.json({ places: [] }));
+    await searchPlaces({ appUserId: 'm2t_a', query: 'cafe' });
+    expect(fetchMock.mock.calls[0][0]).toBe('https://workers-places.money2time.com/search');
   });
 
   it.each([
@@ -98,18 +105,13 @@ describe('place search client', () => {
     });
   });
 
-  it('reports a network failure and an unset Worker', async () => {
+  it('reports a network failure', async () => {
     fetchMock.mockRejectedValue(new TypeError('Network request failed'));
     await expect(searchPlaces({ appUserId: 'm2t_a', query: 'cafe' })).rejects.toBeInstanceOf(
       PlaceSearchError,
     );
     await expect(searchPlaces({ appUserId: 'm2t_a', query: 'cafe' })).rejects.toMatchObject({
       code: 'network',
-    });
-    process.env.EXPO_PUBLIC_MONEY2TIME_WORKERS_RECEIPT_SCANNER = '';
-    expect(isPlaceSearchAvailable()).toBe(false);
-    await expect(searchPlaces({ appUserId: 'm2t_a', query: 'cafe' })).rejects.toMatchObject({
-      code: 'not_available',
     });
   });
 });
