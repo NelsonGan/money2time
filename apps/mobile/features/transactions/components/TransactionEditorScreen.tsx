@@ -16,7 +16,6 @@ import {
   Hash,
   Images,
   Layers,
-  MapPin,
   Pencil,
   Power,
   Receipt,
@@ -74,7 +73,6 @@ import {
   Text,
 } from '~/components/ui';
 import { ClayIcon } from '~/components/ui/ClayIcon';
-import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { SentimentIcon } from '~/components/ui/SentimentIcons';
 import { hasSubscriptionLogoArt } from '~/components/ui/SubscriptionLogo';
 import { SINGLE_LINE_TEXT_INPUT_STYLE } from '~/components/ui/textInputStyles';
@@ -3131,23 +3129,25 @@ export function TransactionEditorScreen({
   // count-as-spending tick on a transfer, and the details note on all three.
   // A recurring rule has its own editor shape (a loan's rule carries the
   // setting from the loan itself).
-  const showOptionsButton =
-    useStickyNumpad &&
-    (type === 'expense' || type === 'income' || type === 'transfer') &&
-    !recurringOptions;
-  // Lit when the panel is open or holds a tick or a note worth noticing.
-  const optionsActive =
-    hasDetails ||
-    (type === 'transfer' ? transferCountsAsExpense : type === 'expense' && reimbursable);
-  // Receipt attach rides at the right end of the action row (money-in/out).
-  const showReceiptButton = useStickyNumpad && (type === 'expense' || type === 'income');
-  // Where it happened: offered with Save locations on, and always shown on an
-  // entry that already has a place, so it can be seen and removed.
-  const showLocationButton =
+  // Where it happened, a row of the options panel: offered with Locations on,
+  // and always shown on an entry that already has a place, so it can be seen
+  // and removed.
+  const showLocationRow =
     useStickyNumpad &&
     !recurringOptions &&
     (type === 'expense' || type === 'income') &&
     (settings.transactionLocationsEnabled || location !== null);
+  const showOptionsButton =
+    useStickyNumpad &&
+    (type === 'expense' || type === 'income' || type === 'transfer') &&
+    !recurringOptions;
+  // Lit when the panel is open or holds a tick, a note or a place worth noticing.
+  const optionsActive =
+    hasDetails ||
+    (showLocationRow && location !== null) ||
+    (type === 'transfer' ? transferCountsAsExpense : type === 'expense' && reimbursable);
+  // Receipt attach rides at the right end of the action row (money-in/out).
+  const showReceiptButton = useStickyNumpad && (type === 'expense' || type === 'income');
   // A transfer's fee. A recurring rule sets it from the Fee row under To instead.
   const showTransferFeeButton = useStickyNumpad && isTransferType;
   // Currency now lives on the amount card, not the action row.
@@ -3157,7 +3157,6 @@ export function TransactionEditorScreen({
       showSplitButton ||
       showSentimentButton ||
       showReceiptButton ||
-      showLocationButton ||
       showTransferFeeButton ||
       showOptionsButton);
   // Compact 4-row pad with flat, short keys; save row owns the bottom inset.
@@ -4902,7 +4901,7 @@ export function TransactionEditorScreen({
             </View>
           </GestureDetector>
 
-          {/* Action row: account chip + split + currency + sentiment + receipt + location.
+          {/* Action row: account chip + split + currency + sentiment + receipt.
               Scrolls horizontally when the chips (e.g. a long account name) run
               past the edge instead of wrapping. */}
           {showActionRow ? (
@@ -5108,44 +5107,6 @@ export function TransactionEditorScreen({
                       optionsOpen || optionsActive ? themeColors.primary : themeColors.textMuted
                     }
                   />
-                </Pressable>
-              ) : null}
-              {/* Last in the row: a place is the least-used detail. */}
-              {showLocationButton ? (
-                <Pressable
-                  onPress={() => {
-                    void triggerHaptic('selection');
-                    Keyboard.dismiss();
-                    setPlacePickerVisible(true);
-                  }}
-                  accessibilityRole="button"
-                  accessibilityLabel={
-                    location
-                      ? `${I18n.t('locations.picker_title')}: ${location.placeName}`
-                      : I18n.t('locations.add')
-                  }
-                  className={cn(
-                    'h-9 flex-row items-center justify-center gap-1.5 rounded-full border active:opacity-70',
-                    location
-                      ? 'border-primary/40 bg-primary/15 px-3'
-                      : 'w-9 border-border/30 bg-secondary/60',
-                  )}
-                  style={location ? { maxWidth: 180 } : undefined}
-                >
-                  <MapPin
-                    size={15}
-                    color={location ? themeColors.primary : themeColors.textMuted}
-                  />
-                  {location ? (
-                    <Text
-                      variant="caption"
-                      numberOfLines={1}
-                      className="shrink font-medium text-primary"
-                      {...REPLAY_PRIVATE}
-                    >
-                      {location.placeName}
-                    </Text>
-                  ) : null}
                 </Pressable>
               ) : null}
             </ScrollView>
@@ -5491,6 +5452,14 @@ export function TransactionEditorScreen({
                           onToggleCountsAsExpense={handleToggleTransferExpense}
                           category={transferCategoryPreview}
                           onPickCategory={() => setTransferCategoryPickerVisible(true)}
+                          location={
+                            showLocationRow
+                              ? {
+                                  placeName: location?.placeName ?? null,
+                                  onPress: () => setPlacePickerVisible(true),
+                                }
+                              : undefined
+                          }
                         />
                       )}
                     </ScrollView>
@@ -5688,7 +5657,7 @@ export function TransactionEditorScreen({
           setCurrencyPickerVisible(false);
         }}
       />
-      {showLocationButton || placePickerVisible ? (
+      {showLocationRow || placePickerVisible ? (
         <PlacePickerSheet
           visible={placePickerVisible}
           current={location}
