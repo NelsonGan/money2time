@@ -222,6 +222,34 @@ for (const mintAfterWait of [false, true]) {
   });
 }
 
+test("a new album's first two credential requests both get the token the first to finish saved", async (t) => {
+  const f = await fixture(t);
+  // Just shared: nobody has asked for a token yet. Sharing an album also
+  // joins it, and the join's write saves a token while the phone's first
+  // sync asks for credentials (production, 2026-11-21).
+  f.db.prepare('UPDATE shared_ledgers SET token = NULL, token_expires_at = NULL').run();
+  const minted = deferred();
+  const resume = deferred();
+  let mints = 0;
+  f.onMint(async () => {
+    if (++mints > 1) return;
+    minted.resolve();
+    await resume.promise;
+  });
+  const first = f.call('owner', '/credentials');
+  await minted.promise;
+  try {
+    const second = await f.call('remaining', '/credentials');
+    assert.equal(second?.status, 200);
+  } finally {
+    resume.resolve();
+  }
+  const response = await first;
+  assert.equal(response?.status, 200);
+  assert.equal((await response?.json()).authToken, await f.cachedToken());
+  assert.equal(mints, 2);
+});
+
 test('credentials and a second removal wait for an ongoing revocation', async (t) => {
   const f = await fixture(t);
   const rotating = deferred();

@@ -2421,7 +2421,10 @@ how the household is spending, and who is covering what.
   Token issuance is fenced during revocation: unique `revoking:` / `revoked:`
   markers in the existing `shared_ledgers.token` field prevent an in-flight
   credentials request from returning or caching a token across the change.
-  The Worker checks membership again before returning credentials. A Turso
+  The Worker checks membership again before returning credentials. When two
+  requests mint a ledger's first token at once (sharing an album joins it
+  while the phone's first sync asks for credentials), the one that saves
+  second answers with the saved token instead of an error. A Turso
   failure leaves membership and the invite intact, drops the cached token,
   and returns an error so the action can be retried. An abandoned fence
   expires after a minute and is recovered by a credentials or removal retry.
