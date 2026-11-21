@@ -12,7 +12,7 @@ export { CategoriesScreen, CategoryEditor, CategoryEditorScreen } from './Catego
 export { DataManagementScreen } from './DataManagementScreen';
 export { DisplaySettingsScreen } from './DisplaySettingsScreen';
 export { ExchangeRatesScreen } from './ExchangeRatesScreen';
-export { AddWageMonthScreen, HourlyValueScreen } from './HourlyValueScreen';
+export { HourlyValueScreen } from './HourlyValueScreen';
 export { HourlyValueSettingsScreen } from './HourlyValueSettingsScreen';
 export { MonthCycleScreen } from './MonthCycleScreen';
 export { ProPaywallScreen } from './ProPaywallScreen';
@@ -24,7 +24,7 @@ export { SettingsScreen } from './SettingsScreen';
 export { SettingsStack } from './SettingsStack';
 export { ShareAndEarnScreen } from './ShareAndEarnScreen';
 export { StatementImportScreen } from './StatementImportScreen';
-export { WageCalculatorFlowScreen } from './WageCalculatorFlowScreen';
+export { WageEditorScreen } from './WageEditorScreen';
 export { WidgetPreviewsScreen } from './WidgetPreviewsScreen';
 export { NewsScreen } from '~/features/news/screens/NewsScreen';
 export type { SettingsStackParamList } from '~/navigation/settingsStack';

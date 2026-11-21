@@ -4,11 +4,10 @@ import Animated, { FadeIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
-import { ThemeModal } from '~/components/ui';
 import { DEFAULT_WAGE_CONFIG } from '~/constants/appDefaults';
 import { useApp } from '~/context/AppContext';
 import { OnboardingTopBar } from '~/features/onboarding/components/OnboardingTopBar';
-import { WageCalculatorFlowScreen } from '~/features/settings/screens';
+import { wageConfigOf } from '~/features/settings/lib/wageMonths';
 import { I18n, setAppLocale } from '~/lib/i18n';
 import { AnalyticsEvents, setUserProperties, trackEvent } from '~/services/analytics';
 import {
@@ -22,7 +21,6 @@ import { requestPermissions } from '~/services/notifications';
 import { type WageConfig } from '~/types';
 import { getErrorMessage } from '~/utils/errorHandling';
 import { financialMonthKeyForDate, monthCycleOf } from '~/utils/financialMonth';
-import { normalizeMoneyAmount } from '~/utils/formatters';
 
 import { OnboardingAutomationsStep } from './OnboardingAutomationsStep';
 import { OnboardingBackupStep } from './OnboardingBackupStep';
@@ -63,7 +61,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 
   const [step, setStep] = useState<OnboardingStepId>('welcome');
   const [acquisitionSource, setAcquisitionSource] = useState<AcquisitionSource | null>(null);
-  const [showWageCalculator, setShowWageCalculator] = useState(false);
   // The financial month, the one `currentMonthWage` and Settings › Hourly
   // value read: with a cycle starting on the 25th, the 20th belongs to the
   // month before.
@@ -73,19 +70,11 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     [monthCycle],
   );
 
-  // The income step edits a draft; it is saved when the user continues (or
-  // finishes the full calculator), never on each keystroke.
+  // The income step edits a draft; it is saved when the user continues, never
+  // on each keystroke.
   const [wageDraft, setWageDraft] = useState<WageConfig>(() =>
     currentMonthWage && currentMonthWage.wageAmount > 0
-      ? {
-          wageType: currentMonthWage.wageType,
-          // Rounded to cents: a wage read in another currency than it is kept
-          // in arrives converted (9015.251158712264) and would fill the field so.
-          wageAmount: normalizeMoneyAmount(currentMonthWage.wageAmount),
-          hoursWorkedPerWeek: currentMonthWage.hoursWorkedPerWeek,
-          workdaysPerWeek: currentMonthWage.workdaysPerWeek,
-          commuteMinutesPerWorkday: currentMonthWage.commuteMinutesPerWorkday,
-        }
+      ? wageConfigOf(currentMonthWage)
       : { ...DEFAULT_WAGE_CONFIG },
   );
   const savedHourlyRate = currentMonthWage?.trueHourlyRate ?? 0;
@@ -99,15 +88,15 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 
   // Android's back button and back gesture go to the previous step, as the
   // chevron does; they used to close the app mid-setup. On the welcome page
-  // they still leave the app, and the calculator sheet handles its own.
+  // they still leave the app.
   useEffect(() => {
-    if (step === 'welcome' || showWageCalculator) return undefined;
+    if (step === 'welcome') return undefined;
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
       goBack();
       return true;
     });
     return () => subscription.remove();
-  }, [goBack, showWageCalculator, step]);
+  }, [goBack, step]);
 
   const handleEnableBackup = useCallback(async () => {
     const target = Platform.OS === 'ios' ? 'icloud' : 'googleDrive';
@@ -269,7 +258,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
               currencySymbol={settings.currencySymbol}
               onChange={setWageDraft}
               onBack={goBack}
-              onFineTune={() => setShowWageCalculator(true)}
               onContinue={() => {
                 updateWageConfigForMonth(currentMonth, wageDraft);
                 void trackEvent(AnalyticsEvents.ONBOARDING_STEP_COMPLETED, {
@@ -357,27 +345,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             />
           )}
         </Animated.View>
-
-        {/* Wage Calculator Modal */}
-        <ThemeModal
-          visible={showWageCalculator}
-          animationType="slide"
-          presentationStyle="pageSheet"
-          onRequestClose={() => setShowWageCalculator(false)}
-        >
-          <WageCalculatorFlowScreen
-            initialConfig={wageDraft}
-            settings={settings}
-            monthLabel={currentMonth}
-            onCancel={() => setShowWageCalculator(false)}
-            onComplete={(config) => {
-              setWageDraft(config);
-              updateWageConfigForMonth(currentMonth, config);
-              setShowWageCalculator(false);
-              void triggerHaptic('success');
-            }}
-          />
-        </ThemeModal>
       </TabletContentContainer>
     </SafeAreaView>
   );

@@ -147,7 +147,6 @@ import {
   AccountEditorScreen,
   AccountGroupEditorScreen,
   AccountsScreen,
-  AddWageMonthScreen,
   AutoBackupScreen,
   CardDesignPickerScreen,
   CategoryEditorScreen,
@@ -162,7 +161,7 @@ import {
   RecurringSettingsScreen,
   SettingsStack,
   ShareAndEarnScreen,
-  WageCalculatorFlowScreen,
+  WageEditorScreen,
 } from '~/features/settings/screens';
 import { WebDashboardScreen } from '~/features/settings/screens/WebDashboardScreen';
 import { useOpenLedgerSharedAndActive } from '~/features/sharedLedgers/hooks/useSharedLedgers';
@@ -277,7 +276,6 @@ import type {
   BudgetPeriod,
   CategoryType,
   TransactionWithRelations,
-  WageConfig,
 } from '~/types';
 import { foldSpan, readableColumn } from '~/utils/adaptiveLayout';
 import { convert } from '~/utils/currency';
@@ -1204,12 +1202,9 @@ function MainShellScreen({
   const openAddTransactionDetailed = useCallback(() => {
     navigation.navigate('AddTransactionDetailed');
   }, [navigation]);
-  const openAddWageMonth = useCallback(() => {
-    navigation.navigate('AddWageMonth');
-  }, [navigation]);
-  const openWageCalculator = useCallback(
-    (params: { monthKey: string; initialConfig: WageConfig }) => {
-      navigation.navigate('SettingsWageCalculator', params);
+  const openWageEditor = useCallback(
+    (monthKey?: string) => {
+      navigation.navigate('SettingsWageEditor', { monthKey });
     },
     [navigation],
   );
@@ -1422,8 +1417,7 @@ function MainShellScreen({
             onOpenCreateGroup={openAccountGroupEditor}
             onOpenCategoryEditor={openCategoryEditor}
             onOpenCategoryIconPicker={openCategoryIconPicker}
-            onOpenAddWageMonth={openAddWageMonth}
-            onOpenWageCalculator={openWageCalculator}
+            onOpenWageEditor={openWageEditor}
             onOpenProPaywall={openProPaywall}
             onOpenSettleUp={openSettleUp}
             onOpenInstalments={openInstalments}
@@ -2670,10 +2664,7 @@ function SettingsHourlyValueRouteScreen({
   return (
     <HourlyValueScreen
       onClose={() => navigation.goBack()}
-      onOpenWageCalculator={({ monthKey, initialConfig }) =>
-        navigation.navigate('SettingsWageCalculator', { monthKey, initialConfig })
-      }
-      onOpenAddWageMonth={() => navigation.navigate('AddWageMonth')}
+      onOpenWageEditor={(monthKey) => navigation.navigate('SettingsWageEditor', { monthKey })}
       onOpenSettings={() => navigation.navigate('SettingsTimeDisplay')}
     />
   );
@@ -2726,17 +2717,6 @@ function SettingsTimeDisplayRouteScreen({
   navigation,
 }: RootStackRouteProps<'SettingsTimeDisplay'>) {
   return <HourlyValueSettingsScreen onBack={() => navigation.goBack()} />;
-}
-
-function AddWageMonthRouteScreen({ navigation }: RootStackRouteProps<'AddWageMonth'>) {
-  return (
-    <AddWageMonthScreen
-      onClose={() => navigation.goBack()}
-      onOpenWageCalculator={({ monthKey, initialConfig }) =>
-        navigation.replace('SettingsWageCalculator', { monthKey, initialConfig })
-      }
-    />
-  );
 }
 
 function SettingsQuickEntryRouteScreen({ navigation }: RootStackRouteProps<'SettingsQuickEntry'>) {
@@ -2847,25 +2827,11 @@ function SettleUpTransactionRouteScreen({
   );
 }
 
-function SettingsWageCalculatorRouteScreen({
+function SettingsWageEditorRouteScreen({
   route,
   navigation,
-}: RootStackRouteProps<'SettingsWageCalculator'>) {
-  const { settings, updateWageConfigForMonth } = useApp();
-  const { monthKey, initialConfig } = route.params;
-
-  return (
-    <WageCalculatorFlowScreen
-      initialConfig={initialConfig}
-      settings={settings}
-      monthLabel={monthKey}
-      onCancel={() => navigation.goBack()}
-      onComplete={(config) => {
-        updateWageConfigForMonth(monthKey, config);
-        navigation.goBack();
-      }}
-    />
-  );
+}: RootStackRouteProps<'SettingsWageEditor'>) {
+  return <WageEditorScreen monthKey={route.params?.monthKey} onClose={() => navigation.goBack()} />;
 }
 
 function InsightsDrilldownRouteScreen({
@@ -3429,7 +3395,6 @@ function AppContent() {
               component={SettingsWebDashboardRouteScreen}
             />
             <RootStack.Screen name="JoinLedger" component={JoinLedgerRouteScreen} />
-            <RootStack.Screen name="AddWageMonth" component={AddWageMonthRouteScreen} />
             <RootStack.Screen name="SettingsQuickEntry" component={SettingsQuickEntryRouteScreen} />
             <RootStack.Screen
               name="SettingsMultiCurrency"
@@ -3462,10 +3427,7 @@ function AppContent() {
               name="SettingsBudgetTemplates"
               component={SettingsBudgetTemplatesRouteScreen}
             />
-            <RootStack.Screen
-              name="SettingsWageCalculator"
-              component={SettingsWageCalculatorRouteScreen}
-            />
+            <RootStack.Screen name="SettingsWageEditor" component={SettingsWageEditorRouteScreen} />
             <RootStack.Screen name="Tutorials" component={TutorialsRouteScreen} />
             <RootStack.Screen name="TutorialDetail" component={TutorialDetailRouteScreen} />
             <RootStack.Screen

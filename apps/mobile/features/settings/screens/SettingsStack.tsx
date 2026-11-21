@@ -27,7 +27,7 @@ import { requestFocusInsight, requestOpenBudget } from '~/services/insightsNavig
 import { requestOpenPaymentAlerts } from '~/services/paymentAlertsNavigation';
 import { subscribeOpenSettingsScreenRequest } from '~/services/settingsNavigation';
 import { requestOpenTab } from '~/services/tabNavigation';
-import type { CategoryType, TransactionWithRelations, WageConfig } from '~/types';
+import type { CategoryType, TransactionWithRelations } from '~/types';
 
 import { AccountSettingsScreen } from './AccountSettingsScreen';
 import { AccountsScreen } from './AccountsScreen';
@@ -72,8 +72,7 @@ interface SettingsStackProps {
     type?: CategoryType;
   }) => void;
   onOpenCategoryIconPicker: (session: CategoryIconPickerSession) => void;
-  onOpenAddWageMonth: () => void;
-  onOpenWageCalculator: (params: { monthKey: string; initialConfig: WageConfig }) => void;
+  onOpenWageEditor: (monthKey?: string) => void;
   /** `source` names the entry point, for the paywall funnel's attribution. */
   onOpenProPaywall: (source: string) => void;
   onOpenSettleUp: () => void;
@@ -156,8 +155,7 @@ export function SettingsStack({
   onOpenCreateGroup,
   onOpenCategoryEditor,
   onOpenCategoryIconPicker,
-  onOpenAddWageMonth,
-  onOpenWageCalculator,
+  onOpenWageEditor,
   onOpenProPaywall,
   onOpenSettleUp,
   onOpenInstalments,
@@ -282,8 +280,7 @@ export function SettingsStack({
           return (
             <HourlyValueScreen
               onClose={() => props.navigation.goBack()}
-              onOpenWageCalculator={onOpenWageCalculator}
-              onOpenAddWageMonth={onOpenAddWageMonth}
+              onOpenWageEditor={onOpenWageEditor}
               onOpenSettings={() => props.navigation.navigate('HourlyValueSettings')}
             />
           );

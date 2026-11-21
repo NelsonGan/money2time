@@ -1,13 +1,13 @@
 /**
  * Web Dashboard edits: Hourly value: monthly wage entries (HourlyValueScreen
- * and its wage calculator). Planned on the phone like the app's own editor;
+ * and its one-page editor, WageEditorScreen). Planned on the phone like the app's own editor;
  * applied by features/settings/lib/webDashboardApply/wage.ts.
  *
  *   module:wage  create { month, config }   update { month, at, config }   delete { month, at }
  *
  * `month` is `YYYY-MM`, the key the app files an entry under; `at` is that
- * entry's `updated_at` in the browser's copy. `config` is the calculator's
- * answers: { wageType, wageAmount, hoursWorkedPerWeek, workdaysPerWeek,
+ * entry's `updated_at` in the browser's copy. `config` is the editor's
+ * fields: { wageType, wageAmount, hoursWorkedPerWeek, workdaysPerWeek,
  * commuteMinutesPerWorkday }.
  */
 
@@ -109,7 +109,8 @@ export const wageModule: EditModule = {
     const entries = entriesByMonth(tools.extra);
     const current = entries.get(op.month) ?? null;
     if (op.op === 'create') {
-      // The app offers to edit a month that already has an entry; the browser's copy lacked it.
+      // The browser replaces a month it knows has an entry with an update (as the app's Replace);
+      // a create for one means its copy lacked it.
       if (current) return tools.refuse('conflict');
       // The app's month picker offers five years back to three ahead, plus years it has entries in.
       const year = Number(op.month.slice(0, 4));
@@ -134,7 +135,7 @@ export const wageModule: EditModule = {
       return tools.ok(1);
     }
     const { config } = op;
-    // The calculator moves on only with a wage, hours and workdays.
+    // The editor saves only with a wage, hours and workdays.
     if (config.wageAmount <= 0 || config.hoursWorkedPerWeek <= 0 || config.workdaysPerWeek <= 0) {
       return tools.refuse('invalid');
     }
