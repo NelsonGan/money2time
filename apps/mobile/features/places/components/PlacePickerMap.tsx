@@ -1,7 +1,7 @@
 import { forwardRef, memo, useImperativeHandle, useRef } from 'react';
 import { View } from 'react-native';
 import type MapView from 'react-native-maps';
-import { Marker, type Region } from 'react-native-maps';
+import { type EdgePadding, Marker, type Region } from 'react-native-maps';
 
 import { useIsFlatIcons } from '~/context/ThemeContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -39,9 +39,14 @@ interface PlacePickerMapProps {
   onRegionSettled: (center: Coordinate, byUser: boolean) => void;
   /** The native map can take camera moves (MapKit ignores them before this). */
   onReady: () => void;
+  /** The part of the map the page covers at its edges (the list's panel). */
+  mapPadding?: EdgePadding;
+  /** How far down the page's floating header reaches: framing stays below it. */
+  fitTop?: number;
 }
 
 const FIT_MARGIN = { top: 56, right: 56, bottom: 56, left: 40 };
+const NO_PADDING: EdgePadding = { top: 0, right: 0, bottom: 0, left: 0 };
 
 interface PinProps {
   place: PlaceResult;
@@ -137,6 +142,8 @@ export const PlacePickerMap = forwardRef<PlacePickerMapHandle, PlacePickerMapPro
       onLongPress,
       onRegionSettled,
       onReady,
+      mapPadding = NO_PADDING,
+      fitTop = 0,
     },
     ref,
   ) {
@@ -161,12 +168,13 @@ export const PlacePickerMap = forwardRef<PlacePickerMapHandle, PlacePickerMapPro
           touchedRef.current = false;
           fitMapToPoints(mapRef.current, points, {
             minDelta: STREET_DELTA,
-            margin: FIT_MARGIN,
+            margin: { ...FIT_MARGIN, top: FIT_MARGIN.top + fitTop },
+            mapPadding,
             animated: true,
           });
         },
       }),
-      [],
+      [mapPadding, fitTop],
     );
 
     return (
@@ -179,6 +187,7 @@ export const PlacePickerMap = forwardRef<PlacePickerMapHandle, PlacePickerMapPro
         <AppMap
           ref={mapRef}
           initialRegion={initialRegion}
+          mapPadding={mapPadding}
           showsUserLocation={showsUserLocation}
           onPress={onMapPress}
           onLongPress={(event) => onLongPress(event.nativeEvent.coordinate)}
