@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { gzipSync } from 'node:zlib';
 
-import { gunzipInSlices } from '~/lib/db/citiesDb';
+import { gunzipInSlices } from '~/utils/gzipSlices';
 
 describe('gunzipInSlices', () => {
   it('unpacks input spanning many slices', async () => {

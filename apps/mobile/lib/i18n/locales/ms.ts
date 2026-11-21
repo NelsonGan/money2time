@@ -15,6 +15,9 @@ const ms = {
       '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
     sync_pending: 'Restored here. Stay signed in to finish syncing.',
     failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+    photos_unavailable:
+      'Tidak dapat memuat turun foto sandaran ini. Semak sambungan anda dan cuba lagi.',
+    photos_missing: '{{count}} foto daripada sandaran ini tidak ditemui, jadi ia tidak dipulihkan.',
   },
   common: {
     back: 'Kembali',

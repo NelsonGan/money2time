@@ -17,14 +17,25 @@ import {
   selectExpiredRecords,
   sortRecordsNewestFirst,
 } from '~/services/autoBackup.shared';
+import { decodeBackupFile, encodeBackupFile } from '~/services/backupFile';
+import {
+  type BackupPhotoStore,
+  type BackupPhotoUpload,
+  clearResolvedBackupPhotos,
+  describeBackupPhotos,
+  pruneBackupPhotos,
+  rememberBackupPhotos,
+  resolveBackupPhotos,
+  uploadMissingPhotos,
+} from '~/services/backupPhotos';
 import {
   applyBackupData,
   type BackupData,
-  buildBackupJson,
+  buildBackupData,
   type ImportResult,
-  parseBackupJson,
   yieldToEventLoop,
 } from '~/services/dataManagementService';
+import { shrinkStoredPhotos } from '~/services/imageShrink';
 import type { BackupTarget } from '~/types';
 import { getErrorMessage } from '~/utils/errorHandling';
 
@@ -62,15 +73,53 @@ export async function signOutFromGoogle(): Promise<void> {
   resetGoogleDriveFolderCache();
 }
 
-interface Provider {
+interface Provider extends BackupPhotoStore {
   target: BackupTarget;
   isAvailable(): Promise<boolean>;
   /** Why the target cannot take a backup now (null when it can), for analytics. */
   unavailableReason?(): Promise<string | null>;
-  upload(name: string, json: string): Promise<BackupRecord>;
+  upload(name: string, bytes: Uint8Array): Promise<BackupRecord>;
   list(): Promise<BackupRecord[]>;
-  download(record: BackupRecord): Promise<string>;
+  /** Gzip bytes for a compact backup, text for an older JSON one. */
+  download(record: BackupRecord): Promise<string | Uint8Array>;
   delete(record: BackupRecord): Promise<void>;
+}
+
+/** One backup, encoded once and written to each target with its photos. */
+interface PreparedBackup {
+  bytes: Uint8Array;
+  photos: BackupPhotoUpload[];
+}
+
+/**
+ * Builds the compact backup file, which lists its photos rather than embedding
+ * them. Large stored photos are shrunk first, so the copies stored beside the
+ * backups are the small ones.
+ */
+async function prepareBackup(): Promise<PreparedBackup> {
+  await shrinkStoredPhotos();
+  const data = await buildBackupData({ assetFiles: true });
+  const photos = await describeBackupPhotos(data.assetFiles ?? []);
+  // Reading every table and packing the result each take a noticeable slice of
+  // the JS thread on a large database; let a frame render between the two.
+  await yieldToEventLoop();
+  const bytes = await encodeBackupFile(
+    data,
+    photos.map(({ path, photo }) => ({ path, photo })),
+  );
+  return { bytes, photos };
+}
+
+/** Stores the photos the target lacks, then the backup that lists them. */
+async function writeBackup(
+  provider: Provider,
+  name: string,
+  prepared: PreparedBackup,
+): Promise<BackupRecord> {
+  await uploadMissingPhotos(provider, prepared.photos);
+  const record = await provider.upload(name, prepared.bytes);
+  rememberBackupPhotos(record, prepared.photos);
+  return record;
 }
 
 function getProvider(target: BackupTarget): Provider {
@@ -116,7 +165,7 @@ export async function runAutoBackupIfDue(opts?: { force?: boolean }): Promise<Ba
       return { skipped: true, reason: 'backoff', written: [], errors: [] };
     }
 
-    const { json } = await buildBackupJson();
+    const prepared = await prepareBackup();
     const name = buildAutoBackupName();
     // Writing the file is the third long step after reading and serializing.
     await yieldToEventLoop();
@@ -148,9 +197,9 @@ export async function runAutoBackupIfDue(opts?: { force?: boolean }): Promise<Ba
     for (const target of targets) {
       const provider = getProvider(target);
       try {
-        const record = await provider.upload(name, json);
+        const record = await writeBackup(provider, name, prepared);
         written.push(record);
-        await rotate(provider);
+        await rotate(provider, record);
         continue;
       } catch (e) {
         errors.push(describeBackupError(target, e));
@@ -177,9 +226,10 @@ export async function runAutoBackupIfDue(opts?: { force?: boolean }): Promise<Ba
       // cloud failure stays the reported one (`error_kind` is the first kind),
       // even if this write fails too.
       try {
-        written.push(await localProvider.upload(name, json));
+        const record = await writeBackup(localProvider, name, prepared);
+        written.push(record);
         savedOnDeviceAfterFailure = true;
-        await rotate(localProvider);
+        await rotate(localProvider, record);
       } catch (e) {
         errors.push(describeBackupError('local', e));
         errorKinds.push(backupErrorKind(e));
@@ -292,17 +342,33 @@ function targetLabel(target: BackupTarget): string {
   }
 }
 
-async function rotate(provider: Provider): Promise<void> {
+/** The stored photos a backup lists, read from the backup itself. */
+async function readBackupPhotoNames(
+  provider: Provider,
+  record: BackupRecord,
+): Promise<readonly string[]> {
+  const backup = await decodeBackupFile(await provider.download(record));
+  return (backup.photos ?? []).map((photo) => photo.photo);
+}
+
+/** Deletes the oldest backups past the limit, then the photos none still lists. */
+async function rotate(provider: Provider, written: BackupRecord): Promise<void> {
   try {
     const all = await provider.list();
     const expired = selectExpiredRecords(all, MAX_AUTO_BACKUPS);
+    const deleted = new Set<BackupRecord>();
     for (const record of expired) {
       try {
         await provider.delete(record);
+        deleted.add(record);
       } catch {
         // Best-effort; never throw from rotation.
       }
     }
+    const kept = all.filter((record) => !deleted.has(record));
+    await pruneBackupPhotos(provider, written, kept, (record) =>
+      readBackupPhotoNames(provider, record),
+    );
   } catch {
     // Best-effort; never throw from rotation.
   }
@@ -336,29 +402,77 @@ export async function restoreFromBackup(
   restore?: (backup: BackupData) => Promise<ImportResult>,
 ): Promise<ImportResult> {
   const provider = getProvider(record.target);
-  let json: string;
+  let payload: string | Uint8Array;
   try {
-    json = await provider.download(record);
+    payload = await provider.download(record);
   } catch (e) {
     return { canceled: false, success: false, error: getErrorMessage(e, 'Failed to read backup') };
   }
   let result: ImportResult;
   try {
-    result = restore
-      ? await restore(parseBackupJson(json))
-      : applyBackupData(parseBackupJson(json));
+    const backup = await decodeBackupFile(payload);
+    result = await withBackupPhotos(backup, [provider], async (resolved) =>
+      restore ? restore(resolved) : applyBackupData(resolved),
+    );
   } catch (error) {
     return { canceled: false, success: false, error: getErrorMessage(error, 'Invalid backup') };
   }
   if (result.success) {
-    void trackEvent(AnalyticsEvents.AUTO_BACKUP_RESTORED, { target: record.target });
+    void trackEvent(AnalyticsEvents.AUTO_BACKUP_RESTORED, {
+      target: record.target,
+      missing_photos: result.missingPhotos ?? 0,
+    });
   }
   return result;
 }
 
+/**
+ * Runs a restore with the photos a compact backup lists downloaded from
+ * `stores`, and deletes the downloads after. Throws, restoring nothing, when a
+ * store could not be read; a successful result counts the photos no store had.
+ */
+async function withBackupPhotos(
+  backup: BackupData,
+  stores: BackupPhotoStore[],
+  run: (backup: BackupData) => Promise<ImportResult>,
+): Promise<ImportResult> {
+  if (!backup.photos?.length) return run(backup);
+  try {
+    const resolved = await resolveBackupPhotos(backup, stores);
+    const result = await run(resolved.backup);
+    return result.success && resolved.missing > 0
+      ? { ...result, missingPhotos: resolved.missing }
+      : result;
+  } finally {
+    clearResolvedBackupPhotos();
+  }
+}
+
+/**
+ * Restores a backup file the user picked. A compact automatic backup copied
+ * out of its folder lists photos stored beside it there, which are looked for
+ * on the phone, then in iCloud and Google Drive when they are connected.
+ */
+export async function restoreImportedBackup(
+  backup: BackupData,
+  restore: (backup: BackupData) => Promise<ImportResult>,
+): Promise<ImportResult> {
+  const stores: Provider[] = [];
+  if (backup.photos?.length) {
+    stores.push(localProvider);
+    if (Platform.OS === 'ios' && (await iCloudProvider.isAvailable().catch(() => false))) {
+      stores.push(iCloudProvider);
+    }
+    if (await googleDriveProvider.isAvailable().catch(() => false)) {
+      stores.push(googleDriveProvider);
+    }
+  }
+  return withBackupPhotos(backup, stores, restore);
+}
+
 /** Always local, never rotated here, and never overwrites the backup being restored. */
 export async function saveRestoreSafetyBackup(): Promise<BackupRecord> {
-  const { json } = await buildBackupJson();
+  const prepared = await prepareBackup();
   const existing = new Set((await localProvider.list()).map((record) => record.id));
   let time = Date.now();
   let name = buildRecoveryBackupName(new Date(time));
@@ -366,7 +480,7 @@ export async function saveRestoreSafetyBackup(): Promise<BackupRecord> {
     time += 1000;
     name = buildRecoveryBackupName(new Date(time));
   }
-  return localProvider.upload(name, json);
+  return writeBackup(localProvider, name, prepared);
 }
 
 export async function deleteBackup(record: BackupRecord): Promise<void> {

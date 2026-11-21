@@ -29,6 +29,13 @@ export async function restoreFromBackup(
   return { canceled: false, success: false, error: 'Auto-backup not available on this platform' };
 }
 
+export async function restoreImportedBackup(
+  backup: BackupData,
+  restore: (backup: BackupData) => Promise<ImportResult>,
+): Promise<ImportResult> {
+  return restore(backup);
+}
+
 export async function saveRestoreSafetyBackup(): Promise<BackupRecord> {
   throw new Error('Auto-backup not available on this platform');
 }

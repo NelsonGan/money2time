@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { AlertTriangle, Check, CloudOff, RefreshCw, Smartphone, Trash2 } from 'lucide-react-native';
+import { AlertTriangle, Check, CloudOff, RefreshCw, Trash2 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -25,8 +25,10 @@ import {
   Text,
   useSettingsBottomNavInset,
 } from '~/components/ui';
+import { ClayIcon } from '~/components/ui/ClayIcon';
 import { BACKUP_PROVIDER_LOGOS } from '~/constants/brandLogos';
 import { useApp } from '~/context/AppContext';
+import { useIsFlatIcons } from '~/context/ThemeContext';
 import { useBackupRestore } from '~/features/settings/hooks/useBackupRestore';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -49,6 +51,8 @@ import { triggerHaptic } from '~/services/haptics';
 import type { BackupTarget } from '~/types';
 import { getErrorMessage } from '~/utils/errorHandling';
 
+import { restoreResultMessage } from '../lib/restoreResultMessage';
+
 interface AutoBackupScreenProps {
   onBack: () => void;
 }
@@ -66,8 +70,16 @@ function targetLabel(target: BackupTarget): string {
   }
 }
 
-function targetIcon(target: BackupTarget, size = 16, color?: string) {
-  if (target === 'local') return <Smartphone size={size} color={color} />;
+/** A target's icon: clay art drawn larger, the flat line icon at its old size. */
+const CLAY_TARGET_ICON_SIZE = 26;
+const FLAT_TARGET_ICON_SIZE = 18;
+
+function targetIcon(target: BackupTarget, isFlat: boolean, color: string) {
+  const size = isFlat ? FLAT_TARGET_ICON_SIZE : CLAY_TARGET_ICON_SIZE;
+  if (target === 'local') {
+    return <ClayIcon name="ui/phone" size={size} flatSize={size} flatColor={color} />;
+  }
+  // The iCloud and Drive marks are the brands' own artwork in both styles.
   return (
     <Image
       source={BACKUP_PROVIDER_LOGOS[target]}
@@ -103,6 +115,7 @@ export function AutoBackupScreen({ onBack }: AutoBackupScreenProps) {
   const { chooseAndRestore, restoreSheet } = useBackupRestore();
   const bottomNavInset = useSettingsBottomNavInset();
   const themeColors = useThemeColors();
+  const isFlatIcons = useIsFlatIcons();
 
   const [records, setRecords] = useState<BackupRecord[]>([]);
   const [refreshing, setRefreshing] = useState(false);
@@ -426,11 +439,7 @@ export function AutoBackupScreen({ onBack }: AutoBackupScreenProps) {
         void triggerHaptic('success');
         Alert.alert(
           I18n.t('auto_backup.restore_success_title'),
-          I18n.t(
-            result.syncPending
-              ? 'backup_restore.sync_pending'
-              : 'auto_backup.restore_success_message',
-          ),
+          restoreResultMessage(result, 'auto_backup.restore_success_message'),
         );
       } else {
         Alert.alert(
@@ -527,7 +536,11 @@ export function AutoBackupScreen({ onBack }: AutoBackupScreenProps) {
                         },
                       ]}
                     >
-                      {targetIcon(target, 18, selected ? themeColors.primary : themeColors.muted)}
+                      {targetIcon(
+                        target,
+                        isFlatIcons,
+                        selected ? themeColors.primary : themeColors.muted,
+                      )}
                       <View style={styles.targetTextWrap}>
                         <Text variant="caption" className="text-foreground">
                           {targetLabel(target)}
@@ -674,10 +687,14 @@ export function AutoBackupScreen({ onBack }: AutoBackupScreenProps) {
                     },
                   ]}
                 >
+                  {/* Clay is its own container; flat line art gets its tinted plate. */}
                   <View
-                    style={[styles.recordIcon, { backgroundColor: `${themeColors.primary}14` }]}
+                    style={[
+                      styles.recordIcon,
+                      isFlatIcons && { backgroundColor: `${themeColors.primary}14` },
+                    ]}
                   >
-                    {targetIcon(record.target, 18, themeColors.primary)}
+                    {targetIcon(record.target, isFlatIcons, themeColors.primary)}
                   </View>
                   <View style={styles.recordText}>
                     <Text variant="caption" className="text-foreground">

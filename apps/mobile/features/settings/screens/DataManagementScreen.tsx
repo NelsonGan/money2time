@@ -1,6 +1,6 @@
 import * as DocumentPicker from 'expo-document-picker';
 import { Image } from 'expo-image';
-import { ChevronRight, CloudUpload, Trash2 } from 'lucide-react-native';
+import { ChevronRight, Trash2 } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
@@ -14,17 +14,22 @@ import {
   Text,
   useSettingsBottomNavInset,
 } from '~/components/ui';
+import { ClayIcon } from '~/components/ui/ClayIcon';
 import { EXCEL_LOGO, MONEY_MANAGER_LOGO, MONEY2TIME_LOGO } from '~/constants/brandLogos';
 import { useApp } from '~/context/AppContext';
+import { useIsFlatIcons } from '~/context/ThemeContext';
 import { useCloudSync } from '~/features/cloudSync/CloudSyncContext';
 import { useBackupRestore } from '~/features/settings/hooks/useBackupRestore';
 import { useSharedLedgers } from '~/features/sharedLedgers/hooks/useSharedLedgers';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
+import { restoreImportedBackup } from '~/services/autoBackup';
 import { exportDatabase, pickAndImportDatabase } from '~/services/dataManagementService';
 import { exportExcel } from '~/services/excelExportService';
 import { triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
+
+import { restoreResultMessage } from '../lib/restoreResultMessage';
 
 interface DataManagementScreenProps {
   onBack: () => void;
@@ -38,6 +43,8 @@ interface DataRowProps {
   icon: React.ReactNode;
   /** Tints the icon tile. Omit when `icon` is a full-bleed brand logo. */
   iconColor?: string;
+  /** No tile at all: clay art is its own container. */
+  bareIcon?: boolean;
   title: string;
   description: string;
   onPress: () => void;
@@ -49,6 +56,7 @@ interface DataRowProps {
 function DataRow({
   icon,
   iconColor,
+  bareIcon = false,
   title,
   description,
   onPress,
@@ -70,11 +78,13 @@ function DataRow({
       <View
         style={[
           styles.iconContainer,
-          iconColor
-            ? { backgroundColor: `${iconColor}14` }
-            : // A full-bleed logo supplies its own background, which can be pale
-              // enough to disappear into the card. A hairline keeps its edge.
-              { borderWidth: StyleSheet.hairlineWidth, borderColor: themeColors.border },
+          bareIcon
+            ? null
+            : iconColor
+              ? { backgroundColor: `${iconColor}14` }
+              : // A full-bleed logo supplies its own background, which can be pale
+                // enough to disappear into the card. A hairline keeps its edge.
+                { borderWidth: StyleSheet.hairlineWidth, borderColor: themeColors.border },
         ]}
       >
         {icon}
@@ -111,6 +121,7 @@ export function DataManagementScreen({ onBack, onOpenAutoBackup }: DataManagemen
     [message, ...notes.filter((note) => note !== false).map((note) => I18n.t(note))].join('\n\n');
   const bottomNavInset = useSettingsBottomNavInset();
   const themeColors = useThemeColors();
+  const isFlatIcons = useIsFlatIcons();
   const [exportingKind, setExportingKind] = useState<ExportKind | null>(null);
   // `activeFlow` covers the whole picker + import lifecycle and drives button
   // disable state, so rapid taps can't fire two DocumentPicker calls in
@@ -156,7 +167,7 @@ export function DataManagementScreen({ onBack, onOpenAutoBackup }: DataManagemen
     try {
       const result = await pickAndImportDatabase({
         onFilePicked: () => setImportingSource('money2time'),
-        restore: chooseAndRestore,
+        restore: (backup) => restoreImportedBackup(backup, chooseAndRestore),
       });
       if (result.canceled) return;
 
@@ -164,11 +175,7 @@ export function DataManagementScreen({ onBack, onOpenAutoBackup }: DataManagemen
         refreshAll();
         Alert.alert(
           I18n.t('data_management.import_success_title'),
-          I18n.t(
-            result.syncPending
-              ? 'backup_restore.sync_pending'
-              : 'data_management.import_success_message',
-          ),
+          restoreResultMessage(result, 'data_management.import_success_message'),
         );
       } else {
         Alert.alert(
@@ -288,8 +295,16 @@ export function DataManagementScreen({ onBack, onOpenAutoBackup }: DataManagemen
         {onOpenAutoBackup ? (
           <View style={styles.leadRow}>
             <DataRow
-              icon={<CloudUpload size={18} color={themeColors.primary} />}
+              icon={
+                <ClayIcon
+                  name="status/cloud-upload"
+                  size={isFlatIcons ? 18 : 34}
+                  flatSize={18}
+                  flatColor={themeColors.primary}
+                />
+              }
               iconColor={themeColors.primary}
+              bareIcon={!isFlatIcons}
               title={I18n.t('auto_backup.entry_title')}
               description={
                 settings.autoBackupEnabled

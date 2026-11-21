@@ -15,6 +15,8 @@ const zh = {
       '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
     sync_pending: 'Restored here. Stay signed in to finish syncing.',
     failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+    photos_unavailable: '无法下载此备份的照片。请检查网络连接后重试。',
+    photos_missing: '此备份中有 {{count}} 张照片未找到，因此未恢复。',
   },
   common: {
     back: '返回',

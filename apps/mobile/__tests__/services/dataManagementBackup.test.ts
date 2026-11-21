@@ -2,6 +2,11 @@ import { getSQLite } from '~/lib/db/client';
 import { normalizeCurrencyColumns } from '~/lib/db/normalizeCurrencies';
 import { applyBackupData, buildBackupData } from '~/services/dataManagementService';
 import { resetAutomationCaptureData } from '~/services/resetAutomationCaptureData';
+import {
+  collectUserAssetsForBackup,
+  listUserAssetFilesForBackup,
+  restoreUserAssetsFromBackup,
+} from '~/services/userAssets';
 
 jest.mock('~/services/resetAutomationCaptureData', () => ({
   resetAutomationCaptureData: jest.fn(),
@@ -16,6 +21,12 @@ jest.mock('expo-sharing', () => ({}));
 jest.mock('~/lib/db/client', () => ({ getSQLite: jest.fn() }));
 jest.mock('~/services/userAssets', () => ({
   collectUserAssetsForBackup: jest.fn(async () => []),
+  listUserAssetFilesForBackup: jest.fn(() => []),
+  // Paths a row names: bare photo paths, or `custom:` icons.
+  assetRelativePathFromRef: (ref?: string | null) =>
+    ref && /^[a-z-]+\/[\w.-]+$/.test(ref.replace(/^custom:/, ''))
+      ? ref.replace(/^custom:/, '')
+      : null,
   restoreUserAssetsFromBackup: jest.fn(),
 }));
 jest.mock('~/lib/db/normalizeCurrencies', () => ({ normalizeCurrencyColumns: jest.fn() }));
@@ -593,6 +604,43 @@ describe('dataManagementService savings-goal cover backup/restore', () => {
     const result = applyBackupData(data);
     expect(result.success).toBe(true);
     expect(fresh.tables.accounts[0].goal_cover_uri).toBe('goal-covers/9f3c.jpg');
+  });
+
+  it('lists the photo files without reading them for a backup that stores them apart', async () => {
+    seed();
+    const files = [
+      { path: 'goal-covers/9f3c.jpg', uri: 'file:///doc/user-assets/goal-covers/9f3c.jpg' },
+    ];
+    (listUserAssetFilesForBackup as jest.Mock).mockReturnValueOnce(files);
+    (collectUserAssetsForBackup as jest.Mock).mockClear();
+
+    const data = await buildBackupData({ assetFiles: true });
+
+    expect(data.assetFiles).toEqual(files);
+    expect(data.userAssets).toBeUndefined();
+    expect(collectUserAssetsForBackup).not.toHaveBeenCalled();
+  });
+
+  it('copies downloaded photos into place, only those a restored row names', async () => {
+    seed();
+    const data = await buildBackupData();
+    const fresh = createFakeSqlite({ accounts: [] }, { accounts: ACCOUNT_COLUMNS });
+    (getSQLite as jest.Mock).mockReturnValue(fresh);
+    (restoreUserAssetsFromBackup as jest.Mock).mockClear();
+
+    const result = applyBackupData({
+      ...data,
+      userAssets: undefined,
+      assetFiles: [
+        { path: 'goal-covers/9f3c.jpg', uri: 'cache/backup-photos/a.jpg' },
+        { path: 'album-covers/orphan.jpg', uri: 'cache/backup-photos/b.jpg' },
+      ],
+    });
+
+    expect(result.success).toBe(true);
+    expect(restoreUserAssetsFromBackup).toHaveBeenCalledWith(undefined, [
+      { path: 'goal-covers/9f3c.jpg', uri: 'cache/backup-photos/a.jpg' },
+    ]);
   });
 
   it('restores a goal from a backup written before the column existed', () => {

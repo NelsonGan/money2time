@@ -15,6 +15,9 @@ const ko = {
       '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
     sync_pending: 'Restored here. Stay signed in to finish syncing.',
     failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+    photos_unavailable:
+      '이 백업의 사진을 다운로드하지 못했습니다. 연결을 확인하고 다시 시도하세요.',
+    photos_missing: '이 백업의 사진 {{count}}장을 찾지 못해 복원하지 않았습니다.',
   },
   common: {
     back: '뒤로',

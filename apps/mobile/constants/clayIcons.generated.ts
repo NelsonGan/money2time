@@ -93,6 +93,7 @@ export const CLAY_ICON_SOURCES = {
   'ui/eye': require('../assets/clay-icons/ui/eye.png'),
   'ui/filter-sliders': require('../assets/clay-icons/ui/filter-sliders.png'),
   'ui/map': require('../assets/clay-icons/ui/map.png'),
+  'ui/phone': require('../assets/clay-icons/ui/phone.png'),
   'ui/search': require('../assets/clay-icons/ui/search.png'),
   'ui/settings': require('../assets/clay-icons/ui/settings.png'),
   'ui/share': require('../assets/clay-icons/ui/share.png'),

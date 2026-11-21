@@ -15,6 +15,10 @@ const da = {
       '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
     sync_pending: 'Restored here. Stay signed in to finish syncing.',
     failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+    photos_unavailable:
+      'Kunne ikke hente sikkerhedskopiens billeder. Tjek din forbindelse, og prøv igen.',
+    photos_missing:
+      'Nogle billeder fra sikkerhedskopien blev ikke fundet og er ikke gendannet ({{count}}).',
   },
   common: {
     back: 'Tilbage',

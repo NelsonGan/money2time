@@ -25,7 +25,7 @@ import { sha256 } from '@noble/hashes/sha2.js';
 import * as Application from 'expo-application';
 import * as Device from 'expo-device';
 import { Directory, File, Paths } from 'expo-file-system/next';
-import { Gzip, strToU8 } from 'fflate';
+import { strToU8 } from 'fflate';
 
 import { selfMember } from '~/features/albums/lib/albumPeople';
 import {
@@ -42,6 +42,7 @@ import { buildBackupData, yieldToEventLoop } from '~/services/dataManagementServ
 import { previousInstallForgotten } from '~/services/previousInstall';
 import type { UserAssetReadCache } from '~/services/userAssets';
 import { webDashboardBudgetsOnly } from '~/services/webDashboardBudgets';
+import { gzipText } from '~/utils/gzipSlices';
 
 import {
   type BrowserConnection,
@@ -111,7 +112,6 @@ const DASHBOARD_ASSET_FOLDERS = [
   'item-icons/',
   'category-icons/',
 ];
-const GZIP_SLICE_BYTES = 1024 * 1024;
 /** Copies kept to patch against: one per browser in step, plus the one before. */
 const MAX_SNAPSHOTS = 3;
 /** Where each browser's copy waits for the next visit, as hashes (in the cache: the system may clear it). */
@@ -387,27 +387,6 @@ export async function beginLink(qrText: string): Promise<PendingBrowser> {
 const includeDashboardAsset = (path: string) =>
   DASHBOARD_ASSET_FOLDERS.some((folder) => path.startsWith(folder));
 
-/** Gzips a slice at a time, so the screen keeps moving on a large export. */
-async function gzipJson(json: string): Promise<Uint8Array> {
-  const bytes = strToU8(json);
-  await yieldToEventLoop();
-  const parts: Uint8Array[] = [];
-  const gzip = new Gzip({ level: 6 }, (chunk) => parts.push(chunk));
-  for (let offset = 0; offset < bytes.length; offset += GZIP_SLICE_BYTES) {
-    const end = Math.min(offset + GZIP_SLICE_BYTES, bytes.length);
-    gzip.push(bytes.subarray(offset, end), end === bytes.length);
-    await yieldToEventLoop();
-  }
-  const size = parts.reduce((sum, part) => sum + part.length, 0);
-  const gzipped = new Uint8Array(size);
-  let offset = 0;
-  for (const part of parts) {
-    gzipped.set(part, offset);
-    offset += part.length;
-  }
-  return gzipped;
-}
-
 /** Each shared album's group as this phone holds it (the albums screens' store). */
 function readAlbumGroups(): WebAlbumGroup[] {
   return listAlbumShares().map((share) => {
@@ -481,7 +460,7 @@ async function buildTransfer(
     snapshot = { index };
   }
   await yieldToEventLoop();
-  const gzipped = await gzipJson(json);
+  const gzipped = await gzipText(json);
   let timeZone: string | null = null;
   try {
     timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone ?? null;

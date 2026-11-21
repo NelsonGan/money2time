@@ -2,11 +2,18 @@ import * as ImagePicker from 'expo-image-picker';
 import { Alert } from 'react-native';
 
 import { I18n } from '~/lib/i18n';
+import { type PickedImageKind, shrinkPickedImage } from '~/services/imageShrink';
 import { getErrorMessage } from '~/utils/errorHandling';
 
 interface PickLibraryImageOptions {
   /** Crop the pick to this aspect ratio. Omitted keeps the whole image. */
   aspect?: [number, number];
+  /**
+   * What the image is for, which sets the size it is stored at (see
+   * imageShrink.shared.ts). Omitted hands over the pick as it is, for a caller
+   * that crops and sizes it itself.
+   */
+  kind?: PickedImageKind;
   /** Shown when photo access is denied. Defaults to the generic photo-access copy. */
   permissionAlert?: { title: string; message: string };
   /**
@@ -24,7 +31,7 @@ interface PickLibraryImageOptions {
  */
 export async function pickLibraryImage(
   onPicked: (uri: string) => void,
-  { aspect, permissionAlert, failureTitle }: PickLibraryImageOptions = {},
+  { aspect, kind, permissionAlert, failureTitle }: PickLibraryImageOptions = {},
 ): Promise<void> {
   const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
   if (!permission.granted) {
@@ -41,8 +48,9 @@ export async function pickLibraryImage(
       ...(aspect ? { aspect } : {}),
       quality: 0.9,
     });
-    if (result.canceled || !result.assets?.[0]) return;
-    onPicked(result.assets[0].uri);
+    const picked = result.canceled ? null : result.assets?.[0];
+    if (!picked) return;
+    onPicked(kind ? await shrinkPickedImage(picked.uri, kind, picked) : picked.uri);
   } catch (error) {
     if (failureTitle) {
       Alert.alert(failureTitle);

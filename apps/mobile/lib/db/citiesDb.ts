@@ -1,6 +1,7 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
 import type { City } from '~/types';
+import { gunzipInSlices } from '~/utils/gzipSlices';
 
 /**
  * Read-only offline place database (GeoNames cities15000), separate from
@@ -142,30 +143,6 @@ async function copyAssetIfNeeded(force = false): Promise<void> {
 
   marker.create();
   await marker.write(String(CITIES_DB_VERSION));
-}
-
-const GUNZIP_SLICE_BYTES = 256 * 1024;
-
-/**
- * Unpacks gzip a slice at a time and yields to the event loop between slices,
- * so the one-off 5 MB unpack on the first city search does not freeze typing.
- */
-export async function gunzipInSlices(compressed: Uint8Array): Promise<Uint8Array> {
-  const { Gunzip } = await import('fflate');
-  const chunks: Uint8Array[] = [];
-  const stream = new Gunzip((chunk) => chunks.push(chunk));
-  for (let start = 0; start < compressed.length; start += GUNZIP_SLICE_BYTES) {
-    const end = start + GUNZIP_SLICE_BYTES;
-    stream.push(compressed.subarray(start, end), end >= compressed.length);
-    await new Promise((resolve) => setTimeout(resolve, 0));
-  }
-  const out = new Uint8Array(chunks.reduce((total, chunk) => total + chunk.length, 0));
-  let offset = 0;
-  for (const chunk of chunks) {
-    out.set(chunk, offset);
-    offset += chunk.length;
-  }
-  return out;
 }
 
 function hasCitiesTable(db: SQLiteDatabase): boolean {

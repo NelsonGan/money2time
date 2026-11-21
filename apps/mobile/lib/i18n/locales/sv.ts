@@ -15,6 +15,10 @@ const sv = {
       '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
     sync_pending: 'Restored here. Stay signed in to finish syncing.',
     failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+    photos_unavailable:
+      'Det gick inte att hämta säkerhetskopians bilder. Kontrollera anslutningen och försök igen.',
+    photos_missing:
+      'Några bilder från säkerhetskopian hittades inte och återställdes inte ({{count}}).',
   },
   common: {
     back: 'Tillbaka',

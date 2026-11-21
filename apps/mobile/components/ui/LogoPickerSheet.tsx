@@ -285,7 +285,7 @@ export function LogoPickerSheet({
         catalog.saveCustom(uri);
         refreshCustomLogos();
       },
-      { aspect: [1, 1], failureTitle: I18n.t('accounts.logo.upload_failed') },
+      { aspect: [1, 1], kind: 'icon', failureTitle: I18n.t('accounts.logo.upload_failed') },
     );
   }, [catalog, customLogos.length, refreshCustomLogos]);
 
