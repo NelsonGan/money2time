@@ -3791,7 +3791,6 @@ const pt = {
     locate_me: 'Mostrar minha localização',
     choose: 'Escolher',
     pin_drop: 'Soltar um alfinete',
-    pin_hint: 'Segure o mapa para soltar um alfinete',
     pin_drag: 'Mova o mapa para posicionar o alfinete',
     pin_use: 'Usar este ponto',
     category_food: 'Comida',

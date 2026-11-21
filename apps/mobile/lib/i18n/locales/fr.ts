@@ -3815,7 +3815,6 @@ const fr = {
     locate_me: 'Afficher ma position',
     choose: 'Choisir',
     pin_drop: 'Placer une épingle',
-    pin_hint: 'Maintenez la carte pour placer une épingle',
     pin_drag: 'Déplacez la carte pour placer l’épingle',
     pin_use: 'Utiliser cet endroit',
     category_food: 'Restos',

@@ -3776,7 +3776,6 @@ const pl = {
     locate_me: 'Pokaż moją lokalizację',
     choose: 'Wybierz',
     pin_drop: 'Upuść pinezkę',
-    pin_hint: 'Przytrzymaj mapę, aby upuścić pinezkę',
     pin_drag: 'Przesuń mapę, aby ustawić pinezkę',
     pin_use: 'Użyj tego miejsca',
     category_food: 'Jedzenie',

@@ -3740,7 +3740,6 @@ const vi = {
     locate_me: 'Hiện vị trí của tôi',
     choose: 'Chọn',
     pin_drop: 'Thả ghim',
-    pin_hint: 'Nhấn giữ bản đồ để thả ghim',
     pin_drag: 'Di chuyển bản đồ để đặt ghim',
     pin_use: 'Dùng điểm này',
     category_food: 'Ăn uống',

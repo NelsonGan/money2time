@@ -3788,7 +3788,6 @@ const ms = {
     locate_me: 'Tunjukkan lokasi saya',
     choose: 'Pilih',
     pin_drop: 'Letak pin',
-    pin_hint: 'Tekan lama peta untuk meletak pin',
     pin_drag: 'Gerakkan peta untuk meletak pin',
     pin_use: 'Guna lokasi ini',
     category_food: 'Makanan',

@@ -3793,7 +3793,6 @@ const es = {
     locate_me: 'Mostrar mi ubicación',
     choose: 'Elegir',
     pin_drop: 'Soltar un pin',
-    pin_hint: 'Mantén pulsado el mapa para soltar un pin',
     pin_drag: 'Mueve el mapa para colocar el pin',
     pin_use: 'Usar este punto',
     category_food: 'Comida',

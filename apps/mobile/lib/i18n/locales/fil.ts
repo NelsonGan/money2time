@@ -3823,7 +3823,6 @@ const fil = {
     locate_me: 'Ipakita ang lokasyon ko',
     choose: 'Piliin',
     pin_drop: 'Mag-pin',
-    pin_hint: 'Pindutin nang matagal ang mapa para mag-pin',
     pin_drag: 'Igalaw ang mapa para ilagay ang pin',
     pin_use: 'Gamitin ang puwestong ito',
     category_food: 'Pagkain',

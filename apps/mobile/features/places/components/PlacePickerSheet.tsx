@@ -1,5 +1,5 @@
 import {
-  History,
+  ChevronRight,
   LocateFixed,
   type LucideIcon,
   MapPin,
@@ -7,8 +7,6 @@ import {
   Navigation,
   RotateCw,
   Search,
-  Sparkles,
-  Trash2,
   X,
 } from 'lucide-react-native';
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -21,6 +19,7 @@ import {
   ScrollView,
   StyleSheet,
   TextInput,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated';
@@ -84,7 +83,19 @@ interface PlacePickerSheetProps {
 const MAX_QUERY_LENGTH = 120;
 const SEARCH_DEBOUNCE_MS = 350;
 const MIN_QUERY_LENGTH = 2;
-const MAP_HEIGHT = 248;
+// The map is the page's upper part, edge to edge, so it is easy to pan and
+// pinch; the list's panel overlaps its bottom edge by its rounded corners.
+const MAP_HEIGHT_SHARE = 0.46;
+const PANEL_OVERLAP = 24;
+// The panel covers the map's bottom edge: the map keeps its logos above it.
+// MapKit only moves its logos, but Google Maps also centres its camera in the
+// padded area, so on Android the centre pin moves up with it.
+const MAP_PADDING = { top: 0, right: 0, bottom: PANEL_OVERLAP, left: 0 };
+const PIN_CENTER_LIFT = Platform.OS === 'android' ? PANEL_OVERLAP : 0;
+// The map's floating buttons and cards sit above its logos and legal link.
+const MAP_CONTROLS_BOTTOM = PANEL_OVERLAP + 30;
+// The close button and the search field float over the map's top edge.
+const HEADER_ROW_HEIGHT = 44;
 // Moving the map this far from where the list was found offers "Search this area".
 const AREA_MOVED_METERS = 250;
 // A dropped pin is named once the map has been still this long.
@@ -107,7 +118,7 @@ type PinState =
   | { kind: 'named'; center: Coordinate; place: PlaceResult | null };
 
 type Row =
-  | { kind: 'header'; key: string; label: string; icon: LucideIcon }
+  | { kind: 'header'; key: string; label: string }
   | { kind: 'place'; key: string; place: PlaceResult; source: PlaceSource }
   | { kind: 'status'; key: string; loading: boolean; message?: string };
 
@@ -207,6 +218,13 @@ export function PlacePickerSheet({
   const themeColors = useThemeColors();
   const flatIcons = useIsFlatIcons();
   const insets = useSafeAreaInsets();
+  const { height: windowHeight } = useWindowDimensions();
+  const mapHeight = Math.round(windowHeight * MAP_HEIGHT_SHARE);
+  // Below the floating close button and search field.
+  const headerBottom = insets.top + 8 + HEADER_ROW_HEIGHT;
+  // Typing (or no point to show yet) folds the map up to a strip behind the
+  // search field, so the results have the room.
+  const foldedMapHeight = headerBottom + 12 + PANEL_OVERLAP;
   const locale = I18n.locale;
   const appUserId = settings.appUserId;
   const [query, setQuery] = useState('');
@@ -527,7 +545,6 @@ export function PlacePickerSheet({
         kind: 'header',
         key: 'h-yours',
         label: I18n.t('locations.your_places'),
-        icon: History,
       });
       for (const place of localMatches)
         rows.push({ kind: 'place', key: `y-${placeKey(place)}`, place, source: 'recent' });
@@ -537,7 +554,6 @@ export function PlacePickerSheet({
         kind: 'header',
         key: 'h-results',
         label: I18n.t('locations.search_results'),
-        icon: Search,
       });
     }
     if (search.kind === 'searching' || search.kind === 'idle') {
@@ -560,7 +576,6 @@ export function PlacePickerSheet({
         kind: 'header',
         key: 'h-recent',
         label: I18n.t('locations.recent_places'),
-        icon: History,
       });
       for (const place of recents)
         rows.push({ kind: 'place', key: `c-${placeKey(place)}`, place, source: 'recent' });
@@ -575,7 +590,6 @@ export function PlacePickerSheet({
         kind: 'header',
         key: 'h-nearby',
         label: I18n.t('locations.nearby'),
-        icon: Sparkles,
       });
       if (nearby.kind === 'loading') {
         rows.push({ kind: 'status', key: 's-nearby', loading: true });
@@ -603,14 +617,11 @@ export function PlacePickerSheet({
 
   const mapStyle = useAnimatedStyle(
     () => ({
-      height: withTiming(keyboardUp || !initialPoint ? 0 : MAP_HEIGHT, {
-        duration: motionDurations.normal,
-      }),
-      marginBottom: withTiming(keyboardUp || !initialPoint ? 0 : 12, {
+      height: withTiming(keyboardUp || !initialPoint ? foldedMapHeight : mapHeight, {
         duration: motionDurations.normal,
       }),
     }),
-    [keyboardUp, initialPoint],
+    [keyboardUp, initialPoint, mapHeight, foldedMapHeight],
   );
   const showAreaButton =
     mapMoved &&
@@ -624,7 +635,7 @@ export function PlacePickerSheet({
     pin.kind === 'named' ? { ...(pin.place ?? pinnedSpot(pin.center)), ...pin.center } : null;
 
   const mapCard = initialPoint ? (
-    <View className="flex-1 overflow-hidden rounded-3xl bg-secondary/60">
+    <View className="flex-1 bg-secondary/60">
       <AppErrorBoundary fallback={<View className="flex-1 bg-secondary/60" />}>
         <Suspense
           fallback={
@@ -636,6 +647,8 @@ export function PlacePickerSheet({
           <PlacePickerMap
             ref={mapRef}
             onReady={handleMapReady}
+            mapPadding={MAP_PADDING}
+            fitTop={headerBottom}
             initialRegion={{
               ...initialPoint,
               latitudeDelta: STREET_DELTA,
@@ -661,7 +674,7 @@ export function PlacePickerSheet({
         // The pin's tip sits on the map's centre.
         <View
           pointerEvents="none"
-          style={StyleSheet.absoluteFill}
+          style={[StyleSheet.absoluteFill, { bottom: PIN_CENTER_LIFT }]}
           className="items-center justify-center"
         >
           <View className="items-center" style={{ marginBottom: 34 }}>
@@ -676,8 +689,12 @@ export function PlacePickerSheet({
         </View>
       ) : null}
 
-      {showAreaButton ? (
-        <View pointerEvents="box-none" className="absolute left-0 right-0 top-3 items-center">
+      {showAreaButton && !keyboardUp ? (
+        <View
+          pointerEvents="box-none"
+          className="absolute left-0 right-0 items-center"
+          style={{ top: headerBottom + 10 }}
+        >
           <Pressable
             onPress={handleSearchArea}
             accessibilityRole="button"
@@ -692,27 +709,33 @@ export function PlacePickerSheet({
         </View>
       ) : null}
 
-      <View pointerEvents="box-none" className="absolute bottom-3 right-3 gap-2">
-        {settings.transactionLocationsEnabled && here.status !== 'unavailable' ? (
-          <MapButton
-            icon={Navigation}
-            label={I18n.t('locations.locate_me')}
-            busy={here.status === 'locating'}
-            onPress={handleLocateMe}
-          />
-        ) : null}
-        <MapButton
-          icon={MapPinned}
-          label={I18n.t('locations.pin_drop')}
-          active={pin.kind !== 'off'}
-          onPress={handlePinToggle}
-        />
-      </View>
-
-      {pin.kind !== 'off' ? (
+      {keyboardUp ? null : (
         <View
-          className="absolute bottom-3 left-3 flex-row items-center gap-2 rounded-2xl bg-card py-2 pl-3 pr-2"
-          style={[styles.floating, { right: 68 }]}
+          pointerEvents="box-none"
+          className="absolute right-4 gap-2"
+          style={{ bottom: MAP_CONTROLS_BOTTOM }}
+        >
+          {settings.transactionLocationsEnabled && here.status !== 'unavailable' ? (
+            <MapButton
+              icon={Navigation}
+              label={I18n.t('locations.locate_me')}
+              busy={here.status === 'locating'}
+              onPress={handleLocateMe}
+            />
+          ) : null}
+          <MapButton
+            icon={MapPinned}
+            label={I18n.t('locations.pin_drop')}
+            active={pin.kind !== 'off'}
+            onPress={handlePinToggle}
+          />
+        </View>
+      )}
+
+      {keyboardUp ? null : pin.kind !== 'off' ? (
+        <View
+          className="absolute left-4 flex-row items-center gap-2 rounded-2xl bg-card py-2 pl-3 pr-2"
+          style={[styles.floating, { right: 72, bottom: MAP_CONTROLS_BOTTOM }]}
         >
           <View className="min-w-0 flex-1" {...REPLAY_PRIVATE}>
             {pinPlace ? (
@@ -747,8 +770,8 @@ export function PlacePickerSheet({
         </View>
       ) : focused ? (
         <View
-          className="absolute bottom-3 left-3 flex-row items-center gap-2.5 rounded-2xl bg-card py-2 pl-2.5 pr-2"
-          style={[styles.floating, { right: 68 }]}
+          className="absolute left-4 flex-row items-center gap-2.5 rounded-2xl bg-card py-2 pl-2.5 pr-2"
+          style={[styles.floating, { right: 72, bottom: MAP_CONTROLS_BOTTOM }]}
         >
           <View
             className={cn(
@@ -793,17 +816,6 @@ export function PlacePickerSheet({
             </Text>
           </Pressable>
         </View>
-      ) : !mapMoved ? (
-        <View
-          pointerEvents="none"
-          className="absolute bottom-3 left-3 flex-row items-center gap-1.5 rounded-full bg-card px-3 py-1.5"
-          style={styles.floating}
-        >
-          <MapPinned size={13} color={themeColors.textMuted} />
-          <Text variant="caption" tone="muted">
-            {I18n.t('locations.pin_hint')}
-          </Text>
-        </View>
       ) : null}
     </View>
   ) : null;
@@ -813,7 +825,7 @@ export function PlacePickerSheet({
   const currentSubtitle = (() => {
     switch (here.status) {
       case 'ready':
-        return [here.place?.name, here.place?.address].filter(Boolean).join(' · ');
+        return here.place?.address || here.place?.name || '';
       case 'ask':
         return I18n.t('locations.permission_allow');
       case 'blocked':
@@ -831,37 +843,38 @@ export function PlacePickerSheet({
     <Pressable
       onPress={handleCurrentPress}
       accessibilityRole="button"
-      accessibilityLabel={I18n.t('locations.current_location')}
-      className="mb-2 flex-row items-center gap-3 rounded-2xl py-2 active:opacity-70"
+      accessibilityLabel={[I18n.t('locations.current_location'), currentSubtitle]
+        .filter(Boolean)
+        .join(', ')}
+      className="flex-row items-center gap-3 border-b border-border/40 py-3 active:opacity-70"
     >
-      <View className="h-10 w-10 items-center justify-center rounded-2xl bg-primary">
+      <View className="h-8 w-8 items-center justify-center">
         {here.status === 'locating' || here.status === 'idle' ? (
-          <ActivityIndicator size="small" color={themeColors.card} />
+          <ActivityIndicator size="small" color={themeColors.primary} />
         ) : (
-          <LocateFixed size={20} color={themeColors.card} />
+          <LocateFixed size={22} color={themeColors.primary} />
         )}
       </View>
       <View className="min-w-0 flex-1">
         <Text variant="bodyStrong" numberOfLines={1}>
           {I18n.t('locations.current_location')}
         </Text>
-        <Text variant="caption" tone="muted" numberOfLines={2} {...REPLAY_PRIVATE}>
-          {currentSubtitle}
-        </Text>
+        {currentSubtitle ? (
+          <Text variant="caption" tone="muted" numberOfLines={1} {...REPLAY_PRIVATE}>
+            {currentSubtitle}
+          </Text>
+        ) : null}
       </View>
+      <ChevronRight size={18} color={themeColors.textMuted} />
     </Pressable>
   ) : undefined;
 
   const renderRow = ({ item }: { item: Row }) => {
     if (item.kind === 'header') {
-      const Icon = item.icon;
       return (
-        <View className="mb-1 mt-3 flex-row items-center gap-1.5">
-          <Icon size={13} color={themeColors.textMuted} />
-          <Text variant="label" tone="muted">
-            {item.label}
-          </Text>
-        </View>
+        <Text variant="caption" tone="muted" className="mt-4 font-semibold">
+          {item.label}
+        </Text>
       );
     }
     if (item.kind === 'status') {
@@ -870,7 +883,7 @@ export function PlacePickerSheet({
           <ActivityIndicator color={themeColors.primary} />
         </View>
       ) : (
-        <Text variant="body" tone="muted" className="py-5 text-center">
+        <Text variant="caption" tone="muted" className="py-4 text-center">
           {item.message}
         </Text>
       );
@@ -895,34 +908,29 @@ export function PlacePickerSheet({
         accessibilityLabel={[place.name, place.address].filter(Boolean).join(', ')}
         accessibilityState={{ selected }}
         style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+        // One line a place: its icon, name and distance. The address stays in
+        // the map's card (hold the row) and in what is read aloud.
         className={cn(
-          'flex-row items-center gap-3 rounded-2xl py-2.5',
-          selected && '-mx-2 border border-primary/30 bg-primary/10 px-2',
+          'flex-row items-center gap-3 border-b border-border/40 py-2.5',
+          selected && '-mx-2 rounded-xl border-transparent bg-primary/10 px-2',
         )}
       >
         <View
           className={cn(
-            'h-10 w-10 items-center justify-center rounded-full',
+            'h-8 w-8 items-center justify-center rounded-full',
             flatIcons && 'bg-primary/10',
           )}
         >
           <PlaceIcon
             spec={placeCategoryIcon(place.category)}
-            size={32}
-            flatSize={18}
+            size={28}
+            flatSize={16}
             color={themeColors.primary}
           />
         </View>
-        <View className="min-w-0 flex-1" {...REPLAY_PRIVATE}>
-          <Text variant="bodyStrong" numberOfLines={1}>
-            {place.name}
-          </Text>
-          {place.address ? (
-            <Text variant="caption" tone="muted" numberOfLines={1}>
-              {place.address}
-            </Text>
-          ) : null}
-        </View>
+        <Text variant="body" numberOfLines={1} className="min-w-0 flex-1" {...REPLAY_PRIVATE}>
+          {place.name}
+        </Text>
         {distance ? (
           <Text variant="caption" tone="muted">
             {distance}
@@ -933,33 +941,50 @@ export function PlacePickerSheet({
   };
 
   return (
-    <ThemeModal visible={visible} transparent animationType="fade" onRequestClose={handleClose}>
-      <Pressable style={styles.backdrop} onPress={handleClose}>
-        <Pressable onPress={(e) => e.stopPropagation()} style={[styles.sheet, sheetColumnStyle]}>
+    // A full page, map first: the map fills the upper part edge to edge, the
+    // close button and search float over it, and the list is a panel below.
+    // No backdrop, so nothing outside closes it (a backdrop Pressable around
+    // the old sheet took the touch when a second finger landed on the map,
+    // so a pinch closed the picker).
+    <ThemeModal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="fullScreen"
+      statusBarTranslucent
+      navigationBarTranslucent
+      onRequestClose={handleClose}
+    >
+      <View className="flex-1 bg-card">
+        <Animated.View
+          className="overflow-hidden"
+          style={mapStyle}
+          onLayout={(event) => setMapOpen(event.nativeEvent.layout.height >= mapHeight - 1)}
+        >
+          {mapCard ?? <View className="flex-1 bg-secondary/60" />}
+
           <View
-            className="flex-1 rounded-t-[28px] bg-card"
-            style={{ paddingBottom: Math.max(insets.bottom, 16) }}
+            pointerEvents="box-none"
+            className="absolute left-0 right-0 top-0"
+            style={{ paddingTop: insets.top + 8 }}
           >
-            <View className="flex-row items-center gap-2 px-5 pb-3 pt-5">
-              <Text variant="subheading" numberOfLines={1} className="shrink">
-                {I18n.t('locations.picker_title')}
-              </Text>
-              <View className="flex-1" />
+            <View
+              pointerEvents="box-none"
+              className="flex-row items-center gap-2 px-4"
+              style={sheetColumnStyle}
+            >
               <Pressable
                 onPress={handleClose}
                 accessibilityRole="button"
                 accessibilityLabel={I18n.t('common.close')}
-                hitSlop={8}
-                className="h-9 w-9 items-center justify-center rounded-full bg-secondary/50 active:opacity-70"
+                hitSlop={4}
+                className="items-center justify-center rounded-full bg-card active:opacity-70"
+                style={[styles.floating, { width: HEADER_ROW_HEIGHT, height: HEADER_ROW_HEIGHT }]}
               >
-                <X size={18} color={themeColors.textMuted} />
+                <X size={20} color={themeColors.text} />
               </Pressable>
-            </View>
-
-            <View className="px-5 pb-3">
               <View
-                className="flex-row items-center gap-2 rounded-2xl bg-secondary/60 px-3"
-                style={{ height: 44 }}
+                className="flex-1 flex-row items-center gap-2 rounded-full bg-card px-4"
+                style={[styles.floating, { height: HEADER_ROW_HEIGHT }]}
               >
                 <Search size={16} color={themeColors.textMuted} />
                 <TextInput
@@ -990,6 +1015,17 @@ export function PlacePickerSheet({
                   </Pressable>
                 ) : null}
               </View>
+            </View>
+          </View>
+        </Animated.View>
+
+        <View
+          className="flex-1 rounded-t-[28px] bg-card"
+          style={[styles.panel, { marginTop: -PANEL_OVERLAP }]}
+        >
+          <View className="flex-1" style={sheetColumnStyle}>
+            <View className="items-center pb-3 pt-2">
+              <View className="h-1.5 w-10 rounded-full bg-border" />
             </View>
 
             {!showingSearch && origin ? (
@@ -1036,21 +1072,17 @@ export function PlacePickerSheet({
               </ScrollView>
             ) : null}
 
-            <Animated.View
-              className="mx-5"
-              style={mapStyle}
-              onLayout={(event) => setMapOpen(event.nativeEvent.layout.height >= MAP_HEIGHT - 1)}
-            >
-              {mapCard}
-            </Animated.View>
-
             <FlatList
               data={rows}
               keyExtractor={(item) => item.key}
               keyboardShouldPersistTaps="handled"
               keyboardDismissMode="on-drag"
+              automaticallyAdjustKeyboardInsets
               showsVerticalScrollIndicator={false}
-              contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 16 }}
+              contentContainerStyle={{
+                paddingHorizontal: 20,
+                paddingBottom: Math.max(insets.bottom, 16) + 8,
+              }}
               ListHeaderComponent={header}
               renderItem={renderRow}
               ListFooterComponent={
@@ -1058,9 +1090,9 @@ export function PlacePickerSheet({
                   <Pressable
                     onPress={handleRemove}
                     accessibilityRole="button"
-                    className="mt-4 flex-row items-center justify-center gap-2 rounded-2xl border border-border/40 py-3 active:opacity-70"
+                    hitSlop={8}
+                    className="mt-3 items-center py-3 active:opacity-70"
                   >
-                    <Trash2 size={16} color={themeColors.error} />
                     <Text variant="body" className="text-destructive">
                       {I18n.t('locations.remove')}
                     </Text>
@@ -1069,20 +1101,20 @@ export function PlacePickerSheet({
               }
             />
           </View>
-        </Pressable>
-      </Pressable>
+        </View>
+      </View>
     </ThemeModal>
   );
 }
 
 const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'flex-end',
-  },
-  sheet: {
-    height: '92%',
+  // The list's panel casts a soft shadow up onto the map.
+  panel: {
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: -2 },
+    elevation: 8,
   },
   // Lifts the map's buttons and cards off the tiles.
   floating: {

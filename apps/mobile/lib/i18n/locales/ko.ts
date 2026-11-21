@@ -3713,7 +3713,6 @@ const ko = {
     locate_me: '내 위치 보기',
     choose: '선택',
     pin_drop: '핀 꽂기',
-    pin_hint: '지도를 길게 눌러 핀 꽂기',
     pin_drag: '지도를 움직여 핀 위치 조정',
     pin_use: '이 지점 사용',
     category_food: '음식',

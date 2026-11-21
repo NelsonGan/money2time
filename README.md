@@ -612,7 +612,23 @@ locations** is off for everyone until they turn it on. The code lives in
   when set. A set place lights the gear like a note or a tick does. The row
   shows while Locations is on, and on any entry that already has a place even
   with it off, so a place can always be seen and removed. It opens
-  `PlacePickerSheet`, a tall sheet with a map in it (Apple Maps on iOS,
+  `PlacePickerSheet`, a full page laid out map first, like RiceCal's: the
+  map fills the upper 46% edge to edge, under the status bar, with the close
+  button and the search field floating over its top, and the list is a
+  rounded panel below that overlaps the map's bottom edge (the map's padding
+  keeps Apple's and Google's logos above the panel; on Android that padding
+  also moves the camera's centre, so the centre pin moves with it). Typing
+  folds the map to a strip behind the search field. The panel is kept quiet,
+  after a Codex mockup: no title (the category chips sit under its grabber),
+  **Current location** on one line with a chevron, every place on one line
+  (category icon, name, distance; the address stays in the map's card and in
+  what VoiceOver reads) between hairlines, sentence-case section labels, and
+  **Remove location** as a plain text action. There is no always-visible
+  hint on the map: the drop-a-pin button and holding the map both drop a
+  pin. It is a full-screen modal
+  with no backdrop, so nothing outside it closes it: a backdrop Pressable
+  around the old sheet took the touch when a second finger landed on the map,
+  so a pinch closed the picker (Apple Maps on iOS,
   Google Maps on Android, the app's one `AppMap`, lazy-loaded as
   `PlacePickerMap` behind an error boundary so a build without the native
   module keeps the list):
@@ -623,8 +639,8 @@ locations** is off for everyone until they turn it on. The code lives in
     the phone (or asks for location access), and moving the map more than
     250 m from where the list was found offers **Search this area**, which
     lists nearby places (or re-runs the search) around the map's centre. The
-    map folds away while the keyboard is up, so results have the room, and
-    frames a new list once it is open again (and only after MapKit's
+    map folds to a strip behind the search field while the keyboard is up,
+    so results have the room, and frames a new list once it is open again (and only after MapKit's
     `onMapReady`: it ignores camera moves before that).
   - **Drop a pin**: the pin button, or holding the map, puts a pin in the
     map's centre; moving the map moves the spot, and once the map rests for

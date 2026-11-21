@@ -3787,7 +3787,6 @@ const it = {
     locate_me: 'Mostra la mia posizione',
     choose: 'Scegli',
     pin_drop: 'Metti un segnaposto',
-    pin_hint: 'Tieni premuta la mappa per mettere un segnaposto',
     pin_drag: 'Sposta la mappa per posizionare il segnaposto',
     pin_use: 'Usa questo punto',
     category_food: 'Cibo',

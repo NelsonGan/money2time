@@ -3602,7 +3602,6 @@ const zhHant = {
     locate_me: '顯示我的位置',
     choose: '選擇',
     pin_drop: '放置圖釘',
-    pin_hint: '長按地圖放置圖釘',
     pin_drag: '移動地圖來放置圖釘',
     pin_use: '使用此位置',
     category_food: '餐飲',
