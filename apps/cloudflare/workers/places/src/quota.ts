@@ -77,18 +77,26 @@ export async function checkQuota(
   return { allowed: true, reachedBy: null };
 }
 
-/** Counts one use today for both (only after Apple answered). */
-export async function consumeQuota(subjects: QuotaSubjects, env: QuotaEnv, now: Date): Promise<void> {
+/**
+ * Counts today's uses for both (only after Apple answered): one per Apple
+ * call, so a nearby list built from two searches counts two.
+ */
+export async function consumeQuota(
+  subjects: QuotaSubjects,
+  env: QuotaEnv,
+  now: Date,
+  uses = 1,
+): Promise<void> {
   const start = dayStart(now);
   const db = env.MONEY2TIME_D1_PLACES;
   const upsert = (subject: string) =>
     db
       .prepare(
         `INSERT INTO search_usage (subject, day_start, count, expires_at)
-         VALUES (?1, ?2, 1, ?3)
-         ON CONFLICT(subject, day_start) DO UPDATE SET count = count + 1`,
+         VALUES (?1, ?2, ?4, ?3)
+         ON CONFLICT(subject, day_start) DO UPDATE SET count = count + ?4`,
       )
-      .bind(subject, start, start + DAY_MS);
+      .bind(subject, start, start + DAY_MS, uses);
   await db.batch([upsert(subjects.user), upsert(subjects.address)]);
 }
 

@@ -2,17 +2,23 @@
 // Places Worker), served at location.money2time.com:
 //
 //   POST /search   { appUserId, query, latitude?, longitude?, language? }
+//   POST /nearby   { appUserId, latitude, longitude, category?, language? }
 //   POST /reverse  { appUserId, latitude, longitude, language? }
 //
-// Both answer { places: PlaceResult[] } from the Apple Maps Server API
+// All answer { places: PlaceResult[] } from the Apple Maps Server API
 // (places.ts). Works signed out: a request is signed with the app's shared key
 // like the other Workers. An edge-cache hit answers without touching the
 // user's daily allowance or Apple; a miss checks the allowance, asks Apple,
-// then counts one use and caches the answer. Neither the query nor a
+// then counts one use per Apple call and caches the answer. Neither the query nor a
 // coordinate is ever logged: together they say where someone is.
 
 import {
   appleGet,
+  mergeNearby,
+  nearbyCacheKey,
+  nearbyCenter,
+  nearbyPaths,
+  parseNearbyRequest,
   parseReverseRequest,
   parseSearchRequest,
   type PlaceResult,
@@ -46,8 +52,12 @@ const SIGNATURE_MAX_SKEW_MS = 5 * 60 * 1000;
 // A request is a query and a point: anything bigger is refused unread.
 const MAX_BODY_BYTES = 4096;
 
-type Kind = 'search' | 'reverse';
-const ROUTES: Record<string, Kind> = { '/search': 'search', '/reverse': 'reverse' };
+type Kind = 'search' | 'nearby' | 'reverse';
+const ROUTES: Record<string, Kind> = {
+  '/search': 'search',
+  '/nearby': 'nearby',
+  '/reverse': 'reverse',
+};
 
 // One JSON line per event for Workers Logs.
 function log(event: string, data: Record<string, unknown>): void {
@@ -59,7 +69,8 @@ function logError(event: string, data: Record<string, unknown>): void {
 
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-    const kind = ROUTES[new URL(request.url).pathname];
+    const pathname = new URL(request.url).pathname;
+    const kind = Object.hasOwn(ROUTES, pathname) ? ROUTES[pathname] : undefined;
     if (request.method !== 'POST' || !kind) return json({ error: 'not_found' }, 404);
     if (await overLimit(env.PLACES_LIMITER, request)) return json({ error: 'rate_limited' }, 429);
     return handlePlaces(request, env, ctx, kind);
@@ -95,7 +106,12 @@ async function handlePlaces(
   } catch {
     return json({ error: 'invalid_json' }, 400);
   }
-  const parsed = kind === 'search' ? parseSearchRequest(raw) : parseReverseRequest(raw);
+  const parsed =
+    kind === 'search'
+      ? parseSearchRequest(raw)
+      : kind === 'nearby'
+        ? parseNearbyRequest(raw)
+        : parseReverseRequest(raw);
   if ('error' in parsed) {
     logError('bad_request', { reqId, kind, error: parsed.error });
     return json({ error: parsed.error }, 400);
@@ -104,11 +120,22 @@ async function handlePlaces(
     logError('bad_signature', { reqId, appUserId: parsed.appUserId });
     return json({ error: 'unauthorized' }, 401);
   }
-  const path =
-    kind === 'search'
-      ? searchPath(parsed as Parameters<typeof searchPath>[0])
-      : reversePath(parsed as Parameters<typeof reversePath>[0]);
-  const cached = await readCachedPlaces(path);
+  // The Apple calls this request needs, and the key its answer is cached
+  // under: the Apple path itself, except for nearby, which merges several.
+  let applePaths: string[];
+  let cachePath: string;
+  if (kind === 'nearby') {
+    const nearby = parsed as Parameters<typeof nearbyPaths>[0];
+    applePaths = nearbyPaths(nearby);
+    cachePath = nearbyCacheKey(nearby);
+  } else {
+    cachePath =
+      kind === 'search'
+        ? searchPath(parsed as Parameters<typeof searchPath>[0])
+        : reversePath(parsed as Parameters<typeof reversePath>[0]);
+    applePaths = [cachePath];
+  }
+  const cached = await readCachedPlaces(cachePath);
   if (cached) return json({ places: cached }, 200);
 
   const now = new Date();
@@ -131,7 +158,13 @@ async function handlePlaces(
   }
   let places: PlaceResult[];
   try {
-    places = toPlaceResults(await appleGet(env, path, now.getTime()));
+    const payloads = await Promise.all(
+      applePaths.map((path) => appleGet(env, path, now.getTime())),
+    );
+    places =
+      kind === 'nearby'
+        ? mergeNearby(payloads, nearbyCenter(parsed as Parameters<typeof nearbyCenter>[0]))
+        : toPlaceResults(payloads[0]);
   } catch (err) {
     const error = err instanceof PlacesError ? err : new PlacesError('upstream', 502);
     logError('apple_failed', { reqId, kind, error: error.code });
@@ -139,8 +172,8 @@ async function handlePlaces(
   }
   ctx.waitUntil(
     Promise.all([
-      consumeQuota(subjects, env, now).catch(() => undefined),
-      writeCachedPlaces(path, places),
+      consumeQuota(subjects, env, now, applePaths.length).catch(() => undefined),
+      writeCachedPlaces(cachePath, places),
     ]),
   );
   log('places_ok', { reqId, kind, results: places.length });

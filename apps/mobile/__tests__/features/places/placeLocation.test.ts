@@ -4,7 +4,9 @@ import {
   groupByPlace,
   isLocatedTransaction,
   locationOfTransaction,
+  matchPlaces,
   placeKey,
+  preferNearResults,
   recentPlaces,
   regionFor,
   toTransactionLocation,
@@ -206,5 +208,52 @@ describe('places', () => {
     const region = regionFor([KLCC, { latitude: 1.3521, longitude: 103.8198 }], { padding: 1 });
     expect(region?.latitudeDelta).toBeCloseTo(3.1579 - 1.3521, 4);
     expect(region?.longitude).toBeCloseTo((101.7123 + 103.8198) / 2, 4);
+  });
+});
+
+function place(name: string, latitude = 3.158, longitude = 101.712, address = '') {
+  return { id: null, name, address, latitude, longitude, category: null, countryCode: null };
+}
+
+describe('matchPlaces', () => {
+  const places = [
+    place('Village Grocer', 3.1, 101.7, 'Jalan Ampang'),
+    place('ZUS Coffee'),
+    place('Café Kopi'),
+    place('The Coffee Bean'),
+    place('Kopitiam Lama'),
+  ];
+
+  it('ranks a name that starts with the query, then a word, then anywhere, then the address', () => {
+    expect(matchPlaces(places, 'kopi').map((p) => p.name)).toEqual(['Kopitiam Lama', 'Café Kopi']);
+    expect(matchPlaces(places, 'coffee').map((p) => p.name)).toEqual([
+      'ZUS Coffee',
+      'The Coffee Bean',
+    ]);
+    expect(matchPlaces(places, 'ampang').map((p) => p.name)).toEqual(['Village Grocer']);
+  });
+
+  it('ignores case and accents, and an empty query matches nothing', () => {
+    expect(matchPlaces(places, 'CAFE').map((p) => p.name)).toEqual(['Café Kopi']);
+    expect(matchPlaces(places, '  ')).toEqual([]);
+  });
+
+  it('keeps at most the limit', () => {
+    expect(matchPlaces(places, 'e', 2)).toHaveLength(2);
+  });
+});
+
+describe('preferNearResults', () => {
+  const kl = { latitude: 3.158, longitude: 101.712 };
+  const local = place('Tower 2');
+  const minnesota = place('Tower', 47.8, -92.3);
+
+  it('drops results on another continent when some are local', () => {
+    expect(preferNearResults([minnesota, local], kl)).toEqual([local]);
+  });
+
+  it('keeps a search for a far city, and everything without a point', () => {
+    expect(preferNearResults([minnesota], kl)).toEqual([minnesota]);
+    expect(preferNearResults([minnesota, local], null)).toEqual([minnesota, local]);
   });
 });

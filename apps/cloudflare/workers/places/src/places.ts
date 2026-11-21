@@ -1,6 +1,6 @@
 // Apple Maps Server API for place search: POST /search (text search biased
-// toward the user) and POST /reverse (coordinates to the place there), see
-// index.ts for the routes.
+// toward the user), POST /nearby (places to spend around a point) and POST
+// /reverse (coordinates to the place there), see index.ts for the routes.
 //
 // The Apple key never leaves the Worker: it signs a short-lived Maps auth
 // token (ES256), trades it at /v1/token for a 30-minute access token, and
@@ -39,6 +39,27 @@ export interface SearchRequest {
   language: string | null;
 }
 
+/** What the nearby list shows; each is one or two fixed Apple searches. */
+export const NEARBY_CATEGORIES = [
+  'all',
+  'food',
+  'coffee',
+  'groceries',
+  'shopping',
+  'fuel',
+  'transport',
+  'health',
+] as const;
+export type NearbyCategory = (typeof NEARBY_CATEGORIES)[number];
+
+export interface NearbyRequest {
+  appUserId: string;
+  latitude: number;
+  longitude: number;
+  category: NearbyCategory;
+  language: string | null;
+}
+
 export interface ReverseRequest {
   appUserId: string;
   latitude: number;
@@ -54,6 +75,45 @@ const MAX_RESULTS = 12;
 // needs the spot itself, so 4 decimals (about 11 m).
 const SEARCH_COORD_DECIMALS = 2;
 const REVERSE_COORD_DECIMALS = 4;
+// Nearby needs the block, not the neighbourhood: 3 decimals (about 110 m)
+// still lets neighbours share cache entries.
+const NEARBY_COORD_DECIMALS = 3;
+const MAX_NEARBY_RESULTS = 20;
+const METERS_PER_DEGREE = 111320;
+
+// Apple's search needs a query, so "nearby" is a fixed query limited to a box
+// around the point and to the categories people spend in. "All" is two
+// searches (eating and shops), merged by distance. Sparse kinds of place (a
+// petrol station, a pharmacy) search a wider box.
+interface NearbySearch {
+  q: string;
+  categories: string[];
+}
+const NEARBY_SEARCHES: Record<NearbyCategory, { radiusM: number; searches: NearbySearch[] }> = {
+  all: {
+    radiusM: 400,
+    searches: [
+      { q: 'food', categories: ['Restaurant', 'Cafe', 'Bakery', 'Brewery', 'Nightlife'] },
+      {
+        q: 'store',
+        categories: ['Store', 'FoodMarket', 'Pharmacy', 'GasStation', 'MovieTheater', 'Beauty'],
+      },
+    ],
+  },
+  food: {
+    radiusM: 600,
+    searches: [{ q: 'food', categories: ['Restaurant', 'Cafe', 'Bakery', 'Brewery'] }],
+  },
+  coffee: { radiusM: 800, searches: [{ q: 'coffee', categories: ['Cafe', 'Bakery'] }] },
+  groceries: { radiusM: 1200, searches: [{ q: 'grocery', categories: ['FoodMarket', 'Store'] }] },
+  shopping: { radiusM: 800, searches: [{ q: 'store', categories: ['Store'] }] },
+  fuel: { radiusM: 2500, searches: [{ q: 'gas station', categories: ['GasStation', 'EVCharger'] }] },
+  transport: {
+    radiusM: 1500,
+    searches: [{ q: 'station', categories: ['PublicTransport', 'Parking', 'Airport'] }],
+  },
+  health: { radiusM: 1500, searches: [{ q: 'pharmacy', categories: ['Pharmacy', 'Hospital'] }] },
+};
 // How long an answer stays in the edge cache. Places rarely move; a day keeps
 // popular searches free without serving stale results for long.
 const CACHE_TTL_SECONDS = 24 * 60 * 60;
@@ -130,6 +190,25 @@ export function parseSearchRequest(raw: unknown): SearchRequest | { error: strin
   };
 }
 
+export function parseNearbyRequest(raw: unknown): NearbyRequest | { error: string } {
+  if (!raw || typeof raw !== 'object') return { error: 'invalid_body' };
+  const body = raw as Record<string, unknown>;
+  const appUserId = readAppUserId(body);
+  if (!appUserId) return { error: 'missing_app_user_id' };
+  if (!validCoordinate(body.latitude, body.longitude)) return { error: 'invalid_location' };
+  const category = body.category ?? 'all';
+  if (!(NEARBY_CATEGORIES as readonly unknown[]).includes(category)) {
+    return { error: 'invalid_category' };
+  }
+  return {
+    appUserId,
+    latitude: body.latitude as number,
+    longitude: body.longitude as number,
+    category: category as NearbyCategory,
+    language: normalizeLanguage(body.language),
+  };
+}
+
 export function parseReverseRequest(raw: unknown): ReverseRequest | { error: string } {
   if (!raw || typeof raw !== 'object') return { error: 'invalid_body' };
   const body = raw as Record<string, unknown>;
@@ -168,6 +247,87 @@ export function reversePath(request: ReverseRequest): string {
   });
   if (request.language) params.set('lang', request.language);
   return `/v1/reverseGeocode?${params.toString()}`;
+}
+
+/** The point a nearby request is answered for, rounded (privacy and cache). */
+export function nearbyCenter(request: NearbyRequest): { latitude: number; longitude: number } {
+  return {
+    latitude: Number(round(request.latitude, NEARBY_COORD_DECIMALS)),
+    longitude: Number(round(request.longitude, NEARBY_COORD_DECIMALS)),
+  };
+}
+
+/** The edge-cache key of a nearby answer (not an Apple path). */
+export function nearbyCacheKey(request: NearbyRequest): string {
+  const center = nearbyCenter(request);
+  const params = new URLSearchParams({
+    category: request.category,
+    loc: `${center.latitude.toFixed(NEARBY_COORD_DECIMALS)},${center.longitude.toFixed(NEARBY_COORD_DECIMALS)}`,
+  });
+  if (request.language) params.set('lang', request.language);
+  return `/nearby?${params.toString()}`;
+}
+
+/**
+ * The Apple searches behind a nearby request: each limited to a box around
+ * the rounded point (north,east,south,west) and to its categories.
+ */
+export function nearbyPaths(request: NearbyRequest): string[] {
+  const center = nearbyCenter(request);
+  const { radiusM, searches } = NEARBY_SEARCHES[request.category];
+  const dLat = radiusM / METERS_PER_DEGREE;
+  const dLng =
+    radiusM / (METERS_PER_DEGREE * Math.max(0.01, Math.cos((center.latitude * Math.PI) / 180)));
+  const clampLat = (value: number) => Math.min(90, Math.max(-90, value));
+  const clampLng = (value: number) => Math.min(180, Math.max(-180, value));
+  const region = [
+    clampLat(center.latitude + dLat),
+    clampLng(center.longitude + dLng),
+    clampLat(center.latitude - dLat),
+    clampLng(center.longitude - dLng),
+  ]
+    .map((value) => (value + 0).toFixed(5))
+    .join(',');
+  return searches.map(({ q, categories }) => {
+    const params = new URLSearchParams({
+      q,
+      searchRegion: region,
+      searchRegionPriority: 'required',
+      resultTypeFilter: 'Poi',
+      includePoiCategories: categories.join(','),
+    });
+    if (request.language) params.set('lang', request.language);
+    return `/v1/search?${params.toString()}`;
+  });
+}
+
+function distanceSquared(
+  a: { latitude: number; longitude: number },
+  b: { latitude: number; longitude: number },
+): number {
+  const dLat = a.latitude - b.latitude;
+  const dLng = (a.longitude - b.longitude) * Math.cos((a.latitude * Math.PI) / 180);
+  return dLat * dLat + dLng * dLng;
+}
+
+/** Several Apple answers as one list: each place once, closest first. */
+export function mergeNearby(
+  payloads: unknown[],
+  center: { latitude: number; longitude: number },
+): PlaceResult[] {
+  const seen = new Set<string>();
+  const merged: PlaceResult[] = [];
+  for (const payload of payloads) {
+    for (const place of toPlaceResults(payload, MAX_NEARBY_RESULTS)) {
+      const key = place.id ?? `${place.name}@${place.latitude.toFixed(5)},${place.longitude.toFixed(5)}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      merged.push(place);
+    }
+  }
+  return merged
+    .sort((a, b) => distanceSquared(center, a) - distanceSquared(center, b))
+    .slice(0, MAX_NEARBY_RESULTS);
 }
 
 interface ApplePlace {
@@ -221,14 +381,14 @@ export function toPlaceResult(place: ApplePlace): PlaceResult | null {
   };
 }
 
-export function toPlaceResults(payload: unknown): PlaceResult[] {
+export function toPlaceResults(payload: unknown, limit = MAX_RESULTS): PlaceResult[] {
   const results = (payload as { results?: unknown } | null)?.results;
   if (!Array.isArray(results)) return [];
   const out: PlaceResult[] = [];
   for (const item of results) {
     const place = toPlaceResult((item ?? {}) as ApplePlace);
     if (place) out.push(place);
-    if (out.length >= MAX_RESULTS) break;
+    if (out.length >= limit) break;
   }
   return out;
 }

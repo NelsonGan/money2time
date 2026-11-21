@@ -154,6 +154,57 @@ export function recentPlaces(
   return [...nearby, ...rest].slice(0, limit).map((entry) => entry.place);
 }
 
+/** Folds case and accents, so "cafe" finds "Café" and "ZUS" finds "Zus". */
+function foldText(text: string): string {
+  return text.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().trim();
+}
+
+/**
+ * The user's own places that match what they are typing, best first: a name
+ * that starts with it, then a word in the name that does, then the name or
+ * address containing it. Instant and offline, shown above Apple's results.
+ */
+export function matchPlaces(
+  places: readonly PlaceResult[],
+  query: string,
+  limit = 4,
+): PlaceResult[] {
+  const needle = foldText(query);
+  if (!needle) return [];
+  const ranked: { place: PlaceResult; rank: number }[] = [];
+  for (const place of places) {
+    const name = foldText(place.name);
+    let rank = -1;
+    if (name.startsWith(needle)) rank = 0;
+    else if (name.split(/[\s\-–—·,&/()]+/).some((word) => word.startsWith(needle))) rank = 1;
+    else if (name.includes(needle)) rank = 2;
+    else if (foldText(place.address).includes(needle)) rank = 3;
+    if (rank >= 0) ranked.push({ place, rank });
+  }
+  // Stable: places keep their recency order within a rank.
+  return ranked
+    .sort((a, b) => a.rank - b.rank)
+    .slice(0, limit)
+    .map((entry) => entry.place);
+}
+
+/**
+ * Apple's search ranks by the point but does not stay near it: "tower" in
+ * Kuala Lumpur also finds a town in Minnesota. When some results are local,
+ * the ones on another continent go; a search for a far city (nothing local)
+ * keeps everything.
+ */
+export function preferNearResults(
+  places: readonly PlaceResult[],
+  near: Coordinate | null,
+  { localMeters = 100_000, farMeters = 1_000_000 } = {},
+): PlaceResult[] {
+  if (!near) return [...places];
+  const anyLocal = places.some((place) => distanceMeters(near, place) <= localMeters);
+  if (!anyLocal) return [...places];
+  return places.filter((place) => distanceMeters(near, place) <= farMeters);
+}
+
 export interface PlaceGroup<T extends Transaction = Transaction> {
   key: string;
   name: string;
