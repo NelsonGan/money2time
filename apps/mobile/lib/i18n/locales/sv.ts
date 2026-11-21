@@ -3783,7 +3783,6 @@ const sv = {
     map_empty_message: 'Lägg till en plats på en utgift för att se den här.',
     map_disabled_message: 'Slå på Platser för att lägga till platser på utgifter.',
     map_turn_on: 'Slå på Platser',
-    map_places_one: '{{count}} plats',
     map_places_other: '{{count}} platser',
     map_previous: 'Föregående',
     map_next: 'Nästa',

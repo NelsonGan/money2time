@@ -116,18 +116,33 @@ function sanitizeSettingsRowsForExport(rows: Record<string, unknown>[]) {
   });
 }
 
-function withPreservedAppUserId(
+/**
+ * Settings a restore keeps from this phone: its purchase identity, and the
+ * Locations switches, which need this phone's own location permission (a
+ * backup from a phone with them on would turn them on here without asking).
+ */
+const RESTORE_KEEPS_DEVICE_SETTINGS = [
+  'transaction_locations_enabled',
+  'transaction_location_auto_tag',
+] as const;
+
+function withPreservedDeviceSettings(
   rows: Record<string, unknown>[] | undefined,
   appUserId: string,
+  current: Record<string, unknown> | undefined,
 ): Record<string, unknown>[] {
   if (!rows || rows.length === 0) {
     return [];
   }
-
-  return rows.map((row) => ({
-    ...row,
-    app_user_id: appUserId,
-  }));
+  return rows.map((row) => {
+    const next: Record<string, unknown> = { ...row, app_user_id: appUserId };
+    for (const column of RESTORE_KEEPS_DEVICE_SETTINGS) {
+      // This phone's value, else the column's default: never the backup's.
+      if (current?.[column] !== undefined) next[column] = current[column];
+      else delete next[column];
+    }
+    return next;
+  });
 }
 
 /**
@@ -416,7 +431,7 @@ function tryReadTable(
  * A backup file with its photos embedded: the export, which leaves the app on
  * its own. Large stored photos are shrunk first (services/imageShrink).
  */
-export async function buildEmbeddedBackupFile(): Promise<{ bytes: Uint8Array; data: BackupData }> {
+async function buildEmbeddedBackupFile(): Promise<{ bytes: Uint8Array; data: BackupData }> {
   await shrinkStoredPhotos();
   const data = await buildBackupData();
   // Reading every table and packing the result each take a noticeable slice
@@ -568,13 +583,16 @@ export function applyBackupData(
     preserved.add(DEFAULT_LEDGER_ID);
   }
   backup = { ...backup, tables: filterBackupLedgers(backup.tables, [...preserved]) };
+  const currentSettings = (
+    sqlite.getAllSync('SELECT * FROM settings LIMIT 1') as Record<string, unknown>[]
+  )[0];
   const currentAppUserId =
-    (
-      sqlite.getAllSync('SELECT app_user_id FROM settings LIMIT 1') as {
-        app_user_id?: string | null;
-      }[]
-    )[0]?.app_user_id ?? newAppUserId();
-  const settingsRows = withPreservedAppUserId(backup.tables.settings, currentAppUserId);
+    (currentSettings?.app_user_id as string | null | undefined) ?? newAppUserId();
+  const settingsRows = withPreservedDeviceSettings(
+    backup.tables.settings,
+    currentAppUserId,
+    currentSettings,
+  );
 
   // Keep unselected shared ledgers and, for shared-only recovery, personal rows.
   const shared = [...preserved];
@@ -800,15 +818,19 @@ export function applyBackupData(
     resetAutomationCaptureData(currentAppUserId);
 
     // Restore user-uploaded assets (custom logos, …) outside the DB transaction.
+    let failedPhotos = 0;
     try {
-      restoreUserAssetsFromBackup(assetsToRestore, filesToRestore);
+      failedPhotos = restoreUserAssetsFromBackup(assetsToRestore, filesToRestore) ?? 0;
       // The restored DB replaced every reference, so any file left from the
       // device's prior state (not carried by this backup) is now an orphan.
       runUserAssetGc();
     } catch {
       // Asset restore is best-effort — a failure here shouldn't fail the import.
     }
-    return { canceled: false, success: true };
+    // A downloaded photo that would not copy into place is missing too.
+    return failedPhotos > 0
+      ? { canceled: false, success: true, missingPhotos: failedPhotos }
+      : { canceled: false, success: true };
   } catch (e) {
     try {
       sqlite.execSync('ROLLBACK');

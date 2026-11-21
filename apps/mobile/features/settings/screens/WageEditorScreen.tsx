@@ -139,7 +139,12 @@ export function WageEditorScreen({ monthKey, onClose }: WageEditorScreenProps) {
             </View>
           </View>
         ) : null}
-        <WageForm config={config} currencySymbol={settings.currencySymbol} onChange={setConfig} />
+        <WageForm
+          config={config}
+          currencySymbol={settings.currencySymbol}
+          onChange={setConfig}
+          askHoursForHourly
+        />
       </OnboardingStepLayout>
     </SettingsPageLayout>
   );

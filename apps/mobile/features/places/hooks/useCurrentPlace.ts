@@ -72,12 +72,16 @@ export function useCurrentPlace({
     // Checked even for a reused fix: access revoked a moment ago means no place.
     const permission = await getLocationPermission();
     if (id !== runId.current) return null;
-    if (permission.status === 'unavailable') {
-      setStatus('unavailable');
-      return null;
-    }
     if (permission.status !== 'granted') {
-      setStatus(permission.canAskAgain ? 'ask' : 'blocked');
+      // An earlier fix no longer counts once access is gone.
+      setResolved(null);
+      setStatus(
+        permission.status === 'unavailable'
+          ? 'unavailable'
+          : permission.canAskAgain
+            ? 'ask'
+            : 'blocked',
+      );
       return null;
     }
     const reusable = lastResolved;
@@ -101,6 +105,7 @@ export function useCurrentPlace({
     } catch (err) {
       if (id !== runId.current) return null;
       const code = err instanceof CurrentLocationError ? err.code : 'no_fix';
+      if (code === 'permission') setResolved(null);
       setStatus(
         code === 'permission'
           ? 'ask'
@@ -117,6 +122,7 @@ export function useCurrentPlace({
   const request = useCallback(async () => {
     const permission = await requestLocationPermission();
     if (permission.status === 'granted') return locate();
+    setResolved(null);
     setStatus(
       permission.status === 'unavailable'
         ? 'unavailable'

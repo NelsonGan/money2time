@@ -49,6 +49,12 @@ interface WageFormProps {
   config: WageConfig;
   currencySymbol: string;
   onChange: (config: WageConfig) => void;
+  /**
+   * Asks an hourly earner for their hours too. Settings does: the Hourly
+   * value page's weekly, monthly and yearly views multiply by them.
+   * Onboarding needs them only to spread extra time.
+   */
+  askHoursForHourly?: boolean;
 }
 
 /**
@@ -56,7 +62,12 @@ interface WageFormProps {
  * cards. "Add commute and more" opens the workdays and extra time fields in
  * place; removing them zeroes the extra time again.
  */
-export function WageForm({ config, currencySymbol, onChange }: WageFormProps) {
+export function WageForm({
+  config,
+  currencySymbol,
+  onChange,
+  askHoursForHourly = false,
+}: WageFormProps) {
   const themeColors = useThemeColors();
   const [amountText, setAmountText] = useNumberText(config.wageAmount);
   // Open when the wage already counts extra time, so editing it shows it.
@@ -64,8 +75,9 @@ export function WageForm({ config, currencySymbol, onChange }: WageFormProps) {
 
   const { trueHourlyRate, baseHourlyRate, trueHoursPerWeek } = computeHourlyRates(config);
   const hasRate = trueHourlyRate > 0;
-  // An hourly wage needs the hours only to spread extra time over them.
-  const showHours = config.wageType !== 'hourly' || showExtras;
+  // The hourly value of an hourly wage needs the hours only to spread extra
+  // time over them.
+  const showHours = config.wageType !== 'hourly' || showExtras || askHoursForHourly;
   const countsExtraTime = showExtras && config.commuteMinutesPerWorkday > 0 && hasRate;
 
   return (

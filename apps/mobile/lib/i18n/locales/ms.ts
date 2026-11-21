@@ -3808,7 +3808,6 @@ const ms = {
     map_empty_message: 'Tambah lokasi pada perbelanjaan untuk melihatnya di sini.',
     map_disabled_message: 'Hidupkan Lokasi untuk menambah tempat pada perbelanjaan.',
     map_turn_on: 'Hidupkan Lokasi',
-    map_places_one: '{{count}} tempat',
     map_places_other: '{{count}} tempat',
     map_previous: 'Sebelumnya',
     map_next: 'Seterusnya',

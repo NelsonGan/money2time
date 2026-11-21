@@ -3623,7 +3623,6 @@ const zh = {
     map_empty_message: '为支出添加位置后会显示在这里。',
     map_disabled_message: '开启"位置"即可为支出添加地点。',
     map_turn_on: '开启"位置"',
-    map_places_one: '{{count}} 个地点',
     map_places_other: '{{count}} 个地点',
     map_previous: '上一个',
     map_next: '下一个',

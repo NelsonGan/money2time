@@ -188,6 +188,23 @@ describe('places', () => {
     expect(groups[0]?.transactions[0]?.date).toBe('2026-11-19T00:00:00.000Z');
   });
 
+  it('groups a spot without an Apple id across drifting fixes, by name', () => {
+    const cafe = {
+      latitude: 3.15791,
+      longitude: 101.71234,
+      placeName: 'Kopi Corner',
+      placeId: null,
+    };
+    // About 20 m and 30 m away: the phone's fix on other days.
+    const drift1 = { ...cafe, latitude: 3.15809 };
+    const drift2 = { ...cafe, longitude: 101.71261 };
+    // 200 m away: another shop with the same name.
+    const other = { ...cafe, latitude: 3.15971 };
+    const groups = groupByPlace([tx(cafe), tx(drift1), tx(drift2), tx(other)]);
+    expect(groups.map((g) => g.transactions.length)).toEqual([3, 1]);
+    expect(recentPlaces([tx(cafe), tx(drift1), tx(other)])).toHaveLength(2);
+  });
+
   it('groups spots without an Apple id by point and name, never by transaction', () => {
     const cafe = {
       latitude: 3.15791,

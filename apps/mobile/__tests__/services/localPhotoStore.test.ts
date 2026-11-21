@@ -4,6 +4,7 @@
  * delete the photo it had just stored.
  */
 const disk = new Map<string, string>();
+const created = new Map<string, number>();
 let failCopy = false;
 
 jest.mock('expo-file-system/next', () => {
@@ -23,7 +24,7 @@ jest.mock('expo-file-system/next', () => {
       return this.uri.slice(this.uri.lastIndexOf('/') + 1);
     }
     get creationTime() {
-      return 1;
+      return created.get(this.uri) ?? 1;
     }
     get size() {
       return (disk.get(this.uri) ?? '').length;
@@ -68,6 +69,7 @@ const PHOTO = `money2time_PHOTO_${'a'.repeat(32)}.jpg`;
 
 beforeEach(() => {
   disk.clear();
+  created.clear();
   failCopy = false;
 });
 
@@ -95,4 +97,17 @@ it('does not copy a photo it already has', async () => {
   disk.set('doc/user-assets/album-covers/a.jpg', 'other');
   await localProvider.uploadPhoto(PHOTO, 'doc/user-assets/album-covers/a.jpg');
   expect(disk.get(`doc/backups/${PHOTO}`)).toBe('stored');
+});
+
+it('sweeps a copy an app kill left behind, once no copy can still be writing it', async () => {
+  const stale = `doc/backups/${PHOTO}.1-abc.partial`;
+  const fresh = `doc/backups/${PHOTO}.2-def.partial`;
+  disk.set(stale, 'trunc');
+  disk.set(fresh, 'writing');
+  created.set(fresh, Date.now());
+  disk.set('doc/backups/notes.partial', 'not ours');
+  await expect(localProvider.listPhotos()).resolves.toEqual([]);
+  expect(disk.has(stale)).toBe(false);
+  expect(disk.has(fresh)).toBe(true);
+  expect(disk.has('doc/backups/notes.partial')).toBe(true);
 });

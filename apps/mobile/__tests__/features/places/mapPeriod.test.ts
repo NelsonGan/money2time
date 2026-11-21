@@ -42,6 +42,11 @@ describe('spending map period', () => {
   it('filters by date and labels the period', () => {
     expect(inPeriod(new Date(2026, 10, 30, 23, 59).toISOString(), nov)).toBe(true);
     expect(inPeriod(new Date(2026, 11, 1).toISOString(), nov)).toBe(false);
+    // Bare day keys (quick entry) are local days, as the Calendar reads them.
+    expect(inPeriod('2026-11-01', nov)).toBe(true);
+    expect(inPeriod('2026-11-30', nov)).toBe(true);
+    expect(inPeriod('2026-12-01', nov)).toBe(false);
+    expect(inPeriod('2026-10-31', nov)).toBe(false);
     expect(periodLabel(nov, 'en', 'All time')).toBe('November 2026');
     expect(periodLabel({ kind: 'year', anchor: nov.anchor }, 'en', 'All time')).toBe('2026');
     expect(periodLabel({ kind: 'all', anchor: nov.anchor }, 'en', 'All time')).toBe('All time');

@@ -3796,7 +3796,6 @@ const pl = {
     map_empty_message: 'Dodaj lokalizację do wydatku, aby zobaczyć go tutaj.',
     map_disabled_message: 'Włącz Lokalizacje, aby dodawać miejsca do wydatków.',
     map_turn_on: 'Włącz Lokalizacje',
-    map_places_one: '{{count}} miejsce',
     map_places_other: '{{count}} miejsc',
     map_previous: 'Poprzedni',
     map_next: 'Następny',

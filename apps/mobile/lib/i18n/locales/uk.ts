@@ -3785,7 +3785,6 @@ const uk = {
     map_empty_message: 'Додайте місце до витрати, щоб побачити її тут.',
     map_disabled_message: 'Увімкніть «Місця», щоб додавати місця до витрат.',
     map_turn_on: 'Увімкнути «Місця»',
-    map_places_one: '{{count}} місце',
     map_places_other: '{{count}} місць',
     map_previous: 'Назад',
     map_next: 'Далі',

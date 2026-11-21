@@ -12,6 +12,7 @@ import {
   financialMonthRange,
   financialMonthStartDate,
 } from '~/utils/financialMonth';
+import { timeFromDateLocal } from '~/utils/formatters';
 
 export type MapPeriodKind = 'month' | 'year' | 'all';
 
@@ -77,7 +78,8 @@ export function isLatestPeriod(
 export function inPeriod(dateIso: string, period: MapPeriod, cycle: MonthCycleInput = 1): boolean {
   const { start, end } = periodRange(period, cycle);
   if (!start || !end) return true;
-  const time = new Date(dateIso).getTime();
+  // A bare day key is local midnight, as the Calendar reads it, not UTC.
+  const time = timeFromDateLocal(dateIso);
   return time >= start.getTime() && time < end.getTime();
 }
 

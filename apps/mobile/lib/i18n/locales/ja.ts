@@ -3756,7 +3756,6 @@ const ja = {
     map_empty_message: '支出に場所を追加するとここに表示されます。',
     map_disabled_message: '支出に場所を追加するには「場所」をオンにしてください。',
     map_turn_on: '「場所」をオンにする',
-    map_places_one: '{{count}}か所',
     map_places_other: '{{count}}か所',
     map_previous: '前へ',
     map_next: '次へ',

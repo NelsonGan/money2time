@@ -3622,7 +3622,6 @@ const zhHant = {
     map_empty_message: '為支出加上位置後會顯示在這裡。',
     map_disabled_message: '開啟「位置」即可為支出加上地點。',
     map_turn_on: '開啟「位置」',
-    map_places_one: '{{count}} 個地點',
     map_places_other: '{{count}} 個地點',
     map_previous: '上一個',
     map_next: '下一個',

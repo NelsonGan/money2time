@@ -3783,7 +3783,6 @@ const da = {
     map_empty_message: 'Tilføj et sted til en udgift for at se den her.',
     map_disabled_message: 'Slå Steder til for at tilføje steder til udgifter.',
     map_turn_on: 'Slå Steder til',
-    map_places_one: '{{count}} sted',
     map_places_other: '{{count}} steder',
     map_previous: 'Forrige',
     map_next: 'Næste',

@@ -183,8 +183,29 @@ async function handlePlaces(
   return json({ places }, 200);
 }
 
-function clientIp(request: Request): string {
-  return request.headers.get('cf-connecting-ip') ?? 'unknown';
+/**
+ * The client for limits: its IPv4 address, or its IPv6 /64 (the block one
+ * subscriber usually gets), so rotating addresses inside it gets no new
+ * per-minute or daily allowance.
+ */
+export function clientIp(request: Request): string {
+  const ip = request.headers.get('cf-connecting-ip') ?? 'unknown';
+  if (!ip.includes(':')) return ip;
+  // An IPv4 address written as IPv6 (`::ffff:203.0.113.9`) is that address.
+  const mapped = /^::ffff:(\d+\.\d+\.\d+\.\d+)$/i.exec(ip);
+  if (mapped) return mapped[1]!;
+  // Addresses arrive compressed (`2a01:4f8::1`): expand `::` before taking
+  // the first four groups, or every interface id would get its own key.
+  const [head, tail = ''] = ip.split('::');
+  const left = head ? head.split(':') : [];
+  const right = ip.includes('::') && tail ? tail.split(':') : [];
+  const groups = ip.includes('::')
+    ? [...left, ...Array<string>(Math.max(0, 8 - left.length - right.length)).fill('0'), ...right]
+    : left;
+  return `${groups
+    .slice(0, 4)
+    .map((group) => group.toLowerCase().replace(/^0+(?=.)/, ''))
+    .join(':')}::/64`;
 }
 
 /** True when this client IP is over its per-minute limit. No binding, no limit. */

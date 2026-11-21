@@ -3760,7 +3760,6 @@ const vi = {
     map_empty_message: 'Thêm vị trí cho một khoản chi để xem ở đây.',
     map_disabled_message: 'Bật Vị trí để thêm địa điểm cho khoản chi.',
     map_turn_on: 'Bật Vị trí',
-    map_places_one: '{{count}} địa điểm',
     map_places_other: '{{count}} địa điểm',
     map_previous: 'Trước',
     map_next: 'Sau',

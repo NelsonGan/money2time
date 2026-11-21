@@ -3794,7 +3794,6 @@ const tr = {
     map_empty_message: 'Burada görmek için bir harcamaya konum ekle.',
     map_disabled_message: 'Harcamalara yer eklemek için Konumlar’ı aç.',
     map_turn_on: 'Konumlar’ı aç',
-    map_places_one: '{{count}} yer',
     map_places_other: '{{count}} yer',
     map_previous: 'Önceki',
     map_next: 'Sonraki',

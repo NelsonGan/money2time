@@ -3807,7 +3807,6 @@ const it = {
     map_empty_message: 'Aggiungi un luogo a una spesa per vederla qui.',
     map_disabled_message: 'Attiva Luoghi per aggiungere luoghi alle spese.',
     map_turn_on: 'Attiva Luoghi',
-    map_places_one: '{{count}} luogo',
     map_places_other: '{{count}} luoghi',
     map_previous: 'Precedente',
     map_next: 'Successivo',

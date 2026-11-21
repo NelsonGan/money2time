@@ -3773,7 +3773,6 @@ const en = {
     map_empty_message: 'Add a location to an expense to see it here.',
     map_disabled_message: 'Turn on Locations to add places to expenses.',
     map_turn_on: 'Turn on Locations',
-    map_places_one: '{{count}} place',
     map_places_other: '{{count}} places',
     map_previous: 'Previous',
     map_next: 'Next',
