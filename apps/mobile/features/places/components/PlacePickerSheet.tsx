@@ -1,21 +1,14 @@
 import {
-  Coffee,
-  Fuel,
   History,
   LocateFixed,
   type LucideIcon,
   MapPin,
   MapPinned,
   Navigation,
-  Pill,
   RotateCw,
   Search,
-  ShoppingBag,
-  ShoppingBasket,
   Sparkles,
-  TrainFront,
   Trash2,
-  Utensils,
   X,
 } from 'lucide-react-native';
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -39,6 +32,7 @@ import { Text } from '~/components/ui/text';
 import { ThemeModal } from '~/components/ui/theme-modal';
 import { motionDurations } from '~/constants/motion';
 import { useApp, useTransactions } from '~/context/AppContext';
+import { useIsFlatIcons } from '~/context/ThemeContext';
 import { useSheetColumnStyle } from '~/hooks/useSheetColumnStyle';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -50,7 +44,7 @@ import { runAfterInteractions } from '~/utils/interactions';
 import { useCurrentPlace } from '../hooks/useCurrentPlace';
 import { useNearbyPlaces } from '../hooks/useNearbyPlaces';
 import { STREET_DELTA } from '../lib/fitMap';
-import { placeCategoryIcon } from '../lib/placeIcons';
+import { NEARBY_CHIP_ICONS, placeCategoryIcon, type PlaceIconSpec } from '../lib/placeIcons';
 import {
   distanceMeters,
   formatDistance,
@@ -64,6 +58,7 @@ import {
 import type { Coordinate, NearbyCategory, PlaceResult } from '../lib/placeTypes';
 import { describeCoordinate, openLocationSettings } from '../services/deviceLocation';
 import { PlaceSearchError, searchPlaces } from '../services/placeSearch';
+import { PlaceIcon } from './PlaceIcon';
 import type { PlacePickerMapHandle } from './PlacePickerMap';
 
 // react-native-maps is a native module: loaded only when the picker opens, and
@@ -95,15 +90,10 @@ const AREA_MOVED_METERS = 250;
 // A dropped pin is named once the map has been still this long.
 const PIN_NAME_DEBOUNCE_MS = 400;
 
-const CATEGORY_CHIPS: { id: Exclude<NearbyCategory, 'all'>; icon: LucideIcon }[] = [
-  { id: 'food', icon: Utensils },
-  { id: 'coffee', icon: Coffee },
-  { id: 'groceries', icon: ShoppingBasket },
-  { id: 'shopping', icon: ShoppingBag },
-  { id: 'fuel', icon: Fuel },
-  { id: 'transport', icon: TrainFront },
-  { id: 'health', icon: Pill },
-];
+const CATEGORY_CHIPS = Object.entries(NEARBY_CHIP_ICONS) as [
+  Exclude<NearbyCategory, 'all'>,
+  PlaceIconSpec,
+][];
 
 type SearchState =
   | { kind: 'idle' }
@@ -215,6 +205,7 @@ export function PlacePickerSheet({
   const { transactions } = useTransactions();
   const sheetColumnStyle = useSheetColumnStyle();
   const themeColors = useThemeColors();
+  const flatIcons = useIsFlatIcons();
   const insets = useSafeAreaInsets();
   const locale = I18n.locale;
   const appUserId = settings.appUserId;
@@ -748,14 +739,19 @@ export function PlacePickerSheet({
           className="absolute bottom-3 left-3 flex-row items-center gap-2.5 rounded-2xl bg-card py-2 pl-2.5 pr-2"
           style={[styles.floating, { right: 68 }]}
         >
-          {(() => {
-            const Icon = placeCategoryIcon(focused.category);
-            return (
-              <View className="h-9 w-9 items-center justify-center rounded-full bg-primary/10">
-                <Icon size={17} color={themeColors.primary} />
-              </View>
-            );
-          })()}
+          <View
+            className={cn(
+              'h-9 w-9 items-center justify-center rounded-full',
+              flatIcons && 'bg-primary/10',
+            )}
+          >
+            <PlaceIcon
+              spec={placeCategoryIcon(focused.category)}
+              size={30}
+              flatSize={17}
+              color={themeColors.primary}
+            />
+          </View>
           <View className="min-w-0 flex-1" {...REPLAY_PRIVATE}>
             <Text variant="bodyStrong" numberOfLines={1}>
               {focused.name}
@@ -869,7 +865,6 @@ export function PlacePickerSheet({
       );
     }
     const { place, source } = item;
-    const Icon = placeCategoryIcon(place.category);
     const distance = distanceFrom
       ? formatDistance(distanceMeters(distanceFrom, place), locale)
       : '';
@@ -894,8 +889,18 @@ export function PlacePickerSheet({
           selected && '-mx-2 border border-primary/30 bg-primary/10 px-2',
         )}
       >
-        <View className="h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-          <Icon size={18} color={themeColors.primary} />
+        <View
+          className={cn(
+            'h-10 w-10 items-center justify-center rounded-full',
+            flatIcons && 'bg-primary/10',
+          )}
+        >
+          <PlaceIcon
+            spec={placeCategoryIcon(place.category)}
+            size={32}
+            flatSize={18}
+            color={themeColors.primary}
+          />
         </View>
         <View className="min-w-0 flex-1" {...REPLAY_PRIVATE}>
           <Text variant="bodyStrong" numberOfLines={1}>
@@ -986,7 +991,7 @@ export function PlacePickerSheet({
                 style={{ flexGrow: 0, flexShrink: 0 }}
                 contentContainerStyle={{ paddingHorizontal: 20, gap: 8 }}
               >
-                {CATEGORY_CHIPS.map(({ id, icon: Icon }) => {
+                {CATEGORY_CHIPS.map(([id, spec]) => {
                   const active = category === id;
                   return (
                     <Pressable
@@ -999,7 +1004,12 @@ export function PlacePickerSheet({
                         active ? 'border-primary bg-primary' : 'border-border/60 bg-card',
                       )}
                     >
-                      <Icon size={14} color={active ? themeColors.card : themeColors.primary} />
+                      <PlaceIcon
+                        spec={spec}
+                        size={18}
+                        flatSize={14}
+                        color={active ? themeColors.card : themeColors.primary}
+                      />
                       <Text
                         variant="caption"
                         className={cn(

@@ -9,6 +9,7 @@ import { EmptyState } from '~/components/feedback/EmptyState';
 import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { Text } from '~/components/ui/text';
 import { useApp, useTransactions } from '~/context/AppContext';
+import { useIsFlatIcons } from '~/context/ThemeContext';
 import { countsTowardSpending } from '~/features/reimbursements/lib/reimbursementMath';
 import { ActivityTransactionList } from '~/features/transactions/components/ActivityTransactionList';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -21,6 +22,7 @@ import { monthCycleOf } from '~/utils/financialMonth';
 import { formatAmount, formatHoursCompact } from '~/utils/formatters';
 
 import { AppMap } from '../components/AppMap';
+import { PlaceIcon } from '../components/PlaceIcon';
 import { PlaceSummary, type PlaceSummaryData } from '../components/PlaceSummary';
 import { PlaceClusterPin, PlacePricePin } from '../components/SpendingMapPins';
 import { fitMapToPoints } from '../lib/fitMap';
@@ -81,6 +83,7 @@ export function SpendingMapContent({
   const { transactions } = useTransactions();
   const { settings, getDisplayValueForTransaction, getTrueHourlyRateForDate } = useApp();
   const themeColors = useThemeColors();
+  const flatIcons = useIsFlatIcons();
   const insets = useSafeAreaInsets();
   const { width, height } = useWindowDimensions();
   const mapRef = useRef<MapView>(null);
@@ -315,7 +318,6 @@ export function SpendingMapContent({
   const anyLocated = located.length > 0;
 
   const renderPlaceRow = (group: Group, index: number) => {
-    const Icon = placeCategoryIcon(group.category);
     const totals = totalsByKey.get(group.key);
     return (
       <Pressable
@@ -328,7 +330,12 @@ export function SpendingMapContent({
           index > 0 && 'border-t border-border/40',
         )}
       >
-        <Icon size={20} color={themeColors.primary} />
+        <PlaceIcon
+          spec={placeCategoryIcon(group.category)}
+          size={28}
+          flatSize={20}
+          color={themeColors.primary}
+        />
         <View className="min-w-0 flex-1">
           <Text variant="bodyStrong" numberOfLines={1}>
             {group.name}
@@ -355,12 +362,21 @@ export function SpendingMapContent({
   const panel = (() => {
     if (selection && selectedGroups.length === 1) {
       const group = selectedGroups[0] as Group;
-      const PlaceIcon = placeCategoryIcon(group.category);
       return (
         <View className="flex-1">
           <View className="flex-row items-center gap-3 px-5 pt-4">
-            <View className="h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-              <PlaceIcon size={22} color={themeColors.primary} />
+            <View
+              className={cn(
+                'h-12 w-12 items-center justify-center rounded-full',
+                flatIcons && 'bg-primary/10',
+              )}
+            >
+              <PlaceIcon
+                spec={placeCategoryIcon(group.category)}
+                size={40}
+                flatSize={22}
+                color={themeColors.primary}
+              />
             </View>
             <View className="min-w-0 flex-1">
               <Text variant="headingSm" numberOfLines={1}>

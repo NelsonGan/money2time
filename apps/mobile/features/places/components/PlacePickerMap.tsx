@@ -3,6 +3,7 @@ import { View } from 'react-native';
 import type MapView from 'react-native-maps';
 import { Marker, type Region } from 'react-native-maps';
 
+import { useIsFlatIcons } from '~/context/ThemeContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { cn } from '~/utils';
 
@@ -11,6 +12,7 @@ import { placeCategoryIcon } from '../lib/placeIcons';
 import { placeKey } from '../lib/placeLocation';
 import type { Coordinate, PlaceResult } from '../lib/placeTypes';
 import { AppMap } from './AppMap';
+import { PlaceIcon } from './PlaceIcon';
 import { useBriefTracking } from './SpendingMapPins';
 
 export interface PlacePickerMapHandle {
@@ -50,9 +52,12 @@ interface PinProps {
 /** A place in the list: a round badge with its category icon. */
 const PlaceIconPin = memo(function PlaceIconPinImpl({ place, filled, onPress }: PinProps) {
   const themeColors = useThemeColors();
-  const tracking = useBriefTracking(filled, themeColors.primary, themeColors.card);
-  const Icon = placeCategoryIcon(place.category);
-  const size = filled ? 40 : 30;
+  const flatIcons = useIsFlatIcons();
+  const tracking = useBriefTracking(filled, flatIcons, themeColors.primary, themeColors.card);
+  const size = filled ? 42 : 32;
+  // Flat: a filled accent disc marks the chosen pin. Clay is never set on a
+  // tinted plate, so there it is an accent ring around the white badge.
+  const filledDisc = filled && flatIcons;
   return (
     <Marker
       identifier={placeKey(place)}
@@ -71,7 +76,11 @@ const PlaceIconPin = memo(function PlaceIconPinImpl({ place, filled, onPress }: 
         <View
           className={cn(
             'items-center justify-center rounded-full border-2',
-            filled ? 'border-card bg-primary' : 'border-card bg-card',
+            filledDisc
+              ? 'border-card bg-primary'
+              : filled
+                ? 'border-primary bg-card'
+                : 'border-card bg-card',
           )}
           style={{
             width: size,
@@ -83,7 +92,12 @@ const PlaceIconPin = memo(function PlaceIconPinImpl({ place, filled, onPress }: 
             elevation: 3,
           }}
         >
-          <Icon size={filled ? 20 : 15} color={filled ? themeColors.card : themeColors.primary} />
+          <PlaceIcon
+            spec={placeCategoryIcon(place.category)}
+            size={filled ? 28 : 22}
+            flatSize={filled ? 20 : 15}
+            color={filledDisc ? themeColors.card : themeColors.primary}
+          />
         </View>
         <View
           style={{
