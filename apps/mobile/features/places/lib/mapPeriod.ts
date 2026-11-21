@@ -68,15 +68,18 @@ export interface PlaceTotals {
 /**
  * A place's totals in the value the app shows: money in the main currency
  * (the amount frozen at save for a foreign one) or hours in time mode, which
- * `value` returns.
+ * `value` returns. Every entry is a visit; only those `counts` lets through
+ * add to the money (reimbursements, when the user leaves them out of spending).
  */
 export function placeTotals<T extends Transaction>(
   transactions: readonly T[],
   value: (transaction: T) => number,
+  counts: (transaction: T) => boolean = () => true,
 ): PlaceTotals {
   let spent = 0;
   let earned = 0;
   for (const transaction of transactions) {
+    if (!counts(transaction)) continue;
     const amount = Math.abs(value(transaction));
     if (transaction.type === 'expense') spent += amount;
     else if (transaction.type === 'income') earned += amount;

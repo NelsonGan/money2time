@@ -59,5 +59,8 @@ const ICON_BY_CATEGORY: Record<string, LucideIcon> = {
 };
 
 export function placeCategoryIcon(category: string | null | undefined): LucideIcon {
-  return (category && ICON_BY_CATEGORY[category]) || MapPin;
+  // Own keys only: the category is synced data, and "constructor" is not an icon.
+  return category && Object.hasOwn(ICON_BY_CATEGORY, category)
+    ? (ICON_BY_CATEGORY[category] as LucideIcon)
+    : MapPin;
 }

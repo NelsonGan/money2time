@@ -3,9 +3,11 @@ const worker = require('../../../cloudflare/workers/places/src/index').default;
 const {
   checkQuota,
   consumeQuota,
-  dailyLimit,
+  dailyLimits,
   dayStart,
+  addressSubject,
 } = require('../../../cloudflare/workers/places/src/quota');
+const realQuota = jest.requireActual('../../../cloudflare/workers/places/src/quota');
 
 import {
   addressOf,
@@ -21,7 +23,7 @@ import {
 jest.mock('../../../cloudflare/workers/places/src/quota', () => ({
   ...jest.requireActual('../../../cloudflare/workers/places/src/quota'),
   checkQuota: jest.fn(),
-  consumeQuota: jest.fn(async () => 1),
+  consumeQuota: jest.fn(async () => undefined),
 }));
 
 /**
@@ -232,7 +234,7 @@ describe('POST /search and /reverse', () => {
     jest.spyOn(console, 'log').mockImplementation(() => undefined);
     resetAppleTokenCache();
     waits = [];
-    (checkQuota as jest.Mock).mockResolvedValue({ allowed: true, used: 0, limit: 200 });
+    (checkQuota as jest.Mock).mockResolvedValue({ allowed: true, reachedBy: null });
     fetchMock = jest.fn(async (url: unknown) => {
       const href = String(url);
       if (href.endsWith('/v1/token')) {
@@ -301,8 +303,10 @@ describe('POST /search and /reverse', () => {
     );
     expect((searchCall?.[1] as RequestInit).headers).toEqual({ Authorization: 'Bearer access-1' });
     await Promise.all(waits);
-    expect(checkQuota).toHaveBeenCalledWith('m2t_a', expect.anything(), expect.any(Date));
-    expect(consumeQuota).toHaveBeenCalledWith('m2t_a', expect.anything(), expect.any(Date));
+    // Counted against the user and, hashed, the address it came from.
+    const subjects = { user: 'm2t_a', address: expect.stringMatching(/^ip:[0-9a-f]{32}$/) };
+    expect(checkQuota).toHaveBeenCalledWith(subjects, expect.anything(), expect.any(Date));
+    expect(consumeQuota).toHaveBeenCalledWith(subjects, expect.anything(), expect.any(Date));
   });
 
   it('keeps the access token between searches', async () => {
@@ -349,7 +353,7 @@ describe('POST /search and /reverse', () => {
   });
 
   it('stops at the daily allowance without calling Apple', async () => {
-    (checkQuota as jest.Mock).mockResolvedValue({ allowed: false, used: 200, limit: 200 });
+    (checkQuota as jest.Mock).mockResolvedValue({ allowed: false, reachedBy: 'address' });
     const response = await post('/search', { appUserId: 'm2t_a', query: 'cafe' });
     expect(response.status).toBe(429);
     expect(await response.json()).toEqual({ error: 'limit_reached' });
@@ -446,11 +450,73 @@ describe('routes and the daily allowance', () => {
     }
   });
 
-  it('counts per UTC day, 200 unless configured', () => {
+  it('counts per UTC day: 200 per user and 1000 per address unless configured', () => {
     expect(dayStart(new Date('2026-11-21T23:59:59.999Z'))).toBe(Date.UTC(2026, 10, 21));
     expect(dayStart(new Date('2026-11-22T00:00:00.000Z'))).toBe(Date.UTC(2026, 10, 22));
-    expect(dailyLimit({ PLACES_DAILY_LIMIT: '50' } as Record<string, string>)).toBe(50);
-    expect(dailyLimit({ PLACES_DAILY_LIMIT: 'lots' } as Record<string, string>)).toBe(200);
-    expect(dailyLimit({} as Record<string, string>)).toBe(200);
+    expect(dailyLimits({ PLACES_DAILY_LIMIT: '50' })).toEqual({ user: 50, address: 1000 });
+    expect(dailyLimits({ PLACES_DAILY_LIMIT: 'lots', PLACES_ADDRESS_DAILY_LIMIT: '-1' })).toEqual({
+      user: 200,
+      address: 1000,
+    });
+  });
+
+  it('stores an address only as a hash that changes every day', async () => {
+    const day1 = new Date('2026-11-21T10:00:00Z');
+    const a = await addressSubject('203.0.113.9', day1);
+    expect(a).toMatch(/^ip:[0-9a-f]{32}$/);
+    expect(a).not.toContain('203');
+    expect(await addressSubject('203.0.113.9', new Date('2026-11-21T23:00:00Z'))).toBe(a);
+    expect(await addressSubject('203.0.113.9', new Date('2026-11-22T01:00:00Z'))).not.toBe(a);
+  });
+
+  it('stops at whichever cap is reached: the user first, then the address', async () => {
+    const counts: Record<string, number> = {};
+    const db = {
+      prepare: () => ({
+        bind: (_day: number, user: string, address: string) => ({
+          all: async () => ({
+            results: [user, address]
+              .filter((subject) => subject in counts)
+              .map((subject) => ({ subject, count: counts[subject] })),
+          }),
+        }),
+      }),
+    };
+    const env = {
+      MONEY2TIME_D1_PLACES: db,
+      PLACES_DAILY_LIMIT: '2',
+      PLACES_ADDRESS_DAILY_LIMIT: '3',
+    };
+    const subjects = { user: 'm2t_a', address: 'ip:x' };
+    const now = new Date();
+    expect(await realQuota.checkQuota(subjects, env, now)).toEqual({
+      allowed: true,
+      reachedBy: null,
+    });
+    counts['m2t_a'] = 2;
+    expect(await realQuota.checkQuota(subjects, env, now)).toEqual({
+      allowed: false,
+      reachedBy: 'user',
+    });
+    counts['m2t_a'] = 0;
+    counts['ip:x'] = 3;
+    expect(await realQuota.checkQuota({ ...subjects, user: 'm2t_new' }, env, now)).toEqual({
+      allowed: false,
+      reachedBy: 'address',
+    });
+  });
+
+  it('refuses an oversized body before reading it', async () => {
+    const response = await worker.fetch(
+      new Request('https://places.test/search', {
+        method: 'POST',
+        headers: { 'content-length': '5000' },
+        body: 'x'.repeat(5000),
+      }),
+      {},
+      { waitUntil: () => undefined },
+    );
+    expect(response.status).toBe(413);
+    expect(checkQuota).not.toHaveBeenCalled();
   });
 });

@@ -96,7 +96,7 @@ export function useCurrentPlace({
       return next;
     } catch (err) {
       if (id !== runId.current) return null;
-      const code = err instanceof CurrentLocationError ? err.code : 'unavailable';
+      const code = err instanceof CurrentLocationError ? err.code : 'no_fix';
       setStatus(
         code === 'permission'
           ? 'ask'

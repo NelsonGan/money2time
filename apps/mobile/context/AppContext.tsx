@@ -244,8 +244,12 @@ import {
   assertInOpenLedger,
   type CreateTransactionInput,
   EntryLedgerGoneError,
+  locationChanges,
+  locationInputOf,
   summarizeSplits,
+  type TransactionLocationInput,
   transactionsRepository,
+  withNormalizedLocation,
 } from '~/lib/repositories/transactionsRepository';
 import {
   AnalyticsEvents,
@@ -704,7 +708,8 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
     fields: Pick<
       CreateTransactionInput,
       'details' | 'receiptUri' | 'sentiment' | 'reimbursable' | 'accountId'
-    >,
+    > &
+      Partial<TransactionLocationInput>,
   ) => void;
   /** Puts shared albums' entries on an account, on this phone only. Returns how many took it. */
   setGroupEntriesAccount: (transactionIds: readonly string[], accountId: string) => number;
@@ -4153,6 +4158,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             };
           }
         }
+        // The place as the row will store it (cleared on a change to a
+        // transfer, never half), so the list matches the database.
+        normalizedInput = withNormalizedLocation(normalizedInput);
         normalizedUpdates.push({ id, input: normalizedInput });
         const hasRelationChange =
           'accountId' in normalizedInput ||
@@ -4665,6 +4673,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           receiptUri: input.receiptUri ?? null,
           sentiment: input.sentiment ?? 'neutral',
           reimbursable: input.reimbursable ?? false,
+          // Where it happened is the user's own too, never sent to the group.
+          ...locationInputOf(input),
         };
         const current = existingId
           ? transactionsRef.current.find((tx) => tx.id === existingId)
@@ -4675,7 +4685,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             (current.details ?? null) !== entry.details ||
             (current.receiptUri ?? null) !== entry.receiptUri ||
             (current.sentiment ?? 'neutral') !== entry.sentiment ||
-            (current.reimbursable ?? false) !== entry.reimbursable)
+            (current.reimbursable ?? false) !== entry.reimbursable ||
+            locationChanges(current, entry))
         ) {
           // The fields that are the user's own, on the entry they already
           // have, when they changed (every write is a row Cloud Sync sends).
@@ -4686,6 +4697,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             receiptUri: entry.receiptUri,
             sentiment: entry.sentiment,
             reimbursable: entry.reimbursable,
+            ...locationInputOf(entry),
           });
         }
         projectGroup(groupId, env, { expenseId: id, hints: { entry } });
@@ -4766,7 +4778,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       fields: Pick<
         CreateTransactionInput,
         'details' | 'receiptUri' | 'sentiment' | 'reimbursable' | 'accountId'
-      >,
+      > &
+        Partial<TransactionLocationInput>,
     ) => {
       const tx = transactionsRef.current.find((item) => item.id === transactionId);
       if (!tx?.albumGroupId) return;
@@ -4776,6 +4789,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           receiptUri: fields.receiptUri ?? null,
           sentiment: fields.sentiment ?? 'neutral',
           reimbursable: fields.reimbursable ?? false,
+          ...locationInputOf(fields),
         });
         if (fields.accountId && fields.accountId !== tx.accountId) {
           setGroupEntryAccount(transactionId, fields.accountId);

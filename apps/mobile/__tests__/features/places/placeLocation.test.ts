@@ -141,13 +141,14 @@ describe('distances', () => {
 
 describe('places', () => {
   it('keys a searched place by Apple id and a spot by point and name', () => {
-    expect(placeKey(starbucks)).toBe('id:I88BAA55D81E8BF1');
-    expect(placeKey({ latitude: 3.15791, longitude: 101.71234, placeName: 'Jalan Ampang' })).toBe(
-      'pt:3.1579,101.7123:jalan ampang',
+    const spot = { id: null, latitude: 3.15791, longitude: 101.71234 };
+    expect(placeKey({ ...spot, id: 'I88BAA55D81E8BF1', name: 'Starbucks' })).toBe(
+      'id:I88BAA55D81E8BF1',
     );
+    expect(placeKey({ ...spot, name: 'Jalan Ampang' })).toBe('pt:3.1579,101.7123:jalan ampang');
     // Same street, different name next door: another place.
-    expect(placeKey({ latitude: 3.15791, longitude: 101.71234, name: 'Kiosk' })).not.toBe(
-      placeKey({ latitude: 3.15791, longitude: 101.71234, name: 'Jalan Ampang' }),
+    expect(placeKey({ ...spot, name: 'Kiosk' })).not.toBe(
+      placeKey({ ...spot, name: 'Jalan Ampang' }),
     );
   });
 
@@ -183,6 +184,20 @@ describe('places', () => {
       ['Market', 1],
     ]);
     expect(groups[0]?.transactions[0]?.date).toBe('2026-11-19T00:00:00.000Z');
+  });
+
+  it('groups spots without an Apple id by point and name, never by transaction', () => {
+    const cafe = {
+      latitude: 3.15791,
+      longitude: 101.71234,
+      placeName: 'Suria KLCC',
+      placeId: null,
+    };
+    const groups = groupByPlace([tx(cafe), tx(cafe), tx({ ...cafe, placeName: 'Kiosk' })]);
+    expect(groups.map((g) => [g.name, g.transactions.length])).toEqual([
+      ['Suria KLCC', 2],
+      ['Kiosk', 1],
+    ]);
   });
 
   it('frames the points with padding and a minimum zoom', () => {

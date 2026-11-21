@@ -17,6 +17,7 @@ import { EmptyState } from '~/components/feedback/EmptyState';
 import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { Text } from '~/components/ui/text';
 import { useApp, useTransactions } from '~/context/AppContext';
+import { countsTowardSpending } from '~/features/reimbursements/lib/reimbursementMath';
 import { ActivityTransactionList } from '~/features/transactions/components/ActivityTransactionList';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -106,6 +107,12 @@ export function SpendingMapContent({
       isTime ? getDisplayValueForTransaction(tx) : (tx.reportingAmount ?? tx.amount),
     [isTime, getDisplayValueForTransaction],
   );
+  // Like every other total: reimbursements count only when the user says so.
+  const countsAsMoney = useCallback(
+    (tx: TransactionWithRelations) =>
+      countsTowardSpending(tx, settings.reimbursementsCountAsExpense),
+    [settings.reimbursementsCountAsExpense],
+  );
   const hoursOf = useCallback(
     (tx: TransactionWithRelations) => {
       const rate = getTrueHourlyRateForDate(tx.date);
@@ -123,9 +130,11 @@ export function SpendingMapContent({
 
   const totalsByKey = useMemo(() => {
     const map = new Map<string, ReturnType<typeof placeTotals>>();
-    for (const group of groups) map.set(group.key, placeTotals(group.transactions, valueOf));
+    for (const group of groups) {
+      map.set(group.key, placeTotals(group.transactions, valueOf, countsAsMoney));
+    }
     return map;
-  }, [groups, valueOf]);
+  }, [groups, valueOf, countsAsMoney]);
 
   const fitRegion = useMemo(
     () => regionFor(groups, { padding: 1.5, minDelta: 0.02 }) ?? WORLD_REGION,
@@ -248,8 +257,11 @@ export function SpendingMapContent({
   // Visits, then the money (spent, or earned where nothing was spent), then
   // the hours of work it cost; time mode already shows hours as the money.
   const statsFor = (txs: readonly TransactionWithRelations[]): PlaceStat[] => {
-    const totals = placeTotals(txs, valueOf);
-    const hours = txs.reduce((sum, tx) => sum + (tx.type === 'expense' ? hoursOf(tx) : 0), 0);
+    const totals = placeTotals(txs, valueOf, countsAsMoney);
+    const hours = txs.reduce(
+      (sum, tx) => sum + (tx.type === 'expense' && countsAsMoney(tx) ? hoursOf(tx) : 0),
+      0,
+    );
     const stats: PlaceStat[] = [
       {
         key: 'visits',

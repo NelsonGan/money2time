@@ -10,7 +10,7 @@
  * search only).
  */
 
-import { Platform } from 'react-native';
+import { Linking } from 'react-native';
 
 import type { Coordinate, PlaceResult } from '../lib/placeTypes';
 import { reverseGeocodePlace } from './placeSearch';
@@ -65,7 +65,12 @@ export async function requestLocationPermission(): Promise<LocationPermissionSta
   }
 }
 
-export type CurrentCoordinateError = 'permission' | 'services_off' | 'timeout' | 'unavailable';
+/**
+ * Why there is no position: no permission, Location Services off, no fix this
+ * time (a timeout, or the phone could not get one; worth a retry), or no
+ * location module in this build.
+ */
+export type CurrentCoordinateError = 'permission' | 'services_off' | 'no_fix' | 'unavailable';
 
 export class CurrentLocationError extends Error {
   constructor(readonly code: CurrentCoordinateError) {
@@ -110,13 +115,14 @@ export async function getCurrentCoordinate(): Promise<Coordinate> {
         mayShowUserSettingsDialog: false,
       }),
       new Promise<never>((_, reject) => {
-        timer = setTimeout(() => reject(new CurrentLocationError('timeout')), FIX_TIMEOUT_MS);
+        timer = setTimeout(() => reject(new CurrentLocationError('no_fix')), FIX_TIMEOUT_MS);
       }),
     ]);
     return { latitude: position.coords.latitude, longitude: position.coords.longitude };
   } catch (err) {
     if (err instanceof CurrentLocationError) throw err;
-    throw new CurrentLocationError('unavailable');
+    // iOS's kCLErrorLocationUnknown, or Android with no fix yet: try again later.
+    throw new CurrentLocationError('no_fix');
   } finally {
     if (timer) clearTimeout(timer);
   }
@@ -200,10 +206,5 @@ export async function describeCoordinate(
 
 /** Opens this app's page in the Settings app, for a permission the user denied. */
 export async function openLocationSettings(): Promise<void> {
-  const { Linking } = await import('react-native');
-  if (Platform.OS === 'ios') {
-    await Linking.openURL('app-settings:').catch(() => undefined);
-    return;
-  }
   await Linking.openSettings().catch(() => undefined);
 }

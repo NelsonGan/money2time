@@ -1,5 +1,12 @@
 jest.mock('~/lib/db/client', () => ({ getDb: jest.fn(), getSQLite: jest.fn() }));
 jest.mock('~/lib/repositories/transactionsRepository', () => ({
+  // The real pick of a save's location fields; the writes are fakes.
+  locationInputOf: (input: Record<string, unknown>) =>
+    Object.fromEntries(
+      ['latitude', 'longitude', 'placeName', 'placeAddress', 'placeId', 'placeCategory']
+        .filter((key) => key in input)
+        .map((key) => [key, input[key]]),
+    ),
   transactionsRepository: {
     createWithId: jest.fn(),
     softDelete: jest.fn(),
@@ -176,7 +183,17 @@ describe('createInstalmentPlan', () => {
       {
         ...PLAN_INPUT,
         startDate: noon('2026-11-02'),
-        firstPayment: { receiptUri: 'receipts/a.jpg', details: 'Living room', reimbursable: true },
+        firstPayment: {
+          receiptUri: 'receipts/a.jpg',
+          details: 'Living room',
+          reimbursable: true,
+          latitude: 3.1579,
+          longitude: 101.7123,
+          placeName: 'IKEA',
+          placeAddress: null,
+          placeId: null,
+          placeCategory: 'Store',
+        },
       },
       noon('2026-11-02'),
     );
@@ -194,6 +211,9 @@ describe('createInstalmentPlan', () => {
         receiptUri: 'receipts/a.jpg',
         details: 'Living room',
         reimbursable: true,
+        latitude: 3.1579,
+        longitude: 101.7123,
+        placeName: 'IKEA',
         instalmentRuleId: 'plan',
         instalmentNumber: 1,
       }),

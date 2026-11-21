@@ -1,7 +1,23 @@
-jest.mock('react-native', () => ({ Platform: { OS: 'ios' } }));
+jest.mock('react-native', () => ({ Linking: { openSettings: jest.fn(async () => undefined) } }));
 jest.mock('~/features/places/services/placeSearch', () => ({ reverseGeocodePlace: jest.fn() }));
+jest.mock(
+  'expo-location',
+  () => ({
+    Accuracy: { Balanced: 3 },
+    getForegroundPermissionsAsync: jest.fn(async () => ({ status: 'granted' })),
+    hasServicesEnabledAsync: jest.fn(async () => true),
+    getLastKnownPositionAsync: jest.fn(async () => null),
+    getCurrentPositionAsync: jest.fn(),
+  }),
+  { virtual: true },
+);
 
-import { placeFromGeocodedAddress } from '~/features/places/services/deviceLocation';
+import * as Location from 'expo-location';
+
+import {
+  getCurrentCoordinate,
+  placeFromGeocodedAddress,
+} from '~/features/places/services/deviceLocation';
 
 const HERE = { latitude: 3.1579, longitude: 101.7123 };
 
@@ -43,5 +59,16 @@ describe('the phone geocoder answer as a place', () => {
       address: '',
     });
     expect(placeFromGeocodedAddress(HERE, {})).toBeNull();
+  });
+});
+
+describe('the current position', () => {
+  it('reports a failed fix as worth retrying, not as no location support', async () => {
+    (Location.getCurrentPositionAsync as jest.Mock).mockRejectedValueOnce(
+      new Error('kCLErrorLocationUnknown'),
+    );
+    await expect(getCurrentCoordinate()).rejects.toMatchObject({ code: 'no_fix' });
+    (Location.getCurrentPositionAsync as jest.Mock).mockResolvedValueOnce({ coords: HERE });
+    await expect(getCurrentCoordinate()).resolves.toEqual(HERE);
   });
 });

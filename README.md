@@ -308,7 +308,7 @@ SQLite via `expo-sqlite` + Drizzle ORM. Schema is in `lib/db/schema.ts`. The DB 
 
 **Offline places DB (`lib/db/citiesDb.ts`).** A second, **read-only** SQLite connection holds GeoNames cities (used by `CityPickerSheet` to attach a location to an album). The prebuilt asset ships gzipped as `assets/db/cities.db.gz` (2.3 MB instead of 5.3 MB of app size, bundled via the `gz` entry added to metro `assetExts`) and is unpacked with fflate into the SQLite dir once on first run, guarded by `CITIES_DB_VERSION`, so the uncompressed file exists on the device only once. Regenerate it with `node scripts/build-cities-db.mjs` (downloads GeoNames `cities15000`, VACUUMs and gzips; `--empty` writes a schema-only placeholder). **Never** run the money2time migration runner against `cities.db` — it is pure reference data: not migrated, not backed up, not reset. On open the loader checks that the copy has a `cities` table and, if not, unpacks the asset again once: 1.6.1 and 1.6.2 opened the database before their un-awaited copy finished, which left an empty `cities.db` that the version marker called current. Failed opens close their connection where possible and disable further open attempts for the session. It degrades to empty results if the asset is missing/corrupt. `searchCities` is **fuzzy**: the FTS5 index covers city, admin1/state and country names so a query can resolve by any of them (e.g. `japan`, `california`), and results are ordered by match tier (city-name match > state > country) then population. Each table carries an `ascii_name` column for the diacritic-free LIKE checks that drive that tiering.
 
-**Album location map (`features/albums/`).** Albums with a location show on the Albums screen's Map tab (`AlbumMapPanel` → `components/AlbumMapView.tsx`): a photo card per album (`AlbumMapMarker`: cover, month badge, name, total spend) on the app's one map, `features/places/components/AppMap.tsx` (react-native-maps: **Apple Maps on iOS**, no key; **Google Maps on Android**, with the Maps SDK key, see [Transaction locations](#transaction-locations)). Albums in the same city share a point, so each card in a stack is its own marker moved off the point (`anchor` on Android, `centerOffset` on iOS): tapping a card behind brings it to the front, tapping the front one opens the album. A "show all" button fits every album. The map is a native module: `AlbumMapPanel` lazy-loads it only once the Map tab is first opened (keeping it off the cold-start path) behind an `AppErrorBoundary`, so a dev client built without it shows a message instead of crashing. Pins come from `AlbumPin[]` (built from `locatedAlbums` + `getAlbumStats`); `locatedAlbums` is a selector on `useApp()`.
+**Album location map (`features/albums/`).** Albums with a location show on the Albums screen's Map tab (`AlbumMapPanel` → `components/AlbumMapView.tsx`): a photo card per album (`AlbumMapMarker`: cover, month badge, name, total spend) on the app's one map, `features/places/components/AppMap.tsx` (react-native-maps: **Apple Maps on iOS**, no key; **Google Maps on Android**, with the Maps SDK key, see [Transaction locations](#transaction-locations)). Albums in the same city share a point, so they draw as one marker (`AlbumStackMarker`): up to three cards fanned behind each other in a fixed order with a count badge (one marker, because MapKit ignores `zIndex` between markers at one point). Tapping it opens "Albums here" (`AlbumStackSheet`), which lists them; picking one opens it once the sheet has closed. A single album's card opens it directly. Marker covers re-render only when their label, cover or the theme changes (`tracksViewChanges` on Android is turned back off once the cover has loaded). A "show all" button fits every album. The map is a native module: `AlbumMapPanel` lazy-loads it only once the Map tab is first opened (keeping it off the cold-start path) behind an `AppErrorBoundary`, so a dev client built without it shows a message instead of crashing. Pins come from `AlbumPin[]` (built from `locatedAlbums` + `getAlbumStats`); `locatedAlbums` is a selector on `useApp()`.
 
 **Tables** (all use soft-deletes via `deletedAt`, except `exchange_rates` which is a cache). Each ledger's root tables also carry `ledgerId`; see [Ledgers](#ledgers):
 
@@ -593,7 +593,9 @@ locations** is off for everyone until they turn it on. The code lives in
   `PlacePickerSheet`:
   - **Current location**: the phone's fix named by the phone's own geocoder
     (`describeCoordinate`), or a prompt to allow location, or to turn on
-    Location Services.
+    Location Services, or "Tap to retry" when there was no fix. Only while
+    Locations is on: with it off the picker only shows, changes or removes an
+    entry's place and never locates the phone.
   - **Recent places**: places the user tagged before (`recentPlaces`), the
     ones within 2 km first, closest first. No search needed for the cafe they
     go to every week.
@@ -620,7 +622,11 @@ locations** is off for everyone until they turn it on. The code lives in
   time (‹ › moves between periods, never past the current one). Each place is
   a price tag of what was spent there (money in the main currency, the amount
   frozen at save for a foreign entry, or hours in time mode; an income-only
-  place shows its income in green). Places that crowd at the current zoom
+  place shows its income in green). Entries group by Apple's place id, else by
+  name at the same point (`placeKey`), so three coffees at one auto-tagged spot
+  are one place with three visits. Totals follow the reimbursements setting
+  like every other total (`countsTowardSpending`): a left-out reimbursement is
+  still a visit, with no money. Places that crowd at the current zoom
   merge into a bubble with their entry count and total (`placeClusters.ts`,
   Supercluster); tapping a bubble zooms in to where it splits. Places at one
   point (two shops in one building) never split, so past the clustering zoom
@@ -652,9 +658,12 @@ locations** is off for everyone until they turn it on. The code lives in
 - **Where it travels.** The columns are part of the row, so Cloud Sync, backups,
   the Export Database JSON and the Web Dashboard carry them with no change
   (older apps and backups simply lack them). Shared-ledger members see an
-  entry's place like its note. A shared album's bill does not carry it to the
-  album's other members (`albumGroupSync`'s `TX_COLUMNS` leaves it out).
-  Duplicating an entry keeps its place.
+  entry's place like its note. On a shared album's bill the place is one of
+  the user's own fields, like the longer note: saved on their entry (a new
+  bill through `projectGroup`'s `hints.entry`, an edit straight on the row,
+  `locationInputOf`) and never sent to the album's other members. An
+  instalment plan's first payment keeps the form's place, and duplicating an
+  entry keeps it too.
 - **Place search** goes through its own Worker, `location.money2time.com`
   (`/search` and `/reverse`, see [Places Worker](#places-worker)), which proxies
   the Apple Maps Server API with the Apple key kept server-side. The app's client
@@ -4998,18 +5007,25 @@ the routes and the signature check; `src/quota.ts` the daily allowance.
 - **Cost.** Apple allows 25,000 calls a day for the whole team (shared with
   MapKit JS), free, and refuses past that with a 429 rather than billing.
   Every answer is kept in the edge cache (`caches.default`) for a day, keyed by
-  the normalized request, and a cache hit uses neither Apple nor the user's
-  allowance. A miss checks the user's count for the UTC day
-  (`PLACES_DAILY_LIMIT`, 200 for everyone), asks Apple, then counts one use.
-  `PLACES_LIMITER` caps each address at 60 a minute.
+  the normalized request, and a cache hit uses neither Apple nor any
+  allowance. A miss checks two daily counts in one read: the user's
+  (`PLACES_DAILY_LIMIT`, 200) and the address's (`PLACES_ADDRESS_DAILY_LIMIT`,
+  1,000), since a user id is whatever the caller sends and one script inventing
+  ids must not use up Apple's day for everyone. It then asks Apple and counts
+  one use for both. `PLACES_LIMITER` caps each address at 60 a minute, and a
+  body over 4 KB is refused unread (413).
 - **Storage.** One table, `search_usage` (`apps/cloudflare/d1/places/schema.sql`):
-  a count per `(app_user_id, day_start)` with `expires_at` at the day's end,
-  deleted by the daily cron. No query, place or coordinate is stored.
+  a count per `(subject, day_start)`, the subject being the user id or `ip:`
+  and a hash of the address salted with the day, with `expires_at` at the
+  day's end, deleted by the daily cron. No query, place, coordinate or IP is
+  stored.
 - **Privacy.** A search's bias point is rounded to 2 decimals (about 1 km) and
   a reverse lookup's to 4 (about 11 m) before Apple or the cache sees it. Logs
   carry the outcome and result count, never a query or a point.
-- **Errors.** 404 for any other route, 400 for a bad body (`query_too_short`
-  under two characters, `invalid_location`), 401 bad signature, 429
+- **Errors.** 404 for any other route, 413 for a body over 4 KB, 400 for a
+  bad body (`query_too_short` under two characters, `query_too_long` over 120,
+  which the picker's search box cannot reach, `invalid_location`), 401 bad
+  signature, 429
   `limit_reached` (the daily allowance) or `rate_limited` (the address), 503
   `not_configured` (no key) or `capacity` (Apple's quota), 502 `upstream`. The
   app maps them in `features/places/services/placeSearch.ts`.

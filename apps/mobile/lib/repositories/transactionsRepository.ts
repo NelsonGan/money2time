@@ -144,6 +144,32 @@ const LOCATION_KEYS = [
   'placeCategory',
 ] as const;
 
+export type TransactionLocationInput = Pick<CreateTransactionInput, (typeof LOCATION_KEYS)[number]>;
+
+/**
+ * The location fields a save names, and only those: an edit that leaves the
+ * place alone sends none, so passing this along never clears a place.
+ */
+export function locationInputOf(
+  input: Partial<CreateTransactionInput>,
+): Partial<TransactionLocationInput> {
+  const picked: Partial<TransactionLocationInput> = {};
+  for (const key of LOCATION_KEYS) {
+    if (key in input) (picked as Record<string, unknown>)[key] = input[key];
+  }
+  return picked;
+}
+
+/** Whether a save names a location that differs from the one a row has. */
+export function locationChanges(
+  current: Partial<TransactionLocationInput>,
+  input: Partial<CreateTransactionInput>,
+): boolean {
+  return LOCATION_KEYS.some(
+    (key) => key in input && (current[key] ?? null) !== (input[key] ?? null),
+  );
+}
+
 /**
  * An input that changes the type to one without a place clears it. An input
  * that touches the location gets all six fields, validated together
@@ -151,7 +177,7 @@ const LOCATION_KEYS = [
  * location. An input that does not touch it is left alone, so an edit that
  * changes the amount keeps the location.
  */
-function withNormalizedLocation<T extends Partial<CreateTransactionInput>>(input: T): T {
+export function withNormalizedLocation<T extends Partial<CreateTransactionInput>>(input: T): T {
   // Only an expense or income has a place: an entry made, or changed into, a
   // transfer or balance adjustment loses it, whichever editor did it.
   if (input.type === 'transfer' || input.type === 'balance_adjustment') {

@@ -45,6 +45,9 @@ APPLE_TEAM_ID = "A9QF26PBRS"
 # Searches per user per UTC day that reach Apple (cache hits are free). A
 # search is about one call per pause in typing.
 PLACES_DAILY_LIMIT = "200"
+# The same per address (any user ids it sends), so one script cannot use up
+# Apple's day for everyone; a shared network is many people, so it is higher.
+PLACES_ADDRESS_DAILY_LIMIT = "1000"
 
 # Secrets: set with `wrangler secret put <NAME>` (or the dashboard), never commit:
 #   APPLE_MAPS_PRIVATE_KEY         — the "Money2Time Maps" key's .p8 (PEM text,

@@ -117,7 +117,7 @@ async function post(path: string, body: Record<string, unknown>): Promise<PlaceR
   }
 }
 
-export interface SearchPlacesArgs {
+interface SearchPlacesArgs {
   appUserId: string;
   query: string;
   /** Ranks places near here first; never stored by the Worker. */

@@ -18,6 +18,8 @@ import { albumGroupsRepository } from '~/lib/repositories/albumGroupsRepository'
 import { transactionSplitsRepository } from '~/lib/repositories/transactionSplitsRepository';
 import {
   type CreateTransactionInput,
+  locationInputOf,
+  type TransactionLocationInput,
   transactionsRepository,
 } from '~/lib/repositories/transactionsRepository';
 import type {
@@ -68,7 +70,8 @@ export interface ProjectHints {
   entry?: Pick<
     CreateTransactionInput,
     'accountId' | 'details' | 'receiptUri' | 'sentiment' | 'reimbursable'
-  >;
+  > &
+    Partial<TransactionLocationInput>;
   /** The account a settlement just recorded here moved through, by settlement id. */
   accounts?: ReadonlyMap<string, string | null>;
 }
@@ -527,6 +530,7 @@ function projectExpense(
           receiptUri: hints.entry?.receiptUri ?? null,
           sentiment: hints.entry?.sentiment ?? 'neutral',
           reimbursable: hints.entry?.reimbursable ?? false,
+          ...locationInputOf(hints.entry ?? {}),
         }),
     albumGroupId: groupId,
   });

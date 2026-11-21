@@ -49,7 +49,10 @@ import {
   transferFeeDraftOf,
 } from '~/features/transactions/lib/transferFee';
 import { I18n } from '~/lib/i18n';
-import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
+import {
+  type CreateTransactionInput,
+  locationInputOf,
+} from '~/lib/repositories/transactionsRepository';
 import type { RootStackParamList } from '~/navigation/rootStack';
 import { requestHighlightTransaction } from '~/services/transactionsNavigation';
 import type { TransactionType, TransactionWithRelations } from '~/types';
@@ -521,6 +524,7 @@ function TransactionEditor({
             sentiment: input.sentiment ?? 'neutral',
             reimbursable: input.reimbursable ?? false,
             accountId: input.accountId ?? transaction.accountId,
+            ...locationInputOf(input),
           });
           return true;
         }

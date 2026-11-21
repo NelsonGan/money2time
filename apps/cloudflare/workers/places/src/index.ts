@@ -24,7 +24,14 @@ import {
   toPlaceResults,
   writeCachedPlaces,
 } from './places';
-import { checkQuota, consumeQuota, pruneExpired, type QuotaEnv } from './quota';
+import {
+  addressSubject,
+  checkQuota,
+  consumeQuota,
+  pruneExpired,
+  type QuotaEnv,
+  type QuotaSubjects,
+} from './quota';
 
 export interface Env extends PlacesEnv, QuotaEnv {
   // Shared secret the app signs requests with (X-Signature / X-Timestamp).
@@ -36,6 +43,8 @@ export interface Env extends PlacesEnv, QuotaEnv {
 }
 
 const SIGNATURE_MAX_SKEW_MS = 5 * 60 * 1000;
+// A request is a query and a point: anything bigger is refused unread.
+const MAX_BODY_BYTES = 4096;
 
 type Kind = 'search' | 'reverse';
 const ROUTES: Record<string, Kind> = { '/search': 'search', '/reverse': 'reverse' };
@@ -75,9 +84,14 @@ async function handlePlaces(
   kind: Kind,
 ): Promise<Response> {
   const reqId = crypto.randomUUID();
+  if (Number(request.headers.get('content-length') ?? 0) > MAX_BODY_BYTES) {
+    return json({ error: 'too_large' }, 413);
+  }
   let raw: unknown;
   try {
-    raw = await request.json();
+    const text = await request.text();
+    if (text.length > MAX_BODY_BYTES) return json({ error: 'too_large' }, 413);
+    raw = JSON.parse(text);
   } catch {
     return json({ error: 'invalid_json' }, 400);
   }
@@ -98,9 +112,13 @@ async function handlePlaces(
   if (cached) return json({ places: cached }, 200);
 
   const now = new Date();
-  const quota = await checkQuota(parsed.appUserId, env, now);
+  const subjects: QuotaSubjects = {
+    user: parsed.appUserId,
+    address: await addressSubject(clientIp(request), now),
+  };
+  const quota = await checkQuota(subjects, env, now);
   if (!quota.allowed) {
-    log('limit_reached', { reqId, appUserId: parsed.appUserId, used: quota.used });
+    log('limit_reached', { reqId, appUserId: parsed.appUserId, by: quota.reachedBy });
     return json({ error: 'limit_reached' }, 429);
   }
   let places: PlaceResult[];
@@ -113,7 +131,7 @@ async function handlePlaces(
   }
   ctx.waitUntil(
     Promise.all([
-      consumeQuota(parsed.appUserId, env, now).catch(() => undefined),
+      consumeQuota(subjects, env, now).catch(() => undefined),
       writeCachedPlaces(path, places),
     ]),
   );
@@ -121,11 +139,14 @@ async function handlePlaces(
   return json({ places }, 200);
 }
 
+function clientIp(request: Request): string {
+  return request.headers.get('cf-connecting-ip') ?? 'unknown';
+}
+
 /** True when this client IP is over its per-minute limit. No binding, no limit. */
 async function overLimit(limiter: RateLimit | undefined, request: Request): Promise<boolean> {
   if (!limiter) return false;
-  const key = request.headers.get('cf-connecting-ip') ?? 'unknown';
-  return !(await limiter.limit({ key })).success;
+  return !(await limiter.limit({ key: clientIp(request) })).success;
 }
 
 // HMAC-SHA256(`<timestamp>.<appUserId>`) in X-Signature, with X-Timestamp

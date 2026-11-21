@@ -27,6 +27,7 @@ import { placeCategoryIcon } from '../lib/placeIcons';
 import {
   distanceMeters,
   formatDistance,
+  locationKey,
   placeKey,
   recentPlaces,
   toTransactionLocation,
@@ -49,6 +50,7 @@ interface PlacePickerSheetProps {
 
 // Searching waits for a pause in typing: each search is an Apple Maps call
 // from a shared daily allowance.
+const MAX_QUERY_LENGTH = 120;
 const SEARCH_DEBOUNCE_MS = 450;
 const MIN_QUERY_LENGTH = 2;
 
@@ -89,7 +91,10 @@ export function PlacePickerSheet({
   const [search, setSearch] = useState<SearchState>({ kind: 'idle' });
   const requestId = useRef(0);
 
-  const here = useCurrentPlace({ active: visible, appUserId: settings.appUserId, locale });
+  // With Locations off the picker only shows or removes an existing place:
+  // the phone is never located then.
+  const locating = visible && settings.transactionLocationsEnabled;
+  const here = useCurrentPlace({ active: locating, appUserId: settings.appUserId, locale });
   const near = here.coordinate;
   // Read when a search fires, so a fix that lands while the user types still
   // ranks the results; a new fix alone does not search again.
@@ -180,13 +185,11 @@ export function PlacePickerSheet({
       ? search.results
       : []
     : recents;
-  const currentKey = current
-    ? placeKey({ ...current, placeId: current.placeId, placeName: current.placeName })
-    : null;
+  const currentKey = current ? locationKey(current) : null;
 
   const header = (
     <View>
-      {here.status !== 'unavailable' && !showingSearch ? (
+      {settings.transactionLocationsEnabled && here.status !== 'unavailable' && !showingSearch ? (
         <Pressable
           onPress={handleCurrentPress}
           accessibilityRole="button"
@@ -271,6 +274,8 @@ export function PlacePickerSheet({
                   value={query}
                   onChangeText={setQuery}
                   placeholder={I18n.t('locations.search_placeholder')}
+                  // The Worker refuses a longer query (query_too_long).
+                  maxLength={MAX_QUERY_LENGTH}
                   placeholderTextColor={themeColors.textMuted}
                   autoCorrect={false}
                   returnKeyType="search"

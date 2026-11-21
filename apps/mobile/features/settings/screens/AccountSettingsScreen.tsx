@@ -74,11 +74,9 @@ export function AccountSettingsScreen({ onBack }: AccountSettingsScreenProps) {
     [settings.transactionLocationAutoTag, updateSettings],
   );
 
-  const permissionBlocked =
-    locationsEnabled &&
-    permission !== null &&
-    permission.status !== 'granted' &&
-    permission.status !== 'unavailable';
+  // Only a refusal: "undetermined" is also what a read returns while the
+  // system prompt is still on screen, right after the switch turns on.
+  const permissionBlocked = locationsEnabled && permission?.status === 'denied';
 
   return (
     <SettingsPageLayout>

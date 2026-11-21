@@ -99,18 +99,24 @@ export function formatDistance(meters: number, locale?: string): string {
  * the point rounded to about 11 m (two spots on the same street with the same
  * name are one place; a different name next door is another).
  */
-export function placeKey(place: {
-  placeId?: string | null;
-  id?: string | null;
-  latitude: number;
-  longitude: number;
-  placeName?: string | null;
-  name?: string | null;
-}): string {
-  const id = place.placeId ?? place.id;
-  if (id) return `id:${id}`;
-  const name = (place.placeName ?? place.name ?? '').trim().toLowerCase();
+export function placeKey(
+  place: Pick<PlaceResult, 'id' | 'name' | 'latitude' | 'longitude'>,
+): string {
+  if (place.id) return `id:${place.id}`;
+  const name = place.name.trim().toLowerCase();
   return `pt:${place.latitude.toFixed(4)},${place.longitude.toFixed(4)}:${name}`;
+}
+
+/** The place key of a saved location (a transaction's own id is never its place). */
+export function locationKey(
+  location: Pick<TransactionLocation, 'placeId' | 'placeName' | 'latitude' | 'longitude'>,
+): string {
+  return placeKey({
+    id: location.placeId,
+    name: location.placeName,
+    latitude: location.latitude,
+    longitude: location.longitude,
+  });
 }
 
 /**
@@ -164,7 +170,7 @@ export function groupByPlace<T extends Transaction>(transactions: readonly T[]):
   const groups = new Map<string, PlaceGroup<T>>();
   for (const transaction of transactions) {
     if (transaction.deletedAt || !isLocatedTransaction(transaction)) continue;
-    const key = placeKey(transaction);
+    const key = locationKey(transaction);
     let group = groups.get(key);
     if (!group) {
       group = {

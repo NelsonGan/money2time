@@ -2405,25 +2405,16 @@ export function TransactionEditorScreen({
 
   // The location fields a save writes: all of them on a new entry (or none),
   // and on an edit only once the user changed the place. The automatic tag of
-  // a new expense goes only while it is still an expense dated today: one
-  // backdated or switched to income was not bought here.
-  const isTodayLocal = (iso: string) => {
-    const when = new Date(iso);
-    const now = new Date();
-    return (
-      when.getFullYear() === now.getFullYear() &&
-      when.getMonth() === now.getMonth() &&
-      when.getDate() === now.getDate()
-    );
-  };
+  // a new expense goes only while it is still an expense dated today
+  // (`autoTagApplies`): one backdated or switched to income was not bought here.
   // How the place this save writes was chosen, for `Transaction Location Set`,
   // which is sent only once the save goes through.
   const locationEventRef = useRef<PlaceSource | 'auto' | null>(null);
-  const locationPayload = (txDate: string) => {
+  const locationPayload = () => {
     locationEventRef.current = null;
     let saved = location;
     // The effect above drops it on screen; this holds at save time too.
-    if (locationSource === 'auto' && (type !== 'expense' || !isTodayLocal(txDate))) saved = null;
+    if (locationSource === 'auto' && !autoTagApplies) saved = null;
     if (mode === 'edit' && locationSource === null) return {};
     if (!saved) return mode === 'edit' ? NO_TRANSACTION_LOCATION : {};
     if (locationSource && locationSource !== 'removed') locationEventRef.current = locationSource;
@@ -2612,7 +2603,7 @@ export function TransactionEditorScreen({
           // Only an expense can be reimbursed; income keeps the column false so
           // switching type does not leave a stale flag behind.
           reimbursable: type === 'expense' ? reimbursable : false,
-          ...locationPayload(txDate),
+          ...locationPayload(),
         };
         preparedSubmitPayload = submitPayload;
       }
@@ -2793,12 +2784,15 @@ export function TransactionEditorScreen({
       }
 
       void triggerHaptic('success');
-      if (locationEventRef.current) {
-        void trackEvent(AnalyticsEvents.TRANSACTION_LOCATION_SET, {
-          source: locationEventRef.current,
-        });
-        locationEventRef.current = null;
-      }
+      // Sent once, and only where the save has gone through: an awaited save
+      // that fails, or a split confirmation the user backs out of, sends none.
+      let locationEvent = locationEventRef.current;
+      locationEventRef.current = null;
+      const reportLocationSet = () => {
+        if (!locationEvent) return;
+        void trackEvent(AnalyticsEvents.TRANSACTION_LOCATION_SET, { source: locationEvent });
+        locationEvent = null;
+      };
       perfInteraction(
         mode === 'edit' ? 'editor_update' : bulk ? 'editor_bulk_save' : 'editor_save',
       );
@@ -2813,6 +2807,7 @@ export function TransactionEditorScreen({
         setConfirmedSaving(true);
         try {
           await onSubmitConfirmed(submitPayload);
+          reportLocationSet();
           settlePagerNow();
           // Let the remove guard update before dispatching the close action.
           requestAnimationFrame(() => {
@@ -2851,6 +2846,7 @@ export function TransactionEditorScreen({
             receiptCommittedRef.current = false;
             return;
           }
+          reportLocationSet();
           if (!bulk) {
             settlePagerNow();
             requestAnimationFrame(() => {
@@ -2871,6 +2867,9 @@ export function TransactionEditorScreen({
       } else {
         deferredSubmit = recurringSubmit;
       }
+      // The rest are optimistic saves that land with no wait (a group bill
+      // reported above already).
+      reportLocationSet();
 
       // Bulk create mode: keep the editor open and make the reset feel instant.
       // Reset the per-transaction fields (amount / note / receipt / splits) on

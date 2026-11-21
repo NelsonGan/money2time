@@ -55,7 +55,9 @@ function useCoverTracking(key: string): [boolean, () => void] {
     const timer = setTimeout(() => setTracking(false), 1500);
     return () => clearTimeout(timer);
   }, [key]);
-  return [tracking, () => setTracking(false)];
+  // Stable, so the memoized cards it is handed to as `onLoad` do not re-render.
+  const stop = useCallback(() => setTracking(false), []);
+  return [tracking, stop];
 }
 
 /** What a card shows, for re-tracking when it changes. */

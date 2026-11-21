@@ -55,6 +55,18 @@ describe('spending map period', () => {
       { type: 'income', amount: 100 },
     ] as Transaction[];
     expect(placeTotals(rows, (t) => t.amount)).toEqual({ spent: 15, earned: 100, visits: 3 });
+    // An entry left out of spending is still a visit, with no money.
+    expect(
+      placeTotals(
+        rows,
+        (t) => t.amount,
+        (t) => t.type !== 'income',
+      ),
+    ).toEqual({
+      spent: 15,
+      earned: 0,
+      visits: 3,
+    });
     expect(isMapTransaction({ type: 'transfer', deletedAt: null } as Transaction)).toBe(false);
     expect(isMapTransaction({ type: 'expense', deletedAt: '2026-01-01' } as Transaction)).toBe(
       false,
