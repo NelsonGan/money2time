@@ -783,7 +783,7 @@ export function PlacePickerSheet({
       ) : !mapMoved ? (
         <View
           pointerEvents="none"
-          className="absolute bottom-3 left-3 flex-row items-center gap-1.5 rounded-full bg-card/95 px-3 py-1.5"
+          className="absolute bottom-3 left-3 flex-row items-center gap-1.5 rounded-full bg-card px-3 py-1.5"
           style={styles.floating}
         >
           <MapPinned size={13} color={themeColors.textMuted} />

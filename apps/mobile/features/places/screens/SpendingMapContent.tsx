@@ -153,7 +153,8 @@ export function SpendingMapContent({
   const markers = useMemo(() => clusterer(region, width), [clusterer, region, width]);
 
   const panelHeight = Math.round(height * (selection ? 0.46 : 0.3));
-  const topInset = insets.top + 112;
+  // Below the floating header card (title, period, Month / Year / All).
+  const topInset = insets.top + 120;
 
   const mapPadding = useMemo(
     () => ({ top: topInset, right: 0, bottom: panelHeight, left: 0 }),
@@ -535,56 +536,66 @@ export function SpendingMapContent({
         </AppMap>
       </View>
 
-      {/* Floating header: back, the period, and its length. */}
+      {/* Floating header: back, then one card with the period (its arrows
+          paired on the right, never beside Back) and its length. */}
       <View
         pointerEvents="box-none"
-        className="absolute left-0 right-0 top-0 px-4"
+        className="absolute left-0 right-0 top-0 flex-row items-start gap-2 px-4"
         style={{ paddingTop: insets.top + 8 }}
       >
-        <View pointerEvents="box-none" className="flex-row items-center gap-2">
-          <Pressable
-            onPress={onBack}
-            accessibilityRole="button"
-            accessibilityLabel={I18n.t('common.back')}
-            className="h-11 w-11 items-center justify-center rounded-full border border-border/40 bg-card shadow-soft active:opacity-80"
-          >
-            <ChevronLeft size={20} color={themeColors.text} />
-          </Pressable>
-          <View className="h-11 flex-1 flex-row items-center justify-between rounded-full border border-border/40 bg-card px-1.5 shadow-soft">
-            <Pressable
-              onPress={() => setPeriod((p) => shiftPeriod(p, -1, monthCycle))}
-              disabled={period.kind === 'all'}
-              accessibilityRole="button"
-              accessibilityLabel={I18n.t('locations.map_previous')}
-              hitSlop={6}
-              className={cn(
-                'h-8 w-8 items-center justify-center rounded-full',
-                period.kind === 'all' && 'opacity-0',
-              )}
-            >
-              <ChevronLeft size={18} color={themeColors.textMuted} />
-            </Pressable>
-            <Text variant="bodyStrong" numberOfLines={1} className="shrink">
-              {periodText}
-            </Text>
-            <Pressable
-              onPress={() => setPeriod((p) => shiftPeriod(p, 1, monthCycle))}
-              disabled={latest}
-              accessibilityRole="button"
-              accessibilityLabel={I18n.t('locations.map_next')}
-              hitSlop={6}
-              className={cn(
-                'h-8 w-8 items-center justify-center rounded-full',
-                latest && 'opacity-0',
-              )}
-            >
-              <ChevronRight size={18} color={themeColors.textMuted} />
-            </Pressable>
+        <Pressable
+          onPress={onBack}
+          accessibilityRole="button"
+          accessibilityLabel={I18n.t('common.back')}
+          className="h-11 w-11 items-center justify-center rounded-full border border-border/40 bg-card shadow-soft active:opacity-80"
+        >
+          <ChevronLeft size={20} color={themeColors.text} />
+        </Pressable>
+        <View className="min-w-0 flex-1 rounded-3xl border border-border/40 bg-card p-1.5 shadow-soft">
+          <View className="flex-row items-center gap-2 pb-1.5 pl-2.5 pt-0.5">
+            <View className="min-w-0 flex-1">
+              <Text variant="caption" tone="muted" numberOfLines={1}>
+                {I18n.t('locations.map_title')}
+              </Text>
+              <Text variant="bodyStrong" numberOfLines={1}>
+                {periodText}
+              </Text>
+            </View>
+            {period.kind !== 'all' ? (
+              <View className="flex-row items-center gap-1.5">
+                <Pressable
+                  onPress={() => {
+                    void triggerHaptic('selection');
+                    setPeriod((p) => shiftPeriod(p, -1, monthCycle));
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('locations.map_previous')}
+                  hitSlop={4}
+                  className="h-9 w-9 items-center justify-center rounded-full bg-secondary/70 active:opacity-70"
+                >
+                  <ChevronLeft size={18} color={themeColors.text} />
+                </Pressable>
+                <Pressable
+                  onPress={() => {
+                    void triggerHaptic('selection');
+                    setPeriod((p) => shiftPeriod(p, 1, monthCycle));
+                  }}
+                  disabled={latest}
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('locations.map_next')}
+                  accessibilityState={{ disabled: latest }}
+                  hitSlop={4}
+                  className={cn(
+                    'h-9 w-9 items-center justify-center rounded-full bg-secondary/70 active:opacity-70',
+                    latest && 'opacity-40',
+                  )}
+                >
+                  <ChevronRight size={18} color={themeColors.text} />
+                </Pressable>
+              </View>
+            ) : null}
           </View>
-          <View className="w-11" />
-        </View>
-        <View pointerEvents="box-none" className="mt-2 items-center">
-          <View className="flex-row rounded-full border border-border/40 bg-card p-1 shadow-soft">
+          <View className="flex-row rounded-full bg-secondary/60 p-0.5">
             {kinds.map((kind) => {
               const active = period.kind === kind;
               return (
@@ -597,7 +608,7 @@ export function SpendingMapContent({
                   }}
                   accessibilityRole="button"
                   accessibilityState={{ selected: active }}
-                  className={cn('rounded-full px-4 py-1.5', active && 'bg-primary')}
+                  className={cn('flex-1 items-center rounded-full py-1.5', active && 'bg-primary')}
                 >
                   <Text
                     variant="caption"

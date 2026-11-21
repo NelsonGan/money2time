@@ -1088,6 +1088,7 @@ function MainShellScreen({
     void trackEvent(AnalyticsEvents.TUTORIAL_LIST_OPENED, { source: 'settings' });
     navigation.navigate('Tutorials');
   }, [navigation]);
+  const openSpendingMap = useCallback(() => navigation.navigate('SpendingMap'), [navigation]);
   const openItemEditorFromAssets = useCallback(() => openItemEditor(), [openItemEditor]);
   const openAddTransactionForAccount = useCallback(
     (accountId: string) =>
@@ -1423,6 +1424,7 @@ function MainShellScreen({
             onOpenSettleUp={openSettleUp}
             onOpenInstalments={openInstalments}
             onOpenTutorials={openTutorials}
+            onOpenSpendingMap={openSpendingMap}
             onOpenEditTransaction={openTransactionEditor}
             onOpenAddTransaction={openAddTransactionDetailed}
             onScreenChange={handleSettingsScreenChange}

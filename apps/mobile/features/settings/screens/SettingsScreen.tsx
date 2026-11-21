@@ -87,6 +87,7 @@ interface SettingsScreenProps {
   onOpenAccounts: () => void;
   onOpenItems: () => void;
   onOpenAlbums: () => void;
+  onOpenSpendingMap: () => void;
   onOpenExchangeRates: () => void;
   onOpenCategories: () => void;
   onOpenRecurring: () => void;
@@ -124,6 +125,7 @@ export function SettingsScreen({
   onOpenAccounts,
   onOpenItems,
   onOpenAlbums,
+  onOpenSpendingMap,
   onOpenExchangeRates,
   onOpenCategories,
   onOpenRecurring,
@@ -613,6 +615,11 @@ export function SettingsScreen({
                   icon={<ClayIcon name="settings/albums" size={34} flatSize={20} />}
                   label={I18n.t('albums.title')}
                   onPress={onOpenAlbums}
+                />
+                <SettingsGridTile
+                  icon={<ClayIcon name="ui/map" size={34} flatSize={20} />}
+                  label={I18n.t('locations.map_title')}
+                  onPress={onOpenSpendingMap}
                 />
                 <SettingsGridTile
                   icon={<ClayIcon name="settings/receipts" size={34} flatSize={20} />}
