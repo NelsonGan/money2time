@@ -59,11 +59,15 @@ export async function addressSubject(ip: string, now: Date): Promise<string> {
   return `ip:${hex.slice(0, 32)}`;
 }
 
-/** Whether both the user and the address may search again today (one read). */
+/**
+ * Whether both the user and the address may make `uses` more Apple calls
+ * today (one read): a nearby list of two searches needs room for two.
+ */
 export async function checkQuota(
   subjects: QuotaSubjects,
   env: QuotaEnv,
   now: Date,
+  uses = 1,
 ): Promise<QuotaDecision> {
   const limits = dailyLimits(env);
   const { results } = await env.MONEY2TIME_D1_PLACES.prepare(
@@ -72,8 +76,10 @@ export async function checkQuota(
     .bind(dayStart(now), subjects.user, subjects.address)
     .all<{ subject: string; count: number }>();
   const used = (subject: string) => results.find((row) => row.subject === subject)?.count ?? 0;
-  if (used(subjects.user) >= limits.user) return { allowed: false, reachedBy: 'user' };
-  if (used(subjects.address) >= limits.address) return { allowed: false, reachedBy: 'address' };
+  if (used(subjects.user) + uses > limits.user) return { allowed: false, reachedBy: 'user' };
+  if (used(subjects.address) + uses > limits.address) {
+    return { allowed: false, reachedBy: 'address' };
+  }
   return { allowed: true, reachedBy: null };
 }
 

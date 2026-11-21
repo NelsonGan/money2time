@@ -49,6 +49,7 @@ import { runAfterInteractions } from '~/utils/interactions';
 
 import { useCurrentPlace } from '../hooks/useCurrentPlace';
 import { useNearbyPlaces } from '../hooks/useNearbyPlaces';
+import { STREET_DELTA } from '../lib/fitMap';
 import { placeCategoryIcon } from '../lib/placeIcons';
 import {
   distanceMeters,
@@ -504,9 +505,10 @@ export function PlacePickerSheet({
       mapRef.current?.fitTo(points);
     }, motionDurations.normal);
     return () => clearTimeout(handle);
-    // Only a new list moves the camera, not a re-render.
+    // Only a new list moves the camera, not a re-render (one that arrived
+    // while a pin was being dropped is framed once the pin is put away).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mapReady, mapPlacesSignature, keyboardUp]);
+  }, [mapReady, mapPlacesSignature, keyboardUp, pin.kind]);
   useEffect(() => {
     if (visible) return;
     setMapReady(false);
@@ -632,7 +634,11 @@ export function PlacePickerSheet({
           <PlacePickerMap
             ref={mapRef}
             onReady={handleMapReady}
-            initialRegion={{ ...initialPoint, latitudeDelta: 0.006, longitudeDelta: 0.006 }}
+            initialRegion={{
+              ...initialPoint,
+              latitudeDelta: STREET_DELTA,
+              longitudeDelta: STREET_DELTA,
+            }}
             places={mapPlaces}
             selectedKey={currentKey}
             focusedKey={focusedKey}
@@ -873,6 +879,8 @@ export function PlacePickerSheet({
         onPress={() => choose(place, source)}
         onLongPress={() => {
           void triggerHaptic('selection');
+          // The keyboard going down would frame the whole list over this row.
+          framedRef.current = mapPlacesSignature;
           Keyboard.dismiss();
           setFocusedKey(placeKey(place));
           mapRef.current?.animateTo(place);

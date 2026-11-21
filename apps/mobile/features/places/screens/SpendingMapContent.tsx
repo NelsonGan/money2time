@@ -153,8 +153,8 @@ export function SpendingMapContent({
   const markers = useMemo(() => clusterer(region, width), [clusterer, region, width]);
 
   const panelHeight = Math.round(height * (selection ? 0.46 : 0.3));
-  // Below the floating header card (title, period, Month / Year / All).
-  const topInset = insets.top + 120;
+  // Below the floating header (back and Month / Year / All).
+  const topInset = insets.top + 64;
 
   const mapPadding = useMemo(
     () => ({ top: topInset, right: 0, bottom: panelHeight, left: 0 }),
@@ -421,55 +421,98 @@ export function SpendingMapContent({
       );
     }
     const list = selection ? selectedGroups : groups;
+    // The sheet is the period's: its title and its ‹ › (a bubble's places
+    // get a close button instead, since they are not the whole period).
+    const header = (
+      <View className="flex-row items-center gap-2 px-5 pb-2 pt-3">
+        <View className="min-w-0 flex-1">
+          <Text variant="headingSm" numberOfLines={1}>
+            {periodText}
+          </Text>
+          {list.length > 0 ? (
+            <Text variant="caption" tone="muted" numberOfLines={1}>
+              {I18n.t(
+                list.length === 1 ? 'locations.map_places_one' : 'locations.map_places_other',
+                { count: list.length },
+              )}
+            </Text>
+          ) : null}
+        </View>
+        {selection ? (
+          <Pressable
+            onPress={() => setSelection(null)}
+            accessibilityRole="button"
+            accessibilityLabel={I18n.t('common.close')}
+            hitSlop={8}
+            className="h-9 w-9 items-center justify-center rounded-full bg-secondary/60 active:opacity-70"
+          >
+            <X size={18} color={themeColors.textMuted} />
+          </Pressable>
+        ) : period.kind !== 'all' ? (
+          <View className="flex-row items-center gap-2">
+            <Pressable
+              onPress={() => {
+                void triggerHaptic('selection');
+                setPeriod((p) => shiftPeriod(p, -1, monthCycle));
+              }}
+              accessibilityRole="button"
+              accessibilityLabel={I18n.t('locations.map_previous')}
+              hitSlop={4}
+              className="h-10 w-10 items-center justify-center rounded-full border border-border/50 bg-card active:opacity-70"
+            >
+              <ChevronLeft size={18} color={themeColors.text} />
+            </Pressable>
+            <Pressable
+              onPress={() => {
+                void triggerHaptic('selection');
+                setPeriod((p) => shiftPeriod(p, 1, monthCycle));
+              }}
+              disabled={latest}
+              accessibilityRole="button"
+              accessibilityLabel={I18n.t('locations.map_next')}
+              accessibilityState={{ disabled: latest }}
+              hitSlop={4}
+              className={cn(
+                'h-10 w-10 items-center justify-center rounded-full border border-border/50 bg-card active:opacity-70',
+                latest && 'border-transparent bg-secondary/60 opacity-50',
+              )}
+            >
+              <ChevronRight size={18} color={themeColors.text} />
+            </Pressable>
+          </View>
+        ) : null}
+      </View>
+    );
     if (list.length === 0) {
       return (
-        <View className="flex-1 justify-center px-5">
-          <EmptyState
-            compact
-            title={I18n.t(
-              anyLocated ? 'locations.map_empty_period_title' : 'locations.map_empty_title',
-            )}
-            message={
-              settings.transactionLocationsEnabled
-                ? I18n.t('locations.map_empty_message')
-                : I18n.t('locations.map_disabled_message')
-            }
-            mascotMood="curious"
-            action={
-              settings.transactionLocationsEnabled
-                ? undefined
-                : { label: I18n.t('locations.map_turn_on'), onPress: onOpenLocationSettings }
-            }
-          />
+        <View className="flex-1">
+          {header}
+          <View className="flex-1 justify-center px-5">
+            <EmptyState
+              compact
+              title={I18n.t(
+                anyLocated ? 'locations.map_empty_period_title' : 'locations.map_empty_title',
+              )}
+              message={
+                settings.transactionLocationsEnabled
+                  ? I18n.t('locations.map_empty_message')
+                  : I18n.t('locations.map_disabled_message')
+              }
+              mascotMood="curious"
+              action={
+                settings.transactionLocationsEnabled
+                  ? undefined
+                  : { label: I18n.t('locations.map_turn_on'), onPress: onOpenLocationSettings }
+              }
+            />
+          </View>
         </View>
       );
     }
     const all = list.flatMap((g) => g.transactions);
     return (
       <View className="flex-1">
-        <View className="flex-row items-start gap-2 px-5 pb-2 pt-4">
-          <View className="min-w-0 flex-1">
-            <Text variant="subheading" numberOfLines={1}>
-              {I18n.t(
-                list.length === 1 ? 'locations.map_places_one' : 'locations.map_places_other',
-                {
-                  count: list.length,
-                },
-              )}
-            </Text>
-          </View>
-          {selection ? (
-            <Pressable
-              onPress={() => setSelection(null)}
-              accessibilityRole="button"
-              accessibilityLabel={I18n.t('common.close')}
-              hitSlop={8}
-              className="h-9 w-9 items-center justify-center rounded-full bg-secondary/60 active:opacity-70"
-            >
-              <X size={18} color={themeColors.textMuted} />
-            </Pressable>
-          ) : null}
-        </View>
+        {header}
         <View className="px-4 pb-2">
           <PlaceStats stats={statsFor(all)} />
         </View>
@@ -536,11 +579,11 @@ export function SpendingMapContent({
         </AppMap>
       </View>
 
-      {/* Floating header: back, then one card with the period (its arrows
-          paired on the right, never beside Back) and its length. */}
+      {/* Floating header: back, and the period's length. The period itself
+          and its ‹ › head the sheet, beside what they change. */}
       <View
         pointerEvents="box-none"
-        className="absolute left-0 right-0 top-0 flex-row items-start gap-2 px-4"
+        className="absolute left-0 right-0 top-0 flex-row items-center px-4"
         style={{ paddingTop: insets.top + 8 }}
       >
         <Pressable
@@ -551,51 +594,8 @@ export function SpendingMapContent({
         >
           <ChevronLeft size={20} color={themeColors.text} />
         </Pressable>
-        <View className="min-w-0 flex-1 rounded-3xl border border-border/40 bg-card p-1.5 shadow-soft">
-          <View className="flex-row items-center gap-2 pb-1.5 pl-2.5 pt-0.5">
-            <View className="min-w-0 flex-1">
-              <Text variant="caption" tone="muted" numberOfLines={1}>
-                {I18n.t('locations.map_title')}
-              </Text>
-              <Text variant="bodyStrong" numberOfLines={1}>
-                {periodText}
-              </Text>
-            </View>
-            {period.kind !== 'all' ? (
-              <View className="flex-row items-center gap-1.5">
-                <Pressable
-                  onPress={() => {
-                    void triggerHaptic('selection');
-                    setPeriod((p) => shiftPeriod(p, -1, monthCycle));
-                  }}
-                  accessibilityRole="button"
-                  accessibilityLabel={I18n.t('locations.map_previous')}
-                  hitSlop={4}
-                  className="h-9 w-9 items-center justify-center rounded-full bg-secondary/70 active:opacity-70"
-                >
-                  <ChevronLeft size={18} color={themeColors.text} />
-                </Pressable>
-                <Pressable
-                  onPress={() => {
-                    void triggerHaptic('selection');
-                    setPeriod((p) => shiftPeriod(p, 1, monthCycle));
-                  }}
-                  disabled={latest}
-                  accessibilityRole="button"
-                  accessibilityLabel={I18n.t('locations.map_next')}
-                  accessibilityState={{ disabled: latest }}
-                  hitSlop={4}
-                  className={cn(
-                    'h-9 w-9 items-center justify-center rounded-full bg-secondary/70 active:opacity-70',
-                    latest && 'opacity-40',
-                  )}
-                >
-                  <ChevronRight size={18} color={themeColors.text} />
-                </Pressable>
-              </View>
-            ) : null}
-          </View>
-          <View className="flex-row rounded-full bg-secondary/60 p-0.5">
+        <View pointerEvents="box-none" className="flex-1 items-center">
+          <View className="flex-row rounded-full border border-border/40 bg-card p-1 shadow-soft">
             {kinds.map((kind) => {
               const active = period.kind === kind;
               return (
@@ -608,7 +608,7 @@ export function SpendingMapContent({
                   }}
                   accessibilityRole="button"
                   accessibilityState={{ selected: active }}
-                  className={cn('flex-1 items-center rounded-full py-1.5', active && 'bg-primary')}
+                  className={cn('rounded-full px-4 py-2', active && 'bg-primary')}
                 >
                   <Text
                     variant="caption"
@@ -624,6 +624,8 @@ export function SpendingMapContent({
             })}
           </View>
         </View>
+        {/* Balances the back button so the switch sits in the middle. */}
+        <View className="w-11" />
       </View>
 
       {groups.length > 0 ? (

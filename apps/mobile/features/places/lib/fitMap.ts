@@ -10,6 +10,9 @@ interface FittableMap {
   ): void;
 }
 
+/** About two blocks across: close enough to read street names. */
+export const STREET_DELTA = 0.006;
+
 const NO_PADDING: EdgePadding = { top: 0, right: 0, bottom: 0, left: 0 };
 
 /**

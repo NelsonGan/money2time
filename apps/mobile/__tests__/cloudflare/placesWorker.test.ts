@@ -407,7 +407,7 @@ describe('POST /search and /reverse', () => {
     await Promise.all(waits);
     // Counted against the user and, hashed, the address it came from.
     const subjects = { user: 'm2t_a', address: expect.stringMatching(/^ip:[0-9a-f]{32}$/) };
-    expect(checkQuota).toHaveBeenCalledWith(subjects, expect.anything(), expect.any(Date));
+    expect(checkQuota).toHaveBeenCalledWith(subjects, expect.anything(), expect.any(Date), 1);
     expect(consumeQuota).toHaveBeenCalledWith(subjects, expect.anything(), expect.any(Date), 1);
   });
 
@@ -494,6 +494,13 @@ describe('POST /search and /reverse', () => {
     ]);
     const searches = fetchMock.mock.calls.filter(([url]) => String(url).includes('/v1/search'));
     expect(searches).toHaveLength(2);
+    // The allowance must have room for both calls.
+    expect(checkQuota).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.any(Date),
+      2,
+    );
     await Promise.all(waits);
     expect(consumeQuota).toHaveBeenCalledWith(
       expect.anything(),
@@ -501,6 +508,36 @@ describe('POST /search and /reverse', () => {
       expect.any(Date),
       2,
     );
+  });
+
+  it('keeps a nearby list when one of its searches fails, counting the one that answered', async () => {
+    const error = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    try {
+      fetchMock.mockImplementation(async (url: unknown) => {
+        const href = String(url);
+        if (href.endsWith('/v1/token')) {
+          return Response.json({ accessToken: 'access-1', expiresInSeconds: 1800 });
+        }
+        if (href.includes('q=store')) return new Response('', { status: 500 });
+        return Response.json(APPLE_SEARCH);
+      });
+      const response = await post('/nearby', {
+        appUserId: 'm2t_a',
+        latitude: 3.1579,
+        longitude: 101.7123,
+      });
+      expect(response.status).toBe(200);
+      expect((await response.json()).places).toHaveLength(2);
+      await Promise.all(waits);
+      expect(consumeQuota).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.any(Date),
+        1,
+      );
+    } finally {
+      error.mockRestore();
+    }
   });
 
   it('stops at the daily allowance without calling Apple', async () => {
@@ -645,6 +682,16 @@ describe('routes and the daily allowance', () => {
     expect(await realQuota.checkQuota(subjects, env, now)).toEqual({
       allowed: true,
       reachedBy: null,
+    });
+    counts['m2t_a'] = 1;
+    // One call left: a single search may go, a two-search nearby list may not.
+    expect(await realQuota.checkQuota(subjects, env, now)).toEqual({
+      allowed: true,
+      reachedBy: null,
+    });
+    expect(await realQuota.checkQuota(subjects, env, now, 2)).toEqual({
+      allowed: false,
+      reachedBy: 'user',
     });
     counts['m2t_a'] = 2;
     expect(await realQuota.checkQuota(subjects, env, now)).toEqual({

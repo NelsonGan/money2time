@@ -13,6 +13,9 @@ export type NearbyState =
 // window, so tagging three coffees in a row asks the Worker once.
 const REUSE_MS = 5 * 60 * 1000;
 const answers = new Map<string, { places: PlaceResult[]; at: number }>();
+// A question still in flight, shared by an effect that runs again before it
+// answers (a chip tapped twice, a search typed and cleared): each is Apple calls.
+const pending = new Map<string, Promise<PlaceResult[]>>();
 
 function answerKey(origin: Coordinate, category: NearbyCategory, locale: string | null): string {
   // About 110 m, as the Worker rounds it: a few steps away is the same answer.
@@ -57,9 +60,18 @@ export function useNearbyPlaces({
     }
     const id = ++requestId.current;
     setState({ kind: 'loading' });
-    nearbyPlaces({ appUserId, near, category, locale })
+    let request = pending.get(key);
+    if (!request) {
+      request = nearbyPlaces({ appUserId, near, category, locale })
+        .then((places) => {
+          answers.set(key, { places, at: Date.now() });
+          return places;
+        })
+        .finally(() => pending.delete(key));
+      pending.set(key, request);
+    }
+    request
       .then((places) => {
-        answers.set(key, { places, at: Date.now() });
         if (id === requestId.current) setState({ kind: 'done', places });
       })
       .catch((err: unknown) => {

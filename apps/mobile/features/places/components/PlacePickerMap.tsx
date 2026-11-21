@@ -6,7 +6,7 @@ import { Marker, type Region } from 'react-native-maps';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { cn } from '~/utils';
 
-import { fitMapToPoints } from '../lib/fitMap';
+import { fitMapToPoints, STREET_DELTA } from '../lib/fitMap';
 import { placeCategoryIcon } from '../lib/placeIcons';
 import { placeKey } from '../lib/placeLocation';
 import type { Coordinate, PlaceResult } from '../lib/placeTypes';
@@ -39,8 +39,6 @@ interface PlacePickerMapProps {
   onReady: () => void;
 }
 
-// About two blocks across: close enough to read street names.
-export const STREET_DELTA = 0.006;
 const FIT_MARGIN = { top: 56, right: 56, bottom: 56, left: 40 };
 
 interface PinProps {
@@ -130,19 +128,23 @@ export const PlacePickerMap = forwardRef<PlacePickerMapHandle, PlacePickerMapPro
   ) {
     const mapRef = useRef<MapView>(null);
     // MapKit cannot tell a pan from an animation (`isGesture` is Google-only):
-    // a touch on the map marks the next settle as the user's.
+    // a touch on the map marks the next settle as the user's. A camera move
+    // the app starts clears it, so a tap that moved nothing (a pin, or the
+    // map to close a card) does not make the next framing look like a pan.
     const touchedRef = useRef(false);
 
     useImperativeHandle(
       ref,
       () => ({
         animateTo: (coordinate, delta = STREET_DELTA) => {
+          touchedRef.current = false;
           mapRef.current?.animateToRegion(
             { ...coordinate, latitudeDelta: delta, longitudeDelta: delta },
             350,
           );
         },
         fitTo: (points) => {
+          touchedRef.current = false;
           fitMapToPoints(mapRef.current, points, {
             minDelta: STREET_DELTA,
             margin: FIT_MARGIN,

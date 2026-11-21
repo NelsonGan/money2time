@@ -676,10 +676,12 @@ locations** is off for everyone until they turn it on. The code lives in
   opens from a map button in the Calendar header, shown while Locations
   is on or once any entry has a place, and from a **Spending map** tile in
   Settings' Money grid (after Albums; always there, the map's empty state
-  offers to turn Locations on). Its floating header is a back button and one
-  card: "Spending map" over the period, the ‹ › pair together at the card's
-  right edge (never beside Back; › dims on the current period, and both hide
-  for all time), and Month / Year / All under them. It shows one month, one
+  offers to turn Locations on). Over the map float only a back button and
+  the Month / Year / All switch; the sheet below is titled with the period
+  ("November 2026", the place count under it) and has the ‹ › pair at its right
+  (› dims on the current period, both hide for all time, and a bubble's list
+  shows a close button there instead), so the arrows sit by what they change
+  and stay there when a period is empty. It shows one month, one
   year or all time (‹ › moves between periods, never past the current one); months follow
   the month cycle like the Calendar (`mapPeriod.ts` on the `financialMonth`
   helpers), so "November" covers the same days in both, and a year runs from
@@ -5090,8 +5092,11 @@ the routes and the signature check; `src/quota.ts` the daily allowance.
   allowance. A miss checks two daily counts in one read: the user's
   (`PLACES_DAILY_LIMIT`, 200) and the address's (`PLACES_ADDRESS_DAILY_LIMIT`,
   1,000), since a user id is whatever the caller sends and one script inventing
-  ids must not use up Apple's day for everyone. It then asks Apple and counts
-  one use for both per Apple call (a nearby "all" list counts two). `PLACES_LIMITER` caps each address at 60 a minute, and a
+  ids must not use up Apple's day for everyone; both need room for every Apple
+  call the request makes. It then asks Apple and counts one use for both per
+  Apple call that answered (a nearby "all" list counts two). When one of a
+  nearby list's two searches fails, the other's places are still answered,
+  counted and not cached. `PLACES_LIMITER` caps each address at 60 a minute, and a
   body over 4 KB is refused unread (413).
 - **Storage.** One table, `search_usage` (`apps/cloudflare/d1/places/schema.sql`):
   a count per `(subject, day_start)`, the subject being the user id or `ip:`

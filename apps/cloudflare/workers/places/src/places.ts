@@ -319,7 +319,11 @@ export function mergeNearby(
   const merged: PlaceResult[] = [];
   for (const payload of payloads) {
     for (const place of toPlaceResults(payload, MAX_NEARBY_RESULTS)) {
-      const key = place.id ?? `${place.name}@${place.latitude.toFixed(5)},${place.longitude.toFixed(5)}`;
+      // The app's placeKey (features/places/lib/placeLocation.ts): two places
+      // it would draw as one pin and one row are one place here too.
+      const key = place.id
+        ? `id:${place.id}`
+        : `pt:${place.latitude.toFixed(4)},${place.longitude.toFixed(4)}:${place.name.trim().toLowerCase()}`;
       if (seen.has(key)) continue;
       seen.add(key);
       merged.push(place);

@@ -145,7 +145,7 @@ async function handlePlaces(
   };
   let quota: Awaited<ReturnType<typeof checkQuota>>;
   try {
-    quota = await checkQuota(subjects, env, now);
+    quota = await checkQuota(subjects, env, now, applePaths.length);
   } catch (err) {
     // The database is down: refuse with a JSON error rather than throw, and
     // never search Apple without the allowance checked.
@@ -156,26 +156,29 @@ async function handlePlaces(
     log('limit_reached', { reqId, appUserId: parsed.appUserId, by: quota.reachedBy });
     return json({ error: 'limit_reached' }, 429);
   }
-  let places: PlaceResult[];
-  try {
-    const payloads = await Promise.all(
-      applePaths.map((path) => appleGet(env, path, now.getTime())),
-    );
-    places =
-      kind === 'nearby'
-        ? mergeNearby(payloads, nearbyCenter(parsed as Parameters<typeof nearbyCenter>[0]))
-        : toPlaceResults(payloads[0]);
-  } catch (err) {
+  // Every Apple call that answered counts, even when another one failed. A
+  // nearby list missing one of its searches is still shown, but not cached.
+  const settled = await Promise.allSettled(
+    applePaths.map((path) => appleGet(env, path, now.getTime())),
+  );
+  const payloads = settled.flatMap((result) =>
+    result.status === 'fulfilled' ? [result.value] : [],
+  );
+  const failure = settled.find((result) => result.status === 'rejected');
+  if (payloads.length > 0) {
+    ctx.waitUntil(consumeQuota(subjects, env, now, payloads.length).catch(() => undefined));
+  }
+  if (failure && (kind !== 'nearby' || payloads.length === 0)) {
+    const err = failure.reason;
     const error = err instanceof PlacesError ? err : new PlacesError('upstream', 502);
     logError('apple_failed', { reqId, kind, error: error.code });
     return json({ error: error.code }, error.status);
   }
-  ctx.waitUntil(
-    Promise.all([
-      consumeQuota(subjects, env, now, applePaths.length).catch(() => undefined),
-      writeCachedPlaces(cachePath, places),
-    ]),
-  );
+  const places: PlaceResult[] =
+    kind === 'nearby'
+      ? mergeNearby(payloads, nearbyCenter(parsed as Parameters<typeof nearbyCenter>[0]))
+      : toPlaceResults(payloads[0]);
+  if (!failure) ctx.waitUntil(writeCachedPlaces(cachePath, places));
   log('places_ok', { reqId, kind, results: places.length });
   return json({ places }, 200);
 }

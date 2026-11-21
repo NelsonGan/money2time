@@ -18,14 +18,12 @@ export interface Coordinate {
 }
 
 /** The nearby list's filter: everything people spend in, or one kind of place. */
-export const NEARBY_CATEGORIES = [
-  'all',
-  'food',
-  'coffee',
-  'groceries',
-  'shopping',
-  'fuel',
-  'transport',
-  'health',
-] as const;
-export type NearbyCategory = (typeof NEARBY_CATEGORIES)[number];
+export type NearbyCategory =
+  | 'all'
+  | 'food'
+  | 'coffee'
+  | 'groceries'
+  | 'shopping'
+  | 'fuel'
+  | 'transport'
+  | 'health';

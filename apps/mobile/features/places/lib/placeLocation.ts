@@ -181,7 +181,8 @@ export function matchPlaces(
     else if (foldText(place.address).includes(needle)) rank = 3;
     if (rank >= 0) ranked.push({ place, rank });
   }
-  // Stable: places keep their recency order within a rank.
+  // Stable: places keep the order they came in within a rank (recentPlaces:
+  // the ones close by first, then the most recent).
   return ranked
     .sort((a, b) => a.rank - b.rank)
     .slice(0, limit)
