@@ -94,8 +94,8 @@ Before the PR, screenshot the result and compare it with the mockup: close the
 gaps the project's rules allow, and name each deliberate difference. The mockup
 goes in the PR's evidence beside the result. Design reviews, user or UX reviews
 and reviews of UI PRs use a mockup the same way, as the yardstick. Skip it only
-when nothing about how a screen looks changes, or the user gave the design;
-say so in the PR.
+when nothing about how a screen looks changes, the user gave the design, or no
+image backend works; say so in the PR.
 
 **Show the device in T3 Code's Device panel while testing.** Open it with
 `device_open` and leave it on the tested screen while the user should still look

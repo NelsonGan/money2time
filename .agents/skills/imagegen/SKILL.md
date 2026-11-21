@@ -35,22 +35,24 @@ The script lives next to this file: `scripts/imagegen.sh`. From the repo root th
 .agents/skills/imagegen/scripts/imagegen.sh -o <out.png> [options] "<brief>"
 ```
 
-| Flag       | Meaning                                                                           |
-| ---------- | --------------------------------------------------------------------------------- |
-| `-o PATH`  | Output file (required). With `-n` > 1 you get `PATH-1.png`, `PATH-2.png`, ...     |
-| `-n COUNT` | Variants, one generation call each. Each adds roughly 30-60s.                     |
-| `-t`       | Real transparent background (alpha kept). Use for icons, stickers, cutouts.       |
-| `-i FILE`  | Attach an image (repeatable). By default it is a style/subject **reference**.     |
-| `-e`       | Make the first `-i` image the **edit target**: change only what the brief says.   |
-| `-b LIST`  | Backends to try, in order: `codex`, `antigravity`, or both (`antigravity,codex`). |
-| `-m MODEL` | Model override for that backend. Needs a single backend in `-b`.                  |
+| Flag       | Meaning                                                                                                                                  |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `-o PATH`  | Output file (required). With `-n` > 1 you get `PATH-1.png`, `PATH-2.png`, ... Never overwrites: an existing file makes it `PATH-v2.png`. |
+| `-n COUNT` | Variants, one generation call each. Each adds roughly 30-60s.                                                                            |
+| `-t`       | Real transparent background (alpha kept). Use for icons, stickers, cutouts.                                                              |
+| `-i FILE`  | Attach an image (repeatable). By default it is a style/subject **reference**.                                                            |
+| `-e`       | Make the first `-i` image the **edit target**: change only what the brief says.                                                          |
+| `-b LIST`  | Backends to try, in order: `codex`, `antigravity`, or both (`antigravity,codex`).                                                        |
+| `-m MODEL` | Model override for that backend. Needs a single backend in `-b`.                                                                         |
 
 `IMAGEGEN_BACKEND` sets the default for `-b`, and `CODEX_BIN` / `AGY_BIN` point at a
 CLI the script cannot find. It prints the absolute path of each saved image, one per
-line, and `imagegen: made with <backend>` on stderr. A single image takes about
-30-90s and two variants about 2 minutes, plus the time a failed backend takes to
-fail, so give the shell call a timeout of at least 5 minutes (add ~1 minute per
-extra variant), or run it in the background. For several **distinct** images, start
+line (use those paths: they differ from `-o` when that file already existed), and
+`imagegen: made with <backend>` on stderr. A single image takes about 30-90s and two
+variants about 2 minutes. Each backend gets `IMAGEGEN_TIMEOUT` seconds (default 180
+plus 90 per image) before the script stops it and tries the next, so a run can take
+twice that when the first backend hangs: give the shell call a timeout of at least
+10 minutes, or run it in the background. For several **distinct** images, start
 separate invocations in parallel rather than one long `-n` run.
 
 Pick a backend only when it matters: `-b codex` for a real alpha channel (`-t`),
@@ -97,8 +99,9 @@ start. Keep one backend for a whole family (`-b`), since each model has its own 
    go ahead.
 4. Never overwrite an existing project asset unless asked; write a sibling
    (`icon-v2.png`) and let the user pick.
-5. Generate drafts into a scratch/temp folder, not the repo, and copy only the
-   chosen image in. Then run whatever asset pipeline the repo uses (icon registry
+5. Generate drafts into a scratch/temp folder (UI mockups go in the ignored
+   `.github/pr-assets/<topic>/`), not the tracked repo, and copy only the chosen
+   image in. Then run whatever asset pipeline the repo uses (icon registry
    generators, compression, etc.).
 
 ## Troubleshooting
@@ -112,5 +115,8 @@ start. Keep one backend for a whole family (`-b`), since each model has its own 
   Antigravity), or a usage limit (Antigravity names the time its quota resets). The
   script has already tried the next backend; when all fail, report it to the user
   rather than retrying in a loop.
+- Antigravity runs sandboxed in an empty temp folder, with the attached images
+  copied in, and the script ignores anything it returns that is only a copy of an
+  attached image. Codex runs read-only.
 - Codex may log MCP auth errors (e.g. a Cloudflare OAuth prompt) to stderr. They are
   harmless.

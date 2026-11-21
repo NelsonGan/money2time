@@ -17,7 +17,7 @@ how the screen should look shows what the real one is missing.
 Pictures come from [imagegen](../imagegen/SKILL.md), which uses whichever image
 model is available (Codex or Antigravity today). Read its `SKILL.md` once per
 session for the flags. An image takes 30-90 s: run the script in the background or
-with a timeout of 5+ minutes, and start independent images in parallel.
+with a timeout of 10+ minutes, and start independent images in parallel.
 
 ## When
 
@@ -63,7 +63,7 @@ Asset type: high-fidelity UI mockup of one <iPhone app screen | Android app scre
 Product: Money2Time, an expense tracker that shows what things cost in hours of the user's work; calm, warm, trustworthy
 Screen: <what this screen is for, what the user does here, the primary action>
 Content (use exactly): <real labels, realistic amounts in a real currency, hours, account and category names; sections in priority order>
-Visual language: match the references (rosewood accent on neutral surfaces, Work Sans, soft rounded cards, generous spacing), <light or dark>
+Visual language: match the references (rosewood accent on neutral surfaces, Work Sans in the app or DM Sans on the web, soft rounded cards, generous spacing), <light or dark>
 Platform: <iOS: safe areas, floating tab bar, sheet grabber | Android: Material conventions | web: nav, max content width>
 Composition: portrait 9:19.5 (phone) | landscape 3:2 (web, iPad)
 Avoid: lorem ipsum, placeholder boxes, watermark, device frame, multiple screens in one image
@@ -79,7 +79,9 @@ Real content matters most. A mockup of fake content is a design for fake content
 
 Make two variants (`-n 2`) for open-ended work; the second often finds a better
 structure. For a third take from another model, run once more with
-`-b antigravity` (or `-b codex`, whichever did not make the first). For a feature
+`-b antigravity` (or `-b codex`, whichever did not make the first) and
+`-o .github/pr-assets/<topic>/mockup-alt.png`. The script never overwrites a file,
+so always use the paths it prints. For a feature
 that spans screens, mock the key screen first, then pass it with `-i` when mocking
 the others so they read as one product. A change shown on both the app and the Web
 Dashboard gets a mockup for each, the second made with the first as reference.
