@@ -12,7 +12,7 @@ import { cn } from '~/utils';
  * changes the card colour while the accent stays), then stop so panning stays
  * smooth.
  */
-function useBriefTracking(...deps: unknown[]): boolean {
+export function useBriefTracking(...deps: unknown[]): boolean {
   const [tracking, setTracking] = useState(true);
   useEffect(() => {
     setTracking(true);

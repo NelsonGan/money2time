@@ -16,3 +16,14 @@ export interface Coordinate {
   latitude: number;
   longitude: number;
 }
+
+/** The nearby list's filter: everything people spend in, or one kind of place. */
+export type NearbyCategory =
+  | 'all'
+  | 'food'
+  | 'coffee'
+  | 'groceries'
+  | 'shopping'
+  | 'fuel'
+  | 'transport'
+  | 'health';

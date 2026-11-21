@@ -78,6 +78,8 @@ interface SettingsStackProps {
   onOpenSettleUp: () => void;
   onOpenInstalments: () => void;
   onOpenTutorials: () => void;
+  /** The Spending map is a root screen (full-bleed map, above the tab bar). */
+  onOpenSpendingMap: () => void;
   onOpenEditTransaction: (transaction: TransactionWithRelations) => void;
   onOpenAddTransaction: () => void;
   onScreenChange?: (screen: string) => void;
@@ -99,12 +101,14 @@ function SettingsHomeRoute({
   onOpenSettleUp,
   onOpenInstalments,
   onOpenTutorials,
+  onOpenSpendingMap,
 }: SettingsStackRouteProps<'SettingsHome'> & {
   scrollToTopToken: number;
   onOpenProPaywall: (source: string) => void;
   onOpenSettleUp: () => void;
   onOpenInstalments: () => void;
   onOpenTutorials: () => void;
+  onOpenSpendingMap: () => void;
 }) {
   return (
     <SettingsScreen
@@ -115,6 +119,7 @@ function SettingsHomeRoute({
       onOpenAccounts={() => navigation.navigate('Accounts')}
       onOpenItems={() => navigation.navigate('Items')}
       onOpenAlbums={() => requestOpenTab('albums')}
+      onOpenSpendingMap={onOpenSpendingMap}
       onOpenExchangeRates={() => navigation.navigate('ExchangeRates')}
       onOpenCategories={() => navigation.navigate('Categories')}
       onOpenRecurring={() => navigation.navigate('Recurring')}
@@ -160,6 +165,7 @@ export function SettingsStack({
   onOpenSettleUp,
   onOpenInstalments,
   onOpenTutorials,
+  onOpenSpendingMap,
   onOpenEditTransaction,
   onOpenAddTransaction,
   onScreenChange,
@@ -239,6 +245,7 @@ export function SettingsStack({
               onOpenSettleUp={onOpenSettleUp}
               onOpenInstalments={onOpenInstalments}
               onOpenTutorials={onOpenTutorials}
+              onOpenSpendingMap={onOpenSpendingMap}
             />
           );
         }}

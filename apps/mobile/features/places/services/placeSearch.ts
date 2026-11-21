@@ -8,7 +8,7 @@
 import { signingHeaders } from '~/services/requestSigning';
 import { getErrorMessage } from '~/utils/errorHandling';
 
-import type { PlaceResult } from '../lib/placeTypes';
+import type { Coordinate, NearbyCategory, PlaceResult } from '../lib/placeTypes';
 
 export type PlaceSearchErrorCode =
   | 'not_available'
@@ -92,8 +92,9 @@ async function post(path: string, body: Record<string, unknown>): Promise<PlaceR
         throw new PlaceSearchError('rate_limited', 'Too many searches. Try again shortly.');
       if (payload.error === 'capacity')
         throw new PlaceSearchError('busy', 'Place search is busy. Try again shortly.');
-      if (payload.error === 'not_configured')
-        throw new PlaceSearchError('not_available', 'Place search is not configured.');
+      // not_found: a Worker older than the route (the app can ship first).
+      if (payload.error === 'not_configured' || payload.error === 'not_found')
+        throw new PlaceSearchError('not_available', 'Place search is not available.');
       throw new PlaceSearchError(
         'server',
         payload.error ?? `Place search failed (${response.status}).`,
@@ -130,6 +131,30 @@ export function searchPlaces({ appUserId, query, near, locale }: SearchPlacesArg
     appUserId,
     query: query.trim(),
     ...(near ? { latitude: near.latitude, longitude: near.longitude } : {}),
+    language: appleLanguage(locale),
+  });
+}
+
+/**
+ * Places to spend around a point (the phone, or where the map was moved to),
+ * closest first: every kind with `all`, or one kind of place.
+ */
+export function nearbyPlaces({
+  appUserId,
+  near,
+  category,
+  locale,
+}: {
+  appUserId: string;
+  near: Coordinate;
+  category: NearbyCategory;
+  locale?: string | null;
+}) {
+  return post('/nearby', {
+    appUserId,
+    latitude: near.latitude,
+    longitude: near.longitude,
+    category,
     language: appleLanguage(locale),
   });
 }

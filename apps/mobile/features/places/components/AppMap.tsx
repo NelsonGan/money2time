@@ -2,6 +2,7 @@ import { forwardRef, type ReactNode } from 'react';
 import { Platform, StyleSheet } from 'react-native';
 import MapView, {
   type EdgePadding,
+  type LongPressEvent,
   type MapPressEvent,
   type MapStyleElement,
   PROVIDER_DEFAULT,
@@ -16,7 +17,10 @@ interface AppMapProps {
   mapPadding?: EdgePadding;
   onRegionChangeComplete?: (region: Region) => void;
   onPress?: (event: MapPressEvent) => void;
+  onLongPress?: (event: LongPressEvent) => void;
   onMapReady?: () => void;
+  /** The system's blue dot for the phone. Only where the app may locate it. */
+  showsUserLocation?: boolean;
   children?: ReactNode;
 }
 
@@ -45,7 +49,16 @@ const ANDROID_DARK: MapStyleElement[] = [
  * module, so screens load it lazily behind an error boundary.
  */
 export const AppMap = forwardRef<MapView, AppMapProps>(function AppMapImpl(
-  { initialRegion, mapPadding, onRegionChangeComplete, onPress, onMapReady, children },
+  {
+    initialRegion,
+    mapPadding,
+    onRegionChangeComplete,
+    onPress,
+    onLongPress,
+    onMapReady,
+    showsUserLocation = false,
+    children,
+  },
   ref,
 ) {
   const dark = useResolvedTheme() === 'dark';
@@ -63,6 +76,7 @@ export const AppMap = forwardRef<MapView, AppMapProps>(function AppMapImpl(
       showsBuildings={false}
       showsTraffic={false}
       showsIndoors={false}
+      showsUserLocation={showsUserLocation}
       showsMyLocationButton={false}
       toolbarEnabled={false}
       rotateEnabled={false}
@@ -70,6 +84,7 @@ export const AppMap = forwardRef<MapView, AppMapProps>(function AppMapImpl(
       moveOnMarkerPress={false}
       onRegionChangeComplete={onRegionChangeComplete}
       onPress={onPress}
+      onLongPress={onLongPress}
       onMapReady={onMapReady}
     >
       {children}

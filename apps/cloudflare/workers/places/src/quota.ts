@@ -59,11 +59,15 @@ export async function addressSubject(ip: string, now: Date): Promise<string> {
   return `ip:${hex.slice(0, 32)}`;
 }
 
-/** Whether both the user and the address may search again today (one read). */
+/**
+ * Whether both the user and the address may make `uses` more Apple calls
+ * today (one read): a nearby list of two searches needs room for two.
+ */
 export async function checkQuota(
   subjects: QuotaSubjects,
   env: QuotaEnv,
   now: Date,
+  uses = 1,
 ): Promise<QuotaDecision> {
   const limits = dailyLimits(env);
   const { results } = await env.MONEY2TIME_D1_PLACES.prepare(
@@ -72,23 +76,33 @@ export async function checkQuota(
     .bind(dayStart(now), subjects.user, subjects.address)
     .all<{ subject: string; count: number }>();
   const used = (subject: string) => results.find((row) => row.subject === subject)?.count ?? 0;
-  if (used(subjects.user) >= limits.user) return { allowed: false, reachedBy: 'user' };
-  if (used(subjects.address) >= limits.address) return { allowed: false, reachedBy: 'address' };
+  if (used(subjects.user) + uses > limits.user) return { allowed: false, reachedBy: 'user' };
+  if (used(subjects.address) + uses > limits.address) {
+    return { allowed: false, reachedBy: 'address' };
+  }
   return { allowed: true, reachedBy: null };
 }
 
-/** Counts one use today for both (only after Apple answered). */
-export async function consumeQuota(subjects: QuotaSubjects, env: QuotaEnv, now: Date): Promise<void> {
+/**
+ * Counts today's uses for both (only after Apple answered): one per Apple
+ * call, so a nearby list built from two searches counts two.
+ */
+export async function consumeQuota(
+  subjects: QuotaSubjects,
+  env: QuotaEnv,
+  now: Date,
+  uses = 1,
+): Promise<void> {
   const start = dayStart(now);
   const db = env.MONEY2TIME_D1_PLACES;
   const upsert = (subject: string) =>
     db
       .prepare(
         `INSERT INTO search_usage (subject, day_start, count, expires_at)
-         VALUES (?1, ?2, 1, ?3)
-         ON CONFLICT(subject, day_start) DO UPDATE SET count = count + 1`,
+         VALUES (?1, ?2, ?4, ?3)
+         ON CONFLICT(subject, day_start) DO UPDATE SET count = count + ?4`,
       )
-      .bind(subject, start, start + DAY_MS);
+      .bind(subject, start, start + DAY_MS, uses);
   await db.batch([upsert(subjects.user), upsert(subjects.address)]);
 }
 

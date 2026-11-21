@@ -1,5 +1,6 @@
 import {
   appleLanguage,
+  nearbyPlaces,
   PlaceSearchError,
   reverseGeocodePlace,
   searchPlaces,
@@ -79,6 +80,25 @@ describe('place search client', () => {
     });
   });
 
+  it('asks for places near a point by kind', async () => {
+    fetchMock.mockResolvedValueOnce(Response.json({ places: [] }));
+    await nearbyPlaces({
+      appUserId: 'm2t_a',
+      near: { latitude: 3.158, longitude: 101.712 },
+      category: 'coffee',
+      locale: 'en',
+    });
+    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe('https://worker.test/nearby');
+    expect(JSON.parse(String(init.body))).toEqual({
+      appUserId: 'm2t_a',
+      latitude: 3.158,
+      longitude: 101.712,
+      category: 'coffee',
+      language: 'en',
+    });
+  });
+
   it('returns the first reverse result or null', async () => {
     fetchMock.mockResolvedValueOnce(Response.json({ places: [] }));
     expect(await reverseGeocodePlace({ appUserId: 'm2t_a', latitude: 1, longitude: 2 })).toBeNull();
@@ -97,6 +117,8 @@ describe('place search client', () => {
     [429, { error: 'rate_limited' }, 'rate_limited'],
     [503, { error: 'capacity' }, 'busy'],
     [503, { error: 'not_configured' }, 'not_available'],
+    // A Worker older than the route: the app quietly leaves it out.
+    [404, { error: 'not_found' }, 'not_available'],
     [502, { error: 'upstream' }, 'server'],
   ])('maps a %s %j to %s', async (status, body, code) => {
     fetchMock.mockResolvedValue(Response.json(body, { status }));

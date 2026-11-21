@@ -12,6 +12,10 @@ const realQuota = jest.requireActual('../../../cloudflare/workers/places/src/quo
 import {
   addressOf,
   mapsAuthToken,
+  mergeNearby,
+  nearbyCacheKey,
+  nearbyPaths,
+  parseNearbyRequest,
   parseReverseRequest,
   parseSearchRequest,
   resetAppleTokenCache,
@@ -140,6 +144,89 @@ describe('places request parsing', () => {
         language: null,
       }),
     ).toBe('/v1/reverseGeocode?loc=3.1579%2C101.7123');
+  });
+});
+
+describe('nearby requests', () => {
+  it('needs a real point, defaults to every category and refuses an unknown one', () => {
+    expect(parseNearbyRequest({ appUserId: 'm2t_a', latitude: 3.1 })).toEqual({
+      error: 'invalid_location',
+    });
+    expect(
+      parseNearbyRequest({ appUserId: 'm2t_a', latitude: 3.1, longitude: 101.7, category: 'x' }),
+    ).toEqual({ error: 'invalid_category' });
+    expect(
+      parseNearbyRequest({
+        appUserId: 'm2t_a',
+        latitude: 3.1,
+        longitude: 101.7,
+        category: 'constructor',
+      }),
+    ).toEqual({ error: 'invalid_category' });
+    expect(parseNearbyRequest({ appUserId: 'm2t_a', latitude: 3.1, longitude: 101.7 })).toEqual({
+      appUserId: 'm2t_a',
+      latitude: 3.1,
+      longitude: 101.7,
+      category: 'all',
+      language: null,
+    });
+  });
+
+  it('searches a box around the point rounded to 3 decimals, limited to its categories', () => {
+    const request = {
+      appUserId: 'm2t_a',
+      latitude: 3.157912,
+      longitude: 101.712345,
+      category: 'coffee' as const,
+      language: 'en',
+    };
+    expect(nearbyCacheKey(request)).toBe('/nearby?category=coffee&loc=3.158%2C101.712&lang=en');
+    const [path] = nearbyPaths(request);
+    const params = new URL(`https://apple.test${path}`).searchParams;
+    expect(params.get('q')).toBe('coffee');
+    expect(params.get('includePoiCategories')).toBe('Cafe,Bakery');
+    expect(params.get('searchRegionPriority')).toBe('required');
+    expect(params.get('resultTypeFilter')).toBe('Poi');
+    expect(params.get('lang')).toBe('en');
+    // north,east,south,west about 800 m around the rounded point.
+    const [north, east, south, west] = params.get('searchRegion')!.split(',').map(Number);
+    expect(north).toBeCloseTo(3.158 + 800 / 111320, 5);
+    expect(south).toBeCloseTo(3.158 - 800 / 111320, 5);
+    expect((east + west) / 2).toBeCloseTo(101.712, 5);
+    // A point a few metres away shares the cache entry.
+    expect(nearbyCacheKey({ ...request, latitude: 3.15801, longitude: 101.71231 })).toBe(
+      nearbyCacheKey(request),
+    );
+  });
+
+  it('asks for eating and shops separately for the all list', () => {
+    const paths = nearbyPaths({
+      appUserId: 'm2t_a',
+      latitude: 3.158,
+      longitude: 101.712,
+      category: 'all',
+      language: null,
+    });
+    expect(paths.map((path) => new URL(`https://apple.test${path}`).searchParams.get('q'))).toEqual(
+      ['food', 'store'],
+    );
+  });
+
+  it('merges answers: each place once, closest first, at most 20', () => {
+    const place = (id: string, latitude: number) => ({
+      id,
+      name: id,
+      coordinate: { latitude, longitude: 101.712 },
+      formattedAddressLines: ['Jalan Ampang'],
+    });
+    const far = { results: [place('far', 3.162), place('near', 3.1581)] };
+    const mid = { results: [place('mid', 3.159), place('near', 3.1581)] };
+    const merged = mergeNearby([far, mid], { latitude: 3.158, longitude: 101.712 });
+    expect(merged.map((p) => p.id)).toEqual(['near', 'mid', 'far']);
+    const many = {
+      results: Array.from({ length: 30 }, (_, i) => place(`p${i}`, 3.158 + i / 10000)),
+    };
+    expect(mergeNearby([many], { latitude: 3.158, longitude: 101.712 })).toHaveLength(20);
   });
 });
 
@@ -320,8 +407,8 @@ describe('POST /search and /reverse', () => {
     await Promise.all(waits);
     // Counted against the user and, hashed, the address it came from.
     const subjects = { user: 'm2t_a', address: expect.stringMatching(/^ip:[0-9a-f]{32}$/) };
-    expect(checkQuota).toHaveBeenCalledWith(subjects, expect.anything(), expect.any(Date));
-    expect(consumeQuota).toHaveBeenCalledWith(subjects, expect.anything(), expect.any(Date));
+    expect(checkQuota).toHaveBeenCalledWith(subjects, expect.anything(), expect.any(Date), 1);
+    expect(consumeQuota).toHaveBeenCalledWith(subjects, expect.anything(), expect.any(Date), 1);
   });
 
   it('keeps the access token between searches', async () => {
@@ -389,6 +476,68 @@ describe('POST /search and /reverse', () => {
       category: null,
       countryCode: 'MY',
     });
+  });
+
+  it('lists places nearby from two Apple searches and counts two uses', async () => {
+    const response = await post('/nearby', {
+      appUserId: 'm2t_a',
+      latitude: 3.1579,
+      longitude: 101.7123,
+      language: 'en',
+    });
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    // Both searches answered the same two places: each is listed once.
+    expect(body.places.map((p: { id: string }) => p.id)).toEqual([
+      'I88BAA55D81E8BF1',
+      'I98B228E836480FB3',
+    ]);
+    const searches = fetchMock.mock.calls.filter(([url]) => String(url).includes('/v1/search'));
+    expect(searches).toHaveLength(2);
+    // The allowance must have room for both calls.
+    expect(checkQuota).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.any(Date),
+      2,
+    );
+    await Promise.all(waits);
+    expect(consumeQuota).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.any(Date),
+      2,
+    );
+  });
+
+  it('keeps a nearby list when one of its searches fails, counting the one that answered', async () => {
+    const error = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    try {
+      fetchMock.mockImplementation(async (url: unknown) => {
+        const href = String(url);
+        if (href.endsWith('/v1/token')) {
+          return Response.json({ accessToken: 'access-1', expiresInSeconds: 1800 });
+        }
+        if (href.includes('q=store')) return new Response('', { status: 500 });
+        return Response.json(APPLE_SEARCH);
+      });
+      const response = await post('/nearby', {
+        appUserId: 'm2t_a',
+        latitude: 3.1579,
+        longitude: 101.7123,
+      });
+      expect(response.status).toBe(200);
+      expect((await response.json()).places).toHaveLength(2);
+      await Promise.all(waits);
+      expect(consumeQuota).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.any(Date),
+        1,
+      );
+    } finally {
+      error.mockRestore();
+    }
   });
 
   it('stops at the daily allowance without calling Apple', async () => {
@@ -470,12 +619,14 @@ describe('POST /search and /reverse', () => {
 });
 
 describe('routes and the daily allowance', () => {
-  it('answers 404 to anything but POST /search and /reverse', async () => {
+  it('answers 404 to anything but POST /search, /nearby and /reverse', async () => {
     const ctx = { waitUntil: () => undefined };
     for (const [method, path] of [
       ['GET', '/search'],
       ['POST', '/places/search'],
       ['POST', '/scan'],
+      ['POST', '/constructor'],
+      ['GET', '/nearby'],
     ]) {
       const response = await worker.fetch(
         new Request(`https://places.test${path}`, {
@@ -531,6 +682,16 @@ describe('routes and the daily allowance', () => {
     expect(await realQuota.checkQuota(subjects, env, now)).toEqual({
       allowed: true,
       reachedBy: null,
+    });
+    counts['m2t_a'] = 1;
+    // One call left: a single search may go, a two-search nearby list may not.
+    expect(await realQuota.checkQuota(subjects, env, now)).toEqual({
+      allowed: true,
+      reachedBy: null,
+    });
+    expect(await realQuota.checkQuota(subjects, env, now, 2)).toEqual({
+      allowed: false,
+      reachedBy: 'user',
     });
     counts['m2t_a'] = 2;
     expect(await realQuota.checkQuota(subjects, env, now)).toEqual({
