@@ -98,6 +98,9 @@ async function fixture(t: TestContext, mintAfterWait = false) {
   let failRotation = false;
   let onMint: (() => Promise<void>) | undefined;
   let onRotate: (() => Promise<void>) | undefined;
+  // Off: every mint of one generation is the same token, as the tests expect.
+  let nameMints = false;
+  let mints = 0;
   const rotations: string[] = [];
   const fetcher = t.mock.method(globalThis, 'fetch', async (input, init) => {
     const url = String(input);
@@ -112,8 +115,10 @@ async function fixture(t: TestContext, mintAfterWait = false) {
     }
     assert.match(url, /\/databases\/ledger-database\/auth\/tokens\?/);
     const beforeWait = `token-${epoch}`;
+    const mint = ++mints;
     await onMint?.();
-    return Response.json({ jwt: mintAfterWait ? `token-${epoch}` : beforeWait });
+    const jwt = mintAfterWait ? `token-${epoch}` : beforeWait;
+    return Response.json({ jwt: nameMints ? `${jwt}-mint${mint}` : jwt });
   });
   t.after(() => fetcher.mock.restore());
   const call = (user: string, path: string, method = 'POST') => {
@@ -144,6 +149,7 @@ async function fixture(t: TestContext, mintAfterWait = false) {
     failBatch: (value: boolean) => (failBatch = value),
     onMint: (callback: () => Promise<void>) => (onMint = callback),
     onRotate: (callback: () => Promise<void>) => (onRotate = callback),
+    nameMints: () => (nameMints = true),
   };
 }
 
@@ -221,6 +227,40 @@ for (const mintAfterWait of [false, true]) {
     assert.equal((await remaining?.json()).authToken, 'token-1');
   });
 }
+
+test("a new album's first two credential requests both get the token the first to finish saved", async (t) => {
+  const f = await fixture(t);
+  // Just shared: nobody has asked for a token yet. Sharing an album also
+  // joins it, and the join's write saves a token while the phone's first
+  // sync asks for credentials (production, 2026-11-21).
+  f.db.prepare('UPDATE shared_ledgers SET token = NULL, token_expires_at = NULL').run();
+  f.nameMints();
+  const minted = deferred();
+  const resume = deferred();
+  let mints = 0;
+  f.onMint(async () => {
+    if (++mints > 1) return;
+    minted.resolve();
+    await resume.promise;
+  });
+  const first = f.call('owner', '/credentials');
+  await minted.promise;
+  let saved: string;
+  try {
+    const second = await f.call('remaining', '/credentials');
+    assert.equal(second?.status, 200);
+    saved = (await second?.json()).authToken;
+  } finally {
+    resume.resolve();
+  }
+  assert.equal(saved, 'token-0-mint2');
+  const response = await first;
+  assert.equal(response?.status, 200);
+  // The token it saved, not the one it minted itself (mint1, kept nowhere).
+  assert.equal((await response?.json()).authToken, saved);
+  assert.equal(await f.cachedToken(), saved);
+  assert.equal(mints, 2);
+});
 
 test('credentials and a second removal wait for an ongoing revocation', async (t) => {
   const f = await fixture(t);

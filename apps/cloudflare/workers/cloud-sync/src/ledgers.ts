@@ -739,12 +739,10 @@ async function credentials(
     await confirmAccess();
     return json({ url: ledger.db_url, authToken: 'local', expiresAt: now + DAY_MS });
   }
-  if (ledger.token && (ledger.token_expires_at ?? 0) - now > TOKEN_REUSE_MARGIN_MS) {
-    const token = await open(env, 'turso-token', ledger.token);
-    if (token) {
-      await confirmAccess();
-      return json({ url: ledger.db_url, authToken: token, expiresAt: ledger.token_expires_at });
-    }
+  const reused = await reusableToken(env, ledger, now);
+  if (reused) {
+    await confirmAccess();
+    return json({ url: ledger.db_url, authToken: reused, expiresAt: ledger.token_expires_at });
   }
   const token = await createToken(env, ledger.db_name, TOKEN_TTL_DAYS);
   const expiresAt = now + TOKEN_TTL_DAYS * DAY_MS;
@@ -755,9 +753,33 @@ async function credentials(
   )
     .bind(ledger.id, sealed, expiresAt, ledger.token)
     .run();
-  if (!saved.meta.changes) throw new Error('ledger_access_changed');
+  if (!saved.meta.changes) {
+    // Another request saved a token first: a second phone, or the album
+    // join that sharing an album sends beside the first sync (writerToken).
+    // Its token is as good as this one, so answer with it. A revocation's
+    // lock, a revoked token or a lost membership still refuses.
+    const current = await access(env, ledger.id, userId);
+    const theirs = current ? await reusableToken(env, current.ledger, Date.now()) : null;
+    if (!current || !theirs) throw new Error('ledger_access_changed');
+    await confirmAccess(current.ledger.token);
+    return json({
+      url: current.ledger.db_url,
+      authToken: theirs,
+      expiresAt: current.ledger.token_expires_at,
+    });
+  }
   await confirmAccess(sealed);
   return json({ url: ledger.db_url, authToken: token, expiresAt });
+}
+
+/** The ledger's saved token, when it has a while left to run. */
+async function reusableToken(
+  env: Env,
+  ledger: SharedLedgerRow,
+  now: number,
+): Promise<string | null> {
+  if (!ledger.token || (ledger.token_expires_at ?? 0) - now <= TOKEN_REUSE_MARGIN_MS) return null;
+  return open(env, 'turso-token', ledger.token);
 }
 
 async function listMembers(env: Env, ledger: SharedLedgerRow, role: Role): Promise<Response> {
@@ -792,10 +814,8 @@ async function writerToken(env: Env, ledger: SharedLedgerRow): Promise<string> {
   if (ledger.token?.startsWith(REVOKING_PREFIX) && (ledger.token_expires_at ?? 0) > now) {
     throw new Error('ledger_access_changing');
   }
-  if (ledger.token && (ledger.token_expires_at ?? 0) - now > TOKEN_REUSE_MARGIN_MS) {
-    const token = await open(env, 'turso-token', ledger.token);
-    if (token) return token;
-  }
+  const reused = await reusableToken(env, ledger, now);
+  if (reused) return reused;
   const token = await createToken(env, ledger.db_name, TOKEN_TTL_DAYS);
   // Kept only if nobody changed it meanwhile (a revocation's lock wins).
   await env.AUTH_DB.prepare(

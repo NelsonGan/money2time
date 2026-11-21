@@ -48,11 +48,28 @@ function stalledFirstRequestDb() {
   };
 }
 
-const settlesWithin = <T>(promise: Promise<T>, ms: number) =>
-  Promise.race([
-    promise.then(() => true),
-    new Promise<false>((resolve) => setTimeout(() => resolve(false), ms).unref()),
-  ]);
+// The timer keeps the test running until it fires: unref'd, a request that
+// never settles ends the run as "cancelled" instead of failing this check.
+async function settlesWithin<T>(promise: Promise<T>, ms: number): Promise<boolean> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      promise.then(() => true),
+      new Promise<false>((resolve) => (timer = setTimeout(() => resolve(false), ms))),
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/** Waits, a few milliseconds at a time, until `ready()` is true. */
+async function until(ready: () => boolean, ms: number): Promise<void> {
+  const deadline = Date.now() + ms;
+  while (!ready()) {
+    if (Date.now() > deadline) throw new Error(`not ready within ${ms} ms`);
+    await new Promise((resolve) => setTimeout(resolve, 5));
+  }
+}
 
 test('a request the phone abandoned does not hold up the next request in the isolate', async () => {
   const db = stalledFirstRequestDb();
@@ -61,8 +78,12 @@ test('a request the phone abandoned does not hold up the next request in the iso
   const headers = () => new Headers({ authorization: 'Bearer session-token-of-a-phone' });
 
   // The first request in a fresh isolate: its D1 read never comes back.
+  // Wait for that read rather than a set time: a busy machine takes longer
+  // than 20 ms to get there, and the next request's read was then the one
+  // stalled (CI on main, 2026-11-21).
   void auth.api.getSession({ headers: headers() }).catch(() => {});
-  await new Promise((resolve) => setTimeout(resolve, 20));
+  await until(() => db.reads.length > 0, 5000);
+  assert.match(db.reads[0]!, /from "session"/);
 
   // Later requests must not wait on a promise that belongs to the first one:
   // in production that wait fails ("This promise was created by a request
