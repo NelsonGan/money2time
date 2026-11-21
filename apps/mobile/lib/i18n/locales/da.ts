@@ -3762,6 +3762,10 @@ const da = {
     map_stat_spent: 'brugt',
     map_stat_earned: 'tjent',
     map_stat_work: 'arbejde',
+    offer_title: 'Husk, hvor du bruger penge?',
+    offer_body:
+      'Mærk udgifter med steder og se dit forbrug på et kort. Skift det når som helst i Indstillinger.',
+    offer_chip_auto: 'Automærk',
   },
 };
 

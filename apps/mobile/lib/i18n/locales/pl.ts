@@ -3775,6 +3775,10 @@ const pl = {
     map_stat_spent: 'wydano',
     map_stat_earned: 'zarobiono',
     map_stat_work: 'pracy',
+    offer_title: 'Zapamiętywać, gdzie wydajesz?',
+    offer_body:
+      'Oznaczaj wydatki miejscami i zobacz je na mapie. Zmienisz to w każdej chwili w Ustawieniach.',
+    offer_chip_auto: 'Auto-oznaczanie',
   },
 };
 

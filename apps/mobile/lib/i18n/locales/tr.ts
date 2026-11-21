@@ -3774,6 +3774,10 @@ const tr = {
     map_stat_spent: 'harcandı',
     map_stat_earned: 'kazanıldı',
     map_stat_work: 'çalışma',
+    offer_title: 'Nerede harcadığını hatırlasın mı?',
+    offer_body:
+      'Harcamalarını yerlerle etiketle ve haritada gör. İstediğin zaman Ayarlar’dan değiştir.',
+    offer_chip_auto: 'Otomatik etiket',
   },
 };
 

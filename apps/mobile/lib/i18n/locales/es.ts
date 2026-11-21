@@ -3792,6 +3792,10 @@ const es = {
     map_stat_spent: 'gastado',
     map_stat_earned: 'ganado',
     map_stat_work: 'de trabajo',
+    offer_title: '¿Recordar dónde gastas?',
+    offer_body:
+      'Etiqueta tus gastos con lugares y mira tus gastos en un mapa. Cámbialo cuando quieras en Ajustes.',
+    offer_chip_auto: 'Etiqueta automática',
   },
 };
 

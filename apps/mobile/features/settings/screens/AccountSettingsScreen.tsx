@@ -57,7 +57,10 @@ export function AccountSettingsScreen({ onBack }: AccountSettingsScreenProps) {
       if (value === settings.transactionLocationsEnabled) return;
       void triggerHaptic('selection');
       updateSettings({ transactionLocationsEnabled: value });
-      void trackEvent(AnalyticsEvents.TRANSACTION_LOCATIONS_TOGGLED, { enabled: value });
+      void trackEvent(AnalyticsEvents.TRANSACTION_LOCATIONS_TOGGLED, {
+        enabled: value,
+        source: 'settings',
+      });
       // Ask right away, while the reason is on screen. A no still leaves place
       // search working; only "where I am" needs the permission.
       if (value) setPermission(await requestLocationPermission());

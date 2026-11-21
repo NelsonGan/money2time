@@ -115,6 +115,7 @@ import {
   isInstalmentPlan,
 } from '~/features/instalments/lib/instalmentPlan';
 import { computeItemStats } from '~/features/items/utils';
+import { asksForLocationsOffer, requestLocationsOffer } from '~/features/places/lib/locationsOffer';
 import {
   buildRefundNote,
   countsTowardSpending,
@@ -3864,6 +3865,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             });
           }
           recordTransactionLogged();
+          if (
+            asksForLocationsOffer(
+              normalizedInput.type,
+              meta?.source,
+              settingsRef.current?.transactionLocationsEnabled ?? false,
+            )
+          ) {
+            requestLocationsOffer();
+          }
           // Reconcile only the inserted row. A full refreshTransactions here
           // would re-read the whole table and replace every row identity,
           // re-rendering all transaction consumers (calendar, insights) with
@@ -5964,6 +5974,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             });
           }
           recordTransactionLogged();
+          if (
+            asksForLocationsOffer(
+              normalizedInput.type,
+              source,
+              settingsRef.current?.transactionLocationsEnabled ?? false,
+            )
+          ) {
+            requestLocationsOffer();
+          }
         } catch {
           // optimistic rollback handled by refresh
         }

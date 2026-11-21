@@ -3786,6 +3786,10 @@ const it = {
     map_stat_spent: 'spesi',
     map_stat_earned: 'guadagnati',
     map_stat_work: 'di lavoro',
+    offer_title: 'Ricordare dove spendi?',
+    offer_body:
+      'Associa un luogo alle spese e vedi le tue spese su una mappa. Puoi cambiarlo quando vuoi in Impostazioni.',
+    offer_chip_auto: 'Tag automatico',
   },
 };
 

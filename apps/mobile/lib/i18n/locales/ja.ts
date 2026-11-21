@@ -3735,6 +3735,9 @@ const ja = {
     map_stat_spent: '支出',
     map_stat_earned: '収入',
     map_stat_work: 'の労働',
+    offer_title: '使った場所を記録しますか？',
+    offer_body: '支出に場所を記録して、マップで支出を確認できます。設定でいつでも変更できます。',
+    offer_chip_auto: '自動で記録',
   },
 };
 

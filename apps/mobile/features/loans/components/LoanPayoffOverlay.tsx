@@ -5,6 +5,7 @@ import { Mascot } from '~/components/feedback/Mascot';
 import { Button, Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import { I18n } from '~/lib/i18n';
+import { markPromptHidden, markPromptVisible } from '~/services/globalPromptCoordinator';
 import { triggerHaptic } from '~/services/haptics';
 import type { Account } from '~/types';
 import { formatAmount } from '~/utils/formatters';
@@ -45,6 +46,16 @@ export function LoanPayoffOverlay({ allowed }: LoanPayoffOverlayProps) {
   useEffect(() => {
     if (pendingLoanCelebration) setContent(pendingLoanCelebration);
   }, [pendingLoanCelebration]);
+
+  // Reported while one is waiting or showing, so a lower-priority prompt from
+  // the same save (the one-time Locations offer, the review pre-prompt) waits
+  // instead of stacking a second Modal on it.
+  const pending = pendingLoanCelebration != null;
+  useEffect(() => {
+    if (!pending) return undefined;
+    markPromptVisible('loanCelebration');
+    return () => markPromptHidden('loanCelebration');
+  }, [pending]);
 
   useEffect(() => {
     if (visible) void triggerHaptic('success');

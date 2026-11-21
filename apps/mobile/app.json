@@ -31,7 +31,7 @@
         "LSApplicationQueriesSchemes": ["chatgpt", "claude", "gemini"],
         "NSPhotoLibraryUsageDescription": "Money2Time may access your photo library if you choose to attach an image to a transaction.",
         "NSCameraUsageDescription": "Money2Time uses your camera if you choose to photograph a receipt, or to scan the code that links the Web Dashboard on your computer.",
-        "NSLocationWhenInUseUsageDescription": "If you turn on Save locations, Money2Time uses your location to tag an expense with where you are and to find places near you. Locations stay with your transactions.",
+        "NSLocationWhenInUseUsageDescription": "If you turn on Locations, Money2Time uses your location to tag an expense with where you are and to find places near you. Locations stay with your transactions.",
         "BGTaskSchedulerPermittedIdentifiers": ["money2time-auto-backup"],
         "NSUbiquitousContainers": {
           "iCloud.com.nelsongan.money2time": {
@@ -238,7 +238,7 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "If you turn on Save locations, Money2Time uses your location to tag an expense with where you are and to find places near you. Locations stay with your transactions.",
+          "locationWhenInUsePermission": "If you turn on Locations, Money2Time uses your location to tag an expense with where you are and to find places near you. Locations stay with your transactions.",
           "isIosBackgroundLocationEnabled": false,
           "isAndroidBackgroundLocationEnabled": false,
           "isAndroidForegroundServiceEnabled": false

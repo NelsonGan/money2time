@@ -3713,6 +3713,10 @@ const ko = {
     map_stat_spent: '지출',
     map_stat_earned: '수입',
     map_stat_work: '근무',
+    offer_title: '어디서 썼는지 기록할까요?',
+    offer_body:
+      '지출에 장소를 기록하고 지도에서 지출을 확인하세요. 설정에서 언제든 바꿀 수 있어요.',
+    offer_chip_auto: '자동 태그',
   },
 };
 

@@ -3788,6 +3788,10 @@ const ms = {
     map_stat_spent: 'dibelanjakan',
     map_stat_earned: 'diperoleh',
     map_stat_work: 'kerja',
+    offer_title: 'Ingat di mana anda berbelanja?',
+    offer_body:
+      'Tag perbelanjaan dengan tempat dan lihat perbelanjaan anda pada peta. Tukar bila-bila masa dalam Tetapan.',
+    offer_chip_auto: 'Tag automatik',
   },
 };
 

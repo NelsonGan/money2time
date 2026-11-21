@@ -3603,6 +3603,9 @@ const zhHant = {
     map_stat_spent: '支出',
     map_stat_earned: '收入',
     map_stat_work: '工時',
+    offer_title: '要記錄消費地點嗎？',
+    offer_body: '為支出加上地點，在地圖上查看你的消費。隨時可在設定中更改。',
+    offer_chip_auto: '自動標記',
   },
 };
 

@@ -3813,6 +3813,10 @@ const de = {
     map_stat_spent: 'ausgegeben',
     map_stat_earned: 'verdient',
     map_stat_work: 'Arbeit',
+    offer_title: 'Merken, wo du Geld ausgibst?',
+    offer_body:
+      'Verorte Ausgaben und sieh deine Ausgaben auf einer Karte. Jederzeit in den Einstellungen änderbar.',
+    offer_chip_auto: 'Automatisch',
   },
 };
 

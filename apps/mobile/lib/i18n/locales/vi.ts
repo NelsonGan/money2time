@@ -3740,6 +3740,10 @@ const vi = {
     map_stat_spent: 'đã chi',
     map_stat_earned: 'đã nhận',
     map_stat_work: 'làm việc',
+    offer_title: 'Ghi nhớ nơi bạn chi tiêu?',
+    offer_body:
+      'Gắn địa điểm cho khoản chi và xem chi tiêu trên bản đồ. Có thể đổi bất cứ lúc nào trong Cài đặt.',
+    offer_chip_auto: 'Tự động gắn',
   },
 };
 

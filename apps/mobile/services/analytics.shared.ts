@@ -257,8 +257,11 @@ export const GA4_ONLY_EVENTS = {
   // Transaction locations. `source` is how the place was chosen:
   // current | search | recent | auto (a new expense tagged on open).
   TRANSACTION_LOCATION_SET: 'Transaction Location Set',
+  // `source`: settings | offer (the one-time offer after a first entry).
   TRANSACTION_LOCATIONS_TOGGLED: 'Transaction Locations Toggled',
   SPENDING_MAP_OPENED: 'Spending Map Opened',
+  // The one-time "Turn on Locations?" offer is on screen; once per install at most.
+  LOCATIONS_OFFER_SHOWN: 'Locations Offer Shown',
   // Album members and shared albums
   ALBUM_SHARED: 'Album Shared',
   ALBUM_SHARE_STOPPED: 'Album Share Stopped',

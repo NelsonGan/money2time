@@ -122,7 +122,7 @@ import { loanRepaymentReporting } from '~/features/loans/lib/loanMath';
 import { FeatureAnnouncementModal } from '~/features/news/components/FeatureAnnouncementModal';
 import type { FeatureAnnouncement } from '~/features/news/featureAnnouncements';
 import { OnboardingFlow } from '~/features/onboarding/screens';
-import { SpendingMapScreen } from '~/features/places';
+import { LocationsOfferHost, SpendingMapScreen } from '~/features/places';
 import { ReimbursementsScreen } from '~/features/reimbursements/screens/ReimbursementsScreen';
 import { ReviewPrePromptSheet } from '~/features/reviewPrompt/components/ReviewPrePromptSheet';
 import { BiometricLockGate } from '~/features/settings/components/BiometricLockGate';
@@ -3556,6 +3556,9 @@ function AppContent() {
         onTurnOn={handleTurnOnCloudSync}
       />
       <ReviewPrePromptSheet allowed={!biometricLocked && rootPromptsAllowed} />
+      {/* The one-time Locations offer after a first entry; waits for any other
+          prompt (or celebration) through the coordinator. */}
+      <LocationsOfferHost allowed={!biometricLocked && rootPromptsAllowed} />
       <AutoLogLimitPrompt
         allowed={
           navigationReady &&

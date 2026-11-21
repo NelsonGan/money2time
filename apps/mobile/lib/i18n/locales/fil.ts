@@ -3822,6 +3822,10 @@ const fil = {
     map_stat_spent: 'nagastos',
     map_stat_earned: 'kinita',
     map_stat_work: 'ng trabaho',
+    offer_title: 'Tandaan kung saan ka gumagastos?',
+    offer_body:
+      'Lagyan ng lugar ang mga gastos at makita ang paggastos mo sa mapa. Mababago ito anumang oras sa Settings.',
+    offer_chip_auto: 'Auto-tag',
   },
 };
 

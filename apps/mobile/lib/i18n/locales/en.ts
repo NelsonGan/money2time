@@ -3752,6 +3752,10 @@ const en = {
     map_stat_spent: 'spent',
     map_stat_earned: 'earned',
     map_stat_work: 'of work',
+    offer_title: 'Remember where you spend?',
+    offer_body:
+      'Tag expenses with places and see your spending on a map. Change it anytime in Settings.',
+    offer_chip_auto: 'Auto-tag',
   },
 };
 

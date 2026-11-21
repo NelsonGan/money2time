@@ -3785,6 +3785,10 @@ const id = {
     map_stat_spent: 'dibelanjakan',
     map_stat_earned: 'diterima',
     map_stat_work: 'kerja',
+    offer_title: 'Ingat di mana Anda belanja?',
+    offer_body:
+      'Tandai pengeluaran dengan tempat dan lihat pengeluaran Anda di peta. Ubah kapan saja di Pengaturan.',
+    offer_chip_auto: 'Tandai otomatis',
   },
 };
 

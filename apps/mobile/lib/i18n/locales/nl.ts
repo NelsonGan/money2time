@@ -3800,6 +3800,10 @@ const nl = {
     map_stat_spent: 'uitgegeven',
     map_stat_earned: 'verdiend',
     map_stat_work: 'werk',
+    offer_title: 'Onthouden waar je geld uitgeeft?',
+    offer_body:
+      'Tag uitgaven met plaatsen en zie je uitgaven op een kaart. Wijzig het altijd in Instellingen.',
+    offer_chip_auto: 'Automatisch taggen',
   },
 };
 

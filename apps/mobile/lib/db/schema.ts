@@ -249,7 +249,7 @@ export const settingsTable = sqliteTable('settings', {
     .default(false),
   workingHoursPerDay: real('working_hours_per_day').notNull().default(8),
   hapticsEnabled: integer('haptics_enabled', { mode: 'boolean' }).notNull().default(true),
-  // Migration 098: Settings > Personalize > Save locations (off by default) and
+  // Migration 098: Settings > Personalize > Locations (off by default) and
   // whether a new expense starts tagged with where the phone is. Device-local.
   transactionLocationsEnabled: integer('transaction_locations_enabled', { mode: 'boolean' })
     .notNull()

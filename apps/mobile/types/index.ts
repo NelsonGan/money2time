@@ -248,9 +248,9 @@ export interface UserSettings {
   /** Number of working hours represented by one displayed working day. */
   workingHoursPerDay: number;
   hapticsEnabled: boolean;
-  /** Settings > Personalize > Save locations. Off by default; device-local. */
+  /** Settings > Personalize > Locations. Off by default; device-local. */
   transactionLocationsEnabled: boolean;
-  /** With Save locations on, a new expense starts tagged with where you are. */
+  /** With Locations on, a new expense starts tagged with where you are. */
   transactionLocationAutoTag: boolean;
   themeMode: ThemeMode;
   themeColor: ThemeColor;

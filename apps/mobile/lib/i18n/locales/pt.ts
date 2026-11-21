@@ -3790,6 +3790,10 @@ const pt = {
     map_stat_spent: 'gasto',
     map_stat_earned: 'ganho',
     map_stat_work: 'de trabalho',
+    offer_title: 'Lembrar onde gasta?',
+    offer_body:
+      'Marque as despesas com locais e veja os seus gastos num mapa. Altere a qualquer momento nas Definições.',
+    offer_chip_auto: 'Marcação automática',
   },
 };
 

@@ -199,7 +199,7 @@ export function CalendarScreen({
     [paybackRows, storedTransactions],
   );
   const rootNavigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  // The spending map's button: with Save locations on, or once any entry
+  // The spending map's button: with Locations on, or once any entry
   // has a place (README: Transaction locations).
   const hasLocatedTransaction = useMemo(
     () => storedTransactions.some((tx) => tx.latitude !== null && !tx.deletedAt),

@@ -3764,6 +3764,10 @@ const nb = {
     map_stat_spent: 'brukt',
     map_stat_earned: 'tjent',
     map_stat_work: 'arbeid',
+    offer_title: 'Husk hvor du bruker penger?',
+    offer_body:
+      'Merk utgifter med steder og se forbruket ditt på et kart. Endre det når som helst i Innstillinger.',
+    offer_chip_auto: 'Automerk',
   },
 };
 

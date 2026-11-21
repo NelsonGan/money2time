@@ -3814,6 +3814,10 @@ const fr = {
     map_stat_spent: 'dépensé',
     map_stat_earned: 'gagné',
     map_stat_work: 'de travail',
+    offer_title: 'Retenir où vous dépensez ?',
+    offer_body:
+      'Associez un lieu à vos dépenses et voyez-les sur une carte. Modifiable à tout moment dans Réglages.',
+    offer_chip_auto: 'Lieu auto',
   },
 };
 

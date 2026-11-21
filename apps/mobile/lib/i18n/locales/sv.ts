@@ -3762,6 +3762,10 @@ const sv = {
     map_stat_spent: 'spenderat',
     map_stat_earned: 'tjänat',
     map_stat_work: 'arbete',
+    offer_title: 'Kom ihåg var du handlar?',
+    offer_body:
+      'Tagga utgifter med platser och se ditt spenderande på en karta. Ändra när som helst i Inställningar.',
+    offer_chip_auto: 'Autotagg',
   },
 };
 
