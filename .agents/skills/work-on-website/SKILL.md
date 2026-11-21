@@ -82,6 +82,13 @@ Put any local environment value in `.env.development.local`, never
   `public/dashboard-assets/` (`node scripts/sync-dashboard-assets.mjs`, which
   reads `../mobile`). The README's "Generated website files" table names each
   script.
+- **Design from a mockup.** A new or restyled page, section, dashboard view or
+  editor starts from a mockup made with [ui-mockups](../ui-mockups/SKILL.md)
+  (at desktop width, and at phone width when the layout changes there), with
+  screenshots of the current pages as references. Build with it as the guide,
+  then compare the result in the preview tools against it before the PR. A
+  dashboard view that rebuilds an app screen uses the app's mockup or screenshot
+  as its reference.
 - **The dashboard mirrors the app.** When the dashboard's behavior has to match
   the app (totals, editors, free-plan limits, protocol), follow
   [sync-web-dashboard](../sync-web-dashboard/SKILL.md). It is the skill that also

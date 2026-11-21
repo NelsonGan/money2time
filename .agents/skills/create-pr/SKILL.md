@@ -12,6 +12,7 @@ Write for a reviewer who has not seen the conversation. Describe the final chang
 - Read the repository instructions and any PR template. Inspect the branch, working tree, full diff against the target branch, and existing PR before writing.
 - Assess analytics impact for every change. If tracking or a tracked flow changes, follow [maintain-analytics-tracking](../maintain-analytics-tracking/SKILL.md), update the [Analytics](../../../README.md#analytics) tables in `README.md` in the same change, run the tracking-table check, and explain any PostHog volume change (against the README event budget) in the PR.
 - Assess Web Dashboard impact for every change with [sync-web-dashboard](../sync-web-dashboard/SKILL.md). Its website change (`apps/web`) goes in the same PR; give it a row in the Verification table: what was checked on the dashboard, or "No impact" and why.
+- For a change to visible UI, find the mockup it was built from (the [ui-mockups](../ui-mockups/SKILL.md) skill saves it in `.github/pr-assets/<topic>/`) and the notes on what was taken from it. If there is none and the change alters how a screen looks, make one and check the UI against it before opening the PR. A UI change without a mockup says why (no visible design change, the user supplied the design, or no image backend worked).
 - This repository holds the app (`apps/mobile`), the Workers (`apps/cloudflare`), the website (`apps/web`) and App Studio (`apps/app-studio`). Work that spans them goes in one PR. Name the apps it changes, run each changed app's checks (AGENTS.md lists them), and say what merging does: `apps/web` deploys the website at once, any change under `apps/mobile` cuts a store build, a Worker change deploys that Worker, and App Studio deploys nothing.
 - Review the actual changes and available verification results. Run the checks required by the repository for code changes; when only rewriting a description, reuse verified results for the same code and identify any gaps.
 - When creating a PR, commit only the intended changes, follow the repository's branch and commit conventions, and push the branch. Preserve unrelated work. When rewriting a PR, update that PR instead of opening a duplicate or making unrelated code changes.
@@ -36,10 +37,12 @@ Start with one sentence explaining what the PR achieves. No Summary heading is n
   | Same swipes, both directions    | iOS, iPhone 18 Pro simulator (iOS 27.0)              | ✅ Matches the header, layout unchanged       |
   | `npm run check`, `npm test`     | Local                                                | ✅ 283 suites, 3,901 tests                    |
   | Household page                  | Not run: needs a signed-in shared ledger             | ⚠️ Same change as Budget, covered by the test |
+  | Against the mockup              | iOS, iPhone 18 Pro simulator, light and dark         | ✅ Same hierarchy; theme tokens, not its pink |
   | Web Dashboard                   |                                                      | ➖ No impact: native page layout only         |
   | Analytics                       |                                                      | ➖ No impact: no events or screens changed    |
   ```
 
+- A UI change has an "Against the mockup" row: what matched the mockup, and each deliberate difference and why (a project rule, an existing primitive, real data). Without a mockup, the row says why there is none.
 - Name the platform, device or simulator, and whether the backend was local, staging, or production when relevant. Distinguish manual checks, automated checks, and pending CI. Keep untested platforms or paths, the Web Dashboard row, and the Analytics row in the table instead of in loose paragraphs.
 - A setup worth knowing (seeded data, an account state, the build used) goes in one sentence above the table. After the table, one line says what merging does, such as "**Merging** cuts a store build."
 - For instructions-only changes without UI testing, the table has the documentation checks and a row saying no app behavior changed. Leave out the Evidence section; screenshots of unchanged app screens are not required.
@@ -50,6 +53,7 @@ After UI testing, always show the final UI here. Evidence goes in tables, never 
 
 - **Group by device.** Start each group with one bold line naming the device, such as `**Android · Pixel 10 emulator (Android 16)**`, then its table. One table per group; do not repeat the setup already given under Verification.
 - **Every image and GIF sits in a table cell, with a header that says what it shows.** Never put an image alone between paragraphs or several images on one line. Center the columns (`| :---: |`). Captions go in the header or the first column, not only in alt text, and alt text never contains `|`.
+- **Mockup and result** (when a mockup guided the change): `| | Mockup | Result |` with one row per screen or state, the mockup beside a screenshot of the built UI in the same state and theme. Add a Before column when a before was captured. The mockup is an attachment like any screenshot, never committed.
 - **Before and after** (only when both were captured): `| | Before | After |` with one row per state, the first column naming the state. Without a before: one column per platform, screen, or theme (`| iOS | Android |`, `| Light | Dark |`). Use up to four phone screenshots per row, and one or two for iPad, web, or other wide captures.
 - **Numbers and observations** (measurements, a step-by-step result) go in a table of their own, like `| Swipe | Header | Old code | With the fix |`. Long logs or test output go in a collapsed `<details>` block.
 

@@ -76,6 +76,11 @@ against the new images.
 - **Exports are not committed.** Exported sets go in the ignored `exports/`
   folder or outside the repo. Only source art and the captures in `public/` are
   committed; remove art that nothing uses any more.
+- **A new or redesigned scene or creative starts from a mockup** made with
+  [ui-mockups](../ui-mockups/SKILL.md), with an existing export as its
+  reference, and is compared with it before the PR. Art inside a scene comes
+  from [imagegen](../imagegen/SKILL.md); app screens inside a scene are always
+  real captures, never generated.
 - Its conventions are its own (Next.js 15 defaults, single quotes). Match the
   file you are in. Never import from another app in this repo.
 
