@@ -27,6 +27,8 @@ interface Resolved {
   coordinate: Coordinate;
   place: PlaceResult;
   at: number;
+  /** The language the place was named in. */
+  locale: string | null;
 }
 
 // One fix and its name serve every editor opened within this window, so
@@ -67,11 +69,7 @@ export function useCurrentPlace({
 
   const locate = useCallback(async () => {
     const id = ++runId.current;
-    if (lastResolved && Date.now() - lastResolved.at < REUSE_MS) {
-      setResolved(lastResolved);
-      setStatus('ready');
-      return lastResolved;
-    }
+    // Checked even for a reused fix: access revoked a moment ago means no place.
     const permission = await getLocationPermission();
     if (id !== runId.current) return null;
     if (permission.status === 'unavailable') {
@@ -82,6 +80,12 @@ export function useCurrentPlace({
       setStatus(permission.canAskAgain ? 'ask' : 'blocked');
       return null;
     }
+    const reusable = lastResolved;
+    if (reusable && reusable.locale === (locale ?? null) && Date.now() - reusable.at < REUSE_MS) {
+      setResolved(reusable);
+      setStatus('ready');
+      return reusable;
+    }
     setStatus('locating');
     try {
       const coordinate = await getCurrentCoordinate();
@@ -89,7 +93,7 @@ export function useCurrentPlace({
       const place =
         (await describeCoordinate(coordinate, { appUserId, locale })) ?? pinnedPlace(coordinate);
       if (id !== runId.current) return null;
-      const next = { coordinate, place, at: Date.now() };
+      const next = { coordinate, place, at: Date.now(), locale: locale ?? null };
       lastResolved = next;
       setResolved(next);
       setStatus('ready');
@@ -124,11 +128,12 @@ export function useCurrentPlace({
   }, [locate]);
 
   useEffect(() => {
-    if (!active) {
-      runId.current += 1;
-      return;
-    }
+    if (!active) return undefined;
     void locate();
+    // Closing or unmounting drops the answer of a fix still in flight.
+    return () => {
+      runId.current += 1;
+    };
   }, [active, locate]);
 
   return {

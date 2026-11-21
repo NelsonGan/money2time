@@ -116,7 +116,15 @@ async function handlePlaces(
     user: parsed.appUserId,
     address: await addressSubject(clientIp(request), now),
   };
-  const quota = await checkQuota(subjects, env, now);
+  let quota: Awaited<ReturnType<typeof checkQuota>>;
+  try {
+    quota = await checkQuota(subjects, env, now);
+  } catch (err) {
+    // The database is down: refuse with a JSON error rather than throw, and
+    // never search Apple without the allowance checked.
+    logError('quota_failed', { reqId, error: err instanceof Error ? err.message : String(err) });
+    return json({ error: 'upstream' }, 503);
+  }
   if (!quota.allowed) {
     log('limit_reached', { reqId, appUserId: parsed.appUserId, by: quota.reachedBy });
     return json({ error: 'limit_reached' }, 429);

@@ -48,7 +48,7 @@ export interface ReverseRequest {
 
 const APPLE_MAPS_ORIGIN = 'https://maps-api.apple.com';
 const MAX_QUERY_LENGTH = 120;
-export const MAX_RESULTS = 12;
+const MAX_RESULTS = 12;
 // Search bias rounds to 2 decimals (about 1 km): enough to rank nearby places
 // first, coarse enough that neighbours share cache entries. A reverse lookup
 // needs the spot itself, so 4 decimals (about 11 m).
@@ -56,17 +56,21 @@ const SEARCH_COORD_DECIMALS = 2;
 const REVERSE_COORD_DECIMALS = 4;
 // How long an answer stays in the edge cache. Places rarely move; a day keeps
 // popular searches free without serving stale results for long.
-export const CACHE_TTL_SECONDS = 24 * 60 * 60;
+const CACHE_TTL_SECONDS = 24 * 60 * 60;
 // Mint a fresh access token this long before Apple's expiry.
 const TOKEN_REFRESH_MARGIN_MS = 60 * 1000;
 const APPLE_TIMEOUT_MS = 8000;
 const LANGUAGE_PATTERN = /^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8}){0,2}$/;
 
 let cachedAccessToken: { token: string; expiresAt: number; keyId: string } | null = null;
+// The token request in flight: searches that arrive together on a cold
+// isolate (or as the token expires) share one call to Apple's /v1/token.
+let pendingAccessToken: Promise<string> | null = null;
 
 /** Test hook: forget the cached Apple access token. */
 export function resetAppleTokenCache(): void {
   cachedAccessToken = null;
+  pendingAccessToken = null;
 }
 
 export class PlacesError extends Error {
@@ -99,7 +103,10 @@ function normalizeLanguage(value: unknown): string | null {
 
 function readAppUserId(body: Record<string, unknown>): string | null {
   const id = body.appUserId;
-  return typeof id === 'string' && id.trim() && id.length <= 128 ? id : null;
+  if (typeof id !== 'string') return null;
+  // Trimmed, so " m2t_1" and "m2t_1" share one daily allowance.
+  const trimmed = id.trim();
+  return trimmed && trimmed.length <= 128 ? trimmed : null;
 }
 
 export function parseSearchRequest(raw: unknown): SearchRequest | { error: string } {
@@ -138,7 +145,8 @@ export function parseReverseRequest(raw: unknown): ReverseRequest | { error: str
 }
 
 function round(value: number, decimals: number): string {
-  return value.toFixed(decimals);
+  // "+ 0" turns -0 into 0, so a point just west of 0° shares a key with 0°.
+  return (Number(value.toFixed(decimals)) + 0).toFixed(decimals);
 }
 
 /** The Apple path (and edge-cache key) for a search, coordinates rounded. */
@@ -299,6 +307,13 @@ async function accessToken(env: PlacesEnv, nowMs: number): Promise<string> {
   ) {
     return cachedAccessToken.token;
   }
+  pendingAccessToken ??= mintAccessToken(env, nowMs, keyId).finally(() => {
+    pendingAccessToken = null;
+  });
+  return pendingAccessToken;
+}
+
+async function mintAccessToken(env: PlacesEnv, nowMs: number, keyId: string): Promise<string> {
   const authToken = await mapsAuthToken(env, nowMs);
   const response = await fetchWithTimeout(`${APPLE_MAPS_ORIGIN}/v1/token`, {
     headers: { Authorization: `Bearer ${authToken}` },

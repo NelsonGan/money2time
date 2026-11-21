@@ -2689,9 +2689,10 @@ export function TransactionEditorScreen({
         }
         // A receipt, the longer note and the reimbursement tick belong to one
         // real payment: the first, made at once. A new plan that starts later
-        // has nowhere to keep them. The mood is not kept either, but it starts
-        // as neutral and is not worth stopping the save for. A saved expense
-        // keeps them all, since it is the first payment itself.
+        // has nowhere to keep them. The mood and a picked place are not kept
+        // either, but neither is worth stopping the save for (and the place
+        // is not reported as set). A saved expense keeps them all, since it
+        // is the first payment itself.
         const firstPaymentLater =
           mode === 'create' && new Date(capturedPayload.date).getTime() > Date.now();
         if (
@@ -2703,6 +2704,7 @@ export function TransactionEditorScreen({
           showToast(I18n.t('instalments.extras_need_today'));
           return;
         }
+        if (firstPaymentLater) locationEventRef.current = null;
         // Jump the list to the first payment only when it exists.
         preparedSubmitPayload = firstPaymentLater ? null : capturedPayload;
         recurringSubmit = () => {

@@ -10,6 +10,7 @@ import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { Text } from '~/components/ui/text';
 import { ThemeModal } from '~/components/ui/theme-modal';
 import { AppMap } from '~/features/places/components/AppMap';
+import { fitMapToPoints } from '~/features/places/lib/fitMap';
 import { regionFor } from '~/features/places/lib/placeLocation';
 import { useSheetColumnStyle } from '~/hooks/useSheetColumnStyle';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -44,20 +45,25 @@ const WORLD_REGION = { latitude: 20, longitude: 0, latitudeDelta: 120, longitude
 
 /**
  * Google Maps draws a marker's view as a snapshot, so a marker tracks view
- * changes only until its covers have loaded (or 1.5 s, for albums without
- * one), and again whenever what it shows changes (`key`: its labels, covers
- * and the theme).
+ * changes only until all `covers` of its cards have loaded (or failed), or
+ * 1.5 s, and again whenever what it shows changes (`key`: its labels, covers
+ * and the theme). Returns whether to track and the cards' `onLoad`.
  */
-function useCoverTracking(key: string): [boolean, () => void] {
+function useCoverTracking(key: string, covers: number): [boolean, () => void] {
   const [tracking, setTracking] = useState(true);
+  const loaded = useRef(0);
   useEffect(() => {
+    loaded.current = 0;
     setTracking(true);
     const timer = setTimeout(() => setTracking(false), 1500);
     return () => clearTimeout(timer);
   }, [key]);
-  // Stable, so the memoized cards it is handed to as `onLoad` do not re-render.
-  const stop = useCallback(() => setTracking(false), []);
-  return [tracking, stop];
+  // Stable, so the memoized cards it is handed to do not re-render.
+  const onCoverLoad = useCallback(() => {
+    loaded.current += 1;
+    if (loaded.current >= covers) setTracking(false);
+  }, [covers]);
+  return [tracking, onCoverLoad];
 }
 
 /** What a card shows, for re-tracking when it changes. */
@@ -77,7 +83,10 @@ const AlbumMarker = memo(function AlbumMarkerImpl({
   onPress: (pin: AlbumPin) => void;
 }) {
   const themeColors = useThemeColors();
-  const [tracking, stopTracking] = useCoverTracking(pinContentKey([pin], themeColors.card));
+  const [tracking, onCoverLoad] = useCoverTracking(
+    pinContentKey([pin], themeColors.card),
+    pin.coverUri ? 1 : 0,
+  );
   return (
     <Marker
       identifier={pin.albumId}
@@ -96,7 +105,7 @@ const AlbumMarker = memo(function AlbumMarkerImpl({
         coverUri={pin.coverUri}
         spendLabel={pin.spendLabel}
         monthLabel={pin.monthLabel}
-        onLoad={stopTracking}
+        onLoad={onCoverLoad}
       />
     </Marker>
   );
@@ -116,8 +125,12 @@ const AlbumStackMarker = memo(function AlbumStackMarkerImpl({
   onPress: (pins: AlbumPin[]) => void;
 }) {
   const themeColors = useThemeColors();
-  const [tracking, stopTracking] = useCoverTracking(pinContentKey(pins, themeColors.card));
   const shown = pins.slice(0, MAX_STACK_CARDS);
+  // Every card shown waits for its own cover, not only the front one.
+  const [tracking, onCoverLoad] = useCoverTracking(
+    pinContentKey(pins, themeColors.card),
+    shown.filter((pin) => pin.coverUri).length,
+  );
   const behind = shown.length - 1;
   const width = ALBUM_MARKER_SIZE.width + behind * STACK_SHIFT_X;
   const height = ALBUM_MARKER_SIZE.height + behind * STACK_PEEK_Y;
@@ -159,7 +172,7 @@ const AlbumStackMarker = memo(function AlbumStackMarkerImpl({
                 coverUri={pin.coverUri}
                 spendLabel={pin.spendLabel}
                 monthLabel={pin.monthLabel}
-                onLoad={depth === 0 ? stopTracking : undefined}
+                onLoad={onCoverLoad}
               />
             </View>
           ))}
@@ -313,15 +326,12 @@ export function AlbumMapView({ pins, onSelectAlbum }: AlbumMapViewProps) {
 
   const fitAll = useCallback(() => {
     void triggerHaptic('selection');
-    if (pins.length === 1) {
-      mapRef.current?.animateToRegion(initialRegion, 350);
-      return;
-    }
-    mapRef.current?.fitToCoordinates(pins, {
-      edgePadding: { top: 220, right: 80, bottom: 160, left: 80 },
+    fitMapToPoints(mapRef.current, pins, {
+      minDelta: SINGLE_PIN_DELTA,
+      margin: { top: 220, right: 80, bottom: 160, left: 80 },
       animated: true,
     });
-  }, [pins, initialRegion]);
+  }, [pins]);
 
   return (
     // Where the user's albums are is their location history.

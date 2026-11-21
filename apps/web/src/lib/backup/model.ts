@@ -563,7 +563,8 @@ export function buildModel(backup: BackupFile, opts: { timeZone?: string | null 
     const hasTime =
       row.date.length > 10 &&
       !(date.getHours() === 0 && date.getMinutes() === 0 && date.getSeconds() === 0 && date.getMilliseconds() === 0);
-    const place = type === "transfer" ? null : placeOf(row);
+    // Only an expense or income has a place, as on the phone.
+    const place = type === "expense" || type === "income" ? placeOf(row) : null;
     txs.push({
       id: row.id,
       type,

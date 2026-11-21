@@ -8,7 +8,9 @@ import { cn } from '~/utils';
 
 /**
  * Google Maps draws a marker's view as a snapshot: track changes for a moment
- * after the label or selection changes, then stop so panning stays smooth.
+ * after anything it shows changes (label, selection, colours: a theme switch
+ * changes the card colour while the accent stays), then stop so panning stays
+ * smooth.
  */
 function useBriefTracking(...deps: unknown[]): boolean {
   const [tracking, setTracking] = useState(true);
@@ -63,7 +65,7 @@ export const PlacePricePin = memo(function PlacePricePinImpl({
   onPress,
 }: PinProps) {
   const themeColors = useThemeColors();
-  const tracking = useBriefTracking(label, selected, themeColors.primary);
+  const tracking = useBriefTracking(label, selected, income, themeColors.primary, themeColors.card);
   return (
     <Marker
       identifier={id}
@@ -114,11 +116,19 @@ export const PlaceClusterPin = memo(function PlaceClusterPinImpl({
   label,
   count,
   selected,
+  income = false,
   accessibilityLabel,
   onPress,
 }: ClusterPinProps) {
   const themeColors = useThemeColors();
-  const tracking = useBriefTracking(label, count, selected, themeColors.primary);
+  const tracking = useBriefTracking(
+    label,
+    count,
+    selected,
+    income,
+    themeColors.primary,
+    themeColors.card,
+  );
   return (
     <Marker
       identifier={id}
@@ -156,7 +166,7 @@ export const PlaceClusterPin = memo(function PlaceClusterPinImpl({
             numberOfLines={1}
             className={cn(
               'text-[13px] font-extrabold leading-4',
-              selected ? 'text-primary-foreground' : 'text-primary',
+              selected ? 'text-primary-foreground' : income ? 'text-success' : 'text-primary',
             )}
           >
             {label}

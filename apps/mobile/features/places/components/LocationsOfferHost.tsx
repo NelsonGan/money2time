@@ -51,6 +51,10 @@ export function LocationsOfferHost({
   // Up, or closing: holds the coordinator until the sheet (and the system
   // dialog after it) are gone.
   const holdingRef = useRef(false);
+  // Set from the first tap that closes it, so a second tap (or the backdrop
+  // during the fade) cannot run the answer twice or free the coordinator
+  // while the system dialog is up.
+  const closingRef = useRef(false);
   const allowedRef = useRef(allowed);
   allowedRef.current = allowed;
   const mountedRef = useRef(true);
@@ -108,15 +112,27 @@ export function LocationsOfferHost({
         // Answered before it is on screen: never shown twice, even after a crash.
         await markLocationsOfferDone();
         if (!mountedRef.current) return;
+        closingRef.current = false;
         setVisible(true);
-        void trackEvent(AnalyticsEvents.LOCATIONS_OFFER_SHOWN);
       })();
     }, OFFER_DELAY_MS);
     return () => clearTimeout(timer);
   }, [allowed, locationsEnabled, tick]);
 
-  /** Closes the sheet, runs `after` once it has faded, then frees the coordinator. */
+  // Counted when it is actually on screen: it can wait hidden behind a modal
+  // route or the app lock after it was claimed.
+  const onScreen = visible && allowed;
+  const shownRef = useRef(false);
+  useEffect(() => {
+    if (!onScreen || shownRef.current) return;
+    shownRef.current = true;
+    void trackEvent(AnalyticsEvents.LOCATIONS_OFFER_SHOWN);
+  }, [onScreen]);
+
+  /** Closes the sheet once, runs `after` once it has faded, then frees the coordinator. */
   const close = useCallback((after?: () => Promise<unknown>) => {
+    if (closingRef.current) return;
+    closingRef.current = true;
     setVisible(false);
     setTimeout(() => {
       void (async () => {
@@ -131,6 +147,7 @@ export function LocationsOfferHost({
   }, []);
 
   const accept = useCallback(() => {
+    if (closingRef.current) return;
     void triggerHaptic('selection');
     updateSettings({ transactionLocationsEnabled: true });
     void trackEvent(AnalyticsEvents.TRANSACTION_LOCATIONS_TOGGLED, {
@@ -144,7 +161,12 @@ export function LocationsOfferHost({
 
   const dismiss = useCallback(() => close(), [close]);
 
-  return <LocationsOfferSheet visible={visible && allowed} onEnable={accept} onDismiss={dismiss} />;
+  // Turned on elsewhere while it waited hidden (Settings): nothing left to ask.
+  useEffect(() => {
+    if (locationsEnabled && visible) close();
+  }, [locationsEnabled, visible, close]);
+
+  return <LocationsOfferSheet visible={onScreen} onEnable={accept} onDismiss={dismiss} />;
 }
 
 function LocationsOfferSheet({

@@ -34,9 +34,9 @@ describe('spending map period', () => {
 
   it('knows the current period is the latest', () => {
     const now = new Date(2026, 10, 21);
-    expect(isLatestPeriod(nov, now)).toBe(true);
-    expect(isLatestPeriod(shiftPeriod(nov, -1), now)).toBe(false);
-    expect(isLatestPeriod({ kind: 'all', anchor: now }, now)).toBe(true);
+    expect(isLatestPeriod(nov, 1, now)).toBe(true);
+    expect(isLatestPeriod(shiftPeriod(nov, -1), 1, now)).toBe(false);
+    expect(isLatestPeriod({ kind: 'all', anchor: now }, 1, now)).toBe(true);
   });
 
   it('filters by date and labels the period', () => {
@@ -46,6 +46,23 @@ describe('spending map period', () => {
     expect(periodLabel({ kind: 'year', anchor: nov.anchor }, 'en', 'All time')).toBe('2026');
     expect(periodLabel({ kind: 'all', anchor: nov.anchor }, 'en', 'All time')).toBe('All time');
     expect(periodLabel(nov, 'not a locale!', 'All time')).toBe('November 2026');
+  });
+
+  it('follows a month cycle that starts on the 25th, like the Calendar', () => {
+    // Nov 26 sits in the cycle labelled November: Oct 25 to Nov 24 is October's.
+    const payday = { kind: 'month' as const, anchor: new Date(2026, 10, 26) };
+    expect(periodRange(payday, 25)).toEqual({
+      start: new Date(2026, 10, 25),
+      end: new Date(2026, 11, 25),
+    });
+    expect(periodLabel(payday, 'en', 'All time', 25)).toBe('November 2026');
+    expect(inPeriod(new Date(2026, 10, 24, 12).toISOString(), payday, 25)).toBe(false);
+    expect(inPeriod(new Date(2026, 11, 24, 12).toISOString(), payday, 25)).toBe(true);
+    expect(periodRange(shiftPeriod(payday, 1, 25), 25).start).toEqual(new Date(2026, 11, 25));
+    expect(periodRange({ kind: 'year', anchor: payday.anchor }, 25)).toEqual({
+      start: new Date(2026, 0, 25),
+      end: new Date(2027, 0, 25),
+    });
   });
 
   it('counts expenses as spending and income apart, never transfers', () => {

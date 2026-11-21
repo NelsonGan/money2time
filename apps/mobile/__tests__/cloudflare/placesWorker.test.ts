@@ -87,6 +87,21 @@ describe('places request parsing', () => {
     });
   });
 
+  it('trims the user id, so one user has one allowance', () => {
+    expect(parseSearchRequest({ appUserId: ' m2t_a ', query: 'cafe' })).toMatchObject({
+      appUserId: 'm2t_a',
+    });
+    expect(parseReverseRequest({ appUserId: '   ', latitude: 1, longitude: 2 })).toEqual({
+      error: 'missing_app_user_id',
+    });
+  });
+
+  it('keys a point just west of 0° like 0° itself', () => {
+    expect(
+      reversePath({ appUserId: 'm2t_a', latitude: -0.00001, longitude: -0.00002, language: null }),
+    ).toBe('/v1/reverseGeocode?loc=0.0000%2C0.0000');
+  });
+
   it('collapses spaces, keeps an optional location and drops a malformed language', () => {
     expect(
       parseSearchRequest({ appUserId: 'm2t_a', query: '  Star   bucks ', language: 'en; DROP' }),
@@ -315,6 +330,30 @@ describe('POST /search and /reverse', () => {
     expect(fetchMock.mock.calls.filter(([url]) => String(url).endsWith('/v1/token'))).toHaveLength(
       1,
     );
+  });
+
+  it('shares one token request between searches that arrive together', async () => {
+    await Promise.all([
+      post('/search', { appUserId: 'm2t_a', query: 'cafe' }),
+      post('/search', { appUserId: 'm2t_b', query: 'bakery' }),
+      post('/reverse', { appUserId: 'm2t_c', latitude: 3.1, longitude: 101.7 }),
+    ]);
+    expect(fetchMock.mock.calls.filter(([url]) => String(url).endsWith('/v1/token'))).toHaveLength(
+      1,
+    );
+  });
+
+  it('answers a JSON 503 and never asks Apple when the allowance cannot be read', async () => {
+    const error = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    try {
+      (checkQuota as jest.Mock).mockRejectedValueOnce(new Error('D1 unavailable'));
+      const response = await post('/search', { appUserId: 'm2t_a', query: 'cafe' });
+      expect(response.status).toBe(503);
+      expect(await response.json()).toEqual({ error: 'upstream' });
+      expect(fetchMock).not.toHaveBeenCalled();
+    } finally {
+      error.mockRestore();
+    }
   });
 
   it('mints a new token once when Apple refuses the cached one', async () => {

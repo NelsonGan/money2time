@@ -308,7 +308,7 @@ SQLite via `expo-sqlite` + Drizzle ORM. Schema is in `lib/db/schema.ts`. The DB 
 
 **Offline places DB (`lib/db/citiesDb.ts`).** A second, **read-only** SQLite connection holds GeoNames cities (used by `CityPickerSheet` to attach a location to an album). The prebuilt asset ships gzipped as `assets/db/cities.db.gz` (2.3 MB instead of 5.3 MB of app size, bundled via the `gz` entry added to metro `assetExts`) and is unpacked with fflate into the SQLite dir once on first run, guarded by `CITIES_DB_VERSION`, so the uncompressed file exists on the device only once. Regenerate it with `node scripts/build-cities-db.mjs` (downloads GeoNames `cities15000`, VACUUMs and gzips; `--empty` writes a schema-only placeholder). **Never** run the money2time migration runner against `cities.db` — it is pure reference data: not migrated, not backed up, not reset. On open the loader checks that the copy has a `cities` table and, if not, unpacks the asset again once: 1.6.1 and 1.6.2 opened the database before their un-awaited copy finished, which left an empty `cities.db` that the version marker called current. Failed opens close their connection where possible and disable further open attempts for the session. It degrades to empty results if the asset is missing/corrupt. `searchCities` is **fuzzy**: the FTS5 index covers city, admin1/state and country names so a query can resolve by any of them (e.g. `japan`, `california`), and results are ordered by match tier (city-name match > state > country) then population. Each table carries an `ascii_name` column for the diacritic-free LIKE checks that drive that tiering.
 
-**Album location map (`features/albums/`).** Albums with a location show on the Albums screen's Map tab (`AlbumMapPanel` → `components/AlbumMapView.tsx`): a photo card per album (`AlbumMapMarker`: cover, month badge, name, total spend) on the app's one map, `features/places/components/AppMap.tsx` (react-native-maps: **Apple Maps on iOS**, no key; **Google Maps on Android**, with the Maps SDK key, see [Transaction locations](#transaction-locations)). Albums in the same city share a point, so they draw as one marker (`AlbumStackMarker`): up to three cards fanned behind each other in a fixed order with a count badge (one marker, because MapKit ignores `zIndex` between markers at one point). Tapping it opens "Albums here" (`AlbumStackSheet`), which lists them; picking one opens it once the sheet has closed. A single album's card opens it directly. Marker covers re-render only when their label, cover or the theme changes (`tracksViewChanges` on Android is turned back off once the cover has loaded). A "show all" button fits every album. The map is a native module: `AlbumMapPanel` lazy-loads it only once the Map tab is first opened (keeping it off the cold-start path) behind an `AppErrorBoundary`, so a dev client built without it shows a message instead of crashing. Pins come from `AlbumPin[]` (built from `locatedAlbums` + `getAlbumStats`); `locatedAlbums` is a selector on `useApp()`.
+**Album location map (`features/albums/`).** Albums with a location show on the Albums screen's Map tab (`AlbumMapPanel` → `components/AlbumMapView.tsx`): a photo card per album (`AlbumMapMarker`: cover, month badge, name, total spend) on the app's one map, `features/places/components/AppMap.tsx` (react-native-maps: **Apple Maps on iOS**, no key; **Google Maps on Android**, with the Maps SDK key, see [Transaction locations](#transaction-locations)). Albums in the same city share a point, so they draw as one marker (`AlbumStackMarker`): up to three cards fanned behind each other in a fixed order with a count badge (one marker, because MapKit ignores `zIndex` between markers at one point). Tapping it opens "Albums here" (`AlbumStackSheet`), which lists them; picking one opens it once the sheet has closed. A single album's card opens it directly. Marker covers re-render only when their label, cover or the theme changes (`tracksViewChanges` on Android is turned back off once every card shown has loaded its cover, or after 1.5 s). A "show all" button fits every album (`fitMapToPoints`; albums all in one city get the single-album zoom rather than street level). The map is a native module: `AlbumMapPanel` lazy-loads it only once the Map tab is first opened (keeping it off the cold-start path) behind an `AppErrorBoundary`, so a dev client built without it shows a message instead of crashing. Pins come from `AlbumPin[]` (built from `locatedAlbums` + `getAlbumStats`); `locatedAlbums` is a selector on `useApp()`.
 
 **Tables** (all use soft-deletes via `deletedAt`, except `exchange_rates` which is a cache). Each ledger's root tables also carry `ledgerId`; see [Ledgers](#ledgers):
 
@@ -587,9 +587,13 @@ locations** is off for everyone until they turn it on. The code lives in
   the sheet that saved the entry to finish closing. Turn on Locations sets the
   setting, closes the sheet and only then asks for the system permission, so
   the system dialog never meets another modal; the coordinator stays held
-  until that dialog is answered. A refusal leaves Locations on with place
-  search, as in Settings. A request made before a kill is forgotten, and the
-  next entry asks again.
+  until that dialog is answered. A second tap while it closes does nothing,
+  `Locations Offer Shown` is sent only once it is actually on screen, and if
+  Locations is turned on elsewhere while it waits hidden it closes unasked. A
+  refusal leaves Locations on with place search, as in Settings. A request
+  made before a kill is forgotten, and the next entry asks again. A place on a
+  new instalment plan whose first payment is later is not kept (no payment
+  exists yet to hold it) and not reported as set.
 - **Settings › Personalize** (`AccountSettingsScreen`) has a Locations card
   laid out like the Haptics card above it: **Locations** ("Add places to your
   transactions", off by default) and, under it, **Auto-tag new expenses** (on
@@ -635,7 +639,14 @@ locations** is off for everyone until they turn it on. The code lives in
   `screens/SpendingMapScreen.tsx` lazy-loading `SpendingMapContent.tsx`)
   opens from a map button in the Calendar header, shown while Locations
   is on or once any entry has a place. It shows one month, one year or all
-  time (‹ › moves between periods, never past the current one). Each place is
+  time (‹ › moves between periods, never past the current one); months follow
+  the month cycle like the Calendar (`mapPeriod.ts` on the `financialMonth`
+  helpers), so "November" covers the same days in both, and a year runs from
+  its January cycle to the end of its December one. Framing the places
+  (`lib/fitMap.ts`, shared with the album map) waits for the place panel to
+  close, gives places at one spot a fixed zoom instead of a box of no size,
+  and passes the panel and header as padding the way each platform expects
+  (Google Maps adds `edgePadding` to the map's own padding; MapKit does not). Each place is
   a price tag of what was spent there (money in the main currency, the amount
   frozen at save for a foreign entry, or hours in time mode; an income-only
   place shows its income in green). Entries group by Apple's place id, else by
@@ -3109,7 +3120,7 @@ Two providers, two jobs:
 | Transaction milestone thresholds                       | 6           | One event at each documented logged-transaction count.                                                  |
 | Maximum adoption/milestone events per eligible install | 27          | Feature first uses plus transaction milestones, with working persistent storage; not a total event cap. |
 
-Every native app user is identified in both providers with the same pseudonymous `settings.appUserId`; there is no user or event sampling of custom events. PostHog's automatic lifecycle events, screen events, touch autocapture and rage clicks are disabled. GA4 collects its SDK events after identity/consent configuration; manually emitted `screen_view` is documented below and is additional to the 169 custom definitions. RevenueCat server events are listed separately.
+Every native app user is identified in both providers with the same pseudonymous `settings.appUserId`; there is no user or event sampling of custom events. PostHog's automatic lifecycle events, screen events, touch autocapture and rage clicks are disabled. GA4 collects its SDK events after identity/consent configuration; manually emitted `screen_view` is documented below and is additional to the custom events in the tables below. RevenueCat server events are listed separately.
 
 ### PostHog event budget
 
@@ -5016,8 +5027,9 @@ Maps enabled, Maps ID `maps.com.nelsongan.money2time`; its .p8 is the secret
 `APPLE_MAPS_PRIVATE_KEY`, kept in `~/.config/money2time/`; `APPLE_MAPS_KEY_ID`
 and `APPLE_TEAM_ID` are vars). The Worker signs a 10-minute ES256 Maps auth
 token (`scope: server_api`) with WebCrypto, trades it at `/v1/token` for a
-30-minute access token kept per isolate, and mints a new one once when Apple
-answers 401. Answers are normalized (one-line address without the name or
+30-minute access token kept per isolate (searches arriving together share one
+token request), and mints a new one once when Apple answers 401. User ids are
+trimmed, and a coordinate just below 0° rounds to the same key as 0°. Answers are normalized (one-line address without the name or
 country, Apple's id and `poiCategory`, at most 12 places). `src/index.ts` holds
 the routes and the signature check; `src/quota.ts` the daily allowance.
 
@@ -5044,7 +5056,8 @@ the routes and the signature check; `src/quota.ts` the daily allowance.
   which the picker's search box cannot reach, `invalid_location`), 401 bad
   signature, 429
   `limit_reached` (the daily allowance) or `rate_limited` (the address), 503
-  `not_configured` (no key) or `capacity` (Apple's quota), 502 `upstream`. The
+  `not_configured` (no key), `capacity` (Apple's quota) or `upstream` (the
+  allowance could not be read, so Apple is not asked), 502 `upstream`. The
   app maps them in `features/places/services/placeSearch.ts`.
 - **Deploy.** CI applies the schema and deploys on merge like the other
   Workers (the `places` entry in `.github/workflows/cloudflare.yml`). The two
@@ -6292,7 +6305,8 @@ app's `services/webDashboardLink.ts`, `webDashboardCrypto.ts`,
   [Transaction locations](#transaction-locations)) is read by
   `src/lib/backup/place.ts` (`placeOf`, the same all-or-nothing rule as the
   app's `transactionLocationFields`) and shown in the lists (`TxList`) as a pin
-  and the place's name, with the address on hover. The dashboard never edits
+  and the place's name, with the address on hover, on an expense or income
+  only, as on the phone. The dashboard never edits
   it: an edit from the browser sends only the fields it changed, so the place
   stays as it was, the album-location rule. Rows from an older app have none.
 - **A shared album's Activity**: the album's page shows its log under the

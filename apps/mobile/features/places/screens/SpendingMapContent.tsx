@@ -25,11 +25,13 @@ import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import type { TransactionWithRelations } from '~/types';
 import { cn } from '~/utils';
+import { monthCycleOf } from '~/utils/financialMonth';
 import { formatAmount, formatHoursCompact } from '~/utils/formatters';
 
 import { AppMap } from '../components/AppMap';
 import { type PlaceStat, PlaceStats } from '../components/PlaceStats';
 import { PlaceClusterPin, PlacePricePin } from '../components/SpendingMapPins';
+import { fitMapToPoints } from '../lib/fitMap';
 import {
   inPeriod,
   isLatestPeriod,
@@ -52,6 +54,11 @@ import { placeCategoryIcon } from '../lib/placeIcons';
 import { groupByPlace, type PlaceGroup, regionFor } from '../lib/placeLocation';
 
 type Group = PlaceGroup<TransactionWithRelations>;
+
+/** Green only for money in: a place whose entries all count for nothing (left-out reimbursements) is neither. */
+function isIncomeOnly(totals: { spent: number; earned: number } | undefined): boolean {
+  return !!totals && totals.spent === 0 && totals.earned > 0;
+}
 
 type Selection = { kind: 'place'; key: string } | { kind: 'cluster'; keys: string[] } | null;
 
@@ -87,6 +94,7 @@ export function SpendingMapContent({
   const mapRef = useRef<MapView>(null);
   const locale = I18n.locale;
   const isTime = settings.displayMode === 'time';
+  const monthCycle = useMemo(() => monthCycleOf(settings), [settings]);
 
   const [period, setPeriod] = useState<MapPeriod>({ kind: 'month', anchor: new Date() });
   const [selection, setSelection] = useState<Selection>(null);
@@ -96,8 +104,8 @@ export function SpendingMapContent({
     [transactions],
   );
   const groups = useMemo(
-    () => groupByPlace(located.filter((tx) => inPeriod(tx.date, period))),
-    [located, period],
+    () => groupByPlace(located.filter((tx) => inPeriod(tx.date, period, monthCycle))),
+    [located, period, monthCycle],
   );
   const groupByKey = useMemo(() => new Map(groups.map((g) => [g.key, g])), [groups]);
 
@@ -147,36 +155,39 @@ export function SpendingMapContent({
   const panelHeight = Math.round(height * (selection ? 0.46 : 0.3));
   const topInset = insets.top + 112;
 
-  const fitAll = useCallback(
-    (animated = true) => {
-      if (groups.length === 0) return;
-      if (groups.length === 1) {
-        const only = groups[0] as Group;
-        mapRef.current?.animateToRegion(
-          {
-            latitude: only.latitude,
-            longitude: only.longitude,
-            latitudeDelta: 0.02,
-            longitudeDelta: 0.02,
-          },
-          animated ? 350 : 0,
-        );
-        return;
-      }
-      mapRef.current?.fitToCoordinates(groups, {
-        edgePadding: { top: topInset + 24, right: 48, bottom: panelHeight + 24, left: 48 },
-        animated,
-      });
-    },
-    [groups, topInset, panelHeight],
+  const mapPadding = useMemo(
+    () => ({ top: topInset, right: 0, bottom: panelHeight, left: 0 }),
+    [topInset, panelHeight],
   );
+  const fitAll = useCallback(
+    (animated: boolean) =>
+      fitMapToPoints(mapRef.current, groups, {
+        minDelta: 0.02,
+        margin: { top: 24, right: 48, bottom: 24, left: 48 },
+        mapPadding,
+        animated,
+      }),
+    [groups, mapPadding],
+  );
+
+  // A fit closes the place panel first and frames the places once the panel
+  // is back to its own height; read with the taller place panel, the places
+  // would end up framed too small.
+  const [fitRequest, setFitRequest] = useState<{ animated: boolean } | null>(null);
+  const requestFit = useCallback((animated: boolean) => {
+    setSelection(null);
+    setFitRequest({ animated });
+  }, []);
+  useEffect(() => {
+    if (!fitRequest || selection) return;
+    fitAll(fitRequest.animated);
+    setFitRequest(null);
+  }, [fitRequest, selection, fitAll]);
 
   // A new period re-frames the map around its places.
   useEffect(() => {
-    setSelection(null);
-    fitAll(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [period]);
+    requestFit(true);
+  }, [period, requestFit]);
 
   useEffect(() => {
     void trackEvent(AnalyticsEvents.SPENDING_MAP_OPENED, { count: groups.length });
@@ -246,6 +257,18 @@ export function SpendingMapContent({
     [region.latitudeDelta, region.longitudeDelta],
   );
 
+  // A bubble shows what was spent at its places, or the income of an
+  // income-only bubble, in green.
+  const clusterLook = (clustered: readonly { key: string }[]) => {
+    const totals = { spent: 0, earned: 0 };
+    for (const { key } of clustered) {
+      totals.spent += totalsByKey.get(key)?.spent ?? 0;
+      totals.earned += totalsByKey.get(key)?.earned ?? 0;
+    }
+    const value = totals.spent > 0 ? totals.spent : totals.earned;
+    return { label: formatValue(value, value >= 1000), income: isIncomeOnly(totals) };
+  };
+
   const pinLabel = (key: string) => {
     const totals = totalsByKey.get(key);
     if (!totals) return '';
@@ -297,8 +320,8 @@ export function SpendingMapContent({
   };
 
   const kinds: MapPeriodKind[] = ['month', 'year', 'all'];
-  const periodText = periodLabel(period, locale, I18n.t('locations.map_all_time'));
-  const latest = isLatestPeriod(period);
+  const periodText = periodLabel(period, locale, I18n.t('locations.map_all_time'), monthCycle);
+  const latest = isLatestPeriod(period, monthCycle);
   const anyLocated = located.length > 0;
 
   const renderPlaceRow = (group: Group) => {
@@ -329,7 +352,10 @@ export function SpendingMapContent({
             {group.address ? ` · ${group.address}` : ''}
           </Text>
         </View>
-        <Text variant="bodyStrong" tone={totals && totals.spent > 0 ? 'primary' : 'success'}>
+        <Text
+          variant="bodyStrong"
+          tone={isIncomeOnly(totals) ? 'success' : totals && totals.spent > 0 ? 'primary' : 'muted'}
+        >
           {pinLabel(group.key)}
         </Text>
       </Pressable>
@@ -469,7 +495,7 @@ export function SpendingMapContent({
         <AppMap
           ref={mapRef}
           initialRegion={fitRegion}
-          mapPadding={{ top: topInset, right: 0, bottom: panelHeight, left: 0 }}
+          mapPadding={mapPadding}
           onRegionChangeComplete={(next: Region) => setRegion(next)}
           onPress={() => setSelection(null)}
           onMapReady={() => fitAll(false)}
@@ -482,7 +508,7 @@ export function SpendingMapContent({
                 latitude={marker.latitude}
                 longitude={marker.longitude}
                 label={pinLabel(marker.key)}
-                income={(totalsByKey.get(marker.key)?.spent ?? 0) === 0}
+                income={isIncomeOnly(totalsByKey.get(marker.key))}
                 selected={selectedKeys.has(marker.key) && selection?.kind === 'place'}
                 accessibilityLabel={`${marker.group.name}, ${pinLabel(marker.key)}`}
                 onPress={() => handleMarkerPress(marker)}
@@ -494,14 +520,7 @@ export function SpendingMapContent({
                 latitude={marker.latitude}
                 longitude={marker.longitude}
                 count={marker.count}
-                label={(() => {
-                  // What was spent there, or the income of an income-only bubble.
-                  const sum = (field: 'spent' | 'earned') =>
-                    marker.groups.reduce((n, g) => n + (totalsByKey.get(g.key)?.[field] ?? 0), 0);
-                  const spent = sum('spent');
-                  const total = spent > 0 ? spent : sum('earned');
-                  return formatValue(total, total >= 1000);
-                })()}
+                {...clusterLook(marker.groups)}
                 selected={
                   selection?.kind === 'cluster' &&
                   marker.groups.some((g) => selectedKeys.has(g.key))
@@ -533,7 +552,7 @@ export function SpendingMapContent({
           </Pressable>
           <View className="h-11 flex-1 flex-row items-center justify-between rounded-full border border-border/40 bg-card px-1.5 shadow-soft">
             <Pressable
-              onPress={() => setPeriod((p) => shiftPeriod(p, -1))}
+              onPress={() => setPeriod((p) => shiftPeriod(p, -1, monthCycle))}
               disabled={period.kind === 'all'}
               accessibilityRole="button"
               accessibilityLabel={I18n.t('locations.map_previous')}
@@ -549,7 +568,7 @@ export function SpendingMapContent({
               {periodText}
             </Text>
             <Pressable
-              onPress={() => setPeriod((p) => shiftPeriod(p, 1))}
+              onPress={() => setPeriod((p) => shiftPeriod(p, 1, monthCycle))}
               disabled={latest}
               accessibilityRole="button"
               accessibilityLabel={I18n.t('locations.map_next')}
@@ -600,8 +619,7 @@ export function SpendingMapContent({
         <Pressable
           onPress={() => {
             void triggerHaptic('selection');
-            setSelection(null);
-            fitAll(true);
+            requestFit(true);
           }}
           accessibilityRole="button"
           accessibilityLabel={I18n.t('locations.map_fit')}
