@@ -1,5 +1,5 @@
 import {
-  History,
+  ChevronRight,
   LocateFixed,
   type LucideIcon,
   MapPin,
@@ -7,8 +7,6 @@ import {
   Navigation,
   RotateCw,
   Search,
-  Sparkles,
-  Trash2,
   X,
 } from 'lucide-react-native';
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -120,7 +118,7 @@ type PinState =
   | { kind: 'named'; center: Coordinate; place: PlaceResult | null };
 
 type Row =
-  | { kind: 'header'; key: string; label: string; icon: LucideIcon }
+  | { kind: 'header'; key: string; label: string }
   | { kind: 'place'; key: string; place: PlaceResult; source: PlaceSource }
   | { kind: 'status'; key: string; loading: boolean; message?: string };
 
@@ -536,7 +534,6 @@ export function PlacePickerSheet({
         kind: 'header',
         key: 'h-yours',
         label: I18n.t('locations.your_places'),
-        icon: History,
       });
       for (const place of localMatches)
         rows.push({ kind: 'place', key: `y-${placeKey(place)}`, place, source: 'recent' });
@@ -546,7 +543,6 @@ export function PlacePickerSheet({
         kind: 'header',
         key: 'h-results',
         label: I18n.t('locations.search_results'),
-        icon: Search,
       });
     }
     if (search.kind === 'searching' || search.kind === 'idle') {
@@ -569,7 +565,6 @@ export function PlacePickerSheet({
         kind: 'header',
         key: 'h-recent',
         label: I18n.t('locations.recent_places'),
-        icon: History,
       });
       for (const place of recents)
         rows.push({ kind: 'place', key: `c-${placeKey(place)}`, place, source: 'recent' });
@@ -584,7 +579,6 @@ export function PlacePickerSheet({
         kind: 'header',
         key: 'h-nearby',
         label: I18n.t('locations.nearby'),
-        icon: Sparkles,
       });
       if (nearby.kind === 'loading') {
         rows.push({ kind: 'status', key: 's-nearby', loading: true });
@@ -811,17 +805,6 @@ export function PlacePickerSheet({
             </Text>
           </Pressable>
         </View>
-      ) : !mapMoved ? (
-        <View
-          pointerEvents="none"
-          className="absolute left-4 flex-row items-center gap-1.5 rounded-full bg-card px-3 py-1.5"
-          style={[styles.floating, { bottom: MAP_CONTROLS_BOTTOM }]}
-        >
-          <MapPinned size={13} color={themeColors.textMuted} />
-          <Text variant="caption" tone="muted">
-            {I18n.t('locations.pin_hint')}
-          </Text>
-        </View>
       ) : null}
     </View>
   ) : null;
@@ -831,7 +814,7 @@ export function PlacePickerSheet({
   const currentSubtitle = (() => {
     switch (here.status) {
       case 'ready':
-        return [here.place?.name, here.place?.address].filter(Boolean).join(' · ');
+        return here.place?.address || here.place?.name || '';
       case 'ask':
         return I18n.t('locations.permission_allow');
       case 'blocked':
@@ -849,37 +832,38 @@ export function PlacePickerSheet({
     <Pressable
       onPress={handleCurrentPress}
       accessibilityRole="button"
-      accessibilityLabel={I18n.t('locations.current_location')}
-      className="mb-2 flex-row items-center gap-3 rounded-2xl py-2 active:opacity-70"
+      accessibilityLabel={[I18n.t('locations.current_location'), currentSubtitle]
+        .filter(Boolean)
+        .join(', ')}
+      className="flex-row items-center gap-3 border-b border-border/40 py-3 active:opacity-70"
     >
-      <View className="h-10 w-10 items-center justify-center rounded-2xl bg-primary">
+      <View className="h-8 w-8 items-center justify-center">
         {here.status === 'locating' || here.status === 'idle' ? (
-          <ActivityIndicator size="small" color={themeColors.card} />
+          <ActivityIndicator size="small" color={themeColors.primary} />
         ) : (
-          <LocateFixed size={20} color={themeColors.card} />
+          <LocateFixed size={22} color={themeColors.primary} />
         )}
       </View>
       <View className="min-w-0 flex-1">
         <Text variant="bodyStrong" numberOfLines={1}>
           {I18n.t('locations.current_location')}
         </Text>
-        <Text variant="caption" tone="muted" numberOfLines={2} {...REPLAY_PRIVATE}>
-          {currentSubtitle}
-        </Text>
+        {currentSubtitle ? (
+          <Text variant="caption" tone="muted" numberOfLines={1} {...REPLAY_PRIVATE}>
+            {currentSubtitle}
+          </Text>
+        ) : null}
       </View>
+      <ChevronRight size={18} color={themeColors.textMuted} />
     </Pressable>
   ) : undefined;
 
   const renderRow = ({ item }: { item: Row }) => {
     if (item.kind === 'header') {
-      const Icon = item.icon;
       return (
-        <View className="mb-1 mt-3 flex-row items-center gap-1.5">
-          <Icon size={13} color={themeColors.textMuted} />
-          <Text variant="label" tone="muted">
-            {item.label}
-          </Text>
-        </View>
+        <Text variant="caption" tone="muted" className="mt-4 font-semibold">
+          {item.label}
+        </Text>
       );
     }
     if (item.kind === 'status') {
@@ -888,7 +872,7 @@ export function PlacePickerSheet({
           <ActivityIndicator color={themeColors.primary} />
         </View>
       ) : (
-        <Text variant="body" tone="muted" className="py-5 text-center">
+        <Text variant="caption" tone="muted" className="py-4 text-center">
           {item.message}
         </Text>
       );
@@ -913,34 +897,29 @@ export function PlacePickerSheet({
         accessibilityLabel={[place.name, place.address].filter(Boolean).join(', ')}
         accessibilityState={{ selected }}
         style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+        // One line a place: its icon, name and distance. The address stays in
+        // the map's card (hold the row) and in what is read aloud.
         className={cn(
-          'flex-row items-center gap-3 rounded-2xl py-2.5',
-          selected && '-mx-2 border border-primary/30 bg-primary/10 px-2',
+          'flex-row items-center gap-3 border-b border-border/40 py-2.5',
+          selected && '-mx-2 rounded-xl border-transparent bg-primary/10 px-2',
         )}
       >
         <View
           className={cn(
-            'h-10 w-10 items-center justify-center rounded-full',
+            'h-8 w-8 items-center justify-center rounded-full',
             flatIcons && 'bg-primary/10',
           )}
         >
           <PlaceIcon
             spec={placeCategoryIcon(place.category)}
-            size={32}
-            flatSize={18}
+            size={28}
+            flatSize={16}
             color={themeColors.primary}
           />
         </View>
-        <View className="min-w-0 flex-1" {...REPLAY_PRIVATE}>
-          <Text variant="bodyStrong" numberOfLines={1}>
-            {place.name}
-          </Text>
-          {place.address ? (
-            <Text variant="caption" tone="muted" numberOfLines={1}>
-              {place.address}
-            </Text>
-          ) : null}
-        </View>
+        <Text variant="body" numberOfLines={1} className="min-w-0 flex-1" {...REPLAY_PRIVATE}>
+          {place.name}
+        </Text>
         {distance ? (
           <Text variant="caption" tone="muted">
             {distance}
@@ -1034,12 +1013,9 @@ export function PlacePickerSheet({
           style={[styles.panel, { marginTop: -PANEL_OVERLAP }]}
         >
           <View className="flex-1" style={sheetColumnStyle}>
-            <View className="items-center pb-1 pt-2">
+            <View className="items-center pb-3 pt-2">
               <View className="h-1.5 w-10 rounded-full bg-border" />
             </View>
-            <Text variant="subheading" numberOfLines={1} className="px-5 pb-3 pt-1">
-              {I18n.t('locations.picker_title')}
-            </Text>
 
             {!showingSearch && origin ? (
               <ScrollView
@@ -1103,9 +1079,9 @@ export function PlacePickerSheet({
                   <Pressable
                     onPress={handleRemove}
                     accessibilityRole="button"
-                    className="mt-4 flex-row items-center justify-center gap-2 rounded-2xl border border-border/40 py-3 active:opacity-70"
+                    hitSlop={8}
+                    className="mt-3 items-center py-3 active:opacity-70"
                   >
-                    <Trash2 size={16} color={themeColors.error} />
                     <Text variant="body" className="text-destructive">
                       {I18n.t('locations.remove')}
                     </Text>

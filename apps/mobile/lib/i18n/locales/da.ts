@@ -3763,7 +3763,6 @@ const da = {
     locate_me: 'Vis min placering',
     choose: 'Vælg',
     pin_drop: 'Sæt en nål',
-    pin_hint: 'Hold på kortet for at sætte en nål',
     pin_drag: 'Flyt kortet for at placere nålen',
     pin_use: 'Brug dette sted',
     category_food: 'Mad',

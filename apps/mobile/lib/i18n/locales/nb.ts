@@ -3765,7 +3765,6 @@ const nb = {
     locate_me: 'Vis min posisjon',
     choose: 'Velg',
     pin_drop: 'Slipp en nål',
-    pin_hint: 'Hold på kartet for å slippe en nål',
     pin_drag: 'Flytt kartet for å plassere nålen',
     pin_use: 'Bruk dette stedet',
     category_food: 'Mat',

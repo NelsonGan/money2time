@@ -3801,7 +3801,6 @@ const nl = {
     locate_me: 'Toon mijn locatie',
     choose: 'Kies',
     pin_drop: 'Speld plaatsen',
-    pin_hint: 'Houd de kaart ingedrukt om een speld te plaatsen',
     pin_drag: 'Verschuif de kaart om de speld te plaatsen',
     pin_use: 'Deze plek gebruiken',
     category_food: 'Eten',

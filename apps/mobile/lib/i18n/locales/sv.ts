@@ -3763,7 +3763,6 @@ const sv = {
     locate_me: 'Visa min plats',
     choose: 'Välj',
     pin_drop: 'Släpp en nål',
-    pin_hint: 'Håll på kartan för att släppa en nål',
     pin_drag: 'Flytta kartan för att placera nålen',
     pin_use: 'Använd den här platsen',
     category_food: 'Mat',

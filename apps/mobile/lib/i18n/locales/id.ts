@@ -3785,7 +3785,6 @@ const id = {
     locate_me: 'Tampilkan lokasi saya',
     choose: 'Pilih',
     pin_drop: 'Pasang pin',
-    pin_hint: 'Tahan peta untuk memasang pin',
     pin_drag: 'Geser peta untuk menempatkan pin',
     pin_use: 'Gunakan titik ini',
     category_food: 'Makanan',

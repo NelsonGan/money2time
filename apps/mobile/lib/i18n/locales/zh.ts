@@ -3603,7 +3603,6 @@ const zh = {
     locate_me: '显示我的位置',
     choose: '选择',
     pin_drop: '放置图钉',
-    pin_hint: '长按地图放置图钉',
     pin_drag: '移动地图来放置图钉',
     pin_use: '使用此位置',
     category_food: '餐饮',

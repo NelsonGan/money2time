@@ -3736,7 +3736,6 @@ const ja = {
     locate_me: '現在地を表示',
     choose: '選択',
     pin_drop: 'ピンを立てる',
-    pin_hint: '地図を長押しでピンを立てる',
     pin_drag: '地図を動かしてピンの位置を調整',
     pin_use: 'この地点を使う',
     category_food: '食事',

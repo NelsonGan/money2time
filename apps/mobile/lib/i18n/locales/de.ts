@@ -3814,7 +3814,6 @@ const de = {
     locate_me: 'Meinen Standort zeigen',
     choose: 'Auswählen',
     pin_drop: 'Stecknadel setzen',
-    pin_hint: 'Karte gedrückt halten, um eine Stecknadel zu setzen',
     pin_drag: 'Karte bewegen, um die Stecknadel zu platzieren',
     pin_use: 'Diesen Ort verwenden',
     category_food: 'Essen',

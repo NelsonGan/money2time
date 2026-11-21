@@ -3774,7 +3774,6 @@ const tr = {
     locate_me: 'Konumumu göster',
     choose: 'Seç',
     pin_drop: 'İğne bırak',
-    pin_hint: 'İğne bırakmak için haritaya basılı tutun',
     pin_drag: 'İğneyi yerleştirmek için haritayı kaydırın',
     pin_use: 'Bu noktayı kullan',
     category_food: 'Yemek',

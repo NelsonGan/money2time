@@ -3753,7 +3753,6 @@ const en = {
     locate_me: 'Show my location',
     choose: 'Choose',
     pin_drop: 'Drop a pin',
-    pin_hint: 'Hold the map to drop a pin',
     pin_drag: 'Move the map to place the pin',
     pin_use: 'Use this spot',
     category_food: 'Food',
