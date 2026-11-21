@@ -32,7 +32,7 @@ export class PlaceSearchError extends Error {
 // user typing again rather than spin.
 const FETCH_TIMEOUT_MS = 10000;
 
-const DEFAULT_BASE_URL = 'https://workers-places.money2time.com';
+const DEFAULT_BASE_URL = 'https://locations.money2time.com';
 
 // `EXPO_PUBLIC_MONEY2TIME_WORKERS_PLACES` points a dev build at a local Worker.
 function apiBaseUrl(): string {

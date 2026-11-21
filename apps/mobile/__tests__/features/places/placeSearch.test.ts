@@ -89,7 +89,7 @@ describe('place search client', () => {
     process.env.EXPO_PUBLIC_MONEY2TIME_WORKERS_PLACES = '';
     fetchMock.mockResolvedValueOnce(Response.json({ places: [] }));
     await searchPlaces({ appUserId: 'm2t_a', query: 'cafe' });
-    expect(fetchMock.mock.calls[0][0]).toBe('https://workers-places.money2time.com/search');
+    expect(fetchMock.mock.calls[0][0]).toBe('https://locations.money2time.com/search');
   });
 
   it.each([
