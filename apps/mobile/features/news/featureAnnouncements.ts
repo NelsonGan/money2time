@@ -77,7 +77,9 @@ export interface FeatureAnnouncementPage {
     | 'splitFriendPaid'
     | 'splitMethods'
     | 'albumIcons'
-    | 'sharedAlbums';
+    | 'sharedAlbums'
+    | 'freeScans'
+    | 'locationTagging';
   /**
    * Optional call-to-action for this page. On the last page it replaces the
    * primary button; on earlier pages it sits above the Back/Next row so the
@@ -111,7 +113,8 @@ export interface FeatureAnnouncementPage {
     | 'openBudget'
     | 'openSettleUp'
     | 'openScanReceipt'
-    | 'openAlbums';
+    | 'openAlbums'
+    | 'openLocations';
   /** Mark sponsored or promotional content clearly in the announcement panel. */
   badge?: 'ad';
   /**
@@ -160,7 +163,11 @@ export function announcementPageTitle(
   announcement: FeatureAnnouncement,
   page: FeatureAnnouncementPage,
 ): string {
-  return I18n.t(`news.${announcement.i18nKey}.${page.key}.title`);
+  const key = `news.${announcement.i18nKey}.${page.key}.title`;
+  if (announcement.i18nKey === 'free_scans_locations' && page.key === 'freeScans') {
+    return I18n.t(key, { count: PRO_LIMITS.FREE_MAX_RECEIPT_SCANS });
+  }
+  return I18n.t(key);
 }
 
 /** Localized body copy for a single announcement page. */
@@ -184,6 +191,10 @@ export function announcementPageBody(
   if (announcement.i18nKey === 'budgets_splits_scans_archive' && page.key === 'batchScan') {
     // The album pick limit comes from the scan code, never from the copy.
     return I18n.t(key, { count: MAX_RECEIPT_BATCH });
+  }
+  if (announcement.i18nKey === 'free_scans_locations' && page.key === 'freeScans') {
+    // The monthly free scan limit comes from PRO_LIMITS, never from the copy.
+    return I18n.t(key, { count: PRO_LIMITS.FREE_MAX_RECEIPT_SCANS });
   }
   return I18n.t(key);
 }
@@ -286,6 +297,8 @@ export function announcementCtaLabel(cta: NonNullable<FeatureAnnouncementPage['c
       return I18n.t('news.cta.open_scan_receipt');
     case 'openAlbums':
       return I18n.t('news.cta.open_albums');
+    case 'openLocations':
+      return I18n.t('locations.map_turn_on');
     case 'openShareEarn':
     default:
       return I18n.t('news.cta.open_share_earn');

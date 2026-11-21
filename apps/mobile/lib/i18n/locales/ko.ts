@@ -170,6 +170,17 @@ const ko = {
     reset_action: '삭제 후 전환',
   },
   news: {
+    free_scans_locations: {
+      title: '무료 스캔 확대 및 위치 태그',
+      freeScans: {
+        title: '매월 무료 영수증 스캔 %{count}회',
+        body: '무료 플랜에서도 이제 매월 %{count}회 영수증을 스캔할 수 있으며 매달 초기화됩니다. 영수증 스캔에서 사진을 찍거나 앨범에서 선택하면 Money2Time이 상호, 금액, 날짜, 카테고리를 자동으로 입력해 줍니다. Pro는 계속 무제한입니다.',
+      },
+      locations: {
+        title: '거래에 위치 태그 추가',
+        body: '설정 > 개인화에서 위치를 켜면 지출과 수입에 장소를 기록할 수 있습니다. 새 지출에 현재 위치를 자동으로 태그하거나 검색과 최근 장소에서 선택할 수 있습니다. 캘린더에서 지출 지도를 열어 어디서 돈을 썼는지 확인해 보세요.',
+      },
+    },
     split_bills_album_icons: {
       title: '공유 앨범과 더치페이',
       sharedAlbums: {

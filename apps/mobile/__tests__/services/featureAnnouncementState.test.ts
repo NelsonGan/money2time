@@ -5,6 +5,7 @@ import { PRO_LIMITS } from '~/constants/proLimits';
 import {
   announcementPageBody,
   announcementPagesForPlatform,
+  announcementPageTitle,
   getFeatureAnnouncementById,
   getFeatureAnnouncementsNewestFirst,
   getLatestFeatureAnnouncement,
@@ -52,8 +53,64 @@ describe('feature announcement state', () => {
     );
   });
 
-  it('announces shared albums, bills a friend paid, split methods and album icons', () => {
+  it('announces 20 free monthly scans and location tagging on both platforms', () => {
     const latest = getLatestFeatureAnnouncement()!;
+    expect(latest).toMatchObject({
+      id: 'free_scans_locations_2026_11',
+      announcementNumber: 27,
+      pages: [
+        { key: 'freeScans', visual: 'freeScans', cta: 'openScanReceipt' },
+        { key: 'locations', visual: 'locationTagging', cta: 'openLocations' },
+      ],
+    });
+    expect(latest.requiresCapability).toBeUndefined();
+    expect(announcementPagesForPlatform(latest, 'ios')).toHaveLength(2);
+    expect(announcementPagesForPlatform(latest, 'android')).toHaveLength(2);
+  });
+
+  it('takes the monthly free scan limit in the new announcement from PRO_LIMITS', () => {
+    const latest = getFeatureAnnouncementById('free_scans_locations_2026_11')!;
+    const freeScans = latest.pages.find((page) => page.key === 'freeScans')!;
+    const t = jest.spyOn(I18n, 't');
+    announcementPageTitle(latest, freeScans);
+    announcementPageBody(latest, freeScans);
+    expect(t).toHaveBeenCalledWith('news.free_scans_locations.freeScans.title', {
+      count: PRO_LIMITS.FREE_MAX_RECEIPT_SCANS,
+    });
+    expect(t).toHaveBeenCalledWith('news.free_scans_locations.freeScans.body', {
+      count: PRO_LIMITS.FREE_MAX_RECEIPT_SCANS,
+    });
+    t.mockRestore();
+    // Every language takes the number as a placeholder, never as written text,
+    // and writes the new announcement without dashes.
+    for (const locale of SUPPORTED_LOCALE_FILES) {
+      const news = loadLocale(locale).news.free_scans_locations;
+      expect([locale, news.freeScans.title]).toEqual([locale, expect.stringContaining('%{count}')]);
+      expect([locale, news.freeScans.body]).toEqual([locale, expect.stringContaining('%{count}')]);
+      expect([locale, JSON.stringify(news)]).toEqual([locale, expect.not.stringMatching(/[–—]/)]);
+    }
+  });
+
+  it('names the real Scan receipt, Locations, Personalize and Spending map labels in every language', () => {
+    for (const locale of SUPPORTED_LOCALE_FILES) {
+      const strings = loadLocale(locale);
+      const news = strings.news.free_scans_locations;
+      expect([locale, news.freeScans.body]).toEqual([
+        locale,
+        expect.stringContaining(strings.add_action.scan_title),
+      ]);
+      for (const name of [
+        strings.locations.settings_title,
+        strings.settings.account_settings,
+        strings.locations.map_title,
+      ]) {
+        expect([locale, news.locations.body]).toEqual([locale, expect.stringContaining(name)]);
+      }
+    }
+  });
+
+  it('announces shared albums, bills a friend paid, split methods and album icons', () => {
+    const latest = getFeatureAnnouncementById('split_bills_album_icons_2026_11')!;
     expect(latest).toMatchObject({
       id: 'split_bills_album_icons_2026_11',
       announcementNumber: 26,

@@ -144,6 +144,17 @@ const zhHant = {
     },
   },
   news: {
+    free_scans_locations: {
+      title: '更多免費掃描與位置標記',
+      freeScans: {
+        title: '每月 %{count} 次免費收據掃描',
+        body: '免費版用戶現在每月享有 %{count} 次收據掃描，每月自動重設。點擊掃描收據拍照或從相簿選取收據，Money2Time 會自動填入商家、金額、日期與分類。Pro 版依然不限次數。',
+      },
+      locations: {
+        title: '為交易標記消費地點',
+        body: '在設定 > 個性化中開啟位置，即可為支出與收入記錄消費地點。新增支出時可自動標記目前位置，也可搜尋或選擇最近地點。在日曆中打開消費地圖，一眼看清錢都花在哪裡。',
+      },
+    },
     split_bills_album_icons: {
       title: '共享相簿與分攤帳單',
       sharedAlbums: {

@@ -3545,6 +3545,10 @@ function AppContent() {
         onOpenInsights={() => requestOpenTab('insights')}
         onOpenInstalments={() => navigationRef.navigate('SettingsInstalments')}
         onOpenSettleUp={() => navigationRef.navigate('SettleUp')}
+        onOpenLocations={() => {
+          requestOpenTab('settings');
+          requestOpenSettingsScreen('AccountSettings');
+        }}
       />
       <CloudBackupPromptModal
         visible={cloudBackupPromptVisible && !biometricLocked && rootPromptsAllowed}

@@ -146,6 +146,17 @@ const en = {
     },
   },
   news: {
+    free_scans_locations: {
+      title: 'More free scans and locations',
+      freeScans: {
+        title: '%{count} free receipt scans a month',
+        body: 'Everyone on the free plan now gets %{count} receipt scans every month, refreshing each month. Snap a photo or pick receipts from your album under Scan receipt, and Money2Time fills in the merchant, amount, date and category for you. Pro stays unlimited.',
+      },
+      locations: {
+        title: 'Tag transactions with places',
+        body: 'Turn on Locations in Settings > Personalize to tag expenses and income with where they happened. New expenses can auto-tag your current spot, or pick any place from search or recent spots. Open the Spending map from Calendar to see where your money goes.',
+      },
+    },
     split_bills_album_icons: {
       title: 'Shared albums and split bills',
       sharedAlbums: {

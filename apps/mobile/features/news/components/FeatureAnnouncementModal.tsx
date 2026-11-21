@@ -80,6 +80,7 @@ import {
 } from './EverydayPersonalizationShowcases';
 import { ExcelExportShowcase } from './ExcelExportShowcase';
 import { FinancialMonthShowcase } from './FinancialMonthShowcase';
+import { FreeScansShowcase, LocationTaggingShowcase } from './FreeScansLocationsShowcases';
 import { GoalsShowcase } from './GoalsShowcase';
 import { IconStyleShowcase } from './IconStyleShowcase';
 import { ItemsShowcase } from './ItemsShowcase';
@@ -162,6 +163,8 @@ export interface FeatureAnnouncementCtaHandlers {
   onOpenInstalments?: () => void;
   /** Open Who owes you (Settle Up). */
   onOpenSettleUp?: () => void;
+  /** Open Settings > Personalize, where Locations lives. */
+  onOpenLocations?: () => void;
 }
 
 interface FeatureAnnouncementModalProps extends FeatureAnnouncementCtaHandlers {
@@ -238,6 +241,7 @@ export function FeatureAnnouncementModal({
   onOpenInsights,
   onOpenInstalments,
   onOpenSettleUp,
+  onOpenLocations,
 }: FeatureAnnouncementModalProps) {
   const colors = useThemeColors();
   const { settings, paymentAlertPrefs } = useApp();
@@ -311,6 +315,7 @@ export function FeatureAnnouncementModal({
       : undefined,
     openInstalments: onOpenInstalments,
     openSettleUp: onOpenSettleUp,
+    openLocations: onOpenLocations,
     // Budget is an Insights page, and Scan receipt one of the + button's flows:
     // both are reached through their bridges, the same from every caller.
     openBudget: requestOpenBudget,
@@ -454,7 +459,11 @@ export function FeatureAnnouncementModal({
               </View>
             ) : null}
             <View style={styles.showcaseSlot}>
-              {page.visual === 'sharedAlbums' ? (
+              {page.visual === 'freeScans' ? (
+                <FreeScansShowcase width={Math.round(showcaseWidth * 0.92)} />
+              ) : page.visual === 'locationTagging' ? (
+                <LocationTaggingShowcase width={Math.round(showcaseWidth * 0.92)} />
+              ) : page.visual === 'sharedAlbums' ? (
                 <SharedAlbumsShowcase width={Math.round(showcaseWidth * 0.92)} />
               ) : page.visual === 'splitFriendPaid' ? (
                 <SplitFriendPaidShowcase width={Math.round(showcaseWidth * 0.92)} />

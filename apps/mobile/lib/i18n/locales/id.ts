@@ -171,6 +171,17 @@ const id = {
     reset_action: 'Hapus & ganti',
   },
   news: {
+    free_scans_locations: {
+      title: 'Lebih banyak pindai gratis dan lokasi',
+      freeScans: {
+        title: '%{count} pindai struk gratis per bulan',
+        body: 'Pengguna paket gratis kini mendapat %{count} pindai struk setiap bulan, yang diperbarui tiap bulan. Ambil foto atau pilih struk dari album lewat Pindai struk, lalu Money2Time mengisi toko, nominal, tanggal, dan kategori untuk Anda. Pro tetap tanpa batas.',
+      },
+      locations: {
+        title: 'Tandai transaksi dengan lokasi',
+        body: 'Aktifkan Lokasi di Pengaturan > Personalisasi untuk menambahkan tempat pada pengeluaran dan pemasukan. Pengeluaran baru dapat otomatis menandai lokasi saat ini, atau pilih tempat dari pencarian maupun lokasi terakhir. Buka Peta pengeluaran dari Kalender untuk melihat ke mana uang Anda pergi.',
+      },
+    },
     split_bills_album_icons: {
       title: 'Album bersama dan bagi tagihan',
       sharedAlbums: {

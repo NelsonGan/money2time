@@ -171,6 +171,17 @@ const de = {
     reset_action: 'Löschen & wechseln',
   },
   news: {
+    free_scans_locations: {
+      title: 'Mehr kostenlose Scans und Orte',
+      freeScans: {
+        title: '%{count} kostenlose Belegscans pro Monat',
+        body: 'Im kostenlosen Tarif gibt es jetzt %{count} Belegscans pro Monat, die jeden Monat erneuert werden. Mach ein Foto oder wähle Belege aus deinem Album unter Beleg scannen, und Money2Time füllt Händler, Betrag, Datum und Kategorie für dich aus. Pro bleibt unbegrenzt.',
+      },
+      locations: {
+        title: 'Transaktionen mit Orten versehen',
+        body: 'Aktiviere Orte unter Einstellungen > Personalisierung, um Ausgaben und Einnahmen mit ihrem Ort zu versehen. Neue Ausgaben können automatisch deinen aktuellen Standort übernehmen, oder du wählst einen Ort über die Suche oder letzte Orte. Öffne die Ausgabenkarte im Kalender, um zu sehen, wo dein Geld bleibt.',
+      },
+    },
     split_bills_album_icons: {
       title: 'Geteilte Alben und Rechnungen',
       sharedAlbums: {

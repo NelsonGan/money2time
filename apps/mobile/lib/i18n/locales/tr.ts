@@ -171,6 +171,17 @@ const tr = {
     reset_action: 'Sil ve değiştir',
   },
   news: {
+    free_scans_locations: {
+      title: 'Daha fazla ücretsiz tarama ve konumlar',
+      freeScans: {
+        title: 'Ayda %{count} ücretsiz fiş taraması',
+        body: 'Ücretsiz plandaki herkes artık her ay yenilenen %{count} fiş taraması hakkına sahip. Fiş tara üzerinden fotoğraf çekin veya albümden fiş seçin, Money2Time işletme, tutar, tarih ve kategoriyi sizin için doldursun. Pro sınırsız kalmaya devam eder.',
+      },
+      locations: {
+        title: 'İşlemleri yerlerle etiketleyin',
+        body: 'Harcama ve gelirlere nerede yapıldığını eklemek için Ayarlar > Kişiselleştirme altında Konumlar’ı açın. Yeni harcamalar mevcut konumunuzla otomatik etiketlenebilir ya da aramadan ve son yerlerden seçim yapabilirsiniz. Paranızın nereye gittiğini görmek için Takvim’den Harcama haritası’nı açın.',
+      },
+    },
     split_bills_album_icons: {
       title: 'Paylaşılan albümler ve bölünen hesaplar',
       sharedAlbums: {

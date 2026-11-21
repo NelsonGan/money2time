@@ -171,6 +171,17 @@ const fr = {
     reset_action: 'Supprimer et changer',
   },
   news: {
+    free_scans_locations: {
+      title: 'Plus de scans gratuits et lieux',
+      freeScans: {
+        title: '%{count} scans de reçus gratuits par mois',
+        body: 'L’offre gratuite inclut désormais %{count} scans de reçus par mois, renouvelés chaque mois. Prenez une photo ou choisissez des reçus dans votre album via Scanner un reçu, et Money2Time remplit le commerçant, le montant, la date et la catégorie. Pro reste illimité.',
+      },
+      locations: {
+        title: 'Ajoutez un lieu aux transactions',
+        body: 'Activez Lieux dans Réglages > Personnalisation pour associer un lieu à vos dépenses et revenus. Les nouvelles dépenses peuvent enregistrer automatiquement votre position actuelle, ou choisissez un lieu via la recherche ou vos lieux récents. Ouvrez la Carte des dépenses depuis le Calendrier pour voir où part votre argent.',
+      },
+    },
     split_bills_album_icons: {
       title: 'Albums partagés et factures partagées',
       sharedAlbums: {
