@@ -30,6 +30,12 @@ import type { UserAssetFileEntry } from '~/services/userAssets';
 
 /** The photo half of a backup target (services/autoBackupProviders/*). */
 export interface BackupPhotoStore {
+  /**
+   * Whether a photo just stored is listed at once (the phone, iCloud), so a run
+   * can check its uploads before writing a backup that names them. Drive's
+   * listing lags, and its upload already answers with the new file's id.
+   */
+  readonly listsUploadsAtOnce: boolean;
   listPhotos(): Promise<BackupPhotoRecord[]>;
   uploadPhoto(name: string, sourceUri: string): Promise<void>;
   downloadPhoto(photo: BackupPhotoRecord, destination: File): Promise<void>;
@@ -105,6 +111,11 @@ export async function uploadMissingPhotos(
   };
   await Promise.all(Array.from({ length: UPLOAD_CONCURRENCY }, worker));
   if (failure !== null) throw failure;
+  if (queue.size === 0 || !store.listsUploadsAtOnce) return;
+  // A backup must never name a photo that is not there: check before it is written.
+  const now = new Set((await store.listPhotos()).map((photo) => photo.name));
+  const lost = [...queue.keys()].filter((name) => !now.has(name));
+  if (lost.length > 0) throw new Error(`${lost.length} stored photo(s) missing after upload`);
 }
 
 function resolvedPhotosDir(): Directory {

@@ -117,6 +117,7 @@ const PHOTO_MIME_TYPES: Record<string, string> = {
 
 export const googleDriveProvider = {
   target: 'googleDrive' as const,
+  listsUploadsAtOnce: false,
 
   async isAvailable(): Promise<boolean> {
     return (await googleDriveProvider.unavailableReason()) === null;

@@ -25,6 +25,7 @@ function storedAt(file: File): number | null {
 
 export const localProvider = {
   target: 'local' as const,
+  listsUploadsAtOnce: true,
 
   async isAvailable(): Promise<boolean> {
     return true;
@@ -100,10 +101,13 @@ export const localProvider = {
     );
     try {
       await new File(sourceUri).copy(partial);
-      partial.moveSync(file, { overwrite: true });
-    } finally {
+    } catch (error) {
       if (partial.exists) partial.delete();
+      throw error;
     }
+    // After the move `partial` names the stored photo itself (a move points
+    // the File at its destination), so nothing may delete through it after.
+    partial.moveSync(file, { overwrite: true });
   },
 
   async downloadPhoto(photo: BackupPhotoRecord, destination: File): Promise<void> {

@@ -1118,18 +1118,30 @@ row, and 10.9 MB of photos as base64.
     copied out of its folder) looks for them on the phone, in iCloud and in
     Drive.
   - After rotation a stored photo is deleted when no kept backup lists it and
-    it is more than a day old. Nothing is deleted when the listing does not
-    show the backup the run just wrote (an iCloud folder that failed to read or
-    has not caught up), or when a kept backup the phone has not seen (from
-    another phone, or not downloaded yet) cannot be read. What each backup
-    lists is remembered in AsyncStorage, so a run usually reads none back. The
-    day's grace keeps a photo another phone stored for a backup it is still
-    writing; iCloud photos are written afresh, not copied, so their creation
-    time is when they were stored.
+    it is more than a day old. The backup the run just wrote always counts as
+    kept, since Drive's listing can lag an upload by seconds to minutes. A
+    listing that fails throws (iCloud's no longer reads as an empty folder),
+    and a kept backup the phone has not seen (from another phone, or not
+    downloaded yet) that cannot be read stops the cleanup: either way nothing
+    is deleted. What each backup lists is remembered in AsyncStorage, so a run
+    usually reads none back. Every copy of an unlisted photo is deleted, Drive
+    duplicates too. The day's grace keeps a photo another phone stored for a
+    backup it is still writing; iCloud photos are written afresh, not copied,
+    so their creation time is when they were stored.
   - iCloud may show a file it has not downloaded as `.<name>.icloud`. Those
     count as stored, and are downloaded (`triggerSync`, then waited for) before
-    a restore reads them. On the phone a photo is copied under a `.partial`
-    name and renamed, so a copy cut short never passes for the photo.
+    a restore reads them. On the phone a photo is copied under its own
+    `.partial` name and renamed, so a copy cut short never passes for the
+    photo and a recovery copy beside a backup cannot collide with it.
+  - On the phone and iCloud, whose listings show a stored photo at once, a run
+    checks every photo it stored is listed before writing the backup that
+    names it, so a backup never names a photo that is not there (Drive answers
+    each upload with the new file's id instead). A copy on the phone is moved
+    into place last: expo-file-system points a moved `File` at its destination,
+    so nothing may delete through it after the move.
+  - Every user-asset file is stored, whatever its extension: the stored copy
+    keeps a short lowercase extension, or `bin`. A damaged or cut-short
+    compact file reads as `Invalid backup format`.
   - Missing photos are uploaded three at a time. One that fails fails that
     target's backup, as a failed upload always did; those already stored stay,
     so the next run carries on (the first backup after updating can be large).
@@ -1145,7 +1157,10 @@ row, and 10.9 MB of photos as base64.
     from an older backup, or synced from another phone), in place: same path,
     same format, so every row and every Cloud Sync copy that names it still
     does. A file that cannot get smaller is remembered at its size (in
-    AsyncStorage), so later passes check only file sizes.
+    AsyncStorage), so later passes check only file sizes. The pass is skipped
+    in a background task, a failed decode is not remembered (the next pass
+    tries again), and a file replaced while it was re-encoded is left as it
+    is.
   - Measured on that user's backup restored on a simulator (2026-11-21): the
     automatic backup went from 20.8 MB to 596 KB, the 17 photos it lists from
     7.6 MB to 5.5 MB (stored once), and the export from 24.9 MB to 6.4 MB.

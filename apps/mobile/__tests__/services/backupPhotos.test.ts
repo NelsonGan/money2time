@@ -71,6 +71,7 @@ const photoName = (hash: string, ext = 'jpg') => `money2time_PHOTO_${hash}.${ext
 function memoryStore(initial: BackupPhotoRecord[] = []) {
   const photos = new Map(initial.map((photo) => [photo.name, photo]));
   const store: BackupPhotoStore & { photos: typeof photos } = {
+    listsUploadsAtOnce: true,
     photos,
     listPhotos: jest.fn(async () => [...photos.values()]),
     uploadPhoto: jest.fn(async (name: string) => {
@@ -173,6 +174,23 @@ describe('uploadMissingPhotos', () => {
     // Every photo but the refused one landed, the one in flight beside it too.
     expect(store.photos.size).toBe(4);
     expect(store.photos.has(photoName('dddd'.padEnd(32, '0')))).toBe(false);
+  });
+
+  it('fails the backup when an upload reported success but the photo is not there', async () => {
+    const store = memoryStore();
+    (store.uploadPhoto as jest.Mock).mockResolvedValue(undefined);
+    await expect(
+      uploadMissingPhotos(store, [{ path: 'avatars/2.jpg', photo: photoName(HASH_B), uri: 'b' }]),
+    ).rejects.toThrow('1 stored photo(s) missing after upload');
+  });
+
+  it('trusts a store whose listing lags its uploads', async () => {
+    const store = { ...memoryStore(), listsUploadsAtOnce: false };
+    (store.uploadPhoto as jest.Mock).mockResolvedValue(undefined);
+    await expect(
+      uploadMissingPhotos(store, [{ path: 'avatars/2.jpg', photo: photoName(HASH_B), uri: 'b' }]),
+    ).resolves.toBeUndefined();
+    expect(store.listPhotos).toHaveBeenCalledTimes(1);
   });
 
   it('fails the backup when a photo cannot be stored', async () => {

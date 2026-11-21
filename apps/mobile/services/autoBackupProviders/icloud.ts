@@ -100,6 +100,7 @@ const PHOTO_MIME_TYPES: Record<string, string> = {
 
 export const iCloudProvider = {
   target: 'icloud' as const,
+  listsUploadsAtOnce: true,
 
   async isAvailable(): Promise<boolean> {
     if (Platform.OS !== 'ios') return false;
