@@ -29,10 +29,10 @@ Contact: https://www.money2time.com/contact`,
     whatsNew: `- Added location tagging for transactions and a Spending map
 - Added 20 free receipt scans every month
 - Revamped onboarding and the hourly value screen
-- Fixed settling up debts in shared albums
-- Fixed a crash when sharing a Settle Up receipt
+- Reduced the size of backups
+- Fixed settling up in shared albums
 
-Watch where your money goes, for it carries the hours you worked to earn it.`,
+Don't put all your eggs in one basket.`,
   },
 
   zh: {
@@ -52,10 +52,10 @@ Watch where your money goes, for it carries the hours you worked to earn it.`,
     whatsNew: `- 新增了交易位置标记和消费地图
 - 新增了每月 20 次免费收据扫描
 - 重新设计了新手引导和时薪页面
-- 修复了共享相册结算债务的问题
-- 修复了分享结算收据时闪退的问题
+- 缩小了备份文件的大小
+- 修复了共享相册结算的问题
 
-留意每一笔钱的去向，因为里面装着你辛苦工作换来的时间。`,
+不要把所有鸡蛋放在同一个篮子里。`,
   },
 
   de: {
@@ -75,10 +75,10 @@ Kontakt: https://www.money2time.com/contact`,
     whatsNew: `- Ortsmarkierung für Transaktionen und Ausgabenkarte hinzugefügt
 - 20 kostenlose Belegscans pro Monat hinzugefügt
 - Einführung und Stundenlohn-Ansicht überarbeitet
-- Problem beim Begleichen von Schulden in geteilten Alben behoben
-- Absturz beim Teilen eines Abrechnungsbelegs behoben
+- Größe von Backups reduziert
+- Probleme beim Abrechnen in geteilten Alben behoben
 
-Achte darauf, wohin dein Geld fließt, denn darin stecken die Stunden deiner Arbeit.`,
+Setze nicht alles auf eine Karte.`,
   },
 
   fr: {
@@ -98,10 +98,10 @@ Contact : https://www.money2time.com/contact`,
     whatsNew: `- Ajout du marquage de lieu pour les transactions et d'une carte des dépenses
 - Ajout de 20 scans de reçus gratuits par mois
 - Refonte de l'accueil et de l'écran de valeur horaire
-- Correction du règlement des dettes dans les albums partagés
-- Correction d'un plantage lors du partage d'un reçu de règlement
+- Réduction de la taille des sauvegardes
+- Correction du règlement dans les albums partagés
 
-Veillez à l'endroit où va votre argent, car il porte les heures que vous avez travaillées pour le gagner.`,
+Il ne faut pas mettre tous ses œufs dans le même panier.`,
   },
 
   es: {
@@ -121,10 +121,10 @@ Contacto: https://www.money2time.com/contact`,
     whatsNew: `- Se añadió el etiquetado de ubicación en transacciones y un mapa de gastos
 - Se añadieron 20 escaneos de recibos gratis cada mes
 - Se renovaron el inicio y la pantalla de valor por hora
-- Se corrigió la liquidación de deudas en álbumes compartidos
-- Se corrigió un cierre inesperado al compartir un recibo de liquidación
+- Se redujo el tamaño de las copias de seguridad
+- Se corrigió la liquidación en álbumes compartidos
 
-Observa adónde va tu dinero, porque lleva consigo las horas que trabajaste para ganarlo.`,
+No pongas todos los huevos en la misma cesta.`,
   },
 
   pt: {
@@ -144,10 +144,10 @@ Contato: https://www.money2time.com/contact`,
     whatsNew: `- Adicionada marcação de local em transações e mapa de gastos
 - Adicionadas 20 digitalizações de recibos grátis por mês
 - Renovados o início e o ecrã de valor por hora
-- Corrigida a liquidação de dívidas em álbuns partilhados
-- Corrigido um bloqueio ao partilhar um recibo de acerto de contas
+- Reduzido o tamanho das cópias de segurança
+- Corrigida a liquidação em álbuns partilhados
 
-Veja para onde vai o seu dinheiro, pois ele carrega as horas que trabalhou para o ganhar.`,
+Não se deve pôr todos os ovos no mesmo cesto.`,
   },
 
   it: {
@@ -167,10 +167,10 @@ Contatto: https://www.money2time.com/contact`,
     whatsNew: `- Aggiunti i tag di posizione per le transazioni e la mappa delle spese
 - Aggiunte 20 scansioni di scontrini gratis ogni mese
 - Rinnovati la configurazione iniziale e lo schermo del valore orario
-- Risolto il saldo dei debiti negli album condivisi
-- Risolto un arresto anomalo durante la condivisione di una ricevuta di saldo
+- Ridotte le dimensioni dei backup
+- Risolto il saldo negli album condivisi
 
-Guarda dove vanno i tuoi soldi, perché portano con sé le ore che hai lavorato per guadagnarli.`,
+Non mettere tutte le uova nello stesso paniere.`,
   },
 
   nl: {
@@ -190,10 +190,10 @@ Contact: https://www.money2time.com/contact`,
     whatsNew: `- Locatietags voor transacties en een uitgavenkaart toegevoegd
 - 20 gratis bonscans per maand toegevoegd
 - Introductie en het uurloonscherm vernieuwd
-- Probleem met schulden vereffenen in gedeelde albums opgelost
-- Crash bij het delen van een afrekeningsbon opgelost
+- Grootte van back-ups verkleind
+- Problemen met afrekenen in gedeelde albums opgelost
 
-Let op waar je geld naartoe gaat, want het draagt de uren die je ervoor hebt gewerkt.`,
+Leg niet al je eieren in één mand.`,
   },
 
   ru: {
@@ -213,10 +213,10 @@ Let op waar je geld naartoe gaat, want het draagt de uren die je ervoor hebt gew
     whatsNew: `- Добавлены метки мест для операций и карта расходов
 - Добавлено 20 бесплатных сканов чеков каждый месяц
 - Обновлены первый запуск и экран почасовой ставки
-- Исправлен расчёт долгов в общих альбомах
-- Исправлен сбой при отправке чека о расчёте
+- Уменьшен размер резервных копий
+- Исправлены расчёты в общих альбомах
 
-Следите за тем, куда уходят ваши деньги, ведь в них заключены часы вашего труда.`,
+Не клади все яйца в одну корзину.`,
   },
 
   ja: {
@@ -236,10 +236,10 @@ Let op waar je geld naartoe gaat, want het draagt de uren die je ervoor hebt gew
     whatsNew: `- 取引の場所タグと支出マップを追加しました
 - 毎月20回の無料レシートスキャンを追加しました
 - 初期設定と時給の画面を刷新しました
+- バックアップのサイズを削減しました
 - 共有アルバムでの精算に関する問題を修正しました
-- 精算レシートの共有時に落ちる問題を修正しました
 
-お金の行き先を見つめましょう。そこには、あなたが働いて得た時間が詰まっています。`,
+卵は一つのカゴに盛るな。`,
   },
 
   ko: {
@@ -259,10 +259,10 @@ Let op waar je geld naartoe gaat, want het draagt de uren die je ervoor hebt gew
     whatsNew: `- 거래 위치 태그와 지출 지도를 추가했습니다
 - 매월 20회 무료 영수증 스캔을 추가했습니다
 - 첫 설정과 시급 화면을 새롭게 개편했습니다
+- 백업 용량을 줄였습니다
 - 공유 앨범의 정산 문제를 수정했습니다
-- 정산 영수증 공유 시 앱이 종료되던 문제를 수정했습니다
 
-돈이 어디로 가는지 살펴보세요. 그 안에는 당신이 일해서 번 시간이 담겨 있습니다.`,
+달걀을 한 바구니에 담지 마라.`,
   },
 
   hi: {
@@ -282,10 +282,10 @@ Let op waar je geld naartoe gaat, want het draagt de uren die je ervoor hebt gew
     whatsNew: `- लेन-देन के लिए स्थान टैग और खर्च का नक्शा जोड़ा गया
 - हर महीने 20 मुफ़्त रसीद स्कैन जोड़े गए
 - शुरुआती सेटअप और प्रति घंटे आय स्क्रीन को नया रूप दिया गया
+- बैकअप का आकार कम किया गया
 - साझा एल्बम में हिसाब चुकाने की समस्या ठीक की गई
-- हिसाब की रसीद साझा करते समय क्रैश होने की समस्या ठीक की गई
 
-ध्यान रखें कि आपका पैसा कहाँ जाता है, क्योंकि उसमें आपकी मेहनत के घंटे जुड़े हैं।`,
+सारे अंडे एक ही टोकरी में न रखें।`,
   },
 
   id: {
@@ -305,10 +305,10 @@ Kontak: https://www.money2time.com/contact`,
     whatsNew: `- Menambahkan penandaan lokasi transaksi dan peta pengeluaran
 - Menambahkan 20 pindai struk gratis setiap bulan
 - Memperbarui panduan awal dan layar nilai per jam
-- Memperbaiki pelunasan utang di album bersama
-- Memperbaiki aplikasi tertutup saat membagikan struk pelunasan
+- Memperkecil ukuran cadangan
+- Memperbaiki pelunasan di album bersama
 
-Perhatikan ke mana uangmu pergi, karena di dalamnya tersimpan jam kerja yang kamu curahkan.`,
+Jangan menaruh semua telur dalam satu keranjang.`,
   },
 
   tr: {
@@ -328,10 +328,10 @@ Gizlilik Politikası: https://money2time.com/privacy
     whatsNew: `- İşlemler için konum etiketi ve harcama haritası eklendi
 - Her ay 20 ücretsiz fiş taraması eklendi
 - Başlangıç adımları ve saatlik değer ekranı yenilendi
-- Paylaşılan albümlerde borç kapatma sorunu giderildi
-- Hesaplaşma makbuzu paylaşılırken oluşan çökme giderildi
+- Yedeklerin boyutu küçültüldü
+- Paylaşılan albümlerde hesaplaşma sorunları giderildi
 
-Paranın nereye gittiğine dikkat et, çünkü onu kazanmak için çalıştığın saatleri taşır.`,
+Bütün yumurtaları aynı sepete koyma.`,
   },
 
   vi: {
@@ -351,10 +351,10 @@ Liên hệ: https://www.money2time.com/contact`,
     whatsNew: `- Thêm gắn vị trí cho giao dịch và bản đồ chi tiêu
 - Thêm 20 lượt quét hóa đơn miễn phí mỗi tháng
 - Làm mới phần thiết lập ban đầu và màn hình giá trị theo giờ
-- Khắc phục lỗi tất toán nợ trong album chia sẻ
-- Khắc phục lỗi thoát ứng dụng khi chia sẻ biên lai thanh toán
+- Giảm dung lượng bản sao lưu
+- Khắc phục lỗi tất toán trong album chia sẻ
 
-Hãy để ý tiền của bạn đi đâu, vì nó mang theo những giờ bạn đã làm việc để kiếm ra.`,
+Đừng bỏ tất cả trứng vào một giỏ.`,
   },
 
   th: {
@@ -374,10 +374,10 @@ Hãy để ý tiền của bạn đi đâu, vì nó mang theo những giờ bạ
     whatsNew: `- เพิ่มการแท็กตำแหน่งในรายการและแผนที่การใช้จ่าย
 - เพิ่มสิทธิ์สแกนใบเสร็จฟรี 20 ครั้งทุกเดือน
 - ปรับโฉมหน้าเริ่มต้นและหน้ามูลค่าต่อชั่วโมง
-- แก้ไขปัญหาการเคลียร์ยอดหนี้ในอัลบั้มที่แชร์
-- แก้ไขปัญหาแอปปิดตัวเมื่อแชร์ใบเสร็จเคลียร์ยอด
+- ลดขนาดไฟล์สำรองข้อมูล
+- แก้ไขปัญหาการเคลียร์ยอดในอัลบั้มที่แชร์
 
-สังเกตให้ดีว่าเงินของคุณไปไหน เพราะมันคือชั่วโมงที่คุณทำงานแลกมา`,
+อย่าใส่ไข่ทั้งหมดไว้ในตะกร้าใบเดียว`,
   },
 
   pl: {
@@ -397,10 +397,10 @@ Kontakt: https://www.money2time.com/contact`,
     whatsNew: `- Dodano oznaczanie lokalizacji w transakcjach i mapę wydatków
 - Dodano 20 darmowych skanów paragonów miesięcznie
 - Odświeżono ekran powitalny i ekran stawki godzinowej
-- Naprawiono rozliczanie długów we wspólnych albumach
-- Naprawiono zamykanie aplikacji przy udostępnianiu potwierdzenia rozliczenia
+- Zmniejszono rozmiar kopii zapasowych
+- Naprawiono rozliczenia we wspólnych albumach
 
-Zwracaj uwagę, dokąd idą Twoje pieniądze, bo niosą godziny, które na nie przepracowałeś.`,
+Nie wkładaj wszystkich jajek do jednego koszyka.`,
   },
 
   uk: {
@@ -420,10 +420,10 @@ Zwracaj uwagę, dokąd idą Twoje pieniądze, bo niosą godziny, które na nie p
     whatsNew: `- Додано позначки місць для операцій і мапу витрат
 - Додано 20 безкоштовних сканів чеків щомісяця
 - Оновлено перший запуск і екран погодинної ставки
-- Виправлено розрахунок боргів у спільних альбомах
-- Виправлено збій під час надсилання квитанції про розрахунок
+- Зменшено розмір резервних копій
+- Виправлено розрахунки у спільних альбомах
 
-Стежте за тим, куди йдуть ваші гроші, адже в них вкладені години вашої праці.`,
+Не клади всі яйця в один кошик.`,
   },
 
   sv: {
@@ -443,10 +443,10 @@ Kontakt: https://www.money2time.com/contact`,
     whatsNew: `- Lade till platstaggning för transaktioner och en utgiftskarta
 - Lade till 20 gratis kvittoskanningar varje månad
 - Förnyade introduktionen och skärmen för timvärde
-- Åtgärdade reglering av skulder i delade album
-- Åtgärdade en krasch vid delning av ett avräkningskvitto
+- Minskade storleken på säkerhetskopior
+- Åtgärdade reglering i delade album
 
-Håll koll på vart dina pengar går, för de bär timmarna du arbetade för att tjäna dem.`,
+Lägg inte alla ägg i samma korg.`,
   },
 
   nb: {
@@ -466,10 +466,10 @@ Kontakt: https://www.money2time.com/contact`,
     whatsNew: `- La til stedsmerking for transaksjoner og et forbrukskart
 - La til 20 gratis kvitteringsskanninger hver måned
 - Fornyet oppstarten og skjermen for timeverdi
-- Rettet oppgjør av gjeld i delte album
-- Rettet en krasj ved deling av en oppgjørskvittering
+- Reduserte størrelsen på sikkerhetskopier
+- Rettet oppgjør i delte album
 
-Følg med på hvor pengene dine går, for de bærer timene du arbeidet for å tjene dem.`,
+Ikke legg alle eggene i én kurv.`,
   },
 
   da: {
@@ -489,10 +489,10 @@ Kontakt: https://www.money2time.com/contact`,
     whatsNew: `- Tilføjede stedsmærkning til transaktioner og et forbrugskort
 - Tilføjede 20 gratis kvitteringsscanninger hver måned
 - Fornyede opstarten og skærmen til timeværdi
-- Rettede afregning af gæld i delte album
-- Rettede et nedbrud ved deling af en afregningskvittering
+- Reducerede størrelsen på sikkerhedskopier
+- Rettede afregning i delte album
 
-Hold øje med, hvor dine penge går hen, for de rummer de timer, du arbejdede for dem.`,
+Læg ikke alle æggene i én kurv.`,
   },
 
   ms: {
@@ -512,10 +512,10 @@ Hubungi Kami: https://www.money2time.com/contact`,
     whatsNew: `- Menambah penandaan lokasi transaksi dan peta perbelanjaan
 - Menambah 20 imbasan resit percuma setiap bulan
 - Memperbaharui panduan awal dan skrin nilai sejam
-- Membaiki penyelesaian hutang dalam album kongsi
-- Membaiki masalah aplikasi tertutup semasa berkongsi resit penyelesaian
+- Mengecilkan saiz sandaran
+- Membaiki penyelesaian dalam album kongsi
 
-Perhatikan ke mana wang anda pergi, kerana ia membawa jam yang anda usahakan untuk memperolehnya.`,
+Jangan letak semua telur dalam satu bakul.`,
   },
 
   fil: {
@@ -533,10 +533,10 @@ Makipag-ugnayan: https://www.money2time.com/contact`,
     whatsNew: `- Nagdagdag ng location tagging sa mga transaksyon at mapa ng gastos
 - Nagdagdag ng 20 libreng scan ng resibo bawat buwan
 - Pinabago ang onboarding at screen ng halaga bawat oras
-- Inayos ang pagbabayad ng utang sa mga shared album
-- Inayos ang pag-crash kapag nagbabahagi ng resibo ng bayaran
+- Pinaliit ang laki ng mga backup
+- Inayos ang pagbabayaran sa mga shared album
 
-Bantayan kung saan napupunta ang pera mo, dahil dala nito ang mga oras na pinagtrabahuhan mo.`,
+Huwag ilagay ang lahat ng itlog sa iisang basket.`,
   },
 
 };
