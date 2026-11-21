@@ -3785,7 +3785,6 @@ const nb = {
     map_empty_message: 'Legg til et sted på en utgift for å se den her.',
     map_disabled_message: 'Slå på Steder for å legge til steder på utgifter.',
     map_turn_on: 'Slå på Steder',
-    map_places_one: '{{count}} sted',
     map_places_other: '{{count}} steder',
     map_previous: 'Forrige',
     map_next: 'Neste',

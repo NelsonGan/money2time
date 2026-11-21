@@ -191,15 +191,11 @@ export const iCloudProvider = {
 
   async listPhotos(): Promise<BackupPhotoRecord[]> {
     const storage = getInstance();
-    if (!(await safeExists(storage, FOLDER_PATH))) return [];
-    let names: string[];
-    try {
-      names = await storage.readdir(FOLDER_PATH);
-    } catch {
-      // Unreadable now: nothing counts as stored, so nothing is deleted and
-      // the photos are written again (over themselves).
-      return [];
-    }
+    // A folder that is not there holds no photos. One that cannot be read
+    // throws: an empty answer would let a restore go ahead without photos
+    // iCloud still has (an upload and the cleanup stop on a throw too).
+    if (!(await storage.exists(FOLDER_PATH))) return [];
+    const names = await storage.readdir(FOLDER_PATH);
     const photos: BackupPhotoRecord[] = [];
     for (const name of names.map(cloudFileName)) {
       if (!isBackupPhotoName(name)) continue;

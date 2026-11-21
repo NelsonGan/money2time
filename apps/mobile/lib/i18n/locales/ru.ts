@@ -3790,7 +3790,6 @@ const ru = {
     map_empty_message: 'Добавьте место к расходу, чтобы увидеть его здесь.',
     map_disabled_message: 'Включите «Места», чтобы добавлять места к расходам.',
     map_turn_on: 'Включить «Места»',
-    map_places_one: '{{count}} место',
     map_places_other: '{{count}} мест',
     map_previous: 'Назад',
     map_next: 'Вперёд',

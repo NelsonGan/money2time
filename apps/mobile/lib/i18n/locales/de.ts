@@ -3834,7 +3834,6 @@ const de = {
     map_empty_message: 'Füge einer Ausgabe einen Ort hinzu, um sie hier zu sehen.',
     map_disabled_message: 'Aktiviere Orte, um Ausgaben Orte hinzuzufügen.',
     map_turn_on: 'Orte aktivieren',
-    map_places_one: '{{count}} Ort',
     map_places_other: '{{count}} Orte',
     map_previous: 'Zurück',
     map_next: 'Weiter',

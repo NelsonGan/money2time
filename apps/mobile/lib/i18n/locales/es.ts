@@ -3813,7 +3813,6 @@ const es = {
     map_empty_message: 'Añade una ubicación a un gasto para verlo aquí.',
     map_disabled_message: 'Activa Ubicaciones para añadir lugares a tus gastos.',
     map_turn_on: 'Activar Ubicaciones',
-    map_places_one: '{{count}} lugar',
     map_places_other: '{{count}} lugares',
     map_previous: 'Anterior',
     map_next: 'Siguiente',

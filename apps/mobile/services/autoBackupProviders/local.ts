@@ -23,6 +23,16 @@ function storedAt(file: File): number | null {
   return file.creationTime ?? file.modificationTime ?? null;
 }
 
+/**
+ * A photo copy an app kill cut short (`uploadPhoto`): never renamed into
+ * place, so nothing names it. An hour old, no copy can still be writing it.
+ */
+function isStalePartialCopy(file: File): boolean {
+  if (!file.name.startsWith('money2time_PHOTO_') || !file.name.endsWith('.partial')) return false;
+  const at = storedAt(file);
+  return at !== null && Date.now() - at > 60 * 60 * 1000;
+}
+
 export const localProvider = {
   target: 'local' as const,
   listsUploadsAtOnce: true,
@@ -80,7 +90,16 @@ export const localProvider = {
   async listPhotos(): Promise<BackupPhotoRecord[]> {
     const photos: BackupPhotoRecord[] = [];
     for (const entry of ensureBackupsDir().list()) {
-      if (!(entry instanceof File) || !isBackupPhotoName(entry.name)) continue;
+      if (!(entry instanceof File)) continue;
+      if (isStalePartialCopy(entry)) {
+        try {
+          entry.delete();
+        } catch {
+          // The next listing tries again.
+        }
+        continue;
+      }
+      if (!isBackupPhotoName(entry.name)) continue;
       photos.push({ name: entry.name, ref: entry.uri, createdAt: storedAt(entry) });
     }
     return photos;

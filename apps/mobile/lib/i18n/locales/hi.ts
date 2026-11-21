@@ -3765,7 +3765,6 @@ const hi = {
     map_empty_message: 'किसी खर्च में स्थान जोड़ें, वह यहाँ दिखेगा।',
     map_disabled_message: 'खर्चों में जगहें जोड़ने के लिए स्थान चालू करें।',
     map_turn_on: 'स्थान चालू करें',
-    map_places_one: '{{count}} जगह',
     map_places_other: '{{count}} जगहें',
     map_previous: 'पिछला',
     map_next: 'अगला',

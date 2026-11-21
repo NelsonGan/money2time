@@ -255,7 +255,7 @@ export const GA4_ONLY_EVENTS = {
   ALBUM_LOCATION_SET: 'Album Location Set',
   ALBUM_LOCATIONS_OPENED: 'Album Locations Opened',
   // Transaction locations. `source` is how the place was chosen:
-  // current | search | recent | auto (a new expense tagged on open).
+  // current | search | recent | nearby | pin | auto (a new expense tagged on open).
   TRANSACTION_LOCATION_SET: 'Transaction Location Set',
   // `source`: settings | offer (the one-time offer after a first entry).
   TRANSACTION_LOCATIONS_TOGGLED: 'Transaction Locations Toggled',

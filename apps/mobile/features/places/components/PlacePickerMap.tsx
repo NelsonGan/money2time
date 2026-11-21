@@ -16,8 +16,8 @@ import { PlaceIcon } from './PlaceIcon';
 import { useBriefTracking } from './SpendingMapPins';
 
 export interface PlacePickerMapHandle {
-  /** Centres the map on a point, at street zoom unless `delta` says otherwise. */
-  animateTo: (coordinate: Coordinate, delta?: number) => void;
+  /** Centres the map on a point, at street zoom. */
+  animateTo: (coordinate: Coordinate) => void;
   /** Frames every point (the list's places and where they are near). */
   fitTo: (points: readonly Coordinate[]) => void;
 }
@@ -150,10 +150,10 @@ export const PlacePickerMap = forwardRef<PlacePickerMapHandle, PlacePickerMapPro
     useImperativeHandle(
       ref,
       () => ({
-        animateTo: (coordinate, delta = STREET_DELTA) => {
+        animateTo: (coordinate) => {
           touchedRef.current = false;
           mapRef.current?.animateToRegion(
-            { ...coordinate, latitudeDelta: delta, longitudeDelta: delta },
+            { ...coordinate, latitudeDelta: STREET_DELTA, longitudeDelta: STREET_DELTA },
             350,
           );
         },

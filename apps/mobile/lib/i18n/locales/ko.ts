@@ -3733,7 +3733,6 @@ const ko = {
     map_empty_message: '지출에 위치를 추가하면 여기에 표시됩니다.',
     map_disabled_message: '지출에 장소를 추가하려면 위치를 켜세요.',
     map_turn_on: '위치 켜기',
-    map_places_one: '장소 {{count}}곳',
     map_places_other: '장소 {{count}}곳',
     map_previous: '이전',
     map_next: '다음',

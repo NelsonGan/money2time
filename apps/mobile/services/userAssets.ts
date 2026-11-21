@@ -621,13 +621,15 @@ function restoreTarget(path: string): File | null {
 /**
  * Writes backed-up user assets back to disk (overwriting), creating dirs:
  * `assets` embedded as base64, `files` copied from where a restore downloaded
- * them. A file that fails to copy is skipped; the rest still land.
+ * them. A file that fails to copy is skipped; the rest still land. Returns
+ * how many of `files` did not, for the restore's missing-photo count.
  */
 export function restoreUserAssetsFromBackup(
   assets?: UserAssetBackupEntry[],
   files?: UserAssetFileEntry[],
-) {
-  if (!assets?.length && !files?.length) return;
+): number {
+  if (!assets?.length && !files?.length) return 0;
+  let failed = 0;
   for (const asset of assets ?? []) {
     const file = restoreTarget(asset.path);
     if (!file) continue;
@@ -641,8 +643,10 @@ export function restoreUserAssetsFromBackup(
       if (file.exists) file.delete();
       new File(entry.uri).copySync(file);
     } catch (error) {
+      failed += 1;
       console.warn(`[userAssets] could not restore ${entry.path}`, error);
     }
   }
   invalidateCustomUriCache();
+  return failed;
 }

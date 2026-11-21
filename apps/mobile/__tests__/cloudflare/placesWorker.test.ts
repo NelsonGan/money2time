@@ -1,4 +1,5 @@
-const worker = require('../../../cloudflare/workers/places/src/index').default;
+const workerModule = require('../../../cloudflare/workers/places/src/index');
+const worker = workerModule.default;
 // Required, not imported: the app's typecheck has no Workers types (D1Database).
 const {
   checkQuota,
@@ -561,6 +562,25 @@ describe('POST /search and /reverse', () => {
     expect(await response.json()).toEqual({ error: 'rate_limited' });
     expect(blocked.limit).toHaveBeenCalledWith({ key: '203.0.113.9' });
     expect(checkQuota).not.toHaveBeenCalled();
+  });
+
+  it('limits an IPv6 client by its /64, not by each address', async () => {
+    const ask = (ip: string) =>
+      workerModule.clientIp(
+        new Request('https://x/search', { headers: { 'cf-connecting-ip': ip } }),
+      );
+    expect(ask('2a01:4f8:c17:1a2b::1')).toBe('2a01:4f8:c17:1a2b::/64');
+    expect(ask('2a01:04f8:0c17:1a2b:dead:beef:0:7')).toBe('2a01:4f8:c17:1a2b::/64');
+    expect(ask('2a01:4f8::1')).toBe('2a01:4f8:0:0::/64');
+    expect(ask('203.0.113.9')).toBe('203.0.113.9');
+    const limiter = { limit: jest.fn(async () => ({ success: false })) };
+    await post(
+      '/search',
+      { appUserId: 'm2t_a', query: 'cafe' },
+      { PLACES_LIMITER: limiter },
+      { 'cf-connecting-ip': '2a01:4f8:c17:1a2b:1234:5678:9abc:def0' },
+    );
+    expect(limiter.limit).toHaveBeenCalledWith({ key: '2a01:4f8:c17:1a2b::/64' });
   });
 
   it('says not_configured without the key and capacity when Apple is out of quota', async () => {

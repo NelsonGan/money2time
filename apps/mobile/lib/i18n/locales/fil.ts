@@ -3843,7 +3843,6 @@ const fil = {
     map_empty_message: 'Magdagdag ng lokasyon sa isang gastos para makita ito rito.',
     map_disabled_message: 'I-on ang Mga lokasyon para magdagdag ng lugar sa gastos.',
     map_turn_on: 'I-on ang Mga lokasyon',
-    map_places_one: '{{count}} lugar',
     map_places_other: '{{count}} lugar',
     map_previous: 'Nakaraan',
     map_next: 'Susunod',

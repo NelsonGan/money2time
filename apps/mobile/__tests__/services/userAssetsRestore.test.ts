@@ -102,10 +102,11 @@ it('keeps every restored path inside the user-assets folder', () => {
 it('restores the rest when one downloaded photo cannot be copied', () => {
   disk.set('cache/backup-photos/ok.jpg', 'ok');
   failing.add('cache/backup-photos/gone.jpg');
-  restoreUserAssetsFromBackup(undefined, [
+  const failed = restoreUserAssetsFromBackup(undefined, [
     { path: 'album-covers/gone.jpg', uri: 'cache/backup-photos/gone.jpg' },
     { path: 'album-covers/ok.jpg', uri: 'cache/backup-photos/ok.jpg' },
   ]);
+  expect(failed).toBe(1);
   expect(disk.get('doc/user-assets/album-covers/ok.jpg')).toBe('ok');
   expect(disk.has('doc/user-assets/album-covers/gone.jpg')).toBe(false);
 });

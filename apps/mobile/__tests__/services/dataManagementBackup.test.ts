@@ -71,10 +71,14 @@ function createFakeSqlite(tables: Record<string, Row[]>, columns: Record<string,
     getAllSync(sql: string) {
       const pragma = /PRAGMA table_info\((\w+)\)/.exec(sql);
       if (pragma) return (columns[pragma[1]] ?? []).map((name) => ({ name }));
-      if (/app_user_id\s+FROM\s+settings/i.test(sql)) return [{ app_user_id: 'user-1' }];
+      if (/FROM\s+settings\s+LIMIT 1/i.test(sql))
+        return tables.settings?.length ? [...tables.settings] : [{ app_user_id: 'user-1' }];
       const from = /FROM\s+(\w+)/i.exec(sql);
       if (from) return [...(tables[from[1]] ?? [])];
       return [];
+    },
+    getFirstSync(sql: string) {
+      return this.getAllSync(sql)[0] ?? null;
     },
     runSync(sql: string, params: unknown[]) {
       const insert = /INSERT OR REPLACE INTO (\w+) \(([^)]+)\)/.exec(sql);
@@ -688,6 +692,40 @@ describe('notification review data on backup restore', () => {
     jest.mocked(getSQLite).mockReturnValue(createFakeSqlite({}, {}) as never);
     expect(applyBackupData(backup as never).success).toBe(true);
     expect(resetAutomationCaptureData).toHaveBeenCalledWith('user-1');
+  });
+  it("keeps this phone's identity and Locations switches, never the backup's", () => {
+    const columns = [
+      'id',
+      'app_user_id',
+      'currency_code',
+      'transaction_locations_enabled',
+      'transaction_location_auto_tag',
+    ];
+    const here = {
+      id: 1,
+      app_user_id: 'user-here',
+      currency_code: 'MYR',
+      transaction_locations_enabled: 0,
+      transaction_location_auto_tag: 1,
+    };
+    const fake = createFakeSqlite({ settings: [{ ...here }] }, { settings: columns });
+    const fromOtherPhone = {
+      tables: {
+        ...backup.tables,
+        settings: [
+          {
+            id: 1,
+            app_user_id: 'user-there',
+            currency_code: 'USD',
+            transaction_locations_enabled: 1,
+            transaction_location_auto_tag: 0,
+          },
+        ],
+      },
+    };
+    jest.mocked(getSQLite).mockReturnValue(fake as never);
+    expect(applyBackupData(fromOtherPhone as never).success).toBe(true);
+    expect(fake.tables.settings).toEqual([{ ...here, currency_code: 'USD' }]);
   });
   it('preserves reviews when the database replacement rolls back', () => {
     const sqlite = createFakeSqlite({}, {});

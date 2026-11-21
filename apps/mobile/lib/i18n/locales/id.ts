@@ -3805,7 +3805,6 @@ const id = {
     map_empty_message: 'Tambahkan lokasi ke pengeluaran untuk melihatnya di sini.',
     map_disabled_message: 'Aktifkan Lokasi untuk menambahkan tempat ke pengeluaran.',
     map_turn_on: 'Aktifkan Lokasi',
-    map_places_one: '{{count}} tempat',
     map_places_other: '{{count}} tempat',
     map_previous: 'Sebelumnya',
     map_next: 'Berikutnya',

@@ -273,10 +273,12 @@ export function PlacePickerSheet({
     setSearch({ kind: 'searching' });
     const id = ++requestId.current;
     const handle = setTimeout(() => {
-      searchPlaces({ appUserId, query: trimmed, near: searchNearRef.current, locale })
+      // The point this search used, even if a fix lands while it runs.
+      const near = searchNearRef.current;
+      searchPlaces({ appUserId, query: trimmed, near, locale })
         .then((results) => {
           if (id !== requestId.current) return;
-          setSearch({ kind: 'done', results: preferNearResults(results, searchNearRef.current) });
+          setSearch({ kind: 'done', results: preferNearResults(results, near) });
         })
         .catch((err: unknown) => {
           if (id === requestId.current)
@@ -419,9 +421,10 @@ export function PlacePickerSheet({
           const moved = distanceMeters(previous.center, center) > 3;
           return moved ? { kind: 'naming', center } : previous;
         });
-        return;
       }
       if (!byUser) return;
+      // Tracked while a pin is down too, so "Search this area" searches where
+      // the map is once the pin is put away.
       setMapCenter(center);
       setMapMoved(true);
     },
@@ -440,6 +443,8 @@ export function PlacePickerSheet({
   const handleCategory = (id: NearbyCategory) => {
     void triggerHaptic('selection');
     setFocusedKey(null);
+    // The chip's list is framed, even after a pan.
+    setMapMoved(false);
     setCategory((previous) => (previous === id ? 'all' : id));
   };
 
@@ -490,6 +495,9 @@ export function PlacePickerSheet({
   const framedRef = useRef<string | null>(null);
   useEffect(() => {
     if (!mapReady || !mapOpen || pin.kind !== 'off') return;
+    // A nearby list that changes by itself after the user panned (a late
+    // fix) leaves the camera where they put it; "Search this area" stays.
+    if (mapMoved && !showingSearch) return;
     if (framedRef.current === mapPlacesSignature) return;
     const points: Coordinate[] = [...mapPlaces];
     if (!showingSearch && origin) points.push(origin);
@@ -499,7 +507,7 @@ export function PlacePickerSheet({
     // Only a new list moves the camera, not a re-render (one that arrived
     // while a pin was being dropped is framed once the pin is put away).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mapReady, mapOpen, mapPlacesSignature, pin.kind]);
+  }, [mapReady, mapOpen, mapPlacesSignature, pin.kind, mapMoved]);
   useEffect(() => {
     if (visible) return;
     setMapReady(false);

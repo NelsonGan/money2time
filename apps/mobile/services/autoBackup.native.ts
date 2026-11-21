@@ -441,7 +441,7 @@ async function withBackupPhotos(
     const resolved = await resolveBackupPhotos(backup, stores);
     const result = await run(resolved.backup);
     return result.success && resolved.missing > 0
-      ? { ...result, missingPhotos: resolved.missing }
+      ? { ...result, missingPhotos: resolved.missing + (result.missingPhotos ?? 0) }
       : result;
   } finally {
     clearResolvedBackupPhotos();
@@ -457,14 +457,25 @@ export async function restoreImportedBackup(
   backup: BackupData,
   restore: (backup: BackupData) => Promise<ImportResult>,
 ): Promise<ImportResult> {
-  const stores: Provider[] = [];
+  const stores: BackupPhotoStore[] = [];
   if (backup.photos?.length) {
     stores.push(localProvider);
     if (Platform.OS === 'ios' && (await iCloudProvider.isAvailable().catch(() => false))) {
       stores.push(iCloudProvider);
     }
-    if (await googleDriveProvider.isAvailable().catch(() => false)) {
+    const driveReason = await googleDriveProvider
+      .unavailableReason()
+      .catch(() => 'session_unavailable' as const);
+    if (driveReason === null) {
       stores.push(googleDriveProvider);
+    } else if (driveReason === 'session_unavailable' || driveReason === 'no_token') {
+      // Drive is connected but cannot be reached now (offline, a token that
+      // would not refresh): photos it has would count as gone, so the restore
+      // stops and asks to try again instead.
+      stores.push({
+        ...googleDriveProvider,
+        listPhotos: () => Promise.reject(new Error(`Google Drive unavailable: ${driveReason}`)),
+      });
     }
   }
   return withBackupPhotos(backup, stores, restore);

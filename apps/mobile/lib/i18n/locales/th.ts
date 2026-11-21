@@ -3713,7 +3713,6 @@ const th = {
     map_empty_message: 'เพิ่มตำแหน่งให้รายจ่ายเพื่อดูที่นี่',
     map_disabled_message: 'เปิดตำแหน่งเพื่อเพิ่มสถานที่ให้รายจ่าย',
     map_turn_on: 'เปิดตำแหน่ง',
-    map_places_one: '{{count}} แห่ง',
     map_places_other: '{{count}} แห่ง',
     map_previous: 'ก่อนหน้า',
     map_next: 'ถัดไป',

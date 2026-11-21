@@ -3835,7 +3835,6 @@ const fr = {
     map_empty_message: 'Ajoutez un lieu à une dépense pour la voir ici.',
     map_disabled_message: 'Activez Lieux pour ajouter des lieux à vos dépenses.',
     map_turn_on: 'Activer Lieux',
-    map_places_one: '{{count}} lieu',
     map_places_other: '{{count}} lieux',
     map_previous: 'Précédent',
     map_next: 'Suivant',

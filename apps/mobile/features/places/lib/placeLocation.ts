@@ -107,6 +107,35 @@ export function placeKey(
   return `pt:${place.latitude.toFixed(4)},${place.longitude.toFixed(4)}:${name}`;
 }
 
+/**
+ * How far apart two tags of a spot without an Apple id can be and still be one
+ * place: the phone's fixes on different days drift 10-30 m, more than the
+ * key's rounding.
+ */
+const SAME_SPOT_METERS = 50;
+
+/**
+ * `placeKey` for many places at once: a spot without an Apple id joins an
+ * earlier one with the same name within `SAME_SPOT_METERS`, so three coffees
+ * auto-tagged at one café are one place.
+ */
+function placeKeyResolver(): (
+  place: Pick<PlaceResult, 'id' | 'name' | 'latitude' | 'longitude'>,
+) => string {
+  const spotsByName = new Map<string, { key: string; latitude: number; longitude: number }[]>();
+  return (place) => {
+    const key = placeKey(place);
+    if (place.id) return key;
+    const name = place.name.trim().toLowerCase();
+    const spots = spotsByName.get(name) ?? [];
+    const match = spots.find((spot) => distanceMeters(spot, place) <= SAME_SPOT_METERS);
+    if (match) return match.key;
+    spots.push({ key, latitude: place.latitude, longitude: place.longitude });
+    spotsByName.set(name, spots);
+    return key;
+  };
+}
+
 /** The place key of a saved location (a transaction's own id is never its place). */
 export function locationKey(
   location: Pick<TransactionLocation, 'placeId' | 'placeName' | 'latitude' | 'longitude'>,
@@ -133,11 +162,12 @@ export function recentPlaces(
   }: { limit?: number; near?: Coordinate | null; nearRadiusMeters?: number } = {},
 ): PlaceResult[] {
   const byKey = new Map<string, { place: PlaceResult; date: string }>();
+  const keyOf = placeKeyResolver();
   for (const transaction of transactions) {
     if (transaction.deletedAt) continue;
     const place = placeOfTransaction(transaction);
     if (!place) continue;
-    const key = placeKey(place);
+    const key = keyOf(place);
     const seen = byKey.get(key);
     if (!seen || transaction.date > seen.date) byKey.set(key, { place, date: transaction.date });
   }
@@ -220,9 +250,15 @@ export interface PlaceGroup<T extends Transaction = Transaction> {
 /** A period's located entries, one group per place, busiest place first. */
 export function groupByPlace<T extends Transaction>(transactions: readonly T[]): PlaceGroup<T>[] {
   const groups = new Map<string, PlaceGroup<T>>();
+  const keyOf = placeKeyResolver();
   for (const transaction of transactions) {
     if (transaction.deletedAt || !isLocatedTransaction(transaction)) continue;
-    const key = locationKey(transaction);
+    const key = keyOf({
+      id: transaction.placeId,
+      name: transaction.placeName,
+      latitude: transaction.latitude,
+      longitude: transaction.longitude,
+    });
     let group = groups.get(key);
     if (!group) {
       group = {

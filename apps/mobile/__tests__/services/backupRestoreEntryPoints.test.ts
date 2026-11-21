@@ -27,7 +27,10 @@ jest.mock('~/services/autoBackupProviders/icloud', () => ({
   iCloudProvider: { isAvailable: jest.fn(async () => true) },
 }));
 jest.mock('~/services/autoBackupProviders/googleDrive', () => ({
-  googleDriveProvider: { isAvailable: jest.fn(async () => false) },
+  googleDriveProvider: {
+    isAvailable: jest.fn(async () => false),
+    unavailableReason: jest.fn(async () => 'signed_out'),
+  },
 }));
 jest.mock('~/services/autoBackupProviders/googleDriveAuth', () => ({}));
 jest.mock('~/services/dataManagementService', () => ({
@@ -196,8 +199,28 @@ describe('a picked backup file', () => {
     const restore = jest.fn(async () => ({ canceled: false, success: true }));
     await restoreImportedBackup(backup as never, restore);
     expect(restore).toHaveBeenCalledWith(backup);
-    expect(googleDriveProvider.isAvailable).not.toHaveBeenCalled();
+    expect(googleDriveProvider.unavailableReason).not.toHaveBeenCalled();
     expect(resolveBackupPhotos).not.toHaveBeenCalled();
+  });
+
+  it('counts a connected Drive it cannot reach now as unreachable, not as empty', async () => {
+    const { googleDriveProvider } = jest.requireMock('~/services/autoBackupProviders/googleDrive');
+    googleDriveProvider.unavailableReason.mockResolvedValueOnce('no_token');
+    const restore = jest.fn(async () => ({ canceled: false, success: true }));
+    await restoreImportedBackup({ ...backup, photos } as never, restore);
+    const stores = (resolveBackupPhotos as jest.Mock).mock.calls.at(-1)[1];
+    expect(stores).toHaveLength(3);
+    await expect(stores[2].listPhotos()).rejects.toThrow('Google Drive unavailable');
+  });
+
+  it('uses a reachable Drive as a store', async () => {
+    const { googleDriveProvider } = jest.requireMock('~/services/autoBackupProviders/googleDrive');
+    googleDriveProvider.unavailableReason.mockResolvedValueOnce(null);
+    const restore = jest.fn(async () => ({ canceled: false, success: true }));
+    await restoreImportedBackup({ ...backup, photos } as never, restore);
+    expect((resolveBackupPhotos as jest.Mock).mock.calls.at(-1)[1].at(-1)).toBe(
+      googleDriveProvider,
+    );
   });
 
   it('restores nothing when the stored photos cannot be downloaded', async () => {

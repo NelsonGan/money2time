@@ -3821,7 +3821,6 @@ const nl = {
     map_empty_message: 'Voeg een locatie toe aan een uitgave om die hier te zien.',
     map_disabled_message: 'Zet Locaties aan om plaatsen aan uitgaven toe te voegen.',
     map_turn_on: 'Locaties aanzetten',
-    map_places_one: '{{count}} plaats',
     map_places_other: '{{count}} plaatsen',
     map_previous: 'Vorige',
     map_next: 'Volgende',

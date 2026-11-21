@@ -3811,7 +3811,6 @@ const pt = {
     map_empty_message: 'Adicione um local a uma despesa para a ver aqui.',
     map_disabled_message: 'Ative Locais para adicionar locais às despesas.',
     map_turn_on: 'Ativar Locais',
-    map_places_one: '{{count}} local',
     map_places_other: '{{count}} locais',
     map_previous: 'Anterior',
     map_next: 'Seguinte',
