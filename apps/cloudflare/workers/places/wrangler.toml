@@ -6,7 +6,7 @@ compatibility_date = "2024-11-01"
 # money2time.com zone is on this Cloudflare account, so `wrangler deploy`
 # provisions the certificate and route for this hostname.
 routes = [
-  { pattern = "locations.money2time.com", custom_domain = true }
+  { pattern = "location.money2time.com", custom_domain = true }
 ]
 
 # Reached only through the custom domain; versioned preview URLs stay on for

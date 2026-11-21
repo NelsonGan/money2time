@@ -1,5 +1,5 @@
 // Place search for tagging transactions with where they happened (README:
-// Places Worker), served at locations.money2time.com:
+// Places Worker), served at location.money2time.com:
 //
 //   POST /search   { appUserId, query, latitude?, longitude?, language? }
 //   POST /reverse  { appUserId, latitude, longitude, language? }

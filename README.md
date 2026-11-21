@@ -655,7 +655,7 @@ locations** is off for everyone until they turn it on. The code lives in
   entry's place like its note. A shared album's bill does not carry it to the
   album's other members (`albumGroupSync`'s `TX_COLUMNS` leaves it out).
   Duplicating an entry keeps its place.
-- **Place search** goes through its own Worker, `locations.money2time.com`
+- **Place search** goes through its own Worker, `location.money2time.com`
   (`/search` and `/reverse`, see [Places Worker](#places-worker)), which proxies
   the Apple Maps Server API with the Apple key kept server-side. The app's client
   is `services/placeSearch.ts`, signed like scanning so it works without an
@@ -4970,7 +4970,7 @@ release that calls it.
 Place search for [Transaction locations](#transaction-locations), on its own
 Worker so the Apple key, its quota and its traffic stay apart from receipt
 scanning. `apps/cloudflare/workers/places` (`money2time-workers-places`),
-served at `locations.money2time.com`, with one D1 database
+served at `location.money2time.com`, with one D1 database
 (`money2time-d1-places`). Both routes are signed like `/scan` (the app's shared
 `MONEY2TIME_REQUEST_SIGNING_KEY`), so signed-out users can use them:
 
