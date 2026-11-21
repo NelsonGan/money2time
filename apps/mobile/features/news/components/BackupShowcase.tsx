@@ -3,6 +3,8 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { Text } from '~/components/ui';
+import { ClayIcon } from '~/components/ui/ClayIcon';
+import { useIsFlatIcons } from '~/context/ThemeContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { withColorAlpha } from '~/utils/color';
@@ -13,6 +15,7 @@ interface BackupShowcaseProps {
 
 export function BackupShowcase({ width }: BackupShowcaseProps) {
   const colors = useThemeColors();
+  const isFlatIcons = useIsFlatIcons();
 
   return (
     <View
@@ -22,10 +25,20 @@ export function BackupShowcase({ width }: BackupShowcaseProps) {
       ]}
     >
       <View style={styles.cloudWrap}>
+        {/* Clay art is its own container; the flat line icon keeps its bubble. */}
         <View
-          style={[styles.cloudBubble, { backgroundColor: withColorAlpha(colors.primary, 0.14) }]}
+          style={[
+            styles.cloudBubble,
+            isFlatIcons && { backgroundColor: withColorAlpha(colors.primary, 0.14) },
+          ]}
         >
-          <CloudUpload size={34} color={colors.primary} strokeWidth={2.2} />
+          <ClayIcon
+            name="status/cloud-upload"
+            size={isFlatIcons ? 34 : 60}
+            flat={{ icon: CloudUpload, strokeWidth: 2.2 }}
+            flatSize={34}
+            flatColor={colors.primary}
+          />
         </View>
         {/* The tick is the whole point of this release: the uploads land again. */}
         <View
