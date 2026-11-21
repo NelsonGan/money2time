@@ -85,6 +85,18 @@ older apps and pages working, and verify it end to end against the simulator.
 A change without web impact says "Web Dashboard: no impact" and why in its PR.
 Merging deploys the website at once, while the app reaches the stores later.
 
+**UI changes start from a generated mockup and are checked against it.**
+Before you build or restyle visible UI in any app here (the app, the website,
+the Web Dashboard, App Studio), generate a mockup of it with the `ui-mockups`
+skill, which uses whichever image model is available through the `imagegen`
+skill (Codex or Antigravity today), and build with it as the design guide.
+Before the PR, screenshot the result and compare it with the mockup: close the
+gaps the project's rules allow, and name each deliberate difference. The mockup
+goes in the PR's evidence beside the result. Design reviews, user or UX reviews
+and reviews of UI PRs use a mockup the same way, as the yardstick. Skip it only
+when nothing about how a screen looks changes, or the user gave the design;
+say so in the PR.
+
 **Show the device in T3 Code's Device panel while testing.** Open it with
 `device_open` and leave it on the tested screen while the user should still look
 at it. The pool runs two devices at once and at most one Android emulator, so
@@ -205,5 +217,6 @@ one for the app you are changing: `work-on-website` (with `seo-loop`,
 `migrate-to-vinext` and `sync-web-dashboard`) for `apps/web`,
 `work-on-app-studio` (with `update-whats-new` and
 `update-app-studio-screenshots`) for `apps/app-studio`, and the
-rest for the app in `apps/mobile`. A skill's paths are relative to its app
-unless it says otherwise.
+rest for the app in `apps/mobile`. `ui-mockups` and `imagegen` serve every
+app: mockups for UI work and reviews, and generated art. A skill's paths are
+relative to its app unless it says otherwise.

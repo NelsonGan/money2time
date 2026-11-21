@@ -1,6 +1,6 @@
 ---
 name: frontend-design
-description: Design and build polished, on-brand UI for the money2time React Native app. Use when adding or restyling screens, sheets, cards, charts, or any visible UI; when the user asks for design work, layout, spacing, typography, theming, dark-mode, or visual polish; or when reviewing a screen for visual quality. Enforces NativeWind + the project design system.
+description: Design and build polished, on-brand UI for the money2time React Native app. Use when adding or restyling screens, sheets, cards, charts, or any visible UI; when the user asks for design work, layout, spacing, typography, theming, dark-mode, or visual polish; or when reviewing a screen for visual quality. Enforces NativeWind + the project design system, with a generated mockup (ui-mockups) as the design guide.
 ---
 
 # Frontend design (money2time)
@@ -56,10 +56,13 @@ Every new screen or list needs all three: use `EmptyState`, `LoadingDots` / `Imp
 ## Workflow
 
 1. **Locate the pattern.** Find the closest existing screen/component and mirror its structure, spacing, and tokens. Consistency beats novelty.
-2. **Compose from primitives.** Build with `components/ui/*` and feature components; only drop to raw RN when nothing fits.
-3. **Wire data via `useApp()`** — never read the DB or repositories directly from a component.
-4. **Verify visually.** Run the app and inspect it with the **T3 Code device tools** (`device_open`, then the `agent-device` command it returns; see AGENTS.md), with the device left in the Device panel. Always start Metro with `npx expo start --localhost`. Use `agent-device screenshot` for before/after captures of visible changes. Check **both light and dark**, and **both phone and tablet** if layout changed.
-5. **Self-review checklist** before finishing:
+2. **Mock it up first.** For any change to how a screen looks, generate a mockup with [ui-mockups](../ui-mockups/SKILL.md) (any available image model, through [imagegen](../imagegen/SKILL.md)), using screenshots of the current or nearest screen as references, and note what you take from it. It is the design guide; this skill's rules win every conflict with it.
+3. **Compose from primitives.** Build with `components/ui/*` and feature components; only drop to raw RN when nothing fits.
+4. **Wire data via `useApp()`** — never read the DB or repositories directly from a component.
+5. **Verify visually.** Run the app and inspect it with the **T3 Code device tools** (`device_open`, then the `agent-device` command it returns; see AGENTS.md), with the device left in the Device panel. Start Metro with `simlock-metro` (AGENTS.md). Use `agent-device screenshot` for before/after captures of visible changes. Check **both light and dark**, and **both phone and tablet** if layout changed.
+6. **Check it against the mockup.** Screenshot the result in the mockup's state and theme and compare them side by side ([ui-mockups](../ui-mockups/SKILL.md) step 5): same hierarchy, grouping, density and primary action. Close the gaps, and note each deliberate difference for the PR.
+7. **Self-review checklist** before finishing:
+   - [ ] Mockup made (or the reason there is none) and the result checked against it
    - [ ] No hardcoded colors/hex; theming works across all 8 palettes
    - [ ] Dark mode correct
    - [ ] All strings via `I18n.t` and added to every locale
@@ -79,3 +82,5 @@ Every new screen or list needs all three: use `EmptyState`, `LoadingDots` / `Imp
 - Manual `Intl`/string money formatting instead of `formatAmount`.
 - `StyleSheet.create` for static styling that NativeWind can express.
 - Reading repositories/DB from a component instead of `useApp()`.
+- Building a new or restyled screen straight from a description, with no mockup to work toward or check against.
+- Hand-drawn SVG, an emoji stand-in or a grey box where an illustration belongs: generate it with [imagegen](../imagegen/SKILL.md).
