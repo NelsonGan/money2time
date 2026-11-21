@@ -28,7 +28,7 @@ type AlternateAppIconsModule = typeof import('expo-alternate-app-icons');
  * Loaded through a guarded require because expo-alternate-app-icons reaches for
  * its native module at import time and throws when it is not there. AppContext
  * pulls this module in, so a plain import would take the whole app down on a dev
- * client built before the package was added, the same way MapLibre and
+ * client built before the package was added, the same way react-native-maps and
  * expo-camera would if they were not lazy.
  */
 const alternateAppIcons: AlternateAppIconsModule | null = (() => {

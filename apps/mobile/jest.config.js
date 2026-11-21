@@ -14,9 +14,10 @@ module.exports = {
     '\\.(png|jpg|jpeg|gif|webp|svg)$': '<rootDir>/__tests__/__mocks__/imageAsset.ts',
     '^~/(.*)$': '<rootDir>/$1',
   },
-  // @noble/* ship ES modules only (the Web Dashboard's crypto); compile them
-  // like the app's own sources.
-  transformIgnorePatterns: ['/node_modules/(?!@noble/)'],
+  // @noble/* (the Web Dashboard's crypto) and supercluster with its kdbush
+  // (the spending map's clustering) ship ES modules only; compile them like
+  // the app's own sources.
+  transformIgnorePatterns: ['/node_modules/(?!(@noble/|supercluster/|kdbush/))'],
   transform: {
     '^.+\\.[tj]sx?$': [
       'ts-jest',

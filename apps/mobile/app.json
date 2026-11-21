@@ -31,7 +31,7 @@
         "LSApplicationQueriesSchemes": ["chatgpt", "claude", "gemini"],
         "NSPhotoLibraryUsageDescription": "Money2Time may access your photo library if you choose to attach an image to a transaction.",
         "NSCameraUsageDescription": "Money2Time uses your camera if you choose to photograph a receipt, or to scan the code that links the Web Dashboard on your computer.",
-        "NSLocationWhenInUseUsageDescription": "Money2Time can use your location to show your current position on the trip album map. Your location is never stored or shared.",
+        "NSLocationWhenInUseUsageDescription": "If you turn on Locations, Money2Time uses your location to tag an expense with where you are and to find places near you. Locations stay with your transactions.",
         "BGTaskSchedulerPermittedIdentifiers": ["money2time-auto-backup"],
         "NSUbiquitousContainers": {
           "iCloud.com.nelsongan.money2time": {
@@ -235,7 +235,15 @@
           }
         ]
       ],
-      "@maplibre/maplibre-react-native",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "If you turn on Locations, Money2Time uses your location to tag an expense with where you are and to find places near you. Locations stay with your transactions.",
+          "isIosBackgroundLocationEnabled": false,
+          "isAndroidBackgroundLocationEnabled": false,
+          "isAndroidForegroundServiceEnabled": false
+        }
+      ],
       [
         "expo-splash-screen",
         {
@@ -351,7 +359,6 @@
         "assets/db/**/*",
         "assets/icon-atlases/**/*",
         "assets/items/**/*",
-        "assets/map/**/*",
         "assets/mascots/**/*",
         "node_modules/**/*"
       ]

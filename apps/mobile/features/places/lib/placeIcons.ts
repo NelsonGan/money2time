@@ -1,0 +1,66 @@
+import {
+  BedDouble,
+  Building2,
+  Coffee,
+  Dumbbell,
+  Film,
+  Fuel,
+  Landmark,
+  type LucideIcon,
+  MapPin,
+  Pill,
+  Plane,
+  ShoppingBag,
+  ShoppingBasket,
+  SquareParking,
+  Stethoscope,
+  TrainFront,
+  Trees,
+  Utensils,
+  Wine,
+} from 'lucide-react-native';
+
+// Apple's PoiCategory values (README: Transaction locations) grouped onto the
+// app's line icons. Anything unlisted, and a spot with no category, is a pin.
+const ICON_BY_CATEGORY: Record<string, LucideIcon> = {
+  Cafe: Coffee,
+  Bakery: Coffee,
+  Restaurant: Utensils,
+  Brewery: Wine,
+  Winery: Wine,
+  Distillery: Wine,
+  Nightlife: Wine,
+  FoodMarket: ShoppingBasket,
+  Store: ShoppingBag,
+  GasStation: Fuel,
+  EVCharger: Fuel,
+  AutomotiveRepair: Fuel,
+  Hotel: BedDouble,
+  Airport: Plane,
+  AirportGate: Plane,
+  AirportTerminal: Plane,
+  PublicTransport: TrainFront,
+  Parking: SquareParking,
+  Pharmacy: Pill,
+  Hospital: Stethoscope,
+  Bank: Landmark,
+  ATM: Landmark,
+  MovieTheater: Film,
+  Theater: Film,
+  MusicVenue: Film,
+  FitnessCenter: Dumbbell,
+  Park: Trees,
+  NationalPark: Trees,
+  Beach: Trees,
+  Museum: Building2,
+  University: Building2,
+  School: Building2,
+  Library: Building2,
+};
+
+export function placeCategoryIcon(category: string | null | undefined): LucideIcon {
+  // Own keys only: the category is synced data, and "constructor" is not an icon.
+  return category && Object.hasOwn(ICON_BY_CATEGORY, category)
+    ? (ICON_BY_CATEGORY[category] as LucideIcon)
+    : MapPin;
+}

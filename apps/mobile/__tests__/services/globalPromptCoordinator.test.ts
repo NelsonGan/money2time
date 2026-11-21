@@ -3,6 +3,7 @@ import {
   markPromptHidden,
   markPromptVisible,
   resetGlobalPromptCoordinator,
+  subscribePromptChanges,
 } from '~/services/globalPromptCoordinator';
 
 describe('globalPromptCoordinator', () => {
@@ -37,5 +38,34 @@ describe('globalPromptCoordinator', () => {
     markPromptVisible('featureAnnouncement');
     markPromptHidden('featureAnnouncement');
     expect(isAnyPromptVisible()).toBe(false);
+  });
+});
+
+describe('prompt change subscriptions', () => {
+  beforeEach(() => {
+    resetGlobalPromptCoordinator();
+  });
+
+  it('tells a waiting prompt when another shows or hides, once per real change', () => {
+    const listener = jest.fn();
+    const unsubscribe = subscribePromptChanges(listener);
+    markPromptVisible('goalCelebration');
+    markPromptVisible('goalCelebration');
+    expect(listener).toHaveBeenCalledTimes(1);
+    markPromptHidden('goalCelebration');
+    markPromptHidden('goalCelebration');
+    expect(listener).toHaveBeenCalledTimes(2);
+    unsubscribe();
+    markPromptVisible('reviewPrePrompt');
+    expect(listener).toHaveBeenCalledTimes(2);
+  });
+
+  it('counts the celebrations and the Locations offer like any prompt', () => {
+    markPromptVisible('loanCelebration');
+    expect(isAnyPromptVisible('locationsOffer')).toBe(true);
+    markPromptHidden('loanCelebration');
+    markPromptVisible('locationsOffer');
+    expect(isAnyPromptVisible('reviewPrePrompt')).toBe(true);
+    expect(isAnyPromptVisible('locationsOffer')).toBe(false);
   });
 });

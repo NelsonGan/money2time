@@ -80,6 +80,7 @@ import type {
   UserSettings,
   WeekStartsOn,
 } from '~/types';
+import { NO_TRANSACTION_LOCATION } from '~/types';
 import { clampFirstDayOfMonth } from '~/utils/financialMonth';
 import { isAnchorDay } from '~/utils/recurringRules';
 
@@ -747,9 +748,60 @@ export function toTransaction(row: TransactionRow): Transaction {
     albumCategory: isAlbumCategoryKey(row.albumCategory) ? row.albumCategory : null,
     albumCategoryName: albumCategoryKeyed(row.albumCategory, row.albumCategoryName),
     albumCategoryIcon: albumCategoryKeyed(row.albumCategory, row.albumCategoryIcon),
+    ...transactionLocationFields(
+      row.latitude,
+      row.longitude,
+      row.placeName,
+      row.placeAddress,
+      row.placeId,
+      row.placeCategory,
+    ),
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     deletedAt: row.deletedAt,
+  };
+}
+
+type TransactionLocationFields = Pick<
+  Transaction,
+  'latitude' | 'longitude' | 'placeName' | 'placeAddress' | 'placeId' | 'placeCategory'
+>;
+
+function textOrNull(value: unknown, max: number): string | null {
+  return typeof value === 'string' && value.trim() ? value.trim().slice(0, max) : null;
+}
+
+/**
+ * A transaction's location, all or nothing: a point outside the globe (or
+ * half of one) reads as no location, and a located row always has a name.
+ */
+export function transactionLocationFields(
+  latitude: unknown,
+  longitude: unknown,
+  placeName: unknown,
+  placeAddress: unknown,
+  placeId: unknown,
+  placeCategory: unknown,
+): TransactionLocationFields {
+  if (
+    typeof latitude !== 'number' ||
+    typeof longitude !== 'number' ||
+    !Number.isFinite(latitude) ||
+    !Number.isFinite(longitude) ||
+    Math.abs(latitude) > 90 ||
+    Math.abs(longitude) > 180
+  ) {
+    return NO_TRANSACTION_LOCATION;
+  }
+  const address = textOrNull(placeAddress, 300);
+  return {
+    latitude,
+    longitude,
+    placeName:
+      textOrNull(placeName, 200) ?? address ?? `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
+    placeAddress: address,
+    placeId: textOrNull(placeId, 128),
+    placeCategory: textOrNull(placeCategory, 64),
   };
 }
 
@@ -773,7 +825,8 @@ export const TRANSACTION_RAW_COLUMNS_SQL = `
   t.reimbursement_account_id, t.reimbursement_transaction_id, t.reimbursement_of_id,
   t.counts_as_expense, t.day_order, t.created_at, t.updated_at, t.deleted_at, t.details,
   t.instalment_rule_id, t.instalment_number, t.created_by, t.member_id, t.fee_of_id,
-  t.album_group_id, t.album_category, t.album_category_name, t.album_category_icon`;
+  t.album_group_id, t.album_category, t.album_category_name, t.album_category_icon,
+  t.latitude, t.longitude, t.place_name, t.place_address, t.place_id, t.place_category`;
 
 type RawValue = string | number | null;
 
@@ -829,16 +882,24 @@ export function toTransactionWithRelationsFromRaw(
     albumCategory: isAlbumCategoryKey(values[38]) ? values[38] : null,
     albumCategoryName: albumCategoryKeyed(values[38], values[39]),
     albumCategoryIcon: albumCategoryKeyed(values[38], values[40]),
-    accountName: (values[41] as string | null) ?? null,
-    fromAccountName: (values[42] as string | null) ?? null,
-    toAccountName: (values[43] as string | null) ?? null,
+    ...transactionLocationFields(
+      values[41],
+      values[42],
+      values[43],
+      values[44],
+      values[45],
+      values[46],
+    ),
+    accountName: (values[47] as string | null) ?? null,
+    fromAccountName: (values[48] as string | null) ?? null,
+    toAccountName: (values[49] as string | null) ?? null,
     ...withAlbumCategory(values[38], values[39], values[40], {
-      categoryName: (values[44] as string | null) ?? null,
-      categoryParentId: (values[46] as string | null) ?? null,
-      categoryParentName: (values[47] as string | null) ?? null,
-      categoryIcon: (values[45] as string | null) ?? null,
+      categoryName: (values[50] as string | null) ?? null,
+      categoryParentId: (values[52] as string | null) ?? null,
+      categoryParentName: (values[53] as string | null) ?? null,
+      categoryIcon: (values[51] as string | null) ?? null,
     }),
-    instalmentCount: (values[48] as number | null) ?? null,
+    instalmentCount: (values[54] as number | null) ?? null,
   };
 }
 
@@ -919,6 +980,13 @@ const TRANSACTION_SPARSE_DEFAULTS: Readonly<Record<string, RawValue>> = {
   album_category: null,
   album_category_name: null,
   album_category_icon: null,
+  // A location is only on the entries the user tagged.
+  latitude: null,
+  longitude: null,
+  place_name: null,
+  place_address: null,
+  place_id: null,
+  place_category: null,
 };
 
 const SPARSE_COLUMNS = TRANSACTION_RAW_COLUMNS.filter(
@@ -1115,6 +1183,7 @@ export function createTransactionAssembler(
       albumCategory: null,
       albumCategoryName: null,
       albumCategoryIcon: null,
+      ...NO_TRANSACTION_LOCATION,
       accountName: nameOf(common[8]),
       fromAccountName: nameOf(common[9]),
       toAccountName: nameOf(common[10]),
@@ -1263,6 +1332,8 @@ export function toSettings(row: SettingsRow): UserSettings {
         ? Math.min(row.workingHoursPerDay, 24)
         : 8,
     hapticsEnabled: row.hapticsEnabled ?? true,
+    transactionLocationsEnabled: row.transactionLocationsEnabled ?? false,
+    transactionLocationAutoTag: row.transactionLocationAutoTag ?? true,
     themeMode: asThemeMode(row.themeMode),
     themeColor: asThemeColor(row.themeColor),
     iconStyle: asIconStyle(row.iconStyle),

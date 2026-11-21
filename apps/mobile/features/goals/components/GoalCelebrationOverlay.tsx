@@ -5,6 +5,7 @@ import { Mascot } from '~/components/feedback/Mascot';
 import { Button, Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import { I18n } from '~/lib/i18n';
+import { markPromptHidden, markPromptVisible } from '~/services/globalPromptCoordinator';
 import { triggerHaptic } from '~/services/haptics';
 import type { Account } from '~/types';
 
@@ -39,6 +40,16 @@ export function GoalCelebrationOverlay({ allowed }: GoalCelebrationOverlayProps)
   useEffect(() => {
     if (pendingGoalCelebration) setContent(pendingGoalCelebration);
   }, [pendingGoalCelebration]);
+
+  // Reported while one is waiting or showing, so a lower-priority prompt from
+  // the same save (the one-time Locations offer, the review pre-prompt) waits
+  // instead of stacking a second Modal on it.
+  const pending = pendingGoalCelebration != null;
+  useEffect(() => {
+    if (!pending) return undefined;
+    markPromptVisible('goalCelebration');
+    return () => markPromptHidden('goalCelebration');
+  }, [pending]);
 
   useEffect(() => {
     if (visible) void triggerHaptic('success');

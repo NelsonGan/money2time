@@ -97,6 +97,9 @@ import {
   canSplitInstalments,
   isRegularAmountValid,
 } from '~/features/instalments/lib/instalmentPlan';
+import { PlacePickerSheet, type PlaceSource } from '~/features/places/components/PlacePickerSheet';
+import { useCurrentPlace } from '~/features/places/hooks/useCurrentPlace';
+import { toTransactionLocation } from '~/features/places/lib/placeLocation';
 import { selfMemberIdFor } from '~/features/sharedLedgers/lib/entryStamp';
 import { useOpenLedgerPeople } from '~/features/sharedLedgers/lib/ledgerPeople';
 import {
@@ -145,7 +148,13 @@ import type { RootStackParamList } from '~/navigation/rootStack';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import { deleteReceiptImage, getReceiptUri, saveReceiptImage } from '~/services/userAssets';
-import type { Category, TransactionSentiment, TransactionType } from '~/types';
+import {
+  type Category,
+  NO_TRANSACTION_LOCATION,
+  type TransactionLocation,
+  type TransactionSentiment,
+  type TransactionType,
+} from '~/types';
 import { cn } from '~/utils';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import {
@@ -410,6 +419,8 @@ interface TransactionEditorInitialValues {
   createdBy: string | null;
   /** Shared ledgers: whose entry it is (null = the ledger's owner). */
   memberId: string | null;
+  /** Where it happened (README: Transaction locations), or null. */
+  location?: TransactionLocation | null;
 }
 
 /** What a save carries beside the transaction itself. */
@@ -934,6 +945,43 @@ export function TransactionEditorScreen({
   );
   // Optional receipt image (relative path within the user-assets store).
   const [receiptUri, setReceiptUri] = useState<string | null>(initialValues?.receiptUri ?? null);
+  // Where it happened (README: Transaction locations). `locationSource` is how
+  // it was chosen; 'auto' is the tag a new expense starts with, which a save
+  // keeps only while it is still an expense dated today. An edit sends the
+  // location only once the user changed it.
+  const [location, setLocation] = useState<TransactionLocation | null>(
+    initialValues?.location ?? null,
+  );
+  const [locationSource, setLocationSource] = useState<PlaceSource | 'auto' | 'removed' | null>(
+    null,
+  );
+  const [placePickerVisible, setPlacePickerVisible] = useState(false);
+  const autoTagEligible =
+    mode === 'create' &&
+    !recurringOptions &&
+    !initialValues?.location &&
+    settings.transactionLocationsEnabled &&
+    settings.transactionLocationAutoTag;
+  const autoTag = useCurrentPlace({
+    active: autoTagEligible,
+    appUserId: settings.appUserId,
+    locale: I18n.locale,
+  });
+  // The automatic tag shows only while the entry is an expense dated today (it
+  // was bought here, now), and comes back if it becomes one again. A place the
+  // user picked or removed is never touched.
+  const autoTagApplies = type === 'expense' && date === toDateInput(new Date());
+  useEffect(() => {
+    if (!autoTagEligible) return;
+    if (locationSource !== null && locationSource !== 'auto') return;
+    if (autoTagApplies && autoTag.status === 'ready' && autoTag.place) {
+      setLocation(toTransactionLocation(autoTag.place));
+      setLocationSource('auto');
+    } else if (!autoTagApplies && locationSource === 'auto') {
+      setLocation(null);
+      setLocationSource(null);
+    }
+  }, [autoTagEligible, autoTagApplies, autoTag.status, autoTag.place, locationSource]);
   // "To be reimbursed", plus whether it has already been paid back. A settled
   // reimbursement is shown read-only here: undoing it has to remove the
   // money-in entry too, which is the Reimbursements page's job.
@@ -2355,8 +2403,28 @@ export function TransactionEditorScreen({
     return 'default' as const;
   }, [amount, isBalanceAdjustmentType, type]);
 
+  // The location fields a save writes: all of them on a new entry (or none),
+  // and on an edit only once the user changed the place. The automatic tag of
+  // a new expense goes only while it is still an expense dated today
+  // (`autoTagApplies`): one backdated or switched to income was not bought here.
+  // How the place this save writes was chosen, for `Transaction Location Set`,
+  // which is sent only once the save goes through.
+  const locationEventRef = useRef<PlaceSource | 'auto' | null>(null);
+  const locationPayload = () => {
+    locationEventRef.current = null;
+    let saved = location;
+    // The effect above drops it on screen; this holds at save time too.
+    if (locationSource === 'auto' && !autoTagApplies) saved = null;
+    if (mode === 'edit' && locationSource === null) return {};
+    if (!saved) return mode === 'edit' ? NO_TRANSACTION_LOCATION : {};
+    if (locationSource && locationSource !== 'removed') locationEventRef.current = locationSource;
+    return saved;
+  };
+
   const handleSubmit = async (bulkOverride?: boolean) => {
     if (confirmedSubmitRef.current) return;
+    // A save that never reaches the payload (a transfer, an early check) sends no location event.
+    locationEventRef.current = null;
     // Whether this save is the one a split confirmation just let through.
     const splitConfirmed = splitConfirmedRef.current;
     splitConfirmedRef.current = false;
@@ -2535,6 +2603,7 @@ export function TransactionEditorScreen({
           // Only an expense can be reimbursed; income keeps the column false so
           // switching type does not leave a stale flag behind.
           reimbursable: type === 'expense' ? reimbursable : false,
+          ...locationPayload(),
         };
         preparedSubmitPayload = submitPayload;
       }
@@ -2620,9 +2689,10 @@ export function TransactionEditorScreen({
         }
         // A receipt, the longer note and the reimbursement tick belong to one
         // real payment: the first, made at once. A new plan that starts later
-        // has nowhere to keep them. The mood is not kept either, but it starts
-        // as neutral and is not worth stopping the save for. A saved expense
-        // keeps them all, since it is the first payment itself.
+        // has nowhere to keep them. The mood and a picked place are not kept
+        // either, but neither is worth stopping the save for (and the place
+        // is not reported as set). A saved expense keeps them all, since it
+        // is the first payment itself.
         const firstPaymentLater =
           mode === 'create' && new Date(capturedPayload.date).getTime() > Date.now();
         if (
@@ -2634,6 +2704,7 @@ export function TransactionEditorScreen({
           showToast(I18n.t('instalments.extras_need_today'));
           return;
         }
+        if (firstPaymentLater) locationEventRef.current = null;
         // Jump the list to the first payment only when it exists.
         preparedSubmitPayload = firstPaymentLater ? null : capturedPayload;
         recurringSubmit = () => {
@@ -2715,6 +2786,15 @@ export function TransactionEditorScreen({
       }
 
       void triggerHaptic('success');
+      // Sent once, and only where the save has gone through: an awaited save
+      // that fails, or a split confirmation the user backs out of, sends none.
+      let locationEvent = locationEventRef.current;
+      locationEventRef.current = null;
+      const reportLocationSet = () => {
+        if (!locationEvent) return;
+        void trackEvent(AnalyticsEvents.TRANSACTION_LOCATION_SET, { source: locationEvent });
+        locationEvent = null;
+      };
       perfInteraction(
         mode === 'edit' ? 'editor_update' : bulk ? 'editor_bulk_save' : 'editor_save',
       );
@@ -2729,6 +2809,7 @@ export function TransactionEditorScreen({
         setConfirmedSaving(true);
         try {
           await onSubmitConfirmed(submitPayload);
+          reportLocationSet();
           settlePagerNow();
           // Let the remove guard update before dispatching the close action.
           requestAnimationFrame(() => {
@@ -2767,6 +2848,7 @@ export function TransactionEditorScreen({
             receiptCommittedRef.current = false;
             return;
           }
+          reportLocationSet();
           if (!bulk) {
             settlePagerNow();
             requestAnimationFrame(() => {
@@ -2787,6 +2869,9 @@ export function TransactionEditorScreen({
       } else {
         deferredSubmit = recurringSubmit;
       }
+      // The rest are optimistic saves that land with no wait (a group bill
+      // reported above already).
+      reportLocationSet();
 
       // Bulk create mode: keep the editor open and make the reset feel instant.
       // Reset the per-transaction fields (amount / note / receipt / splits) on
@@ -3045,13 +3130,22 @@ export function TransactionEditorScreen({
   // count-as-spending tick on a transfer, and the details note on all three.
   // A recurring rule has its own editor shape (a loan's rule carries the
   // setting from the loan itself).
+  // Where it happened, a row of the options panel: offered with Locations on,
+  // and always shown on an entry that already has a place, so it can be seen
+  // and removed.
+  const showLocationRow =
+    useStickyNumpad &&
+    !recurringOptions &&
+    (type === 'expense' || type === 'income') &&
+    (settings.transactionLocationsEnabled || location !== null);
   const showOptionsButton =
     useStickyNumpad &&
     (type === 'expense' || type === 'income' || type === 'transfer') &&
     !recurringOptions;
-  // Lit when the panel is open or holds a tick or a note worth noticing.
+  // Lit when the panel is open or holds a tick, a note or a place worth noticing.
   const optionsActive =
     hasDetails ||
+    (showLocationRow && location !== null) ||
     (type === 'transfer' ? transferCountsAsExpense : type === 'expense' && reimbursable);
   // Receipt attach rides at the right end of the action row (money-in/out).
   const showReceiptButton = useStickyNumpad && (type === 'expense' || type === 'income');
@@ -5359,6 +5453,14 @@ export function TransactionEditorScreen({
                           onToggleCountsAsExpense={handleToggleTransferExpense}
                           category={transferCategoryPreview}
                           onPickCategory={() => setTransferCategoryPickerVisible(true)}
+                          location={
+                            showLocationRow
+                              ? {
+                                  placeName: location?.placeName ?? null,
+                                  onPress: () => setPlacePickerVisible(true),
+                                }
+                              : undefined
+                          }
                         />
                       )}
                     </ScrollView>
@@ -5556,6 +5658,23 @@ export function TransactionEditorScreen({
           setCurrencyPickerVisible(false);
         }}
       />
+      {showLocationRow || placePickerVisible ? (
+        <PlacePickerSheet
+          visible={placePickerVisible}
+          current={location}
+          onClose={() => setPlacePickerVisible(false)}
+          onSelect={(next, source) => {
+            setLocation(next);
+            setLocationSource(source);
+          }}
+          onRemove={() => {
+            setLocation(null);
+            // A removal is a choice: an edit clears the saved place, and the
+            // automatic tag never comes back over it.
+            setLocationSource('removed');
+          }}
+        />
+      ) : null}
       <ReceiptViewerModal
         visible={receiptViewerVisible}
         fileUri={getReceiptUri(receiptUri)}

@@ -244,6 +244,16 @@ type Selection = {
   enabled: boolean;
 };
 
+/** Where it happened, before the place's name (the app's map pin). */
+function PinMark() {
+  return (
+    <svg aria-hidden viewBox="0 0 24 24" width={12} height={12} fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+      <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0" />
+      <circle cx="12" cy="10" r="3" />
+    </svg>
+  );
+}
+
 /** A paged list of transactions, grouped by day; with `selection`, rows can be ticked and opened to edit. */
 export function TxList({ txs, pageSize = 30, selection, onPage }: { txs: Tx[]; pageSize?: number; selection?: Selection; onPage?: (rows: Tx[]) => void }) {
   const t = useTranslations("dashboard.transactions");
@@ -332,6 +342,12 @@ export function TxList({ txs, pageSize = 30, selection, onPage }: { txs: Tx[]; p
                         <AccountLogo logoId={account.logoId} name={account.name} size={14} />
                         {account.name}
                         {to && !paybackRow ? ` → ${to.name}` : ""}
+                      </span>
+                    ) : null}
+                    {tx.place ? (
+                      <span className="inline-flex items-center gap-1 truncate" title={tx.place.address ?? tx.place.name}>
+                        <PinMark />
+                        {tx.place.name}
                       </span>
                     ) : null}
                     {tx.hasTime ? <span>{f.time(tx.date)}</span> : null}

@@ -17,7 +17,10 @@ import { type SplitDraft, splitsHelpers } from '~/features/transactions/componen
 import type { TransactionEditorSubmitExtras } from '~/features/transactions/components/TransactionEditorScreen';
 import { useNewTransactionGate } from '~/features/transactions/hooks/useNewTransactionGate';
 import { draftPayer, friendPaidExpense } from '~/features/transactions/lib/splitPayer';
-import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
+import {
+  type CreateTransactionInput,
+  locationInputOf,
+} from '~/lib/repositories/transactionsRepository';
 import type { AddTransactionInitialValues } from '~/navigation/rootStack';
 import { requestHighlightTransaction } from '~/services/transactionsNavigation';
 
@@ -128,6 +131,7 @@ export function AddTransactionScreen({
             receiptUri: transaction.receiptUri ?? null,
             sentiment: transaction.sentiment,
             reimbursable: transaction.reimbursable ?? false,
+            ...locationInputOf(transaction),
           },
         });
         if (created?.firstPaymentId) requestHighlightTransaction(created.firstPaymentId);

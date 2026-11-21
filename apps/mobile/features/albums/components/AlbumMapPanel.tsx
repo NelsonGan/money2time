@@ -12,7 +12,7 @@ import { formatAmount, formatHoursCompact } from '~/utils/formatters';
 
 import { type AlbumPin, formatAlbumMonthYear } from '../utils';
 
-// MapLibre is a native module; lazy-load it so the rest of the app keeps working
+// The map (react-native-maps) is a native module; lazy-load it so the rest of the app keeps working
 // on a dev client that hasn't been rebuilt with the native pod yet.
 const AlbumMapView = lazy(() =>
   import('./AlbumMapView').then((m) => ({ default: m.AlbumMapView })),
@@ -48,7 +48,7 @@ export function AlbumMapPanel({
 
   const isTimeMode = settings.displayMode === 'time';
 
-  // MapLibre is a large native+JS module. Importing it (via the lazy
+  // The map is a large native+JS module. Importing it (via the lazy
   // AlbumMapView below) synchronously evaluates its module graph on the JS
   // thread — a multi-second hit with real data. The albums tab is pre-mounted
   // in the background during cold start, so touching the map here would block
@@ -90,7 +90,7 @@ export function AlbumMapPanel({
   }, [active]);
 
   // Until the Map tab has been opened, render nothing heavy — this keeps the
-  // lazy MapLibre import (and the per-album stat queries) off the cold-start
+  // lazy map import (and the per-album stat queries) off the cold-start
   // preload path. A plain View is enough for the hidden, pre-mounted tab.
   if (!shouldRenderMap) {
     return <View className="flex-1" />;
@@ -111,7 +111,7 @@ export function AlbumMapPanel({
   }
 
   return (
-    // The native MapLibre module may be missing on a dev client that hasn't been
+    // The native map module may be missing on a dev client that hasn't been
     // rebuilt — degrade to a message instead of crashing the whole app (the lazy
     // import would otherwise reject past Suspense to the root).
     <AppErrorBoundary

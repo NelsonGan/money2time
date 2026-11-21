@@ -6,14 +6,15 @@ import { owedToPayer } from '~/features/transactions/lib/splitPayer';
 import { getDb, getSQLite } from '~/lib/db/client';
 import { getActiveLedgerId, inActiveLedger } from '~/lib/db/ledgerScope';
 import { transactionsTable } from '~/lib/db/schema';
-import type {
-  Transaction,
-  TransactionFilters,
-  TransactionSentiment,
-  TransactionSplit,
-  TransactionSplitsSummary,
-  TransactionType,
-  TransactionWithRelations,
+import {
+  NO_TRANSACTION_LOCATION,
+  type Transaction,
+  type TransactionFilters,
+  type TransactionSentiment,
+  type TransactionSplit,
+  type TransactionSplitsSummary,
+  type TransactionType,
+  type TransactionWithRelations,
 } from '~/types';
 import { normalizeMoneyAmount } from '~/utils/formatters';
 import { newId, nowIso } from '~/utils/id';
@@ -27,6 +28,7 @@ import {
   TRANSACTION_COMMON_COLUMNS_SQL,
   TRANSACTION_SPARSE_COLUMNS_SQL,
   TRANSACTION_SPARSE_FILTER_SQL,
+  transactionLocationFields,
   type TransactionRelationLookups,
   transactionRelations,
 } from './mappers';
@@ -120,6 +122,79 @@ export interface CreateTransactionInput {
   /** That category's name and icon when the album added or changed it (null: a default's own). */
   albumCategoryName?: string | null;
   albumCategoryIcon?: string | null;
+  /**
+   * Where it happened (README: Transaction locations). Written and cleared
+   * together: an input carrying any of them is normalized as a whole
+   * (`withNormalizedLocation`), so a half location never reaches the row.
+   */
+  latitude?: number | null;
+  longitude?: number | null;
+  placeName?: string | null;
+  placeAddress?: string | null;
+  placeId?: string | null;
+  placeCategory?: string | null;
+}
+
+const LOCATION_KEYS = [
+  'latitude',
+  'longitude',
+  'placeName',
+  'placeAddress',
+  'placeId',
+  'placeCategory',
+] as const;
+
+export type TransactionLocationInput = Pick<CreateTransactionInput, (typeof LOCATION_KEYS)[number]>;
+
+/**
+ * The location fields a save names, and only those: an edit that leaves the
+ * place alone sends none, so passing this along never clears a place.
+ */
+export function locationInputOf(
+  input: Partial<CreateTransactionInput>,
+): Partial<TransactionLocationInput> {
+  const picked: Partial<TransactionLocationInput> = {};
+  for (const key of LOCATION_KEYS) {
+    if (key in input) (picked as Record<string, unknown>)[key] = input[key];
+  }
+  return picked;
+}
+
+/** Whether a save names a location that differs from the one a row has. */
+export function locationChanges(
+  current: Partial<TransactionLocationInput>,
+  input: Partial<CreateTransactionInput>,
+): boolean {
+  return LOCATION_KEYS.some(
+    (key) => key in input && (current[key] ?? null) !== (input[key] ?? null),
+  );
+}
+
+/**
+ * An input that changes the type to one without a place clears it. An input
+ * that touches the location gets all six fields, validated together
+ * (`transactionLocationFields`): a missing or out-of-range point clears the
+ * location. An input that does not touch it is left alone, so an edit that
+ * changes the amount keeps the location.
+ */
+export function withNormalizedLocation<T extends Partial<CreateTransactionInput>>(input: T): T {
+  // Only an expense or income has a place: an entry made, or changed into, a
+  // transfer or balance adjustment loses it, whichever editor did it.
+  if (input.type === 'transfer' || input.type === 'balance_adjustment') {
+    return { ...input, ...NO_TRANSACTION_LOCATION };
+  }
+  if (!LOCATION_KEYS.some((key) => key in input)) return input;
+  return {
+    ...input,
+    ...transactionLocationFields(
+      input.latitude,
+      input.longitude,
+      input.placeName,
+      input.placeAddress,
+      input.placeId,
+      input.placeCategory,
+    ),
+  };
 }
 
 /** Ids per `IN (…)` lookup, under SQLite's bound-parameter limit. */
@@ -153,10 +228,11 @@ function normalizeTransactionFilters(
 }
 
 function normalizeTransactionInput<T extends Partial<CreateTransactionInput>>(input: T): T {
-  if (input.amount === undefined) return input;
+  const located = withNormalizedLocation(input);
+  if (located.amount === undefined) return located;
   return {
-    ...input,
-    amount: normalizeMoneyAmount(input.amount),
+    ...located,
+    amount: normalizeMoneyAmount(located.amount),
   };
 }
 
@@ -686,6 +762,12 @@ class TransactionsRepository {
         albumCategory: normalizedInput.albumCategory ?? null,
         albumCategoryName: normalizedInput.albumCategoryName ?? null,
         albumCategoryIcon: normalizedInput.albumCategoryIcon ?? null,
+        latitude: normalizedInput.latitude ?? null,
+        longitude: normalizedInput.longitude ?? null,
+        placeName: normalizedInput.placeName ?? null,
+        placeAddress: normalizedInput.placeAddress ?? null,
+        placeId: normalizedInput.placeId ?? null,
+        placeCategory: normalizedInput.placeCategory ?? null,
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,

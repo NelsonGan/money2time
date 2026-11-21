@@ -26,6 +26,7 @@ import { albumOfEntries } from "./album-lines";
 import { storedBudgetCurrency, storedBudgetRate } from "./budget-currency";
 import { monthlyBudgetRows } from "./budget-period";
 import { paidWithoutTransfer, paybackNote } from "./paybacks";
+import { placeOf, type TxPlace } from "./place";
 import { isPayBackPart, owedToPayers, partyKey } from "./split-payer";
 import { highlightsRecurringRuns, isRecurringRun, planRuleIdsOf, recurringRuleFee } from "./recurring-run";
 import {
@@ -127,6 +128,8 @@ export type Tx = {
   albumCategoryIcon?: string;
   /** Made by an ordinary recurring rule (`isRecurringRun`), tinted in the lists while `Model.highlightRecurring`. */
   recurring?: boolean;
+  /** Where it happened (`placeOf`), shown in the lists; absent when untagged or from an older app. */
+  place?: TxPlace;
 };
 
 export type Category = {
@@ -560,6 +563,8 @@ export function buildModel(backup: BackupFile, opts: { timeZone?: string | null 
     const hasTime =
       row.date.length > 10 &&
       !(date.getHours() === 0 && date.getMinutes() === 0 && date.getSeconds() === 0 && date.getMilliseconds() === 0);
+    // Only an expense or income has a place, as on the phone.
+    const place = type === "expense" || type === "income" ? placeOf(row) : null;
     txs.push({
       id: row.id,
       type,
@@ -594,6 +599,7 @@ export function buildModel(backup: BackupFile, opts: { timeZone?: string | null 
       ...(isAlbumCategoryKey(row.album_category) ? { albumCategory: row.album_category } : null),
       ...(isAlbumCategoryKey(row.album_category) && typeof row.album_category_name === "string" && row.album_category_name.trim() ? { albumCategoryName: row.album_category_name.slice(0, 64) } : null),
       ...(isAlbumCategoryKey(row.album_category) && typeof row.album_category_icon === "string" && ALBUM_CATEGORY_ICON.test(row.album_category_icon) ? { albumCategoryIcon: row.album_category_icon } : null),
+      ...(place ? { place } : null),
     });
   }
   txs.sort((a, b) => b.date.getTime() - a.date.getTime());

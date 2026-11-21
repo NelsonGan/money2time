@@ -115,6 +115,7 @@ import {
   isInstalmentPlan,
 } from '~/features/instalments/lib/instalmentPlan';
 import { computeItemStats } from '~/features/items/utils';
+import { asksForLocationsOffer, requestLocationsOffer } from '~/features/places/lib/locationsOffer';
 import {
   buildRefundNote,
   countsTowardSpending,
@@ -223,6 +224,7 @@ import { categoriesRepository } from '~/lib/repositories/categoriesRepository';
 import { exchangeRatesRepository } from '~/lib/repositories/exchangeRatesRepository';
 import { itemsRepository } from '~/lib/repositories/itemsRepository';
 import { type LedgerInput, ledgersRepository } from '~/lib/repositories/ledgersRepository';
+import { transactionLocationFields } from '~/lib/repositories/mappers';
 import { monthlyWageRepository } from '~/lib/repositories/monthlyWageRepository';
 import { paymentAlertCapturesRepository } from '~/lib/repositories/paymentAlertCapturesRepository';
 import { periodBudgetsRepository } from '~/lib/repositories/periodBudgetsRepository';
@@ -243,8 +245,12 @@ import {
   assertInOpenLedger,
   type CreateTransactionInput,
   EntryLedgerGoneError,
+  locationChanges,
+  locationInputOf,
   summarizeSplits,
+  type TransactionLocationInput,
   transactionsRepository,
+  withNormalizedLocation,
 } from '~/lib/repositories/transactionsRepository';
 import {
   AnalyticsEvents,
@@ -304,6 +310,7 @@ import {
   type LocatedAlbum,
   type MonthCycleInput,
   type MonthlyWageSettings,
+  NO_TRANSACTION_LOCATION,
   type NotificationPreferences,
   type PaymentAlertChannel,
   type PaymentAlertPrefs,
@@ -702,7 +709,8 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
     fields: Pick<
       CreateTransactionInput,
       'details' | 'receiptUri' | 'sentiment' | 'reimbursable' | 'accountId'
-    >,
+    > &
+      Partial<TransactionLocationInput>,
   ) => void;
   /** Puts shared albums' entries on an account, on this phone only. Returns how many took it. */
   setGroupEntriesAccount: (transactionIds: readonly string[], accountId: string) => number;
@@ -880,6 +888,8 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
         | 'workdayDisplayEnabled'
         | 'workingHoursPerDay'
         | 'hapticsEnabled'
+        | 'transactionLocationsEnabled'
+        | 'transactionLocationAutoTag'
         | 'themeMode'
         | 'themeColor'
         | 'iconStyle'
@@ -1148,6 +1158,7 @@ function optimisticPaybackTransfer(input: {
     albumCategory: null,
     albumCategoryName: null,
     albumCategoryIcon: null,
+    ...NO_TRANSACTION_LOCATION,
     recurrencePattern: 'none',
     recurrenceInterval: 1,
     recurrenceEndDate: null,
@@ -3616,6 +3627,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         albumCategory: normalizedInput.albumCategory ?? null,
         albumCategoryName: normalizedInput.albumCategoryName ?? null,
         albumCategoryIcon: normalizedInput.albumCategoryIcon ?? null,
+        ...transactionLocationFields(
+          normalizedInput.latitude,
+          normalizedInput.longitude,
+          normalizedInput.placeName,
+          normalizedInput.placeAddress,
+          normalizedInput.placeId,
+          normalizedInput.placeCategory,
+        ),
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,
@@ -3737,6 +3756,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         albumCategory: normalizedInput.albumCategory ?? null,
         albumCategoryName: normalizedInput.albumCategoryName ?? null,
         albumCategoryIcon: normalizedInput.albumCategoryIcon ?? null,
+        ...transactionLocationFields(
+          normalizedInput.latitude,
+          normalizedInput.longitude,
+          normalizedInput.placeName,
+          normalizedInput.placeAddress,
+          normalizedInput.placeId,
+          normalizedInput.placeCategory,
+        ),
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,
@@ -3838,6 +3865,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             });
           }
           recordTransactionLogged();
+          if (
+            asksForLocationsOffer(
+              normalizedInput.type,
+              meta?.source,
+              settingsRef.current?.transactionLocationsEnabled ?? false,
+            )
+          ) {
+            requestLocationsOffer();
+          }
           // Reconcile only the inserted row. A full refreshTransactions here
           // would re-read the whole table and replace every row identity,
           // re-rendering all transaction consumers (calendar, insights) with
@@ -4132,6 +4168,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             };
           }
         }
+        // The place as the row will store it (cleared on a change to a
+        // transfer, never half), so the list matches the database.
+        normalizedInput = withNormalizedLocation(normalizedInput);
         normalizedUpdates.push({ id, input: normalizedInput });
         const hasRelationChange =
           'accountId' in normalizedInput ||
@@ -4644,6 +4683,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           receiptUri: input.receiptUri ?? null,
           sentiment: input.sentiment ?? 'neutral',
           reimbursable: input.reimbursable ?? false,
+          // Where it happened is the user's own too, never sent to the group.
+          ...locationInputOf(input),
         };
         const current = existingId
           ? transactionsRef.current.find((tx) => tx.id === existingId)
@@ -4654,7 +4695,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             (current.details ?? null) !== entry.details ||
             (current.receiptUri ?? null) !== entry.receiptUri ||
             (current.sentiment ?? 'neutral') !== entry.sentiment ||
-            (current.reimbursable ?? false) !== entry.reimbursable)
+            (current.reimbursable ?? false) !== entry.reimbursable ||
+            locationChanges(current, entry))
         ) {
           // The fields that are the user's own, on the entry they already
           // have, when they changed (every write is a row Cloud Sync sends).
@@ -4665,6 +4707,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             receiptUri: entry.receiptUri,
             sentiment: entry.sentiment,
             reimbursable: entry.reimbursable,
+            ...locationInputOf(entry),
           });
         }
         projectGroup(groupId, env, { expenseId: id, hints: { entry } });
@@ -4745,7 +4788,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       fields: Pick<
         CreateTransactionInput,
         'details' | 'receiptUri' | 'sentiment' | 'reimbursable' | 'accountId'
-      >,
+      > &
+        Partial<TransactionLocationInput>,
     ) => {
       const tx = transactionsRef.current.find((item) => item.id === transactionId);
       if (!tx?.albumGroupId) return;
@@ -4755,6 +4799,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           receiptUri: fields.receiptUri ?? null,
           sentiment: fields.sentiment ?? 'neutral',
           reimbursable: fields.reimbursable ?? false,
+          ...locationInputOf(fields),
         });
         if (fields.accountId && fields.accountId !== tx.accountId) {
           setGroupEntryAccount(transactionId, fields.accountId);
@@ -5617,6 +5662,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         albumCategory: null,
         albumCategoryName: null,
         albumCategoryIcon: null,
+        ...NO_TRANSACTION_LOCATION,
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,
@@ -5819,6 +5865,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         albumCategory: normalizedInput.albumCategory ?? null,
         albumCategoryName: normalizedInput.albumCategoryName ?? null,
         albumCategoryIcon: normalizedInput.albumCategoryIcon ?? null,
+        ...transactionLocationFields(
+          normalizedInput.latitude,
+          normalizedInput.longitude,
+          normalizedInput.placeName,
+          normalizedInput.placeAddress,
+          normalizedInput.placeId,
+          normalizedInput.placeCategory,
+        ),
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,
@@ -5920,6 +5974,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             });
           }
           recordTransactionLogged();
+          if (
+            asksForLocationsOffer(
+              normalizedInput.type,
+              source,
+              settingsRef.current?.transactionLocationsEnabled ?? false,
+            )
+          ) {
+            requestLocationsOffer();
+          }
         } catch {
           // optimistic rollback handled by refresh
         }
@@ -6954,6 +7017,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           | 'workdayDisplayEnabled'
           | 'workingHoursPerDay'
           | 'hapticsEnabled'
+          | 'transactionLocationsEnabled'
+          | 'transactionLocationAutoTag'
           | 'themeMode'
           | 'themeColor'
           | 'iconStyle'

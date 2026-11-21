@@ -1,3 +1,5 @@
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { LayoutChangeEvent, TextInputInstance } from 'react-native';
@@ -61,6 +63,7 @@ import { useMonthPager } from '~/hooks/useMonthPager';
 import { usePersistedJsonSnapshot } from '~/hooks/usePersistedJsonSnapshot';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
+import type { RootStackParamList } from '~/navigation/rootStack';
 import { subscribeCalendarGoToToday } from '~/services/calendarNavigation';
 import { triggerHaptic } from '~/services/haptics';
 import type { CategoryType, TransactionWithRelations } from '~/types';
@@ -194,6 +197,13 @@ export function CalendarScreen({
   const transactions = useMemo(
     () => mergeTransactionsByDateDesc(storedTransactions, paybackRows),
     [paybackRows, storedTransactions],
+  );
+  const rootNavigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  // The spending map's button: with Locations on, or once any entry
+  // has a place (README: Transaction locations).
+  const hasLocatedTransaction = useMemo(
+    () => storedTransactions.some((tx) => tx.latitude !== null && !tx.deletedAt),
+    [storedTransactions],
   );
   const {
     settings,
@@ -1556,11 +1566,26 @@ export function CalendarScreen({
 
   // The button names where it zooms out to: the month, or with two panes
   // (month already beside the list) the year.
+  // The spending map's button takes the header room a long month name needs,
+  // so with it the month reads short ("Nov 2026").
+  const showSpendingMapButton = settings.transactionLocationsEnabled || hasLocatedTransaction;
+  const shortMonthLabel = useMemo(() => {
+    const date = headerFollowsList ? activeListMonthDate : activeMonthDate;
+    try {
+      return new Intl.DateTimeFormat(activeLocale, { month: 'short', year: 'numeric' }).format(
+        date,
+      );
+    } catch {
+      return displayedMonthLabel;
+    }
+  }, [headerFollowsList, activeListMonthDate, activeMonthDate, activeLocale, displayedMonthLabel]);
   const backButtonLabel =
     viewMode === 'day'
       ? twoPane
         ? String(activeListMonthDate.getFullYear())
-        : displayedMonthLabel
+        : showSpendingMapButton
+          ? shortMonthLabel
+          : displayedMonthLabel
       : String(activeMonthDate.getFullYear());
 
   const BackButton = useMemo(
@@ -1637,6 +1662,24 @@ export function CalendarScreen({
                 <>
                   <View className="flex-row items-center gap-2 flex-1">{BackButton}</View>
                   <View className="flex-row items-center gap-2">
+                    {showSpendingMapButton ? (
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={I18n.t('locations.map_title')}
+                        onPress={() => {
+                          void triggerHaptic('selection');
+                          rootNavigation.navigate('SpendingMap');
+                        }}
+                        className="h-10 w-10 items-center justify-center rounded-full border border-border/30 bg-card active:opacity-85"
+                      >
+                        <ClayIcon
+                          name="ui/map"
+                          size={24}
+                          flatSize={16}
+                          flatColor={themeColors.textMuted}
+                        />
+                      </Pressable>
+                    ) : null}
                     <Pressable
                       accessibilityRole="button"
                       accessibilityLabel={I18n.t('transactions.filters.search')}

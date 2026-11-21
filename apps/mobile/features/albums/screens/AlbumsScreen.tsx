@@ -72,7 +72,7 @@ export function AlbumsScreen({
   const [pageWidth, setPageWidth] = useState(Math.min(windowWidth, wideColumns.maxWidth ?? 640));
   const [pageHeight, setPageHeight] = useState(0);
   // Defer mounting the (native, GL-backed) map until the user first swipes
-  // toward or taps the Map tab, then keep it mounted. Avoids paying MapLibre's
+  // toward or taps the Map tab, then keep it mounted. Avoids paying the map's
   // cost just for viewing the album list.
   const [mapMounted, setMapMounted] = useState(false);
   // Measured height of the floating header, so the albums list can clear it

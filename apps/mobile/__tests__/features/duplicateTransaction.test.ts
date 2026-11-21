@@ -121,6 +121,19 @@ describe('buildDuplicateInput', () => {
     expect(input.createdBy).toBeUndefined();
   });
 
+  it('keeps the place of a tagged entry, and adds none to an untagged one', () => {
+    const place = {
+      latitude: 3.1589569,
+      longitude: 101.7137273,
+      placeName: 'Starbucks',
+      placeAddress: '151, Jalan Ampang',
+      placeId: 'I88BAA55D81E8BF1',
+      placeCategory: 'Cafe',
+    };
+    expect(buildDuplicateInput(makeTransaction(place), '2026-04-01')).toMatchObject(place);
+    expect('latitude' in buildDuplicateInput(makeTransaction(), '2026-04-01')).toBe(false);
+  });
+
   it('leaves the FX snapshot to be retaken at write time', () => {
     const input = buildDuplicateInput(makeTransaction(), '2026-04-01');
     expect(input.reportingCurrency).toBeUndefined();

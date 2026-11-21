@@ -451,6 +451,29 @@ describe('changes to a bill', () => {
     expect(balances()).toEqual({ Aisha: 40, Ben: 40 });
   });
 
+  it('gives a new bill the place the editor picked, kept by later projections', () => {
+    addBill('lunch', 'me', 90);
+    const place = {
+      latitude: 3.1579,
+      longitude: 101.7123,
+      placeName: 'Suria KLCC',
+      placeAddress: 'Lorong Kuda',
+      placeId: null,
+      placeCategory: null,
+    };
+    projectGroup(GROUP, env, {
+      expenseId: 'lunch',
+      hints: { entry: { accountId: 'cash', ...place } },
+    });
+    const placeOf = (id: string) =>
+      app.all('SELECT amount, place_name, latitude FROM transactions WHERE id = ?', id)[0];
+    expect(placeOf('lunch')).toMatchObject({ place_name: 'Suria KLCC', latitude: 3.1579 });
+    // The place is the user's own, never the group's: an edit from the group keeps it.
+    addBill('lunch', 'me', 120);
+    projectGroup(GROUP, env);
+    expect(placeOf('lunch')).toMatchObject({ amount: 120, place_name: 'Suria KLCC' });
+  });
+
   it('a deleted bill keeps its payments, owed back, and a restore brings it back with them', () => {
     addBill('dinner', 'me');
     pay('s1', 'dinner', 'aisha', 'me', 10, '2026-11-13T08:00:00.000Z');

@@ -53,6 +53,8 @@ jobs:
           - worker: web-dashboard
           - worker: cloud-sync
             database: money2time-cloud-sync-auth
+          - worker: places
+            database: money2time-d1-places
     steps:
       # Only apps/cloudflare (and the root files): nothing a Worker builds or
       # tests reads the rest of the repository, and the app's artwork and the
@@ -104,6 +106,9 @@ jobs:
           - worker: cloud-sync
             database: money2time-cloud-sync-auth
             schema: cloud-sync
+          - worker: places
+            database: money2time-d1-places
+            schema: places
     steps:
       # The comparison below only reads the two commits' file lists, which a
       # sparse checkout has in full, so it still sees a change to this workflow

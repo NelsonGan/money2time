@@ -1,0 +1,56 @@
+name = "money2time-workers-places"
+main = "src/index.ts"
+compatibility_date = "2024-11-01"
+
+# Place search for transaction locations (README: Places Worker). The
+# money2time.com zone is on this Cloudflare account, so `wrangler deploy`
+# provisions the certificate and route for this hostname.
+routes = [
+  { pattern = "location.money2time.com", custom_domain = true }
+]
+
+# Reached only through the custom domain; versioned preview URLs stay on for
+# `wrangler versions upload --preview-alias <name>` by hand.
+workers_dev = false
+preview_urls = true
+
+# Requests per client IP per minute. Typing searches as it pauses, so a burst
+# of a few a second is normal; this only stops one address scripting Apple's
+# shared quota away.
+[[ratelimits]]
+name = "PLACES_LIMITER"
+namespace_id = "2408"
+simple = { limit = 60, period = 60 }
+
+# Each user's daily search count (schema: apps/cloudflare/d1/places/schema.sql).
+[[d1_databases]]
+binding = "MONEY2TIME_D1_PLACES"
+database_name = "money2time-d1-places"
+database_id = "3b03d865-7ef2-4142-ab48-6526e1ce01ae"
+
+# Daily cron that deletes the counters of days that are over (D1 has no TTL).
+[triggers]
+crons = ["0 3 * * *"]
+
+# Workers Logs, on every version wrangler creates (deploys and preview uploads).
+[observability]
+enabled = true
+head_sampling_rate = 1
+
+[vars]
+# The "Money2Time Maps" key (Maps enabled, Maps ID maps.com.nelsongan.money2time).
+# Apple allows 25,000 calls a day for the whole team; edge-cache hits cost none.
+APPLE_MAPS_KEY_ID = "566492L2DK"
+APPLE_TEAM_ID = "A9QF26PBRS"
+# Searches per user per UTC day that reach Apple (cache hits are free). A
+# search is about one call per pause in typing.
+PLACES_DAILY_LIMIT = "200"
+# The same per address (any user ids it sends), so one script cannot use up
+# Apple's day for everyone; a shared network is many people, so it is higher.
+PLACES_ADDRESS_DAILY_LIMIT = "1000"
+
+# Secrets: set with `wrangler secret put <NAME>` (or the dashboard), never commit:
+#   APPLE_MAPS_PRIVATE_KEY         — the "Money2Time Maps" key's .p8 (PEM text,
+#                                    ~/.config/money2time/AuthKey_566492L2DK.p8)
+#   MONEY2TIME_REQUEST_SIGNING_KEY — shared secret the app signs requests with
+#                                    (same value as EXPO_PUBLIC_REQUEST_SIGNING_KEY)

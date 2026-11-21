@@ -175,6 +175,14 @@ export const transactionsTable = sqliteTable('transactions', {
   // changed it (NULL for a default as it is), kept with the key.
   albumCategoryName: text('album_category_name'),
   albumCategoryIcon: text('album_category_icon'),
+  // Migration 098: where it happened, when the user tagged it (README:
+  // Transaction locations). All NULL for an untagged entry.
+  latitude: real('latitude'),
+  longitude: real('longitude'),
+  placeName: text('place_name'),
+  placeAddress: text('place_address'),
+  placeId: text('place_id'),
+  placeCategory: text('place_category'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
   deletedAt: text('deleted_at'),
@@ -241,6 +249,14 @@ export const settingsTable = sqliteTable('settings', {
     .default(false),
   workingHoursPerDay: real('working_hours_per_day').notNull().default(8),
   hapticsEnabled: integer('haptics_enabled', { mode: 'boolean' }).notNull().default(true),
+  // Migration 098: Settings > Personalize > Locations (off by default) and
+  // whether a new expense starts tagged with where the phone is. Device-local.
+  transactionLocationsEnabled: integer('transaction_locations_enabled', { mode: 'boolean' })
+    .notNull()
+    .default(false),
+  transactionLocationAutoTag: integer('transaction_location_auto_tag', { mode: 'boolean' })
+    .notNull()
+    .default(true),
   themeMode: text('theme_mode').notNull().default('system'),
   themeColor: text('theme_color').notNull().default('rosewood'),
   // 'clay' | 'flat' — which artwork the app's own chrome draws. See

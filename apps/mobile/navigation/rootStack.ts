@@ -147,6 +147,8 @@ export type RootStackParamList = {
   // `money2time://tutorial?id=` can reset straight onto them.
   Tutorials: undefined;
   TutorialDetail: { id: string };
+  /** Tagged transactions on a map (README: Transaction locations). */
+  SpendingMap: undefined;
   // Android notification capture setup.
   PaymentAlertsSetup: { step?: 'apps' } | undefined;
   NotificationHistory: undefined;

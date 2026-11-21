@@ -15,16 +15,39 @@ export type GlobalPromptId =
   | 'featureAnnouncement'
   | 'reviewPrePrompt'
   | 'cloudBackupPrompt'
-  | 'cloudSyncPrompt';
+  | 'cloudSyncPrompt'
+  | 'locationsOffer'
+  | 'goalCelebration'
+  | 'loanCelebration';
 
 const visiblePrompts = new Set<GlobalPromptId>();
+const listeners = new Set<() => void>();
+
+function notify(): void {
+  listeners.forEach((listener) => listener());
+}
 
 export function markPromptVisible(id: GlobalPromptId): void {
+  if (visiblePrompts.has(id)) return;
   visiblePrompts.add(id);
+  notify();
 }
 
 export function markPromptHidden(id: GlobalPromptId): void {
-  visiblePrompts.delete(id);
+  if (!visiblePrompts.delete(id)) return;
+  notify();
+}
+
+/**
+ * Called whenever a prompt reports showing or hiding, so one that is waiting
+ * its turn (the one-time Locations offer) can try again as soon as the screen
+ * is free rather than give up.
+ */
+export function subscribePromptChanges(listener: () => void): () => void {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
 }
 
 /**
@@ -42,4 +65,5 @@ export function isAnyPromptVisible(excludeId?: GlobalPromptId): boolean {
 /** Test-only: clear all tracked state between cases. */
 export function resetGlobalPromptCoordinator(): void {
   visiblePrompts.clear();
+  listeners.clear();
 }

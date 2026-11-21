@@ -114,6 +114,17 @@ export type TransactionRow = Row & {
    */
   album_category_name?: string | null;
   album_category_icon?: string | null;
+  /**
+   * Where it happened (the app's migration 098, README: Transaction
+   * locations); null when untagged, absent from an older app. Shown, never
+   * edited here (`place.ts`).
+   */
+  latitude?: number | null;
+  longitude?: number | null;
+  place_name?: string | null;
+  place_address?: string | null;
+  place_id?: string | null;
+  place_category?: string | null;
 };
 
 export type TransactionSplitRow = Row & {

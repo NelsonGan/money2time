@@ -47,7 +47,12 @@ import { repairRecurringSchedule } from '~/utils/recurringScheduleRepair';
 import { exchangeRatesRepository } from './exchangeRatesRepository';
 import { ledgersRepository } from './ledgersRepository';
 import { toRecurringRule } from './mappers';
-import { type CreateTransactionInput, transactionsRepository } from './transactionsRepository';
+import {
+  type CreateTransactionInput,
+  locationInputOf,
+  type TransactionLocationInput,
+  transactionsRepository,
+} from './transactionsRepository';
 
 export interface CreateRecurringRuleInput {
   name: string;
@@ -122,7 +127,7 @@ export interface CreateInstalmentPlanInput {
     receiptUri?: string | null;
     sentiment?: TransactionSentiment;
     reimbursable?: boolean;
-  };
+  } & Partial<TransactionLocationInput>;
   /**
    * Shared ledgers: whose plan it is (the editor's Belongs to). Left out, the
    * plan is this phone's account when it is a member of the open ledger.
@@ -505,6 +510,7 @@ class RecurringRulesRepository {
             receiptUri: input.firstPayment?.receiptUri ?? null,
             sentiment: input.firstPayment?.sentiment,
             reimbursable: input.firstPayment?.reimbursable ?? false,
+            ...locationInputOf(input.firstPayment ?? {}),
             instalmentRuleId: ruleId,
             instalmentNumber: 1,
           });

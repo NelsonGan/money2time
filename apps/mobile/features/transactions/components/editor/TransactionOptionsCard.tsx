@@ -1,7 +1,8 @@
-import { FileText, Tag, Undo2, Wallet } from 'lucide-react-native';
+import { FileText, MapPin, Tag, Undo2, Wallet } from 'lucide-react-native';
 import React from 'react';
 
 import { CategoryEmoji, Text } from '~/components/ui';
+import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { BelongsToPicker } from '~/features/sharedLedgers/components/BelongsToPicker';
 import type { LedgerPeople } from '~/features/sharedLedgers/lib/ledgerPeople';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -29,6 +30,11 @@ interface TransactionOptionsCardProps {
   onToggleCountsAsExpense: () => void;
   category: { name: string; icon: string | null | undefined } | null;
   onPickCategory: () => void;
+  /**
+   * Expenses and income: where it happened (README: Transaction locations).
+   * Absent when the row is not offered; `placeName` is null with no place yet.
+   */
+  location?: { placeName: string | null; onPress: () => void };
 }
 
 /**
@@ -51,6 +57,7 @@ export function TransactionOptionsCard({
   onToggleCountsAsExpense,
   category,
   onPickCategory,
+  location,
 }: TransactionOptionsCardProps) {
   const themeColors = useThemeColors();
   const tile = { size: 16, color: themeColors.primary };
@@ -94,6 +101,26 @@ export function TransactionOptionsCard({
           disabled={isReimbursed}
           switchValue={reimbursable}
           onToggle={onToggleReimbursable}
+        />
+      ) : null}
+      {location ? (
+        <OptionRow
+          divider
+          icon={<MapPin {...tile} />}
+          label={I18n.t('locations.picker_title')}
+          accessibilityValue={location.placeName ?? undefined}
+          value={
+            <Text
+              variant="body"
+              tone="muted"
+              numberOfLines={1}
+              className="shrink"
+              {...REPLAY_PRIVATE}
+            >
+              {location.placeName ?? I18n.t('locations.add')}
+            </Text>
+          }
+          onPress={location.onPress}
         />
       ) : null}
       {type === 'transfer' ? (

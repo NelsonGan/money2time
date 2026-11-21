@@ -82,6 +82,9 @@ export const DEVICE_LOCAL_SETTINGS_COLUMNS: ReadonlySet<string> = new Set([
   'app_icon',
   'biometric_lock_enabled',
   'biometric_lock_delay_seconds',
+  // Location needs this phone's own permission, so each phone opts in.
+  'transaction_locations_enabled',
+  'transaction_location_auto_tag',
   'notification_prefs_json',
   'auto_log_prefs_json',
   'auto_backup_enabled',
