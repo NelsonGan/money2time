@@ -4902,7 +4902,7 @@ export function TransactionEditorScreen({
             </View>
           </GestureDetector>
 
-          {/* Action row: account chip + split + currency + sentiment + receipt.
+          {/* Action row: account chip + split + currency + sentiment + receipt + location.
               Scrolls horizontally when the chips (e.g. a long account name) run
               past the edge instead of wrapping. */}
           {showActionRow ? (
@@ -4950,43 +4950,6 @@ export function TransactionEditorScreen({
                     {selectedAccount?.name ?? I18n.t('transactions.editor.choose_account')}
                   </Text>
                   <ChevronDown size={12} color={themeColors.textMuted} />
-                </Pressable>
-              ) : null}
-              {showLocationButton ? (
-                <Pressable
-                  onPress={() => {
-                    void triggerHaptic('selection');
-                    Keyboard.dismiss();
-                    setPlacePickerVisible(true);
-                  }}
-                  accessibilityRole="button"
-                  accessibilityLabel={
-                    location
-                      ? `${I18n.t('locations.picker_title')}: ${location.placeName}`
-                      : I18n.t('locations.add')
-                  }
-                  className={cn(
-                    'h-9 flex-row items-center justify-center gap-1.5 rounded-full border active:opacity-70',
-                    location
-                      ? 'border-primary/40 bg-primary/15 px-3'
-                      : 'w-9 border-border/30 bg-secondary/60',
-                  )}
-                  style={location ? { maxWidth: 180 } : undefined}
-                >
-                  <MapPin
-                    size={15}
-                    color={location ? themeColors.primary : themeColors.textMuted}
-                  />
-                  {location ? (
-                    <Text
-                      variant="caption"
-                      numberOfLines={1}
-                      className="shrink font-medium text-primary"
-                      {...REPLAY_PRIVATE}
-                    >
-                      {location.placeName}
-                    </Text>
-                  ) : null}
                 </Pressable>
               ) : null}
               {instalmentsOffered ? (
@@ -5145,6 +5108,44 @@ export function TransactionEditorScreen({
                       optionsOpen || optionsActive ? themeColors.primary : themeColors.textMuted
                     }
                   />
+                </Pressable>
+              ) : null}
+              {/* Last in the row: a place is the least-used detail. */}
+              {showLocationButton ? (
+                <Pressable
+                  onPress={() => {
+                    void triggerHaptic('selection');
+                    Keyboard.dismiss();
+                    setPlacePickerVisible(true);
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel={
+                    location
+                      ? `${I18n.t('locations.picker_title')}: ${location.placeName}`
+                      : I18n.t('locations.add')
+                  }
+                  className={cn(
+                    'h-9 flex-row items-center justify-center gap-1.5 rounded-full border active:opacity-70',
+                    location
+                      ? 'border-primary/40 bg-primary/15 px-3'
+                      : 'w-9 border-border/30 bg-secondary/60',
+                  )}
+                  style={location ? { maxWidth: 180 } : undefined}
+                >
+                  <MapPin
+                    size={15}
+                    color={location ? themeColors.primary : themeColors.textMuted}
+                  />
+                  {location ? (
+                    <Text
+                      variant="caption"
+                      numberOfLines={1}
+                      className="shrink font-medium text-primary"
+                      {...REPLAY_PRIVATE}
+                    >
+                      {location.placeName}
+                    </Text>
+                  ) : null}
                 </Pressable>
               ) : null}
             </ScrollView>

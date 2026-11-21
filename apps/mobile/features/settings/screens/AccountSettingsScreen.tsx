@@ -1,4 +1,4 @@
-import { LocateFixed, MapPin, Smartphone } from 'lucide-react-native';
+import { MapPin, MapPinOff, Smartphone } from 'lucide-react-native';
 import React, { useCallback, useEffect, useState } from 'react';
 import { AppState, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
 
@@ -10,7 +10,6 @@ import {
   Text,
   useSettingsBottomNavInset,
 } from '~/components/ui';
-import { InfoTooltipButton } from '~/components/ui/info-tooltip';
 import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import {
@@ -136,14 +135,13 @@ export function AccountSettingsScreen({ onBack }: AccountSettingsScreenProps) {
               >
                 <MapPin size={18} color={themeColors.primary} />
               </View>
-              <View style={[styles.titleBlock, styles.titleRow]}>
-                <Text variant="bodyStrong" className="shrink text-foreground" numberOfLines={2}>
+              <View style={styles.titleBlock}>
+                <Text variant="bodyStrong" className="text-foreground" numberOfLines={1}>
                   {I18n.t('locations.settings_title')}
                 </Text>
-                <InfoTooltipButton
-                  title={I18n.t('locations.settings_title')}
-                  infoTooltip={I18n.t('locations.settings_help')}
-                />
+                <Text variant="caption" className="text-foreground/60 mt-0.5" numberOfLines={2}>
+                  {I18n.t('locations.settings_subtitle')}
+                </Text>
               </View>
               <Switch
                 style={styles.switchSmall}
@@ -157,22 +155,14 @@ export function AccountSettingsScreen({ onBack }: AccountSettingsScreenProps) {
                 thumbColor="#FFFFFF"
               />
             </View>
+            {/* The rows below sit under the title, like a settings sub-group. */}
             {locationsEnabled ? (
-              <>
-                <View className="mx-3 h-px bg-border/40" />
-                <View style={styles.row}>
-                  <View style={styles.iconBox} className="items-center justify-center">
-                    <LocateFixed size={18} color={themeColors.textMuted} />
-                  </View>
-                  <View style={[styles.titleBlock, styles.titleRow]}>
-                    <Text variant="body" className="shrink text-foreground" numberOfLines={2}>
-                      {I18n.t('locations.auto_tag')}
-                    </Text>
-                    <InfoTooltipButton
-                      title={I18n.t('locations.auto_tag')}
-                      infoTooltip={I18n.t('locations.auto_tag_help')}
-                    />
-                  </View>
+              <View style={styles.nested}>
+                <View className="h-px bg-border/40" />
+                <View style={styles.nestedRow}>
+                  <Text variant="body" className="flex-1 text-foreground" numberOfLines={2}>
+                    {I18n.t('locations.auto_tag')}
+                  </Text>
                   <Switch
                     style={styles.switchSmall}
                     accessibilityLabel={I18n.t('locations.auto_tag')}
@@ -186,29 +176,36 @@ export function AccountSettingsScreen({ onBack }: AccountSettingsScreenProps) {
                   />
                 </View>
                 {permissionBlocked ? (
-                  <Pressable
-                    accessibilityRole="button"
-                    onPress={() => {
-                      void triggerHaptic('selection');
-                      if (permission?.canAskAgain) {
-                        void requestLocationPermission().then(setPermission);
-                      } else {
-                        void openLocationSettings();
-                      }
-                    }}
-                    className="mx-3 mb-3 flex-row items-center justify-between rounded-xl bg-secondary/60 px-3 py-2.5 active:opacity-70"
-                  >
-                    <Text variant="caption" tone="muted" className="flex-1">
-                      {I18n.t('locations.permission_off')}
-                    </Text>
-                    <Text variant="caption" tone="primary" className="font-semibold">
-                      {permission?.canAskAgain
-                        ? I18n.t('locations.permission_allow')
-                        : I18n.t('locations.open_settings')}
-                    </Text>
-                  </Pressable>
+                  <>
+                    <View className="h-px bg-border/40" />
+                    <View style={styles.nestedRow}>
+                      <MapPinOff size={15} color={themeColors.textMuted} />
+                      <Text variant="caption" tone="muted" className="flex-1" numberOfLines={2}>
+                        {I18n.t('locations.permission_off')}
+                      </Text>
+                      <Pressable
+                        accessibilityRole="button"
+                        hitSlop={6}
+                        onPress={() => {
+                          void triggerHaptic('selection');
+                          if (permission?.canAskAgain) {
+                            void requestLocationPermission().then(setPermission);
+                          } else {
+                            void openLocationSettings();
+                          }
+                        }}
+                        className="rounded-full bg-secondary/80 px-3.5 py-1.5 active:opacity-70"
+                      >
+                        <Text variant="caption" tone="primary" className="font-semibold">
+                          {permission?.canAskAgain
+                            ? I18n.t('locations.allow')
+                            : I18n.t('locations.open_settings')}
+                        </Text>
+                      </Pressable>
+                    </View>
+                  </>
                 ) : null}
-              </>
+              </View>
             ) : null}
           </View>
         </View>
@@ -248,10 +245,17 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: 0,
   },
-  titleRow: {
+  // Lines up with the title text: row padding + icon box + gap.
+  nested: {
+    marginLeft: spacing.sm + 36 + spacing.sm,
+    marginRight: spacing.sm,
+  },
+  nestedRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: spacing.xs,
+    minHeight: 48,
+    paddingVertical: spacing.xs,
   },
   switchSmall: {
     transform: [{ scaleX: 0.85 }, { scaleY: 0.85 }],

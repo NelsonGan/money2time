@@ -1,4 +1,12 @@
-import { ChevronLeft, ChevronRight, Maximize2, X } from 'lucide-react-native';
+import {
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  MapPin,
+  Maximize2,
+  X,
+} from 'lucide-react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
 import type MapView from 'react-native-maps';
@@ -19,6 +27,7 @@ import { cn } from '~/utils';
 import { formatAmount, formatHoursCompact } from '~/utils/formatters';
 
 import { AppMap } from '../components/AppMap';
+import { type PlaceStat, PlaceStats } from '../components/PlaceStats';
 import { PlaceClusterPin, PlacePricePin } from '../components/SpendingMapPins';
 import {
   inPeriod,
@@ -236,19 +245,43 @@ export function SpendingMapContent({
     return formatValue(value, value >= 1000);
   };
 
-  const summaryLine = (txs: readonly TransactionWithRelations[]) => {
+  // Visits, then the money (spent, or earned where nothing was spent), then
+  // the hours of work it cost; time mode already shows hours as the money.
+  const statsFor = (txs: readonly TransactionWithRelations[]): PlaceStat[] => {
     const totals = placeTotals(txs, valueOf);
     const hours = txs.reduce((sum, tx) => sum + (tx.type === 'expense' ? hoursOf(tx) : 0), 0);
-    const visits = I18n.t(
-      totals.visits === 1 ? 'locations.map_visits_one' : 'locations.map_visits_other',
-      { count: totals.visits },
-    );
-    const parts = [visits];
-    if (totals.spent > 0) parts.push(formatValue(totals.spent, false));
+    const stats: PlaceStat[] = [
+      {
+        key: 'visits',
+        icon: CalendarDays,
+        value: String(totals.visits),
+        label: I18n.t(
+          totals.visits === 1 ? 'locations.map_stat_visits_one' : 'locations.map_stat_visits_other',
+        ),
+      },
+    ];
+    if (totals.spent > 0 || totals.earned === 0)
+      stats.push({
+        key: 'spent',
+        value: formatValue(totals.spent, totals.spent >= 100_000),
+        label: I18n.t('locations.map_stat_spent'),
+        tone: 'primary',
+      });
+    if (totals.earned > 0)
+      stats.push({
+        key: 'earned',
+        value: `+${formatValue(totals.earned, totals.earned >= 100_000)}`,
+        label: I18n.t('locations.map_stat_earned'),
+        tone: 'success',
+      });
     if (!isTime && hours > 0)
-      parts.push(I18n.t('locations.map_of_work', { time: formatHoursCompact(hours, settings) }));
-    if (totals.earned > 0) parts.push(`+${formatValue(totals.earned, false)}`);
-    return parts.join(' · ');
+      stats.push({
+        key: 'work',
+        icon: Clock,
+        value: formatHoursCompact(hours, settings),
+        label: I18n.t('locations.map_stat_work'),
+      });
+    return stats;
   };
 
   const kinds: MapPeriodKind[] = ['month', 'year', 'all'];
@@ -294,20 +327,24 @@ export function SpendingMapContent({
   const panel = (() => {
     if (selection && selectedGroups.length === 1) {
       const group = selectedGroups[0] as Group;
+      const PlaceIcon = placeCategoryIcon(group.category);
       return (
         <View className="flex-1">
-          <View className="flex-row items-start gap-2 px-5 pb-2 pt-4">
+          <View className="flex-row items-center gap-3 px-5 pt-4">
+            <View className="h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+              <PlaceIcon size={22} color={themeColors.primary} />
+            </View>
             <View className="min-w-0 flex-1">
-              <Text variant="heading" numberOfLines={1}>
+              <Text variant="headingSm" numberOfLines={1}>
                 {group.name}
               </Text>
-              <Text variant="caption" tone="muted" numberOfLines={1}>
-                {summaryLine(group.transactions)}
-              </Text>
               {group.address ? (
-                <Text variant="caption" tone="muted" numberOfLines={1}>
-                  {group.address}
-                </Text>
+                <View className="flex-row items-center gap-1">
+                  <MapPin size={13} color={themeColors.textMuted} />
+                  <Text variant="caption" tone="muted" numberOfLines={1} className="shrink">
+                    {group.address}
+                  </Text>
+                </View>
               ) : null}
             </View>
             <Pressable
@@ -319,6 +356,9 @@ export function SpendingMapContent({
             >
               <X size={18} color={themeColors.textMuted} />
             </Pressable>
+          </View>
+          <View className="px-4 pb-1 pt-3">
+            <PlaceStats stats={statsFor(group.transactions)} />
           </View>
           <View className="flex-1">
             <ActivityTransactionList
@@ -332,6 +372,9 @@ export function SpendingMapContent({
               emptyMessage={I18n.t('locations.map_empty_message')}
               contentPaddingTop={0}
               contentPaddingBottom={insets.bottom + 16}
+              locale={locale}
+              // The same rows as the Calendar, without the accent strip.
+              compactItems
               disableItemAnimations
             />
           </View>
@@ -375,9 +418,6 @@ export function SpendingMapContent({
                 },
               )}
             </Text>
-            <Text variant="caption" tone="muted" numberOfLines={1}>
-              {summaryLine(all)}
-            </Text>
           </View>
           {selection ? (
             <Pressable
@@ -390,6 +430,9 @@ export function SpendingMapContent({
               <X size={18} color={themeColors.textMuted} />
             </Pressable>
           ) : null}
+        </View>
+        <View className="px-4 pb-2">
+          <PlaceStats stats={statsFor(all)} />
         </View>
         <ScrollView
           contentContainerStyle={{

@@ -364,11 +364,6 @@ export function PlacePickerSheet({
                       </Text>
                     </Pressable>
                   ) : null}
-                  {showingSearch && search.kind === 'done' && search.results.length > 0 ? (
-                    <Text variant="caption" tone="muted" className="text-center">
-                      {I18n.t('locations.attribution')}
-                    </Text>
-                  ) : null}
                 </View>
               }
             />
