@@ -1995,7 +1995,11 @@ updated_at)`, with each row as JSON, plus `sync_info` (the choice screen's
   cloud copy first, since a replica kept from an earlier session is only
   refreshed by a pull. A pull that fails because the Turso engine's record of
   how far its last pull reached no longer matches the replica's WAL ("unable
-  to checkpoint synced portion of WAL", Turso 0.8.3) fails every time, so the
+  to checkpoint synced portion of WAL", Turso 0.8.3), or because the replica's
+  files were put back from an older copy of themselves (an Android or iCloud
+  backup restored, a phone-to-phone transfer: the cloud then remembers more
+  pushes from this replica than its files do, the engine's
+  `remote_pull_gen > local_pull_gen` protocol error), fails every time, so the
   replica is deleted and downloaded again once, when it holds nothing the
   cloud lacks: always before a link (it is only a copy of the cloud then),
   and in a sync when nothing waits to be pushed. Each rebuild sends an error

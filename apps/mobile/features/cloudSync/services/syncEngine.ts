@@ -761,8 +761,8 @@ export class SyncEngine {
 
   /**
    * Pulls. Turso's engine records how far into the WAL its last pull reached;
-   * a replica whose WAL no longer holds those frames fails every pull
-   * (`isStuckReplicaError`). Such a replica is deleted and downloaded again
+   * a replica whose WAL no longer holds those frames, or whose files were put
+   * back from an older copy, fails every pull (`isStuckReplicaError`). Such a replica is deleted and downloaded again
    * when it holds nothing the cloud lacks: always before a link (it is only a
    * copy of the cloud then), and in a sync when nothing waits to be pushed.
    * Returns whether the pull may have brought changes.
@@ -1810,12 +1810,20 @@ function assetFile(relativePath: string): File {
 }
 
 /**
- * The engine's own bookkeeping no longer matches the replica's WAL (Turso
- * 0.8.3, like tursodatabase/turso#8366): pulls into it keep failing.
+ * Turso 0.8.3 refuses every pull into this replica, so only a fresh download
+ * gets it syncing again:
+ * - the engine's own bookkeeping no longer matches the replica's WAL (like
+ *   tursodatabase/turso#8366);
+ * - the replica's files were put back from an older copy (an Android or
+ *   iCloud backup restored, a phone-to-phone transfer): the cloud's record of
+ *   this replica's pushes is ahead of what its files remember.
  */
 function isStuckReplicaError(error: unknown): boolean {
   const message = error instanceof Error ? error.message : String(error);
-  return message.includes('unable to checkpoint synced portion of WAL');
+  return (
+    message.includes('unable to checkpoint synced portion of WAL') ||
+    message.includes('remote_pull_gen > local_pull_gen')
+  );
 }
 
 /**

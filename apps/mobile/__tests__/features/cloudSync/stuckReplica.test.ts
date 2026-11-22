@@ -9,6 +9,15 @@ import { reportError } from '~/services/errorReporting';
 const STUCK =
   'sync engine operation failed: database sync engine error: unable to checkpoint synced portion of WAL: ' +
   'result=CheckpointResult { wal_max_frame: 0, wal_total_backfilled: 0 }, watermark=998';
+// A replica whose files were put back from an older copy (an Android or iCloud
+// backup restored, a phone-to-phone transfer) has pushed more than its files
+// remember: the cloud's record of this replica's last push is ahead of its own,
+// and the engine refuses every pull. Reproduced against a local tursodb 0.8.3
+// sync server by restoring a replica's files from a copy taken three syncs earlier.
+const RESTORED =
+  'sync engine operation failed: database sync engine error: protocol error: ' +
+  'remote_pull_gen > local_pull_gen: 11 > 10';
+let stuckMessage = STUCK;
 
 const REPLICA_DIR = '/data/user/0/app/databases';
 const files = new Set<string>();
@@ -34,7 +43,7 @@ jest.mock('@tursodatabase/sync-react-native', () => {
     async exec() {}
     async pull() {
       log.push('pull');
-      if (this.stuck) throw new Error(STUCK);
+      if (this.stuck) throw new Error(stuckMessage);
       return true;
     }
     close() {
@@ -90,6 +99,7 @@ beforeEach(() => {
   log.length = 0;
   freshOpenError = null;
   deleteFails = false;
+  stuckMessage = STUCK;
   jest.mocked(reportError).mockClear();
 });
 
@@ -103,32 +113,39 @@ describe('pulling before a link', () => {
     expect(log).toEqual(['open fresh', 'pull']);
   });
 
-  it('starts again from a fresh copy of the cloud when a kept replica is stuck', async () => {
-    // An earlier session left the replica behind; the engine cannot pull into it.
-    await engine().open();
-    log.length = 0;
-    const sync = engine();
-    await sync.open();
+  it.each([
+    ['its WAL no longer holds the last pull', STUCK],
+    ['it was restored from an older copy of its files', RESTORED],
+  ])(
+    'starts again from a fresh copy of the cloud when a kept replica is stuck: %s',
+    async (_case, message) => {
+      stuckMessage = message;
+      // An earlier session left the replica behind; the engine cannot pull into it.
+      await engine().open();
+      log.length = 0;
+      const sync = engine();
+      await sync.open();
 
-    await expect(sync.pullLatest()).resolves.toBeUndefined();
+      await expect(sync.pullLatest()).resolves.toBeUndefined();
 
-    const deleted = expect.stringMatching(/^delete m2t-cloud-\w+\.db(-wal|-info)?$/);
-    expect(log).toEqual([
-      'open kept',
-      'pull',
-      'close',
-      deleted,
-      deleted,
-      deleted,
-      'open fresh',
-      'pull',
-    ]);
-    // Recovered, but still reported, so the engine fault's rate stays visible.
-    expect(reportError).toHaveBeenCalledWith(expect.objectContaining({ message: STUCK }), {
-      scope: 'cloud_sync',
-      stage: 'replica_rebuilt',
-    });
-  });
+      const deleted = expect.stringMatching(/^delete m2t-cloud-\w+\.db(-wal|-info)?$/);
+      expect(log).toEqual([
+        'open kept',
+        'pull',
+        'close',
+        deleted,
+        deleted,
+        deleted,
+        'open fresh',
+        'pull',
+      ]);
+      // Recovered, but still reported, so the engine fault's rate stays visible.
+      expect(reportError).toHaveBeenCalledWith(expect.objectContaining({ message }), {
+        scope: 'cloud_sync',
+        stage: 'replica_rebuilt',
+      });
+    },
+  );
 
   it('gives up after one fresh copy, so a failing download is reported as before', async () => {
     await engine().open();

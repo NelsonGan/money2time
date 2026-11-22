@@ -73,6 +73,10 @@ let remoteChanged: boolean;
 /** Turso's engine refuses every pull into this replica (see stuckReplica.test.ts). */
 let stuckPull: boolean;
 const STUCK = 'database sync engine error: unable to checkpoint synced portion of WAL';
+/** A replica restored from an older copy of its files (see stuckReplica.test.ts). */
+const RESTORED =
+  'database sync engine error: protocol error: remote_pull_gen > local_pull_gen: 11 > 10';
+let stuckMessage: string;
 
 function addTransaction(id: string, amount: number, extra: Record<string, string> = {}) {
   const columns = [
@@ -157,6 +161,7 @@ beforeEach(() => {
   pushError = null;
   remoteChanged = false;
   stuckPull = false;
+  stuckMessage = STUCK;
   pushedRows = new Map();
   const write = (sql: string, args: (string | number | null)[] = []) => {
     calls.push(sql.trim().split(/\s+/).slice(0, 3).join(' ').toUpperCase());
@@ -183,7 +188,7 @@ beforeEach(() => {
     },
     pull: async () => {
       calls.push('pull');
-      if (stuckPull) throw new Error(STUCK);
+      if (stuckPull) throw new Error(stuckMessage);
       const changed = remoteChanged;
       remoteChanged = false;
       return changed;
@@ -996,6 +1001,23 @@ describe('with a replica the engine cannot pull into', () => {
     expect(app.prepare('SELECT profile_name FROM settings').get()?.profile_name).toBe('Sam');
 
     // An edit right after goes up through the new replica.
+    calls = [];
+    addTransaction('lunch', 12);
+    await engine.syncNow();
+    expect(rounds()).toEqual(['pull', 'push']);
+    expect(cloudRow('lunch')?.amount).toBe(12);
+  });
+
+  it('downloads again a replica restored from an older copy of its files', async () => {
+    await engine.uploadAllReplacingCloud();
+    stuckMessage = RESTORED;
+    stuckPull = true;
+    const rebuild = spyOnRebuild();
+    calls = [];
+
+    await engine.syncNow();
+
+    expect(rebuild).toHaveBeenCalledTimes(1);
     calls = [];
     addTransaction('lunch', 12);
     await engine.syncNow();
