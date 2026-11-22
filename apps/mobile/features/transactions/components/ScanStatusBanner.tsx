@@ -45,8 +45,8 @@ function stageMessageForPct(pct: number): string {
 /**
  * The receipt-scan rows of Home's activity sheet. A snapped receipt is parsed
  * by the Worker while the user keeps using the app. A normal or screenshot
- * scan becomes a "logged" row whose View opens the saved expense (the sheet
- * clears these once it closes). A split scan opens the split editor for
+ * scan becomes a "logged" row whose View opens the saved expense (dismissing
+ * the sheet clears these). A split scan opens the split editor for
  * review. A failed scan stays as a dismissible error. Renders nothing when
  * idle.
  */
@@ -54,8 +54,7 @@ export function ScanStatusBanner({ onNavigate }: { onNavigate?: () => void } = {
   const { jobs, dismissJob, openReadyJob, openReadyJobAsSplit, openCreatedJob } = useReceiptScans();
 
   if (jobs.length === 0) return null;
-  // A row that opens another screen closes the sheet after it acts, since
-  // closing clears the results that were seen.
+  // A row that opens another screen acts first, then closes the sheet.
   const go = (action: (id: string) => void) => (id: string) => {
     action(id);
     onNavigate?.();

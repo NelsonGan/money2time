@@ -1,3 +1,4 @@
+import { useIsFocused } from '@react-navigation/native';
 import React, { useEffect, useRef, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import Animated, {
@@ -92,6 +93,14 @@ export function HomeActivity({
     if (open && !hasActivity) setOpen(false);
   }, [hasActivity, open]);
 
+  // Another screen opened over Home while the sheet was up (a scan hitting the
+  // quota opens the paywall): close the sheet so that screen is not left under
+  // it. Nothing is cleared, since the user did not close it themselves.
+  const isFocused = useIsFocused();
+  useEffect(() => {
+    if (!isFocused) setOpen(false);
+  }, [isFocused]);
+
   // What was shown is seen: logged scans and failures leave. Running scans and
   // split scans that wait to be opened stay.
   const clearSeenScans = () => {
@@ -103,15 +112,15 @@ export function HomeActivity({
   const close = () => {
     setOpen(false);
     clearSeenScans();
-    // AI's review results move to History.
-    review.markResultsSeen();
+    // AI's review results move to History, but only once the row showed them:
+    // while a new batch runs it shows only the progress line.
+    if (review.reviewing === 0) review.markResultsSeen();
   };
-  // Review opens the review page, which shows AI's results in its "Sorted for
-  // you" card and marks them seen when the user leaves it, so they stay unseen.
-  const closeForReview = () => {
-    setOpen(false);
-    clearSeenScans();
-  };
+  // A row that opens another screen (View, Review, a batch's receipt) just
+  // closes the sheet: the user is mid-task, so the other rows stay (the rest
+  // of a batch to work through) and AI's results stay unseen for the review
+  // page's "Sorted for you" card, which marks them seen when the user leaves.
+  const closeForRow = () => setOpen(false);
 
   const icon: ClayIconName = scanning
     ? 'money-time/receipt'
@@ -136,7 +145,7 @@ export function HomeActivity({
           }}
         />
       ) : null}
-      <ActivitySheet visible={open} onClose={close} onOpenReview={closeForReview} review={review} />
+      <ActivitySheet visible={open} onClose={close} onLeaveForRow={closeForRow} review={review} />
     </>
   );
 }
@@ -299,13 +308,13 @@ function ActivityBubble({
 function ActivitySheet({
   visible,
   onClose,
-  onOpenReview,
+  onLeaveForRow,
   review,
 }: {
   visible: boolean;
   onClose: () => void;
-  /** Closes the sheet as the review page opens, leaving AI's results unseen. */
-  onOpenReview: () => void;
+  /** Closes the sheet as a row opens another screen, clearing nothing. */
+  onLeaveForRow: () => void;
   review: ReturnType<typeof useNotificationReviewState>;
 }) {
   const insets = useSafeAreaInsets();
@@ -325,8 +334,8 @@ function ActivitySheet({
         </Text>
       </View>
       <View className="gap-2 px-4">
-        <ScanStatusBanner onNavigate={onClose} />
-        <NotificationReviewCard review={review} onOpen={onOpenReview} />
+        <ScanStatusBanner onNavigate={onLeaveForRow} />
+        <NotificationReviewCard review={review} onOpen={onLeaveForRow} />
       </View>
     </BottomSheetModal>
   );
