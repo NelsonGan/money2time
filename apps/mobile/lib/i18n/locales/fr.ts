@@ -37,6 +37,8 @@ const fr = {
     delete: 'Supprimer',
     remove: 'Retirer',
     edit: 'Modifier',
+    view: 'Voir',
+    review: 'Vérifier',
     reorder: 'Réorganiser',
     continue: 'Continuer',
     setup: 'Configurer',

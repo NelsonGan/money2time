@@ -36,6 +36,8 @@ const vi = {
     delete: 'Xóa',
     remove: 'Gỡ',
     edit: 'Sửa',
+    view: 'Xem',
+    review: 'Xem lại',
     reorder: 'Sắp xếp',
     continue: 'Tiếp tục',
     setup: 'Thiết lập',

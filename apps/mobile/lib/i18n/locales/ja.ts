@@ -37,6 +37,8 @@ const ja = {
     delete: '削除',
     remove: '外す',
     edit: '編集',
+    view: '表示',
+    review: '確認',
     reorder: '並び替え',
     continue: '続ける',
     setup: '設定',

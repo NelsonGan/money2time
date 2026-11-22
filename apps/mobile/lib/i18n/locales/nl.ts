@@ -37,6 +37,8 @@ const nl = {
     delete: 'Verwijderen',
     remove: 'Verwijderen',
     edit: 'Bewerken',
+    view: 'Bekijken',
+    review: 'Beoordelen',
     reorder: 'Sorteren',
     continue: 'Doorgaan',
     setup: 'Instellen',

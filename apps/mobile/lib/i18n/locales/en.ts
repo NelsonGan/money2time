@@ -37,6 +37,8 @@ const en = {
     delete: 'Delete',
     remove: 'Remove',
     edit: 'Edit',
+    view: 'View',
+    review: 'Review',
     reorder: 'Reorder',
     continue: 'Continue',
     setup: 'Set up',

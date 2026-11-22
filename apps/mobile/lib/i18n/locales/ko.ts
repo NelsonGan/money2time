@@ -36,6 +36,8 @@ const ko = {
     delete: '삭제',
     remove: '제거',
     edit: '편집',
+    view: '보기',
+    review: '검토',
     reorder: '순서 변경',
     continue: '계속',
     setup: '설정',

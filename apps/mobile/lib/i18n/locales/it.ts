@@ -37,6 +37,8 @@ const it = {
     delete: 'Elimina',
     remove: 'Rimuovi',
     edit: 'Modifica',
+    view: 'Vedi',
+    review: 'Rivedi',
     reorder: 'Riordina',
     continue: 'Continua',
     setup: 'Configura',

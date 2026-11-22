@@ -37,6 +37,8 @@ const sv = {
     delete: 'Ta bort',
     remove: 'Ta bort',
     edit: 'Redigera',
+    view: 'Visa',
+    review: 'Granska',
     reorder: 'Sortera om',
     continue: 'Fortsätt',
     setup: 'Konfigurera',

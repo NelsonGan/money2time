@@ -206,6 +206,7 @@ import { useLiveEarningsSync } from '~/features/widgets/useLiveEarningsSync';
 import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useProGate } from '~/hooks/useProGate';
 import { useRootScreenSettled } from '~/hooks/useRootScreenSettled';
+import { TabActiveContext } from '~/hooks/useTabActive';
 import { useThemeVars } from '~/hooks/useThemeVars';
 import { I18n } from '~/lib/i18n';
 import {
@@ -474,7 +475,7 @@ function MountedTab({
         <ColumnGutterProvider gutter={isWide ? slot.right : 0}>
           <ContentFrameProvider width={slot.width} height={frame.height} onFold={fold !== null}>
             <TransactionsWhileVisible key={resetKey} visible={active}>
-              {children}
+              <TabActiveContext.Provider value={active}>{children}</TabActiveContext.Provider>
             </TransactionsWhileVisible>
           </ContentFrameProvider>
         </ColumnGutterProvider>
@@ -825,8 +826,13 @@ function MainShellScreen({
     });
   }, [navigation]);
 
+  // Read by the open-transactions listener, which subscribes once.
+  const activeTabRef = useRef(activeTab);
+  activeTabRef.current = activeTab;
   useEffect(() => {
     return subscribeOpenTransactionsRequest((request) => {
+      // A background scan only scrolls Home when Home is what the user sees.
+      if (request.onlyIfShowing && activeTabRef.current !== 'calendar') return;
       setActiveTab('calendar');
       // Land the list on the transaction's own day (it may sit in an earlier
       // month) instead of snapping back to the current month.

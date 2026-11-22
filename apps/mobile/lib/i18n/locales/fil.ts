@@ -37,6 +37,8 @@ const fil = {
     delete: 'Burahin',
     remove: 'Alisin',
     edit: 'I-edit',
+    view: 'Tingnan',
+    review: 'Suriin',
     reorder: 'Ayusin',
     continue: 'Ituloy',
     setup: 'I-set up',

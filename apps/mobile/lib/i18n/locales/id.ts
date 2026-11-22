@@ -36,6 +36,8 @@ const id = {
     delete: 'Hapus',
     remove: 'Keluarkan',
     edit: 'Edit',
+    view: 'Lihat',
+    review: 'Tinjau',
     reorder: 'Urutkan',
     continue: 'Lanjutkan',
     setup: 'Atur',

@@ -37,6 +37,8 @@ const pl = {
     delete: 'Usuń',
     remove: 'Usuń',
     edit: 'Edytuj',
+    view: 'Zobacz',
+    review: 'Przejrzyj',
     reorder: 'Zmień kolejność',
     continue: 'Kontynuuj',
     setup: 'Skonfiguruj',

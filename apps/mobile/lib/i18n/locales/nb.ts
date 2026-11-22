@@ -37,6 +37,8 @@ const nb = {
     delete: 'Slett',
     remove: 'Fjern',
     edit: 'Rediger',
+    view: 'Vis',
+    review: 'Gjennomgå',
     reorder: 'Sorter',
     continue: 'Fortsett',
     setup: 'Konfigurer',

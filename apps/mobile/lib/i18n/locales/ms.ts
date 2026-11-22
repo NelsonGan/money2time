@@ -36,6 +36,8 @@ const ms = {
     delete: 'Padam',
     remove: 'Buang',
     edit: 'Edit',
+    view: 'Lihat',
+    review: 'Semak',
     reorder: 'Susun Semula',
     continue: 'Teruskan',
     setup: 'Sediakan',

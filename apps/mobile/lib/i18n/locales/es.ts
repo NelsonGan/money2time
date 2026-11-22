@@ -37,6 +37,8 @@ const es = {
     delete: 'Eliminar',
     remove: 'Quitar',
     edit: 'Editar',
+    view: 'Ver',
+    review: 'Revisar',
     reorder: 'Reordenar',
     continue: 'Continuar',
     setup: 'Configurar',

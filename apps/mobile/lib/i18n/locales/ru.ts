@@ -36,6 +36,8 @@ const ru = {
     delete: 'Удалить',
     remove: 'Убрать',
     edit: 'Изменить',
+    view: 'Открыть',
+    review: 'Проверить',
     reorder: 'Сортировка',
     continue: 'Продолжить',
     setup: 'Настроить',

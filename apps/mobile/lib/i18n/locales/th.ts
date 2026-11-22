@@ -35,6 +35,8 @@ const th = {
     delete: 'ลบ',
     remove: 'นำออก',
     edit: 'แก้ไข',
+    view: 'ดู',
+    review: 'ตรวจสอบ',
     reorder: 'จัดเรียง',
     continue: 'ต่อไป',
     setup: 'ตั้งค่า',

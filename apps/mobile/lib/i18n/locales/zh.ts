@@ -35,6 +35,8 @@ const zh = {
     delete: '删除',
     remove: '移除',
     edit: '编辑',
+    view: '查看',
+    review: '审核',
     reorder: '排序',
     continue: '继续',
     setup: '设置',

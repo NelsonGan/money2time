@@ -36,6 +36,8 @@ const tr = {
     delete: 'Sil',
     remove: 'Kaldır',
     edit: 'Düzenle',
+    view: 'Gör',
+    review: 'İncele',
     reorder: 'Yeniden Sırala',
     continue: 'Devam',
     setup: 'Kur',

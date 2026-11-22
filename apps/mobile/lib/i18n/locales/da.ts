@@ -37,6 +37,8 @@ const da = {
     delete: 'Slet',
     remove: 'Fjern',
     edit: 'Rediger',
+    view: 'Vis',
+    review: 'Gennemgå',
     reorder: 'Omarranger',
     continue: 'Fortsæt',
     setup: 'Opsæt',

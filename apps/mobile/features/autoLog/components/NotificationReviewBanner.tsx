@@ -1,11 +1,10 @@
-import { ChevronRight, X } from 'lucide-react-native';
 import React, { useEffect, useRef, useState, useSyncExternalStore } from 'react';
-import { Alert, AppState, Pressable, View } from 'react-native';
+import { Alert, AppState } from 'react-native';
 
-import { ClayIcon, Text } from '~/components/ui';
+import { FlashBanner } from '~/components/feedback/FlashBanner';
+import { ClayIcon } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import { ScanProgress } from '~/features/transactions/components/ScanStatusBanner';
-import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { resolveNotificationReviews } from '~/services/notificationReview';
@@ -21,11 +20,17 @@ import { requestOpenPaymentAlerts } from '~/services/paymentAlertsNavigation';
 import { countKey, isReviewBannerVisible } from '../lib/presentation';
 import { getNotificationAiStatus, subscribeNotificationAiStatus } from '../notificationAiReview';
 
+/** How long the review banner stays before it tucks itself away. */
+const REVIEW_AUTO_HIDE_MS = 9000;
+
 /**
- * Inline home review action, styled like the receipt-scan banner beside it.
- * Its X ignores the notifications still waiting, like Ignore All on the review
- * page, and marks auto-review's results seen. With AI auto-review on it shows the
- * batch in progress with the scan banner's own progress row, then one line on
+ * Home's flash banner for payment alerts waiting for review, stacked with the
+ * receipt-scan banners. Review opens the review page. Its X ignores the
+ * notifications still waiting, like Ignore All on the review page, and marks
+ * auto-review's results seen. A swipe up, or the banner running out of time,
+ * only puts it away until something new arrives or the app returns to the
+ * foreground. With AI auto-review on it shows the batch in progress with the
+ * scan banner's own progress row (and stays while it runs), then one line on
  * what AI did, so the results are in front of the user right after launch.
  */
 export function NotificationReviewBanner() {
@@ -33,7 +38,6 @@ export function NotificationReviewBanner() {
   const { settings } = app;
   const live = useRef(app);
   live.current = app;
-  const colors = useThemeColors();
   const [ids, setIds] = useState<string[]>([]);
   const [aiIds, setAiIds] = useState<string[]>([]);
   // What X cleared; anything new (or a new review run) brings the banner back.
@@ -83,8 +87,8 @@ export function NotificationReviewBanner() {
         ids.length === 1 ? 'payment_alerts.review_banner_single' : 'payment_alerts.review_banner',
         { count: ids.length },
       );
+  // The banner's X plays the haptic.
   const dismiss = () => {
-    void triggerHaptic('selection');
     const appUserId = settings.appUserId;
     setDismissed(new Set([...ids, ...aiIds]));
     // Seen, AI's results move to History (where Undo stays).
@@ -108,64 +112,48 @@ export function NotificationReviewBanner() {
         ignoring.current = false;
       });
   };
+  // The Review button plays its own haptic; a tap on the banner adds one.
+  const openPage = () => requestOpenPaymentAlerts({ screen: 'NotificationHistory' });
   const open = () => {
     void triggerHaptic('selection');
-    requestOpenPaymentAlerts({ screen: 'NotificationHistory' });
+    openPage();
   };
+  // Put away until something new arrives or the app comes back to the
+  // foreground, without ignoring anything or marking AI's results seen.
+  const putAway = () => setDismissed(new Set([...ids, ...aiIds]));
+  const icon = <ClayIcon name="settings/notifications" size={30} flatSize={22} />;
+  if (reviewing > 0) {
+    const label = I18n.t(countKey('payment_alerts.ai_banner_reviewing', reviewing), {
+      count: reviewing,
+    });
+    return (
+      <FlashBanner
+        testID="notification-review-banner"
+        icon={icon}
+        body={<ScanProgress label={label} />}
+        onPress={open}
+        accessibilityLabel={label}
+      />
+    );
+  }
+  const subtitle =
+    done && ids.length > 0
+      ? I18n.t(countKey('payment_alerts.ai_banner_needs_you', ids.length), { count: ids.length })
+      : null;
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={
-        reviewing > 0
-          ? I18n.t(countKey('payment_alerts.ai_banner_reviewing', reviewing), { count: reviewing })
-          : title
-      }
+    <FlashBanner
       testID="notification-review-banner"
+      icon={icon}
+      title={title}
+      subtitle={subtitle}
       onPress={open}
-      style={({ pressed }) => ({ opacity: pressed ? 0.9 : 1 })}
-      className="flex-row items-center gap-3 rounded-2xl border border-border/50 bg-card px-3 py-2.5 shadow-soft"
-    >
-      <View className="h-11 w-11 items-center justify-center rounded-2xl">
-        <ClayIcon name="settings/notifications" size={32} flatSize={22} />
-      </View>
-      {reviewing > 0 ? (
-        <ScanProgress
-          label={I18n.t(countKey('payment_alerts.ai_banner_reviewing', reviewing), {
-            count: reviewing,
-          })}
-        />
-      ) : (
-        <>
-          <View className="flex-1">
-            <Text variant="body" className="font-semibold text-foreground" numberOfLines={1}>
-              {title}
-            </Text>
-            {done && ids.length > 0 ? (
-              <Text variant="caption" tone="muted" className="mt-0.5" numberOfLines={1}>
-                {I18n.t(countKey('payment_alerts.ai_banner_needs_you', ids.length), {
-                  count: ids.length,
-                })}
-              </Text>
-            ) : null}
-          </View>
-          {/* A nested Pressable so X does not open the page. */}
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={I18n.t(
-              ids.length > 0 ? 'payment_alerts.review_ignore_all' : 'common.close',
-            )}
-            testID="notification-review-banner-dismiss"
-            hitSlop={8}
-            onPress={dismiss}
-            className="h-7 w-7 items-center justify-center rounded-full bg-secondary/60"
-          >
-            <X size={15} color={colors.textMuted} />
-          </Pressable>
-          <View className="h-7 w-7 items-center justify-center rounded-full bg-primary/15">
-            <ChevronRight size={16} color={colors.primary} />
-          </View>
-        </>
-      )}
-    </Pressable>
+      accessibilityLabel={[title, subtitle].filter(Boolean).join(', ')}
+      onClose={dismiss}
+      closeLabel={I18n.t(ids.length > 0 ? 'payment_alerts.review_ignore_all' : 'common.close')}
+      actions={[{ label: I18n.t('common.review'), onPress: openPage }]}
+      onSwipeAway={putAway}
+      autoHideMs={REVIEW_AUTO_HIDE_MS}
+      onAutoHide={putAway}
+    />
   );
 }

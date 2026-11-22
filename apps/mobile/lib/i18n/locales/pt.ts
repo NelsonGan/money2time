@@ -37,6 +37,8 @@ const pt = {
     delete: 'Excluir',
     remove: 'Remover',
     edit: 'Editar',
+    view: 'Ver',
+    review: 'Revisar',
     reorder: 'Reordenar',
     continue: 'Continuar',
     setup: 'Configurar',

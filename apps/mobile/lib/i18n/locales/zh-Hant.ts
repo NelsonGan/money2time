@@ -35,6 +35,8 @@ const zhHant = {
     delete: '刪除',
     remove: '移除',
     edit: '編輯',
+    view: '查看',
+    review: '審核',
     reorder: '排序',
     continue: '繼續',
     setup: '設定',
