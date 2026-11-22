@@ -37,6 +37,7 @@ const zh = {
     edit: '编辑',
     view: '查看',
     review: '审核',
+    activity: '动态',
     reorder: '排序',
     continue: '继续',
     setup: '设置',

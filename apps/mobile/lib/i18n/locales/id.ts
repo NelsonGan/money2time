@@ -38,6 +38,7 @@ const id = {
     edit: 'Edit',
     view: 'Lihat',
     review: 'Tinjau',
+    activity: 'Aktivitas',
     reorder: 'Urutkan',
     continue: 'Lanjutkan',
     setup: 'Atur',

@@ -39,6 +39,7 @@ const it = {
     edit: 'Modifica',
     view: 'Vedi',
     review: 'Rivedi',
+    activity: 'Attività',
     reorder: 'Riordina',
     continue: 'Continua',
     setup: 'Configura',

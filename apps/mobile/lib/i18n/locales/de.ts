@@ -39,6 +39,7 @@ const de = {
     edit: 'Bearbeiten',
     view: 'Ansehen',
     review: 'Prüfen',
+    activity: 'Aktivität',
     reorder: 'Sortieren',
     continue: 'Weiter',
     setup: 'Einrichten',

@@ -39,6 +39,7 @@ const nl = {
     edit: 'Bewerken',
     view: 'Bekijken',
     review: 'Beoordelen',
+    activity: 'Activiteit',
     reorder: 'Sorteren',
     continue: 'Doorgaan',
     setup: 'Instellen',

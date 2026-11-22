@@ -11,7 +11,6 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { FlashBanner } from '~/components/feedback/FlashBanner';
 import { LoadingDots } from '~/components/feedback/LoadingDots';
 import { ClayIcon, Text } from '~/components/ui';
 import { type ScanJob, useReceiptScans } from '~/context/ReceiptScanContext';
@@ -19,6 +18,7 @@ import { groupScanJobs, summarizeScanBatch } from '~/features/transactions/lib/r
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
+import { cn } from '~/utils';
 
 // The scan is a single, indeterminate request (no progress events), so we show
 // a perceived-progress bar: ease toward ~92% over a typical inference window.
@@ -42,47 +42,67 @@ function stageMessageForPct(pct: number): string {
   return I18n.t(SCAN_STAGE_KEYS[index]).replace(/…\s*$/, '');
 }
 
-/** How long a logged scan's banner stays before it hides itself. */
-const CREATED_AUTO_HIDE_MS = 6000;
-/** A failed scan, or a finished batch, stays a little longer to be read. */
-const SETTLED_AUTO_HIDE_MS = 9000;
-
 /**
- * Flash banners for background receipt scans, floated over the top of Home by
- * a `FlashBannerStack`. A snapped receipt is parsed by the Worker while the
- * user keeps using the app. A normal or screenshot scan becomes a short-lived
- * "logged" banner (Home scrolls to the expense and flashes it; View opens it)
- * that hides itself. A split scan stays until it is opened in the split editor
- * or closed. A failed scan says so, then hides itself. Every one can be swiped
- * away. Renders nothing when idle.
+ * The receipt-scan rows of Home's activity sheet. A snapped receipt is parsed
+ * by the Worker while the user keeps using the app. A normal or screenshot
+ * scan becomes a "logged" row whose View opens the saved expense (the sheet
+ * clears these once it closes). A split scan opens the split editor for
+ * review. A failed scan stays as a dismissible error. Renders nothing when
+ * idle.
  */
-export function ScanStatusBanner() {
+export function ScanStatusBanner({ onNavigate }: { onNavigate?: () => void } = {}) {
   const { jobs, dismissJob, openReadyJob, openReadyJobAsSplit, openCreatedJob } = useReceiptScans();
 
   if (jobs.length === 0) return null;
+  // A row that opens another screen closes the sheet after it acts, since
+  // closing clears the results that were seen.
+  const go = (action: (id: string) => void) => (id: string) => {
+    action(id);
+    onNavigate?.();
+  };
 
   return (
-    <>
+    <View className="gap-2">
       {groupScanJobs(jobs).map((entry) =>
         entry.kind === 'batch' ? (
           <ScanBatchCard
             key={entry.batchId}
             jobs={entry.jobs}
             onDismissJob={dismissJob}
-            onOpenCreated={openCreatedJob}
+            onOpenCreated={go(openCreatedJob)}
           />
         ) : (
           <ScanJobCard
             key={entry.job.id}
             job={entry.job}
             onDismiss={() => dismissJob(entry.job.id)}
-            onOpen={() => openReadyJob(entry.job.id)}
-            onOpenSplit={() => openReadyJobAsSplit(entry.job.id)}
-            onOpenCreated={() => openCreatedJob(entry.job.id)}
+            onOpen={() => go(openReadyJob)(entry.job.id)}
+            onOpenSplit={() => go(openReadyJobAsSplit)(entry.job.id)}
+            onOpenCreated={() => go(openCreatedJob)(entry.job.id)}
           />
         ),
       )}
-    </>
+    </View>
+  );
+}
+
+/** The tinted action button on an activity row (View, Review). */
+export function ActivityPill({ label, onPress }: { label: string; onPress: () => void }) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      hitSlop={6}
+      onPress={() => {
+        void triggerHaptic('selection');
+        onPress();
+      }}
+      style={({ pressed }) => ({ opacity: pressed ? 0.75 : 1 })}
+      className="rounded-full bg-primary/15 px-3.5 py-1.5"
+    >
+      <Text variant="caption" className="font-semibold text-primary" numberOfLines={1}>
+        {label}
+      </Text>
+    </Pressable>
   );
 }
 
@@ -101,92 +121,142 @@ function ScanJobCard({
 }) {
   const themeColors = useThemeColors();
 
-  if (job.status === 'error') {
-    return (
-      <FlashBanner
-        tone="error"
-        icon={<AlertTriangle size={19} color={themeColors.error} />}
-        title={errorTitle(job)}
-        subtitle={I18n.t('receiptScan.banner_dismiss_hint')}
-        accessibilityLabel={errorTitle(job)}
-        onPress={() => {
-          void triggerHaptic('selection');
-          onDismiss();
-        }}
-        onSwipeAway={onDismiss}
-        autoHideMs={SETTLED_AUTO_HIDE_MS}
-        onAutoHide={onDismiss}
-      />
-    );
-  }
+  const isError = job.status === 'error';
+  const isReady = job.status === 'ready';
+  const isCreated = job.status === 'created';
+  const tappable = isError || isReady || isCreated;
+  // A split-intent scan opens Split by Item as its primary action; a quick
+  // scan that parsed line items offers it as a secondary chip.
+  const splitPrimary = isReady && job.intent === 'split' && !!job.splitPayload;
+  const splitChip = isReady && !splitPrimary && !!job.splitPayload;
 
-  if (job.status === 'created') {
-    // Several expenses from one image read as a count; one reads as its merchant.
-    const count = job.createdCount ?? 1;
-    const named = count === 1 ? job.createdNote?.trim() : '';
-    const title = named
-      ? named
-      : count > 1
-        ? I18n.t('receiptScan.batch_logged_other', { count })
-        : I18n.t('receiptScan.logged_title');
-    const subtitle = [named ? I18n.t('receiptScan.logged_title') : null, job.createdAmountLabel]
-      .filter(Boolean)
-      .join(' · ');
-    return (
-      <FlashBanner
-        icon={<ClayIcon name="status/success" size={30} flatSize={22} />}
-        title={title}
-        subtitle={subtitle || I18n.t('receiptScan.logged_hint')}
-        accessibilityLabel={[title, subtitle].filter(Boolean).join(', ')}
-        onPress={onOpenCreated}
-        actions={[{ label: I18n.t('common.view'), onPress: onOpenCreated }]}
-        onSwipeAway={onDismiss}
-        autoHideMs={CREATED_AUTO_HIDE_MS}
-        onAutoHide={onDismiss}
-      />
-    );
-  }
-
-  if (job.status === 'ready') {
-    // A split-intent scan opens Split by Item as its primary action; a quick
-    // scan that parsed line items offers it as a secondary chip.
-    const splitPrimary = job.intent === 'split' && !!job.splitPayload;
-    const splitChip = !splitPrimary && !!job.splitPayload;
-    return (
-      <FlashBanner
-        icon={<ClayIcon name="money-time/receipt" size={30} flatSize={22} />}
-        title={I18n.t('receiptScan.review_ready_title')}
-        subtitle={I18n.t('receiptScan.review_ready_hint')}
-        onPress={splitPrimary ? onOpenSplit : onOpen}
-        accessibilityLabel={I18n.t('receiptScan.review_ready_title')}
-        onClose={onDismiss}
-        onSwipeAway={onDismiss}
-        actions={[
-          splitChip && {
-            label: I18n.t('transactions.receiptSplit.split_by_item'),
-            onPress: onOpenSplit,
-            tone: 'soft',
-          },
-        ]}
-      />
-    );
-  }
+  const handlePress = () => {
+    if (isCreated) {
+      onOpenCreated();
+      return;
+    }
+    if (isReady) {
+      if (splitPrimary) {
+        onOpenSplit();
+        return;
+      }
+      onOpen();
+      return;
+    }
+    if (isError) {
+      void triggerHaptic('selection');
+      onDismiss();
+    }
+  };
 
   return (
-    <FlashBanner
-      icon={<ClayIcon name="money-time/receipt" size={30} flatSize={22} />}
-      body={<ScanProgress />}
-    />
+    <Pressable
+      accessibilityRole={tappable ? 'button' : undefined}
+      onPress={handlePress}
+      disabled={!tappable}
+      style={({ pressed }) => ({ opacity: pressed && tappable ? 0.9 : 1 })}
+      className="flex-row items-center gap-3 rounded-2xl border border-border/50 bg-card px-3 py-2.5 shadow-soft"
+    >
+      {/* Leading status glyph. The clay art carries its own colour, so only the
+          error state (a Lucide glyph) needs a tinted tile behind it. */}
+      <View
+        className={cn(
+          'h-11 w-11 items-center justify-center rounded-2xl',
+          isError ? 'bg-destructive/10' : null,
+        )}
+      >
+        {isError ? (
+          <AlertTriangle size={19} color={themeColors.error} />
+        ) : (
+          <ClayIcon
+            name={isCreated ? 'status/success' : 'money-time/receipt'}
+            size={32}
+            flatSize={22}
+          />
+        )}
+      </View>
+
+      {isError ? (
+        <>
+          <View className="flex-1">
+            <Text variant="body" className="font-semibold text-foreground" numberOfLines={1}>
+              {errorTitle(job)}
+            </Text>
+            <Text variant="caption" tone="muted" className="mt-0.5" numberOfLines={1}>
+              {I18n.t('receiptScan.banner_dismiss_hint')}
+            </Text>
+          </View>
+          <View className="h-7 w-7 items-center justify-center rounded-full bg-secondary/60">
+            <X size={15} color={themeColors.textMuted} />
+          </View>
+        </>
+      ) : isCreated ? (
+        <>
+          <View className="min-w-0 flex-1">
+            <Text variant="body" className="font-semibold text-foreground" numberOfLines={1}>
+              {createdTitle(job)}
+            </Text>
+            <Text variant="caption" tone="muted" className="mt-0.5" numberOfLines={1}>
+              {createdSubtitle(job)}
+            </Text>
+          </View>
+          <ActivityPill label={I18n.t('common.view')} onPress={onOpenCreated} />
+        </>
+      ) : isReady ? (
+        <>
+          <View className="flex-1">
+            <Text variant="body" className="font-semibold text-foreground" numberOfLines={1}>
+              {I18n.t('receiptScan.review_ready_title')}
+            </Text>
+            <Text variant="caption" tone="muted" className="mt-0.5" numberOfLines={1}>
+              {I18n.t('receiptScan.review_ready_hint')}
+            </Text>
+          </View>
+          {/* Secondary action: open the parsed line items in Split by Item.
+              Nested Pressable so it doesn't bubble to the card's open-on-tap. */}
+          {splitChip ? (
+            <Pressable
+              accessibilityRole="button"
+              onPress={onOpenSplit}
+              hitSlop={6}
+              className="rounded-full bg-primary/15 px-2.5 py-1.5"
+            >
+              <Text variant="caption" tone="primary" className="font-medium" numberOfLines={1}>
+                {I18n.t('transactions.receiptSplit.split_by_item')}
+              </Text>
+            </Pressable>
+          ) : null}
+          {/* Dismiss the notice; a nested Pressable so it doesn't bubble to the
+              card's open-on-tap. */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={I18n.t('common.close')}
+            onPress={() => {
+              void triggerHaptic('selection');
+              onDismiss();
+            }}
+            hitSlop={8}
+            className="h-7 w-7 items-center justify-center rounded-full bg-secondary/60"
+          >
+            <X size={15} color={themeColors.textMuted} />
+          </Pressable>
+          <View className="h-7 w-7 items-center justify-center rounded-full bg-primary/15">
+            <ChevronRight size={16} color={themeColors.primary} />
+          </View>
+        </>
+      ) : (
+        <ScanProgress />
+      )}
+    </Pressable>
   );
 }
 
 /**
- * One banner for the receipts of a multi-select album pick, so ten receipts do
- * not stack ten banners. While they scan it shows how many are done;
- * afterwards how many expenses were logged and how many receipts failed, then
- * hides itself unless opened. Tapping it lists each receipt: a logged one
- * opens its expense, a failed one can be dismissed. The close button clears
- * the whole batch once nothing is scanning.
+ * One card for the receipts of a multi-select album pick, so ten receipts do
+ * not push the calendar off screen. While they scan it shows how many are done;
+ * afterwards how many expenses were logged and how many receipts failed. Tapping
+ * it lists each receipt: a logged one opens its expense, a failed one can be
+ * dismissed. The close button clears the whole batch once nothing is scanning.
  */
 function ScanBatchCard({
   jobs,
@@ -211,7 +281,6 @@ function ScanBatchCard({
     void triggerHaptic('selection');
     setExpanded((value) => !value);
   };
-  const dismissAll = () => jobs.forEach((job) => onDismissJob(job.id));
 
   const failedLabel =
     summary.failed > 0
@@ -237,40 +306,62 @@ function ScanBatchCard({
   const Chevron = expanded ? ChevronUp : ChevronDown;
 
   return (
-    <FlashBanner
-      tone={allFailed ? 'error' : 'default'}
-      icon={
-        allFailed ? (
-          <AlertTriangle size={19} color={themeColors.error} />
-        ) : (
-          <ClayIcon
-            name={running ? 'money-time/receipt' : 'status/success'}
-            size={30}
-            flatSize={22}
-          />
-        )
-      }
-      title={title}
-      subtitle={hint}
-      body={
-        running ? (
+    <View className="rounded-2xl border border-border/50 bg-card shadow-soft">
+      <Pressable
+        accessibilityRole="button"
+        accessibilityState={{ expanded }}
+        onPress={toggle}
+        style={({ pressed }) => ({ opacity: pressed ? 0.9 : 1 })}
+        className="flex-row items-center gap-3 px-3 py-2.5"
+      >
+        <View
+          className={cn(
+            'h-11 w-11 items-center justify-center rounded-2xl',
+            allFailed ? 'bg-destructive/10' : null,
+          )}
+        >
+          {allFailed ? (
+            <AlertTriangle size={19} color={themeColors.error} />
+          ) : (
+            <ClayIcon
+              name={running ? 'money-time/receipt' : 'status/success'}
+              size={32}
+              flatSize={22}
+            />
+          )}
+        </View>
+
+        {running ? (
           <BatchProgress done={summary.total - summary.scanning} total={summary.total} />
-        ) : undefined
-      }
-      onPress={toggle}
-      accessibilityLabel={running ? I18n.t('receiptScan.batch_scanning') : title}
-      accessibilityState={{ expanded }}
-      onClose={running ? undefined : dismissAll}
-      onSwipeAway={running ? undefined : dismissAll}
-      // An open list is being read: it stays until closed or collapsed again.
-      autoHideMs={running || expanded ? null : SETTLED_AUTO_HIDE_MS}
-      onAutoHide={dismissAll}
-      trailing={
+        ) : (
+          <>
+            <View className="flex-1">
+              <Text variant="body" className="font-semibold text-foreground" numberOfLines={1}>
+                {title}
+              </Text>
+              <Text variant="caption" tone="muted" className="mt-0.5" numberOfLines={1}>
+                {hint}
+              </Text>
+            </View>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={I18n.t('common.close')}
+              onPress={() => {
+                void triggerHaptic('selection');
+                jobs.forEach((job) => onDismissJob(job.id));
+              }}
+              hitSlop={8}
+              className="h-7 w-7 items-center justify-center rounded-full bg-secondary/60"
+            >
+              <X size={15} color={themeColors.textMuted} />
+            </Pressable>
+          </>
+        )}
         <View className="h-7 w-7 items-center justify-center rounded-full bg-primary/15">
           <Chevron size={16} color={themeColors.primary} />
         </View>
-      }
-    >
+      </Pressable>
+
       {expanded ? (
         <View className="border-t border-border/40 px-3 py-1">
           {jobs.map((job) => (
@@ -283,7 +374,7 @@ function ScanBatchCard({
           ))}
         </View>
       ) : null}
-    </FlashBanner>
+    </View>
   );
 }
 
@@ -458,6 +549,25 @@ export function ScanProgress({ label }: { label?: string } = {}) {
         />
       </View>
     </View>
+  );
+}
+
+/** A logged scan reads as its merchant; several expenses from one image as a count. */
+function createdTitle(job: ScanJob): string {
+  const count = job.createdCount ?? 1;
+  const named = count === 1 ? job.createdNote?.trim() : '';
+  if (named) return named;
+  return count > 1
+    ? I18n.t('receiptScan.batch_logged_other', { count })
+    : I18n.t('receiptScan.logged_title');
+}
+
+function createdSubtitle(job: ScanJob): string {
+  const named = (job.createdCount ?? 1) === 1 && !!job.createdNote?.trim();
+  return (
+    [named ? I18n.t('receiptScan.logged_title') : null, job.createdAmountLabel]
+      .filter(Boolean)
+      .join(' · ') || I18n.t('receiptScan.logged_hint')
   );
 }
 

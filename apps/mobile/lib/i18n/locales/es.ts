@@ -39,6 +39,7 @@ const es = {
     edit: 'Editar',
     view: 'Ver',
     review: 'Revisar',
+    activity: 'Actividad',
     reorder: 'Reordenar',
     continue: 'Continuar',
     setup: 'Configurar',

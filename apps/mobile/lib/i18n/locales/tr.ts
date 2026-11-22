@@ -38,6 +38,7 @@ const tr = {
     edit: 'Düzenle',
     view: 'Gör',
     review: 'İncele',
+    activity: 'Etkinlik',
     reorder: 'Yeniden Sırala',
     continue: 'Devam',
     setup: 'Kur',

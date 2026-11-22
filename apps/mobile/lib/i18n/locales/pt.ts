@@ -39,6 +39,7 @@ const pt = {
     edit: 'Editar',
     view: 'Ver',
     review: 'Revisar',
+    activity: 'Atividade',
     reorder: 'Reordenar',
     continue: 'Continuar',
     setup: 'Configurar',

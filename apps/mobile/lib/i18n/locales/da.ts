@@ -39,6 +39,7 @@ const da = {
     edit: 'Rediger',
     view: 'Vis',
     review: 'Gennemgå',
+    activity: 'Aktivitet',
     reorder: 'Omarranger',
     continue: 'Fortsæt',
     setup: 'Opsæt',

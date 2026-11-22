@@ -31,7 +31,8 @@ export const ADD_FAB_SIZE = 60;
 /** The flat + sits inside a primary disc, which reads smaller than bare clay. */
 const FLAT_FAB_SIZE = 56;
 const FAB_BOTTOM_GAP = 12;
-const FAB_RIGHT_MARGIN = spacing.lg;
+export const ADD_FAB_RIGHT_MARGIN = spacing.lg;
+const FAB_RIGHT_MARGIN = ADD_FAB_RIGHT_MARGIN;
 
 export function AddFabButton({
   onPress,

@@ -39,6 +39,7 @@ const pl = {
     edit: 'Edytuj',
     view: 'Zobacz',
     review: 'Przejrzyj',
+    activity: 'Aktywność',
     reorder: 'Zmień kolejność',
     continue: 'Kontynuuj',
     setup: 'Skonfiguruj',

@@ -38,6 +38,7 @@ const ms = {
     edit: 'Edit',
     view: 'Lihat',
     review: 'Semak',
+    activity: 'Aktiviti',
     reorder: 'Susun Semula',
     continue: 'Teruskan',
     setup: 'Sediakan',

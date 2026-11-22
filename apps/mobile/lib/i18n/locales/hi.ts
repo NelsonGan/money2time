@@ -38,6 +38,7 @@ const hi = {
     edit: 'संपादित करें',
     view: 'देखें',
     review: 'समीक्षा करें',
+    activity: 'गतिविधि',
     reorder: 'क्रम बदलें',
     continue: 'जारी रखें',
     setup: 'सेट अप करें',

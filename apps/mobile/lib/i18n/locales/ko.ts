@@ -38,6 +38,7 @@ const ko = {
     edit: '편집',
     view: '보기',
     review: '검토',
+    activity: '활동',
     reorder: '순서 변경',
     continue: '계속',
     setup: '설정',

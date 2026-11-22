@@ -37,6 +37,7 @@ const zhHant = {
     edit: '編輯',
     view: '查看',
     review: '審核',
+    activity: '動態',
     reorder: '排序',
     continue: '繼續',
     setup: '設定',

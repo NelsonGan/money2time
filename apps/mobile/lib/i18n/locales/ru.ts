@@ -38,6 +38,7 @@ const ru = {
     edit: 'Изменить',
     view: 'Открыть',
     review: 'Проверить',
+    activity: 'Активность',
     reorder: 'Сортировка',
     continue: 'Продолжить',
     setup: 'Настроить',

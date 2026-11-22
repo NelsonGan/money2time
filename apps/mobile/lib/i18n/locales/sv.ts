@@ -39,6 +39,7 @@ const sv = {
     edit: 'Redigera',
     view: 'Visa',
     review: 'Granska',
+    activity: 'Aktivitet',
     reorder: 'Sortera om',
     continue: 'Fortsätt',
     setup: 'Konfigurera',

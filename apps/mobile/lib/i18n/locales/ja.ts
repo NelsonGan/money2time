@@ -39,6 +39,7 @@ const ja = {
     edit: '編集',
     view: '表示',
     review: '確認',
+    activity: 'アクティビティ',
     reorder: '並び替え',
     continue: '続ける',
     setup: '設定',

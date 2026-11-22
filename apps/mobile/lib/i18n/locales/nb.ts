@@ -39,6 +39,7 @@ const nb = {
     edit: 'Rediger',
     view: 'Vis',
     review: 'Gjennomgå',
+    activity: 'Aktivitet',
     reorder: 'Sorter',
     continue: 'Fortsett',
     setup: 'Konfigurer',

@@ -38,6 +38,7 @@ const vi = {
     edit: 'Sửa',
     view: 'Xem',
     review: 'Xem lại',
+    activity: 'Hoạt động',
     reorder: 'Sắp xếp',
     continue: 'Tiếp tục',
     setup: 'Thiết lập',

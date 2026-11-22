@@ -14,10 +14,8 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { MonthYearWheelPicker } from '~/components/datePicker';
 import { monthsBetween, shiftYearMonth, yearMonthFromKey } from '~/components/datePicker/monthJump';
-import { FlashBannerStack } from '~/components/feedback/FlashBanner';
 import { useContentFrame } from '~/components/layout/ContentFrame';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
-import { getAboveFabRowInset } from '~/components/navigation/AddFab';
 import { useBottomNavMinimize } from '~/components/navigation/BottomNavMinimize';
 import { FilterIconButton } from '~/components/navigation/FilterIconButton';
 import { IN_OUT_VALUE_TEXT_PROPS, InOutHeader } from '~/components/navigation/InOutHeader';
@@ -32,7 +30,6 @@ import {
 } from '~/components/ui';
 import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { useApp, usePaybackRows, useTransactions } from '~/context/AppContext';
-import { NotificationReviewBanner } from '~/features/autoLog/components/NotificationReviewBanner';
 import {
   buildInsightsCategoryPickerData,
   type InsightsCategoryPickerData,
@@ -48,7 +45,6 @@ import {
   DuplicateTransactionsDatePicker,
   MonthPagerPage,
 } from '~/features/transactions/components';
-import { ScanStatusBanner } from '~/features/transactions/components/ScanStatusBanner';
 import { TransactionSelectionActions } from '~/features/transactions/components/TransactionSelectionToolbar';
 import {
   MONTH_PAGER_CENTER_INDEX,
@@ -63,7 +59,6 @@ import {
 } from '~/hooks/useIndexedScrollToTopRefs';
 import { useMonthPager } from '~/hooks/useMonthPager';
 import { usePersistedJsonSnapshot } from '~/hooks/usePersistedJsonSnapshot';
-import { useTabActive } from '~/hooks/useTabActive';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import type { RootStackParamList } from '~/navigation/rootStack';
@@ -102,6 +97,7 @@ import {
   CENTER_YEAR_INDEX,
   TOTAL_YEAR_SLOTS,
 } from '../components/CalendarYearView';
+import { HomeActivity } from '../components/HomeActivity';
 import {
   amountKeyMatches,
   parseAmountQuery,
@@ -223,12 +219,7 @@ export function CalendarScreen({
   } = useApp();
   const monthCycle = monthCycleOf(settings);
   const themeColors = useThemeColors();
-  const {
-    contentWidth: frameContentWidth,
-    panes: twoPane,
-    wideTabs,
-    navPlacement,
-  } = useDeviceLayout();
+  const { contentWidth: frameContentWidth, panes: twoPane, wideTabs } = useDeviceLayout();
   const safeAreaInsets = useSafeAreaInsets();
   const { width: frameWidth } = useContentFrame();
   // Open iPhone Duo: the header and a live month grid fill the left pane and
@@ -2083,40 +2074,11 @@ export function CalendarScreen({
         onDuplicated={handleDuplicated}
       />
 
-      {/* Flash banners for background receipt scans and payment alerts to
-          review. They float over the bottom of the screen, above the + and the
-          tab bar, instead of sitting in the header, so they never push the
-          list down, and only show (and count down) while the day list is on
-          screen. */}
-      <HomeFlashBanners
-        shown={viewMode === 'day' && !isSearchOpen && !isSelectionMode}
-        bottom={getAboveFabRowInset(safeAreaInsets.bottom, navPlacement)}
-        right={twoPane?.right ?? 0}
-      />
+      {/* Background activity (receipt and screenshot scans, payment alerts to
+          review) as one circle above the +, which opens the Activity sheet.
+          Only in the day list, outside search and selection. */}
+      <HomeActivity shown={viewMode === 'day' && !isSearchOpen && !isSelectionMode} />
     </View>
-  );
-}
-
-/**
- * Home's flash banners. They read whether Home is the visible tab here, not in
- * the screen, so a tab switch re-renders this and not the whole calendar.
- */
-function HomeFlashBanners({
-  shown,
-  bottom,
-  right,
-}: {
-  shown: boolean;
-  bottom: number;
-  right: number;
-}) {
-  const tabActive = useTabActive();
-  if (!shown || !tabActive) return null;
-  return (
-    <FlashBannerStack bottom={bottom} right={right}>
-      <ScanStatusBanner />
-      <NotificationReviewBanner />
-    </FlashBannerStack>
   );
 }
 

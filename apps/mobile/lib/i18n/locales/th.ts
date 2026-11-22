@@ -37,6 +37,7 @@ const th = {
     edit: 'แก้ไข',
     view: 'ดู',
     review: 'ตรวจสอบ',
+    activity: 'กิจกรรม',
     reorder: 'จัดเรียง',
     continue: 'ต่อไป',
     setup: 'ตั้งค่า',

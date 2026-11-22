@@ -206,7 +206,6 @@ import { useLiveEarningsSync } from '~/features/widgets/useLiveEarningsSync';
 import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useProGate } from '~/hooks/useProGate';
 import { useRootScreenSettled } from '~/hooks/useRootScreenSettled';
-import { TabActiveContext } from '~/hooks/useTabActive';
 import { useThemeVars } from '~/hooks/useThemeVars';
 import { I18n } from '~/lib/i18n';
 import {
@@ -475,7 +474,7 @@ function MountedTab({
         <ColumnGutterProvider gutter={isWide ? slot.right : 0}>
           <ContentFrameProvider width={slot.width} height={frame.height} onFold={fold !== null}>
             <TransactionsWhileVisible key={resetKey} visible={active}>
-              <TabActiveContext.Provider value={active}>{children}</TabActiveContext.Provider>
+              {children}
             </TransactionsWhileVisible>
           </ContentFrameProvider>
         </ColumnGutterProvider>

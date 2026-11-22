@@ -39,6 +39,7 @@ const fil = {
     edit: 'I-edit',
     view: 'Tingnan',
     review: 'Suriin',
+    activity: 'Aktibidad',
     reorder: 'Ayusin',
     continue: 'Ituloy',
     setup: 'I-set up',

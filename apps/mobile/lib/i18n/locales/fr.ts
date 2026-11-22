@@ -39,6 +39,7 @@ const fr = {
     edit: 'Modifier',
     view: 'Voir',
     review: 'Vérifier',
+    activity: 'Activité',
     reorder: 'Réorganiser',
     continue: 'Continuer',
     setup: 'Configurer',
