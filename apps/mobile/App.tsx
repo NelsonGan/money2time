@@ -638,6 +638,7 @@ function MainShellScreen({
   const [calendarGoToDayRequest, setCalendarGoToDayRequest] = useState<{
     dayKey: string;
     token: number;
+    onlyIfShowing?: boolean;
   } | null>(null);
   const [insightsResetToMonthToken, setInsightsResetToMonthToken] = useState(0);
   const [activityBreakdownInsightRequest, setActivityBreakdownInsightRequest] =
@@ -825,14 +826,24 @@ function MainShellScreen({
     });
   }, [navigation]);
 
+  // Read by the open-transactions listener, which subscribes once.
+  const activeTabRef = useRef(activeTab);
+  activeTabRef.current = activeTab;
   useEffect(() => {
     return subscribeOpenTransactionsRequest((request) => {
+      // A background scan only scrolls Home when Home is what the user sees.
+      if (request.onlyIfShowing && activeTabRef.current !== 'calendar') return;
       setActiveTab('calendar');
       // Land the list on the transaction's own day (it may sit in an earlier
       // month) instead of snapping back to the current month.
       if (request.dayKey) {
         const dayKey = request.dayKey;
-        setCalendarGoToDayRequest((prev) => ({ dayKey, token: (prev?.token ?? 0) + 1 }));
+        const onlyIfShowing = request.onlyIfShowing;
+        setCalendarGoToDayRequest((prev) => ({
+          dayKey,
+          token: (prev?.token ?? 0) + 1,
+          onlyIfShowing,
+        }));
       } else {
         setCalendarResetToken((prev) => prev + 1);
       }

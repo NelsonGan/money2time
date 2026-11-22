@@ -28,6 +28,7 @@ import { type OpenScanReviewRequest, requestOpenScanReview } from '~/services/sc
 import {
   requestEditTransaction,
   requestHighlightTransaction,
+  requestRevealCreatedTransaction,
 } from '~/services/transactionsNavigation';
 import { copyReceiptImage, deleteReceiptImage } from '~/services/userAssets';
 import { isAccountArchived } from '~/utils/accountArchive';
@@ -90,11 +91,11 @@ interface BatchRun {
   /** Set by the first scan that hits the quota, so the paywall opens once. */
   limitHit: boolean;
   /**
-   * Each created job's first expense, by job id. Kept here rather than read
-   * back from the job list, whose update may not have landed when the batch
-   * finishes.
+   * Each created job's first expense and its day, by job id. Kept here rather
+   * than read back from the job list, whose update may not have landed when
+   * the batch finishes.
    */
-  createdIds: Map<string, string>;
+  createdIds: Map<string, { id: string; date: string }>;
 }
 
 interface ReceiptScanContextValue {
@@ -151,6 +152,15 @@ interface ReceiptScanContextValue {
 }
 
 const ReceiptScanContext = createContext<ReceiptScanContextValue | null>(null);
+
+/**
+ * Bring a scanned expense into view: Home's list scrolls to its day (when Home
+ * is open, without switching tabs) and the row flashes once it lands there.
+ */
+function revealCreated(transactionId: string, date: string) {
+  requestRevealCreatedTransaction(date);
+  requestHighlightTransaction(transactionId);
+}
 
 export function useReceiptScans(): ReceiptScanContextValue {
   const ctx = useContext(ReceiptScanContext);
@@ -496,7 +506,7 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
           if (!firstId) firstId = txnId;
         });
         if (!keepImage) deleteReceiptImage(rel);
-        if (batch && firstId) batch.createdIds.set(id, firstId);
+        if (batch && firstId) batch.createdIds.set(id, { id: firstId, date: first.date });
         // Keep a completion card in this provider's in-memory job list. It is
         // deliberately not persisted, so a native app restart clears it.
         setJobsBoth((prev) =>
@@ -519,9 +529,10 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
           ),
         );
         void trackEvent(AnalyticsEvents.RECEIPT_SCAN_SAVED, { count: drafts.length });
-        // A batch flashes a row and buzzes once, when the whole batch is done.
+        // A batch scrolls to and flashes a row and buzzes once, when the whole
+        // batch is done.
         if (!batch) {
-          if (firstId) requestHighlightTransaction(firstId);
+          if (firstId) revealCreated(firstId, first.date);
           void triggerHaptic('success');
         }
         return 'created';
@@ -631,11 +642,11 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
         setJobsBoth((prev) => prev.filter((j) => j.id !== id));
       }).then(() => {
         // The first receipt in pick order that made an expense.
-        const createdId = queue
+        const created = queue
           .map(({ id }) => batch.createdIds.get(id))
-          .find((txnId) => txnId != null);
-        if (!createdId) return;
-        requestHighlightTransaction(createdId);
+          .find((entry) => entry != null);
+        if (!created) return;
+        revealCreated(created.id, created.date);
         void triggerHaptic('success');
       });
     },

@@ -2,6 +2,7 @@ import {
   requestEditTransaction,
   requestOpenTransactions,
   requestOpenTransactionsAfterSave,
+  requestRevealCreatedTransaction,
   subscribeEditTransaction,
   subscribeOpenTransactionsRequest,
 } from '~/services/transactionsNavigation';
@@ -32,6 +33,23 @@ describe('transaction save destination', () => {
       }
     },
   );
+});
+
+describe('revealing a scanned transaction', () => {
+  it('asks to scroll to its day without switching tabs', () => {
+    const listener = jest.fn();
+    const unsub = subscribeOpenTransactionsRequest(listener);
+    try {
+      requestRevealCreatedTransaction('2026-10-03');
+      expect(listener).toHaveBeenCalledWith({
+        monthKey: '2026-10',
+        dayKey: '2026-10-03',
+        onlyIfShowing: true,
+      });
+    } finally {
+      unsub();
+    }
+  });
 });
 
 describe('transactionsNavigation pub/sub', () => {

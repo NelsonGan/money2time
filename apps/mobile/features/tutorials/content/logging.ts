@@ -218,12 +218,14 @@ export const LOGGING_TUTORIALS: Tutorial[] = [
       'duitnow',
       'undo',
       'sorted for you',
+      'activity',
+      'badge',
     ],
     steps: [
       {
         image: 'review-notifications-1',
-        title: 'Tap the banner',
-        body: 'Once notification logging is set up in Automation, new bank and wallet notifications wait in a banner above your Calendar entries.',
+        title: 'Tap the circle above +',
+        body: 'Once notification logging is set up in Automation, new bank and wallet notifications are counted on the circle above the + on your Calendar. Tap it, then Review.',
       },
       {
         image: 'review-notifications-2',

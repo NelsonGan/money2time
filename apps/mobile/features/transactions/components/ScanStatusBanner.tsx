@@ -43,20 +43,24 @@ function stageMessageForPct(pct: number): string {
 }
 
 /**
- * Inline home-screen banner that surfaces background receipt scans. A snapped
- * receipt is parsed by the Worker while the user keeps using the app. A normal
- * or screenshot scan stays as a session-only completion card that opens the
- * saved expense. A split scan opens the split editor for review. A failed scan
- * stays as a dismissible error.
- * Renders nothing when idle.
+ * The receipt-scan rows of Home's activity sheet. A snapped receipt is parsed
+ * by the Worker while the user keeps using the app. A normal or screenshot
+ * scan becomes a "logged" row whose View opens the saved expense (dismissing
+ * the sheet clears these). A split scan opens the split editor for
+ * review. A failed scan stays as a dismissible error. Renders nothing when
+ * idle.
  */
-export function ScanStatusBanner() {
+export function ScanStatusBanner({ onNavigate }: { onNavigate?: () => void } = {}) {
   const { jobs, dismissJob, openReadyJob, openReadyJobAsSplit, openCreatedJob } = useReceiptScans();
 
   if (jobs.length === 0) return null;
+  // A row that opens another screen acts first, then closes the sheet.
+  const go = (action: (id: string) => void) => (id: string) => {
+    action(id);
+    onNavigate?.();
+  };
 
   return (
-    // No horizontal padding: the home header already insets this row (px-5).
     <View className="gap-2">
       {groupScanJobs(jobs).map((entry) =>
         entry.kind === 'batch' ? (
@@ -64,20 +68,40 @@ export function ScanStatusBanner() {
             key={entry.batchId}
             jobs={entry.jobs}
             onDismissJob={dismissJob}
-            onOpenCreated={openCreatedJob}
+            onOpenCreated={go(openCreatedJob)}
           />
         ) : (
           <ScanJobCard
             key={entry.job.id}
             job={entry.job}
             onDismiss={() => dismissJob(entry.job.id)}
-            onOpen={() => openReadyJob(entry.job.id)}
-            onOpenSplit={() => openReadyJobAsSplit(entry.job.id)}
-            onOpenCreated={() => openCreatedJob(entry.job.id)}
+            onOpen={() => go(openReadyJob)(entry.job.id)}
+            onOpenSplit={() => go(openReadyJobAsSplit)(entry.job.id)}
+            onOpenCreated={() => go(openCreatedJob)(entry.job.id)}
           />
         ),
       )}
     </View>
+  );
+}
+
+/**
+ * The tinted action button on an activity row (View, Review). No haptic of its
+ * own: the actions it runs play one.
+ */
+export function ActivityPill({ label, onPress }: { label: string; onPress: () => void }) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      hitSlop={6}
+      onPress={onPress}
+      style={({ pressed }) => ({ opacity: pressed ? 0.75 : 1 })}
+      className="rounded-full bg-primary/15 px-3.5 py-1.5"
+    >
+      <Text variant="caption" className="font-semibold text-primary" numberOfLines={1}>
+        {label}
+      </Text>
+    </Pressable>
   );
 }
 
@@ -165,14 +189,26 @@ function ScanJobCard({
             <X size={15} color={themeColors.textMuted} />
           </View>
         </>
-      ) : isReady || isCreated ? (
+      ) : isCreated ? (
+        <>
+          <View className="min-w-0 flex-1">
+            <Text variant="body" className="font-semibold text-foreground" numberOfLines={1}>
+              {createdTitle(job)}
+            </Text>
+            <Text variant="caption" tone="muted" className="mt-0.5" numberOfLines={1}>
+              {createdSubtitle(job)}
+            </Text>
+          </View>
+          <ActivityPill label={I18n.t('common.view')} onPress={onOpenCreated} />
+        </>
+      ) : isReady ? (
         <>
           <View className="flex-1">
             <Text variant="body" className="font-semibold text-foreground" numberOfLines={1}>
-              {I18n.t(isCreated ? 'receiptScan.logged_title' : 'receiptScan.review_ready_title')}
+              {I18n.t('receiptScan.review_ready_title')}
             </Text>
             <Text variant="caption" tone="muted" className="mt-0.5" numberOfLines={1}>
-              {I18n.t(isCreated ? 'receiptScan.logged_hint' : 'receiptScan.review_ready_hint')}
+              {I18n.t('receiptScan.review_ready_hint')}
             </Text>
           </View>
           {/* Secondary action: open the parsed line items in Split by Item.
@@ -190,7 +226,7 @@ function ScanJobCard({
             </Pressable>
           ) : null}
           {/* Dismiss the notice; a nested Pressable so it doesn't bubble to the
-              card's open-on-tap. Created transactions retain their receipt. */}
+              card's open-on-tap. */}
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={I18n.t('common.close')}
@@ -512,6 +548,25 @@ export function ScanProgress({ label }: { label?: string } = {}) {
         />
       </View>
     </View>
+  );
+}
+
+/** A logged scan reads as its merchant; several expenses from one image as a count. */
+function createdTitle(job: ScanJob): string {
+  const count = job.createdCount ?? 1;
+  const named = count === 1 ? job.createdNote?.trim() : '';
+  if (named) return named;
+  return count > 1
+    ? I18n.t('receiptScan.batch_logged_other', { count })
+    : I18n.t('receiptScan.logged_title');
+}
+
+function createdSubtitle(job: ScanJob): string {
+  const named = (job.createdCount ?? 1) === 1 && !!job.createdNote?.trim();
+  return (
+    [named ? I18n.t('receiptScan.logged_title') : null, job.createdAmountLabel]
+      .filter(Boolean)
+      .join(' · ') || I18n.t('receiptScan.logged_hint')
   );
 }
 

@@ -4,6 +4,12 @@ type OpenTransactionsRequest = {
   monthKey: string | null;
   /** Day (YYYY-MM-DD) to scroll to within the focused month, if any. */
   dayKey?: string | null;
+  /**
+   * Scroll Home's list only when Home is already the open tab, never switching
+   * to it. For work that finishes in the background (a receipt or screenshot
+   * scan), so it never pulls the user away from the tab they moved on to.
+   */
+  onlyIfShowing?: boolean;
 };
 
 type Listener = (request: OpenTransactionsRequest) => void;
@@ -20,6 +26,18 @@ export function requestOpenTransactionsAfterSave(date: string, keepCurrentTab = 
   requestOpenTransactions({
     monthKey: monthKeyFromIsoLocal(date),
     dayKey: dayKeyFromIsoLocal(date),
+  });
+}
+
+/**
+ * Land Home's list on the day of a transaction made in the background (a
+ * receipt scan), when Home is open, so the new row is in view as it flashes.
+ */
+export function requestRevealCreatedTransaction(date: string) {
+  requestOpenTransactions({
+    monthKey: monthKeyFromIsoLocal(date),
+    dayKey: dayKeyFromIsoLocal(date),
+    onlyIfShowing: true,
   });
 }
 

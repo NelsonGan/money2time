@@ -48,6 +48,8 @@ interface MonthPagerPageProps {
   fillLastSectionToViewport?: boolean;
   /** Flash a just-created transaction's row (see ActivityTransactionList). */
   highlightOnCreate?: boolean;
+  /** Room below the last row, above the tab bar's own inset. */
+  contentPaddingBottom?: number;
 }
 
 const EMPTY_TRANSACTIONS: TransactionWithRelations[] = [];
@@ -79,6 +81,7 @@ export const MonthPagerPage = memo(function MonthPagerPageImpl({
   contentPaddingHorizontal,
   fillLastSectionToViewport = false,
   highlightOnCreate = false,
+  contentPaddingBottom = LIST_BOTTOM_PADDING,
 }: MonthPagerPageProps) {
   const monthDate = useMemo(
     () => addFinancialMonths(monthPagerAnchorDate, item - centerIndex, monthCycle),
@@ -105,7 +108,7 @@ export const MonthPagerPage = memo(function MonthPagerPageImpl({
         onToggleDaySelection={onToggleDaySelection}
         emptyTitle={I18n.t('transactions.empty_month_title')}
         emptyMessage={I18n.t('transactions.empty_month_message')}
-        contentPaddingBottom={LIST_BOTTOM_PADDING}
+        contentPaddingBottom={contentPaddingBottom}
         contentPaddingHorizontal={contentPaddingHorizontal}
         extendUnderBottomNav
         fillLastSectionToViewport={fillLastSectionToViewport}

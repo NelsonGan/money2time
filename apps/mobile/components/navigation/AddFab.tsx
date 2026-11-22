@@ -17,6 +17,7 @@ import { TABLET_CONTENT_MAX_WIDTH, useDeviceLayout } from '~/hooks/useDeviceLayo
 import { usePressScale } from '~/hooks/usePressScale';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { triggerHaptic } from '~/services/haptics';
+import type { NavPlacement } from '~/utils/adaptiveLayout';
 
 interface AddFabButtonProps {
   onPress: () => void;
@@ -30,7 +31,8 @@ export const ADD_FAB_SIZE = 60;
 /** The flat + sits inside a primary disc, which reads smaller than bare clay. */
 const FLAT_FAB_SIZE = 56;
 const FAB_BOTTOM_GAP = 12;
-const FAB_RIGHT_MARGIN = spacing.lg;
+export const ADD_FAB_RIGHT_MARGIN = spacing.lg;
+const FAB_RIGHT_MARGIN = ADD_FAB_RIGHT_MARGIN;
 
 export function AddFabButton({
   onPress,
@@ -186,6 +188,15 @@ interface AddFabProps extends AddFabButtonProps {
    * than its items add up to.
    */
   railPillEnd?: number | null;
+}
+
+/**
+ * Distance from the bottom of the screen to just above the row the + and the
+ * Today pill float in, over the tab bar. Home's activity circle sits here so
+ * it covers neither. With the side rail it still clears the Today pill's row.
+ */
+export function getAboveFabRowInset(safeBottom: number, placement: NavPlacement = 'bottom') {
+  return getFloatingNavReservedInset(safeBottom, placement) + FAB_BOTTOM_GAP + ADD_FAB_SIZE + 10;
 }
 
 /** Gap between a top-aligned rail's pill and the + slot under it. */

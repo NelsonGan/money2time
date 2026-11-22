@@ -30,7 +30,6 @@ import {
 } from '~/components/ui';
 import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { useApp, usePaybackRows, useTransactions } from '~/context/AppContext';
-import { NotificationReviewBanner } from '~/features/autoLog/components/NotificationReviewBanner';
 import {
   buildInsightsCategoryPickerData,
   type InsightsCategoryPickerData,
@@ -46,7 +45,6 @@ import {
   DuplicateTransactionsDatePicker,
   MonthPagerPage,
 } from '~/features/transactions/components';
-import { ScanStatusBanner } from '~/features/transactions/components/ScanStatusBanner';
 import { TransactionSelectionActions } from '~/features/transactions/components/TransactionSelectionToolbar';
 import {
   MONTH_PAGER_CENTER_INDEX,
@@ -99,6 +97,7 @@ import {
   CENTER_YEAR_INDEX,
   TOTAL_YEAR_SLOTS,
 } from '../components/CalendarYearView';
+import { ACTIVITY_CIRCLE_CLEARANCE, HomeActivity } from '../components/HomeActivity';
 import {
   amountKeyMatches,
   parseAmountQuery,
@@ -167,9 +166,11 @@ export interface CalendarScreenProps {
   /**
    * Request to jump the calendar to a specific day (e.g. after creating a
    * transaction dated in an earlier month). The `token` makes repeat requests
-   * for the same day re-fire.
+   * for the same day re-fire. `onlyIfShowing` (a background scan) scrolls only
+   * the plain day list: it never leaves the month or year view, search or
+   * selection the user is in.
    */
-  goToDayRequest?: { dayKey: string; token: number } | null;
+  goToDayRequest?: { dayKey: string; token: number; onlyIfShowing?: boolean } | null;
   onOpenTransaction: (tx: TransactionWithRelations) => void;
   onOpenTransactionSplitBadge?: (tx: TransactionWithRelations) => void;
   onSelectionModeChange?: (isSelectionMode: boolean) => void;
@@ -1224,7 +1225,8 @@ export function CalendarScreen({
     const token = goToDayRequest?.token ?? 0;
     if (!token || token === lastGoToDayTokenRef.current) return;
     lastGoToDayTokenRef.current = token;
-    const { dayKey } = goToDayRequest!;
+    const { dayKey, onlyIfShowing } = goToDayRequest!;
+    if (onlyIfShowing && (viewMode !== 'day' || isSearchOpen || isSelectionModeRef.current)) return;
     const index = getMonthIndexForDay(dayKey);
     setSelectedDayKey(dayKey);
     setActiveListMonthIndex(index);
@@ -1240,6 +1242,7 @@ export function CalendarScreen({
   }, [
     goToDayRequest,
     getMonthIndexForDay,
+    isSearchOpen,
     scheduleFrame,
     setActiveListMonthIndex,
     viewMode,
@@ -1513,6 +1516,8 @@ export function CalendarScreen({
     ],
   );
 
+  // The activity circle floats over the list's end while it shows.
+  const [activityCircleVisible, setActivityCircleVisible] = useState(false);
   const renderListMonthPage = useCallback(
     ({ item }: { item: number }) => (
       <MonthPagerPage
@@ -1539,10 +1544,16 @@ export function CalendarScreen({
         contentPaddingHorizontal={listHorizontalPadding}
         fillLastSectionToViewport
         highlightOnCreate
+        contentPaddingBottom={
+          activityCircleVisible
+            ? LIST_BOTTOM_PADDING + ACTIVITY_CIRCLE_CLEARANCE
+            : LIST_BOTTOM_PADDING
+        }
       />
     ),
     [
       activeLocale,
+      activityCircleVisible,
       activeListMonthIndex,
       getDisplayValueForTransaction,
       getPageScrollToDayRef,
@@ -1782,18 +1793,6 @@ export function CalendarScreen({
                   </View>
                 </View>
               </Reanimated.View>
-            ) : null}
-
-            {/* Background receipt-scan status — sits below the income/expense
-                summary and above the transaction list on the home view. A
-                fragment, not a wrapping View: the header's gap applies to any
-                child it has, so an always-mounted wrapper put an empty gap
-                under the summary whenever both banners were hidden. */}
-            {viewMode === 'day' && !isSearchOpen ? (
-              <>
-                <ScanStatusBanner />
-                <NotificationReviewBanner />
-              </>
             ) : null}
           </View>
         </View>
@@ -2085,6 +2084,14 @@ export function CalendarScreen({
         transactions={duplicableSelectedTransactions}
         onClose={() => setShowDuplicatePicker(false)}
         onDuplicated={handleDuplicated}
+      />
+
+      {/* Background activity (receipt and screenshot scans, payment alerts to
+          review) as one circle above the +, which opens the Activity sheet.
+          Only in the day list, outside search and selection. */}
+      <HomeActivity
+        shown={viewMode === 'day' && !isSearchOpen && !isSelectionMode}
+        onVisibleChange={setActivityCircleVisible}
       />
     </View>
   );

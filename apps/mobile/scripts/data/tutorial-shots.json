@@ -1634,12 +1634,11 @@
     "source": "RAW/review-notifications-1.png",
     "marks": [
       {
-        "type": "rect",
-        "x": 0.044,
-        "y": 0.277,
-        "w": 0.913,
-        "h": 0.07,
-        "radius": 0.035
+        "type": "circle",
+        "x": 0.801,
+        "y": 0.73,
+        "w": 0.149,
+        "h": 0.0686
       }
     ]
   },
