@@ -638,6 +638,7 @@ function MainShellScreen({
   const [calendarGoToDayRequest, setCalendarGoToDayRequest] = useState<{
     dayKey: string;
     token: number;
+    onlyIfShowing?: boolean;
   } | null>(null);
   const [insightsResetToMonthToken, setInsightsResetToMonthToken] = useState(0);
   const [activityBreakdownInsightRequest, setActivityBreakdownInsightRequest] =
@@ -837,7 +838,12 @@ function MainShellScreen({
       // month) instead of snapping back to the current month.
       if (request.dayKey) {
         const dayKey = request.dayKey;
-        setCalendarGoToDayRequest((prev) => ({ dayKey, token: (prev?.token ?? 0) + 1 }));
+        const onlyIfShowing = request.onlyIfShowing;
+        setCalendarGoToDayRequest((prev) => ({
+          dayKey,
+          token: (prev?.token ?? 0) + 1,
+          onlyIfShowing,
+        }));
       } else {
         setCalendarResetToken((prev) => prev + 1);
       }

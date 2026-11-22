@@ -86,16 +86,16 @@ export function ScanStatusBanner({ onNavigate }: { onNavigate?: () => void } = {
   );
 }
 
-/** The tinted action button on an activity row (View, Review). */
+/**
+ * The tinted action button on an activity row (View, Review). No haptic of its
+ * own: the actions it runs play one.
+ */
 export function ActivityPill({ label, onPress }: { label: string; onPress: () => void }) {
   return (
     <Pressable
       accessibilityRole="button"
       hitSlop={6}
-      onPress={() => {
-        void triggerHaptic('selection');
-        onPress();
-      }}
+      onPress={onPress}
       style={({ pressed }) => ({ opacity: pressed ? 0.75 : 1 })}
       className="rounded-full bg-primary/15 px-3.5 py-1.5"
     >

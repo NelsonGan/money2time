@@ -37,6 +37,11 @@ import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 
 const BUBBLE_SIZE = 52;
+/**
+ * Extra room a list needs at its end while the circle shows, so the circle
+ * covers no more of the last rows than the + under it already does.
+ */
+export const ACTIVITY_CIRCLE_CLEARANCE = BUBBLE_SIZE + 10;
 const RING_STROKE = 3;
 const RING_RADIUS = (BUBBLE_SIZE - RING_STROKE) / 2;
 const RING_LENGTH = 2 * Math.PI * RING_RADIUS;
@@ -55,7 +60,14 @@ const isSettled = (job: ScanJob) => job.status !== 'scanning';
  * scans waiting to be opened and notifications to review stay. Renders
  * nothing when there is no activity.
  */
-export function HomeActivity({ shown }: { shown: boolean }) {
+export function HomeActivity({
+  shown,
+  onVisibleChange,
+}: {
+  shown: boolean;
+  /** Whether the circle is on screen, so the list can make room for it. */
+  onVisibleChange?: (visible: boolean) => void;
+}) {
   const { jobs, dismissJob } = useReceiptScans();
   const review = useNotificationReviewState();
   const [open, setOpen] = useState(false);
@@ -69,21 +81,35 @@ export function HomeActivity({ shown }: { shown: boolean }) {
     ).length + (review.visible && review.reviewing === 0 ? 1 : 0);
   const hasActivity = jobs.length > 0 || review.visible;
 
+  const circleVisible = shown && hasActivity;
+  useEffect(() => {
+    onVisibleChange?.(circleVisible);
+  }, [circleVisible, onVisibleChange]);
+
   // Nothing left (the last row was opened or cleared): close the sheet too.
   useEffect(() => {
     if (open && !hasActivity) setOpen(false);
   }, [hasActivity, open]);
 
-  const close = () => {
-    setOpen(false);
-    // What was shown is seen: logged scans and failures leave, and AI's
-    // review results move to History. Running scans and split scans that wait
-    // to be opened stay.
+  // What was shown is seen: logged scans and failures leave. Running scans and
+  // split scans that wait to be opened stay.
+  const clearSeenScans = () => {
     jobs
       .filter((job) => job.status === 'created' || job.status === 'error')
       .filter((job) => !job.batchId || jobs.every((j) => j.batchId !== job.batchId || isSettled(j)))
       .forEach((job) => dismissJob(job.id));
+  };
+  const close = () => {
+    setOpen(false);
+    clearSeenScans();
+    // AI's review results move to History.
     review.markResultsSeen();
+  };
+  // Review opens the review page, which shows AI's results in its "Sorted for
+  // you" card and marks them seen when the user leaves it, so they stay unseen.
+  const closeForReview = () => {
+    setOpen(false);
+    clearSeenScans();
   };
 
   const icon: ClayIconName = scanning
@@ -98,7 +124,7 @@ export function HomeActivity({ shown }: { shown: boolean }) {
 
   return (
     <>
-      {shown && hasActivity ? (
+      {circleVisible ? (
         <ActivityBubble
           icon={icon}
           running={running}
@@ -109,7 +135,7 @@ export function HomeActivity({ shown }: { shown: boolean }) {
           }}
         />
       ) : null}
-      <ActivitySheet visible={open} onClose={close} review={review} />
+      <ActivitySheet visible={open} onClose={close} onOpenReview={closeForReview} review={review} />
     </>
   );
 }
@@ -272,10 +298,13 @@ function ActivityBubble({
 function ActivitySheet({
   visible,
   onClose,
+  onOpenReview,
   review,
 }: {
   visible: boolean;
   onClose: () => void;
+  /** Closes the sheet as the review page opens, leaving AI's results unseen. */
+  onOpenReview: () => void;
   review: ReturnType<typeof useNotificationReviewState>;
 }) {
   const insets = useSafeAreaInsets();
@@ -296,7 +325,7 @@ function ActivitySheet({
       </View>
       <View className="gap-2 px-4">
         <ScanStatusBanner onNavigate={onClose} />
-        <NotificationReviewCard review={review} onOpen={onClose} />
+        <NotificationReviewCard review={review} onOpen={onOpenReview} />
       </View>
     </BottomSheetModal>
   );

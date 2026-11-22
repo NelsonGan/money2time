@@ -192,8 +192,8 @@ interface AddFabProps extends AddFabButtonProps {
 
 /**
  * Distance from the bottom of the screen to just above the row the + and the
- * Today pill float in, over the tab bar. Flash banners sit here so they cover
- * neither. With the side rail it still clears the Today pill's row.
+ * Today pill float in, over the tab bar. Home's activity circle sits here so
+ * it covers neither. With the side rail it still clears the Today pill's row.
  */
 export function getAboveFabRowInset(safeBottom: number, placement: NavPlacement = 'bottom') {
   return getFloatingNavReservedInset(safeBottom, placement) + FAB_BOTTOM_GAP + ADD_FAB_SIZE + 10;
