@@ -17,6 +17,7 @@ import { TABLET_CONTENT_MAX_WIDTH, useDeviceLayout } from '~/hooks/useDeviceLayo
 import { usePressScale } from '~/hooks/usePressScale';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { triggerHaptic } from '~/services/haptics';
+import type { NavPlacement } from '~/utils/adaptiveLayout';
 
 interface AddFabButtonProps {
   onPress: () => void;
@@ -186,6 +187,15 @@ interface AddFabProps extends AddFabButtonProps {
    * than its items add up to.
    */
   railPillEnd?: number | null;
+}
+
+/**
+ * Distance from the bottom of the screen to just above the row the + and the
+ * Today pill float in, over the tab bar. Flash banners sit here so they cover
+ * neither. With the side rail it still clears the Today pill's row.
+ */
+export function getAboveFabRowInset(safeBottom: number, placement: NavPlacement = 'bottom') {
+  return getFloatingNavReservedInset(safeBottom, placement) + FAB_BOTTOM_GAP + ADD_FAB_SIZE + 10;
 }
 
 /** Gap between a top-aligned rail's pill and the + slot under it. */

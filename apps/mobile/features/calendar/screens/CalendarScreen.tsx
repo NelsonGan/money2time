@@ -17,6 +17,7 @@ import { monthsBetween, shiftYearMonth, yearMonthFromKey } from '~/components/da
 import { FlashBannerStack } from '~/components/feedback/FlashBanner';
 import { useContentFrame } from '~/components/layout/ContentFrame';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
+import { getAboveFabRowInset } from '~/components/navigation/AddFab';
 import { useBottomNavMinimize } from '~/components/navigation/BottomNavMinimize';
 import { FilterIconButton } from '~/components/navigation/FilterIconButton';
 import { IN_OUT_VALUE_TEXT_PROPS, InOutHeader } from '~/components/navigation/InOutHeader';
@@ -222,7 +223,12 @@ export function CalendarScreen({
   } = useApp();
   const monthCycle = monthCycleOf(settings);
   const themeColors = useThemeColors();
-  const { contentWidth: frameContentWidth, panes: twoPane, wideTabs } = useDeviceLayout();
+  const {
+    contentWidth: frameContentWidth,
+    panes: twoPane,
+    wideTabs,
+    navPlacement,
+  } = useDeviceLayout();
   const safeAreaInsets = useSafeAreaInsets();
   const { width: frameWidth } = useContentFrame();
   // Open iPhone Duo: the header and a live month grid fill the left pane and
@@ -2078,12 +2084,13 @@ export function CalendarScreen({
       />
 
       {/* Flash banners for background receipt scans and payment alerts to
-          review. They float over the top of the screen instead of sitting in
-          the header, so they never push the list down, and only show (and
-          count down) while the day list is on screen. */}
+          review. They float over the bottom of the screen, above the + and the
+          tab bar, instead of sitting in the header, so they never push the
+          list down, and only show (and count down) while the day list is on
+          screen. */}
       <HomeFlashBanners
         shown={viewMode === 'day' && !isSearchOpen && !isSelectionMode}
-        top={safeAreaInsets.top + 4}
+        bottom={getAboveFabRowInset(safeAreaInsets.bottom, navPlacement)}
         right={twoPane?.right ?? 0}
       />
     </View>
@@ -2094,11 +2101,19 @@ export function CalendarScreen({
  * Home's flash banners. They read whether Home is the visible tab here, not in
  * the screen, so a tab switch re-renders this and not the whole calendar.
  */
-function HomeFlashBanners({ shown, top, right }: { shown: boolean; top: number; right: number }) {
+function HomeFlashBanners({
+  shown,
+  bottom,
+  right,
+}: {
+  shown: boolean;
+  bottom: number;
+  right: number;
+}) {
   const tabActive = useTabActive();
   if (!shown || !tabActive) return null;
   return (
-    <FlashBannerStack top={top} right={right}>
+    <FlashBannerStack bottom={bottom} right={right}>
       <ScanStatusBanner />
       <NotificationReviewBanner />
     </FlashBannerStack>
