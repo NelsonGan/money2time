@@ -36,7 +36,8 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 
-const BUBBLE_SIZE = 52;
+// The same size as the + under it, so the two read as a pair.
+const BUBBLE_SIZE = ADD_FAB_SIZE;
 /**
  * Extra room a list needs at its end while the circle shows, so the circle
  * covers no more of the last rows than the + under it already does.
@@ -246,7 +247,7 @@ function ActivityBubble({
                 }}
                 className="items-center justify-center border border-border bg-card"
               >
-                <ClayIcon name={icon} size={30} flatSize={22} />
+                <ClayIcon name={icon} size={34} flatSize={24} />
                 <Animated.View
                   pointerEvents="none"
                   style={[
