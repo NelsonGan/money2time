@@ -21,7 +21,7 @@ import {
 import { runAfterInteractions } from '~/utils/interactions';
 
 import type { CaptureInput } from '../lib/captureQueue';
-import { androidCapturePackages } from '../lib/prefs';
+import { listenerConfigFor } from '../lib/prefs';
 import { runNotificationAiReview } from '../notificationAiReview';
 import {
   type AlertProcessingDeps,
@@ -99,17 +99,7 @@ export function PaymentAlertSync() {
   // The listener reads this file; the packages are the only alert content filter.
   useEffect(() => {
     if (!isNotificationCaptureSupported()) return;
-    writeListenerConfig({
-      enabled: prefs.alertsEnabled,
-      packages: androidCapturePackages(prefs),
-      // `adb shell cmd notification post` alerts, for development only.
-      allowShell: __DEV__ && prefs.alertsEnabled,
-      // Turned off after being set up (apps chosen, master switch off), as
-      // opposed to not set up yet, when setup still wants the recent apps.
-      optedOut:
-        !prefs.alertsEnabled &&
-        Object.values(prefs.sources).some((source) => source.channel === 'android_notification'),
-    });
+    writeListenerConfig(listenerConfigFor(prefs, __DEV__));
   }, [prefs]);
 
   const drain = useCallback(async () => {
@@ -205,7 +195,11 @@ export function PaymentAlertSync() {
   useEffect(() => {
     if (!isPaymentAlertCaptureSupported()) return undefined;
     // Off the startup path: the first screen needs the JS thread more.
-    const handle = runAfterInteractions(() => void drainRef.current());
+    // A cold start is when a killed listener most needs reconnecting, not only a return to the foreground.
+    const handle = runAfterInteractions(() => {
+      void drainRef.current();
+      void repairListener(alertsEnabledRef.current);
+    });
     // Android tells the open app about each capture; iOS cannot, so look.
     let poll: ReturnType<typeof setInterval> | null = null;
     const stopPolling = () => {

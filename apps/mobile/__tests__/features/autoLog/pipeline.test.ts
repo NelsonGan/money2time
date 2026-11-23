@@ -12,6 +12,7 @@ import { PAYMENT_APPS } from '~/features/autoLog/lib/paymentApps';
 import {
   androidCapturePackages,
   iosSourceKey,
+  listenerConfigFor,
   matchesIgnorePhrase,
   newAlertSource,
   parsePaymentAlertPrefs,
@@ -191,6 +192,22 @@ describe('payment alert prefs', () => {
     value = withAlertSource(value, source({ channel: 'ios_alert', sourceKey: 'maybank' }));
     expect(androidCapturePackages(value)).toEqual(['a.wallet', 'b.bank']);
     expect(androidCapturePackages({ ...value, alertsEnabled: false })).toEqual([]);
+  });
+
+  it('tells the listener it was turned off only after apps were chosen', () => {
+    const chosen = withAlertSource(prefs({ alertsEnabled: true }), source({ sourceKey: 'b.bank' }));
+    expect(listenerConfigFor(chosen, false)).toMatchObject({
+      enabled: true,
+      packages: ['b.bank'],
+      optedOut: false,
+    });
+    // Switched back on: written before the rebind, so the listener stays bound.
+    expect(listenerConfigFor({ ...chosen, alertsEnabled: false }, false)).toMatchObject({
+      enabled: false,
+      packages: [],
+      optedOut: true,
+    });
+    expect(listenerConfigFor(prefs({ alertsEnabled: false }), false).optedOut).toBe(false);
   });
 
   it('starts a new source with no guessed account', () => {

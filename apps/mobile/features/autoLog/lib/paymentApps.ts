@@ -37,6 +37,38 @@ export const PAYMENT_APPS: readonly PaymentApp[] = [
     package: 'com.tpaay.bigpay',
     name: 'BigPay',
   },
+  {
+    package: 'my.rytbank.app',
+    name: 'Ryt Bank',
+  },
+  {
+    package: 'my.com.gxbank.app',
+    name: 'GXBank',
+  },
+  {
+    package: 'my.com.hongleongconnect.mobileconnect',
+    name: 'HLB Connect',
+  },
+  {
+    package: 'com.cimb.cimbocto',
+    name: 'CIMB OCTO',
+  },
+  {
+    package: 'com.pbb.mypb',
+    name: 'MyPB by Public Bank',
+  },
+  {
+    package: 'com.rhbgroup.rhbmobilebanking',
+    name: 'RHB Mobile Banking',
+  },
+  {
+    package: 'com.ambank.ambankonline',
+    name: 'AmOnline',
+  },
+  {
+    package: 'com.bsn.mybsn',
+    name: 'myBSN',
+  },
   // Singapore
   {
     package: 'com.dbs.dbspaylah',

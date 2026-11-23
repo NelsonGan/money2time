@@ -164,6 +164,33 @@ export function matchesIgnorePhrase(
   return phrases.some((phrase) => containsWords(lowerText, phrase));
 }
 
+/**
+ * What the native listener reads from config.json. Write it before asking
+ * Android to rebind: a listener that connects while the file still says
+ * optedOut unbinds itself again at once.
+ */
+export function listenerConfigFor(
+  prefs: PaymentAlertPrefs,
+  isDev: boolean,
+): {
+  enabled: boolean;
+  packages: string[];
+  allowShell: boolean;
+  optedOut: boolean;
+} {
+  return {
+    enabled: prefs.alertsEnabled,
+    packages: androidCapturePackages(prefs),
+    // `adb shell cmd notification post` alerts, for development only.
+    allowShell: isDev && prefs.alertsEnabled,
+    // Turned off after being set up (apps chosen, master switch off), as
+    // opposed to not set up yet, when setup still wants the recent apps.
+    optedOut:
+      !prefs.alertsEnabled &&
+      Object.values(prefs.sources).some((source) => source.channel === 'android_notification'),
+  };
+}
+
 /** Android packages the native listener should capture. */
 export function androidCapturePackages(prefs: PaymentAlertPrefs): string[] {
   if (!prefs.alertsEnabled) return [];

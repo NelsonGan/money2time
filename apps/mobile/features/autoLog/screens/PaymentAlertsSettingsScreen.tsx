@@ -21,10 +21,12 @@ import {
   readListenerStatus,
   rebindNotificationListener,
   unbindNotificationListener,
+  writeListenerConfig,
 } from '~/services/paymentCapture';
 import type { PaymentAlertSource } from '~/types';
 
 import { isPayableAccount } from '../lib/binding';
+import { listenerConfigFor } from '../lib/prefs';
 
 interface PaymentAlertsSettingsScreenProps {
   onBack: () => void;
@@ -110,6 +112,9 @@ export function PaymentAlertsSettingsScreen({
       return;
     }
     updatePrefs((previous) => ({ ...previous, alertsEnabled: enabled }));
+    // Now rather than in PaymentAlertSync's effect, which runs after the
+    // rebind below: the listener reads optedOut as it connects.
+    writeListenerConfig(listenerConfigFor({ ...prefs, alertsEnabled: enabled }, __DEV__));
     if (enabled) void rebindNotificationListener().then(refreshHealth);
     else void unbindNotificationListener();
   };
