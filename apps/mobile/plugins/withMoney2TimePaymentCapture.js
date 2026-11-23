@@ -697,10 +697,33 @@ class PaymentCaptureModule(reactContext: ReactApplicationContext) : ReactContext
     promise.reject("unavailable", "No notification access settings on this device")
   }
 
+  /**
+   * Reconnect a granted listener that is not bound. Xiaomi's HyperOS (and
+   * other OEM battery managers) kill the listener and then ignore
+   * requestRebind, leaving access granted with nothing delivered. Turning the
+   * service component off and on makes the system rebind the package's
+   * listeners the way an app update does; the user's grant is kept.
+   */
   @ReactMethod
   fun requestRebind(promise: Promise) {
+    val context = reactApplicationContext
+    val component = listenerComponent()
     try {
-      NotificationListenerService.requestRebind(listenerComponent())
+      val granted = NotificationManagerCompat.getEnabledListenerPackages(context).contains(context.packageName)
+      if (granted && !PaymentCaptureListener.isConnected()) {
+        val packageManager = context.packageManager
+        packageManager.setComponentEnabledSetting(
+          component,
+          PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+          PackageManager.DONT_KILL_APP,
+        )
+        packageManager.setComponentEnabledSetting(
+          component,
+          PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+          PackageManager.DONT_KILL_APP,
+        )
+      }
+      NotificationListenerService.requestRebind(component)
       promise.resolve(null)
     } catch (error: Exception) {
       promise.reject("rebind_failed", error)

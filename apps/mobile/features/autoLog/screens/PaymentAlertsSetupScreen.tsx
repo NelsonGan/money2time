@@ -171,6 +171,11 @@ export function PaymentAlertsSetupScreen({ initialStep, onClose }: PaymentAlerts
     [updatePrefs],
   );
 
+  const savedLabel = useCallback(
+    (pkg: string) => findAlertSource(prefs, 'android_notification', pkg)?.label,
+    [prefs],
+  );
+
   const setBinding = useCallback(
     (source: PaymentAlertSource, accountId: string) => {
       updatePrefs((previous) => withAlertSource(previous, { ...source, accountId }));
@@ -295,6 +300,7 @@ export function PaymentAlertsSetupScreen({ initialStep, onClose }: PaymentAlerts
             <AppPickerList
               selected={selected}
               onToggle={toggleApp}
+              savedLabel={savedLabel}
               renderSelectedDetail={(app) => {
                 const source = findAlertSource(prefs, 'android_notification', app.package);
                 if (!source) return null;

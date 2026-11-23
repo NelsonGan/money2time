@@ -29,6 +29,8 @@ interface AppPickerListProps {
   onToggle: (app: PickableApp, on: boolean) => void;
   /** Rendered under a selected app (its "Pays from" control). */
   renderSelectedDetail?: (app: PickableApp) => React.ReactNode;
+  /** The name saved when an app was chosen, for one neither list shows any more. */
+  savedLabel?: (pkg: string) => string | undefined;
 }
 
 /**
@@ -37,7 +39,12 @@ interface AppPickerListProps {
  * <queries>, so no broad package visibility is needed); "Recently active" are
  * apps the listener has seen post a notification (labels only, never content).
  */
-export function AppPickerList({ selected, onToggle, renderSelectedDetail }: AppPickerListProps) {
+export function AppPickerList({
+  selected,
+  onToggle,
+  renderSelectedDetail,
+  savedLabel,
+}: AppPickerListProps) {
   const themeColors = useThemeColors();
   const [installed, setInstalled] = useState<InstalledAppInfo[]>([]);
   const [seen, setSeen] = useState<SeenApp[]>([]);
@@ -113,10 +120,10 @@ export function AppPickerList({ selected, onToggle, renderSelectedDetail }: AppP
       .filter((pkg) => !shown.has(pkg))
       .map((pkg) => ({
         package: pkg,
-        label: PAYMENT_APPS.find((app) => app.package === pkg)?.name ?? pkg,
+        label: PAYMENT_APPS.find((app) => app.package === pkg)?.name ?? savedLabel?.(pkg) ?? pkg,
         iconUri: null,
       }));
-  }, [recent, selected, suggested]);
+  }, [recent, savedLabel, selected, suggested]);
 
   const renderRow = (app: PickableApp) => {
     const on = selected.has(app.package);
