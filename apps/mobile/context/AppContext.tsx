@@ -115,6 +115,7 @@ import {
   isInstalmentPlan,
 } from '~/features/instalments/lib/instalmentPlan';
 import { computeItemStats } from '~/features/items/utils';
+import { requestAutomationTag } from '~/features/places/lib/automationTag';
 import { asksForLocationsOffer, requestLocationsOffer } from '~/features/places/lib/locationsOffer';
 import {
   buildRefundNote,
@@ -434,6 +435,12 @@ export interface CreateTransactionMeta {
   onNotificationReviewPersisted?: (transactionId: string) => void;
   /** A transfer's fee, written as its own expense row beside it (`transferFee.ts`). */
   transferFee?: TransferFeeDraft | null;
+  /**
+   * An automation's entry (an Apple Pay tap, a payment alert, a screenshot):
+   * when it saw the payment. A save that names no place is then tagged with
+   * the phone's, if that was moments ago (`features/places/lib/automationTag.ts`).
+   */
+  automationOccurredAt?: string;
 }
 
 export interface CreateItemInput {
@@ -795,6 +802,10 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   deleteTransaction: (id: string) => void;
   updateTransactionsBulk: (
     updates: { id: string; input: Partial<CreateTransactionInput> }[],
+    options?: {
+      /** Runs once the deferred write has landed, told whether it was stored. */
+      afterWrite?: (stored: boolean) => void;
+    },
   ) => void;
   deleteTransactionsBulk: (ids: string[]) => void;
   /** Returns the id of the newly created (optimistically inserted) transaction.
@@ -3873,6 +3884,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             )
           ) {
             requestLocationsOffer();
+          }
+          if (
+            meta?.automationOccurredAt &&
+            Object.keys(locationInputOf(requestedInput)).length === 0
+          ) {
+            requestAutomationTag({ transactionId: id, occurredAt: meta.automationOccurredAt });
           }
           // Reconcile only the inserted row. A full refreshTransactions here
           // would re-read the whole table and replace every row identity,

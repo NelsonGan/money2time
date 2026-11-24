@@ -122,7 +122,7 @@ import { loanRepaymentReporting } from '~/features/loans/lib/loanMath';
 import { FeatureAnnouncementModal } from '~/features/news/components/FeatureAnnouncementModal';
 import type { FeatureAnnouncement } from '~/features/news/featureAnnouncements';
 import { OnboardingFlow } from '~/features/onboarding/screens';
-import { LocationsOfferHost, SpendingMapScreen } from '~/features/places';
+import { AutomationTagHost, LocationsOfferHost, SpendingMapScreen } from '~/features/places';
 import { ReimbursementsScreen } from '~/features/reimbursements/screens/ReimbursementsScreen';
 import { ReviewPrePromptSheet } from '~/features/reviewPrompt/components/ReviewPrePromptSheet';
 import { BiometricLockGate } from '~/features/settings/components/BiometricLockGate';
@@ -1909,6 +1909,7 @@ function AutoLogSync() {
           current.createTransaction(input, {
             source: 'autolog',
             autoLogIsPro: current.isPro,
+            automationOccurredAt: entry.createdAt,
             onAutoLogPersisted: (transactionId) =>
               recordApplePayTap(entry, input, {
                 status: 'logged',
@@ -2062,6 +2063,10 @@ function ScreenshotScanSync() {
             rel,
             Platform.OS === 'android' ? 'share' : 'shortcut',
             'screenshot',
+            // Back Tap shoots the screen as it is, so its time is the moment
+            // the user looked at the payment. A shared image can be any age
+            // (a receipt from lunch shared at home), so it is never tagged.
+            Platform.OS === 'ios' ? entry.createdAt : undefined,
           );
         } catch (error) {
           // Couldn't even read/store the shot — report for visibility and drop
@@ -3576,6 +3581,7 @@ function AppContent() {
       {/* The one-time Locations offer after a first entry; waits for any other
           prompt (or celebration) through the coordinator. */}
       <LocationsOfferHost allowed={!biometricLocked && rootPromptsAllowed} />
+      <AutomationTagHost />
       <AutoLogLimitPrompt
         allowed={
           navigationReady &&
