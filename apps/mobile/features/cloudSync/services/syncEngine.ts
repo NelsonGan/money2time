@@ -762,7 +762,8 @@ export class SyncEngine {
   /**
    * Pulls. Turso's engine records how far into the WAL its last pull reached;
    * a replica whose WAL no longer holds those frames, or whose files were put
-   * back from an older copy, fails every pull (`isStuckReplicaError`). Such a replica is deleted and downloaded again
+   * back from an older copy, or whose file is damaged, fails every pull
+   * (`isStuckReplicaError`). Such a replica is deleted and downloaded again
    * when it holds nothing the cloud lacks: always before a link (it is only a
    * copy of the cloud then), and in a sync when nothing waits to be pushed.
    * Returns whether the pull may have brought changes.
@@ -1822,7 +1823,11 @@ function isStuckReplicaError(error: unknown): boolean {
   const message = error instanceof Error ? error.message : String(error);
   return (
     message.includes('unable to checkpoint synced portion of WAL') ||
-    message.includes('remote_pull_gen > local_pull_gen')
+    message.includes('remote_pull_gen > local_pull_gen') ||
+    // The local file is damaged (a TEXT value that is not UTF-8, say): the app
+    // cannot write one, and the same read fails every pull. A server's own
+    // damage report comes back as a remote error and is not ours to rebuild.
+    (message.includes('Corrupt database') && !message.includes('remote server returned an error'))
   );
 }
 
