@@ -2024,8 +2024,11 @@ updated_at)`, with each row as JSON, plus `sync_info` (the choice screen's
   files were put back from an older copy of themselves (an Android or iCloud
   backup restored, a phone-to-phone transfer: the cloud then remembers more
   pushes from this replica than its files do, the engine's
-  `remote_pull_gen > local_pull_gen` protocol error), fails every time, so the
-  replica is deleted and downloaded again once, when it holds nothing the
+  `remote_pull_gen > local_pull_gen` protocol error), or because the
+  replica's file is damaged (the engine's `Corrupt database`, such as a TEXT
+  value that is not UTF-8, which the app cannot write: the binding stores an
+  unpaired surrogate as U+FFFD; a server's own damage report does not count),
+  fails every time, so the replica is deleted and downloaded again once, when it holds nothing the
   cloud lacks: always before a link (it is only a copy of the cloud then),
   and in a sync when nothing waits to be pushed. Each rebuild sends an error
   report with `stage: 'replica_rebuilt'`, so the fault's rate stays visible.
@@ -3777,7 +3780,7 @@ PostHog error tracking replaced Sentry on 2026-10-12. The native app sends every
 | Caught errors                | `reportError(error, context)` from [errorReporting](apps/mobile/services/errorReporting.native.ts)              | Existing call sites keep their `scope` context (`app_load`, `notifications`, `revenueCat.restore`, …). Context keys are snake-cased; only scalar values are kept. |
 | Breadcrumbs                  | `addErrorStep` on every visible-screen change                                                                   | Local only; attached to the next exception as `$exception_steps`.                                                                                                 |
 
-One caught-error report marks a recovery, not a failure: `scope: 'cloud_sync'`, `stage: 'replica_rebuilt'` is sent once each time Cloud Sync replaces a local replica the Turso engine could not pull into (see [Cloud Sync](#cloud-sync), When it runs): one whose WAL no longer matches the engine's record (`unable to checkpoint synced portion of WAL`), or one whose files were put back from an older copy by a backup restore or phone transfer (`remote_pull_gen > local_pull_gen`; first seen 2026-11-22, 1 user). About one a day at its first rate (2026-11), well inside the exception allowance; a rebuild that fails is reported at the caller's stage instead.
+One caught-error report marks a recovery, not a failure: `scope: 'cloud_sync'`, `stage: 'replica_rebuilt'` is sent once each time Cloud Sync replaces a local replica the Turso engine could not pull into (see [Cloud Sync](#cloud-sync), When it runs): one whose WAL no longer matches the engine's record (`unable to checkpoint synced portion of WAL`), one whose files were put back from an older copy by a backup restore or phone transfer (`remote_pull_gen > local_pull_gen`; first seen 2026-11-22, 1 user), or one whose file is damaged (`Corrupt database`, for example `TEXT value contains invalid UTF-8` while replaying an unsent change; first seen 2026-11-24, 1 user, whose Cloud Sync could not be turned on until then). About one a day at its first rate (2026-11), well inside the exception allowance; a rebuild that fails is reported at the caller's stage instead.
 
 Hardening ([errorReporting.shared.ts](apps/mobile/services/errorReporting.shared.ts)): identical exceptions are deduplicated and at most 25 distinct exceptions are sent per rolling 5 minutes, so a render loop cannot exhaust the allowance; context is reduced to PostHog `$` fields, `component_stack` and short scalars. Console output is not captured. The website captures its own uncaught errors with `capture_exceptions`.
 

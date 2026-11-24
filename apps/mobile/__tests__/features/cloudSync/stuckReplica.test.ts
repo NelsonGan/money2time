@@ -17,6 +17,13 @@ const STUCK =
 const RESTORED =
   'sync engine operation failed: database sync engine error: protocol error: ' +
   'remote_pull_gen > local_pull_gen: 11 > 10';
+// A replica file the engine finds damaged: replaying this phone's unsent change
+// over the pulled ones read a TEXT value that is not UTF-8. The app cannot
+// write one (the binding stores an unpaired surrogate as U+FFFD), so the file
+// itself is damaged, and every pull fails the same way (2026-11-24, iPadOS).
+const CORRUPT =
+  'sync engine operation failed: database sync engine error: failed to replay local change after remote apply: ' +
+  'database error: Corrupt database: TEXT value contains invalid UTF-8';
 let stuckMessage = STUCK;
 
 const REPLICA_DIR = '/data/user/0/app/databases';
@@ -116,6 +123,7 @@ describe('pulling before a link', () => {
   it.each([
     ['its WAL no longer holds the last pull', STUCK],
     ['it was restored from an older copy of its files', RESTORED],
+    ['its file is damaged', CORRUPT],
   ])(
     'starts again from a fresh copy of the cloud when a kept replica is stuck: %s',
     async (_case, message) => {
@@ -177,6 +185,19 @@ describe('pulling before a link', () => {
 
     await expect(sync.pullLatest()).rejects.toThrow(STUCK);
     expect(reportError).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    'remote server returned an error: status=500, body={"error":"Corrupt database: page 7"}',
+    'unexpected http response: status=502, body=Corrupt database: page 7',
+  ])('keeps the replica when the cloud, not this file, reports damage: %s', async (remote) => {
+    stuckMessage = `sync engine operation failed: database sync engine error: ${remote}`;
+    await engine().open();
+    const sync = engine();
+    await sync.open();
+
+    await expect(sync.pullLatest()).rejects.toThrow(stuckMessage);
+    expect(log.some((entry) => entry.startsWith('delete'))).toBe(false);
   });
 
   it('does not throw away the replica for other failures', async () => {

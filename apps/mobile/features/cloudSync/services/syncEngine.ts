@@ -762,7 +762,8 @@ export class SyncEngine {
   /**
    * Pulls. Turso's engine records how far into the WAL its last pull reached;
    * a replica whose WAL no longer holds those frames, or whose files were put
-   * back from an older copy, fails every pull (`isStuckReplicaError`). Such a replica is deleted and downloaded again
+   * back from an older copy, or whose file is damaged, fails every pull
+   * (`isStuckReplicaError`). Such a replica is deleted and downloaded again
    * when it holds nothing the cloud lacks: always before a link (it is only a
    * copy of the cloud then), and in a sync when nothing waits to be pushed.
    * Returns whether the pull may have brought changes.
@@ -1816,13 +1817,18 @@ function assetFile(relativePath: string): File {
  *   tursodatabase/turso#8366);
  * - the replica's files were put back from an older copy (an Android or
  *   iCloud backup restored, a phone-to-phone transfer): the cloud's record of
- *   this replica's pushes is ahead of what its files remember.
+ *   this replica's pushes is ahead of what its files remember;
+ * - the replica's file is damaged (`Corrupt database`, such as a TEXT value
+ *   that is not UTF-8, which the app cannot write): the same read fails every
+ *   pull. A server's damage report carries its HTTP status and body (`status=500,
+ *   body=…`, in either of the engine's two formats) and is not ours to rebuild.
  */
 function isStuckReplicaError(error: unknown): boolean {
   const message = error instanceof Error ? error.message : String(error);
   return (
     message.includes('unable to checkpoint synced portion of WAL') ||
-    message.includes('remote_pull_gen > local_pull_gen')
+    message.includes('remote_pull_gen > local_pull_gen') ||
+    (message.includes('Corrupt database') && !/status=\d+, body=/.test(message))
   );
 }
 
