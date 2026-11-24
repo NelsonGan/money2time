@@ -19,7 +19,7 @@ name: CI / CD
 # and branch runs are easy to tell apart at a glance.
 run-name: >-
   ${{ github.event_name == 'pull_request' && format('PR · #{0}', github.event.number)
-   || github.event_name == 'workflow_dispatch' && format('Manual · {0}/{1}', github.event.inputs.platform, github.event.inputs.profile)
+   || github.event_name == 'workflow_dispatch' && format('Manual · {0}/{1}{2}', github.event.inputs.platform, github.event.inputs.profile, (github.event.inputs.submit == 'false' || github.event.inputs.profile != 'production') && ' · build only' || '')
    || github.ref == 'refs/heads/main' && 'Production Release'
    || format('Branch · {0}', github.ref_name) }}
 
@@ -45,6 +45,10 @@ on:
           - production
           - preview
           - development
+      submit:
+        description: Submit the build to the store (off builds only, and may run from any branch)
+        type: boolean
+        default: true
 
 # Only pull request runs cancel each other here. A push to main gets a group of
 # its own: a Worker- or docs-only merge used to start a run in the same group
@@ -57,6 +61,9 @@ concurrency:
   cancel-in-progress: true
 
 env:
+  # The one place the EAS CLI's version is written. The store build's cache of
+  # its local build plugin is named after it too.
+  EAS_CLI_VERSION: 27.5.0
   # Paths that cannot change the shipped binary; anything else is an app
   # change. Read by `changes` and by `plan`'s newer-release check.
   NON_APP_PATHS: '^(apps/cloudflare/|apps/web/|apps/app-studio/|\.github/|\.claude/|\.agents/|\.codex/|\.vscode/)|(^|/)[^/]*\.md$|^LICENSE$'
@@ -348,8 +355,8 @@ jobs:
   # both `bundle` jobs passed (or `bundle` had nothing to do). They are separate jobs
   # so they can run at the same time, and without this a pull request with one
   # of them red would look green on the others. Nothing waits for this job: the
-  # store build is gated on `checks` and `lint`, as it was when the bundle was
-  # a pull-request-only step.
+  # store build checks `checks` and `lint` before it submits, as it did when
+  # the bundle was a pull-request-only step.
   test:
     name: Test
     needs: [changes, checks, lint, bundle]
@@ -395,11 +402,18 @@ jobs:
 
   plan:
     name: Production · Plan
-    # Waits for `checks` and `lint`, not for the `test` job that sums them up
-    # with `bundle`: a job whose own `if:` has no status check is skipped when
-    # any job upstream of it was skipped, and `bundle` is skipped on a manual
-    # run.
-    needs: [changes, checks, lint]
+    # Does not wait for `checks` and `lint`. The store build starts beside
+    # them and waits for them only before it submits (see "Wait for the
+    # checks" in `deploy`), so the two minutes they take are spent while the
+    # build compiles instead of before it starts. A commit whose checks fail is
+    # still built, and the build is thrown away: it takes a build number, and
+    # nothing reaches either store. It also still replaces a release already
+    # building (`deploy`'s concurrency), so a red commit merged during a green
+    # one's build means neither ships until the next green push. RiceCal's
+    # workflow has always worked this way; checks that passed on the pull
+    # request almost never fail on `main`, and two app merges close together
+    # are much more common, where replacing the older build is what saves time.
+    needs: changes
     # A push to main only cuts a store build when something in the push can
     # reach the binary — a Worker-only or docs-only merge stops here. Manual
     # dispatch always builds (that is what it is for).
@@ -472,8 +486,10 @@ jobs:
     # A newer store build of the same platform and profile replaces this one.
     # Job-level, so only a run that gets this far (an app change) cancels a
     # release; a skipped job never joins the group.
+    # A build-only dispatch has a group of its own, so trying a build on `main`
+    # does not cancel a release.
     concurrency:
-      group: store-build-${{ github.ref }}-${{ matrix.platform }}-${{ matrix.profile }}
+      group: store-build-${{ github.ref }}-${{ matrix.platform }}-${{ matrix.profile }}${{ github.event_name == 'workflow_dispatch' && (github.event.inputs.submit == 'false' || github.event.inputs.profile != 'production') && '-build-only' || '' }}
       cancel-in-progress: true
     strategy:
       fail-fast: false
@@ -483,11 +499,21 @@ jobs:
     timeout-minutes: 90
     permissions:
       contents: read
+      # For "Wait for the checks", which reads this run's jobs.
+      actions: read
+    env:
+      # Whether this run ends in a store. A push always does. A dispatch does
+      # when it asks to and builds the production profile, the only one
+      # `eas.json` has a submit profile for. A run that does not submit builds
+      # and stops, from any branch: the way to try a change to the store build
+      # before it is on `main`.
+      WILL_SUBMIT: ${{ github.event_name != 'workflow_dispatch' || (inputs.submit && inputs.profile == 'production') }}
     steps:
+      # Only a build that will be submitted has to come from `main`.
       - name: Verify branch
-        if: github.ref != 'refs/heads/main'
+        if: github.ref != 'refs/heads/main' && env.WILL_SUBMIT == 'true'
         run: |
-          echo "Deploy can only run on main (got ${{ github.ref }})."
+          echo "Only main can be submitted to the stores (got ${{ github.ref }})."
           exit 1
 
       - name: Check out repository
@@ -575,6 +601,57 @@ jobs:
       - name: Set up the compiler cache
         uses: ./.github/actions/ccache
 
+      # ccache does nothing for Swift, and with the C family cached Swift is
+      # most of what Xcode still compiles: the Expo modules and other pods
+      # that ship as Swift source, the app, its widget, and the second
+      # xcodebuild that builds ExpoModulesJSI.xcframework, during which nothing
+      # else compiles. Xcode has a cache of its own for Swift, keyed on content
+      # like ccache's, which is off unless asked for. RiceCal turned it on in
+      # its store build on 2026-11-11 and its whole Xcode phase went from 1176
+      # to 271 seconds.
+      #
+      # It is asked for in the same build-settings file as the compiler cache
+      # (`XCODE_XCCONFIG_FILE`), which this step replaces with one that
+      # includes the compiler cache's and adds two settings, so the Podfile,
+      # the app's config and a build on a laptop are unchanged. The two caches
+      # do not overlap: Xcode leaves C, C++ and Objective-C out of its cache
+      # when the compiler is a wrapper script, which is what ccache makes it.
+      # The second xcodebuild inherits the variable, so it is cached too.
+      #
+      # Named after Xcode's build number and the dependencies, with no
+      # fallback: Xcode does not trim this folder, so a copy carried from one
+      # lockfile to the next would only grow. What the pods compile to is most
+      # of it and changes only with the dependencies; the app's own Swift is
+      # compiled on every release. Like the compiler cache, it can never stop a
+      # release: if this step fails, the build runs without it.
+      - name: Set up the Swift compilation cache
+        id: swift-setup
+        if: matrix.platform == 'ios'
+        continue-on-error: true
+        shell: bash
+        run: |
+          xcode=$(xcodebuild -version | awk '/Build version/ { print $3 }')
+          [ -n "$xcode" ] || { echo "::warning::Could not read Xcode's build number; building without the Swift cache."; exit 0; }
+          config="$RUNNER_TEMP/store-build.xcconfig"
+          {
+            if [ -n "${XCODE_XCCONFIG_FILE:-}" ]; then
+              echo "#include \"$XCODE_XCCONFIG_FILE\""
+            fi
+            echo 'COMPILATION_CACHE_ENABLE_CACHING = YES'
+            echo "COMPILATION_CACHE_CAS_PATH = $HOME/.cache/xcode-compilation-cache"
+          } > "$config"
+          cat "$config"
+          echo "XCODE_XCCONFIG_FILE=$config" >> "$GITHUB_ENV"
+          echo "xcode=$xcode" >> "$GITHUB_OUTPUT"
+
+      - name: Restore the Swift compilation cache
+        id: swift-cache
+        if: matrix.platform == 'ios' && steps.swift-setup.outputs.xcode != ''
+        uses: actions/cache/restore@v5
+        with:
+          path: ~/.cache/xcode-compilation-cache
+          key: swift-cache-${{ runner.os }}-xcode-${{ steps.swift-setup.outputs.xcode }}-${{ hashFiles('apps/mobile/package-lock.json', 'apps/mobile/patches/**') }}
+
       # eas-cli reads the app config from this checkout, which needs
       # node_modules here; EAS then installs again in its own copy.
       - name: Set up dependencies
@@ -592,8 +669,36 @@ jobs:
       - name: Set up EAS CLI
         uses: expo/expo-github-action@v9
         with:
-          eas-version: 27.5.0
+          eas-version: ${{ env.EAS_CLI_VERSION }}
           token: ${{ secrets.EXPO_TOKEN }}
+
+      # `eas build --local` runs the build through a second package,
+      # eas-cli-local-build-plugin, which it starts with `npx -y` at its own
+      # version. npx installed it, and its few hundred dependencies, on every
+      # build: 15 seconds on Android and 44 on iOS. npx keeps what it installs
+      # in ~/.npm/_npx and runs it from there when the version matches, so
+      # this keeps that folder. Named after the CLI's version, which the
+      # plugin's always equals; a CLI bump starts a new one.
+      - name: Restore the local build plugin
+        id: npx-cache
+        uses: actions/cache/restore@v5
+        with:
+          path: ~/.npm/_npx
+          key: eas-local-build-plugin-${{ runner.os }}-${{ runner.arch }}-${{ env.EAS_CLI_VERSION }}
+
+      # EAS runs `npm ci` again in its own copy of the project, and that
+      # install downloaded every package from the registry on every build: 79
+      # seconds on Android and 137 on iOS (the job's own install comes from
+      # the node_modules cache and leaves npm's download cache empty). This
+      # keeps npm's download cache for it. npm checks every package it takes
+      # from there against the lockfile's integrity hash. No fallback, for the
+      # same reason as Gradle's: npm never trims it.
+      - name: Restore npm's download cache
+        id: npm-cache
+        uses: actions/cache/restore@v5
+        with:
+          path: ~/.npm/_cacache
+          key: npm-cache-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('apps/mobile/package-lock.json') }}
 
       # The release build runs R8 in the 4 GB Gradle daemon (plus a Kotlin
       # daemon) while CMake compiles the app's native code for four ABIs. On
@@ -629,12 +734,19 @@ jobs:
           echo "file=./build/money2time-${{ matrix.platform }}-${{ matrix.profile }}.$ext" >> "$GITHUB_OUTPUT"
 
       - name: Build app
+        id: build
         working-directory: apps/mobile
         env:
           # The same directory on every build instead of a random temporary
           # one: the compiler cache hashes the paths it is given, so it only
           # hits when they do not change.
           EAS_LOCAL_BUILD_WORKINGDIR: ${{ runner.temp }}/eas-build
+          # EAS runs `expo doctor` before prebuild, 9 to 17 seconds a build,
+          # and only ever turns what it finds into a warning on the build: it
+          # cannot fail it, and nobody reads the warnings of a green release.
+          # Run `npx expo-doctor` in apps/mobile by hand after a dependency
+          # upgrade instead.
+          EAS_BUILD_DISABLE_EXPO_DOCTOR_STEP: '1'
         run: |
           mkdir -p build
           eas build \
@@ -665,6 +777,33 @@ jobs:
       - name: Save the compiler cache
         uses: ./.github/actions/ccache/save
 
+      # After a build that worked only: these three are saved once per name
+      # and never again, so one saved half-filled by a build that stopped
+      # early would stay half-filled until the name changes.
+      - name: Save the Swift compilation cache
+        if: steps.build.outcome == 'success' && steps.swift-cache.outcome == 'success' && steps.swift-cache.outputs.cache-hit != 'true'
+        continue-on-error: true
+        uses: actions/cache/save@v5
+        with:
+          path: ~/.cache/xcode-compilation-cache
+          key: ${{ steps.swift-cache.outputs.cache-primary-key }}
+
+      - name: Save the local build plugin
+        if: steps.build.outcome == 'success' && steps.npx-cache.outputs.cache-hit != 'true'
+        continue-on-error: true
+        uses: actions/cache/save@v5
+        with:
+          path: ~/.npm/_npx
+          key: ${{ steps.npx-cache.outputs.cache-primary-key }}
+
+      - name: Save npm's download cache
+        if: steps.build.outcome == 'success' && steps.npm-cache.outputs.cache-hit != 'true'
+        continue-on-error: true
+        uses: actions/cache/save@v5
+        with:
+          path: ~/.npm/_cacache
+          key: ${{ steps.npm-cache.outputs.cache-primary-key }}
+
       - name: Report peak memory and disk
         if: always() && matrix.platform == 'android'
         run: |
@@ -681,7 +820,19 @@ jobs:
           command -v ccache > /dev/null || exit 0
           ccache --show-stats || true
 
+      # `checks` and `lint` are what stand between a commit and both stores,
+      # and this job no longer waits for them to start (see `plan`), so it
+      # waits here instead. They take about two minutes and the build about
+      # twenty, so this normally finds them finished. It runs on a build-only
+      # dispatch too, so that such a run is red when they are, like a release
+      # would be.
+      - name: Wait for the checks
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: .github/scripts/wait-for-jobs.sh Checks Lint
+
       - name: Submit build
+        if: env.WILL_SUBMIT == 'true'
         working-directory: apps/mobile
         run: |
           eas submit \
@@ -714,7 +865,7 @@ jobs:
       - name: Set up EAS CLI
         uses: expo/expo-github-action@v9
         with:
-          eas-version: 27.5.0
+          eas-version: ${{ env.EAS_CLI_VERSION }}
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Start cloud dev-client build

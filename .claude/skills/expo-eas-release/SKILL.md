@@ -19,13 +19,13 @@ Config sources of truth: `eas.json` (profiles/submit), `app.json` (version), `.g
 
 ## The pipeline (`deploy.yml`)
 
-Seven jobs (`bundle` once per platform): `changes → checks + lint → plan → deploy`, with `bundle` beside them and `test` reporting on all three. **`changes` decides whether a push to `main` is an app release at all:** a diff confined to `apps/cloudflare/`, `apps/web/`, `apps/app-studio/`, `.github/`, the agent folders and `*.md` cuts no store build; anything else (any file under `apps/mobile`, even a script or a test) does. The website deploys through its own `Web` workflow and App Studio has a check-only workflow, so a change there never needs this one.
+Seven jobs (`bundle` once per platform): `changes → plan → deploy`, with `checks`, `lint` and `bundle` beside them and `test` reporting on all three. `deploy` starts at once and waits for `checks` and `lint` only before `eas submit`. **`changes` decides whether a push to `main` is an app release at all:** a diff confined to `apps/cloudflare/`, `apps/web/`, `apps/app-studio/`, `.github/`, the agent folders and `*.md` cuts no store build; anything else (any file under `apps/mobile`, even a script or a test) does. The website deploys through its own `Web` workflow and App Studio has a check-only workflow, so a change there never needs this one.
 
-- **checks** and **lint** — run on every push, PR, and dispatch, side by side: typecheck, format and `npm test` in one, ESLint in the other. Together they are `npm run check` plus `npm test`. A red check in either blocks `plan` and `deploy`.
+- **checks** and **lint** — run on every push, PR, and dispatch, side by side: typecheck, format and `npm test` in one, ESLint in the other. Together they are `npm run check` plus `npm test`. A red check in either fails `deploy` before it submits: the build still runs and is thrown away.
 - **bundle** — PRs: `npx expo export`, one job per platform, so a PR that breaks the Metro bundle fails here instead of in the store build. On `main` it only refreshes the Metro cache; the store build does not wait for it.
 - **test** — runs nothing itself: green when `checks`, `lint` and `bundle` all passed. It is the one check to read on a PR.
 - **plan** — push-to-`main` and manual-dispatch only. Resolves the build matrix (push = iOS + Android production; dispatch = the chosen single platform/profile).
-- **deploy** — push-to-`main` and manual-dispatch only. `eas build --local` on the matched runner (`xcode-27` with Xcode 27.1 pinned for iOS, ubuntu-latest for Android; see the README for why the pin matters), then `eas submit`. `fail-fast: false`, so one platform failing doesn't kill the other.
+- **deploy** — push-to-`main` and manual-dispatch only. `eas build --local` on the matched runner (`xcode-27` with Xcode 27.1 pinned for iOS, ubuntu-latest for Android; see the README for why the pin matters), then, once `checks` and `lint` have passed, `eas submit`. `fail-fast: false`, so one platform failing doesn't kill the other.
 
 A newer store build cancels an in-flight one (job-level concurrency on `deploy`, per platform and profile); a push that builds no app (Workers, website, App Studio, docs) never cancels a release.
 
@@ -34,8 +34,9 @@ A newer store build cancels an in-flight one (job-level concurrency on `deploy`,
 1. **Make sure `npm run check` and `npm test` pass** (locally is fine; CI's `checks` and `lint` jobs will block the release otherwise). This is the only gate that matters before shipping.
 2. **Bump `app.json` `expo.version`** for a user-facing release. Don't touch build numbers — `appVersionSource: remote` + `autoIncrement` manages them.
 3. **Trigger the deploy:**
-   - **Normal release:** merge/push to `main`. CI runs checks + lint → plan → deploy and ships **both** platforms to TestFlight + Play (`production` track) automatically.
+   - **Normal release:** merge/push to `main`. CI runs checks + lint beside plan → deploy and ships **both** platforms to TestFlight + Play (`production` track) automatically.
    - **Single platform / non-production profile:** use **workflow_dispatch** on `deploy.yml` and pick the `platform` (ios/android) and `profile` (production/preview/development) inputs.
+   - **Try the store build without releasing:** dispatch with `submit` off (`gh workflow run deploy.yml --ref <branch> -f platform=ios -f profile=production -f submit=false`). It builds and stops, from any branch, and still takes a build number.
 4. **Watch the run** until `deploy` is green; confirm the build reached the store track.
 
 ## Versioning
@@ -45,7 +46,7 @@ A newer store build cancels an in-flight one (job-level concurrency on `deploy`,
 
 ## Debugging
 
-- **`checks` or `lint` job red** → fix `npm run check` / `npm test` locally and push again; the pipeline won't build until it's green.
+- **`checks` or `lint` job red** → fix `npm run check` / `npm test` locally and push again; nothing is submitted until it's green.
 - **`deploy` build fails** → read the EAS build logs in the job output; common causes are signing/credentials (`eas credentials`) or a native/config error. Credentials are managed by EAS.
 - **Submit rejected** → verify `ascAppId` / Play track in `eas.json` and that the version/build number isn't already used on the store.
 - **Inspect** outside CI with read-only commands if needed: `eas build:list`, `eas build:view`, `eas submit` history.
