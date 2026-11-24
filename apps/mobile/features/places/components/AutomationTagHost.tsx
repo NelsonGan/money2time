@@ -8,6 +8,7 @@ import { useApp } from '~/context/AppContext';
 import { I18n } from '~/lib/i18n';
 import { transactionsRepository } from '~/lib/repositories/transactionsRepository';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
+import { reportError } from '~/services/errorReporting';
 
 import {
   type AutomationTagRequest,
@@ -20,9 +21,9 @@ import { locateCurrentPlace } from '../services/currentPlace';
 import { getLocationPermission } from '../services/deviceLocation';
 
 export function AutomationTagHost() {
-  const { settings, updateTransaction } = useApp();
-  const stateRef = useRef({ settings, updateTransaction });
-  stateRef.current = { settings, updateTransaction };
+  const { settings, updateTransactionsBulk } = useApp();
+  const stateRef = useRef({ settings, updateTransactionsBulk });
+  stateRef.current = { settings, updateTransactionsBulk };
 
   useEffect(() => {
     let running = false;
@@ -60,6 +61,7 @@ export function AutomationTagHost() {
         ({ place } = await locateCurrentPlace({
           appUserId: stateRef.current.settings.appUserId,
           locale: I18n.locale,
+          isCancelled: () => unmounted,
         }));
       } catch {
         // No fix this time (Location Services off, indoors): no tag.
@@ -71,8 +73,14 @@ export function AutomationTagHost() {
         // Checked again: the user may have opened it and picked a place, or
         // deleted it, while the phone was finding the spot.
         if (!eligible(request)) continue;
-        stateRef.current.updateTransaction(request.transactionId, location);
-        void trackEvent(AnalyticsEvents.TRANSACTION_LOCATION_SET, { source: 'automation' });
+        stateRef.current.updateTransactionsBulk([{ id: request.transactionId, input: location }], {
+          // Counted once the place is stored, like the editor's.
+          afterWrite: (stored) => {
+            if (stored) {
+              void trackEvent(AnalyticsEvents.TRANSACTION_LOCATION_SET, { source: 'automation' });
+            }
+          },
+        });
       }
     };
 
@@ -85,7 +93,12 @@ export function AutomationTagHost() {
       try {
         do {
           rerun = false;
-          await runOnce();
+          try {
+            await runOnce();
+          } catch (error) {
+            // A failed pass loses only its own tags; the next request still runs.
+            reportError(error, { scope: 'automation_location_tag' });
+          }
         } while (rerun && !unmounted);
       } finally {
         running = false;

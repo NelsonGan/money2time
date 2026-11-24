@@ -140,7 +140,7 @@ interface ReceiptScanContextValue {
     rel: string,
     source: ScanSource,
     intent?: ScanIntent,
-    /** A screenshot automation: when the shortcut ran or the image was shared (location tag). */
+    /** A Back Tap screenshot: when the shortcut ran, for its location tag (README: Transaction locations). */
     occurredAt?: string,
   ) => Promise<ScanOutcome>;
   /** Open a 'ready' job in the review editor and remove its banner card. */

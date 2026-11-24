@@ -66,7 +66,11 @@ export function useCurrentPlace({
     }
     setStatus('locating');
     try {
-      const next = await locateCurrentPlace({ appUserId, locale });
+      const next = await locateCurrentPlace({
+        appUserId,
+        locale,
+        isCancelled: () => id !== runId.current,
+      });
       if (id !== runId.current) return null;
       setResolved(next);
       setStatus('ready');

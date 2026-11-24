@@ -1,7 +1,7 @@
 import { I18n } from '~/lib/i18n';
 
 import type { Coordinate, PlaceResult } from '../lib/placeTypes';
-import { describeCoordinate, getCurrentCoordinate } from './deviceLocation';
+import { CurrentLocationError, describeCoordinate, getCurrentCoordinate } from './deviceLocation';
 
 export interface ResolvedCurrentPlace {
   coordinate: Coordinate;
@@ -41,18 +41,24 @@ export function reusableCurrentPlace(locale?: string | null): ResolvedCurrentPla
 
 /**
  * Where the phone is and what the spot is called, reusing a recent answer.
- * Never asks for permission; throws `CurrentLocationError` without a fix.
+ * Never asks for permission; throws `CurrentLocationError` without a fix (or
+ * when cancelled before the spot is named).
  */
 export async function locateCurrentPlace({
   appUserId,
   locale,
+  isCancelled,
 }: {
   appUserId: string;
   locale?: string | null;
+  /** True once the caller no longer wants the answer: skips naming the spot. */
+  isCancelled?: () => boolean;
 }): Promise<ResolvedCurrentPlace> {
   const reusable = reusableCurrentPlace(locale);
   if (reusable) return reusable;
   const coordinate = await getCurrentCoordinate();
+  // Naming can call the Worker (a paid lookup): not for an answer nobody reads.
+  if (isCancelled?.()) throw new CurrentLocationError('no_fix');
   const place =
     (await describeCoordinate(coordinate, { appUserId, locale })) ?? pinnedPlace(coordinate);
   const next = { coordinate, place, at: Date.now(), locale: locale ?? null };

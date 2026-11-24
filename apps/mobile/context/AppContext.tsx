@@ -802,6 +802,10 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   deleteTransaction: (id: string) => void;
   updateTransactionsBulk: (
     updates: { id: string; input: Partial<CreateTransactionInput> }[],
+    options?: {
+      /** Runs once the deferred write has landed, told whether it was stored. */
+      afterWrite?: (stored: boolean) => void;
+    },
   ) => void;
   deleteTransactionsBulk: (ids: string[]) => void;
   /** Returns the id of the newly created (optimistically inserted) transaction.

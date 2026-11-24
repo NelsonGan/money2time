@@ -2063,7 +2063,10 @@ function ScreenshotScanSync() {
             rel,
             Platform.OS === 'android' ? 'share' : 'shortcut',
             'screenshot',
-            entry.createdAt,
+            // Back Tap shoots the screen as it is, so its time is the moment
+            // the user looked at the payment. A shared image can be any age
+            // (a receipt from lunch shared at home), so it is never tagged.
+            Platform.OS === 'ios' ? entry.createdAt : undefined,
           );
         } catch (error) {
           // Couldn't even read/store the shot — report for visibility and drop
