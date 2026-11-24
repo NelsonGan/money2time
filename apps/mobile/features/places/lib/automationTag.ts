@@ -1,6 +1,6 @@
 /**
  * Auto-tagging what an automation saved (README: Transaction locations >
- * Automations). An Apple Pay tap, a payment alert or a Back Tap / shared
+ * Automations). An Apple Pay tap, a payment alert or an iOS Back Tap
  * screenshot is saved by the app when it next runs, not where the user paid,
  * and the app has "while using the app" location only. So an automation's
  * expense is tagged with where the phone is only when the payment was moments
