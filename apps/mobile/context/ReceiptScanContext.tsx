@@ -140,6 +140,8 @@ interface ReceiptScanContextValue {
     rel: string,
     source: ScanSource,
     intent?: ScanIntent,
+    /** A screenshot automation: when the shortcut ran or the image was shared (location tag). */
+    occurredAt?: string,
   ) => Promise<ScanOutcome>;
   /** Open a 'ready' job in the review editor and remove its banner card. */
   openReadyJob: (id: string) => void;
@@ -331,6 +333,7 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
       rel: string,
       intent: ScanIntent = 'quick',
       batch?: BatchRun,
+      occurredAt?: string,
     ): Promise<ScanOutcome> => {
       const appUserId = envRef.current.settings.appUserId?.trim();
       if (!appUserId) {
@@ -501,7 +504,12 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
               sentiment: d.sentiment,
               receiptUri: receiptUri ?? undefined,
             },
-            { source: 'receipt' },
+            {
+              source: 'receipt',
+              // Only a screenshot automation: a scan the user takes by hand
+              // is not tagged (README: Transaction locations).
+              automationOccurredAt: intent === 'screenshot' ? occurredAt : undefined,
+            },
           );
           if (!firstId) firstId = txnId;
         });
@@ -564,12 +572,17 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
   // can act on the outcome. `scanReceiptImage` below is the fire-and-forget
   // wrapper the camera screen uses.
   const startScanJob = useCallback(
-    (rel: string, source: ScanSource, intent: ScanIntent = 'quick'): Promise<ScanOutcome> => {
+    (
+      rel: string,
+      source: ScanSource,
+      intent: ScanIntent = 'quick',
+      occurredAt?: string,
+    ): Promise<ScanOutcome> => {
       const id = newId();
       setJobsBoth((prev) => [...prev, { id, status: 'scanning', receiptUri: rel, intent }]);
       void triggerHaptic('selection');
       void trackEvent(AnalyticsEvents.RECEIPT_SCAN_STARTED, { source, intent, batchSize: 1 });
-      return runScan(id, rel, intent);
+      return runScan(id, rel, intent, undefined, occurredAt);
     },
     [runScan, setJobsBoth],
   );
@@ -588,8 +601,8 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
   // is created (or the scan errors). The screenshot drain awaits this so it
   // clears its App Group entry only after the scan has taken ownership.
   const scanReceiptImageAsync = useCallback(
-    (rel: string, source: ScanSource, intent: ScanIntent = 'quick') =>
-      startScanJob(rel, source, intent),
+    (rel: string, source: ScanSource, intent: ScanIntent = 'quick', occurredAt?: string) =>
+      startScanJob(rel, source, intent, occurredAt),
     [startScanJob],
   );
 

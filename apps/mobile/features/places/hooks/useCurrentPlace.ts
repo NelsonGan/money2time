@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { I18n } from '~/lib/i18n';
-
-import type { Coordinate, PlaceResult } from '../lib/placeTypes';
+import {
+  locateCurrentPlace,
+  type ResolvedCurrentPlace,
+  reusableCurrentPlace,
+} from '../services/currentPlace';
 import {
   CurrentLocationError,
-  describeCoordinate,
-  getCurrentCoordinate,
   getLocationPermission,
   requestLocationPermission,
 } from '../services/deviceLocation';
@@ -23,32 +23,6 @@ export type CurrentPlaceStatus =
   | 'unavailable'
   | 'error';
 
-interface Resolved {
-  coordinate: Coordinate;
-  place: PlaceResult;
-  at: number;
-  /** The language the place was named in. */
-  locale: string | null;
-}
-
-// One fix and its name serve every editor opened within this window, so
-// adding three coffees in a row asks the GPS and the geocoder once.
-const REUSE_MS = 90 * 1000;
-let lastResolved: Resolved | null = null;
-
-/** A spot the geocoders could not name: kept, with a generic name. */
-function pinnedPlace(coordinate: Coordinate): PlaceResult {
-  return {
-    id: null,
-    name: I18n.t('locations.pinned_location'),
-    address: '',
-    latitude: coordinate.latitude,
-    longitude: coordinate.longitude,
-    category: null,
-    countryCode: null,
-  };
-}
-
 /**
  * Where the phone is and what the spot is called, for the location picker's
  * "Current location" row and a new expense's automatic tag. Asks the system
@@ -64,7 +38,7 @@ export function useCurrentPlace({
   locale?: string | null;
 }) {
   const [status, setStatus] = useState<CurrentPlaceStatus>('idle');
-  const [resolved, setResolved] = useState<Resolved | null>(null);
+  const [resolved, setResolved] = useState<ResolvedCurrentPlace | null>(null);
   const runId = useRef(0);
 
   const locate = useCallback(async () => {
@@ -84,21 +58,16 @@ export function useCurrentPlace({
       );
       return null;
     }
-    const reusable = lastResolved;
-    if (reusable && reusable.locale === (locale ?? null) && Date.now() - reusable.at < REUSE_MS) {
+    const reusable = reusableCurrentPlace(locale);
+    if (reusable) {
       setResolved(reusable);
       setStatus('ready');
       return reusable;
     }
     setStatus('locating');
     try {
-      const coordinate = await getCurrentCoordinate();
+      const next = await locateCurrentPlace({ appUserId, locale });
       if (id !== runId.current) return null;
-      const place =
-        (await describeCoordinate(coordinate, { appUserId, locale })) ?? pinnedPlace(coordinate);
-      if (id !== runId.current) return null;
-      const next = { coordinate, place, at: Date.now(), locale: locale ?? null };
-      lastResolved = next;
       setResolved(next);
       setStatus('ready');
       return next;

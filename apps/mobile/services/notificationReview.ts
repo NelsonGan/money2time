@@ -196,6 +196,7 @@ export function resolveNotificationReviews(
           source: 'notification_review',
           channel: entry.channel,
           decision: 'confirm',
+          automationOccurredAt: entry.capturedAt,
           onNotificationReviewPersisted: (persistedId) =>
             paymentAlertCapturesRepository.update(id, {
               status: 'logged',
@@ -392,6 +393,7 @@ export function applyNotificationAiResults(
           source: 'notification_review',
           channel: entry.channel,
           decision: 'ai',
+          automationOccurredAt: entry.capturedAt,
           onNotificationReviewPersisted: (persistedId) =>
             paymentAlertCapturesRepository.update(entry.id, {
               status: 'logged',
