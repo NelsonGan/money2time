@@ -407,7 +407,12 @@ jobs:
     # checks" in `deploy`), so the two minutes they take are spent while the
     # build compiles instead of before it starts. A commit whose checks fail is
     # still built, and the build is thrown away: it takes a build number, and
-    # nothing reaches either store.
+    # nothing reaches either store. It also still replaces a release already
+    # building (`deploy`'s concurrency), so a red commit merged during a green
+    # one's build means neither ships until the next green push. RiceCal's
+    # workflow has always worked this way; checks that passed on the pull
+    # request almost never fail on `main`, and two app merges close together
+    # are much more common, where replacing the older build is what saves time.
     needs: changes
     # A push to main only cuts a store build when something in the push can
     # reach the binary — a Worker-only or docs-only merge stops here. Manual

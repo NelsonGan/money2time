@@ -16,10 +16,21 @@ set -uo pipefail
 timeout=${WAIT_TIMEOUT_SECONDS:-1800}
 deadline=$(( $(date +%s) + timeout ))
 url="repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/jobs?filter=latest&per_page=100"
+command -v gh > /dev/null || { echo "::error::gh is not installed, so the checks cannot be read."; exit 1; }
+api_failures=0
 
 while :; do
-  if ! jobs=$(gh api "$url" --jq '.jobs[] | [.name, .status, (.conclusion // "")] | @tsv'); then
-    # A failed API call is not a failed check: try again until the deadline.
+  if jobs=$(gh api "$url" --jq '.jobs[] | [.name, .status, (.conclusion // "")] | @tsv'); then
+    api_failures=0
+  else
+    # One failed call is not a failed check, so try again; five in a row
+    # (about a minute) is not going to recover, so stop instead of holding
+    # the runner until the deadline. Either way nothing is submitted.
+    api_failures=$((api_failures + 1))
+    if [ "$api_failures" -ge 5 ]; then
+      echo "::error::Could not read this run's jobs from the GitHub API five times in a row."
+      exit 1
+    fi
     jobs=""
   fi
 
