@@ -187,10 +187,11 @@ describe('pulling before a link', () => {
     expect(reportError).not.toHaveBeenCalled();
   });
 
-  it('keeps the replica when the cloud, not this file, reports damage', async () => {
-    stuckMessage =
-      'sync engine operation failed: database sync engine error: remote server returned an error: ' +
-      'status=500, body={"error":"Corrupt database: page 7"}';
+  it.each([
+    'remote server returned an error: status=500, body={"error":"Corrupt database: page 7"}',
+    'unexpected http response: status=502, body=Corrupt database: page 7',
+  ])('keeps the replica when the cloud, not this file, reports damage: %s', async (remote) => {
+    stuckMessage = `sync engine operation failed: database sync engine error: ${remote}`;
     await engine().open();
     const sync = engine();
     await sync.open();

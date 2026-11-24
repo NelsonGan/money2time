@@ -1817,17 +1817,18 @@ function assetFile(relativePath: string): File {
  *   tursodatabase/turso#8366);
  * - the replica's files were put back from an older copy (an Android or
  *   iCloud backup restored, a phone-to-phone transfer): the cloud's record of
- *   this replica's pushes is ahead of what its files remember.
+ *   this replica's pushes is ahead of what its files remember;
+ * - the replica's file is damaged (`Corrupt database`, such as a TEXT value
+ *   that is not UTF-8, which the app cannot write): the same read fails every
+ *   pull. A server's damage report carries its HTTP status and body (`status=500,
+ *   body=…`, in either of the engine's two formats) and is not ours to rebuild.
  */
 function isStuckReplicaError(error: unknown): boolean {
   const message = error instanceof Error ? error.message : String(error);
   return (
     message.includes('unable to checkpoint synced portion of WAL') ||
     message.includes('remote_pull_gen > local_pull_gen') ||
-    // The local file is damaged (a TEXT value that is not UTF-8, say): the app
-    // cannot write one, and the same read fails every pull. A server's own
-    // damage report comes back as a remote error and is not ours to rebuild.
-    (message.includes('Corrupt database') && !message.includes('remote server returned an error'))
+    (message.includes('Corrupt database') && !/status=\d+, body=/.test(message))
   );
 }
 
