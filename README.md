@@ -1187,6 +1187,19 @@ row, and 10.9 MB of photos as base64.
   - Missing photos are uploaded three at a time. One that fails fails that
     target's backup, as a failed upload always did; those already stored stay,
     so the next run carries on (the first backup after updating can be large).
+  - Each Drive request asks for the Google access token, so the three uploads
+    ask at once. Android's Google Sign-In SDK keeps one pending promise per
+    call: a `getTokens()` or `clearCachedAccessToken()` made while the last is
+    still running rejects that one with `ASYNC_OP_IN_PROGRESS`. In 1.9.0 that
+    left uploads without a token, and the run reported `error_kind` `auth`
+    ("Google Drive: not signed in") and fell back to the phone (about 22
+    Android users a day). `googleDriveAuth.ts` therefore runs the native token
+    calls one at a time, and reads that overlap share one. A clear waits for
+    a read in flight, so that read cannot hand out the token just dropped, and
+    the retry after a forced session restore makes its own read. One native
+    call holds the line for at most 30 s: a read parked behind a consent
+    screen then counts as failed, and the requests waiting on it restore the
+    session and read again.
   - The export embeds its photos, because that file leaves the app on its own.
 - **Photo sizes (`services/imageShrink.*`).** A picked photo used to be stored
   at full size and JPEG quality 0.9 (an album cover was 400–800 KB).
