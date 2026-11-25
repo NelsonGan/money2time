@@ -1,16 +1,11 @@
 import { after, NextResponse, type NextRequest } from "next/server";
 
-import { APP_STORE_URL, PLAY_STORE_URL } from "@/lib/app-links";
 import { trackServerEvent } from "@/lib/posthog/server";
 import {
   isProductionHost,
   mobilePlatformFromUserAgent,
 } from "@/lib/platform";
-
-const storeUrls = {
-  android: PLAY_STORE_URL,
-  ios: APP_STORE_URL,
-} as const;
+import { storeUrlForCampaign } from "@/lib/store-campaign";
 
 const UTM_PARAMS = [
   "utm_source",
@@ -76,7 +71,11 @@ export function GET(request: NextRequest) {
   const homeUrl = new URL("/", request.url);
   homeUrl.search = campaign.toString();
 
-  const destination = platform ? storeUrls[platform] : homeUrl.toString();
+  // Phones go to their store with the campaign attached, so App Store Connect
+  // and Play Console can count the installs each campaign brings.
+  const destination = platform
+    ? storeUrlForCampaign(platform, campaign)
+    : homeUrl.toString();
 
   // Rendered-site CTAs already emit one client event with the browser's stable
   // anonymous identity. Keep this server event only for direct/external links,
