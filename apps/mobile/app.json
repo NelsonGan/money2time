@@ -53,7 +53,10 @@
       "package": "com.nelsongan.money2time",
       "blockedPermissions": [
         "com.google.android.gms.permission.AD_ID",
-        "android.permission.ACCESS_ADSERVICES_AD_ID"
+        "android.permission.ACCESS_ADSERVICES_AD_ID",
+        "android.permission.ACCESS_ADSERVICES_ATTRIBUTION",
+        "android.permission.ACCESS_ADSERVICES_CUSTOM_AUDIENCE",
+        "android.permission.ACCESS_ADSERVICES_TOPICS"
       ],
       "permissions": ["android.permission.CAMERA"]
     },
@@ -75,6 +78,14 @@
           "ios": {
             "withoutAdIdSupport": true
           }
+        }
+      ],
+      [
+        "./plugins/withMetaAppEvents",
+        {
+          "appId": "1607958107752114",
+          "clientToken": "fae834e5547bfca86abb71dc25bba784",
+          "displayName": "Money2Time"
         }
       ],
       "./plugins/withGradleMemory",

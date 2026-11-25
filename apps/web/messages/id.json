@@ -346,7 +346,7 @@
   },
   "privacy": {
     "title": "Kebijakan Privasi",
-    "lastUpdated": "Terakhir diperbarui: 15 November 2026",
+    "lastUpdated": "Terakhir diperbarui: 25 November 2026",
     "links": {
       "userDataPolicy": "Google API Services User Data Policy",
       "googlePermissions": "myaccount.google.com/permissions",
@@ -357,7 +357,7 @@
         "title": "Ikhtisar",
         "paragraphs": [
           "Money2Time (Aplikasi) adalah aplikasi keuangan pribadi yang mengonversi pengeluaran Anda menjadi padanan waktu berdasarkan upah per jam Anda. Aplikasi ini dijalankan oleh tim Money2Time (kami). Kebijakan ini menjelaskan data apa yang dikumpulkan oleh Aplikasi, money2time.com, Dasbor Web (app.money2time.com), dan album bersama di web (album.money2time.com), bagaimana data tersebut digunakan, disimpan, dan dibagikan, serta pilihan dan hak Anda terkait data tersebut.",
-          "Kami tidak menjual data pribadi atau keuangan Anda, kami tidak menampilkan iklan, dan kami tidak menggunakan data Anda untuk periklanan."
+          "Kami tidak menjual data pribadi atau keuangan Anda, dan kami tidak menampilkan iklan. Satu-satunya cara kami menggunakan data untuk periklanan adalah untuk mengukur iklan kami sendiri di Facebook dan Instagram, seperti yang dijelaskan di bagian Pengukuran Iklan di bawah, dan itu tidak pernah mencakup data keuangan Anda."
         ]
       },
       {
@@ -437,6 +437,13 @@
                 "Preferensi umum seperti mata uang, lokal, tema, dan mode tampilan",
                 "Platform seperti iOS atau Android"
               ]
+            ]
+          },
+          {
+            "title": "Pengukuran Iklan",
+            "paragraphs": [
+              "Kami mengiklankan Money2Time di Facebook dan Instagram. Untuk menghitung berapa banyak instalasi yang dihasilkan iklan tersebut, Aplikasi di iOS dan Android menyertakan perangkat lunak peristiwa aplikasi (app events) dari Meta, yang memberi tahu Meta saat Aplikasi diinstal dan dibuka. Meta juga menerima informasi teknis tentang perangkat Anda, seperti model, sistem operasi, bahasa, zona waktu, dan alamat IP-nya, serta pengidentifikasi yang dibuat perangkat lunak Meta di Aplikasi. Di Android, perangkat lunak ini juga dapat membaca pengidentifikasi atribusi dari aplikasi Facebook di perangkat Anda dan install referrer Google Play, sehingga Meta dapat mengetahui apakah instalasi tersebut terjadi setelah salah satu iklan kami.",
+              "Meta tidak menerima pengidentifikasi aplikasi acak Anda, ID iklan perangkat Anda, nama atau alamat email Anda, data keuangan Anda, atau apa pun yang Anda ketik, dan kami tidak menggunakan data ini untuk menampilkan iklan kepada Anda. Aplikasi tidak meminta izin untuk melacak Anda di iOS, sehingga di iOS Meta hanya mengukur instalasi melalui SKAdNetwork dari Apple dan Aggregated Event Measurement dari Meta, yang melaporkan hasil secara agregat. Meta memproses data ini berdasarkan ketentuannya sendiri dan Meta Privacy Policy. Aplikasi tidak mengirimkannya dari perangkat yang wilayahnya diatur ke negara di Kawasan Ekonomi Eropa, Britania Raya, atau Swiss."
             ]
           },
           {
@@ -530,7 +537,7 @@
       {
         "title": "8. Penyimpanan Data",
         "paragraphs": [
-          "Data di perangkat Anda tetap ada hingga Anda menghapusnya atau menghapus instalasi Aplikasi. Informasi akun, salinan Cloud Sync Anda, dan gambar Anda di server kami disimpan hingga Anda menghapus akun Anda. Data buku dan album bersama disimpan selama grup tersebut ada. Data penghasilan langsung dihapus saat Anda menonaktifkannya, dan paling lambat 45 hari setelah Aplikasi terakhir kali mengonfirmasinya. Sesi masuk berlaku hingga satu tahun dan diperpanjang selama Anda menggunakannya. Teks struk dan notifikasi yang dikirim untuk pemrosesan AI tidak kami simpan. Data analitik disimpan hingga 14 bulan di Google Analytics dan sesuai dengan pengaturan penyimpanan kami di PostHog. Detail koneksi seperti alamat IP disimpan sebentar di log penyedia layanan kami."
+          "Data di perangkat Anda tetap ada hingga Anda menghapusnya atau menghapus instalasi Aplikasi. Informasi akun, salinan Cloud Sync Anda, dan gambar Anda di server kami disimpan hingga Anda menghapus akun Anda. Data buku dan album bersama disimpan selama grup tersebut ada. Data penghasilan langsung dihapus saat Anda menonaktifkannya, dan paling lambat 45 hari setelah Aplikasi terakhir kali mengonfirmasinya. Sesi masuk berlaku hingga satu tahun dan diperpanjang selama Anda menggunakannya. Teks struk dan notifikasi yang dikirim untuk pemrosesan AI tidak kami simpan. Data analitik disimpan hingga 14 bulan di Google Analytics dan sesuai dengan pengaturan penyimpanan kami di PostHog. Meta menyimpan data pengukuran iklan berdasarkan ketentuannya sendiri. Detail koneksi seperti alamat IP disimpan sebentar di log penyedia layanan kami."
         ]
       },
       {
@@ -538,7 +545,7 @@
         "paragraphs": [
           "Anda memiliki kendali penuh atas data Anda. Atur Ulang Data di Pengaturan menghapus secara permanen akun, kategori, dan transaksi Anda dari perangkat Anda, dan dari salinan Cloud Sync Anda jika Cloud Sync aktif. Menghapus instalasi Aplikasi akan menghapus basis data lokal dari perangkat Anda, tetapi tidak menghapus cadangan Anda di Google Drive atau iCloud, maupun akun Anda.",
           "Untuk menghapus akun Anda, buka halaman Akun di Aplikasi dan pilih Hapus akun. Tindakan ini menghapus secara permanen informasi akun Anda, salinan Cloud Sync Anda, setiap gambar yang Anda simpan pada kami, serta buku dan album bersama yang Anda miliki, dan mencabut akses masuk Apple untuk Aplikasi. Memutuskan tautan browser dari Dasbor Web menghapus salinan yang disimpannya: langsung saat Anda memutuskan tautan di browser, dan saat berikutnya browser terhubung bila Anda memutuskan tautan dari Aplikasi.",
-          "Menghapus data Anda tidak menghapus catatan langganan Anda yang disimpan oleh Apple atau Google, maupun data analitik yang sebelumnya dikirim ke PostHog dan Google Analytics for Firebase. Untuk meminta penghapusan data analitik, hubungi kami melalui email di bawah. Langkah-langkah lengkapnya tersedia di {dataDeletion} kami."
+          "Menghapus data Anda tidak menghapus catatan langganan Anda yang disimpan oleh Apple atau Google, data analitik yang sebelumnya dikirim ke PostHog dan Google Analytics for Firebase, maupun data pengukuran iklan yang sebelumnya dikirim ke Meta. Untuk meminta penghapusan data analitik, hubungi kami melalui email di bawah. Langkah-langkah lengkapnya tersedia di {dataDeletion} kami."
         ]
       },
       {
@@ -562,6 +569,11 @@
               "RevenueCat",
               "Pengelolaan langganan",
               "ID aplikasi acak, status langganan"
+            ],
+            [
+              "Meta (Facebook dan Instagram)",
+              "Mengukur instalasi dari iklan kami",
+              "Instalasi dan peluncuran Aplikasi, informasi perangkat seperti model, sistem operasi, dan alamat IP, pengidentifikasi yang dibuat oleh perangkat lunak Meta"
             ],
             [
               "Cloudflare (Workers, D1, R2, Durable Objects, Email, Turnstile)",

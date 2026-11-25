@@ -346,7 +346,7 @@
   },
   "privacy": {
     "title": "Gizlilik Politikası",
-    "lastUpdated": "Son güncelleme: 15 Kasım 2026",
+    "lastUpdated": "Son güncelleme: 25 Kasım 2026",
     "links": {
       "userDataPolicy": "Google API Services User Data Policy",
       "googlePermissions": "myaccount.google.com/permissions",
@@ -357,7 +357,7 @@
         "title": "Genel Bakış",
         "paragraphs": [
           "Money2Time (Uygulama), harcamalarınızı saatlik ücretinize göre zaman karşılıklarına dönüştüren bir kişisel finans uygulamasıdır. Uygulama Money2Time ekibi (biz) tarafından işletilir. Bu politika; Uygulamanın, money2time.com'un, Web Gösterge Paneli'nin (app.money2time.com) ve web'deki paylaşılan albümlerin (album.money2time.com) hangi verileri topladığını, bu verilerin nasıl kullanıldığını, saklandığını ve paylaşıldığını, ayrıca bu verilerle ilgili seçeneklerinizi ve haklarınızı açıklar.",
-          "Kişisel veya finansal verilerinizi satmayız, reklam göstermeyiz ve verilerinizi reklam amacıyla kullanmayız."
+          "Kişisel veya finansal verilerinizi satmayız ve reklam göstermeyiz. Verileri reklam amacıyla kullandığımız tek durum, aşağıda Reklam Ölçümü bölümünde açıklandığı gibi Facebook ve Instagram'daki kendi reklamlarımızı ölçmektir ve bu, finansal verilerinizi hiçbir zaman kapsamaz."
         ]
       },
       {
@@ -437,6 +437,13 @@
                 "Para birimi, yerel ayar, tema ve görüntüleme modu gibi genel tercihler",
                 "iOS veya Android gibi platform"
               ]
+            ]
+          },
+          {
+            "title": "Reklam Ölçümü",
+            "paragraphs": [
+              "Money2Time'ın reklamını Facebook ve Instagram'da yapıyoruz. Bu reklamların kaç yükleme getirdiğini saymak için iOS ve Android'deki Uygulama, Meta'nın uygulama etkinlikleri (App Events) yazılımını içerir; bu yazılım, Uygulama yüklendiğinde ve açıldığında bunu Meta'ya bildirir. Meta ayrıca cihazınız hakkında model, işletim sistemi, dil, saat dilimi ve IP adresi gibi teknik bilgileri ve Meta'nın yazılımının Uygulama içinde oluşturduğu bir tanımlayıcıyı alır. Android'de bu yazılım, Meta'nın yüklemenin reklamlarımızdan birinin ardından gelip gelmediğini anlayabilmesi için cihazınızdaki Facebook uygulamasının atıf tanımlayıcısını ve Google Play yükleme yönlendiricisini (install referrer) de okuyabilir.",
+              "Meta; rastgele uygulama tanımlayıcınızı, cihazınızın reklam kimliğini, adınızı veya e-posta adresinizi, finansal verilerinizi ya da yazdığınız hiçbir şeyi almaz ve bu verileri size reklam göstermek için kullanmayız. Uygulama, iOS'ta sizi izlemek için izin istemez; bu nedenle Meta, iOS'ta yüklemeleri yalnızca Apple'ın SKAdNetwork'ü ve Meta'nın Aggregated Event Measurement özelliği aracılığıyla ölçer ve bunlar sonuçları toplu olarak raporlar. Meta bu verileri kendi koşulları ve Meta Privacy Policy kapsamında işler. Uygulama, bölgesi Avrupa Ekonomik Alanı'ndaki bir ülkeye, Birleşik Krallık'a veya İsviçre'ye ayarlanmış bir cihazda bu verileri göndermez."
             ]
           },
           {
@@ -530,7 +537,7 @@
       {
         "title": "8. Veri Saklama",
         "paragraphs": [
-          "Cihazınızdaki veriler, siz silene veya Uygulamayı kaldırana kadar kalır. Hesap bilgileri, Cloud Sync kopyanız ve sunucularımızdaki görselleriniz, hesabınızı silene kadar saklanır. Paylaşılan defter ve albüm verileri, grup var olduğu sürece saklanır. Canlı kazanç verileri, bu özelliği kapattığınızda ve en geç Uygulamanın bunları son kez onaylamasından 45 gün sonra silinir. Giriş oturumları en fazla bir yıl sürer ve siz kullandıkça yenilenir. Yapay zekâ ile işlenmek üzere gönderilen fiş ve bildirim metinleri tarafımızdan saklanmaz. Analiz verileri Google Analytics'te en fazla 14 ay ve PostHog'da saklama ayarlarımıza göre tutulur. IP adresleri gibi bağlantı ayrıntıları, hizmet sağlayıcılarımızın günlüklerinde kısa süre tutulur."
+          "Cihazınızdaki veriler, siz silene veya Uygulamayı kaldırana kadar kalır. Hesap bilgileri, Cloud Sync kopyanız ve sunucularımızdaki görselleriniz, hesabınızı silene kadar saklanır. Paylaşılan defter ve albüm verileri, grup var olduğu sürece saklanır. Canlı kazanç verileri, bu özelliği kapattığınızda ve en geç Uygulamanın bunları son kez onaylamasından 45 gün sonra silinir. Giriş oturumları en fazla bir yıl sürer ve siz kullandıkça yenilenir. Yapay zekâ ile işlenmek üzere gönderilen fiş ve bildirim metinleri tarafımızdan saklanmaz. Analiz verileri Google Analytics'te en fazla 14 ay ve PostHog'da saklama ayarlarımıza göre tutulur. Meta, reklam ölçümü verilerini kendi koşullarına göre saklar. IP adresleri gibi bağlantı ayrıntıları, hizmet sağlayıcılarımızın günlüklerinde kısa süre tutulur."
         ]
       },
       {
@@ -538,7 +545,7 @@
         "paragraphs": [
           "Verileriniz üzerinde tam kontrole sahipsiniz. Ayarlar'daki Verileri Sıfırla; hesaplarınızı, kategorilerinizi ve işlemlerinizi cihazınızdan ve Cloud Sync açıksa Cloud Sync kopyanızdan kalıcı olarak siler. Uygulamayı kaldırmak yerel veritabanını cihazınızdan kaldırır, ancak Google Drive veya iCloud'daki yedeklerinizi ya da hesabınızı silmez.",
           "Hesabınızı silmek için Uygulamanın Hesap sayfasını açın ve Hesabı sil'i seçin. Bu işlem hesap bilgilerinizi, Cloud Sync kopyanızı, bizde sakladığınız her görseli ve sahibi olduğunuz paylaşılan defterleri ve albümleri kalıcı olarak siler ve Uygulamanın Apple ile giriş yetkisini iptal eder. Bir tarayıcının Web Gösterge Paneli bağlantısını kaldırmak, onun tuttuğu kopyayı siler: bağlantıyı tarayıcıda kaldırırsanız hemen, Uygulamadan kaldırırsanız tarayıcı bir sonraki bağlandığında.",
-          "Verilerinizi silmek, Apple veya Google tarafından tutulan abonelik kayıtlarınızı ya da daha önce PostHog ve Google Analytics for Firebase'e gönderilmiş analitik verileri silmez. Analitik verilerin silinmesini talep etmek için aşağıdaki e-posta adresinden bizimle iletişime geçin. Tüm adımlar {dataDeletion} yer alır."
+          "Verilerinizi silmek, Apple veya Google tarafından tutulan abonelik kayıtlarınızı, daha önce PostHog ve Google Analytics for Firebase'e gönderilmiş analitik verileri ya da daha önce Meta'ya gönderilmiş reklam ölçümü verilerini silmez. Analitik verilerin silinmesini talep etmek için aşağıdaki e-posta adresinden bizimle iletişime geçin. Tüm adımlar {dataDeletion} yer alır."
         ]
       },
       {
@@ -562,6 +569,11 @@
               "RevenueCat",
               "Abonelik yönetimi",
               "Rastgele Uygulama kimliği, abonelik durumu"
+            ],
+            [
+              "Meta (Facebook ve Instagram)",
+              "Reklamlarımızdan gelen yüklemeleri ölçme",
+              "Uygulama yüklemeleri ve açılışları, model, işletim sistemi ve IP adresi gibi cihaz bilgileri, Meta'nın yazılımı tarafından oluşturulan bir tanımlayıcı"
             ],
             [
               "Cloudflare (Workers, D1, R2, Durable Objects, Email, Turnstile)",

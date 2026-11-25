@@ -346,7 +346,7 @@
   },
   "privacy": {
     "title": "Privacybeleid",
-    "lastUpdated": "Laatst bijgewerkt: 15 november 2026",
+    "lastUpdated": "Laatst bijgewerkt: 25 november 2026",
     "links": {
       "userDataPolicy": "Google API Services User Data Policy",
       "googlePermissions": "myaccount.google.com/permissions",
@@ -357,7 +357,7 @@
         "title": "Overzicht",
         "paragraphs": [
           "Money2Time (de App) is een app voor persoonlijke financiën die je uitgaven omzet in tijdsequivalenten op basis van je uurloon. De App wordt beheerd door het Money2Time-team (wij, ons). Dit beleid legt uit welke gegevens de App, money2time.com, het Webdashboard (app.money2time.com) en gedeelde albums op het web (album.money2time.com) verzamelen, hoe die worden gebruikt, opgeslagen en gedeeld, en welke keuzes en rechten je hebt met betrekking tot die gegevens.",
-          "We verkopen je persoonlijke of financiële gegevens niet, we tonen geen advertenties en we gebruiken je gegevens niet voor advertenties."
+          "We verkopen je persoonlijke of financiële gegevens niet en we tonen geen advertenties. De enige manier waarop we gegevens voor advertenties gebruiken, is het meten van onze eigen advertenties op Facebook en Instagram, zoals hieronder beschreven bij Advertentiemeting, en daar vallen je financiële gegevens nooit onder."
         ]
       },
       {
@@ -437,6 +437,13 @@
                 "Algemene voorkeuren, zoals valuta, locale, thema en weergavemodus",
                 "Platform, zoals iOS of Android"
               ]
+            ]
+          },
+          {
+            "title": "Advertentiemeting",
+            "paragraphs": [
+              "We adverteren voor Money2Time op Facebook en Instagram. Om te tellen hoeveel installaties die advertenties opleveren, bevat de App op iOS en Android de app-eventsoftware van Meta, die Meta laat weten wanneer de App wordt geïnstalleerd en geopend. Meta ontvangt ook technische informatie over je apparaat, zoals het model, het besturingssysteem, de taal, de tijdzone en het IP-adres, en een ID die de software van Meta in de App aanmaakt. Op Android kan de software ook de attributie-ID van de Facebook-app op je apparaat en de Google Play install referrer uitlezen, zodat Meta kan zien of de installatie volgde op een van onze advertenties.",
+              "Meta ontvangt niet je willekeurige app-ID, de advertentie-ID van je apparaat, je naam of e-mailadres, je financiële gegevens of iets wat je typt, en we gebruiken deze gegevens niet om je advertenties te tonen. De App vraagt op iOS geen toestemming om je te volgen, dus op iOS meet Meta installaties alleen via SKAdNetwork van Apple en Aggregated Event Measurement van Meta, die de resultaten geaggregeerd rapporteren. Meta verwerkt deze gegevens volgens zijn eigen voorwaarden en de Meta Privacy Policy. De App verstuurt ze niet vanaf een apparaat waarvan de regio is ingesteld op een land in de Europese Economische Ruimte, het Verenigd Koninkrijk of Zwitserland."
             ]
           },
           {
@@ -530,7 +537,7 @@
       {
         "title": "8. Bewaartermijnen",
         "paragraphs": [
-          "Gegevens op je apparaat blijven daar totdat je ze verwijdert of de App verwijdert. Accountgegevens, je Cloud Sync-kopie en je afbeeldingen op onze servers worden bewaard totdat je je account verwijdert. Gegevens van gedeelde boeken en albums worden bewaard zolang de groep bestaat. Gegevens van Live verdiensten worden verwijderd wanneer je de functie uitschakelt, en uiterlijk 45 dagen nadat de App ze voor het laatst heeft bevestigd. Inlogsessies duren maximaal een jaar en worden verlengd zolang je ze gebruikt. Teksten van bonnetjes en meldingen die voor AI-verwerking worden verstuurd, worden niet door ons bewaard. Analysegegevens worden maximaal 14 maanden bewaard in Google Analytics en volgens onze bewaarinstellingen in PostHog. Verbindingsgegevens zoals IP-adressen worden kort bewaard in de logs van onze dienstverleners."
+          "Gegevens op je apparaat blijven daar totdat je ze verwijdert of de App verwijdert. Accountgegevens, je Cloud Sync-kopie en je afbeeldingen op onze servers worden bewaard totdat je je account verwijdert. Gegevens van gedeelde boeken en albums worden bewaard zolang de groep bestaat. Gegevens van Live verdiensten worden verwijderd wanneer je de functie uitschakelt, en uiterlijk 45 dagen nadat de App ze voor het laatst heeft bevestigd. Inlogsessies duren maximaal een jaar en worden verlengd zolang je ze gebruikt. Teksten van bonnetjes en meldingen die voor AI-verwerking worden verstuurd, worden niet door ons bewaard. Analysegegevens worden maximaal 14 maanden bewaard in Google Analytics en volgens onze bewaarinstellingen in PostHog. Meta bewaart gegevens voor advertentiemeting volgens zijn eigen voorwaarden. Verbindingsgegevens zoals IP-adressen worden kort bewaard in de logs van onze dienstverleners."
         ]
       },
       {
@@ -538,7 +545,7 @@
         "paragraphs": [
           "Je hebt volledige controle over je gegevens. Gegevens resetten in Instellingen verwijdert je rekeningen, categorieën en transacties permanent van je apparaat, en uit je Cloud Sync-kopie als Cloud Sync aan staat. Als je de App verwijdert, wordt de lokale database van je apparaat verwijderd, maar niet je back-ups in Google Drive of iCloud, en ook niet je account.",
           "Om je account te verwijderen, open je de pagina Account in de App en kies je Account verwijderen. Hiermee worden je accountgegevens, je Cloud Sync-kopie, elke afbeelding die je bij ons hebt opgeslagen en de gedeelde boeken en albums waarvan je eigenaar bent permanent verwijderd, en wordt de inlog met Apple voor de App ingetrokken. Een browser ontkoppelen van het Webdashboard verwijdert de kopie die hij bewaart: meteen als je in de browser ontkoppelt en de eerstvolgende keer dat hij verbinding maakt als je vanuit de App ontkoppelt.",
-          "Het verwijderen van je gegevens verwijdert niet je abonnementsgegevens die door Apple of Google worden bewaard, en ook niet analysegegevens die eerder naar PostHog en Google Analytics for Firebase zijn verzonden. Neem contact met ons op via het onderstaande e-mailadres om verwijdering van analysegegevens aan te vragen. Op onze {dataDeletion} staan alle stappen."
+          "Het verwijderen van je gegevens verwijdert niet je abonnementsgegevens die door Apple of Google worden bewaard, en ook niet analysegegevens die eerder naar PostHog en Google Analytics for Firebase zijn verzonden of gegevens voor advertentiemeting die eerder naar Meta zijn verzonden. Neem contact met ons op via het onderstaande e-mailadres om verwijdering van analysegegevens aan te vragen. Op onze {dataDeletion} staan alle stappen."
         ]
       },
       {
@@ -562,6 +569,11 @@
               "RevenueCat",
               "Abonnementsbeheer",
               "Willekeurige app-ID, abonnementsstatus"
+            ],
+            [
+              "Meta (Facebook en Instagram)",
+              "Meten van installaties via onze advertenties",
+              "App-installaties en -starts, apparaatinformatie zoals model, besturingssysteem en IP-adres, een ID aangemaakt door de software van Meta"
             ],
             [
               "Cloudflare (Workers, D1, R2, Durable Objects, Email, Turnstile)",

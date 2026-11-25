@@ -346,7 +346,7 @@
   },
   "privacy": {
     "title": "Privatlivspolitik",
-    "lastUpdated": "Sidst opdateret: 15. november 2026",
+    "lastUpdated": "Sidst opdateret: 25. november 2026",
     "links": {
       "userDataPolicy": "Google API Services User Data Policy",
       "googlePermissions": "myaccount.google.com/permissions",
@@ -357,7 +357,7 @@
         "title": "Overblik",
         "paragraphs": [
           "Money2Time (appen) er en privatøkonomiapp, der omregner dit forbrug til tidsækvivalenter baseret på din timeløn. Den drives af Money2Time-teamet (vi, os). Denne politik forklarer, hvilke data appen, money2time.com, Webdashboardet (app.money2time.com) og delte albums på nettet (album.money2time.com) indsamler, hvordan de bruges, opbevares og deles, samt hvilke valg og rettigheder du har i forhold til disse data.",
-          "Vi sælger ikke dine personlige eller finansielle data, vi viser ikke annoncer, og vi bruger ikke dine data til annoncering."
+          "Vi sælger ikke dine personlige eller finansielle data, og vi viser ikke annoncer. Den eneste måde, vi bruger data til annoncering på, er til at måle vores egne annoncer på Facebook og Instagram, som beskrevet under Annoncemåling nedenfor, og det omfatter aldrig dine finansielle data."
         ]
       },
       {
@@ -437,6 +437,13 @@
                 "Generelle præferencer som valuta, lokalitet, tema og visningstilstand",
                 "Platform som iOS eller Android"
               ]
+            ]
+          },
+          {
+            "title": "Annoncemåling",
+            "paragraphs": [
+              "Vi annoncerer for Money2Time på Facebook og Instagram. For at tælle, hvor mange installationer disse annoncer giver, indeholder appen på iOS og Android Metas software til apphændelser (app events), som fortæller Meta, når appen installeres og åbnes. Meta modtager også tekniske oplysninger om din enhed, såsom dens model, styresystem, sprog, tidszone og IP-adresse, og et id, som Metas software opretter i appen. På Android kan softwaren også læse attributions-id'et fra Facebook-appen på din enhed og installationshenvisningen (install referrer) fra Google Play, så Meta kan se, om installationen fulgte efter en af vores annoncer.",
+              "Meta modtager ikke dit tilfældige app-id, din enheds annonce-id, dit navn eller din e-mailadresse, dine finansielle data eller noget, du skriver, og vi bruger ikke disse data til at vise dig annoncer. Appen beder ikke om tilladelse til at spore dig på iOS, så på iOS måler Meta kun installationer via Apples SKAdNetwork og Metas Aggregated Event Measurement, som rapporterer resultaterne samlet. Meta behandler disse data i henhold til sine egne vilkår og Meta Privacy Policy. Appen sender dem ikke fra en enhed, hvis region er indstillet til et land i Det Europæiske Økonomiske Samarbejdsområde, Storbritannien eller Schweiz."
             ]
           },
           {
@@ -530,7 +537,7 @@
       {
         "title": "8. Opbevaring af data",
         "paragraphs": [
-          "Data på din enhed forbliver der, indtil du sletter dem eller afinstallerer appen. Kontooplysninger, din Cloud Sync-kopi og dine billeder på vores servere opbevares, indtil du sletter din konto. Data i delte regnskaber og albums opbevares, så længe gruppen eksisterer. Data om live-indtjening slettes, når du slår funktionen fra, og senest 45 dage efter, at appen sidst har bekræftet dem. Loginsessioner varer op til et år og fornyes, mens du bruger dem. Kvitteringer og notifikationstekster, der sendes til AI-behandling, gemmes ikke af os. Analysedata opbevares i op til 14 måneder i Google Analytics og i henhold til vores opbevaringsindstillinger i PostHog. Forbindelsesoplysninger såsom IP-adresser opbevares kortvarigt i vores tjenesteudbyderes logfiler."
+          "Data på din enhed forbliver der, indtil du sletter dem eller afinstallerer appen. Kontooplysninger, din Cloud Sync-kopi og dine billeder på vores servere opbevares, indtil du sletter din konto. Data i delte regnskaber og albums opbevares, så længe gruppen eksisterer. Data om live-indtjening slettes, når du slår funktionen fra, og senest 45 dage efter, at appen sidst har bekræftet dem. Loginsessioner varer op til et år og fornyes, mens du bruger dem. Kvitteringer og notifikationstekster, der sendes til AI-behandling, gemmes ikke af os. Analysedata opbevares i op til 14 måneder i Google Analytics og i henhold til vores opbevaringsindstillinger i PostHog. Meta opbevarer data om annoncemåling i henhold til sine egne vilkår. Forbindelsesoplysninger såsom IP-adresser opbevares kortvarigt i vores tjenesteudbyderes logfiler."
         ]
       },
       {
@@ -538,7 +545,7 @@
         "paragraphs": [
           "Du har fuld kontrol over dine data. Nulstil data i Indstillinger sletter permanent dine konti, kategorier og transaktioner fra din enhed og fra din Cloud Sync-kopi, hvis Cloud Sync er slået til. Hvis du afinstallerer appen, fjernes den lokale database fra din enhed, men ikke dine sikkerhedskopier i Google Drive eller iCloud eller din konto.",
           "For at slette din konto skal du åbne appens Konto-side og vælge Slet konto. Dette sletter permanent dine kontooplysninger, din Cloud Sync-kopi, alle billeder, du har gemt hos os, og de delte regnskaber og albums, du ejer, og tilbagekalder appens login med Apple. Når du fjerner en browsers forbindelse til Webdashboardet, slettes den kopi, den har gemt: med det samme, når du gør det i browseren, og næste gang den får forbindelse, når du gør det i appen.",
-          "Sletning af dine data sletter ikke dine abonnementsoplysninger hos Apple eller Google eller analysedata, der tidligere er sendt til PostHog og Google Analytics for Firebase. For at anmode om sletning af analysedata kan du kontakte os på e-mailadressen nedenfor. Vores {dataDeletion} indeholder den fulde vejledning."
+          "Sletning af dine data sletter ikke dine abonnementsoplysninger hos Apple eller Google, analysedata, der tidligere er sendt til PostHog og Google Analytics for Firebase, eller data om annoncemåling, der tidligere er sendt til Meta. For at anmode om sletning af analysedata kan du kontakte os på e-mailadressen nedenfor. Vores {dataDeletion} indeholder den fulde vejledning."
         ]
       },
       {
@@ -562,6 +569,11 @@
               "RevenueCat",
               "Abonnementsadministration",
               "Tilfældigt app-id, abonnementsstatus"
+            ],
+            [
+              "Meta (Facebook og Instagram)",
+              "Måling af installationer fra vores annoncer",
+              "Installationer og åbninger af appen, enhedsoplysninger såsom model, styresystem og IP-adresse, et id oprettet af Metas software"
             ],
             [
               "Cloudflare (Workers, D1, R2, Durable Objects, Email, Turnstile)",

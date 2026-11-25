@@ -346,7 +346,7 @@
   },
   "privacy": {
     "title": "Dasar Privasi",
-    "lastUpdated": "Kemas kini terakhir: 15 November 2026",
+    "lastUpdated": "Kemas kini terakhir: 25 November 2026",
     "links": {
       "userDataPolicy": "Google API Services User Data Policy",
       "googlePermissions": "myaccount.google.com/permissions",
@@ -357,7 +357,7 @@
         "title": "Gambaran Keseluruhan",
         "paragraphs": [
           "Money2Time (Aplikasi) ialah aplikasi kewangan peribadi yang menukar perbelanjaan anda kepada padanan masa berdasarkan gaji sejam anda. Aplikasi ini dikendalikan oleh pasukan Money2Time (kami). Dasar ini menerangkan data yang dikumpulkan oleh Aplikasi, money2time.com, Papan Pemuka Web (app.money2time.com) dan album dikongsi di web (album.money2time.com), cara data itu digunakan, disimpan dan dikongsi, serta pilihan dan hak anda berkaitan data tersebut.",
-          "Kami tidak menjual data peribadi atau kewangan anda, kami tidak memaparkan iklan, dan kami tidak menggunakan data anda untuk pengiklanan."
+          "Kami tidak menjual data peribadi atau kewangan anda, dan kami tidak memaparkan iklan. Satu-satunya cara kami menggunakan data untuk pengiklanan adalah untuk mengukur iklan kami sendiri di Facebook dan Instagram, seperti yang diterangkan dalam Pengukuran Iklan di bawah, dan ini tidak pernah termasuk data kewangan anda."
         ]
       },
       {
@@ -437,6 +437,13 @@
                 "Keutamaan umum seperti mata wang, lokal, tema, dan mod paparan",
                 "Platform seperti iOS atau Android"
               ]
+            ]
+          },
+          {
+            "title": "Pengukuran Iklan",
+            "paragraphs": [
+              "Kami mengiklankan Money2Time di Facebook dan Instagram. Untuk mengira bilangan pemasangan yang dihasilkan oleh iklan tersebut, Aplikasi pada iOS dan Android mengandungi perisian acara aplikasi (app events) Meta, yang memberitahu Meta apabila Aplikasi dipasang dan dibuka. Meta juga menerima maklumat teknikal tentang peranti anda, seperti model, sistem pengendalian, bahasa, zon waktu dan alamat IP peranti itu, serta pengecam yang dicipta oleh perisian Meta dalam Aplikasi. Pada Android, perisian itu juga boleh membaca pengecam atribusi aplikasi Facebook pada peranti anda dan install referrer Google Play, supaya Meta dapat mengetahui sama ada pemasangan itu berlaku selepas salah satu iklan kami.",
+              "Meta tidak menerima pengecam aplikasi rawak anda, ID pengiklanan peranti anda, nama atau alamat e-mel anda, data kewangan anda atau apa-apa yang anda taip, dan kami tidak menggunakan data ini untuk menunjukkan iklan kepada anda. Aplikasi tidak meminta kebenaran untuk menjejak anda pada iOS, jadi pada iOS Meta hanya mengukur pemasangan melalui SKAdNetwork Apple dan Aggregated Event Measurement Meta, yang melaporkan hasil secara agregat. Meta memproses data ini mengikut termanya sendiri dan Meta Privacy Policy. Aplikasi tidak menghantarnya dari peranti yang rantaunya ditetapkan kepada negara di Kawasan Ekonomi Eropah, United Kingdom atau Switzerland."
             ]
           },
           {
@@ -530,7 +537,7 @@
       {
         "title": "8. Penyimpanan Data",
         "paragraphs": [
-          "Data pada peranti anda kekal sehingga anda memadamnya atau menyahpasang Aplikasi. Maklumat akaun, salinan Cloud Sync anda dan imej anda pada pelayan kami disimpan sehingga anda memadam akaun anda. Data buku dan album dikongsi disimpan selagi kumpulan itu wujud. Data pendapatan langsung dipadam apabila anda mematikannya, dan paling lewat 45 hari selepas Aplikasi kali terakhir mengesahkannya. Sesi log masuk bertahan sehingga satu tahun dan diperbaharui semasa anda menggunakannya. Teks resit dan pemberitahuan yang dihantar untuk pemprosesan AI tidak disimpan oleh kami. Data analitik disimpan sehingga 14 bulan dalam Google Analytics dan mengikut tetapan penyimpanan kami dalam PostHog. Butiran sambungan seperti alamat IP disimpan untuk tempoh singkat dalam log penyedia perkhidmatan kami."
+          "Data pada peranti anda kekal sehingga anda memadamnya atau menyahpasang Aplikasi. Maklumat akaun, salinan Cloud Sync anda dan imej anda pada pelayan kami disimpan sehingga anda memadam akaun anda. Data buku dan album dikongsi disimpan selagi kumpulan itu wujud. Data pendapatan langsung dipadam apabila anda mematikannya, dan paling lewat 45 hari selepas Aplikasi kali terakhir mengesahkannya. Sesi log masuk bertahan sehingga satu tahun dan diperbaharui semasa anda menggunakannya. Teks resit dan pemberitahuan yang dihantar untuk pemprosesan AI tidak disimpan oleh kami. Data analitik disimpan sehingga 14 bulan dalam Google Analytics dan mengikut tetapan penyimpanan kami dalam PostHog. Meta menyimpan data pengukuran iklan mengikut termanya sendiri. Butiran sambungan seperti alamat IP disimpan untuk tempoh singkat dalam log penyedia perkhidmatan kami."
         ]
       },
       {
@@ -538,7 +545,7 @@
         "paragraphs": [
           "Anda mempunyai kawalan penuh ke atas data anda. Set Semula Data dalam Tetapan memadam secara kekal akaun, kategori dan transaksi anda daripada peranti anda, dan daripada salinan Cloud Sync anda jika Cloud Sync dihidupkan. Menyahpasang Aplikasi membuang pangkalan data lokal daripada peranti anda, tetapi tidak membuang sandaran anda dalam Google Drive atau iCloud, atau akaun anda.",
           "Untuk memadam akaun anda, buka halaman Akaun dalam Aplikasi dan pilih Padam akaun. Ini memadam secara kekal maklumat akaun anda, salinan Cloud Sync anda, setiap imej yang anda simpan bersama kami, serta buku dan album dikongsi yang anda miliki, dan membatalkan log masuk Apple Aplikasi. Menyahpaut pelayar daripada Papan Pemuka Web memadam salinan yang disimpannya: serta-merta apabila anda menyahpaut dalam pelayar, dan pada kali berikutnya ia bersambung apabila anda menyahpaut daripada Aplikasi.",
-          "Pemadaman data anda tidak memadam rekod langganan anda yang dipegang oleh Apple atau Google, atau data analitik yang telah dihantar kepada PostHog dan Google Analytics for Firebase sebelum ini. Untuk meminta pemadaman data analitik, hubungi kami di e-mel di bawah. Langkah penuh terdapat di {dataDeletion} kami."
+          "Pemadaman data anda tidak memadam rekod langganan anda yang dipegang oleh Apple atau Google, data analitik yang telah dihantar kepada PostHog dan Google Analytics for Firebase sebelum ini, atau data pengukuran iklan yang telah dihantar kepada Meta sebelum ini. Untuk meminta pemadaman data analitik, hubungi kami di e-mel di bawah. Langkah penuh terdapat di {dataDeletion} kami."
         ]
       },
       {
@@ -562,6 +569,11 @@
               "RevenueCat",
               "Pengurusan langganan",
               "ID Aplikasi rawak, status langganan"
+            ],
+            [
+              "Meta (Facebook dan Instagram)",
+              "Mengukur pemasangan daripada iklan kami",
+              "Pemasangan dan pelancaran Aplikasi, maklumat peranti seperti model, sistem pengendalian dan alamat IP, pengecam yang dicipta oleh perisian Meta"
             ],
             [
               "Cloudflare (Workers, D1, R2, Durable Objects, Email, Turnstile)",

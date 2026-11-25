@@ -1,0 +1,20 @@
+plugins {
+  id 'com.android.library'
+  id 'expo-module-gradle-plugin'
+}
+
+group = 'com.nelsongan.money2time'
+version = '1.0.0'
+
+android {
+  namespace "com.nelsongan.money2time.metaappevents"
+  defaultConfig {
+    versionCode 1
+    versionName '1.0.0'
+  }
+}
+
+dependencies {
+  // Core only: app events and install attribution. No Login, Share or Gaming.
+  implementation 'com.facebook.android:facebook-core:19.0.1'
+}

@@ -1,0 +1,8 @@
+{
+  "name": "meta-app-events",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Meta app events (install and app launch) for ad measurement, core SDK only",
+  "main": "index.ts",
+  "license": "UNLICENSED"
+}

@@ -346,7 +346,7 @@
   },
   "privacy": {
     "title": "Privacy Policy",
-    "lastUpdated": "Last updated: November 15, 2026",
+    "lastUpdated": "Last updated: November 25, 2026",
     "links": {
       "userDataPolicy": "Google API Services User Data Policy",
       "googlePermissions": "myaccount.google.com/permissions",
@@ -357,7 +357,7 @@
         "title": "Overview",
         "paragraphs": [
           "Money2Time (the App) is a personal finance app that converts your spending into time equivalents based on your hourly wage. It is run by the Money2Time team (we, us). This policy explains what data the App, money2time.com, the Web Dashboard (app.money2time.com) and shared albums on the web (album.money2time.com) collect, how it is used, stored and shared, and your choices and rights regarding that data.",
-          "We do not sell your personal or financial data, we do not show advertisements, and we do not use your data for advertising."
+          "We do not sell your personal or financial data, and we do not show advertisements. The only way we use data for advertising is to measure our own ads on Facebook and Instagram, as described under Ad Measurement below, and that never includes your financial data."
         ]
       },
       {
@@ -437,6 +437,13 @@
                 "General preferences such as currency, locale, theme, and display mode",
                 "Platform such as iOS or Android"
               ]
+            ]
+          },
+          {
+            "title": "Ad Measurement",
+            "paragraphs": [
+              "We advertise Money2Time on Facebook and Instagram. To count how many installs those ads bring in, the App on iOS and Android includes Meta's app events software, which tells Meta when the App is installed and opened. Meta also receives technical information about your device, such as its model, operating system, language, time zone and IP address, and an identifier its software creates in the App. On Android, it may also read the attribution identifier of the Facebook app on your device and the Google Play install referrer, so Meta can tell whether the install followed one of our ads.",
+              "Meta does not receive your random app identifier, your device's advertising ID, your name or email address, your financial data, or anything you type, and we do not use this data to show you ads. The App does not ask for permission to track you on iOS, so on iOS Meta measures installs only through Apple's SKAdNetwork and Meta's Aggregated Event Measurement, which report results in aggregate. Meta processes this data under its own terms and the Meta Privacy Policy. The App does not send it on a device whose region is set to a country in the European Economic Area, the United Kingdom or Switzerland."
             ]
           },
           {
@@ -530,7 +537,7 @@
       {
         "title": "8. Data Retention",
         "paragraphs": [
-          "Data on your device stays until you delete it or uninstall the App. Account information, your Cloud Sync copy, and your images on our servers are kept until you delete your account. Shared ledger and album data is kept while the group exists. Live earnings data is deleted when you turn it off, and at the latest 45 days after the App last confirms it. Sign-in sessions last up to one year and renew while you use them. Receipt and notification texts sent for AI processing are not stored by us. Analytics data is kept for up to 14 months in Google Analytics and according to our retention settings in PostHog. Connection details such as IP addresses are kept briefly in our service providers' logs."
+          "Data on your device stays until you delete it or uninstall the App. Account information, your Cloud Sync copy, and your images on our servers are kept until you delete your account. Shared ledger and album data is kept while the group exists. Live earnings data is deleted when you turn it off, and at the latest 45 days after the App last confirms it. Sign-in sessions last up to one year and renew while you use them. Receipt and notification texts sent for AI processing are not stored by us. Analytics data is kept for up to 14 months in Google Analytics and according to our retention settings in PostHog. Meta keeps ad measurement data under its own terms. Connection details such as IP addresses are kept briefly in our service providers' logs."
         ]
       },
       {
@@ -538,7 +545,7 @@
         "paragraphs": [
           "You have full control over your data. Reset Data in Settings permanently deletes your accounts, categories, and transactions from your device, and from your Cloud Sync copy if Cloud Sync is on. Uninstalling the App removes the local database from your device, but not your backups in Google Drive or iCloud, or your account.",
           "To delete your account, open the App's Account page and choose Delete account. This permanently deletes your account information, your Cloud Sync copy, every image you stored with us, and the shared ledgers and albums you own, and revokes the App's Apple sign-in. Unlinking a browser from the Web Dashboard deletes the copy it keeps: right away when you unlink in the browser, and the next time it connects when you unlink from the App.",
-          "Deleting your data does not delete your subscription records held by Apple or Google, or analytics data previously sent to PostHog and Google Analytics for Firebase. To request deletion of analytics data, contact us at the email below. Our {dataDeletion} has the full steps."
+          "Deleting your data does not delete your subscription records held by Apple or Google, analytics data previously sent to PostHog and Google Analytics for Firebase, or ad measurement data previously sent to Meta. To request deletion of analytics data, contact us at the email below. Our {dataDeletion} has the full steps."
         ]
       },
       {
@@ -562,6 +569,11 @@
               "RevenueCat",
               "Subscription management",
               "Random app ID, subscription status"
+            ],
+            [
+              "Meta (Facebook and Instagram)",
+              "Measuring installs from our ads",
+              "App installs and launches, device information such as model, operating system and IP address, an identifier created by Meta's software"
             ],
             [
               "Cloudflare (Workers, D1, R2, Durable Objects, Email, Turnstile)",
