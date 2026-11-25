@@ -9,9 +9,28 @@ import {
 } from '~/features/cloudSync/lib/rowCodec';
 
 describe('encodeRow', () => {
-  it('stores the row as JSON', () => {
+  it('stores the row as JSON and omits never-set null columns on UUID-keyed tables', () => {
     const json = encodeRow('transactions', { id: 't1', amount: 12.5, note: null }, null);
+    expect(JSON.parse(json)).toEqual({ id: 't1', amount: 12.5 });
+  });
+
+  it('keeps explicit null when clearing a previously stored column (backward-compatible UPDATE)', () => {
+    const stored = JSON.stringify({ id: 't1', amount: 12.5, note: 'Lunch' });
+    const json = encodeRow('transactions', { id: 't1', amount: 12.5, note: null }, stored);
     expect(JSON.parse(json)).toEqual({ id: 't1', amount: 12.5, note: null });
+  });
+
+  it('keeps pre-existing null keys in legacy stored JSON to avoid unnecessary rewrites', () => {
+    const stored = JSON.stringify({ id: 't1', amount: 12.5, note: null });
+    const json = encodeRow('transactions', { id: 't1', amount: 12.5, note: null }, stored);
+    expect(JSON.parse(json)).toEqual({ id: 't1', amount: 12.5, note: null });
+  });
+
+  it('keeps explicit null columns on singleton tables (settings, ledgers)', () => {
+    const settingsJson = encodeRow('settings', { id: 'primary', profile_avatar_uri: null }, null);
+    expect(JSON.parse(settingsJson)).toEqual({ id: 'primary', profile_avatar_uri: null });
+    const ledgerJson = encodeRow('ledgers', { id: 'default', emoji: null }, null);
+    expect(JSON.parse(ledgerJson)).toEqual({ id: 'default', emoji: null });
   });
 
   it('keeps fields a newer app version stored that this phone does not have', () => {

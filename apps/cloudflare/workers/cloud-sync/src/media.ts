@@ -10,6 +10,24 @@ import { json } from './http';
 
 /** One folder and one file name, as `services/userAssets.ts` writes them. */
 const ASSET_PATH = /^[a-z][a-z-]{1,40}\/[A-Za-z0-9][A-Za-z0-9._-]{0,120}$/;
+/**
+ * The only folders `services/userAssets.ts` writes. Bundled bank/subscription
+ * logos (`malaysia/maybank`, `global/netflix`) and card designs (`mascot/chick`)
+ * also contain a slash; older app versions asked R2 for them and always got
+ * 404. Rejecting unknown folders before touching R2 eliminates those lookups.
+ */
+export const KNOWN_MEDIA_FOLDERS: ReadonlySet<string> = new Set([
+  'account-logos',
+  'album-covers',
+  'avatars',
+  'card-designs',
+  'goal-covers',
+  'category-icons',
+  'item-icons',
+  'payment-qr',
+  'receipts',
+  'subscription-logos',
+]);
 const MAX_BYTES = 15 * 1024 * 1024;
 const MAX_EXISTS_BATCH = 100;
 const CONTENT_TYPES: Record<string, string> = {
@@ -49,6 +67,12 @@ export function ledgerSpace(sharedLedgerId: string): MediaSpace {
 
 export function isValidAssetPath(path: string): boolean {
   return ASSET_PATH.test(path);
+}
+
+/** Whether `path`'s leading folder is one of the user-asset folders the app writes. */
+export function isKnownMediaFolder(path: string): boolean {
+  const slash = path.indexOf('/');
+  return slash > 0 && KNOWN_MEDIA_FOLDERS.has(path.slice(0, slash));
 }
 
 export function contentTypeFor(path: string): string | null {
@@ -120,7 +144,9 @@ export async function putMedia(
   request: Request,
 ): Promise<Response> {
   const contentType = contentTypeFor(path);
-  if (!isValidAssetPath(path) || !contentType) return json({ error: 'bad_path' }, 400);
+  if (!isValidAssetPath(path) || !isKnownMediaFolder(path) || !contentType) {
+    return json({ error: 'bad_path' }, 400);
+  }
   // A declared length is required, so an oversized upload or a full quota is
   // refused before the body is read.
   const length = Number(request.headers.get('content-length') ?? '');
@@ -129,19 +155,27 @@ export async function putMedia(
   }
   if (length > MAX_BYTES) return json({ error: 'too_large' }, 413);
   const key = mediaKey(space, path);
-  const counted = await countNewImage(env, space, key);
-  if (counted === 'full') return json({ error: 'quota' }, 507);
-  const uncount = () => (counted === 'counted' ? adjustCount(env, space, -1) : undefined);
+  let counted: 'replaced' | 'counted' | 'full';
   let body: ArrayBuffer | ReadableStream = request.body;
   if (length <= RETRYABLE_UPLOAD_BYTES) {
-    // A phone that drops mid-upload fails this read: its client error, not ours.
-    const read = await request.arrayBuffer().catch(() => null);
+    // Overlap reading the small image body with the R2 HEAD + D1 quota check.
+    // A phone that drops mid-upload fails the read: its client error, not ours.
+    const [countResult, read] = await Promise.all([
+      countNewImage(env, space, key),
+      request.arrayBuffer().catch(() => null),
+    ]);
+    counted = countResult;
+    if (counted === 'full') return json({ error: 'quota' }, 507);
     if (!read || read.byteLength !== length) {
-      await uncount();
+      if (counted === 'counted') await adjustCount(env, space, -1);
       return json({ error: 'incomplete_body' }, 400);
     }
     body = read;
+  } else {
+    counted = await countNewImage(env, space, key);
+    if (counted === 'full') return json({ error: 'quota' }, 507);
   }
+  const uncount = () => (counted === 'counted' ? adjustCount(env, space, -1) : undefined);
   const write = () => env.MEDIA.put(key, body, { httpMetadata: { contentType } });
   try {
     await (body instanceof ArrayBuffer ? withR2Retry(write) : write());
@@ -223,6 +257,7 @@ async function countObjects(env: Env, space: MediaSpace): Promise<number> {
 
 export async function getMedia(env: Env, space: MediaSpace, path: string): Promise<Response> {
   if (!isValidAssetPath(path)) return json({ error: 'bad_path' }, 400);
+  if (!isKnownMediaFolder(path)) return json({ error: 'not_found' }, 404);
   const object = await withR2Retry(() => env.MEDIA.get(mediaKey(space, path)));
   if (!object) return json({ error: 'not_found' }, 404);
   return new Response(object.body, {
@@ -242,7 +277,9 @@ export async function existingMedia(
   if (!Array.isArray(paths) || paths.length > MAX_EXISTS_BATCH) {
     return json({ error: 'bad_paths' }, 400);
   }
-  const valid = paths.filter((p): p is string => typeof p === 'string' && isValidAssetPath(p));
+  const valid = paths.filter(
+    (p): p is string => typeof p === 'string' && isValidAssetPath(p) && isKnownMediaFolder(p),
+  );
   const heads = await Promise.all(
     valid.map((p) => withR2Retry(() => env.MEDIA.head(mediaKey(space, p)))),
   );

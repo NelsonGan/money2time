@@ -97,6 +97,7 @@ import {
   budgetWeekOverlaps,
   isBudgetPeriodKey,
 } from '~/features/budget/lib/budgetPeriods';
+import { notifyLocalDataChanged } from '~/features/cloudSync/lib/outboxWake';
 import { forgetPreviousInstallSession } from '~/features/cloudSync/services/cloudSyncSession';
 import { deletePersonalLedgerRows } from '~/features/cloudSync/services/ledgerChannels';
 import {
@@ -2763,6 +2764,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     <T,>(operation: () => T, options?: { fallbackMessage?: string; refresh?: () => void }): T => {
       try {
         const result = operation();
+        notifyLocalDataChanged();
         (options?.refresh ?? refreshAll)();
         return result;
       } catch (error) {

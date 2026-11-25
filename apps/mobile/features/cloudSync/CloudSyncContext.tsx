@@ -97,6 +97,7 @@ import {
   enableCapture,
   isCloudSyncAvailable,
   pendingChangeCount,
+  pendingChannels,
   pendingSharedChangeCount,
   resetLocalSyncState,
   runExclusive,
@@ -292,6 +293,16 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
   /** The personal sync in flight, and whether another was asked for meanwhile. */
   const syncingRef = useRef<Promise<void> | null>(null);
   const syncAgainRef = useRef(false);
+  /** Shared scope to run on the queued follow-up sync (`false`: personal only, `true`: all). */
+  const syncAgainSharedRef = useRef<boolean | Set<string>>(false);
+  /**
+   * Whether the account has any other active phone signed in. Starts true
+   * conservatively until the Worker reports `hasOtherPhones: false`; flipped
+   * back to true immediately if a personal live nudge arrives (e.g. a second
+   * phone signing in). Lets single-phone accounts skip no-op personal notify
+   * requests.
+   */
+  const hasOtherPhonesRef = useRef(true);
   const accountCheckedAtRef = useRef(0);
   const accountAskRef = useRef(0);
   /**
@@ -382,11 +393,14 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
 
   /**
    * Tells the other phones that `channel` changed. Best effort. `pro`: this
-   * phone's own Pro began, so the user's paused phones ask again.
+   * phone's own Pro began, so the user's paused phones ask again. Single-phone
+   * accounts skip personal `data` nudges because no other phone is signed in
+   * (shared ledgers and shared albums always notify for members and the web).
    */
   const announce = useCallback((channel: string, reason?: 'pro') => {
     const token = sessionRef.current?.token;
     if (!token) return;
+    if (channel === PERSONAL_CHANNEL && reason !== 'pro' && !hasOtherPhonesRef.current) return;
     void notifyChanged(token, channel, LIVE_DEVICE_ID, reason).catch(() => undefined);
   }, []);
   const announceRef = useRef(announce);
@@ -435,10 +449,14 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
         const answer = await getAccountStatus(
           session.token,
           session.linked ? appUserIdRef.current : null,
+          isStatusKnownRef.current ? isStoreProRef.current : undefined,
         );
         const current = sessionRef.current;
         // Signed out meanwhile, or a newer answer is on its way.
         if (current?.user.id !== session.user.id || asked !== accountAskRef.current) return null;
+        if (typeof answer.hasOtherPhones === 'boolean') {
+          hasOtherPhonesRef.current = answer.hasOtherPhones;
+        }
         rememberProAnswer(session.user.id, answer);
         setAccountPro(session.user.id, answer.isPro && current.linked);
         setPhoneLimited(answer.limited);
@@ -489,8 +507,15 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       throw new CloudSyncApiError(known?.limited ? 'phone_limit' : 'not_pro', 403);
     }
     try {
-      const next = await getSyncCredentials(session.token, id);
+      const next = await getSyncCredentials(
+        session.token,
+        id,
+        isStatusKnownRef.current ? isStoreProRef.current : undefined,
+      );
       if (sessionRef.current?.user.id === session.user.id) {
+        if (typeof next.hasOtherPhones === 'boolean') {
+          hasOtherPhonesRef.current = next.hasOtherPhones;
+        }
         rememberProAnswer(session.user.id, { isPro: true, limited: false });
       }
       credentialsRef.current = next;
@@ -539,6 +564,7 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       });
       retryRef.current = false;
       reportedRef.current = false;
+      hasOtherPhonesRef.current = true;
       accountCheckedAtRef.current = 0;
       proAnswerRef.current = null;
       if (pausedCheckRef.current) clearTimeout(pausedCheckRef.current.timer);
@@ -636,9 +662,9 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
     return opening;
   }, [closeEngine, fetchCredentials, sessionToken]);
 
-  /** Syncs the shared ledgers. A failure shows until a round succeeds, and is retried soon. */
+  /** Syncs the shared ledgers (all, or specific `channels`). A failure shows until a round succeeds. */
   const runSharedSync = useCallback(
-    async (opts: { forceList?: boolean } = {}) => {
+    async (opts: { forceList?: boolean; channels?: readonly string[] } = {}) => {
       if (!sessionRef.current || closingRef.current) return;
       const generation = generationRef.current;
       let failure: unknown = null;
@@ -668,78 +694,112 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
     [forgetSession, reloadAfterApply, report],
   );
 
-  const runSyncOnce = useCallback(async () => {
-    if (closingRef.current) return;
-    if (!sessionRef.current?.linked) {
-      await runSharedSync();
-      return;
-    }
-    const generation = generationRef.current;
-    setIsSyncing(true);
-    try {
-      void refreshAccountPro();
-      // Which ledgers are shared decides where rows go, so learn of a ledger
-      // shared from another phone before its rows leave the user's own copy.
-      // A failed read is retried later, but a rejected session is not: the
-      // account may have been deleted on another phone, while the cached
-      // Turso token would keep syncing for days.
-      const removed = await sharedLedgerSync.refreshList().catch((error: unknown) => {
-        if (errorKind(error) === 'session_expired') throw error;
-        return 0;
-      });
-      if (removed > 0) reloadAfterApply();
-      const engine = await openEngine();
-      const outcome = await engine.syncNow();
-      if (generation !== generationRef.current) return;
-      if (outcome.pushed) announce(PERSONAL_CHANNEL);
-      setStatus('ready');
-      setPhoneLimited(false);
-      setLastSyncedAt(Date.now());
-      // No image sweep here: a photo just picked in an editor is not in a
-      // row yet, and the sweep would delete it.
-      if (outcome.appliedRows > 0) reloadAfterApply();
-      if (outcome.applyError) {
-        // A pulled row could not be written: it is retried, and shown until it is.
-        retryRef.current = true;
-        await handleError(outcome.applyError, 'apply', generation);
-      } else {
-        retryRef.current = false;
-        reportedRef.current = false;
-        setLastError(null);
+  const runSyncOnce = useCallback(
+    async (shared: boolean | readonly string[] = true) => {
+      if (closingRef.current) return;
+      if (!sessionRef.current?.linked) {
+        if (shared === true) await runSharedSync();
+        else if (Array.isArray(shared) && shared.length) {
+          await runSharedSync({ channels: shared });
+        }
+        return;
       }
-    } catch (error) {
-      retryRef.current = true;
-      await handleError(error, 'sync', generation);
-    } finally {
-      setIsSyncing(false);
-    }
-    await runSharedSync();
-  }, [announce, handleError, openEngine, refreshAccountPro, reloadAfterApply, runSharedSync]);
+      const generation = generationRef.current;
+      setIsSyncing(true);
+      try {
+        void refreshAccountPro();
+        // Which ledgers are shared decides where rows go, so learn of a ledger
+        // shared from another phone before its rows leave the user's own copy.
+        // A failed read is retried later, but a rejected session is not: the
+        // account may have been deleted on another phone, while the cached
+        // Turso token would keep syncing for days.
+        const removed = await sharedLedgerSync.refreshList().catch((error: unknown) => {
+          if (errorKind(error) === 'session_expired') throw error;
+          return 0;
+        });
+        if (removed > 0) reloadAfterApply();
+        const engine = await openEngine();
+        const outcome = await engine.syncNow();
+        if (generation !== generationRef.current) return;
+        if (outcome.pushed) announce(PERSONAL_CHANNEL);
+        setStatus('ready');
+        setPhoneLimited(false);
+        setLastSyncedAt(Date.now());
+        // No image sweep here: a photo just picked in an editor is not in a
+        // row yet, and the sweep would delete it.
+        if (outcome.appliedRows > 0) reloadAfterApply();
+        if (outcome.applyError) {
+          // A pulled row could not be written: it is retried, and shown until it is.
+          retryRef.current = true;
+          await handleError(outcome.applyError, 'apply', generation);
+        } else {
+          retryRef.current = false;
+          reportedRef.current = false;
+          setLastError(null);
+        }
+      } catch (error) {
+        retryRef.current = true;
+        await handleError(error, 'sync', generation);
+      } finally {
+        setIsSyncing(false);
+      }
+      if (shared === true) await runSharedSync();
+      else if (Array.isArray(shared) && shared.length) {
+        await runSharedSync({ channels: shared });
+      }
+    },
+    [announce, handleError, openEngine, refreshAccountPro, reloadAfterApply, runSharedSync],
+  );
 
   /**
    * One personal sync at a time. A call while one runs (an edit, a live
    * nudge) is not dropped: one more sync follows, which picks up everything
-   * asked for meanwhile.
+   * asked for meanwhile (merging any requested shared-channel scopes).
    */
-  const runSync = useCallback((): Promise<void> => {
-    if (syncingRef.current) {
-      syncAgainRef.current = true;
-      return syncingRef.current;
-    }
-    const run = (async () => {
-      try {
-        do {
-          syncAgainRef.current = false;
-          await runSyncOnce();
-        } while (syncAgainRef.current && !closingRef.current);
-      } finally {
-        // In the same tick as the last check, so no request falls between.
-        syncingRef.current = null;
+  const runSync = useCallback(
+    (opts: { shared?: boolean | readonly string[] } = {}): Promise<void> => {
+      const requested = opts.shared ?? true;
+      if (syncingRef.current) {
+        if (!syncAgainRef.current) {
+          syncAgainRef.current = true;
+          syncAgainSharedRef.current =
+            typeof requested === 'boolean' ? requested : new Set(requested);
+        } else if (syncAgainSharedRef.current !== true) {
+          if (requested === true) {
+            syncAgainSharedRef.current = true;
+          } else if (Array.isArray(requested)) {
+            if (syncAgainSharedRef.current === false) {
+              syncAgainSharedRef.current = new Set(requested);
+            } else {
+              for (const id of requested) syncAgainSharedRef.current.add(id);
+            }
+          }
+        }
+        return syncingRef.current;
       }
-    })();
-    syncingRef.current = run;
-    return run;
-  }, [runSyncOnce]);
+      const run = (async () => {
+        try {
+          let nextShared: boolean | readonly string[] = requested;
+          for (;;) {
+            syncAgainRef.current = false;
+            syncAgainSharedRef.current = false;
+            await runSyncOnce(nextShared);
+            if (!syncAgainRef.current || closingRef.current) break;
+            const queued = syncAgainSharedRef.current;
+            nextShared = typeof queued === 'boolean' ? queued : [...queued];
+          }
+        } finally {
+          // In the same tick as the last check, so no request falls between.
+          syncingRef.current = null;
+          syncAgainRef.current = false;
+          syncAgainSharedRef.current = false;
+        }
+      })();
+      syncingRef.current = run;
+      return run;
+    },
+    [runSyncOnce],
+  );
 
   const markLinked = useCallback(async (mode: LinkMode) => {
     const session = sessionRef.current;
@@ -903,6 +963,7 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       closingRef.current = false;
       retryRef.current = false;
       reportedRef.current = false;
+      hasOtherPhonesRef.current = true;
       // Another account's Pro does not carry over.
       if (getAccountProAnswer()?.userId !== signedIn.id) clearAccountPro();
       accountCheckedAtRef.current = 0;
@@ -1265,20 +1326,31 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
   }, [isStorePro, isStatusKnown]);
 
   const scheduledSync = useCallback(() => void runSync(), [runSync]);
+  const syncPendingChannels = useCallback((): boolean => {
+    const { personal, shared } = pendingChannels();
+    if (personal) {
+      void runSync({ shared: shared.size ? [...shared] : false });
+      return true;
+    }
+    if (shared.size) {
+      void runSharedSync({ channels: [...shared] });
+      return true;
+    }
+    return false;
+  }, [runSharedSync, runSync]);
   const syncWanted = useCallback(() => retryRef.current || pendingChangeCount() > 0, []);
-  // An edit goes up within about a second, unless a sync is running (it follows
-  // that one) or the last failed (the 15 s retry has it).
-  // A shared ledger whose sync keeps failing leaves rows in the outbox too:
-  // then this waits for the 15 s retry rather than syncing every second.
-  const pushSoon = useCallback(
-    () =>
-      !syncingRef.current &&
-      !retryRef.current &&
-      !sharedLedgerSync.retry &&
-      pendingChangeCount() > 0,
-    [],
-  );
-  useSyncScheduler(status === 'ready', scheduledSync, syncWanted, { pushSoon });
+  // An edit goes up within ~250 ms via local write wake (or the fallback poll),
+  // unless a sync is running (it follows that one) or the last failed (the 15 s
+  // retry has it). Only the channel(s) with pending edits are synced.
+  const pushSoon = useCallback(() => {
+    if (syncingRef.current || retryRef.current || sharedLedgerSync.retry) return false;
+    const { personal, shared } = pendingChannels();
+    return personal || shared.size > 0;
+  }, []);
+  useSyncScheduler(status === 'ready', scheduledSync, syncWanted, {
+    pushSoon,
+    onPushSoon: syncPendingChannels,
+  });
 
   // Paused: check again on return to the app and every 15 minutes, so a
   // renewal on another phone resumes this one without a tap. A purchase on
@@ -1298,24 +1370,29 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
   // Pro, or Pro paused): on their own schedule. Ready runs them with runSync.
   const hasShared = useHasSharedLedgers();
   const scheduledShared = useCallback(() => void runSharedSync(), [runSharedSync]);
+  const syncPendingSharedChannels = useCallback((): boolean => {
+    const { shared } = pendingChannels();
+    if (!shared.size) return false;
+    void runSharedSync({ channels: [...shared] });
+    return true;
+  }, [runSharedSync]);
   const sharedWanted = useCallback(
     () => sharedLedgerSync.retry || pendingSharedChangeCount() > 0,
     [],
   );
-  const sharedPushSoon = useCallback(
-    () =>
-      !sharedLedgerSync.isRunning() && !sharedLedgerSync.retry && pendingSharedChangeCount() > 0,
-    [],
-  );
+  const sharedPushSoon = useCallback(() => {
+    if (sharedLedgerSync.isRunning() || sharedLedgerSync.retry) return false;
+    return pendingChannels().shared.size > 0;
+  }, []);
   useSyncScheduler(
     hasShared && user !== null && status !== 'ready' && status !== 'unavailable',
     scheduledShared,
     sharedWanted,
-    { pushSoon: sharedPushSoon },
+    { pushSoon: sharedPushSoon, onPushSoon: syncPendingSharedChannels },
   );
 
   // Live updates while signed in: another phone (this user's, or someone in a
-  // shared ledger) pushed, so sync that channel now.
+  // shared ledger) pushed, so sync only that channel now.
   const runSyncRef = useRef(runSync);
   runSyncRef.current = runSync;
   const runSharedSyncRef = useRef(runSharedSync);
@@ -1328,6 +1405,10 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       onChange: ({ channel, reason, actor }) => {
         if (closingRef.current) return;
         if (reason === 'access' && actor === userId) sharedLedgerSync.noteLeftByUser(channel);
+        if (channel === PERSONAL_CHANNEL) {
+          // Another phone of this account is active: resume sending personal nudges.
+          hasOtherPhonesRef.current = true;
+        }
         if (channel === PERSONAL_CHANNEL && statusRef.current === 'notPro') {
           // Paused: its own data does not sync. Another phone's Pro (`pro`)
           // may resume it: asked, and never lost. An `access` change (the
@@ -1339,15 +1420,20 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
           if (reason === 'access') checkWhilePaused({ always: true });
           else if (reason === 'pro') checkWhilePaused({ later: true });
         } else if (channel === PERSONAL_CHANNEL) {
-          // Also how a deletion of the account on another phone is learned:
-          // the sync finds the session gone and signs this phone out.
-          void runSyncRef.current();
+          // Sync only the personal channel (skip pulling every shared album/ledger).
+          void runSyncRef.current({ shared: false });
+        } else if (reason === 'access') {
+          void runSharedSyncRef.current({ forceList: true });
         } else {
-          void runSharedSyncRef.current({ forceList: reason === 'access' });
+          // Sync only the specific shared ledger / shared album that changed.
+          void runSharedSyncRef.current({ channels: [channel] });
         }
       },
       onReconnect: () => {
         if (closingRef.current) return;
+        // If this phone thought it was alone, check the account on reconnect so
+        // it learns immediately if a second phone signed in while disconnected.
+        if (!hasOtherPhonesRef.current) void refreshAccountProRef.current(true);
         // A paused phone's own data has nothing to sync; its shared ledgers
         // catch up, and a nudge the socket missed is checked for, unless the
         // return to the app that reconnected it checked just now.

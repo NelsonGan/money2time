@@ -1,9 +1,17 @@
+import { USER_ASSET_KINDS } from '~/features/cloudSync/lib/syncTables';
+
 // Loaded with require() on a path variable, like the receipt-scanner tests, so
 // the app's typecheck does not pull in the Worker's Cloudflare types.
 const WORKER_SRC = '../../../cloudflare/workers/cloud-sync/src';
-const { contentTypeFor, isValidAssetPath, ledgerSpace, mediaKey, userSpace } = require(
-  `${WORKER_SRC}/media`,
-);
+const {
+  contentTypeFor,
+  isKnownMediaFolder,
+  isValidAssetPath,
+  KNOWN_MEDIA_FOLDERS,
+  ledgerSpace,
+  mediaKey,
+  userSpace,
+} = require(`${WORKER_SRC}/media`);
 const { invitePage, maskEmail } = require(`${WORKER_SRC}/ledgers`) as {
   invitePage: (code: string) => Response;
   maskEmail: (email: string) => string;
@@ -59,6 +67,13 @@ describe('cloud-sync media paths', () => {
     expect(mediaKey(ledgerSpace('abc123'), 'receipts/x.jpg')).toBe('l/abc123/receipts/x.jpg');
     expect(userSpace('user1').usageTable).toBe('media_usage');
     expect(ledgerSpace('abc123').usageTable).toBe('ledger_media_usage');
+  });
+
+  it('keeps KNOWN_MEDIA_FOLDERS in exact parity with USER_ASSET_KINDS', () => {
+    expect([...KNOWN_MEDIA_FOLDERS].sort()).toEqual([...USER_ASSET_KINDS].sort());
+    expect(isKnownMediaFolder('receipts/a.jpg')).toBe(true);
+    expect(isKnownMediaFolder('malaysia/maybank')).toBe(false);
+    expect(isKnownMediaFolder('mascot/chick')).toBe(false);
   });
 });
 

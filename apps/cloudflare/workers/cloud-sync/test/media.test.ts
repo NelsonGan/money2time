@@ -219,3 +219,20 @@ test('deleting every image survives R2 failing the list and the delete once', as
   assert.equal(r2.calls.list, 2);
   assert.equal(r2.calls.delete, 2);
 });
+
+test('bundled logo and card-design folders return 404 without touching R2', async (t) => {
+  const { env, r2 } = fixture(t, {});
+  const res = await getMedia(env, space, 'malaysia/maybank');
+  assert.equal(res.status, 404);
+  assert.equal(r2.calls.get, 0);
+  const card = await getMedia(env, space, 'mascot/chick');
+  assert.equal(card.status, 404);
+  assert.equal(r2.calls.get, 0);
+  const exists = await existingMedia(env, space, ['malaysia/maybank', 'global/netflix']);
+  assert.equal(exists.status, 200);
+  assert.deepEqual(await exists.json(), { existing: [] });
+  assert.equal(r2.calls.head, 0);
+  const putUnknown = await putMedia(env, space, 'malaysia/maybank.jpg', upload());
+  assert.equal(putUnknown.status, 400);
+  assert.equal(r2.calls.put, 0);
+});

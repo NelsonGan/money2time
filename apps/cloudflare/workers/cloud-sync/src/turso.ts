@@ -37,7 +37,7 @@ export interface SyncDatabase {
   expiresAt: number;
 }
 
-interface SyncDatabaseRow {
+export interface SyncDatabaseRow {
   db_name: string;
   db_url: string;
   token: string | null;
@@ -52,14 +52,21 @@ export async function databaseNameFor(userId: string): Promise<string> {
 }
 
 /** The user's database and a usable token, making the database on first use. */
-export async function getSyncDatabase(env: Env, userId: string): Promise<SyncDatabase> {
-  if (env.LOCAL_SYNC_URL) return localSyncDatabase(env, userId);
+export async function getSyncDatabase(
+  env: Env,
+  userId: string,
+  preloaded?: SyncDatabaseRow | null,
+): Promise<SyncDatabase> {
+  if (env.LOCAL_SYNC_URL) return localSyncDatabase(env, userId, preloaded);
   const now = Date.now();
-  const existing = await env.AUTH_DB.prepare(
-    'SELECT db_name, db_url, token, token_expires_at FROM sync_databases WHERE user_id = ?1',
-  )
-    .bind(userId)
-    .first<SyncDatabaseRow>();
+  const existing =
+    preloaded !== undefined
+      ? preloaded
+      : await env.AUTH_DB.prepare(
+          'SELECT db_name, db_url, token, token_expires_at FROM sync_databases WHERE user_id = ?1',
+        )
+          .bind(userId)
+          .first<SyncDatabaseRow>();
 
   if (existing?.token && (existing.token_expires_at ?? 0) - now > TOKEN_REUSE_MARGIN_MS) {
     // Stored sealed; unreadable after a secret rotation, then a new one is minted.
@@ -101,12 +108,19 @@ export async function getSyncDatabase(env: Env, userId: string): Promise<SyncDat
  * Local development: LOCAL_SYNC_URL is a comma-separated list of sync servers,
  * one per test account in sign-up order (a single URL serves every account).
  */
-async function localSyncDatabase(env: Env, userId: string): Promise<SyncDatabase> {
+async function localSyncDatabase(
+  env: Env,
+  userId: string,
+  preloaded?: SyncDatabaseRow | null,
+): Promise<SyncDatabase> {
   const expiresAt = Date.now() + TOKEN_TTL_MS;
   const servers = csv(env.LOCAL_SYNC_URL);
-  const known = await env.AUTH_DB.prepare('SELECT db_url FROM sync_databases WHERE user_id = ?1')
-    .bind(userId)
-    .first<{ db_url: string }>();
+  const known =
+    preloaded !== undefined
+      ? preloaded
+      : await env.AUTH_DB.prepare('SELECT db_url FROM sync_databases WHERE user_id = ?1')
+          .bind(userId)
+          .first<{ db_url: string }>();
   if (known) return { url: known.db_url, token: 'local', expiresAt };
   const { results } = await env.AUTH_DB.prepare('SELECT db_url FROM sync_databases').all<{
     db_url: string;

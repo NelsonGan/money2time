@@ -1982,9 +1982,16 @@ updated_at)`, with each row as JSON, plus `sync_info` (the choice screen's
   the missing columns.
 - **Images** live in R2 under `u/<userId>/<asset path>`, the same relative
   path the rows store (`receipts/x.jpg`, `custom:account-logos/x.png`), so a
-  synced row finds its image under the same name. Images to upload are queued
+  synced row finds its image under the same name. Only paths under the ten
+  managed folders (`USER_ASSET_KINDS` in `lib/syncTables.ts`, kept in parity
+  with the Worker's `KNOWN_MEDIA_FOLDERS`) are queued or downloaded; bundled
+  bank/subscription logos (`malaysia/maybank`, `global/netflix`) and card
+  designs (`mascot/chick`) are ignored, and stale entries queued by older
+  builds are cleaned from `sync_media_missing`. Images to upload are queued
   in `sync_media_pending` with the outbox flush and uploaded before the push,
   four at a time, so a row never reaches another phone before its image can.
+  A single newly-captured image uploads directly without calling
+  `/v1/media/exists`; multi-image batches still check `/exists` first.
   An upload that breaks on the phone (`network`: a dropped connection, as
   `uploadMedia` reports any rejection of the upload), fails on the server
   (`server` without a 4xx status) or is timed out on the way (a 408, which
@@ -2010,13 +2017,30 @@ updated_at)`, with each row as JSON, plus `sync_info` (the choice screen's
   stay in step with `collectReferencedAssetPaths` (a test checks it), or the
   orphan sweep deletes a downloaded image. Images the app stops using are not
   deleted from R2 (see [Cloud-sync Worker > Images](#cloud-sync-worker)).
+- **Compact row JSON** (`lib/rowCodec.ts`). For UUID-keyed tables, `encodeRow`
+  omits columns whose value is `null` and that were never stored in the cloud
+  copy (every nullable column in `schema.ts` defaults to `NULL` on `INSERT`),
+  cutting stored JSON size by ~45–68% on wide tables like `transactions` and
+  `accounts`. Clearing a previously non-null column still writes explicit
+  `null` so older app versions clear it on `UPDATE`, pre-existing `null` keys
+  in legacy rows are preserved to avoid unnecessary rewrites, and singleton
+  tables (`settings`, `ledgers`) always keep explicit `null`. On `UPDATE`,
+  this version also null-fills absent nullable non-device-local columns so a
+  cleared field from a compact first upload clears any stale local copy (such
+  as after a backup restore or attaching a shared ledger).
 - **When it runs** (`useSyncScheduler`): at launch, on return to the app, on
-  going to the background, within about a second of a local edit (the outbox
-  is checked every second while no sync is running and the last one did not
-  fail),
+  going to the background, within ~250 ms of a local edit (local mutations in
+  `AppContext` and `albumGroupWrites` wake the scheduler via `outboxWake` with
+  a 250 ms debounce, coalescing multi-row bursts, with a 3 s fallback poll),
   every 15 s while the last sync failed (a failed sync has usually moved the
-  outbox into the replica already), and every 3 minutes otherwise. Only one
-  personal sync runs at a time; a request during one runs one more after it.
+  outbox into the replica already), and every 3 minutes otherwise. Local-edit
+  pushes inspect `pendingChannels()` and sync only the channel(s) with pending
+  edits (a personal edit skips pulling shared ledgers and albums; a shared
+  album edit skips pulling personal and other shares); launch, foreground,
+  background, 15 s retry and the 3-minute fallback still sync all channels.
+  When a round syncs multiple active shares, missing credentials are
+  prefetched in parallel. Only one personal sync runs at a time; a request
+  during one runs one more after it (merging requested channel scopes).
   After rows are applied the app runs `refreshAll()`. Linking pulls the latest
   cloud copy first, since a replica kept from an earlier session is only
   refreshed by a pull. A pull that fails because the Turso engine's record of
@@ -2029,18 +2053,27 @@ updated_at)`, with each row as JSON, plus `sync_info` (the choice screen's
   replica's file is damaged (the engine's `Corrupt database`, such as a TEXT
   value that is not UTF-8, which the app cannot write: the binding stores an
   unpaired surrogate as U+FFFD; a server's own damage report does not count),
-  fails every time, so the replica is deleted and downloaded again once, when it holds nothing the
+  fails every time, so the replica is deleted and downloaded again when it holds nothing the
   cloud lacks: always before a link (it is only a copy of the cloud then),
-  and in a sync when nothing waits to be pushed. Each rebuild sends an error
-  report with `stage: 'replica_rebuilt'`, so the fault's rate stays visible.
+  and in a sync when nothing waits to be pushed. Consecutive rebuilds on a
+  channel back off exponentially (`rebuild_backoff:<channel>` in `sync_state`:
+  immediate first recovery, then 5 min, 30 min, 2 h, 12 h, 24 h; cleared once
+  a normal non-rebuild pull succeeds, so a persistent fault shows a sync error
+  between attempts instead of looping full-database downloads). Each rebuild
+  sends an error report with `stage: 'replica_rebuilt'`, so the fault's rate
+  stays visible.
 - **Live updates** (`services/liveSync.ts`, Worker `src/live.ts`). While the
   app is open and signed in it keeps one WebSocket to the Worker
   (`GET /v1/live`), held by a Durable Object per user (`SyncHub`, hibernating,
   so an idle socket costs nothing). After a sync that pushed, the phone posts
-  `POST /v1/sync/notify {channel}`; the Worker tells every phone of the user
-  (personal channel) or of everyone in the shared ledger, except the sender,
-  and they sync that channel at once. A typical edit shows on another phone
-  in 2 to 4 seconds. Messages carry only the channel name and a reason. The
+  `POST /v1/sync/notify {channel}` (single-phone accounts whose last check-in
+  reported `hasOtherPhones: false` skip personal `data` nudges; a second phone
+  checking in nudges the hub so existing phones resume immediately, and shared
+  ledgers/albums always notify for members and the web); the Worker tells every
+  phone of the user (personal channel) or of everyone in the shared ledger,
+  except the sender, and they sync only that channel at once (a personal
+  nudge skips shared channels; a shared `data` nudge syncs only that share).
+  Messages carry only the channel name and a reason. The
   socket closes in the background, reconnects with backoff (2 s to 1 minute)
   and syncs on every reconnect; the 3-minute pull stays as the fallback. A
   paused phone handles its own channel differently (see When Pro ends). `access` changes
@@ -5931,7 +5964,14 @@ Leave and account deletion return an error if a token revocation fails, so
 membership is not silently ended while an issued token still works.
 
 Every `/v1` route except the invite preview needs `Authorization: Bearer <session token>` (Better Auth's
-bearer plugin; the app never uses cookies). The shared-album website calls the
+bearer plugin; the app never uses cookies). On `/v1` routes, `src/session.ts`
+verifies the bearer token (raw or signed `<token>.<hmac>`) directly and batches
+the `"session" JOIN "user"` lookup with each hot route's primary D1 read in a
+single `AUTH_DB.batch` round trip (`GET /v1/ledgers` including fresh-Pro status,
+`POST /v1/account/status`, `POST /v1/sync/credentials`, `POST /v1/sync/notify`,
+`GET /v1/ledgers/<id>/album`, and `/v1/media/*`); sliding-window session
+renewal (`updateAge`) and `/v1/sync/notify` hub delivery run in
+`ctx.waitUntil`. The shared-album website calls the
 same routes over a service binding, turning its own HttpOnly cookie into that
 header ([Shared albums on the web](#shared-albums-on-the-web)); this Worker still
 sets no cookies and no CORS headers. Internal error text stays in the
@@ -5962,9 +6002,13 @@ email codes, expired invite links and rate-limit rows older than a day.
   credentials or the account status; a free ID is not recorded until it is Pro.
   Sign-out deletes the install's rows. The account's Pro reaches the first 5
   phones to join besides those with their own purchase, a place freeing on
-  sign-out or after 30 days unused (`account_phones`, written at most daily per phone;
-  `POST /v1/account/status` answers `{isPro, limited}` per phone and
-  credentials refuse a phone past it with 403 `phone_limit`). The account is Pro
+  sign-out or after 30 days unused (`account_phones`, written at most daily per phone,
+  with routine daily touches deferred to `ctx.waitUntil`;
+  `POST /v1/account/status` answers `{isPro, limited, hasOtherPhones}` per phone and
+  credentials refuse a phone past it with 403 `phone_limit`, returning
+  `hasOtherPhones` on success; when a client knows locally it has no store
+  purchase it sends `storePro: false` so the Worker skips the RevenueCat link
+  lookup for that install while still checking the account's existing links). The account is Pro
   while any of its IDs has the `pro` entitlement, cached an hour when Pro and
   a minute when not, read from RevenueCat's subscriber endpoint with
   `REVENUECAT_SECRET_KEY` if set, else both public SDK keys at once. An ID
@@ -5976,8 +6020,11 @@ email codes, expired invite links and rate-limit rows older than a day.
   cost of changing purchase identity. Staleness: a lapsed account stays Pro
   for up to an hour of cache plus the 7 days of a token already issued, and
   a RevenueCat outage keeps the last answer instead of downgrading.
-- **Images.** Uploads need a `Content-Length` (at most 15 MB); a full quota
-  is refused before the body is read, and a failed or abandoned write is
+- **Images.** Uploads need a `Content-Length` (at most 15 MB); unknown
+  leading folders (such as bundled logos or card designs from older app
+  versions) answer 404 on GET and are skipped on `/exists` without touching
+  R2 (`KNOWN_MEDIA_FOLDERS`). A full quota
+  is refused and a failed or abandoned write is
   uncounted (an upload the phone drops midway is a 400). Every R2 call (head,
   get, put, list, delete) is retried twice, after about 200 ms and 1 s with
   jitter, when R2 answers one of the codes its docs say to retry: internal
@@ -5986,7 +6033,7 @@ email codes, expired invite links and rate-limit rows older than a day.
   2026-11-06 failed image uploads and checks for several phones at once
   (PostHog `01a1ae5f`, `01a1ae9d`). Other R2 errors are not retried. A write
   can only be sent again from memory, so images up to 4 MB (all of the app's
-  compressed photos) are read whole first; larger ones stream once, so a few
+  compressed photos) are read whole in parallel with quota counting; larger ones stream once, so a few
   big uploads cannot fill the Worker's memory. `media_usage` caps an account
   at 20,000 images; when the counter says full, the real count is read from R2
   first, so drift never refuses an upload. Images the app stops using stay in

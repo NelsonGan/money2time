@@ -29,9 +29,16 @@ jest.mock('~/services/userAssets', () => ({
 }));
 jest.mock('~/services/userAssetGc', () => ({ collectReferencedAssetPaths: () => new Set() }));
 
-type Round = (forceList: boolean) => Promise<SharedSyncOutcome>;
+type Round = (
+  forceList: boolean,
+  channels: ReadonlySet<string> | null,
+) => Promise<SharedSyncOutcome>;
 
-let rounds: { forceList: boolean; finish: (outcome: Partial<SharedSyncOutcome>) => void }[];
+let rounds: {
+  forceList: boolean;
+  channels: ReadonlySet<string> | null;
+  finish: (outcome: Partial<SharedSyncOutcome>) => void;
+}[];
 let runAll: jest.SpyInstance;
 
 beforeEach(() => {
@@ -45,10 +52,11 @@ beforeEach(() => {
   runAll = jest
     .spyOn(sharedLedgerSync as unknown as { runAll: Round }, 'runAll')
     .mockImplementation(
-      (forceList: boolean) =>
+      (forceList: boolean, channels: ReadonlySet<string> | null = null) =>
         new Promise((resolve) => {
           rounds.push({
             forceList,
+            channels,
             finish: (outcome) =>
               resolve({ appliedRows: 0, removedLedgers: 0, error: null, ...outcome }),
           });
@@ -119,4 +127,25 @@ it('never drops a call made just as the last round ends', async () => {
     await expect(late).resolves.toMatchObject({ appliedRows: 1 });
     await first;
   }
+});
+
+it('merges targeted channel requests and widens to all if any caller asks for all', async () => {
+  const first = sharedLedgerSync.syncAll({ channels: ['share-a'] });
+  const second = sharedLedgerSync.syncAll({ channels: ['share-b'] });
+  const third = sharedLedgerSync.syncAll({ channels: ['share-c'] });
+  expect(rounds).toHaveLength(1);
+  expect(rounds[0].channels).toEqual(new Set(['share-a']));
+  rounds[0].finish({});
+  await flush();
+  expect(rounds).toHaveLength(2);
+  expect(rounds[1].channels).toEqual(new Set(['share-b', 'share-c']));
+  // A full sync requested during the second round widens the follow-up to null (all).
+  const fourth = sharedLedgerSync.syncAll({ channels: ['share-d'] });
+  const fifth = sharedLedgerSync.syncAll();
+  rounds[1].finish({});
+  await flush();
+  expect(rounds).toHaveLength(3);
+  expect(rounds[2].channels).toBeNull();
+  rounds[2].finish({});
+  await Promise.all([first, second, third, fourth, fifth]);
 });

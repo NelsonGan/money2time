@@ -73,6 +73,8 @@ export interface SyncCredentials {
   url: string;
   authToken: string;
   expiresAt: number;
+  /** False when this phone is the account's only active phone (skip personal live nudges). */
+  hasOtherPhones?: boolean;
 }
 
 export async function request<T>(
@@ -216,22 +218,34 @@ export interface AccountStatus {
   isPro: boolean;
   /** The account is Pro, but this phone is past the 5 phones its Pro reaches. */
   limited: boolean;
+  /** False when this phone is the account's only active phone (skip personal live nudges). */
+  hasOtherPhones?: boolean;
 }
 
 /**
  * Whether this phone gets Pro from the account (any install of it is Pro, and
  * this phone is among the 5 its Pro reaches; `limited` when it is not). Sent
  * with this install's App User ID, which the Worker links if it is Pro.
+ * `storePro`: when `false`, the Worker skips calling RevenueCat to link this
+ * install (never trusted to grant Pro).
  */
 export async function getAccountStatus(
   token: string,
   appUserId: string | null,
+  storePro?: boolean,
 ): Promise<AccountStatus> {
-  const body = await request<{ isPro?: unknown; limited?: unknown }>('/v1/account/status', {
-    body: { appUserId },
-    token,
-  });
-  return { isPro: body.isPro === true, limited: body.limited === true };
+  const body = await request<{ isPro?: unknown; limited?: unknown; hasOtherPhones?: unknown }>(
+    '/v1/account/status',
+    {
+      body: storePro === undefined ? { appUserId } : { appUserId, storePro },
+      token,
+    },
+  );
+  return {
+    isPro: body.isPro === true,
+    limited: body.limited === true,
+    ...(typeof body.hasOtherPhones === 'boolean' ? { hasOtherPhones: body.hasOtherPhones } : {}),
+  };
 }
 
 /** Sign-out: this install stops counting toward the account's Pro. */
@@ -257,8 +271,15 @@ export async function notifyChanged(
   await request('/v1/sync/notify', { body: { channel, device: deviceId, reason }, token });
 }
 
-export function getSyncCredentials(token: string, appUserId: string): Promise<SyncCredentials> {
-  return request<SyncCredentials>('/v1/sync/credentials', { body: { appUserId }, token });
+export function getSyncCredentials(
+  token: string,
+  appUserId: string,
+  storePro?: boolean,
+): Promise<SyncCredentials> {
+  return request<SyncCredentials>('/v1/sync/credentials', {
+    body: storePro === undefined ? { appUserId } : { appUserId, storePro },
+    token,
+  });
 }
 
 /** The user's own images; a shared ledger's are under `ledgerMediaPath`. */

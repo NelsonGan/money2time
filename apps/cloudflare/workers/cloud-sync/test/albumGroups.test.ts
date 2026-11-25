@@ -653,6 +653,45 @@ test('the website reads the group in one round trip, and a write reads what it n
   assert.equal(fixture.trips() - before, 2);
 });
 
+test('readGroup JS moneyRev matches SQL MONEY_STAMP_SQL across bills, payments and deletions', async () => {
+  const { db, group } = await trip();
+  const { moneyRevOf } = await import('../src/albumGroups.ts');
+  await write(group, 'owner', {
+    rows: [
+      bill('u-bali-owner', { 'u-bali-owner': 30, 'u-bali-tess': 30 }, { id: 'b-zebra' }),
+      bill('u-bali-tess', { 'u-bali-owner': 10, 'u-bali-tess': 10 }, { id: 'b-alpha' }),
+    ],
+  });
+  await write(group, 'tess', {
+    rows: [
+      {
+        table: 'album_settlements',
+        row: {
+          id: 's-1',
+          expense_id: 'b-zebra',
+          from_member: 'u-bali-tess',
+          to_member: 'u-bali-owner',
+          amount: 15,
+          currency: 'MYR',
+          date: '2026-11-14',
+        },
+      },
+    ],
+  });
+  const { moneyRev } = await readGroup(group);
+  const sqlStamp = (
+    db
+      .prepare(
+        `SELECT COALESCE((SELECT group_concat(table_name || ':' || row_id || ':' || rev, ',') FROM
+           (SELECT table_name, row_id, rev FROM sync_rows
+            WHERE table_name IN ('album_expenses', 'album_settlements')
+            ORDER BY table_name, row_id)), '') AS money`,
+      )
+      .get() as { money: string }
+  ).money;
+  assert.equal(moneyRev, await moneyRevOf(sqlStamp));
+});
+
 /** A website write, with what the page read: the rows' revisions and the money stamp. */
 async function webWrite(
   group: GroupDb,
