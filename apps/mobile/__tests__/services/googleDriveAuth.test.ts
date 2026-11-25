@@ -517,16 +517,29 @@ describe('token calls on Android', () => {
       cached = 'new-token';
       return null;
     });
-    googleSignin.getTokens.mockImplementation(tokens.mock);
-    googleSignin.clearCachedAccessToken.mockImplementation(clears.mock);
+    // Reads and clears have separate native promises, so count the two together.
+    let running = 0;
+    let mostAtOnce = 0;
+    const counted =
+      <T>(call: () => Promise<T>) =>
+      () => {
+        running += 1;
+        mostAtOnce = Math.max(mostAtOnce, running);
+        return call().finally(() => {
+          running -= 1;
+        });
+      };
+    googleSignin.getTokens.mockImplementation(counted(tokens.mock));
+    googleSignin.clearCachedAccessToken.mockImplementation(counted(clears.mock));
     const auth = loadAuth();
 
     await Promise.all([
       auth.clearGoogleTokenCache('old-token'),
-      auth.clearGoogleTokenCache('old-token'),
       auth.getGoogleAccessToken(),
+      auth.clearGoogleTokenCache('old-token'),
     ]);
 
+    expect(mostAtOnce).toBe(1);
     expect(tokens.state.overlaps + clears.state.overlaps).toBe(0);
   });
 

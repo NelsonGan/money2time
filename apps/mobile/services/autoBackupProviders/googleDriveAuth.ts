@@ -175,6 +175,8 @@ export async function signInWithGoogle(): Promise<
 export async function signOutFromGoogle(): Promise<void> {
   configureOnce();
   restorePromise = null;
+  // A token read of the old session must not reach the next one's first caller.
+  sharedTokenRead = null;
   try {
     await GoogleSignin.signOut();
   } catch {
@@ -189,8 +191,8 @@ export async function signOutFromGoogle(): Promise<void> {
  * authentication credentials".
  */
 export async function clearGoogleTokenCache(token: string): Promise<void> {
-  // A read already running may still return the token cleared here; later
-  // reads wait for the clear and start their own.
+  // A read queued before this clear may still return the token cleared here;
+  // reads after it wait for the clear and start their own.
   sharedTokenRead = null;
   try {
     await queueTokenCall(() => GoogleSignin.clearCachedAccessToken(token));
