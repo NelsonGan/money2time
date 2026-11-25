@@ -346,7 +346,7 @@
   },
   "privacy": {
     "title": "Datenschutzerklärung",
-    "lastUpdated": "Letzte Aktualisierung: 15. November 2026",
+    "lastUpdated": "Letzte Aktualisierung: 25. November 2026",
     "links": {
       "userDataPolicy": "Google API Services User Data Policy",
       "googlePermissions": "myaccount.google.com/permissions",
@@ -357,7 +357,7 @@
         "title": "Überblick",
         "paragraphs": [
           "Money2Time (die App) ist eine persönliche Finanz-App, die deine Ausgaben auf Basis deines Stundenlohns in Zeitäquivalente umrechnet. Sie wird vom Money2Time-Team (wir, uns) betrieben. Diese Erklärung erläutert, welche Daten die App, money2time.com, das Web-Dashboard (app.money2time.com) und geteilte Alben im Web (album.money2time.com) erheben, wie sie verwendet, gespeichert und weitergegeben werden und welche Wahlmöglichkeiten und Rechte du in Bezug auf diese Daten hast.",
-          "Wir verkaufen deine personenbezogenen Daten und Finanzdaten nicht, wir zeigen keine Werbung an und wir verwenden deine Daten nicht für Werbezwecke."
+          "Wir verkaufen deine personenbezogenen Daten und Finanzdaten nicht und wir zeigen keine Werbung an. Wir verwenden Daten nur auf eine Weise für Werbung: um unsere eigenen Anzeigen auf Facebook und Instagram zu messen, wie unten unter „Anzeigenmessung“ beschrieben, und dazu gehören niemals deine Finanzdaten."
         ]
       },
       {
@@ -437,6 +437,13 @@
                 "Allgemeine Einstellungen wie Währung, Gebietsschema, Design und Anzeigemodus",
                 "Plattform wie iOS oder Android"
               ]
+            ]
+          },
+          {
+            "title": "Anzeigenmessung",
+            "paragraphs": [
+              "Wir bewerben Money2Time auf Facebook und Instagram. Um zu zählen, wie viele Installationen diese Anzeigen bringen, enthält die App unter iOS und Android die App-Events-Software von Meta, die Meta mitteilt, wann die App installiert und geöffnet wird. Meta erhält außerdem technische Informationen über dein Gerät, etwa Modell, Betriebssystem, Sprache, Zeitzone und IP-Adresse, sowie eine Kennung, die die Software von Meta in der App erzeugt. Unter Android kann die Software außerdem die Attributionskennung der Facebook- oder Instagram-App auf deinem Gerät und den Google Play Install Referrer auslesen, damit Meta erkennen kann, ob die Installation auf eine unserer Anzeigen folgte.",
+              "Meta erhält weder deine zufällige App-ID noch die Werbe-ID deines Geräts, deinen Namen oder deine E-Mail-Adresse, deine Finanzdaten oder irgendetwas, das du eingibst, und wir verwenden diese Daten nicht, um dir Werbung anzuzeigen. Die App fragt unter iOS nicht nach der Erlaubnis, dich zu tracken, daher misst Meta Installationen unter iOS nur über Apples SKAdNetwork und Metas Aggregated Event Measurement, die Ergebnisse in aggregierter Form melden. Meta verarbeitet diese Daten gemäß seinen eigenen Bedingungen und der Meta Privacy Policy. Die App sendet sie nicht von einem Gerät, dessen Region auf ein Land im Europäischen Wirtschaftsraum, das Vereinigte Königreich oder die Schweiz eingestellt ist."
             ]
           },
           {
@@ -530,7 +537,7 @@
       {
         "title": "8. Datenaufbewahrung",
         "paragraphs": [
-          "Daten auf deinem Gerät bleiben erhalten, bis du sie löschst oder die App deinstallierst. Kontoinformationen, deine Cloud-Sync-Kopie und deine Bilder auf unseren Servern werden aufbewahrt, bis du dein Konto löschst. Daten geteilter Bücher und Alben werden aufbewahrt, solange die Gruppe besteht. Daten zum Live-Verdienst werden gelöscht, wenn du ihn ausschaltest, spätestens aber 45 Tage nachdem die App sie zuletzt bestätigt hat. Anmeldesitzungen gelten bis zu ein Jahr und verlängern sich, während du sie nutzt. Beleg- und Benachrichtigungstexte, die zur KI-Verarbeitung gesendet werden, werden von uns nicht gespeichert. Analysedaten werden in Google Analytics bis zu 14 Monate und in PostHog gemäß unseren Aufbewahrungseinstellungen aufbewahrt. Verbindungsdaten wie IP-Adressen werden kurzzeitig in den Protokollen unserer Dienstleister gespeichert."
+          "Daten auf deinem Gerät bleiben erhalten, bis du sie löschst oder die App deinstallierst. Kontoinformationen, deine Cloud-Sync-Kopie und deine Bilder auf unseren Servern werden aufbewahrt, bis du dein Konto löschst. Daten geteilter Bücher und Alben werden aufbewahrt, solange die Gruppe besteht. Daten zum Live-Verdienst werden gelöscht, wenn du ihn ausschaltest, spätestens aber 45 Tage nachdem die App sie zuletzt bestätigt hat. Anmeldesitzungen gelten bis zu ein Jahr und verlängern sich, während du sie nutzt. Beleg- und Benachrichtigungstexte, die zur KI-Verarbeitung gesendet werden, werden von uns nicht gespeichert. Analysedaten werden in Google Analytics bis zu 14 Monate und in PostHog gemäß unseren Aufbewahrungseinstellungen aufbewahrt. Meta bewahrt Daten zur Anzeigenmessung gemäß seinen eigenen Bedingungen auf. Verbindungsdaten wie IP-Adressen werden kurzzeitig in den Protokollen unserer Dienstleister gespeichert."
         ]
       },
       {
@@ -538,7 +545,7 @@
         "paragraphs": [
           "Du hast die volle Kontrolle über deine Daten. „Daten zurücksetzen“ in den Einstellungen löscht deine Konten, Kategorien und Transaktionen dauerhaft von deinem Gerät und, wenn Cloud Sync aktiviert ist, auch aus deiner Cloud-Sync-Kopie. Durch das Deinstallieren der App wird die lokale Datenbank von deinem Gerät entfernt, nicht aber deine Backups in Google Drive oder iCloud oder dein Konto.",
           "Um dein Konto zu löschen, öffne in der App die Seite „Konto“ und wähle „Konto löschen“. Dadurch werden deine Kontoinformationen, deine Cloud-Sync-Kopie, alle Bilder, die du bei uns gespeichert hast, sowie die geteilten Bücher und Alben, deren Eigentümer du bist, dauerhaft gelöscht, und die Anmeldung mit Apple für die App wird widerrufen. Wenn du die Verknüpfung eines Browsers mit dem Web-Dashboard aufhebst, wird die Kopie gelöscht, die er speichert: sofort, wenn du die Verknüpfung im Browser aufhebst, und beim nächsten Verbindungsaufbau, wenn du sie in der App aufhebst.",
-          "Das Löschen deiner Daten löscht weder deine bei Apple oder Google gespeicherten Abonnementdaten noch Analysedaten, die zuvor an PostHog und Google Analytics for Firebase gesendet wurden. Um die Löschung von Analysedaten zu beantragen, kontaktiere uns unter der unten angegebenen E-Mail-Adresse. Auf unserer {dataDeletion} findest du alle Schritte."
+          "Das Löschen deiner Daten löscht weder deine bei Apple oder Google gespeicherten Abonnementdaten noch Analysedaten, die zuvor an PostHog und Google Analytics for Firebase gesendet wurden, noch Daten zur Anzeigenmessung, die zuvor an Meta gesendet wurden. Um die Löschung von Analysedaten zu beantragen, kontaktiere uns unter der unten angegebenen E-Mail-Adresse. Auf unserer {dataDeletion} findest du alle Schritte."
         ]
       },
       {
@@ -562,6 +569,11 @@
               "RevenueCat",
               "Abonnementverwaltung",
               "Zufällige App-ID, Abonnementstatus"
+            ],
+            [
+              "Meta (Facebook und Instagram)",
+              "Messung von Installationen über unsere Anzeigen",
+              "App-Installationen und -Starts, Geräteinformationen wie Modell, Betriebssystem und IP-Adresse, eine von der Software von Meta erzeugte Kennung"
             ],
             [
               "Cloudflare (Workers, D1, R2, Durable Objects, Email, Turnstile)",

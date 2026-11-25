@@ -346,7 +346,7 @@
   },
   "privacy": {
     "title": "Chính sách quyền riêng tư",
-    "lastUpdated": "Cập nhật lần cuối: ngày 15 tháng 11 năm 2026",
+    "lastUpdated": "Cập nhật lần cuối: ngày 25 tháng 11 năm 2026",
     "links": {
       "userDataPolicy": "Google API Services User Data Policy",
       "googlePermissions": "myaccount.google.com/permissions",
@@ -357,7 +357,7 @@
         "title": "Tổng quan",
         "paragraphs": [
           "Money2Time (Ứng dụng) là ứng dụng tài chính cá nhân chuyển chi tiêu của bạn thành giá trị thời gian tương đương dựa trên lương theo giờ của bạn. Ứng dụng do đội ngũ Money2Time (chúng tôi) vận hành. Chính sách này giải thích Ứng dụng, money2time.com, Bảng điều khiển web (app.money2time.com) và album chung trên web (album.money2time.com) thu thập dữ liệu nào, dữ liệu đó được sử dụng, lưu trữ và chia sẻ như thế nào, cũng như các lựa chọn và quyền của bạn đối với dữ liệu đó.",
-          "Chúng tôi không bán dữ liệu cá nhân hoặc dữ liệu tài chính của bạn, không hiển thị quảng cáo và không sử dụng dữ liệu của bạn cho mục đích quảng cáo."
+          "Chúng tôi không bán dữ liệu cá nhân hoặc dữ liệu tài chính của bạn và không hiển thị quảng cáo. Cách duy nhất chúng tôi sử dụng dữ liệu cho mục đích quảng cáo là đo lường quảng cáo của chính chúng tôi trên Facebook và Instagram, như được mô tả trong mục Đo lường quảng cáo bên dưới, và việc này không bao giờ bao gồm dữ liệu tài chính của bạn."
         ]
       },
       {
@@ -437,6 +437,13 @@
                 "Tùy chọn chung như tiền tệ, ngôn ngữ/khu vực, giao diện và chế độ hiển thị",
                 "Nền tảng như iOS hoặc Android"
               ]
+            ]
+          },
+          {
+            "title": "Đo lường quảng cáo",
+            "paragraphs": [
+              "Chúng tôi quảng cáo Money2Time trên Facebook và Instagram. Để đếm số lượt cài đặt mà các quảng cáo đó mang lại, Ứng dụng trên iOS và Android có tích hợp phần mềm sự kiện ứng dụng (App Events) của Meta, phần mềm này cho Meta biết khi Ứng dụng được cài đặt và mở. Meta cũng nhận thông tin kỹ thuật về thiết bị của bạn, chẳng hạn như kiểu máy, hệ điều hành, ngôn ngữ, múi giờ và địa chỉ IP, cùng một mã định danh do phần mềm của Meta tạo trong Ứng dụng. Trên Android, phần mềm này cũng có thể đọc mã định danh phân bổ (attribution) của ứng dụng Facebook hoặc Instagram trên thiết bị của bạn và install referrer của Google Play, để Meta biết lượt cài đặt có đến từ một quảng cáo của chúng tôi hay không.",
+              "Meta không nhận mã định danh ứng dụng ngẫu nhiên của bạn, ID quảng cáo của thiết bị, tên hoặc địa chỉ email của bạn, dữ liệu tài chính của bạn hay bất cứ nội dung nào bạn nhập, và chúng tôi không dùng dữ liệu này để hiển thị quảng cáo cho bạn. Ứng dụng không xin phép theo dõi bạn trên iOS, vì vậy trên iOS, Meta chỉ đo lường lượt cài đặt thông qua SKAdNetwork của Apple và Aggregated Event Measurement của Meta, vốn báo cáo kết quả ở dạng tổng hợp. Meta xử lý dữ liệu này theo điều khoản riêng của Meta và Meta Privacy Policy. Ứng dụng không gửi dữ liệu này trên thiết bị có vùng được đặt thành một quốc gia thuộc Khu vực Kinh tế Châu Âu, Vương quốc Anh hoặc Thụy Sĩ."
             ]
           },
           {
@@ -530,7 +537,7 @@
       {
         "title": "8. Lưu giữ dữ liệu",
         "paragraphs": [
-          "Dữ liệu trên thiết bị của bạn được giữ cho đến khi bạn xóa hoặc gỡ cài đặt Ứng dụng. Thông tin tài khoản, bản sao Cloud Sync và hình ảnh của bạn trên máy chủ của chúng tôi được giữ cho đến khi bạn xóa tài khoản. Dữ liệu sổ và album chia sẻ được giữ trong thời gian nhóm còn tồn tại. Dữ liệu thu nhập trực tiếp bị xóa khi bạn tắt tính năng này, và muộn nhất là 45 ngày sau lần cuối Ứng dụng xác nhận dữ liệu đó. Phiên đăng nhập kéo dài tối đa một năm và được gia hạn khi bạn sử dụng. Chúng tôi không lưu nội dung hóa đơn và thông báo được gửi để xử lý bằng AI. Dữ liệu phân tích được giữ tối đa 14 tháng trong Google Analytics và theo cài đặt lưu giữ của chúng tôi trong PostHog. Thông tin kết nối như địa chỉ IP được lưu ngắn hạn trong nhật ký của các nhà cung cấp dịch vụ của chúng tôi."
+          "Dữ liệu trên thiết bị của bạn được giữ cho đến khi bạn xóa hoặc gỡ cài đặt Ứng dụng. Thông tin tài khoản, bản sao Cloud Sync và hình ảnh của bạn trên máy chủ của chúng tôi được giữ cho đến khi bạn xóa tài khoản. Dữ liệu sổ và album chia sẻ được giữ trong thời gian nhóm còn tồn tại. Dữ liệu thu nhập trực tiếp bị xóa khi bạn tắt tính năng này, và muộn nhất là 45 ngày sau lần cuối Ứng dụng xác nhận dữ liệu đó. Phiên đăng nhập kéo dài tối đa một năm và được gia hạn khi bạn sử dụng. Chúng tôi không lưu nội dung hóa đơn và thông báo được gửi để xử lý bằng AI. Dữ liệu phân tích được giữ tối đa 14 tháng trong Google Analytics và theo cài đặt lưu giữ của chúng tôi trong PostHog. Meta lưu giữ dữ liệu đo lường quảng cáo theo điều khoản riêng của Meta. Thông tin kết nối như địa chỉ IP được lưu ngắn hạn trong nhật ký của các nhà cung cấp dịch vụ của chúng tôi."
         ]
       },
       {
@@ -538,7 +545,7 @@
         "paragraphs": [
           "Bạn có toàn quyền kiểm soát dữ liệu của mình. \"Đặt lại dữ liệu\" trong Cài đặt xóa vĩnh viễn tài khoản, danh mục và giao dịch của bạn khỏi thiết bị, và khỏi bản sao Cloud Sync nếu Cloud Sync đang bật. Gỡ cài đặt Ứng dụng sẽ xóa cơ sở dữ liệu cục bộ khỏi thiết bị, nhưng không xóa bản sao lưu của bạn trong Google Drive hoặc iCloud, hay tài khoản của bạn.",
           "Để xóa tài khoản, hãy mở trang \"Tài khoản\" của Ứng dụng và chọn \"Xóa tài khoản\". Thao tác này xóa vĩnh viễn thông tin tài khoản, bản sao Cloud Sync, mọi hình ảnh bạn lưu trên hệ thống của chúng tôi, cùng các sổ và album chia sẻ mà bạn sở hữu, đồng thời thu hồi quyền đăng nhập bằng Apple của Ứng dụng. Hủy liên kết một trình duyệt khỏi Bảng điều khiển web sẽ xóa bản sao mà trình duyệt đó giữ: ngay lập tức nếu bạn hủy liên kết trong trình duyệt, và vào lần kết nối tiếp theo của trình duyệt nếu bạn hủy liên kết từ Ứng dụng.",
-          "Việc xóa dữ liệu không xóa hồ sơ đăng ký do Apple hoặc Google nắm giữ, hoặc dữ liệu phân tích đã gửi trước đó tới PostHog và Google Analytics for Firebase. Để yêu cầu xóa dữ liệu phân tích, hãy liên hệ với chúng tôi qua email bên dưới. Bạn có thể xem đầy đủ các bước trên {dataDeletion} của chúng tôi."
+          "Việc xóa dữ liệu không xóa hồ sơ đăng ký do Apple hoặc Google nắm giữ, dữ liệu phân tích đã gửi trước đó tới PostHog và Google Analytics for Firebase, hoặc dữ liệu đo lường quảng cáo đã gửi trước đó tới Meta. Để yêu cầu xóa dữ liệu phân tích, hãy liên hệ với chúng tôi qua email bên dưới. Bạn có thể xem đầy đủ các bước trên {dataDeletion} của chúng tôi."
         ]
       },
       {
@@ -562,6 +569,11 @@
               "RevenueCat",
               "Quản lý gói đăng ký",
               "ID ứng dụng ngẫu nhiên, trạng thái đăng ký"
+            ],
+            [
+              "Meta (Facebook và Instagram)",
+              "Đo lường lượt cài đặt từ quảng cáo của chúng tôi",
+              "Lượt cài đặt và lượt mở Ứng dụng, thông tin thiết bị như kiểu máy, hệ điều hành và địa chỉ IP, một mã định danh do phần mềm của Meta tạo"
             ],
             [
               "Cloudflare (Workers, D1, R2, Durable Objects, Email, Turnstile)",

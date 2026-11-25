@@ -346,7 +346,7 @@
   },
   "privacy": {
     "title": "Politique de confidentialité",
-    "lastUpdated": "Dernière mise à jour : 15 novembre 2026",
+    "lastUpdated": "Dernière mise à jour : 25 novembre 2026",
     "links": {
       "userDataPolicy": "Google API Services User Data Policy",
       "googlePermissions": "myaccount.google.com/permissions",
@@ -357,7 +357,7 @@
         "title": "Vue d'ensemble",
         "paragraphs": [
           "Money2Time (l'App) est une app de finances personnelles qui convertit vos dépenses en équivalents de temps selon votre salaire horaire. Elle est exploitée par l'équipe Money2Time (nous). Cette politique explique quelles données l'App, money2time.com, le Tableau de bord web (app.money2time.com) et les albums partagés sur le web (album.money2time.com) collectent, comment elles sont utilisées, stockées et partagées, ainsi que vos choix et vos droits concernant ces données.",
-          "Nous ne vendons pas vos données personnelles ou financières, nous n'affichons pas de publicités et nous n'utilisons pas vos données à des fins publicitaires."
+          "Nous ne vendons pas vos données personnelles ou financières, et nous n'affichons pas de publicités. La seule utilisation publicitaire que nous faisons des données consiste à mesurer nos propres publicités sur Facebook et Instagram, comme décrit ci-dessous dans Mesure publicitaire, et elle n'inclut jamais vos données financières."
         ]
       },
       {
@@ -437,6 +437,13 @@
                 "Préférences générales, comme la devise, la locale, le thème et le mode d'affichage",
                 "Plateforme, comme iOS ou Android"
               ]
+            ]
+          },
+          {
+            "title": "Mesure publicitaire",
+            "paragraphs": [
+              "Nous diffusons des publicités pour Money2Time sur Facebook et Instagram. Pour compter le nombre d'installations générées par ces publicités, l'App sur iOS et Android intègre le logiciel d'événements d'application (App Events) de Meta, qui informe Meta lorsque l'App est installée et ouverte. Meta reçoit également des informations techniques sur votre appareil, comme son modèle, son système d'exploitation, sa langue, son fuseau horaire et son adresse IP, ainsi qu'un identifiant que le logiciel de Meta crée dans l'App. Sur Android, ce logiciel peut aussi lire l'identifiant d'attribution de l'app Facebook ou Instagram présente sur votre appareil et le référent d'installation Google Play (install referrer), afin que Meta puisse savoir si l'installation fait suite à l'une de nos publicités.",
+              "Meta ne reçoit pas votre identifiant d'App aléatoire, l'identifiant publicitaire de votre appareil, votre nom ou votre adresse e-mail, vos données financières ni rien de ce que vous saisissez, et nous n'utilisons pas ces données pour vous montrer des publicités. L'App ne demande pas l'autorisation de vous suivre sur iOS. Sur iOS, Meta mesure donc les installations uniquement via SKAdNetwork d'Apple et Aggregated Event Measurement de Meta, qui communiquent les résultats de façon agrégée. Meta traite ces données selon ses propres conditions et la Meta Privacy Policy. L'App ne les envoie pas depuis un appareil dont la région est définie sur un pays de l'Espace économique européen, le Royaume-Uni ou la Suisse."
             ]
           },
           {
@@ -530,7 +537,7 @@
       {
         "title": "8. Conservation des données",
         "paragraphs": [
-          "Les données sur votre appareil y restent jusqu'à ce que vous les supprimiez ou désinstalliez l'App. Les informations du compte, votre copie Cloud Sync et vos images sur nos serveurs sont conservées jusqu'à ce que vous supprimiez votre compte. Les données des carnets et albums partagés sont conservées tant que le groupe existe. Les données des gains en direct sont supprimées lorsque vous les désactivez, et au plus tard 45 jours après leur dernière confirmation par l'App. Les sessions de connexion durent jusqu'à un an et sont renouvelées tant que vous les utilisez. Les textes de reçus et de notifications envoyés pour un traitement par IA ne sont pas stockés par nous. Les données d'analyse sont conservées jusqu'à 14 mois dans Google Analytics et selon nos paramètres de conservation dans PostHog. Les informations de connexion, comme les adresses IP, sont conservées brièvement dans les journaux de nos prestataires."
+          "Les données sur votre appareil y restent jusqu'à ce que vous les supprimiez ou désinstalliez l'App. Les informations du compte, votre copie Cloud Sync et vos images sur nos serveurs sont conservées jusqu'à ce que vous supprimiez votre compte. Les données des carnets et albums partagés sont conservées tant que le groupe existe. Les données des gains en direct sont supprimées lorsque vous les désactivez, et au plus tard 45 jours après leur dernière confirmation par l'App. Les sessions de connexion durent jusqu'à un an et sont renouvelées tant que vous les utilisez. Les textes de reçus et de notifications envoyés pour un traitement par IA ne sont pas stockés par nous. Les données d'analyse sont conservées jusqu'à 14 mois dans Google Analytics et selon nos paramètres de conservation dans PostHog. Meta conserve les données de mesure publicitaire selon ses propres conditions. Les informations de connexion, comme les adresses IP, sont conservées brièvement dans les journaux de nos prestataires."
         ]
       },
       {
@@ -538,7 +545,7 @@
         "paragraphs": [
           "Vous gardez le contrôle total de vos données. Réinitialiser les données, dans Réglages, supprime définitivement vos comptes, catégories et transactions de votre appareil, ainsi que de votre copie Cloud Sync si Cloud Sync est activé. La désinstallation de l'App supprime la base de données locale de votre appareil, mais pas vos sauvegardes dans Google Drive ou iCloud, ni votre compte.",
           "Pour supprimer votre compte, ouvrez la page Compte de l'App et choisissez Supprimer le compte. Cela supprime définitivement les informations de votre compte, votre copie Cloud Sync, toutes les images que vous avez stockées chez nous ainsi que les carnets et albums partagés dont vous êtes propriétaire, et révoque la connexion Apple de l'App. Dissocier un navigateur du Tableau de bord web supprime la copie qu'il conserve : immédiatement si vous le dissociez depuis le navigateur, et à sa prochaine connexion si vous le dissociez depuis l'App.",
-          "La suppression de vos données ne supprime pas vos enregistrements d'abonnement détenus par Apple ou Google, ni les données d'analyse précédemment envoyées à PostHog et Google Analytics for Firebase. Pour demander la suppression des données d'analyse, contactez-nous à l'adresse e-mail ci-dessous. Notre {dataDeletion} détaille toutes les étapes."
+          "La suppression de vos données ne supprime pas vos enregistrements d'abonnement détenus par Apple ou Google, ni les données d'analyse précédemment envoyées à PostHog et Google Analytics for Firebase, ni les données de mesure publicitaire précédemment envoyées à Meta. Pour demander la suppression des données d'analyse, contactez-nous à l'adresse e-mail ci-dessous. Notre {dataDeletion} détaille toutes les étapes."
         ]
       },
       {
@@ -562,6 +569,11 @@
               "RevenueCat",
               "Gestion des abonnements",
               "Identifiant d'App aléatoire, statut d'abonnement"
+            ],
+            [
+              "Meta (Facebook et Instagram)",
+              "Mesure des installations issues de nos publicités",
+              "Installations et ouvertures de l'App, informations sur l'appareil comme le modèle, le système d'exploitation et l'adresse IP, un identifiant créé par le logiciel de Meta"
             ],
             [
               "Cloudflare (Workers, D1, R2, Durable Objects, Email, Turnstile)",

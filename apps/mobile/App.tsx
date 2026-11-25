@@ -249,6 +249,7 @@ import {
 } from '~/services/globalPromptCoordinator';
 import { subscribeOpenHourlyValueRequest } from '~/services/hourlyValueNavigation';
 import { requestFocusInsight } from '~/services/insightsNavigation';
+import { startMetaAppEvents } from '~/services/metaAppEvents';
 import { subscribeNotificationResponses } from '~/services/notifications';
 import { subscribeOpenPaymentAlerts } from '~/services/paymentAlertsNavigation';
 import { subscribeOpenPaywallRequest } from '~/services/paywallNavigation';
@@ -289,6 +290,9 @@ import { markSplashHidden, whenSplashHidden } from '~/utils/splashState';
 // JavaScript errors, unhandled rejections and native crashes) covers startup.
 // Its options, and why each is set, live in services/posthog.native.
 initPostHog();
+// Meta's install and app-launch events for ad measurement; services/metaAppEvents
+// decides whether this launch may send them.
+startMetaAppEvents();
 
 type MainTab = TabName;
 

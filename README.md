@@ -125,6 +125,7 @@ apps/mobile/
 ├── utils/                      # Pure helpers (formatters, IDs, date keys, currency, error utils)
 ├── types/                      # Shared domain types
 ├── plugins/                    # Expo config plugins (widgets, auto-log, payment capture, alternate icons)
+├── modules/                    # Local Expo modules, autolinked (meta-app-events: Meta install measurement)
 ├── scripts/                    # Icon/logo/tutorial generation pipelines
 └── __tests__/                  # Jest tests (184 suites: utils, repositories, services, navigation, db, features, i18n)
 ```
@@ -3341,6 +3342,8 @@ Two providers, two jobs:
 - **GA4** (free, unsampled) receives every custom event: the complete per-use record, plus RevenueCat revenue.
 - **PostHog** (project `Money2Time`, id `658608`, US Cloud, free plan) receives the curated events below and everything GA4 cannot do: person-level funnels, retention and paths, error tracking with native crashes, masked session replay, feature flags and AI observability for the receipt scanner.
 
+Meta is not a third analytics provider: [Meta app events](#meta-app-events) sends Meta only its SDK's automatic install and app-launch events, so Ads Manager can count the installs our Meta ads bring in. No custom event, property or identity in this section goes to Meta.
+
 ### Provider coverage
 
 | Coverage                                               | Definitions | Meaning                                                                                                 |
@@ -3788,7 +3791,7 @@ Sources: [native analytics](apps/mobile/services/analytics.native.ts), [shared P
 | Firebase app selection       | Every build (development, preview and production, Android and iOS) uses `com.nelsongan.money2time`, with one Firebase client configuration per platform.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | [Expo config](apps/mobile/app.config.ts), [base config](apps/mobile/app.json)                                                                                                                                                                          |
 | Firebase iOS crash hardening | Require GoogleUtilities `~> 8.1.4` in every iOS build. Its dictionary guards ignore nil keys from malformed analytics configuration instead of crashing on a background queue, as in MONEY2TIME-5P during the September 29, 2026 incident.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | [Base config](apps/mobile/app.json), [GoogleUtilities 8.1.4](https://github.com/google/GoogleUtilities/releases/tag/8.1.4), [Firebase incident report](https://firebase.blog/posts/2026/10/firebase-analytics-outage)                                  |
 | Firebase startup collection  | Auto-collection is disabled until JavaScript sets consent and the app user ID, then enables product analytics. Serialize customer configuration, reopen readiness for customer switches and retry failed configuration on the next event or identification for the same user. Manual screen reporting replaces automatic native screen reporting.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | [Firebase config](apps/mobile/firebase.json), [native analytics](apps/mobile/services/analytics.native.ts)                                                                                                                                             |
-| Advertising collection       | Deny ad storage, ad user data and ad personalization; disable Android advertising-ID collection/permissions and iOS Analytics advertising-ID support. PostHog collects no advertising identifiers.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | [Firebase config](apps/mobile/firebase.json), [base config](apps/mobile/app.json), [native analytics](apps/mobile/services/analytics.native.ts)                                                                                                        |
+| Advertising collection       | Deny ad storage, ad user data and ad personalization; disable Android advertising-ID collection/permissions and iOS Analytics advertising-ID support. PostHog collects no advertising identifiers. Meta app events collect no advertising ID either (advertiser-ID collection off on both platforms; the AD_ID and Privacy Sandbox permissions its Android SDK adds are blocked), and the app never asks for App Tracking Transparency.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | [Firebase config](apps/mobile/firebase.json), [base config](apps/mobile/app.json), [native analytics](apps/mobile/services/analytics.native.ts), [Meta plugin](apps/mobile/plugins/withMetaAppEvents.js)                                               |
 | Firebase default parameters  | Development sets `debug_mode = 1`; production clears it with null. Firebase identity configuration clears `revenuecat_revenue_enabled`; an HTTP 200 acknowledgement from RevenueCat’s attributes endpoint sets it to `1`. Serialize marker writes with Firebase configuration so an old customer cannot overwrite the new customer’s defaults.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | [Native analytics](apps/mobile/services/analytics.native.ts), [RevenueCat service](apps/mobile/services/revenueCat.native.ts), [Firebase defaults](https://firebase.google.com/docs/reference/android/com/google/firebase/analytics/FirebaseAnalytics) |
 
 ### Screens and SDK events
@@ -3797,6 +3800,7 @@ Sources: [native analytics](apps/mobile/services/analytics.native.ts), [shared P
 | ------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `screen_view`                                                                                                      | No `$screen` events (budget); Insights visits feed `Feature Used`; each screen is an exception step | Explicit screen event with `screen_name` and `screen_class`       | Visible screen changes through `setCurrentScreen`; duplicate current/last screen is suppressed. No `m2t_` prefix. The Notifications settings and source screens (internally `PaymentAlerts*`) are entered from Android only. `NotificationHistory` and `NotificationReviewEditor` produce GA4 screen views only; saving uses the confirmed-review transaction events. A page added to the bottom bar reports its tab name (`goals`, `recurring`, `instalments`, `reimbursements`, `receipts`, `settleUp`) while it is the visible tab. Saving quick/full entry from a non-Calendar home page (including quick-to-full expansion) preserves the originating tab; account-detail saves return to the account, so backing out reports the originating tab rather than an unintended Calendar view. Calendar entry retains its saved-day focus. No additional PostHog event is emitted. |
 | SDK `first_open`, `session_start`, engagement/attribution events                                                   | None                                                                                                | SDK-managed after collection is enabled                           | Outside the custom-event inventory and its 119-definition count. Actual SDK event set depends on the configured native SDK.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| Meta SDK `MOBILE_APP_INSTALL`, `fb_mobile_activate_app`, `fb_mobile_deactivate_app`                                | None                                                                                                | None (Meta only)                                                  | Meta ad measurement, outside the custom-event inventory: install on a device's first start, one launch per start and return to the foreground. Only when [Meta app events](#meta-app-events) starts (store builds outside the EEA, UK and Switzerland). No custom events, properties or identity.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | `Application Installed`, `Application Opened`, `Application Backgrounded`, `$screen`, `$autocapture`, `$rageclick` | Disabled (and dropped by the allowlist)                                                             | Not applicable                                                    | `First App Open` and `Daily App Open` replace them at a fraction of the volume.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | `$identify`, `$set`                                                                                                | Sent                                                                                                | Not applicable                                                    | Once per install and on person-property changes; see the budget.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | Store trial conversions, renewals, cancellations, billing issues and refunds                                       | RevenueCat server lifecycle events below                                                            | RevenueCat server lifecycle events below plus legacy SDK coverage | External producer, outside the 128 app custom definitions. SDK store events become `m2t_store_revenue_observed` in GA4 only when the new client marks RevenueCat identity ready.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
@@ -4115,6 +4119,110 @@ Identity contract:
   `app_variant` super property. On Android, a run on Firebase Test Lab (Google
   Play's pre-launch report) reports `test_lab` instead, from
   `@react-native-firebase/app`'s `isRunningInTestLab`.
+
+#### Meta app events
+
+Meta's SDK lets Ads Manager count the installs and app launches our Facebook
+and Instagram ads bring in, so a campaign shows a real cost per install and an
+App promotion campaign can optimize for installs. It is ad measurement, not a
+third analytics provider: the SDK sends only its own automatic install and
+app-launch events, and no custom event, property, `appUserId` or financial
+data ever goes to Meta.
+
+- **Meta app.** `Money2Time` (app ID `1607958107752114`) on
+  developers.facebook.com, with the iOS bundle ID and App Store ID
+  `6760418898`, the Android package and `MainActivity`, and the Play Install
+  Referrer decryption key. Ad account `act_2827452600696712` is an authorized
+  ad account. The client token in `app.json` is a public client key, like the
+  PostHog token; the app secret is never used.
+- **SDK.** A local Expo module, [modules/meta-app-events](apps/mobile/modules/meta-app-events),
+  wraps Meta's core SDK only (`FBSDKCoreKit` 19 on iOS, `facebook-core` 19 on
+  Android), so the app does not ship Facebook Login, Share or Gaming. That is
+  why it is not `react-native-fbsdk-next`, which pulls in all of them. It adds
+  three dynamic frameworks on iOS (about 5 MB of arm64 code before symbol
+  stripping) and a 1.1 MB library on Android before R8.
+- **Native configuration.** [plugins/withMetaAppEvents.js](apps/mobile/plugins/withMetaAppEvents.js)
+  writes the app ID and client token with automatic logging and
+  advertising-ID collection off on both platforms. On Android it also turns
+  off auto-init, automatic advanced matching (which reads typed fields) and
+  product-improvement logging, and declares the Facebook app packages
+  (`com.facebook.katana`, `com.facebook.wakizashi`) in `<queries>`. The SDK
+  reads the Facebook app's attribution ID from them, which is how Meta
+  matches an Android install to an ad without the advertising ID. `app.json` blocks the AD_ID and Privacy
+  Sandbox permissions that `facebook-core`'s manifest adds.
+- **When it starts.** `startMetaAppEvents()` ([services/metaAppEvents.ts](apps/mobile/services/metaAppEvents.ts))
+  runs once at launch in `App.tsx`, right after `initPostHog()`. It starts the
+  SDK unless:
+  - the bundle is a development one (set `EXPO_PUBLIC_META_APP_EVENTS_DEV=1`
+    to send from one, with the SDK's debug logging on);
+  - the device is a Google Play pre-launch test device (`test_lab`);
+  - the device region is in the EEA, the UK or Switzerland, where ad
+    measurement needs consent the app does not ask for.
+
+  A launch that does not start calls `disable()`, because the SDK remembers
+  its switches across launches: once started on Android, it starts natively
+  at the next launch before JavaScript runs, so a device whose region moves
+  into the list sends one more launch before `disable()` turns it off. iOS
+  never starts without `start()`. The decision uses the device's region
+  setting, not its location.
+
+- **iOS and ATT.** The app never asks for App Tracking Transparency (there is
+  no `NSUserTrackingUsageDescription`). FBSDK 17+ reads the ATT status itself,
+  so every event goes out with `advertiser_tracking_enabled = 0` and no IDFA.
+  Meta then measures iOS through SKAdNetwork (installs from App promotion
+  campaigns, aggregated and delayed by Apple) and Aggregated Event Measurement
+  (in-app events). The module passes opened URLs to the SDK, so AEM can read
+  an ad's deep-link parameters; a cold-launch URL is held until `start()`.
+- **Android.** Meta matches installs through the Facebook app's attribution ID
+  and the Google Play install referrer. Without the advertising ID, a user who
+  has neither a logged-in Facebook app nor a click from one may not be
+  attributed.
+- **What Meta receives.** Events are `MOBILE_APP_INSTALL` (first start on a
+  device), `fb_mobile_activate_app` (each launch and return to the foreground)
+  and `fb_mobile_deactivate_app` (time in app, Android). The SDK also sends its
+  own housekeeping, such as `fb_mobile_ate_status`. With each request come
+  device information (model, OS version, locale, time zone, screen size,
+  carrier), the IP address, and the SDK's own `anon_id`. Nothing is sent that
+  the user typed.
+- **Meta-side settings.** In the app's dataset in Events Manager, automatic
+  advanced matching and Event suggestions (codeless button events) are off.
+  In the app dashboard, automatic in-app purchase and subscription logging are
+  off on both platforms, so Meta gets no purchases. Turning them back on is
+  the first step towards purchase optimization, and it needs the privacy
+  label, Data safety and privacy policy changes for purchases.
+- **Privacy statements.** The website's privacy policy (Ad Measurement under
+  Information We Collect, plus the Overview, the Third-Party Services table,
+  Data Retention and Data Deletion) describes this. The store answers it
+  implies:
+  - App Store privacy: Identifiers → Device ID (the SDK's `anon_id`) and Usage
+    Data → Product Interaction (launches) and Advertising Data (which ad led
+    to the install), for Developer's Advertising or Marketing and Third-Party
+    Advertising, not linked to the user's identity. "Used to track": no,
+    because ATT is never granted, so Meta limits the events to AEM and
+    SKAdNetwork. Meta derives an approximate location from the IP address, so
+    Location → Coarse Location for the same purposes is the cautious answer.
+  - Google Play Data safety: Device or other IDs and App activity → App
+    interactions, collected and shared with Meta for Advertising or marketing
+    and Analytics, processed ephemerally: no, required (not optional),
+    encrypted in transit. The Advertising ID declaration stays "No": the
+    AD_ID permission is blocked.
+- **Verification.** Set `EXPO_PUBLIC_META_APP_EVENTS_DEV=1` for Metro and
+  launch the app. The SDK logs every request: on iOS, `FBSDKLog:` lines in the
+  simulator log (`xcrun simctl --set ~/.simlock/devices/ios spawn <udid> log show --predicate 'process == "Money2Time"'`);
+  on Android, the `FacebookSDK` tag in `adb logcat` (with
+  `ANDROID_ADB_SERVER_PORT=5038`). Check for `event: MOBILE_APP_INSTALL` on a
+  fresh install, one `fb_mobile_activate_app` per launch, `success = 1` from
+  `/activities`, and `advertiser_id_collection_enabled: 0`. Meta's
+  [App Ads Helper](https://developers.facebook.com/tools/app-ads-helper/?id=1607958107752114)
+  shows "Last iOS Install" and "Last Android Install" within a minute.
+  Events Manager's Test events only shows a device it can tie to your
+  Facebook account (a phone with the Facebook app logged in, or a registered
+  advertising ID), so a pool simulator does not appear there.
+- **Campaigns.** Installs are attributed to Meta ads whose destination is the
+  app, meaning App promotion campaigns. A Traffic campaign that links to
+  money2time.com/download goes through the website and the store, so Meta
+  cannot match its installs; store-side counts for that path come from the
+  `/download` redirect's campaign tokens and Play install referrer.
 
 #### Configuration and credentials
 

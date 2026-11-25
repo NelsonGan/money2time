@@ -346,7 +346,7 @@
   },
   "privacy": {
     "title": "Patakaran sa Privacy",
-    "lastUpdated": "Huling na-update: Nobyembre 15, 2026",
+    "lastUpdated": "Huling na-update: Nobyembre 25, 2026",
     "links": {
       "userDataPolicy": "Google API Services User Data Policy",
       "googlePermissions": "myaccount.google.com/permissions",
@@ -357,7 +357,7 @@
         "title": "Pangkalahatang-ideya",
         "paragraphs": [
           "Ang Money2Time (ang App) ay isang personal finance app na ginagawang katumbas na oras ang iyong paggastos batay sa iyong hourly wage. Pinapatakbo ito ng Money2Time team (kami). Ipinapaliwanag ng patakarang ito kung anong data ang kinokolekta ng App, ng money2time.com, ng Web Dashboard (app.money2time.com) at ng mga shared na album sa web (album.money2time.com), kung paano ito ginagamit, iniimbak at ibinabahagi, at ang iyong mga pagpipilian at karapatan kaugnay ng data na iyon.",
-          "Hindi namin ibinebenta ang iyong personal o financial data, hindi kami nagpapakita ng advertisement, at hindi namin ginagamit ang iyong data para sa advertising."
+          "Hindi namin ibinebenta ang iyong personal o financial data, at hindi kami nagpapakita ng advertisement. Ang tanging paraan ng paggamit namin ng data para sa advertising ay ang pagsukat sa sarili naming mga ad sa Facebook at Instagram, gaya ng inilalarawan sa Pagsukat ng Ad sa ibaba, at hindi kailanman kasama rito ang iyong financial data."
         ]
       },
       {
@@ -437,6 +437,13 @@
                 "Mga pangkalahatang preference tulad ng currency, locale, theme, at display mode",
                 "Platform tulad ng iOS o Android"
               ]
+            ]
+          },
+          {
+            "title": "Pagsukat ng Ad",
+            "paragraphs": [
+              "Nag-a-advertise kami ng Money2Time sa Facebook at Instagram. Para mabilang kung ilang install ang naidudulot ng mga ad na iyon, may kasamang app events software ng Meta ang App sa iOS at Android, na nagsasabi sa Meta kapag na-install at nabuksan ang App. Natatanggap din ng Meta ang teknikal na impormasyon tungkol sa iyong device, gaya ng model, operating system, wika, time zone at IP address nito, at isang identifier na ginagawa ng software ng Meta sa App. Sa Android, maaari ring basahin ng software na ito ang attribution identifier ng Facebook o Instagram app sa iyong device at ang Google Play install referrer, para malaman ng Meta kung ang install ay kasunod ng isa sa aming mga ad.",
+              "Hindi natatanggap ng Meta ang iyong random app identifier, ang advertising ID ng iyong device, ang iyong pangalan o email address, ang iyong financial data, o anumang tina-type mo, at hindi namin ginagamit ang data na ito para magpakita sa iyo ng mga ad. Hindi humihingi ang App ng pahintulot na i-track ka sa iOS, kaya sa iOS, sinusukat lang ng Meta ang mga install sa pamamagitan ng SKAdNetwork ng Apple at Aggregated Event Measurement ng Meta, na nag-uulat ng mga resulta nang pinagsama-sama. Pinoproseso ng Meta ang data na ito ayon sa sarili nitong mga tuntunin at sa Meta Privacy Policy. Hindi ito ipinapadala ng App mula sa device na ang region ay nakatakda sa isang bansa sa European Economic Area, United Kingdom o Switzerland."
             ]
           },
           {
@@ -530,7 +537,7 @@
       {
         "title": "8. Pagpapanatili ng Data",
         "paragraphs": [
-          "Nananatili ang data sa iyong device hanggang burahin mo ito o i-uninstall ang App. Itinatago ang impormasyon ng account, ang iyong Cloud Sync copy, at ang iyong mga larawan sa aming mga server hanggang burahin mo ang iyong account. Itinatago ang data ng shared ledger at album habang umiiral ang grupo. Binubura ang data ng live na kita kapag in-off mo ito, at hindi lalampas sa 45 araw matapos itong huling kumpirmahin ng App. Tumatagal nang hanggang isang taon ang mga sign-in session at nire-renew habang ginagamit mo ang mga ito. Hindi namin iniimbak ang mga resibo at teksto ng notification na ipinadala para sa AI processing. Itinatago ang analytics data nang hanggang 14 na buwan sa Google Analytics at ayon sa aming mga retention setting sa PostHog. Saglit na itinatago sa mga log ng aming mga service provider ang mga detalye ng koneksyon gaya ng mga IP address."
+          "Nananatili ang data sa iyong device hanggang burahin mo ito o i-uninstall ang App. Itinatago ang impormasyon ng account, ang iyong Cloud Sync copy, at ang iyong mga larawan sa aming mga server hanggang burahin mo ang iyong account. Itinatago ang data ng shared ledger at album habang umiiral ang grupo. Binubura ang data ng live na kita kapag in-off mo ito, at hindi lalampas sa 45 araw matapos itong huling kumpirmahin ng App. Tumatagal nang hanggang isang taon ang mga sign-in session at nire-renew habang ginagamit mo ang mga ito. Hindi namin iniimbak ang mga resibo at teksto ng notification na ipinadala para sa AI processing. Itinatago ang analytics data nang hanggang 14 na buwan sa Google Analytics at ayon sa aming mga retention setting sa PostHog. Itinatago ng Meta ang ad measurement data ayon sa sarili nitong mga tuntunin. Saglit na itinatago sa mga log ng aming mga service provider ang mga detalye ng koneksyon gaya ng mga IP address."
         ]
       },
       {
@@ -538,7 +545,7 @@
         "paragraphs": [
           "May ganap kang kontrol sa iyong data. Permanenteng binubura ng I-reset ang Data sa Mga setting ang iyong mga account, kategorya, at transaksyon mula sa iyong device, at mula sa iyong Cloud Sync copy kung naka-on ang Cloud Sync. Kapag in-uninstall ang App, inaalis ang lokal na database mula sa iyong device, pero hindi ang iyong mga backup sa Google Drive o iCloud, o ang iyong account.",
           "Para burahin ang iyong account, buksan ang Account page ng App at piliin ang Burahin ang account. Permanenteng binubura nito ang impormasyon ng iyong account, ang iyong Cloud Sync copy, ang bawat larawang iniimbak mo sa amin, at ang mga shared ledger at album na pagmamay-ari mo, at binabawi nito ang Apple sign-in ng App. Kapag in-unlink ang isang browser mula sa Web Dashboard, binubura ang kopyang itinatago nito: agad kapag nag-unlink ka sa browser, at sa susunod na pagkonekta nito kapag nag-unlink ka mula sa App.",
-          "Hindi binubura ng pagbura ng iyong data ang mga rekord ng iyong subscription na hawak ng Apple o Google, o ang analytics data na dati nang naipadala sa PostHog at Google Analytics for Firebase. Para humiling ng pagbura ng analytics data, makipag-ugnayan sa amin sa email sa ibaba. Nasa aming {dataDeletion} ang kumpletong mga hakbang."
+          "Hindi binubura ng pagbura ng iyong data ang mga rekord ng iyong subscription na hawak ng Apple o Google, ang analytics data na dati nang naipadala sa PostHog at Google Analytics for Firebase, o ang ad measurement data na dati nang naipadala sa Meta. Para humiling ng pagbura ng analytics data, makipag-ugnayan sa amin sa email sa ibaba. Nasa aming {dataDeletion} ang kumpletong mga hakbang."
         ]
       },
       {
@@ -562,6 +569,11 @@
               "RevenueCat",
               "Pamamahala ng subscription",
               "Random na app ID, status ng subscription"
+            ],
+            [
+              "Meta (Facebook at Instagram)",
+              "Pagsukat ng mga install mula sa aming mga ad",
+              "Mga install at pagbukas ng App, impormasyon ng device gaya ng model, operating system at IP address, isang identifier na ginawa ng software ng Meta"
             ],
             [
               "Cloudflare (Workers, D1, R2, Durable Objects, Email, Turnstile)",

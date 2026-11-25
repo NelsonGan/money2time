@@ -1,0 +1,10 @@
+{
+  "platforms": ["apple", "android"],
+  "apple": {
+    "modules": ["MetaAppEventsModule"],
+    "appDelegateSubscribers": ["MetaAppEventsAppDelegate"]
+  },
+  "android": {
+    "modules": ["com.nelsongan.money2time.metaappevents.MetaAppEventsModule"]
+  }
+}
