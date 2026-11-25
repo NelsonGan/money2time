@@ -115,6 +115,7 @@ import {
   isInstalmentPlan,
 } from '~/features/instalments/lib/instalmentPlan';
 import { computeItemStats } from '~/features/items/utils';
+import { type StarterAccountSeed } from '~/features/onboarding/lib/starterAccounts';
 import { requestAutomationTag } from '~/features/places/lib/automationTag';
 import { asksForLocationsOffer, requestLocationsOffer } from '~/features/places/lib/locationsOffer';
 import {
@@ -970,7 +971,12 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   quickEntryPrefs: QuickEntryPrefs;
   updateQuickEntryPrefs: (updates: Partial<QuickEntryPrefs>) => void;
 
-  completeOnboarding: (options?: { seedDefaultAccounts?: boolean }) => {
+  /**
+   * Finish onboarding. `starterAccounts`, the accounts step's picks, are
+   * created when there are any; otherwise `seedDefaultAccounts` adds the
+   * starter set.
+   */
+  completeOnboarding: (options?: CompleteOnboardingOptions) => {
     createdAccounts: number;
     createdCategories: number;
   };
@@ -1474,6 +1480,49 @@ function seedMinimalCategoriesIfMissing() {
   });
 
   return createdCategories;
+}
+
+interface CompleteOnboardingOptions {
+  seedDefaultAccounts?: boolean;
+  starterAccounts?: StarterAccountSeed[];
+}
+
+/**
+ * Create the accounts picked in onboarding, in the default set's groups. Like
+ * the default set it skips a name that exists and stays inside the free plan.
+ */
+function createStarterAccounts(seeds: StarterAccountSeed[], currency: string) {
+  const groupOrder: string[] = [...ONBOARDING_DEFAULT_GROUPS];
+  const existingAccounts = accountsRepository.list();
+  const existing = new Set(existingAccounts.map((account) => accountNameSeedKey(account.name)));
+  let remainingSlots = Math.max(
+    PRO_LIMITS.FREE_MAX_ACCOUNTS - countAccountsTowardFreeLimit(existingAccounts),
+    0,
+  );
+  let createdAccounts = 0;
+  seeds.forEach((seed) => {
+    if (remainingSlots <= 0) return;
+    const key = accountNameSeedKey(seed.name);
+    if (existing.has(key)) return;
+    // A group only when an account goes in it (create() reuses an existing
+    // one), at the default set's position.
+    accountGroupsRepository.create(seed.accountGroup, groupOrder.indexOf(seed.accountGroup));
+    accountsRepository.create({
+      name: seed.name,
+      type: seed.type,
+      accountGroup: seed.accountGroup,
+      logoId: seed.logoId,
+      creditStatementDay: null,
+      creditDueDay: null,
+      startingBalance: 0,
+      includeInTotals: true,
+      currency,
+    });
+    existing.add(key);
+    createdAccounts += 1;
+    remainingSlots -= 1;
+  });
+  return createdAccounts;
 }
 
 function seedDefaultAccountsIfMissing(preferredCurrency: string) {
@@ -8349,7 +8398,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [refreshAll, settings?.currencySymbol, settings?.appUserId],
   );
 
-  const completeOnboarding = useCallback((options?: { seedDefaultAccounts?: boolean }) => {
+  const completeOnboarding = useCallback((options?: CompleteOnboardingOptions) => {
     try {
       const currentSettings = settingsRepository.get();
       // Seed new accounts/wallets with the reporting currency CODE so they
@@ -8369,7 +8418,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       createdCategories = seedMinimalCategoriesIfMissing();
       if (createdCategories > 0) shouldRefreshCategories = true;
 
-      if (options?.seedDefaultAccounts) {
+      if (options?.starterAccounts && options.starterAccounts.length > 0) {
+        createdAccounts = createStarterAccounts(options.starterAccounts, preferredCurrency);
+        shouldRefreshAccounts = true;
+      } else if (options?.seedDefaultAccounts) {
         const accountCurrency = accountsRepository.list()[0]?.currency ?? preferredCurrency;
         createdAccounts = seedDefaultAccountsIfMissing(accountCurrency);
         shouldRefreshAccounts = true;

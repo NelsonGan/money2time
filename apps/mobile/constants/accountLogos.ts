@@ -86,10 +86,15 @@ export function getLogosForCountry(countrySlug: string): AccountLogoMeta[] {
   return LOGOS_BY_COUNTRY.get(countrySlug) ?? [];
 }
 
+/** The shipped country slug for a device region code (e.g. "MY"), or null when there is none. */
+export function shippedCountryForRegion(regionCode?: string | null): string | null {
+  if (!regionCode) return null;
+  return REGION_TO_COUNTRY[regionCode.toUpperCase()] ?? null;
+}
+
 /** Maps a device region code (e.g. "MY") to a shipped country slug. */
 export function regionToCountrySlug(regionCode?: string | null): string {
-  if (!regionCode) return DEFAULT_LOGO_COUNTRY;
-  return REGION_TO_COUNTRY[regionCode.toUpperCase()] ?? DEFAULT_LOGO_COUNTRY;
+  return shippedCountryForRegion(regionCode) ?? DEFAULT_LOGO_COUNTRY;
 }
 
 /**
