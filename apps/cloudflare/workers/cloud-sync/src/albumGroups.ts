@@ -184,8 +184,7 @@ interface GroupRow {
  * allow, so nothing here is trusted for more than its shape.
  */
 export async function readGroup(db: GroupDb): Promise<{ rows: GroupRow[]; moneyRev: string }> {
-  const [stamp, rows, activity] = await db.queryAll([
-    { sql: `SELECT ${MONEY_STAMP_SQL} AS money`, args: [] },
+  const [rows, activity] = await db.queryAll([
     // People and settings first, then bills before payments: past the cap
     // (far beyond any trip) the newest payments go, never a member.
     {
@@ -216,7 +215,36 @@ export async function readGroup(db: GroupDb): Promise<{ rows: GroupRow[]; moneyR
       // A row that is not JSON is passed over, as a phone passes it over.
     }
   }
-  return { rows: out, moneyRev: await moneyRevOf(String(stamp[0]?.money ?? '')) };
+  // Compute the money stamp from the rows already read instead of scanning
+  // sync_rows a second time (identical to MONEY_STAMP_SQL unless capped).
+  let stamp: string;
+  if (rows.length < MAX_READ_ROWS) {
+    const moneyRows = rows
+      .filter(
+        (raw) => raw.table_name === 'album_expenses' || raw.table_name === 'album_settlements',
+      )
+      .map((raw) => ({
+        table: String(raw.table_name),
+        id: String(raw.row_id),
+        rev: String(raw.rev),
+      }))
+      .sort((a, b) =>
+        a.table !== b.table
+          ? a.table < b.table
+            ? -1
+            : 1
+          : a.id !== b.id
+            ? a.id < b.id
+              ? -1
+              : 1
+            : 0,
+      );
+    stamp = moneyRows.map((row) => `${row.table}:${row.id}:${row.rev}`).join(',');
+  } else {
+    const [fallback] = await db.queryAll([{ sql: `SELECT ${MONEY_STAMP_SQL} AS money`, args: [] }]);
+    stamp = String(fallback[0]?.money ?? '');
+  }
+  return { rows: out, moneyRev: await moneyRevOf(stamp) };
 }
 
 /** The name the account goes by in the group, while it is in it; null when it is not. */

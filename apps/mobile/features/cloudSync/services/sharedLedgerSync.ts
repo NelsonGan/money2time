@@ -210,6 +210,8 @@ class SharedLedgerSync {
   /** Asked again while a round ran: run one more (see syncAll). */
   private again = false;
   private againForceList = false;
+  /** Target shareIds for the follow-up round; null means every active share. */
+  private againChannels: Set<string> | null = null;
   /** The last sync of some ledger failed: retry soon. */
   retry = false;
 
@@ -529,27 +531,38 @@ class SharedLedgerSync {
   }
 
   /**
-   * Syncs every shared ledger that is active. A call while a round runs (a
-   * live nudge, an edit) is not dropped: that round may have pulled before
-   * the change it is about, so one more round follows, and the call resolves
-   * with it. The outcome adds up the rows of every round and reports the last
-   * round's error.
+   * Syncs active shared ledgers (all of them, or only `channels` when a live
+   * nudge or local edit named specific shareIds). A call while a round runs is
+   * not dropped: that round may have pulled before the change it is about, so
+   * one more round follows (widening to all channels if any caller asked for
+   * all), and the call resolves with it.
    */
-  syncAll(opts: { forceList?: boolean } = {}): Promise<SharedSyncOutcome> {
+  syncAll(
+    opts: { forceList?: boolean; channels?: readonly string[] } = {},
+  ): Promise<SharedSyncOutcome> {
+    const requested = opts.channels ? new Set(opts.channels) : null;
     if (this.running) {
-      this.again = true;
+      if (!this.again) {
+        this.again = true;
+        this.againChannels = requested;
+      } else if (this.againChannels !== null) {
+        if (requested === null) this.againChannels = null;
+        else for (const id of requested) this.againChannels.add(id);
+      }
       this.againForceList ||= opts.forceList ?? false;
       return this.running;
     }
     const session = this.session;
     this.running = (async () => {
       try {
-        const outcome = await this.runAll(opts.forceList ?? false);
+        const outcome = await this.runAll(opts.forceList ?? false, requested);
         while (this.again && this.session === session) {
           const forceList = this.againForceList;
+          const channels = this.againChannels;
           this.again = false;
           this.againForceList = false;
-          const next = await this.runAll(forceList);
+          this.againChannels = null;
+          const next = await this.runAll(forceList, channels);
           outcome.appliedRows += next.appliedRows;
           outcome.removedLedgers += next.removedLedgers;
           outcome.error = next.error;
@@ -560,31 +573,53 @@ class SharedLedgerSync {
         this.running = null;
         this.again = false;
         this.againForceList = false;
+        this.againChannels = null;
       }
     })();
     return this.running;
   }
 
-  private async runAll(forceList: boolean): Promise<SharedSyncOutcome> {
+  private async runAll(
+    forceList: boolean,
+    channels: ReadonlySet<string> | null = null,
+  ): Promise<SharedSyncOutcome> {
     const outcome: SharedSyncOutcome = { appliedRows: 0, removedLedgers: 0, error: null };
     const session = this.session;
     if (!session) return outcome;
-    try {
-      outcome.removedLedgers += await this.refreshList(forceList);
-    } catch (error) {
-      // A rejected session (account deleted elsewhere) signs the phone out.
-      if (isCode(error, 'unauthorized')) {
-        this.retry = false;
-        throw error;
+    // Targeted channel syncs (a live nudge or local edit for a known share)
+    // skip the periodic list fetch unless forced or an unknown shareId arrived.
+    const known = listSharedLedgers();
+    const unknownTarget =
+      channels !== null && [...channels].some((id) => !known.some((l) => l.shareId === id));
+    if (channels === null || forceList || unknownTarget) {
+      try {
+        outcome.removedLedgers += await this.refreshList(forceList || unknownTarget);
+      } catch (error) {
+        // A rejected session (account deleted elsewhere) signs the phone out.
+        if (isCode(error, 'unauthorized')) {
+          this.retry = false;
+          throw error;
+        }
+        // Offline: sync what this phone knows of. With nothing shared yet,
+        // there is no ledger to show failing.
+        if (listSharedLedgers().length) outcome.error = error;
       }
-      // Offline: sync what this phone knows of. With nothing shared yet,
-      // there is no ledger to show failing.
-      if (listSharedLedgers().length) outcome.error = error;
     }
     if (this.session === session && session.personalInactive()) {
       await runExclusive(() => getSQLite().withTransactionSync(dropPersonalOutbox));
     }
-    for (const ledger of listSharedLedgers()) {
+    const targets = listSharedLedgers().filter(
+      (ledger) => channels === null || channels.has(ledger.shareId),
+    );
+    // When syncing multiple active shares in one round, prefetch any missing
+    // credentials in parallel before the serialized replica sync loop.
+    const activeTargets = targets.filter((ledger) => ledger.active);
+    if (activeTargets.length > 1) {
+      await Promise.allSettled(
+        activeTargets.map((ledger) => this.readyCredentials(ledger.shareId)),
+      );
+    }
+    for (const ledger of targets) {
       if (!ledger.active) {
         this.closeEngine(ledger.shareId);
         continue;
@@ -616,7 +651,8 @@ class SharedLedgerSync {
         }
       }
     }
-    this.retry = outcome.error !== null;
+    if (channels === null) this.retry = outcome.error !== null;
+    else if (outcome.error !== null) this.retry = true;
     return outcome;
   }
 

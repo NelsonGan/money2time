@@ -1,18 +1,29 @@
 import { useEffect } from 'react';
 import { AppState } from 'react-native';
 
-/** How often `pushSoon` is asked: an edit reaches the cloud about this fast. */
-const QUICK_EVERY_MS = 1_000;
+import { subscribeLocalDataChanged } from '../lib/outboxWake';
+
+/** Debounce after a local write notification: fast push while coalescing multi-row bursts. */
+const WAKE_DEBOUNCE_MS = 250;
+/** Fallback outbox poll for writes outside `AppContext` / `albumGroupWrites`. */
+const QUICK_EVERY_MS = 3_000;
 const CHECK_EVERY_MS = 15_000;
 /** The fallback pull, for when the live socket (services/liveSync.ts) is down. */
 const PULL_EVERY_MS = 3 * 60_000;
 
 interface SchedulerOptions {
   /**
-   * Checked every second: true when this phone has edits that a sync would send
-   * now (not when the last sync failed, which waits for the 15 s retry).
+   * Checked on local write wakes (debounced 250 ms) and on the fallback poll:
+   * true when this phone has edits that a sync would send now (not when the
+   * last sync failed, which waits for the 15 s retry).
    */
   pushSoon?: () => boolean;
+  /**
+   * Optional targeted runner for `pushSoon` triggers (pushes only the
+   * channel(s) that have pending outbox edits, avoiding unnecessary cross-
+   * channel pulls). Falls back to `sync`.
+   */
+  onPushSoon?: () => void;
   /** How long `sync` waits while open with nothing wanted (the fallback pull: 3 minutes). */
   everyMs?: number;
   /** Also run on going to the background (the default), where a last push belongs. */
@@ -21,34 +32,49 @@ interface SchedulerOptions {
 
 /**
  * While `active`: runs `sync` on return to the app and on going to the
- * background, within about a second of a local edit (`pushSoon`), every 15 s while
- * open if `needsSync()` says so (changes waiting, or the last sync failed),
- * and every 3 minutes (`everyMs`) otherwise. Changes from other phones arrive sooner
- * through the live socket; the 3-minute pull is the fallback.
+ * background, within ~250 ms of a local edit (`pushSoon` + `notifyLocalDataChanged`),
+ * every 15 s while open if `needsSync()` says so (changes waiting, or the last
+ * sync failed), and every 3 minutes (`everyMs`) otherwise. Changes from other
+ * phones arrive sooner through the live socket; the 3-minute pull is the fallback.
  */
 export function useSyncScheduler(
   active: boolean,
   sync: () => void,
   needsSync: () => boolean,
-  { pushSoon, everyMs = PULL_EVERY_MS, onBackground = true }: SchedulerOptions = {},
+  { pushSoon, onPushSoon, everyMs = PULL_EVERY_MS, onBackground = true }: SchedulerOptions = {},
 ) {
   useEffect(() => {
     if (!active) return;
     let lastRun = Date.now();
     let lastCheck = Date.now();
+    let wakeTimer: ReturnType<typeof setTimeout> | null = null;
     const run = () => {
       lastRun = Date.now();
       sync();
     };
+    const runPush = () => {
+      if (onPushSoon) onPushSoon();
+      else run();
+    };
+    const unsubscribeWake = pushSoon
+      ? subscribeLocalDataChanged(() => {
+          if (AppState.currentState !== 'active') return;
+          if (wakeTimer) clearTimeout(wakeTimer);
+          wakeTimer = setTimeout(() => {
+            wakeTimer = null;
+            if (AppState.currentState !== 'active') return;
+            if (pushSoon()) runPush();
+          }, WAKE_DEBOUNCE_MS);
+        })
+      : null;
     const interval = setInterval(
       () => {
         if (AppState.currentState !== 'active') return;
         const now = Date.now();
         if (pushSoon?.()) {
-          run();
+          runPush();
           return;
         }
-        // With the 1 s tick, the 15 s checks run on every fifteenth or so.
         if (pushSoon && now - lastCheck < CHECK_EVERY_MS - QUICK_EVERY_MS / 2) return;
         lastCheck = now;
         if (now - lastRun > everyMs || needsSync()) run();
@@ -59,8 +85,10 @@ export function useSyncScheduler(
       if (next === 'active' || (onBackground && next === 'background')) run();
     });
     return () => {
+      if (wakeTimer) clearTimeout(wakeTimer);
+      unsubscribeWake?.();
       clearInterval(interval);
       subscription.remove();
     };
-  }, [active, sync, needsSync, pushSoon, everyMs, onBackground]);
+  }, [active, sync, needsSync, pushSoon, onPushSoon, everyMs, onBackground]);
 }

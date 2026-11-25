@@ -166,12 +166,12 @@ test('the owner and a member each see the ledger with their role', async (t) => 
   assert.deepEqual(await list('owner'), [
     { ...HOUSEHOLD, role: 'owner', active: true, joinedAt: SHARED_AT },
   ]);
-  // Was 3 one after another: owned ledgers, joined ledgers, then each view.
-  assert.equal(waited(), 2);
+  // Was 3 one after another (then 2): owned + joined + fresh-Pro in one round trip.
+  assert.equal(waited(), 1);
   assert.deepEqual(await list('member'), [
     { ...HOUSEHOLD, role: 'member', active: true, joinedAt: JOINED_AT },
   ]);
-  assert.equal(waited(), 2);
+  assert.equal(waited(), 1);
   assert.deepEqual(await list('outsider'), []);
 });
 
@@ -180,8 +180,8 @@ test('a ledger stays active while a member is Pro, and stops when nobody is', as
   assert.deepEqual(await memberPro.list('member'), [
     { ...HOUSEHOLD, role: 'member', active: true, joinedAt: JOINED_AT },
   ]);
-  // Was 5: owned, joined, the owner's Pro, the members, the members' Pro.
-  assert.equal(memberPro.waited(), 3);
+  // Was 5 (then 3): fresh cached member Pro is checked in the list query itself.
+  assert.equal(memberPro.waited(), 1);
   const nobody = fixture(t, []);
   assert.deepEqual(await nobody.list('owner'), [
     { ...HOUSEHOLD, role: 'owner', active: false, joinedAt: SHARED_AT },

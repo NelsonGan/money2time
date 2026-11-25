@@ -37,12 +37,19 @@ import { getAuth } from './auth';
 import { csv, type Env } from './env';
 import { json, readJson } from './http';
 import {
+  type AccessQueryRow,
+  accessStatement,
   audienceIfAllowed,
+  audienceStatements,
   deleteLedgerAccess,
   expiredInvitesStatement,
   invitePage,
   isLedgerActive,
   ledgerForMedia,
+  type ListedLedgerRow,
+  listedLedgerStatements,
+  parseAccessRow,
+  type PreloadedLedgerRoute,
   previewInvite,
   routeLedgers,
   type SessionUser,
@@ -58,8 +65,24 @@ import {
   userSpace,
 } from './media';
 import { connectLive, isValidChannel, isValidDeviceId, notifyUsers } from './live';
-import { checkInPhone, isAccountPro, isValidAppUserId, unlinkAppUserId } from './revenuecat';
-import { databaseNameFor, deleteDatabase, deleteSyncDatabase, getSyncDatabase } from './turso';
+import {
+  checkInPhoneDetailed,
+  checkInStatements,
+  isAccountPro,
+  isValidAppUserId,
+  preloadedCheckInFromBatch,
+  type ProLinkRow,
+  proLinksStatement,
+  unlinkAppUserId,
+} from './revenuecat';
+import { authenticateBatch, SESSION_USER_SUBQUERY } from './session';
+import {
+  databaseNameFor,
+  deleteDatabase,
+  deleteSyncDatabase,
+  getSyncDatabase,
+  type SyncDatabaseRow,
+} from './turso';
 import { checkTurnstile, TURNSTILE_HEADER } from './turnstile';
 
 export { SyncHub } from './live';
@@ -95,7 +118,7 @@ const isInviteOnlyHost = (env: Env, url: URL): boolean =>
   url.host !== hostOf(env.BETTER_AUTH_URL) && url.host === inviteHost(env);
 
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx?: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
     try {
       const join = /^\/join\/([^/]+)$/.exec(url.pathname);
@@ -126,10 +149,7 @@ export default {
         return await previewInvite(env, preview[1]);
       }
 
-      const session = await getAuth(env).api.getSession({ headers: request.headers });
-      if (!session) return json({ error: 'unauthorized' }, 401);
-      const { id, email, name } = session.user;
-      return await route(request, url, env, { id, email, name });
+      return await routeAuthenticated(request, url, env, ctx);
     } catch (error) {
       // Internal text (D1, Turso, RevenueCat) stays in the logs.
       console.error(
@@ -189,22 +209,224 @@ async function authGate(request: Request, url: URL, env: Env): Promise<Response 
   return null;
 }
 
+/**
+ * Authenticates the request and batches each hot route's primary D1 read into
+ * the same single `AUTH_DB.batch` round trip as the session lookup.
+ */
+async function routeAuthenticated(
+  request: Request,
+  url: URL,
+  env: Env,
+  ctx?: ExecutionContext,
+): Promise<Response> {
+  const { pathname } = url;
+  const method = request.method;
+  const waitUntil = ctx ? (promise: Promise<unknown>) => ctx.waitUntil(promise) : undefined;
+  const runBackground = async (promise: Promise<unknown>) => {
+    if (ctx) ctx.waitUntil(promise.catch(() => undefined));
+    else await promise;
+  };
+
+  // Hot routes that read a small JSON body before batching with session auth.
+  if (pathname === '/v1/account/status' && method === 'POST') {
+    const body = await readJson<{ appUserId: unknown; storePro: unknown }>(request);
+    const appUserId = isValidAppUserId(body?.appUserId) ? body.appUserId : null;
+    const storePro = typeof body?.storePro === 'boolean' ? body.storePro : undefined;
+    const auth = await authenticateBatch(request, env, ctx, (token) =>
+      checkInStatements(env, SESSION_USER_SUBQUERY, token, appUserId),
+    );
+    if (!auth) return json({ error: 'unauthorized' }, 401);
+    const pro = await checkInPhoneDetailed(env, auth.user.id, appUserId, {
+      storePro,
+      preloaded: auth.extra ? preloadedCheckInFromBatch(auth.extra, appUserId !== null) : undefined,
+      waitUntil,
+    });
+    if (pro.joinedAsAdditionalPhone) {
+      await runBackground(notifyUsers(env, [auth.user.id], 'personal', null, 'data'));
+    }
+    return json({
+      isPro: pro.isPro,
+      limited: pro.limited,
+      hasOtherPhones: pro.hasOtherPhones,
+    });
+  }
+
+  if (pathname === '/v1/sync/credentials' && method === 'POST') {
+    const body = await readJson<{ appUserId: unknown; storePro: unknown }>(request);
+    const appUserId = isValidAppUserId(body?.appUserId) ? body.appUserId : null;
+    const storePro = typeof body?.storePro === 'boolean' ? body.storePro : undefined;
+    const auth = await authenticateBatch(request, env, ctx, (token) => [
+      ...checkInStatements(env, SESSION_USER_SUBQUERY, token, appUserId),
+      env.AUTH_DB.prepare(
+        `SELECT db_name, db_url, token, token_expires_at FROM sync_databases
+         WHERE user_id = ${SESSION_USER_SUBQUERY}`,
+      ).bind(token),
+    ]);
+    if (!auth) return json({ error: 'unauthorized' }, 401);
+    const preloadedCheckIn = auth.extra
+      ? preloadedCheckInFromBatch(auth.extra, appUserId !== null)
+      : undefined;
+    const dbIndex = appUserId !== null ? 3 : 2;
+    const preloadedDb = auth.extra
+      ? (((auth.extra[dbIndex]?.results as SyncDatabaseRow[] | undefined)?.[0] ?? null) as
+          | SyncDatabaseRow
+          | null)
+      : undefined;
+    const pro = await checkInPhoneDetailed(env, auth.user.id, appUserId, {
+      storePro,
+      preloaded: preloadedCheckIn,
+      waitUntil,
+    });
+    if (pro.joinedAsAdditionalPhone) {
+      await runBackground(notifyUsers(env, [auth.user.id], 'personal', null, 'data'));
+    }
+    if (!pro.isPro) return json({ error: pro.limited ? 'phone_limit' : 'not_pro' }, 403);
+    // A concurrent DELETE /v1/account makes the database insert fail on the
+    // user's foreign key, and getSyncDatabase removes what it made.
+    const db = await getSyncDatabase(env, auth.user.id, preloadedDb);
+    return json({
+      url: db.url,
+      authToken: db.token,
+      expiresAt: db.expiresAt,
+      hasOtherPhones: pro.hasOtherPhones,
+    });
+  }
+
+  if (pathname === '/v1/sync/notify' && method === 'POST') {
+    const body = await readJson<{ channel: unknown; device: unknown; reason: unknown }>(request);
+    const channel = body?.channel;
+    const sharedChannel = isValidChannel(channel) && channel !== 'personal' ? channel : null;
+    const auth = await authenticateBatch(request, env, ctx, (token) =>
+      sharedChannel ? audienceStatements(env, sharedChannel, SESSION_USER_SUBQUERY, token) : [],
+    );
+    if (!auth) return json({ error: 'unauthorized' }, 401);
+    if (env.NOTIFY_LIMITER && !(await env.NOTIFY_LIMITER.limit({ key: auth.user.id })).success) {
+      return json({ error: 'rate_limited' }, 429);
+    }
+    if (!isValidChannel(channel)) return json({ error: 'bad_request' }, 400);
+    const device = isValidDeviceId(body?.device) ? body.device : null;
+    // `pro`: the sender's own Pro began, which only the user's own phones
+    // (paused ones) act on. Anything else is a data change.
+    const reason = channel === 'personal' && body?.reason === 'pro' ? 'pro' : 'data';
+    let audience: string[] | null;
+    if (channel === 'personal') {
+      audience = [auth.user.id];
+    } else if (auth.extra && sharedChannel) {
+      const accessRow = (auth.extra[0]?.results as AccessQueryRow[] | undefined)?.[0];
+      const found = parseAccessRow(accessRow, auth.user.id);
+      if (!found) {
+        audience = null;
+      } else {
+        const members = ((auth.extra[1]?.results as { user_id: string }[] | undefined) ?? []).map(
+          (row) => row.user_id,
+        );
+        audience = [found.ledger.owner_user_id, ...members];
+      }
+    } else {
+      audience = await audienceIfAllowed(env, channel, auth.user.id);
+    }
+    if (!audience) return json({ error: 'not_found' }, 404);
+    await runBackground(notifyUsers(env, audience, channel, device, reason));
+    return json({ ok: true });
+  }
+
+  // Hot GET / PUT / POST routes that batch their primary read with session auth.
+  if (pathname === '/v1/account' && method === 'GET') {
+    const auth = await authenticateBatch(request, env, ctx, (token) => [
+      proLinksStatement(env, SESSION_USER_SUBQUERY, token),
+    ]);
+    if (!auth) return json({ error: 'unauthorized' }, 401);
+    const preloaded = auth.extra ? (auth.extra[0]?.results as ProLinkRow[] | undefined) : undefined;
+    return json({ user: auth.user, isPro: await isAccountPro(env, auth.user.id, preloaded) });
+  }
+
+  if (pathname === '/v1/ledgers' && method === 'GET') {
+    const auth = await authenticateBatch(request, env, ctx, (token) =>
+      listedLedgerStatements(env, SESSION_USER_SUBQUERY, token),
+    );
+    if (!auth) return json({ error: 'unauthorized' }, 401);
+    const preloaded: PreloadedLedgerRoute | undefined = auth.extra
+      ? {
+          list: {
+            owned: (auth.extra[0]?.results as ListedLedgerRow[] | undefined) ?? [],
+            joined:
+              (auth.extra[1]?.results as (ListedLedgerRow & { joined_at: number })[] | undefined) ??
+              [],
+          },
+        }
+      : undefined;
+    return (
+      (await routeLedgers(request, url, env, auth.user, preloaded)) ??
+      json({ error: 'not_found' }, 404)
+    );
+  }
+
+  if (pathname.startsWith('/v1/media/')) {
+    const needsProCheck = method !== 'GET';
+    const auth = await authenticateBatch(request, env, ctx, (token) =>
+      needsProCheck ? [proLinksStatement(env, SESSION_USER_SUBQUERY, token)] : [],
+    );
+    if (!auth) return json({ error: 'unauthorized' }, 401);
+    const preloadedPro =
+      needsProCheck && auth.extra
+        ? (auth.extra[0]?.results as ProLinkRow[] | undefined)
+        : undefined;
+    const canWrite = () => isAccountPro(env, auth.user.id, preloadedPro);
+    return mediaRoute(
+      request,
+      env,
+      userSpace(auth.user.id),
+      pathname.slice('/v1/media/'.length),
+      canWrite,
+    );
+  }
+
+  const ledgerMedia = /^\/v1\/ledgers\/([^/]+)\/media\/(.+)$/.exec(pathname);
+  if (ledgerMedia) {
+    const auth = await authenticateBatch(request, env, ctx, (token) => [
+      accessStatement(env, ledgerMedia[1], SESSION_USER_SUBQUERY, token),
+    ]);
+    if (!auth) return json({ error: 'unauthorized' }, 401);
+    const ledger = auth.extra
+      ? (parseAccessRow(
+          (auth.extra[0]?.results as AccessQueryRow[] | undefined)?.[0],
+          auth.user.id,
+        )?.ledger ?? null)
+      : await ledgerForMedia(env, ledgerMedia[1], auth.user.id);
+    if (!ledger) return json({ error: 'not_found' }, 404);
+    // A shared ledger's images: writing needs the ledger active (anyone in it Pro).
+    const canWrite = () => isLedgerActive(env, ledger);
+    return mediaRoute(request, env, ledgerSpace(ledger.id), ledgerMedia[2], canWrite);
+  }
+
+  const ledgerRoute = /^\/v1\/ledgers\/([^/]+)(?:\/|$)/.exec(pathname);
+  if (ledgerRoute) {
+    const auth = await authenticateBatch(request, env, ctx, (token) => [
+      accessStatement(env, ledgerRoute[1], SESSION_USER_SUBQUERY, token),
+    ]);
+    if (!auth) return json({ error: 'unauthorized' }, 401);
+    const preloaded: PreloadedLedgerRoute | undefined = auth.extra
+      ? {
+          access: parseAccessRow(
+            (auth.extra[0]?.results as AccessQueryRow[] | undefined)?.[0],
+            auth.user.id,
+          ),
+        }
+      : undefined;
+    return (
+      (await routeLedgers(request, url, env, auth.user, preloaded)) ??
+      json({ error: 'not_found' }, 404)
+    );
+  }
+
+  const auth = await authenticateBatch(request, env, ctx);
+  if (!auth) return json({ error: 'unauthorized' }, 401);
+  return route(request, url, env, auth.user);
+}
+
 async function route(request: Request, url: URL, env: Env, user: SessionUser): Promise<Response> {
   const { pathname } = url;
   const method = request.method;
-
-  if (pathname === '/v1/account' && method === 'GET') {
-    return json({ user, isPro: await isAccountPro(env, user.id) });
-  }
-
-  if (pathname === '/v1/account/status' && method === 'POST') {
-    // Asked by every signed-in phone, Pro or not: a phone that is Pro is
-    // linked here, so the account's Pro reaches the user's other phones (at
-    // most 5, the most recently active; `limited` says this one is past it).
-    const body = await readJson<{ appUserId: unknown }>(request);
-    const appUserId = isValidAppUserId(body?.appUserId) ? body.appUserId : null;
-    return json(await checkInPhone(env, user.id, appUserId));
-  }
 
   if (pathname === '/v1/account/install' && method === 'DELETE') {
     // Signing out: this install no longer makes the account Pro, and its App
@@ -217,24 +439,6 @@ async function route(request: Request, url: URL, env: Env, user: SessionUser): P
 
   if (pathname === '/v1/live' && method === 'GET') {
     return connectLive(request, env, user.id, url);
-  }
-
-  if (pathname === '/v1/sync/notify' && method === 'POST') {
-    if (env.NOTIFY_LIMITER && !(await env.NOTIFY_LIMITER.limit({ key: user.id })).success) {
-      return json({ error: 'rate_limited' }, 429);
-    }
-    const body = await readJson<{ channel: unknown; device: unknown; reason: unknown }>(request);
-    const channel = body?.channel;
-    if (!isValidChannel(channel)) return json({ error: 'bad_request' }, 400);
-    const device = isValidDeviceId(body?.device) ? body.device : null;
-    // `pro`: the sender's own Pro began, which only the user's own phones
-    // (paused ones) act on. Anything else is a data change.
-    const reason = channel === 'personal' && body?.reason === 'pro' ? 'pro' : 'data';
-    const audience =
-      channel === 'personal' ? [user.id] : await audienceIfAllowed(env, channel, user.id);
-    if (!audience) return json({ error: 'not_found' }, 404);
-    await notifyUsers(env, audience, channel, device, reason);
-    return json({ ok: true });
   }
 
   if (pathname === '/v1/account' && method === 'DELETE') {
@@ -272,38 +476,6 @@ async function route(request: Request, url: URL, env: Env, user: SessionUser): P
     if (typeof body?.code !== 'string' || !body.code) return json({ error: 'bad_code' }, 400);
     const result = await storeAppleRefreshToken(env, user.id, body.code);
     return json({ ok: result === 'stored', reason: result });
-  }
-
-  if (pathname === '/v1/sync/credentials' && method === 'POST') {
-    const body = await readJson<{ appUserId: unknown }>(request);
-    const appUserId = isValidAppUserId(body?.appUserId) ? body.appUserId : null;
-    const pro = await checkInPhone(env, user.id, appUserId);
-    if (!pro.isPro) return json({ error: pro.limited ? 'phone_limit' : 'not_pro' }, 403);
-    // A concurrent DELETE /v1/account makes the database insert fail on the
-    // user's foreign key, and getSyncDatabase removes what it made.
-    const db = await getSyncDatabase(env, user.id);
-    return json({ url: db.url, authToken: db.token, expiresAt: db.expiresAt });
-  }
-
-  if (pathname.startsWith('/v1/media/')) {
-    // Personal images: writing needs the account's Pro.
-    const canWrite = () => isAccountPro(env, user.id);
-    return mediaRoute(
-      request,
-      env,
-      userSpace(user.id),
-      pathname.slice('/v1/media/'.length),
-      canWrite,
-    );
-  }
-
-  const ledgerMedia = /^\/v1\/ledgers\/([^/]+)\/media\/(.+)$/.exec(pathname);
-  if (ledgerMedia) {
-    const ledger = await ledgerForMedia(env, ledgerMedia[1], user.id);
-    if (!ledger) return json({ error: 'not_found' }, 404);
-    // A shared ledger's images: writing needs the ledger active (anyone in it Pro).
-    const canWrite = () => isLedgerActive(env, ledger);
-    return mediaRoute(request, env, ledgerSpace(ledger.id), ledgerMedia[2], canWrite);
   }
 
   return (await routeLedgers(request, url, env, user)) ?? json({ error: 'not_found' }, 404);

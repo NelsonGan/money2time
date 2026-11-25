@@ -148,6 +148,35 @@ export function isSyncedRow(table: string, row: Row): boolean {
 }
 
 /**
+ * The managed folders under `user-assets/` (keep in step with
+ * `services/userAssets.ts` and the cloud-sync Worker's `KNOWN_MEDIA_FOLDERS`).
+ * Bundled bank/subscription logos (`malaysia/maybank`, `global/netflix`) and
+ * card designs (`mascot/chick`) also contain a slash, so Cloud Sync must check
+ * this set instead of `rel.includes('/')` or every phone asks R2 for them and
+ * gets 404.
+ */
+export const USER_ASSET_KINDS: ReadonlySet<string> = new Set([
+  'account-logos',
+  'album-covers',
+  'avatars',
+  'card-designs',
+  'goal-covers',
+  'category-icons',
+  'item-icons',
+  'payment-qr',
+  'receipts',
+  'subscription-logos',
+]);
+
+/** Whether a normalized asset relative path belongs to one of the managed user-asset folders. */
+export function isUserAssetRelativePath(rel: string): boolean {
+  const slash = rel.indexOf('/');
+  if (slash <= 0 || slash === rel.length - 1) return false;
+  if (rel.includes('/', slash + 1)) return false;
+  return USER_ASSET_KINDS.has(rel.slice(0, slash));
+}
+
+/**
  * Columns holding a user image (`receipts/x.jpg`, `custom:account-logos/x.png`).
  * Keep in step with `collectReferencedAssetPaths` in services/userAssetGc.ts.
  */

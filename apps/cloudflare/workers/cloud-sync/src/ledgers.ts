@@ -48,7 +48,7 @@ import { csv, type Env } from './env';
 import { json, readJson } from './http';
 import { isValidDeviceId, markLedgerChanged, notifyUsers } from './live';
 import { deleteAllMedia, ledgerSpace } from './media';
-import { isAccountPro } from './revenuecat';
+import { isAccountPro, PRO_CACHE_MS } from './revenuecat';
 import { brokenInvitePageHtml, invitePageHtml } from './pages';
 import { open, seal } from './secretBox';
 import {
@@ -112,6 +112,8 @@ interface SharedLedgerRow {
   is_album?: number;
   /** Its change stamp (`ledger_changes`), as `access` reads it with the ledger; null before the first. */
   changed_at?: number | null;
+  /** 1 when the owner or any member has a fresh cached Pro row (skips extra D1 reads). */
+  has_fresh_pro?: number;
 }
 
 type Role = 'owner' | 'member';
@@ -219,29 +221,53 @@ async function getLedger(env: Env, id: string): Promise<SharedLedgerRow | null> 
     .first<SharedLedgerRow>();
 }
 
+const freshProCutoff = (env: Env, now: number): number =>
+  env.LOCAL_SYNC_URL && env.DEV_ASSUME_PRO === 'cached' ? -1 : now - PRO_CACHE_MS;
+
+const freshProSql = (cutoffParam: string) =>
+  `EXISTS (SELECT 1 FROM pro_links p WHERE p.is_pro = 1 AND p.checked_at > ${cutoffParam} AND (p.user_id = l.owner_user_id OR p.user_id IN (SELECT m2.user_id FROM ledger_members m2 WHERE m2.ledger_id = l.id)))`;
+
+export type AccessQueryRow = SharedLedgerRow & { is_member: number };
+
+/** D1 statement for `access()`, parameterized so `index.ts` can batch it with session auth. */
+export function accessStatement(
+  env: Env,
+  id: string,
+  userExpr: string,
+  firstBind: string,
+  now = Date.now(),
+): D1PreparedStatement {
+  return env.AUTH_DB.prepare(
+    `SELECT ${LEDGER_COLUMNS}, EXISTS (
+       SELECT 1 FROM ledger_members m WHERE m.ledger_id = l.id AND m.user_id = ${userExpr}
+     ) AS is_member,
+     (SELECT c.changed_at FROM ledger_changes c WHERE c.ledger_id = l.id) AS changed_at,
+     ${freshProSql('?3')} AS has_fresh_pro
+     FROM shared_ledgers l WHERE l.id = ?2`,
+  ).bind(firstBind, id, freshProCutoff(env, now));
+}
+
+export function parseAccessRow(
+  row: AccessQueryRow | null | undefined,
+  userId: string,
+): { ledger: SharedLedgerRow; role: Role } | null {
+  if (!row) return null;
+  const { is_member: isMember, ...ledger } = row;
+  if (ledger.owner_user_id === userId) return { ledger, role: 'owner' };
+  return isMember === 1 ? { ledger, role: 'member' } : null;
+}
+
 /** The ledger and the user's role in it, or null when they have none. */
 async function access(
   env: Env,
   id: string,
   userId: string,
 ): Promise<{ ledger: SharedLedgerRow; role: Role } | null> {
-  // One read for the ledger and whether the user is in it: every ledger
-  // route, image and notify starts here, and a member used to wait for two.
-  // With its change stamp, so the website's poll of an album that has not
-  // changed reads nothing else (`albumRead`).
-  const row = await env.AUTH_DB.prepare(
-    `SELECT ${LEDGER_COLUMNS}, EXISTS (
-       SELECT 1 FROM ledger_members m WHERE m.ledger_id = l.id AND m.user_id = ?2
-     ) AS is_member,
-     (SELECT c.changed_at FROM ledger_changes c WHERE c.ledger_id = l.id) AS changed_at
-     FROM shared_ledgers l WHERE l.id = ?1`,
-  )
-    .bind(id, userId)
-    .first<SharedLedgerRow & { is_member: number }>();
-  if (!row) return null;
-  const { is_member: isMember, ...ledger } = row;
-  if (ledger.owner_user_id === userId) return { ledger, role: 'owner' };
-  return isMember === 1 ? { ledger, role: 'member' } : null;
+  // One read for the ledger, whether the user is in it, its change stamp and
+  // whether any participant has a fresh cached Pro row: every ledger route,
+  // image and notify starts here.
+  const row = await accessStatement(env, id, '?1', userId).first<AccessQueryRow>();
+  return parseAccessRow(row, userId);
 }
 
 /**
@@ -351,6 +377,8 @@ export async function ledgerAudience(env: Env, ledger: SharedLedgerRow): Promise
  */
 export async function isLedgerActive(env: Env, ledger: SharedLedgerRow): Promise<boolean> {
   if (!needsPro(ledger)) return true;
+  if (env.LOCAL_SYNC_URL && env.DEV_ASSUME_PRO === 'true') return true;
+  if (ledger.has_fresh_pro === 1) return true;
   if (await isAccountPro(env, ledger.owner_user_id)) return true;
   return anyAccountPro(env, await memberIds(env, ledger.id));
 }
@@ -371,15 +399,47 @@ async function ownerOf(
 }
 
 /** A share as the list reads it: with its owner and how many joined, in the same statement. */
-interface ListedLedgerRow extends SharedLedgerRow {
+export interface ListedLedgerRow extends SharedLedgerRow {
   owner_name: string | null;
   owner_email: string | null;
   member_count: number;
 }
 
-const LISTED_COLUMNS = `${LEDGER_COLUMNS}, u.name AS owner_name, u.email AS owner_email,
-  (SELECT COUNT(*) FROM ledger_members c WHERE c.ledger_id = l.id) AS member_count`;
+const listedColumns = (cutoffParam: string) =>
+  `${LEDGER_COLUMNS}, u.name AS owner_name, u.email AS owner_email,
+   (SELECT COUNT(*) FROM ledger_members c WHERE c.ledger_id = l.id) AS member_count,
+   ${freshProSql(cutoffParam)} AS has_fresh_pro`;
 const LISTED_FROM = 'shared_ledgers l LEFT JOIN "user" u ON u.id = l.owner_user_id';
+
+/** D1 statements for `GET /v1/ledgers`, ready to batch with session auth. */
+export function listedLedgerStatements(
+  env: Env,
+  userExpr: string,
+  firstBind: string,
+  now = Date.now(),
+): [D1PreparedStatement, D1PreparedStatement] {
+  const cutoff = freshProCutoff(env, now);
+  const cols = listedColumns('?2');
+  return [
+    env.AUTH_DB.prepare(
+      `SELECT ${cols} FROM ${LISTED_FROM} WHERE l.owner_user_id = ${userExpr}`,
+    ).bind(firstBind, cutoff),
+    env.AUTH_DB.prepare(
+      `SELECT ${cols}, m.joined_at AS joined_at FROM ${LISTED_FROM}
+       JOIN ledger_members m ON m.ledger_id = l.id
+       WHERE m.user_id = ${userExpr}`,
+    ).bind(firstBind, cutoff),
+  ];
+}
+
+/** Preloaded D1 results batched with session verification in `index.ts`. */
+export interface PreloadedLedgerRoute {
+  list?: {
+    owned: ListedLedgerRow[];
+    joined: (ListedLedgerRow & { joined_at: number })[];
+  };
+  access?: { ledger: SharedLedgerRow; role: Role } | null;
+}
 
 async function view(
   env: Env,
@@ -387,17 +447,37 @@ async function view(
   role: Role,
 ): Promise<LedgerView> {
   const listed = 'member_count' in ledger ? ledger : null;
-  const proRule = needsPro(ledger);
+  const knownActive =
+    !needsPro(ledger) ||
+    (Boolean(env.LOCAL_SYNC_URL) && env.DEV_ASSUME_PRO === 'true') ||
+    ledger.has_fresh_pro === 1;
+  // Fast path: when listed and active status is already known (albums, or any
+  // participant has a fresh cached Pro row), zero extra D1 queries are needed.
+  if (listed && knownActive) {
+    return {
+      id: ledger.id,
+      ledgerId: ledger.ledger_id,
+      name: ledger.name,
+      emoji: ledger.emoji,
+      role,
+      ownerId: ledger.owner_user_id,
+      ownerName: displayName(listed.owner_name, listed.owner_email),
+      memberCount: listed.member_count,
+      active: true,
+      kind: kindOf(ledger),
+    };
+  }
+  const proRule = !knownActive;
   // A ledger's members are read once, for the count and (when the owner is
-  // not Pro) for whether one of them keeps it syncing. An album needs only
-  // the count, and a listed one has it already: nothing more is read.
+  // not Pro) for whether one of them keeps it syncing. An album or a ledger
+  // already known active needs only the count, and a listed one has it already.
   const [owner, members, count, ownerActive] = await Promise.all([
     listed
       ? { name: listed.owner_name ?? '', email: listed.owner_email ?? '' }
       : ownerOf(env, ledger),
     proRule ? memberIds(env, ledger.id) : [],
     proRule ? null : (listed?.member_count ?? memberCount(env, ledger.id)),
-    !proRule || isAccountPro(env, ledger.owner_user_id),
+    knownActive || isAccountPro(env, ledger.owner_user_id),
   ]);
   const active = ownerActive || (await anyAccountPro(env, members));
   return {
@@ -436,6 +516,7 @@ export async function routeLedgers(
   url: URL,
   env: Env,
   user: SessionUser,
+  preloaded?: PreloadedLedgerRoute,
 ): Promise<Response | null> {
   const parts = url.pathname.split('/').filter(Boolean); // ['v1', 'ledgers', id, ...]
   const method = request.method;
@@ -447,12 +528,15 @@ export async function routeLedgers(
   if (parts[1] !== 'ledgers') return null;
 
   if (parts.length === 2) {
-    if (method === 'GET') return listLedgers(env, user, url.searchParams.get('albums') === '1');
+    if (method === 'GET') {
+      return listLedgers(env, user, url.searchParams.get('albums') === '1', preloaded?.list);
+    }
     if (method === 'POST') return shareLedger(env, user, request);
     return null;
   }
 
-  const found = await access(env, parts[2], user.id);
+  const found =
+    preloaded && 'access' in preloaded ? preloaded.access : await access(env, parts[2], user.id);
   if (!found) return json({ error: 'not_found' }, 404);
   const { ledger, role } = found;
   const action = parts[3];
@@ -518,6 +602,19 @@ export async function routeLedgers(
   return null;
 }
 
+/** D1 statements for `POST /v1/sync/notify` on a shared channel, ready to batch with auth. */
+export function audienceStatements(
+  env: Env,
+  id: string,
+  userExpr: string,
+  firstBind: string,
+): [D1PreparedStatement, D1PreparedStatement] {
+  return [
+    accessStatement(env, id, userExpr, firstBind),
+    env.AUTH_DB.prepare('SELECT user_id FROM ledger_members WHERE ledger_id = ?1').bind(id),
+  ];
+}
+
 /** Who to tell when the user changed a shared ledger, or null if it is not theirs. */
 export async function audienceIfAllowed(
   env: Env,
@@ -541,26 +638,33 @@ export async function ledgerForMedia(
  * `withAlbums`: the app asked for shared albums too (`?albums=1`). One that
  * does not would take an album's group for a ledger, so it is not told.
  */
-async function listLedgers(env: Env, user: SessionUser, withAlbums: boolean): Promise<Response> {
-  // Asked together: the app lists its ledgers before almost every sync.
-  const [owned, joined] = await Promise.all([
-    env.AUTH_DB.prepare(`SELECT ${LISTED_COLUMNS} FROM ${LISTED_FROM} WHERE l.owner_user_id = ?1`)
-      .bind(user.id)
-      .all<ListedLedgerRow>(),
-    env.AUTH_DB.prepare(
-      `SELECT ${LISTED_COLUMNS}, m.joined_at AS joined_at FROM ${LISTED_FROM}
-       JOIN ledger_members m ON m.ledger_id = l.id
-       WHERE m.user_id = ?1`,
-    )
-      .bind(user.id)
-      .all<ListedLedgerRow & { joined_at: number }>(),
-  ]);
+async function listLedgers(
+  env: Env,
+  user: SessionUser,
+  withAlbums: boolean,
+  preloaded?: PreloadedLedgerRoute['list'],
+): Promise<Response> {
+  let ownedRows: ListedLedgerRow[];
+  let joinedRows: (ListedLedgerRow & { joined_at: number })[];
+  if (preloaded) {
+    ownedRows = preloaded.owned;
+    joinedRows = preloaded.joined;
+  } else {
+    // Asked together: the app lists its ledgers before almost every sync.
+    const [ownedStmt, joinedStmt] = listedLedgerStatements(env, '?1', user.id);
+    const [owned, joined] = await Promise.all([
+      ownedStmt.all<ListedLedgerRow>(),
+      joinedStmt.all<ListedLedgerRow & { joined_at: number }>(),
+    ]);
+    ownedRows = owned.results;
+    joinedRows = joined.results;
+  }
   const shown = (row: SharedLedgerRow) => withAlbums || kindOf(row) === 'ledger';
   const ledgers = await Promise.all([
-    ...owned.results
+    ...ownedRows
       .filter(shown)
       .map(async (row) => ({ ...(await view(env, row, 'owner')), joinedAt: row.created_at })),
-    ...joined.results
+    ...joinedRows
       .filter(shown)
       .map(async (row) => ({ ...(await view(env, row, 'member')), joinedAt: row.joined_at })),
   ]);

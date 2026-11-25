@@ -13,8 +13,10 @@ import {
   GROUP_SYNC_TABLES,
   hasMeaningfulRows,
   isDeviceLocalColumn,
+  isUserAssetRelativePath,
   SYNC_TABLES,
   type SyncTable,
+  USER_ASSET_KINDS,
 } from '~/features/cloudSync/lib/syncTables';
 
 const root = join(__dirname, '../../..');
@@ -108,5 +110,25 @@ describe('what counts as recorded data', () => {
     ['a ledger of its own', { ledgers: [{ id: 'default' }, { id: 'work' }] }],
   ])('counts %s', (_label, rows) => {
     expect(hasMeaningfulRows(side(rows))).toBe(true);
+  });
+});
+
+describe('user-asset relative paths', () => {
+  it('accepts every managed user-asset folder', () => {
+    for (const kind of USER_ASSET_KINDS) {
+      expect(isUserAssetRelativePath(`${kind}/abc.jpg`)).toBe(true);
+    }
+    expect(isUserAssetRelativePath('card-designs/id.text-light.jpg')).toBe(true);
+  });
+
+  it('rejects bundled bank logos, subscription logos, card designs and nested paths', () => {
+    expect(isUserAssetRelativePath('malaysia/maybank')).toBe(false);
+    expect(isUserAssetRelativePath('global/netflix')).toBe(false);
+    expect(isUserAssetRelativePath('united-states/chase')).toBe(false);
+    expect(isUserAssetRelativePath('mascot/chick')).toBe(false);
+    expect(isUserAssetRelativePath('pixel/neon')).toBe(false);
+    expect(isUserAssetRelativePath('receipts/nested/a.jpg')).toBe(false);
+    expect(isUserAssetRelativePath('receipts/')).toBe(false);
+    expect(isUserAssetRelativePath('bare')).toBe(false);
   });
 });

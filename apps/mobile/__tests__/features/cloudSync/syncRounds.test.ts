@@ -6,13 +6,18 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 
 import {
   downloadMedia as apiDownloadMedia,
+  existingMedia as apiExistingMedia,
   uploadMedia as apiUploadMedia,
 } from '~/features/cloudSync/services/cloudSyncApi';
 import {
   removeSharedLedger,
   saveSharedLedger,
 } from '~/features/cloudSync/services/sharedLedgerStore';
-import { enableCapture, SyncEngine } from '~/features/cloudSync/services/syncEngine';
+import {
+  enableCapture,
+  pendingChannels,
+  SyncEngine,
+} from '~/features/cloudSync/services/syncEngine';
 import { getSQLite } from '~/lib/db/client';
 import { applyMigrations } from '~/lib/db/migrations/runner';
 
@@ -1035,5 +1040,125 @@ describe('with a replica the engine cannot pull into', () => {
 
     await expect(engine.syncNow()).rejects.toThrow(STUCK);
     expect(rebuild).not.toHaveBeenCalled();
+  });
+
+  it('backs off consecutive stuck-replica rebuilds instead of looping full downloads', async () => {
+    await engine.uploadAllReplacingCloud();
+    stuckPull = true;
+    const rebuild = spyOnRebuild();
+
+    // First rebuild runs immediately.
+    await engine.syncNow();
+    expect(rebuild).toHaveBeenCalledTimes(1);
+
+    // If the replica hits a stuck error again immediately, cooldown prevents a second rebuild.
+    stuckPull = true;
+    await expect(engine.syncNow()).rejects.toThrow(STUCK);
+    expect(rebuild).toHaveBeenCalledTimes(1);
+
+    // A clean non-rebuild pull clears the backoff so a later stuck replica recovers immediately.
+    stuckPull = false;
+    await engine.syncNow();
+    stuckPull = true;
+    await engine.syncNow();
+    expect(rebuild).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('media and channel routing optimizations', () => {
+  it('never downloads bundled bank logos or card designs and cleans stale bogus rows', async () => {
+    // Stale bogus row queued by an older app build before launch.
+    app
+      .prepare(
+        "INSERT INTO sync_media_missing (path, channel) VALUES ('malaysia/maybank', 'personal')",
+      )
+      .run();
+    await engine.uploadAllReplacingCloud();
+    // Another phone pushes an account using a bundled logo and bundled card design.
+    cloud
+      .prepare(
+        `INSERT INTO sync_rows (table_name, row_id, data, rev, origin, updated_at)
+         VALUES ('accounts', 'acc-bank', ?, 'r1', 'other', 1)`,
+      )
+      .run(
+        JSON.stringify({
+          id: 'acc-bank',
+          ledger_id: 'default',
+          name: 'Maybank',
+          type: 'debit',
+          currency: 'MYR',
+          logo_id: 'malaysia/maybank',
+          card_design: 'mascot/chick',
+          starting_balance: 0,
+          created_at: now,
+          updated_at: now,
+        }),
+      );
+    remoteChanged = true;
+    await engine.syncNow();
+
+    expect(apiDownloadMedia).not.toHaveBeenCalled();
+    const missing = app.prepare('SELECT path FROM sync_media_missing').all();
+    expect(missing).toEqual([]);
+  });
+
+  it('skips /v1/media/exists when uploading a single image, and keeps it for batches', async () => {
+    (apiUploadMedia as jest.Mock).mockResolvedValue(undefined);
+    await engine.uploadAllReplacingCloud();
+    (apiExistingMedia as jest.Mock).mockClear();
+    (apiUploadMedia as jest.Mock).mockClear();
+
+    // Single receipt upload: straight to PUT without /exists.
+    files.add('user-assets/receipts/one.jpg');
+    addTransaction('tx-one', 15, { receipt_uri: 'receipts/one.jpg' });
+    await engine.syncNow();
+    expect(apiExistingMedia).not.toHaveBeenCalled();
+    expect(apiUploadMedia).toHaveBeenCalledTimes(1);
+
+    // Multi-image batch: checks /exists first.
+    (apiExistingMedia as jest.Mock).mockClear();
+    (apiUploadMedia as jest.Mock).mockClear();
+    files.add('user-assets/receipts/two.jpg');
+    files.add('user-assets/receipts/three.jpg');
+    addTransaction('tx-two', 20, { receipt_uri: 'receipts/two.jpg' });
+    addTransaction('tx-three', 30, { receipt_uri: 'receipts/three.jpg' });
+    await engine.syncNow();
+    expect(apiExistingMedia).toHaveBeenCalledTimes(1);
+    expect(apiUploadMedia).toHaveBeenCalledTimes(2);
+  });
+
+  it('routes pendingChannels to personal-only or specific shared channels', () => {
+    app.exec('DELETE FROM sync_outbox');
+    saveSharedLedger({
+      ledgerId: 'trip-1',
+      shareId: 'share-trip-1',
+      role: 'owner',
+      name: 'Bali',
+      ownerName: 'Mei',
+      memberCount: 1,
+      active: true,
+      userId: 'u1',
+      ownerUserId: 'u1',
+      kind: 'album',
+    });
+    try {
+      expect(pendingChannels()).toEqual({ personal: false, shared: new Set() });
+
+      // Personal transaction only -> does not pull shared album.
+      addTransaction('tx-p', 10);
+      expect(pendingChannels()).toEqual({ personal: true, shared: new Set() });
+
+      // Shared album group row only -> does not pull personal channel.
+      app.exec('DELETE FROM sync_outbox');
+      app
+        .prepare(
+          `INSERT INTO album_groups (id, ledger_id, simplify_debts, created_at, updated_at)
+           VALUES ('trip-1', 'trip-1', 1, ?, ?)`,
+        )
+        .run(now, now);
+      expect(pendingChannels()).toEqual({ personal: false, shared: new Set(['share-trip-1']) });
+    } finally {
+      removeSharedLedger('trip-1');
+    }
   });
 });

@@ -8,6 +8,7 @@
 // names one), so no change skips the log. The caller then brings the user's own entries in step
 // (`projectGroup`). See README.md > Album members and shared albums.
 
+import { notifyLocalDataChanged } from '~/features/cloudSync/lib/outboxWake';
 import { CloudSyncApiError } from '~/features/cloudSync/services/cloudSyncApi';
 import {
   listAlbumShares,
@@ -114,6 +115,7 @@ function applyPlanLocally(groupId: string, plan: Plan): void {
   db.withTransactionSync(() => {
     for (const write of plan.writes) writeRow(groupId, write);
   });
+  notifyLocalDataChanged();
 }
 
 function writeRow(groupId: string, write: PlannedWrite): void {

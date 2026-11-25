@@ -67,6 +67,7 @@ import {
   isGroupTable,
   isSyncedRow,
   isSyncTable,
+  isUserAssetRelativePath,
   type LiveRows,
   MEANINGFUL_ROWS,
   shapeAdditions,
@@ -413,7 +414,7 @@ function collectAssetRefs(table: string, row: Row | null, into: Set<string>): vo
     const value = row[column];
     if (typeof value !== 'string') continue;
     const rel = assetRelativePathFromRef(value);
-    if (rel && rel.includes('/')) into.add(rel);
+    if (rel && isUserAssetRelativePath(rel)) into.add(rel);
   }
 }
 
@@ -591,6 +592,46 @@ export function dropPersonalOutbox(): void {
 }
 
 /**
+ * Which channels currently have edits waiting to go up (in `sync_outbox` or
+ * flushed into a replica as `unpushed`). Paused shared ledgers are ignored.
+ * Used by local-edit push wakes so a personal edit syncs only the personal
+ * channel and a shared-album edit syncs only that album.
+ */
+export function pendingChannels(): { personal: boolean; shared: Set<string> } {
+  const shared = new Set<string>();
+  const allShares = listSharedLedgers();
+  const activeShares = allShares.filter((ledger) => ledger.active);
+  let personal = hasUnpushedChanges(PERSONAL_CHANNEL);
+  for (const share of activeShares) {
+    if (hasUnpushedChanges(share.shareId)) shared.add(share.shareId);
+  }
+  const db = getSQLite();
+  const anyOutbox = db.getFirstSync('SELECT 1 FROM sync_outbox LIMIT 1');
+  if (!anyOutbox) return { personal, shared };
+  if (!allShares.length) return { personal: true, shared };
+  const activeIds = new Set(activeShares.map((ledger) => ledger.shareId));
+  const entries = db.getAllSync<{ table_name: string; row_id: string }>(
+    'SELECT table_name, row_id FROM sync_outbox',
+  );
+  for (const entry of entries) {
+    if (personal && shared.size === activeIds.size) break;
+    if (!isSyncTable(entry.table_name)) {
+      personal = true;
+      continue;
+    }
+    const local = db.getFirstSync<Row>(`SELECT * FROM "${entry.table_name}" WHERE id = ?`, [
+      entry.row_id,
+    ]);
+    const channel = local
+      ? channelOfRow(entry.table_name, local)
+      : (recordedChannel(entry.table_name, entry.row_id) ?? PERSONAL_CHANNEL);
+    if (channel === PERSONAL_CHANNEL) personal = true;
+    else if (activeIds.has(channel)) shared.add(channel);
+  }
+  return { personal, shared };
+}
+
+/**
  * Whether a channel has changes flushed into its replica that no push has
  * carried yet (a sync failed after its flush). They are out of the outbox.
  */
@@ -681,10 +722,64 @@ export function runExclusive<T>(fn: () => Promise<T> | T): Promise<T> {
   return result;
 }
 
+/**
+ * Exponential cooldown for consecutive stuck-replica rebuilds on one channel.
+ * The first recovery runs immediately (0 ms). If a replica keeps hitting a
+ * stuck error without a clean non-rebuild pull in between, consecutive
+ * rebuilds back off instead of re-downloading the whole Turso database every
+ * 15 seconds (which previously caused hundreds of full-DB downloads per day).
+ */
+const REBUILD_BACKOFF_MS = [
+  0,
+  5 * 60_000,
+  30 * 60_000,
+  2 * 60 * 60_000,
+  12 * 60 * 60_000,
+  24 * 60 * 60_000,
+];
+
+function rebuildBackoffKey(channel: string): string {
+  return `rebuild_backoff:${channel}`;
+}
+
+interface RebuildBackoffState {
+  count: number;
+  nextAt: number;
+}
+
+function readRebuildBackoff(channel: string): RebuildBackoffState {
+  try {
+    const raw = getState(rebuildBackoffKey(channel));
+    if (!raw) return { count: 0, nextAt: 0 };
+    const parsed = JSON.parse(raw) as { count?: unknown; nextAt?: unknown };
+    return {
+      count: typeof parsed.count === 'number' && parsed.count >= 0 ? parsed.count : 0,
+      nextAt: typeof parsed.nextAt === 'number' && parsed.nextAt >= 0 ? parsed.nextAt : 0,
+    };
+  } catch {
+    return { count: 0, nextAt: 0 };
+  }
+}
+
+function noteRebuildAttempt(channel: string, now = Date.now()): void {
+  const prev = readRebuildBackoff(channel);
+  const nextCount = prev.count + 1;
+  const delay = REBUILD_BACKOFF_MS[Math.min(nextCount, REBUILD_BACKOFF_MS.length - 1)];
+  setState(rebuildBackoffKey(channel), JSON.stringify({ count: nextCount, nextAt: now + delay }));
+}
+
+function clearRebuildBackoff(channel: string): void {
+  if (getState(rebuildBackoffKey(channel)) !== null) {
+    setState(rebuildBackoffKey(channel), null);
+  }
+}
+
 export class SyncEngine {
   private replica: Replica | null = null;
   /** A rebuild failed (offline, say) after deleting the replica: the next pull opens a fresh one. */
   private rebuildPending = false;
+  /** Whether `sync_info` has already been confirmed to hold this phone's `deviceName`. */
+  private deviceNameRecorded = false;
   private running: Promise<SyncOutcome> | null = null;
   /** The last apply left ledger-row removals for later (see applyRemoteChanges). */
   private removalsDeferred = false;
@@ -741,6 +836,7 @@ export class SyncEngine {
   close(): void {
     this.replica?.close();
     this.replica = null;
+    this.deviceNameRecorded = false;
   }
 
   private exclusive<T>(fn: () => Promise<T>): Promise<T> {
@@ -765,17 +861,23 @@ export class SyncEngine {
    * back from an older copy, or whose file is damaged, fails every pull
    * (`isStuckReplicaError`). Such a replica is deleted and downloaded again
    * when it holds nothing the cloud lacks: always before a link (it is only a
-   * copy of the cloud then), and in a sync when nothing waits to be pushed.
+   * copy of the cloud then), and in a sync when nothing waits to be pushed
+   * (with exponential backoff across consecutive rebuilds so a persistent
+   * error never triggers a full-database download loop).
    * Returns whether the pull may have brought changes.
    */
   private async pullOrRebuild(beforeLink = false): Promise<boolean> {
     await this.reopenAfterFailedRebuild();
     try {
-      return await this.db().pull();
+      const pulled = await this.db().pull();
+      if (!beforeLink) clearRebuildBackoff(this.channel);
+      return pulled;
     } catch (error) {
       if (!isStuckReplicaError(error)) throw error;
       if (!beforeLink) {
         if (hasUnpushedChanges(this.channel)) throw error;
+        const backoff = readRebuildBackoff(this.channel);
+        if (Date.now() < backoff.nextAt) throw error;
         const replicaWrites = await this.db()
           .stats()
           .then(
@@ -784,6 +886,7 @@ export class SyncEngine {
           );
         if (replicaWrites > 0) throw error;
       }
+      if (!beforeLink) noteRebuildAttempt(this.channel);
       await this.rebuildReplica(error);
       return true;
     }
@@ -1211,15 +1314,20 @@ export class SyncEngine {
    * (`last_synced_at`, `last_device_name`) are no longer written.
    */
   private async recordLastDevice(): Promise<void> {
+    if (this.deviceNameRecorded) return;
     const replica = this.db();
     const nameKey = deviceNameKey(deviceId());
     const name = this.config.deviceName;
     const info = await this.readInfo([nameKey]);
-    if (info.get(nameKey) === name) return;
+    if (info.get(nameKey) === name) {
+      this.deviceNameRecorded = true;
+      return;
+    }
     await replica.transaction(async () => {
       await replica.run('DELETE FROM sync_info WHERE key = ?', [nameKey]);
       await replica.run('INSERT INTO sync_info (key, value) VALUES (?, ?)', [nameKey, name]);
     });
+    this.deviceNameRecorded = true;
   }
 
   /** The stored data and revision of `ids` in one table, read in batches. */
@@ -1675,6 +1783,14 @@ export class SyncEngine {
     if (!onDisk.length) return;
     const token = await this.config.getSessionToken();
     const { mediaPath } = this.config;
+    // A single newly-captured photo (receipt, cover, icon) skips `/exists` and
+    // uploads directly, saving an entire HTTP + D1 + R2 HEAD round trip.
+    if (onDisk.length === 1) {
+      const path = onDisk[0];
+      await uploadWithRetry(() => uploadMedia(token, mediaPath, path, assetFile(path)));
+      done(path);
+      return;
+    }
     for (let i = 0; i < onDisk.length; i += MEDIA_BATCH) {
       const slice = onDisk.slice(i, i + MEDIA_BATCH);
       const existing = await existingMedia(token, mediaPath, slice);
@@ -1698,7 +1814,7 @@ export class SyncEngine {
     const db = getSQLite();
     const channel = this.channel;
     for (const path of paths) {
-      if (!assetFile(path).exists) {
+      if (isUserAssetRelativePath(path) && !assetFile(path).exists) {
         db.runSync('INSERT OR IGNORE INTO sync_media_missing (path, channel) VALUES (?, ?)', [
           path,
           channel,
@@ -1707,15 +1823,26 @@ export class SyncEngine {
     }
     const retryAll = Date.now() >= this.missingRetryAt;
     if (!retryAll && !paths.size) return;
-    const missing = db
+    const rawMissing = db
       .getAllSync<{
         path: string;
       }>('SELECT path FROM sync_media_missing WHERE channel = ? AND attempts < ?', [
         channel,
         MAX_DOWNLOAD_ATTEMPTS,
       ])
-      .map((r) => r.path)
-      .filter((path) => retryAll || paths.has(path));
+      .map((r) => r.path);
+    const missing: string[] = [];
+    for (const path of rawMissing) {
+      if (!isUserAssetRelativePath(path)) {
+        // Clean up bogus bundled logo / card-design paths queued by older builds.
+        db.runSync('DELETE FROM sync_media_missing WHERE path = ? AND channel = ?', [
+          path,
+          channel,
+        ]);
+        continue;
+      }
+      if (retryAll || paths.has(path)) missing.push(path);
+    }
     if (retryAll) this.missingRetryAt = Date.now() + MISSING_MEDIA_RETRY_MS;
     if (!missing.length) return;
     let token: string;
