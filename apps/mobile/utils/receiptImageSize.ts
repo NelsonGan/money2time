@@ -5,11 +5,12 @@
  *
  * Photos of paper receipts keep 1536px on the long edge: small printed text,
  * glare and skew need it. Phone screenshots are crisp rendered text, and they
- * stay fully legible at 1280px: on 18 payment screenshots sent twice through
- * the production scanner (2026-11-25), 1536, 1280 and 1092px read the same
- * amounts, dates, merchants, accounts and categories, while 896px began to
- * drop fields. 1280px billed 2,112 input tokens a scan against 1536px's 2,530,
- * 18% less per screenshot scan, the most common kind of scan.
+ * stay fully legible at 1280px: on 18 phone screenshots (14 payments, 4 screens
+ * with none) sent twice through the production scanner (2026-11-25), 1536,
+ * 1280 and 1092px read the same amounts, dates, merchants, accounts and
+ * categories, while 896px began to drop fields. 1280px billed 2,112 input
+ * tokens a scan against 1536px's 2,530, 18% less per screenshot scan, the most
+ * common kind of scan.
  */
 
 /** Long-edge cap for photos of receipts (camera, album, Split by Item). */

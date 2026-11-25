@@ -5056,9 +5056,10 @@ no tiles), so the app's long-edge cap sets that share directly: a phone
 screenshot at the photo cap of 1536 px came to about 1,450 of a screenshot
 scan's 2,530 input tokens. Screenshot scans, about three quarters of the AI
 bill, send phone-shaped images at 1280 px instead (`utils/receiptImageSize.ts`):
-on 18 payment screenshots sent twice through this Worker on 2026-11-25, 1536,
-1280 and 1092 px read the same amounts, dates, merchants, accounts and
-categories, 896 px began to drop fields, and 1280 px billed 2,112 input tokens
+on 18 phone screenshots (14 payments, 4 screens with none) sent twice through
+this Worker on 2026-11-25, 1536, 1280 and 1092 px read the same amounts, dates,
+merchants, accounts and categories, 896 px began to drop fields, and 1280 px
+billed 2,112 input tokens
 a scan, 18% less. Photos of paper receipts keep 1536 px. Even with every
 scan hitting the shared prompt, cache reads are about a third of Claude's input
 tokens (720, 786 and 1,053 tokens of prompt for quick, screenshot and itemized),
