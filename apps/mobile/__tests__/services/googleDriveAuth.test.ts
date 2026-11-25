@@ -22,6 +22,7 @@ interface GoogleSigninMock {
   addScopes: jest.Mock;
   signOut: jest.Mock;
   getTokens: jest.Mock;
+  clearCachedAccessToken: jest.Mock;
   hasPlayServices: jest.Mock;
 }
 
@@ -34,6 +35,7 @@ const googleSignin: GoogleSigninMock = {
   addScopes: jest.fn(),
   signOut: jest.fn(),
   getTokens: jest.fn(),
+  clearCachedAccessToken: jest.fn(),
   hasPlayServices: jest.fn(),
 };
 
@@ -438,5 +440,134 @@ describe('getGoogleDriveSessionState', () => {
     const auth = loadAuth();
 
     await expect(auth.getGoogleDriveSessionState()).resolves.toBe('connected');
+  });
+});
+
+/**
+ * Android's SDK keeps one pending promise per call (`PromiseWrapper` in
+ * RNGoogleSigninModule): a call made while the last one is still running
+ * rejects that one with ASYNC_OP_IN_PROGRESS, and the first native task to
+ * finish settles whichever promise is pending then. `overlaps` counts the
+ * calls that were rejected that way.
+ */
+function androidNativeCall<T>(run: () => T) {
+  const state = { overlaps: 0 };
+  let resolvePending: ((value: T) => void) | null = null;
+  let rejectPending: ((error: Error) => void) | null = null;
+  const mock = jest.fn(
+    () =>
+      new Promise<T>((resolve, reject) => {
+        if (rejectPending) {
+          state.overlaps += 1;
+          rejectPending(
+            Object.assign(
+              new Error('Warning: previous promise did not settle and was overwritten.'),
+              {
+                code: 'ASYNC_OP_IN_PROGRESS',
+              },
+            ),
+          );
+        }
+        const value = run();
+        resolvePending = resolve;
+        rejectPending = reject;
+        setTimeout(() => {
+          const settle = resolvePending;
+          resolvePending = null;
+          rejectPending = null;
+          settle?.(value);
+        }, 0);
+      }),
+  );
+  return { mock, state };
+}
+
+describe('token calls on Android', () => {
+  // Backups store up to three photos on Drive at once (#784), and each Drive
+  // request asks for the access token. On Android the overlapping calls
+  // rejected each other, so a request found no token and the run reported
+  // "Google Drive: not signed in" (error_kind auth) and fell back to the phone.
+  function liveSession() {
+    googleSignin.hasPreviousSignIn.mockReturnValue(true);
+    googleSignin.getCurrentUser.mockReturnValue(ACCOUNT);
+    googleSignin.signInSilently.mockResolvedValue({ type: 'success', data: ACCOUNT });
+  }
+
+  it('hands every concurrent Drive request a token', async () => {
+    liveSession();
+    const tokens = androidNativeCall(() => ({ idToken: 'id', accessToken: 'access-token' }));
+    googleSignin.getTokens.mockImplementation(tokens.mock);
+    const auth = loadAuth();
+
+    const results = await Promise.all([
+      auth.getGoogleAccessToken(),
+      auth.getGoogleAccessToken(),
+      auth.getGoogleAccessToken(),
+    ]);
+
+    expect(results).toEqual(['access-token', 'access-token', 'access-token']);
+    expect(tokens.state.overlaps).toBe(0);
+  });
+
+  it('never runs a token clear beside a token read', async () => {
+    liveSession();
+    let cached = 'old-token';
+    const tokens = androidNativeCall(() => ({ idToken: 'id', accessToken: cached }));
+    const clears = androidNativeCall(() => {
+      cached = 'new-token';
+      return null;
+    });
+    googleSignin.getTokens.mockImplementation(tokens.mock);
+    googleSignin.clearCachedAccessToken.mockImplementation(clears.mock);
+    const auth = loadAuth();
+
+    await Promise.all([
+      auth.clearGoogleTokenCache('old-token'),
+      auth.clearGoogleTokenCache('old-token'),
+      auth.getGoogleAccessToken(),
+    ]);
+
+    expect(tokens.state.overlaps + clears.state.overlaps).toBe(0);
+  });
+
+  it('reads a fresh token after a clear instead of sharing the one read before it', async () => {
+    liveSession();
+    let cached = 'old-token';
+    googleSignin.getTokens.mockImplementation(async () => ({ idToken: 'id', accessToken: cached }));
+    googleSignin.clearCachedAccessToken.mockImplementation(async () => {
+      cached = 'new-token';
+    });
+    const auth = loadAuth();
+
+    const before = auth.getGoogleAccessToken();
+    await auth.clearGoogleTokenCache('old-token');
+    const after = await auth.getGoogleAccessToken();
+
+    await before;
+    expect(after).toBe('new-token');
+  });
+
+  it('does not let a token read that never settles hold up later calls', async () => {
+    jest.useFakeTimers();
+    try {
+      liveSession();
+      // Android can park a read behind a consent screen that is never answered.
+      googleSignin.getTokens.mockReturnValueOnce(new Promise(() => undefined));
+      googleSignin.clearCachedAccessToken.mockResolvedValue(null);
+      const auth = loadAuth();
+
+      void auth.getGoogleAccessToken();
+      await jest.advanceTimersByTimeAsync(0);
+      expect(googleSignin.getTokens).toHaveBeenCalledTimes(1);
+      const cleared = auth.clearGoogleTokenCache('old-token');
+      await jest.advanceTimersByTimeAsync(29_000);
+      expect(googleSignin.clearCachedAccessToken).not.toHaveBeenCalled();
+
+      await jest.advanceTimersByTimeAsync(1_000);
+      await cleared;
+      expect(googleSignin.clearCachedAccessToken).toHaveBeenCalledWith('old-token');
+    } finally {
+      jest.useRealTimers();
+    }
   });
 });

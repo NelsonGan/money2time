@@ -189,24 +189,71 @@ export async function signOutFromGoogle(): Promise<void> {
  * authentication credentials".
  */
 export async function clearGoogleTokenCache(token: string): Promise<void> {
+  // A read already running may still return the token cleared here; later
+  // reads wait for the clear and start their own.
+  sharedTokenRead = null;
   try {
-    await GoogleSignin.clearCachedAccessToken(token);
+    await queueTokenCall(() => GoogleSignin.clearCachedAccessToken(token));
   } catch {
     // Nothing to clear, or the session is already gone.
   }
 }
 
+type GoogleTokens = Awaited<ReturnType<typeof GoogleSignin.getTokens>>;
+
+// Android's SDK keeps one pending promise for `getTokens()` and one for
+// `clearCachedAccessToken()`: a call made while the last is still running
+// rejects that one with ASYNC_OP_IN_PROGRESS. A backup stores up to three
+// photos on Drive at once and every Drive request asks for the token, so the
+// requests rejected each other and the run reported "not signed in". Native
+// token calls therefore run one at a time, and reads that overlap share one.
+let tokenCalls: Promise<unknown> = Promise.resolve();
+let sharedTokenRead: Promise<GoogleTokens> | null = null;
+/**
+ * How long a call waits for the one before it. A token read the SDK parked
+ * behind a consent screen may never settle, and must not hold up every later
+ * call; past this the call runs anyway, as it did before the queue.
+ */
+const TOKEN_CALL_WAIT_MS = 30_000;
+
+function afterPreviousTokenCall(previous: Promise<unknown>): Promise<void> {
+  return new Promise((resolve) => {
+    const timer = setTimeout(resolve, TOKEN_CALL_WAIT_MS);
+    void previous.then(() => {
+      clearTimeout(timer);
+      resolve();
+    });
+  });
+}
+
+function queueTokenCall<T>(call: () => Promise<T>): Promise<T> {
+  const run = afterPreviousTokenCall(tokenCalls).then(call);
+  tokenCalls = run.catch(() => undefined);
+  return run;
+}
+
+function readGoogleTokens(): Promise<GoogleTokens> {
+  if (sharedTokenRead) return sharedTokenRead;
+  const read = queueTokenCall(() => GoogleSignin.getTokens());
+  sharedTokenRead = read;
+  const forget = () => {
+    if (sharedTokenRead === read) sharedTokenRead = null;
+  };
+  read.then(forget, forget);
+  return read;
+}
+
 export async function getGoogleAccessToken(): Promise<string | null> {
   if (!(await ensureGoogleSession())) return null;
   try {
-    const tokens = await GoogleSignin.getTokens();
+    const tokens = await readGoogleTokens();
     return tokens.accessToken ?? null;
   } catch {
     // The restored session was rejected while refreshing (token revoked on the
     // Google side, password change). Force one more restore before giving up.
     if (!(await ensureGoogleSession({ force: true }))) return null;
     try {
-      const tokens = await GoogleSignin.getTokens();
+      const tokens = await readGoogleTokens();
       return tokens.accessToken ?? null;
     } catch {
       return null;
@@ -239,7 +286,8 @@ export async function getGoogleIdToken(): Promise<GoogleIdTokenResult> {
   const purpose = hasDriveAccess(GoogleSignin.getCurrentUser()) ? 'drive' : 'sign_in';
   if ((await restoreGoogleSession({ force: true, purpose })) === 'restored') {
     try {
-      const tokens = await GoogleSignin.getTokens();
+      // Its own read, after the restore above, but never beside a backup's.
+      const tokens = await queueTokenCall(() => GoogleSignin.getTokens());
       if (tokens.idToken) return { ok: true, idToken: tokens.idToken };
     } catch {
       // Fall through to an interactive sign-in.
