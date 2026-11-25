@@ -2,7 +2,8 @@
 // request, verifies the RevenueCat entitlement and per-user scan quota, runs
 // OpenRouter inference (primary MODEL, falling back to BACKUP_MODEL, then
 // SECOND_BACKUP_MODEL; Claude is skipped where it is refused; a Claude
-// model runs only on our own Anthropic key), and
+// model runs only on our own Anthropic key), then WORKERS_AI_MODEL on
+// Cloudflare when every OpenRouter model failed, and
 // returns the parsed transactions. The OpenRouter key lives only in this
 // Worker's secrets — never in the app.
 
@@ -21,6 +22,7 @@ import {
 } from './notifications';
 import { checkQuota, consumeQuota } from './ratelimit';
 import { getEntitlement } from './revenuecat';
+import { runWorkersAi, type WorkersAiBinding } from './workersAi';
 import {
   type BuiltPrompt,
   buildReceiptPrompt,
@@ -48,6 +50,11 @@ export interface Env extends PostHogEnv, PromptEnv {
   // Tried last, when BACKUP_MODEL fails too. Optional; skipped when unset or
   // equal to a model before it.
   SECOND_BACKUP_MODEL?: string;
+  // Tried after every OpenRouter model has failed, on Cloudflare's own Workers
+  // AI (the `AI` binding), so an OpenRouter outage or refusal does not end the
+  // scan. Skipped when either is unset. See ./workersAi.ts.
+  WORKERS_AI_MODEL?: string;
+  AI?: WorkersAiBinding;
   // Comma-separated ISO country codes whose requests skip Anthropic models:
   // OpenRouter refuses Claude for users there ("not available in your region").
   CLAUDE_BLOCKED_COUNTRIES?: string;
@@ -673,6 +680,8 @@ interface ModelChoice {
   byok: boolean;
   /** BACKUP_MODEL's slot (or the default standing in), whether or not a model ran before it. */
   isBackup: boolean;
+  /** Where the call goes: OpenRouter, or Cloudflare's Workers AI (WORKERS_AI_MODEL). */
+  provider: 'openrouter' | 'workers-ai';
 }
 
 // OpenRouter's `~anthropic/…-latest` aliases are Claude too, so they get the
@@ -692,7 +701,9 @@ function claudeBlockedIn(env: Env, country: string | null): boolean {
 }
 
 // Models to try in order: primary MODEL, then BACKUP_MODEL, then
-// SECOND_BACKUP_MODEL (each skipped when unset or already in the chain).
+// SECOND_BACKUP_MODEL (each skipped when unset or already in the chain), all
+// through OpenRouter, then WORKERS_AI_MODEL on Cloudflare when it and the `AI`
+// binding are set and the image is one it reads.
 // Anthropic models drop out once one has been billed to credits (`byokBroken`),
 // for a user in a country where Claude is refused (CLAUDE_BLOCKED_COUNTRIES),
 // and for an image whose bytes are not a type Claude reads (`imageType` null):
@@ -708,9 +719,30 @@ function resolveModels(
   const skipClaude = byokBroken || !imageType || claudeBlockedIn(env, country);
   const chain = [primary, backup, second]
     .filter((model, i, all): model is string => !!model && all.indexOf(model) === i)
-    .map((model, i) => ({ model, byok: isAnthropicModel(model), isBackup: i > 0 }))
+    .map(
+      (model, i): ModelChoice => ({
+        model,
+        byok: isAnthropicModel(model),
+        isBackup: i > 0,
+        provider: 'openrouter',
+      }),
+    )
     .filter((choice) => !(choice.byok && skipClaude));
-  return chain.length ? chain : [{ model: DEFAULT_BACKUP_MODEL, byok: false, isBackup: true }];
+  if (!chain.length) {
+    chain.push({
+      model: DEFAULT_BACKUP_MODEL,
+      byok: false,
+      isBackup: true,
+      provider: 'openrouter',
+    });
+  }
+  // Workers AI refuses an image it cannot decode (HEIC: "8006: Invalid data
+  // for image"), so like Claude it only gets a JPEG, PNG or WebP.
+  const workersAiModel = env.WORKERS_AI_MODEL?.trim();
+  if (env.AI && workersAiModel && imageType) {
+    chain.push({ model: workersAiModel, byok: false, isBackup: true, provider: 'workers-ai' });
+  }
+  return chain;
 }
 
 // One attempt's inference settings, shared by the failover chain.
@@ -794,7 +826,30 @@ async function completeScan(
   let httpStatus: number | undefined;
   let usage: OpenRouterUsage | undefined;
   let failure: string | undefined;
+  const messageContent = [...promptBlocks(opts.prompt, choice.byok), ...tail];
   try {
+    if (choice.provider === 'workers-ai' && env.AI) {
+      const result = await runWorkersAi(
+        env.AI,
+        model,
+        messageContent,
+        opts.maxTokens,
+        opts.temperature,
+        Math.min(INFERENCE_TIMEOUT_MS, remaining),
+      ).catch((err: unknown) => {
+        // Same rule as OpenRouter's error bodies: notification text never
+        // reaches the logs, PostHog or the client.
+        throw new Error(
+          opts.spanName === 'notification_review'
+            ? 'workers-ai failed'
+            : `workers-ai: ${(err instanceof Error ? err.message : String(err)).slice(0, 200)}`,
+        );
+      });
+      httpStatus = 200;
+      usage = result.usage;
+      log('workers_ai_response', { reqId, model, ms: Date.now() - calledAt });
+      return result.content;
+    }
     const res = await fetch(OPENROUTER_URL, {
       method: 'POST',
       headers: {
@@ -825,7 +880,7 @@ async function completeScan(
         // Usage accounting adds the real USD cost to `usage`, which the
         // PostHog generation records instead of re-pricing from tokens.
         usage: { include: true },
-        messages: [{ role: 'user', content: [...promptBlocks(opts.prompt, choice.byok), ...tail] }],
+        messages: [{ role: 'user', content: messageContent }],
       }),
     });
 
@@ -876,6 +931,7 @@ async function completeScan(
     clearTimeout(timer);
     opts.trace.recordGeneration({
       model,
+      provider: choice.provider,
       spanName: opts.spanName,
       startedAt: calledAt,
       endedAt: Date.now(),
