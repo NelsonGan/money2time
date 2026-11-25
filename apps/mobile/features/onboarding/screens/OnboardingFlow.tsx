@@ -89,15 +89,26 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const [starterSelections, setStarterSelections] =
     useState<StarterSelection[]>(initialStarterSelections);
   const [starterAccountsSkipped, setStarterAccountsSkipped] = useState(false);
-  const starterCountry = useMemo(
+  // The step opens on the user's own country, which follows the currency
+  // picked in basics until the flag picks another one.
+  const [pickedStarterCountry, setPickedStarterCountry] = useState<string | null>(null);
+  const ownCountry = useMemo(
     () =>
       resolveStarterCountry({
-        savedCountry: settings.accountLogoCountry,
         currencyCode: settings.currencyCode,
         regionCode: getDeviceRegionCode(),
       }),
-    [settings.accountLogoCountry, settings.currencyCode],
+    [settings.currencyCode],
   );
+  const starterCountry = pickedStarterCountry ?? ownCountry;
+  // The logo pickers open on the country the step ended on, so a country
+  // browsed before onboarding does not outlive it.
+  const leaveAccountsStep = () => {
+    if (settings.accountLogoCountry !== starterCountry) {
+      updateSettings({ accountLogoCountry: starterCountry });
+    }
+    setStep('automations');
+  };
 
   // The welcome page has no top bar, so the bar counts the steps after it.
   const stepIndex = STEP_ORDER.indexOf(step);
@@ -317,8 +328,10 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             <OnboardingAccountsStep
               country={starterCountry}
               onCountryChange={(accountLogoCountry) => {
-                // The logo pickers open on the same country later.
-                updateSettings({ accountLogoCountry });
+                // Picking the country it already shows keeps it following the currency.
+                setPickedStarterCountry(
+                  accountLogoCountry === ownCountry ? null : accountLogoCountry,
+                );
               }}
               selections={starterSelections}
               onSelectionsChange={setStarterSelections}
@@ -331,7 +344,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                   account_country: starterCountry,
                   skipped: false,
                 });
-                setStep('automations');
+                leaveAccountsStep();
               }}
               onSkip={() => {
                 setStarterAccountsSkipped(true);
@@ -341,7 +354,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                   account_country: starterCountry,
                   skipped: true,
                 });
-                setStep('automations');
+                leaveAccountsStep();
               }}
             />
           )}

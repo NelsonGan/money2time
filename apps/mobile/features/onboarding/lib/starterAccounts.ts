@@ -585,20 +585,18 @@ const CURRENCY_COUNTRY: Record<string, string> = {
 const SHIPPED_COUNTRIES = new Set(ACCOUNT_LOGO_COUNTRIES.map((country) => country.slug));
 
 /**
- * The country whose accounts the step shows first: the one the user browsed
- * logos for before, else the country of a currency only one country uses,
- * else the device region, else the international brands.
+ * The user's own country, which the step opens on: the country of a currency
+ * only one country uses, else the device region, else the international
+ * brands. The country the logo pickers last browsed is not used: browsing
+ * another country's logos (or a test run) does not make it the user's.
  */
 export function resolveStarterCountry({
-  savedCountry,
   currencyCode,
   regionCode,
 }: {
-  savedCountry?: string | null;
   currencyCode?: string | null;
   regionCode?: string | null;
 }): string {
-  if (savedCountry && SHIPPED_COUNTRIES.has(savedCountry)) return savedCountry;
   const byCurrency = currencyCode ? CURRENCY_COUNTRY[currencyCode.toUpperCase()] : undefined;
   if (byCurrency && SHIPPED_COUNTRIES.has(byCurrency)) return byCurrency;
   const byRegion = shippedCountryForRegion(regionCode);
