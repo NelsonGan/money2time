@@ -6421,7 +6421,7 @@ To run the Web Dashboard against a local relay, start the relay in
 - `/statements-import` — How to import a bank statement
 - `/contact` — Contact form that checks the message, then opens the visitor's mail app with it addressed to support
 - `/privacy`, `/terms`, `/data-deletion` — Legal pages for store compliance
-- `/download` — Redirects to the App Store or Play Store by user agent
+- `/download` — Redirects to the App Store or Play Store by user agent. A link with UTM tags (an ad, a creator, a post) passes its campaign to the store, so each store counts the installs it brings: the App Store link gets provider `pt=128646860`, `mt=8` and a campaign token `ct` of the source and the content or campaign (`meta-aarontjj7_tng`, at most 40 characters), shown in App Store Connect › App Analytics › Acquisition › Campaigns; the Play link gets the UTM tags as its install `referrer`, shown in Play Console's acquisition reports by UTM campaign. Divide an ad's spend by those installs for its cost per install. Links without UTM tags, and every desktop browser, go to the plain page as before
 
 `app.money2time.com` is the Web Dashboard, served by the same Worker:
 `src/proxy.ts` rewrites every path on an `app.` host to `/[locale]/dashboard`,
