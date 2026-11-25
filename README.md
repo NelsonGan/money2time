@@ -4145,7 +4145,9 @@ data ever goes to Meta.
   writes the app ID and client token with automatic logging and
   advertising-ID collection off on both platforms. On Android it also turns
   off auto-init, automatic advanced matching (which reads typed fields) and
-  product-improvement logging, and declares the Facebook app packages
+  product-improvement logging, removes the SDK's startup provider
+  (`FacebookInitProvider`, so the SDK loads only when the module's `start()`
+  initializes it), and declares the Facebook app packages
   (`com.facebook.katana`, `com.facebook.wakizashi`) in `<queries>`. The SDK
   reads the Facebook app's attribution ID from them, which is how Meta
   matches an Android install to an ad without the advertising ID. `app.json` blocks the AD_ID and Privacy
@@ -4155,15 +4157,22 @@ data ever goes to Meta.
   SDK unless:
   - the bundle is a development one (set `EXPO_PUBLIC_META_APP_EVENTS_DEV=1`
     to send from one, with the SDK's debug logging on);
+  - the build is a preview one (`preview`), which only testers install;
   - the device is a Google Play pre-launch test device (`test_lab`);
   - the device region is in the EEA, the UK or Switzerland, where ad
-    measurement needs consent the app does not ask for.
+    measurement needs consent the app does not ask for. The list also has the
+    places a device reports under their own region code while the GDPR or an
+    equivalent law applies: the EU's outermost regions and Åland (including
+    CLDR's `IC` and `EA`), the Crown Dependencies and Gibraltar.
 
-  A launch that does not start calls `disable()`, because the SDK remembers
-  its switches across launches: once started on Android, it starts natively
-  at the next launch before JavaScript runs, so a device whose region moves
-  into the list sends one more launch before `disable()` turns it off. iOS
-  never starts without `start()`. The decision uses the device's region
+  Neither platform's SDK loads on its own, so a launch that does not start
+  sends Meta nothing, and a device whose region moves into the list stops
+  sending from that launch. On Android the startup provider is removed: with
+  it the SDK would load and fetch its settings from Meta at every launch, and
+  after one start it would remember its switches and send launches before
+  JavaScript decides. On iOS the SDK initializes only in `start()`; a launch
+  that does not start still calls `disable()`, which turns off the automatic
+  logging an earlier start remembered. The decision uses the device's region
   setting, not its location.
 
 - **iOS and ATT.** The app never asks for App Tracking Transparency (there is

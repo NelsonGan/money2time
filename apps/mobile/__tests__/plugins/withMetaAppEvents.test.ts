@@ -3,12 +3,17 @@ import path from 'path';
 
 const plugin = require('../../plugins/withMetaAppEvents.js') as {
   META_PACKAGES: string[];
+  META_INIT_PROVIDER: string;
   MANIFEST_META_DATA: Record<string, string>;
   applyMetaInfoPlist: (plist: Record<string, unknown>, options: unknown) => Record<string, unknown>;
   applyMetaManifest: (manifest: unknown) => {
     manifest: {
+      $: Record<string, string>;
       queries: { package: { $: { 'android:name': string } }[] }[];
-      application: { 'meta-data': { $: Record<string, string> }[] }[];
+      application: {
+        'meta-data': { $: Record<string, string> }[];
+        provider: { $: Record<string, string> }[];
+      }[];
     };
   };
   applyMetaStrings: (
@@ -88,6 +93,15 @@ describe('withMetaAppEvents', () => {
     ]) {
       expect(metaData[key]).toBe('false');
     }
+  });
+
+  it("removes the SDK's startup provider, once, however often it runs", () => {
+    const twice = plugin.applyMetaManifest(plugin.applyMetaManifest(emptyManifest()));
+    expect(twice.manifest.$['xmlns:tools']).toBe('http://schemas.android.com/tools');
+    expect(twice.manifest.application[0].provider).toEqual([
+      { $: { 'android:name': plugin.META_INIT_PROVIDER, 'tools:node': 'remove' } },
+    ]);
+    expect(plugin.META_INIT_PROVIDER).toBe('com.facebook.internal.FacebookInitProvider');
   });
 
   it('declares the Meta apps once, however often it runs', () => {

@@ -21,8 +21,11 @@ const {
  * - **Android** gets the same IDs as string resources (a numeric literal in a
  *   manifest `meta-data` value is read as an integer), with auto-init, automatic
  *   logging, automatic advanced matching and advertising-ID collection off. The
- *   SDK's startup provider initializes it locally but sends nothing until
- *   `start()`. The advertising-ID and Privacy Sandbox permissions the SDK's
+ *   SDK's startup provider (`FacebookInitProvider`) is removed, so the SDK does
+ *   not load, and fetches nothing from Meta, until the module's `start()`
+ *   initializes it: otherwise it would load at every launch, and after one
+ *   start it would send launches on its own before JavaScript can decide.
+ *   The advertising-ID and Privacy Sandbox permissions the SDK's
  *   manifest adds are blocked in app.json. `<queries>` lets the SDK read the
  *   Facebook apps' attribution ID, Meta's install match on Android without the
  *   advertising ID.
@@ -54,6 +57,9 @@ function applyMetaInfoPlist(infoPlist, options) {
   };
 }
 
+// facebook-core's startup ContentProvider, removed by `tools:node="remove"`.
+const META_INIT_PROVIDER = 'com.facebook.internal.FacebookInitProvider';
+
 const MANIFEST_META_DATA = {
   'com.facebook.sdk.ApplicationId': '@string/facebook_app_id',
   'com.facebook.sdk.ClientToken': '@string/facebook_client_token',
@@ -69,6 +75,16 @@ function applyMetaManifest(manifest) {
   for (const [name, value] of Object.entries(MANIFEST_META_DATA)) {
     AndroidConfig.Manifest.addMetaDataItemToMainApplication(application, name, value);
   }
+  manifest.manifest.$ = {
+    'xmlns:tools': 'http://schemas.android.com/tools',
+    ...manifest.manifest.$,
+  };
+  application.provider = (application.provider ?? []).filter(
+    (provider) => provider.$?.['android:name'] !== META_INIT_PROVIDER,
+  );
+  application.provider.push({
+    $: { 'android:name': META_INIT_PROVIDER, 'tools:node': 'remove' },
+  });
   const ours = new Set(META_PACKAGES);
   manifest.manifest.queries = (manifest.manifest.queries ?? [])
     .map((query) => ({
@@ -116,6 +132,7 @@ module.exports = function withMetaAppEvents(config, options) {
 };
 
 module.exports.META_PACKAGES = META_PACKAGES;
+module.exports.META_INIT_PROVIDER = META_INIT_PROVIDER;
 module.exports.MANIFEST_META_DATA = MANIFEST_META_DATA;
 module.exports.applyMetaInfoPlist = applyMetaInfoPlist;
 module.exports.applyMetaManifest = applyMetaManifest;

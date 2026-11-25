@@ -47,6 +47,13 @@ describe('decideMetaAppEvents', () => {
     });
   });
 
+  it('skips preview builds, which only testers install', () => {
+    expect(decideMetaAppEvents({ ...base, appVariant: 'preview' })).toEqual({
+      start: false,
+      reason: 'preview',
+    });
+  });
+
   it("skips Google Play's pre-launch test devices", () => {
     expect(decideMetaAppEvents({ ...base, platform: 'android', appVariant: 'test_lab' })).toEqual({
       start: false,
@@ -55,7 +62,7 @@ describe('decideMetaAppEvents', () => {
   });
 
   it('skips regions where ad measurement needs consent, in any case', () => {
-    for (const region of ['DE', 'fr', 'GB', 'CH', 'NO', 'IE']) {
+    for (const region of ['DE', 'fr', 'GB', 'CH', 'NO', 'IE', 'RE', 'AX', 'IC', 'JE', 'GI']) {
       expect(decideMetaAppEvents({ ...base, regionCode: region })).toEqual({
         start: false,
         reason: 'consent_region',
@@ -63,8 +70,10 @@ describe('decideMetaAppEvents', () => {
     }
   });
 
-  it('covers the 27 EU members, the 3 other EEA states, the UK and Switzerland', () => {
-    expect(META_CONSENT_REGIONS.size).toBe(32);
+  it('covers the EEA, the UK and Switzerland, and the territories with their own codes', () => {
+    // 27 EU members, 3 other EEA states, the UK, Switzerland, 9 EU outermost
+    // region and Åland codes, the 3 Crown Dependencies and Gibraltar.
+    expect(META_CONSENT_REGIONS.size).toBe(45);
     for (const market of ['MY', 'SG', 'US', 'ID', 'TW', 'HK', 'CN']) {
       expect(META_CONSENT_REGIONS.has(market)).toBe(false);
     }

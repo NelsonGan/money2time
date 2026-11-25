@@ -442,7 +442,7 @@
           {
             "title": "广告效果衡量",
             "paragraphs": [
-              "我们在 Facebook 和 Instagram 上为 Money2Time 投放广告。为了统计这些广告带来的安装量，iOS 和 Android 版的本应用内置了 Meta 的应用事件软件，它会在本应用被安装和打开时通知 Meta。Meta 还会收到你设备的技术信息，例如型号、操作系统、语言、时区和 IP 地址，以及 Meta 的软件在本应用中创建的一个标识符。在 Android 上，该软件还可能读取你设备上 Facebook 或 Instagram 应用的归因标识符以及 Google Play 安装引荐来源（install referrer），以便 Meta 判断该安装是否来自我们的某个广告。",
+              "我们在 Facebook 和 Instagram 上为 Money2Time 投放广告。为了统计这些广告带来的安装量，iOS 和 Android 版的本应用内置了 Meta 的应用事件软件，它会在本应用被安装和打开时通知 Meta。Meta 还会收到你设备的技术信息，例如型号、操作系统、语言、时区和 IP 地址，以及 Meta 的软件在本应用中创建的一个标识符。在 Android 上，该软件还可能读取你设备上 Facebook 应用的归因标识符以及 Google Play 安装引荐来源（install referrer），以便 Meta 判断该安装是否来自我们的某个广告。",
               "Meta 不会收到你的随机应用标识符、设备的广告 ID、你的姓名或电子邮件地址、你的财务数据或你输入的任何内容，我们也不会使用这些数据向你展示广告。本应用不会在 iOS 上请求跟踪你的权限，因此在 iOS 上，Meta 仅通过 Apple 的 SKAdNetwork 和 Meta 的 Aggregated Event Measurement 衡量安装量，二者均以汇总形式报告结果。Meta 会依据其自身条款和 Meta Privacy Policy 处理这些数据。如果设备的地区设置为欧洲经济区国家、英国或瑞士，本应用不会发送这些数据。"
             ]
           },
