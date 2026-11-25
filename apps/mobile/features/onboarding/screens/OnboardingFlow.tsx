@@ -7,8 +7,13 @@ import { TabletContentContainer } from '~/components/layout/TabletContentContain
 import { DEFAULT_WAGE_CONFIG } from '~/constants/appDefaults';
 import { useApp } from '~/context/AppContext';
 import { OnboardingTopBar } from '~/features/onboarding/components/OnboardingTopBar';
+import {
+  resolveStarterCountry,
+  starterAccountSeeds,
+  type StarterSelection,
+} from '~/features/onboarding/lib/starterAccounts';
 import { wageConfigOf } from '~/features/settings/lib/wageMonths';
-import { I18n, setAppLocale } from '~/lib/i18n';
+import { getDeviceRegionCode, I18n, setAppLocale } from '~/lib/i18n';
 import { AnalyticsEvents, setUserProperties, trackEvent } from '~/services/analytics';
 import {
   ensureGoogleSession,
@@ -22,20 +27,20 @@ import { type WageConfig } from '~/types';
 import { getErrorMessage } from '~/utils/errorHandling';
 import { financialMonthKeyForDate, monthCycleOf } from '~/utils/financialMonth';
 
+import { initialStarterSelections, OnboardingAccountsStep } from './OnboardingAccountsStep';
 import { OnboardingAutomationsStep } from './OnboardingAutomationsStep';
 import { OnboardingBackupStep } from './OnboardingBackupStep';
 import { OnboardingIncomeStep } from './OnboardingIncomeStep';
 import { OnboardingNotificationsStep } from './OnboardingNotificationsStep';
 import { OnboardingPreferencesStep } from './OnboardingPreferencesStep';
 import { type AcquisitionSource, OnboardingSourceStep } from './OnboardingSourceStep';
-import { OnboardingTryItStep } from './OnboardingTryItStep';
 import { OnboardingWelcomeStep } from './OnboardingWelcomeStep';
 
 const STEP_ORDER = [
   'welcome',
   'basics',
   'wage',
-  'try_it',
+  'accounts',
   'automations',
   'backup',
   'source',
@@ -78,6 +83,21 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       : { ...DEFAULT_WAGE_CONFIG },
   );
   const savedHourlyRate = currentMonthWage?.trueHourlyRate ?? 0;
+
+  // The accounts step's picks, kept here so going back and forth keeps them.
+  // After a skip, onboarding ends with the starter set instead.
+  const [starterSelections, setStarterSelections] =
+    useState<StarterSelection[]>(initialStarterSelections);
+  const [starterAccountsSkipped, setStarterAccountsSkipped] = useState(false);
+  const starterCountry = useMemo(
+    () =>
+      resolveStarterCountry({
+        savedCountry: settings.accountLogoCountry,
+        currencyCode: settings.currencyCode,
+        regionCode: getDeviceRegionCode(),
+      }),
+    [settings.accountLogoCountry, settings.currencyCode],
+  );
 
   // The welcome page has no top bar, so the bar counts the steps after it.
   const stepIndex = STEP_ORDER.indexOf(step);
@@ -187,6 +207,12 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     try {
       const result = completeOnboarding({
         seedDefaultAccounts: accounts.length === 0 && categories.length === 0,
+        starterAccounts: starterAccountsSkipped
+          ? undefined
+          : starterAccountSeeds(starterSelections, {
+              cash: I18n.t('onboarding.accounts.cash'),
+              card: (name) => I18n.t('onboarding.accounts.card_name', { name }),
+            }),
       });
 
       if (result.createdCategories > 0 || result.createdAccounts > 0) {
@@ -200,7 +226,14 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       void triggerHaptic('error');
       Alert.alert(I18n.t('errors.generic_operation_failed'), getErrorMessage(error));
     }
-  }, [accounts.length, categories.length, completeOnboarding, onComplete]);
+  }, [
+    accounts.length,
+    categories.length,
+    completeOnboarding,
+    onComplete,
+    starterAccountsSkipped,
+    starterSelections,
+  ]);
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
@@ -265,28 +298,45 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                   wage_set: true,
                   wage_type: wageDraft.wageType,
                 });
-                setStep('try_it');
+                setStep('accounts');
               }}
               onSkip={() => {
                 void trackEvent(AnalyticsEvents.ONBOARDING_STEP_COMPLETED, {
                   step: 'wage',
                   wage_set: savedHourlyRate > 0,
                 });
-                setStep('try_it');
+                setStep('accounts');
               }}
             />
           )}
 
-          {step === 'try_it' && (
-            <OnboardingTryItStep
-              hourlyRate={savedHourlyRate}
-              currencyCode={settings.currencyCode}
-              currencySymbol={settings.currencySymbol}
+          {step === 'accounts' && (
+            <OnboardingAccountsStep
+              country={starterCountry}
+              onCountryChange={(accountLogoCountry) => {
+                // The logo pickers open on the same country later.
+                updateSettings({ accountLogoCountry });
+              }}
+              selections={starterSelections}
+              onSelectionsChange={setStarterSelections}
               onBack={goBack}
-              onContinue={(samplesAdded) => {
+              onContinue={() => {
+                setStarterAccountsSkipped(false);
                 void trackEvent(AnalyticsEvents.ONBOARDING_STEP_COMPLETED, {
-                  step: 'try_it',
-                  samples_added: samplesAdded,
+                  step: 'accounts',
+                  accounts_added: starterSelections.length,
+                  account_country: starterCountry,
+                  skipped: false,
+                });
+                setStep('automations');
+              }}
+              onSkip={() => {
+                setStarterAccountsSkipped(true);
+                void trackEvent(AnalyticsEvents.ONBOARDING_STEP_COMPLETED, {
+                  step: 'accounts',
+                  accounts_added: 0,
+                  account_country: starterCountry,
+                  skipped: true,
                 });
                 setStep('automations');
               }}

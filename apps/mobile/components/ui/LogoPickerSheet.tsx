@@ -1,17 +1,16 @@
-import { Ban, Check, ChevronDown, ImagePlus, Search, Trash2, X } from 'lucide-react-native';
+import { Ban, ChevronDown, ImagePlus, Search, Trash2, X } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, FlatList, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { useReanimatedKeyboardAnimation } from 'react-native-keyboard-controller';
 import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { LogoCountryPickerModal } from '~/components/ui/LogoCountryPickerModal';
 import { PickerTabs } from '~/components/ui/PickerTabs';
 import { SettingsHeader } from '~/components/ui/settings';
 import { Text } from '~/components/ui/text';
-import { ThemeModal } from '~/components/ui/theme-modal';
 import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
-import { useSheetColumnStyle } from '~/hooks/useSheetColumnStyle';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { getDeviceRegionCode, I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -101,21 +100,6 @@ const styles = StyleSheet.create({
     alignSelf: 'stretch',
     marginVertical: 8,
     opacity: 0.6,
-  },
-  countryBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'flex-end',
-  },
-  countrySheet: {
-    height: '70%',
-  },
-  countryRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    paddingVertical: 14,
-    paddingHorizontal: spacing.md,
   },
   flexOne: {
     flex: 1,
@@ -208,7 +192,6 @@ export function LogoPickerSheet({
   const { Logo } = catalog;
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
-  const sheetColumnStyle = useSheetColumnStyle();
   const { settings, updateSettings } = useApp();
   const [tab, setTab] = useState<PickerTab>('library');
   const [query, setQuery] = useState('');
@@ -531,67 +514,14 @@ export function LogoPickerSheet({
         )}
       </View>
 
-      <ThemeModal
+      <LogoCountryPickerModal
         visible={showCountryModal}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowCountryModal(false)}
-      >
-        <Pressable style={styles.countryBackdrop} onPress={() => setShowCountryModal(false)}>
-          <Pressable
-            onPress={(e) => e.stopPropagation()}
-            style={[styles.countrySheet, sheetColumnStyle]}
-          >
-            <View
-              className="bg-card rounded-t-[28px] flex-1"
-              style={{ paddingBottom: Math.max(insets.bottom, 16) }}
-            >
-              <View className="px-5 pt-5 pb-3 flex-row items-center">
-                <Text variant="subheading" className="flex-1">
-                  {I18n.t('accounts.logo.country')}
-                </Text>
-                <Pressable
-                  onPress={() => setShowCountryModal(false)}
-                  accessibilityRole="button"
-                  accessibilityLabel={I18n.t('common.close')}
-                  hitSlop={8}
-                  className="h-9 w-9 rounded-full items-center justify-center bg-secondary/50 active:opacity-70"
-                >
-                  <X size={18} color={themeColors.textMuted} />
-                </Pressable>
-              </View>
-              <FlatList
-                data={catalog.countries}
-                keyExtractor={(c) => c.slug}
-                className="flex-1"
-                contentContainerStyle={{ paddingBottom: spacing.md }}
-                showsVerticalScrollIndicator={false}
-                renderItem={({ item: country }) => {
-                  const isActive = country.slug === activeCountry;
-                  return (
-                    <Pressable
-                      onPress={() => handleSelectCountry(country.slug)}
-                      style={styles.countryRow}
-                      accessibilityRole="button"
-                      accessibilityState={{ selected: isActive }}
-                    >
-                      <Text className="text-[20px]">{catalog.getFlag(country.slug)}</Text>
-                      <Text
-                        variant="body"
-                        numberOfLines={1}
-                        className={cn('flex-1', isActive && 'text-primary font-medium')}
-                      >
-                        {country.name}
-                      </Text>
-                      {isActive ? <Check size={18} color={themeColors.primary} /> : null}
-                    </Pressable>
-                  );
-                }}
-              />
-            </View>
-          </Pressable>
-        </Pressable>
-      </ThemeModal>
+        onClose={() => setShowCountryModal(false)}
+        countries={catalog.countries}
+        activeCountry={activeCountry}
+        getFlag={catalog.getFlag}
+        onSelect={handleSelectCountry}
+      />
     </SafeAreaView>
   );
 }

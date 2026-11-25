@@ -24,7 +24,7 @@ const BOOK_AUTHORS = 'Vicki Robin & Joe Dominguez';
  * RM1,200), so the prices look right in any currency.
  */
 const EXAMPLES = [
-  { key: 'onboarding.try_it.coffee', icon: 'coffee', hours: 0.3 },
+  { key: 'onboarding.welcome.coffee', icon: 'coffee', hours: 0.3 },
   { key: 'onboarding.welcome.sneakers', icon: 'sneaker', hours: 3 },
   { key: 'onboarding.welcome.phone', icon: 'smartphone', hours: 80 },
 ] as const;
