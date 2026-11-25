@@ -5,35 +5,9 @@ import {
   isProductionHost,
   mobilePlatformFromUserAgent,
 } from "@/lib/platform";
-import { storeUrlForCampaign } from "@/lib/store-campaign";
-
-const UTM_PARAMS = [
-  "utm_source",
-  "utm_medium",
-  "utm_campaign",
-  "utm_content",
-  "utm_id",
-  "utm_term",
-] as const;
-const UTM_VALUE_LIMIT = 100;
+import { campaignFromQuery, storeUrlForCampaign } from "@/lib/store-campaign";
 
 export const dynamic = "force-dynamic";
-
-function campaignParameters(searchParams: URLSearchParams): URLSearchParams {
-  const campaign = new URLSearchParams();
-
-  for (const parameter of UTM_PARAMS) {
-    const value = searchParams.get(parameter);
-    if (value) {
-      campaign.set(
-        parameter,
-        Array.from(value).slice(0, UTM_VALUE_LIMIT).join(""),
-      );
-    }
-  }
-
-  return campaign;
-}
 
 function requestReferrer(request: NextRequest): URL | undefined {
   const value = request.headers.get("referer");
@@ -57,7 +31,7 @@ function safeReferrer(referrer: URL | undefined): string | undefined {
 
 export function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
-  const campaign = campaignParameters(searchParams);
+  const campaign = campaignFromQuery(searchParams);
   const platform = mobilePlatformFromUserAgent(
     request.headers.get("user-agent"),
   );

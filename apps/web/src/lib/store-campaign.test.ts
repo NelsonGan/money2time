@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import { APP_STORE_URL, PLAY_STORE_URL } from "./app-links.ts";
-import { appStoreCampaignToken, storeUrlForCampaign } from "./store-campaign.ts";
+import { appStoreCampaignToken, campaignFromQuery, storeUrlForCampaign } from "./store-campaign.ts";
 
 // A `/download` link's UTM parameters travel on to the store, so each store
 // can count the installs a campaign brings.
@@ -53,4 +53,29 @@ test("the Play link carries the UTM parameters as its install referrer", () => {
 test("a link without a campaign goes to the plain store page", () => {
   assert.equal(storeUrlForCampaign("ios", new URLSearchParams()), APP_STORE_URL);
   assert.equal(storeUrlForCampaign("android", new URLSearchParams()), PLAY_STORE_URL);
+});
+
+test("blank or padded UTM values never make a blank or space-edged token", () => {
+  assert.equal(appStoreCampaignToken(new URLSearchParams({ utm_source: " ", utm_content: "" })), undefined);
+  assert.equal(appStoreCampaignToken(new URLSearchParams({ utm_source: " ", utm_content: "ad1" })), "ad1");
+  assert.equal(appStoreCampaignToken(new URLSearchParams({ utm_source: " meta ", utm_content: " ad1 " })), "meta-ad1");
+  // The source is cut at 12 characters; a space there must not end up before the dash.
+  assert.equal(
+    appStoreCampaignToken(new URLSearchParams({ utm_source: "a very long source", utm_content: "x" })),
+    "a very long-x",
+  );
+  assert.equal(storeUrlForCampaign("ios", new URLSearchParams({ utm_source: "  " })), APP_STORE_URL);
+});
+
+test("a request keeps only its UTM tags, trimmed, without blank ones", () => {
+  const campaign = campaignFromQuery(
+    new URLSearchParams({ utm_source: "  ", utm_content: " ad1 ", fbclid: "x", utm_term: "" }),
+  );
+  assert.equal(campaign.toString(), "utm_content=ad1");
+  // Cut to 100 characters, and trimmed again when the cut ends on a space.
+  const long = campaignFromQuery(new URLSearchParams({ utm_content: `${"a".repeat(99)} bbb` }));
+  assert.equal(long.get("utm_content"), "a".repeat(99));
+  // Only blank tags: Play gets its plain page, not an empty referrer.
+  const blank = campaignFromQuery(new URLSearchParams({ utm_source: " ", utm_medium: "\t" }));
+  assert.equal(storeUrlForCampaign("android", blank), PLAY_STORE_URL);
 });
