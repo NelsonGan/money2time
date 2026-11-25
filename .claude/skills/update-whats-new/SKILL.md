@@ -138,6 +138,7 @@ Frugality is enjoying the virtue of getting good value for every minute of your 
 He who has little is not poor, but he who wants more.
 I have learned to seek my happiness by limiting my desires, rather than in attempting to satisfy them.
 I'm not really frugal or thrifty. I just don't waste money on little things that don't matter, but spend on big things that do.
+Know what you own, and know why you own it.
 Little by little, a little becomes a lot.
 Lost time is never found again.
 Many hands make light work.
