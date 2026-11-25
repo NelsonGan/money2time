@@ -206,19 +206,42 @@ export function OnboardingAccountsStep({
     );
   };
 
-  const renderGrid = (title: string, tiles: Tile[], extra?: React.ReactNode) => (
+  const count = selections.length;
+
+  // How many are picked sits beside the first section's title; at the limit
+  // it says why a tap did nothing.
+  const counter = (
+    <Text
+      variant="caption"
+      tone={limitHit ? 'default' : 'muted'}
+      numberOfLines={2}
+      className={cn('flex-shrink text-right', limitHit && 'text-primary')}
+      accessibilityLiveRegion="polite"
+    >
+      {limitHit
+        ? I18n.t('onboarding.accounts.limit', { max: MAX_STARTER_ACCOUNTS })
+        : I18n.t('onboarding.accounts.count', { count, max: MAX_STARTER_ACCOUNTS })}
+    </Text>
+  );
+
+  const renderGrid = (
+    title: string,
+    tiles: Tile[],
+    options: { first?: boolean; extra?: React.ReactNode } = {},
+  ) => (
     <View className="mt-5" key={title}>
-      <Text variant="label" tone="muted" className="mb-2.5">
-        {title}
-      </Text>
+      <View className="mb-2.5 flex-row items-center justify-between gap-3">
+        <Text variant="label" tone="muted">
+          {title}
+        </Text>
+        {options.first ? counter : null}
+      </View>
       <View className="flex-row flex-wrap" style={{ gap: TILE_GAP }}>
         {tiles.map(renderTile)}
-        {extra}
+        {options.extra}
       </View>
     </View>
   );
-
-  const count = selections.length;
 
   return (
     <OnboardingStepLayout
@@ -240,42 +263,25 @@ export function OnboardingAccountsStep({
       }}
       secondary={{ label: I18n.t('onboarding.accounts.skip'), onPress: onSkip }}
     >
-      <View className="flex-row items-center justify-between gap-3">
+      {/* The country rides in the search field, as in the logo pickers. */}
+      <View
+        className={cn('h-12 flex-row items-center gap-2 px-3.5', ONBOARDING_CARD, 'rounded-2xl')}
+      >
         <Pressable
           onPress={() => {
             void triggerHaptic('selection');
             setShowCountries(true);
           }}
-          className={cn('flex-row items-center gap-2 px-3.5 py-2', ONBOARDING_CARD, 'rounded-full')}
+          hitSlop={6}
+          className="flex-row items-center gap-0.5"
           accessibilityRole="button"
           accessibilityLabel={`${I18n.t('accounts.logo.country')}: ${countryName}`}
         >
           <Text className="text-[18px]">{getCountryFlag(country)}</Text>
-          <Text variant="bodyStrong" numberOfLines={1} className="max-w-[160px] text-foreground">
-            {countryName}
-          </Text>
-          <ChevronDown size={16} color={themeColors.textMuted} />
+          <ChevronDown size={13} color={themeColors.textMuted} />
         </Pressable>
-        <Text
-          variant="caption"
-          tone={limitHit ? 'default' : 'muted'}
-          className={cn('flex-shrink text-right', limitHit && 'text-primary')}
-          accessibilityLiveRegion="polite"
-        >
-          {limitHit
-            ? I18n.t('onboarding.accounts.limit', { max: MAX_STARTER_ACCOUNTS })
-            : I18n.t('onboarding.accounts.count', { count, max: MAX_STARTER_ACCOUNTS })}
-        </Text>
-      </View>
-
-      <View
-        className={cn(
-          'mt-3 h-12 flex-row items-center gap-2 px-3.5',
-          ONBOARDING_CARD,
-          'rounded-2xl',
-        )}
-      >
-        <Search size={17} color={themeColors.textMuted} />
+        <View className="my-3 w-px self-stretch bg-border" />
+        <Search size={16} color={themeColors.textMuted} />
         <TextInput
           value={query}
           onChangeText={setQuery}
@@ -304,39 +310,44 @@ export function OnboardingAccountsStep({
 
       <View onLayout={(event) => setGridWidth(event.nativeEvent.layout.width)}>
         {tileWidth <= 0 ? null : trimmedQuery ? (
-          renderGrid(
-            I18n.t('onboarding.accounts.section_results'),
-            searchTiles,
-            <Pressable
-              onPress={addTyped}
-              style={{ width: tileWidth }}
-              className={cn(
-                'items-center gap-2 px-1.5 pb-2.5 pt-3',
-                ONBOARDING_CARD,
-                'border-dashed',
-              )}
-              accessibilityRole="button"
-              accessibilityLabel={I18n.t('onboarding.accounts.add_typed', { name: trimmedQuery })}
-            >
-              <View className="h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
-                <Plus size={20} color={themeColors.primary} />
-              </View>
-              <Text
-                variant="caption"
-                numberOfLines={2}
-                className="text-center text-[12px] leading-[16px] text-primary"
+          renderGrid(I18n.t('onboarding.accounts.section_results'), searchTiles, {
+            first: true,
+            extra: (
+              <Pressable
+                onPress={addTyped}
+                style={{ width: tileWidth }}
+                className={cn(
+                  'items-center gap-2 px-1.5 pb-2.5 pt-3',
+                  ONBOARDING_CARD,
+                  'border-dashed',
+                )}
+                accessibilityRole="button"
+                accessibilityLabel={I18n.t('onboarding.accounts.add_typed', { name: trimmedQuery })}
               >
-                {I18n.t('onboarding.accounts.add_typed', { name: trimmedQuery })}
-              </Text>
-            </Pressable>,
-          )
+                <View className="h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+                  <Plus size={20} color={themeColors.primary} />
+                </View>
+                <Text
+                  variant="caption"
+                  numberOfLines={2}
+                  className="text-center text-[12px] leading-[16px] text-primary"
+                >
+                  {I18n.t('onboarding.accounts.add_typed', { name: trimmedQuery })}
+                </Text>
+              </Pressable>
+            ),
+          })
         ) : (
           <>
             {otherPicks.length > 0
-              ? renderGrid(I18n.t('onboarding.accounts.section_picked'), otherPicks)
+              ? renderGrid(I18n.t('onboarding.accounts.section_picked'), otherPicks, {
+                  first: true,
+                })
               : null}
-            {sections.map((section) =>
-              renderGrid(I18n.t(SECTION_TITLE_KEY[section.kind]), section.tiles),
+            {sections.map((section, index) =>
+              renderGrid(I18n.t(SECTION_TITLE_KEY[section.kind]), section.tiles, {
+                first: index === 0 && otherPicks.length === 0,
+              }),
             )}
           </>
         )}
