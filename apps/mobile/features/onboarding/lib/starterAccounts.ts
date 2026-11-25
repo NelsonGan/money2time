@@ -3,6 +3,7 @@ import {
   type AccountLogoMeta,
   getAccountLogoMeta,
   getLogosForCountry,
+  shippedCountryForRegion,
 } from '~/constants/accountLogos';
 import type { AccountType } from '~/types';
 
@@ -548,7 +549,7 @@ export const STARTER_ACCOUNT_LISTS: Record<string, CountryStarters> = {
   },
   global: {
     wallets: ['paypal', 'revolut', 'wise', 'payoneer', 'skrill'],
-    banks: ['n26', 'revolut', 'wise'],
+    banks: ['n26'],
     cards: ['visa', 'mastercard', 'american-express'],
   },
 };
@@ -581,36 +582,6 @@ const CURRENCY_COUNTRY: Record<string, string> = {
   UAH: 'ukraine',
 };
 
-const REGION_COUNTRY: Record<string, string> = {
-  US: 'united-states',
-  CN: 'china',
-  MY: 'malaysia',
-  MX: 'mexico',
-  ES: 'spain',
-  BR: 'brazil',
-  PT: 'portugal',
-  DE: 'germany',
-  FR: 'france',
-  IT: 'italy',
-  IN: 'india',
-  ID: 'indonesia',
-  JP: 'japan',
-  SG: 'singapore',
-  KR: 'south-korea',
-  TW: 'taiwan',
-  DK: 'denmark',
-  NO: 'norway',
-  NL: 'netherlands',
-  PL: 'poland',
-  RU: 'russia',
-  SE: 'sweden',
-  TH: 'thailand',
-  TR: 'turkey',
-  UA: 'ukraine',
-  VN: 'vietnam',
-  PH: 'philippines',
-};
-
 const SHIPPED_COUNTRIES = new Set(ACCOUNT_LOGO_COUNTRIES.map((country) => country.slug));
 
 /**
@@ -630,7 +601,7 @@ export function resolveStarterCountry({
   if (savedCountry && SHIPPED_COUNTRIES.has(savedCountry)) return savedCountry;
   const byCurrency = currencyCode ? CURRENCY_COUNTRY[currencyCode.toUpperCase()] : undefined;
   if (byCurrency && SHIPPED_COUNTRIES.has(byCurrency)) return byCurrency;
-  const byRegion = regionCode ? REGION_COUNTRY[regionCode.toUpperCase()] : undefined;
+  const byRegion = shippedCountryForRegion(regionCode);
   if (byRegion && SHIPPED_COUNTRIES.has(byRegion)) return byRegion;
   return GLOBAL_COUNTRY;
 }
@@ -670,15 +641,26 @@ export function starterSectionsForCountry(country: string): StarterSection[] {
   return sections.filter((section) => section.logos.length > 0);
 }
 
-const WALLET_LOGO_IDS = new Set(
-  Object.entries(STARTER_ACCOUNT_LISTS).flatMap(([country, starters]) =>
-    starters.wallets.map((entry) => (entry.includes('/') ? entry : `${country}/${entry}`)),
-  ),
-);
+function listedIds(pick: (starters: CountryStarters) => readonly string[]): Set<string> {
+  return new Set(
+    Object.entries(STARTER_ACCOUNT_LISTS).flatMap(([country, starters]) =>
+      pick(starters).map((entry) => (entry.includes('/') ? entry : `${country}/${entry}`)),
+    ),
+  );
+}
 
-/** What a logo found by search becomes: a wallet when it is one somewhere, else a bank. */
-export function starterKindForLogo(logoId: string): 'wallet' | 'bank' {
-  return WALLET_LOGO_IDS.has(logoId) ? 'wallet' : 'bank';
+const WALLET_LOGO_IDS = listedIds((starters) => starters.wallets);
+const BANK_LOGO_IDS = listedIds((starters) => starters.banks);
+const CARD_LOGO_IDS = listedIds((starters) => starters.cards);
+
+/**
+ * What a logo found by search becomes: a wallet when it is one on some list,
+ * a card when it is only ever a card (JCB, Visa, Nexi), else a bank.
+ */
+export function starterKindForLogo(logoId: string): Exclude<StarterKind, 'cash'> {
+  if (WALLET_LOGO_IDS.has(logoId)) return 'wallet';
+  if (CARD_LOGO_IDS.has(logoId) && !BANK_LOGO_IDS.has(logoId)) return 'card';
+  return 'bank';
 }
 
 export interface StarterSelection {
@@ -689,21 +671,26 @@ export interface StarterSelection {
   name: string;
 }
 
-/** One key per thing that can be picked: the same bank can be a bank and a card. */
-export function starterSelectionKey(selection: Pick<StarterSelection, 'kind' | 'logoId' | 'name'>) {
-  // There is one cash account, whatever language its name was given in.
+/**
+ * One key per account a pick creates, so two tiles that would make the same
+ * account count once: a brand on two lists (Revolut as a wallet and a bank)
+ * or in two countries (Danske Bank), or a typed name the set has. A bank and
+ * its card are two accounts. There is one cash account, whatever language
+ * its name was given in.
+ */
+export function starterSelectionKey(selection: StarterSelection) {
   if (selection.kind === 'cash') return 'cash';
-  return `${selection.kind}:${selection.logoId ?? selection.name.trim().toLowerCase()}`;
+  const name = selection.name.trim().toLowerCase();
+  return selection.kind === 'card' ? `card:${name}` : `account:${name}`;
 }
 
 /** The account groups the starter accounts go in; the same ones the default set uses. */
-export const STARTER_GROUP_BY_KIND: Record<StarterKind, 'Cash' | 'Bank Accounts' | 'Credit Cards'> =
-  {
-    cash: 'Cash',
-    wallet: 'Cash',
-    bank: 'Bank Accounts',
-    card: 'Credit Cards',
-  };
+const STARTER_GROUP_BY_KIND: Record<StarterKind, 'Cash' | 'Bank Accounts' | 'Credit Cards'> = {
+  cash: 'Cash',
+  wallet: 'Cash',
+  bank: 'Bank Accounts',
+  card: 'Credit Cards',
+};
 
 export interface StarterAccountSeed {
   name: string;

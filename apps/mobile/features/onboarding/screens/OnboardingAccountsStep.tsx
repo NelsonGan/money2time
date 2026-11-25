@@ -132,9 +132,17 @@ export function OnboardingAccountsStep({
 
   const searchTiles = useMemo<Tile[]>(() => {
     if (!trimmedQuery) return [];
+    // A brand in two countries (Mercado Pago) makes one account, so it shows once.
+    const seen = new Set<string>();
     return searchAccountLogos(trimmedQuery)
-      .slice(0, MAX_SEARCH_RESULTS)
-      .map((logo) => tileFor(starterKindForLogo(logo.id), logo));
+      .map((logo) => tileFor(starterKindForLogo(logo.id), logo))
+      .filter((tile) => {
+        const key = starterSelectionKey(tile.selection);
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      })
+      .slice(0, MAX_SEARCH_RESULTS);
   }, [trimmedQuery]);
 
   /** Picks or unpicks; false when the pick was refused at the limit. */
@@ -156,11 +164,24 @@ export function OnboardingAccountsStep({
     return true;
   };
 
+  // A name the set has, typed in full, is that result: it takes its logo,
+  // and no "Add" tile repeats it.
+  const exact = trimmedQuery
+    ? searchTiles.find((tile) => tile.selection.name.toLowerCase() === trimmedQuery.toLowerCase())
+    : undefined;
+
   // A name the logo set does not have becomes a bank account without a logo.
   // The field keeps the name when the limit refuses it.
   const addTyped = () => {
     if (!trimmedQuery) return;
-    if (toggle({ kind: 'bank', logoId: null, name: trimmedQuery })) setQuery('');
+    const typed: StarterSelection = exact?.selection ?? {
+      kind: 'bank',
+      logoId: null,
+      name: trimmedQuery,
+    };
+    // Already picked (typed before, or a logo of that name): adding again
+    // must not take it back.
+    if (selectedKeys.has(starterSelectionKey(typed)) || toggle(typed)) setQuery('');
   };
 
   const renderTile = (tile: Tile) => {
@@ -168,7 +189,7 @@ export function OnboardingAccountsStep({
     const selected = selectedKeys.has(key);
     return (
       <Pressable
-        key={key}
+        key={`${key}|${tile.selection.logoId ?? ''}`}
         onPress={() => toggle(tile.selection)}
         style={{ width: tileWidth }}
         className={cn(
@@ -291,7 +312,7 @@ export function OnboardingAccountsStep({
           autoCapitalize="none"
           returnKeyType="done"
           onSubmitEditing={() => {
-            if (searchTiles.length === 0) addTyped();
+            if (searchTiles.length === 0 || exact) addTyped();
           }}
           className="flex-1 text-[16px] text-foreground"
           style={{ paddingVertical: 0 }}
@@ -312,7 +333,7 @@ export function OnboardingAccountsStep({
         {tileWidth <= 0 ? null : trimmedQuery ? (
           renderGrid(I18n.t('onboarding.accounts.section_results'), searchTiles, {
             first: true,
-            extra: (
+            extra: exact ? null : (
               <Pressable
                 onPress={addTyped}
                 style={{ width: tileWidth }}

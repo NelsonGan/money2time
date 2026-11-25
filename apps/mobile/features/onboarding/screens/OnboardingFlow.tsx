@@ -207,12 +207,15 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     try {
       const result = completeOnboarding({
         seedDefaultAccounts: accounts.length === 0 && categories.length === 0,
-        starterAccounts: starterAccountsSkipped
-          ? undefined
-          : starterAccountSeeds(starterSelections, {
-              cash: I18n.t('onboarding.accounts.cash'),
-              card: (name) => I18n.t('onboarding.accounts.card_name', { name }),
-            }),
+        // Like the starter set, picks are only created for someone without
+        // accounts: a replay from Settings never adds to what is there.
+        starterAccounts:
+          starterAccountsSkipped || accounts.length > 0
+            ? undefined
+            : starterAccountSeeds(starterSelections, {
+                cash: I18n.t('onboarding.accounts.cash'),
+                card: (name) => I18n.t('onboarding.accounts.card_name', { name }),
+              }),
       });
 
       if (result.createdCategories > 0 || result.createdAccounts > 0) {

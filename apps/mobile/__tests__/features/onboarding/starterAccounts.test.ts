@@ -85,6 +85,21 @@ describe('starterKindForLogo', () => {
     expect(starterKindForLogo('global/paypal')).toBe('wallet');
     expect(starterKindForLogo('malaysia/maybank')).toBe('bank');
   });
+
+  it('makes a brand that is only ever a card a card', () => {
+    expect(starterKindForLogo('japan/jcb')).toBe('card');
+    expect(starterKindForLogo('global/visa')).toBe('card');
+    expect(starterKindForLogo('global/american-express')).toBe('card');
+    expect(starterKindForLogo('italy/nexi')).toBe('card');
+  });
+
+  it('keeps a bank whose card is also listed a bank', () => {
+    expect(starterKindForLogo('singapore/dbs-bank')).toBe('bank');
+  });
+
+  it('makes anything unlisted a bank', () => {
+    expect(starterKindForLogo('malaysia/kenanga')).toBe('bank');
+  });
 });
 
 describe('starterSelectionKey', () => {
@@ -98,6 +113,32 @@ describe('starterSelectionKey', () => {
     expect(starterSelectionKey({ kind: 'bank', logoId: 'malaysia/cimb', name: 'CIMB' })).not.toBe(
       starterSelectionKey({ kind: 'card', logoId: 'malaysia/cimb', name: 'CIMB' }),
     );
+  });
+
+  it('counts tiles that make the same account once', () => {
+    // On two lists of one country.
+    expect(starterSelectionKey({ kind: 'wallet', logoId: 'global/revolut', name: 'Revolut' })).toBe(
+      starterSelectionKey({ kind: 'bank', logoId: 'global/revolut', name: 'Revolut' }),
+    );
+    // In two countries.
+    expect(
+      starterSelectionKey({ kind: 'bank', logoId: 'denmark/danske-bank', name: 'Danske Bank' }),
+    ).toBe(
+      starterSelectionKey({ kind: 'bank', logoId: 'norway/danske-bank', name: 'Danske Bank' }),
+    );
+    // Typed by name.
+    expect(starterSelectionKey({ kind: 'bank', logoId: null, name: ' maybank ' })).toBe(
+      starterSelectionKey({ kind: 'bank', logoId: 'malaysia/maybank', name: 'Maybank' }),
+    );
+  });
+});
+
+describe('the global list', () => {
+  it('offers each brand once', () => {
+    const ids = starterSectionsForCountry(GLOBAL_COUNTRY).flatMap((section) =>
+      section.kind === 'card' ? [] : section.logos.map((logo) => logo.id),
+    );
+    expect(new Set(ids).size).toBe(ids.length);
   });
 });
 

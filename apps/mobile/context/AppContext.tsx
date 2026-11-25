@@ -115,10 +115,7 @@ import {
   isInstalmentPlan,
 } from '~/features/instalments/lib/instalmentPlan';
 import { computeItemStats } from '~/features/items/utils';
-import {
-  STARTER_GROUP_BY_KIND,
-  type StarterAccountSeed,
-} from '~/features/onboarding/lib/starterAccounts';
+import { type StarterAccountSeed } from '~/features/onboarding/lib/starterAccounts';
 import { requestAutomationTag } from '~/features/places/lib/automationTag';
 import { asksForLocationsOffer, requestLocationsOffer } from '~/features/places/lib/locationsOffer';
 import {
@@ -1496,14 +1493,6 @@ interface CompleteOnboardingOptions {
  */
 function createStarterAccounts(seeds: StarterAccountSeed[], currency: string) {
   const groupOrder: string[] = [...ONBOARDING_DEFAULT_GROUPS];
-  const usedGroups = new Set(seeds.map((seed) => seed.accountGroup));
-  // Only the groups something goes in, in the default set's order.
-  [...new Set(Object.values(STARTER_GROUP_BY_KIND))]
-    .filter((group) => usedGroups.has(group))
-    .forEach((group) => {
-      accountGroupsRepository.create(group, groupOrder.indexOf(group));
-    });
-
   const existingAccounts = accountsRepository.list();
   const existing = new Set(existingAccounts.map((account) => accountNameSeedKey(account.name)));
   let remainingSlots = Math.max(
@@ -1515,6 +1504,9 @@ function createStarterAccounts(seeds: StarterAccountSeed[], currency: string) {
     if (remainingSlots <= 0) return;
     const key = accountNameSeedKey(seed.name);
     if (existing.has(key)) return;
+    // A group only when an account goes in it (create() reuses an existing
+    // one), at the default set's position.
+    accountGroupsRepository.create(seed.accountGroup, groupOrder.indexOf(seed.accountGroup));
     accountsRepository.create({
       name: seed.name,
       type: seed.type,
