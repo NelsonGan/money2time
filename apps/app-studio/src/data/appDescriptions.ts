@@ -26,13 +26,13 @@ Hopefully you'll always have control of your money and your life.
 Terms of Use: https://money2time.com/terms
 Privacy Policy: https://money2time.com/privacy
 Contact: https://www.money2time.com/contact`,
-    whatsNew: `- Added location tagging for transactions and a Spending map
-- Added 20 free receipt scans every month
-- Revamped onboarding and the hourly value screen
-- Reduced the size of backups
-- Fixed settling up in shared albums
+    whatsNew: `- Added the ability to pick your accounts during onboarding
+- Added location tags to automatically recorded expenses
+- Reduced Cloud Sync and shared album delays
+- Fixed payment alerts stopping on some phones
+- Fixed receipt scanning in mainland China
 
-Don't put all your eggs in one basket.`,
+Know what you own, and know why you own it.`,
   },
 
   zh: {
@@ -49,13 +49,13 @@ Don't put all your eggs in one basket.`,
 使用条款：https://money2time.com/terms
 隐私政策：https://money2time.com/privacy
 联系我们：https://www.money2time.com/contact`,
-    whatsNew: `- 新增了交易位置标记和消费地图
-- 新增了每月 20 次免费收据扫描
-- 重新设计了新手引导和时薪页面
-- 缩小了备份文件的大小
-- 修复了共享相册结算的问题
+    whatsNew: `- 新增了在新手引导中选择自己账户的功能
+- 新增了自动记录支出的位置标记
+- 减少了 Cloud Sync 和共享相册的延迟
+- 修复了部分手机上付款通知中断的问题
+- 修复了中国大陆的收据扫描问题
 
-不要把所有鸡蛋放在同一个篮子里。`,
+清楚自己拥有什么，也清楚为什么拥有它。`,
   },
 
   de: {
@@ -72,13 +72,13 @@ Ich hoffe, du hast immer die Kontrolle über dein Geld – und dein Leben.
 Nutzungsbedingungen: https://money2time.com/terms
 Datenschutzrichtlinie: https://money2time.com/privacy
 Kontakt: https://www.money2time.com/contact`,
-    whatsNew: `- Ortsmarkierung für Transaktionen und Ausgabenkarte hinzugefügt
-- 20 kostenlose Belegscans pro Monat hinzugefügt
-- Einführung und Stundenlohn-Ansicht überarbeitet
-- Größe von Backups reduziert
-- Probleme beim Abrechnen in geteilten Alben behoben
+    whatsNew: `- Auswahl eigener Konten in der Einführung hinzugefügt
+- Ortsmarkierung für automatisch erfasste Ausgaben hinzugefügt
+- Verzögerungen bei Cloud Sync und geteilten Alben reduziert
+- Ausbleibende Zahlungsbenachrichtigungen auf einigen Handys behoben
+- Probleme beim Belegscan in Festlandchina behoben
 
-Setze nicht alles auf eine Karte.`,
+Wisse, was du besitzt, und warum du es besitzt.`,
   },
 
   fr: {
@@ -95,13 +95,13 @@ J'espère que vous aurez toujours le contrôle de votre argent et de votre vie.
 Conditions d'utilisation : https://money2time.com/terms
 Politique de confidentialité : https://money2time.com/privacy
 Contact : https://www.money2time.com/contact`,
-    whatsNew: `- Ajout du marquage de lieu pour les transactions et d'une carte des dépenses
-- Ajout de 20 scans de reçus gratuits par mois
-- Refonte de l'accueil et de l'écran de valeur horaire
-- Réduction de la taille des sauvegardes
-- Correction du règlement dans les albums partagés
+    whatsNew: `- Ajout du choix de vos comptes lors de l'accueil
+- Ajout du marquage de lieu pour les dépenses enregistrées automatiquement
+- Réduction des délais de Cloud Sync et des albums partagés
+- Correction des alertes de paiement interrompues sur certains téléphones
+- Correction du scan de reçus en Chine continentale
 
-Il ne faut pas mettre tous ses œufs dans le même panier.`,
+Sachez ce que vous possédez, et pourquoi vous le possédez.`,
   },
 
   es: {
@@ -118,13 +118,13 @@ Ojalá siempre tengas el control de tu dinero y de tu vida.
 Condiciones de uso: https://money2time.com/terms
 Política de privacidad: https://money2time.com/privacy
 Contacto: https://www.money2time.com/contact`,
-    whatsNew: `- Se añadió el etiquetado de ubicación en transacciones y un mapa de gastos
-- Se añadieron 20 escaneos de recibos gratis cada mes
-- Se renovaron el inicio y la pantalla de valor por hora
-- Se redujo el tamaño de las copias de seguridad
-- Se corrigió la liquidación en álbumes compartidos
+    whatsNew: `- Se añadió la opción de elegir tus cuentas al empezar
+- Se añadió el etiquetado de ubicación en gastos registrados automáticamente
+- Se redujeron los retrasos de Cloud Sync y los álbumes compartidos
+- Se corrigieron las alertas de pago que dejaban de llegar en algunos teléfonos
+- Se corrigió el escaneo de recibos en China continental
 
-No pongas todos los huevos en la misma cesta.`,
+Sabe lo que tienes y por qué lo tienes.`,
   },
 
   pt: {
@@ -141,13 +141,13 @@ Que você sempre tenha controle do seu dinheiro e da sua vida.
 Termos de Uso: https://money2time.com/terms
 Política de Privacidade: https://money2time.com/privacy
 Contato: https://www.money2time.com/contact`,
-    whatsNew: `- Adicionada marcação de local em transações e mapa de gastos
-- Adicionadas 20 digitalizações de recibos grátis por mês
-- Renovados o início e o ecrã de valor por hora
-- Reduzido o tamanho das cópias de segurança
-- Corrigida a liquidação em álbuns partilhados
+    whatsNew: `- Adicionada a escolha das suas contas no início
+- Adicionada marcação de local em despesas registadas automaticamente
+- Reduzidos os atrasos do Cloud Sync e dos álbuns partilhados
+- Corrigidos os alertas de pagamento que paravam em alguns telemóveis
+- Corrigida a digitalização de recibos na China continental
 
-Não se deve pôr todos os ovos no mesmo cesto.`,
+Saiba o que tem e porque o tem.`,
   },
 
   it: {
@@ -164,13 +164,13 @@ Speriamo che tu possa sempre avere il controllo del tuo denaro e della tua vita.
 Termini di utilizzo: https://money2time.com/terms
 Informativa sulla privacy: https://money2time.com/privacy
 Contatto: https://www.money2time.com/contact`,
-    whatsNew: `- Aggiunti i tag di posizione per le transazioni e la mappa delle spese
-- Aggiunte 20 scansioni di scontrini gratis ogni mese
-- Rinnovati la configurazione iniziale e lo schermo del valore orario
-- Ridotte le dimensioni dei backup
-- Risolto il saldo negli album condivisi
+    whatsNew: `- Aggiunta la scelta dei propri conti nella configurazione iniziale
+- Aggiunti i tag di posizione per le spese registrate automaticamente
+- Ridotti i ritardi di Cloud Sync e degli album condivisi
+- Risolti gli avvisi di pagamento che si interrompevano su alcuni telefoni
+- Risolta la scansione degli scontrini nella Cina continentale
 
-Non mettere tutte le uova nello stesso paniere.`,
+Sappi cosa possiedi e perché lo possiedi.`,
   },
 
   nl: {
@@ -187,13 +187,13 @@ Hopelijk heb je altijd de controle over je geld en je leven.
 Gebruiksvoorwaarden: https://money2time.com/terms
 Privacybeleid: https://money2time.com/privacy
 Contact: https://www.money2time.com/contact`,
-    whatsNew: `- Locatietags voor transacties en een uitgavenkaart toegevoegd
-- 20 gratis bonscans per maand toegevoegd
-- Introductie en het uurloonscherm vernieuwd
-- Grootte van back-ups verkleind
-- Problemen met afrekenen in gedeelde albums opgelost
+    whatsNew: `- Eigen rekeningen kiezen tijdens de introductie toegevoegd
+- Locatietags voor automatisch vastgelegde uitgaven toegevoegd
+- Vertraging bij Cloud Sync en gedeelde albums verminderd
+- Wegvallende betaalmeldingen op sommige telefoons opgelost
+- Problemen met bonscans op het Chinese vasteland opgelost
 
-Leg niet al je eieren in één mand.`,
+Weet wat je bezit, en waarom je het bezit.`,
   },
 
   ru: {
@@ -210,13 +210,13 @@ Leg niet al je eieren in één mand.`,
 Условия использования: https://money2time.com/terms
 Политика конфиденциальности: https://money2time.com/privacy
 Контакты: https://www.money2time.com/contact`,
-    whatsNew: `- Добавлены метки мест для операций и карта расходов
-- Добавлено 20 бесплатных сканов чеков каждый месяц
-- Обновлены первый запуск и экран почасовой ставки
-- Уменьшен размер резервных копий
-- Исправлены расчёты в общих альбомах
+    whatsNew: `- Добавлен выбор своих счетов при первом запуске
+- Добавлены метки мест для автоматически записанных расходов
+- Уменьшены задержки Cloud Sync и общих альбомов
+- Исправлена пропажа уведомлений о платежах на некоторых телефонах
+- Исправлено сканирование чеков в материковом Китае
 
-Не клади все яйца в одну корзину.`,
+Знай, чем владеешь, и знай, зачем.`,
   },
 
   ja: {
@@ -233,13 +233,13 @@ Leg niet al je eieren in één mand.`,
 利用規約: https://money2time.com/terms
 プライバシーポリシー: https://money2time.com/privacy
 お問い合わせ: https://www.money2time.com/contact`,
-    whatsNew: `- 取引の場所タグと支出マップを追加しました
-- 毎月20回の無料レシートスキャンを追加しました
-- 初期設定と時給の画面を刷新しました
-- バックアップのサイズを削減しました
-- 共有アルバムでの精算に関する問題を修正しました
+    whatsNew: `- 初期設定で自分の口座を選べるようにしました
+- 自動記録された支出に場所タグを追加しました
+- Cloud Syncと共有アルバムの遅延を削減しました
+- 一部の端末で支払い通知が届かなくなる問題を修正しました
+- 中国本土でのレシートスキャンの問題を修正しました
 
-卵は一つのカゴに盛るな。`,
+自分が何を持ち、なぜ持つのかを知れ。`,
   },
 
   ko: {
@@ -256,13 +256,13 @@ Leg niet al je eieren in één mand.`,
 이용 약관: https://money2time.com/terms
 개인정보 처리방침: https://money2time.com/privacy
 문의: https://www.money2time.com/contact`,
-    whatsNew: `- 거래 위치 태그와 지출 지도를 추가했습니다
-- 매월 20회 무료 영수증 스캔을 추가했습니다
-- 첫 설정과 시급 화면을 새롭게 개편했습니다
-- 백업 용량을 줄였습니다
-- 공유 앨범의 정산 문제를 수정했습니다
+    whatsNew: `- 첫 설정에서 내 계좌를 고를 수 있는 기능을 추가했습니다
+- 자동 기록된 지출에 위치 태그를 추가했습니다
+- Cloud Sync와 공유 앨범의 지연을 줄였습니다
+- 일부 휴대폰에서 결제 알림이 끊기는 문제를 수정했습니다
+- 중국 본토의 영수증 스캔 문제를 수정했습니다
 
-달걀을 한 바구니에 담지 마라.`,
+무엇을 가졌는지, 왜 가졌는지 알아라.`,
   },
 
   hi: {
@@ -279,13 +279,13 @@ Leg niet al je eieren in één mand.`,
 उपयोग की शर्तें: https://money2time.com/terms
 गोपनीयता नीति: https://money2time.com/privacy
 संपर्क: https://www.money2time.com/contact`,
-    whatsNew: `- लेन-देन के लिए स्थान टैग और खर्च का नक्शा जोड़ा गया
-- हर महीने 20 मुफ़्त रसीद स्कैन जोड़े गए
-- शुरुआती सेटअप और प्रति घंटे आय स्क्रीन को नया रूप दिया गया
-- बैकअप का आकार कम किया गया
-- साझा एल्बम में हिसाब चुकाने की समस्या ठीक की गई
+    whatsNew: `- शुरुआती सेटअप में अपने खाते चुनने की सुविधा जोड़ी गई
+- अपने-आप दर्ज हुए खर्चों के लिए स्थान टैग जोड़े गए
+- Cloud Sync और साझा एल्बम की देरी कम की गई
+- कुछ फ़ोन पर भुगतान सूचनाएँ रुकने की समस्या ठीक की गई
+- मुख्य भूमि चीन में रसीद स्कैन की समस्या ठीक की गई
 
-सारे अंडे एक ही टोकरी में न रखें।`,
+जानें कि आपके पास क्या है और क्यों है।`,
   },
 
   id: {
@@ -302,13 +302,13 @@ Semoga Anda selalu punya kendali atas uang dan hidup Anda.
 Syarat Penggunaan: https://money2time.com/terms
 Kebijakan Privasi: https://money2time.com/privacy
 Kontak: https://www.money2time.com/contact`,
-    whatsNew: `- Menambahkan penandaan lokasi transaksi dan peta pengeluaran
-- Menambahkan 20 pindai struk gratis setiap bulan
-- Memperbarui panduan awal dan layar nilai per jam
-- Memperkecil ukuran cadangan
-- Memperbaiki pelunasan di album bersama
+    whatsNew: `- Menambahkan pilihan akun sendiri di panduan awal
+- Menambahkan tag lokasi untuk pengeluaran yang dicatat otomatis
+- Mengurangi jeda Cloud Sync dan album bersama
+- Memperbaiki notifikasi pembayaran yang berhenti di beberapa ponsel
+- Memperbaiki pindai struk di Tiongkok daratan
 
-Jangan menaruh semua telur dalam satu keranjang.`,
+Ketahuilah apa yang kamu miliki dan mengapa kamu memilikinya.`,
   },
 
   tr: {
@@ -325,13 +325,13 @@ Umarım paranızın ve hayatınızın kontrolü her zaman sizde olur.
 Kullanım Koşulları: https://money2time.com/terms
 Gizlilik Politikası: https://money2time.com/privacy
 İletişim: https://www.money2time.com/contact`,
-    whatsNew: `- İşlemler için konum etiketi ve harcama haritası eklendi
-- Her ay 20 ücretsiz fiş taraması eklendi
-- Başlangıç adımları ve saatlik değer ekranı yenilendi
-- Yedeklerin boyutu küçültüldü
-- Paylaşılan albümlerde hesaplaşma sorunları giderildi
+    whatsNew: `- Başlangıçta kendi hesaplarını seçme özelliği eklendi
+- Otomatik kaydedilen harcamalara konum etiketi eklendi
+- Cloud Sync ve paylaşılan albümlerdeki gecikmeler azaltıldı
+- Bazı telefonlarda kesilen ödeme bildirimleri düzeltildi
+- Çin anakarasında fiş taraması düzeltildi
 
-Bütün yumurtaları aynı sepete koyma.`,
+Neye sahip olduğunu ve neden sahip olduğunu bil.`,
   },
 
   vi: {
@@ -348,13 +348,13 @@ Hy vọng bạn luôn làm chủ được tiền bạc và cuộc sống của m
 Điều khoản sử dụng: https://money2time.com/terms
 Chính sách bảo mật: https://money2time.com/privacy
 Liên hệ: https://www.money2time.com/contact`,
-    whatsNew: `- Thêm gắn vị trí cho giao dịch và bản đồ chi tiêu
-- Thêm 20 lượt quét hóa đơn miễn phí mỗi tháng
-- Làm mới phần thiết lập ban đầu và màn hình giá trị theo giờ
-- Giảm dung lượng bản sao lưu
-- Khắc phục lỗi tất toán trong album chia sẻ
+    whatsNew: `- Thêm lựa chọn tài khoản của bạn khi thiết lập ban đầu
+- Thêm gắn vị trí cho các khoản chi được ghi tự động
+- Giảm độ trễ của Cloud Sync và album chia sẻ
+- Khắc phục lỗi thông báo thanh toán bị ngừng trên một số điện thoại
+- Khắc phục lỗi quét hóa đơn tại Trung Quốc đại lục
 
-Đừng bỏ tất cả trứng vào một giỏ.`,
+Hãy biết mình sở hữu gì và vì sao mình sở hữu nó.`,
   },
 
   th: {
@@ -371,13 +371,13 @@ Liên hệ: https://www.money2time.com/contact`,
 เงื่อนไขการใช้งาน: https://money2time.com/terms
 นโยบายความเป็นส่วนตัว: https://money2time.com/privacy
 ติดต่อ: https://www.money2time.com/contact`,
-    whatsNew: `- เพิ่มการแท็กตำแหน่งในรายการและแผนที่การใช้จ่าย
-- เพิ่มสิทธิ์สแกนใบเสร็จฟรี 20 ครั้งทุกเดือน
-- ปรับโฉมหน้าเริ่มต้นและหน้ามูลค่าต่อชั่วโมง
-- ลดขนาดไฟล์สำรองข้อมูล
-- แก้ไขปัญหาการเคลียร์ยอดในอัลบั้มที่แชร์
+    whatsNew: `- เพิ่มการเลือกบัญชีของคุณเองในหน้าเริ่มต้น
+- เพิ่มแท็กตำแหน่งให้รายจ่ายที่บันทึกอัตโนมัติ
+- ลดความล่าช้าของ Cloud Sync และอัลบั้มที่แชร์
+- แก้ไขปัญหาการแจ้งเตือนการชำระเงินหยุดทำงานในบางเครื่อง
+- แก้ไขการสแกนใบเสร็จในจีนแผ่นดินใหญ่
 
-อย่าใส่ไข่ทั้งหมดไว้ในตะกร้าใบเดียว`,
+จงรู้ว่าตนมีอะไร และมีไว้เพื่ออะไร`,
   },
 
   pl: {
@@ -394,13 +394,13 @@ Mam nadzieję, że zawsze będziesz mieć kontrolę nad swoimi pieniędzmi i swo
 Warunki korzystania: https://money2time.com/terms
 Polityka prywatności: https://money2time.com/privacy
 Kontakt: https://www.money2time.com/contact`,
-    whatsNew: `- Dodano oznaczanie lokalizacji w transakcjach i mapę wydatków
-- Dodano 20 darmowych skanów paragonów miesięcznie
-- Odświeżono ekran powitalny i ekran stawki godzinowej
-- Zmniejszono rozmiar kopii zapasowych
-- Naprawiono rozliczenia we wspólnych albumach
+    whatsNew: `- Dodano wybór własnych kont na ekranie powitalnym
+- Dodano oznaczanie lokalizacji automatycznie zapisanych wydatków
+- Zmniejszono opóźnienia Cloud Sync i wspólnych albumów
+- Naprawiono znikające powiadomienia o płatnościach na niektórych telefonach
+- Naprawiono skanowanie paragonów w Chinach kontynentalnych
 
-Nie wkładaj wszystkich jajek do jednego koszyka.`,
+Wiedz, co posiadasz i dlaczego to posiadasz.`,
   },
 
   uk: {
@@ -417,13 +417,13 @@ Nie wkładaj wszystkich jajek do jednego koszyka.`,
 Умови використання: https://money2time.com/terms
 Політика конфіденційності: https://money2time.com/privacy
 Контакт: https://www.money2time.com/contact`,
-    whatsNew: `- Додано позначки місць для операцій і мапу витрат
-- Додано 20 безкоштовних сканів чеків щомісяця
-- Оновлено перший запуск і екран погодинної ставки
-- Зменшено розмір резервних копій
-- Виправлено розрахунки у спільних альбомах
+    whatsNew: `- Додано вибір власних рахунків під час першого запуску
+- Додано позначки місць для автоматично записаних витрат
+- Зменшено затримки Cloud Sync і спільних альбомів
+- Виправлено зникнення сповіщень про платежі на деяких телефонах
+- Виправлено сканування чеків у материковому Китаї
 
-Не клади всі яйця в один кошик.`,
+Знай, чим володієш, і знай, навіщо.`,
   },
 
   sv: {
@@ -440,13 +440,13 @@ Förhoppningsvis har du alltid kontroll över dina pengar och ditt liv.
 Användarvillkor: https://money2time.com/terms
 Integritetspolicy: https://money2time.com/privacy
 Kontakt: https://www.money2time.com/contact`,
-    whatsNew: `- Lade till platstaggning för transaktioner och en utgiftskarta
-- Lade till 20 gratis kvittoskanningar varje månad
-- Förnyade introduktionen och skärmen för timvärde
-- Minskade storleken på säkerhetskopior
-- Åtgärdade reglering i delade album
+    whatsNew: `- Lade till val av egna konton i introduktionen
+- Lade till platstaggning för automatiskt registrerade utgifter
+- Minskade fördröjningar i Cloud Sync och delade album
+- Åtgärdade betalningsaviseringar som slutade komma på vissa telefoner
+- Åtgärdade kvittoskanning i Fastlandskina
 
-Lägg inte alla ägg i samma korg.`,
+Vet vad du äger och varför du äger det.`,
   },
 
   nb: {
@@ -463,13 +463,13 @@ Forhåpentligvis vil du alltid ha kontroll over pengene dine – og livet ditt.
 Vilkår for bruk: https://money2time.com/terms
 Personvernerklæring: https://money2time.com/privacy
 Kontakt: https://www.money2time.com/contact`,
-    whatsNew: `- La til stedsmerking for transaksjoner og et forbrukskart
-- La til 20 gratis kvitteringsskanninger hver måned
-- Fornyet oppstarten og skjermen for timeverdi
-- Reduserte størrelsen på sikkerhetskopier
-- Rettet oppgjør i delte album
+    whatsNew: `- La til valg av egne kontoer i oppstarten
+- La til stedsmerking for automatisk registrerte utgifter
+- Reduserte forsinkelser i Cloud Sync og delte album
+- Rettet betalingsvarsler som stoppet på enkelte telefoner
+- Rettet kvitteringsskanning i Fastlands-Kina
 
-Ikke legg alle eggene i én kurv.`,
+Vit hva du eier, og hvorfor du eier det.`,
   },
 
   da: {
@@ -486,13 +486,13 @@ Forhåbentlig har du altid kontrol over dine penge og dit liv.
 Brugsbetingelser: https://money2time.com/terms
 Privatlivspolitik: https://money2time.com/privacy
 Kontakt: https://www.money2time.com/contact`,
-    whatsNew: `- Tilføjede stedsmærkning til transaktioner og et forbrugskort
-- Tilføjede 20 gratis kvitteringsscanninger hver måned
-- Fornyede opstarten og skærmen til timeværdi
-- Reducerede størrelsen på sikkerhedskopier
-- Rettede afregning i delte album
+    whatsNew: `- Tilføjede valg af egne konti i opstarten
+- Tilføjede stedsmærkning til automatisk registrerede udgifter
+- Reducerede forsinkelser i Cloud Sync og delte album
+- Rettede betalingsnotifikationer der stoppede på nogle telefoner
+- Rettede kvitteringsscanning i Fastlandskina
 
-Læg ikke alle æggene i én kurv.`,
+Vid, hvad du ejer, og hvorfor du ejer det.`,
   },
 
   ms: {
@@ -509,13 +509,13 @@ Semoga anda sentiasa memiliki kawalan ke atas wang dan kehidupan anda.
 Terma Penggunaan: https://money2time.com/terms
 Dasar Privasi: https://money2time.com/privacy
 Hubungi Kami: https://www.money2time.com/contact`,
-    whatsNew: `- Menambah penandaan lokasi transaksi dan peta perbelanjaan
-- Menambah 20 imbasan resit percuma setiap bulan
-- Memperbaharui panduan awal dan skrin nilai sejam
-- Mengecilkan saiz sandaran
-- Membaiki penyelesaian dalam album kongsi
+    whatsNew: `- Menambah pilihan akaun sendiri dalam panduan awal
+- Menambah tag lokasi untuk perbelanjaan yang direkod secara automatik
+- Mengurangkan kelewatan Cloud Sync dan album kongsi
+- Membaiki pemberitahuan pembayaran yang terhenti pada sesetengah telefon
+- Membaiki imbasan resit di tanah besar China
 
-Jangan letak semua telur dalam satu bakul.`,
+Ketahui apa yang anda miliki dan mengapa anda memilikinya.`,
   },
 
   fil: {
@@ -530,13 +530,13 @@ Sana lagi kang may kontrol sa iyong pera at sa iyong buhay.
 Mga Tuntunin ng Paggamit: https://money2time.com/terms
 Patakaran sa Privacy: https://money2time.com/privacy
 Makipag-ugnayan: https://www.money2time.com/contact`,
-    whatsNew: `- Nagdagdag ng location tagging sa mga transaksyon at mapa ng gastos
-- Nagdagdag ng 20 libreng scan ng resibo bawat buwan
-- Pinabago ang onboarding at screen ng halaga bawat oras
-- Pinaliit ang laki ng mga backup
-- Inayos ang pagbabayaran sa mga shared album
+    whatsNew: `- Nagdagdag ng pagpili ng sarili mong mga account sa onboarding
+- Nagdagdag ng location tag sa mga gastos na awtomatikong naitala
+- Binawasan ang pagkaantala ng Cloud Sync at mga shared album
+- Inayos ang mga payment alert na humihinto sa ilang telepono
+- Inayos ang pag-scan ng resibo sa mainland China
 
-Huwag ilagay ang lahat ng itlog sa iisang basket.`,
+Alamin kung ano ang pag-aari mo at kung bakit mo ito pag-aari.`,
   },
 
 };
