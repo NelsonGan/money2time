@@ -39,6 +39,11 @@ database_id = "1409fa69-bbe8-4251-94b0-c96f653849e8"
 
 # Daily cron that prunes expired D1 rows (scan_usage / entitlement_cache). D1
 # has no native TTL, so the scheduled() handler runs the cleanup.
+# Workers AI, the last model in the scan chain (WORKERS_AI_MODEL): billed to
+# this account, reached without OpenRouter.
+[ai]
+binding = "AI"
+
 [triggers]
 crons = ["0 3 * * *"]
 
@@ -69,6 +74,7 @@ BACKUP_MODEL = "qwen/qwen3.7-flash"
 # it is not refused in China or Hong Kong the way Claude and OpenAI are.
 # Remove the line to stop at BACKUP_MODEL.
 SECOND_BACKUP_MODEL = "deepseek/deepseek-v4.1-flash-1017"
+WORKERS_AI_MODEL = "@cf/qwen/qwen3.8-27b"
 # Countries whose users skip Claude and start at BACKUP_MODEL. OpenRouter
 # refuses Claude there ("This model is not available in your region", 403),
 # going by where the user is: a Worker pinned to Singapore was still refused.

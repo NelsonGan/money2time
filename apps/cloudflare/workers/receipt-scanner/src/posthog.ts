@@ -1,4 +1,4 @@
-// PostHog AI observability for receipt scanning. Each OpenRouter call becomes
+// PostHog AI observability for receipt scanning. Each model call becomes
 // one `$ai_generation` event, grouped into a trace per scan request (the
 // `reqId`), and attributed to the same pseudonymous `m2t_<uuid>` the app
 // identifies PostHog with, so a scan's model calls sit next to the app's
@@ -39,6 +39,8 @@ export interface OpenRouterUsage {
 
 export interface GenerationRecord {
   model: string;
+  /** Where the call went; OpenRouter when absent. Workers AI's `cost` is its neurons priced. */
+  provider?: 'openrouter' | 'workers-ai';
   /** e.g. `receipt_scan_quick`. */
   spanName: string;
   startedAt: number;
@@ -104,14 +106,18 @@ export class AiTrace {
       ? finite(record.usage.cost_details?.upstream_inference_cost)
       : undefined;
     const cost =
-      charged === undefined && upstream === undefined ? undefined : (charged ?? 0) + (upstream ?? 0);
+      charged === undefined && upstream === undefined
+        ? undefined
+        : (charged ?? 0) + (upstream ?? 0);
     const cachedTokens = finite(record.usage?.prompt_tokens_details?.cached_tokens);
     const properties: Record<string, unknown> = {
       $ai_trace_id: this.traceId,
       $ai_span_name: record.spanName,
       $ai_model: record.model,
-      $ai_provider: 'openrouter',
-      $ai_base_url: OPENROUTER_BASE_URL,
+      // Workers AI is reached through the `AI` binding, so it has no base URL.
+      ...(record.provider === 'workers-ai'
+        ? { $ai_provider: 'cloudflare-workers-ai' }
+        : { $ai_provider: 'openrouter', $ai_base_url: OPENROUTER_BASE_URL }),
       $ai_latency: (record.endedAt - record.startedAt) / 1000,
       $ai_max_tokens: record.maxTokens,
       $ai_stream: false,
