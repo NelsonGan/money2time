@@ -533,32 +533,86 @@ describe('token calls on Android', () => {
   it('reads a fresh token after a clear instead of sharing the one read before it', async () => {
     liveSession();
     let cached = 'old-token';
-    googleSignin.getTokens.mockImplementation(async () => ({ idToken: 'id', accessToken: cached }));
+    const reads: Array<() => void> = [];
+    // Each read settles only when the test lets it, with the token cached when it started.
+    googleSignin.getTokens.mockImplementation(() => {
+      const token = cached;
+      return new Promise((resolve) => {
+        reads.push(() => resolve({ idToken: 'id', accessToken: token }));
+      });
+    });
     googleSignin.clearCachedAccessToken.mockImplementation(async () => {
       cached = 'new-token';
     });
     const auth = loadAuth();
 
     const before = auth.getGoogleAccessToken();
-    await auth.clearGoogleTokenCache('old-token');
-    const after = await auth.getGoogleAccessToken();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(googleSignin.getTokens).toHaveBeenCalledTimes(1);
+    const cleared = auth.clearGoogleTokenCache('old-token');
+    const after = auth.getGoogleAccessToken();
+    reads.shift()!();
+    await expect(before).resolves.toBe('old-token');
+    await cleared;
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    reads.shift()!();
 
-    await before;
-    expect(after).toBe('new-token');
+    await expect(after).resolves.toBe('new-token');
   });
 
-  it('does not let a token read that never settles hold up later calls', async () => {
+  it('retries with its own read after a restore, not one started before it finished', async () => {
+    googleSignin.hasPreviousSignIn.mockReturnValue(true);
+    googleSignin.getCurrentUser.mockReturnValue(ACCOUNT);
+    let finishRestore!: () => void;
+    googleSignin.signInSilently
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            finishRestore = () => resolve({ type: 'success', data: ACCOUNT });
+          }),
+      )
+      .mockResolvedValue({ type: 'success', data: ACCOUNT });
+    let failReadDuringRestore!: () => void;
+    googleSignin.getTokens
+      .mockRejectedValueOnce(new Error('token revoked'))
+      .mockImplementationOnce(
+        () =>
+          new Promise((_resolve, reject) => {
+            failReadDuringRestore = () => reject(new Error('token revoked'));
+          }),
+      )
+      .mockResolvedValue({ idToken: 'id', accessToken: 'fresh-token' });
+    const auth = loadAuth();
+
+    const first = auth.getGoogleAccessToken();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    // Another request reads while the first one's restore is still running.
+    const second = auth.getGoogleAccessToken();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(googleSignin.getTokens).toHaveBeenCalledTimes(2);
+    finishRestore();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    failReadDuringRestore();
+
+    await expect(first).resolves.toBe('fresh-token');
+    await expect(second).resolves.toBe('fresh-token');
+  });
+
+  it('does not let a token read that never settles hold up later requests', async () => {
     jest.useFakeTimers();
     try {
       liveSession();
       // Android can park a read behind a consent screen that is never answered.
-      googleSignin.getTokens.mockReturnValueOnce(new Promise(() => undefined));
+      googleSignin.getTokens
+        .mockReturnValueOnce(new Promise(() => undefined))
+        .mockResolvedValue({ idToken: 'id', accessToken: 'fresh-token' });
       googleSignin.clearCachedAccessToken.mockResolvedValue(null);
       const auth = loadAuth();
 
-      void auth.getGoogleAccessToken();
+      const first = auth.getGoogleAccessToken();
       await jest.advanceTimersByTimeAsync(0);
       expect(googleSignin.getTokens).toHaveBeenCalledTimes(1);
+      const second = auth.getGoogleAccessToken();
       const cleared = auth.clearGoogleTokenCache('old-token');
       await jest.advanceTimersByTimeAsync(29_000);
       expect(googleSignin.clearCachedAccessToken).not.toHaveBeenCalled();
@@ -566,6 +620,8 @@ describe('token calls on Android', () => {
       await jest.advanceTimersByTimeAsync(1_000);
       await cleared;
       expect(googleSignin.clearCachedAccessToken).toHaveBeenCalledWith('old-token');
+      await expect(first).resolves.toBe('fresh-token');
+      await expect(second).resolves.toBe('fresh-token');
     } finally {
       jest.useRealTimers();
     }

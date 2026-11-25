@@ -1194,9 +1194,12 @@ row, and 10.9 MB of photos as base64.
     left uploads without a token, and the run reported `error_kind` `auth`
     ("Google Drive: not signed in") and fell back to the phone (about 22
     Android users a day). `googleDriveAuth.ts` therefore runs the native token
-    calls one at a time, and reads that overlap share one. A call waits at
-    most 30 s for the one before it, so a read parked behind a consent screen
-    holds nothing up.
+    calls one at a time, and reads that overlap share one. A clear waits for
+    a read in flight, so that read cannot hand out the token just dropped, and
+    the retry after a forced session restore makes its own read. One native
+    call holds the line for at most 30 s: a read parked behind a consent
+    screen then counts as failed, and the requests waiting on it restore the
+    session and read again.
   - The export embeds its photos, because that file leaves the app on its own.
 - **Photo sizes (`services/imageShrink.*`).** A picked photo used to be stored
   at full size and JPEG quality 0.9 (an album cover was 400–800 KB).
