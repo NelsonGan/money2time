@@ -89,15 +89,18 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const [starterSelections, setStarterSelections] =
     useState<StarterSelection[]>(initialStarterSelections);
   const [starterAccountsSkipped, setStarterAccountsSkipped] = useState(false);
-  const starterCountry = useMemo(
+  // The step opens on the user's own country, which follows the currency
+  // picked in basics until the flag picks another one.
+  const [pickedStarterCountry, setPickedStarterCountry] = useState<string | null>(null);
+  const ownCountry = useMemo(
     () =>
       resolveStarterCountry({
-        savedCountry: settings.accountLogoCountry,
         currencyCode: settings.currencyCode,
         regionCode: getDeviceRegionCode(),
       }),
-    [settings.accountLogoCountry, settings.currencyCode],
+    [settings.currencyCode],
   );
+  const starterCountry = pickedStarterCountry ?? ownCountry;
 
   // The welcome page has no top bar, so the bar counts the steps after it.
   const stepIndex = STEP_ORDER.indexOf(step);
@@ -317,6 +320,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             <OnboardingAccountsStep
               country={starterCountry}
               onCountryChange={(accountLogoCountry) => {
+                setPickedStarterCountry(accountLogoCountry);
                 // The logo pickers open on the same country later.
                 updateSettings({ accountLogoCountry });
               }}

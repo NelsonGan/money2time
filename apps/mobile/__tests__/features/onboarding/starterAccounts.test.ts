@@ -36,12 +36,6 @@ describe('starter account lists', () => {
 });
 
 describe('resolveStarterCountry', () => {
-  it('keeps a country the user picked before', () => {
-    expect(
-      resolveStarterCountry({ savedCountry: 'japan', currencyCode: 'MYR', regionCode: 'US' }),
-    ).toBe('japan');
-  });
-
   it('reads the country from a currency only one country uses', () => {
     expect(resolveStarterCountry({ currencyCode: 'MYR', regionCode: 'US' })).toBe('malaysia');
     expect(resolveStarterCountry({ currencyCode: 'php' })).toBe('philippines');
@@ -54,7 +48,8 @@ describe('resolveStarterCountry', () => {
 
   it('falls back to the international brands', () => {
     expect(resolveStarterCountry({ currencyCode: 'GBP', regionCode: 'GB' })).toBe(GLOBAL_COUNTRY);
-    expect(resolveStarterCountry({ savedCountry: 'atlantis' })).toBe(GLOBAL_COUNTRY);
+    expect(resolveStarterCountry({ regionCode: 'AQ' })).toBe(GLOBAL_COUNTRY);
+    expect(resolveStarterCountry({})).toBe(GLOBAL_COUNTRY);
   });
 });
 

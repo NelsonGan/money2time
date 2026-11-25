@@ -36,6 +36,25 @@ const SECTION_TITLE_KEY: Record<StarterKind, string> = {
   card: 'onboarding.accounts.section_cards',
 };
 
+/**
+ * Splits tiles into rows of COLUMNS, the last one padded with spacers. Each
+ * row shares its width out with flex, where tiles measured to a third of the
+ * grid wrapped the third one onto its own line whenever the grid came out a
+ * hair narrower than measured (the 430 pt iPhone Pro Max).
+ */
+function gridRows(items: React.ReactNode[]): React.ReactNode[][] {
+  const tiles = items.filter((item) => item != null && item !== false);
+  const rows: React.ReactNode[][] = [];
+  for (let start = 0; start < tiles.length; start += COLUMNS) {
+    const row = tiles.slice(start, start + COLUMNS);
+    for (let spacer = row.length; spacer < COLUMNS; spacer++) {
+      row.push(<View key={`spacer-${spacer}`} className="flex-1" />);
+    }
+    rows.push(row);
+  }
+  return rows;
+}
+
 interface Tile {
   selection: StarterSelection;
   /** The tile's caption: a card says "Maybank card" where the account is "Maybank Card". */
@@ -87,8 +106,6 @@ export function OnboardingAccountsStep({
   const [query, setQuery] = useState('');
   const [showCountries, setShowCountries] = useState(false);
   const [limitHit, setLimitHit] = useState(false);
-  const [gridWidth, setGridWidth] = useState(0);
-  const tileWidth = gridWidth > 0 ? (gridWidth - TILE_GAP * (COLUMNS - 1)) / COLUMNS : 0;
 
   const selectedKeys = useMemo(() => new Set(selections.map(starterSelectionKey)), [selections]);
   const countryName =
@@ -191,9 +208,8 @@ export function OnboardingAccountsStep({
       <Pressable
         key={`${key}|${tile.selection.logoId ?? ''}`}
         onPress={() => toggle(tile.selection)}
-        style={{ width: tileWidth }}
         className={cn(
-          'items-center gap-2 px-1.5 pb-2.5 pt-3',
+          'flex-1 items-center gap-2 px-1.5 pb-2.5 pt-3',
           selected ? ONBOARDING_CARD_SELECTED : ONBOARDING_CARD,
         )}
         accessibilityRole="checkbox"
@@ -257,9 +273,12 @@ export function OnboardingAccountsStep({
         </Text>
         {options.first ? counter : null}
       </View>
-      <View className="flex-row flex-wrap" style={{ gap: TILE_GAP }}>
-        {tiles.map(renderTile)}
-        {options.extra}
+      <View style={{ gap: TILE_GAP }}>
+        {gridRows([...tiles.map(renderTile), options.extra]).map((row, index) => (
+          <View key={index} className="flex-row" style={{ gap: TILE_GAP }}>
+            {row}
+          </View>
+        ))}
       </View>
     </View>
   );
@@ -329,16 +348,16 @@ export function OnboardingAccountsStep({
         ) : null}
       </View>
 
-      <View onLayout={(event) => setGridWidth(event.nativeEvent.layout.width)}>
-        {tileWidth <= 0 ? null : trimmedQuery ? (
+      <View>
+        {trimmedQuery ? (
           renderGrid(I18n.t('onboarding.accounts.section_results'), searchTiles, {
             first: true,
             extra: exact ? null : (
               <Pressable
+                key="add-typed"
                 onPress={addTyped}
-                style={{ width: tileWidth }}
                 className={cn(
-                  'items-center gap-2 px-1.5 pb-2.5 pt-3',
+                  'flex-1 items-center gap-2 px-1.5 pb-2.5 pt-3',
                   ONBOARDING_CARD,
                   'border-dashed',
                 )}
