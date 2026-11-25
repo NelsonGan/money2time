@@ -205,8 +205,7 @@ export default {
     }
     const url = new URL(request.url);
     if (request.method === 'POST' && url.pathname === '/notifications') {
-      if (await overLimit(env.NOTIFICATION_LIMITER, request))
-        return json({ error: 'rate_limited' }, 429);
+      if (await overLimit(env.NOTIFICATION_LIMITER, request)) return json({ error: 'rate_limited' }, 429);
       return handleNotifications(request, env, ctx, false);
     }
     if (request.method === 'POST' && url.pathname === '/notifications/quota') {
@@ -218,10 +217,7 @@ export default {
 
     if (await overLimit(env.SCAN_LIMITER, request)) return json({ error: 'rate_limited' }, 429);
     // The image is capped below; refuse a larger body before reading it at all.
-    if (
-      Number(request.headers.get('content-length') ?? 0) >
-      MAX_IMAGE_BYTES + MAX_EXTRA_BODY_BYTES
-    ) {
+    if (Number(request.headers.get('content-length') ?? 0) > MAX_IMAGE_BYTES + MAX_EXTRA_BODY_BYTES) {
       return json({ error: 'image_too_large' }, 413);
     }
 
@@ -248,7 +244,9 @@ export default {
     }
 
     const mode: ScanMode =
-      body.mode === 'itemized' || body.mode === 'screenshot' ? body.mode : 'quick';
+      body.mode === 'itemized' || body.mode === 'screenshot'
+        ? body.mode
+        : 'quick';
     const country = requestCountry(request);
     log('scan_request', {
       reqId,
@@ -710,7 +708,11 @@ function claudeBlockedIn(env: Env, country: string | null): boolean {
 // for a user in a country where Claude is refused (CLAUDE_BLOCKED_COUNTRIES),
 // and for an image whose bytes are not a type Claude reads (`imageType` null):
 // HEIC, labelled as it is or as a JPEG, is refused every time with a 400.
-function resolveModels(env: Env, imageType: string | null, country: string | null): ModelChoice[] {
+function resolveModels(
+  env: Env,
+  imageType: string | null,
+  country: string | null,
+): ModelChoice[] {
   const primary = env.MODEL?.trim() || DEFAULT_BACKUP_MODEL;
   const backup = env.BACKUP_MODEL?.trim() || DEFAULT_BACKUP_MODEL;
   const second = env.SECOND_BACKUP_MODEL?.trim();

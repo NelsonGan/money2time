@@ -106,9 +106,7 @@ export class AiTrace {
       ? finite(record.usage.cost_details?.upstream_inference_cost)
       : undefined;
     const cost =
-      charged === undefined && upstream === undefined
-        ? undefined
-        : (charged ?? 0) + (upstream ?? 0);
+      charged === undefined && upstream === undefined ? undefined : (charged ?? 0) + (upstream ?? 0);
     const cachedTokens = finite(record.usage?.prompt_tokens_details?.cached_tokens);
     const properties: Record<string, unknown> = {
       $ai_trace_id: this.traceId,

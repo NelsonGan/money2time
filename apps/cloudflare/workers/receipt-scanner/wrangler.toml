@@ -37,13 +37,13 @@ binding = "MONEY2TIME_D1_RECEIPT_SCANNER"
 database_name = "money2time-d1-receipt-scanner"
 database_id = "1409fa69-bbe8-4251-94b0-c96f653849e8"
 
-# Daily cron that prunes expired D1 rows (scan_usage / entitlement_cache). D1
-# has no native TTL, so the scheduled() handler runs the cleanup.
 # Workers AI, the last model in the scan chain (WORKERS_AI_MODEL): billed to
 # this account, reached without OpenRouter.
 [ai]
 binding = "AI"
 
+# Daily cron that prunes expired D1 rows (scan_usage / entitlement_cache). D1
+# has no native TTL, so the scheduled() handler runs the cleanup.
 [triggers]
 crons = ["0 3 * * *"]
 
@@ -74,6 +74,10 @@ BACKUP_MODEL = "qwen/qwen3.7-flash"
 # it is not refused in China or Hong Kong the way Claude and OpenAI are.
 # Remove the line to stop at BACKUP_MODEL.
 SECOND_BACKUP_MODEL = "deepseek/deepseek-v4.1-flash-1017"
+# Tried after every OpenRouter model has failed, on Workers AI (the [ai]
+# binding above), so an OpenRouter refusal does not end the scan: since
+# 2026-11-25 OpenRouter refuses many requests from mainland China with a 400
+# "Request path cannot be relayed". Remove the line to stop at the models above.
 WORKERS_AI_MODEL = "@cf/qwen/qwen3.8-27b"
 # Countries whose users skip Claude and start at BACKUP_MODEL. OpenRouter
 # refuses Claude there ("This model is not available in your region", 403),

@@ -31,7 +31,7 @@ const body = {
 };
 const ANSWER =
   '{"transactions":[{"type":"expense","amount":38,"currency":"CNY","date":null,"category":"Food","note":"茶语时光"}]}';
-// What OpenRouter answered every mainland China request with on 2026-11-25.
+// What OpenRouter answered most requests from mainland China with on 2026-11-25.
 const RELAY_REFUSAL = '{"error":{"message":"Request path cannot be relayed","code":400}}';
 const WORKERS_AI_USAGE = {
   prompt_tokens: 1456,
