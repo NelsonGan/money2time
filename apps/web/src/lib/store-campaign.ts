@@ -18,17 +18,16 @@ const truncate = (value: string, limit: number) => Array.from(value).slice(0, li
  * campaigns. Any UTM tag yields a token, as any UTM tag yields a Play referrer.
  */
 export function appStoreCampaignToken(campaign: URLSearchParams): string | undefined {
-  const source = campaign.get("utm_source") || campaign.get("utm_medium");
-  const detail =
-    campaign.get("utm_content") ||
-    campaign.get("utm_campaign") ||
-    campaign.get("utm_id") ||
-    campaign.get("utm_term");
+  // A blank or space-padded tag counts as missing or trimmed, so no token is
+  // just a space or has a space beside its dash.
+  const tag = (name: string) => campaign.get(name)?.trim();
+  const source = tag("utm_source") || tag("utm_medium");
+  const detail = tag("utm_content") || tag("utm_campaign") || tag("utm_id") || tag("utm_term");
 
-  const head = source ? truncate(source, SOURCE_LIMIT) : "";
+  const head = source ? truncate(source, SOURCE_LIMIT).trimEnd() : "";
   if (!detail) return head || undefined;
-  if (!head) return truncate(detail, CAMPAIGN_TOKEN_LIMIT);
-  return `${head}-${truncate(detail, CAMPAIGN_TOKEN_LIMIT - Array.from(head).length - 1)}`;
+  if (!head) return truncate(detail, CAMPAIGN_TOKEN_LIMIT).trimEnd();
+  return `${head}-${truncate(detail, CAMPAIGN_TOKEN_LIMIT - Array.from(head).length - 1).trimEnd()}`;
 }
 
 /**

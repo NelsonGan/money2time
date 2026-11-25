@@ -54,3 +54,15 @@ test("a link without a campaign goes to the plain store page", () => {
   assert.equal(storeUrlForCampaign("ios", new URLSearchParams()), APP_STORE_URL);
   assert.equal(storeUrlForCampaign("android", new URLSearchParams()), PLAY_STORE_URL);
 });
+
+test("blank or padded UTM values never make a blank or space-edged token", () => {
+  assert.equal(appStoreCampaignToken(new URLSearchParams({ utm_source: " ", utm_content: "" })), undefined);
+  assert.equal(appStoreCampaignToken(new URLSearchParams({ utm_source: " ", utm_content: "ad1" })), "ad1");
+  assert.equal(appStoreCampaignToken(new URLSearchParams({ utm_source: " meta ", utm_content: " ad1 " })), "meta-ad1");
+  // The source is cut at 12 characters; a space there must not end up before the dash.
+  assert.equal(
+    appStoreCampaignToken(new URLSearchParams({ utm_source: "a very long source", utm_content: "x" })),
+    "a very long-x",
+  );
+  assert.equal(storeUrlForCampaign("ios", new URLSearchParams({ utm_source: "  " })), APP_STORE_URL);
+});

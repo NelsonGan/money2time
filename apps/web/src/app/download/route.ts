@@ -23,7 +23,8 @@ function campaignParameters(searchParams: URLSearchParams): URLSearchParams {
   const campaign = new URLSearchParams();
 
   for (const parameter of UTM_PARAMS) {
-    const value = searchParams.get(parameter);
+    // A blank tag is no tag: it would give Play an empty referrer value.
+    const value = searchParams.get(parameter)?.trim();
     if (value) {
       campaign.set(
         parameter,
