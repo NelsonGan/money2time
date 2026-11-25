@@ -231,6 +231,25 @@ test('extractBearerToken accepts raw and valid signed tokens and rejects forged 
     ),
     null,
   );
+  // Non-Bearer scheme and oversized tokens are rejected.
+  assert.equal(
+    await extractBearerToken(
+      new Request('https://sync.example/v1/ledgers', {
+        headers: { Authorization: `Basic ${token}` },
+      }),
+      SECRET,
+    ),
+    null,
+  );
+  assert.equal(
+    await extractBearerToken(
+      new Request('https://sync.example/v1/ledgers', {
+        headers: { Authorization: `Bearer ${'a'.repeat(300)}` },
+      }),
+      SECRET,
+    ),
+    null,
+  );
 });
 
 test('hot /v1 endpoints complete in a single D1 round trip including bearer auth', async (t) => {

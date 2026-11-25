@@ -13,9 +13,11 @@ import { getAuth } from './auth';
 import type { Env } from './env';
 import type { SessionUser } from './ledgers';
 
-/** Keep in step with `auth.ts` (`session.expiresIn` and `session.updateAge`). */
-export const SESSION_EXPIRES_IN_MS = 60 * 60 * 24 * 365 * 1000;
-export const SESSION_UPDATE_AGE_MS = 60 * 60 * 24 * 7 * 1000;
+/** Shared with `auth.ts` (`session.expiresIn` and `session.updateAge`) so they cannot drift. */
+export const SESSION_EXPIRES_IN_SECONDS = 60 * 60 * 24 * 365;
+export const SESSION_UPDATE_AGE_SECONDS = 60 * 60 * 24 * 7;
+export const SESSION_EXPIRES_IN_MS = SESSION_EXPIRES_IN_SECONDS * 1000;
+export const SESSION_UPDATE_AGE_MS = SESSION_UPDATE_AGE_SECONDS * 1000;
 
 /**
  * SQL subquery yielding the authenticated user's id for a bearer token bound

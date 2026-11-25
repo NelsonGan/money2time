@@ -1161,4 +1161,67 @@ describe('media and channel routing optimizations', () => {
       removeSharedLedger('trip-1');
     }
   });
+
+  it('null-fills absent nullable columns when updating an existing row from compact cloud JSON', async () => {
+    await engine.uploadAllReplacingCloud();
+    // This phone has a pre-existing transaction with a note (e.g. from backup restore).
+    addTransaction('tx-compact', 25, { note: 'Old local note' });
+    app.exec('DELETE FROM sync_outbox');
+    // Cloud sends compact JSON omitting `note` (cleared on another phone before first upload).
+    cloud
+      .prepare(
+        `INSERT INTO sync_rows (table_name, row_id, data, rev, origin, updated_at)
+         VALUES ('transactions', 'tx-compact', ?, 'r-compact', 'other', 1)`,
+      )
+      .run(
+        JSON.stringify({
+          id: 'tx-compact',
+          ledger_id: 'default',
+          type: 'expense',
+          amount: 25,
+          currency: 'USD',
+          date: '2026-11-05',
+          created_at: now,
+          updated_at: now,
+        }),
+      );
+    remoteChanged = true;
+    await engine.syncNow();
+    const updated = app.prepare('SELECT note FROM transactions WHERE id = ?').get('tx-compact') as {
+      note: string | null;
+    };
+    expect(updated.note).toBeNull();
+  });
+
+  it('ignores deleted rows of a paused shared ledger in pendingChannels so scheduler is never starved', () => {
+    app.exec('DELETE FROM sync_outbox');
+    saveSharedLedger({
+      ledgerId: 'paused-ledger',
+      shareId: 'share-paused',
+      role: 'member',
+      name: 'Paused',
+      ownerName: 'Mei',
+      memberCount: 1,
+      active: false,
+      userId: 'u1',
+      ownerUserId: 'u2',
+      kind: 'ledger',
+    });
+    try {
+      // Simulate a row previously synced on the paused share that was deleted locally.
+      app
+        .prepare(
+          "INSERT INTO sync_row_meta (table_name, row_id, rev, channel) VALUES ('transactions', 'tx-gone', 'r1', 'share-paused')",
+        )
+        .run();
+      app
+        .prepare(
+          "INSERT INTO sync_outbox (table_name, row_id, seq) VALUES ('transactions', 'tx-gone', 1)",
+        )
+        .run();
+      expect(pendingChannels()).toEqual({ personal: false, shared: new Set() });
+    } finally {
+      removeSharedLedger('paused-ledger');
+    }
+  });
 });

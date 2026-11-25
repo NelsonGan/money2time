@@ -64,6 +64,7 @@ import {
   ASSET_COLUMNS,
   CURRENT_SYNCED_SHAPE,
   hasMeaningfulRows,
+  isDeviceLocalColumn,
   isGroupTable,
   isSyncedRow,
   isSyncTable,
@@ -202,13 +203,34 @@ function replicaFileName(userId: string, channel: string): string {
 // App database helpers (synchronous, like the rest of the app)
 
 const columnCache = new Map<string, Set<string>>();
+const nullableColumnCache = new Map<string, Set<string>>();
+
+function loadTableColumns(table: string): void {
+  const info = getSQLite().getAllSync<{ name: string; notnull: number; pk: number }>(
+    `PRAGMA table_info("${table}")`,
+  );
+  if (!info.length) return;
+  columnCache.set(table, new Set(info.map((c) => c.name)));
+  nullableColumnCache.set(
+    table,
+    new Set(info.filter((c) => c.notnull === 0 && c.pk === 0).map((c) => c.name)),
+  );
+}
 
 function localColumns(table: string): Set<string> {
   let cols = columnCache.get(table);
   if (!cols) {
-    const info = getSQLite().getAllSync<{ name: string }>(`PRAGMA table_info("${table}")`);
-    cols = new Set(info.map((c) => c.name));
-    if (cols.size) columnCache.set(table, cols);
+    loadTableColumns(table);
+    cols = columnCache.get(table) ?? new Set();
+  }
+  return cols;
+}
+
+function localNullableColumns(table: string): Set<string> {
+  let cols = nullableColumnCache.get(table);
+  if (!cols) {
+    loadTableColumns(table);
+    cols = nullableColumnCache.get(table) ?? new Set();
   }
   return cols;
 }
@@ -379,13 +401,27 @@ function resolveUniqueClashes(table: string, row: Row): boolean {
 }
 
 /** Writes one pulled row, keeping this phone's device-local settings. */
-function writeRow(table: string, row: Row): boolean {
+function writeRow(table: string, row: Row, shared = false): boolean {
   const db = getSQLite();
   const exists = !!db.getFirstSync('SELECT 1 FROM "' + table + '" WHERE id = ?', [row.id ?? '']);
   // A settings row only ever updates this phone's own row.
   if (!exists && table === 'settings') return false;
   if (!resolveUniqueClashes(table, row)) return false;
-  const [sql, params] = buildWrite(table, row, exists);
+  // On UPDATE, null-fill absent nullable non-device-local columns so a compact
+  // row (omitted never-set nulls) clears any stale local value from a backup
+  // restore, cloud reset, or newly attached shared ledger.
+  let toWrite = row;
+  if (exists) {
+    const nullable = localNullableColumns(table);
+    let filled: Row | null = null;
+    for (const column of nullable) {
+      if (column in row || isDeviceLocalColumn(table, column, shared)) continue;
+      filled ??= { ...row };
+      filled[column] = null;
+    }
+    if (filled) toWrite = filled;
+  }
+  const [sql, params] = buildWrite(table, toWrite, exists);
   db.runSync(sql, params);
   return true;
 }
@@ -395,11 +431,11 @@ function writeRow(table: string, row: Row): boolean {
  * store (a constraint another version allows) does not stop the rows after it.
  * Returns whether it was written, or the error that stopped it.
  */
-function writeRowSafely(table: string, row: Row): boolean | Error {
+function writeRowSafely(table: string, row: Row, shared = false): boolean | Error {
   const db = getSQLite();
   db.execSync('SAVEPOINT m2t_sync_row');
   try {
-    const written = writeRow(table, row);
+    const written = writeRow(table, row, shared);
     db.execSync('RELEASE m2t_sync_row');
     return written;
   } catch (error) {
@@ -610,15 +646,33 @@ export function pendingChannels(): { personal: boolean; shared: Set<string> } {
   if (!anyOutbox) return { personal, shared };
   if (!allShares.length) return { personal: true, shared };
   const activeIds = new Set(activeShares.map((ledger) => ledger.shareId));
+  const hasLedgerShares = listLedgerShares().length > 0;
+  // Classify by table first so large personal imports skip per-row lookups when
+  // only shared albums (no shared ledgers) exist, or for non-ledger tables.
+  const tables = db
+    .getAllSync<{ table_name: string }>('SELECT DISTINCT table_name FROM sync_outbox')
+    .map((row) => row.table_name);
+  const perRowTables: string[] = [];
+  for (const table of tables) {
+    if (!isSyncTable(table) || !isLedgerScoped(table)) {
+      personal = true;
+    } else if (isGroupTable(table)) {
+      perRowTables.push(table);
+    } else if (!hasLedgerShares) {
+      personal = true;
+    } else {
+      perRowTables.push(table);
+    }
+  }
+  if (!perRowTables.length || (personal && shared.size === activeIds.size)) {
+    return { personal, shared };
+  }
   const entries = db.getAllSync<{ table_name: string; row_id: string }>(
-    'SELECT table_name, row_id FROM sync_outbox',
+    `SELECT table_name, row_id FROM sync_outbox WHERE table_name IN (${perRowTables.map(() => '?').join(', ')})`,
+    perRowTables,
   );
   for (const entry of entries) {
     if (personal && shared.size === activeIds.size) break;
-    if (!isSyncTable(entry.table_name)) {
-      personal = true;
-      continue;
-    }
     const local = db.getFirstSync<Row>(`SELECT * FROM "${entry.table_name}" WHERE id = ?`, [
       entry.row_id,
     ]);
@@ -730,7 +784,6 @@ export function runExclusive<T>(fn: () => Promise<T> | T): Promise<T> {
  * 15 seconds (which previously caused hundreds of full-DB downloads per day).
  */
 const REBUILD_BACKOFF_MS = [
-  0,
   5 * 60_000,
   30 * 60_000,
   2 * 60 * 60_000,
@@ -764,7 +817,7 @@ function readRebuildBackoff(channel: string): RebuildBackoffState {
 function noteRebuildAttempt(channel: string, now = Date.now()): void {
   const prev = readRebuildBackoff(channel);
   const nextCount = prev.count + 1;
-  const delay = REBUILD_BACKOFF_MS[Math.min(nextCount, REBUILD_BACKOFF_MS.length - 1)];
+  const delay = REBUILD_BACKOFF_MS[Math.min(nextCount - 1, REBUILD_BACKOFF_MS.length - 1)];
   setState(rebuildBackoffKey(channel), JSON.stringify({ count: nextCount, nextAt: now + delay }));
 }
 
@@ -1536,7 +1589,7 @@ export class SyncEngine {
         try {
           for (const { table, id, data } of adopted) {
             const row = decodeRow(table, data, localColumns(table), !this.isPersonal);
-            if (row && writeRowSafely(table, row) === true) adoptedRows += 1;
+            if (row && writeRowSafely(table, row, !this.isPersonal) === true) adoptedRows += 1;
             // Not written: forget the revision, so the next pull applies it.
             else recordRev(table, id, null, this.channel);
           }
@@ -1648,7 +1701,7 @@ export class SyncEngine {
           recordRev(item.table, item.id, item.rev, this.channel);
           continue;
         }
-        const written = writeRowSafely(item.table, row);
+        const written = writeRowSafely(item.table, row, !this.isPersonal);
         if (written instanceof Error) {
           if (isGroupTable(item.table)) {
             // A shared album's group is written by everyone in it. A row of

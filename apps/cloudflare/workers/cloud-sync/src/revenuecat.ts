@@ -41,13 +41,9 @@ export interface ProLinkRow {
   checked_at: number;
 }
 
-export interface AccountPhoneWithPro extends AccountPhone {
-  own_pro: number;
-}
-
 export interface PreloadedCheckIn {
   proLinks: ProLinkRow[];
-  phones: AccountPhoneWithPro[];
+  phones: AccountPhone[];
   /** Owner of `appUserId` in `pro_links`, when `appUserId` was sent. */
   appUserOwner?: { user_id: string } | null;
 }
@@ -151,10 +147,9 @@ export function checkInStatements(
   const statements: D1PreparedStatement[] = [
     proLinksStatement(env, userExpr, firstBind),
     env.AUTH_DB.prepare(
-      `SELECT a.app_user_id, a.first_seen_at, a.last_seen_at, COALESCE(p.is_pro, 0) AS own_pro
-       FROM account_phones a LEFT JOIN pro_links p
-         ON p.user_id = a.user_id AND p.app_user_id = a.app_user_id
-       WHERE a.user_id = ${userExpr} LIMIT 500`,
+      `SELECT app_user_id, first_seen_at, last_seen_at
+       FROM account_phones
+       WHERE user_id = ${userExpr} LIMIT 500`,
     ).bind(firstBind),
   ];
   if (appUserId) {
@@ -171,7 +166,7 @@ export function preloadedCheckInFromBatch(
 ): PreloadedCheckIn {
   return {
     proLinks: [...((results[0]?.results as ProLinkRow[] | undefined) ?? [])],
-    phones: [...((results[1]?.results as AccountPhoneWithPro[] | undefined) ?? [])],
+    phones: [...((results[1]?.results as AccountPhone[] | undefined) ?? [])],
     appUserOwner: hasAppUserId
       ? (((results[2]?.results as { user_id: string }[] | undefined)?.[0] ?? null) as {
           user_id: string;
@@ -268,7 +263,7 @@ export async function checkInPhoneDetailed(
     );
   const { proLinks, phones, appUserOwner } = loaded;
   const now = Date.now();
-  const claimedByOther = Boolean(appUserId && appUserOwner && appUserOwner.user_id !== userId);
+  let claimedByOther = Boolean(appUserId && appUserOwner && appUserOwner.user_id !== userId);
   if (claimedByOther) {
     console.warn('[cloud-sync] app user id already linked to another account');
   }
@@ -292,7 +287,6 @@ export async function checkInPhoneDetailed(
           app_user_id: appUserId,
           first_seen_at: now,
           last_seen_at: now,
-          own_pro: 0,
         });
       } else {
         existingPhone.first_seen_at = now;
@@ -314,13 +308,32 @@ export async function checkInPhoneDetailed(
       (async () => {
         if ((await fetchEntitlement(env, appUserId)) !== true) return;
         const linkedAt = Date.now();
-        await env.AUTH_DB.prepare(
+        const insert = await env.AUTH_DB.prepare(
           `INSERT OR IGNORE INTO pro_links (user_id, app_user_id, is_pro, checked_at)
            VALUES (?1, ?2, 1, ?3)`,
         )
           .bind(userId, appUserId, linkedAt)
           .run();
-        if (!proLinks.some((row) => row.app_user_id === appUserId)) {
+        let ownsLink = (insert.meta?.changes ?? 0) > 0;
+        if (!ownsLink) {
+          // Lost a concurrent INSERT race: verify whether this account or another claimed it.
+          const winner = await env.AUTH_DB.prepare(
+            'SELECT user_id FROM pro_links WHERE app_user_id = ?1',
+          )
+            .bind(appUserId)
+            .first<{ user_id: string }>();
+          ownsLink = winner?.user_id === userId;
+          if (!ownsLink && winner) {
+            claimedByOther = true;
+            console.warn('[cloud-sync] app user id already linked to another account');
+            await env.AUTH_DB.prepare(
+              'DELETE FROM account_phones WHERE user_id = ?1 AND app_user_id = ?2',
+            )
+              .bind(userId, appUserId)
+              .run();
+          }
+        }
+        if (ownsLink && !proLinks.some((row) => row.app_user_id === appUserId)) {
           proLinks.push({ app_user_id: appUserId, is_pro: 1, checked_at: linkedAt });
         }
       })(),
@@ -329,9 +342,13 @@ export async function checkInPhoneDetailed(
 
   if (parallelWork.length) await Promise.all(parallelWork);
 
-  const hasOtherPhones = phones.some(
+  const activePhones = claimedByOther
+    ? phones.filter((phone) => phone.app_user_id !== appUserId)
+    : phones;
+  const hasOtherPhones = activePhones.some(
     (phone) => phone.app_user_id !== appUserId && now - phone.last_seen_at < SLOT_IDLE_MS,
   );
+  if (claimedByOther) joinedAsAdditionalPhone = false;
 
   if (!(await isAccountPro(env, userId, proLinks))) {
     return { isPro: false, limited: false, hasOtherPhones, joinedAsAdditionalPhone };
@@ -342,11 +359,13 @@ export async function checkInPhoneDetailed(
   if (proLinks.some((row) => row.app_user_id === appUserId && row.is_pro === 1)) {
     return { isPro: true, limited: false, hasOtherPhones, joinedAsAdditionalPhone };
   }
+  // Use only the refreshed `proLinks` (not a pre-refresh SQL join), so a phone
+  // whose own purchase just lapsed immediately takes an account Pro slot.
   const ownProIds = new Set(
     proLinks.filter((row) => row.is_pro === 1).map((row) => row.app_user_id),
   );
   const places = phonesWithAccountPro(
-    phones.filter((phone) => phone.own_pro !== 1 && !ownProIds.has(phone.app_user_id)),
+    activePhones.filter((phone) => !ownProIds.has(phone.app_user_id)),
     now,
   );
   return places.has(appUserId)

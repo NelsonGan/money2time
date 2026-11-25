@@ -3,6 +3,7 @@ import { bearer, emailOTP } from 'better-auth/plugins';
 
 import { signInCodeEmail } from './email';
 import { csv, type Env } from './env';
+import { SESSION_EXPIRES_IN_SECONDS, SESSION_UPDATE_AGE_SECONDS } from './session';
 
 // Better Auth on D1. The app never uses cookies: every sign-in returns a
 // session token (bearer plugin) that the app keeps in the secure store and
@@ -50,8 +51,8 @@ function createAuth(env: Env) {
     },
     session: {
       // A phone stays signed in; each use within the update window extends it.
-      expiresIn: 60 * 60 * 24 * 365,
-      updateAge: 60 * 60 * 24 * 7,
+      expiresIn: SESSION_EXPIRES_IN_SECONDS,
+      updateAge: SESSION_UPDATE_AGE_SECONDS,
     },
     // No Better Auth delete-user endpoint: DELETE /v1/account also removes the
     // Turso database and the images, which Better Auth alone would orphan.

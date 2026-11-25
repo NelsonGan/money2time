@@ -232,4 +232,7 @@ test('bundled logo and card-design folders return 404 without touching R2', asyn
   assert.equal(exists.status, 200);
   assert.deepEqual(await exists.json(), { existing: [] });
   assert.equal(r2.calls.head, 0);
+  const putUnknown = await putMedia(env, space, 'malaysia/maybank.jpg', upload());
+  assert.equal(putUnknown.status, 400);
+  assert.equal(r2.calls.put, 0);
 });

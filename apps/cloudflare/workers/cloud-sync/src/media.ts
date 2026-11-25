@@ -144,7 +144,9 @@ export async function putMedia(
   request: Request,
 ): Promise<Response> {
   const contentType = contentTypeFor(path);
-  if (!isValidAssetPath(path) || !contentType) return json({ error: 'bad_path' }, 400);
+  if (!isValidAssetPath(path) || !isKnownMediaFolder(path) || !contentType) {
+    return json({ error: 'bad_path' }, 400);
+  }
   // A declared length is required, so an oversized upload or a full quota is
   // refused before the body is read.
   const length = Number(request.headers.get('content-length') ?? '');

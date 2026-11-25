@@ -21,9 +21,11 @@ interface SchedulerOptions {
   /**
    * Optional targeted runner for `pushSoon` triggers (pushes only the
    * channel(s) that have pending outbox edits, avoiding unnecessary cross-
-   * channel pulls). Falls back to `sync`.
+   * channel pulls). Returns `true` when it started a sync; if it returns
+   * `false`, the interval falls through to normal 15 s / 3 min checks so a
+   * paused-ledger outbox entry can never starve periodic pulls.
    */
-  onPushSoon?: () => void;
+  onPushSoon?: () => boolean;
   /** How long `sync` waits while open with nothing wanted (the fallback pull: 3 minutes). */
   everyMs?: number;
   /** Also run on going to the background (the default), where a last push belongs. */
@@ -52,9 +54,10 @@ export function useSyncScheduler(
       lastRun = Date.now();
       sync();
     };
-    const runPush = () => {
-      if (onPushSoon) onPushSoon();
-      else run();
+    const runPush = (): boolean => {
+      if (onPushSoon) return onPushSoon();
+      run();
+      return true;
     };
     const unsubscribeWake = pushSoon
       ? subscribeLocalDataChanged(() => {
@@ -71,8 +74,7 @@ export function useSyncScheduler(
       () => {
         if (AppState.currentState !== 'active') return;
         const now = Date.now();
-        if (pushSoon?.()) {
-          runPush();
+        if (pushSoon?.() && runPush()) {
           return;
         }
         if (pushSoon && now - lastCheck < CHECK_EVERY_MS - QUICK_EVERY_MS / 2) return;

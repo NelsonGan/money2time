@@ -1326,26 +1326,27 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
   }, [isStorePro, isStatusKnown]);
 
   const scheduledSync = useCallback(() => void runSync(), [runSync]);
-  const syncPendingChannels = useCallback(() => {
+  const syncPendingChannels = useCallback((): boolean => {
     const { personal, shared } = pendingChannels();
     if (personal) {
       void runSync({ shared: shared.size ? [...shared] : false });
-    } else if (shared.size) {
-      void runSharedSync({ channels: [...shared] });
+      return true;
     }
+    if (shared.size) {
+      void runSharedSync({ channels: [...shared] });
+      return true;
+    }
+    return false;
   }, [runSharedSync, runSync]);
   const syncWanted = useCallback(() => retryRef.current || pendingChangeCount() > 0, []);
   // An edit goes up within ~250 ms via local write wake (or the fallback poll),
   // unless a sync is running (it follows that one) or the last failed (the 15 s
   // retry has it). Only the channel(s) with pending edits are synced.
-  const pushSoon = useCallback(
-    () =>
-      !syncingRef.current &&
-      !retryRef.current &&
-      !sharedLedgerSync.retry &&
-      pendingChangeCount() > 0,
-    [],
-  );
+  const pushSoon = useCallback(() => {
+    if (syncingRef.current || retryRef.current || sharedLedgerSync.retry) return false;
+    const { personal, shared } = pendingChannels();
+    return personal || shared.size > 0;
+  }, []);
   useSyncScheduler(status === 'ready', scheduledSync, syncWanted, {
     pushSoon,
     onPushSoon: syncPendingChannels,
@@ -1369,19 +1370,20 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
   // Pro, or Pro paused): on their own schedule. Ready runs them with runSync.
   const hasShared = useHasSharedLedgers();
   const scheduledShared = useCallback(() => void runSharedSync(), [runSharedSync]);
-  const syncPendingSharedChannels = useCallback(() => {
+  const syncPendingSharedChannels = useCallback((): boolean => {
     const { shared } = pendingChannels();
-    if (shared.size) void runSharedSync({ channels: [...shared] });
+    if (!shared.size) return false;
+    void runSharedSync({ channels: [...shared] });
+    return true;
   }, [runSharedSync]);
   const sharedWanted = useCallback(
     () => sharedLedgerSync.retry || pendingSharedChangeCount() > 0,
     [],
   );
-  const sharedPushSoon = useCallback(
-    () =>
-      !sharedLedgerSync.isRunning() && !sharedLedgerSync.retry && pendingSharedChangeCount() > 0,
-    [],
-  );
+  const sharedPushSoon = useCallback(() => {
+    if (sharedLedgerSync.isRunning() || sharedLedgerSync.retry) return false;
+    return pendingChannels().shared.size > 0;
+  }, []);
   useSyncScheduler(
     hasShared && user !== null && status !== 'ready' && status !== 'unavailable',
     scheduledShared,
@@ -1429,6 +1431,9 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       },
       onReconnect: () => {
         if (closingRef.current) return;
+        // If this phone thought it was alone, check the account on reconnect so
+        // it learns immediately if a second phone signed in while disconnected.
+        if (!hasOtherPhonesRef.current) void refreshAccountProRef.current(true);
         // A paused phone's own data has nothing to sync; its shared ledgers
         // catch up, and a nudge the socket missed is checked for, unless the
         // return to the app that reconnected it checked just now.

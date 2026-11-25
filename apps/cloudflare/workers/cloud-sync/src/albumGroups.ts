@@ -184,37 +184,20 @@ interface GroupRow {
  * allow, so nothing here is trusted for more than its shape.
  */
 export async function readGroup(db: GroupDb): Promise<{ rows: GroupRow[]; moneyRev: string }> {
-  const [rows, activity] = await db.queryAll([
-    // People and settings first, then bills before payments: past the cap
-    // (far beyond any trip) the newest payments go, never a member.
-    {
-      sql: `SELECT table_name, row_id, data, rev FROM sync_rows
+  const groupRowsSql = `SELECT table_name, row_id, data, rev FROM sync_rows
             WHERE table_name IN ('album_members', 'album_expenses', 'album_settlements', 'album_groups',
               'album_categories')
             ORDER BY CASE table_name WHEN 'album_members' THEN 0 WHEN 'album_groups' THEN 1
               WHEN 'album_categories' THEN 1 WHEN 'album_expenses' THEN 2 ELSE 3 END, updated_at
-            LIMIT ${MAX_READ_ROWS}`,
-      args: [],
-    },
-    {
-      sql: `SELECT table_name, row_id, data, rev FROM sync_rows WHERE table_name = 'album_activity'
-            ORDER BY updated_at DESC, row_id DESC LIMIT ${MAX_READ_ACTIVITY}`,
-      args: [],
-    },
+            LIMIT ${MAX_READ_ROWS}`;
+  const activitySql = `SELECT table_name, row_id, data, rev FROM sync_rows WHERE table_name = 'album_activity'
+            ORDER BY updated_at DESC, row_id DESC LIMIT ${MAX_READ_ACTIVITY}`;
+  let [rows, activity] = await db.queryAll([
+    // People and settings first, then bills before payments: past the cap
+    // (far beyond any trip) the newest payments go, never a member.
+    { sql: groupRowsSql, args: [] },
+    { sql: activitySql, args: [] },
   ]);
-  const out: GroupRow[] = [];
-  for (const raw of [...rows, ...activity]) {
-    const table = String(raw.table_name) as GroupTable;
-    if (!(GROUP_TABLES as readonly string[]).includes(table)) continue;
-    try {
-      const data = JSON.parse(String(raw.data)) as unknown;
-      if (data && typeof data === 'object' && !Array.isArray(data)) {
-        out.push({ table, id: String(raw.row_id), data: data as Row, rev: String(raw.rev) });
-      }
-    } catch {
-      // A row that is not JSON is passed over, as a phone passes it over.
-    }
-  }
   // Compute the money stamp from the rows already read instead of scanning
   // sync_rows a second time (identical to MONEY_STAMP_SQL unless capped).
   let stamp: string;
@@ -241,8 +224,29 @@ export async function readGroup(db: GroupDb): Promise<{ rows: GroupRow[]; moneyR
       );
     stamp = moneyRows.map((row) => `${row.table}:${row.id}:${row.rev}`).join(',');
   } else {
-    const [fallback] = await db.queryAll([{ sql: `SELECT ${MONEY_STAMP_SQL} AS money`, args: [] }]);
-    stamp = String(fallback[0]?.money ?? '');
+    // Past the cap: re-read the whole group with MONEY_STAMP_SQL first in one
+    // round trip so a change landing meanwhile fails safe as stale.
+    const [stampRow, freshRows, freshActivity] = await db.queryAll([
+      { sql: `SELECT ${MONEY_STAMP_SQL} AS money`, args: [] },
+      { sql: groupRowsSql, args: [] },
+      { sql: activitySql, args: [] },
+    ]);
+    rows = freshRows;
+    activity = freshActivity;
+    stamp = String(stampRow[0]?.money ?? '');
+  }
+  const out: GroupRow[] = [];
+  for (const raw of [...rows, ...activity]) {
+    const table = String(raw.table_name) as GroupTable;
+    if (!(GROUP_TABLES as readonly string[]).includes(table)) continue;
+    try {
+      const data = JSON.parse(String(raw.data)) as unknown;
+      if (data && typeof data === 'object' && !Array.isArray(data)) {
+        out.push({ table, id: String(raw.row_id), data: data as Row, rev: String(raw.rev) });
+      }
+    } catch {
+      // A row that is not JSON is passed over, as a phone passes it over.
+    }
   }
   return { rows: out, moneyRev: await moneyRevOf(stamp) };
 }

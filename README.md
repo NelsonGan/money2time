@@ -2023,7 +2023,10 @@ updated_at)`, with each row as JSON, plus `sync_info` (the choice screen's
   `accounts`. Clearing a previously non-null column still writes explicit
   `null` so older app versions clear it on `UPDATE`, pre-existing `null` keys
   in legacy rows are preserved to avoid unnecessary rewrites, and singleton
-  tables (`settings`, `ledgers`) always keep explicit `null`.
+  tables (`settings`, `ledgers`) always keep explicit `null`. On `UPDATE`,
+  this version also null-fills absent nullable non-device-local columns so a
+  cleared field from a compact first upload clears any stale local copy (such
+  as after a backup restore or attaching a shared ledger).
 - **When it runs** (`useSyncScheduler`): at launch, on return to the app, on
   going to the background, within ~250 ms of a local edit (local mutations in
   `AppContext` and `albumGroupWrites` wake the scheduler via `outboxWake` with
@@ -2054,9 +2057,10 @@ updated_at)`, with each row as JSON, plus `sync_info` (the choice screen's
   and in a sync when nothing waits to be pushed. Consecutive rebuilds on a
   channel back off exponentially (`rebuild_backoff:<channel>` in `sync_state`:
   immediate first recovery, then 5 min, 30 min, 2 h, 12 h, 24 h; cleared once
-  a normal non-rebuild pull succeeds), preventing persistent faults from
-  looping full-database downloads. Each rebuild sends an error report with
-  `stage: 'replica_rebuilt'`, so the fault's rate stays visible.
+  a normal non-rebuild pull succeeds, so a persistent fault shows a sync error
+  between attempts instead of looping full-database downloads). Each rebuild
+  sends an error report with `stage: 'replica_rebuilt'`, so the fault's rate
+  stays visible.
 - **Live updates** (`services/liveSync.ts`, Worker `src/live.ts`). While the
   app is open and signed in it keeps one WebSocket to the Worker
   (`GET /v1/live`), held by a Durable Object per user (`SyncHub`, hibernating,
