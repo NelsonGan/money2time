@@ -6,6 +6,7 @@
  */
 
 import type { ReceiptPixelCrop } from '~/utils/receiptCrop';
+import type { ReceiptImageKind } from '~/utils/receiptImageSize';
 
 /** Platform fallback used by web/tests, where the native crop pipeline is unavailable. */
 export async function cropReceiptImage(uri: string, _crop: ReceiptPixelCrop): Promise<string> {
@@ -16,6 +17,7 @@ export async function cropReceiptImage(uri: string, _crop: ReceiptPixelCrop): Pr
 export async function downscaleReceiptForStorage(
   uri: string,
   _source?: { width?: number | null; height?: number | null },
+  _kind?: ReceiptImageKind,
 ): Promise<string> {
   return uri;
 }

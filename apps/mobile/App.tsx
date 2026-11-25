@@ -2055,9 +2055,15 @@ function ScreenshotScanSync() {
             await clearAutoLogPendingScans([entry.id]);
             continue;
           }
-          // Same storage treatment as a camera capture: downscale/re-encode,
-          // then copy into the receipt store, which the scan job then owns.
-          const downscaled = await downscaleReceiptForStorage(uri, (await getImageSize(uri)) ?? {});
+          // Downscale/re-encode like a camera capture, then copy into the
+          // receipt store, which the scan job then owns. A phone screenshot is
+          // capped smaller than a photo: its text stays legible and the scan's
+          // image tokens drop (utils/receiptImageSize.ts).
+          const downscaled = await downscaleReceiptForStorage(
+            uri,
+            (await getImageSize(uri)) ?? {},
+            'screenshot',
+          );
           const rel = saveReceiptImage(downscaled);
           outcome = await scanReceiptImageAsync(
             rel,

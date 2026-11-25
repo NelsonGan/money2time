@@ -5,14 +5,12 @@
  * re-encode as JPEG before the image is stored, so the single stored copy is
  * what both the attachment view and the upload use.
  *
- * The cap is 1536px on the long edge — receipts are dense small text, so
- * shrinking too far would make line items unreadable to the OCR model. 1536 is
- * chosen to land on the model's tile grid: vision models tile images into
- * 768px cells (2 x 768 = 1536), so a portrait receipt fits in a 2x2 = 4-tile
- * budget. Nudging up to 1600 spills the long edge into a third tile row (6
- * tiles, ~50% more image tokens) for no readable gain, so we sit right at the
- * boundary. A typical portrait receipt lands at ~1.2–1.8 MP: legible, but a
- * fraction of the original ~12 MP.
+ * The cap depends on what the image is (`receiptMaxEdge` in
+ * utils/receiptImageSize.ts): 1536px for photos of paper receipts, whose small
+ * printed text needs it, and 1280px for phone screenshots in screenshot scans,
+ * which read the same at that size. Claude, the scan model, bills an image by
+ * its pixels (width x height / 750 tokens), so the cap sets the image's share
+ * of every scan's cost directly.
  *
  * Resizing is by a SINGLE dimension (the longer edge), so the library preserves
  * the aspect ratio — the whole receipt is scaled down, never cropped or
@@ -23,15 +21,11 @@
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 
 import type { ReceiptPixelCrop } from '~/utils/receiptCrop';
+import { type ReceiptImageKind, receiptMaxEdge } from '~/utils/receiptImageSize';
 
 /**
- * Longest edge (px) the stored receipt is capped to; never upscales. Sits on
- * the 768px tile grid (2 x 768) so a portrait receipt fits a 4-tile budget.
- */
-const MAX_EDGE = 1536;
-/**
  * JPEG quality for the re-encode (0–1). Quality does not affect the model's
- * image-token cost (that is resolution/tile-based), only the stored file size,
+ * image-token cost (that is set by the pixel count), only the stored file size,
  * so keep it high enough for crisp small text.
  */
 const COMPRESS = 0.7;
@@ -48,17 +42,19 @@ export async function cropReceiptImage(uri: string, crop: ReceiptPixelCrop): Pro
 export async function downscaleReceiptForStorage(
   uri: string,
   source: { width?: number | null; height?: number | null } = {},
+  kind: ReceiptImageKind = 'photo',
 ): Promise<string> {
   try {
     const width = source.width ?? 0;
     const height = source.height ?? 0;
+    const maxEdge = receiptMaxEdge(source, kind);
     const context = ImageManipulator.manipulate(uri);
 
     // Only scale down, and only along the longer edge so the aspect ratio is
     // preserved (single-dimension resize never crops or distorts). When the
     // dimensions are unknown or already within budget we just re-encode.
-    if (Math.max(width, height) > MAX_EDGE) {
-      context.resize(width >= height ? { width: MAX_EDGE } : { height: MAX_EDGE });
+    if (Math.max(width, height) > maxEdge) {
+      context.resize(width >= height ? { width: maxEdge } : { height: maxEdge });
     }
 
     const image = await context.renderAsync();
