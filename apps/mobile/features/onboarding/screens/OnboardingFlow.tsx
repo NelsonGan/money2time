@@ -101,6 +101,14 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     [settings.currencyCode],
   );
   const starterCountry = pickedStarterCountry ?? ownCountry;
+  // The logo pickers open on the country the step ended on, so a country
+  // browsed before onboarding does not outlive it.
+  const leaveAccountsStep = () => {
+    if (settings.accountLogoCountry !== starterCountry) {
+      updateSettings({ accountLogoCountry: starterCountry });
+    }
+    setStep('automations');
+  };
 
   // The welcome page has no top bar, so the bar counts the steps after it.
   const stepIndex = STEP_ORDER.indexOf(step);
@@ -320,9 +328,10 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             <OnboardingAccountsStep
               country={starterCountry}
               onCountryChange={(accountLogoCountry) => {
-                setPickedStarterCountry(accountLogoCountry);
-                // The logo pickers open on the same country later.
-                updateSettings({ accountLogoCountry });
+                // Picking the country it already shows keeps it following the currency.
+                setPickedStarterCountry(
+                  accountLogoCountry === ownCountry ? null : accountLogoCountry,
+                );
               }}
               selections={starterSelections}
               onSelectionsChange={setStarterSelections}
@@ -335,7 +344,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                   account_country: starterCountry,
                   skipped: false,
                 });
-                setStep('automations');
+                leaveAccountsStep();
               }}
               onSkip={() => {
                 setStarterAccountsSkipped(true);
@@ -345,7 +354,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                   account_country: starterCountry,
                   skipped: true,
                 });
-                setStep('automations');
+                leaveAccountsStep();
               }}
             />
           )}

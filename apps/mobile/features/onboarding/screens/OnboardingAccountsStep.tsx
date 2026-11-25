@@ -37,22 +37,21 @@ const SECTION_TITLE_KEY: Record<StarterKind, string> = {
 };
 
 /**
- * Splits tiles into rows of COLUMNS, the last one padded with spacers. Each
- * row shares its width out with flex, where tiles measured to a third of the
- * grid wrapped the third one onto its own line whenever the grid came out a
- * hair narrower than measured (the 430 pt iPhone Pro Max).
+ * A tile takes a third of its row: a 30% basis puts three on a line, and
+ * growing shares out the rest, so a line always adds up to exactly the grid.
+ * Tiles measured to a third of the grid wrapped the third one onto its own
+ * line whenever the grid came out a hair narrower (the 430 pt iPhone Pro Max).
  */
-function gridRows(items: React.ReactNode[]): React.ReactNode[][] {
+const TILE_STYLE = { flexBasis: '30%', flexGrow: 1 } as const;
+
+/** Pads the last line with spacers, so its tiles keep a third of the width. */
+function withSpacers(items: React.ReactNode[]): React.ReactNode[] {
   const tiles = items.filter((item) => item != null && item !== false);
-  const rows: React.ReactNode[][] = [];
-  for (let start = 0; start < tiles.length; start += COLUMNS) {
-    const row = tiles.slice(start, start + COLUMNS);
-    for (let spacer = row.length; spacer < COLUMNS; spacer++) {
-      row.push(<View key={`spacer-${spacer}`} className="flex-1" />);
-    }
-    rows.push(row);
+  const spacers = (COLUMNS - (tiles.length % COLUMNS)) % COLUMNS;
+  for (let index = 0; index < spacers; index++) {
+    tiles.push(<View key={`spacer-${index}`} style={TILE_STYLE} />);
   }
-  return rows;
+  return tiles;
 }
 
 interface Tile {
@@ -208,8 +207,9 @@ export function OnboardingAccountsStep({
       <Pressable
         key={`${key}|${tile.selection.logoId ?? ''}`}
         onPress={() => toggle(tile.selection)}
+        style={TILE_STYLE}
         className={cn(
-          'flex-1 items-center gap-2 px-1.5 pb-2.5 pt-3',
+          'items-center gap-2 px-1.5 pb-2.5 pt-3',
           selected ? ONBOARDING_CARD_SELECTED : ONBOARDING_CARD,
         )}
         accessibilityRole="checkbox"
@@ -273,12 +273,8 @@ export function OnboardingAccountsStep({
         </Text>
         {options.first ? counter : null}
       </View>
-      <View style={{ gap: TILE_GAP }}>
-        {gridRows([...tiles.map(renderTile), options.extra]).map((row, index) => (
-          <View key={index} className="flex-row" style={{ gap: TILE_GAP }}>
-            {row}
-          </View>
-        ))}
+      <View className="flex-row flex-wrap" style={{ gap: TILE_GAP }}>
+        {withSpacers([...tiles.map(renderTile), options.extra])}
       </View>
     </View>
   );
@@ -356,8 +352,9 @@ export function OnboardingAccountsStep({
               <Pressable
                 key="add-typed"
                 onPress={addTyped}
+                style={TILE_STYLE}
                 className={cn(
-                  'flex-1 items-center gap-2 px-1.5 pb-2.5 pt-3',
+                  'items-center gap-2 px-1.5 pb-2.5 pt-3',
                   ONBOARDING_CARD,
                   'border-dashed',
                 )}
