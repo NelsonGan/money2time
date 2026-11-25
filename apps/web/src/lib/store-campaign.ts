@@ -9,6 +9,30 @@ const SOURCE_LIMIT = 12;
 
 const truncate = (value: string, limit: number) => Array.from(value).slice(0, limit).join("");
 
+const UTM_PARAMS = [
+  "utm_source",
+  "utm_medium",
+  "utm_campaign",
+  "utm_content",
+  "utm_id",
+  "utm_term",
+] as const;
+const UTM_VALUE_LIMIT = 100;
+
+/**
+ * The UTM tags of a `/download` request, the only query parameters it passes
+ * on. Each value is trimmed, cut to 100 characters and trimmed again; a blank
+ * tag is left out, since it would give Play an empty referrer value.
+ */
+export function campaignFromQuery(searchParams: URLSearchParams): URLSearchParams {
+  const campaign = new URLSearchParams();
+  for (const parameter of UTM_PARAMS) {
+    const value = truncate(searchParams.get(parameter)?.trim() ?? "", UTM_VALUE_LIMIT).trimEnd();
+    if (value) campaign.set(parameter, value);
+  }
+  return campaign;
+}
+
 /**
  * The App Store campaign token for a `/download` link's UTM parameters: the
  * source (or medium) and the most specific detail the link has (content, then
