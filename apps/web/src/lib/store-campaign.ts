@@ -4,18 +4,31 @@ type StorePlatform = "android" | "ios";
 
 // App Store Connect keeps campaign tokens up to 40 characters.
 const CAMPAIGN_TOKEN_LIMIT = 40;
+// The source is a short channel name; capping it keeps room for the detail.
+const SOURCE_LIMIT = 12;
+
+const truncate = (value: string, limit: number) => Array.from(value).slice(0, limit).join("");
 
 /**
  * The App Store campaign token for a `/download` link's UTM parameters: the
- * source and the most specific of content or campaign, for example
- * `meta-aarontjj7_tng`. App Store Connect's App Analytics counts product page
- * views and downloads under it (Acquisition › Campaigns).
+ * source (or medium) and the most specific detail the link has (content, then
+ * campaign, id or term), for example `meta-aarontjj7_tng`. App Store Connect's
+ * App Analytics counts product page views and downloads under it
+ * (Acquisition › Campaigns), so a link's `utm_content` should be unique across
+ * campaigns. Any UTM tag yields a token, as any UTM tag yields a Play referrer.
  */
 export function appStoreCampaignToken(campaign: URLSearchParams): string | undefined {
-  const source = campaign.get("utm_source");
-  const detail = campaign.get("utm_content") ?? campaign.get("utm_campaign");
-  const token = [source, detail].filter(Boolean).join("-");
-  return token ? Array.from(token).slice(0, CAMPAIGN_TOKEN_LIMIT).join("") : undefined;
+  const source = campaign.get("utm_source") || campaign.get("utm_medium");
+  const detail =
+    campaign.get("utm_content") ||
+    campaign.get("utm_campaign") ||
+    campaign.get("utm_id") ||
+    campaign.get("utm_term");
+
+  const head = source ? truncate(source, SOURCE_LIMIT) : "";
+  if (!detail) return head || undefined;
+  if (!head) return truncate(detail, CAMPAIGN_TOKEN_LIMIT);
+  return `${head}-${truncate(detail, CAMPAIGN_TOKEN_LIMIT - Array.from(head).length - 1)}`;
 }
 
 /**

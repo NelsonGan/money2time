@@ -29,6 +29,21 @@ test("the campaign token falls back to the campaign, then the source, and keeps 
   assert.equal(appStoreCampaignToken(new URLSearchParams()), undefined);
 });
 
+test("a long source never crowds out the detail", () => {
+  const token = appStoreCampaignToken(new URLSearchParams({ utm_source: "s".repeat(39), utm_content: "ad1" }));
+  assert.equal(token, `${"s".repeat(12)}-ad1`);
+  const long = appStoreCampaignToken(new URLSearchParams({ utm_source: "meta", utm_content: "c".repeat(60) }));
+  assert.equal(long?.length, 40);
+  assert.ok(long?.startsWith("meta-c"));
+});
+
+test("any UTM tag gives an App Store token, as it gives a Play referrer", () => {
+  assert.equal(appStoreCampaignToken(new URLSearchParams({ utm_id: "123", utm_medium: "paid_social" })), "paid_social-123");
+  assert.equal(appStoreCampaignToken(new URLSearchParams({ utm_term: "budget" })), "budget");
+  const url = new URL(storeUrlForCampaign("ios", new URLSearchParams({ utm_medium: "email" })));
+  assert.equal(url.searchParams.get("ct"), "email");
+});
+
 test("the Play link carries the UTM parameters as its install referrer", () => {
   const url = new URL(storeUrlForCampaign("android", ad));
   assert.equal(url.searchParams.get("id"), "com.nelsongan.money2time");
