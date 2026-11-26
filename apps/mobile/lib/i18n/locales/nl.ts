@@ -1,20 +1,21 @@
 const nl = {
   backup_restore: {
-    title: 'Restore backup',
-    export_description: 'Personal data and shared ledgers you own.',
-    import_description: 'Choose what to restore from a backup.',
-    personal: 'Personal ledgers',
-    personal_note: 'Replaces ledgers and settings on synced devices.',
-    personal_local_note: 'Replaces ledgers and settings.',
-    shared_ledgers: 'Shared ledgers',
-    owned: 'You own this ledger',
-    unavailable: 'Owner access required',
-    restore_action: 'Restore selected',
-    confirm_title: 'Restore for everyone?',
+    title: 'Back-up terugzetten',
+    export_description: 'Persoonlijke gegevens en gedeelde boeken waarvan je eigenaar bent.',
+    import_description: 'Kies wat je uit een back-up wilt terugzetten.',
+    personal: 'Persoonlijke boeken',
+    personal_note: 'Vervangt boeken en instellingen op gesynchroniseerde apparaten.',
+    personal_local_note: 'Vervangt boeken en instellingen.',
+    shared_ledgers: 'Gedeelde boeken',
+    owned: 'Je bent eigenaar van dit boek',
+    unavailable: 'Eigenaarstoegang vereist',
+    restore_action: 'Selectie terugzetten',
+    confirm_title: 'Voor iedereen terugzetten?',
     confirm_message:
-      '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
-    sync_pending: 'Restored here. Stay signed in to finish syncing.',
-    failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+      '{{names}}\n\nVervangen door de back-up van {{date}}. Latere wijzigingen gaan verloren. Leden en uitnodigingen blijven ongewijzigd.',
+    sync_pending: 'Hier teruggezet. Blijf ingelogd om het synchroniseren af te ronden.',
+    failed:
+      'Terugzetten mislukt. Controleer je verbinding, eigenaarstoegang en vrije opslagruimte.',
     photos_unavailable:
       'Kan de foto’s van deze back-up niet downloaden. Controleer je verbinding en probeer het opnieuw.',
     photos_missing:
@@ -70,12 +71,12 @@ const nl = {
     split_manual_subtitle: 'Voer een rekening in en splits deze',
     split_scan_title: 'Scannen en splitsen',
     split_scan_subtitle: 'Scan een bon, splits de items',
-    voice_title: 'Steminvoer',
+    voice_title: 'Spraakinvoer',
     voice_subtitle: 'Zeg het, wij noteren het',
     voice_unavailable_title: 'Spraakinvoer niet beschikbaar',
     voice_unavailable_message: 'Dit apparaat ondersteunt geen spraakinvoer.',
     over_account_limit_message:
-      'Je hebt {{active}} actieve accounts. Om gratis transacties toe te voegen, houd je maximaal {{count}} actieve accounts. Verwijder de extra accounts, of abonneer je op Pro. Andere acties blijven beschikbaar.',
+      'Je hebt {{active}} actieve rekeningen. Om gratis transacties toe te voegen, houd je maximaal {{count}} actieve rekeningen. Verwijder de extra rekeningen, of abonneer je op Pro. Andere acties blijven beschikbaar.',
     quick_title: 'Snelle invoer',
     quick_subtitle: 'Snel toevoegen met het toetsenblok',
     full_title: 'Volledige invoer',
@@ -186,7 +187,7 @@ const nl = {
       },
       locations: {
         title: 'Tag transacties met plaatsen',
-        body: 'Zet Locaties aan via Instellingen > Personalisatie om een plaats aan uitgaven en inkomsten toe te voegen. Nieuwe uitgaven kunnen automatisch je huidige locatie krijgen, of kies een plek via zoeken of recente plaatsen. Open de Uitgavenkaart vanuit de Kalender om te zien waar je geld naartoe gaat.',
+        body: 'Zet Locaties aan via Instellingen > Personalisatie om een plaats aan uitgaven en inkomsten toe te voegen. Nieuwe uitgaven kunnen automatisch je huidige locatie krijgen, of kies een plek via zoeken of recente plaatsen. Open de Uitgavenkaart vanuit Agenda om te zien waar je geld naartoe gaat.',
       },
     },
     split_bills_album_icons: {
@@ -322,17 +323,17 @@ const nl = {
       },
     },
     pro_trial_accounts: {
-      title: 'Gratis proefperiode en meer gratis accounts',
+      title: 'Gratis proefperiode en meer gratis rekeningen',
       trial: {
         title: 'De gratis proefperiode is er',
         body: 'Als je store-account in aanmerking komt, kun je Pro proberen voordat je betaalt. Open de planpagina voor de proefduur en het exacte bedrag daarna.',
       },
       accounts: {
-        title: 'Meer accounts met Gratis',
-        body: 'Het Gratis-abonnement bevat nu {{count}} betaal- of kredietaccounts, in plaats van vijf. Doelen en leningen houden hun eigen limieten. Je bestaande transacties en andere acties blijven beschikbaar.',
+        title: 'Meer rekeningen met Gratis',
+        body: 'Het Gratis-abonnement bevat nu {{count}} betaal- of kredietrekeningen, in plaats van vijf. Doelen en leningen houden hun eigen limieten. Je bestaande transacties en andere acties blijven beschikbaar.',
       },
     },
-    badge: { ad: 'ADVERTENTIE' },
+    badge: { ad: 'ADV' },
     ricecal: {
       title: 'RiceCal',
       card_subtitle: 'Houd calorieën bij',
@@ -349,7 +350,7 @@ const nl = {
       },
       liveEarnings: {
         title: 'Zie je loon oplopen',
-        body: 'Zet een live kaart op je vergrendelscherm en zie wat je vandaag al hebt verdiend, oplopend met je echte uurwaarde. Start hem zelf, of stel je dienst in en hij start vanzelf.',
+        body: 'Zet een live kaart op je vergrendelscherm en zie wat je vandaag al hebt verdiend, oplopend met je echte uurtarief. Start hem zelf, of stel je dienst in en hij start vanzelf.',
       },
       appIcon: {
         title: 'Het oude icoon is terug',
@@ -361,7 +362,7 @@ const nl = {
       },
     },
     subscriptions_tutorials_loans: {
-      title: 'Abonnementen & tutorials',
+      title: 'Abonnementen & handleidingen',
       subscriptionLogos: {
         title: 'Logo’s voor je abonnementen',
         body: 'Typ een naam als Netflix en het logo verschijnt. Ruim 2.000 merken om uit te kiezen. Je eigen afbeelding met Pro.',
@@ -371,8 +372,8 @@ const nl = {
         body: 'Terugkerend laat nu zien wat je deze maand nog betaalt, wat het per jaar kost en op welke dagen er geld weggaat.',
       },
       tutorials: {
-        title: 'Tutorials in de app',
-        body: 'Korte uitleg met schermafbeeldingen, van een bon scannen tot een rekening delen. Zoek ze in Instellingen onder Help en info.',
+        title: 'Handleidingen in de app',
+        body: 'Korte uitleg met schermafbeeldingen, van een bon scannen tot een rekening splitsen. Zoek ze in Instellingen onder Help en info.',
       },
       loanInstalments: {
         title: 'Leningtermijnen voor je geboekt',
@@ -445,7 +446,7 @@ const nl = {
       title: 'Splitsen per item',
       split: {
         title: 'Scan een bonnetje en splits het item voor item',
-        body: 'Maak een foto van de rekening en wijs elke regel toe aan wie het had — deel gerechten in porties, en belasting en bediening worden vanzelf eerlijk verdeeld. Iedereen komt met een exact bedrag in “Wie jou nog moet betalen” terecht.',
+        body: 'Maak een foto van de rekening en wijs elke regel toe aan wie het had. Deel gerechten in porties, en belasting en bediening worden vanzelf eerlijk verdeeld. Iedereen komt met een exact bedrag in “Wie jou nog moet betalen” terecht.',
       },
       selector: {
         title: 'Sneller toevoegen',
@@ -483,7 +484,7 @@ const nl = {
       },
       redesign: {
         title: 'Een frisse nieuwe look',
-        body: 'Instellingen, Uurwaarde en Terugkerende betalingen zijn opnieuw ontworpen, overzichtelijker en makkelijker in gebruik.',
+        body: 'Instellingen, Uurtarief en Terugkerende betalingen zijn opnieuw ontworpen, overzichtelijker en makkelijker in gebruik.',
       },
       app_lock: {
         title: 'Vergrendel de app',
@@ -509,7 +510,7 @@ const nl = {
       open_hourly_value_settings: 'Werkuren instellen',
       open_add_transaction: 'Transactie toevoegen',
       open_recurring: 'Terugkerend openen',
-      open_tutorials: 'Tutorials bekijken',
+      open_tutorials: 'Handleidingen bekijken',
       open_live_earnings: 'Live verdiensten instellen',
       open_app_icon: 'Kies je icoon',
       open_ricecal: 'Probeer RiceCal',
@@ -574,7 +575,7 @@ const nl = {
       voice_logged: 'Vastgelegd via spraak',
       voice_example: 'taxi 30',
       album_trip: 'Reis naar Tokio',
-      album_trip_meta: '4 mrt – 11 mrt',
+      album_trip_meta: '4 mrt - 11 mrt',
       album_celebration: "Mama's verjaardag",
       album_celebration_meta: '8 transacties',
       month_starts_on_payday: 'Je maand begint op je betaaldag',
@@ -602,7 +603,7 @@ const nl = {
       },
       savings: {
         title: 'Hoeveel je overhoudt',
-        body: 'Je spaarquote van deze maand in één oogopslag — wat je overhield versus wat je uitgaf, in geld en werkuren.',
+        body: 'Je spaarquote van deze maand in één oogopslag: wat je overhield versus wat je uitgaf, in geld en werkuren.',
       },
       trend: {
         title: 'Je spaartrend',
@@ -623,7 +624,7 @@ const nl = {
     spent: 'Uitgegeven',
     of_income_saved: 'van het inkomen gespaard',
     add_income_hint: 'Voeg inkomsten toe om je percentage te zien',
-    set_hourly_value: 'Stel uurwaarde in de app in',
+    set_hourly_value: 'Stel je uurtarief in de app in',
     of_work: '{{hours}} werk',
     of_work_kept: '≈ {{hours}} werk behouden',
     of_work_behind: '≈ {{hours}} werk achterstand',
@@ -655,7 +656,7 @@ const nl = {
       wage_title: 'Wat is een uur waard?',
       wage_body:
         'Live verdiensten lopen op met je echte uurtarief. Stel het in en je kunt beginnen.',
-      wage_action: 'Mijn uurwaarde instellen',
+      wage_action: 'Mijn uurtarief instellen',
       disabled_title: 'Live-activiteiten staan uit',
       disabled_body: 'Zet ze weer aan voor Money2Time in de iOS-instellingen en kom dan terug.',
       unavailable: 'Live-activiteiten vereisen een iPhone met iOS 16.2 of nieuwer.',
@@ -790,7 +791,7 @@ const nl = {
       confirm_skip: 'Toch overslaan',
       icloud_pending_title: 'Back-up ingeschakeld',
       icloud_pending_message:
-        'Log in bij iCloud en schakel iCloud Drive in bij Instellingen — je back-up start automatisch zodra deze beschikbaar is.',
+        'Log in bij iCloud en schakel iCloud Drive in bij Instellingen. Je back-up start automatisch zodra deze beschikbaar is.',
     },
     source: {
       title: 'Hoe heb je ons gevonden?',
@@ -814,7 +815,7 @@ const nl = {
       discard_message: 'Je items en toewijzingen gaan verloren.',
       discard_confirm: 'Weggooien',
       keep_editing: 'Blijven bewerken',
-      low_confidence_banner: 'Sommige regels waren moeilijk te lezen — controleer ze even.',
+      low_confidence_banner: 'Sommige regels waren moeilijk te lezen. Controleer ze even.',
       items_empty_title: 'Nog geen items',
       items_empty_message: 'Voeg elke regel van de bon toe om item voor item te splitsen.',
       item_name_placeholder: 'Itemnaam',
@@ -1009,7 +1010,7 @@ const nl = {
         chip_active: 'Kosten {{amount}}',
         title: 'Overboekingskosten',
         amount_label: 'Bedrag van de kosten',
-        charged_to: 'Betaald door',
+        charged_to: 'Afgeschreven van',
         remove: 'Kosten verwijderen',
         row_note: 'Overboekingskosten',
         delete_confirm:
@@ -1102,7 +1103,7 @@ const nl = {
         transfer_amount_gt_zero: 'Overboekingsbedrag moet groter zijn dan nul.',
         amount_gt_zero: 'Bedrag moet > 0 zijn',
         pick_two_different_accounts: 'Kies twee verschillende rekeningen voor de overboeking.',
-        enter_rule_name: 'Voer een naam in voor de herhalingssregel.',
+        enter_rule_name: 'Voer een naam in voor de herhalingsregel.',
         valid_end_date: 'Kies een geldige einddatum.',
       },
       split: {
@@ -1252,10 +1253,10 @@ const nl = {
       'Kies een categorie en volg hoe de uitgaven zich in de loop van de tijd ontwikkelen.',
     expense_sentiment: 'Uitgavengevoel',
     expense_sentiment_description:
-      'Zie de stemming achter je uitgaven — blij, neutraal of spijt — dag voor dag.',
+      'Zie de stemming achter je uitgaven: blij, neutraal of spijtig, dag voor dag.',
     asset_history: 'Vermogenstrend',
     asset_history_description:
-      'Volg je totale vermogen over het jaar en bekijk de maandelijkse balansrend.',
+      'Volg je totale vermogen over het jaar en bekijk de maandelijkse saldotrend.',
     income_rate_history: 'Uurtarief-geschiedenis',
     income_rate_history_description:
       'Zie hoe je echte uurtarief in de loop van de tijd is veranderd over je volledige transactiegeschiedenis.',
@@ -1350,7 +1351,7 @@ const nl = {
         goal_hint: '20%+ wordt als gezond beschouwd.',
       },
       income_rate_history: {
-        rate_title: 'Inkomstenpercentage',
+        rate_title: 'Uurtarief',
         no_data_title: 'Onvoldoende uurtarief-data',
         no_data_message:
           'Voeg minstens 2 uurtarief-vermeldingen toe om je tariefgeschiedenisdiagram te zien.',
@@ -1451,7 +1452,7 @@ const nl = {
       auto_categorize_mapping_link: 'Trefwoordtoewijzing bewerken',
       save_screenshot_label: 'Schermafbeelding als bon opslaan',
       save_screenshot_hint: 'Houd de gemaakte schermafbeelding bij de geboekte transactie.',
-      tutorial_button: 'Tutorial',
+      tutorial_button: 'Handleiding',
       video_tutorial: 'Video bekijken',
       download_shortcut_button: 'Opdracht ophalen',
       download_automation_button: 'Automatisering ophalen',
@@ -1489,16 +1490,16 @@ const nl = {
         'Tik op de knop hieronder en tik daarna op Add Shortcut in het volgende scherm om hem te installeren.',
       new_transaction_step_2:
         'Open Instellingen → Toegankelijkheid → Aanraken → Tik op achterkant en tik dan op Dubbele tik (of Driedubbele tik).',
-      new_transaction_step_3: 'Scroll omlaag naar het gedeelte Shortcuts en kies New Transaction.',
+      new_transaction_step_3: 'Scroll omlaag naar het gedeelte Opdrachten en kies New Transaction.',
       new_transaction_step_4:
         'Klaar. Tik twee keer op de achterkant van je iPhone om meteen een nieuwe transactie te openen.',
       log_screenshot_hint:
-        'Gebruik Tik op de achterkant op een betaal- of bonscherm. Money2Time legt het vast en leest bedrag, winkelier en rekening automatisch.',
+        'Gebruik Tik op achterkant op een betaal- of bonscherm. Money2Time legt het vast en leest bedrag, winkelier en rekening automatisch.',
       log_screenshot_step_1:
         'Tik op de knop hieronder en tik daarna op Add Shortcut in het volgende scherm om hem te installeren.',
       log_screenshot_step_2:
         'Open Instellingen → Toegankelijkheid → Aanraken → Tik op achterkant en tik dan op Dubbele tik (of Driedubbele tik).',
-      log_screenshot_step_3: 'Scroll omlaag naar het gedeelte Shortcuts en kies Log Screenshot.',
+      log_screenshot_step_3: 'Scroll omlaag naar het gedeelte Opdrachten en kies Log Screenshot.',
       log_screenshot_step_4:
         'Tik op een betaal- of bonscherm twee keer op de achterkant van je iPhone. Hij maakt de schermafbeelding automatisch voor je.',
       log_screenshot_step_5:
@@ -1540,7 +1541,7 @@ const nl = {
       payment_alerts_android_step_7:
         'Open Geschiedenis om elke melding te bekijken. Kies Inkomsten, Uitgaven of Negeren, of gebruik de knoppen “Alles”.',
       payment_alerts_ios_step_1:
-        'Open Shortcuts, tik op + en daarna Edit. Tik in de editor op Automation.',
+        'Open Opdrachten, tik op + en daarna Edit. Tik in de editor op Automation.',
       payment_alerts_ios_step_2: 'Zoek Notification en selecteer dit.',
       payment_alerts_ios_step_3: 'Zoek Log Notification en voeg het toe.',
       payment_alerts_ios_step_4: 'Tik op Message in Log Notification en daarna Select Variable.',
@@ -1549,7 +1550,7 @@ const nl = {
       payment_alerts_ios_step_7:
         'Tik op terug om te bewaren. Herhaal dit voor elke bank- of wallet-app. Tik in Money2Time op het geschiedenis-icoon naast Meldingen om nieuwe meldingen te bekijken, ook offline.',
       payment_alerts_android_disclosure:
-        'Lees hoe meldingstoegang wordt gebruikt en tik op Continue.',
+        'Lees hoe meldingstoegang wordt gebruikt en tik op Doorgaan.',
       payment_alerts_ios_app:
         'Tik op App en kies je bank- of wallet-app. Deze screenshots gebruiken Wallet als voorbeeld.',
       payment_alerts_ios_run:
@@ -1635,11 +1636,11 @@ const nl = {
     account_signed_out: 'Niet ingelogd',
     account_signed_in_a11y: 'Ingelogd als {{email}}',
     account_sign_in_prompt:
-      'Log in om albums te delen en mee te doen met gedeelde grootboeken. Je gegevens blijven op deze telefoon tot je Cloud Sync aanzet.',
+      'Log in om albums te delen en mee te doen met gedeelde boeken. Je gegevens blijven op deze telefoon tot je Cloud Sync aanzet.',
     account_faq: {
       what: {
         q: 'Wat doet inloggen?',
-        a: 'Je krijgt een account om albums te delen en mee te doen met grootboeken die anderen met je delen. Je gegevens blijven op deze telefoon.',
+        a: 'Je krijgt een account om albums te delen en mee te doen met boeken die anderen met je delen. Je gegevens blijven op deze telefoon.',
       },
       sync: {
         q: 'Synchroniseert inloggen mijn gegevens?',
@@ -1647,23 +1648,23 @@ const nl = {
       },
       pro: {
         q: 'Heb ik Pro nodig om in te loggen?',
-        a: 'Nee. Inloggen, albums delen en meedoen met gedeelde grootboeken is gratis. Pro is voor het synchroniseren van je eigen gegevens en het delen van een grootboek.',
+        a: 'Nee. Inloggen, albums delen en meedoen met gedeelde boeken is gratis. Pro is voor het synchroniseren van je eigen gegevens en het delen van een boek.',
       },
       shared_pro: {
         q: 'Heeft een gedeeld boek Pro nodig?',
         a: 'Maar één persoon erin heeft Pro nodig, de eigenaar of een willekeurig lid. Heeft niemand erin Pro, dan pauzeert het voor iedereen tot iemand het heeft. Er wordt niets verwijderd.',
       },
       shared_free_limits: {
-        q: 'Kan ik zonder Pro boekingen toevoegen aan een gedeeld kasboek?',
-        a: 'Ja, ook als het meer dan 6 rekeningen heeft. De andere limieten van het gratis plan blijven gelden, zoals rekeningen of categorieën toevoegen boven de limiet. Vraag de eigenaar van het kasboek om die wijzigingen te doen.',
+        q: 'Kan ik zonder Pro boekingen toevoegen aan een gedeeld boek?',
+        a: 'Ja, ook als het meer dan 6 rekeningen heeft. De andere limieten van het gratis abonnement blijven gelden, zoals rekeningen of categorieën toevoegen boven de limiet. Vraag de eigenaar van het boek om die wijzigingen te doen.',
       },
       family_pro: {
         q: 'Kan mijn gezin mijn Pro gebruiken?',
-        a: 'Deel een boek met ze: mensen die je uitnodigt, hebben geen Pro nodig. Als je op hun telefoon aanmeldt met je account, zien ze al je geldgegevens.',
+        a: 'Deel een boek met ze: mensen die je uitnodigt, hebben geen Pro nodig. Als je op hun telefoon inlogt met je account, zien ze al je geldgegevens.',
       },
       sign_out_delete: {
         q: 'Wat als ik me afmeld of mijn account verwijder?',
-        a: 'Als je je afmeldt, blijven je gegevens op deze telefoon, en boeken die anderen met je hebben gedeeld, verdwijnen ervan tot je je weer aanmeldt. Als je je account verwijdert, wordt de cloudkopie gewist. Boeken die je deelt, verdwijnen van de telefoons van alle anderen, en jij houdt ze.',
+        a: 'Als je je afmeldt, blijven je gegevens op deze telefoon, en boeken die anderen met je hebben gedeeld, verdwijnen ervan tot je weer inlogt. Als je je account verwijdert, wordt de cloudkopie gewist. Boeken die je deelt, verdwijnen van de telefoons van alle anderen, en jij houdt ze.',
       },
     },
     stat_days: 'Dagen bijgehouden',
@@ -1687,9 +1688,9 @@ const nl = {
       bucket_labels: {
         food: 'Eten & drinken',
         groceries: 'Boodschappen',
-        transport: 'Transport',
+        transport: 'Vervoer',
         housing: 'Wonen',
-        bills: 'Rekeningen & nutsvoorzieningen',
+        bills: 'Vaste lasten',
         healthcare: 'Zorg',
         shopping: 'Winkelen',
         entertainment: 'Entertainment',
@@ -1709,7 +1710,7 @@ const nl = {
         listening: 'Luisteren…',
         starting: 'Starten…',
         release_hint: 'Loslaten om te herkennen',
-        permission_denied_title: 'Microfoon toegang nodig',
+        permission_denied_title: 'Microfoontoegang nodig',
         permission_denied_message:
           'Sta microfoon en spraakherkenning toe in Instellingen om transacties in te spreken.',
         open_settings: 'Instellingen openen',
@@ -1723,7 +1724,7 @@ const nl = {
         preview_category: 'Categorie',
         preview_account: 'Rekening',
         preview_note_empty: 'Spraakinvoer',
-        discard: 'Verwerpen',
+        discard: 'Weggooien',
         edit: 'Bewerken',
         save: 'Opslaan',
         tap_stop_hint: 'Tik ergens om te stoppen',
@@ -1746,7 +1747,7 @@ const nl = {
     hourly_value: 'Uurtarief',
     notifications: 'Meldingen',
     manage_formulas:
-      'Voeg alleen een vermelding toe wanneer je inkomsten veranderen — niet elke maand bijwerken nodig.',
+      'Voeg alleen een vermelding toe wanneer je inkomsten veranderen. Je hoeft niet elke maand bij te werken.',
     accounts: 'Rekeningen',
     categories: 'Categorieën',
     recurring: 'Terugkerende transacties',
@@ -1768,7 +1769,7 @@ const nl = {
     year: 'Jaar',
     month: 'Maand',
     hourly_history_empty: 'Nog geen uurtarief-geschiedenis.',
-    hourly_now_label: 'Je echte uurwaarde nu',
+    hourly_now_label: 'Je echte uurtarief nu',
     hourly_now_weekly: 'Je weekinkomen nu',
     hourly_now_monthly: 'Je maandinkomen nu',
     hourly_now_yearly: 'Je jaarinkomen nu',
@@ -1785,9 +1786,9 @@ const nl = {
     hourly_delete_title: 'Maandelijks uurtarief verwijderen?',
     hourly_delete_message:
       'Tarief voor {{month}} verwijderen? Maanden die hiervan afhankelijk zijn, vallen terug op de vorige beschikbare maand.',
-    hourly_add_title: 'Inkomstenpercentage toevoegen',
+    hourly_add_title: 'Uurtarief toevoegen',
     hourly_month_exists_title: '{{month}} bestaat al',
-    hourly_month_exists_message: 'Het inkomenstarief hierdoor vervangen?',
+    hourly_month_exists_message: 'Het bestaande uurtarief vervangen door dit?',
     hourly_replace: 'Vervangen',
     account_settings: 'Personalisatie',
     haptics: 'Haptisch',
@@ -1805,7 +1806,7 @@ const nl = {
     step1_recommended:
       'Voor grote of meerdere bijlagen kun je de denk-/redeneermodus van de AI inschakelen voor de beste resultaten.',
     open_in: 'Openen in',
-    step2_title: 'Importeerresultaat',
+    step2_title: 'Importresultaat',
     step2_description: 'Kopieer de JSON uit het AI-antwoord en plak hem hier.',
     paste_json: 'Plakken vanuit klembord',
     preview_title: 'Voorbeeld',
@@ -1826,7 +1827,7 @@ const nl = {
     import_error_generic: 'Kon transacties niet importeren. Probeer het opnieuw.',
     account_placeholder: 'Rekening selecteren',
     account_required: 'Selecteer een rekening voor het importeren.',
-    account_mapping_required: 'Koppel alle rekeningafschriften voor het importeren.',
+    account_mapping_required: 'Koppel alle rekeningen uit het afschrift voordat je importeert.',
     selected: 'Geselecteerd',
     how_to_video: 'Zie hoe het werkt',
     currency_label: 'Valuta van het afschrift',
@@ -1842,9 +1843,12 @@ const nl = {
       '- category: beste overeenkomst uit mijn categorieën hieronder, gebruik "Ouder > Subcategorie" als een subcategorie past, anders alleen de naam van de ouder, "Overig" als je het niet zeker weet\n' +
       '- account: specifieke rekeningnaam zoals afgedrukt op het afschrift (bijv. "Chase Sapphire Reserve", "OCBC 365 Credit Card"), geen algemene labels\n\n' +
       'Sla alleen over: saldoboekingen, afschrifttotalen, openbaarmakingen, kop- en voetteksten.\n\n' +
-      '## Mijn rekeningen\n{{accounts}}\n\n' +
-      '## Mijn uitgavecategorieën\n{{expenses}}\n\n' +
-      '## Mijn inkomstencategorieën\n{{incomes}}\n\n' +
+      '## Mijn rekeningen\n' +
+      '{{accounts}}\n\n' +
+      '## Mijn uitgavecategorieën\n' +
+      '{{expenses}}\n\n' +
+      '## Mijn inkomstencategorieën\n' +
+      '{{incomes}}\n\n' +
       'Antwoord met ALLEEN een json-codeblok, geen andere tekst:\n\n' +
       '```json\n' +
       '{\n' +
@@ -1859,13 +1863,13 @@ const nl = {
       '}\n' +
       '```\n\n' +
       '## Regels\n' +
-      '- Geef de valuta van het afschrift op als ISO 4217-code (bijvoorbeeld "MYR", "SGD", "USD"). Neem elk bedrag exact over zoals het is afgedrukt en reken het NOOIT om naar een andere valuta.\\n' +
+      '- Geef de valuta van het afschrift op als ISO 4217-code (bijvoorbeeld "MYR", "SGD", "USD"). Neem elk bedrag exact over zoals het is afgedrukt en reken het NOOIT om naar een andere valuta.\n' +
       '- Verzin NOOIT transacties. Geef alleen weer wat in het document staat.\n' +
       '- Sla NOOIT transacties over, kort ze niet in en laat ze niet weg. Lees elke pagina van elk bestand van begin tot einde. Geef elke transactierij weer.\n' +
       '- Als er meerdere bestanden zijn geüpload, verwerk elk bestand volledig en voeg daarna alle transacties samen in de enkele "transactions"-array.\n' +
       '- Als het afschrift een jaargrens overschrijdt en alleen maand/dag toont, leid het jaar af uit de afschriftperiode.\n' +
       '- Stel geen vragen, weiger niet, bied niet aan om in meerdere antwoorden te splitsen.\n' +
-      "- Als je uitvoer wordt afgekapt, stop dan midden in de JSON en ik zal 'doorgaan' antwoorden zodat je kunt afmaken. Stop niet vroeg om afkappen te vermijden — ga gewoon door.",
+      "- Als je uitvoer wordt afgekapt, stop dan midden in de JSON en ik zal 'doorgaan' antwoorden zodat je kunt afmaken. Stop niet vroeg om afkappen te vermijden, ga gewoon door.",
   },
   data_management: {
     section_export: 'Exporteren',
@@ -1929,7 +1933,7 @@ const nl = {
     import_money_manager_importing: 'Money Manager-back-up importeren',
     import_money_manager_confirm_title: 'Money Manager-back-up importeren?',
     import_money_manager_confirm_message:
-      'Dit vervangt je huidige rekeningen, categorieën, transacties en terugkerende regels met de gegevens uit de geselecteerde .mmbak-back-up. Je Money2Time-instellingen en uurtarief-geschiedenis blijven behouden.',
+      'Dit vervangt je huidige rekeningen, categorieën, transacties en terugkerende regels door de gegevens uit de geselecteerde .mmbak-back-up. Je Money2Time-instellingen en uurtarief-geschiedenis blijven behouden.',
     import_money_manager_confirm_action: 'Back-up importeren',
     import_money_manager_invalid_file_title: 'Ongeldig bestand',
     import_money_manager_invalid_file_message:
@@ -1986,8 +1990,8 @@ const nl = {
       'Om een bon, details of vergoeding te houden, moet de eerste termijn vandaag of eerder zijn.',
     remove: 'Termijnen verwijderen',
     add_payments: '{{count}} termijnen toevoegen',
-    convert_payments: 'Omzetten in {{count}} betalingen',
-    convert_note: 'Deze uitgave wordt betaling 1 van {{count}}. De rest volgt volgens schema.',
+    convert_payments: 'Omzetten in {{count}} termijnen',
+    convert_note: 'Deze uitgave wordt termijn 1 van {{count}}. De rest volgt volgens schema.',
     convert_failed: 'Deze uitgave kon niet in termijnen worden omgezet. Probeer het opnieuw.',
     already_due_one:
       'Er is al {{count}} betaling extra verschuldigd. Die wordt toegevoegd als je opslaat.',
@@ -2067,10 +2071,10 @@ const nl = {
     highlight_label: 'Terugkerende items kleuren',
     highlight_hint:
       'Items die je terugkerende regels toevoegen krijgen een zachte lavendelkleurige achtergrond in je transactielijsten, zodat je ze onderscheidt van wat je zelf invoerde.',
-    overdue: 'Verlopen',
+    overdue: 'Achterstallig',
     show_all_days: 'Alle dagen',
-    day_due_count: '{{count}} vervallen',
-    day_nothing_due: 'Niets vervalt',
+    day_due_count: '{{count}} te betalen',
+    day_nothing_due: 'Niets te betalen',
   },
   app_icon: {
     title: 'App-icoon',
@@ -2112,7 +2116,7 @@ const nl = {
     group_transport: 'Vervoer',
     group_travel: 'Reizen',
     group_home: 'Huis',
-    group_bills: 'Rekeningen',
+    group_bills: 'Vaste lasten',
     group_shopping: 'Winkelen',
     group_health: 'Gezondheid',
     group_leisure: 'Vrije tijd',
@@ -2227,7 +2231,7 @@ const nl = {
       interest_rate_info_flat:
         'Het jaarlijkse vaste tarief, berekend over het hele geleende bedrag voor de hele looptijd. Vul het in en we berekenen de maandtermijn en het totaal, of vul het totaal in en we berekenen de rente.',
       effective_rate_hint:
-        'Effectieve rente {{rate}}%. Dat kost deze vlakke rente op een dalend saldo.',
+        'Effectieve rente {{rate}}%. Zoveel kost dit vaste tarief bij een dalend saldo.',
       rate_change_title: 'Vanaf wanneer geldt de nieuwe rente?',
       rate_change_message:
         'De rente verandert van {{from}}% naar {{to}}%. Pas hem toe vanaf vandaag om de al berekende rente te behouden, of vanaf het begin als je een fout corrigeert.',
@@ -2318,7 +2322,7 @@ const nl = {
     show_balances: 'Saldi tonen',
     type: 'Type',
     statement_day: 'Afschriftdag',
-    due_day: 'Vervaldatum',
+    due_day: 'Vervaldag',
     due_rule: 'Vervaldatum',
     due_rule_day_of_month: 'Dag van de maand',
     due_rule_days_after: 'Dagen na afschrift',
@@ -2361,8 +2365,8 @@ const nl = {
     group_name: 'Groepsnaam',
     expand: 'Uitvouwen',
     collapse: 'Samenvouwen',
-    add_account_to_group: 'Account toevoegen',
-    empty_group_accounts: 'Nog geen accounts in deze groep',
+    add_account_to_group: 'Rekening toevoegen',
+    empty_group_accounts: 'Nog geen rekeningen in deze groep',
     delete_group_title: 'Groep verwijderen?',
     delete_group_message: 'Rekeningen in deze groep worden verplaatst naar Niet gegroepeerd.',
     empty_groups_title: 'Nog geen groepen',
@@ -2468,8 +2472,8 @@ const nl = {
     accounts_label: 'Rekeningen',
     categories_label: 'Categorieën',
     recurring_label: 'Terugkerend',
-    instalments_label: 'Afbetalingsplannen',
-    hourly_income_label: 'Uurloon-inkomsten',
+    instalments_label: 'Termijnbetalingen',
+    hourly_income_label: 'Uurtarieven',
     trends_label: 'Langetermijntrends',
     voice_label: 'Spraakinvoer',
     receipt_scans_label: 'Bonscans',
@@ -2490,7 +2494,7 @@ const nl = {
     compare_title: 'Alles in Pro',
     compare_subtitle: 'Zie precies wat je ontgrendelt met een upgrade.',
     hero_title: 'Neem controle over je geld en je tijd',
-    social_rating_value: '4.9',
+    social_rating_value: '4,9',
     social_rating_label: 'App Store-beoordeling',
     social_downloads_value: '60k+',
     social_downloads_label: 'Keuze van gebruikers',
@@ -2531,7 +2535,7 @@ const nl = {
     expires_on: 'Toegang tot',
     lifetime_access: 'Je hebt levenslange toegang tot alle Pro-functies.',
     cancel_subscription: 'Abonnement opzeggen',
-    lifetime_sub_warning_title: 'Je wordt dubbel belast',
+    lifetime_sub_warning_title: 'Je betaalt dubbel',
     lifetime_sub_warning_body:
       'Je hebt Levenslang Pro, maar een abonnement is nog actief. Zeg het op zodat je niets meer wordt berekend.',
     upgrade_to_lifetime: 'Upgraden naar Levenslang',
@@ -2566,9 +2570,9 @@ const nl = {
     limit_goals:
       'Met het gratis abonnement kun je maximaal {{count}} spaardoelen hebben. Onbeperkt met Pro.',
     limit_loans:
-      'Je kunt {{count}} lening bijhouden met het gratis plan. Upgrade naar Pro voor onbeperkt.',
+      'Je kunt {{count}} lening bijhouden met het gratis abonnement. Upgrade naar Pro voor onbeperkt.',
     limit_instalments:
-      'Met het gratis plan kun je {{count}} termijnbetalingen tegelijk afbetalen. Upgrade naar Pro voor onbeperkt.',
+      'Met het gratis abonnement kun je {{count}} termijnbetalingen tegelijk afbetalen. Upgrade naar Pro voor onbeperkt.',
     badge: 'PRO',
     trend_preview_title: 'Langetermijntrends ontgrendelen',
     trend_preview_message:
@@ -2629,7 +2633,7 @@ const nl = {
     archive_message:
       'Het doel verdwijnt uit je doelenlijst en automatisch sparen ernaartoe wordt gepauzeerd.',
     archive_balance_hint:
-      'Er staat nog geld op. Je kunt het eerst opnemen, of het hier bewaard laten.',
+      'Er staat nog geld op. Je kunt het eerst opnemen, of het hier laten staan.',
     archive_confirm: 'Archiveren',
     unarchive: 'Doel herstellen',
     archived_banner: 'Dit doel is gearchiveerd. Herstel het om verder te sparen.',
@@ -2698,7 +2702,7 @@ const nl = {
     },
     recurring: {
       title: 'Terugkerende transacties',
-      label: 'Automatische-afschrijvingsmeldingen',
+      label: 'Meldingen bij automatische afschrijving',
       description:
         'Ontvang een melding wanneer terugkerende transacties automatisch worden aangemaakt.',
     },
@@ -2840,7 +2844,7 @@ const nl = {
     google_drive_unconfigured_message:
       'Deze versie van Money2Time heeft geen Google OAuth-client geconfigureerd.',
     google_drive_unconfigured_short: 'Niet geconfigureerd in deze versie',
-    google_drive_sign_in_failed_title: 'Aanmelden mislukt',
+    google_drive_sign_in_failed_title: 'Inloggen mislukt',
     google_drive_sign_out_title: 'Afmelden bij Google Drive?',
     google_drive_sign_out_message:
       'Automatische back-ups vallen terug op Op apparaat. Bestaande back-ups in Google Drive blijven bewaard.',
@@ -2859,7 +2863,7 @@ const nl = {
       prefix: '{{target}}: {{reason}}',
       offline: 'Geen internetverbinding. Maak verbinding en probeer het opnieuw.',
       timeout: 'De verbinding is verlopen. Probeer het op een sneller netwerk.',
-      auth: 'Meld je opnieuw aan bij Google Drive om verder te back-uppen.',
+      auth: 'Log opnieuw in bij Google Drive om verder te back-uppen.',
       quota: 'Je Google Drive is vol. Maak ruimte vrij en probeer het opnieuw.',
       rate_limited: 'Google Drive is momenteel druk. Probeer het zo meteen opnieuw.',
       server: 'Google Drive is tijdelijk niet beschikbaar. Probeer het later opnieuw.',
@@ -2894,7 +2898,7 @@ const nl = {
     preprompt_happy: 'Ja, ik vind het leuk',
     preprompt_unhappy: 'Niet echt',
     preprompt_dismiss: 'Misschien later',
-    feedback_prompt: 'Jammer om te horen — kun je delen wat het beter zou maken?',
+    feedback_prompt: 'Jammer om te horen. Wil je delen wat het beter zou maken?',
     feedback_open: 'Feedback delen',
     feedback_skip: 'Nee, bedankt',
   },
@@ -2913,7 +2917,7 @@ const nl = {
     continue_apple: 'Doorgaan met Apple',
     continue_google: 'Doorgaan met Google',
     continue_email: 'Doorgaan met e-mail',
-    email_title: 'Aanmelden met e-mail',
+    email_title: 'Inloggen met e-mail',
     email_body: 'We sturen je een 6-cijferige code.',
     email_placeholder: 'jij@voorbeeld.nl',
     send_code: 'Code sturen',
@@ -2972,7 +2976,7 @@ const nl = {
     profile_a11y_hint: 'Opent Cloud Sync',
     errors: {
       offline: 'Je bent offline',
-      session_expired: 'Afgemeld. Meld je opnieuw aan.',
+      session_expired: 'Afgemeld. Log opnieuw in.',
       server: 'Er ging iets mis',
       unknown: 'Er ging iets mis',
       invalid_code: 'Onjuiste of verlopen code',
@@ -2996,7 +3000,7 @@ const nl = {
       items: {
         needs_pro: {
           q: 'Heeft Cloud Sync Pro nodig?',
-          a: 'Ja, je eigen gegevens synchroniseren vraagt Pro. Albums en grootboeken die anderen met je delen, synchroniseren ook zonder.',
+          a: 'Ja, je eigen gegevens synchroniseren vraagt Pro. Albums en boeken die anderen met je delen, synchroniseren ook zonder.',
         },
         pro_other_phone: {
           q: 'Ik heb Pro op een andere telefoon. Waarom niet op deze?',
@@ -3038,8 +3042,8 @@ const nl = {
       add: 'Locatie toevoegen',
       clear: 'Locatie wissen',
       picker_title: 'Kies een plek',
-      search_placeholder: 'Steden zoeken…',
-      search_hint: 'Zoek een stad om deze reis op de kaart te plaatsen.',
+      search_placeholder: 'Zoek stad, provincie of land…',
+      search_hint: 'Zoek op stad, provincie of land om deze reis op de kaart te plaatsen.',
       no_results: 'Geen plaatsen gevonden',
       empty_title: 'Nog geen plaatsen',
       empty_message: 'Voeg een locatie toe aan een album om het op de globe en kaart te zien.',
@@ -3115,7 +3119,7 @@ const nl = {
         'Niemand kan nog rekeningen toevoegen of wijzigen. Iedereen houdt het album onder Gearchiveerd, met hun transacties en saldi zoals ze zijn.',
       limit: 'Je kunt maximaal {{max}} albums tegelijk delen.',
       full: 'Maximaal {{max}} personen kunnen aan een album meedoen.',
-      sign_in: 'Meld je aan om dit album te delen.',
+      sign_in: 'Log in om dit album te delen.',
     },
     archive: {
       action: 'Archiveren',
@@ -3129,8 +3133,8 @@ const nl = {
       body: 'Je hebt dit album verlaten, het delen is gestopt of je bent uitgelogd. Het blijft zoals het was, met je transacties, en wordt niet meer bijgewerkt. Log opnieuw in of doe opnieuw mee om het terug te krijgen.',
     },
     balances: {
-      tab: "Saldo's",
-      empty_title: "Nog geen saldo's",
+      tab: 'Saldi',
+      empty_title: 'Nog geen saldi',
       who_owes_whom: 'Wie is wie wat schuldig',
       owes_you: '{{name}} is jou schuldig',
       owes: '{{from}} is {{to}} schuldig',
@@ -3186,9 +3190,9 @@ const nl = {
     categories: {
       food: 'Eten',
       groceries: 'Boodschappen',
-      transport: 'Transport',
+      transport: 'Vervoer',
       housing: 'Wonen',
-      bills: 'Rekeningen',
+      bills: 'Vaste lasten',
       healthcare: 'Zorg',
       shopping: 'Winkelen',
       other: 'Overig',
@@ -3218,7 +3222,7 @@ const nl = {
       paid_even: '{{from}} betaalde {{to}} {{money}} om te verrekenen',
       undid_payment: '{{actor}} maakte ongedaan dat {{from}} {{to}} {{money}} betaalde',
       undid_own_payment: '{{actor}} maakte de betaling van {{money}} aan {{to}} ongedaan',
-      joined: '{{name}} kwam bij het album',
+      joined: '{{name}} doet nu mee aan het album',
       started: '{{name}} heeft het album gemaakt',
       left: '{{name}} verliet het album',
       renamed_member: '{{before}} heet nu {{after}}',
@@ -3417,7 +3421,7 @@ const nl = {
     purchase_date_label: 'Aankoopdatum',
     mark_inactive: 'Markeren als inactief',
     mark_inactive_hint:
-      'Stopt het tellen van dagen voor dingen die je verkocht, kapot of niet meer gebruikt.',
+      'Stopt het tellen van dagen voor dingen die je hebt verkocht, die kapot zijn of die je niet meer gebruikt.',
     end_date_label: 'Einddatum',
     sold_toggle: 'Ik heb het verkocht',
     sale_price_label: 'Verkoopprijs',
@@ -3466,7 +3470,7 @@ const nl = {
     everything_caption_one: 'Een volledige kopie met {{count}} post, budgetten en albums',
     everything_caption_other: 'Een volledige kopie met {{count}} posten, budgetten en albums',
     everything_currency_note: 'Een volledige kopie houdt de valuta van {{name}}.',
-    delete_open_note: 'Het is nu geopend, dus {{name}} wordt geopend.',
+    delete_open_note: 'Het is nu geopend, dus in plaats daarvan wordt {{name}} geopend.',
     copy_from: 'Kopiëren uit',
     copy_accounts_one: '{{count}} rekening, saldo op nul',
     copy_accounts_other: '{{count}} rekeningen, saldo op nul',
@@ -3533,7 +3537,7 @@ const nl = {
     title: 'Delen',
     share_toggle: 'Dit boek delen',
     share_toggle_caption: 'Nodig tot {{max}} mensen uit. Ze hebben geen Pro nodig.',
-    needs_cloud_sync: 'Zet Cloud Sync aan om een grootboek te delen.',
+    needs_cloud_sync: 'Zet Cloud Sync aan om een boek te delen.',
     has_shared_albums: 'Dit boek heeft gedeelde albums. Stop eerst met het delen daarvan.',
     limit_reached: 'Je kunt voorlopig tot {{max}} boeken delen.',
     share_failed:
@@ -3608,7 +3612,7 @@ const nl = {
     join_from: 'Gedeeld door {{owner}}',
     people_one: '{{count}} persoon',
     people_other: '{{count}} mensen',
-    join_sign_in: 'Meld je aan om mee te doen. Je hebt geen Pro nodig.',
+    join_sign_in: 'Log in om mee te doen. Je hebt geen Pro nodig.',
     join_button: 'Meedoen met {{name}}',
     joining_as: 'Je doet mee als',
     join_already: 'Je zit al in dit boek.',
@@ -3669,7 +3673,7 @@ const nl = {
     ai_settings: 'Instellingen autocontrole',
     ai_quota_free: 'Nog %{count} van %{limit} gratis',
     ai_quota_pro: 'Onbeperkt met Pro',
-    ai_quota_left: 'Nog %{count}',
+    ai_quota_left: 'Nog %{count} gratis',
     ai_quota_unlimited: 'Onbeperkt',
     ai_quota_info_title: 'Gratis autocontroles',
     ai_quota_info:
@@ -3689,7 +3693,7 @@ const nl = {
     ai_scope_expense: 'Legt alleen uitgaven vast',
     ai_scope_income: 'Legt alleen inkomsten vast',
     ai_scope_both: 'Legt uitgaven en inkomsten vast',
-    ai_get_unlimited: 'Onbeperkt met Pro',
+    ai_get_unlimited: 'Neem Pro voor onbeperkt',
     ai_done_title: 'Voor je gesorteerd',
     ai_logged_count: '%{count} vastgelegd',
     ai_ignored_count: '%{count} genegeerd',
@@ -3785,7 +3789,7 @@ const nl = {
     settings_subtitle: 'Voeg plaatsen toe aan je transacties',
     auto_tag: 'Nieuwe uitgaven automatisch taggen',
     permission_off: 'Locatietoegang staat uit',
-    allow: 'Sta toe',
+    allow: 'Toestaan',
     permission_allow: 'Locatietoegang toestaan',
     permission_blocked: 'Zet locatietoegang aan in Instellingen',
     services_off: 'Zet Locatievoorzieningen aan in Instellingen',

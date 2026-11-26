@@ -1,20 +1,20 @@
 const fil = {
   backup_restore: {
-    title: 'Restore backup',
-    export_description: 'Personal data and shared ledgers you own.',
-    import_description: 'Choose what to restore from a backup.',
-    personal: 'Personal ledgers',
-    personal_note: 'Replaces ledgers and settings on synced devices.',
-    personal_local_note: 'Replaces ledgers and settings.',
-    shared_ledgers: 'Shared ledgers',
-    owned: 'You own this ledger',
-    unavailable: 'Owner access required',
-    restore_action: 'Restore selected',
-    confirm_title: 'Restore for everyone?',
+    title: 'I-restore ang backup',
+    export_description: 'Personal na data at mga shared ledger na pag-aari mo.',
+    import_description: 'Piliin kung ano ang ire-restore mula sa backup.',
+    personal: 'Mga personal na ledger',
+    personal_note: 'Papalitan ang mga ledger at setting sa mga naka-sync na device.',
+    personal_local_note: 'Papalitan ang mga ledger at setting.',
+    shared_ledgers: 'Mga shared ledger',
+    owned: 'Ikaw ang may-ari ng ledger na ito',
+    unavailable: 'Kailangan ng access ng may-ari',
+    restore_action: 'I-restore ang napili',
+    confirm_title: 'I-restore para sa lahat?',
     confirm_message:
-      '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
-    sync_pending: 'Restored here. Stay signed in to finish syncing.',
-    failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+      '{{names}}\n\nPapalitan ito ng backup noong {{date}}. Mawawala ang mga pagbabagong ginawa pagkatapos nito. Hindi magbabago ang mga miyembro at imbitasyon.',
+    sync_pending: 'Na-restore dito. Manatiling naka-sign in para matapos ang pag-sync.',
+    failed: 'Hindi ma-restore. Tingnan ang iyong koneksyon, access ng may-ari at libreng storage.',
     photos_unavailable:
       'Hindi ma-download ang mga larawan ng backup na ito. Tingnan ang iyong koneksyon at subukang muli.',
     photos_missing:
@@ -24,7 +24,7 @@ const fil = {
     back: 'Bumalik',
     loading: 'Naglo-load…',
     close: 'Isara',
-    done: 'Tapos',
+    done: 'Tapos na',
     save: 'I-save',
     cancel: 'Kanselahin',
     reset: 'I-reset',
@@ -141,7 +141,7 @@ const fil = {
     only_mmbak_supported: 'Ang .mmbak backup files lang ang sinusuportahan.',
     mm_unsupported_backup_schema:
       'Hindi sinusuportahan ang format ng backup file na ito. Gamitin ang Money Manager backup na na-export mula sa iOS app.',
-    recurring_fallback_name: 'Recurring {{id}}',
+    recurring_fallback_name: 'Paulit-ulit {{id}}',
     import_failed_generic: 'Nabigo ang pag-import. Subukan ulit.',
     data_load_failed_title: 'Hindi ma-load ang data',
     data_load_failed: 'Subukan ulit. Kung patuloy ito, i-restart ang app.',
@@ -154,23 +154,23 @@ const fil = {
   },
   exchange_rates: {
     title: 'Multi-currency',
-    main_currency: 'Pangunahing pera',
+    main_currency: 'Pangunahing currency',
     as_of: 'Na-update {{date}}',
     never_updated: 'Hindi pa na-update',
     update_rates: 'I-update ang rate',
     updating: 'Ina-update…',
     rates_title: 'Mga rate',
     subcurrencies_title: 'Mga sub-currency',
-    no_foreign_accounts: 'Magdagdag ng pera para subaybayan ang palitan nito.',
+    no_foreign_accounts: 'Magdagdag ng currency para subaybayan ang exchange rate nito.',
     manual_badge: 'Manual',
-    add_currency: 'Magdagdag ng pera',
+    add_currency: 'Magdagdag ng currency',
     add: 'Idagdag',
-    choose_currency: 'Pumili ng pera',
-    search_currency: 'Maghanap ng pera',
-    no_currency_match: 'Walang tugmang pera',
+    choose_currency: 'Pumili ng currency',
+    search_currency: 'Maghanap ng currency',
+    no_currency_match: 'Walang tugmang currency',
     edit_rate_title: 'I-edit ang rate',
     remove_currency: 'Alisin',
-    reset_title: 'Palitan ang pangunahing pera?',
+    reset_title: 'Palitan ang pangunahing currency?',
     reset_message:
       'Ang paglipat sa {{code}} ay permanenteng magbubura ng lahat ng iyong account, transaksyon, at setting. Hindi ito maibabalik.',
     reset_prompt: 'I-type ang {{word}} para kumpirmahin',
@@ -197,11 +197,11 @@ const fil = {
       },
       friendPaid: {
         title: 'Hatiin ang bill na binayaran ng kaibigan',
-        body: 'Sa Split Bill, i-tap ang Binayaran ni at piliin ang kaibigang nagbayad. Ang bahagi mo lang ang bibilangin bilang gastos, at makikita sa Mga Balanse kung magkano ang utang mo. Bayaran siya nang buo o paunti-unti, at mag-settle up sa isang tap.',
+        body: 'Sa Hatiin ang bill, i-tap ang Binayaran ni at piliin ang kaibigang nagbayad. Ang bahagi mo lang ang bibilangin bilang gastos, at makikita sa Mga Balanse kung magkano ang utang mo. Bayaran siya nang buo o paunti-unti, at mag-settle up sa isang tap.',
       },
       splitMethods: {
         title: 'Mas maraming paraan ng paghahati',
-        body: 'Sa ilalim ng halaga sa Split Bill, piliin ang Halaga, %, Bahagi o +/−. Bigyan ng porsyento ang bawat isa, bigyan ng 2 bahagi ang isang tao para doble ang bayad niya, o hatiin nang pantay at magdagdag o magbawas para sa isang tao. Makikita sa ilalim ng pangalan kung magkano ang babayaran ng bawat isa.',
+        body: 'Sa ilalim ng halaga sa Hatiin ang bill, piliin ang Halaga, %, Bahagi o +/−. Bigyan ng porsyento ang bawat isa, bigyan ng 2 bahagi ang isang tao para doble ang bayad niya, o hatiin nang pantay at magdagdag o magbawas para sa isang tao. Makikita sa ilalim ng pangalan kung magkano ang babayaran ng bawat isa.',
       },
       albumIcons: {
         title: 'Mga icon para sa album',
@@ -231,11 +231,11 @@ const fil = {
       title: 'Cloud Sync at mga shared ledger',
       cloudSync: {
         title: 'Narito na ang Cloud Sync',
-        body: 'Mag-sign in gamit ang Apple, Google o email, at pareho ang data mo sa lahat ng phone mo. Dumarating ang mga pagbabago sa loob ng ilang segundo. Bahagi ng Pro ang pag-sync. Hanapin ito sa Settings > Cloud Sync.',
+        body: 'Mag-sign in gamit ang Apple, Google o email, at pareho ang data mo sa lahat ng phone mo. Dumarating ang mga pagbabago sa loob ng ilang segundo. Bahagi ng Pro ang pag-sync. Hanapin ito sa Mga setting > Cloud Sync.',
       },
       sharedLedgers: {
         title: 'Mga shared ledger',
-        body: 'Ibahagi ang ledger sa hanggang 5 tao at sabay na hawakan ang budget ng bahay. Lahat ay nagdadagdag ng entry at nakikita ito sa sarili nilang phone. Libre ang pagsali; kailangan ng Pro para magbahagi.',
+        body: 'Ibahagi ang ledger sa hanggang 5 tao at sabay na hawakan ang badyet ng sambahayan. Lahat ay nagdadagdag ng entry at nakikita ito sa sarili nilang phone. Libre ang pagsali; kailangan ng Pro para magbahagi.',
       },
       household: {
         title: 'Insights ng sambahayan',
@@ -246,7 +246,7 @@ const fil = {
       title: 'Auto-review at iba pa',
       autoReview: {
         title: 'Mga notification na kusang nag-aayos',
-        body: 'Kapag naka-on ang notification logging sa Settings > Automation, i-on ang Auto-review. Itinatala ang mga bayad bilang gastos, binabalewala ang mga code at promo, at naghihintay sa iyo ang hindi malinaw. Puwedeng i-undo ang anumang resulta. May %{count} review ang libreng plan.',
+        body: 'Kapag naka-on ang notification logging sa Mga setting > Automation, i-on ang Auto-review. Itinatala ang mga bayad bilang gastos, binabalewala ang mga code at promo, at naghihintay sa iyo ang hindi malinaw. Puwedeng i-undo ang anumang resulta. May %{count} review ang libreng plan.',
       },
       insights: {
         title: 'Bagong disenyo ng Insights',
@@ -268,11 +268,11 @@ const fil = {
       title: 'Web Dashboard at iba pa',
       webDashboard: {
         title: 'Bagong Web Dashboard',
-        body: 'Buksan ang app.money2time.com sa computer at i-scan ang code nito sa Settings > Web Dashboard. Ipinapadala ng phone mo ang naka-encrypt na data sa browser. Walang naiimbak online at hindi kailangan ng account.',
+        body: 'Buksan ang app.money2time.com sa computer at i-scan ang code nito sa Mga setting > Web Dashboard. Ipinapadala ng phone mo ang naka-encrypt na data sa browser. Walang naiimbak online at hindi kailangan ng account.',
       },
       notificationReview: {
         title: 'Itala ang mga bayad mula sa notification',
-        body: 'Naghihintay na ngayon bilang draft ang mga notification mula sa bangko at e-wallet. Piliin ang Kita, Gastos o Huwag pansinin, isa-isa o lahat nang sabay. I-set up sa Settings > Automation.',
+        body: 'Naghihintay na ngayon bilang draft ang mga notification mula sa bangko at e-wallet. Piliin ang Kita, Gastos o Huwag pansinin, isa-isa o lahat nang sabay. I-set up sa Mga setting > Automation.',
       },
       fasterScans: {
         title: 'Pag-scan ng resibo, 50% mas mabilis',
@@ -284,18 +284,18 @@ const fil = {
       },
       bottomBar: {
         title: 'Gawing iyo ang bottom bar',
-        body: 'Piliin kung aling mga page ang nasa bottom bar at i-drag ang mga ito sa anumang pagkakasunod-sunod. Magdagdag ng Mga goal, Paulit-ulit, Mga Resibo at iba pa. Ang unang page ang magiging home screen mo. Makikita ito sa Settings > Display > Bottom bar.',
+        body: 'Piliin kung aling mga page ang nasa bottom bar at i-drag ang mga ito sa anumang pagkakasunod-sunod. Magdagdag ng Mga goal, Paulit-ulit, Mga Resibo at iba pa. Ang unang page ang magiging home screen mo. Makikita ito sa Mga setting > Display > Bottom bar.',
       },
     },
     transaction_updates: {
       title: 'Mas madaling pagsubaybay sa transaksyon',
       androidScreenshot: {
         title: 'Mag-share ng screenshot sa Android',
-        body: 'I-share ang screenshot ng bayad o larawan ng resibo sa Money2Time. Binabasa nito ang mga detalye at awtomatikong itinatala ang transaksyon. Makikita ang gabay sa Settings > Automation.',
+        body: 'I-share ang screenshot ng bayad o larawan ng resibo sa Money2Time. Binabasa nito ang mga detalye at awtomatikong itinatala ang transaksyon. Makikita ang gabay sa Mga setting > Automation.',
       },
       accountLabels: {
         title: 'Makita ang account ng bawat transaksyon',
-        body: 'Lumalabas na ang pangalan ng account sa listahan ng transaksyon para makita kung saan galing o napunta ang pera. Gusto ng mas simpleng view? I-off ang pagpapakita ng account sa Settings > Display.',
+        body: 'Lumalabas na ang pangalan ng account sa listahan ng transaksyon para makita kung saan galing o napunta ang pera. Gusto ng mas simpleng view? I-off ang Ipakita ang account sa mga transaksyon sa Mga setting > Display.',
       },
       amountSearch: {
         title: 'Maghanap ng transaksyon ayon sa halaga',
@@ -310,7 +310,7 @@ const fil = {
       },
       homeCards: {
         title: 'Piliin ang mga card sa home',
-        body: 'Gawing Kita, Gastos o Balanse ang alinmang card sa Display settings. I-tap ang mata para itago ang halaga nito.',
+        body: 'Gawing Kita, Gastos o Balanse ang alinmang card sa mga setting ng Display. I-tap ang mata para itago ang halaga nito.',
       },
       itemIcons: {
         title: 'Mas maraming icon ng item',
@@ -345,7 +345,7 @@ const fil = {
       title: 'Siklo ng buwan at live na kita',
       monthCycle: {
         title: 'Sariling simulang araw kada buwan',
-        body: 'Naglilipat ang sahod, kaya puwede rin ang buwan mo. Pumili ng default na simulang araw, tapos i-tap ang kahit anong buwan para bigyan ito ng sarili nito. Susunod ang mga insight, budget, sahod at kalendaryo.',
+        body: 'Nagbabago ang araw ng sahod, kaya puwede ring magbago ang buwan mo. Pumili ng default na simulang araw, tapos i-tap ang kahit anong buwan para bigyan ito ng sarili nitong simula. Susunod ang Insights, mga badyet, sahod at kalendaryo.',
       },
       liveEarnings: {
         title: 'Panoorin ang kita mong umaakyat',
@@ -353,7 +353,7 @@ const fil = {
       },
       appIcon: {
         title: 'Bumalik na ang lumang icon',
-        body: 'Bumalik sa icon picker ang coin purse na dating suot ng app, libre para sa lahat. Nasa Settings ito, sa ilalim ng Display, katabi ng mga Pro icon.',
+        body: 'Bumalik sa icon picker ang coin purse na dating suot ng app, libre para sa lahat. Nasa Mga setting ito, sa ilalim ng Display, katabi ng mga Pro icon.',
       },
       loanInterest: {
         title: 'Flat rate o bumababang balanse',
@@ -367,12 +367,12 @@ const fil = {
         body: 'I-type ang pangalan tulad ng Netflix at lalabas ang logo. Mahigit 2,000 brand. Sariling larawan, kailangan ng Pro.',
       },
       forecast: {
-        title: 'Alamin kung kailan may lalabas',
+        title: 'Alamin kung ano ang babayaran at kailan',
         body: 'Ipinapakita na ng Paulit-ulit kung magkano pa ang babayaran ngayong buwan, magkano sa isang taon, at kung anong mga araw lumalabas ang pera.',
       },
       tutorials: {
         title: 'Tutorial sa loob ng app',
-        body: 'Maiikling gabay na may screenshot, mula sa pag-scan ng resibo hanggang sa paghahati ng bill. Hanapin sa Settings, sa Help and About.',
+        body: 'Maiikling gabay na may screenshot, mula sa pag-scan ng resibo hanggang sa paghahati ng bill. Hanapin sa Mga setting, sa Tulong at Tungkol sa.',
       },
       loanInstalments: {
         title: 'Kusang naitatala ang hulog',
@@ -387,7 +387,7 @@ const fil = {
       },
       workdays: {
         title: 'Makita ang oras bilang mga araw ng trabaho',
-        body: 'Gawing 3 araw ng trabaho ang 24 na oras. Piliin ang karaniwan mong oras ng trabaho bawat araw sa Hourly value settings.',
+        body: 'Gawing 3 araw ng trabaho ang 24 na oras. Piliin ang karaniwan mong oras ng trabaho bawat araw sa mga setting ng Hourly value.',
       },
       exchangeRate: {
         title: 'Itakda ang rate para sa bawat transaksyon',
@@ -402,14 +402,14 @@ const fil = {
       title: 'I-review ang gastos',
       recap: {
         title: 'Balikan ang iyong linggo',
-        body: 'Isang recap ng bawat linggo, buwan at taon kapag tapos na ang panahon: kung magkano ang lumabas, kumusta ito kumpara noong nakaraan, saan ito napunta, at ano ang naramdaman mo. I-on ang mga paalala sa Mga setting, sa Mga Notipikasyon, at sasabihan ka namin kapag may bago. Nasa tab na Insights ito.',
+        body: 'Isang recap ng bawat linggo, buwan at taon kapag tapos na ang panahon: kung magkano ang lumabas, kumusta ito kumpara noong nakaraan, saan ito napunta, at ano ang naramdaman mo. I-on ang mga paalala sa Mga setting, sa Mga notification, at sasabihan ka namin kapag may bago. Nasa tab na Insights ito.',
       },
     },
     icon_style: {
       title: 'Piliin ang estilo ng icon',
       choose: {
         title: 'Clay o flat, ikaw ang bahala',
-        body: 'Hindi para sa lahat ang bagong clay icons, kaya nandiyan pa rin ang lumang flat. Magpalit anumang oras sa Settings sa ilalim ng Display, at susunod ang buong app: mga tab, button, at bawat settings tile.',
+        body: 'Hindi para sa lahat ang bagong clay icons, kaya nandiyan pa rin ang lumang flat. Magpalit anumang oras sa Mga setting sa ilalim ng Display, at susunod ang buong app: mga tab, button, at bawat tile ng setting.',
       },
     },
     google_drive_backup: {
@@ -427,11 +427,11 @@ const fil = {
       },
       month: {
         title: 'Simulan ang buwan sa araw ng sahod',
-        body: 'Piliin kung anong araw nagsisimula ang buwan mo, para ang mga budget, insight, sahod, at kalendaryo ay sumunod sa sahod cycle mo imbes na sa ika-1. Makikita mo ito sa Settings, Display.',
+        body: 'Piliin kung anong araw nagsisimula ang buwan mo, para ang mga badyet, insight, sahod, at kalendaryo ay sumunod sa cycle ng sahod mo imbes na sa ika-1. Makikita mo ito sa Mga setting, sa ilalim ng Display.',
       },
       export: {
         title: 'I-export lahat sa Excel',
-        body: 'I-save ang data mo bilang .xlsx spreadsheet: mga transaksyon, account, kategorya, at paulit-ulit na gastos, bawat isa sa sarili nitong sheet. Makikita mo ito sa Settings, Data Management.',
+        body: 'I-save ang data mo bilang .xlsx spreadsheet: mga transaksyon, account, kategorya, at paulit-ulit na gastos, bawat isa sa sarili nitong sheet. Makikita mo ito sa Mga setting, sa Pamamahala ng data.',
       },
     },
     automations_update: {
@@ -445,18 +445,18 @@ const fil = {
       title: 'Hatiin bawat item',
       split: {
         title: 'I-scan ang resibo, hatiin ito bawat item',
-        body: 'Kuhanan ng litrato ang bill at i-assign ang bawat linya sa taong kumuha nito — hatiin ang mga ulam sa porsyon, at awtomatikong patas na nahahati ang tax at service charge. Lahat ay mapupunta sa “Sino ang may utang sa iyo” nang may eksaktong halaga.',
+        body: 'Kuhanan ng litrato ang bill at i-assign ang bawat linya sa taong kumuha nito. Hatiin ang mga ulam sa porsyon, at kusang patas na nahahati ang tax at service charge. Lahat ay mapupunta sa “Sino ang may utang sa iyo” nang may eksaktong halaga.',
       },
       selector: {
         title: 'Mas mabilis na paraan ng pagdagdag',
-        body: 'Ang + button ay nagbubukas na ngayon ng menu na may mga tab na Add at Split, kaya ang mabilis na pag-input, pag-scan ng resibo, boses, at paghati ng bill ay isang tap na lang. Mas gusto mong dumiretso sa quick entry? Puwede mong i-off ang menu na ito anumang oras sa Quick Entry settings.',
+        body: 'Ang + button ay nagbubukas na ngayon ng menu na may mga tab na Idagdag at Hatiin, kaya ang mabilis na paglagay, pag-scan ng resibo, boses, at paghati ng bill ay isang tap na lang. Mas gusto mong dumiretso sa mabilis na paglagay? Puwede mong i-off ang menu na ito anumang oras sa mga setting ng Mabilis na paglagay.',
       },
     },
     budget_items_update: {
-      title: 'Mga Budget at Gamit',
+      title: 'Mga Badyet at Gamit',
       budget: {
-        title: 'Magtakda ng buwanang budget',
-        body: 'Gumawa ng budget mula sa mga template na magagamit muli at panoorin ang bawat kategorya na mapuno habang gumagastos ka. Makita ang natitira sa isang sulyap, bawat buwan o mismo sa iyong home screen.',
+        title: 'Magtakda ng buwanang badyet',
+        body: 'Gumawa ng badyet mula sa mga template na magagamit muli at panoorin ang bawat kategorya na mapuno habang gumagastos ka. Makita ang natitira sa isang sulyap, bawat buwan o mismo sa iyong home screen.',
       },
       items: {
         title: 'Kung magkano ang gamit mo kada araw',
@@ -464,10 +464,10 @@ const fil = {
       },
     },
     calendar_albums_update: {
-      title: 'Calendar home at Albums',
+      title: 'Kalendaryo sa home at Mga album',
       calendar: {
         title: 'Ang pera mo, araw-araw',
-        body: 'Calendar na ngayon ang home tab. I-tap ang kahit anong araw para makita ang gastos mo, mag-swipe sa pagitan ng mga araw, at mag-zoom out sa buwan o buong taon para makita agad ang iyong mga padron.',
+        body: 'Kalendaryo na ngayon ang home tab. I-tap ang kahit anong araw para makita ang gastos mo, mag-swipe sa pagitan ng mga araw, at mag-zoom out sa buwan o buong taon para makita agad ang iyong mga padron.',
       },
       albums: {
         title: 'Pagsama-samahin ang gastos sa album',
@@ -478,12 +478,12 @@ const fil = {
       title: 'Multi-currency at iba pa',
       showcase_main: 'Pangunahin',
       currency: {
-        title: 'Gumastos sa kahit anong pera',
-        body: 'Subaybayan ang mga account at transaksyon sa maraming pera. Magdagdag ng sub-currency, itakda ang rate, at lahat ng total ay nakabatay pa rin sa iyong pangunahing pera.',
+        title: 'Gumastos sa kahit anong currency',
+        body: 'Subaybayan ang mga account at transaksyon sa maraming currency. Magdagdag ng sub-currency, itakda ang rate nito, at lahat ng total ay nakabatay pa rin sa iyong pangunahing currency.',
       },
       redesign: {
         title: 'Bagong itsura',
-        body: 'Binago namin ang Settings, Hourly value, at Recurring na mga bayarin para mas malinis at madaling gamitin.',
+        body: 'Binago namin ang Mga setting, Hourly value, at mga paulit-ulit na bayarin para mas malinis at madaling gamitin.',
       },
       app_lock: {
         title: 'I-lock ang app',
@@ -501,11 +501,11 @@ const fil = {
       title: 'Mag-share, kumita ng Pro',
       rewards: {
         title: 'Mag-post, libreng Pro',
-        body: 'Mag-post tungkol sa Money2Time sa Instagram, 小红书, Reddit o Facebook. Ang pag-post ay 1 buwang Pro, 100+ likes ay isang taon, at 500+ likes ay habambuhay na Pro. Buksan ang Settings para kunin ang reward.',
+        body: 'Mag-post tungkol sa Money2Time sa Instagram, 小红书, Reddit o Facebook. Ang pag-post ay 1 buwang Pro, 100+ likes ay isang taon, at 500+ likes ay habambuhay na Pro. Buksan ang Mga setting para kunin ang reward.',
       },
     },
     cta: {
-      open_accounts: 'Mga account',
+      open_accounts: 'Pamahalaan ang mga account',
       open_hourly_value_settings: 'Itakda ang oras ng trabaho',
       open_add_transaction: 'Magdagdag ng transaksyon',
       open_recurring: 'Buksan ang Paulit-ulit',
@@ -524,7 +524,7 @@ const fil = {
       open_scan_receipt: 'Mag-scan ng mga resibo',
       open_albums: 'Buksan ang Mga album',
       open_share_earn: 'Kunin ang Pro nang libre',
-      open_quick_entry_settings: 'Buksan ang Quick Entry settings',
+      open_quick_entry_settings: 'Buksan ang mga setting ng Mabilis na paglagay',
       open_auto_log: 'I-set up ang mga automation',
       open_first_day_of_month: 'Itakda ang simula ng buwan',
       open_excel_export: 'Pumunta sa Excel export',
@@ -574,7 +574,7 @@ const fil = {
       voice_logged: 'Naitala sa boses',
       voice_example: 'taxi 30',
       album_trip: 'Biyahe sa Tokyo',
-      album_trip_meta: 'Mar 4 – Mar 11',
+      album_trip_meta: 'Mar 4 - Mar 11',
       album_celebration: 'Kaarawan ni Mama',
       album_celebration_meta: '8 na transaksyon',
       month_starts_on_payday: 'Nagsisimula ang buwan mo sa araw ng sahod',
@@ -602,7 +602,7 @@ const fil = {
       },
       savings: {
         title: 'Kung magkano ang naiipon mo',
-        body: 'Ang iyong savings rate ngayong buwan sa isang sulyap — kung magkano ang naitabi laban sa nagastos, sa pera at oras ng trabaho.',
+        body: 'Ang iyong savings rate ngayong buwan sa isang sulyap: kung magkano ang naitabi laban sa nagastos, sa pera at oras ng trabaho.',
       },
       trend: {
         title: 'Ang trend ng iyong ipon',
@@ -623,10 +623,10 @@ const fil = {
     spent: 'Nagastos',
     of_income_saved: 'ng kita ang naipon',
     add_income_hint: 'Magdagdag ng kita para makita ang iyong rate',
-    set_hourly_value: 'Itakda ang halaga kada oras sa app',
-    of_work: '{{hours}} trabaho',
-    of_work_kept: '≈ {{hours}} trabaho ang naitabi',
-    of_work_behind: '≈ {{hours}} trabaho ang kulang',
+    set_hourly_value: 'Itakda ang hourly value sa app',
+    of_work: '{{hours}} ng trabaho',
+    of_work_kept: '≈ {{hours}} ng trabaho ang naitabi',
+    of_work_behind: '≈ {{hours}} ng trabaho ang kulang',
     budget_setup: 'Magtakda ng buwanang badyet',
     budget_over: 'lampas sa badyet',
     budget_left_of: 'natitira sa {{total}}',
@@ -655,7 +655,7 @@ const fil = {
       wage_title: 'Magkano ang isang oras mo?',
       wage_body:
         'Bumibilang ang live na kita ayon sa totoong halaga mo kada oras. Itakda mo lang at handa na.',
-      wage_action: 'Itakda ang halaga kada oras',
+      wage_action: 'Itakda ang hourly value ko',
       disabled_title: 'Naka-off ang Live Activities',
       disabled_body: 'I-on ulit para sa Money2Time sa iOS Settings, tapos balik ka dito.',
       unavailable: 'Kailangan ng Live Activities ang iPhone na may iOS 16.2 o mas bago.',
@@ -670,12 +670,12 @@ const fil = {
       schedule_time: 'Oras',
       schedule_duration: 'Haba ng shift',
       schedule_no_days: 'Pumili ng kahit isang araw.',
-      offset_title: 'Nagsimula nang',
+      offset_title: 'Nagsimula noong',
       summary_ends: 'Matatapos',
       summary_total: 'Kabuuan ng shift',
       of_total: 'sa {{total}}',
       refresh: 'I-refresh',
-      widget_idle: 'Walang session',
+      widget_idle: 'Hindi nagbibilang',
     },
   },
   home: {
@@ -716,7 +716,7 @@ const fil = {
       title: 'I-set ang mga basic',
       subtitle: 'Puwede mo itong baguhin mamaya.',
       language_label: 'Wika',
-      currency_label: 'Pera',
+      currency_label: 'Currency',
     },
     income: {
       title: 'Magkano ang kita mo?',
@@ -745,7 +745,7 @@ const fil = {
     },
     automations: {
       title: 'Hayaan itong mag-log para sa iyo',
-      subtitle: 'I-set up kahit kailan sa Settings.',
+      subtitle: 'I-set up kahit kailan sa Mga setting.',
       screenshot_title: 'Mga screenshot',
       screenshot_subtitle_ios: 'I-screenshot ang resibo o bayad.',
       screenshot_subtitle_android: 'I-share ang screenshot ng resibo o bayad.',
@@ -760,13 +760,13 @@ const fil = {
     notifications: {
       title: 'Manatiling updated',
       subtitle: 'Ilang kapaki-pakinabang na paalala, iyon lang.',
-      enable: 'I-enable ang Mga Notipikasyon',
+      enable: 'I-on ang mga notification',
       not_now: 'Hindi Ngayon',
-      daily_title: 'Daily check-in',
+      daily_title: 'Araw-araw na check-in',
       daily_subtitle: 'Paalala na mag-log ngayon.',
-      recurring_title: 'Mga recurring na entry',
+      recurring_title: 'Mga paulit-ulit na entry',
       recurring_subtitle: 'Malaman kapag naidagdag.',
-      weekly_title: 'Weekly summary',
+      weekly_title: 'Lingguhang buod',
       weekly_subtitle: 'Ang huling 7 araw mo sa isang tingin.',
     },
     backup: {
@@ -790,7 +790,7 @@ const fil = {
       confirm_skip: 'Laktawan pa rin',
       icloud_pending_title: 'Naka-on ang backup',
       icloud_pending_message:
-        'Mag-sign in sa iCloud at i-on ang iCloud Drive sa Settings — awtomatikong magsisimula ang iyong backup sa sandaling available na ito.',
+        'Mag-sign in sa iCloud at i-on ang iCloud Drive sa Settings. Awtomatikong magsisimula ang iyong backup sa sandaling available na ito.',
     },
     source: {
       title: 'Paano mo kami nakilala?',
@@ -814,7 +814,7 @@ const fil = {
       discard_message: 'Mawawala ang iyong mga item at pagtatalaga.',
       discard_confirm: 'Itapon',
       keep_editing: 'Ituloy ang pag-edit',
-      low_confidence_banner: 'Mahirap basahin ang ilang linya — pakisuri ulit.',
+      low_confidence_banner: 'Mahirap basahin ang ilang linya. Pakisuri ulit.',
       items_empty_title: 'Wala pang item',
       items_empty_message: 'Idagdag ang bawat linya mula sa resibo para hatiin ito kada item.',
       item_name_placeholder: 'Pangalan ng item',
@@ -876,7 +876,7 @@ const fil = {
       bills_other: '{{count}} bill',
       someone: 'Isang tao',
       person_owes_label: 'May utang sa iyo',
-      untitled_bill: 'Split bill',
+      untitled_bill: 'Hinating bill',
       remove_bill_title: 'Alisin ang request na ito?',
       remove_bill_message:
         'Ic-clear nito ang utang nila sa iyo para sa bill na ito. Hindi mababago ang transaksyon mismo.',
@@ -936,7 +936,7 @@ const fil = {
     empty_search_message: 'Subukan ng ibang keyword o i-clear ang search',
     sort: {
       newest: 'Pinakabago',
-      oldest: 'Pinakamatanda',
+      oldest: 'Pinakaluma',
       high: 'Pinakamataas',
       low: 'Pinakamababa',
     },
@@ -948,8 +948,8 @@ const fil = {
       type: 'Uri',
       account: 'Account',
       category: 'Kategorya',
-      income_category: 'Income category',
-      expense_category: 'Expense category',
+      income_category: 'Kategorya ng kita',
+      expense_category: 'Kategorya ng gastos',
       min: 'Min',
       max: 'Max',
       sort: 'Ayusin',
@@ -960,8 +960,8 @@ const fil = {
       adjustment: 'Adjustment',
       all_accounts: 'Lahat ng account',
       all_categories: 'Lahat ng kategorya',
-      all_income_categories: 'Lahat ng income category',
-      all_expense_categories: 'Lahat ng expense category',
+      all_income_categories: 'Lahat ng kategorya ng kita',
+      all_expense_categories: 'Lahat ng kategorya ng gastos',
     },
     selection: {
       duplicate: 'I-duplicate',
@@ -995,29 +995,29 @@ const fil = {
       },
       transfer_expense_label: 'Ibilang bilang gastos',
       transfer_expense_tooltip:
-        'Ibinibilang ang transfer na ito bilang gastos sa iyong mga kabuuan, budget at chart, sa ilalim ng kategoryang pipiliin mo. Gumagalaw pa rin ang pera sa pagitan ng dalawang account gaya ng dati.',
+        'Ibinibilang ang transfer na ito bilang gastos sa iyong mga kabuuan, badyet at chart, sa ilalim ng kategoryang pipiliin mo. Gumagalaw pa rin ang pera sa pagitan ng dalawang account gaya ng dati.',
       received_amount: 'Halagang natanggap ({{currency}})',
       transfer_rate_hint:
-        'Iwanang blangko para i-convert ang {{from}} → {{to}} sa pinakabagong palitan.',
+        'Iwanang blangko para i-convert ang {{from}} → {{to}} sa pinakabagong rate.',
       received_label: 'Natanggap',
       fx_title: 'Pagpapalit',
-      fx_rate: 'Palitan',
+      fx_rate: 'Exchange rate',
       fx_received: 'Halagang natanggap',
       fx_converted: 'Na-convert na halaga',
       fx_edit: 'I-edit ang conversion',
       transfer_fee: {
-        chip_label: 'Bayad',
-        chip_active: 'Bayad {{amount}}',
-        title: 'Bayad sa transfer',
-        amount_label: 'Halaga ng bayad',
+        chip_label: 'Singil',
+        chip_active: 'Singil {{amount}}',
+        title: 'Singil sa transfer',
+        amount_label: 'Halaga ng singil',
         charged_to: 'Sinisingil sa',
-        remove: 'Alisin ang bayad',
-        row_note: 'Bayad sa transfer',
-        delete_confirm: 'Mabubura rin ang {{fee}} na bayad nito. Hindi na ito maibabalik. Ituloy?',
+        remove: 'Alisin ang singil',
+        row_note: 'Singil sa transfer',
+        delete_confirm: 'Mabubura rin ang {{fee}} na singil nito. Hindi na ito maibabalik. Ituloy?',
       },
       title_create: 'Magdagdag',
       title_edit: 'I-update',
-      bulk_mode: 'Bulk',
+      bulk_mode: 'Maramihan',
       subtitle_create: 'Mabilis at malinaw na entry',
       subtitle_edit: 'I-update ang mga detalye',
       subtitle_edit_balance_adjustment: 'I-update ang halaga at apektadong account',
@@ -1060,16 +1060,16 @@ const fil = {
       category: 'Kategorya',
       from: 'Mula',
       to: 'Patungo',
-      swap_accounts: 'Palitan ang from at to na account',
+      swap_accounts: 'Pagpalitin ang Mula at Patungo na account',
       choose_account: 'Pumili ng account',
       choose_category: 'Pumili ng kategorya',
       choose_field: 'Pumili ng {{field}}',
       optional: 'Opsyonal',
       yest_short: 'Kahapon',
       subcategories: 'Mga subcategory',
-      recurring_settings: 'Recurring settings',
+      recurring_settings: 'Mga setting ng paulit-ulit',
       rule_name: 'Pangalan ng rule',
-      rule_name_placeholder: 'Netflix subscription',
+      rule_name_placeholder: 'Subscription sa Netflix',
       repeat: 'Ulitin',
       daily: 'Araw-araw',
       weekly: 'Linggo-linggo',
@@ -1082,7 +1082,7 @@ const fil = {
       never: 'Hindi kailanman',
       on_date: 'Sa petsa',
       end_date: 'Petsa ng pagtatapos',
-      sentiment_label: 'Paano ka nakaramdam?',
+      sentiment_label: 'Ano ang naramdaman mo?',
       status: 'Status',
       active: 'Aktibo',
       paused: 'Naka-pause',
@@ -1101,12 +1101,12 @@ const fil = {
         transfer_amount_gt_zero: 'Ang transfer amount ay dapat higit sa zero.',
         amount_gt_zero: 'Ang halaga ay dapat > 0',
         pick_two_different_accounts: 'Pumili ng dalawang magkaibang account para sa transfer.',
-        enter_rule_name: 'Mangyaring magpasok ng pangalan ng recurring rule.',
-        valid_end_date: 'Mangyaring pumili ng valid na end date.',
+        enter_rule_name: 'Maglagay ng pangalan ng paulit-ulit na rule.',
+        valid_end_date: 'Pumili ng wastong petsa ng pagtatapos.',
       },
       split: {
-        toggle_title: 'Split Bill',
-        button_label: 'Split Bill',
+        toggle_title: 'Hatiin ang bill',
+        button_label: 'Hatiin ang bill',
         button_short: 'Hatiin',
         even_toggle: 'Hatiin nang pantay',
         split_by_label: 'Hatiin ayon sa',
@@ -1116,7 +1116,7 @@ const fil = {
         method_percent_hint: 'Bigyan ang bawat isa ng porsyento ng bill',
         method_shares: 'Bahagi',
         method_shares_hint: 'Ang 2 bahagi ay doble ng 1',
-        method_adjust: 'Adjustment',
+        method_adjust: 'Dagdag/Bawas',
         method_adjust_hint: 'Hatiin nang pantay, saka dagdagan o bawasan ang isang tao',
         percent_sum: '{{given}}% ng 100%',
         percent_left: '{{diff}}% pa ang natitira',
@@ -1168,7 +1168,7 @@ const fil = {
     title: 'Detalye ng transaksyon',
     category: 'Kategorya',
     account: 'Account',
-    note: 'Note',
+    note: 'Tala',
   },
   insights: {
     household: 'Sambahayan',
@@ -1222,7 +1222,7 @@ const fil = {
       income_trend: 'Trend ng kita',
       category_trend: 'Trend ng kategorya',
       expense_sentiment: 'Mood',
-      asset_history: 'Assets',
+      asset_history: 'Ari-arian',
       income_rate_history: 'Hourly rate',
     },
     review: 'I-review ang gastos',
@@ -1248,16 +1248,16 @@ const fil = {
       'I-track ang buwanang kita sa buong taon at mabilis na makita ang iyong pinakamalakas na buwan.',
     category_trend: 'Trend ng kategorya',
     category_trend_description:
-      'Pumili ng kategorya at subaybayan kung paano nagba-trend ang gastos nito sa paglipas ng panahon.',
+      'Pumili ng kategorya at subaybayan kung paano nagbabago ang gastos nito sa buong buwan o taon.',
     expense_sentiment: 'Sentiment ng gastos',
     expense_sentiment_description:
-      'Tingnan ang mood sa likod ng iyong gastos — masaya, neutral, o nagsisisi — araw-araw.',
+      'Tingnan ang mood sa likod ng iyong gastos araw-araw: masaya, neutral, o nagsisisi.',
     asset_history: 'Trend ng Ari-arian',
     asset_history_description:
-      'I-track ang iyong kabuuang assets sa buong taon at suriin ang buwanang balance trend.',
+      'I-track ang iyong kabuuang ari-arian sa buong taon at suriin ang buwanang trend ng balanse.',
     income_rate_history: 'Kasaysayan ng income rate',
     income_rate_history_description:
-      'Tingnan kung paano nagbago ang iyong true hourly rate sa paglipas ng panahon sa buong kasaysayan ng transaksyon.',
+      'Tingnan kung paano nagbago ang iyong totoong hourly rate sa paglipas ng panahon, sa buong kasaysayan ng transaksyon mo.',
     total_expense: 'Kabuuang gastos',
     total_income: 'Kabuuang kita',
     no_positive_slices: 'Walang positibong expense slice para sa panahong ito.',
@@ -1302,7 +1302,7 @@ const fil = {
         top_category_title: 'Nangungunang kategorya',
         transactions: '{{count}} transaksyon',
         no_data_title: 'Wala pang trend ng gastos',
-        no_data_message: 'Magdagdag ng expense transactions para makita ang trend.',
+        no_data_message: 'Magdagdag ng mga gastos para makita ang trend.',
       },
       income_trend: {
         title: 'Pulso ng kita',
@@ -1316,7 +1316,7 @@ const fil = {
         top_category_title: 'Nangungunang kategorya',
         transactions: '{{count}} transaksyon',
         no_data_title: 'Wala pang trend ng kita',
-        no_data_message: 'Magdagdag ng income transactions para makita ang trend.',
+        no_data_message: 'Magdagdag ng kita para makita ang trend.',
       },
       category_trend: {
         no_data_title: 'Walang gastos sa kategoryang ito',
@@ -1327,8 +1327,7 @@ const fil = {
         count_one: '{{count}} gastos',
         count_other: '{{count}} gastos',
         no_data_title: 'Wala pang sentiment data',
-        no_data_message:
-          'Magdagdag ng expense transactions na may mood para makita ang sentiment chart.',
+        no_data_message: 'Magdagdag ng mga gastos na may mood para makita ang sentiment chart.',
       },
       asset_history: {
         summary_title: 'Trend ng net asset',
@@ -1344,7 +1343,7 @@ const fil = {
         no_income_title: 'Walang kita sa panahong ito',
         no_income_short: 'Walang kita',
         of_income: 'mula sa {{value}} na kita',
-        saved_per_year: '{{value}} na nai-save ngayong taon',
+        saved_per_year: '{{value}} naipon ngayong taon',
         exclusions_active: 'Inalis ang {{count}} kategorya mula sa kalkulasyon.',
         goal_hint: 'Ang 20%+ ay itinuturing na malusog.',
       },
@@ -1356,7 +1355,7 @@ const fil = {
       },
     },
     empty: {
-      title: 'Wala pang transaction data',
+      title: 'Wala pang data ng transaksyon',
       message: 'Magdagdag ng kita o gastos para ma-unlock ang mga insight para sa panahong ito',
     },
     empty_category: {
@@ -1375,7 +1374,7 @@ const fil = {
       income: 'Kita',
       expense: 'Gastos',
       all_accounts: 'Lahat ng Account',
-      all_selected: 'Lahat napili',
+      all_selected: 'Napili lahat',
       asset_history_accounts: 'Mga account sa kasaysayan ng asset',
       expense_trend_exclusions: 'Mga exclusion sa expense trend',
       include_accounts: 'Isama ang mga account',
@@ -1443,7 +1442,7 @@ const fil = {
       opens_label: 'Binubuksan',
       subcategories_label: 'Ipakita ang mga subcategory',
       subcategories_hint:
-        'Kapag naka-off, mga pangunahing kategorya lang ang lalabas sa Category picker.',
+        'Kapag naka-off, mga pangunahing kategorya lang ang lalabas sa pagpili ng Kategorya.',
       auto_categorize_label: 'Awtomatikong ikategorya ayon sa merchant',
       auto_categorize_hint:
         'Pumipili ng kategorya mula sa pangalan ng merchant, kaya hindi ka na tatanungin kapag nagbabayad.',
@@ -1460,7 +1459,7 @@ const fil = {
       lp27_card:
         'I-tap ang Any Card, piliin ang card na ita-track, pagkatapos ay i-tap ang Add Shortcut.',
       lp27_finish:
-        'Naka-off ito pagdating. Buksan ito, i-tap ang Edit, itakda ang Account sa Log Card Payment, at i-on ang Automation. Kung walang action, burahin ito at sundin ang mga susunod na hakbang para gawin ito mismo.',
+        'Naka-off ito pagdating. Buksan ito, i-tap ang Edit, itakda ang Account sa Log Card Payment, at i-on ang Automation. Kung walang action, burahin ito at sundin ang mga susunod na hakbang para ikaw mismo ang gumawa nito.',
       lp27_m_options:
         'I-tap ang › sa trigger. Panatilihing naka-on ang Automation at i-off ang Notify.',
       lp27_m_select_variable: 'I-tap ang Amount, pagkatapos ay Select Variable.',
@@ -1564,12 +1563,12 @@ const fil = {
       payment_alerts_ios_input: 'Piliin ang Notification variable sa ilalim ng trigger.',
       payment_alerts_ios_body: 'I-tap ang inilagay na variable, piliin ang Body, saka Return.',
     },
-    title: 'Settings',
+    title: 'Mga setting',
     display: 'Display',
     theme: 'Tema',
-    theme_system: 'System',
-    theme_light: 'Light',
-    theme_dark: 'Dark',
+    theme_system: 'Sistema',
+    theme_light: 'Maliwanag',
+    theme_dark: 'Madilim',
     theme_color: 'Kulay ng tema',
     theme_color_sage: 'Sage',
     theme_color_ocean: 'Ocean',
@@ -1604,7 +1603,7 @@ const fil = {
       default_row: 'Nagsisimula ang bawat buwan sa araw na',
       custom: 'Custom',
       now: 'Ngayon',
-      sheet_default: 'Default na start day',
+      sheet_default: 'Default na simulang araw',
       use_default: 'Gamitin ang default ({{day}})',
       reset: 'I-clear ang mga custom na buwan',
       reset_confirm_title: 'I-clear ang mga custom na buwan?',
@@ -1623,7 +1622,7 @@ const fil = {
     select_year: 'Pumili ng taon',
     language: 'Wika',
     language_confirm_title: 'Baguhin ang wika?',
-    language_confirm_message: 'Palitan na ng {{language}} ang wika ng app ngayon?',
+    language_confirm_message: 'Gawing {{language}} na ang wika ng app?',
     language_confirm_action: 'Baguhin',
     user_id: 'User ID',
     user_id_unavailable: 'Hindi available',
@@ -1650,7 +1649,7 @@ const fil = {
       },
       sync: {
         q: 'Sini-sync ba ng pag-sign in ang data ko?',
-        a: 'Hindi. Naka-off ang Cloud Sync hanggang i-on mo ito sa Settings > Cloud Sync. Kailangan ng Pro para i-sync ang sarili mong data.',
+        a: 'Hindi. Naka-off ang Cloud Sync hanggang i-on mo ito sa Mga setting > Cloud Sync. Kailangan ng Pro para i-sync ang sarili mong data.',
       },
       pro: {
         q: 'Kailangan ko ba ng Pro para mag-sign in?',
@@ -1662,7 +1661,7 @@ const fil = {
       },
       shared_free_limits: {
         q: 'Puwede ba akong magdagdag ng entry sa shared ledger nang walang Pro?',
-        a: 'Oo, kahit may higit sa 6 na account ito. Nalalapat pa rin ang ibang limit ng libreng plan, gaya ng pagdagdag ng account o category lampas sa limit. Hilingin sa may-ari ng ledger na gawin ang mga pagbabagong iyon.',
+        a: 'Oo, kahit may higit sa 6 na account ito. Nalalapat pa rin dito ang ibang limit ng libreng plan, gaya ng pagdagdag ng account o kategorya lampas sa libreng limit. Hilingin sa may-ari ng ledger na gawin ang mga pagbabagong iyon.',
       },
       family_pro: {
         q: 'Puwede bang gamitin ng pamilya ko ang Pro ko?',
@@ -1676,17 +1675,17 @@ const fil = {
     stat_days: 'Araw na sinusubaybayan',
     stat_transactions: 'Naitala',
     stat_this_month: 'Ngayong buwan',
-    news: 'Mga Balita',
+    news: 'Ano ang Bago',
     quick_entry: {
-      title: 'Quick Entry',
+      title: 'Mabilis na paglagay',
       section_expense: 'Gastos',
       section_income: 'Kita',
       default_account_section: 'Mga default',
       default_account_label: 'Default na account',
       default_account_subtitle:
         'Ginagamit ng voice at text entry kung walang nahanap na kasaysayan',
-      default_currency_label: 'Default na pera',
-      default_currency_auto: 'Itugma sa pera ng account',
+      default_currency_label: 'Default na currency',
+      default_currency_auto: 'Itugma sa currency ng account',
       default_row: 'Default',
       no_default: 'Awtomatiko · babalik sa Iba pa',
       unmapped: 'Hindi naka-map',
@@ -1706,11 +1705,11 @@ const fil = {
         fitness: 'Fitness',
         gifts: 'Regalo at Donasyon',
         salary: 'Sahod',
-        investment: 'Investment',
+        investment: 'Pamumuhunan',
         refund: 'Refund',
       },
       voice: {
-        section_title: 'Voice Input',
+        section_title: 'Paglagay gamit ang boses',
         skip_confirmation_label: 'Laktawan ang kumpirmasyon',
         skip_confirmation_subtitle: 'I-save agad ang voice entry nang walang preview',
         listening: 'Nakikinig…',
@@ -1725,38 +1724,38 @@ const fil = {
         no_amount_title: 'Walang natukoy na halaga',
         no_amount_message:
           'Narinig ko ang "{{transcript}}" pero hindi ko mahanap ang halaga. Subukan ang pagsasabi ng halaga, hal. "Grab 30".',
-        preview_note: 'Note',
+        preview_note: 'Tala',
         preview_amount: 'Halaga',
         preview_category: 'Kategorya',
         preview_account: 'Account',
-        preview_note_empty: 'Voice entry',
+        preview_note_empty: 'Paglagay gamit ang boses',
         discard: 'Itapon',
         edit: 'I-edit',
         save: 'I-save',
         tap_stop_hint: 'I-tap kahit saan para huminto',
       },
       add_button: {
-        section_title: 'Add button',
+        section_title: 'Button na +',
         sheet_label: 'Ipakita ang mga opsyon kapag nagdadagdag',
-        sheet_subtitle: 'I-tap ang + para pumili ng Scan, Voice, o Manual',
+        sheet_subtitle: 'I-tap ang + para pumili ng Scan, Boses, o Manual',
         tap_label: 'Kapag na-tap',
         hold_label: 'Kapag pinindot nang matagal',
         action_quick: 'Mabilis na paglagay',
         action_full: 'Kumpletong paglagay',
         action_scan: 'I-scan ang resibo',
-        action_voice: 'Voice entry',
+        action_voice: 'Paglagay gamit ang boses',
         action_split: 'Manual na paghahati',
         action_splitScan: 'I-scan at hatiin',
         action_none: 'Wala',
       },
     },
     hourly_value: 'Hourly value',
-    notifications: 'Mga Notipikasyon',
+    notifications: 'Mga notification',
     manage_formulas:
-      'Magdagdag lang ng entry kapag nagbago ang iyong kita — hindi kailangang mag-update bawat buwan.',
+      'Magdagdag lang ng entry kapag nagbago ang iyong kita. Hindi kailangang mag-update bawat buwan.',
     accounts: 'Mga Account',
     categories: 'Mga Kategorya',
-    recurring: 'Mga recurring na transaksyon',
+    recurring: 'Mga paulit-ulit na transaksyon',
     replay_onboarding: 'I-replay ang onboarding',
     replay_title: 'I-replay ang onboarding?',
     replay_message:
@@ -1780,12 +1779,12 @@ const fil = {
     hourly_now_monthly: 'Ang iyong buwanang kita ngayon',
     hourly_now_yearly: 'Ang iyong taunang kita ngayon',
     hourly_show_as: 'Ipakita bilang',
-    hourly_period_hourly: 'Oras-oras',
+    hourly_period_hourly: 'Kada oras',
     hourly_period_weekly: 'Lingguhan',
     hourly_period_monthly: 'Buwanan',
     hourly_period_yearly: 'Taunan',
     hourly_suffix_hourly: '/oras',
-    hourly_suffix_weekly: '/lggo',
+    hourly_suffix_weekly: '/linggo',
     hourly_suffix_monthly: '/buwan',
     hourly_suffix_yearly: '/taon',
     hourly_timeline: 'Timeline',
@@ -1794,17 +1793,17 @@ const fil = {
       'Burahin ang rate para sa {{month}}? Ang mga buwang nakasalalay dito ay babalik sa nakaraang available na buwan.',
     hourly_add_title: 'Magdagdag ng income rate',
     hourly_month_exists_title: 'Mayroon nang {{month}}',
-    hourly_month_exists_message: 'Palitan ang income rate nito ng ito?',
+    hourly_month_exists_message: 'Ipalit ito sa kasalukuyang income rate nito?',
     hourly_replace: 'Palitan',
     account_settings: 'Personalisasyon',
     haptics: 'Haptics',
     haptics_subtitle: 'I-on o i-off ang touch feedback sa buong app.',
-    data_management: 'Data Management',
+    data_management: 'Pamamahala ng data',
     web_dashboard: 'Web Dashboard',
-    statement_import: 'Statement Import',
+    statement_import: 'Pag-import ng statement',
   },
   statement_import: {
-    title: 'Statement Import',
+    title: 'Pag-import ng statement',
     step1_title: 'Kopyahin ang Prompt',
     copy_prompt: 'Kopyahin ang Prompt',
     step1_instructions:
@@ -1839,7 +1838,7 @@ const fil = {
     currency_label: 'Currency ng Statement',
     currency_hint: 'Ini-import ang mga halaga nang eksakto ayon sa nakalagay sa statement.',
     currency_hint_converted:
-      'Iniimbak ang mga halaga sa %{statement} at kino-convert sa %{reporting} gamit ang palitan sa petsa ng bawat transaksyon.',
+      'Iniimbak ang mga halaga sa %{statement} at kino-convert sa %{reporting} gamit ang rate sa petsa ng bawat transaksyon.',
     prompt_template:
       'I-parse ang mga na-upload na bank statement sa JSON. Maaaring may nakalakip na isa o maraming file.\n\n' +
       'Para sa bawat transaksyon na nahanap:\n' +
@@ -1849,9 +1848,12 @@ const fil = {
       '- category: pinakamalapit na tugma mula sa aking mga kategorya sa ibaba gamit ang "Parent > Subcategory" kung may angkop na subcategory, pangalan lang ng parent kung wala, "Other" kung hindi sigurado\n' +
       '- account: tiyak na pangalan ng account na nakasulat sa statement (hal. "Chase Sapphire Reserve", "OCBC 365 Credit Card"), hindi generic na label\n\n' +
       'Laktawan lang: mga balance line, kabuuan ng statement, mga disclosure, header/footer.\n\n' +
-      '## Ang Aking Mga Account\n{{accounts}}\n\n' +
-      '## Ang Aking Mga Expense Category\n{{expenses}}\n\n' +
-      '## Ang Aking Mga Income Category\n{{incomes}}\n\n' +
+      '## Ang Aking Mga Account\n' +
+      '{{accounts}}\n\n' +
+      '## Ang Aking Mga Expense Category\n' +
+      '{{expenses}}\n\n' +
+      '## Ang Aking Mga Income Category\n' +
+      '{{incomes}}\n\n' +
       'Sumagot ng ISANG json code block lang, walang ibang teksto:\n\n' +
       '```json\n' +
       '{\n' +
@@ -1866,13 +1868,13 @@ const fil = {
       '}\n' +
       '```\n\n' +
       '## Mga Panuntunan\n' +
-      '- Ilagay ang currency ng statement bilang ISO 4217 code (halimbawa "MYR", "SGD", "USD"). Kopyahin ang bawat halaga nang eksakto ayon sa nakalimbag at HUWAG itong i-convert sa ibang currency.\\n' +
+      '- Ilagay ang currency ng statement bilang ISO 4217 code (halimbawa "MYR", "SGD", "USD"). Kopyahin ang bawat halaga nang eksakto ayon sa nakalimbag at HUWAG itong i-convert sa ibang currency.\n' +
       '- HUWAG KAILANMAN gumawa o mag-hallucinate ng mga transaksyon. Output lang ang nasa dokumento.\n' +
       '- HUWAG KAILANMAN laktawan, putulin, o alisin ang mga transaksyon. Basahin ang bawat pahina ng bawat file mula simula hanggang katapusan. I-output ang bawat transaksyon.\n' +
       '- Kung maraming file ang na-upload, iproseso nang buo ang bawat file pagkatapos ay pagsamahin ang lahat ng transaksyon sa iisang "transactions" array.\n' +
       '- Kung ang statement ay sumasaklaw ng dalawang taon at nagpapakita lang ng buwan/araw, hulaan ang taon mula sa statement period.\n' +
       '- Huwag magtanong, huwag tumanggi, huwag mag-alok na hatiin sa maraming response.\n' +
-      "- Kung ma-cut off ang iyong output, huminto sa gitna ng JSON at sasagutin ko ng 'continue' para maipagpatuloy mo. Huwag huminto nang maaga para maiwasan ang pag-cut off — ituloy lang.",
+      "- Kung ma-cut off ang iyong output, huminto sa gitna ng JSON at sasagutin ko ng 'continue' para maipagpatuloy mo. Huwag huminto nang maaga para maiwasan ang pag-cut off; ituloy lang.",
   },
   data_management: {
     section_export: 'Export',
@@ -1892,9 +1894,9 @@ const fil = {
       column_date: 'Petsa',
       column_type: 'Uri',
       column_amount: 'Halaga',
-      column_currency: 'Pera',
+      column_currency: 'Currency',
       column_reporting_amount: 'Halaga sa reporting',
-      column_reporting_currency: 'Pera sa reporting',
+      column_reporting_currency: 'Currency sa reporting',
       column_account: 'Account',
       column_from_account: 'Mula sa account',
       column_to_account: 'Papunta sa account',
@@ -1918,7 +1920,7 @@ const fil = {
       value_yes: 'Oo',
       value_no: 'Hindi',
     },
-    title: 'Data Management',
+    title: 'Pamamahala ng data',
     export_title: 'I-export ang Database',
     exporting: 'Ine-export...',
     export_error_title: 'Nabigo ang Export',
@@ -1932,11 +1934,11 @@ const fil = {
       'Hindi ma-import ang backup file. Tiyakin na ito ay valid na Money2Time JSON backup.',
     import_money_manager_title: 'Mag-import ng Money Manager Backup',
     import_money_manager_description:
-      'Mag-import ng mga account, kategorya, transaksyon, at recurring rule mula sa Money Manager .mmbak backup. Mananatili ang iyong Money2Time settings at kasaysayan ng hourly value.',
+      'Mag-import ng mga account, kategorya, transaksyon, at paulit-ulit na rule mula sa Money Manager .mmbak backup. Mananatili ang iyong mga setting sa Money2Time at kasaysayan ng hourly value.',
     import_money_manager_importing: 'Ina-import ang Money Manager backup',
     import_money_manager_confirm_title: 'Mag-import ng Money Manager Backup?',
     import_money_manager_confirm_message:
-      'Papalitan nito ang iyong kasalukuyang account, kategorya, transaksyon, at recurring rule ng data mula sa napiling .mmbak backup. Mananatili ang iyong Money2Time settings at kasaysayan ng hourly value.',
+      'Papalitan nito ang iyong kasalukuyang account, kategorya, transaksyon, at paulit-ulit na rule ng data mula sa napiling .mmbak backup. Mananatili ang iyong mga setting sa Money2Time at kasaysayan ng hourly value.',
     import_money_manager_confirm_action: 'Mag-import ng Backup',
     import_money_manager_invalid_file_title: 'Invalid na file',
     import_money_manager_invalid_file_message:
@@ -1945,7 +1947,7 @@ const fil = {
     import_money_manager_success_message:
       'Na-import ang {{accounts}} account, {{categories}} kategorya, at {{transactions}} transaksyon.',
     reset_data_description:
-      'Permanenteng alisin ang lahat ng account, kategorya, transaksyon, at recurring rule mula sa device na ito.',
+      'Permanenteng alisin ang lahat ng account, kategorya, transaksyon, at paulit-ulit na rule mula sa device na ito.',
   },
   instalments: {
     title: 'Hulugan',
@@ -1993,14 +1995,14 @@ const fil = {
       'Para mapanatili ang resibo, detalye o reimbursement, dapat ngayong araw o mas maaga ang unang hulog.',
     remove: 'Alisin ang hulugan',
     add_payments: 'Idagdag ang {{count}} hulog',
-    convert_payments: 'Gawing {{count}} bayad',
+    convert_payments: 'Gawing {{count}} hulog',
     convert_note:
-      'Ang gastos na ito ang magiging bayad 1 sa {{count}}. Susunod ang iba ayon sa iskedyul.',
+      'Ang gastos na ito ang magiging hulog 1 sa {{count}}. Susunod ang iba ayon sa iskedyul.',
     convert_failed: 'Hindi magawang hulugan ang gastos na ito. Pakisubukang muli.',
-    already_due_one: 'May {{count}} pang bayad na dapat nang bayaran. Idaragdag ito pag-save mo.',
+    already_due_one: 'May {{count}} pang hulog na dapat nang bayaran. Idaragdag ito pag-save mo.',
     already_due_other:
-      'May {{count}} pang bayad na dapat nang bayaran. Idaragdag ang mga ito pag-save mo.',
-    pill_a11y: 'Hulugan {{label}}',
+      'May {{count}} pang hulog na dapat nang bayaran. Idaragdag ang mga ito pag-save mo.',
+    pill_a11y: 'Hulog {{label}}',
     new_plan: 'Bagong hulugan',
     due_this_month: 'Dapat bayaran ngayong buwan',
     left_to_pay: 'Natitirang babayaran',
@@ -2047,10 +2049,10 @@ const fil = {
       custom: 'Custom na logo',
       search_placeholder: 'Maghanap ng subscription',
     },
-    title: 'Mga recurring na commitment',
+    title: 'Mga paulit-ulit na commitment',
     delete_rule: 'Burahin ang rule',
-    edit_rule: 'I-edit ang recurring rule',
-    new_rule: 'Bagong recurring rule',
+    edit_rule: 'I-edit ang paulit-ulit na rule',
+    new_rule: 'Bagong paulit-ulit na rule',
     same_flow: 'Parehong proseso ng pagdadagdag ng transaksyon',
     save_rule: 'I-save ang rule',
     every_days: 'Tuwing {{count}} araw',
@@ -2061,12 +2063,12 @@ const fil = {
     empty_title: 'Wala pang commitment.',
     create_commitment: 'Gumawa ng commitment',
     empty_message:
-      'Mag-set up ng mga paulit-ulit na panuntunan para i-automate ang iyong regular na kita at gastos.',
+      'Mag-set up ng mga paulit-ulit na rule para i-automate ang iyong regular na kita at gastos.',
     per_month_suffix: '/buwan',
     this_year: 'Ngayong taon',
     active_count: 'Aktibo',
     approx_per_month: '≈ {{amount}}/buwan',
-    delete_confirm: 'Tanggalin ang “{{name}}”? Hindi na ito maibabalik.',
+    delete_confirm: 'Burahin ang “{{name}}”? Hindi na ito maibabalik.',
     due_tomorrow: 'Bukas',
     week_strip_label: 'Susunod na 7 araw',
     this_month: 'Ngayong buwan',
@@ -2077,11 +2079,11 @@ const fil = {
       'Ang mga entry na idinadagdag ng iyong mga paulit-ulit na rule ay may malambot na lavender na background sa iyong mga listahan ng transaksyon, para makilala mo ang mga ito mula sa mga tinype mo.',
     overdue: 'Lagpas na',
     show_all_days: 'Lahat ng araw',
-    day_due_count: '{{count}} dapat na',
-    day_nothing_due: 'Walang dapat na',
+    day_due_count: '{{count}} babayaran',
+    day_nothing_due: 'Walang babayaran',
   },
   app_icon: {
-    title: 'App icon',
+    title: 'Icon ng app',
     unsupported: 'Hindi mababago ng device na ito ang app icon.',
     classic: 'Orihinal',
     purse: 'Klasiko',
@@ -2151,7 +2153,7 @@ const fil = {
     move_confirm_action: 'Ilipat at burahin',
     name: 'Pangalan',
     icon: 'Icon',
-    parent_optional: 'Parent (opsyonal)',
+    parent_optional: 'Pangunahing kategorya (opsyonal)',
     no_subcategories: 'Wala pang subcategory',
     expand: 'Palawakin',
     collapse: 'I-collapse',
@@ -2160,10 +2162,10 @@ const fil = {
     income: 'Kita',
   },
   accounts: {
-    currency: 'Pera',
-    currency_change_title: 'Palitan ang pera ng account?',
+    currency: 'Currency',
+    currency_change_title: 'Palitan ang currency ng account?',
     currency_change_message:
-      'Iko-convert ang balanse mula {{from}} papuntang {{to}} sa pinakabagong palitan. Pinapanatili ng mga umiiral na entry ang orihinal nilang pera.',
+      'Iko-convert ang balanse mula {{from}} papuntang {{to}} sa pinakabagong rate. Mananatili sa orihinal nilang currency ang mga dating entry.',
     currency_change_action: 'I-convert at palitan',
     card_design: {
       label: 'Disenyo ng card',
@@ -2221,7 +2223,7 @@ const fil = {
       permission_title: 'Kailangan ng access sa photos',
       permission_message: 'Payagan ang access sa photo library para mag-upload ng custom na logo.',
       upload_failed: 'Hindi magamit ang larawang iyon. Subukan ang iba.',
-      delete_title: 'Tanggalin ang logo?',
+      delete_title: 'Burahin ang logo?',
       delete_message: 'Aalisin ang custom na logo na ito.',
     },
     loan: {
@@ -2229,7 +2231,7 @@ const fil = {
       interest_model_reducing: 'Bumababang balanse',
       interest_model_flat: 'Flat rate',
       interest_model_info:
-        'Bumababang balanse: sinisingil ang interes buwan buwan sa natitira mong utang, kaya ang dagdag o maagang bayad ay nagpapababa ng interes. Ganito ang karamihan ng home loan. Flat rate: minsan lang kinukuwenta ang interes sa buong halagang hiniram at idinadagdag agad, kaya mas mabilis mabayaran ang utang pero walang natitipid na interes. Ganito ang karamihan ng car at personal loan.',
+        'Bumababang balanse: sinisingil ang interes buwan-buwan sa natitira mong utang, kaya ang dagdag o maagang bayad ay nagpapababa ng interes. Ganito ang karamihan ng home loan. Flat rate: minsan lang kinukuwenta ang interes sa buong halagang hiniram at idinadagdag agad, kaya mas mabilis mabayaran ang utang pero walang natitipid na interes. Ganito ang karamihan ng car at personal loan.',
       interest_rate_info_reducing:
         'Ang taunang rate na sinisingil ng bangko sa natitira mong utang. I-type ito at kukuwentahin namin ang buwanang hulog at kabuuan, o i-type ang kabuuan at kukuwentahin namin ang rate.',
       interest_rate_info_flat:
@@ -2269,10 +2271,10 @@ const fil = {
       instalment_label: 'Buwanang hulog',
       total_interest_label: 'Kabuuang interes',
       balance_owed_label: 'Natitirang utang',
-      interest_rate_label: 'Interes',
+      interest_rate_label: 'Rate ng interes',
       autopay_rule_name: 'Bayad sa {{name}}',
       payment_below_interest_short: 'Kulang ang bayad para sa interes',
-      payoff_by_label: 'Bayad sa',
+      payoff_by_label: 'Bayad na pagsapit ng',
       first_instalment_label: 'Unang hulog',
       instalments_left_label: 'Natitirang hulog',
       projection_with_date_one: 'Mababayaran nang mga {{date}}, {{count}} bayad pa',
@@ -2310,42 +2312,42 @@ const fil = {
     edit_account: 'I-edit ang Account',
     account_name: 'Pangalan ng account',
     account_name_placeholder: 'Pang-araw-araw na Wallet',
-    account_group: 'Account group',
+    account_group: 'Grupo ng account',
     include_in_totals: 'Isama sa kabuuan',
-    include_in_totals_hint: 'Ang mga nakatagong account ay hindi kasama sa kabuuang balance.',
+    include_in_totals_hint: 'Ang mga nakatagong account ay hindi kasama sa kabuuang balanse.',
     include_option_include: 'Isama',
     include_option_hide: 'Itago',
-    hide_balances: 'Itago ang mga balance',
+    hide_balances: 'Itago ang mga balanse',
     archived_section: 'Naka-archive',
     show_archived_action: 'Ipakita ang archived ({{count}})',
     hide_archived_action: 'Itago ang archived',
     archive_action: 'I-archive ang account',
     archive_hint:
       'Itinatago ito sa iyong mga account at pagpili ng account. Nananatili ang mga transaksyon nito, at naka-pause ang mga paulit-ulit na entry nito.',
-    show_balances: 'Ipakita ang mga balance',
+    show_balances: 'Ipakita ang mga balanse',
     type: 'Uri',
     statement_day: 'Araw ng statement',
-    due_day: 'Due date',
-    due_rule: 'Petsa ng due',
+    due_day: 'Araw ng due',
+    due_rule: 'Due date',
     due_rule_day_of_month: 'Araw ng buwan',
     due_rule_days_after: 'Araw pagkatapos ng statement',
     due_next_date: 'Susunod na due date: {{date}}',
     due_days_after_error: 'Maglagay ng 1 hanggang {{max}} araw',
     due_days_after_needs_statement: 'Maglagay ng statement day na pagbibilangan',
-    current_balance: 'Kasalukuyang balance',
-    balance_adjustment_prompt_title: 'Paano dapat itala ang pagbabago ng balance?',
+    current_balance: 'Kasalukuyang balanse',
+    balance_adjustment_prompt_title: 'Paano dapat itala ang pagbabago ng balanse?',
     balance_adjustment_prompt_message:
-      'Nagbago ang balance ng {{amount}}. Itala bilang kita/gastos o panatilihin bilang pagkakaiba ng account (hindi kasama sa kabuuan ng insights).',
+      'Nagbago ang balanse ng {{amount}}. Itala bilang kita/gastos o panatilihin bilang pagkakaiba ng account (hindi kasama sa kabuuan ng Insights).',
     record_as_income: 'Itala bilang kita',
     record_as_expense: 'Itala bilang gastos',
     record_as_difference: 'Itala bilang pagkakaiba ng account',
-    balance_adjustment_transaction_note: 'Balance adjustment',
-    starting_balance: 'Panimulang balance',
+    balance_adjustment_transaction_note: 'Pagsasaayos ng balanse',
+    starting_balance: 'Panimulang balanse',
     credit: 'Credit',
     statement_on: 'Statement {{date}}',
     due_on: 'Due {{date}}',
-    payable: 'Balance Payable',
-    outstanding: 'Outstanding Balance',
+    payable: 'Balanseng babayaran',
+    outstanding: 'Natitirang balanse',
     pay_this_card: 'Bayaran ang card na ito',
     delete_account: 'Burahin ang account',
     delete_account_confirm:
@@ -2356,13 +2358,13 @@ const fil = {
     title: 'Mga Account',
     assets: 'Mga Asset',
     debt: 'Utang',
-    net_assets: 'Net Assets',
+    net_assets: 'Netong asset',
     view_transactions: 'Tingnan ang Mga Transaksyon',
     pay: 'Bayaran',
     paid_note: 'Bayad: {{name}}',
     pay_credit_card: 'Bayaran ang credit card',
     pay_from: 'Bayaran mula sa',
-    payment_note_placeholder: 'Note ng bayad',
+    payment_note_placeholder: 'Tala ng bayad',
     create_group: 'Gumawa ng grupo',
     create_group_placeholder: 'Mga Gastos',
     group_name: 'Pangalan ng grupo',
@@ -2381,11 +2383,11 @@ const fil = {
   },
   wage: {
     type: {
-      hourly: 'Hourly',
-      monthly: 'Monthly',
-      yearly: 'Yearly',
+      hourly: 'Kada oras',
+      monthly: 'Buwanan',
+      yearly: 'Taunan',
     },
-    pay_label: 'Take-home pay',
+    pay_label: 'Netong sahod',
     hours_label: 'Oras kada linggo',
     decrease_hours: 'Bawasan ang oras',
     increase_hours: 'Dagdagan ang oras',
@@ -2398,21 +2400,21 @@ const fil = {
     decrease_minutes: 'Bawasan ang minuto',
     increase_minutes: 'Dagdagan ang minuto',
     rate_label: 'Halaga ng oras mo',
-    base_rate: 'Base rate {{rate}}',
-    time_split: '{{paid}} bayad + {{extra}} dagdag = {{total}} bawat linggo',
+    base_rate: 'Batayang rate {{rate}}',
+    time_split: '{{paid}} may bayad + {{extra}} dagdag = {{total}} bawat linggo',
     add_extra: 'Idagdag ang biyahe at iba pa',
   },
   pro: {
     limit_receipt_scans:
       'Kasama sa libreng plan ang {{count}} pag-scan ng resibo bawat buwan. Mag-upgrade sa Pro para sa walang limitasyong pag-scan.',
     limit_autolog:
-      'Nagamit mo na ang lahat ng {{count}} libreng Apple Pay Automation, kaya hindi na-log ang mga huli mong bayad. Mag-upgrade sa Pro para sa walang limitasyon.',
+      'Nagamit mo na ang lahat ng {{count}} libreng automation sa Apple Pay, kaya hindi na-log ang mga huli mong bayad. Mag-upgrade sa Pro para walang limitasyon.',
     custom_logos_label: 'Custom na logo ng account',
     items_label: 'Mga item',
-    budget_templates_label: 'Mga template ng budget',
+    budget_templates_label: 'Mga template ng badyet',
     goals_label: 'Mga Savings Goal',
     receipts_label: 'Mga resibo',
-    split_bills_label: 'Mga hindi pa bayad na hatiang bill',
+    split_bills_label: 'Mga hindi pa bayad na hinating bill',
     custom_item_images_label: 'Custom na larawan ng item',
     icon_packs_label: 'Icon pack at custom na icon',
     custom_subscription_logos_label: 'Sariling logo ng subscription',
@@ -2423,7 +2425,7 @@ const fil = {
     limit_custom_item_images:
       'Maaari kang mag-upload ng hanggang {{count}} custom na larawan ng item sa libreng plano. Mag-Pro para walang limitasyon.',
     limit_custom_category_icons:
-      'Ang pag-upload ng sariling icon ay Pro feature. Mag-upgrade para magamit ang kahit anong larawan sa mga kategorya, goal at budget.',
+      'Ang pag-upload ng sariling icon ay Pro feature. Mag-upgrade para magamit ang kahit anong larawan sa mga kategorya, goal at badyet.',
     limit_app_icon:
       'Pro feature ang mga karagdagang app icon. Mag-upgrade para bigyan ng bagong hitsura ang Money2Time sa iyong home screen.',
     limit_custom_card_designs:
@@ -2438,11 +2440,11 @@ const fil = {
     limit_subcurrencies:
       'Maaari kang magdagdag ng {{count}} sub-currency sa libreng plano. Mag-upgrade sa Pro para walang limitasyon.',
     upgrade: 'Mag-upgrade sa Pro',
-    upgrade_subtitle: 'I-unlock ang unlimited na mga feature',
+    upgrade_subtitle: 'I-unlock ang lahat ng feature nang walang limitasyon',
     active: 'Naka-Pro ka na',
     active_subtitle: 'Lahat ng feature ay naka-unlock',
     restore: 'I-restore ang Mga Binili',
-    restoring: 'Ire-restore...',
+    restoring: 'Nire-restore...',
     restore_success: 'Matagumpay na na-restore ang mga binili!',
     restore_none: 'Walang nahanap na nakaraang binili.',
     restore_failed: 'Hindi ma-restore ang mga binili. Subukan ulit.',
@@ -2456,7 +2458,7 @@ const fil = {
     payment_pending_message:
       'Naghihintay pa ng pag-apruba ang bayad mo. Kusang mabubuksan ang Pro kapag nakumpleto ito, kaya hindi mo na kailangang bumili ulit.',
     already_owned_not_restored:
-      'May Pro na ang store account na ito, pero hindi ito mailapat dito. I-tap ang Restore Purchases, at siguraduhing naka-sign in ka sa store account na bumili nito.',
+      'May Pro na ang store account na ito, pero hindi ito mailapat dito. I-tap ang I-restore ang Mga Binili, at siguraduhing naka-sign in ka sa store account na bumili nito.',
     monthly: 'Buwanan',
     yearly: 'Taunan',
     lifetime: 'Habambuhay',
@@ -2466,25 +2468,25 @@ const fil = {
     yearly_subtitle: 'Sinisingil bawat taon',
     lifetime_subtitle: 'Isang beses na bayad',
     lifetime_desc: 'Bayad nang minsan, sa iyo magpakailanman',
-    best_value: 'Pinakamura',
-    privacy_policy: 'Privacy Policy',
+    best_value: 'Pinakasulit',
+    privacy_policy: 'Patakaran sa Privacy',
     apple_standard_eula: 'Apple Standard EULA',
     free_title: 'Libre',
     pro_title: 'Pro',
     accounts_label: 'Mga Account',
     categories_label: 'Mga Kategorya',
-    recurring_label: 'Recurring',
-    instalments_label: 'Hulugang plano',
-    hourly_income_label: 'Hourly Income',
+    recurring_label: 'Paulit-ulit',
+    instalments_label: 'Mga hulugan',
+    hourly_income_label: 'Kita kada oras',
     trends_label: 'Pangmatagalang Trend',
-    voice_label: 'Mga voice entry',
+    voice_label: 'Paglagay gamit ang boses',
     receipt_scans_label: 'Mga pag-scan ng resibo',
     notification_ai_label: 'Auto-review ng notification',
-    apple_pay_automation_label: 'Apple Pay Automation',
-    screenshot_automation_label: 'Screenshot Automation',
+    apple_pay_automation_label: 'Automation sa Apple Pay',
+    screenshot_automation_label: 'Automation sa screenshot',
     live_earnings_auto_start_label: 'Awtomatikong simula ng live na kita',
     widgets_label: 'Mga widget sa home screen',
-    currencies_label: 'Mga pera',
+    currencies_label: 'Mga currency',
     albums_label: 'Mga Album',
     limit_albums:
       'Maaari kang gumawa ng hanggang {{count}} album sa libreng plano. Mag-upgrade sa Pro para walang limitasyon.',
@@ -2492,7 +2494,7 @@ const fil = {
     shared_ledgers_label: 'Mga shared ledger',
     shared_ledgers_free: 'Sumali',
     shared_ledgers_pro: 'I-share',
-    biometric_label: 'App Lock (biometric)',
+    biometric_label: 'Lock ng App (biometric)',
     compare_title: 'Lahat sa Pro',
     compare_subtitle: 'Tingnan kung ano ang mabubuksan kapag nag-upgrade ka.',
     hero_title: 'Kontrolin ang iyong pera at ang iyong oras',
@@ -2519,8 +2521,8 @@ const fil = {
     trial_free: '{{duration}} libre',
     trial_cta: 'Simulan ang libreng trial',
     subscribe: 'Mag-subscribe',
-    buy_lifetime: 'Bilhin ang Lifetime',
-    maybe_later: 'Siguro mamaya',
+    buy_lifetime: 'Bilhin ang Habambuhay',
+    maybe_later: 'Sa susunod na lang',
     trial_terms: 'Libre sa loob ng {{duration}}, pagkatapos ay {{price}}.',
     plans_heading: 'Piliin ang iyong plano',
     save_percent: 'Makatipid ng {{percent}}%',
@@ -2539,28 +2541,28 @@ const fil = {
     cancel_subscription: 'Kanselahin ang Subscription',
     lifetime_sub_warning_title: 'Sinisingil ka nang dalawang beses',
     lifetime_sub_warning_body:
-      'Mayroon kang Lifetime Pro, ngunit may aktibo pa ring subscription. Kanselahin ito para hindi ka na singilin muli.',
-    upgrade_to_lifetime: 'Mag-upgrade sa Lifetime',
+      'Mayroon kang Habambuhay na Pro, ngunit may aktibo pa ring subscription. Kanselahin ito para hindi ka na singilin muli.',
+    upgrade_to_lifetime: 'Mag-upgrade sa Habambuhay',
     lifetime_upsell_subtitle:
       'Isang bayad, sa iyo na habambuhay. Wala nang pag-renew ng subscription.',
-    switch_to_lifetime: 'Lumipat sa Lifetime',
-    lifetime_purchased_title: 'Mayroon ka nang Lifetime Pro',
+    switch_to_lifetime: 'Lumipat sa Habambuhay',
+    lifetime_purchased_title: 'Mayroon ka nang Habambuhay na Pro',
     lifetime_purchased_body:
       'Hindi na kailangan ang iyong subscription. Kanselahin ito para hindi ka na singilin muli.',
     not_now: 'Hindi ngayon',
     cancel_subscription_note:
-      'Para kanselahin ang iyong subscription, ire-redirect ka sa subscription settings ng iyong device.',
+      'Para kanselahin ang iyong subscription, ire-redirect ka sa mga setting ng subscription sa iyong device.',
     limit_reached_title: 'Naabot na ang limitasyon ng libreng plano',
     limit_accounts:
       'Maaari kang magkaroon ng hanggang {{count}} account sa libreng plano. Mag-upgrade sa Pro para walang limitasyon.',
     limit_categories:
       'Maaari kang magkaroon ng hanggang {{count}} kategorya sa libreng plano. Mag-upgrade sa Pro para walang limitasyon.',
     limit_recurring:
-      'Maaari kang magkaroon ng hanggang {{count}} recurring rule sa libreng plano. Mag-upgrade sa Pro para walang limitasyon.',
+      'Maaari kang magkaroon ng hanggang {{count}} paulit-ulit na rule sa libreng plano. Mag-upgrade sa Pro para walang limitasyon.',
     limit_wage_entries:
       'Maaari kang magkaroon ng hanggang {{count}} hourly rate entry sa libreng plano. Mag-upgrade sa Pro para walang limitasyon.',
     limit_voice:
-      'Ang libreng plano ay may kasamang {{count}} voice entry. Mag-upgrade sa Pro para sa unlimited na voice input.',
+      'Kasama sa libreng plano ang {{count}} paglagay gamit ang boses. Mag-upgrade sa Pro para walang limitasyon.',
     limit_items:
       'Maaari kang mag-track ng hanggang {{count}} item sa libreng plano. Mag-Pro para walang limitasyon.',
     limit_budget_templates:
@@ -2568,7 +2570,7 @@ const fil = {
     limit_receipts:
       'Sa libreng plan, makakapaglakip ka ng hanggang {{count}} resibo. Walang limitasyon sa Pro.',
     limit_split_bills:
-      'Sa libreng plan, puwede kang magkaroon ng hanggang {{count}} hindi pa bayad na hatiang bill. Bayaran ang isa o mag-upgrade sa Pro para walang limitasyon.',
+      'Sa libreng plan, puwede kang magkaroon ng hanggang {{count}} hindi pa bayad na hinating bill. Bayaran ang isa o mag-upgrade sa Pro para walang limitasyon.',
     limit_goals:
       'Sa libreng plan, puwede kang magkaroon ng hanggang {{count}} savings goal. Mag-upgrade sa Pro para walang limitasyon.',
     limit_loans:
@@ -2666,8 +2668,8 @@ const fil = {
     tier1_reward: '1 buwang Pro',
     tier1_desc: 'Abutin ang 30 likes sa iyong post sa Instagram, 小红书, Facebook at iba pa.',
     tier2_badge: '100+ likes',
-    tier2_reward: '1 taóng Pro',
-    tier2_desc: 'Umugat sa mga tao ang post mo.',
+    tier2_reward: '1 taon ng Pro',
+    tier2_desc: 'Tumatak sa mga tao ang post mo.',
     tier3_badge: '500+ likes',
     tier3_reward: 'Habambuhay na Pro',
     tier3_desc: 'Naging viral ka. Sa iyo na ang Pro habambuhay.',
@@ -2686,25 +2688,25 @@ const fil = {
       'Manu-manong ibinibigay ang reward matapos naming kumpirmahin na public ang post mo. Isang reward kada tao. Ang bilang ng likes ay tinitingnan sa oras ng pag-claim.',
   },
   notifications: {
-    title: 'Mga Notipikasyon',
+    title: 'Mga notification',
     subtitle: 'Manatiling updated sa iyong gastos gamit ang mga napapanahong paalala at alerto.',
-    permission_required: 'Disabled ang mga notipikasyon',
+    permission_required: 'Naka-off ang mga notification',
     permission_required_message:
-      'I-enable ang mga notipikasyon sa iyong device settings para makatanggap ng mga paalala.',
-    permission_denied_title: 'Naka-block ang mga notipikasyon',
+      'I-on ang mga notification sa mga setting ng iyong device para makatanggap ng mga paalala.',
+    permission_denied_title: 'Naka-block ang mga notification',
     permission_denied_message:
-      'Para makatanggap ng mga paalala, buksan ang iyong device settings at payagan ang mga notipikasyon para sa Money2Time.',
+      'Para makatanggap ng mga paalala, buksan ang mga setting ng iyong device at payagan ang mga notification para sa Money2Time.',
     open_settings: 'Buksan ang Settings',
     daily_checkin: {
-      title: 'Daily Check-in',
+      title: 'Araw-araw na Check-in',
       label: 'Pang-araw-araw na paalala',
-      description: 'Makatanggap ng nudge para i-log ang iyong gastos bawat araw.',
+      description: 'Makatanggap ng paalala na i-log ang iyong gastos bawat araw.',
       time: 'Oras ng paalala',
     },
     recurring: {
-      title: 'Mga Recurring na Transaksyon',
+      title: 'Mga Paulit-ulit na Transaksyon',
       label: 'Mga alerto sa auto-charge',
-      description: 'Maabisuhan kapag awtomatikong ginagawa ang mga recurring na transaksyon.',
+      description: 'Maabisuhan kapag awtomatikong ginagawa ang mga paulit-ulit na transaksyon.',
     },
     weekly_review: {
       title: 'Lingguhang Review',
@@ -2718,7 +2720,7 @@ const fil = {
     },
     review: {
       fires_on: 'Dumarating',
-      fires_on_hint: 'Nakabatay sa simula ng iyong linggo at buwan sa Display settings.',
+      fires_on_hint: 'Nakabatay sa simula ng iyong linggo at buwan sa mga setting ng Display.',
       every_week_on: 'Tuwing {{day}}',
       every_month_on: 'Araw {{day}} ng bawat buwan',
       day_of_month_short: 'Araw {{day}}',
@@ -2734,12 +2736,12 @@ const fil = {
       sunday: 'Linggo',
     },
     customize: 'I-customize',
-    send_test: 'Magpadala ng test na notipikasyon',
+    send_test: 'Magpadala ng test na notification',
     channel_name: 'Mga paalala at aktibidad',
     content: {
       autolog_title: 'Awtomatikong na-log',
       autolog_failure_title: 'Hindi awtomatikong na-log ang isang bayad',
-      autolog_failure_body: 'Pindutin para idagdag ito nang manu-mano.',
+      autolog_failure_body: 'I-tap para idagdag ito nang manu-mano.',
       autolog_test_title: 'Gumagana ang automation',
       autolog_test_card_body:
         'Walang bayad na kasama sa run na ito, na normal sa test. Kung kababayad mo lang, buksan ang Money2Time para idagdag ito.',
@@ -2750,17 +2752,17 @@ const fil = {
       daily_title: 'Kumusta ang araw mo?',
       daily_body: 'Maglaan ng 30 segundo para i-log ang gastos mo ngayon habang sariwa pa.',
       recurring_title: '{{name}} · {{amount}}',
-      recurring_body: 'Awtomatikong na-log ang iyong recurring na transaksyon.',
+      recurring_body: 'Awtomatikong na-log ang iyong paulit-ulit na transaksyon.',
       recurring_body_with_hours:
         'Awtomatikong na-log. Katumbas iyan ng {{hours}} ng iyong trabaho.',
       live_earnings_title: 'Handa nang mag-clock in?',
       live_earnings_body: 'I-tap para simulan ang live na orasan ng kita mo.',
       live_earnings_started_title: 'Nagsimula na ang live na kita',
       live_earnings_started_body: 'Umaandar na ang orasan mo.',
-      weekly_review_title: 'Ang iyong linggo sa review',
+      weekly_review_title: 'Balikan ang iyong linggo',
       weekly_review_body:
         'Tingnan kung saan napunta ang iyong pera at oras noong nakaraang linggo.',
-      monthly_review_title: 'Ang iyong buwan sa review',
+      monthly_review_title: 'Balikan ang iyong buwan',
       monthly_review_body:
         'Tingnan kung saan napunta ang iyong pera at oras noong nakaraang buwan.',
     },
@@ -2827,11 +2829,11 @@ const fil = {
     },
   },
   auto_backup: {
-    title: 'Auto-backup',
+    title: 'Awtomatikong backup',
     subtitle: 'Panatilihing hanggang 10 backup ng iyong data, ligtas kahit matanggal ang app.',
     entry_title: 'Awtomatikong backup',
-    entry_enabled: 'On · Awtomatikong nibe-backup',
-    entry_disabled: 'Off · Pindutin para i-set up',
+    entry_enabled: 'Naka-on · Awtomatikong nagba-back up',
+    entry_disabled: 'Naka-off · I-tap para i-set up',
     toggle_label: 'Awtomatikong backup',
     destination_label: 'Saan i-save',
     target: {
@@ -2848,11 +2850,11 @@ const fil = {
       'Ang build ng Money2Time na ito ay walang naka-configure na Google OAuth client.',
     google_drive_unconfigured_short: 'Hindi naka-configure sa build na ito',
     google_drive_sign_in_failed_title: 'Nabigo ang pag-sign in',
-    google_drive_sign_out_title: 'Mag-sign out ng Google Drive?',
+    google_drive_sign_out_title: 'Mag-sign out sa Google Drive?',
     google_drive_sign_out_message:
-      'Ang mga auto-backup ay babalik sa Sa device. Ang mga kasalukuyang backup sa Google Drive ay mananatili.',
+      'Babalik sa “Sa device na ito” ang mga auto-backup. Mananatili ang mga kasalukuyang backup sa Google Drive.',
     google_drive_sign_out_action: 'Mag-sign out',
-    google_drive_sign_out_link: 'Mag-sign out ng Google',
+    google_drive_sign_out_link: 'Mag-sign out sa Google',
     fallback_local_title: 'Na-save sa device na ito',
     fallback_local_message:
       'Hindi maabot ng Money2Time ang {{target}}, kaya na-save ang backup na ito sa device na ito. Ikonekta muli para magpatuloy ang pag-backup sa {{target}}.',
@@ -2874,7 +2876,7 @@ const fil = {
     },
     last_backup: 'Huling backup {{relative}}',
     last_backup_never: 'Wala pang backup',
-    just_now: 'katapos lang',
+    just_now: 'ngayon lang',
     minutes_ago: '{{count}} min na nakalipas',
     hours_ago: '{{count}}h na nakalipas',
     days_ago: '{{count}}d na nakalipas',
@@ -2883,13 +2885,13 @@ const fil = {
     backup_partial_title: 'May error ang backup',
     list_title: 'Mga Backup',
     empty_state:
-      'Wala pang backup. Isang backup ay awtomatikong ginagawa isang beses sa isang araw kapag binuksan mo ang app.',
+      'Wala pang backup. Awtomatikong gumagawa ng backup isang beses sa isang araw kapag binuksan mo ang app.',
     restore_action: 'I-restore',
     delete_action: 'Burahin',
     delete_confirm_title: 'Burahin ang backup na ito?',
     delete_confirm_message: 'Permanenteng aalisin ang backup file na ito.',
     delete_failed_title: 'Nabigo ang pagbura',
-    restoring: 'Ire-restore...',
+    restoring: 'Nire-restore...',
     restore_success_title: 'Na-restore',
     restore_success_message: 'Ang iyong data ay na-restore mula sa backup na ito.',
     restore_failed_title: 'Nabigo ang pag-restore',
@@ -2900,8 +2902,7 @@ const fil = {
     preprompt_happy: 'Oo, gusto ko ito',
     preprompt_unhappy: 'Hindi talaga',
     preprompt_dismiss: 'Mamaya na lang',
-    feedback_prompt:
-      'Paumanhin na hindi ito nasiyahan — maaari mo bang ibahagi kung ano ang makakatulong?',
+    feedback_prompt: 'Pasensya na. Puwede mo bang sabihin kung ano ang makakapagpabuti nito?',
     feedback_open: 'Magbahagi ng feedback',
     feedback_skip: 'Hindi, salamat',
   },
@@ -2968,8 +2969,8 @@ const fil = {
     needs_pro_title: 'Kailangan ng Pro para mag-sync',
     needs_pro_body:
       'Naka-sign in ka. Kumuha ng Pro para magsimulang mag-sync. Bumili ng Pro sa ibang phone? I-on din doon ang Cloud Sync, at maa-unlock ito rito.',
-    tile_on: 'On',
-    profile_off: 'Off',
+    tile_on: 'Naka-on',
+    profile_off: 'Naka-off',
     profile_paused: 'Naka-pause',
     off_title: 'Naka-off ang Cloud Sync',
     off_body:
@@ -2991,7 +2992,7 @@ const fil = {
     prompt: {
       title: 'I-on ang Cloud Sync?',
       body: 'Ang data mo sa bawat telepono.',
-      chip_backup: 'Auto backup',
+      chip_backup: 'Awtomatikong backup',
       chip_devices: 'Lahat ng device',
       cta: 'I-on',
       dismiss: 'Hindi ngayon',
@@ -3010,7 +3011,7 @@ const fil = {
           a: 'Mag-sign in gamit ang parehong account sa dalawang phone at i-on ang Cloud Sync. Kapag nakapag-sync na ang phone na ito, Pro na rin ito habang may phone sa account na may Pro, kahit hindi mo na ginagamit. Umaabot sa hanggang 5 phone ang Pro ng account mo.',
         },
         restore_moved_pro: {
-          q: 'Ni-restore ko ang purchase ko at nawalan ng Pro ang isa ko pang telepono.',
+          q: 'Ni-restore ko ang binili ko at nawalan ng Pro ang isa ko pang telepono.',
           a: 'Inililipat ng store restore ang binili sa phone na nag-restore nito. Panatilihing naka-on ang Cloud Sync sa dalawang phone at pareho silang mananatiling Pro.',
         },
         pro_ends: {
@@ -3045,8 +3046,8 @@ const fil = {
       add: 'Magdagdag ng lokasyon',
       clear: 'I-clear ang lokasyon',
       picker_title: 'Pumili ng lugar',
-      search_placeholder: 'Maghanap ng lungsod…',
-      search_hint: 'Maghanap ng lungsod para ilagay ang biyaheng ito sa mapa.',
+      search_placeholder: 'Maghanap ng lungsod, estado o bansa…',
+      search_hint: 'Maghanap ayon sa lungsod, estado o bansa para ilagay ang biyaheng ito sa mapa.',
       no_results: 'Walang nahanap na lugar',
       empty_title: 'Wala pang lugar',
       empty_message: 'Magdagdag ng lokasyon sa album para makita ito sa globo at mapa.',
@@ -3060,7 +3061,7 @@ const fil = {
     change_cover: 'Palitan ang cover',
     edit_details_title: 'I-edit ang biyahe',
     start_date: 'Petsa ng simula',
-    end_date: 'Petsa ng tapos',
+    end_date: 'Petsa ng pagtatapos',
     dates_optional: 'Mga petsa (opsyonal)',
     create: 'Gumawa',
     create_title: 'Bagong Album',
@@ -3084,7 +3085,7 @@ const fil = {
     tab_map: 'Mapa',
     no_transactions_title: 'Walang transaksyon',
     no_transactions_message: 'Magdagdag ng transaksyon sa album na ito para makita dito.',
-    delete_title: 'Tanggalin ang album?',
+    delete_title: 'Burahin ang album?',
     delete_body:
       'Mananatili ang mga transaksyon mo at babalik sa sarili nilang mga kategorya. Para panatilihin ang album kung ano ito, i-archive na lang ito.',
     delete_body_member:
@@ -3143,9 +3144,9 @@ const fil = {
       owes: 'May utang si {{from}} kay {{to}}',
       group_spending: 'Gastos ng grupo',
       your_share: 'Ang parte mo',
-      record_others_title: 'I-record ang bayad na ito?',
+      record_others_title: 'Itala ang bayad na ito?',
       record_others_body: 'Binayaran ni {{from}} si {{to}} ng {{amount}}.',
-      record_others_confirm: 'I-record',
+      record_others_confirm: 'Itala',
     },
     simplify: {
       row: 'Pasimplehin ang utang ng grupo',
@@ -3156,7 +3157,7 @@ const fil = {
       own: 'Isa ito sa sarili mong mga album.',
       already: 'Kasali ka na sa album na ito.',
       main_shared:
-        'Naka-share ang main ledger mo, kaya hindi ito puwedeng maglaman ng shared na album.',
+        'Naka-share ang pangunahing ledger mo, kaya hindi ito puwedeng maglaman ng shared na album.',
       unavailable: 'Hindi pa available ang mga shared album sa bersyong ito.',
       full: 'Puno na ang album na ito. Hilingin sa may-ari na magbigay ng puwang.',
     },
@@ -3316,7 +3317,7 @@ const fil = {
     choose_template: 'Pumili ng template',
     custom_option: 'Custom',
     custom_option_caption_week: 'Gumawa ng one-time na badyet para sa linggong ito lang.',
-    custom_option_caption_month: 'Gumawa ng one-time na budget para sa buwang ito lang.',
+    custom_option_caption_month: 'Gumawa ng one-time na badyet para sa buwang ito lang.',
     custom_option_caption_year: 'Gumawa ng one-time na badyet para sa taong ito lang.',
     categories_count_one: '{{count}} kategorya',
     categories_count_other: '{{count}} kategorya',
@@ -3352,16 +3353,16 @@ const fil = {
     allocated_summary: '{{allocated}} sa {{total}} ang nailaan',
     allocated_done: 'Ganap nang nailaan',
     fill_remainder: 'Punan',
-    currency_label: 'Pera',
+    currency_label: 'Currency',
     currency_hint_template:
-      'Ginagamit ng bawat badyet ang palitan sa araw na ginawa ito, at dito kino-convert ang gastos sa ibang pera. Ngayon: 1 {{currency}} = {{rate}} {{main}}.',
+      'Ginagamit ng bawat badyet ang rate sa araw na ginawa ito, at dito kino-convert ang gastos sa ibang currency. Ngayon: 1 {{currency}} = {{rate}} {{main}}.',
     currency_hint_budget:
-      'Kino-convert ang gastos sa ibang pera sa 1 {{currency}} = {{rate}} {{main}}.',
+      'Kino-convert ang gastos sa ibang currency sa 1 {{currency}} = {{rate}} {{main}}.',
     currency_hint_no_rate:
-      'Wala pang palitan para sa {{currency}}. Magdagdag sa Multi-currency para mabilang ang gastos sa ibang pera.',
-    unconverted_one: '1 gastos ang hindi pa nabibilang: walang palitan para sa {{currency}}.',
+      'Wala pang exchange rate para sa {{currency}}. Magdagdag sa Multi-currency para mabilang ang gastos sa ibang currency.',
+    unconverted_one: '1 gastos ang hindi pa nabibilang: walang exchange rate para sa {{currency}}.',
     unconverted_other:
-      '{{count}} gastos ang hindi pa nabibilang: walang palitan para sa {{currency}}.',
+      '{{count}} gastos ang hindi pa nabibilang: walang exchange rate para sa {{currency}}.',
     approx_main: '≈ {{amount}}',
     back_populate_title_week: 'Punan ang mga nakaraang linggo',
     back_populate_title_month: 'Punan ang mga nakaraang buwan',
@@ -3392,7 +3393,7 @@ const fil = {
   reimbursements: {
     title: 'Mga reimbursement',
     tile_label: 'Bayad-balik',
-    subtitle: 'Mga gastos na babayaran ka pabalik.',
+    subtitle: 'Mga gastos na ibabalik sa iyo ng iba.',
     count_as_expense_label: 'Bilangin bilang gastos',
     count_as_expense_hint:
       'Naka-off: hindi kasama sa kabuuang gastos ang mga ire-reimburse at ang perang babalik.',
@@ -3409,7 +3410,8 @@ const fil = {
     undo_action: 'I-undo',
     refund_note_prefix: 'Na-reimburse',
     editor_label: 'Nakabinbing reimbursement',
-    editor_tooltip: 'Gastos na babayaran ka pabalik. Singilin ito sa pahinang Mga reimbursement.',
+    editor_tooltip:
+      'Gastos na ibabalik sa iyo ng ibang tao. Singilin ito sa pahina ng Mga reimbursement.',
     editor_reimbursed_label: 'Nabayaran na',
     options_title: 'Mga opsyon sa transaksyon',
     untitled: 'Gastos',
@@ -3428,9 +3430,9 @@ const fil = {
     name_label: 'Pangalan',
     name_placeholder: 'hal. Espresso machine',
     price_label: 'Presyo ng pagbili',
-    currency_label: 'Pera',
+    currency_label: 'Currency',
     purchase_date_label: 'Petsa ng pagbili',
-    mark_inactive: 'Markahan bilang inactive',
+    mark_inactive: 'Markahan bilang hindi na aktibo',
     mark_inactive_hint:
       'Hinihinto ang pagbilang ng araw para sa mga bagay na naibenta, nasira, o hindi na ginagamit.',
     end_date_label: 'Petsa ng pagtatapos',
@@ -3438,12 +3440,12 @@ const fil = {
     sale_price_label: 'Presyo ng benta',
     note_label: 'Tala',
     note_placeholder: 'Opsyonal',
-    status_inactive: 'Inactive',
+    status_inactive: 'Hindi aktibo',
     status_active: 'Aktibo',
     days_count: '{{count}} araw',
     summary_total_value: 'Kabuuang halaga',
     per_day: '/ araw',
-    delete_title: 'Tanggalin ang item?',
+    delete_title: 'Burahin ang item?',
     delete_message: 'Aalisin nito ang item sa iyong tracker.',
     summary_daily_cost: 'Gastos / araw',
     summary_counts: 'Mga item',
@@ -3458,7 +3460,7 @@ const fil = {
     label: 'Ledger',
     title: 'Mga Ledger',
     switcher_label: 'Ledger: {{name}}. Lumipat ng ledger',
-    default_name: 'Main',
+    default_name: 'Pangunahin',
     untitled: 'Ledger na walang pangalan',
     entries_one: '{{count}} entry',
     entries_other: '{{count}} na entry',
@@ -3468,7 +3470,7 @@ const fil = {
     edit_named: 'I-edit ang {{name}}',
     open_badge: 'BUKAS',
     explainer:
-      'May sariling account, goal, utang, kategorya, transaksyon, recurring na entry, budget, item, album at cycle ng buwan ang bawat ledger. Saklaw silang lahat ng iba mo pang settings, hourly value at mga backup.',
+      'May sariling account, goal, utang, kategorya, transaksyon, paulit-ulit na entry, badyet, item, album at cycle ng buwan ang bawat ledger. Saklaw silang lahat ng iba mo pang setting, hourly value at mga backup.',
     name_label: 'Pangalan',
     name_placeholder: 'hal. Trabaho, Raket',
     currency_label: 'Pangunahing currency',
@@ -3477,8 +3479,8 @@ const fil = {
     categories: 'Mga Kategorya',
     copy_from_hint: 'Piliin kung aling ledger ang kokopyahin',
     everything: 'Lahat',
-    everything_caption_one: 'Buong kopya kasama ang {{count}} entry nito, mga budget at album',
-    everything_caption_other: 'Buong kopya kasama ang {{count}} na entry nito, mga budget at album',
+    everything_caption_one: 'Buong kopya kasama ang {{count}} entry nito, mga badyet at album',
+    everything_caption_other: 'Buong kopya kasama ang {{count}} na entry nito, mga badyet at album',
     everything_currency_note: 'Pinapanatili ng buong kopya ang currency ng {{name}}.',
     delete_open_note: 'Bukas ito ngayon, kaya ang {{name}} ang bubuksan.',
     copy_from: 'Kopyahin mula sa',
@@ -3490,8 +3492,8 @@ const fil = {
     starter_categories_caption: 'Maikling listahan ng mga pang-araw-araw na kategorya.',
     goals: 'Mga Goal',
     loans: 'Mga Utang',
-    recurring: 'Recurring',
-    budgets: 'Mga Budget',
+    recurring: 'Paulit-ulit',
+    budgets: 'Mga Badyet',
     items: 'Mga Item',
     albums: 'Mga Album',
     month_cycle: 'Cycle ng buwan',
@@ -3502,8 +3504,8 @@ const fil = {
     copy_recurring_one: '{{count}} rule, mula sa susunod na petsa nito',
     copy_recurring_other: '{{count}} na rule, mula sa kani-kanilang susunod na petsa',
     copy_recurring_none: 'Gumagamit ang mga rule nito ng goal o utang na hindi kasama',
-    copy_budgets_one: '{{count}} template ng budget',
-    copy_budgets_other: '{{count}} na template ng budget',
+    copy_budgets_one: '{{count}} template ng badyet',
+    copy_budgets_other: '{{count}} na template ng badyet',
     copy_items_one: '{{count}} item',
     copy_items_other: '{{count}} na item',
     copy_albums_one: '{{count}} album, nang walang mga entry nito',
@@ -3520,9 +3522,9 @@ const fil = {
     create: 'Gumawa ng ledger',
     delete_title: 'Burahin ang {{name}}?',
     delete_message_one:
-      'Buburahin nito ang {{name}} kasama ang {{count}} entry nito, mga account, kategorya, budget at album. Hindi maaapektuhan ang ibang ledger.',
+      'Buburahin nito ang {{name}} kasama ang {{count}} entry nito, mga account, kategorya, badyet at album. Hindi maaapektuhan ang ibang ledger.',
     delete_message_other:
-      'Buburahin nito ang {{name}} kasama ang {{count}} na entry nito, mga account, kategorya, budget at album. Hindi maaapektuhan ang ibang ledger.',
+      'Buburahin nito ang {{name}} kasama ang {{count}} na entry nito, mga account, kategorya, badyet at album. Hindi maaapektuhan ang ibang ledger.',
     locked_note: 'Ligtas na nakatabi ang mga naka-lock na ledger at mabubuksan ulit gamit ang Pro.',
     pro_ended_title: 'Bumalik ka sa {{name}}',
     pro_ended_message:
@@ -3569,7 +3571,7 @@ const fil = {
       'Ang ledger lang na ito ang naka-share. Mananatiling private ang iba mong ledger.',
     point_control: 'Mag-alis ng tao o itigil ang pag-share anumang oras.',
     default_not_shareable:
-      'Mananatiling private ang main ledger mo. Gumawa ng ibang ledger para mag-share.',
+      'Mananatiling private ang pangunahing ledger mo. Gumawa ng ibang ledger para mag-share.',
     share_button: 'I-share ang {{name}}',
     owner_note: 'Shinare mo. Puwedeng magdagdag at mag-edit ng entry ang lahat dito.',
     member_note: 'Shinare ni {{owner}}. Puwedeng magdagdag at mag-edit ng entry ang lahat dito.',
@@ -3604,7 +3606,7 @@ const fil = {
       'Hindi babaguhin ang mga shared ledger. Para alisin ang isa, umalis dito o itigil ang pag-share nito.',
     changes_for_everyone: 'Shared ang ledger na ito, kaya mababago ito para sa lahat ng kasali.',
     leave_unsent:
-      'Hindi pa naipapadala ang pinakabago mong entries sa ledger na ito. Kapag umalis ka ngayon, mawawala ang mga ito.',
+      'Hindi pa naipapadala ang pinakabago mong mga entry sa ledger na ito. Kapag umalis ka ngayon, mawawala ang mga ito.',
     leave_anyway: 'Umalis pa rin',
     sign_out_unsent:
       'May ilang entry sa mga ledger na shinare sa iyo na hindi pa naipapadala. Kapag nag-sign out ka, aalisin ang mga ledger na iyon sa phone na ito, kasama ang mga entry.',
@@ -3685,10 +3687,10 @@ const fil = {
     review_show_more: 'Ipakita ang buong notification',
     review_show_less: 'Ipakita nang mas kaunti',
     ai_title: 'Auto-review',
-    ai_settings: 'Settings ng auto-review',
+    ai_settings: 'Mga setting ng auto-review',
     ai_quota_free: '%{count} sa %{limit} libre ang natitira',
     ai_quota_pro: 'Walang limitasyon sa Pro',
-    ai_quota_left: '%{count} natitira',
+    ai_quota_left: '%{count} libre pa',
     ai_quota_unlimited: 'Walang limitasyon',
     ai_quota_info_title: 'Libreng auto-review',
     ai_quota_info:
@@ -3719,7 +3721,7 @@ const fil = {
     ai_hint_income: 'Mungkahi: kita',
     ai_reason_otp: 'Security code',
     ai_reason_promotion: 'Promo',
-    ai_reason_balance: 'Balance o paalala',
+    ai_reason_balance: 'Balanse o paalala',
     ai_reason_not_completed: 'Hindi natuloy',
     ai_reason_own_transfer: 'Sariling transfer',
     ai_reason_not_money: 'Hindi bayad',
@@ -3727,8 +3729,8 @@ const fil = {
     ai_banner_reviewing_other: 'Nire-review ang %{count} notification…',
     ai_banner_done_one: '1 notification ang naayos para sa iyo',
     ai_banner_done_other: '%{count} notification ang naayos para sa iyo',
-    ai_banner_needs_you_one: '1 pa ang kailangan ka',
-    ai_banner_needs_you_other: '%{count} pa ang kailangan ka',
+    ai_banner_needs_you_one: '1 pa ang naghihintay sa iyo',
+    ai_banner_needs_you_other: '%{count} pa ang naghihintay sa iyo',
     history: 'History',
     history_title: 'History ng notification',
     history_empty: 'Wala pang notification',
@@ -3847,7 +3849,7 @@ const fil = {
     map_fit: 'Ipakita ang lahat ng lugar',
     map_visits_one: '{{count}} pagbisita',
     map_visits_other: '{{count}} pagbisita',
-    map_all_time: 'Lahat ng oras',
+    map_all_time: 'Lahat ng panahon',
     map_empty_title: 'Wala pang mga lugar',
     map_empty_period_title: 'Walang lugar sa panahong ito',
     map_empty_message: 'Magdagdag ng lokasyon sa isang gastos para makita ito rito.',
@@ -3863,7 +3865,7 @@ const fil = {
     map_summary_earned: '{{amount}} kinita',
     offer_title: 'Tandaan kung saan ka gumagastos?',
     offer_body:
-      'Lagyan ng lugar ang mga gastos at makita ang paggastos mo sa mapa. Mababago ito anumang oras sa Settings.',
+      'Lagyan ng lugar ang mga gastos at makita ang paggastos mo sa mapa. Mababago ito anumang oras sa Mga setting.',
     offer_chip_auto: 'Auto-tag',
   },
 };

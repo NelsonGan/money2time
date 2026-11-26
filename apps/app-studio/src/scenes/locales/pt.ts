@@ -10,8 +10,8 @@ const pt: LocaleModule = {
   meta: { code: 'pt', flag: '🇧🇷', label: 'Português' },
 
   phone: {
-    s1:  { h: 'Cada Linha,\nem Horas.', hl: 'em Horas.', sh: 'Seu extrato fala em dinheiro e tempo', she: '⏳', price: '$10.10', time: '23m', timeSub: 'de trabalho' },
-    s2:  { h: 'Todo Dinheiro.\nUm Lugar.', hl: 'Um Lugar.', sh: 'Patrimônio, poupança, crédito — à vista', she: '💚', netWorth: '$55,931', netWorthLabel: 'Patrimônio', checking: 'Conta Corrente', checkingSub: 'Dia a dia', checkingValue: '$31,079', savings: 'Poupança Rendimento', savingsSub: 'Metas', savingsValue: '$15,004' },
+    s1:  { h: 'Cada Linha,\nem Horas.', hl: 'em Horas.', sh: 'Seus registros falam em dinheiro e tempo', she: '⏳', price: '$10.10', time: '23m', timeSub: 'de trabalho' },
+    s2:  { h: 'Todo Seu Dinheiro.\nUm Só Lugar.', hl: 'Um Só Lugar.', sh: 'Patrimônio, poupança, crédito — à vista', she: '💚', netWorth: '$55,931', netWorthLabel: 'Patrimônio', checking: 'Conta Corrente', checkingSub: 'Dia a dia', checkingValue: '$31,079', savings: 'Poupança Rendimento', savingsSub: 'Metas', savingsValue: '$15,004' },
     s3:  { h: 'Veja Cada Dia\nde Relance', hl: 'de Relance', sh: 'Calendário visual dos seus gastos', she: '🗓️', date: 'MAY 20', dateLabel: 'MAY', dateNumber: '20', transactions: 'Gasto hoje', amount: '$76.55', food: 'Comida', shopping: 'Compras', transport: 'Transporte' },
     s4:  { h: 'Para Onde Vai\no seu Dinheiro?', hl: 'seu Dinheiro?', sh: 'Gráficos claros detalham tudo', she: '🥧', home: 'Casa  59%', travel: 'Comida  22%', food: 'Transporte  9%', total: 'Gasto Total', totalValue: '$2,899.22' },
     s5:  { h: 'Cada Dólar\né seu Tempo', hl: 'seu Tempo', sh: 'Veja quanto você trabalhou por ele', she: '⏰', time: '112h 24m', timeLabel: 'este mês', money: '$2,899.22' },
@@ -20,10 +20,10 @@ const pt: LocaleModule = {
     s8:  { h: 'Divida\na Conta', hl: 'a Conta', sh: 'Divida contas, humor, notas — você decide', she: '✍️', splitBill: 'Dividir', mood: 'Humor', note: 'Notas' },
     s9:  { h: 'Quanto Você\nGanha Mesmo?', hl: 'Ganha Mesmo?', sh: 'Valor por hora mensal, sempre atualizado', she: '💡', rate: '$25.79', perHour: 'por hora', revealed: 'Valor atual', current: 'May 2026 — atual' },
     s10: { h: 'Assinaturas\nSob Controle', hl: 'Sob Controle', sh: 'Aluguel, mensalidades, contas fixas', she: '🔁', total: '$1,556.99 / mês', rent: 'Aluguel', gym: 'Academia', streaming: 'Pacote Streaming' },
-    s11: { h: 'Deixe do Seu\nJeito', hl: 'Jeito', sh: 'Personalize cada canto do app', she: '⚙️', display: 'Tela', hourly: 'Valor por hora', categories: 'Categorias' },
+    s11: { h: 'Deixe do Seu\nJeito', hl: 'Jeito', sh: 'Personalize cada canto do app', she: '⚙️', display: 'Exibição', hourly: 'Valor por hora', categories: 'Categorias' },
     s12: { h: 'Escolha seu\nEstilo', hl: 'Estilo', sh: 'Idioma, moeda e tema — do seu jeito', she: '🎨', language: 'Português (pt)', currency: 'USD ($)', theme: 'Claro · Sálvia' },
-    s13: { h: 'Importe\ncom um Toque', hl: 'com um Toque', sh: 'A IA lê seu extrato. Você confirma', she: '🤖', aiPowered: 'Com IA', oneTap: 'Copiar Texto', pasteJSON: 'Colar JSON' },
-    s14: { h: 'Digite.\nToque. Pronto.', hl: 'Pronto.', sh: 'Seu teclado é o caminho mais rápido', she: '⌨️', type: 'Café 6.50', tap: '↵', done: '0m ao anotar', category: 'Auto · Comida / Café' },
+    s13: { h: 'Importe\ncom um Toque', hl: 'com um Toque', sh: 'A IA lê seu extrato. Você confirma', she: '🤖', aiPowered: 'Com IA', oneTap: 'Copiar prompt', pasteJSON: 'Colar JSON' },
+    s14: { h: 'Digite.\nToque. Pronto.', hl: 'Pronto.', sh: 'Seu teclado é o caminho mais rápido', she: '⌨️', type: 'Café 6.50', tap: '↵', done: '0m para registrar', category: 'Auto · Comida / Café' },
     s15: {
       h: 'Seus dados\nsão só seus.', hl: 'são só seus.',
       privacy: 'Privado desde a origem', privacySub: 'Salvos no seu celular. Sincronizar é opcional.',

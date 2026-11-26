@@ -1,22 +1,23 @@
 const tr = {
   backup_restore: {
-    title: 'Restore backup',
-    export_description: 'Personal data and shared ledgers you own.',
-    import_description: 'Choose what to restore from a backup.',
-    personal: 'Personal ledgers',
-    personal_note: 'Replaces ledgers and settings on synced devices.',
-    personal_local_note: 'Replaces ledgers and settings.',
-    shared_ledgers: 'Shared ledgers',
-    owned: 'You own this ledger',
-    unavailable: 'Owner access required',
-    restore_action: 'Restore selected',
-    confirm_title: 'Restore for everyone?',
+    title: 'Yedeği geri yükle',
+    export_description: 'Kişisel veriler ve sahibi olduğunuz paylaşılan defterler.',
+    import_description: 'Yedekten neyin geri yükleneceğini seçin.',
+    personal: 'Kişisel defterler',
+    personal_note: 'Eşitlenen cihazlardaki defterleri ve ayarları değiştirir.',
+    personal_local_note: 'Defterleri ve ayarları değiştirir.',
+    shared_ledgers: 'Paylaşılan defterler',
+    owned: 'Bu defterin sahibi sizsiniz',
+    unavailable: 'Sahip erişimi gerekli',
+    restore_action: 'Seçilenleri geri yükle',
+    confirm_title: 'Herkes için geri yüklensin mi?',
     confirm_message:
-      '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
-    sync_pending: 'Restored here. Stay signed in to finish syncing.',
-    failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+      '{{names}}\n\n{{date}} tarihli yedekle değiştirilecek. Sonraki değişiklikler kaybolur. Üyeler ve davetler değişmez.',
+    sync_pending: 'Bu cihazda geri yüklendi. Eşitlemenin tamamlanması için oturumunuzu açık tutun.',
+    failed:
+      'Geri yüklenemedi. Bağlantınızı, sahip erişiminizi ve boş depolama alanınızı kontrol edin.',
     photos_unavailable:
-      'Bu yedeğin fotoğrafları indirilemedi. Bağlantını kontrol edip tekrar dene.',
+      'Bu yedeğin fotoğrafları indirilemedi. Bağlantınızı kontrol edip tekrar deneyin.',
     photos_missing: 'Bu yedekteki {{count}} fotoğraf bulunamadığı için geri yüklenmedi.',
   },
   common: {
@@ -78,7 +79,7 @@ const tr = {
     quick_title: 'Hızlı giriş',
     quick_subtitle: 'Tuş takımıyla hızlıca ekle',
     full_title: 'Tam giriş',
-    full_subtitle: 'Tüm alanlar, bölüşmeler ve daha fazlası',
+    full_subtitle: 'Tüm alanlar ve bölüşmeler',
   },
   receiptScan: {
     banner_scanning: 'Fiş taranıyor…',
@@ -282,7 +283,7 @@ const tr = {
         body: 'Her hesap kartına kendi görünümünü verin: renk geçişlerinden mermere, bozuk para kesesi civcivimize kadar 70’ten fazla tasarım. Bir hesabı düzenleyip Kart tasarımı’na dokunun. Pro ile kendi fotoğrafınızı da yükleyebilirsiniz.',
       },
       bottomBar: {
-        title: 'Alt çubuğu size göre',
+        title: 'Alt çubuğu kişiselleştirin',
         body: 'Alt çubukta hangi sayfaların olacağını seçin ve istediğiniz sıraya sürükleyin. Hedefler, Tekrarlayan, Fişler ve daha fazlasını ekleyin. İlk sayfa ana ekranınız olur. Ayarlar > Görünüm > Alt çubuk bölümünde bulabilirsiniz.',
       },
     },
@@ -360,7 +361,7 @@ const tr = {
       },
     },
     subscriptions_tutorials_loans: {
-      title: 'Abonelikler ve eğitimler',
+      title: 'Abonelikler ve kılavuzlar',
       subscriptionLogos: {
         title: 'Abonelikleriniz için logolar',
         body: 'Netflix gibi bir ad yazın, logo kendiliğinden gelsin. 2.000’den fazla marka. Kendi görselinizi Pro ile yükleyin.',
@@ -370,8 +371,8 @@ const tr = {
         body: 'Tekrarlayanlar artık bu ay ne kadar kaldığını, yılda ne tuttuğunu ve paranın hangi günler çıktığını gösteriyor.',
       },
       tutorials: {
-        title: 'Uygulamada eğitimler',
-        body: 'Ekran görüntülü kısa rehberler, fiş taramaktan hesap bölüşmeye kadar. Ayarlar’da Yardım ve Hakkında altında arayın.',
+        title: 'Uygulamada kılavuzlar',
+        body: 'Ekran görüntülü kısa kılavuzlar, fiş taramaktan hesap bölüşmeye kadar. Ayarlar’da Yardım ve Hakkında altında arayın.',
       },
       loanInstalments: {
         title: 'Kredi taksitleri sizin için işleniyor',
@@ -437,14 +438,14 @@ const tr = {
       title: 'Otomasyonlar',
       auto: {
         title: 'Harcamaların kendiliğinden kaydedilir',
-        body: 'iOS için üç yeni otomasyon: kartını okut, Apple Pay ödemesi kendiliğinden kaydedilsin; Log Screenshot bir ödeme ekran görüntüsünü taranmış bir işleme dönüştürür; Back Tap ise telefonun arkasına dokununca hızlı girişi açar. Bunları Otomasyon sayfasından kur.',
+        body: 'iOS için üç yeni otomasyon: kartını okut, Apple Pay ödemesi kendiliğinden kaydedilsin; Log Screenshot bir ödeme ekran görüntüsünü taranmış bir işleme dönüştürür; Arkaya Dokunma ise telefonun arkasına dokununca hızlı girişi açar. Bunları Otomasyon sayfasından kur.',
       },
     },
     receipt_split_update: {
       title: 'Kalem kalem bölüş',
       split: {
         title: 'Fişi tara, kalem kalem bölüş',
-        body: 'Hesabın fotoğrafını çek ve her satırı onu alan kişiye ata — ortak yemekleri porsiyonlara böl, vergi ve servis ücreti kendiliğinden adil şekilde paylaşılır. Herkes tam tutarıyla “Size kim borçlu” ekranına düşer.',
+        body: 'Hesabın fotoğrafını çek ve her satırı onu alan kişiye ata. Ortak yemekleri porsiyonlara böl; vergi ve servis ücreti kendiliğinden adil şekilde paylaşılır. Herkes tam tutarıyla “Size kim borçlu” ekranına düşer.',
       },
       selector: {
         title: 'Daha hızlı ekleme yolu',
@@ -486,7 +487,7 @@ const tr = {
       },
       app_lock: {
         title: 'Uygulamayı kilitle',
-        body: 'Finansını Face ID, Touch ID veya parmak iziyle gizli tut. Pro ile kullanılabilir.',
+        body: 'Finanslarını Face ID, Touch ID veya parmak iziyle gizli tut. Pro ile kullanılabilir.',
       },
     },
     account_logos: {
@@ -504,11 +505,11 @@ const tr = {
       },
     },
     cta: {
-      open_accounts: 'Hesapları aç',
+      open_accounts: 'Hesapları yönet',
       open_hourly_value_settings: 'Çalışma saatlerini ayarla',
       open_add_transaction: 'İşlem ekle',
       open_recurring: 'Tekrarlayanları aç',
-      open_tutorials: 'Eğitimlere göz at',
+      open_tutorials: 'Kılavuzlara göz at',
       open_live_earnings: 'Canlı kazancı ayarla',
       open_app_icon: 'Simgeni seç',
       open_ricecal: "RiceCal'i dene",
@@ -573,7 +574,7 @@ const tr = {
       voice_logged: 'Sesle kaydedildi',
       voice_example: 'taksi 30',
       album_trip: 'Tokyo Gezisi',
-      album_trip_meta: '4 Mar – 11 Mar',
+      album_trip_meta: '4 Mar - 11 Mar',
       album_celebration: 'Annemin Doğum Günü',
       album_celebration_meta: '8 işlem',
       month_starts_on_payday: 'Ayın maaş gününde başlar',
@@ -596,12 +597,12 @@ const tr = {
         body: 'Son yedi günün her biri için bir çubuk; böylece çok harcadığın bir gün anında öne çıkar.',
       },
       month: {
-        title: 'Tüm ayın, haritalanmış',
+        title: 'Tüm ayın, gün gün',
         body: 'Uygulamadaki takvim gibi, ayın her günü için gelir ve giderler.',
       },
       savings: {
         title: 'Ne kadar biriktirdiğin',
-        body: 'Bu ayki tasarruf oranın bir bakışta — para ve çalışma saati olarak, biriktirdiğine karşılık harcadığın.',
+        body: 'Bu ayki tasarruf oranın bir bakışta: para ve çalışma saati olarak, biriktirdiğine karşılık harcadığın.',
       },
       trend: {
         title: 'Tasarruf eğilimin',
@@ -620,11 +621,11 @@ const tr = {
     saved: 'Biriktirildi',
     overspent: 'Fazla harcandı',
     spent: 'Harcandı',
-    of_income_saved: 'gelirin biriktirildi',
+    of_income_saved: 'gelirin biriktirilen kısmı',
     add_income_hint: 'Oranını görmek için gelir ekle',
     set_hourly_value: 'Uygulamada saatlik değeri ayarla',
     of_work: '{{hours}} çalışma',
-    of_work_kept: '≈ {{hours}} çalışma korundu',
+    of_work_kept: '≈ {{hours}} çalışma biriktirildi',
     of_work_behind: '≈ {{hours}} çalışma açık',
     budget_setup: 'Aylık bütçe belirle',
     budget_over: 'bütçe aşıldı',
@@ -643,7 +644,7 @@ const tr = {
       headline: 'Bugün bu kadar kazandınız',
       badge_on: 'Açık',
       rate: '{{amount}}/sa',
-      ends_at: '{{time}} biter',
+      ends_at: 'Bitiş {{time}}',
       duration_title: 'Süre',
       hours_one: '{{count}} saat',
       hours_other: '{{count}} saat',
@@ -654,9 +655,9 @@ const tr = {
       wage_title: 'Bir saat ne eder?',
       wage_body: 'Canlı kazanç gerçek saatlik ücretinizle artar. Onu girin, hazırsınız.',
       wage_action: 'Saatlik değerimi belirle',
-      disabled_title: 'Canlı etkinlikler kapalı',
+      disabled_title: 'Canlı Etkinlikler kapalı',
       disabled_body: 'iOS Ayarlar’dan Money2Time için yeniden açın, sonra buraya dönün.',
-      unavailable: 'Canlı etkinlikler iOS 16.2 veya sonrasını çalıştıran bir iPhone gerektirir.',
+      unavailable: 'Canlı Etkinlikler iOS 16.2 veya sonrasını çalıştıran bir iPhone gerektirir.',
       start_failed: 'Başlamadı. Bir daha deneyin.',
       stop_failed: 'Durmadı. Bir daha deneyin.',
       schedule_section: 'Program',
@@ -727,7 +728,7 @@ const tr = {
       count: '{{count}}/{{max}}',
       limit: 'Şimdilik en fazla {{max}}. Sonra daha fazlasını ekle.',
       search_placeholder: 'Banka ve cüzdan ara',
-      section_wallets: 'Nakit ve cüzdanlar',
+      section_wallets: 'Nakit ve e-cüzdanlar',
       section_banks: 'Bankalar',
       section_cards: 'Kredi kartları',
       section_results: 'Sonuçlar',
@@ -788,7 +789,7 @@ const tr = {
       confirm_skip: 'Yine de atla',
       icloud_pending_title: 'Yedekleme açıldı',
       icloud_pending_message:
-        "iCloud'da oturum aç ve Ayarlar'dan iCloud Drive'ı aç — yedeklemen kullanılabilir olur olmaz otomatik olarak başlayacak.",
+        "iCloud'da oturum aç ve Ayarlar'dan iCloud Drive'ı aç. Yedeklemen kullanılabilir olur olmaz otomatik olarak başlayacak.",
     },
     source: {
       title: 'Bizi nasıl buldunuz?',
@@ -812,7 +813,7 @@ const tr = {
       discard_message: 'Kalemleriniz ve atamalarınız kaybolacak.',
       discard_confirm: 'Vazgeç',
       keep_editing: 'Düzenlemeye devam et',
-      low_confidence_banner: 'Bazı satırlar zor okundu — tekrar kontrol edin.',
+      low_confidence_banner: 'Bazı satırlar zor okundu. Tekrar kontrol edin.',
       items_empty_title: 'Henüz kalem yok',
       items_empty_message: 'Fişteki her satırı ekleyerek kalem kalem bölün.',
       item_name_placeholder: 'Kalem adı',
@@ -882,7 +883,7 @@ const tr = {
       receipt_scan_short: 'Ödemek için tarayın',
       settings_title: 'Hesaplaşma ayarları',
       settings_action: 'Hesaplaşma ayarları',
-      qr_prompt_title: 'Ödeme QR kodunuzu ekleyin mi?',
+      qr_prompt_title: 'Ödeme QR kodunuz eklensin mi?',
       qr_prompt_message:
         'Ödeme QR kodunuzu ayarlayın; böylece arkadaşlarınız onu tarayıp makbuzdan doğrudan size geri ödeme yapabilir.',
       qr_prompt_cta: 'Ödeme QR kodu ekle',
@@ -1030,8 +1031,8 @@ const tr = {
         choose_from_library: 'Galeriden seç',
         replace: 'Değiştir',
         save_to_photos: 'Fotoğraflara kaydet',
-        save_success: 'Makbuz Fotoğraflara kaydedildi.',
-        save_failed: 'Makbuz kaydedilemedi. Fotoğraf erişimini kontrol edip tekrar deneyin.',
+        save_success: 'Fiş, Fotoğraflar’a kaydedildi.',
+        save_failed: 'Fiş kaydedilemedi. Fotoğraf erişimini kontrol edip tekrar deneyin.',
         crop: 'Kırp',
         crop_title: 'Fişi kırp',
         crop_hint:
@@ -1083,7 +1084,7 @@ const tr = {
       active: 'Aktif',
       paused: 'Duraklatıldı',
       nudge: {
-        small: 'Bu yaklaşık {{hours}} zamanınıza mal oluyor',
+        small: 'Bu, yaklaşık {{hours}} zamanınıza denk geliyor',
         pause: 'Düşünmeye değer: ~{{hours}} çalışma',
         large: 'Bu {{hours}} çalışma sürenize denk geliyor',
       },
@@ -1181,15 +1182,15 @@ const tr = {
       vs_average: 'Ortalamaya göre %{{percent}}',
       at_average: 'Tam ortalamada',
       average_line: 'Ort. {{value}}',
-      change_since: '{{period}} itibarıyla {{value}}',
-      flat_since: '{{period}} itibarıyla değişiklik yok',
+      change_since: '{{period}} dönemine göre {{value}}',
+      flat_since: '{{period}} dönemine göre değişiklik yok',
     },
     compare: {
       pick_hint: 'Kategori seç',
       add: 'Karşılaştır',
       remove: 'Karşılaştırmayı kaldır',
-      summary_more: '{{first}} için {{second}} kategorisinden %{{percent}} daha fazla harcadın',
-      summary_same: '{{first}} ve {{second}} için yaklaşık aynı harcadın',
+      summary_more: '{{first}} için {{second}} kategorisinden %{{percent}} daha fazla harcadınız',
+      summary_same: '{{first}} ve {{second}} için yaklaşık aynı harcadınız',
       summary_none: 'Bu dönemde {{name}} için harcama yok',
     },
     budget: 'Bütçe',
@@ -1215,7 +1216,7 @@ const tr = {
       savings_rate: 'Tasarruf',
       expense_trend: 'Gider eğilimi',
       income_trend: 'Gelir eğilimi',
-      category_trend: 'Kategori trendi',
+      category_trend: 'Kategori eğilimi',
       expense_sentiment: 'Duygu',
       asset_history: 'Varlıklar',
       income_rate_history: 'Saatlik ücret',
@@ -1234,20 +1235,20 @@ const tr = {
       'Bu dönemde en fazla çalışma süresi tüketen giderleri sıralayın.',
     savings_rate: 'Tasarruf oranı',
     savings_rate_description:
-      'Bu dönemde gelirinizden giderler düşüldükten sonra ne kadar tuttuğunuzu ölçün.',
+      'Bu dönemde giderlerden sonra gelirinizin ne kadarını elinizde tuttuğunuzu ölçün.',
     expense_trend: 'Gider eğilimi',
     expense_trend_description:
       'Yıl boyunca aylık harcamaları takip edin ve yoğun ayları hızlıca tespit edin.',
     income_trend: 'Gelir eğilimi',
     income_trend_description:
       'Yıl boyunca aylık gelirleri takip edin ve en güçlü aylarınızı hızlıca keşfedin.',
-    category_trend: 'Kategori trendi',
+    category_trend: 'Kategori eğilimi',
     category_trend_description:
       'Bir kategori seçin ve harcamasının zaman içinde nasıl değiştiğini izleyin.',
     expense_sentiment: 'Gider duygu analizi',
     expense_sentiment_description:
-      'Harcamalarınızın arkasındaki duyguyu — mutlu, nötr veya pişman — gün gün görün.',
-    asset_history: 'Varlık Trendi',
+      'Harcamalarınızın arkasındaki duyguyu gün gün görün: mutlu, nötr veya pişman.',
+    asset_history: 'Varlık eğilimi',
     asset_history_description:
       'Yıl boyunca toplam varlıklarınızı takip edin ve aylık bakiye eğilimini inceleyin.',
     income_rate_history: 'Gelir oranı geçmişi',
@@ -1262,8 +1263,8 @@ const tr = {
     drilldown_subtitle_income: 'Bu kategorideki tüm gelirler',
     time_cost: {
       summary_title: 'En fazla zaman harcatan giderler',
-      summary_top_categories: 'Üst kategoriler',
-      summary_top_transactions: 'Üst işlemler',
+      summary_top_categories: 'En büyük kategoriler',
+      summary_top_transactions: 'En büyük işlemler',
       total_hours: 'Toplam zaman maliyeti',
       money_equivalent: 'Para karşılığı',
       summary_hint: 'Pay, bu dönemin toplam zaman maliyetine göre hesaplanır.',
@@ -1294,7 +1295,7 @@ const tr = {
         average_title_day: 'Günlük ortalama',
         active_months: '{{count}} aktif ay',
         active_days: '{{count}} aktif gün',
-        top_category_title: 'Üst kategori',
+        top_category_title: 'En büyük kategori',
         transactions: '{{count}} işlem',
         no_data_title: 'Henüz gider eğilimi yok',
         no_data_message: 'Eğilimi görmek için gider işlemleri ekleyin.',
@@ -1308,7 +1309,7 @@ const tr = {
         average_title_day: 'Günlük ortalama',
         active_months: '{{count}} aktif ay',
         active_days: '{{count}} aktif gün',
-        top_category_title: 'Üst kategori',
+        top_category_title: 'En büyük kategori',
         transactions: '{{count}} işlem',
         no_data_title: 'Henüz gelir eğilimi yok',
         no_data_message: 'Eğilimi görmek için gelir işlemleri ekleyin.',
@@ -1322,7 +1323,7 @@ const tr = {
         count_one: '{{count}} harcama',
         count_other: '{{count}} harcama',
         no_data_title: 'Henüz duygu verisi yok',
-        no_data_message: 'Duygu grafiğini görmek için duygulu gider işlemleri ekleyin.',
+        no_data_message: 'Duygu grafiğini görmek için giderlerinize duygu ekleyin.',
       },
       asset_history: {
         summary_title: 'Net varlık eğilimi',
@@ -1337,7 +1338,7 @@ const tr = {
         overspent: '{{value}} fazla harcandı',
         no_income_title: 'Bu dönemde gelir yok',
         no_income_short: 'Gelir yok',
-        of_income: '{{value}} gelirin',
+        of_income: '{{value}} gelirden',
         saved_per_year: 'Bu yıl {{value}} tasarruf edildi',
         exclusions_active: '{{count}} kategori hesaplamadan çıkarıldı.',
         goal_hint: '%20 ve üzeri sağlıklı kabul edilir.',
@@ -1350,7 +1351,7 @@ const tr = {
     },
     empty: {
       title: 'Henüz işlem verisi yok',
-      message: 'Bu dönem için analizleri açmak için gelir veya gider ekleyin',
+      message: 'Bu dönemin analizlerini görmek için gelir veya gider ekleyin',
     },
     empty_category: {
       title: 'Bu kategoride işlem yok',
@@ -1403,8 +1404,8 @@ const tr = {
       home: 'Ana sayfa',
       more_pages: 'Diğer sayfalar',
       pinned: 'Her zaman çubukta',
-      remove: '{{page}} kaldır',
-      add: '{{page}} ekle',
+      remove: '{{page}} sayfasını kaldır',
+      add: '{{page}} sayfasını ekle',
       reset: 'Varsayılana sıfırla',
     },
     app_lock: {
@@ -1432,7 +1433,7 @@ const tr = {
       log_payment_hint:
         'Bunu bir Transaction otomasyonuna ekleyin; o kartla yapılan her ödeme kendini kaydetsin.',
       new_transaction_hint:
-        'Money2Time’ı bir giriş ekranında açar. Her kısayol veya otomasyon bunu çalıştırabilir.',
+        'Money2Time’ı bir giriş ekranında açar. Her kestirme veya otomasyon bunu çalıştırabilir.',
       opens_label: 'Şunu açar',
       subcategories_label: 'Alt kategorileri göster',
       subcategories_hint: 'Kapalıyken Category seçici yalnızca üst düzey kategorileri listeler.',
@@ -1442,9 +1443,9 @@ const tr = {
       auto_categorize_mapping_link: 'Anahtar kelime eşlemesini düzenle',
       save_screenshot_label: 'Ekran görüntüsünü fiş olarak kaydet',
       save_screenshot_hint: 'Alınan ekran görüntüsünü kaydedilen işleme ekli tutun.',
-      tutorial_button: 'Öğretici',
+      tutorial_button: 'Kılavuz',
       video_tutorial: 'Videoyu izle',
-      download_shortcut_button: 'Kısayolu al',
+      download_shortcut_button: 'Kestirmeyi al',
       download_automation_button: 'Otomasyonu al',
       lp27_get: 'En hızlısı: aşağıdaki düğmeye, ardından Set Up Shortcut’a dokunun.',
       lp27_card: 'Any Card’a dokunun, izlenecek kartı seçin, ardından Add Shortcut’a dokunun.',
@@ -1463,12 +1464,12 @@ const tr = {
       bt27_shortcuts: 'Kestirmeler’e dokunun.',
       step_counter: '%{current} / %{total}',
       log_payment_step_1:
-        'Kısayollar’ı açın, Automation sekmesine gidin ve New Automation’a dokunun.',
+        'Kestirmeler’i açın, Automation sekmesine gidin ve New Automation’a dokunun.',
       log_payment_step_2: 'Wallet’ı seçin: “Bir Wallet Kartına veya Geçişine dokunduğumda.”',
       log_payment_step_3: 'İzlemek istediğiniz kartı seçin.',
       log_payment_step_4:
         'Run Immediately’i seçin, Notify When Run’ı kapatın, ardından Next’e dokunun.',
-      log_payment_step_create_shortcut: "Get Started altında Create New Shortcut'a dokun.",
+      log_payment_step_create_shortcut: "Get Started altında Create New Shortcut'a dokunun.",
       log_payment_step_5: 'Ara’ya dokunun, Money2Time yazın ve Log Card Payment’ı ekleyin.',
       log_payment_step_6:
         'Amount alanına dokunun, Select Variable’ı seçin, ardından Shortcut Input’u seçip Amount’u seçin. Böylece tutar, dokunulan karta bağlanır.',
@@ -1481,8 +1482,8 @@ const tr = {
       new_transaction_step_1:
         "Aşağıdaki düğmeye dokunun, ardından sonraki ekranda Add Shortcut'a dokunarak yükleyin.",
       new_transaction_step_2:
-        'Ayarlar → Erişilebilirlik → Dokunma → Arkaya Dokunma yolunu açın, sonra İki Kez Dokunma’ya (veya Üç Kez Dokunma’ya) dokunun.',
-      new_transaction_step_3: "Shortcuts bölümüne inin ve New Transaction'ı seçin.",
+        'Ayarlar → Erişilebilirlik → Dokunma → Arkaya Dokunma yolunu açın, sonra Çift Dokunma’ya (veya Üçlü Dokunma’ya) dokunun.',
+      new_transaction_step_3: "Kestirmeler bölümüne inin ve New Transaction'ı seçin.",
       new_transaction_step_4:
         "Tamam. Yeni bir işlemi anında açmak için iPhone'unuzun arkasına iki kez dokunun.",
       log_screenshot_hint:
@@ -1490,8 +1491,8 @@ const tr = {
       log_screenshot_step_1:
         "Aşağıdaki düğmeye dokunun, ardından sonraki ekranda Add Shortcut'a dokunarak yükleyin.",
       log_screenshot_step_2:
-        'Ayarlar → Erişilebilirlik → Dokunma → Arkaya Dokunma yolunu açın, sonra İki Kez Dokunma’ya (veya Üç Kez Dokunma’ya) dokunun.',
-      log_screenshot_step_3: "Shortcuts bölümüne inin ve Log Screenshot'ı seçin.",
+        'Ayarlar → Erişilebilirlik → Dokunma → Arkaya Dokunma yolunu açın, sonra Çift Dokunma’ya (veya Üçlü Dokunma’ya) dokunun.',
+      log_screenshot_step_3: "Kestirmeler bölümüne inin ve Log Screenshot'ı seçin.",
       log_screenshot_step_4:
         "Herhangi bir ödeme veya fiş ekranında iPhone'unuzun arkasına iki kez dokunun. Ekran görüntüsünü sizin için otomatik alır.",
       log_screenshot_step_5:
@@ -1533,7 +1534,7 @@ const tr = {
       payment_alerts_android_step_7:
         'Her bildirimi incelemek için Geçmiş’i açın. Gelir, Gider veya Yok say seçeneğini belirleyin ya da Tümü düğmelerini kullanın.',
       payment_alerts_ios_step_1:
-        'Shortcuts uygulamasında +, ardından Edit seçeneğine dokunun. Düzenleyicide Automation seçeneğine dokunun.',
+        'Kestirmeler uygulamasında +, ardından Edit seçeneğine dokunun. Düzenleyicide Automation seçeneğine dokunun.',
       payment_alerts_ios_step_2: 'Notification arayıp seçin.',
       payment_alerts_ios_step_3: 'Log Notification eylemini arayıp ekleyin.',
       payment_alerts_ios_step_4:
@@ -1582,7 +1583,7 @@ const tr = {
     first_day_saturday: 'Cumartesi',
     first_day_of_month: 'Ayın ilk günü',
     first_day_of_month_help:
-      'Öngörüler, bütçeler, maaşlar ve takvim genelinde her ayın hangi gün başlayacağını belirler. Varsayılan 1.',
+      'Analizler, bütçeler, maaşlar ve takvim genelinde her ayın hangi gün başlayacağını belirler. Varsayılan 1.',
     month_cycle: {
       title: 'Ay döngüsü',
       default_title: 'Varsayılan',
@@ -1663,7 +1664,7 @@ const tr = {
     stat_days: 'Takip günü',
     stat_transactions: 'Kaydedildi',
     stat_this_month: 'Bu ay',
-    news: 'Haberler',
+    news: 'Yenilikler',
     quick_entry: {
       title: 'Hızlı Giriş',
       section_expense: 'Gider',
@@ -1704,7 +1705,7 @@ const tr = {
         release_hint: 'Tanımak için bırakın',
         permission_denied_title: 'Mikrofon erişimi gerekli',
         permission_denied_message:
-          "İşlem dikte etmek için Ayarlar'dan mikrofon ve konuşma tanıma iznine izin verin.",
+          "İşlemleri dikte etmek için Ayarlar'dan mikrofona ve konuşma tanımaya izin verin.",
         open_settings: 'Ayarları Aç',
         error_title: 'Sesli giriş başarısız',
         error_message: 'Sesli giriş işlenemedi. Lütfen tekrar deneyin.',
@@ -1739,7 +1740,7 @@ const tr = {
     hourly_value: 'Saatlik değer',
     notifications: 'Bildirimler',
     manage_formulas:
-      'Yalnızca geliriniz değiştiğinde giriş ekleyin — her ay güncellemenize gerek yok.',
+      'Yalnızca geliriniz değiştiğinde giriş ekleyin. Her ay güncellemenize gerek yok.',
     accounts: 'Hesaplar',
     categories: 'Kategoriler',
     recurring: 'Tekrarlayan işlemler',
@@ -1753,7 +1754,7 @@ const tr = {
       tile: 'Bize ulaşın',
       title: 'İletişime geçin',
       body: 'Bir sorunuz mu var, bir hata mı buldunuz ya da geri bildirim mi paylaşmak istiyorsunuz? Discord topluluğumuza katılın.',
-      button: "Discord'umuza katıl",
+      button: "Discord'umuza katılın",
       close: 'Belki sonra',
     },
     reset_data_title: 'Verileri Sıfırla',
@@ -1836,9 +1837,12 @@ const tr = {
       '- category: alt kategori uyuyorsa "Ana Kategori > Alt Kategori" formatında, aksi hâlde yalnızca ana kategori adını kullanarak aşağıdaki kategorilerimden en iyi eşleşeni seçin, emin değilseniz "Other" yazın\n' +
       '- account: ekstrede yazdığı şekliyle spesifik hesap adı (ör. "Chase Sapphire Reserve", "OCBC 365 Credit Card"), genel etiketler değil\n\n' +
       'Yalnızca şunları atlayın: bakiye satırları, ekstre toplamları, açıklamalar, üstbilgi/altbilgiler.\n\n' +
-      '## Hesaplarım\n{{accounts}}\n\n' +
-      '## Gider Kategorilerim\n{{expenses}}\n\n' +
-      '## Gelir Kategorilerim\n{{incomes}}\n\n' +
+      '## Hesaplarım\n' +
+      '{{accounts}}\n\n' +
+      '## Gider Kategorilerim\n' +
+      '{{expenses}}\n\n' +
+      '## Gelir Kategorilerim\n' +
+      '{{incomes}}\n\n' +
       'YALNIZCA bir json kod bloğu ile yanıt verin, başka hiçbir metin olmadan:\n\n' +
       '```json\n' +
       '{\n' +
@@ -1853,13 +1857,13 @@ const tr = {
       '}\n' +
       '```\n\n' +
       '## Kurallar\n' +
-      '- Ekstrenin para birimini ISO 4217 kodu olarak belirt (örneğin "MYR", "SGD", "USD"). Her tutarı basıldığı gibi birebir aktar ve ASLA başka bir para birimine çevirme.\\n' +
+      '- Ekstrenin para birimini ISO 4217 kodu olarak belirtin (örneğin "MYR", "SGD", "USD"). Her tutarı basıldığı gibi birebir aktarın ve ASLA başka bir para birimine çevirmeyin.\n' +
       '- ASLA işlem uydurmayın veya halüsinasyon görmeyin. Yalnızca belgede yer alan içerikleri çıktı olarak verin.\n' +
-      '- ASLA işlemleri atlamayın, kesmeyerek veya eksik bırakmayın. Her dosyanın her sayfasını baştan sona okuyun. Her işlem satırını çıktıya ekleyin.\n' +
+      '- ASLA işlemleri atlamayın, kesmeyin veya eksik bırakmayın. Her dosyanın her sayfasını baştan sona okuyun. Her işlem satırını çıktıya ekleyin.\n' +
       '- Birden fazla dosya yüklendiyse her dosyayı tam olarak işleyin, ardından tüm işlemleri tek "transactions" dizisinde birleştirin.\n' +
       '- Ekstre yıl sınırını aşıyorsa ve yalnızca ay/gün gösteriyorsa yılı ekstre döneminden çıkarın.\n' +
       '- Soru sormayın, reddetmeyin, birden fazla yanıta bölmeyi teklif etmeyin.\n' +
-      '- Çıktınız kesilirse JSON\'ın ortasında durun; "devam" diye yanıt verdiğimde kaldığınız yerden devam edin. Kesilmemek için erken durmayın — devam edin.',
+      '- Çıktınız kesilirse JSON\'ın ortasında durun; "devam" diye yanıt verdiğimde kaldığınız yerden devam edin. Kesilmemek için erken durmayın, devam edin.',
   },
   data_management: {
     section_export: 'Dışa aktarma',
@@ -1875,7 +1879,7 @@ const tr = {
       sheet_transactions: 'İşlemler',
       sheet_accounts: 'Hesaplar',
       sheet_categories: 'Kategoriler',
-      sheet_recurring: 'Yinelenen',
+      sheet_recurring: 'Tekrarlayan',
       column_date: 'Tarih',
       column_type: 'Tür',
       column_amount: 'Tutar',
@@ -1890,14 +1894,14 @@ const tr = {
       column_note: 'Not',
       column_details: 'Ayrıntılar',
       column_sentiment: 'Duygu',
-      column_recurring: 'Yinelenen',
+      column_recurring: 'Tekrarlayan',
       column_name: 'Ad',
       column_group: 'Grup',
       column_starting_balance: 'Başlangıç bakiyesi',
       column_include_in_totals: 'Toplamlara dahil et',
       column_parent: 'Üst kategori',
       column_icon: 'Simge',
-      column_pattern: 'Düzen',
+      column_pattern: 'Sıklık',
       column_interval: 'Aralık',
       column_next_run: 'Sonraki çalışma',
       column_end_date: 'Bitiş tarihi',
@@ -1978,13 +1982,13 @@ const tr = {
     amount_too_large: 'Çok yüksek: taksitler toplamı aşar.',
     extras_need_today:
       'Fişi, ayrıntıları veya geri ödemeyi korumak için ilk taksit bugün ya da daha önce olmalı.',
-    remove: 'Taksiti kaldır',
+    remove: 'Taksitleri kaldır',
     add_payments: '{{count}} taksit ekle',
-    convert_payments: '{{count}} ödemeye dönüştür',
-    convert_note: 'Bu harcama {{count}} ödemenin 1. ödemesi olur. Kalanlar plana göre gelir.',
-    convert_failed: 'Bu harcama taksitlere dönüştürülemedi. Lütfen tekrar dene.',
-    already_due_one: '{{count}} ödemenin daha vadesi geldi. Kaydettiğinde eklenir.',
-    already_due_other: '{{count}} ödemenin daha vadesi geldi. Kaydettiğinde eklenir.',
+    convert_payments: '{{count}} taksite dönüştür',
+    convert_note: 'Bu harcama {{count}} taksitten ilki olur. Kalanlar plana göre eklenir.',
+    convert_failed: 'Bu harcama taksitlere dönüştürülemedi. Lütfen tekrar deneyin.',
+    already_due_one: '{{count}} taksidin daha vadesi geldi. Kaydettiğinizde eklenir.',
+    already_due_other: '{{count}} taksidin daha vadesi geldi. Kaydettiğinizde eklenir.',
     pill_a11y: 'Taksit {{label}}',
     new_plan: 'Yeni taksit planı',
     due_this_month: 'Bu ay ödenecek',
@@ -2043,7 +2047,7 @@ const tr = {
     empty_title: 'Henüz taahhüt yok.',
     create_commitment: 'Taahhüt oluştur',
     empty_message:
-      'Düzenli gelir ve giderlerinizi otomatikleştirmek için yinelenen kurallar oluşturun.',
+      'Düzenli gelir ve giderlerinizi otomatikleştirmek için tekrarlayan kurallar oluşturun.',
     per_month_suffix: '/ay',
     this_year: 'Bu yıl',
     active_count: 'Etkin',
@@ -2059,8 +2063,8 @@ const tr = {
       'Tekrarlayan kurallarının eklediği kayıtlar işlem listelerinde yumuşak lavanta bir arka plan alır, böylece kendi girdiklerinden ayırt edebilirsin.',
     overdue: 'Gecikmiş',
     show_all_days: 'Tüm günler',
-    day_due_count: '{{count}} vadesi geldi',
-    day_nothing_due: 'Vadesi gelen yok',
+    day_due_count: '{{count}} ödeme',
+    day_nothing_due: 'Ödeme yok',
   },
   app_icon: {
     title: 'Uygulama simgesi',
@@ -2161,7 +2165,7 @@ const tr = {
       upload_pro_hint: 'Pro ile kendi fotoğrafını veya çizimini kart tasarımı olarak kullan.',
       upload_failed: 'Bu görsel kullanılamadı. Başka bir tane dene.',
       delete_title: 'Bu tasarım silinsin mi?',
-      delete_label: 'Tasarımı sil {{number}}',
+      delete_label: '{{number}}. tasarımı sil',
       delete_message: 'Bunu kullanan kartlar düz renge döner.',
       template_label: '{{genre}} kart tasarımı {{number}}',
       crop_title: 'Tasarımını ayarla',
@@ -2216,10 +2220,10 @@ const tr = {
       interest_rate_info_flat:
         'Yıllık sabit oran, çekilen tutarın tamamı üzerinden tüm vade boyunca uygulanır. Yazın, aylık taksit ve toplam hesaplansın; ya da toplamı yazın, oran hesaplansın.',
       effective_rate_hint:
-        'Efektif faiz {{rate}}%. Bu sabit faizin azalan bakiyede gerçek maliyeti budur.',
+        'Efektif faiz %{{rate}}. Bu sabit faizin azalan bakiyede gerçek maliyeti budur.',
       rate_change_title: 'Yeni oran ne zamandan itibaren geçerli?',
       rate_change_message:
-        'Oran {{from}}% seviyesinden {{to}}% seviyesine değişiyor. Şimdiye kadar işlenen faizi korumak için bugünden, bir hatayı düzeltiyorsan baştan itibaren uygula.',
+        'Oran %{{from}} oranından %{{to}} oranına değişiyor. Şimdiye kadar işlenen faizi korumak için bugünden, bir hatayı düzeltiyorsanız baştan itibaren uygulayın.',
       rate_change_from_today: 'Bugünden',
       rate_change_from_start: 'Baştan',
       interest_saved_label: 'Tasarruf edilen faiz',
@@ -2242,7 +2246,7 @@ const tr = {
       collect_account_info:
         'Taksidin her ay çekileceği hesap. Birini seçerseniz otomatik kaydedilir; boş bırakırsanız her ödemeyi kendiniz kaydedersiniz.',
       collect_account_manual: 'Ödemeleri kendim kaydederim',
-      collect_account_external: 'Bu ödeme Yinelenen bölümünde ayarlı. Oradan düzenleyin.',
+      collect_account_external: 'Bu ödeme Tekrarlayan bölümünde ayarlı. Oradan düzenleyin.',
       count_as_expense_label: 'Taksiti gider olarak say',
       count_as_expense_info:
         'Bir ödeme her zaman krediye para aktarır, bu yüzden kalan borcunuz her durumda azalır. Bu açıkken ödeme, seçtiğiniz kategori altında toplamlarınızda, bütçelerinizde ve grafiklerinizde gider olarak da sayılır. Kapatırsanız ödemeler giderlerinizin dışında kalır. Sonradan değiştirmek yalnızca o andan sonra kaydedilen ödemeleri etkiler.',
@@ -2312,7 +2316,7 @@ const tr = {
     due_rule_days_after: 'Ekstreden sonraki gün',
     due_next_date: 'Sonraki son ödeme: {{date}}',
     due_days_after_error: '1 ile {{max}} gün arası girin',
-    due_days_after_needs_statement: 'Saymaya başlamak için bir hesap kesim günü ekleyin',
+    due_days_after_needs_statement: 'Saymaya başlamak için bir ekstre günü ekleyin',
     current_balance: 'Mevcut bakiye',
     balance_adjustment_prompt_title: 'Bu bakiye değişikliği nasıl kaydedilsin?',
     balance_adjustment_prompt_message:
@@ -2341,8 +2345,8 @@ const tr = {
     view_transactions: 'İşlemleri Görüntüle',
     pay: 'Öde',
     paid_note: 'Ödendi: {{name}}',
-    pay_credit_card: 'Kredi kartı öde',
-    pay_from: 'Kaynaktan',
+    pay_credit_card: 'Kredi kartını öde',
+    pay_from: 'Kaynak hesap',
     payment_note_placeholder: 'Ödeme notu',
     create_group: 'Grup oluştur',
     create_group_placeholder: 'Harcamalar',
@@ -2381,7 +2385,7 @@ const tr = {
     rate_label: 'Saatinizin değeri',
     base_rate: 'Temel ücret {{rate}}',
     time_split: '{{paid}} ücretli + {{extra}} ek = haftada {{total}}',
-    add_extra: 'Yol süresi ve daha fazlası',
+    add_extra: 'Yol süresi ve fazlasını ekle',
   },
   pro: {
     limit_receipt_scans:
@@ -2391,29 +2395,29 @@ const tr = {
     custom_logos_label: 'Özel hesap logoları',
     items_label: 'Eşyalar',
     budget_templates_label: 'Bütçe şablonları',
-    goals_label: 'Birikim Hedefleri',
+    goals_label: 'Birikim hedefleri',
     receipts_label: 'Fişler',
     split_bills_label: 'Ödenmemiş bölüşülen hesaplar',
     custom_item_images_label: 'Özel eşya görselleri',
     icon_packs_label: 'Simge paketleri ve özel simgeler',
-    custom_subscription_logos_label: 'Kendi abonelik logoları',
+    custom_subscription_logos_label: 'Özel abonelik logoları',
     limit_custom_logos:
       'Ücretsiz planda en fazla {{count}} özel logo yükleyebilirsiniz. Sınırsız için Pro’ya geçin.',
     limit_custom_subscription_logos:
       'Kendi abonelik logonuzu yüklemek bir Pro özelliğidir. Pro’ya geçin, tekrarlayan ödemelerde istediğiniz görseli kullanın.',
     limit_custom_item_images:
-      'Ücretsiz planda {{count}} özel eşya görseline kadar yükleyebilirsin. Sınırsız için Pro’ya geç.',
+      'Ücretsiz planda en fazla {{count}} özel eşya görseli yükleyebilirsiniz. Sınırsız için Pro’ya geçin.',
     limit_custom_category_icons:
-      'Kendi simgelerini yüklemek bir Pro özelliğidir. Kategoriler, hedefler ve bütçelerde istediğin görseli kullanmak için yükselt.',
+      'Kendi simgelerinizi yüklemek bir Pro özelliğidir. Kategoriler, hedefler ve bütçelerde istediğiniz görseli kullanmak için yükseltin.',
     limit_app_icon:
       'Ek uygulama simgeleri bir Pro özelliğidir. Money2Time’a ana ekranınızda yeni bir görünüm vermek için yükseltin.',
     limit_custom_card_designs:
-      'Kendi kart tasarımların bir Pro özelliğidir. Kartlarına istediğin fotoğrafı veya çizimi koymak için yükselt.',
+      'Kendi kart tasarımlarınız bir Pro özelliğidir. Kartlarınıza istediğiniz fotoğrafı veya çizimi koymak için yükseltin.',
     limit_icon_packs: 'Ek simge paketleri bir Pro özelliğidir. Tümünü kullanmak için yükseltin.',
     limit_live_earnings_auto_start:
       'Sayacı programa göre başlatmak bir Pro özelliğidir. Pro’ya geçin, vardiyanız kendi kendine başlasın. Elle başlatmak her zaman ücretsizdir.',
     limit_album_categories:
-      'Paylaşılan bir albümün kategorilerini değiştirmek bir Pro özelliğidir. Albümdeki herkes için yeniden adlandırmak, eklemek veya kaldırmak için yükselt.',
+      'Paylaşılan bir albümün kategorilerini değiştirmek bir Pro özelliğidir. Albümdeki herkes için yeniden adlandırmak, eklemek veya kaldırmak için yükseltin.',
     limit_reimbursements:
       'Geri ödeme takibi bir Pro özelliğidir. Geri alacağınız harcamaları işaretlemek için yükseltin.',
     limit_subcurrencies:
@@ -2437,7 +2441,7 @@ const tr = {
     payment_pending_message:
       'Ödemeniz onay bekliyor. Tamamlandığında Pro otomatik olarak açılır, bu yüzden tekrar satın almanıza gerek yok.',
     already_owned_not_restored:
-      "Bu mağaza hesabı zaten Pro'ya sahip, ancak burada uygulanamadı. Satın Alımları Geri Yükle'ye dokunun ve satın alan mağaza hesabıyla oturum açtığınızdan emin olun.",
+      "Bu mağaza hesabı zaten Pro'ya sahip, ancak burada uygulanamadı. Satın Almaları Geri Yükle'ye dokunun ve satın alan mağaza hesabıyla oturum açtığınızdan emin olun.",
     monthly: 'Aylık',
     yearly: 'Yıllık',
     lifetime: 'Ömür Boyu',
@@ -2508,7 +2512,7 @@ const tr = {
     per_month_short: '/ay',
     no_commitment: 'Taahhüt yok. İstediğin zaman iptal et.',
     compare_limited: 'Sınırlı',
-    terms_prefix: 'Satın alarak',
+    terms_prefix: 'Satın alarak şunu kabul etmiş olursunuz:',
     manage_subscription: 'Aboneliği Yönet',
     plan_label: 'Mevcut Plan',
     plan_monthly: 'Aylık',
@@ -2542,13 +2546,15 @@ const tr = {
     limit_voice:
       "Ücretsiz plan {{count}} sesli giriş içerir. Sınırsız sesli giriş için Pro'ya yükseltin.",
     limit_items:
-      'Ücretsiz planda {{count}} eşyaya kadar takip edebilirsin. Sınırsız için Pro’ya geç.',
+      'Ücretsiz planda en fazla {{count}} eşya takip edebilirsiniz. Sınırsız için Pro’ya geçin.',
     limit_budget_templates:
-      'Ücretsiz planda {{count}} bütçe şablonu oluşturabilirsin. Pro ile sınırsız.',
-    limit_receipts: 'Ücretsiz planda en fazla {{count}} fiş ekleyebilirsin. Pro ile sınırsız.',
+      'Ücretsiz planda {{count}} bütçe şablonu oluşturabilirsiniz. Sınırsız için Pro’ya geçin.',
+    limit_receipts:
+      'Ücretsiz planda en fazla {{count}} fiş ekleyebilirsiniz. Sınırsız için Pro’ya geçin.',
     limit_split_bills:
-      "Ücretsiz planda en fazla {{count}} ödenmemiş bölüşülen hesabın olabilir. Birini öde ya da sınırsız için Pro'ya geç.",
-    limit_goals: 'Ücretsiz planda en fazla {{count}} birikim hedefin olabilir. Pro ile sınırsız.',
+      "Ücretsiz planda en fazla {{count}} ödenmemiş bölüşülen hesabınız olabilir. Birini kapatın ya da sınırsız için Pro'ya geçin.",
+    limit_goals:
+      'Ücretsiz planda en fazla {{count}} birikim hedefiniz olabilir. Sınırsız için Pro’ya geçin.',
     limit_loans: "Ücretsiz planda {{count}} kredi takip edebilirsiniz. Sınırsız için Pro'ya geçin.",
     limit_instalments:
       "Ücretsiz planda aynı anda {{count}} taksit planı takip edebilirsiniz. Sınırsız için Pro'ya geçin.",
@@ -2562,7 +2568,7 @@ const tr = {
     new_goal: 'Yeni hedef',
     summary_total_saved: 'Toplam birikim',
     summary_active: 'Aktif hedefler',
-    picker_group: 'Birikim Hedefleri',
+    picker_group: 'Birikim hedefleri',
     deposit_from_account: 'Bir hesaptan',
     deposit_from_account_hint: 'Hesaplarından birinden para aktar.',
     deposit_outside: 'Dışarıdan para',
@@ -2618,7 +2624,7 @@ const tr = {
     detail_on_track: '{{date}} için yolunda',
     detail_behind: '{{date}} için geride',
     detail_required_monthly: 'Yetişmek için ayda {{amount}} biriktir.',
-    detail_projection: 'Ayda {{amount}} ile yaklaşık {{date}} civarında hedefe ulaşırsın.',
+    detail_projection: 'Ayda {{amount}} ile {{date}} civarında hedefe ulaşırsın.',
     deposit: 'Para yatır',
     withdraw: 'Para çek',
     activity_title: 'Hareketler',
@@ -2634,7 +2640,7 @@ const tr = {
     row_subtitle: 'Ücretsiz Pro kazan',
     title: 'Paylaş ve Pro kazan',
     subtitle: 'Money2Time hakkında paylaşım yap, Pro’yu senin için açalım, bizden olsun.',
-    hero_title: 'Yay, Pro kazan 🎁',
+    hero_title: 'Haberi yay, Pro kazan 🎁',
     hero_body:
       'Bir ekran görüntüsüyle uygulama hakkında paylaşım yap. Paylaşımın ne kadar çok sevilirse ödül o kadar büyük olur.',
     rewards_title: 'Ödül seviyeleri',
@@ -2674,7 +2680,7 @@ const tr = {
     daily_checkin: {
       title: 'Günlük Kontrol',
       label: 'Günlük hatırlatma',
-      description: 'Her gün harcamalarınızı kaydetmeniz için bir dürtme alın.',
+      description: 'Her gün harcamalarınızı kaydetmeniz için hatırlatma alın.',
       time: 'Hatırlatma saati',
     },
     recurring: {
@@ -2768,7 +2774,7 @@ const tr = {
     edits_off:
       'Bu tarayıcı yalnızca verilerinizi görüntüleyebilir. Bu ekran açıkken bu tarayıcıdan kayıt eklemek, düzenlemek ve silmek için değişikliklere izin verin.',
     edits_allow: 'Değişikliklere izin ver',
-    edits_disallow: 'Salt görüntüleme',
+    edits_disallow: 'Salt görüntülemeye çevir',
     read_only: 'Salt görüntüleme',
     edit_hint_some_read_only:
       'Bu ekran açıkken izin verdiğiniz tarayıcılar da kayıt ekleyebilir, düzenleyebilir ve silebilir. İzin vermek için tarayıcının yanındaki ⋯ simgesine dokunun. Değişiklikler bu telefona kaydedilir.',
@@ -2792,7 +2798,7 @@ const tr = {
       rejected: 'Tarayıcı verileri açamadı. Tekrar deneyin.',
       closed: 'Bağlantı kurulmadan önce tarayıcı kapandı. Sayfayı yenileyip tekrar tarayın.',
       too_many: 'En fazla {{max}} tarayıcı bağlayabilirsiniz. Önce birinin bağlantısını kaldırın.',
-      too_large: 'Verileriniz Web Panosu’na gönderilemeyecek kadar büyük.',
+      too_large: 'Verileriniz Web Gösterge Paneli’ne gönderilemeyecek kadar büyük.',
       failed: 'Bir sorun oluştu. Tekrar deneyin.',
     },
   },
@@ -2821,7 +2827,7 @@ const tr = {
     google_drive_sign_in_failed_title: 'Giriş başarısız',
     google_drive_sign_out_title: "Google Drive'dan çıkış yapılsın mı?",
     google_drive_sign_out_message:
-      "Otomatik yedeklemeler cihaza geri döner. Google Drive'daki mevcut yedekler korunur.",
+      "Otomatik yedeklemeler bu cihaza kaydedilir. Google Drive'daki mevcut yedekler korunur.",
     google_drive_sign_out_action: 'Çıkış yap',
     google_drive_sign_out_link: "Google'dan çıkış yap",
     fallback_local_title: 'Bu cihaza kaydedildi',
@@ -2854,7 +2860,7 @@ const tr = {
     backup_partial_title: 'Yedeklemede hatalar oluştu',
     list_title: 'Yedekler',
     empty_state:
-      'Henüz yedek yok. Uygulamayı her açtığınızda günde bir kez otomatik olarak yedek oluşturulur.',
+      'Henüz yedek yok. Uygulamayı açtığınızda günde bir kez otomatik olarak yedek oluşturulur.',
     restore_action: 'Geri Yükle',
     delete_action: 'Sil',
     delete_confirm_title: 'Bu yedek silinsin mi?',
@@ -2871,7 +2877,7 @@ const tr = {
     preprompt_happy: 'Evet, beğeniyorum',
     preprompt_unhappy: 'Pek değil',
     preprompt_dismiss: 'Belki daha sonra',
-    feedback_prompt: 'Bunu duymak üzücü — neyin daha iyi olmasını istediğinizi paylaşır mısınız?',
+    feedback_prompt: 'Bunu duymak üzücü. Neyin daha iyi olmasını istediğinizi paylaşır mısınız?',
     feedback_open: 'Geri bildirim gönder',
     feedback_skip: 'Hayır, teşekkürler',
   },
@@ -2884,7 +2890,7 @@ const tr = {
   cloud_sync: {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
-    hero_title: 'Telefonlar arası senkron',
+    hero_title: 'Telefonlar arası eşitleme',
     hero_body:
       "Başka bir telefonda Pro'n mu var? Giriş yapıp Cloud Sync'i açarak burada da kullan.",
     continue_apple: 'Apple ile devam et',
@@ -2934,7 +2940,7 @@ const tr = {
     phone_limit_title: 'Pro 5 başka telefonda',
     phone_limit_body:
       "Hesabının Pro'su en fazla 5 telefona ulaşır ve 5 yerin hepsi dolu. Artık kullanmadığın bir telefonda Cloud Sync'ten çıkış yap (30 gün kullanılmayan bir telefon da yerini boşaltır). Ya da bu telefonda Pro al.",
-    needs_pro_title: 'Senkron için Pro gerekli',
+    needs_pro_title: 'Eşitleme için Pro gerekli',
     needs_pro_body:
       "Giriş yaptın. Eşitlemeye başlamak için Pro al. Başka bir telefonda Pro mu aldın? Orada da Cloud Sync'i aç, burada da açılır.",
     tile_on: 'Açık',
@@ -2975,7 +2981,7 @@ const tr = {
           a: 'Evet, kendi verilerini eşitlemek Pro gerektirir. Başkalarının seninle paylaştığı albümler ve defterler Pro olmadan da eşitlenir.',
         },
         pro_other_phone: {
-          q: 'Başka bir telefonda Pro var. Neden bu telefonda yok?',
+          q: "Başka bir telefonda Pro'm var. Neden bu telefonda yok?",
           a: "İki telefonda da aynı hesapla giriş yap ve Cloud Sync'i aç. Bu telefon bir kez eşitlendiğinde, hesaptaki bir telefonda Pro olduğu sürece bu da Pro olur, artık kullanmadığın bir telefon olsa bile. Hesabının Pro'su 5 telefona kadar geçerlidir.",
         },
         restore_moved_pro: {
@@ -3014,8 +3020,8 @@ const tr = {
       add: 'Konum ekle',
       clear: 'Konumu temizle',
       picker_title: 'Bir yer seçin',
-      search_placeholder: 'Şehir ara…',
-      search_hint: 'Bu geziyi haritaya yerleştirmek için bir şehir arayın.',
+      search_placeholder: 'Şehir, eyalet veya ülke ara…',
+      search_hint: 'Bu geziyi haritaya yerleştirmek için şehir, eyalet veya ülke arayın.',
       no_results: 'Yer bulunamadı',
       empty_title: 'Henüz yer yok',
       empty_message: 'Küre ve haritada görmek için bir albüme konum ekleyin.',
@@ -3056,9 +3062,9 @@ const tr = {
     delete_body:
       'İşlemlerin korunur ve kendi kategorilerine geri döner. Albümü olduğu gibi tutmak için bunun yerine arşivle.',
     delete_body_member:
-      'Albümden ayrılırsın ve albüm bu telefondan silinir. İşlemlerin kendi kategorilerinde korunur, diğerleri de albümü ve faturalarını tutar. Albümde kalmak için bunun yerine arşivle.',
+      'Albümden ayrılırsın ve albüm bu telefondan silinir. İşlemlerin kendi kategorilerinde korunur, diğerleri de albümü ve harcamalarını tutar. Albümde kalmak için bunun yerine arşivle.',
     delete_body_owner:
-      "Bu, albümü herkes için de bitirir: diğerleri albümü şu anki haliyle Arşivlenenler'de tutar ve kimse faturalarını değiştiremez. İşlemlerin kendi kategorilerinde korunur. Devam etmesi için bunun yerine arşivle.",
+      "Bu, albümü herkes için de bitirir: diğerleri albümü şu anki haliyle Arşivlenenler'de tutar ve kimse harcamalarını değiştiremez. İşlemlerin kendi kategorilerinde korunur. Devam etmesi için bunun yerine arşivle.",
     delete_body_ended:
       'Bu telefondan silinir ve işlemlerin kendi kategorilerine geri döner. Diğerleri albümü tutar.',
     deleting: 'Albüm siliniyor…',
@@ -3081,13 +3087,13 @@ const tr = {
       caption: 'Herkes hesapları ve kimin kime borçlu olduğunu görür.',
       link_note: '24 saat geçerlidir. Bağlantıya sahip herkes katılabilir.',
       leave: 'Albümden ayrıl',
-      leave_title: '{{name}} albümünden ayrılınsın mı?',
+      leave_title: '{{name}} albümünden ayrılmak istiyor musunuz?',
       leave_message:
-        "Arşivlenenler'e taşınır ve artık güncellenmez. İşlemlerin sende kalır, diğerleri de albümü ve faturalarını tutar.",
+        "Arşivlenenler'e taşınır ve artık güncellenmez. İşlemlerin sende kalır, diğerleri de albümü ve harcamalarını tutar.",
       end: 'Albümü sonlandır',
       end_title: '{{name}} herkes için sonlandırılsın mı?',
       end_message:
-        "Artık kimse faturalarını ekleyemez veya değiştiremez. Herkes albümü, işlemleri ve bakiyeleri olduğu gibi Arşivlenenler'de tutar.",
+        "Artık kimse harcamalarını ekleyemez veya değiştiremez. Herkes albümü, işlemleri ve bakiyeleri olduğu gibi Arşivlenenler'de tutar.",
       limit: 'Aynı anda en fazla {{max}} albüm paylaşabilirsiniz.',
       full: 'Bir albüme en fazla {{max}} kişi katılabilir.',
       sign_in: 'Bu albümü paylaşmak için giriş yapın.',
@@ -3147,7 +3153,7 @@ const tr = {
       signed_out: 'Bu albümü değiştirmek için yeniden giriş yapın.',
       failed: 'Bu albümdeki değişiklik kaydedilemedi. Tekrar deneyin.',
       debt_changed:
-        'Bu borç sen açtıktan sonra değişti, bu yüzden hiçbir şey kaydedilmedi. Tekrar bak.',
+        'Bu borç siz açtıktan sonra değişti, bu yüzden hiçbir şey kaydedilmedi. Tekrar bakın.',
     },
     line_label: '{{name}}, albüm',
     category_list: {
@@ -3175,7 +3181,7 @@ const tr = {
       you_lower: 'siz',
       untitled: 'bir hesap',
       added: '{{actor}}: {{title}} eklendi · {{money}}',
-      said_you_paid: '{{actor}}: {{title}} için ödeyen siz · {{money}}',
+      said_you_paid: '{{actor}}, {{title}} hesabını sizin ödediğinizi belirtti · {{money}}',
       restored: '{{actor}}: {{title}} geri yüklendi · {{money}}',
       deleted: '{{actor}}: {{title}} silindi · {{money}}',
       changed_amount: '{{actor}}: {{title}} değiştirildi, {{before}} → {{after}}',
@@ -3191,10 +3197,10 @@ const tr = {
       paid: '{{from}} → {{to}}: {{money}} ödendi',
       paid_even: '{{from}} → {{to}}: denkleştirmek için {{money}} ödendi',
       undid_payment: '{{actor}}: {{from}} → {{to}} {{money}} ödemesi geri alındı',
-      undid_own_payment: '{{actor}}: → {{to}} {{money}} ödemesi geri alındı',
-      joined: '{{name}}: artık albümde',
+      undid_own_payment: '{{actor}}, {{to}} kişisine yaptığı {{money}} ödemesini geri aldı',
+      joined: '{{name}} albüme katıldı',
       started: '{{name}} albümü oluşturdu',
-      left: '{{name}}: artık albümde değil',
+      left: '{{name}} albümden ayrıldı',
       renamed_member: '{{before}} artık {{after}}',
       simplify_on: '{{actor}}: Grup borçlarını sadeleştir açıldı',
       simplify_off: '{{actor}}: Grup borçlarını sadeleştir kapatıldı',
@@ -3306,7 +3312,7 @@ const tr = {
     repeats_label: 'Tekrar',
     repeats_hint_week: 'Her {{day}} yeni bir bütçe başlar.',
     repeats_hint_month: 'Her ay yeni bir bütçe başlar.',
-    repeats_hint_year: 'Her yıl ocak ayında yeni bir bütçe başlar.',
+    repeats_hint_year: 'Her yıl Ocak ayında yeni bir bütçe başlar.',
     total_label_week: 'Haftalık toplam',
     total_label_month: 'Aylık toplam',
     total_label_year: 'Yıllık toplam',
@@ -3361,14 +3367,14 @@ const tr = {
     settings_title: 'Geri ödeme ayarları',
     empty_title: 'Geri istenecek bir şey yok',
     empty_message: 'Bir harcamada "Geri ödeme bekliyor" kutusunu işaretleyin, burada görünsün.',
-    mark_reimbursed: 'İste',
+    mark_reimbursed: 'Tahsil et',
     paid_into: '{{account}} hesabına',
     undo_title: 'Bu geri ödeme geri alınsın mı?',
     undo_message: 'Para girişi kaydı silinir.',
     undo_action: 'Geri al',
     refund_note_prefix: 'Geri ödendi',
     editor_label: 'Geri ödeme bekliyor',
-    editor_tooltip: 'Başkasının geri ödeyeceği bir harcama. Geri ödemeler sayfasından isteyin.',
+    editor_tooltip: 'Başkasının geri ödeyeceği bir harcama. Geri ödemeler sayfasından tahsil edin.',
     editor_reimbursed_label: 'Zaten geri ödendi',
     options_title: 'İşlem seçenekleri',
     untitled: 'Harcama',
@@ -3423,7 +3429,7 @@ const tr = {
     new: 'Yeni defter',
     manage: 'Defterleri yönet',
     edit_title: 'Defteri düzenle',
-    edit_named: '{{name}} düzenle',
+    edit_named: '{{name}} defterini düzenle',
     open_badge: 'AÇIK',
     explainer:
       'Her defterin kendi hesapları, hedefleri, kredileri, kategorileri, işlemleri, tekrarlayan kayıtları, bütçeleri, eşyaları, albümleri ve ay döngüsü vardır. Diğer ayarların, saatlik değerin ve yedeklerin hepsini kapsar.',
@@ -3550,7 +3556,7 @@ const tr = {
     delete_account_note: 'Paylaştığın defterler herkesin telefonundan da kaldırılır.',
     delete_shared_note: 'Paylaşıldığı için diğer herkes de onu kaybeder.',
     leave: 'Defterden ayrıl',
-    leave_title: '{{name}} defterinden ayrılınsın mı?',
+    leave_title: '{{name}} defterinden ayrılmak istiyor musun?',
     leave_message: 'Bu telefondan kaldırılır. {{owner}} seni tekrar davet edebilir.',
     no_longer_shared: 'Bu defter artık paylaşılmıyor.',
     reset_keeps_shared:
@@ -3641,7 +3647,7 @@ const tr = {
     ai_settings: 'Otomatik inceleme ayarları',
     ai_quota_free: 'Ücretsiz %{limit} incelemeden %{count} kaldı',
     ai_quota_pro: 'Pro ile sınırsız',
-    ai_quota_left: '%{count} kaldı',
+    ai_quota_left: '%{count} ücretsiz kaldı',
     ai_quota_unlimited: 'Sınırsız',
     ai_quota_info_title: 'Ücretsiz otomatik incelemeler',
     ai_quota_info:
@@ -3662,7 +3668,7 @@ const tr = {
     ai_scope_income: 'Yalnızca gelirleri kaydeder',
     ai_scope_both: 'Gider ve gelirleri kaydeder',
     ai_get_unlimited: 'Pro ile sınırsız kullanın',
-    ai_done_title: 'Sizin için ayrıldı',
+    ai_done_title: 'Sizin için halledildi',
     ai_logged_count: '%{count} kaydedildi',
     ai_ignored_count: '%{count} yok sayıldı',
     ai_undo: 'Geri al',
@@ -3678,8 +3684,8 @@ const tr = {
     ai_reason_not_money: 'Ödeme değil',
     ai_banner_reviewing_one: '1 bildirim inceleniyor…',
     ai_banner_reviewing_other: '%{count} bildirim inceleniyor…',
-    ai_banner_done_one: '1 bildirim sizin için ayrıldı',
-    ai_banner_done_other: '%{count} bildirim sizin için ayrıldı',
+    ai_banner_done_one: '1 bildirim sizin için halledildi',
+    ai_banner_done_other: '%{count} bildirim sizin için halledildi',
     ai_banner_needs_you_one: '1 bildirim hâlâ sizi bekliyor',
     ai_banner_needs_you_other: '%{count} bildirim hâlâ sizi bekliyor',
     history: 'Geçmiş',
@@ -3777,15 +3783,15 @@ const tr = {
     search_unavailable: 'Yer arama kullanılamıyor.',
     remove: 'Konumu kaldır',
     pinned_location: 'İşaretli konum',
-    nearby: 'Yakında',
-    nearby_empty: 'Yakında bir şey bulunamadı',
+    nearby: 'Yakındakiler',
+    nearby_empty: 'Yakınlarda bir şey bulunamadı',
     your_places: 'Yerleriniz',
     search_results: 'Arama sonuçları',
     search_area: 'Bu alanda ara',
     locate_me: 'Konumumu göster',
     choose: 'Seç',
-    pin_drop: 'İğne bırak',
-    pin_drag: 'İğneyi yerleştirmek için haritayı kaydırın',
+    pin_drop: 'İşaret koy',
+    pin_drag: 'İşareti yerleştirmek için haritayı kaydır',
     pin_use: 'Bu noktayı kullan',
     category_food: 'Yemek',
     category_coffee: 'Kahve',

@@ -767,7 +767,7 @@ const en = {
       confirm_skip: 'Skip anyway',
       icloud_pending_title: 'Backup turned on',
       icloud_pending_message:
-        "Sign in to iCloud and turn on iCloud Drive in Settings — your backup will start automatically as soon as it's available.",
+        'Sign in to iCloud and turn on iCloud Drive in Settings. Your backup starts automatically as soon as it’s available.',
     },
     source: {
       title: 'How did you find us?',
@@ -791,7 +791,7 @@ const en = {
       discard_message: 'Your items and assignments will be lost.',
       discard_confirm: 'Discard',
       keep_editing: 'Keep editing',
-      low_confidence_banner: 'Some lines were hard to read — double-check them.',
+      low_confidence_banner: 'Some lines were hard to read. Double-check them.',
       items_empty_title: 'No items yet',
       items_empty_message: 'Add each line from the receipt to split it item by item.',
       item_name_placeholder: 'Item name',

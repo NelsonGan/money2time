@@ -1,20 +1,22 @@
 const de = {
   backup_restore: {
-    title: 'Restore backup',
-    export_description: 'Personal data and shared ledgers you own.',
-    import_description: 'Choose what to restore from a backup.',
-    personal: 'Personal ledgers',
-    personal_note: 'Replaces ledgers and settings on synced devices.',
-    personal_local_note: 'Replaces ledgers and settings.',
-    shared_ledgers: 'Shared ledgers',
-    owned: 'You own this ledger',
-    unavailable: 'Owner access required',
-    restore_action: 'Restore selected',
-    confirm_title: 'Restore for everyone?',
+    title: 'Backup wiederherstellen',
+    export_description: 'Persönliche Daten und geteilte Bücher, die dir gehören.',
+    import_description: 'Wähle, was aus einem Backup wiederhergestellt werden soll.',
+    personal: 'Persönliche Bücher',
+    personal_note: 'Ersetzt Bücher und Einstellungen auf synchronisierten Geräten.',
+    personal_local_note: 'Ersetzt Bücher und Einstellungen.',
+    shared_ledgers: 'Geteilte Bücher',
+    owned: 'Dieses Buch gehört dir',
+    unavailable: 'Nur für Eigentümer',
+    restore_action: 'Auswahl wiederherstellen',
+    confirm_title: 'Für alle wiederherstellen?',
     confirm_message:
-      '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
-    sync_pending: 'Restored here. Stay signed in to finish syncing.',
-    failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+      '{{names}}\n\nDurch das Backup vom {{date}} ersetzen. Spätere Änderungen gehen verloren. Mitglieder und Einladungen bleiben unverändert.',
+    sync_pending:
+      'Hier wiederhergestellt. Bleib angemeldet, bis die Synchronisierung abgeschlossen ist.',
+    failed:
+      'Wiederherstellen fehlgeschlagen. Prüfe deine Verbindung, den Eigentümerzugriff und den freien Speicher.',
     photos_unavailable:
       'Die Fotos dieses Backups konnten nicht geladen werden. Prüfe deine Verbindung und versuche es erneut.',
     photos_missing:
@@ -235,7 +237,7 @@ const de = {
       },
       sharedLedgers: {
         title: 'Geteilte Bücher',
-        body: 'Teile ein Buch mit bis zu 5 Personen und führt das Haushaltsbudget gemeinsam. Alle tragen ein und sehen die Einträge auf dem eigenen Handy. Beitreten ist kostenlos; Teilen braucht Pro.',
+        body: 'Teile ein Buch mit bis zu 5 Personen, um das Haushaltsbudget gemeinsam zu führen. Alle tragen ein und sehen die Einträge auf dem eigenen Handy. Beitreten ist kostenlos; Teilen braucht Pro.',
       },
       household: {
         title: 'Einblicke für den Haushalt',
@@ -345,7 +347,7 @@ const de = {
       title: 'Monatszyklen & Live-Verdienst',
       monthCycle: {
         title: 'Starttag Monat für Monat festlegen',
-        body: 'Der Zahltag verschiebt sich, dein Monat darf das auch. Lege einen Standard-Starttag fest und tippe dann auf einen einzelnen Monat, um ihm einen eigenen zu geben. Auswertungen, Budgets, Löhne und Kalender folgen mit.',
+        body: 'Der Zahltag verschiebt sich, dein Monat darf das auch. Lege einen Standard-Starttag fest und tippe dann auf einen einzelnen Monat, um ihm einen eigenen zu geben. Einblicke, Budgets, Löhne und Kalender folgen mit.',
       },
       liveEarnings: {
         title: 'Sieh deinem Verdienst beim Wachsen zu',
@@ -356,8 +358,8 @@ const de = {
         body: 'Das Portemonnaie, das die App früher trug, ist zurück in der Symbolauswahl, kostenlos für alle. In den Einstellungen unter Anzeige, neben den Pro-Symbolen.',
       },
       loanInterest: {
-        title: 'Nominalzins oder Restschuld',
-        body: 'Kredite werden auf beide Arten angeboten, also wählst du jetzt die aus deinem Vertrag. Bei der Restschuld fallen Zinsen auf das an, was du noch schuldest, beim Nominalzins auf den vollen aufgenommenen Betrag.',
+        title: 'Pauschalzins oder Restschuld',
+        body: 'Kredite werden auf beide Arten angeboten, also wählst du jetzt die aus deinem Vertrag. Bei der Restschuld fallen Zinsen auf das an, was du noch schuldest, beim Pauschalzins auf den vollen aufgenommenen Betrag.',
       },
     },
     subscriptions_tutorials_loans: {
@@ -438,14 +440,14 @@ const de = {
       title: 'Automatisierungen',
       auto: {
         title: 'Deine Ausgaben erfassen sich selbst',
-        body: 'Drei neue Automatisierungen für iOS: Halte deine Karte ans Terminal und die Apple-Pay-Zahlung erfasst sich selbst, Log Screenshot macht aus dem Screenshot einer Zahlung eine gescannte Transaktion, und Back Tap öffnet die Schnelleingabe durch Tippen auf die Rückseite des Telefons. Richte sie auf der Seite Automatisierung ein.',
+        body: 'Drei neue Automatisierungen für iOS: Halte deine Karte ans Terminal und die Apple-Pay-Zahlung erfasst sich selbst, Log Screenshot macht aus dem Screenshot einer Zahlung eine gescannte Transaktion, und Auf Rückseite tippen öffnet die Schnelleingabe durch Tippen auf die Rückseite des Telefons. Richte sie auf der Seite Automatisierung ein.',
       },
     },
     receipt_split_update: {
       title: 'Nach Posten teilen',
       split: {
-        title: 'Scanne einen Kassenbon und teile ihn Posten für Posten',
-        body: 'Fotografiere die Rechnung und ordne jede Position der Person zu, die sie hatte — geteilte Gerichte nach Portionen, Steuer und Service verteilen sich fair von selbst. Alle landen mit einem exakten Betrag unter „Wer dir Geld schuldet“.',
+        title: 'Scanne einen Beleg und teile ihn Posten für Posten',
+        body: 'Fotografiere die Rechnung und ordne jede Position der Person zu, die sie hatte. Geteilte Gerichte gehen nach Portionen, Steuer und Service verteilen sich fair von selbst. Alle landen mit einem exakten Betrag unter „Salden“.',
       },
       selector: {
         title: 'Schneller erfassen',
@@ -453,10 +455,10 @@ const de = {
       },
     },
     budget_items_update: {
-      title: 'Budgets & Gegenstände',
+      title: 'Budgets & Artikel',
       budget: {
         title: 'Monatsbudget festlegen',
-        body: 'Erstelle ein Budget aus wiederverwendbaren Vorlagen und sieh zu, wie sich jede Kategorie beim Ausgeben füllt. Sieh auf einen Blick, was übrig ist, pro Monat oder direkt auf deinem Homescreen.',
+        body: 'Erstelle ein Budget aus wiederverwendbaren Vorlagen und sieh zu, wie sich jede Kategorie beim Ausgeben füllt. Sieh auf einen Blick, was übrig ist, pro Monat oder direkt auf deinem Startbildschirm.',
       },
       items: {
         title: 'Was deine Dinge pro Tag kosten',
@@ -479,7 +481,7 @@ const de = {
       showcase_main: 'Haupt',
       currency: {
         title: 'In jeder Währung ausgeben',
-        body: 'Verfolge Konten und Transaktionen in mehreren Währungen. Füge Unterwährungen hinzu, lege Kurse fest – jede Summe wird weiterhin in deine Hauptwährung umgerechnet.',
+        body: 'Verfolge Konten und Transaktionen in mehreren Währungen. Füge Unterwährungen hinzu und lege ihre Kurse fest, und jede Summe wird weiterhin in deine Hauptwährung umgerechnet.',
       },
       redesign: {
         title: 'Frisches neues Design',
@@ -505,7 +507,7 @@ const de = {
       },
     },
     cta: {
-      open_accounts: 'Konten öffnen',
+      open_accounts: 'Konten verwalten',
       open_hourly_value_settings: 'Arbeitsstunden festlegen',
       open_add_transaction: 'Transaktion hinzufügen',
       open_recurring: 'Wiederkehrendes öffnen',
@@ -574,7 +576,7 @@ const de = {
       voice_logged: 'Per Sprache erfasst',
       voice_example: 'Taxi 30',
       album_trip: 'Tokio-Reise',
-      album_trip_meta: '4. Mär – 11. Mär',
+      album_trip_meta: '4. Mär - 11. Mär',
       album_celebration: 'Mamas Geburtstag',
       album_celebration_meta: '8 Transaktionen',
       month_starts_on_payday: 'Dein Monat beginnt am Zahltag',
@@ -586,7 +588,7 @@ const de = {
       title: 'Startbildschirm-Widgets',
       overview: {
         title: 'Money2Time auf deinem Startbildschirm',
-        body: 'Sieh, was du diesen Monat ausgegeben hast und was es an Arbeitsstunden kostet – ohne die App zu öffnen.',
+        body: 'Sieh, was du diesen Monat ausgegeben hast und was es an Arbeitsstunden kostet, ohne die App zu öffnen.',
       },
       quick_log: {
         title: 'Mit einem Tipp erfassen',
@@ -602,7 +604,7 @@ const de = {
       },
       savings: {
         title: 'Wie viel du behältst',
-        body: 'Deine Sparquote diesen Monat auf einen Blick – was du behalten hast gegenüber dem, was du ausgegeben hast, in Geld und Arbeitsstunden.',
+        body: 'Deine Sparquote diesen Monat auf einen Blick: was du behalten hast gegenüber dem, was du ausgegeben hast, in Geld und Arbeitsstunden.',
       },
       trend: {
         title: 'Dein Spartrend',
@@ -613,7 +615,7 @@ const de = {
       title: 'Transaktionen per Sprache hinzufügen',
       say_it: {
         title: 'Sag es einfach',
-        body: 'Halte die +-Taste gedrückt und sprich, z. B. "Taxi 30" oder "Kaffee 4.50". Wir erkennen Betrag und Kategorie für dich – alles auf deinem Handy.',
+        body: 'Halte die +-Taste gedrückt und sprich, z. B. „Taxi 30“ oder „Kaffee 4,50“. Wir erkennen Betrag und Kategorie für dich, alles direkt auf deinem Handy.',
       },
     },
   },
@@ -664,7 +666,7 @@ const de = {
       stop_failed: 'Das Stoppen hat nicht geklappt. Versuch es noch einmal.',
       schedule_section: 'Zeitplan',
       schedule_tooltip:
-        'Ab iOS 17.2 startet Money2Time die Uhr zu dieser Zeit für Sie, auch bei geschlossener App. Auf älteren Versionen sendet die App stattdessen eine Mitteilung, und ein Tippen darauf startet die Uhr.',
+        'Ab iOS 17.2 startet Money2Time die Uhr zu dieser Zeit für dich, auch bei geschlossener App. Auf älteren Versionen sendet die App stattdessen eine Mitteilung, und ein Tippen darauf startet die Uhr.',
       schedule_title: 'Automatisch starten',
       schedule_body: 'Ein Tippen auf die Erinnerung startet die Uhr.',
       schedule_body_auto: 'Die Uhr startet an diesen Tagen von selbst.',
@@ -736,8 +738,8 @@ const de = {
       section_results: 'Ergebnisse',
       section_picked: 'Deine Auswahl',
       cash: 'Bargeld',
-      card_tile: '{{name}} Karte',
-      card_name: '{{name}} Karte',
+      card_tile: '{{name}}-Karte',
+      card_name: '{{name}}-Karte',
       add_none: 'Wähle ein Konto',
       add_one: '1 Konto hinzufügen',
       add_other: '{{count}} Konten hinzufügen',
@@ -791,7 +793,7 @@ const de = {
       confirm_skip: 'Trotzdem überspringen',
       icloud_pending_title: 'Backup aktiviert',
       icloud_pending_message:
-        'Melde dich bei iCloud an und aktiviere iCloud Drive in den Einstellungen — dein Backup startet automatisch, sobald es verfügbar ist.',
+        'Melde dich bei iCloud an und aktiviere iCloud Drive in den Einstellungen. Dein Backup startet automatisch, sobald es verfügbar ist.',
     },
     source: {
       title: 'Wie hast du uns gefunden?',
@@ -815,7 +817,7 @@ const de = {
       discard_message: 'Deine Posten und Zuweisungen gehen verloren.',
       discard_confirm: 'Verwerfen',
       keep_editing: 'Weiter bearbeiten',
-      low_confidence_banner: 'Einige Zeilen waren schwer lesbar — prüfe sie noch einmal.',
+      low_confidence_banner: 'Einige Zeilen waren schwer lesbar. Prüfe sie noch einmal.',
       items_empty_title: 'Noch keine Posten',
       items_empty_message:
         'Füge jede Zeile des Belegs hinzu, um ihn Posten für Posten aufzuteilen.',
@@ -911,7 +913,7 @@ const de = {
       paid_from: 'Bezahlt von Konto',
       you_owe_tag: 'Du schuldest',
       even_tag: 'Ausgeglichen',
-      owed_to_you: 'Schuldet man dir',
+      owed_to_you: 'Dir geschuldet',
       hero_owed: 'Du bekommst',
       hero_even: 'Ihr seid quitt',
       hero_settled: 'Alles beglichen',
@@ -926,7 +928,7 @@ const de = {
       person_pays_you: '{{name}} zahlt dir',
       you_pay_person: 'Du zahlst {{name}}',
       even_caption: 'Ihr seid quitt, nichts zu zahlen',
-      you_paid_on: 'Bezahlt am {{date}}',
+      you_paid_on: 'Du hast am {{date}} bezahlt',
       person_paid_on: '{{name}} hat am {{date}} bezahlt',
       undo_payment_title: 'Diese Zahlung rückgängig machen?',
       undo_payment_message:
@@ -934,7 +936,7 @@ const de = {
     },
     title: 'Transaktionen',
     empty_month_title: 'Keine Transaktionen diesen Monat',
-    empty_month_message: 'Füge deinen ersten Eintrag hinzu, um zu tracken',
+    empty_month_message: 'Füge deinen ersten Eintrag hinzu, um loszulegen',
     empty_search_title: 'Keine passenden Transaktionen',
     empty_search_message: 'Anderes Stichwort versuchen oder Suche leeren',
     sort: {
@@ -989,8 +991,8 @@ const de = {
     quick_add: {
       expand: 'Detailformular öffnen',
       time_sentence: '{{amount}} ≈ {{hours}} Arbeitszeit',
-      placeholder_expense: 'Versuche „Uber 30", „Kaffee 5", „Dominos 25".',
-      placeholder_income: 'Versuche „Gehalt 3000", „Bonus 500", „Rückerstattung 50".',
+      placeholder_expense: 'Versuche „Uber 30“, „Kaffee 5“, „Dominos 25“.',
+      placeholder_income: 'Versuche „Gehalt 3000“, „Bonus 500“, „Rückerstattung 50“.',
     },
     editor: {
       details: {
@@ -1158,14 +1160,14 @@ const de = {
         paid_floor: 'Du hast bereits {{amount}} zurückgezahlt',
         your_share_label: 'Dein Anteil',
         paid_by_you: 'Von dir bezahlt',
-        section_subtitle_unpaid: '{{count}} schuldet noch',
-        section_subtitle_unpaid_plural: '{{count}} schulden noch',
+        section_subtitle_unpaid: '{{count}} schuldet dir noch',
+        section_subtitle_unpaid_plural: '{{count}} schulden dir noch',
         subtotal_label: 'Zwischensumme',
         itemized_total: 'Gesamt: {{sum}}',
         itemized_total_zero_hint: 'Gib mindestens einen Betrag ein',
         adjustments_title: 'Steuer & Service',
         discount_title: 'Rabatt',
-        percent_chip: '{{percent}}%',
+        percent_chip: '{{percent}} %',
         apply: 'Anwenden',
       },
     },
@@ -1236,10 +1238,10 @@ const de = {
       'Blicke auf eine abgeschlossene Woche, einen Monat oder ein Jahr zurück: was ausgegeben wurde, was geblieben ist und wie es sich angefühlt hat.',
     expense_breakdown: 'Ausgabenaufschlüsselung',
     expense_breakdown_description:
-      'Sieh, wohin deine Ausgaben fließen – nach Kategorie mit Anteil und Details.',
+      'Sieh nach Kategorie, wohin deine Ausgaben fließen, mit Anteil und Details.',
     income_breakdown: 'Einnahmenaufschlüsselung',
     income_breakdown_description:
-      'Sieh, woher deine Einnahmen kommen – nach Kategorie mit Anteil und Details.',
+      'Sieh nach Kategorie, woher deine Einnahmen kommen, mit Anteil und Details.',
     time_cost_leaderboard: 'Zeitkosten-Rangliste',
     time_cost_leaderboard_description:
       'Die Ausgaben mit den höchsten Arbeitsstunden-Kosten in diesem Zeitraum.',
@@ -1257,7 +1259,7 @@ const de = {
       'Wähle eine Kategorie und verfolge, wie sich ihre Ausgaben im Zeitverlauf entwickeln.',
     expense_sentiment: 'Ausgabenstimmung',
     expense_sentiment_description:
-      'Sieh die Stimmung hinter deinen Ausgaben – glücklich, neutral oder bereut – Tag für Tag.',
+      'Sieh die Stimmung hinter deinen Ausgaben, Tag für Tag: glücklich, neutral oder bereut.',
     asset_history: 'Vermögenstrend',
     asset_history_description:
       'Gesamtvermögen im Jahresverlauf verfolgen und monatlichen Saldo-Trend einsehen.',
@@ -1462,7 +1464,7 @@ const de = {
       lp27_card:
         'Tippe auf Any Card, wähle die Karte, die du erfassen willst, und tippe dann auf Add Shortcut.',
       lp27_finish:
-        'Sie wird ausgeschaltet hinzugefügt. Öffne sie, tippe auf Edit, wähle bei Log Card Payment das Account und schalte Automation ein. Hat sie keine Aktionen, lösche sie und baue sie mit den nächsten Schritten selbst.',
+        'Sie wird ausgeschaltet hinzugefügt. Öffne sie, tippe auf Edit, wähle bei Log Card Payment den Account und schalte Automation ein. Hat sie keine Aktionen, lösche sie und baue sie mit den nächsten Schritten selbst.',
       lp27_m_options: 'Tippe beim Auslöser auf ›. Lass Automation an und schalte Notify aus.',
       lp27_m_select_variable: 'Tippe auf Amount und dann auf Select Variable.',
       lp27_m_transaction: 'Wähle die Variable Transaction unter dem Auslöser.',
@@ -1484,14 +1486,15 @@ const de = {
       log_payment_step_merchant:
         'Tippe jetzt auf das Feld Merchant und mach dasselbe: Select Variable, Shortcut Input, dann wähle Merchant.',
       log_payment_step_7:
-        'Tippe auf ›, um die Aktion aufzuklappen, und setz dann das Account dieser Karte.',
+        'Tippe auf ›, um die Aktion aufzuklappen, und setz dann den Account dieser Karte.',
       log_payment_step_8:
         'Fertig. Wiederhol das für jede Karte: eine Automation pro Karte, jede mit ihrem eigenen Account.',
       new_transaction_step_1:
         'Tippe auf die Schaltfläche unten und dann auf dem nächsten Bildschirm auf Add Shortcut, um ihn zu installieren.',
       new_transaction_step_2:
-        'Öffne Einstellungen → Bedienungshilfen → Tippen → Auf Rückseite tippen und tippe dann auf Zweimal tippen (oder Dreimal tippen).',
-      new_transaction_step_3: 'Scroll nach unten zum Abschnitt Shortcuts und wähl New Transaction.',
+        'Öffne Einstellungen → Bedienungshilfen → Tippen → Auf Rückseite tippen und tippe dann auf Doppeltippen (oder Dreifachtippen).',
+      new_transaction_step_3:
+        'Scroll nach unten zum Abschnitt Kurzbefehle und wähl New Transaction.',
       new_transaction_step_4:
         'Fertig. Tippe zweimal auf die Rückseite deines iPhone, um sofort eine neue Transaktion zu öffnen.',
       log_screenshot_hint:
@@ -1499,10 +1502,10 @@ const de = {
       log_screenshot_step_1:
         'Tippe auf die Schaltfläche unten und dann auf dem nächsten Bildschirm auf Add Shortcut, um ihn zu installieren.',
       log_screenshot_step_2:
-        'Öffne Einstellungen → Bedienungshilfen → Tippen → Auf Rückseite tippen und tippe dann auf Zweimal tippen (oder Dreimal tippen).',
-      log_screenshot_step_3: 'Scroll nach unten zum Abschnitt Shortcuts und wähl Log Screenshot.',
+        'Öffne Einstellungen → Bedienungshilfen → Tippen → Auf Rückseite tippen und tippe dann auf Doppeltippen (oder Dreifachtippen).',
+      log_screenshot_step_3: 'Scroll nach unten zum Abschnitt Kurzbefehle und wähl Log Screenshot.',
       log_screenshot_step_4:
-        'Tippe auf einem beliebigen Zahlungs- oder Beleg-Bildschirm zweimal auf die Rückseite deines iPhone. Es nimmt den Screenshot automatisch für dich auf.',
+        'Tippe auf einem beliebigen Zahlungs- oder Beleg-Bildschirm zweimal auf die Rückseite deines iPhone. Der Kurzbefehl nimmt den Screenshot automatisch für dich auf.',
       log_screenshot_step_5:
         'Wenn er das erste Mal läuft, tippe auf Always Allow, damit er deinen Screenshot lesen darf.',
       log_screenshot_step_6:
@@ -1543,7 +1546,7 @@ const de = {
       payment_alerts_android_step_7:
         'Öffne den Verlauf, um jede Benachrichtigung zu prüfen. Wähle Einnahmen, Ausgaben oder Ignorieren, oder nutze die Schaltflächen „Alle …“.',
       payment_alerts_ios_step_1:
-        'Öffne Shortcuts, tippe auf +, dann Edit. Tippe im Edit auf Automation.',
+        'Öffne Kurzbefehle, tippe auf +, dann Edit. Tippe im Editor auf Automation.',
       payment_alerts_ios_step_2: 'Suche nach Notification und wähle sie aus.',
       payment_alerts_ios_step_3: 'Suche nach Log Notification und füge es hinzu.',
       payment_alerts_ios_step_4: 'Tippe in Log Notification auf Message, dann auf Select Variable.',
@@ -1552,7 +1555,7 @@ const de = {
       payment_alerts_ios_step_7:
         'Tippe auf Zurück, um zu speichern. Wiederhole das für jede Bank- oder Wallet-App. Um neue Benachrichtigungen zu prüfen, auch offline, tippe in Money2Time auf das Verlaufssymbol neben Benachrichtigungen.',
       payment_alerts_android_disclosure:
-        'Lies, wie der Benachrichtigungszugriff verwendet wird, und tippe auf Continue.',
+        'Lies, wie der Benachrichtigungszugriff verwendet wird, und tippe auf Weiter.',
       payment_alerts_ios_app:
         'Tippe auf App und wähle deine Banking- oder Wallet-App. Diese Screenshots zeigen Wallet als Beispiel.',
       payment_alerts_ios_run:
@@ -1609,12 +1612,12 @@ const de = {
     },
     workday_display: 'Zeit als Arbeitstage anzeigen',
     workday_display_help:
-      'Zeitwerte anhand Ihres üblichen Arbeitstags umrechnen. Alles unter einem ganzen Tag wird weiterhin in Stunden angezeigt.',
+      'Zeitwerte anhand deines üblichen Arbeitstags umrechnen. Alles unter einem ganzen Tag wird weiterhin in Stunden angezeigt.',
     time_display: 'Zeitanzeige',
     working_hours_per_day: 'Arbeitsstunden pro Tag',
     working_hours_per_day_help:
       'Beispielsweise entsprechen 24 Stunden {{days}} Arbeitstagen bei einem {{hours}}-Stunden-Arbeitstag.',
-    working_hours_per_day_error: 'Geben Sie einen Wert zwischen 1 und 24 Stunden ein.',
+    working_hours_per_day_error: 'Gib einen Wert zwischen 1 und 24 Stunden ein.',
     select_year_month: 'Monat wählen',
     select_year: 'Jahr wählen',
     language: 'Sprache',
@@ -1638,11 +1641,11 @@ const de = {
     account_signed_out: 'Nicht angemeldet',
     account_signed_in_a11y: 'Angemeldet als {{email}}',
     account_sign_in_prompt:
-      'Melde dich an, um Alben zu teilen und geteilten Haushaltsbüchern beizutreten. Deine Daten bleiben auf diesem Handy, bis du Cloud Sync einschaltest.',
+      'Melde dich an, um Alben zu teilen und geteilten Büchern beizutreten. Deine Daten bleiben auf diesem Handy, bis du Cloud Sync einschaltest.',
     account_faq: {
       what: {
         q: 'Was bewirkt die Anmeldung?',
-        a: 'Du bekommst ein Konto, mit dem du Alben teilen und Haushaltsbüchern beitreten kannst, die andere mit dir teilen. Deine Daten bleiben auf diesem Handy.',
+        a: 'Du bekommst ein Konto, mit dem du Alben teilen und Büchern beitreten kannst, die andere mit dir teilen. Deine Daten bleiben auf diesem Handy.',
       },
       sync: {
         q: 'Synchronisiert die Anmeldung meine Daten?',
@@ -1650,15 +1653,15 @@ const de = {
       },
       pro: {
         q: 'Brauche ich Pro, um mich anzumelden?',
-        a: 'Nein. Anmelden, Alben teilen und geteilten Haushaltsbüchern beitreten sind kostenlos. Pro brauchst du, um deine eigenen Daten zu synchronisieren und ein Haushaltsbuch zu teilen.',
+        a: 'Nein. Anmelden, Alben teilen und geteilten Büchern beitreten sind kostenlos. Pro brauchst du, um deine eigenen Daten zu synchronisieren und ein Buch zu teilen.',
       },
       shared_pro: {
         q: 'Braucht ein geteiltes Buch Pro?',
-        a: 'Nur eine Person darin braucht Pro, der Besitzer oder ein beliebiges Mitglied. Hat niemand darin Pro, pausiert es für alle, bis jemand Pro hat. Nichts wird gelöscht.',
+        a: 'Nur eine Person darin braucht Pro, der Eigentümer oder ein beliebiges Mitglied. Hat niemand darin Pro, pausiert es für alle, bis jemand Pro hat. Nichts wird gelöscht.',
       },
       shared_free_limits: {
-        q: 'Kann ich ohne Pro Einträge in einem geteilten Kassenbuch anlegen?',
-        a: 'Ja, auch wenn es mehr als 6 Konten hat. Die übrigen Grenzen des kostenlosen Plans gelten dort weiter, etwa für weitere Konten oder Kategorien über die Grenze hinaus. Bitte den Besitzer des Kassenbuchs, diese Änderungen vorzunehmen.',
+        q: 'Kann ich ohne Pro Einträge in einem geteilten Buch anlegen?',
+        a: 'Ja, auch wenn es mehr als 6 Konten hat. Die übrigen Grenzen des kostenlosen Plans gelten dort weiter, etwa für weitere Konten oder Kategorien über die Grenze hinaus. Bitte den Eigentümer des Buchs, diese Änderungen vorzunehmen.',
       },
       family_pro: {
         q: 'Kann meine Familie mein Pro nutzen?',
@@ -1684,7 +1687,7 @@ const de = {
       default_currency_label: 'Standardwährung',
       default_currency_auto: 'Kontowährung übernehmen',
       default_row: 'Standard',
-      no_default: 'Auto · fällt auf „Sonstiges" zurück',
+      no_default: 'Auto · fällt auf „Sonstiges“ zurück',
       unmapped: 'Nicht zugeordnet',
       custom_badge: 'Benutzerdefiniert',
       bucket_labels: {
@@ -1720,7 +1723,7 @@ const de = {
         error_message: 'Spracheingabe konnte nicht verarbeitet werden. Bitte erneut versuchen.',
         no_amount_title: 'Kein Betrag erkannt',
         no_amount_message:
-          'Ich habe „{{transcript}}" gehört, konnte aber keinen Betrag finden. Versuche, den Betrag zu nennen, z. B. „Uber 30".',
+          'Ich habe „{{transcript}}“ gehört, konnte aber keinen Betrag finden. Versuche, den Betrag zu nennen, z. B. „Uber 30“.',
         preview_note: 'Notiz',
         preview_amount: 'Betrag',
         preview_category: 'Kategorie',
@@ -1749,7 +1752,7 @@ const de = {
     hourly_value: 'Stundenwert',
     notifications: 'Benachrichtigungen',
     manage_formulas:
-      'Nur einen Eintrag hinzufügen, wenn sich dein Einkommen ändert – kein monatliches Update nötig.',
+      'Nur einen Eintrag hinzufügen, wenn sich dein Einkommen ändert. Ein monatliches Update ist nicht nötig.',
     accounts: 'Konten',
     categories: 'Kategorien',
     recurring: 'Wiederkehrende Transaktionen',
@@ -1842,12 +1845,15 @@ const de = {
       '- date: YYYY-MM-DD\n' +
       '- description: bereinigter Händler-/Empfängername (Codes, Referenznummern und nachgestellte Ziffern entfernen)\n' +
       '- amount: NEGATIV für Ausgaben/Belastungen, POSITIV für Einnahmen/Gutschriften\n' +
-      '- category: beste Übereinstimmung aus meinen unten stehenden Kategorien; Format „Elternkategorie > Unterkategorie" wenn eine Unterkategorie passt, andernfalls nur den Elternnamen; bei Unsicherheit „Other"\n' +
-      '- account: genauer Kontoname wie auf dem Auszug gedruckt (z. B. „Chase Sapphire Reserve", „OCBC 365 Credit Card"), keine allgemeinen Bezeichnungen\n\n' +
+      '- category: beste Übereinstimmung aus meinen unten stehenden Kategorien; Format „Elternkategorie > Unterkategorie“ wenn eine Unterkategorie passt, andernfalls nur den Elternnamen; bei Unsicherheit „Other“\n' +
+      '- account: genauer Kontoname wie auf dem Auszug gedruckt (z. B. „Chase Sapphire Reserve“, „OCBC 365 Credit Card“), keine allgemeinen Bezeichnungen\n\n' +
       'Nur überspringen: Saldozeilen, Kontoauszugssummen, Hinweistexte, Kopf-/Fußzeilen.\n\n' +
-      '## Meine Konten\n{{accounts}}\n\n' +
-      '## Meine Ausgabenkategorien\n{{expenses}}\n\n' +
-      '## Meine Einnahmenkategorien\n{{incomes}}\n\n' +
+      '## Meine Konten\n' +
+      '{{accounts}}\n\n' +
+      '## Meine Ausgabenkategorien\n' +
+      '{{expenses}}\n\n' +
+      '## Meine Einnahmenkategorien\n' +
+      '{{incomes}}\n\n' +
       'Antworte NUR mit einem json-Codeblock, kein weiterer Text:\n\n' +
       '```json\n' +
       '{\n' +
@@ -1862,13 +1868,13 @@ const de = {
       '}\n' +
       '```\n\n' +
       '## Regeln\n' +
-      '- Gib die Währung des Kontoauszugs als ISO-4217-Code an (z. B. "MYR", "SGD", "USD"). Übernimm jeden Betrag genau wie abgedruckt und rechne ihn NIEMALS in eine andere Währung um.\\n' +
+      '- Gib die Währung des Kontoauszugs als ISO-4217-Code an (z. B. "MYR", "SGD", "USD"). Übernimm jeden Betrag genau wie abgedruckt und rechne ihn NIEMALS in eine andere Währung um.\n' +
       '- NIEMALS Transaktionen erfinden oder halluzinieren. Gib nur aus, was im Dokument steht.\n' +
       '- NIEMALS Transaktionen überspringen, kürzen oder weglassen. Lies jede Seite jeder Datei von Anfang bis Ende. Gib jede einzelne Transaktionszeile aus.\n' +
-      '- Wenn mehrere Dateien hochgeladen sind, jede Datei vollständig verarbeiten und dann alle Transaktionen in einem einzigen „transactions"-Array zusammenführen.\n' +
+      '- Wenn mehrere Dateien hochgeladen sind, jede Datei vollständig verarbeiten und dann alle Transaktionen in einem einzigen „transactions“-Array zusammenführen.\n' +
       '- Wenn der Auszug eine Jahresgrenze überschreitet und nur Monat/Tag anzeigt, das Jahr aus dem Auszugszeitraum ableiten.\n' +
       '- Keine Rückfragen stellen, nicht ablehnen, nicht anbieten, die Antwort aufzuteilen.\n' +
-      '- Wenn die Ausgabe abgeschnitten wird, mitten im JSON aufhören, und ich antworte mit „weiter", damit du fortfahren kannst. Nicht vorzeitig aufhören, um einem Abschneiden zuvorzukommen — einfach weitermachen.',
+      '- Wenn die Ausgabe abgeschnitten wird, mitten im JSON aufhören, und ich antworte mit „weiter“, damit du fortfahren kannst. Nicht vorzeitig aufhören, um einem Abschneiden zuvorzukommen, einfach weitermachen.',
   },
   data_management: {
     section_export: 'Export',
@@ -2095,7 +2101,7 @@ const de = {
     clear: 'Symbol entfernen',
     pack_label: 'Symbolpaket',
     pack_pro_banner: 'Diese Symbole gehören zu Pro. Upgrade, um sie zu nutzen.',
-    pack_default: 'Knete',
+    pack_default: 'Ton',
     pack_lowpoly: 'Low Poly',
     pack_line: 'Linie',
     pack_pixel: 'Pixel',
@@ -2225,15 +2231,15 @@ const de = {
     loan: {
       interest_model_label: 'Zinsen',
       interest_model_reducing: 'Restschuld',
-      interest_model_flat: 'Nominalzins',
+      interest_model_flat: 'Pauschalzins',
       interest_model_info:
-        'Restschuld: Zinsen fallen jeden Monat auf den noch offenen Betrag an, deshalb senken Sonder- oder frühe Zahlungen die Zinsen. So funktionieren die meisten Baufinanzierungen. Nominalzins: die Zinsen werden einmalig auf den vollen Kreditbetrag berechnet und vorab aufgeschlagen, frühe Zahlungen tilgen also schneller, sparen aber keine Zinsen. So funktionieren die meisten Auto- und Privatkredite.',
+        'Restschuld: Zinsen fallen jeden Monat auf den noch offenen Betrag an, deshalb senken Sonder- oder frühe Zahlungen die Zinsen. So funktionieren die meisten Baufinanzierungen. Pauschalzins: Die Zinsen werden einmalig auf den vollen Kreditbetrag berechnet und vorab aufgeschlagen, frühe Zahlungen tilgen also schneller, sparen aber keine Zinsen. So funktionieren die meisten Auto- und Privatkredite.',
       interest_rate_info_reducing:
-        'Der Jahreszins, den Ihre Bank auf die Restschuld berechnet. Geben Sie ihn ein und Monatsrate und Gesamtsumme werden berechnet, oder geben Sie die Gesamtsumme ein und der Zins wird berechnet.',
+        'Der Jahreszins, den deine Bank auf die Restschuld berechnet. Gib ihn ein, dann werden Monatsrate und Gesamtsumme berechnet, oder gib die Gesamtsumme ein, dann wird der Zins berechnet.',
       interest_rate_info_flat:
-        'Der jährliche Nominalzins, berechnet auf den vollen Kreditbetrag über die gesamte Laufzeit. Geben Sie ihn ein und Monatsrate und Gesamtsumme werden berechnet, oder geben Sie die Gesamtsumme ein und der Zins wird berechnet.',
+        'Der jährliche Pauschalzins, berechnet auf den vollen Kreditbetrag über die gesamte Laufzeit. Gib ihn ein, dann werden Monatsrate und Gesamtsumme berechnet, oder gib die Gesamtsumme ein, dann wird der Zins berechnet.',
       effective_rate_hint:
-        'Effektivzins {{rate}}%. So viel kostet dieser Flachzins auf die Restschuld gerechnet.',
+        'Effektivzins {{rate}} %. So viel kostet dieser Pauschalzins auf die Restschuld gerechnet.',
       rate_change_title: 'Ab wann gilt der neue Zinssatz?',
       rate_change_message:
         'Der Zinssatz ändert sich von {{from}}% auf {{to}}%. Ab heute anwenden, damit bereits berechnete Zinsen bleiben, oder von Anfang an, wenn du einen Fehler korrigierst.',
@@ -2270,7 +2276,7 @@ const de = {
       total_interest_label: 'Zinsen gesamt',
       balance_owed_label: 'Offener Betrag',
       interest_rate_label: 'Zinssatz',
-      autopay_rule_name: '{{name}} Rate',
+      autopay_rule_name: 'Rate {{name}}',
       payment_below_interest_short: 'Rate deckt die Zinsen nicht',
       payoff_by_label: 'Abbezahlt bis',
       first_instalment_label: 'Erste Rate',
@@ -2281,13 +2287,13 @@ const de = {
       projection_payments_only_other: 'Noch {{count}} Raten',
       no_projection: 'Gib eine monatliche Rate ein, um ein Tilgungsdatum zu sehen',
       instalment_info:
-        'Was Sie jeden Monat zahlen. Folgt der Summe oben; schalten Sie den Schalter ein, wenn Ihre Bank einen anderen Betrag abbucht, dann übernehmen wir Ihren genau so.',
+        'Was du jeden Monat zahlst. Folgt der Summe oben; schalte den Schalter ein, wenn deine Bank einen anderen Betrag abbucht, dann übernehmen wir deinen genau so.',
       total_repayable_info:
-        'Alles, was Sie über die gesamte Laufzeit zurückzahlen: die geliehene Summe plus sämtliche Zinsen.',
+        'Alles, was du über die gesamte Laufzeit zurückzahlst: die geliehene Summe plus sämtliche Zinsen.',
       balance_owed_info:
-        'Was Sie heute noch schulden, ohne die Zinsen, die Ihnen noch nicht berechnet wurden. Normalerweise kleiner als der Betrag auf Ihrem Kontoauszug.',
+        'Was du heute noch schuldest, ohne die Zinsen, die dir noch nicht berechnet wurden. Normalerweise kleiner als der Betrag auf deinem Kontoauszug.',
       balance_owed_hint:
-        'Auf Ihrem Kontoauszug steht vielleicht {{amount}}, darin stecken die noch kommenden Zinsen.',
+        'Auf deinem Kontoauszug steht vielleicht {{amount}}, darin stecken die noch kommenden Zinsen.',
       paid_so_far_label: 'Bisher gezahlt',
       left_to_pay_label: 'Noch zu zahlen',
       awaiting_contract: 'Felder oben ausfüllen',
@@ -2309,7 +2315,7 @@ const de = {
     new_account: 'Neues Konto',
     edit_account: 'Konto bearbeiten',
     account_name: 'Kontoname',
-    account_name_placeholder: 'Tagesbörse',
+    account_name_placeholder: 'Geldbörse',
     account_group: 'Kontogruppe',
     include_in_totals: 'In Gesamtsummen einbeziehen',
     include_in_totals_hint: 'Ausgeblendete Konten werden vom Gesamtsaldo ausgeschlossen.',
@@ -2350,7 +2356,7 @@ const de = {
     delete_account: 'Konto löschen',
     delete_account_confirm:
       'Dieses Konto und alle zugehörigen Transaktionen werden dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden.',
-    type_credit: 'Kredit',
+    type_credit: 'Kreditkarte',
     type_debit: 'Debit',
     type_loan: 'Kredit',
     title: 'Konten',
@@ -2371,7 +2377,7 @@ const de = {
     add_account_to_group: 'Konto hinzufügen',
     empty_group_accounts: 'Noch keine Konten in dieser Gruppe',
     delete_group_title: 'Gruppe löschen?',
-    delete_group_message: 'Konten in dieser Gruppe werden zu „Ohne Gruppe" verschoben.',
+    delete_group_message: 'Konten in dieser Gruppe werden zu „Ohne Gruppe“ verschoben.',
     empty_groups_title: 'Noch keine Gruppen',
     empty_groups_message: 'Erstelle eine Gruppe, um Konten zu organisieren',
     empty_period_title: 'Keine Transaktionen in diesem Zeitraum',
@@ -2421,16 +2427,16 @@ const de = {
     limit_custom_subscription_logos:
       'Eigene Abo-Logos hochzuladen ist eine Pro-Funktion. Mit Pro nutzt du jedes Bild für eine wiederkehrende Zahlung.',
     limit_custom_item_images:
-      'Im kostenlosen Tarif kannst du bis zu {{count}} eigene Artikelbilder hochladen. Hol dir Pro für unbegrenzte.',
+      'Im kostenlosen Tarif kannst du bis zu {{count}} eigene Artikelbilder hochladen. Mit Pro unbegrenzt.',
     limit_custom_category_icons:
       'Eigene Symbole hochzuladen ist eine Pro-Funktion. Upgrade, um jedes Bild für Kategorien, Ziele und Budgets zu nutzen.',
     limit_app_icon:
-      'Weitere App-Symbole sind eine Pro-Funktion. Hol dir Pro und gib Money2Time einen neuen Look auf deinem Home-Bildschirm.',
+      'Weitere App-Symbole sind eine Pro-Funktion. Hol dir Pro und gib Money2Time einen neuen Look auf deinem Startbildschirm.',
     limit_custom_card_designs:
       'Eigene Kartendesigns sind eine Pro-Funktion. Upgrade, um beliebige Fotos oder Kunstwerke auf deinen Karten zu verwenden.',
     limit_icon_packs: 'Weitere Symbolpakete sind eine Pro-Funktion. Upgrade für alle Pakete.',
     limit_live_earnings_auto_start:
-      'Die Uhr nach Zeitplan zu starten ist eine Pro-Funktion. Mit einem Upgrade beginnt Ihre Schicht von selbst. Der manuelle Start bleibt immer kostenlos.',
+      'Die Uhr nach Zeitplan zu starten ist eine Pro-Funktion. Mit einem Upgrade beginnt deine Schicht von selbst. Der manuelle Start bleibt immer kostenlos.',
     limit_album_categories:
       'Die Kategorien eines geteilten Albums zu ändern ist eine Pro-Funktion. Mit Pro kannst du sie für alle im Album umbenennen, hinzufügen oder entfernen.',
     limit_reimbursements:
@@ -2487,7 +2493,7 @@ const de = {
     currencies_label: 'Währungen',
     albums_label: 'Alben',
     limit_albums:
-      'Im kostenlosen Plan kannst du bis zu {{count}} Alben erstellen. Upgrade auf Pro für unbegrenzt.',
+      'Im kostenlosen Plan kannst du bis zu {{count}} Alben erstellen. Mit Pro unbegrenzt.',
     cloud_sync_label: 'Cloud Sync',
     shared_ledgers_label: 'Geteilte Bücher',
     shared_ledgers_free: 'Beitreten',
@@ -2496,7 +2502,7 @@ const de = {
     compare_title: 'Alles in Pro',
     compare_subtitle: 'Sieh genau, was du mit dem Upgrade freischaltest.',
     hero_title: 'Übernimm die Kontrolle über dein Geld und deine Zeit',
-    social_rating_value: '4.9',
+    social_rating_value: '4,9',
     social_rating_label: 'App-Store-Bewertung',
     social_downloads_value: '60k+',
     social_downloads_label: 'Nutzerfavorit',
@@ -2540,9 +2546,9 @@ const de = {
     lifetime_sub_warning_title: 'Du zahlst doppelt',
     lifetime_sub_warning_body:
       'Du hast Lifetime Pro, aber ein Abo ist noch aktiv. Kündige es, damit dir nichts mehr berechnet wird.',
-    upgrade_to_lifetime: 'Auf Lebenslang upgraden',
+    upgrade_to_lifetime: 'Auf Lifetime upgraden',
     lifetime_upsell_subtitle: 'Einmal zahlen, für immer deins. Keine Abo-Verlängerungen mehr.',
-    switch_to_lifetime: 'Zu Lebenslang wechseln',
+    switch_to_lifetime: 'Zu Lifetime wechseln',
     lifetime_purchased_title: 'Du hast jetzt Lifetime Pro',
     lifetime_purchased_body:
       'Dein Abo wird nicht mehr benötigt. Kündige es, damit dir nichts mehr berechnet wird.',
@@ -2561,7 +2567,7 @@ const de = {
     limit_voice:
       'Der kostenlose Plan enthält {{count}} Spracheingaben. Upgrade auf Pro für unbegrenzte Spracheingabe.',
     limit_items:
-      'Im kostenlosen Tarif kannst du bis zu {{count}} Artikel verfolgen. Hol dir Pro für unbegrenzte.',
+      'Im kostenlosen Tarif kannst du bis zu {{count}} Artikel verfolgen. Mit Pro unbegrenzt.',
     limit_budget_templates:
       'Im Gratis-Plan kannst du {{count}} Budget-Vorlage erstellen. Mit Pro unbegrenzt.',
     limit_receipts:
@@ -2569,10 +2575,9 @@ const de = {
     limit_split_bills:
       'Im Gratis-Plan kannst du bis zu {{count}} offene geteilte Rechnungen haben. Begleiche eine oder hol dir Pro für unbegrenzt.',
     limit_goals: 'Im Gratis-Plan kannst du bis zu {{count}} Sparziele haben. Mit Pro unbegrenzt.',
-    limit_loans:
-      'Im kostenlosen Plan kannst du {{count}} Kredit verfolgen. Upgrade auf Pro für unbegrenzt.',
+    limit_loans: 'Im kostenlosen Plan kannst du {{count}} Kredit verfolgen. Mit Pro unbegrenzt.',
     limit_instalments:
-      'Im kostenlosen Plan kannst du {{count}} Ratenzahlungen gleichzeitig abbezahlen. Upgrade auf Pro für unbegrenzt.',
+      'Im kostenlosen Plan kannst du {{count}} Ratenzahlungen gleichzeitig abbezahlen. Mit Pro unbegrenzt.',
     badge: 'PRO',
     trend_preview_title: 'Langfristige Trends freischalten',
     trend_preview_message:
@@ -2587,7 +2592,7 @@ const de = {
     deposit_from_account: 'Von einem Konto',
     deposit_from_account_hint: 'Geld von einem deiner Konten umbuchen.',
     deposit_outside: 'Geld von außen',
-    deposit_outside_hint: 'Ein Geschenk oder Bargeld von außen, wird als Einkommen erfasst.',
+    deposit_outside_hint: 'Ein Geschenk oder Bargeld von außen, wird als Einnahme erfasst.',
     withdraw_to_account: 'Auf ein Konto',
     withdraw_to_account_hint: 'Geld zurück auf eines deiner Konten umbuchen.',
     withdraw_spend: 'Direkt ausgeben',
@@ -2758,7 +2763,7 @@ const de = {
       live_earnings_title: 'Bereit einzustempeln?',
       live_earnings_body: 'Tippe, um deine Live-Verdienstuhr zu starten.',
       live_earnings_started_title: 'Live-Verdienst gestartet',
-      live_earnings_started_body: 'Ihre Uhr läuft.',
+      live_earnings_started_body: 'Deine Uhr läuft.',
       weekly_review_title: 'Deine Woche im Rückblick',
       weekly_review_body: 'Sieh, wohin dein Geld und deine Zeit letzte Woche geflossen sind.',
       monthly_review_title: 'Dein Monat im Rückblick',
@@ -2828,7 +2833,8 @@ const de = {
   },
   auto_backup: {
     title: 'Auto-Backup',
-    subtitle: 'Bis zu 10 Backups deiner Daten aufbewahren – auch wenn die App gelöscht wird.',
+    subtitle:
+      'Bis zu 10 Backups deiner Daten aufbewahren, sicher auch dann, wenn die App gelöscht wird.',
     entry_title: 'Automatische Backups',
     entry_enabled: 'An · Automatisch gesichert',
     entry_disabled: 'Aus · Tippen zum Einrichten',
@@ -2841,7 +2847,7 @@ const de = {
     },
     icloud_unavailable_title: 'iCloud nicht verfügbar',
     icloud_unavailable_message:
-      'Melde dich bei iCloud an und aktiviere iCloud Drive in den iOS-Einstellungen, dann erneut versuchen.',
+      'Melde dich bei iCloud an und aktiviere iCloud Drive in den iOS-Einstellungen. Versuche es dann erneut.',
     icloud_unavailable_short: 'Bei iCloud anmelden',
     google_drive_unconfigured_title: 'Google Drive nicht konfiguriert',
     google_drive_unconfigured_message:
@@ -2850,7 +2856,7 @@ const de = {
     google_drive_sign_in_failed_title: 'Anmeldung fehlgeschlagen',
     google_drive_sign_out_title: 'Von Google Drive abmelden?',
     google_drive_sign_out_message:
-      'Auto-Backups wechseln zurück auf Gerät. Vorhandene Backups in Google Drive bleiben erhalten.',
+      'Auto-Backups werden dann auf diesem Gerät gespeichert. Vorhandene Backups in Google Drive bleiben erhalten.',
     google_drive_sign_out_action: 'Abmelden',
     google_drive_sign_out_link: 'Von Google abmelden',
     fallback_local_title: 'Auf diesem Gerät gespeichert',
@@ -2879,7 +2885,7 @@ const de = {
     just_now: 'gerade eben',
     minutes_ago: 'vor {{count}} Min.',
     hours_ago: 'vor {{count}} Std.',
-    days_ago: 'vor {{count}} Tagen',
+    days_ago: 'vor {{count}} T.',
     back_up_now: 'Jetzt sichern',
     backing_up: 'Wird gesichert…',
     backup_partial_title: 'Backup hatte Fehler',
@@ -2902,7 +2908,7 @@ const de = {
     preprompt_happy: 'Ja, ich mag es',
     preprompt_unhappy: 'Nicht wirklich',
     preprompt_dismiss: 'Vielleicht später',
-    feedback_prompt: 'Das tut uns leid – magst du teilen, was wir verbessern könnten?',
+    feedback_prompt: 'Das tut uns leid. Magst du uns sagen, was wir verbessern könnten?',
     feedback_open: 'Feedback geben',
     feedback_skip: 'Nein danke',
   },
@@ -2947,7 +2953,7 @@ const de = {
     cancel_sign_out: 'Abbrechen',
     status_on: 'Synchronisiert',
     status_synced: 'Zuletzt synchronisiert %{time}',
-    status_syncing: 'Synchronisiert…',
+    status_syncing: 'Wird synchronisiert…',
     status_never: 'Noch nicht synchronisiert',
     status_offline: 'Offline',
     status_error: 'Sync fehlgeschlagen',
@@ -3004,7 +3010,7 @@ const de = {
       items: {
         needs_pro: {
           q: 'Braucht Cloud Sync Pro?',
-          a: 'Ja, deine eigenen Daten zu synchronisieren braucht Pro. Alben und Haushaltsbücher, die andere mit dir teilen, werden auch ohne synchronisiert.',
+          a: 'Ja, deine eigenen Daten zu synchronisieren braucht Pro. Alben und Bücher, die andere mit dir teilen, werden auch ohne synchronisiert.',
         },
         pro_other_phone: {
           q: 'Ich habe Pro auf einem anderen Handy. Warum nicht auf diesem?',
@@ -3045,14 +3051,15 @@ const de = {
       add: 'Ort hinzufügen',
       clear: 'Ort entfernen',
       picker_title: 'Ort auswählen',
-      search_placeholder: 'Städte suchen…',
-      search_hint: 'Suche eine Stadt, um diese Reise auf der Karte zu platzieren.',
+      search_placeholder: 'Stadt, Region oder Land suchen…',
+      search_hint:
+        'Suche nach Stadt, Region oder Land, um diese Reise auf der Karte zu platzieren.',
       no_results: 'Keine Orte gefunden',
       empty_title: 'Noch keine Orte',
       empty_message: 'Füge einem Album einen Ort hinzu, um es auf Globus und Karte zu sehen.',
     },
     title: 'Alben',
-    active_label: 'Neue Transaktionen hinzufügen zu',
+    active_label: 'Neue Transaktionen automatisch hinzufügen zu',
     active_sheet_title: 'Aktive Reise',
     active_none: 'Keine',
     active_badge: 'Aktiv',
@@ -3157,7 +3164,7 @@ const de = {
       already: 'Du bist bereits in diesem Album.',
       main_shared: 'Dein Hauptbuch ist geteilt und kann deshalb kein geteiltes Album enthalten.',
       unavailable: 'Geteilte Alben sind in dieser Version noch nicht verfügbar.',
-      full: 'Dieses Album ist voll. Bitte den Besitzer, Platz zu schaffen.',
+      full: 'Dieses Album ist voll. Bitte den Eigentümer, Platz zu schaffen.',
     },
     bill: {
       delete_shared:
@@ -3218,7 +3225,7 @@ const de = {
       renamed_bill: '{{actor}}: Rechnung „{{before}}“ in „{{after}}“ umbenannt',
       moved_bill: '{{actor}}: Rechnung „{{title}}“ auf {{day}} verschoben',
       changed_bill: '{{actor}}: Rechnung „{{title}}“ geändert',
-      recategorized_bill: '{{actor}} hat {{title}} unter {{category}} eingeordnet',
+      recategorized_bill: '{{actor}}: Rechnung „{{title}}“ unter {{category}} eingeordnet',
       your_share: 'Dein Anteil {{money}}',
       your_share_change: 'Dein Anteil {{before}} → {{after}}',
       your_share_gone: 'Dein Anteil von {{money}} entfällt',
@@ -3233,10 +3240,10 @@ const de = {
       simplify_on: '{{actor}}: „Gruppenschulden vereinfachen“ aktiviert',
       simplify_off: '{{actor}}: „Gruppenschulden vereinfachen“ deaktiviert',
       cover: '{{actor}}: Titelbild geändert',
-      category_added: '{{actor}} hat die Kategorie {{name}} hinzugefügt',
-      category_removed: '{{actor}} hat die Kategorie {{name}} entfernt',
-      category_renamed: '{{actor}} hat die Kategorie {{before}} in {{after}} umbenannt',
-      category_icon: '{{actor}} hat das Symbol von {{name}} geändert',
+      category_added: '{{actor}}: Kategorie {{name}} hinzugefügt',
+      category_removed: '{{actor}}: Kategorie {{name}} entfernt',
+      category_renamed: '{{actor}}: Kategorie {{before}} in {{after}} umbenannt',
+      category_icon: '{{actor}}: Symbol von {{name}} geändert',
     },
   },
   assets: {
@@ -3396,7 +3403,7 @@ const de = {
     settings_title: 'Erstattungseinstellungen',
     empty_title: 'Nichts zurückzufordern',
     empty_message:
-      'Setze bei einer Ausgabe den Haken "Erstattung ausstehend", dann steht sie hier.',
+      'Setze bei einer Ausgabe den Haken „Erstattung ausstehend“, dann steht sie hier.',
     mark_reimbursed: 'Einfordern',
     paid_into: 'Auf {{account}}',
     undo_title: 'Diese Erstattung rückgängig machen?',
@@ -3543,7 +3550,7 @@ const de = {
     title: 'Teilen',
     share_toggle: 'Dieses Buch teilen',
     share_toggle_caption: 'Lade bis zu {{max}} Personen ein. Sie brauchen kein Pro.',
-    needs_cloud_sync: 'Schalte Cloud Sync ein, um ein Haushaltsbuch zu teilen.',
+    needs_cloud_sync: 'Schalte Cloud Sync ein, um ein Buch zu teilen.',
     has_shared_albums: 'Dieses Buch enthält geteilte Alben. Beende zuerst deren Freigabe.',
     limit_reached: 'Du kannst vorerst bis zu {{max}} Bücher teilen.',
     share_failed:
@@ -3625,7 +3632,7 @@ const de = {
     open_ledger: '{{name}} öffnen',
     join_note: 'Es öffnet sich als eigenes Buch. Deine eigenen Bücher bleiben privat.',
     join_invalid:
-      'Dieser Einladungslink funktioniert nicht mehr. Ein Link gilt 24 Stunden und endet früher, wenn der Besitzer das Teilen beendet oder jemanden entfernt. Bitte den Besitzer um einen neuen Link.',
+      'Dieser Einladungslink funktioniert nicht mehr. Ein Link gilt 24 Stunden und endet früher, wenn der Eigentümer das Teilen beendet oder jemanden entfernt. Bitte den Eigentümer um einen neuen Link.',
     join_full: 'Dieses Buch ist voll. Bitte den Eigentümer, Platz zu machen.',
     join_paused: 'Dieses Buch ist pausiert, weil gerade niemand darin Pro hat.',
     join_own: 'Das ist eines deiner eigenen Bücher.',
@@ -3679,7 +3686,7 @@ const de = {
     ai_settings: 'Einstellungen der Autoprüfung',
     ai_quota_free: 'Noch %{count} von %{limit} gratis',
     ai_quota_pro: 'Unbegrenzt mit Pro',
-    ai_quota_left: 'Noch %{count}',
+    ai_quota_left: 'Noch %{count} gratis',
     ai_quota_unlimited: 'Unbegrenzt',
     ai_quota_info_title: 'Kostenlose Autoprüfungen',
     ai_quota_info:

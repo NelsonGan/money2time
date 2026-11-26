@@ -1,20 +1,20 @@
 const pl = {
   backup_restore: {
-    title: 'Restore backup',
-    export_description: 'Personal data and shared ledgers you own.',
-    import_description: 'Choose what to restore from a backup.',
-    personal: 'Personal ledgers',
-    personal_note: 'Replaces ledgers and settings on synced devices.',
-    personal_local_note: 'Replaces ledgers and settings.',
-    shared_ledgers: 'Shared ledgers',
-    owned: 'You own this ledger',
-    unavailable: 'Owner access required',
-    restore_action: 'Restore selected',
-    confirm_title: 'Restore for everyone?',
+    title: 'Przywróć kopię zapasową',
+    export_description: 'Dane osobiste i udostępnione księgi, których jesteś właścicielem.',
+    import_description: 'Wybierz, co przywrócić z kopii zapasowej.',
+    personal: 'Księgi osobiste',
+    personal_note: 'Zastępuje księgi i ustawienia na synchronizowanych urządzeniach.',
+    personal_local_note: 'Zastępuje księgi i ustawienia.',
+    shared_ledgers: 'Udostępnione księgi',
+    owned: 'Jesteś właścicielem tej księgi',
+    unavailable: 'Wymagany dostęp właściciela',
+    restore_action: 'Przywróć wybrane',
+    confirm_title: 'Przywrócić dla wszystkich?',
     confirm_message:
-      '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
-    sync_pending: 'Restored here. Stay signed in to finish syncing.',
-    failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+      '{{names}}\n\nZastąp kopią zapasową z {{date}}. Późniejsze zmiany zostaną utracone. Członkowie i zaproszenia pozostaną bez zmian.',
+    sync_pending: 'Przywrócono tutaj. Pozostań zalogowany, aby dokończyć synchronizację.',
+    failed: 'Nie udało się przywrócić. Sprawdź połączenie, dostęp właściciela i wolne miejsce.',
     photos_unavailable:
       'Nie udało się pobrać zdjęć z tej kopii. Sprawdź połączenie i spróbuj ponownie.',
     photos_missing:
@@ -49,7 +49,7 @@ const pl = {
     ungrouped: 'Bez grupy',
     other: 'Inne',
     unknown: 'Nieznany',
-    hour_unit: 'g',
+    hour_unit: 'h',
     minute_unit: 'min',
     day_unit: 'd',
     year_unit: 'r',
@@ -65,21 +65,21 @@ const pl = {
     tab_add: 'Dodaj',
     tab_split: 'Podziel',
     scan_title: 'Skanuj paragon',
-    scan_subtitle: 'Zrób zdjęcie, my je wypełnimy',
+    scan_subtitle: 'Zrób zdjęcie, resztę uzupełnimy',
     split_manual_title: 'Podział ręczny',
     split_manual_subtitle: 'Wpisz rachunek i podziel go',
     split_scan_title: 'Skanuj i podziel',
     split_scan_subtitle: 'Zeskanuj paragon i podziel pozycje',
     voice_title: 'Wpis głosowy',
     voice_subtitle: 'Powiedz, a my zapiszemy',
-    voice_unavailable_title: 'Wprowadzanie głosowe niedostępne',
+    voice_unavailable_title: 'Wpis głosowy niedostępny',
     voice_unavailable_message: 'To urządzenie nie obsługuje wprowadzania głosowego.',
     over_account_limit_message:
       'Masz {{active}} aktywnych kont. Aby bezpłatnie dodawać transakcje, zachowaj najwyżej {{count}} aktywnych kont. Usuń nadmiarowe konta albo wykup Pro. Inne działania pozostają dostępne.',
     quick_title: 'Szybki wpis',
     quick_subtitle: 'Szybko dodawaj klawiaturą',
     full_title: 'Pełny wpis',
-    full_subtitle: 'Wszystkie pola, podziały i więcej',
+    full_subtitle: 'Wszystkie pola i podziały',
   },
   receiptScan: {
     banner_scanning: 'Skanowanie paragonu…',
@@ -216,11 +216,11 @@ const pl = {
       },
       partPayments: {
         title: 'Zwroty w częściach',
-        body: 'Znajomi mogą teraz oddawać ci pieniądze po trochu. W Kto jest ci winien stuknij Oznacz jako zapłacone i wpisz, ile zapłacili. Reszta pozostaje do oddania, z paskiem postępu i listą wszystkich wpłat, a każda wpłata trafia do twoich kont, gdy tylko wpłynie.',
+        body: 'Znajomi mogą teraz oddawać Ci pieniądze po trochu. W Kto jest Ci winien stuknij Oznacz jako zapłacone i wpisz, ile zapłacili. Reszta pozostaje do oddania, z paskiem postępu i listą wszystkich wpłat, a każda wpłata trafia do Twoich kont, gdy tylko wpłynie.',
       },
       batchScan: {
         title: 'Skanuj wiele paragonów naraz',
-        body: 'Stuknij Skanuj paragon, otwórz album i wybierz do %{count} paragonów. Każdy staje się osobnym wydatkiem, z własnym sprzedawcą, kwotą, datą i kategorią, a ty w tym czasie dalej korzystasz z aplikacji. Jedna karta na ekranie Start pokazuje postęp.',
+        body: 'Stuknij Skanuj paragon, otwórz album i wybierz do %{count} paragonów. Każdy staje się osobnym wydatkiem, z własnym sprzedawcą, kwotą, datą i kategorią, a Ty w tym czasie dalej korzystasz z aplikacji. Jedna karta na ekranie Start pokazuje postęp.',
       },
       archive: {
         title: 'Archiwizuj konta',
@@ -329,7 +329,7 @@ const pl = {
       },
       accounts: {
         title: 'Więcej kont w planie Darmowym',
-        body: 'Plan Darmowy obejmuje teraz {{count}} kont debetowych lub kredytowych zamiast pięciu. Cele i pożyczki mają osobne limity. Istniejące transakcje i inne działania pozostają dostępne.',
+        body: 'Plan Darmowy obejmuje teraz {{count}} kont debetowych lub kredytowych zamiast pięciu. Cele i kredyty mają osobne limity. Istniejące transakcje i inne działania pozostają dostępne.',
       },
     },
     badge: { ad: 'REKLAMA' },
@@ -345,11 +345,11 @@ const pl = {
       title: 'Cykle miesiąca i zarobki na żywo',
       monthCycle: {
         title: 'Dzień początku dla każdego miesiąca',
-        body: 'Dzień wypłaty się przesuwa, twój miesiąc też może. Ustaw domyślny dzień początku, a potem dotknij dowolnego miesiąca, żeby dać mu własny. Analizy, budżety, wynagrodzenia i kalendarz idą za tym.',
+        body: 'Dzień wypłaty się przesuwa, Twój miesiąc też może. Ustaw domyślny dzień początku, a potem dotknij dowolnego miesiąca, żeby dać mu własny. Analizy, budżety, wynagrodzenia i kalendarz dostosują się do tego.',
       },
       liveEarnings: {
-        title: 'Patrz, jak rośnie twoja wypłata',
-        body: 'Umieść kartę na żywo na ekranie blokady i zobacz, ile już dziś zarobiłeś, licząc w górę według twojej prawdziwej stawki godzinowej. Uruchom ją sam albo ustaw zmianę, a ruszy sama.',
+        title: 'Patrz, jak rośnie Twoja wypłata',
+        body: 'Umieść kartę na żywo na ekranie blokady i zobacz, ile już dziś zarobiłeś. Kwota rośnie zgodnie z Twoją prawdziwą stawką godzinową. Uruchom ją sam albo ustaw zmianę, a ruszy sama.',
       },
       appIcon: {
         title: 'Stara ikona wróciła',
@@ -357,7 +357,7 @@ const pl = {
       },
       loanInterest: {
         title: 'Stała stawka czy malejące saldo',
-        body: 'Kredyty podawane są na oba sposoby, więc teraz wybierasz ten z twojej umowy. Malejące saldo nalicza odsetki od tego, co jeszcze jesteś winien, stała stawka od całej pożyczonej kwoty.',
+        body: 'Kredyty podawane są na oba sposoby, więc teraz wybierasz ten z Twojej umowy. Malejące saldo nalicza odsetki od tego, co jeszcze jesteś winien, stała stawka od całej pożyczonej kwoty.',
       },
     },
     subscriptions_tutorials_loans: {
@@ -376,7 +376,7 @@ const pl = {
       },
       loanInstalments: {
         title: 'Raty zapisywane za Ciebie',
-        body: 'Wybierz konto, z którego schodzi pożyczka. Każda rata zostanie zapisana, trafi do wybranej kategorii i policzy się jako wydatek.',
+        body: 'Wybierz konto, z którego schodzi rata kredytu. Każda rata zostanie zapisana, trafi do wybranej kategorii i policzy się jako wydatek.',
       },
     },
     loans_workdays_fx_mascots: {
@@ -409,7 +409,7 @@ const pl = {
       title: 'Wybierz styl ikon',
       choose: {
         title: 'Glina albo płaskie, jak wolisz',
-        body: 'Nowe gliniane ikony nie każdemu przypadną do gustu, więc dawne płaskie wciąż tu są. Przełączaj się między nimi w Ustawieniach w sekcji Wyświetlanie, a cała aplikacja pójdzie za tym: karty, przyciski i każdy kafelek ustawień.',
+        body: 'Nowe gliniane ikony nie każdemu przypadną do gustu, więc dawne płaskie wciąż tu są. Przełączaj się między nimi w Ustawieniach w sekcji Wyświetlanie, a cała aplikacja dostosuje się: karty, przyciski i każdy kafelek ustawień.',
       },
     },
     google_drive_backup: {
@@ -445,7 +445,7 @@ const pl = {
       title: 'Podział na pozycje',
       split: {
         title: 'Zeskanuj paragon i podziel go pozycja po pozycji',
-        body: 'Zrób zdjęcie rachunku i przypisz każdą pozycję do osoby, która ją zamówiła — wspólne dania podziel na porcje, a podatek i serwis rozliczą się sprawiedliwie same. Każdy trafia do „Kto jest ci winien” z dokładną kwotą.',
+        body: 'Zrób zdjęcie rachunku i przypisz każdą pozycję do osoby, która ją zamówiła. Wspólne dania podziel na porcje, a podatek i serwis rozliczą się sprawiedliwie same. Każdy trafia do „Rozliczeń” z dokładną kwotą.',
       },
       selector: {
         title: 'Szybszy sposób dodawania',
@@ -483,7 +483,7 @@ const pl = {
       },
       redesign: {
         title: 'Świeży, nowy wygląd',
-        body: 'Ustawienia, Wartość godzinowa i Płatności cykliczne zostały przeprojektowane, by były czytelniejsze i wygodniejsze.',
+        body: 'Ustawienia, Stawka godzinowa i Płatności cykliczne zostały przeprojektowane, by były czytelniejsze i wygodniejsze.',
       },
       app_lock: {
         title: 'Zablokuj aplikację',
@@ -501,11 +501,11 @@ const pl = {
       title: 'Udostępnij i zdobądź Pro',
       rewards: {
         title: 'Opublikuj, zdobądź Pro za darmo',
-        body: 'Napisz o Money2Time na Instagram, 小红书, Reddit lub Facebook. Sam post daje 1 miesiąc Pro, 100+ polubień cały rok, a 500+ polubień Pro na zawsze. Otwórz Ustawienia, aby odebrać nagrodę.',
+        body: 'Napisz o Money2Time na Instagramie, 小红书, Reddicie lub Facebooku. Sam post daje 1 miesiąc Pro, 100+ polubień cały rok, a 500+ polubień Pro na zawsze. Otwórz Ustawienia, aby odebrać nagrodę.',
       },
     },
     cta: {
-      open_accounts: 'Otwórz konta',
+      open_accounts: 'Zarządzaj kontami',
       open_hourly_value_settings: 'Ustaw godziny pracy',
       open_add_transaction: 'Dodaj transakcję',
       open_recurring: 'Otwórz cykliczne',
@@ -574,7 +574,7 @@ const pl = {
       voice_logged: 'Zapisano głosem',
       voice_example: 'taksówka 30',
       album_trip: 'Wyjazd do Tokio',
-      album_trip_meta: '4 mar – 11 mar',
+      album_trip_meta: '4 mar - 11 mar',
       album_celebration: 'Urodziny mamy',
       album_celebration_meta: '8 transakcji',
       month_starts_on_payday: 'Twój miesiąc zaczyna się w dniu wypłaty',
@@ -602,7 +602,7 @@ const pl = {
       },
       savings: {
         title: 'Ile odkładasz',
-        body: 'Twoja stopa oszczędności w tym miesiącu w skrócie — ile odłożyłeś w stosunku do tego, ile wydałeś, w pieniądzach i godzinach pracy.',
+        body: 'Twoja stopa oszczędności w tym miesiącu w skrócie: ile odłożyłeś w stosunku do tego, ile wydałeś, w pieniądzach i godzinach pracy.',
       },
       trend: {
         title: 'Trend Twoich oszczędności',
@@ -613,7 +613,7 @@ const pl = {
       title: 'Dodawaj transakcje głosem',
       say_it: {
         title: 'Po prostu powiedz',
-        body: 'Przytrzymaj przycisk + i powiedz, na przykład "taksówka 30" lub "kawa 4.50". Rozpoznamy kwotę i kategorię za Ciebie — wszystko na Twoim telefonie.',
+        body: 'Przytrzymaj przycisk + i powiedz, na przykład „taksówka 30” lub „kawa 4,50”. Rozpoznamy kwotę i kategorię za Ciebie, wszystko na Twoim telefonie.',
       },
     },
   },
@@ -623,9 +623,9 @@ const pl = {
     spent: 'Wydano',
     of_income_saved: 'dochodu zaoszczędzone',
     add_income_hint: 'Dodaj przychód, aby zobaczyć swoją stopę',
-    set_hourly_value: 'Ustaw wartość godziny w aplikacji',
+    set_hourly_value: 'Ustaw stawkę godzinową w aplikacji',
     of_work: '{{hours}} pracy',
-    of_work_kept: '≈ {{hours}} pracy zachowane',
+    of_work_kept: '≈ {{hours}} pracy na plusie',
     of_work_behind: '≈ {{hours}} pracy na minusie',
     budget_setup: 'Ustaw budżet miesięczny',
     budget_over: 'ponad budżet',
@@ -655,18 +655,18 @@ const pl = {
       wage_title: 'Ile warta jest godzina?',
       wage_body:
         'Zarobki na żywo rosną według Twojej rzeczywistej stawki godzinowej. Ustaw ją i gotowe.',
-      wage_action: 'Ustaw moją wartość godziny',
+      wage_action: 'Ustaw moją stawkę godzinową',
       disabled_title: 'Aktywności na żywo są wyłączone',
       disabled_body: 'Włącz je ponownie dla Money2Time w Ustawieniach iOS i wróć tutaj.',
       unavailable: 'Aktywności na żywo wymagają iPhone’a z iOS 16.2 lub nowszym.',
-      start_failed: 'Nie wystartowała. Spróbuj jeszcze raz.',
-      stop_failed: 'Nie zatrzymała się. Spróbuj jeszcze raz.',
+      start_failed: 'Nie udało się uruchomić. Spróbuj jeszcze raz.',
+      stop_failed: 'Nie udało się zatrzymać. Spróbuj jeszcze raz.',
       schedule_section: 'Harmonogram',
       schedule_tooltip:
-        'W systemie iOS 17.2 i nowszym Money2Time uruchamia zegar za Ciebie o tej godzinie, nawet gdy aplikacja jest zamknięta. W starszych wersjach wysyła powiadomienie, a jego dotknięcie uruchamia zegar.',
+        'W systemie iOS 17.2 i nowszym Money2Time uruchamia licznik za Ciebie o tej godzinie, nawet gdy aplikacja jest zamknięta. W starszych wersjach wysyła powiadomienie, a jego dotknięcie uruchamia licznik.',
       schedule_title: 'Uruchamiaj automatycznie',
-      schedule_body: 'Jedno dotknięcie przypomnienia uruchamia zegar.',
-      schedule_body_auto: 'W te dni zegar uruchamia się sam.',
+      schedule_body: 'Jedno dotknięcie przypomnienia uruchamia licznik.',
+      schedule_body_auto: 'W te dni licznik uruchamia się sam.',
       schedule_time: 'Godzina',
       schedule_duration: 'Długość zmiany',
       schedule_no_days: 'Wybierz co najmniej jeden dzień.',
@@ -675,14 +675,14 @@ const pl = {
       summary_total: 'Suma zmiany',
       of_total: 'z {{total}}',
       refresh: 'Odśwież',
-      widget_idle: 'Brak sesji',
+      widget_idle: 'Licznik wyłączony',
     },
   },
   home: {
     hide_summary_metric: 'Ukryj {{metric}}',
     show_summary_metric: 'Pokaż {{metric}}',
     converter: {
-      of_work_suffix: 'twojego czasu',
+      of_work_suffix: 'Twojego czasu',
       exact_hours: '{{value}} godz.',
       workday_equivalent: '{{exact}} · ok. {{duration}}',
       workweek_unit_one: '{{count}} tydzień roboczy',
@@ -744,7 +744,7 @@ const pl = {
       skip: 'Pomiń, użyj kont startowych',
     },
     automations: {
-      title: 'Niech zapisuje za ciebie',
+      title: 'Niech zapisuje za Ciebie',
       subtitle: 'Ustawisz je w każdej chwili w Ustawieniach.',
       screenshot_title: 'Zrzuty ekranu',
       screenshot_subtitle_ios: 'Zrób zrzut paragonu lub płatności.',
@@ -775,7 +775,7 @@ const pl = {
       provider_icloud: 'iCloud',
       provider_google: 'Google Drive',
       automatic_title: 'Automatycznie',
-      automatic_subtitle: 'Codziennie zapis w {{provider}}.',
+      automatic_subtitle: 'Codzienny zapis w {{provider}}.',
       private_title: 'Prywatnie',
       private_subtitle: 'Bez konta.',
       restore_title: 'Łatwe przywracanie',
@@ -790,7 +790,7 @@ const pl = {
       confirm_skip: 'Pomiń mimo to',
       icloud_pending_title: 'Kopia zapasowa włączona',
       icloud_pending_message:
-        'Zaloguj się do iCloud i włącz iCloud Drive w Ustawieniach — kopia zapasowa rozpocznie się automatycznie, gdy tylko będzie dostępna.',
+        'Zaloguj się do iCloud i włącz iCloud Drive w Ustawieniach. Kopia zapasowa rozpocznie się automatycznie, gdy tylko będzie dostępna.',
     },
     source: {
       title: 'Skąd o nas wiesz?',
@@ -814,7 +814,7 @@ const pl = {
       discard_message: 'Pozycje i przypisania zostaną utracone.',
       discard_confirm: 'Odrzuć',
       keep_editing: 'Edytuj dalej',
-      low_confidence_banner: 'Niektóre wiersze były trudne do odczytania — sprawdź je.',
+      low_confidence_banner: 'Niektóre wiersze były trudne do odczytania. Sprawdź je.',
       items_empty_title: 'Brak pozycji',
       items_empty_message: 'Dodaj każdy wiersz z paragonu, aby podzielić go pozycja po pozycji.',
       item_name_placeholder: 'Nazwa pozycji',
@@ -837,7 +837,7 @@ const pl = {
       portions_title: 'Porcje',
       your_share: 'Twoja część',
       tax_fees_label: 'Podatki i opłaty',
-      tax_service_title: 'Podatek i obsługa',
+      tax_service_title: 'Podatek i serwis',
       people_label: 'Osoby',
       optional_name: 'Imię (opcjonalnie)',
       person_named: 'Osoba {{label}}',
@@ -847,7 +847,7 @@ const pl = {
       save_action: 'Zapisz podział',
       paid_locked_title: 'Rozliczone udziały uległyby zmianie',
       paid_locked_message:
-        '{{names}} ma już opłacony ten rachunek. Oznacz jako niezapłacone, zanim zmienisz udział.',
+        '{{names}}: rachunek już opłacony. Oznacz jako nieopłacone, zanim zmienisz udział.',
       settleup_cta: 'Podziel paragon',
       itemized_receipt: 'Paragon z pozycjami',
       split_by_item: 'Podziel według pozycji',
@@ -857,7 +857,7 @@ const pl = {
     settleUp: {
       title: 'Rozliczenia',
       subtitle:
-        'Ile ty i twoi znajomi jesteście sobie winni za dzielone rachunki, w jednym miejscu.',
+        'Ile Ty i Twoi znajomi jesteście sobie winni za dzielone rachunki, w jednym miejscu.',
       tab_person: 'Osoba',
       tab_transactions: 'Transakcje',
       search_placeholder: 'Szukaj osób lub transakcji',
@@ -871,23 +871,23 @@ const pl = {
       qr_replace: 'Zmień',
       empty_title: 'Brak wspólnych rachunków',
       empty_subtitle:
-        'Podziel rachunek, a zobaczysz tu, ile ty i twoi znajomi jesteście sobie winni.',
+        'Podziel rachunek, a zobaczysz tu, ile Ty i Twoi znajomi jesteście sobie winni.',
       bills_one: '1 rachunek',
-      bills_other: '{{count}} rachunków',
+      bills_other: 'Rachunki: {{count}}',
       someone: 'Ktoś',
-      person_owes_label: 'Jest ci winien',
+      person_owes_label: 'Jest Ci winien',
       untitled_bill: 'Podzielony rachunek',
       remove_bill_title: 'Usunąć tę prośbę?',
       remove_bill_message:
-        'To usunie kwotę, którą są ci winni za ten rachunek. Sama transakcja pozostaje bez zmian.',
+        'To usunie kwotę, którą są Ci winni za ten rachunek. Sama transakcja pozostaje bez zmian.',
       share_receipt: 'Wyślij paragon',
       receipt_qr_note: 'Zeskanuj załączony kod QR, aby mi oddać.',
       receipt_scan_short: 'Zeskanuj, aby zapłacić',
       settings_title: 'Ustawienia rozliczeń',
       settings_action: 'Ustawienia rozliczeń',
-      qr_prompt_title: 'Dodać Twój kod QR do płatności?',
+      qr_prompt_title: 'Dodać swój kod QR do płatności?',
       qr_prompt_message:
-        'Skonfiguruj swój kod QR do płatności, aby znajomi mogli go zeskanować i oddać Ci pieniądze prosto z rachunku.',
+        'Skonfiguruj swój kod QR do płatności, aby znajomi mogli go zeskanować i oddać Ci pieniądze prosto z paragonu.',
       qr_prompt_cta: 'Dodaj kod QR do płatności',
       part_paid: 'Częściowo spłacone',
       section_owed: 'Nadal do oddania',
@@ -908,7 +908,7 @@ const pl = {
       paid_from: 'Zapłacono z',
       you_owe_tag: 'Jesteś winien',
       even_tag: 'Na zero',
-      owed_to_you: 'Winni tobie',
+      owed_to_you: 'Winni Tobie',
       hero_owed: 'Masz do odebrania',
       hero_even: 'Jesteście kwita',
       hero_settled: 'Wszystko rozliczone',
@@ -920,7 +920,7 @@ const pl = {
       you_paid_back: 'Oddałeś pieniądze: {{name}}',
       net_breakdown: '{{name}} jest winien {{owes}} · Ty jesteś winien {{owe}}',
       settle_up: 'Rozlicz',
-      person_pays_you: '{{name}} płaci tobie',
+      person_pays_you: '{{name}} płaci Tobie',
       you_pay_person: 'Ty płacisz: {{name}}',
       even_caption: 'Jesteście kwita, nic do zapłaty',
       you_paid_on: 'Zapłacono {{date}}',
@@ -966,17 +966,18 @@ const pl = {
     selection: {
       duplicate: 'Duplikuj',
       duplicate_title: 'Duplikuj na datę',
-      selected_count: '{{count}} zaznaczono',
+      selected_count: 'Zaznaczono: {{count}}',
       selected_total: 'Łącznie {{amount}}',
       update: 'Zaktualizuj',
-      update_title: 'Zaktualizuj {{count}} transakcji',
+      update_title: 'Zaktualizuj transakcje ({{count}})',
       update_subtitle: 'Zastosuj zmiany do wszystkich zaznaczonych transakcji.',
       enable: 'Włącz',
       enabled: 'Włączono',
       set_note: 'Ustaw notatkę',
       clear_note: 'Wyczyść notatki',
       delete_title: 'Usunąć zaznaczone transakcje?',
-      delete_message: 'Zostanie usuniętych {{count}} transakcji. Tej operacji nie można cofnąć.',
+      delete_message:
+        'Zostaną usunięte zaznaczone transakcje ({{count}}). Tej operacji nie można cofnąć.',
     },
     calculator: {
       set_hourly_for_time: 'Ustaw stawkę godzinową, by zobaczyć odpowiednik czasowy',
@@ -985,8 +986,8 @@ const pl = {
     quick_add: {
       expand: 'Otwórz szczegółowy edytor',
       time_sentence: '{{amount}} ≈ {{hours}} pracy',
-      placeholder_expense: 'Spróbuj "Uber 30", "Kawa 5", "Pizza 25".',
-      placeholder_income: 'Spróbuj "Pensja 3000", "Premia 500", "Zwrot 50".',
+      placeholder_expense: 'Spróbuj „Uber 30”, „Kawa 5”, „Pizza 25”.',
+      placeholder_income: 'Spróbuj „Pensja 3000”, „Premia 500”, „Zwrot 50”.',
     },
     editor: {
       details: {
@@ -1067,7 +1068,7 @@ const pl = {
       optional: 'Opcjonalne',
       yest_short: 'Wczoraj',
       subcategories: 'Podkategorie',
-      recurring_settings: 'Ustawienia cykliczne',
+      recurring_settings: 'Ustawienia cykliczności',
       rule_name: 'Nazwa reguły',
       rule_name_placeholder: 'Subskrypcja Netflix',
       repeat: 'Powtarzaj',
@@ -1087,9 +1088,9 @@ const pl = {
       active: 'Aktywny',
       paused: 'Wstrzymany',
       nudge: {
-        small: 'To około {{hours}} twojego czasu',
+        small: 'To około {{hours}} Twojego czasu',
         pause: 'Warto się zastanowić: ~{{hours}} pracy',
-        large: 'To {{hours}} twojego czasu pracy',
+        large: 'To {{hours}} Twojego czasu pracy',
       },
       error: {
         amount_zero: 'Kwota nie może wynosić zero.',
@@ -1136,7 +1137,7 @@ const pl = {
         sum_left: 'Pozostało {{diff}}',
         sum_mismatch: 'Nieprzypisano {{diff}}',
         sum_over: 'Za dużo o {{diff}}',
-        negative_self: 'Znajomi mają więcej niż łączna kwota',
+        negative_self: 'Znajomi są winni więcej niż łączna kwota',
         mark_paid: 'Oznacz jako zapłacone',
         paid_label: 'Zapłacono {{date}}',
         undo_paid: 'Cofnij',
@@ -1145,18 +1146,18 @@ const pl = {
         paid_by_locked: 'Cofnij płatności na tym rachunku, aby zmienić, kto zapłacił.',
         bill_total_label: 'Suma rachunku',
         payer_tag: 'Zapłacił(a)',
-        you_owe_summary: 'Jesteś winien {{name}} {{amount}}',
+        you_owe_summary: '{{name}}: jesteś winien {{amount}}',
         you_owe_nothing: 'Na tym rachunku nic nie jesteś winien',
-        get_back_hint: 'Wraca do ciebie {{amount}}',
+        get_back_hint: 'Wraca do Ciebie {{amount}}',
         paid_floor: 'Oddano już {{amount}}',
         your_share_label: 'Twoja część',
         paid_by_you: 'Zapłacone przez Ciebie',
-        section_subtitle_unpaid: '{{count}} nadal zalega',
-        section_subtitle_unpaid_plural: '{{count}} nadal zalega',
+        section_subtitle_unpaid: 'Nadal winni: {{count}}',
+        section_subtitle_unpaid_plural: 'Nadal winni: {{count}}',
         subtotal_label: 'Suma częściowa',
         itemized_total: 'Razem: {{sum}}',
         itemized_total_zero_hint: 'Wpisz co najmniej jedną kwotę',
-        adjustments_title: 'Podatek i obsługa',
+        adjustments_title: 'Podatek i serwis',
         discount_title: 'Rabat',
         percent_chip: '{{percent}}%',
         apply: 'Zastosuj',
@@ -1179,7 +1180,7 @@ const pl = {
       expense_trend: 'Wydatki',
       income_trend: 'Przychody',
       category_trend: 'Kategoria',
-      asset_history: 'Majątek',
+      asset_history: 'Aktywa',
     },
     trend_stats: {
       vs_average: '{{percent}}% vs śr.',
@@ -1202,7 +1203,7 @@ const pl = {
     insight_type: 'Typ analizy',
     groups: {
       breakdowns: {
-        title: 'Rozkłady',
+        title: 'Podziały',
       },
       activity: {
         title: 'Aktywność i nawyki',
@@ -1226,11 +1227,11 @@ const pl = {
     },
     review: 'Przegląd wydatków',
     review_description:
-      'Spójrz wstecz na zakończony tydzień, miesiąc lub rok: co wypłynęło, co zostało i jak to było.',
-    expense_breakdown: 'Rozkład wydatków',
+      'Spójrz wstecz na zakończony tydzień, miesiąc lub rok: co wydałeś, co zostało i jak się z tym czułeś.',
+    expense_breakdown: 'Podział wydatków',
     expense_breakdown_description:
       'Zobacz, na co idą wydatki według kategorii, z udziałem i szczegółami.',
-    income_breakdown: 'Rozkład przychodów',
+    income_breakdown: 'Podział przychodów',
     income_breakdown_description:
       'Zobacz, skąd pochodzą przychody według kategorii, z udziałem i szczegółami.',
     time_cost_leaderboard: 'Ranking kosztów czasu',
@@ -1249,19 +1250,19 @@ const pl = {
       'Wybierz kategorię i śledź, jak zmieniają się jej wydatki w czasie.',
     expense_sentiment: 'Nastrój przy wydatkach',
     expense_sentiment_description:
-      'Zobacz nastrój za wydatkami — radość, obojętność lub żal — dzień po dniu.',
-    asset_history: 'Trend majątku',
+      'Zobacz nastrój za wydatkami (radość, obojętność lub żal) dzień po dniu.',
+    asset_history: 'Trend aktywów',
     asset_history_description:
       'Śledź łączne aktywa przez cały rok i przeglądaj miesięczny trend salda.',
     income_rate_history: 'Historia stawki godzinowej',
     income_rate_history_description:
-      'Zobacz, jak zmieniała się twoja rzeczywista stawka godzinowa w całej historii transakcji.',
+      'Zobacz, jak zmieniała się Twoja rzeczywista stawka godzinowa w całej historii transakcji.',
     total_expense: 'Łączne wydatki',
     total_income: 'Łączne przychody',
     no_positive_slices: 'Brak dodatnich wydatków w tym okresie.',
     no_positive_income_slices: 'Brak dodatnich przychodów w tym okresie.',
     category_fallback: 'Kategoria',
-    drilldown_subtitle: 'Rozkład transakcji dla tego wyboru',
+    drilldown_subtitle: 'Podział transakcji dla tego wyboru',
     drilldown_subtitle_income: 'Wszystkie przychody w tej kategorii',
     time_cost: {
       summary_title: 'Największe pochłaniacze czasu',
@@ -1272,7 +1273,7 @@ const pl = {
       summary_hint: 'Udział oparty na łącznym koszcie czasu w tym okresie.',
       share_label: 'Udział',
       drilldown_subtitle: 'Wydatki w tej kategorii według kosztu czasu',
-      transaction_count: '{{count}} transakcji',
+      transaction_count: 'Transakcje: {{count}}',
       views: {
         category: 'Kategorie',
         transaction: 'Transakcje',
@@ -1295,10 +1296,10 @@ const pl = {
         peak_title_day: 'Szczytowy dzień',
         average_title: 'Średni miesiąc',
         average_title_day: 'Średnia dzienna',
-        active_months: '{{count}} aktywnych miesięcy',
-        active_days: '{{count}} aktywnych dni',
+        active_months: 'Aktywne miesiące: {{count}}',
+        active_days: 'Aktywne dni: {{count}}',
         top_category_title: 'Czołowa kategoria',
-        transactions: '{{count}} transakcji',
+        transactions: 'Transakcje: {{count}}',
         no_data_title: 'Brak trendu wydatków',
         no_data_message: 'Dodaj transakcje wydatków, by zobaczyć trend.',
       },
@@ -1309,10 +1310,10 @@ const pl = {
         peak_title_day: 'Szczytowy dzień',
         average_title: 'Średni miesiąc',
         average_title_day: 'Średnia dzienna',
-        active_months: '{{count}} aktywnych miesięcy',
-        active_days: '{{count}} aktywnych dni',
+        active_months: 'Aktywne miesiące: {{count}}',
+        active_days: 'Aktywne dni: {{count}}',
         top_category_title: 'Czołowa kategoria',
-        transactions: '{{count}} transakcji',
+        transactions: 'Transakcje: {{count}}',
         no_data_title: 'Brak trendu przychodów',
         no_data_message: 'Dodaj transakcje przychodów, by zobaczyć trend.',
       },
@@ -1322,7 +1323,7 @@ const pl = {
       },
       expense_sentiment: {
         count_one: '{{count}} wydatek',
-        count_other: '{{count}} wydatków',
+        count_other: 'Wydatki: {{count}}',
         no_data_title: 'Brak danych nastrojów',
         no_data_message: 'Dodaj transakcje wydatków z nastrojem, by zobaczyć wykres.',
       },
@@ -1339,8 +1340,8 @@ const pl = {
         no_income_title: 'Brak przychodów w tym okresie',
         no_income_short: 'Brak przychodu',
         of_income: 'z {{value}} przychodu',
-        saved_per_year: '{{value}} oszczędzono w tym roku',
-        exclusions_active: 'Wyłączono {{count}} kategorii z obliczeń.',
+        saved_per_year: '{{value}} zaoszczędzone w tym roku',
+        exclusions_active: 'Kategorie wyłączone z obliczeń: {{count}}.',
         goal_hint: '20%+ uważane jest za zdrowy poziom.',
       },
       income_rate_history: {
@@ -1385,7 +1386,7 @@ const pl = {
       none: 'Brak wykluczeń',
     },
     period: {
-      all_time: 'Cały czas',
+      all_time: 'Cały okres',
       week: 'Tydzień',
       month: 'Miesiąc',
       year: 'Rok',
@@ -1459,7 +1460,7 @@ const pl = {
       lp27_m_merchant: 'Zrób to samo dla Merchant: Select Variable, Transaction, a potem Merchant.',
       bt27_touch: 'Otwórz Ustawienia → Dostępność → Dotyk.',
       bt27_backtap: 'Przewiń w dół i stuknij Stuknięcie w tył.',
-      bt27_double: 'Stuknij Stuknij dwukrotnie (lub trzykrotnie).',
+      bt27_double: 'Wybierz Stuknij dwukrotnie (lub Stuknij trzykrotnie).',
       bt27_shortcuts: 'Stuknij Skróty.',
       step_counter: '%{current} z %{total}',
       log_payment_step_1: 'Otwórz Skróty, przejdź do karty Automation i dotknij New Automation.',
@@ -1479,8 +1480,8 @@ const pl = {
       new_transaction_step_1:
         'Dotknij przycisku poniżej, a następnie na kolejnym ekranie dotknij Add Shortcut, aby go zainstalować.',
       new_transaction_step_2:
-        'Otwórz Ustawienia → Dostępność → Dotyk → Back Tap, a następnie dotknij Double Tap (lub Triple Tap).',
-      new_transaction_step_3: 'Przewiń w dół do sekcji Shortcuts i wybierz New Transaction.',
+        'Otwórz Ustawienia → Dostępność → Dotyk → Stuknięcie w tył, a następnie wybierz Stuknij dwukrotnie (lub Stuknij trzykrotnie).',
+      new_transaction_step_3: 'Przewiń w dół do sekcji Skróty i wybierz New Transaction.',
       new_transaction_step_4:
         "Gotowe. Dwukrotnie stuknij w tył iPhone'a, aby od razu otworzyć nową transakcję.",
       log_screenshot_hint:
@@ -1488,8 +1489,8 @@ const pl = {
       log_screenshot_step_1:
         'Dotknij przycisku poniżej, a następnie na kolejnym ekranie dotknij Add Shortcut, aby go zainstalować.',
       log_screenshot_step_2:
-        'Otwórz Ustawienia → Dostępność → Dotyk → Back Tap, a następnie dotknij Double Tap (lub Triple Tap).',
-      log_screenshot_step_3: 'Przewiń w dół do sekcji Shortcuts i wybierz Log Screenshot.',
+        'Otwórz Ustawienia → Dostępność → Dotyk → Stuknięcie w tył, a następnie wybierz Stuknij dwukrotnie (lub Stuknij trzykrotnie).',
+      log_screenshot_step_3: 'Przewiń w dół do sekcji Skróty i wybierz Log Screenshot.',
       log_screenshot_step_4:
         "Na dowolnym ekranie płatności lub paragonu stuknij dwukrotnie w tył iPhone'a. Sam wykona zrzut ekranu.",
       log_screenshot_step_5:
@@ -1579,7 +1580,7 @@ const pl = {
     first_day_saturday: 'Sobota',
     first_day_of_month: 'Pierwszy dzień miesiąca',
     first_day_of_month_help:
-      'Określa, którego dnia zaczyna się każdy miesiąc, w statystykach, budżetach, wynagrodzeniach i kalendarzu. Domyślnie 1.',
+      'Określa, którego dnia zaczyna się każdy miesiąc, w analizach, budżetach, wynagrodzeniach i kalendarzu. Domyślnie 1.',
     month_cycle: {
       title: 'Cykl miesiąca',
       default_title: 'Domyślnie',
@@ -1601,7 +1602,7 @@ const pl = {
     time_display: 'Wyświetlanie czasu',
     working_hours_per_day: 'Godziny pracy dziennie',
     working_hours_per_day_help:
-      'Na przykład 24 godziny to {{days}} dni roboczych przy {{hours}}-godzinnym dniu pracy.',
+      'Na przykład 24 godziny to {{days}} dni pracy przy {{hours}} godzinach pracy dziennie.',
     working_hours_per_day_error: 'Wprowadź wartość od 1 do 24 godzin.',
     select_year_month: 'Wybierz miesiąc',
     select_year: 'Wybierz rok',
@@ -1668,11 +1669,11 @@ const pl = {
       default_account_section: 'Domyślne',
       default_account_label: 'Domyślne konto',
       default_account_subtitle:
-        'Używane przez wpis głosowy i tekstowy, gdy nie pasuje żaden z historii',
+        'Używane przez wpis głosowy i tekstowy, gdy nic z historii nie pasuje',
       default_currency_label: 'Domyślna waluta',
       default_currency_auto: 'Dopasuj do waluty konta',
       default_row: 'Domyślne',
-      no_default: 'Auto · przechodzi do Innych',
+      no_default: 'Auto · domyślnie Inne',
       unmapped: 'Nieprzypisane',
       custom_badge: 'Własne',
       bucket_labels: {
@@ -1708,7 +1709,7 @@ const pl = {
         error_message: 'Nie udało się przetworzyć wpisu głosowego. Spróbuj ponownie.',
         no_amount_title: 'Nie wykryto kwoty',
         no_amount_message:
-          'Usłyszałem "{{transcript}}", ale nie znalazłem kwoty. Spróbuj podać kwotę, np. "uber 30".',
+          'Usłyszałem „{{transcript}}”, ale nie znalazłem kwoty. Spróbuj podać kwotę, np. „uber 30”.',
         preview_note: 'Notatka',
         preview_amount: 'Kwota',
         preview_category: 'Kategoria',
@@ -1737,12 +1738,12 @@ const pl = {
     hourly_value: 'Stawka godzinowa',
     notifications: 'Powiadomienia',
     manage_formulas:
-      'Dodaj wpis tylko wtedy, gdy zmieni się twój przychód — nie musisz aktualizować co miesiąc.',
+      'Dodaj wpis tylko wtedy, gdy zmieni się Twój przychód. Nie musisz aktualizować co miesiąc.',
     accounts: 'Konta',
     categories: 'Kategorie',
     recurring: 'Transakcje cykliczne',
-    replay_onboarding: 'Powtórz onboarding',
-    replay_title: 'Powtórzyć onboarding?',
+    replay_onboarding: 'Powtórz wprowadzenie',
+    replay_title: 'Powtórzyć wprowadzenie?',
     replay_message:
       'Przewodnik konfiguracji pojawi się ponownie przy następnym uruchomieniu. Żadne dane nie zostaną usunięte.',
     replay_action: 'Powtórz',
@@ -1769,9 +1770,9 @@ const pl = {
     hourly_period_weekly: 'Tygodniowo',
     hourly_period_monthly: 'Miesięcznie',
     hourly_period_yearly: 'Rocznie',
-    hourly_suffix_hourly: '/godz',
-    hourly_suffix_weekly: '/tydz',
-    hourly_suffix_monthly: '/mies',
+    hourly_suffix_hourly: '/godz.',
+    hourly_suffix_weekly: '/tydz.',
+    hourly_suffix_monthly: '/mies.',
     hourly_suffix_yearly: '/rok',
     hourly_timeline: 'Oś czasu',
     hourly_delete_title: 'Usunąć miesięczną stawkę godzinową?',
@@ -1779,7 +1780,7 @@ const pl = {
       'Usunąć stawkę za {{month}}? Miesiące zależne od niej przejdą na poprzednią dostępną.',
     hourly_add_title: 'Dodaj stawkę przychodu',
     hourly_month_exists_title: '{{month}} już istnieje',
-    hourly_month_exists_message: 'Zastąpić jego stawkę dochodu tą?',
+    hourly_month_exists_message: 'Zastąpić jego stawkę przychodu tą nową?',
     hourly_replace: 'Zastąp',
     account_settings: 'Personalizacja',
     haptics: 'Wibracje',
@@ -1803,10 +1804,10 @@ const pl = {
     preview_title: 'Podgląd',
     expenses: 'Wydatki',
     income: 'Przychody',
-    import_action: 'Importuj %{count} transakcji',
+    import_action: 'Importuj transakcje (%{count})',
     importing: 'Importowanie...',
     import_success_title: 'Import ukończony',
-    import_success_message: 'Pomyślnie zaimportowano %{count} transakcji.',
+    import_success_message: 'Zaimportowano transakcje: %{count}.',
     import_error_title: 'Import nie powiódł się',
     import_error_empty_clipboard: 'Schowek jest pusty. Najpierw skopiuj JSON z odpowiedzi AI.',
     import_error_invalid_json:
@@ -1819,7 +1820,7 @@ const pl = {
     account_required: 'Wybierz konto przed importem.',
     account_mapping_required: 'Przypisz wszystkie konta z wyciągu przed importem.',
     selected: 'Wybrano',
-    how_to_video: 'Zobacz jak to działa',
+    how_to_video: 'Zobacz, jak to działa',
     currency_label: 'Waluta wyciągu',
     currency_hint: 'Kwoty są importowane dokładnie tak, jak widnieją na wyciągu.',
     currency_hint_converted:
@@ -1830,12 +1831,15 @@ const pl = {
       '- date: YYYY-MM-DD\n' +
       '- description: czysta nazwa sprzedawcy/odbiorcy (usuń kody, numery referencyjne, końcowe cyfry)\n' +
       '- amount: UJEMNA dla wydatków/obciążeń, DODATNIA dla przychodów/uznań\n' +
-      '- category: najlepsze dopasowanie z moich kategorii poniżej, używając formatu "Rodzic > Podkategoria" gdy pasuje podkategoria, samo imię rodzica w przeciwnym razie, "Other" jeśli nie wiadomo\n' +
+      '- category: najlepsze dopasowanie z moich kategorii poniżej, używając formatu "Kategoria nadrzędna > Podkategoria" gdy pasuje podkategoria, w przeciwnym razie sama nazwa kategorii nadrzędnej, "Other" jeśli nie wiadomo\n' +
       '- account: konkretna nazwa konta wydrukowana na wyciągu (np. "Chase Sapphire Reserve", "OCBC 365 Credit Card"), nie etykiety ogólne\n\n' +
-      'Pomiń tylko: wiersze salda, sumy wyciągów, ujawnienia, nagłówki/stopki.\n\n' +
-      '## Moje konta\n{{accounts}}\n\n' +
-      '## Moje kategorie wydatków\n{{expenses}}\n\n' +
-      '## Moje kategorie przychodów\n{{incomes}}\n\n' +
+      'Pomiń tylko: wiersze salda, sumy wyciągów, informacje prawne, nagłówki/stopki.\n\n' +
+      '## Moje konta\n' +
+      '{{accounts}}\n\n' +
+      '## Moje kategorie wydatków\n' +
+      '{{expenses}}\n\n' +
+      '## Moje kategorie przychodów\n' +
+      '{{incomes}}\n\n' +
       'Odpowiedz TYLKO blokiem json, bez żadnego innego tekstu:\n\n' +
       '```json\n' +
       '{\n' +
@@ -1850,13 +1854,13 @@ const pl = {
       '}\n' +
       '```\n\n' +
       '## Zasady\n' +
-      '- Podaj walutę wyciągu jako kod ISO 4217 (na przykład "MYR", "SGD", "USD"). Przepisz każdą kwotę dokładnie tak, jak jest wydrukowana, i NIGDY nie przeliczaj jej na inną walutę.\\n' +
+      '- Podaj walutę wyciągu jako kod ISO 4217 (na przykład "MYR", "SGD", "USD"). Przepisz każdą kwotę dokładnie tak, jak jest wydrukowana, i NIGDY nie przeliczaj jej na inną walutę.\n' +
       '- NIGDY nie wymyślaj ani nie halucynuj transakcji. Wypisuj tylko to, co jest w dokumencie.\n' +
       '- NIGDY nie pomijaj, nie skracaj ani nie opuszczaj transakcji. Przeczytaj każdą stronę każdego pliku od początku do końca. Wypisz każdy wiersz transakcji.\n' +
       '- Jeśli wgranych jest wiele plików, przetwórz każdy plik w całości, a następnie scal wszystkie transakcje w jedną tablicę "transactions".\n' +
       '- Jeśli wyciąg obejmuje przełom roku i pokazuje tylko miesiąc/dzień, wywnioskuj rok z okresu wyciągu.\n' +
       '- Nie zadawaj pytań, nie odmawiaj, nie proponuj podzielenia na wiele odpowiedzi.\n' +
-      '- Jeśli Twoja odpowiedź zostanie przerwana, zatrzymaj się w połowie JSON, a ja odpiszę "kontynuuj", żebyś mógł dokończyć. Nie przerywaj wcześniej, by uniknąć przerwania — po prostu kontynuuj.',
+      '- Jeśli Twoja odpowiedź zostanie przerwana, zatrzymaj się w połowie JSON, a ja odpiszę "kontynuuj", żebyś mógł dokończyć. Nie przerywaj wcześniej, by uniknąć przerwania, po prostu kontynuuj.',
   },
   data_management: {
     section_export: 'Eksport',
@@ -1920,14 +1924,14 @@ const pl = {
     import_money_manager_importing: 'Importowanie kopii zapasowej Money Manager',
     import_money_manager_confirm_title: 'Importować kopię zapasową Money Manager?',
     import_money_manager_confirm_message:
-      'Zastąpi to twoje bieżące konta, kategorie, transakcje i reguły cykliczne danymi z wybranej kopii .mmbak. Twoje ustawienia Money2Time i historia stawki godzinowej zostaną zachowane.',
+      'Zastąpi to Twoje bieżące konta, kategorie, transakcje i reguły cykliczne danymi z wybranej kopii .mmbak. Twoje ustawienia Money2Time i historia stawki godzinowej zostaną zachowane.',
     import_money_manager_confirm_action: 'Importuj kopię',
     import_money_manager_invalid_file_title: 'Nieprawidłowy plik',
     import_money_manager_invalid_file_message:
       'Wybierz plik kopii zapasowej Money Manager z rozszerzeniem .mmbak.',
     import_money_manager_success_title: 'Import Money Manager ukończony',
     import_money_manager_success_message:
-      'Zaimportowano {{accounts}} kont, {{categories}} kategorii i {{transactions}} transakcji.',
+      'Zaimportowano konta: {{accounts}}, kategorie: {{categories}} i transakcje: {{transactions}}.',
     reset_data_description:
       'Trwale usuń wszystkie konta, kategorie, transakcje i reguły cykliczne z tego urządzenia.',
   },
@@ -1982,7 +1986,7 @@ const pl = {
     convert_failed: 'Nie udało się rozłożyć tego wydatku na raty. Spróbuj ponownie.',
     already_due_one: 'Jeszcze {{count}} płatność jest już wymagalna. Zostanie dodana po zapisaniu.',
     already_due_other:
-      'Jeszcze {{count}} płatności jest już wymagalnych. Zostaną dodane po zapisaniu.',
+      'Kolejne płatności są już wymagalne ({{count}}). Zostaną dodane po zapisaniu.',
     pill_a11y: 'Rata {{label}}',
     new_plan: 'Nowy plan ratalny',
     due_this_month: 'Do zapłaty w tym miesiącu',
@@ -2034,8 +2038,8 @@ const pl = {
     same_flow: 'Ten sam przepływ co przy dodawaniu transakcji',
     save_rule: 'Zapisz regułę',
     every_days: 'Co {{count}} dni',
-    every_weeks: 'Co {{count}} tygodnie',
-    every_months: 'Co {{count}} miesiące',
+    every_weeks: 'Co {{count}} tyg.',
+    every_months: 'Co {{count}} mies.',
     every_years: 'Co {{count}} lata',
     paused: 'Wstrzymana',
     empty_title: 'Brak zobowiązań.',
@@ -2051,7 +2055,7 @@ const pl = {
     week_strip_label: 'Następne 7 dni',
     this_month: 'W tym miesiącu',
     paused_section: 'Wstrzymane',
-    settings_title: 'Ustawienia cyklicznych',
+    settings_title: 'Ustawienia płatności cyklicznych',
     highlight_label: 'Wyróżniaj wpisy cykliczne',
     highlight_hint:
       'Wpisy dodane przez reguły cykliczne mają w listach transakcji delikatne lawendowe tło, więc odróżnisz je od tych wpisanych ręcznie.',
@@ -2078,7 +2082,7 @@ const pl = {
     choose_title: 'Wybierz ikonę',
     clear: 'Usuń ikonę',
     pack_label: 'Pakiet ikon',
-    pack_pro_banner: 'Te ikony są częścią Pro. Ulepsz plan, aby ich użyć.',
+    pack_pro_banner: 'Te ikony są częścią Pro. Przejdź na Pro, aby ich użyć.',
     pack_default: 'Glina',
     pack_lowpoly: 'Low poly',
     pack_line: 'Linia',
@@ -2122,7 +2126,7 @@ const pl = {
     delete_confirm: 'Ta kategoria zostanie trwale usunięta. Tej operacji nie można cofnąć.',
     delete_title: 'Usunąć kategorię?',
     delete_has_transactions_body:
-      '{{count}} transakcji używa tej kategorii. Przenieś je do innej kategorii albo usuń ją i pozostaw bez kategorii.',
+      'Transakcje z tą kategorią: {{count}}. Przenieś je do innej kategorii albo usuń ją i pozostaw je bez kategorii.',
     delete_move_to_other: 'Przenieś do innej kategorii',
     delete_keep_delete: 'Usuń mimo to',
     move_confirm_title: 'Przenieść transakcje?',
@@ -2131,7 +2135,7 @@ const pl = {
     move_confirm_action: 'Przenieś i usuń',
     name: 'Nazwa',
     icon: 'Ikona',
-    parent_optional: 'Nadrzędna (opcjonalne)',
+    parent_optional: 'Nadrzędna (opcjonalnie)',
     no_subcategories: 'Brak podkategorii',
     expand: 'Rozwiń',
     collapse: 'Zwiń',
@@ -2152,7 +2156,7 @@ const pl = {
       clear: 'Usuń wygląd karty',
       apply: 'Użyj tego wzoru',
       filter_all: 'Wszystkie',
-      my_uploads: 'Moje przesłane',
+      my_uploads: 'Moje wzory',
       upload: 'Prześlij własny',
       upload_pro: 'Prześlij (Pro)',
       upload_label: 'Twój wzór {{number}}',
@@ -2164,7 +2168,7 @@ const pl = {
       template_label: 'Wzór karty: {{genre}} {{number}}',
       crop_title: 'Dopasuj wzór',
       crop_hint:
-        'Przeciągnij i uszczypnij, aby wykadrować. Zamknięta karta pokazuje pas między przerywanymi liniami; w stosie widać tylko górny pasek z nazwą.',
+        'Przeciągnij i zsuń lub rozsuń palce, aby wykadrować. Zamknięta karta pokazuje pas między przerywanymi liniami; w stosie widać tylko górny pasek z nazwą.',
       text_label: 'Kolor tekstu',
       text_light: 'Jasny tekst',
       text_dark: 'Ciemny tekst',
@@ -2196,7 +2200,7 @@ const pl = {
       tab_library: 'Biblioteka',
       tab_custom: 'Własne',
       upload: 'Prześlij',
-      upload_pro: 'Dodaj (Pro)',
+      upload_pro: 'Prześlij (Pro)',
       permission_title: 'Wymagany dostęp do zdjęć',
       permission_message: 'Zezwól na dostęp do biblioteki zdjęć, aby przesłać własne logo.',
       upload_failed: 'Nie można użyć tego obrazu. Spróbuj innego.',
@@ -2214,7 +2218,7 @@ const pl = {
       interest_rate_info_flat:
         'Roczna stała stawka, naliczana od całej pożyczonej kwoty przez cały okres. Wpisz ją, a wyliczymy ratę i sumę, albo wpisz sumę, a wyliczymy stawkę.',
       effective_rate_hint:
-        'Stopa efektywna {{rate}}%. Tyle naprawdę kosztuje ta stała stopa przy malejącym saldzie.',
+        'Stopa efektywna {{rate}}%. Tyle naprawdę kosztuje ta stała stawka przy malejącym saldzie.',
       rate_change_title: 'Od kiedy obowiązuje nowa stopa?',
       rate_change_message:
         'Stopa zmienia się z {{from}}% na {{to}}%. Zastosuj ją od dziś, aby zachować już naliczone odsetki, albo od początku, jeśli poprawiasz błąd.',
@@ -2229,7 +2233,7 @@ const pl = {
       total_repayable_label: 'Łączna kwota do spłaty',
       instalment_error_low: 'Za mała, aby spłacić kredyt w tym okresie.',
       instalment_error_high: 'Za duża dla tej kwoty kredytu i tego okresu.',
-      paid_periods_label: 'Rat już zapłaconych',
+      paid_periods_label: 'Zapłacone raty',
       paid_periods_info:
         'Zostaw 0 przy nowym kredycie. Jeśli już go spłacasz, podaj liczbę zapłaconych rat, a saldo początkowe zostanie wyliczone.',
       paid_periods_error: 'Musi być mniejsza niż okres kredytu.',
@@ -2243,7 +2247,7 @@ const pl = {
       collect_account_external: 'Ta spłata jest ustawiona w Cyklicznych. Edytuj ją tam.',
       count_as_expense_label: 'Licz ratę jako wydatek',
       count_as_expense_info:
-        'Spłata zawsze przenosi pieniądze na pożyczkę, więc zadłużenie i tak maleje. Gdy ta opcja jest włączona, spłata liczy się też jako wydatek w sumach, budżetach i wykresach, w wybranej przez Ciebie kategorii. Wyłącz ją, a spłaty pozostaną poza Twoimi wydatkami. Późniejsza zmiana dotyczy tylko spłat zapisanych od tego momentu.',
+        'Spłata zawsze przenosi pieniądze na kredyt, więc zadłużenie i tak maleje. Gdy ta opcja jest włączona, spłata liczy się też jako wydatek w sumach, budżetach i wykresach, w wybranej przez Ciebie kategorii. Wyłącz ją, a spłaty pozostaną poza Twoimi wydatkami. Późniejsza zmiana dotyczy tylko spłat zapisanych od tego momentu.',
       payment_category_label: 'Kategoria spłaty',
       payment_category_placeholder: 'Wybierz kategorię',
       instalment_label: 'Rata miesięczna',
@@ -2261,7 +2265,7 @@ const pl = {
       projection_payments_only_other: 'Zostało rat: {{count}}',
       no_projection: 'Dodaj ratę miesięczną, aby zobaczyć datę spłaty',
       instalment_info:
-        'Ile płacisz co miesiąc. Podąża za kwotą powyżej; włącz przełącznik, jeśli bank pobiera inną kwotę, a użyjemy dokładnie twojej.',
+        'Ile płacisz co miesiąc. Wynika z kwoty powyżej; włącz przełącznik, jeśli bank pobiera inną kwotę, a użyjemy dokładnie Twojej.',
       total_repayable_info:
         'Wszystko, co oddasz przez cały okres kredytu: pożyczona kwota plus całe odsetki.',
       balance_owed_info:
@@ -2325,7 +2329,7 @@ const pl = {
     statement_on: 'Wyciąg {{date}}',
     due_on: 'Płatność {{date}}',
     payable: 'Saldo do zapłaty',
-    outstanding: 'Saldo zaległe',
+    outstanding: 'Bieżące zadłużenie',
     pay_this_card: 'Opłać tę kartę',
     delete_account: 'Usuń konto',
     delete_account_confirm:
@@ -2403,14 +2407,14 @@ const pl = {
     limit_custom_item_images:
       'W planie darmowym możesz przesłać do {{count}} własnych obrazów przedmiotów. Przejdź na Pro, aby mieć ich bez limitu.',
     limit_custom_category_icons:
-      'Przesyłanie własnych ikon to funkcja Pro. Ulepsz plan, aby użyć dowolnego obrazu w kategoriach, celach i budżetach.',
+      'Przesyłanie własnych ikon to funkcja Pro. Przejdź na Pro, aby użyć dowolnego obrazu w kategoriach, celach i budżetach.',
     limit_app_icon:
       'Dodatkowe ikony aplikacji to funkcja Pro. Przejdź na Pro, aby nadać Money2Time nowy wygląd na ekranie głównym.',
     limit_custom_card_designs:
       'Własne wzory kart to funkcja Pro. Przejdź na Pro, aby umieścić dowolne zdjęcie lub grafikę na swoich kartach.',
-    limit_icon_packs: 'Dodatkowe pakiety ikon to funkcja Pro. Ulepsz plan, aby użyć wszystkich.',
+    limit_icon_packs: 'Dodatkowe pakiety ikon to funkcja Pro. Przejdź na Pro, aby użyć wszystkich.',
     limit_live_earnings_auto_start:
-      'Uruchamianie zegara według harmonogramu to funkcja Pro. Przejdź na Pro, a zmiana zacznie się sama. Ręczne uruchomienie zawsze jest darmowe.',
+      'Uruchamianie licznika według harmonogramu to funkcja Pro. Przejdź na Pro, a zmiana zacznie się sama. Ręczne uruchomienie zawsze jest darmowe.',
     limit_album_categories:
       'Zmiana kategorii udostępnionego albumu to funkcja Pro. Przejdź na Pro, aby zmieniać ich nazwy, dodawać je lub usuwać dla wszystkich w albumie.',
     limit_reimbursements:
@@ -2467,7 +2471,7 @@ const pl = {
     currencies_label: 'Waluty',
     albums_label: 'Albumy',
     limit_albums:
-      'W planie darmowym możesz utworzyć maksymalnie {{count}} albumów. Przejdź na Pro, aby mieć nieograniczoną liczbę.',
+      'W planie darmowym możesz utworzyć do {{count}} albumów. Przejdź na Pro, aby mieć nieograniczoną liczbę.',
     cloud_sync_label: 'Cloud Sync',
     shared_ledgers_label: 'Wspólne księgi',
     shared_ledgers_free: 'Dołącz',
@@ -2476,7 +2480,7 @@ const pl = {
     compare_title: 'Wszystko w Pro',
     compare_subtitle: 'Zobacz dokładnie, co odblokujesz po przejściu na wyższą wersję.',
     hero_title: 'Przejmij kontrolę nad swoimi pieniędzmi i swoim czasem',
-    social_rating_value: '4.9',
+    social_rating_value: '4,9',
     social_rating_label: 'Ocena w App Store',
     social_downloads_value: '60k+',
     social_downloads_label: 'Wybór użytkowników',
@@ -2539,7 +2543,7 @@ const pl = {
     limit_wage_entries:
       'W planie darmowym możesz mieć do {{count}} wpisów stawki godzinowej. Przejdź na Pro, by uzyskać nieograniczony dostęp.',
     limit_voice:
-      'Plan darmowy obejmuje {{count}} wpisów głosowych. Przejdź na Pro, by uzyskać nieograniczony wpis głosowy.',
+      'Plan darmowy obejmuje {{count}} wpisów głosowych. Przejdź na Pro, by korzystać z wpisów głosowych bez limitu.',
     limit_items:
       'W planie darmowym możesz śledzić do {{count}} przedmiotów. Przejdź na Pro, aby mieć ich bez limitu.',
     limit_budget_templates:
@@ -2636,20 +2640,20 @@ const pl = {
     row_label: 'Udostępnij i zyskaj',
     row_subtitle: 'Zdobądź Pro za darmo',
     title: 'Udostępnij i zdobądź Pro',
-    subtitle: 'Napisz o Money2Time, a my odblokujemy Ci Pro, za darmo.',
+    subtitle: 'Napisz o Money2Time, a my odblokujemy Ci Pro za darmo.',
     hero_title: 'Rozgłoś to, zdobądź Pro 🎁',
     hero_body:
       'Opublikuj post o aplikacji ze zrzutem ekranu. Im więcej polubień zdobędzie Twój post, tym większa nagroda.',
     rewards_title: 'Poziomy nagród',
     tier1_badge: '30+ polubień',
     tier1_reward: '1 miesiąc Pro',
-    tier1_desc: 'Zdobądź 30 polubień pod swoim postem na Instagram, 小红书, Facebook i innych.',
+    tier1_desc: 'Zdobądź 30 polubień pod swoim postem na Instagramie, 小红书, Facebooku i innych.',
     tier2_badge: '100+ polubień',
     tier2_reward: '1 rok Pro',
     tier2_desc: 'Twój post trafił do ludzi.',
     tier3_badge: '500+ polubień',
     tier3_reward: 'Pro na zawsze',
-    tier3_desc: 'Zrobiło się wiralowo. Pro jest Twoje na zawsze.',
+    tier3_desc: 'Twój post stał się viralem. Pro jest Twoje na zawsze.',
     how_title: 'Jak to działa',
     step1_body:
       'Po prostu opublikuj post o aplikacji na Instagramie, 小红书, Reddicie, Facebooku lub gdziekolwiek. Zrzut ekranu ulubionego widoku w zupełności wystarczy.',
@@ -2698,7 +2702,7 @@ const pl = {
     review: {
       fires_on: 'Przychodzi',
       fires_on_hint: 'Zależy od początku tygodnia i miesiąca w ustawieniach Wyświetlanie.',
-      every_week_on: 'W każdy {{day}}',
+      every_week_on: 'Co tydzień: {{day}}',
       every_month_on: '{{day}}. dnia każdego miesiąca',
       day_of_month_short: 'Dzień {{day}}',
       time: 'Godzina',
@@ -2730,15 +2734,15 @@ const pl = {
       daily_body: 'Poświęć 30 sekund, by zapisać dzisiejsze wydatki, póki są świeże.',
       recurring_title: '{{name}} · {{amount}}',
       recurring_body: 'Twoja transakcja cykliczna została zapisana automatycznie.',
-      recurring_body_with_hours: 'Zapisano automatycznie. To {{hours}} twojej pracy.',
+      recurring_body_with_hours: 'Zapisano automatycznie. To {{hours}} Twojej pracy.',
       live_earnings_title: 'Gotowy, by zacząć?',
-      live_earnings_body: 'Dotknij, aby uruchomić zegar zarobków na żywo.',
+      live_earnings_body: 'Dotknij, aby uruchomić licznik zarobków na żywo.',
       live_earnings_started_title: 'Zarobki na żywo uruchomione',
-      live_earnings_started_body: 'Twój zegar działa.',
+      live_earnings_started_body: 'Twój licznik działa.',
       weekly_review_title: 'Twój tydzień w skrócie',
-      weekly_review_body: 'Zobacz, gdzie w zeszłym tygodniu trafiły twoje pieniądze i czas.',
+      weekly_review_body: 'Zobacz, gdzie w zeszłym tygodniu trafiły Twoje pieniądze i czas.',
       monthly_review_title: 'Twój miesiąc w skrócie',
-      monthly_review_body: 'Zobacz, gdzie w zeszłym miesiącu trafiły twoje pieniądze i czas.',
+      monthly_review_body: 'Zobacz, gdzie w zeszłym miesiącu trafiły Twoje pieniądze i czas.',
     },
   },
   web_dashboard: {
@@ -2761,7 +2765,7 @@ const pl = {
     status_connecting: 'Łączenie…',
     status_open: 'Połączono',
     status_sending: 'Wysyłanie… {{percent}}%',
-    status_closed: 'Nie otwarto',
+    status_closed: 'Zamknięta',
     just_now: 'teraz',
     last_sent: 'Ostatnio wysłano {{date}}',
     edit_hint:
@@ -2796,7 +2800,7 @@ const pl = {
       closed:
         'Przeglądarka zamknęła się przed zakończeniem łączenia. Odśwież ją i zeskanuj ponownie.',
       too_many: 'Możesz połączyć maksymalnie {{max}} przeglądarek. Najpierw odłącz jedną.',
-      too_large: 'Twoje dane są zbyt duże, by wysłać je do Panelu WWW.',
+      too_large: 'Twoje dane są zbyt duże, by wysłać je do panelu webowego.',
       failed: 'Coś poszło nie tak. Spróbuj ponownie.',
     },
   },
@@ -2817,10 +2821,10 @@ const pl = {
     icloud_unavailable_message:
       'Zaloguj się do iCloud i włącz iCloud Drive w Ustawieniach iOS, a następnie spróbuj ponownie.',
     icloud_unavailable_short: 'Zaloguj się do iCloud',
-    google_drive_unconfigured_title: 'Google Drive nie skonfigurowany',
+    google_drive_unconfigured_title: 'Google Drive nieskonfigurowany',
     google_drive_unconfigured_message:
       'Ta wersja Money2Time nie ma skonfigurowanego klienta Google OAuth.',
-    google_drive_unconfigured_short: 'Nie skonfigurowane w tej wersji',
+    google_drive_unconfigured_short: 'Nieskonfigurowane w tej wersji',
     google_drive_sign_in_failed_title: 'Logowanie nie powiodło się',
     google_drive_sign_out_title: 'Wylogować się z Google Drive?',
     google_drive_sign_out_message:
@@ -2839,19 +2843,19 @@ const pl = {
       prefix: '{{target}}: {{reason}}',
       offline: 'Brak połączenia z internetem. Połącz się i spróbuj ponownie.',
       timeout: 'Przekroczono czas połączenia. Spróbuj w szybszej sieci.',
-      auth: 'Zaloguj się ponownie do Dysku Google, aby kontynuować tworzenie kopii.',
-      quota: 'Twój Dysk Google jest pełny. Zwolnij miejsce i spróbuj ponownie.',
-      rate_limited: 'Dysk Google jest teraz zajęty. Spróbuj za chwilę.',
-      server: 'Dysk Google jest chwilowo niedostępny. Spróbuj później.',
-      client: 'Dysk Google odrzucił kopię zapasową.',
+      auth: 'Zaloguj się ponownie do Google Drive, aby kontynuować tworzenie kopii.',
+      quota: 'Brak miejsca na Google Drive. Zwolnij miejsce i spróbuj ponownie.',
+      rate_limited: 'Google Drive jest teraz zajęty. Spróbuj za chwilę.',
+      server: 'Google Drive jest chwilowo niedostępny. Spróbuj później.',
+      client: 'Google Drive odrzucił kopię zapasową.',
       unknown: 'Coś poszło nie tak.',
     },
     last_backup: 'Ostatnia kopia {{relative}}',
     last_backup_never: 'Brak kopii',
     just_now: 'przed chwilą',
     minutes_ago: '{{count}} min temu',
-    hours_ago: '{{count}}g temu',
-    days_ago: '{{count}}d temu',
+    hours_ago: '{{count}} godz. temu',
+    days_ago: '{{count}} dn. temu',
     back_up_now: 'Utwórz kopię teraz',
     backing_up: 'Tworzenie kopii...',
     backup_partial_title: 'Kopia zakończona z błędami',
@@ -2869,12 +2873,12 @@ const pl = {
     restore_failed_title: 'Przywracanie nie powiodło się',
   },
   review_prompt: {
-    preprompt_title: 'Podoba ci się Money2Time?',
+    preprompt_title: 'Podoba Ci się Money2Time?',
     preprompt_subtitle: 'Twoja szczera opinia pomaga nam się doskonalić.',
-    preprompt_happy: 'Tak, lubię go',
+    preprompt_happy: 'Tak, podoba mi się',
     preprompt_unhappy: 'Niezbyt',
     preprompt_dismiss: 'Może później',
-    feedback_prompt: 'Przykro nam to słyszeć — masz ochotę podzielić się, co można poprawić?',
+    feedback_prompt: 'Przykro nam to słyszeć. Powiesz nam, co możemy poprawić?',
     feedback_open: 'Podziel się opinią',
     feedback_skip: 'Nie, dziękuję',
   },
@@ -2887,7 +2891,7 @@ const pl = {
   cloud_sync: {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
-    hero_title: 'Sync na wszystkich telefonach',
+    hero_title: 'Synchronizacja na wszystkich telefonach',
     hero_body:
       'Masz Pro na innym telefonie? Zaloguj się i włącz Cloud Sync, aby odblokować je także tutaj.',
     continue_apple: 'Kontynuuj z Apple',
@@ -2925,13 +2929,13 @@ const pl = {
     status_error: 'Błąd synchronizacji',
     sync_now: 'Synchronizuj teraz',
     sign_out: 'Wyloguj',
-    sign_out_confirm_title: 'Wylogować?',
+    sign_out_confirm_title: 'Wylogować się?',
     sign_out_confirm_body: 'Twoje dane zostają na tym telefonie.',
     delete_account: 'Usuń konto',
     delete_confirm_title: 'Usunąć konto?',
     delete_confirm_body: 'Usuwa kopię w chmurze i zdjęcia. Ten telefon zachowuje swoje dane.',
     delete_confirm_cta: 'Usuń',
-    not_pro_title: 'Sync wstrzymany',
+    not_pro_title: 'Synchronizacja wstrzymana',
     not_pro_body: 'Pro wygasło. Twoje dane są bezpieczne i znów się zsynchronizują po odnowieniu.',
     renew_pro: 'Odnów Pro',
     phone_limit_title: 'Pro jest na 5 innych telefonach',
@@ -3017,8 +3021,8 @@ const pl = {
       add: 'Dodaj lokalizację',
       clear: 'Wyczyść lokalizację',
       picker_title: 'Wybierz miejsce',
-      search_placeholder: 'Szukaj miast…',
-      search_hint: 'Wyszukaj miasto, aby umieścić tę podróż na mapie.',
+      search_placeholder: 'Szukaj miasta, regionu lub kraju…',
+      search_hint: 'Wyszukaj miasto, region lub kraj, aby umieścić tę podróż na mapie.',
       no_results: 'Nie znaleziono miejsc',
       empty_title: 'Brak miejsc',
       empty_message: 'Dodaj lokalizację do albumu, aby zobaczyć ją na globusie i mapie.',
@@ -3041,13 +3045,14 @@ const pl = {
     add_cover: 'Dodaj zdjęcie okładki',
     select_transactions: 'Dodaj transakcje',
     transactions_selected: 'Wybrano: {{count}}',
-    transaction_count: '{{count}} transakcji',
+    transaction_count: 'Transakcje: {{count}}',
     empty_title: 'Brak albumów',
     empty_message: 'Pogrupuj transakcje z podróży lub wydarzenia w album.',
     edit_transactions_title: 'Edytuj transakcje',
     add_transactions_title: 'Dodaj transakcje',
     remove_from_album: 'Usuń z albumu',
-    remove_selected_body: 'Usunąć {{count}} transakcji z tego albumu? Nie zostaną skasowane.',
+    remove_selected_body:
+      'Usunąć zaznaczone transakcje ({{count}}) z tego albumu? Nie zostaną skasowane.',
     tab_breakdown: 'Podział',
     breakdown_everyone: 'Wszyscy',
     breakdown_showing: 'Pokazuje',
@@ -3071,7 +3076,7 @@ const pl = {
       title: 'Osoby',
       split_with: 'Podziel z',
       me_tag: 'Ty',
-      joined: 'Dołączono',
+      joined: 'Dołączył(a)',
       left: 'Opuścił(a)',
       unnamed: 'Znajomy',
       name_taken: 'Ktoś tutaj ma już to imię.',
@@ -3102,8 +3107,8 @@ const pl = {
       section: 'Zarchiwizowane ({{count}})',
     },
     ended: {
-      label: 'Już nieudostępniany',
-      title: 'Już nieudostępniany',
+      label: 'Nie jest już udostępniany',
+      title: 'Nie jest już udostępniany',
       body: 'Opuszczono ten album, udostępnianie zostało zakończone lub wylogowano się. Album zostaje taki, jaki był, z Twoimi transakcjami, i nie jest już aktualizowany. Zaloguj się ponownie lub dołącz ponownie, aby go przywrócić.',
     },
     balances: {
@@ -3189,7 +3194,7 @@ const pl = {
       renamed_bill: '{{actor}}: zmieniono nazwę rachunku „{{before}}” na „{{after}}”',
       moved_bill: '{{actor}}: przeniesiono rachunek „{{title}}” na {{day}}',
       changed_bill: '{{actor}}: zmieniono rachunek „{{title}}”',
-      recategorized_bill: '{{actor}} przeniósł(a) {{title}} do kategorii {{category}}',
+      recategorized_bill: '{{actor}}: przeniesiono rachunek „{{title}}” do kategorii {{category}}',
       your_share: 'Twój udział {{money}}',
       your_share_change: 'Twój udział {{before}} → {{after}}',
       your_share_gone: 'Twojego udziału {{money}} już nie ma',
@@ -3204,10 +3209,10 @@ const pl = {
       simplify_on: '{{actor}}: włączono „Uprość długi grupy”',
       simplify_off: '{{actor}}: wyłączono „Uprość długi grupy”',
       cover: '{{actor}}: zmieniono okładkę',
-      category_added: '{{actor}} dodaje kategorię {{name}}',
-      category_removed: '{{actor}} usuwa kategorię {{name}}',
-      category_renamed: '{{actor}} zmienia nazwę kategorii {{before}} na {{after}}',
-      category_icon: '{{actor}} zmienia ikonę kategorii {{name}}',
+      category_added: '{{actor}}: dodano kategorię {{name}}',
+      category_removed: '{{actor}}: usunięto kategorię {{name}}',
+      category_renamed: '{{actor}}: zmieniono nazwę kategorii {{before}} na {{after}}',
+      category_icon: '{{actor}}: zmieniono ikonę kategorii {{name}}',
     },
   },
   assets: {
@@ -3221,7 +3226,7 @@ const pl = {
       month: 'Miesiąc',
       year: 'Rok',
     },
-    range: '{{start}} do {{end}}',
+    range: 'Od {{start}} do {{end}}',
     week_tick: 'T{{index}}',
     range_short: '{{start}} – {{end}}',
     in_progress: 'W toku, kończy się {{date}}',
@@ -3250,10 +3255,10 @@ const pl = {
     mood_happy: 'Było dobrze',
     mood_neutral: 'Ani tak, ani tak',
     mood_regret: 'Lepiej było odpuścić',
-    standouts: 'Wyróżniki',
+    standouts: 'Najważniejsze',
     biggest_expense: 'Największy wydatek',
     busiest_day: 'Najbardziej intensywny dzień',
-    entries_count: '{{count}} wpisów',
+    entries_count: 'Wpisy: {{count}}',
     quiet_days: 'Spokojne dni',
     of_total: '{{count}} z {{total}}',
     entries_logged: 'Zapisane wpisy',
@@ -3261,7 +3266,7 @@ const pl = {
   budget: {
     title: 'Budżet',
     templates_title: 'Szablony budżetu',
-    templates_subtitle: 'Wielokrotnego użytku plany tygodniowe, miesięczne i roczne',
+    templates_subtitle: 'Plany tygodniowe, miesięczne i roczne wielokrotnego użytku',
     template_default_badge: 'Domyślny',
     make_default: 'Ustaw jako domyślny',
     new_template: 'Nowy szablon',
@@ -3298,7 +3303,7 @@ const pl = {
     unbudgeted_section: 'Wydatki poza budżetem',
     albums_section: 'Albumy',
     left: 'Pozostało {{amount}}',
-    over: '{{amount}} ponad',
+    over: '{{amount}} ponad budżet',
     name_label: 'Nazwa',
     name_placeholder: 'np. Codzienne',
     period_week: 'Tygodniowy',
@@ -3333,13 +3338,13 @@ const pl = {
     back_populate_title_year: 'Uzupełnij poprzednie lata',
     back_populate_caption_week_one: 'Tworzy budżet na {{first}}. Tygodnie z budżetem są pomijane.',
     back_populate_caption_week_other:
-      'Tworzy budżety na {{count}} tyg.: pierwszy — {{first}}, ostatni — {{last}}. Tygodnie z budżetem są pomijane.',
+      'Tworzy budżety na {{count}} tyg.: od {{first}} do {{last}}. Tygodnie z budżetem są pomijane.',
     back_populate_caption_month_one: 'Tworzy budżet na {{first}}. Miesiące z budżetem są pomijane.',
     back_populate_caption_month_other:
-      'Tworzy budżety na {{count}} mies.: pierwszy — {{first}}, ostatni — {{last}}. Miesiące z budżetem są pomijane.',
+      'Tworzy budżety na {{count}} mies.: od {{first}} do {{last}}. Miesiące z budżetem są pomijane.',
     back_populate_caption_year_one: 'Tworzy budżet na rok {{first}}. Lata z budżetem są pomijane.',
     back_populate_caption_year_other:
-      'Tworzy budżety na lata {{first}}–{{last}} (łącznie: {{count}}). Lata z budżetem są pomijane.',
+      'Tworzy budżety na lata {{first}} - {{last}} (łącznie: {{count}}). Lata z budżetem są pomijane.',
     count_unbudgeted_title: 'Licz wydatki poza budżetem',
     count_unbudgeted_caption_week:
       'Uwzględniaj w sumie tygodnia wydatki z kategorii bez pozycji budżetu.',
@@ -3361,7 +3366,7 @@ const pl = {
     settled_title: 'Zwrócone',
     settings_title: 'Ustawienia zwrotów',
     empty_title: 'Nie ma czego odzyskiwać',
-    empty_message: 'Zaznacz "Zwrot oczekujący" przy wydatku, aby zobaczyć go tutaj.',
+    empty_message: 'Zaznacz „Zwrot oczekujący” przy wydatku, aby zobaczyć go tutaj.',
     mark_reimbursed: 'Odzyskaj',
     paid_into: 'Na {{account}}',
     undo_title: 'Cofnąć ten zwrot?',
@@ -3369,7 +3374,7 @@ const pl = {
     undo_action: 'Cofnij',
     refund_note_prefix: 'Zwrot',
     editor_label: 'Zwrot oczekujący',
-    editor_tooltip: 'Wydatek, który ktoś ci odda. Odzyskaj go na stronie Zwroty kosztów.',
+    editor_tooltip: 'Wydatek, który ktoś Ci odda. Odzyskaj go na stronie Zwroty kosztów.',
     editor_reimbursed_label: 'Już zwrócone',
     options_title: 'Opcje transakcji',
     untitled: 'Wydatek',
@@ -3377,7 +3382,7 @@ const pl = {
   },
   items: {
     title: 'Przedmioty',
-    subtitle: 'Zobacz, ile naprawdę kosztują twoje rzeczy dziennie',
+    subtitle: 'Zobacz, ile naprawdę kosztują Twoje rzeczy dziennie',
     add: 'Dodaj przedmiot',
     add_title: 'Nowy przedmiot',
     edit_title: 'Edytuj przedmiot',
@@ -3393,17 +3398,17 @@ const pl = {
     mark_inactive_hint:
       'Zatrzymuje liczenie dni dla rzeczy sprzedanych, zepsutych lub nieużywanych.',
     end_date_label: 'Data zakończenia',
-    sold_toggle: 'Sprzedałem to',
+    sold_toggle: 'Sprzedane',
     sale_price_label: 'Cena sprzedaży',
     note_label: 'Notatka',
     note_placeholder: 'Opcjonalnie',
     status_inactive: 'Nieaktywny',
     status_active: 'Aktywny',
-    days_count: '{{count}} dni',
+    days_count: 'Dni: {{count}}',
     summary_total_value: 'Wartość łączna',
     per_day: '/ dzień',
     delete_title: 'Usunąć przedmiot?',
-    delete_message: 'To usuwa przedmiot z twojego rejestru.',
+    delete_message: 'To usuwa przedmiot z Twojego rejestru.',
     summary_daily_cost: 'Koszt / dzień',
     summary_counts: 'Przedmioty',
     icon: {
@@ -3501,7 +3506,7 @@ const pl = {
   shared_ledgers: {
     member_fallback: 'Członek',
     belongs_to_title: 'Należy do',
-    belongs_to_you: '{{name}} (ty)',
+    belongs_to_you: '{{name}} (Ty)',
     belongs_to_added_by: 'Dodane przez: {{name}}',
     title: 'Udostępnianie',
     share_toggle: 'Udostępnij tę księgę',
@@ -3607,11 +3612,11 @@ const pl = {
     badge_ios: 'iPhone',
     category: {
       start: 'Zacznij tutaj',
-      logging: 'Zapisywanie wydatków',
+      logging: 'Zapisywanie transakcji',
       organize: 'Porządkowanie',
       plan: 'Planowanie',
       share: 'Dzielenie i rozliczanie',
-      insights: 'Zrozum to',
+      insights: 'Analizy',
       data: 'Twoje dane',
     },
   },
@@ -3648,7 +3653,7 @@ const pl = {
     ai_quota_info_title: 'Darmowe autosprawdzenia',
     ai_quota_info:
       'Każde automatycznie sprawdzone powiadomienie zużywa jedno. Darmowy plan obejmuje łącznie %{limit}. Pro nie ma limitu.',
-    ai_exhausted: 'Wykorzystano wszystkie %{limit} darmowe sprawdzenia',
+    ai_exhausted: 'Wykorzystano wszystkie %{limit} darmowych sprawdzeń',
     ai_upgrade: 'Przejdź na Pro',
     ai_consent_title: 'Włączyć autosprawdzanie?',
     ai_consent_body:
@@ -3799,14 +3804,14 @@ const pl = {
     map_title: 'Mapa wydatków',
     map_fit: 'Pokaż wszystkie miejsca',
     map_visits_one: '{{count}} wizyta',
-    map_visits_other: '{{count}} wizyt',
+    map_visits_other: 'Wizyty: {{count}}',
     map_all_time: 'Cały okres',
     map_empty_title: 'Brak miejsc',
     map_empty_period_title: 'Brak miejsc w tym okresie',
     map_empty_message: 'Dodaj lokalizację do wydatku, aby zobaczyć go tutaj.',
     map_disabled_message: 'Włącz Lokalizacje, aby dodawać miejsca do wydatków.',
     map_turn_on: 'Włącz Lokalizacje',
-    map_places_other: '{{count}} miejsc',
+    map_places_other: 'Miejsca: {{count}}',
     map_previous: 'Poprzedni',
     map_next: 'Następny',
     map_period_month: 'Miesiąc',

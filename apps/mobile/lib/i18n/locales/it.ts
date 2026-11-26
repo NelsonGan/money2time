@@ -1,20 +1,21 @@
 const it = {
   backup_restore: {
-    title: 'Restore backup',
-    export_description: 'Personal data and shared ledgers you own.',
-    import_description: 'Choose what to restore from a backup.',
-    personal: 'Personal ledgers',
-    personal_note: 'Replaces ledgers and settings on synced devices.',
-    personal_local_note: 'Replaces ledgers and settings.',
-    shared_ledgers: 'Shared ledgers',
-    owned: 'You own this ledger',
-    unavailable: 'Owner access required',
-    restore_action: 'Restore selected',
-    confirm_title: 'Restore for everyone?',
+    title: 'Ripristina backup',
+    export_description: 'Dati personali e registri condivisi di tua proprietà.',
+    import_description: 'Scegli cosa ripristinare da un backup.',
+    personal: 'Registri personali',
+    personal_note: 'Sostituisce registri e impostazioni sui dispositivi sincronizzati.',
+    personal_local_note: 'Sostituisce registri e impostazioni.',
+    shared_ledgers: 'Registri condivisi',
+    owned: 'Sei il proprietario di questo registro',
+    unavailable: "Serve l'accesso da proprietario",
+    restore_action: 'Ripristina selezionati',
+    confirm_title: 'Ripristinare per tutti?',
     confirm_message:
-      '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
-    sync_pending: 'Restored here. Stay signed in to finish syncing.',
-    failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+      '{{names}}\n\nVerranno sostituiti con il backup del {{date}}. Le modifiche successive andranno perse. Membri e inviti restano invariati.',
+    sync_pending: 'Ripristinato qui. Resta connesso per completare la sincronizzazione.',
+    failed:
+      "Impossibile ripristinare. Controlla la connessione, l'accesso da proprietario e lo spazio libero.",
     photos_unavailable:
       'Impossibile scaricare le foto di questo backup. Controlla la connessione e riprova.',
     photos_missing:
@@ -69,7 +70,7 @@ const it = {
     split_manual_title: 'Divisione manuale',
     split_manual_subtitle: 'Inserisci un conto e dividilo',
     split_scan_title: 'Scansiona e dividi',
-    split_scan_subtitle: 'Scansiona uno scontrino e dividi le voci',
+    split_scan_subtitle: 'Scatta e dividi le voci',
     voice_title: 'Inserimento vocale',
     voice_subtitle: 'Dillo, lo registriamo',
     voice_unavailable_title: 'Inserimento vocale non disponibile',
@@ -109,13 +110,13 @@ const it = {
     camera_permission_body:
       'Consenti l’accesso alla fotocamera per fotografare uno scontrino, oppure scegline uno dal tuo album.',
     camera_permission_grant: 'Consenti l’accesso alla fotocamera',
-    batch_scanning: 'Scansione delle ricevute',
+    batch_scanning: 'Scansione degli scontrini',
     batch_logged_one: '{{count}} spesa registrata',
     batch_logged_other: '{{count}} spese registrate',
     batch_none_logged: 'Nessuna spesa registrata',
-    batch_failed_one: 'Impossibile leggere {{count}} ricevuta',
-    batch_failed_other: 'Impossibile leggere {{count}} ricevute',
-    batch_hint: 'Tocca per vedere ogni ricevuta',
+    batch_failed_one: 'Impossibile leggere {{count}} scontrino',
+    batch_failed_other: 'Impossibile leggere {{count}} scontrini',
+    batch_hint: 'Tocca per vedere ogni scontrino',
   },
   app: {
     name: 'Money2Time',
@@ -275,8 +276,8 @@ const it = {
         body: 'Le notifiche della banca e del portafoglio digitale ora ti aspettano come bozze. Scegli Entrate, Uscite o Ignora, una alla volta o tutte insieme. Attivalo in Impostazioni > Automazione.',
       },
       fasterScans: {
-        title: 'Scansione ricevute più veloce del 50%',
-        body: 'Scansionare una ricevuta ora richiede circa la metà del tempo, con la stessa precisione. Scatta una foto e importo, articoli e categoria vengono compilati per te.',
+        title: 'Scansione scontrini più veloce del 50%',
+        body: 'Scansionare uno scontrino ora richiede circa la metà del tempo, con la stessa precisione. Scatta una foto e importo, articoli e categoria vengono compilati per te.',
       },
       cardDesigns: {
         title: 'Nuovi design della carta',
@@ -353,7 +354,7 @@ const it = {
       },
       appIcon: {
         title: 'La vecchia icona è tornata',
-        body: "Il portamonete che l'app portava prima torna nel selettore di icone, gratis per tutti. In Impostazioni, sotto Visualizzazione, accanto alle icone Pro.",
+        body: "Il portamonete che l'app portava prima torna nel selettore di icone, gratis per tutti. Lo trovi in Impostazioni, sotto Visualizzazione, accanto alle icone Pro.",
       },
       loanInterest: {
         title: 'Tasso fisso o saldo decrescente',
@@ -401,7 +402,7 @@ const it = {
     review_spending: {
       title: 'Resoconto spese',
       recap: {
-        title: 'Guarda indietro alla tua settimana',
+        title: 'Ripercorri la tua settimana',
         body: "Un resoconto di ogni settimana, mese e anno appena si chiude: quanto è uscito, come si confronta con la volta precedente, dov'è finito e come ti sei sentito. Attiva i promemoria in Impostazioni, sotto Notifiche, e ti avvisiamo quando ce n'è uno nuovo. Lo trovi nella scheda Analisi.",
       },
     },
@@ -409,7 +410,7 @@ const it = {
       title: 'Scegli lo stile delle icone',
       choose: {
         title: 'Argilla o piatto, decidi tu',
-        body: 'Le nuove icone in argilla non piacciono a tutti, quindi le vecchie icone piatte sono ancora qui. Passa dall’una all’altra quando vuoi in Impostazioni, sotto Schermo, e tutta l’app si adegua: schede, pulsanti e ogni riquadro delle impostazioni.',
+        body: 'Le nuove icone in argilla non piacciono a tutti, quindi le vecchie icone piatte sono ancora qui. Passa dall’una all’altra quando vuoi in Impostazioni, sotto Visualizzazione, e tutta l’app si adegua: schede, pulsanti e ogni riquadro delle impostazioni.',
       },
     },
     google_drive_backup: {
@@ -427,7 +428,7 @@ const it = {
       },
       month: {
         title: 'Fai iniziare il mese al giorno di paga',
-        body: 'Scegli il giorno in cui inizia il tuo mese, così budget, analisi, stipendi e calendario seguono il tuo ciclo di paga invece del 1. Lo trovi in Impostazioni, Visualizzazione.',
+        body: 'Scegli il giorno in cui inizia il tuo mese, così budget, analisi, stipendi e calendario seguono il tuo ciclo di paga invece del primo del mese. Lo trovi in Impostazioni, Visualizzazione.',
       },
       export: {
         title: 'Esporta tutto in Excel',
@@ -445,7 +446,7 @@ const it = {
       title: 'Dividi per voce',
       split: {
         title: 'Scansiona uno scontrino e dividilo voce per voce',
-        body: 'Fotografa il conto e assegna ogni riga a chi l’ha presa — condividi i piatti in porzioni, mentre tasse e servizio si dividono equamente da soli. Ognuno finisce in “Chi ti deve dei soldi” con un importo esatto.',
+        body: 'Fotografa il conto e assegna ogni riga a chi l’ha presa. Condividi i piatti in porzioni, mentre tasse e servizio si dividono equamente da soli. Ognuno finisce in Saldi con un importo esatto.',
       },
       selector: {
         title: 'Un modo più rapido per aggiungere',
@@ -501,7 +502,7 @@ const it = {
       title: 'Condividi e guadagna Pro',
       rewards: {
         title: 'Pubblica, Pro gratis',
-        body: 'Pubblica su Money2Time su Instagram, 小红书, Reddit o Facebook. Un post dà 1 mese di Pro, 100+ like un anno intero e 500+ like Pro a vita. Apri le Impostazioni per richiedere la ricompensa.',
+        body: 'Parla di Money2Time in un post su Instagram, 小红书, Reddit o Facebook. Un post dà 1 mese di Pro, 100+ like un anno intero e 500+ like Pro a vita. Apri le Impostazioni per richiedere la ricompensa.',
       },
     },
     cta: {
@@ -521,7 +522,7 @@ const it = {
       open_instalments: 'Vedi le rate',
       open_budget: 'Apri Budget',
       open_settle_up: 'Apri Saldi',
-      open_scan_receipt: 'Scansiona ricevute',
+      open_scan_receipt: 'Scansiona scontrini',
       open_albums: 'Apri Album',
       open_share_earn: 'Ottieni Pro gratis',
       open_quick_entry_settings: 'Apri le impostazioni di Inserimento rapido',
@@ -574,7 +575,7 @@ const it = {
       voice_logged: 'Registrato a voce',
       voice_example: 'taxi 30',
       album_trip: 'Viaggio a Tokyo',
-      album_trip_meta: '4 mar – 11 mar',
+      album_trip_meta: '4 mar - 11 mar',
       album_celebration: 'Compleanno della mamma',
       album_celebration_meta: '8 transazioni',
       month_starts_on_payday: 'Il tuo mese inizia il giorno di paga',
@@ -663,10 +664,10 @@ const it = {
       stop_failed: 'Non si è fermata. Riprova.',
       schedule_section: 'Programmazione',
       schedule_tooltip:
-        "Su iOS 17.2 e versioni successive Money2Time avvia l'orologio per te a quest'ora, anche con l'app chiusa. Sulle versioni precedenti invia invece una notifica e toccarla avvia l'orologio.",
+        "Su iOS 17.2 e versioni successive Money2Time avvia il conteggio per te a quest'ora, anche con l'app chiusa. Sulle versioni precedenti invia invece una notifica e toccarla avvia il conteggio.",
       schedule_title: 'Avvio automatico',
       schedule_body: 'Un tocco sul promemoria avvia il conteggio.',
-      schedule_body_auto: "L'orologio parte da solo in questi giorni.",
+      schedule_body_auto: 'Il conteggio parte da solo in questi giorni.',
       schedule_time: 'Ora',
       schedule_duration: 'Durata del turno',
       schedule_no_days: 'Scegli almeno un giorno.',
@@ -814,7 +815,7 @@ const it = {
       discard_message: 'Gli articoli e le assegnazioni andranno persi.',
       discard_confirm: 'Scarta',
       keep_editing: 'Continua a modificare',
-      low_confidence_banner: 'Alcune righe erano difficili da leggere — ricontrollale.',
+      low_confidence_banner: 'Alcune righe erano difficili da leggere. Ricontrollale.',
       items_empty_title: 'Ancora nessun articolo',
       items_empty_message:
         'Aggiungi ogni riga dello scontrino per dividerlo articolo per articolo.',
@@ -848,7 +849,7 @@ const it = {
       save_action: 'Salva divisione',
       paid_locked_title: 'Le quote saldate cambierebbero',
       paid_locked_message:
-        '{{names}} ha già pagato questo conto. Segna come non pagato prima di modificarne la quota.',
+        'Risulta già pagato da {{names}}. Segna come non pagato prima di modificare la quota.',
       settleup_cta: 'Dividi uno scontrino',
       itemized_receipt: 'Scontrino dettagliato',
       split_by_item: 'Dividi per articolo',
@@ -883,8 +884,8 @@ const it = {
       share_receipt: 'Invia ricevuta',
       receipt_qr_note: 'Scansiona il QR che ho allegato per rimborsarmi.',
       receipt_scan_short: 'Scansiona per pagare',
-      settings_title: 'Impostazioni di saldo conti',
-      settings_action: 'Impostazioni di saldo conti',
+      settings_title: 'Impostazioni Saldi',
+      settings_action: 'Impostazioni Saldi',
       qr_prompt_title: 'Aggiungere il tuo QR di pagamento?',
       qr_prompt_message:
         'Configura il tuo QR di pagamento così gli amici possono scansionarlo e rimborsarti direttamente dalla ricevuta.',
@@ -905,7 +906,7 @@ const it = {
       payment_left_of: 'Restano {{left}} di {{total}}',
       payment_too_much: 'Più dei {{owed}} ancora dovuti',
       payment_paid_to: 'Pagato su',
-      paid_from: 'Pagato da conto',
+      paid_from: 'Pagato dal conto',
       you_owe_tag: 'Devi',
       even_tag: 'Pari',
       owed_to_you: 'Ti devono',
@@ -923,7 +924,7 @@ const it = {
       person_pays_you: '{{name}} ti paga',
       you_pay_person: 'Paghi {{name}}',
       even_caption: 'Siete pari, niente da pagare',
-      you_paid_on: 'Pagato il {{date}}',
+      you_paid_on: 'Hai pagato il {{date}}',
       person_paid_on: '{{name}} ha pagato il {{date}}',
       undo_payment_title: 'Annullare questo pagamento?',
       undo_payment_message:
@@ -1247,7 +1248,7 @@ const it = {
     category_trend_description: "Scegli una categoria e osserva l'andamento della spesa nel tempo.",
     expense_sentiment: 'Umore delle spese',
     expense_sentiment_description:
-      "Vedi l'umore dietro le tue spese — felice, neutro o rimpianto — giorno per giorno.",
+      "Vedi l'umore dietro le tue spese: felice, neutro o pentito, giorno per giorno.",
     asset_history: 'Andamento patrimonio',
     asset_history_description:
       "Monitora il patrimonio totale nell'anno e il trend dei saldi mensili.",
@@ -1439,7 +1440,7 @@ const it = {
         'Se disattivato, il selettore Category mostra solo le categorie principali.',
       auto_categorize_label: 'Categorizza automaticamente per esercente',
       auto_categorize_hint:
-        'Sceglie una categoria dal nome del commerciante, così non ti viene chiesto al pagamento.',
+        "Sceglie una categoria dal nome dell'esercente, così non ti viene chiesto al pagamento.",
       auto_categorize_mapping_link: 'Modifica mappatura parole chiave',
       save_screenshot_label: 'Salva screenshot come ricevuta',
       save_screenshot_hint: 'Mantieni lo screenshot allegato alla transazione registrata.',
@@ -1447,7 +1448,7 @@ const it = {
       video_tutorial: 'Guarda il video',
       download_shortcut_button: 'Ottieni comando',
       download_automation_button: 'Ottieni automazione',
-      lp27_get: 'Più veloce: tocca il pulsante qui sotto, poi Set Up Shortcut.',
+      lp27_get: 'Il modo più rapido: tocca il pulsante qui sotto, poi Set Up Shortcut.',
       lp27_card: 'Tocca Any Card, scegli la carta da monitorare, poi tocca Add Shortcut.',
       lp27_finish:
         'Viene aggiunta disattivata. Aprila, tocca Edit, scegli l’Account in Log Card Payment e attiva Automation. Se non ha azioni, eliminala e creala tu con i passaggi successivi.',
@@ -1528,7 +1529,7 @@ const it = {
         'Invia una notifica di prova per verificare che tutto funzioni.',
       payment_alerts_android_step_7:
         'Apri Cronologia per controllare ogni notifica. Scegli Entrate, Uscite o Ignora, oppure usa i pulsanti “Tutto”.',
-      payment_alerts_ios_step_1: 'Apri Shortcuts, tocca +, poi Edit. Tocca Automation nell’editor.',
+      payment_alerts_ios_step_1: 'Apri Comandi, tocca +, poi Edit. Tocca Automation nell’editor.',
       payment_alerts_ios_step_2: 'Cerca Notification e selezionalo.',
       payment_alerts_ios_step_3: 'Cerca Log Notification e aggiungilo.',
       payment_alerts_ios_step_4: 'Tocca Message in Log Notification, poi Select Variable.',
@@ -1576,7 +1577,7 @@ const it = {
     first_day_saturday: 'Sabato',
     first_day_of_month: 'Primo giorno del mese',
     first_day_of_month_help:
-      'Imposta il giorno in cui inizia ogni mese, in statistiche, budget, stipendi e calendario. Il valore predefinito è 1.',
+      'Imposta il giorno in cui inizia ogni mese, in analisi, budget, stipendi e calendario. Il valore predefinito è 1.',
     month_cycle: {
       title: 'Ciclo del mese',
       default_title: 'Predefinito',
@@ -1693,7 +1694,7 @@ const it = {
       voice: {
         section_title: 'Input vocale',
         skip_confirmation_label: 'Salta conferma',
-        skip_confirmation_subtitle: 'Salva le voci vocali immediatamente senza anteprima',
+        skip_confirmation_subtitle: 'Salva subito gli inserimenti vocali senza anteprima',
         listening: 'In ascolto…',
         starting: 'Avvio…',
         release_hint: 'Rilascia per riconoscere',
@@ -1710,7 +1711,7 @@ const it = {
         preview_amount: 'Importo',
         preview_category: 'Categoria',
         preview_account: 'Conto',
-        preview_note_empty: 'Voce vocale',
+        preview_note_empty: 'Inserimento vocale',
         discard: 'Scarta',
         edit: 'Modifica',
         save: 'Salva',
@@ -1721,10 +1722,10 @@ const it = {
         sheet_label: 'Mostra le opzioni quando aggiungi',
         sheet_subtitle: 'Tocca + per scegliere Scansiona, Voce o Manuale',
         tap_label: 'Al tocco',
-        hold_label: 'Alla pressione',
+        hold_label: 'Tenendo premuto',
         action_quick: 'Inserimento rapido',
         action_full: 'Inserimento completo',
-        action_scan: 'Scansiona ricevuta',
+        action_scan: 'Scansiona scontrino',
         action_voice: 'Inserimento vocale',
         action_split: 'Divisione manuale',
         action_splitScan: 'Scansiona e dividi',
@@ -1734,7 +1735,7 @@ const it = {
     hourly_value: 'Valore orario',
     notifications: 'Notifiche',
     manage_formulas:
-      'Aggiungi una voce solo quando il reddito cambia — non è necessario aggiornare ogni mese.',
+      'Aggiungi una voce solo quando il reddito cambia. Non serve aggiornarla ogni mese.',
     accounts: 'Conti',
     categories: 'Categorie',
     recurring: 'Transazioni ricorrenti',
@@ -1778,7 +1779,7 @@ const it = {
     hourly_month_exists_message: 'Sostituire la sua tariffa di reddito con questa?',
     hourly_replace: 'Sostituisci',
     account_settings: 'Personalizzazione',
-    haptics: 'Aptico',
+    haptics: 'Feedback aptico',
     haptics_subtitle: "Attiva o disattiva il feedback tattile nell'app.",
     data_management: 'Gestione dati',
     web_dashboard: 'Dashboard web',
@@ -1789,7 +1790,7 @@ const it = {
     step1_title: 'Copia prompt',
     copy_prompt: 'Copia prompt',
     step1_instructions:
-      'Incolla il prompt e allega il/i tuo/i estratto/i bancario/i. Puoi allegarne più di uno alla volta.',
+      'Incolla il prompt e allega uno o più estratti conto. Puoi allegarne più di uno alla volta.',
     step1_recommended:
       'Per allegati grandi o multipli, attiva la modalità di ragionamento/pensiero per risultati migliori.',
     open_in: 'Apri in',
@@ -1822,17 +1823,20 @@ const it = {
     currency_hint_converted:
       'Gli importi vengono salvati in %{statement} e convertiti in %{reporting} al tasso della data di ciascuna transazione.',
     prompt_template:
-      'Analizza il/i estratto/i bancario/i caricato/i e convertilo/i in JSON. Potrebbero essere allegati uno o più file.\n\n' +
+      'Converti in JSON gli estratti conto bancari caricati. Potrebbero essere allegati uno o più file.\n\n' +
       'Per ogni riga di transazione trovata:\n' +
       '- date: YYYY-MM-DD\n' +
-      '- description: nome pulito del commerciante/beneficiario (rimuovi codici, numeri di riferimento, cifre finali)\n' +
+      "- description: nome pulito dell'esercente/beneficiario (rimuovi codici, numeri di riferimento, cifre finali)\n" +
       '- amount: NEGATIVO per uscite/addebiti, POSITIVO per entrate/accrediti\n' +
-      '- category: la corrispondenza migliore dalle mie categorie in basso usando "Genitore > Sottocategoria" quando una sottocategoria è adatta, solo il nome genitore altrimenti, "Other" se incerto\n' +
+      '- category: la corrispondenza migliore dalle mie categorie in basso usando "Categoria > Sottocategoria" quando una sottocategoria è adatta, altrimenti solo il nome della categoria principale, "Other" se incerto\n' +
       '- account: nome specifico del conto come stampato sull\'estratto (es. "Chase Sapphire Reserve", "OCBC 365 Credit Card"), non etichette generiche\n\n' +
       'Salta solo: righe di saldo, totali estratto, informative, intestazioni/piè di pagina.\n\n' +
-      '## I miei conti\n{{accounts}}\n\n' +
-      '## Le mie categorie uscite\n{{expenses}}\n\n' +
-      '## Le mie categorie entrate\n{{incomes}}\n\n' +
+      '## I miei conti\n' +
+      '{{accounts}}\n\n' +
+      '## Le mie categorie uscite\n' +
+      '{{expenses}}\n\n' +
+      '## Le mie categorie entrate\n' +
+      '{{incomes}}\n\n' +
       'Rispondi SOLO con un blocco di codice json, nessun altro testo:\n\n' +
       '```json\n' +
       '{\n' +
@@ -1847,13 +1851,13 @@ const it = {
       '}\n' +
       '```\n\n' +
       '## Regole\n' +
-      '- Indica la valuta dell\'estratto conto come codice ISO 4217 (ad esempio "MYR", "SGD", "USD"). Copia ogni importo esattamente come è stampato e non convertirlo MAI in un\'altra valuta.\\n' +
+      '- Indica la valuta dell\'estratto conto come codice ISO 4217 (ad esempio "MYR", "SGD", "USD"). Copia ogni importo esattamente come è stampato e non convertirlo MAI in un\'altra valuta.\n' +
       '- NON inventare o allucinare transazioni. Restituisci solo ciò che è nel documento.\n' +
       "- NON saltare, troncare o omettere transazioni. Leggi ogni pagina di ogni file dall'inizio alla fine. Restituisci ogni singola riga di transazione.\n" +
       '- Se sono caricati più file, elabora completamente ogni file poi unisci tutte le transazioni nell\'unico array "transactions".\n' +
       "- Se l'estratto copre un cambio d'anno e mostra solo mese/giorno, deduci l'anno dal periodo dell'estratto.\n" +
       '- Non fare domande, non rifiutare, non offrire di suddividere in più risposte.\n' +
-      "- Se l'output viene interrotto, fermati a metà JSON e risponderò 'continue' per farti finire. Non fermarti prima per evitare interruzioni — continua.",
+      "- Se l'output viene interrotto, fermati a metà JSON e risponderò 'continue' per farti finire. Non fermarti prima per evitare interruzioni: continua e basta.",
   },
   data_management: {
     section_export: 'Esporta',
@@ -2204,13 +2208,13 @@ const it = {
       interest_model_reducing: 'Saldo decrescente',
       interest_model_flat: 'Tasso fisso',
       interest_model_info:
-        'Saldo decrescente: gli interessi si calcolano ogni mese su quanto devi ancora, quindi pagare di più o in anticipo riduce gli interessi. Funzionano così quasi tutti i mutui. Tasso fisso: gli interessi si calcolano una volta sull intero importo prestato e si aggiungono subito, quindi pagare in anticipo estingue prima il debito ma non fa risparmiare interessi. Funzionano così quasi tutti i prestiti auto e personali.',
+        "Saldo decrescente: gli interessi si calcolano ogni mese su quanto devi ancora, quindi pagare di più o in anticipo riduce gli interessi. Funzionano così quasi tutti i mutui. Tasso fisso: gli interessi si calcolano una volta sull'intero importo prestato e si aggiungono subito, quindi pagare in anticipo estingue prima il debito ma non fa risparmiare interessi. Funzionano così quasi tutti i prestiti auto e personali.",
       interest_rate_info_reducing:
         'Il tasso annuo che la banca applica al debito residuo. Inseriscilo e calcoliamo la rata e il totale, oppure inserisci il totale e calcoliamo il tasso.',
       interest_rate_info_flat:
-        'Il tasso fisso annuo, applicato all intero importo prestato per tutta la durata. Inseriscilo e calcoliamo la rata e il totale, oppure inserisci il totale e calcoliamo il tasso.',
+        "Il tasso fisso annuo, applicato all'intero importo prestato per tutta la durata. Inseriscilo e calcoliamo la rata e il totale, oppure inserisci il totale e calcoliamo il tasso.",
       effective_rate_hint:
-        'Tasso effettivo {{rate}}%. È quanto costa questo tasso flat su saldo decrescente.',
+        'Tasso effettivo {{rate}}%. È quanto costa questo tasso fisso su saldo decrescente.',
       rate_change_title: 'Da quando si applica il nuovo tasso?',
       rate_change_message:
         "Il tasso passa da {{from}}% a {{to}}%. Applicalo da oggi per mantenere gli interessi già addebitati, o dall'inizio se stai correggendo un errore.",
@@ -2330,7 +2334,7 @@ const it = {
     type_debit: 'Debito',
     type_loan: 'Prestito',
     title: 'Conti',
-    assets: 'Attività',
+    assets: 'Patrimonio',
     debt: 'Debiti',
     net_assets: 'Patrimonio netto',
     view_transactions: 'Vedi transazioni',
@@ -2383,7 +2387,7 @@ const it = {
       'Il piano gratuito include {{count}} scansioni di scontrini al mese. Passa a Pro per scansioni illimitate.',
     limit_autolog:
       'Hai usato tutte le {{count}} automazioni Apple Pay gratuite, quindi gli ultimi pagamenti non sono stati registrati. Passa a Pro per usarle senza limiti.',
-    custom_logos_label: 'Logo conto personalizzati',
+    custom_logos_label: 'Loghi dei conti personalizzati',
     items_label: 'Oggetti',
     budget_templates_label: 'Modelli di budget',
     goals_label: 'Obiettivi di risparmio',
@@ -2391,9 +2395,9 @@ const it = {
     split_bills_label: 'Conti divisi da saldare',
     custom_item_images_label: 'Immagini oggetti personalizzate',
     icon_packs_label: 'Pacchetti icone e icone personalizzate',
-    custom_subscription_logos_label: 'Loghi abbonamento personali',
+    custom_subscription_logos_label: 'Loghi personalizzati degli abbonamenti',
     limit_custom_logos:
-      'Puoi caricare fino a {{count}} logo personalizzati nel piano gratuito. Passa a Pro per illimitati.',
+      'Puoi caricare fino a {{count}} loghi personalizzati nel piano gratuito. Passa a Pro per averne illimitati.',
     limit_custom_subscription_logos:
       'Caricare il tuo logo di abbonamento è una funzione Pro. Passa a Pro per usare qualsiasi immagine su un pagamento ricorrente.',
     limit_custom_item_images:
@@ -2407,7 +2411,7 @@ const it = {
     limit_icon_packs:
       'I pacchetti icone extra sono una funzione Pro. Passa a Pro per usarli tutti.',
     limit_live_earnings_auto_start:
-      "Avviare l'orologio in base a una programmazione è una funzione Pro. Passa a Pro e il tuo turno inizia da solo. Avviarlo a mano resta sempre gratuito.",
+      'Avviare il conteggio in base a una programmazione è una funzione Pro. Passa a Pro e il tuo turno inizia da solo. Avviarlo a mano resta sempre gratuito.',
     limit_album_categories:
       "Modificare le categorie di un album condiviso è una funzione Pro. Passa a Pro per rinominarle, aggiungerle o rimuoverle per tutti nell'album.",
     limit_reimbursements:
@@ -2459,7 +2463,7 @@ const it = {
     notification_ai_label: 'Revisione automatica notifiche',
     apple_pay_automation_label: 'Automazione Apple Pay',
     screenshot_automation_label: 'Automazione screenshot',
-    live_earnings_auto_start_label: 'Avvio automatico dei guadagni in tempo reale',
+    live_earnings_auto_start_label: 'Avvio automatico dei guadagni in diretta',
     widgets_label: 'Widget della schermata Home',
     currencies_label: 'Valute',
     albums_label: 'Album',
@@ -2496,7 +2500,7 @@ const it = {
     trial_free: '{{duration}} gratis',
     trial_cta: 'Inizia la prova gratuita',
     subscribe: 'Abbonati',
-    buy_lifetime: 'Acquista Lifetime',
+    buy_lifetime: 'Acquista Pro a vita',
     maybe_later: 'Magari più tardi',
     trial_terms: 'Gratis per {{duration}}, poi {{price}}.',
     plans_heading: 'Scegli il tuo piano',
@@ -2513,19 +2517,19 @@ const it = {
     member_since: 'Membro dal',
     expires_on: 'Accesso fino al',
     lifetime_access: 'Hai accesso a vita a tutte le funzionalità Pro.',
-    cancel_subscription: 'Cancella abbonamento',
-    lifetime_sub_warning_title: 'Ti viene addebitato due volte',
+    cancel_subscription: 'Annulla abbonamento',
+    lifetime_sub_warning_title: 'Stai pagando due volte',
     lifetime_sub_warning_body:
-      'Hai Pro a vita, ma un abbonamento è ancora attivo. Annullalo per non essere più addebitato.',
-    upgrade_to_lifetime: 'Passa a A vita',
+      'Hai Pro a vita, ma un abbonamento è ancora attivo. Annullalo per non ricevere altri addebiti.',
+    upgrade_to_lifetime: 'Passa a Pro a vita',
     lifetime_upsell_subtitle: "Un pagamento, tuo per sempre. Nessun rinnovo dell'abbonamento.",
-    switch_to_lifetime: 'Passa a A vita',
+    switch_to_lifetime: 'Passa a Pro a vita',
     lifetime_purchased_title: 'Ora hai Pro a vita',
     lifetime_purchased_body:
-      'Il tuo abbonamento non è più necessario. Annullalo per non essere più addebitato.',
+      'Il tuo abbonamento non è più necessario. Annullalo per non ricevere altri addebiti.',
     not_now: 'Non ora',
     cancel_subscription_note:
-      "Per cancellare l'abbonamento, verrai reindirizzato alle impostazioni abbonamento del dispositivo.",
+      "Per annullare l'abbonamento, verrai reindirizzato alle impostazioni abbonamento del dispositivo.",
     limit_reached_title: 'Limite piano gratuito raggiunto',
     limit_accounts:
       'Puoi avere fino a {{count}} conti nel piano gratuito. Passa a Pro per averne illimitati.',
@@ -2536,7 +2540,7 @@ const it = {
     limit_wage_entries:
       'Puoi avere fino a {{count}} voci tariffa oraria nel piano gratuito. Passa a Pro per averne illimitate.',
     limit_voice:
-      'Il piano gratuito include {{count}} voci vocali. Passa a Pro per input vocale illimitato.',
+      'Il piano gratuito include {{count}} inserimenti vocali. Passa a Pro per input vocale illimitato.',
     limit_items:
       'Con il piano gratuito puoi tracciare fino a {{count}} oggetti. Passa a Pro per averne illimitati.',
     limit_budget_templates:
@@ -2633,7 +2637,7 @@ const it = {
     row_label: 'Condividi e guadagna',
     row_subtitle: 'Ottieni Pro gratis',
     title: 'Condividi e guadagna Pro',
-    subtitle: 'Pubblica su Money2Time e ti sblocchiamo Pro, gratis.',
+    subtitle: 'Pubblica un post su Money2Time e ti sblocchiamo Pro, gratis.',
     hero_title: 'Spargi la voce, guadagna Pro 🎁',
     hero_body:
       "Pubblica un post sull'app con uno screenshot. Più il tuo post piace, più grande sarà la ricompensa.",
@@ -2731,9 +2735,9 @@ const it = {
       recurring_body: 'La tua transazione ricorrente è stata registrata automaticamente.',
       recurring_body_with_hours: 'Registrata automaticamente. Equivale a {{hours}} del tuo lavoro.',
       live_earnings_title: 'Pronto a timbrare?',
-      live_earnings_body: 'Tocca per avviare il tuo contatore di guadagni in tempo reale.',
-      live_earnings_started_title: 'Guadagni in tempo reale avviati',
-      live_earnings_started_body: 'Il tuo orologio è in funzione.',
+      live_earnings_body: 'Tocca per avviare il conteggio dei guadagni in diretta.',
+      live_earnings_started_title: 'Guadagni in diretta avviati',
+      live_earnings_started_body: 'Il conteggio è partito.',
       weekly_review_title: 'La tua settimana in sintesi',
       weekly_review_body:
         'Scopri dove sono andati i tuoi soldi e il tuo tempo la settimana scorsa.',
@@ -2773,7 +2777,7 @@ const it = {
     edits_off:
       'Questo browser può solo vedere i tuoi dati. Consenti le modifiche per aggiungere, modificare ed eliminare movimenti da qui finché questa schermata è aperta.',
     edits_allow: 'Consenti modifiche',
-    edits_disallow: 'Sola lettura',
+    edits_disallow: 'Imposta sola lettura',
     read_only: 'Sola lettura',
     edit_hint_some_read_only:
       'Finché questa schermata è aperta, i browser che consenti possono anche aggiungere, modificare ed eliminare movimenti. Tocca ⋯ accanto a un browser per consentirlo. Le modifiche vengono salvate su questo telefono.',
@@ -2876,7 +2880,7 @@ const it = {
     preprompt_happy: 'Sì, mi piace',
     preprompt_unhappy: 'Non molto',
     preprompt_dismiss: 'Forse dopo',
-    feedback_prompt: 'Ci dispiace — vuoi dirci cosa potremmo migliorare?',
+    feedback_prompt: 'Ci dispiace. Vuoi dirci cosa potremmo migliorare?',
     feedback_open: 'Invia feedback',
     feedback_skip: 'No grazie',
   },
@@ -2889,7 +2893,7 @@ const it = {
   cloud_sync: {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
-    hero_title: 'Sync su tutti i telefoni',
+    hero_title: 'Sincronizza tutti i telefoni',
     hero_body: 'Hai Pro su un altro telefono? Accedi e attiva Cloud Sync per sbloccarlo anche qui.',
     continue_apple: 'Continua con Apple',
     continue_google: 'Continua con Google',
@@ -2932,7 +2936,7 @@ const it = {
     delete_confirm_title: "Eliminare l'account?",
     delete_confirm_body: 'Cancella la copia cloud e le foto. Questo telefono mantiene i suoi dati.',
     delete_confirm_cta: 'Elimina',
-    not_pro_title: 'Sync in pausa',
+    not_pro_title: 'Sincronizzazione in pausa',
     not_pro_body:
       'Pro è scaduto. I tuoi dati sono al sicuro e si sincronizzano di nuovo quando rinnovi.',
     renew_pro: 'Rinnova Pro',
@@ -3019,8 +3023,8 @@ const it = {
       add: 'Aggiungi luogo',
       clear: 'Rimuovi luogo',
       picker_title: 'Scegli un luogo',
-      search_placeholder: 'Cerca città…',
-      search_hint: 'Cerca una città per posizionare questo viaggio sulla mappa.',
+      search_placeholder: 'Cerca città, regione o paese…',
+      search_hint: 'Cerca per città, regione o paese per posizionare questo viaggio sulla mappa.',
       no_results: 'Nessun luogo trovato',
       empty_title: 'Ancora nessun luogo',
       empty_message: 'Aggiungi un luogo a un album per vederlo sul globo e sulla mappa.',
@@ -3191,7 +3195,7 @@ const it = {
       renamed_bill: '{{actor}}: conto «{{before}}» rinominato «{{after}}»',
       moved_bill: '{{actor}}: conto «{{title}}» spostato al {{day}}',
       changed_bill: '{{actor}}: conto «{{title}}» modificato',
-      recategorized_bill: '{{actor}} ha spostato {{title}} in {{category}}',
+      recategorized_bill: '{{actor}}: conto «{{title}}» spostato in {{category}}',
       your_share: 'La tua quota {{money}}',
       your_share_change: 'La tua quota {{before}} → {{after}}',
       your_share_gone: "La tua quota di {{money}} non c'è più",
@@ -3369,14 +3373,14 @@ const it = {
     settings_title: 'Impostazioni rimborsi',
     empty_title: 'Niente da farsi restituire',
     empty_message: 'Spunta "Rimborso in attesa" su una spesa per vederla qui.',
-    mark_reimbursed: 'Richiedi',
+    mark_reimbursed: 'Incassa',
     paid_into: 'Su {{account}}',
     undo_title: 'Annullare questo rimborso?',
     undo_message: 'La voce di entrata viene rimossa.',
     undo_action: 'Annulla',
     refund_note_prefix: 'Rimborsato',
     editor_label: 'Rimborso in attesa',
-    editor_tooltip: 'Una spesa che qualcuno ti restituirà. Richiedila nella pagina Rimborsi.',
+    editor_tooltip: 'Una spesa che qualcuno ti restituirà. Incassala nella pagina Rimborsi.',
     editor_reimbursed_label: 'Già rimborsata',
     options_title: 'Opzioni della transazione',
     untitled: 'Spesa',
@@ -3636,7 +3640,7 @@ const it = {
     review_banner_single: '1 notifica da controllare',
     review_missing: 'Ad alcuni elementi mancano ancora l’importo o il conto.',
     review_no_account_ios:
-      "Nessun conto. Sceglilo nell'abbreviazione Log Notification per registrarle automaticamente.",
+      'Nessun conto. Sceglilo nel comando rapido Log Notification per registrarle automaticamente.',
     review_no_account_android:
       'Nessun conto per questa app. Sceglilo in %{path} per registrarle automaticamente.',
     review_save_error: 'Impossibile salvare. Gli elementi non completati sono ancora qui.',
@@ -3653,7 +3657,7 @@ const it = {
     ai_settings: 'Impostazioni revisione automatica',
     ai_quota_free: 'Ne restano %{count} gratuite su %{limit}',
     ai_quota_pro: 'Illimitate con Pro',
-    ai_quota_left: 'Ne restano %{count}',
+    ai_quota_left: 'Ne restano %{count} gratuite',
     ai_quota_unlimited: 'Illimitate',
     ai_quota_info_title: 'Revisioni automatiche gratuite',
     ai_quota_info:

@@ -1,20 +1,20 @@
 const ja = {
   backup_restore: {
-    title: 'Restore backup',
-    export_description: 'Personal data and shared ledgers you own.',
-    import_description: 'Choose what to restore from a backup.',
-    personal: 'Personal ledgers',
-    personal_note: 'Replaces ledgers and settings on synced devices.',
-    personal_local_note: 'Replaces ledgers and settings.',
-    shared_ledgers: 'Shared ledgers',
-    owned: 'You own this ledger',
-    unavailable: 'Owner access required',
-    restore_action: 'Restore selected',
-    confirm_title: 'Restore for everyone?',
+    title: 'バックアップから復元',
+    export_description: '個人データと、あなたがオーナーの共有帳簿。',
+    import_description: 'バックアップから復元する内容を選んでください。',
+    personal: '個人の帳簿',
+    personal_note: '同期中の端末の帳簿と設定を置き換えます。',
+    personal_local_note: '帳簿と設定を置き換えます。',
+    shared_ledgers: '共有帳簿',
+    owned: 'あなたがオーナーの帳簿',
+    unavailable: 'オーナー権限が必要です',
+    restore_action: '選択した項目を復元',
+    confirm_title: '全員の分を復元しますか？',
     confirm_message:
-      '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
-    sync_pending: 'Restored here. Stay signed in to finish syncing.',
-    failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+      '{{names}}\n\n{{date}} のバックアップで置き換えます。それ以降の変更は失われます。メンバーと招待はそのままです。',
+    sync_pending: 'この端末では復元しました。同期が完了するまでサインインしたままにしてください。',
+    failed: '復元できませんでした。接続、オーナー権限、空き容量を確認してください。',
     photos_unavailable:
       'このバックアップの写真をダウンロードできませんでした。接続を確認して、もう一度お試しください。',
     photos_missing:
@@ -196,8 +196,8 @@ const ja = {
         body: '旅行に行くなら、新規アルバムで「友だちと割り勘」をオンにして、メンバーから招待リンクを送りましょう。みんなで支出を追加でき、各支出は最初から均等に割り勘され、誰が誰にいくら借りているかは貸し借りでわかります。アプリがない友だちも album.money2time.com で参加して支出を追加できます。',
       },
       friendPaid: {
-        title: '友達が払った分も割り勘',
-        body: '割り勘で「支払った人」をタップし、払ってくれた友達を選びます。支出になるのは自分の分だけで、いくら借りているかは貸し借りで確認できます。一度にでも少しずつでも返せて、精算はワンタップです。',
+        title: '友だちが払った分も割り勘',
+        body: '割り勘で「支払った人」をタップし、払ってくれた友だちを選びます。支出になるのは自分の分だけで、いくら借りているかは貸し借りで確認できます。一度にでも少しずつでも返せて、精算はワンタップです。',
       },
       splitMethods: {
         title: '割り方が増えました',
@@ -216,7 +216,7 @@ const ja = {
       },
       partPayments: {
         title: '少しずつ返済',
-        body: '友だちが少しずつ返済できるようになりました。未精算の相手で支払済みにするをタップし、支払われた金額を入力します。残りは未精算のまま、進行状況バーとすべての支払い履歴が表示され、各支払いは受け取った時点で口座に反映されます。',
+        body: '友だちが少しずつ返済できるようになりました。貸し借りで「支払済みにする」をタップし、支払われた金額を入力します。残りは未払いのまま、進行状況バーとすべての支払い履歴が表示され、各支払いは受け取った時点で口座に反映されます。',
       },
       batchScan: {
         title: 'レシートをまとめてスキャン',
@@ -345,7 +345,7 @@ const ja = {
       title: '月サイクルとライブ収入',
       monthCycle: {
         title: '月ごとに開始日を決められます',
-        body: '給料日はずれることがあるので、月の始まりもずらせます。まず既定の開始日を決め、あとは月をタップしてその月だけ変更。分析も予算も給与もカレンダーも、すべて合わせて動きます。',
+        body: '給料日はずれることがあるので、月の始まりもずらせます。まず既定の開始日を決め、あとは月をタップしてその月だけ変更。インサイトも予算も給与もカレンダーも、すべて合わせて動きます。',
       },
       liveEarnings: {
         title: '稼ぎが増えていくのを見る',
@@ -356,8 +356,8 @@ const ja = {
         body: 'このアプリが以前使っていたがま口のアイコンが、アイコン選択に戻ってきました。誰でも無料で使えます。設定の表示から、Proのアイコンの隣にあります。',
       },
       loanInterest: {
-        title: '元金定額か残高逓減か',
-        body: 'ローンはどちらの方式でも提示されるので、契約に合わせて選べるようになりました。残高逓減はまだ残っている元金に利息がかかり、元金定額は借りた全額に利息がかかります。',
+        title: 'アドオン方式か残債方式か',
+        body: 'ローンの金利はどちらの方式でも提示されるので、契約に合わせて選べるようになりました。残債方式はまだ残っている元金に利息がかかり、アドオン方式は借りた全額に利息がかかります。',
       },
     },
     subscriptions_tutorials_loans: {
@@ -427,7 +427,7 @@ const ja = {
       },
       month: {
         title: '月の始まりを給料日に',
-        body: '月の始まりの日を選べます。予算、分析、給与、カレンダーが1日ではなくあなたの給与サイクルを基準に動きます。設定の「表示」から変更できます。',
+        body: '月の始まりの日を選べます。予算、インサイト、給与、カレンダーが1日ではなくあなたの給与サイクルを基準に動きます。設定の「表示」から変更できます。',
       },
       export: {
         title: 'すべてをExcelに書き出す',
@@ -438,18 +438,18 @@ const ja = {
       title: '自動化',
       auto: {
         title: '支出がひとりでに記録される',
-        body: 'iOS向けの3つの新しい自動化: カードをかざすとApple Payの支払いが自動で記録され、Log Screenshotは支払いのスクリーンショットをスキャン済みの取引に変換し、Back Tapは本体の背面をタップするだけでクイック入力を開きます。自動化ページで設定できます。',
+        body: 'iOS向けの3つの新しい自動化: カードをかざすとApple Payの支払いが自動で記録され、Log Screenshotは支払いのスクリーンショットをスキャン済みの取引に変換し、背面タップは本体の背面をタップするだけでクイック入力を開きます。自動化ページで設定できます。',
       },
     },
     receipt_split_update: {
       title: '品目ごとに割り勘',
       split: {
         title: 'レシートをスキャンして、品目ごとに割り勘',
-        body: 'レシートを撮って、各行を頼んだ人に割り当てるだけ。シェアした料理は取り分で分けられ、税金やサービス料も自動で公平に按分されます。全員が正確な金額で「未精算の相手」にまとまります。',
+        body: 'レシートを撮って、各行を頼んだ人に割り当てるだけ。シェアした料理は取り分で分けられ、税金やサービス料も自動で公平に按分されます。全員が正確な金額で「貸し借り」にまとまります。',
       },
       selector: {
         title: 'もっと速く追加',
-        body: '＋ボタンをタップすると、「追加」と「分割」のタブが並んだメニューが開くようになりました。クイック入力、レシートのスキャン、音声、割り勘がワンタップで使えます。すぐにクイック入力を開きたいですか？このメニューはクイック入力の設定でいつでもオフにできます。',
+        body: '＋ボタンをタップすると、「追加」と「割り勘」のタブが並んだメニューが開くようになりました。クイック入力、レシートのスキャン、音声、割り勘がワンタップで使えます。すぐにクイック入力を開きたいですか？このメニューはクイック入力の設定でいつでもオフにできます。',
       },
     },
     budget_items_update: {
@@ -483,7 +483,7 @@ const ja = {
       },
       redesign: {
         title: '新しいデザイン',
-        body: '設定・時給価値・定期支払いのページを、より見やすく使いやすく刷新しました。',
+        body: '設定・時給・定期支払いのページを、より見やすく使いやすく刷新しました。',
       },
       app_lock: {
         title: 'アプリをロック',
@@ -505,7 +505,7 @@ const ja = {
       },
     },
     cta: {
-      open_accounts: '口座を開く',
+      open_accounts: '口座を管理',
       open_hourly_value_settings: '勤務時間を設定',
       open_add_transaction: '取引を追加',
       open_recurring: '定期取引を開く',
@@ -613,7 +613,7 @@ const ja = {
       title: '音声で取引を追加',
       say_it: {
         title: '話すだけ',
-        body: '+ボタンを長押しして、「タクシー 30」や「コーヒー 4.50」のように話してください。金額とカテゴリーを自動で読み取ります。すべて端末内で処理されます。',
+        body: '+ボタンを長押しして、「タクシー 30」や「コーヒー 4.50」のように話してください。金額とカテゴリを自動で読み取ります。すべて端末内で処理されます。',
       },
     },
   },
@@ -654,7 +654,7 @@ const ja = {
       stop: '計測をとめる',
       wage_title: '1 時間の価値は？',
       wage_body: 'ライブ収入はあなたの実質時給で増えていきます。設定すれば準備完了です。',
-      wage_action: '時給価値を設定',
+      wage_action: '時給を設定',
       disabled_title: 'ライブアクティビティがオフです',
       disabled_body:
         'iOS の「設定」で Money2Time のライブアクティビティをオンにして、ここに戻ってください。',
@@ -921,7 +921,7 @@ const ja = {
       even_caption: '差し引きゼロです。支払いはありません',
       you_paid_on: '{{date}}に支払い',
       person_paid_on: '{{name}}が{{date}}に支払い',
-      undo_payment_title: 'この支払いを取り消しますか?',
+      undo_payment_title: 'この支払いを取り消しますか？',
       undo_payment_message: '{{amount}}がふたたび未払いになり、支払い元の口座から外れます。',
     },
     title: '取引',
@@ -1240,7 +1240,7 @@ const ja = {
     asset_history_description: '年間の総資産推移を追跡し、月別残高のトレンドを確認します。',
     income_rate_history: '時給履歴',
     income_rate_history_description:
-      '全取引履歴を通じて、真の時給がどのように変化してきたかを確認します。',
+      '全取引履歴を通じて、実質時給がどのように変化してきたかを確認します。',
     total_expense: '支出合計',
     total_income: '収入合計',
     no_positive_slices: 'この期間の正の支出データがありません。',
@@ -1576,7 +1576,7 @@ const ja = {
       sheet_default: 'デフォルトの開始日',
       use_default: 'デフォルトを使う ({{day}})',
       reset: '個別設定を消去',
-      reset_confirm_title: '個別設定を消去しますか?',
+      reset_confirm_title: '個別設定を消去しますか？',
       reset_confirm_message: 'すべての月が {{day}} 日開始に戻ります。',
       ledger_note: '{{name}}のみに適用されます。月のサイクルは帳簿ごとに設定されます。',
     },
@@ -1661,7 +1661,7 @@ const ja = {
       custom_badge: 'カスタム',
       bucket_labels: {
         food: '食事・飲み物',
-        groceries: '日用品',
+        groceries: '食料品',
         transport: '交通',
         housing: '住居',
         bills: '公共料金',
@@ -1759,7 +1759,7 @@ const ja = {
       '{{month}} の時給を削除しますか？依存する月は直前の利用可能な月にフォールバックします。',
     hourly_add_title: '時給記録を追加',
     hourly_month_exists_title: '{{month}} はすでに存在します',
-    hourly_month_exists_message: 'この収入レートで置き換えますか？',
+    hourly_month_exists_message: 'この時給で置き換えますか？',
     hourly_replace: '置き換える',
     account_settings: 'カスタマイズ',
     haptics: '触覚フィードバック',
@@ -1814,9 +1814,12 @@ const ja = {
       '- category: 以下の私のカテゴリから最も合うものを選択。サブカテゴリが該当する場合は「親カテゴリ > サブカテゴリ」、そうでなければ親カテゴリ名のみ、不明な場合は「その他」\n' +
       '- account: 明細書に印刷されている具体的な口座名（例：「Chase Sapphire Reserve」「OCBC 365 Credit Card」）、汎用ラベルは使用しない\n\n' +
       '以下のみスキップ: 残高行・明細合計・開示事項・ヘッダー/フッター。\n\n' +
-      '## 私の口座\n{{accounts}}\n\n' +
-      '## 私の支出カテゴリ\n{{expenses}}\n\n' +
-      '## 私の収入カテゴリ\n{{incomes}}\n\n' +
+      '## 私の口座\n' +
+      '{{accounts}}\n\n' +
+      '## 私の支出カテゴリ\n' +
+      '{{expenses}}\n\n' +
+      '## 私の収入カテゴリ\n' +
+      '{{incomes}}\n\n' +
       'JSONコードブロックのみで返答してください。他のテキストは不要です:\n\n' +
       '```json\n' +
       '{\n' +
@@ -1831,13 +1834,13 @@ const ja = {
       '}\n' +
       '```\n\n' +
       '## ルール\n' +
-      '- 明細の通貨を ISO 4217 コード(例:「MYR」「SGD」「USD」)で示してください。金額は印字されているとおりに正確に写し、他の通貨に換算しないでください。\\n' +
+      '- 明細の通貨を ISO 4217 コード(例:「MYR」「SGD」「USD」)で示してください。金額は印字されているとおりに正確に写し、他の通貨に換算しないでください。\n' +
       '- 取引を捏造・作り話してはいけません。ドキュメントに実際に存在する内容のみを出力してください。\n' +
       '- 取引をスキップ・省略・切り捨ててはいけません。すべてのファイルのすべてのページを最初から最後まで読み、すべての取引行を出力してください。\n' +
       '- 複数ファイルがアップロードされている場合は、各ファイルを完全に処理してから、すべての取引を一つの "transactions" 配列にまとめてください。\n' +
       '- 明細が年をまたいでいて月日のみ表示されている場合は、明細期間から年を推定してください。\n' +
       '- 質問しない、拒否しない、複数回に分けることを提案しない。\n' +
-      '- 出力が途中で切れた場合はJSON途中で停止してください。「続けて」と返信すれば再開できます。切れることを恐れて早めに停止しないでください — そのまま続けてください。',
+      '- 出力が途中で切れた場合はJSON途中で停止してください。「続けて」と返信すれば再開できます。切れることを恐れて早めに停止しないでください。そのまま続けてください。',
   },
   data_management: {
     section_export: 'エクスポート',
@@ -1995,7 +1998,7 @@ const ja = {
     delete_message: '今後の支払いは取り消されます。支払済みの分は残しますか？',
     delete_message_none: 'この分割払いの支払いは取り消されます。',
     delete_keep_payments: '支払済み分を残す',
-    delete_with_payments: 'それも削除',
+    delete_with_payments: '支払済み分も削除',
     edit_notice: '{{count}} 回中 {{number}} 回目 · {{name}}',
     edit_notice_payoff: '残りを完済 · {{name}}',
     view_plan: 'プランを見る',
@@ -2007,7 +2010,7 @@ const ja = {
       custom: 'カスタムロゴ',
       search_placeholder: 'サブスクを検索',
     },
-    title: '定期コミットメント',
+    title: '定期取引',
     delete_rule: 'ルールを削除',
     edit_rule: '定期ルールを編集',
     new_rule: '新規定期ルール',
@@ -2018,9 +2021,9 @@ const ja = {
     every_months: '{{count}}か月ごと',
     every_years: '{{count}}年ごと',
     paused: '一時停止',
-    empty_title: 'コミットメントがありません。',
-    create_commitment: 'コミットメントを作成',
-    empty_message: '定期的な収入と支出を自動化するために、繰り返しルールを設定しましょう。',
+    empty_title: '定期取引はまだありません。',
+    create_commitment: '定期取引を作成',
+    empty_message: '定期ルールを設定して、毎月決まった収入と支出を自動で記録しましょう。',
     per_month_suffix: '/月',
     this_year: '今年',
     active_count: '有効',
@@ -2079,7 +2082,7 @@ const ja = {
     group_transport: '交通',
     group_travel: '旅行',
     group_home: '住まい',
-    group_bills: '請求',
+    group_bills: '公共料金',
     group_shopping: '買い物',
     group_health: '健康',
     group_leisure: '娯楽',
@@ -2185,16 +2188,16 @@ const ja = {
     },
     loan: {
       interest_model_label: '利息',
-      interest_model_reducing: '残高逓減',
-      interest_model_flat: '元金定額',
+      interest_model_reducing: '残債方式',
+      interest_model_flat: 'アドオン方式',
       interest_model_info:
-        '残高逓減: 利息は毎月の残債に対してかかるため、多めに払ったり早く払ったりすると利息が減ります。多くの住宅ローンはこの方式です。元金定額: 利息は借入額全体に対して一度だけ計算されて最初に上乗せされるため、早く払うと完済は早まりますが利息は減りません。多くの自動車ローンや個人ローンはこの方式です。',
+        '残債方式: 利息は毎月の残債に対してかかるため、多めに払ったり早く払ったりすると利息が減ります。多くの住宅ローンはこの方式です。アドオン方式: 利息は借入額全体に対して一度だけ計算されて最初に上乗せされるため、早く払うと完済は早まりますが利息は減りません。多くの自動車ローンや個人ローンはこの方式です。',
       interest_rate_info_reducing:
         '残債に対して銀行が課す年利です。入力すると毎月の返済額と総額を計算します。総額を入力すれば年利を計算します。',
       interest_rate_info_flat:
-        '年間の元金定額利率で、借入額全体に対して全期間を通じてかかります。入力すると毎月の返済額と総額を計算します。総額を入力すれば利率を計算します。',
+        'アドオン方式の年利で、借入額全体に対して全期間を通じてかかります。入力すると毎月の返済額と総額を計算します。総額を入力すれば利率を計算します。',
       effective_rate_hint:
-        '実質年率 {{rate}}%。このフラット金利を残高逓減方式に換算した実際のコストです。',
+        '実質年率 {{rate}}%。このアドオン金利を残債方式に換算した実際のコストです。',
       rate_change_title: '新しい金利はいつから適用しますか？',
       rate_change_message:
         '金利が {{from}}% から {{to}}% に変わります。すでに発生した利息をそのまま残すなら今日から、入力ミスの修正なら最初から適用してください。',
@@ -2221,9 +2224,9 @@ const ja = {
       collect_account_external: 'この支払いは定期に設定されています。そちらで編集してください。',
       count_as_expense_label: '返済を支出として計上',
       count_as_expense_info:
-        '返済は必ずローンへ資金を移すので、残債はどちらでも減ります。これをオンにすると、選んだカテゴリーで合計、予算、グラフの支出にも計上されます。オフにすると返済は支出に含まれません。後から変更しても、それ以降に記録した返済にのみ適用されます。',
-      payment_category_label: '返済のカテゴリー',
-      payment_category_placeholder: 'カテゴリーを選択',
+        '返済は必ずローンへ資金を移すので、残債はどちらでも減ります。これをオンにすると、選んだカテゴリで合計、予算、グラフの支出にも計上されます。オフにすると返済は支出に含まれません。後から変更しても、それ以降に記録した返済にのみ適用されます。',
+      payment_category_label: '返済のカテゴリ',
+      payment_category_placeholder: 'カテゴリを選択',
       instalment_label: '毎月の返済額',
       total_interest_label: '利息の総額',
       balance_owed_label: '残高',
@@ -2266,7 +2269,7 @@ const ja = {
     new_account: '新規口座',
     edit_account: '口座を編集',
     account_name: '口座名',
-    account_name_placeholder: '日常ウォレット',
+    account_name_placeholder: '普段使いの財布',
     account_group: '口座グループ',
     include_in_totals: '合計に含める',
     include_in_totals_hint: '非表示の口座は合計残高から除外されます。',
@@ -2413,9 +2416,9 @@ const ja = {
       'お支払いは承認待ちです。完了すると Pro は自動的に有効になるため、もう一度購入する必要はありません。',
     already_owned_not_restored:
       'このストアアカウントはすでに Pro を所有していますが、ここで適用できませんでした。「購入を復元」をタップし、購入したストアアカウントでサインインしていることを確認してください。',
-    monthly: '月次',
-    yearly: '年次',
-    lifetime: '永久',
+    monthly: '月額',
+    yearly: '年額',
+    lifetime: '買い切り',
     monthly_subtitle: '月払い',
     per_month_suffix: ' / 月',
     per_year_suffix: ' / 年',
@@ -2455,7 +2458,7 @@ const ja = {
     social_rating_value: '4.9',
     social_rating_label: 'App Storeの評価',
     social_downloads_value: '60k+',
-    social_downloads_label: 'ユーザーの選択',
+    social_downloads_label: 'ユーザーズチョイス',
     trial_duration_day_one: '{{count}}日間',
     trial_duration_day_other: '{{count}}日間',
     trial_duration_day_few: '{{count}}日間',
@@ -2474,8 +2477,8 @@ const ja = {
     trial_duration_year_many: '{{count}}年間',
     trial_free: '{{duration}}無料',
     trial_cta: '無料トライアルを開始',
-    subscribe: '購読する',
-    buy_lifetime: '生涯プランを購入',
+    subscribe: '登録する',
+    buy_lifetime: '買い切りを購入',
     maybe_later: 'あとで',
     trial_terms: '{{duration}}無料、その後{{price}}。',
     plans_heading: 'プランを選択',
@@ -2486,9 +2489,9 @@ const ja = {
     terms_prefix: '購入すると、当社の',
     manage_subscription: 'サブスクリプションを管理',
     plan_label: '現在のプラン',
-    plan_monthly: '月次',
-    plan_annual: '年次',
-    plan_lifetime: '永久',
+    plan_monthly: '月額',
+    plan_annual: '年額',
+    plan_lifetime: '買い切り',
     member_since: '加入日',
     expires_on: '利用期限',
     lifetime_access: 'すべての Pro 機能を永久に利用できます。',
@@ -2503,7 +2506,7 @@ const ja = {
     lifetime_purchased_body: 'サブスクリプションは不要になりました。解約すれば今後請求されません。',
     not_now: '今はしない',
     cancel_subscription_note:
-      'サブスクリプションをキャンセルするには、デバイスのサブスクリプション設定にリダイレクトされます。',
+      'サブスクリプションをキャンセルするには、端末のサブスクリプション設定に移動します。',
     limit_reached_title: '無料プランの上限に達しました',
     limit_accounts:
       '無料プランでは最大 {{count}} 口座まで。無制限は Pro にアップグレードしてください。',
@@ -2621,7 +2624,7 @@ const ja = {
     tier3_badge: '500いいね以上',
     tier3_reward: 'Pro 永久',
     tier3_desc: 'バズりました。Proはずっとあなたのものです。',
-    how_title: '使い方',
+    how_title: '参加方法',
     step1_body:
       'Instagram、小红书、Reddit、Facebookなど、どこでもアプリについて投稿するだけ。お気に入りの画面のスクリーンショットで十分です。',
     step2_body: 'いいねを集めましょう。いいねが多いほど報酬が大きくなります。',
@@ -2795,7 +2798,7 @@ const ja = {
     google_drive_sign_in_failed_title: 'サインインに失敗しました',
     google_drive_sign_out_title: 'Google Drive からサインアウトしますか？',
     google_drive_sign_out_message:
-      '自動バックアップはデバイスに戻ります。Google Drive 上の既存のバックアップは保持されます。',
+      '自動バックアップの保存先は「このデバイス」に戻ります。Google Drive 上の既存のバックアップは保持されます。',
     google_drive_sign_out_action: 'サインアウト',
     google_drive_sign_out_link: 'Google からサインアウト',
     fallback_local_title: 'この端末に保存しました',
@@ -2810,11 +2813,11 @@ const ja = {
       prefix: '{{target}}: {{reason}}',
       offline: 'インターネットに接続されていません。接続してからもう一度お試しください。',
       timeout: '接続がタイムアウトしました。より高速なネットワークでお試しください。',
-      auth: 'バックアップを続けるには Google ドライブに再度ログインしてください。',
-      quota: 'Google ドライブの空き容量がありません。空き容量を確保してお試しください。',
-      rate_limited: 'Google ドライブが混み合っています。しばらくしてからお試しください。',
-      server: 'Google ドライブが一時的に利用できません。しばらくしてからお試しください。',
-      client: 'Google ドライブがバックアップを拒否しました。',
+      auth: 'バックアップを続けるには Google Drive に再度サインインしてください。',
+      quota: 'Google Drive の空き容量がありません。空き容量を確保してお試しください。',
+      rate_limited: 'Google Drive が混み合っています。しばらくしてからお試しください。',
+      server: 'Google Drive が一時的に利用できません。しばらくしてからお試しください。',
+      client: 'Google Drive がバックアップを拒否しました。',
       unknown: '問題が発生しました。',
     },
     last_backup: '最終バックアップ {{relative}}',
@@ -2845,13 +2848,13 @@ const ja = {
     preprompt_happy: 'はい、気に入っています',
     preprompt_unhappy: 'あまり好きではない',
     preprompt_dismiss: '後で',
-    feedback_prompt: '残念です — どうすれば改善できるか教えていただけますか？',
+    feedback_prompt: '残念です。どうすれば良くなるか教えていただけますか？',
     feedback_open: 'フィードバックを送る',
     feedback_skip: '結構です',
   },
   cloud_backup_prompt: {
     title: 'データを安全に保ちましょう',
-    body: 'バックアップはこの端末にのみ保存されているため、アプリを削除すると失われます。クラウドバックアップをオンにして、iCloud または Google ドライブに安全に保管しましょう。',
+    body: 'バックアップはこの端末にのみ保存されているため、アプリを削除すると失われます。クラウドバックアップをオンにして、iCloud または Google Drive に安全に保管しましょう。',
     cta: 'クラウドにバックアップ',
     dismiss: 'あとで',
   },
@@ -2987,8 +2990,8 @@ const ja = {
       add: '場所を追加',
       clear: '場所をクリア',
       picker_title: '場所を選択',
-      search_placeholder: '都市を検索…',
-      search_hint: 'この旅行を地図に表示する都市を検索します。',
+      search_placeholder: '都市・州・国を検索…',
+      search_hint: '都市・州・国で検索して、この旅行を地図に表示します。',
       no_results: '場所が見つかりません',
       empty_title: 'まだ場所がありません',
       empty_message: 'アルバムに場所を追加すると、地球儀とマップに表示されます。',
@@ -3060,7 +3063,7 @@ const ja = {
       end: 'アルバムを終了',
       end_title: '{{name}}を全員に対して終了しますか？',
       end_message:
-        '誰も会計を追加・変更できなくなります。全員のアルバムは「アーカイブ済み」に残り、取引と残高はそのままです。',
+        '誰も会計を追加・変更できなくなります。全員のアルバムは「アーカイブ済み」に残り、取引と貸し借りはそのままです。',
       limit: '同時に共有できるアルバムは{{max}}件までです。',
       full: '1つのアルバムに参加できるのは{{max}}人までです。',
       sign_in: 'このアルバムを共有するにはサインインしてください。',
@@ -3077,14 +3080,14 @@ const ja = {
       body: 'このアルバムから退出したか、共有が終了したか、サインアウトしました。取引とともにそのままの状態で残りますが、更新はされません。再度サインインするか、もう一度参加すると元に戻ります。',
     },
     balances: {
-      tab: '残高',
-      empty_title: 'まだ残高はありません',
+      tab: '貸し借り',
+      empty_title: 'まだ貸し借りはありません',
       who_owes_whom: '誰が誰にいくら',
       owes_you: '{{name}}さんからもらう',
       owes: '{{from}}さん → {{to}}さん',
       group_spending: 'グループの支出',
       your_share: 'あなたの負担',
-      record_others_title: 'この支払いを記録しますか?',
+      record_others_title: 'この支払いを記録しますか？',
       record_others_body: '{{from}}さんが{{to}}さんに{{amount}}を支払いました。',
       record_others_confirm: '記録',
     },
@@ -3132,7 +3135,7 @@ const ja = {
     },
     categories: {
       food: '食費',
-      groceries: '日用品',
+      groceries: '食料品',
       transport: '交通',
       housing: '住居',
       bills: '公共料金',
@@ -3220,7 +3223,7 @@ const ja = {
     mood_regret: '後悔している',
     standouts: 'ハイライト',
     biggest_expense: '最大の支出',
-    busiest_day: '最も忙しかった日',
+    busiest_day: '記録が最も多い日',
     entries_count: '{{count}} 件',
     quiet_days: '記録のない日',
     of_total: '{{total}} 中 {{count}}',
@@ -3604,7 +3607,7 @@ const ja = {
     ai_settings: '自動確認の設定',
     ai_quota_free: '無料分 残り %{count} / %{limit} 回',
     ai_quota_pro: 'Pro なら無制限',
-    ai_quota_left: '残り%{count}件',
+    ai_quota_left: '無料 残り%{count}件',
     ai_quota_unlimited: '無制限',
     ai_quota_info_title: '無料の自動確認',
     ai_quota_info:

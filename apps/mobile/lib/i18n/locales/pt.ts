@@ -1,20 +1,20 @@
 const pt = {
   backup_restore: {
-    title: 'Restore backup',
-    export_description: 'Personal data and shared ledgers you own.',
-    import_description: 'Choose what to restore from a backup.',
-    personal: 'Personal ledgers',
-    personal_note: 'Replaces ledgers and settings on synced devices.',
-    personal_local_note: 'Replaces ledgers and settings.',
-    shared_ledgers: 'Shared ledgers',
-    owned: 'You own this ledger',
-    unavailable: 'Owner access required',
-    restore_action: 'Restore selected',
-    confirm_title: 'Restore for everyone?',
+    title: 'Restaurar backup',
+    export_description: 'Dados pessoais e livros compartilhados dos quais você é dono.',
+    import_description: 'Escolha o que restaurar de um backup.',
+    personal: 'Livros pessoais',
+    personal_note: 'Substitui livros e configurações nos aparelhos sincronizados.',
+    personal_local_note: 'Substitui livros e configurações.',
+    shared_ledgers: 'Livros compartilhados',
+    owned: 'Você é o dono deste livro',
+    unavailable: 'Requer acesso de dono',
+    restore_action: 'Restaurar selecionados',
+    confirm_title: 'Restaurar para todos?',
     confirm_message:
-      '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
-    sync_pending: 'Restored here. Stay signed in to finish syncing.',
-    failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+      '{{names}}\n\nSubstituir pelo backup de {{date}}. As alterações posteriores serão perdidas. Membros e convites não mudam.',
+    sync_pending: 'Restaurado aqui. Continue conectado para terminar a sincronização.',
+    failed: 'Não foi possível restaurar. Verifique sua conexão, o acesso de dono e o espaço livre.',
     photos_unavailable:
       'Não foi possível baixar as fotos deste backup. Verifique sua conexão e tente novamente.',
     photos_missing:
@@ -83,8 +83,8 @@ const pt = {
   },
   receiptScan: {
     banner_scanning: 'Digitalizando recibo…',
-    banner_scanning_2: 'A ler os itens…',
-    banner_scanning_3: 'A ordenar por categoria…',
+    banner_scanning_2: 'Lendo os itens…',
+    banner_scanning_3: 'Organizando por categoria…',
     banner_scanning_4: 'Quase pronto…',
     banner_dismiss_hint: 'Toque para dispensar',
     empty_title: 'Nenhuma transação encontrada',
@@ -94,11 +94,11 @@ const pt = {
     error_body: 'Algo deu errado ao ler esse recibo. Tente novamente.',
     limit_title: 'Limite de digitalizações atingido',
     limit_body:
-      'Você atingiu o seu limite mensal de {{count}} digitalizações de recibos. Contacte-nos se precisar de um limite maior.',
+      'Você atingiu o seu limite mensal de {{count}} digitalizações de recibos. Entre em contato conosco se precisar de um limite maior.',
     review_ready_title: 'Recibo pronto para revisar',
     review_ready_hint: 'Toque para verificar e salvar',
-    logged_title: 'Despesa registada',
-    logged_hint: 'Toque para rever ou editar',
+    logged_title: 'Despesa registrada',
+    logged_hint: 'Toque para revisar ou editar',
     camera_hint: 'Posicione o recibo dentro do quadro',
     camera_album: 'Álbum',
     camera_close: 'Fechar',
@@ -131,7 +131,7 @@ const pt = {
     tab_accounts: 'Contas',
     tab_insights: 'Análises',
     tab_albums: 'Álbuns',
-    tab_settings: 'Definições',
+    tab_settings: 'Configurações',
     income: 'Receita',
     expense: 'Despesa',
     balance: 'Saldo',
@@ -182,11 +182,11 @@ const pt = {
       title: 'Mais digitalizações grátis e locais',
       freeScans: {
         title: '%{count} digitalizações de recibos grátis por mês',
-        body: 'O plano gratuito inclui agora %{count} digitalizações de recibos por mês, renovadas todos os meses. Tire uma foto ou escolha recibos do álbum em Digitalizar recibo, e o Money2Time preenche o comerciante, o valor, a data e a categoria por si. O Pro continua ilimitado.',
+        body: 'O plano gratuito agora inclui %{count} digitalizações de recibos por mês, renovadas todo mês. Tire uma foto ou escolha recibos do álbum em Digitalizar recibo, e o Money2Time preenche o estabelecimento, o valor, a data e a categoria para você. O Pro continua ilimitado.',
       },
       locations: {
         title: 'Adicione locais às transações',
-        body: 'Ative Locais em Definições > Personalização para associar um local a despesas e receitas. As novas despesas podem marcar automaticamente a sua localização atual, ou escolha um local na pesquisa ou nos recentes. Abra o Mapa de gastos no Calendário para ver onde gasta o seu dinheiro.',
+        body: 'Ative Locais em Configurações > Personalização para marcar onde aconteceram suas despesas e receitas. Novas despesas podem marcar automaticamente sua localização atual, ou escolha um local na busca ou entre os recentes. Abra o Mapa de gastos no Calendário para ver para onde vai o seu dinheiro.',
       },
     },
     split_bills_album_icons: {
@@ -231,7 +231,7 @@ const pt = {
       title: 'Cloud Sync e livros compartilhados',
       cloudSync: {
         title: 'Chegou o Cloud Sync',
-        body: 'Entre com Apple, Google ou e-mail e seus dados ficam iguais em todos os seus celulares. As mudanças chegam em segundos. A sincronização faz parte do Pro. Fica em Ajustes > Cloud Sync.',
+        body: 'Entre com Apple, Google ou e-mail e seus dados ficam iguais em todos os seus celulares. As mudanças chegam em segundos. A sincronização faz parte do Pro. Fica em Configurações > Cloud Sync.',
       },
       sharedLedgers: {
         title: 'Livros compartilhados',
@@ -345,19 +345,19 @@ const pt = {
       title: 'Ciclos de mês e ganhos ao vivo',
       monthCycle: {
         title: 'Um dia de início para cada mês',
-        body: 'O dia de pagamento muda, e o seu mês também pode. Escolha um dia de início padrão e depois toque em qualquer mês para lhe dar o seu. Análises, orçamentos, salários e calendário acompanham.',
+        body: 'O dia de pagamento muda, e o seu mês também pode mudar. Escolha um dia de início padrão e toque em qualquer mês para definir um dia só dele. Análises, orçamentos, salários e calendário acompanham.',
       },
       liveEarnings: {
         title: 'Veja o seu pagamento subir',
-        body: 'Coloque um cartão ao vivo no ecrã bloqueado e veja o que já ganhou hoje, a subir ao seu valor real por hora. Comece você mesmo, ou defina o seu turno e ele começa sozinho.',
+        body: 'Coloque um cartão ao vivo na tela bloqueada e veja quanto você já ganhou hoje, subindo no seu valor real por hora. Inicie você mesmo, ou defina seu turno e ele começa sozinho.',
       },
       appIcon: {
         title: 'O ícone antigo voltou',
-        body: 'A carteira que a app usava antes está de volta ao seletor de ícones, grátis para todos. Nas Definições, em Exibição, ao lado dos ícones Pro.',
+        body: 'O porta-moedas que o app usava antes está de volta ao seletor de ícones, grátis para todos. Fica em Configurações, em Exibição, ao lado dos ícones Pro.',
       },
       loanInterest: {
         title: 'Taxa fixa ou saldo decrescente',
-        body: 'Os empréstimos são apresentados das duas formas, por isso agora escolhe a do seu contrato. O saldo decrescente cobra juros sobre o que ainda deve, a taxa fixa cobra sobre todo o valor pedido.',
+        body: 'Os empréstimos são cotados das duas formas, então agora você escolhe a do seu contrato. O saldo decrescente cobra juros sobre o que você ainda deve; a taxa fixa cobra sobre todo o valor emprestado.',
       },
     },
     subscriptions_tutorials_loans: {
@@ -372,7 +372,7 @@ const pt = {
       },
       tutorials: {
         title: 'Tutoriais no app',
-        body: 'Guias curtos com capturas de tela, de escanear um recibo a dividir uma conta. Procure em Ajustes, em Ajuda e sobre.',
+        body: 'Guias curtos com capturas de tela, de escanear um recibo a dividir uma conta. Procure em Configurações, em Ajuda e sobre.',
       },
       loanInstalments: {
         title: 'Parcelas anotadas para você',
@@ -402,14 +402,14 @@ const pt = {
       title: 'Revisão de gastos',
       recap: {
         title: 'Olhe para trás na sua semana',
-        body: 'Um resumo de cada semana, mês e ano assim que o período fecha: o que saiu, como se compara com a vez anterior, para onde foi e como se sentiu. Ative os lembretes nas Definições, em Notificações, e avisamos quando houver um novo. Encontra no separador Análises.',
+        body: 'Um resumo de cada semana, mês e ano assim que o período termina: o que saiu, como se compara com o período anterior, para onde foi e como você se sentiu. Ative os lembretes em Configurações, em Notificações, e avisaremos quando houver um novo. Fica na aba Análises.',
       },
     },
     icon_style: {
       title: 'Escolha o estilo dos ícones',
       choose: {
         title: 'Argila ou plano, você decide',
-        body: 'Os novos ícones de argila não agradam a todos, então os antigos ícones planos continuam aqui. Alterne quando quiser em Ajustes, na seção Exibição, e o app inteiro acompanha: abas, botões e cada bloco de ajustes.',
+        body: 'Os novos ícones de argila não agradam a todos, então os antigos ícones planos continuam aqui. Alterne quando quiser em Configurações, na seção Exibição, e o app inteiro acompanha: abas, botões e cada bloco das configurações.',
       },
     },
     google_drive_backup: {
@@ -445,7 +445,7 @@ const pt = {
       title: 'Dividir por item',
       split: {
         title: 'Digitalize um recibo e divida-o item a item',
-        body: 'Fotografe a conta e atribua cada linha a quem a consumiu — partilhe pratos em porções, e impostos e serviço dividem-se sozinhos de forma justa. Cada pessoa aparece em “Quem te deve” com o valor exato.',
+        body: 'Fotografe a conta e atribua cada linha a quem consumiu. Divida pratos em porções, e impostos e serviço se dividem sozinhos de forma justa. Cada pessoa aparece em Saldos com o valor exato.',
       },
       selector: {
         title: 'Uma forma mais rápida de adicionar',
@@ -456,7 +456,7 @@ const pt = {
       title: 'Orçamentos e itens',
       budget: {
         title: 'Defina um orçamento mensal',
-        body: 'Crie um orçamento a partir de modelos reutilizáveis e veja cada categoria encher à medida que gasta. Veja o que resta num relance, por mês ou direto na tela inicial.',
+        body: 'Crie um orçamento a partir de modelos reutilizáveis e veja cada categoria encher conforme você gasta. Veja o que resta de relance, por mês ou direto na tela inicial.',
       },
       items: {
         title: 'Quanto suas coisas custam por dia',
@@ -467,11 +467,11 @@ const pt = {
       title: 'Início em calendário e álbuns',
       calendar: {
         title: 'O seu dinheiro, dia a dia',
-        body: 'A aba inicial agora é um calendário. Toque em qualquer dia para ver o que gastou, deslize entre os dias e afaste para o mês ou o ano inteiro para perceber os seus padrões num relance.',
+        body: 'A aba inicial agora é um calendário. Toque em qualquer dia para ver o que você gastou, deslize entre os dias e afaste o zoom para ver o mês ou o ano inteiro e notar seus padrões de relance.',
       },
       albums: {
         title: 'Agrupe gastos em álbuns',
-        body: 'Junte as transações de uma viagem, festa ou projeto num álbum com capa, total e detalhamento próprios. Defina um como ativo e as novas despesas são adicionadas automaticamente.',
+        body: 'Junte as transações de uma viagem, festa ou projeto em um álbum com capa, total e detalhamento próprios. Defina um como ativo e as novas despesas são adicionadas automaticamente.',
       },
     },
     multi_currency_update: {
@@ -501,7 +501,7 @@ const pt = {
       title: 'Compartilhe e ganhe Pro',
       rewards: {
         title: 'Poste e ganhe Pro grátis',
-        body: 'Poste sobre o Money2Time no Instagram, 小红书, Reddit ou Facebook. Postar dá 1 mês de Pro, 100+ curtidas um ano inteiro e 500+ curtidas Pro vitalício. Abra os Ajustes para resgatar sua recompensa.',
+        body: 'Poste sobre o Money2Time no Instagram, 小红书, Reddit ou Facebook. Postar dá 1 mês de Pro, 100+ curtidas um ano inteiro e 500+ curtidas Pro vitalício. Abra as Configurações para resgatar sua recompensa.',
       },
     },
     cta: {
@@ -557,7 +557,7 @@ const pt = {
       autolog_backtap: 'Toque Traseiro',
       autolog_merchant: 'Cafezinho',
       autolog_logged: 'Registrado automaticamente',
-      receipt_pasta: 'Massa com trufas',
+      receipt_pasta: 'Macarrão com trufas',
       receipt_wine: 'Vinho da casa',
       budget_food: 'Comida',
       budget_transport: 'Transporte',
@@ -574,7 +574,7 @@ const pt = {
       voice_logged: 'Registrado por voz',
       voice_example: 'táxi 30',
       album_trip: 'Viagem a Tóquio',
-      album_trip_meta: '4 mar – 11 mar',
+      album_trip_meta: '4 mar - 11 mar',
       album_celebration: 'Aniversário da mãe',
       album_celebration_meta: '8 transações',
       month_starts_on_payday: 'Seu mês começa no dia do pagamento',
@@ -593,7 +593,7 @@ const pt = {
         body: 'Um widget de bolso com botões rápidos para adicionar uma despesa ou receita no momento em que acontece.',
       },
       week: {
-        title: 'Sua semana num relance',
+        title: 'Sua semana de relance',
         body: 'Uma barra para cada um dos últimos sete dias, para que um dia de gastos altos se destaque na hora.',
       },
       month: {
@@ -602,7 +602,7 @@ const pt = {
       },
       savings: {
         title: 'Quanto você guarda',
-        body: 'Sua taxa de economia deste mês num relance — o que você guardou em relação ao que gastou, em dinheiro e horas de trabalho.',
+        body: 'Sua taxa de economia deste mês de relance: o que você guardou em relação ao que gastou, em dinheiro e horas de trabalho.',
       },
       trend: {
         title: 'Sua tendência de economia',
@@ -705,15 +705,15 @@ const pt = {
       subtitle: 'O Money2Time transforma cada gasto no tempo que você trabalhou por ele.',
       of_work: 'de trabalho',
       get_started: 'Começar',
-      sneakers: 'Sapatilhas',
-      phone: 'Telemóvel novo',
+      sneakers: 'Tênis',
+      phone: 'Celular novo',
       inspired_by: 'Inspirado em {{book}}',
       rate_key: '1 hora = {{rate}}',
       coffee: 'Café',
     },
     preferences: {
       title: 'Configure o básico',
-      subtitle: 'Pode alterar isto mais tarde.',
+      subtitle: 'Você pode alterar isso depois.',
       language_label: 'Idioma',
       currency_label: 'Moeda',
     },
@@ -744,7 +744,7 @@ const pt = {
     },
     automations: {
       title: 'Deixe que ele registre por você',
-      subtitle: 'Configure quando quiser em Ajustes.',
+      subtitle: 'Configure quando quiser em Configurações.',
       screenshot_title: 'Capturas de tela',
       screenshot_subtitle_ios: 'Tire print de um recibo ou pagamento.',
       screenshot_subtitle_android: 'Compartilhe um print de recibo ou pagamento.',
@@ -766,7 +766,7 @@ const pt = {
       recurring_title: 'Lançamentos recorrentes',
       recurring_subtitle: 'Saiba quando forem adicionados.',
       weekly_title: 'Resumo semanal',
-      weekly_subtitle: 'Seus últimos 7 dias num relance.',
+      weekly_subtitle: 'Seus últimos 7 dias de relance.',
     },
     backup: {
       title: 'Faça backup dos seus dados',
@@ -789,7 +789,7 @@ const pt = {
       confirm_skip: 'Pular mesmo assim',
       icloud_pending_title: 'Backup ativado',
       icloud_pending_message:
-        'Faça login no iCloud e ative o iCloud Drive em Ajustes — seu backup começará automaticamente assim que estiver disponível.',
+        'Faça login no iCloud e ative o iCloud Drive em Ajustes. Seu backup começará automaticamente assim que estiver disponível.',
     },
     source: {
       title: 'Como nos encontrou?',
@@ -813,7 +813,7 @@ const pt = {
       discard_message: 'Seus itens e atribuições serão perdidos.',
       discard_confirm: 'Descartar',
       keep_editing: 'Continuar editando',
-      low_confidence_banner: 'Algumas linhas foram difíceis de ler — confira-as.',
+      low_confidence_banner: 'Algumas linhas foram difíceis de ler. Confira-as.',
       items_empty_title: 'Nenhum item ainda',
       items_empty_message: 'Adicione cada linha do recibo para dividi-lo item por item.',
       item_name_placeholder: 'Nome do item',
@@ -868,7 +868,7 @@ const pt = {
       qr_card_subtitle: 'Anexe uma vez e ele aparece em todos os recibos que você envia.',
       qr_add: 'Adicionar seu QR de pagamento',
       qr_replace: 'Substituir',
-      empty_title: 'Ainda não há contas partilhadas',
+      empty_title: 'Ainda não há contas compartilhadas',
       empty_subtitle:
         'Divida uma conta e aqui aparece o que você e seus amigos devem uns aos outros.',
       bills_one: '1 conta',
@@ -993,7 +993,7 @@ const pt = {
       },
       transfer_expense_label: 'Contar como despesa',
       transfer_expense_tooltip:
-        'Conta esta transferência como despesa nos totais, orçamentos e gráficos, na categoria que escolher. O dinheiro continua a passar entre as duas contas como sempre.',
+        'Conta esta transferência como despesa nos totais, orçamentos e gráficos, na categoria que você escolher. O dinheiro continua passando entre as duas contas normalmente.',
       received_amount: 'Valor recebido ({{currency}})',
       transfer_rate_hint:
         'Deixe em branco para converter {{from}} → {{to}} pela taxa mais recente.',
@@ -1001,7 +1001,7 @@ const pt = {
       fx_title: 'Conversão',
       fx_rate: 'Taxa de câmbio',
       fx_received: 'Valor recebido',
-      fx_converted: 'Montante convertido',
+      fx_converted: 'Valor convertido',
       fx_edit: 'Editar conversão',
       transfer_fee: {
         chip_label: 'Taxa',
@@ -1094,7 +1094,7 @@ const pt = {
       error: {
         amount_zero: 'O valor não pode ser zero.',
         amount_required: 'Valor é obrigatório',
-        fx_values_invalid: 'Insira uma taxa de câmbio e um montante convertido válidos',
+        fx_values_invalid: 'Insira uma taxa de câmbio e um valor convertido válidos',
         required: 'Obrigatório',
         must_be_different_account: 'Deve ser uma conta diferente',
         complete_required: 'Preencha os campos obrigatórios.',
@@ -1198,8 +1198,8 @@ const pt = {
     },
     budget: 'Orçamento',
     title: 'Sua história financeira',
-    loading: 'Carregando insights...',
-    insight_type: 'Tipo de insight',
+    loading: 'Carregando análises...',
+    insight_type: 'Tipo de análise',
     groups: {
       breakdowns: {
         title: 'Composição',
@@ -1221,7 +1221,7 @@ const pt = {
       income_trend: 'Tend. receita',
       category_trend: 'Tendência por categoria',
       expense_sentiment: 'Humor',
-      asset_history: 'Ativos',
+      asset_history: 'Patrimônio',
       income_rate_history: 'Valor/hora',
     },
     review: 'Revisão de gastos',
@@ -1250,7 +1250,7 @@ const pt = {
       'Escolha uma categoria e acompanhe como os gastos evoluem ao longo do tempo.',
     expense_sentiment: 'Humor nas despesas',
     expense_sentiment_description:
-      'Veja o humor por trás dos seus gastos — feliz, neutro ou arrependido — dia a dia.',
+      'Veja o humor por trás dos seus gastos, dia a dia: feliz, neutro ou arrependido.',
     asset_history: 'Tendência do patrimônio',
     asset_history_description:
       'Acompanhe seu total de ativos ao longo do ano e revise a tendência mensal de saldo.',
@@ -1353,7 +1353,7 @@ const pt = {
     },
     empty: {
       title: 'Sem dados de transações ainda',
-      message: 'Adicione receitas ou despesas para desbloquear insights deste período',
+      message: 'Adicione receitas ou despesas para desbloquear as análises deste período',
     },
     empty_category: {
       title: 'Sem transações nesta categoria',
@@ -1361,7 +1361,7 @@ const pt = {
     },
     filters: {
       title: 'Filtros',
-      subtitle: 'Refine seus insights',
+      subtitle: 'Refine suas análises',
       period: 'Período',
       start: 'Início',
       end: 'Fim',
@@ -1408,7 +1408,7 @@ const pt = {
       pinned: 'Sempre na barra',
       remove: 'Remover {{page}}',
       add: 'Adicionar {{page}}',
-      reset: 'Repor padrão',
+      reset: 'Restaurar padrão',
     },
     app_lock: {
       delay_section: 'Bloquear após',
@@ -1475,13 +1475,13 @@ const pt = {
         'Toque no campo Amount, escolha Select Variable, depois Shortcut Input e selecione Amount. Isso vincula o valor ao cartão tocado.',
       log_payment_step_merchant:
         'Agora toque no campo Merchant e faça o mesmo: Select Variable, Shortcut Input e selecione Merchant.',
-      log_payment_step_7: 'Toque em › para expandir a ação e defina o Account deste cartão.',
+      log_payment_step_7: 'Toque em › para expandir a ação e defina a Account deste cartão.',
       log_payment_step_8:
-        'Pronto. Repita para cada cartão: uma automação por cartão, cada uma com seu próprio Account.',
+        'Pronto. Repita para cada cartão: uma automação por cartão, cada uma com sua própria Account.',
       new_transaction_step_1:
         'Toque no botão abaixo e depois toque em Add Shortcut na tela seguinte para instalá-lo.',
       new_transaction_step_2:
-        'Abra Ajustes → Acessibilidade → Toque → Toque nas Costas e toque em Toque Duplo (ou Toque Triplo).',
+        'Abra Ajustes → Acessibilidade → Toque → Toque Traseiro e toque em Toque Duplo (ou Toque Triplo).',
       new_transaction_step_3: 'Role até a seção Shortcuts e escolha New Transaction.',
       new_transaction_step_4:
         'Pronto. Toque duas vezes na parte de trás do seu iPhone para abrir uma nova transação na hora.',
@@ -1490,7 +1490,7 @@ const pt = {
       log_screenshot_step_1:
         'Toque no botão abaixo e depois toque em Add Shortcut na tela seguinte para instalá-lo.',
       log_screenshot_step_2:
-        'Abra Ajustes → Acessibilidade → Toque → Toque nas Costas e toque em Toque Duplo (ou Toque Triplo).',
+        'Abra Ajustes → Acessibilidade → Toque → Toque Traseiro e toque em Toque Duplo (ou Toque Triplo).',
       log_screenshot_step_3: 'Role até a seção Shortcuts e escolha Log Screenshot.',
       log_screenshot_step_4:
         'Em qualquer tela de pagamento ou recibo, toque duas vezes na parte de trás do seu iPhone. Ele faz a captura de tela por você automaticamente.',
@@ -1575,7 +1575,7 @@ const pt = {
     show_transaction_account_help:
       'Mostra a conta de origem ou destino de cada transação. Transferências sempre mostram as contas envolvidas.',
     icon_style_help:
-      'Argila usa as ilustrações 3D suaves em abas, ajustes e botões. Plano volta aos ícones de linha simples.',
+      'Argila usa as ilustrações 3D suaves em abas, configurações e botões. Plano volta aos ícones de linha simples.',
     first_day_of_week: 'Primeiro dia da semana',
     first_day_sunday: 'Domingo',
     first_day_monday: 'Segunda-feira',
@@ -1618,7 +1618,7 @@ const pt = {
     section_money: 'Dinheiro',
     section_data: 'Dados',
     section_support: 'Ajuda e sobre',
-    profile_member_since: 'Registando desde {{date}}',
+    profile_member_since: 'Registrando desde {{date}}',
     profile_member_new: 'Bem-vindo a bordo 👋',
     profile_name_add: 'Adicione o seu nome',
     profile_edit_name: 'Editar nome',
@@ -1626,30 +1626,30 @@ const pt = {
     account_sign_in: 'Entrar',
     account_title: 'Conta',
     account_a11y_hint: 'Abre a sua conta',
-    account_signed_out: 'Sem sessão iniciada',
-    account_signed_in_a11y: 'Sessão iniciada como {{email}}',
+    account_signed_out: 'Não conectado',
+    account_signed_in_a11y: 'Conectado como {{email}}',
     account_sign_in_prompt:
-      'Entre para partilhar álbuns e juntar-se a livros partilhados. Os seus dados ficam neste telemóvel até ativar o Cloud Sync.',
+      'Entre para compartilhar álbuns e participar de livros compartilhados. Seus dados ficam neste celular até você ativar o Cloud Sync.',
     account_faq: {
       what: {
-        q: 'O que faz entrar na conta?',
-        a: 'Dá-lhe uma conta para partilhar álbuns e juntar-se a livros que outros partilham consigo. Os seus dados ficam neste telemóvel.',
+        q: 'O que acontece ao entrar?',
+        a: 'Você ganha uma conta para compartilhar álbuns e participar de livros que outras pessoas compartilham com você. Seus dados ficam neste celular.',
       },
       sync: {
-        q: 'Entrar sincroniza os meus dados?',
-        a: 'Não. O Cloud Sync fica desligado até o ativar em Definições > Cloud Sync. Sincronizar os seus próprios dados requer Pro.',
+        q: 'Entrar sincroniza meus dados?',
+        a: 'Não. O Cloud Sync fica desativado até você ativá-lo em Configurações > Cloud Sync. Sincronizar seus próprios dados exige o Pro.',
       },
       pro: {
         q: 'Preciso de Pro para entrar?',
-        a: 'Não. Entrar, partilhar álbuns e juntar-se a livros partilhados é grátis. O Pro serve para sincronizar os seus próprios dados e partilhar um livro.',
+        a: 'Não. Entrar, compartilhar álbuns e participar de livros compartilhados é grátis. O Pro serve para sincronizar seus próprios dados e compartilhar um livro.',
       },
       shared_pro: {
         q: 'Um livro compartilhado precisa do Pro?',
         a: 'Só uma pessoa nele precisa do Pro, o dono ou qualquer membro. Se ninguém nele tiver o Pro, ele pausa para todos até alguém ter. Nada é apagado.',
       },
       shared_free_limits: {
-        q: 'Posso adicionar lançamentos a um livro partilhado sem Pro?',
-        a: 'Sim, mesmo que tenha mais de 6 contas. Os outros limites do plano gratuito continuam a valer, como adicionar contas ou categorias acima do limite. Peça ao dono do livro para fazer essas alterações.',
+        q: 'Posso adicionar lançamentos a um livro compartilhado sem o Pro?',
+        a: 'Sim, mesmo que ele tenha mais de 6 contas. Os outros limites do plano gratuito continuam valendo nele, como adicionar contas ou categorias acima do limite. Peça ao dono do livro para fazer essas alterações.',
       },
       family_pro: {
         q: 'Minha família pode usar meu Pro?',
@@ -1660,8 +1660,8 @@ const pt = {
         a: 'Ao sair, seus dados ficam neste celular, e os livros que outras pessoas compartilharam com você saem dele até você entrar de novo. Excluir sua conta apaga a cópia na nuvem. Os livros que você compartilha saem dos celulares de todos os outros, e você continua com eles.',
       },
     },
-    stat_days: 'Dias a registar',
-    stat_transactions: 'Registadas',
+    stat_days: 'Dias registrando',
+    stat_transactions: 'Registradas',
     stat_this_month: 'Este mês',
     news: 'Novidades',
     quick_entry: {
@@ -1700,7 +1700,7 @@ const pt = {
         skip_confirmation_label: 'Pular confirmação',
         skip_confirmation_subtitle: 'Salvar entradas por voz diretamente sem prévia',
         listening: 'Ouvindo…',
-        starting: 'A iniciar…',
+        starting: 'Iniciando…',
         release_hint: 'Solte para reconhecer',
         permission_denied_title: 'Acesso ao microfone necessário',
         permission_denied_message:
@@ -1739,7 +1739,7 @@ const pt = {
     hourly_value: 'Valor/hora',
     notifications: 'Notificações',
     manage_formulas:
-      'Adicione uma entrada só quando sua receita mudar — sem precisar atualizar todo mês.',
+      'Adicione uma entrada só quando sua receita mudar. Não precisa atualizar todo mês.',
     accounts: 'Contas',
     categories: 'Categorias',
     recurring: 'Transações recorrentes',
@@ -1835,9 +1835,12 @@ const pt = {
       '- category: melhor correspondência das minhas categorias abaixo usando "Pai > Subcategoria" quando houver subcategoria adequada, apenas o nome pai caso contrário, "Other" se não tiver certeza\n' +
       '- account: nome exato da conta conforme impresso no extrato (ex.: "Nubank Mastercard", "Itaú Conta Corrente"), não use rótulos genéricos\n\n' +
       'Ignore apenas: linhas de saldo, totais do extrato, avisos legais, cabeçalhos/rodapés.\n\n' +
-      '## Minhas Contas\n{{accounts}}\n\n' +
-      '## Minhas Categorias de Despesa\n{{expenses}}\n\n' +
-      '## Minhas Categorias de Receita\n{{incomes}}\n\n' +
+      '## Minhas Contas\n' +
+      '{{accounts}}\n\n' +
+      '## Minhas Categorias de Despesa\n' +
+      '{{expenses}}\n\n' +
+      '## Minhas Categorias de Receita\n' +
+      '{{incomes}}\n\n' +
       'Responda APENAS com um bloco de código json, sem nenhum outro texto:\n\n' +
       '```json\n' +
       '{\n' +
@@ -1852,13 +1855,13 @@ const pt = {
       '}\n' +
       '```\n\n' +
       '## Regras\n' +
-      '- Indique a moeda do extrato como código ISO 4217 (por exemplo "MYR", "SGD", "USD"). Copie cada valor exatamente como está impresso e NUNCA o converta para outra moeda.\\n' +
+      '- Indique a moeda do extrato como código ISO 4217 (por exemplo "MYR", "SGD", "USD"). Copie cada valor exatamente como está impresso e NUNCA o converta para outra moeda.\n' +
       '- NUNCA invente ou alucie transações. Gere apenas o que estiver no documento.\n' +
       '- NUNCA pule, trunque ou omita transações. Leia cada página de cada arquivo do início ao fim. Gere cada linha de transação.\n' +
       '- Se vários arquivos forem enviados, processe cada um completamente e depois una todas as transações em um único array "transactions".\n' +
       '- Se o extrato cruzar a virada do ano e mostrar apenas mês/dia, deduza o ano a partir do período do extrato.\n' +
       '- Não faça perguntas, não recuse, não ofereça dividir em múltiplas respostas.\n' +
-      "- Se sua saída for cortada, pare no meio do JSON e eu responderei 'continue' para você terminar. Não pare antes para evitar ser cortado — continue gerando.",
+      "- Se sua saída for cortada, pare no meio do JSON e eu responderei 'continue' para você terminar. Não pare antes para evitar ser cortado, apenas continue gerando.",
   },
   data_management: {
     section_export: 'Exportar',
@@ -1866,10 +1869,10 @@ const pt = {
     section_others: 'Outros',
     export_excel_title: 'Exportar para Excel',
     export_excel_description:
-      'Guarde as suas transações, contas e categorias como uma folha de cálculo .xlsx que pode abrir no Excel, Numbers ou Google Sheets.',
-    exporting_excel: 'A criar folha de cálculo...',
+      'Salve suas transações, contas e categorias como uma planilha .xlsx que você pode abrir no Excel, Numbers ou Google Sheets.',
+    exporting_excel: 'Criando planilha...',
     export_excel_error_title: 'Falha ao exportar para Excel',
-    export_excel_error_message: 'Não foi possível criar a folha de cálculo. Tente novamente.',
+    export_excel_error_message: 'Não foi possível criar a planilha. Tente novamente.',
     excel: {
       sheet_transactions: 'Transações',
       sheet_accounts: 'Contas',
@@ -2079,7 +2082,7 @@ const pt = {
     choose_title: 'Escolher ícone',
     clear: 'Remover ícone',
     pack_label: 'Pacote de ícones',
-    pack_pro_banner: 'Estes ícones fazem parte do Pro. Faça upgrade para os usar.',
+    pack_pro_banner: 'Estes ícones fazem parte do Pro. Faça upgrade para usá-los.',
     pack_default: 'Argila',
     pack_lowpoly: 'Low poly',
     pack_line: 'Linha',
@@ -2165,7 +2168,7 @@ const pt = {
       template_label: 'Design de cartão {{genre}} {{number}}',
       crop_title: 'Ajuste seu design',
       crop_hint:
-        'Arraste e faça pinça para enquadrar. Um cartão fechado mostra a faixa entre as linhas tracejadas; numa pilha, só aparece a faixa de cima com o nome.',
+        'Arraste e faça pinça para enquadrar. Um cartão fechado mostra a faixa entre as linhas tracejadas; em uma pilha, só aparece a faixa de cima com o nome.',
       text_label: 'Cor do texto',
       text_light: 'Texto claro',
       text_dark: 'Texto escuro',
@@ -2209,48 +2212,48 @@ const pt = {
       interest_model_reducing: 'Saldo decrescente',
       interest_model_flat: 'Taxa fixa',
       interest_model_info:
-        'Saldo decrescente: os juros são cobrados todos os meses sobre o que ainda deve, por isso pagar a mais ou mais cedo reduz os juros. É assim que funciona a maioria dos créditos habitação. Taxa fixa: os juros são calculados uma vez sobre o valor total emprestado e somados logo no início, por isso pagar mais cedo liquida a dívida antes mas não poupa juros. É assim que funciona a maioria dos créditos automóvel e pessoais.',
+        'Saldo decrescente: os juros são cobrados todo mês sobre o que você ainda deve, então pagar a mais ou antes reduz os juros. A maioria dos financiamentos imobiliários funciona assim. Taxa fixa: os juros são calculados uma vez sobre todo o valor emprestado e somados logo no início, então pagar antes quita a dívida mais cedo, mas não economiza juros. A maioria dos financiamentos de carro e empréstimos pessoais funciona assim.',
       interest_rate_info_reducing:
-        'A taxa anual que o banco cobra sobre o que ainda deve. Escreva-a e calculamos a prestação mensal e o total, ou escreva o total e calculamos a taxa.',
+        'A taxa anual que o banco cobra sobre o que você ainda deve. Digite-a e calculamos a prestação mensal e o total, ou digite o total e calculamos a taxa.',
       interest_rate_info_flat:
-        'A taxa fixa anual, cobrada sobre o valor total emprestado durante todo o prazo. Escreva-a e calculamos a prestação mensal e o total, ou escreva o total e calculamos a taxa.',
+        'A taxa fixa anual, cobrada sobre todo o valor emprestado durante todo o prazo. Digite-a e calculamos a prestação mensal e o total, ou digite o total e calculamos a taxa.',
       effective_rate_hint:
         'Taxa efetiva {{rate}}%. É o que esta taxa fixa custa sobre saldo decrescente.',
       rate_change_title: 'A partir de quando se aplica a nova taxa?',
       rate_change_message:
-        'A taxa muda de {{from}}% para {{to}}%. Aplique a partir de hoje para manter os juros já cobrados, ou desde o início se estiver a corrigir um erro.',
+        'A taxa muda de {{from}}% para {{to}}%. Aplique a partir de hoje para manter os juros já cobrados, ou desde o início se estiver corrigindo um erro.',
       rate_change_from_today: 'A partir de hoje',
       rate_change_from_start: 'Desde o início',
-      interest_saved_label: 'Juros poupados',
+      interest_saved_label: 'Juros economizados',
       principal_label: 'Valor do empréstimo',
       term_label: 'Prazo do empréstimo',
       term_info:
-        'Quantas prestações mensais o empréstimo tem, até {{max}}. Um empréstimo a 5 anos são 60.',
-      term_error: 'Escreva um número inteiro de 1 a {{max}}.',
-      total_repayable_label: 'Total a devolver',
+        'Quantas prestações mensais o empréstimo tem, até {{max}}. Um empréstimo de 5 anos tem 60.',
+      term_error: 'Digite um número inteiro de 1 a {{max}}.',
+      total_repayable_label: 'Total a pagar',
       instalment_error_low: 'Baixa demais para pagar o empréstimo dentro do prazo.',
       instalment_error_high: 'Alta demais para este valor e prazo.',
       paid_periods_label: 'Prestações já pagas',
       paid_periods_info:
-        'Deixe em 0 num empréstimo novo. Se já começou, indique quantas prestações pagou e o saldo inicial é calculado.',
-      paid_periods_error: 'Tem de ser inferior ao prazo.',
+        'Deixe 0 para um empréstimo novo. Se você já começou a pagar, informe quantas prestações pagou e o saldo inicial é calculado para você.',
+      paid_periods_error: 'Precisa ser menor que o prazo.',
       start_date_label: 'Data de início',
       start_date_info:
-        'Quando o empréstimo foi contratado. A primeira prestação cai um mês depois e o seu dia passa a ser o dia de pagamento.',
+        'Quando o empréstimo foi contratado. A primeira prestação cai um mês depois, e esse dia do mês passa a ser o seu dia de pagamento.',
       collect_account_label: 'Debitar de',
       collect_account_info:
-        'A conta de onde sai a prestação todos os meses. Escolha uma e fica registada sozinha; deixe vazia e regista cada pagamento.',
-      collect_account_manual: 'Eu registo os pagamentos',
+        'A conta de onde sai a prestação todo mês. Escolha uma e ela é registrada automaticamente; deixe vazio e você registra cada pagamento.',
+      collect_account_manual: 'Eu registro os pagamentos',
       collect_account_external: 'Este pagamento está configurado em Recorrentes. Edite-o lá.',
       count_as_expense_label: 'Contar a prestação como despesa',
       count_as_expense_info:
-        'Um pagamento move sempre dinheiro para o empréstimo, por isso o que deve continua a baixar de qualquer forma. Com isto ligado, também conta como despesa nos seus totais, orçamentos e gráficos, na categoria que escolher. Desligue e os pagamentos ficam fora das suas despesas. Alterar mais tarde afeta apenas os pagamentos registados a partir daí.',
+        'Um pagamento sempre move dinheiro para o empréstimo, então o que você deve continua caindo de qualquer forma. Com isto ativado, ele também conta como despesa nos seus totais, orçamentos e gráficos, na categoria que você escolher. Desative e os pagamentos ficam fora dos seus gastos. Alterar depois só afeta os pagamentos registrados a partir de então.',
       payment_category_label: 'Categoria do pagamento',
       payment_category_placeholder: 'Escolha uma categoria',
       instalment_label: 'Prestação mensal',
       total_interest_label: 'Juros totais',
       balance_owed_label: 'Saldo devedor',
-      interest_rate_label: 'Taxa de juro',
+      interest_rate_label: 'Taxa de juros',
       autopay_rule_name: 'Pagamento de {{name}}',
       payment_below_interest_short: 'A prestação não cobre os juros',
       payoff_by_label: 'Quitado em',
@@ -2262,11 +2265,11 @@ const pt = {
       projection_payments_only_other: 'Faltam {{count}} prestações',
       no_projection: 'Adicione uma prestação mensal para ver uma data de quitação',
       instalment_info:
-        'O que paga todos os meses. Segue o total acima; ligue o interruptor se o seu banco cobrar um valor diferente e usamos exatamente o seu.',
+        'O que você paga todo mês. Segue o total acima; ative a chave se o seu banco cobrar um valor diferente e usaremos exatamente o seu.',
       total_repayable_info:
-        'Tudo o que devolve ao longo do empréstimo: o valor emprestado mais todos os juros.',
+        'Tudo o que você paga ao longo do empréstimo: o valor emprestado mais todos os juros.',
       balance_owed_info:
-        'O que ainda deve hoje, sem os juros que ainda não lhe foram cobrados. Costuma ser menor do que o valor do seu extrato.',
+        'O que você ainda deve hoje, sem os juros que ainda não foram cobrados. Costuma ser menor que o valor do seu extrato.',
       balance_owed_hint:
         'O seu extrato pode mostrar {{amount}}, que já soma os juros que ainda estão para vir.',
       paid_so_far_label: 'Já pago',
@@ -2316,7 +2319,7 @@ const pt = {
     current_balance: 'Saldo atual',
     balance_adjustment_prompt_title: 'Como registrar esta mudança de saldo?',
     balance_adjustment_prompt_message:
-      'Saldo alterado em {{amount}}. Registrar como receita/despesa ou manter como diferença de conta (excluída dos totais de insights)?',
+      'Saldo alterado em {{amount}}. Registrar como receita/despesa ou manter como diferença de conta (excluída dos totais das análises)?',
     record_as_income: 'Registrar como receita',
     record_as_expense: 'Registrar como despesa',
     record_as_difference: 'Registrar como diferença de conta',
@@ -2394,7 +2397,7 @@ const pt = {
     budget_templates_label: 'Modelos de orçamento',
     goals_label: 'Metas de poupança',
     receipts_label: 'Recibos',
-    split_bills_label: 'Contas divididas por acertar',
+    split_bills_label: 'Contas divididas em aberto',
     custom_item_images_label: 'Imagens de itens personalizadas',
     icon_packs_label: 'Pacotes de ícones e ícones personalizados',
     custom_subscription_logos_label: 'Logos de assinatura próprios',
@@ -2403,22 +2406,22 @@ const pt = {
     limit_custom_subscription_logos:
       'Enviar seu próprio logo de assinatura é um recurso Pro. Assine o Pro para usar qualquer imagem em um pagamento recorrente.',
     limit_custom_item_images:
-      'Pode carregar até {{count}} imagens de itens personalizadas no plano gratuito. Torne-se Pro para ter ilimitadas.',
+      'Você pode enviar até {{count}} imagens de itens personalizadas no plano gratuito. Assine o Pro para ilimitadas.',
     limit_custom_category_icons:
       'Enviar os seus próprios ícones é um recurso Pro. Faça upgrade para usar qualquer imagem em categorias, metas e orçamentos.',
     limit_app_icon:
       'Ícones extras são um recurso Pro. Faça upgrade para dar ao Money2Time um novo visual na sua tela inicial.',
     limit_custom_card_designs:
       'Designs de cartão próprios são um recurso Pro. Assine para colocar qualquer foto ou arte nos seus cartões.',
-    limit_icon_packs: 'Pacotes de ícones extra são um recurso Pro. Faça upgrade para usar todos.',
+    limit_icon_packs: 'Pacotes de ícones extras são um recurso Pro. Faça upgrade para usar todos.',
     limit_live_earnings_auto_start:
       'Iniciar o relógio conforme uma programação é um recurso Pro. Faça upgrade e seu turno começa sozinho. Iniciar manualmente é sempre grátis.',
     limit_album_categories:
       'Alterar as categorias de um álbum compartilhado é um recurso Pro. Faça upgrade para renomear, adicionar ou remover categorias para todos no álbum.',
     limit_reimbursements:
-      'O acompanhamento de reembolsos é uma funcionalidade Pro. Faça upgrade para marcar despesas que vai recuperar.',
+      'O acompanhamento de reembolsos é um recurso Pro. Faça upgrade para marcar despesas que você vai receber de volta.',
     limit_subcurrencies:
-      'Você pode adicionar {{count}} sub-moeda no plano gratuito. Atualize para o Pro para multimoeda ilimitada.',
+      'Você pode adicionar {{count}} submoeda no plano gratuito. Assine o Pro para multimoeda ilimitada.',
     upgrade: 'Assinar Pro',
     upgrade_subtitle: 'Desbloqueie recursos ilimitados',
     active: 'Você tem o Pro',
@@ -2478,7 +2481,7 @@ const pt = {
     compare_title: 'Tudo no Pro',
     compare_subtitle: 'Veja exatamente o que você desbloqueia ao fazer upgrade.',
     hero_title: 'Assuma o controle do seu dinheiro e do seu tempo',
-    social_rating_value: '4.9',
+    social_rating_value: '4,9',
     social_rating_label: 'Avaliação na App Store',
     social_downloads_value: '60k+',
     social_downloads_label: 'Escolha dos usuários',
@@ -2543,18 +2546,19 @@ const pt = {
     limit_voice:
       'O plano gratuito inclui {{count}} entradas por voz. Assine o Pro para entrada por voz ilimitada.',
     limit_items:
-      'Pode acompanhar até {{count}} itens no plano gratuito. Torne-se Pro para ter ilimitados.',
+      'Você pode acompanhar até {{count}} itens no plano gratuito. Assine o Pro para ilimitados.',
     limit_budget_templates:
-      'No plano gratuito pode criar {{count}} modelo de orçamento. Com o Pro, ilimitados.',
-    limit_receipts: 'No plano gratuito pode anexar até {{count}} recibos. Com o Pro, ilimitados.',
+      'Você pode criar {{count}} modelo de orçamento no plano gratuito. Assine o Pro para ilimitados.',
+    limit_receipts:
+      'Você pode anexar até {{count}} recibos no plano gratuito. Assine o Pro para ilimitados.',
     limit_split_bills:
-      'No plano gratuito pode ter até {{count}} contas divididas por acertar. Acerte uma ou mude para o Pro para ter ilimitadas.',
+      'Você pode ter até {{count}} contas divididas em aberto no plano gratuito. Acerte uma ou assine o Pro para ilimitadas.',
     limit_goals:
       'Você pode ter até {{count}} metas de poupança no plano gratuito. Assine o Pro para ilimitado.',
     limit_loans:
-      'Pode acompanhar {{count}} empréstimo no plano gratuito. Atualize para Pro para ter ilimitados.',
+      'Você pode acompanhar {{count}} empréstimo no plano gratuito. Assine o Pro para ilimitados.',
     limit_instalments:
-      'No plano gratuito, você pode quitar {{count}} parcelamentos ao mesmo tempo. Atualize para Pro para ter ilimitados.',
+      'No plano gratuito, você pode quitar {{count}} parcelamentos ao mesmo tempo. Assine o Pro para ilimitados.',
     badge: 'PRO',
     trend_preview_title: 'Desbloqueie tendências de longo prazo',
     trend_preview_message:
@@ -2755,7 +2759,7 @@ const pt = {
     confirm_title: 'Vincular {{name}}?',
     confirm_title_unnamed: 'Vincular este navegador?',
     confirm_message:
-      'Confira se o computador mostra o código {{code}}. Só continue se foi você quem abriu app.money2time.com num computador que está usando: ele vai receber todos os seus dados sempre que esta tela estiver aberta.',
+      'Confira se o computador mostra o código {{code}}. Só continue se foi você quem abriu app.money2time.com em um computador que está usando: ele vai receber todos os seus dados sempre que esta tela estiver aberta.',
     confirm_edits:
       'Enquanto esta tela estiver aberta, ele também poderá adicionar, alterar e excluir seus lançamentos.',
     confirm_waiting: 'Agora clique em Vincular no computador também.',
@@ -2789,7 +2793,7 @@ const pt = {
     scan_hint: 'Escaneie o código no computador',
     camera_permission: 'Permita o acesso à câmera para escanear o código.',
     camera_allow: 'Permitir câmera',
-    camera_settings: 'Abrir Ajustes',
+    camera_settings: 'Abrir configurações',
     errors: {
       unavailable:
         'O painel web precisa da versão mais recente do app. Atualize o Money2Time e tente novamente.',
@@ -2842,14 +2846,14 @@ const pt = {
     fallback_local_error: 'Não foi possível acessar o {{target}}. Salvo neste dispositivo.',
     error: {
       prefix: '{{target}}: {{reason}}',
-      offline: 'Sem ligação à internet. Liga-te e tenta novamente.',
-      timeout: 'A ligação expirou. Tenta novamente numa rede mais rápida.',
-      auth: 'Inicia sessão no Google Drive novamente para continuares as cópias de segurança.',
-      quota: 'O teu Google Drive está cheio. Liberta espaço e tenta novamente.',
-      rate_limited: 'O Google Drive está ocupado neste momento. Tenta daqui a pouco.',
-      server: 'O Google Drive está temporariamente indisponível. Tenta mais tarde.',
-      client: 'O Google Drive recusou a cópia de segurança.',
-      unknown: 'Algo correu mal.',
+      offline: 'Sem conexão com a internet. Conecte-se e tente novamente.',
+      timeout: 'A conexão expirou. Tente novamente em uma rede mais rápida.',
+      auth: 'Entre no Google Drive novamente para continuar fazendo backup.',
+      quota: 'Seu Google Drive está cheio. Libere espaço e tente novamente.',
+      rate_limited: 'O Google Drive está ocupado agora. Tente novamente em instantes.',
+      server: 'O Google Drive está temporariamente indisponível. Tente mais tarde.',
+      client: 'O Google Drive recusou o backup.',
+      unknown: 'Algo deu errado.',
     },
     last_backup: 'Último backup {{relative}}',
     last_backup_never: 'Nenhum backup ainda',
@@ -2879,7 +2883,7 @@ const pt = {
     preprompt_happy: 'Sim, estou gostando',
     preprompt_unhappy: 'Não muito',
     preprompt_dismiss: 'Talvez depois',
-    feedback_prompt: 'Que pena — você se importa em compartilhar o que melhoraria o app?',
+    feedback_prompt: 'Que pena. Você se importa em contar o que deixaria o app melhor?',
     feedback_open: 'Enviar feedback',
     feedback_skip: 'Não, obrigado',
   },
@@ -2894,7 +2898,7 @@ const pt = {
     tile_label: 'Cloud Sync',
     hero_title: 'Sincronize seus celulares',
     hero_body:
-      'Tem Pro noutro telemóvel? Entre e ative o Cloud Sync para o desbloquear aqui também.',
+      'Tem o Pro em outro celular? Entre e ative o Cloud Sync para desbloqueá-lo aqui também.',
     continue_apple: 'Continuar com a Apple',
     continue_google: 'Continuar com o Google',
     continue_email: 'Continuar com e-mail',
@@ -2945,13 +2949,13 @@ const pt = {
       'O Pro da sua conta vale para até 5 celulares, e as 5 vagas estão ocupadas. Saia do Cloud Sync em um celular que você não usa mais (um celular sem uso por 30 dias também libera a vaga). Ou obtenha o Pro neste celular.',
     needs_pro_title: 'A sincronização precisa do Pro',
     needs_pro_body:
-      'Tem sessão iniciada. Obtenha o Pro para começar a sincronizar. Comprou o Pro noutro telemóvel? Ative também lá o Cloud Sync e fica desbloqueado aqui.',
+      'Você está conectado. Assine o Pro para começar a sincronizar. Comprou o Pro em outro celular? Ative o Cloud Sync lá também e ele é desbloqueado aqui.',
     tile_on: 'Ligado',
     profile_off: 'Desligado',
     profile_paused: 'Pausado',
     off_title: 'O Cloud Sync está desligado',
     off_body:
-      'Tem sessão iniciada. Ative o Cloud Sync para fazer cópia dos seus dados e manter os seus telemóveis sincronizados.',
+      'Você está conectado. Ative o Cloud Sync para fazer backup dos seus dados e manter seus celulares sincronizados.',
     turn_on: 'Ativar Cloud Sync',
     profile_a11y_label: 'Cloud Sync, %{status}',
     profile_a11y_hint: 'Abre o Cloud Sync',
@@ -2981,15 +2985,15 @@ const pt = {
       items: {
         needs_pro: {
           q: 'O Cloud Sync precisa de Pro?',
-          a: 'Sim, sincronizar os seus próprios dados requer Pro. Álbuns e livros que outros partilham consigo sincronizam sem ele.',
+          a: 'Sim, sincronizar seus próprios dados exige o Pro. Álbuns e livros que outras pessoas compartilham com você sincronizam sem ele.',
         },
         pro_other_phone: {
           q: 'Tenho o Pro em outro celular. Por que não neste?',
-          a: 'Entre com a mesma conta nos dois telemóveis e ative o Cloud Sync. Depois de este telemóvel sincronizar, também fica Pro enquanto algum telemóvel da conta tiver Pro, mesmo um que já não use. O Pro da sua conta abrange até 5 telemóveis.',
+          a: 'Entre com a mesma conta nos dois celulares e ative o Cloud Sync. Depois que este celular sincronizar, ele também fica Pro enquanto algum celular da conta tiver o Pro, mesmo um que você não usa mais. O Pro da sua conta vale para até 5 celulares.',
         },
         restore_moved_pro: {
           q: 'Restaurei minha compra e meu outro celular perdeu o Pro.',
-          a: 'Um restauro na loja move a compra para o telemóvel que a restaurou. Mantenha o Cloud Sync ativo nos dois telemóveis e ambos continuam Pro.',
+          a: 'Uma restauração na loja move a compra para o celular que a restaurou. Mantenha o Cloud Sync ativo nos dois celulares e ambos continuam Pro.',
         },
         pro_ends: {
           q: 'O que acontece quando o Pro termina?',
@@ -3023,14 +3027,14 @@ const pt = {
       add: 'Adicionar localização',
       clear: 'Limpar localização',
       picker_title: 'Escolha um lugar',
-      search_placeholder: 'Pesquisar cidades…',
-      search_hint: 'Pesquise uma cidade para colocar esta viagem no mapa.',
+      search_placeholder: 'Pesquisar cidade, estado ou país…',
+      search_hint: 'Pesquise uma cidade, estado ou país para colocar esta viagem no mapa.',
       no_results: 'Nenhum lugar encontrado',
       empty_title: 'Ainda sem lugares',
       empty_message: 'Adicione uma localização a um álbum para vê-lo no globo e no mapa.',
     },
     title: 'Álbuns',
-    active_label: 'Adicionar novas transações a',
+    active_label: 'Adicionar novas transações automaticamente a',
     active_sheet_title: 'Viagem ativa',
     active_none: 'Nenhuma',
     active_badge: 'Ativo',
@@ -3049,7 +3053,7 @@ const pt = {
     transactions_selected: '{{count}} selecionadas',
     transaction_count: '{{count}} transações',
     empty_title: 'Ainda sem álbuns',
-    empty_message: 'Agrupe as transações de uma viagem ou evento num álbum.',
+    empty_message: 'Agrupe as transações de uma viagem ou evento em um álbum.',
     edit_transactions_title: 'Editar transações',
     add_transactions_title: 'Adicionar transações',
     remove_from_album: 'Remover do álbum',
@@ -3108,7 +3112,7 @@ const pt = {
       section: 'Arquivados ({{count}})',
     },
     ended: {
-      label: 'Não compartilhado mais',
+      label: 'Não está mais compartilhado',
       title: 'Não está mais compartilhado',
       body: 'Você saiu deste álbum, o compartilhamento terminou ou você saiu da conta. Ele fica como estava, com suas transações, e não é mais atualizado. Entre de novo ou participe de novo para recuperá-lo.',
     },
@@ -3134,8 +3138,8 @@ const pt = {
       already: 'Você já está neste álbum.',
       main_shared:
         'Seu livro principal está compartilhado, então não pode conter um álbum compartilhado.',
-      unavailable: 'Os álbuns partilhados ainda não estão disponíveis nesta versão.',
-      full: 'Este álbum está cheio. Pede ao proprietário para abrir espaço.',
+      unavailable: 'Os álbuns compartilhados ainda não estão disponíveis nesta versão.',
+      full: 'Este álbum está cheio. Peça ao dono para abrir espaço.',
     },
     bill: {
       delete_shared: 'Esta conta está em um álbum compartilhado. Excluí-la a remove para todos.',
@@ -3276,12 +3280,12 @@ const pt = {
     edit_title: 'Editar modelo',
     duplicate: 'Duplicar',
     duplicate_suffix: 'cópia',
-    delete_template_title: 'Eliminar modelo?',
+    delete_template_title: 'Excluir modelo?',
     delete_template_message:
-      'Os orçamentos já criados a partir dele são mantidos. Se este for o padrão, o modelo seguinte do mesmo período passa a padrão.',
+      'Os orçamentos já criados a partir dele são mantidos. Se este for o padrão, o modelo seguinte do mesmo período passa a ser o padrão.',
     no_templates_title: 'Ainda sem modelos',
-    no_templates_message: 'Crie um modelo de orçamento para começar a planear os seus gastos.',
-    no_templates_message_month: 'Crie um modelo de orçamento para começar a planear os seus meses.',
+    no_templates_message: 'Crie um modelo de orçamento para começar a planejar seus gastos.',
+    no_templates_message_month: 'Crie um modelo de orçamento para começar a planejar seus meses.',
     no_budget_title: 'Sem orçamento para {{month}}',
     no_budget_message_month: 'Crie um a partir de um modelo para acompanhar este mês.',
     create_budget: 'Criar orçamento',
@@ -3294,10 +3298,10 @@ const pt = {
     categories_count_other: '{{count}} categorias',
     days_left_one: 'Falta {{count}} dia',
     days_left_other: 'Faltam {{count}} dias',
-    delete_budget: 'Eliminar orçamento',
-    delete_budget_title_week: 'Eliminar o orçamento desta semana?',
-    delete_budget_title_month: 'Eliminar o orçamento deste mês?',
-    delete_budget_title_year: 'Eliminar o orçamento deste ano?',
+    delete_budget: 'Excluir orçamento',
+    delete_budget_title_week: 'Excluir o orçamento desta semana?',
+    delete_budget_title_month: 'Excluir o orçamento deste mês?',
+    delete_budget_title_year: 'Excluir o orçamento deste ano?',
     delete_budget_message_week: 'Não será recriado automaticamente para esta semana.',
     delete_budget_message_month: 'Não será recriado automaticamente para este mês.',
     delete_budget_message_year: 'Não será recriado automaticamente para este ano.',
@@ -3368,20 +3372,21 @@ const pt = {
     subtitle: 'Despesas que outra pessoa devolve.',
     count_as_expense_label: 'Contar como despesa',
     count_as_expense_hint:
-      'Desligado: as despesas reembolsáveis e os seus reembolsos ficam fora dos totais de despesa.',
-    pending_title: 'À espera de voltar',
+      'Desativado: as despesas reembolsáveis e seus reembolsos ficam fora dos totais de despesa.',
+    pending_title: 'Aguardando reembolso',
     settled_title: 'Devolvido',
-    settings_title: 'Definições de reembolsos',
-    empty_title: 'Nada para reclamar',
-    empty_message: 'Marque "Reembolso pendente" numa despesa para a ver aqui.',
-    mark_reimbursed: 'Reclamar',
+    settings_title: 'Configurações de reembolsos',
+    empty_title: 'Nada a receber de volta',
+    empty_message: 'Marque "Reembolso pendente" em uma despesa para vê-la aqui.',
+    mark_reimbursed: 'Receber',
     paid_into: 'Para {{account}}',
-    undo_title: 'Anular este reembolso?',
+    undo_title: 'Desfazer este reembolso?',
     undo_message: 'A entrada de dinheiro é removida.',
-    undo_action: 'Anular',
+    undo_action: 'Desfazer',
     refund_note_prefix: 'Reembolsado',
     editor_label: 'Reembolso pendente',
-    editor_tooltip: 'Uma despesa que outra pessoa devolve. Reclame-a na página Reembolsos.',
+    editor_tooltip:
+      'Uma despesa que alguém vai devolver a você. Registre o reembolso na página Reembolsos.',
     editor_reimbursed_label: 'Já devolvido',
     options_title: 'Opções da transação',
     untitled: 'Despesa',
@@ -3394,7 +3399,7 @@ const pt = {
     add_title: 'Novo item',
     edit_title: 'Editar item',
     empty_title: 'Ainda sem itens',
-    empty_message: 'Registe uma compra e veja o custo diminuir a cada dia que a mantém.',
+    empty_message: 'Registre uma compra e veja o custo diminuir a cada dia que você a tem.',
     choose_icon: 'Escolher ícone',
     name_label: 'Nome',
     name_placeholder: 'ex. Máquina de espresso',
@@ -3402,9 +3407,10 @@ const pt = {
     currency_label: 'Moeda',
     purchase_date_label: 'Data de compra',
     mark_inactive: 'Marcar como inativo',
-    mark_inactive_hint: 'Para a contagem de dias para coisas que vendeu, quebraram ou já não usa.',
+    mark_inactive_hint:
+      'Para a contagem de dias de coisas que você vendeu, quebrou ou não usa mais.',
     end_date_label: 'Data de fim',
-    sold_toggle: 'Vendi-o',
+    sold_toggle: 'Eu vendi',
     sale_price_label: 'Preço de venda',
     note_label: 'Nota',
     note_placeholder: 'Opcional',
@@ -3413,14 +3419,14 @@ const pt = {
     days_count: '{{count}} dias',
     summary_total_value: 'Valor total',
     per_day: '/ dia',
-    delete_title: 'Eliminar item?',
-    delete_message: 'Isto remove o item do seu registo.',
+    delete_title: 'Excluir item?',
+    delete_message: 'Isso remove o item da sua lista.',
     summary_daily_cost: 'Custo / dia',
     summary_counts: 'Itens',
     icon: {
       choose_title: 'Escolher ícone',
-      choose_subtitle: 'Escolha um ícone ou carregue o seu',
-      search_placeholder: 'Procurar ícones…',
+      choose_subtitle: 'Escolha um ícone ou envie o seu',
+      search_placeholder: 'Pesquisar ícones…',
     },
   },
   ledgers: {
@@ -3518,7 +3524,7 @@ const pt = {
     title: 'Compartilhamento',
     share_toggle: 'Compartilhar este livro',
     share_toggle_caption: 'Convide até {{max}} pessoas. Elas não precisam do Pro.',
-    needs_cloud_sync: 'Ative o Cloud Sync para partilhar um livro.',
+    needs_cloud_sync: 'Ative o Cloud Sync para compartilhar um livro.',
     has_shared_albums: 'Este livro tem álbuns compartilhados. Pare de compartilhá-los primeiro.',
     limit_reached: 'Por enquanto, você pode compartilhar até {{max}} livros.',
     share_failed:
@@ -3652,10 +3658,10 @@ const pt = {
     review_show_more: 'Ver notificação completa',
     review_show_less: 'Ver menos',
     ai_title: 'Revisão automática',
-    ai_settings: 'Ajustes da revisão automática',
+    ai_settings: 'Configurações da revisão automática',
     ai_quota_free: '%{count} de %{limit} grátis restantes',
     ai_quota_pro: 'Ilimitado com Pro',
-    ai_quota_left: 'Restam %{count}',
+    ai_quota_left: 'Restam %{count} grátis',
     ai_quota_unlimited: 'Ilimitado',
     ai_quota_info_title: 'Revisões automáticas grátis',
     ai_quota_info:
@@ -3675,7 +3681,7 @@ const pt = {
     ai_scope_expense: 'Registra só despesas',
     ai_scope_income: 'Registra só receitas',
     ai_scope_both: 'Registra despesas e receitas',
-    ai_get_unlimited: 'Ilimitado com Pro',
+    ai_get_unlimited: 'Tenha ilimitado com o Pro',
     ai_done_title: 'Organizado para você',
     ai_logged_count: '%{count} registradas',
     ai_ignored_count: '%{count} ignoradas',
@@ -3764,7 +3770,7 @@ const pt = {
     test_timeout_title: 'Nenhuma notificação chegou',
     test_timeout_body:
       'Confira se o acesso a notificações está ativado e tente de novo. Alguns celulares também exigem o uso de bateria do Money2Time como Sem restrições.',
-    source_enabled_hint: 'Desativado, as notificações dele são ignoradas.',
+    source_enabled_hint: 'Quando desativado, as notificações dele são ignoradas.',
     source_missing: 'Esta fonte foi removida.',
     source_remove_title: 'Remover %{app}?',
     source_remove_body_android:
@@ -3777,18 +3783,18 @@ const pt = {
     permission_off: 'O acesso à localização está desativado',
     allow: 'Permitir',
     permission_allow: 'Permitir acesso à localização',
-    permission_blocked: 'Ative o acesso à localização nas Definições',
-    services_off: 'Ative os Serviços de localização nas Definições',
-    open_settings: 'Abrir Definições',
+    permission_blocked: 'Ative o acesso à localização nas Configurações',
+    services_off: 'Ative os Serviços de Localização nas Configurações',
+    open_settings: 'Abrir configurações',
     add: 'Adicionar local',
     picker_title: 'Local',
     search_placeholder: 'Pesquisar locais',
     current_location: 'Localização atual',
-    current_locating: 'A localizar…',
+    current_locating: 'Localizando…',
     current_unavailable: 'Não foi possível encontrar a sua localização. Toque para tentar de novo.',
     recent_places: 'Locais recentes',
     no_results: 'Nenhum local encontrado',
-    search_error: 'Não foi possível pesquisar. Verifique a ligação.',
+    search_error: 'Não foi possível pesquisar. Verifique sua conexão.',
     search_limit: 'Limite diário de pesquisas atingido. Tente amanhã.',
     search_busy: 'A pesquisa está ocupada. Tente daqui a pouco.',
     search_unavailable: 'A pesquisa de locais não está disponível.',
@@ -3818,20 +3824,20 @@ const pt = {
     map_all_time: 'Todo o período',
     map_empty_title: 'Ainda sem locais',
     map_empty_period_title: 'Sem locais neste período',
-    map_empty_message: 'Adicione um local a uma despesa para a ver aqui.',
+    map_empty_message: 'Adicione um local a uma despesa para vê-lo aqui.',
     map_disabled_message: 'Ative Locais para adicionar locais às despesas.',
     map_turn_on: 'Ativar Locais',
     map_places_other: '{{count}} locais',
     map_previous: 'Anterior',
-    map_next: 'Seguinte',
+    map_next: 'Próximo',
     map_period_month: 'Mês',
     map_period_year: 'Ano',
     map_period_all: 'Tudo',
     map_summary_work: '{{time}} de trabalho',
     map_summary_earned: '{{amount}} ganho',
-    offer_title: 'Lembrar onde gasta?',
+    offer_title: 'Lembrar onde você gasta?',
     offer_body:
-      'Marque as despesas com locais e veja os seus gastos num mapa. Altere a qualquer momento nas Definições.',
+      'Marque as despesas com locais e veja seus gastos em um mapa. Altere quando quiser em Configurações.',
     offer_chip_auto: 'Marcação automática',
   },
 };

@@ -1,20 +1,20 @@
 const ms = {
   backup_restore: {
-    title: 'Restore backup',
-    export_description: 'Personal data and shared ledgers you own.',
-    import_description: 'Choose what to restore from a backup.',
-    personal: 'Personal ledgers',
-    personal_note: 'Replaces ledgers and settings on synced devices.',
-    personal_local_note: 'Replaces ledgers and settings.',
-    shared_ledgers: 'Shared ledgers',
-    owned: 'You own this ledger',
-    unavailable: 'Owner access required',
-    restore_action: 'Restore selected',
-    confirm_title: 'Restore for everyone?',
+    title: 'Pulihkan sandaran',
+    export_description: 'Data peribadi dan buku dikongsi milik anda.',
+    import_description: 'Pilih apa yang hendak dipulihkan daripada sandaran.',
+    personal: 'Buku peribadi',
+    personal_note: 'Menggantikan buku dan tetapan pada peranti yang disegerakkan.',
+    personal_local_note: 'Menggantikan buku dan tetapan.',
+    shared_ledgers: 'Buku dikongsi',
+    owned: 'Anda pemilik buku ini',
+    unavailable: 'Perlu akses pemilik',
+    restore_action: 'Pulihkan yang dipilih',
+    confirm_title: 'Pulihkan untuk semua orang?',
     confirm_message:
-      '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
-    sync_pending: 'Restored here. Stay signed in to finish syncing.',
-    failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+      '{{names}}\n\nGantikan dengan sandaran {{date}}. Perubahan selepas itu akan hilang. Ahli dan jemputan kekal tidak berubah.',
+    sync_pending: 'Dipulihkan di sini. Kekal log masuk untuk melengkapkan penyegerakan.',
+    failed: 'Tidak dapat memulihkan. Semak sambungan, akses pemilik dan ruang storan anda.',
     photos_unavailable:
       'Tidak dapat memuat turun foto sandaran ini. Semak sambungan anda dan cuba lagi.',
     photos_missing: '{{count}} foto daripada sandaran ini tidak ditemui, jadi ia tidak dipulihkan.',
@@ -78,7 +78,7 @@ const ms = {
     quick_title: 'Kemasukan pantas',
     quick_subtitle: 'Tambah cepat dengan pad kekunci',
     full_title: 'Kemasukan penuh',
-    full_subtitle: 'Semua medan, pembahagian & lagi',
+    full_subtitle: 'Semua medan & pembahagian',
   },
   receiptScan: {
     banner_scanning: 'Mengimbas resit…',
@@ -185,14 +185,14 @@ const ms = {
       },
       locations: {
         title: 'Tag transaksi dengan lokasi',
-        body: 'Hidupkan Lokasi di Tetapan > Penyesuaian untuk menambah tempat pada perbelanjaan dan pendapatan. Perbelanjaan baharu boleh menag lokasi semasa anda secara automatik, atau pilih tempat daripada carian dan lokasi terkini. Buka Peta perbelanjaan dari Kalendar untuk melihat ke mana wang anda dibelanjakan.',
+        body: 'Hidupkan Lokasi di Tetapan > Penyesuaian untuk menambah tempat pada perbelanjaan dan pendapatan. Perbelanjaan baharu boleh ditag dengan lokasi semasa anda secara automatik, atau pilih tempat daripada carian dan lokasi terkini. Buka Peta perbelanjaan dari Kalendar untuk melihat ke mana wang anda dibelanjakan.',
       },
     },
     split_bills_album_icons: {
       title: 'Album dikongsi dan bil dibahagi',
       sharedAlbums: {
         title: 'Kongsi album percutian dengan rakan',
-        body: 'Nak bercuti? Dalam Album Baharu, hidupkan Kongsi dengan rakan, kemudian hantar pautan jemputan dari Orang. Semua orang boleh menambah bil, setiap bil dibahagi sama rata dari awal, dan Hutang piutang menunjukkan siapa berhutang dengan siapa. Rakan tanpa aplikasi boleh menyertai dan menambah bil di album.money2time.com.',
+        body: 'Nak bercuti? Dalam Album Baharu, hidupkan Bahagi dengan rakan, kemudian hantar pautan jemputan dari Orang. Semua orang boleh menambah bil, setiap bil dibahagi sama rata dari awal, dan Hutang piutang menunjukkan siapa berhutang dengan siapa. Rakan tanpa aplikasi boleh menyertai dan menambah bil di album.money2time.com.',
       },
       friendPaid: {
         title: 'Bahagi bil yang dibayar kawan',
@@ -234,7 +234,7 @@ const ms = {
       },
       sharedLedgers: {
         title: 'Buku dikongsi',
-        body: 'Kongsi buku dengan sehingga 5 orang dan urus belanjawan rumah bersama. Semua orang menambah catatan dan melihatnya pada telefon sendiri. Menyertai adalah percuma; berkongsi memerlukan Pro.',
+        body: 'Kongsi buku dengan sehingga 5 orang dan urus bajet isi rumah bersama. Semua orang menambah catatan dan melihatnya pada telefon sendiri. Menyertai adalah percuma; berkongsi memerlukan Pro.',
       },
       household: {
         title: 'Wawasan isi rumah',
@@ -344,7 +344,7 @@ const ms = {
       title: 'Kitaran bulan dan pendapatan langsung',
       monthCycle: {
         title: 'Hari mula untuk setiap bulan',
-        body: 'Hari gaji boleh beralih, jadi bulan anda pun boleh. Pilih hari mula lalai, kemudian ketik mana-mana bulan untuk memberikannya hari sendiri. Cerapan, belanjawan, gaji dan kalendar semuanya ikut sama.',
+        body: 'Hari gaji boleh beralih, jadi bulan anda pun boleh. Pilih hari mula lalai, kemudian ketik mana-mana bulan untuk memberikannya hari sendiri. Wawasan, bajet, gaji dan kalendar semuanya ikut sama.',
       },
       liveEarnings: {
         title: 'Lihat gaji anda naik',
@@ -371,7 +371,7 @@ const ms = {
       },
       tutorials: {
         title: 'Tutorial dalam apl',
-        body: 'Panduan ringkas berserta tangkapan skrin, daripada mengimbas resit hingga membahagi bil. Cari dalam Tetapan, di bawah Bantuan dan Perihal.',
+        body: 'Panduan ringkas berserta tangkapan skrin, daripada mengimbas resit hingga membahagi bil. Cari dalam Tetapan, di bawah Bantuan & Tentang.',
       },
       loanInstalments: {
         title: 'Ansuran dicatat untuk anda',
@@ -407,8 +407,8 @@ const ms = {
     icon_style: {
       title: 'Pilih gaya ikon anda',
       choose: {
-        title: 'Clay atau rata, terpulang',
-        body: 'Ikon clay baharu tidak sesuai untuk semua orang, jadi ikon rata yang lama masih ada. Tukar bila-bila masa dalam Tetapan di bahagian Paparan, dan seluruh apl akan mengikut: tab, butang dan setiap petak tetapan.',
+        title: 'Tanah liat atau rata, terpulang',
+        body: 'Ikon tanah liat baharu tidak sesuai untuk semua orang, jadi ikon rata yang lama masih ada. Tukar bila-bila masa dalam Tetapan di bahagian Paparan, dan seluruh apl akan mengikut: tab, butang dan setiap petak tetapan.',
       },
     },
     google_drive_backup: {
@@ -419,14 +419,14 @@ const ms = {
       },
     },
     savings_goals: {
-      title: 'Matlamat Simpanan dan lagi',
+      title: 'Matlamat Simpanan dan banyak lagi',
       intro: {
         title: 'Menyimpan untuk sesuatu yang nyata',
         body: 'Beri matlamat anda nama, jumlah sasaran dan tarikh akhir, kemudian lihat ia terisi setiap kali anda memasukkan wang. Simpan auto memindahkan wang mengikut jadual, dan dalam mod masa anda boleh melihat matlamat dalam jam kerja anda. Cari di Matlamat dalam tab Akaun.',
       },
       month: {
         title: 'Mulakan bulan anda pada hari gaji',
-        body: 'Pilih hari bulan anda bermula, supaya belanjawan, cerapan, gaji dan kalendar mengikut kitaran gaji anda dan bukan hari pertama. Anda boleh tetapkannya dalam Tetapan, Paparan.',
+        body: 'Pilih hari bulan anda bermula, supaya bajet, wawasan, gaji dan kalendar mengikut kitaran gaji anda dan bukan hari pertama. Anda boleh tetapkannya dalam Tetapan, Paparan.',
       },
       export: {
         title: 'Eksport semuanya ke Excel',
@@ -437,14 +437,14 @@ const ms = {
       title: 'Automasi',
       auto: {
         title: 'Perbelanjaan anda direkod sendiri',
-        body: 'Tiga automasi baharu untuk iOS: ketik kad anda dan pembayaran Apple Pay direkod sendiri, Log Screenshot menukar tangkapan skrin pembayaran kepada transaksi yang diimbas, dan Back Tap membuka entri pantas dengan mengetuk belakang telefon. Sediakan di halaman Automasi.',
+        body: 'Tiga automasi baharu untuk iOS: ketik kad anda dan pembayaran Apple Pay direkod sendiri, Log Screenshot menukar tangkapan skrin pembayaran kepada transaksi yang diimbas, dan Back Tap membuka kemasukan pantas dengan mengetuk belakang telefon. Sediakan di halaman Automasi.',
       },
     },
     receipt_split_update: {
       title: 'Bahagi ikut item',
       split: {
         title: 'Imbas resit, bahagikannya item demi item',
-        body: 'Snap bil dan tetapkan setiap baris kepada orang yang memesannya — kongsi hidangan mengikut bahagian, dan cukai serta caj perkhidmatan terbahagi secara adil dengan sendirinya. Semua orang masuk ke “Siapa berhutang dengan anda” dengan jumlah yang tepat.',
+        body: 'Ambil foto bil dan tetapkan setiap baris kepada orang yang memesannya. Kongsi hidangan mengikut bahagian, dan cukai serta caj perkhidmatan terbahagi secara adil dengan sendirinya. Semua orang masuk ke Hutang piutang dengan jumlah yang tepat.',
       },
       selector: {
         title: 'Cara lebih pantas untuk menambah',
@@ -474,7 +474,7 @@ const ms = {
       },
     },
     multi_currency_update: {
-      title: 'Berbilang mata wang & lagi',
+      title: 'Berbilang mata wang & banyak lagi',
       showcase_main: 'Utama',
       currency: {
         title: 'Belanja dalam apa-apa mata wang',
@@ -504,7 +504,7 @@ const ms = {
       },
     },
     cta: {
-      open_accounts: 'Buka akaun',
+      open_accounts: 'Urus akaun',
       open_hourly_value_settings: 'Tetapkan waktu bekerja',
       open_add_transaction: 'Tambah transaksi',
       open_recurring: 'Buka Berulang',
@@ -573,7 +573,7 @@ const ms = {
       voice_logged: 'Direkod melalui suara',
       voice_example: 'teksi 30',
       album_trip: 'Percutian Tokyo',
-      album_trip_meta: '4 Mac – 11 Mac',
+      album_trip_meta: '4 Mac - 11 Mac',
       album_celebration: 'Hari Jadi Ibu',
       album_celebration_meta: '8 transaksi',
       month_starts_on_payday: 'Bulan anda bermula pada hari gaji',
@@ -601,7 +601,7 @@ const ms = {
       },
       savings: {
         title: 'Berapa yang anda simpan',
-        body: 'Kadar simpanan anda bulan ini sepintas lalu — yang anda simpan berbanding yang anda belanjakan, dalam wang dan jam kerja.',
+        body: 'Kadar simpanan anda bulan ini sepintas lalu: yang anda simpan berbanding yang anda belanjakan, dalam wang dan jam kerja.',
       },
       trend: {
         title: 'Trend simpanan anda',
@@ -655,10 +655,10 @@ const ms = {
       wage_body:
         'Pendapatan langsung naik mengikut kadar sejam sebenar anda. Tetapkan dan anda sedia.',
       wage_action: 'Tetapkan nilai sejam saya',
-      disabled_title: 'Live Activity dimatikan',
+      disabled_title: 'Aktiviti Langsung dimatikan',
       disabled_body:
         'Hidupkan semula untuk Money2Time dalam Tetapan iOS, kemudian kembali ke sini.',
-      unavailable: 'Live Activity memerlukan iPhone dengan iOS 16.2 atau lebih baharu.',
+      unavailable: 'Aktiviti Langsung memerlukan iPhone dengan iOS 16.2 atau lebih baharu.',
       start_failed: 'Gagal bermula. Cuba sekali lagi.',
       stop_failed: 'Gagal berhenti. Cuba sekali lagi.',
       schedule_section: 'Jadual',
@@ -703,10 +703,11 @@ const ms = {
     },
     welcome: {
       title: 'Setiap harga, dalam jam',
-      subtitle: 'Money2Time menukar setiap perbelanjaan kepada masa yang anda bekerja untuknya.',
+      subtitle:
+        'Money2Time menukar setiap perbelanjaan kepada masa kerja yang diperlukan untuknya.',
       of_work: 'kerja',
       get_started: 'Mulakan',
-      sneakers: 'Kasut sneakers',
+      sneakers: 'Kasut sukan',
       phone: 'Telefon baharu',
       inspired_by: 'Diilhamkan oleh {{book}}',
       rate_key: '1 jam = {{rate}}',
@@ -758,11 +759,11 @@ const ms = {
       add_transaction: 'Tambah Transaksi',
     },
     notifications: {
-      title: 'Kekal berjejak',
+      title: 'Kekal di landasan',
       subtitle: 'Beberapa peringatan berguna, itu sahaja.',
       enable: 'Aktifkan Pemberitahuan',
       not_now: 'Bukan Sekarang',
-      daily_title: 'Daftar masuk harian',
+      daily_title: 'Rekod harian',
       daily_subtitle: 'Peringatan untuk merekod hari ini.',
       recurring_title: 'Rekod berulang',
       recurring_subtitle: 'Tahu bila ia ditambah.',
@@ -790,7 +791,7 @@ const ms = {
       confirm_skip: 'Langkau juga',
       icloud_pending_title: 'Sandaran dihidupkan',
       icloud_pending_message:
-        'Log masuk ke iCloud dan hidupkan iCloud Drive dalam Tetapan — sandaran anda akan bermula secara automatik sebaik sahaja ia tersedia.',
+        'Log masuk ke iCloud dan hidupkan iCloud Drive dalam Tetapan. Sandaran anda akan bermula secara automatik sebaik sahaja ia tersedia.',
     },
     source: {
       title: 'Bagaimana anda kenal kami?',
@@ -810,11 +811,11 @@ const ms = {
   transactions: {
     receiptSplit: {
       title: 'Bahagi ikut item',
-      discard_title: 'Buang bahagian ini?',
+      discard_title: 'Buang pembahagian ini?',
       discard_message: 'Item dan agihan anda akan hilang.',
       discard_confirm: 'Buang',
       keep_editing: 'Terus edit',
-      low_confidence_banner: 'Sesetengah baris sukar dibaca — semak semula.',
+      low_confidence_banner: 'Sesetengah baris sukar dibaca. Semak semula.',
       items_empty_title: 'Belum ada item',
       items_empty_message:
         'Tambah setiap baris daripada resit untuk membahagikannya item demi item.',
@@ -845,7 +846,7 @@ const ms = {
       payback_to: 'Dibayar balik ke',
       date_label: 'Tarikh',
       merchant_placeholder: 'Kedai atau nota',
-      save_action: 'Simpan bahagian',
+      save_action: 'Simpan pembahagian',
       paid_locked_title: 'Bahagian yang selesai akan berubah',
       paid_locked_message:
         '{{names}} sudah membayar bil ini. Tandakan belum dibayar sebelum menukar bahagian mereka.',
@@ -864,7 +865,7 @@ const ms = {
       search_empty_title: 'Tiada hasil ditemui',
       receipt_total_label: 'Jumlah',
       default_account_title: 'Dibayar ke (lalai)',
-      default_account_subtitle: 'Bahagian baharu dibayar ke akaun ini secara lalai.',
+      default_account_subtitle: 'Pembahagian baharu dibayar ke akaun ini secara lalai.',
       qr_card_title: 'QR pembayaran anda',
       qr_card_subtitle: 'Lampirkan sekali dan ia disertakan pada setiap resit yang anda hantar.',
       qr_add: 'Tambah QR pembayaran anda',
@@ -882,8 +883,8 @@ const ms = {
       share_receipt: 'Hantar resit',
       receipt_qr_note: 'Imbas QR yang saya lampirkan untuk membayar balik kepada saya.',
       receipt_scan_short: 'Imbas untuk bayar',
-      settings_title: 'Tetapan Settle Up',
-      settings_action: 'Tetapan Settle Up',
+      settings_title: 'Tetapan Hutang piutang',
+      settings_action: 'Tetapan Hutang piutang',
       qr_prompt_title: 'Tambah QR pembayaran anda?',
       qr_prompt_message:
         'Sediakan QR pembayaran anda supaya rakan boleh mengimbasnya dan membayar balik terus daripada resit.',
@@ -967,16 +968,15 @@ const ms = {
       duplicate_title: 'Duplikat ke tarikh',
       selected_count: '{{count}} dipilih',
       selected_total: 'Jumlah {{amount}}',
-      update: 'Kemaskini',
-      update_title: 'Kemaskini {{count}} transaksi',
+      update: 'Kemas kini',
+      update_title: 'Kemas kini {{count}} transaksi',
       update_subtitle: 'Guna perubahan pada semua transaksi yang dipilih.',
       enable: 'Aktifkan',
       enabled: 'Diaktifkan',
       set_note: 'Tetapkan nota',
       clear_note: 'Kosongkan nota',
       delete_title: 'Padam transaksi yang dipilih?',
-      delete_message:
-        'Ini akan memadam {{count}} transaksi. Tindakan ini tidak boleh dibuat semula.',
+      delete_message: 'Ini akan memadam {{count}} transaksi. Tindakan ini tidak boleh dibuat asal.',
     },
     calculator: {
       set_hourly_for_time: 'Tetapkan nilai jam untuk lihat padanan masa',
@@ -1016,13 +1016,13 @@ const ms = {
           'Caj {{fee}} juga akan dipadam. Tindakan ini tidak boleh dibatalkan. Teruskan?',
       },
       title_create: 'Tambah',
-      title_edit: 'Kemaskini',
+      title_edit: 'Kemas kini',
       bulk_mode: 'Pukal',
       subtitle_create: 'Entri cepat dan mudah',
-      subtitle_edit: 'Kemaskini butiran',
-      subtitle_edit_balance_adjustment: 'Kemaskini jumlah dan akaun berkaitan',
+      subtitle_edit: 'Kemas kini butiran',
+      subtitle_edit_balance_adjustment: 'Kemas kini jumlah dan akaun berkaitan',
       delete_transaction: 'Padam transaksi',
-      delete_confirm: 'Tindakan ini tidak boleh dibuat semula. Teruskan?',
+      delete_confirm: 'Tindakan ini tidak boleh dibuat asal. Teruskan?',
       delete_payback_confirm: 'Bayaran {{name}} kembali kepada hutangnya untuk bil ini. Teruskan?',
       delete_payback_confirm_unnamed:
         'Bayaran ini kembali kepada baki hutang untuk bil ini. Teruskan?',
@@ -1114,7 +1114,7 @@ const ms = {
         method_percent: 'Peratus',
         method_percent_hint: 'Beri setiap orang peratusan bil',
         method_shares: 'Bahagian',
-        method_shares_hint: '2 bahagian bayar dua kali ganda 1',
+        method_shares_hint: '2 bahagian bayar dua kali ganda',
         method_adjust: 'Pelarasan',
         method_adjust_hint: 'Bahagi sama rata, kemudian tambah atau tolak untuk seseorang',
         percent_sum: '{{given}}% daripada 100%',
@@ -1150,8 +1150,8 @@ const ms = {
         paid_floor: 'Anda sudah bayar balik {{amount}}',
         your_share_label: 'Bahagian anda',
         paid_by_you: 'Dibayar oleh anda',
-        section_subtitle_unpaid: '{{count}} masih berhutang anda',
-        section_subtitle_unpaid_plural: '{{count}} masih berhutang anda',
+        section_subtitle_unpaid: '{{count}} masih berhutang dengan anda',
+        section_subtitle_unpaid_plural: '{{count}} masih berhutang dengan anda',
         subtotal_label: 'Subjumlah',
         itemized_total: 'Jumlah: {{sum}}',
         itemized_total_zero_hint: 'Masukkan sekurang-kurangnya satu amaun',
@@ -1198,8 +1198,8 @@ const ms = {
     },
     budget: 'Bajet',
     title: 'Cerita wang anda',
-    loading: 'Memuatkan analitik...',
-    insight_type: 'Jenis analitik',
+    loading: 'Memuatkan wawasan...',
+    insight_type: 'Jenis wawasan',
     groups: {
       breakdowns: {
         title: 'Pecahan',
@@ -1219,7 +1219,7 @@ const ms = {
       savings_rate: 'Simpanan',
       expense_trend: 'Trend belanja',
       income_trend: 'Trend pendapatan',
-      category_trend: 'Aliran kategori',
+      category_trend: 'Trend kategori',
       expense_sentiment: 'Mood',
       asset_history: 'Aset',
       income_rate_history: 'Kadar jam',
@@ -1245,12 +1245,12 @@ const ms = {
     income_trend: 'Trend pendapatan',
     income_trend_description:
       'Jejak pendapatan bulanan sepanjang tahun dan kenal pasti bulan terkuat dengan cepat.',
-    category_trend: 'Aliran kategori',
+    category_trend: 'Trend kategori',
     category_trend_description:
-      'Pilih kategori dan jejaki aliran perbelanjaannya dari semasa ke semasa.',
+      'Pilih kategori dan jejaki trend perbelanjaannya sepanjang bulan atau tahun.',
     expense_sentiment: 'Sentimen perbelanjaan',
     expense_sentiment_description:
-      'Lihat mood di sebalik perbelanjaan anda — gembira, neutral, atau menyesal — hari demi hari.',
+      'Lihat mood di sebalik perbelanjaan anda: gembira, neutral atau menyesal, hari demi hari.',
     asset_history: 'Trend Aset',
     asset_history_description: 'Jejak jumlah aset sepanjang tahun dan semak trend baki bulanan.',
     income_rate_history: 'Sejarah kadar pendapatan',
@@ -1318,7 +1318,7 @@ const ms = {
       category_trend: {
         no_data_title: 'Tiada perbelanjaan dalam kategori ini',
         no_data_message:
-          'Pilih kategori atau tempoh lain, atau tambah perbelanjaan untuk melihat aliran.',
+          'Pilih kategori atau tempoh lain, atau tambah perbelanjaan untuk melihat trend.',
       },
       expense_sentiment: {
         count_one: '{{count}} perbelanjaan',
@@ -1352,7 +1352,7 @@ const ms = {
     },
     empty: {
       title: 'Tiada data transaksi lagi',
-      message: 'Tambah pendapatan atau perbelanjaan untuk buka kunci analitik tempoh ini',
+      message: 'Tambah pendapatan atau perbelanjaan untuk buka kunci wawasan tempoh ini',
     },
     empty_category: {
       title: 'Tiada transaksi dalam kategori ini',
@@ -1360,7 +1360,7 @@ const ms = {
     },
     filters: {
       title: 'Penapis',
-      subtitle: 'Tapis analitik anda',
+      subtitle: 'Tapis wawasan anda',
       period: 'Tempoh',
       start: 'Mula',
       end: 'Tamat',
@@ -1432,16 +1432,16 @@ const ms = {
     auto_log: {
       title: 'Automasi',
       log_payment_hint:
-        'Tambahkannya pada automasi Transaction dan setiap tap pada kad itu akan dilog sendiri.',
+        'Tambahkannya pada automasi Transaction dan setiap ketikan kad itu akan direkod sendiri.',
       new_transaction_hint:
         'Membuka Money2Time pada skrin entri. Mana-mana pintasan atau automasi boleh menjalankannya.',
       opens_label: 'Membuka',
       subcategories_label: 'Tunjukkan subkategori',
       subcategories_hint:
         'Apabila dimatikan, pemilih Category hanya menyenaraikan kategori peringkat atas.',
-      auto_categorize_label: 'Kategorikan automatik mengikut merchant',
+      auto_categorize_label: 'Kategorikan automatik mengikut peniaga',
       auto_categorize_hint:
-        'Memilih kategori daripada nama merchant, jadi anda tidak ditanya semasa membayar.',
+        'Memilih kategori daripada nama peniaga, jadi anda tidak ditanya semasa membayar.',
       auto_categorize_mapping_link: 'Edit pemetaan kata kunci',
       save_screenshot_label: 'Simpan tangkapan skrin sebagai resit',
       save_screenshot_hint:
@@ -1470,12 +1470,12 @@ const ms = {
       log_payment_step_3: 'Pilih kad yang anda mahu jejaki.',
       log_payment_step_4: 'Pilih Run Immediately, matikan Notify When Run, kemudian ketik Next.',
       log_payment_step_create_shortcut: 'Di bawah Get Started, ketik Create New Shortcut.',
-      log_payment_step_5: 'Ketuk Cari, taip Money2Time, dan tambah Log Card Payment.',
+      log_payment_step_5: 'Ketik Cari, taip Money2Time, dan tambah Log Card Payment.',
       log_payment_step_6:
-        'Ketuk medan Amount, pilih Select Variable, kemudian Shortcut Input, dan pilih Amount. Ini memautkan jumlah kepada kad yang diketuk.',
+        'Ketik medan Amount, pilih Select Variable, kemudian Shortcut Input, dan pilih Amount. Ini memautkan jumlah kepada kad yang diketik.',
       log_payment_step_merchant:
-        'Sekarang ketuk medan Merchant dan buat perkara yang sama: Select Variable, Shortcut Input, kemudian pilih Merchant.',
-      log_payment_step_7: 'Ketuk › untuk kembangkan tindakan, kemudian tetapkan Account kad ini.',
+        'Sekarang ketik medan Merchant dan buat perkara yang sama: Select Variable, Shortcut Input, kemudian pilih Merchant.',
+      log_payment_step_7: 'Ketik › untuk kembangkan tindakan, kemudian tetapkan Account kad ini.',
       log_payment_step_8:
         'Selesai. Ulang untuk setiap kad: satu automasi setiap kad, setiap satu dengan Account sendiri.',
       new_transaction_step_1:
@@ -1540,9 +1540,9 @@ const ms = {
       payment_alerts_ios_step_6:
         'Ketik anak panah tindakan, kemudian Account. Pilih tempat transaksi yang disemak akan direkodkan. Category adalah pilihan.',
       payment_alerts_ios_step_7:
-        'Ketik kembali untuk menyimpan. Ulang untuk setiap aplikasi bank atau dompet. Untuk menyemak pemberitahuan baharu, walaupun di luar talian, ketik ikon sejarah di sebelah Pemberitahuan dalam Money2Time.',
+        'Ketik kembali untuk menyimpan. Ulang untuk setiap aplikasi bank atau e-dompet. Untuk menyemak pemberitahuan baharu, walaupun di luar talian, ketik ikon sejarah di sebelah Pemberitahuan dalam Money2Time.',
       payment_alerts_android_disclosure:
-        'Baca cara akses pemberitahuan digunakan, kemudian ketik Continue.',
+        'Baca cara akses pemberitahuan digunakan, kemudian ketik Teruskan.',
       payment_alerts_ios_app:
         'Ketik App dan pilih aplikasi bank atau e-dompet anda. Tangkapan skrin ini menggunakan Wallet sebagai contoh.',
       payment_alerts_ios_run:
@@ -1558,15 +1558,15 @@ const ms = {
     theme_dark: 'Gelap',
     theme_color: 'Warna tema',
     theme_color_sage: 'Sage',
-    theme_color_ocean: 'Ocean',
-    theme_color_terracotta: 'Terracotta',
-    theme_color_slate: 'Slate',
-    theme_color_amber: 'Amber',
+    theme_color_ocean: 'Lautan',
+    theme_color_terracotta: 'Terakota',
+    theme_color_slate: 'Kelabu Batu',
+    theme_color_amber: 'Ambar',
     theme_color_indigo: 'Indigo',
-    theme_color_emerald: 'Emerald',
-    theme_color_rosewood: 'Rosewood',
+    theme_color_emerald: 'Zamrud',
+    theme_color_rosewood: 'Kayu Mawar',
     icon_style: 'Gaya ikon',
-    icon_style_clay: 'Clay',
+    icon_style_clay: 'Tanah liat',
     icon_style_flat: 'Rata',
     home_summary_left: 'Kad kiri skrin utama',
     home_summary_right: 'Kad kanan skrin utama',
@@ -1574,7 +1574,7 @@ const ms = {
     show_transaction_account_help:
       'Menunjukkan akaun asal atau tujuan setiap transaksi. Pindahan sentiasa menunjukkan akaun yang terlibat.',
     icon_style_help:
-      'Clay menggunakan ilustrasi 3D lembut di seluruh tab, tetapan dan butang. Rata menukarkannya kembali kepada ikon garisan ringkas.',
+      'Tanah liat menggunakan ilustrasi 3D lembut di seluruh tab, tetapan dan butang. Rata menukarkannya kembali kepada ikon garisan ringkas.',
     first_day_of_week: 'Hari pertama minggu',
     first_day_sunday: 'Ahad',
     first_day_monday: 'Isnin',
@@ -1628,11 +1628,11 @@ const ms = {
     account_signed_out: 'Belum log masuk',
     account_signed_in_a11y: 'Log masuk sebagai {{email}}',
     account_sign_in_prompt:
-      'Log masuk untuk berkongsi album dan menyertai lejar dikongsi. Data anda kekal di telefon ini sehingga anda menghidupkan Cloud Sync.',
+      'Log masuk untuk berkongsi album dan menyertai buku dikongsi. Data anda kekal di telefon ini sehingga anda menghidupkan Cloud Sync.',
     account_faq: {
       what: {
         q: 'Apakah fungsi log masuk?',
-        a: 'Anda mendapat akaun untuk berkongsi album dan menyertai lejar yang dikongsi orang lain dengan anda. Data anda kekal di telefon ini.',
+        a: 'Anda mendapat akaun untuk berkongsi album dan menyertai buku yang dikongsi orang lain dengan anda. Data anda kekal di telefon ini.',
       },
       sync: {
         q: 'Adakah log masuk menyegerakkan data saya?',
@@ -1640,15 +1640,15 @@ const ms = {
       },
       pro: {
         q: 'Perlukah Pro untuk log masuk?',
-        a: 'Tidak. Log masuk, berkongsi album dan menyertai lejar dikongsi adalah percuma. Pro untuk menyegerakkan data anda sendiri dan berkongsi lejar.',
+        a: 'Tidak. Log masuk, berkongsi album dan menyertai buku dikongsi adalah percuma. Pro untuk menyegerakkan data anda sendiri dan berkongsi buku.',
       },
       shared_pro: {
         q: 'Adakah buku yang dikongsi memerlukan Pro?',
         a: 'Hanya seorang di dalamnya perlu ada Pro, pemilik atau mana-mana ahli. Jika tiada sesiapa di dalamnya ada Pro, ia dijeda untuk semua orang sehingga seseorang mendapatkannya. Tiada apa-apa yang dipadam.',
       },
       shared_free_limits: {
-        q: 'Bolehkah saya menambah entri dalam lejar kongsi tanpa Pro?',
-        a: 'Boleh, walaupun lejar itu ada lebih daripada 6 akaun. Had pelan percuma yang lain masih terpakai, seperti menambah akaun atau kategori melebihi had. Minta pemilik lejar membuat perubahan itu.',
+        q: 'Bolehkah saya menambah entri dalam buku kongsi tanpa Pro?',
+        a: 'Boleh, walaupun buku itu ada lebih daripada 6 akaun. Had pelan percuma yang lain masih terpakai, seperti menambah akaun atau kategori melebihi had. Minta pemilik buku membuat perubahan itu.',
       },
       family_pro: {
         q: 'Bolehkah keluarga saya menggunakan Pro saya?',
@@ -1662,9 +1662,9 @@ const ms = {
     stat_days: 'Hari menjejak',
     stat_transactions: 'Direkod',
     stat_this_month: 'Bulan ini',
-    news: 'Berita',
+    news: 'Apa Yang Baharu',
     quick_entry: {
-      title: 'Entri Cepat',
+      title: 'Kemasukan Pantas',
       section_expense: 'Perbelanjaan',
       section_income: 'Pendapatan',
       default_account_section: 'Lalai',
@@ -1700,10 +1700,10 @@ const ms = {
         skip_confirmation_subtitle: 'Simpan entri suara terus tanpa pratonton',
         listening: 'Mendengar…',
         starting: 'Memulakan…',
-        release_hint: 'Lepas untuk kenali',
+        release_hint: 'Lepaskan untuk mengecam',
         permission_denied_title: 'Akses mikrofon diperlukan',
         permission_denied_message:
-          'Benarkan mikrofon dan pengecaman suara dalam Tetapan untuk diktaf transaksi.',
+          'Benarkan mikrofon dan pengecaman suara dalam Tetapan untuk merekod transaksi dengan suara.',
         open_settings: 'Buka Tetapan',
         error_title: 'Input suara gagal',
         error_message: 'Tidak dapat proses input suara. Sila cuba lagi.',
@@ -1714,7 +1714,7 @@ const ms = {
         preview_amount: 'Jumlah',
         preview_category: 'Kategori',
         preview_account: 'Akaun',
-        preview_note_empty: 'Entri suara',
+        preview_note_empty: 'Kemasukan suara',
         discard: 'Buang',
         edit: 'Edit',
         save: 'Simpan',
@@ -1738,7 +1738,7 @@ const ms = {
     hourly_value: 'Nilai jam',
     notifications: 'Pemberitahuan',
     manage_formulas:
-      'Hanya tambah entri apabila pendapatan berubah — tidak perlu kemaskini setiap bulan.',
+      'Hanya tambah entri apabila pendapatan berubah. Tidak perlu kemas kini setiap bulan.',
     accounts: 'Akaun',
     categories: 'Kategori',
     recurring: 'Transaksi berulang',
@@ -1793,7 +1793,7 @@ const ms = {
     step1_title: 'Salin Arahan',
     copy_prompt: 'Salin Arahan',
     step1_instructions:
-      'Tampal arahan dan lampirkan penyata bank anda. Anda boleh lampirkan beberapa sekaligus.',
+      'Tampal arahan dan lampirkan penyata bank anda. Anda boleh lampirkan beberapa sekali gus.',
     step1_recommended:
       'Untuk lampiran besar atau berbilang, aktifkan mod pemikiran/penaakulan untuk hasil terbaik.',
     open_in: 'Buka dalam',
@@ -1811,7 +1811,7 @@ const ms = {
     import_error_empty_clipboard:
       'Tiada apa-apa dalam papan klip anda. Salin JSON dari respons AI dahulu.',
     import_error_invalid_json:
-      'Ini nampak tidak seperti JSON yang sah. Salin hanya objek JSON dari respons AI, tiada teks lain.',
+      'Ini tidak kelihatan seperti JSON yang sah. Salin hanya objek JSON dari respons AI, tanpa teks lain.',
     import_error_no_transactions: 'JSON sah tetapi tidak mengandungi sebarang transaksi.',
     import_error_invalid_transaction:
       'Sesetengah transaksi tidak mempunyai tarikh atau jumlah. Minta AI menjana semula.',
@@ -1834,9 +1834,12 @@ const ms = {
       '- category: padanan terbaik dari kategori saya di bawah menggunakan "Induk > Subkategori" apabila subkategori sesuai, nama induk sahaja jika tiada, "Other" jika tidak pasti\n' +
       '- account: nama akaun khusus seperti yang tercetak pada penyata (cth. "Maybank Visa Platinum", "CIMB Current Account"), bukan label umum\n\n' +
       'Langkau sahaja: baris baki, jumlah penyata, pendedahan, pengepala/pengaki.\n\n' +
-      '## Akaun Saya\n{{accounts}}\n\n' +
-      '## Kategori Perbelanjaan Saya\n{{expenses}}\n\n' +
-      '## Kategori Pendapatan Saya\n{{incomes}}\n\n' +
+      '## Akaun Saya\n' +
+      '{{accounts}}\n\n' +
+      '## Kategori Perbelanjaan Saya\n' +
+      '{{expenses}}\n\n' +
+      '## Kategori Pendapatan Saya\n' +
+      '{{incomes}}\n\n' +
       'Balas dengan HANYA blok kod json, tiada teks lain:\n\n' +
       '```json\n' +
       '{\n' +
@@ -1851,13 +1854,13 @@ const ms = {
       '}\n' +
       '```\n\n' +
       '## Peraturan\n' +
-      '- Nyatakan mata wang penyata sebagai kod ISO 4217 (contohnya "MYR", "SGD", "USD"). Salin setiap jumlah tepat seperti yang tercetak dan JANGAN sesekali menukarkannya kepada mata wang lain.\\n' +
+      '- Nyatakan mata wang penyata sebagai kod ISO 4217 (contohnya "MYR", "SGD", "USD"). Salin setiap jumlah tepat seperti yang tercetak dan JANGAN sesekali menukarkannya kepada mata wang lain.\n' +
       '- JANGAN SEKALI-KALI reka atau halusinasi transaksi. Hanya output apa yang ada dalam dokumen.\n' +
       '- JANGAN SEKALI-KALI langkau, potong, atau tinggalkan transaksi. Baca setiap halaman setiap fail dari mula hingga akhir. Output setiap baris transaksi.\n' +
       '- Jika beberapa fail dimuat naik, proses setiap fail sepenuhnya kemudian gabungkan semua transaksi ke dalam satu tatasusunan "transactions".\n' +
       '- Jika penyata merentasi sempadan tahun dan hanya menunjukkan bulan/hari, rumuskan tahun dari tempoh penyata.\n' +
       '- Jangan tanya soalan, jangan enggan, jangan tawarkan untuk bahagikan kepada beberapa respons.\n' +
-      "- Jika output terpotong, berhenti di tengah-tengah JSON dan saya akan balas 'teruskan' supaya anda boleh selesaikan. Jangan berhenti awal untuk elak terpotong — teruskan saja.",
+      "- Jika output terpotong, berhenti di tengah-tengah JSON dan saya akan balas 'teruskan' supaya anda boleh selesaikan. Jangan berhenti awal untuk elak terpotong, teruskan saja.",
   },
   data_management: {
     section_export: 'Eksport',
@@ -1982,8 +1985,9 @@ const ms = {
     convert_note:
       'Perbelanjaan ini menjadi bayaran 1 daripada {{count}}. Selebihnya mengikut jadual.',
     convert_failed: 'Perbelanjaan ini tidak dapat dijadikan ansuran. Sila cuba lagi.',
-    already_due_one: '{{count}} lagi bayaran sudah tiba tempoh. Ia ditambah apabila anda simpan.',
-    already_due_other: '{{count}} lagi bayaran sudah tiba tempoh. Ia ditambah apabila anda simpan.',
+    already_due_one: '{{count}} lagi bayaran sudah perlu dibayar. Ia ditambah apabila anda simpan.',
+    already_due_other:
+      '{{count}} lagi bayaran sudah perlu dibayar. Semuanya ditambah apabila anda simpan.',
     pill_a11y: 'Ansuran {{label}}',
     new_plan: 'Pelan ansuran baharu',
     due_this_month: 'Perlu dibayar bulan ini',
@@ -2122,7 +2126,7 @@ const ms = {
     new_category: 'Kategori Baharu',
     edit_category: 'Edit Kategori',
     delete_confirm:
-      'Ini akan memadam kategori ini secara kekal. Tindakan ini tidak boleh dibuat semula.',
+      'Ini akan memadam kategori ini secara kekal. Tindakan ini tidak boleh dibuat asal.',
     delete_title: 'Padam kategori?',
     delete_has_transactions_body:
       '{{count}} transaksi menggunakan kategori ini. Alihkannya ke kategori lain, atau padam dan biarkan tanpa kategori.',
@@ -2137,7 +2141,7 @@ const ms = {
     parent_optional: 'Induk (pilihan)',
     no_subcategories: 'Tiada subkategori lagi',
     expand: 'Kembangkan',
-    collapse: 'Runtuhkan',
+    collapse: 'Kuncupkan',
     add_subcategory: 'Tambah subkategori',
     expense: 'Perbelanjaan',
     income: 'Pendapatan',
@@ -2191,7 +2195,7 @@ const ms = {
       add: 'Tambah logo',
       choose_title: 'Pilih logo',
       choose_subtitle: 'Cari atau semak ikut negara',
-      search_placeholder: 'Cari bank & dompet',
+      search_placeholder: 'Cari bank & e-dompet',
       none: 'Tiada logo',
       clear: 'Buang logo',
       no_results: 'Tiada padanan',
@@ -2213,9 +2217,9 @@ const ms = {
       interest_model_info:
         'Baki berkurangan: faedah dikenakan setiap bulan atas baki yang masih terhutang, jadi bayaran tambahan atau awal mengurangkan faedah. Kebanyakan pinjaman perumahan begini. Kadar rata: faedah dikira sekali atas keseluruhan jumlah pinjaman dan ditambah di awal, jadi bayar awal menyelesaikan hutang lebih cepat tetapi tidak menjimatkan faedah. Kebanyakan pinjaman kereta dan peribadi begini.',
       interest_rate_info_reducing:
-        'Kadar tahunan yang dikenakan bank atas baki yang masih terhutang. Taip kadar dan ansuran bulanan serta jumlah dikira, atau taip jumlah dan kadar yang dikira.',
+        'Kadar tahunan yang dikenakan bank atas baki yang masih terhutang. Taip kadar, dan ansuran bulanan serta jumlah akan dikira untuk anda, atau taip jumlah dan kadar akan dikira.',
       interest_rate_info_flat:
-        'Kadar rata tahunan, dikenakan atas keseluruhan jumlah pinjaman sepanjang tempoh. Taip kadar dan ansuran bulanan serta jumlah dikira, atau taip jumlah dan kadar yang dikira.',
+        'Kadar rata tahunan, dikenakan atas keseluruhan jumlah pinjaman sepanjang tempoh. Taip kadar, dan ansuran bulanan serta jumlah akan dikira untuk anda, atau taip jumlah dan kadar akan dikira.',
       effective_rate_hint:
         'Kadar efektif {{rate}}%. Itulah kos sebenar kadar rata ini atas baki berkurangan.',
       rate_change_title: 'Bila kadar baharu mula digunakan?',
@@ -2241,7 +2245,7 @@ const ms = {
         'Bila pinjaman diambil. Ansuran pertama jatuh sebulan kemudian, dan tarikhnya menjadi hari bayaran anda.',
       collect_account_label: 'Tolak daripada',
       collect_account_info:
-        'Akaun yang ansuran ditolak setiap bulan. Pilih satu dan ia direkod sendiri; biarkan kosong dan anda rekod setiap bayaran.',
+        'Akaun tempat ansuran ditolak setiap bulan. Pilih satu dan ia direkod sendiri; biarkan kosong dan anda rekod setiap bayaran sendiri.',
       collect_account_manual: 'Saya rekod sendiri',
       collect_account_external: 'Bayaran ini ditetapkan dalam Berulang. Edit di sana.',
       count_as_expense_label: 'Kira ansuran sebagai perbelanjaan',
@@ -2318,7 +2322,7 @@ const ms = {
     current_balance: 'Baki semasa',
     balance_adjustment_prompt_title: 'Bagaimana perubahan baki ini perlu direkodkan?',
     balance_adjustment_prompt_message:
-      'Baki berubah sebanyak {{amount}}. Rekod sebagai pendapatan/perbelanjaan atau simpan sebagai perbezaan akaun (dikecualikan dari jumlah analitik).',
+      'Baki berubah sebanyak {{amount}}. Rekod sebagai pendapatan/perbelanjaan atau simpan sebagai perbezaan akaun (dikecualikan dari jumlah Wawasan).',
     record_as_income: 'Rekod sebagai pendapatan',
     record_as_expense: 'Rekod sebagai perbelanjaan',
     record_as_difference: 'Rekod sebagai perbezaan akaun',
@@ -2332,7 +2336,7 @@ const ms = {
     pay_this_card: 'Bayar kad ini',
     delete_account: 'Padam akaun',
     delete_account_confirm:
-      'Ini akan memadam akaun ini dan semua transaksinya secara kekal. Tindakan ini tidak boleh dibuat semula.',
+      'Ini akan memadam akaun ini dan semua transaksinya secara kekal. Tindakan ini tidak boleh dibuat asal.',
     type_credit: 'Kredit',
     type_debit: 'Debit',
     type_loan: 'Pinjaman',
@@ -2350,7 +2354,7 @@ const ms = {
     create_group_placeholder: 'Perbelanjaan',
     group_name: 'Nama kumpulan',
     expand: 'Kembangkan',
-    collapse: 'Runtuhkan',
+    collapse: 'Kuncupkan',
     add_account_to_group: 'Tambah akaun',
     empty_group_accounts: 'Belum ada akaun dalam kumpulan ini',
     delete_group_title: 'Padam kumpulan?',
@@ -2364,7 +2368,7 @@ const ms = {
   },
   wage: {
     type: {
-      hourly: 'Jam',
+      hourly: 'Sejam',
       monthly: 'Bulanan',
       yearly: 'Tahunan',
     },
@@ -2393,7 +2397,7 @@ const ms = {
       'Anda telah menggunakan kesemua {{count}} automasi Apple Pay percuma, jadi pembayaran terkini anda tidak direkodkan. Naik taraf ke Pro untuk tanpa had.',
     custom_logos_label: 'Logo akaun tersuai',
     items_label: 'Item',
-    budget_templates_label: 'Templat belanjawan',
+    budget_templates_label: 'Templat bajet',
     goals_label: 'Matlamat Simpanan',
     receipts_label: 'Resit',
     split_bills_label: 'Bil kongsi belum selesai',
@@ -2401,7 +2405,7 @@ const ms = {
     icon_packs_label: 'Pek ikon dan ikon tersuai',
     custom_subscription_logos_label: 'Logo langganan sendiri',
     limit_custom_logos:
-      'Pelan percuma boleh memuat naik sehingga {{count}} logo tersuai. Naik taraf ke Pro untuk tanpa had.',
+      'Anda boleh memuat naik sehingga {{count}} logo tersuai dalam pelan percuma. Naik taraf ke Pro untuk tanpa had.',
     limit_custom_subscription_logos:
       'Memuat naik logo langganan sendiri ialah ciri Pro. Naik taraf untuk menggunakan sebarang imej pada bayaran berulang.',
     limit_custom_item_images:
@@ -2459,9 +2463,9 @@ const ms = {
     categories_label: 'Kategori',
     recurring_label: 'Berulang',
     instalments_label: 'Pelan ansuran',
-    hourly_income_label: 'Pendapatan Jam',
+    hourly_income_label: 'Pendapatan Sejam',
     trends_label: 'Trend Jangka Panjang',
-    voice_label: 'Entri suara',
+    voice_label: 'Kemasukan suara',
     receipt_scans_label: 'Imbasan resit',
     notification_ai_label: 'Semakan automatik pemberitahuan',
     apple_pay_automation_label: 'Automasi Apple Pay',
@@ -2503,7 +2507,7 @@ const ms = {
     trial_free: 'Percuma {{duration}}',
     trial_cta: 'Mulakan percubaan percuma',
     subscribe: 'Langgan',
-    buy_lifetime: 'Beli Lifetime',
+    buy_lifetime: 'Beli Seumur Hidup',
     maybe_later: 'Mungkin nanti',
     trial_terms: 'Percuma selama {{duration}}, kemudian {{price}}.',
     plans_heading: 'Pilih pelan anda',
@@ -2555,7 +2559,7 @@ const ms = {
     limit_goals:
       'Anda boleh mempunyai sehingga {{count}} matlamat simpanan dalam pelan percuma. Naik taraf ke Pro untuk tanpa had.',
     limit_loans:
-      'Pelan percuma boleh menjejak {{count}} pinjaman. Naik taraf ke Pro untuk tanpa had.',
+      'Anda boleh menjejak {{count}} pinjaman dalam pelan percuma. Naik taraf ke Pro untuk tanpa had.',
     limit_instalments:
       'Anda boleh melangsaikan {{count}} pelan ansuran pada satu masa dalam pelan percuma. Naik taraf ke Pro untuk tanpa had.',
     badge: 'PRO',
@@ -2670,7 +2674,7 @@ const ms = {
   },
   notifications: {
     title: 'Pemberitahuan',
-    subtitle: 'Kekal atas perbelanjaan anda dengan peringatan dan amaran tepat masa.',
+    subtitle: 'Pantau perbelanjaan anda dengan peringatan dan makluman tepat pada masanya.',
     permission_required: 'Pemberitahuan dilumpuhkan',
     permission_required_message:
       'Aktifkan pemberitahuan dalam tetapan peranti anda untuk terima peringatan.',
@@ -2679,14 +2683,14 @@ const ms = {
       'Untuk terima peringatan, buka tetapan peranti dan benarkan pemberitahuan untuk Money2Time.',
     open_settings: 'Buka Tetapan',
     daily_checkin: {
-      title: 'Daftar Masuk Harian',
+      title: 'Rekod Harian',
       label: 'Peringatan harian',
       description: 'Dapatkan dorongan untuk rekod perbelanjaan setiap hari.',
       time: 'Masa peringatan',
     },
     recurring: {
       title: 'Transaksi Berulang',
-      label: 'Amaran caj automatik',
+      label: 'Makluman caj automatik',
       description: 'Dapatkan pemberitahuan apabila transaksi berulang dibuat secara automatik.',
     },
     weekly_review: {
@@ -2766,7 +2770,7 @@ const ms = {
     status_open: 'Bersambung',
     status_sending: 'Menghantar… {{percent}}%',
     status_closed: 'Tidak dibuka',
-    just_now: 'baru',
+    just_now: 'baru sahaja',
     last_sent: 'Terakhir dihantar {{date}}',
     edit_hint:
       'Semasa skrin ini dibuka, pelayar yang dipautkan juga boleh menambah, mengedit dan memadam entri. Perubahan disimpan pada telefon ini.',
@@ -2776,7 +2780,7 @@ const ms = {
     edits_off:
       'Pelayar ini hanya boleh melihat data anda. Benarkan perubahan untuk menambah, mengedit dan memadam entri daripadanya semasa skrin ini dibuka.',
     edits_allow: 'Benarkan perubahan',
-    edits_disallow: 'Lihat sahaja',
+    edits_disallow: 'Jadikan lihat sahaja',
     read_only: 'Lihat sahaja',
     edit_hint_some_read_only:
       'Semasa skrin ini dibuka, pelayar yang anda benarkan juga boleh menambah, mengedit dan memadam entri. Ketik ⋯ di sebelah pelayar untuk membenarkannya. Perubahan disimpan pada telefon ini.',
@@ -2874,10 +2878,10 @@ const ms = {
   review_prompt: {
     preprompt_title: 'Suka Money2Time?',
     preprompt_subtitle: 'Pandangan jujur anda membantu kami menambah baik.',
-    preprompt_happy: 'Ya, saya sukanya',
+    preprompt_happy: 'Ya, saya suka',
     preprompt_unhappy: 'Tidak berapa',
     preprompt_dismiss: 'Mungkin kemudian',
-    feedback_prompt: 'Maaf terdengar begitu — boleh kongsi apa yang boleh dibuat lebih baik?',
+    feedback_prompt: 'Maaf mendengarnya. Boleh kongsi apa yang boleh dibaiki?',
     feedback_open: 'Kongsi maklum balas',
     feedback_skip: 'Tidak perlu',
   },
@@ -2890,7 +2894,7 @@ const ms = {
   cloud_sync: {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
-    hero_title: 'Segerak semua telefon',
+    hero_title: 'Segerak antara telefon',
     hero_body:
       'Ada Pro di telefon lain? Log masuk dan hidupkan Cloud Sync untuk membukanya di sini juga.',
     continue_apple: 'Teruskan dengan Apple',
@@ -2932,11 +2936,11 @@ const ms = {
     sign_out_confirm_body: 'Data anda kekal pada telefon ini.',
     delete_account: 'Padam akaun',
     delete_confirm_title: 'Padam akaun?',
-    delete_confirm_body: 'Memadam salinan awan dan foto anda. Telefon ini kekalkan datanya.',
+    delete_confirm_body: 'Memadam salinan awan dan foto anda. Telefon ini mengekalkan datanya.',
     delete_confirm_cta: 'Padam',
-    not_pro_title: 'Segerak dijeda',
+    not_pro_title: 'Penyegerakan dijeda',
     not_pro_body:
-      'Pro telah tamat. Data anda selamat dan akan diselaraskan semula apabila anda memperbaharui.',
+      'Pro telah tamat. Data anda selamat dan akan disegerakkan semula apabila anda memperbaharui.',
     renew_pro: 'Perbaharui Pro',
     phone_limit_title: 'Pro ada pada 5 telefon lain',
     phone_limit_body:
@@ -2979,7 +2983,7 @@ const ms = {
       items: {
         needs_pro: {
           q: 'Adakah Cloud Sync memerlukan Pro?',
-          a: 'Ya, menyegerakkan data anda sendiri memerlukan Pro. Album dan lejar yang dikongsi orang lain dengan anda disegerakkan tanpanya.',
+          a: 'Ya, menyegerakkan data anda sendiri memerlukan Pro. Album dan buku yang dikongsi orang lain dengan anda disegerakkan tanpanya.',
         },
         pro_other_phone: {
           q: 'Saya ada Pro pada telefon lain. Kenapa tidak pada telefon ini?',
@@ -3021,8 +3025,9 @@ const ms = {
       add: 'Tambah lokasi',
       clear: 'Kosongkan lokasi',
       picker_title: 'Pilih tempat',
-      search_placeholder: 'Cari bandar…',
-      search_hint: 'Cari bandar untuk meletakkan perjalanan ini pada peta.',
+      search_placeholder: 'Cari bandar, negeri atau negara…',
+      search_hint:
+        'Cari mengikut bandar, negeri atau negara untuk meletakkan perjalanan ini pada peta.',
       no_results: 'Tiada tempat dijumpai',
       empty_title: 'Belum ada tempat',
       empty_message: 'Tambah lokasi pada album untuk melihatnya pada glob dan peta.',
@@ -3084,7 +3089,7 @@ const ms = {
       remove_joined_message: 'Dia tidak lagi menerima bil album ini. Bil yang ada namanya kekal.',
     },
     share: {
-      row: 'Kongsi dengan rakan',
+      row: 'Bahagi dengan rakan',
       caption: 'Semua orang nampak bil dan siapa berhutang kepada siapa.',
       link_note: 'Sah selama 24 jam. Sesiapa yang ada pautan ini boleh sertai.',
       leave: 'Keluar album',
@@ -3094,7 +3099,7 @@ const ms = {
       end: 'Tamatkan album',
       end_title: 'Tamatkan {{name}} untuk semua orang?',
       end_message:
-        'Tiada sesiapa boleh menambah atau mengubah bilnya lagi. Semua orang menyimpan album dalam Diarkibkan, dengan transaksi dan baki mereka seperti sedia ada.',
+        'Tiada sesiapa boleh menambah atau mengubah bilnya lagi. Semua orang menyimpan album dalam Diarkibkan, dengan transaksi dan baki hutang mereka seperti sedia ada.',
       limit: 'Anda boleh kongsi sehingga {{max}} album pada satu masa.',
       full: 'Sehingga {{max}} orang boleh sertai satu album.',
       sign_in: 'Log masuk untuk berkongsi album ini.',
@@ -3111,8 +3116,8 @@ const ms = {
       body: 'Anda telah keluar dari album ini, perkongsian telah tamat atau anda telah log keluar. Ia dikekalkan seperti sedia ada, bersama transaksi anda, dan tidak lagi dikemas kini. Log masuk semula atau sertai semula untuk mengembalikannya.',
     },
     balances: {
-      tab: 'Baki',
-      empty_title: 'Belum ada baki',
+      tab: 'Hutang piutang',
+      empty_title: 'Belum ada hutang',
       who_owes_whom: 'Siapa berhutang kepada siapa',
       owes_you: '{{name}} berhutang kepada anda',
       owes: '{{from}} berhutang kepada {{to}}',
@@ -3181,7 +3186,7 @@ const ms = {
       show_less: 'Tunjukkan kurang',
       you: 'Anda',
       you_lower: 'anda',
-      untitled: 'sebuah bil',
+      untitled: 'satu bil',
       added: '{{actor}} menambah {{title}} · {{money}}',
       said_you_paid: '{{actor}} merekodkan anda membayar {{title}} · {{money}}',
       restored: '{{actor}} memulihkan {{title}} · {{money}}',
@@ -3192,7 +3197,7 @@ const ms = {
       renamed_bill: '{{actor}} menukar nama {{before}} kepada {{after}}',
       moved_bill: '{{actor}} memindahkan {{title}} ke {{day}}',
       changed_bill: '{{actor}} mengubah {{title}}',
-      recategorized_bill: '{{actor}} memindahkan {{title}} ke {{category}}',
+      recategorized_bill: '{{actor}} meletakkan {{title}} di bawah {{category}}',
       your_share: 'Bahagian anda {{money}}',
       your_share_change: 'Bahagian anda {{before}} → {{after}}',
       your_share_gone: 'Bahagian anda sebanyak {{money}} sudah tiada',
@@ -3238,7 +3243,7 @@ const ms = {
     went_out: 'Keluar',
     saved: 'Disimpan',
     not_applicable: 'tiada',
-    trend: 'Aliran',
+    trend: 'Trend',
     pace: 'Rentak',
     pace_of_budget: '{{spent}} daripada {{target}}',
     pace_usual: 'Biasanya {{amount}}',
@@ -3363,8 +3368,8 @@ const ms = {
     subtitle: 'Perbelanjaan yang dibayar balik.',
     count_as_expense_label: 'Kira sebagai perbelanjaan',
     count_as_expense_hint:
-      'Mati: perbelanjaan yang boleh dituntut dan wang pulangnya tidak masuk ke jumlah perbelanjaan.',
-    pending_title: 'Menunggu pulang',
+      'Apabila dimatikan, perbelanjaan yang boleh dituntut dan wang pulangnya tidak masuk ke jumlah perbelanjaan.',
+    pending_title: 'Menunggu dibayar balik',
     settled_title: 'Sudah dibayar balik',
     settings_title: 'Tetapan bayaran balik',
     empty_title: 'Tiada apa untuk dituntut',
@@ -3435,7 +3440,7 @@ const ms = {
     edit_named: 'Edit {{name}}',
     open_badge: 'DIBUKA',
     explainer:
-      'Setiap buku mempunyai akaun, matlamat, pinjaman, kategori, transaksi, catatan berulang, belanjawan, item, album dan kitaran bulan sendiri. Tetapan lain, nilai jam dan sandaran anda meliputi semuanya.',
+      'Setiap buku mempunyai akaun, matlamat, pinjaman, kategori, transaksi, catatan berulang, bajet, item, album dan kitaran bulan sendiri. Tetapan lain, nilai jam dan sandaran anda meliputi semuanya.',
     name_label: 'Nama',
     name_placeholder: 'cth. Kerja, Kerja sampingan',
     currency_label: 'Mata wang utama',
@@ -3444,8 +3449,8 @@ const ms = {
     categories: 'Kategori',
     copy_from_hint: 'Pilih buku untuk disalin',
     everything: 'Semua',
-    everything_caption_one: 'Salinan penuh dengan {{count}} catatan, belanjawan dan album',
-    everything_caption_other: 'Salinan penuh dengan {{count}} catatan, belanjawan dan album',
+    everything_caption_one: 'Salinan penuh dengan {{count}} catatan, bajet dan album',
+    everything_caption_other: 'Salinan penuh dengan {{count}} catatan, bajet dan album',
     everything_currency_note: 'Salinan penuh mengekalkan mata wang {{name}}.',
     delete_open_note: 'Buku ini sedang dibuka, jadi {{name}} akan dibuka.',
     copy_from: 'Salin daripada',
@@ -3458,7 +3463,7 @@ const ms = {
     goals: 'Matlamat',
     loans: 'Pinjaman',
     recurring: 'Berulang',
-    budgets: 'Belanjawan',
+    budgets: 'Bajet',
     items: 'Item',
     albums: 'Album',
     month_cycle: 'Kitaran bulan',
@@ -3469,8 +3474,8 @@ const ms = {
     copy_recurring_one: '{{count}} peraturan, dari tarikh seterusnya',
     copy_recurring_other: '{{count}} peraturan, dari tarikh seterusnya',
     copy_recurring_none: 'Peraturannya menggunakan matlamat atau pinjaman yang tidak disalin',
-    copy_budgets_one: '{{count}} templat belanjawan',
-    copy_budgets_other: '{{count}} templat belanjawan',
+    copy_budgets_one: '{{count}} templat bajet',
+    copy_budgets_other: '{{count}} templat bajet',
     copy_items_one: '{{count}} item',
     copy_items_other: '{{count}} item',
     copy_albums_one: '{{count}} album, tanpa catatannya',
@@ -3485,9 +3490,9 @@ const ms = {
     create: 'Cipta buku',
     delete_title: 'Padam {{name}}?',
     delete_message_one:
-      'Ini akan memadam {{name}} bersama {{count}} catatan, akaun, kategori, belanjawan dan albumnya. Buku lain tidak terjejas.',
+      'Ini akan memadam {{name}} bersama {{count}} catatan, akaun, kategori, bajet dan albumnya. Buku lain tidak terjejas.',
     delete_message_other:
-      'Ini akan memadam {{name}} bersama {{count}} catatan, akaun, kategori, belanjawan dan albumnya. Buku lain tidak terjejas.',
+      'Ini akan memadam {{name}} bersama {{count}} catatan, akaun, kategori, bajet dan albumnya. Buku lain tidak terjejas.',
     locked_note: 'Buku yang dikunci disimpan dengan selamat dan dibuka semula dengan Pro.',
     pro_ended_title: 'Anda kembali ke {{name}}',
     pro_ended_message:
@@ -3514,7 +3519,7 @@ const ms = {
     title: 'Perkongsian',
     share_toggle: 'Kongsi buku ini',
     share_toggle_caption: 'Jemput sehingga {{max}} orang. Mereka tidak perlukan Pro.',
-    needs_cloud_sync: 'Hidupkan Cloud Sync untuk berkongsi lejar.',
+    needs_cloud_sync: 'Hidupkan Cloud Sync untuk berkongsi buku.',
     has_shared_albums: 'Buku ini mempunyai album kongsi. Hentikan perkongsian album itu dahulu.',
     limit_reached: 'Buat masa ini anda boleh berkongsi sehingga {{max}} buku.',
     share_failed:
@@ -3619,7 +3624,7 @@ const ms = {
       logging: 'Rekod wang',
       organize: 'Susun',
       plan: 'Rancang',
-      share: 'Kongsi dan selesai',
+      share: 'Kongsi dan selesaikan',
       insights: 'Fahami',
       data: 'Data anda',
     },
@@ -3652,7 +3657,7 @@ const ms = {
     ai_settings: 'Tetapan semakan automatik',
     ai_quota_free: 'Tinggal %{count} daripada %{limit} percuma',
     ai_quota_pro: 'Tanpa had dengan Pro',
-    ai_quota_left: 'Baki %{count}',
+    ai_quota_left: 'Baki %{count} percuma',
     ai_quota_unlimited: 'Tanpa had',
     ai_quota_info_title: 'Semakan automatik percuma',
     ai_quota_info:
@@ -3699,7 +3704,7 @@ const ms = {
     history_none: 'Diabaikan',
     history_failed: 'Tidak direkodkan',
     history_error: 'Tidak dapat memuatkan sejarah pemberitahuan.',
-    test_scan_failed_title: 'Notifikasi ujian tidak dapat direkodkan',
+    test_scan_failed_title: 'Pemberitahuan ujian tidak dapat direkodkan',
     test_scan_failed:
       'Pemberitahuan diterima, tetapi tiada jumlah atau akaun yang dapat dibaca. Semak akaun yang anda pilih dan cuba lagi.',
     account_hint:
@@ -3724,7 +3729,7 @@ const ms = {
     ios_notifications_hint:
       'Sediakan satu automasi Shortcuts untuk setiap aplikasi bank atau e-dompet.',
     ios_needs_27:
-      'Automasi notifikasi aplikasi memerlukan iOS 27. Pada versi terdahulu, anda boleh menggunakan Apple Pay atau berkongsi tangkapan skrin pembayaran.',
+      'Automasi pemberitahuan aplikasi memerlukan iOS 27. Pada versi terdahulu, anda boleh menggunakan Apple Pay atau berkongsi tangkapan skrin pembayaran.',
     section_apps: 'Aplikasi',
     choose_apps: 'Pilih aplikasi',
     source_off: 'Mati',

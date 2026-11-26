@@ -20,8 +20,8 @@ const ko: LocaleModule = {
     s8:  { h: '계산은\n더치페이', hl: '더치페이', sh: '더치페이, 기분, 메모는 자유롭게', she: '✍️', splitBill: '더치페이', mood: '기분', note: '메모' },
     s9:  { h: '진짜 시급은\n얼마?', hl: '얼마?', sh: '월별 시급이 그때그때 갱신돼요', she: '💡', rate: '$25.79', perHour: '시급', revealed: '최신 시급', current: 'May 2026 — 현재' },
     s10: { h: '구독을\n한눈에', hl: '한눈에', sh: '월세, 멤버십, 정기 결제 관리', she: '🔁', total: '$1,556.99 / 월', rent: '월세', gym: '헬스 회원권', streaming: '스트리밍 묶음' },
-    s11: { h: '나만의\n앱으로', hl: '앱으로', sh: '앱 구석구석을 내 맘대로 설정', she: '⚙️', display: '화면', hourly: '시급 환산', categories: '분류' },
-    s12: { h: '나만의\n분위기', hl: '분위기', sh: '언어, 통화, 테마를 내 맘대로', she: '🎨', language: '한국어 (ko)', currency: 'USD ($)', theme: 'Light · Sage' },
+    s11: { h: '나만의\n앱으로', hl: '앱으로', sh: '앱 구석구석을 내 맘대로 설정', she: '⚙️', display: '화면', hourly: '시급', categories: '카테고리' },
+    s12: { h: '나만의\n분위기', hl: '분위기', sh: '언어, 통화, 테마를 내 맘대로', she: '🎨', language: '한국어 (ko)', currency: 'USD ($)', theme: '라이트 · 세이지' },
     s13: { h: '한 번에\n불러오기', hl: '불러오기', sh: 'AI가 내역을 읽고 확인만 하면 끝', she: '🤖', aiPowered: 'AI 기반', oneTap: '프롬프트 복사', pasteJSON: 'JSON 붙여넣기' },
     s14: { h: '입력하면\n바로 끝.', hl: '바로 끝.', sh: '키보드가 가장 빠른 입구예요', she: '⌨️', type: '커피 6.50', tap: '↵', done: '0m 만에 기록', category: '자동 · 식비 / 커피' },
     s15: {
