@@ -84,6 +84,22 @@ export async function describeBackupPhotos(
 }
 
 /**
+ * Whether a photo the backup lists has been deleted since it was listed: a
+ * receipt scan that finished and dropped its image (saving scanned receipts is
+ * off by default), a deleted transaction, the orphan sweep after a sync. Its
+ * copy then fails, and the backup is prepared again without it.
+ */
+export function anyBackupPhotoVanished(photos: BackupPhotoUpload[]): boolean {
+  return photos.some((photo) => {
+    try {
+      return !new File(photo.uri).exists;
+    } catch {
+      return true;
+    }
+  });
+}
+
+/**
  * Stores the photos the target does not have yet, a few at a time. Throws when
  * one fails; those already stored stay, so the next run carries on from there.
  */

@@ -5,6 +5,7 @@
  */
 import type { BackupPhotoRecord, BackupRecord } from '~/services/autoBackup.shared';
 import {
+  anyBackupPhotoVanished,
   type BackupPhotoStore,
   describeBackupPhotos,
   pruneBackupPhotos,
@@ -376,5 +377,20 @@ describe('pruneBackupPhotos', () => {
       'one',
       'two',
     ]);
+  });
+});
+
+describe('anyBackupPhotoVanished', () => {
+  it('says whether a listed photo was deleted after the backup listed it', () => {
+    files.clear();
+    files.set('file:///me.jpg', 'aaaa');
+    files.set('file:///scan.jpg', 'bbbb');
+    const photos = [
+      { path: 'avatars/me.jpg', photo: photoName(HASH_A), uri: 'file:///me.jpg' },
+      { path: 'receipts/scan.jpg', photo: photoName(HASH_B), uri: 'file:///scan.jpg' },
+    ];
+    expect(anyBackupPhotoVanished(photos)).toBe(false);
+    files.delete('file:///scan.jpg');
+    expect(anyBackupPhotoVanished(photos)).toBe(true);
   });
 });

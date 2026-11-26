@@ -1148,7 +1148,14 @@ row, and 10.9 MB of photos as base64.
   computed natively, and no photo is read into JavaScript to build a backup.
   - A run stores the photos the target lacks, then the backup that lists them.
     A photo that fails to store fails that target's backup, as a failed upload
-    always did.
+    always did, unless the photo was deleted after the backup listed it: then
+    the run prepares the backup once more, which leaves it out, and writes
+    that. A backup lists every file in the user-asset folder, so this covers
+    a receipt scan's image too: a scan that opens the app starts the launch's
+    automatic backup, and when the scan finishes it deletes its image (saving
+    scanned receipts is off by default). In 1.9.0 that failed the backup with
+    `error_kind` `unknown` and wrote nothing (a few iOS users a day, each
+    within seconds of a `Receipt Scan Completed`).
   - Restoring downloads the listed photos into the cache and copies them into
     place after the database restore. A target that cannot be read, or a
     download that fails, stops the restore before anything is replaced

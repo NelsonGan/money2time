@@ -19,6 +19,7 @@ import {
 } from '~/services/autoBackup.shared';
 import { decodeBackupFile, encodeBackupFile } from '~/services/backupFile';
 import {
+  anyBackupPhotoVanished,
   type BackupPhotoStore,
   type BackupPhotoUpload,
   clearResolvedBackupPhotos,
@@ -165,8 +166,20 @@ export async function runAutoBackupIfDue(opts?: { force?: boolean }): Promise<Ba
       return { skipped: true, reason: 'backoff', written: [], errors: [] };
     }
 
-    const prepared = await prepareBackup();
+    let prepared = await prepareBackup();
     const name = buildAutoBackupName();
+    // A photo deleted after the backup listed it fails its copy. The run is
+    // often the one a receipt scan's launch starts, and that scan deletes its
+    // image when it finishes, so prepare the backup once more without it.
+    const write = async (provider: Provider): Promise<BackupRecord> => {
+      try {
+        return await writeBackup(provider, name, prepared);
+      } catch (error) {
+        if (!anyBackupPhotoVanished(prepared.photos)) throw error;
+        prepared = await prepareBackup();
+        return writeBackup(provider, name, prepared);
+      }
+    };
     // Writing the file is the third long step after reading and serializing.
     await yieldToEventLoop();
 
@@ -197,7 +210,7 @@ export async function runAutoBackupIfDue(opts?: { force?: boolean }): Promise<Ba
     for (const target of targets) {
       const provider = getProvider(target);
       try {
-        const record = await writeBackup(provider, name, prepared);
+        const record = await write(provider);
         written.push(record);
         await rotate(provider, record);
         continue;
@@ -226,7 +239,7 @@ export async function runAutoBackupIfDue(opts?: { force?: boolean }): Promise<Ba
       // cloud failure stays the reported one (`error_kind` is the first kind),
       // even if this write fails too.
       try {
-        const record = await writeBackup(localProvider, name, prepared);
+        const record = await write(localProvider);
         written.push(record);
         savedOnDeviceAfterFailure = true;
         await rotate(localProvider, record);
