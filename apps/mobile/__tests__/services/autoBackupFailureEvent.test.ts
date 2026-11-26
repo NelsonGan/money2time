@@ -14,6 +14,8 @@ import { runAutoBackupIfDue } from '~/services/autoBackup.native';
 import { googleDriveProvider } from '~/services/autoBackupProviders/googleDrive';
 import { DriveError } from '~/services/autoBackupProviders/googleDriveApi';
 import { localProvider } from '~/services/autoBackupProviders/local';
+import { BackupPhotoVanishedError, uploadMissingPhotos } from '~/services/backupPhotos';
+import { buildBackupData } from '~/services/dataManagementService';
 
 let settings: Record<string, unknown> = {};
 
@@ -50,7 +52,11 @@ jest.mock('~/services/dataManagementService', () => ({
   yieldToEventLoop: jest.fn(async () => undefined),
 }));
 jest.mock('~/services/backupPhotos', () => ({
-  BackupPhotoVanishedError: class VanishedError extends Error {},
+  BackupPhotoVanishedError: class VanishedError extends Error {
+    constructor(readonly original?: unknown) {
+      super('vanished');
+    }
+  },
   describeBackupPhotos: jest.fn(async () => []),
   uploadMissingPhotos: jest.fn(async () => undefined),
   rememberBackupPhotos: jest.fn(),
@@ -246,4 +252,42 @@ it('writes no phone copy when a reachable iCloud throws, so it is retried later 
   expect(result.written).toEqual([]);
   expect(result.savedOnDeviceAfterFailure).toBe(false);
   expect(settings.lastAutoBackupAt).toBeNull();
+});
+
+describe('a photo deleted while Drive backs up', () => {
+  const vanished = (original: unknown = new Error('no such file')) =>
+    new BackupPhotoVanishedError(original);
+
+  it('reports Drive’s own failure when the photo is deleted again', async () => {
+    (uploadMissingPhotos as jest.Mock)
+      .mockRejectedValueOnce(vanished())
+      .mockRejectedValueOnce(vanished(new DriveError('offline', 'Network request failed')));
+
+    const result = await runAutoBackupIfDue({ force: true });
+
+    // Offline usually passes: nothing on the phone, Drive is retried later.
+    expect(local.upload).not.toHaveBeenCalled();
+    expect(result.written).toEqual([]);
+    expect(trackEvent).toHaveBeenCalledWith(
+      'Auto Backup Failed',
+      expect.objectContaining({ error_kind: 'offline', fell_back_to_local: false }),
+    );
+  });
+
+  it('still keeps the phone copy when a photo is deleted twice during the Drive write', async () => {
+    (uploadMissingPhotos as jest.Mock)
+      .mockRejectedValueOnce(vanished())
+      .mockRejectedValueOnce(vanished())
+      .mockRejectedValueOnce(vanished());
+
+    const result = await runAutoBackupIfDue({ force: true });
+
+    // Drive prepared once more, then the phone copy prepared once more too.
+    expect(buildBackupData).toHaveBeenCalledTimes(3);
+    expect(result.written).toEqual([{ id: 'local.json', target: 'local' }]);
+    expect(trackEvent).toHaveBeenCalledWith(
+      'Auto Backup Failed',
+      expect.objectContaining({ error_kind: 'photo_deleted', fell_back_to_local: true }),
+    );
+  });
 });

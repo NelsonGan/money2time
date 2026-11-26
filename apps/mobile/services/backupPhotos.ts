@@ -90,9 +90,12 @@ export async function describeBackupPhotos(
  * The run prepares the backup again, which leaves the photo out.
  */
 export class BackupPhotoVanishedError extends Error {
-  constructor() {
+  /** What the copy threw: a provider's own error (Drive offline, say) is kept. */
+  readonly original: unknown;
+  constructor(original: unknown) {
     super('A photo the backup lists was deleted before it was stored');
     this.name = 'BackupPhotoVanishedError';
+    this.original = original;
   }
 }
 
@@ -128,7 +131,7 @@ export async function uploadMissingPhotos(
       try {
         await store.uploadPhoto(name, uri);
       } catch (error) {
-        failure ??= sourceVanished(uri) ? new BackupPhotoVanishedError() : error;
+        failure ??= sourceVanished(uri) ? new BackupPhotoVanishedError(error) : error;
       }
     }
   };

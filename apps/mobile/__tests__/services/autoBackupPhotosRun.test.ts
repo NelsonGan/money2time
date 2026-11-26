@@ -60,7 +60,11 @@ jest.mock('~/services/backupPhotos', () => ({
   uploadMissingPhotos: jest.fn(async () => {
     calls.push('photos');
   }),
-  BackupPhotoVanishedError: class VanishedError extends Error {},
+  BackupPhotoVanishedError: class VanishedError extends Error {
+    constructor(readonly original?: unknown) {
+      super('vanished');
+    }
+  },
   rememberBackupPhotos: jest.fn(),
   pruneBackupPhotos: jest.fn(async () => {
     calls.push('prune');
@@ -142,7 +146,9 @@ const SCAN_PHOTO = `money2time_PHOTO_${'b'.repeat(32)}.jpg`;
 // backup copied it. The copy threw, nothing was written, and the run reported
 // `error_kind` `unknown`.
 it('prepares the backup again when a photo it lists was deleted meanwhile', async () => {
-  (uploadMissingPhotos as jest.Mock).mockRejectedValueOnce(new BackupPhotoVanishedError());
+  (uploadMissingPhotos as jest.Mock).mockRejectedValueOnce(
+    new BackupPhotoVanishedError(new Error('no such file')),
+  );
   (describeBackupPhotos as jest.Mock).mockResolvedValueOnce([
     { path: 'avatars/me.jpg', photo: PHOTO, uri: 'file:///me.jpg' },
     { path: 'receipts/scan.jpg', photo: SCAN_PHOTO, uri: 'file:///scan.jpg' },
@@ -164,10 +170,10 @@ it('prepares the backup again when a photo it lists was deleted meanwhile', asyn
   expect(trackEvent).not.toHaveBeenCalled();
 });
 
-it('prepares the backup again at most once a run', async () => {
+it('prepares the backup again at most once for a target', async () => {
   (uploadMissingPhotos as jest.Mock)
-    .mockRejectedValueOnce(new BackupPhotoVanishedError())
-    .mockRejectedValueOnce(new BackupPhotoVanishedError());
+    .mockRejectedValueOnce(new BackupPhotoVanishedError(new Error('no such file')))
+    .mockRejectedValueOnce(new BackupPhotoVanishedError(new Error('no such file')));
   local.list.mockResolvedValue([]);
 
   const result = await runAutoBackupIfDue({ force: true });
