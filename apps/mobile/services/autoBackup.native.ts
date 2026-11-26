@@ -21,6 +21,7 @@ import { decodeBackupFile, encodeBackupFile } from '~/services/backupFile';
 import {
   type BackupPhotoStore,
   type BackupPhotoUpload,
+  BackupPhotoVanishedError,
   clearResolvedBackupPhotos,
   describeBackupPhotos,
   pruneBackupPhotos,
@@ -165,8 +166,34 @@ export async function runAutoBackupIfDue(opts?: { force?: boolean }): Promise<Ba
       return { skipped: true, reason: 'backoff', written: [], errors: [] };
     }
 
-    const prepared = await prepareBackup();
+    let prepared = await prepareBackup();
     const name = buildAutoBackupName();
+    // A photo deleted after the backup listed it fails its copy. The run is
+    // often the one a receipt scan's launch starts, and that scan deletes its
+    // image when it finishes, so prepare the backup once more without it (once
+    // per target; any other failure is reported as it is).
+    const write = async (provider: Provider): Promise<BackupRecord> => {
+      try {
+        return await writeBackup(provider, name, prepared);
+      } catch (error) {
+        if (!(error instanceof BackupPhotoVanishedError)) throw error;
+        prepared = await prepareBackup();
+        await yieldToEventLoop();
+        try {
+          return await writeBackup(provider, name, prepared);
+        } catch (retryError) {
+          // Deleted again: report Drive's own failure when there was one, so
+          // the run still tells an offline Drive from a refused one.
+          if (
+            retryError instanceof BackupPhotoVanishedError &&
+            retryError.original instanceof DriveError
+          ) {
+            throw retryError.original;
+          }
+          throw retryError;
+        }
+      }
+    };
     // Writing the file is the third long step after reading and serializing.
     await yieldToEventLoop();
 
@@ -197,7 +224,7 @@ export async function runAutoBackupIfDue(opts?: { force?: boolean }): Promise<Ba
     for (const target of targets) {
       const provider = getProvider(target);
       try {
-        const record = await writeBackup(provider, name, prepared);
+        const record = await write(provider);
         written.push(record);
         await rotate(provider, record);
         continue;
@@ -226,7 +253,7 @@ export async function runAutoBackupIfDue(opts?: { force?: boolean }): Promise<Ba
       // cloud failure stays the reported one (`error_kind` is the first kind),
       // even if this write fails too.
       try {
-        const record = await writeBackup(localProvider, name, prepared);
+        const record = await write(localProvider);
         written.push(record);
         savedOnDeviceAfterFailure = true;
         await rotate(localProvider, record);
@@ -307,7 +334,9 @@ function describeBackupError(target: BackupTarget, error: unknown): string {
   const reason =
     error instanceof DriveError
       ? I18n.t(`auto_backup.error.${error.kind}`)
-      : getErrorMessage(error, I18n.t('auto_backup.error.unknown'));
+      : error instanceof BackupPhotoVanishedError
+        ? I18n.t('auto_backup.error.unknown')
+        : getErrorMessage(error, I18n.t('auto_backup.error.unknown'));
   return I18n.t('auto_backup.error.prefix', { target: targetLabel(target), reason });
 }
 
@@ -322,10 +351,12 @@ const TRANSIENT_BACKUP_ERROR_KINDS: ReadonlySet<string> = new Set([
 
 /**
  * A short reason for analytics: the Drive error kind, `aborted` for a cancelled
- * request, `unknown` otherwise. Never the message, which can carry a file path.
+ * request, `photo_deleted` for a listed photo deleted again after the backup was
+ * prepared a second time for that target, `unknown` otherwise. Never the message, which can carry a file path.
  */
 function backupErrorKind(error: unknown): string {
   if (error instanceof DriveError) return error.kind;
+  if (error instanceof BackupPhotoVanishedError) return 'photo_deleted';
   if (error instanceof Error && error.name === 'AbortError') return 'aborted';
   return 'unknown';
 }

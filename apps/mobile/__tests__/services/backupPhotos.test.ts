@@ -6,6 +6,7 @@
 import type { BackupPhotoRecord, BackupRecord } from '~/services/autoBackup.shared';
 import {
   type BackupPhotoStore,
+  BackupPhotoVanishedError,
   describeBackupPhotos,
   pruneBackupPhotos,
   rememberBackupPhotos,
@@ -169,6 +170,7 @@ describe('uploadMissingPhotos', () => {
       photo: photoName(hash.padEnd(32, '0')),
       uri: `u${i}`,
     }));
+    photos.forEach((photo) => files.set(photo.uri, 'x'));
     await expect(uploadMissingPhotos(store, photos)).rejects.toThrow('quota');
     expect(peak).toBe(3);
     // Every photo but the refused one landed, the one in flight beside it too.
@@ -196,6 +198,7 @@ describe('uploadMissingPhotos', () => {
   it('fails the backup when a photo cannot be stored', async () => {
     const store = memoryStore();
     (store.uploadPhoto as jest.Mock).mockRejectedValueOnce(new Error('Drive is full'));
+    files.set('b', 'bbbb');
     await expect(
       uploadMissingPhotos(store, [{ path: 'avatars/2.jpg', photo: photoName(HASH_B), uri: 'b' }]),
     ).rejects.toThrow('Drive is full');
@@ -376,5 +379,29 @@ describe('pruneBackupPhotos', () => {
       'one',
       'two',
     ]);
+  });
+});
+
+describe('uploadMissingPhotos when a copy fails', () => {
+  const photos = [{ path: 'receipts/scan.jpg', photo: photoName(HASH_B), uri: 'file:///scan.jpg' }];
+
+  it('says the photo was deleted when its file is gone', async () => {
+    files.clear();
+    const store = memoryStore();
+    (store.uploadPhoto as jest.Mock).mockRejectedValueOnce(new Error('no such file'));
+
+    await expect(uploadMissingPhotos(store, photos)).rejects.toBeInstanceOf(
+      BackupPhotoVanishedError,
+    );
+  });
+
+  it('throws the copy error itself while the file is still there', async () => {
+    files.clear();
+    files.set('file:///scan.jpg', 'bbbb');
+    const store = memoryStore();
+    const full = new Error('disk full');
+    (store.uploadPhoto as jest.Mock).mockRejectedValueOnce(full);
+
+    await expect(uploadMissingPhotos(store, photos)).rejects.toBe(full);
   });
 });

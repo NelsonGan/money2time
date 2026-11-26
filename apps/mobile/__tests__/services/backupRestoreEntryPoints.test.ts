@@ -43,6 +43,11 @@ jest.mock('~/services/dataManagementService', () => ({
   yieldToEventLoop: jest.fn(async () => undefined),
 }));
 jest.mock('~/services/backupPhotos', () => ({
+  BackupPhotoVanishedError: class VanishedError extends Error {
+    constructor(readonly original?: unknown) {
+      super('vanished');
+    }
+  },
   describeBackupPhotos: jest.fn(async () => []),
   uploadMissingPhotos: jest.fn(async () => undefined),
   rememberBackupPhotos: jest.fn(),

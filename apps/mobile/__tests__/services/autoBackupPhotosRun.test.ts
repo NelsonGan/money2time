@@ -3,9 +3,18 @@
  * lists them, so a backup never names a photo that is not there yet, and
  * cleans up photos only after rotation decided which backups stay.
  */
+import { gunzipSync } from 'zlib';
+
+import { trackEvent } from '~/services/analytics';
 import { runAutoBackupIfDue } from '~/services/autoBackup.native';
 import { localProvider } from '~/services/autoBackupProviders/local';
-import { pruneBackupPhotos, uploadMissingPhotos } from '~/services/backupPhotos';
+import {
+  BackupPhotoVanishedError,
+  describeBackupPhotos,
+  pruneBackupPhotos,
+  uploadMissingPhotos,
+} from '~/services/backupPhotos';
+import { buildBackupData } from '~/services/dataManagementService';
 
 let settings: Record<string, unknown> = {};
 const calls: string[] = [];
@@ -51,6 +60,11 @@ jest.mock('~/services/backupPhotos', () => ({
   uploadMissingPhotos: jest.fn(async () => {
     calls.push('photos');
   }),
+  BackupPhotoVanishedError: class VanishedError extends Error {
+    constructor(readonly original?: unknown) {
+      super('vanished');
+    }
+  },
   rememberBackupPhotos: jest.fn(),
   pruneBackupPhotos: jest.fn(async () => {
     calls.push('prune');
@@ -105,4 +119,70 @@ it('writes no backup when its photos could not be stored', async () => {
 
   expect(result.written).toEqual([]);
   expect(local.upload).not.toHaveBeenCalled();
+});
+
+it('does not prepare the backup again when every photo is still there', async () => {
+  (uploadMissingPhotos as jest.Mock).mockRejectedValueOnce(new Error('disk full'));
+  local.list.mockResolvedValue([]);
+
+  await runAutoBackupIfDue({ force: true });
+
+  expect(buildBackupData).toHaveBeenCalledTimes(1);
+});
+
+/** The photos a written backup lists. */
+function listedPhotos(bytes: Uint8Array): string[] {
+  const file = JSON.parse(gunzipSync(Buffer.from(bytes)).toString('utf8')) as {
+    photos?: { photo: string }[];
+  };
+  return (file.photos ?? []).map((photo) => photo.photo);
+}
+
+const SCAN_PHOTO = `money2time_PHOTO_${'b'.repeat(32)}.jpg`;
+
+// Production, 1.9.0 iOS: a scan opened the app, the launch's automatic backup
+// listed the scan's image with the other user assets, and the scan deleted it
+// when it finished (saving scanned receipts is off by default) before the
+// backup copied it. The copy threw, nothing was written, and the run reported
+// `error_kind` `unknown`.
+it('prepares the backup again when a photo it lists was deleted meanwhile', async () => {
+  (uploadMissingPhotos as jest.Mock).mockRejectedValueOnce(
+    new BackupPhotoVanishedError(new Error('no such file')),
+  );
+  (describeBackupPhotos as jest.Mock).mockResolvedValueOnce([
+    { path: 'avatars/me.jpg', photo: PHOTO, uri: 'file:///me.jpg' },
+    { path: 'receipts/scan.jpg', photo: SCAN_PHOTO, uri: 'file:///scan.jpg' },
+  ]);
+  local.list.mockResolvedValue([]);
+
+  const result = await runAutoBackupIfDue();
+
+  expect(result.errors).toEqual([]);
+  expect(result.written).toHaveLength(1);
+  expect(buildBackupData).toHaveBeenCalledTimes(2);
+  // The second copy lists only the photos that are still there, and the file
+  // written is that copy.
+  expect((uploadMissingPhotos as jest.Mock).mock.calls[1][1]).toEqual([
+    { path: 'avatars/me.jpg', photo: PHOTO, uri: 'file:///me.jpg' },
+  ]);
+  expect(local.upload).toHaveBeenCalledTimes(1);
+  expect(listedPhotos(local.upload.mock.calls[0][1])).toEqual([PHOTO]);
+  expect(trackEvent).not.toHaveBeenCalled();
+});
+
+it('prepares the backup again at most once for a target', async () => {
+  (uploadMissingPhotos as jest.Mock)
+    .mockRejectedValueOnce(new BackupPhotoVanishedError(new Error('no such file')))
+    .mockRejectedValueOnce(new BackupPhotoVanishedError(new Error('no such file')));
+  local.list.mockResolvedValue([]);
+
+  const result = await runAutoBackupIfDue({ force: true });
+
+  expect(result.written).toEqual([]);
+  expect(buildBackupData).toHaveBeenCalledTimes(2);
+  expect(local.upload).not.toHaveBeenCalled();
+  expect(trackEvent).toHaveBeenCalledWith(
+    undefined,
+    expect.objectContaining({ error_kind: 'photo_deleted' }),
+  );
 });
