@@ -84,24 +84,31 @@ export async function describeBackupPhotos(
 }
 
 /**
- * Whether a photo the backup lists has been deleted since it was listed: a
- * receipt scan that finished and dropped its image (saving scanned receipts is
- * off by default), a deleted transaction, the orphan sweep after a sync. Its
- * copy then fails, and the backup is prepared again without it.
+ * A photo the backup lists was deleted after it was listed, so its copy failed:
+ * a receipt scan that finished and dropped its image (saving scanned receipts
+ * is off by default), a deleted transaction, the orphan sweep after a sync.
+ * The run prepares the backup again, which leaves the photo out.
  */
-export function anyBackupPhotoVanished(photos: BackupPhotoUpload[]): boolean {
-  return photos.some((photo) => {
-    try {
-      return !new File(photo.uri).exists;
-    } catch {
-      return true;
-    }
-  });
+export class BackupPhotoVanishedError extends Error {
+  constructor() {
+    super('A photo the backup lists was deleted before it was stored');
+    this.name = 'BackupPhotoVanishedError';
+  }
+}
+
+/** Whether the file a photo is copied from is gone (false when it cannot tell). */
+function sourceVanished(uri: string): boolean {
+  try {
+    return !new File(uri).exists;
+  } catch {
+    return false;
+  }
 }
 
 /**
  * Stores the photos the target does not have yet, a few at a time. Throws when
  * one fails; those already stored stay, so the next run carries on from there.
+ * A failure whose source file is gone throws {@link BackupPhotoVanishedError}.
  */
 export async function uploadMissingPhotos(
   store: BackupPhotoStore,
@@ -121,7 +128,7 @@ export async function uploadMissingPhotos(
       try {
         await store.uploadPhoto(name, uri);
       } catch (error) {
-        failure ??= error;
+        failure ??= sourceVanished(uri) ? new BackupPhotoVanishedError() : error;
       }
     }
   };
